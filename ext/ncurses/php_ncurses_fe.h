@@ -20,7 +20,7 @@
 #ifndef PHP_NCURSES_FE_H
 #define PHP_NCURSES_FE_H
 
-PHP_FUNCTION(confirm_ncurses_compiled);	/* For testing, remove later. */
+PHP_FUNCTION(confirm_ncurses_compiled); /* For testing, remove later. */
 PHP_FUNCTION(ncurses_addch);
 PHP_FUNCTION(ncurses_color_set);
 PHP_FUNCTION(ncurses_delwin);

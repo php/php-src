@@ -33,14 +33,14 @@
     */
 PHP_FUNCTION(ncurses_addch)
 {
-	zval **ch;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ch) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(ch);
+  zval **ch;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &ch) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(ch);
 
-	RETURN_LONG(addch(_INT(ch)));
+  RETURN_LONG(addch(_INT(ch)));
 }
 /* }}} */
 
@@ -49,18 +49,18 @@ PHP_FUNCTION(ncurses_addch)
 PHP_FUNCTION(ncurses_color_set)
 {
 #ifdef HAVE_NCURSES_COLOR_SET
-	zval **pair;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pair) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(pair);
+  zval **pair;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &pair) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(pair);
  
-	RETURN_LONG(color_set(_INT(pair),NULL));
+  RETURN_LONG(color_set(_INT(pair),NULL));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
-	RETURN_FALSE;
-#endif	
+  php_error(E_WARNING,"%s not supported in this build");
+  RETURN_FALSE;
+#endif  
 }
 /* }}} */
 
@@ -68,16 +68,16 @@ PHP_FUNCTION(ncurses_color_set)
     */
 PHP_FUNCTION(ncurses_delwin)
 {
-	zval **handle;
-	WINDOW *w;
+  zval **handle;
+  WINDOW *w;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
 
-	FETCH_WINRES(w,handle);
+  FETCH_WINRES(w,handle);
 
-	zend_list_delete(_INT(handle));
+  zend_list_delete(_INT(handle));
 }
 /* }}} */
 
@@ -85,7 +85,7 @@ PHP_FUNCTION(ncurses_delwin)
     */
 PHP_FUNCTION(ncurses_end)
 {
-	RETURN_LONG(endwin());             /* endialize the curses library */
+  RETURN_LONG(endwin());             /* endialize the curses library */
 }
 /* }}} */
 
@@ -93,7 +93,7 @@ PHP_FUNCTION(ncurses_end)
     */
 PHP_FUNCTION(ncurses_getch)
 {
-	RETURN_LONG(getch());
+  RETURN_LONG(getch());
 }
 /* }}} */
 
@@ -101,7 +101,7 @@ PHP_FUNCTION(ncurses_getch)
     */
 PHP_FUNCTION(ncurses_has_colors)
 {
-	RETURN_LONG(has_colors());
+  RETURN_LONG(has_colors());
 }
 /* }}} */
 
@@ -109,26 +109,26 @@ PHP_FUNCTION(ncurses_has_colors)
     */
 PHP_FUNCTION(ncurses_init)
 {
-	initscr();             /* initialize the curses library */
-	keypad(stdscr, TRUE);  /* enable keyboard mapping */
-	(void) nonl();         /* tell curses not to do NL->CR/NL on output */
-	(void) cbreak();       /* take input chars one at a time, no wait for \n */}
+  initscr();             /* initialize the curses library */
+  keypad(stdscr, TRUE);  /* enable keyboard mapping */
+  (void) nonl();         /* tell curses not to do NL->CR/NL on output */
+  (void) cbreak();       /* take input chars one at a time, no wait for \n */}
 /* }}} */
 
 /* {{{ proto int ncurses_init_pair(int pair, int fg, int bg)
     */
 PHP_FUNCTION(ncurses_init_pair)
 {
-	zval **pair, **fg, **bg;
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &pair, &fg, &bg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(pair);
-	convert_to_long_ex(fg);
-	convert_to_long_ex(bg);
+  zval **pair, **fg, **bg;
+  if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &pair, &fg, &bg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(pair);
+  convert_to_long_ex(fg);
+  convert_to_long_ex(bg);
 
-	RETURN_LONG(init_pair(_INT(pair),_INT(fg),_INT(bg)));
+  RETURN_LONG(init_pair(_INT(pair),_INT(fg),_INT(bg)));
 }
 /* }}} */
 
@@ -136,15 +136,15 @@ PHP_FUNCTION(ncurses_init_pair)
     */
 PHP_FUNCTION(ncurses_move)
 {
-	zval **x, **y;
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
+  zval **x, **y;
+  if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
 
-	RETURN_LONG(move(_INT(x),_INT(y)));
+  RETURN_LONG(move(_INT(x),_INT(y)));
 }
 /* }}} */
 
@@ -152,26 +152,26 @@ PHP_FUNCTION(ncurses_move)
     */
 PHP_FUNCTION(ncurses_newwin)
 {
-	zval **rows,**cols,**y,**x;
-	WINDOW **pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
+  zval **rows,**cols,**y,**x;
+  WINDOW **pwin = (WINDOW **)emalloc(sizeof(WINDOW *));
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &rows,&cols,&y,&x) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(rows);
-	convert_to_long_ex(cols);
-	convert_to_long_ex(y);
-	convert_to_long_ex(x);
+  if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &rows,&cols,&y,&x) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(rows);
+  convert_to_long_ex(cols);
+  convert_to_long_ex(y);
+  convert_to_long_ex(x);
 
-	*pwin=newwin(_INT(rows),_INT(cols),_INT(y),_INT(x));
-	
-	if(!*pwin) {
-		efree(pwin);
-		RETURN_FALSE;
-	}
+  *pwin=newwin(_INT(rows),_INT(cols),_INT(y),_INT(x));
+  
+  if(!*pwin) {
+    efree(pwin);
+    RETURN_FALSE;
+  }
 
-	ZEND_REGISTER_RESOURCE(return_value, pwin, le_ncurses);
+  ZEND_REGISTER_RESOURCE(return_value, pwin, le_ncurses);
 }
 /* }}} */
 
@@ -179,7 +179,7 @@ PHP_FUNCTION(ncurses_newwin)
     */
 PHP_FUNCTION(ncurses_refresh)
 {
-	RETURN_LONG(refresh());
+  RETURN_LONG(refresh());
 }
 /* }}} */
 
@@ -187,7 +187,7 @@ PHP_FUNCTION(ncurses_refresh)
     */
 PHP_FUNCTION(ncurses_start_color)
 {
-	RETURN_LONG(start_color());
+  RETURN_LONG(start_color());
 }
 /* }}} */
 
@@ -197,7 +197,7 @@ PHP_FUNCTION(ncurses_start_color)
     */
 PHP_FUNCTION(ncurses_standout)
 {
-	RETURN_LONG(standout());
+  RETURN_LONG(standout());
 }
 /* }}} */
 
@@ -205,7 +205,7 @@ PHP_FUNCTION(ncurses_standout)
     */
 PHP_FUNCTION(ncurses_standend)
 {
-	RETURN_LONG(standend());
+  RETURN_LONG(standend());
 }
 /* }}} */
 
@@ -213,7 +213,7 @@ PHP_FUNCTION(ncurses_standend)
     */
 PHP_FUNCTION(ncurses_baudrate)
 {
-	RETURN_LONG(baudrate());
+  RETURN_LONG(baudrate());
 }
 /* }}} */
 
@@ -221,7 +221,7 @@ PHP_FUNCTION(ncurses_baudrate)
     */
 PHP_FUNCTION(ncurses_beep)
 {
-	RETURN_LONG(beep());
+  RETURN_LONG(beep());
 }
 /* }}} */
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(ncurses_beep)
     */
 PHP_FUNCTION(ncurses_can_change_color)
 {
-	RETURN_LONG(can_change_color());
+  RETURN_LONG(can_change_color());
 }
 /* }}} */
 
@@ -237,7 +237,7 @@ PHP_FUNCTION(ncurses_can_change_color)
     */
 PHP_FUNCTION(ncurses_cbreak)
 {
-	RETURN_LONG(cbreak());
+  RETURN_LONG(cbreak());
 }
 /* }}} */
 
@@ -245,7 +245,7 @@ PHP_FUNCTION(ncurses_cbreak)
     */
 PHP_FUNCTION(ncurses_clear)
 {
-	RETURN_LONG(clear());
+  RETURN_LONG(clear());
 }
 /* }}} */
 
@@ -253,7 +253,7 @@ PHP_FUNCTION(ncurses_clear)
     */
 PHP_FUNCTION(ncurses_clrtobot)
 {
-	RETURN_LONG(clrtobot());
+  RETURN_LONG(clrtobot());
 }
 /* }}} */
 
@@ -261,7 +261,7 @@ PHP_FUNCTION(ncurses_clrtobot)
     */
 PHP_FUNCTION(ncurses_clrtoeol)
 {
-	RETURN_LONG(clrtoeol());
+  RETURN_LONG(clrtoeol());
 }
 /* }}} */
 
@@ -269,7 +269,7 @@ PHP_FUNCTION(ncurses_clrtoeol)
     */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
-	RETURN_LONG(def_prog_mode());
+  RETURN_LONG(def_prog_mode());
 }
 /* }}} */
 
@@ -277,7 +277,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
     */
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
-	RETURN_LONG(def_shell_mode());
+  RETURN_LONG(def_shell_mode());
 }
 /* }}} */
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(ncurses_def_shell_mode)
     */
 PHP_FUNCTION(ncurses_delch)
 {
-	RETURN_LONG(delch());
+  RETURN_LONG(delch());
 }
 /* }}} */
 
@@ -293,7 +293,7 @@ PHP_FUNCTION(ncurses_delch)
     */
 PHP_FUNCTION(ncurses_deleteln)
 {
-	RETURN_LONG(deleteln());
+  RETURN_LONG(deleteln());
 }
 /* }}} */
 
@@ -301,7 +301,7 @@ PHP_FUNCTION(ncurses_deleteln)
     */
 PHP_FUNCTION(ncurses_doupdate)
 {
-	RETURN_LONG(doupdate());
+  RETURN_LONG(doupdate());
 }
 /* }}} */
 
@@ -309,7 +309,7 @@ PHP_FUNCTION(ncurses_doupdate)
     */
 PHP_FUNCTION(ncurses_echo)
 {
-	RETURN_LONG(echo());
+  RETURN_LONG(echo());
 }
 /* }}} */
 
@@ -317,7 +317,7 @@ PHP_FUNCTION(ncurses_echo)
     */
 PHP_FUNCTION(ncurses_erase)
 {
-	RETURN_LONG(erase());
+  RETURN_LONG(erase());
 }
 /* }}} */
 
@@ -325,7 +325,7 @@ PHP_FUNCTION(ncurses_erase)
     */
 PHP_FUNCTION(ncurses_erasechar)
 {
-	RETURN_LONG(erasechar());
+  RETURN_LONG(erasechar());
 }
 /* }}} */
 
@@ -333,7 +333,7 @@ PHP_FUNCTION(ncurses_erasechar)
     */
 PHP_FUNCTION(ncurses_flash)
 {
-	RETURN_LONG(flash());
+  RETURN_LONG(flash());
 }
 /* }}} */
 
@@ -341,7 +341,7 @@ PHP_FUNCTION(ncurses_flash)
     */
 PHP_FUNCTION(ncurses_flushinp)
 {
-	RETURN_LONG(flushinp());
+  RETURN_LONG(flushinp());
 }
 /* }}} */
 
@@ -349,7 +349,7 @@ PHP_FUNCTION(ncurses_flushinp)
     */
 PHP_FUNCTION(ncurses_has_ic)
 {
-	RETURN_LONG(has_ic());
+  RETURN_LONG(has_ic());
 }
 /* }}} */
 
@@ -358,7 +358,7 @@ PHP_FUNCTION(ncurses_has_ic)
     */
 PHP_FUNCTION(ncurses_has_il)
 {
-	RETURN_LONG(has_il());
+  RETURN_LONG(has_il());
 }
 /* }}} */
 
@@ -366,7 +366,7 @@ PHP_FUNCTION(ncurses_has_il)
     */
 PHP_FUNCTION(ncurses_inch)
 {
-	RETURN_LONG(inch());
+  RETURN_LONG(inch());
 }
 /* }}} */
 
@@ -374,7 +374,7 @@ PHP_FUNCTION(ncurses_inch)
     */
 PHP_FUNCTION(ncurses_insertln)
 {
-	RETURN_LONG(insertln());
+  RETURN_LONG(insertln());
 }
 /* }}} */
 
@@ -382,7 +382,7 @@ PHP_FUNCTION(ncurses_insertln)
     */
 PHP_FUNCTION(ncurses_isendwin)
 {
-	RETURN_LONG(isendwin());
+  RETURN_LONG(isendwin());
 }
 /* }}} */
 
@@ -390,7 +390,7 @@ PHP_FUNCTION(ncurses_isendwin)
     */
 PHP_FUNCTION(ncurses_killchar)
 {
-	RETURN_LONG(killchar());
+  RETURN_LONG(killchar());
 }
 /* }}} */
 
@@ -398,7 +398,7 @@ PHP_FUNCTION(ncurses_killchar)
     */
 PHP_FUNCTION(ncurses_nl)
 {
-	RETURN_LONG(nl());
+  RETURN_LONG(nl());
 }
 /* }}} */
 
@@ -406,7 +406,7 @@ PHP_FUNCTION(ncurses_nl)
     */
 PHP_FUNCTION(ncurses_nocbreak)
 {
-	RETURN_LONG(nocbreak());
+  RETURN_LONG(nocbreak());
 }
 /* }}} */
 
@@ -414,7 +414,7 @@ PHP_FUNCTION(ncurses_nocbreak)
     */
 PHP_FUNCTION(ncurses_noecho)
 {
-	RETURN_LONG(noecho());
+  RETURN_LONG(noecho());
 }
 /* }}} */
 
@@ -422,7 +422,7 @@ PHP_FUNCTION(ncurses_noecho)
     */
 PHP_FUNCTION(ncurses_nonl)
 {
-	RETURN_LONG(nonl());
+  RETURN_LONG(nonl());
 }
 /* }}} */
 
@@ -430,7 +430,7 @@ PHP_FUNCTION(ncurses_nonl)
     */
 PHP_FUNCTION(ncurses_noraw)
 {
-	RETURN_LONG(noraw());
+  RETURN_LONG(noraw());
 }
 /* }}} */
 
@@ -438,7 +438,7 @@ PHP_FUNCTION(ncurses_noraw)
     */
 PHP_FUNCTION(ncurses_raw)
 {
-	RETURN_LONG(raw());
+  RETURN_LONG(raw());
 }
 /* }}} */
 
@@ -446,7 +446,7 @@ PHP_FUNCTION(ncurses_raw)
     */
 PHP_FUNCTION(ncurses_resetty)
 {
-	RETURN_LONG(resetty());
+  RETURN_LONG(resetty());
 }
 /* }}} */
 
@@ -454,7 +454,7 @@ PHP_FUNCTION(ncurses_resetty)
     */
 PHP_FUNCTION(ncurses_savetty)
 {
-	RETURN_LONG(savetty());
+  RETURN_LONG(savetty());
 }
 /* }}} */
 
@@ -462,7 +462,7 @@ PHP_FUNCTION(ncurses_savetty)
     */
 PHP_FUNCTION(ncurses_termattrs)
 {
-	RETURN_LONG(termattrs());
+  RETURN_LONG(termattrs());
 }
 /* }}} */
 
@@ -470,7 +470,7 @@ PHP_FUNCTION(ncurses_termattrs)
     */
 PHP_FUNCTION(ncurses_use_default_colors)
 {
-	RETURN_LONG(use_default_colors());
+  RETURN_LONG(use_default_colors());
 }
 /* }}} */
 
@@ -478,7 +478,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
     */
 PHP_FUNCTION(ncurses_slk_attr)
 {
-	RETURN_LONG(slk_attr());
+  RETURN_LONG(slk_attr());
 }
 /* }}} */
 
@@ -486,7 +486,7 @@ PHP_FUNCTION(ncurses_slk_attr)
     */
 PHP_FUNCTION(ncurses_slk_clear)
 {
-	RETURN_LONG(slk_clear());
+  RETURN_LONG(slk_clear());
 }
 /* }}} */
 
@@ -494,7 +494,7 @@ PHP_FUNCTION(ncurses_slk_clear)
     */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
-	RETURN_LONG(slk_noutrefresh());
+  RETURN_LONG(slk_noutrefresh());
 }
 /* }}} */
 
@@ -502,7 +502,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
     */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
-	RETURN_LONG(slk_refresh());
+  RETURN_LONG(slk_refresh());
 }
 /* }}} */
 
@@ -510,7 +510,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
     */
 PHP_FUNCTION(ncurses_slk_restore)
 {
-	RETURN_LONG(slk_restore());
+  RETURN_LONG(slk_restore());
 }
 /* }}} */
 
@@ -518,7 +518,7 @@ PHP_FUNCTION(ncurses_slk_restore)
     */
 PHP_FUNCTION(ncurses_slk_touch)
 {
-	RETURN_LONG(slk_touch());
+  RETURN_LONG(slk_touch());
 }
 /* }}} */
 
@@ -526,14 +526,14 @@ PHP_FUNCTION(ncurses_slk_touch)
     */
 PHP_FUNCTION(ncurses_attroff)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(attroff(_INT(intarg)));
+  RETURN_LONG(attroff(_INT(intarg)));
 }
 /* }}} */
 
@@ -541,14 +541,14 @@ PHP_FUNCTION(ncurses_attroff)
     */
 PHP_FUNCTION(ncurses_attron)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(attron(_INT(intarg)));
+  RETURN_LONG(attron(_INT(intarg)));
 }
 /* }}} */
 
@@ -556,14 +556,14 @@ PHP_FUNCTION(ncurses_attron)
     */
 PHP_FUNCTION(ncurses_attrset)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(attrset(_INT(intarg)));
+  RETURN_LONG(attrset(_INT(intarg)));
 }
 /* }}} */
 
@@ -571,14 +571,14 @@ PHP_FUNCTION(ncurses_attrset)
     */
 PHP_FUNCTION(ncurses_bkgd)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(bkgd(_INT(intarg)));
+  RETURN_LONG(bkgd(_INT(intarg)));
 }
 /* }}} */
 
@@ -586,14 +586,14 @@ PHP_FUNCTION(ncurses_bkgd)
     */
 PHP_FUNCTION(ncurses_curs_set)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(curs_set(_INT(intarg)));
+  RETURN_LONG(curs_set(_INT(intarg)));
 }
 /* }}} */
 
@@ -601,14 +601,14 @@ PHP_FUNCTION(ncurses_curs_set)
     */
 PHP_FUNCTION(ncurses_delay_output)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(delay_output(_INT(intarg)));
+  RETURN_LONG(delay_output(_INT(intarg)));
 }
 /* }}} */
 
@@ -616,14 +616,14 @@ PHP_FUNCTION(ncurses_delay_output)
     */
 PHP_FUNCTION(ncurses_echochar)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(echochar(_INT(intarg)));
+  RETURN_LONG(echochar(_INT(intarg)));
 }
 /* }}} */
 
@@ -631,14 +631,14 @@ PHP_FUNCTION(ncurses_echochar)
     */
 PHP_FUNCTION(ncurses_halfdelay)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(halfdelay(_INT(intarg)));
+  RETURN_LONG(halfdelay(_INT(intarg)));
 }
 /* }}} */
 
@@ -646,14 +646,14 @@ PHP_FUNCTION(ncurses_halfdelay)
     */
 PHP_FUNCTION(ncurses_has_key)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(has_key(_INT(intarg)));
+  RETURN_LONG(has_key(_INT(intarg)));
 }
 /* }}} */
 
@@ -661,14 +661,14 @@ PHP_FUNCTION(ncurses_has_key)
     */
 PHP_FUNCTION(ncurses_insch)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(insch(_INT(intarg)));
+  RETURN_LONG(insch(_INT(intarg)));
 }
 /* }}} */
 
@@ -676,14 +676,14 @@ PHP_FUNCTION(ncurses_insch)
     */
 PHP_FUNCTION(ncurses_insdelln)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(insdelln(_INT(intarg)));
+  RETURN_LONG(insdelln(_INT(intarg)));
 }
 /* }}} */
 
@@ -691,14 +691,14 @@ PHP_FUNCTION(ncurses_insdelln)
     */
 PHP_FUNCTION(ncurses_mouseinterval)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(mouseinterval(_INT(intarg)));
+  RETURN_LONG(mouseinterval(_INT(intarg)));
 }
 /* }}} */
 
@@ -706,14 +706,14 @@ PHP_FUNCTION(ncurses_mouseinterval)
     */
 PHP_FUNCTION(ncurses_napms)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(napms(_INT(intarg)));
+  RETURN_LONG(napms(_INT(intarg)));
 }
 /* }}} */
 
@@ -721,14 +721,14 @@ PHP_FUNCTION(ncurses_napms)
     */
 PHP_FUNCTION(ncurses_scrl)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(scrl(_INT(intarg)));
+  RETURN_LONG(scrl(_INT(intarg)));
 }
 /* }}} */
 
@@ -736,14 +736,14 @@ PHP_FUNCTION(ncurses_scrl)
     */
 PHP_FUNCTION(ncurses_slk_attroff)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(slk_attroff(_INT(intarg)));
+  RETURN_LONG(slk_attroff(_INT(intarg)));
 }
 /* }}} */
 
@@ -751,14 +751,14 @@ PHP_FUNCTION(ncurses_slk_attroff)
     */
 PHP_FUNCTION(ncurses_slk_attron)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(slk_attron(_INT(intarg)));
+  RETURN_LONG(slk_attron(_INT(intarg)));
 }
 /* }}} */
 
@@ -766,14 +766,14 @@ PHP_FUNCTION(ncurses_slk_attron)
     */
 PHP_FUNCTION(ncurses_slk_attrset)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(slk_attrset(_INT(intarg)));
+  RETURN_LONG(slk_attrset(_INT(intarg)));
 }
 /* }}} */
 
@@ -782,18 +782,18 @@ PHP_FUNCTION(ncurses_slk_attrset)
 PHP_FUNCTION(ncurses_slk_color)
 {
 #ifdef HAVE_NCURSES_SLK_COLOR
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(slk_color(_INT(intarg)));
+  RETURN_LONG(slk_color(_INT(intarg)));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
-	RETURN_FALSE;
-#endif	
+  php_error(E_WARNING,"%s not supported in this build");
+  RETURN_FALSE;
+#endif  
 }
 /* }}} */
 
@@ -801,14 +801,14 @@ PHP_FUNCTION(ncurses_slk_color)
     */
 PHP_FUNCTION(ncurses_slk_init)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(slk_init(_INT(intarg)));
+  RETURN_LONG(slk_init(_INT(intarg)));
 }
 /* }}} */
 
@@ -816,14 +816,14 @@ PHP_FUNCTION(ncurses_slk_init)
     */
 PHP_FUNCTION(ncurses_typeahead)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(typeahead(_INT(intarg)));
+  RETURN_LONG(typeahead(_INT(intarg)));
 }
 /* }}} */
 
@@ -831,14 +831,14 @@ PHP_FUNCTION(ncurses_typeahead)
     */
 PHP_FUNCTION(ncurses_ungetch)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(ungetch(_INT(intarg)));
+  RETURN_LONG(ungetch(_INT(intarg)));
 }
 /* }}} */
 
@@ -846,14 +846,14 @@ PHP_FUNCTION(ncurses_ungetch)
     */
 PHP_FUNCTION(ncurses_vidattr)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(vidattr(_INT(intarg)));
+  RETURN_LONG(vidattr(_INT(intarg)));
 }
 /* }}} */
 
@@ -862,18 +862,18 @@ PHP_FUNCTION(ncurses_vidattr)
 PHP_FUNCTION(ncurses_use_extended_names)
 {
 #ifdef HAVE_NCURSES_USE_EXTENDED_NAMES
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	RETURN_LONG(use_extended_names(_INT(intarg)));
+  RETURN_LONG(use_extended_names(_INT(intarg)));
 #else
-	php_error(E_WARNING,"%s not supported in this build");
-	RETURN_FALSE;
-#endif	
+  php_error(E_WARNING,"%s not supported in this build");
+  RETURN_FALSE;
+#endif  
 }
 /* }}} */
 
@@ -881,14 +881,14 @@ PHP_FUNCTION(ncurses_use_extended_names)
     */
 PHP_FUNCTION(ncurses_bkgdset)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	bkgdset(_INT(intarg));
+  bkgdset(_INT(intarg));
 }
 /* }}} */
 
@@ -896,7 +896,7 @@ PHP_FUNCTION(ncurses_bkgdset)
     */
 PHP_FUNCTION(ncurses_filter)
 {
-	filter();
+  filter();
 }
 /* }}} */
 
@@ -904,7 +904,7 @@ PHP_FUNCTION(ncurses_filter)
     */
 PHP_FUNCTION(ncurses_noqiflush)
 {
-	noqiflush();
+  noqiflush();
 }
 /* }}} */
 
@@ -912,7 +912,7 @@ PHP_FUNCTION(ncurses_noqiflush)
     */
 PHP_FUNCTION(ncurses_qiflush)
 {
-	qiflush();
+  qiflush();
 }
 /* }}} */
 
@@ -920,14 +920,14 @@ PHP_FUNCTION(ncurses_qiflush)
     */
 PHP_FUNCTION(ncurses_timeout)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	timeout(_INT(intarg));
+  timeout(_INT(intarg));
 }
 /* }}} */
 
@@ -935,14 +935,14 @@ PHP_FUNCTION(ncurses_timeout)
     */
 PHP_FUNCTION(ncurses_use_env)
 {
-	zval **intarg;
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
-	
-	convert_to_long_ex(intarg);
+  zval **intarg;
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &intarg) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
+  
+  convert_to_long_ex(intarg);
 
-	use_env(_INT(intarg));
+  use_env(_INT(intarg));
 }
 /* }}} */
 
@@ -950,15 +950,15 @@ PHP_FUNCTION(ncurses_use_env)
    */
 PHP_FUNCTION(ncurses_addstr)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(addstr(_STRING(data)));
+  RETURN_LONG(addstr(_STRING(data)));
 }
 /* }}} */
 
@@ -974,15 +974,15 @@ PHP_FUNCTION(ncurses_addstr)
    */
 PHP_FUNCTION(ncurses_putp)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(putp(_STRING(data)));
+  RETURN_LONG(putp(_STRING(data)));
 }
 /* }}} */
 
@@ -990,15 +990,15 @@ PHP_FUNCTION(ncurses_putp)
    */
 PHP_FUNCTION(ncurses_scr_dump)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(scr_dump(_STRING(data)));
+  RETURN_LONG(scr_dump(_STRING(data)));
 }
 /* }}} */
 
@@ -1006,15 +1006,15 @@ PHP_FUNCTION(ncurses_scr_dump)
    */
 PHP_FUNCTION(ncurses_scr_init)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(scr_init(_STRING(data)));
+  RETURN_LONG(scr_init(_STRING(data)));
 }
 /* }}} */
 
@@ -1022,15 +1022,15 @@ PHP_FUNCTION(ncurses_scr_init)
    */
 PHP_FUNCTION(ncurses_scr_restore)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(scr_restore(_STRING(data)));
+  RETURN_LONG(scr_restore(_STRING(data)));
 }
 /* }}} */
 
@@ -1038,15 +1038,15 @@ PHP_FUNCTION(ncurses_scr_restore)
    */
 PHP_FUNCTION(ncurses_scr_set)
 {
-	zval **data;
+  zval **data;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(data);
+  convert_to_string_ex(data);
 
-	RETURN_LONG(scr_set(_STRING(data)));
+  RETURN_LONG(scr_set(_STRING(data)));
 }
 /* }}} */
 
@@ -1054,17 +1054,17 @@ PHP_FUNCTION(ncurses_scr_set)
    */
 PHP_FUNCTION(ncurses_mvaddch)
 {
-	zval **x,**y,**c;
+  zval **x,**y,**c;
 
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &c) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &c) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_long_ex(c);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
+  convert_to_long_ex(c);
 
-	RETURN_LONG(mvaddch(_INT(x),_INT(y),_INT(c)));
+  RETURN_LONG(mvaddch(_INT(x),_INT(y),_INT(c)));
 }
 /* }}} */
 
@@ -1072,18 +1072,18 @@ PHP_FUNCTION(ncurses_mvaddch)
    */
 PHP_FUNCTION(ncurses_mvaddchnstr)
 {
-	zval **x,**y,**s,**n;
+  zval **x,**y,**s,**n;
 
-	if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &x, &y, &s, &n) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &x, &y, &s, &n) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_string_ex(s);
-	convert_to_long_ex(n);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
+  convert_to_string_ex(s);
+  convert_to_long_ex(n);
 
-	RETURN_LONG(mvaddchnstr(_INT(x),_INT(y),(chtype *)_STRING(s),_INT(n)));
+  RETURN_LONG(mvaddchnstr(_INT(x),_INT(y),(chtype *)_STRING(s),_INT(n)));
 }
 /* }}} */
 
@@ -1091,16 +1091,16 @@ PHP_FUNCTION(ncurses_mvaddchnstr)
    */
 PHP_FUNCTION(ncurses_addchnstr)
 {
-	zval **s,**n;
+  zval **s,**n;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s, &n) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s, &n) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(s);
-	convert_to_long_ex(n);
+  convert_to_string_ex(s);
+  convert_to_long_ex(n);
 
-	RETURN_LONG(addchnstr((chtype *)_STRING(s),_INT(n)));
+  RETURN_LONG(addchnstr((chtype *)_STRING(s),_INT(n)));
 }
 /* }}} */
 
@@ -1108,17 +1108,17 @@ PHP_FUNCTION(ncurses_addchnstr)
    */
 PHP_FUNCTION(ncurses_mvaddchstr)
 {
-	zval **x,**y,**s;
+  zval **x,**y,**s;
 
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &s) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &s) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_string_ex(s);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
+  convert_to_string_ex(s);
 
-	RETURN_LONG(mvaddchstr(_INT(x),_INT(y),(chtype *)_STRING(s)));
+  RETURN_LONG(mvaddchstr(_INT(x),_INT(y),(chtype *)_STRING(s)));
 }
 /* }}} */
 
@@ -1126,15 +1126,15 @@ PHP_FUNCTION(ncurses_mvaddchstr)
    */
 PHP_FUNCTION(ncurses_addchstr)
 {
-	zval **s;
+  zval **s;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(s);
+  convert_to_string_ex(s);
 
-	RETURN_LONG(addchstr((chtype *)_STRING(s)));
+  RETURN_LONG(addchstr((chtype *)_STRING(s)));
 }
 /* }}} */
 
@@ -1142,18 +1142,18 @@ PHP_FUNCTION(ncurses_addchstr)
    */
 PHP_FUNCTION(ncurses_mvaddnstr)
 {
-	zval **x,**y,**s,**n;
+  zval **x,**y,**s,**n;
 
-	if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &x, &y, &s, &n) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &x, &y, &s, &n) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_string_ex(s);
-	convert_to_long_ex(n);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
+  convert_to_string_ex(s);
+  convert_to_long_ex(n);
 
-	RETURN_LONG(mvaddnstr(_INT(x),_INT(y),_STRING(s),_INT(n)));
+  RETURN_LONG(mvaddnstr(_INT(x),_INT(y),_STRING(s),_INT(n)));
 }
 /* }}} */
 
@@ -1161,16 +1161,16 @@ PHP_FUNCTION(ncurses_mvaddnstr)
    */
 PHP_FUNCTION(ncurses_addnstr)
 {
-	zval **s,**n;
+  zval **s,**n;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s, &n) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s, &n) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(s);
-	convert_to_long_ex(n);
+  convert_to_string_ex(s);
+  convert_to_long_ex(n);
 
-	RETURN_LONG(addnstr(_STRING(s),_INT(n)));
+  RETURN_LONG(addnstr(_STRING(s),_INT(n)));
 }
 /* }}} */
 
@@ -1178,17 +1178,17 @@ PHP_FUNCTION(ncurses_addnstr)
    */
 PHP_FUNCTION(ncurses_mvaddstr)
 {
-	zval **x,**y,**s;
+  zval **x,**y,**s;
 
-	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &s) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &x, &y, &s) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
-	convert_to_string_ex(s);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
+  convert_to_string_ex(s);
 
-	RETURN_LONG(mvaddstr(_INT(x),_INT(y),_STRING(s)));
+  RETURN_LONG(mvaddstr(_INT(x),_INT(y),_STRING(s)));
 }
 /* }}} */
 
@@ -1196,16 +1196,16 @@ PHP_FUNCTION(ncurses_mvaddstr)
    */
 PHP_FUNCTION(ncurses_mvdelch)
 {
-	zval **x,**y,**c;
+  zval **x,**y,**c;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
 
-	RETURN_LONG(mvdelch(_INT(x),_INT(y)));
+  RETURN_LONG(mvdelch(_INT(x),_INT(y)));
 }
 /* }}} */
 
@@ -1214,16 +1214,16 @@ PHP_FUNCTION(ncurses_mvdelch)
    */
 PHP_FUNCTION(ncurses_mvgetch)
 {
-	zval **x,**y;
+  zval **x,**y;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
 
-	RETURN_LONG(mvgetch(_INT(x),_INT(y)));
+  RETURN_LONG(mvgetch(_INT(x),_INT(y)));
 }
 /* }}} */
 
@@ -1231,16 +1231,16 @@ PHP_FUNCTION(ncurses_mvgetch)
    */
 PHP_FUNCTION(ncurses_mvinch)
 {
-	zval **x,**y;
+  zval **x,**y;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &x, &y) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(x);
-	convert_to_long_ex(y);
+  convert_to_long_ex(x);
+  convert_to_long_ex(y);
 
-	RETURN_LONG(mvinch(_INT(x),_INT(y)));
+  RETURN_LONG(mvinch(_INT(x),_INT(y)));
 }
 /* }}} */
 
@@ -1248,15 +1248,15 @@ PHP_FUNCTION(ncurses_mvinch)
    */
 PHP_FUNCTION(ncurses_insstr)
 {
-	zval **str;
+  zval **str;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(str);
+  convert_to_string_ex(str);
 
-	RETURN_LONG(insstr(_STRING(str)));
+  RETURN_LONG(insstr(_STRING(str)));
 }
 /* }}} */
 
@@ -1264,15 +1264,15 @@ PHP_FUNCTION(ncurses_insstr)
    */
 PHP_FUNCTION(ncurses_instr)
 {
-	zval **str;
+  zval **str;
 
-	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(str);
+  convert_to_string_ex(str);
 
-	RETURN_LONG(instr(_STRING(str)));
+  RETURN_LONG(instr(_STRING(str)));
 }
 /* }}} */
 
@@ -1280,18 +1280,18 @@ PHP_FUNCTION(ncurses_instr)
    */
 PHP_FUNCTION(ncurses_mvhline)
 {
-	zval **i1,**i2,**i3,**i4;
+  zval **i1,**i2,**i3,**i4;
 
-	if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
-	convert_to_long_ex(i3);
-	convert_to_long_ex(i4);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
+  convert_to_long_ex(i3);
+  convert_to_long_ex(i4);
 
-	RETURN_LONG(mvhline(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
+  RETURN_LONG(mvhline(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
 }
 /* }}} */
 
@@ -1299,18 +1299,18 @@ PHP_FUNCTION(ncurses_mvhline)
    */
 PHP_FUNCTION(ncurses_mvcur)
 {
-	zval **i1,**i2,**i3,**i4;
+  zval **i1,**i2,**i3,**i4;
 
-	if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
-	convert_to_long_ex(i3);
-	convert_to_long_ex(i4);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
+  convert_to_long_ex(i3);
+  convert_to_long_ex(i4);
 
-	RETURN_LONG(mvcur(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
+  RETURN_LONG(mvcur(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
 }
 /* }}} */
 
@@ -1318,18 +1318,18 @@ PHP_FUNCTION(ncurses_mvcur)
    */
 PHP_FUNCTION(ncurses_init_color)
 {
-	zval **i1,**i2,**i3,**i4;
+  zval **i1,**i2,**i3,**i4;
 
-	if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &i1, &i2, &i3, &i4) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
-	convert_to_long_ex(i3);
-	convert_to_long_ex(i4);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
+  convert_to_long_ex(i3);
+  convert_to_long_ex(i4);
 
-	RETURN_LONG(init_color(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
+  RETURN_LONG(init_color(_INT(i1),_INT(i2),_INT(i3),_INT(i4)));
 }
 /* }}} */
 
@@ -1337,22 +1337,22 @@ PHP_FUNCTION(ncurses_init_color)
    */
 PHP_FUNCTION(ncurses_border)
 {
-	zval **i1,**i2,**i3,**i4,**i5,**i6,**i7,**i8;
+  zval **i1,**i2,**i3,**i4,**i5,**i6,**i7,**i8;
 
-	if(ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 8 || zend_get_parameters_ex(8, &i1, &i2, &i3, &i4, &i5, &i6, &i7, &i8) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
-	convert_to_long_ex(i3);
-	convert_to_long_ex(i4);
-	convert_to_long_ex(i5);
-	convert_to_long_ex(i6);
-	convert_to_long_ex(i7);
-	convert_to_long_ex(i8);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
+  convert_to_long_ex(i3);
+  convert_to_long_ex(i4);
+  convert_to_long_ex(i5);
+  convert_to_long_ex(i6);
+  convert_to_long_ex(i7);
+  convert_to_long_ex(i8);
 
-	RETURN_LONG(border(_INT(i1),_INT(i2),_INT(i3),_INT(i4),_INT(i5),_INT(i6),_INT(i7),_INT(i8)));
+  RETURN_LONG(border(_INT(i1),_INT(i2),_INT(i3),_INT(i4),_INT(i5),_INT(i6),_INT(i7),_INT(i8)));
 }
 /* }}} */
 
@@ -1360,16 +1360,16 @@ PHP_FUNCTION(ncurses_border)
    */
 PHP_FUNCTION(ncurses_assume_default_colors)
 {
-	zval **i1,**i2;
+  zval **i1,**i2;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
 
-	RETURN_LONG(assume_default_colors(_INT(i1),_INT(i2)));
+  RETURN_LONG(assume_default_colors(_INT(i1),_INT(i2)));
 }
 /* }}} */
 
@@ -1377,16 +1377,16 @@ PHP_FUNCTION(ncurses_assume_default_colors)
    */
 PHP_FUNCTION(ncurses_define_key)
 {
-	zval **s1,**i2;
+  zval **s1,**i2;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s1, &i2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &s1, &i2) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_string_ex(s1);
-	convert_to_long_ex(i2);
+  convert_to_string_ex(s1);
+  convert_to_long_ex(i2);
 
-	RETURN_LONG(define_key(_STRING(s1),_INT(i2)));
+  RETURN_LONG(define_key(_STRING(s1),_INT(i2)));
 }
 /* }}} */
 
@@ -1394,16 +1394,16 @@ PHP_FUNCTION(ncurses_define_key)
    */
 PHP_FUNCTION(ncurses_hline)
 {
-	zval **i1,**i2;
+  zval **i1,**i2;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
 
-	RETURN_LONG(hline(_INT(i1),_INT(i2)));
+  RETURN_LONG(hline(_INT(i1),_INT(i2)));
 }
 /* }}} */
 
@@ -1411,16 +1411,16 @@ PHP_FUNCTION(ncurses_hline)
    */
 PHP_FUNCTION(ncurses_vline)
 {
-	zval **i1,**i2;
+  zval **i1,**i2;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &i2) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(i2);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(i2);
 
-	RETURN_LONG(vline(_INT(i1),_INT(i2)));
+  RETURN_LONG(vline(_INT(i1),_INT(i2)));
 }
 /* }}} */
 
@@ -1428,16 +1428,16 @@ PHP_FUNCTION(ncurses_vline)
    */
 PHP_FUNCTION(ncurses_keyok)
 {
-	zval **i1,**b2;
+  zval **i1,**b2;
 
-	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &b2) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+  if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &i1, &b2) == FAILURE) {
+    WRONG_PARAM_COUNT;
+  }
 
-	convert_to_long_ex(i1);
-	convert_to_long_ex(b2);
+  convert_to_long_ex(i1);
+  convert_to_long_ex(b2);
 
-	RETURN_LONG(hline(_INT(i1),_INT(b2)));
+  RETURN_LONG(hline(_INT(i1),_INT(b2)));
 }
 /* }}} */
 
@@ -1445,20 +1445,20 @@ PHP_FUNCTION(ncurses_keyok)
     */
 PHP_FUNCTION(ncurses_mvwaddstr)
 {
-	zval **handle, **x, **y, **text;
-	WINDOW **w;
+  zval **handle, **x, **y, **text;
+  WINDOW **w;
 
-	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &handle, &y, &x, &text) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+  if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &handle, &y, &x, &text) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
 
-	FETCH_WINRES(w,handle);
+  FETCH_WINRES(w,handle);
 
-	convert_to_long_ex(y);
-	convert_to_long_ex(x);
-	convert_to_string_ex(text);
+  convert_to_long_ex(y);
+  convert_to_long_ex(x);
+  convert_to_string_ex(text);
 
-	RETURN_LONG(mvwaddstr(*w,_INT(y),_INT(x),_STRING(text)));
+  RETURN_LONG(mvwaddstr(*w,_INT(y),_INT(x),_STRING(text)));
 }
 /* }}} */
 
@@ -1466,16 +1466,16 @@ PHP_FUNCTION(ncurses_mvwaddstr)
     */
 PHP_FUNCTION(ncurses_wrefresh)
 {
-	zval **handle;
-	WINDOW **w;
+  zval **handle;
+  WINDOW **w;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE){
-		WRONG_PARAM_COUNT;
-	}
+  if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &handle) == FAILURE){
+    WRONG_PARAM_COUNT;
+  }
 
-	FETCH_WINRES(w,handle);
+  FETCH_WINRES(w,handle);
 
-	RETURN_LONG(wrefresh(*w));
+  RETURN_LONG(wrefresh(*w));
 }
 /* }}} */
 

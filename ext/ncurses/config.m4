@@ -6,7 +6,7 @@ PHP_ARG_WITH(ncurses, for ncurses support,
 
 if test "$PHP_NCURSES" != "no"; then
    # --with-ncurses -> check with-path
-	 SEARCH_PATH="/usr/local /usr"     
+   SEARCH_PATH="/usr/local /usr"     
    SEARCH_FOR="/include/curses.h"
    if test -r $PHP_NCURSES/; then # path given as parameter
      NCURSES_DIR=$PHP_NCURSES
@@ -34,15 +34,15 @@ if test "$PHP_NCURSES" != "no"; then
    old_LIBS=$LIBS
    LIBS="$LIBS -L$NCURSES_DIR/lib -lm -ldl"
    AC_CHECK_LIB($LIBNAME, $LIBSYMBOL, [AC_DEFINE(HAVE_NCURSESLIB,1,[ ])],
-				[AC_MSG_ERROR(wrong ncurses lib version or lib not found)])
+        [AC_MSG_ERROR(wrong ncurses lib version or lib not found)])
    LIBS=$old_LIBS
   
    PHP_SUBST(NCURSES_SHARED_LIBADD)
    PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $NCURSES_DIR/lib, SAPRFC_SHARED_LIBADD)
 
-	 AC_CHECK_LIB(ncurses, color_set,   [AC_DEFINE(HAVE_NCURSES_COLOR_SET,  1, [ ])])
-	 AC_CHECK_LIB(ncurses, slk_color,   [AC_DEFINE(HAVE_NCURSES_SLK_COLOR,  1, [ ])])
-	 AC_CHECK_LIB(ncurses, use_extended_names,   [AC_DEFINE(HAVE_NCURSES_USE_EXTENDED_NAMES,  1, [ ])])
+   AC_CHECK_LIB(ncurses, color_set,   [AC_DEFINE(HAVE_NCURSES_COLOR_SET,  1, [ ])])
+   AC_CHECK_LIB(ncurses, slk_color,   [AC_DEFINE(HAVE_NCURSES_SLK_COLOR,  1, [ ])])
+   AC_CHECK_LIB(ncurses, use_extended_names,   [AC_DEFINE(HAVE_NCURSES_USE_EXTENDED_NAMES,  1, [ ])])
 
 
   PHP_EXTENSION(ncurses, $ext_shared)

@@ -47,12 +47,12 @@ PHP_RSHUTDOWN_FUNCTION(ncurses);
 PHP_MINFO_FUNCTION(ncurses);
 
 /* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+    Declare any global variables you may need between the BEGIN
+    and END macros here:     
 
 ZEND_BEGIN_MODULE_GLOBALS(ncurses)
-	int   global_value;
-	char *global_string;
+    int   global_value;
+    char *global_string;
 ZEND_END_MODULE_GLOBALS(ncurses)
 */
 
@@ -71,7 +71,7 @@ ZEND_END_MODULE_GLOBALS(ncurses)
 #define NCURSES_LS_FETCH()
 #endif
 
-#endif	/* PHP_NCURSES_H */
+#endif  /* PHP_NCURSES_H */
 
 
 /*
