@@ -285,6 +285,10 @@ static int _close_oracur(oraCursor *cur)
 
 PHP_MINIT_FUNCTION(oracle)
 {
+
+	ELS_FETCH();
+	ORALS_FETCH();
+
 	if (cfg_get_long("oracle.allow_persistent",
 			 &ORA(allow_persistent))
 		== FAILURE) {
@@ -355,8 +359,6 @@ PHP_MSHUTDOWN_FUNCTION(oracle)
 
 PHP_RSHUTDOWN_FUNCTION(oracle)
 {
-	ORALS_FETCH();
-
 	return SUCCESS;
 
 }
@@ -1814,6 +1816,9 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 	/* see variables.c */
 	HashTable *symbol_table=php3i_get_symbol_table();
 #endif
+
+	ELS_FETCH();
+
 	zend_hash_internal_pointer_reset(cursor->params);
 
 	if(zend_hash_num_elements(cursor->params) != cursor->nparams){
