@@ -35,7 +35,8 @@
 
 #if HAVE_LIBEXPAT
 
-#ifndef PHP_WIN32
+/*#ifndef PHP_WIN32*/
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 #  include "build-defs.h"
 # endif
 # include "ext/standard/head.h"
