@@ -49,14 +49,17 @@ PHP                                                                        NEWS
 - Fixed bug #30147 (OO sqlite_fetch_object did not reset error handler). (Wez)
 - Fixed bug #30133 (get_current_user() crashes on Windows). (Edin)
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
+- Fixed bug #30042 (strtotime does not use second param). (Derick)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
   (cfield at affinitysolutions dot com)
+- Fixed bug #29557 (strtotime error). (Derick)
 - Fixed bug #29418 (double free when openssl_csr_new fails).
   (Kamesh Jayachandran).
 - Fixed bug #29211 (SoapClient doesn't request wsdl through proxy). (Rob)
 - Fixed bug #28599 (strtotime fails with zero base time). (Derick)
 - Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
   characters). (Moriyoshi)
+- Fixed bug #28209 (strtotime("now")). (Derick)
 - Fixed bug #27798 (private / protected variables not exposed by 
   get_object_vars() inside class). (Marcus)
 - Fixed bug #27183 (Userland stream wrapper segfaults on stream_write). 
