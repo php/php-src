@@ -16,6 +16,7 @@
 
 #include "TSRM.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 #if HAVE_STDARG_H
 #include <stdarg.h>
