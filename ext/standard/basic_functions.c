@@ -293,6 +293,8 @@ function_entry basic_functions[] = {
 	PHP_FE(print_r,					NULL)
 	{"setcookie",		php3_SetCookie,		NULL},
 	{"header",			php3_Header,		NULL},
+	PHP_FE(function_exists,				NULL)
+	PHP_FE(extract,						NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -345,6 +347,11 @@ static void _php3_putenv_destructor(putenv_entry *pe)
 #define M_PI 3.14159265358979323846
 #endif
 
+#define EXTR_OVERWRITE		0
+#define EXTR_SKIP			1
+#define EXTR_PREFIX_SAME	2
+#define	EXTR_PREFIX_ALL		3
+
 void test_class_startup();
 
 int php3_minit_basic(INIT_FUNC_ARGS)
@@ -352,6 +359,12 @@ int php3_minit_basic(INIT_FUNC_ARGS)
 	ELS_FETCH();
 
 	REGISTER_DOUBLE_CONSTANT("M_PI", M_PI, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", EXTR_OVERWRITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_SKIP", EXTR_SKIP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_PREFIX_SAME", EXTR_PREFIX_SAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_PREFIX_ALL", EXTR_PREFIX_ALL, CONST_CS | CONST_PERSISTENT);
+	
 	test_class_startup();
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -2143,6 +2156,173 @@ PHP_FUNCTION(defined)
 		RETURN_LONG(0);
 	}
 }
+
+/* {{{ proto int function_exists(string function_name) 
+   Checks if a given function has been defined */
+PHP_FUNCTION(function_exists)
+{
+	pval *fname;
+	pval *tmp;
+	char *lcname;
+	
+	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &fname)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	lcname = estrdup(fname->value.str.val);
+	zend_str_tolower(lcname, fname->value.str.len);
+	if (_php3_hash_find(CG(function_table), lcname,
+						fname->value.str.len+1, (void**)&tmp) == FAILURE) {
+		efree(lcname);
+		RETURN_FALSE;
+	} else {
+		efree(lcname);
+		RETURN_TRUE;
+	}
+}
+
+/* }}} */
+
+
+/* {{{ int _valid_var_name(char *varname) */
+static int _valid_var_name(char *varname)
+{
+	int len, i;
+	
+	if (!varname)
+		return 0;
+	
+	len = strlen(varname);
+	
+	if (!isalpha((int)varname[0]) && varname[0] != '_')
+		return 0;
+	
+	if (len > 1) {
+		for(i=1; i<len; i++) {
+			if (!isalnum((int)varname[i]) && varname[i] != '_') {
+				return 0;
+			}
+		}
+	}
+	
+	return 1;
+}
+/* }}} */
+
+
+/* {{{ proto void extract(array var_array, int extract_type [, string prefix])
+   Imports variables into symbol table from an array */
+PHP_FUNCTION(extract)
+{
+	pval *var_array, *etype, *prefix;
+	pval **var_ptr, *var, *exist;
+	pval *data;
+	char *varname, *finalname;
+	ulong lkey;
+	int res, extype;
+
+	switch(ARG_COUNT(ht)) {
+		case 1:
+			if (getParameters(ht, 1, &var_array) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			extype = EXTR_OVERWRITE;
+			break;
+
+		case 2:
+			if (getParameters(ht, 2, &var_array, &etype) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_long(etype);
+			extype = etype->value.lval;
+			if (extype > EXTR_SKIP && extype <= EXTR_PREFIX_ALL) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+			
+		case 3:
+			if (getParameters(ht, 3, &var_array, &etype, &prefix) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			extype = etype->value.lval;
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	if (extype < EXTR_OVERWRITE || extype > EXTR_PREFIX_ALL) {
+		zend_error(E_WARNING, "Wrong argument in call to extract()");
+		return;
+	}
+	
+	if (!(var_array->type & IS_ARRAY)) {
+		zend_error(E_WARNING, "Wrong datatype in call to extract()");
+		return;
+	}
+		
+	zend_hash_internal_pointer_reset(var_array->value.ht);
+	while(zend_hash_get_current_data(var_array->value.ht, (void **)&var_ptr) == SUCCESS) {
+		var = *var_ptr;
+
+		if (!(var->type == IS_STRING &&
+			var->value.str.val == undefined_variable_string)) {
+
+			if (zend_hash_get_current_key(var_array->value.ht, &varname, &lkey) ==
+					HASH_KEY_IS_STRING) {
+
+				if (_valid_var_name(varname)) {
+					finalname = NULL;
+					
+					res = zend_hash_find(EG(active_symbol_table),
+										  varname, strlen(varname)+1, (void**)&exist);
+					switch (extype) {
+						case EXTR_OVERWRITE:
+							finalname = estrdup(varname);
+							break;
+
+						case EXTR_PREFIX_SAME:
+							if (res != SUCCESS)
+								finalname = estrdup(varname);
+							/* break omitted intentionally */
+
+						case EXTR_PREFIX_ALL:
+							if (!finalname) {
+								finalname = emalloc(strlen(varname) + prefix->value.str.len + 2);
+								strcpy(finalname, prefix->value.str.val);
+								strcat(finalname, "_");
+								strcat(finalname, varname);
+							}
+							break;
+							
+						default:
+							if (res != SUCCESS)
+								finalname = estrdup(varname);
+							break;
+					}
+					
+					if (finalname) {
+						data = (pval *)emalloc(sizeof(pval));
+						*data = *var;
+						pval_copy_constructor(data);
+						data->is_ref = 0;
+						data->refcount = 1;
+
+						zend_hash_update(EG(active_symbol_table), finalname,
+										  strlen(finalname)+1, &data, sizeof(pval *), NULL);
+						efree(finalname);
+					}
+				}
+
+				efree(varname);
+			}
+		}
+		zend_hash_move_forward(var_array->value.ht);
+	}
+}
+/* }}} */
+
 
 /*
  * Local variables:
