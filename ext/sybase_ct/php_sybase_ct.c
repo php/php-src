@@ -307,6 +307,7 @@ PHP_INI_END()
 static void php_sybase_init_globals(zend_sybase_globals *sybase_globals)
 {
 	long timeout;
+	TSRMLS_FETCH();
 
 	if (cs_ctx_alloc(CTLIB_VERSION, &sybase_globals->context)!=CS_SUCCEED || ct_init(sybase_globals->context, CTLIB_VERSION)!=CS_SUCCEED) {
 		return;
@@ -940,6 +941,7 @@ static void php_sybase_finish_results (sybase_result *result)
 	int i;
 	CS_RETCODE retcode;
 	CS_INT restype;
+	TSRMLS_FETCH();
 	
 	efree(result->datafmt);
 	efree(result->lengths);
@@ -2025,7 +2027,6 @@ PHP_FUNCTION(sybase_deadlock_retry_count)
 PHP_FUNCTION(sybase_set_message_handler)
 {
 	zval ***params;
-	zval *retval_ptr;
 	char *name;
 	int argc = ZEND_NUM_ARGS();
 
