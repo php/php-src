@@ -1886,7 +1886,7 @@ dnl This macro is used to get a comparable
 dnl version for apache1/2.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
-  ac_output=`$1 -v 2>&1`
+  ac_output=`$1 -v 2>&1 | grep version`
   ac_IFS=$IFS
 IFS="- /.
 "
