@@ -214,9 +214,11 @@ static long *array_lookup_bool(HashTable *ht, const char *idx)
 	return 0;
 }
 
+#if iliaa_0 /* compile warning fix */
 static int send_present (Yaz_Association t);
 static int send_sort_present (Yaz_Association t);
 static int send_sort (Yaz_Association t);
+#endif
 
 const char *option_get (Yaz_Association as, const char *name)
 {
