@@ -1,3 +1,49 @@
+2000-12-20  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in: install the Math/* files.
+
+2000-12-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/genif.sh
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/oracle/config.m4
+      sapi/cgi/config.m4
+      acinclude.m4
+      configure.in
+      genif.sh: Stop automatically passing vars to AC_SUBST through PHP_SUBST.
+
+    There are some variables which are needed for Makefiles and files
+    created by AC_OUTPUT; we use PHP_SUBST_OLD for those now.
+
+    genif.sh was moved to an appropiate place.
+
+    * build/print_include.awk
+      configure.in
+      genif.sh:
+    Speed up the genif.sh script a little bit.  Whereas it took three seconds
+    previously, it takes now about 100ms on a P233.
+
+2000-12-20  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/fsock.c:
+    - Use memcmp() instead of ugly char-by-char compare
+
+2000-12-20  Zak Greant  <zak@nucleus.com>
+
+    * ext/standard/basic_functions.c: Removed unused variable from is_scalar
+
+2000-12-20  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Note about fix under correct version.
+
+2000-12-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ctype/ctype.c
+      ext/ctype/php_ctype.h
+      ext/ctype/tests/001.phpt
+      ext/ctype/tests/002.phpt: merge in function name changes
+
 2000-12-19  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/credits.c
