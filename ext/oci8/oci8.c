@@ -234,6 +234,8 @@ static sb4 oci_bind_out_callback(dvoid *, OCIBind *, ub4, ub4, dvoid **, ub4 **,
 static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_type, ub4 fo_event);
 #endif
 
+static int oci_lob_flush(oci_descriptor*, int);
+
 /* }}} */
 /* {{{ extension function prototypes */
 
@@ -3185,6 +3187,46 @@ CLEANUP:
 
 /* }}} */
 
+/* {{{ oci_lob_flush() */
+static int oci_lob_flush(oci_descriptor* descr, int flush_flag) {
+    OCILobLocator *mylob;
+    oci_connection *connection;
+
+    mylob = (OCILobLocator *) descr->ocidescr;
+
+    if (! mylob) {
+        return 0;
+    }
+
+    /* do not really flush buffer, but reporting success
+     * to suppress OCI error when flushing not used buffer
+     * */
+    if (descr->buffering != 2) {
+        return 1;
+    }
+
+    connection = descr->conn;
+
+    CALL_OCI_RETURN(connection->error, OCILobFlushBuffer(
+                connection->pServiceContext,
+                connection->pError,
+                mylob,
+                flush_flag));
+
+    oci_debug("OCILobFlushBuffer: flush_flag=%d",flush_flag);
+
+    if (connection->error) {
+        oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
+        oci_handle_error(connection, connection->error);
+        return 0;
+    }
+
+    /* marking buffer as enabled and not used */
+    descr->buffering = 1;
+    return 1;
+}
+/* }}} */
+
 /* {{{ php_oci_fetch_row() */
 static void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args)
 {
@@ -4315,27 +4357,12 @@ PHP_FUNCTION(oci_lob_flush)
 			/* buffering wasn't enabled, there is nothing to flush */
 			RETURN_FALSE;
 		}
-		else if (descr->buffering == 1) {
-			/* buffering is enabled, but not used yet
-			   dunno why, but OCI returns error in this case, so I think we should suppress it */
-			RETURN_TRUE;
-		}
-		
-		CALL_OCI_RETURN(connection->error, OCILobFlushBuffer(
-					connection->pServiceContext, 
-					connection->pError,
-					mylob,
-					flush_flag));
-
-		oci_debug("OCILobFlushBuffer: flush_flag=%d",flush_flag);
-
-		if (connection->error) {
-			oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
-			oci_handle_error(connection, connection->error);
-			RETURN_FALSE;
-		}
-
-		RETURN_TRUE;
+        
+        if (oci_lob_flush(descr,flush_flag) == 1) {
+            RETURN_TRUE;
+        }
+        
+        RETURN_FALSE;
 	}
 	
 	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_flush() should not be called like this. Use $somelob->flush() to flush LOB buffer");
