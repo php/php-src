@@ -1,5 +1,34 @@
 <?php
 
+function timestamp_to_soap_datetime($t) {
+  return date('Y-m-d\TH:i:sO',$t);
+}
+
+function soap_datetime_to_timestamp($t) {
+	/* Ignore Microsecconds */
+  $iso8601 = '(-?[0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\.[0-9]*)?(Z|[+\-][0-9]{4}|[+\-][0-9]{2}:[0-9]{2})?';
+  if (!is_int($t)) {
+	  if (!ereg($iso8601,$t,$r)) {
+  	  return false;
+	  }
+  	$t = mktime($r[6],$r[5],$r[4],$r[3],$r[2],$r[1]);
+	  $op = substr($regs[8],0,1);
+  	$h = substr($regs[8],1,2);
+	  if (strstr($regs[8],':')) {
+  	  $m = substr($regs[8],4,2);
+	  } else {
+  	  $m = substr($regs[8],3,2);
+	  }
+  	$t += (($op == "-"?-1:1) * $h * 60 + $m) * 60;
+  }
+  return t;
+}
+
+function date_compare($f1,$f2)
+{
+	return soap_datetime_to_timestamp($f1) == soap_datetime_to_timestamp($f2);
+}
+
 function hex_compare($f1, $f2)
 {
   return strcasecmp($f1,$f2) == 0;
