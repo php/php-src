@@ -193,6 +193,65 @@ define printzn
 end
 
 document printzn
-	print type and content of znode
+	print type and content of znode. usage: printzn &opline->op1 
+end
+
+define printzops
+	printf "op1 => " 
+	printzn &execute_data->opline.op1
+	printf "op2 => "
+	printzn &execute_data->opline.op2
+	printf "result => "
+	printzn &execute_data->opline.result
+end
+
+document printzops
+	dump operands of the current opline
+end
+
+define zmemcheck
+	set $p = alloc_globals.head
+	set $stat = "?"
+	if $arg0 != 0
+		set $not_found = 1
+	else
+		set $not_found = 0
+	end
+	printf " block      file:line (orig)                                           status\n"
+	printf "-------------------------------------------------------------------------------\n"
+	while $p
+		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
+		if $arg0 == 0 || (void *)$aptr == (void *)$arg0
+			if $p->magic == 0x7312f8dc 
+				set $stat = "OK"
+			end
+			if $p->magic == 0x99954317
+				set $stat = "FREED"
+			end
+			if $p->magic == 0xfb8277dc
+				set $stat = "CACHED"
+			end
+	
+			printf " 0x%08x %-52s:%5d %-06s\n", $aptr, $p->filename, $p->lineno, $stat
+			if $p->orig_filename
+				printf "         <= %-52s:%5d\n", $p->orig_filename, $p->orig_lineno
+			end
+			if $arg0 != 0
+				set $p = 0
+				set $not_found = 0
+			else
+				set $p = $p->pNext
+			end
+		else
+			set $p = $p->pNext
+		end
+	end
+	if $not_found
+		printf "no such block that begins at 0x%08x.\n", $aptr 
+	end
+end
+
+document zmemcheck
+	show status of a memory block. usage: zmemcheck [ptr]. if ptr = 0 all blocks will be listed.
 end
 
