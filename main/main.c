@@ -129,12 +129,14 @@ static PHP_INI_MH(OnSetPrecision)
 static PHP_INI_MH(OnChangeMaxExecutionTime)
 {
 	int new_timeout;
+	PLS_FETCH();
 	
 	if (new_value) {
 		new_timeout = atoi(new_value);
 	} else {
 		new_timeout = 0;
 	}
+	PG(max_execution_time) = new_timeout;
 	php_set_timeout(new_timeout);
 	return SUCCESS;
 }
@@ -739,6 +741,8 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
+
+	php_set_timeout(PG(max_execution_time));
 
 	if (PG(output_buffering)) {
 		php_start_ob_buffering();
