@@ -335,6 +335,16 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 
 	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
 		apr_bucket_read(b, &str, &n, 1);
+
+		/*
+         * An intuitive brigade bug detection
+		 * (http://bugs.php.net/18648)  
+		 *
+         * This has something to do with the issue mentioned in this thread
+         * on dev@httpd.apache.org:
+		 *
+         * http://marc.theaimsgroup.com/?l=apr-dev&m=104039770818472&w=2
+         */
 		if (APR_BUCKET_IS_HEAP(b)) {
 			if ((str == prev_fetched_str && n == prev_fetched_str_len)) {
 				char *brigade_dump = NULL;
