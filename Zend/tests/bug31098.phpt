@@ -1,5 +1,5 @@
 --TEST--
-Bug #31436 (isset incorrectly returning true when passed a bad type)
+Bug #31098 (isset() / empty() incorrectly returns true in dereference of a wrong type)
 --FILE--
 <?php
 $a = '';
