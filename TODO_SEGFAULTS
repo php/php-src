@@ -1,0 +1,108 @@
+    This is an overview over existing segfaults in the current PHP source
+    tree.
+
+
+Fixed:
+
+    i18n_convert/mb_convert_encoding (Moriyoshi Koizumi)
+
+
+
+Open:
+
+    array_pad
+    bcsub (1)
+    dbase_open
+    exif_imagetype
+    exif_thumbnail
+    mb_ereg (2)
+    mb_ereg_match (2)
+    mb_eregi (2)
+    mb_split
+    ob_start (3)
+    setlocale
+    socket_iovec_alloc
+    unregister_tick_function
+    xml_parser_create
+
+    Notes:
+
+(1) appears, when bcadd, bcmod, bcmul, bcscale, bcsqrt have been tested
+    prior to it.  does not segfault otherwise.
+
+(2) sometimes, mb_ereg passes the test, although a subsequent mbereg
+    will cause a segfault. Probably something in-between screws up the engine.
+
+(3) calling ob_start in weird ways caused a segfault in 
+    php_formatted_print(). In this line:
+	
+	format = Z_STRVAL_PP(args[0]);
+
+    I am not able to reproduce this particular issue at the moment.  I
+    was not able to create a simple test case for this initially, so
+    the lack of reproducibility likely relates to changes in the 
+    changed/now-extended test script.
+
+
+
+Methodology
+
+    1. Use a plain PHP_4_3 tree
+    2. Use the config.nice from ammendment 1.
+    3. Download the test script
+
+       <URL:http://schumann.cx/do_crash.txt>
+
+    4a. Use the scripts funcparse.awk/genfunclist.sh from phpdoc/scripts
+        for creating a plain text function list.  Feed that list to
+        the script.  Avoid calls like pcntl_fork.  Manually remove functions
+        which take too long to finish/eat up all memory.
+    
+    4b. For testing a single function, echo the name of the function to
+        the script like this:
+
+        echo dbase_open | php do_crash.txt
+
+
+
+
+Ammendment 1.
+
+CFLAGS='-O0 -g' \
+'../src/php4/configure' \
+'--enable-pcntl' \
+'--enable-shmop' \
+'--enable-sysvsem' \
+'--enable-sysvshm' \
+'--enable-wddx' \
+'--enable-yp' \
+'--enable-filepro' \
+'--enable-ftp' \
+'--enable-dba' \
+'--enable-dbase' \
+'--enable-dio' \
+'--enable-exif' \
+'--enable-mbstring' \
+'--enable-mbregex' \
+'--enable-sockets' \
+'--enable-bcmath' \
+'--enable-calendar' \
+'--enable-pcntl' \
+'--enable-shmop' \
+'--enable-sysvsem' \
+'--enable-sysvshm' \
+'--enable-wddx' \
+'--enable-yp' \
+'--enable-filepro' \
+'--enable-ftp' \
+'--enable-dba' \
+'--enable-dbase' \
+'--enable-dio' \
+'--enable-exif' \
+'--enable-mbstring' \
+'--enable-mbregex' \
+'--enable-sockets' \
+'--enable-bcmath' \
+'--enable-calendar' \
+"$@"
+
