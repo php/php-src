@@ -14,13 +14,60 @@
 		} 
 		
 		function parse_proto($proto) {
+			/* TODO
+				 a 'real' parser is needed here (lex/yacc with PHP output anyone?)
+				 to support stuff like default values 
+				 the current tokenizer is not clever enough for this ...
+
+				 the grammer for a prototype would look like this: ?
+
+				 proto: type name '(' param-list ')'
+
+				 name: [A-Za-z_][A-Za-z0-9_]*
+				 
+				 type: "void"
+				     | typespec
+
+         typespec: typename
+                 | typename '&'
+						 
+				 typename: bool | boolean
+				         | int | integer | long
+								 | float | double | real
+								 | string
+								 | array
+                 | object | object name
+								 | resource | resource name
+								 | mixed
+								 | callback
+								 | stream
+
+					param-list: void
+                    | parameter
+										| parm-list ',' parameter
+								    
+					parameter: typespec name
+                   | typespec name '=' default-value
+
+					default-value: "true" | "false" | "array()"
+					             | numeric-value
+											 | string
+
+					string: '"' character* '"'
+          
+					number: ... the usual int, float, hex and octal stuff ...
+			 */
+			
 			// 'tokenize' it
+			$tokens=array();
+
+			// we collect valid C names as Strings, any other character for itself, blanks are skipped
+			// TODO: this does no longer work if we ever add default values ...
 			$len=strlen($proto);
 			$name="";
-			$tokens=array();
 			for ($n=0;$n<$len;$n++) {
 				$char = $proto{$n};
-				if (ereg("[a-zA-Z0-9_]",$char)) {
+				if (ctype_alpha($char) || $char == '_' || ($n && ctype_digit($char))) {
 					$name.=$char;
 				} else {
 					if ($name) $tokens[]=$name;
