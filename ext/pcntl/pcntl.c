@@ -151,31 +151,43 @@ void php_register_signal_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("SIGSYS",   (long) SIGSYS, CONST_CS | CONST_PERSISTENT);
 }
 
-PHP_MINIT_FUNCTION(pcntl)
+static void php_pcntl_init_globals(zend_pcntl_globals *pcntl_globals) 
 {
- 	PCNTL_LS_FETCH();
-
-   	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
-	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, NULL, 1);
+	zend_hash_init(&pcntl_globals->php_signal_table, 16, NULL, NULL, 1);
 
 	/* Just in case ... */
-	memset(&PCNTL_G(php_signal_queue),0,sizeof(PCNTL_G(php_signal_queue)));
+	memset(&pcntl_globals->php_signal_queue,0,sizeof(pcntl_globals->php_signal_queue));
    
-	zend_llist_init(&PCNTL_G(php_signal_queue), sizeof (long),  NULL, 1);
-	PCNTL_G(signal_queue_ready)=0;
-	PCNTL_G(processing_signal_queue)=0;
+	zend_llist_init(&pcntl_globals->php_signal_queue, sizeof (long),  NULL, 1);
+	pcntl_globals->signal_queue_ready=0;
+	pcntl_globals->processing_signal_queue=0;
+}
+
+static void php_pcntl_shutdown_globals(zend_pcntl_globals *pcntl_globals) 
+{
+	zend_hash_destroy(&pcntl_globals->php_signal_table);
+	zend_llist_destroy(&pcntl_globals->php_signal_queue);
+}
+
+PHP_MINIT_FUNCTION(pcntl)
+{
+   	php_register_signal_constants(INIT_FUNC_ARGS_PASSTHRU);
+	ZEND_INIT_MODULE_GLOBALS(pcntl, php_pcntl_init_globals, php_pcntl_shutdown_globals);
 	if (zend_register_extension(&pcntl_extension_entry, 0)==FAILURE) 
 		return FAILURE;
 	return SUCCESS;
 }
+
 PHP_MSHUTDOWN_FUNCTION(pcntl)
 {
-	PCNTL_LS_FETCH();
-   
+
 	zend_hash_destroy(&PCNTL_G(php_signal_table));
 	zend_llist_destroy(&PCNTL_G(php_signal_queue));
 	return SUCCESS;
 }
+
+
+
 
 PHP_MINFO_FUNCTION(pcntl)
 {
@@ -355,7 +367,6 @@ PHP_FUNCTION(pcntl_signal)
 {
 	zval **signo, **handle;
    	char *func_name;
-	PCNTL_LS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &signo, &handle) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -404,10 +415,9 @@ static void old_pcntl_signal_handler(int signo)
 {
 	char *func_name;
 	zval *param, *call_name, *retval;
-  	PCNTL_LS_FETCH();
 	TSRMLS_FETCH();
 
-    DEBUG_OUT("Caught signal: %d\n", signo); 
+	DEBUG_OUT("Caught signal: %d\n", signo); 
 	if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) signo, (void *) &func_name)==FAILURE) {
 		DEBUG_OUT("Signl handler not fount"); 
 		return;
@@ -434,7 +444,7 @@ static void old_pcntl_signal_handler(int signo)
 static void pcntl_signal_handler(int signo)
 {
 	long signal_num=signo;
-	PCNTL_LS_FETCH();
+	TSRMLS_FETCH();
  
 	DEBUG_OUT("Caught signo %d\n", signo); 
 	if (! PCNTL_G(processing_signal_queue) && pcntl_zend_extension_active ) {
@@ -450,6 +460,8 @@ static void pcntl_signal_handler(int signo)
 
 int pcntl_zend_extension_startup(zend_extension *extension)
 {
+	TSRMLS_FETCH();
+   
 	DEBUG_OUT("Statup Called\n");
 	pcntl_zend_extension_active=1;
 	CG(extended_info) = 1;
@@ -464,6 +476,8 @@ void pcntl_zend_extension_shutdown(zend_extension *extension)
 
 void pcntl_zend_extension_activate(void)
 {
+	TSRMLS_FETCH();
+   
 	DEBUG_OUT("Activate Called\n");
 	pcntl_zend_extension_active=1;
 	CG(extended_info) = 1;
@@ -483,7 +497,6 @@ void pcntl_zend_extension_statement_handler(zend_op_array *op_array)
 	zend_llist_element *element;
     zval *param, *call_name, *retval;
 	char *func_name;
-	PCNTL_LS_FETCH();
 	TSRMLS_FETCH();
 
 	/* Bail if the queue is empty or if we are already playing the queue*/
