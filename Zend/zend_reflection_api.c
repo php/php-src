@@ -301,7 +301,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 		string_printf(str, "\n");
 
 		count = zend_hash_num_elements(&ce->function_table);
-		string_printf(str, "%s  - Methods [%d] {\n", indent, count);
+		string_printf(str, "%s  - Methods [%d] {", indent, count);
 		if (count > 0) {
 			HashPosition pos;
 			zend_function *mptr;
@@ -309,12 +309,13 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			zend_hash_internal_pointer_reset_ex(&ce->function_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->function_table, (void **) &mptr, &pos) == SUCCESS) {
+				string_printf(str, "\n");
 				_function_string(str, mptr, "    " TSRMLS_CC);
 				zend_hash_move_forward_ex(&ce->function_table, &pos);
-				string_printf(str, "\n");
 			}
+		} else {
+			string_printf(str, "\n");
 		}
-		string_printf(str, "\n");
 		string_printf(str, "  }\n");
 	}
 	
@@ -350,9 +351,10 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 		return;
 	}
 
-	string_printf(str, "%sParameters [%d] {\n", indent, fptr->common.num_args);
+	string_printf(str, "\n");
+	string_printf(str, "%s- Parameters [%d] {\n", indent, fptr->common.num_args);
 	for (i = 0; i < fptr->common.num_args; i++) {
-		string_printf(str, "%s  - ", indent);
+		string_printf(str, "%s  ", indent);
 		_parameter_string(str, arg_info, i, indent TSRMLS_CC);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
