@@ -21,10 +21,6 @@
 #ifndef PHP_FTOK_H
 #define PHP_FTOK_H
 
-#if HAVE_SYSVSEM || HAVE_SYSVSHM  || HAVE_SHMOP
-
 PHP_FUNCTION(ftok);
-
-#endif
 
 #endif /* PHP_FTOK_H */
