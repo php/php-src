@@ -19,12 +19,12 @@ Fixed:
     ob_start (Sascha)
     imagecreate/-truecolor (Sascha)
     flock (Sascha)
-	register_shutdown_function (Sascha)
+    register_shutdown_function (Sascha)
+    mb_strcut('', [number greater than the length of first arg]) (Moriyoshi)
 	
 Open:
 
     the dbase extension         (1)
-    mb_strcut('', 2147483647);  (2)
     chunk_split                 (3)
     socket_select               (4)
     php_imagepolygon		(5)
@@ -48,13 +48,6 @@ dbase_numfields
 dbase_numrecords
 dbase_open
 X 
-
-(2) backtrace:
-#0  0x080b828e in mbfl_strcut (string=0xbfffbde0, result=0xbfffbdd0, 
-		    from=2147483647, length=0)
-    at /home/sas/src/php4/ext/mbstring/mbfilter.c:8258
-	8258                                    (*encoder->filter_function)(*p++, encoder TSRMLS_CC);
-
 
 (3) integer overflow in php_chunk_split
 
