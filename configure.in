@@ -1242,7 +1242,7 @@ cat <<X
 |                                                                    |
 | You chose to compile PHP with DB extension. This extension is      |
 | deprecated and does not support databse locking correctly. Please  |
-| use DBA extension which is a full operational superset.            |
+| use DBA extension which is a fully operational superset.           |
 X
   fi
 
