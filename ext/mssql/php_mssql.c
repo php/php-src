@@ -822,7 +822,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				DBDATEREC dateinfo;	
 				int res_length = dbdatlen(mssql_ptr->link,offset);
 
-				if ((column_type != SQLDATETIME) || MS_SQL_G(datetimeconvert)) {
+				if ((column_type != SQLDATETIME && column_type != SQLDATETIM4) || MS_SQL_G(datetimeconvert)) {
 
 					if (column_type == SQLDATETIM4) res_length += 14;
 					if (column_type == SQLDATETIME) res_length += 10;
@@ -830,7 +830,14 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 					res_buf = (unsigned char *) emalloc(res_length+1);
 					res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
 				} else {
-					dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+					if (column_type == SQLDATETIM4) {
+						DBDATETIME temp;
+
+						dbconvert(NULL, SQLDATETIM4, dbdata(mssql_ptr->link,offset), -1, SQLDATETIME, (LPBYTE) &temp, -1);
+						dbdatecrack(mssql_ptr->link, &dateinfo, &temp);
+					} else {
+						dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+					}
 			
 					res_length = 19;
 					res_buf = (unsigned char *) emalloc(res_length+1);
@@ -875,7 +882,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		DBDATEREC dateinfo;	
 		int res_length = dbdatlen(mssql_ptr->link,offset);
 
-		if ((column_type != SQLDATETIME) || MS_SQL_G(datetimeconvert)) {
+		if ((column_type != SQLDATETIME && column_type != SQLDATETIM4) || MS_SQL_G(datetimeconvert)) {
 
 			if (column_type == SQLDATETIM4) res_length += 14;
 			if (column_type == SQLDATETIME) res_length += 10;
@@ -884,7 +891,14 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR, res_buf, -1);
 
 		} else {
-			dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+			if (column_type == SQLDATETIM4) {
+				DBDATETIME temp;
+
+				dbconvert(NULL, SQLDATETIM4, dbdata(mssql_ptr->link,offset), -1, SQLDATETIME, (LPBYTE) &temp, -1);
+				dbdatecrack(mssql_ptr->link, &dateinfo, &temp);
+			} else {
+				dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
+			}
 			
 			res_length = 19;
 			res_buf = (unsigned char *) emalloc(res_length+1);
