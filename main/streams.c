@@ -713,8 +713,11 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			if (toread > stream->chunk_size)
 				toread = stream->chunk_size;
 
-			/* XXX: Should not the loop end, if the stream op fails? */
 			php_stream_fill_read_buffer(stream, toread TSRMLS_CC);
+
+			if (stream->writepos - stream->readpos == 0) {
+				break;
+			}
 		}
 	}
 	
