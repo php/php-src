@@ -41,7 +41,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
 #include "php_zlib.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
 #include "win32/pwd.h"

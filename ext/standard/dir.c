@@ -22,7 +22,7 @@
 /* {{{ includes/startup/misc */
 
 #include "php.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 
 #include "php_dir.h"
 

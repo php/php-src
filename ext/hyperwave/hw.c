@@ -26,7 +26,7 @@
 #include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "SAPI.h"
 
 #ifdef PHP_WIN32

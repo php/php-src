@@ -41,7 +41,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "ext/standard/fsock.h"
 #if HAVE_UNISTD_H
 #include <unistd.h>
