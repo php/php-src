@@ -504,7 +504,7 @@ class PEAR_Downloader extends PEAR_Common
         if (!isset($this->_options['alldeps']) && isset($info['optional']) &&
               $info['optional'] == 'yes') {
             // skip optional deps
-            $this->log(0, "skipping Package $package optional dependency $info[name]");
+            $this->log(0, "skipping Package '$package' optional dependency '$info[name]'");
             return false;
         }
         // {{{ get releases
@@ -514,7 +514,7 @@ class PEAR_Downloader extends PEAR_Common
         }
         if (!count($releases)) {
             if (!isset($this->_installed[strtolower($info['name'])])) {
-                $this->pushError("Package $package dependency $info[name] ".
+                $this->pushError("Package '$package' dependency '$info[name]' ".
                             "has no releases");
             }
             return false;
@@ -543,8 +543,8 @@ class PEAR_Downloader extends PEAR_Common
                     $this->betterStates($release['state'], true));
             }
             $savestate = array_shift($get);
-            $this->pushError( "Release for $package dependency $info[name] " .
-                "has state '$savestate', requires $state");
+            $this->pushError( "Release for '$package' dependency '$info[name]' " .
+                "has state '$savestate', requires '$state'");
             return false;
         }
         if (in_array(strtolower($info['name']), $this->_toDownload) ||
