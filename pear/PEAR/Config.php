@@ -170,7 +170,7 @@ class PEAR_Config extends PEAR
             $this->readConfigFile($user_file);
         }
         if ($system_file && file_exists($system_file)) {
-            $this->mergeConfigFile($system_file, false, true);
+            $this->mergeConfigFile($system_file, false, 'system');
         }
         foreach ($this->configuration_info as $key => $info) {
             $this->configuration['default'][$key] = $info['default'];
@@ -226,21 +226,14 @@ class PEAR_Config extends PEAR
     function readConfigFile($file = null, $layer = 'user')
     {
         if (empty($this->files[$layer])) {
-            return $this->raiseError("unknown config file type");
+            return $this->raiseError("unknown config file type `$layer'");
         }
         if ($file === null) {
             $file = $this->files[$layer];
         }
-        $fp = @fopen($file, "r");
-        if (!$fp) {
-            return $this->raiseError("PEAR_Config::readConfigFile fopen('$file','r') failed");
-        }
-        $size = filesize($file);
-        $contents = fread($fp, $size);
-        $data = unserialize($contents);
-        settype($data, 'array');
-        if (empty($data) && $size > 1) {
-            return $this->raiseError("PEAR_Config::readConfigFile: bad data");
+        $data = $this->_readConfigDataFrom($file);
+        if (PEAR::isError($data)) {
+            return $data;
         }
         $this->_decodeInput($data);
         $this->configuration[$layer] = $data;
@@ -270,18 +263,14 @@ class PEAR_Config extends PEAR
     function mergeConfigFile($file, $override = true, $layer = 'user')
     {
         if (empty($this->files[$layer])) {
-            return $this->raiseError("unknown config file type");
+            return $this->raiseError("unknown config file type `$layer'");
         }
-        $fp = @fopen($file, "r");
-        if (!$fp) {
-            return $this->raiseError($php_errormsg);
+        if ($file === null) {
+            $file = $this->files[$layer];
         }
-        $size = filesize($file);
-        $contents = fread($fp, $size);
-        $data = unserialize($contents);
-        settype($data, 'array');
-        if (empty($data) && $size > 1) {
-            return $this->raiseError("PEAR_Config::mergeConfigFile: bad data");
+        $data = $this->_readConfigDataFrom($file);
+        if (PEAR::isError($data)) {
+            return $data;
         }
         $this->_decodeInput($data);
         if ($override) {
@@ -322,13 +311,12 @@ class PEAR_Config extends PEAR
             return true;
         }
         if (empty($this->files[$layer])) {
-            return $this->raiseError("unknown config file type");
+            return $this->raiseError("unknown config file type `$layer'");
         }
         if ($file === null) {
             $file = $this->files[$layer];
         }
         $data = $this->configuration[$layer];
-        var_dump($this->configuration);
         $this->_encodeOutput($data);
         if (!@is_writeable($file)) {
             return $this->raiseError("no write access to $file!");
@@ -341,6 +329,52 @@ class PEAR_Config extends PEAR
             return $this->raiseError("PEAR_Config::writeConfigFile serialize failed");
         }
         return true;
+    }
+
+    // }}}
+    // {{{ _readConfigDataFrom(file)
+
+    /**
+     * Reads configuration data from a file and returns the parsed data
+     * in an array.
+     *
+     * @param string file to read from
+     *
+     * @return array configuration data or a PEAR error on failure
+     *
+     * @access private
+     */
+    function _readConfigDataFrom($file)
+    {
+        $fp = @fopen($file, "r");
+        if (!$fp) {
+            return $this->raiseError("PEAR_Config::readConfigFile fopen('$file','r') failed");
+        }
+        $size = filesize($file);
+        $contents = fread($fp, $size);
+        $version = '0.1';
+        if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, &$matches)) {
+            $version = $matches[1];
+            $contents = substr($contents, strlen($matches[0]));
+        }
+        if (version_compare($version, '1', '<')) {
+            $data = unserialize($contents);
+            if (!is_array($data)) {
+                if (strlen(trim($contents)) > 0) {
+                    $error = "PEAR_Config: bad data in $file";
+//                if (isset($this)) {
+                    return $this->raiseError($error);
+//                } else {
+//                    return PEAR::raiseError($error);
+                } else {
+                    $data = array();
+                }
+            }
+        // add parsing of newer formats here...
+        } else {
+            return $this->raiseError("unknown format version $version");
+        }
+        return $data;
     }
 
     // }}}
@@ -427,7 +461,7 @@ class PEAR_Config extends PEAR
     {
         foreach ($this->layers as $layer) {
             if (isset($this->configuration[$layer][$key])) {
-                return $layer;
+                return $this->configuration[$layer][$key];
             }
         }
         return null;
@@ -454,11 +488,11 @@ class PEAR_Config extends PEAR
      */
     function set($key, $value, $layer = 'user')
     {
-        if (empty($this->configuration[$layer]) || empty($this->configuration_info[$key])) {
+        if (empty($this->configuration_info[$key])) {
             return false;
         }
-        extract($this->configuration_info[$key], EXTR_OVERWRITE, 'k_');
-        switch ($k_type) {
+        extract($this->configuration_info[$key]);
+        switch ($type) {
             case 'integer': {
                 $value = (int)$value;
                 break;
@@ -467,10 +501,10 @@ class PEAR_Config extends PEAR
                 // If a valid_set is specified, require the value to
                 // be in the set.  If there is no valid_set, accept
                 // any value.
-                if ($k_valid_set) {
-                    reset($k_valid_set);
-                    if ((key($k_valid_set) === 0 && !in_array($value, $k_valid_set)) ||
-                        empty($k_valid_set[$value]))
+                if ($valid_set) {
+                    reset($valid_set);
+                    if ((key($valid_set) === 0 && !in_array($value, $valid_set)) ||
+                        empty($valid_set[$value]))
                     {
                         return false;
                     }
@@ -548,7 +582,7 @@ class PEAR_Config extends PEAR
     // {{{ remove(key, [layer])
 
     /**
-     * Unset the a config key in a specific config layer.
+     * Remove the a config key from a specific config layer.
      *
      * @param string config key
      *
@@ -582,7 +616,7 @@ class PEAR_Config extends PEAR
      */
     function toDefault($key)
     {
-        trigger_error("PEAR_Config::toDefault() deprecated, use PEAR_Config::unset() instead", E_USER_NOTICE);
+        trigger_error("PEAR_Config::toDefault() deprecated, use PEAR_Config::remove() instead", E_USER_NOTICE);
         return $this->remove($key, 'user');
     }
 
