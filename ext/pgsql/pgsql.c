@@ -4074,7 +4074,7 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 {
 	zval *var_converted = NULL, *ids_converted = NULL;
 	smart_str querystr = {0};
-	int ret = SUCCESS;
+	int ret = FAILURE;
 
 	assert(pg_link != NULL);
 	assert(table != NULL);
