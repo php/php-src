@@ -195,6 +195,14 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
 
 #ifdef ZEND_MULTIBYTE
+	if (SCNG(script_org)) {
+		efree(SCNG(script_org));
+		SCNG(script_org) = NULL;
+	}
+	if (SCNG(script_filtered)) {
+		efree(SCNG(script_filtered));
+		SCNG(script_filtered) = NULL;
+	}
 	SCNG(script_org) = lex_state->script_org;
 	SCNG(script_org_size) = lex_state->script_org_size;
 	SCNG(script_filtered) = lex_state->script_filtered;
@@ -371,17 +379,6 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 			zend_bailout();
 		}
 		compilation_successful=1;
-
-#ifdef ZEND_MULTIBYTE
-		if (SCNG(script_org)) {
-			efree(SCNG(script_org));
-			SCNG(script_org) = NULL;
-		}
-		if (SCNG(script_filtered)) {
-			efree(SCNG(script_filtered));
-			SCNG(script_filtered) = NULL;
-		}
-#endif /* ZEND_MULTIBYTE */
 	}
 
 	if (retval) {
