@@ -255,7 +255,7 @@ define_syslog_variables	= Off	; Whether or not to define the various syslog vari
 [mail function]
 SMTP			=	localhost			;for win32 only
 sendmail_from	=	me@localhost.com	;for win32 only
-;sendmail_path	=						;for unix only, may supply arguments as well (default is sendmail -t)
+;sendmail_path	=						;for unix only, may supply arguments as well (default is 'sendmail -t -i')
 
 [Debugger]
 debugger.host	=	localhost

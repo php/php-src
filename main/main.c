@@ -191,7 +191,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 #endif
 
 #ifdef PHP_PROG_SENDMAIL
-#	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t"
+#	define DEFAULT_SENDMAIL_PATH PHP_PROG_SENDMAIL " -t -i "
 #else
 #	define DEFAULT_SENDMAIL_PATH NULL
 #endif
