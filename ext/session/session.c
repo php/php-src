@@ -1270,7 +1270,7 @@ PHP_FUNCTION(session_id)
 }
 /* }}} */
 
-/* {{{ proto string session_regenerate_id()
+/* {{{ proto bool session_regenerate_id()
    Update the current session id with a newly generated one. */
 PHP_FUNCTION(session_regenerate_id)
 {
