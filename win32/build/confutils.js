@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.45 2004-08-03 00:02:48 wez Exp $
+// $Id: confutils.js,v 1.46 2004-08-03 00:58:29 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -456,20 +456,7 @@ function search_paths(thing_to_find, explicit_path, env_name)
 
 	thing_to_find = thing_to_find.replace(new RegExp("/", "g"), "\\");
 
-	if (env_name != null) {
-		env = WshShell.Environment("Process").Item(env_name);
-		env = env.split(";");
-		for (i = 0; i < env.length; i++) {
-			file = glob(env[i] + "\\" + thing_to_find);
-			if (file) {
-				found = true;
-				place = true;
-				break;
-			}
-		}
-	}
-
-	if (!found && explicit_path != null) {
+	if (explicit_path != null) {
 		if (typeof(explicit_path) == "string") {
 			explicit_path = explicit_path.split(";");
 		}
@@ -480,6 +467,19 @@ function search_paths(thing_to_find, explicit_path, env_name)
 				found = true;
 				place = file[0];
 				place = place.substr(0, place.length - thing_to_find.length - 1);
+				break;
+			}
+		}
+	}
+
+	if (!found && env_name != null) {
+		env = WshShell.Environment("Process").Item(env_name);
+		env = env.split(";");
+		for (i = 0; i < env.length; i++) {
+			file = glob(env[i] + "\\" + thing_to_find);
+			if (file) {
+				found = true;
+				place = true;
 				break;
 			}
 		}
