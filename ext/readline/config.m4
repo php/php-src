@@ -68,7 +68,7 @@ if test "$PHP_LIBEDIT" != "no"; then
 
   AC_CHECK_LIB(ncurses, tgetent,
   [
-    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE__SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(ncurses,,READLINE_SHARED_LIBADD)
   ],[
     AC_CHECK_LIB(termcap, tgetent,
     [
