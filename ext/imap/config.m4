@@ -97,6 +97,7 @@ PHP_ARG_WITH(imap,for IMAP support,
     fi
 
     if test "$PHP_IMAP_SSL" != "no"; then
+      AC_DEFINE(HAVE_IMAP_SSL,1,[ ])
       AC_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
       AC_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
       AC_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
