@@ -1796,7 +1796,7 @@ PHP_FUNCTION(array_slice)
 /* }}} */
 
 
-static void php_array_merge_impl(HashTable *dest, HashTable *src, int recursive)
+PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 {
 	zval	  **src_entry,
 			  **dest_entry;
@@ -1812,8 +1812,8 @@ static void php_array_merge_impl(HashTable *dest, HashTable *src, int recursive)
 								   (void **)&dest_entry) == SUCCESS) {
 					convert_to_array_ex(dest_entry);
 					convert_to_array_ex(src_entry);
-					php_array_merge_impl(Z_ARRVAL_PP(dest_entry),
-										 Z_ARRVAL_PP(src_entry), recursive);
+					php_array_merge(Z_ARRVAL_PP(dest_entry),
+									Z_ARRVAL_PP(src_entry), recursive);
 				} else {
 					(*src_entry)->refcount++;
 
@@ -1833,7 +1833,7 @@ static void php_array_merge_impl(HashTable *dest, HashTable *src, int recursive)
 	}
 }
 
-static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
+static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 {
 	zval	  ***args = NULL;
 	int			 argc,
@@ -1856,7 +1856,7 @@ static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 	
 	for (i=0; i<argc; i++) {
 		convert_to_array_ex(args[i]);
-		php_array_merge_impl(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
+		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
 	}
 	
 	efree(args);
@@ -1867,7 +1867,7 @@ static void php_array_merge(INTERNAL_FUNCTION_PARAMETERS, int recursive)
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
-	php_array_merge(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -1876,7 +1876,7 @@ PHP_FUNCTION(array_merge)
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
-	php_array_merge(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_array_merge_wrapper(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
