@@ -57,6 +57,7 @@ PEAR Installer:
 * Bug #249 installing from an url doesnt work
 * Bug #248 --force command does not work as expected
 * Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
+* Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
 
     </notes>
     <provides type="class" name="OS_Guess" />
