@@ -84,6 +84,15 @@ static void normalize_protected_variable(char *varname TSRMLS_DC)
 		memcpy(varname, s, strlen(s)+1);
 	}
 
+	for (p=varname; *p && *p != '['; p++) {
+		switch(*p) {
+			case ' ':
+			case '.':
+				*p='_';
+				break;
+		}
+	}
+
 	/* find index */
 	index = strchr(varname, '[');
 	if (index) {
