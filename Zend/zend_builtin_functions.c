@@ -127,12 +127,17 @@ int zend_startup_builtin_functions(TSRMLS_D)
 }
 
 
+/* {{{ proto string zend_version(void)
+   Get the version of the Zend Engine */
 ZEND_FUNCTION(zend_version)
 {
 	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1, 1);
 }
+/* }}} */
 
 
+/* {{{ proto int func_num_args(void)
+   Get the number of arguments that were passed to the function */
 ZEND_FUNCTION(func_num_args)
 {
 	void **p;
@@ -152,8 +157,11 @@ ZEND_FUNCTION(func_num_args)
 		RETURN_LONG(-1);
 	}
 }
+/* }}} */
 
 
+/* {{{ proto mixed func_get_arg(int arg_num)
+   Get the $arg_num'th argument that was passed to the function */
 ZEND_FUNCTION(func_get_arg)
 {
 	void **p;
@@ -190,8 +198,11 @@ ZEND_FUNCTION(func_get_arg)
 	*return_value = *arg;
 	zval_copy_ctor(return_value);
 }
+/* }}} */
 
 
+/* {{{ proto array func_get_args()
+   Get an array of the arguments that were passed to the function */
 ZEND_FUNCTION(func_get_args)
 {
 	void **p;
@@ -224,6 +235,7 @@ ZEND_FUNCTION(func_get_args)
 		zend_hash_next_index_insert(return_value->value.ht, &element, sizeof(zval *), NULL);
 	}
 }
+/* }}} */
 
 
 /* {{{ proto int strlen(string str)
@@ -240,6 +252,7 @@ ZEND_NAMED_FUNCTION(zend_if_strlen)
 }
 /* }}} */
 
+
 /* {{{ proto int strcmp(string str1, string str2)
    Binary safe string comparison */
 ZEND_FUNCTION(strcmp)
@@ -254,6 +267,7 @@ ZEND_FUNCTION(strcmp)
 	RETURN_LONG(zend_binary_zval_strcmp(*s1, *s2));
 }
 /* }}} */
+
 
 /* {{{ proto int strncmp(string str1, string str2, int len)
    Binary safe string comparison */
@@ -271,6 +285,7 @@ ZEND_FUNCTION(strncmp)
 }
 /* }}} */
 
+
 /* {{{ proto int strcasecmp(string str1, string str2)
    Binary safe case-insensitive string comparison */
 ZEND_FUNCTION(strcasecmp)
@@ -285,6 +300,7 @@ ZEND_FUNCTION(strcasecmp)
 	RETURN_LONG(zend_binary_zval_strcasecmp(*s1, *s2));
 }
 /* }}} */
+
 
 /* {{{ proto int strncasecmp(string str1, string str2, int len)
    Binary safe string comparison */
@@ -302,6 +318,9 @@ ZEND_FUNCTION(strncasecmp)
 }
 /* }}} */
 
+
+/* {{{ proto array each(array arr)
+   Return the currently pointed key..value pair in the passed array, and advance the pointer to the next element */
 ZEND_FUNCTION(each)
 {
 	zval **array, *entry, **entry_ptr, *tmp;
@@ -352,7 +371,11 @@ ZEND_FUNCTION(each)
 	(*inserted_pointer)->refcount++;
 	zend_hash_move_forward(target_hash);
 }
+/* }}} */
 
+
+/* {{{ proto int error_reporting(int new_error_level=null)
+   Return the current error_reporting level, and if an argument was passed - change to the new level */
 ZEND_FUNCTION(error_reporting)
 {
 	zval **arg;
@@ -376,7 +399,11 @@ ZEND_FUNCTION(error_reporting)
 
 	RETVAL_LONG(old_error_reporting);
 }
+/* }}} */
 
+
+/* {{{ proto bool define(string constant_name, mixed value, case_sensitive=true)
+   Define a new constant */
 ZEND_FUNCTION(define)
 {
 	zval **var, **val, **non_cs;
@@ -432,8 +459,11 @@ ZEND_FUNCTION(define)
 	  RETURN_FALSE;
 	}
 }
+/* }}} */
 
 
+/* {{{ proto bool define(string constant_name)
+   Check whether a constant exists */
 ZEND_FUNCTION(defined)
 {
 	zval **var;
@@ -451,6 +481,8 @@ ZEND_FUNCTION(defined)
 		RETURN_LONG(0);
 	}
 }
+/* }}} */
+
 
 /* {{{ proto string get_class(object object)
    Retrieves the class name */
@@ -470,6 +502,7 @@ ZEND_FUNCTION(get_class)
 	RETURN_STRINGL(ce->name, ce->name_length, 1);
 }
 /* }}} */
+
 
 /* {{{ proto string get_parent_class(mixed object)
    Retrieves the parent class name for object or class. */
@@ -497,6 +530,7 @@ ZEND_FUNCTION(get_parent_class)
 	}
 }
 /* }}} */
+
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
    Returns true if the object has this class as one of its parents */
@@ -528,6 +562,7 @@ ZEND_FUNCTION(is_subclass_of)
 	RETURN_FALSE;
 }
 /* }}} */
+
 
 /* {{{ proto array get_class_vars(string class_name)
    Returns an array of default properties of the class */
@@ -561,6 +596,7 @@ ZEND_FUNCTION(get_class_vars)
 }
 /* }}} */
 
+
 /* {{{ proto array get_object_vars(object obj)
    Returns an array of object properties */
 ZEND_FUNCTION(get_object_vars)
@@ -581,6 +617,7 @@ ZEND_FUNCTION(get_object_vars)
 				   (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 }
 /* }}} */
+
 
 /* {{{ proto array get_class_methods(mixed class)
    Returns an array of method names for class or class instance. */
@@ -622,6 +659,7 @@ ZEND_FUNCTION(get_class_methods)
 }
 /* }}} */
 
+
 /* {{{ proto bool method_exists(object object, string method)
    Checks if the class method exists */
 ZEND_FUNCTION(method_exists)
@@ -648,6 +686,7 @@ ZEND_FUNCTION(method_exists)
 }
 /* }}} */
 
+
 /* {{{ proto bool class_exists(string classname)
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
@@ -670,6 +709,7 @@ ZEND_FUNCTION(class_exists)
 	}
 }
 /* }}} */
+
 
 /* {{{ proto bool function_exists(string function_name) 
    Checks if the function exists */
@@ -694,6 +734,8 @@ ZEND_FUNCTION(function_exists)
 /* }}} */
 
 
+/* {{{ proto void leak(int num_bytes=3)
+   Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
 	int leakbytes=3;
@@ -708,6 +750,7 @@ ZEND_FUNCTION(leak)
 	
 	emalloc(leakbytes);
 }
+/* }}} */
 
 
 #ifdef ZEND_TEST_EXCEPTIONS
@@ -815,7 +858,6 @@ ZEND_FUNCTION(set_error_handler)
 /* }}} */
 
 
-
 /* {{{ proto void restore_error_handler(void)
    Restores the previously defined error handler function */
 ZEND_FUNCTION(restore_error_handler)
@@ -842,6 +884,7 @@ static int copy_class_name(zend_class_entry *ce, int num_args, va_list args, zen
 	return 0;
 }
 
+
 /* {{{ proto array get_declared_classes(void)
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
@@ -854,6 +897,7 @@ ZEND_FUNCTION(get_declared_classes)
 	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
 }
 /* }}} */
+
 
 static int copy_function_name(zend_function *func, int num_args, va_list args, zend_hash_key *hash_key)
 {
@@ -872,6 +916,7 @@ static int copy_function_name(zend_function *func, int num_args, va_list args, z
 	
 	return 0;
 }
+
 
 /* {{{ proto array get_defined_functions(void)
    Returns an array of all defined functions */
@@ -905,6 +950,7 @@ ZEND_FUNCTION(get_defined_functions)
 }
 /* }}} */
 
+
 /* {{{ proto array get_defined_vars(void)
    Returns an associative array of names and values of all currently defined variable names (variables in the current scope) */
 ZEND_FUNCTION(get_defined_vars)
@@ -918,8 +964,8 @@ ZEND_FUNCTION(get_defined_vars)
 }
 /* }}} */
 
-#define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 
+#define LAMBDA_TEMP_FUNCNAME	"__lambda_func"
 /* {{{ proto string create_function(string args, string code)
    Creates an anonymous function, and returns its name (funny, eh?) */
 ZEND_FUNCTION(create_function)
@@ -1027,6 +1073,7 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
 	add_assoc_zval_ex(name_array, constant->name, constant->name_len, const_val);
 	return 0;
 }
+
 
 /* {{{ proto array get_loaded_extensions(void)
    Return an array containing names of loaded extensions */
