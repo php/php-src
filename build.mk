@@ -18,8 +18,6 @@ STAMP = buildmk.stamp
 
 ALWAYS = generated_lists
 
-.PHONY: $(ALWAYS)
-
 all: $(STAMP) $(ALWAYS)
 	@$(MAKE) -s -f build2.mk
 
@@ -47,3 +45,5 @@ cvsclean:
 		(cd `dirname $$i` 2>/dev/null && (rm -f `cat .cvsignore` *.o *.a; rm -rf .libs .deps) || true); \
 	done
 	@rm -f $(SUBDIRS) 2>/dev/null || true
+
+.PHONY: $(ALWAYS)
