@@ -973,7 +973,7 @@ ZEND_METHOD(reflection_method, invoke)
 	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC) ||
 		(mptr->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			zend_throw_exception_ex(zend_exception_get_abstract(), 0 TSRMLS_CC, 
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 				"Trying to invoke abstract method %s::%s", 
 				mptr->common.scope->name, mptr->common.function_name);
 		} else {
