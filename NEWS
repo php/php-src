@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed a memory leak that would occur when restarting Apache often
+  (mookid@sigent.ru)
 - Fixed a bug that prevented $argv and $argc from being defined in the command
   line version of PHP (Stas)
 - Fixed a bug that prevented a changed compile-time extension_dir from
