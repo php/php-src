@@ -775,6 +775,11 @@ PHP_FUNCTION(pathinfo)
 		}
 	}
 	
+	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
+		ret = php_basename(Z_STRVAL_PP(str), len);
+		add_assoc_string(tmp, "dirname", ret, 1);
+	}			
+	
 	if (argc == 2) {
 		zval **element;
 		zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **)&element);
@@ -2397,23 +2402,45 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
-/* {{{ proto void parse_str(string encoded_string)
+/* {{{ proto void parse_str(string encoded_string, [array result])
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
 	zval **arg;
+	zval **arrayArg;
+	zval *sarg;
 	char *res = NULL;
+	int argCount;
+	
 	PLS_FETCH();
 	SLS_FETCH();
 
-	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
+	argCount = ARG_COUNT(ht);
+	if(argCount < 1 || argCount > 2 || zend_get_parameters_ex(argCount, &arg, &arrayArg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_string_ex(arg);
-	if ((*arg)->value.str.val && *(*arg)->value.str.val) {
-		res = estrndup((*arg)->value.str.val,(*arg)->value.str.len);
+	sarg = *arg;
+	if (sarg->value.str.val && *sarg->value.str.val) {
+		res = estrndup(sarg->value.str.val, sarg->value.str.len);
 	}
-	php_treat_data(PARSE_STRING, res ELS_CC PLS_CC SLS_CC);
+
+	if(argCount == 1)
+		php_treat_data(PARSE_STRING, res, NULL ELS_CC PLS_CC SLS_CC);
+	else
+	{
+		if(!ParameterPassedByReference(ht, 2)){
+			php_error(E_WARNING, "Array not passed by reference in call to parse_str()");
+			return;
+		}
+		
+		/* Clear out the array that was passed in. */
+		zval_dtor(*arrayArg);
+		array_init(*arrayArg);
+		
+		php_treat_data(PARSE_STRING, res, *arrayArg ELS_CC PLS_CC SLS_CC);
+	}
 }
 /* }}} */
 

@@ -30,7 +30,7 @@
 #define PARSE_COOKIE 2
 #define PARSE_STRING 3
 
-void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC);
+void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC);
 void php_import_environment_variables(ELS_D PLS_DC);
 PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array ELS_DC PLS_DC);
 PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array ELS_DC PLS_DC);
