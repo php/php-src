@@ -1187,7 +1187,7 @@ PS_CREATE_SID_FUNC(msession)
 		}
 	}
 	ELOG("Yikes, could not get sid from msession");
-	return php_session_create_id(mod_data, newlen TSRMLS_DC);
+	return php_session_create_id(mod_data, newlen TSRMLS_CC);
 }
 #endif  /* HAVE_PHP_SESSION_CREATESID */
 #endif	/* HAVE_PHP_SESSION */
