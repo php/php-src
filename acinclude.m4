@@ -4,6 +4,26 @@ dnl This file contains local autoconf functions.
 
 sinclude(dynlib.m4)
 
+dnl
+dnl PHP_TARGET_RDYNAMIC
+dnl
+dnl Checks whether -rdynamic is supported by the compiler.  This
+dnl is necessary for some targets to populate the global symbol
+dnl table.  Otherwise, dynamic modules would not be able to resolve
+dnl PHP-related symbols.
+dnl
+dnl If successful, adds -rdynamic to PHP_LDFLAGS.
+dnl
+AC_DEFUN(PHP_TARGET_RDYNAMIC,[
+  if test -n "$GCC"; then
+    dnl we should use a PHP-specific macro here
+    TSRM_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic=yes)
+    if test "$gcc_rdynamic" = "yes"; then
+      PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
+    fi
+  fi
+])
+
 AC_DEFUN(PHP_REMOVE_USR_LIB,[
   unset ac_new_flags
   for i in [$]$1; do
