@@ -1563,7 +1563,6 @@ PHP_FUNCTION(mb_output_handler)
  	/* just return if the converter is not activated. */
  	if (MBSTRG(outconv) == NULL) {
 		RETURN_STRINGL(arg_string, arg_string_len, 1);
-		return;
 	}
 
  	/* flag */
