@@ -1,3 +1,55 @@
+2004-01-11  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l:
+      TSRMLS fix
+
+2004-01-11  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #26864 (pg_(update|delete) ignore PGSQL_DML_EXEC option).
+
+    * ext/pgsql/pgsql.c:
+      Fixed bug #26864 (pg_(update|delete) ignore PGSQL_DML_EXEC option).
+
+2004-01-11  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Re-allow conditional class declerations. Needless to say that I also
+      - think it's not great coding.. Use polymorphism instead :)
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_language_scanner.l:
+      - This should fix the problem of conditional function decleration on the
+      - same line of code not to work. You should re-evaluate your coding style
+      - if you really code this way :)
+
+2004-01-11  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      oops..
+
+    * NEWS:
+      BFN
+
+    * tests/lang/bug26869.phpt:
+      
+      add test case for bug #26869
+
+2004-01-11  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/tests/array/var_export.phpt:
+      fixing test
+
+2004-01-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/sqlite/config.m4:
+      added utf8 support option for sqlite >= 2.8.9.
+
 2004-01-10  Andrey Hristov  <php@hristov.com>
 
     * ext/standard/tests/array/007.phpt
