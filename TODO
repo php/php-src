@@ -3,14 +3,14 @@ parenthesis means that person has taken on this project.
 
 Zend
 ----
-    * allow foreach ($array as $k => &$val) syntax. right now we can not 
+    * allow foreach ($array as $k => &$val) syntax. right now we cannot 
       traverse an array without copying each element.
     * look at replacing c-lib call tolower().
 
 global
 ------
-    * always build the standalone executable as well as teh chosen SAPI 
-	  target.
+    * always build the standalone executable as well as the chosen SAPI 
+      target.
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
@@ -21,12 +21,12 @@ global
     * --enable-all in configure. (--enable-shared=max ...)
     * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
-      reentrant-save functions
-    * on some platforms unimplemented function will just do nothing (eg symlink)
-      they should print a warning or be not even defined!
-    * implement javadoc based function docs template system
-    * use thread-safe resolver functions (either require BIND 8 or adns)
-    * provide optional IPv6 support
+      reentrancy-safe functions.
+    * on some platforms unimplemented function will just do nothing (e.g. symlink)
+      they should print a warning or not even be defined!
+    * implement javadoc based function docs template system.
+    * use thread-safe resolver functions (either require BIND 8 or adns).
+    * provide optional IPv6 support.
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
       of compliance.
@@ -43,8 +43,8 @@ documentation
 
 ext/pcre
 --------
-    * have a non-greedy option for preg_replace()
-    * have an option for preg_grep() to return keys as well
+    * have a non-greedy option for preg_replace().
+    * have an option for preg_grep() to return keys as well.
 
 ext/wddx
 --------
@@ -54,13 +54,13 @@ ext/wddx
         recordset
 
         http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
-		(Andrei)
+        (Andrei)
 
     * implement wddx_packet_as_javascript(). (Andrei)
 
 ext/dav
 --------
-    * rewrite
+    * rewrite.
 
 ext/oci8
 --------
@@ -73,15 +73,15 @@ ext/mcrypt
 ext/standard
 ------------
     * add a version number to data serialized via serialize().
-    * array_add(), array_rand(), array_uniq() (Andrei)
+    * array_add(), array_rand(), array_uniq(). (Andrei)
     * implement pathinfo() (what the heck is it?)
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * implement regex-cache for url-functions.
-    * strpad() (Andrei)
-    * strcase_replace() (Andrei)
-    * comparing arrays semantically (like Python) (Andrei)
-    * move socket related functions to fsock.c
+    * strpad(). (Andrei)
+    * strcase_replace(). (Andrei)
+    * comparing arrays semantically (like Python). (Andrei)
+    * move socket related functions to fsock.c.
     * NOT binary safe:
         strtok()
         basename()
