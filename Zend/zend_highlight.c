@@ -66,6 +66,15 @@ ZEND_API void zend_html_puts(char *s, uint len)
 	register char *ptr=s, *end=s+len;
 	
 	while (ptr<end) {
+		if (*ptr==' '
+			&& len>1
+			&& !(((ptr+1)>=end) || (*(ptr+1)==' ')) /* next is not a space */
+			&& !((ptr==s) || (*(ptr-1)==' '))) /* last is not a space */ {
+			char c = *ptr++;
+
+			ZEND_PUTC(c);
+			continue;
+		}
 		zend_html_putc(*ptr++);
 	}
 }
