@@ -1597,12 +1597,17 @@ PHP_FUNCTION(call_user_func)
 		efree(params);
 		RETURN_FALSE;
 	}
-	SEPARATE_ZVAL(params[0]);
+
+	if (Z_TYPE_PP(params[0]) != IS_STRING && Z_TYPE_PP(params[0]) != IS_ARRAY) {
+		SEPARATE_ZVAL(params[0]);
+		convert_to_string_ex(params[0]);
+	}
+
 	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 1, NULL)==SUCCESS
 		&& retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
-		php_error(E_WARNING,"Unable to call %s() - function does not exist", Z_STRVAL_PP(params[0]));
+		php_error(E_WARNING,"Unable to call %s() - function does not exist", Z_TYPE_PP(params[0]) == IS_STRING ? Z_STRVAL_PP(params[0]) : "");
 	}
 	efree(params);
 }
@@ -1625,8 +1630,13 @@ PHP_FUNCTION(call_user_func_array)
         zend_get_parameters_ex(2, &func_name, &params) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
-    convert_to_string_ex(func_name);
+	SEPARATE_ZVAL(params);
 	convert_to_array_ex(params);
+
+	if (Z_TYPE_PP(func_name) != IS_STRING && Z_TYPE_PP(func_name) != IS_ARRAY) {
+		SEPARATE_ZVAL(func_name);
+		convert_to_string_ex(func_name);
+	}
 
     params_ar = HASH_OF(*params);
 
@@ -1643,7 +1653,7 @@ PHP_FUNCTION(call_user_func_array)
         && retval_ptr) {
         COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
     } else {
-        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_PP(func_name));
+        php_error(E_WARNING, "Unable to call %s() - function does not exist", Z_TYPE_PP(func_name) == IS_STRING ? Z_STRVAL_PP(func_name) : "");
     }
 
     efree(func_args);
