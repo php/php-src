@@ -13,26 +13,186 @@
  *
  * SPL - Standard PHP Library
  *
+ * SPL is a collection of interfaces and classes that are meant to solve 
+ * standard problems. 
+ *
+ * A nice article about it can be found 
+ * <a href="http://www.sitepoint.com/article/php5-standard-library/1">here</a>.
+ *
  * You can download this documentation as a chm file 
  * <a href="http://php.net/~helly/php/ext/spl/spl.chm">here</a>.
  *
  * (c) Marcus Boerger, 2003 - 2004
  */
 
-/** \defgroup SPL Internal classes
+/** @defgroup ZendEngine Zend engine classes
+ *
+ * The classes and interfaces in this group are contained in the c-code of 
+ * PHP's Zend engine.
+ */
+
+/** @defgroup SPL Internal classes
  *
  * The classes and interfaces in this group are contained in the c-code of 
  * ext/SPL.
  */
 
-/** \defgroup Examples Example classes
+/** @defgroup Examples Example classes
  *
  * The classes and interfaces in this group are contained as PHP code in the 
  * examples subdirectory of ext/SPL. Sooner or later they will be moved to
  * c-code.
  */
 
-/** \ingroup SPL
+/** @ingroup ZendEngine
+ * @brief Basic Exception class.
+ */
+class Exception
+{
+	/** The exception message */
+    protected $message;
+    
+    /** The string represenations as generated during construction */
+    private $string;
+    
+    /** The code passed to the constructor */
+    protected $code;
+    
+    /** The file name where the exception was instantiated */
+    protected $file;
+    
+    /** The line number where the exception was instantiated */
+    protected $line;
+    
+    /** The stack trace */
+    private $trace;
+
+	/** Prevent clone
+	 */
+    final private function __clone();
+
+	/**
+	 */
+	public function __construct($message, $code);
+
+	/** @return the message passed to the constructor
+	 */
+    final public function getMessage();
+
+	/** @return the code passed to the constructor
+	 */
+    final public function getCode();
+
+	/** @return the name of the file where the exception was thrown
+	 */
+    final public function getFile();
+
+	/** @return the line number where the exception was thrown
+	 */
+    final public function getLine();
+
+	/** @return the stack trace as array
+	 */
+    final public function getTrace();
+
+	/** @return the stack trace as string
+	 */
+    final public function getTraceAsString();
+
+	/** @return string represenation of exception
+	 */
+    public function __toString();
+}
+
+/** @ingroup SPL
+ * @brief Exception that represents error in the program logic.
+ *
+ * This kind of exceptions should directly leed to a fix in your code.
+ */
+class LogicException extends Exception
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception that denotes a value not in the valid domain was used.
+ *
+ * This kind of exception should be used to inform about domain erors in 
+ * mathematical sense.
+ */
+class DomainException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception that denotes invalid arguments were passed.
+ */
+class InvalidArgumentException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown when a parameter exceeds the allowed length.
+ *
+ * This can be used for strings length, array size, file size, number of 
+ * elements read from an Iterator and so on.
+ */
+class LengthException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown when an illegal index was requested.
+ *
+ * This represents errors that should be detected at compile time.
+ *
+ * @see OutOfBoundsException
+ */
+class OutOfRangeException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown for errors that are only detectable at runtime. 
+ */
+class RuntimeException extends Exception
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown when an illegal index was requested.
+ *
+ * This represents errors that cannot be detected at compile time.
+ *
+ * @see OutOfRangeException
+ */
+class OutOfBoundsException extends LogicException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown to indicate arithmetic/buffer overflow.
+ */
+class OverflowException extends RuntimeException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception thrown to indicate range errors during program execution.
+ *
+ * Normally this means there was an arithmetic error other than under/overflow.
+ */
+class RangeException extends RuntimeException
+{
+}
+
+/** @ingroup SPL
+ * @brief Exception Exception thrown to indicate arithmetic/buffer underflow.
+ */
+class UnderflowException extends RuntimeException
+{
+}
+
+/** \ingroup ZendEngine
  * \brief Interface to override array access of objects.
  */
 interface ArrayAccess
@@ -57,7 +217,7 @@ interface ArrayAccess
 	function offsetExists($offset);
 }
 
-/** \ingroup SPL
+/** \ingroup ZendEngine
  * \brief Interface to detect a class is traversable using foreach.
  *
  * Abstract base interface that cannot be implemented alone. Instead it
@@ -75,7 +235,7 @@ interface Traversable
 {
 }
 
-/** \ingroup SPL
+/** \ingroup ZendEngine
  * \brief Interface to create an external Iterator.
  *
  * \note This is an engine internal interface.
@@ -87,7 +247,7 @@ interface IteratorAggregate extends Traversable
 	function getIterator();
 }
 
-/** \ingroup SPL
+/** \ingroup ZendEngine
  * \brief Basic iterator
  *
  * Interface for external iterators or objects that can be iterated 
