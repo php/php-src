@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 05 Oct 2000, Version 4.0.3
+- Fixed a problem that allowed users to override admin_value's and admin_flag's
+  (Zeev)
 - Fixed PostgreSQL module to work when the link handle is omitted (Zeev)
 - Fixed returning of empty LOB fields in OCI8. (Thies)
 - Added Calendar module to default Win32 build (Andi)
