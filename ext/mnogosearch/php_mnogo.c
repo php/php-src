@@ -87,6 +87,8 @@
 #define UDM_PARAM_DETECT_CLONES		29
 #define UDM_PARAM_SORT_ORDER		30
 #define UDM_PARAM_RESULTS_LIMIT		31
+#define UDM_PARAM_EXCERPT_SIZE		32
+#define UDM_PARAM_EXCERPT_PADDING	33
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -326,6 +328,9 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_DETECT_CLONES",UDM_PARAM_DETECT_CLONES,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SORT_ORDER",UDM_PARAM_SORT_ORDER,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_RESULTS_LIMIT",UDM_PARAM_RESULTS_LIMIT,CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("UDM_PARAM_EXCERPT_SIZE",UDM_PARAM_EXCERPT_SIZE,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_EXCERPT_PADDING",UDM_PARAM_EXCERPT_PADDING,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -1108,6 +1113,17 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		
 			break;
 #endif
+
+#if UDM_VERSION_ID >= 30216
+		case UDM_PARAM_EXCERPT_SIZE: 
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"ExcerptSize",val);
+		
+			break;
+		case UDM_PARAM_EXCERPT_PADDING: 
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"ExcerptPadding",val);
+		
+			break;
+#endif
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Unknown agent session parameter");
 			RETURN_FALSE;
@@ -1684,11 +1700,22 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 		char		*al;
 		char		*Excerpt;
 		
+#if UDM_VERSION_ID >= 30216
+		size_t		ExcerptSize, ExcerptPadding;
+		
+		ExcerptSize = (size_t)UdmVarListFindInt(&Agent->Conf->Vars, "ExcerptSize", 256);
+		ExcerptPadding = (size_t)UdmVarListFindInt(&Agent->Conf->Vars, "ExcerptPadding", 40);
+#endif	
+	
 		al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), "URL", "")));
 		UdmVarListReplaceInt(&(Res->Doc[row].Sections), "STORED_ID", UdmCRC32(al, strlen(al)));
 		free(al);
 		
+#if UDM_VERSION_ID >= 30216
+		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), ExcerptSize, ExcerptPadding);
+#else
 		Excerpt = UdmExcerptDoc(Agent, Res, &(Res->Doc[row]), 256);
+#endif
 		
 		if ((Excerpt != NULL) && (strlen(Excerpt) > 6)) {
 			char *HlExcerpt = UdmHlConvert(&Res->WWList, Excerpt, Agent->Conf->lcs, Agent->Conf->bcs);
@@ -2218,7 +2245,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_param)
 				    if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_STOP) {
 					sprintf(UDM_STREND(wordinfo),"%s%s : stopword", (*wordinfo) ? ", " : "",  Res->WWList.Word[i].word);
 				    } else if (Res->WWList.Word[i].origin == UDM_WORD_ORIGIN_QUERY) {
-					sprintf(UDM_STREND(wordinfo),"%s%s : %d", (*wordinfo) ? ", " : "", Res->WWList.Word[i].word, Res->WWList.Word[i].count);
+					sprintf(UDM_STREND(wordinfo),"%s%s : %d / %d", (*wordinfo) ? ", " : "", Res->WWList.Word[i].word, Res->WWList.Word[i].count, ccount);
 				    } else continue;
 				    sprintf(UDM_STREND(wordinfo)," / %d", ccount);
 				}
