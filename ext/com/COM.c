@@ -896,7 +896,7 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 }
 
 
-/* {{{ proto mixed com_invoke(int module, string handler_name [, mixed arg [, ...]])
+/* {{{ proto mixed com_invoke(int module, string handler_name [, mixed arg [, mixed ...]])
    Invokes a COM module */
 PHP_FUNCTION(com_invoke)
 {
@@ -1213,7 +1213,7 @@ PHP_FUNCTION(com_propput)
 /* }}} */
 
 
-/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitiv]) 
+/* {{{ proto bool com_load_typelib(string typelib_name [, int case_insensitive]) 
    Loads a Typelib */
 PHP_FUNCTION(com_load_typelib)
 {
@@ -1749,7 +1749,7 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 }
 
 
-/* {{{ proto bool com_isenum(com_module obj)
+/* {{{ proto bool com_isenum(object com_module)
    Grabs an IEnumVariant */
 PHP_FUNCTION(com_isenum)
 {
