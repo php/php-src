@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Stig Bakken <ssb@fast.no>                                   |
+// | Authors: Stig Bakken <ssb@php.net>                                   |
 // |          Martin Jansen <mj@php.net>                                  |
 // +----------------------------------------------------------------------+
 //
@@ -251,21 +251,14 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $this->output = '';
         include_once 'PEAR/Packager.php';
         $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
-        ob_start();
         $packager =& new PEAR_Packager($this->config->get('php_dir'),
                                        $this->config->get('ext_dir'),
                                        $this->config->get('doc_dir'));
         $packager->debug = $this->config->get('verbose');
         $err = $warn = array();
-        $packager->validatePackageInfo($pkginfofile, $err, $warn);
-        if (!$this->_displayValidationResults($err, $warn, true)) {
-            $this->ui->outputData($this->output, $command);
-            return;
-        }
+        $dir = dirname($pkginfofile);
         $compress = empty($options['nocompress']) ? true : false;
-        $result = $packager->Package($pkginfofile, $compress);
-        $this->output = ob_get_contents();
-        ob_end_clean();
+        $result = $packager->package($pkginfofile, $compress);
         if (PEAR::isError($result)) {
             $this->ui->outputData($this->output, $command);
             return $this->raiseError($result);

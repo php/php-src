@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@fast.no>                                    |
+// | Author: Stig Bakken <ssb@php.net>                                    |
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
@@ -227,7 +227,7 @@ installed package.'
             return $info;
         }
         if (empty($info)) {
-            $this->ui->displayLine("Nothing found for `$params[0]'");
+            $this->ui->displayError("Nothing found for `$params[0]'");
             return;
         }
         unset($info['filelist']);

@@ -29,26 +29,43 @@
       <name>Martin Jansen</name>
       <email>mj@php.net</email>
     </maintainer>
+    <maintainer>
+      <user>pajoye</user>
+      <role>developer</role>
+      <name>Pierre-Alain Joye</name>
+      <email>pajoye@pearfr.org</email>
+    </maintainer>
   </maintainers>
   <release>
-    <version>1.0.1</version>
+    <version>1.1</version>
     <state>stable</state>
     <date>2003-01-10</date>
     <notes>
-* PEAR_Error class has call backtrace available by
-  calling getBacktrace().  Available if used with
-  PHP 4.3 or newer.
+PEAR BASE CLASS:
 
-* PEAR_Config class uses getenv() rather than $_ENV
-  to read environment variables.
+* PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
+  error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
+  as an exception (invoke PEAR errors with raiseError() or throwError()
+  just like before).
 
-* System::which() Windows fix, now looks for
-  exe/bat/cmd/com suffixes rather than just exe
+PEAR INSTALLER:
 
-* Added "pear cvsdiff" command
+* Packaging and validation now parses PHP source code (unless
+  ext/tokenizer is disabled) and does some coding standard conformance
+  checks.  Specifically, the names of classes and functions are
+  checked to ensure that they are prefixed with the package name.  If
+  your package has symbols that should be without this prefix, you can
+  override this warning by explicitly adding a "provides" entry in
+  your package.xml file.  See the package.xml file for this release
+  for an example (OS_Guess, System and md5_file).
 
-* Windows output buffering bugfix for "pear" command
+  All classes and non-private (not underscore-prefixed) methods and
+  functions are now registered during "pear package".
+
 </notes>
+    <provides type="class" name="OS_Guess" />
+    <provides type="class" name="System" />
+    <provides type="function" name="md5_file" />
     <filelist>
       <file role="data" name="package.dtd"/>
       <file role="data" name="template.spec"/>
@@ -82,16 +99,24 @@
       <dir name="OS">
         <file role="php" name="Guess.php"/>
       </dir>
-      <dir name="scripts">
-        <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
+      <dir name="scripts" baseinstalldir="/">
+        <file role="script" install-as="pear" name="pear.sh">
           <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+          <replace from="@php_dir@" to="php_dir" type="pear-config"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
-        <file baseinstalldir="/" role="script" platform="windows" install-as="pear.bat" name="pear.bat">
-	  <replace from='"@php_bin@"' to="php_bin" type="pear-config"/>
-	  <replace from='"@include_path@"' to="php_dir" type="pear-config"/>
-	</file>
+        <file role="script" platform="windows" install-as="pear.bat" name="pear.bat">
+	  <replace from="@bin_dir@" to="bin_dir" type="pear-config"/>
+	  <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+	  <replace from="@include_path@" to="php_dir" type="pear-config"/>
+        </file>
+        <file role="php" install-as="pearcmd.php" name="pearcmd.php">
+          <replace from="@php_bin@" to="php_bin" type="pear-config"/>
+          <replace from="@php_dir@" to="php_dir" type="pear-config"/>
+          <replace from="@pear_version@" to="version" type="package-info"/>
+          <replace from="@include_path@" to="php_dir" type="pear-config"/>
+        </file>
       </dir>
     </filelist>
     <deps>
@@ -101,6 +126,36 @@
     </deps>
   </release>
   <changelog>
+   <release>
+     <version>1.0.1</version>
+     <state>stable</state>
+     <date>2003-01-10</date>
+     <notes>
+ * PEAR_Error class has call backtrace available by
+   calling getBacktrace().  Available if used with
+   PHP 4.3 or newer.
+ 
+ * PEAR_Config class uses getenv() rather than $_ENV
+   to read environment variables.
+ 
+ * System::which() Windows fix, now looks for
+   exe/bat/cmd/com suffixes rather than just exe
+ 
+ * Added "pear cvsdiff" command
+ 
+ * Windows output buffering bugfix for "pear" command
+
+ * Multiple drives installation now works on windows
+
+ * pear.bat uses ENV variables, allowing the installation
+   of many PEAR (windows)
+ </notes>
+     <deps>
+       <dep type="php" rel="ge" version="4.1"/>
+       <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
+       <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+     </deps>
+   </release>
    <release>
      <version>1.0</version>
      <state>stable</state>

@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@fast.no>                                    |
+// | Author: Stig Bakken <ssb@php.net>                                    |
 // |         Tomas V.V.Cox <cox@idecnet.com>                              |
 // |                                                                      |
 // +----------------------------------------------------------------------+
@@ -271,9 +271,7 @@ class PEAR_Registry extends PEAR
                 $open_mode = 'r';
             }
 
-            @ini_set('track_errors', true);
             $this->lock_fp = @fopen($this->lockfile, $open_mode);
-            @ini_restore('track_errors');
 
             if (!is_resource($this->lock_fp)) {
                 return $this->raiseError("could not create lock file" .

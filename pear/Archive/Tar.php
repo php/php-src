@@ -176,7 +176,7 @@ class Archive_Tar extends PEAR
         if ($this->_openRead()) {
             if (!$this->_extractList('', $v_list_detail, "list", '', '')) {
                 unset($v_list_detail);
-                return(0);
+                $v_list_detail = 0;
             }
             $this->_close();
         }
@@ -277,9 +277,6 @@ class Archive_Tar extends PEAR
     * error text is send to PEAR error.
     * If a file/dir is not readable the file/dir is ignored. However an
     * error text is send to PEAR error.
-    * If the resulting filename/dirname (after the add/remove option or
-    * not) string is greater than 99 char, the file/dir is
-    * ignored. However an error text is send to PEAR error.
     *
     * @param array      $p_filelist     An array of filenames and directory names, or a single
     *                                   string with names separated by a single blank space.
@@ -393,7 +390,7 @@ class Archive_Tar extends PEAR
         }
 
         if ($v_result = $this->_openRead()) {
-            $v_result = $this->_extractList($p_path, $v_list_detail, "complete", $v_list, $p_remove_path);
+            $v_result = $this->_extractList($p_path, $v_list_detail, "partial", $v_list, $p_remove_path);
             $this->_close();
         }
 
@@ -598,7 +595,7 @@ class Archive_Tar extends PEAR
             }
             $p_hitem = readdir($p_hdir); // '.' directory
             $p_hitem = readdir($p_hdir); // '..' directory
-            while ($p_hitem = readdir($p_hdir)) {
+            while (false !== ($p_hitem = readdir($p_hdir))) {
                 if ($v_filename != ".")
                     $p_temp_list[0] = $v_filename.'/'.$p_hitem;
                 else
@@ -653,12 +650,6 @@ class Archive_Tar extends PEAR
 
       $v_stored_filename = $this->_pathReduction($v_stored_filename);
 
-      if (strlen($v_stored_filename) > 99) {
-          $this->_warning("Stored file name is too long (max. 99) : '$v_stored_filename'");
-          fclose($v_file);
-          return true;
-      }
-
       if (is_file($p_filename)) {
           if (($v_file = @fopen($p_filename, "rb")) == 0) {
               $this->_warning("Unable to open file '$p_filename' in binary read mode");
@@ -694,6 +685,11 @@ class Archive_Tar extends PEAR
         if ($p_stored_filename == '')
             $p_stored_filename = $p_filename;
         $v_reduce_filename = $this->_pathReduction($p_stored_filename);
+
+        if (strlen($v_reduce_filename) > 99) {
+          if (!$this->_writeLongHeader($p_stored_filename))
+            return false;
+        }
 
         $v_info = stat($p_filename);
         $v_uid = sprintf("%6s ", DecOct($v_info[4]));
@@ -766,6 +762,78 @@ class Archive_Tar extends PEAR
     }
     // }}}
 
+    // {{{ _writeLongHeader()
+    function _writeLongHeader($p_filename)
+    {
+        $v_size = sprintf("%11s ", DecOct(strlen($p_filename)));
+
+        $v_typeflag = 'L';
+
+        $v_linkname = '';
+
+        $v_magic = '';
+
+        $v_version = '';
+
+        $v_uname = '';
+
+        $v_gname = '';
+
+        $v_devmajor = '';
+
+        $v_devminor = '';
+
+        $v_prefix = '';
+
+        $v_binary_data_first = pack("a100a8a8a8a12A12", '././@LongLink', 0, 0, 0, $v_size, 0);
+        $v_binary_data_last = pack("a1a100a6a2a32a32a8a8a155a12", $v_typeflag, $v_linkname, $v_magic, $v_version, $v_uname, $v_gname, $v_devmajor, $v_devminor, $v_prefix, '');
+
+        // ----- Calculate the checksum
+        $v_checksum = 0;
+        // ..... First part of the header
+        for ($i=0; $i<148; $i++)
+            $v_checksum += ord(substr($v_binary_data_first,$i,1));
+        // ..... Ignore the checksum value and replace it by ' ' (space)
+        for ($i=148; $i<156; $i++)
+            $v_checksum += ord(' ');
+        // ..... Last part of the header
+        for ($i=156, $j=0; $i<512; $i++, $j++)
+            $v_checksum += ord(substr($v_binary_data_last,$j,1));
+
+        // ----- Write the first 148 bytes of the header in the archive
+        if ($this->_compress)
+            @gzputs($this->_file, $v_binary_data_first, 148);
+        else
+            @fputs($this->_file, $v_binary_data_first, 148);
+
+        // ----- Write the calculated checksum
+        $v_checksum = sprintf("%6s ", DecOct($v_checksum));
+        $v_binary_data = pack("a8", $v_checksum);
+        if ($this->_compress)
+          @gzputs($this->_file, $v_binary_data, 8);
+        else
+          @fputs($this->_file, $v_binary_data, 8);
+
+        // ----- Write the last 356 bytes of the header in the archive
+        if ($this->_compress)
+            @gzputs($this->_file, $v_binary_data_last, 356);
+        else
+            @fputs($this->_file, $v_binary_data_last, 356);
+
+        // ----- Write the filename as content of the block
+        $i=0;
+        while (($v_buffer = substr($p_filename, (($i++)*512), 512)) != '') {
+            $v_binary_data = pack("a512", "$v_buffer");
+            if ($this->_compress)
+                @gzputs($this->_file, $v_binary_data);
+            else
+                @fputs($this->_file, $v_binary_data);
+        }
+
+        return true;
+    }
+    // }}}
+
     // {{{ _readHeader()
     function _readHeader($v_binary_data, &$v_header)
     {
@@ -831,6 +899,41 @@ class Archive_Tar extends PEAR
     }
     // }}}
 
+    // {{{ _readLongHeader()
+    function _readLongHeader(&$v_header)
+    {
+      $v_filename = '';
+      $n = floor($v_header['size']/512);
+      for ($i=0; $i<$n; $i++) {
+        if ($this->_compress)
+          $v_content = @gzread($this->_file, 512);
+        else
+          $v_content = @fread($this->_file, 512);
+        $v_filename .= $v_content;
+      }
+      if (($v_header['size'] % 512) != 0) {
+        if ($this->_compress)
+          $v_content = @gzread($this->_file, 512);
+        else
+          $v_content = @fread($this->_file, 512);
+        $v_filename .= $v_content;
+      }
+
+      // ----- Read the next header
+      if ($this->_compress)
+        $v_binary_data = @gzread($this->_file, 512);
+      else
+        $v_binary_data = @fread($this->_file, 512);
+
+      if (!$this->_readHeader($v_binary_data, $v_header))
+        return false;
+
+      $v_header['filename'] = $v_filename;
+
+      return true;
+    }
+    // }}}
+
     // {{{ _extractList()
     function _extractList($p_path, &$p_list_detail, $p_mode, $p_file_list, $p_remove_path)
     {
@@ -880,13 +983,17 @@ class Archive_Tar extends PEAR
       else
         $v_binary_data = @fread($this->_file, 512);
 
-      if (!$this->_readHeader($v_binary_data, $v_header)) {
-        fclose($this->_file);
+      if (!$this->_readHeader($v_binary_data, $v_header))
         return false;
-      }
 
       if ($v_header['filename'] == '')
         continue;
+
+      // ----- Look for long filename
+      if ($v_header['typeflag'] == 'L') {
+        if (!$this->_readLongHeader($v_header))
+          return false;
+      }
 
       if ((!$v_extract_all) && (is_array($p_file_list))) {
         // ----- By default no unzip if the file is not found

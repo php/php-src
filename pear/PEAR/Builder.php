@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
+// | Authors: Stig Sæther Bakken <ssb@php.net>                            |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -23,7 +23,7 @@ require_once 'PEAR/Common.php';
 /**
  * Class to handle building (compiling) extensions.
  *
- * @author Stig Sæther Bakken <ssb@fast.no>
+ * @author Stig Sæther Bakken <ssb@php.net>
  */
 class PEAR_Builder extends PEAR_Common
 {
@@ -252,9 +252,13 @@ class PEAR_Builder extends PEAR_Common
         }
         foreach ($to_run as $cmd) {
             $err = $this->_runCommand($cmd, $callback);
-            if (PEAR::isError($err) && !$err) {
+            if (PEAR::isError($err)) {
                 chdir($old_cwd);
                 return $err;
+            }
+            if (!$err) {
+                chdir($old_cwd);
+                return $this->raiseError("`$cmd' failed");
             }
         }
         if (!($dp = opendir("modules"))) {

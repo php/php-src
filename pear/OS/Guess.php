@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Stig Bakken <ssb@fast.no>                                   |
+// | Authors: Stig Bakken <ssb@php.net>                                   |
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
@@ -106,13 +106,14 @@ class OS_Guess
         if ($uname === null) {
             $uname = php_uname();
         }
-        $parts = preg_split('/\s+/', trim($uname));
+        $parts = split('[[:space:]]+', trim($uname));
         $n = count($parts);
 
         $release = $machine = $cpu = '';
         $sysname = $parts[0];
         $nodename = $parts[1];
         $cpu = $parts[$n-1];
+        $extra = '';
         if ($cpu == 'unknown') {
             $cpu = $parts[$n-2];
         }
@@ -122,10 +123,23 @@ class OS_Guess
                 $release = "$parts[3].$parts[2]";
                 break;
             case 'Windows':
-                $release = $parts[3];
+                switch ($parts[1]) {
+                    case '95/98':
+                        $release = '9x';
+                        break;
+                    default:
+                        $release = $parts[1];
+                        break;
+                }
+                $cpu = 'i386';
+                break;
+            case 'Linux':
+                $extra = $this->_detectGlibcVersion();
+                // use only the first two digits from the kernel version
+                $release = ereg_replace('^([[:digit:]]+\.[[:digit:]]+).*', '\1', $parts[2]);
                 break;
             default:
-                $release = preg_replace('/-.*/', '', $parts[2]);
+                $release = ereg_replace('-.*', '', $parts[2]);
                 break;
         }
 
@@ -138,13 +152,48 @@ class OS_Guess
         if (isset($cpumap[$cpu])) {
             $cpu = $cpumap[$cpu];
         }
-        $extra = '';
         return array($sysname, $release, $cpu, $extra, $nodename);
+    }
+
+    function _detectGlibcVersion()
+    {
+        // Use glibc's <features.h> header file to
+        // get major and minor version number:
+        include_once "System.php";
+        $tmpfile = System::mktemp("glibctest");
+        $fp = fopen($tmpfile, "w");
+        fwrite($fp, "#include <features.h>\n__GLIBC__ __GLIBC_MINOR__\n");
+        fclose($fp);
+        $cpp = popen("/usr/bin/cpp $tmpfile", "r");
+        $major = $minor = 0;
+        while ($line = fgets($cpp, 1024)) {
+            if ($line{0} == '#') {
+                continue;
+            }
+            if (list($major, $minor) = explode(' ', trim($line))) {
+                break;
+            }
+        }
+        pclose($cpp);
+        unlink($tmpfile);
+        if (!($major && $minor) && file_exists('/lib/libc.so.6')) {
+            // Let's try reading the libc.so.6 symlink
+            if (ereg('^libc-([.*])\.so$', basename(readlink('/lib/libc.so.6')), $matches)) {
+                list($major, $minor) = explode('.', $matches);
+            }
+        }
+        if (!($major && $minor)) {
+            return '';
+        }
+        return "glibc{$major}.{$minor}";
     }
 
     function getSignature()
     {
-        return "{$this->sysname}-{$this->release}-{$this->cpu}";
+        if (empty($this->extra)) {
+            return "{$this->sysname}-{$this->release}-{$this->cpu}";
+        }
+        return "{$this->sysname}-{$this->release}-{$this->cpu}-{$this->extra}";
     }
 
     function getSysname()
@@ -199,8 +248,8 @@ class OS_Guess
     function _matchFragment($fragment, $value)
     {
         if (strcspn($fragment, '*?') < strlen($fragment)) {
-            $preg = '/^' . str_replace(array('*', '?', '/'), array('.*', '.', '\\/'), $fragment) . '$/i';
-            return preg_match($preg, $value);
+            $reg = '^' . str_replace(array('*', '?', '/'), array('.*', '.', '\\/'), $fragment) . '$';
+            return eregi($reg, $value);
         }
         return ($fragment == '*' || !strcasecmp($fragment, $value));
     }

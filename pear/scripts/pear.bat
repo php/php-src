@@ -16,14 +16,54 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.10.4.2 2003/02/15 20:28:54 ssb Exp $
+REM  $Id: pear.bat,v 1.14 2003/04/03 23:21:30 ssb Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------
 
-set PHP_BIN=@php_bin@
-set BIN_DIR=@bin_dir@
-set PEAR_PATH=@include_path@
-
-%PHP_BIN% -C -d output_buffering=1 -d include_path=%PEAR_PATH% -f %BIN_DIR%\pear -- %1 %2 %3 %4 %5 %6 %7 %8 %9
+@ECHO OFF
+:: Check PEAR global ENV, set them if they do not exist
+IF "%PHP_PEAR_INSTALL_DIR%"=="" SET PHP_PEAR_INSTALL_DIR=@include_path@
+IF "%PHP_PEAR_BIN_DIR%"=="" SET PHP_PEAR_BIN_DIR=@bin_dir@
+IF "%PHP_PEAR_PHP_BIN%"=="" SET  PHP_PEAR_PHP_BIN=@php_bin@
+ 
+:: Check Folders and files
+IF NOT EXIST %PHP_PEAR_INSTALL_DIR% GOTO PEAR_INSTALL_ERROR
+IF NOT EXIST %PHP_PEAR_INSTALL_DIR%\pearcmd.php GOTO PEAR_INSTALL_ERROR2
+IF NOT EXIST %PHP_PEAR_BIN_DIR% GOTO PEAR_BIN_ERROR
+IF NOT EXIST %PHP_PEAR_PHP_BIN% GOTO PEAR_PHPBIN_ERROR
+:: launch pearcmd
+GOTO RUN
+:PEAR_INSTALL_ERROR
+ECHO PHP_PEAR_INSTALL_DIR is not set correctly.
+ECHO Please fix it using your environment variable or modify
+ECHO the default value in pear.bat
+ECHO The current value is:
+ECHO %PHP_PEAR_INSTALL_DIR%
+GOTO END
+:PEAR_INSTALL_ERROR2
+ECHO PHP_PEAR_INSTALL_DIR is not set correctly.
+ECHO pearcmd.php could not be found there.
+ECHO Please fix it using your environment variable or modify
+ECHO the default value in pear.bat
+ECHO The current value is:
+ECHO %PHP_PEAR_INSTALL_DIR%
+GOTO END
+:PEAR_BIN_ERROR
+ECHO PHP_PEAR_BIN_DIR is not set correctly.
+ECHO Please fix it using your environment variable or modify
+ECHO the default value in pear.bat
+ECHO The current value is:
+ECHO %PHP_PEAR_BIN_DIR%
+GOTO END
+:PEAR_PHPBIN_ERROR
+ECHO PHP_PEAR_PHP_BIN is not set correctly.
+ECHO Please fix it using your environment variable or modify
+ECHO the default value in pear.bat
+ECHO The current value is:
+ECHO %PHP_PEAR_PHP_BIN%
+GOTO END
+:RUN
+%PHP_PEAR_PHP_BIN% -C -d output_buffering=1 -d include_path=%PHP_PEAR_INSTALL_DIR% -f %PHP_PEAR_INSTALL_DIR%\pearcmd.php -- %1 %2 %3 %4 %5 %6 %7 %8 %9
+:END
 @ECHO ON

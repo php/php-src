@@ -13,7 +13,7 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Authors: Stig Bakken <ssb@fast.no>                                   |
+// | Authors: Stig Bakken <ssb@php.net>                                   |
 // |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
@@ -472,6 +472,13 @@ class PEAR_Common extends PEAR
                     $this->pkginfo['configure_options'][] = $attribs;
                 }
                 break;
+            case 'provides':
+                if (empty($attribs['type']) || empty($attribs['name'])) {
+                    break;
+                }
+                $attribs['explicit'] = true;
+                $this->pkginfo['provides']["$attribs[type];$attribs[name]"] = $attribs;
+                break;
         }
     }
 
@@ -744,7 +751,7 @@ class PEAR_Common extends PEAR
         xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
 
         $this->element_stack = array();
-        $this->pkginfo = array();
+        $this->pkginfo = array('provides' => array());
         $this->current_element = false;
         unset($this->dir_install);
         $this->pkginfo['filelist'] = array();
@@ -925,6 +932,12 @@ class PEAR_Common extends PEAR
             }
             $ret .= "$indent    </configureoptions>\n";
         }
+        if (isset($pkginfo['provides'])) {
+            foreach ($pkginfo['provides'] as $key => $what) {
+                $ret .= "$indent    <provides type=\"$what[type]\" ";
+                $ret .= "name=\"$what[name]\" />\n";
+            }
+        }
         if (isset($pkginfo['filelist'])) {
             $ret .= "$indent    <filelist>\n";
             foreach ($pkginfo['filelist'] as $file => $fa) {
@@ -970,13 +983,16 @@ class PEAR_Common extends PEAR
     /**
      * Validate XML package definition file.
      *
-     * @param  string Filename of the package archive or of the package definition file
-     * @param  array  Array that will contain the errors
-     * @param  array  Array that will contain the warnings
+     * @param  string $info Filename of the package archive or of the
+     *                package definition file
+     * @param  array $errors Array that will contain the errors
+     * @param  array $warnings Array that will contain the warnings
+     * @param  string $dir_prefix (optional) directory where source files
+     *                may be found, or empty if they are not available
      * @access public
      * @return boolean
      */
-    function validatePackageInfo($info, &$errors, &$warnings)
+    function validatePackageInfo($info, &$errors, &$warnings, $dir_prefix = '')
     {
         global $_PEAR_Common_maintainer_roles,
                $_PEAR_Common_release_states,
@@ -1087,15 +1103,99 @@ class PEAR_Common extends PEAR
             foreach ($info['filelist'] as $file => $fa) {
                 if (empty($fa['role'])) {
                     $errors[] = "file $file: missing role";
+                    continue;
                 } elseif (!in_array($fa['role'], $_PEAR_Common_file_roles)) {
                     $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $_PEAR_Common_file_roles);
+                }
+                if ($fa['role'] == 'php' && $dir_prefix) {
+                    $this->log(1, "Analyzing $file");
+                    $srcinfo = $this->analyzeSourceCode($dir_prefix . DIRECTORY_SEPARATOR . $file);
+                    if ($srcinfo) {
+                        $this->buildProvidesArray($srcinfo);
+                    }
                 }
                 // (ssb) Any checks we can do for baseinstalldir?
                 // (cox) Perhaps checks that either the target dir and
                 //       baseInstall doesn't cointain "../../"
             }
         }
+        $pn = $info['package'];
+        $pnl = strlen($pn);
+        foreach ((array)$this->pkginfo['provides'] as $key => $what) {
+            if (isset($what['explicit'])) {
+                // skip conformance checks if the provides entry is
+                // specified in the package.xml file
+                continue;
+            }
+            extract($what);
+            if ($type == 'class') {
+                if (!strncasecmp($name, $pn, $pnl)) {
+                    continue;
+                }
+                $warnings[] = "in $file: class \"$name\" not prefixed with package name \"$pn\"";
+            } elseif ($type == 'function') {
+                if (strstr($name, '::') || !strncasecmp($name, $pn, $pnl)) {
+                    continue;
+                }
+                $warnings[] = "in $file: function \"$name\" not prefixed with package name \"$pn\"";
+            }
+            //print "$file: provides $what[type] $what[name]\n";
+        }
         return true;
+    }
+
+    // }}}
+    // {{{ buildProvidesArray()
+
+    /**
+     * Build a "provides" array from data returned by
+     * analyzeSourceCode().  The format of the built array is like
+     * this:
+     * 
+     *  array(
+     *    'class;MyClass' => 'array('type' => 'class', 'name' => 'MyClass'),
+     *    ...
+     *  )
+     *
+     *
+     * @param array $srcinfo array with information about a source file
+     * as returned by the analyzeSourceCode() method.
+     *
+     * @return void
+     *
+     * @access public
+     * 
+     */
+    function buildProvidesArray($srcinfo)
+    {
+        foreach ($srcinfo['declared_classes'] as $class) {
+            $key = "class;$class";
+            if (isset($this->pkginfo['provides'][$key])) {
+                continue;
+            }
+            $this->pkginfo['provides'][$key] =
+                array('type' => 'class', 'name' => $class);
+        }
+        foreach ($srcinfo['declared_methods'] as $class => $methods) {
+            foreach ($methods as $method) {
+                $function = "$class::$method";
+                $key = "function;$function";
+                if ($method{0} == '_' || !strcasecmp($method, $class) ||
+                    isset($this->pkginfo['provides'][$key])) {
+                    continue;
+                }
+                $this->pkginfo['provides'][$key] =
+                    array('type' => 'function', 'name' => $function);
+            }
+        }
+        foreach ($srcinfo['declared_functions'] as $function) {
+            $key = "function;$function";
+            if ($function{0} == '_' || isset($this->pkginfo['provides'][$key])) {
+                continue;
+            }
+            $this->pkginfo['provides'][$key] =
+                array('type' => 'function', 'name' => $function);
+        }
     }
 
     // }}}
@@ -1120,7 +1220,7 @@ class PEAR_Common extends PEAR
         $tokens = token_get_all($contents);
 /*
         for ($i = 0; $i < sizeof($tokens); $i++) {
-            list($token, $data) = $tokens[$i];
+            @list($token, $data) = $tokens[$i];
             if (is_string($token)) {
                 var_dump($token);
             } else {
@@ -1145,8 +1245,15 @@ class PEAR_Common extends PEAR
         $used_functions = array();
         $nodeps = array();
         for ($i = 0; $i < sizeof($tokens); $i++) {
-            list($token, $data) = $tokens[$i];
+            if (is_array($tokens[$i])) {
+                list($token, $data) = $tokens[$i];
+            } else {
+                $token = $tokens[$i];
+                $data = '';
+            }
             switch ($token) {
+                case T_CURLY_OPEN:
+                case T_DOLLAR_OPEN_CURLY_BRACES:
                 case '{': $brace_level++; continue 2;
                 case '}':
                     $brace_level--;

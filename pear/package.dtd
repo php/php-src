@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.27.4.3 2003-02-15 20:28:50 ssb Exp $
+     $Id: package.dtd,v 1.27.4.4 2003-04-11 23:48:37 ssb Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -17,7 +17,7 @@
      license@php.net so we can mail you a copy immediately.
 
      Authors:
-         Stig S. Bakken <ssb@fast.no>
+         Stig S. Bakken <ssb@php.net>
 
   -->
 
