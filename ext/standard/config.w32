@@ -7,7 +7,11 @@ AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
 ARG_WITH("config-file-path", "Where to find php.ini",
 	'(getenv("SystemRoot"))?getenv("SystemRoot"):""');
 
-AC_DEFINE("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, null, false);
+if (PHP_CONFIG_FILE_PATH == null) {
+	AC_DEFINE("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, null, false);
+} else {
+	AC_DEFINE("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH);
+}
 
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	crc32.c crypt.c cyr_convert.c datetime.c dir.c dl.c dns.c exec.c \
