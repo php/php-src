@@ -203,7 +203,7 @@ static int add_assoc_object(zval *arg, char *key, zval *tmp)
 	HashTable *symtable;
 	
 	if (arg->type == IS_OBJECT) {
-		symtable = arg->value.obj.properties;
+		symtable = Z_OBJPROP_P(arg);
 	} else {
 		symtable = arg->value.ht;
 	}
