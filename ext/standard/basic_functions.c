@@ -763,6 +763,7 @@ PHP_RINIT_FUNCTION(basic)
 #ifdef TRANS_SID
 	if (BG(use_trans_sid)) {
 		PHP_RINIT(url_scanner)(INIT_FUNC_ARGS_PASSTHRU);
+		PHP_RINIT(url_scanner_ex)(INIT_FUNC_ARGS_PASSTHRU);
 	}
 #endif
 	
@@ -792,6 +793,7 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	PHP_RSHUTDOWN(assert)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 #ifdef TRANS_SID
+	PHP_RSHUTDOWN(url_scanner_ex)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 	PHP_RSHUTDOWN(url_scanner)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
 
