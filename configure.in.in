@@ -42,7 +42,7 @@ dnl ## Diversion 4 is the last one.  Here we generate files and clean up.
 divert(1)
 
 dnl ## This is where the version number is changed from now on!
-AM_INIT_AUTOMAKE(php, 4.0pa1)
+AM_INIT_AUTOMAKE(php, 4.0B1)
 
 
 

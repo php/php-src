@@ -94,7 +94,7 @@ PHPAPI void _php3_info(int flag)
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
 		}
-		PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"56\" align=\"right\"></a>\n");
+		PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		php3_printf("System: %s<br>Build Date: %s\n<br>", php3_uname, __DATE__);
 		php3_printf("php3.ini path:  %s<br>\n", CONFIGURATION_FILE_PATH);
 
@@ -109,7 +109,7 @@ PHPAPI void _php3_info(int flag)
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
 		}
-		PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"89\" align=\"right\"></a>\n");
+		PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
 		php3_printf("This program makes use of the Zend scripting language engine:<br><pre>%s</pre>", get_zend_version());
 		PUTS("<hr>");
 	}
