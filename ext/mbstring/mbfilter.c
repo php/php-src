@@ -2954,7 +2954,7 @@ mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc TSRMLS_DC
 	const unsigned char *p;
 
 	len = 0;
-	p = psrc;
+	p = (const unsigned char *)psrc;
 	while (*p) {
 		p++;
 		len++;
@@ -2971,7 +2971,7 @@ mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc TSRMLS_DC
 		device->buffer = tmp;
 	}
 
-	p = psrc;
+	p = (const unsigned char *)psrc;
 	w = &device->buffer[device->pos];
 	device->pos += len;
 	while (len > 0) {
@@ -7739,7 +7739,7 @@ retry:
 			for (;;) {
 				pc->found_pos++;
 				p = h;
-				m = pc->needle.buffer;
+				m = (int *)pc->needle.buffer;
 				n = pc->needle_pos - 1;
 				while (n > 0 && *p == *m) {
 					n--;
