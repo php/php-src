@@ -73,6 +73,10 @@ static int le_result, le_link, le_plink;
 #	endif
 #endif
 
+#if MYSQL_VERSION_ID >= 32032
+#define HAVE_GETINFO_FUNCS
+#endif
+
 #if MYSQL_VERSION_ID > 32133 || defined(FIELD_TYPE_TINY)
 #define MYSQL_HAS_TINY
 #endif
@@ -132,6 +136,12 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_field_type,							NULL)
 	PHP_FE(mysql_field_flags,							NULL)
 	PHP_FE(mysql_escape_string,							NULL)
+#ifdef HAVE_GETINFO_FUNCS
+	PHP_FE(mysql_get_client_info,							NULL)
+	PHP_FE(mysql_get_host_info,							NULL)
+	PHP_FE(mysql_get_proto_info,							NULL)
+	PHP_FE(mysql_get_server_info,							NULL)
+#endif
 	 
 	/* for downwards compatability */
 	PHP_FALIAS(mysql,				mysql_db_query,		NULL)
@@ -689,6 +699,115 @@ PHP_FUNCTION(mysql_select_db)
 }
 /* }}} */
 
+#ifdef HAVE_GETINFO_FUNCS
+
+/* {{{ proto string mysql_get_client_info([int link_identifier])
+   Returns a string that represents the client library version */
+PHP_FUNCTION(mysql_get_client_info)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	RETURN_STRING(mysql_get_client_info(),1);	
+}
+/* }}} */
+
+/* {{{ proto string mysql_get_host_info([int link_identifier])
+   Returns a string describing the type of connection in use, including the
+   server host name */
+PHP_FUNCTION(mysql_get_host_info)
+{
+	zval **mysql_link;
+	int id;
+	MYSQL *mysql;
+	MySLS_FETCH();
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1,&mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	RETURN_STRING(mysql_get_host_info(mysql),1);
+}
+/* }}} */
+
+/* {{{ proto int mysql_get_proto_info([int link_identifier])
+   Returns the protocol version used by current connection */
+PHP_FUNCTION(mysql_get_proto_info)
+{
+	zval **mysql_link;
+	int id;
+	MYSQL *mysql;
+	MySLS_FETCH();
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1,&mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	RETURN_LONG(mysql_get_proto_info(mysql));
+}
+/* }}} */
+
+/* {{{ proto string mysql_get_server_info([int link_identifier])
+   Returns a string that represents the server version number */
+PHP_FUNCTION(mysql_get_server_info)
+{
+	zval **mysql_link;
+	int id;
+	MYSQL *mysql;
+	MySLS_FETCH();
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MySLS_CC);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1,&mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = -1;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	RETURN_STRING(mysql_get_server_info(mysql),1);
+}
+/* }}} */
+
+#endif
 
 /* {{{ proto int mysql_create_db(string database_name [, int link_identifier])
    Create a MySQL database */
