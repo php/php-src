@@ -191,7 +191,8 @@ PHPAPI int php_check_open_basedir(const char *path TSRMLS_DC)
 
 			ptr = end;
 		}
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File is in wrong directory");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
+			"open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, pathbuf);
 		efree(pathbuf);
 		errno = EPERM; /* we deny permission to open it */
 		return -1;
