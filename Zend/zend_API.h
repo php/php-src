@@ -132,6 +132,9 @@ ZEND_API int add_property_double(zval *arg, char *key, double d);
 ZEND_API int add_property_string(zval *arg, char *key, char *str, int duplicate);
 ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
 
+ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
+                                  int is_ref, int num_symbol_tables, ...);
+
 #define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
 
 #define RETVAL_RESOURCE(l) {			\
@@ -279,7 +282,7 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
 
-#endif							/* _ZEND_API_H */
+#endif /* _ZEND_API_H */
 
 /*
  * Local variables:
