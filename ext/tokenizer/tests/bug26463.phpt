@@ -13,12 +13,12 @@ DDDD;
 ?>';
 var_dump(token_get_all($str));
 ?>
---EXPECT--
+--EXPECTF--
 array(17) {
   [0]=>
   array(2) {
     [0]=>
-    int(363)
+    int(%d)
     [1]=>
     string(6) "<?php
 "
@@ -26,7 +26,7 @@ array(17) {
   [1]=>
   array(2) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(2) "$x"
   }
@@ -35,7 +35,7 @@ array(17) {
   [3]=>
   array(2) {
     [0]=>
-    int(367)
+    int(%d)
     [1]=>
     string(6) "<<<DD
 "
@@ -43,7 +43,7 @@ array(17) {
   [4]=>
   array(2) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(13) "jhdsjkfhjdsh
 "
@@ -51,7 +51,7 @@ array(17) {
   [5]=>
   array(2) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(2) "DD"
   }
@@ -60,7 +60,7 @@ array(17) {
   [7]=>
   array(2) {
     [0]=>
-    int(313)
+    int(%d)
     [1]=>
     string(2) """"
   }
@@ -69,7 +69,7 @@ array(17) {
   [9]=>
   array(2) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -77,7 +77,7 @@ array(17) {
   [10]=>
   array(2) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(2) "$a"
   }
@@ -86,7 +86,7 @@ array(17) {
   [12]=>
   array(2) {
     [0]=>
-    int(367)
+    int(%d)
     [1]=>
     string(8) "<<<DDDD
 "
@@ -94,7 +94,7 @@ array(17) {
   [13]=>
   array(2) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(13) "jhdsjkfhjdsh
 "
@@ -102,7 +102,7 @@ array(17) {
   [14]=>
   array(2) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(4) "DDDD"
   }
@@ -111,7 +111,7 @@ array(17) {
   [16]=>
   array(2) {
     [0]=>
-    int(365)
+    int(%d)
     [1]=>
     string(2) "?>"
   }
