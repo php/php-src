@@ -3351,6 +3351,7 @@ int zendlex(znode *zendlval TSRMLS_DC)
 {
 	int retval;
 
+again:
 	if (CG(increment_lineno)) {
 		CG(zend_lineno)++;
 		CG(increment_lineno) = 0;
@@ -3363,8 +3364,8 @@ int zendlex(znode *zendlval TSRMLS_DC)
 		case T_DOC_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:
-			retval = zendlex(zendlval TSRMLS_CC);
-			break;
+			goto again;
+
 		case T_CLOSE_TAG:
 			if (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1]=='\n'
 				|| (LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-2]=='\r' && LANG_SCNG(yy_text)[LANG_SCNG(yy_leng)-1])) {
