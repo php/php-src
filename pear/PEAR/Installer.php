@@ -566,6 +566,13 @@ class PEAR_Installer extends PEAR_Common
         if (!$willinstall) {
             $willinstall = array();
         }
+        if (!$state) {
+            $state = $config->get('preferred_state');
+            if (!$state) {
+                // don't inadvertantly use a non-set preferred_state
+                $state = null;
+            }
+        }
         $mywillinstall = array();
         $php_dir = $config->get('php_dir');
         if (isset($options['installroot'])) {
@@ -582,6 +589,10 @@ class PEAR_Installer extends PEAR_Common
         // download files in this list if necessary
         foreach($packages as $pkgfile) {
             $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
+            if ($version === null) {
+                // use preferred state if no version number was specified
+                $version = $state;
+            }
             if ($this->validPackageName($pkgfile) && !isset($options['upgrade'])) {
                 if ($this->registry->packageExists($pkgfile)) {
                     $this->log(0, "Package '$pkgfile' already installed, skipping");
@@ -609,7 +620,6 @@ class PEAR_Installer extends PEAR_Common
         if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
             $reg = new PEAR_Registry($config->get('php_dir'));
             if (!$installed) {
-                $state = $config->get('preferred_state');
                 $installed = $reg->listPackages();
                 array_walk($installed, create_function('&$v,$k','$v = strtolower($v);'));
                 $installed = array_flip($installed);
