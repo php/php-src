@@ -4,15 +4,6 @@
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
 
-ARG_WITH("config-file-path", "Where to find php.ini",
-	'(getenv("SystemRoot"))?getenv("SystemRoot"):""');
-
-if (PHP_CONFIG_FILE_PATH == null) {
-	AC_DEFINE("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH, null, false);
-} else {
-	AC_DEFINE("PHP_CONFIG_FILE_PATH", PHP_CONFIG_FILE_PATH);
-}
-
 EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 	crc32.c crypt.c cyr_convert.c datetime.c dir.c dl.c dns.c exec.c \
 	file.c filestat.c formatted_print.c fsock.c head.c html.c image.c \
