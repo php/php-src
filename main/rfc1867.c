@@ -159,7 +159,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 				php_parse_gpc_data2(ptr,namebuf,http_post_vars ELS_CC PLS_CC);
 
 				/* And a little kludge to pick out special MAX_FILE_SIZE */
-				itype = php3_check_ident_type(namebuf);
+				itype = php_check_ident_type(namebuf);
 				if (itype) {
 					u = strchr(namebuf, '[');
 					if (u)
@@ -217,7 +217,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary)
 					}
 					bytes = fwrite(ptr, 1, loc - ptr - 4, fp);
 					fclose(fp);
-					php3_list_insert(fn,php_file_le_uploads());  /* Tell PHP about the file so the destructor can unlink it later */
+					zend_list_insert(fn,php_file_le_uploads());  /* Tell PHP about the file so the destructor can unlink it later */
 					if (bytes < (loc - ptr - 4)) {
 						php_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
 					}

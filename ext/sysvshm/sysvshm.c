@@ -142,7 +142,7 @@ PHP_FUNCTION(shm_attach)
 	shm_list_ptr->key = shm_key;
 	shm_list_ptr->id = shm_id;
 	shm_list_ptr->ptr = chunk_ptr;
-	list_id = php3_list_insert(shm_list_ptr, php3_sysvshm_module.le_shm);
+	list_id = zend_list_insert(shm_list_ptr, php3_sysvshm_module.le_shm);
 	RETURN_LONG(list_id);
 }
 /* }}} */
@@ -164,7 +164,7 @@ PHP_FUNCTION(shm_detach)
 	
 	id = (*arg_id)->value.lval;
 
-	php3_list_delete(id);
+	zend_list_delete(id);
 
 	RETURN_TRUE;
 }
@@ -220,7 +220,7 @@ PHP_FUNCTION(shm_put_var)
 	convert_to_long_ex(arg_key);
 	key = (*arg_key)->value.lval;
 
-	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
+	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
 		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;
@@ -270,7 +270,7 @@ PHP_FUNCTION(shm_get_var)
 	convert_to_long_ex(arg_key);
 	key = (*arg_key)->value.lval;
 
-	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
+	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
 		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;
@@ -313,7 +313,7 @@ PHP_FUNCTION(shm_remove_var)
 	convert_to_long_ex(arg_key);
 	key = (*arg_key)->value.lval;
 
-	shm_list_ptr = (sysvshm_shm *) php3_list_find(id, &type);
+	shm_list_ptr = (sysvshm_shm *) zend_list_find(id, &type);
 	if (type!=php3_sysvshm_module.le_shm) {
 		php_error(E_WARNING, "%d is not a SysV shared memory index", id);
 		RETURN_FALSE;

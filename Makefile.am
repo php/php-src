@@ -7,7 +7,7 @@ BUILDLDFLAGS = $(EXTRA_LDFLAGS) $(LDFLAGS)
 
 phptemp_LTLIBRARIES = libphp4.la
 libphp4_la_SOURCES = \
-       main.c internal_functions.c snprintf.c php3_sprintf.c \
+       main.c internal_functions.c snprintf.c php_sprintf.c \
        configuration-parser.y configuration-scanner.l request_info.c \
        safe_mode.c fopen-wrappers.c php3_realpath.c alloca.c \
        php_ini.c SAPI.c rfc1867.c dlist.c php_content_types.c strlcpy.c \

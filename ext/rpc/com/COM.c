@@ -306,7 +306,7 @@ PHP_FUNCTION(COM_load)
 		RETURN_FALSE;
 	}
 
-	RETURN_LONG(php3_list_insert(i_dispatch,le_idispatch));
+	RETURN_LONG(zend_list_insert(i_dispatch,le_idispatch));
 }
 
 
@@ -418,7 +418,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 
 			handle = (pval *) emalloc(sizeof(pval));
 			handle->type = IS_LONG;
-			handle->value.lval = php3_list_insert(var_arg->pdispVal, le_idispatch);
+			handle->value.lval = zend_list_insert(var_arg->pdispVal, le_idispatch);
 			pval_copy_constructor(handle);
 			INIT_PZVAL(handle);
 			zend_hash_index_update(pval_arg->value.obj.properties, 0, &handle, sizeof(pval *), NULL);
@@ -565,7 +565,7 @@ PHP_FUNCTION(COM_invoke)
 
 	/* obtain i_dispatch interface */
 	convert_to_long(object);
-	i_dispatch = php3_list_find(object->value.lval, &type);
+	i_dispatch = zend_list_find(object->value.lval, &type);
 	if (!i_dispatch || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", function_name->value.str.val);
 		RETURN_FALSE;
@@ -731,7 +731,7 @@ PHP_FUNCTION(com_propget)
 	/* obtain i_dispatch interface */
 	convert_to_long(arg_idispatch);
 	/* obtain i_dispatch interface */
-	i_dispatch = php3_list_find(arg_idispatch->value.lval,&type);
+	i_dispatch = zend_list_find(arg_idispatch->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
@@ -757,7 +757,7 @@ PHP_FUNCTION(com_propput)
 	/* obtain i_dispatch interface */
 	convert_to_long(arg_idispatch);
 	/* obtain i_dispatch interface */
-	i_dispatch = php3_list_find(arg_idispatch->value.lval,&type);
+	i_dispatch = zend_list_find(arg_idispatch->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
 		php_error(E_WARNING,"%d is not a COM object handler", arg_idispatch->value.lval);
 	}	
@@ -780,7 +780,7 @@ VARIANTARG _php_COM_get_property_handler(zend_property_reference *property_refer
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
-	i_dispatch = php3_list_find((*idispatch_handle)->value.lval,&type);
+	i_dispatch = zend_list_find((*idispatch_handle)->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
 		/* bail out */
 	}
@@ -851,7 +851,7 @@ int php_COM_set_property_handler(zend_property_reference *property_reference, pv
 
 	/* fetch the IDispatch interface */
 	zend_hash_index_find(object->value.obj.properties, 0, (void **) &idispatch_handle);
-	i_dispatch = php3_list_find((*idispatch_handle)->value.lval,&type);
+	i_dispatch = zend_list_find((*idispatch_handle)->value.lval,&type);
 	if (!i_dispatch || (type!=le_idispatch)) {
 		/* bail out */
 	}

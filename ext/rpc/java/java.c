@@ -227,7 +227,7 @@ static jobjectArray _java_makeArray(int argc, pval** argv) {
 
       case IS_OBJECT:
         zend_hash_index_find(argv[i]->value.obj.properties, 0, (void*)&handle);
-        arg = php3_list_find((*handle)->value.lval, &type);
+        arg = zend_list_find((*handle)->value.lval, &type);
         break;
 
       case IS_BOOL:
@@ -323,7 +323,7 @@ void java_call_function_handler
     jmethodID invoke = (*jenv)->GetStaticMethodID(jenv, php_reflect, "Invoke",
       "(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;J)V");
     zend_hash_index_find(object->value.obj.properties, 0, (void**) &handle);
-    obj = php3_list_find((*handle)->value.lval, &type);
+    obj = zend_list_find((*handle)->value.lval, &type);
     method = (*jenv)->NewStringUTF(jenv, function_name->element.value.str.val);
     (pval*)(long)result = return_value;
 
@@ -360,7 +360,7 @@ static pval _java_getset_property
   /* get the object */
   zend_hash_index_find(property_reference->object->value.obj.properties,
     0, (void **) &pobject);
-  obj = php3_list_find((*pobject)->value.lval,&type);
+  obj = zend_list_find((*pobject)->value.lval,&type);
   (pval*)(long)result = &presult;
   var_uninit(&presult);
 
@@ -503,7 +503,7 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
   handle = (pval *) emalloc(sizeof(pval));
   handle->type = IS_LONG;
   handle->value.lval =
-    php3_list_insert((*jenv)->NewGlobalRef(jenv,value), le_jobject);
+    zend_list_insert((*jenv)->NewGlobalRef(jenv,value), le_jobject);
   pval_copy_constructor(handle);
   INIT_PZVAL(handle);
   zend_hash_index_update(presult->value.obj.properties, 0,

@@ -49,8 +49,8 @@ typedef struct CookieList {
 	struct CookieList *next;
 } CookieList;
 
-extern php3_module_entry php3_header_module_entry;
-#define php3_header_module_ptr &php3_header_module_entry
+extern php3_module_entry php_header_module_entry;
+#define php_header_module_ptr &php_header_module_entry
 
 extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(Header);
@@ -59,9 +59,9 @@ PHP_FUNCTION(headers_sent);
 
 void php4i_add_header_information(char *header_information, uint header_length);
 
-PHPAPI int php3_header(void);
-int php3_headers_unsent(void);
+PHPAPI int php_header(void);
+int php_headers_unsent(void);
 
-#define phpext_head_ptr php3_header_module_ptr
+#define phpext_head_ptr php_header_module_ptr
 
 #endif

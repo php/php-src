@@ -70,7 +70,7 @@ void init_cfg_scanner()
 
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
-	cfglval->value.str.val = php3_strndup("1",1);
+	cfglval->value.str.val = zend_strndup("1",1);
 	cfglval->value.str.len = 1;
 	cfglval->type = IS_STRING;
 	return CFG_TRUE;
@@ -78,7 +78,7 @@ void init_cfg_scanner()
 
 
 <INITIAL>[ ]*("false"|"off"|"no")[ ]* {
-	cfglval->value.str.val = php3_strndup("",0);
+	cfglval->value.str.val = zend_strndup("",0);
 	cfglval->value.str.len = 0;
 	cfglval->type = IS_STRING;
 	return CFG_FALSE;
@@ -98,7 +98,7 @@ void init_cfg_scanner()
 	yytext++;
 	yyleng--;
 
-	cfglval->value.str.val = php3_strndup(yytext,yyleng);
+	cfglval->value.str.val = zend_strndup(yytext,yyleng);
 	cfglval->value.str.len = yyleng;
 	cfglval->type = IS_STRING;
 	return SECTION;
@@ -114,7 +114,7 @@ void init_cfg_scanner()
 	/* eat leading " */
 	yytext++;
 
-	cfglval->value.str.val = php3_strndup(yytext,yyleng);
+	cfglval->value.str.val = zend_strndup(yytext,yyleng);
 	cfglval->value.str.len = yyleng;
 	cfglval->type = IS_STRING;
 	return TC_ENCAPSULATED_STRING;
@@ -144,7 +144,7 @@ void init_cfg_scanner()
 		}
 	}
 	if (yyleng!=0) {
-		cfglval->value.str.val = php3_strndup(yytext,yyleng);
+		cfglval->value.str.val = zend_strndup(yytext,yyleng);
 		cfglval->value.str.len = yyleng;
 		cfglval->type = IS_STRING;
 		return TC_STRING;

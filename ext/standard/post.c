@@ -47,7 +47,7 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 		return;
 	}
 
-	var_type = php3_check_ident_type(var);
+	var_type = php_check_ident_type(var);
 	if (var_type == GPC_INDEXED_ARRAY) {
 		ind = php3_get_ident_index(var);
 		if (PG(magic_quotes_gpc)) {

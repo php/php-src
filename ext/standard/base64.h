@@ -34,7 +34,7 @@
 PHP_FUNCTION(base64_decode);
 PHP_FUNCTION(base64_encode);
 
-extern unsigned char *_php3_base64_encode(const unsigned char *, int, int *);
+extern unsigned char *php_base64_encode(const unsigned char *, int, int *);
 extern unsigned char *_php3_base64_decode(const unsigned char *, int, int *);
 
 #endif /* _BASE64_h */

@@ -86,7 +86,7 @@ PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mod
 		(void) php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	}
 	
-	php3_header();			/* Make sure headers have been sent */
+	php_header();			/* Make sure headers have been sent */
 	php_end_ob_buffering(1);
 	return (OK);
 }

@@ -485,7 +485,7 @@ PHP_FUNCTION(imap_open)
 		imap_le_struct = emalloc(sizeof(pils));
 		imap_le_struct->imap_stream = imap_stream;
 		imap_le_struct->flags = cl_flags;	
-		ind = php3_list_insert(imap_le_struct, le_imap);
+		ind = zend_list_insert(imap_le_struct, le_imap);
 
 		RETURN_LONG(ind);
 	}
@@ -513,7 +513,7 @@ PHP_FUNCTION(imap_reopen)
 
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -559,7 +559,7 @@ PHP_FUNCTION(imap_append)
 	if (myargc == 4) convert_to_string(flags);
 	ind = streamind->value.lval;
   
-	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -591,7 +591,7 @@ PHP_FUNCTION(imap_num_msg)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -617,7 +617,7 @@ PHP_FUNCTION(imap_ping)
 	convert_to_long( streamind );
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
 	if ( !imap_le_struct || ind_type != le_imap ) {
 		php_error( E_WARNING, "Unable to find stream pointer" );
 		RETURN_FALSE;
@@ -638,7 +638,7 @@ PHP_FUNCTION(imap_num_recent)
 	}
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -663,7 +663,7 @@ PHP_FUNCTION(imap_expunge)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -691,7 +691,7 @@ PHP_FUNCTION(imap_close)
 	}
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -706,7 +706,7 @@ PHP_FUNCTION(imap_close)
 		}	
 		imap_le_struct->flags = flags;
 	}
-	php3_list_delete(ind);
+	zend_list_delete(ind);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -732,7 +732,7 @@ PHP_FUNCTION(imap_headers)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -791,7 +791,7 @@ PHP_FUNCTION(imap_body)
 	if(myargc == 3) convert_to_long(flags);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -818,7 +818,7 @@ PHP_FUNCTION(imap_fetchtext_full)
 	if (myargcount == 3) convert_to_long(flags);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -846,7 +846,7 @@ PHP_FUNCTION(imap_mail_copy)
 	if(myargcount == 4) convert_to_long(options);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -878,7 +878,7 @@ PHP_FUNCTION(imap_mail_move)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -908,7 +908,7 @@ PHP_FUNCTION(imap_createmailbox)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -939,7 +939,7 @@ PHP_FUNCTION(imap_renamemailbox)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -969,7 +969,7 @@ PHP_FUNCTION(imap_deletemailbox)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1003,7 +1003,7 @@ PHP_FUNCTION(imap_list)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1045,7 +1045,7 @@ PHP_FUNCTION(imap_listscan)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1084,7 +1084,7 @@ PHP_FUNCTION(imap_check)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1125,7 +1125,7 @@ PHP_FUNCTION(imap_delete)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1153,7 +1153,7 @@ PHP_FUNCTION(imap_undelete)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1197,7 +1197,7 @@ PHP_FUNCTION(imap_headerinfo)
 	if(myargc == 5) convert_to_string(defaulthost);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1522,7 +1522,7 @@ PHP_FUNCTION(imap_lsub)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1559,7 +1559,7 @@ PHP_FUNCTION(imap_subscribe)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1588,7 +1588,7 @@ PHP_FUNCTION(imap_unsubscribe)
 	convert_to_string(folder);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -1726,7 +1726,7 @@ PHP_FUNCTION(imap_fetchstructure)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
 		php_error( E_WARNING, "Unable to find stream pointer" );
@@ -1765,7 +1765,7 @@ PHP_FUNCTION(imap_fetchbody)
 	if(myargc == 4) convert_to_long(flags);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find( ind, &ind_type );
+	imap_le_struct = (pils *)zend_list_find( ind, &ind_type );
 
 	if ( !imap_le_struct || ind_type != le_imap ) {
 		php_error( E_WARNING, "Unable to find stream pointer" );
@@ -1873,7 +1873,7 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if(!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -1988,7 +1988,7 @@ PHP_FUNCTION(imap_setflag_full)
 	if(myargc==4) convert_to_long(flags);
 
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2017,7 +2017,7 @@ PHP_FUNCTION(imap_clearflag_full)
 	convert_to_string(flag);
 	if(myargc==4) convert_to_long(flags);
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2053,7 +2053,7 @@ PHP_FUNCTION(imap_sort)
 	if(myargc==4) convert_to_long(flags);
 
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if(!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2093,7 +2093,7 @@ PHP_FUNCTION(imap_fetchheader)
 	if(myargc == 3) convert_to_long(flags);
 	ind = streamind->value.lval;
 
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -2120,7 +2120,7 @@ PHP_FUNCTION(imap_uid)
  
  	ind = streamind->value.lval;
  
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
 	php_error(E_WARNING, "Unable to find stream pointer");
@@ -2148,7 +2148,7 @@ PHP_FUNCTION(imap_msgno)
  
  	ind = streamind->value.lval;
  
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -2176,7 +2176,7 @@ PHP_FUNCTION(imap_status)
 	convert_to_long(flags);
  	ind = streamind->value.lval;
  
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
  
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -2224,7 +2224,7 @@ PHP_FUNCTION(imap_bodystruct)
 	convert_to_string(section);
  	ind = streamind->value.lval;
  
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -2330,7 +2330,7 @@ PHP_FUNCTION(imap_fetch_overview)
  	convert_to_string(sequence);
 
  	ind = streamind->value.lval;
- 	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+ 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	
 	if (!imap_le_struct || ind_type != le_imap) {
 		php_error(E_WARNING, "Unable to find stream pointer");
@@ -2636,7 +2636,7 @@ PHP_FUNCTION(imap_search)
 	}
 	
 	ind = streamind->value.lval;
-	imap_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;

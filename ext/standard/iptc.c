@@ -204,7 +204,7 @@ PHP_FUNCTION(iptcembed)
     }
 
 	if (spool > 0) 
-		if (!php3_header()){  /* we got a HEAD request. */
+		if (!php_header()){  /* we got a HEAD request. */
 			if (spool == 2){ 
 				RETURN_TRUE;	/* we only wanted to spool - report success. */
 			} else 

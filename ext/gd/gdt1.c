@@ -68,7 +68,7 @@ void php3_imagepsloadfont(INTERNAL_FUNCTION_PARAMETERS) {
 
 	T1_LoadFont(f_ind->font_id);
 	f_ind->extend = 1;
-	l_ind = php3_list_insert(f_ind, GD_GLOBAL(le_ps_font));
+	l_ind = zend_list_insert(f_ind, GD_GLOBAL(le_ps_font));
 	RETURN_LONG(l_ind);
 }
 /* }}} */
@@ -88,7 +88,7 @@ void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
 
 	convert_to_long(fnt);
 
-	of_ind = php3_list_find(fnt->value.lval, &type);
+	of_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
@@ -122,7 +122,7 @@ void php3_imagepscopyfont(INTERNAL_FUNCTION_PARAMETERS) {
 	}
 
 	nf_ind->extend = 1;
-	l_ind = php3_list_insert(nf_ind, GD_GLOBAL(le_ps_font));
+	l_ind = zend_list_insert(nf_ind, GD_GLOBAL(le_ps_font));
 	RETURN_LONG(l_ind);
 }
 */
@@ -140,14 +140,14 @@ void php3_imagepsfreefont(INTERNAL_FUNCTION_PARAMETERS) {
 
 	convert_to_long(fnt);
 
-	php3_list_find(fnt->value.lval, &type);
+	zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
 		RETURN_FALSE;
 	}
 
-	php3_list_delete(fnt->value.lval);
+	zend_list_delete(fnt->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -167,7 +167,7 @@ void php3_imagepsencodefont(INTERNAL_FUNCTION_PARAMETERS) {
 	convert_to_long(fnt);
 	convert_to_string(enc);
 
-	f_ind = php3_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
@@ -185,7 +185,7 @@ void php3_imagepsencodefont(INTERNAL_FUNCTION_PARAMETERS) {
 		php3_error(E_WARNING, "Couldn't reencode font");
 		RETURN_FALSE;
 	}
-	php3_list_insert(enc_vector, GD_GLOBAL(le_ps_enc));
+	zend_list_insert(enc_vector, GD_GLOBAL(le_ps_enc));
 	RETURN_TRUE;
 }
 /* }}} */
@@ -204,7 +204,7 @@ void php3_imagepsextendfont(INTERNAL_FUNCTION_PARAMETERS) {
 	convert_to_long(fnt);
 	convert_to_double(ext);
 
-	f_ind = php3_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
@@ -231,7 +231,7 @@ void php3_imagepsslantfont(INTERNAL_FUNCTION_PARAMETERS) {
 	convert_to_long(fnt);
 	convert_to_double(slt);
 
-	f_ind = php3_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
@@ -309,14 +309,14 @@ void php3_imagepstext(INTERNAL_FUNCTION_PARAMETERS) {
 		WRONG_PARAM_COUNT;
 	}
 
-	bg_img = php3_list_find(img->value.lval, &type);
+	bg_img = zend_list_find(img->value.lval, &type);
 
 	if (!bg_img || type != GD_GLOBAL(le_gd)) {
 		php3_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
-	f_ind = php3_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (!f_ind || type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);
@@ -454,7 +454,7 @@ void php3_imagepsbbox(INTERNAL_FUNCTION_PARAMETERS) {
 		WRONG_PARAM_COUNT;
 	}
 
-	f_ind = php3_list_find(fnt->value.lval, &type);
+	f_ind = zend_list_find(fnt->value.lval, &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
 		php3_error(E_WARNING, "%d is not a Type 1 font index", fnt->value.lval);

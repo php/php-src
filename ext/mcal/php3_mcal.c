@@ -276,7 +276,7 @@ void php3_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	mcal_le_struct->mcal_stream = mcal_stream;
 	mcal_le_struct->event=calevent_new();
 
-	ind = php3_list_insert(mcal_le_struct, le_mcal);	
+	ind = zend_list_insert(mcal_le_struct, le_mcal);	
 	RETURN_LONG(ind);
 }
 
@@ -298,7 +298,7 @@ void php3_mcal_close(INTERNAL_FUNCTION_PARAMETERS)
         }
         convert_to_long(streamind);
         ind = streamind->value.lval;
-        mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+        mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
         if (!mcal_le_struct ) {
 	  php3_error(E_WARNING, "Unable to find stream pointer");
                 RETURN_FALSE;
@@ -308,7 +308,7 @@ void php3_mcal_close(INTERNAL_FUNCTION_PARAMETERS)
                 flags = options->value.lval;
                 mcal_le_struct->flags = flags;
         }
-        php3_list_delete(ind);
+        zend_list_delete(ind);
         RETURN_TRUE;
 }
 /* }}} */
@@ -349,7 +349,7 @@ void php3_mcal_reopen(INTERNAL_FUNCTION_PARAMETERS)
 
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -386,7 +386,7 @@ void php3_mcal_expunge(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -415,7 +415,7 @@ void php3_mcal_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(streamind);
 	convert_to_long(eventid);
 	ind = streamind->value.lval;
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -449,7 +449,7 @@ void php3_mcal_fetch_current_stream_event(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -554,7 +554,7 @@ void php3_mcal_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(streamind);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -615,7 +615,7 @@ void php3_mcal_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string(calendar);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -651,7 +651,7 @@ void php3_mcal_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string(dest_calendar);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -688,7 +688,7 @@ void php3_mcal_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
   convert_to_long(streamind);
   ind = streamind->value.lval;
   
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 	  php3_error(E_WARNING, "Unable to find stream pointer");
 	  RETURN_FALSE;
@@ -743,7 +743,7 @@ void php3_mcal_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string(calendar);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -778,7 +778,7 @@ void php3_mcal_delete_event(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(uid);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
@@ -819,7 +819,7 @@ void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -856,7 +856,7 @@ void php3_mcal_snooze(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -895,7 +895,7 @@ void php3_mcal_event_set_category(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -923,7 +923,7 @@ void php3_mcal_event_set_title(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -951,7 +951,7 @@ void php3_mcal_event_set_description(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -985,7 +985,7 @@ void php3_mcal_event_set_start(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1027,7 +1027,7 @@ void php3_mcal_event_set_end(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1062,7 +1062,7 @@ void php3_mcal_event_set_alarm(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1089,7 +1089,7 @@ void php3_mcal_event_init(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1124,7 +1124,7 @@ void php3_mcal_event_set_class(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1323,7 +1323,7 @@ void php3_mcal_next_recurrence(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_array(next);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1407,7 +1407,7 @@ void php3_mcal_event_set_recur_daily(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1446,7 +1446,7 @@ void php3_mcal_event_set_recur_weekly(INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_long(weekdays);
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1485,7 +1485,7 @@ void php3_mcal_event_set_recur_monthly_mday(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1524,7 +1524,7 @@ void php3_mcal_event_set_recur_monthly_wday(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");
@@ -1563,7 +1563,7 @@ void php3_mcal_event_set_recur_yearly(INTERNAL_FUNCTION_PARAMETERS)
 
 	ind = streamind->value.lval;
 
-	mcal_le_struct = (pils *)php3_list_find(ind, &ind_type);
+	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
 
 	if (!mcal_le_struct ) {
 		php3_error(E_WARNING, "Unable to find stream pointer");

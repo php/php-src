@@ -48,7 +48,7 @@
 static HashTable configuration_hash;
 #ifndef THREAD_SAFE
 extern HashTable browser_hash;
-PHPAPI extern char *php3_ini_path;
+PHPAPI extern char *php_ini_path;
 #endif
 static HashTable *active_zend_hash_table;
 static pval *current_section;
@@ -155,7 +155,7 @@ int php_init_config(void)
 
 #if USE_CONFIG_FILE
 	{
-		char *env_location,*default_location,*php_ini_path;
+		char *env_location,*default_location,*php_ini_search_path;
 		int safe_mode_state = PG(safe_mode);
 		char *open_basedir = PG(open_basedir);
 		char *opened_path;
@@ -167,8 +167,8 @@ int php_init_config(void)
 		}
 #if WIN32|WINNT
 		{
-			if (php3_ini_path) {
-				default_location = php3_ini_path;
+			if (php_ini_path) {
+				default_location = php_ini_path;
 			} else {
 				default_location = (char *) malloc(512);
 			
@@ -179,30 +179,30 @@ int php_init_config(void)
 			}
 		}
 #else
-		if (!php3_ini_path) {
+		if (!php_ini_path) {
 			default_location = CONFIGURATION_FILE_PATH;
 		} else {
-			default_location = php3_ini_path;
+			default_location = php_ini_path;
 		}
 #endif
 
 /* build a path */
-		php_ini_path = (char *) malloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
+		php_ini_search_path = (char *) malloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
 
-		if (!php3_ini_path) {
+		if (!php_ini_path) {
 #if WIN32|WINNT
-			sprintf(php_ini_path,".;%s;%s",env_location,default_location);
+			sprintf(php_ini_search_path,".;%s;%s",env_location,default_location);
 #else
-			sprintf(php_ini_path,".:%s:%s",env_location,default_location);
+			sprintf(php_ini_search_path,".:%s:%s",env_location,default_location);
 #endif
 		} else {
 			/* if path was set via -c flag, only look there */
-			strcpy(php_ini_path,default_location);
+			strcpy(php_ini_search_path,default_location);
 		}
 		PG(safe_mode) = 0;
 		PG(open_basedir) = NULL;
-		cfgin = php_fopen_with_path("php.ini","r",php_ini_path,&opened_path);
-		free(php_ini_path);
+		cfgin = php_fopen_with_path("php.ini","r",php_ini_search_path,&opened_path);
+		free(php_ini_search_path);
 		if (free_default_location) {
 			free(default_location);
 		}
@@ -360,7 +360,7 @@ statement:
 				        php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM);
                                 }
 			} else if (parsing_mode==PARSING_MODE_BROWSCAP) {
-				php3_str_tolower($1.value.str.val,$1.value.str.len);
+				zend_str_tolower($1.value.str.val,$1.value.str.len);
 				zend_hash_update(current_section->value.ht, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
 			}
 			free($1.value.str.val);
@@ -407,7 +407,7 @@ statement:
 				zend_hash_init(tmp.value.ht, 0, NULL, (int (*)(void *))pvalue_config_destructor, 1);
 				tmp.type = IS_OBJECT;
 				zend_hash_update(active_zend_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &tmp, sizeof(pval), (void **) &current_section);
-				tmp.value.str.val = php3_strndup($1.value.str.val,$1.value.str.len);
+				tmp.value.str.val = zend_strndup($1.value.str.val,$1.value.str.len);
 				tmp.value.str.len = $1.value.str.len;
 				tmp.type = IS_STRING;
 				convert_browscap_pattern(&tmp);

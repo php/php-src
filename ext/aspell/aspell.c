@@ -88,7 +88,7 @@ PHP_FUNCTION(aspell_new)
 	else
 	  sc=aspell_new((*master)->value.str.val,"");
 
-	ind = php3_list_insert(sc, le_aspell);
+	ind = zend_list_insert(sc, le_aspell);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -112,7 +112,7 @@ PHP_FUNCTION(aspell_suggest)
 	}
 	convert_to_long_ex(scin);
 	convert_to_string_ex(word);
-	sc = (aspell *)php3_list_find((*scin)->value.lval, &type);
+	sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
 	if(!sc)
 	  {
 		php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
@@ -146,7 +146,7 @@ PHP_FUNCTION(aspell_check)
     }
     convert_to_long_ex(scin);
     convert_to_string_ex(word);
-    sc= (aspell *) php3_list_find((*scin)->value.lval, &type);
+    sc= (aspell *) zend_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
         php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);
@@ -178,7 +178,7 @@ PHP_FUNCTION(aspell_check_raw)
     }
     convert_to_long_ex(scin);
     convert_to_string_ex(word);
-    sc = (aspell *)php3_list_find((*scin)->value.lval, &type);
+    sc = (aspell *)zend_list_find((*scin)->value.lval, &type);
     if(!sc)
       {
         php_error(E_WARNING, "%d is not an ASPELL result index",(*scin)->value.lval);

@@ -43,7 +43,7 @@ void free_url(url *);
 extern url *url_parse(char *);
 extern int _php3_urldecode(char *, int); /* return value: length of decoded string */
 extern char *_php3_urlencode(char *, int);
-extern int _php3_rawurldecode(char *, int); /* return value: length of decoded string */
+extern int php_raw_url_decode(char *, int); /* return value: length of decoded string */
 extern char *_php3_rawurlencode(char *, int);
 
 PHP_FUNCTION(parse_url);

@@ -400,7 +400,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				}
 			}
 		}
-		return_value->value.lval = php3_list_insert(sybase_ptr,php3_sybase_module.le_plink);
+		return_value->value.lval = zend_list_insert(sybase_ptr,php3_sybase_module.le_plink);
 		return_value->type = IS_LONG;
 	} else { /* non persistent */
 		list_entry *index_ptr,new_index_ptr;
@@ -418,7 +418,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
-			ptr = php3_list_find(link,&type);   /* check if the link is still there */
+			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==php3_sybase_module.le_link || type==php3_sybase_module.le_plink)) {
 				return_value->value.lval = php3_sybase_module.default_link = link;
 				return_value->type = IS_LONG;
@@ -450,7 +450,7 @@ static void php3_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		/* add it to the list */
 		sybase_ptr = (sybase_link *) emalloc(sizeof(sybase_link));
 		memcpy(sybase_ptr,&sybase,sizeof(sybase_link));
-		return_value->value.lval = php3_list_insert(sybase_ptr,php3_sybase_module.le_link);
+		return_value->value.lval = zend_list_insert(sybase_ptr,php3_sybase_module.le_link);
 		return_value->type = IS_LONG;
 		
 		/* add it to the hash */
@@ -509,13 +509,13 @@ PHP_FUNCTION(sybase_close)
 			break;
 	}
 	
-	php3_list_find(id,&type);
+	zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
 		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
 	}
 	
-	php3_list_delete(id);
+	zend_list_delete(id);
 	RETURN_TRUE;
 }
 	
@@ -547,7 +547,7 @@ PHP_FUNCTION(sybase_select_db)
 	
 	CHECK_LINK(id);
 	
-	sybase_ptr = (sybase_link *) php3_list_find(id,&type);
+	sybase_ptr = (sybase_link *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
 		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
@@ -675,7 +675,7 @@ PHP_FUNCTION(sybase_query)
 			break;
 	}
 	
-	sybase_ptr = (sybase_link *) php3_list_find(id,&type);
+	sybase_ptr = (sybase_link *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_link && type!=php3_sybase_module.le_plink) {
 		php_error(E_WARNING,"%d is not a Sybase link index",id);
 		RETURN_FALSE;
@@ -777,7 +777,7 @@ PHP_FUNCTION(sybase_query)
 		}
 	}
 	efree(column_types);
-	return_value->value.lval = php3_list_insert(result,php3_sybase_module.le_result);
+	return_value->value.lval = zend_list_insert(result,php3_sybase_module.le_result);
 	return_value->type = IS_LONG;
 }
 
@@ -796,13 +796,13 @@ PHP_FUNCTION(sybase_free_result)
 	if (sybase_result_index->value.lval==0) {
 		RETURN_FALSE;
 	}
-	result = (sybase_result *) php3_list_find(sybase_result_index->value.lval,&type);
+	result = (sybase_result *) zend_list_find(sybase_result_index->value.lval,&type);
 	
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
 		RETURN_FALSE;
 	}
-	php3_list_delete(sybase_result_index->value.lval);
+	zend_list_delete(sybase_result_index->value.lval);
 	RETURN_TRUE;
 }
 
@@ -826,7 +826,7 @@ PHP_FUNCTION(sybase_num_rows)
 	convert_to_long(result_index);
 	id = result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -850,7 +850,7 @@ PHP_FUNCTION(sybase_num_fields)
 	convert_to_long(result_index);
 	id = result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -875,7 +875,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	convert_to_long(sybase_result_index);
 	id = sybase_result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -909,7 +909,7 @@ static PHP_FUNCTION(sybase_fetch_hash)
 	}
 	
 	convert_to_long(sybase_result_index);
-	result = (sybase_result *) php3_list_find(sybase_result_index->value.lval,&type);
+	result = (sybase_result *) zend_list_find(sybase_result_index->value.lval,&type);
 	
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",sybase_result_index->value.lval);
@@ -969,7 +969,7 @@ PHP_FUNCTION(sybase_data_seek)
 	convert_to_long(sybase_result_index);
 	id = sybase_result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	convert_to_long(sybase_result_index);
 	id = sybase_result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -1102,7 +1102,7 @@ PHP_FUNCTION(sybase_field_seek)
 	convert_to_long(sybase_result_index);
 	id = sybase_result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;
@@ -1135,7 +1135,7 @@ PHP_FUNCTION(sybase_result)
 	convert_to_long(sybase_result_index);
 	id = sybase_result_index->value.lval;
 	
-	result = (sybase_result *) php3_list_find(id,&type);
+	result = (sybase_result *) zend_list_find(id,&type);
 	if (type!=php3_sybase_module.le_result) {
 		php_error(E_WARNING,"%d is not a Sybase result index",id);
 		RETURN_FALSE;

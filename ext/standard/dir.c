@@ -209,7 +209,7 @@ PHP_FUNCTION(closedir)
 
 	FETCH_DIRP();
 
-	php3_list_delete(dirp->id);
+	zend_list_delete(dirp->id);
 }
 
 /* }}} */

@@ -131,7 +131,7 @@ velocis_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 {
 	int ind;
 
-	ind = php3_list_insert(conn,php3_velocis_module.le_link);
+	ind = zend_list_insert(conn,php3_velocis_module.le_link);
 	conn->hdbc = hdbc;
 	conn->index = ind;
 
@@ -144,7 +144,7 @@ velocis_find_conn(HashTable *list,int ind)
 	VConn *conn;
 	int type;
 
-	conn = php3_list_find(ind,&type);
+	conn = zend_list_find(ind,&type);
 	if ( !conn || type != php3_velocis_module.le_link ) {
 		return(NULL);
 	}
@@ -154,7 +154,7 @@ velocis_find_conn(HashTable *list,int ind)
 static void
 velocis_del_conn(HashTable *list,int ind)
 {
-	php3_list_delete(ind);
+	zend_list_delete(ind);
 }
 
 static int
@@ -162,7 +162,7 @@ velocis_add_result(HashTable *list,Vresult *res,VConn *conn)
 {
 	int ind;
 
-	ind = php3_list_insert(res,php3_velocis_module.le_result);
+	ind = zend_list_insert(res,php3_velocis_module.le_result);
 	res->conn = conn;
 	res->index = ind;
 
@@ -175,7 +175,7 @@ velocis_find_result(HashTable *list,int ind)
 	Vresult *res;
 	int type;
 
-	res = php3_list_find(ind,&type);
+	res = zend_list_find(ind,&type);
 	if ( !res || type != php3_velocis_module.le_result ) {
 		return(NULL);
 	}
@@ -185,7 +185,7 @@ velocis_find_result(HashTable *list,int ind)
 static void
 velocis_del_result(HashTable *list,int ind)
 {
-	php3_list_delete(ind);
+	zend_list_delete(ind);
 }
 
 /* Users functions */

@@ -444,7 +444,7 @@ static php3i_sockbuf *_php3_sock_create(int socket FLS_DC)
 	return sock;
 }
 
-size_t _php3_sock_set_def_chunk_size(size_t size)
+size_t php_sock_set_def_chunk_size(size_t size)
 {
 	size_t old;
 	FLS_FETCH();

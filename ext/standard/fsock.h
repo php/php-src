@@ -69,7 +69,7 @@ int _php3_is_persistent_sock(int);
 int _php3_sock_set_blocking(int socket, int mode);
 int _php3_sock_destroy(int socket);
 int php_sock_close(int socket);
-size_t _php3_sock_set_def_chunk_size(size_t size);
+size_t php_sock_set_def_chunk_size(size_t size);
 int php_msock_destroy(int *data);
 
 PHPAPI int connect_nonb(int sockfd, struct sockaddr *addr, socklen_t addrlen, struct timeval *timeout);

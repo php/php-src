@@ -73,7 +73,7 @@
 #include "php_getopt.h"
 #endif
 
-PHPAPI extern char *php3_ini_path;
+PHPAPI extern char *php_ini_path;
 
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
@@ -352,7 +352,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					behavior=PHP_MODE_INDENT;
 					break;
 				case 'c':
-					php3_ini_path = strdup(optarg);		/* intentional leak */
+					php_ini_path = strdup(optarg);		/* intentional leak */
 					break;
 				case 'a':
 #if SUPPORT_INTERACTIVE
@@ -482,7 +482,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			break;
 	}
 
-	php3_header();			/* Make sure headers have been sent */
+	php_header();			/* Make sure headers have been sent */
 	if (free_path_translated)
 		efree(SG(request_info).path_translated);
 	php_request_shutdown((void *) 0);

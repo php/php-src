@@ -360,7 +360,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			db_handle = (isc_db_handle) le->ptr;
 		}
-		return_value->value.lval = php3_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_plink);
+		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_plink);
 		return_value->type = IS_LONG;
 	} else {
 		list_entry *index_ptr, new_index_ptr;
@@ -378,7 +378,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
-			ptr = php3_list_find(link,&type);   /* check if the link is still there */
+			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==IBASE_GLOBAL(php3_ibase_module).le_link || type==IBASE_GLOBAL(php3_ibase_module).le_plink)) {
 				return_value->value.lval = IBASE_GLOBAL(php3_ibase_module).default_link = link;
 				return_value->type = IS_LONG;
@@ -401,7 +401,7 @@ static void _php3_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		/* add it to the list */
-		return_value->value.lval = php3_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_link);
+		return_value->value.lval = zend_list_insert(db_handle, IBASE_GLOBAL(php3_ibase_module).le_link);
 		return_value->type = IS_LONG;
 
 		/* add it to the hash */
@@ -459,13 +459,13 @@ PHP_FUNCTION(ibase_close)
 			break;
 	}
 	
-	db_handle = (isc_db_handle) php3_list_find(id, &type);
+	db_handle = (isc_db_handle) zend_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index",id);
 		RETURN_FALSE;
 	}
 	
-	php3_list_delete(ibase_link->value.lval);
+	zend_list_delete(ibase_link->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -661,7 +661,7 @@ PHP_FUNCTION(ibase_query)
 			break;
 	}
 	
-	db_handle = (isc_db_handle) php3_list_find(id, &type);
+	db_handle = (isc_db_handle) zend_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
@@ -691,7 +691,7 @@ PHP_FUNCTION(ibase_query)
 		ibase_result->sqlda = osqlda;
 		ibase_result->trans = tr_handle;
 		ibase_result->commitok = 1;
-		return_value->value.lval = php3_list_insert(ibase_result, php3_ibase_module.le_result);
+		return_value->value.lval = zend_list_insert(ibase_result, php3_ibase_module.le_result);
 		return_value->type = IS_LONG;
 	} else {
 		if (status[0] == 1 && status[1]) {
@@ -737,7 +737,7 @@ PHP_FUNCTION(ibase_fetch_row)
 	}
 	
 	convert_to_long(result);
-	ibase_result = (ibase_result_handle *) php3_list_find(result->value.lval, &type);
+	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval, &type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
 		php_error(E_WARNING,"%d is not an InterBase result index", result->value.lval);
@@ -890,13 +890,13 @@ PHP_FUNCTION(ibase_free_result)
 		RETURN_FALSE;
 	}
 	
-	ibase_result = (ibase_result_handle *) php3_list_find(result->value.lval,&type);
+	ibase_result = (ibase_result_handle *) zend_list_find(result->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_result) {
 		php_error(E_WARNING,"%d is not an InterBase result index",result->value.lval);
 		RETURN_FALSE;
 	}
-	php3_list_delete(result->value.lval);
+	zend_list_delete(result->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -934,7 +934,7 @@ PHP_FUNCTION(ibase_prepare)
 			break;
 	}
 	
-	db_handle = (isc_db_handle) php3_list_find(id, &type);
+	db_handle = (isc_db_handle) zend_list_find(id, &type);
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_link && type!=IBASE_GLOBAL(php3_ibase_module).le_plink) {
 		php_error(E_WARNING, "%d is not an InterBase link index", id);
 		RETURN_FALSE;
@@ -955,7 +955,7 @@ PHP_FUNCTION(ibase_prepare)
 	ibase_query->sqlda = isqlda;
 	ibase_query->trans = tr_handle;
 	ibase_query->alloced = 0;
-	return_value->value.lval = php3_list_insert(ibase_query, php3_ibase_module.le_query);
+	return_value->value.lval = zend_list_insert(ibase_query, php3_ibase_module.le_query);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -978,7 +978,7 @@ PHP_FUNCTION(ibase_bind)
 		RETURN_FALSE;
 	}
 	
-	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval,&type);
+	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index",query->value.lval);
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(ibase_execute)
 		RETURN_FALSE;
 	}
 	
-	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval,&type);
+	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval,&type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
@@ -1052,7 +1052,7 @@ PHP_FUNCTION(ibase_execute)
 	ibase_result = (ibase_result_handle *) emalloc(sizeof(ibase_result_handle));
 	ibase_result->result = ibase_query->query;
 	ibase_result->sqlda = osqlda;
-	return_value->value.lval = php3_list_insert(ibase_result, IBASE_GLOBAL(php3_ibase_module).le_result);
+	return_value->value.lval = zend_list_insert(ibase_result, IBASE_GLOBAL(php3_ibase_module).le_result);
 	return_value->type = IS_LONG;
 }
 /* }}} */
@@ -1075,13 +1075,13 @@ PHP_FUNCTION(ibase_free_query)
 		RETURN_FALSE;
 	}
 	
-	ibase_query = (ibase_query_handle *) php3_list_find(query->value.lval, &type);
+	ibase_query = (ibase_query_handle *) zend_list_find(query->value.lval, &type);
 	
 	if (type!=IBASE_GLOBAL(php3_ibase_module).le_query) {
 		php_error(E_WARNING,"%d is not an InterBase query index", query->value.lval);
 		RETURN_FALSE;
 	}
-	php3_list_delete(query->value.lval);
+	zend_list_delete(query->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
