@@ -2571,6 +2571,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
 	zval		*stack,			/* Input stack */
 			   **val;			/* Value to be popped */
+	HashTable	*new_hash;		/* New stack */
 	char		*string_key;	
 	ulong		 num_key;
 	
@@ -2600,16 +2601,10 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	return_value->is_ref=0;
 	
 	/* Delete the first or last value */
-	switch (zend_hash_get_current_key(stack->value.ht, &string_key, &num_key)) {
-		case HASH_KEY_IS_STRING:
-			zend_hash_del(stack->value.ht, string_key, strlen(string_key)+1);
-			efree(string_key);
-			break;
-			
-		case HASH_KEY_IS_LONG:
-			zend_hash_index_del(stack->value.ht, num_key);
-			break;
-	}
+	new_hash = _phpi_splice(stack->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
+	zend_hash_destroy(stack->value.ht);
+	efree(stack->value.ht);
+	stack->value.ht = new_hash;
 }
 /* }}} */
 
