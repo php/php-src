@@ -424,8 +424,11 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ getPackageDownloadUrl()
 
-    function getPackageDownloadUrl($package)
+    function getPackageDownloadUrl($package, $version = null)
     {
+        if ($version) {
+            $package .= "-$version";
+        }
         if ($this === null || $this->config === null) {
             $package = "http://pear.php.net/get/$package";
         } else {
@@ -448,7 +451,6 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-
     // {{{ _prependPath($path, $prepend)
 
     function _prependPath($path, $prepend)
@@ -464,8 +466,22 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+    // {{ extractDownloadFileName($pkgfile, &$version)
+
+    function extractDownloadFileName($pkgfile, &$version)
+    {
+        // regex defined in Common.php
+        if (preg_match(PEAR_COMMON_PACKAGE_DOWNLOAD_PREG, $pkgfile, $m)) {
+            $version = (isset($m[3])) ? $m[3] : null;
+            return $m[1];
+        }
+        $version = null;
+        return $pkgfile;
+    }
+
+    // }}}
     // {{{ _downloadFile()
-    function _downloadFile($pkgfile, &$config, $options, &$errors)
+    function _downloadFile($pkgfile, &$config, $options, &$errors, $version)
     {
         $need_download = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
@@ -478,7 +494,7 @@ class PEAR_Installer extends PEAR_Common
                         return;
                     }
                 }
-                $pkgfile = $this->getPackageDownloadUrl($pkgfile);
+                $pkgfile = $this->getPackageDownloadUrl($pkgfile, $version);
                 $need_download = true;
             } else {
                 if (strlen($pkgfile)) {
@@ -532,7 +548,7 @@ class PEAR_Installer extends PEAR_Common
      * @param false private recursion variable
      */
     function download($packages, $options, &$config, &$installpackages,
-        &$errors, $installed = false, $willinstall = false, $state = false)
+                      &$errors, $installed = false, $willinstall = false, $state = false)
     {
         // recognized options:
         // - onlyreqdeps   : install all required dependencies as well
@@ -556,13 +572,15 @@ class PEAR_Installer extends PEAR_Common
 
         // download files in this list if necessary
         foreach($packages as $pkgfile) {
+            $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
             if ($this->validPackageName($pkgfile) && !isset($options['upgrade'])) {
                 if ($this->registry->packageExists($pkgfile)) {
+                    $this->log(0, "Package '$pkgfile' already installed, skipping");
                     // ignore dependencies that are installed unless we are upgrading
                     continue;
                 }
             }
-            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors);
+            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors, $version);
             if (PEAR::isError($pkgfile)) {
                 return $pkgfile;
             }
@@ -722,7 +740,6 @@ class PEAR_Installer extends PEAR_Common
             $this->installroot = '';
         }
         $this->registry = &new PEAR_Registry($php_dir);
-        $need_download = false;
         //  ==> XXX should be removed later on
         $flag_old_format = false;
 
