@@ -45,6 +45,13 @@ PHP_FUNCTION(com_create_instance)
 	HRESULT res = E_FAIL;
 	int mode = COMG(autoreg_case_sensitive) ? CONST_CS : 0;
 	ITypeLib *TL = NULL;
+	COSERVERINFO	info;
+	COAUTHIDENTITY	authid = {0};
+	COAUTHINFO		authinfo = {
+		RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
+		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
+		&authid, EOAC_NONE
+	};
 
 	obj = CDNO_FETCH(object);
 
@@ -112,40 +119,9 @@ PHP_FUNCTION(com_create_instance)
 
 	moniker = php_com_string_to_olestring(module_name, module_name_len, obj->code_page TSRMLS_CC);
 
-	if (FAILED(CLSIDFromString(moniker, &clsid))) {
-		/* try to use it as a moniker */
-		IBindCtx *pBindCtx = NULL;
-		IMoniker *pMoniker = NULL;
-		ULONG ulEaten;
-
-		if (server_params != NULL) {
-			/* TODO: review this.
-			 * The assumption seems to be that monikers cannot be invoked for remote servers.
-			 * The BindCtx might allow this however */
-			res = MK_E_SYNTAX;
-		} else if (SUCCEEDED(res = CreateBindCtx(0, &pBindCtx)) &&
-				SUCCEEDED(res = MkParseDisplayName(pBindCtx, moniker, &ulEaten, &pMoniker))) {
-			res = IMoniker_BindToObject(pMoniker, pBindCtx, NULL, &IID_IDispatch, (LPVOID*)&V_DISPATCH(&obj->v));
-			
-			if (SUCCEEDED(res)) {
-				V_VT(&obj->v) = VT_DISPATCH;
-			}
-
-			IMoniker_Release(pMoniker);
-		}
-		if (pBindCtx) {
-			IBindCtx_Release(pBindCtx);
-		}
-	} else if (server_name) {
-		COSERVERINFO	info;
-		MULTI_QI		qi;
-		COAUTHIDENTITY	authid;
-		COAUTHINFO		authinfo = {
-			RPC_C_AUTHN_WINNT, RPC_C_AUTHZ_NONE, NULL,
-			RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
-			&authid, EOAC_NONE
-		};
-
+	/* if instantiating a remote object, either directly, or via
+	 * a moniker, fill in the relevant info */
+	if (server_name) {
 		info.dwReserved1 = 0;
 		info.dwReserved2 = 0;
 		info.pwszName = php_com_string_to_olestring(server_name, server_name_len, obj->code_page TSRMLS_CC);
@@ -174,24 +150,72 @@ PHP_FUNCTION(com_create_instance)
 		} else {
 			info.pAuthInfo = NULL;
 		}
+	}
+
+	if (FAILED(CLSIDFromString(moniker, &clsid))) {
+		/* try to use it as a moniker */
+		IBindCtx *pBindCtx = NULL;
+		IMoniker *pMoniker = NULL;
+		ULONG ulEaten;
+		BIND_OPTS2 bopt = {0};
+
+		if (SUCCEEDED(res = CreateBindCtx(0, &pBindCtx))) {
+			if (server_name) {
+				/* fill in the remote server info.
+				 * MSDN docs indicate that this might be ignored in
+				 * current win32 implementations, but at least we are
+				 * doing the right thing in readiness for the day that
+				 * it does work */
+				bopt.cbStruct = sizeof(bopt);
+				IBindCtx_GetBindOptions(pBindCtx, (BIND_OPTS*)&bopt);
+				bopt.pServerInfo = &info;
+				/* apparently, GetBindOptions will only ever return
+				 * a regular BIND_OPTS structure.  My gut feeling is
+				 * that it will modify the size field to reflect that
+				 * so lets be safe and set it to the BIND_OPTS2 size
+				 * again */
+				bopt.cbStruct = sizeof(bopt);
+				IBindCtx_SetBindOptions(pBindCtx, (BIND_OPTS*)&bopt);
+			}
+			
+			if (SUCCEEDED(res = MkParseDisplayName(pBindCtx, moniker, &ulEaten, &pMoniker))) {
+				res = IMoniker_BindToObject(pMoniker, pBindCtx,
+					NULL, &IID_IDispatch, (LPVOID*)&V_DISPATCH(&obj->v));
+			
+				if (SUCCEEDED(res)) {
+					V_VT(&obj->v) = VT_DISPATCH;
+				}
+
+				IMoniker_Release(pMoniker);
+			}
+		}
+		if (pBindCtx) {
+			IBindCtx_Release(pBindCtx);
+		}
+	} else if (server_name) {
+		MULTI_QI		qi;
+
 		qi.pIID = &IID_IDispatch;
 		qi.pItf = NULL;
 		qi.hr = S_OK;
 
 		res = CoCreateInstanceEx(&clsid, NULL, ctx, &info, 1, &qi);
-		efree(info.pwszName);
 
 		if (SUCCEEDED(res)) {
 			res = qi.hr;
 			V_DISPATCH(&obj->v) = (IDispatch*)qi.pItf;
 			V_VT(&obj->v) = VT_DISPATCH;
 		}
-
 	} else {
 		res = CoCreateInstance(&clsid, NULL, CLSCTX_SERVER, &IID_IDispatch, (LPVOID*)&V_DISPATCH(&obj->v));
 		if (SUCCEEDED(res)) {
 			V_VT(&obj->v) = VT_DISPATCH;
 		}
+	}
+
+	if (server_name) {
+		STR_FREE((char*)info.pwszName);
+		STR_FREE((char*)authid.User);
 	}
 
 	efree(moniker);
