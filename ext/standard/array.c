@@ -83,6 +83,7 @@ function_entry array_functions[] = {
 	PHP_FE(array_count_values,		 			  	NULL)
 	PHP_FE(array_reverse,							NULL)
 	PHP_FE(array_pad,								NULL)
+	PHP_FE(array_flip,								NULL)
 
 	/* Aliases */
 	PHP_FALIAS(pos,				current,			first_arg_force_ref)
@@ -1859,6 +1860,56 @@ PHP_FUNCTION(array_pad)
 	
 	/* Clean up */
 	efree(pads);
+}
+/* }}} */
+
+/* {{{ proto array array_flip(array input)
+   Return array with key <-> value flipped. */
+PHP_FUNCTION(array_flip)
+{
+	zval **array, **entry, *data;
+	HashTable *target_hash;
+	char *string_key;
+	ulong num_key;
+	
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	target_hash = HASH_OF(*array);
+	if (!target_hash) {
+		php_error(E_WARNING, "Wrong datatype in array_flip() call");
+		RETURN_FALSE;
+	}
+	
+	array_init(return_value);
+
+	zend_hash_internal_pointer_reset(target_hash);
+	while (zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
+		MAKE_STD_ZVAL(data);
+		switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
+			case HASH_KEY_IS_STRING:
+				data->value.str.val = string_key;
+				data->value.str.len = strlen(string_key);
+				data->type = IS_STRING;
+				break;
+			case HASH_KEY_IS_LONG:
+				data->type = IS_LONG;
+				data->value.lval = num_key;
+				break;
+		}
+
+		if ((*entry)->type == IS_LONG) {
+			zend_hash_index_update(return_value->value.ht,(*entry)->value.lval, &data, sizeof(data), NULL);
+		} else if ((*entry)->type == IS_STRING) {
+			zend_hash_update(return_value->value.ht,(*entry)->value.str.val,(*entry)->value.str.len + 1, &data, sizeof(data), NULL);
+		} else {
+			zval_dtor(data);
+			php_error(E_WARNING, "Can only flip STRING and INTEGER values!");
+		}
+	
+		zend_hash_move_forward(target_hash);
+	}
 }
 /* }}} */
 
