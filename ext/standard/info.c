@@ -57,7 +57,7 @@ PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
 	char *php3_uname;
-	int allow_builtin_links = INI_INT("allow_builtin_links");
+	int expose_php = INI_INT("expose_php");
 #if WIN32|WINNT
 	char php3_windows_uname[256];
 	DWORD dwBuild=0;
@@ -88,7 +88,7 @@ PHPAPI void php_print_info(int flag)
 		php_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
 
 		PUTS("<hr>");
-		if (allow_builtin_links) {
+		if (expose_php) {
 			PUTS("<a href=\"http://www.php.net/\"><img src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
@@ -106,7 +106,7 @@ PHPAPI void php_print_info(int flag)
 #endif
 		/* Zend Engine */
 		PUTS("<hr>");
-		if (allow_builtin_links) {
+		if (expose_php) {
 			PUTS("<a href=\"http://www.zend.com/\"><img src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
@@ -118,7 +118,7 @@ PHPAPI void php_print_info(int flag)
 
 	PUTS("<center>");
 
-	if ((flag & PHP_INFO_CREDITS) && allow_builtin_links) {	
+	if ((flag & PHP_INFO_CREDITS) && expose_php) {	
 		PUTS("<hr>");
 		PUTS("<a href=\"");
 		if (SG(request_info).request_uri) {

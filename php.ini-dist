@@ -57,10 +57,10 @@ highlight.default	=	#0000BB
 highlight.html		=	#000000
 
 ; Misc
-allow_builtin_links	=	Off		; Sets whether phpinfo() will generate built-in links that display the PHP
-								; and Zend logos, and tells PHP whether to honor them or not.
-								; It is no security threat in any way, but it makes it possible
-								; to determine whether you use PHP on your server or not.
+expose_php	=	On		; Decides whether PHP may expose the fact that it is installed on the
+						; server (e.g., by adding its signature to the Web server header).
+						; It is no security threat in any way, but it makes it possible
+						; to determine whether you use PHP on your server or not.
 
 
 
