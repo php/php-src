@@ -91,6 +91,8 @@ extern PHPAPI char *_php3_addslashes(char *string, int length, int *new_length, 
 extern PHPAPI void _php3_stripslashes(char *string, int *len);
 extern PHPAPI void _php3_dirname(char *str, int len);
 extern PHPAPI char *php3i_stristr(unsigned char *s, unsigned char *t);
+extern PHPAPI char *_php3_str_to_str(char *haystack, int length, char *needle,
+		int needle_len, char *str, int str_len, int *_new_length);
 extern PHPAPI void _php3_trim(pval *str, pval *return_value, int mode);
 extern PHPAPI void _php3_strip_tags(char *rbuf, int state);
 
