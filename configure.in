@@ -523,6 +523,21 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
     AC_MSG_ERROR(Cannot find OpenSSL's <evp.h>)
   fi
 
+  old_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="-I$OPENSSL_INC"
+  AC_MSG_CHECKING(for OpenSSL version)
+  AC_EGREP_CPP(yes,[
+  #include <openssl/opensslv.h>
+  #if OPENSSL_VERSION_NUMBER >= 0x0090600fL
+  yes
+  #endif
+  ],[
+    AC_MSG_RESULT(>= 0.9.6)
+  ],[
+    AC_MSG_ERROR(OpenSSL version 0.9.6 or greater required.)
+  ])
+  CPPFLAGS=$old_CPPFLAGS
+    
   AC_ADD_LIBPATH($OPENSSL_DIR/lib)
   AC_ADD_LIBRARY(ssl)
   AC_ADD_LIBRARY(crypto)
