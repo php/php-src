@@ -78,7 +78,8 @@ if test "$PHP_MYSQL" != "no"; then
   done
 
   if test -z "$MYSQL_DIR"; then
-    AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL])
+    AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL.
+Note that the MySQL client library is not bundled anymore.])
   fi
 
   for i in lib lib/mysql; do
@@ -86,7 +87,8 @@ if test "$PHP_MYSQL" != "no"; then
   done
 
   if test -z "$MYSQL_LIB_DIR"; then
-    AC_MSG_ERROR([Cannot find libmysqlclient under $MYSQL_DIR])
+    AC_MSG_ERROR([Cannot find libmysqlclient under $MYSQL_DIR.
+Note that the MySQL client library is not bundled anymore.])
   fi
 
   PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],
