@@ -77,6 +77,13 @@ PHP_FUNCTION(swfmovie_setFrames);
 
 #ifdef HAVE_NEW_MING
 PHP_FUNCTION(swfmovie_streamMp3);
+PHP_FUNCTION(swfmovie_addExport);
+PHP_FUNCTION(swfmovie_writeExports);
+PHP_FUNCTION(swfmovie_startSound);
+PHP_FUNCTION(swfmovie_stopSound);
+PHP_FUNCTION(swfmovie_importChar);
+PHP_FUNCTION(swfmovie_importFont);
+PHP_FUNCTION(swfmovie_addFont);
 #endif
 
 PHP_FUNCTION(swfsprite_init);
@@ -86,10 +93,28 @@ PHP_FUNCTION(swfsprite_nextFrame);
 PHP_FUNCTION(swfsprite_labelFrame);
 PHP_FUNCTION(swfsprite_setFrames);
 
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swfsprite_startSound);
+PHP_FUNCTION(swfsprite_stopSound);
+#endif
+
 PHP_FUNCTION(swffont_init);
 PHP_FUNCTION(swffont_getWidth);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swffont_getUTF8Width);
+/*PHP_FUNCTION(swffont_getWideWidth);*/
+#endif
+
 PHP_FUNCTION(swffont_getAscent);
 PHP_FUNCTION(swffont_getDescent);
+PHP_FUNCTION(swffont_getLeading);
+
+#ifdef HAVE_NEW_MING
+/*PHP_FUNCTION(swffont_addChars);*/
+PHP_FUNCTION(swffont_getShape);
+#endif
+
 PHP_FUNCTION(swffont_getLeading);
 
 PHP_FUNCTION(swftext_init);
@@ -99,7 +124,19 @@ PHP_FUNCTION(swftext_setSpacing);
 PHP_FUNCTION(swftext_setColor);
 PHP_FUNCTION(swftext_moveTo);
 PHP_FUNCTION(swftext_addString);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swftext_addUTF8String);
+/*PHP_FUNCTION(swftext_addWideString);*/
+#endif
+
 PHP_FUNCTION(swftext_getWidth);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swftext_getUTF8Width);
+/*PHP_FUNCTION(swftext_getWideWidth);*/
+#endif
+
 PHP_FUNCTION(swftext_getAscent);
 PHP_FUNCTION(swftext_getDescent);
 PHP_FUNCTION(swftext_getLeading);
@@ -117,6 +154,11 @@ PHP_FUNCTION(swftextfield_setLineSpacing);
 PHP_FUNCTION(swftextfield_setColor);
 PHP_FUNCTION(swftextfield_setName);
 PHP_FUNCTION(swftextfield_addString);
+PHP_FUNCTION(swftextfield_setPadding);
+PHP_FUNCTION(swftextfield_addChars);
+
+PHP_FUNCTION(swffontchar_addChars);
+PHP_FUNCTION(swffontchar_addUTF8Chars);
 
 PHP_FUNCTION(swfdisplayitem_move);
 PHP_FUNCTION(swfdisplayitem_moveTo);
@@ -136,6 +178,19 @@ PHP_FUNCTION(swfdisplayitem_multColor);
 PHP_FUNCTION(swfdisplayitem_setName);
 PHP_FUNCTION(swfdisplayitem_addAction);
 
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swfdisplayitem_remove);
+PHP_FUNCTION(swfdisplayitem_setMaskLevel);
+PHP_FUNCTION(swfdisplayitem_endMask);
+PHP_FUNCTION(swfdisplayitem_getX);
+PHP_FUNCTION(swfdisplayitem_getY);
+PHP_FUNCTION(swfdisplayitem_getXScale);
+PHP_FUNCTION(swfdisplayitem_getYScale);
+PHP_FUNCTION(swfdisplayitem_getXSkew);
+PHP_FUNCTION(swfdisplayitem_getYSkew);
+PHP_FUNCTION(swfdisplayitem_getRot);
+#endif
+
 PHP_FUNCTION(swfbutton_init);
 PHP_FUNCTION(swfbutton_setHit);
 PHP_FUNCTION(swfbutton_setOver);
@@ -143,7 +198,16 @@ PHP_FUNCTION(swfbutton_setUp);
 PHP_FUNCTION(swfbutton_setDown);
 PHP_FUNCTION(swfbutton_setAction);
 PHP_FUNCTION(swfbutton_addShape);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swfbutton_setMenu);
+#endif
+
 PHP_FUNCTION(swfbutton_addAction);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swfbutton_addSound);
+#endif
 
 PHP_FUNCTION(swfbutton_keypress);
 
@@ -153,9 +217,22 @@ PHP_FUNCTION(swfmorph_init);
 PHP_FUNCTION(swfmorph_getShape1);
 PHP_FUNCTION(swfmorph_getShape2);
 
+PHP_FUNCTION(swfsound_init);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(swfsoundinstance_noMultiple);
+PHP_FUNCTION(swfsoundinstance_loopInPoint);
+PHP_FUNCTION(swfsoundinstance_loopOutPoint);
+PHP_FUNCTION(swfsoundinstance_loopCount);
+#endif
+
 PHP_FUNCTION(ming_setCubicThreshold);
 PHP_FUNCTION(ming_setScale);
 PHP_FUNCTION(ming_useSWFVersion);
+
+#ifdef HAVE_NEW_MING
+PHP_FUNCTION(ming_useConstants);
+#endif
 
 #else
 #define ming_module_ptr NULL
