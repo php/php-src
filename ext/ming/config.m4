@@ -19,7 +19,12 @@ if test "$PHP_MING" != "no"; then
 
   PHP_SUBST(MING_SHARED_LIBADD)
   AC_ADD_LIBRARY_WITH_PATH(ming, $MING_DIR/lib, MING_SHARED_LIBADD)
-  AC_DEFINE(HAVE_MING,1,[ ])
+
+  AC_CHECK_LIB(ming, Ming_setScale, [
+    AC_DEFINE(HAVE_MING,1,[ ])
+  ],[
+    AC_MSG_ERROR(Ming library 0.1.0 or greater required.)
+  ])
 
   PHP_EXTENSION(ming, $ext_shared)
 fi
