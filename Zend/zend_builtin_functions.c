@@ -54,6 +54,7 @@ static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
+static ZEND_FUNCTION(restore_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
 static ZEND_FUNCTION(create_function);
 #if ZEND_DEBUG
@@ -96,6 +97,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(trigger_error,		NULL)
 	ZEND_FALIAS(user_error,		trigger_error,		NULL)
 	ZEND_FE(set_error_handler,		NULL)
+	ZEND_FE(restore_error_handler,	NULL)
 	ZEND_FE(get_declared_classes, NULL)
 	ZEND_FE(create_function,	NULL)
 #if ZEND_DEBUG
@@ -770,9 +772,10 @@ ZEND_FUNCTION(set_error_handler)
 	if (EG(user_error_handler)) {
 		had_orig_error_handler = 1;
 		*return_value = *EG(user_error_handler);
-	} else {
-		ALLOC_ZVAL(EG(user_error_handler));
+		zval_copy_ctor(return_value);
+		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
 	}
+	ALLOC_ZVAL(EG(user_error_handler));
 
 	if (Z_STRLEN_PP(error_handler)==0) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_error_handler));
@@ -784,10 +787,27 @@ ZEND_FUNCTION(set_error_handler)
 	zval_copy_ctor(EG(user_error_handler));
 
 	if (!had_orig_error_handler) {
-		RETURN_STRINGL("", 0, 1);
+		RETURN_NULL();
 	}
 }
 /* }}} */
+
+
+
+/* {{{ proto void restore_error_handler(void)
+   Restores the previously defined error handler function */
+ZEND_FUNCTION(restore_error_handler)
+{
+	if (EG(user_error_handler)) {
+		zval_ptr_dtor(&EG(user_error_handler));
+	}
+	if (zend_ptr_stack_num_elements(&EG(user_error_handlers))==0) {
+		EG(user_error_handler) = NULL;
+	} else {
+		EG(user_error_handler) = zend_ptr_stack_pop(&EG(user_error_handlers));
+	}
+	RETURN_TRUE;
+}
 
 
 static int copy_class_name(zend_class_entry *ce, int num_args, va_list args, zend_hash_key *hash_key)
