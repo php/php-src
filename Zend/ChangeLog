@@ -1,3 +1,11 @@
+2002-05-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Fugbix typo.
+
+2002-05-24  Andi Gutmans  <andi@zend.com>
+
+    * ZEND_CHANGES: - Add a bit of information.
+
 2002-05-20  Zeev Suraski  <zeev@zend.com>
 
     * zend_API.h
