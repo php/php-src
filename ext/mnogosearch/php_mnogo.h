@@ -27,6 +27,8 @@
 
 #if HAVE_MNOGOSEARCH
 
+#undef HAVE_PGSQL
+#undef HAVE_MYSQL
 #include <udm_config.h>
 #include <udmsearch.h>
 
