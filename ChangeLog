@@ -1,3 +1,423 @@
+1999-12-30  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Replaced some ODBC 3 stuff to be backwards compatible to ODBC 2
+
+1999-12-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      php.h: Typedef socklen_t, if it is not available
+
+    * build/build2.mk: Fix for Solaris incapability
+
+    * ext/ldap/config.m4: Append liblber to satisfy symbols in libldap
+
+    * acinclude.m4: Let m4 decide what to do
+
+    * build/build2.mk: Remove second {}, that shouldn't be there
+
+    * ext/odbc/config.m4: Fix define.
+
+    This should be the last one, my earlier search didn't find macro names
+    contain numbers.
+
+1999-12-30  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oracle/config.m4
+      ext/oci8/config.m4: fix AC_DEFINE
+
+1999-12-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Define to 1
+
+    * build/rules.mk: Proper protection for GNU make's parallel build
+
+    * ext/Makefile.in: Propagate error condition correctly
+
+    * ext/dba/config.m4
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_ndbm.c:
+    Ease include file selection. Let's see which cpps support this construct.
+
+    * build/build2.mk: Rebuild config.h.in whenever configure changes
+
+    * build/rules.mk: Add distclean target
+
+    * ext/yp/config.m4
+      ext/zlib/config.m4
+      ext/sybase/config.m4
+      ext/sybase_ct/config.m4
+      ext/standard/config.m4
+      ext/pgsql/config.m4
+      ext/snmp/config.m4
+      ext/oracle/config.m4
+      ext/pdf/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/mhash/config.m4
+      ext/msql/config.m4
+      ext/mcrypt/config.m4
+      ext/mcal/config.m4
+      ext/ldap/config.m4
+      ext/interbase/config.m4
+      ext/java/config.m4
+      ext/imap/config.m4
+      ext/informix/config.m4
+      ext/gettext/config.m4
+      ext/icap/config.m4
+      ext/ftp/config.m4
+      ext/gd/config.m4
+      ext/domxml/config.m4
+      ext/fdf/config.m4
+      ext/db/config.m4
+      ext/dba/config.m4
+      ext/cybercash/config.m4:
+    Whoops, defining them to empty values generates many parse errors.
+    Defaulting to 1.
+
+    * ext/zlib/config.h.stub
+      ext/zlib/config.m4
+      ext/xml/config.h.stub
+      ext/xml/config.m4
+      ext/yp/config.h.stub
+      ext/yp/config.m4
+      ext/sysvshm/config.h.stub
+      ext/sysvshm/config.m4
+      ext/wddx/config.h.stub
+      ext/wddx/config.m4
+      ext/sybase_ct/config.h.stub
+      ext/sybase_ct/config.m4
+      ext/sysvsem/config.h.stub
+      ext/sysvsem/config.m4
+      ext/standard/config.h.stub
+      ext/standard/config.m4
+      ext/sybase/config.h.stub
+      ext/sybase/config.m4
+      ext/readline/config.h.stub
+      ext/readline/config.m4
+      ext/snmp/config.h.stub
+      ext/snmp/config.m4
+      ext/posix/config.h.stub
+      ext/pdf/config.h.stub
+      ext/pdf/config.m4
+      ext/pgsql/config.h.stub
+      ext/pgsql/config.m4
+      ext/pcre/config.h.stub
+      ext/pcre/config.m4
+      ext/oracle/config.h.stub
+      ext/oracle/config.m4
+      ext/oci8/config.h.stub
+      ext/oci8/config.m4
+      ext/odbc/config.h.stub
+      ext/odbc/config.m4
+      ext/mhash/config.h.stub
+      ext/mhash/config.m4
+      ext/msql/config.h.stub
+      ext/msql/config.m4
+      ext/mcal/config.h.stub
+      ext/mcal/config.m4
+      ext/mcrypt/config.h.stub
+      ext/mcrypt/config.m4
+      ext/java/config.h.stub
+      ext/java/config.m4
+      ext/ldap/config.h.stub
+      ext/ldap/config.m4
+      ext/interbase/config.h.stub
+      ext/interbase/config.m4
+      ext/imap/config.h.stub
+      ext/imap/config.m4
+      ext/informix/config.h.stub
+      ext/informix/config.m4
+      ext/hyperwave/config.h.stub
+      ext/hyperwave/config.m4
+      ext/icap/config.h.stub
+      ext/icap/config.m4
+      ext/gd/config.h.stub
+      ext/gd/config.m4
+      ext/gettext/config.h.stub
+      ext/gettext/config.m4
+      ext/ftp/config.h.stub
+      ext/ftp/config.m4
+      ext/fdf/config.h.stub
+      ext/fdf/config.m4
+      ext/filepro/config.h.stub
+      ext/filepro/config.m4
+      ext/dbase/config.h.stub
+      ext/dbase/config.m4
+      ext/domxml/config.h.stub
+      ext/domxml/config.m4
+      ext/db/config.h.stub
+      ext/db/config.m4
+      ext/dba/config.h.stub
+      ext/dba/config.m4
+      ext/dav/config.h.stub
+      ext/dav/config.m4
+      ext/cpdf/config.h.stub
+      ext/cpdf/config.m4
+      ext/cybercash/config.h.stub
+      ext/cybercash/config.m4
+      ext/aspell/config.h.stub
+      ext/aspell/config.m4
+      ext/bcmath/config.h.stub
+      ext/bcmath/config.m4
+      build/build.mk
+      build/build2.mk
+      ext/ext_skel
+      configure.in:
+    Get rid of config.h.stub. Note that you should embed a comment about
+    what the respective define does into the AC_DEFINE macro. I.e.
+
+    AC_DEFINE(HAVE_FOO, 1, [Whether you have FOO])
+
+    * build/build2.mk: We build in regex as well, create empty .deps
+
+    * genfiles: Let genfiles work in the new environment
+
+    * scripts/.cvsignore
+      sapi/thttpd/.cvsignore
+      sapi/thttpd/Makefile.am
+      sapi/thttpd/Makefile.in
+      sapi/thttpd/config.m4
+      sapi/servlet/.cvsignore
+      sapi/servlet/Makefile.am
+      sapi/servlet/Makefile.in
+      sapi/servlet/config.m4
+      sapi/roxen/.cvsignore
+      sapi/roxen/Makefile.am
+      sapi/roxen/Makefile.in
+      sapi/phttpd/.cvsignore
+      sapi/phttpd/Makefile.am
+      sapi/phttpd/Makefile.in
+      sapi/phttpd/config.m4
+      sapi/isapi/.cvsignore
+      sapi/isapi/Makefile.am
+      sapi/isapi/Makefile.in
+      sapi/fhttpd/.cvsignore
+      sapi/apache/.cvsignore
+      sapi/apache/Makefile.am
+      sapi/apache/Makefile.in
+      sapi/apache/config.m4
+      sapi/cgi/.cvsignore
+      sapi/cgi/Makefile.am
+      sapi/cgi/Makefile.in
+      sapi/cgi/config.m4
+      sapi/aolserver/.cvsignore
+      sapi/aolserver/Makefile.am
+      sapi/aolserver/Makefile.in
+      sapi/aolserver/config.m4
+      sapi/.cvsignore
+      sapi/Makefile.am
+      sapi/Makefile.in
+      pear/.cvsignore
+      pear/Makefile.am
+      pear/Makefile.in
+      pear/pear.m4
+      pear/php-config.in
+      pear/phpize.in
+      regex/.cvsignore
+      regex/Makefile.am
+      regex/Makefile.in
+      ext/zlib/.cvsignore
+      ext/zlib/Makefile.am
+      ext/zlib/Makefile.in
+      ext/yp/.cvsignore
+      ext/yp/Makefile.am
+      ext/yp/Makefile.in
+      ext/xml/.cvsignore
+      ext/xml/Makefile.am
+      ext/xml/Makefile.in
+      ext/xml/config.m4
+      ext/wddx/.cvsignore
+      ext/wddx/Makefile.am
+      ext/wddx/Makefile.in
+      ext/sysvshm/.cvsignore
+      ext/sysvshm/Makefile.am
+      ext/sysvshm/Makefile.in
+      ext/sysvsem/.cvsignore
+      ext/sysvsem/Makefile.am
+      ext/sysvsem/Makefile.in
+      ext/sybase_ct/Makefile.am
+      ext/sybase_ct/Makefile.in
+      ext/sybase_ct/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sybase/Makefile.am
+      ext/sybase/Makefile.in
+      ext/standard/.cvsignore
+      ext/standard/Makefile.am
+      ext/standard/Makefile.in
+      ext/standard/config.m4
+      ext/snmp/.cvsignore
+      ext/snmp/Makefile.am
+      ext/snmp/Makefile.in
+      ext/snmp/config.m4
+      ext/session/Makefile.am
+      ext/session/Makefile.in
+      ext/session/config.h.stub
+      ext/session/config.m4
+      ext/session/.cvsignore
+      ext/readline/.cvsignore
+      ext/readline/Makefile.am
+      ext/readline/Makefile.in
+      ext/readline/config.m4
+      ext/posix/.cvsignore
+      ext/posix/Makefile.am
+      ext/posix/Makefile.in
+      ext/pgsql/Makefile.am
+      ext/pgsql/Makefile.in
+      ext/pgsql/config.m4
+      ext/pgsql/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pdf/Makefile.am
+      ext/pdf/Makefile.in
+      ext/pcre/pcrelib/Makefile.am
+      ext/pcre/pcrelib/Makefile.in
+      ext/pcre/config.m4
+      ext/pcre/pcrelib/.cvsignore
+      ext/oracle/Makefile.am
+      ext/oracle/Makefile.in
+      ext/oracle/config.m4
+      ext/pcre/.cvsignore
+      ext/pcre/Makefile.am
+      ext/pcre/Makefile.in
+      ext/odbc/.cvsignore
+      ext/odbc/Makefile.am
+      ext/odbc/Makefile.in
+      ext/odbc/config.m4
+      ext/oracle/.cvsignore
+      ext/oci8/.cvsignore
+      ext/oci8/Makefile.am
+      ext/oci8/Makefile.in
+      ext/oci8/config.m4
+      ext/mysql/.cvsignore
+      ext/mysql/Makefile.am
+      ext/mysql/Makefile.in
+      ext/mysql/config.h.stub
+      ext/mysql/config.m4
+      ext/mssql/.cvsignore
+      ext/msql/.cvsignore
+      ext/msql/Makefile.am
+      ext/msql/Makefile.in
+      ext/mhash/.cvsignore
+      ext/mhash/Makefile.am
+      ext/mhash/Makefile.in
+      ext/mcrypt/Makefile.am
+      ext/mcrypt/Makefile.in
+      ext/mcrypt/.cvsignore
+      ext/mcal/.cvsignore
+      ext/mcal/Makefile.am
+      ext/mcal/Makefile.in
+      ext/ldap/.cvsignore
+      ext/ldap/Makefile.am
+      ext/ldap/Makefile.in
+      ext/java/.cvsignore
+      ext/java/Makefile.am
+      ext/java/Makefile.in
+      ext/java/config.m4
+      ext/interbase/.cvsignore
+      ext/interbase/Makefile.am
+      ext/interbase/Makefile.in
+      ext/informix/.cvsignore
+      ext/informix/Makefile.am
+      ext/informix/Makefile.in
+      ext/informix/config.m4
+      ext/imap/.cvsignore
+      ext/imap/Makefile.am
+      ext/imap/Makefile.in
+      ext/icap/.cvsignore
+      ext/icap/Makefile.am
+      ext/icap/Makefile.in
+      ext/hyperwave/.cvsignore
+      ext/hyperwave/Makefile.am
+      ext/hyperwave/Makefile.in
+      ext/gettext/Makefile.am
+      ext/gettext/Makefile.in
+      ext/gettext/.cvsignore
+      ext/gd/.cvsignore
+      ext/gd/Makefile.am
+      ext/gd/Makefile.in
+      ext/gd/config.m4
+      ext/ftp/.cvsignore
+      ext/ftp/Makefile.am
+      ext/ftp/Makefile.in
+      ext/filepro/.cvsignore
+      ext/filepro/Makefile.am
+      ext/filepro/Makefile.in
+      ext/fdf/.cvsignore
+      ext/fdf/Makefile.am
+      ext/fdf/Makefile.in
+      ext/domxml/Makefile.am
+      ext/domxml/Makefile.in
+      ext/domxml/.cvsignore
+      ext/dbase/.cvsignore
+      ext/dbase/Makefile.am
+      ext/dbase/Makefile.in
+      ext/dbase/config.m4
+      ext/dba/.cvsignore
+      ext/dba/Makefile.am
+      ext/dba/Makefile.in
+      ext/db/.cvsignore
+      ext/db/Makefile.am
+      ext/db/Makefile.in
+      ext/db/config.m4
+      ext/dav/Makefile.am
+      ext/dav/Makefile.in
+      ext/dav/.cvsignore
+      ext/cybercash/.cvsignore
+      ext/cybercash/Makefile.am
+      ext/cybercash/Makefile.in
+      ext/cpdf/.cvsignore
+      ext/cpdf/Makefile.am
+      ext/cpdf/Makefile.in
+      ext/com/.cvsignore
+      ext/aspell/Makefile.am
+      ext/aspell/Makefile.in
+      ext/bcmath/.cvsignore
+      ext/bcmath/Makefile.am
+      ext/bcmath/Makefile.in
+      ext/aspell/.cvsignore
+      ext/apache/.cvsignore
+      ext/apache/Makefile.am
+      ext/apache/Makefile.in
+      ext/.cvsignore
+      ext/Makefile.am
+      ext/Makefile.in
+      ext/ext_skel
+      build/build.mk
+      build/build2.mk
+      build/buildcheck.sh
+      build/fastgen.sh
+      build/library.mk
+      build/ltlib.mk
+      build/mkdep.perl
+      build/program.mk
+      build/rules.mk
+      build/rules_pear.mk
+      build/shtool
+      internal_functions_win32.c
+      snapshot
+      .cvsignore
+      Makefile.am
+      Makefile.in
+      acinclude.m4
+      build.mk
+      build2.mk
+      buildcheck.sh
+      buildconf
+      configure.in: Integration of -ng changes. Changes:
+
+    - added support for externally built modules,
+    - improved support for in-tree shared modules,
+    - fixed diversion bugs,
+    - configure displays some informative messages,
+    - faster static build
+      (libtool isn't used anymore for compiling non-PIC objects),
+    - dependencies comparable to automake's without requiring GNU make or GCC,
+    - working make clean for non-GNU makes.
+
+    * sapi/apache/config.m4: Macro syntax has changed
+
 1999-12-29  Sascha Schumann  <sascha@schumann.cx>
 
     * build.mk: Don't search for config.h.stubs in sapi
