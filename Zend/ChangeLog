@@ -1,3 +1,14 @@
+2004-11-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_reflection_api.c:
+      MFH #30783 Apache crash when using ReflectionFunction::getStaticVariables()
+      MFH proto fixes
+
+    * zend_reflection_api.c:
+      - Bugix #30783: Apache crash when using
+      ReflectionFunction::getStaticVariables()
+
 2004-11-09  Andrei Zmievski  <andreiz@gravitonic.com>
 
     * zend_ini_parser.y:
