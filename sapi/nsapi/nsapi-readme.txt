@@ -37,7 +37,7 @@ The "shlib" will vary depending on your OS:
 	Windows: "c:/path/to/PHP4/php4nsapi.dll"
 
 
-In obj.conf (for virtual server classes [SunONE 6.0] in their vserver.obj.conf):
+In obj.conf (for virtual server classes [SunONE 6.0+] in their vserver.obj.conf):
 
     <Object name="default">
     .
@@ -133,7 +133,7 @@ is disabled.
 
 Under Windows limitations in the DLL handling need the use of a automatic
 detection of the most recent ns-httpdXX.dll file. This is tested for servers
-till version 6.0. If a newer version of the SunONE server is used, the detection
+till version 6.1. If a newer version of the SunONE server is used, the detection
 fails and nsapi_virtual() is disabled.
 
 If this is the case, try the following:
