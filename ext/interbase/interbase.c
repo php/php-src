@@ -59,7 +59,6 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_prepare, NULL)
 	PHP_FE(ibase_execute, NULL)
 	PHP_FE(ibase_free_query, NULL)
-	PHP_FE(ibase_timefmt, NULL)
 	PHP_FE(ibase_gen_id, NULL)
 	PHP_FE(ibase_num_fields, NULL)
 	PHP_FE(ibase_num_params, NULL)
@@ -124,7 +123,6 @@ function_entry ibase_functions[] = {
 	PHP_FALIAS(fbird_prepare,ibase_prepare, NULL)
 	PHP_FALIAS(fbird_execute,ibase_execute, NULL)
 	PHP_FALIAS(fbird_free_query,ibase_free_query, NULL)
-	PHP_FALIAS(fbird_timefmt,ibase_timefmt, NULL)
 	PHP_FALIAS(fbird_gen_id,ibase_gen_id, NULL)
 	PHP_FALIAS(fbird_num_fields,ibase_num_fields, NULL)
 	PHP_FALIAS(fbird_num_params,ibase_num_params, NULL)
@@ -186,13 +184,6 @@ zend_module_entry ibase_module_entry = {
 
 #ifdef COMPILE_DL_INTERBASE
 ZEND_GET_MODULE(ibase)
-#define DL_MALLOC(size) malloc(size)
-#define DL_STRDUP(str) strdup(str)
-#define DL_FREE(ptr) free(ptr)
-#else
-#define DL_MALLOC(size) emalloc(size)
-#define DL_STRDUP(str) estrdup(str)
-#define DL_FREE(ptr) efree(ptr)
 #endif
 
 /* True globals, no need for thread safety */
@@ -429,6 +420,16 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
+static ZEND_INI_DISP(php_ibase_password_displayer_cb)
+{
+	if ((type == ZEND_INI_DISPLAY_ORIG && ini_entry->orig_value) 
+			|| (type != ZEND_INI_DISPLAY_ORIG && ini_entry->value)) {
+		ZEND_PUTS("********");
+	} else {
+		ZEND_PUTS("no value");
+	}
+}
+
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateBool, allow_persistent, zend_ibase_globals, ibase_globals)
@@ -436,18 +437,15 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ibase_globals, ibase_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY("ibase.default_db", NULL, PHP_INI_SYSTEM, OnUpdateString, default_db, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY_EX("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals,php_ibase_password_displayer_cb)
 	STD_PHP_INI_ENTRY("ibase.default_charset", NULL, PHP_INI_ALL, OnUpdateString, default_charset, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timestampformat", IB_DEF_DATE_FMT " " IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, cfg_timestampformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.dateformat", IB_DEF_DATE_FMT, PHP_INI_ALL, OnUpdateString, cfg_dateformat, zend_ibase_globals, ibase_globals)
-	STD_PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.timestampformat", IB_DEF_DATE_FMT " " IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, timestampformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.dateformat", IB_DEF_DATE_FMT, PHP_INI_ALL, OnUpdateString, dateformat, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.timeformat", IB_DEF_TIME_FMT, PHP_INI_ALL, OnUpdateString, timeformat, zend_ibase_globals, ibase_globals)
 PHP_INI_END()
 
 static void php_ibase_init_globals(zend_ibase_globals *ibase_globals)
 {
-	ibase_globals->timestampformat = NULL;
-	ibase_globals->dateformat = NULL;
-	ibase_globals->timeformat = NULL;
 	ibase_globals->num_persistent = 0;
 	ibase_globals->sql_code = 0;
 }
@@ -467,9 +465,6 @@ PHP_MINIT_FUNCTION(ibase)
 	REGISTER_LONG_CONSTANT("IBASE_FETCH_BLOBS", PHP_IBASE_FETCH_BLOBS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_FETCH_ARRAYS", PHP_IBASE_FETCH_ARRAYS, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_UNIXTIME", PHP_IBASE_UNIXTIME, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_TIMESTAMP", PHP_IBASE_TIMESTAMP, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_DATE", PHP_IBASE_DATE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_TIME", PHP_IBASE_TIME, CONST_PERSISTENT);
 
 	/* transactions */
 	REGISTER_LONG_CONSTANT("IBASE_WRITE", PHP_IBASE_WRITE, CONST_PERSISTENT);
@@ -494,21 +489,6 @@ PHP_RINIT_FUNCTION(ibase)
 {
 	IBG(default_link)= -1;
 	IBG(num_links) = IBG(num_persistent);
-
-	if (IBG(timestampformat)) {
-		DL_FREE(IBG(timestampformat));
-	}
-	IBG(timestampformat) = DL_STRDUP(IBG(cfg_timestampformat));
-
-	if (IBG(dateformat)) {
-		DL_FREE(IBG(dateformat));
-	}
-	IBG(dateformat) = DL_STRDUP(IBG(cfg_dateformat));
-
-	if (IBG(timeformat)) {
-		DL_FREE(IBG(timeformat));
-	}
-	IBG(timeformat) = DL_STRDUP(IBG(cfg_timeformat));
 
 	RESET_ERRMSG;
 
@@ -542,21 +522,6 @@ PHP_MSHUTDOWN_FUNCTION(ibase)
 
 PHP_RSHUTDOWN_FUNCTION(ibase)
 {
-	if (IBG(timestampformat)) {
-		DL_FREE(IBG(timestampformat));
-	}
-	IBG(timestampformat) = NULL;
-
-	if (IBG(dateformat)) {
-		DL_FREE(IBG(dateformat));
-	}
-	IBG(dateformat) = NULL;
-
-	if (IBG(timeformat)) {
-		DL_FREE(IBG(timeformat));
-	}
-	IBG(timeformat) = NULL;
-
 	return SUCCESS;
 } 
  
@@ -565,7 +530,12 @@ PHP_MINFO_FUNCTION(ibase)
 	char tmp[64], *s;
 
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Interbase Support", "enabled");
+	php_info_print_table_row(2, "Firebird/InterBase Support", 
+#ifdef COMPILE_DL_INTERBASE
+		"dynamic");
+#else
+		"static");
+#endif
 
 #ifdef FB_API_VER
 	sprintf( (s = tmp), "Firebird API version %d", FB_API_VER);
@@ -600,29 +570,7 @@ PHP_MINFO_FUNCTION(ibase)
 	} while (0);
 #endif			
 
-	php_info_print_table_row(2, "Revision", FILE_REVISION);
-#ifdef COMPILE_DL_INTERBASE
-	php_info_print_table_row(2, "Dynamic Module", "Yes");
-#endif
-	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent) ? "Yes" : "No"));
-
-	if (IBG(max_persistent) == -1) {
-		sprintf(tmp, "%ld/unlimited", IBG(num_persistent));
-	} else {
-		sprintf(tmp, "%ld/%ld", IBG(num_persistent), IBG(max_persistent));
-	}
-	php_info_print_table_row(2, "Persistent Links", tmp);
-
-	if (IBG(max_links) == -1) {
-		sprintf(tmp, "%ld/unlimited", IBG(num_links));
-	} else {
-		sprintf(tmp, "%ld/%ld", IBG(num_links), IBG(max_links));
-	}
-	php_info_print_table_row(2, "Total Links", tmp);
-
-	php_info_print_table_row(2, "Timestamp Format", IBG(timestampformat));
-	php_info_print_table_row(2, "Date Format", IBG(dateformat));
-	php_info_print_table_row(2, "Time Format", IBG(timeformat));
+	DISPLAY_INI_ENTRIES();
 
 	php_info_print_table_end();
 }
@@ -1188,45 +1136,6 @@ PHP_FUNCTION(ibase_commit_ret)
 PHP_FUNCTION(ibase_rollback_ret)
 {
 	_php_ibase_trans_end(INTERNAL_FUNCTION_PARAM_PASSTHRU, ROLLBACK | RETAIN);
-}
-/* }}} */
-
-/* {{{ proto bool ibase_timefmt(string format [, int type ])
-   Sets the format of timestamp, date and time columns returned from queries */
-PHP_FUNCTION(ibase_timefmt)
-{
-	char *fmt;
-	int fmt_len;
-	long type = PHP_IBASE_TIMESTAMP;
-	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &fmt, &fmt_len, &type)) {
-		RETURN_FALSE;
-	}
-
-	switch (type) {
-		case PHP_IBASE_TIMESTAMP:
-			if (IBG(timestampformat)) {
-				DL_FREE(IBG(timestampformat));
-			}
-			IBG(timestampformat) = DL_STRDUP(fmt);
-			break;
-		case PHP_IBASE_DATE:
-			if (IBG(dateformat)) {
-				DL_FREE(IBG(dateformat));
-			}
-			IBG(dateformat) = DL_STRDUP(fmt);
-			break;
-		case PHP_IBASE_TIME:
-			if (IBG(timeformat)) {
-				DL_FREE(IBG(timeformat));
-			}
-			IBG(timeformat) = DL_STRDUP(fmt);
-			break;
-		default:
-			RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 

@@ -26,7 +26,7 @@ InterBase: array handling
 	ibase_commit();
 
 	/* if timefmt not supported, hide error */
-	@ibase_timefmt("%m/%d/%Y %H:%M:%S");
+	ini_set('ibase.timestampformat',"%m/%d/%Y %H:%M:%S");
 
 	echo "insert\n";
 	
