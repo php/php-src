@@ -7,9 +7,11 @@ LTLIBRARY_SOURCES=\
 	link.c mail.c math.c md5.c metaphone.c microtime.c pack.c pageinfo.c \
         parsedate.c quot_print.c rand.c reg.c soundex.c string.c scanf.c \
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c output.c assert.c \
-	strnatcmp.c levenshtein.c incomplete_class.c
+	strnatcmp.c levenshtein.c incomplete_class.c url_scanner_ex.c
 
 include $(top_srcdir)/build/dynlib.mk
 
 parsedate.c: $(srcdir)/parsedate.y
 
+$(srcdir)/url_scanner_ex.c: $(srcdir)/url_scanner_ex.re
+	re2c -b $(srcdir)/url_scanner_ex.re > $@
