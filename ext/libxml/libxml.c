@@ -243,10 +243,18 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 
 int php_libxml_streams_IO_match_wrapper(const char *filename)
 {
+	char *resolved_path;
+	int retval;
+
 	TSRMLS_FETCH();
 
 	if (zend_is_executing(TSRMLS_C)) {
-		return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
+		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
+		retval = php_stream_locate_url_wrapper(resolved_path, NULL, 0 TSRMLS_CC) ? 1 : 0;
+		if (resolved_path) {
+			xmlFree(resolved_path);
+		}
+		return retval;
 	}
 	return 0;
 }
@@ -274,7 +282,7 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 	   in xml processing (eg. DTD files)  */
 	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
-		if (wrapper->wops->url_stat(wrapper, path_to_open, 0, &ssbuf, NULL TSRMLS_CC) == -1) {
+		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL TSRMLS_CC) == -1) {
 			xmlFree(resolved_path);
 			return NULL;
 		}
@@ -282,11 +290,9 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode,
 
 	if (LIBXML(stream_context)) {
 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-		ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
-		xmlFree(resolved_path);
-		return ret_val;
 	}
-	ret_val = php_stream_open_wrapper(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+
+	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
 	xmlFree(resolved_path);
 	return ret_val;
 }
@@ -432,6 +438,15 @@ PHP_LIBXML_API void php_libxml_shutdown() {
 	}
 }
 
+PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC) {
+	zval *oldcontext;
+
+	oldcontext = LIBXML(stream_context);
+	LIBXML(stream_context) = context;
+	return oldcontext;
+
+}
+
 PHP_MINIT_FUNCTION(libxml)
 {
 	php_libxml_initialize();
@@ -502,7 +517,6 @@ PHP_FUNCTION(libxml_set_streams_context)
 	LIBXML(stream_context) = arg;
 }
 /* }}} */
-
 
 /* {{{ Common functions shared by extensions */
 int php_libxml_xmlCheckUTF8(const unsigned char *s)
