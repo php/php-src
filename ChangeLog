@@ -1,3 +1,57 @@
+2001-11-06  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Log.php: fix the singleton and factory methods for
+    a). php 4.0.6 (where include_once might return false)
+    b). to use references and not copy so many objects
+
+    * pear/Mail/smtp.php: fix typo.
+
+2001-11-06  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/assert.c: It doesn't look like we use a fourth pointer.
+
+2001-11-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/oci8.php: typo: modifyQuery -> modifyLimitQuery
+
+2001-11-06  MySQL Team  <mysql-all@mysql.com>
+
+    * ext/mysql/libmysql/charset.c
+      ext/mysql/libmysql/libmysql.c:
+    (PHP mysql_connect) Removed warning message regarding NONEXISTENT character
+    set, when the server's default character set != latin1.
+
+2001-11-06  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/smtp.php:
+    these should all be checking for PEAR::isError(), not ! ...
+
+    * pear/DB/odbc.php:
+    this code _does_ work on versions of php without version_compare.
+    also, silence an odbc_exec() call with an @ - we check for errors already.
+
+2001-11-06  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sockets/php_sockets.h: Include <sys/socket.h> for 'struct sockaddr'.
+
+
+2001-11-06  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/dio/.cvsignore
+      ext/dio/EXPERIMENTAL
+      ext/dio/Makefile.in
+      ext/dio/config.m4
+      ext/dio/dio.c
+      ext/dio/php_dio.h
+      ext/dio/tests/001.phpt:
+     Add Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
+
+2001-11-06  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in
+      pear/PEAR/Packager.php
+      pear/PEAR/Common.php: E_ALL fixes
+
 2001-11-05  Sergey Kartashoff  <gluke@biosys.net>
 
     * ext/mnogosearch/php_mnogo.c
