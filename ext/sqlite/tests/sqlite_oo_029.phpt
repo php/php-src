@@ -1,5 +1,9 @@
 --TEST--
 sqlite-oo: call method with $this
+--SKIPIF--
+<?php # vim:ft=php
+if (!extension_loaded("sqlite")) print "skip"; 
+?>
 --FILE--
 <?php
 include "blankdb_oo.inc";
