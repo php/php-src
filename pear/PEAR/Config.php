@@ -73,7 +73,7 @@ if (getenv('PHP_PEAR_INSTALL_DIR')) {
 if (getenv('PHP_PEAR_EXTENSION_DIR')) {
     define('PEAR_CONFIG_DEFAULT_EXT_DIR', getenv('PHP_PEAR_EXTENSION_DIR'));
 } else {
-    if (!ini_get('extension_dir')) {
+    if (ini_get('extension_dir')) {
         define('PEAR_CONFIG_DEFAULT_EXT_DIR', ini_get('extension_dir'));
     } elseif (defined('PEAR_EXTENSION_DIR') && @is_dir(PEAR_EXTENSION_DIR)) {
         define('PEAR_CONFIG_DEFAULT_EXT_DIR', PEAR_EXTENSION_DIR);
