@@ -108,6 +108,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval *retval_ptr;
 		HashTable symbol_table;
 		zend_class_entry *ce = old_object->ce;
+		zval **args[1];
 
 		zend_hash_copy(new_object->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
 
@@ -129,9 +130,11 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		clone_func_name->value.str.len = sizeof("__clone")-1;
 
 		ZEND_INIT_SYMTABLE(&symbol_table);
-		ZEND_SET_SYMBOL(&symbol_table, "that", old_obj);
+		args[0] = &old_obj;
 		
-		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
+		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 1, args, 1, &symbol_table TSRMLS_CC);
+
+		zval_ptr_dtor(args[0]);
 
 		zend_hash_destroy(&symbol_table);
 		zval_ptr_dtor(&new_obj);

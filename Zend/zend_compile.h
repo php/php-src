@@ -345,6 +345,7 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, znode *class_type, znode *varname, zend_bool pass_by_reference TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
+void zend_do_clone(znode *result, znode *expr TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC);
 void zend_do_fetch_class_name(znode *result, znode *class_entry, znode *class_name TSRMLS_DC);

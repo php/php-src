@@ -1101,8 +1101,16 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 	pass_two(CG(active_op_array) TSRMLS_CC);
+
+	if (CG(active_class_entry)
+		&& !strcmp(CG(active_op_array)->function_name, ZEND_CLONE_FUNC_NAME)
+		&& (CG(active_op_array)->num_args != 1 || strcmp(CG(active_op_array)->arg_info[0].name, "that")!=0)) {
+		zend_error(E_COMPILE_ERROR, "The clone method must be declared as __clone($that)");
+	}
+
 	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
 	CG(active_op_array) = function_token->u.op_array;
+
 
 	/* Pop the switch and foreach seperators */
 	zend_stack_del_top(&CG(switch_cond_stack));
@@ -1192,21 +1200,14 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 
 	if ((last_op->op2.op_type == IS_CONST) && (last_op->op2.u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1)
 		&& !zend_binary_strcasecmp(last_op->op2.u.constant.value.str.val, last_op->op2.u.constant.value.str.len, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)-1)) {
-		last_op->opcode = ZEND_CLONE;
-		left_bracket->op_type = IS_UNUSED;
-		zval_dtor(&last_op->op2.u.constant); 
-		SET_UNUSED(last_op->op2);
-		left_bracket->u.constant.value.lval = get_next_op_number(CG(active_op_array))-1;
-		zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
-		zend_do_extended_fcall_begin(TSRMLS_C); 
-		return;
+		zend_error(E_COMPILE_ERROR, "Cannot call __clone() method on objects - use 'clone $obj' instead");
 	}
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_R) {
 		last_op->opcode = ZEND_INIT_METHOD_CALL;
 		left_bracket->u.constant.value.lval = ZEND_INIT_FCALL_BY_NAME;
 	} else {
-		zend_op* opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 		opline->op2 = *left_bracket;
 		opline->extended_value = 0;
@@ -1217,7 +1218,20 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC)
 	zend_do_extended_fcall_begin(TSRMLS_C); 
 }
  
- 
+
+void zend_do_clone(znode *result, znode *expr TSRMLS_DC)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_CLONE;
+	opline->op1 = *expr;
+	SET_UNUSED(opline->op2);
+	opline->result.op_type = IS_VAR;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	*result = opline->result;
+}
+
+
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 {
 	unsigned char *ptr = NULL;
@@ -1321,7 +1335,6 @@ void zend_do_begin_class_member_function_call(TSRMLS_D)
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC)
 {
 	zend_op *opline;
-
 		
 	if (is_method && function_name && function_name->op_type == IS_UNUSED) {
 		/* clone */
