@@ -1394,6 +1394,7 @@ static void do_soap_call(zval* thisObj,
 	char *buffer;
 	int len;
 	int ret = FALSE;
+	int bailout = FALSE;
 	int soap_version, old_soap_version;
 
 	if (zend_hash_find(Z_OBJPROP_P(thisObj), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
@@ -1478,7 +1479,11 @@ zend_try {
  	}
 } zend_catch {
 	ret = FALSE;
+	bailout = TRUE;
 } zend_end_try();
+	if (bailout) {
+		zend_bailout();
+	}
 	if (!ret) {
 		zval** fault;
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "__soap_fault", sizeof("__soap_fault"), (void **) &fault) == SUCCESS) {
