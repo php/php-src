@@ -1514,7 +1514,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 
 	/* STATIC_MEMBERS_FIXME */
-	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+/*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 	ce->parent = parent_ce;
