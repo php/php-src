@@ -622,7 +622,7 @@ EXEC SQL END DECLARE SECTION;
 	php_ifx_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 
-/* {{{ proto int ifx_connect([string database [, string userid [, string password]]])
+/* {{{ proto resource ifx_connect([string database [, string userid [, string password]]])
    Connects to database using userid/password, returns connection id */
 PHP_FUNCTION(ifx_connect)
 {
@@ -630,7 +630,7 @@ PHP_FUNCTION(ifx_connect)
 }
 /* }}} */
 
-/* {{{ proto int ifx_pconnect([string database [, string userid [, string password]]])
+/* {{{ proto resource ifx_pconnect([string database [, string userid [, string password]]])
    Connects to database using userid/password, returns connection id */
 PHP_FUNCTION(ifx_pconnect)
 {
@@ -646,7 +646,7 @@ PHP_FUNCTION(ifx_pconnect)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_close([int connid])
+/* {{{ proto bool ifx_close([resource connid])
    Close informix connection */
 PHP_FUNCTION(ifx_close)
 {
@@ -711,7 +711,7 @@ EXEC SQL END DECLARE SECTION;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_query(string query, int connid [, int cursortype] [, array idarray])
+/* {{{ proto resource ifx_query(string query, resource connid [, int cursortype] [, array idarray])
    Perform a query on a given connection */
 PHP_FUNCTION(ifx_query)
 {
@@ -1123,7 +1123,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_prepare(string query, int connid [, int cursortype] [, array idarray])
+/* {{{ proto resource ifx_prepare(string query, resource connid [, int cursortype] [, array idarray])
    Prepare a query on a given connection */
 PHP_FUNCTION(ifx_prepare)
 {
@@ -1434,7 +1434,7 @@ EXEC SQL END DECLARE SECTION;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_do(int resultid)
+/* {{{ proto bool ifx_do(resource resultid)
    Executes a previously prepared query or opens a cursor for it */
 PHP_FUNCTION(ifx_do)
 {
@@ -1585,7 +1585,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto string ifx_error([int connection_id])
+/* {{{ proto string ifx_error([resource connection_id])
    Returns the Informix error codes (SQLSTATE & SQLCODE) */
 PHP_FUNCTION(ifx_error)
 {
@@ -1681,7 +1681,7 @@ PHP_FUNCTION(ifx_errormsg)
 ** ---------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_affected_rows(int resultid)
+/* {{{ proto int ifx_affected_rows(resource resultid)
    Returns the number of rows affected by query identified by resultid */
 PHP_FUNCTION(ifx_affected_rows)
 {
@@ -1712,7 +1712,7 @@ PHP_FUNCTION(ifx_affected_rows)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto array ifx_fetch_row(int resultid [, mixed position])
+/* {{{ proto array ifx_fetch_row(resource resultid [, mixed position])
    Fetches the next row or <position> row if using a scroll cursor */
 PHP_FUNCTION(ifx_fetch_row)
 {
@@ -2121,7 +2121,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_htmltbl_result(int resultid [, string htmltableoptions])
+/* {{{ proto int ifx_htmltbl_result(resource resultid [, string htmltableoptions])
    Formats all rows of the resultid query into a html table */
 PHP_FUNCTION(ifx_htmltbl_result)
 {
@@ -2462,7 +2462,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto array ifx_fieldtypes(int resultid)
+/* {{{ proto array ifx_fieldtypes(resource resultid)
    Returns an associative array with fieldnames as key for query <resultid> */
 PHP_FUNCTION(ifx_fieldtypes)
 {
@@ -2613,7 +2613,7 @@ $endif;
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto array ifx_fieldproperties(int resultid)
+/* {{{ proto array ifx_fieldproperties(resource resultid)
    Returns an associative for query <resultid> array with fieldnames as key */
 PHP_FUNCTION(ifx_fieldproperties)
 {
@@ -2771,7 +2771,7 @@ $endif;
 ** ---------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_num_rows(int resultid)
+/* {{{ proto int ifx_num_rows(resource resultid)
    Returns the number of rows already fetched for query identified by resultid */
 PHP_FUNCTION(ifx_num_rows)
 {
@@ -2799,7 +2799,7 @@ PHP_FUNCTION(ifx_num_rows)
 ** ---------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_getsqlca(int resultid)
+/* {{{ proto array ifx_getsqlca(resource resultid)
    Returns the sqlerrd[] fields of the sqlca struct for query resultid */
 PHP_FUNCTION(ifx_getsqlca)
 {
@@ -2836,7 +2836,7 @@ PHP_FUNCTION(ifx_getsqlca)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_num_fields(int resultid)
+/* {{{ proto int ifx_num_fields(resource resultid)
    Returns the number of columns in query resultid */
 PHP_FUNCTION(ifx_num_fields)
 {
@@ -2864,7 +2864,7 @@ PHP_FUNCTION(ifx_num_fields)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_free_result(int resultid)
+/* {{{ proto bool ifx_free_result(resource resultid)
    Releases resources for query associated with resultid */
 PHP_FUNCTION(ifx_free_result)
 {
@@ -3671,7 +3671,7 @@ static long php_intifx_count_descriptors(char *p_statemid TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto void ifx_blobinfile_mode(int mode)
+/* {{{ proto bool ifx_blobinfile_mode(int mode)
    Sets the default blob-mode for all select-queries  */
 PHP_FUNCTION(ifx_blobinfile_mode) 
 {
@@ -3697,7 +3697,7 @@ PHP_FUNCTION(ifx_blobinfile_mode)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto void ifx_textasvarchar(int mode)
+/* {{{ proto bool ifx_textasvarchar(int mode)
    Sets the default text-mode for all select-queries */
 PHP_FUNCTION(ifx_textasvarchar) 
 {
@@ -3723,7 +3723,7 @@ PHP_FUNCTION(ifx_textasvarchar)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto void ifx_byteasvarchar(int mode)
+/* {{{ proto bool ifx_byteasvarchar(int mode)
    Sets the default byte-mode for all select-queries  */
 PHP_FUNCTION(ifx_byteasvarchar) 
 {
@@ -3748,7 +3748,7 @@ PHP_FUNCTION(ifx_byteasvarchar)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto void ifx_nullformat(int mode)
+/* {{{ proto bool ifx_nullformat(int mode)
    Sets the default return value of a NULL-value on a fetch-row  */
 PHP_FUNCTION(ifx_nullformat)
 {
@@ -3920,7 +3920,7 @@ static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_free_char(int bid)
+/* {{{ proto bool ifx_free_char(int bid)
    Deletes the char-object */
 PHP_FUNCTION(ifx_free_char) 
 {
@@ -3978,7 +3978,7 @@ static long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifx_update_char(int bid, string content)
+/* {{{ proto bool ifx_update_char(int bid, string content)
    Updates the content of the char-object */
 PHP_FUNCTION(ifx_update_char)
 {
@@ -4142,7 +4142,7 @@ static long php_intifxus_create_slob(long create_mode, HashTable *list TSRMLS_DC
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_free_slob(int bid)
+/* {{{ proto bool ifxus_free_slob(int bid)
    Deletes the slob-object */
 PHP_FUNCTION(ifxus_free_slob) 
 {
@@ -4204,7 +4204,7 @@ static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_close_slob(int bid)
+/* {{{ proto bool ifxus_close_slob(int bid)
    Deletes the slob-object */
 PHP_FUNCTION(ifxus_close_slob)
 {
@@ -4267,7 +4267,7 @@ static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_open_slob(long bid, int mode)
+/* {{{ proto int ifxus_open_slob(int bid, int mode)
    Opens an slob-object */
 PHP_FUNCTION(ifxus_open_slob)
 {
@@ -4397,7 +4397,7 @@ static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_tell_slob(long bid)
+/* {{{ proto int ifxus_tell_slob(int bid)
    Returns the current file or seek position of an open slob-object */
 PHP_FUNCTION(ifxus_tell_slob)
 {
@@ -4444,7 +4444,7 @@ PHP_FUNCTION(ifxus_tell_slob)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_seek_slob(long bid, int mode, long offset)
+/* {{{ proto int ifxus_seek_slob(int bid, int mode, long offset)
    Sets the current file or seek position of an open slob-object */
 PHP_FUNCTION(ifxus_seek_slob)
 {
@@ -4500,7 +4500,7 @@ PHP_FUNCTION(ifxus_seek_slob)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_read_slob(long bid, long nbytes)
+/* {{{ proto string ifxus_read_slob(int bid, int nbytes)
    Reads nbytes of the slob-object */
 PHP_FUNCTION(ifxus_read_slob) 
 {
@@ -4545,7 +4545,7 @@ PHP_FUNCTION(ifxus_read_slob)
 ** ----------------------------------------------------------------------
 */
 
-/* {{{ proto int ifxus_write_slob(long bid, string content)
+/* {{{ proto int ifxus_write_slob(int bid, string content)
    Writes a string into the slob-object */
 PHP_FUNCTION(ifxus_write_slob) 
 {
