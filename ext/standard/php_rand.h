@@ -106,6 +106,11 @@ extern php_randgen_entry *php_randgen_entries[];
 #define PHP_RAND_NUMRANDS	4
 
 /* Proto's */
+PHP_RINIT_FUNCTION(rand);
+PHP_MINIT_FUNCTION(rand);
+PHP_MINIT_FUNCTION(rand_mt);
+PHP_MINIT_FUNCTION(rand_sys);
+
 PHP_FUNCTION(srand);
 PHP_FUNCTION(rand);
 PHP_FUNCTION(getrandmax);
@@ -114,7 +119,7 @@ PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
 
 PHPAPI long   php_rand(void);
-PHPAPI long   php_rand_range(long min, long max);
+PHPAPI long   php_rand_range(long min, long max TSRMLS_D);
 PHPAPI double php_drand(void);
 PHPAPI long   php_randmax(void);
 

@@ -25,6 +25,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
+#include "php_lcg.h"
 #include "php_ini.h"
 
 #include "zend_execute.h"
@@ -67,7 +68,7 @@ PHP_RINIT_FUNCTION(rand)
 	/* FIXME: or seed relevant numgen on init/update ini-entry? */
 	for (i = 0 ; i < PHP_RAND_NUMRANDS ; i++) {
 		if (PHP_HAS_SRAND(i)) {
-#define SRAND_A_RANDOM_SEED (time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
+#define SRAND_A_RANDOM_SEED ((long)time(0) * (long)getpid() * (long)(php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
 			PHP_SRAND(i,SRAND_A_RANDOM_SEED);
 		}
 	}
@@ -112,8 +113,9 @@ PHP_INI_END()
 
 /* srand */
 
-/* {{{ PHPAPI void php_srand(void) */
-PHPAPI void php_srand(void)
+/* FIXME: isn't used? */
+/* {{{ void php_srand(void) */
+static void php_srand(TSRMLS_D)
 {
 	CURR_GEN = BG(rand_generator);
 	PHP_SRAND(BG(rand_generator), SRAND_A_RANDOM_SEED);
@@ -126,6 +128,7 @@ PHP_FUNCTION(name)							\
 {											\
 	zval **seed;								\
 	zval **alg;								\
+	TSRMLS_FETCH();							\
 											\
 	switch (ZEND_NUM_ARGS()) {						\
 		case 0:										\
@@ -227,7 +230,7 @@ PHPAPI double php_drand(void)
 /* }}} */
 
 /* {{{ PHPAPI long php_rand_range(long min, long max) */
-PHPAPI long php_rand_range(long min, long max)
+PHPAPI long php_rand_range(long min, long max TSRMLS_D)
 {
 	register long result;
 
