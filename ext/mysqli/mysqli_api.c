@@ -77,7 +77,7 @@ PHP_FUNCTION(mysqli_autocommit)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_bind_param(object stmt, mixed variable, int type [,mixed,....])
+/* {{{ proto bool mysqli_bind_param(object stmt, array types, mixed variable [,mixed,....])
    Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_bind_param)
 {
@@ -85,52 +85,43 @@ PHP_FUNCTION(mysqli_bind_param)
 	int     		argc = ZEND_NUM_ARGS();
 	int 	    	i;
 	int				num_vars;
-	int				start = 0;
+	int				start = 2;
 	int				ofs;
 	STMT			*stmt;
+	zval 			*mysql_stmt;
 	MYSQL_BIND		*bind;
-	zval			**object;
+	zval			*types;
 	PR_STMT			*prstmt;
 	PR_COMMAND		*prcommand;
+	HashPosition	hpos;
 	unsigned long	rc;
 
 	/* calculate and check number of parameters */
-	num_vars = argc;
+	num_vars = argc - 1;
 	if (!getThis()) {
 		/* ignore handle parameter in procedural interface*/
 		--num_vars; 
 	}
-	if (num_vars % 2) {
-		/* we need variable/type pairs */
-		WRONG_PARAM_COUNT;
-	}
-	if (num_vars < 2) {
+	if (argc < 2) {
 		/* there has to be at least one pair */
 		WRONG_PARAM_COUNT;
 	}
-	num_vars /= 2;
-	   
 
-	args = (zval ***)emalloc(argc * sizeof(zval **));
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
+	if (zend_parse_method_parameters((getThis()) ? 1:2 TSRMLS_CC, getThis(), "Oa", &mysql_stmt, mysqli_stmt_class_entry, &types) == FAILURE) {
+		return;	
 	}
 
-	if (!getThis()) {
-		if (Z_TYPE_PP(args[0]) != IS_OBJECT) {
-			efree(args);
-			RETURN_FALSE;
-		}
-		MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, args[0], "mysqli_stmt"); 
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt"); 
+
+	if (getThis()) {
 		start = 1;
-	} else {
-		object = &(getThis());	
-		MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, object, "mysqli_stmt"); 
 	}
 
-
+	if (zend_hash_num_elements(Z_ARRVAL_P(types)) != argc - start) {
+		/* number of bind variables doesn't match number of elements in array */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type array doesn't match number of bind variables");
+    }   
+	
 	/* prevent leak if variables are already bound */
 #if HHOLZGRA_0
 	/* this would prevent using both bind_param and bind_result on SELECT
@@ -141,21 +132,26 @@ PHP_FUNCTION(mysqli_bind_param)
 		RETURN_FALSE;
 	}
 #endif
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+
+	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
 
 	stmt->is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *)ecalloc(num_vars, sizeof(MYSQL_BIND));
 
-	for (i=start; i < num_vars * 2 + start; i+=2) {
-		ofs = (i - start) / 2;
-		if (!PZVAL_IS_REF(*args[i]) && Z_LVAL_PP(args[i+1]) != MYSQLI_BIND_SEND_DATA) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d wasn't passed by reference", i+1);
-			efree(bind);
-			efree(args);
-			RETURN_FALSE;
-		}
+	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(types), &hpos);
+
+	ofs = 0;
+	for (i=start; i < argc; i++) {
+		zval **ctype;
+
+		zend_hash_get_current_data_ex(Z_ARRVAL_P(types), (void **)&ctype, &hpos);
 
 		/* set specified type */
-		switch (Z_LVAL_PP(args[i+1])) {
+		switch (Z_LVAL_PP(ctype)) {
 			case MYSQLI_BIND_DOUBLE:
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
 				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
@@ -188,6 +184,8 @@ PHP_FUNCTION(mysqli_bind_param)
 				RETURN_FALSE; 
 				break;
 		}
+		ofs++;
+		zend_hash_move_forward_ex(Z_ARRVAL_P(types), &hpos);
 	}
 	
 	MYSQLI_PROFILER_COMMAND_START(prcommand, prstmt);
@@ -203,12 +201,12 @@ PHP_FUNCTION(mysqli_bind_param)
 	stmt->var_cnt = num_vars;
 	stmt->type = FETCH_SIMPLE;
 	stmt->vars = (zval **)emalloc(num_vars * sizeof(zval));
-	for (i = 0; i < num_vars*2; i+=2) {
-		if (Z_LVAL_PP(args[i+1+start]) != MYSQLI_BIND_SEND_DATA) {
+	for (i = 0; i < num_vars; i++) {
+		if (bind[i].buffer_type  != MYSQLI_BIND_SEND_DATA) {
 			ZVAL_ADDREF(*args[i+start]);
-			stmt->vars[i/2] = *args[i+start];
+			stmt->vars[i] = *args[i+start];
 		} else {
-			stmt->vars[i/2] = NULL;
+			stmt->vars[i] = NULL;
 		}
 	}
 	efree(args);
@@ -229,14 +227,14 @@ PHP_FUNCTION(mysqli_bind_result)
 {
 	zval 		***args;
 	int     	argc = ZEND_NUM_ARGS();
-	zval		**object;
 	int     	i;
-	int			start = 0;
+	int			start = 1;
 	int			var_cnt;
 	int			ofs;
 	long		col_type;
 	ulong		rc;
 	STMT 		*stmt;
+	zval 		*mysql_stmt;
 	MYSQL_BIND 	*bind;
 	PR_STMT		*prstmt;
 	PR_COMMAND	*prcommand;
@@ -244,7 +242,7 @@ PHP_FUNCTION(mysqli_bind_result)
 	if (argc < (getThis() ? 1 : 2))  {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	args = (zval ***)emalloc(argc * sizeof(zval **));
 
 	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
@@ -252,17 +250,15 @@ PHP_FUNCTION(mysqli_bind_result)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (!getThis()) {
-		if (Z_TYPE_PP(args[0]) != IS_OBJECT) {
-			efree(args);
-			RETURN_FALSE;
-		}
-		MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, args[0], "mysqli_stmt"); 
-		start = 1;
-	} else {
-		object = &(getThis());	
-		MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, object, "mysqli_stmt"); 
+	if (getThis()) {
+		start = 0;
 	}
+
+	if (zend_parse_method_parameters((getThis()) ? 0:1 TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;	
+	}
+
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt"); 
 	
 	var_cnt = argc - start;
 
@@ -285,13 +281,6 @@ PHP_FUNCTION(mysqli_bind_result)
 	for (i=start; i < var_cnt + start ; i++) {
 		ofs = i - start;
 		stmt->is_null[ofs] = 0;
-		if (!PZVAL_IS_REF(*args[i])) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d wasn't passed by reference", i);
-			efree(bind);
-			efree(args);
-			php_clear_stmt_bind(stmt);
-			RETURN_FALSE;
-		}
 
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
@@ -1729,8 +1718,7 @@ PHP_FUNCTION(mysqli_select_db)
 	int   		dbname_len;
 	PR_MYSQL	*prmysql;
 
-/*	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,  "Os", &mysql_link, mysqli_link_class_entry, &dbname, &dbname_len) == FAILURE) { 
-*/
+
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &dbname, &dbname_len) == FAILURE) {
 		return;
 	} 

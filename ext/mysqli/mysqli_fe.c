@@ -30,6 +30,10 @@
 #include "php_mysqli.h"
 
 
+static char all_arg_force_by_ref_rest[] = {1, BYREF_FORCE_REST};
+static char second_arg_force_by_ref_rest[] = {2, BYREF_NONE, BYREF_FORCE_REST};
+static char third_arg_force_by_ref_rest[] = {3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST};
+
 /* {{{ mysqli_functions[]
  *
  * Every user visible function must have an entry in mysqli_functions[].
@@ -37,8 +41,8 @@
 function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_affected_rows,						NULL)
 	PHP_FE(mysqli_autocommit,							NULL)
-	PHP_FE(mysqli_bind_param,							NULL)
-	PHP_FE(mysqli_bind_result,							NULL)
+	PHP_FE(mysqli_bind_param,							third_arg_force_by_ref_rest)
+	PHP_FE(mysqli_bind_result,							second_arg_force_by_ref_rest)
 	PHP_FE(mysqli_change_user,							NULL)
 	PHP_FE(mysqli_character_set_name,					NULL)
 	PHP_FALIAS(mysqli_client_encoding, 
@@ -222,8 +226,8 @@ function_entry mysqli_result_methods[] = {
  */
 function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(affected_rows,mysqli_stmt_affected_rows,NULL)
-	PHP_FALIAS(bind_param,mysqli_bind_param,NULL)
-	PHP_FALIAS(bind_result,mysqli_bind_result,NULL)
+	PHP_FALIAS(bind_param,mysqli_bind_param,second_arg_force_by_ref_rest)
+	PHP_FALIAS(bind_result,mysqli_bind_result,all_arg_force_by_ref_rest)
 	PHP_FALIAS(execute,mysqli_execute,NULL)
 	PHP_FALIAS(fetch,mysqli_fetch,NULL)
 	PHP_FALIAS(param_count,mysqli_param_count,NULL)
