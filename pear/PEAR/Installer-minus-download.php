@@ -575,6 +575,7 @@ class PEAR_Installer extends PEAR_Downloader
      * @param false private recursion variable
      * @param false private recursion variable
      * @param false private recursion variable
+     * @deprecated in favor of PEAR_Downloader
      */
     function download($packages, $options, &$config, &$installpackages,
                       &$errors, $installed = false, $willinstall = false, $state = false)
@@ -583,6 +584,8 @@ class PEAR_Installer extends PEAR_Downloader
         parent::PEAR_Downloader($this->ui, $options, $config);
         $errors = $this->getErrorMsgs();
         $installpackages = $this->getDownloadedPackages();
+        trigger_error("PEAR Warning: PEAR_Installer::download() is deprecated " .
+                      "in favor of PEAR_Downloader class", E_USER_WARNING);
         return parent::download($packages);
     }
 
