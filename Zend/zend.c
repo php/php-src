@@ -615,12 +615,13 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 #ifdef HAVE_VSNPRINTF
 			z_error_message->value.str.len = vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
-			if(z_error_message->value.str.len > ZEND_ERROR_BUFFER_SIZE-1) {
+			if (z_error_message->value.str.len > ZEND_ERROR_BUFFER_SIZE-1) {
 				z_error_message->value.str.len = ZEND_ERROR_BUFFER_SIZE-1;
 			}
 #else
+			strncpy(z_error_message->value.str.val, format, ZEND_ERROR_BUFFER_SIZE);
 			/* This is risky... */
-			z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args);
+			/* z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args); */
 #endif
 			z_error_message->type = IS_STRING;
 
