@@ -56,9 +56,12 @@
         <file role="php" name="Registry.php"/>
         <file role="php" name="Remote.php"/>
       </dir>
+      <dir name="OS">
+        <file role="php" name="Guess.php"/>
+      </dir>
       <dir name="scripts">
         <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
-              <replace from="@bindir@" to="PHP_BINDIR" type="php-const"/>
+          <replace from="@prefix@/bin" to="PHP_BINDIR" type="php-const"/>
         </file>
         <file baseinstalldir="/" role="script" name="pear.bat"></file>
       </dir>
