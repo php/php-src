@@ -1454,7 +1454,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 		args -= *(ulong*)args;
 		frames_on_stack++;
 
-		if (args == EG(argument_stack).elements) {
+		if ((args-1) == EG(argument_stack).elements) {
 			arg_stack_consistent = 1;
 			break;
 		}
@@ -1574,7 +1574,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last TSRML
 		args -= *(ulong*)args;
 		frames_on_stack++;
 
-		if (args == EG(argument_stack).elements) {
+		if ((args-1) == EG(argument_stack).elements) {
 			arg_stack_consistent = 1;
 			break;
 		}
