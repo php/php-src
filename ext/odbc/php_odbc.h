@@ -33,6 +33,10 @@
 extern zend_module_entry odbc_module_entry;
 #define odbc_module_ptr &odbc_module_entry
 
+#if defined(HAVE_DBMAKER) || defined(PHP_WIN32) || defined(HAVE_IBMDB2)
+# define PHP_ODBC_HAVE_FETCH_HASH 1
+#endif
+
 /* user functions */
 PHP_MINIT_FUNCTION(odbc);
 PHP_MSHUTDOWN_FUNCTION(odbc);
@@ -54,7 +58,7 @@ PHP_FUNCTION(odbc_data_source);
 PHP_FUNCTION(odbc_do);
 PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_execute);
-#ifdef HAVE_DBMAKER
+#ifdef PHP_ODBC_HAVE_FETCH_HASH
 PHP_FUNCTION(odbc_fetch_array);
 PHP_FUNCTION(odbc_fetch_object);
 #endif
