@@ -45,6 +45,8 @@ $GLOBALS['_PEAR_destructor_object_list'] = array();
 $GLOBALS['_PEAR_shutdown_funcs']         = array();
 $GLOBALS['_PEAR_error_handler_stack']    = array();
 
+ini_set('track_errors', true);
+
 /**
  * Base class for other PEAR classes.  Provides rudimentary
  * emulation of destructors.
@@ -506,6 +508,27 @@ class PEAR
             return new $ec($code, $mode, $options, $userinfo);
         } else {
             return new $ec($message, $code, $mode, $options, $userinfo);
+        }
+    }
+
+    // }}}
+    // {{{ throwError()
+
+    /**
+     * Simpler form of raiseError with fewer options.  In most cases
+     * message, code and userinfo are enough.
+     *
+     * @param string $message
+     *
+     */
+    function &throwError($message = null,
+                         $code = null,
+                         $userinfo = null)
+    {
+        if (isset($this)) {
+            return $this->raiseError($message, $code, null, null, $userinfo);
+        } else {
+            return PEAR::raiseError($message, $code, null, null, $userinfo);
         }
     }
 
