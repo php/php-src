@@ -1014,7 +1014,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_get_proto_info 
+/* {{{ proto int mysqli_get_proto_info(object link) 
    Get MySQL protocol information */
 PHP_FUNCTION(mysqli_get_proto_info)
 {
