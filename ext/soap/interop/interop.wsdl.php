@@ -7,13 +7,14 @@ echo "\n";
     xmlns:xsd="http://www.w3.org/2001/XMLSchema"
     xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
     xmlns:tns="http://soapinterop.org/"
+    xmlns:s="http://soapinterop.org/xsd"
     xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
     xmlns="http://schemas.xmlsoap.org/wsdl/"
     targetNamespace="http://soapinterop.org/">
 
   <types>
-  <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://soapinterop.org/">
+  <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://soapinterop.org/xsd">
    <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
    <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
    <xsd:complexType name="ArrayOfstring">
@@ -47,7 +48,7 @@ echo "\n";
    <xsd:complexType name="ArrayOfSOAPStruct">
     <xsd:complexContent>
      <xsd:restriction base="SOAP-ENC:Array">
-      <xsd:attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="tns:SOAPStruct[]"/>
+      <xsd:attribute ref="SOAP-ENC:arrayType" wsdl:arrayType="s:SOAPStruct[]"/>
      </xsd:restriction>
     </xsd:complexContent>
    </xsd:complexType>
@@ -61,10 +62,10 @@ echo "\n";
     <part name="outputString" type="xsd:string" />
   </message>
   <message name="echoStringArrayRequest">
-    <part name="inputStringArray" type="tns:ArrayOfstring" />
+    <part name="inputStringArray" type="s:ArrayOfstring" />
   </message>
   <message name="echoStringArrayResponse">
-    <part name="outputStringArray" type="tns:ArrayOfstring" />
+    <part name="outputStringArray" type="s:ArrayOfstring" />
   </message>
   <message name="echoIntegerRequest">
     <part name="inputInteger" type="xsd:int" />
@@ -73,10 +74,10 @@ echo "\n";
     <part name="outputInteger" type="xsd:int" />
   </message>
   <message name="echoIntegerArrayRequest">
-    <part name="inputIntegerArray" type="tns:ArrayOfint" />
+    <part name="inputIntegerArray" type="s:ArrayOfint" />
   </message>
   <message name="echoIntegerArrayResponse">
-    <part name="outputIntegerArray" type="tns:ArrayOfint" />
+    <part name="outputIntegerArray" type="s:ArrayOfint" />
   </message>
   <message name="echoFloatRequest">
     <part name="inputFloat" type="xsd:float" />
@@ -85,22 +86,22 @@ echo "\n";
     <part name="outputFloat" type="xsd:float" />
   </message>
   <message name="echoFloatArrayRequest">
-    <part name="inputFloatArray" type="tns:ArrayOffloat" />
+    <part name="inputFloatArray" type="s:ArrayOffloat" />
   </message>
   <message name="echoFloatArrayResponse">
-    <part name="outputFloatArray" type="tns:ArrayOffloat" />
+    <part name="outputFloatArray" type="s:ArrayOffloat" />
   </message>
   <message name="echoStructRequest">
-    <part name="inputStruct" type="tns:SOAPStruct" />
+    <part name="inputStruct" type="s:SOAPStruct" />
   </message>
   <message name="echoStructResponse">
-    <part name="outputStruct" type="tns:SOAPStruct" />
+    <part name="outputStruct" type="s:SOAPStruct" />
   </message>
   <message name="echoStructArrayRequest">
-    <part name="inputStructArray" type="tns:ArrayOfSOAPStruct" />
+    <part name="inputStructArray" type="s:ArrayOfSOAPStruct" />
   </message>
   <message name="echoStructArrayResponse">
-    <part name="outputStructArray" type="tns:ArrayOfSOAPStruct" />
+    <part name="outputStructArray" type="s:ArrayOfSOAPStruct" />
   </message>
   <message name="echoVoidRequest">
   </message>

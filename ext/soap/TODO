@@ -1,7 +1,6 @@
 General
 -------
 - rename soapobject to soapclient
-- make sure soapvar and soapparam are really need
 - make sure soapserver.map(), soap_encode_to_xml() and soap_encode_to_zval() are really need
 - reimplement SoapObject::__getfunctions() and SoapObject::__gettypes()
   to return structures instead of strings
