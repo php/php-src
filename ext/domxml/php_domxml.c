@@ -2512,28 +2512,16 @@ PHP_FUNCTION(domxml_node_replace_child)
 		if (children == oldchild) {
 			foundoldchild = 1;
 		}
-		if(children == newchild) {
-			foundnewchild = 1;
-		}
 		children = children->next;
 	}
 	/* if the child to replace is existent and the new child isn't already
 	 * a child, then do the replacement
 	 */
-	if(foundoldchild && !foundnewchild) {
+	if(foundoldchild ) {
 		zval *rv = NULL;
 		xmlNodePtr node;
 		node = xmlReplaceNode(oldchild, newchild);
 		DOMXML_RET_OBJ(rv, oldchild, &ret);
-		return;
-	}
-	/* If the new child is already a child, then DOM requires to delete
-	 * the old one first, but this makes no sense here, since the old and
-	 * the new node are identical.
-	 */
-	if(foundnewchild) {
-		zval *rv = NULL;
-		DOMXML_RET_OBJ(rv, newchild, &ret);
 		return;
 	} else {
 		RETURN_FALSE;
