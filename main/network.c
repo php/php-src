@@ -826,7 +826,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				}
 			}
 #else
-			if (err == PHP_TIMEOUT_ERROR_VALUE) {
+			if (error_code && *error_code == PHP_TIMEOUT_ERROR_VALUE) {
 				/* Don't even bother trying to connect to the next alternative;
 				 * we have no way to determine how long we have already taken
 				 * and it is quite likely that the next attempt will fail too. */
