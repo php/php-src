@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed bug #31111 (Compile failure of zend_strtod.c). (Derick)
+- Fixed bug #31110 (PHP 4.3.10 does not compile on Tru64 UNIX 5.1B). (Derick)
 - Fixed bug #31056 (php_std_date() returns invalid formatted date if 
   y2k_compliance is On). (Ilia)
 
