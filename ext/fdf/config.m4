@@ -28,8 +28,8 @@ if test "$PHP_FDFTK" != "no"; then
     AC_CHECK_LIB($i, FDFOpen, [FDFLIBRARY=$i], [], [-L$FDFTK_DIR/lib -lm])
   done
   
-  if test $FDFLIBRARY = ""; then
-    AC_MSG_ERROR(fdftk module requires fdftk 2.0)
+  if test -z "$FDFLIBRARY"; then
+    AC_MSG_ERROR(fdftk module requires >= fdftk 2.0)
   fi
   
   AC_DEFINE(HAVE_FDFLIB,1,[ ])
