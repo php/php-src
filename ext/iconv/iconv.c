@@ -203,7 +203,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	iconv_t cd;
 	size_t in_left, out_size, out_left;
 	char *out_p, *out_buf, *tmp_buf;
-	size_t bsz, result;
+	size_t bsz, result = 0;
 
 	*err = 0;
 	cd = icv_open(out_charset, in_charset);
@@ -311,22 +311,37 @@ PHP_NAMED_FUNCTION(php_if_iconv)
    Returns str in output buffer converted to the iconv.output_encoding character set */
 PHP_FUNCTION(ob_iconv_handler)
 {
-	char *out_buffer;
+	char *out_buffer, *content_type, *mimetype = NULL, *s;
 	zval *zv_string;
 	unsigned int out_len;
-	int err, status;;
+	int err, status;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zl", &zv_string, &status) == FAILURE)
 		return;
 
 	convert_to_string_ex(&zv_string);
 
-	if (SG(sapi_headers).send_default_content_type &&
+	if (SG(sapi_headers).mimetype && 
+		strncmp(SG(sapi_headers).mimetype, "text/", 5) == 0) {
+		if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL){
+			mimetype = estrdup(SG(sapi_headers).mimetype);
+		} else {
+			mimetype = estrndup(SG(sapi_headers).mimetype,s-SG(sapi_headers).mimetype);
+		}
+	} else if (SG(sapi_headers).send_default_content_type) {
+		mimetype = estrdup(SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE);
+	}
+	if (mimetype &&
 		php_iconv_string(Z_STRVAL_P(zv_string), Z_STRLEN_P(zv_string),
 						 &out_buffer, &out_len,
 						 ICONVG(internal_encoding),
 						 ICONVG(output_encoding),
 						 &err TSRMLS_CC) == SUCCESS) {
+		spprintf(&content_type, 0, "Content-Type:%s;charset=%s", mimetype, ICONVG(output_encoding));
+		if (content_type && sapi_add_header(content_type, strlen(content_type), 0) != FAILURE) {
+			SG(sapi_headers).send_default_content_type = 0;
+		}
+		efree(mimetype);
 		RETVAL_STRINGL(out_buffer, out_len, 0);
 	} else {
 		zval_dtor(return_value);
