@@ -74,6 +74,7 @@ zend_module_entry calendar_module_entry = {
 #ifdef COMPILE_DL_CALENDAR
 ZEND_GET_MODULE(calendar)
 #endif
+
 /* this order must match the conversion table below */
 enum cal_name_type_t {
 	CAL_GREGORIAN = 0,
@@ -82,6 +83,7 @@ enum cal_name_type_t {
 	CAL_FRENCH,
 	CAL_NUM_CALS
 };
+
 typedef long int (*cal_to_jd_func_t) (int month, int day, int year);
 typedef void (*cal_from_jd_func_t) (long int jd, int *year, int *month, int *day);
 typedef char *(*cal_as_string_func_t) (int year, int month, int day);
@@ -96,6 +98,7 @@ struct cal_entry_t {
 	char **month_name_short;
 	char **month_name_long;
 };
+
 static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 	{"Gregorian", "CAL_GREGORIAN", GregorianToSdn, SdnToGregorian, 12, 31,
 	 MonthNameShort, MonthNameLong},
@@ -109,6 +112,7 @@ static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 
 /* For jddayofweek */
 enum { CAL_DOW_DAYNO, CAL_DOW_SHORT, CAL_DOW_LONG };
+
 /* For jdmonthname */
 enum { CAL_MONTH_GREGORIAN_SHORT, CAL_MONTH_GREGORIAN_LONG,
 	CAL_MONTH_JULIAN_SHORT, CAL_MONTH_JULIAN_LONG, CAL_MONTH_JEWISH,
