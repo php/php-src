@@ -757,7 +757,7 @@ _php_math_longtobase(zval *arg, int base)
  * the number.
  */
 PHPAPI char *
-_php_math_zvaltobase(zval *arg, int base)
+_php_math_zvaltobase(zval *arg, int base TSRMLS_DC)
 {
 	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -770,6 +770,13 @@ _php_math_zvaltobase(zval *arg, int base)
 		char *ptr, *end;
 		char buf[(sizeof(double) << 3) + 1];
 
+		/* Don't try to convert +/- infinity */
+		if (fvalue == HUGE_VAL || fvalue == -HUGE_VAL) {
+			php_error(E_WARNING, "Number too large in %s() call",
+				get_active_function_name(TSRMLS_C));
+			return empty_string;
+		}
+		
 		end = ptr = buf + sizeof(buf) - 1;
 		*ptr = '\0';
 
@@ -927,7 +934,7 @@ PHP_FUNCTION(base_convert)
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp) != SUCCESS) {
+	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp TSRMLS_CC) != SUCCESS) {
 		RETURN_FALSE;
 	}
 	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase));
