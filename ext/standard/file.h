@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997,1998 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
    | This program is free software; you can redistribute it and/or modify |
    | it under the terms of one of the following licenses:                 |
@@ -32,38 +32,37 @@
 #ifndef _FILE_H
 #define _FILE_H
 
-#ifndef INIT_FUNC_ARGS
-#include "modules.h"
-#endif
+extern php3_module_entry php3_file_module_entry;
+#define php3_file_module_ptr &php3_file_module_entry
 
 extern int php3_minit_file(INIT_FUNC_ARGS);
-extern void php3_tempnam(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fopen(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fclose(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_popen(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_pclose(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_feof(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fread(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fgetc(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fgets(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fgetss(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fgetcsv(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fwrite(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_set_file_buffer(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_rewind(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_ftell(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fseek(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_mkdir(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_rmdir(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fpassthru(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_readfile(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_fileumask(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_rename(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_file_copy(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_file(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_set_socket_blocking(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_set_socket_timeout(INTERNAL_FUNCTION_PARAMETERS);
-extern void php3_get_meta_tags(INTERNAL_FUNCTION_PARAMETERS);
-extern PHP_FUNCTION(flock);
+PHP_FUNCTION(tempnam);
+PHP_FUNCTION(fopen);
+PHP_FUNCTION(fclose);
+PHP_FUNCTION(popen);
+PHP_FUNCTION(pclose);
+PHP_FUNCTION(feof);
+PHP_FUNCTION(fread);
+PHP_FUNCTION(fgetc);
+PHP_FUNCTION(fgets);
+PHP_FUNCTION(fgetss);
+PHP_FUNCTION(fgetcsv);
+PHP_FUNCTION(fwrite);
+PHP_FUNCTION(rewind);
+PHP_FUNCTION(ftell);
+PHP_FUNCTION(fseek);
+PHP_FUNCTION(mkdir);
+PHP_FUNCTION(rmdir);
+PHP_FUNCTION(fpassthru);
+PHP_FUNCTION(readfile);
+PHP_FUNCTION(fileumask);
+PHP_FUNCTION(rename);
+PHP_FUNCTION(file_copy);
+PHP_FUNCTION(file);
+PHP_FUNCTION(set_socket_blocking);
+PHP_FUNCTION(set_socket_timeout);
+PHP_FUNCTION(get_meta_tags);
+PHP_FUNCTION(flock);
 
+#define phpext_file_ptr php3_file_module_ptr
 #endif /* _FILE_H */
