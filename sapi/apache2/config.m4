@@ -1,6 +1,6 @@
 dnl ## -*- sh -*-
 dnl
-dnlAC_DEFUN(PHP_APACHE_CHECK_RDYNAMIC,[
+dnl AC_DEFUN(PHP_APACHE_CHECK_RDYNAMIC,[
 dnl  if test -n "$GCC"; then
 dnl    dnl we should use a PHP-specific macro here
 dnl    TSRM_CHECK_GCC_ARG(-rdynamic, gcc_rdynamic=yes)
@@ -8,11 +8,11 @@ dnl    if test "$gcc_rdynamic" = "yes"; then
 dnl      PHP_LDFLAGS="$PHP_LDFLAGS -rdynamic"
 dnl    fi
 dnl  fi
-dnl])
+dnl ])
 dnl
-dnlAC_MSG_CHECKING(for Apache module support via DSO through APXS)
-dnlAC_ARG_WITH(apxs,
-dnl[  --with-apxs[=FILE]      Build shared Apache module. FILE is the optional
+dnl AC_MSG_CHECKING(for Apache module support via DSO through APXS)
+dnl AC_ARG_WITH(apxs,
+dnl [  --with-apxs[=FILE]      Build shared Apache module. FILE is the optional
 dnl                          pathname to the Apache apxs tool; defaults to "apxs".],[
 dnl	if test "$withval" = "yes"; then
 dnl		APXS=apxs
@@ -55,16 +55,16 @@ dnl	STRONGHOLD=
 dnl	AC_DEFINE(HAVE_AP_CONFIG_H,1,[ ])
 dnl	AC_DEFINE(HAVE_AP_COMPAT_H,1,[ ])
 dnl	AC_MSG_RESULT(yes)
-dnl],[
+dnl ],[
 dnl	AC_MSG_RESULT(no)
-dnl])
+dnl ])
 dnl
-dnlAPACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
+dnl APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache/mod_php4.* sapi/apache/libphp4.module"
 dnl
-dnlif test "$PHP_SAPI" != "apache"; then
-dnlAC_MSG_CHECKING(for Apache module support)
-dnlAC_ARG_WITH(apache,
-dnl[  --with-apache[=DIR]     Build Apache module. DIR is the top-level Apache
+dnl if test "$PHP_SAPI" != "apache"; then
+dnl AC_MSG_CHECKING(for Apache module support)
+dnl AC_ARG_WITH(apache,
+dnl [  --with-apache[=DIR]     Build Apache module. DIR is the top-level Apache
 dnl                          build directory, defaults to /usr/local/etc/httpd.],[
 dnl	if test "$withval" = "yes"; then
 dnl	  # Apache's default directory
@@ -193,45 +193,45 @@ dnl		fi
 dnl	else
 dnl		AC_MSG_RESULT(no)
 dnl	fi
-dnl],[
+dnl ],[
 dnl	AC_MSG_RESULT(no)
-dnl])
+dnl ])
 dnl
-dnlINCLUDES="$INCLUDES $APACHE_INCLUDE"
-dnlfi
+dnl INCLUDES="$INCLUDES $APACHE_INCLUDE"
+dnl fi
 dnl
-dnlif test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
+dnl if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
 dnl	APXS_EXP="-bE:sapi/apache/mod_php4.exp"
-dnlfi
+dnl fi
 dnl
-dnlPHP_SUBST(APXS_EXP)
-dnlPHP_SUBST(APACHE_INCLUDE)
-dnlPHP_SUBST(APACHE_TARGET)
-dnlPHP_SUBST(APXS)
-dnlPHP_SUBST(APXS_LDFLAGS)
-dnlPHP_SUBST(APACHE_INSTALL)
-dnlPHP_SUBST(STRONGHOLD)
+dnl PHP_SUBST(APXS_EXP)
+dnl PHP_SUBST(APACHE_INCLUDE)
+dnl PHP_SUBST(APACHE_TARGET)
+dnl PHP_SUBST(APXS)
+dnl PHP_SUBST(APXS_LDFLAGS)
+dnl PHP_SUBST(APACHE_INSTALL)
+dnl PHP_SUBST(STRONGHOLD)
 dnl
-dnlAC_MSG_CHECKING(for mod_charset compatibility option)
-dnlAC_ARG_WITH(mod_charset,
-dnl[  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
-dnl[
+dnl AC_MSG_CHECKING(for mod_charset compatibility option)
+dnl AC_ARG_WITH(mod_charset,
+dnl [  --with-mod_charset      Enable transfer tables for mod_charset (Rus Apache).],
+dnl [
 dnl	AC_MSG_RESULT(yes)
 dnl    AC_DEFINE(USE_TRANSFER_TABLES,1,[ ])
-dnl],[
+dnl ],[
 dnl	AC_MSG_RESULT(no)
-dnl])
+dnl ])
 dnl
-dnlif test -n "$APACHE_MODULE"; then
+dnl if test -n "$APACHE_MODULE"; then
 dnl  PHP_APACHE_CHECK_RDYNAMIC
 dnl  $php_shtool mkdir -p sapi/apache
 dnl  PHP_OUTPUT(sapi/apache/libphp4.module)
 dnl  PHP_BUILD_STATIC
-dnlfi
+dnl fi
 dnl
-dnlif test -n "$APACHE_INSTALL"; then
+dnl if test -n "$APACHE_INSTALL"; then
 dnl  INSTALL_IT=$APACHE_INSTALL
-dnlfi
+dnl fi
 dnl
 dnl ## Local Variables:
 dnl ## tab-width: 4
