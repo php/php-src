@@ -385,7 +385,7 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_LIBT1
 	php_info_print_table_row(2, "T1Lib Support", "enabled");
-#endif         
+#endif
 
 /* this next part is stupid ... if I knew better, I'd put them all on one row (cmv) */
 
@@ -430,8 +430,7 @@ PHP_GD_API int phpi_get_le_gd(void)
 /*                                                                  */
 /* in a single function                                             */
 
-int
-gdImageColorResolve(gdImagePtr im, int r, int g, int b)
+int gdImageColorResolve(gdImagePtr im, int r, int g, int b)
 {
 	int c;
 	int ct = -1;
@@ -651,7 +650,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 #if HAVE_GD_BUNDLED
 /* {{{ proto void imagecolormatch(resource im1, resource im2)
-	Makes the colors of the palette version of an image more closely match the true color version */
+   Makes the colors of the palette version of an image more closely match the true color version */
 PHP_FUNCTION(imagecolormatch)
 {
 	zval **IM1, **IM2;
@@ -1053,13 +1052,13 @@ gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioc
 {
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
-        
+
 	io_ctx = gdNewDynamicCtx (Z_STRLEN_PP(data), Z_STRVAL_PP(data));
-        
-	if(!io_ctx) {
+
+	if (!io_ctx) {
 		return NULL;
 	}
-        
+
 	im = (*ioctx_func_p)(io_ctx);
 	if (!im) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed data is not in '%s' format", tn);
@@ -1136,9 +1135,9 @@ PHP_FUNCTION(imagecreatefromstring)
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Data is not in a recognized format.");
-            RETURN_FALSE;
-
+			RETURN_FALSE;
 	}
+
 	if (!im) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't create GD Image Stream out of Data");
 		RETURN_FALSE;
@@ -1443,10 +1442,10 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			php_write(buf, b TSRMLS_CC);
 		}
 
-        fclose(tmp);
-        /* the temporary file is automatically deleted */
+		fclose(tmp);
+		/* the temporary file is automatically deleted */
 	}
-    RETURN_TRUE;
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -2263,22 +2262,22 @@ static gdFontPtr php_find_gd_font(int size)
 	TSRMLS_FETCH();
 	
 	switch (size) {
-    	case 1:
+		case 1:
 			 font = gdFontTiny;
 			 break;
-    	case 2:
+		case 2:
 			 font = gdFontSmall;
 			 break;
-    	case 3:
+		case 3:
 			 font = gdFontMediumBold;
 			 break;
-    	case 4:
+		case 4:
 			 font = gdFontLarge;
 			 break;
-    	case 5:
+		case 5:
 			 font = gdFontGiant;
 			 break;
-	    default:
+		default:
 			font = zend_list_find(size - 5, &ind_type);
 			 if (!font || ind_type != le_gd_font) {
 				  if (size < 1) {
@@ -2396,20 +2395,20 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	font = php_find_gd_font(size);
 
 	switch(mode) {
-    	case 0:
+		case 0:
 			gdImageChar(im, font, x, y, ch, col);
 			break;
-    	case 1:
+		case 1:
 			php_gdimagecharup(im, font, x, y, ch, col);
 			break;
-    	case 2:
+		case 2:
 			for (i = 0; (i < l); i++) {
 				gdImageChar(im, font, x, y, (int)((unsigned char)str[i]),
 							col);
 				x += font->w;
 			}
 			break;
-    	case 3: {
+		case 3: {
 			for (i = 0; (i < l); i++) {
 				/* php_gdimagecharup(im, font, x, y, (int)str[i], col); */
 				gdImageCharUp(im, font, x, y, (int)str[i], col);
