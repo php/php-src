@@ -4,7 +4,7 @@ PEAR_Registry
 <?php
 
 error_reporting(E_ALL);
-include "../PEAR/Registry.php";
+include dirname(__FILE__)."/../PEAR/Registry.php";
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
 cleanall();
 

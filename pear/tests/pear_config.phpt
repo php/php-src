@@ -6,7 +6,7 @@ PEAR_Config
 error_reporting(E_ALL);
 system("pwd");
 chdir(dirname(__FILE__));
-include "../PEAR/Config.php";
+include dirname(__FILE__)."/../PEAR/Config.php";
 copy("system.input", "system.conf");
 copy("user.input", "user.conf");
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
