@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed crash on OCI?Logon() failure. (thies)
 - Make the special Header("http/...") response be case insensitive like 3.0 (Rasmus)
 - Allow cybercash to compile as a DL module. (Sterling)
 - Fixed the dbase_create function. (Sterling)
