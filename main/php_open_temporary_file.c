@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 #ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
@@ -34,7 +35,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#endif
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -86,7 +86,9 @@ static FILE *php_do_open_temporary_file(char *path, const char *pfx, char **open
 	char *trailing_slash;
 	FILE *fp;
 	char *opened_path;
+#ifndef PHP_WIN32
 	int fd;
+#endif
 
 	if (!path) {
 		return NULL;
