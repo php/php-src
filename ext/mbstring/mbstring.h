@@ -55,8 +55,10 @@
 # undef MBSTRING_API
 # ifdef MBSTRING_EXPORTS
 #  define MBSTRING_API __declspec(dllexport)
-# else
+# elif defined(COMPILE_DL_MBSTRING)
 #  define MBSTRING_API __declspec(dllimport)
+# else
+#  define MBSTRING_API /* nothing special */
 # endif
 #else
 # undef MBSTRING_API
