@@ -187,6 +187,7 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_utf7_decode,	NULL)
 	PHP_FE(imap_utf7_encode,	NULL)
 	PHP_FE(imap_utf8,       	NULL)
+	PHP_FE(imap_mime_header_decode,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -3867,6 +3868,95 @@ long mm_diskerror (MAILSTREAM *stream,long errcode,long serious)
 
 void mm_fatal (char *str)
 {
+}
+
+/* {{{ proto array mime_decode(string str)
+   Decode mime header element in accordance with RFC 2047
+   return array of objects containing 'charset' encoding and decoded 'text' */
+PHP_FUNCTION(imap_mime_header_decode)
+{
+	zval **str,*myobject;
+	char *string,*charset,encoding,*text,*decode;
+	long charset_token,encoding_token,end_token,end,offset=0,i;
+	long unsigned newlength;
+
+	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(str);
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	string=(*str)->value.str.val;
+	end=(*str)->value.str.len;
+			
+	if((charset=((char *)emalloc((end+1)*2)))) {
+		text=&charset[end+1];
+		while(offset<end) {													// Reached end of the string?
+			if((charset_token=php_memnstr(&string[offset],"=?",2,string+end))) {		// Is there anything encoded in the string?
+				charset_token-=(long unsigned)string;
+				if(offset!=charset_token) {										// Is there anything before the encoded data?
+					// Retrieve unencoded data that is found at the beginning
+					memcpy(text,&string[offset],charset_token-offset);
+					text[charset_token-offset]=0x00;
+					MAKE_STD_ZVAL(myobject);
+					object_init(myobject);
+					add_property_string(myobject,"charset","default",1);
+					add_property_string(myobject,"text",text,1);
+					zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+				}
+				if((encoding_token=php_memnstr(&string[charset_token+2],"?",1,string+end))) {			// Find token for encoding
+					encoding_token-=(long unsigned)string;
+					if((end_token=php_memnstr(&string[encoding_token+1],"?=",2,string+end))) {		// Find token for end of encoded data
+						end_token-=(long unsigned)string;
+						memcpy(charset,&string[charset_token+2],encoding_token-(charset_token+2));	// Extract charset encoding
+						charset[encoding_token-(charset_token+2)]=0x00;
+						encoding=string[encoding_token+1];										// Extract encoding from string
+						memcpy(text,&string[encoding_token+3],end_token-(encoding_token+3));		// Extract text
+						text[end_token-(encoding_token+3)]=0x00;
+						decode=text;
+						if(encoding=='q' || encoding=='Q') {										// Decode 'q' encoded data
+							for(i=0;text[i]!=0x00;i++) if(text[i]=='_') text[i]=' ';							// Replace all *_' with space.
+							decode = (char *) rfc822_qprint((unsigned char *) text, strlen(text),&newlength);
+						}
+						if(encoding=='b' || encoding=='B') decode = (char *) rfc822_base64((unsigned char *) text, strlen(text),&newlength); // Decode 'B' encoded data
+						MAKE_STD_ZVAL(myobject);
+						object_init(myobject);
+						add_property_string(myobject,"charset",charset,1);
+						add_property_string(myobject,"text",decode,1);
+						zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+						
+						offset+=end_token+2;
+						if(string[offset]==' ' && string[offset+1]=='=' && string[offset+2]=='?') offset++;	// Remove required space between encoded segments
+						continue;								// Iterate the loop again please.
+					}
+				}
+			} else {
+				// Just some tweaking to optimize the code, and get the end statements work in a general manner.
+				// If we end up here we didn't find a position for "charset_token",
+				// so we need to set it to the start of the yet unextracted data.
+				charset_token=offset;
+			}
+			// Return the rest of the data as unencoded, as it was either unencoded or was missing separators
+			// which rendered the the remainder of the string impossible for us to decode.
+			memcpy(text,&string[charset_token],end-charset_token);		// Extract unencoded text from string
+			text[end-charset_token]=0x00;
+			MAKE_STD_ZVAL(myobject);
+			object_init(myobject);
+			add_property_string(myobject,"charset","default",1);
+			add_property_string(myobject,"text",text,1);
+			zend_hash_next_index_insert(return_value->value.ht,(void *)&myobject,sizeof(zval *),NULL);
+			
+			offset=end;	// We have reached the end of the string.
+		}
+		efree(charset);
+	} else {
+		php_error(E_WARNING, "Unable to allocate temporary memory buffer for imap_mime_header_decode");
+		RETURN_FALSE;
+	}
 }
 
 #endif
