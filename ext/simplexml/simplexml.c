@@ -283,9 +283,9 @@ static void sxe_prop_dim_write(zval *object, zval *member, zval *value, zend_boo
 	zval            tmp_zv, trim_zv;
 
 	if (!member) {
-		/* this happens when the user did: $sxe[] = $value
-		 * and could also be E_PARSE, but use this only during parsing
-		 * but this is during runtime.
+		/* This happens when the user did: $sxe[] = $value
+		 * and could also be E_PARSE, but we use this only during parsing
+		 * and this is during runtime.
 		 */
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot create unnamed attribute");
 		return;
