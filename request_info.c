@@ -71,12 +71,6 @@ int php3_init_request_info(void *conf)
 	} else {
 		request_info.filename = NULL;
 	}
-#else
-	if (SG(request_info).path_translated) {
-		request_info.filename = estrdup(SG(request_info).path_translated);
-	} else {
-		request_info.filename = NULL;
-	}
 #endif
 	return SUCCESS;
 }

@@ -178,8 +178,7 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 	char *s;
 /* temporary locals */
-	char *_cgi_filename=NULL;
-	int _cgi_started=0;
+	int cgi_started=0;
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=0;
 #if SUPPORT_INTERACTIVE
@@ -205,6 +204,8 @@ int main(int argc, char *argv[])
 #endif
 
 	sapi_startup(&sapi_module);
+
+	SG(request_info).path_translated = NULL;
 
 #if WIN32|WINNT
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
@@ -270,7 +271,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		while ((c = getopt(argc, argv, "c:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
-					if (!_cgi_started){ 
+					if (!cgi_started){ 
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
@@ -279,14 +280,14 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					if (no_headers) {
 						SG(headers_sent) = 1;
 					}
-					_cgi_started=1;
-					_cgi_filename = estrdup(optarg);
+					cgi_started=1;
+					SG(request_info).path_translated = estrdup(optarg);
 					/* break missing intentionally */
 				case 'q':
 					no_headers = 1;
 					break;
 				case 'v':
-					if (!_cgi_started) {
+					if (!cgi_started) {
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
@@ -299,7 +300,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					exit(1);
 					break;
 				case 'i':
-					if (!_cgi_started) {
+					if (!cgi_started) {
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
 							return FAILURE;
@@ -308,7 +309,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					if (no_headers) {
 						SG(headers_sent) = 1;
 					}
-					_cgi_started=1;
+					cgi_started=1;
 					php3_TreatHeaders();
 					_php3_info();
 					exit(1);
@@ -350,7 +351,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	EG(interactive) = interactive;
 #endif
 
-	if (!_cgi_started) {
+	if (!cgi_started) {
 		if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 			php_module_shutdown();
 			return FAILURE;
@@ -362,9 +363,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.filename = "-";
 	file_handle.type = ZEND_HANDLE_FP;
 	file_handle.handle.fp = stdin;
-	if (_cgi_filename) {
-		request_info.filename = _cgi_filename;
-	}
 
 	php3_TreatHeaders();
 
@@ -383,19 +381,18 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			}
 			SG(request_info).query_string = s;
 		}
-		if (!request_info.filename && argc > optind)
-			request_info.filename = argv[optind];
+		if (!SG(request_info).path_translated && argc > optind)
+			SG(request_info).path_translated = argv[optind];
 	}
 	/* If for some reason the CGI interface is not setting the
-	   PATH_TRANSLATED correctly, request_info.filename is NULL.
+	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
 	   We still call php3_fopen_for_parser, because if you set doc_root
 	   or user_dir configuration directives, PATH_INFO is used to construct
 	   the filename as a side effect of php3_fopen_for_parser.
 	 */
-	if (cgi || request_info.filename) {
-		file_handle.filename = request_info.filename;
+	if (cgi || SG(request_info).path_translated) {
 		file_handle.handle.fp = php3_fopen_for_parser();
-		SG(request_info).path_translated = file_handle.filename;
+		file_handle.filename = SG(request_info).path_translated;
 	}
 
 	if (cgi && !file_handle.handle.fp) {
