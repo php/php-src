@@ -382,117 +382,86 @@ PHP_FUNCTION(pi)
 
 /* }}} */
 
+
+/* {{{ proto bool finite(double val)
+   Returns whether double is finite. */
+PHP_FUNCTION(finite)
+{
+	double dval;
+
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+		return;
+	}
+	RETURN_BOOL(finite(dval));
+}
+/* }}} */
+
+/* {{{ proto bool isinf(double val)
+   Returns whether double is infinite. */
+PHP_FUNCTION(isinf)
+{
+	double dval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+		return;
+	}
+	RETURN_BOOL(isinf(dval));
+}
+/* }}} */
+
+/* {{{ proto bool isnan(double val)
+   Returns whether double is not a number. */
+PHP_FUNCTION(isnan)
+{
+	double dval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d", &dval) == FAILURE) {
+		return;
+	}
+	RETURN_BOOL(isnan(dval));
+}
+/* }}} */
+
 /* {{{ proto number pow(number base, number exponent)
    Returns base raised to the power of exponent. Returns
    integer result when possible. */
-
 PHP_FUNCTION(pow)
 {
-	/* FIXME: What is our policy on float-overflow? With pow, it's 
-	 * extremely easy to request results that won't fit in any double.
-	 */
-	
-	zval **zbase, **zexp;
-	long lbase, lexp;
+	zval *zbase, *zexp;
 	double dval;
-	
-	if (ZEND_NUM_ARGS() != 2) {
-		WRONG_PARAM_COUNT;
-	} 
-	zend_get_parameters_ex(ZEND_NUM_ARGS(), &zbase, &zexp);
-	convert_scalar_to_number_ex(zbase);
-	convert_scalar_to_number_ex(zexp);
-	if ((Z_TYPE_PP(zbase) != IS_LONG && Z_TYPE_PP(zbase) != IS_DOUBLE) ||
-		(Z_TYPE_PP(zexp ) != IS_LONG && Z_TYPE_PP(zexp ) != IS_DOUBLE)) {
-		php_error(E_WARNING, "Invalid argument(s) passed to pow()");
+	zend_bool wantlong;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zbase, &zexp) == FAILURE) {
+		return;
+	}
+
+	if ((Z_TYPE_P(zbase) != IS_LONG && Z_TYPE_P(zbase) != IS_DOUBLE) ||
+		(Z_TYPE_P(zexp ) != IS_LONG && Z_TYPE_P(zexp ) != IS_DOUBLE)) {
+		php_error(E_WARNING, "Invalid argument(s) passed to %s()", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
+
+	/* if both base and exponent were longs, try to get a long out */
+	wantlong = Z_TYPE_P(zbase) == IS_LONG 
+	        && Z_TYPE_P(zexp ) == IS_LONG && Z_LVAL_P(zexp) >= 0;
+
+	/* need to SEPERATE_ZVAL? */
+	multi_convert_to_double_ex(2,&zbase,&zexp);
 	
-	if (Z_TYPE_PP(zexp) == IS_DOUBLE) {
-		/* pow(?, float), this is the ^^ case */
-		convert_to_double_ex(zbase);
+	/* go ahead and calculate things. */
+	dval = pow(Z_DVAL_P(zbase),Z_DVAL_P(zexp));
 
-		if (Z_DVAL_PP(zbase) < 0.0) {
-			/* Note that with the old behaviour, php pow() returned bogus
-			   results. Try pow(-1, 2.5) in PHP <= 4.0.6 ... */
-			php_error(E_WARNING, "Trying to raise a nonpositive value to a broken power");
-			RETURN_FALSE;
-		}
-		RETURN_DOUBLE(exp(log(Z_DVAL_PP(zbase)) * Z_DVAL_PP(zexp)));
+	/* if we wanted a long, and dval < LONG_MAX, it must be a long. */
+	if (wantlong && finite(dval) && dval <= (double)LONG_MAX) {
+		RETURN_LONG((long)dval);
 	}
 
-	/* pow(?, int), this is the ** case */
-
-	lexp = Z_LVAL_PP(zexp);
-
-
-	if (Z_TYPE_PP(zbase) == IS_DOUBLE) {
-		/* pow(float, int) */
-		if (lexp == 0) {
-			RETURN_DOUBLE(1.0);
-		}
-		if (Z_DVAL_PP(zbase) > 0.0) {
-			RETURN_DOUBLE(exp(log(Z_DVAL_PP(zbase)) * lexp));
-		} else if (Z_DVAL_PP(zbase) == 0.0) {
-			if (lexp < 0) {
-				php_error(E_WARNING,
-					"Division by zero: pow(0.0, [negative integer])");
-				RETURN_FALSE;
-			} else {
-				RETURN_DOUBLE(0.0);
-			}
-		} else { /* lbase < 0.0 */
-			dval = exp(log(-Z_DVAL_PP(zbase)) * (double)lexp);
-			RETURN_DOUBLE(lexp & 1 ? -dval : dval);
-		}
-			
-	}
-	
-	/* pow(int, int) */
-	if (lexp == 0) {
-		RETURN_LONG(1);
-	}
-
-	lbase = Z_LVAL_PP(zbase);
-
-	/* lexp != 0 */
-	switch (lbase) {
-		case -1:
-			RETURN_LONG( lexp & 1 ? -1 : 1 ); /* if lexp=odd ... */
-		case 0:
-			if (lexp < 0) {
-				php_error(E_WARNING,
-					"Division by zero: pow(0, [negative integer])");
-				RETURN_FALSE;
-			} else {
-				RETURN_LONG(0);
-			}
-		case 1:
-			RETURN_LONG(1);
-		default:
-			/* abs(lbase) > 1 */
-			dval = exp(log(lbase>0? (double)lbase : -(double)lbase ) * 
-								  (double) lexp);
-			if (lexp < 0 || dval > (double) LONG_MAX) {
-				/* 1/n ( abs(n) > 1 ) || overflow */
-				RETURN_DOUBLE(((lexp & 1) && lbase<0) ? -dval : dval);
-			}
-
-			Z_TYPE_P(return_value) = IS_LONG;
-			Z_LVAL_P(return_value) = 1;
-
-			/* loop runs at most log(log(LONG_MAX)) times, i.e. ~ 5 */
-			while (lexp > 0) { 
-				if (lexp & 1) /* odd */
-					Z_LVAL_P(return_value) *= lbase;
-				lexp >>= 1;
-				lbase *= lbase;
-			}
-			/* return */
-	}
+	/* otherwise just return the double. */
+	RETURN_DOUBLE(dval);
 }
-
 /* }}} */
+
 /* {{{ proto float exp(float number)
    Returns e raised to the power of the number */
 
