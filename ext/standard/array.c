@@ -994,7 +994,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 {
 	zval **args[3],			/* Arguments to userland function */
 		  *retval_ptr,			/* Return value - unused */
-		  *key;				/* Entry key */
+		  *key=NULL;				/* Entry key */
 	char  *string_key;
 	uint   string_key_len;
 	ulong  num_key;
@@ -1058,7 +1058,10 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 			}
 		}
 
-		zval_ptr_dtor(&key);
+		if (key) {
+			zval_ptr_dtor(&key);
+			key = NULL;
+		}
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
 	
