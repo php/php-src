@@ -274,10 +274,8 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 		case XSD_TYPEKIND_UNION:
 			return to_zval_union(enc, data);
 		case XSD_TYPEKIND_COMPLEX:
-		case XSD_TYPEKIND_SIMPLE_RESTRICTION:
-		case XSD_TYPEKIND_SIMPLE_EXTENSION:
-		case XSD_TYPEKIND_COMPLEX_RESTRICTION:
-		case XSD_TYPEKIND_COMPLEX_EXTENSION:
+		case XSD_TYPEKIND_RESTRICTION:
+		case XSD_TYPEKIND_EXTENSION:
 			if (type->encode &&
 			    (type->encode->details.type == IS_ARRAY ||
 			     type->encode->details.type == SOAP_ENC_ARRAY)) {
@@ -331,10 +329,8 @@ xmlNodePtr sdl_guess_convert_xml(encodeTypePtr enc, zval *data, int style)
 			ret = to_xml_union(enc, data, style);
 			break;
 		case XSD_TYPEKIND_COMPLEX:
-		case XSD_TYPEKIND_SIMPLE_RESTRICTION:
-		case XSD_TYPEKIND_SIMPLE_EXTENSION:
-		case XSD_TYPEKIND_COMPLEX_RESTRICTION:
-		case XSD_TYPEKIND_COMPLEX_EXTENSION:
+		case XSD_TYPEKIND_RESTRICTION:
+		case XSD_TYPEKIND_EXTENSION:
 			if (type->encode &&
 			    (type->encode->details.type == IS_ARRAY ||
 			     type->encode->details.type == SOAP_ENC_ARRAY)) {
