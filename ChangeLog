@@ -1,3 +1,8 @@
+1999-11-16  Stig Bakken  <ssb@fast.no>
+
+    * php_version.h
+      configure.in: 4.0b3 coming up
+
 1999-11-15  Andrei Zmievski  <zmievski@ispi.net>
 
     * NEWS: cleaning up
