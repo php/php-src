@@ -60,7 +60,7 @@ WARNING: You specified Informix base install directory that is different
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION)
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(informix)
-      EXTRA_LIBS="$EXTRA_LIBS $IFX_LIBS $IFX_LFLAGS"
+      IFX_LIBS="$IFX_LFLAGS $IFX_LIBS"
       INCLUDES="$INCLUDES $IFX_INCLUDE"
     fi
   else
@@ -71,7 +71,8 @@ WARNING: You specified Informix base install directory that is different
   AC_MSG_RESULT(no)
 ])
 AC_SUBST(INFORMIXDIR)
-
+AC_SUBST(IFX_LIBS)
+	
 divert(5)
 
 dnl Warn if Informix support was requested but environment is not set up correctly.
