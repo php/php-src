@@ -532,7 +532,7 @@ PHP_FUNCTION(mdecrypt_generic)
 /* }}} */
 
 
-/* {{{ proto int mcrypt_enc_get_supported_key_sizes(resource td)
+/* {{{ proto array mcrypt_enc_get_supported_key_sizes(resource td)
    This function decrypts the crypttext */
 PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 {
@@ -783,7 +783,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 /* }}} */
 
 
-/* {{{ proto int mcrypt_module_get_supported_key_sizes(string algorithm [, string lib_dir])
+/* {{{ proto array mcrypt_module_get_supported_key_sizes(string algorithm [, string lib_dir])
    This function decrypts the crypttext */
 PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 {
