@@ -179,7 +179,10 @@ PHP_FUNCTION(com_dotnet_create_instance)
 
 	if (ret == FAILURE) {
 		char buf[1024];
-		sprintf(buf, "Failed to instantiate .Net object [%s]", where);
+		char *err = php_win_err(hr);
+		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] %s", where, err);
+		if (err)
+			LocalFree(err);
 		php_com_throw_exception(hr, buf TSRMLS_CC);
 		ZVAL_NULL(object);
 		return;
