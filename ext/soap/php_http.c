@@ -32,6 +32,23 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 	}
 
+	/* Check if keep-alive connection is still opened */
+	if (stream != NULL) {
+		struct timeval tv;
+		tv.tv_sec = 0;
+		tv.tv_usec = 1;
+		php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+	  if (php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS, 0, NULL) != PHP_STREAM_OPTION_RETURN_OK) {
+			php_stream_close(stream);
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+  		stream = NULL;
+  	} else {
+			tv.tv_sec = FG(default_socket_timeout);;
+			tv.tv_usec = 0;
+			php_stream_set_option(stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
+	}
+
 	if(!stream) {
 		char *url;
 		int use_ssl;
@@ -100,6 +117,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 #endif
 
 		if(stream) {
+			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
 			ret = zend_list_insert(phpurl, le_url);
 			add_property_resource(this_ptr, "httpurl", ret);
@@ -118,13 +136,14 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		smart_str_append_const(&soap_headers, "POST ");
 		smart_str_appends(&soap_headers, phpurl->path);
 		smart_str_append_const(&soap_headers, " HTTP/1.1\r\n"
-			"Connection: close\r\n"
-			"Accept: text/html; text/xml; text/plain\r\n"
-			"User-Agent: PHP SOAP 0.1\r\n"
 			"Host: ");
 		smart_str_appends(&soap_headers, phpurl->host);
 		smart_str_append_const(&soap_headers, "\r\n"
-			"Content-Type: text/xml\r\n"
+			"Connection: Keep-Alive\r\n"
+//			"Connection: close\r\n"
+//			"Accept: text/html; text/xml; text/plain\r\n"
+//			"User-Agent: PHP SOAP 0.1\r\n"
+			"Content-Type: text/xml; charset=\"utf-8\"\r\n"
 			"Content-Length: ");
 		smart_str_append_long(&soap_headers, buf_size);
 		smart_str_append_const(&soap_headers, "\r\n"
@@ -174,27 +193,18 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *soapaction TSRMLS_
 		}
 		smart_str_append_const(&soap_headers, "\r\n");
 
-		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
+		smart_str_appendl(&soap_headers, buf, buf_size);
 
+		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if(err != soap_headers.len) {
 			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
 			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-			add_soap_fault(this_ptr, "SOAP-ENV:Client", "Failed Sending HTTP Headers", NULL, NULL TSRMLS_CC);
+			add_soap_fault(this_ptr, "SOAP-ENV:Client", "Failed Sending HTTP SOAP request", NULL, NULL TSRMLS_CC);
 			return FALSE;
 		}
 		smart_str_free(&soap_headers);
-
-		err = php_stream_write(stream, buf, buf_size);
-
-		if(err != (int)strlen(buf)) {
-			xmlFree(buf);
-			php_stream_close(stream);
-			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
-			add_soap_fault(this_ptr, "SOAP-ENV:Client", "Failed Sending HTTP Content", NULL, NULL TSRMLS_CC);
-			return FALSE;
-		}
 
 	}
 	xmlFree(buf);
@@ -208,6 +218,8 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	zval **socket_ref;
 	php_stream *stream;
 	zval **trace;
+	char* connection;
+	int http_1_1 = 0;
 
 	if(FIND_SOCKET_PROPERTY(this_ptr, socket_ref) != FAILURE) {
 		FETCH_SOCKET_RES(stream, socket_ref);
@@ -262,7 +274,10 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 				return FALSE;
 			}
 		}
-
+		
+		if (strncmp(http_version,"1.1", 3)) {
+			http_1_1 = 1;
+		}
 		efree(http_version);
 	}
 
@@ -283,17 +298,15 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	*/
 	/* See if the server requested a close */
 	http_close = TRUE;
-	/*
 	connection = get_http_header_value(http_headers,"Connection: ");
 	if(connection) {
-		if(!strcmp(connection, "Keep-Alive"))
+		if(!strcmp(connection, "Keep-Alive")) {
 			http_close = FALSE;
+		}
 		efree(connection);
-	} else {
-		if(!strncmp(http_version,"1.1", 3))
-				http_close = FALSE;
+	} else if (http_1_1) {
+		http_close = FALSE;
 	}
-	*/
 
 	if (http_close) {
 		php_stream_close(stream);
@@ -467,7 +480,7 @@ static int get_http_body(php_stream *stream, char *headers,  char **response, in
 		http_buf[size] = '\0';
 		efree(content_length);
 	} else {
-//		php_error(E_ERROR, "Don't know how to read http body, No Content-Length or chunked data");
+		php_error(E_ERROR, "Don't know how to read http body, No Content-Length or chunked data");
 		return FALSE;
 	}
 
