@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.4
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
+- Added length and charsetnr for field array and object. (Georg)
 - Fixed a bug in mysql_stmt_execute (type conversion with NULL values). (Georg)
 - Fixed bug #31142 (imap_mail_compose() fails to generate correct output). (Ilia)
 - Fixed bug #31139 (XML Parser Functions seem to drop &amp; when parsing). (Rob)
