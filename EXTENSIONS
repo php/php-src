@@ -119,8 +119,7 @@ STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
 -------------------------------------------------------------------------------
 EXTENSION:           dbase
-PRIMARY MAINTAINER:  Jim Winstead <jimw@php.net>
-MAINTENANCE:         Odd Fixes
+MAINTENANCE:         Orphaned
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           dbx
