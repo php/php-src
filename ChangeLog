@@ -1,3 +1,41 @@
+2000-07-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ingres_ii/README: typo
+
+    * ext/ingres_ii/ii.c: Fix building ingres_ii as a shared module
+
+2000-07-18  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/string.c: Shutup a gcc warning
+
+2000-07-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/cybercash/cybercash.c
+      ext/cybercash/cybercash.h: Fixed compilation errors.
+
+2000-07-18  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * MAINTAINERS: Added myself
+
+2000-07-18  Ken Coar  <ken.coar@golux.com>
+
+    * ext/standard/formatted_print.c:
+    	Bring forward the zero-precision (%.0s) string formatting fix
+    	from PHP3.  (After being nagged by Thies. :-)  Whee!  My first
+    	PHP4 commit..
+
+2000-07-18  Stig Bakken  <ssb@fast.no>
+
+    * build-defs.h.in
+      configure.in
+      ext/standard/rand.c
+      main/main.c:
+    Set default include_path so PEAR files can be reached 
+
+2000-07-18  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/swf/swf.c: Patch STDOUT support.
+
 2000-07-17  Hénot David  <henot@iie.cnam.fr>
 
     * ext/ingres_ii/ii.c
