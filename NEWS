@@ -76,7 +76,9 @@ PHP 4.0                                                                    NEWS
 - Made resource type names visible, e.g. var_dump() and
   get_resource_type() display "file" for file resources. (Andrei)
 - Added the curl_getinfo() function to find out information about a CURL
-- Added the CURLOPT_KRB4, CURLOPT_INTERFACE, CURLOPT_QUOTE,
+  transfer.  This function requires cURL 7.4.0 or above. (Sterling)
+- Added the CURLOPT_KRB4, CURLOPT_INTERFACE, CURLOPT_QUOTE, CURLOPT_POSTQUOTE,
+  CURLOPT_QUOTE and CURLOPT_HTTPPROXYTUNNELL options. (Sterling)
 - Renamed the shm_* functions to shmop_* (Derick)
 - Updated ext/mysql/libmysql to version 3.23 (tim@mysql.com)
 - Added ldap_get_option() and ldap_set_option() functions (Stig Venaas)
