@@ -72,7 +72,10 @@ typedef struct _cwd_state {
 	uint cwd_length;
 } cwd_state;
 
-#ifndef PHP_WIN32
+#ifndef S_ISDIR
+#define S_ISDIR(mode) ((mode) & _S_IFDIR)
+#endif
+
 static int php_is_dir_ok(const cwd_state *state) 
 {
 	struct stat buf;
@@ -82,7 +85,7 @@ static int php_is_dir_ok(const cwd_state *state)
 
 	return (1);
 }
-#endif
+
 
 
 char *virtual_getcwd(cwd_state *state, uint *length)
