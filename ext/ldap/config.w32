@@ -12,6 +12,7 @@ if (PHP_LDAP != "no") {
 			CHECK_LIB("olber32.lib", "ldap", PHP_LDAP)) {
 		EXTENSION('ldap', 'ldap.c');
 
+		AC_DEFINE('HAVE_LDAP_PARSE_REFERENCE', 1);
 		AC_DEFINE('HAVE_LDAP_START_TLS_S', 1);
 		AC_DEFINE('HAVE_LDAP', 1);
 
