@@ -48,7 +48,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "php4isapi"=.\php4isapi\php4isapi.dsp - Package Owner=<4>
+Project: "php4isapi"=.\sapi\isapi\php4isapi.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
