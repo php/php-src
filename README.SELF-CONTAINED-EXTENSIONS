@@ -126,4 +126,26 @@ INSTALLING A SELF-CONTAINED EXTENSION
      $ ./configure \
             [--with-php-config=/path/to/php-config]
      $ make install
-  
+
+ADDING SHARED MODULE SUPPORT TO A MODULE
+
+  In order to be useful, a self-contained extension must be loadable
+  as a shared module. I will explain now how you can shared module support
+  to an existing module called foo.
+
+  1. In config.m4, use PHP_ARG_WITH/PHP_ARG_ENABLE. Then you will
+     automatically be able to use --with-foo=shared or
+     --enable-foo=shared.
+
+  2. In config.m4, use PHP_EXTENSION(foo, $ext_shared) to enable
+     building the extension.
+
+  3. Add the following line to Makefile.in:
+
+        LTLIBRARY_SHARED_NAME = foo.la
+
+  4. Add the following lines to your C source file:
+
+        #if defined(COMPILE_DL) || defined(COMPILE_DL_FOO)
+        ZEND_GET_MODULE(foo)
+        #endif
