@@ -1473,35 +1473,6 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 
 	/* deserialize functions */
 	WSDL_CACHE_GET_INT(num_func, &in);
-<<<<<<< php_sdl.c
-	zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
-	functions = emalloc(num_func*sizeof(sdlFunctionPtr));
-	for (i = 0; i < num_func; i++) {
-		int binding_num, num_faults;
-		sdlFunctionPtr func = emalloc(sizeof(sdlFunction));
-		sdl_deserialize_key(&sdl->functions, func, &in);
-		func->functionName = sdl_deserialize_string(&in);
-		func->requestName = sdl_deserialize_string(&in);
-		func->responseName = sdl_deserialize_string(&in);
-
-		WSDL_CACHE_GET_INT(binding_num, &in);
-		if (binding_num == 0) {
-			func->binding = NULL;
-		} else {
-			func->binding = bindings[binding_num-1];
-		}
-		if (func->binding && func->binding->bindingType == BINDING_SOAP && *in != 0) {
-			sdlSoapBindingFunctionPtr binding = func->bindingAttributes = emalloc(sizeof(sdlSoapBindingFunction));
-			memset(binding, 0, sizeof(sdlSoapBindingFunction));
-			WSDL_CACHE_GET_1(binding->style,sdlEncodingStyle,&in);
-			binding->soapAction = sdl_deserialize_string(&in);
-			sdl_deserialize_soap_body(&binding->input, encoders, types, &in);
-			sdl_deserialize_soap_body(&binding->output, encoders, types, &in);
-		} else {
-			WSDL_CACHE_SKIP(1, &in);
-			func->bindingAttributes = NULL;
-		}
-=======
 	if (num_func > 0) {
 		zend_hash_init(&sdl->functions, num_func, NULL, delete_function, 0);
 		functions = emalloc(num_func*sizeof(sdlFunctionPtr));
@@ -1530,7 +1501,6 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t)
 				WSDL_CACHE_SKIP(1, &in);
 				func->bindingAttributes = NULL;
 			}
->>>>>>> 1.70.2.3
 
 			func->requestParameters = sdl_deserialize_parameters(encoders, types, &in);
 			func->responseParameters = sdl_deserialize_parameters(encoders, types, &in);
