@@ -520,7 +520,23 @@ class DB
         // Get dabase if any
         // $dsn => database
         if (!empty($dsn)) {
-            $parsed['database'] = $dsn;
+            // /database
+            if (($pos = strpos($dsn, '?')) === false) {
+                $parsed['database'] = $dsn;
+            // /database?param1=value1&param2=value2
+            } else {
+                $parsed['database'] = substr($dsn, 0, $pos);
+                $dsn = substr($dsn, $pos + 1);
+                if (strpos($dsn, '&') !== false) {
+                    $opts = explode('&', $dsn);
+                } else { // database?param1=value1
+                    $opts = array($dsn);
+                }
+                foreach ($opts as $opt) {
+                    list($key, $value) = explode('=', $opt);
+                    $parsed[$key] = urldecode($value);
+                }
+            }
         }
 
         return $parsed;
