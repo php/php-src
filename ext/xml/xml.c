@@ -1038,7 +1038,7 @@ PHP_FUNCTION(xml_parser_create)
 }
 /* }}} */
 
-/* {{{ proto int xml_set_object(int pind,object &obj) 
+/* {{{ proto int xml_set_object(int pind, object &obj) 
    Set up object which should be used for callbacks */
 PHP_FUNCTION(xml_set_object)
 {
