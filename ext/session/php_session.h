@@ -186,8 +186,14 @@ PHPAPI int php_session_register_serializer(const char *name,
 PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 PHPAPI void php_session_start(TSRMLS_D);
 
-#define PS_ADD_VARL(name,namelen) \
-	zend_hash_add_empty_element(&PS(vars), name, namelen + 1)
+#define PS_ADD_VARL(name,namelen)											\
+	zend_hash_add_empty_element(&PS(vars), name, namelen + 1);				\
+	if (PS(http_session_vars)) {											\
+		zval *empty_var;													\
+																			\
+		ALLOC_INIT_ZVAL(empty_var);											\
+		zend_hash_add(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, &empty_var, sizeof(zval *), NULL);	\
+	}
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
@@ -205,13 +211,17 @@ PHPAPI void php_session_start(TSRMLS_D);
 	zval **struc;
 
 #define PS_ENCODE_LOOP(code)										\
-	for (zend_hash_internal_pointer_reset(&PS(vars));			\
-			zend_hash_get_current_key_ex(&PS(vars), &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
-			zend_hash_move_forward(&PS(vars))) {				\
-			key_length--;										\
-		if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) { \
-			code;		 										\
-		} 														\
+	{																\
+		HashTable *_ht = (PS(http_session_vars) ? Z_ARRVAL_P(PS(http_session_vars)) : &PS(vars)); \
+																	\
+		for (zend_hash_internal_pointer_reset(_ht);			\
+				zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
+				zend_hash_move_forward(_ht)) {				\
+				key_length--;										\
+			if (php_get_session_var(key, key_length, &struc TSRMLS_CC) == SUCCESS) { \
+				code;		 										\
+			} 														\
+		}															\
 	}
 
 ZEND_EXTERN_MODULE_GLOBALS(ps);
