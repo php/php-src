@@ -1,3 +1,74 @@
+2004-03-04  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * sapi/cli/php_cli.c:
+      - typo (must have sleep.)
+
+    * ZendEngine2/zend_language_scanner.l:
+      - Fix memleak when scanner is called from within tokenizer extension.
+
+    * sapi/cli/php_cli.c:
+      - Prevent cli from printing multiple "Interactive mode enabled" if
+        the command line option is given more than once (like -aaaaaa).
+
+2004-03-04  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      ext/ftp/ftp.c:
+      MFH: Don't rely on ANSI tmpfile(), use the streams layer instead, it'll
+      deal with platform issues.
+
+    * ext/ftp/ftp.c:
+      Don't rely on ANSI tmpfile(), use the streams layer instead, it'll deal
+      with platform issues.
+
+2004-03-04  Derick Rethans  <php@derickrethans.nl>
+
+    * EXTENSIONS:
+      - No maintainer anymore.
+
+2004-03-04  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_4_3)
+      pear/PEAR/Builder.php:
+      MFH (fix a linefeed problem, if more than one configureoption)
+
+    * pear/PEAR/Builder.php:
+      - fix a linefeed problem, if there are more than one configureoption
+
+2004-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_execute.h:
+      fix the fix
+
+    * ZendEngine2/zend_execute.h:
+      oops, fix cut&paste gone bad
+
+    * ZendEngine2/zend_execute.h:
+      Fix object true value: if we are in compat mode and it's Zend object -
+      use PHP4 rules. Otherwise, object is always true.
+
+2004-03-04  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_constants.h
+      ZendEngine2/zend_operators.h:
+      - Fixed a 64bit issue (for zend_builtin_functions.c, module_number is an
+      int).
+      - Change the MAX_LENGTH_OF_LONG constant to 20, as LONG_MAX is 20
+      characters.
+        (Patches by Ard Biesheuven)
+
+    * ZendEngine2/tests/zend_operators.phpt:
+      - Added instance_of test (patch by Ard Biesheuvel)
+
+2004-03-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Disallow redefining ctors and cleanup
+
+    * ZendEngine2/zend_mm.c:
+      Handle out of memory/bad size situation gracefully, without getting into
+      loop
+
 2004-03-03  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/dom/document.c:
