@@ -334,7 +334,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 #endif
 #if defined(TSRM_WIN32)
 	{
-		char *dummy;
+		char *dummy = NULL;
 		char *new_path;
 		int new_path_length;
   
