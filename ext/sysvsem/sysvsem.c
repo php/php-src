@@ -121,6 +121,11 @@ int php3_minit_sysvsem(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
+#define SETVAL_WANTS_PTR
+
+#if defined(_AIX)
+#undef SETVAL_WANTS_PTR
+#endif
 
 /* {{{ proto int sem_get(int key [, int max_acquire [, int perm]])
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously. */
@@ -237,9 +242,14 @@ PHP_FUNCTION(sysvsem_get)
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
 			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
 		}
-#else
+#elif defined(SETVAL_WANTS_PTR)
 		/* This is correct for Solaris 2.6 which does not have union semun. */
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, &max_acquire) == -1) {
+			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
+		}
+#else
+		/* This works for i.e. AIX */
+		if (semctl(semid, SYSVSEM_SEM, SETVAL, max_acquire) == -1) {
 			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
 		}
 #endif
