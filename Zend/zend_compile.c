@@ -90,9 +90,6 @@ void init_compiler(CLS_D ELS_DC)
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	zend_llist_init(&CG(filenames_list), sizeof(char *), free_filename, 0);
-	CG(short_tags) = ZEND_UV(short_tags);
-	CG(asp_tags) = ZEND_UV(asp_tags);
-	CG(allow_call_time_pass_reference) = ZEND_UV(allow_call_time_pass_reference);
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	zend_init_rsrc_list(ELS_C);
