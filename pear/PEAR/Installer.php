@@ -572,8 +572,8 @@ class PEAR_Installer extends PEAR_Common
         switch ($what) {
             
         }
-        if (($what == 'cmdoutput' && $this->verbose > 1) ||
-            ($what == 'output' && $this->verbose > 0)) {
+        if (($what == 'cmdoutput' && $this->debug > 1) ||
+            ($what == 'output' && $this->debug > 0)) {
             $this->ui->outputData(rtrim($data), 'build');
         }
     }
