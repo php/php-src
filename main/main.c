@@ -643,7 +643,7 @@ static void php_message_handler_for_zend(long message, void *data)
 				time(&curtime);
 				ta = localtime(&curtime);
 				datetime_str = asctime(ta);
-				datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the traililng newline */
+				datetime_str[strlen(datetime_str)-1]=0;	/* get rid of the trailing newline */
 				fprintf(stderr, "[%s]  Script:  '%s'\n", datetime_str, SAFE_FILENAME(SG(request_info).path_translated));
 			}
 			break;
