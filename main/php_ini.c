@@ -233,7 +233,7 @@ int php_init_config()
 		char *default_location;
 		char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 
-		php_ini_search_path = (char *) emalloc(MAX_PATH*3+strlen(env_location)+3+1);
+		php_ini_search_path = (char *) emalloc(MAXPATHLEN*3+strlen(env_location)+3+1);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
 
@@ -251,8 +251,8 @@ int php_init_config()
 
 		/* Add binary directory */
 #ifdef PHP_WIN32
-		binary_location = (char *) emalloc(MAX_PATH);
-		if (GetModuleFileName(0, binary_location, MAX_PATH)==0) {
+		binary_location = (char *) emalloc(MAXPATHLEN);
+		if (GetModuleFileName(0, binary_location, MAXPATHLEN)==0) {
 			efree(binary_location);
 			binary_location = NULL;
 		}
@@ -282,9 +282,9 @@ int php_init_config()
 
 		/* Add default location */
 #ifdef PHP_WIN32
-		default_location = (char *) emalloc(MAX_PATH+1);
+		default_location = (char *) emalloc(MAXPATHLEN+1);
 	
-		if (!GetWindowsDirectory(default_location, MAX_PATH)) {
+		if (!GetWindowsDirectory(default_location, MAXPATHLEN)) {
 			default_location[0]=0;
 		}
 		strcat(php_ini_search_path, default_location);
