@@ -19,6 +19,12 @@ fi
 
 dnl TSRM_PTHREAD
 
+AC_CHECK_HEADERS(
+utime.h \
+dirent.h \
+stdarg.h
+)
+
 AC_DEFINE(ZTS,1,[ ])
 
 AC_OUTPUT(Makefile)
