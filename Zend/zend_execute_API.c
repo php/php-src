@@ -152,7 +152,7 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		zend_ptr_stack_destroy(&EG(arg_types_stack));
 				
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
@@ -175,13 +175,13 @@ void shutdown_executor(ELS_D)
 		/* Destroy all op arrays */
 		zend_hash_apply(EG(function_table), (int (*)(void *)) is_not_internal_function);
 		zend_hash_apply(EG(class_table), (int (*)(void *)) is_not_internal_class);
-	}
+	} zend_end_try();
 
 	zend_destroy_rsrc_list(ELS_C); /* must be destroyed after the main symbol table and
 									* op arrays are destroyed.
 									*/
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		clean_non_persistent_constants();
 #if ZEND_DEBUG
 	signal(SIGSEGV, original_sigsegv_handler);
@@ -198,7 +198,7 @@ void shutdown_executor(ELS_D)
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 
 		EG(error_reporting) = EG(orig_error_reporting);
-	}
+	} zend_end_try();
 }
 
 

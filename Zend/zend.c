@@ -464,11 +464,15 @@ void zenderror(char *error)
 
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_bailout()
+ZEND_API void _zend_bailout(ZEND_FILE_LINE_D)
 {
 	CLS_FETCH();
 	ELS_FETCH();
 
+	if (!EG(bailout_set)) {
+		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", ZEND_FILE_LINE_RELAY_C);
+		exit(-1);
+	}
 	CG(unclean_shutdown) = 1;
 	CG(in_compilation) = EG(in_execution) = 0;
 	longjmp(EG(bailout), FAILURE);
@@ -506,6 +510,7 @@ ZEND_API char *get_zend_version()
 
 void zend_activate(CLS_D ELS_DC)
 {
+	EG(bailout_set) = 0;
 	init_compiler(CLS_C ELS_CC);
 	init_executor(CLS_C ELS_CC);
 	startup_scanner(CLS_C);
@@ -522,9 +527,9 @@ void zend_deactivate_modules()
 	ELS_FETCH();
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
-	}
+	} zend_end_try();
 }
 
 void zend_deactivate(CLS_D ELS_DC)
@@ -533,17 +538,20 @@ void zend_deactivate(CLS_D ELS_DC)
 	EG(opline_ptr) = NULL; 
 	EG(active_symbol_table) = NULL;
 
-	if (setjmp(EG(bailout))==0) {
+	zend_try {
 		shutdown_scanner(CLS_C);
-	}
+	} zend_end_try();
+
 	/* shutdown_executor() takes care of its own bailout handling */
 	shutdown_executor(ELS_C);
-	if (setjmp(EG(bailout))==0) {
+
+	zend_try {
 		shutdown_compiler(CLS_C);
-	}
-	if (setjmp(EG(bailout))==0) {
+	} zend_end_try();
+
+	zend_try {
 		zend_ini_deactivate(ELS_C);
-	}
+	} zend_end_try();
 }
 
 
