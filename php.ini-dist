@@ -389,7 +389,7 @@ post_max_size = 8M
 ;
 
 ; Magic quotes for incoming GET/POST/Cookie data.
-magic_quotes_gpc = Off
+magic_quotes_gpc = On
 
 ; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
 magic_quotes_runtime = Off
