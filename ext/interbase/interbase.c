@@ -169,7 +169,7 @@ static void get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, ibase_d
 			*trans_id = (Z_LVAL_PP(link_id));
 			ZEND_FETCH_RESOURCE(ib_trans, ibase_tr_link *, link_id, -1, "InterBase transaction", le_trans);
 			*trans_n = ib_trans->trans_num;
-			ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, link_id, ib_trans->link_rsrc, "InterBase link", le_link, le_plink);
+			ZEND_FETCH_RESOURCE2(resource, ibase_db_link *, NULL, ib_trans->link_rsrc, "InterBase link", le_link, le_plink);
 		} else {
 			IBDEBUG("Type is le_[p]link");
 			/* Database link resource, use default transaction (=0). */
