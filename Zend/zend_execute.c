@@ -1933,7 +1933,7 @@ send_by_ref:
 							NEXT_OPCODE();
 						}
 					}
-					if (opline->op1.op_type == IS_TMP_VAR) { /* temporary variable */
+					if (!opline->extended_value && EG(free_op1)) { /* temporary variable */
 						zval *new_expr;
 
 						ALLOC_ZVAL(new_expr);
