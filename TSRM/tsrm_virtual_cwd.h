@@ -62,7 +62,13 @@ typedef unsigned short mode_t;
 #endif
 
 #define DEFAULT_SLASH '/'
-#define DEFAULT_DIR_SEPARATOR	':'
+
+#ifdef __riscos__
+#define DEFAULT_DIR_SEPARATOR  ';'
+#else
+#define DEFAULT_DIR_SEPARATOR  ':'
+#endif
+
 #define IS_SLASH(c)	((c) == '/')
 
 #endif
