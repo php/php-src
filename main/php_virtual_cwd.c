@@ -226,9 +226,32 @@ int virtual_chdir(cwd_state *state, char *path)
 	return virtual_file_ex(state, path, NULL); /* Use NULL right now instead of php_is_dir_ok */
 }
 
-int virtual_filepath(cwd_state *state, char *path)
+int virtual_filepath(cwd_state *state, char *path, char **filepath)
 {
-	return virtual_file_ex(state, path, php_is_file_ok);
+	cwd_state new_state = *state;
+	int retval;
+
+	new_state.cwd = strdup(state->cwd);
+	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
+	*filepath = new_state.cwd;
+	return retval;
+}
+
+FILE *virtual_fopen(cwd_state *state, char *path, const char *mode)
+{
+	cwd_state new_state = *state;
+	FILE *f;
+	int retval;
+
+	new_state.cwd = strdup(state->cwd);
+	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
+
+	if (retval) {
+		return NULL;
+	}
+	f = fopen(new_state.cwd, mode);
+	free(new_state.cwd);
+	return f;
 }
 
 main(void)
