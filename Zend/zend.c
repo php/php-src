@@ -161,8 +161,6 @@ static FILE *zend_fopen_wrapper(const char *filename)
 
 static void register_standard_class()
 {
-	CLS_FETCH();
-
 	standard_class.type = ZEND_INTERNAL_CLASS;
 	standard_class.name_length = sizeof("stdClass") - 1;
 	standard_class.name = zend_strndup("stdClass", standard_class.name_length);
@@ -198,11 +196,32 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 	zend_hash_destroy(compiler_globals->class_table);
 	free(compiler_globals->class_table);
 }
+
+
+static void executor_globals_ctor(zend_executor_globals *executor_globals)
+{
+	zend_startup_constants(ELS_C);
+}
+
+
+static void executor_globals_dtor(zend_executor_globals *executor_globals)
+{
+	zend_shutdown_constants(ELS_C);
+}
+
+
 #endif
 
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 {
+#ifdef ZTS
+	zend_executor_globals *executor_globals;
+
+	tsrm_startup(1,1,0);
+	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), NULL, NULL);
+#endif
+
 	start_memory_manager();
 
 	/* Set up utility functions and values */
@@ -227,7 +246,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 
 	/* Prepare data structures */
 #ifndef ZTS
-	zend_startup_constants();
+	zend_startup_constants(ELS_C);
 #endif
 	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
@@ -235,15 +254,15 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	zend_hash_init(GLOBAL_CLASS_TABLE, 10, NULL, (void (*)(void *)) destroy_zend_class, 1);
 	register_standard_class();
 	zend_hash_init(&module_registry, 50, NULL, (void (*)(void *)) module_destructor, 1);
-	init_resource_plist();
 	zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
 
 #ifdef ZTS
-	tsrm_startup(1,1,0);
 	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
-	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), NULL, NULL);
-	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), NULL, NULL);
+	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), (void (*)(void *)) executor_globals_ctor, (void (*)(void *)) executor_globals_dtor);
+	executor_globals = ts_resource(executor_globals_id);
 #endif
+
+	init_resource_plist(ELS_C);
 
 	return SUCCESS;
 }
@@ -261,7 +280,7 @@ void zend_shutdown()
 	zend_shutdown_extensions();
 	free(zend_version_info);
 #ifndef ZTS
-	zend_shutdown_constants();
+	zend_shutdown_constants(ELS_C);
 #endif
 }
 

@@ -59,7 +59,7 @@ void clean_module_constants(int module_number)
 }
 
 
-int zend_startup_constants(void)
+int zend_startup_constants(ELS_D)
 {
 #if WIN32|WINNT
 	DWORD dwBuild=0;
@@ -67,7 +67,6 @@ int zend_startup_constants(void)
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 #endif
-	ELS_FETCH();
 
 
 /* ZEND_FIX:  Move to PHP */
@@ -114,23 +113,21 @@ int zend_startup_constants(void)
 		c.name_len = 5;
 		c.value.value.lval = 1;
 		c.value.type = IS_BOOL;
-		zend_register_constant(&c);
+		zend_register_constant(&c ELS_CC);
 		
 		c.name = zend_strndup("FALSE",5);
 		c.name_len = 6;
 		c.value.value.lval = 0;
 		c.value.type = IS_BOOL;
-		zend_register_constant(&c);
+		zend_register_constant(&c ELS_CC);
 	}
 
 	return SUCCESS;
 }
 
 
-int zend_shutdown_constants(void)
+int zend_shutdown_constants(ELS_D)
 {
-	ELS_FETCH();
-
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
 	return SUCCESS;
@@ -145,7 +142,7 @@ void clean_non_persistent_constants(void)
 }
 
 
-ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number)
+ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number ELS_DC)
 {
 	zend_constant c;
 	
@@ -155,11 +152,11 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c);
+	zend_register_constant(&c ELS_CC);
 }
 
 
-ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number)
+ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number ELS_DC)
 {
 	zend_constant c;
 	
@@ -169,11 +166,11 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c);
+	zend_register_constant(&c ELS_CC);
 }
 
 
-ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number)
+ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number ELS_DC)
 {
 	zend_constant c;
 	
@@ -184,13 +181,13 @@ ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *st
 	c.name = zend_strndup(name,name_len);
 	c.name_len = name_len;
 	c.module_number = module_number;
-	zend_register_constant(&c);
+	zend_register_constant(&c ELS_CC);
 }
 
 
-ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number)
+ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number ELS_DC)
 {
-	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number);
+	zend_register_stringl_constant(name, name_len, strval, strlen(strval), flags, module_number ELS_CC);
 }
 
 
@@ -220,10 +217,9 @@ ZEND_API int zend_get_constant(char *name, uint name_len, zval *result)
 }
 
 
-ZEND_API void zend_register_constant(zend_constant *c)
+ZEND_API void zend_register_constant(zend_constant *c ELS_DC)
 {
 	char *lowercase_name = zend_strndup(c->name, c->name_len);
-	ELS_FETCH();
 
 #if 0
 	printf("Registering constant for module %d\n",c->module_number);

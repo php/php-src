@@ -45,8 +45,8 @@ void list_entry_destructor(void *ptr);
 void plist_entry_destructor(void *ptr);
 
 int clean_module_resource_destructors(list_destructors_entry *ld, int *module_number);
-int init_resource_list(void);
-int init_resource_plist(void);
+int init_resource_list(ELS_D);
+int init_resource_plist(ELS_D);
 void destroy_resource_list(void);
 void destroy_resource_plist(void);
 

@@ -175,18 +175,14 @@ void plist_entry_destructor(void *ptr)
 }
 
 
-int init_resource_list(void)
+int init_resource_list(ELS_D)
 {
-	ELS_FETCH();
-
 	return zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0);
 }
 
 
-int init_resource_plist(void)
+int init_resource_plist(ELS_D)
 {
-	ELS_FETCH();
-
 	return zend_hash_init(&EG(persistent_list), 0, NULL, plist_entry_destructor, 1);
 }
 
