@@ -1,3 +1,37 @@
+2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acconfig.h:
+      support for building asm in the unix buildsys.
+      Also, when ZEND_ACCONFIG_H_NO_C_PROTOS is defined,
+      omit the C prototypes from the configuration header
+      so that it can be included into asm files.
+
+2004-01-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * RFCs/002.txt:
+      this one is declined
+
+2004-01-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_object_handlers.h:
+      must be extern to avoid problems with some compilers
+
+2004-01-09  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/bug26077.phpt:
+      fix expect
+
+    * zend_compile.c:
+      Bug #25816 - disallow arrays in class constants
+
+    * tests/bug26077.phpt:
+      add test
+
+    * zend_compile.c
+      zend_execute.c:
+      Fix Bug #26077 - memory leak when new() result is not assigned
+      and no constructor defined
+
 2004-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * acconfig.h
