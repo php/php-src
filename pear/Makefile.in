@@ -83,6 +83,17 @@ PEAR_FILES = \
 	System.php \
 	XML/Parser.php 
 
+PEAR_COMMAND_LIBS=\
+	pearcmd-common.php \
+	pearcmd-help.php \
+	pearcmd-info.php \
+	pearcmd-install.php \
+	pearcmd-list.php \
+	pearcmd-package.php \
+	pearcmd-remote-list.php \
+	pearcmd-show-config.php \
+	pearcmd-uninstall.php
+
 install-data-local:
 	@if $(mkinstalldirs) $(INSTALL_ROOT)$(peardir); then \
 		for i in $(PEAR_SUBDIRS); do \
@@ -131,6 +142,10 @@ install-programs:
 	for prog in phpextdist; do \
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
+	done; \
+	for lib in $(PEAR_COMMAND_LIBS); do \
+		echo "Installing program library: $$lib"; \
+		$(INSTALL) -m 755 $(srcdir)/scripts/$$lib $(INSTALL_ROOT)$(bindir)/$$lib; \
 	done
 
 HEADER_DIRS = \

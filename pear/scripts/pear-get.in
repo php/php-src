@@ -19,313 +19,40 @@
 // +----------------------------------------------------------------------+
 //
 
-
-/*
-
-command structure:
-
-* list available packages
-* list not-installed packages
-* list upgrades
-* list packages (by author/category/state)
-
-* installation commands:
-** install latest stable
-** install specific release
-
-* package generation commands:
-
-*/
-
 require_once 'PEAR.php';
-require_once 'PEAR/Common.php';
-require_once 'PEAR/Config.php';
 require_once 'PEAR/Remote.php';
-require_once 'PEAR/Registry.php';
-require_once 'Console/Getopt.php';
 
 error_reporting(E_ALL & ~E_NOTICE);
 
-$argv = Console_Getopt::readPHPArgv();
-if (PEAR::isError($argv)) {
-    die($argv->getMessage());
-}
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
-if (PEAR::isError($options)) {
-    usage($options);
-}
-
-PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
-
-if (OS_WINDOWS) {
-    $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pearsys.ini';
-    $pear_user_config    = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.ini';
-} else {
-    $pear_default_config = PHP_SYSCONFDIR.DIRECTORY_SEPARATOR.'pear.conf';
-    $pear_user_config    = getenv('HOME').DIRECTORY_SEPARATOR.'.pearrc';
-}
-
-$opts = $options[0];
-
-foreach ($opts as $opt) {
-    switch ($opt[0]) {
-        case 'c':
-            $pear_user_config = $opt[1];
-            break;
-        case 'C':
-            $pear_default_config = $opt[1];
-            break;
-    }
-}
-
-$config = new PEAR_Config($pear_user_config, $pear_default_config);
-$verbose = 1;
-
-foreach ($opts as $opt) {
-    $param = $opt[1];
-    switch ($opt[0]) {
-        case 'd':
-            list($key, $value) = explode('=', $param);
-            $config->set($key, $value);
-            break;
-        case 'D':
-            list($key, $value) = explode('=', $param);
-            $config->set($key, $value, true);
-            break;
-        case 'u':
-            $config->toDefault($param);
-            break;
-        case 'v':
-            $verbose++;
-            break;
-        case 'q':
-            $verbose--;
-            break;
-    }
-}
-
-$fallback_config = array(
-    'master_server' => 'pear.php.net',
-    'php_dir'       => PEAR_INSTALL_DIR,
-    'ext_dir'       => PEAR_EXTENSION_DIR,
-    'doc_dir'       => '',
-    'verbose'       => true,
+$subcommands = array(
+    'help'        => 'help [command]',
+    'install'     => 'install [-r] <package file/name>',
+    'upgrade'     => 'upgrade [-r] <package file/name>',
+    'list'        => 'list',
+    'info'        => 'info <package name>',
 );
-$fallback_done = array();
 
-foreach ($fallback_config as $key => $value) {
-    if (!$config->isDefined($key)) {
-        $config->set($key, $value);
-        $fallback_done[$key] = true;
-    }
-}
-
-//$verbose    = $config->get("verbose");
-$script_dir = $config->get("php_dir");
-$ext_dir    = $config->get("ext_dir");
-$doc_dir    = $config->get("doc_dir");
-
-$command = (isset($options[1][1])) ? $options[1][1] : null;
-$rest = array_slice($options[1], 2);
+$shortcuts = array(
+    'list'     => 'remote-list',
+    'upgrade'  => 'install',
+);
 
 $command_options = array(
-    "install"        => "fr",
-    "uninstall"      => "fr",
-    "upgrade"        => "fr",
+    'install' => 'fr',
 );
 
-if (isset($command_options[$command])) {
-    $tmp = Console_Getopt::getopt($rest, $command_options[$command]);
-    if (PEAR::isError($tmp)) {
-        usage($tmp);
-    }
-    $cmdopts = $tmp[0];
-    $cmdargs = $tmp[1];
+include "pearcmd-common.php";
+
+if (isset($shortcuts[$command])) {
+    $realcommand = $shortcuts[$command];
 } else {
-    $cmdopts = array();
-    $cmdargs = $rest;
+    $realcommand = $command;
 }
 
-// }}}
-
-switch ($command) {
-
-    // {{{ install, upgrade
-
-    case 'install': case 'upgrade': {
-        include_once 'PEAR/Installer.php';
-        $pkgfile = $cmdargs[0];
-        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
-        $installer->setErrorHandling(PEAR_ERROR_DIE,
-                                     basename($pkgfile) . ": %s\n");
-        $installer->debug = $verbose;
-        $install_options = array();
-        if ($command == 'upgrade') {
-            $install_options['upgrade'] = true;
-        }
-        foreach ($cmdopts as $opt) {
-            switch ($opt[0]) {
-                case 'r':
-                    // This option is for use by rpm and other package
-                    // tools that can install files etc. by itself, but
-                    // still needs to register the package as installed in
-                    // PEAR's local registry.
-                    $install_options['register_only'] = true;
-                    break;
-                case 'f':
-                    $install_options['force'] = true;
-                    break;
-            }
-        }
-        if ($installer->install($pkgfile, $install_options, $config)) {
-            print "install ok\n";
-        } else {
-            print "install failed\n";
-        }
-        break;
-    }
-
-    // }}}
-    // {{{ uninstall
-    case 'uninstall': {
-        include_once 'PEAR/Installer.php';
-        $pkgfile = $cmdargs[0];
-        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
-        $installer->setErrorHandling(PEAR_ERROR_DIE,
-                                     basename($pkgfile) . ": %s\n");
-        $installer->debug = $verbose;
-        $uninstall_options = array();
-        foreach ($cmdopts as $opt) {
-            switch ($opt[0]) {
-                case 'r':
-                    $uninstall_options['register_only'] = true;
-                    break;
-                case 'f':
-                    $uninstall_options['force'] = true;
-                    break;
-            }
-        }
-        if ($installer->uninstall($pkgfile, $uninstall_options)) {
-            print "uninstall ok\n";
-        } else {
-            print "uninstall failed\n";
-        }
-        break;
-    }
-    // }}}
-    // {{{ list
-
-    case 'list': {
-        $remote = new PEAR_Remote($config);
-        $result = $remote->call('package.listAll');
-        $i = $j = 0;
-        heading("Available packages");
-        foreach ($result as $package => $info) {
-            if ($i++ % 20 == 0) {
-                if ($j++ > 0) {
-                    print "\n";
-                }
-                printf("%-20s %-10s %-15s %s\n",
-                       "Package", "Stable", "Lead", "Category");
-                print str_repeat("-", 75)."\n";
-            }
-            if (empty($info['stable'])) {
-                $info['stable'] = '(none)';
-            }
-            $stable = (string)$info['stable'];
-            printf("%-20s %-10s %-15s %s\n", $package,
-                   $info['stable'], $info['lead'], $info['category']);
-        }
-        break;
-    }
-
-    // }}}
-    default: {
-        if (!$store_default_config && !$store_user_config) {
-            usage();
-        }
-        break;
-    }
+if (isset($subcommands[$command])) {
+    include "pearcmd-$realcommand.php";
+} elseif (!$store_default_config && !$store_user_config) {
+    usage();
 }
-
-// {{{ usage()
-
-function usage($error = null)
-{
-    $stderr = fopen('php://stderr', 'w');
-    if (PEAR::isError($error)) {
-        fputs($stderr, $error->getMessage());
-    } elseif ($error !== null) {
-        fputs($stderr, $error);
-    }
-    fputs($stderr,
-          "Usage: pear-get [options] command [command-options] <parameters>\n".
-          "Options:\n".
-          "     -v         increase verbosity level (default 1)\n".
-          "     -q         be quiet, decrease verbosity level\n".
-          "     -c file    find user configuration in `file'\n".
-          "     -C file    find system configuration in `file'\n".
-          "     -d foo=bar set user config variable `foo' to `bar'\n".
-          "     -D foo=bar set system config variable `foo' to `bar'\n".
-          "     -u foo     unset `foo' in the user configuration\n".
-          "     -h, -?     display help/usage (this message)\n".
-          "Commands:\n".
-          "   help [command]\n".
-          "   install [-r] <package file>\n".
-          "   uninstall [-r] <package name>\n".
-          "   list\n".
-          "   info\n".
-          "\n");
-    fclose($stderr);
-    exit;
-}
-
-// }}}
-// {{{ present_array()
-
-function present_array(&$arr, $keys = null)
-{
-    if ($keys === null) {
-        $keys = array_keys($arr);
-    }
-    $longest_key = max(array_map("strlen", array_keys($arr))) + 2;
-    $format_string = "%{$longest_key}s : %s\n";
-    foreach ($keys as $k) {
-        if (is_array($arr[$k])) {
-            foreach ($arr[$k] as $i => $value) {
-                $x = "$k #$i";
-                $cont = array();
-                foreach(array_keys($value) as $val) {
-                    $cont[] = "$val=" . $value[$val];
-                }
-                $v = implode(", ", $cont);
-                printf($format_string, $x, $v);
-            }
-            continue;
-        } else {
-            $v = $arr[$k];
-            printf($format_string, $k, $v);
-        }
-    }
-}
-
-// }}}
-// {{{ heading()
-
-function heading($text)
-{
-    $l = strlen(trim($text));
-    print rtrim($text) . "\n" . str_repeat("=", $l) . "\n";
-}
-
-// }}}
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- */
 
 ?>
