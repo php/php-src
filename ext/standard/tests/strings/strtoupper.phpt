@@ -8,7 +8,7 @@ if (!setlocale(LC_CTYPE, "de_DE", "de", "german", "ge")) {
 ?>
 --FILE--
 <?php
-$chars = "אכן";
+$chars = "הצü";
 // Not sure which is most portable. BSD's answer to
 // this one. A small array based on PHP_OS should
 // cover a majority of systems and makes the problem
@@ -17,4 +17,4 @@ setlocale(LC_CTYPE, "de_DE", "de", "german", "ge");
 echo strtoupper($chars)."\n";
 ?>
 --EXPECT--
-ְֻֿ
+ִײÜ
