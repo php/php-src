@@ -615,6 +615,9 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 #ifdef HAVE_VSNPRINTF
 			z_error_message->value.str.len = vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
+			if(z_error_message->value.str.len > ZEND_ERROR_BUFFER_SIZE-1) {
+				z_error_message->value.str.len = ZEND_ERROR_BUFFER_SIZE-1;
+			}
 #else
 			/* This is risky... */
 			z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args);
