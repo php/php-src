@@ -95,17 +95,8 @@ struct _php_core_globals {
 	long max_execution_time;
 
 	unsigned char header_is_being_sent;
-
-	zend_llist ll_pre_request_shutdown;
-
-	zend_bool pre_request_shutdown_ok;
 };
 
-
-typedef struct {
-	void (*func)(void *);
-	void *userdata;
-} php_request_hook;
 
 #endif /* _PHP_GLOBALS_H */
 
