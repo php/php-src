@@ -33,7 +33,7 @@ if test "$PHP_EXPAT_DIR" = "no"; then
     PHP_EXTENSION(xml, $ext_shared)
     LIB_BUILD($ext_builddir/expat,$ext_shared,yes)
     PHP_ADD_INCLUDE($ext_srcdir/expat)
-    PHP_FAST_OUTPUT($ext_builddir/expat/Makefile $ext_builddir/expat/xmlparse/Makefile $ext_builddir/expat/xmltok/Makefile)
+    PHP_FAST_OUTPUT($ext_builddir/expat/Makefile)
 
 else
   
