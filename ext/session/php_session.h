@@ -78,6 +78,7 @@ typedef struct {
 	char *entropy_file;
 	int entropy_length;
 	int lifetime;
+	zend_bool define_sid;
 	ps_module *mod;
 	void *mod_data;
 	HashTable vars;
@@ -141,4 +142,10 @@ typedef struct ps_serializer_struct {
 #define PS_SERIALIZER_ENTRY(x) \
 	{ #x, _ps_srlzr_encode_##x, _ps_srlzr_decode_##x }
 
+#ifdef TRANS_SID
+void session_adapt_uris(const char *, uint, char **, uint *);
+#else
+#define session_adapt_uris(a,b) do { } while(0)
+#endif
+	
 #endif

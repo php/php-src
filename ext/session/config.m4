@@ -2,8 +2,7 @@ dnl $Id$
 dnl config.m4 for extension session
 dnl don't forget to call PHP_EXTENSION(session)
 
-
-MM_RESULT=no
+RESULT=no
 AC_MSG_CHECKING(for mm support)
 AC_ARG_WITH(mm,
 [  --with-mm[=DIR]         Include mm support],
@@ -22,10 +21,22 @@ AC_ARG_WITH(mm,
 		AC_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/lib)
 		AC_ADD_INCLUDE($MM_DIR/include)
 		AC_DEFINE(HAVE_LIBMM, 1)
-		MM_RESULT=yes
+		RESULT=yes
 		PHP_EXTENSION(ps_mm)
 	fi
 ])
-AC_MSG_RESULT($MM_RESULT)
+AC_MSG_RESULT($RESULT)
+
+RESULT=no
+AC_MSG_CHECKING(whether to enable transparent session id propagation)
+AC_ARG_ENABLE(trans-sid,
+[  --enable-trans-sid      Enable transparent session id propagation],
+[
+  if test "$enableval" = "yes" ; then
+    AC_DEFINE(TRANS_SID, 1)
+	RESULT=yes
+  fi
+])
+AC_MSG_RESULT($RESULT)
 
 PHP_EXTENSION(session)
