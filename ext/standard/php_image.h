@@ -46,9 +46,11 @@ typedef enum
   IMAGE_FILETYPE_JB2,
   IMAGE_FILETYPE_SWC,
   IMAGE_FILETYPE_IFF,
-/* WHEN EXTENDING: PLEASE ALSO REGISTER IN ext/exif/exif.c:PHP_MINIT_FUNCTION(exif) */
+/* WHEN EXTENDING: PLEASE ALSO REGISTER IN image.c:PHP_MINIT_FUNCTION(imagetypes) */
 } image_filetype;
 /* }}} */
+
+PHP_MINIT_FUNCTION(imagetypes);
 
 PHPAPI int php_getimagetype(php_stream *stream, char *filetype TSRMLS_DC);
 
