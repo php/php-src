@@ -117,6 +117,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 PS_SERIALIZER_FUNCS(php);
+PS_SERIALIZER_FUNCS(php_binary);
 #ifdef WDDX_SERIALIZER
 PS_SERIALIZER_FUNCS(wddx);
 #endif
@@ -127,6 +128,7 @@ const static ps_serializer ps_serializers[] = {
 	PS_SERIALIZER_ENTRY(wddx),
 #endif
 	PS_SERIALIZER_ENTRY(php),
+	PS_SERIALIZER_ENTRY(php_binary),
 	{0}
 };
 
@@ -165,20 +167,20 @@ typedef struct {
 
 #define STR_CAT(P,S,I) {\
 	pval *__p = (P);\
+	size_t __l = (I);\
 		ulong __i = __p->value.str.len;\
-		__p->value.str.len += (I);\
+		__p->value.str.len += __l;\
 		if (__p->value.str.val) {\
 			__p->value.str.val = (char *)erealloc(__p->value.str.val, __p->value.str.len + 1);\
 		} else {\
 			__p->value.str.val = emalloc(__p->value.str.len + 1);\
 				*__p->value.str.val = 0;\
 		}\
-	strcat(__p->value.str.val + __i, (S));\
+	memcpy(__p->value.str.val + __i, (S), __l); \
+	__p->value.str.val[__p->value.str.len] = '\0'; \
 }
 
 #define MAX_STR 512
-#define STD_FMT "%s|"
-#define NOTFOUND_FMT "!%s|"
 
 #define PS_ADD_VARL(name,namelen) \
 	zend_hash_update(&PS(vars), name, namelen + 1, 0, 0, NULL)
@@ -242,6 +244,81 @@ static int php_get_session_var(char *name, size_t namelen, zval ***state_var PLS
 	return zend_hash_find(ht, name, namelen + 1, (void **)state_var);
 }
 
+#define PS_BIN_NR_OF_BITS 8
+#define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
+#define PS_BIN_MAX (PS_BIN_UNDEF-1)
+
+PS_SERIALIZER_ENCODE_FUNC(php_binary)
+{
+	zval *buf;
+	char strbuf[MAX_STR + 1];
+	ENCODE_VARS;
+
+	buf = ecalloc(sizeof(*buf), 1);
+	buf->type = IS_STRING;
+	buf->refcount++;
+
+	ENCODE_LOOP(
+			size_t slen = strlen(key);
+
+			if (slen > PS_BIN_MAX) continue;
+			strbuf[0] = slen;
+			memcpy(strbuf + 1, key, slen);
+			
+			STR_CAT(buf, strbuf, slen + 1);
+			php_var_serialize(buf, struc);
+		} else {
+			size_t slen = strlen(key);
+
+			if (slen > PS_BIN_MAX) continue;
+			strbuf[0] = slen & PS_BIN_UNDEF;
+			memcpy(strbuf + 1, key, slen);
+			
+			STR_CAT(buf, strbuf, slen + 1);
+	);
+
+	if (newlen) *newlen = buf->value.str.len;
+	*newstr = buf->value.str.val;
+	efree(buf);
+
+	return SUCCESS;
+}
+
+PS_SERIALIZER_DECODE_FUNC(php_binary)
+{
+	const char *p;
+	char *name;
+	const char *endptr = val + vallen;
+	zval *current;
+	int namelen;
+	int has_value;
+
+	current = (zval *) ecalloc(sizeof(zval), 1);
+	for (p = val; p < endptr; ) {
+		namelen = *p & (~PS_BIN_UNDEF);
+		has_value = *p & PS_BIN_UNDEF ? 0 : 1;
+
+		name = estrndup(p + 1, namelen);
+		
+		p += namelen + 1;
+		
+		if (has_value) {
+			if (php_var_unserialize(&current, &p, endptr)) {
+				php_set_session_var(name, namelen, current PSLS_CC);
+				zval_dtor(current);
+			}
+		}
+		PS_ADD_VARL(name, namelen);
+		efree(name);
+	}
+	efree(current);
+
+	return SUCCESS;
+}
+
+#define PS_DELIMITER '|'
+#define PS_UNDEF_MARKER '!'
+
 PS_SERIALIZER_ENCODE_FUNC(php)
 {
 	zval *buf;
@@ -253,12 +330,23 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	buf->refcount++;
 
 	ENCODE_LOOP(
-			snprintf(strbuf, MAX_STR, STD_FMT, key);
-			STR_CAT(buf, strbuf, strlen(strbuf));
+			size_t slen = strlen(key);
+
+			if (slen + 1 > MAX_STR) continue;
+			memcpy(strbuf, key, slen);
+			strbuf[slen] = PS_DELIMITER;
+			STR_CAT(buf, strbuf, slen + 1);
+			
 			php_var_serialize(buf, struc);
 		} else {
-			snprintf(strbuf, MAX_STR, NOTFOUND_FMT, key);
-			STR_CAT(buf, strbuf, strlen(strbuf));
+			size_t slen = strlen(key);
+
+			if (slen + 2 > MAX_STR) continue;
+			strbuf[0] = PS_UNDEF_MARKER;
+			memcpy(strbuf + 1, key, slen);
+			strbuf[slen + 1] = PS_DELIMITER;
+			
+			STR_CAT(buf, strbuf, slen + 2);
 	);
 
 	if (newlen) *newlen = buf->value.str.len;
@@ -278,8 +366,8 @@ PS_SERIALIZER_DECODE_FUNC(php)
 	int has_value;
 
 	current = (zval *) ecalloc(sizeof(zval), 1);
-	for (p = q = val; (p < endptr) && (q = memchr(p, '|', endptr - p)); p = q) {
-		if (p[0] == '!') {
+	for (p = q = val; (p < endptr) && (q = memchr(p, PS_DELIMITER, endptr - p)); p = q) {
+		if (p[0] == PS_UNDEF_MARKER) {
 			p++;
 			has_value = 0;
 		} else {
@@ -296,7 +384,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 				zval_dtor(current);
 			}
 		}
-		PS_ADD_VAR(name);
+		PS_ADD_VARL(name, namelen);
 		efree(name);
 	}
 	efree(current);
