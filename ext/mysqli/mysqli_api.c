@@ -1042,7 +1042,6 @@ PHP_FUNCTION(mysqli_kill)
 }
 /* }}} */
 
-#ifndef PHP_WIN32
 /* {{{ proto mysqli_set_local_infile_default(object link)
    unsets user defined handler for load local infile command */
 PHP_FUNCTION(mysqli_set_local_infile_default)
@@ -1105,7 +1104,6 @@ PHP_FUNCTION(mysqli_set_local_infile_handler)
 				&php_local_infile_end, &php_local_infile_error, (void *)mysql); 
 }
 /* }}} */
-#endif
 
 /* {{{ proto bool mysqli_more_results(object link)
    check if there any more query results from a multi query */

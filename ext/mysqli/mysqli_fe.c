@@ -96,10 +96,8 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_info,									NULL)
 	PHP_FE(mysqli_insert_id,							NULL)
 	PHP_FE(mysqli_kill,									NULL)
-#ifndef PHP_WIN32
 	PHP_FE(mysqli_set_local_infile_default,				NULL)
 	PHP_FE(mysqli_set_local_infile_handler,				NULL)
-#endif
 	PHP_FE(mysqli_master_query,							NULL)
 	PHP_FE(mysqli_more_results,							NULL)
 	PHP_FE(mysqli_multi_query, 							NULL)
