@@ -254,15 +254,11 @@ PHP_MINIT_FUNCTION(ps_mm)
 	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
-   	if (!ps_mm_instance) {
-		php_error(E_WARNING,"mm session save handler cannot allocate shared memory");
+   	if (!ps_mm_instance)
 		return FAILURE;
-	}
 
-	if (!sprintf(euid,"%d", geteuid())) {
-		php_error(E_WARNING,"mm session save handler cannot get effective UID");
+	if (!sprintf(euid,"%d", geteuid())) 
 		return FAILURE;
-	}
 		
     /* '/tmp/' + File + Module Name + Effective UID + \0 */	
 	ps_mm_path = do_alloca(5+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
@@ -279,7 +275,6 @@ PHP_MINIT_FUNCTION(ps_mm)
 	if (ret != SUCCESS) {
 		free(ps_mm_instance);
 		ps_mm_instance = NULL;
-		php_error(E_NOTICE,"mm session save handler failed to initialize. Check your save_path.");
 		return FAILURE;
 	}
 	
@@ -331,10 +326,7 @@ PS_READ_FUNC(mm)
 		(*val)[sd->datalen] = '\0';
 		ret = SUCCESS;
 	}
-	else {
-		*val = estrdup("");
-	}
-	
+
 	mm_unlock(data->mm);
 	
 	return ret;
