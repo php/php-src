@@ -228,6 +228,9 @@ xml_encoding xml_encodings[] = {
 
 int php3_minit_xml(INIT_FUNC_ARGS)
 {
+
+	ELS_FETCH();
+
 #if defined(THREAD_SAFE)
 	xml_global_struct *xml_globals;
 	PHP3_MUTEX_ALLOC(xml_mutex);
