@@ -47,7 +47,6 @@ typedef struct {
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
-	int le_socketp, le_psocketp, le_document;
 } zend_hw_globals;
 
 #ifdef ZTS

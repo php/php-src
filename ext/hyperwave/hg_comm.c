@@ -31,7 +31,7 @@
 #include <string.h> 
 #include <sys/types.h>
 #ifdef PHP_WIN32
-# include <winsock2.h>
+# include <winsock.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
 # define ETIMEDOUT WSAETIMEDOUT
 # define bcopy memcpy
@@ -619,6 +619,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	int laststart=0;
 	char emptystring[BUFFERLEN];
 	int i;
+	ELS_FETCH();
 	
 	emptystring[0] = '\0';
 
