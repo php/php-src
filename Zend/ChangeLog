@@ -1,3 +1,19 @@
+2005-01-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      zend.h:
+      MFH: - Fix outside-source-tree builds. Always include generated header
+      files
+             with #include <some_header.h> to make sure the correct file is
+      used.
+
+    * zend.h:
+      - Fix outside-source-tree builds. Always include generated header files
+        with #include <some_header.h> to make sure the correct file is used.
+
+    * zend.c:
+      MFB: - Rationalize code a bit
+
 2005-01-03  Stanislav Malyshev  <stas@zend.com>
 
     * (PHP_5_0)
