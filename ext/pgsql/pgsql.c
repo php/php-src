@@ -767,7 +767,7 @@ PHP_FUNCTION(pgsql_field_name)
 }
 /* }}} */
 
-/* {{{ int proto pg_fieldsize(int result, int field_number)
+/* {{{ proto int pg_fieldsize(int result, int field_number)
    Returns the internal size of the field */ 
 PHP_FUNCTION(pgsql_field_size)
 {
