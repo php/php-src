@@ -186,19 +186,29 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
  */
 static int browser_reg_compare(zval **browser, int num_args, va_list args, zend_hash_key *key)
 {
-	zval **browser_name;
+	zval **browser_name, **current;
 	regex_t r;
 	char *lookup_browser_name = va_arg(args, char *);
 	zval **found_browser_entry = va_arg(args, zval **);
 
-	if (*found_browser_entry) { /* already found */
-		return 0;
-	}
 	if (zend_hash_find(Z_ARRVAL_PP(browser), "browser_name_regex", sizeof("browser_name_regex"), (void **) &browser_name) == FAILURE) {
 		return 0;
 	}
-	if (Z_STRVAL_PP(browser_name)[0] != '^') {
-		return 0;
+
+	if (*found_browser_entry) {
+		/* We've already found it, so don't compare to the default browser,
+		   because it will match anything. */
+		if (!strcmp(Z_STRVAL_PP(browser_name), "^.*$")) {
+			return 0;
+		}
+		/* If we've found a possible browser, check it's length. Longer user
+		   agent strings are assumed to be more precise, so use them. */
+		else if (zend_hash_find(Z_ARRVAL_PP(found_browser_entry), "browser_name_regex", sizeof("browser_name_regex"), (void**) &current) == FAILURE) {
+			return 0;
+		}
+		else if (Z_STRLEN_PP(current) > Z_STRLEN_PP(browser_name)) {
+			return 0;
+		}
 	}
 	if (regcomp(&r, Z_STRVAL_PP(browser_name), REG_NOSUB)!=0) {
 		return 0;
