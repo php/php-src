@@ -24,6 +24,8 @@
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
+
+#include <string.h>
 #undef ZEND_TEST_EXCEPTIONS
 
 static ZEND_FUNCTION(zend_version);
