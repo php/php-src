@@ -1,3 +1,52 @@
+2002-09-14  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/pcre/pcrelib/doc/pcregrep.txt
+      ext/pcre/pcrelib/doc/pcretest.1
+      ext/pcre/pcrelib/doc/pcretest.html
+      ext/pcre/pcrelib/doc/pcretest.txt
+      ext/pcre/pcrelib/testdata/testinput1
+      ext/pcre/pcrelib/testdata/testinput2
+      ext/pcre/pcrelib/testdata/testinput6
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/testdata/testoutput5
+      ext/pcre/pcrelib/testdata/testoutput6
+      ext/pcre/pcrelib/AUTHORS
+      ext/pcre/pcrelib/COPYING
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/NEWS
+      ext/pcre/pcrelib/NON-UNIX-USE
+      ext/pcre/pcrelib/README
+      ext/pcre/pcrelib/RunTest
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/doc/Tech.Notes
+      ext/pcre/pcrelib/doc/pcre.3
+      ext/pcre/pcrelib/doc/pcre.html
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/doc/pcregrep.1
+      ext/pcre/pcrelib/doc/pcregrep.html
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcre.h
+      ext/pcre/pcrelib/pcregrep.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/pcreposix.h
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/pcrelib/study.c: Update bundled pcrelib to 3.9.
+
+2002-09-14  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/http_fopen_wrapper.c:  - fix typo in comment
+
+2002-09-14  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/filestat.c: - Don't think we need the do { } while (0) here
+
 2002-09-13  Andrei Zmievski  <andrei@php.net>
 
     * pear/package-Console_Getopt.xml:
