@@ -474,7 +474,7 @@ static zend_module_entry php_caudium_module = {
 };
 
 
-INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC TSRMLS_DC TSRMLS_DC)   
+INLINE static void low_sapi_caudium_register_variables(zval *track_vars_array TSRMLS_DC)   
 {
   char *tmp;
   php_register_variable("PHP_SELF", SG(request_info).request_uri,
