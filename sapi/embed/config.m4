@@ -11,11 +11,11 @@ AC_ARG_ENABLE(embed,
   case $enableval in
     yes|shared)
       PHP_EMBED_TYPE=shared
-      INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)/lib"
+      INSTALL_IT="\$(mkinstalldirs) \$(prefix)/lib; \$(INSTALL) -m 0755 $SAPI_SHARED \$(prefix)/lib"
       ;;
     static)
       PHP_EMBED_TYPE=static
-      INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_STATIC \$(INSTALL_ROOT)/lib"
+      INSTALL_IT="\$(mkinstalldirs) \$(prefix)/lib; \$(INSTALL) -m 0644 $SAPI_STATIC \$(prefix)/lib"
       ;;
     *)
       PHP_EMBED_TYPE=no
