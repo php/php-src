@@ -728,7 +728,7 @@ dnl
 dnl OpenSSL configure
 dnl
 PHP_ARG_WITH(openssl,for OpenSSL support,
-[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ])
+[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.6) ])
 
 if test "$PHP_OPENSSL" != "no"; then
   ext_openssl_shared=$ext_shared
