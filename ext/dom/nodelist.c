@@ -157,13 +157,13 @@ PHP_FUNCTION(dom_nodelist_item)
 				}
 			}
 		}
+
+		if (itemnode) {
+			DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+		}
 	}
 
-	if (itemnode) {
-		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
-	} else {
-		RETVAL_NULL();
-	}
+	RETVAL_NULL();
 }
 /* }}} end dom_nodelist_item */
 #endif

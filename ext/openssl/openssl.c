@@ -3082,7 +3082,6 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
 	X509 *err_cert;
 	int err, depth, ret;
 	zval **val;
-	TSRMLS_FETCH();
 
 	ret = preverify_ok;
 
