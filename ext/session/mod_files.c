@@ -105,8 +105,9 @@ static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, con
 		buf[n++] = *p++;
 		buf[n++] = DIR_DELIMITER;
 	}
+	buf[n] = '\0';
 	strcat(buf, FILE_PREFIX);
-	strcat(buf, p);
+	strcat(buf, key);
 	
 	return buf;
 }
