@@ -1112,7 +1112,7 @@ function get_summary($show_ext_summary)
 	global $exts_skipped, $exts_tested, $n_total, $sum_results, $percent_results, $end_time, $start_time, $failed_test_summary, $PHP_FAILED_TESTS;
 
 	$x_total = $n_total - $sum_results['SKIPPED'] - $sum_results['BORKED'];
-	$x_warned = (100.0 * $sum_results['FAILED']) / $x_total;
+	$x_warned = (100.0 * $sum_results['WARNED']) / $x_total;
 	$x_failed = (100.0 * $sum_results['FAILED']) / $x_total;
 	$x_passed = (100.0 * $sum_results['PASSED']) / $x_total;
 
