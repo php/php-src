@@ -139,6 +139,8 @@ static int array_reverse_key_compare(const void *a, const void *b)
 	return array_key_compare(a,b)*-1;
 }
 
+/* {{{ proto int krsort(array array_arg)
+   Sort an array reverse by key */
 PHP_FUNCTION(krsort)
 {
 	pval **array;
@@ -157,7 +159,10 @@ PHP_FUNCTION(krsort)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ksort(array array_arg)
+   Sort an array by key */
 PHP_FUNCTION(ksort)
 {
 	pval **array;
@@ -177,7 +182,8 @@ PHP_FUNCTION(ksort)
 	RETURN_TRUE;
 }
 
-
+/* {{{ proto int count(mixed var)
+   Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
 	pval **array;
@@ -197,7 +203,7 @@ PHP_FUNCTION(count)
 
 	RETURN_LONG(zend_hash_num_elements(target_hash));
 }
-
+/* }}} */
 
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
@@ -247,6 +253,8 @@ static int array_reverse_data_compare(const void *a, const void *b)
 	return array_data_compare(a,b)*-1;
 }
 
+/* {{{ proto void asort(array array_arg)
+   Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
 	pval **array;
@@ -265,7 +273,10 @@ PHP_FUNCTION(asort)
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto void arsort(array array_arg)
+   Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
 	pval **array;
@@ -277,14 +288,17 @@ PHP_FUNCTION(arsort)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in arsort() call");
-		return;
+		RETURN_FALSE;
 	}
 	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,0) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto void sort(array array_arg)
+   Sort an array */
 PHP_FUNCTION(sort)
 {
 	pval **array;
@@ -296,14 +310,17 @@ PHP_FUNCTION(sort)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in sort() call");
-		return;
+		RETURN_FALSE;
 	}
 	if (zend_hash_sort(target_hash, qsort, array_data_compare,1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto void rsort(array array_arg)
+   Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
 	pval **array;
@@ -315,10 +332,10 @@ PHP_FUNCTION(rsort)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in rsort() call");
-		return;
+		RETURN_FALSE;
 	}
 	if (zend_hash_sort(target_hash, qsort, array_reverse_data_compare,1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
@@ -352,7 +369,8 @@ static int array_user_compare(const void *a, const void *b)
 	}
 }
 
-
+/* {{{ proto void usort(array array_arg, string cmp_function)
+   Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
 {
 	pval **array;
@@ -369,17 +387,20 @@ PHP_FUNCTION(usort)
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in usort() call");
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 1) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto void uasort(array array_arg, string cmp_function)
+   Sort an array with a user-defined comparison function and maintain index association */
 PHP_FUNCTION(uasort)
 {
 	pval **array;
@@ -396,17 +417,17 @@ PHP_FUNCTION(uasort)
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uasort() call");
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_compare, 0) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 static int array_user_key_compare(const void *a, const void *b)
 {
@@ -457,7 +478,8 @@ static int array_user_key_compare(const void *a, const void *b)
 	}
 }
 
-
+/* {{{ proto void uksort(array array_arg, string cmp_function)
+   Sort an array by keys using a user-defined comparison function */
 PHP_FUNCTION(uksort)
 {
 	pval **array;
@@ -474,17 +496,20 @@ PHP_FUNCTION(uksort)
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in uksort() call");
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(BG(user_compare_func_name));
 	if (zend_hash_sort(target_hash, qsort, array_user_key_compare, 0) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
-		return;
+		RETURN_FALSE;
 	}
 	BG(user_compare_func_name) = old_compare_func;
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto mixed end(array array_arg)
+   Advances array argument's internal pointer to the last element and return it */
 PHP_FUNCTION(end)
 {
 	pval **array, **entry;
@@ -496,7 +521,7 @@ PHP_FUNCTION(end)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to end() is not an array or object");
-		return;
+		RETURN_FALSE;
 	}
 	zend_hash_internal_pointer_end(target_hash);
 
@@ -509,8 +534,10 @@ PHP_FUNCTION(end)
 		zval_copy_ctor(return_value);
 	}
 }
+/* }}} */
 
-
+/* {{{ proto mixed prev(array array_arg)
+   Move array argument's internal pointer to the previous element and return it */
 PHP_FUNCTION(prev)
 {
 	pval **array, **entry;
@@ -535,8 +562,10 @@ PHP_FUNCTION(prev)
 		zval_copy_ctor(return_value);
 	}
 }
+/* }}} */
 
-
+/* {{{ proto mixed next(array array_arg)
+   Move array argument's internal pointer to the next element and return it */
 PHP_FUNCTION(next)
 {
 	pval **array, **entry;
@@ -561,8 +590,10 @@ PHP_FUNCTION(next)
 		zval_copy_ctor(return_value);
 	}
 }
+/* }}} */
 
-	
+/* {{{ proto mixed reset(array array_arg)
+   Set array argument's internal pointer to the first element and return it */	
 PHP_FUNCTION(reset)
 {
 	pval **array, **entry;
@@ -574,7 +605,7 @@ PHP_FUNCTION(reset)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to reset() is not an array or object");
-		return;
+		RETURN_FALSE;
 	}
 	zend_hash_internal_pointer_reset(target_hash);
 
@@ -587,7 +618,10 @@ PHP_FUNCTION(reset)
 		zval_copy_ctor(return_value);
 	}
 }
+/* }}} */
 
+/* {{{ proto mixed current(array array_arg)
+   Return the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(current)
 {
 	pval **array, **entry;
@@ -599,16 +633,18 @@ PHP_FUNCTION(current)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to current() is not an array or object");
-		return;
+		RETURN_FALSE;
 	}
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	*return_value = **entry;
 	zval_copy_ctor(return_value);
 }
+/* }}} */
 
-
+/* {{{ proto mixed key(array array_arg)
+   Return the key of the element currently pointed to by the internal array pointer */
 PHP_FUNCTION(key)
 {
 	pval **array;
@@ -622,7 +658,7 @@ PHP_FUNCTION(key)
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
 		php_error(E_WARNING, "Variable passed to key() is not an array or object");
-		return;
+		RETURN_FALSE;
 	}
 	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 		case HASH_KEY_IS_STRING:
@@ -638,8 +674,10 @@ PHP_FUNCTION(key)
 			return;
 	}
 }
+/* }}} */
 
-
+/* {{{ proto mixed min(mixed arg1 [, mixed arg2 [, ...]])
+   Return the lowest value in an array or a series of arguments */
 PHP_FUNCTION(min)
 {
 	int argc=ARG_COUNT(ht);
@@ -648,7 +686,7 @@ PHP_FUNCTION(min)
 	if (argc<=0) {
 		php_error(E_WARNING, "min: must be passed at least 1 value");
 		var_uninit(return_value);
-		return;
+		RETURN_FALSE;
 	}
 	if (argc == 1) {
 		pval **arr;
@@ -688,8 +726,10 @@ PHP_FUNCTION(min)
 		efree(args);
 	}
 }
+/* }}} */
 
-
+/* {{{ proto mixed max(mixed arg1 [, mixed arg2 [, ...]])
+   Return the highest value in an array or a series of arguments */
 PHP_FUNCTION(max)
 {
 	int argc=ARG_COUNT(ht);
@@ -698,7 +738,7 @@ PHP_FUNCTION(max)
 	if (argc<=0) {
 		php_error(E_WARNING, "max: must be passed at least 1 value");
 		var_uninit(return_value);
-		return;
+		RETURN_FALSE;
 	}
 	if (argc == 1) {
 		pval **arr;
@@ -738,6 +778,7 @@ PHP_FUNCTION(max)
 		efree(args);
 	}
 }
+/* }}} */
 
 static int php_array_walk(HashTable *target_hash, zval **userdata)
 {
@@ -809,14 +850,14 @@ PHP_FUNCTION(array_walk) {
 	if (!target_hash) {
 		php_error(E_WARNING, "Wrong datatype in array_walk() call");
 		BG(array_walk_func_name) = old_walk_func_name;
-		return;
+		RETURN_FALSE;
 	}
 	convert_to_string_ex(BG(array_walk_func_name));
 	php_array_walk(target_hash, userdata);
 	BG(array_walk_func_name) = old_walk_func_name;
 	RETURN_TRUE;
 }
-
+/* }}} */
 
 /* {{{ proto bool in_array(mixed needle, array haystack)
    Checks if the given value exists in the array */
@@ -835,12 +876,12 @@ PHP_FUNCTION(in_array)
 	
 	if ((*value)->type == IS_ARRAY || (*value)->type == IS_OBJECT) {
 		php_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
-		return;
+		RETURN_FALSE;
 	}
 	
 	if ((*array)->type != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
-		return;
+		RETURN_FALSE;
 	}
 
 	target_hash = HASH_OF(*array);
@@ -931,12 +972,12 @@ PHP_FUNCTION(extract)
 	
 	if (extype < EXTR_OVERWRITE || extype > EXTR_PREFIX_ALL) {
 		php_error(E_WARNING, "Wrong argument in call to extract()");
-		return;
+		RETURN_FALSE;
 	}
 	
 	if ((*var_array)->type != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype in call to extract()");
-		return;
+		RETURN_FALSE;
 	}
 		
 	zend_hash_internal_pointer_reset((*var_array)->value.ht);
@@ -1103,10 +1144,10 @@ PHP_FUNCTION(shuffle)
 	}
 	if ((*array)->type != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
-		return;
+		RETURN_FALSE;
 	}
 	if (zend_hash_sort((*array)->value.ht, (sort_func_t)mergesort, array_data_shuffle, 1) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
@@ -2078,6 +2119,7 @@ PHP_FUNCTION(array_multisort)
 	efree(args);
 	RETURN_TRUE;
 }
+/* }}} */
 
 /*
  * Local variables:
