@@ -515,7 +515,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		mysql = (MYSQL *) emalloc(sizeof(MYSQL));
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(mysql);
-		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,NULL,0)==NULL) {
+		if (mysql_real_connect(mysql,host,user,passwd,NULL,port,socket,0)==NULL) {
 #else
 		if (mysql_connect(mysql,host,user,passwd)==NULL) {
 #endif
