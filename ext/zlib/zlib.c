@@ -153,8 +153,9 @@ PHP_MINFO_FUNCTION(zlib)
 static gzFile php_gzopen_wrapper(char *path, char *mode, int options)
 {
 	FILE *f;
+	int issock=0, socketd=0;
 
-	f = php_fopen_wrapper(path, mode, options, NULL, NULL, NULL);
+	f = php_fopen_wrapper(path, mode, options, &issock, &socketd, NULL);
 
 	if (!f) {
 		return NULL;
