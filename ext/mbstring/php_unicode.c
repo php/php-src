@@ -257,11 +257,26 @@ PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen
 			}
 			break;
 
-		case PHP_UNICODE_CASE_TITLE:
+		case PHP_UNICODE_CASE_TITLE: {
+			int mode = 0; 
+
 			for (i = 0; i < unicode_len / sizeof(unsigned long); i++) {
-				unicode_ptr[i] = php_unicode_totitle(unicode_ptr[i]);
+				int res = php_unicode_is_prop(unicode_ptr[i],
+					UC_MN|UC_ME|UC_CF|UC_LM|UC_SK|UC_LU|UC_LL|UC_LT, 0);
+				if (mode) {
+					if (res) {
+						unicode_ptr[i] = php_unicode_tolower(unicode_ptr[i]);
+					} else {
+						mode = 0;
+					}	
+				} else {
+					if (res) {
+						mode = 1;
+						unicode_ptr[i] = php_unicode_totitle(unicode_ptr[i]);
+					}
+				}
 			}
-			break;
+		} break;
 
 	}
 	
