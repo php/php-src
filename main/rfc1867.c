@@ -37,7 +37,7 @@
 #define SAFE_RETURN { \
 	if (lbuf) efree(lbuf); \
 	if (abuf) efree(abuf); \
-	if(array_index) efree(array_index); \
+	if (array_index) efree(array_index); \
 	zend_hash_destroy(&PG(rfc1867_protected_variables)); \
 	zend_llist_destroy(&header); \
 	if (mbuff->boundary_next) efree(mbuff->boundary_next); \
@@ -549,6 +549,7 @@ static char *multipart_buffer_read_body(multipart_buffer *self TSRMLS_DC)
 	}
 
 	if(out) {
+		out = erealloc(out, total_bytes + 1);
 		out[total_bytes] = '\0';
 	}
 
@@ -671,7 +672,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					max_file_size = atol(value);
 				}
 
-				if (param) efree(param);
+				efree(param);
+				if(value != "") efree(value);
 				continue;
 			}
 
@@ -688,10 +690,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 			while (!cancel_upload && (blen = multipart_buffer_read(mbuff, buff, sizeof(buff) TSRMLS_CC)))
 			{
 				if (total_bytes > PG(upload_max_filesize)) {
-					sapi_module.sapi_error(E_WARNING, "upload_max_filesize of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize), param);
+					sapi_module.sapi_error(E_WARNING, "upload_max_filesize of %ld bytes exceeded - file [%s=%s] not saved", PG(upload_max_filesize), param, filename);
 					cancel_upload = UPLOAD_ERROR_A;
 				} else if (max_file_size && (total_bytes > max_file_size)) {
-					sapi_module.sapi_error(E_WARNING, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s] not saved", max_file_size, param);
+					sapi_module.sapi_error(E_WARNING, "MAX_FILE_SIZE of %ld bytes exceeded - file [%s=%s] not saved", max_file_size, param, filename);
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
 					wlen = fwrite(buff, 1, blen, fp);
@@ -772,7 +774,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				register_http_post_files_variable(lbuf, filename, http_post_files, 0 TSRMLS_CC);
 			}
 			s = "";
-			
+			efree(filename);
 	
 		/* Possible Content-Type: */
 			if (!(cd = php_mime_get_hdr_value(header, "Content-Type")) || filename == "") {
@@ -809,26 +811,25 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 			{
 				zval file_size, error_type;
+
+				error_type.value.lval = cancel_upload;
+				error_type.type = IS_LONG;
 				
 			/* Add $foo[error] */
 				if (cancel_upload) {
-					error_type.value.lval = cancel_upload;
-					error_type.type = IS_LONG;
-
 					file_size.value.lval = 0;
 					file_size.type = IS_LONG;
-	
-					if(is_arr_upload) {
-						sprintf(lbuf, "%s[error][%s]", abuf, array_index);
-					} else {
-						sprintf(lbuf, "%s[error]", param);
-					}
-					register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
-
 				} else {
 					file_size.value.lval = total_bytes;
 					file_size.type = IS_LONG;
 				}	
+	
+				if(is_arr_upload) {
+					sprintf(lbuf, "%s[error][%s]", abuf, array_index);
+				} else {
+					sprintf(lbuf, "%s[error]", param);
+				}
+				register_http_post_files_variable_ex(lbuf, &error_type, http_post_files, 0 TSRMLS_CC);
 							
 			/* Add $foo_size */
 				if(is_arr_upload) {
@@ -846,6 +847,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 				}
 				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
 			}
+			efree(param);
 		}
 	}
 
