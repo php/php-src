@@ -5,19 +5,21 @@
 	$Id$
 */
 
+#define CONDENV(ev,def) (getenv(ev)!=NULL?getenv(ev):def)
+
 /* Default PHP / PEAR directories */
-#define CONFIGURATION_FILE_PATH "php.ini"
-#define PEAR_INSTALLDIR "c:\\php4\\pear"
-#define PHP_BINDIR "c:\\php4"
-#define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""
-#define PHP_CONFIG_FILE_SCAN_DIR ""
-#define PHP_DATADIR "c:\\php4"
-#define PHP_EXTENSION_DIR "c:\\php4"
-#define PHP_INCLUDE_PATH	".;c:\\php4\\pear"
-#define PHP_LIBDIR "c:\\php4"
-#define PHP_LOCALSTATEDIR "c:\\php4"
-#define PHP_PREFIX "c:\\php4"
-#define PHP_SYSCONFDIR "c:\\php4"
+#define CONFIGURATION_FILE_PATH   "php.ini"
+#define PEAR_INSTALLDIR           CONDENV("PEAR_INSTALLDIR", "c:\\php4\\pear")
+#define PHP_BINDIR                CONDENV("PHP_BINDIR", "c:\\php4")
+#define PHP_CONFIG_FILE_PATH      CONDENV("SystemRoot", "")
+#define PHP_CONFIG_FILE_SCAN_DIR  CONDENV("PHP_CONFIG_FILE_SCAN_DIR", "")
+#define PHP_DATADIR               CONDENV("PHP_DATADIR", "c:\\php4")
+#define PHP_EXTENSION_DIR         "c:\\php4"
+#define PHP_INCLUDE_PATH          ".;c:\\php4\\pear"
+#define PHP_LIBDIR                CONDENV("PHP_LIBDIR", "c:\\php4")
+#define PHP_LOCALSTATEDIR         CONDENV("PHP_LOCALSTATEDIR", "c:\\php4")
+#define PHP_PREFIX                CONDENV("PHP_PREFIX", "c:\\php4")
+#define PHP_SYSCONFDIR            CONDENV("PHP_SYSCONFDIR", "c:\\php4")
 
 /* Enable / Disable BCMATH extension (default: enabled) */
 #define WITH_BCMATH 1
