@@ -44,9 +44,14 @@ if (getenv('TEST_PHP_SRCDIR')) {
 
 $cwd = getcwd();
 set_time_limit(0);
-while(ob_get_level()) {
-	ob_end_clean();
-}
+
+// delete as much output buffers as possible
+$ob = ob_get_level();
+if ($ob) do {
+	@ob_end_clean();
+} while($ob>1 && $ob-- > ob_get_level());
+if (ob_get_level()) echo "Not all buffers were deleted.\n";
+
 error_reporting(E_ALL);
 ini_set('magic_quotes_runtime',0); // this would break tests by modifying EXPECT sections
 
