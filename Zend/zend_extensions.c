@@ -45,19 +45,23 @@ int zend_load_extension(char *path)
 
 	handle = DL_LOAD(path);
 	if (!handle) {
-		zend_printf("Failed loading %s\n", path);
+#ifndef WIN32||WINNT
+		fprintf(stderr, "Failed loading %s:  %s\n", path, dlerror());
+#else
+		fprintf(stderr, "Failed loading %s\n", path);
+#endif
 		return FAILURE;
 	}
 
 	extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
 	new_extension = (zend_extension *) DL_FETCH_SYMBOL(handle, "zend_extension_entry");
 	if (!extension_version_info || !new_extension) {
-		zend_printf("%s doesn't appear to be a valid Zend extension\n", path);
+		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
 		return FAILURE;
 	}
 
 	if (extension_version_info->zend_extension_api_no > ZEND_EXTENSION_API_NO) {
-		zend_printf("%s requires Zend version %s or later\n"
+		fprintf(stderr, "%s requires Zend version %s or later\n"
 					"Current version %s, API version %d\n",
 					new_extension->name,
 					extension_version_info->required_zend_version,
@@ -67,7 +71,7 @@ int zend_load_extension(char *path)
 		return FAILURE;
 	} else if (extension_version_info->zend_extension_api_no < ZEND_EXTENSION_API_NO) {
 		/* we may be able to allow for downwards compatability in some harmless cases. */
-		zend_printf("%s is outdated (API version %d, current version %d)\n"
+		fprintf(stderr, "%s is outdated (API version %d, current version %d)\n"
 					"Contact %s at %s for a later version of this module.\n",
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
@@ -77,14 +81,14 @@ int zend_load_extension(char *path)
 		DL_UNLOAD(handle);
 		return FAILURE;
 	} else if (ZTS_V!=extension_version_info->thread_safe) {
-		zend_printf("Cannot load %s - it %s thread safe, whereas Zend %s\n",
+		fprintf(stderr, "Cannot load %s - it %s thread safe, whereas Zend %s\n",
 					new_extension->name,
 					(extension_version_info->thread_safe?"is":"isn't"),
 					(ZTS_V?"is":"isn't"));
 		DL_UNLOAD(handle);
 		return FAILURE;
 	} else if (ZEND_DEBUG_V!=extension_version_info->debug) {
-		zend_printf("Cannot load %s - it %s debug information, whereas Zend %s\n",
+		fprintf(stderr, "Cannot load %s - it %s debug information, whereas Zend %s\n",
 					new_extension->name,
 					(extension_version_info->debug?"contains":"does not contain"),
 					(ZEND_DEBUG_V?"does":"does not"));
@@ -103,12 +107,12 @@ int zend_load_extension(char *path)
 
 	zend_llist_add_element(&zend_extensions, &extension);
 
-	/*zend_printf("Loaded %s, version %s\n", extension.name, extension.version);*/
+	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
 
 	zend_append_version_info(&extension);
 	return SUCCESS;
 #else
-	zend_printf("Extensions are not supported on this platform.\n");
+	fprintf(stderr, "Extensions are not supported on this platform.\n");
 	return FAILURE
 #endif
 }
