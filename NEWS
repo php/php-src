@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)
   . headers_list(). (Sara)
+  . php_strip_whitespace(). strip whitespace & comments from a script. (Ilia)
+  . php_check_syntax(). check php script for parse errors. (Ilia)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #24394 (Serializing cross-referenced objects causes segfault).

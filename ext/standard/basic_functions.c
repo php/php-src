@@ -35,6 +35,12 @@
 #include "ext/standard/dns.h"
 #include "ext/standard/php_uuencode.h"
 
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
+
+#include "zend.h"
+#include "zend_language_scanner.h"
+#include "zend_language_parser.h"
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
@@ -606,6 +612,8 @@ function_entry basic_functions[] = {
 	PHP_FE(highlight_file,													NULL)
 	PHP_FALIAS(show_source, 		highlight_file,							NULL)
 	PHP_FE(highlight_string,												NULL)
+	PHP_FE(php_strip_whitespace,												NULL)
+	PHP_FE(php_check_syntax,												NULL)
 
 	PHP_FE(ini_get,															NULL)
 	PHP_FE(ini_get_all,														NULL)
@@ -2306,6 +2314,85 @@ PHP_FUNCTION(highlight_file)
 }
 /* }}} */
 
+/* {{{ proto string php_strip_whitespace(string file_name)
+   Return source with stripped comments and whitespace */
+PHP_FUNCTION(php_strip_whitespace)
+{
+	char *filename;
+	int filename_len;
+	zend_lex_state original_lex_state;
+	zend_file_handle file_handle = {0};
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
+
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.filename = filename;
+	file_handle.free_filename = 0;
+	file_handle.opened_path = NULL;
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
+	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
+		RETURN_EMPTY_STRING();
+	}
+
+	zend_strip(TSRMLS_C);
+	
+	zend_destroy_file_handle(&file_handle TSRMLS_CC);
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
+
+	php_ob_get_buffer(return_value TSRMLS_CC);
+	php_end_ob_buffer(0, 0 TSRMLS_CC);
+
+	return;
+}
+/* }}} */
+
+/* {{{ proto bool php_check_syntax(string file_name [, &$error_message])
+   Check the syntax of the specified file. */
+PHP_FUNCTION(php_check_syntax)
+{
+	char *filename;
+	int filename_len;
+	zval *errm=NULL;
+	zend_file_handle file_handle = {0};
+
+	int old_errors = PG(display_errors);
+	int log_errors = PG(log_errors);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &filename, &filename_len, &errm) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.filename = filename;
+	file_handle.free_filename = 0;
+	file_handle.opened_path = NULL;	
+
+	PG(log_errors) = PG(display_errors) = 0;
+
+	if (php_lint_script(&file_handle TSRMLS_CC) != SUCCESS) {
+		if (errm && PZVAL_IS_REF(errm)) {
+			char *error_str;
+
+			convert_to_string_ex(&errm);
+			spprintf(&error_str, 0, "%s in %s on line %d", PG(last_error_message), PG(last_error_file), PG(last_error_lineno));
+			ZVAL_STRING(errm, error_str, 0);
+		}
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+
+	PG(display_errors) = old_errors;
+	PG(log_errors) = log_errors;
+
+	return;
+}
+/* }}} */
+
 /* {{{ proto bool highlight_string(string string [, bool return] )
    Syntax highlight a string or optionally return it */
 PHP_FUNCTION(highlight_string)
@@ -2314,6 +2401,7 @@ PHP_FUNCTION(highlight_string)
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	char *hicompiled_string_description;
 	zend_bool  i = 0;
+	int old_error_reporting = EG(error_reporting);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &expr, &i) == FAILURE) {
 		RETURN_FALSE;
@@ -2324,6 +2412,8 @@ PHP_FUNCTION(highlight_string)
 		php_start_ob_buffer (NULL, 0, 1 TSRMLS_CC);
 	}
 
+	EG(error_reporting) = E_ERROR;
+
 	php_get_highlight_struct(&syntax_highlighter_ini);
 
 	hicompiled_string_description = zend_make_compiled_string_description("highlighted code" TSRMLS_CC);
@@ -2333,6 +2423,8 @@ PHP_FUNCTION(highlight_string)
 		RETURN_FALSE;
 	}
 	efree(hicompiled_string_description);
+
+	EG(error_reporting) = old_error_reporting;
 
 	if (i) {
 		php_ob_get_buffer (return_value TSRMLS_CC);
