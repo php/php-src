@@ -1103,6 +1103,8 @@ PHP_FUNCTION(socket_bind)
 		struct sockaddr_in sa;
 		struct hostent *hp;
 
+		memset(&sa, 0, sizeof(sa));
+
 		if (argc != 3) {
 			WRONG_PARAM_COUNT;
 		}
