@@ -883,8 +883,9 @@ static void process_EXIF (ImageInfoType *ImageInfo, char *CharBuf, unsigned int 
 static int scan_JPEG_header (ImageInfoType *ImageInfo, FILE *infile, Section_t *Sections, int *SectionsRead, int ReadAll, char *LastExifRefd)
 {
     int a;
+/*
     int HaveCom = FALSE;
-
+*/
     a = fgetc(infile);
     if (a != 0xff || fgetc(infile) != M_SOI) {
         return FALSE;

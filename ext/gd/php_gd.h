@@ -146,7 +146,6 @@ PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
 PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
-static void php_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
 PHP_FUNCTION(imagettfbbox);
 PHP_FUNCTION(imagettftext);

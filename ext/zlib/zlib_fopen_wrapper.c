@@ -75,7 +75,7 @@ FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock,
 		
 		path++;
 
-		fp = php_fopen_wrapper(path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL TSRMLS_CC);
+		fp = php_fopen_wrapper((char *) path, mode, options|IGNORE_URL, &fissock, &fsocketd, NULL TSRMLS_CC);
 		
 		if (!fp) {
 			free(gc);
