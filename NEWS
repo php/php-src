@@ -7,14 +7,13 @@ PHP 4                                                                      NEWS
   Ilia <ilia@prohost.org>. (kalowsky)
 - Added a default timeout to PHP streams. (kalowsky, Ilia A <ilia@prohost.org>)
 - Added clickable error messages that direct to a page describing the
-  error or function causing the error in detail. (Yasuo, Wez, Marcus)
+  error or function causing the error in detail. (Derick, Wez, Marcus)
 - Added odbc_data_source() functionality to identify DB ServerName, and a 
   description of it gathered from the DSN. (kalowsky)
 - Added $DomDocument->xinclude() for substitution of XIncludes in
-- Changed zlib.output_compression behavior. If larger chunk is preferred,
-- Copy() fixed to return 1 on 0 byte files. Patch by Ilia A <ilia@prohost.org>.
+- Copy() fixed to return 1 on 0 byte files. (Patch by Ilia A <ilia@prohost.org>)
 - Added ob_list_handlers() which returns an array of all active output
-  handlers. (marcus)
+  handlers. (Marcus)
 - Added mbstring encoding/decoding "HTML-ENTITIES". (Marcus)
 - Added parameter 'L' for mb_http_input() to retrieve input encoding as a
   comma separated string. (Marcus)
