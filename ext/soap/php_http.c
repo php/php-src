@@ -186,11 +186,11 @@ static int in_domain(const char *host, const char *domain)
   }
 }
 
-int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction, int soap_version TSRMLS_DC)
+int send_http_soap_request(zval *this_ptr, char *buf, int buf_size, char *location, char *soapaction, int soap_version TSRMLS_DC)
 {
-	xmlChar *buf, *request;
+	char *request;
 	smart_str soap_headers = {0};
-	int buf_size, request_size, err;
+	int request_size, err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval **trace, **tmp;
@@ -208,16 +208,6 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 		}
 	} else {
 		stream = NULL;
-	}
-
-	xmlDocDumpMemory(doc, &buf, &buf_size);
-	if (!buf) {
-		add_soap_fault(this_ptr, "HTTP", "Error build soap request", NULL, NULL TSRMLS_CC);
-		return FALSE;
-	}
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    Z_LVAL_PP(trace) > 0) {
-		add_property_stringl(this_ptr, "__last_request", buf, buf_size, 1);
 	}
 
 	if (location != NULL && location[0] != '\000') {
@@ -494,7 +484,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 	}
 	if (request != buf) {efree(request);}
-	xmlFree(buf);
+
 	return TRUE;
 }
 
@@ -789,10 +779,6 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	} else {
 		*buffer = http_body;
 		*buffer_len = http_body_size;
-	}
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    Z_LVAL_PP(trace) > 0) {
-		add_property_stringl(this_ptr, "__last_response", *buffer, *buffer_len, 1);
 	}
 
 	efree(http_headers);
