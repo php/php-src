@@ -1916,7 +1916,13 @@ PHP_FUNCTION(apache_exec_uri)
    Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
-	RETURN_STRING(SERVER_VERSION, 1);
+	char *apv = (char *) ap_get_server_version();
+
+	if (apv && *apv) {
+		RETURN_STRING(apv, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
