@@ -38,6 +38,7 @@
 
 #ifndef THREAD_SAFE
 extern char *strtok_string;
+extern char *locale_string;
 #endif
 
 PHP_FUNCTION(strspn);
