@@ -98,6 +98,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
                         case 'doc':
                             $dest = $this->config->get('doc_dir') . DIRECTORY_SEPARATOR .
                                     $dest;
+                            break;
                         case 'php':
                         default:
                             $dest = $this->config->get('php_dir') . DIRECTORY_SEPARATOR .
