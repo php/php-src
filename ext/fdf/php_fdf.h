@@ -40,7 +40,7 @@
 #include <FdfTk.h>
 
 extern zend_module_entry fdf_module_entry;
-#define phpext_fdf_ptr &fdf_module_entry
+#define fdf_module_ptr &fdf_module_entry
 
 extern PHP_MINIT_FUNCTION(fdf);
 extern PHP_MSHUTDOWN_FUNCTION(fdf);
