@@ -24,7 +24,7 @@
         </notes>
 		<deps>
 		 <dep type="pkg" version="1.0" rel="ge">pkg4</dep>
-		 <dep type="php" version="1.0" rel="ge">pkg5</dep>
+		 <dep type="pkg" version="1.0" rel="ge">pkg5</dep>
 		</deps>
         <filelist>
           <dir name="/" baseinstalldir="grob" role="php">
