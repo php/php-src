@@ -508,7 +508,7 @@ PHP_FUNCTION(aggregate_properties_by_list)
 }
 /* }}} */
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+#if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 /* {{{ proto void aggregate_methods_by_regexp(object obj, string class, string regexp [, bool exclude])
    */
 PHP_FUNCTION(aggregate_methods_by_regexp)

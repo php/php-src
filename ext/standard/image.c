@@ -34,7 +34,7 @@
 #endif
 #include "php_image.h"
 
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 #include "zlib.h"
 #endif
 
@@ -80,7 +80,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
-#if HAVE_ZLIB	
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
 #endif	
 	REGISTER_LONG_CONSTANT("IMAGETYPE_IFF",     IMAGE_FILETYPE_IFF,     CONST_CS | CONST_PERSISTENT);
@@ -170,7 +170,7 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 }
 /* }}} */
 
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 /* {{{ php_handle_swc
  */
 static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
@@ -944,7 +944,7 @@ PHP_FUNCTION(getimagesize)
 		case IMAGE_FILETYPE_SWF:
 			result = php_handle_swf(stream TSRMLS_CC);
 			break;
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 		case IMAGE_FILETYPE_SWC:
 			result = php_handle_swc(stream TSRMLS_CC);
 			break;

@@ -194,7 +194,7 @@ static long from_oct(int, char *);
 static int fsmagic(char *fn TSRMLS_DC);
 
 
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 static int zmagic(unsigned char *, int);
 #endif
 
@@ -1020,7 +1020,7 @@ static void tryit(unsigned char *buf, int nb, int checkzmagic)
     /*
      * Try compression stuff
      */
-#if HAVE_ZLIB
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 	if (checkzmagic == 1) {  
 		if (zmagic(buf, nb) == 1)
 			return;
@@ -1569,7 +1569,7 @@ static int mcheck(union VALUETYPE *p, struct magic *m)
     return matched;
 }
 
-#if HAVE_ZLIB 
+#if HAVE_ZLIB && !defined(COMPILE_DL_ZLIB)
 /*
  * compress routines: zmagic() - returns 0 if not recognized, uncompresses
  * and prints information if recognized uncompress(s, method, old, n, newch)
