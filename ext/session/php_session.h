@@ -91,6 +91,7 @@ typedef struct _php_ps_globals {
 	zend_bool define_sid;
 	zend_bool use_cookies;
 	zend_bool use_trans_sid;
+	zend_bool output_handler_registered;
 } php_ps_globals;
 
 extern zend_module_entry session_module_entry;
