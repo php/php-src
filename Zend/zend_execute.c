@@ -78,7 +78,9 @@ static inline void zend_clean_garbage(TSRMLS_D)
 
 #define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z TSRMLS_CC)
 #define PZVAL_LOCK(z) zend_pzval_lock_func(z)
-#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { PZVAL_LOCK(pzv); }
+#define RETURN_VALUE_UNUSED(pzn)	(((pzn)->u.EA.type & EXT_TYPE_UNUSED))
+#define SELECTIVE_PZVAL_LOCK(pzv, pzn)	if (!RETURN_VALUE_UNUSED(pzn)) { PZVAL_LOCK(pzv); }
+
 
 /* End of zend_execute_locks.h */
 
@@ -1091,10 +1093,15 @@ static void zend_fetch_property_address_read(znode *result, znode *op1, znode *o
 			zval_dtor(offset);
 		}
 		FREE_OP(Ts, op2, EG(free_op2));
+
+		if (RETURN_VALUE_UNUSED(result) && ((*retval)->refcount == 0)) {
+			zval_dtor(*retval);
+			FREE_ZVAL(*retval);
+			return; /* no need for locking */
+		}
 	}
 	
 	SELECTIVE_PZVAL_LOCK(*retval, result);
-	return;
 }
 
 static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp_variable * Ts, int (*incdec_op)(zval *) TSRMLS_DC)
