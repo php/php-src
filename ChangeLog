@@ -1,3 +1,67 @@
+2001-04-02  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c:
+    changed the flags parameters to be a bitfield + constants (I don't know what
+    I was thinking!).  Added a couple of extra parameters so that the equivalent
+    functionality of the openssl smime command can be pretty much used in full.
+    Added some more error reporting.
+
+2001-04-02  Andi Gutmans  <andi@zend.com>
+
+    * configure.in
+      main/php_version.h: - RC6
+
+2001-04-02  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ext/zlib/zlib.c: MFH, rev 1.77
+
+    * ext/standard/output.c: MFH, rev 1.53
+
+    * ext/standard/output.c:
+    Free the correct output buffer, to avoid a segfault on a HEAD request
+    when using output buffering with a custom handler (patch by zeev@)
+
+2001-04-02  James Moore  <James@phpuk.org>
+
+    * ext/standard/mail.c: remove rogue ZEND_GET_MODULE()
+
+2001-04-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: MFH
+
+2001-04-02  Nick Gorham  <nick@easysoft.com>
+
+    * ext/odbc/php_odbc.c
+      NEWS:
+    Added small change to php_odbc module, to check for failed SQLDisconnects
+    and to close any outstanding transactions if the call fails, then disconnect
+    again. This can cause chaos with SQL Server, this regards a SELECT as
+    starting a transaction, and will leave it  open if the result set is not all
+    read.
+
+2001-04-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Use correct string length.
+
+2001-04-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/aspell/config.m4: MFH
+
+    * ext/aspell/config.m4: Fixed a typo. Bug: #10103
+
+2001-04-02  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_pgsql.c:
+    Inserted a few extra initialisations, just in case. Had some problems in a
+    different module, this solved it there, hance the added insurance. (Mc)
+
+2001-04-02  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/openssl/openssl.c:
+    added some more error reporting and did a little tidying.
+
 2001-04-01  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/openssl/CREDITS
