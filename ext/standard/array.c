@@ -1542,6 +1542,8 @@ PHP_FUNCTION(array_fill)
 	convert_to_long_ex(num);
 	i = Z_LVAL_PP(num) - 1;	
 	if (i < 0) {
+		zend_hash_destroy(Z_ARRVAL_P(return_value));
+		efree(Z_ARRVAL_P(return_value));
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements must be positive");
 		RETURN_FALSE;
 	}
