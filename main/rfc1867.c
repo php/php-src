@@ -158,7 +158,7 @@ typedef struct {
 */
 static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 {
-	int bytes_to_read, actual_read = 0;
+	int bytes_to_read, total_read = 0, actual_read = 0;
 
 	/* shift the existing data if necessary */
 	if (self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {
@@ -171,7 +171,7 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 	bytes_to_read = self->bufsize - self->bytes_in_buffer;
 
 	/* read the required number of bytes */
-	if (bytes_to_read > 0) {
+	while (bytes_to_read > 0) {
 
 		char *buf = self->buffer + self->bytes_in_buffer;
 
@@ -181,10 +181,14 @@ static int fill_buffer(multipart_buffer *self TSRMLS_DC)
 		if (actual_read > 0) {
 			self->bytes_in_buffer += actual_read;
 			SG(read_post_bytes) += actual_read;
+			total_read += actual_read;
+			bytes_to_read -= actual_read;
+		} else {
+			break;
 		}
 	}
 
-	return actual_read;
+	return total_read;
 }
 
 
@@ -334,7 +338,12 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 		/* add header to table */
 		
 		char *key = line;
-		char *value = strchr(line, ':');
+		char *value = NULL;
+		
+		/* space in the beginning means same header */
+		if (!isspace(line[0])) {
+			value = strchr(line, ':');
+		}
 
 		if (value) {
 			*value = 0;
@@ -343,7 +352,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value = estrdup(value);
 			entry.key = estrdup(key);
 
-		} else if (zend_llist_remove_tail(header)) { /* If no ':' on the line, add to previous line */
+		} else if (header->count) { /* If no ':' on the line, add to previous line */
 
 			prev_len = strlen(prev_entry.value);
 			cur_len = strlen(line);
@@ -354,6 +363,8 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 			entry.value[cur_len + prev_len] = '\0';
 
 			entry.key = estrdup(prev_entry.key);
+			
+			zend_llist_remove_tail(header);
 		} else {
 			continue;
 		}
