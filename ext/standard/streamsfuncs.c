@@ -928,6 +928,30 @@ PHP_FUNCTION(stream_context_set_params)
 }
 /* }}} */
 
+/* {{{ proto resource stream_context_get_default([array options])
+   Get a handle on the default file/stream context and optionally set parameters */
+PHP_FUNCTION(stream_context_get_default)
+{
+	zval *params = NULL;
+	php_stream_context *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a", &params) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	if (FG(default_context) == NULL) {
+		FG(default_context) = php_stream_context_alloc();
+	}
+	context = FG(default_context);
+	
+	if (params) {
+		parse_context_options(context, params);
+	}
+	
+	php_stream_context_to_zval(context, return_value);
+}
+/* }}} */
+
 /* {{{ proto resource stream_context_create([array options])
    Create a file context and optionally set parameters */
 PHP_FUNCTION(stream_context_create)
@@ -1163,6 +1187,35 @@ PHP_FUNCTION(stream_set_write_buffer)
 	}
 
 	RETURN_LONG(ret == 0 ? 0 : EOF);
+}
+/* }}} */
+
+/* {{{ proto bool stream_socket_enable_crypto(resource stream, bool enable [, int cryptokind, resource sessionstream])
+   Enable or disable a specific kind of crypto on the stream */
+PHP_FUNCTION(stream_socket_enable_crypto)
+{
+	long cryptokind;
+	zval *zstream, *zsessstream = NULL;
+	php_stream *stream, *sessstream = NULL;
+	zend_bool enable;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|lr", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	php_stream_from_zval(stream, &zstream);
+
+	if (ZEND_NUM_ARGS() >= 3) {
+		if (zsessstream) {
+			php_stream_from_zval(sessstream, zsessstream);
+		}
+		
+		if (php_stream_xport_crypto_setup(stream, cryptokind, sessstream TSRMLS_CC) < 0) {
+			RETURN_FALSE;
+		}
+	}
+
+	RETURN_BOOL(php_stream_xport_crypto_enable(stream, enable TSRMLS_CC) < 0 ? 0 : 1);
 }
 /* }}} */
 

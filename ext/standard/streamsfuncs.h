@@ -47,8 +47,10 @@ PHP_FUNCTION(stream_context_create);
 PHP_FUNCTION(stream_context_set_params);
 PHP_FUNCTION(stream_context_set_option);
 PHP_FUNCTION(stream_context_get_options);
+PHP_FUNCTION(stream_context_get_default);
 PHP_FUNCTION(stream_filter_prepend);
 PHP_FUNCTION(stream_filter_append);
+PHP_FUNCTION(stream_socket_enable_crypto);
 
 /*
  * Local variables:
