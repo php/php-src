@@ -1011,6 +1011,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid function name");
 				}
 			}
+			break;
 		}
 
 		zend_hash_move_forward_ex(target_hash, &pos);
