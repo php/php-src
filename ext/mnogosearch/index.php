@@ -972,6 +972,7 @@ if(($errno=Udm_Errno($udm_agent))>0){
 	}
                         
         for($i=0;$i<$rows;$i++){
+		$excerpt_flag=0;
         	if (Udm_Api_Version() >= 30204) {
         		$excerpt_flag=Udm_Make_Excerpt($udm_agent, $res, $i);
         	}
@@ -1023,7 +1024,18 @@ if(($errno=Udm_Errno($udm_agent))>0){
 	    		    	"&q=".urlencode($query_orig);
 		    	print ("<DD><a href=\"$storedstr\">Cached copy</a>\n");
 		    }
-		} 		
+		} elseif (Udm_Api_Version() >= 30204) {
+		    if ($excerpt_flag) {
+			    $storedstr="$storedocurl?rec_id=".Udm_CRC32($udm_agent,$save_url).
+		    		    "&DM=".urlencode($lastmod).
+				    "&DS=$docsize".
+		    		    "&L=$doclang".
+				    "&CS=$doccharset".
+				    "&DU=".urlencode($save_url).
+				    "&q=".urlencode($query_orig);
+			    print_template('stored');
+		    }
+		}
 	}	
 
         if ((Udm_Api_Version() == 30203) &&
