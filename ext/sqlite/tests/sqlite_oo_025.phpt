@@ -23,7 +23,7 @@ foreach ($data as $str) {
 }
 
 echo "====UNBUFFERED====\n";
-$r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
+$r = $db->unbufferedQuery("SELECT a from strings", SQLITE_NUM);
 //var_dump(class_implements($r));
 foreach($r as $row) {
 	var_dump($row);
@@ -33,7 +33,7 @@ foreach($r as $row) {
 	var_dump($row);
 }
 echo "====DIRECT====\n";
-foreach($db->unbuffered_query("SELECT a from strings", SQLITE_NUM) as $row) {
+foreach($db->unbufferedQuery("SELECT a from strings", SQLITE_NUM) as $row) {
 	var_dump($row);
 }
 echo "====BUFFERED====\n";

@@ -60,7 +60,7 @@ class SqliteNestedset implements RecursiveIterator
 	{
 		$this->db = $db;
 		$this->id_l = $id_l;
-		$this->id_r = $this->db->single_query('SELECT id_r FROM menu WHERE id_l='.$id_l, 1);
+		$this->id_r = $this->db->singleQuery('SELECT id_r FROM menu WHERE id_l='.$id_l, 1);
 		$this->id = $id_l;
 	}
 	
@@ -93,8 +93,8 @@ class SqliteNestedset implements RecursiveIterator
 
 	protected function fetch()
 	{
-		$res = $this->db->unbuffered_query('SELECT * FROM menu WHERE id_l='.$this->id);
-		$this->entry = $res->fetch_object('SqliteNestedsetElement', array(&$this->db));
+		$res = $this->db->unbufferedQuery('SELECT * FROM menu WHERE id_l='.$this->id);
+		$this->entry = $res->fetchObject('SqliteNestedsetElement', array(&$this->db));
 		unset($res);
 	}
 	
