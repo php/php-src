@@ -483,7 +483,6 @@ ENCAPSED_TOKENS [\[\]{}$]
 ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 ANY_CHAR (.|[\n])
 NEWLINE ("\r"|"\n"|"\r\n")
-NAMESPACE_NAME ({LABEL}":")+{LABEL}
 
 %option noyylineno
 %option noyywrap
@@ -1128,13 +1127,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
 	return T_STRING;
-}
-
-<ST_IN_SCRIPTING>{NAMESPACE_NAME} {
-	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
-	return T_NAMESPACE_NAME;
 }
 
 <ST_HEREDOC>{ENCAPSED_STRING} {
