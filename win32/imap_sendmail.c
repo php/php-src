@@ -117,6 +117,7 @@ int imap_SendText(char *RPath, char *Subject, char *mailTo, char *data, char *he
 	char *p;
 	char *tempMailTo;
 	ADDRESS *addr;
+	char *server_response = NULL;
 
 	/* check for NULL parameters */
 	if (data == NULL)
