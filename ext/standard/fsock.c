@@ -52,7 +52,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	if (persistent) {
-		spprintf(&hashkey, 0, "pfsockopen__%s:%d", host, port);
+		spprintf(&hashkey, 0, "pfsockopen__%s:%ld", host, port);
 	}
 
 	if (port > 0) {
