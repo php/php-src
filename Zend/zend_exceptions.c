@@ -147,16 +147,16 @@ ZEND_METHOD(exception, __construct)
 /* }}} */
 
 
-/* {{{ proto ErrorException::__construct(string message, int code, int severity)
+/* {{{ proto ErrorException::__construct(string message, int code, int severity [, $filename [, $lineno]])
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
-	char  *message = NULL;
-	long   code = 0, severity = E_ERROR;
+	char  *message = NULL, *filename = NULL;
+	long   code = 0, severity = E_ERROR, lineno;
 	zval  *object;
-	int    argc = ZEND_NUM_ARGS(), message_len;
+	int    argc = ZEND_NUM_ARGS(), message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sll", &message, &message_len, &code, &severity) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sllsl", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno) == FAILURE) {
 		zend_error(E_CORE_ERROR, "Wrong parameter count for exception([string $exception [, long $code ]])");
 	}
 
@@ -171,6 +171,14 @@ ZEND_METHOD(error_exception, __construct)
 	}
 
 	zend_update_property_long(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
+	
+	if (argc >= 4) {
+	    zend_update_property_string(default_exception_ce, object, "file", sizeof("file")-1, filename TSRMLS_CC);
+    	if (argc < 5) {
+    	    lineno = 0; // invalidate lineno
+    	}
+    	zend_update_property_long(default_exception_ce, object, "line", sizeof("line")-1, lineno TSRMLS_CC);
+	}
 }
 /* }}} */
 
@@ -532,10 +540,12 @@ static zend_function_entry default_exception_functions[] = {
 };
 
 static
-ZEND_BEGIN_ARG_INFO(arginfo_error_exception___construct, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 3)
 	ZEND_ARG_INFO(0, message)
 	ZEND_ARG_INFO(0, code)
 	ZEND_ARG_INFO(0, severity)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, lineno)
 ZEND_END_ARG_INFO();
 
 static zend_function_entry error_exception_functions[] = {
