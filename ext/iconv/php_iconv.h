@@ -21,6 +21,7 @@
 #define PHP_ICONV_H
 
 #include <iconv.h>
+#include "php.h"
 #include "SAPI.h"
 
 extern zend_module_entry iconv_module_entry;
