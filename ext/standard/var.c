@@ -514,7 +514,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				char s[256];
 				ulong slen;
 
-				slen = sprintf(s, "d:%.*G;", (int) EG(precision), Z_DVAL_PP(struc));
+				slen = sprintf(s, "d:%.252g;", Z_DVAL_PP(struc));
 				smart_str_appendl(buf, s, slen);
 				return;
 			}
