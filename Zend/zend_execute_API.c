@@ -32,14 +32,6 @@
 #include "zend_extensions.h"
 
 
-#define AI_USE_PTR(ai) \
-	if ((ai).ptr_ptr) { \
-		(ai).ptr = *((ai).ptr_ptr); \
-		(ai).ptr_ptr = &((ai).ptr); \
-	} else { \
-		(ai).ptr = NULL; \
-	}
-
 ZEND_API void (*zend_execute)(zend_op_array *op_array ELS_DC);
 
 
