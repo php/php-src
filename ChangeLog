@@ -1,3 +1,55 @@
+1999-12-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      NEWS:
+    Moved function_exists() to Zend library.
+
+1999-12-14  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/bcmath/bcmath.c:
+    (bcmath) Name of header changed from php3 to php but include forgotten.
+
+1999-12-14  Joey Smith  <joey@samaritan.com>
+
+    * ext/xml/xml.c
+      ext/bcmath/Makefile.am
+      ext/bcmath/bcmath.c:    Preliminary support for date/time stamping in error logs
+
+1999-12-14  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c: always check if output is ok after php3_header()
+
+1999-12-14  Mark Musone  <musone@afterfive.com>
+
+    * ext/mcal/php3_mcal.c: whoops..need to allow 7 parameters also
+
+1999-12-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/image.c:
+    (getimagesize) grrr, fixed newly (30 min ago) introduced NPR
+
+    * ext/standard/reg.c: use ex-API
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    * ext/standard/metaphone.c
+      ext/standard/iptc.c: use ex-API
+
+    * ext/standard/info.c
+      ext/standard/image.c: use _ex-API
+
+1999-12-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c
+      NEWS: Boo.
+
+1999-12-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * main.c:
+    Postpone the execution of post request startup handlers until the symbol_table is populated
+
 1999-12-13  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/standard/php_string.h
