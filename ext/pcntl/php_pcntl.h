@@ -39,6 +39,7 @@ PHP_RINIT_FUNCTION(pcntl);
 PHP_RSHUTDOWN_FUNCTION(pcntl);
 PHP_MINFO_FUNCTION(pcntl);
 
+PHP_FUNCTION(pcntl_alarm);
 PHP_FUNCTION(pcntl_fork);
 PHP_FUNCTION(pcntl_waitpid);
 PHP_FUNCTION(pcntl_wifexited);
