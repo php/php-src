@@ -338,7 +338,7 @@ PHP_MINIT_FUNCTION(ifx)
 	le_idresult = zend_register_list_destructors_ex(NULL, NULL, "informix id result", module_number);
 	le_link     = zend_register_list_destructors_ex(_close_ifx_link,NULL, "informix link",      module_number);
 	le_plink    = zend_register_list_destructors_ex(NULL,_close_ifx_plink,"informix persistent link", module_number);
-	Z_TYPE(ifx_module_entry) = type;
+	ifx_module_entry.type = type;
     
 	REGISTER_LONG_CONSTANT("IFX_SCROLL",      IFX_SCROLL,  CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IFX_HOLD",        IFX_HOLD,    CONST_CS | CONST_PERSISTENT);
@@ -513,7 +513,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 
 			/* hash it up */
-			Z_TYPE(new_le) = le_plink;
+			new_le.type = le_plink;
 			new_le.ptr = ifx;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) 
 			{
@@ -524,7 +524,7 @@ EXEC SQL END DECLARE SECTION;
 			IFXG(num_persistent)++;
 			IFXG(num_links)++;
 		} else {  /* we do */
-			if (Z_TYPE_P(le) != le_plink) {
+			if (le->type != le_plink) {
 				RETURN_FALSE;
 			}
 			/* ensure that the link did not die */
@@ -558,7 +558,7 @@ EXEC SQL END DECLARE SECTION;
 			int type,link;
 			void *ptr;
 
-			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
+			if (index_ptr->type != le_index_ptr) {
 				RETURN_FALSE;
 			}
 			link = (int) index_ptr->ptr;
@@ -581,9 +581,9 @@ EXEC SQL END DECLARE SECTION;
 					}
 				}
 				zend_list_addref(link);
-				Z_LVAL_P(return_value) = link;
+				return_value->value.lval = link;
 				php_ifx_set_default_link(link TSRMLS_CC);
-				Z_TYPE_P(return_value) = IS_RESOURCE;
+				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
 			} else {
@@ -614,8 +614,8 @@ EXEC SQL END DECLARE SECTION;
 		ZEND_REGISTER_RESOURCE(return_value, ifx, le_link);
 
 		/* add it to the hash */
-		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
-		Z_TYPE(new_index_ptr) = le_index_ptr;
+		new_index_ptr.ptr = (void *) return_value->value.lval;
+		new_index_ptr.type = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length+1, (void *) &new_index_ptr, sizeof(list_entry), NULL) == FAILURE) 
 		{
 			efree(hashed_details);
@@ -624,7 +624,7 @@ EXEC SQL END DECLARE SECTION;
 		IFXG(num_links)++;
 	}
 	efree(hashed_details);
-	php_ifx_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
+	php_ifx_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 
 /* {{{ proto int ifx_connect([string database [, string userid [, string password]]])
@@ -865,25 +865,25 @@ EXEC SQL END DECLARE SECTION;
 				RETURN_FALSE;
 			}
 
-			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pblobidarr));
+			zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
 			i=1;
-			while (zend_hash_get_current_data(Z_ARRVAL_PP(pblobidarr), (void **) &tmp) == SUCCESS) {
+			while (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_long(*tmp);
 				if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
 					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
 				}
 
-				ifx_type=php_intifx_getType((int)Z_LVAL_PP(tmp),&EG(regular_list) TSRMLS_CC);
+				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
 				switch(ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)(Z_LVAL_PP(tmp)),&EG(regular_list) TSRMLS_CC);
+						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
 						if(locator==NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
 							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
-							php_error(E_WARNING,"%d is not a Informix blob-result index", (int)(Z_LVAL_PP(tmp)));
+							php_error(E_WARNING,"%d is not a Informix blob-result index", (int)((*tmp)->value.lval));
 							RETURN_FALSE;
 						}
 						if(locator->loc_loctype==LOCFNAME) {
@@ -893,7 +893,7 @@ EXEC SQL END DECLARE SECTION;
 						break;
 
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)(Z_LVAL_PP(tmp)),&EG(regular_list),&char_tmp TSRMLS_CC);
+						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
 						indicator=0;
 						if(char_tmp==NULL || len<0) {
 							indicator=-1;
@@ -908,7 +908,7 @@ EXEC SQL END DECLARE SECTION;
 						break;
 				}
 				i++;
-				zend_hash_move_forward(Z_ARRVAL_PP(pblobidarr));
+				zend_hash_move_forward((*pblobidarr)->value.ht);
 			}
 			Ifx_Result->paramquery=1;  
 			EXEC SQL EXECUTE :statemid USING SQL DESCRIPTOR :descrpid;
@@ -1209,7 +1209,7 @@ EXEC SQL END DECLARE SECTION;
 				RETURN_FALSE;
 			}
 
-			if(Z_TYPE_PP(pblobidarr) != IS_ARRAY) {
+			if((*pblobidarr)->type != IS_ARRAY) {
 				IFXG(sv_sqlcode) = SQLCODE;
 				EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
 				EXEC SQL free :statemid;
@@ -1218,25 +1218,25 @@ EXEC SQL END DECLARE SECTION;
 				RETURN_FALSE;
 			} 
 
-			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(pblobidarr));
+			zend_hash_internal_pointer_reset((*pblobidarr)->value.ht);
 			i=1;
-			while (zend_hash_get_current_data(Z_ARRVAL_PP(pblobidarr), (void **) &tmp) == SUCCESS) {
+			while (zend_hash_get_current_data((*pblobidarr)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_long(*tmp);
 				if ((query_type == SQ_UPDATE) || (query_type == SQ_UPDALL)) {
 					EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
 				}
 				
-				ifx_type=php_intifx_getType((int)Z_LVAL_PP(tmp),&EG(regular_list) TSRMLS_CC);
+				ifx_type=php_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list) TSRMLS_CC);
 				switch(ifx_type) {
 					case TYPE_BLTEXT:
 					case TYPE_BLBYTE:
-						locator=php_intifx_get_blobloc((int)(Z_LVAL_PP(tmp)),&EG(regular_list) TSRMLS_CC);
+						locator=php_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list) TSRMLS_CC);
 						if(locator==NULL) {
 							IFXG(sv_sqlcode) = SQLCODE;
 							EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
 							EXEC SQL free :statemid;
 							efree(Ifx_Result);
-							php_error(E_WARNING,"%d is not a Informix blob-result index", (int)(Z_LVAL_PP(tmp)));
+							php_error(E_WARNING,"%d is not a Informix blob-result index", (int)((*tmp)->value.lval));
 							RETURN_FALSE;
 						}
 						if(locator->loc_loctype==LOCFNAME) {
@@ -1245,7 +1245,7 @@ EXEC SQL END DECLARE SECTION;
 						EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA= :*locator, TYPE=:loc_t_type; 
 						break;
 					case TYPE_CHAR:
-						len=php_intifx_get_char((int)(Z_LVAL_PP(tmp)),&EG(regular_list),&char_tmp TSRMLS_CC);
+						len=php_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp TSRMLS_CC);
 						
 						indicator=0;
 						if(char_tmp==NULL || len < 0) {
@@ -1261,7 +1261,7 @@ EXEC SQL END DECLARE SECTION;
 						break;
 				}
 				i++;
-				zend_hash_move_forward(Z_ARRVAL_PP(pblobidarr));
+				zend_hash_move_forward((*pblobidarr)->value.ht);
 			} 
 		}
 
@@ -2032,7 +2032,7 @@ EXEC SQL END DECLARE SECTION;
 			if (zend_get_parameters_ex(2, &result, &arg2)==FAILURE) {
 				RETURN_FALSE;
 			}
-			table_options = Z_STRVAL_PP(arg2);
+			table_options = (*arg2)->value.str.val;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -2796,7 +2796,7 @@ static long php_intifx_getType(long id, HashTable *list TSRMLS_DC)
 		php_error(E_WARNING,"%d is not a Informix id-result index", id);
 		return -1;
 	}
-	return IZ_TYPE_P(fx_res);
+	return Ifx_res->type;
 }
 
 /* ----------------------------------------------------------------------
@@ -2873,9 +2873,9 @@ static long php_intifx_create_blob(long type, long mode, char* param, long len, 
 	memset(Ifx_blob, 0, sizeof(IFX_IDRES));
 	
 	if(type==0 ) {
-		IZ_TYPE_P(fx_blob)=TYPE_BLBYTE;
+		Ifx_blob->type=TYPE_BLBYTE;
 	} else {
-		IZ_TYPE_P(fx_blob)=TYPE_BLTEXT;
+		Ifx_blob->type=TYPE_BLTEXT;
 	}
 	Ifx_blob->BLOB.mode=(int)mode;
 
@@ -2965,7 +2965,7 @@ static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || !(IZ_TYPE_P(fx_blob_orig)==TYPE_BLBYTE || IZ_TYPE_P(fx_blob_orig)==TYPE_BLTEXT)) {
+	if (type!=le_idresult || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return -1;
 	}
@@ -2978,7 +2978,7 @@ static long php_intifx_copy_blob(long bid, HashTable *list TSRMLS_DC)
 	
 	memset(Ifx_blob, 0, sizeof(IFX_IDRES));
   
-	IZ_TYPE_P(fx_blob)=IZ_TYPE_P(fx_blob_orig);
+	Ifx_blob->type=Ifx_blob_orig->type;
 	Ifx_blob->BLOB.mode=Ifx_blob_orig->BLOB.mode;
  
 	locator=&(Ifx_blob->BLOB.blob_data);
@@ -3041,7 +3041,7 @@ PHP_FUNCTION(ifx_free_blob)
 	}
 	convert_to_long(pid);
 
-	ret=php_intifx_free_blob(Z_LVAL_P(pid),&EG(regular_list) TSRMLS_CC); 
+	ret=php_intifx_free_blob(pid->value.lval,&EG(regular_list) TSRMLS_CC); 
 	if(ret<0) {
 		RETURN_FALSE;
 	} 
@@ -3067,7 +3067,7 @@ static long php_intifx_free_blob(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_blob)==TYPE_BLTEXT || IZ_TYPE_P(fx_blob)==TYPE_BLBYTE)) {
+	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return -1;
 	}
@@ -3105,7 +3105,7 @@ static long php_intifx2_free_blob(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_blob)==TYPE_BLTEXT || IZ_TYPE_P(fx_blob)==TYPE_BLBYTE)) {
+	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return -1;
 	}
@@ -3152,7 +3152,7 @@ PHP_FUNCTION(ifx_get_blob)
 	}
 	convert_to_long(pbid);
 
-	len=php_intifx_get_blob(Z_LVAL_P(pbid),&EG(regular_list),&content TSRMLS_CC); 
+	len=php_intifx_get_blob(pbid->value.lval,&EG(regular_list),&content TSRMLS_CC); 
 	if(content==NULL || len<0) {
 		RETURN_STRING(php_intifx_null(TSRMLS_C),1);
 	}
@@ -3178,7 +3178,7 @@ static long php_intifx_get_blob(long bid, HashTable *list, char** content TSRMLS
 	int type;
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_blob)==TYPE_BLTEXT || IZ_TYPE_P(fx_blob)==TYPE_BLBYTE)) {
+	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return -1;
 	}
@@ -3207,7 +3207,7 @@ static loc_t *php_intifx_get_blobloc(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_blob)==TYPE_BLTEXT || IZ_TYPE_P(fx_blob)==TYPE_BLBYTE)) {
+	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return NULL;
 	}
@@ -3263,7 +3263,7 @@ static long php_intifx_update_blob(long bid, char* param, long len, HashTable *l
 	int type;
 
 	Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_blob)==TYPE_BLTEXT || IZ_TYPE_P(fx_blob)==TYPE_BLBYTE)) {
+	if (type!=le_idresult && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
 		php_error(E_WARNING,"%d is not a Informix blob-result index", bid);
 		return -1;
 	}
@@ -3511,7 +3511,7 @@ static long php_intifx_create_char(char* param, long len, HashTable *list)
 		return -1;
 	}
 
-	IZ_TYPE_P(fx_char)=TYPE_CHAR;
+	Ifx_char->type=TYPE_CHAR;
 
 	if(param==NULL || len<0) {
 		Ifx_char->CHAR.char_data=NULL;
@@ -3578,7 +3578,7 @@ static long php_intifx_get_char(long bid, HashTable *list, char** content TSRMLS
 	int type;
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_char)==TYPE_CHAR)) {
+	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
 		php_error(E_WARNING,"%d is not a Informix char-result index", bid);
 		return -1;
 	}
@@ -3631,7 +3631,7 @@ static long php_intifx_free_char(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_char)==TYPE_CHAR)) {
+	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
 		php_error(E_WARNING,"%d is not a Informix char-result index", bid);
 		return -1;
 	}
@@ -3691,7 +3691,7 @@ static long php_intifx_update_char(long bid, char* param, long len, HashTable *l
 	int type;
 
 	Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult && !(IZ_TYPE_P(fx_char)==TYPE_CHAR)) {
+	if (type!=le_idresult && !(Ifx_char->type==TYPE_CHAR)) {
 		php_error(E_WARNING,"%d is not a Informix char-result index", bid);
 		return -1;
 	}
@@ -3793,7 +3793,7 @@ static long php_intifxus_create_slob(long create_mode, HashTable *list)
 		return -1;
 	}
 
-	IZ_TYPE_P(fx_slob)=TYPE_SLOB;
+	Ifx_slob->type=TYPE_SLOB;
 	Ifx_slob->SLOB.lofd=ifx_lo_create(Ifx_slob->SLOB.createspec,create_mode,&(Ifx_slob->SLOB.slob_data),&errcode);
 	if(errcode<0 || Ifx_slob->SLOB.lofd<0) {
 		php_error(E_WARNING,"can't create slob-resource: %d", errcode);
@@ -3846,7 +3846,7 @@ static long php_intifxus_free_slob(long bid, HashTable *list TSRMLS_DC)
 	int type;
 	
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		return -1;
 	}
@@ -3907,7 +3907,7 @@ static long php_intifxus_close_slob(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		return -1;
 	}
@@ -3985,7 +3985,7 @@ static long php_intifxus_open_slob(long bid, long create_mode, HashTable *list T
 	int type;
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		return -1;
 	}
@@ -4022,7 +4022,7 @@ static long php_intifxus_new_slob(HashTable *list)
 		return -1;
 	}
 	
-	IZ_TYPE_P(fx_slob)=TYPE_SLOB;
+	Ifx_slob->type=TYPE_SLOB;
 	Ifx_slob->SLOB.lofd=-1;
 	Ifx_slob->SLOB.createspec=NULL;
 	return zend_list_insert(Ifx_slob,le_idresult);
@@ -4043,7 +4043,7 @@ static ifx_lo_t *php_intifxus_get_slobloc(long bid, HashTable *list TSRMLS_DC)
 	int type;
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult  || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult  || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		return NULL;
 	}
@@ -4077,7 +4077,7 @@ PHP_FUNCTION(ifxus_tell_slob)
 	bid=Z_LVAL_P(pbid);
 
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
@@ -4125,7 +4125,7 @@ PHP_FUNCTION(ifxus_seek_slob)
  
 	bid=Z_LVAL_P(pbid);
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
@@ -4180,7 +4180,7 @@ PHP_FUNCTION(ifxus_read_slob)
  
 	bid=Z_LVAL_P(pbid);
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
@@ -4224,7 +4224,7 @@ PHP_FUNCTION(ifxus_write_slob)
  
 	bid=Z_LVAL_P(pbid);
 	Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
-	if (type!=le_idresult || IZ_TYPE_P(fx_slob)!=TYPE_SLOB) {
+	if (type!=le_idresult || Ifx_slob->type!=TYPE_SLOB) {
 		php_error(E_WARNING,"%d is not a Informix slob-result index", bid);
 		RETURN_FALSE;
 	}
