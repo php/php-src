@@ -66,7 +66,8 @@ typedef struct _hashtable {
 	Bucket *pListTail;
 	Bucket **arBuckets;
 	dtor_func_t pDestructor;
-	unsigned char persistent;
+	zend_bool persistent;
+	unsigned char nApplyCount;
 #if ZEND_DEBUG
 	int inconsistent;
 #endif

@@ -108,6 +108,17 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
 #define SET_INCONSISTENT(n)
 #endif
 
+#define HASH_APPLY_BEGIN(ht)														\
+	if ((ht)->nApplyCount>=3) {														\
+		zend_error(E_WARNING, "Nesting level too deep - recursive dependency?");	\
+		return;																		\
+	}																				\
+	(ht)->nApplyCount++;
+
+#define HASH_APPLY_END(ht)															\
+	(ht)->nApplyCount--;
+
+
 /* Generated on an Octa-ALPHA 300MHz CPU & 2.5GB RAM monster */
 static uint PrimeNumbers[] =
 {5, 11, 19, 53, 107, 223, 463, 983, 1979, 3907, 7963, 16229, 32531, 65407, 130987, 262237, 524521, 1048793, 2097397, 4194103, 8388857, 16777447, 33554201, 67108961, 134217487, 268435697, 536870683, 1073741621, 2147483399};
@@ -204,6 +215,7 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 	ht->nNextFreeElement = 0;
 	ht->pInternalPointer = NULL;
 	ht->persistent = persistent;
+	ht->nApplyCount = 0;
 	return SUCCESS;
 }
 
@@ -654,6 +666,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 
 	IS_CONSISTENT(ht);
 
+	HASH_APPLY_BEGIN(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
 		if (apply_func(p->pData)) {
@@ -662,6 +675,7 @@ ZEND_API void zend_hash_apply(HashTable *ht, apply_func_t apply_func)
 			p = p->pListNext;
 		}
 	}
+	HASH_APPLY_END(ht);
 }
 
 
@@ -671,6 +685,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 
 	IS_CONSISTENT(ht);
 
+	HASH_APPLY_BEGIN(ht);
 	p = ht->pListHead;
 	while (p != NULL) {
 		if (apply_func(p->pData, argument)) {
@@ -679,6 +694,7 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t appl
 			p = p->pListNext;
 		}
 	}
+	HASH_APPLY_END(ht);
 }
 
 
@@ -690,8 +706,9 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 
 	IS_CONSISTENT(ht);
 
-	va_start(args, num_args);
+	HASH_APPLY_BEGIN(ht);
 
+	va_start(args, num_args);
 	p = ht->pListHead;
 	while (p != NULL) {
 		hash_key.arKey = p->arKey;
@@ -703,8 +720,9 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 			p = p->pListNext;
 		}
 	}
-
 	va_end(args);
+
+	HASH_APPLY_END(ht);
 }
 
 
