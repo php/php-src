@@ -1,3 +1,99 @@
+2003-01-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_mbregex.c:
+      Oops! wrong patch. Reverted.
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed mb_ereg_replace() bug (the function has ignored the default option)
+
+    * tests/lang/bug21800.phpt:
+      Added test case for bug #21800
+
+    * ext/mbstring/php_mbregex.c:
+      Fixed mb_ereg_search() segfault that occurs when the function is called
+      before a string to be searched is passed by mb_ereg_search_init()
+
+2003-01-21  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/sysvshm/sysvshm.c:
+      increasing readability.
+
+2003-01-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/odbc/birdstep.c:
+      getParameters -> zend_get_parameters_ex.
+
+    * ext/fbsql/php_fbsql.c
+      ext/mbstring/mbstring.c
+      ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/string.c
+      sapi/apache/php_apache.c
+      sapi/apache_hooks/php_apache.c:
+      ARG_COUNT(ht) -> ZEND_NUM_ARGS().
+
+2003-01-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php
+      pear/package-PEAR.xml:
+      - PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
+        error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
+        as an exception (invoke PEAR errors with raiseError() or throwError()
+        just like before).
+
+2003-01-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4)
+      main/SAPI.h:
+      cvs server: warning: file `main/SAPI.h' seems to still contain conflict
+      indicators
+      
+      ..but it checks it in nevertheless.
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php4.c:
+      add sapi_get_target_uid/_gid for obtaining information about the
+      non-privileged user the web server is running as.  this is useful
+      for creating shared memory segments which need to be accessed by
+      the child processes/threads.
+
+2003-01-21  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/apache2filter/config.m4:
+      MFH: Fixed bug: #21698, httpd.conf not modified with "make install"
+
+    * sapi/apache2filter/config.m4:
+      Fixed bug: #21698, httpd.conf not modified with "make install"
+
+    * ext/ircg/config.m4:
+      fix typo
+
+    * (PHP_4_3)
+      ext/ircg/config.m4:
+      MFH: Fix bug: #21249, configure fails when searching for ircg-config script
+
+    * ext/ircg/config.m4:
+      Fix bug: #21249, configure fails when searching for ircg-config script
+
+2003-01-21  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/EXPERIMENTAL
+      sapi/embed/config.m4:
+      
+      Added missing warning about experimental nature of sapi/embed.
+
+2003-01-21  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/libgd/gd.c:
+      Remove the (c), in the future, can we add PHP Licence terms for the new
+      functions ?
+
+    * ext/gd/libgd/gd.c:
+      Add credits to my functions (thx for the advice Wez&Ilia :)
+
 2003-01-20  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/imap/php_imap.c

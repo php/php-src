@@ -1,3 +1,8 @@
+2003-01-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_objects_API.c:
+      fix by phanto to the cloning
+
 2003-01-19  Zeev Suraski  <zeev@zend.com>
 
     * Zend.m4:
