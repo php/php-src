@@ -3,15 +3,15 @@ PHP 4.0                                                                    NEWS
 
 ?? ??? 2000, Version 4.0.2
 - Fixed a bug in ldap_get_entries() and ldap_get_attributes(). (Jani)
-- Ported DB to new error reporting scheme. (Stig)
-- Added sybase and ibase DB backends. (Sterling)
+- Ported DB to new error reporting scheme in PEAR. (Stig)
+- Added sybase and ibase DB backends in PEAR. (Sterling)
 - New PEAR package Payment_Verisign for use with the Payflow Pro
   (pfpro) extension. (David Croft)
 - Added CURL support. (Sterling)
 - Catch users trying to set "compatibility" parameter in PDF, which is not
   supported from user-land. (Joey)
 - Fixed dbase_add_record. (Sterling)
-- Added new function "wordwrap" to wordwrap long strings from Chris
+- Added new function wordwrap() to wordwrap long strings from Chris
   Russel <russel@yorku.ca> (David Croft)
 - Added four additional arguments: attrsonly, sizelimit, timelimit, deref which
   were missing in ldap_search(), ldap_list() and ldap_read() functions (Jani)
@@ -22,7 +22,7 @@ PHP 4.0                                                                    NEWS
 - Itanium patch (Steve Robb)
 - Set default include_path so PEAR files can be reached (Stig)
 - Added "pear" executable, requires CGI version installed (Stig)
-- Added extension ii for Ingres II native support. See README in ext/ii
+- Added extension ii for Ingres II native support. See README in ext/ingres_ii
   directory. (David H)
 - Added Win32 project for the Interbase module (Zeev)
 - Added ability to perform calls to the parent class without explicitly
