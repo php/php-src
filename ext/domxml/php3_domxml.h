@@ -35,7 +35,7 @@
 #define _PHP3_DOMXML_H
 
 #if HAVE_DOMXML
-#include <parser.h>
+#include <gnome-xml/parser.h>
 
 extern php3_module_entry php3_domxml_module_entry;
 #define php3_domxml_module_ptr &php3_domxml_module_entry
