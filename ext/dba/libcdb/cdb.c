@@ -64,23 +64,14 @@ static int cdb_match(struct cdb *c, char *key, unsigned int len, uint32 pos TSRM
 }
 /* }}} */
 
-/* {{{ cdb_hashadd */
-static uint32 cdb_hashadd(uint32 h, unsigned char c)
-{
-	h += (h << 5);
-	return h ^ c;
-}
-/* }}} */
-
 /* {{{ cdb_hash */
 uint32 cdb_hash(char *buf, unsigned int len)
 {
 	uint32 h;
 
 	h = CDB_HASHSTART;
-	while (len) {
-		h = cdb_hashadd(h, *buf++);
-		--len;
+	while (len--) {
+		h = ( h + (h << 5)) ^ (*buf++);
 	}
 	return h;
 }
