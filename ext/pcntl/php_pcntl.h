@@ -19,6 +19,7 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
+#include <sys/wait.h>
 #include "php_signal.h"
 #include "zend_extensions.h"
 extern zend_module_entry pcntl_module_entry;
@@ -38,6 +39,12 @@ PHP_MINFO_FUNCTION(pcntl);
 
 PHP_FUNCTION(pcntl_fork);	
 PHP_FUNCTION(pcntl_waitpid);
+PHP_FUNCTION(pcntl_wifexited);
+PHP_FUNCTION(pcntl_wifstopped);
+PHP_FUNCTION(pcntl_wifsignaled);
+PHP_FUNCTION(pcntl_wexitstatus);
+PHP_FUNCTION(pcntl_wtermsig);
+PHP_FUNCTION(pcntl_wstopsig);
 PHP_FUNCTION(pcntl_signal);
 
 static void pcntl_signal_handler(int);

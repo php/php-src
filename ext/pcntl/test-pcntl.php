@@ -31,5 +31,5 @@ if ($pid==0) {
    posix_kill($pid,SIGUSR1);
    sleep(1);
    print "Parent: Sending SIGALRM to Child\n";
-   pcntl_waitpid($pid, $status, $options);
+   pcntl_waitpid($pid, &$status, $options);
 }
