@@ -1942,6 +1942,9 @@ static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zv
 			AI_USE_PTR(EX_T(opline->result.u.var).var);
 		}
 		FREE_OP_VAR_PTR(free_op1);
+		if (increment_opline) {
+			INC_OPCODE();
+		}
 		NEXT_OPCODE();
 	}
 	
