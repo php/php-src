@@ -61,8 +61,8 @@ PHP_FUNCTION(apache_sub_req)
 	
 	if (rr->status == HTTP_OK) {
 		ap_run_sub_req(rr);
-		RETURN_TRUE;
 		ap_destroy_sub_req(rr);
+		RETURN_TRUE;
 	}
 	ap_destroy_sub_req(rr);
 	RETURN_FALSE;
