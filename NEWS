@@ -1,6 +1,20 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- Introduced major modifications to the Sockets Extension and its API (Jason):
+  . Fixed numerous bugs.
+  . Added automatic host lookup capability to all functions that take addr's
+  . ex. socket_connect($sock, 'www.yahoo.com', 80);
+  . Corrected and standardized host lookup errors
+  . Modified socket_recv() behavior. [$r=socket_recv($sock, $buf, $len, $flags)]
+  . Added socket_set_block() which changes a socket into blocking IO mode
+  . Modified socket_last_error() to not clear the last error
+  . Added socket_clear_error() which clears the last error on a socket
+  . Removed all code pertaining to fd_sets (socket_fd_*)
+  . Modfied/Improved socket_select() to take resource arrays instead of fd_sets
+     ex. <?php $wfds=$rfds=array($sock1, $sock2, $sock3, $sock7);
+	       $r=socket_select($rfds, $wfds, NULL, 1);
+	       print "Ready to read:\n"; var_dump($rfds); ?>
 - Returned iconv support to FreeBSD (kalowsky)
 - Added CLI (command line intrerface) sapi based on a cut-down version
   of the CGI sapi which is more suited for writing shell scripts. Some of
