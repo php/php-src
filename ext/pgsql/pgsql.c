@@ -618,7 +618,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
 				RETURN_FALSE;
 			}
-			link = (int) (long) index_ptr->ptr; /* XXX: bogus? cast */
+			link = (int) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
 				Z_LVAL_P(return_value) = link;
@@ -850,7 +850,7 @@ PHP_FUNCTION(pg_host)
 }
 /* }}} */
 
-/* {{{ proto bool pg_ping([resource connection])
+/* {{{ proto bool pg_ping(resource connection)
    Ping database. If connection is bad, try to reconnect. */
 PHP_FUNCTION(pg_ping)
 {
