@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -16,20 +16,13 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #include "php.h"
 
 PHPAPI char *php_win_err(int error)
 {
-	static char *buf = NULL;
-
-#if MBO_0
-	/* leak for now */
-	if (buf) {
-		free(buf);
-	}
-#endif
-
-	buf = NULL;
+	char *buf = NULL;
 
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
