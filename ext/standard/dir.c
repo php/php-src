@@ -139,9 +139,6 @@ PHP_MINIT_FUNCTION(dir)
 #ifdef GLOB_BRACE
 	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_CS | CONST_PERSISTENT);
 #endif
-#ifdef GLOB_ONLYDIR
-	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
-#endif
 #ifdef GLOB_MARK
 	REGISTER_LONG_CONSTANT("GLOB_MARK", GLOB_MARK, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -154,6 +151,17 @@ PHP_MINIT_FUNCTION(dir)
 #ifdef GLOB_NOESCAPE
 	REGISTER_LONG_CONSTANT("GLOB_NOESCAPE", GLOB_NOESCAPE, CONST_CS | CONST_PERSISTENT);
 #endif
+
+#ifndef GLOB_ONLYDIR
+#define GLOB_ONLYDIR (1<<30)
+#define GLOB_EMULATE_ONLYDIR
+#define GLOB_FLAGMASK (~GLOB_ONLYDIR)
+#else
+#define GLOB_FLAGMASK (~0)
+#endif
+
+	REGISTER_LONG_CONSTANT("GLOB_ONLYDIR", GLOB_ONLYDIR, CONST_CS | CONST_PERSISTENT);
+
 #endif
 
 	return SUCCESS;
@@ -384,7 +392,7 @@ PHP_FUNCTION(glob)
 #endif
 
 	globbuf.gl_offs = 0;
-	if (0 != (ret = glob(pattern, flags, NULL, &globbuf))) {
+	if (0 != (ret = glob(pattern, flags & GLOB_FLAGMASK, NULL, &globbuf))) {
 #ifdef GLOB_NOMATCH
 		if (GLOB_NOMATCH == ret) {
 			/* Linux handles no matches as an error condition, but FreeBSD
@@ -419,6 +427,19 @@ PHP_FUNCTION(glob)
 
 	array_init(return_value);
 	for (n = 0; n < globbuf.gl_pathc; n++) {
+#ifdef GLOB_EMULATE_ONLYDIR
+		if (flags & GLOB_ONLYDIR) {
+			struct stat s;
+
+			if (0 != VCWD_STAT(globbuf.gl_pathv[n], &s)) {
+				continue;
+			}
+
+			if (S_IFDIR != (s.st_mode & S_IFMT)) {
+				continue;
+			}
+		}
+#endif
 		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip, 1);
 	}
 
