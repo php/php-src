@@ -1,3 +1,57 @@
+2003-10-09  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_parser.y:
+      Allow foo::$bar()
+
+2003-10-09  Andrey Hristov  <php@hristov.com>
+
+    * NEWS:
+      typo
+
+2003-10-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      cleanup
+
+2003-10-09  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/standard/tests/array/array_intersect_1.phpt:
+      New array functions for doing intersection of arrays that are complementary
+      to array_*diff* family of functions. Namely array_uintersect(),
+      array_uintersect_assoc(),
+      array_intersect_uassoc() and array_uintersect_uassoc(). Test case is also
+      included.
+
+    * NEWS:
+      new functions NEWS entry
+
+2003-10-09  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/dom/examples/note.xml:
+      add the valid xml test
+
+    * ext/dom/examples/note-invalid.xml
+      ext/dom/examples/note.dtd
+      ext/dom/examples/note.php:
+      add a DTD example
+
+2003-10-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/main.c:
+      MFH: Fixed bug #25746 (Do not bail out when unable to chdir original dir on
+      systems with broken getcwd()).
+
+    * main/main.c:
+      Fixed bug #25746 (Do not bail out when unable to chdir original dir on
+      systems with broken getcwd()).
+
 2003-10-08  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/openssl/xp_ssl.c:
