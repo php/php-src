@@ -1,3 +1,19 @@
+2003-10-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-10-12  Vlad Krupin  <phpdevel@echospace.com>
+
+    * (PHP_4_3)
+      ext/dbase/dbf_head.c:
+      MFH fix for 25558 in case there is ever another 4.3 release.
+
+    * ext/dbase/dbf_head.c:
+      rolling back fix for 23463. The "fix" broke more than it fixed (see bug
+      25558)
+
 2003-10-10  Tomas V.V.Cox  <cox@idecnet.com>
 
     * pear/PEAR/Installer.php:
