@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Sam Ruby <rubys@us.ibm.com>                                  |
+   |         Harald Radi <h.radi@nme.at>                                  |
    +----------------------------------------------------------------------+
  */
 
@@ -101,21 +102,32 @@ void dotnet_term() {
   pDomain = 0;
 }
 
-/* {{{ proto int dotnet_load(string module_name)
+/* {{{ proto int dotnet_load(string assembly_name [, string datatype_name, int codepage])
    Loads a DOTNET module */
-PHP_FUNCTION(DOTNET_load)
+PHP_FUNCTION(dotnet_load)
 {
 	HRESULT hr;
-	pval *assembly_name, *datatype_name;
+	pval *assembly_name, *datatype_name, *code_page;
 	OLECHAR *assembly, *datatype;
 	i_dispatch *obj;
 
-	if (ZEND_NUM_ARGS() != 2) WRONG_PARAM_COUNT;
+	switch(ZEND_NUM_ARGS())
+	{
+		case 2:
+			getParameters(ht, 2, &assembly_name, &datatype_name);
+			codepage = CP_ACP;
+			break;
+		case 3:
+			getParameters(ht, 3, &assembly_name, &datatype_name, &code_page);
 
-	/* should be made configurable like in ext/com */
-	codepage = CP_ACP;
+			convert_to_long(code_page);
+			codepage = code_page->value.lval;
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
 
-	getParameters(ht, 2, &assembly_name, &datatype_name);
 	convert_to_string(assembly_name);
 	assembly = php_char_to_OLECHAR(assembly_name->value.str.val, assembly_name->value.str.len, codepage);
 
@@ -156,7 +168,7 @@ void php_DOTNET_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_propert
 		&& !strcmp(function_name->element.value.str.val, "dotnet")) { /* constructor */
 		pval *object_handle;
 
-		PHP_FN(DOTNET_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		PHP_FN(dotnet_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if (!zend_is_true(return_value)) {
 			var_reset(object);
 			return;
