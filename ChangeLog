@@ -1,3 +1,46 @@
+2000-07-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    It's better not touch those ldap->ld_* when they aren't given as parameters.
+    (Now using -1 the parameters not wanted can be omitted)
+
+2000-07-23  Sterling Hughes  <stirling@bestweb.net>
+
+    * pear/File/Find.php
+      pear/PEAR_Error.php: Remove $file and $line.
+
+    * pear/File/Find.php: Fixes.
+
+2000-07-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.c: (getimagesize) fix FORCE_REF.
+
+2000-07-23  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/browscap.c: Add another check for broken browscap object
+
+    * main/configuration-parser.y:
+    Make browscap not to lowercase its arguments
+
+    * ext/standard/browscap.c:
+    Try to fix some get_browser crashes and clean it up
+
+2000-07-23  Joey Smith  <joey@joeysmith.com>
+
+    * ext/pdf/pdf.c:
+    Setting "compatibility" parameter requires having a PDF structure that
+    has NOT had PDF_open_*() called on it, according to the documentation.
+
+    There is not currently any way to obtain such from user-land in PHP.
+
+    * main/php_sprintf.c
+      main/snprintf.h: BROKEN_SPRINTF should be PHP_BROKEN_SPRINTF
+
+2000-07-23  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/dbase/dbase.c:
+    Fixed dbase_add_record
+
 2000-07-22  Sam Ruby  <rubys@us.ibm.com>
 
     * ext/java/README
