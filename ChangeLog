@@ -1,3 +1,63 @@
+2003-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysqli/config.m4:
+      Better config.m4..
+
+    * ext/tokenizer/tokenizer.c:
+      And this too..
+
+    * ext/tokenizer/tokenizer.c:
+      Andrei forgot this..
+
+2003-03-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      - reenable $argc/$argv
+      - add a comment where hardcoded defaults would go
+
+2003-03-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      This little fragment didn't get merged from head...
+
+2003-03-19  David Hill  <David.Hill@hp.com>
+
+    * README.TESTING:
+      Correcting example to use proper variable - NO_INTERACTION
+
+2003-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-recommended:
+      Using of quotes around paths is a very good idea..
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      main/main.c:
+      MFH: Fixed bug #22775 (Fatal errors exit with status 0 with CGI/CLI)
+
+    * main/main.c:
+      Fixed bug #22775 (Fatal errors exit with status 0 with CGI/CLI)
+
+2003-03-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Fix my fix.
+
+    * (PHP_4_3)
+      main/streams.c:
+      Manual merge of persistent stream sanity check from php5.
+
+    * main/streams/streams.c:
+      Sanity check for when a stream is requested to be persistent but the
+      wrapper
+      does not respect the flag.
+
 2003-03-18  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/streamsfuncs.c:

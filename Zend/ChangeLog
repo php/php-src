@@ -1,3 +1,18 @@
+2003-03-19  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_highlight.c
+      zend_language_parser.y
+      zend_language_scanner.l:
+      - Keep track of starting/ending line numbers for user functions.
+      - Store last parsed doc comment in a compiler global for future use.
+
+    * zend_API.c:
+      Lowercase the function name when used as key in the function name. The
+      original case is still preserved in zend_function structure.
+
 2003-03-18  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
