@@ -1407,7 +1407,7 @@
     a class/module use "@see $variable" and "@see function()". Note the $ and the "()".
     If the referenced element is unknow, the reference will be dropped and a warning is generated.
 
-    - added @version $Id$ to some class doc comments
+    - added @version CVS Id to some class doc comments
 
     This is an eays way to add a version tag to inline docs if you use a CVS.
 
