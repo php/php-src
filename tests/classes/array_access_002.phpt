@@ -1,9 +1,5 @@
 --TEST--
 ZE2 ArrayAccess::offsetSet without return
---SKIPIF--
-<?php
-	if (!class_exists('ArrayAccess')) die('skip ArrayAccess not present');
-?>
 --FILE--
 <?php
 class object implements ArrayAccess {
