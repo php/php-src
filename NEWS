@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, PHP 5 Release Candidate 1
+?? March 2004, PHP 5 Release Candidate 1
+- Upgraded bundled oniguruma library to version 2.2.2. (Rui, Moriyoshi)
+- Fixed bug #26677 (mbstring compile errors with IRIX compiler).
+  (K.Kosako, Rui, Moriyoshi)
 - Renamed php.ini option "zend2.implicit_clone" to 
   "zend.ze1_compatibility_mode" as it doesn't only affect implicit cloning.
   (Andi, Zeev)
