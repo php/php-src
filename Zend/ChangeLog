@@ -1,3 +1,11 @@
+2004-07-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c:
+      be consistent with write_dimension
+
+    * zend_object_handlers.c:
+      fix #28957
+
 2004-07-13  Andi Gutmans  <andi@zend.com>
 
     * zend.h:
