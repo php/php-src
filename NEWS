@@ -44,7 +44,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #23201 (set_file_buffer() crashes with stdio streams). (Ilia)
 - Fixed Bug #23188 (CDB databases created with 'c' mode do not work). (Marcus)
 - Fixed bug #23187 (memory leaks in sybase_connect/sybase_pconnect). (Ilia)
-- Fixed bug #23162 (user_error() crashs if $error_msg > 1024 bytes). (Moriyoshi, Marcus)
+- Fixed bug #23162 (user_error() crashs if error message > 1024 bytes).
+  (Jay, Marcus, Moriyoshi)
 - Fixed bug #23152 ($http_response_header empty on invalid URLs) (Ilia)
 - Fixed bug #23102 (integer overflow in exif_iif_add_value()). (Ilia)
 - Fixed bug #23099 (ext/interbase: "libgds.so: undefined reference to 'crypt'"). (Jani)
