@@ -464,13 +464,13 @@ void zenderror(char *error)
 
 
 BEGIN_EXTERN_C()
-ZEND_API void _zend_bailout(ZEND_FILE_LINE_D)
+ZEND_API void _zend_bailout(char *filename, uint lineno)
 {
 	CLS_FETCH();
 	ELS_FETCH();
 
 	if (!EG(bailout_set)) {
-		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!" ZEND_FILE_LINE_RELAY_CC);
+		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
 		exit(-1);
 	}
 	CG(unclean_shutdown) = 1;

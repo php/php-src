@@ -307,14 +307,10 @@ void zend_shutdown(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 BEGIN_EXTERN_C()
-ZEND_API void _zend_bailout(ZEND_FILE_LINE_D);
+ZEND_API void _zend_bailout(char *filename, uint lineno);
 END_EXTERN_C()
 
-#if ZEND_DEBUG
-#define zend_bailout()		_zend_bailout(ZEND_FILE_LINE_C)
-#else
-#define zend_bailout()		_zend_bailout()
-#endif
+#define zend_bailout()		_zend_bailout(__FILE__, __LINE__)
 
 #define zend_try												\
 	{															\
