@@ -998,8 +998,11 @@ PHP_METHOD(SoapServer, setPersistence)
 PHP_METHOD(SoapServer, setClass)
 {
 	soapServicePtr service;
+#ifdef ZEND_ENGINE_2		
+	zend_class_entry **ce;
+#else
 	zend_class_entry *ce;
-	char *class_name = NULL;
+#endif
 	int found, argc;
 	zval ***argv;
 
@@ -1016,14 +1019,17 @@ PHP_METHOD(SoapServer, setClass)
 	}
 
 	if (Z_TYPE_PP(argv[0]) == IS_STRING) {
-		class_name = estrdup(Z_STRVAL_PP(argv[0]));
-
+#ifdef ZEND_ENGINE_2		
+		found = zend_lookup_class(Z_STRVAL_PP(argv[0]), Z_STRLEN_PP(argv[0]), &ce);
+#else
+		char *class_name = estrdup(Z_STRVAL_PP(argv[0]));
 		found = zend_hash_find(EG(class_table), php_strtolower(class_name, Z_STRLEN_PP(argv[0])), Z_STRLEN_PP(argv[0])	 + 1, (void **)&ce);
 		efree(class_name);
+#endif
 		if (found != FAILURE) {
 			service->type = SOAP_CLASS;
 #ifdef ZEND_ENGINE_2
-			service->soap_class.ce = *(zend_class_entry**)ce;
+			service->soap_class.ce = *ce;
 #else
 			service->soap_class.ce = ce;
 #endif

@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2004, PHP 5.0.0
+- Fixed bug #28751 (SoapServer does not call _autoload()). (Dmitry)
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
 - Changed doc comments to require a single white space after '/**'. (Marcus)
 - Fixed bug #29019 (Database not closing). (Marcus)
