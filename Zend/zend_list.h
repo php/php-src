@@ -24,6 +24,7 @@
 #include "zend_hash.h"
 #include "zend_globals.h"
 
+BEGIN_EXTERN_C()
 
 #define ZEND_RESOURCE_LIST_TYPE_STD	1
 #define ZEND_RESOURCE_LIST_TYPE_EX	2
@@ -105,5 +106,6 @@ extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
     if (le_id == 0) {                                  \
         le_id = zend_fetch_list_dtor_id(le_type_name); \
 	}
+END_EXTERN_C()
 
 #endif

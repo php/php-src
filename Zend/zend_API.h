@@ -29,6 +29,8 @@
 #include "zend_variables.h"
 #include "zend_execute.h"
 
+
+BEGIN_EXTERN_C()
 #define ZEND_FN(name) zif_##name
 #define ZEND_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name) ZEND_NAMED_FUNCTION(ZEND_FN(name))
@@ -426,6 +428,8 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define ZEND_RSHUTDOWN_FUNCTION		ZEND_MODULE_DEACTIVATE_D
 #define ZEND_MINFO_FUNCTION			ZEND_MODULE_INFO_D
 
+END_EXTERN_C()
+	
 #endif /* ZEND_API_H */
 
 

@@ -49,6 +49,7 @@ typedef union _temp_variable {
 } temp_variable;
 
 
+BEGIN_EXTERN_C()
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 
 void init_executor(TSRMLS_D);
@@ -160,5 +161,7 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2
+
+END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
