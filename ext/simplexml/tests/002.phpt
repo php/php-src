@@ -7,7 +7,7 @@ SimpleXML and clone
 
 $sxe = simplexml_load_file(dirname(__FILE__).'/sxe.xml');
 
-$copy = $sxe->__clone;
+$copy = $sxe->__clone();
 
 print_r($copy);
 
