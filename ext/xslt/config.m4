@@ -58,6 +58,30 @@ if test "$PHP_XSLT" != "no"; then
   fi
 					
   if test "$PHP_XSLT_SABLOT" != "no"; then
+    AC_MSG_CHECKING([for Sablotron version])
+    old_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS="$CPPFLAGS -I$XSLT_DIR/include"
+    AC_TRY_RUN([
+#include <stdlib.h>
+#include <sablot.h>
+
+int main ()
+{
+	double version;
+	version = atof(SAB_VERSION);
+	
+	if (version >= 0.96) {
+		exit(0);
+	}
+	exit(255);
+}
+    ],[
+      AC_MSG_RESULT([>= 0.96])
+    ],[
+      AC_MSG_ERROR([Sablotron version 0.96 or greater required.])
+    ])
+    CPPFLAGS=$old_CPPFLAGS
+
     found_expat=no
     for i in $PHP_EXPAT_DIR $XSLT_DIR /usr/local /usr; do
       if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME; then
