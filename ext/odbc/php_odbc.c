@@ -1613,7 +1613,7 @@ PHP_FUNCTION(odbc_fetch_into)
 				if (rc == SQL_SUCCESS_WITH_INFO) {
 					Z_STRLEN_P(tmp) = result->longreadlen;
 				} else if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					ZVAL_NULL(tmp);
 					break;
 				} else {
 					Z_STRLEN_P(tmp) = result->values[i].vallen;
@@ -1623,7 +1623,7 @@ PHP_FUNCTION(odbc_fetch_into)
 
 			default:
 				if (result->values[i].vallen == SQL_NULL_DATA) {
-					Z_STRVAL_P(tmp) = empty_string;
+					ZVAL_NULL(tmp);
 					break;
 				}
 				Z_STRLEN_P(tmp) = result->values[i].vallen;
@@ -1845,7 +1845,10 @@ PHP_FUNCTION(odbc_result)
 				RETURN_FALSE;
 			}
 
-			if (result->values[field_ind].vallen == SQL_NULL_DATA || rc == SQL_NO_DATA_FOUND) {
+			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
+				efree(field);
+				RETURN_NULL();
+			} else if (rc == SQL_NO_DATA_FOUND) {
 				efree(field);
 				RETURN_FALSE;
 			}
@@ -1861,7 +1864,7 @@ PHP_FUNCTION(odbc_result)
 			
 		default:
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
-				RETURN_FALSE;
+				RETURN_NULL();
 			} else {
 				RETURN_STRINGL(result->values[field_ind].value, result->values[field_ind].vallen, 1);
 			}
@@ -1890,7 +1893,7 @@ PHP_FUNCTION(odbc_result)
 		
 		if (result->values[field_ind].vallen == SQL_NULL_DATA) {
 			efree(field);
-			RETURN_FALSE;
+			RETURN_NULL();
 		}
 		/* chop the trailing \0 by outputing only 4095 bytes */
 		PHPWRITE(field,(rc == SQL_SUCCESS_WITH_INFO) ? 4095 :
@@ -1997,7 +2000,7 @@ PHP_FUNCTION(odbc_result_all)
 					if (rc == SQL_SUCCESS_WITH_INFO)
 						php_printf(buf,result->longreadlen);
 					else if (result->values[i].vallen == SQL_NULL_DATA) {
-						php_printf("&nbsp;</td>");
+						php_printf("<td>NULL</td>");
 						break;
 					} else {
 						php_printf(buf, result->values[i].vallen);
@@ -2006,7 +2009,7 @@ PHP_FUNCTION(odbc_result_all)
 					break;
 				default:
 					if (result->values[i].vallen == SQL_NULL_DATA) {
-						php_printf("<td>&nbsp;</td>");
+						php_printf("<td>NULL</td>");
 					} else {
 						php_printf("<td>%s</td>", result->values[i].value);
 					}
