@@ -1,8 +1,8 @@
 /* 
    +----------------------------------------------------------------------+
-   | PHP version 4.0                                                      |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2001 The PHP Group                                |
+   | Copyright (c) 1997-2002 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,8 @@ PHP_FUNCTION(domxml_doc_create_text_node);
 PHP_FUNCTION(domxml_doc_create_comment);
 PHP_FUNCTION(domxml_doc_create_processing_instruction);
 PHP_FUNCTION(domxml_doc_create_attribute);
+PHP_FUNCTION(domxml_doc_create_cdata_section);
+PHP_FUNCTION(domxml_doc_create_entity_reference);
 PHP_FUNCTION(domxml_doc_imported_node);
 PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
@@ -85,13 +87,16 @@ PHP_FUNCTION(domxml_node_has_child_nodes);
 PHP_FUNCTION(domxml_node_parent);
 PHP_FUNCTION(domxml_node_prefix);
 PHP_FUNCTION(domxml_node);
+PHP_FUNCTION(domxml_clone_node);
 PHP_FUNCTION(domxml_node_unlink_node);
 PHP_FUNCTION(domxml_node_new_child);
 PHP_FUNCTION(domxml_node_set_content);
 PHP_FUNCTION(domxml_node_text_concat);
 PHP_FUNCTION(domxml_node_set_name);
 PHP_FUNCTION(domxml_node_name);
+PHP_FUNCTION(domxml_node_type);
 PHP_FUNCTION(domxml_node_value);
+PHP_FUNCTION(domxml_is_blank_node);
 
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attr_name);
@@ -135,8 +140,8 @@ PHP_FUNCTION(xpath_eval_expression);
 PHP_FUNCTION(xptr_new_context);
 PHP_FUNCTION(xptr_eval);
 #endif
-
 PHP_FUNCTION(domxml_test);
+
 #else
 #define domxml_module_ptr NULL
 #endif /* HAVE_DOMXML */
