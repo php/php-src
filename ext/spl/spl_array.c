@@ -328,18 +328,26 @@ SPL_METHOD(Array, __construct)
 /* exceptions do not work yet
 	php_set_error_handling(EH_THROW, zend_exception_get_default() TSRMLS_CC);*/
 
+	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
+
 	if (ZEND_NUM_ARGS() > 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!HASH_OF(*array)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object, using empty array instead");
-		php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-		return;
+	if (Z_TYPE_PP(array) == IS_OBJECT && (Z_OBJ_HT_PP(array) == &spl_handler_ArrayObject || Z_OBJ_HT_PP(array) == &spl_handler_ArrayIterator)) {
+		spl_array_object *other  = (spl_array_object*)zend_object_store_get_object(*array TSRMLS_CC);
+		zval_dtor(intern->array);
+		FREE_ZVAL(intern->array);
+		intern->array = other->array;		
+	} else {
+		if (!HASH_OF(*array)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed variable is not an array or object, using empty array instead");
+			php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
+			return;
+		}
+		zval_dtor(intern->array);
+		FREE_ZVAL(intern->array);
+		intern->array = *array;
 	}
-	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	zval_dtor(intern->array);
-	FREE_ZVAL(intern->array);
-	intern->array = *array;
 	ZVAL_ADDREF(intern->array);
 
 	zend_hash_internal_pointer_reset_ex(HASH_OF(intern->array), &intern->pos);
