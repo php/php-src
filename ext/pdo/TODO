@@ -2,14 +2,14 @@ $Id$
 
 In no particular order:
 
+Probable Bugs:
+- persistent connections with bound parameters might segv on subsequent
+  requests
+
 Low-level:
 
 - $dbh->quote()
-- Scrollable cursors
-- meta data from driver, such as server version and supported features
-- field meta data from statement handles
 - LOB support via Streams API
-- iterator support
 - make errors generated at the pdo level (as opposed to driver level) use the
   selected error mode.
 
