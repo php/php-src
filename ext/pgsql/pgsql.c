@@ -848,7 +848,8 @@ PHP_FUNCTION(pg_query)
 
 	convert_to_string_ex(query);
 	if (PQisBusy(pgsql)) {
-		php_error(E_NOTICE,"PostgreSQL: Cannot execute query while executing async query.");
+		php_error(E_NOTICE,"%s() cannot execute query while executing async query.",
+				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	while ((pgsql_result = PQgetResult(pgsql))) {
@@ -883,10 +884,6 @@ PHP_FUNCTION(pg_query)
 				pg_result->result = pgsql_result;
 				pg_result->row = -1;
 				ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
-				/*
-				Z_LVAL_P(return_value) = zend_list_insert(pg_result,le_result);
-				Z_TYPE_P(return_value) = IS_LONG;
-				*/
 			} else {
 				RETURN_FALSE;
 			}
