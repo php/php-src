@@ -485,7 +485,9 @@ PHP_FUNCTION(proc_open)
 		RETURN_FALSE;
 	}
 
-	if (cwd_len==0) cwd = NULL;
+	if (cwd_len==0) {
+		cwd = NULL;
+	}
 
 	if (environment) {
 		env = _php_array_to_envp(environment, is_persistent TSRMLS_CC);
