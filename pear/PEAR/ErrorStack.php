@@ -664,12 +664,22 @@ class PEAR_ErrorStack {
     }
     
     /**
-     * Determine whether there are any errors on any error stack
+     * Determine whether there are any errors on a single error stack, or on any error stack
+     *
+     * The optional parameter can be used to test the existence of any errors without the need of
+     * singleton instantiation
+     * @param string|false Package name to check for errors
      * @return boolean
      * @static
      */
-    function staticHasErrors()
+    function staticHasErrors($package = false)
     {
+        if ($package) {
+            if (!isset($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package])) {
+                return false;
+            }
+            return $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->hasErrors();
+        }
         foreach ($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] as $package => $obj) {
             if ($obj->hasErrors()) {
                 return true;
@@ -824,7 +834,8 @@ class PEAR_ErrorStack {
         if (count($err['params'])) {
             foreach ($err['params'] as $name => $val) {
                 if (is_array($val)) {
-                    $val = implode(', ', $val);
+                    // @ is needed in case $val is a multi-dimensional array
+                    $val = @implode(', ', $val);
                 }
                 if (is_object($val)) {
                     if (method_exists($val, '__toString')) {
@@ -836,7 +847,7 @@ class PEAR_ErrorStack {
                         $val = 'Object';
                     }
                 }
-                $mainmsg = str_replace('%' . $name . '%', $val,  $mainmsg);
+                $mainmsg = str_replace('%' . $name . '%', $val, $mainmsg);
             }
         }
         return $mainmsg;
