@@ -29,6 +29,12 @@
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
 
+typedef struct {
+	isc_svc_handle handle;
+	char *hostname;
+	char *username;
+} ibase_service;
+
 static int le_service;
 
 static void _php_ibase_free_service(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
