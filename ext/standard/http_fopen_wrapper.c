@@ -85,7 +85,7 @@
 #define PHP_URL_REDIRECT_MAX		20
 
 
-php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -97,7 +97,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
-	zval *response_header = NULL;
+	zval **response_header = NULL;
 	int reqok = 0;
 	char *http_header_line = NULL;
 	char tmp_line[128];
@@ -255,8 +255,14 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	location[0] = '\0';
 
-	MAKE_STD_ZVAL(response_header);
-	array_init(response_header);
+	if (header_init) {
+		zval *tmp;
+		MAKE_STD_ZVAL(tmp);
+		array_init(tmp);
+		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", tmp);
+	}
+
+	zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &response_header);
 
 	if (!php_stream_eof(stream))	{
 		/* get response header */
@@ -293,61 +299,59 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 				}
 			}
 			Z_TYPE_P(http_response) = IS_STRING;
-			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response, sizeof(zval *), NULL);
+			zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_response, sizeof(zval *), NULL);
 		}
 	}
 	
-	if (reqok) {
-		/* read past HTTP headers */
+	/* read past HTTP headers */
 	
-		http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
+	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
 
-		while (!body && !php_stream_eof(stream))	{
+	while (!body && !php_stream_eof(stream))	{
 		
-			if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
-				char *p;
-				int found_eol = 0;
-				int http_header_line_length;
+		if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+			char *p;
+			int found_eol = 0;
+			int http_header_line_length;
 			
-				http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
-				p = http_header_line;
-				while(*p)	{
-					while(*p == '\n' || *p == '\r')	{
-						*p = '\0';
-						p--;
-						found_eol = 1;
-					}
-					if (found_eol)
-						break;
-					p++;
+			http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
+			p = http_header_line;
+			while(*p) {
+				while(*p == '\n' || *p == '\r')	{
+					*p = '\0';
+					p--;
+					found_eol = 1;
 				}
-				http_header_line_length = p-http_header_line+1;
-		
-				if (!strncasecmp(http_header_line, "Location: ", 10)) {
-					strlcpy(location, http_header_line + 10, sizeof(location));
-				} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
-					php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
-				} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
-					file_size = atoi(http_header_line + 16);
-					php_stream_notify_file_size(context, file_size, http_header_line, 0);
-				}
-
-				if (http_header_line[0] == '\0') {
-					body = 1;
-				} else {
-					zval *http_header;
-
-					MAKE_STD_ZVAL(http_header);
-
-					ZVAL_STRINGL(http_header, http_header_line, http_header_line_length, 1);
-				
-					zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
-				}
-			} else {
-				break;
+				if (found_eol)
+					break;
+				p++;
 			}
+			http_header_line_length = p-http_header_line+1;
+		
+			if (!strncasecmp(http_header_line, "Location: ", 10)) {
+				strlcpy(location, http_header_line + 10, sizeof(location));
+			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
+				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
+			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
+				file_size = atoi(http_header_line + 16);
+				php_stream_notify_file_size(context, file_size, http_header_line, 0);
+			}
+
+			if (http_header_line[0] == '\0') {
+				body = 1;
+			} else {
+				zval *http_header;
+
+				MAKE_STD_ZVAL(http_header);
+
+				ZVAL_STRINGL(http_header, http_header_line, http_header_line_length, 1);
+				
+				zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), &http_header, sizeof(zval *), NULL);
+			}
+		} else {
+			break;
 		}
-	} 
+	}
 	
 	if (!reqok || location[0] != '\0')	{		
 		if (location[0] != '\0')
@@ -395,28 +399,22 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 			} else {
 				strlcpy(new_path, location, sizeof(new_path));
 			}
-			stream = php_stream_url_wrap_http_ex(NULL, new_path, mode, options, opened_path, context, --redirect_max STREAMS_CC TSRMLS_CC);
+			stream = php_stream_url_wrap_http_ex(NULL, new_path, mode, options, opened_path, context, --redirect_max, 0 STREAMS_CC TSRMLS_CC);
 			if (stream && stream->wrapperdata)	{
 				entryp = &entry;
 				MAKE_STD_ZVAL(entry);
 				ZVAL_EMPTY_STRING(entry);
-				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), entryp, sizeof(zval *), NULL);
+				zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), entryp, sizeof(zval *), NULL);
 				zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream->wrapperdata));
 				while (zend_hash_get_current_data(Z_ARRVAL_P(stream->wrapperdata), (void **)&entryp) == SUCCESS) {
 					zval_add_ref(entryp);
-					zend_hash_next_index_insert(Z_ARRVAL_P(response_header), entryp, sizeof(zval *), NULL);
+					zend_hash_next_index_insert(Z_ARRVAL_PP(response_header), entryp, sizeof(zval *), NULL);
 					zend_hash_move_forward(Z_ARRVAL_P(stream->wrapperdata));
 				}
 				zval_dtor(stream->wrapperdata);
 				FREE_ZVAL(stream->wrapperdata);
-			} else {
-				zval_dtor(response_header);
-				FREE_ZVAL(response_header);
 			}
 		} else {
-			zval_dtor(response_header);
-			FREE_ZVAL(response_header);
-
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP request failed! %s", tmp_line);
 		}
 	}
@@ -427,8 +425,10 @@ out:
 		efree(scratch);
 	php_url_free(resource);
 
-	if (stream)	{
-		stream->wrapperdata = response_header;
+	if (stream) {
+		if (header_init) {
+			stream->wrapperdata = *response_header;
+		}
 		php_stream_notify_progress_init(context, 0, file_size);
 		/* Restore original chunk size now that we're done with headers (if applicable) */
 		if (options & STREAM_WILL_CAST)
@@ -442,20 +442,12 @@ out:
 		stream->position = 0;
 	}
 
-	if (response_header)	{
-		zval *sym;
-		MAKE_STD_ZVAL(sym);
-		*sym = *response_header;
-		zval_copy_ctor(sym);
-		ZEND_SET_SYMBOL(EG(active_symbol_table), "http_response_header", sym);
-	}
-	
 	return stream;
 }
 
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX STREAMS_CC TSRMLS_CC);
+	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, 1 STREAMS_CC TSRMLS_CC);
 }
 
 static int php_stream_http_stream_stat(php_stream_wrapper *wrapper,
