@@ -734,6 +734,7 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
+	zend_op_array *orig_op_array = EG(active_op_array);
 
 	va_start(files, file_count);
 	for (i=0; i<file_count; i++) {
@@ -752,10 +753,12 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
 			efree(EG(active_op_array));
 		} else if (type==ZEND_REQUIRE) {
 			va_end(files);
+			EG(active_op_array) = orig_op_array;
 			return FAILURE;
 		}
 	}
 	va_end(files);
+	EG(active_op_array) = orig_op_array;
 
 	return SUCCESS;
 }
