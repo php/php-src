@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.3
+- Fixed several problems with directory functions on Windows. (Steph)
 - Fixed ob_gzhandler()'s handling of requests that do have the Accept-Encoding
   header, but do not allow compression (Zeev)
 - Fixed several bugs in the multithreaded version that could cause random parse
