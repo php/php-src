@@ -151,5 +151,7 @@ AC_ARG_WITH(system-regex,
 
 AC_CRYPT_CAP
 
+AC_CHECK_HEADERS(sys/resource.h)
+
 PHP_EXTENSION(standard)
 
