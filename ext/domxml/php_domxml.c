@@ -2377,7 +2377,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	}
 	
 	if (!(child->doc == NULL || child->doc == parent->doc)) {
-		php_error(E_WARNING, "%s(): Can't append node, which is in a different document than the parent node", get_active_function_name(TSRMLS_C));
+		php_error_docref("function.domnode-append-child" TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
 		RETURN_FALSE;
 	}
 	
