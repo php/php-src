@@ -84,6 +84,7 @@ zend_module_entry *php_builtin_extensions[] = {
 #if HAVE_OVERLOAD
   phpext_overload_ptr,
 #endif
+  phpext_tokenizer_ptr,
 	phpext_pcre_ptr,
 	phpext_session_ptr,
 	phpext_xml_ptr,
