@@ -110,7 +110,7 @@ static
 		ZEND_ARG_PASS_INFO(1)
 	ZEND_END_ARG_INFO();
 
-static unsigned char second_fifth_and_sixth_args_force_ref[] =
+static 
 	ZEND_BEGIN_ARG_INFO(second_fifth_and_sixth_args_force_ref, 0)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(1)
