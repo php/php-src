@@ -1587,8 +1587,8 @@ PHP_FUNCTION(domxml_node_children)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_unlink_node(void)
-   Deletes node */
+/* {{{ proto void domxml_node_unlink_node([object node])
+   Deletes the node */
 PHP_FUNCTION(domxml_node_unlink_node)
 {
 	zval *id;
@@ -1599,7 +1599,6 @@ PHP_FUNCTION(domxml_node_unlink_node)
 	xmlUnlinkNode(nodep);
 	xmlFreeNode(nodep);
 	zval_dtor(id);				/* This is not enough because the children won't be deleted */
-	RETURN_TRUE;
 }
 /* }}} */
 
