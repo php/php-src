@@ -53,11 +53,12 @@ SPL_METHOD(DirectoryIterator, getPathname);
 SPL_METHOD(DirectoryIterator, isDot);
 SPL_METHOD(DirectoryIterator, isDir);
 
-SPL_METHOD(DirectoryTreeIterator, rewind);
-SPL_METHOD(DirectoryTreeIterator, next);
-SPL_METHOD(DirectoryTreeIterator, key);
-SPL_METHOD(DirectoryTreeIterator, hasChildren);
-SPL_METHOD(DirectoryTreeIterator, getChildren);
+SPL_METHOD(RecursiveDirectoryIterator, rewind);
+SPL_METHOD(RecursiveDirectoryIterator, next);
+SPL_METHOD(RecursiveDirectoryIterator, key);
+SPL_METHOD(RecursiveDirectoryIterator, hasChildren);
+SPL_METHOD(RecursiveDirectoryIterator, getChildren);
+SPL_METHOD(RecursiveDirectoryIterator, __toString);
 
 
 /* declare method parameters */
@@ -82,15 +83,17 @@ static zend_function_entry spl_ce_dir_class_functions[] = {
 	SPL_ME(DirectoryIterator, getPathname,   NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, isDot,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(DirectoryIterator, isDir,         NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(DirectoryIterator, __toString, DirectoryIterator, getFilename, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry spl_ce_dir_tree_class_functions[] = {
-	SPL_ME(DirectoryTreeIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryTreeIterator, next,          NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryTreeIterator, key,           NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryTreeIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(DirectoryTreeIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, next,          NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, key,           NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, hasChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveDirectoryIterator, getChildren,   NULL, ZEND_ACC_PUBLIC)
+	SPL_MA(RecursiveDirectoryIterator, __toString, DirectoryIterator, getPathname, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
@@ -101,7 +104,7 @@ static zend_object_handlers spl_ce_dir_handlers;
 
 /* decalre the class entry */
 zend_class_entry *spl_ce_DirectoryIterator;
-zend_class_entry *spl_ce_DirectoryTreeIterator;
+zend_class_entry *spl_ce_RecursiveDirectoryIterator;
 
 
 /* the overloaded class structure */
@@ -358,15 +361,19 @@ SPL_METHOD(DirectoryIterator, getPathname)
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	char *filename;
-	int filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
-	RETURN_STRINGL(filename, filename_len, 0);
+	if (intern->entry.d_name[0]) {
+		char *filename;
+		int filename_len = spprintf(&filename, 0, "%s/%s", intern->path, intern->entry.d_name);
+		RETURN_STRINGL(filename, filename_len, 0);
+	} else {
+		RETURN_BOOL(0);
+	}
 }
 /* }}} */
 
-/* {{{ proto string DirectoryTreeIterator::key()
+/* {{{ proto string RecursiveDirectoryIterator::key()
    Return path and filename of current dir entry */
-SPL_METHOD(DirectoryTreeIterator, key)
+SPL_METHOD(RecursiveDirectoryIterator, key)
 {
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -404,9 +411,9 @@ SPL_METHOD(DirectoryIterator, isDir)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryTreeIterator::rewind()
+/* {{{ proto void RecursiveDirectoryIterator::rewind()
    Rewind dir back to the start */
-SPL_METHOD(DirectoryTreeIterator, rewind)
+SPL_METHOD(RecursiveDirectoryIterator, rewind)
 {
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -423,9 +430,9 @@ SPL_METHOD(DirectoryTreeIterator, rewind)
 }
 /* }}} */
 
-/* {{{ proto void DirectoryTreeIterator::next()
+/* {{{ proto void RecursiveDirectoryIterator::next()
    Move to next entry */
-SPL_METHOD(DirectoryTreeIterator, next)
+SPL_METHOD(RecursiveDirectoryIterator, next)
 {
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -439,9 +446,9 @@ SPL_METHOD(DirectoryTreeIterator, next)
 }
 /* }}} */
 
-/* {{{ proto bool DirectoryTreeIterator::hasChildren()
+/* {{{ proto bool RecursiveDirectoryIterator::hasChildren()
    Returns whether current entry is a directory and not '.' or '..' */
-SPL_METHOD(DirectoryTreeIterator, hasChildren)
+SPL_METHOD(RecursiveDirectoryIterator, hasChildren)
 {
 	zval *object = getThis();
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -458,9 +465,9 @@ SPL_METHOD(DirectoryTreeIterator, hasChildren)
 }
 /* }}} */
 
-/* {{{ proto DirectoryTreeIterator DirectoryIterator::getChildren()
+/* {{{ proto RecursiveDirectoryIterator DirectoryIterator::getChildren()
    Returns an iterator fo rthe current entry if it is a directory */
-SPL_METHOD(DirectoryTreeIterator, getChildren)
+SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 {
 	zval *object = getThis(), zpath;
 	spl_ce_dir_object *intern = (spl_ce_dir_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -470,7 +477,7 @@ SPL_METHOD(DirectoryTreeIterator, getChildren)
 	
 	ZVAL_STRINGL(&zpath, path, path_len, 0);
 
-	spl_instantiate_arg_ex1(spl_ce_DirectoryTreeIterator, &return_value, 0, &zpath TSRMLS_CC);
+	spl_instantiate_arg_ex1(spl_ce_RecursiveDirectoryIterator, &return_value, 0, &zpath TSRMLS_CC);
 	zval_dtor(&zpath);
 }
 /* }}} */
@@ -624,17 +631,11 @@ static void spl_ce_dir_tree_it_move_forward(zend_object_iterator *iter TSRMLS_DC
 	spl_ce_dir_object   *object   = iterator->object;
 	
 	object->index++;
-	zval_dtor(iterator->current);
-skip_dots:
-	if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
-		object->entry.d_name[0] = '\0';
-		ZVAL_NULL(iterator->current);
-	} else {
-		if (!strcmp(object->entry.d_name, ".") || !strcmp(object->entry.d_name, "..")) {
-			goto skip_dots;
+	do {
+		if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
+			object->entry.d_name[0] = '\0';
 		}
-		ZVAL_STRING(iterator->current, object->entry.d_name, 1);
-	}
+	} while (!strcmp(object->entry.d_name, ".") || !strcmp(object->entry.d_name, ".."));
 }
 /* }}} */
 
@@ -648,20 +649,13 @@ static void spl_ce_dir_tree_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 	if (object->dirp) {
 		php_stream_rewinddir(object->dirp);
 	}
-	zval_dtor(iterator->current);
-skip_dots:
-	if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
-		object->entry.d_name[0] = '\0';
-		ZVAL_NULL(iterator->current);
-	} else {
-		if (!strcmp(object->entry.d_name, ".") || !strcmp(object->entry.d_name, "..")) {
-			goto skip_dots;
+	do {
+		if (!object->dirp || !php_stream_readdir(object->dirp, &object->entry)) {
+			object->entry.d_name[0] = '\0';
 		}
-		ZVAL_STRING(iterator->current, object->entry.d_name, 1);
-	}
+	} while (!strcmp(object->entry.d_name, ".") || !strcmp(object->entry.d_name, ".."));
 }
 /* }}} */
-
 
 /* iterator handler table */
 zend_object_iterator_funcs spl_ce_dir_tree_it_funcs = {
@@ -682,7 +676,8 @@ zend_object_iterator *spl_ce_dir_tree_get_iterator(zend_class_entry *ce, zval *o
 	object->refcount++;
 	iterator->intern.data = (void*)object;
 	iterator->intern.funcs = &spl_ce_dir_tree_it_funcs;
-	MAKE_STD_ZVAL(iterator->current);
+	iterator->current = object;
+	object->refcount++;
 	iterator->object = dir_object;
 	
 	return (zend_object_iterator*)iterator;
@@ -701,10 +696,10 @@ PHP_MINIT_FUNCTION(spl_directory)
 
 	spl_ce_DirectoryIterator->get_iterator = spl_ce_dir_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(DirectoryTreeIterator, DirectoryIterator, spl_ce_dir_object_new, spl_ce_dir_tree_class_functions);
-	REGISTER_SPL_IMPLEMENTS(DirectoryTreeIterator, RecursiveIterator);
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveDirectoryIterator, DirectoryIterator, spl_ce_dir_object_new, spl_ce_dir_tree_class_functions);
+	REGISTER_SPL_IMPLEMENTS(RecursiveDirectoryIterator, RecursiveIterator);
 
-	spl_ce_DirectoryTreeIterator->get_iterator = spl_ce_dir_tree_get_iterator;
+	spl_ce_RecursiveDirectoryIterator->get_iterator = spl_ce_dir_tree_get_iterator;
 
 	return SUCCESS;
 }
