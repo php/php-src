@@ -232,18 +232,24 @@ module MODULE_VAR_EXPORT php4_module;
 		ctx->bb = ap_brigade_create(f->c->pool); \
 	}
 
-static int php_rbody_filter(ap_filter_t *f, ap_bucket_brigade *bb)
+static int php_input_filter(ap_filter_t *f, ap_bucket_brigade *bb, 
+		ap_input_mode_t mode)
 {
 	php_struct *ctx;
 	long old_index;
 	ap_bucket *b;
 	const char *str;
 	apr_ssize_t n;
+	apr_status_t rv;
 	SLS_FETCH();
 
 	ctx = SG(server_context);
 
 	INIT_CTX;
+
+	if ((rv = ap_get_brigade(f->next, bb, mode)) != APR_SUCCESS) {
+		return rv;
+	}
 
 	AP_BRIGADE_FOREACH(b, bb) {
 		ap_bucket_read(b, &str, &n, 1);
@@ -254,10 +260,10 @@ static int php_rbody_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 			memcpy(ctx->post_data + old_index, str, n);
 		}
 	}
-	return ap_pass_brigade(f->next, bb);
+	return APR_SUCCESS;
 }
 
-static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
+static int php_output_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 {
 	php_struct *ctx;
 	ap_bucket *b;
@@ -292,7 +298,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		/* XXX: Lots of startup crap. Should be moved into its own func */
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
-		SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
+		SG(request_info).content_type = (char *) apr_table_get(f->r->headers_in, "Content-Type");
 		SG(request_info).query_string = f->r->args;
 		SG(request_info).request_method = (char *) f->r->method;
 		SG(request_info).request_uri = f->r->uri;
@@ -414,8 +420,8 @@ php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 static void php_register_hook(void)
 {
 	ap_hook_child_init(php_apache_server_startup, NULL, NULL, AP_HOOK_MIDDLE);
-    ap_register_output_filter("PHP", php_filter, AP_FTYPE_CONTENT);
-    ap_register_rbody_filter("PHP", php_rbody_filter, AP_FTYPE_CONTENT);
+	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_CONTENT);
+	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_CONTENT);
 }
 
 module MODULE_VAR_EXPORT php4_module = {
