@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- The fgetcsv() function now handles embedded end-of-line in a quoted field
+  (Nick Talbott)
 - Added user_error(), to allow explicitly generate error messages from scripts
   (Zeev, Zend Engine)
 - Fixed a problem in long2ip() that occasionally returned incorrect IP address.
