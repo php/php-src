@@ -44,8 +44,7 @@
 #include "ext/standard/file.h"
 #include "php_curl.h"
 
-static int  le_curl;
-#define le_curl_name "cURL handle"
+static unsigned char second_arg_force_ref[] = {2, BYREF_NONE, BYREF_FORCE};
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 
@@ -59,14 +58,22 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 /* {{{ curl_functions[]
  */
 function_entry curl_functions[] = {
-	PHP_FE(curl_init,     NULL)
-	PHP_FE(curl_version,  NULL)
-	PHP_FE(curl_setopt,   NULL)
-	PHP_FE(curl_exec,     NULL)
-	PHP_FE(curl_getinfo,  NULL)
-	PHP_FE(curl_error,    NULL)
-	PHP_FE(curl_errno,    NULL)
-	PHP_FE(curl_close,    NULL)
+	PHP_FE(curl_init,                NULL)
+	PHP_FE(curl_version,             NULL)
+	PHP_FE(curl_setopt,              NULL)
+	PHP_FE(curl_exec,                NULL)
+	PHP_FE(curl_getinfo,             NULL)
+	PHP_FE(curl_error,               NULL)
+	PHP_FE(curl_errno,               NULL)
+	PHP_FE(curl_close,               NULL)
+	PHP_FE(curl_multi_init,          NULL)
+	PHP_FE(curl_multi_add_handle,    NULL)
+	PHP_FE(curl_multi_remove_handle, NULL)
+	PHP_FE(curl_multi_select,        NULL)
+	PHP_FE(curl_multi_exec,          second_arg_force_ref)
+	PHP_FE(curl_multi_getcontent,    NULL)
+	PHP_FE(curl_multi_info_read,     NULL)
+	PHP_FE(curl_multi_close,         NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -109,6 +116,7 @@ PHP_MINFO_FUNCTION(curl)
 PHP_MINIT_FUNCTION(curl)
 {
 	le_curl = zend_register_list_destructors_ex(_php_curl_close, NULL, "curl", module_number);
+	le_curl_multi_handle = zend_register_list_destructors_ex(_php_curl_multi_close, NULL, "curl", module_number);
 	
 	/* Constants for curl_setopt() */
 	REGISTER_CURL_CONSTANT(CURLOPT_DNS_USE_GLOBAL_CACHE);
@@ -183,6 +191,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_COOKIEJAR);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSL_CIPHER_LIST);
 	REGISTER_CURL_CONSTANT(CURLOPT_BINARYTRANSFER);
+	REGISTER_CURL_CONSTANT(CURLOPT_NOSIGNAL);
+	REGISTER_CURL_CONSTANT(CURLOPT_PROXYTYPE);
+	REGISTER_CURL_CONSTANT(CURLOPT_BUFFERSIZE);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPGET);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_VERSION);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSLKEY);
@@ -220,6 +231,15 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_CONTENT_TYPE);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_COUNT);
+
+	/* cURL protocol constants (curl_version) */
+	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_KERBEROS4);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_SSL);
+	REGISTER_CURL_CONSTANT(CURL_VERSION_LIBZ);
+	
+	/* version constants */
+	REGISTER_CURL_CONSTANT(CURLVERSION_NOW);
 
 	/* Error Constants */
 	REGISTER_CURL_CONSTANT(CURLE_OK);
@@ -275,6 +295,9 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_OBSOLETE);
 	REGISTER_CURL_CONSTANT(CURLE_SSL_PEER_CERTIFICATE);
 
+	REGISTER_CURL_CONSTANT(CURLPROXY_HTTP);
+	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5);
+
 	REGISTER_CURL_CONSTANT(CURL_NETRC_OPTIONAL);
 	REGISTER_CURL_CONSTANT(CURL_NETRC_IGNORED);
 	REGISTER_CURL_CONSTANT(CURL_NETRC_REQUIRED);
@@ -283,6 +306,14 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_1_0);
 	REGISTER_CURL_CONSTANT(CURL_HTTP_VERSION_1_1);
 	
+	REGISTER_CURL_CONSTANT(CURLM_CALL_MULTI_PERFORM);
+	REGISTER_CURL_CONSTANT(CURLM_OK);
+	REGISTER_CURL_CONSTANT(CURLM_BAD_HANDLE);
+	REGISTER_CURL_CONSTANT(CURLM_BAD_EASY_HANDLE);
+	REGISTER_CURL_CONSTANT(CURLM_OUT_OF_MEMORY);
+	REGISTER_CURL_CONSTANT(CURLM_INTERNAL_ERROR);
+
+	REGISTER_CURL_CONSTANT(CURLMSG_DONE);
 	
 	if (curl_global_init(CURL_GLOBAL_SSL) != CURLE_OK) {
 		return FAILURE;
@@ -315,15 +346,6 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 }
 /* }}} */
 
-#define PHP_CURL_STDOUT 0
-#define PHP_CURL_FILE   1
-#define PHP_CURL_USER   2
-#define PHP_CURL_DIRECT 3
-#define PHP_CURL_RETURN 4
-#define PHP_CURL_ASCII  5
-#define PHP_CURL_BINARY 6
-#define PHP_CURL_IGNORE 7
-
 /* {{{ curl_write
  */
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
@@ -333,6 +355,12 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	size_t          length = size * nmemb;
 	TSRMLS_FETCH();
 
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "curl_write() called\n");
+	fprintf(stderr, "data = %s, size = %d, nmemb = %d, ctx = %x\n", 
+			data, size, nmemb, ctx);
+#endif
+	
 	switch (t->method) {
 	case PHP_CURL_STDOUT:
 		PUTS(data);
@@ -569,15 +597,45 @@ static void curl_free_slist(void **slist)
 /* }}} */
 
 
-/* {{{ proto array curl_version(void)
+/* {{{ proto array curl_version([int version])
    Return cURL version information. */
 PHP_FUNCTION(curl_version)
 {
-	if (ZEND_NUM_ARGS() != 0) {
-		WRONG_PARAM_COUNT;
+	curl_version_info_data *d;
+	long                    uversion = CURLVERSION_NOW;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &uversion) == FAILURE) {
+		return;
 	}
 
-	RETURN_STRING(curl_version(), 1);
+	d = curl_version_info(uversion);
+	if (d == NULL) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	CAAL("version_number", d->version_num);
+	CAAL("age", d->age);
+	CAAL("features", d->features);
+	CAAL("ssl_version_number", d->ssl_version_num);
+	CAAS("version", d->version);
+	CAAS("host", d->host);
+	CAAS("ssl_version", d->ssl_version);
+	CAAS("libz_version", d->libz_version);
+	/* Add an array of protocols */
+	{
+		char **p = (char **) d->protocols;
+		zval  *protocol_list = NULL;
+
+		MAKE_STD_ZVAL(protocol_list);
+		array_init(protocol_list);
+
+		while (*p != NULL) {
+			add_next_index_string(protocol_list,  *p++, 1);
+		}
+		CAAZ("protocols", protocol_list);
+	}
 }
 /* }}} */
 
@@ -707,6 +765,9 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_SSL_VERIFYHOST:
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_DNS_USE_GLOBAL_CACHE:
+		case CURLOPT_NOSIGNAL:
+		case CURLOPT_PROXYTYPE:
+		case CURLOPT_BUFFERSIZE:
 		case CURLOPT_HTTPGET:
 		case CURLOPT_HTTP_VERSION:
 		case CURLOPT_CRLF:
@@ -956,10 +1017,10 @@ PHP_FUNCTION(curl_setopt)
 }
 /* }}} */
 
-/* {{{ cleanup_handle(ch) 
+/* {{{ _php_curl_cleanup_handle(ch) 
    Cleanup an execution phase */
-static void 
-cleanup_handle(php_curl *ch)
+void 
+_php_curl_cleanup_handle(php_curl *ch)
 {
 	if (ch->uses < 1) {
 		return;
@@ -988,7 +1049,7 @@ PHP_FUNCTION(curl_exec)
 	}
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
 
-	cleanup_handle(ch);
+	_php_curl_cleanup_handle(ch);
 	
 	error = curl_easy_perform(ch->cp);
 	SAVE_CURL_ERROR(ch, error);
@@ -1005,7 +1066,7 @@ PHP_FUNCTION(curl_exec)
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
 		if (ch->handlers->write->type != PHP_CURL_BINARY) 
 			smart_str_0(&ch->handlers->write->buf);
-		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
+		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 0);
 	}
 
 	RETURN_TRUE;
@@ -1182,6 +1243,10 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_curl *ch = (php_curl *) rsrc->ptr;
 
+#if PHP_CURL_DEBUG
+	fprintf(stderr, "DTOR CALLED, ch = %x\n", ch);
+#endif
+	
 	curl_easy_cleanup(ch->cp);
 	zend_llist_clean(&ch->to_free.str);
 	zend_llist_clean(&ch->to_free.slist);

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Sterling Hughes <sterling@php.net>                           |
-   | Wez Furlong <wez@thebrainroom.com>                                   |
+   |         Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
 */
 
@@ -32,14 +32,29 @@
 
 #if HAVE_CURL
 
-#include <curl/curl.h>
+#define PHP_CURL_DEBUG 0
 
+#include <curl/curl.h>
+#include <curl/multi.h>
 
 extern zend_module_entry curl_module_entry;
 #define curl_module_ptr &curl_module_entry
 
 #define CURLOPT_RETURNTRANSFER 19913
 #define CURLOPT_BINARYTRANSFER 19914
+#define PHP_CURL_STDOUT 0
+#define PHP_CURL_FILE   1
+#define PHP_CURL_USER   2
+#define PHP_CURL_DIRECT 3
+#define PHP_CURL_RETURN 4
+#define PHP_CURL_ASCII  5
+#define PHP_CURL_BINARY 6
+#define PHP_CURL_IGNORE 7
+
+int  le_curl;
+#define le_curl_name "cURL handle"
+int  le_curl_multi_handle;
+#define le_curl_multi_handle_name "cURL Multi Handle"
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
@@ -52,6 +67,15 @@ PHP_FUNCTION(curl_getinfo);
 PHP_FUNCTION(curl_error);
 PHP_FUNCTION(curl_errno);
 PHP_FUNCTION(curl_close);
+PHP_FUNCTION(curl_multi_init);
+PHP_FUNCTION(curl_multi_add_handle);
+PHP_FUNCTION(curl_multi_remove_handle);
+PHP_FUNCTION(curl_multi_select);
+PHP_FUNCTION(curl_multi_exec);
+PHP_FUNCTION(curl_multi_getcontent);
+PHP_FUNCTION(curl_multi_info_read);
+PHP_FUNCTION(curl_multi_close);
+void _php_curl_multi_close(zend_rsrc_list_entry *);
 
 typedef struct {
 	zval         *func;
@@ -87,13 +111,20 @@ struct _php_curl_free {
 };
 
 typedef struct {
-	CURL                    *cp;
-	php_curl_handlers       *handlers;
 	struct _php_curl_error   err;
 	struct _php_curl_free    to_free;
+	CURL                    *cp;
+	php_curl_handlers       *handlers;
 	long                     id;
 	unsigned int             uses;
 } php_curl;
+
+typedef struct {
+	int    still_running;
+	CURLM *multi;
+} php_curlm;
+
+void _php_curl_cleanup_handle(php_curl *);
 
 /* streams support */
 
