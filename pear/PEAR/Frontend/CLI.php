@@ -225,7 +225,7 @@ class PEAR_Frontend_CLI extends PEAR
                         $w = strlen($line);
                     }
                 }
-                $lines = sizeof($lines);
+                $lines = sizeof($multiline);
             } else {
                 $w = strlen($col);
             }
@@ -381,18 +381,24 @@ class PEAR_Frontend_CLI extends PEAR
                 $this->_endTable();
                 break;
             case 'config-show':
+                $data['border'] = true;
+                $opts = array(0 => array('wrap' => 20),
+                              1 => array('wrap' => 20),
+                              2 => array('wrap' => 35));
                 $this->_startTable($data);
-                if (isset($data['headline']) && is_array($data['headline']))
-                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
-
+                if (isset($data['headline']) && is_array($data['headline'])) {
+                    $this->_tableRow($data['headline'],
+                                     array('bold' => true),
+                                     $opts);
+                }
                 foreach($data['data'] as $group) {
                     foreach($group as $value) {
-                        if ($value === null || $value === '') {
-                            $value = "<not set>";
-                        };
-                        $this->_tableRow($value, null, array(1 => array('wrap' => 55)));
+                        if ($value[2] == '') {
+                            $value[2] = "<not set>";
+                        }
+                        $this->_tableRow($value, null, $opts);
                     }
-                };
+                }
                 $this->_endTable();
                 break;
             case 'remote-info':
@@ -416,12 +422,12 @@ class PEAR_Frontend_CLI extends PEAR
                     $count = count($data['data'][0]);
                     if ($count == 2) {
                         $opts = array(0 => array('wrap' => 25),
-                                      1 => array('wrap' => 55)
+                                      1 => array('wrap' => 50)
                         );
                     } elseif ($count == 3) {
                         $opts = array(0 => array('wrap' => 20),
                                       1 => array('wrap' => 20),
-                                      2 => array('wrap' => 40)
+                                      2 => array('wrap' => 35)
                         );
                     }
                     if (isset($data['headline']) && is_array($data['headline'])) {
