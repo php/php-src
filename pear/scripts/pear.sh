@@ -17,7 +17,7 @@ if test "x$PHP_PEAR_INSTALL_DIR" != "x"; then
   INCARG="-d include_path=$PHP_PEAR_INSTALL_DIR"
 else
   if test "@php_dir@" = '@'php_dir'@'; then
-    INCDIR=`dirname $0`/..
+    INCDIR=`dirname $0`
     INCARG=""  
   else
     INCDIR="@php_dir@"
