@@ -700,7 +700,7 @@ PHP_FUNCTION(fclose)
 	what = zend_fetch_resource(arg1,-1,"File-Handle",&type,2,le_fopen,le_socket);
 	ZEND_VERIFY_RESOURCE(what);
 	
-	php3_list_delete((*arg1)->value.lval);
+	zend_list_delete((*arg1)->value.lval);
 	RETURN_TRUE;
 }
 
@@ -776,7 +776,7 @@ PHP_FUNCTION(pclose)
 	what = zend_fetch_resource(arg1,-1,"File-Handle",NULL,1,le_popen);
 	ZEND_VERIFY_RESOURCE(what);
 	
-	php3_list_delete((*arg1)->value.lval);
+	zend_list_delete((*arg1)->value.lval);
 	RETURN_LONG(FIL(pclose_ret));
 }
 
@@ -888,7 +888,7 @@ PHP_FUNCTION(set_socket_timeout)
 	convert_to_long(socket);
 	convert_to_long(timeout);
 	
-	sock = php3_list_find(socket->value.lval, &type);
+	sock = zend_list_find(socket->value.lval, &type);
 	if (type!=le_socket) {
 		php_error(E_WARNING,"%d is not a socket id",socket->value.lval);
 		RETURN_FALSE;
@@ -1337,7 +1337,7 @@ PHP_FUNCTION(readfile)
 		}
 		RETURN_FALSE;
 	}
-	if (php3_header()) {
+	if (php_header()) {
 		size = php_passthru_fd(socketd, fp, issock);
 	}
 	if (issock) {
@@ -1400,11 +1400,11 @@ PHP_FUNCTION(fpassthru)
 	}
 
 	size = 0;
-	if (php3_header()) { /* force headers if not already sent */
+	if (php_header()) { /* force headers if not already sent */
 		size = php_passthru_fd(socketd, (FILE*) what, issock);
 	}
 
-	php3_list_delete((*arg1)->value.lval);
+	zend_list_delete((*arg1)->value.lval);
 	RETURN_LONG(size);
 }
 

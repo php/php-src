@@ -30,7 +30,7 @@
 #define _TYPE_H
 
 extern int php3_check_type(char *str);
-extern int php3_check_ident_type(char *str);
+extern int php_check_ident_type(char *str);
 extern char *php3_get_ident_index(char *str);
 
 #define GPC_REGULAR 0x1

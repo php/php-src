@@ -6,6 +6,6 @@ PHP_FUNCTION(getmypid);
 PHP_FUNCTION(getmyinode);
 PHP_FUNCTION(getlastmod);
 
-extern long _php3_getuid(void);
+extern long php_getuid(void);
 
 #endif

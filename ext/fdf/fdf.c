@@ -141,7 +141,7 @@ PHP_FUNCTION(fdf_open) {
 	if(!fdf)
 		RETURN_FALSE;
 
-	id = php3_list_insert(fdf,FDF_GLOBAL(le_fdf));
+	id = zend_list_insert(fdf,FDF_GLOBAL(le_fdf));
 	RETURN_LONG(id);
 } /* }}} */
 
@@ -159,14 +159,14 @@ PHP_FUNCTION(fdf_close) {
 
 	convert_to_long_ex(arg1);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 /*	FDFClose(fdf); */
-	php3_list_delete(id);
+	zend_list_delete(id);
 
 	RETURN_TRUE;
 } /* }}} */
@@ -185,7 +185,7 @@ PHP_FUNCTION(fdf_create) {
 	if(!fdf)
 		RETURN_FALSE;
 
-	id = php3_list_insert(fdf,FDF_GLOBAL(le_fdf));
+	id = zend_list_insert(fdf,FDF_GLOBAL(le_fdf));
 	RETURN_LONG(id);
 }
 /* }}} */
@@ -208,7 +208,7 @@ PHP_FUNCTION(fdf_get_value) {
 	convert_to_long_ex(arg1);
 	convert_to_string_ex(arg2);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -251,7 +251,7 @@ PHP_FUNCTION(fdf_set_value) {
 	convert_to_string_ex(arg3);
 	convert_to_long_ex(arg4);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -292,7 +292,7 @@ PHP_FUNCTION(fdf_next_field_name) {
 		fieldname = NULL;
 	}
 	id=(*argv[0])->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -333,7 +333,7 @@ PHP_FUNCTION(fdf_set_ap) {
 	convert_to_string_ex(arg4);
 	convert_to_long_ex(arg5);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -379,7 +379,7 @@ PHP_FUNCTION(fdf_set_status) {
 	convert_to_long_ex(arg1);
 	convert_to_string_ex(arg2);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -410,7 +410,7 @@ PHP_FUNCTION(fdf_get_status) {
 
 	convert_to_long_ex(arg1);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -446,7 +446,7 @@ PHP_FUNCTION(fdf_set_file) {
 	convert_to_long_ex(arg1);
 	convert_to_string_ex(arg2);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -477,7 +477,7 @@ PHP_FUNCTION(fdf_get_file) {
 
 	convert_to_long_ex(arg1);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -513,7 +513,7 @@ PHP_FUNCTION(fdf_save) {
 	convert_to_long_ex(arg1);
 	convert_to_string_ex(arg2);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
@@ -546,7 +546,7 @@ PHP_FUNCTION(fdf_add_template) {
 	convert_to_string_ex(arg4);
 	convert_to_long_ex(arg5);
 	id=(*arg1)->value.lval;
-	fdf = php3_list_find(id,&type);
+	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
 		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;

@@ -395,13 +395,13 @@ PHP_FUNCTION(rawurldecode)
 	if (!(*arg)->value.str.len) {
 		RETURN_FALSE;
 	}
-	len = _php3_rawurldecode((*arg)->value.str.val, (*arg)->value.str.len);
+	len = php_raw_url_decode((*arg)->value.str.val, (*arg)->value.str.len);
 
 	RETVAL_STRINGL((*arg)->value.str.val, len, 1);
 }
 /* }}} */
 
-int _php3_rawurldecode(char *str, int len)
+int php_raw_url_decode(char *str, int len)
 {
 	char *dest = str;
 	char *data = str;

@@ -64,7 +64,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 		}
 		if (ret>-1) {
 			uid=sb.st_uid;
-			if (uid==_php3_getuid()) return(1);
+			if (uid==php_getuid()) return(1);
 		}
 	}
 	s = strrchr(fn,'/');
@@ -100,7 +100,7 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 		}
 		duid = sb.st_uid;
 	}
-	if (duid == (uid=_php3_getuid())) return(1);
+	if (duid == (uid=php_getuid())) return(1);
 	else {
 		php_error(E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld",uid,fn,duid);
 		return(0);

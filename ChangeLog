@@ -6285,7 +6285,7 @@
       mod_php4.c
       php.h
       php3_compat.h
-      php3_sprintf.c
+      php_sprintf.c
       php_ini.c
       rfc1867.c
       safe_mode.c
@@ -7244,7 +7244,7 @@
       php.h
       php3_realpath.c
       php3_realpath.h
-      php3_sprintf.c
+      php_sprintf.c
       php_globals.h
       php_ini.c
       php_ini.h
@@ -9008,7 +9008,7 @@
       main.c
       mod_php3.c
       php.h
-      php3_sprintf.c
+      php_sprintf.c
       php_regex.h
       request_info.c
       snprintf.c: * Get Apache to work.  POST doesn't work yet.
@@ -10976,7 +10976,7 @@
 
     * php3_realpath.c
       php3_realpath.h
-      php3_sprintf.c
+      php_sprintf.c
       php3_threads.c
       php3_threads.h
       php3extra.dsw
@@ -10984,7 +10984,7 @@
 
     * php3_realpath.c
       php3_realpath.h
-      php3_sprintf.c
+      php_sprintf.c
       php3_threads.c
       php3_threads.h
       php3extra.dsw

@@ -368,7 +368,7 @@ PHP_FUNCTION(ldap_connect)
 	if ( ldap == NULL ) {
 	  RETURN_FALSE;
 	} else {
-	  RETURN_LONG(php3_list_insert((void*)ldap,LDAP_GLOBAL(le_link)));
+	  RETURN_LONG(zend_list_insert((void*)ldap,LDAP_GLOBAL(le_link)));
 	}
 
 }
@@ -382,7 +382,7 @@ static LDAP * _get_ldap_link(pval **link, HashTable *list)
 	LDAP_TLS_VARS;
 
 	convert_to_long_ex(link);
-	ldap = (LDAP *) php3_list_find((*link)->value.lval, &type);
+	ldap = (LDAP *) zend_list_find((*link)->value.lval, &type);
 	
 	if (!ldap || !(type == LDAP_GLOBAL(le_link))) {
 	  php_error(E_WARNING, "%d is not a LDAP link index",(*link)->value.lval);
@@ -399,7 +399,7 @@ static LDAPMessage * _get_ldap_result(pval **result, HashTable *list)
 	LDAP_TLS_VARS;
 
 	convert_to_long_ex(result);
-	ldap_result = (LDAPMessage *)php3_list_find((*result)->value.lval, &type);
+	ldap_result = (LDAPMessage *)zend_list_find((*result)->value.lval, &type);
 
 	if (!ldap_result || type != LDAP_GLOBAL(le_result)) {
 		php_error(E_WARNING, "%d is not a LDAP result index",(*result)->value.lval);
@@ -417,7 +417,7 @@ static LDAPMessage * _get_ldap_result_entry(pval **result, HashTable *list)
 	LDAP_TLS_VARS;
 
 	convert_to_long_ex(result);
-	ldap_result_entry = (LDAPMessage *)php3_list_find((*result)->value.lval, &type);
+	ldap_result_entry = (LDAPMessage *)zend_list_find((*result)->value.lval, &type);
 
 	if (!ldap_result_entry || type != LDAP_GLOBAL(le_result_entry)) {
 		php_error(E_WARNING, "%d is not a LDAP result entry index", (*result)->value.lval);
@@ -435,7 +435,7 @@ static BerElement * _get_ber_entry(pval **berp, HashTable *list)
 	LDAP_TLS_VARS;
 
 	convert_to_long_ex(berp);
-	ber = (BerElement *) php3_list_find((*berp)->value.lval, &type);
+	ber = (BerElement *) zend_list_find((*berp)->value.lval, &type);
 
 	if ( type != LDAP_GLOBAL(le_ber_entry)) {
 		php_error(E_WARNING, "%d is not a BerElement index",(*berp)->value.lval);
@@ -454,7 +454,7 @@ PHP_FUNCTION(ber_free)
 		WRONG_PARAM_COUNT;
 	}
 	
-	php3_list_delete((*berp)->value.lval);
+	zend_list_delete((*berp)->value.lval);
 	RETURN_TRUE;
 }
 #endif
@@ -531,7 +531,7 @@ PHP_FUNCTION(ldap_unbind)
 	ldap = _get_ldap_link(link, list);
 	if (ldap == NULL) RETURN_FALSE;
 
-	php3_list_delete((*link)->value.lval);
+	zend_list_delete((*link)->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -628,7 +628,7 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 #endif
 		RETVAL_FALSE;
 	} else  {
-		RETVAL_LONG(php3_list_insert(ldap_result, LDAP_GLOBAL(le_result)));
+		RETVAL_LONG(zend_list_insert(ldap_result, LDAP_GLOBAL(le_result)));
 	}
 
 	if (ldap_attrs != NULL) {
@@ -678,7 +678,7 @@ PHP_FUNCTION(ldap_free_result)
 	if (ldap_result == NULL) {
 		RETVAL_FALSE;
 	} else {
-		php3_list_delete((*result)->value.lval);  /* Delete list entry and call registered destructor function */
+		zend_list_delete((*result)->value.lval);  /* Delete list entry and call registered destructor function */
 		RETVAL_TRUE;
 	}
 	return;
@@ -730,7 +730,7 @@ PHP_FUNCTION(ldap_first_entry)
 	if ((ldap_result_entry = ldap_first_entry(ldap, ldap_result)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(php3_list_insert(ldap_result_entry, LDAP_GLOBAL(le_result_entry)));
+		RETURN_LONG(zend_list_insert(ldap_result_entry, LDAP_GLOBAL(le_result_entry)));
 	}
 }
 /* }}} */
@@ -757,7 +757,7 @@ PHP_FUNCTION(ldap_next_entry)
 	if ((ldap_result_entry_next = ldap_next_entry(ldap, ldap_result_entry)) == NULL) {
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(php3_list_insert(ldap_result_entry_next, LDAP_GLOBAL(le_result_entry)));
+		RETURN_LONG(zend_list_insert(ldap_result_entry_next, LDAP_GLOBAL(le_result_entry)));
 	}
 }
 /* }}} */
@@ -875,7 +875,7 @@ PHP_FUNCTION(ldap_first_attribute)
 	} else {
 		/* brep is passed by ref so we do not have to account for memory */
 		(*berp)->type=IS_LONG;
-		(*berp)->value.lval=php3_list_insert(ber,LDAP_GLOBAL(le_ber_entry));
+		(*berp)->value.lval=zend_list_insert(ber,LDAP_GLOBAL(le_ber_entry));
 
 		RETVAL_STRING(attribute,1);
 #ifdef WINDOWS

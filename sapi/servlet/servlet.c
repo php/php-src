@@ -71,7 +71,7 @@
 #include "php_getopt.h"
 #endif
 
-PHPAPI extern char *php3_ini_path;
+PHPAPI extern char *php_ini_path;
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setEnv
   (JNIEnv *newJenv, jclass self);
@@ -363,7 +363,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	/*
 	 * Clean up
 	 */
-	php3_header();			/* Make sure headers have been sent */
+	php_header();			/* Make sure headers have been sent */
 	
 	FREESTRING(SG(request_info).request_method);
 	FREESTRING(SG(request_info).query_string);

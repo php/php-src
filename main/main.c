@@ -105,7 +105,7 @@ void *gLock;					/*mutex variable */
 
 /* True globals (no need for thread safety) */
 HashTable configuration_hash;
-PHPAPI char *php3_ini_path = NULL;
+PHPAPI char *php_ini_path = NULL;
 
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
@@ -259,36 +259,6 @@ PHP_INI_END()
 /* True global (no need for thread safety */
 static int module_initialized = 0;
 
-#if 0
-#if APACHE
-void php3_apache_puts(const char *s)
-{
-	SLS_FETCH();
-	
-	if (SG(server_context)) {
-		if(rputs(s, (request_rec *) SG(server_context))==-1) {
-			PG(connection_status) |= PHP_CONNECTION_ABORTED;
-		}
-	} else {
-		fputs(s, stdout);
-	}
-}
-
-void php3_apache_putc(char c)
-{
-	SLS_FETCH();
-	
-	if (SG(server_context)) {
-		if(rputc(c, (request_rec *) SG(server_context))!=c) {
-			PG(connection_status) |= PHP_CONNECTION_ABORTED;
-		}
-	} else {
-		fputc(c, stdout);
-	}
-}
-#endif
-#endif
-
 void php_log_err(char *log_message)
 {
 	FILE *log_file;
@@ -337,7 +307,7 @@ void php_log_err(char *log_message)
 #endif							/*APACHE */
 
 #if CGI_BINARY
-	if (php3_header()) {
+	if (php_header()) {
 		fprintf(stderr, log_message);
 		fprintf(stderr, "\n");
 	}
@@ -583,9 +553,9 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 	int old_chunk_size;
 	FILE *retval;
 	
-	old_chunk_size = _php3_sock_set_def_chunk_size(1);
+	old_chunk_size = php_sock_set_def_chunk_size(1);
 	retval=php_fopen_wrapper((char *) filename, "r", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path);
-	_php3_sock_set_def_chunk_size(old_chunk_size);
+	php_sock_set_def_chunk_size(old_chunk_size);
 	
 	if (issock) {
 		retval = fdopen(socketd, "r");
@@ -729,7 +699,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	 * function that gets triggered when our request pool is destroyed.
 	 * We need this because at any point in our code we can be interrupted
 	 * and that may happen before we have had time to free our memory.
-	 * The php3_shutdown function needs to free all outstanding allocated
+	 * The php_request_shutdown function needs to free all outstanding allocated
 	 * memory.  
 	 */
 	block_alarms();
@@ -827,7 +797,7 @@ void php_request_shutdown(void *dummy)
 }
 
 
-static int php3_config_ini_startup(void)
+static int php_config_ini_startup(void)
 {
 	if (php_init_config() == FAILURE) {
 		php_printf("PHP:  Unable to parse configuration file.\n");
@@ -836,7 +806,7 @@ static int php3_config_ini_startup(void)
 	return SUCCESS;
 }
 
-static void php3_config_ini_shutdown(void)
+static void php_config_ini_shutdown(void)
 {
 	php_shutdown_config();
 }
@@ -980,7 +950,7 @@ int php_module_startup(sapi_module_struct *sf)
 
 	php_ini_mstartup();
 
-	if (php3_config_ini_startup() == FAILURE) {
+	if (php_config_ini_startup() == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1026,7 +996,7 @@ void php_module_shutdown()
 	}
 #if !USE_SAPI
 	/* close down the ini config */
-	php3_config_ini_shutdown();
+	php_config_ini_shutdown();
 #endif
 
 #if (WIN32|WINNT) && !(USE_SAPI)

@@ -79,9 +79,9 @@
 #include <sys/un.h>
 #endif
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
+static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
 
-int _php3_getftpresult(int socketd);
+int php_get_ftp_result(int socketd);
 
 /*
 	When open_basedir is not NULL, check if the given filename is located in
@@ -194,7 +194,7 @@ PHPAPI FILE *php_fopen_wrapper(char *path, char *mode, int options, int *issock,
 	   be runtime enabled, NOT compile time. */
 #if PHP3_URL_FOPEN
 	if (!(options & IGNORE_URL)) {
-		return php3_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
+		return php_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
 	}
 #endif
 
@@ -432,7 +432,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
  * Otherwise, fopen is called as usual and the file pointer is returned.
  */
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	url *resource;
 	int result;
@@ -524,7 +524,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			strcpy(scratch, resource->user);
 			strcat(scratch, ":");
 			strcat(scratch, resource->pass);
-			tmp = _php3_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
+			tmp = php_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
 
 			if (snprintf(hdr_line, sizeof(hdr_line),
 						 "Authorization: Basic %s\r\n", tmp) > 0) {
@@ -595,7 +595,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			*socketd = 0;
 			free_url(resource);
 			if (location[0] != '\0') {
-				return php3_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
+				return php_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
 			} else {
 				return NULL;
 			}
@@ -667,7 +667,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 #endif
 
 		/* Start talking to ftp server */
-		result = _php3_getftpresult(*socketd);
+		result = php_get_ftp_result(*socketd);
 		if (result > 299 || result < 200) {
 			free_url(resource);
 			SOCK_FCLOSE(*socketd);
@@ -677,7 +677,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		/* send the user name */
 		SOCK_WRITE("USER ", *socketd);
 		if (resource->user != NULL) {
-			_php3_rawurldecode(resource->user, strlen(resource->user));
+			php_raw_url_decode(resource->user, strlen(resource->user));
 			SOCK_WRITE(resource->user, *socketd);
 		} else {
 			SOCK_WRITE("anonymous", *socketd);
@@ -685,13 +685,13 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		SOCK_WRITE("\r\n", *socketd);
 
 		/* get the response */
-		result = _php3_getftpresult(*socketd);
+		result = php_get_ftp_result(*socketd);
 
 		/* if a password is required, send it */
 		if (result >= 300 && result <= 399) {
 			SOCK_WRITE("PASS ", *socketd);
 			if (resource->pass != NULL) {
-				_php3_rawurldecode(resource->pass, strlen(resource->pass));
+				php_raw_url_decode(resource->pass, strlen(resource->pass));
 				SOCK_WRITE(resource->pass, *socketd);
 			} else {
 				/* if the user has configured who they are,
@@ -705,7 +705,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			SOCK_WRITE("\r\n", *socketd);
 
 			/* read the response */
-			result = _php3_getftpresult(*socketd);
+			result = php_get_ftp_result(*socketd);
 			if (result > 299 || result < 200) {
 				free_url(resource);
 				SOCK_FCLOSE(*socketd);
@@ -721,7 +721,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 
 		/* set the connection to be binary */
 		SOCK_WRITE("TYPE I\r\n", *socketd);
-		result = _php3_getftpresult(*socketd);
+		result = php_get_ftp_result(*socketd);
 		if (result > 299 || result < 200) {
 			free_url(resource);
 			SOCK_FCLOSE(*socketd);
@@ -735,7 +735,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		SOCK_WRITE("\r\n", *socketd);
 
 		/* read the response */
-		result = _php3_getftpresult(*socketd);
+		result = php_get_ftp_result(*socketd);
 		if (mode[0] == 'r') {
 			/* when reading file, it must exist */
 			if (result > 299 || result < 200) {
@@ -918,7 +918,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	return NULL;
 }
 
-int _php3_getftpresult(int socketd)
+int php_get_ftp_result(int socketd)
 {
 	char tmp_line[513];
 

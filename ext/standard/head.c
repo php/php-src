@@ -104,7 +104,7 @@ void php4i_add_header_information(char *header_information, uint header_length)
 				rr = r + 1;
 			}
 			if (PG(safe_mode) && (!strcasecmp(header_information, "WWW-authenticate"))) {
-				myuid = _php3_getuid();
+				myuid = php_getuid();
 				sprintf(temp2, "realm=\"%ld ", myuid);  /* SAFE */
 				temp = _php3_regreplace("realm=\"", temp2, rr, 1, 0);
 				if (!strcmp(temp, rr)) {
@@ -214,16 +214,16 @@ PHP_FUNCTION(Header)
 
 #if 0
 /*
- * php3_header() flushes the header info built up using calls to
+ * php_header() flushes the header info built up using calls to
  * the Header() function.  If type is 1, a redirect to str is done.
  * Otherwise type should be 0 and str NULL.
  *
  * The function returns non-zero if output is allowed after the
- * call, and zero otherwise.  Any call to php3_header() must check
+ * call, and zero otherwise.  Any call to php_header() must check
  * the return status and if false, no output must be sent.  This
  * is in order to correctly handle HEAD requests.
  */
-PHPAPI int php3_header(void)
+PHPAPI int php_header(void)
 {
 #if APACHE
 	CookieList *cookie;
@@ -379,7 +379,7 @@ PHPAPI int php3_header(void)
 	return(1);
 }
 #else
-PHPAPI int php3_header()
+PHPAPI int php_header()
 {
 	SLS_FETCH();
 
@@ -548,7 +548,7 @@ PHP_FUNCTION(setcookie)
 }
 
 
-int php3_headers_unsent(void)
+int php_headers_unsent(void)
 {
 	if (php3_HeaderPrinted!=1 || !php3_PrintHeader) {
 		return 1;
@@ -568,13 +568,13 @@ PHP_FUNCTION(headers_sent)
 	}
 }
 
-function_entry php3_header_functions[] = {
+function_entry php_header_functions[] = {
 	{NULL, NULL, NULL}
 };
 
 
-php3_module_entry php3_header_module_entry = {
-	"PHP_head", php3_header_functions, NULL, NULL, PHP_RINIT(head), NULL, NULL, STANDARD_MODULE_PROPERTIES
+php3_module_entry php_header_module_entry = {
+	"PHP_head", php_header_functions, NULL, NULL, PHP_RINIT(head), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 /*

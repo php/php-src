@@ -58,7 +58,7 @@ int php3_check_type(char *str)
  * 1 - non-index array
  * 2 - index array
  */
-int php3_check_ident_type(char *str)
+int php_check_ident_type(char *str)
 {
 	char *s;
 

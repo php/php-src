@@ -118,7 +118,7 @@ PHP_MINIT_FUNCTION(ftp)
 	int	id, type; \
 	convert_to_long(pval); \
 	id = (pval)->value.lval; \
-	(ftp) = php3_list_find(id, &type); \
+	(ftp) = zend_list_find(id, &type); \
 	if (!(ftp) || type != le_ftpbuf) { \
 		php_error(E_WARNING, "Unable to find ftpbuf %d", id); \
 		RETURN_FALSE; \
@@ -175,7 +175,7 @@ PHP_FUNCTION(ftp_connect)
 	if (ftp == NULL)
 		RETURN_FALSE;
 
-	RETURN_LONG(php3_list_insert(ftp, le_ftpbuf));
+	RETURN_LONG(zend_list_insert(ftp, le_ftpbuf));
 }
 /* }}} */
 
@@ -786,8 +786,8 @@ PHP_FUNCTION(ftp_quit)
 	}
 
 	id = arg1->value.lval;
-	if (php3_list_find(id, &type) && type == le_ftpbuf)
-		php3_list_delete(id);
+	if (zend_list_find(id, &type) && type == le_ftpbuf)
+		zend_list_delete(id);
 
 	RETURN_TRUE;
 }

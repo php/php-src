@@ -137,7 +137,7 @@ PHP_FUNCTION(dbase_open) {
 		RETURN_FALSE;
 	}
 
-	handle = php3_list_insert(dbh, DBase_GLOBAL(le_dbhead));
+	handle = zend_list_insert(dbh, DBase_GLOBAL(le_dbhead));
 	RETURN_LONG(handle);
 }
 /* }}} */
@@ -154,13 +154,13 @@ PHP_FUNCTION(dbase_close) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
 	}
 
-	php3_list_delete(dbh_id->value.lval);
+	zend_list_delete(dbh_id->value.lval);
 	RETURN_TRUE;
 }
 /* }}} */
@@ -177,7 +177,7 @@ PHP_FUNCTION(dbase_numrecords) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -199,7 +199,7 @@ PHP_FUNCTION(dbase_numfields) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -221,7 +221,7 @@ PHP_FUNCTION(dbase_pack) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -255,7 +255,7 @@ PHP_FUNCTION(dbase_add_record) {
 		RETURN_FALSE;
 	}
 
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -324,7 +324,7 @@ void php3_dbase_replace_record(INTERNAL_FUNCTION_PARAMETERS) {
 		RETURN_FALSE;
 	}
 
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -383,7 +383,7 @@ PHP_FUNCTION(dbase_delete_record) {
 	convert_to_long(dbh_id);
 	convert_to_long(record);
 
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -420,7 +420,7 @@ PHP_FUNCTION(dbase_get_record) {
 	convert_to_long(dbh_id);
 	convert_to_long(record);
 
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -503,7 +503,7 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 	convert_to_long(dbh_id);
 	convert_to_long(record);
 
-	dbh = php3_list_find(dbh_id->value.lval, &dbh_type);
+	dbh = zend_list_find(dbh_id->value.lval, &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
 		php_error(E_WARNING, "Unable to find database for identifier %d", dbh_id->value.lval);
 		RETURN_FALSE;
@@ -704,7 +704,7 @@ PHP_FUNCTION(dbase_create) {
 	dbh->db_rlen = rlen;
         put_dbf_info(dbh);
 
-	handle = php3_list_insert(dbh, DBase_GLOBAL(le_dbhead));
+	handle = zend_list_insert(dbh, DBase_GLOBAL(le_dbhead));
 	RETURN_LONG(handle);
 }
 /* }}} */

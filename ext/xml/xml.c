@@ -1381,7 +1381,7 @@ PHP_FUNCTION(xml_parser_free)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
-	if (php3_list_delete(parser->index) == FAILURE) {
+	if (zend_list_delete(parser->index) == FAILURE) {
 		RETURN_FALSE;
 	}
 

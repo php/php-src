@@ -334,7 +334,7 @@ static int php_ub_body_write(const char *str, uint str_length)
 	if (SG(request_info).headers_only) {
 		zend_bailout();
 	}
-	if (php3_header()) {
+	if (php_header()) {
 		OG(php_body_write) = php_ub_body_write_no_header;
 		result = php_ub_body_write_no_header(str, str_length);
 	}

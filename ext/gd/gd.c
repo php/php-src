@@ -363,7 +363,7 @@ PHP_FUNCTION(imageloadfont) {
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	ind = 5 + php3_list_insert(font, GD_GLOBAL(le_gd_font));
+	ind = 5 + zend_list_insert(font, GD_GLOBAL(le_gd_font));
 
 	RETURN_LONG(ind);
 }
@@ -386,7 +386,7 @@ PHP_FUNCTION(imagecreate)
 	convert_to_long(y_size);
 
 	im = gdImageCreate(x_size->value.lval, y_size->value.lval);
-	ind = php3_list_insert(im, GD_GLOBAL(le_gd));		
+	ind = zend_list_insert(im, GD_GLOBAL(le_gd));		
 
 	RETURN_LONG(ind);
 }
@@ -423,7 +423,7 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
       im = gdImageCreateFromPng (fp);
       fflush(fp);
       fclose(fp);
-      ind = php3_list_insert(im, GD_GLOBAL(le_gd));
+      ind = zend_list_insert(im, GD_GLOBAL(le_gd));
       RETURN_LONG(ind);
 }
 /* }}} */
@@ -452,7 +452,7 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
                       RETURN_FALSE;
               }
       }
-      im = php3_list_find(imgind->value.lval, &ind_type);
+      im = zend_list_find(imgind->value.lval, &ind_type);
       if (!im || ind_type != GD_GLOBAL(le_gd)) {
               php3_error(E_WARNING, "ImagePng: unable to find image pointer");
               RETURN_FALSE;
@@ -476,7 +476,7 @@ void php3_imagepng (INTERNAL_FUNCTION_PARAMETERS) {
                       php3_error(E_WARNING, "Unable to open temporary file");
                       RETURN_FALSE;
               }
-              output = php3_header();
+              output = php_header();
               if (output) {
                       gdImagePng (im, tmp);
             fseek(tmp, 0, SEEK_SET);
@@ -536,7 +536,7 @@ PHP_FUNCTION(imagecreatefromgif )
 	fflush(fp);
 	fclose(fp);
 
-	ind = php3_list_insert(im, GD_GLOBAL(le_gd));
+	ind = zend_list_insert(im, GD_GLOBAL(le_gd));
 
 	RETURN_LONG(ind);
 }
@@ -571,7 +571,7 @@ PHP_FUNCTION(imagegif )
 		}
 	}
 
-	im = php3_list_find(imgind->value.lval, &ind_type);
+	im = zend_list_find(imgind->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageGif: unable to find image pointer");
 		RETURN_FALSE;
@@ -598,7 +598,7 @@ PHP_FUNCTION(imagegif )
 			RETURN_FALSE;
 		}
 
-		output = php3_header();
+		output = php_header();
 
 		if (output) {
 			gdImageGif (im, tmp);
@@ -637,7 +637,7 @@ PHP_FUNCTION(imagedestroy)
 
 	convert_to_long(imgind);
 
-	php3_list_delete(imgind->value.lval);
+	zend_list_delete(imgind->value.lval);
 
 	RETURN_TRUE;
 }
@@ -669,7 +669,7 @@ PHP_FUNCTION(imagecolorallocate)
 	g = green->value.lval;
 	b = blue->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorAllocate: Unable to find image pointer");
 		RETURN_FALSE;
@@ -699,7 +699,7 @@ PHP_FUNCTION(imagecolorat)
 	
 	ind = imgind->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorAt: Unable to find image pointer");
 		RETURN_FALSE;
@@ -743,7 +743,7 @@ PHP_FUNCTION(imagecolorclosest)
 	g = green->value.lval;
 	b = blue->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorClosest: Unable to find image pointer");
 		RETURN_FALSE;
@@ -771,7 +771,7 @@ PHP_FUNCTION(imagecolordeallocate)
 	ind = imgind->value.lval;
 	col = index->value.lval;
 
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorDeallocate: Unable to find image pointer");
 		RETURN_FALSE;
@@ -814,7 +814,7 @@ PHP_FUNCTION(imagecolorresolve)
 	g = green->value.lval;
 	b = blue->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorResolve: Unable to find image pointer");
 		RETURN_FALSE;
@@ -850,7 +850,7 @@ PHP_FUNCTION(imagecolorexact)
 	g = green->value.lval;
 	b = blue->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorExact: Unable to find image pointer");
 		RETURN_FALSE;
@@ -887,7 +887,7 @@ PHP_FUNCTION(imagecolorset)
 	g = green->value.lval;
 	b = blue->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorSet: Unable to find image pointer");
 		RETURN_FALSE;
@@ -921,7 +921,7 @@ PHP_FUNCTION(imagecolorsforindex)
 	ind = imgind->value.lval;
 	col = index->value.lval;
 	
-	im = php3_list_find(ind, &ind_type);
+	im = zend_list_find(ind, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "ImageColorsForIndex: Unable to find image pointer");
 		RETURN_FALSE;
@@ -967,7 +967,7 @@ PHP_FUNCTION(imagesetpixel)
 	y = yarg->value.lval;
 	x = xarg->value.lval;
 
-	im = php3_list_find(imarg->value.lval, &ind_type);
+	im = zend_list_find(imarg->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1009,7 +1009,7 @@ PHP_FUNCTION(imageline)
 	y2 = Y2->value.lval;
 	col = COL->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(imagedashedline)
 	y2 = Y2->value.lval;
 	col = COL->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(imagerectangle)
 	y2 = Y2->value.lval;
 	col = COL->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(imagefilledrectangle)
 	y2 = Y2->value.lval;
 	col = COL->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(imagearc)
 		st %= 360;
 	}
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1220,7 +1220,7 @@ PHP_FUNCTION(imagefilltoborder)
 	y = Y->value.lval;
 	x = X->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1257,7 +1257,7 @@ PHP_FUNCTION(imagefill)
 	y = Y->value.lval;
 	x = X->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1282,7 +1282,7 @@ PHP_FUNCTION(imagecolorstotal)
 	}
 	convert_to_long(IM);
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1320,7 +1320,7 @@ PHP_FUNCTION(imagecolortransparent)
 	}
 	convert_to_long(IM);
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(imageinterlace)
 	}
 	convert_to_long(IM);
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1402,7 +1402,7 @@ static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 	npoints = NPOINTS->value.lval;
 	col = COL->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1505,7 +1505,7 @@ static gdFontPtr _php3_find_gd_font(int size)
 			 font = gdFontGiant;
 			 break;
 	    default:
-			font = php3_list_find(size - 5, &ind_type);
+			font = zend_list_find(size - 5, &ind_type);
 			 if (!font || ind_type != GD_GLOBAL(le_gd_font)) {
 				  if (size < 1) {
 					   font = gdFontTiny;
@@ -1618,7 +1618,7 @@ static void _php3_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	x = X->value.lval;
 	size = SIZE->value.lval;
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		if (string) {
@@ -1719,13 +1719,13 @@ PHP_FUNCTION(imagecopy)
 	dstX = DX->value.lval;
 	dstY = DY->value.lval;
 
-	im_src = php3_list_find(SIM->value.lval, &ind_type);
+	im_src = zend_list_find(SIM->value.lval, &ind_type);
 	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
-	im_dst = php3_list_find(DIM->value.lval, &ind_type);
+	im_dst = zend_list_find(DIM->value.lval, &ind_type);
 	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1773,13 +1773,13 @@ PHP_FUNCTION(imagecopyresized)
 	dstH = DH->value.lval;
 	dstW = DW->value.lval;
 
-	im_src = php3_list_find(SIM->value.lval, &ind_type);
+	im_src = zend_list_find(SIM->value.lval, &ind_type);
 	if (!im_src || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
-	im_dst = php3_list_find(DIM->value.lval, &ind_type);
+	im_dst = zend_list_find(DIM->value.lval, &ind_type);
 	if (!im_dst || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1804,7 +1804,7 @@ PHP_FUNCTION(imagesx)
 		WRONG_PARAM_COUNT;
 	}
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1827,7 +1827,7 @@ PHP_FUNCTION(imagesy)
 		WRONG_PARAM_COUNT;
 	}
 
-	im = php3_list_find(IM->value.lval, &ind_type);
+	im = zend_list_find(IM->value.lval, &ind_type);
 	if (!im || ind_type != GD_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "Unable to find image pointer");
 		RETURN_FALSE;
@@ -1897,7 +1897,7 @@ void php3_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		col = COL->value.lval;
 		y = Y->value.lval;
 		x = X->value.lval;
-              im = php3_list_find(IM->value.lval, &ind_type);
+              im = zend_list_find(IM->value.lval, &ind_type);
               if (!im || ind_type != GD_GLOBAL(le_gd)) {
                       php_error(E_WARNING, "Unable to find image pointer");
                       RETURN_FALSE;

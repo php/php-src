@@ -81,7 +81,7 @@ static void _php3_statpage(void)
 #endif
 }
 
-long _php3_getuid(void)
+long php_getuid(void)
 {
 	BLS_FETCH();
 
@@ -95,7 +95,7 @@ PHP_FUNCTION(getmyuid)
 {
 	long uid;
 	
-	uid = _php3_getuid();
+	uid = php_getuid();
 	if (uid < 0) {
 		RETURN_FALSE;
 	} else {

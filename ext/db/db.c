@@ -196,7 +196,7 @@ dbm_info *_php3_finddbm(pval *id,HashTable *list)
 
 	/* didn't find it as a database filename, try as a number */
 	convert_to_long(id);
-	info = php3_list_find(id->value.lval, &info_type);
+	info = zend_list_find(id->value.lval, &info_type);
 	if (info_type != DBM_GLOBAL(le_db))
 		return NULL;
 	return info;
@@ -265,7 +265,7 @@ PHP_FUNCTION(dbmopen) {
 	
 	info = _php3_dbmopen(filename->value.str.val, mode->value.str.val);
 	if (info) {
-		ret = php3_list_insert(info, DBM_GLOBAL(le_db));
+		ret = zend_list_insert(info, DBM_GLOBAL(le_db));
 		RETURN_LONG(ret);
 	} else {
 		RETURN_FALSE;
@@ -417,7 +417,7 @@ PHP_FUNCTION(dbmclose) {
 	}
 	convert_to_long(id);
 
-	if (php3_list_delete(id->value.lval) == SUCCESS) {
+	if (zend_list_delete(id->value.lval) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

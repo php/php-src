@@ -71,7 +71,7 @@ int checkinput(int h)
 }
 
 
-PHPAPI void php3_fhttpd_free_header(void)
+PHPAPI void php_fhttpd_free_header(void)
 {
 	int i;
 
@@ -92,7 +92,7 @@ PHPAPI void php3_fhttpd_free_header(void)
 }
 
 
-PHPAPI void php3_fhttpd_puts_header(char *s)
+PHPAPI void php_fhttpd_puts_header(char *s)
 {
 	char *p0, *p1, *p2, *p3, **p;
 	int l;
@@ -162,17 +162,17 @@ void fhttpd_flush(void)
 {
 }
 
-PHPAPI void php3_fhttpd_puts(char *s)
+PHPAPI void php_fhttpd_puts(char *s)
 {
 	putlinetoresponse(response, s);
 }
 
-PHPAPI void php3_fhttpd_putc(char c)
+PHPAPI void php_fhttpd_putc(char c)
 {
 	writetoresponse(response, &c, 1);
 }
 
-PHPAPI int php3_fhttpd_write(char *a, int n)
+PHPAPI int php_fhttpd_write(char *a, int n)
 {
 	return writetoresponse(response, a, n);
 }
