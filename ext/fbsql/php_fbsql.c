@@ -1526,7 +1526,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 	if (!mdOk(link, meta))
 	{
 		return_value->value.lval = 0;
-		return_value->type       = IS_LONG;
+		return_value->type       = IS_BOOL;
 		fbcmdRelease(meta);
 	}
 	else {
@@ -1542,14 +1542,14 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 		if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
 			return_value->value.lval = 1;
-			return_value->type       = IS_LONG;
+			return_value->type       = IS_BOOL;
 			if (sR == 1 && md) fbcmdRelease(md);
 		}
 		else if (tp[0] == 'I' || tp[0] == 'U' || tp[0] == 'A')
 		{
 			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
 			return_value->value.lval = 1;
-			return_value->type       = IS_LONG;
+			return_value->type       = IS_BOOL;
 			if (sR == 1 && md) fbcmdRelease(md);
 		}
 		else if ((fh = fbcmdFetchHandle(md)) || (tp[0] == 'E'))
