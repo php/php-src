@@ -20,6 +20,15 @@
 
 /* $Id$ */
 
+/*
+ * HTML entity resources:
+ *
+ * http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset2.asp
+ * http://msdn.microsoft.com/workshop/author/dhtml/reference/charsets/charset3.asp
+ * http://www.unicode.org/Public/MAPPINGS/OBSOLETE/UNI2SGML.TXT
+ *
+ */
+
 #include "php.h"
 #if PHP_WIN32
 #include "config.w32.h"
