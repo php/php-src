@@ -222,49 +222,6 @@ void timeout(int sig);
 
 #define CHECK_LINK(link) { if (link==-1) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); RETURN_FALSE; } }
 
-/* {{{ _restore_connection_defaults
- */
-static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	php_mysql_conn *link;
-	char	user[128];
-	char 	passwd[128];
-
-	/* check if its a persistent link */
-	if (Z_TYPE_P(rsrc) != le_plink) 
-		return 0;
-
-	link = (php_mysql_conn *) rsrc->ptr;
-
-	/* Find the active result set and free it */
-	if (link->active_result_id) {
-		int type;
-		MYSQL_RES *mysql_result;
-
-		mysql_result = (MYSQL_RES *) zend_list_find(link->active_result_id, &type);
-		if (mysql_result && type==le_result) {
-			zend_list_delete(link->active_result_id);
-			link->active_result_id = 0;
-		}
-	}
-
-	/* rollback possible transactions */
-	mysql_query(&link->conn, "ROLLBACK");
-
-	/* restore session variable "autocommit" to default (1) */
-	mysql_query(&link->conn, "SET AUTOCOMMIT=1");
-
-	/* unset the current selected db */
-#if MYSQL_VERSION_ID > 32329
-	strcpy (user, (char *)(&link->conn)->user);
-	strcpy (passwd, (char *)(&link->conn)->passwd);
-	mysql_change_user(&link->conn, user, passwd, "");
-#endif
-
-	return 0;	
-}
-/* }}} */
-
 /* {{{ _free_mysql_result
  * This wrapper is required since mysql_free_result() returns an integer, and
  * thus, cannot be used directly
@@ -446,8 +403,6 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
-	zend_hash_apply(&EG(persistent_list), (apply_func_t) _restore_connection_defaults TSRMLS_CC);
-
 	if (MySG(trace_mode)) {
 		if (MySG(result_allocated)){
 			char tmp[128];
