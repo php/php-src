@@ -26,7 +26,7 @@ EOF;
 	exit(1);
 }
 
-if (!class_exists("RegexFindFile")) require_once("regexfindfile.inc");
+if (!class_exists("RegexFindFile", false)) require_once("regexfindfile.inc");
 
 foreach(new RegexFindFile($argv[1], $argv[2]) as $file)
 {
