@@ -139,7 +139,7 @@ function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_locreate,	     pg_lo_create,      NULL)
 	PHP_FALIAS(pg_lounlink,	     pg_lo_unlink,      NULL)
 	PHP_FALIAS(pg_loopen,	     pg_lo_open,        NULL)
-	PHP_FALIAS(pg_loclose,	     pg_lo_close,        NULL)
+	PHP_FALIAS(pg_loclose,	     pg_lo_close,       NULL)
 	PHP_FALIAS(pg_loread,	     pg_lo_read,        NULL)
 	PHP_FALIAS(pg_lowrite,	     pg_lo_write,       NULL)
 	PHP_FALIAS(pg_loimport,	     pg_lo_import,      NULL)
@@ -148,7 +148,7 @@ function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,		NULL)
 	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	NULL)
 #endif
-	{NULL, NULL, NULL}
+	{NULL, NULL, NULL} 
 };
 /* }}} */
 
@@ -177,7 +177,7 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 #ifdef ZTS
 int pgsql_globals_id;
 #else
-PHP_PGSQL_API php_pgsql_globals pgsql_globals;
+php_pgsql_globals pgsql_globals;
 #endif
 
 /* {{{ php_pgsql_set_default_link

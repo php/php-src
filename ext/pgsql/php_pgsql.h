@@ -38,12 +38,6 @@ extern zend_module_entry pgsql_module_entry;
 #include <libpq/libpq-fs.h>
 #endif
 
-#ifdef PHP_WIN32
-#define PHP_PGSQL_API __declspec(dllexport)
-#else
-#define PHP_PGSQL_API
-#endif
-
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 const char * pg_encoding_to_char(int encoding);
 #endif
@@ -158,9 +152,10 @@ typedef struct {
 
 #ifdef ZTS
 # define PGG(v) TSRMG(pgsql_globals_id, php_pgsql_globals *, v)
+extern int pgsql_globals_id;
 #else
 # define PGG(v) (pgsql_globals.v)
-extern PHP_PGSQL_API php_pgsql_globals pgsql_globals;
+extern php_pgsql_globals pgsql_globals;
 #endif
 
 #endif
