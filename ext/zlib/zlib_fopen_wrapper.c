@@ -27,6 +27,7 @@
 
 struct php_gz_stream_data_t	{
 	gzFile gz_file;
+	php_stream *stream;
 };
 
 static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
@@ -74,6 +75,10 @@ static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			ret = gzclose(self->gz_file);
 			self->gz_file = NULL;
 		}
+		if (self->stream) {
+			php_stream_close(self->stream);
+			self->stream = NULL;
+		}
 	}
 	efree(self);
 
@@ -100,7 +105,7 @@ php_stream_ops php_stream_gzio_ops = {
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, 
 							  char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	struct php_gz_stream_data_t *self;
+	struct php_gz_stream_data_t *self = {0};
 	php_stream *stream = NULL, *innerstream = NULL;
 
 	/* sanity check the stream: it can be either read-only or write-only */
@@ -124,8 +129,9 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mod
 	if (innerstream) {
 		int fd;
 
-		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_RELEASE, (void **) &fd, REPORT_ERRORS)) {
+		if (SUCCESS == php_stream_cast(innerstream, PHP_STREAM_AS_FD, (void **) &fd, REPORT_ERRORS)) {
 			self->gz_file = gzdopen(fd, mode);
+			self->stream = innerstream;
 			if (self->gz_file)	{
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
 				if (stream) {
