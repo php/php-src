@@ -66,6 +66,7 @@
 #include "zend_indent.h"
 
 #include "php_content_types.h"
+#include "php_ticks.h"
 
 #include "SAPI.h"
 
@@ -202,8 +203,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_append_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_append_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_prepend_file",		NULL,		PHP_INI_ALL,		OnUpdateString,			auto_prepend_file,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("doc_root",				NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,				php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_charset", SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_charset,		php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("default_mimetype",SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_mimetype,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("default_charset", SAPI_DEFAULT_CHARSET,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_charset,		sapi_globals_struct,sapi_globals)
+	STD_PHP_INI_ENTRY("default_mimetype",SAPI_DEFAULT_MIMETYPE,	PHP_INI_ALL,	OnUpdateStringUnempty,	default_mimetype,		sapi_globals_struct,sapi_globals)
 	STD_PHP_INI_ENTRY("error_log",				NULL,		PHP_INI_ALL,		OnUpdateString,			error_log,				php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("extension_dir",			NULL,		PHP_INI_SYSTEM,		OnUpdateStringUnempty,	extension_dir,			php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",		PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,				php_core_globals,	core_globals)
@@ -801,7 +802,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.block_interruptions = sapi_module.block_interruptions;
 	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
-	zuf.ticks_function = NULL;
+	zuf.ticks_function = php_run_ticks;
 	zend_startup(&zuf, NULL);
 
 #ifdef ZTS
@@ -851,6 +852,11 @@ int php_module_startup(sapi_module_struct *sf)
     REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
     REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
 
+	if (php_startup_ticks(PLS_C) == FAILURE) {
+		php_printf("Unable to start PHP ticks\n");
+		return FAILURE;
+	}
+
 	if (php_startup_internal_extensions() == FAILURE) {
 		php_printf("Unable to start builtin modules\n");
 		return FAILURE;
@@ -878,6 +884,7 @@ int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals)
 void php_module_shutdown()
 {
 	int module_number=0;	/* for UNREGISTER_INI_ENTRIES() */
+	PLS_FETCH();
 
 	if (!module_initialized) {
 		return;
@@ -891,6 +898,7 @@ void php_module_shutdown()
 	WSACleanup();
 #endif
 
+	php_shutdown_ticks(PLS_C);
 	sapi_flush();
 
 	global_lock_destroy();

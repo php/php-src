@@ -2135,3 +2135,10 @@ PHP_FUNCTION(array_multisort)
 	efree(args);
 	RETURN_TRUE;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

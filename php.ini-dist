@@ -183,6 +183,12 @@ magic_quotes_sybase	=	Off		; Use Sybase-style magic quotes (escape ' with '' ins
 auto_prepend_file	=
 auto_append_file	=
 
+; As of 4.0b4, PHP always outputs a character encoding by default in
+; the Content-type: header.  Set default_charset to "none" to disable
+; this.  PHP's built-in default is text/html with the iso-8859-1
+; charset.
+;default_mimetype = "text/html"
+;default_charset = "iso-8859-1"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
@@ -386,3 +392,6 @@ mssql.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0
 ;assert.callback			=	0	; user-function to be called if an assertion fails.
 ;assert.quiet_eval			=	0	; eval the expression with current error_reporting(). set to true if you want error_reporting(0) around the eval().
 
+; Local Variables:
+; tab-width: 4
+; End:

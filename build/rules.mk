@@ -116,7 +116,7 @@ install-modules:
 	echo "installing shared modules into $(moduledir)" && \
 	rm -f modules/*.la && \
 	cp modules/* $(moduledir) || true
-	
+
 include $(srcdir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \

@@ -177,36 +177,65 @@ SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
+SAPI_API char *sapi_get_default_content_type(SLS_D)
+{
+	char *mimetype, *charset, *content_type;
+
+	mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
+
+	if (strncasecmp(mimetype, "text/", 5) == 0 && strcasecmp(charset, "none") != 0) {
+		int len = strlen(mimetype) + sizeof(";charset=") + strlen(charset);
+		content_type = emalloc(len);
+		strlcpy(content_type, mimetype, len);
+		strlcat(content_type, ";charset=", len);
+		strlcat(content_type, charset, len);
+	} else {
+		content_type = estrdup(mimetype);
+	}
+	return content_type;
+}
+
+/*
+ * Add charset on content-type header if the MIME type starts with
+ * "text/", the default_charset directive is not set to "none" and
+ * there is not already a charset option in there.
+ *
+ * If "mimetype" is non-NULL, it should point to a pointer allocated
+ * with emalloc().  If a charset is added, the string will be
+ * re-allocated and the new length is returned.  If mimetype is
+ * unchanged, 0 is returned.
+ *
+ */
+SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len SLS_DC)
+{
+	char *charset, *newtype;
+	int newlen;
+	charset = SG(default_charset) ? SG(default_charset) : SAPI_DEFAULT_CHARSET;
+
+	if (strcasecmp(charset, "none") != 0 && strncmp(*mimetype, "text/", 5) == 0 && strstr(*mimetype, "charset=") == NULL) {
+		newlen = len + (sizeof(";charset=")-1) + strlen(charset);
+		newtype = emalloc(newlen + 1);
+		strlcpy(newtype, *mimetype, len);
+		strlcat(newtype, ";charset=", len);
+		if (*mimetype != NULL) {
+			efree(*mimetype);
+		}
+		*mimetype = newtype;
+		return newlen;
+	}
+	return 0;
+}
+
+
 /*
  * Called from php_request_startup() for every request.
  */
-SAPI_API void sapi_activate(SLS_D PLS_DC)
+SAPI_API void sapi_activate(SLS_D)
 {
-	int len;
-
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
-	if (PG(default_mimetype) != NULL) {
-		if (strncasecmp(PG(default_mimetype), "text/", 5) == 0) {
-			len = strlen(PG(default_mimetype)) + sizeof(";charset=") + strlen(PG(default_charset));
-			/* add charset for text output */
-			SG(sapi_headers).default_content_type = emalloc(len);
-			strcpy(SG(sapi_headers).default_content_type, PG(default_mimetype));
-			strlcat(SG(sapi_headers).default_content_type, ";charset=", len);
-			strlcat(SG(sapi_headers).default_content_type, PG(default_charset), len);
-		} else {
-			/* don't add charset */
-			len = strlen(PG(default_mimetype)) + 1;
-			SG(sapi_headers).default_content_type = emalloc(len);
-			strcpy(SG(sapi_headers).default_content_type, PG(default_mimetype));
-		}
-		SG(sapi_headers).default_content_type[len - 1] = '\0';
-		SG(sapi_headers).default_content_type_size = len;
-	} else {
-		SG(sapi_headers).default_content_type = NULL;
-		SG(sapi_headers).default_content_type_size = 0;
-	}
 	SG(sapi_headers).http_response_code = 200;
 	SG(sapi_headers).http_status_line = NULL;
 	SG(headers_sent) = 0;
@@ -295,7 +324,7 @@ static int sapi_extract_response_code(const char *header_line)
  */
 SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 {
-	int retval;
+	int retval, free_header = 0;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
 	SLS_FETCH();
@@ -329,6 +358,25 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 		if (colon_offset) {
 			*colon_offset = 0;
 			if (!STRCASECMP(header_line, "Content-Type")) {
+				char *ptr = colon_offset, *mimetype = NULL, *newheader;
+				size_t len = header_line_len - (ptr - header_line), newlen;
+				while (*ptr == ' ' && *ptr != '\0') {
+					ptr++;
+				}
+				mimetype = estrdup(ptr);
+				newlen = sapi_apply_default_charset(&mimetype, len);
+				if (newlen != 0) {
+					newlen += sizeof("Content-type: ");
+					newheader = emalloc(newlen);
+					strlcpy(newheader, "Content-type: ", newlen);
+					strlcpy(newheader, mimetype, newlen);
+					sapi_header.header = newheader;
+					sapi_header.header_len = newlen - 1;
+					colon_offset = strchr(newheader, ':');
+					*colon_offset = '\0';
+					free_header = 1;
+				}
+				efree(mimetype);
 				SG(sapi_headers).send_default_content_type = 0;
 			} else if (!STRCASECMP(header_line, "Location")) {
 				SG(sapi_headers).http_response_code = 302; /* redirect */
@@ -349,6 +397,9 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len)
 	}
 	if (retval & SAPI_HEADER_ADD) {
 		zend_llist_add_element(&SG(sapi_headers).headers, (void *) &sapi_header);
+	}
+	if (free_header) {
+		efree(sapi_header.header);
 	}
 	return SUCCESS;
 }
@@ -488,3 +539,10 @@ SAPI_API char *sapi_getenv(char *name, int name_len)
 		return NULL;
 	}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

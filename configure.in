@@ -68,14 +68,16 @@ fi
 
 AM_CONFIG_HEADER(php_config.h)
 AM_MAINTAINER_MODE
+AC_CANONICAL_HOST
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-dnl If we're using cc on HP-UX, add -Ae -D_HPUX_SOURCE [obsolete]
-dnl if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
-dnl   test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
-dnl fi
+dnl ## If we're using cc on HP-UX, add -Ae -D_HPUX_SOURCE [obsolete]
+dnl ## if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"
+dnl ## then
+dnl ##	 test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
+dnl ## fi
 
 dnl Checks for programs.
 AC_PROG_YACC
@@ -93,10 +95,10 @@ else
 fi
 
 dnl ## there has to be a better way...
-dnl## OLDLIBS=$LIBS; LIBS=""
+dnl ## OLDLIBS=$LIBS; LIBS=""
 AC_PROG_CC
 AC_AIX
-dnl## LIBS=$OLDLIBS
+dnl ## LIBS=$OLDLIBS
 
 AM_PROG_CC_STDC
 
@@ -106,9 +108,9 @@ AC_PROG_LN_S
 
 AM_PROG_LEX
 
-dnl Make flex scanners use const if they can, even if __STDC__ is not
-dnl true, for compilers like Sun's that only set __STDC__ true in
-dnl "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
+dnl ## Make flex scanners use const if they can, even if __STDC__ is not
+dnl ## true, for compilers like Sun's that only set __STDC__ true in
+dnl ## "limit-to-ANSI-standard" mode, not in "ANSI-compatible" mode
 AC_C_CONST
 if test "$ac_cv_c_const" = "yes" ; then
   LEX_CFLAGS="-DYY_USE_CONST"
