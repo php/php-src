@@ -930,6 +930,13 @@ AC_OUTPUT(Makefile libphp4.module
           @@EXT_MAKEFILES@@ build-defs.h, [
 ], [
 
+if test ! -f $srcdir/ext/bcmath/number.c; then
+	echo "creating number.c"
+	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c
+	echo "creating number.h"
+	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
+fi
+
 chmod +x scripts/mkextlib
 # Hacking while airborne considered harmful.
 #
@@ -949,14 +956,25 @@ dnl Warn about CGI version with no extra security options.
 if test "$BINNAME" = "php"; then
 	if test "$REDIRECT" = "0"; then
 		if test "$DISCARD_PATH" = "0"; then
-		echo "WARNING: You will be compiling the CGI version of PHP without any"
-		echo "         redirection checking.  By putting this cgi binary somewhere"
-		echo "         in your web space, users may be able to circumvent existing .htaccess"
-		echo "         security by loading files directly through the parser.  See"
-		echo "         http://www.php.net/manual/config-security.php3 for more details."
+		echo "+--------------------------------------------------------------------+"
+		echo "| Warning:                                                           |"
+		echo "| You will be compiling the CGI version of PHP without any           |"
+		echo "| redirection checking.  By putting this cgi binary somewhere in     |"
+		echo "| your web space, users may be able to circumvent existing .htaccess |"
+		echo "| security by loading files directly through the parser.  See        |"
+		echo "| http://www.php.net/manual/config-security.php3 for more details.   |"
 		fi
 	fi
 fi
+
+echo "+--------------------------------------------------------------------+"
+echo "| License:                                                           |"
+echo "| This software is subject to the PHP License, available in this     |"
+echo "| distribution in the file LICENSE.  By continuing this installation |"
+echo "| process, you are bound by the terms of this license agreement.     |"
+echo "| If you do not agree with the terms of this license, you must abort |"
+echo "| the installation process at this point.                            |"
+echo "+--------------------------------------------------------------------+"
 
 ])
 
