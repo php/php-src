@@ -1,3 +1,88 @@
+2001-03-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php:
+    - extended "prevnext" mode to show the previous, up and next item (up is new)
+
+2001-03-12  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: Start 4.0.5 release process...
+
+2001-03-12  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu.php: - removed a typo
+    - added the Isomenu feature "use which fits best" for the search of the selected item
+
+    * pear/Experimental/HTML/Menu.php: - made 'tree' the default redering type
+
+    * pear/Experimental/HTML/Menu.php:
+    - made the URL check independend from $PHP_SELF
+    - removed homepage specific code
+
+2001-03-12  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Makefile.in: Forgot to add it here
+
+    * pear/Net/Dig.php: A nice friendly OO interface to dig
+
+2001-03-12  Sean Bright  <elixer@erols.com>
+
+    * ext/mysql/php_mysql.c: Fixed prototype.
+
+2001-03-12  Alexander Feldman  <alex@zend.com>
+
+    * NEWS: Added NEWS.
+
+    * ext/gd/gd.c: A small fix to make the function imageloadfont portable.
+
+2001-03-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/oci8.php: * added "@" in front of all OCI* function calls
+
+2001-03-12  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/article.c: added NULL-check
+
+2001-03-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/array.c: Prevent memory leak
+
+2001-03-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/pear.m4:
+    HEADS UP: renamed config header file in "phpize"d extensions to
+    "config.h" rather than "php_config.h".
+
+    * pear/DB/common.php: * bugfix (thanks to Alexey Borzov)
+
+2001-03-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/array.c: Use hash position with array_flip
+
+2001-03-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: This will have to do until the docs come along.
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h
+      ext/pcre/php_pcre.c:
+    - Added array_reduce(), which allows iterative reduction of an array
+      to a single value via a callback function. 
+    - Added array_reduce(), which allows iterative reduction of an array
+      to a single value via a callback function.
+    - Fixed usage of zend_is_callable() in PCRE.
+
+    * pear/Console/Getopt.php: Use proper class name.
+
+2001-03-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4: Cleaning this a little bit.
+
+    * ext/pdf/config.m4: ws fixes. Plus removed unnecessary AC_MSG_ calls.
+
+    * ext/muscat/config.m4: ws fix.
+
 2001-03-11  David Guerizec  <david@guerizec.net>
 
     * ext/midgard/config.m4
