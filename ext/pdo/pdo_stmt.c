@@ -292,8 +292,10 @@ static PHP_METHOD(PDOStatement, execute)
 		RETURN_FALSE;
 	}
 	if (stmt->methods->executer(stmt TSRMLS_CC)) {
-		efree(stmt->active_query_string);
-		stmt->active_query_string = NULL;
+		if (stmt->active_query_string) {
+			efree(stmt->active_query_string);
+			stmt->active_query_string = NULL;
+		}
 		if (!stmt->executed) {
 			/* this is the first execute */
 
@@ -312,8 +314,10 @@ static PHP_METHOD(PDOStatement, execute)
 			
 		RETURN_BOOL(ret);
 	}
-	efree(stmt->active_query_string);
-	stmt->active_query_string = NULL;
+	if (stmt->active_query_string) {
+		efree(stmt->active_query_string);
+		stmt->active_query_string = NULL;
+	}
 	RETURN_FALSE;
 }
 /* }}} */
