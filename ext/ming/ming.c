@@ -904,7 +904,7 @@ PHP_FUNCTION(swfdisplayitem_addAction)
 
 	convert_to_object_ex(zaction);
 	convert_to_long_ex(flags);
-	action = (SWFBlock)getAction(*zaction TSRMLS_CC);
+	action = getAction(*zaction TSRMLS_CC);
 	SWFDisplayItem_addAction(item, action, Z_LVAL_PP(flags));
 }
 /* }}} */
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(swffont_init)
 		font = loadSWFFontFromFile(file);
 		php_stream_close(stream);
 	} else {
-		font = newSWFBrowserFont(Z_STRVAL_PP(zfile));
+		font = (SWFFont)newSWFBrowserFont(Z_STRVAL_PP(zfile));
 	}
 
 	ret = zend_list_insert(font, le_swffontp);
@@ -1427,7 +1427,7 @@ PHP_FUNCTION(swfmovie_remove)
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_output(void)
+/* {{{ proto int swfmovie_output([int compression])
 */
 static void phpByteOutputMethod(byte b, void *data)
 {
@@ -1438,13 +1438,28 @@ static void phpByteOutputMethod(byte b, void *data)
 
 PHP_FUNCTION(swfmovie_output)
 {
-  SWFMovie movie = getMovie(getThis() TSRMLS_CC);
+	zval **zlimit = NULL;
+	int limit = -1;
+	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
-  RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL));
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		limit = Z_LVAL_PP(zlimit);
+		if((limit<0)||(limit>9)) {
+			php_error(E_WARNING,"compression level must be within 0..9");
+			RETURN_FALSE;
+		}
+		break;
+	}
+
+	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL, limit));
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_saveToFile(stream x)
+/* {{{ proto int swfmovie_saveToFile(stream x [, int compression])
 */
 static void phpStreamOutputMethod(byte b, void * data)
 {
@@ -1456,32 +1471,66 @@ static void phpStreamOutputMethod(byte b, void * data)
 PHP_FUNCTION(swfmovie_saveToFile)
 {
 	zval **x;
+	zval **zlimit = NULL;
+	int limit = -1;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 	php_stream *what;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &x) == FAILURE) {
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &x) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		limit = Z_LVAL_PP(zlimit);
+		if((limit<0)||(limit>9)) {
+			php_error(E_WARNING,"compression level must be within 0..9");
+			RETURN_FALSE;
+		}
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
-	php_stream_from_zval(what, x);
-	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what));
+
+	ZEND_FETCH_RESOURCE(what, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+	RETURN_LONG(SWFMovie_output(movie, &phpStreamOutputMethod, what, limit));
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_save(mixed where)
+/* {{{ proto int swfmovie_save(mixed where [, int compression])
   Saves the movie. 'where' can be stream and the movie will be saved there otherwise it is treated as string and written in file with that name */
 PHP_FUNCTION(swfmovie_save)
 {
-	zval **x;
+	zval **x, **zlimit = NULL;
+	int limit = -1;
 	long retval;
 	php_stream *stream;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &x) == FAILURE) {
+	switch (ZEND_NUM_ARGS()) {
+	case 1:
+		if (zend_get_parameters_ex(1, &x) == FAILURE)
+			WRONG_PARAM_COUNT;
+		break;
+	case 2:
+		if (zend_get_parameters_ex(2, &x, &zlimit) == FAILURE)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(zlimit);
+		limit = Z_LVAL_PP(zlimit);
+		if((limit<0)||(limit>9)) {
+			php_error(E_WARNING,"compression level must be within 0..9");
+			RETURN_FALSE;
+		}
+		break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
-
+		  
 	if (Z_TYPE_PP(x) == IS_RESOURCE) {
-		php_stream_from_zval(stream, x);
-		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream));
+		ZEND_FETCH_RESOURCE(stream, php_stream *, x, -1,"File-Handle",php_file_le_stream());
+		RETURN_LONG(SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, stream, limit));
 	}
 
 	convert_to_string_ex(x);
@@ -1491,7 +1540,7 @@ PHP_FUNCTION(swfmovie_save)
 		RETURN_FALSE;
 	}
 	
-	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream);
+	retval = SWFMovie_output(getMovie(getThis() TSRMLS_CC), &phpStreamOutputMethod, (void *)stream, limit);
 	php_stream_close(stream);
 	RETURN_LONG(retval);
 }
@@ -1565,7 +1614,7 @@ PHP_FUNCTION(swfmovie_setFrames)
 PHP_FUNCTION(swfmovie_streamMp3)
 {
 	zval **zfile;
-	SWFSound sound;
+	SWFSoundStream sound;
 	SWFInput input;
 	SWFMovie movie = getMovie(getThis() TSRMLS_CC);
 
@@ -1581,7 +1630,7 @@ PHP_FUNCTION(swfmovie_streamMp3)
 		input = getInput(zfile TSRMLS_CC);
 	}
 	
-	sound = newSWFSound_fromInput(input);
+	sound = newSWFSoundStream_fromInput(input);
 	SWFMovie_setSoundStream(movie, sound);
 }
 /* }}} */
@@ -2386,10 +2435,6 @@ PHP_FUNCTION(swftext_addString)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &s) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (!getFont(getText(getThis() TSRMLS_CC) TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must specify a font before writing text.");
-		RETURN_FALSE;
-	}
 
 	convert_to_string_ex(s);
 	SWFText_addString(text, Z_STRVAL_PP(s), NULL);
@@ -2723,7 +2768,7 @@ PHP_MINFO_FUNCTION(ming)
 */
 
 /* custom error handler propagates ming errors up to php */
-static void php_ming_error(char *msg, ...)
+static void php_ming_error(const char *msg, ...)
 {
 	va_list args;
 	char *buffer;
