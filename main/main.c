@@ -806,7 +806,7 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
 	zuf.ticks_function = php_run_ticks;
-	zend_startup(&zuf, NULL);
+	zend_startup(&zuf, NULL, 1);
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
