@@ -165,7 +165,7 @@ PS_WRITE_FUNC(files)
 	return SUCCESS;
 }
 
-PS_DELETE_FUNC(files)
+PS_DESTROY_FUNC(files)
 {
 	char buf[MAXPATHLEN];
 	PS_FILES_DATA;

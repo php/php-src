@@ -86,7 +86,7 @@ static int php_rinit_session(INIT_FUNC_ARGS);
 static int php_mshutdown_session(SHUTDOWN_FUNC_ARGS);
 static int php_rshutdown_session(SHUTDOWN_FUNC_ARGS);
 static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS);
-static void php_rshutdown_globals(PSLS_D);
+static void php_rshutdown_session_globals(PSLS_D);
 
 zend_module_entry session_module_entry = {
 	"session",
@@ -308,7 +308,7 @@ static void _php_session_start(PSLS_D)
 
 	if(PS(mod_data) && PS(gc_probability) > 0) {
 		srand(time(NULL));
-		nrand = (100.0*rand()/RAND_MAX);
+		nrand = (int) (100.0*rand()/RAND_MAX);
 		if(nrand >= PS(gc_probability)) 
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime));
 	}
@@ -319,8 +319,8 @@ static void _php_session_destroy(PSLS_D)
 	if(PS(nr_open_sessions) == 0)
 		return;
 
-	PS(mod)->delete(&PS(mod_data), &PS(id));
-	php_rshutdown_globals(PSLS_C);
+	PS(mod)->destroy(&PS(mod_data), PS(id));
+	php_rshutdown_session_globals(PSLS_C);
 	PS(nr_open_sessions)--;
 }
 
@@ -521,7 +521,7 @@ PHP_FUNCTION(session_destroy)
 }
 /* }}} */
 
-void php_rinit_globals(PSLS_D)
+static void php_rinit_session_globals(PSLS_D)
 {
 	PS(mod) = _php_find_ps_module(INI_STR("session_module_name") PSLS_CC);
 		
@@ -535,7 +535,7 @@ void php_rinit_globals(PSLS_D)
 	PS(mod_data) = NULL;
 }
 
-void php_rshutdown_globals(PSLS_D)
+static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
@@ -549,7 +549,7 @@ int php_rinit_session(INIT_FUNC_ARGS)
 {
 	PSLS_FETCH();
 
-	php_rinit_globals(PSLS_C);
+	php_rinit_session_globals(PSLS_C);
 
 	if(INI_INT("session_auto_start")) {
 		_php_session_start(PSLS_C);
@@ -568,7 +568,7 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 		_php_session_save_current_state(PSLS_C);
 		PS(nr_open_sessions)--;
 	}
-	php_rshutdown_globals(PSLS_C);
+	php_rshutdown_session_globals(PSLS_C);
 	return SUCCESS;
 }
 

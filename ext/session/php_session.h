@@ -39,7 +39,7 @@ typedef enum {
 #define PS_CLOSE_ARGS void **mod_data
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen
 #define PS_WRITE_ARGS void **mod_data, const char *key, const char *val, const int vallen
-#define PS_DELETE_ARGS void **mod_data, const char *key
+#define PS_DESTROY_ARGS void **mod_data, const char *key
 #define PS_GC_ARGS void **mod_data, int maxlifetime
 
 typedef struct ps_module_struct {
@@ -48,7 +48,7 @@ typedef struct ps_module_struct {
 	int (*close)(PS_CLOSE_ARGS);
 	int (*read)(PS_READ_ARGS);
 	int (*write)(PS_WRITE_ARGS);
-	int (*delete)(PS_DELETE_ARGS);
+	int (*destroy)(PS_DESTROY_ARGS);
 	int (*gc)(PS_GC_ARGS);
 } ps_module;
 
@@ -57,7 +57,7 @@ typedef struct ps_module_struct {
 #define PS_CLOSE_FUNC(x) 	int _ps_close_##x(PS_CLOSE_ARGS)
 #define PS_READ_FUNC(x) 	int _ps_read_##x(PS_READ_ARGS)
 #define PS_WRITE_FUNC(x) 	int _ps_write_##x(PS_WRITE_ARGS)
-#define PS_DELETE_FUNC(x) 	int _ps_delete_##x(PS_DELETE_ARGS)
+#define PS_DESTROY_FUNC(x) 	int _ps_delete_##x(PS_DESTROY_ARGS)
 #define PS_GC_FUNC(x) 		int _ps_gc_##x(PS_GC_ARGS)
 
 #define PS_FUNCS(x) \
@@ -65,7 +65,7 @@ typedef struct ps_module_struct {
 	PS_CLOSE_FUNC(x); \
 	PS_READ_FUNC(x); \
 	PS_WRITE_FUNC(x); \
-	PS_DELETE_FUNC(x); \
+	PS_DESTROY_FUNC(x); \
 	PS_GC_FUNC(x)
 
 

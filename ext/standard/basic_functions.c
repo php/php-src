@@ -2744,8 +2744,8 @@ PHP_FUNCTION(array_slice)
 				 length_val,	/* Value of the length argument */
 				 num_in,		/* Number of elements in the input array */
 				 pos,			/* Current position in the array */
-				 argc,			/* Number of function arguments */
-				 i;				/* Loop counter */
+				 argc;			/* Number of function arguments */
+				 
 	char		*string_key;
 	ulong		 num_key;
 	
