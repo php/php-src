@@ -417,7 +417,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_str_tolower(uwrap->classname, classname_len);
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
 	
-	if (zend_hash_find(EG(class_table), uwrap->classname, classname_len + 1, (void**)&uwrap->ce) == SUCCESS) {
+	if (zend_lookup_class(uwrap->classname, classname_len, (zend_class_entry***)&uwrap->ce TSRMLS_CC) == SUCCESS) {
 		uwrap->ce = *(zend_class_entry**)uwrap->ce;
 		if (php_register_url_stream_wrapper(protocol, &uwrap->wrapper TSRMLS_CC) == SUCCESS) {
 			RETURN_TRUE;
