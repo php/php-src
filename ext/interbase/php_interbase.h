@@ -83,6 +83,9 @@ PHP_FUNCTION(ibase_service_attach);
 PHP_FUNCTION(ibase_service_detach);
 PHP_FUNCTION(ibase_backup);
 PHP_FUNCTION(ibase_restore);
+PHP_FUNCTION(ibase_maintain_db);
+PHP_FUNCTION(ibase_db_info);
+PHP_FUNCTION(ibase_server_info);
 #endif
 PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
