@@ -9,7 +9,7 @@ PHP 4.0                                                                    NEWS
   (Zeev, Zend Engine)
 - Fixed a problem in long2ip() that occasionally returned incorrect IP address.
   (Evan, Andrei)
-- Fixed many memory leaks in the IMAP module (Stanislav, Andi, Zeev)
+- Fixed many memory leaks in the IMAP module (Stas, Andi, Zeev)
 - Fixed bug in number_format (Jon Forsberg)
 - Make error_prepend_string and error_append_string work (Rasmus)
 - array_walk() now automatically resets the array. (Andrei)
@@ -28,7 +28,7 @@ PHP 4.0                                                                    NEWS
 - Ported ldap_errno(), ldap_err2str() and ldap_error() from PHP3 to PHP4.
   (Sterling)
 - WDDX now defaults to ISO-8859-1. (Thies)
-- Fixed crash resulting from IMAP's error handling (Stanislav)
+- Fixed crash resulting from IMAP's error handling (Stas)
 - Added $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
   retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] (Zeev)
 - Made the IMAP and LDAP modules compilable under Windows and thread-safe (Zeev)
@@ -55,7 +55,7 @@ PHP 4.0                                                                    NEWS
 - Added gmstrftime() function. (Sterling)
 - snmp_walkoid is now an alias for snmp_realwalk. (Sterling)
 - Fixed a bug that could cause a crash when using 'global' inside large include
-  files (Stanislav, Zend Engine)
+  files (Stas, Zend Engine)
 - Fixed dynamic loading where extension_dir had no trailing slash (Sascha)
 - Fixed dynamic loading on OpenBSD (Sascha)
 - Improved POSIX threads check. ZTS works now on at least Linux, Solaris, 
