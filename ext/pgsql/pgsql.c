@@ -997,7 +997,7 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 #if HAVE_PQCMDTUPLES
 			Z_LVAL_P(return_value) = atoi(PQcmdTuples(pgsql_result));
 #else
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supportted under this build.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not supported under this build.");
 			Z_LVAL_P(return_value) = 0;
 #endif
 			break;
