@@ -803,6 +803,10 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		}
 	}
 
+	if (toread > maxlen && maxlen > 0) {
+		toread = maxlen;
+	}
+
 	buf = emalloc(toread + 1);
 	*returned_len = php_stream_read(stream, buf, toread);
 	                
