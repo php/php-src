@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added the ability to globaly declare a compiler modifier globally by using an empty statement
+  i.e. <?php declare (ticks=1); //do something ?> (Jason)
 - Bring strtotime() "next" keyword handling in line with documentation and
   its glibc cousin.  (Rasmus)
 - Fixed str_rot13() to not mangle source string. (Rasmus)
