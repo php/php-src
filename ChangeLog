@@ -1,3 +1,140 @@
+2004-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN (small but important change)
+
+2004-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_5_0)
+      ZendEngine2/zend_highlight.c:
+      MFH: Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
+      returning the value).
+
+    * ZendEngine2/zend_highlight.c:
+      Fixed bug #29606 (php_strip_whitespace() prints to stdout rather then
+      returning the value).
+
+2004-08-10  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * NEWS
+      main/SAPI.c
+      main/SAPI.h
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Add SAPI hook to get the request time if provided by the web server,
+      otherwise call time(0) on the first call and store it so subsequent
+      calls will get the same time.  Hook support for Apache1/2 included.
+
+2004-08-10  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Changed bugs order.
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #28969 (Wrong data encoding of special characters)
+
+    * NEWS:
+      Fixed bug #28969 (Wrong data encoding of special characters).
+
+    * NEWS:
+      Fixed bug #29256 (SOAP HTTP Error when envelop size is more than 24345
+      bytes)
+
+2004-08-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * main/streams/xp_socket.c:
+      Fix for #29256 from Dmitry, very slightly modified
+
+2004-08-10  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/xsltprocessor.c:
+      Fix segfault on error in xslt
+
+2004-08-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - 5.0.1RC1
+
+2004-08-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c:
+      - Fix warnings
+
+2004-08-10  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_4_3)
+      INSTALL
+      NEWS
+      win32/install.txt:
+      - MF PHP_5_0
+
+2004-08-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/array.c:
+      - MFH: Bugfix #29493 (extract(array, EXTR_REFS) misbehaves with elements
+        referred twice or more times)
+
+    * (PHP_5_0)
+      ext/standard/array.c:
+      - Bugfix #29493 (extract(array, EXTR_REFS) misbehaves with elements
+      referred
+        twice or more times)
+
+    * ext/standard/array.c:
+      - Bugfix #29493 (extract(array, EXTR_REFS) misbehaves with elements
+      referred
+        twice or more times). (Patch inspired by Michael Manley. Thanks.)
+
+2004-08-10  Andi Gutmans  <andi@zend.com>
+
+    * INSTALL
+      NEWS
+      win32/install.txt:
+      - MFB
+
+    * (PHP_5_0)
+      INSTALL
+      NEWS
+      win32/install.txt:
+      - The documentation team has re-wroten the installation part of the manual.
+
+2004-08-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      php.ini-dist
+      php.ini-dist
+      php.ini-recommended
+      php.ini-recommended:
+      MFH: Fixed bug #29581 (Typo inside php.ini comments for mysql.trace_mode).
+
+    * php.ini-dist
+      php.ini-recommended:
+      Fixed bug #29581 (Typo inside php.ini comments for mysql.trace_mode).
+
 2004-08-09  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
