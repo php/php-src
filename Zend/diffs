@@ -1,0 +1,8 @@
+Index: zend_execute.c
+===================================================================
+RCS file: /repository/Zend/ZendCore/zend_execute.c,v
+retrieving revision 1.25
+retrieving revision 1.26
+diff -r1.25 -r1.26
+17d16
+< /* $Id$ */

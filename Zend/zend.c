@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-
 #include "zend.h"
 #include "zend_operators.h"
 #include "zend_variables.h"
