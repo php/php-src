@@ -973,17 +973,9 @@ PHP_FUNCTION(yaz_record)
                 int rlen;
 				const char *info = ZOOM_record_get (r, type, &rlen);
 
-                if (rlen <= 0)
-                {
-                    return_value->value.str.len = 0;
-                    return_value->value.str.val = "";
-                }
-                else
-                {
-                    return_value->value.str.len = rlen;
-                    return_value->value.str.val =
-                        estrndup(info, return_value->value.str.len);
-                }
+                return_value->value.str.len = (rlen > 0) ? rlen : 0;
+                return_value->value.str.val =
+                    estrndup(info, return_value->value.str.len);
                 return_value->type = IS_STRING;
 			}
 		}
