@@ -261,7 +261,7 @@ ZEND_GET_MODULE(fbsql)
 #define CHECK_LINK(link) { \
 	if (link==-1) { \
 		if (FB_SQL_G(generateWarnings)) \
-			php_error(E_WARNING, "%s(): A link to the server could not be established", get_active_function_name(TSRMLS_C)); \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "A link to the server could not be established"); \
 		RETURN_FALSE; \
 	} \
 }
@@ -525,14 +525,14 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 			{
 				if (FB_SQL_G(generateWarnings))
-					php_error(E_WARNING, "%s(): FrontBase link limit %d exceeded ", get_active_function_name(TSRMLS_C), FB_SQL_G(maxLinks));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase link limit %d exceeded", FB_SQL_G(maxLinks));
 				RETURN_FALSE;
 			}
 
 			if ((FB_SQL_G(maxPersistent) != -1 && FB_SQL_G(persistentCount) == FB_SQL_G(maxPersistent)))
 			{
 				if (FB_SQL_G(generateWarnings))
-					php_error(E_WARNING, "%s(): FrontBase persistent link limit %d exceeded ", get_active_function_name(TSRMLS_C), FB_SQL_G(maxPersistent));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase persistent link limit %d exceeded", FB_SQL_G(maxPersistent));
 				RETURN_FALSE;
 			}
 
@@ -574,7 +574,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		if ((FB_SQL_G(maxLinks) != -1 && FB_SQL_G(linkCount) == FB_SQL_G(maxLinks)))
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): FrontBase link limit %d exceeded ", get_active_function_name(TSRMLS_C), FB_SQL_G(maxLinks));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "FrontBase link limit %d exceeded", FB_SQL_G(maxLinks));
 			RETURN_FALSE;
 		}
 
@@ -735,7 +735,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 		if (c == NULL)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), fbcdcClassErrorMessage());
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, fbcdcClassErrorMessage());
 			return 0;
 		}
 		md = fbcdcCreateSession(c, "PHP", link->userName, link->userPassword, link->userName);
@@ -746,9 +746,9 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 			if (FB_SQL_G(generateWarnings))
 			{
 				if (emg)
-					php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), emg);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, emg);
 				else
-					php_error(E_WARNING, "%s(): No message", get_active_function_name(TSRMLS_C));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 			}
 			link->errorText = strdup(emg);
 			link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
@@ -1063,7 +1063,8 @@ static void php_fbsql_read_lob(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	convert_to_string_ex(lob_handle);
 
 	if (Z_STRLEN_PP(lob_handle) != 27 || Z_STRVAL_PP(lob_handle)[0] != '@') {
-		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "%s(): The handle is invalid", get_active_function_name(TSRMLS_C));
+		if (FB_SQL_G(generateWarnings)) 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The handle is invalid");
 		RETURN_FALSE;
 	}
 
@@ -1126,7 +1127,8 @@ static void php_fbsql_lob_size(INTERNAL_FUNCTION_PARAMETERS, int lob_type)
 	convert_to_string_ex(lob_handle);
 
 	if (Z_STRLEN_PP(lob_handle) != 27 || Z_STRVAL_PP(lob_handle)[0] != '@') {
-		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "%s(): The handle is invalid", get_active_function_name(TSRMLS_C));
+		if (FB_SQL_G(generateWarnings)) 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The handle is invalid");
 		RETURN_FALSE;
 	}
 
@@ -1362,8 +1364,7 @@ PHP_FUNCTION(fbsql_select_db)
 		int port = atoi(name);
 		if (port == 0 || port > 64535) {
 			if (FB_SQL_G(generateWarnings)) {
-				php_error(E_WARNING, "%s(): Cannot connect to FBExec for database '%s'", get_active_function_name(TSRMLS_C), name);
-				php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), fbcehClassErrorMessage());
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to FBExec for database '%s'. (%s)", name, fbcehClassErrorMessage());
 			}
 			RETURN_FALSE;
 		}
@@ -1478,14 +1479,14 @@ PHP_FUNCTION(fbsql_create_db)
 		else if (status == FBStopping) txt = "stopping";
 		else if (status == FBNoExec  ) txt = "no exec";
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Could not create %s@%s, database is %s", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, txt);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create %s@%s, database is %s", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 	if (!fbcehCreateDatabaseNamedWithOptions(phpLink->execHandler, databaseName, ""))
 	{
 		char* error = fbechErrorMessage(phpLink->execHandler);
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Could not create %s@%s. %s.", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, error);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not create %s@%s. %s", databaseName, phpLink->hostName, error);
 		RETURN_FALSE;
 	}
 	for (i=0; i < 20; i++)
@@ -1501,7 +1502,7 @@ PHP_FUNCTION(fbsql_create_db)
 	if (status != FBRunning)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Database %s@%s created -- status unknown", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Database %s@%s created -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1552,7 +1553,7 @@ PHP_FUNCTION(fbsql_drop_db)
 		else if (status == FBStopping     ) txt = "stopping";
 		else if (status == FBNoExec       ) txt = "no exec";
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Could not drop %s@%s, database is %s.", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, txt);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not drop %s@%s, database is %s", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 
@@ -1560,7 +1561,7 @@ PHP_FUNCTION(fbsql_drop_db)
 	{
 		char* error = fbechErrorMessage(phpLink->execHandler);
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Could not drop %s@%s. %s.", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, error);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not drop %s@%s. %s", databaseName, phpLink->hostName, error);
 		RETURN_FALSE;
 	}
 	for (i=0; i < 20; i++)
@@ -1576,7 +1577,7 @@ PHP_FUNCTION(fbsql_drop_db)
 	if (status != FBUnknownStatus)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Database %s@%s dropped -- status unknown", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Database %s@%s dropped -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 }
@@ -1625,7 +1626,7 @@ PHP_FUNCTION(fbsql_start_db)
 		else if (status == FBStopping) txt = "stopping";
 		else if (status == FBNoExec  ) txt = "no exec";
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Could not start %s@%s, as database is %s.", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, txt);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not start %s@%s, as database is %s", databaseName, phpLink->hostName, txt);
 		RETURN_FALSE;
 	}
 
@@ -1635,7 +1636,7 @@ PHP_FUNCTION(fbsql_start_db)
 		{
 			char* error = fbechErrorMessage(phpLink->execHandler);
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): Could not start %s@%s. %s.", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName, error);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not start %s@%s. %s", databaseName, phpLink->hostName, error);
 			RETURN_FALSE;
 		}
 	}
@@ -1653,7 +1654,7 @@ PHP_FUNCTION(fbsql_start_db)
 	if (status != FBRunning)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Database %s@%s started -- status unknown", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Database %s@%s started -- status unknown", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1701,7 +1702,7 @@ PHP_FUNCTION(fbsql_stop_db)
 	if (!fbcdcStopDatabase(phpLink->connection))
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Cannot stop database %s@%s", get_active_function_name(TSRMLS_C), databaseName, phpLink->hostName);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot stop database %s@%s", databaseName, phpLink->hostName);
 		RETURN_FALSE;
 	}
 
@@ -1778,7 +1779,8 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 	{
 		link->errorNo = 1;
 		link->errorText = strdup("Connection to database server was lost");
-		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), link->errorText);
+		if (FB_SQL_G(generateWarnings)) 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", link->errorText);
 		result = 0;
 	}
 	else if (fbcmdErrorsFound(md))
@@ -1788,9 +1790,9 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 		if (FB_SQL_G(generateWarnings))
 		{
 			if (emg)
-				php_error(E_WARNING, "%s(): Error in statement: '%s' %s", get_active_function_name(TSRMLS_C), sql, emg);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error in statement: '%s' %s", sql, emg);
 			else
-				php_error(E_WARNING, "%s(): No message", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 		}
 		link->errorText = strdup(emg);
 		link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
@@ -2445,7 +2447,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		break;
 
 		default:
-			php_error(E_ERROR, "%s(): Unimplemented type", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unimplemented type (%d)", dtc);
 		break;
 	}
 }
@@ -2490,13 +2492,13 @@ void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIn
 	else if (!phpfbFetchRow(result, rowIndex))
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): No such row %d in result set %d", get_active_function_name(TSRMLS_C), rowIndex, rowIndex);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such row %d in result set %d", rowIndex, rowIndex);
 		RETURN_FALSE;
 	}
 	else if (columnIndex >= result->columnCount)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): No such column %d in result set %d", get_active_function_name(TSRMLS_C), columnIndex, rowIndex);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No such column %d in result set %d", columnIndex, rowIndex);
 		RETURN_FALSE;
 	}
 	else
@@ -2577,7 +2579,7 @@ PHP_FUNCTION(fbsql_result)
 			if (columnIndex < 0)
 			{
 				if (FB_SQL_G(generateWarnings))
-					php_error(E_WARNING, "%s(): Illegal column index - %d", get_active_function_name(TSRMLS_C), columnIndex);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal column index - %d", columnIndex);
 				RETURN_FALSE;
 			}
 		}
@@ -2810,7 +2812,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	if (((result_type & FBSQL_NUM) != FBSQL_NUM) && ((result_type & FBSQL_ASSOC) != FBSQL_ASSOC))
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH.", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal result type use FBSQL_NUM, FBSQL_ASSOC, or FBSQL_BOTH");
 		RETURN_FALSE;
 	}
 	if (array_init(return_value)==FAILURE)
@@ -2979,7 +2981,7 @@ PHP_FUNCTION(fbsql_data_seek)
 	if (rowIndex < 0)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Illegal row_index (%i)", get_active_function_name(TSRMLS_C), rowIndex);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal row_index (%d)", rowIndex);
 		RETURN_FALSE;
 	}
 
@@ -3056,7 +3058,7 @@ PHP_FUNCTION(fbsql_fetch_field)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3113,7 +3115,7 @@ PHP_FUNCTION(fbsql_field_seek)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3156,7 +3158,7 @@ PHP_FUNCTION(fbsql_field_name)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3205,7 +3207,7 @@ PHP_FUNCTION(fbsql_field_table)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3246,7 +3248,7 @@ PHP_FUNCTION(fbsql_field_len)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3298,7 +3300,7 @@ PHP_FUNCTION(fbsql_field_type)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3352,7 +3354,7 @@ PHP_FUNCTION(fbsql_field_flags)
 		if (column < 0 || column >= result->columnCount)
 		{
 			if (FB_SQL_G(generateWarnings))
-				php_error(E_WARNING, "%s(): %d no such column in result", get_active_function_name(TSRMLS_C), column);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d no such column in result", column);
 			RETURN_FALSE;
 		}
 	}
@@ -3430,7 +3432,7 @@ PHP_FUNCTION(fbsql_table_name)
 	if (index < 0)
 	{
 		if (FB_SQL_G(generateWarnings))
-			php_error(E_WARNING, "%s(): Illegal index (%i)", get_active_function_name(TSRMLS_C), index);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal index (%i)", index);
 		RETURN_FALSE;
 	}
 
@@ -3496,7 +3498,8 @@ PHP_FUNCTION(fbsql_get_autostart_info)
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
 	if (phpLink->execHandler == NULL) {
-		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, "%s(): No valid Exec handler available for this connection", get_active_function_name(TSRMLS_C));
+		if (FB_SQL_G(generateWarnings)) 
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No valid Exec handler available for this connection");
 		RETURN_FALSE;
 	}
 	else {
