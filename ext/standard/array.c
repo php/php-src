@@ -948,7 +948,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 		  *retval_ptr,			/* Return value - unused */
 		  *key;				/* Entry key */
 	char  *string_key;
-	ulong  string_key_len;
+	uint  string_key_len;
 	ulong  num_key;
 	HashPosition pos;
 
@@ -1144,7 +1144,8 @@ PHP_FUNCTION(extract)
 	zval **var_array, **z_extract_type, **prefix;
 	zval **entry, *data;
 	char *var_name, *final_name;
-	ulong num_key, var_name_len;
+	ulong num_key;
+	uint var_name_len;
 	int var_exists, extract_type, key_type, count = 0;
 	HashPosition pos;
 
@@ -1735,7 +1736,7 @@ PHP_FUNCTION(array_slice)
 				 argc;			/* Number of function arguments */
 				 
 	char		*string_key;
-	ulong		 string_key_len;
+	uint		 string_key_len;
 	ulong		 num_key;
 	HashPosition hpos;
 	
@@ -1821,7 +1822,7 @@ PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 	zval	  **src_entry,
 			  **dest_entry;
 	char	   *string_key;
-	ulong		string_key_len;
+	uint		string_key_len;
 	ulong		num_key;
 	HashPosition pos;
 
@@ -1913,7 +1914,7 @@ PHP_FUNCTION(array_keys)
 				*new_val;		/* New value */
 	int			 add_key;		/* Flag to indicate whether a key should be added */
 	char		*string_key;	/* String key */
-	ulong		 string_key_len;
+	uint		 string_key_len;
 	ulong		 num_key;		/* Numeric key */
 	HashPosition pos;
 
@@ -2074,7 +2075,7 @@ PHP_FUNCTION(array_reverse)
 			   **z_preserve_keys, /* Flag: whether to preserve keys */
 			   **entry;			  /* An entry in the input array */
 	char		*string_key;
-	ulong		 string_key_len;
+	uint		 string_key_len;
 	ulong		 num_key;
 	zend_bool	 preserve_keys = 0;
 	HashPosition pos;
@@ -2195,7 +2196,7 @@ PHP_FUNCTION(array_flip)
 	zval **array, **entry, *data;
 	HashTable *target_hash;
 	char *string_key;
-	ulong str_key_len;
+	uint str_key_len;
 	ulong num_key;
 	HashPosition pos;
 					
@@ -2721,7 +2722,7 @@ PHP_FUNCTION(array_rand)
 	long randval;
 	int num_req_val, num_avail, key_type;
 	char *string_key;
-	ulong string_key_len;
+	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
 
@@ -2926,7 +2927,7 @@ PHP_FUNCTION(array_filter)
 	zval *retval = NULL;
 	char *callback_name;
 	char *string_key;
-	ulong string_key_len;
+	uint string_key_len;
 	ulong num_key;
 	HashPosition pos;
 	

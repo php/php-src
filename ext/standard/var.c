@@ -320,7 +320,7 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 				char *key;
 				zval **data;
 				ulong index;
-				ulong key_len;
+				uint key_len;
 				HashPosition pos;
 				
 				zend_hash_internal_pointer_reset_ex(myht, &pos);

@@ -529,7 +529,7 @@ static void php_session_save_current_state(TSRMLS_D)
 	int vallen;
 	int ret = FAILURE;
 	char *variable;
-	ulong variable_len;
+	uint variable_len;
 	ulong num_key;
 	HashPosition pos;
 	
