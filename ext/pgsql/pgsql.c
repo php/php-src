@@ -75,6 +75,8 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_loreadall,	NULL)
 	PHP_FE(pg_loimport,		NULL)
 	PHP_FE(pg_loexport,		NULL)
+	PHP_FE(pg_putline,		NULL)
+	PHP_FE(pg_endcopy,		NULL)
 #if HAVE_PQCLIENTENCODING
 	PHP_FE(pg_clientencoding,	NULL)
 	PHP_FE(pg_setclientencoding,	NULL)
@@ -645,7 +647,91 @@ PHP_FUNCTION(pg_exec)
 	}
 }
 /* }}} */
+/* {{{ proto int pg_endcopy([int connection])
+   Sync with backend. Completes the Copy command */
+PHP_FUNCTION(pg_endcopy)
+{
+   zval **query, **pgsql_link;
+   int id = -1;
+   PGconn *pgsql;
+   int result = 0;
+   ExecStatusType status;
+   pgsql_result_handle *pg_result;
+   PGLS_FETCH();
 
+   switch(ZEND_NUM_ARGS()) {
+	   case 1:
+		   if (zend_get_parameters_ex(1, &query)==FAILURE) {
+			   RETURN_FALSE;
+		   }
+		   id = PGG(default_link);
+		   break;
+	   case 2:
+		   if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
+			   RETURN_FALSE;
+		   }
+		   break;
+	   default:
+		   WRONG_PARAM_COUNT;
+		   break;
+   }
+
+   ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+   convert_to_string_ex(query);
+   result = PQendcopy(pgsql);
+
+/* if (result!=0)
+   {
+	   php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+	   RETURN_FALSE;
+   } */
+   RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto int pg_putline([int connection,] string query)
+   Send null-terminated string to backend server*/
+PHP_FUNCTION(pg_putline)
+{
+   zval **query, **pgsql_link;
+   int id = -1;
+   PGconn *pgsql;
+   int result = 0;
+   ExecStatusType status;
+   pgsql_result_handle *pg_result;
+   PGLS_FETCH();
+
+   switch(ZEND_NUM_ARGS()) {
+	   case 1:
+		   if (zend_get_parameters_ex(1, &query)==FAILURE) {
+			   RETURN_FALSE;
+		   }
+		   id = PGG(default_link);
+		   break;
+	   case 2:
+		   if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
+			   RETURN_FALSE;
+		   }
+		   break;
+	   default:
+		   WRONG_PARAM_COUNT;
+		   break;
+   }
+
+   ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+   convert_to_string_ex(query);
+   result = PQputline(pgsql, Z_STRVAL_PP(query));
+
+   if (result==EOF)
+   {
+	   php_error(E_WARNING, "PostgreSQL query failed:  %s", PQerrorMessage(pgsql));
+	   RETURN_FALSE;
+   }
+   RETURN_FALSE;
+}
+/* }}} */
 #define PHP_PG_NUM_ROWS 1
 #define PHP_PG_NUM_FIELDS 2
 #define PHP_PG_CMD_TUPLES 3
