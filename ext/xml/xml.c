@@ -995,7 +995,6 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 	}
 }
 /* }}} */
-/* }}} */
 
 /************************* EXTENSION FUNCTIONS *************************/
 
