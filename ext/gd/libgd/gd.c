@@ -1869,12 +1869,13 @@ void gdImageFill(gdImagePtr im, int x, int y, int nc)
 		return;
 	}
 
-	stack = (struct seg *)emalloc(sizeof(struct seg) * ((int)(im->sy*im->sx)/4)+1);
-	sp = stack;
-
 	wx2=im->sx;wy2=im->sy;
 	oc = gdImageGetPixel(im, x, y);
 	if (oc==nc || x<0 || x>wx2 || y<0 || y>wy2) return;
+
+	stack = (struct seg *)emalloc(sizeof(struct seg) * ((int)(im->sy*im->sx)/4)+1);
+	sp = stack;
+
 	/* required! */
 	FILL_PUSH(y,x,x,1);
 	/* seed segment (popped 1st) */
