@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050214
+#define PDO_DRIVER_API	20050220
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
