@@ -122,24 +122,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 	*ErrString = NULL;
 	/* @todo use DispInvoke here ? */
 	if (C_ISREFD(obj)) {
-		if (C_HASTLIB(obj)) {
-			hr = C_TYPEINFO_VT(obj)->Invoke(C_TYPEINFO(obj), C_DISPATCH(obj), dispIdMember, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
-			if (FAILED(hr) && (hr != DISP_E_EXCEPTION)) {
-				hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
-				if (SUCCEEDED(hr)) {
-					/*
-					 * ITypLib doesn't work
-					 * Release ITypeLib and fall back to IDispatch
-					 */
-
-					C_TYPEINFO_VT(obj)->Release(C_TYPEINFO(obj));
-					C_HASTLIB(obj) = FALSE;
-					C_TYPEINFO(obj) = NULL;
-				}
-			}
-		} else {
-			hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
-		}
+		hr = C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
 
 		if (FAILED(hr)) {
 			switch (hr) {
