@@ -390,7 +390,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		ret = 1;
 	} else {
 		CWD_STATE_FREE(old_state);
-		ret = (verify_path)? 0:1;
+		ret = 0;
 	}
 	
 	free(old_state);
