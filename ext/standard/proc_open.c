@@ -403,7 +403,11 @@ PHP_FUNCTION(proc_get_status)
 		}
 		if (WIFSIGNALED(wstatus)) {
 			signaled = 1;
+#ifdef NETWARE
+			termsig = WIFTERMSIG(wstatus);
+#else
 			termsig = WTERMSIG(wstatus);
+#endif
 		}
 		if (WIFSTOPPED(wstatus)) {
 			stopped = 1;
