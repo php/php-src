@@ -1,5 +1,5 @@
 /*
-  +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2001 The PHP Group                                |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Frank M. Kromann <fmk@swwwing.com>                          |
+   | Authors: Frank M. Kromann frank@frontbase.com>                       |
    +----------------------------------------------------------------------+
  */
 
