@@ -285,11 +285,11 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		}
 	}
 
-	tsrm_mutex_unlock(tsmm_mutex);
-
 	if (tsrm_new_thread_end_handler) {
 		tsrm_new_thread_end_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
+
+	tsrm_mutex_unlock(tsmm_mutex);
 }
 
 
