@@ -85,7 +85,7 @@ Fixed Bugs:
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
-        <file baseinstalldir="/" role="script" platform="windows" name="pear.bat"></file>
+        <file baseinstalldir="/" role="script" platform="windows" install-as="pear.bat" name="pear.bat"></file>
       </dir>
     </filelist>
     <deps>
