@@ -22,9 +22,6 @@ AC_ARG_WITH(apxs,
 	fi
 	APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
 	APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
-	if test -d "$APXS_INCLUDEDIR/xml" ; then
-		XML_INCLUDE="$APXS_INCLUDEDIR/xml"
-	fi
 	AC_ADD_INCLUDE($APXS_INCLUDEDIR)
 	if test -n "`$APXS -q CFLAGS | grep USE_HSREGEX`"; then
 		APACHE_HAS_REGEX=yes
@@ -128,9 +125,6 @@ AC_ARG_WITH(apache,
 			APACHE_HAS_REGEX=1
 			APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
 			APACHE_TARGET=$withval/src/modules/php4
-			if test -d $withval/src/lib/expat-lite ; then
-				  XML_INCLUDE=$withval/src/lib/expat-lite
-			fi
 			if test ! -d $APACHE_TARGET; then
 				mkdir $APACHE_TARGET
 			fi
