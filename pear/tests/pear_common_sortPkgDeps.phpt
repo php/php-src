@@ -39,7 +39,7 @@ dumpPacks($packages);
 
 echo "Test Uninstall Sort:\n";
 $c->sortPkgDeps($uninstallpackages, true);
-dumpPacks($packages);
+dumpPacks($uninstallpackages);
 
 chdir($dir);
 
@@ -58,8 +58,8 @@ function dumpPacks($p)
 Test Install Sort:
 Packages(
 pkg6,
-pkg4,
 pkg5,
+pkg4,
 pkg3,
 pkg2,
 pkg1,
@@ -69,7 +69,7 @@ Packages(
 pkg1,
 pkg2,
 pkg3,
-pkg4,
 pkg5,
+pkg4,
 pkg6,
 )
