@@ -1849,6 +1849,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 			else 
 			{
 				char* r = fbcmdMessage(result->metaData);
+				fbcrhConvertToOutputCharSet(fbcdcOutputCharacterSet(link->connection), (unsigned char *)r);
 				if ((result->list = fbcplParse(r)))
 				{
 					result->rowCount    = fbcplCount(result->list);
