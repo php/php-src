@@ -49,6 +49,20 @@
 #ifdef COMPILE_DL_MBSTRING
 #undef HAVE_MBSTRING
 #define HAVE_MBSTRING 1
+#ifdef PHP_WIN32
+# undef HAVE_MBREGEX
+# define HAVE_MBREGEX 0
+# undef HAVE_MBSTR_CN
+# define HAVE_MBSTR_CN 1
+# undef HAVE_MBSTR_JA
+# define HAVE_MBSTR_JA 1
+# undef HAVE_MBSTR_KR
+# define HAVE_MBSTR_KR 1
+# undef HAVE_MBSTR_RU
+# define HAVE_MBSTR_RU 1
+# undef HAVE_MBSTR_TW
+# define HAVE_MBSTR_TW 1
+#endif
 #endif
 
 #ifdef PHP_WIN32
