@@ -1,3 +1,39 @@
+2000-10-14  Marko Karppinen  <karppinen@pobox.com>
+
+    * ext/gd/config.m4
+      ext/gd/gdttf.c:
+    We don't support FreeType 2 - let's stop pretending we do
+
+2000-10-14  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Missed this from last commit.
+
+    * ext/gd/config.m4: config.m4
+
+    * acinclude.m4: Fix to #7162.
+
+2000-10-14  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php
+      pear/Date/Calendar.php:
+    renamed to Calc.php, fixed small bug in end_of_prev_month()
+
+2000-10-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/HTML/Form.php: PEAR HTML_Form class:
+     * multiple file upload support (by Urs Gehrig)
+     * select multiple fixes
+     * added form target
+
+2000-10-14  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/PHPDoc/analyser/PhpdocAnalyser.php:
+    Thomas Weinert (subjective) fixed a small issue that messages like "the 4th parameter...." which need another suffix (1st, 2nd, 21st 22nd...) are handled correctly. I just coumit it for him. We hope its all OK for Ulf.
+
+2000-10-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/sapi_apache.c: This appears to be the correct fix to me.
+
 2000-10-13  Daniel Beulshausen  <daniel@php4win.de>
 
     * sapi/apache/php_apache.c: trivial output change
