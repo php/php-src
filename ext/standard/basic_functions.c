@@ -729,7 +729,7 @@ PHP_MINIT_FUNCTION(basic)
 		if(FAILURE==php_register_url_wrapper("ftp",php_fopen_url_wrap_ftp)) {
 			return  FAILURE;
 		}  
-		if(FAILURE==php_register_url_wrapper("php",php_fopen_url_wrap_ftp)) {
+		if(FAILURE==php_register_url_wrapper("php",php_fopen_url_wrap_php)) {
 			return  FAILURE;
 		}  
 	}
