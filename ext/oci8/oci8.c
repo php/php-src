@@ -2256,7 +2256,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	/* create an environment using the character set id, Oracle 9i+ ONLY */
 	CALL_OCI(OCIEnvNlsCreate(
 				&session->pEnv,
-				OCI_DEFAULT, 
+				PHP_OCI_INIT_MODE, 
 				0, 
 				NULL,
 				NULL,
