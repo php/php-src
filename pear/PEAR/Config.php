@@ -122,7 +122,11 @@ class PEAR_Config extends PEAR
         'verbose' => array(
             'type' => 'integer',
             'default' => 1,
-            'doc' => 'verbosity level',
+            'doc' => 'verbosity level
+0: really quiet
+1: somewhat quiet
+2: verbose
+3: debug',
             ),
         'preferred_state' => array(
             'type' => 'set',
