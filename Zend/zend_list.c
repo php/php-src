@@ -36,13 +36,11 @@ static inline int zend_list_do_insert(HashTable *list, void *ptr, int type)
 	int index;
 	zend_rsrc_list_entry le;
 
-	index = zend_hash_next_free_element(list);
-
-	if (index==0) index++;
-
 	le.ptr=ptr;
 	le.type=type;
 	le.refcount=1;
+
+	index = zend_hash_next_free_element(list);
 	zend_hash_index_update(list, index, (void *) &le, sizeof(zend_rsrc_list_entry), NULL);
 	return index;
 }
@@ -238,7 +236,9 @@ void plist_entry_destructor(void *ptr)
 
 int zend_init_rsrc_list(ELS_D)
 {
-	return zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0);
+	if (zend_hash_init(&EG(regular_list), 0, NULL, list_entry_destructor, 0)==SUCCESS) {
+		EG(regular_list).nNextFreeElement=1;	/* we don't want resource id 0 */
+	}
 }
 
 
