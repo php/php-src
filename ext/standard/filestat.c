@@ -221,8 +221,8 @@ PHP_FUNCTION(diskfreespace)
 	RETURN_DOUBLE(bytesfree);
 }
 
-/* {{{ bool chgrp(string filename, mixed group)
-   Change file group */
+/* {{{ bool bool chown(string filename, mixed user)
+   Change file owner */
 PHP_FUNCTION(chgrp)
 {
 #ifndef WINDOWS
