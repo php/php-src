@@ -48,7 +48,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
      *
      * @access public
      */
-    function run($command, $params)
+    function run($command, $options, $params)
     {
         $failmsg = '';
         switch ($command) {

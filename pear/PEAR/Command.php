@@ -34,6 +34,12 @@ $GLOBALS['_PEAR_Command_commandlist'] = array();
 $GLOBALS['_PEAR_Command_uiclass'] = 'PEAR_CommandUI_CLI';
 
 /**
+* The options accepted by the commands
+* @var string the options
+*/
+$GLOBALS['_PEAR_Command_commandopts'] = '';
+
+/**
  * PEAR command class, a simple factory class for administrative
  * commands.
  *
@@ -154,6 +160,7 @@ class PEAR_Command
         if (!$merge) {
             $GLOBALS['_PEAR_Command_commandlist'] = array();
         }
+        $cmdopts = array();
         while ($entry = readdir($dp)) {
             if ($entry{0} == '.' || substr($entry, -4) != '.php' ||
                 $entry == 'Common.php')
@@ -163,11 +170,15 @@ class PEAR_Command
             $class = "PEAR_Command_".substr($entry, 0, -4);
             $file = "$dir/$entry";
             include_once $file;
+            // List of commands
             $implements = call_user_func(array($class, "getCommands"));
             foreach ($implements as $command) {
                 $GLOBALS['_PEAR_Command_commandlist'][$command] = $class;
             }
+            // List of options accepted
+            $cmdopts = array_merge($cmdopts, call_user_func(array($class, "getOptions")));
         }
+        $GLOBALS['_PEAR_Command_commandopts'] = implode('', $cmdopts);
         return true;
     }
 
@@ -185,6 +196,14 @@ class PEAR_Command
             PEAR_Command::registerCommands();
         }
         return $GLOBALS['_PEAR_Command_commandlist'];
+    }
+
+    function getOptions()
+    {
+        if (empty($GLOBALS['_PEAR_Command_commandlist'])) {
+            PEAR_Command::registerCommands();
+        }
+        return $GLOBALS['_PEAR_Command_commandopts'];
     }
 }
 

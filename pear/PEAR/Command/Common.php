@@ -49,6 +49,11 @@ class PEAR_Command_Common extends PEAR
         $this->ui = $ui;
     }
 
+    function getOptions()
+    {
+        return array();
+    }
+
     /**
      * Return a PEAR_CommandResponse object with parameters
      * filled in.

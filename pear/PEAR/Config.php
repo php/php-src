@@ -355,7 +355,7 @@ class PEAR_Config extends PEAR
         $size = filesize($file);
         $contents = fread($fp, $size);
         $version = '0.1';
-        if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, &$matches)) {
+        if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, $matches)) {
             $version = $matches[1];
             $contents = substr($contents, strlen($matches[0]));
         }

@@ -74,7 +74,7 @@ class PEAR_Remote extends PEAR
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
         $line1 = fgets($fp, 2048);
-        if (!preg_match('!^HTTP/[0-9\.]+ (\d+) (.*)!', $line1, &$matches)) {
+        if (!preg_match('!^HTTP/[0-9\.]+ (\d+) (.*)!', $line1, $matches)) {
             return $this->raiseError("PEAR_Remote: invalid HTTP response from XML-RPC server");
         }
         switch ($matches[1]) {
