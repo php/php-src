@@ -1801,7 +1801,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 
 		case 0:
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
-			if (ib_link->tr_list == NULL) {
+			if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 				/* this link doesn't have a default transaction */
 				_php_ibase_module_error("Default link has no default transaction");
 				RETURN_FALSE;
@@ -1992,45 +1992,6 @@ PHP_FUNCTION(ibase_query)
 		case 3:
 			/* two ids were passed, first should be link and second should be trans; */
 			ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link*, args[0], -1, "InterBase link", le_link, le_plink);
-
-#if abies_0
-			/* as yet undocumented: passing a non-resource as trans argument allows SET TRANSACTION stmt */
-			if (Z_TYPE_PP(args[1]) != IS_RESOURCE) {
-				isc_tr_handle tr = NULL;
-
-				if (isc_dsql_execute_immediate(IB_STATUS, &ib_link->link, &tr, 0, query, SQL_DIALECT_CURRENT, NULL)) {
-					_php_ibase_error(TSRMLS_C);
-					free_alloca(args);
-					RETURN_FALSE;
-				}
-				if (tr != NULL) {
-					ibase_tr_list **l;
-					
-					trans = (ibase_trans *) emalloc(sizeof(ibase_trans));
-					trans->handle = tr;
-					trans->link_cnt = 1;
-					trans->db_link[0] = ib_link;
-
-					if (ib_link->trans == NULL) {
-						ib_link->trans = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
-						ib_link->trans->trans = NULL;
-						ib_link->trans->next = NULL;
-					}
-					
-					/* link the transaction into the connection-transaction list */
-					for (l = &ib_link->trans; *l != NULL; l = &(*l)->next);
-					*l = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
-					(*l)->trans = trans;
-					(*l)->next = NULL;
-
-					ZEND_REGISTER_RESOURCE(return_value, trans, le_trans);
-
-					free_alloca(args);
-					return;
-				}
-			}
-#endif
-
 			ZEND_FETCH_RESOURCE(trans, ibase_trans*, args[1], -1, "InterBase transaction", le_trans);
 			break;
 		default:
@@ -2058,6 +2019,53 @@ PHP_FUNCTION(ibase_query)
 	if (_php_ibase_alloc_query(&ib_query, ib_link->link, trans->handle, query, ib_link->dialect TSRMLS_CC) == FAILURE) {
 		free_alloca(args);
 		RETURN_FALSE;
+	} else {
+	
+		/* find out if the statement is a SET TRANSACTION, because we have to execute it
+		   with a NULL trans handle */
+		char item_type[] = {isc_info_sql_stmt_type}, result[8];
+
+		if (isc_dsql_sql_info(IB_STATUS, &ib_query->stmt, sizeof(item_type), item_type, sizeof(result), result)) {
+			_php_ibase_error(TSRMLS_C);
+			RETURN_FALSE;
+		}
+
+		if (result[0] == isc_info_sql_stmt_type &&
+		    isc_vax_integer(&result[3], isc_vax_integer(&result[1],2)) == isc_info_sql_stmt_start_trans) {
+		    	
+			isc_tr_handle tr = NULL;
+			ibase_tr_list **l;
+			
+			if (isc_dsql_execute_immediate(IB_STATUS, &ib_link->link, &tr, 0, query, ib_link->dialect, NULL)) {
+				_php_ibase_error(TSRMLS_C);
+				_php_ibase_free_query(ib_query TSRMLS_CC);
+				free_alloca(args);
+				RETURN_FALSE;
+			}
+			
+			trans = (ibase_trans *) emalloc(sizeof(ibase_trans));
+			trans->handle = tr;
+			trans->link_cnt = 1;
+			trans->db_link[0] = ib_link;
+
+			if (ib_link->tr_list == NULL) {
+				ib_link->tr_list = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
+				ib_link->tr_list->trans = NULL;
+				ib_link->tr_list->next = NULL;
+			}
+			
+			/* link the transaction into the connection-transaction list */
+			for (l = &ib_link->tr_list; *l != NULL; l = &(*l)->next);
+			*l = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
+			(*l)->trans = trans;
+			(*l)->next = NULL;
+
+			ZEND_REGISTER_RESOURCE(return_value, trans, le_trans);
+
+			_php_ibase_free_query(ib_query TSRMLS_CC);
+			free_alloca(args);
+			return;
+		}
 	}
 
 	if (_php_ibase_exec(&ib_result, ib_query, bind_n, bind_args TSRMLS_CC) == FAILURE) {
