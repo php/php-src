@@ -227,6 +227,8 @@ PHP_FUNCTION(pcntl_waitpid)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &pid, &z_status, &options) == FAILURE)
 		return;
+	
+	convert_to_long_ex(&z_status);
 
 	status = Z_LVAL_P(z_status);
 
@@ -622,8 +624,7 @@ void pcntl_zend_extension_statement_handler(zend_op_array *op_array)
 		if (zend_hash_index_find(&PCNTL_G(php_signal_table), *signal_num, (void *) &func_name)==FAILURE) {
 			continue;
 		}
-		convert_to_long_ex(&param);
-		convert_to_string_ex(&call_name);
+
 		ZVAL_LONG(param, *signal_num);
 		ZVAL_STRING(call_name, func_name, 0);
 		
