@@ -52,7 +52,7 @@
 
 #if HAVE_ORACLE
 
-#include "oracle.h"
+#include "php3_oracle.h"
 #ifdef WIN32
 # include "variables.h"
 #else

@@ -25,6 +25,7 @@
 
 extern php3_module_entry oracle_module_entry;
 #define oracle_module_ptr &oracle_module_entry
+#define phpext_oracle_ptr &oracle_module_entry
 
 /* oparse flags */
 #define  DEFER_PARSE        1
