@@ -65,7 +65,7 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
 	int len=sizeof("Set-Cookie: ");
@@ -75,11 +75,14 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	int result;
 	
 	len += name_len;
-	if (value) {
+	if (value && url_encode) {
 		int encoded_value_len;
 
 		encoded_value = php_url_encode(value, value_len, &encoded_value_len);
 		len += encoded_value_len;
+	} else if ( value ) {
+		encoded_value = estrdup(value);
+		len += value_len;
 	}
 	if (path) {
 		len += path_len;
@@ -150,7 +153,30 @@ PHP_FUNCTION(setcookie)
 		return;
 	}
 
-	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure TSRMLS_CC) == SUCCESS) {
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 1 TSRMLS_CC) == SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool setrawcookie(string name [, string value [, int expires [, string path [, string domain [, bool secure]]]]])
+   Send a cookie with no url encoding of the value */
+PHP_FUNCTION(setrawcookie)
+{
+	char *name, *value = NULL, *path = NULL, *domain = NULL;
+	long expires = 0;
+	zend_bool secure = 0;
+	int name_len, value_len, path_len, domain_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|slssb", &name,
+							  &name_len, &value, &value_len, &expires, &path,
+							  &path_len, &domain, &domain_len, &secure) == FAILURE) {
+		return;
+	}
+
+	if (php_setcookie(name, name_len, value, value_len, expires, path, path_len, domain, domain_len, secure, 0 TSRMLS_CC) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
