@@ -10,7 +10,8 @@ AC_DEFUN(PHP_DBA_STD_BEGIN,[
 
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
   old_LDFLAGS=$LDFLAGS
-  LDFLAGS="$1 $LDFLAGS"
+dnl  LDFLAGS="$1 $LDFLAGS"
+  LDFLAGS="$1"
   $2
   LDFLAGS=$old_LDFLAGS
 ])
@@ -139,18 +140,20 @@ dnl Berkeley specific (library and version test)
 dnl parameters(version, library list, function)
 AC_DEFUN(PHP_DBA_DB_CHECK,[
   for LIB in $2; do
-    PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
-      AC_CHECK_LIB($LIB, $3, [
-        AC_EGREP_CPP(yes,[
+    if test -f $THIS_PREFIX/lib/lib$LIB.a -o -f $THIS_PREFIX/lib/lib$LIB.$SHLIB_SUFFIX_NAME; then
+      PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+        AC_CHECK_LIB($LIB, $3, [
+          AC_EGREP_CPP(yes,[
 #include "$THIS_INCLUDE"
             yes
 #endif
-        ],[
-          THIS_LIBS=$LIB
-          break
+          ],[
+            THIS_LIBS=$LIB
+            break
+          ])
         ])
       ])
-    ])
+    fi
   done
   if test "$1" = "4"; then
     AC_MSG_CHECKING(for db4 minor version and patch level)
