@@ -1092,21 +1092,19 @@ PHP_FUNCTION(imap_headers)
 	}
 
 	convert_to_long(streamind);
-
+	
 	ind = streamind->value.lval;
-
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-
+	
 	/* Initialize return array */
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-
+	
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
 		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream,msgno);
 		mail_fetchstructure (imap_le_struct->imap_stream,msgno,NIL);
@@ -1116,26 +1114,25 @@ PHP_FUNCTION(imap_headers)
 		tmp[3] = cache->answered ? 'A' : ' ';
 		tmp[4] = cache->deleted ? 'D' : ' ';
 		tmp[5] = cache->draft ? 'X' : ' ';
-		sprintf (tmp+5,"%4ld) ",cache->msgno);
-		mail_date (tmp+11,cache);
+		sprintf(tmp+5, "%4ld) ", cache->msgno);
+		mail_date(tmp+11,cache);
 		tmp[17] = ' ';
 		tmp[18] = '\0';
-		mail_fetchfrom (tmp+18,imap_le_struct->imap_stream,msgno,(long) 20);
-		strcat (tmp," ");
+		mail_fetchfrom(tmp+18,imap_le_struct->imap_stream,msgno, (long) 20);
+		strcat(tmp," ");
 		if ((i = cache->user_flags)) {
-			strcat (tmp,"{");
+			strcat(tmp, "{");
 			while (i) {
-				strcat (tmp,imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)]);
-				if (i) strcat (tmp," ");
+				strcat(tmp,imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)]);
+				if (i) strcat(tmp," ");
 			}
-			strcat (tmp,"} ");
+			strcat(tmp,"} ");
 		}
 		mail_fetchsubject(t=tmp+strlen(tmp),imap_le_struct->imap_stream,msgno,(long)25);
-		sprintf (t+=strlen(t)," (%ld chars)",cache->rfc822_size);
+		sprintf(t+=strlen(t)," (%ld chars)",cache->rfc822_size);
 		add_next_index_string(return_value,tmp,1);
 	}
 }
-
 /* }}} */
 
 /* {{{ proto string imap_body(int stream_id, int msg_no [, int options])
@@ -1674,7 +1671,7 @@ PHP_FUNCTION(imap_headerinfo)
 			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
 		}
 
-		if(fulladdress) add_property_string( return_value, "toaddress", fulladdress, 1);
+		if (fulladdress) add_property_string( return_value, "toaddress", fulladdress, 1);
 		addresstmp=en->to;
 		MAKE_STD_ZVAL(to);
 		array_init(to);
@@ -1686,21 +1683,21 @@ PHP_FUNCTION(imap_headerinfo)
 			if(addresstmp->mailbox) add_property_string(tovals, "mailbox", addresstmp->mailbox, 1);
 			if(addresstmp->host) add_property_string(tovals, "host", addresstmp->host, 1);
 			add_next_index_object(to, tovals);
-		} while ( (addresstmp = addresstmp->next) );
+		} while ((addresstmp = addresstmp->next));
 		add_assoc_object(return_value, "to", to);
 	}
-
+	
 	if(en->from) {
 		int ok=1;
 		addresstmp=en->from;
 		fulladdress[0]=0x00;
-  
+		
 		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
 			addresstmp2=addresstmp->next; /* save the pointer to the next address */
 			addresstmp->next=NULL; /* make this address the only one now. */
 			tempaddress[0]=0x00; /* reset tempaddress buffer */
 			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+			if ((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
 				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
 				strcat(fulladdress,tempaddress); /* put in the new address */
 			} else { /* no */
@@ -1709,8 +1706,8 @@ PHP_FUNCTION(imap_headerinfo)
 			}
 			addresstmp=addresstmp2; /* reset the pointer to the next address first! */
 		}
-
-		if(fulladdress) add_property_string( return_value, "fromaddress", fulladdress, 1);
+		
+		if (fulladdress) add_property_string( return_value, "fromaddress", fulladdress, 1);
 		addresstmp=en->from;
 		MAKE_STD_ZVAL(from);
 		array_init(from);
@@ -1722,11 +1719,11 @@ PHP_FUNCTION(imap_headerinfo)
 			if(addresstmp->mailbox) add_property_string(fromvals, "mailbox", addresstmp->mailbox, 1);
 			if(addresstmp->host) add_property_string(fromvals, "host", addresstmp->host, 1);
 			add_next_index_object(from, fromvals);
-		} while ( (addresstmp = addresstmp->next) );
-		add_assoc_object( return_value, "from", from );
+		} while ((addresstmp = addresstmp->next));
+		add_assoc_object(return_value, "from", from);
 	}
-
-	if(en->cc) {
+	
+	if (en->cc) {
 		int ok=1;
 		addresstmp=en->cc;
 		fulladdress[0]=0x00;
@@ -1871,12 +1868,12 @@ PHP_FUNCTION(imap_headerinfo)
 		int ok=1;
 		addresstmp=en->return_path;
 		fulladdress[0]=0x00;
-		while(ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
+		while (ok && addresstmp) { /* while length < 1000 and we are not at the end of the list */
 			addresstmp2=addresstmp->next; /* save the pointer to the next address */
 			addresstmp->next=NULL; /* make this address the only one now. */
 			tempaddress[0]=0x00; /* reset tempaddress buffer */
 			rfc822_write_address(tempaddress,addresstmp); /* ok, write the address into tempaddress string */
-			if((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
+			if ((strlen(tempaddress) + strlen(fulladdress)) < 1000) { /* is the new address + total address < 1000 */
 				if(strlen(fulladdress)) strcat(fulladdress,","); /* put in a comma */ 
 				strcat(fulladdress,tempaddress); /* put in the new address */
 			} else { /* no */
@@ -1898,7 +1895,7 @@ PHP_FUNCTION(imap_headerinfo)
 			if(addresstmp->mailbox) add_property_string(return_pathvals, "mailbox", addresstmp->mailbox, 1);
 			if(addresstmp->host) add_property_string(return_pathvals, "host", addresstmp->host, 1);
 			add_next_index_object(return_path, return_pathvals );
-		} while ( (addresstmp = addresstmp->next) );
+		} while ((addresstmp = addresstmp->next));
 		add_assoc_object( return_value, "return_path", return_path );
 	}
 	add_property_string(return_value,"Recent",cache->recent ? (cache->seen ? "R": "N") : " ",1);
@@ -2874,15 +2871,15 @@ PHP_FUNCTION(imap_sort)
 	convert_to_long(streamind);
 	convert_to_long(rev);
 	convert_to_long(pgm);
-	if(pgm->value.lval>SORTSIZE) {
+	if (pgm->value.lval>SORTSIZE) {
 		php_error(E_WARNING, "Unrecognized sort criteria");
 		RETURN_FALSE;
 	}
-	if(myargc==4) convert_to_long(flags);
-
+	if (myargc==4) convert_to_long(flags);
+	
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
-	if(!imap_le_struct || !IS_STREAM(ind_type)) {
+	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
@@ -2891,16 +2888,14 @@ PHP_FUNCTION(imap_sort)
 	mypgm->reverse=rev->value.lval;
 	mypgm->function=pgm->value.lval;
 	mypgm->next=NIL;
-
+	
 	array_init(return_value);
-	slst=mail_sort(imap_le_struct->imap_stream,NIL,spg,mypgm,myargc == 4 ? flags->value.lval:NIL);
-
-
+	slst = mail_sort(imap_le_struct->imap_stream,NIL,spg,mypgm,myargc == 4 ? flags->value.lval:NIL);
+	
 	for (sl = slst; *sl; sl++) { 
 		add_next_index_long(return_value,*sl);
 	}
-		fs_give ((void **) &slst); 
-
+	fs_give ((void **) &slst); 
 }
 /* }}} */
 
@@ -2908,26 +2903,31 @@ PHP_FUNCTION(imap_sort)
    Get the full unfiltered header for a message */
 PHP_FUNCTION(imap_fetchheader)
 {
-	pval *streamind, * msgno, * flags;
+	pval *streamind, *msgno, *flags;
 	int ind, ind_type;
 	pils *imap_le_struct;
 	int myargc = ARG_COUNT(ht);
 	if (myargc < 2 || myargc > 3 || getParameters(ht,myargc,&streamind,&msgno,&flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-
+	
 	convert_to_long(streamind);
 	convert_to_long(msgno);
-	if(myargc == 3) convert_to_long(flags);
+	if (myargc == 3) convert_to_long(flags);
 	ind = streamind->value.lval;
-
+	
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	RETVAL_STRING(mail_fetchheader_full (imap_le_struct->imap_stream,msgno->value.lval,NIL,NIL,myargc == 3 ? flags->value.lval : NIL),1);
-
+	
+	if ((msgno->value.lval < 1) || (msgno->value.lval > imap_le_struct->imap_stream->nmsgs)) {
+		php_error(E_WARNING, "Bad message number");
+		RETURN_FALSE;
+	}
+	
+	RETVAL_STRING(mail_fetchheader_full(imap_le_struct->imap_stream, msgno->value.lval, NIL, NIL, myargc == 3 ? flags->value.lval : NIL), 1);
 }
 /* }}} */
 
