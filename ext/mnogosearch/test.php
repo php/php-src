@@ -63,6 +63,9 @@
 		$total=Udm_Get_Res_Param($res,UDM_PARAM_FOUND);
 		$rows=Udm_Get_Res_Param($res,UDM_PARAM_NUM_ROWS);
 		$wordinfo=Udm_Get_Res_Param($res,UDM_PARAM_WORDINFO);
+		$searchtime=Udm_Get_Res_Param($res,UDM_PARAM_SEARCHTIME);
+
+		printf("Searchtime: ".$searchtime."\n\n");
 
 		printf("Documents %d-%d from %d total found; %s\n\n",
 			$first,$first+$rows-1,$total,$wordinfo);
@@ -79,7 +82,7 @@
 			printf("     SIZE : %d\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_SIZE));
 			printf("     MODIFIED : %s\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_MODIFIED));
 			printf("     URLID : %d\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_URLID));
-			printf("     SCORE : %d\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_SCORE));
+			printf("     RATING : %d\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_RATING));
 			printf("     CRC : %d\n",Udm_Get_Res_Field($res,$i,UDM_FIELD_CRC));
 			printf("---------\n");
 		}
