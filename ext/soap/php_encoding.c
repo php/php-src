@@ -41,6 +41,13 @@ static xmlNodePtr to_xml_gday(encodeType type, zval *data, int style);
 static xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style);
 static xmlNodePtr to_xml_duration(encodeType type, zval *data, int style);
 
+static int is_map(zval *array);
+static void get_array_type(xmlNodePtr node, zval *array, smart_str *out_type TSRMLS_DC);
+
+static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret);
+static void set_ns_and_type(xmlNodePtr node, encodeType type);
+static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
+
 encode defaultEncoding[] = {
 	{{UNKNOWN_TYPE, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
@@ -960,25 +967,9 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 				}
 				if (myNs != NULL) {
 					enc = get_encoder(SOAP_GLOBAL(sdl), myNs->href, value);
-
-					if (strcmp(myNs->href,XSD_NAMESPACE) == 0) {
-						smart_str_appendl(&array_type, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
-						smart_str_appendc(&array_type, ':');
-					} else {
-						smart_str *prefix = encode_new_ns();
-						smart_str smart_ns = {0};
-
-						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
-						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
-						smart_str_0(&smart_ns);
-						xmlSetProp(xmlParam, smart_ns.c, myNs->href);
-						smart_str_free(&smart_ns);
-
-						smart_str_appends(&array_type, prefix->c);
-						smart_str_appendc(&array_type, ':');
-						smart_str_free(prefix);
-						efree(prefix);
-					}
+					get_type_str(xmlParam, myNs->href, value, &array_type);
+				} else {
+					smart_str_appends(&array_type, value);
 				}
 
 				dims = emalloc(sizeof(int)*dimension);
@@ -995,8 +986,6 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 					}
 				}
 
-				smart_str_appends(&array_type, value);
-
 				smart_str_append_long(&array_size, dims[0]);
 				for (i=1; i<dimension; i++) {
 					smart_str_appendc(&array_size, ',');
@@ -1010,37 +999,18 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 			           zend_hash_num_elements(sdl_type->elements) == 1 &&
 			           (elementType = *(sdlTypePtr*)sdl_type->elements->pListHead->pData) != NULL &&
 			           elementType->encode && elementType->encode->details.type_str) {
-				char* ns = elementType->encode->details.ns;
 
-				if (ns) {
-					if (strcmp(ns,XSD_NAMESPACE) == 0) {
-						smart_str_appendl(&array_type, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
-						smart_str_appendc(&array_type, ':');
-					} else {
-						smart_str *prefix = encode_new_ns();
-						smart_str smart_ns = {0};
-
-						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
-						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
-						smart_str_0(&smart_ns);
-						xmlSetProp(xmlParam, smart_ns.c, ns);
-						smart_str_free(&smart_ns);
-
-						smart_str_appends(&array_type, prefix->c);
-						smart_str_appendc(&array_type, ':');
-						smart_str_free(prefix);
-						efree(prefix);
-					}
-				}
 				enc = elementType->encode;
-				smart_str_appends(&array_type, elementType->encode->details.type_str);
+
+				get_type_str(xmlParam, elementType->encode->details.ns, elementType->encode->details.type_str, &array_type);
+
 				smart_str_append_long(&array_size, i);
 
 				dims = emalloc(sizeof(int)*dimension);
 				dims[0] = i;
 			} else {
 
-				get_array_type(data, &array_type TSRMLS_CC);
+				get_array_type(xmlParam, data, &array_type TSRMLS_CC);
 				enc = get_encoder_ex(SOAP_GLOBAL(sdl), array_type.c);
 				smart_str_append_long(&array_size, i);
 				dims = emalloc(sizeof(int)*dimension);
@@ -1048,6 +1018,11 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 			}
 
 			if (soap_version == SOAP_1_1) {
+				smart_str_0(&array_type);
+				if (strcmp(array_type.c,"xsd:anyType") == 0) {
+					smart_str_0(&array_type);
+					smart_str_appendl(&array_type,"xsd:ur-type",sizeof("xsd:ur-type")-1);				  
+				}
 				smart_str_appendc(&array_type, '[');
 				smart_str_append(&array_type, &array_size);
 				smart_str_appendc(&array_type, ']');
@@ -1587,45 +1562,17 @@ static xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 	return to_xml_datetime_ex(type, data, "--%m--", style);
 }
 
-void set_ns_and_type(xmlNodePtr node, encodeType type)
+static void set_ns_and_type(xmlNodePtr node, encodeType type)
 {
 	set_ns_and_type_ex(node, type.ns, type.type_str);
 }
 
-void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type)
+static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type)
 {
-	if (ns != NULL) {
-		char *sprefix;
-		smart_str *prefix;
-		smart_str xmlns = {0}, nstype = {0};
-
-		TSRMLS_FETCH();
-
-		if (zend_hash_find(SOAP_GLOBAL(defEncNs), ns, strlen(ns) + 1, (void **)&sprefix) == FAILURE) {
-			prefix = encode_new_ns();
-			smart_str_appendl(&xmlns, "xmlns:", 6);
-			smart_str_append(&xmlns, prefix);
-			smart_str_0(&xmlns);
-
-			xmlSetProp(node, xmlns.c, ns);
-		} else {
-			prefix = emalloc(sizeof(smart_str));
-			memset(prefix, 0, sizeof(smart_str));
-			smart_str_appends(prefix, sprefix);
-		}
-
-		smart_str_append(&nstype, prefix);
-		smart_str_appendc(&nstype, ':');
-		smart_str_appends(&nstype, type);
-		smart_str_0(&nstype);
-		xmlSetProp(node, "xsi:type", nstype.c);
-		smart_str_free(&nstype);
-		smart_str_free(&xmlns);
-		smart_str_free(prefix);
-		efree(prefix);
-	} else {
-		xmlSetProp(node, "xsi:type", type);
-	}
+	smart_str nstype = {0};
+	get_type_str(node, ns, type, &nstype);
+	xmlSetProp(node, "xsi:type", nstype.c);
+	smart_str_free(&nstype);
 }
 
 smart_str *encode_new_ns()
@@ -1728,7 +1675,7 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, cons
 	}
 }
 
-int is_map(zval *array)
+static int is_map(zval *array)
 {
 	int i, count = zend_hash_num_elements(Z_ARRVAL_P(array));
 
@@ -1742,7 +1689,7 @@ int is_map(zval *array)
 	return FALSE;
 }
 
-void get_array_type(zval *array, smart_str *type TSRMLS_DC)
+static void get_array_type(xmlNodePtr node, zval *array, smart_str *type TSRMLS_DC)
 {
 	HashTable *ht = HASH_OF(array);
 	int i, count, cur_type, prev_type, different;
@@ -1789,25 +1736,50 @@ void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 		smart_str_appendl(type, "xsd:anyType", 11);
 	} else {
 		encodePtr enc;
-		char *prefix;
 
 		enc = get_conversion(cur_type);
-
-		if (enc->details.ns != NULL) {
-			if (zend_hash_find(SOAP_GLOBAL(defEncNs), enc->details.ns, strlen(enc->details.ns) + 1, (void **)&prefix) == FAILURE) {
-				php_error(E_ERROR, "Unknown namespace '%s'",enc->details.ns);
-			}
-
-			smart_str_appendl(type, prefix, strlen(prefix));
-			smart_str_appendc(type, ':');
-			smart_str_appendl(type, enc->details.type_str, strlen(enc->details.type_str));
-			smart_str_0(type);
-		} else {
-			smart_str_appendl(type, enc->details.type_str, strlen(enc->details.type_str));
-		}
+		get_type_str(node, enc->details.ns, enc->details.type_str, type);
 	}
 }
 
+static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret)
+{
+	char *prefix;
+	TSRMLS_FETCH();
+	if (ns) {
+		if (SOAP_GLOBAL(soap_version) == SOAP_1_2 && 
+		    strcmp(ns,SOAP_1_1_ENC_NAMESPACE) == 0) {
+			ns = SOAP_1_2_ENC_NAMESPACE;
+		} else if (SOAP_GLOBAL(soap_version) == SOAP_1_1 &&
+		           strcmp(ns,SOAP_1_2_ENC_NAMESPACE) == 0) {
+			ns = SOAP_1_1_ENC_NAMESPACE;
+		}
+		if (zend_hash_find(SOAP_GLOBAL(defEncNs), (char*)ns, strlen(ns) + 1, (void **)&prefix) == SUCCESS) {
+			smart_str_appendl(ret, prefix, strlen(prefix));
+			smart_str_appendc(ret, ':');
+		} else  if (node != NULL) {
+			smart_str* prefix = encode_new_ns();
+			smart_str xmlns = {0};
+
+			smart_str_appendl(&xmlns, "xmlns:", 6);
+			smart_str_append(&xmlns, prefix);
+			smart_str_0(&xmlns);
+
+			xmlSetProp(node, xmlns.c, ns);
+
+			smart_str_append(ret, prefix);
+			smart_str_appendc(ret, ':');
+
+			smart_str_free(&xmlns);
+			smart_str_free(prefix);
+			efree(prefix);
+		} else {
+			php_error(E_ERROR,"Unknown namespace '%s'",ns);
+		}
+	}
+	smart_str_appendl(ret, type, strlen(type));
+	smart_str_0(ret);
+}
 
 smart_str *build_soap_action(zval *this_ptr, char *soapaction)
 {

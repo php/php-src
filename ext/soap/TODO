@@ -57,7 +57,7 @@ Encoding
   + multidimensional arrays
   + arrays of arrays
 	+ SOAP 1.2 array encoding/decoding (itemType, arraySize)
-  - SOAP 1.1 - arrayType="xsd:ur-type[]", SOAP 1.2 - itemType="xsd:anyType"
+  + SOAP 1.1 - arrayType="xsd:ur-type[]", SOAP 1.2 - itemType="xsd:anyType"
   - SOAP 1.1 encoding of arrays with holes (partially transmitted and sparse arrays)
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
 - full support for structures???  

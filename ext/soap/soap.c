@@ -279,7 +279,9 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 			}
 		}
 		/* Index everything by number */
-		zend_hash_index_update(soap_globals->defEncIndex, defaultEncoding[i].details.type, &enc, sizeof(encodePtr), NULL);
+		if (!zend_hash_index_exists(soap_globals->defEncIndex, defaultEncoding[i].details.type)) {
+			zend_hash_index_update(soap_globals->defEncIndex, defaultEncoding[i].details.type, &enc, sizeof(encodePtr), NULL);
+		}
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 
@@ -1306,6 +1308,7 @@ PHP_METHOD(soapobject, soapobject)
 	long use   = SOAP_RPC;
 	long style = SOAP_ENCODED;
 	long version = SOAP_1_1;
+	long old_soap_version	;
 
 	GET_THIS_OBJECT(thisObj);
 
@@ -1315,12 +1318,6 @@ PHP_METHOD(soapobject, soapobject)
 			sdlPtr sdl;
 			int ret;
 
-			sdl = get_sdl(location);
-			ret = zend_list_insert(sdl, le_sdl);
-
-			add_property_resource(thisObj, "sdl", ret);
-			zend_list_addref(ret);
-
 			if (arg2 != NULL) {
 				version = Z_LVAL_P(arg2);
 			}
@@ -1329,6 +1326,17 @@ PHP_METHOD(soapobject, soapobject)
 			} else {
 				php_error(E_ERROR,"Can't create SoapObject. Wrong 'version' parameter.");
 			}
+			old_soap_version = SOAP_GLOBAL(soap_version);
+			SOAP_GLOBAL(soap_version) = version;
+
+			sdl = get_sdl(location);
+			ret = zend_list_insert(sdl, le_sdl);
+
+			add_property_resource(thisObj, "sdl", ret);
+			zend_list_addref(ret);
+
+			SOAP_GLOBAL(soap_version) = old_soap_version;
+
 		} else if (arg2 != NULL && Z_TYPE_P(arg2) == IS_STRING) {
 			/* SoapObject($location, $uri, $style=SOAP_RPC, $use=SOAP_ENCODED, $version=SOAP_1_1) */
 			add_property_stringl(thisObj, "location", location, location_len, 1);
