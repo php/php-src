@@ -1,0 +1,180 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(libmysql.c)
+
+dnl Checks for programs.
+AC_PROG_AWK
+AC_PROG_YACC
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_RANLIB
+
+dnl Checks for libraries.
+AC_ARG_WITH(mysql,--with-mysql=DIR          Where to look for mysql libraries/includes, \
+MYSQL_DIR="${withval}", MYSQL_DIR="/usr/local/mysql")
+
+
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(pwd.h sgtty.h sys/ioctl.h termio.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_CHECK_SIZEOF(long long, 8)
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+AC_TYPE_UID_T
+
+dnl Checks for library functions.
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(
+bmove \
+getcwd \
+gethostbyname_r \
+getpwnam GETRUSAGE \
+getwd \
+longjmp \
+realpath \
+access \
+strtoull \
+tempnam \
+pthread_getsequence_np \
+pthread_setschedparamselect \
+socket \
+)
+
+#---START: Used in for client configure
+
+# Check definition of gethostbyname_r (glibc2.0.100 is different from Solaris)
+ac_save_CXXFLAGS="$CXXFLAGS"
+AC_CACHE_CHECK([style of gethostname_r routines], mysql_cv_gethostname_style,
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+if test "$ac_cv_prog_gxx" = "yes"
+then
+  CXXFLAGS="$CXXFLAGS -Werror"
+fi
+AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>],
+[int skr;
+
+ int res = gethostbyname_r((const char *) 0,
+  (struct hostent*) 0, (char*) 0, 0, (struct hostent **) 0, &skr);],
+mysql_cv_gethostname_style=glibc2, mysql_cv_gethostname_style=other))
+AC_LANG_RESTORE
+CXXFLAGS="$ac_save_CXXFLAGS"
+if test "$mysql_cv_gethostname_style" = "glibc2"
+then
+  AC_DEFINE(HAVE_GLIBC2_STYLE_GETHOSTBYNAME_R)
+fi
+
+if test "$with_mit_threads" = "no"
+then
+  # Check definition of pthread_getspecific
+  AC_CACHE_CHECK("args to pthread_getspecific", mysql_cv_getspecific_args,
+  AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h> ],
+[ void *pthread_getspecific(pthread_key_t key);
+pthread_getspecific((pthread_key_t) NULL); ],
+mysql_cv_getspecific_args=POSIX, mysql_cv_getspecific_args=other))
+  if test "$mysql_cv_getspecific_args" = "other"
+  then
+    AC_DEFINE(HAVE_NONPOSIX_PTHREAD_GETSPECIFIC)
+  fi
+
+  # Check definition of pthread_mutex_init
+  AC_CACHE_CHECK("args to pthread_mutex_init", mysql_cv_mutex_init_args,
+  AC_TRY_COMPILE(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h> ],
+[ 
+  pthread_mutexattr_t attr;
+  pthread_mutex_t mp;
+  pthread_mutex_init(&mp,&attr); ],
+mysql_cv_mutex_init_args=POSIX, mysql_cv_mutex_init_args=other))
+  if test "$mysql_cv_mutex_init_args" = "other"
+  then
+    AC_DEFINE(HAVE_NONPOSIX_PTHREAD_MUTEX_INIT)
+  fi
+fi
+#---END:
+
+#---START: Used in for client configure
+# Check definition of readdir_r
+AC_CACHE_CHECK("args to readdir_r", mysql_cv_readdir_r,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <dirent.h>],
+[ int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result);
+readdir_r((DIR *) NULL, (struct dirent *) NULL, (struct dirent **) NULL); ],
+mysql_cv_readdir_r=POSIX, mysql_cv_readdir_r=other))
+if test "$mysql_cv_readdir_r" = "POSIX"
+then
+  AC_DEFINE(HAVE_READDIR_R)
+fi
+
+# Check definition av posix sigwait()
+AC_CACHE_CHECK("style of sigwait", mysql_cv_sigwait,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <signal.h>],
+[#ifndef _AIX
+sigset_t set;
+int sig;
+sigwait(&set,&sig);
+#endif],
+mysql_cv_sigwait=POSIX, mysql_cv_sigwait=other))
+if test "$mysql_cv_sigwait" = "POSIX"
+then
+  AC_DEFINE(HAVE_SIGWAIT)
+fi
+
+if test "$mysql_cv_sigwait" != "POSIX"
+then
+unset mysql_cv_sigwait
+# Check definition av posix sigwait()
+AC_CACHE_CHECK("style of sigwait", mysql_cv_sigwait,
+AC_TRY_LINK(
+[#ifndef SCO
+#define _REENTRANT
+#endif
+#define _POSIX_PTHREAD_SEMANTICS 
+#include <pthread.h>
+#include <signal.h>],
+[sigset_t set;
+int sig;
+sigwait(&set);],
+mysql_cv_sigwait=NONPOSIX, mysql_cv_sigwait=other))
+if test "$mysql_cv_sigwait" = "NONPOSIX"
+then
+  AC_DEFINE(HAVE_NONPOSIX_SIGWAIT)
+fi
+fi
+#---END:
+
+AC_OUTPUT(Makefile)
