@@ -61,7 +61,7 @@
 /* Prototypes */
 static zval get_overloaded_property(ELS_D);
 static void set_overloaded_property(zval *value ELS_DC);
-static void call_overloaded_function(int arg_count, zval *return_value, HashTable *list, HashTable *plist ELS_DC);
+static void call_overloaded_function(int arg_count, zval *return_value ELS_DC);
 static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
 static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
 static inline void zend_fetch_property_address(znode *result, znode *op1, znode *op2, temp_variable *Ts, int type ELS_DC);
@@ -925,7 +925,7 @@ static void set_overloaded_property(zval *value ELS_DC)
 }
 
 
-static void call_overloaded_function(int arg_count, zval *return_value, HashTable *list, HashTable *plist ELS_DC)
+static void call_overloaded_function(int arg_count, zval *return_value ELS_DC)
 {
 	zend_property_reference *property_reference;
 
@@ -1595,7 +1595,7 @@ do_fcall_common:
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
 						INIT_ZVAL(*(Ts[opline->result.u.var].var.ptr));
-						call_overloaded_function(opline->extended_value, Ts[opline->result.u.var].var.ptr, &EG(regular_list), &EG(persistent_list) ELS_CC);
+						call_overloaded_function(opline->extended_value, Ts[opline->result.u.var].var.ptr ELS_CC);
 						efree(fbc);
 						if (!return_value_used) {
 							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
