@@ -392,10 +392,10 @@ static union _zend_function *com_constructor_get(zval *object TSRMLS_DC)
 #endif
 		
 		case 'c':
-			POPULATE_CTOR(d, com_create_instance);
+			POPULATE_CTOR(c, com_create_instance);
 		
 		case 'v':
-			POPULATE_CTOR(d, com_variant_create_instance);
+			POPULATE_CTOR(v, com_variant_create_instance);
 			
 		default:
 			return NULL;
