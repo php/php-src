@@ -328,7 +328,7 @@ static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb,
 		return rv;
 	}
 
-	APR_BRIGADE_FOREACH(b, bb) {
+	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
 		apr_bucket_read(b, &str, &n, 1);
 		if (n > 0) {
 			old_index = ctx->post_len;
@@ -415,7 +415,7 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 		return ap_pass_brigade(f->next, bb);
 	}
 
-	APR_BRIGADE_FOREACH(b, bb) {
+	for (b = APR_BRIGADE_FIRST(bb); b != APR_BRIGADE_SENTINEL(bb); b = APR_BUCKET_NEXT(b)) {
 		zend_file_handle zfd;
 
 		if (!ctx->request_processed && APR_BUCKET_IS_FILE(b)) {
