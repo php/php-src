@@ -77,12 +77,26 @@ allow_call_time_pass_reference	= On	; whether to enable the ability to force arg
 ; Safe Mode
 safe_mode		=	Off
 safe_mode_exec_dir	=
-safe_mode_protected_env_vars = LD_LIBRARY_PATH		; In Safe Mode, setting certain environment
-													; variables may be a potential security
-													; breach.  This directive contains
-													; a comma delimited list of environment
-													; variables, that the end user won't be
-													; able to override using putenv()
+safe_mode_allowed_env_vars = PHP_					; Setting certain environment variables
+													; may be a potential security breach.
+													; This directive contains a comma-delimited
+													; list of prefixes.  In Safe Mode, the
+													; user may only alter environment
+													; variables whose names begin with the
+													; prefixes supplied here.
+													; By default, users will only be able
+													; to set environment variables that begin
+													; with PHP_ (e.g. PHP_FOO=BAR).
+													; Note:  If this directive is empty, PHP
+													; will let the user modify ANY environment
+													; variable!
+safe_mode_protected_env_vars = LD_LIBRARY_PATH		; This directive contains a comma-
+													; delimited list of environment variables,
+													; that the end user won't be able to
+													; change using putenv().
+													; These variables will be protected
+													; even if safe_mode_allowed_env_vars is
+													; set to allow to change them.
 
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in <font color=???> would work.
 highlight.string	=	#DD0000
