@@ -35,6 +35,8 @@
 #if HAVE_WDDX
 
 #include "php_wddx_api.h"
+#define PHP_XML_INTERNAL
+#include "ext/xml/php_xml.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"
@@ -579,7 +581,10 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		
 		for (i=0; atts[i]; i++) {
 			if (!strcmp(atts[i], EL_VAR_NAME) && atts[i+1]) {
-				stack->varname = estrdup(atts[i+1]);
+				char *decoded_value;
+				int decoded_len;
+				decoded_value = xml_utf8_decode(atts[i+1],strlen(atts[i+1]),&decoded_len,"ISO-8859-1");
+				stack->varname = decoded_value;
 			}
 		}
 	}
@@ -667,21 +672,27 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 {
 	st_entry *ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
+	char *decoded_value;
+	int decoded_len;
 
 	if (!wddx_stack_is_empty(stack)) {
 		wddx_stack_top(stack, (void**)&ent);
 		switch (ent->type) {
-			case ST_STRING:
+			case ST_STRING: 
+				decoded_value = xml_utf8_decode(s,len,&decoded_len,"ISO-8859-1");
+
 				if (ent->data->value.str.len == 0) {
-					ent->data->value.str.val = estrndup(s, len);
-					ent->data->value.str.len = len;
+					ent->data->value.str.val = estrndup(decoded_value, decoded_len);
+					ent->data->value.str.len = decoded_len;
 				} else {
 					ent->data->value.str.val = erealloc(ent->data->value.str.val,
-							ent->data->value.str.len + len + 1);
-					strncpy(ent->data->value.str.val+ent->data->value.str.len, s, len);
-					ent->data->value.str.len += len;
+							ent->data->value.str.len + decoded_len + 1);
+					strncpy(ent->data->value.str.val+ent->data->value.str.len, decoded_value, decoded_len);
+					ent->data->value.str.len += decoded_len;
 					ent->data->value.str.val[ent->data->value.str.len] = '\0';
 				}
+
+				efree(decoded_value);
 				break;
 
 			case ST_NUMBER:
@@ -722,7 +733,7 @@ void php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
 	st_entry *ent;
 	
 	wddx_stack_init(&stack);
-	parser = XML_ParserCreate(NULL);
+	parser = XML_ParserCreate("ISO-8859-1");
 
 	XML_SetUserData(parser, &stack);
 	XML_SetElementHandler(parser, php_wddx_push_element, php_wddx_pop_element);
