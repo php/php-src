@@ -279,9 +279,6 @@ AC_STRUCT_ST_RDEV
 dnl Checks for types
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
-dnl This is required for QNX and may be some BSD derived systems
-AC_CHECK_TYPE( uint, unsigned int )
-AC_CHECK_TYPE( ulong, unsigned long )
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
