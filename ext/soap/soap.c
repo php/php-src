@@ -170,12 +170,12 @@ ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, const char *, const uint, const char*, va_list);
 
-#define PHP_SOAP_SERVER_CLASSNAME "soapserver"
-#define PHP_SOAP_CLIENT_CLASSNAME "soapclient"
-#define PHP_SOAP_VAR_CLASSNAME    "soapvar"
-#define PHP_SOAP_FAULT_CLASSNAME  "soapfault"
-#define PHP_SOAP_PARAM_CLASSNAME  "soapparam"
-#define PHP_SOAP_HEADER_CLASSNAME "soapheader"
+#define PHP_SOAP_SERVER_CLASSNAME "SoapServer"
+#define PHP_SOAP_CLIENT_CLASSNAME "SoapClient"
+#define PHP_SOAP_VAR_CLASSNAME    "SoapVar"
+#define PHP_SOAP_FAULT_CLASSNAME  "SoapFault"
+#define PHP_SOAP_PARAM_CLASSNAME  "SoapParam"
+#define PHP_SOAP_HEADER_CLASSNAME "SoapHeader"
 
 PHP_RINIT_FUNCTION(soap);
 PHP_MINIT_FUNCTION(soap);
@@ -214,39 +214,39 @@ PHP_FUNCTION(is_soap_fault);
 
 
 /* Server Functions */
-PHP_METHOD(soapserver,soapserver);
-PHP_METHOD(soapserver,setclass);
-PHP_METHOD(soapserver,addfunction);
-PHP_METHOD(soapserver,getfunctions);
-PHP_METHOD(soapserver,handle);
-PHP_METHOD(soapserver,setpersistence);
-PHP_METHOD(soapserver,fault);
+PHP_METHOD(SoapServer, SoapServer);
+PHP_METHOD(SoapServer, setClass);
+PHP_METHOD(SoapServer, addFunction);
+PHP_METHOD(SoapServer, getFunctions);
+PHP_METHOD(SoapServer, handle);
+PHP_METHOD(SoapServer, setPersistence);
+PHP_METHOD(SoapServer, fault);
 #ifdef HAVE_PHP_DOMXML
-PHP_METHOD(soapserver,map);
+PHP_METHOD(PHP_SOAP_SERVER_CLASS, map);
 #endif
 
 /* Client Functions */
-PHP_METHOD(soapclient, soapclient);
-PHP_METHOD(soapclient, __call);
-PHP_METHOD(soapclient, __getlastrequest);
-PHP_METHOD(soapclient, __getlastresponse);
-PHP_METHOD(soapclient, __getfunctions);
-PHP_METHOD(soapclient, __gettypes);
+PHP_METHOD(SoapClient, SoapClient);
+PHP_METHOD(SoapClient, __call);
+PHP_METHOD(SoapClient, __getLastRequest);
+PHP_METHOD(SoapClient, __getLastResponse);
+PHP_METHOD(SoapClient, __getFunctions);
+PHP_METHOD(SoapClient, __getTypes);
 
 /* SoapVar Functions */
-PHP_METHOD(soapvar, soapvar);
+PHP_METHOD(SoapVar, SoapVar);
 
 /* SoapFault Functions */
-PHP_METHOD(soapfault, soapfault);
+PHP_METHOD(SoapFault, SoapFault);
 #ifdef ZEND_ENGINE_2
-PHP_METHOD(soapfault, __toString);
+PHP_METHOD(SoapFault, __toString);
 #endif
 
 /* SoapParam Functions */
-PHP_METHOD(soapparam, soapparam);
+PHP_METHOD(SoapParam, SoapParam);
 
 /* SoapHeader Functions */
-PHP_METHOD(soapheader, soapheader);
+PHP_METHOD(SoapHeader, SoapHeader);
 
 static zend_function_entry soap_functions[] = {
 #ifdef HAVE_PHP_DOMXML
@@ -259,23 +259,23 @@ static zend_function_entry soap_functions[] = {
 };
 
 static zend_function_entry soap_fault_functions[] = {
-	PHP_ME(soapfault, soapfault, NULL, 0)
+	PHP_ME(SoapFault, SoapFault, NULL, 0)
 #ifdef ZEND_ENGINE_2
-	PHP_ME(soapfault, __toString, NULL, 0)
+	PHP_ME(SoapFault, __toString, NULL, 0)
 #endif
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_server_functions[] = {
-	PHP_ME(soapserver, soapserver, NULL, 0)
-	PHP_ME(soapserver, setpersistence, NULL, 0)
-	PHP_ME(soapserver, setclass, NULL, 0)
-	PHP_ME(soapserver, addfunction, NULL, 0)
-	PHP_ME(soapserver, getfunctions, NULL, 0)
-	PHP_ME(soapserver, handle, NULL, 0)
-	PHP_ME(soapserver, fault, NULL, 0)
+	PHP_ME(SoapServer, SoapServer, NULL, 0)
+	PHP_ME(SoapServer, setPersistence, NULL, 0)
+	PHP_ME(SoapServer, setClass, NULL, 0)
+	PHP_ME(SoapServer, addFunction, NULL, 0)
+	PHP_ME(SoapServer, getFunctions, NULL, 0)
+	PHP_ME(SoapServer, handle, NULL, 0)
+	PHP_ME(SoapServer, fault, NULL, 0)
 #ifdef HAVE_PHP_DOMXML
-	PHP_ME(soapserver, map, NULL, 0)
+	PHP_ME(SoapServer, map, NULL, 0)
 #endif
 	{NULL, NULL, NULL}
 };
@@ -293,27 +293,27 @@ unsigned char __call_args[] = { 5, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NON
 #endif
 
 static zend_function_entry soap_client_functions[] = {
-	PHP_ME(soapclient, soapclient, NULL, 0)
-	PHP_ME(soapclient, __call, __call_args, 0)
-	PHP_ME(soapclient, __getlastrequest, NULL, 0)
-	PHP_ME(soapclient, __getlastresponse, NULL, 0)
-	PHP_ME(soapclient, __getfunctions, NULL, 0)
-	PHP_ME(soapclient, __gettypes, NULL, 0)
+	PHP_ME(SoapClient, SoapClient, NULL, 0)
+	PHP_ME(SoapClient, __call, __call_args, 0)
+	PHP_ME(SoapClient, __getLastRequest, NULL, 0)
+	PHP_ME(SoapClient, __getLastResponse, NULL, 0)
+	PHP_ME(SoapClient, __getFunctions, NULL, 0)
+	PHP_ME(SoapClient, __getTypes, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_var_functions[] = {
-	PHP_ME(soapvar, soapvar, NULL, 0)
+	PHP_ME(SoapVar, SoapVar, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_param_functions[] = {
-	PHP_ME(soapparam, soapparam, NULL, 0)
+	PHP_ME(SoapParam, SoapParam, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
 static zend_function_entry soap_header_functions[] = {
-	PHP_ME(soapheader, soapheader, NULL, 0)
+	PHP_ME(SoapHeader, SoapHeader, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -443,7 +443,7 @@ PHP_MINIT_FUNCTION(soap)
 		zend_internal_function fe;
 
 		fe.type = ZEND_INTERNAL_FUNCTION;
-		fe.handler = zif_soapclient___call;
+		fe.handler = ZEND_FN(SoapClient___call);
 		fe.function_name = NULL;
 		fe.scope = NULL;
 		fe.fn_flags = 0;
@@ -609,7 +609,7 @@ PHP_FUNCTION(soap_encode_to_zval)
 	}
 
 	if (zend_hash_index_find(Z_OBJPROP_P(dom), 1, (void **)&addr) == FAILURE) {
-		php_error(E_ERROR, "Cannot find domaddress to parameter passed to soap_encode_to_zval");
+		OAP_HEADER_CLASS
 	}
 
 	node = (xmlNodePtr)Z_LVAL_PP(addr);
@@ -619,7 +619,7 @@ PHP_FUNCTION(soap_encode_to_zval)
 #endif
 
 /* SoapParam functions */
-PHP_METHOD(soapparam,soapparam)
+PHP_METHOD(SoapParam, SoapParam)
 {
 	zval *data;
 	char *name;
@@ -637,7 +637,7 @@ PHP_METHOD(soapparam,soapparam)
 }
 
 /* SoapHeader functions */
-PHP_METHOD(soapheader,soapheader)
+PHP_METHOD(SoapHeader, SoapHeader)
 {
 	zval *data = NULL, *actor = NULL;
 	char *name, *ns;
@@ -668,7 +668,7 @@ PHP_METHOD(soapheader,soapheader)
 }
 
 /* SoapFault functions */
-PHP_METHOD(soapfault,soapfault)
+PHP_METHOD(SoapFault, SoapFault)
 {
 	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL;
 	int fault_string_len, fault_code_len, fault_actor_len, name_len;
@@ -689,7 +689,7 @@ PHP_METHOD(soapfault,soapfault)
 }
 
 #ifdef ZEND_ENGINE_2
-PHP_METHOD(soapfault,__toString)
+PHP_METHOD(SoapFault, __toString)
 {
 	zval *faultcode, *faultstring, *file, *line, *trace;
 	char *str;
@@ -727,7 +727,7 @@ PHP_METHOD(soapfault,__toString)
 #endif
 
 /* SoapVar functions */
-PHP_METHOD(soapvar,soapvar)
+PHP_METHOD(SoapVar, SoapVar)
 {
 	zval *data, *type;
 	char *stype = NULL, *ns = NULL, *name = NULL, *namens = NULL;
@@ -769,7 +769,7 @@ PHP_METHOD(soapvar,soapvar)
 }
 
 /* SoapServer functions */
-PHP_METHOD(soapserver,soapserver)
+PHP_METHOD(SoapServer, SoapServer)
 {
 	soapServicePtr service;
 	zval *wsdl, *options = NULL;
@@ -851,7 +851,7 @@ PHP_METHOD(soapserver,soapserver)
 	(zval && Z_TYPE_P(zval) != IS_NULL)
 
 #ifdef HAVE_PHP_DOMXML
-PHP_FUNCTION(SoapServer,map)
+PHP_FUNCTION(PHP_SOAP_SERVER_CLASS, map)
 {
 	char *type, *class_name;
 	zval *to_xml_before = NULL, *to_xml = NULL, *to_xml_after = NULL,
@@ -964,7 +964,7 @@ PHP_FUNCTION(SoapServer,map)
 }
 #endif
 
-PHP_METHOD(soapserver,setpersistence)
+PHP_METHOD(SoapServer, setPersistence)
 {
 	soapServicePtr service;
 	long value;
@@ -989,7 +989,7 @@ PHP_METHOD(soapserver,setpersistence)
 	SOAP_SERVER_END_CODE();
 }
 
-PHP_METHOD(soapserver,setclass)
+PHP_METHOD(SoapServer, setClass)
 {
 	soapServicePtr service;
 	zend_class_entry *ce;
@@ -1043,7 +1043,7 @@ PHP_METHOD(soapserver,setclass)
 	SOAP_SERVER_END_CODE();
 }
 
-PHP_METHOD(soapserver,getfunctions)
+PHP_METHOD(SoapServer, getFunctions)
 {
 	soapServicePtr  service;
 	HashTable      *ft = NULL;
@@ -1081,7 +1081,7 @@ PHP_METHOD(soapserver,getfunctions)
 	SOAP_SERVER_END_CODE();
 }
 
-PHP_METHOD(soapserver, addfunction)
+PHP_METHOD(SoapServer, addFunction)
 {
 	soapServicePtr service;
 	zval *function_name, *function_copy;
@@ -1171,7 +1171,7 @@ PHP_METHOD(soapserver, addfunction)
 	SOAP_SERVER_END_CODE();
 }
 
-PHP_METHOD(soapserver, handle)
+PHP_METHOD(SoapServer, handle)
 {
 	int soap_version, old_soap_version;
 	sdlPtr old_sdl = NULL;
@@ -1566,7 +1566,7 @@ PHP_METHOD(soapserver, handle)
 	SOAP_SERVER_END_CODE();
 }
 
-PHP_METHOD(soapserver, fault)
+PHP_METHOD(SoapServer, fault)
 {
 	char *code, *string, *actor=NULL, *name=NULL;
 	int code_len, string_len, actor_len, name_len;
@@ -1723,7 +1723,7 @@ PHP_FUNCTION(is_soap_fault)
 /*
 	SoapClient($wsdl, $options=array())
 */
-PHP_METHOD(soapclient, soapclient)
+PHP_METHOD(SoapClient, SoapClient)
 {
 
 	zval *wsdl;
@@ -2005,7 +2005,7 @@ static void do_soap_call(zval* this_ptr,
 	SOAP_CLIENT_END_CODE();
 }
 
-PHP_METHOD(soapclient, __call)
+PHP_METHOD(SoapClient, __call)
 {
 	char *function, *soap_action = NULL, *uri = NULL;
 	int function_len, i = 0;
@@ -2088,7 +2088,7 @@ PHP_METHOD(soapclient, __call)
 	}
 }
 
-PHP_METHOD(soapclient, __getfunctions)
+PHP_METHOD(SoapClient, __getFunctions)
 {
 	sdlPtr sdl;
 	HashPosition pos;
@@ -2110,7 +2110,7 @@ PHP_METHOD(soapclient, __getfunctions)
 	}
 }
 
-PHP_METHOD(soapclient, __gettypes)
+PHP_METHOD(SoapClient, __getTypes)
 {
 	sdlPtr sdl;
 	HashPosition pos;
@@ -2134,7 +2134,7 @@ PHP_METHOD(soapclient, __gettypes)
 	}
 }
 
-PHP_METHOD(soapclient, __getlastrequest)
+PHP_METHOD(SoapClient, __getLastRequest)
 {
 	zval **tmp;
 
@@ -2144,7 +2144,7 @@ PHP_METHOD(soapclient, __getlastrequest)
 	RETURN_NULL();
 }
 
-PHP_METHOD(soapclient, __getlastresponse)
+PHP_METHOD(SoapClient, __getLastResponse)
 {
 	zval **tmp;
 
