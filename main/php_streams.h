@@ -455,7 +455,8 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 /* try really, really hard to make sure the cast happens (socketpair) */
 #define PHP_STREAM_CAST_TRY_HARD	0x80000000
 #define PHP_STREAM_CAST_RELEASE		0x40000000	/* stream becomes invalid on success */
-#define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE)
+#define PHP_STREAM_CAST_INTERNAL	0x20000000	/* stream cast for internal use */
+#define PHP_STREAM_CAST_MASK		(PHP_STREAM_CAST_TRY_HARD | PHP_STREAM_CAST_RELEASE | PHP_STREAM_CAST_INTERNAL)
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC);
 /* use this to check if a stream can be cast into another form */
 #define php_stream_can_cast(stream, as)	_php_stream_cast((stream), (as), NULL, 0 TSRMLS_CC)
