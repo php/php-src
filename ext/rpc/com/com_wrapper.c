@@ -413,7 +413,7 @@ static PHP_INI_MH(OnTypelibFileChange)
 		ITypeLib *pTL;
 		char *typelib_name;
 		char *modifier, *ptr;
-		int mode = CONST_PERSISTENT|CONST_CS;
+		int mode = CONST_CS;
 
 		if(typelib_name_buffer[0]==';')
 		{
@@ -490,7 +490,7 @@ PHP_FUNCTION(com_load)
 	comval *obj;
 	char *error_message;
 	char *clsid_str;
-	int mode = CONST_PERSISTENT;
+	int mode = 0; /* CONST_PERSISTENT; */
 	ITypeLib *pTL;
 
 
@@ -747,7 +747,6 @@ int do_COM_invoke(comval *obj, pval *function_name, VARIANT *var_result, pval **
 				return FAILURE;
 			}
 		}
-
 		/* return a single element if next() was called without count */
 		if((arg_count == 0) && (count == 1))
 		{
@@ -1216,7 +1215,7 @@ PHP_FUNCTION(com_load_typelib)
 	{
 		case 1:
 			getParameters(ht, 1, &arg_typelib);
-			mode = CONST_PERSISTENT|CONST_CS;
+			mode = CONST_CS; /* CONST_PERSISTENT|CONST_CS; */
 			break;
 		case 2:
 			getParameters(ht, 2, &arg_typelib, &arg_cis);
@@ -1758,10 +1757,12 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					j++;
 					continue;
 				}
-				ids = php_OLECHAR_to_char(bstr_ids, NULL, 1, codepage TSRMLS_CC);
+				ids = php_OLECHAR_to_char(bstr_ids, NULL, TRUE, codepage TSRMLS_CC);
 				SysFreeString(bstr_ids);
 				c.name_len = strlen(ids)+1;
 				c.name = ids;
+				
+				/* Before registering the contsnt, let's see if we can find it */
 				if (zend_get_constant(c.name, c.name_len-1, &exists TSRMLS_CC))
 				{
 					/* Oops, it already exists. No problem if it is defined as the same value */
@@ -1775,13 +1776,11 @@ static int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 					continue;
 				}
 
-				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, FALSE, codepage TSRMLS_CC);
+				php_variant_to_pval(pVarDesc->lpvarValue, &c.value, mode & CONST_PERSISTENT, codepage TSRMLS_CC);
 				c.flags = mode;
 
-				/* Before registering the contsnt, let's see if we can find it */
-				{
-					zend_register_constant(&c TSRMLS_CC);
-				}
+				zend_register_constant(&c TSRMLS_CC);
+
 				j++;
 			}
 			TypeInfo->lpVtbl->Release(TypeInfo);
