@@ -2843,9 +2843,7 @@ PHP_FUNCTION(domxml_dump_mem)
 /* }}} */
 
 /* {{{ proto int domxml_dump_mem_file(object doc_handle [, int filename [, int compressmode]])
-   Dumps document into file and uses compression if specified
-   Returns false on error, otherwise the length of the xml-document (uncompressed)
-   */
+   Dumps document into file and uses compression if specified. Returns false on error, otherwise the length of the xml-document (uncompressed) */
 PHP_FUNCTION(domxml_dump_mem_file)
 {
 	zval *id;
