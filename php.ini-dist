@@ -14,15 +14,27 @@
 ; The syntax of the file is extremely simple.  Whitespace and Lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
 ; Section headers (e.g. [Foo]) are also silently ignored, even though
-; they might mean something in the future (they probably won't).
+; they might mean something in the future.
 ;
-; Options are specified using the syntax key = value or key = "complex value".
-; Key names are *case sensitive*.  foo = bar is different from FOO = bar.
-; 'value' can be any number, word or keyword (keywords are On, Off, True,
-; False, Yes and No, and are case insensitive).
-; 'complex value' can be just about anything, expcept for " and a newline
+; Directives are specified using the following syntax:
+; directive = value
+; Directive names are *case sensitive* - foo=bar is different from FOO=bar.
+;
+; The value can be a string, a number, a PHP constant (e.g. E_ALL or M_PI), one
+; of the INI constants (On, Off, True, False, Yes and No) or an expression
+; (e.g. E_ALL & ~E_NOTICE), or a quoted string ("foo").
+;
+; Expressions in the INI file are limited to bitwise operators and parentheses:
+; |				bitwise OR
+; &				bitwise AND
+; ~				bitwise NOT
+;
 ; Boolean flags can be turned on using the values 1, On, True or Yes.
 ; They can be turned off using the values 0, Off, False or No.
+;
+; If you use constants in your value, and these constants belong to a dynamically
+; loaded extension (either a PHP extension or a Zend extension), you may only
+; use these constants *after* the line that loads the extension.
 ;
 ; All the values in the php.ini-dist file correspond to the builtin
 ; defaults (that is, if no php.ini is used, or if you delete these lines,
@@ -87,12 +99,23 @@ memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; error_reporting is a bit-field.  Add each number up to get desired error reporting level
-;  1 = Normal errors
-;  2 = Normal warnings
-;  4 = Parser errors
-;  8 = Notices - warnings you can ignore, but sometimes imply a bug (e.g., using an uninitialized variable)
-error_reporting	=	7
+; error_reporting is a bit-field.  Or each number up to get desired error reporting level
+; E_ALL				- All errors and warnings
+; E_ERROR			- fatal run-time errors
+; E_WARNING			- run-time warnings (non fatal errors)
+; E_PARSE			- compile-time parse errors
+; E_NOTICE			- run-time notices (these are warnings which often result from a bug in
+;					  your code, but it's possible that it was intentional (e.g., using an
+;					  uninitialized variable and relying on the fact it's automatically
+;					  initialized to an empty string)
+; E_CORE_ERROR		- fatal errors that occur during PHP's initial startup
+; E_CORE_WARNING	- warnings (non fatal errors) that occur during PHP's initial startup
+; E_COMPILE_ERROR	- fatal compile-time errors
+; E_COMPILE_WARNING	- compile-time warnings (non fatal errors)
+; Examples:
+; error_reporting = E_ALL & ~E_NOTICE						; show all errors, except for notices
+; error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR	; show only errors
+error_reporting	=	E_ALL & ~E_NOTICE		; Show all errors except for notices
 display_errors	=	On	; Print out errors (as a part of the HTML script)
 log_errors		=	Off	; Log errors into a log file (server-specific log, stderr, or error_log (below))
 track_errors	=	Off	; Store the last error/warning message in $php_errormsg (boolean)

@@ -21,7 +21,7 @@
 
 /* $Id$ */
 
-#define DEBUG_CFG_PARSER 1
+#define DEBUG_CFG_PARSER 0
 #include "php.h"
 #include "php_globals.h"
 #include "php_ini.h"
@@ -30,8 +30,6 @@
 #include "ext/standard/php_browscap.h"
 #include "zend_extensions.h"
 
-#undef YYPARSE_PARAM
-#undef YYLEX_PARAM
 
 #if WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -224,7 +222,7 @@ int php_init_config(void)
 			tmp.value.str.len = strlen(opened_path);
 			tmp.type = IS_STRING;
 			zend_hash_update(&configuration_hash,"cfg_file_path",sizeof("cfg_file_path"),(void *) &tmp,sizeof(pval),NULL);
-#if 0
+#if DEBUG_CFG_PARSER
 			php_printf("INI file opened at '%s'\n",opened_path);
 #endif
 		}
@@ -327,6 +325,63 @@ static void convert_browscap_pattern(pval *pattern)
 	return;
 }
 
+
+void do_cfg_op(char type, zval *result, zval *op1, zval *op2)
+{
+	int i_result;
+	int i_op1, i_op2;
+	char str_result[MAX_LENGTH_OF_LONG];
+
+	i_op1 = atoi(op1->value.str.val);
+	free(op1->value.str.val);
+	if (op2) {
+		i_op2 = atoi(op2->value.str.val);
+		free(op2->value.str.val);
+	} else {
+		i_op2 = 0;
+	}
+
+	switch (type) {
+		case '|':
+			i_result = i_op1 | i_op2;
+			break;
+		case '&':
+			i_result = i_op1 & i_op2;
+			break;
+		case '~':
+			i_result = ~i_op1;
+			break;
+		default:
+			result = 0;
+			break;
+	}
+
+	result->value.str.len = zend_sprintf(str_result, "%ld", i_result);
+	result->value.str.val = (char *) malloc(result->value.str.len+1);
+	memcpy(result->value.str.val, str_result, result->value.str.len);
+	result->value.str.val[result->value.str.len] = 0;
+	result->type = IS_STRING;
+}
+
+
+void do_cfg_get_constant(zval *result, zval *name)
+{
+	zval z_constant;
+
+	if (zend_get_constant(name->value.str.val, name->value.str.len, &z_constant)) {
+		/* z_constant is emalloc()'d */
+		convert_to_string(&z_constant);
+		result->value.str.val = zend_strndup(z_constant.value.str.val, z_constant.value.str.len);
+		result->value.str.len = z_constant.value.str.len;
+		result->type = z_constant.type;
+		zval_dtor(&z_constant);
+		free(name->value.str.val);	
+	} else {
+		*result = *name;
+	}
+}
+
+
 %}
 
 %pure_parser
@@ -340,6 +395,8 @@ static void convert_browscap_pattern(pval *pattern)
 %token T_ZEND_EXTENSION_TS
 %token T_ZEND_EXTENSION_DEBUG
 %token T_ZEND_EXTENSION_DEBUG_TS
+%left '|' '&'
+%right '~'
 
 %%
 
@@ -349,8 +406,8 @@ statement_list:
 ;
 
 statement:
-		string '=' string_or_value {
-#if 0
+		TC_STRING '=' string_or_value {
+#if DEBUG_CFG_PARSER
 			printf("'%s' = '%s'\n",$1.value.str.val,$3.value.str.val);
 #endif
 			$3.type = IS_STRING;
@@ -365,34 +422,34 @@ statement:
 			}
 			free($1.value.str.val);
 		}
-	|	string { free($1.value.str.val); }
-	|	EXTENSION '=' string {
+	|	TC_STRING { free($1.value.str.val); }
+	|	EXTENSION '=' string_foo {
 			pval dummy;
-#if 0
+#if DEBUG_CFG_PARSER
 			printf("Loading '%s'\n",$3.value.str.val);
 #endif
 			
 			php_dl(&$3,MODULE_PERSISTENT,&dummy);
 		}
-	|	T_ZEND_EXTENSION '=' string {
+	|	T_ZEND_EXTENSION '=' string_foo {
 #if !defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_TS '=' string { 
+	|	T_ZEND_EXTENSION_TS '=' string_foo { 
 #if defined(ZTS) && !ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_DEBUG '=' string { 
+	|	T_ZEND_EXTENSION_DEBUG '=' string_foo { 
 #if !defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
 			free($3.value.str.val);
 		}
-	|	T_ZEND_EXTENSION_DEBUG_TS '=' string { 
+	|	T_ZEND_EXTENSION_DEBUG_TS '=' string_foo { 
 #if defined(ZTS) && ZEND_DEBUG
 			zend_load_extension($3.value.str.val);
 #endif
@@ -419,19 +476,30 @@ statement:
 ;
 
 
-string:
+string_foo:
 		TC_STRING { $$ = $1; }
 	|	TC_ENCAPSULATED_STRING { $$ = $1; }
 ;
 
 string_or_value:
-		string { $$ = $1; }
+		expr { $$ = $1; }
+	|	TC_ENCAPSULATED_STRING { $$ = $1; }
 	|	CFG_TRUE { $$ = $1; }
 	|	CFG_FALSE { $$ = $1; }
 	|	'\n' { $$.value.str.val = strdup(""); $$.value.str.len=0; $$.type = IS_STRING; }
 ;
 
+expr:
+		constant_string			{ $$ = $1; }
+	|	expr '|' expr			{ do_cfg_op('|', &$$, &$1, &$3); }
+	|	expr '&' expr			{ do_cfg_op('&', &$$, &$1, &$3); }
+	|	'~' expr				{ do_cfg_op('~', &$$, &$2, NULL); }
+	|	'(' expr ')'			{ $$ = $2; }
+;
 
+constant_string:
+		TC_STRING { do_cfg_get_constant(&$$, &$1); }
+;
 /*
  * Local variables:
  * tab-width: 4
