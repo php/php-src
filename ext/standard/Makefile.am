@@ -11,7 +11,7 @@ libphpext_standard_a_SOURCES=\
 	parsedate.y lcg.c url_scanner.c metaphone.c
 
 $(srcdir)/url_scanner.c: $(srcdir)/url_scanner.re
-	re2c -b $< > $@
+	-re2c -b $< > $@.new && mv $@.new $@
 
 #number.o: number.c
 #	$(CC) $(CFLAGS) -w@WARNING_LEVEL@ -c $< -o $@
