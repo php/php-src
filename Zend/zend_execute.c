@@ -1273,18 +1273,14 @@ binary_assign_op_addr: {
 				NEXT_OPCODE();
 			case ZEND_ASSIGN: {
 					zval *value;
-					SUSPEND_GARBAGE();
 					value = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
-					RESUME_GARBAGE();
 
 					zend_assign_to_variable(&opline->result, &opline->op1, &opline->op2, value, (EG(free_op2)?IS_TMP_VAR:opline->op2.op_type), Ts ELS_CC);
 					/* zend_assign_to_variable() always takes care of op2, never free it! */
 				}
 				NEXT_OPCODE();
 			case ZEND_ASSIGN_REF:
-				SUSPEND_GARBAGE();
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
-				RESUME_GARBAGE();
 				NEXT_OPCODE();
 			case ZEND_JMP:
 #if DEBUG_ZEND>=2
@@ -1616,7 +1612,6 @@ do_fcall_common:
 					zval *retval_ptr;
 					zval **retval_ptr_ptr;
 					
-					SUSPEND_GARBAGE();
 					if ((EG(active_op_array)->return_reference == ZEND_RETURN_REF) &&
 						(opline->op1.op_type != IS_CONST) && 
 						(opline->op1.op_type != IS_TMP_VAR)) {
@@ -1650,7 +1645,6 @@ do_fcall_common:
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
 						}
 					}
-					RESUME_GARBAGE();
 #if SUPPORT_INTERACTIVE
 					op_array->last_executed_op_number = opline-op_array->opcodes;
 #endif
@@ -1679,9 +1673,7 @@ do_fcall_common:
 				}
 				{
 					zval *varptr;
-					SUSPEND_GARBAGE();
 					varptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
-					RESUME_GARBAGE();
 
 					if (varptr == &EG(uninitialized_zval)) {
 						ALLOC_ZVAL(varptr);
@@ -1705,9 +1697,7 @@ send_by_ref:
 			case ZEND_SEND_REF: {
 					zval **varptr_ptr;
 					zval *varptr;
-					SUSPEND_GARBAGE();
 					varptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W);
-					RESUME_GARBAGE();
 
 					varptr = *varptr_ptr;
 
@@ -1898,14 +1888,12 @@ send_by_ref:
 					zval *expr_ptr, **expr_ptr_ptr = NULL;
 					zval *offset=get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
 
-					SUSPEND_GARBAGE();
 					if (opline->extended_value) {
 						expr_ptr_ptr=get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 						expr_ptr = *expr_ptr_ptr;
 					} else {
 						expr_ptr=get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 					}
-					RESUME_GARBAGE();
 					
 					if (opline->opcode==ZEND_INIT_ARRAY) {
 						array_init(array_ptr);

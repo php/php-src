@@ -146,8 +146,9 @@ void shutdown_executor(ELS_D)
 	signal(SIGSEGV, original_sigsegv_handler);
 #endif
 	while (EG(garbage_ptr)--) {
-		zval_dtor(EG(garbage)[EG(garbage_ptr)]);
-		FREE_ZVAL(EG(garbage)[EG(garbage_ptr)]);
+		if (EG(garbage)[EG(garbage_ptr)]->refcount==1) {
+			zval_ptr_dtor(&EG(garbage)[EG(garbage_ptr)]);
+		}
 	}
 
 	zend_hash_destroy(&EG(imported_files));

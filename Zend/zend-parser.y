@@ -616,14 +616,14 @@ ref_list:
 ;
 
 object_property:
-		object_dim_list { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
+		object_dim_list { $$ = $1; }
 	|	cvar_without_objects { do_end_variable_parse(BP_VAR_R, 0 CLS_CC); } { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
 ;
 
 object_dim_list:
 		object_dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
 	|	object_dim_list '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 CLS_CC); }
-	|	variable_name
+	|	variable_name { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
 ;
 
 variable_name:
