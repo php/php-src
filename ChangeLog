@@ -1,3 +1,71 @@
+2004-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      MFH: Fixed bug #31024 (Crash in fgetcsv() with negative length).
+
+2004-12-08  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/mssql/config.m4:
+      MFH: Fix logic for file checking. Bug #31019
+
+    * (PHP_5_0)
+      ext/mssql/config.m4:
+      MFB: Fix logic for file checking. Bug #31019
+
+    * ext/mssql/config.m4:
+      Fix logic for file checking. Bug #31019
+
+2004-12-08  Joe Orton  <jorton@redhat.com>
+
+    * acinclude.m4:
+      Fix VPATH build again.
+
+2004-12-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/mcve/config.m4
+      ext/mcve/config.m4:
+      MFH: Fix build. This was not supposed to halt configure if test fails.
+
+    * ext/mcve/config.m4:
+      Fix build. This was not supposed to halt configure if test fails.
+
+2004-12-08  Brad House  <brad@mainstreetsoftworks.com>
+
+    * (PHP_4_3)
+      ext/mcve/config.m4
+      ext/mcve/mcve.c:
+      backport from 5.0/head. Newer versions of libmonetra broke compatability
+      with one function. Make workaround that detects version, and works with
+      both.
+
+    * (PHP_5_0)
+      ext/mcve/config.m4
+      ext/mcve/mcve.c:
+      backport from head. compatability fix with libmonetra 4.2 and higher (still
+      works with older releases too).
+
+    * ext/mcve/config.m4
+      ext/mcve/mcve.c:
+      Newer versions of libmonetra broke compatability with one function. Make
+      workaround that detects version, and works with both.
+
+2004-12-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Back to dev.
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      4.3.10RC2
+
 2004-12-07  Dmitry Stogov  <dmitry@zend.com>
 
     * ext/session/session.c
