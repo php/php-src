@@ -1,6 +1,6 @@
-diff -ur thttpd-2.21/Makefile.in thttpd-2.21-p/Makefile.in
---- thttpd-2.21/Makefile.in	Thu Mar 29 20:36:21 2001
-+++ thttpd-2.21-p/Makefile.in	Sun Apr 22 15:59:42 2001
+diff -ur thttpd-2.21b-orig/Makefile.in thttpd-2.21b/Makefile.in
+--- thttpd-2.21b-orig/Makefile.in	Thu Mar 29 20:36:21 2001
++++ thttpd-2.21b/Makefile.in	Mon Aug 13 23:50:27 2001
 @@ -46,13 +46,15 @@
  
  # You shouldn't need to edit anything below here.
@@ -38,9 +38,21 @@ diff -ur thttpd-2.21/Makefile.in thttpd-2.21-p/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
---- thttpd-2.21/libhttpd.c	Sat Apr 21 02:11:32 2001
-+++ thttpd-2.21-p/libhttpd.c	Sun Apr 22 16:01:41 2001
+diff -ur thttpd-2.21b-orig/config.h thttpd-2.21b/config.h
+--- thttpd-2.21b-orig/config.h	Mon Apr  9 23:57:36 2001
++++ thttpd-2.21b/config.h	Mon Aug 13 23:51:00 2001
+@@ -316,7 +316,7 @@
+ /* CONFIGURE: A list of index filenames to check.  The files are searched
+ ** for in this order.
+ */
+-#define INDEX_NAMES "index.html", "index.htm", "Default.htm", "index.cgi"
++#define INDEX_NAMES "index.php", "index.html", "index.htm", "Default.htm", "index.cgi"
+ 
+ /* CONFIGURE: If this is defined then thttpd will automatically generate
+ ** index pages for directories that don't have an explicit index file.
+diff -ur thttpd-2.21b-orig/libhttpd.c thttpd-2.21b/libhttpd.c
+--- thttpd-2.21b-orig/libhttpd.c	Tue Apr 24 00:42:40 2001
++++ thttpd-2.21b/libhttpd.c	Mon Aug 13 23:50:27 2001
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -50,7 +62,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
  #ifndef STDIN_FILENO
  #define STDIN_FILENO 0
  #endif
-@@ -243,6 +245,8 @@
+@@ -242,6 +244,8 @@
  	free( (void*) hs->cwd );
      if ( hs->cgi_pattern != (char*) 0 )
  	free( (void*) hs->cgi_pattern );
@@ -59,7 +71,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
      if ( hs->charset != (char*) 0 )
  	free( (void*) hs->charset );
      if ( hs->url_pattern != (char*) 0 )
-@@ -250,6 +254,7 @@
+@@ -249,6 +253,7 @@
      if ( hs->local_pattern != (char*) 0 )
  	free( (void*) hs->local_pattern );
      free( (void*) hs );
@@ -67,7 +79,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
      }
  
  
-@@ -313,6 +318,7 @@
+@@ -312,6 +317,7 @@
  	}
  
      hs->port = port;
@@ -75,7 +87,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
      if ( cgi_pattern == (char*) 0 )
  	hs->cgi_pattern = (char*) 0;
      else
-@@ -386,6 +392,8 @@
+@@ -385,6 +391,8 @@
  	return (httpd_server*) 0;
  	}
  
@@ -84,7 +96,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
  	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -2336,7 +2344,10 @@
+@@ -2353,7 +2361,10 @@
      {
      make_log_entry( hc, nowP );
  
@@ -96,7 +108,7 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
  	{
  	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3543,6 +3554,11 @@
+@@ -3560,6 +3571,11 @@
  	 ( hc->sb.st_mode & S_IXOTH ) &&
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
@@ -108,9 +120,10 @@ diff -ur thttpd-2.21/libhttpd.c thttpd-2.21-p/libhttpd.c
  
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
-diff -ur thttpd-2.21/libhttpd.h thttpd-2.21-p/libhttpd.h
---- thttpd-2.21/libhttpd.h	Fri Apr 13 07:37:17 2001
-+++ thttpd-2.21-p/libhttpd.h	Sun Apr 22 15:59:42 2001
+Only in thttpd-2.21b: libhttpd.c~
+diff -ur thttpd-2.21b-orig/libhttpd.h thttpd-2.21b/libhttpd.h
+--- thttpd-2.21b-orig/libhttpd.h	Tue Apr 24 00:36:50 2001
++++ thttpd-2.21b/libhttpd.h	Mon Aug 13 23:50:27 2001
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -119,10 +132,21 @@ diff -ur thttpd-2.21/libhttpd.h thttpd-2.21-p/libhttpd.h
      char* charset;
      char* cwd;
      int listen4_fd, listen6_fd;
-diff -ur thttpd-2.21/thttpd.c thttpd-2.21-p/thttpd.c
---- thttpd-2.21/thttpd.c	Sun Apr 15 18:09:20 2001
-+++ thttpd-2.21-p/thttpd.c	Sun Apr 22 15:59:42 2001
-@@ -1392,6 +1392,12 @@
+Only in thttpd-2.21b: thttpd-cgi-patch
+Only in thttpd-2.21b: thttpd-poll-patch
+diff -ur thttpd-2.21b-orig/thttpd.c thttpd-2.21b/thttpd.c
+--- thttpd-2.21b-orig/thttpd.c	Tue Apr 24 00:41:57 2001
++++ thttpd-2.21b/thttpd.c	Mon Aug 13 23:50:27 2001
+@@ -1333,7 +1333,7 @@
+ 	clear_connection( c, tvP );
+ 	return;
+ 	}
+-    hc->read_idx += sz;
++    if (sz > 0) hc->read_idx += sz;
+ 
+     /* Do we have a complete request yet? */
+     switch ( httpd_got_request( hc ) )
+@@ -1387,6 +1387,12 @@
  	clear_connection( c, tvP );
  	return;
  	}
@@ -135,3 +159,13 @@ diff -ur thttpd-2.21/thttpd.c thttpd-2.21-p/thttpd.c
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* There's nothing to send. */
+@@ -1500,7 +1506,7 @@
+ 	    {
+ 	    /* Yes; move the unwritten part to the front of the buffer. */
+ 	    int newlen = hc->responselen - sz;
+-	    (void) memcpy( hc->response, &(hc->response[sz]), newlen );
++	    (void) memmove( hc->response, &(hc->response[sz]), newlen );
+ 	    hc->responselen = newlen;
+ 	    sz = 0;
+ 	    }
+Only in thttpd-2.21b: thttpd.c~
