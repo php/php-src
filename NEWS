@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30613 (Prevent infinite recursion in url redirection). (Ilia)
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
 - Fixed bug #30388 (rename across filesystems loses ownership and
