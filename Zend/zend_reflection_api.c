@@ -881,6 +881,14 @@ static void _relection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *ce
 }
 /* }}} */
 
+/* {{{ Preventing __clone from being called */
+ZEND_METHOD(reflection, __clone)
+{
+	/* Should never be executable */
+	_DO_THROW("Cannot clone object using __clone()");
+}
+/* }}} */
+
 /* {{{ proto public static mixed Reflection::export(Reflector r [, bool return])
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection, export)
@@ -2888,6 +2896,10 @@ ZEND_METHOD(reflection_extension, getINIEntries)
 /* }}} */
 
 /* {{{ method tables */
+static zend_function_entry reflection_exception_functions[] = {
+	{NULL, NULL, NULL}
+};
+
 static zend_function_entry reflection_functions[] = {
 	ZEND_ME(reflection, getModifierNames, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(reflection, export, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -2901,6 +2913,7 @@ static zend_function_entry reflector_functions[] = {
 };
 
 static zend_function_entry reflection_function_functions[] = {
+	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_function, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_function, __construct, NULL, 0)
 	ZEND_ME(reflection_function, __toString, NULL, 0)
@@ -2937,6 +2950,7 @@ static zend_function_entry reflection_method_functions[] = {
 };
 
 static zend_function_entry reflection_class_functions[] = {
+	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_class, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_class, __construct, NULL, 0)
 	ZEND_ME(reflection_class, __toString, NULL, 0)
@@ -2977,6 +2991,7 @@ static zend_function_entry reflection_object_functions[] = {
 };
 
 static zend_function_entry reflection_property_functions[] = {
+	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_property, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_property, __construct, NULL, 0)
 	ZEND_ME(reflection_property, __toString, NULL, 0)
@@ -2994,6 +3009,7 @@ static zend_function_entry reflection_property_functions[] = {
 };
 
 static zend_function_entry reflection_parameter_functions[] = {
+	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_parameter, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_parameter, __construct, NULL, 0)
 	ZEND_ME(reflection_parameter, __toString, NULL, 0)
@@ -3005,6 +3021,7 @@ static zend_function_entry reflection_parameter_functions[] = {
 };
 
 static zend_function_entry reflection_extension_functions[] = {
+	ZEND_ME(reflection, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_extension, export, NULL, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
 	ZEND_ME(reflection_extension, __construct, NULL, 0)
 	ZEND_ME(reflection_extension, __toString, NULL, 0)
@@ -3023,7 +3040,7 @@ ZEND_API void zend_register_reflection_api(TSRMLS_D) {
 
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
-	INIT_CLASS_ENTRY(_reflection_entry, "reflection_exception", reflection_functions);
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_exception", reflection_exception_functions);
 	reflection_exception_ptr = zend_register_internal_class_ex(&_reflection_entry, zend_exception_get_default(), NULL TSRMLS_CC);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "reflection", reflection_functions);
