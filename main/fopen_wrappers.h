@@ -17,8 +17,8 @@
  */
 /* $Id$ */
 
-#ifndef _FOPEN_WRAPPERS_H
-#define _FOPEN_WRAPPERS_H
+#ifndef FOPEN_WRAPPERS_H
+#define FOPEN_WRAPPERS_H
 
 #include "php_globals.h"
 
