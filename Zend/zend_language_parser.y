@@ -105,6 +105,9 @@
 %token T_FUNCTION
 %token T_CONST
 %token T_RETURN
+%token T_TRY
+%token T_CATCH
+%token T_THROW
 %token T_USE
 %token T_GLOBAL
 %token T_STATIC
@@ -201,6 +204,9 @@ unticked_statement:
 	|	T_FOREACH '(' expr_without_variable T_AS { zend_do_foreach_begin(&$1, &$3, &$2, &$4, 0 TSRMLS_CC); } w_cvar foreach_optional_arg ')' { zend_do_foreach_cont(&$6, &$7, &$4 TSRMLS_CC); } foreach_statement { zend_do_foreach_end(&$1, &$2 TSRMLS_CC); }
 	|	T_DECLARE { zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(TSRMLS_C); }
 	|	';'		/* empty statement */
+	|	T_TRY { zend_do_try(&$1 CLS_CC); } '{' inner_statement_list '}'
+			T_CATCH '(' T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8 CLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 CLS_CC); }
+	|	T_THROW expr ';' { zend_do_throw(&$2 CLS_CC); }
 	|	T_DELETE cvar	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_OBJ TSRMLS_CC); }
 ;
 

@@ -81,6 +81,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(handle_op_arrays) = 1;
 	CG(in_compilation) = 0;
 	init_compiler_declarables(TSRMLS_C);
+	CG(throw_list) = NULL;
 }
 
 
@@ -758,6 +759,8 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		zend_stack_push(&CG(foreach_copy_stack), (void *) &switch_entry.cond, sizeof(znode));
 	}
+	function_token->throw_list = CG(throw_list);
+	CG(throw_list) = NULL;	
 }
 
 
@@ -771,6 +774,8 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	/* Pop the switch and foreach seperators */
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
+
+	CG(throw_list) = function_token->throw_list;
 }
 
 
@@ -919,7 +924,16 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	opline->result.op_type = IS_VAR;
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.constant.value.lval = is_method;
+
+	// Check how much this is really needed
+	//opline->op2.u.constant.value.lval = is_method;
+	if (CG(throw_list) != NULL) {
+		long op_number = get_next_op_number(CG(active_op_array))-1;
+		zend_llist_add_element(CG(throw_list), &op_number);
+	} else {
+		opline->op2.u.opline_num = -1;
+	}
+
 	zend_stack_del_top(&CG(function_call_stack));
 	opline->extended_value = argument_list->u.constant.value.lval;
 }
@@ -1088,6 +1102,74 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 }
 
+
+void zend_do_try(znode *try_token CLS_DC)
+{
+	try_token->throw_list = (void *) CG(throw_list);
+	CG(throw_list) = (zend_llist *) emalloc(sizeof(zend_llist));
+	zend_llist_init(CG(throw_list), sizeof(long), NULL, 0);
+	// Initialize try backpatch list used to backpatch throw, do_fcall
+}
+
+static void throw_list_applier(long *opline_num, long *catch_opline)
+{
+	zend_op *opline;
+	CLS_FETCH(); // Pass this by argument
+
+	opline = &CG(active_op_array)->opcodes[*opline_num];
+
+	// Backpatch the opline of the catch statement
+	switch (opline->opcode) {
+		case ZEND_DO_FCALL:
+		case ZEND_DO_FCALL_BY_NAME:
+		case ZEND_THROW:
+			opline->op2.u.opline_num = *catch_opline;
+			break;
+		default:
+			zend_error(E_ERROR, "Bad opcode in throw list");
+			break;
+	}
+}
+
+void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC)
+{
+	long catch_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline;
+	
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline->opcode = ZEND_CATCH;
+	opline->op1 = *catch_var;
+	SET_UNUSED(opline->op2);
+
+	zend_llist_apply_with_argument(CG(throw_list), throw_list_applier, &catch_op_number);
+	zend_llist_destroy(CG(throw_list));
+	efree(CG(throw_list));
+	CG(throw_list) = (void *) try_token->throw_list;
+
+	try_token->u.opline_num = catch_op_number;
+}
+
+void zend_do_end_catch(znode *try_token CLS_DC)
+{
+	CG(active_op_array)->opcodes[try_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+}
+
+void zend_do_throw(znode *expr CLS_DC)
+{
+	zend_op *opline;
+	long throw_op_number = get_next_op_number(CG(active_op_array));
+	
+	opline = get_next_op(CG(active_op_array) CLS_CC);
+	opline->opcode = ZEND_THROW;
+	opline->op1 = *expr;
+	SET_UNUSED(opline->op2);
+	
+	if (CG(throw_list) != NULL) {
+		zend_llist_add_element(CG(throw_list), &throw_op_number);
+	} else {
+		opline->op2.u.opline_num = -1;
+	}
+}
 
 ZEND_API void function_add_ref(zend_function *function)
 {
@@ -1778,6 +1860,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
+	// FIXME: exception support not added to this op2
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_DO_FCALL;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));

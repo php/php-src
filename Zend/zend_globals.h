@@ -121,6 +121,8 @@ struct _zend_compiler_globals {
 	void *ini_parser;
 #endif
 
+	zend_llist *throw_list;
+
 	struct _zend_ini_parser_param *ini_parser_param;
 
 	int interactive;
@@ -203,6 +205,7 @@ struct _zend_executor_globals {
 
 	HashTable ini_directives;
 	zend_objects objects;
+	zval *exception;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

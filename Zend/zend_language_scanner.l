@@ -648,6 +648,18 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_RETURN;
 }
 
+<ST_IN_SCRIPTING>"try" {
+	return T_TRY;
+}
+
+<ST_IN_SCRIPTING>"catch" {
+	return T_CATCH;
+}
+
+<ST_IN_SCRIPTING>"throw" {
+	return T_THROW;
+}
+
 <ST_IN_SCRIPTING>"if" {
 	return T_IF;
 }
