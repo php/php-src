@@ -208,7 +208,6 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
-		
 		switch (op) {
 			case ZEND_ASSIGN_ADD:
 				opline->opcode = ZEND_ASSIGN_ADD_OBJ;

@@ -177,6 +177,7 @@ struct _zend_executor_globals {
 	zend_bool in_execution;
 	zend_bool bailout_set;
 	zend_bool full_tables_cleanup;
+	zend_bool implicit_clone;
 
 	/* for extended information support */
 	zend_bool no_extensions;

@@ -84,6 +84,7 @@ struct _zend_ini_entry {
 
 ZEND_API int zend_ini_startup(TSRMLS_D);
 ZEND_API int zend_ini_shutdown(TSRMLS_D);
+ZEND_API int zend_ini_global_shutdown(TSRMLS_D);
 ZEND_API int zend_ini_deactivate(TSRMLS_D);
 
 ZEND_API int zend_copy_ini_directives(TSRMLS_D);
