@@ -238,20 +238,15 @@ php_mbregex_compile_pattern(mb_regex_t *pre, const char *pattern, int patlen, in
 			rc->options != options || rc->mbctype != mbctype) {
 		memset(pre, 0, sizeof(*pre));
 		pre->fastmap = (char*)emalloc((1 << MBRE_BYTEWIDTH)*sizeof(char));
-		if (pre->fastmap) {
-			pre->options = options;
-			pre->mbctype = mbctype;
-			err_str = mbre_compile_pattern(pattern, patlen, pre);
-			if (!err_str) {
-				zend_hash_update(&MBSTRG(ht_rc), (char *) pattern, patlen+1, (void *) pre, sizeof(*pre), NULL);
-			} else {
-				efree(pre->fastmap);
-				pre->fastmap = (char*)0;
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex compile err: %s", err_str);
-				res = 1;
-			}
+		pre->options = options;
+		pre->mbctype = mbctype;
+		err_str = mbre_compile_pattern(pattern, patlen, pre);
+		if (!err_str) {
+			zend_hash_update(&MBSTRG(ht_rc), (char *) pattern, patlen+1, (void *) pre, sizeof(*pre), NULL);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory in mbregex_compile_pattern");
+			efree(pre->fastmap);
+			pre->fastmap = (char*)0;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex compile err: %s", err_str);
 			res = 1;
 		}
 	} else {
@@ -698,10 +693,6 @@ PHP_FUNCTION(mb_split)
 
 	if (count == 0) count = 1;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
 	/* create regex pattern buffer */
 	err = php_mbregex_compile_pattern(
 	     &re,
@@ -711,6 +702,8 @@ PHP_FUNCTION(mb_split)
 	if (err) {
 		RETURN_FALSE;
 	}
+
+	array_init(return_value);
 
 	pos = 0;
 	err = 0;
@@ -895,29 +888,23 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		}
 		switch (mode) {
 		case 1:
-			if (array_init(return_value) != FAILURE) {
-				beg = MBSTRG(search_regs)->beg[0];
-				end = MBSTRG(search_regs)->end[0];
-				add_next_index_long(return_value, beg);
-				add_next_index_long(return_value, end - beg);
-			} else {
-				RETVAL_FALSE;
-			}
+			array_init(return_value);
+			beg = MBSTRG(search_regs)->beg[0];
+			end = MBSTRG(search_regs)->end[0];
+			add_next_index_long(return_value, beg);
+			add_next_index_long(return_value, end - beg);
 			break;
 		case 2:
-			if (array_init(return_value) != FAILURE) {
-				n = MBSTRG(search_regs)->num_regs;
-				for (i = 0; i < n; i++) {
-					beg = MBSTRG(search_regs)->beg[i];
-					end = MBSTRG(search_regs)->end[i];
-					if (beg >= 0 && beg <= end && end <= len) {
-						add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
-					} else {
-						add_index_bool(return_value, i, 0);
-					}
+			array_init(return_value);
+			n = MBSTRG(search_regs)->num_regs;
+			for (i = 0; i < n; i++) {
+				beg = MBSTRG(search_regs)->beg[i];
+				end = MBSTRG(search_regs)->end[i];
+				if (beg >= 0 && beg <= end && end <= len) {
+					add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
+				} else {
+					add_index_bool(return_value, i, 0);
 				}
-			} else {
-				RETVAL_FALSE;
 			}
 			break;
 		default:
