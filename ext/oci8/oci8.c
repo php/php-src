@@ -340,9 +340,6 @@ static void php_oci_init_globals(OCILS_D)
 PHP_MINIT_FUNCTION(oci)
 {
 	zend_class_entry oci_lob_class_entry;
-	OCILS_FETCH();
-
-	OCI(shutdown) = 0;
 
 #ifdef ZTS 
 #define PHP_OCI_INIT_MODE OCI_THREADED
