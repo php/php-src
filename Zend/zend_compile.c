@@ -2553,6 +2553,10 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 
 void zend_do_declare_implicit_property(TSRMLS_D)
 {
+/* Fixes bug #26182. Not sure why we needed to do this in the first place.
+   Has to be checked with Zeev.
+*/
+#if ANDI_0
 	zend_op *opline_ptr;
 	zend_llist_element *le;
 	zend_llist *fetch_list_ptr;
@@ -2577,6 +2581,7 @@ void zend_do_declare_implicit_property(TSRMLS_D)
 		property.u.constant.value.str.val = estrndup(opline_ptr->op2.u.constant.value.str.val, opline_ptr->op2.u.constant.value.str.len);
 		zend_do_declare_property(&property, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_IMPLICIT_PUBLIC TSRMLS_CC);
 	}
+#endif
 }
 
 
