@@ -108,13 +108,10 @@ scan:
 /*!re2c
   ":"		{ smart_str_append(dest, url); return; }
   "?"		{ sep = separator; goto done; }
-  "#"		{ bash = p; goto done; }
+  "#"		{ bash = p - 1; goto done; }
   (any\[:?#])+		{ goto scan; }
 */
 done:
- 
-	if (bash)
-		bash--;
 	
 	/* Don't modify URLs of the format "#mark" */
 	if (bash && bash - url->c == 0) {
