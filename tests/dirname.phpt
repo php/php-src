@@ -19,12 +19,12 @@ dirname test
 	check_dirname("c:\foo");
 ?>
 --EXPECT--
-dirname(/foo/) == 
-dirname(/foo) == 
+dirname(/foo/) == /
+dirname(/foo) == /
 dirname(/foo/bar) == /foo
-dirname(d:\foo\bar.inc) == 
-dirname(/) == 
+dirname(d:\foo\bar.inc) == .
+dirname(/) == /
 dirname(.../foo) == ...
 dirname(./foo) == .
-dirname(foobar///) == 
-dirname(c:\foo) == 
+dirname(foobar///) == .
+dirname(c:\foo) == .
