@@ -275,7 +275,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 }
 
 /* {{{ proto array gzfile(string filename [, int use_include_path])
-Read und uncompress entire .gz-file into an array */
+   Read und uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile) {
 	pval **filename, **arg2;
 	gzFile zp;
@@ -331,7 +331,7 @@ PHP_FUNCTION(gzfile) {
 /* }}} */
 
 /* {{{ proto int gzopen(string filename, string mode [, int use_include_path])
-Open a .gz-file and return a .gz-file pointer */
+   Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen) {
 	pval **arg1, **arg2, **arg3;
 	gzFile *zp;
@@ -377,7 +377,7 @@ PHP_FUNCTION(gzopen) {
 /* }}} */
 
 /* {{{ proto int gzclose(int zp)
-Close an open .gz-file pointer */
+   Close an open .gz-file pointer */
 PHP_FUNCTION(gzclose) {
 	pval **arg1;
 	gzFile *zp;
@@ -392,7 +392,7 @@ PHP_FUNCTION(gzclose) {
 /* }}} */
 
 /* {{{ proto int gzeof(int zp)
-Test for end-of-file on a .gz-file pointer */
+   Test for end-of-file on a .gz-file pointer */
 PHP_FUNCTION(gzeof) {
 	pval **arg1;
 	gzFile *zp;
@@ -411,7 +411,7 @@ PHP_FUNCTION(gzeof) {
 /* }}} */
 
 /* {{{ proto string gzgets(int zp, int length)
-Get a line from .gz-file pointer */
+   Get a line from .gz-file pointer */
 PHP_FUNCTION(gzgets) {
 	pval **arg1, **arg2;
 	gzFile *zp;
@@ -447,7 +447,7 @@ PHP_FUNCTION(gzgets) {
 /* }}} */
 
 /* {{{ proto string gzgetc(int zp)
-Get a character from .gz-file pointer */
+   Get a character from .gz-file pointer */
 PHP_FUNCTION(gzgetc) {
 	pval **arg1;
 	gzFile *zp;
@@ -477,7 +477,7 @@ PHP_FUNCTION(gzgetc) {
 
 /* Strip any HTML tags while reading */
 /* {{{ proto string gzgetss(int zp, int length [, string allowable_tags])
-Get a line from file pointer and strip HTML tags */
+   Get a line from file pointer and strip HTML tags */
 PHP_FUNCTION(gzgetss)
 {
 	pval **fd, **bytes, **allow=NULL;
@@ -530,7 +530,7 @@ PHP_FUNCTION(gzgetss)
 /* }}} */
 
 /* {{{ proto int gzwrite(int zp, string str [, int length])
-Binary-safe .gz-file write */
+   Binary-safe .gz-file write */
 PHP_FUNCTION(gzwrite) {
 	pval **arg1, **arg2, **arg3=NULL;
 	gzFile *zp;
@@ -576,7 +576,7 @@ PHP_FUNCTION(gzwrite) {
 /* }}} */
 
 /* {{{ proto int gzrewind(int zp)
-Rewind the position of a .gz-file pointer */
+   Rewind the position of a .gz-file pointer */
 PHP_FUNCTION(gzrewind) {
 	pval **arg1;
 	gzFile *zp;
@@ -593,7 +593,7 @@ PHP_FUNCTION(gzrewind) {
 /* }}} */
 
 /* {{{ proto int gztell(int zp)
-Get .gz-file pointer's read/write position */
+   Get .gz-file pointer's read/write position */
 PHP_FUNCTION(gztell) {
 	pval **arg1;
 	long pos;
@@ -611,7 +611,7 @@ PHP_FUNCTION(gztell) {
 /* }}} */
 
 /* {{{ proto int gzseek(int zp, int offset)
-Seek on a file pointer */
+   Seek on a file pointer */
 PHP_FUNCTION(gzseek) {
 	pval **arg1, **arg2;
 	int ret;
@@ -633,7 +633,7 @@ PHP_FUNCTION(gzseek) {
  * Read a file and write the ouput to stdout
  */
 /* {{{ proto int readgzfile(string filename [, int use_include_path])
-Output a .gz-file */
+   Output a .gz-file */
 PHP_FUNCTION(readgzfile) {
 	pval **arg1, **arg2;
 	char buf[8192];
@@ -684,7 +684,7 @@ PHP_FUNCTION(readgzfile) {
  * Read to EOF on a file descriptor and write the output to stdout.
  */
 /* {{{ proto int gzpassthru(int zp)
-Output all remaining data from a .gz-file pointer */
+   Output all remaining data from a .gz-file pointer */
 PHP_FUNCTION(gzpassthru) {
 	pval **arg1;
 	gzFile *zp;
@@ -709,7 +709,7 @@ PHP_FUNCTION(gzpassthru) {
 /* }}} */
 
 /* {{{ proto string gzread(int zp, int length)
-Binary-safe file read */
+   Binary-safe file read */
 PHP_FUNCTION(gzread)
 {
 	pval **arg1, **arg2;

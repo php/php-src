@@ -974,7 +974,7 @@ _xml_externalEntityRefHandler(XML_Parser parserPtr,
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto int xml_parser_create() 
+/* {{{ proto int xml_parser_create(void) 
    Create an XML parser */
 PHP_FUNCTION(xml_parser_create)
 {
@@ -1197,7 +1197,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 }
 /* }}} */
 
-/* {{{ proto int xml_parse(int pind, string data[, int isFinal]) 
+/* {{{ proto int xml_parse(int pind, string data [, int isFinal]) 
    Start parsing an XML document */
 PHP_FUNCTION(xml_parse)
 {
@@ -1225,7 +1225,7 @@ PHP_FUNCTION(xml_parse)
 }
 
 /* }}} */
-/* {{{ proto int xml_parse_into_struct(int pind, string data,array &struct,array &index) 
+/* {{{ proto int xml_parse_into_struct(int pind, string data, array &struct, array &index) 
    Parsing a XML document */
 
 PHP_FUNCTION(xml_parse_into_struct)
@@ -1324,8 +1324,7 @@ PHP_FUNCTION(xml_get_current_line_number)
 /* }}} */
 
 /* {{{ proto int xml_get_current_column_number(int pind)
-   Get current column number for an XML parser
-*/
+   Get current column number for an XML parser */
 PHP_FUNCTION(xml_get_current_column_number)
 {
 	xml_parser *parser;

@@ -76,7 +76,7 @@ PHP_MINIT_FUNCTION(sysvshm)
 
 
 /* {{{ proto int shm_attach(int key, int size, int flag)
-   Return an id for the shared memory with the given key. */
+   Return an id for the shared memory with the given key */
 PHP_FUNCTION(shm_attach)
 {
 	pval **arg_key,**arg_size,**arg_flag;
@@ -151,7 +151,7 @@ PHP_FUNCTION(shm_attach)
 
 
 /* {{{ proto int shm_detach(int id)
-   releases the shared memory attachment with the given id. */
+   Releases the shared memory attachment with the given id */
 PHP_FUNCTION(shm_detach)
 {
 	pval **arg_id;
@@ -171,7 +171,7 @@ PHP_FUNCTION(shm_detach)
 }
 /* }}} */
 /* {{{ proto int shm_remove(int key)
-   removes the shared memory with the given key. */
+   Removes the shared memory with the given key */
 PHP_FUNCTION(shm_remove)
 {
 	pval **arg_key;
@@ -202,7 +202,7 @@ PHP_FUNCTION(shm_remove)
 
 
 /* {{{ proto int shm_put(int id, int key, object *variable)
-   insert a variable into shared memory. */
+   Insert a variable into shared memory */
 PHP_FUNCTION(shm_put_var)
 {
 	pval **arg_id, **arg_key, **arg_var;
@@ -251,7 +251,7 @@ PHP_FUNCTION(shm_put_var)
 
 
 /* {{{ proto string/float/int/array shm_get_var(int id, int key)
-   returns a variable into shared memory. */
+   Returns a variable into shared memory */
 PHP_FUNCTION(shm_get_var)
 {
 	pval **arg_id, **arg_key;
@@ -296,7 +296,7 @@ PHP_FUNCTION(shm_get_var)
 /* }}} */
 
 /* {{{ proto int shm_remove_var(int id, int key)
-   removes variable from shared memory. */
+   Removes variable from shared memory */
 PHP_FUNCTION(shm_remove_var)
 {
 	pval **arg_id, **arg_key;
@@ -330,11 +330,6 @@ PHP_FUNCTION(shm_remove_var)
 	RETURN_TRUE;
 }
 /* }}} */
-
-
-
-
-
 
 
 /* inserts an ascii-string into shared memory */

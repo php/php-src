@@ -128,7 +128,7 @@ PHP_MINIT_FUNCTION(sysvsem)
 #endif
 
 /* {{{ proto int sem_get(int key [, int max_acquire [, int perm]])
-   Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously. */
+   Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously */
 PHP_FUNCTION(sem_get)
 {
 	pval **arg_key, **arg_max_acquire, **arg_perm;
@@ -329,7 +329,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
 
 /* {{{ proto int sem_acquire(int id)
-   Acquires the semaphore with the given id, blocking if necessary. */
+   Acquires the semaphore with the given id, blocking if necessary */
 PHP_FUNCTION(sem_acquire)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -337,7 +337,7 @@ PHP_FUNCTION(sem_acquire)
 /* }}} */
 
 /* {{{ proto int sem_release(int id)
-   Releases the semaphore with the given id. */
+   Releases the semaphore with the given id */
 PHP_FUNCTION(sem_release)
 {
 	php_sysvsem_semop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
