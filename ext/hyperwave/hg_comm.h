@@ -74,6 +74,7 @@
 #define PUTDOCUMENT_MESSAGE          38
 #define GETREMOTE_MESSAGE            39
 #define GETREMOTECHILDREN_MESSAGE    40
+#define HG_MAPID                     43
 #define CHILDREN_MESSAGE             44
 #define GETCGI_MESSAGE               45
 #define PIPECGI_MESSAGE              46
@@ -200,6 +201,7 @@ extern int send_insertobject(int sockfd, char *objrec, char *parms, hw_objectID 
 extern int send_insdoc(int sockfd, hw_objectID objectID, char *objrec, char *text, hw_objectID *new_objectID);
 extern int send_incollections(int sockfd, int retcol, int cobjids, hw_objectID *objectIDs, int ccollids, hw_objectID *collIDs, int *count, hw_objectID **retIDs);
 extern int send_getsrcbydest(int sockfd, hw_objectID objid, char ***childrec, int *count);
+extern int send_mapid(int sockfd, int servid, hw_objectID id, int *virtid);
 extern int send_dummy(int sockfd, hw_objectID objectID, int msgid, char **attributes);
 extern char *get_hw_info(hw_connection *conn);
 

@@ -68,8 +68,11 @@ int version      = HW_VERSION;
    virtual. This means whenever an object is requested a
    new id is generated for this session. Wavemaster and
    Harmony set this flag. How do I know? tcpdump tells
-   a lot if investigate the output.
-  int version      = HW_VERSION | F_DISTRIBUTED; */
+   a lot if  the output is investigated. The bit is also
+   need to allow access on other server through the local
+   server. The hw_mapid() function won't work unless you
+   set F_DISTRIBUTED */
+/* int version      = HW_VERSION | F_DISTRIBUTED; */
 /* int version   = HW_VERSION | F_DISTRIBUTED | F_COMPRESSED; */
 static int msgid        =  1;
 static int sock_flags   = -1;
@@ -516,7 +519,10 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						break;
 					default:
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
-						snprintf(istr, BUFFERLEN, "<A HREF='%s' %s>", cur_ptr->link, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+						if(cur_ptr->fragment)
+							snprintf(istr, BUFFERLEN, "<A HREF='%s#%s' %s>", cur_ptr->link, cur_ptr->fragment, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
+						else
+							snprintf(istr, BUFFERLEN, "<A HREF='%s' %s>", cur_ptr->link, cur_ptr->htmlattr == NULL ? "" : cur_ptr->htmlattr);
 				}
 			} else {
 				switch(cur_ptr->linktype) {
@@ -4677,6 +4683,53 @@ int send_getsrcbydest(int sockfd, hw_objectID objectID, char ***childrec, int *c
 				}
 			}
 		}
+	}
+
+	return(0);
+}
+
+int send_mapid(int sockfd, int servid, hw_objectID id, int *virtid)
+{
+	hg_msg msg, *retmsg;
+	int length, i, error;
+	char *tmp;
+	int *ptr, *ptr1;
+
+	length = HEADER_LENGTH + 2 * sizeof(hw_objectID);
+
+	build_msg_header(&msg, length, msgid++, HG_MAPID);
+
+	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(-1);
+	}
+
+	tmp = build_msg_int(msg.buf, servid);
+	tmp = build_msg_int(tmp, id);
+
+	if (-1 == send_hg_msg(sockfd, &msg, length))  {
+		efree(msg.buf);
+		return(-2);
+	}
+
+	efree(msg.buf);
+	retmsg = recv_hg_msg(sockfd);
+	if ( retmsg == NULL )  {
+		return(-3);
+	}
+
+	ptr = (int *) retmsg->buf;
+	if(ptr == NULL) {
+		if(retmsg) efree(retmsg);
+		return -1;
+	}
+	if(*ptr++ == 0) {
+		*virtid = *ptr;
+	} else {
+		error = *((int *) retmsg->buf);
+		efree(retmsg->buf);
+		efree(retmsg);
+		return error;
 	}
 
 	return(0);
