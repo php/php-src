@@ -67,6 +67,7 @@ PHP_FUNCTION(number_format);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
 
+#include <math.h>
 
 #ifndef M_E
 #define M_E            2.7182818284590452354   /* e */
