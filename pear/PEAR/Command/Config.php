@@ -147,9 +147,6 @@ displays help for all configuration parameters.
             $failmsg .= $error;
             return PEAR::raiseError($failmsg);
         }
-        if ($params[0] == 'umask') {
-            list($params[1]) = sscanf($params[1], '%o');
-        }
         if (!call_user_func_array(array(&$this->config, 'set'), $params))
         {
             $failmsg = "config-set (" . implode(", ", $params) . ") failed";
