@@ -24,7 +24,7 @@ AC_ARG_WITH(servlet,
       fi
     fi
 
-    AC_DEFINE(SAPI_SERVLET)
+    AC_DEFINE(SAPI_SERVLET, 1, [Whether you use Servlet])
     PHP_EXTENSION(servlet, "shared")
     PHP_SAPI=servlet
     PHP_BUILD_SHARED

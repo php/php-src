@@ -11,7 +11,7 @@ AC_ARG_WITH(aolserver,
 	PHP_BUILD_THREAD_SAFE
 	NS_DIR=$withval
 	AC_ADD_INCLUDE($NS_DIR/include)
-	AC_DEFINE(HAVE_AOLSERVER)
+	AC_DEFINE(HAVE_AOLSERVER,1,[Whether you have AOLserver])
 	PHP_SAPI=aolserver
 	PHP_BUILD_SHARED
 	INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_SHARED $NS_DIR/root/bin/"
