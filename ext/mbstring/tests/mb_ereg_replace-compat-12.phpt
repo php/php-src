@@ -1,8 +1,11 @@
 --TEST--
-mb_ereg_replace() compatibility test 12 (counterpart: ext/standard/tests/reg/015.phpt)
---POST--
---GET--
+mb_ereg_replace() compat test 12
+--SKIPIF--
+extension_loaded('mbstring') or die('skip');
 --FILE--
-<?php echo mb_ereg_replace("^","z","abc123")?>
+<?php
+/* (counterpart: ext/standard/tests/reg/015.phpt) */
+  echo mb_ereg_replace("^","z","abc123");
+?>
 --EXPECT--
 zabc123
