@@ -99,7 +99,7 @@ PHP_FUNCTION(mysqli_connect)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_array (resource result [,int resulttype])
+/* {{{ proto array mysqli_fetch_array (object result [,int resulttype])
    Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array) 
 {
@@ -107,7 +107,7 @@ PHP_FUNCTION(mysqli_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_assoc (resource result)
+/* {{{ proto array mysqli_fetch_assoc (object result)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc) 
 {
@@ -115,7 +115,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_object (resource result)
+/* {{{ proto array mysqli_fetch_object (object result)
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object) 
 {
@@ -127,7 +127,7 @@ PHP_FUNCTION(mysqli_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_query(resource link, string query [,int resultmode])
+/* {{{ proto resource mysqli_query(object link, string query [,int resultmode])
    Send a MySQL query */
 PHP_FUNCTION(mysqli_query) {
 	MYSQL				*mysql;
