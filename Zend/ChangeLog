@@ -1,3 +1,9 @@
+2002-10-01  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y:
+    - Fix problem when crashing on illegal tokens in class name during class
+    - definition.
+
 2002-09-30  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ZEND_CHANGES: - No tabs :)
