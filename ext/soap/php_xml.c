@@ -183,12 +183,12 @@ xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 	href = get_attribute(data->properties, "href");
 	if(href)
 	{
-		// Internal href try and find node
+		/*  Internal href try and find node */
 		if(href->children->content[0] == '#')
 		{
 			ret = get_node_with_attribute_recursive(data->doc->children, NULL, "id", &href->children->content[1]);
 		}
-		// External href....?
+		/*  External href....? */
 	}
 
 	return ret;
