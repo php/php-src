@@ -31,15 +31,16 @@ if (PHP_MBSTRING == "yes") {
 		mbfilter_koi8r.c mbfilter_qprint.c mbfilter_sjis.c mbfilter_ucs2.c \
 		mbfilter_ucs4.c mbfilter_uhc.c mbfilter_utf16.c mbfilter_utf32.c \
 		mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
-		mbfilter_uuencode.c", "mbstring");
+		mbfilter_uuencode.c mbfilter_armscii8.c", "mbstring");
 
 	ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \
 		mbfilter_pass.c mbfilter_wchar.c mbfl_convert.c mbfl_encoding.c \
 		mbfl_filter_output.c mbfl_ident.c mbfl_language.c mbfl_memory_device.c \
 		mbfl_string.c mbfl_allocators.c", "mbstring");
 
-	ADD_SOURCES("ext/mbstring/libmbfl/nls", "nls_de.c nls_en.c nls_ja.c nls_kr.c \
-		nls_neutral.c nls_ru.c nls_uni.c nls_zh.c", "mbstring");
+	ADD_SOURCES("ext/mbstring/libmbfl/nls", "nls_de.c nls_en.c nls_ja.c \
+		nls_kr.c nls_neutral.c nls_ru.c nls_uni.c nls_zh.c nls_hy.c \
+		", "mbstring");
 
 	AC_DEFINE('HAVE_MBSTRING', 1, 'Have mbstring support');
 	AC_DEFINE('HAVE_MBSTR_CN', 1, 'CN');
