@@ -26,10 +26,10 @@
 ; (e.g. E_ALL & ~E_NOTICE), or a quoted string ("foo").
 ;
 ; Expressions in the INI file are limited to bitwise operators and parentheses:
-; |				bitwise OR
-; &				bitwise AND
-; ~				bitwise NOT
-; !				boolean NOT
+; |        bitwise OR
+; &        bitwise AND
+; ~        bitwise NOT
+; !        boolean NOT
 ;
 ; Boolean flags can be turned on using the values 1, On, True or Yes.
 ; They can be turned off using the values 0, Off, False or No.
@@ -37,9 +37,9 @@
 ; An empty string can be denoted by simply not writing anything after the equal
 ; sign, or by using the None keyword:
 ;
-;   foo =			; sets foo to an empty string
-;	foo = none		; sets foo to an empty string
-;	foo = "none"	; sets foo to the string 'none'
+;  foo =         ; sets foo to an empty string
+;  foo = none    ; sets foo to an empty string
+;  foo = "none"  ; sets foo to the string 'none'
 ;
 ; If you use constants in your value, and these constants belong to a
 ; dynamically loaded extension (either a PHP extension or a Zend extension),
@@ -64,7 +64,7 @@ short_open_tag = On
 asp_tags = Off
 
 ; The number of significant digits displayed in floating point numbers.
-precision		=	14
+precision    =  14
 
 ; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
 y2k_compliance = Off
@@ -130,12 +130,12 @@ disable_functions =
 
 ; Colors for Syntax Highlighting mode.  Anything that's acceptable in
 ; <font color="??????"> would work.
-highlight.string	=	#CC0000
-highlight.comment	=	#FF9900
-highlight.keyword	=	#006600
-highlight.bg		=	#FFFFFF
-highlight.default	=	#0000CC
-highlight.html		=	#000000
+highlight.string  =  #CC0000
+highlight.comment  =  #FF9900
+highlight.keyword  =  #006600
+highlight.bg    =  #FFFFFF
+highlight.default  =  #0000CC
+highlight.html    =  #000000
 
 
 ;
@@ -153,7 +153,7 @@ expose_php = On
 ;;;;;;;;;;;;;;;;;;;
 
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
-memory_limit = 8M			; Maximum amount of memory a script may consume (8MB)
+memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,7 +192,7 @@ memory_limit = 8M			; Maximum amount of memory a script may consume (8MB)
 ;
 ;   - Show all errors except for notices
 ;
-error_reporting	=	E_ALL & ~E_NOTICE
+error_reporting  =  E_ALL & ~E_NOTICE
 
 ; Print out errors (as a part of the output).  For production web sites,
 ; you're strongly encouraged to turn this feature off, and use error logging
@@ -275,7 +275,7 @@ gpc_order = "GPC"
 magic_quotes_gpc = On
 
 ; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-magic_quotes_runtime = Off		
+magic_quotes_runtime = Off    
 
 ; Use Sybase-style magic quotes (escape ' with '' instead of \').
 magic_quotes_sybase = Off
@@ -326,7 +326,7 @@ file_uploads = On
 
 ; Temporary directory for HTTP uploaded files (will use system default if not
 ; specified).
-;upload_tmp_dir	=
+;upload_tmp_dir  =
 
 ; Maximum allowed size for uploaded files.
 upload_max_filesize = 2M
@@ -390,6 +390,7 @@ allow_url_fopen = On
 ;extension=php_interbase.dll
 ;extension=php_java.dll
 ;extension=php_ldap.dll
+;extension=php_mcrypt.dll
 ;extension=php_mhash.dll
 ;extension=php_ming.dll
 ;extension=php_mssql.dll
@@ -414,7 +415,7 @@ allow_url_fopen = On
 ; Whether or not to define the various syslog variables (e.g. $LOG_PID,
 ; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
 ; runtime, you can define these variables by calling define_syslog_variables().
-define_syslog_variables	= Off
+define_syslog_variables  = Off
 
 [mail function]
 ; For Win32 only.
@@ -425,11 +426,6 @@ sendmail_from = me@localhost.com
 
 ; For Unix only.  You may supply arguments as well (default: 'sendmail -t -i').
 ;sendmail_path =
-
-[Debugger]
-debugger.host = localhost
-debugger.port = 7869
-debugger.enabled = False
 
 [Logging]
 ; These configuration directives are used by the example logging mechanism.
@@ -447,9 +443,9 @@ debugger.enabled = False
 sql.safe_mode = Off
 
 [ODBC]
-;odbc.default_db		=	Not yet implemented
-;odbc.default_user		=	Not yet implemented
-;odbc.default_pw		=	Not yet implemented
+;odbc.default_db    =  Not yet implemented
+;odbc.default_user  =  Not yet implemented
+;odbc.default_pw    =  Not yet implemented
 
 ; Allow or prevent persistent links.
 odbc.allow_persistent = On
@@ -461,16 +457,16 @@ odbc.check_persistent = On
 odbc.max_persistent = -1
 
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
-odbc.max_links = -1	
+odbc.max_links = -1  
 
 ; Handling of LONG fields.  Returns number of bytes to variables.  0 means
 ; passthru.
-odbc.defaultlrl = 4096	
+odbc.defaultlrl = 4096  
 
 ; Handling of binary data.  0 means passthru, 1 return as is, 2 convert to char.
 ; See the documentation on odbc_binmode and odbc_longreadlen for an explanation
 ; of uodbc.defaultlrl and uodbc.defaultbinmode
-odbc.defaultbinmode = 1	
+odbc.defaultbinmode = 1  
 
 [MySQL]
 ; Allow or prevent persistent links.
@@ -535,7 +531,7 @@ sybase.max_persistent = -1
 ; Maximum number of links (persistent + non-persistent).  -1 means no limit.
 sybase.max_links = -1
 
-;sybase.interface_file	=	"/usr/sybase/interfaces"
+;sybase.interface_file  =  "/usr/sybase/interfaces"
 
 ; Minimum error severity to display.
 sybase.min_error_severity = 10
@@ -571,7 +567,7 @@ sybct.min_client_severity = 10
 bcmath.scale = 0
 
 [browscap]
-;browscap	=	extra/browscap.ini
+;browscap  =  extra/browscap.ini
 
 [Informix]
 ; Default host for ifx_connect() (doesn't apply in safe mode).
@@ -657,9 +653,9 @@ session.entropy_length = 0
 ; Specified here to create the session id.
 session.entropy_file =
 
-;session.entropy_length    = 16
+;session.entropy_length = 16
 
-;session.entropy_file      = /dev/urandom
+;session.entropy_file = /dev/urandom
 
 ; Set to {nocache,private,public} to determine HTTP caching aspects.
 session.cache_limiter = nocache
