@@ -87,6 +87,12 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 }
 /* }}} */
 
+static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
+{
+/*	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data; */
+}
+/* }}} */
+
 static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -377,6 +383,8 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR);
 		goto cleanup;
 	}
+
+	PQsetNoticeProcessor(H->server, (void(*)(void*,const char*))_pdo_pgsql_notice, (void *)&dbh);
 
 	H->attached = 1;
 	H->pgoid = -1;
