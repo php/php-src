@@ -1568,7 +1568,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
 	zend_file_handle prepend_file, append_file;
+#if HAVE_BROKEN_GETCWD 
+	int old_cwd_fd;
+#else
 	char *old_cwd;
+#endif
 	char *old_primary_file_path = NULL;
 	int retval = 0;
 
@@ -1576,9 +1580,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	if (php_handle_special_queries(TSRMLS_C)) {
 		return 0;
 	}
-#define OLD_CWD_SIZE 4096
+#ifndef HAVE_BROKEN_GETCWD
+# define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
+#endif
 
 	zend_try {
 #ifdef PHP_WIN32
@@ -1589,7 +1595,12 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 
 		if (primary_file->type == ZEND_HANDLE_FILENAME 
 				&& primary_file->filename) {
+#if HAVE_BROKEN_GETCWD
+			/* this looks nasty to me */
+			old_cwd_fd = open(".", 0);
+#else
 			VCWD_GETCWD(old_cwd, OLD_CWD_SIZE-1);
+#endif
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 
@@ -1641,10 +1652,15 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		
 	} zend_end_try();
 
+#if HAVE_BROKEN_GETCWD
+	fchdir(old_cwd_fd);
+	close(old_cwd_fd);
+#else
 	if (old_cwd[0] != '\0') {
 		VCWD_CHDIR(old_cwd);
 	}
 	free_alloca(old_cwd);
+#endif
 	return retval;
 }
 /* }}} */

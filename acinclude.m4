@@ -1448,6 +1448,20 @@ int main(void) {
   fi
 ])
 
+dnl Some systems, notably Solaris, cause getcwd() or realpath to fail if a
+dnl component of the path has execute but not read permissions
+AC_DEFUN([PHP_BROKEN_GETCWD],[
+  AC_MSG_CHECKING([for broken getcwd])
+  os=`uname -sr 2>/dev/null`
+  case $os in
+    SunOS*)
+	  AC_DEFINE(HAVE_BROKEN_GETCWD,1, [Define if system has broken getcwd])
+	  AC_MSG_RESULT([yes]);;
+	*)
+	  AC_MSG_RESULT([no]);;
+  esac
+])
+
 AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND],[
   AC_MSG_CHECKING([for broken libc stdio])
   AC_CACHE_VAL(have_broken_glibc_fopen_append,[

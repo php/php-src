@@ -125,6 +125,11 @@ PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int
 			VCWD_REALPATH(filename, path);
 			*s = DEFAULT_SLASH;
 		} else {
+			/* Under Solaris, getcwd() can fail if there are no
+			 * read permissions on a component of the path, even
+			 * though it has the required x permissions */
+			path[0] = '.';
+			path[1] = '\0';
 			VCWD_GETCWD(path, sizeof(path));
  		}
 	} /* end CHECKUID_ALLOW_ONLY_DIR */

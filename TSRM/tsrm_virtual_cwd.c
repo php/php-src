@@ -303,7 +303,10 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		return (0);
 
 #if !defined(TSRM_WIN32) && !defined(NETWARE)
-	if (IS_ABSOLUTE_PATH(path, path_length)) {
+	/* cwd_length can be 0 when getcwd() fails.
+	 * This can happen under solaris when a dir does not have read permissions
+	 * but *does* have execute permissions */
+	if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
 		if (use_realpath && realpath(path, resolved_path)) {
 			path = resolved_path;
 			path_length = strlen(path);
@@ -363,58 +366,64 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 
 
-	ptr = tsrm_strtok_r(path_copy, TOKENIZER_STRING, &tok);
-	while (ptr) {
-		ptr_length = strlen(ptr);
+	if (state->cwd_length > 0 || IS_ABSOLUTE_PATH(path, path_length)) {
+		ptr = tsrm_strtok_r(path_copy, TOKENIZER_STRING, &tok);
+		while (ptr) {
+			ptr_length = strlen(ptr);
 
-		if (IS_DIRECTORY_UP(ptr, ptr_length)) {
-			char save;
+			if (IS_DIRECTORY_UP(ptr, ptr_length)) {
+				char save;
 
-			save = DEFAULT_SLASH;
+				save = DEFAULT_SLASH;
 
 #define PREVIOUS state->cwd[state->cwd_length - 1]
 
-			while (IS_ABSOLUTE_PATH(state->cwd, state->cwd_length) &&
-					!IS_SLASH(PREVIOUS)) {
-				save = PREVIOUS;
-				PREVIOUS = '\0';
-				state->cwd_length--;
-			}
+				while (IS_ABSOLUTE_PATH(state->cwd, state->cwd_length) &&
+						!IS_SLASH(PREVIOUS)) {
+					save = PREVIOUS;
+					PREVIOUS = '\0';
+					state->cwd_length--;
+				}
 
-			if (!IS_ABSOLUTE_PATH(state->cwd, state->cwd_length)) {
-				state->cwd[state->cwd_length++] = save;
-				state->cwd[state->cwd_length] = '\0';
-			} else {
-				PREVIOUS = '\0';
-				state->cwd_length--;
-			}
-		} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
-			state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
+				if (!IS_ABSOLUTE_PATH(state->cwd, state->cwd_length)) {
+					state->cwd[state->cwd_length++] = save;
+					state->cwd[state->cwd_length] = '\0';
+				} else {
+					PREVIOUS = '\0';
+					state->cwd_length--;
+				}
+			} else if (!IS_DIRECTORY_CURRENT(ptr, ptr_length)) {
+				state->cwd = (char *) realloc(state->cwd, state->cwd_length+ptr_length+1+1);
 #ifdef TSRM_WIN32
-			/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
-			if ((state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') || 
-				IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
-				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
-			}
+				/* Windows 9x will consider C:\\Foo as a network path. Avoid it. */
+				if ((state->cwd[state->cwd_length-1]!='\\' && state->cwd[state->cwd_length-1]!='/') || 
+						IsDBCSLeadByte(state->cwd[state->cwd_length-2])) {
+					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+				}
 #elif defined(NETWARE)
-            /* If the token is a volume name, it will have colon at the end -- so, no slash before it */
-            if (ptr[ptr_length-1] != ':') {
-				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
-			}
+				/* If the token is a volume name, it will have colon at the end -- so, no slash before it */
+				if (ptr[ptr_length-1] != ':') {
+					state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+				}
 #else
-			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
+				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
-			memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
-			state->cwd_length += ptr_length;
+				memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
+				state->cwd_length += ptr_length;
+			}
+			ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
 		}
-		ptr = tsrm_strtok_r(NULL, TOKENIZER_STRING, &tok);
-	}
 
-	if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
-		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
-		state->cwd[state->cwd_length] = DEFAULT_SLASH;
-		state->cwd[state->cwd_length+1] = '\0';
-		state->cwd_length++;
+		if (state->cwd_length == COPY_WHEN_ABSOLUTE(state->cwd)) {
+			state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
+			state->cwd[state->cwd_length] = DEFAULT_SLASH;
+			state->cwd[state->cwd_length+1] = '\0';
+			state->cwd_length++;
+		}
+	} else {
+		state->cwd = (char *) realloc(state->cwd, path_length+1);
+		memcpy(state->cwd, path, path_length+1);
+		state->cwd_length = path_length;
 	}
 
 	if (verify_path && verify_path(state)) {
