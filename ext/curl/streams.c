@@ -299,7 +299,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curl_easy_setopt(curlstream->curl, CURLOPT_PROGRESSDATA, stream);
 	curl_easy_setopt(curlstream->curl, CURLOPT_NOPROGRESS, 0);
 
-	curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, "PHP/" PHP_VERSION);
+	curl_easy_setopt(curlstream->curl, CURLOPT_USERAGENT, FG(user_agent) ? FG(user_agent) : "PHP/" PHP_VERSION);
 	
 	/* TODO: read cookies and options from context */
 
