@@ -51,9 +51,21 @@ that you wish to run PHP on:
 Troubleshooting
 ---------------
 
+*) Why does the compile fail at Zend/zend-scanner-cc.cc
+                             or Zend/zend-parser.c ?
+
+These source files are auto-generated from the corresponding .y files.
+The default distribution of PHP contains pre-generated versions of these
+files that have caused problems for some people. The simplest solution is
+to delete the files. They will then be rebuilt correctly. You must have the
+following GNU tools to do this:
+
+       bison  1.28 or later
+       flex  2.5.4 or later
+
 *) Why does my PHP library fail to load?
 
-After configuring Zeus, if you get a '502 Bad Gatway' error when
+After configuring Zeus, if you get a '502 Bad Gateway' error when
 accessing a PHP page, there are problems loading the PHP
 library. Check the error log ($ZEUSHOME/web/log/errors) for errors.
 
