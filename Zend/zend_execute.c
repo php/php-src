@@ -2585,15 +2585,25 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	zend_class_entry *current_scope;
 	zval *current_this;
 	int return_value_used = RETURN_VALUE_USED(EX(opline));
+	zend_bool should_change_scope;
 	
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 
-	current_this = EG(This);
-	EG(This) = EX(object);
-	current_scope = EG(scope);
-	EG(scope) = EX(calling_scope);
+	if (EX(function_state).function->type == ZEND_USER_FUNCTION
+		|| EX(function_state).function->common.scope) {
+		should_change_scope = 1;
+	} else {
+		should_change_scope = 0;
+	}
+
+	if (should_change_scope) {
+		current_this = EG(This);
+		EG(This) = EX(object);
+		current_scope = EG(scope);
+		EG(scope) = EX(calling_scope);
+	}
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
@@ -2668,11 +2678,14 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
 		}
 	}
-	if (EG(This)) {
-		zval_ptr_dtor(&EG(This));
+
+	if (should_change_scope) {
+		if (EG(This)) {
+			zval_ptr_dtor(&EG(This));
+		}
+		EG(This) = current_this;
+		EG(scope) = current_scope;
 	}
-	EG(This) = current_this;
-	EG(scope) = current_scope;
 	zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	
 	EX(function_state).function = (zend_function *) op_array;
