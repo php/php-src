@@ -138,13 +138,13 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
-			case T_OPEN_TAG:
-			case T_CLOSE_TAG:
-			case T_WHITESPACE:
-				break;
-			default:
-				efree(token.value.str.val);
-				break;
+				case T_OPEN_TAG:
+				case T_CLOSE_TAG:
+				case T_WHITESPACE:
+					break;
+				default:
+					efree(token.value.str.val);
+					break;
 			}
 		}
 		token.type = 0;

@@ -66,6 +66,7 @@ void init_compiler(CLS_D ELS_DC)
 	CG(handle_op_arrays) = 1;
 	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_request_startup);
 	init_resource_list(ELS_C);
+	CG(unclean_shutdown) = 0;
 }
 
 

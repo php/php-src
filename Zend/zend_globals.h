@@ -146,6 +146,7 @@ struct _zend_compiler_globals {
 	unsigned char extended_info;	/* generate extension information for debugger/profiler */
 	unsigned char handle_op_arrays;	/* run op_arrays through op_array handlers */
 
+	unsigned char unclean_shutdown;
 #ifdef ZTS
 #ifdef __cplusplus
 	ZendFlexLexer *ZFL;
