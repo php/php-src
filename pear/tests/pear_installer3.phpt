@@ -224,7 +224,58 @@ if (isset($installer->pkginfo['filelist']['dirtree'][$p])) {
 } else {
     echo "filelist dirtree fromp not created!\n";
 }
-    
+
+echo "Do valid addFileOperation() installed_as\n";
+$installer->addFileOperation('installed_as', array('test.php',
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR .
+    'glomp' . DIRECTORY_SEPARATOR . 'fromp' . DIRECTORY_SEPARATOR
+    . 'installertestfooblah.phpt',
+    $temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR,
+    'glomp' . DIRECTORY_SEPARATOR . 'fromp'));
+echo "test valid rollbackFileTransaction():\n";
+$installer->rollbackFileTransaction();
+if (isset($installer->pkginfo['filelist'])) {
+    echo "filelist created\n";
+} else {
+    echo "filelist not created!\n";
+}
+if (isset($installer->pkginfo['filelist']['test.php'])) {
+    echo "filelist test.php created\n";
+} else {
+    echo "filelist test.php not created!\n";
+}
+if (isset($installer->pkginfo['filelist']['test.php']['installed_as'])) {
+    echo "filelist test.php installed_as created\n";
+} else {
+    echo "filelist test.php installed_as not created!\n";
+}
+$p = $temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR .
+    'glomp' . DIRECTORY_SEPARATOR . 'fromp' . DIRECTORY_SEPARATOR
+    . 'installertestfooblah.phpt';
+if (@$installer->pkginfo['filelist']['test.php']['installed_as'] == $p) {
+    echo "filelist test.php installed_as is correct\n";
+} else {
+    echo "filelist test.php installed_as is not correct!\n";
+}
+if (isset($installer->pkginfo['filelist']['dirtree'])) {
+    echo "filelist dirtree created\n";
+} else {
+    echo "filelist dirtree not created!\n";
+}
+$p = $temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR .
+    'glomp';
+if (isset($installer->pkginfo['filelist']['dirtree'][$p])) {
+    echo "filelist dirtree glomp created\n";
+} else {
+    echo "filelist dirtree glomp not created!\n";
+}
+$p .= DIRECTORY_SEPARATOR . 'fromp';
+if (isset($installer->pkginfo['filelist']['dirtree'][$p])) {
+    echo "filelist dirtree fromp created\n";
+} else {
+    echo "filelist dirtree fromp not created!\n";
+}
+
 // invalid tests
 echo "\n==>Invalid tests\n";
 echo "Do valid addFileOperation() delete with non-existing file\n";
@@ -327,6 +378,16 @@ filelist test.php installed_as is correct
 filelist dirtree created
 filelist dirtree glomp created
 filelist dirtree fromp created
+Do valid addFileOperation() installed_as
+test valid rollbackFileTransaction():
+rolling back 1 file operations
+filelist created
+filelist test.php created
+filelist test.php installed_as not created!
+filelist test.php installed_as is not correct!
+filelist dirtree not created!
+filelist dirtree glomp not created!
+filelist dirtree fromp not created!
 
 ==>Invalid tests
 Do valid addFileOperation() delete with non-existing file
