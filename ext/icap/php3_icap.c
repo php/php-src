@@ -133,7 +133,7 @@ void icap_info(void)
 {
 	php3_printf("Icap Support enabled<br>");
 	php3_printf("<table>");
-	php3_printf("<tr><td>Icap c-client Version:</td>");
+	php3_printf("<tr><td>Icap Version:</td>");
 	php3_printf("<td>%s</td>",ICAPVER);
 	php3_printf("</tr></table>");
 }
@@ -437,9 +437,8 @@ if(myargc == 3)
 /* }}} */
 
 
-/* {{{ proto string icap_create(int stream_id, string calendar)
+/* {{{ proto string icap_create_calendar(int stream_id, string calendar)
    Create a new calendar*/
-/* }}} */
 
 void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -471,10 +470,9 @@ void php3_icap_create_calendar(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto string icap_rename(int stream_id, string src_calendar, string dest_calendar)
    Rename a calendar*/
-/* }}} */
-
 void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *src_calendar,*dest_calendar;
@@ -503,6 +501,8 @@ void php3_icap_rename_calendar(INTERNAL_FUNCTION_PARAMETERS)
 
 
 
+/* {{{ proto int icap_reopen(int stream_id, array date, array time)
+   list alarms for a given time */
 void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *date,*time;
@@ -567,50 +567,11 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 
 
 }
-/* Interfaces to C-client */
+/* }}} */
 
-
-void cc_searched (u_int32_t cal_uid)
-{
-
-  if(g_cal_list==NULL)
-    {
-      g_cal_list=malloc(sizeof(struct cal_list));
-      g_cal_list->uid=cal_uid;
-      g_cal_list->next=NULL;
-      g_cal_list_end=g_cal_list;
-    }
-  else
-    {
-      g_cal_list_end->next=malloc(sizeof(struct cal_list));
-      g_cal_list_end=g_cal_list_end->next;
-      g_cal_list_end->uid=cal_uid;
-      g_cal_list_end->next=NULL;
-    }
-}
-
-
-
-
-cal_expunge()
-{
-  return 1;
-}
-
-
-
-icap_create(){
-  return 1;
-}
-
-icap_rename(){
-  return 1;
-}
 
 /* {{{ proto string icap_delete_calendar(int stream_id, string calendar)
    Delete calendar*/
-/* }}} */
-
 void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *calendar;
@@ -641,10 +602,9 @@ void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto string icap_delete_event(int stream_id, int uid)
    Delete event*/
-/* }}} */
-
 void php3_icap_delete_event(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *uid;
@@ -675,14 +635,19 @@ void php3_icap_delete_event(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+/* {{{ proto string icap_delete_calendar(int stream_id, int uid)
+   Delete event*/
 icap_delete_calendar(){
   return 1;
 }
+/* }}} */
 
 void php3_icap_popen(INTERNAL_FUNCTION_PARAMETERS){
 }
 
 
+/* {{{ proto string icap_store_event(int stream_id, object event)
+   Store an  event*/
 void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind,*storeobject;
@@ -794,6 +759,8 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 /* }}} */
 
 
+/* {{{ proto string icap_snooze(int stream_id, int uid)
+   Snooze an alarm*/
 void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind,*uid;
@@ -829,6 +796,34 @@ void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
 
 
 }
+/* }}} */
+
+
+/* Interfaces to callbacks */
+
+
+void cc_searched (u_int32_t cal_uid)
+{
+
+  if(g_cal_list==NULL)
+    {
+      g_cal_list=malloc(sizeof(struct cal_list));
+      g_cal_list->uid=cal_uid;
+      g_cal_list->next=NULL;
+      g_cal_list_end=g_cal_list;
+    }
+  else
+    {
+      g_cal_list_end->next=malloc(sizeof(struct cal_list));
+      g_cal_list_end=g_cal_list_end->next;
+      g_cal_list_end->uid=cal_uid;
+      g_cal_list_end->next=NULL;
+    }
+}
+
+
+
+
 
 
 void cc_appended(u_int32_t uid)
