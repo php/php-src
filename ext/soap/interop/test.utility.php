@@ -1,6 +1,4 @@
 <?php
-require_once("SOAP/Parser.php");
-require_once("SOAP/Value.php");
 
 function number_compare($f1, $f2)
 {
@@ -12,7 +10,8 @@ function number_compare($f1, $f2)
     $d = max(min(strlen(count($m1)?$m1[1]:'0'),strlen(count($m2)?$m2[1]:'0')),2);
     $f1 = round($f1, $d);
     $f2 = round($f2, $d);
-    return bccomp($f1, $f2, $d) == 0;
+    return $f1 == $f2;
+//    return bccomp($f1, $f2, $d) == 0;
 }
 
 function boolean_compare($f1, $f2)
@@ -34,30 +33,50 @@ function string_compare($e1, $e2)
     $e2_type = gettype($e2);
     $ok = FALSE;
     if ($e1_type == "string") {
-        $dt = new SOAP_Type_dateTime();
-        $ok = $dt->compare($e1, $e2) == 0;
+//        $dt = new SOAP_Type_dateTime();
+//        $ok = $dt->compare($e1, $e2) == 0;
+        $oj = false;
     }
     return $ok || $e1 == $e2 || strcasecmp(trim($e1), trim($e2)) == 0;
 }
 
-function array_compare(&$ar1, &$ar2)
-{
-    if (gettype($ar1) != 'array' || gettype($ar2) != 'array') return FALSE;
-    # first a shallow diff
-    if (count($ar1) != count($ar2)) return FALSE;
-    $diff = array_diff($ar1, $ar2);
-    if (count($diff) == 0) return TRUE;
+function array_compare(&$ar1, &$ar2) {
+  if (gettype($ar1) != 'array' || gettype($ar2) != 'array') return FALSE;
+  if (count($ar1) != count($ar2)) return FALSE;
+  foreach ($ar1 as $k => $v) {
+    if (!array_key_exists($k,$ar2)) return FALSE;
+    if (!compare($v,$ar2[$k])) return FALSE;
+  }
+  return TRUE;
+}
 
-    # diff failed, do a full check of the array
-    foreach ($ar1 as $k => $v) {
-        #print "comparing $v == $ar2[$k]\n";
-        if (gettype($v) == "array") {
-            if (!array_compare($v, $ar2[$k])) return FALSE;
-        } else {
-            if (!string_compare($v, $ar2[$k])) return FALSE;
-        }
+function object_compare(&$obj1, &$obj2) {
+  if (gettype($obj1) != 'object' || gettype($obj2) != 'object') return FALSE;
+//  if (class_name(obj1) != class_name(obj2)) return FALSE;
+  $ar1 = (array)$obj1;
+  $ar2 = (array)$obj2;
+  return array_compare($ar1,$ar2);
+}
+
+function compare(&$x,&$y) {
+  $ok = 0;
+  $x_type = gettype($x);
+  $y_type = gettype($y);
+  if ($x_type == $y_type) {
+    if ($x_type == "array") {
+      $ok = array_compare($x, $y);
+    } else if ($x_type == "object") {
+      $ok = object_compare($x, $y);
+    } else if ($x_type == "double") {
+      $ok = number_compare($x, $y);
+//    } else if ($x_type == 'boolean') {
+//      $ok = boolean_compare($x, $y);
+    } else {
+    	$ok = ($x == $y);
+//      $ok = string_compare($expect, $result);
     }
-    return TRUE;
+  }
+  return $ok;
 }
 
 
@@ -77,5 +96,12 @@ function parseMessage($msg)
     return $v;
 }
 
+function var_dump_str($var) {
+  ob_start();
+  var_dump($var);
+  $res = ob_get_contents();
+  ob_end_clean();
+  return $res;
+}
 
 ?>

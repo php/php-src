@@ -9,7 +9,7 @@
 <a href="index.php">Back to Interop Index</a><br>
 <p>&nbsp;</p>
 <?php
-require_once 'SOAP/interop/client_round2_interop.php';
+require_once 'client_round2_interop.php';
 
 $iop = new Interop_Client();
 
@@ -18,6 +18,7 @@ function endpointList($test,$sel_endpoint)
     global $iop;
     $iop->getEndpoints($test);
     echo "<select name='endpoint'>\n";
+    echo "<option value=''>-- All Endpoints --</option>\n";
     foreach ($iop->endpoints as $epname => $epinfo) {
         $selected = '';
         if ($sel_endpoint == $epname) $selected = ' SELECTED';
@@ -28,15 +29,20 @@ function endpointList($test,$sel_endpoint)
 function methodList($test,$sel_method)
 {
     global $iop;
-    
-    $ml = $iop->getMethodList($test);
+    global $soap_tests;
+
     echo "<select name='method'>\n";
-    foreach ($ml as $method) {
-        $selected = '';
-        if ($sel_method == $method) $selected = ' SELECTED';
-        echo "<option value='$method'$selected>$method</option>\n";
+    echo "<option value='ALL'>-- Run All Methods --</option>\n";
+		$prev_method = "";
+    foreach ($soap_tests[$test] as $x) {
+        $method = $x->test_name;
+        if ($method != $prev_method) {
+        	$prev_method = $method;
+          $selected = '';
+          if ($sel_method == $method) $selected = ' SELECTED';
+          echo "<option value='$method'$selected>$method</option>\n";
+        }
     }
-    echo "<option value='ALL'>Run All Methods</option>\n";
     echo "</select>\n";
 }
 
@@ -50,9 +56,14 @@ function endpointTestForm($test, $endpoint, $method, $paramType, $useWSDL)
     echo "<input type='hidden' name='test' value='$test'>\n";
     endpointList($test, $endpoint);
     methodList($test, $method);
-    echo "<select name='paramType'><option value='soapval'>soap value</option>";
+    echo "<select name='paramType'>";
+//    echo "<option value='all'>-- All --</option>";
+    echo "<option value='soapval'".($paramType=='soapval'?' selected':'').">soap value</option>";
     echo "<option value='php'".($paramType=='php'?' selected':'').">php internal type</option></select>\n";
-    echo "<select name='useWSDL'><option value='0'>go Direct</option><option value='1'".($useWSDL?' selected':'').">use WSDL</option></select>\n";
+    echo "<select name='useWSDL'>";
+//    echo "<option value='all'>-- All --</option>";
+    echo "<option value='0'>go Direct</option>";
+    echo "<option value='1'".($useWSDL?' selected':'').">use WSDL</option></select>\n";
     echo "<input type='submit' value='Go'>\n";
     echo "</form><br>\n";
 }
@@ -80,7 +91,7 @@ if ($_POST['test'] && array_key_exists('endpoint', $_POST) && array_key_exists('
     // here we execute the orders
     echo "<h2>Calling {$_POST['method']} at {$_POST['endpoint']}</h2>\n";
     echo "NOTE: wire's are slightly modified to display better in web browsers.<br>\n";
-    
+
     $iop->currentTest = $_POST['test'];      // see $tests above
     $iop->paramType = $_POST['paramType'];     // 'php' or 'soapval'
     $iop->useWSDL = $_POST['useWSDL'];           // 1= do wsdl tests
@@ -88,10 +99,10 @@ if ($_POST['test'] && array_key_exists('endpoint', $_POST) && array_key_exists('
     $iop->specificEndpoint = $_POST['endpoint']; // test only this endpoint
     $iop->testMethod = $_POST['method']=='ALL'?'':$_POST['method'];       // test only this method
     $iop->skipEndpointList = array(); // endpoints to skip
-    $this->nosave = 0; // 1= disable saving results to database
+    $iop->nosave = 0; // 1= disable saving results to database
     // debug output
-    $iop->show = 1;
-    $iop->debug = 1;
+    $iop->show = 0;
+    $iop->debug = 0;
     $iop->showFaults = 0; // used in result table output
     echo '<pre>';
     $iop->doTest();  // run a single set of tests using above options

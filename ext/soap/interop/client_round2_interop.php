@@ -19,23 +19,23 @@
 // $Id$
 //
 require_once 'DB.php'; // PEAR/DB
-require_once 'base.php';
 require_once 'client_round2_params.php';
 require_once 'test.utility.php';
+require_once 'config.php';
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-class Interop_Client extends Interop_Base
+class Interop_Client
 {
     // database DNS
-    var $DSN = 'mysql://user@localhost/interop2';
+    var $DSN = "";
 
     // our central interop server, where we can get the list of endpoints
-    var $interopServer = "http://www.whitemesa.net/interopInfo";
-    
+    var $interopServer = "http://www.whitemesa.net/wsdl/interopInfo.wsdl";
+
     // our local endpoint, will always get added to the database for all tests
     var $localEndpoint;
-    
+
     // specify testing
     var $currentTest = 'base';      // see $tests above
     var $paramType = 'php';     // 'php' or 'soapval'
@@ -50,15 +50,17 @@ class Interop_Client extends Interop_Base
     var $show = 1;
     var $debug = 0;
     var $showFaults = 0; // used in result table output
-    
+
     // PRIVATE VARIABLES
     var $dbc = NULL;
     var $totals = array();
     var $tests = array('base','GroupB', 'GroupC');
     var $paramTypes = array('php', 'soapval');
     var $endpoints = array();
-    
+
     function Interop_Client() {
+        global $interopConfig;
+    		$this->DSN = $interopConfig['DSN'];
         // set up the database connection
         $this->dbc = DB::connect($this->DSN, true);
         // if it errors out, just ignore it and rely on regular methods
@@ -67,41 +69,41 @@ class Interop_Client extends Interop_Base
             $this->dbc = NULL;
         }
         // set up local endpoint
-        $this->localEndpoint['base'] = array(
-                                'endpointName'=>'PEAR SOAP',
-                                'endpointURL'=>'http://localhost/soap_interop/server_round2.php',
-                                'wsdlURL'=>'http://localhost/soap_interop/interop.wsdl'
+        $this->localEndpoint['base'] = (object)array(
+                                'endpointName'=>'PHP ext/soap',
+                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_base.php',
+                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/interop.wsdl.php'
                               );
-        $this->localEndpoint['GroupB'] = array(
-                                'endpointName'=>'PEAR SOAP',
-                                'endpointURL'=>'http://localhost/soap_interop/server_round2.php',
-                                'wsdlURL'=>'http://localhost/soap_interop/interopB.wsdl'
+        $this->localEndpoint['GroupB'] = (object)array(
+                                'endpointName'=>'PHP ext/soap',
+                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupB.php',
+                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/interopB.wsdl.php'
                               );
-        $this->localEndpoint['GroupC'] = array(
-                                'endpointName'=>'PEAR SOAP',
-                                'endpointURL'=>'http://localhost/soap_interop/server_round2.php',
-                                'wsdlURL'=>'http://localhost/soap_interop/echoheadersvc.wsdl'
+        $this->localEndpoint['GroupC'] = (object)array(
+                                'endpointName'=>'PHP ext/soap',
+                                'endpointURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/server_round2_groupC.php',
+                                'wsdlURL'=>'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']).'/echoheadersvc.wsdl.php'
                               );
     }
-    
+
     function _fetchEndpoints(&$soapclient, $test) {
         $this->_getEndpoints($test, 1);
-        
+
         // retreive endpoints from the endpoint server
-        $endpointArray = $soapclient->call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/info/","http://soapinterop.org/info/");
+        $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),"http://soapinterop.org/info/","http://soapinterop.org/info/");
         if (PEAR::isError($endpointArray)) {
             print $soapclient->wire;
             print_r($endpointArray);
             return;
         }
-        
+
         // add our local endpoint
         if ($this->localEndpoint[$test]) {
-        array_push($endpointArray, $this->localEndpoint[$test]);
+          array_push($endpointArray, $this->localEndpoint[$test]);
         }
-        
+
         if (!$endpointArray) return;
-        
+
         // reset the status to zero
         $res = $this->dbc->query("update endpoints set status = 0 where class='$test'");
         if (DB::isError($res)) {
@@ -110,10 +112,10 @@ class Interop_Client extends Interop_Base
         if (is_object($res)) $res->free();
         // save new endpoints into database
         foreach($endpointArray as $k => $v){
-            if (array_key_exists($v['endpointName'],$this->endpoints)) {
-                $res = $this->dbc->query("update endpoints set endpointURL='{$v['endpointURL']}', wsdlURL='{$v['wsdlURL']}', status=1 where id={$this->endpoints[$v['endpointName']]['id']}");
+            if (array_key_exists($v->endpointName,$this->endpoints)) {
+                $res = $this->dbc->query("update endpoints set endpointURL='{$v->endpointURL}', wsdlURL='{$v->wsdlURL}', status=1 where id={$this->endpoints[$v->endpointName]['id']}");
             } else {
-                $res = $this->dbc->query("insert into endpoints (endpointName,endpointURL,wsdlURL,class) values('{$v['endpointName']}','{$v['endpointURL']}','{$v['wsdlURL']}','$test')");
+                $res = $this->dbc->query("insert into endpoints (endpointName,endpointURL,wsdlURL,class) values('{$v->endpointName}','{$v->endpointURL}','{$v->wsdlURL}','$test')");
             }
             if (DB::isError($res)) {
                 die ($res->getMessage());
@@ -121,18 +123,18 @@ class Interop_Client extends Interop_Base
             if (is_object($res)) $res->free();
         }
     }
-    
+
     /**
     *  fetchEndpoints
     * retreive endpoints interop server
     *
     * @return boolean result
     * @access private
-    */    
+    */
     function fetchEndpoints($test = NULL) {
         // fetch from the interop server
         $soapclient = new SoapObject($this->interopServer);
-        
+
         if ($test) {
             $this->_fetchEndpoints($soapclient, $test);
         } else {
@@ -141,12 +143,13 @@ class Interop_Client extends Interop_Base
             }
             $test = 'base';
         }
-        
+
         // retreive all endpoints now
         $this->currentTest = $test;
-        return $this->_getEndpoints($test);
+        $x = $this->_getEndpoints();
+        return $x;
     }
-    
+
     /**
     *  getEndpoints
     * retreive endpoints from either database or interop server
@@ -155,7 +158,7 @@ class Interop_Client extends Interop_Base
     * @param boolean all (if false, only get valid endpoints, status=1)
     * @return boolean result
     * @access private
-    */    
+    */
     function getEndpoints($base = 'base', $all = 0) {
         if (!$this->_getEndpoints($base, $all)) {
             return $this->fetchEndpoints($base);
@@ -171,7 +174,7 @@ class Interop_Client extends Interop_Base
     * @param boolean all (if false, only get valid endpoints, status=1)
     * @return boolean result
     * @access private
-    */    
+    */
     function _getEndpoints($base = "", $all = 0) {
         $this->endpoints = array();
 
@@ -182,7 +185,7 @@ class Interop_Client extends Interop_Base
             if (!$all) $sql .= "and status=1";
         } else
         if (!$all) $sql .= "where status=1";
-        
+
         $db_ep = $this->dbc->getAll($sql,NULL, DB_FETCHMODE_ASSOC );
         if (DB::isError($db_ep)) {
             echo $sql."\n";
@@ -193,6 +196,13 @@ class Interop_Client extends Interop_Base
         foreach ($db_ep as $entry) {
             $this->endpoints[$entry['endpointName']] = $entry;
         }
+/*
+        $this->endpoints["PHP ext/soap"] =
+          array("endpointName" => "PHP ext/soap",
+                "endpointURL"  => "http://soap.4s4c.com/ilab/soap.asp",
+                "wsdlURL"      => "http://www.pocketsoap.com/services/ilab.wsdl",
+                "class"        => "base" "status"]=> string(1) "1" }
+*/
         if (count($this->endpoints) > 0) {
             $this->currentTest = $base;
             return TRUE;
@@ -209,7 +219,7 @@ class Interop_Client extends Interop_Base
     function getResults($test = 'base', $type = 'php', $wsdl = 0) {
         // be sure we have the right endpoints for this test result
         $this->getEndpoints($test);
-        
+
         // retreive the results and put them into the endpoint info
         $sql = "select * from results where class='$test' and type='$type' and wsdl=$wsdl";
         $results = $this->dbc->getAll($sql,NULL, DB_FETCHMODE_ASSOC );
@@ -224,7 +234,7 @@ class Interop_Client extends Interop_Base
             }
         }
     }
-    
+
     /**
     *  saveResults
     * save the results of a method test into the database
@@ -233,7 +243,7 @@ class Interop_Client extends Interop_Base
     */
     function _saveResults($endpoint_id, &$soap_test) {
         if ($this->nosave) return;
-        
+
         $result = $soap_test->result;
         $wire = $result['wire'];
         if ($result['success']) {
@@ -244,7 +254,7 @@ class Interop_Client extends Interop_Base
             $error = $result['fault']->faultstring;
             if (!$wire) $wire= $result['fault']->detail;
         }
-        
+
         $test_name = $soap_test->test_name;
         // add header info to the test name
         if ($soap_test->headers) {
@@ -261,7 +271,7 @@ class Interop_Client extends Interop_Base
                 }
             }
         }
-        
+
         $sql = "delete from results where endpoint=$endpoint_id ".
                     "and class='$this->currentTest' and type='$this->paramType' ".
                     "and wsdl=$this->useWSDL and function=".
@@ -272,7 +282,7 @@ class Interop_Client extends Interop_Base
             die ($res->getMessage());
         }
         if (is_object($res)) $res->free();
-        
+
         $sql = "insert into results (endpoint,stamp,class,type,wsdl,function,result,error,wire) ".
                     "values($endpoint_id,".time().",'$this->currentTest',".
                     "'$this->paramType',$this->useWSDL,".
@@ -282,7 +292,7 @@ class Interop_Client extends Interop_Base
                     ($wire?$this->dbc->quote($wire):"''").")";
         #echo "\n".$sql;
         $res = $this->dbc->query($sql);
-        
+
         if (DB::isError($res)) {
             die ($res->getMessage());
         }
@@ -296,7 +306,7 @@ class Interop_Client extends Interop_Base
     * @param SOAP_Value soapval
     * @return mixed result
     * @access public
-    */    
+    */
     function decodeSoapval($soapval)
     {
         if (gettype($soapval) == "object" &&
@@ -320,7 +330,7 @@ class Interop_Client extends Interop_Base
         }
         return $val;
     }
-    
+
     /**
     *  compareResult
     * compare two php types for a match
@@ -329,22 +339,10 @@ class Interop_Client extends Interop_Base
     * @param string test_result
     * @return boolean result
     * @access public
-    */    
+    */
     function compareResult($expect, $result, $type = NULL)
     {
-        $ok = 0;
-        $expect_type = gettype($expect);
-        $result_type = gettype($result);
-        if ($expect_type == "array" && $result_type == "array") {
-            # compare arrays
-            $ok = array_compare($expect, $result);
-        } else {
-            if ($type == 'boolean')
-                $ok = boolean_compare($expect, $result);
-            else
-                $ok = string_compare($expect, $result);
-        }
-        return $ok;
+    	return compare($expect, $result);
     }
 
 
@@ -356,22 +354,23 @@ class Interop_Client extends Interop_Base
     * @param SOAP_Test test
     * @return boolean result
     * @access public
-    */    
+    */
     function doEndpointMethod(&$endpoint_info, &$soap_test) {
         $ok = FALSE;
-        
+
         // prepare a holder for the test results
         $soap_test->result['class'] = $this->currentTest;
         $soap_test->result['type'] = $this->paramType;
         $soap_test->result['wsdl'] = $this->useWSDL;
-        
+
         if ($this->useWSDL) {
             if (array_key_exists('wsdlURL',$endpoint_info)) {
                 if (!array_key_exists('client',$endpoint_info)) {
                     $endpoint_info['client'] = new SoapObject($endpoint_info['wsdlURL']);
+                    $endpoint_info['client']->__trace(1);
                 }
                 $soap =& $endpoint_info['client'];
-                
+
                 # XXX how do we determine a failure on retreiving/parsing wsdl?
                 if ($soap->wsdl->fault) {
                     $fault = $soap->wsdl->fault->getFault();
@@ -404,6 +403,7 @@ class Interop_Client extends Interop_Base
             }
             if (!array_key_exists('client',$endpoint_info)) {
                 $endpoint_info['client'] = new SoapObject($endpoint_info['endpointURL'],$soapaction);
+                $endpoint_info['client']->__trace(1);
             }
             $soap = $endpoint_info['client'];
         }
@@ -417,7 +417,6 @@ class Interop_Client extends Interop_Base
         // XXX no way to set encoding
         // this lets us set UTF-8, US-ASCII or other
         //$soap->setEncoding($soap_test->encoding);
-        
         if ($this->useWSDL) {
             $args = '';
             foreach ($soap_test->method_params as $pname => $param) {
@@ -428,16 +427,16 @@ class Interop_Client extends Interop_Base
         } else {
             $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace);
         }
-        
-        // save the wire
-        $wire = $soap->__getlastrequest()."\n\n".$soap->__getlastresponse();
-        $wire = str_replace('>',">\n",$wire);
-        $wire = str_replace('" ',"\" \n",$wire);
-        #print $wire;
-        
+
+
         if(!$soap->__isfault()){
-            if (is_array($soap_test->method_params) && count($soap_test->method_params) == 1) {
-                $sent = array_shift($soap_test->method_params);
+            if ($soap_test->expect !== NULL) {
+                $sent = $soap_test->expect;
+            } else if (is_array($soap_test->method_params) && count($soap_test->method_params) == 1) {
+                reset($soap_test->method_params);
+                $sent = current($soap_test->method_params);
+            } else if (is_array($soap_test->method_params) && count($soap_test->method_params) == 0) {
+                $sent = null;
             } else {
                 $sent = $soap_test->method_params;
             }
@@ -445,7 +444,7 @@ class Interop_Client extends Interop_Base
             // compare header results
             $header_result = array();
             $headers_ok = TRUE;
-            
+
             # XXX need to implement header support!
             #
             #if ($soap_test->headers) {
@@ -476,15 +475,24 @@ class Interop_Client extends Interop_Base
 
             # we need to decode what we sent so we can compare!
             $sent_d = $this->decodeSoapval($sent);
-            
+
             $soap_test->result['sent'] = $sent;
             $soap_test->result['return'] = $return;
+
             // compare the results with what we sent
+
             $ok = $this->compareResult($sent_d,$return, $sent->type);
             if (!$ok && $soap_test->expect) {
                 $ok = $this->compareResult($soap_test->expect,$return);
             }
-            
+
+            // save the wire
+            $wire = "REQUEST:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastrequest()))."\n\n".
+                    "RESPONSE:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastresponse()))."\n\n".
+                    "EXPECTED:\n".var_dump_str($sent_d)."\n".
+                    "RESULTL:\n".var_dump_str($return);
+            #print "Wire:".htmlentities($wire);
+
             if($ok){
                 if (!$headers_ok) {
                     $fault = new SoapFault('HEADER','The returned result did not match what we expected to receive');
@@ -514,48 +522,54 @@ class Interop_Client extends Interop_Base
                 $ok = 0;
                 $res =$fault->faultcode;
             }
+            // save the wire
+            $wire = "REQUEST:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastrequest()))."\n\n".
+                    "RESPONSE:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastresponse()));
+            #print "Wire:".htmlentities($wire);
+
             $soap_test->setResult($ok,$res, $wire,$fault->faultstring, $fault);
+
         }
         return $ok;
     }
-    
+
 
     /**
     *  doTest
     *  run a single round of tests
     *
     * @access public
-    */    
+    */
     function doTest() {
         global $soap_tests;
         // get endpoints for this test
         $this->getEndpoints($this->currentTest);
         #clear totals
         $this->totals = array();
-        
+
         $i = 0;
         foreach($this->endpoints as $endpoint => $endpoint_info){
-            
+
             // if we specify an endpoint, skip until we find it
             if ($this->specificEndpoint && $endpoint != $this->specificEndpoint) continue;
             if ($this->useWSDL && !$endpoint_info['endpointURL']) continue;
-            
+
             $skipendpoint = FALSE;
             $this->totals['servers']++;
             #$endpoint_info['tests'] = array();
-            
+
             if ($this->show) print "Processing $endpoint at {$endpoint_info['endpointURL']}<br>\n";
-            
+
             foreach($soap_tests[$this->currentTest] as $soap_test) {
             //foreach(array_keys($method_params[$this->currentTest][$this->paramType]) as $method)
-            
+
                 // only run the type of test we're looking for (php or soapval)
                 if ($soap_test->type != $this->paramType) continue;
-                
+
                 // if we haven't reached our startpoint, skip
                 if ($this->startAt && $this->startAt != $endpoint_info['endpointName']) continue;
                 $this->startAt = '';
-            
+
                 // if this is in our skip list, skip it
                 if (in_array($endpoint, $this->skipEndpointList)) {
                     $skipendpoint = TRUE;
@@ -570,13 +584,13 @@ class Interop_Client extends Interop_Base
                     $soap_test->result = NULL;
                     continue;
                 }
-                
+
                 // if we're looking for a specific method, skip unless we have it
-                if ($this->testMethod && !strstr($this->testMethod,$soap_test->test_name)) continue;
+                if ($this->testMethod && strcmp($this->testMethod,$soap_test->test_name) != 0) continue;
                 if ($this->testMethod && $this->currentTest == 'GroupC') {
                     // we have to figure things out now
                     if (!preg_match('/(.*):(.*),(\d),(\d)/',$this->testMethod, $m)) continue;
-                    
+
                     // is the header in the headers list?
                     $gotit = FALSE;
                     foreach ($soap_test->headers as $header) {
@@ -594,7 +608,7 @@ class Interop_Client extends Interop_Base
                     }
                     if (!$gotit) continue;
                 }
-            
+
                 // if we are skipping the rest of the tests (due to error) note a fault
                 if ($skipendpoint) {
                     $soap_test->setResult(0,$fault->faultcode, '',
@@ -623,7 +637,7 @@ class Interop_Client extends Interop_Base
             if ($this->numservers && ++$i >= $this->numservers) break;
         }
     }
-    
+
     function doGroupTests() {
         $dowsdl = array(0,1);
         foreach($dowsdl as $usewsdl) {
@@ -636,13 +650,13 @@ class Interop_Client extends Interop_Base
             }
         }
     }
-    
+
     /**
     *  doTests
     *  go all out.  This takes time.
     *
     * @access public
-    */    
+    */
     function doTests() {
         // the mother of all interop tests
         $dowsdl = array(0,1);
@@ -659,10 +673,10 @@ class Interop_Client extends Interop_Base
             }
         }
     }
-    
+
     // ***********************************************************
     // output functions
-    
+
     /**
     *  getResults
     * retreive results from the database, stuff them into the endpoint array
@@ -679,18 +693,18 @@ class Interop_Client extends Interop_Base
         }
         return $ar;
     }
-    
+
     function outputTable()
     {
         $methods = $this->getMethodList($this->currentTest);
         if (!$methods) return;
         $this->getResults($this->currentTest,$this->paramType,$this->useWSDL);
-        
+
         echo "<b>Testing $this->currentTest ";
         if ($this->useWSDL) echo "using WSDL ";
         else echo "using Direct calls ";
         echo "with $this->paramType values</b><br>\n";
-        
+
         // calculate totals for this table
         $this->totals['success'] = 0;
         $this->totals['fail'] = 0;
@@ -709,14 +723,14 @@ class Interop_Client extends Interop_Base
         }
         $this->totals['calls'] = count($methods) * $this->totals['servers'];
 
-        if ($this->totals['fail'] == $this->totals['calls']) {
-            // assume tests have not run, skip outputing table
-            print "No Data Available<br>\n";
-            return;
-        }
-        
+#        if ($this->totals['fail'] == $this->totals['calls']) {
+#            // assume tests have not run, skip outputing table
+#            print "No Data Available<br>\n";
+#            return;
+#        }
+
         echo "\n\n<b>Servers: {$this->totals['servers']} Calls: {$this->totals['calls']} Success: {$this->totals['success']} Fail: {$this->totals['fail']}</b><br>\n";
-       
+
         echo "<table border=\"1\" cellspacing=\"0\" cellpadding=\"2\">\n";
         echo "<tr><td class=\"BLANK\">Endpoint</td>\n";
         foreach ($methods as $method) {
@@ -766,7 +780,7 @@ class Interop_Client extends Interop_Base
         }
         echo "</ul><br><br>\n";
     }
-    
+
     function outputTables() {
         // the mother of all interop tests
         $dowsdl = array(0,1);
@@ -783,7 +797,7 @@ class Interop_Client extends Interop_Base
             }
         }
     }
-    
+
     function showWire($id) {
         $results = $this->dbc->getAll("select * from results where id=$id",NULL, DB_FETCHMODE_ASSOC );
         #$wire = preg_replace("/>/",">\n",$results[0]['wire']);

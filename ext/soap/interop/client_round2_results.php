@@ -60,7 +60,7 @@ if ($_GET['wire']) {
 } else {
     $iop->getEndpoints();
     $iop->getResults();
-    
+
     if ($_GET['test']) {
         $iop->currentTest = $_GET['test'];
         $iop->useWSDL = $_GET['wsdl']?$_GET['wsdl']:0;

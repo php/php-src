@@ -17,7 +17,7 @@ xmlNodePtr get_node_ex(xmlNodePtr node,char *name, char *ns);
 xmlNodePtr get_node_recurisve_ex(xmlNodePtr node,char *name, char *ns);
 xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
-int parse_namespace(char *inval,char **value,char **namespace);
+int parse_namespace(const char *inval,char **value,char **namespace);
 xmlNodePtr check_and_resolve_href(xmlNodePtr data);
 
 int php_stream_xmlIO_match_wrapper(const char *filename);

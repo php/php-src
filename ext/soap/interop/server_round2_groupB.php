@@ -19,69 +19,52 @@
 //
 // $Id$
 //
-require_once 'SOAP/Server.php';
 
 class SOAP_Interop_GroupB {
     var $method_namespace = 'http://soapinterop.org/';
     var $dispatch_map = array();
-    
+
     function SOAP_Interop_GroupB() {
-	$this->dispatch_map['echoStructAsSimpleTypes'] =
-		array('in' => array('inputStruct' => 'SOAPStruct'),
-		      'out' => array('outputString' => 'string', 'outputInteger' => 'int', 'outputFloat' => 'float')
-		      );
-	
-#        $server->addToMap('echoSimpleTypesAsStruct',
-#		      array('outputString' => 'string', 'outputInteger' => 'int', 'outputFloat' => 'float'),
-#		      array('return' => 'struct'));
-#	$server->addToMap('echoNestedStruct', array(), array());
-#	$server->addToMap('echo2DStringArray', array(), array());
-#	$server->addToMap('echoNestedArray', array(), array());
+      $this->dispatch_map['echoStructAsSimpleTypes'] =
+        array('in' => array('inputStruct' => 'SOAPStruct'),
+              'out' => array('outputString' => 'string', 'outputInteger' => 'int', 'outputFloat' => 'float')
+             );
+
     }
+
     function echoStructAsSimpleTypes ($struct)
     {
-	# convert a SOAPStruct to an array
-	$vals = array_values($struct);
-	return array(
-	    new SOAP_Value('outputString','string',$struct['varString']),
-	    new SOAP_Value('outputInteger','int',$struct['varInt']),
-	    new SOAP_Value('outputFloat','float',$struct['varFloat'])
-	    );
-	return array_values($struct);
+      return array('outputString'  => $struct->varString,
+                   'outputInteger' => $struct->varInt,
+                   'outputFloat'   => $struct->varFloat);
     }
 
     function echoSimpleTypesAsStruct($string, $int, $float)
     {
-	# convert a input into struct
-	$ret = new SOAP_Value('return','{http://soapinterop.org/xsd}SOAPStruct',
-		array( #push struct elements into one soap value
-		    new SOAP_Value('varString','string',$string),
-		    new SOAP_Value('varInt','int',(int)$int),
-		    new SOAP_Value('varFloat','float',(FLOAT)$float)
-		)
-	    );
-	return $ret;
+      return (object)array("varString" => $string,
+      										 "varInt"    => $int,
+      										 "varFloat"  => $float);
     }
 
     function echoNestedStruct($struct)
     {
-	return $struct;
+     return $struct;
     }
 
     function echo2DStringArray($ary)
     {
-	$ret = new SOAP_Value('return','Array',$ary);
-	$ret->options['flatten'] = TRUE;
-	return $ret;
+//      $ret->options['flatten'] = TRUE;
+      return $ary;
     }
 
     function echoNestedArray($ary)
     {
-	return $ary;
+      return $ary;
     }
 }
 
-$groupb = new SOAP_Interop_GroupB();
-$server->addObjectMap($groupb);
-
+$server = new SoapServer("http://test-uri");
+$server->bind("http://".$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php");
+$server->setClass("SOAP_Interop_GroupB");
+$server->handle();
 ?>

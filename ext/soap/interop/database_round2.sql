@@ -42,4 +42,3 @@ CREATE TABLE results (
   wire text NOT NULL,
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
-

@@ -1,141 +1,209 @@
 #include "php_soap.h"
 
-int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval ***ret, int *num_params TSRMLS_DC)
+/* SOAP client calls this function to parse response from SOAP server */
+int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value TSRMLS_DC)
 {
 	xmlDocPtr response;
-	xmlNodePtr trav, trav2, env, body, resp, cur, fault;
-	zval **tmp_ret;
+	xmlNodePtr trav, /*trav2,*/ env, body, resp, cur, fault;
+	int param_count = 0;
 
+	ZVAL_NULL(return_value);
+
+	/* Parse XML packet */
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
-	
 	if (!response) {
-		php_error(E_ERROR, "looks like we got no XML document");
+		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got no XML document", NULL, NULL TSRMLS_CC);
+		return FALSE;
 	}
 
-	(*num_params) = 0;
-
+	/* Get <Envelope> element */
+	env = NULL;
 	trav = response->children;
-	FOREACHNODE(trav,"Envelope",env)
-	{
-		trav2 = env->children;
-		FOREACHNODE(trav2,"Body",body)
-		{
-			fault = get_node(body->children,"Fault");
-			if(fault != NULL)
-			{
-				char *faultcode = NULL, *faultstring = NULL, *faultactor = NULL;
-				zval *details = NULL;
-				xmlNodePtr tmp;
+	while (trav != NULL) {
+		if (trav->type == XML_ELEMENT_NODE &&
+		    node_is_equal_ex(trav,"Envelope","http://schemas.xmlsoap.org/soap/envelope/")) {
+	  	if (env != NULL) {
+				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
+				xmlFreeDoc(response);
+				return FALSE;
+	  	}
+	  	env = trav;
+	  }
+	  trav = trav->next;
+	}
+	if (env == NULL) {
+		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML without \"Envelope\" element\n", NULL, NULL TSRMLS_CC);
+		xmlFreeDoc(response);
+		return FALSE;
+	}
 
-				tmp = get_node(fault->children,"faultcode");
-				if(tmp != NULL && tmp->children != NULL)
-					faultcode = tmp->children->content;
+	/* Get <Body> element */
+	body = NULL;
+	trav = env->children;
+	while (trav != NULL) {
+		if (trav->type == XML_ELEMENT_NODE &&
+		    node_is_equal_ex(trav,"Body","http://schemas.xmlsoap.org/soap/envelope/")) {
+	  	if (body != NULL) {
+				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got \"Envelope\" with several \"Body\" elements\n", NULL, NULL TSRMLS_CC);
+				xmlFreeDoc(response);
+				return FALSE;
+	  	}
+	  	body = trav;
+	  }
+	  trav = trav->next;
+	}
+	if (body == NULL) {
+		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got \"Envelope\" without \"Body\" element\n", NULL, NULL TSRMLS_CC);
+		xmlFreeDoc(response);
+		return FALSE;
+	}
 
-				tmp = get_node(fault->children,"faultstring");
-				if(tmp != NULL && tmp->children != NULL)
-					faultstring = tmp->children->content;
+	/* Check if <Body> contains <Fault> element */
+	fault = get_node_ex(body->children,"Fault","http://schemas.xmlsoap.org/soap/envelope/");
+	if(fault != NULL) {
+		char *faultcode = NULL, *faultstring = NULL, *faultactor = NULL;
+		zval *details = NULL;
+		xmlNodePtr tmp;
 
-				tmp = get_node(fault->children,"faultactor");
-				if(tmp != NULL && tmp->children != NULL)
-					faultactor = tmp->children->content;
+		tmp = get_node(fault->children,"faultcode");
+		if (tmp != NULL && tmp->children != NULL) {
+			faultcode = tmp->children->content;
+		}
 
-				tmp = get_node(fault->children,"detail");
-				if(tmp != NULL)
-				{
-					encodePtr enc;
-					enc = get_conversion(UNKNOWN_TYPE);
-					details = enc->to_zval(enc->details, tmp);
+		tmp = get_node(fault->children,"faultstring");
+		if (tmp != NULL && tmp->children != NULL) {
+			faultstring = tmp->children->content;
+		}
+
+		tmp = get_node(fault->children,"faultactor");
+		if (tmp != NULL && tmp->children != NULL) {
+			faultactor = tmp->children->content;
+		}
+
+		tmp = get_node(fault->children,"detail");
+		if (tmp != NULL) {
+			encodePtr enc;
+			enc = get_conversion(UNKNOWN_TYPE);
+			details = enc->to_zval(enc->details, tmp);
+		}
+
+		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
+		xmlFreeDoc(response);
+		return FALSE;
+	}
+
+	/* Parse content of <Body> element */
+	resp = body->children;
+	if (fn != NULL) {
+	  /* Function has WSDL description */
+		sdlParamPtr *h_param, param = NULL;
+		xmlNodePtr val = NULL;
+		char *name, *ns = NULL;
+		zval* tmp;
+
+		if (fn->bindingType == BINDING_SOAP) {
+			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
+			int res_count = zend_hash_num_elements(fn->responseParameters);
+
+			array_init(return_value);
+			zend_hash_internal_pointer_reset(fn->responseParameters);
+			while (zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) == SUCCESS) {
+				param = (*h_param);
+				if (fnb->style == SOAP_DOCUMENT) {
+					name = param->encode->details.type_str;
+					ns = param->encode->details.ns;
+				} else {
+					name = fn->responseName;
+					/* ns = ? */
 				}
 
-				add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
+				/* Get value of parameter */
+				cur = get_node_ex(resp, name, ns);
+				if (!cur) {
+					cur = get_node(resp, name);
+					/* TODO: produce warning invalid ns */
+				}
+				if (cur) {
+					if (fnb->style == SOAP_DOCUMENT) {
+						val = cur;
+					} else {
+						val = get_node(cur->children, param->paramName);
+						if (val == NULL && res_count == 1) {
+							val = get_node(cur->children, "return");
+						}
+					}
+				}
+
+				if (!val) {
+					/* TODO: may be "nil" is not OK? */
+					MAKE_STD_ZVAL(tmp);
+					ZVAL_NULL(tmp);
+/*
+					add_soap_fault(this_ptr, "SOAP-ENV:Client", "Can't find response data", NULL, NULL TSRMLS_CC);
+					xmlFreeDoc(response);
+					return FALSE;
+*/
+				} else {
+					/* Decoding value of parameter */
+					if (param != NULL) {
+						tmp = master_to_zval(param->encode, val);
+					} else {
+						tmp = master_to_zval(get_conversion(UNKNOWN_TYPE), val);
+					}
+				}
+				add_assoc_zval(return_value, param->paramName, tmp);
+				/*add_assoc_zval(return_value, (char*)val->name, tmp);*/
+
+				param_count++;
+
+				zend_hash_move_forward(fn->responseParameters);
 			}
-			else
-			{
-				resp = body->children;
-				if(fn != NULL)
-				{
-					sdlParamPtr *h_param, param = NULL;
-					xmlNodePtr val = NULL;
-					encodePtr enc;
-					char *name, *ns = NULL;
-
-					if(fn->bindingType == BINDING_SOAP)
-					{
-						sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
-
-						zend_hash_internal_pointer_reset(fn->responseParameters);
-						if(zend_hash_get_current_data(fn->responseParameters, (void **)&h_param) != SUCCESS)
-							php_error(E_ERROR, "Can't find response parameter \"%s\"", param->paramName);
-
-						param = (*h_param);
-						if(fnb->style == SOAP_DOCUMENT)
-						{
-							name = (*h_param)->encode->details.type_str;
-							ns = (*h_param)->encode->details.ns;
-						}
-						else
-						{
-							name = fn->responseName;
-							/* ns = ? */
-						}
-
-						cur = get_node_ex(resp, name, ns);
-						/* TODO: produce warning invalid ns */
-						if(!cur)
-							cur = get_node(resp, name);
-						
-						if(!cur)
-							php_error(E_ERROR, "Can't find response data");
-
-
-						if(fnb->style == SOAP_DOCUMENT)
-							val = cur;
-						else
-							val = get_node(cur->children, param->paramName);
-
-						if(!val)
-							php_error(E_ERROR, "Can't find response data");
-
-						tmp_ret = emalloc(sizeof(zval **));
-						if(param != NULL)
-							enc = param->encode;
-						else
-							enc = get_conversion(UNKNOWN_TYPE);
-
-						tmp_ret[0] = master_to_zval(enc, val);
-						(*ret) = tmp_ret;
-						(*num_params) = 1;
-					}
+		}
+	} else {
+	  /* Function hasn't WSDL description */
+		cur = resp;
+		array_init(return_value);
+		while(cur && cur->type != XML_ELEMENT_NODE) {
+			cur = cur->next;
+		}
+		if (cur != NULL) {
+			xmlNodePtr val;
+			val = cur->children;
+			while (val != NULL) {
+				while(val && val->type != XML_ELEMENT_NODE) {
+					val = val->next;
 				}
-				else
-				{
-					cur = resp;
-					while(cur && cur->type != XML_ELEMENT_NODE)
-							cur = cur->next;
-					if(cur != NULL)
-					{
-						xmlNodePtr val;
-						val = cur->children;
-						while(val && val->type != XML_ELEMENT_NODE)
-							val = val->next;
-
-						if(val != NULL)
-						{
-							encodePtr enc;
-							enc = get_conversion(UNKNOWN_TYPE);
-							tmp_ret = emalloc(sizeof(zval **));
-							tmp_ret[0] = master_to_zval(enc, val);
-							(*ret) = tmp_ret;
-							(*num_params) = 1;
-						}
+				if (val != NULL) {
+					encodePtr enc;
+					zval *tmp;
+					enc = get_conversion(UNKNOWN_TYPE);
+					tmp = master_to_zval(enc, val);
+					if (val->name) {
+						add_assoc_zval(return_value, (char*)val->name, tmp);
+					} else {
+						add_next_index_zval(return_value, tmp);
 					}
+					++param_count;
+					val = val->next;
 				}
 			}
 		}
-		ENDFOREACH(trav2);
 	}
-	ENDFOREACH(trav);
+
+	if (Z_TYPE_P(return_value) == IS_ARRAY) {
+		if (param_count == 0) {
+		  zval_dtor(return_value);
+		  ZVAL_NULL(return_value);
+		} else if (param_count == 1) {
+		  zval *tmp = *(zval**)Z_ARRVAL_P(return_value)->pListHead->pData;
+		  tmp->refcount++;
+		  zval_dtor(return_value);
+		  *return_value = *tmp;
+		  FREE_ZVAL(tmp);
+		}
+	}
+
 	xmlFreeDoc(response);
 	return TRUE;
 }

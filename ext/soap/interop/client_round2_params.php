@@ -35,11 +35,11 @@ class SOAP_Test {
     var $show = 1;
     var $debug = 0;
     var $encoding = 'UTF-8';
-    
+
     function SOAP_Test($methodname, $params, $expect = NULL) {
         # XXX we have to do this to make php-soap happy with NULL params
         if (!$params) $params = array();
-        
+
         if (strchr($methodname,'(')) {
             preg_match('/(.*)\((.*)\)/',$methodname,$matches);
             $this->test_name = $methodname;
@@ -48,8 +48,10 @@ class SOAP_Test {
             $this->test_name = $this->method_name = $methodname;
         }
         $this->method_params = $params;
-        $this->expect = $expect;
-        
+        if ($expect !== NULL) {
+          $this->expect = $expect;
+        }
+
         // determine test type
         if ($params) {
         $v = array_values($params);
@@ -58,7 +60,7 @@ class SOAP_Test {
             $this->type = 'soapval';
         }
     }
-    
+
     function setResult($ok, $result, $wire, $error = '', $fault = NULL)
     {
         $this->result['success'] = $ok;
@@ -75,19 +77,19 @@ class SOAP_Test {
     * @param array endpoint_info
     * @param string method
     * @access public
-    */    
+    */
     function showTestResult($debug = 0) {
         // debug output
         if ($debug) $this->show = 1;
         if ($debug) {
             echo str_repeat("-",50)."<br>\n";
         }
-        
+
         echo "testing $this->test_name : ";
         if ($this->headers) {
             foreach ($this->headers as $h) {
                 if (get_class($h) == 'soap_header') {
-                    
+
                     echo "\n    {$h->name},{$h->attributes['SOAP-ENV:actor']},{$h->attributes['SOAP-ENV:mustUnderstand']} : ";
                 } else {
                     if (!$h[4]) $h[4] = SOAP_TEST_ACTOR_NEXT;
@@ -96,22 +98,22 @@ class SOAP_Test {
                 }
             }
         }
-        
+
         if ($debug) {
             print "method params: ";
             print_r($this->params);
             print "\n";
         }
-        
+
         $ok = $this->result['success'];
         if ($ok) {
-            print "SUCCESS\n";
+            print "<font color=\"#00cc00\">SUCCESS</font>\n";
         } else {
             $fault = $this->result['fault'];
             if ($fault) {
-                print "FAILED: {$fault->faultcode} {$fault->faultstring}\n";
+                print "<font color=\"#ff0000\">FAILED: {$fault->faultcode} {$fault->faultstring}</font>\n";
             } else {
-                print "FAILED: ".$this->result['result']."\n";
+                print "<font color=\"#ff0000\">FAILED: ".$this->result['result']."</font>\n";
             }
         }
         if ($debug) {
@@ -151,10 +153,14 @@ class SOAPStruct {
 
 $soap_tests['base'][] = new SOAP_Test('echoString', array('inputString' => 'hello world!'));
 $soap_tests['base'][] = new SOAP_Test('echoString', array('inputString' => soap_value('inputString','hello world',XSD_STRING)));
-$soap_tests['base'][] = new SOAP_Test('echoString(null)', array('inputString' => ""));
-$soap_tests['base'][] = new SOAP_Test('echoString(null)', array('inputString' => soap_value('inputString','',XSD_STRING)));
-$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => 'hello world\nline 2\n'));
-$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => soap_value('inputString','hello world\nline 2\n',XSD_STRING)));
+$soap_tests['base'][] = new SOAP_Test('echoString(empty)', array('inputString' => ''));
+$soap_tests['base'][] = new SOAP_Test('echoString(empty)', array('inputString' => soap_value('inputString','',XSD_STRING)));
+$soap_tests['base'][] = new SOAP_Test('echoString(null)', array('inputString' => NULL));
+$soap_tests['base'][] = new SOAP_Test('echoString(null)', array('inputString' => soap_value('inputString',NULL,XSD_STRING)));
+//$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => ">,<,&,\",',0:\x00",1:\x01,2:\x02,3:\x03,4:\x04,5:\x05,6:\x06,7:\x07,8:\x08,9:\x09,10:\x0a,11:\x0b,12:\x0c,13:\x0d,14:\x0e,15:\x0f,16:\x10,17:\x11,18:\x12,19:\x13,20:\x14,21:\x15,22:\x16,23:\x17,24:\x18,25:\x19,26:\x1a,27:\x1b,28:\x1c,29:\x1d,30:\x1e,31:\x1f"));
+//$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => soap_value('inputString',">,<,&,\",',0:\x00",1:\x01,2:\x02,3:\x03,4:\x04,5:\x05,6:\x06,7:\x07,8:\x08,9:\x09,10:\x0a,11:\x0b,12:\x0c,13:\x0d,14:\x0e,15:\x0f,16:\x10,17:\x11,18:\x12,19:\x13,20:\x14,21:\x15,22:\x16,23:\x17,24:\x18,25:\x19,26:\x1a,27:\x1b,28:\x1c,29:\x1d,30:\x1e,31:\x1f",XSD_STRING)));
+$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => ">,<,&,\",',\\,\n"));
+$soap_tests['base'][] = new SOAP_Test('echoString(entities)', array('inputString' => soap_value('inputString',">,<,&,\",',\\,\n",XSD_STRING)));
 $test = new SOAP_Test('echoString(utf-8)', array('inputString' => utf8_encode('ỗÈéóÒ₧⅜ỗỸ')));
 $test->encoding = 'UTF-8';
 $soap_tests['base'][] = $test;
@@ -170,15 +176,25 @@ $soap_tests['base'][] = new SOAP_Test('echoStringArray',
 $soap_tests['base'][] = new SOAP_Test('echoStringArray',
         array('inputStringArray' =>
             soap_value('inputStringArray',array('good','bad'),SOAP_ENC_ARRAY)));
-        
-// null array test
+
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(one)',
+        array('inputStringArray' => array('good')));
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(one)',
+        array('inputStringArray' =>
+            soap_value('inputStringArray',array('good'),SOAP_ENC_ARRAY)));
+
+// empty array test
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(empty)', array('inputStringArray' => array()));
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(empty)', array('inputStringArray' => soap_value('inputStringArray',array(),SOAP_ENC_ARRAY)));
+
 # XXX NULL Arrays not supported
-#$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => NULL));
-#$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => soap_value('inputStringArray',NULL,XSD_STRING)));
+// null array test
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => NULL));
+$soap_tests['base'][] = new SOAP_Test('echoStringArray(null)', array('inputStringArray' => soap_value('inputStringArray',NULL,SOAP_ENC_ARRAY)));
 
 //***********************************************************
 // Base echoInteger
-
+$x = new SOAP_Test('echoInteger', array('inputInteger' => 34345));
 $soap_tests['base'][] = new SOAP_Test('echoInteger', array('inputInteger' => 34345));
 $soap_tests['base'][] = new SOAP_Test('echoInteger', array('inputInteger' => soap_value('inputInteger',12345,XSD_INT)));
 
@@ -191,12 +207,7 @@ $soap_tests['base'][] = new SOAP_Test('echoIntegerArray',
             soap_value('inputIntegerArray',
                        array(new soapvar(12345,XSD_INT),new soapvar(654321,XSD_INT)),
                     SOAP_ENC_ARRAY)));
-#
-#// null array test
-# XXX NULL Arrays not supported
-#$soap_tests['base'][] = new SOAP_Test('echoIntegerArray(null)', array('inputIntegerArray' => NULL));
-#$soap_tests['base'][] = new SOAP_Test('echoIntegerArray(null)', array('inputIntegerArray' => new SOAP_Value('inputIntegerArray','Array',NULL)));
-#
+
 //***********************************************************
 // Base echoFloat
 
@@ -207,7 +218,7 @@ $soap_tests['base'][] = new SOAP_Test('echoFloat', array('inputFloat' => soap_va
 // Base echoFloatArray
 
 $soap_tests['base'][] = new SOAP_Test('echoFloatArray', array('inputFloatArray' => array(1.3223,34.2,325.325)));
-$soap_tests['base'][] = new SOAP_Test('echoFloatArray', 
+$soap_tests['base'][] = new SOAP_Test('echoFloatArray',
         array('inputFloatArray' =>
             soap_value('inputFloatArray',
                        array(new soapvar(123.45,XSD_FLOAT),new soapvar(654.321,XSD_FLOAT)),
@@ -243,177 +254,179 @@ $soap_tests['base'][] = $test;
 
 $soap_tests['base'][] = new SOAP_Test('echoBase64', array('inputBase64' => 'TmVicmFza2E='));
 $soap_tests['base'][] = new SOAP_Test('echoBase64', array('inputBase64' =>
-        soap_value('inputBase64','TmVicmFza2E=',XSD_BASE64BINARY)));                                                          
+        soap_value('inputBase64','TmVicmFza2E=',XSD_BASE64BINARY)));
 
 //***********************************************************
 // Base echoHexBinary
 
 $soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' => '736F61707834'));
-$soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' => 
-        soap_value('inputHexBinary','736F61707834',XSD_HEXBINARY)));                                                          
+$soap_tests['base'][] = new SOAP_Test('echoHexBinary', array('inputHexBinary' =>
+        soap_value('inputHexBinary','736F61707834',XSD_HEXBINARY)));
 
 //***********************************************************
 // Base echoDecimal
 
 # XXX test fails because php-soap incorrectly sets decimal to long rather than float
-$soap_tests['base'][] = new SOAP_Test('echoDecimal', array('inputDecimal' => 12345.67890));
-$soap_tests['base'][] = new SOAP_Test('echoDecimal', array('inputDecimal' => 
-        soap_value('inputDecimal',12345.67890,XSD_DECIMAL)));                                                          
+$soap_tests['base'][] = new SOAP_Test('echoDecimal', array('inputDecimal' => '12345.67890'));
+$soap_tests['base'][] = new SOAP_Test('echoDecimal', array('inputDecimal' =>
+        soap_value('inputDecimal','12345.67890',XSD_DECIMAL)));
 
 //***********************************************************
 // Base echoDate
 
 # php-soap doesn't handle datetime types properly yet
 $soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' => '2001-05-24T17:31:41Z'));
-$soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' => 
+$soap_tests['base'][] = new SOAP_Test('echoDate', array('inputDate' =>
         soap_value('inputDate','2001-05-24T17:31:41Z',XSD_DATETIME)));#'2001-04-25T13:31:41-0700'
-        
+
 //***********************************************************
 // Base echoBoolean
 
 # php-soap sends boolean as zero or one, which is ok, but to be explicit, send true or false.
-$soap_tests['base'][] = new SOAP_Test('echoBoolean', array('inputBoolean' => TRUE));
-$soap_tests['base'][] = new SOAP_Test('echoBoolean', array('inputBoolean' =>
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(true)', array('inputBoolean' => TRUE));
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(true)', array('inputBoolean' =>
         soap_value('inputBoolean',TRUE,XSD_BOOLEAN)));
-$soap_tests['base'][] = new SOAP_Test('echoBoolean', array('inputBoolean' => FALSE));
-$soap_tests['base'][] = new SOAP_Test('echoBoolean', array('inputBoolean' =>
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(false)', array('inputBoolean' => FALSE));
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(false)', array('inputBoolean' =>
         soap_value('inputBoolean',FALSE,XSD_BOOLEAN)));
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(1)', array('inputBoolean' => 1),true);
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(1)', array('inputBoolean' =>
+        soap_value('inputBoolean',1,XSD_BOOLEAN)),true);
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(0)', array('inputBoolean' => 0),false);
+$soap_tests['base'][] = new SOAP_Test('echoBoolean(0)', array('inputBoolean' =>
+        soap_value('inputBoolean',0,XSD_BOOLEAN)),false);
 
-#
-#
-#//***********************************************************
-#// GROUP B
-#
-#
-#//***********************************************************
-#// GroupB echoStructAsSimpleTypes
-#
-#$expect = array(
-#        'outputString'=>'arg',
-#        'outputInteger'=>34,
-#        'outputFloat'=>325.325
-#    );
-#$soap_tests['GroupB'][] = new SOAP_Test('echoStructAsSimpleTypes',
-#    array('inputStruct' => array(
-#        'varString'=>'arg',
-#        'varInt'=>34,
-#        'varFloat'=>325.325
-#    )), $expect);
-#$soap_tests['GroupB'][] = new SOAP_Test('echoStructAsSimpleTypes',
-#    array('inputStruct' =>
-#        new SOAP_Value('inputStruct','SOAPStruct',
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325)
-#            ))), $expect);
-#
-#//***********************************************************
-#// GroupB echoSimpleTypesAsStruct
-#
-#$expect =
-#    array(
-#        'varString'=>'arg',
-#        'varInt'=>34,
-#        'varFloat'=>325.325
-#    );
-#$soap_tests['GroupB'][] = new SOAP_Test('echoSimpleTypesAsStruct',
-#    array(
-#        'inputString'=>'arg',
-#        'inputInteger'=>34,
-#        'inputFloat'=>325.325
-#    ), $expect);
-#$soap_tests['GroupB'][] = new SOAP_Test('echoSimpleTypesAsStruct',
-#    array(
-#        new SOAP_Value('inputString','string','arg'),
-#        new SOAP_Value('inputInteger','int',34),
-#        new SOAP_Value('inputFloat','float',325.325)
-#    ), $expect);    
-#
-#//***********************************************************
-#// GroupB echo2DStringArray
-#
-#$soap_tests['GroupB'][] = new SOAP_Test('echo2DStringArray',
-#    array('input2DStringArray' => make_2d(3,3)));
-#
-#$multidimarray =
-#    new SOAP_Value('input2DStringArray','Array',
-#        array(
-#            array(
-#                new SOAP_Value('item','string','row0col0'),
-#                new SOAP_Value('item','string','row0col1'),
-#                new SOAP_Value('item','string','row0col2')
-#                 ),
-#            array(
-#                new SOAP_Value('item','string','row1col0'),
-#                new SOAP_Value('item','string','row1col1'),
-#                new SOAP_Value('item','string','row1col2')
-#                )
-#        )
-#    );
-#$multidimarray->options['flatten'] = TRUE;
-#$soap_tests['GroupB'][] = new SOAP_Test('echo2DStringArray',
-#    array('input2DStringArray' => $multidimarray));
-#
-#//***********************************************************
-#// GroupB echoNestedStruct
-#
-#$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
-#    array('inputStruct' => array(
-#        'varString'=>'arg',
-#        'varInt'=>34,
-#        'varFloat'=>325.325,
-#        'varStruct' => array(
-#            'varString'=>'arg',
-#            'varInt'=>34,
-#            'varFloat'=>325.325
-#        )
-#    )));
-#$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
-#    array('inputStruct' =>
-#        new SOAP_Value('inputStruct','struct',
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325),
-#                new SOAP_Value('varStruct','SOAPStruct',
-#                    array( #push struct elements into one soap value
-#                        new SOAP_Value('varString','string','arg'),
-#                        new SOAP_Value('varInt','int',34),
-#                        new SOAP_Value('varFloat','float',325.325)
-#                    )
-#                /*,NULL,'http://soapinterop.org/xsd'*/)
-#            )
-#        )));
-#
-#//***********************************************************
-#// GroupB echoNestedArray
-#
-#$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
-#    array('inputStruct' => array(
-#        'varString'=>'arg',
-#        'varInt'=>34,
-#        'varFloat'=>325.325,
-#        'varArray' => array('red','blue','green')
-#    )));
-#$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
-#    array('inputStruct' =>
-#        new SOAP_Value('inputStruct','struct',
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325),
-#                new SOAP_Value('varArray','Array',
-#                    array( #push struct elements into one soap value
-#                        new SOAP_Value('item','string','red'),
-#                        new SOAP_Value('item','string','blue'),
-#                        new SOAP_Value('item','string','green')
-#                    )
-#                )
-#            )
-#        )));
-#        
-#
+
+
+//***********************************************************
+// GROUP B
+
+
+//***********************************************************
+// GroupB echoStructAsSimpleTypes
+
+$expect = array(
+        'outputString'=>'arg',
+        'outputInteger'=>34,
+        'outputFloat'=>325.325
+    );
+$soap_tests['GroupB'][] = new SOAP_Test('echoStructAsSimpleTypes',
+    array('inputStruct' => (object)array(
+        'varString'=>'arg',
+        'varInt'=>34,
+        'varFloat'=>325.325
+    )), $expect);
+$soap_tests['GroupB'][] = new SOAP_Test('echoStructAsSimpleTypes',
+    array('inputStruct' =>
+          soap_value('inputStruct',
+            (object)array('varString' => 'arg',
+                					'varInt'    => 34,
+                          'varFloat'  => 325.325
+            ), SOAP_ENC_OBJECT)), $expect);
+
+//***********************************************************
+// GroupB echoSimpleTypesAsStruct
+
+$expect =
+    (object)array(
+        'varString'=>'arg',
+        'varInt'=>34,
+        'varFloat'=>325.325
+    );
+$soap_tests['GroupB'][] = new SOAP_Test('echoSimpleTypesAsStruct',
+    array(
+        'inputString'=>'arg',
+        'inputInteger'=>34,
+        'inputFloat'=>325.325
+    ), $expect);
+$soap_tests['GroupB'][] = new SOAP_Test('echoSimpleTypesAsStruct',
+    array(
+        soap_value('inputString','arg', XSD_STRING),
+        soap_value('inputInteger',34, XSD_INT),
+        soap_value('inputFloat',325.325, XSD_FLOAT)
+    ), $expect);
+
+//***********************************************************
+// GroupB echo2DStringArray
+
+$soap_tests['GroupB'][] = new SOAP_Test('echo2DStringArray',
+    array('input2DStringArray' => make_2d(3,3)));
+
+$multidimarray =
+    soap_value('input2DStringArray',
+        array(
+            array('row0col0', 'row0col1', 'row0col2'),
+            array('row1col0', 'row1col1', 'row1col2')
+        ), SOAP_ENC_ARRAY
+    );
+//$multidimarray->options['flatten'] = TRUE;
+$soap_tests['GroupB'][] = new SOAP_Test('echo2DStringArray',
+    array('input2DStringArray' => $multidimarray));
+
+//***********************************************************
+// GroupB echoNestedStruct
+
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
+    array('inputStruct' => (object)array(
+        'varString'=>'arg',
+        'varInt'=>34,
+        'varFloat'=>325.325,
+        'varStruct' => (object)array(
+            'varString'=>'arg',
+            'varInt'=>34,
+            'varFloat'=>325.325
+        )
+    )));
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedStruct',
+    array('inputStruct' =>
+        soap_value('inputStruct',
+						(object)array(
+				        'varString'=>'arg',
+        				'varInt'=>34,
+				        'varFloat'=>325.325,
+        				'varStruct' => (object)array(
+				            'varString'=>'arg',
+        				    'varInt'=>34,
+				            'varFloat'=>325.325
+        				)
+//            array( #push struct elements into one soap value
+//                soap_value('varString','arg', XSD_STRING),
+//                soap_value('varInt',34, XSD_INT),
+//                soap_value('varFloat',325.325,XSD_FLOAT),
+//                soap_value('varStruct',
+//                    (object)array('varString' => 'arg',
+//                                  'varInt'    => 34,
+//                                  'varFloat'  => 325.325
+//                    ), SOAP_ENC_OBJECT
+            ), SOAP_ENC_OBJECT
+        )));
+
+//***********************************************************
+// GroupB echoNestedArray
+
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
+    array('inputStruct' => (object)array(
+        'varString'=>'arg',
+        'varInt'=>34,
+        'varFloat'=>325.325,
+        'varArray' => array('red','blue','green')
+    )));
+$soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
+    array('inputStruct' =>
+        soap_value('inputStruct',
+            (object)array('varString' => 'arg',
+                          'varInt'    => 34,
+                          'varFloat'  => 325.325,
+                          'varArray'  =>
+                    array("red", "blue", "green")
+//                        soap_value('item','red', XSD_STRING),
+//                        soap_value('item','blue', XSD_STRING),
+//                        soap_value('item','green', XSD_STRING)
+//                    )
+                ), SOAP_ENC_OBJECT
+        )));
+
+
 #//***********************************************************
 #// GROUP C header tests
 #

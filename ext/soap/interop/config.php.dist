@@ -1,0 +1,4 @@
+<?php
+// configuration items
+$interopConfig['DSN'] = 'mysql://root@localhost/soapinterop';
+?>
