@@ -50,18 +50,6 @@ typedef struct _zend_ini_parser_param {
 int ini_lex(zval *ini_lval);
 int ini_parse(void *ini_parser_param);
 
-#define PARSING_MODE_CFG		0
-#define PARSING_MODE_BROWSCAP	1
-#define PARSING_MODE_STANDALONE	2
-
-static HashTable configuration_hash;
-extern HashTable browser_hash;
-ZEND_API extern char *php_ini_path;
-static HashTable *active_hash_table;
-static zval *current_section;
-
-static int parsing_mode;
-
 zval yylval;
 
 #ifndef ZTS
