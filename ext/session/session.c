@@ -641,7 +641,7 @@ static void strcat_gmt(char *ubuf, time_t *when)
 
 static void last_modified(void)
 {
-	char *path;
+	const char *path;
 	struct stat sb;
 	char buf[MAX_STR + 1];
 	SLS_FETCH();
