@@ -24,7 +24,7 @@ AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
     /var/run/mysql/mysql.sock \
     /var/lib/mysql/mysql.sock \
     /var/mysql/mysql.sock \
-    /usr/local/mysql/var/mysql.sock \	
+    /usr/local/mysql/var/mysql.sock \
     /Private/tmp/mysql.sock \
     /tmp/mysql.sock \
   ; do
