@@ -312,7 +312,6 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 		FETCH_GMP_ZVAL(gmpnum_b, b_arg);
 	}
 
-	convert_to_long_ex(b_arg);
 	if (!Z_LVAL_PP(b_arg)) {
 		RETURN_FALSE;
 	}
@@ -358,7 +357,6 @@ static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, z
 		FETCH_GMP_ZVAL(gmpnum_b, b_arg);
 	}
 
-	convert_to_long_ex(b_arg);
 	if (!Z_LVAL_PP(b_arg)) {
 		RETURN_FALSE;
 	}
