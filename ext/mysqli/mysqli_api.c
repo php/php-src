@@ -96,12 +96,22 @@ PHP_FUNCTION(mysqli_bind_param)
 	PR_COMMAND		*prcommand;
 	unsigned long	rc;
 
-	/* check if number of parameters > 2 and odd */
-	if (argc < 3 || !(argc & 1)) {
-		WRONG_PARAM_COUNT;
-	} else {
-		num_vars = (argc - 1) / 2;
+	/* calculate and check number of parameters */
+	num_vars = argc;
+	if (!getThis()) {
+		/* ignore handle parameter in procedural interface*/
+		--num_vars; 
 	}
+	if (num_vars % 2) {
+		/* we need variable/type pairs */
+		WRONG_PARAM_COUNT;
+	}
+	if (num_vars < 2) {
+		/* there has to be at least one pair */
+		WRONG_PARAM_COUNT;
+	}
+	num_vars /= 2;
+	   
 
 	args = (zval ***)emalloc(argc * sizeof(zval **));
 
@@ -229,7 +239,7 @@ PHP_FUNCTION(mysqli_bind_result)
 	PR_STMT		*prstmt;
 	PR_COMMAND	*prcommand;
 
-	if (argc < 2)  {
+	if (argc < (getThis() ? 1 : 2))  {
 		WRONG_PARAM_COUNT;
 	}
 	
