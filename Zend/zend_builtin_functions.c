@@ -502,10 +502,11 @@ ZEND_FUNCTION(get_class)
 	}
 
 	if (Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
-	   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-		zend_class_entry *ce, **_ce;
+		Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
+		zend_class_entry *ce;
 
-		if (((_ce = zend_get_class_entry(*arg)) == NULL) || ((ce = *_ce) == NULL)) {
+		ce = zend_get_class_entry(*arg);
+		if (!ce) {
 			RETURN_FALSE;
 		}
 
@@ -532,19 +533,20 @@ ZEND_FUNCTION(get_parent_class)
 	if (Z_TYPE_PP(arg) == IS_OBJECT) {
 		char *name;
 		zend_uint name_length;
-		
-		if (Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
-		   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) != SUCCESS) {
-			zend_class_entry *ce, **_ce;
 
-			if (!(_ce = zend_get_class_entry(*arg)) || !(ce = *_ce) || !(ce = ce->parent)) {
-				RETURN_FALSE;
-			}
-
+		/* first try asking handler for parent class name */
+		if (Z_OBJ_HT_PP(arg)->get_class_name != NULL &&
+			Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
 			name = ce->name;
 			name_length = ce->name_length;
+
+			RETURN_STRINGL(name, name_length, 1);
 		}
-		RETURN_STRINGL(name, name_length, 1);
+		/* then try getting the class entry
+		   if successfull, will fall through to standard ce handling */
+		if(!Z_OBJ_HT_PP(arg)->get_class_entry || !(ce = zend_get_class_entry(*arg))) {
+			RETURN_FALSE;
+		}
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {
 		zend_class_entry **pce;
 		

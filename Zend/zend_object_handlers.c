@@ -215,6 +215,14 @@ static int zend_std_has_property(zval *object, zval *member, int check_empty TSR
 	return result;
 }
 
+zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC)
+{
+	zend_object *zobj;
+	zobj = Z_OBJ_P(object);
+
+	return zobj->ce;
+}
+
 zend_object_handlers std_object_handlers = {
 	zend_objects_add_ref,                    /* add_ref */
 	zend_objects_del_ref,                    /* del_ref */
@@ -233,8 +241,8 @@ zend_object_handlers std_object_handlers = {
 	zend_std_get_method,                     /* get_method */
 	NULL,                                    /* call_method */
 	zend_std_get_constructor,                /* get_constructor */
-	NULL,                                    /* get_class_entry */
-	NULL,                                    /* get_class */
+	zend_std_object_get_class,               /* get_class_entry */
+	NULL,                                    /* get_class_name */
 	zend_std_compare_objects                 /* compare_objects */
 };
 
