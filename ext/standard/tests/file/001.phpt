@@ -12,7 +12,7 @@ if (file_exists('test.file')) {
     echo "test.file does not exist\n";
 }
 fclose (fopen('test.file', 'w'));
-chmod ('test.file', 0654);
+chmod ('test.file', 0744);
 if (file_exists('test.file')) {
     echo "test.file exists\n";
 } else {
@@ -134,11 +134,11 @@ test.link lstat and stat differ at element 9
 test.link lstat and stat differ at element 10
 test.file is file
 test.link is link
-test.file permissions are 0654
+test.file permissions are 0744
 test.file size is 0
 test.file is writeable
 test.file is readable
-test.file is not executable
+test.file is executable
 test.file is not executable
 test.file is a regular file
 test.link is a regular file
