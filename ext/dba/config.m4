@@ -152,10 +152,19 @@ AC_ARG_WITH(db3,
 [  --with-db3[=DIR]        Include Berkeley DB3 support],[
   if test "$withval" != "no"; then
     for i in /usr/local /usr /usr/local/BerkeleyDB.3.0 $withval; do
-      if test -f "$i/include/db3/db.h"; then
+      if test -f "$i/db3/db.h"; then
+        THIS_PREFIX=$i
+        DB3_EXTRA=db3
+      elif test -f "$i/include/db3/db.h"; then
         THIS_PREFIX=$i
         DB3_EXTRA=db3/db.h
-      elif test -f "$i/include/db.h" ; then
+      elif test -f "$i/include/db/db3.h"; then
+        THIS_PREFIX=$i
+        DB3_EXTRA=db/db3.h
+      elif test -f "$i/include/db3.h"; then
+        THIS_PREFIX=$i
+        DB3_EXTRA=db3.h
+      elif test -f "$i/include/db.h" ; 
         THIS_PREFIX=$i
         DB3_EXTRA=db.h
       fi
