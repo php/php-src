@@ -35,7 +35,7 @@ typedef struct {
 
 
 BEGIN_EXTERN_C()
-void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini);
+ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini);
 int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini);
 int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini);
 END_EXTERN_C()

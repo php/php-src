@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDebug_TS" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /D "NDebug_TS" /D "WIN32" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /D "TSRM_EXPORTS" /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDebug_TS" /D "_LIB" /D "TSRM_EXPORTS" /D "LIBZEND_EXPORTS" /D "ZTS" /D "WIN32" /D "_MBCS" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x40d /d "NDebug_TS"
 # ADD RSC /l 0x40d /d "NDebug_TS"
@@ -61,7 +61,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug_TS" /D "WIN32" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /D "TSRM_EXPORTS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "." /D "_Debug_TS" /D "WIN32" /D "_MBCS" /D "_LIB" /D "LIBZEND_EXPORTS" /D "ZTS" /D "TSRM_EXPORTS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug_TS"
 # ADD RSC /l 0x40d /d "_Debug_TS"
 BSC32=bscmake.exe
@@ -80,10 +80,6 @@ LIB32=link.exe -lib
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Source File
-
-SOURCE=".\zend-parser.c"
-# End Source File
 # Begin Source File
 
 SOURCE=".\zend-scanner.cpp"
@@ -312,6 +308,14 @@ BuildCmds= \
 SOURCE=".\zend-scanner.l"
 
 !IF  "$(CFG)" == "libzendts - Win32 Release_TS"
+
+# Begin Custom Build
+InputPath=".\zend-scanner.l"
+
+"zend-scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -+ -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
+
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "libzendts - Win32 Debug_TS"
 

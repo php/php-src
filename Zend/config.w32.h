@@ -31,7 +31,7 @@ typedef unsigned int uint;
 #define DL_HANDLE			HMODULE
 #define ZEND_EXTENSIONS_SUPPORT 1
 
-#ifdef COMPILE_LIBZEND
+#ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)
 #else
 #	define ZEND_API __declspec(dllimport)
