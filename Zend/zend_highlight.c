@@ -202,14 +202,22 @@ ZEND_API void zend_strip(TSRMLS_D)
 		}
 
 		switch (token_type) {
-			case 349:
+			case T_CLASS:
 				break;
 
 			default: {
-					char c, *ptr=LANG_SCNG(yy_text), *end=LANG_SCNG(yy_text)+LANG_SCNG(yy_leng);
-					while (ptr<end) {
-						c = *ptr++;
-						putchar(c);
+					char *ptr = LANG_SCNG(yy_text);
+
+					if (token_type != T_END_HEREDOC) {
+						fwrite(ptr, LANG_SCNG(yy_leng), 1, stdout);
+					} else {
+						fwrite(ptr, LANG_SCNG(yy_leng) - 1, 1, stdout);
+						/* The ensure that we only write one ; and that it followed by the required newline */
+						putchar('\n');
+						if (ptr[LANG_SCNG(yy_leng) - 1] == ';') {
+							lex_scan(&token TSRMLS_CC);
+						}
+						efree(token.value.str.val);
 					}
 				}
 				break;
@@ -227,14 +235,6 @@ ZEND_API void zend_strip(TSRMLS_D)
 				default:
 					efree(token.value.str.val);
 					break;
-			}
-		} else if (token_type == T_END_HEREDOC) {
-			zend_bool has_semicolon=(strchr(token.value.str.val, ';')?1:0);
-
-			efree(token.value.str.val);
-			if (has_semicolon) {
-				/* the following semicolon was unput(), ignore it */
-				lex_scan(&token TSRMLS_CC);
 			}
 		}
 		token.type = 0;
