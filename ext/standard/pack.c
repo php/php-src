@@ -167,7 +167,7 @@ PHP_FUNCTION(pack)
 			case 'X':	
 			case '@':
 				if (arg < 0) {
-					php_error(E_WARNING, "pack type %c: '*' ignored", code);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: '*' ignored", code);
 					arg = 1;
 				}
 				break;
@@ -181,7 +181,7 @@ PHP_FUNCTION(pack)
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
-					php_error(E_WARNING, "pack type %c: not enough arguments", code);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough arguments", code);
 					RETURN_FALSE;
 				}
 
@@ -217,7 +217,7 @@ PHP_FUNCTION(pack)
 					efree(argv);
 					efree(formatcodes);
 					efree(formatargs);
-					php_error(E_WARNING, "pack type %c: too few arguments", code);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: too few arguments", code);
 					RETURN_FALSE;
 				}
 				break;
@@ -226,7 +226,7 @@ PHP_FUNCTION(pack)
 				efree(argv);
 				efree(formatcodes);
 				efree(formatargs);
-				php_error(E_WARNING, "pack type %c: unknown format code", code);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: unknown format code", code);
 				RETURN_FALSE;
 		}
 
@@ -235,7 +235,7 @@ PHP_FUNCTION(pack)
 	}
 
 	if (currentarg < argc) {
-		php_error(E_WARNING, "pack %d arguments unused", (argc - currentarg));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d arguments unused", (argc - currentarg));
 	}
 
 	/* Calculate output length and upper bound while processing*/
@@ -288,7 +288,7 @@ PHP_FUNCTION(pack)
 				outputpos -= arg;
 
 				if (outputpos < 0) {
-					php_error(E_WARNING, "pack type %c: outside of string", code);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", code);
 					outputpos = 0;
 				}
 				break;
@@ -335,7 +335,7 @@ PHP_FUNCTION(pack)
 				v = Z_STRVAL_PP(val);
 				outputpos--;
 				if(arg > Z_STRLEN_PP(val)) {
-					php_error(E_WARNING, "pack type %c: not enough characters in string", code);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
 					arg = Z_STRLEN_PP(val);
 				}
 
@@ -349,7 +349,7 @@ PHP_FUNCTION(pack)
 					} else if (n >= 'a' && n <= 'f') {
 						n -= ('a' - 10);
 					} else {
-						php_error(E_WARNING, "pack type %c: illegal hex digit %c", code, n);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: illegal hex digit %c", code, n);
 						n = 0;
 					}
 
@@ -804,7 +804,7 @@ PHP_FUNCTION(unpack)
 							i = arg - 1;		/* Break out of for loop */
 
 							if (arg >= 0) {
-								php_error(E_WARNING, "pack type %c: outside of string", type);
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
 							}
 						}
 						break;
@@ -813,7 +813,7 @@ PHP_FUNCTION(unpack)
 						if (arg <= inputlen) {
 							inputpos = arg;
 						} else {
-							php_error(E_WARNING, "pack type %c: outside of string", type);
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
 						}
 
 						i = arg - 1;	/* Done, break out of for loop */
@@ -825,7 +825,7 @@ PHP_FUNCTION(unpack)
 				/* Reached end of input for '*' repeater */
 				break;
 			} else {
-				php_error(E_WARNING, "pack type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough input, need %d, have %d", type, size, inputlen - inputpos);
 				zval_dtor(return_value);
 				RETURN_FALSE;
 			}

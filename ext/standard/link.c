@@ -68,7 +68,7 @@ PHP_FUNCTION(readlink)
 	ret = readlink(Z_STRVAL_PP(filename), buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
-		php_error(E_WARNING, "readlink failed (%s)", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
@@ -97,7 +97,7 @@ PHP_FUNCTION(linkinfo)
 
 	ret = VCWD_LSTAT(Z_STRVAL_PP(filename), &sb);
 	if (ret == -1) {
-		php_error(E_WARNING, "Linkinfo failed (%s)", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_LONG(-1L);
 	}
 
@@ -126,7 +126,7 @@ PHP_FUNCTION(symlink)
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
-		php_error(E_WARNING, "Unable to symlink to a URL");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to symlink to a URL");
 		RETURN_FALSE;	
 	}
 
@@ -152,7 +152,7 @@ PHP_FUNCTION(symlink)
 	ret = symlink(dest_p, source_p);
 #endif	
 	if (ret == -1) {
-		php_error(E_WARNING, "Symlink failed (%s)", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -181,7 +181,7 @@ PHP_FUNCTION(link)
 	if (php_stream_locate_url_wrapper(source_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ||
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
-		php_error(E_WARNING, "Unable to link to a URL");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
 		RETURN_FALSE;	
 	}
 
@@ -207,7 +207,7 @@ PHP_FUNCTION(link)
 	ret = link(dest_p, source_p);	
 #endif	
 	if (ret == -1) {
-		php_error(E_WARNING, "Link failed (%s)", strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 

@@ -221,7 +221,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 				ua[ua_len] = 0;
 				php_stream_write(stream, ua, ua_len);
 			} else {
-				php_error(E_WARNING, "Cannot construct User-agent header");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot construct User-agent header");
 			}
 
 			if (ua) {
