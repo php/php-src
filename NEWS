@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Added function fribidi_get_charsets() (Tal)
+- Added function fribidi_charset_info() (Tal)
+- fixes bugs #19156 and #19544 (memleak)
+- Added Oracle TIMESTAMP type to oci8 extension. (thies)
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
