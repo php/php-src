@@ -1031,19 +1031,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
-				if (tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) {
+				if ((tmp = php_mb_strrchr(filename, '/' TSRMLS_CC)) > s) {
 					s = tmp;
 				}
 				num_vars--;
 			} else {
 				s = strrchr(filename, '\\');
-				if (tmp = strrchr(filename, '/')) {
+				if ((tmp = strrchr(filename, '/')) > s) {
 					s = tmp;
 				}
 			}
 #else
 			s = strrchr(filename, '\\');
-			if (tmp = strrchr(filename, '/')) {
+			if ((tmp = strrchr(filename, '/')) > s) {
 				s = tmp;
 			}
 #endif
