@@ -32,7 +32,19 @@
 
 /* See php_rand.h for information about layout */
 
-#define SRAND_A_RANDOM_SEED (time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
+#if 0
+#define RANDGEN_ENTRY(intval, lower, upper, has_seed) \
+	php_randgen_entry[intval] = { \
+		(has_seed) ? php_rand_##lower : NULL, \
+		php_rand_##lower, \
+		PHP_RANDMAX_##upper, \
+		"lower" \
+	};
+#endif
+
+#define FOREACH_RANDGEN(var,i) for ( (var) = php_randgen_entry[(i)=0] ; (var) < PHP_RAND_NUMGENS ; (var) = php_randgen_entry[++(i)] )
+
+php_randgen_entry php_randgen_entries[PHP_RAND_NUMGENS];
 
 /* TODO: check that this function is called on the start of each script
  * execution: not more often, not less often.
@@ -43,29 +55,30 @@
  */
 PHP_RINIT_FUNCTION(rand)
 {
+	register php_randgen_entry *randgen;
+	register int i;
+
 	/* seed all number-generators */
 	/* FIXME: or seed relevant numgen on init/update ini-entry? */
-	php_srand_sys(SRAND_A_RANDOM_SEED);
-	php_srand_mt(SRAND_A_RANDOM_SEED);
+	FOREACH_RANDGEN(randgen,i) {
+		if (randgen.srand) {
+#define SRAND_A_RANDOM_SEED (time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
+			randgen->srand(SRAND_A_RANDOM_SEED);
+		}
+	}
 }
 
 /* INI */
 static int randgen_str_to_int(char *str, int strlen)
 {
-	/* manually check all cases, or some loop to automate this
-	 * kind of stuff, so that a new random number generator
-	 * can be added more easily?
-	 *
-	 * --jeroen
-	 */
-	if (!strcasecmp(str,RAND_SYS_STR)) {
-		return RAND_SYS;
-	} else if (!strcasecmp(str,RAND_MT_STR)) {
-		return RAND_MT;
-	} else if (!strcasecmp(str,RAND_LCG_STR)) {
-		return RAND_LCG;
+	register php_randgen_entry *randgen;
+	register int i;
+
+	FOREACH_RANDGEN(randgen,i) {
+		if (!strcasecmp(str, randgen.ini_str))
+			return i;
 	}
-	return 0; /* FIXME: include that f*** .h that has FALSE */
+	return -1;
 }
 	
 /* FIXME: check that this is called on initial ini-parsing too */
@@ -75,7 +88,7 @@ static PHP_INI_MH(OnUpdateRandGen)
 	/* Set BG(rand_generator) to the correct integer value indicating
 	 * ini-setting */
 	BG(rand_generator) = randgen_str_to_int(new_value, new_value_length);
-	if (!BG(rand_generator)) {
+	if (BG(rand_generator) == -1) {
 		/* FIXME: is this possible? What happens if this occurs during
 		 * ini-parsing at startup? */
 		php_error(E_WARNING,"Invalid value for random_number_generator: \"%s\"", new_value);
@@ -89,7 +102,7 @@ static PHP_INI_MH(OnUpdateRandGen)
 }
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("random_number_generator",	RAND_DEFAULT_STR,	PHP_INI_ALL,		OnUpdateRandGen)
+	PHP_INI_ENTRY("random_number_generator", PHP_RAND_INISTR(PHP_RAND_DEFAULT), PHP_INI_ALL, OnUpdateRandGen)
 PHP_INI_END()
 
 /* srand */
@@ -97,25 +110,8 @@ PHP_INI_END()
 /* {{{ PHPAPI void php_srand(void) */
 PHPAPI void php_srand(void)
 {
-	/* php_srand_2( 1e6d * microtime() , protocol-specified-in-php.ini ) */
-	php_error(E_ERROR,"Not yet implemented");
-}
-/* }}} */
-
-/* {{{ void php_srand2(long seed, int alg) */
-static inline void php_srand2(long seed, int alg)
-{
-	switch (alg) {
-		case RAND_SYS:
-			php_srand_sys(seed);
-			return;
-		case RAND_MT:
-			php_srand_mt(seed TSRMLS_CC);
-			return;
-		default:
-			php_error(E_ERROR,"Bug, please report (php_srand2-%d)",alg);
-			return;
-	}
+	BG(rand_generator_current) = BG(rand_generator);
+	PHP_SRAND(BG(rand_generator), SRAND_A_RANDOM_SEED);
 }
 /* }}} */
 
@@ -131,18 +127,19 @@ PHP_FUNCTION(name)							\
 	zend_get_parameters_ex(1, &arg);		\
 	convert_to_long_ex(arg);				\
 											\
-	php_srand2((*arg)->value.lval, type); 	\
+	BG(rand_generator_current) = type;		\
+	PHP_SRAND(type, Z_LVAL_PP(arg)); 		\
 }
 /* }}} */
 
 /* {{{ proto void srand(int seed)
    Seeds random number generator */
-pim_srand_common(srand,RAND_SYS)
+pim_srand_common(srand,PHP_RAND_SYS)
 /* }}} */
 
 /* {{{ proto void mt_srand(int seed)
    Seeds random number generator */
-pim_srand_common(mt_srand,RAND_MT)
+pim_srand_common(mt_srand,PHP_RAND_MT)
 /* }}} */
 
 /* rand */
@@ -150,13 +147,12 @@ pim_srand_common(mt_srand,RAND_MT)
 /* {{{ PHPAPI long php_rand(void) */
 PHPAPI long php_rand(void)
 {
-	/* algorithm = BG(current_alg) */
-	return php_rand_sys();
+	return PHP_RAND(BG(rand_generator_current));
 }
 /* }}} */
 
-/* {{{ macro: php_map_a_range */
-#define php_map_a_range(number,min,max,MAX) {  \
+/* {{{ macro: PHP_RAND_RANGE */
+#define PHP_RAND_RANGE(which,min,max,result) {  \
     /*
      * A bit of tricky math here.  We want to avoid using a modulus because
      * that simply tosses the high-order bits and might skew the distribution
@@ -178,66 +174,48 @@ PHPAPI long php_rand(void)
 	 *  chance, it's ignored.
 	 *
 	 *  --Rasmus and Jeroen
-     */                            \
-	if ((max) < (min)) {		\
+     */								\
+	(result) = PHP_RAND(which);		\
+	if ((max) < (min)) {			\
 		php_error(E_WARNING, "%s():  Invalid range:  %ld..%ld (minimum can't be larger than maximum)", \
 			get_active_function_name(TSRMLS_C), (min), (max)); \
-	} else if ( (max) - (min) > (MAX) ) { \
+	} else if ( (max) - (min) > PHP_RANDMAX(which) ) { \
 		/* TODO: this can done better, get two numbers and combine... */ \
 		php_error(E_WARNING, "%s():  Invalid range:  %ld..%ld (can't give that much randomness)",  \
 			get_active_function_name(TSRMLS_C), (min), (max)); \
 	} \
-	(number) = (min) + (int) ((double)((max)-(min)+1) * (number)/(MAX+1.0)); \
-}
-/* }}} */
-
-/* {{{ long php_rand_range2(long min, long max, int alg) 
- *  Temporary hack function */
-static inline long php_rand_range2(long min, long max, int alg)
-{
-	long number;
-	
-	switch (alg) {
-		case RAND_SYS:
-			number = php_rand_sys();
-			php_map_a_range(number,min,max,php_randmax_sys());
-			return number;
-		case RAND_MT:
-			number = php_rand_mt();
-			php_map_a_range(number,min,max,php_randmax_mt());
-			return number;
-		default:
-			php_error(E_ERROR,"Bug, please report (php_rand_range2-%d)",alg);
-			return;
-	}
+	(result) = (min) + (long) ((double)((max)-(min)+1) * (result)/(PHP_RANDMAX(which)+1.0)); \
 }
 /* }}} */
 
 /* {{{ PHPAPI long php_rand_range(long min, long max) */
 PHPAPI long php_rand_range(long min, long max)
 {
-	/* will be php.ini & srand aware */
-	return php_rand_range2(min,max,RAND_SYS);
+	register long result;
+	PHP_RAND_RANGE(BG(rand_generator_current), min, max, result);
+	return result;
 }
 /* }}} */
 
 /* {{{ [mt_]rand common */
-#define PHP_FUNCTION_RAND(name,type,lowertype)   					\
+#define PHP_FUNCTION_RAND(name,which)								\
 PHP_FUNCTION(name)													\
 {																	\
 	zval **min, **max;												\
 																	\
 	switch (ZEND_NUM_ARGS()) {										\
 		case 0:														\
-			RETURN_LONG(php_rand_##lowertype());					\
+			RETURN_LONG(PHP_RAND(which));							\
 		case 2:														\
 			if (zend_get_parameters_ex(2, &min, &max)==FAILURE) {	\
 				RETURN_FALSE;										\
 			}														\
 			convert_to_long_ex(min);								\
 			convert_to_long_ex(max);								\
-			RETURN_LONG(php_rand_range2(Z_LVAL_PP(min), 			\
-						Z_LVAL_PP(max), type));				\
+			Z_TYPE_P(return_value) = IS_LONG;						\
+			PHP_RAND_RANGE(which, Z_LVAL_PP(min), 					\
+					Z_LVAL_PP(max), Z_LVAL_P(return_value));		\
+			return;													\
 		default:													\
 			WRONG_PARAM_COUNT;										\
 			break;													\
@@ -247,12 +225,12 @@ PHP_FUNCTION(name)													\
 
 /* {{{ proto int rand([int min, int max]) 
    Returns a random number */
-PHP_FUNCTION_RAND(rand,RAND_SYS,sys)
+PHP_FUNCTION_RAND(rand,PHP_RAND_SYS)
 /* }}} */
 
 /* {{{ proto int mt_rand([int min, int max]) 
    Returns a random number by means of Mersenne Twister */
-PHP_FUNCTION_RAND(mt_rand,RAND_MT,mt)
+PHP_FUNCTION_RAND(mt_rand,PHP_RAND_MT)
 /* }}} */
 
 /* getrandmax */
@@ -261,8 +239,7 @@ PHP_FUNCTION_RAND(mt_rand,RAND_MT,mt)
    Returns the maximum value a random number can have */
 PHPAPI long php_randmax(void)
 {
-	/* Get current algorithm */
-	return php_randmax_sys();
+	return PHP_RANDMAX(BG(rand_generator_current));
 }
 /* }}} */
 
@@ -274,7 +251,7 @@ PHP_FUNCTION(getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( php_randmax_sys() );
+	RETURN_LONG( PHP_RANDMAX(PHP_RAND_SYS));
 }
 /* }}} */
 
@@ -286,7 +263,7 @@ PHP_FUNCTION(mt_getrandmax)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG( php_randmax_mt() );
+	RETURN_LONG( PHP_RANDMAX(PHP_RAND_MT));
 }
 /* }}} */
 

@@ -82,6 +82,21 @@
    Melo: we should put some ifdefs here to catch those alphas...
 */
 
+static        void _php_srand_mt(long seed TSRMLS_DC);
+static inline long _php_rand_mt_reload(TSRMLS_D);
+static        long _php_rand_mt(void);
+/*
+ * Melo: it could be 2^^32 but we only use 2^^31 to maintain
+ * compatibility with the previous php_rand
+ */
+#define _PHP_RANDMAX_MT ((long)(0x7FFFFFFF)) /* 2^^31 - 1 */
+
+php_randgen_entries[PHP_RAND_MT] = {
+	_php_srand_mt,	/* void srand(long seed)	*/
+	_php_rand_mt,	/* long rand(void)			*/
+	PHP_RANDMAX_MT,	/* long randmax				*/
+	"mt"			/* char *ini_str			*/
+}
 
 #define N             MT_N                 /* length of state vector */
 #define M             (397)                /* a period parameter */
@@ -109,9 +124,9 @@
 	return (long)((var) >> 1);            \
 }
 
-/* {{{ void php_srand_mt(long seed)
+/* {{{ void _php_srand_mt(long seed)
  */
-void php_srand_mt(long seed TSRMLS_DC)
+static void _php_srand_mt(long seed TSRMLS_DC)
 {
     /*
        We initialize state[0..(N-1)] via the generator
@@ -167,15 +182,15 @@ void php_srand_mt(long seed TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ long php_rand_mt_reload(void) [internal function]
+/* {{{ long _php_rand_mt_reload(void) [internal function]
  * Generates a new batch of random numbers, and returns the first of it */
-static inline long php_rand_mt_reload(TSRMLS_D)
+static inline long _php_rand_mt_reload(TSRMLS_D)
 {
     register php_uint32 *p0=BG(state), *p2=BG(state)+2, *pM=BG(state)+M, s0, s1;
     register int    j;
 
     if(BG(left) < -1)
-        php_srand_mt(4357U TSRMLS_CC);
+        _php_srand_mt(4357U TSRMLS_CC);
 
     BG(left)=N-1, BG(next)=BG(state)+1;
 
@@ -190,24 +205,18 @@ static inline long php_rand_mt_reload(TSRMLS_D)
 }
 /*}}}*/
 
-/* {{{ long php_rand_mt(void) */
-long php_rand_mt(void)
+/* {{{ long _php_rand_mt(void) */
+static long _php_rand_mt(void)
 {
     php_uint32 y;
 	TSRMLS_FETCH();
 
     if(--BG(left) < 0)
-        return(php_rand_mt_reload(TSRMLS_C));
+        return(_php_rand_mt_reload(TSRMLS_C));
 
     y  = *BG(next)++;
 	MIX_AND_RETURN(y);
 }
-/* }}} */
-
-/* {{{ long php_randmax_mt(void) */
-
-/* in php_rand.h */
-
 /* }}} */
 
 /*

@@ -15,6 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Pedro Melo <melo@ip.pt>                                     |
+   |          Jeroen van Wolffelaar <jeroen@php.net>                      |
    |                                                                      |
    | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
@@ -56,27 +57,51 @@
  *   --Jeroen
  */
 
+/* TODO:
+ * - make constants available to PHP-user
+ * - MINFO section about which random number generators are available
+ * - Nuke randmax by enhancing PHP_RAND_RANGE to work well in the case of a
+ *   greater request than the real (internal) randmax is
+ * - Implement LCG
+ * - Implement a real-random source? (via internet, and/or /dev/urandom?)
+ * - Can lrand48 be thread-safe?
+ * - Is random() useful sometimes?
+ * - Which system algorithms are available, maybe name them after real
+ *   algorithm by compile-time detection?
+ * - Get this to compile :-)
+ */
 #ifndef PHP_RAND_H
 #define	PHP_RAND_H
 
 #include <stdlib.h>
 
-#ifndef RAND_MAX
-#define RAND_MAX (1<<15)
-#endif
+/* FIXME: that '_php_randgen_entry' needed, or not? */
+typedef struct _php_randgen_entry {
+	void (*srand)(long seed);
+	long (*rand)(void);
+	long randmax;
+	char *ini_str;
+} php_randgen_entry;
 
-#if HAVE_LRAND48
-#define php_randmax_sys() 2147483647
-#else
-#define php_randmax_sys() RAND_MAX
-#endif
+php_randgen_entry *php_randgen_entries;
 
-/*
- * Melo: it could be 2^^32 but we only use 2^^31 to maintain
- * compatibility with the previous php_rand
- */
-#define php_randmax_mt() ((long)(0x7FFFFFFF)) /* 2^^31 - 1 */
+#define PHP_SRAND(which,seed)	(php_randgen_entry[which]->srand(seed))
+#define PHP_RAND(which)			(php_randgen_entry[which]->rand())
+#define PHP_RANDMAX(which)		(php_randgen_entry[which].randmax)
+#define PHP_RAND_INISTR(which)	(php_randgen_entry[which].ini_str)
 
+/* Define random generator constants */
+#define PHP_RAND_SYS		0
+#define PHP_RAND_LRAND48	1
+#define PHP_RAND_MT			2
+#define PHP_RAND_LCG		3
+
+#define PHP_RAND_DEFAULT	PHP_RAND_MT
+
+/* how many there are */
+#define PHP_RAND_NUMRANDS	4
+
+/* Proto's */
 PHP_FUNCTION(srand);
 PHP_FUNCTION(rand);
 PHP_FUNCTION(getrandmax);
@@ -87,45 +112,6 @@ PHP_FUNCTION(mt_getrandmax);
 PHPAPI long php_rand(void);
 PHPAPI long php_rand_range(long min, long max);
 PHPAPI long php_randmax(void);
-long php_rand_mt(void);
-void php_srand_mt(long seed TSRMLS_DC);
-
-/* Define rand Function wrapper */
-#ifdef HAVE_RANDOM
-#define php_rand_sys() random()
-#else
-#ifdef HAVE_LRAND48
-#define php_rand_sys() lrand48()
-#else
-#define php_rand_sys() rand()
-#endif
-#endif
-
-/* Define srand Function wrapper */
-#ifdef HAVE_SRANDOM
-#define php_srand_sys(seed) srandom((unsigned int)seed)
-#else
-#ifdef HAVE_SRAND48
-#define php_srand_sys(seed) srand48((long)seed)
-#else
-#define php_srand_sys(seed) srand((unsigned int)seed)
-#endif
-#endif
-
-/* Define random generator constants */
-#define RAND_SYS 1
-#define RAND_MT  2
-#define RAND_LCG 3
-#define RAND_SYS_STR "system"
-#define RAND_MT_STR  "mt"
-#define RAND_LCG_STR "lcg"
-
-#define RAND_DEFAULT     RAND_MT
-#define RAND_DEFAULT_STR RAND_MT_STR
-
-
-/* BC */
-#define PHP_RAND_MAX php_randmax()
 
 #endif	/* PHP_RAND_H */
 
