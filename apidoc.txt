@@ -471,13 +471,13 @@ handy when a server supports multiple virtual hosts.
 
 The steps required to add a new directive:
 
- 1. Add directive to php3_ini_structure struct in mod_php3.h. 
+ 1. Add directive to php3_ini_structure struct in mod_php4.h. 
     
  2. In main.c, edit the php3_module_startup function and add the
     appropriate cfg_get_string() or cfg_get_long() call.
 
  3. Add the directive, restrictions and a comment to the php3_commands
-    structure in mod_php3.c.  Note the restrictions part.  RSRC_CONF are
+    structure in mod_php4.c.  Note the restrictions part.  RSRC_CONF are
     directives that can only be present in the actual Apache .conf files.
     Any OR_OPTIONS directives can be present anywhere, include normal
     .htaccess files.

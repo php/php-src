@@ -87,22 +87,22 @@ php: all-recursive $(OBJS) @REGEX_LIB@ @FHTTPD_LIB@ @TSRM_LIB@
 	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(LIBS)
 
 # Apache modules
-libphp3.a libmodphp3.a: all-recursive $(OBJS)
+libphp4.a libmodphp4.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
 	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a $(srcdir)/libzend/libzend.a @TSRM_LIB@
 	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
 
 # Apache modules
-libmodphp3-so.a: all-recursive $(OBJS)
+libmodphp4-so.a: all-recursive $(OBJS)
 	$(AR) $@.tmp $(OBJS)
 	$(srcdir)/scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a @TSRM_LIB@
 	@rm -f $@.tmp
-	$(RANLIB) libmodphp3-so.a
+	$(RANLIB) libmodphp4-so.a
 
 # Apache 1.3 shared module
-libphp3.so: $(srcdir)/mod_php3.c libmodphp3-so.a
-	$(APXS) -c -o libphp3.so $(APXS_LDFLAGS) mod_php3.c libmodphp3-so.a
+libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a
+	$(APXS) -c -o libphp4.so $(APXS_LDFLAGS) mod_php4.c libmodphp4-so.a
 
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
@@ -117,7 +117,7 @@ configuration-scanner.c:	$(srcdir)/configuration-scanner.l
 	flex -Pcfg -oconfiguration-scanner.c -i $(srcdir)/configuration-scanner.l
 
 clean: clean-recursive
-	-rm -f libphp3.a libmodphp3.a php *.o
+	-rm -f libphp4.a libmodphp4.a php *.o
 	-rm -f test/php.desc test/php.in test/php.out test/php.test
 	-rm -f test/a.tmp test/b.tmp test/test.dbm*
 
@@ -125,7 +125,7 @@ distclean: clean distclean-recursive
 	-rm -f *-parser.[ch] *-scanner.c *.output
 	-rm -f config.status config.cache config.log
 	-rm -f Makefile Makefile.depend php_config.h build-defs.h
-	-rm -f libphp3.module stamp-h
+	-rm -f libphp4.module stamp-h
 	-rm -f regex/*.o regex/*.a regex/*.ih
 	-rm -f doc/checkdoc doc/funcparse doc/version.ent
 	-rm -f do-conf test/test.log

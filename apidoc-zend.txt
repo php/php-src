@@ -163,7 +163,7 @@ cfg_hash into php3_ini.
 b.  Get rid of php3_ini.  The performance penalty of copying it around all
 the time in the Apache module probably wasn't too high, but
 psychologically, it annoyed me :)
-c.  Get rid of the ugly code in mod_php3.c, that also reads values from
+c.  Get rid of the ugly code in mod_php4.c, that also reads values from
 Apache directives and puts them into the php3_ini structure.
 d.  Generalize all the code so that you only have to add an entry in one
 single place and get it automatically supported in php3.ini, Apache, Win32

@@ -53,18 +53,18 @@
 #include "util_script.h"
 
 #include "php_version.h"
-#include "mod_php3.h"
+#include "mod_php4.h"
 #if HAVE_MOD_DAV
 # include "mod_dav.h"
 #endif
 
 PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
 
-/* ### these should be defined in mod_php3.h or somewhere else */
+/* ### these should be defined in mod_php4.h or somewhere else */
 #define USE_PATH 1
 #define IGNORE_URL 2
 
-module MODULE_VAR_EXPORT php3_module;
+module MODULE_VAR_EXPORT php4_module;
 
 int saved_umask;
 
@@ -366,7 +366,7 @@ int php3_xbithack_handler(request_rec * r)
 {
 	php_apache_info_struct *conf;
 
-	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config, &php3_module);
+	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config, &php4_module);
 	if (!(r->finfo.st_mode & S_IXUSR)) {
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
@@ -400,7 +400,7 @@ int send_parsed_php3_dav_script(request_rec *r)
 	php_apache_info_struct *conf;
 
 	conf = (php_apache_info_struct *) get_module_config(r->per_dir_config,
-													&php3_module);
+													&php4_module);
 	return send_php3(r, 0, 0, conf->dav_script);
 }
 
@@ -409,7 +409,7 @@ static int php3_type_checker(request_rec *r)
 	php_apache_info_struct *conf;
 
 	conf = (php_apache_info_struct *)get_module_config(r->per_dir_config,
-												   &php3_module);
+												   &php4_module);
 
     /* If DAV support is enabled, use mod_dav's type checker. */
     if (conf->dav_script) {
@@ -448,7 +448,7 @@ command_rec php3_commands[] =
 
 
 
-module MODULE_VAR_EXPORT php3_module =
+module MODULE_VAR_EXPORT php4_module =
 {
 	STANDARD_MODULE_STUFF,
 	php3_init_handler,			/* initializer */

@@ -1213,6 +1213,7 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 #endif
 	SLS_FETCH();
 
+	fprintf(stderr, "%d request startup\n", getpid());
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
@@ -1220,10 +1221,13 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
 	file_handle.filename = SG(request_info).path_translated;
+	fprintf(stderr, "%d executing script\n", getpid());
 	(void) php_execute_script(&file_handle CLS_CC ELS_CC);
 	
+	fprintf(stderr, "%d Terminated successfully, sending headers\n", getpid());
 	php3_header();			/* Make sure headers have been sent */
 	zend_end_ob_buffering(1);
+	fprintf(stderr, "%d all done\n", getpid());
 	return (OK);
 }
 #endif							/* APACHE */
