@@ -2396,29 +2396,41 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 		return str;
 	}
 	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
-	for (source=str, end=source+length, target=new_str; source<end; source++) {
-		c = *source;
-		switch(c) {
-			case '\0':
-				*target++ = '\\';
-				*target++ = '0';
-				break;
-			case '\'':
-				if (PG(magic_quotes_sybase)) {
+	if (PG(magic_quotes_sybase)) {
+		for (source=str, end=source+length, target=new_str; source<end; source++) {
+			c = *source;
+			switch(c) {
+				case '\0':
+					*target++ = '\\';
+					*target++ = '0';
+					break;
+				case '\'':
 					*target++ = '\'';
 					*target++ = '\'';
 					break;
-				}
-				/* break is missing *intentionally* */
-			case '\"':
-			case '\\':
-				if (!PG(magic_quotes_sybase)) {
-					*target++ = '\\';
-				}
-				/* break is missing *intentionally* */
-			default:
-				*target++ = c;
+				default:
+					*target++ = c;
 				break;
+			}
+		}
+	}
+	else {
+		for (source=str, end=source+length, target=new_str; source<end; source++) {
+			c = *source;
+			switch(c) {
+				case '\0':
+					*target++ = '\\';
+					*target++ = '0';
+					break;
+				case '\'':
+				case '\"':
+				case '\\':
+					*target++ = '\\';
+					/* break is missing *intentionally* */
+				default:
+					*target++ = c;
+					break;
+			}
 		}
 	}
 	*target = 0;
