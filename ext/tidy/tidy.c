@@ -156,6 +156,7 @@ zend_module_entry tidy_module_entry = {
 ZEND_GET_MODULE(tidy)
 #endif
 
+#if MEMORY_LIMIT
 void *php_tidy_malloc(size_t len)
 {
 	return emalloc(len);
@@ -170,12 +171,11 @@ void php_tidy_free(void *buf)
 {
 	efree(buf);
 }
-
+#endif
 void php_tidy_panic(ctmbstr msg)
 {
 	zend_error(E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
-
 
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_file)
 {
@@ -297,13 +297,13 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 			break;
 
 		case is_doc:
-/* for debugging of libtidy only
+#if MEMORY_LIMIT
 			tidySetMallocCall(php_tidy_malloc);
 			tidySetReallocCall(php_tidy_realloc);
 			tidySetFreeCall(php_tidy_free);
-		
+#endif
 			tidySetPanicCall(php_tidy_panic);
-*/
+
 			intern->ptdoc = emalloc(sizeof(PHPTidyDoc));
 			intern->ptdoc->doc = tidyCreate();
 			intern->ptdoc->parsed = FALSE;
