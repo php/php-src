@@ -865,9 +865,9 @@ AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME")
 PHP_OS=`uname`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS")
 
-AC_OUTPUT(Makefile build-defs.h libphp3.module
+AC_OUTPUT(Makefile libphp3.module
           scripts/mkextlib regex/Makefile ext/Makefile
-          @@EXT_MAKEFILES@@, [
+          @@EXT_MAKEFILES@@ build-defs.h, [
 chmod +x scripts/mkextlib
 ], [
 
@@ -876,7 +876,7 @@ chmod +x scripts/mkextlib
 echo "creating internal_functions.c"
 extensions=\`grep '^s.@EXT_SUBDIRS@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
 mv -f internal_functions.c internal_functions.c.old 2>/dev/null
-perl genif.pl internal_functions.c.in \$extensions > internal_functions.c
+perl $srcdir/genif.pl $srcdir/internal_functions.c.in \$srcdir \$extensions > internal_functions.c
 if cmp internal_functions.c.old internal_functions.c > /dev/null 2>&1; then
     echo "internal_functions.c is unchanged"
     mv internal_functions.c.old internal_functions.c
