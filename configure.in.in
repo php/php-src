@@ -637,6 +637,7 @@ AC_ARG_ENABLE(debug,
 ]) 
 AC_SUBST(DEBUG_CFLAGS)
 AC_SUBST(PHP_DEBUG)
+CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 
 AC_MSG_CHECKING(whether to enable safe mode by default)
