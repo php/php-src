@@ -260,7 +260,7 @@ PHP_FUNCTION(stream_socket_accept)
 				&tv, &errstr
 				TSRMLS_CC) && clistream) {
 
-		Z_TYPE_P(peername) = IS_STRING;
+		if (peername) {Z_TYPE_P(peername) = IS_STRING;}
 		php_stream_to_zval(clistream, return_value);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "accept failed: %s", errstr ? errstr : "Unknown error");
