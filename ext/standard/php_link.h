@@ -35,7 +35,6 @@
 #ifdef HAVE_SYMLINK
 
 PHP_FUNCTION(link);
-PHP_FUNCTION(unlink);
 PHP_FUNCTION(readlink);
 PHP_FUNCTION(linkinfo);
 PHP_FUNCTION(symlink);

@@ -27,6 +27,7 @@
 #include "php_globals.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/exec.h"
+#include "ext/standard/php_filestat.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1575,11 +1576,10 @@ PHP_FUNCTION(fpassthru)
 	zend_list_delete((*arg1)->value.lval);
 	RETURN_LONG(size);
 }
-
 /* }}} */
+
 /* {{{ proto int rename(string old_name, string new_name)
    Rename a file */
-
 PHP_FUNCTION(rename)
 {
 	pval **old_arg, **new_arg;
@@ -1609,8 +1609,38 @@ PHP_FUNCTION(rename)
 
 	RETVAL_TRUE;
 }
-
 /* }}} */
+
+
+/* {{{ proto int unlink(string filename)
+   Delete a file */
+PHP_FUNCTION(unlink)
+{
+	pval **filename;
+	int ret;
+	PLS_FETCH();
+	
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(filename);
+
+	if (PG(safe_mode) && !php_checkuid((*filename)->value.str.val, NULL, 2)) {
+		RETURN_FALSE;
+	}
+
+	ret = V_UNLINK((*filename)->value.str.val);
+	if (ret == -1) {
+		php_error(E_WARNING, "Unlink failed (%s)", strerror(errno));
+		RETURN_FALSE;
+	}
+	/* Clear stat cache */
+	PHP_FN(clearstatcache)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 /* {{{ proto int ftruncate (int fp, int size)
    Truncate file to 'size' length */
 PHP_FUNCTION(ftruncate)
