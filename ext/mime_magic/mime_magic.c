@@ -274,6 +274,14 @@ PHP_MINIT_FUNCTION(mime_magic)
 PHP_MSHUTDOWN_FUNCTION(mime_magic)
 {
 	UNREGISTER_INI_ENTRIES();
+	if (mime_global.magic != NULL && (int)mime_global.magic != -1) {
+		struct magic *iter = mime_global.magic;
+		while (iter != NULL) {
+			struct magic *iter_next = iter->next;	
+			free(iter);
+			iter = iter_next;
+		}
+	}
 	return SUCCESS;
 }
 /* }}} */
