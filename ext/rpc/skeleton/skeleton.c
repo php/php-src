@@ -115,7 +115,7 @@ ZEND_MINFO_FUNCTION(skeleton)
 	DISPLAY_INI_ENTRIES();
 }
 
-#ifdef COMPILE_DL_COM
+#ifdef COMPILE_DL_SKELETON
 ZEND_GET_MODULE(skeleton);
 #endif
 
