@@ -19,7 +19,6 @@ PHP 4                                                                      NEWS
   (cfield at affinitysolutions dot com)
 - Fixed bug #29805 (HTTP Authentication Issues). (Uwe Schindler)
 - Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
-- Fixed bug #27792 (Enabled large file support on Linux). (Edin)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 
 22 Sep 2004, Version 4.3.9
