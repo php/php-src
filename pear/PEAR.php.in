@@ -252,6 +252,9 @@ class PEAR
      * @param $userinfo If you need to pass along for example debug
      *                  information, this parameter is meant for that.
      *
+     * @param $error_class The returned error object will be instantiated
+     *                  from this class, if specified.
+     *
      * @return object   a PEAR error object
      *
      * @see PEAR::setErrorHandling
@@ -261,7 +264,7 @@ class PEAR
 
     function &raiseError($message = null, $code = null, $mode = null,
                          $options = null, $userinfo = null,
-                         $error_class = null)
+                         $error_class = null, $skipmsg = false)
     {
         if ($mode === null) {
             if (isset($this) && isset($this->_default_error_mode)) {
@@ -305,7 +308,11 @@ class PEAR
         } else {
             $ec = 'PEAR_Error';
         }
-        return new $ec($message, $code, $mode, $options, $userinfo);
+        if ($skipmsg) {
+            return new $ec($code, $mode, $options, $userinfo);
+        } else {
+            return new $ec($message, $code, $mode, $options, $userinfo);
+        }
     }
 
     // }}}
