@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- str_repeat() now returns correct length. (Thies)
+- Don't assume libz and libpng are installed for the GD checks (Rasmus)
 - Implemented support for <boolean> and <null> types according
   to WDDX version 1.0 (Andrei)
 - Made var_dump()/serialize()/unserialize() NULL aware. (Thies)
