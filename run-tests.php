@@ -620,7 +620,7 @@ function system_with_timeout($commandline)
 		$e = null;
 		$n = @stream_select($r, $w, $e, 60);
 
-		if ($n == 0) {
+		if ($n === 0) {
 			/* timed out */
 			$data .= "\n ** ERROR: process timed out **\n";
 			proc_terminate($proc);
