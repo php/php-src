@@ -37,13 +37,17 @@
 
 #include "php_pcre.h"
 
+#define PREG_PATTERN_ORDER	0
+#define PREG_SET_ORDER		1
+
 /* {{{ module definition structures */
 
 unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 function_entry pcre_functions[] = {
-	PHP_FE(pcre_match,		third_arg_force_ref)
-	PHP_FE(pcre_replace,	NULL)
+	PHP_FE(preg_match,		third_arg_force_ref)
+	PHP_FE(preg_match_all,	third_arg_force_ref)
+	PHP_FE(preg_replace,	NULL)
 	{NULL, 		NULL, 		NULL}
 };
 
@@ -54,6 +58,7 @@ php3_module_entry pcre_module_entry = {
 };
 
 /* }}} */
+
 
 #ifdef ZTS
 int pcre_globals_id;
@@ -118,6 +123,9 @@ int php_minit_pcre(INIT_FUNC_ARGS)
 #else
 	zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, _php_free_pcre_cache, 1);
 #endif
+	
+	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -268,23 +276,31 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra) {
 /* }}} */
 
 
-/* {{{ proto pcre_match(string pattern, string subject [, array subpatterns ])
-   Perform a Perl-style regular expression match */
-PHP_FUNCTION(pcre_match)
+/* {{{ void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) */
+void _pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 {
 	zval			*regex,				/* Regular expression */
 					*subject,			/* String to match against */
-					*subpats = NULL;	/* Array for subpatterns */
+					*subpats = NULL,	/* Array for subpatterns */
+					*subpats_order,		/* Order of the results in the subpatterns
+										   array for global match */
+					*result_set,		/* Holds a set of subpatterns after
+										   a global match */
+				   **match_sets;		/* An array of sets of matches for each
+										   subpattern after a global match */
 	pcre			*re = NULL;			/* Compiled regular expression */
 	pcre_extra		*extra = NULL;		/* Holds results of studying */
 	int			 	 exoptions = 0;		/* Execution options */
-	int			 	 count;				/* Count of matched subpatterns */
+	int			 	 count = 0;			/* Count of matched subpatterns */
 	int			 	*offsets;			/* Array of subpattern offsets */
+	int				 num_subpats;		/* Number of captured subpatterns */
 	int			 	 size_offsets;		/* Size of the offsets array */
 	int			 	 matched;			/* Has anything matched */
 	int				 i;
+	int				 subpats_order_val;	/* Integer value of subpats_order */
 	const char	   **stringlist;		/* Used to hold list of subpatterns */
-
+	int				 subject_offset;	/* Current position in the subject string */
+	
 	/* Get function parameters and do error-checking. */
 	switch(ARG_COUNT(ht)) {
 		case 2:
@@ -297,9 +313,29 @@ PHP_FUNCTION(pcre_match)
 			if (getParameters(ht, 3, &regex, &subject, &subpats) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
+			if (global)
+				subpats_order_val = PREG_PATTERN_ORDER;
 			if (!ParameterPassedByReference(ht, 3)) {
 				zend_error(E_WARNING, "Array to be filled with matches must be passed by reference.");
 				RETURN_FALSE;
+			}
+			break;
+
+		case 4:
+			if (getParameters(ht, 4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			if (!ParameterPassedByReference(ht, 3)) {
+				zend_error(E_WARNING, "Array to be filled with matches must be passed by reference.");
+				RETURN_FALSE;
+			}
+	
+			/* Make sure subpats_order is a number */
+			convert_to_long(subpats_order);
+			subpats_order_val = subpats_order->value.lval;
+			if (subpats_order_val < PREG_PATTERN_ORDER ||
+				subpats_order_val > PREG_SET_ORDER) {
+				zend_error(E_WARNING, "Wrong value for parameter 4 in call to preg_match_all()");
 			}
 			break;
 			
@@ -311,67 +347,137 @@ PHP_FUNCTION(pcre_match)
 	convert_to_string(regex);
 	convert_to_string(subject);
 
+	/* Make sure to clean up the passed array and initialize it. */
+	if (subpats != NULL) {
+		zval_dtor(subpats);
+		array_init(subpats);
+	}
+
 	/* Compile regex or get it from cache. */
 	if ((re = _pcre_get_compiled_regex(regex->value.str.val, extra)) == NULL)
 		return;
-	
+
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pcre_info(re, NULL, NULL) + 1) * 3;
+	num_subpats = pcre_info(re, NULL, NULL) + 1;
+	size_offsets = num_subpats * 3;
 	offsets = (int *)emalloc(size_offsets * sizeof(int));
-	
-	/* Execute the regular expression. */
-	count = pcre_exec(re, extra, subject->value.str.val, subject->value.str.len,
-					  exoptions, offsets, size_offsets);
 
-	/* Check for too many substrings condition. */	
-	if (count == 0) {
-		zend_error(E_NOTICE, "Matched, but too many substrings\n");
-		count = size_offsets/3;
-	}
-	
-	/* If something has matched */
-	if (count >= 0) {
-		matched = 1;
-
-		/* If subpatters array has been passed, fill it in with values. */
-		if (subpats != NULL) {
-			/* Try to get the list of substrings and display a warning if failed. */
-			if (pcre_get_substring_list(subject->value.str.val, offsets, count, &stringlist) < 0) {
-				efree(offsets);
-				efree(re);
-				zend_error(E_WARNING, "Get subpatterns list failed");
-				return;
-			}
-
-			/* Make sure to clean up the passed array and initialize it. */
-			zval_dtor(subpats);
-			array_init(subpats);
-
-			/* For each subpattern, insert it into the subpatterns array. */
-			for (i=0; i<count; i++) {
-				add_next_index_string(subpats, (char *)stringlist[i], 1);
-			}
-			
-			php_pcre_free(stringlist);
-		}
-	}
-	/* If nothing matched */
-	else {
-		matched = 0;
-
-		/* Make sure to clean up the passed array and initialize it
-		   to empty since we don't want to leave previous values in it. */
-		if (subpats != NULL) {
-			zval_dtor(subpats);
-			array_init(subpats);
+	/* Allocate match sets array and initialize the values */
+	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
+		match_sets = (zval **)emalloc(num_subpats * sizeof(zval *));
+		for (i=0; i<num_subpats; i++) {
+			match_sets[i] = (zval *)emalloc(sizeof(zval));
+			array_init(match_sets[i]);
+			match_sets[i]->is_ref = 0;
+			match_sets[i]->refcount = 1;
 		}
 	}
 
+	/* Start from the beginning of the string */
+	subject_offset = 0;
+	
+	do {
+		/* Execute the regular expression. */
+		count = pcre_exec(re, extra, &subject->value.str.val[subject_offset],
+						  subject->value.str.len-subject_offset,
+						  (subject_offset ? exoptions|PCRE_NOTBOL : exoptions),
+						  offsets, size_offsets);
+
+		/* Check for too many substrings condition. */	
+		if (count == 0) {
+			zend_error(E_NOTICE, "Matched, but too many substrings\n");
+			count = size_offsets/3;
+		}
+
+		/* If something has matched */
+		if (count >= 0) {
+			matched = 1;
+
+			/* If subpatters array has been passed, fill it in with values. */
+			if (subpats != NULL) {
+				/* Try to get the list of substrings and display a warning if failed. */
+				if (pcre_get_substring_list(&subject->value.str.val[subject_offset],
+						offsets, count, &stringlist) < 0) {
+					efree(offsets);
+					efree(re);
+					zend_error(E_WARNING, "Get subpatterns list failed");
+					return;
+				}
+
+				if (global) {	/* global pattern matching */
+					if (subpats_order_val == PREG_PATTERN_ORDER) {
+						/* For each subpattern, insert it into the appropriate array */
+						for (i=0; i<count; i++) {
+							add_next_index_string(match_sets[i], (char *)stringlist[i], 1);
+						}
+					}
+					else {
+						/* Allocate the result set array */
+						result_set = emalloc(sizeof(zval));
+						array_init(result_set);
+						result_set->is_ref = 0;
+						result_set->refcount = 1;
+						
+						/* Add all the subpatterns to it */
+						for (i=0; i<count; i++) {
+							add_next_index_string(result_set, (char *)stringlist[i], 1);
+						}
+						/* And add it to the output array */
+						zend_hash_next_index_insert(subpats->value.ht, &result_set,
+								sizeof(zval *), NULL);
+					}
+				}
+				else {			/* single pattern matching */
+					/* For each subpattern, insert it into the subpatterns array. */
+					for (i=0; i<count; i++) {
+						add_next_index_string(subpats, (char *)stringlist[i], 1);
+					}
+				}
+
+				php_pcre_free(stringlist);
+				
+				/* Advance to the position right after the last full match */
+				subject_offset += offsets[1];
+			}
+		}
+		/* If nothing matched */
+		else {
+			matched = 0;
+		}
+	} while (global && count >= 0);
+
+	/* Add the match sets to the output array and clean up */
+	if (global && subpats_order_val == PREG_PATTERN_ORDER) {
+		for (i=0; i<num_subpats; i++) {
+			zend_hash_next_index_insert(subpats->value.ht, &match_sets[i], sizeof(zval *), NULL);
+		}
+		efree(match_sets);
+	}
+	
 	efree(offsets);
 
 	RETVAL_LONG(matched);
 }
 /* }}} */
+
+
+/* {{{ proto preg_match(string pattern, string subject [, array subpatterns ])
+   Perform a Perl-style regular expression match */
+PHP_FUNCTION(preg_match)
+{
+	_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+
+/* {{{ proto preg_match_all(string pattern, string subject, array subpatterns, integer order)
+   Perform a Perl-style global regular expression match */
+PHP_FUNCTION(preg_match_all)
+{
+	_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
 
 /* {{{ int _pcre_get_backref(const char *walk, int *backref) */
 static int _pcre_get_backref(const char *walk, int *backref)
@@ -602,9 +708,9 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 }
 
 
-/* {{{ proto pcre_replace(string|array regex, string|array replace, string|array subject)
+/* {{{ proto preg_replace(string|array regex, string|array replace, string|array subject)
     Perform Perl-style regular expression replacement */
-PHP_FUNCTION(pcre_replace)
+PHP_FUNCTION(preg_replace)
 {
 	zval			*regex,
 					*replace,
