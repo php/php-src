@@ -73,7 +73,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	 * If given filepath is a URL, allow - safe mode stuff
 	 * related to URL's is checked in individual functions
 	 */
-	if (!strncasecmp(filename,"http://", 7) || !strncasecmp(filename,"ftp://", 6)) {
+	if (!strncasecmp(filename,"http://", 7) || !strncasecmp(filename,"ftp://", 6) || !strncasecmp(filename,"https://", 8)) {
 		return 1;
 	}
 		
