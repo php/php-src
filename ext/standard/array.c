@@ -1966,7 +1966,7 @@ PHP_FUNCTION(array_slice)
 /* }}} */
 
 
-PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
+PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive)
 {
 	zval	  **src_entry,
 			  **dest_entry;
@@ -1982,10 +1982,16 @@ PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 				if (recursive &&
 					zend_hash_find(dest, string_key, string_key_len,
 								   (void **)&dest_entry) == SUCCESS) {
+					if (*src_entry == *dest_entry) {
+						zend_error(E_WARNING, "%s(): recursion detected",
+								   get_active_function_name());
+						return 0;
+					}
 					convert_to_array_ex(dest_entry);
 					convert_to_array_ex(src_entry);
-					php_array_merge(Z_ARRVAL_PP(dest_entry),
-									Z_ARRVAL_PP(src_entry), recursive);
+					if (!php_array_merge(Z_ARRVAL_PP(dest_entry),
+									Z_ARRVAL_PP(src_entry), recursive))
+						return 0;
 				} else {
 					(*src_entry)->refcount++;
 
@@ -2002,6 +2008,8 @@ PHPAPI void php_array_merge(HashTable *dest, HashTable *src, int recursive)
 
 		zend_hash_move_forward_ex(src, &pos);
 	}
+
+	return 1;
 }
 
 static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
