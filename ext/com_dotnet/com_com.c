@@ -290,21 +290,8 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 	unsigned int arg_err;
 	EXCEPINFO e;
 
-	if (obj->typeinfo) {
-		hr = ITypeInfo_Invoke(obj->typeinfo, V_DISPATCH(&obj->v), id_member, flags, disp_params, v, &e, &arg_err);
-		if (FAILED(hr) && (hr != DISP_E_EXCEPTION)) {
-			hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
-				&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
-			if (SUCCEEDED(hr)) {
-				/* fall back on using IDispatch directly */
-				ITypeInfo_Release(obj->typeinfo);
-				obj->typeinfo = NULL;
-			}
-		}
-	} else {
-		hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
-			&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
-	}
+	hr = IDispatch_Invoke(V_DISPATCH(&obj->v), id_member,
+		&IID_NULL, LOCALE_SYSTEM_DEFAULT, flags, disp_params, v, &e, &arg_err);
 
 	if (FAILED(hr)) {
 		char *source = NULL, *desc = NULL, *msg = NULL;
