@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(pi3web,for Pi3Web Support,
-[  --with-pi3web=DIR       Build PHP as a module for use with Pi3Web.])
+[  --with-pi3web=DIR       Build PHP as a module for use with Pi3Web.], no, no)
 
 if test "$PHP_PI3WEB" != "no"; then
 	if test "$PHP_PI3WEB" = "yes"; then

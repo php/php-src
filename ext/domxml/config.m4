@@ -108,12 +108,12 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
 ])
 
 PHP_ARG_WITH(dom-xslt, for DOM XSLT support,
-[  --with-dom-xslt[=DIR]   Include DOM XSLT support (requires libxslt >= 1.0.18).
-                          DIR is the libxslt install directory.])
+[  --with-dom-xslt[=DIR]     DOMXML: Include DOM XSLT support (requires libxslt >= 1.0.18).
+                            DIR is the libxslt install directory.], no, no)
 
 PHP_ARG_WITH(dom-exslt, for DOM EXSLT support,
-[  --with-dom-exslt[=DIR]  Include DOM EXSLT support (requires libxslt >= 1.0.18).
-                          DIR is the libexslt install directory.])
+[  --with-dom-exslt[=DIR]    DOMXML: Include DOM EXSLT support (requires libxslt >= 1.0.18).
+                            DIR is the libexslt install directory.], no, no)
 
 if test "$PHP_DOM_XSLT" != "no"; then
 

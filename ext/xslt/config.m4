@@ -9,31 +9,22 @@ dnl +---------------------------------------------------------------------------
 PHP_ARG_ENABLE(xslt, whether to enable xslt support,
 [  --enable-xslt           Enable xslt support.])
 
-xslt_ext_shared=$ext_shared
-
 PHP_ARG_WITH(xslt-sablot, for XSLT Sablotron backend,
-[  --with-xslt-sablot=DIR    XSLT: Enable the sablotron backend.])
+[  --with-xslt-sablot=DIR    XSLT: Enable the sablotron backend.], no, no)
 
 PHP_ARG_WITH(expat-dir, for libexpat dir for Sablotron XSL support,
-[  --with-expat-dir=DIR      XSLT: libexpat dir for Sablotron.])
+[  --with-expat-dir=DIR      XSLT: libexpat dir for Sablotron.], no, no)
 
 PHP_ARG_WITH(iconv-dir, for iconv dir for Sablotron XSL support,
-[  --with-iconv-dir=DIR      XSLT: iconv dir for Sablotron.])
+[  --with-iconv-dir=DIR      XSLT: iconv dir for Sablotron.], no, no)
 
-dnl This configure option is optional. 
-AC_MSG_CHECKING([for JavaScript for Sablotron XSL support])
-AC_ARG_WITH(sablot-js,
-[  --with-sablot-js=DIR      XSLT: enable JavaScript support for Sablotron.],[
-  PHP_SABLOT_JS=$withval
-  AC_MSG_RESULT(yes)
-], [
-  PHP_SABLOT_JS=no
-  AC_MSG_RESULT(no)
-])
+PHP_ARG_WITH(sablot-js, for JavaScript for Sablotron XSL support,
+[  --with-sablot-js=DIR      XSLT: enable JavaScript support for Sablotron.], no, no)
+
 
 if test "$PHP_XSLT" != "no"; then
 
-  PHP_NEW_EXTENSION(xslt, xslt.c sablot.c, $xslt_ext_shared)
+  PHP_NEW_EXTENSION(xslt, xslt.c sablot.c, $ext_shared)
   PHP_SUBST(XSLT_SHARED_LIBADD)
 
   if test "$PHP_XSLT_SABLOT" != "no"; then

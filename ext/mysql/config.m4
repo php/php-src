@@ -43,13 +43,13 @@ AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
 ])
 
 
-PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
-[  --with-mysql-sock[=DIR] Location of the MySQL unix socket pointer.
-                          If unspecified, the default locations are searched.])
-
 PHP_ARG_WITH(mysql, for MySQL support,
 [  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
                           If unspecified, the bundled MySQL library will be used.], yes)
+
+PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
+[  --with-mysql-sock[=DIR] Location of the MySQL unix socket pointer.
+                          If unspecified, the default locations are searched.], no, no)
 
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])

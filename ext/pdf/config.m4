@@ -5,23 +5,21 @@ dnl
 PHP_ARG_WITH(pdflib,for PDFlib support,
 [  --with-pdflib[=DIR]     Include PDFlib support.])
 
-pdflib_ext_shared=$ext_shared
-
 PHP_ARG_WITH(jpeg-dir, for the location of libjpeg, 
 [  --with-jpeg-dir[=DIR]     PDFLIB: define libjpeg install directory.
-                                     (OPTIONAL for PDFlib v4)])
+                                     (OPTIONAL for PDFlib v4)], no, no)
 
 PHP_ARG_WITH(png-dir, for the location of libpng, 
 [  --with-png-dir[=DIR]      PDFLIB: define libpng install directory.
-                                     (OPTIONAL for PDFlib v4)])
+                                     (OPTIONAL for PDFlib v4)], no, no)
  
 PHP_ARG_WITH(tiff-dir, for the location of libtiff,
 [  --with-tiff-dir[=DIR]     PDFLIB: define libtiff install directory.
-                                     (OPTIONAL for PDFlib v4)])
+                                     (OPTIONAL for PDFlib v4)], no, no)
 
 if test "$PHP_PDFLIB" != "no"; then
 
-  PHP_NEW_EXTENSION(pdf, pdf.c, $pdflib_ext_shared)
+  PHP_NEW_EXTENSION(pdf, pdf.c, $ext_shared)
   PHP_SUBST(PDFLIB_SHARED_LIBADD)
 
   dnl #
