@@ -337,7 +337,7 @@ static int php_ub_body_write(const char *str, uint str_length)
  */
 
 
-/* {{{ proto void ob_start()
+/* {{{ proto void ob_start(void)
    Turn on Output Buffering */
 PHP_FUNCTION(ob_start)
 {
@@ -346,7 +346,7 @@ PHP_FUNCTION(ob_start)
 /* }}} */
 
 
-/* {{{ proto void ob_end_flush()
+/* {{{ proto void ob_end_flush(void)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
@@ -355,7 +355,7 @@ PHP_FUNCTION(ob_end_flush)
 /* }}} */
 
 
-/* {{{ proto void ob_end_clean()
+/* {{{ proto void ob_end_clean(void)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
@@ -364,7 +364,7 @@ PHP_FUNCTION(ob_end_clean)
 /* }}} */
 
 
-/* proto string ob_get_contents()
+/* proto string ob_get_contents(void)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
@@ -375,9 +375,8 @@ PHP_FUNCTION(ob_get_contents)
 /* }}} */
 
 
-/* proto void ob_implicit_flush([flag])
-   Turn implicit flush on/off
-   Implicit flush is equivalent to calling flush() after every output call */
+/* {{{ proto void ob_implicit_flush([int flag])
+   Turn implicit flush on/off and is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
 {
 	zval **zv_flag;
