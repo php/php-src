@@ -399,6 +399,9 @@ PHP_MINFO_FUNCTION(pgsql)
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
+#ifdef HAVE_PG_CONFIG_H
+	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
+#endif	
 	sprintf(buf, "%ld", PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	sprintf(buf, "%ld", PGG(num_links));
