@@ -423,13 +423,6 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		datastream = NULL;
 		goto errexit;	
 	}
-	
-	/* close control connection if not in ssl mode */
-	if (!use_ssl) {
-		php_stream_write_string(stream, "QUIT\r\n");
-		php_stream_close(stream);
-		stream = NULL;
-	}
 		
 	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
