@@ -1,3 +1,103 @@
+2003-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libinifile/inifile.c:
+      Dropped optimization
+
+2003-02-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Correct a bug number - thanks to Philip...
+
+2003-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libinifile/inifile.c:
+      INI files are case insensitive
+
+2003-02-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      Revent previous patch, adding of file_write_content() was premature.
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/html.c:
+      int/long change.
+
+2003-02-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/libinifile/inifile.c:
+      Remove testcode
+
+    * ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_inifile.c
+      ext/dba/php_inifile.h
+      ext/dba/libinifile/.cvsignore
+      ext/dba/libinifile/inifile.c
+      ext/dba/libinifile/inifile.h
+      ext/dba/tests/dba_inifile.phpt:
+      
+
+2003-02-22  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c:
+      additional speedup for array_shift(). No need to rehash if the removed
+      element's
+      key is not scalar and elements with scalar keys are already well numbered
+      (sequentially from 0) for some reason. This is the case if the leading
+      elements have no scalar indexes.
+
+2003-02-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Squashed those ugly bugs!
+
+2003-02-22  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c:
+      rehash only in case something is changed.
+
+2003-02-22  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/mysqli_api.c:
+      removed some comments
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/php_mysqli.h:
+      Fixed bug with stmt_close (libmysql bk version 1.1477 required)
+      Fixed bug with mysql_execute and float values
+
+2003-02-22  Justin Erenkrantz  <justin@erenkrantz.com>
+
+    * sapi/apache2handler/sapi_apache2.c:
+      Add xbithack support to apache2handler SAPI.
+      
+      (configuration doesn't work, but that's not something new apparently.)
+
+2003-02-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/tests/file/bug21131.phpt
+      ext/standard/tests/file/bug22362.phpt
+      ext/standard/tests/file/bug22362.phpt
+      main/php_streams.h
+      main/streams.c:
+      Miscellaneous streams fixes, including probable fixes for:
+      Bug #21131 (fopen with 'a+' and rewind() doesn't work)
+      Bug #21713 (include remote files leaks temporary files + descriptors on
+      Solaris)
+      Bug #21185 (move_uploaded_file() does not ignore open_basedir as it
+      should)
+      Bug #22362 (combinations of fwrite(), fread() and fseek() produce
+      unexpected results)
+
 2003-02-21  Wez Furlong  <wez.php@thebrainroom.net>
 
     * main/network.c
