@@ -78,7 +78,7 @@ if test "$PHP_XSLT" != "no"; then
     fi
 
     if test "$found_iconv" = "no"; then
-      AC_MSG_ERROR(iconv not found, in order to build sablotron you need the iconv library)
+      AC_MSG_ERROR([iconv not found, in order to build sablotron you need the iconv library])
     fi
  
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
