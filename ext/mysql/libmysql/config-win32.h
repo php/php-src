@@ -7,7 +7,11 @@
 #include <io.h>
 #include <malloc.h>
 
-#define	SYSTEM_TYPE	"Win95"
+#ifdef __NT__
+#define	SYSTEM_TYPE	"NT"
+#else
+#define	SYSTEM_TYPE	"Win95/Win98"
+#endif
 #define MACHINE_TYPE	"i586"		/* Define to machine type name */
 #ifndef __WIN32__
 #define __WIN32__                       /* To make it easier in VC++ */
@@ -57,31 +61,42 @@
 
 typedef unsigned short  ushort;
 typedef unsigned int    uint;
-typedef	long off_t ;
 typedef unsigned int size_t;
 typedef unsigned __int64 ulonglong;	/* Microsofts 64 bit types */
 typedef __int64	longlong;
 typedef int sigset_t;
 #define longlong_defined
+/* off_t should not be __int64 because of conflicts in header files;
+   Use my_off_t or os_off_t instead */
+typedef	long off_t;
+typedef __int64 os_off_t;
 
-#define Socket SOCKET
+#define Socket_defined
+#define my_socket SOCKET
 #define bool BOOL
 #define SIGPIPE	SIGINT
 #define RETQSORTTYPE void
 #define QSORT_TYPE_IS_VOID
 #define RETSIGTYPE void
 #define SOCKET_SIZE_TYPE int
-#define Socket_defined
+#define my_socket_defined
 #define bool_defined
 #define byte_defined
 #define HUGE_PTR
+#define STDCALL __stdcall           /* Used by libmysql.dll */
 
+#ifndef UNDEF_THREAD_HACK
 #define THREAD
+#endif
 #define VOID_SIGHANDLER
 #define SIZEOF_CHAR		1
 #define SIZEOF_LONG		4
 #define SIZEOF_LONG_LONG	8
+#define SIZEOF_OFF_T		8
 #define HAVE_BROKEN_NETINET_INCLUDES
+#ifdef __NT__
+#define HAVE_NAMED_PIPE			/* We can only create pipes on NT */
+#endif
 
 /* Convert some simple functions to Posix */
 
@@ -99,19 +114,28 @@ inline double rint(double nr)
 {
   double f = floor(nr);
   double c = ceil(nr);
-  return (((nr-c) >= (nr-f)) ? f :c);
+  return (((c-nr) >= (nr-f)) ? f :c);
 }
 
-inline double ulonglong2double(longlong nr)
+inline double ulonglong2double(ulonglong value)
 {
+  longlong nr=(longlong) value;
   if (nr >= 0)
     return (double) nr;
   return (18446744073709551616.0 + (double) nr);
 }
+
+#define my_off_t2double(A) ulonglong2double(A)
 #else
 #define inline __inline
 #endif
 
+#if SIZEOF_OFF_T > 4
+#define lseek(A,B,C) _lseeki64((A),(longlong) (B),(C))
+#define tell(A) _telli64(A)
+#endif
+
+#define STACK_DIRECTION -1
 
 /* Optimized store functions for Intel x86 */
 
@@ -128,16 +152,34 @@ inline double ulonglong2double(longlong nr)
 #define uint2korr(A)	(*((uint16 *) (A)))
 #define uint3korr(A)	(long) (*((unsigned long *) (A)) & 0xFFFFFF)
 #define uint4korr(A)	(*((unsigned long *) (A)))
+#define uint5korr(A)	((ulonglong)(((uint32) ((uchar) (A)[0])) +\
+				    (((uint32) ((uchar) (A)[1])) << 8) +\
+				    (((uint32) ((uchar) (A)[2])) << 16) +\
+				    (((uint32) ((uchar) (A)[3])) << 24)) +\
+			 	    (((ulonglong) ((uchar) (A)[4])) << 32))
+#define uint8korr(A)	(*((ulonglong *) (A)))
+#define sint8korr(A)	(*((longlong *) (A)))
 #define int2store(T,A)	*((uint16*) (T))= (uint16) (A)
 #define int3store(T,A)		{ *(T)=  (uchar) ((A));\
 				  *(T+1)=(uchar) (((uint) (A) >> 8));\
 				  *(T+2)=(uchar) (((A) >> 16)); }
 #define int4store(T,A)	*((long *) (T))= (long) (A)
+#define int5store(T,A)	{ *(T)= (uchar)((A));\
+			  *((T)+1)=(uchar) (((A) >> 8));\
+			  *((T)+2)=(uchar) (((A) >> 16));\
+			  *((T)+3)=(uchar) (((A) >> 24)); \
+			  *((T)+4)=(uchar) (((A) >> 32)); }
+#define int8store(T,A)	*((ulonglong *) (T))= (ulonglong) (A)
 
 #define doubleget(V,M)	{ *((long *) &V) = *((long*) M); \
 			  *(((long *) &V)+1) = *(((long*) M)+1); }
 #define doublestore(T,V) { *((long *) T) = *((long*) &V); \
 			   *(((long *) T)+1) = *(((long*) &V)+1); }
+#define float4get(V,M) { *((long *) &(V)) = *((long*) (M)); }
+#define float8get(V,M) doubleget((V),(M))
+#define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
+#define float8store(V,M) doublestore((V),(M))
+
 
 #define HAVE_PERROR
 #define HAVE_VFPRINT
@@ -159,6 +201,10 @@ inline double ulonglong2double(longlong nr)
 #define HAVE_FLOAT_H
 #define HAVE_LIMITS_H
 #define HAVE_STDDEF_H
+#define HAVE_RINT               /* defined in this file */
+#define NO_FCNTL_NONBLOCK       /* No FCNTL */
+#define HAVE_ALLOCA
+#define HAVE_COMPRESS
 
 #ifdef _MSC_VER
 #define HAVE_LDIV		/* The optimizer breaks in zortech for ldiv */
@@ -166,9 +212,32 @@ inline double ulonglong2double(longlong nr)
 #define HAVE_SYS_UTIME_H
 #define HAVE_STRTOUL
 #endif
+#define my_reinterpret_cast(A) reinterpret_cast <A>
+#define my_const_cast(A) const_cast<A>
 
 /* MYSQL OPTIONS */
 
 #define	DEFAULT_MYSQL_HOME	"c:\\mysql"
 #define PACKAGE		 	"mysql"
 #define PROTOCOL_VERSION	10
+#define DEFAULT_BASEDIR		"C:\\"
+#define MY_CHARSET_CURRENT	MY_CHARSET_LATIN1
+#define MY_CHARSET		"isolatin1"
+
+/* File name handling */
+
+#define FN_LIBCHAR	'\\'
+#define FN_ROOTDIR	"\\"
+#define FN_NETWORK_DRIVES	/* Uses \\ to indicate network drives */
+#define FN_NO_CASE_SENCE	/* Files are not case-sensitive */
+#define FN_LOWER_CASE	TRUE	/* Files are represented in lower case */
+#define MY_NFILE	127	/* This is only used to save filenames */
+
+
+#define thread_safe_increment(V,L) InterlockedIncrement((long*) &(V))
+/* The following is only used for statistics, so it should be good enough */
+#ifdef __NT__  /* This should also work on Win98 but .. */
+#define thread_safe_add(V,C,L) InterlockedExchangeAdd((long*) &(V),(C))
+#else
+#define thread_safe_add(V,C,L) InterlockedExchange((long*) &(V),(V)+(C))
+#endif
