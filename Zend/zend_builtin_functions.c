@@ -851,7 +851,7 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t)copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
 }
 /* }}} */
 
@@ -891,7 +891,7 @@ ZEND_FUNCTION(get_defined_functions)
 	array_init(user);
 	array_init(return_value);
 	
-	zend_hash_apply_with_arguments(EG(function_table), (apply_func_args_t)copy_function_name, 2, internal, user);
+	zend_hash_apply_with_arguments(EG(function_table), (apply_func_args_t) copy_function_name, 2, internal, user);
 	
 	if (zend_hash_add(return_value->value.ht, "internal", sizeof("internal"), (void **)&internal, sizeof(zval *), NULL) == FAILURE) {
 		zend_error(E_WARNING, "Cannot add internal functions to return value from get_defined_functions()");
