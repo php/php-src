@@ -60,6 +60,7 @@ YACC = @YACC@
 MAINT = @MAINT@
 APXS = @APXS@
 APXS_LDFLAGS = $(EXTRA_LIBS) $(LIBS)
+APXS_EXP = @APXS_EXP@
 WARNING_LEVEL = @WARNING_LEVEL@
 LEX_CFLAGS = -w$(WARNING_LEVEL) @LEX_CFLAGS@
 
@@ -107,7 +108,7 @@ libmodphp4-so.a: all-recursive $(OBJS) @REGEX_LIB@
 # Apache 1.3 shared module
 libphp4.so: $(srcdir)/mod_php4.c libmodphp4-so.a @REGEX_LIB@
 	-@test -f mod_php4.c || test -L mod_php4.c || $(LN_S) $(srcdir)/mod_php4.c mod_php4.c
-	$(APXS) $(INCLUDE) -c -o libphp4.so @RPATHS@ mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS)
+	$(APXS) $(INCLUDE) -c -o libphp4.so @RPATHS@ mod_php4.c libmodphp4-so.a $(APXS_LDFLAGS) $(APXS_EXP)
 
 regex/libregex.a:
 	(cd regex; $(MAKE) lib)
