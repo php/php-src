@@ -102,6 +102,18 @@ void spl_register_functions(zend_class_entry * class_entry, function_entry * fun
 }
 /* }}} */
 
+/* {{{ spl_register_property */
+void spl_register_property( zend_class_entry * class_entry, char *prop_name, zval *prop_val, int prop_flags TSRMLS_DC)
+{
+	if (!prop_val) {
+		INIT_PZVAL(prop_val);
+		prop_val->type = IS_NULL;
+	}
+
+	zend_declare_property(class_entry, prop_name, strlen(prop_name), prop_val, prop_flags);
+}
+/* }}} */
+
 /* {{{ spl_add_class_name */
 void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC)
 {

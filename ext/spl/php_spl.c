@@ -136,6 +136,7 @@ PHP_MINIT_FUNCTION(spl)
 	REGISTER_SPL_IMPLEMENT(array_access, array_read);
 	REGISTER_SPL_INTF_FUNC(array_access, set);
 
+	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
