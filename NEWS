@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
   them sort based on the current locale. (Derick)
 - Fixed bug #32538 (ext/swf/swf.c does not compile with gcc-3.4.x or newer).
   (adam dot greenfield at gmail dot com)
+- Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
+  longer then the original string). (Ilia)
 
 31 Mar 2005, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
