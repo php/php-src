@@ -1,3 +1,29 @@
+2000-04-17  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/php_mssql.c: minor optimization
+
+2000-04-17  Andrew Skalski  <askalski@chek.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h: fixed imap quota/relogin compilation errors
+
+2000-04-17  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/info.c: Have forgotten myself.
+
+2000-04-17  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/pcre/pcrelib/doc/.cvsignore
+      ext/pcre/pcrelib/testdata/.cvsignore: shut up CVS!
+
+2000-04-17  Stig Bakken  <ssb@fast.no>
+
+    * ext/calendar/.cvsignore: ignore stuff
+
+2000-04-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/calendar/cal_unix.c: initial checkin
+
 2000-04-16  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: This doesn't belong in NEWS.
