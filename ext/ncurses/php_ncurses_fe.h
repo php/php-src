@@ -92,6 +92,7 @@ PHP_FUNCTION(ncurses_slk_attron);
 PHP_FUNCTION(ncurses_slk_attrset);
 PHP_FUNCTION(ncurses_slk_color);
 PHP_FUNCTION(ncurses_slk_init);
+PHP_FUNCTION(ncurses_slk_set);
 PHP_FUNCTION(ncurses_typeahead);
 PHP_FUNCTION(ncurses_ungetch);
 PHP_FUNCTION(ncurses_vidattr);

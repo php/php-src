@@ -471,6 +471,9 @@ PHP_FUNCTION(ncurses_use_default_colors)
 }
 /* }}} */
 
+/* {{{ proto bool ncurses_slk_clear(void)
+ */
+
 /* {{{ proto bool ncurses_slk_attr(void)
  */
 PHP_FUNCTION(ncurses_slk_attr)
@@ -518,6 +521,23 @@ PHP_FUNCTION(ncurses_slk_touch)
 	RETURN_LONG(slk_touch());
 }
 /* }}} */
+
+/* {{{ proto bool ncurses_slk_init(int labelnr, string label, int format)
+  sets function key labels */
+PHP_FUNCTION(ncurses_slk_set)
+{
+	char *str;
+	int  len;
+	long labelnr;
+	long format;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lsl",&labelnr, &str, &len, &format)==FAILURE) {
+		return;
+	}
+	RETURN_BOOL(slk_set(labelnr, str, format));
+}
+/* }}} */
+
 
 /* {{{ proto int ncurses_attroff(int attributes)
    Turn off the given attributes */
@@ -626,7 +646,7 @@ PHP_FUNCTION(ncurses_halfdelay)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
-	
+
 	RETURN_LONG(halfdelay(intarg));
 }
 /* }}} */
@@ -763,7 +783,7 @@ PHP_FUNCTION(ncurses_slk_color)
 {
 #ifdef HAVE_NCURSES_SLK_COLOR
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -772,7 +792,7 @@ PHP_FUNCTION(ncurses_slk_color)
 #else
 	php_error(E_WARNING,"%s not supported in this build");
 	RETURN_FALSE;
-#endif  
+#endif
 }
 /* }}} */
 
@@ -781,7 +801,7 @@ PHP_FUNCTION(ncurses_slk_color)
 PHP_FUNCTION(ncurses_slk_init)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -795,7 +815,7 @@ PHP_FUNCTION(ncurses_slk_init)
 PHP_FUNCTION(ncurses_typeahead)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -809,7 +829,7 @@ PHP_FUNCTION(ncurses_typeahead)
 PHP_FUNCTION(ncurses_ungetch)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -908,7 +928,7 @@ PHP_FUNCTION(ncurses_timeout)
 PHP_FUNCTION(ncurses_use_env)
 {
 	long intarg;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",&intarg)==FAILURE) {
 		return;
 	}
@@ -1447,7 +1467,7 @@ PHP_FUNCTION(ncurses_mousemask)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_getmouse(array mevent)
+/* {{{ proto bool ncurses_getmouse(array mevent)
    Reads mouse event from queue */
 PHP_FUNCTION(ncurses_getmouse)
 {
@@ -1470,12 +1490,12 @@ PHP_FUNCTION(ncurses_getmouse)
 	add_assoc_long(*arg, "z", mevent.z);
 	add_assoc_long(*arg, "mmask", mevent.bstate);
 
-	RETURN_LONG(retval);
+	RETURN_BOOL(retval);
 }
 /* }}} */
 
 /* {{{ proto int ncurses_ungetmouse(array mevent)
-   push mouse event to queue */
+   pushes mouse event to queue */
 PHP_FUNCTION(ncurses_ungetmouse)
 {
   zval **arg, **pvalue;

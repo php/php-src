@@ -107,6 +107,7 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_slk_attrset, NULL)
   PHP_FE(ncurses_slk_color, NULL)
   PHP_FE(ncurses_slk_init, NULL)
+	PHP_FE(ncurses_slk_set, NULL)
   PHP_FE(ncurses_typeahead, NULL)
   PHP_FE(ncurses_ungetch, NULL)
   PHP_FE(ncurses_vidattr, NULL)
