@@ -88,13 +88,6 @@ dnl
 dnl Try to find a way to enable POSIX threads
 dnl
 AC_DEFUN(PTHREADS_CHECK,[
-if test -n "$ac_cv_pthreads_lib"; then
-  LIBS="$LIBS -l$ac_cv_pthreads_lib"
-fi
-
-if test -n "$ac_cv_pthreads_cflags"; then
-  CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
-fi
 
 PTHREADS_CHECK_COMPILE
 
@@ -105,11 +98,11 @@ if test "$pthreads_working" != "yes"; then
     ac_save="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
     PTHREADS_CHECK_COMPILE
+    CFLAGS="$ac_save"
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_cflags="$flag"
       break
     fi
-    CFLAGS="$ac_save"
   done
 fi
 ])
@@ -121,11 +114,11 @@ if test "$pthreads_working" != "yes"; then
     ac_save="$LIBS"
     LIBS="$LIBS -l$lib"
     PTHREADS_CHECK_COMPILE
+    LIBS="$ac_save"
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_lib="$lib"
       break
     fi
-    LIBS="$ac_save"
   done
 fi
 ])
@@ -134,5 +127,16 @@ if test "$pthreads_working" = "yes"; then
   threads_result="POSIX Threads found"
 else
   threads_result="POSIX Threads not found"
+fi
+])dnl
+dnl
+dnl
+AC_DEFUN(PTHREADS_ASSIGN_VARS,[
+if test -n "$ac_cv_pthreads_lib"; then
+  LIBS="$LIBS -l$ac_cv_pthreads_lib"
+fi
+
+if test -n "$ac_cv_pthreads_cflags"; then
+  CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
 fi
 ])dnl
