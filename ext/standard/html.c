@@ -183,8 +183,10 @@ PHP_FUNCTION(get_html_translation_table)
 
 		case HTML_SPECIALCHARS:
 			ind[0]=38; add_assoc_string(return_value,ind,"&amp;",1);
-			if(quote_style&ENT_QUOTES) ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1);
-			if(!(quote_style&ENT_NOQUOTES)) ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1);
+			if(quote_style&ENT_QUOTES) {
+				ind[0]=39; add_assoc_string(return_value,ind,"&#039;",1); }
+			if(!(quote_style&ENT_NOQUOTES)) {
+				ind[0]=34; add_assoc_string(return_value,ind,"&quot;",1); }
 			ind[0]=60; add_assoc_string(return_value,ind,"&lt;",1);
 			ind[0]=62; add_assoc_string(return_value,ind,"&gt;",1);
 			break;
