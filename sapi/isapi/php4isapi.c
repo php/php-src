@@ -770,7 +770,11 @@ __declspec(dllexport) BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, L
 {
 	switch (fdwReason) {
 		case DLL_PROCESS_ATTACH:
-			tsrm_startup(1, 1, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
+#ifdef WITH_ZEUS
+			tsrm_startup(128, 1, TSRM_ERROR_LEVEL_CORE, "TSRM.log");
+#else
+			tsrm_startup(128, 1, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
+#endif
 			sapi_startup(&isapi_sapi_module);
 			if (isapi_sapi_module.startup) {
 				isapi_sapi_module.startup(&sapi_module);
