@@ -1,3 +1,51 @@
+2001-05-07  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: whitespace
+
+    * ext/standard/output.c:
+    Avoid crashing if somehow, output is sent in a new thread tha had no requests
+
+2001-05-07  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c:
+    Passed db_handle to dbx_error_function instead of NULL (Mc)
+
+2001-05-07  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter_ja.h
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_ja.c: update address of licence term in mbstring.
+
+2001-05-07  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Update NEWS
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c:
+    Allow virtual() of PHP files.  We may have to improve the detection code a
+    bit, but it worked well on everything I tried.
+
+2001-05-07  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mysql/php_mysql.c:
+    Enabled optional result_mode param in mysql_db_query() to make it behave
+    as mysql_unbuffered_query (can be either MYSQL_USE_RESULT or
+    MYSQL_STORE_RESULT)
+
+2001-05-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/wddx/config.m4:
+    As the WDDX extension can now be built as shared extension
+    without functional loss with regard to the session serializer, it
+    is safe to default to disable.  We enable XML automatically only,
+    if the user is building WDDX as a static extension.
+
+2001-05-07  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Patch from Jan Legenhausen to add vars to the HTTP_SERVER_VARS array.
+
 2001-05-06  Stig Bakken  <ssb@fast.no>
 
     * pear/CODING_STANDARDS: updated the .emacs example
