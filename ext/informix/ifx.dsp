@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
-CFG=ifx - Win32 Debug
+CFG=ifx - Win32 Debug_TS
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,12 +13,12 @@ CFG=ifx - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "ifx.mak" CFG="ifx - Win32 Debug"
+!MESSAGE NMAKE /f "ifx.mak" CFG="ifx - Win32 Debug_TS"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "ifx - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "ifx - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "ifx - Win32 Release_TS" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "ifx - Win32 Debug_TS" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -29,21 +29,21 @@ CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "ifx - Win32 Release"
+!IF  "$(CFG)" == "ifx - Win32 Release_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ifx___Wi"
-# PROP BASE Intermediate_Dir "ifx___Wi"
+# PROP BASE Output_Dir "..\..\Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS"
+# PROP Output_Dir "..\..\Release_TS"
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /D ZEND_DEBUG=0 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -53,9 +53,9 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 isqlt09a.lib php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"Release_TS/php_ifx.dll" /libpath:"..\..\Release_TS"
+# ADD LINK32 isqlt09a.lib php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386 /out:"..\..\Release_TS/php_ifx.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 
-!ELSEIF  "$(CFG)" == "ifx - Win32 Debug"
+!ELSEIF  "$(CFG)" == "ifx - Win32 Debug_TS"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /D "_DEBUG" /D ZEND_DEBUG=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL" /D HAVE_IFX=1 /D HAVE_IUS=1 /D "ZTS" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D IFX_VERSION=921 /D COMPILE_DL_INFORMIX=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x406 /d "_DEBUG"
@@ -79,30 +79,56 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 isqlt09a.lib php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug_TS/php_ifx.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
+# ADD LINK32 isqlt09a.lib php4ts_debug.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug_TS/php_ifx.dll" /pdbtype:sept /libpath:"..\..\Debug_TS"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "ifx - Win32 Release"
-# Name "ifx - Win32 Debug"
+# Name "ifx - Win32 Release_TS"
+# Name "ifx - Win32 Debug_TS"
+# Begin Group "Source Files"
+
+# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=.\ifx.c
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "ifx - Win32 Release"
+SOURCE=.\ifx.ec
 
-# ADD CPP /D ZEND_DEBUG=0
+!IF  "$(CFG)" == "ifx - Win32 Release_TS"
 
-!ELSEIF  "$(CFG)" == "ifx - Win32 Debug"
+# Begin Custom Build
+InputPath=.\ifx.ec
+
+".\ifx.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\.. ifx.ec
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ifx - Win32 Debug_TS"
+
+# Begin Custom Build
+InputPath=.\ifx.ec
+
+".\ifx.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	esql.exe -dcmdl -p -G -subsystem:windows -thread -I..\.. ifx.ec
+
+# End Custom Build
 
 !ENDIF 
 
 # End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
 SOURCE=.\php_informix.h
 # End Source File
+# End Group
 # End Target
 # End Project
