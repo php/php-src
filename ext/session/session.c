@@ -611,13 +611,14 @@ static void php_session_initialize(TSRMLS_D)
 	}
 }
 
-static void migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
+static int migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 {
 	char *str;
 	uint str_len;
 	ulong num_key;
 	int n;
 	zval **val = NULL;
+	int ret = 0;
 	
 	n = zend_hash_get_current_key_ex(ht, &str, &str_len, &num_key, 0, pos);
 
@@ -626,6 +627,7 @@ static void migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 			zend_hash_find(&EG(symbol_table), str, str_len, (void **) &val);
 			if (val) {
 				ZEND_SET_SYMBOL_WITH_LENGTH(ht, str, str_len, *val, (*val)->refcount + 1 , 1);
+				ret = 1;
 			}
 			break;
 		case HASH_KEY_IS_LONG:
@@ -634,6 +636,8 @@ static void migrate_global(HashTable *ht, HashPosition *pos TSRMLS_DC)
 					"numeric nature.", num_key);
 			break;
 	}
+	
+	return ret;
 }
 
 static void php_session_save_current_state(TSRMLS_D)
@@ -652,9 +656,8 @@ static void php_session_save_current_state(TSRMLS_D)
 			while (zend_hash_get_current_data_ex(ht, 
 						(void **) &val, &pos) != FAILURE) {
 				if (Z_TYPE_PP(val) == IS_NULL) {
-					do_warn = 1;
-
-					migrate_global(ht, &pos TSRMLS_CC);
+					if (migrate_global(ht, &pos TSRMLS_CC))
+						do_warn = 1;
 				}
 				zend_hash_move_forward_ex(ht, &pos);
 			}
