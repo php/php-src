@@ -226,19 +226,19 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 							}
 
 
-#define ZEND_SET_GLOBAL_VAR(name, var)									\
-	{																	\
-		char *_name = (name);											\
-																		\
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH(_name, strlen(_name)+1, var);	\
+#define ZEND_SET_SYMBOL(symtable, name, var)									\
+	{																			\
+		char *_name = (name);													\
+																				\
+		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var);		\
 	}
 
 
-#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var)														\
+#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var)									\
 	{																									\
 		zval **orig_var;																				\
 																										\
-		if (zend_hash_find(&EG(symbol_table), (name), (name_length), (void **) &orig_var)==SUCCESS		\
+		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
 			int locks = (*orig_var)->EA.locks;															\
 			int refcount = (*orig_var)->refcount;														\
@@ -252,9 +252,16 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 			efree(var);																					\
 		} else {																						\
 			INIT_PZVAL(var);																			\
-			zend_hash_update(&EG(symbol_table), (name), (name_length), &var, sizeof(zval *), NULL);		\
+			zend_hash_update(symtable, (name), (name_length), &var, sizeof(zval *), NULL);				\
 		}																								\
 	}
+
+
+#define ZEND_SET_GLOBAL_VAR(name, var)				\
+	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
+
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var)		\
+	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var)
 
 #endif							/* _ZEND_API_H */
 
