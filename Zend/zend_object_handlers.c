@@ -5,7 +5,7 @@
 #include "zend_objects.h"
 #include "zend_object_handlers.h"
 
-#define DEBUG_OBJECT_HANDLERS 1
+#define DEBUG_OBJECT_HANDLERS 0
 
 static HashTable *zend_std_get_properties(zval *object TSRMLS_DC)
 {

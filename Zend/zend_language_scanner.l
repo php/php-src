@@ -705,6 +705,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_STATIC;
 }
 
+<ST_IN_SCRIPTING>"private" {
+	return T_PRIVATE;
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
 }
