@@ -1765,12 +1765,14 @@ PHP_FUNCTION(pg_lo_close)
 }
 /* }}} */
 
+#define PGSQL_LO_READ_BUF_SIZE  8192
+
 /* {{{ proto string pg_lo_read(resource large_object [, int len])
    Read a large object */
 PHP_FUNCTION(pg_lo_read)
 {
   	zval **pgsql_id, **len;
-	int buf_len = 1024, nbytes;
+	int buf_len = PGSQL_LO_READ_BUF_SIZE, nbytes;
 	char *buf;
 	pgLofp *pgsql;
 
@@ -1816,6 +1818,16 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		convert_to_long_ex(z_len);
+		if (Z_LVAL_PP(z_len) > Z_STRLEN_PP(str)) {
+			php_error(E_WARNING, "%s() cannot write more than buffer size %d. Tried to wtite %d",
+					  get_active_function_name(TSRMLS_C), Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			RETURN_FALSE;
+		}
+		if (Z_LVAL_PP(z_len) < 0) {
+			php_error(E_WARNING, "%s() buffer size must be larger than 0. %d specified for buffer size.",
+					  get_active_function_name(TSRMLS_C), Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			RETURN_FALSE;
+		}
 		len = Z_LVAL_PP(z_len);
 	}
 	else {
@@ -1837,11 +1849,10 @@ PHP_FUNCTION(pg_lo_write)
 PHP_FUNCTION(pg_lo_read_all)
 {
   	zval **pgsql_id;
-	int i, tbytes;
+	int tbytes;
 	volatile int nbytes;
-	char buf[8192];
+	char buf[PGSQL_LO_READ_BUF_SIZE];
 	pgLofp *pgsql;
-	int output=1;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
@@ -1857,11 +1868,9 @@ PHP_FUNCTION(pg_lo_read_all)
 	ZEND_FETCH_RESOURCE(pgsql, pgLofp *, pgsql_id, -1, "PostgreSQL large object", le_lofp);
 
 	tbytes = 0;
-	while ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf, 8192))>0) {
-		for(i=0; i<nbytes; i++) {
-			if (output) { (void) PUTC(buf[i]); }
-		}
-		tbytes += i;
+	while ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, buf, PGSQL_LO_READ_BUF_SIZE))>0) {
+		php_body_write(buf, nbytes TSRMLS_CC);
+		tbytes += nbytes;
 	}
 	RETURN_LONG(tbytes);
 }
@@ -1888,7 +1897,7 @@ PHP_FUNCTION(pg_lo_import)
 		CHECK_DEFAULT_LINK(id);
 	}
 	else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC,
-									 "rs", &pgsql_link, &file_in, &name_len) == SUCCESS) {
+									 "sr", &file_in, &name_len, &pgsql_link) == SUCCESS) {
 		php_error(E_NOTICE, "Old API for %s() is used.", get_active_function_name(TSRMLS_C));
 	}
 	else {
