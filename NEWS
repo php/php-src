@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Hugely improved the performance of the thread-safe version of PHP, especially
+  under Windows (Andi & Zeev) 
+- Improved request-shutdown performance significantly (Andi & Zeev, Zend
+  Engine)
 - Added a few new math functions. (Jesus)
 - Bump bundled expat to 1.95.2 (Thies)
 - Improved the stability of OCIPlogon() after a database restart. (Thies)
