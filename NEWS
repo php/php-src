@@ -1,7 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ?? 1999, Version 4.0 Beta 3
+November 16 1999, Version 4.0 Beta 3
 - ucfirst()/ucwords() no longer modify arg1. (Thies)
 - Fixed strtr() not to modify arg1. (Thies)
 - Added Win32 build files for Informix driver and make it
