@@ -307,7 +307,9 @@ php_mbereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		mbre_free_registers(&regs);
 		RETURN_FALSE;
 	}
-
+	if (regs.beg[0] == regs.end[0]) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+	}
 	match_len = 1;
 	str = Z_STRVAL_PP(arg_string);
 	if (array) {
@@ -423,6 +425,10 @@ php_mbereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 	pos = 0;
 	while (err >= 0) {
 		err = mbre_search(&re, string, string_len, pos, string_len - pos, &regs);
+		if ( regs.beg[0] == regs.end[0] ) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+			break;
+		}
 		if (err <= -2) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in php_mbereg_replace_exec()");
 			break;
@@ -565,20 +571,19 @@ PHP_FUNCTION(mb_split)
 	/* churn through str, generating array entries as we go */
 	while ((count != 0) &&
 		   (err = mbre_search(&re, string, string_len, pos, string_len - pos, &regs)) >= 0) {
+		if ( regs.beg[0] == regs.end[0] ) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+			break;
+		}
+
 		n = regs.beg[0];
-		if (n == pos) {
-			/* match is at start of string, return empty string */
-			add_next_index_stringl(return_value, empty_string, 0, 1);
+		/* add it to the array */
+		if (n < string_len && n <= pos) {
+			n -= pos;
+			add_next_index_stringl(return_value, &string[pos], n, 1);
 		} else {
-			/* On a real match */
-			/* add it to the array */
-			if (n < string_len) {
-				n -= pos;
-				add_next_index_stringl(return_value, &string[pos], n, 1);
-			} else {
-				err = -2;
-				break;
-			}
+			err = -2;
+			break;
 		}
 		/* point at our new starting point */
 		n = regs.end[0];
@@ -736,7 +741,6 @@ php_mbereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	err = mbre_search(MBSTRG(search_re), str, len, pos, len - pos, MBSTRG(search_regs));
-
 	if (err <= -2) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbregex_search()");
 		RETVAL_FALSE;
@@ -744,6 +748,9 @@ php_mbereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		MBSTRG(search_pos) = len;
 		RETVAL_FALSE;
 	} else {
+		if (MBSTRG(search_regs)->beg[0] == MBSTRG(search_regs)->end[0]) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+		}
 		switch (mode) {
 		case 1:
 			if (array_init(return_value) != FAILURE) {
