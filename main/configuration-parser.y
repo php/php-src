@@ -463,7 +463,7 @@ statement:
 						new_property->value.str.val = $3.value.str.val;
 						new_property->value.str.len = $3.value.str.len;
 						new_property->type = IS_STRING;
-						zend_str_tolower(new_property->value.str.val, new_property->value.str.len);
+						/* zend_str_tolower(new_property->value.str.val, new_property->value.str.len); */
 						zend_hash_update(current_section->value.obj.properties, $1.value.str.val, $1.value.str.len+1, &new_property, sizeof(zval *), NULL);
 					}
 					break;
