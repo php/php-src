@@ -221,7 +221,7 @@ PHP_FUNCTION(file_register_wrapper)
 	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, uwrap, le_protocols);
 	
 	if (zend_hash_find(EG(class_table), uwrap->classname, classname_len + 1, (void**)&uwrap->ce) == SUCCESS) {
-#if ZEND_ENGINE_2
+#ifdef ZEND_ENGINE_2
 		uwrap->ce = *(zend_class_entry**)uwrap->ce;
 #endif
 		if (php_register_url_stream_wrapper(protocol, &uwrap->wrapper TSRMLS_CC) == SUCCESS) {
