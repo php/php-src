@@ -16,8 +16,12 @@
 #  | Authors: Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: fastgen.sh,v 1.10 2001-05-20 22:04:23 sas Exp $ 
+# $Id: fastgen.sh,v 1.11 2001-08-28 12:15:01 ssb Exp $ 
 #
+
+if test "$#" = "0"; then
+  echo "Usage: fastgen.sh <srcdir> <mkdir_p> <bsdmakefile_p> <file>"
+fi
 
 srcdir=$1
 shift
