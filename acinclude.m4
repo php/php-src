@@ -1213,7 +1213,7 @@ main() {
   fi
 ])
 
-dnl PHP_SHARED_MODULE(module-name, object-var, build-dir)
+dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx)
 dnl
 dnl Basically sets up the link-stage for building module-name
 dnl from object_var in build-dir.
@@ -1226,7 +1226,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
 	\$(LIBTOOL) --mode=install cp $3/$1.la \$(phplibdir)
 
 $3/$1.la: \$($2) \$(translit($1,a-z-,A-Z_)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link \$(CC) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) -o \[$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z-,A-Z_)_SHARED_LIBADD)
+	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) -o \[$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z-,A-Z_)_SHARED_LIBADD)
 
 EOF
 ])
@@ -1274,7 +1274,7 @@ AC_DEFUN([PHP_GEN_BUILD_DIRS],[
 ])
 
 dnl
-dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags]]])
+dnl PHP_NEW_EXTENSION(extname, sources [, shared [,sapi_class[, extra-cflags[, cxx]]]])
 dnl
 dnl Includes an extension in the build.
 dnl
@@ -1304,7 +1304,7 @@ dnl ---------------------------------------------- Static module
     if test "$3" = "shared" || test "$3" = "yes"; then
 dnl ---------------------------------------------- Shared module
       PHP_ADD_SOURCES_X(PHP_EXT_DIR($1),$2,$ac_extra,shared_objects_$1,yes)
-      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir)
+      PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6)
       AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
     fi
   fi
