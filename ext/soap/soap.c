@@ -1,7 +1,6 @@
 #include "php_soap.h"
 
 int le_sdl = 0;
-int le_http_socket = 0;
 int le_url = 0;
 int le_service = 0;
 
@@ -185,6 +184,11 @@ PHP_MINIT_FUNCTION(soap)
 	/* TODO: add ini entry for always use soap errors */
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, php_soap_del_globals);
 
+	/* Enable php stream/wrapper support for libxml */
+	xmlRegisterDefaultInputCallbacks();
+	xmlRegisterInputCallbacks(php_stream_xmlIO_match_wrapper, php_stream_xmlIO_open_wrapper,
+			php_stream_xmlIO_read, php_stream_xmlIO_close);
+	
 	/* Register SoapObject class */
 	/* BIG NOTE : THIS EMITS AN COMPILATION WARNING UNDER ZE2 - handle_function_call deprecated. 
 		soap_call_function_handler should be of type struct _zend_function, not (*handle_function_call).
@@ -209,7 +213,6 @@ PHP_MINIT_FUNCTION(soap)
 	zend_register_internal_class(&soap_param_class_entry TSRMLS_CC);
 
 	le_sdl = register_list_destructors(NULL, NULL);
-	le_http_socket = register_list_destructors(delete_http_socket, NULL);
 	le_url = register_list_destructors(delete_url, NULL);
 	le_service = register_list_destructors(delete_service, NULL);
 
@@ -781,6 +784,8 @@ PHP_FUNCTION(addfunction)
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &function_name) == FAILURE)
 		php_error(E_ERROR, "Invalid parameters passed to addfunction");
 
+	/* TODO: could use zend_is_callable here */
+	
 	if(function_name->type == IS_ARRAY)
 	{
 		if(service->type == SOAP_FUNCTIONS)
@@ -1167,6 +1172,7 @@ PHP_FUNCTION(soapobject)
 			ret = zend_list_insert(sdl, le_sdl);
 
 			add_property_resource(thisObj, "sdl", ret);
+			/* FIXME: this is extremely bad practice */
 			add_property_resource(thisObj, "port", (long)get_binding_from_type(sdl, BINDING_SOAP));
 			zend_list_addref(ret);
 		}
@@ -1261,7 +1267,7 @@ PHP_FUNCTION(__generate)
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|ss",
 		&function, &function_len, &args, &soap_action, &soap_action_len, &uri, &uri_len) == FAILURE)
-		php_error(E_ERROR, "Invalid arguments to SoapObject->__call");
+		php_error(E_ERROR, "Invalid arguments to SoapObject->__generate");
 
 	arg_count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
@@ -1331,6 +1337,7 @@ PHP_FUNCTION(__parse)
 	}
 
 	if (ret_params) {
+		FREE_ZVAL(ret_params[0]);
 		efree(ret_params);
 	}
 }
@@ -1381,6 +1388,7 @@ PHP_FUNCTION(__call)
 	}
 
 	if (ret_params) {
+		FREE_ZVAL(ret_params[0]);
 		efree(ret_params);
 	}
 }
@@ -1482,9 +1490,7 @@ PHP_FUNCTION(__getlastrequest)
 
 	if(zend_hash_find(Z_OBJPROP_P(thisObj), "__last_request", sizeof("__last_request"), (void **)&tmp) == SUCCESS)
 	{
-		*return_value = *(*tmp);
-		zval_copy_ctor(return_value);
-		return;
+		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	}
 	RETURN_NULL();
 }
@@ -1498,9 +1504,7 @@ PHP_FUNCTION(__getlastresponse)
 
 	if(zend_hash_find(Z_OBJPROP_P(thisObj), "__last_response", sizeof("__last_response"), (void **)&tmp) == SUCCESS)
 	{
-		*return_value = *(*tmp);
-		zval_copy_ctor(return_value);
-		return;
+		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	}
 	RETURN_NULL();
 }
@@ -1512,8 +1516,6 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 	zval *thisObj;
 	char *function = Z_STRVAL(function_name->element);
 	zend_function *builtin_function;
-	
-//	TSRMLS_FETCH();
 
 	GET_THIS_OBJECT(thisObj);
 
@@ -1578,6 +1580,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 				}
 
 				if (ret_params) {
+					FREE_ZVAL(ret_params[0]);
 					efree(ret_params);
 				}
 			}
@@ -2114,17 +2117,6 @@ void delete_sdl(void *handle)
 		free(tmp->bindings);
 	}
 	free(tmp);
-}
-
-void delete_http_socket(void *handle)
-{
-	SOAP_STREAM stream = (SOAP_STREAM)handle;
-#ifdef PHP_HAVE_STREAMS
-	TSRMLS_FETCH();
-	php_stream_close(stream);
-#else
-	SOCK_CLOSE(stream);
-#endif
 }
 
 void delete_url(void *handle)

@@ -7,7 +7,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	int buf_size,err,ret;
 	sdlPtr sdl;
 	php_url *phpurl = NULL;
-	SOAP_STREAM stream;
+	php_stream *stream;
 	zval **trace;
 
 	FETCH_THIS_SOCKET(stream);
@@ -26,6 +26,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	if(!stream)
 	{
 		char *url;
+		int use_ssl;
 
 		if(!sdl)
 		{
@@ -42,35 +43,46 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 		}
 
 		phpurl = php_url_parse(url);
+		if (phpurl == NULL) {
+			php_error(E_ERROR, "Unable to parse URL \"%s\"", url);
+		}
 
+		use_ssl = strcmp(phpurl->scheme, "https") == 0;
+#if !HAVE_OPENSSL_EXT
+		if (use_ssl) {
+			php_error(E_ERROR, "SSL support not available in this build");
+		}
+#endif
+		
 		if (phpurl->port == 0) {
-			if (strcmp(phpurl->scheme, "http") == 0)
-				phpurl->port = 80;
-			else if (strcmp(phpurl->scheme, "https") == 0)
-				phpurl->port = 443;
+			phpurl->port = use_ssl ? 443 : 80;
 		}
 		
-#ifdef PHP_HAVE_STREAMS
 		stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, NULL);
-#else
-		stream = get_socket(phpurl->host, phpurl->port, 10);
-#endif
+
 		if(stream)
 		{
-			ret = zend_list_insert((void *)stream, le_http_socket);
-			add_property_resource(this_ptr, "httpsocket", ret);
-			zend_list_addref(ret);
+
+#if HAVE_OPENSSL_EXT
+			/* fire up SSL, if requested */
+			if (use_ssl) {
+				if (FAILURE == php_stream_sock_ssl_activate(stream, 1)) {
+					php_error(E_ERROR, "SSL Connection attempt failed");
+				}
+			}
+#endif
+			
+			add_property_resource(this_ptr, "httpsocket", php_stream_get_resource_id(stream));
 
 			ret = zend_list_insert(phpurl, le_url);
 			add_property_resource(this_ptr, "httpurl", ret);
 			zend_list_addref(ret);
 		} else {
-			php_error(E_ERROR,"Could not connect to host");
+			php_error(E_ERROR, "Could not connect to host");
 		}
 	}
 
-	if(stream)
-	{
+	if (stream) {
 		zval **cookies;
 		char *header = "POST %s HTTP/1.1\r\nConnection: close\r\nAccept: text/html; text/xml; text/plain\r\nUser-Agent: PHP SOAP 0.1\r\nHost: %s\r\nContent-Type: text/xml\r\nContent-Length: %d\r\nSOAPAction: \"%s\"\r\n";
 		int size = strlen(header) + strlen(phpurl->host) + strlen(phpurl->path) + 10;
@@ -88,11 +100,8 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			sprintf(soap_headers, header, phpurl->path, phpurl->host, buf_size, soapaction);
 		}
 		
-#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, soap_headers, strlen(soap_headers));
-#else
-		err = send(stream, soap_headers, strlen(soap_headers), 0);
-#endif
+
 		if(err != (int)strlen(soap_headers))
 			php_error(E_ERROR,"Failed Sending HTTP Headers");
 
@@ -120,31 +129,22 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			smart_str_appendl(&cookie_str, "\r\n", 2);
 			smart_str_0(&cookie_str);
 
-#ifdef PHP_HAVE_STREAMS
 			err = php_stream_write(stream, cookie_str.c, cookie_str.len);
-#else
-			err = send(stream, cookie_str.c, cookie_str.len,0);
-#endif
+
 			if(err != (int)cookie_str.len)
 				php_error(E_ERROR,"Failed Sending HTTP Headers");
 
 			smart_str_free(&cookie_str);
 		}
 
-#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, "\r\n", 2);
-#else
-		err = send(stream, "\r\n", 2, 0);
-#endif
+
 		if(err != 2)
 			php_error(E_ERROR,"Failed Sending HTTP Headers");
 
 
-#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, buf, buf_size);
-#else
-		err = send(stream, buf, buf_size, 0);
-#endif
+
 		if(err != (int)strlen(buf))
 			php_error(E_ERROR,"Failed Sending HTTP Content");
 
@@ -159,7 +159,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRML
 	int http_header_size, http_body_size, http_close;
 	sdlPtr sdl;
 	zval **socket_ref;
-	SOAP_STREAM stream;
+	php_stream *stream;
 	zval **trace;
 
 	FETCH_THIS_SDL(sdl);
@@ -244,15 +244,9 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRML
 	}
 	*/
 
-	if(http_close)
-	{
-#ifdef PHP_HAVE_STREAMS
+	if (http_close) {
 		php_stream_close(stream);
-#else
-		SOCK_CLOSE(stream);
-#endif
-		zend_list_delete(Z_RESVAL_PP(socket_ref));
-		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", strlen("httpsocket") + 1);
+		zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
 	}
 
 	/* Check and see if the server even sent a xml document */
@@ -336,164 +330,127 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRML
 
 char *get_http_header_value(char *headers, char *type)
 {
-	char *tmp = NULL,*var = NULL;
-	int size;
+	char *pos, *tmp = NULL;
+	int typelen, headerslen;
 
-	tmp = strstr(headers, type);
-	if(tmp != NULL)
-	{
-		tmp += strlen(type);
-		size = strstr(tmp, "\r\n") - tmp;
-		var = emalloc(size + 1);
-		strncpy(var, tmp, size);
-		var[size] = '\0';
-	}
-	return var;
+	typelen = strlen(type);
+	headerslen = strlen(headers);
+
+	/* header `titles' can be lower case, or any case combination, according
+	 * to the various RFC's. */
+	pos = headers;
+	do {
+		/* start of buffer or start of line */
+		if (strncasecmp(pos, type, typelen) == 0) {
+			char *eol;
+			
+			/* match */
+			tmp = pos + typelen;
+			eol = strstr(tmp, "\r\n");
+			if (eol == NULL) {
+				eol = headers + headerslen;
+			}
+			return estrndup(tmp, eol - tmp);
+		}
+		
+		/* find next line */
+		pos = strstr(pos, "\r\n");
+		if (pos)
+			pos += 2;
+
+	} while (pos);
+
+	return NULL;
 }
 
-int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_size TSRMLS_DC)
+int get_http_body(php_stream *stream, char *headers,  char **response, int *out_size TSRMLS_DC)
 {
-	char *trans_enc, *content_length, *http_buf;
+	char *trans_enc, *content_length, *http_buf = NULL;
 	int http_buf_size = 0;
-/*	TSRMLS_FETCH();*/
 
 	trans_enc = get_http_header_value(headers, "Transfer-Encoding: ");
 	content_length = get_http_header_value(headers, "Content-Length: ");
 
-	/* this is temp...
-	  netscape enterprise server sends in lowercase???
-	*/
-	if(content_length == NULL)
-		content_length = get_http_header_value(headers, "Content-length: ");
-
-	if(trans_enc && !strcmp(trans_enc, "chunked"))
-	{
+	if (trans_enc && !strcmp(trans_enc, "chunked")) {
 		int cur = 0, size = 0, buf_size = 0, len_size;
 		char done, chunk_size[10];
 
 		done = FALSE;
-		http_buf = emalloc(1);
-		*http_buf = '\0';
-		while(!done)
-		{
-			for (cur = 0; cur < 3 || !(chunk_size[cur - 2] == '\r' && chunk_size[cur - 1] == '\n'); cur++)
-#ifdef PHP_HAVE_STREAMS
-				chunk_size[cur] = php_stream_getc(stream);
-#else
-				chunk_size[cur] = php_sock_fgetc(stream);
-#endif
-			chunk_size[cur] = '\0';
-			if(sscanf(chunk_size,"%x",&buf_size) != -1)
-			{
-				http_buf = erealloc(http_buf,http_buf_size + buf_size);
+		http_buf = NULL;
+
+		while (!done) {
+			php_stream_gets(stream, chunk_size, sizeof(chunk_size));
+
+			if (sscanf(chunk_size, "%x", &buf_size) != -1) {
+				http_buf = erealloc(http_buf, http_buf_size + buf_size + 1);
 				len_size = 0;
-				while(http_buf_size < buf_size)
-				{
-#ifdef PHP_HAVE_STREAMS
-					len_size += php_stream_read(stream, &http_buf[http_buf_size], buf_size - len_size);
-#else
-					len_size += php_sock_fread(&http_buf[http_buf_size], buf_size - len_size, stream);
-#endif
+				
+				while (http_buf_size < buf_size) {
+					len_size += php_stream_read(stream, http_buf + http_buf_size, buf_size - len_size);
 					http_buf_size += len_size;
 				}
-#ifdef PHP_HAVE_STREAMS
-				php_stream_getc(stream);php_stream_getc(stream);
-#else
+				
 				/* Eat up '\r' '\n' */
-				php_sock_fgetc(stream);php_sock_fgetc(stream);
-#endif
+				php_stream_getc(stream);php_stream_getc(stream);
 			}
-			if(buf_size == 0)
+			if (buf_size == 0) {
 				done = TRUE;
+			}
 		}
 		efree(trans_enc);
-	}
-	else if(content_length)
-	{
+
+		if (http_buf == NULL) {
+			http_buf = estrndup("", 1);
+			http_buf_size = 1;
+		} else {
+			http_buf[http_buf_size] = '\0';
+		}
+		
+	} else if (content_length) {
 		int size;
 		size = atoi(content_length);
 		http_buf = emalloc(size + 1);
 
-		while(http_buf_size < size)
-#ifdef PHP_HAVE_STREAMS
-			http_buf_size += php_stream_read(stream, &http_buf[http_buf_size], size - http_buf_size);
-#else
-			http_buf_size += php_sock_fread(&http_buf[http_buf_size], size - http_buf_size, stream);
-#endif
+		while(http_buf_size < size) {
+			http_buf_size += php_stream_read(stream, http_buf + http_buf_size, size - http_buf_size);
+		}
 		http_buf[size] = '\0';
 		efree(content_length);
+	} else {
+		php_error(E_ERROR, "Don't know how to read http body, No Content-Length or chunked data");
 	}
-	else
-		php_error(E_ERROR,"Don't know how to read http body, No Content-Length or chunked data");
 
 	(*response) = http_buf;
 	(*out_size) = http_buf_size;
 	return TRUE;
 }
 
-int get_http_headers(SOAP_STREAM stream, char **response, int *out_size TSRMLS_DC)
+int get_http_headers(php_stream *stream, char **response, int *out_size TSRMLS_DC)
 {
-	int done;
+	int done = FALSE;
 	char chr;
 	smart_str tmp_response = {0};
-
-	done = FALSE;
+	char headerbuf[8192];
 
 	while(!done)
 	{
-#ifdef PHP_HAVE_STREAMS
-		chr = php_stream_getc(stream);
-#else
-		chr = php_sock_fgetc(stream);
-#endif
-		if(chr != EOF)
-		{
-			smart_str_appendc(&tmp_response, chr);
-			if(tmp_response.c[tmp_response.len - 2] == '\r' && tmp_response.c[tmp_response.len - 1] == '\n' &&
-				tmp_response.c[tmp_response.len - 4] == '\r' && tmp_response.c[tmp_response.len - 3] == '\n')
-			{
-				smart_str_0(&tmp_response);
-				done = TRUE;
-			}
-		} else {
-			return FALSE;
+		if (!php_stream_gets(stream, headerbuf, sizeof(headerbuf))) {
+			break;
 		}
+
+		if (strcmp(headerbuf, "\r\n") == 0) {
+			/* empty line marks end of headers */
+			done = TRUE;
+			break;
+		}
+
+		/* add header to collection */
+		smart_str_appends(&tmp_response, headerbuf);
 	}
+	smart_str_0(&tmp_response);
 	(*response) = tmp_response.c;
 	(*out_size) = tmp_response.len;
-	return TRUE;
+	return done;
 }
 
-#ifndef PHP_HAVE_STREAMS
-SOCKET get_socket(char* host,int portno,int time)
-{
-	SOCKET socketd = -1;
-	struct sockaddr_in server;
-	struct timeval timeout;
 
-	memset(&server, 0, sizeof(server));
-	socketd = socket(AF_INET,SOCK_STREAM,0);
-	if (socketd == SOCK_ERR) {
-		if(socketd > 0)
-			SOCK_CLOSE(socketd);
-		return FALSE;
-	}
-	server.sin_family = AF_INET;
-
-	if(php_lookup_hostname(host,&server.sin_addr)) {
-		if(socketd > 0)
-			SOCK_CLOSE(socketd);
-		return FALSE;
-	}
-	server.sin_port = htons((unsigned short)portno);
-	timeout.tv_sec = time;
-	timeout.tv_usec = 0;
-	if (php_connect_nonb(socketd, (struct sockaddr *)&server, sizeof(struct sockaddr_in), &timeout) == SOCK_CONN_ERR) {
-		if(socketd > 0)
-			SOCK_CLOSE(socketd);
-		return FALSE;
-	}
-
-	return socketd;
-}
-#endif

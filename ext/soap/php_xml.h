@@ -20,4 +20,9 @@ xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, cha
 int parse_namespace(char *inval,char **value,char **namespace);
 xmlNodePtr check_and_resolve_href(xmlNodePtr data);
 
+int php_stream_xmlIO_match_wrapper(const char *filename);
+void *php_stream_xmlIO_open_wrapper(const char *filename);
+int php_stream_xmlIO_read(void *context, char *buffer, int len);
+int php_stream_xmlIO_close(void *context);
+
 #endif
