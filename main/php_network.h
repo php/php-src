@@ -63,6 +63,16 @@
 #include <stddef.h>
 #endif
 
+#ifdef PHP_WIN32
+# define SOCK_ERR INVALID_SOCKET
+# define SOCK_CONN_ERR SOCKET_ERROR
+# define SOCK_RECV_ERR SOCKET_ERROR
+#else
+# define SOCK_ERR -1
+# define SOCK_CONN_ERR -1
+# define SOCK_RECV_ERR -1
+#endif
+
 #ifdef HAVE_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
