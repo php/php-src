@@ -41,12 +41,11 @@ PHP                                                                        NEWS
 - Fixed problem preventing startup errors from being displayed. (Marcus)
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
-- Fixed bug #27504 (Visibility bugs in call_user_function()). (Dmitry)
-- Fixed bug #27123 (Fix crash caused by bug in get_object_vars()). (Andi)
-- Fixed bug #27535 (Problem with object freeing mechanism). (Dmitry)
 - Fixed bug #27586 (ArrayObject::getIterator crashes with [] assignment). 
   (Marcus)
 - Fixed bug #27537 (Objects pointing to each other segfaults). (Dmitry)
+- Fixed bug #27535 (Problem with object freeing mechanism). (Dmitry)
+- Fixed bug #27504 (Visibility bugs in call_user_function()). (Dmitry)
 - Fixed bug #27338 (memory leak inside tsrm_virtual_cwd.c on win32). (Ilia)
 - Fixed bug #27287 (wddx segfaults during deserialization). (Moriyoshi)
 - Fixed bug #27263 (session extension crashes when unserializing referenced
@@ -54,6 +53,7 @@ PHP                                                                        NEWS
 - Fixed bug #27237 (Working with simplexml crashes apache2). (Rob)
 - Fixed bug #27227 (Mixed case class names causes Fatal Error in Constructor 
   call). (Marcus)
+- Fixed bug #27123 (Fix crash caused by bug in get_object_vars()). (Andi)
 - Fixed bug #26677 (mbstring compile errors with IRIX compiler).
   (K.Kosako <kosako at sofnec dot co dot jp>, Rui, Moriyoshi)
 
