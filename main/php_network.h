@@ -82,7 +82,7 @@ struct _php_netstream_data_t	{
 	char timeout_event;
 #if HAVE_OPENSSL_EXT
 	/* openssl specific bits here */
-	SSL * ssl_handle;
+	SSL *ssl_handle;
 	int ssl_active;
 #endif
 };
@@ -93,19 +93,19 @@ typedef struct _php_netstream_data_t php_netstream_data_t;
 extern php_stream_ops php_stream_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
-PHPAPI php_stream * php_stream_sock_open_from_socket(int socket, int persistent);
+PHPAPI php_stream *php_stream_sock_open_from_socket(int socket, int persistent);
 /* open a connection to a host using php_hostconnect and return a stream */
-PHPAPI php_stream * php_stream_sock_open_host(const char * host, unsigned short port,
+PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short port,
 		int socktype, int timeout, int persistent);
-PHPAPI php_stream * php_stream_sock_open_unix(const char * path, int persistent, struct timeval * timeout);
+PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int persistent, struct timeval *timeout);
 
-PHPAPI void php_stream_sock_set_timeout(php_stream * stream, struct timeval *timeout);
-PHPAPI int php_stream_sock_set_blocking(php_stream * stream, int mode);
+PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout);
+PHPAPI int php_stream_sock_set_blocking(php_stream *stream, int mode);
 /* set the chunk size for the stream; return the old chunk size */
-PHPAPI size_t php_stream_sock_set_chunk_size(php_stream * stream, size_t size);
+PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size);
 
 #if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream * stream, int activate, SSL_METHOD * method);
+PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method);
 #define php_stream_sock_ssl_activate(stream, activate)	php_stream_sock_ssl_activate_with_method((stream), (activate), SSLv23_client_method())
 
 #endif

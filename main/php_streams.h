@@ -35,13 +35,13 @@ typedef struct _php_stream_ops  {
 	int    (*flush)(php_stream *stream);
 	/* these are optional */
 	int    (*seek)(php_stream *stream, off_t offset, int whence);
-	char * (*gets)(php_stream *stream, char *buf, size_t size);
+	char *(*gets)(php_stream *stream, char *buf, size_t size);
 	int (*cast)(php_stream *stream, int castas, void **ret);
 	const char *label; /* label for this ops structure */
 } php_stream_ops;
 
 /* options uses the IGNORE_URL family of defines from fopen_wrappers.h */
-typedef php_stream * (*php_stream_factory_func_t)(char *filename, char *mode, int options, char ** opened_path TSRMLS_DC);
+typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path TSRMLS_DC);
 typedef void (*php_stream_wrapper_dtor_func_t)(php_stream *stream);
 
 typedef struct _php_stream_wrapper	{
@@ -102,12 +102,12 @@ PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent);
 /* operations for a stdio FILE; use the php_stream_fopen_XXX funcs below */
 extern php_stream_ops php_stream_stdio_ops;
 /* like fopen, but returns a stream */
-PHPAPI php_stream * php_stream_fopen(const char *filename, const char *mode, char **opened_path TSRMLS_DC);
-PHPAPI php_stream * php_stream_fopen_with_path(char *filename, char * mode, char *path, char **opened_path TSRMLS_DC);
-PHPAPI php_stream * php_stream_fopen_from_file(FILE *file, const char *mode);
-PHPAPI php_stream * php_stream_fopen_from_pipe(FILE *file, const char *mode);
-PHPAPI php_stream * php_stream_fopen_tmpfile(void);
-PHPAPI php_stream * php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path TSRMLS_DC);
+PHPAPI php_stream *php_stream_fopen(const char *filename, const char *mode, char **opened_path TSRMLS_DC);
+PHPAPI php_stream *php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path TSRMLS_DC);
+PHPAPI php_stream *php_stream_fopen_from_file(FILE *file, const char *mode);
+PHPAPI php_stream *php_stream_fopen_from_pipe(FILE *file, const char *mode);
+PHPAPI php_stream *php_stream_fopen_tmpfile(void);
+PHPAPI php_stream *php_stream_fopen_temporary_file(const char *dir, const char *pfx, char **opened_path TSRMLS_DC);
 
 /* coerce the stream into some other form */
 /* cast as a stdio FILE * */
@@ -125,7 +125,7 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 #define php_stream_can_cast(stream, as)	php_stream_cast(stream, as, NULL, 0)
 
 /* use this to check if a stream is of a particular type:
- * PHPAPI int php_stream_is(php_stream *stream, php_stream_ops * ops); */
+ * PHPAPI int php_stream_is(php_stream *stream, php_stream_ops *ops); */
 #define php_stream_is(stream, anops)		((stream)->ops == anops)
 #define PHP_STREAM_IS_STDIO &php_stream_stdio_ops
 
@@ -137,7 +137,7 @@ int php_shutdown_stream_wrappers(TSRMLS_D);
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 
-PHPAPI php_stream * php_stream_open_wrapper(char * path, char *mode, int options, char **opened_path TSRMLS_DC);
+PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC);
 
 #endif
 

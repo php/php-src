@@ -44,7 +44,7 @@
 static HashTable url_stream_wrappers_hash;
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char * mode) /* {{{ */
+PHPAPI php_stream *php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char *mode) /* {{{ */
 {
 	php_stream *ret;
 
@@ -162,7 +162,7 @@ PHPAPI char *php_stream_gets(php_stream *stream, char *buf, size_t maxlen)
 	} else {
 		/* unbuffered fgets - poor performance ! */
 		size_t n = 0;
-		char * c = buf;
+		char *c = buf;
 
 		/* TODO: look at error returns? */
 
@@ -227,7 +227,7 @@ PHPAPI int php_stream_seek(php_stream *stream, off_t offset, int whence)
 PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
 {
 	size_t ret = 0;
-	char * ptr;
+	char *ptr;
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
@@ -247,7 +247,7 @@ PHPAPI size_t php_stream_read_all(php_stream *src, char **buf, int persistent)
 		struct stat sbuf;
 
 		if (fstat(srcfd, &sbuf) == 0) {
-			void * srcfile;
+			void *srcfile;
 			
 			srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
@@ -309,7 +309,7 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 		struct stat sbuf;
 
 		if (fstat(srcfd, &sbuf) == 0) {
-			void * srcfile;
+			void *srcfile;
 			
 			srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, srcfd, 0);
 			if (srcfile != (void*)MAP_FAILED) {
@@ -366,7 +366,7 @@ PHPAPI size_t php_stream_copy_to_stream(php_stream *src, php_stream *dest, size_
 /* {{{ ------- STDIO stream implementation -------*/
 
 typedef struct {
-	FILE * file;
+	FILE *file;
 	int is_pipe;	/* use pclose */
 #if HAVE_FLUSHIO
 	char last_op;
@@ -433,7 +433,7 @@ PHPAPI php_stream *php_stream_fopen_from_pipe(FILE *file, const char *mode)
 }
 static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count)
 {
-	php_stdio_stream_data * data = (php_stdio_stream_data*)stream->abstract;
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 #if HAVE_FLUSHIO
 	if (data->last_op == 'r') {
@@ -447,7 +447,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 {
-	php_stdio_stream_data * ata = (php_stdio_stream_data*)stream->abstract;
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	if (buf == NULL && count == 0)	{
 		/* check for EOF condition */
@@ -700,7 +700,7 @@ static int stream_cookie_seeker(void *cookie, off_t position, int whence) {
 }
 
 static int stream_cookie_closer(void *cookie) {
-	php_stream * stream = (php_stream*)cookie;
+	php_stream *stream = (php_stream*)cookie;
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 	return php_stream_close(stream);
@@ -768,7 +768,7 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 exit_fail:
 	if (show_err)	{
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
-		static const char * cast_names[3] = {
+		static const char *cast_names[3] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
 		};
 		TSRMLS_FETCH();
@@ -817,7 +817,7 @@ PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 	return SUCCESS;
 }
 
-static php_stream * php_stream_open_url(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
+static php_stream *php_stream_open_url(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
 	const char *p, *protocol = NULL;
@@ -837,7 +837,7 @@ static php_stream * php_stream_open_url(char *path, char *mode, int options, cha
 			protocol = NULL;
 		}
 		if (wrapper)	{
-			php_stream * stream = wrapper->create(path, mode, options, opened_path TSRMLS_CC);
+			php_stream *stream = wrapper->create(path, mode, options, opened_path TSRMLS_CC);
 			if (stream)
 				stream->wrapper = wrapper;
 			return stream;
@@ -859,7 +859,7 @@ static php_stream * php_stream_open_url(char *path, char *mode, int options, cha
 	return NULL;
 }
 
-PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char ** opened_path TSRMLS_DC)
+PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path TSRMLS_DC)
 {
 	php_stream *stream = NULL;
 	
@@ -885,7 +885,7 @@ PHPAPI php_stream *php_stream_open_wrapper(char *path, char *mode, int options, 
 	stream = php_stream_fopen(path, mode, opened_path TSRMLS_CC);
 out:
 	if (stream == NULL && (options & REPORT_ERRORS))	{
-		char * tmp = estrdup(path);
+		char *tmp = estrdup(path);
 		php_strip_url_passwd(tmp);
 		zend_error(E_WARNING, "%s(\"%s\") - %s", get_active_function_name(TSRMLS_CC), tmp, strerror(errno));
 		efree(tmp);
