@@ -12,7 +12,7 @@ AC_ARG_WITH(cybercash,
       test -f $withval/c-api/mckcrypt.h && MCK_DIR=$withval/c-api
       if test -n "$MCK_DIR"; then
 	AC_MSG_RESULT(yes)
-	PHP_EXTENSION(cybercash)
+	PHP_EXTENSION(cybercash, cybercash.c)
 	old_LIBS=$LIBS
 	LIBS="$LIBS -L$MCK_DIR/lib"
 	AC_CHECK_LIB(mckcrypto,base64_encode,[AC_DEFINE(HAVE_MCK,1,[ ])],

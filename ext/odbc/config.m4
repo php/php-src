@@ -548,5 +548,5 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST_OLD(ODBC_LIBS)
   PHP_SUBST_OLD(ODBC_LFLAGS)
   PHP_SUBST_OLD(ODBC_TYPE)
-  PHP_EXTENSION(odbc, $shared)
+  PHP_NEW_EXTENSION(odbc, php_odbc.c, $shared)
 fi

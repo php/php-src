@@ -9,7 +9,7 @@ AC_ARG_WITH(cpdflib,
       AC_MSG_RESULT(no) ;;
     yes)
       AC_MSG_RESULT(yes)
-      PHP_EXTENSION(cpdf)
+      PHP_NEW_EXTENSION(cpdf, cpdf.c)
       AC_CHECK_LIB(cpdf, cpdf_open, [AC_DEFINE(HAVE_CPDFLIB,1,[Whether you have cpdflib])],
         [AC_MSG_ERROR([Cpdf module requires cpdflib >= 2.])])
       PHP_ADD_LIBRARY(cpdf)
@@ -20,7 +20,7 @@ AC_ARG_WITH(cpdflib,
       test -f $withval/include/cpdflib.h && CPDFLIB_INCLUDE=$withval/include
       if test -n "$CPDFLIB_INCLUDE" ; then
         AC_MSG_RESULT(yes)
-        PHP_EXTENSION(cpdf)
+        PHP_EXTENSION(cpdf, cpdf.c)
         old_LIBS=$LIBS
         old_withval=$withval
 
