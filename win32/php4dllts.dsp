@@ -910,6 +910,34 @@ SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
 # End Group
 # End Group
 # End Group
+# Begin Group "FTP"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 6"
+
+# PROP Default_Filter "*.c"
+# Begin Source File
+
+SOURCE=..\ext\ftp\ftp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\ftp\php_ftp.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 6"
+
+# PROP Default_Filter "*.h"
+# Begin Source File
+
+SOURCE=..\ext\ftp\ftp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\ftp\php_ftp.h
+# End Source File
+# End Group
+# End Group
 # End Group
 # Begin Group "Win32"
 

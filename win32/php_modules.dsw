@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "ZendTS"=.\Zend\ZendTS.dsp - Package Owner=<4>
+Project: "ZendTS"=..\Zend\ZendTS.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "calendar"=.\ext\calendar\calendar.dsp - Package Owner=<4>
+Project: "calendar"=..\ext\calendar\calendar.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cpdf"=.\ext\cpdf\cpdf.dsp - Package Owner=<4>
+Project: "cpdf"=..\ext\cpdf\cpdf.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "curl"=.\ext\curl\curl.dsp - Package Owner=<4>
+Project: "curl"=..\ext\curl\curl.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "cybercash"=.\ext\cybercash\cybercash.dsp - Package Owner=<4>
+Project: "cybercash"=..\ext\cybercash\cybercash.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +63,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "db"=.\ext\db\db.dsp - Package Owner=<4>
+Project: "db"=..\ext\db\db.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -75,7 +75,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dbase"=.\ext\dbase\dbase.dsp - Package Owner=<4>
+Project: "dbase"=..\ext\dbase\dbase.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -87,7 +87,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "domxml"=.\ext\domxml\domxml.dsp - Package Owner=<4>
+Project: "domxml"=..\ext\domxml\domxml.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -99,7 +99,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dotnet"=.\ext\dotnet\dotnet.dsp - Package Owner=<4>
+Project: "dotnet"=..\ext\dotnet\dotnet.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -111,7 +111,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "filepro"=".\ext\filepro\filepro.dsp" - Package Owner=<4>
+Project: "exif"=..\ext\exif\exif.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -123,7 +123,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "exif"=.\ext\exif\exif.dsp - Package Owner=<4>
+Project: "fdf"=..\ext\fdf\fdf.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -135,7 +135,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "fdf"=.\ext\fdf\fdf.dsp - Package Owner=<4>
+Project: "filepro"=..\ext\filepro\filepro.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -147,7 +147,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ftp"=.\ext\ftp\ftp.dsp - Package Owner=<4>
+Project: "gd"=..\ext\gd\gd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -159,7 +159,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gd"=.\ext\gd\gd.dsp - Package Owner=<4>
+Project: "gettext"=..\ext\gettext\gettext.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -171,7 +171,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "gettext"=.\ext\gettext\gettext.dsp - Package Owner=<4>
+Project: "ifx"=..\ext\informix\ifx.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -183,7 +183,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "imap"=.\ext\imap\imap.dsp - Package Owner=<4>
+Project: "imap"=..\ext\imap\imap.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -195,20 +195,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ifx"=.\ext\informix\ifx.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-
-###############################################################################
-
-Project: "interbase"=.\ext\interbase\interbase.dsp - Package Owner=<4>
+Project: "interbase"=..\ext\interbase\interbase.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -220,7 +207,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "java"=.\ext\java\java.dsp - Package Owner=<4>
+Project: "java"=..\ext\java\java.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -232,7 +219,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "ldap"=.\ext\ldap\ldap.dsp - Package Owner=<4>
+Project: "ldap"=..\ext\ldap\ldap.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -244,7 +231,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mcrypt"=.\ext\mcrypt\mcrypt.dsp - Package Owner=<4>
+Project: "mcrypt"=..\ext\mcrypt\mcrypt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -256,7 +243,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mhash"=.\ext\mhash\mhash.dsp - Package Owner=<4>
+Project: "mhash"=..\ext\mhash\mhash.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -268,7 +255,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "mssql"=.\ext\mssql\mssql.dsp - Package Owner=<4>
+Project: "mssql"=..\ext\mssql\mssql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -280,7 +267,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "oci8"=.\ext\oci8\oci8.dsp - Package Owner=<4>
+Project: "oci8"=..\ext\oci8\oci8.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -292,7 +279,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "oracle"=.\ext\oracle\oracle.dsp - Package Owner=<4>
+Project: "oracle"=..\ext\oracle\oracle.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -304,7 +291,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "pdf"=".\ext\pdf\pdf.dsp" - Package Owner=<4>
+Project: "pdf"=..\ext\pdf\pdf.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -316,7 +303,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
+Project: "pgsql"=..\ext\pgsql\pgsql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -328,7 +315,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "snmp"=.\ext\snmp\snmp.dsp - Package Owner=<4>
+Project: "snmp"=..\ext\snmp\snmp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -340,7 +327,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "swf"=.\ext\swf\swf.dsp - Package Owner=<4>
+Project: "swf"=..\ext\swf\swf.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -352,7 +339,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "sybase_ct"=.\ext\sybase_ct\sybase_ct.dsp - Package Owner=<4>
+Project: "sybase_ct"=..\ext\sybase_ct\sybase_ct.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -364,7 +351,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "zlib"=.\ext\zlib\zlib.dsp - Package Owner=<4>
+Project: "zlib"=..\ext\zlib\zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

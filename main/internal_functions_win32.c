@@ -50,6 +50,7 @@
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
 #include "ext/com/php_COM.h"
+#include "ext/ftp/php_ftp.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/odbc/php_odbc.h"
@@ -67,6 +68,7 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 	phpext_standard_ptr,
 	COM_module_ptr,
+	phpext_ftp_ptr,
 	phpext_pcre_ptr,
 	phpext_odbc_ptr,
 	phpext_session_ptr,

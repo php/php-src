@@ -18,6 +18,10 @@
 /* set to enable mysql */
 #define HAVE_MYSQL 1
 
+/* set to enable FTP support */
+#define HAVE_FTP 1
+
+
 /* set to enable bundled PCRE library */
 #define HAVE_BUNDLED_PCRE	1
 
