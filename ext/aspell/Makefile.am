@@ -1,6 +1,6 @@
 # $Id$
 
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
-noinst_LIBRARIES=libphpext_aspell.a
-libphpext_aspell_a_SOURCES=aspell.c
+noinst_LTLIBRARIES=libphpext_aspell.la
+libphpext_aspell_la_SOURCES=aspell.c
 

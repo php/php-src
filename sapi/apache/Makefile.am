@@ -2,5 +2,5 @@
 
 APACHE_INCLUDE=@APACHE_INCLUDE@
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend $(APACHE_INCLUDE)
-noinst_LIBRARIES=libphpsapi_apache.a
-libphpsapi_apache_a_SOURCES=apache.c
+noinst_LTLIBRARIES=libphpsapi_apache.la
+libphpsapi_apache_la_SOURCES=sapi_apache.c mod_php4.c

@@ -51,11 +51,12 @@ AC_ARG_WITH(pcre-regex,
 			;;
 	esac
 ],[
-  EXTRA_LIBS="-L$abs_builddir/ext/pcre/pcrelib -lpcre $EXTRA_LIBS"
-  PCRE_SUBDIR="pcrelib"
+  PCRE_LIBADD=pcrelib/libpcre.la
+  PCRE_SUBDIRS=pcrelib
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1)
   AC_MSG_RESULT(yes)
   PHP_EXTENSION(pcre)
   PHP_OUTPUT(ext/pcre/pcrelib/Makefile)
 ]) 
-AC_SUBST(PCRE_SUBDIR)
+AC_SUBST(PCRE_LIBADD)
+AC_SUBST(PCRE_SUBDIRS)

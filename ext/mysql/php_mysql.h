@@ -38,7 +38,7 @@
 #define DLEXPORT
 #endif
 
-#ifdef ZTS
+#ifdef __ZTS
 #include "TSRM.h"
 #endif
 

@@ -41,7 +41,7 @@ AC_ARG_WITH(xml,
       EXTRA_LIBS="$EXTRA_LIBS $XML_LIBS"
       AC_ADD_INCLUDE($XML_INCLUDE)
       XML_INCLUDE=""
-      XML_STATIC="libphpext_xml.a"
+      XML_STATIC="libphpext_xml.la"
     else
       XML_INCLUDE="-I$XML_INCLUDE"
       XML_SHARED="xml.la"

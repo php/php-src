@@ -57,7 +57,7 @@ AC_ARG_WITH(mysql,
             AC_MSG_RESULT(yes (static))
             AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBDIR)
             AC_ADD_INCLUDE($MYSQL_INCDIR)
-            MYSQL_STATIC="libphpext_mysql.a"
+            MYSQL_STATIC="libphpext_mysql.la"
         fi
         PHP_EXTENSION(mysql, $shared)
 

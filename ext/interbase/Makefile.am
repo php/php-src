@@ -1,6 +1,6 @@
 # $Id$
 
 INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
-noinst_LIBRARIES=libphpext_interbase.a
-libphpext_interbase_a_SOURCES=interbase.c
+noinst_LTLIBRARIES=libphpext_interbase.la
+libphpext_interbase_la_SOURCES=interbase.c
 
