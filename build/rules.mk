@@ -53,6 +53,9 @@ distclean: distclean-recursive clean-x
 	rm -f config.cache config.log config.status config_vars.mk libtool \
 	php_config.h stamp-h Makefile build-defs.h php4.spec libphp4.module
 
+test: $(top_builddir)/php
+	@$(top_builddir)/php -f $(top_srcdir)/run-tests.php `pwd`
+
 include $(builddir)/.deps
 
 .PHONY: all-recursive clean-recursive install-recursive \

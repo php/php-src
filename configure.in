@@ -552,7 +552,6 @@ if test "$PHP_PEAR" = "yes"; then
 fi
 
 PHP_OUTPUT(pear/pear)
-PHP_OUTPUT(pear/run-tests)
 PHP_OUTPUT(pear/phpize)
 PHP_OUTPUT(pear/php-config)
 PHP_OUTPUT(pear/PEAR.php)

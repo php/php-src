@@ -37,7 +37,7 @@ DEFS = -I. -I$(srcdir) -I$(top_builddir) -I$(top_builddir)/main
 moduledir    = $(EXTENSION_DIR)
 
 CXX_SUFFIX = .cpp
-	
+
 .SUFFIXES:
 .SUFFIXES: .slo .c $(CXX_SUFFIX) .lo .o .s .y .l
 
