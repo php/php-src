@@ -18,7 +18,7 @@ class Name {
 class Person {
 	private $name;
 
-	function Person($_name, $_address) {
+	function person($_name, $_address) {
 		$this->name = new Name($_name);
 	}
 

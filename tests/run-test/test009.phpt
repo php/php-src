@@ -7,6 +7,6 @@ $foo = new Foo;
 print_r($foo);
 ?>
 --EXPECTF--
-foo Object
+Foo Object
 (
 )

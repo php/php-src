@@ -24,5 +24,5 @@ $test2 = $test->__copy();
 var_dump($test2);
 ?>
 --EXPECT--
-object(test)#2 (0) {
+object(Test)#2 (0) {
 }

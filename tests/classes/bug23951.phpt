@@ -27,7 +27,7 @@ print_r($b->b_var);
 
 ?>
 --EXPECT--
-a Object
+A Object
 (
     [a_var] => Array
         (
