@@ -1,3 +1,18 @@
+2002-06-15  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/gd/gd.c: - Be more verbose which index causes the warning.
+
+    * ext/gd/gd.c: - Don't forget to close the stream.
+
+2002-06-15  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/sockets/php_sockets_win.c
+      ext/sockets/sockets.c: workaround for a win32 memleak
+
+2002-06-15  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/gd/.cvsignore: Add new target directories.
+
 2002-06-14  Markus Fischer  <mfischer@guru.josefine.at>
 
     * NEWS: - Update Win32/mail changes, mention bundled gd library.
