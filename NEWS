@@ -95,6 +95,8 @@ PHP                                                                        NEWS
   entries). (Andrei)
 - Fixed bug #28444 (Cannot access undefined property for object with overloaded
   property access). (Dmitry)
+- Fixed bug #28227 (PHP CGI depends upon non-standard SCRIPT_FILENAME). 
+  (lukem at NetBSD dot org)
 - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr stream).
   (chris at ex-parrot dot com)
 - Fixed bug #28041 (SOAP HTTP Digest Access Authentication). (Dmitry)
