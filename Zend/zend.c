@@ -47,11 +47,7 @@ ZEND_API void (*zend_ticks_function)(int ticks);
 static void (*zend_message_dispatcher_p)(long message, void *data);
 static int (*zend_get_ini_entry_p)(char *name, uint name_length, zval *contents);
 
-#if ZEND_NEW_ERROR_HANDLING
 static void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args);
-#else
-ZEND_API void (*zend_error_cb)(int type, const char *format, ...);
-#endif
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -498,9 +494,6 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents)
 }
 
 
-
-#if ZEND_NEW_ERROR_HANDLING
-
 #define ZEND_ERROR_BUFFER_SIZE 1024
 
 ZEND_API void zend_error(int type, const char *format, ...)
@@ -552,6 +545,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 
 	va_start(args, format);
+
 	/* if we don't have a user defined error handler */
 	if (!EG(user_error_handler)) {
 		zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -571,8 +565,12 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			INIT_PZVAL(&error_type);
 			error_message.value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
-			/* error_message.value.str.len = vsnprintf(error_message->value.str.val, error_message->value.str.len-1, format, args); */
+#ifdef HAVE_VSNPRINTF
+			error_message.value.str.len = vsnprintf(error_message.value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
+#else
+			/* This is risky... */
 			error_message.value.str.len = vsprintf(error_message.value.str.val, format, args);
+#endif
 			error_message.type = IS_STRING;
 
 			error_type.value.lval = type;
@@ -595,6 +593,4 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 	va_end(args);
 }
-
-#endif
 
