@@ -114,9 +114,10 @@ static void php_pgsql_set_default_link(int id)
 {   
 	PGLS_FETCH();
 
-    if (PGG(default_link)!=-1) {
+    if ((PGG(default_link) != -1) && (PGG(default_link) != id)) {
         zend_list_delete(PGG(default_link));
     }
+
     if (PGG(default_link) != id) {
         PGG(default_link) = id;
         zend_list_addref(id);
