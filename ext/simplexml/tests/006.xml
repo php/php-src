@@ -20,5 +20,8 @@
  </elem1>
  <elem11 attr2='second'>
   Bla bla 2.
+  <elem111>
+   Foo Bar
+  </elem111>
  </elem11>
 </sxe> 

@@ -64,6 +64,12 @@ typedef struct {
 	HashTable *properties;
 	simplexml_nsmap *nsmapptr;
 	xmlXPathContextPtr xpath;
+	struct {
+		xmlNodePtr            node;
+		char                  *name;
+		int                   namelen;
+		zval                  *data;
+	} iter;
 } php_sxe_object;
 
 
