@@ -41,7 +41,10 @@
 #endif
 
 #ifndef HAVE_FLOCK
-/* defines flock as php_flock */
+PHPAPI int php_flock(int fd, int operation)
+{
+	return php_flock(fd, operation);
+}
 #endif /* !defined(HAVE_FLOCK) */
 
 PHPAPI int php_flock(int fd, int operation)
