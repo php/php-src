@@ -66,14 +66,14 @@ static zend_object_handlers php_tidy_object_handlers = {
 
 function_entry tidy_functions[] = {
 	PHP_FE(tidy_create,	        	NULL)
-	PHP_FE(tidy_setopt,             NULL)
-	PHP_FE(tidy_getopt,             NULL)
-	PHP_FE(tidy_parse_string,       NULL)
-	PHP_FE(tidy_parse_file,         NULL)
-	PHP_FE(tidy_get_output,         NULL)
-	PHP_FE(tidy_get_error_buffer,   NULL)
-	PHP_FE(tidy_clean_repair,       NULL)
-	PHP_FE(tidy_diagnose,           NULL)
+	PHP_FE(tidy_setopt,             	NULL)
+	PHP_FE(tidy_getopt,             	NULL)
+	PHP_FE(tidy_parse_string,       	NULL)
+	PHP_FE(tidy_parse_file,         	NULL)
+	PHP_FE(tidy_get_output,         	NULL)
+	PHP_FE(tidy_get_error_buffer,   	NULL)
+	PHP_FE(tidy_clean_repair,       	NULL)
+	PHP_FE(tidy_diagnose,           	NULL)
 	PHP_FE(tidy_get_release,		NULL)
 	PHP_FE(tidy_get_status,		  	NULL)
 	PHP_FE(tidy_get_html_ver,	  	NULL)
@@ -84,7 +84,7 @@ function_entry tidy_functions[] = {
 	PHP_FE(tidy_access_count,	  	NULL)
 	PHP_FE(tidy_config_count,	  	NULL)
 	PHP_FE(tidy_load_config,		NULL)
-	PHP_FE(tidy_load_config_enc,	NULL)
+	PHP_FE(tidy_load_config_enc,		NULL)
 	PHP_FE(tidy_set_encoding,	  	NULL)
 	PHP_FE(tidy_save_config,		NULL)
 	PHP_FE(tidy_get_root,		  	NULL)
@@ -99,7 +99,7 @@ zend_module_entry tidy_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
-	"Tidy",
+	"tidy",
 	tidy_functions,
 	PHP_MINIT(tidy),
 	PHP_MSHUTDOWN(tidy),
@@ -152,18 +152,19 @@ PHPTidyObj *php_tidy_new(TSRMLS_DC) {
 	intern->attr = NULL;
 	intern->type = PHP_IS_TIDYUNDEF;
 	intern->tdoc = NULL;
+	intern->parent = NULL;
 	
-	intern->obj.properties = emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(intern->obj.properties);
 	zend_hash_init(intern->obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	return intern;	
 	
 }
 
-static zval *_php_tidy_create_obj_zval(unsigned int objtype,
-									   PHPTidyObj *parent,
-									   void  *data
-									   TSRMLS_DC) {
+zval *_php_tidy_create_obj_zval(unsigned int objtype,
+					PHPTidyObj *parent,
+					void  *data
+					TSRMLS_DC) {
 	zval *return_value;
 	MAKE_STD_ZVAL(return_value);
 	ZVAL_NULL(return_value);
@@ -172,18 +173,25 @@ static zval *_php_tidy_create_obj_zval(unsigned int objtype,
 	return return_value;
 }
 
-static void _php_tidy_create_obj(zval *return_value,
-								  unsigned int objtype,
-								  PHPTidyObj *parent,
-							      void *data
-							      TSRMLS_DC) {
+void _php_tidy_create_obj(zval *return_value,
+				unsigned int objtype,
+				PHPTidyObj *parent,
+				void *data
+				TSRMLS_DC) {
 	
-	PHPTidyObj *retobj;
+	PHPTidyObj *retobj, *t;
 	
 	retobj = php_tidy_new();
 	retobj->tdoc = parent->tdoc;
 	retobj->type = objtype;
 	retobj->refcount = 1;
+	retobj->parent = parent;
+	
+	t = retobj;
+	while((t = t->parent)) {
+		t->refcount++;
+	}
+	
 	parent->refcount++;
 	
 	switch(objtype) {
@@ -204,13 +212,13 @@ static void _php_tidy_create_obj(zval *return_value,
 
 }
 
-static zend_object_value php_tidy_register_object(PHPTidyObj *intern TSRMLS_DC) {
+zend_object_value php_tidy_register_object(PHPTidyObj *intern TSRMLS_DC) {
 	
 	zend_object_value retval;
 	
 	retval.handle = zend_objects_store_put(intern,
-										   php_tidy_obj_dtor,
-										   php_tidy_obj_clone TSRMLS_CC);
+						php_tidy_obj_dtor,
+						php_tidy_obj_clone TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &php_tidy_object_handlers;
 
 	return retval;
@@ -218,39 +226,55 @@ static zend_object_value php_tidy_register_object(PHPTidyObj *intern TSRMLS_DC) 
  
 void dtor_TidyDoc(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
     
-    PHPTidyDoc *tdoc = (PHPTidyDoc *)rsrc->ptr;
-        
-    if(tdoc->doc) {
-		tidyRelease(tdoc->doc);
-    }
-    if(tdoc->errbuf) {
-		tidyBufFree(tdoc->errbuf);
-		efree(tdoc->errbuf);
-
-    }
-    
+	PHPTidyDoc *tdoc = (PHPTidyDoc *)rsrc->ptr;
+	    
+	if(tdoc->doc) {
+		    tidyRelease(tdoc->doc);
+	}
+	if(tdoc->errbuf) {
+		    tidyBufFree(tdoc->errbuf);
+		    efree(tdoc->errbuf);
+	
+	}
+	
 	efree(tdoc);
     
 }
 
-static void php_tidy_obj_dtor(void *object, zend_object_handle handle TSRMLS_DC) {
+ void php_tidy_obj_dtor(void *object, zend_object_handle handle TSRMLS_DC) {
 		
 	PHPTidyObj *o = (PHPTidyObj *)object;
 	
-	if(--o->refcount == 0) {
+	do {
+		o->refcount--;
+	} while((o = o->parent));
+	
+	o = (PHPTidyObj *)object;
+	
+	if(o->refcount <= 0) {
 		/* We don't free anything else here from
 		   PHPTidyObj, they are all pointers
 		   to internal TidyNode structs, which
 		   get freed when the tidy resource is
 		   destroied by TidyRelease()
 		*/
-	
+		
+//		zend_hash_destroy(o->obj.properties);
+//		FREE_HASHTABLE(o->obj.properties);
+		
 		zend_objects_destroy_object(&o->obj, handle TSRMLS_CC);
+		
+		o->node = NULL;
+		o->attr = NULL;
+		o->tdoc = NULL;
+		o->type = PHP_IS_TIDYUNDEF;
+		o->parent = NULL;
+		efree(o);
 	}
 	
 }
 
-static void php_tidy_obj_clone(void *object, void **object_clone TSRMLS_DC) {
+ void php_tidy_obj_clone(void *object, void **object_clone TSRMLS_DC) {
 	
 	PHPTidyObj *intern = (PHPTidyObj *) object;
 	PHPTidyObj **intern_clone = (PHPTidyObj **) object_clone;
@@ -269,23 +293,23 @@ static void php_tidy_obj_clone(void *object, void **object_clone TSRMLS_DC) {
 	
 }
 
-static void php_tidy_init_globals(zend_tidy_globals *tidy_globals) {
+ void php_tidy_init_globals(zend_tidy_globals *tidy_globals) {
 	
 	/* No globals for now */
 }
 
 PHP_MINIT_FUNCTION(tidy) {
 
-    zend_class_entry _tidy_entry;
+	zend_class_entry _tidy_entry;
     
-    INIT_CLASS_ENTRY(_tidy_entry, "TidyObject", NULL);
-    php_tidy_ce = zend_register_internal_class(&_tidy_entry TSRMLS_CC);
+	INIT_CLASS_ENTRY(_tidy_entry, "TidyObject", NULL);
+	php_tidy_ce = zend_register_internal_class(&_tidy_entry TSRMLS_CC);
     
-    ZEND_INIT_MODULE_GLOBALS(tidy, php_tidy_init_globals, NULL);
-    le_tidydoc = zend_register_list_destructors_ex(dtor_TidyDoc, NULL, le_tidydoc_name, module_number);
+	ZEND_INIT_MODULE_GLOBALS(tidy, php_tidy_init_globals, NULL);
+	le_tidydoc = zend_register_list_destructors_ex(dtor_TidyDoc, NULL, le_tidydoc_name, module_number);
     
-    _php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
-    _php_tidy_register_attributes(INIT_FUNC_ARGS_PASSTHRU);
+	_php_tidy_register_tags(INIT_FUNC_ARGS_PASSTHRU);
+	_php_tidy_register_attributes(INIT_FUNC_ARGS_PASSTHRU);
 	_php_tidy_register_nodetypes(INIT_FUNC_ARGS_PASSTHRU);
 	
 	tidySetMallocCall(_php_tidy_mem_alloc);
@@ -293,7 +317,7 @@ PHP_MINIT_FUNCTION(tidy) {
 	tidySetFreeCall(_php_tidy_mem_free);
 	tidySetPanicCall(_php_tidy_mem_panic);
 	
-    return SUCCESS;
+	return SUCCESS;
 
 }
 
@@ -320,21 +344,21 @@ PHP_MINFO_FUNCTION(tidy) {
    Initialize a new tidy document */
 PHP_FUNCTION(tidy_create) {
     
-    PHPTidyDoc *tdoc;
-    tdoc = emalloc(sizeof(PHPTidyDoc));
-    tdoc->doc = tidyCreate();
-    tdoc->parsed = 0;
-    
-    tdoc->errbuf = emalloc(sizeof(TidyBuffer));
-    tidyBufInit(tdoc->errbuf);
-    
-   if(tidySetErrorBuffer(tdoc->doc, tdoc->errbuf) != 0) 
-        php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not set Tidy error buffer");
-   
-    tidyOptSetBool(tdoc->doc, TidyForceOutput, yes);
-	tidyOptSetBool(tdoc->doc, TidyMark, no);
-		
-    ZEND_REGISTER_RESOURCE(return_value, tdoc, le_tidydoc);
+	PHPTidyDoc *tdoc;
+	tdoc = emalloc(sizeof(PHPTidyDoc));
+	tdoc->doc = tidyCreate();
+	tdoc->parsed = 0;
+	
+	tdoc->errbuf = emalloc(sizeof(TidyBuffer));
+	tidyBufInit(tdoc->errbuf);
+	
+	if(tidySetErrorBuffer(tdoc->doc, tdoc->errbuf) != 0) 
+	    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not set Tidy error buffer");
+	
+	tidyOptSetBool(tdoc->doc, TidyForceOutput, yes);
+	    tidyOptSetBool(tdoc->doc, TidyMark, no);
+		    
+	ZEND_REGISTER_RESOURCE(return_value, tdoc, le_tidydoc);
     
 }
 /* }}} */
@@ -343,27 +367,27 @@ PHP_FUNCTION(tidy_create) {
    Parse a document stored in a string */
 PHP_FUNCTION(tidy_parse_string) {
     
-    char *input;
-    int input_len;
-    zval *res;
-    PHPTidyDoc *tdoc;
-
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &input, &input_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    
-    if(tidyParseString(tdoc->doc, input) < 0) {
-        php_error_docref(NULL TSRMLS_CC, E_ERROR, "[Tidy error] %s", tdoc->errbuf->bp);
-    }
-    
-    tdoc->parsed = 1;
+	char *input;
+	int input_len;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &input, &input_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(tidyParseString(tdoc->doc, input) < 0) {
+	    php_error_docref(NULL TSRMLS_CC, E_ERROR, "[Tidy error] %s", tdoc->errbuf->bp);
+	}
+	
+	tdoc->parsed = 1;
     
 }
 /* }}} */
@@ -372,33 +396,33 @@ PHP_FUNCTION(tidy_parse_string) {
    Return warnings and errors which occured parsing the specified document*/
 PHP_FUNCTION(tidy_get_error_buffer) {
 
-    zval *res;
-    PHPTidyDoc *tdoc;
-    zend_bool detailed;
-    
-    if((ZEND_NUM_ARGS() == 0) || (ZEND_NUM_ARGS() > 2)) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r|b", &res, &detailed) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-    
-    if(detailed) {
-	tidyErrorSummary(tdoc->doc);
-    }
-
-    RETVAL_STRING(tdoc->errbuf->bp, 1);
-    
-    tidyBufClear(tdoc->errbuf); 
+	zval *res;
+	PHPTidyDoc *tdoc;
+	zend_bool detailed;
+	
+	if((ZEND_NUM_ARGS() == 0) || (ZEND_NUM_ARGS() > 2)) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r|b", &res, &detailed) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	if(detailed) {
+	    tidyErrorSummary(tdoc->doc);
+	}
+	
+	RETVAL_STRING(tdoc->errbuf->bp, 1);
+	
+	tidyBufClear(tdoc->errbuf); 
     
 }
 /* }}} */
@@ -407,31 +431,31 @@ PHP_FUNCTION(tidy_get_error_buffer) {
    Return a string representing the parsed tidy markup */
 PHP_FUNCTION(tidy_get_output) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-    TidyBuffer output = {0};
-    
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
- 
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
- 
-    tidySaveBuffer( tdoc->doc, &output );
-    
-    RETVAL_STRING(output.bp, 1);
-    
-    tidyBufFree(&output);
+	zval *res;
+	PHPTidyDoc *tdoc;
+	TidyBuffer output = {0};
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	tidySaveBuffer( tdoc->doc, &output );
+	
+	RETVAL_STRING(output.bp, 1);
+	
+	tidyBufFree(&output);
     
 }
 /* }}} */
@@ -441,44 +465,44 @@ PHP_FUNCTION(tidy_get_output) {
 PHP_FUNCTION(tidy_parse_file) {
 	
     
-    char *inputfile;
-    int input_len;
-    zval *res;
-    PHPTidyDoc *tdoc;
-    php_stream *stream;
-    char *contents;
-    
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &inputfile, &input_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    
-    stream = php_stream_open_wrapper(inputfile, "rb",
-									 ENFORCE_SAFE_MODE | REPORT_ERRORS,
-									 NULL);
-    
-    if(!stream) {
-		RETURN_FALSE;
-    }
-    
-	if (php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0) > 0) {
-		
-		if(tidyParseString(tdoc->doc, contents) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "[Tidy error] %s", tdoc->errbuf->bp);
-		}
-		tdoc->parsed = TRUE;
-		efree(contents);
+	char *inputfile;
+	int input_len;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	php_stream *stream;
+	char *contents;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
 	}
-
-	php_stream_close(stream);
-    
-    RETURN_TRUE;
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &inputfile, &input_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	stream = php_stream_open_wrapper(inputfile, "rb",
+									     ENFORCE_SAFE_MODE | REPORT_ERRORS,
+									     NULL);
+	
+	if(!stream) {
+		    RETURN_FALSE;
+	}
+	
+	    if (php_stream_copy_to_mem(stream, &contents, PHP_STREAM_COPY_ALL, 0) > 0) {
+		    
+		    if(tidyParseString(tdoc->doc, contents) < 0) {
+			    php_error_docref(NULL TSRMLS_CC, E_ERROR, "[Tidy error] %s", tdoc->errbuf->bp);
+		    }
+		    tdoc->parsed = TRUE;
+		    efree(contents);
+	    }
+	
+	    php_stream_close(stream);
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -486,28 +510,28 @@ PHP_FUNCTION(tidy_parse_file) {
    Execute configured cleanup and repair operations on parsed markup */
 PHP_FUNCTION(tidy_clean_repair) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-    
-    if(ZEND_NUM_ARGS() != 1) {
-       WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-    
-    if(tidyCleanAndRepair(tdoc->doc) >= 0) RETURN_TRUE;
-    
-    RETURN_FALSE;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	   WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	if(tidyCleanAndRepair(tdoc->doc) >= 0) RETURN_TRUE;
+	
+	RETURN_FALSE;
         
 }
 /* }}} */
@@ -516,28 +540,28 @@ PHP_FUNCTION(tidy_clean_repair) {
     Run configured diagnostics on parsed and repaired markup. */
 PHP_FUNCTION(tidy_diagnose) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-    
-    if(tidyRunDiagnostics(tdoc->doc) >= 0) RETURN_TRUE;
-    
-    RETURN_FALSE;    
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	if(tidyRunDiagnostics(tdoc->doc) >= 0) RETURN_TRUE;
+	
+	RETURN_FALSE;    
 }
 
 /* }}} */
@@ -546,28 +570,28 @@ PHP_FUNCTION(tidy_diagnose) {
     Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release) {
 
-    RETURN_STRING((char *)tidyReleaseDate(), 1);    
+	RETURN_STRING((char *)tidyReleaseDate(), 1);    
 }
 /* }}} */
 
 /* {{{ proto int tidy_get_status(resource tidy)
     Get status of specfied document. */
 PHP_FUNCTION(tidy_get_status) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    RETURN_LONG(tidyStatus(tdoc->doc));
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	RETURN_LONG(tidyStatus(tdoc->doc));
     
 }
 /* }}} */
@@ -575,53 +599,53 @@ PHP_FUNCTION(tidy_get_status) {
 /* {{{ proto int tidy_get_html_ver(resource tidy)
     Get the Detected HTML version for the specified document. */
 PHP_FUNCTION(tidy_get_html_ver) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-
-    RETURN_LONG(tidyDetectedHtmlVersion(tdoc->doc));
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	
+	RETURN_LONG(tidyDetectedHtmlVersion(tdoc->doc));
 }
 /* }}} */
 
 /* {{{ proto boolean tidy_is_xhtml(resource tidy)
     Indicates if the document is a XHTML document. */
 PHP_FUNCTION(tidy_is_xhtml) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    RETURN_BOOL(tidyDetectedXhtml(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	RETURN_BOOL(tidyDetectedXhtml(tdoc->doc));	
 	
 }
 /* }}} */
@@ -629,104 +653,104 @@ PHP_FUNCTION(tidy_is_xhtml) {
 /* {{{ proto boolean tidy_is_xhtml(resource tidy)
     Indicates if the document is a generic (non HTML/XHTML) XML document. */
 PHP_FUNCTION(tidy_is_xml) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    RETURN_BOOL(tidyDetectedGenericXml(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	RETURN_BOOL(tidyDetectedGenericXml(tdoc->doc));	
 }
 /* }}} */
 
 /* {{{ proto int tidy_error_count(resource tidy)
     Returns the Number of Tidy errors encountered for specified document. */
 PHP_FUNCTION(tidy_error_count) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    RETURN_LONG(tidyErrorCount(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	RETURN_LONG(tidyErrorCount(tdoc->doc));	
 }
 /* }}} */
 
 /* {{{ proto int tidy_warning_count(resource tidy)
     Returns the Number of Tidy warnings encountered for specified document. */
 PHP_FUNCTION(tidy_warning_count) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    RETURN_LONG(tidyWarningCount(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	RETURN_LONG(tidyWarningCount(tdoc->doc));	
 }
 /* }}} */
 
 /* {{{ proto int tidy_access_count(resource tidy)
     Returns the Number of Tidy accessibility warnings encountered for specified document. */
 PHP_FUNCTION(tidy_access_count) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    RETURN_LONG(tidyAccessWarningCount(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	RETURN_LONG(tidyAccessWarningCount(tdoc->doc));	
 		
 }
 /* }}} */
@@ -734,22 +758,22 @@ PHP_FUNCTION(tidy_access_count) {
 /* {{{ proto int tidy_config_count(resource tidy)
     Returns the Number of Tidy configuration errors encountered for specified document. */
 PHP_FUNCTION(tidy_config_count) {
-    zval *res;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-
-    RETURN_LONG(tidyConfigErrorCount(tdoc->doc));	
+	zval *res;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	
+	RETURN_LONG(tidyConfigErrorCount(tdoc->doc));	
 	
 }
 /* }}} */
@@ -757,24 +781,24 @@ PHP_FUNCTION(tidy_config_count) {
 /* {{{ proto void tidy_load_config(resource tidy, string filename)
     Load an ASCII Tidy configuration file */
 PHP_FUNCTION(tidy_load_config) {
-    zval *res;
-    char *filename;
-    int filename_len;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &filename, &filename_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    if(tidyLoadConfig(tdoc->doc, filename) < 0) {
-	 php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not load configuration file '%s'", filename);
-    }
+	zval *res;
+	char *filename;
+	int filename_len;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &filename, &filename_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	if(tidyLoadConfig(tdoc->doc, filename) < 0) {
+	     php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not load configuration file '%s'", filename);
+	}
     
 }
 /* }}} */
@@ -782,28 +806,28 @@ PHP_FUNCTION(tidy_load_config) {
 /* {{{ proto void tidy_load_config(resource tidy, string filename, string encoding)
     Load an ASCII Tidy configuration file with the specified encoding */
 PHP_FUNCTION(tidy_load_config_enc) {
-    zval *res;
-    char *filename;
-    char *encoding;
-    int enc_len, file_len;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rss", &res, &filename, &file_len, &encoding, &enc_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    if(tidyLoadConfigEnc(tdoc->doc, filename, encoding) < 0) {
-	 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s' using encoding '%s'", filename, encoding);
-	 RETURN_FALSE;
-    }
-    
-    RETURN_TRUE;
+	zval *res;
+	char *filename;
+	char *encoding;
+	int enc_len, file_len;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rss", &res, &filename, &file_len, &encoding, &enc_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	if(tidyLoadConfigEnc(tdoc->doc, filename, encoding) < 0) {
+	     php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not load configuration file '%s' using encoding '%s'", filename, encoding);
+	     RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -812,54 +836,54 @@ PHP_FUNCTION(tidy_load_config_enc) {
     Values include: ascii, latin1, raw, utf8, iso2022, mac, win1252, utf16le,
     utf16be, utf16, big5 and shiftjis. */
 PHP_FUNCTION(tidy_set_encoding) {
-    zval *res;
-    char *encoding;
-    int enc_len;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &encoding, &enc_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    if(tidySetCharEncoding(tdoc->doc, encoding) < 0) {
-	 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", encoding);
-	 RETURN_FALSE;
-    }
-    
-    RETURN_TRUE;
+	zval *res;
+	char *encoding;
+	int enc_len;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &encoding, &enc_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	if(tidySetCharEncoding(tdoc->doc, encoding) < 0) {
+	     php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not set encoding '%s'", encoding);
+	     RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ proto boolean tidy_save_config(resource tidy, string filename)
     Save current settings to named file. Only non-default values are written. */
 PHP_FUNCTION(tidy_save_config) {
-    zval *res;
-    char *filename;
-    int file_len;
-    PHPTidyDoc *tdoc;
-  
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &filename, &file_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-    if(tidyOptSaveFile(tdoc->doc, filename) < 0) {
-	 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not write tidy configuration file '%s'", filename);
-	 RETURN_FALSE;
-    }
-    
-    RETURN_TRUE;
+	zval *res;
+	char *filename;
+	int file_len;
+	PHPTidyDoc *tdoc;
+	
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
+	}
+	
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &filename, &file_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	if(tidyOptSaveFile(tdoc->doc, filename) < 0) {
+	     php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not write tidy configuration file '%s'", filename);
+	     RETURN_FALSE;
+	}
+	
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -868,36 +892,36 @@ PHP_FUNCTION(tidy_save_config) {
 PHP_FUNCTION(tidy_setopt) {
 	
 	zval *res, *value;
-    char *optname;
-    int optname_len;
-    PHPTidyDoc *tdoc;
-    TidyOption opt;
-    
-  
-    if(ZEND_NUM_ARGS() != 3) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rsz", &res, &optname, &optname_len, &value) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->doc) {
-		php_error_docref(NULL TSRMLS_CC,E_ERROR, "Invalid Tidy Resource Specified");
-		RETURN_FALSE;
-    }
-    
-    opt = tidyGetOptionByName(tdoc->doc, optname);
-	if(!opt) {
-		php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
-		RETURN_FALSE;
+	char *optname;
+	int optname_len;
+	PHPTidyDoc *tdoc;
+	TidyOption opt;
+	
+	
+	if(ZEND_NUM_ARGS() != 3) {
+	    WRONG_PARAM_COUNT;
 	}
 	
-    switch(tidyOptGetType(opt)) {
-		
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rsz", &res, &optname, &optname_len, &value) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->doc) {
+		    php_error_docref(NULL TSRMLS_CC,E_ERROR, "Invalid Tidy Resource Specified");
+		    RETURN_FALSE;
+	}
+	
+	opt = tidyGetOptionByName(tdoc->doc, optname);
+	    if(!opt) {
+		    php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+		    RETURN_FALSE;
+	    }
+	    
+	switch(tidyOptGetType(opt)) {
+		    
 		case TidyString:
 			if(tidyOptSetValue(tdoc->doc, tidyOptGetId(opt), Z_STRVAL_P(value))) {
 				RETURN_TRUE;
@@ -919,9 +943,9 @@ PHP_FUNCTION(tidy_setopt) {
 		default:
 			
 			php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unable to determine type of Tidy configuration constant to set");
-			
-    }
-    RETURN_FALSE;
+			    
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -930,63 +954,63 @@ PHP_FUNCTION(tidy_setopt) {
 PHP_FUNCTION(tidy_getopt) {
 	
 	zval *res;
-    char *optname, *strval;
-    int optname_len;
-    PHPTidyDoc *tdoc;
-	TidyOption opt;
-	
-    if(ZEND_NUM_ARGS() != 2) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "rs", &res, &optname, &optname_len) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-   
-    if(!tdoc->doc) {
-		php_error_docref(NULL TSRMLS_CC,E_ERROR, "Invalid Tidy Resource Specified");
-		RETURN_FALSE;
-    }
-    
-    opt = tidyGetOptionByName(tdoc->doc, optname);
-	if(!opt) {
-		php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
-		RETURN_FALSE;
+	char *optname, *strval;
+	int optname_len;
+	PHPTidyDoc *tdoc;
+	    TidyOption opt;
+	    
+	if(ZEND_NUM_ARGS() != 2) {
+	    WRONG_PARAM_COUNT;
 	}
 	
-    switch(tidyOptGetType(opt)) {
-		
-		case TidyString:
-			strval = (char *)tidyOptGetValue(tdoc->doc, tidyOptGetId(opt));
-			
-			if(strval) {
-				RETURN_STRING(strval, 0);
-			} else {
-				RETURN_EMPTY_STRING();
-			}
-			
-			break;
-		case TidyInteger:
-			RETURN_LONG(tidyOptGetInt(tdoc->doc, tidyOptGetId(opt)))
-			break;
-		case TidyBoolean:	
-						
-			if(tidyOptGetBool(tdoc->doc, tidyOptGetId(opt))) {
-				RETURN_TRUE;
-			}
-			
-			break;
-			
-		default:
-			
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to get");
-			
-    }
-    
-    RETURN_FALSE;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "rs", &res, &optname, &optname_len) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->doc) {
+		    php_error_docref(NULL TSRMLS_CC,E_ERROR, "Invalid Tidy Resource Specified");
+		    RETURN_FALSE;
+	}
+	
+	opt = tidyGetOptionByName(tdoc->doc, optname);
+	    if(!opt) {
+		    php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
+		    RETURN_FALSE;
+	    }
+	    
+	switch(tidyOptGetType(opt)) {
+		    
+		    case TidyString:
+			    strval = (char *)tidyOptGetValue(tdoc->doc, tidyOptGetId(opt));
+			    
+			    if(strval) {
+				    RETURN_STRING(strval, 0);
+			    } else {
+				    RETURN_EMPTY_STRING();
+			    }
+			    
+			    break;
+		    case TidyInteger:
+			    RETURN_LONG(tidyOptGetInt(tdoc->doc, tidyOptGetId(opt)))
+			    break;
+		    case TidyBoolean:	
+						    
+			    if(tidyOptGetBool(tdoc->doc, tidyOptGetId(opt))) {
+				    RETURN_TRUE;
+			    }
+			    
+			    break;
+			    
+		    default:
+			    
+			    php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to determine type of Tidy configuration constant to get");
+			    
+	}
+	
+	RETURN_FALSE;
 	
 }
 /* }}} */
@@ -995,33 +1019,33 @@ PHP_FUNCTION(tidy_getopt) {
     Returns a TidyNode Object representing the root of the tidy parse tree */
 PHP_FUNCTION(tidy_get_root) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-	PHPTidyObj *obj;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	    PHPTidyObj *obj;
+	    
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
 	
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-    
-    obj = php_tidy_new();
-    obj->node = tidyGetRoot(tdoc->doc);
-    obj->tdoc = tdoc;
-    obj->attr = NULL;
-    obj->type = PHP_IS_TIDYNODE;
-    
-    return_value->type = IS_OBJECT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	obj = php_tidy_new();
+	obj->node = tidyGetRoot(tdoc->doc);
+	obj->tdoc = tdoc;
+	obj->attr = NULL;
+	obj->type = PHP_IS_TIDYNODE;
+	
+	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_tidy_register_object(obj TSRMLS_CC);	
 	
 }
@@ -1031,33 +1055,33 @@ PHP_FUNCTION(tidy_get_root) {
     Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_html) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-	PHPTidyObj *obj;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	    PHPTidyObj *obj;
+	    
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
 	
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-
-    obj = php_tidy_new();
-    obj->node = tidyGetHtml(tdoc->doc);
-    obj->tdoc = tdoc;
-    obj->attr = NULL;
-    obj->type = PHP_IS_TIDYNODE;
-    
-    return_value->type = IS_OBJECT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	obj = php_tidy_new();
+	obj->node = tidyGetHtml(tdoc->doc);
+	obj->tdoc = tdoc;
+	obj->attr = NULL;
+	obj->type = PHP_IS_TIDYNODE;
+	
+	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_tidy_register_object(obj TSRMLS_CC);
 	
 }
@@ -1067,33 +1091,33 @@ PHP_FUNCTION(tidy_get_html) {
     Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_head) {
     
-    zval *res;
-    PHPTidyDoc *tdoc;
-	PHPTidyObj *obj;
+	zval *res;
+	PHPTidyDoc *tdoc;
+	    PHPTidyObj *obj;
+	    
+	if(ZEND_NUM_ARGS() != 1) {
+	    WRONG_PARAM_COUNT;
+	}
 	
-    if(ZEND_NUM_ARGS() != 1) {
-        WRONG_PARAM_COUNT;
-    }
-    
-    if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                             "r", &res) == FAILURE) {
-        return;
-    }
-    
-    ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
-
-    if(!tdoc->parsed) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
-		RETURN_FALSE;
-    }
-    
-    obj = php_tidy_new();
-    obj->node = tidyGetHead(tdoc->doc);
-    obj->tdoc = tdoc;
-    obj->attr = NULL;
-    obj->type = PHP_IS_TIDYNODE;
-    
-    return_value->type = IS_OBJECT;
+	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
+				 "r", &res) == FAILURE) {
+	    return;
+	}
+	
+	ZEND_FETCH_RESOURCE(tdoc, PHPTidyDoc *, &res, -1, le_tidydoc_name, le_tidydoc);
+	
+	if(!tdoc->parsed) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "A document must be parsed before executing this function.");
+		    RETURN_FALSE;
+	}
+	
+	obj = php_tidy_new();
+	obj->node = tidyGetHead(tdoc->doc);
+	obj->tdoc = tdoc;
+	obj->attr = NULL;
+	obj->type = PHP_IS_TIDYNODE;
+	
+	return_value->type = IS_OBJECT;
 	return_value->value.obj = php_tidy_register_object(obj TSRMLS_CC);	
 	
 }
@@ -1135,29 +1159,29 @@ PHP_FUNCTION(tidy_get_body) {
 }
 /* }}} */
 
-static void tidy_property_delete(zval *obj, zval *member TSRMLS_DC) {}
-static void tidy_property_write(zval *obj, zval *member, zval *value TSRMLS_DC) {}
-static void tidy_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) {}
-static union _zend_function * tidy_get_constructor(zval *obj TSRMLS_DC) { return NULL; }
-static void tidy_write_dim(zval *object, zval *offset, zval *value TSRMLS_DC) {}
-static void tidy_del_dim(zval *object, zval *offset TSRMLS_DC) {}
-static zval *tidy_read_dim(zval *object, zval *offset TSRMLS_DC) {
+ void tidy_property_delete(zval *obj, zval *member TSRMLS_DC) {}
+ void tidy_property_write(zval *obj, zval *member, zval *value TSRMLS_DC) {}
+ void tidy_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC) {}
+ union _zend_function * tidy_get_constructor(zval *obj TSRMLS_DC) { return NULL; }
+ void tidy_write_dim(zval *object, zval *offset, zval *value TSRMLS_DC) {}
+ void tidy_del_dim(zval *object, zval *offset TSRMLS_DC) {}
+ zval *tidy_read_dim(zval *object, zval *offset TSRMLS_DC) {
 	
 	return EG(uninitialized_zval_ptr);
 }
 
-static zend_class_entry * tidy_get_class_entry(zval *obj TSRMLS_DC) {
+ zend_class_entry * tidy_get_class_entry(zval *obj TSRMLS_DC) {
 	
 	return php_tidy_ce;
 }
 
 
-static zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC) {
+ zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC) {
 	zval **p_ptr;
 	zval  *p;
 
 	/* How to fix this memleak? */
-	p_ptr = emalloc(sizeof(zval **));
+	//p_ptr = emalloc(sizeof(zval **));
 
 	p = tidy_property_read(obj, member, 0 TSRMLS_CC);
 
@@ -1167,7 +1191,7 @@ static zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC) {
 	
 }
 
-static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC) {
+ zval * tidy_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC) {
 	
 	PHPTidyObj *obj = php_tidy_fetch_object(object);
 	zval *return_value, *temp;
@@ -1228,14 +1252,11 @@ static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TS
 				if(tempattr) {
 					
 					temp = _php_tidy_create_obj_zval(PHP_IS_TIDYATTR, obj, tempattr TSRMLS_CC);
-					temp->refcount--;
 					add_next_index_zval(return_value, temp);
-					
 					while((tempattr = tidyAttrNext(tempattr))) {
 						
 						temp = _php_tidy_create_obj_zval(PHP_IS_TIDYATTR, obj, tempattr TSRMLS_CC);
 						add_next_index_zval(return_value, temp);
-						
 					}
 				}
 				
@@ -1247,13 +1268,10 @@ static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TS
 					
 					temp = _php_tidy_create_obj_zval(PHP_IS_TIDYNODE, obj, tempnode TSRMLS_CC);
 					add_next_index_zval(return_value, temp);
-					
 					while((tempnode = tidyGetNext(tempnode))) {
 						
-						temp = _php_tidy_create_obj_zval(PHP_IS_TIDYNODE, obj, tempnode TSRMLS_CC);
-						temp->refcount--;
+						temp = _php_tidy_create_obj_zval(PHP_IS_TIDYNODE, obj, tempnode TSRMLS_CC);					
 						add_next_index_zval(return_value, temp);
-							
 					}
 				}
 				
@@ -1266,6 +1284,7 @@ static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TS
 			}
 			
 			break;
+			
 		case PHP_IS_TIDYATTR:
 			
 			if(!strcmp(name, "name")) {
@@ -1293,12 +1312,12 @@ static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TS
 			
 }
 
-static int tidy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC) {
+ int tidy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC) {
 		
 	return TRUE;
 }
 
-static HashTable * tidy_get_properties(zval *object TSRMLS_DC) {
+ HashTable * tidy_get_properties(zval *object TSRMLS_DC) {
 		
 	zend_object *zobj;
 	zobj = zend_objects_get_address(object TSRMLS_CC);
@@ -1306,7 +1325,7 @@ static HashTable * tidy_get_properties(zval *object TSRMLS_DC) {
 	
 }
 
-static union _zend_function * tidy_get_method(zval *obj, char *method, int method_len TSRMLS_DC) {
+ union _zend_function * tidy_get_method(zval *obj, char *method, int method_len TSRMLS_DC) {
 	
 	zend_internal_function *f;
 
@@ -1315,8 +1334,6 @@ static union _zend_function * tidy_get_method(zval *obj, char *method, int metho
 	f->arg_types = NULL;
 	f->scope = php_tidy_ce;
 	f->fn_flags = 0;
-
-	/* How to fix this memleak? */
 	f->function_name = estrndup(method, method_len);
 
 	return (union _zend_function *) f;
@@ -1325,10 +1342,12 @@ static union _zend_function * tidy_get_method(zval *obj, char *method, int metho
 zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 
 	PHPTidyObj *obj = php_tidy_fetch_object(getThis());
+	zend_internal_function *func = (zend_internal_function *)EG(function_state_ptr)->function;
 	PHPTidyObj *newobj;
 	TidyNode tempnode;
 	TidyAttr tempattr;
-		
+	zend_bool retval = TRUE;
+	
 	int param;
 	
 	if(strstr(method, "has_")) {
@@ -1445,7 +1464,7 @@ zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 										tempnode TSRMLS_CC);
 				} 
 							
-		}  else if(!strcmp(method, "prev")) {
+		} else if(!strcmp(method, "prev")) {
 
 				tempnode = tidyGetPrev(obj->node);
 				if(tempnode) {
@@ -1511,13 +1530,13 @@ zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 			}
 						
 		} else {
-			
-			return FALSE;
+			retval = FALSE;
 
 		}
 	}
-	
-	return TRUE;
+	efree(func->function_name);
+	efree(func);
+	return retval;
 	
 }
 
@@ -1547,7 +1566,7 @@ zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	return TRUE;
 }
 
-static int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
+ int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 	
 	PHPTidyObj *obj = php_tidy_fetch_object(getThis());
 
@@ -1567,7 +1586,7 @@ static int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS) {
 	return FALSE;
 }
 
-static int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len, int parent TSRMLS_DC) {
+ int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len, int parent TSRMLS_DC) {
 	
 	PHPTidyObj *object = php_tidy_fetch_object(obj);
 	
@@ -1595,7 +1614,7 @@ static int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len
 	return TRUE;
 }
 
-static int tidy_objects_compare(zval *obj_one, zval *obj_two TSRMLS_DC) {
+ int tidy_objects_compare(zval *obj_one, zval *obj_two TSRMLS_DC) {
 
 	PHPTidyObj *obj1, *obj2;
 	
