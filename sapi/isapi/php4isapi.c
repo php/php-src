@@ -65,8 +65,6 @@ static char *isapi_special_server_variable_names[] = {
 	"HTTPS",
 #ifndef WITH_ZEUS
 	"SCRIPT_NAME",
-#else
-	"PATH_INFO",
 #endif
 	NULL
 };
@@ -349,33 +347,44 @@ static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, 
 {
 	char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
 	DWORD variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	DWORD scriptname_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	DWORD pathinfo_len = 0;
 	char *strtok_buf = NULL;
 
-    /*
-     * Zeus' map module translates the given URL onto the PHP ISAPI library;
-     * from an internal point of view, SCRIPT_NAME and URL are correct,
-     * but from the end-users point of view, it is not... We need to
-     * reconstruct the SCRIPT_NAME and URL from PATH_INFO, and then
-     * finally clear out PATH_INFO.
-     */
-    variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
-    if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
-        php_register_variable( "SCRIPT_NAME", static_variable_buf, track_vars_array ELS_CC PLS_CC );
-        /* append query string to give url... extra byte for '?' */
-        if ( strlen(lpECB->lpszQueryString) + variable_len + 1 < ISAPI_SERVER_VAR_BUF_SIZE ) {
+	/* Get SCRIPT_NAME, we use this to work out which bit of the URL
+	 * belongs in PHP's version of PATH_INFO
+	 */
+	lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &scriptname_len);
+
+	/* Adjust Zeus' version of PATH_INFO, set PHP_SELF,
+	 * and generate REQUEST_URI
+	 */
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+
+		/* PHP_SELF is just PATH_INFO */
+		php_register_variable( "PHP_SELF", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+
+		/* Chop off filename to get just the 'real' PATH_INFO' */
+		pathinfo_len = variable_len - scriptname_len;
+		php_register_variable( "PATH_INFO", static_variable_buf + scriptname_len - 1, track_vars_array ELS_CC PLS_CC );
+		/* append query string to give url... extra byte for '?' */
+		if ( strlen(lpECB->lpszQueryString) + variable_len + 1 < ISAPI_SERVER_VAR_BUF_SIZE ) {
 			/* append query string only if it is present... */
 			if ( strlen(lpECB->lpszQueryString) ) {
 				static_variable_buf[ variable_len - 1 ] = '?';
 				strcpy( static_variable_buf + variable_len, lpECB->lpszQueryString );
 			}
-            php_register_variable( "URL", static_variable_buf, track_vars_array ELS_CC PLS_CC );
-            php_register_variable( "REQUEST_URI", static_variable_buf, track_vars_array ELS_CC PLS_CC );
-        }
-    }
-    variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
-    if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
-        php_register_variable( "SCRIPT_FILENAME", static_variable_buf, track_vars_array ELS_CC PLS_CC );
-    }
+			php_register_variable( "URL", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+			php_register_variable( "REQUEST_URI", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+		}
+	}
+
+	/* Get and adjust PATH_TRANSLATED to what PHP wants */
+	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+	if ( lpECB->GetServerVariable(lpECB->ConnID, "PATH_TRANSLATED", static_variable_buf, &variable_len) && static_variable_buf[0] ) {
+		static_variable_buf[ variable_len - pathinfo_len - 1 ] = '\0';
+		php_register_variable( "PATH_TRANSLATED", static_variable_buf, track_vars_array ELS_CC PLS_CC );
+	}
 }
 #endif
 
@@ -550,7 +559,7 @@ DWORD WINAPI HttpFilterProc(PHTTP_FILTER_CONTEXT pfc, DWORD notificationType, LP
 
 				if (auth_user && auth_user[0]) {
 					SG(request_info).auth_user = estrdup(auth_user);
-				}   
+				}	
 				if (auth_password && auth_password[0]) {
 					SG(request_info).auth_password = estrdup(auth_password);
 				}
@@ -652,8 +661,27 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		init_request_info(sapi_globals, lpECB);
 		SG(server_context) = lpECB;
 
+#ifdef WITH_ZEUS
+		/* PATH_TRANSLATED can contain extra PATH_INFO stuff after the
+		 * file being loaded, so we must use SCRIPT_FILENAME instead
+		 */
+		file_handle.filename = (char *)emalloc( ISAPI_SERVER_VAR_BUF_SIZE );
+		file_handle.free_filename = 1;
+		{
+			DWORD filename_len = ISAPI_SERVER_VAR_BUF_SIZE;
+			if( !lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_FILENAME", file_handle.filename, &filename_len) || file_handle.filename[ 0 ] == '\0' ) {
+                /* If we're running on an earlier version of Zeus, this
+                 * variable won't be present, so fall back to old behaviour.
+                 */
+                efree( file_handle.filename );
+                file_handle.filename = sapi_globals->request_info.path_translated;
+                file_handle.free_filename = 0;
+            }
+		}
+#else
 		file_handle.filename = sapi_globals->request_info.path_translated;
 		file_handle.free_filename = 0;
+#endif
 		file_handle.type = ZEND_HANDLE_FILENAME;
 		file_handle.opened_path = NULL;
 

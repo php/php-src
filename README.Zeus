@@ -6,9 +6,11 @@ significant improvement in PHP 4 is that you can now run PHP as an
 ISAPI module, giving great performance benefits over traditional CGI
 code.
 
-Note that you will need to be running at least version 3.3.6 of the
+Note that you will need to be running at least version 3.3.8 of the
 webserver. If you are running an earlier version, please see our
 website (http://www.zeus.com) for upgrade instructions.
+Earlier versions of Zeus (3.3.6) can also run PHP, but it is
+suggested that you upgrade for full compatibility.
 
 
 To build the ISAPI version of PHP, start the configuration with:
