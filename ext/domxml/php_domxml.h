@@ -44,6 +44,7 @@ extern zend_module_entry php_domxml_module_entry;
 extern PHP_MINIT_FUNCTION(domxml);
 extern PHP_MINFO_FUNCTION(domxml);
 PHP_FUNCTION(getdom);
+PHP_FUNCTION(getdomfile);
 PHP_FUNCTION(domxml_newxmldoc);
 
 /* Class Document methods */
