@@ -4199,6 +4199,7 @@ int zend_verify_abstract_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 void zend_init_opcodes_handlers()
 {
+	memset(zend_opcode_handlers, sizeof(zend_opcode_handlers), 0);
 	zend_opcode_handlers[ZEND_NOP] = zend_nop_handler;
 	zend_opcode_handlers[ZEND_ADD] = zend_add_handler;
 	zend_opcode_handlers[ZEND_SUB] = zend_sub_handler;
