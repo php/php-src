@@ -1047,6 +1047,19 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 {
 	zval op1_copy, op2_copy;
 
+	if ((op1->type == IS_NULL && op2->type == IS_STRING)
+		|| (op2->type == IS_NULL && op1->type == IS_STRING)) {
+		if (op1->type == IS_NULL) {
+			result->type = IS_LONG;
+			result->value.lval = zend_binary_strcmp("", 0, op2->value.str.val, op2->value.str.len);
+			return SUCCESS;
+		} else {
+			result->type = IS_LONG;
+			result->value.lval = zend_binary_strcmp(op1->value.str.val, op1->value.str.len, "", 0);
+			return SUCCESS;
+		}
+	}
+		
 	if (op1->type == IS_STRING && op2->type == IS_STRING) {
 		zendi_smart_strcmp(result, op1, op2);
 		return SUCCESS;
