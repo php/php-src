@@ -238,7 +238,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 
 		wildname = estrdup(filtername);
 		period = wildname + (period - filtername);
-		while (period) {
+		while (period && !filter) {
 			*period = '\0';
 			strcat(wildname, ".*");
 			if (SUCCESS == zend_hash_find(&stream_filters_hash, wildname, strlen(wildname), (void**)&factory)) {
