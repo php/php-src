@@ -388,23 +388,26 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 {
 	int   handler_gz, handler_mb, handler_ic;
 
-	/* check for specific handlers where rules apply */
-	handler_gz = strcmp(handler_name, "ob_gzhandler");
-	handler_mb = strcmp(handler_name, "mb_output_handler");
-	handler_ic = strcmp(handler_name, "ob_iconv_handler");
-	/* apply rules */
-	if (!handler_gz || !handler_mb || !handler_ic) {
-		if (php_ob_handler_used(handler_name TSRMLS_CC)) {
-			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be used twice", handler_name);
-			return FAILURE;
+	if (OG(ob_nesting_level>1)) {
+		/* check for specific handlers where rules apply */
+		handler_gz = strcmp(handler_name, "ob_gzhandler");
+		handler_mb = strcmp(handler_name, "mb_output_handler");
+		handler_ic = strcmp(handler_name, "ob_iconv_handler");
+		/* apply rules */
+		if (!handler_gz || !handler_mb || !handler_ic) {
+			if (php_ob_handler_used(handler_name TSRMLS_CC)) {
+				php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be used twice", handler_name);
+				return FAILURE;
+			}
+			if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
+				return FAILURE;
+			if (!handler_mb && php_ob_init_conflict(handler_name, "ob_iconv_handler" TSRMLS_CC))
+				return FAILURE;
+			if (!handler_ic && php_ob_init_conflict(handler_name, "mb_output_handler" TSRMLS_CC))
+				return FAILURE;
 		}
-		if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
-			return FAILURE;
-		if (!handler_mb && php_ob_init_conflict(handler_name, "ob_iconv_handler" TSRMLS_CC))
-			return FAILURE;
-		if (!handler_ic && php_ob_init_conflict(handler_name, "mb_output_handler" TSRMLS_CC))
-			return FAILURE;
 	}
+	
 	if (OG(ob_nesting_level)>0) {
 		if (OG(ob_nesting_level)==1) { /* initialize stack */
 			zend_stack_init(&OG(ob_buffers));
