@@ -98,6 +98,10 @@ echo ""
 # remove CVS stuff...
 find . \( \( -name CVS -type d \) -o -name .cvsignore \) -exec rm -rf {} \;
 
+# hide away our own ltconfig/ltmain so they won't be overwritten
+mv ltconfig ltconfig.php
+mv ltmain.sh ltmain.sh.php
+
 # generate some files so people don't need bison, flex and autoconf
 # to install
 set -x
@@ -107,6 +111,10 @@ set -x
 
 echo "/* Dummy File */" > ext/bcmath/number.c
 echo "/* Dummy File */" > ext/bcmath/number.h
+
+# now restore our own ltconfig/ltmain.sh files
+mv ltconfig.php ltconfig
+mv ltmain.sh.php ltmain.sh
 
 cd $MY_OLDPWD
 $ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
