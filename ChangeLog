@@ -1,3 +1,72 @@
+2003-11-22  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/php_mysqli.h:
+      - Added multiquery support:
+      	mysqli_multi_query
+      	mysqli_more_results
+      	mysqli_next_results
+      
+      - added read-only properties (and removed methods)
+      	object mysql
+      		affected_rows
+      		client_flags
+      		client_version
+      		errno, error,
+      		host, host_info, info
+      		server_capabilities, server_version
+      		sqlstate, port, protocol_version,
+      		server_language
+      		thread_id, user, warning_count
+      
+      	object result
+      		current_field, field_count,
+      		lengths, num_rows, type
+      
+      	object stmt
+      		query, param_count, field_count,
+      		id, errno, error, sqlstate
+      
+      
+      - added constructor
+      
+      - minor fixes, prototypes
+
+2003-11-22  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c:
+      On error do not leave content_type_dup unitialised.
+
+2003-11-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      fix default recovery mode
+
+2003-11-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/iconv/iconv.c:
+      MFH(r-1.98): Fixed bug #26194 (iconv() not properly defined with libiconv).
+
+    * ext/iconv/iconv.c:
+      Fixed bug #26194 (iconv() not properly defined with libiconv).
+
+2003-11-22  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      ext/gd/libgd/gdft.c:
+      Compile fix
+
 2003-11-21  Christian Stocker  <chregu@phant.ch>
 
     * ext/xsl/xsl_fe.h
