@@ -829,8 +829,12 @@ PHP_FUNCTION(strtok)
 		tok = args[1];
 		convert_to_string_ex(str);
 
-		STR_FREE(BG(strtok_string));
-		BG(strtok_last) = BG(strtok_string) = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+		zval_add_ref(str);
+		if (BG(strtok_zval))
+			zval_ptr_dtor(BG(strtok_zval));
+		BG(strtok_zval) = str;
+		
+		BG(strtok_last) = BG(strtok_string) = Z_STRVAL_PP(str);
 		BG(strtok_len) = Z_STRLEN_PP(str);
 		break;
 	}

@@ -849,6 +849,7 @@ PHP_RINIT_FUNCTION(basic)
 {
 	memset(BG(strtok_table), 0, 256);
 	BG(strtok_string) = NULL;
+	BG(strtok_zval) = NULL;
 	BG(locale_string) = NULL;
 	BG(user_compare_func_name) = NULL;
 	BG(array_walk_func_name) = NULL;
@@ -892,8 +893,10 @@ PHP_RINIT_FUNCTION(basic)
 
 PHP_RSHUTDOWN_FUNCTION(basic)
 {
-	STR_FREE(BG(strtok_string));
+	if (BG(strtok_zval))
+		zval_ptr_dtor(BG(strtok_zval));
 	BG(strtok_string) = NULL;
+	BG(strtok_zval) = NULL;
 #ifdef HAVE_PUTENV
 	zend_hash_destroy(&BG(putenv_ht));
 #endif
