@@ -600,7 +600,7 @@ means that a page will only be served up if the REDIRECT_STATUS CGI variable is\
 set, eg via an Apache Action directive.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
-<a href="http://php.net/install.windows">the manual page</a></p>\n");
+<a href=\"http://php.net/install.windows\">the manual page</a></p>\n");
 
 #ifdef ZTS
 	        tsrm_shutdown();
