@@ -261,8 +261,8 @@ PHP_FUNCTION(apache_setenv)
 
 	ctx = SG(server_context);
 
+	r = ctx->r;
 	if (arg_count == 3 && Z_STRVAL_PP(walk_to_top)) {
-        r = ctx->r;
 		while(r->prev) {
 			r = r->prev;
 		}	
