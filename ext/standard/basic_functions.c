@@ -2553,7 +2553,6 @@ PHP_FUNCTION(push)
 	   and add it to the end of the array */
 	for (i=1; i<argc; i++) {
 		new_var = args[i];
-		new_var->is_ref = 1;
 		new_var->refcount++;
 	
 		zend_hash_next_index_insert(stack->value.ht, &new_var, sizeof(zval *), NULL);
