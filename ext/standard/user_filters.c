@@ -19,6 +19,27 @@
 
 /* $Id$ */
 
+/*
+ * TODO: Rewrite for buckets.
+ * Concept:
+ *       The user defined filter class should implement a method named
+ *       "filter" with the following proto:
+ *       long filter(object brigade_in, object brigade_out, long &consumed, long flags);
+ *
+ *       brigade_in and brigade_out are overloaded objects that wrap around
+ *       the php_stream_bucket_brigades passed to the underlying filter method.
+ *       The brigades have methods for retrieving the head of the brigade as
+ *       an overloaded bucket object, a method for appending a
+ *       bucket object to the end of the brigade, and a method for creating a new
+ *       bucket at the end of the brigade.
+ *
+ *       The bucket object has methods to unlink it from it's containing brigade,
+ *       split into two buckets, and retrieve the buffer from a bucket.
+ *       
+ *       This approach means that there doesn't need to be very much magic between
+ *       userspace and the real C interface.
+ */
+
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
@@ -44,77 +65,14 @@ static int le_userfilters;
 
 /* define the base filter class */
 
-/* Descendants call this function to actually send the data on to the next
- * filter (or the stream itself).
- * The intention is to invoke it as parent::write($data)
- * */
-PHP_FUNCTION(user_filter_write)
-{
-	char *data;
-	int data_len;
-	size_t wrote = 0;
-	php_stream_filter *filter;
-
-	GET_FILTER_FROM_OBJ();
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &data, &data_len) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	wrote = php_stream_filter_write_next(filter->stream, filter, data, data_len);
-
-	RETURN_LONG(wrote);
-}
-
-PHP_FUNCTION(user_filter_read)
-{
-	long data_to_read;
-	char *data;
-	size_t didread = 0;
-	php_stream_filter *filter;
-
-	RETVAL_FALSE;
-	
-	GET_FILTER_FROM_OBJ();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &data_to_read) == FAILURE) {
-		RETURN_FALSE;
-	}
-	
-	data = emalloc(data_to_read + 1);
-	didread = php_stream_filter_read_next(filter->stream, filter, data, data_to_read);
-	
-	if (didread > 0) {
-		data = erealloc(data, didread + 1);
-		RETURN_STRINGL(data, didread, 0);
-	} else {
-		efree(data);
-		RETURN_FALSE;
-	}
-}
-
-PHP_FUNCTION(user_filter_flush)
-{
-	zend_bool closing;
-	php_stream_filter *filter;
-
-	GET_FILTER_FROM_OBJ();
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &closing) == FAILURE) {
-		RETURN_FALSE;
-	}
-	
-	RETURN_LONG(php_stream_filter_flush_next(filter->stream, filter, closing));
-}
-
 PHP_FUNCTION(user_filter_nop)
 {
 }
 
 static zend_function_entry user_filter_class_funcs[] = {
-	PHP_NAMED_FE(write,		PHP_FN(user_filter_write),		NULL)
-	PHP_NAMED_FE(read,		PHP_FN(user_filter_read),		NULL)
-	PHP_NAMED_FE(flush,		PHP_FN(user_filter_flush),		NULL)
+	PHP_NAMED_FE(write,		PHP_FN(user_filter_nop),		NULL)
+	PHP_NAMED_FE(read,		PHP_FN(user_filter_nop),		NULL)
+	PHP_NAMED_FE(flush,		PHP_FN(user_filter_nop),		NULL)
 	PHP_NAMED_FE(oncreate,	PHP_FN(user_filter_nop),		NULL)
 	PHP_NAMED_FE(onclose,	PHP_FN(user_filter_nop),		NULL)
 	{ NULL, NULL, NULL }
@@ -138,148 +96,6 @@ PHP_MINIT_FUNCTION(user_filters)
 		return FAILURE;
 	
 	return SUCCESS;
-}
-
-static size_t userfilter_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
-{
-	size_t wrote = 0;
-	zval *obj = (zval*)thisfilter->abstract;
-	zval func_name;
-	zval *retval = NULL;
-	zval **args[1];
-	zval *zbuf;
-	int call_result;
-
-	ZVAL_STRINGL(&func_name, "write", sizeof("write")-1, 0);
-
-	ALLOC_INIT_ZVAL(zbuf);
-	ZVAL_STRINGL(zbuf, (char*)buf, count, 1);
-
-	args[0] = &zbuf;
-
-	call_result = call_user_function_ex(NULL,
-			&obj,
-			&func_name,
-			&retval,
-			1, args,
-			0, NULL TSRMLS_CC);
-
-	if (call_result == SUCCESS && retval != NULL) {
-		convert_to_long(retval);
-		wrote = Z_LVAL_P(retval);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user-filter write function!?");
-	}
-
-	/* beware of buffer overruns */
-	if (wrote > count) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"wrote %d bytes more data than requested (%d written, %d max)",
-				wrote - count,
-				wrote,
-				count);
-		wrote = count;
-	}
-
-	if (retval)
-		zval_ptr_dtor(&retval);
-
-	if (zbuf)
-		zval_ptr_dtor(&zbuf);
-	
-	return wrote;
-}
-
-static size_t userfilter_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	size_t didread = 0;
-	zval *obj = (zval*)thisfilter->abstract;
-	zval func_name;
-	zval *retval = NULL;
-	zval **args[1];
-	zval *zcount;
-	int call_result;
-
-	ZVAL_STRINGL(&func_name, "read", sizeof("read")-1, 0);
-
-	ALLOC_INIT_ZVAL(zcount);
-	ZVAL_LONG(zcount, count);
-	args[0] = &zcount;
-
-	call_result = call_user_function_ex(NULL,
-			&obj,
-			&func_name,
-			&retval,
-			1, args,
-			0, NULL TSRMLS_CC);
-
-	if (call_result == SUCCESS && retval != NULL) {
-		convert_to_string(retval);
-		didread = Z_STRLEN_P(retval);
-
-		if (didread > count) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-					"read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
-					didread - count, didread, count);
-			didread = count;
-		}
-		if (didread > 0)
-			memcpy(buf, Z_STRVAL_P(retval), didread);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call read function!");
-	}
-
-	if (retval)
-		zval_ptr_dtor(&retval);
-
-	zval_ptr_dtor(&zcount);
-	
-	return didread;
-}
-
-static int userfilter_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
-{
-	int ret = EOF;
-	zval *obj = (zval*)thisfilter->abstract;
-	zval func_name;
-	zval *retval = NULL;
-	zval **args[1];
-	zval *zcount;
-	int call_result;
-
-	ZVAL_STRINGL(&func_name, "flush", sizeof("flush")-1, 0);
-
-	ALLOC_INIT_ZVAL(zcount);
-	ZVAL_BOOL(zcount, closing);
-	args[0] = &zcount;
-
-	call_result = call_user_function_ex(NULL,
-			&obj,
-			&func_name,
-			&retval,
-			1, args,
-			0, NULL TSRMLS_CC);
-
-	if (call_result == SUCCESS && retval != NULL) {
-		convert_to_long(retval);
-		ret = Z_LVAL_P(retval);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call flush function");
-	}
-
-	if (retval)
-		zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&zcount);
-
-	return ret;
-}
-
-static int userfilter_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
-{
-	/* TODO: does this actually ever get called!? */
-	return php_stream_filter_eof_next(stream, thisfilter);
 }
 
 static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
@@ -310,11 +126,52 @@ static void userfilter_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 	zval_ptr_dtor(&obj);
 }
 
+php_stream_filter_status_t userfilter_filter(
+			php_stream *stream,
+			php_stream_filter *thisfilter,
+			php_stream_bucket_brigade *buckets_in,
+			php_stream_bucket_brigade *buckets_out,
+			size_t *bytes_consumed,
+			int flags
+			TSRMLS_DC)
+{
+	int ret = EOF;
+	zval *obj = (zval*)thisfilter->abstract;
+	zval func_name;
+	zval *retval = NULL;
+	zval **args[1];
+	zval *zcount;
+	int call_result;
+
+	ZVAL_STRINGL(&func_name, "filter", sizeof("filter")-1, 0);
+
+	ALLOC_INIT_ZVAL(zcount);
+	ZVAL_BOOL(zcount, flags & PSFS_FLAG_FLUSH_CLOSE);
+	args[0] = &zcount;
+
+	call_result = call_user_function_ex(NULL,
+			&obj,
+			&func_name,
+			&retval,
+			1, args,
+			0, NULL TSRMLS_CC);
+
+	if (call_result == SUCCESS && retval != NULL) {
+		convert_to_long(retval);
+		ret = Z_LVAL_P(retval);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call filter function");
+	}
+
+	if (retval)
+		zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&zcount);
+
+	return PSFS_ERR_FATAL;
+}
+
 static php_stream_filter_ops userfilter_ops = {
-	userfilter_write,
-	userfilter_read,
-	userfilter_flush,
-	userfilter_eof,
+	userfilter_filter,
 	userfilter_dtor,
 	"user-filter"
 };
@@ -356,9 +213,6 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 		fdat->ce = *(zend_class_entry**)fdat->ce;
 #endif
 
-		/* the class *must* be a descendant of the user-space filter
-		 * base class, otherwise it will never work */
-		/* TODO: make this sanity check */
 	}
 
 	filter = php_stream_filter_alloc(&userfilter_ops, NULL, 0);

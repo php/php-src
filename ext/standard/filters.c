@@ -25,61 +25,40 @@
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 
-/* {{{ common "no-opperation" methods */
-static int commonfilter_nop_flush(php_stream *stream, php_stream_filter *thisfilter, int closing TSRMLS_DC)
-{
-	return php_stream_filter_flush_next(stream, thisfilter, closing);
-}
-
-static int commonfilter_nop_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
-{
-	return php_stream_filter_eof_next(stream, thisfilter);
-}
-/* }}} */
-
 /* {{{ rot13 stream filter implementation */
 static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
-static size_t strfilter_rot13_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
+static php_stream_filter_status_t strfilter_rot13_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
 {
-	char rotbuf[1024];
-	size_t chunk;
-	size_t wrote = 0;
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
 
-	while (count > 0) {
-		chunk = count;
-		if (chunk > sizeof(rotbuf))
-			chunk = sizeof(rotbuf);
-
-		PHP_STRLCPY(rotbuf, buf, sizeof(rotbuf), chunk);
-		buf += chunk;
-		count -= chunk;
-
-		php_strtr(rotbuf, chunk, rot13_from, rot13_to, 52);
-		wrote += php_stream_filter_write_next(stream, thisfilter, rotbuf, chunk);
+	while (buckets_in->head) {
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, rot13_from, rot13_to, 52);
+		consumed += bucket->buflen;
+		
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
-	return wrote;
-}
-
-static size_t strfilter_rot13_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	size_t read;
-
-	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
-	php_strtr(buf, read, rot13_from, rot13_to, 52);
-
-	return read;
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
 }
 
 static php_stream_filter_ops strfilter_rot13_ops = {
-	strfilter_rot13_write,
-	strfilter_rot13_read,
-	commonfilter_nop_flush,
-	commonfilter_nop_eof,
+	strfilter_rot13_filter,
 	NULL,
 	"string.rot13"
 };
@@ -99,88 +78,70 @@ static php_stream_filter_factory strfilter_rot13_factory = {
 static char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
 static char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-static size_t strfilter_toupper_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
+static php_stream_filter_status_t strfilter_toupper_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
 {
-	char tmpbuf[1024];
-	size_t chunk;
-	size_t wrote = 0;
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
 
-	while (count > 0) {
-		chunk = count;
-		if (chunk > sizeof(tmpbuf))
-			chunk = sizeof(tmpbuf);
-
-		PHP_STRLCPY(tmpbuf, buf, sizeof(tmpbuf), chunk);
-		buf += chunk;
-		count -= chunk;
-
-		php_strtr(tmpbuf, chunk, lowercase, uppercase, 26);
-		wrote += php_stream_filter_write_next(stream, thisfilter, tmpbuf, chunk);
+	while (buckets_in->head) {
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, lowercase, uppercase, 26);
+		consumed += bucket->buflen;
+		
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
-	return wrote;
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
 }
 
-static size_t strfilter_tolower_write(php_stream *stream, php_stream_filter *thisfilter,
-			const char *buf, size_t count TSRMLS_DC)
+static php_stream_filter_status_t strfilter_tolower_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
 {
-	char tmpbuf[1024];
-	size_t chunk;
-	size_t wrote = 0;
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
 
-	while (count > 0) {
-		chunk = count;
-		if (chunk > sizeof(tmpbuf))
-			chunk = sizeof(tmpbuf);
-
-		PHP_STRLCPY(tmpbuf, buf, sizeof(tmpbuf), chunk);
-		buf += chunk;
-		count -= chunk;
-
-		php_strtr(tmpbuf, chunk, uppercase, lowercase, 26);
-		wrote += php_stream_filter_write_next(stream, thisfilter, tmpbuf, chunk);
+	while (buckets_in->head) {
+		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		
+		php_strtr(bucket->buf, bucket->buflen, uppercase, lowercase, 26);
+		consumed += bucket->buflen;
+		
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
 	}
 
-	return wrote;
-}
-
-static size_t strfilter_toupper_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	size_t read;
-
-	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
-	php_strtr(buf, read, lowercase, uppercase, 26);
-
-	return read;
-}
-
-static size_t strfilter_tolower_read(php_stream *stream, php_stream_filter *thisfilter,
-			char *buf, size_t count TSRMLS_DC)
-{
-	size_t read;
-
-	read = php_stream_filter_read_next(stream, thisfilter, buf, count);
-	php_strtr(buf, read, uppercase, lowercase, 26);
-
-	return read;
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
 }
 
 static php_stream_filter_ops strfilter_toupper_ops = {
-	strfilter_toupper_write,
-	strfilter_toupper_read,
-	commonfilter_nop_flush,
-	commonfilter_nop_eof,
+	strfilter_toupper_filter,
 	NULL,
 	"string.toupper"
 };
 
 static php_stream_filter_ops strfilter_tolower_ops = {
-	strfilter_tolower_write,
-	strfilter_tolower_read,
-	commonfilter_nop_flush,
-	commonfilter_nop_eof,
+	strfilter_tolower_filter,
 	NULL,
 	"string.tolower"
 };
@@ -1400,6 +1361,54 @@ static void php_convert_filter_dtor(php_convert_filter *inst)
 	}
 }
 
+static php_stream_filter_status_t strfilter_convert_filter(
+	php_stream *stream,
+	php_stream_filter *thisfilter,
+	php_stream_bucket_brigade *buckets_in,
+	php_stream_bucket_brigade *buckets_out,
+	size_t *bytes_consumed,
+	int flags
+	TSRMLS_DC)
+{
+	php_stream_bucket *bucket;
+	size_t consumed = 0;
+	php_conv_err_t err;
+	php_convert_filter *inst = (php_convert_filter *)thisfilter->abstract;
+
+	while (thisfilter->buffer.head || buckets_in->head) {
+		/* take head off buffer first, then input brigade */
+		bucket = thisfilter->buffer.head ? thisfilter->buffer.head : buckets_in->head;
+		php_stream_bucket_unlink(bucket TSRMLS_CC);
+
+#if 0
+		err = php_conv_convert(inst->write_cd, ... )
+
+		/* update consumed by the number of bytes just used */
+			
+		/* give output bucket to next in chain */
+		php_stream_bucket_append(buckets_out, bucket TSRMLS_CC);
+			
+ 		if (only used part of buffer) {
+			bucket *left, *right;
+			php_stream_buffer_split(bucket, &left, &right, used_len TSRMLS_CC);
+			php_stream_buffer_delref(left); /* delete the part we consumed */
+			php_stream_buffer_append(&filter->buffer, right TSRMLS_CC);
+			break;
+ 		}
+#endif
+	}
+
+	if (bytes_consumed) {
+		*bytes_consumed = consumed;
+	}
+	
+	return PSFS_PASS_ON;
+}
+
+
+
+
+#if 0
 static size_t strfilter_convert_write(php_stream *stream, php_stream_filter *thisfilter,
 			const char *buf, size_t count TSRMLS_DC)
 {
@@ -1537,11 +1546,7 @@ static int strfilter_convert_flush(php_stream *stream, php_stream_filter *thisfi
 	}
 	return php_stream_filter_flush_next(stream, thisfilter, closing);
 }
-
-static int strfilter_convert_eof(php_stream *stream, php_stream_filter *thisfilter TSRMLS_DC)
-{
-	return php_stream_filter_eof_next(stream, thisfilter);
-}
+#endif
 
 static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 {
@@ -1552,10 +1557,7 @@ static void strfilter_convert_dtor(php_stream_filter *thisfilter TSRMLS_DC)
 }
 
 static php_stream_filter_ops strfilter_convert_ops = {
-	strfilter_convert_write,
-	strfilter_convert_read,
-	strfilter_convert_flush,
-	strfilter_convert_eof,
+	strfilter_convert_filter,
 	strfilter_convert_dtor,
 	"convert.*"
 };

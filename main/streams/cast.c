@@ -173,7 +173,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		 * first, to avoid doubling up the layers of stdio with an fopencookie */
 		if (php_stream_is(stream, PHP_STREAM_IS_STDIO) &&
 				stream->ops->cast &&
-				stream->filterhead == NULL &&
+				!php_stream_is_filtered(stream) &&
 				stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
 		{
 			goto exit_success;
@@ -235,7 +235,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		}
 	}
 
-	if (stream->filterhead) {
+	if (php_stream_is_filtered(stream)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
 		return FAILURE;
 	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {

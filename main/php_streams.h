@@ -97,8 +97,8 @@ typedef struct _php_stream_wrapper php_stream_wrapper;
 typedef struct _php_stream_context php_stream_context;
 typedef struct _php_stream_filter php_stream_filter;
 
-#include "streams/context.h"
-#include "streams/filter_api.h"
+#include "streams/php_stream_context.h"
+#include "streams/php_stream_filter_api.h"
 
 typedef struct _php_stream_statbuf {
 #if defined(NETWARE) && defined(CLIB_STAT_PATCH)
@@ -174,9 +174,8 @@ struct _php_stream  {
 	php_stream_ops *ops;
 	void *abstract;  		/* convenience pointer for abstraction */
 
-	php_stream_filter *filterhead;
-	php_stream_filter *filtertail;
-	
+	php_stream_filter_chain readfilters, writefilters;
+
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
 	void *wrapperthis;		/* convenience pointer for a instance of a wrapper */
 	zval *wrapperdata;		/* fgetwrapperdata retrieves this */
@@ -287,6 +286,7 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen, 
 #define php_stream_gets(stream, buf, maxlen)	_php_stream_get_line((stream), (buf), (maxlen), NULL TSRMLS_CC)
 
 #define php_stream_get_line(stream, buf, maxlen, retlen) _php_stream_get_line((stream), (buf), (maxlen), (retlen) TSRMLS_CC)
+PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC);
 
 /* CAREFUL! this is equivalent to puts NOT fputs! */
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
@@ -347,8 +347,8 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define php_stream_passthru(stream)	_php_stream_passthru((stream) STREAMS_CC TSRMLS_CC)
 
-#include "streams/plain_wrapper.h"
-#include "streams/userspace.h"
+#include "streams/php_stream_plain_wrapper.h"
+#include "streams/php_stream_userspace.h"
 
 /* coerce the stream into some other form */
 /* cast as a stdio FILE * */

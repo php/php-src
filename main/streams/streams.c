@@ -310,8 +310,11 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
 		
-		while (stream->filterhead) {
-			php_stream_filter_remove_head(stream, 1);
+		while (stream->readfilters.head) {
+			php_stream_filter_remove(stream->readfilters.head, 1);
+		}
+		while (stream->writefilters.head) {
+			php_stream_filter_remove(stream->writefilters.head, 1);
 		}
 
 		if (stream->wrapper && stream->wrapper->wops && stream->wrapper->wops->stream_closer) {
@@ -363,44 +366,129 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 {
 	/* allocate/fill the buffer */
 	
-	/* is there enough data in the buffer ? */
-	if (stream->writepos - stream->readpos < (off_t)size) {
-		size_t justread = 0;
-	
-		/* ignore eof here; the underlying state might have changed */
+	if (stream->readfilters.head) {
+		char *chunk_buf;
+		int err_flag = 0;
+		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
+		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
+
+		/* allocate a buffer for reading chunks */
+		chunk_buf = emalloc(stream->chunk_size);
+
+		while (!err_flag && (stream->writepos - stream->readpos < (off_t)size)) {
+			size_t justread = 0;
+			int flags;
+			php_stream_bucket *bucket;
+			php_stream_filter_status_t status;
+			php_stream_filter *filter;
+
+			/* read a chunk into a bucket */
+			justread = stream->ops->read(stream, chunk_buf, stream->chunk_size TSRMLS_CC);
+			if (justread > 0) {
+				bucket = php_stream_bucket_new(stream, chunk_buf, justread, 0, 0 TSRMLS_CC);
+
+				/* after this call, bucket is owned by the brigade */
+				php_stream_bucket_append(brig_inp, bucket);
+
+				flags = PSFS_FLAG_NORMAL;
+			} else {
+				flags = stream->eof ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC;
+			}
 		
-		/* no; so lets fetch more data */
-		
-		/* reduce buffer memory consumption if possible, to avoid a realloc */
-		if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
-			memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->readbuflen - stream->readpos);
-			stream->writepos -= stream->readpos;
-			stream->readpos = 0;
+			/* wind the handle... */
+			for (filter = stream->readfilters.head; filter; filter = filter->next) {
+				status = filter->fops->filter(stream, filter, brig_inp, brig_outp, NULL, flags TSRMLS_CC);
+
+				if (status != PSFS_PASS_ON) {
+					break;
+				}
+				
+				/* brig_out becomes brig_in.
+				 * brig_in will always be empty here, as the filter MUST attach any un-consumed buckets
+				 * to its own brigade */
+				brig_swap = brig_inp;
+				brig_inp = brig_outp;
+				brig_outp = brig_swap;
+				memset(brig_outp, 0, sizeof(*brig_outp));
+			}
+			
+			switch (status) {
+				case PSFS_PASS_ON:
+					/* we get here when the last filter in the chain has data to pass on.
+					 * in this situation, we are passing the brig_in brigade into the
+					 * stream read buffer */
+					while (brig_inp->head) {
+						bucket = brig_inp->head;
+						/* grow buffer to hold this bucket
+						 * TODO: this can fail for persistent streams */
+						if (stream->readbuflen - stream->writepos < bucket->buflen) {
+							stream->readbuflen += bucket->buflen;
+							stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
+									stream->is_persistent);
+						}
+						memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+						stream->writepos += bucket->buflen;
+						
+						php_stream_bucket_unlink(bucket TSRMLS_CC);
+						php_stream_bucket_delref(bucket TSRMLS_CC);
+					}
+
+					break;
+
+				case PSFS_FEED_ME:
+					/* when a filter needs feeding, there is no brig_out to deal with.
+					 * we simply continue the loop; if the caller needs more data,
+					 * we will read again, otherwise out job is done here */
+					if (justread == 0) {
+						/* there is no data */
+						err_flag = 1;
+						break;
+					}
+					continue;
+
+				case PSFS_ERR_FATAL:
+					/* some fatal error. Theoretically, the stream is borked, so all
+					 * further reads should fail. */
+					err_flag = 1;
+					break;
+			}
+
+			if (justread == 0) {
+				break;
+			}
 		}
-		
-		/* grow the buffer if required */
-		if (stream->readbuflen - stream->writepos < stream->chunk_size) {
-			stream->readbuflen += stream->chunk_size;
-			stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
-					stream->is_persistent);
-		}
-		
-		if (stream->filterhead) {
-			justread = stream->filterhead->fops->read(stream, stream->filterhead,
-					stream->readbuf + stream->writepos,
-					stream->readbuflen - stream->writepos
-					TSRMLS_CC);
-		} else {
+
+		efree(chunk_buf);
+
+	} else {
+		/* is there enough data in the buffer ? */
+		if (stream->writepos - stream->readpos < (off_t)size) {
+			size_t justread = 0;
+
+			/* reduce buffer memory consumption if possible, to avoid a realloc */
+			if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
+				memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->readbuflen - stream->readpos);
+				stream->writepos -= stream->readpos;
+				stream->readpos = 0;
+			}
+
+			/* grow the buffer if required
+			 * TODO: this can fail for persistent streams */
+			if (stream->readbuflen - stream->writepos < stream->chunk_size) {
+				stream->readbuflen += stream->chunk_size;
+				stream->readbuf = perealloc(stream->readbuf, stream->readbuflen,
+						stream->is_persistent);
+			}
+
 			justread = stream->ops->read(stream, stream->readbuf + stream->writepos,
 					stream->readbuflen - stream->writepos
 					TSRMLS_CC);
-		}
 
-		if (justread != (size_t)-1) {
-			stream->writepos += justread;
+			if (justread != (size_t)-1) {
+				stream->writepos += justread;
+			}
 		}
 	}
-
 }
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
@@ -431,14 +519,8 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 			break;
 		}
 
-		if (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1) {
-			if (stream->filterhead) {
-				toread = stream->filterhead->fops->read(stream, stream->filterhead,
-						buf, size
-						TSRMLS_CC);
-			} else {
-				toread = stream->ops->read(stream, buf, size TSRMLS_CC);
-			}
+		if (!stream->readfilters.head && (stream->flags & PHP_STREAM_FLAG_NO_BUFFER || stream->chunk_size == 1)) {
+			toread = stream->ops->read(stream, buf, size TSRMLS_CC);
 		} else {
 			php_stream_fill_read_buffer(stream, size TSRMLS_CC);
 
@@ -715,12 +797,111 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	}
 }
 
+/* Writes a buffer directly to a stream, using multiple of the chunk size */
+static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	size_t didwrite = 0, towrite, justwrote;
+
+	while (count > 0) {
+		towrite = count;
+		if (towrite > stream->chunk_size)
+			towrite = stream->chunk_size;
+	
+		justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
+
+		if (justwrote > 0) {
+			buf += justwrote;
+			count -= justwrote;
+			didwrite += justwrote;
+			
+			/* Only screw with the buffer if we can seek, otherwise we lose data
+			 * buffered from fifos and sockets */
+			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && !php_stream_is_filtered(stream)) {
+				stream->position += justwrote;
+				stream->writepos = 0;
+				stream->readpos = 0;
+			}
+		} else {
+			break;
+		}
+	}
+	return didwrite;
+
+}
+
+/* push some data through the write filter chain.
+ * buf may be NULL, if flags are set to indicate a flush.
+ * This may trigger a real write to the stream.
+ * Returns the number of bytes consumed from buf by the first filter in the chain.
+ * */
+static size_t _php_stream_write_filtered(php_stream *stream, const char *buf, size_t count, int flags TSRMLS_DC)
+{
+	size_t consumed = 0;
+	php_stream_bucket *bucket;
+	php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
+	php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out, *brig_swap;
+	php_stream_filter_status_t status;
+	php_stream_filter *filter;
+
+	if (buf) {
+		bucket = php_stream_bucket_new(stream, (char *)buf, count, 0, 0 TSRMLS_CC);
+		php_stream_bucket_append(&brig_in, bucket);
+	}
+
+	for (filter = stream->writefilters.head; filter; filter = filter->next) {
+		/* for our return value, we are interested in the number of bytes consumed from
+		 * the first filter in the chain */
+		status = filter->fops->filter(stream, filter, brig_inp, brig_outp,
+				filter == stream->writefilters.head ? &consumed : NULL, flags TSRMLS_CC);
+
+		if (status != PSFS_PASS_ON) {
+			break;
+		}
+		/* brig_out becomes brig_in.
+		 * brig_in will always be empty here, as the filter MUST attach any un-consumed buckets
+		 * to its own brigade */
+		brig_swap = brig_inp;
+		brig_inp = brig_outp;
+		brig_outp = brig_swap;
+		memset(brig_outp, 0, sizeof(*brig_outp));
+	}
+
+	switch (status) {
+		case PSFS_PASS_ON:
+			/* filter chain generated some output; push it through to the
+			 * underlying stream */
+			while (brig_inp->head) {
+				bucket = brig_inp->head;
+				_php_stream_write_buffer(stream, bucket->buf, bucket->buflen TSRMLS_CC);
+				/* Potential error situation - eg: no space on device. Perhaps we should keep this brigade
+				 * hanging around and try to write it later.
+				 * At the moment, we just drop it on the floor
+				 * */
+
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+			}
+			break;
+		case PSFS_FEED_ME:
+			/* need more data before we can push data through to the stream */
+			break;
+
+		case PSFS_ERR_FATAL:
+			/* some fatal error.  Theoretically, the stream is borked, so all
+			 * further writes should fail. */
+			break;
+	}
+
+	return consumed;
+}
+
 PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 {
 	int ret = 0;
 	
-	if (stream->filterhead)
-		stream->filterhead->fops->flush(stream, stream->filterhead, closing TSRMLS_CC);
+	if (stream->writefilters.head) {
+		_php_stream_write_filtered(stream, NULL, 0, closing ? PSFS_FLAG_FLUSH_CLOSE : PSFS_FLAG_FLUSH_INC  TSRMLS_CC);
+	}
 	
 	if (stream->ops->flush) {
 		ret = stream->ops->flush(stream TSRMLS_CC);
@@ -731,39 +912,14 @@ PHPAPI int _php_stream_flush(php_stream *stream, int closing TSRMLS_DC)
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
-	size_t didwrite = 0, towrite, justwrote;
-	
-	assert(stream);
 	if (buf == NULL || count == 0 || stream->ops->write == NULL)
 		return 0;
 
-	while (count > 0) {
-		towrite = count;
-		if (towrite > stream->chunk_size)
-			towrite = stream->chunk_size;
-	
-		if (stream->filterhead) {
-			justwrote = stream->filterhead->fops->write(stream, stream->filterhead, buf, towrite TSRMLS_CC);
-		} else {
-			justwrote = stream->ops->write(stream, buf, towrite TSRMLS_CC);
-		}
-		if (justwrote > 0) {
-			buf += justwrote;
-			count -= justwrote;
-			didwrite += justwrote;
-			
-			/* Only screw with the buffer if we can seek, otherwise we lose data
-			 * buffered from fifos and sockets */
-			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-				stream->position += justwrote;
-				stream->writepos = 0;
-				stream->readpos = 0;
-			}
-		} else {
-			break;
-		}
+	if (stream->writefilters.head) {
+		return _php_stream_write_filtered(stream, buf, count, PSFS_FLAG_NORMAL TSRMLS_CC);
+	} else {
+		return _php_stream_write_buffer(stream, buf, count TSRMLS_CC);
 	}
-	return didwrite;
 }
 
 PHPAPI size_t _php_stream_printf(php_stream *stream TSRMLS_DC, const char *fmt, ...)
@@ -825,8 +981,9 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 		int ret;
 		
-		if (stream->filterhead)
-			stream->filterhead->fops->flush(stream, stream->filterhead, 0 TSRMLS_CC);
+		if (stream->writefilters.head) {
+			_php_stream_flush(stream, 0 TSRMLS_CC);
+		}
 		
 		switch(whence) {
 			case SEEK_CUR:
@@ -910,7 +1067,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 
 #ifdef HAVE_MMAP
 	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)
-			&& stream->filterhead == NULL
+			&& !php_stream_is_filtered(stream)
 			&& php_stream_tell(stream) == 0
 			&& SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0))
 	{
@@ -975,7 +1132,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	 * buffering layer.
 	 * */
 	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			src->filterhead == NULL &&
+			!php_stream_is_filtered(src) &&
 			php_stream_tell(src) == 0 &&
 			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
 	{
@@ -1057,7 +1214,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 	 * buffering layer.
 	 * */
 	if ( php_stream_is(src, PHP_STREAM_IS_STDIO) &&
-			src->filterhead == NULL &&
+			!php_stream_is_filtered(src) &&
 			php_stream_tell(src) == 0 &&
 			SUCCESS == php_stream_cast(src, PHP_STREAM_AS_FD, (void**)&srcfd, 0))
 	{
