@@ -60,7 +60,7 @@ PHP_FUNCTION(mysqli_connect)
 
 	if (mysql_real_connect(mysql,hostname,username,passwd,dbname,port,socket,0) == NULL) {
 		/* Save error messages */
-		php_mysqli_set_error(mysql_errno(mysql), mysql_error(mysql) TSRMLS_CC);
+		php_mysqli_set_error(mysql_errno(mysql), (char *mysql_error(mysql) TSRMLS_CC);
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysql_error(mysql));
 		/* free mysql structure */
