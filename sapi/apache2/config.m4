@@ -1,4 +1,4 @@
-dnldnl ## -*- sh -*-
+dnl ## -*- sh -*-
 dnl
 dnlAC_DEFUN(PHP_APACHE_CHECK_RDYNAMIC,[
 dnl  if test -n "$GCC"; then
@@ -233,6 +233,6 @@ dnlif test -n "$APACHE_INSTALL"; then
 dnl  INSTALL_IT=$APACHE_INSTALL
 dnlfi
 dnl
-dnldnl ## Local Variables:
-dnldnl ## tab-width: 4
-dnldnl ## End:
+dnl ## Local Variables:
+dnl ## tab-width: 4
+dnl ## End:
