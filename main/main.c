@@ -238,7 +238,7 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("max_execution_time",		"30",			PHP_INI_ALL,		OnChangeMaxExecutionTime)
 	PHP_INI_ENTRY("memory_limit",			"8388608",		PHP_INI_ALL,		OnChangeMemoryLimit)
 
-	STD_PHP_INI_BOOLEAN("track_vars",				"0",			PHP_INI_ALL,		OnUpdateInt,				track_vars,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("track_vars",			(PHP_TRACK_VARS?"1":"0"),			PHP_INI_ALL,		OnUpdateInt,				track_vars,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("gpc_order",				"GPC",			PHP_INI_ALL,		OnUpdateStringUnempty,	gpc_order,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("arg_separator",			"&",			PHP_INI_ALL,		OnUpdateStringUnempty,	arg_separator,	php_core_globals,	core_globals)
 PHP_INI_END()
