@@ -14,10 +14,10 @@ Zend
 
 global
 ------
-	* when used in standalone (skell-script like) mode don't urldecode
-	  arguments passed to php. right now it's not possible to say
-	    /usr/local/bin/php somescript.php dog+cat.txt
-	  as "dog+cat.txt" will arrive in php as "dog cat.txt". 
+    * when used in standalone (skell-script like) mode don't urldecode
+      arguments passed to php. right now it's not possible to say
+        /usr/local/bin/php somescript.php dog+cat.txt
+      as "dog+cat.txt" will arrive in php as "dog cat.txt". 
     * make everything on the language-level independent of your locale setings.
     * always build the standalone executable as well as the chosen SAPI 
       target.
@@ -52,16 +52,16 @@ documentation
 -------------
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
-	* improve documentation for the sablotron extension
-	* update curl documentation
-	* write documentation for the bzip2 extension
-	* write documentation for the zziplib extension
+    * improve documentation for the sablotron extension
+    * update curl documentation
+    * write documentation for the bzip2 extension
+    * write documentation for the zziplib extension
 
 ext/curl
 --------
-	* Use the cURL write handler to save data for use when returning data or outputting
-	  data.
-	* Have a warning scheme for when people use unsupported features.
+    * Use the cURL write handler to save data for use when returning data or outputting
+      data.
+    * Have a warning scheme for when people use unsupported features.
 
 ext/dav
 --------
@@ -71,8 +71,8 @@ ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
     * have a flag that trims trailing spaces from CHAR fields on retrieval.
-	* make allow_call_time_pass_reference=Off working.
-	* for additional todo information, see oci8.c, in ext/oci8
+    * make allow_call_time_pass_reference=Off working.
+    * for additional todo information, see oci8.c, in ext/oci8
 
 ext/pcre
 --------
@@ -80,9 +80,9 @@ ext/pcre
 
 ext/sablot
 ----------
-	* Re-write the error handling and reporting interface
-	* Cleanup the underlying code a bit
-	* Add proper support for the message handlers
+    * Re-write the error handling and reporting interface
+    * Cleanup the underlying code a bit
+    * Add proper support for the message handlers
 
 ext/session
 -----------
@@ -93,8 +93,8 @@ ext/session
 
 ext/sockets
 -----------
-	* Make the extension work on windows
-	* Make the extension work with Solaris and the Sun GCC
+    * Make the extension work on windows
+    * Make the extension work with Solaris and the Sun GCC
 
 ext/standard
 ------------
@@ -117,7 +117,7 @@ ext/standard
 
 ext/zziplib
 ------------
-	* more fully support the zziplib api
+    * more fully support the zziplib api
 
 ext/wddx
 --------
