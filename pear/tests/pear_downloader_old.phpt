@@ -40,7 +40,7 @@ if (!is_dir($temp_path . DIRECTORY_SEPARATOR . 'bin')) {
     mkdir($temp_path . DIRECTORY_SEPARATOR . 'bin');
 }
 // make the fake configuration - we'll use one of these and it should work
-$config = serialize(array('master_server' => 'pear.php.net',
+$config = serialize(array('master_server' => $server,
     'php_dir' => $temp_path . DIRECTORY_SEPARATOR . 'php',
     'ext_dir' => $temp_path . DIRECTORY_SEPARATOR . 'ext',
     'data_dir' => $temp_path . DIRECTORY_SEPARATOR . 'data',
@@ -114,8 +114,27 @@ echo "File is the same? ";
 $good = implode('', file(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'pkg6-1.1.tgz'));
 $dled = implode('', file($installpackages[0]['file']));
 echo ($good == $dled) ? "yes\n" : "no\n";
+unlink($installpackages[0]['file']);
 unset($installpackages[0]['file']);
 var_dump($installpackages);
+
+echo "Test simple package name download:\n";
+$installpackages = $errors = array();
+$packages = array('pkg6');
+$a = $installer->download($packages, array(), &$config, &$installpackages, &$errors);
+var_dump($a, $errors);
+
+echo "File exists? ";
+echo (is_file($installpackages[0]['file'])) ? "yes\n" : "no\n";
+echo "File is the same? ";
+$good = implode('', file(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'test-pkg6' . DIRECTORY_SEPARATOR . 'pkg6-1.1.tgz'));
+$dled = implode('', file($installpackages[0]['file']));
+echo ($good == $dled) ? "yes\n" : "no\n";
+unlink($installpackages[0]['file']);
+unset($installpackages[0]['file']);
+var_dump($installpackages);
+
+
 chdir($curdir);
 cleanall($temp_path);
 
@@ -142,6 +161,80 @@ function cleanall($dir)
 --POST--
 --EXPECT--
 Test simple direct url download:
+Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class
+NULL
+array(0) {
+}
+File exists? yes
+File is the same? yes
+array(1) {
+  [0]=>
+  array(2) {
+    ["pkg"]=>
+    string(4) "pkg6"
+    ["info"]=>
+    array(11) {
+      ["provides"]=>
+      array(0) {
+      }
+      ["filelist"]=>
+      &array(3) {
+        ["zoorb.php"]=>
+        array(2) {
+          ["role"]=>
+          string(3) "php"
+          ["baseinstalldir"]=>
+          string(5) "groob"
+        }
+        ["goompness\oggbrzitzkee.php"]=>
+        array(2) {
+          ["role"]=>
+          string(3) "php"
+          ["baseinstalldir"]=>
+          string(5) "groob"
+        }
+        ["goompness\Mopreeb.php"]=>
+        array(2) {
+          ["role"]=>
+          string(3) "php"
+          ["baseinstalldir"]=>
+          string(5) "groob"
+        }
+      }
+      ["package"]=>
+      string(4) "pkg6"
+      ["summary"]=>
+      string(32) "required test for PEAR_Installer"
+      ["description"]=>
+      string(12) "fake package"
+      ["maintainers"]=>
+      array(1) {
+        [0]=>
+        &array(4) {
+          ["handle"]=>
+          string(8) "fakeuser"
+          ["name"]=>
+          string(9) "Joe Shmoe"
+          ["email"]=>
+          string(18) "nobody@example.com"
+          ["role"]=>
+          string(4) "lead"
+        }
+      }
+      ["version"]=>
+      string(3) "1.1"
+      ["release_date"]=>
+      string(10) "2003-09-09"
+      ["release_license"]=>
+      string(11) "PHP License"
+      ["release_state"]=>
+      string(6) "stable"
+      ["release_notes"]=>
+      string(24) "required dependency test"
+    }
+  }
+}
+Test simple package name download:
 Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class
 NULL
 array(0) {
