@@ -83,7 +83,6 @@ test -f config.cache && rm -f config.cache
 sh ./configure --prefix=/usr \
 	--with-apxs=/usr/sbin/apxs \
 	--enable-cli \
-	--enable-versioning \
 	--with-config-file-path=%{_sysconfdir} \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
