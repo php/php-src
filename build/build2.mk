@@ -61,7 +61,7 @@ aclocal.m4: configure.in acinclude.m4 dynlib.m4
 	aclocal
 
 SUPPRESS_WARNINGS = (egrep -v '(warning: AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|.*AM_PROG_LEX.*)'||true)
-	
+
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 
 # correctly otherwise (timestamps are not updated)
