@@ -169,7 +169,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	} else {
 		int b, i;
 
-		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
+		while ((b = fread(buf, 1, buflen, fp)) > 0) {
 			for (i = 0; i < b; i++)
 				if (output) (void)PUTC(buf[i]);
 		}
@@ -181,8 +181,6 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 		
 		tmp = php_addslashes(buf, 0, &len, 0);
 		RETVAL_STRINGL(tmp,len,0);
-	} else {
-		RETVAL_STRING(buf,1);
 	}
 	
 	ret = pclose(fp);
