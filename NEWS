@@ -18,7 +18,7 @@ PHP 4                                                                      NEWS
 - Added memory_get_usage(). Only available when PHP is configured with 
   --enable-memory-limit. (Andrey)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
-  separate tag elements).
+  separate tag elements). (Ilia)
 - Fixed bug #22141 (removed undocumented Boyer str_replace() method). (Sara)
 - Fixed bug #22103 (Added gdImageEllipse and replaced old gdImageFilledEllipse
   with a better implementation). (Pierre)
