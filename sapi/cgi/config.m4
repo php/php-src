@@ -38,7 +38,7 @@ if test "$PHP_SAPI" = "default"; then
 
   PHP_TEST_WRITE_STDOUT
 
-  PHP_ARG_ENABLE(force-cgi-redirect,whether to force Apache CGI redirect,
+PHP_ARG_ENABLE(force-cgi-redirect,whether to force Apache CGI redirect,
 [  --enable-force-cgi-redirect
                           Enable the security check for internal server
                           redirects.  You should use this if you are
@@ -51,7 +51,7 @@ if test "$PHP_SAPI" = "default"; then
   fi
   AC_DEFINE_UNQUOTED(FORCE_CGI_REDIRECT,$REDIRECT,[ ])
 
-  PHP_ARG_ENABLE(discard-path,whether to discard path_info + path_translated,
+PHP_ARG_ENABLE(discard-path,whether to discard path_info + path_translated,
 [  --enable-discard-path   If this is enabled, the PHP CGI binary
                           can safely be placed outside of the
                           web tree and people will not be able
@@ -83,7 +83,7 @@ AC_ARG_WITH(fhttpd,
         FHTTPD_LIB=$withval/servproc.o
         FHTTPD_TARGET=$withval/
         PHP_BUILD_STATIC
-		PHP_SAPI=cgi
+        PHP_SAPI=cgi
         AC_DEFINE(FHTTPD,1,[ ])
         AC_MSG_RESULT(yes - fhttpd 0.3.x)
       else
