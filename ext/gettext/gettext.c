@@ -47,18 +47,18 @@ PHP_MINFO_FUNCTION(gettext)
 
 PHP_FUNCTION(textdomain)
 {
-    pval *domain;
+    pval **domain;
     char *domain_name, *retval;
+	char *val;
 
-    if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &domain) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &domain) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
-    convert_to_string(domain);
+    convert_to_string_ex(domain);
 
-	if (strcmp(domain->value.str.val, "")
-		&& strcmp(domain->value.str.val, "0"))
-	{
-		domain_name = domain->value.str.val;
+	val = (*domain)->value.str.val;
+	if (strcmp(val, "") && strcmp(val, "0")) {
+		domain_name = val;
 	} else {
 		domain_name = NULL;
 	}
@@ -70,80 +70,80 @@ PHP_FUNCTION(textdomain)
 
 PHP_FUNCTION(gettext)
 {
-    pval *msgid;
+    pval **msgid;
     char *msgstr;
 
-    if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &msgid) == FAILURE) {
+    if (ARG_COUNT(ht) != 1 || getParametersEx(1, &msgid) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
-    convert_to_string(msgid);
+    convert_to_string_ex(msgid);
 
-    msgstr = gettext(msgid->value.str.val);
+    msgstr = gettext((*msgid)->value.str.val);
 
     RETURN_STRING(msgstr, 1);
 }
 
 PHP_FUNCTION(dgettext)
 {
-	pval *domain_name, *msgid;
+	pval **domain_name, **msgid;
 	char *msgstr;
 
 	if (ARG_COUNT(ht) != 2
-		|| getParameters(ht, 2, &domain_name, &msgid) == FAILURE)
+		|| getParametersEx(2, &domain_name, &msgid) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(domain_name);
-	convert_to_string(msgid);
+	convert_to_string_ex(domain_name);
+	convert_to_string_ex(msgid);
 
-	msgstr = dgettext(domain_name->value.str.val, msgid->value.str.val);
+	msgstr = dgettext((*domain_name)->value.str.val, (*msgid)->value.str.val);
 
 	RETURN_STRING(msgstr, 1);
 }
 
 PHP_FUNCTION(dcgettext)
 {
-	pval *domain_name, *msgid, *category;
+	pval **domain_name, **msgid, **category;
 	char *msgstr;
 
 	if (ARG_COUNT(ht) != 3
-		|| getParameters(ht, 3, &domain_name, &msgid, &category) == FAILURE)
+		|| getParametersEx(3, &domain_name, &msgid, &category) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(domain_name);
-	convert_to_string(msgid);
-	convert_to_long(category);
+	convert_to_string_ex(domain_name);
+	convert_to_string_ex(msgid);
+	convert_to_long_ex(category);
 
-	msgstr = dcgettext(domain_name->value.str.val,
-					   msgid->value.str.val,
-					   category->value.lval);
+	msgstr = dcgettext((*domain_name)->value.str.val,
+					   (*msgid)->value.str.val,
+					   (*category)->value.lval);
 
 	RETURN_STRING(msgstr, 1);
 }
 
 PHP_FUNCTION(bindtextdomain)
 {
-	pval *domain_name, *dir;
+	pval **domain_name, **dir;
 	char *retval, *dir_name;
+	char *val;
 
 	if (ARG_COUNT(ht) != 2
-		|| getParameters(ht, 2, &domain_name, &dir) == FAILURE)
+		|| getParametersEx(2, &domain_name, &dir) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(domain_name);
-	convert_to_string(dir);
+	convert_to_string_ex(domain_name);
+	convert_to_string_ex(dir);
 
-	if (strcmp(dir->value.str.val, "")
-		&& strcmp(dir->value.str.val, "0"))
-	{
-		dir_name = dir->value.str.val;
+	val = (*dir)->value.str.val;
+	if (strcmp(val, "") && strcmp(val, "0")) {
+		dir_name = val;
 	} else {
 		dir_name = NULL;
 	}
 
-	retval = bindtextdomain(domain_name->value.str.val, dir_name);
+	retval = bindtextdomain((*domain_name)->value.str.val, dir_name);
 
 	RETURN_STRING(retval, 1);
 }

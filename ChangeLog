@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Updated session, dba, mhash, mcrypt, sysvshm, sysvsem, gettext modules to use
+  the new high-performance Zend function API (Sascha)
 - Extended var_dump to handle resource type somewhat (Andrey)
 - Updated WDDX to use the new high-performance Zend function API (Andrey)
 - Updated XML to use the new high-performance Zend function API. (Thies)

@@ -131,7 +131,7 @@ int php3_minit_sysvsem(INIT_FUNC_ARGS)
    Return an id for the semaphore with the given key, and allow max_acquire (default 1) processes to acquire it simultaneously. */
 PHP_FUNCTION(sysvsem_get)
 {
-	pval *arg_key, *arg_max_acquire, *arg_perm;
+	pval **arg_key, **arg_max_acquire, **arg_perm;
 	int key, max_acquire, perm;
     int semid;
 	struct sembuf sop[3];
@@ -146,31 +146,31 @@ PHP_FUNCTION(sysvsem_get)
 
 	switch (ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &arg_key)==FAILURE) {
+			if (getParametersEx(1, &arg_key)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(arg_key);
-			key = (int)arg_key->value.lval;
+			convert_to_long_ex(arg_key);
+			key = (int)(*arg_key)->value.lval;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &arg_key, &arg_max_acquire)==FAILURE) {
+			if (getParametersEx(2, &arg_key, &arg_max_acquire)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(arg_key);
-			key = (int)arg_key->value.lval;
-			convert_to_long(arg_max_acquire);
-			max_acquire = (int)arg_max_acquire->value.lval;
+			convert_to_long_ex(arg_key);
+			key = (int)(*arg_key)->value.lval;
+			convert_to_long_ex(arg_max_acquire);
+			max_acquire = (int)(*arg_max_acquire)->value.lval;
 			break;
 		case 3:
-			if (getParameters(ht, 3, &arg_key, &arg_max_acquire, &arg_perm)==FAILURE) {
+			if (getParametersEx(3, &arg_key, &arg_max_acquire, &arg_perm)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(arg_key);
-			key = (int)arg_key->value.lval;
-			convert_to_long(arg_max_acquire);
-			max_acquire = (int)arg_max_acquire->value.lval;
-			convert_to_long(arg_perm);
-			perm = (int)arg_perm->value.lval;
+			convert_to_long_ex(arg_key);
+			convert_to_long_ex(arg_max_acquire);
+			convert_to_long_ex(arg_perm);
+			key = (int)(*arg_key)->value.lval;
+			max_acquire = (int)(*arg_max_acquire)->value.lval;
+			perm = (int)(*arg_perm)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -281,18 +281,18 @@ PHP_FUNCTION(sysvsem_get)
 
 static void _php3_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
-	pval *arg_id;
+	pval **arg_id;
 	int id, type;
 	sysvsem_sem *sem_ptr;
     struct sembuf sop;
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
-			if (getParameters(ht, 1, &arg_id)==FAILURE) {
+			if (getParametersEx(1, &arg_id)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long(arg_id);
-			id = (int)arg_id->value.lval;
+			convert_to_long_ex(arg_id);
+			id = (int)(*arg_id)->value.lval;
 			break;
 		default:
 			WRONG_PARAM_COUNT;

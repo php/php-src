@@ -79,13 +79,13 @@ typedef struct {
 
 
 
-extern int php3_minit_sysvshm(INIT_FUNC_ARGS);
-PHP_FUNCTION(sysvshm_attach);
-PHP_FUNCTION(sysvshm_detach);
-PHP_FUNCTION(sysvshm_remove);
-PHP_FUNCTION(sysvshm_put_var);
-PHP_FUNCTION(sysvshm_get_var);
-PHP_FUNCTION(sysvshm_remove_var);
+PHP_MINIT_FUNCTION(sysvshm);
+PHP_FUNCTION(shm_attach);
+PHP_FUNCTION(shm_detach);
+PHP_FUNCTION(shm_remove);
+PHP_FUNCTION(shm_put_var);
+PHP_FUNCTION(shm_get_var);
+PHP_FUNCTION(shm_remove_var);
 extern int php3int_put_shmdata(sysvshm_chunk_head *ptr,long key,char *data, long len);
 extern long php3int_check_shmdata(sysvshm_chunk_head *ptr, long key);
 extern int php3int_remove_shmdata(sysvshm_chunk_head *ptr, long shm_varpos);
