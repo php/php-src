@@ -125,7 +125,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /I "..\ext\xml\expat" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /I "..\ext\xml\expat" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\ext\mysql\libmysql" /I "..\ext\xml\expat" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "TSRM_EXPORTS" /D "SAPI_EXPORTS" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /FR /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -274,10 +274,10 @@ SOURCE=..\main\config.w32.h.in
 InputPath=..\main\config.w32.h.in
 
 "..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
+	if not exist ..\main\config.w32.h ( 
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
+	) 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
@@ -286,10 +286,10 @@ InputPath=..\main\config.w32.h.in
 InputPath=..\main\config.w32.h.in
 
 "..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
+	if not exist ..\main\config.w32.h ( 
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
+	) 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
@@ -298,10 +298,10 @@ InputPath=..\main\config.w32.h.in
 InputPath=..\main\config.w32.h.in
 
 "..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
+	if not exist ..\main\config.w32.h ( 
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
+	) 
+	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
@@ -310,10 +310,10 @@ InputPath=..\main\config.w32.h.in
 InputPath=..\main\config.w32.h.in
 
 "..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h (
-	  copy ..\main\config.w32.h.in ..\main\config.w32.h > nul
-	)
-
+	if not exist ..\main\config.w32.h ( 
+	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
+	) 
+	
 # End Custom Build
 
 !ENDIF 
