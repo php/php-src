@@ -344,7 +344,7 @@ void do_include_or_eval(int type, znode *result, znode *op1 CLS_DC);
 void do_unset(znode *variable CLS_DC);
 void do_isset_or_isempty(int type, znode *result, znode *variable CLS_DC);
 
-void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token CLS_DC);
+void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable CLS_DC);
 void do_foreach_cont(znode *value, znode *key, znode *as_token CLS_DC);
 void do_foreach_end(znode *foreach_token, znode *open_brackets_token CLS_DC);
 

@@ -2012,7 +2012,7 @@ void do_isset_or_isempty(int type, znode *result, znode *variable CLS_DC)
 }
 
 
-void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token CLS_DC)
+void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
 
@@ -2022,6 +2022,11 @@ void do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_t
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *array;
 	SET_UNUSED(opline->op2);
+	if (variable) {
+		opline->extended_value = 1;
+	} else {
+		opline->extended_value = 0;
+	}
 	*open_brackets_token = opline->result;
 
 	zend_stack_push(&CG(foreach_copy_stack), (void *) &opline->result, sizeof(znode));
