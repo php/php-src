@@ -373,9 +373,10 @@ CWD_API int virtual_filepath(char *path, char **filepath)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	retval = virtual_file_ex(&new_state, path, php_is_file_ok);
+
 	*filepath = new_state.cwd;
+
 	return retval;
 }
 
@@ -386,10 +387,10 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	f = fopen(new_state.cwd, mode);
+
 	CWD_STATE_FREE(&new_state);
 	return f;
 }
@@ -401,7 +402,6 @@ CWD_API int virtual_open(const char *path, int flags, ...)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	if (flags & O_CREAT) {
@@ -427,7 +427,6 @@ CWD_API int virtual_creat(const char *path, mode_t mode)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	f = open(new_state.cwd, O_CREAT | O_TRUNC, mode);
@@ -444,10 +443,10 @@ CWD_API int virtual_stat(const char *path, struct stat *buf)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	retval = stat(new_state.cwd, buf);
+
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
@@ -461,10 +460,10 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	retval = lstat(new_state.cwd, buf);
+
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }
@@ -478,10 +477,40 @@ CWD_API int virtual_unlink(const char *path)
 	CWDLS_FETCH();
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-
 	virtual_file_ex(&new_state, path, NULL);
 
 	retval = unlink(new_state.cwd);
+
+	CWD_STATE_FREE(&new_state);
+	return retval;
+}
+
+CWD_API int virtual_mkdir(const char *pathname, mode_t mode)
+{
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, pathname, NULL);
+
+	retval = mkdir(new_state.cwd, mode);
+
+	CWD_STATE_FREE(&new_state);
+	return retval;
+}
+
+CWD_API int virtual_rmdir(const char *pathname)
+{
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+	virtual_file_ex(&new_state, pathname, NULL);
+
+	retval = rmdir(new_state.cwd);
+
 	CWD_STATE_FREE(&new_state);
 	return retval;
 }

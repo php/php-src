@@ -1232,7 +1232,7 @@ PHP_FUNCTION(mkdir)
 	if (PG(safe_mode) &&(!php_checkuid((*arg1)->value.str.val,3))) {
 		RETURN_FALSE;
 	}
-	ret = mkdir((*arg1)->value.str.val,mode);
+	ret = V_MKDIR((*arg1)->value.str.val,mode);
 	if (ret < 0) {
 		php_error(E_WARNING,"MkDir failed (%s)", strerror(errno));
 		RETURN_FALSE;

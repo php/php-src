@@ -289,7 +289,7 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define PUTS_H(str)					php_header_write((str), strlen((str)))
 #define PUTC_H(c)					(php_header_write(&(c), 1), (c))
 
-/* #define VIRTUAL_DIR */
+#define VIRTUAL_DIR
 #include "php_virtual_cwd.h"
 
 /* Virtual current directory support */
@@ -309,6 +309,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_LSTAT(path, buff) virtual_lstat(path, buff)
 #endif
 #define V_UNLINK(path) virtual_unlink(path)
+#define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
+#define V_RMDIR(pathname) virtual_rmdir(pathname)
 #else
 #define V_GETCWD(buff, size) getcwd(buff,size)
 #define V_FOPEN(path, mode)  fopen(path, mode)
@@ -320,6 +322,8 @@ PHPAPI int cfg_get_string(char *varname, char **result);
 #define V_STAT(path, buff) stat(path, buff)
 #define V_LSTAT(path, buff) lstat(path, buff)
 #define V_UNLINK(path) unlink(path)
+#define V_MKDIR(pathname, mode) mkdir(pathname, mode)
+#define V_RMDIR(pathname) rmdir(pathname)
 #endif
 
 #include "zend_constants.h"
