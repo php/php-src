@@ -70,6 +70,7 @@ PHP_FUNCTION(mssql_num_fields);
 PHP_FUNCTION(mssql_fetch_field);
 PHP_FUNCTION(mssql_fetch_row);
 PHP_FUNCTION(mssql_fetch_array);
+PHP_FUNCTION(mssql_fetch_assoc);
 PHP_FUNCTION(mssql_fetch_object);
 PHP_FUNCTION(mssql_field_length);
 PHP_FUNCTION(mssql_field_name);

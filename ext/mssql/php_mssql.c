@@ -63,6 +63,7 @@ function_entry mssql_functions[] = {
 	PHP_FE(mssql_fetch_field,			NULL)
 	PHP_FE(mssql_fetch_row,				NULL)
 	PHP_FE(mssql_fetch_array,			NULL)
+	PHP_FE(mssql_fetch_assoc,			NULL)
 	PHP_FE(mssql_fetch_object,			NULL)
 	PHP_FE(mssql_field_length,			NULL)
 	PHP_FE(mssql_field_name,			NULL)
@@ -1280,11 +1281,19 @@ PHP_FUNCTION(mssql_fetch_object)
    Returns an associative array of the current row in the result set specified by result_id */
 PHP_FUNCTION(mssql_fetch_array)
 {
-	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_BOTH);
 }
 
 /* }}} */
 
+/* {{{ proto array mssql_fetch_array(int result_id [, int result_type])
+   Returns an associative array of the current row in the result set specified by result_id */
+PHP_FUNCTION(mssql_fetch_assoc)
+{
+	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSSQL_ASSOC);
+}
+
+/* }}} */
 
 /* {{{ proto int mssql_data_seek(int result_id, int offset)
    Moves the internal row pointer of the MS-SQL result associated with the specified result identifier to pointer to the specified row number */
