@@ -1415,7 +1415,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	zuv.import_use_extension = ".php";
 	php_startup_auto_globals(TSRMLS_C);
 	zend_set_utility_values(&zuv);
-	php_startup_sapi_content_types();
+	php_startup_sapi_content_types(TSRMLS_C);
 
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_VERSION", PHP_VERSION, sizeof(PHP_VERSION)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_OS", php_os, strlen(php_os), CONST_PERSISTENT | CONST_CS);
