@@ -27,16 +27,12 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP_SYSLOG_H
-#define _PHP_SYSLOG_H
+#ifndef _PHP_EXT_SYSLOG_H
+#define _PHP_EXT_SYSLOG_H
 
-#if HAVE_SYSLOG_H
+#ifdef HAVE_SYSLOG_H
 
-#ifdef PHP_WIN32
-#include "win32/syslog.h"
-#else
-#include <syslog.h>
-#endif
+#include "php_syslog.h"
 
 extern PHP_MINIT_FUNCTION(syslog);
 extern PHP_RINIT_FUNCTION(syslog);
@@ -49,4 +45,4 @@ PHP_FUNCTION(define_syslog_variables);
 
 #endif
 
-#endif /* _PHP_SYSLOG_H */
+#endif /* _PHP_EXT_SYSLOG_H */
