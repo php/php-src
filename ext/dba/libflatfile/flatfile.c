@@ -295,6 +295,13 @@ datum flatfile_nextkey(flatfile *dba TSRMLS_DC) {
 }	
 /* }}} */
 
+/* {{{ flatfile_version */
+char *flatfile_version() 
+{
+	return "1.0, $Revision$";
+}
+/* }}} */ 
+
 /*
  * Local variables:
  * tab-width: 4

@@ -68,6 +68,23 @@ typedef struct dba_info {
 extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
 
+typedef struct dba_handler {
+	char *name; /* handler name */
+	int flags; /* whether and how dba does locking and other flags*/
+	int (*open)(dba_info *, char **error TSRMLS_DC);
+	void (*close)(dba_info * TSRMLS_DC);
+	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
+	int (*update)(dba_info *, char *, int, char *, int, int TSRMLS_DC);
+	int (*exists)(dba_info *, char *, int TSRMLS_DC);
+	int (*delete)(dba_info *, char *, int TSRMLS_DC);
+	char* (*firstkey)(dba_info *, int * TSRMLS_DC);
+	char* (*nextkey)(dba_info *, int * TSRMLS_DC);
+	int (*optimize)(dba_info * TSRMLS_DC);
+	int (*sync)(dba_info * TSRMLS_DC);
+	char* (*info)(struct dba_handler *hnd, dba_info * TSRMLS_DC);
+		/* dba_info==NULL: Handler info, dba_info!=NULL: Database info */
+} dba_handler;
+
 /* common prototypes which must be supplied by modules */
 
 #define DBA_OPEN_FUNC(x) \
@@ -90,6 +107,8 @@ extern zend_module_entry dba_module_entry;
 	int dba_optimize_##x(dba_info *info TSRMLS_DC)
 #define DBA_SYNC_FUNC(x) \
 	int dba_sync_##x(dba_info *info TSRMLS_DC)
+#define DBA_INFO_FUNC(x) \
+	char *dba_info_##x(dba_handler *hnd, dba_info *info TSRMLS_DC)
 
 #define DBA_FUNCS(x) \
 	DBA_OPEN_FUNC(x); \
@@ -101,7 +120,8 @@ extern zend_module_entry dba_module_entry;
 	DBA_FIRSTKEY_FUNC(x); \
 	DBA_NEXTKEY_FUNC(x); \
 	DBA_OPTIMIZE_FUNC(x); \
-	DBA_SYNC_FUNC(x)
+	DBA_SYNC_FUNC(x); \
+	DBA_INFO_FUNC(x)
 
 #define VALLEN(p) Z_STRVAL_PP(p), Z_STRLEN_PP(p)
 	
