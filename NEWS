@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Fixed a bug in preg_split() that would incorrectly limit the number of
+  results when used along with PREG_SPLIT_NO_EMPTY flag. (Andrei)
+- Added connection error support to mysql_error() and mysql_errno() (Jason)
 - Added support to getimagesize to return dimensions of BMP and PSD
   files (Derick)
 - Added Japanese multibyte string functions support. (Rui)
