@@ -88,6 +88,7 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_port,			NULL)
 	PHP_FE(pg_tty,			NULL)
 	PHP_FE(pg_options,		NULL)
+	PHP_FE(pg_version,		NULL)
 	PHP_FE(pg_ping,			NULL)
 	/* query functions */
 	PHP_FE(pg_query,		NULL)
@@ -782,6 +783,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_PORT 4
 #define PHP_PG_TTY 5
 #define PHP_PG_HOST 6
+#define PHP_PG_VERSION 7
 
 /* {{{ php_pgsql_get_link_info
  */
@@ -831,6 +833,18 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 		case PHP_PG_HOST:
 			Z_STRVAL_P(return_value) = PQhost(pgsql);
 			break;
+		case PHP_PG_VERSION:
+			array_init(return_value);
+			add_assoc_string(return_value, "client", PG_VERSION, 1);
+#if HAVE_PQPROTOCOLVERSION
+			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
+#if HAVE_PQPARAMETERSTATUS
+			if (PQprotocolVersion(pgsql) >= 3) {
+				add_assoc_string(return_value, "server", PQparameterStatus(pgsql, "server_version"), 1);
+			}
+#endif
+#endif
+			return;
 		default:
 			RETURN_FALSE;
 	}
@@ -890,6 +904,14 @@ PHP_FUNCTION(pg_tty)
 PHP_FUNCTION(pg_host)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_HOST);
+}
+/* }}} */
+
+/* {{{ proto array pg_version([resource connection])
+   Returns an array with client, protocol and server version (when available) */
+PHP_FUNCTION(pg_version)
+{
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_VERSION);
 }
 /* }}} */
 
