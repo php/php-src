@@ -175,15 +175,21 @@ PHP_MINIT_FUNCTION(dir)
 /* {{{ internal functions */
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
-	pval **arg;
+	char *dirname;
+	long dir_len;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 	php_stream *dirp;
-	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
-		WRONG_PARAM_COUNT;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dirname, &dir_len, &zcontext) == FAILURE) {
+		RETURN_NULL();
 	}
-	convert_to_string_ex(arg);
+
+	if (zcontext) {
+		context = php_stream_context_from_zval(zcontext, 0);
+	}
 	
-	dirp = php_stream_opendir(Z_STRVAL_PP(arg), ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	dirp = php_stream_opendir(dirname, ENFORCE_SAFE_MODE|REPORT_ERRORS, context);
 
 	if (dirp == NULL) {
 		RETURN_FALSE;
@@ -193,7 +199,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 
 	if (createobject) {
 		object_init_ex(return_value, dir_class_entry_ptr);
-		add_property_stringl(return_value, "path", Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), 1);
+		add_property_stringl(return_value, "path", dirname, dir_len, 1);
 		add_property_resource(return_value, "handle", dirp->rsrc_id);
 		php_stream_auto_cleanup(dirp); /* so we don't get warnings under debug */
 	} else {
@@ -202,7 +208,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 }
 /* }}} */
 
-/* {{{ proto mixed opendir(string path)
+/* {{{ proto mixed opendir(string path[, resource context])
    Open a directory and return a dir_handle */
 PHP_FUNCTION(opendir)
 {
@@ -210,7 +216,7 @@ PHP_FUNCTION(opendir)
 }
 /* }}} */
 
-/* {{{ proto object dir(string directory)
+/* {{{ proto object dir(string directory[, resource context])
    Directory class with properties, handle and class and methods read, rewind and close */
 PHP_FUNCTION(getdir)
 {
