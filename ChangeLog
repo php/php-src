@@ -1,3 +1,107 @@
+2002-07-21  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: unify error messages & notices
+
+2002-07-21  georg  <georg@pb1.pair.com>
+
+    * ext/mysql/php_mysql.c: Automatic rollback for non committed transactions
+
+    * ext/mysql/php_mysql.c:
+    removed changes for mysql_select_db (optional parameter)
+
+    Why:
+    1) Its not the common way to add additionally functionality for functions or
+    features which are already implemented in SQL. Therefore also a lot of
+    mysql functions are marked as deprecated (and will be removed in near future)
+
+    2) The implemented workaround works only when mysql_select_db was called
+    before (fetching the databasename from mysql->conn.db). It returns invalid
+    or inconsistent results e.g.:
+
+    - when "USE databasename" via mysql_query was used
+    - when database was dropped or grant privileges had changed.
+
+    In conjunction with persistent connection, there are also some inconsistencies,
+    cause mysql_select_db returns the databasename from an old connection.
+
+    To determine the database name just use the SQL command "SELECT DATABASE()"
+
+    * ext/mysql/php_mysql.c: fixed bug in mysql_real_escape_string:
+    allocated 1 more byte for '\0' terminating character
+
+2002-07-21  Stig Bakken  <ssb@pb1.pair.com>
+
+    * LICENSE: * yeah yeah
+
+    * LICENSE:
+    * split #3 into two paragraphs again, like the Apache license we once
+      borrowed it from
+
+2002-07-21  markonen  <markonen@pb1.pair.com>
+
+    * acinclude.m4
+      sapi/cgi/config.m4
+      sapi/cli/config.m4:
+    Made PHP_ADD_LIBPATH use the $ld_runpath_switch and changed the Darwin
+    link lines in sapi/cli and sapi/cgi to use $NATIVE_RPATHS.
+    This is a tentative fix for #18450.
+
+2002-07-21  Sascha Schumann  <sas@pb1.pair.com>
+
+    * build/build.mk
+      build/buildcheck.sh
+      buildconf:
+    Move autoconf-2.13 check into buildcheck.sh where we already have
+    version parsing code and (more importantly) proper error checking
+    for missing autoconf.
+
+    * build/build2.mk: One should not ignore
+
+    AC_PROG_CPP was called before AC_PROG_CC
+
+    because this error caused the Solaris issue
+
+2002-07-21  derick  <derick@pb1.pair.com>
+
+    * configure.in: - Merges sascha's fix
+
+2002-07-21  Sascha Schumann  <sas@pb1.pair.com>
+
+    * configure.in: Fix warning
+
+    Noticed by: Derick
+
+2002-07-21  Stig Bakken  <ssb@pb1.pair.com>
+
+    * pear/packages/Mail-1.0.tar
+      pear/packages/Net_SMTP-1.0.tar: * bundle these releases
+
+    * pear/Mail.php
+      pear/package-Mail.xml: * moved to /pear cvs
+
+2002-07-21  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    Added pg_fetch_all() that fetch all rows in result.
+    Useful and faster when there is enough memory.
+
+2002-07-21  Stig Bakken  <ssb@pb1.pair.com>
+
+    * pear/HTTP.php: * already moved to /pear
+
+    * pear/PEAR/Dependency.php: * support "zend" dependency type
+
+    * pear/package-Net_SMTP.xml: * moved to /pear cvs
+
+    * pear/package.dtd: * added missing license element
+    * added "zend" dependency type
+
+    * pear/PEAR.php: * always enable track_errors
+    * added throwError method (simpler version of raiseError)
+
+    * LICENSE: * license out of "alpha"
+
 2002-07-20  derick  <derick@pb1.pair.com>
 
     * NEWS: - Typos
