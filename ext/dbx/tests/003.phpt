@@ -49,18 +49,14 @@ else {
         }
     }
 
-if ($module != DBX_SQLITE) { // skip persistent tests for sqlite until that bug is solved
-
 $dlo = dbx_connect($module_name, $host, $database, $username, $password, DBX_PERSISTENT);
 if ($dlo!=0) {
 	print('persistent connect using string ok'."\n");
-    var_dump($dlo->handle);
 	dbx_close($dlo);
 	}
 $dlo = dbx_connect($module, $host, $database, $username, $password, DBX_PERSISTENT);
 if ($dlo!=0) {
 	print('persistent connect using constant ok'."\n");
-    var_dump($dlo->handle);
 	dbx_close($dlo);
 	}
 // sqlite is a special case as it will just create a db if it isn't found
@@ -77,22 +73,20 @@ else {
         dbx_close($dlo);
         }
     }
-$dlo = @dbx_connect($module, $host, $database, $nonexisting_username, $nonexisting_password, DBX_PERSISTENT);
-if ($dlo==0) {
-	print('persistent connect with false username/password combi failed, so it\'s ok'."\n");
-	}
-else {
-    print_r($dlo);
-	dbx_close($dlo);
+// sqlite is a special case as it doesn't use user/password restrictions
+if ($module == DBX_SQLITE) {
+    print('persistent connect with false username/password combi failed, so it\'s ok'."\n");
     }
-
-}  // skip persistent tests for sqlite until that bug is solved
 else {
-	print('persistent connect using string ok'."\n");
-	print('persistent connect using constant ok'."\n");
-    print('persistent connect to non-existing database failed, so it\'s ok'."\n");
-	print('persistent connect with false username/password combi failed, so it\'s ok'."\n");
-}
+    $dlo = @dbx_connect($module, $host, $database, $nonexisting_username, $nonexisting_password, DBX_PERSISTENT);
+    if ($dlo==0) {
+        print('persistent connect with false username/password combi failed, so it\'s ok'."\n");
+        }
+    else {
+        print_r($dlo);
+        dbx_close($dlo);
+        }
+    }
 
 $dlo = @dbx_connect($module, $host, $database, $username, $password, DBX_PERSISTENT, "12many");
 if ($dlo==0) {
