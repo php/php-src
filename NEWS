@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Added extension YAZ (dickmeiss).
 - Fixed a crash bug triggered by certain cases of class redeclarations
   (Stanislav & Zeev, Zend Engine)
 - Fixed min()/max() segfault. (Andrei)
