@@ -127,6 +127,12 @@ function_entry snmp_functions[] = {
 #endif
 	PHP_FE(snmpset, NULL)
 
+	PHP_FE(snmp2_get, NULL)
+	PHP_FE(snmp2_getnext, NULL)
+	PHP_FE(snmp2_walk, NULL)
+	PHP_FE(snmp2_real_walk, NULL)
+	PHP_FE(snmp2_set, NULL)
+
 	PHP_FE(snmp3_get, NULL)
 	PHP_FE(snmp3_getnext, NULL)
 	PHP_FE(snmp3_walk, NULL)
@@ -318,7 +324,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 
 /* {{{ php_snmp_internal
 *
-* Generic SNMP object fetcher (for both v3 and v1)
+* Generic SNMP object fetcher (for all SNMP versions)
 *
 * st=1   snmpget()  - query an agent and return a single value.
 * st=2   snmpget()  - query an agent and return the next single value.
@@ -518,7 +524,7 @@ retry:
 
 /* {{{ php_snmp
 *
-* Generic SNMPv1 handler
+* Generic community based SNMP handler for version 1 and 2.
 * This function makes use of the internal SNMP object fetcher.
 * The object fetcher is shared with SNMPv3.
 *
@@ -532,7 +538,7 @@ retry:
 * st=11  snmpset() - query an agent and set a single value
 *
 */
-static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) 
+static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st, int version) 
 {
 	zval **a1, **a2, **a3, **a4, **a5, **a6, **a7;
 	struct snmp_session session;
@@ -594,7 +600,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 
 	session.peername = hostname;
 	session.remote_port = remote_port;
-	session.version = SNMP_VERSION_1;
+	session.version = version;
 	/*
 	* FIXME: potential memory leak
 	* This is a workaround for an "artifact" (Mike Slifcak)
@@ -620,7 +626,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
    Fetch a SNMP object */
 PHP_FUNCTION(snmpget)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1, SNMP_VERSION_1);
 }
 /* }}} */
 
@@ -628,7 +634,7 @@ PHP_FUNCTION(snmpget)
    Fetch a SNMP object */
 PHP_FUNCTION(snmpgetnext)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2, SNMP_VERSION_1);
 }
 /* }}} */
 
@@ -636,7 +642,7 @@ PHP_FUNCTION(snmpgetnext)
    Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3, SNMP_VERSION_1);
 }
 /* }}} */
 
@@ -644,7 +650,7 @@ PHP_FUNCTION(snmpwalk)
    Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4, SNMP_VERSION_1);
 }
 /* }}} */
 
@@ -722,7 +728,7 @@ PHP_FUNCTION(snmp_set_oid_numeric_print)
    Set the value of a SNMP object */
 PHP_FUNCTION(snmpset)
 {
-	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11, SNMP_VERSION_1);
 }
 /* }}} */
 
@@ -804,6 +810,9 @@ static int netsnmp_session_set_sec_protocol(struct snmp_session *s, char *prot T
 * symbol on purpose, as it's defined to be the same as the former.
 */
 			|| !strcasecmp(prot, "AES")) {
+			s->securityPrivProto = usmAES128PrivProtocol;
+			s->securityPrivProtoLen = OIDSIZE(usmAES128PrivProtocol);
+			return (0);
 #else			
 		) {
 			s->securityPrivProto = usmAES128PrivProtocol;
@@ -888,6 +897,45 @@ static int netsnmp_session_gen_sec_key(struct snmp_session *s, u_char *pass TSRM
 }
 /* }}} */
 
+/* {{{ proto string snmp2_get(string host, string community, string object_id [, int timeout [, int retries]]) 
+   Fetch a SNMP object */
+PHP_FUNCTION(snmp2_get)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1, SNMP_VERSION_2c);
+}
+/* }}} */
+
+/* {{{ proto string snmp2_getnext(string host, string community, string object_id [, int timeout [, int retries]]) 
+   Fetch a SNMP object */
+PHP_FUNCTION(snmp2_getnext)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2, SNMP_VERSION_2c);
+}
+/* }}} */
+
+/* {{{ proto array snmp2_walk(string host, string community, string object_id [, int timeout [, int retries]]) 
+   Return all objects under the specified object id */
+PHP_FUNCTION(snmp2_walk)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3, SNMP_VERSION_2c);
+}
+/* }}} */
+
+/* {{{ proto array snmp2_real_walk(string host, string community, string object_id [, int timeout [, int retries]])
+   Return all objects including their respective object id withing the specified one */
+PHP_FUNCTION(snmp2_real_walk)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4, SNMP_VERSION_2c);
+}
+/* }}} */
+
+/* {{{ proto int snmp2_set(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
+   Set the value of a SNMP object */
+PHP_FUNCTION(snmp2_set)
+{
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11, SNMP_VERSION_2c);
+}
+/* }}} */
 
 /* {{{ proto void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 *

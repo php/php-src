@@ -52,6 +52,12 @@ PHP_FUNCTION(snmp_set_enum_print);
 PHP_FUNCTION(snmp_set_oid_numeric_print);
 PHP_FUNCTION(snmpset);
 
+PHP_FUNCTION(snmp2_get);
+PHP_FUNCTION(snmp2_getnext);
+PHP_FUNCTION(snmp2_walk);
+PHP_FUNCTION(snmp2_real_walk);
+PHP_FUNCTION(snmp2_set);
+
 PHP_FUNCTION(snmp3_get);
 PHP_FUNCTION(snmp3_getnext);
 PHP_FUNCTION(snmp3_walk);
