@@ -781,7 +781,7 @@ PHP_FUNCTION(dba_sync)
 /* }}} */
 
 /* {{{ proto array dba_handlers([bool full_info])
-   List configured databases */
+   List configured database handlers */
 PHP_FUNCTION(dba_handlers)
 {
 	dba_handler *hptr;
@@ -805,7 +805,7 @@ PHP_FUNCTION(dba_handlers)
 /* }}} */
 
 /* {{{ proto array dba_list()
-   List configured databases */
+   List opened databases */
 PHP_FUNCTION(dba_list)
 {
 	ulong numitems, i;
