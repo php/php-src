@@ -1266,6 +1266,8 @@ static zval *debug_backtrace_get_args(void ***curpos, int andjustonly TSRMLS_DC)
 		}
 		return arg_array;
 	}
+
+	return NULL;
 }
 
 /* {{{ proto void debug_backtrace(void)
@@ -1277,6 +1279,7 @@ ZEND_FUNCTION(debug_backtrace)
 	char *function_name;
 	char *filename;
 	char *class_name;
+	char *include_filename = NULL;
 	zval *stack_frame;
 	void **cur_arg_pos = EG(argument_stack).top_element;
 
@@ -1303,7 +1306,7 @@ ZEND_FUNCTION(debug_backtrace)
 		}
 		
 		if (ptr->op_array) {
-			filename = ptr->op_array->filename;
+			include_filename = filename = ptr->op_array->filename;
 			lineno = ptr->opline->lineno;
 			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
@@ -1321,14 +1324,22 @@ ZEND_FUNCTION(debug_backtrace)
 			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
+			int fn = 1;
 
 			switch (ptr->opline->op2.u.constant.value.lval) {
-				case ZEND_EVAL:         function_name = "eval"; break;
+				case ZEND_EVAL:         function_name = "eval"; fn = 0; break;
 				case ZEND_INCLUDE:      function_name = "include"; break;
 				case ZEND_REQUIRE:      function_name = "require"; break;
 				case ZEND_INCLUDE_ONCE: function_name = "include_once"; break;
 				case ZEND_REQUIRE_ONCE: function_name = "require_once"; break;
-				default:				function_name = "unknown - please report a bug"; break;
+				default:				function_name = "unknown - please report a bug";  fn = 0; break;
+			}
+
+			if (fn && include_filename) {
+				/* include_filename always points to the last known filename.
+				   if we have called include in the frame above - this is the file we have included
+				 */
+				printf("%s\n", include_filename);
 			}
 
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
