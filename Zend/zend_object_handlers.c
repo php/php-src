@@ -972,6 +972,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
 	NULL,									/* cast_object */
+	NULL,									/* count_elements */
 };
 
 /*
