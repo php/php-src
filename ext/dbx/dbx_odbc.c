@@ -94,6 +94,7 @@ int dbx_odbc_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERN
         return 0;
         }
     MAKE_STD_ZVAL(num_fields_zval);
+    ZVAL_LONG(num_fields_zval, 0);
     if (!dbx_odbc_getcolumncount(&num_fields_zval, &queryresult_zval, INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
         FREE_ZVAL(num_fields_zval);
         if (queryresult_zval) zval_ptr_dtor(&queryresult_zval);
@@ -187,6 +188,7 @@ int dbx_odbc_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL
 
     /*/ get # fields /*/
     MAKE_STD_ZVAL(num_fields_zval);
+    ZVAL_LONG(num_fields_zval, 0);
     if (!dbx_odbc_getcolumncount(&num_fields_zval, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
         return 0;
         }
@@ -215,6 +217,7 @@ int dbx_odbc_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL
         return 0;
         }
     MAKE_STD_ZVAL(field_index_zval);
+    ZVAL_LONG(field_index_zval, 0);
     number_of_arguments=2;
     for (field_index=0; field_index<field_count; ++field_index) {
         ZVAL_LONG(field_index_zval, field_index+1);

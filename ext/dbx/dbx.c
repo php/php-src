@@ -293,6 +293,7 @@ ZEND_FUNCTION(dbx_close)
         }
 
     MAKE_STD_ZVAL(rv_success); 
+    ZVAL_LONG(rv_success, 0);
 
     result = switch_dbx_close(&rv_success, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
 
@@ -359,6 +360,7 @@ ZEND_FUNCTION(dbx_query)
 / /        }
  /*/
     MAKE_STD_ZVAL(rv_result_handle); 
+    ZVAL_LONG(rv_result_handle, 0);
     convert_to_string_ex(arguments[1]);
     result = switch_dbx_query(&rv_result_handle, dbx_handle, arguments[1], INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
     /*/ boolean return value means either failure for any query or success for queries that don't return anything  /*/
@@ -398,6 +400,7 @@ ZEND_FUNCTION(dbx_query)
     zend_hash_update(return_value->value.obj.properties, "data", 5, (void *)&(data), sizeof(zval *), NULL);
     /*/ get columncount and add to returnvalue as property /*/
     MAKE_STD_ZVAL(rv_column_count); 
+    ZVAL_LONG(rv_column_count, 0);
     result = switch_dbx_getcolumncount(&rv_column_count, &rv_result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
     if (!result) { 
         zend_error(E_ERROR, "dbx_query: get column_count failed...");
@@ -417,6 +420,7 @@ ZEND_FUNCTION(dbx_query)
         for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
             zval * rv_column_name;
             MAKE_STD_ZVAL(rv_column_name);
+            ZVAL_LONG(rv_column_name, 0);
             result = switch_dbx_getcolumnname(&rv_column_name, &rv_result_handle, col_index, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
             if (result) { 
                 zend_hash_index_update(info_row->value.ht, col_index, (void *)&(rv_column_name), sizeof(zval *), NULL);
@@ -439,6 +443,7 @@ ZEND_FUNCTION(dbx_query)
         for (col_index=0; col_index<rv_column_count->value.lval; ++col_index) {
             zval * rv_column_type;
             MAKE_STD_ZVAL(rv_column_type);
+            ZVAL_LONG(rv_column_type, 0);
             result = switch_dbx_getcolumntype(&rv_column_type, &rv_result_handle, col_index, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
             if (result) { 
                 zend_hash_index_update(info_row->value.ht, col_index, (void *)&(rv_column_type), sizeof(zval *), NULL);
@@ -455,6 +460,7 @@ ZEND_FUNCTION(dbx_query)
     while (result) {
         zval * rv_row;
         MAKE_STD_ZVAL(rv_row);
+        ZVAL_LONG(rv_row, 0);
         result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
         if (result) {
 /*/            if (row_count>=result_row_offset && (result_row_count==-1 || row_count<result_row_offset+result_row_count)) { /*/
@@ -513,6 +519,7 @@ ZEND_FUNCTION(dbx_error)
         }
 
     MAKE_STD_ZVAL(rv_errormsg); 
+    ZVAL_LONG(rv_errormsg, 0);
     result = switch_dbx_error(&rv_errormsg, NULL, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
     if (!result) {
         FREE_ZVAL(rv_errormsg);
