@@ -58,9 +58,9 @@ $(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_f
 	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
 
 aclocal.m4: configure.in acinclude.m4 dynlib.m4
-	aclocal
+	aclocal 2>&1 | $(SUPPRESS_WARNINGS)
 
-SUPPRESS_WARNINGS = (egrep -v '(warning: AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|.*AM_PROG_LEX.*)'||true)
+SUPPRESS_WARNINGS = (egrep -v '(warning: AC_TRY_RUN called without default to allow cross compiling|AC_PROG_CXXCPP was called before AC_PROG_CXX|.*AM_PROG_LEX.*|defined in acinclude.m4 but never used)'||true)
 
 $(config_h_in): configure acconfig.h
 # explicitly remove target since autoheader does not seem to work 

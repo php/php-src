@@ -1050,6 +1050,11 @@ int main(void) {
   fi
 ])
 
+AC_DEFUN(AC_ADD_LIBPATH, [indir([PHP_ADD_LIBPATH])])
+AC_DEFUN(AC_ADD_LIBRARY, [indir([PHP_ADD_LIBRARY])])
+AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH, [indir([PHP_ADD_LIBRARY_WITH_PATH])])
+AC_DEFUN(AC_ADD_INCLUDE, [indir([PHP_ADD_INCLUDE])])
+
 AC_DEFUN(PHP_FOPENCOOKIE,[
 	AC_CHECK_FUNC(fopencookie, [ have_glibc_fopencookie=yes ])
 
