@@ -135,7 +135,7 @@ zend_module_entry openssl_module_entry = {
 	"openssl",
 	openssl_functions,
 	PHP_MINIT(openssl),
-	NULL,
+	PHP_MSHUTDOWN(openssl),
 	NULL,
 	NULL,
 	PHP_MINFO(openssl),
@@ -1673,6 +1673,12 @@ PHP_FUNCTION(openssl_csr_new)
 						} else if (key_resource != -1) {
 							req.priv_key = NULL; /* make sure the cleanup code doesn't zap it! */
 						}
+					}
+				}
+				else {
+					if (!we_made_the_key) {
+						/* if we have not made the key we are not supposed to zap it by calling dispose! */
+						req.priv_key = NULL;
 					}
 				}
 			}
