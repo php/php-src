@@ -1082,16 +1082,12 @@ function settings2array($settings, &$ini_settings)
 
 function settings2params(&$ini_settings)
 {
-	if (count($ini_settings)) {
-		$settings = '';
-		foreach($ini_settings as $name => $value) {
-			$value = addslashes($value);
-			$settings .= " -d \"$name=$value\"";
-		}
-		$ini_settings = $settings;
-	} else {
-		$ini_settings = '';
+	$settings = '';
+	foreach($ini_settings as $name => $value) {
+		$value = addslashes($value);
+		$settings .= " -d \"$name=$value\"";
 	}
+	$ini_settings = $settings;
 }
 
 function compute_summary()
