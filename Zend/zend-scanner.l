@@ -413,17 +413,19 @@ int require_filename(char *filename CLS_DC)
 int require_file(zend_file_handle *file_handle CLS_DC)
 {
 	zend_lex_state original_lex_state;
+	int compiler_result;
 
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
 		return FAILURE;
 	}
-	if (zendparse(CLS_C)==1) {
-		zend_bailout();
-	}
+	compiler_result = zendparse(CLS_C);
 	zend_close_file_handle(file_handle);
 	restore_lexical_state(&original_lex_state CLS_CC);
+	if (compiler_result==1) {
+		zend_bailout();
+	}
 	return SUCCESS;
 }
 
