@@ -24,25 +24,25 @@ require_once 'PEAR.php';
  * PEAR's Mail:: interface. Defines the interface for implementing
  * mailers under the PEAR hierarchy, and provides supporting functions
  * useful in multiple mailer backends.
- * 
+ *
  * @access public
  * @version $Revision$
  * @package Mail
  */
 class Mail extends PEAR {
-    
+
     /**
      * Provides an interface for generating Mail:: objects of various
      * types
      *
      * @param string $driver The kind of Mail:: object to instantiate.
-     * @param array  $params The parameters to pass to the Mail:: object.     
+     * @param array  $params The parameters to pass to the Mail:: object.
      @ @return object Mail a instance of the driver class or if fails a PEAR Error
      * @access public
      */
     function factory($driver, $params = array())
     {
-	$driver = strtolower($driver);
+        $driver = strtolower($driver);
         if (@include_once 'Mail/' . $driver . '.php') {
             $class = 'Mail_' . $driver;
             return new $class($params);
@@ -51,8 +51,8 @@ class Mail extends PEAR {
         }
 
     }
-    
-	/**
+
+    /**
      * Implements Mail::send() function using php's built-in mail()
      * command.
      *
@@ -77,14 +77,14 @@ class Mail extends PEAR {
      *               failure.
      * @access public
      * @deprecated use Mail_mail::send instead
-     */	
+     */
     function send($recipients, $headers, $body)
     {
         // if we're passed an array of recipients, implode it.
         if (is_array($recipients)) {
             $recipients = implode(', ', $recipients);
         }
-        
+
         // get the Subject out of the headers array so that we can
         // pass it as a seperate argument to mail().
         $subject = '';
@@ -92,14 +92,14 @@ class Mail extends PEAR {
             $subject = $headers['Subject'];
             unset($headers['Subject']);
         }
-        
+
         // flatten the headers out.
         list(,$text_headers) = Mail::prepareHeaders($headers);
-        
+
         return mail($recipients, $subject, $body, $text_headers);
 
     }
-    
+
     /**
      * Take an array of mail headers and return a string containing
      * text usable in sending a message.
@@ -121,11 +121,11 @@ class Mail extends PEAR {
         // Look out for the From: value to use along the way.
         $text_headers = '';  // text representation of headers
         $from = null;
-        
+
         foreach ($headers as $key => $val) {
             if ($key == 'From') {
                 include_once 'Mail/RFC822.php';
-                
+
                 $from_arr = Mail_RFC822::parseAddressList($val, 'localhost', false);
                 $from = $from_arr[0]->mailbox . '@' . $from_arr[0]->host;
                 if (strstr($from, ' ')) {
@@ -142,10 +142,10 @@ class Mail extends PEAR {
                 $text_headers .= $key . ': ' . $val . "\n";
             }
         }
-        
+
         return array($from, $text_headers);
     }
-    
+
     /**
      * Take a set of recipients and parse them, returning an array of
      * bare addresses (forward paths) that can be passed to sendmail
@@ -161,13 +161,13 @@ class Mail extends PEAR {
     function parseRecipients($recipients)
     {
         include_once 'Mail/RFC822.php';
-        
+
         // if we're passed an array, assume addresses are valid and
         // implode them before parsing.
         if (is_array($recipients)) {
             $recipients = implode(', ', $recipients);
         }
-        
+
         // Parse recipients, leaving out all personal info. This is
         // for smtp recipients, etc. All relevant personal information
         // should already be in the headers.
@@ -178,9 +178,9 @@ class Mail extends PEAR {
                 $recipients[] = $ob->mailbox . '@' . $ob->host;
             }
         }
-        
+
         return $recipients;
     }
-    
+
 }
 ?>
