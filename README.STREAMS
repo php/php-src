@@ -276,11 +276,12 @@ Writing your own stream implementation
 ======================================
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-RULE #1: when writing your own streams: make sure you have configured PHP
-with --enable-debug.  I've some great pains to hook into the zend memory
-manager to help track down allocation problems.  It will also help you
-spot incorrect use of the STREAMS_DC, STREAMS_CC and the semi-private
-STREAMS_REL_CC macros for function definitions.
+RULE #1: when writing your own streams: make sure you have configured PHP with
+--enable-debug.
+I've taken some great pains to hook into the zend memory manager to help track
+down allocation problems.  It will also help you spot incorrect use of the
+STREAMS_DC, STREAMS_CC and the semi-private STREAMS_REL_CC macros for function
+definitions.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 RULE #2: Please use the stdio stream as a reference; it will help you
