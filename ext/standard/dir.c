@@ -275,6 +275,7 @@ PHP_FUNCTION(chdir)
 {
 	pval **arg;
 	int ret;
+	PLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
