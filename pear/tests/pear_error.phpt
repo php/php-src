@@ -79,26 +79,26 @@ print $err->toString() . "\n";
 --GET--
 --POST--
 --EXPECT--
-default PEAR_Error: [pear_error: message="unknown error" code=0 mode=return level=notice prefix="" prepend="" append=""]
+default PEAR_Error: [pear_error: message="unknown error" code=0 mode=return level=notice prefix="" prepend="" append="" debug=""]
 Testing it: bool(true)
 This is not an error: bool(false)
 Now trying a bunch of variations...
-different message: [pear_error: message="test error" code=0 mode=return level=notice prefix="" prepend="" append=""]
-different message,code: [pear_error: message="test error" code=-42 mode=return level=notice prefix="" prepend="" append=""]
-mode=print: test error[pear_error: message="test error" code=-42 mode=print level=notice prefix="" prepend="" append=""]
-mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append=""]
-mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append=""]
+different message: [pear_error: message="test error" code=0 mode=return level=notice prefix="" prepend="" append="" debug=""]
+different message,code: [pear_error: message="test error" code=-42 mode=return level=notice prefix="" prepend="" append="" debug=""]
+mode=print: test error[pear_error: message="test error" code=-42 mode=print level=notice prefix="" prepend="" append="" debug=""]
+mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" prepend="" append="" debug=""]
+mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" prepend="" append="" debug=""]
 mode=print&trigger: test error<br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>203</b><br>
-[pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append=""]
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+[pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger: <br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>203</b><br>
-[pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append=""]
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+[pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger,level=notice: <br>
-<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>203</b><br>
-[pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append=""]
+<b>Notice</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+[pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" prepend="" append="" debug=""]
 mode=trigger,level=warning: <br>
-<b>Warning</b>:  test error in <b>PEAR.php</b> on line <b>203</b><br>
-[pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append=""]
+<b>Warning</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>
+[pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" prepend="" append="" debug=""]
 mode=trigger,level=error: <br>
-<b>Fatal error</b>:  test error in <b>PEAR.php</b> on line <b>203</b><br>
+<b>Fatal error</b>:  test error in <b>PEAR.php</b> on line <b>204</b><br>

@@ -469,17 +469,21 @@ class DB_Error extends PEAR_Error {
 	 *
 	 * @param $code mixed DB error code, or string with error message.
 	 * @param $mode int what "error mode" to operate in
-	 * @param $level what error level to use for $mode == PEAR_ERROR_TRIGGER
+	 * @param $level what error level to use for $mode & PEAR_ERROR_TRIGGER
+	 * @param $debuginfo additional debug info, such as the last query
 	 *
 	 * @access public
+	 *
+	 * @see PEAR_Error
 	 */
 	function DB_Error($code = DB_ERROR,
 					  $mode = PEAR_ERROR_RETURN,
-					  $level = E_USER_NOTICE) {
+					  $level = E_USER_NOTICE,
+					  $debuginfo = null) {
 		if (is_int($code)) {
-			$this->PEAR_Error("DB Error: " . DB::errorMessage($code), $code, $mode, $level);
+			$this->PEAR_Error("DB Error: " . DB::errorMessage($code), $code, $mode, $level, $debuginfo);
 		} else {
-			$this->PEAR_Error("DB Error: $code", 0, $mode, $level);
+			$this->PEAR_Error("DB Error: $code", 0, $mode, $level, $debuginfo);
 		}
 	}
 }
@@ -497,16 +501,20 @@ class DB_Warning extends PEAR_Error {
 	 * @param $code mixed DB error code, or string with error message.
 	 * @param $mode int what "error mode" to operate in
 	 * @param $level what error level to use for $mode == PEAR_ERROR_TRIGGER
+	 * @param $debuginfo additional debug info, such as the last query
 	 *
 	 * @access public
+	 *
+	 * @see PEAR_Error
 	 */
 	function DB_Warning($code = DB_WARNING,
 						$mode = PEAR_ERROR_RETURN,
-						$level = E_USER_NOTICE) {
+						$level = E_USER_NOTICE,
+						$debuginfo = null) {
 		if (is_int($code)) {
-			$this->PEAR_Error("DB Warning: " . DB::errorMessage($code), $code, $mode, $level);
+			$this->PEAR_Error("DB Warning: " . DB::errorMessage($code), $code, $mode, $level, $debuginfo);
 		} else {
-			$this->PEAR_Error("DB Warning: $code", 0, $mode, $level);
+			$this->PEAR_Error("DB Warning: $code", 0, $mode, $level, $debuginfo);
 		}
 	}
 }
