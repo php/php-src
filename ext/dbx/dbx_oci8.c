@@ -218,6 +218,7 @@ int dbx_oci8_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_F
 	zval *returned_zval=NULL;
 
 	MAKE_STD_ZVAL(zval_returned_array); /* no value needed, it will be overwritten anyway */
+	ZVAL_EMPTY_STRING(zval_returned_array); /* there seems to be some weird mem-bug, so assigning a value anyway */
 	MAKE_STD_ZVAL(zval_resulttype);
 	ZVAL_LONG(zval_resulttype, OCI_NUM | OCI_RETURN_NULLS | OCI_RETURN_LOBS); /* no ASSOC, dbx handles that part */
 	arguments[0]=result_handle;
