@@ -1,3 +1,23 @@
+1999-10-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.am: Remove redundant library declaration. All libtool libraries
+    are referenced through DEPENDENCIES now.
+
+    * Makefile.am: Only link with bundled regex, if the user wants it.
+
+    * regex/regcomp.c: POSIX_MISTAKE is enabled by default.
+
+1999-10-09  Thies C. Arntzen  <thies@digicol.de>
+
+    * sapi/apache/config.m4:
+    fix suggested by sascha for xml-build in apxs mode
+
+1999-10-09  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-08  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
 
     * ext/odbc/php_odbc.c:
