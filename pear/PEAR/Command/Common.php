@@ -54,6 +54,11 @@ class PEAR_Command_Common extends PEAR
         return array();
     }
 
+    function getHelp($command)
+    {
+        return array(null, 'No help avaible yet');
+    }
+
     /**
      * Return a PEAR_CommandResponse object with parameters
      * filled in.
