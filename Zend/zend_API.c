@@ -836,3 +836,24 @@ ZEND_API zend_module_entry *zend_get_module(int module_number)
 		return NULL;
 	}
 }
+
+ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
+                                  int is_ref, int num_symbol_tables, ...)
+{
+    HashTable  *symbol_table;
+    va_list     symbol_table_list;
+
+    if (num_symbol_tables <= 0) return FAILURE;
+
+    symbol->is_ref = is_ref;
+    symbol->refcount = 0;
+
+    va_start(symbol_table_list, num_symbol_tables);
+    while(num_symbol_tables-- > 0) {
+        symbol_table = va_arg(symbol_table_list, HashTable *);
+        zend_hash_update_ptr(symbol_table, name, name_length + 1, symbol, sizeof(zval *), NULL);
+        zval_add_ref(&symbol);
+    }
+    va_end(symbol_table_list);
+    return SUCCESS;
+}

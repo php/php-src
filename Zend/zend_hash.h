@@ -100,7 +100,6 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 
 ZEND_API int zend_hash_pointer_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData);
 
-
 typedef struct _zend_hash_key {
 	char *arKey;
 	uint nKeyLength;
