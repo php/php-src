@@ -29,6 +29,7 @@ HEADER_DIRS = \
 	main/ \
 	main/streams/ \
 	regex/ \
+	ext/libxml/ \
 	ext/standard/ \
 	ext/session/ \
 	ext/xml/ \
