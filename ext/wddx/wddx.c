@@ -271,7 +271,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 					key = tmp;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
-					php_set_session_var(key, key_length-1, *ent PSLS_CC);
+					php_set_session_var(key, key_length-1, *ent, NULL PSLS_CC);
 					PS_ADD_VAR(key);
 			}
 		}
