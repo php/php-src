@@ -30,9 +30,7 @@
  */
 #include "corba.h"
 
-#ifdef HAVE_CONFIG_H
 #include "php_config.h"	/* for COMPILE_DL_ORBIT */
-#endif
 
 /* ZTS = thread-safe Zend */
 #ifdef ZTS

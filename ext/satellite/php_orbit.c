@@ -38,9 +38,7 @@
 #include "struct.h"
 
 
-#ifdef HAVE_CONFIG_H
 #include "php_config.h"	/* for COMPILE_DL_ORBIT */
-#endif
 
 /* see php4/README.SELF-CONTAINED-EXTENSIONS */
 #if COMPILE_DL_SATELLITE
