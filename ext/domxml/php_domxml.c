@@ -433,7 +433,7 @@ PHP_MINFO_FUNCTION(domxml)
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();	
 	php_info_print_table_row(2, "DOM/XML", "enabled");
-	php_info_print_table_row(2, "libmxl Version", LIBXML_DOTTED_VERSION );
+	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION );
 #if defined(LIBXML_XPATH_ENABLED)
 	php_info_print_table_row(2, "XPath Support", "enabled");
 #endif
