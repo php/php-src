@@ -191,7 +191,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	zval *flags;
 	char *str;
 	
-	if(S->current_data == NULL || !S->result) {
+	if(!S->result) {
 		return FAILURE;
 	}
 	if(colno >= mysql_num_fields(S->result)) {
