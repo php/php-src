@@ -1,3 +1,18 @@
+2005-01-06  Joe Orton  <jorton@redhat.com>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/curl/curl.c
+      ext/curl/interface.c:
+      MFH: - Fixed bug #31413 (curl POSTFIELDS crashes on 64-bit platforms).
+
+2005-01-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_5_0)
+      ext/session/mod_files.c:
+      Revert. This is always 1.
+
 2005-01-05  Joe Orton  <jorton@redhat.com>
 
     * ext/curl/interface.c:
