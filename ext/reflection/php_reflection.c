@@ -148,6 +148,7 @@ typedef struct _parameter_reference {
 	int offset;
 	int required;
 	struct _zend_arg_info *arg_info;
+	zend_function *fptr;
 } parameter_reference;
 
 /* Struct for reflection objects */
@@ -502,7 +503,7 @@ static void _const_string(string *str, char *name, zval *value, char *indent TSR
 /* }}} */
 
 /* {{{ _parameter_string */
-static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int offset, int required, char* indent TSRMLS_DC)
+static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg_info *arg_info, int offset, int required, char* indent TSRMLS_DC)
 {
 	string_printf(str, "Parameter #%d [ ", offset);
 	if (offset >= required) {
@@ -524,6 +525,31 @@ static void _parameter_string(string *str, struct _zend_arg_info *arg_info, int 
 	} else {
 		string_printf(str, "$param%d", offset);
 	}
+	if (fptr->type == ZEND_USER_FUNCTION && offset >= required) {
+		zend_op *precv = &((zend_op_array*)fptr)->opcodes[offset*2 + 1];
+		if (precv->opcode == ZEND_RECV_INIT && precv->op2.op_type != IS_UNUSED) {
+			zval *zv, zv_copy;
+			int use_copy;
+			string_write(str, " = ", sizeof(" = ")-1);
+			zv = &precv->op2.u.constant;
+			zval_update_constant(&zv, (void*)1 TSRMLS_CC);
+			if (Z_TYPE_P(zv) == IS_NULL) {
+				string_write(str, "NULL", sizeof("NULL")-1);
+			} else if (Z_TYPE_P(zv) == IS_STRING) {
+				string_write(str, "'", sizeof("'")-1);
+				string_write(str, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 15));
+				if (Z_STRLEN_P(zv) > 15) {
+					string_write(str, "...", sizeof("...")-1);
+				}
+				string_write(str, "'", sizeof("'")-1);
+			} else {
+				zend_make_printable_zval(zv, &zv_copy, &use_copy);
+				string_write(str, Z_STRVAL(zv_copy), Z_STRLEN(zv_copy));
+				zval_dtor(&zv_copy);
+			}
+			zval_ptr_dtor(&zv);
+		}
+	}
 	string_write(str, " ]", sizeof(" ]")-1);
 }
 /* }}} */
@@ -543,7 +569,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 	string_printf(str, "%s- Parameters [%d] {\n", indent, fptr->common.num_args);
 	for (i = 0; i < fptr->common.num_args; i++) {
 		string_printf(str, "%s  ", indent);
-		_parameter_string(str, arg_info, i, required, indent TSRMLS_CC);
+		_parameter_string(str, fptr, arg_info, i, required, indent TSRMLS_CC);
 		string_write(str, "\n", sizeof("\n")-1);
 		arg_info++;
 	}
@@ -833,7 +859,7 @@ static void reflection_extension_factory(zval *object, char *name_str TSRMLS_DC)
 /* }}} */
 
 /* {{{ reflection_parameter_factory */
-static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int offset, int required, zval *object TSRMLS_DC)
+static void reflection_parameter_factory(zend_function *fptr, struct _zend_arg_info *arg_info, int offset, int required, zval *object TSRMLS_DC)
 {
 	reflection_object *intern;
 	parameter_reference *reference;
@@ -851,6 +877,7 @@ static void reflection_parameter_factory(struct _zend_arg_info *arg_info, int of
 	reference->arg_info = arg_info;
 	reference->offset = offset;
 	reference->required = required;
+	reference->fptr = fptr;
 	intern->ptr = reference;
 	intern->free_ptr = 1;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
@@ -1414,7 +1441,7 @@ ZEND_METHOD(reflection_function, getParameters)
 		 zval *parameter;   
 
 		 ALLOC_ZVAL(parameter);
-		 reflection_parameter_factory(arg_info, i, fptr->common.required_num_args, parameter TSRMLS_CC);
+		 reflection_parameter_factory(fptr, arg_info, i, fptr->common.required_num_args, parameter TSRMLS_CC);
 		 add_next_index_zval(return_value, parameter);
 		 
 		 arg_info++;
@@ -1551,6 +1578,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	ref->arg_info = &arg_info[position];
 	ref->offset = position;
 	ref->required = fptr->common.required_num_args;
+	ref->fptr = fptr;
 	intern->ptr = ref;
 	intern->free_ptr = 1;
 }
@@ -1567,7 +1595,7 @@ ZEND_METHOD(reflection_parameter, __toString)
 	METHOD_NOTSTATIC_NUMPARAMS(0);
 	GET_REFLECTION_OBJECT_PTR(param);
 	string_init(&str);
-	_parameter_string(&str, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
+	_parameter_string(&str, param->fptr, param->arg_info, param->offset, param->required, "" TSRMLS_CC);
 	RETURN_STRINGL(str.string, str.len - 1, 0);
 }
 /* }}} */
