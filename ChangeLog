@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Ported strtotime() function from PHP3 (Andrey)
 - Merged in gdttf stuff from php3 (Sascha)
 - buildconf now checks your installation (Stig)
 - XML module now built dynamically with --with-xml=shared (Stig)
