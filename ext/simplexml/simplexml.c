@@ -955,7 +955,7 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		xmlFree(contents);
 	}
 	if (should_free) {
-		/*zval_dtor(&free_obj);*/
+		zval_dtor(&free_obj);
 	}
 	return rv;
 }
