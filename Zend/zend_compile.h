@@ -169,6 +169,7 @@ typedef struct _list_llist_element {
 typedef struct _zend_file_handle {
 	int type;
 	char *filename;
+	char *opened_path;
 	union {
 		int fd;
 		FILE *fp;
@@ -344,12 +345,12 @@ void do_extended_fcall_end(CLS_D);
 
 /* helper functions in zend-scanner.l */
 BEGIN_EXTERN_C()
-ZEND_API int require_file(zend_file_handle *file_handle CLS_DC);	
-ZEND_API int require_filename(char *filename CLS_DC);				
+ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
+ZEND_API int require_filename(char *filename, zend_bool unique CLS_DC);
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
 ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, va_list files);
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
-ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
+ZEND_API zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
@@ -535,6 +536,7 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
+#define ZEND_IMPORT				(1<<2)
 
 #define ZEND_ISSET				(1<<0)
 #define ZEND_ISEMPTY			(1<<1)
