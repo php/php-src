@@ -84,6 +84,7 @@ PHP_METHOD(soapobject, __style);
 PHP_METHOD(soapobject, __isfault);
 PHP_METHOD(soapobject, __getfault);
 PHP_METHOD(soapobject, __call);
+PHP_METHOD(soapobject, __login);
 PHP_METHOD(soapobject, __trace);
 PHP_METHOD(soapobject, __getfunctions);
 PHP_METHOD(soapobject, __gettypes);
@@ -133,6 +134,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_ME(soapobject, __getfault, NULL, 0)
 	PHP_ME(soapobject, __use, NULL, 0)
 	PHP_ME(soapobject, __style, NULL, 0)
+	PHP_ME(soapobject, __login, NULL, 0)
 	PHP_ME(soapobject, __call, NULL, 0)
 	PHP_ME(soapobject, __trace, NULL, 0)
 	PHP_ME(soapobject, __getlastrequest, NULL, 0)
@@ -1480,6 +1482,24 @@ zend_try {
 	}
 	SOAP_GLOBAL(sdl) = NULL;
 }
+
+PHP_METHOD(soapobject, __login)
+{
+  char *login_name;
+  char *login_pass;
+  int login_name_len;
+  int login_pass_len;
+  zval* thisObj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+	    &login_name, &login_name_len, &login_pass, &login_pass_len) == FAILURE) {
+		return;
+	}
+	GET_THIS_OBJECT(thisObj);
+	add_property_stringl(thisObj,"_login",login_name,login_name_len, 1);
+	add_property_stringl(thisObj,"_password",login_pass,login_pass_len, 1);
+}
+
 
 PHP_METHOD(soapobject, __call)
 {
