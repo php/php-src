@@ -1,3 +1,38 @@
+2005-01-02  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      Zend/zend_highlight.c
+      ZendEngine2/zend_highlight.c:
+      MFH: Fixed bug #31371 (highlight_file() trims new line after heredoc).
+
+    * ZendEngine2/zend_highlight.c:
+      Fixed bug #31371 (highlight_file() trims new line after heredoc).
+
+2005-01-02  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      allow parser flags to be passed to xinclude()
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+2005-01-02  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/array/bug29493.phpt
+      ext/standard/tests/array/bug29493.phpt
+      ext/standard/tests/array/bug31213.phpt
+      ext/standard/tests/array/bug31213.phpt:
+      - MFH: add testcases for bug #29493 and #31213.
+
+    * ext/standard/tests/array/bug29493.phpt
+      ext/standard/tests/array/bug31213.phpt:
+        1.1.4;
+      - Add testcases for bug #29493 and #31213.
+
 2005-01-01  Wez Furlong  <wez.php@thebrainroom.net>
 
     * (PHP_5_0)
