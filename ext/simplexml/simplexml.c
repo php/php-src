@@ -92,7 +92,7 @@ static void _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value, int
 		__n = (__s)->node->node; \
 	} else { \
 		__n = NULL; \
-		php_error(E_WARNING, "Node no longer exists"); \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node no longer exists"); \
 	} \
 }
 
@@ -295,7 +295,7 @@ change_node_zval(xmlNodePtr node, zval *value)
 			}
 			break;
 		default:
-			php_error(E_WARNING, "It is not possible to assign complex types to nodes");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not possible to assign complex types to nodes");
 			break;
 	}
 }
@@ -420,7 +420,7 @@ next_iter:
 			}
 			change_node_zval(newnode, value);
 		} else if (counter > 1) {
-			php_error(E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)\n");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)\n");
 		} else {
 			if (attribs) {
 				switch (Z_TYPE_P(value)) {
@@ -433,7 +433,7 @@ next_iter:
 						newnode = (xmlNodePtr)xmlNewProp(node, name, Z_STRVAL_P(value));
 						break;
 					default:
-						php_error(E_WARNING, "It is not yet possible to assign complex types to attributes");
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "It is not yet possible to assign complex types to attributes");
 				}
 			}
 		}
@@ -1545,7 +1545,7 @@ PHP_FUNCTION(simplexml_import_dom)
 
 	if (nodep) {
 		if (nodep->doc == NULL) {
-			php_error(E_WARNING, "Imported Node must have associated Document");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Imported Node must have associated Document");
 			RETURN_NULL();
 		}
 		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
@@ -1570,7 +1570,7 @@ PHP_FUNCTION(simplexml_import_dom)
 		return_value->type = IS_OBJECT;
 		return_value->value.obj = php_sxe_register_object(sxe TSRMLS_CC);
 	} else {
-		php_error(E_WARNING, "Invalid Nodetype to import");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");
 		RETVAL_NULL();
 	}
 }
