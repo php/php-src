@@ -100,6 +100,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 							if (T->EA.data.str_offset.str->type != IS_STRING
 								|| (T->EA.data.str_offset.offset<0)
 								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
+								zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->EA.data.str_offset.offset);
 								T->tmp_var.value.str.val = empty_string;
 								T->tmp_var.value.str.len = 0;
 							} else {
@@ -315,11 +316,28 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 			case IS_STRING_OFFSET: {
 					temp_variable *T = &Ts[op1->u.var];
 
-					if (T->EA.data.str_offset.str->type == IS_STRING
-						&& (T->EA.data.str_offset.offset >= 0)
-						&& (T->EA.data.str_offset.offset < T->EA.data.str_offset.str->value.str.len)) {
+					if (T->EA.data.str_offset.str->type == IS_STRING) do {
 						zval tmp;
 						zval *final_value = value;
+
+						if ((T->EA.data.str_offset.offset < 0)) {
+							zend_error(E_WARNING, "Illegal string offset:  %d", T->EA.data.str_offset.offset);
+							break;
+						}
+						if (T->EA.data.str_offset.offset >= T->EA.data.str_offset.str->value.str.len) {
+							int i;
+
+							if (T->EA.data.str_offset.str->value.str.len==0) {
+								T->EA.data.str_offset.str->value.str.val = (char *) emalloc(T->EA.data.str_offset.offset+1+1);
+							} else {
+								T->EA.data.str_offset.str->value.str.val = (char *) erealloc(T->EA.data.str_offset.str->value.str.val, T->EA.data.str_offset.offset+1+1);
+							}
+							for (i=T->EA.data.str_offset.str->value.str.len; i<T->EA.data.str_offset.offset; i++) {
+								T->EA.data.str_offset.str->value.str.val[i] = ' ';
+							}
+							T->EA.data.str_offset.str->value.str.val[T->EA.data.str_offset.offset+1] = 0;
+							T->EA.data.str_offset.str->value.str.len = T->EA.data.str_offset.offset+1;
+						}
 
 						if (value->type!=IS_STRING) {
 							tmp = *value;
@@ -343,7 +361,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						 * the value of an assignment to a string offset is undefined
 						Ts[result->u.var].var = &T->EA.data.str_offset.str;
 						*/
-					}
+					} while(0);
 					/* zval_ptr_dtor(&T->EA.data.str_offset.str); Nuke this line if it doesn't cause a leak */
 					T->tmp_var.type = IS_STRING;
 				}
@@ -1067,9 +1085,12 @@ ZEND_API void execute(zend_op_array *op_array ELS_DC)
 				EG(binary_op) = boolean_xor_function;
 		  	    /* Fall through */
 binary_op_addr:
-				EG(binary_op)(&Ts[opline->result.u.var].tmp_var, 
-							 get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R),
-							 get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R) );
+				{
+					zval *zp1 = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval *zp2 = get_zval_ptr(&opline->op2, Ts, &EG(free_op1), BP_VAR_R);
+
+					EG(binary_op)(&Ts[opline->result.u.var].tmp_var, zp1, zp2);
+				}
 				FREE_OP(&opline->op1, EG(free_op1));
 				FREE_OP(&opline->op2, EG(free_op2));
 				NEXT_OPCODE();
