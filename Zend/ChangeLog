@@ -1,3 +1,8 @@
+2002-09-25  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_extensions.h:
+    Propmote API NO year, so that it will never be the same as ZE1 API NO
+
 2002-09-24  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c: - Fix leak
