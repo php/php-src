@@ -358,7 +358,7 @@ static int apprentice(void)
     fname = conf->magicfile; /* todo cwd? */
     f = fopen(fname, "rb");
     if (f == NULL) {
-		(int) conf->magic = -1;
+		*(int *)&conf->magic = -1;
 		return -1;
     }
 
