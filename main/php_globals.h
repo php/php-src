@@ -71,6 +71,7 @@ struct _php_core_globals {
 	char *safe_mode_exec_dir;
 
 	long memory_limit;
+	long max_input_time;
 
 	zend_bool track_errors;
 	zend_bool display_errors;

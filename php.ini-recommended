@@ -232,6 +232,7 @@ expose_php = On
 ;;;;;;;;;;;;;;;;;;;
 
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
+max_input_time = 60	; Maximum amount of time each script may spend parsing request data
 memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 
 
