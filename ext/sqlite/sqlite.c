@@ -181,6 +181,29 @@ static void php_sqlite_function_callback(sqlite_func *func, int argc, const char
 	}
 }
 
+/* Authorization Callback */
+
+static int php_sqlite_authorizer(void *autharg, int access_type, const char *arg3, const char *arg4)
+{
+	switch (access_type) {
+		case SQLITE_COPY:
+			{
+				TSRMLS_FETCH();
+				if (PG(safe_mode) && (!php_checkuid(arg4, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+					return SQLITE_DENY;
+				}
+
+				if (php_check_open_basedir(arg4 TSRMLS_CC)) {
+					return SQLITE_DENY;
+				}
+			}
+			return SQLITE_OK;
+
+		default:
+			/* access allowed */
+			return SQLITE_OK;
+	}
+}
 
 PHP_MINIT_FUNCTION(sqlite)
 {
@@ -248,6 +271,9 @@ PHP_FUNCTION(sqlite_open)
 	/* set default busy handler; keep retrying up until 1/2 second has passed,
 	 * then fail with a busy status code */
 	sqlite_busy_timeout(db, 500);
+
+	/* authorizer hook so we can enforce safe mode */
+	sqlite_set_authorizer(db, php_sqlite_authorizer, NULL);
 	
 	ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_db);
 	
