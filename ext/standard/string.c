@@ -1627,7 +1627,7 @@ PHP_FUNCTION(substr)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
-	convert_to_string_ex(from);
+	convert_to_long_ex(from);
 
 	if (argc > 2) {
 		convert_to_long_ex(len);
