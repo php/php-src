@@ -634,6 +634,11 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
+<<<<<<< php_domxml.c
+
+	node_wrapper_dtor(node);
+	dom_object_set_data(node, NULL);
+=======
 
 	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here
 	and for all children as well. */
@@ -646,6 +651,7 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		node_wrapper_dtor(node);
 	}
 
+>>>>>>> 1.181
 }
 
 
@@ -1378,7 +1384,7 @@ static void domxml_error_ext(void *ctx, const char *msg, ...)
 	   	MAKE_STD_ZVAL(errormessages);
 
 		if(array_init(errormessages) != SUCCESS) {
-			// do error handling here
+			/* do error handling here */
 		} 
 		add_assoc_string(errormessages,"errormessage",buf,1);				
 		input = ctxt->input;
@@ -1415,7 +1421,7 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 		zval *errormessages;
 	   	MAKE_STD_ZVAL(errormessages);
 		if(array_init(errormessages) != SUCCESS) {
-			// do error handling here
+			/* do error handling here */
 		} 
 		if (ctxt->parser != NULL) {
 			if (ctxt->parser->name) {
@@ -1434,9 +1440,9 @@ static void domxml_error_validate(void *ctx, const char *msg, ...)
 		
 		if (ctxt->valid->node != NULL)
 		{
-//		   php_error(E_WARNING,"nodename %s",(char *) ctxt->valid->name);			
-		  
-//			node = *ctxt->node;
+			/*php_error(E_WARNING,"nodename %s",(char *) ctxt->valid->name);
+
+			node = *ctxt->node;*/
 		}
 		add_assoc_string(errormessages,"errormessage",buf,1);			   
    		add_next_index_zval(ctxt->errors,errormessages);
