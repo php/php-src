@@ -1024,6 +1024,14 @@ static void php_putenv_destructor(putenv_entry *pe)
 		}
 # endif
 	}
+#ifdef HAVE_TZSET
+	/* don't forget to reset the various libc globals that
+	 * we might have changed by an earlier call to tzset(). */
+	if (!strncmp(pe->key, "TZ", pe->key_len)) {
+		tzset();
+	}
+#endif
+		
 	efree(pe->putenv_string);
 	efree(pe->key);
 }
@@ -1423,7 +1431,7 @@ PHP_FUNCTION(putenv)
 		if (putenv(pe.putenv_string) == 0) {	/* success */
 			zend_hash_add(&BG(putenv_ht), pe.key, pe.key_len+1, (void **) &pe, sizeof(putenv_entry), NULL);
 #ifdef HAVE_TZSET
-			if (!strncmp(pe.key, "TZ", 2)) {
+			if (!strncmp(pe.key, "TZ", pe.key_len)) {
 				tzset();
 			}
 #endif
