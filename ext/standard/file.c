@@ -247,7 +247,7 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 PHP_FUNCTION(flock)
 {
 	zval *arg1, *arg3 = NULL;
-	int fd, act;
+	int act;
 	php_stream *stream;
 	long operation = 0;
 
@@ -256,10 +256,6 @@ PHP_FUNCTION(flock)
 	}
 
 	php_stream_from_zval(stream, &arg1);
-
-	if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE) {
-		RETURN_FALSE;
-	}
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
