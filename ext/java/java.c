@@ -101,12 +101,15 @@ PHP_INI_END()
  */
 void jvm_destroy() {
   if (php_reflect) (*jenv)->DeleteGlobalRef(jenv, php_reflect);
-  if (jvm) (*jvm)->DestroyJavaVM(jvm);
+  if (jvm) {
+    (*jvm)->DetachCurrentThread(jvm);
+    (*jvm)->DestroyJavaVM(jvm);
+    jvm = 0;
+  }
 #if !(WIN32||WINNT)
   if (javadl) dlclose(javadl);
 #endif
   php_reflect = 0;
-  jvm = 0;
   jenv = 0;
 }
 
