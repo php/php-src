@@ -672,6 +672,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 	}
 
 	if (container->type==IS_NULL
+		|| (container->type==IS_BOOL && container->value.lval==0)
 		|| (container->type==IS_STRING && container->value.str.len==0)) {
 		switch (type) {
 			case BP_VAR_RW:
