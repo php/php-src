@@ -186,7 +186,6 @@ AC_ARG_WITH(apache,
 ])
 
 INCLUDES="$INCLUDES $APACHE_INCLUDE"
-dnl## PHP_SUBST(APACHE_INCLUDE)
 fi
 
 if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
@@ -211,21 +210,7 @@ AC_ARG_WITH(mod_charset,
 	AC_MSG_RESULT(no)
 ])
 
-if test "$with_regex" = "apache" && test -z "$APACHE_HAS_REGEX"; then
-  with_regex=php
-fi
-
-if test -z "$with_regex" && test -n "$APACHE_HAS_REGEX"; then
-  with_regex=apache
-fi
-
 if test -n "$APACHE_MODULE"; then
-  if test "$with_regex" = "apache"; then
-    APACHE_WANT_HSREGEX=yes
-  else
-    APACHE_WANT_HSREGEX=no
-  fi
-  PHP_SUBST(APACHE_WANT_HSREGEX)
   PHP_APACHE_CHECK_RDYNAMIC
   PHP_OUTPUT(sapi/apache/libphp4.module)
   PHP_BUILD_STATIC
