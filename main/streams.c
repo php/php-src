@@ -1875,6 +1875,9 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 			}
 			flags |= O_CREAT|O_APPEND;
 			break;
+		case 'x':
+			flags = O_CREAT|O_EXCL;
+			break;
 		default:
 			/* unknown mode */
 			return FAILURE;

@@ -102,7 +102,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect;
 
-	if (strchr(mode, 'a') || strchr(mode, '+') || strchr(mode, 'w')) {
+	if (strpbrk(mode, "awx+")) {
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "HTTP wrapper does not support writeable connections.");
 		return NULL;
 	}
