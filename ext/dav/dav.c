@@ -36,8 +36,6 @@
 #if HAVE_MOD_DAV
 
 # include "mod_dav.h"
-# include "phpdav.h"
-# include "variables.h"
 
 /* {{{ thread safety stuff */
 
