@@ -246,7 +246,7 @@ PHP_FUNCTION(mailparse_uudecode_all)
 		}
 		else	{
 			/* write to the output file */
-			php_stream_puts(outstream, buffer);
+			php_stream_write_string(outstream, buffer);
 		}
 	}
 	php_stream_close(outstream);
@@ -438,13 +438,39 @@ PHP_FUNCTION(mailparse_stream_encode)
 			deststream
 			);
 
-	while(!php_stream_eof(srcstream))	{
-		len = php_stream_read(srcstream, buf, bufsize);
-		if (len > 0)
-		{
-			int i;
-			for (i=0; i<len; i++)
-				mbfl_convert_filter_feed(buf[i], conv);
+	if (enc == mbfl_no_encoding_qprint) {
+		/* If the qp encoded section is going to be digitally signed,
+		 * it is a good idea to make sure that lines that begin "From "
+		 * have the letter F encoded, so that MTAs do not stick a > character
+		 * in front of it and invalidate the content/signature */
+		while(!php_stream_eof(srcstream))	{
+			if (NULL != php_stream_gets(srcstream, buf, bufsize)) {
+				int i;
+				
+				len = strlen(buf);
+				
+				if (strncmp(buf, "From ", 5) == 0) {
+					mbfl_convert_filter_flush(conv);
+					php_stream_write(deststream, "=46rom ", 7);
+					i = 5;
+				} else {
+					i = 0;
+				}
+				
+				for (; i<len; i++)
+					mbfl_convert_filter_feed(buf[i], conv);
+			}
+		}
+
+	} else {
+		while(!php_stream_eof(srcstream))	{
+			len = php_stream_read(srcstream, buf, bufsize);
+			if (len > 0)
+			{
+				int i;
+				for (i=0; i<len; i++)
+					mbfl_convert_filter_feed(buf[i], conv);
+			}
 		}
 	}
 
