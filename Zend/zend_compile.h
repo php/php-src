@@ -662,7 +662,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_START_NAMESPACE		143
 
 #define ZEND_ADD_INTERFACE			144
-#define ZEND_VERIFY_CE				145
+#define ZEND_VERIFY_INSTANCEOF		145
 
 /* end of block */
 

@@ -1119,7 +1119,7 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-		opline->opcode = ZEND_VERIFY_CE;
+		opline->opcode = ZEND_VERIFY_INSTANCEOF;
 		opline->op1 = *class_type;
 		opline->op2 = passed_var;
 		opline->extended_value = offset->u.constant.value.lval;
