@@ -1617,6 +1617,8 @@ static php_stream_filter_status_t strfilter_convert_filter(
 			if (out_buf_size - ocnt > 0) {
 				new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, inst->persistent TSRMLS_CC);
 				php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+			} else {
+				pefree(out_buf, inst->persistent);
 			}
 
 			php_stream_bucket_delref(bucket TSRMLS_CC);
