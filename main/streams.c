@@ -69,6 +69,7 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 
 	if (stream->wrapper && stream->wrapper->destroy) {
 		stream->wrapper->destroy(stream);
+		stream->wrapper = NULL;
 	}
 
 	if (call_dtor) {
@@ -84,9 +85,12 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 		}
 		
 		php_stream_flush(stream);
-		ret = stream->ops->close(stream);
-		stream->abstract = NULL;
+	}
 	
+	ret = stream->ops->close(stream, call_dtor);
+	stream->abstract = NULL;
+	
+	if (call_dtor)	{	
 		/* tidy up any FILE* that might have been fdopened */
 		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
 			fclose(stream->stdiocast);
@@ -96,6 +100,7 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 
 	if (stream->wrapperdata) {
 		FREE_ZVAL(stream->wrapperdata);
+		stream->wrapperdata = NULL;
 	}
 	pefree(stream, stream->is_persistent);
 
@@ -494,18 +499,22 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 	return fread(buf, 1, count, data->file);
 }
 
-static int php_stdiop_close(php_stream *stream)
+static int php_stdiop_close(php_stream *stream, int close_handle)
 {
 	int ret;
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
 	assert(data != NULL);
 
-	if (data->is_pipe) {
-		ret = pclose(data->file);
-	} else {
-		ret = fclose(data->file);
+	if (close_handle) {
+		if (data->is_pipe) {
+			ret = pclose(data->file);
+		} else {
+			ret = fclose(data->file);
+		}
 	}
+	else
+		ret = 0;
 
 	efree(data);
 	
@@ -759,16 +768,15 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 
 PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_err) /* {{{ */
 {
+	int flags = castas & PHP_STREAM_CAST_MASK;
+	castas &= ~PHP_STREAM_CAST_MASK;
 	
-	/* trying hard is not yet implemented */
-	castas &= ~PHP_STREAM_CAST_TRY_HARD;
-	
-	if (castas == PHP_STREAM_AS_STDIO)	{
-		if (stream->stdiocast)	{
+	if (castas == PHP_STREAM_AS_STDIO) {
+		if (stream->stdiocast) {
 			if (ret) {
 				*ret = stream->stdiocast;
 			}
-			return SUCCESS;
+			goto exit_success;
 		}
 
 		if (stream->ops->cast && stream->ops->cast(stream, castas, ret) == SUCCESS)
@@ -782,8 +790,8 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 
 		*ret = fopencookie(stream, stream->mode, stream_cookie_functions);
 
-		if (*ret != NULL)	{
-			stream->fclose_stdiocast = 1;
+		if (*ret != NULL) {
+			stream->fclose_stdiocast = PHP_STREAM_FCLOSE_FOPENCOOKIE;
 			goto exit_success;
 		}
 
@@ -807,7 +815,7 @@ PHPAPI int php_stream_cast(php_stream *stream, int castas, void **ret, int show_
 
 
 exit_fail:
-	if (show_err)	{
+	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char *cast_names[3] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
@@ -827,6 +835,19 @@ exit_success:
 	if (castas == PHP_STREAM_AS_STDIO && ret)
 		stream->stdiocast = *ret;
 
+	if (flags & PHP_STREAM_CAST_RELEASE) {
+		/* Something other than php_stream_close will be closing
+		 * the underlying handle, so we should free the stream handle/data
+		 * here now.  The stream may not be freed immediately (in the case
+		 * of fopencookie), but the caller should still not touch their
+		 * original stream pointer in any case. */
+		if (stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
+			/* ask the implementation to release resources other than
+			 * the underlying handle */
+			php_stream_free(stream, 0);
+		}
+	}
+	
 	return SUCCESS;
 
 } /* }}} */

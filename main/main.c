@@ -572,11 +572,10 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 		/* no need for us to check the stream type here */
 		php_stream_sock_set_chunk_size(stream, 1);
 
-		if (php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void**)&retval, 1) == SUCCESS)	{
-			/* The leak here prevents a segfault */
-			/*	ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream()); */
-		}
-		else	{
+		/* when this succeeds, stream either has or will be freed automatically */
+		if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
+					(void**)&retval, REPORT_ERRORS) == FAILURE)
+		{
 			php_stream_close(stream);
 			if (opened_path && *opened_path)
 				efree(*opened_path);
