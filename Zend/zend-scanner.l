@@ -96,6 +96,9 @@ do { \
 }
 		
 
+#define ZEND_IS_OCT(c)  ((c)>='0' && (c)<'8')
+#define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
+
 
 void zend_fatal_scanner_error(char *message)
 {
@@ -1121,8 +1124,37 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 					zendlval->value.str.len--;
 					break;
 				default:
-					*t++ = '\\';
-					*t++ = *s;
+					/* check for an octal */
+					if (ZEND_IS_OCT(*s)) {
+						char octal_buf[4] = { 0, 0, 0, 0 };
+
+						octal_buf[0] = *s;
+						zendlval->value.str.len--;
+						if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
+							octal_buf[1] = *(++s);
+							zendlval->value.str.len--;
+							if ((s+1)<end && ZEND_IS_OCT(*(s+1))) {
+								octal_buf[2] = *(++s);
+								zendlval->value.str.len--;
+							}
+						}
+						*t++ = (char) strtol(octal_buf, NULL, 8);
+					} else if (*s=='x' && (s+1)<end && ZEND_IS_HEX(*(s+1))) {
+						char hex_buf[3] = { 0, 0, 0};
+
+						zendlval->value.str.len--; /* for the 'x' */
+
+						hex_buf[0] = *(++s);
+						zendlval->value.str.len--;
+						if ((s+1)<end && ZEND_IS_HEX(*(s+1))) {
+							hex_buf[1] = *(++s);
+							zendlval->value.str.len--;
+						}
+						*t++ = (char) strtol(hex_buf, NULL, 16);
+					} else {
+						*t++ = '\\';
+						*t++ = *s;
+					}
 					break;
 			}
 			s++;
