@@ -86,7 +86,7 @@ class InfiniteIterator implements Iterator
 	 */	
 	function __call($func, $params)
 	{
-		return call_user_func_array(array($this->getSubIterator(), $func), $params);
+		return call_user_func_array(array($this->it, $func), $params);
 	}
 }
 
