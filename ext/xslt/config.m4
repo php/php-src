@@ -10,6 +10,8 @@ PHP_ARG_ENABLE(xslt, whether to enable xslt support,
 
 if test "$PHP_XSLT" != "no"; then
 
+	PHP_EXTENSION(xslt, $ext_shared)
+
 	PHP_ARG_WITH(xslt-sablot, whether to enable the sablotron backend,
 	[  --with-xslt-sablot      Enable the sablotron backend])
 
@@ -95,5 +97,4 @@ if test "$PHP_XSLT" != "no"; then
 	fi
 
 	AC_DEFINE(HAVE_XSLT, 1, [ ])
-	PHP_EXTENSION(xslt, $ext_shared)
 fi
