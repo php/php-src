@@ -465,12 +465,12 @@ PHP_FUNCTION(chmod)
 }
 /* }}} */
 
-/* {{{ proto bool touch(string filename [, int time])
+/* {{{ proto bool touch(string filename [, int time [, int atime]])
    Set modification time of file */
 PHP_FUNCTION(touch)
 {
 #if HAVE_UTIME
-	pval **filename, **filetime;
+	pval **filename, **filetime, **fileatime;
 	int ret;
 	struct stat sb;
 	FILE *file;
@@ -484,8 +484,7 @@ PHP_FUNCTION(touch)
 			php_error(E_WARNING, "unable to emalloc memory for changing time");
 			return;
 		}
-		newtime->actime = time(NULL);
-		newtime->modtime = newtime->actime;
+		newtime->modtime = newtime->actime = time(NULL);
 #endif
 	} else if (ac == 2 && zend_get_parameters_ex(2, &filename, &filetime) != FAILURE) {
 		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
@@ -494,7 +493,16 @@ PHP_FUNCTION(touch)
 			return;
 		}
 		convert_to_long_ex(filetime);
-		newtime->actime = Z_LVAL_PP(filetime);
+		newtime->modtime = newtime->actime = Z_LVAL_PP(filetime);
+	} else if (ac == 3 && zend_get_parameters_ex(3, &filename, &filetime, &fileatime) != FAILURE) {
+		newtime = (struct utimbuf *)emalloc(sizeof(struct utimbuf));
+		if (!newtime) {
+			php_error(E_WARNING, "unable to emalloc memory for changing time");
+			return;
+		}
+		convert_to_long_ex(fileatime);
+		convert_to_long_ex(filetime);
+		newtime->actime = Z_LVAL_PP(fileatime);
 		newtime->modtime = Z_LVAL_PP(filetime);
 	} else {
 		WRONG_PARAM_COUNT;
