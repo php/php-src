@@ -877,7 +877,7 @@ static sdlPtr load_wsdl(char *struri)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 02
+#define WSDL_CACHE_VERSION 03
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((int)(*buf)[0])|((int)(*buf)[1]<<8)|((int)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -992,14 +992,12 @@ static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *e
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE:
 			WSDL_CACHE_GET_INT(i, in);
-			if (i > 0) {
-				model->u.content = emalloc(sizeof(HashTable));
-				zend_hash_init(model->u.content, i, NULL, delete_model, 0);
-				while (i > 0) {
-					sdlContentModelPtr x = sdl_deserialize_model(types, elements, in);
-					zend_hash_next_index_insert(model->u.content,&x,sizeof(sdlContentModelPtr),NULL);
-					i--;
-				}
+			model->u.content = emalloc(sizeof(HashTable));
+			zend_hash_init(model->u.content, i, NULL, delete_model, 0);
+			while (i > 0) {
+				sdlContentModelPtr x = sdl_deserialize_model(types, elements, in);
+				zend_hash_next_index_insert(model->u.content,&x,sizeof(sdlContentModelPtr),NULL);
+				i--;
 			}
 			break;
 		case XSD_CONTENT_GROUP_REF:

@@ -108,7 +108,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
 	  if (style == SOAP_ENCODED) {\
 			xmlSetProp(xml, "xsi:nil", "1"); \
-		}\
+		} \
 		return xml; \
 	} \
 }
@@ -979,12 +979,34 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 
 					zend_hash_internal_pointer_reset(ht);
 					while (zend_hash_get_current_data(ht,(void**)&val) == SUCCESS) {
-						property = master_to_xml(enc, *val, style, node);
+						if (Z_TYPE_PP(val) == IS_NULL && model->u.element->nillable) {
+							property = xmlNewNode(NULL,"BOGUS");
+							xmlAddChild(node, property);
+							if (style == SOAP_ENCODED) {
+								xmlSetProp(property, "xsi:nil", "1");
+							} else {
+							  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
+								xmlSetNsProp(property, xsi, "nil", "1");
+							}
+						} else {
+							property = master_to_xml(enc, *val, style, node);
+						}
 						xmlNodeSetName(property, model->u.element->name);
 						zend_hash_move_forward(ht);
 					}
 				} else {
-					property = master_to_xml(enc, *data, style, node);
+					if (Z_TYPE_PP(data) == IS_NULL && model->u.element->nillable) {
+						property = xmlNewNode(NULL,"BOGUS");
+						xmlAddChild(node, property);
+						if (style == SOAP_ENCODED) {
+							xmlSetProp(property, "xsi:nil", "1");
+						} else {
+						  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
+							xmlSetNsProp(property, xsi, "nil", "1");
+						}
+					} else {
+						property = master_to_xml(enc, *data, style, node);
+					}
 					xmlNodeSetName(property, model->u.element->name);
 				}
 				return 1;
@@ -1149,7 +1171,19 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 
 				zend_hash_internal_pointer_reset(prop);
 				while (zend_hash_get_current_data(prop,(void**)&val) == SUCCESS) {
-					xmlNodePtr property = master_to_xml(array_el->encode, *val, style, xmlParam);
+					xmlNodePtr property;
+					if (Z_TYPE_PP(val) == IS_NULL && array_el->nillable) {
+						property = xmlNewNode(NULL,"BOGUS");
+						xmlAddChild(xmlParam, property);
+						if (style == SOAP_ENCODED) {
+							xmlSetProp(property, "xsi:nil", "1");
+						} else {
+						  xmlNsPtr xsi = encode_add_ns(property,XSI_NAMESPACE);
+							xmlSetNsProp(property, xsi, "nil", "1");
+						}
+					} else {
+						property = master_to_xml(array_el->encode, *val, style, xmlParam);
+					}
 					xmlNodeSetName(property, array_el->name);
 					zend_hash_move_forward(prop);
 				}
