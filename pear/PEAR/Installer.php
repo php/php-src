@@ -711,56 +711,46 @@ class PEAR_Installer extends PEAR_Common
             if (!is_file($pkgfile)) {
                 $origpkgfile = $pkgfile;
                 $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
-                $version_is_state = false;
-                if ($version === null) {
-                    // use preferred state if no version number was specified
-                    $version = $state;
-                    $version_is_state = true;
-                }
-                if ($this->validPackageName($pkgfile) && !isset($options['upgrade'])) {
-                    if ($this->registry->packageExists($pkgfile)) {
+                if ($this->validPackageName($pkgfile)) {
+                    if ($this->registry->packageExists($pkgfile)
+                          && !isset($options['upgrade'])) {
                         $this->log(0, "Package '$pkgfile' already installed, skipping");
                         // ignore dependencies that are installed unless we are upgrading
                         continue;
                     }
-                }
-                if ($version_is_state) {
-                    $savepkgfile = $pkgfile;
-                    PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
-                    $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                    $errors, $version, $origpkgfile,
-                                                    $state);
-                    PEAR::popErrorHandling();
-                    if (PEAR::isError($pkgfile) &&
-                        $pkgfile->getCode() != PEAR_INSTALLER_ERROR_NO_PREF_STATE) {
-                        return $pkgfile;
-                    } elseif (PEAR::isError($pkgfile)) {
-                        $pkgfile = $savepkgfile;
-                        $states = $this->betterStates($state, false);
-                        $init = true;
-                        // try from stable down to preferred_state
-                        while(($init || (PEAR::isError($pkgfile) &&
-                              $pkgfile->getCode() == PEAR_INSTALLER_ERROR_NO_PREF_STATE))
-                              && count($states)) {
-                            $pkgfile = $savepkgfile;
-                            $init = false;
-                            $nextstate = array_pop($states);
-                            PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
-                            $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                            $errors, $nextstate, $origpkgfile,
-                                                            $state);
-                            PEAR::popErrorHandling();
+                    if ($version === null) {
+                        // use preferred state if no version number was specified
+                        include_once 'PEAR/Remote.php';
+                        $curver = $this->registry->packageInfo($pkgfile, 'version');
+                        $remote = &new PEAR_Remote($config);
+                        $releases = $remote->call('package.info', $pkgfile, 'releases');
+                        $states = $this->betterStates($state, true);
+                        $possible = false;
+                        foreach($releases as $ver => $inf) {
+                            if (in_array($inf['state'], $states)) {
+                                if (is_array($possible)) {
+                                    if (version_compare(key($possible), $ver) < 0) {
+                                        $possible = array($ver => $inf['state']);
+                                    }
+                                } else {
+                                    if (version_compare($ver, $curver) > 0) {
+                                        $possible = array($ver => $inf['state']);
+                                    }
+                                }
+                            }
                         }
+                        if ($possible) {
+                            $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                    $errors, key($possible), $origpkgfile,
+                                                    $state);
+                        }
+                    } else {
+                        $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                        $errors, $version, $origpkgfile,
+                                                        $state);
                         if (PEAR::isError($pkgfile)) {
                             return $pkgfile;
                         }
-                    }
-                } else {
-                    $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
-                                                    $errors, $version, $origpkgfile,
-                                                    $state);
-                    if (PEAR::isError($pkgfile)) {
-                        return $pkgfile;
                     }
                 }
             }
