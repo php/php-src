@@ -41,7 +41,7 @@ InterBase: misc sql types (may take a while)
     	$v_decimal7_2 = rand_number(7,2); 
     	$v_decimal7_0 = rand_number(7,0);
     	$v_numeric15_15 = rand_number(15,15);
-    	$v_numeric15_0 = rand_number(15,0);
+    	$v_numeric15_0 = $iter ? rand_number(15,0) : 0;
     	$v_double  = rand_number(18);
     	$v_float   = rand_number(7);
     	$v_integer = rand_number(9,0);
@@ -88,7 +88,7 @@ InterBase: misc sql types (may take a while)
             echo " in:  $v_numeric15_15\n";
             echo " out: $row->V_NUMERIC15_15\n";
         }
-        if($row->V_NUMERIC15_0 != $v_numeric15_0){
+        if($row->V_NUMERIC15_0 != (string)$v_numeric15_0){
             echo " NUMERIC15_0 fail\n";
             echo " in:  $v_numeric15_0\n";
             echo " out: $row->V_NUMERIC15_0\n";
