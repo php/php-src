@@ -737,8 +737,10 @@ phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
 AC_SUBST(phplibdir)
 AC_SUBST(phptempdir)
-EXTRA_LIBS="$LIBS $EXTRA_LIBS"
+EXTRA_LIBS="$EXTRA_LIBS $LIBS"
 LIBS=""
+EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
+LDFLAGS=""
 
 AC_SUBST(CFLAGS)
 AC_SUBST(PROG_SENDMAIL)
