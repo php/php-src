@@ -97,7 +97,7 @@ function_entry wddx_functions[] = {
 };
 
 zend_module_entry wddx_module_entry = {
-	"WDDX_A", wddx_functions, php_minit_wddx, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"WDDX", wddx_functions, php_minit_wddx, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 /* }}} */
