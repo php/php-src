@@ -269,8 +269,8 @@ PHP_FUNCTION(dns_check_record)
 /* PHP_DNS_xx = 1<<(T_xx-1) */
 #define PHP_DNS_A      0x00000001
 #define PHP_DNS_NS     0x00000002
-#define PHP_DNS_CNAME  0x00000020
-#define PHP_DNS_SOA    0x00000040
+#define PHP_DNS_CNAME  0x00000010
+#define PHP_DNS_SOA    0x00000020
 #define PHP_DNS_PTR    0x00000800
 #define PHP_DNS_HINFO  0x00001000
 #define PHP_DNS_MX     0x00004000
