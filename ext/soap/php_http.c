@@ -214,8 +214,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 
 		efree(http_version);
 	}
-
-
+	
 	if(!get_http_body(stream, http_headers, &http_body, &http_body_size))
 		php_error(E_ERROR, "Error Fetching http body");
 
@@ -368,15 +367,16 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 
 		done = FALSE;
 		http_buf = emalloc(1);
+		*http_buf = '\0';
 		while(!done)
 		{
-			cur = 0;
-			while(!(chunk_size[cur - 2] == '\r' && chunk_size[cur - 1] == '\n'))
+			for (cur = 0; cur < 3 || !(chunk_size[cur - 2] == '\r' && chunk_size[cur - 1] == '\n'); cur++)
 #ifdef PHP_STREAMS
-				chunk_size[cur++] = php_stream_getc(stream);
+				chunk_size[cur] = php_stream_getc(stream);
 #else
-				chunk_size[cur++] = php_sock_fgetc(stream);
+				chunk_size[cur] = php_sock_fgetc(stream);
 #endif
+			chunk_size[cur] = '\0';
 			if(sscanf(chunk_size,"%x",&buf_size) != -1)
 			{
 				http_buf = erealloc(http_buf,http_buf_size + buf_size);
