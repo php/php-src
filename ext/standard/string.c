@@ -1607,7 +1607,7 @@ PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int should_
 					case '\v': *target++ = 'v'; break;
 					case '\b': *target++ = 'b'; break;
 					case '\f': *target++ = 'f'; break;
-					default: target += sprintf(target, "%03o", (unsigned char)c);
+					default: target += zend_sprintf(target, "%03o", (unsigned char)c);
 				}
 				continue;
 			} 
