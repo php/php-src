@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26564 (ncurses5 has headers in PREFIX/include/ncurses/). (Jani)
 - Fixed bug #26548 (ext/session: Malformed HTTP dates headers). (Derick)
 - Fixed bug #26531 (ext/domxml: get_elements_by_tag_name() wildcard fails).
   (Rob Richards)
