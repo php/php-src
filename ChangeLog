@@ -1,3 +1,30 @@
+1999-10-11  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.c:
+    Modified sorting functions to use updated zend_hash() prototype.
+
+    * README.CVS-RULES: Added notice about LXR and Bonsai.
+
+    * MAINTAINERS: First revision.
+
+1999-10-11  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/config.m4: *** empty log message ***
+
+    * ext/informix/ifx.ec:
+    (ext/informix) Changed ifx.ec to use the new high-performance
+                   ZEND API now that it compiles with libtool. (Danny)
+
+    * ext/informix/config.m4:
+    (configure) Allow IFX_LIBDIR environment variable to specify the
+                Informix library path to allow linking with the static
+                libraries (libtool related). (Danny).
+       path for configure (Danny).
+
+1999-10-11  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-10  Sascha Schumann  <sascha@schumann.cx>
 
     * build.mk: automake scans aclocal.m4 as well
