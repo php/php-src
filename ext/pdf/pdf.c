@@ -145,10 +145,12 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_set_duration, NULL)
 	PHP_FE(pdf_open_jpeg, NULL)
 	PHP_FE(pdf_open_tiff, NULL)
+	PHP_FE(pdf_open_png, NULL)
 #if HAVE_LIBGD13
 	PHP_FE(pdf_open_memory_image, NULL)
 #endif
 	PHP_FE(pdf_open_gif, NULL)
+	PHP_FE(pdf_open_image_file, NULL)
 	PHP_FE(pdf_close_image, NULL)
 	PHP_FE(pdf_place_image, NULL)
 	PHP_FE(pdf_add_weblink, NULL)
@@ -2143,7 +2145,7 @@ PHP_FUNCTION(pdf_open_gif) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_GIF(pdf, arg2->value.str.val);
+	pdf_image = PDF_open_image_file(pdf, "gif", arg2->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2177,7 +2179,41 @@ PHP_FUNCTION(pdf_open_jpeg) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_JPEG(pdf, arg2->value.str.val);
+	pdf_image = PDF_open_image_file(pdf, "jpeg", arg2->value.str.val, "", 0);
+
+	if(pdf_image < 0) {
+		php_error(E_WARNING, "Could not open image");
+		RETURN_FALSE;
+	}
+
+	id = zend_list_insert((void *) pdf_image,PDF_GLOBAL(le_pdf_image));
+	RETURN_LONG(id);
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_png(int pdf, string pngfile)
+   Opens a png file and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_png) {
+	pval *arg1, *arg2;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	pdf_image = PDF_open_image_file(pdf, "png", arg2->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2211,7 +2247,42 @@ PHP_FUNCTION(pdf_open_tiff) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_TIFF(pdf, arg2->value.str.val);
+	pdf_image = PDF_open_image_file(pdf, "tiff", arg2->value.str.val, "", 0);
+
+	if(pdf_image < 0) {
+		php_error(E_WARNING, "Could not open image");
+		RETURN_FALSE;
+	}
+
+	id = zend_list_insert((void *) pdf_image,PDF_GLOBAL(le_pdf_image));
+	RETURN_LONG(id);
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_image_file(int pdf, string type, string file)
+   Opens an image file of the given type and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_image_file) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_string(arg3);
+	id=arg1->value.lval;
+	pdf = zend_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	pdf_image = PDF_open_image_file(pdf, arg2->value.str.val, arg3->value.str.val, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2269,7 +2340,6 @@ PHP_FUNCTION(pdf_open_memory_image) {
 			*ptr++ = im->blue[color];
 		}
 	}
-
 
 	pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
 	efree(buffer);
