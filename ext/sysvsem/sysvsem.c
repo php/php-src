@@ -114,6 +114,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 
 	if(sem_ptr->count == -1 || !sem_ptr->auto_release) {
+		efree(sem_ptr);
 		return;
 	}
 	/* Decrement the usage count. */
@@ -272,10 +273,7 @@ PHP_FUNCTION(sem_get)
 	sem_ptr->count = 0;
 	sem_ptr->auto_release = auto_release;
 
-	Z_LVAL_P(return_value) = zend_list_insert(sem_ptr, php_sysvsem_module.le_sem);
-	Z_TYPE_P(return_value) = IS_LONG;
-
-	sem_ptr->id = (int)Z_LVAL_P(return_value);
+	sem_ptr->id = ZEND_REGISTER_RESOURCE(return_value, sem_ptr, php_sysvsem_module.le_sem);
 }
 /* }}} */
 
@@ -284,7 +282,6 @@ PHP_FUNCTION(sem_get)
 static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 {
 	pval **arg_id;
-	int id, type;
 	sysvsem_sem *sem_ptr;
     struct sembuf sop;
 
@@ -293,22 +290,16 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 			if (zend_get_parameters_ex(1, &arg_id)==FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_long_ex(arg_id);
-			id = (int)Z_LVAL_PP(arg_id);
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 
-	sem_ptr = (sysvsem_sem *) zend_list_find(id, &type);
-	if (type!=php_sysvsem_module.le_sem) {
-		php_error(E_WARNING, "%d is not a SysV semaphore index", id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semphore", php_sysvsem_module.le_sem);
 
 	if (!acquire && sem_ptr->count == 0) {
-		php_error(E_WARNING, "SysV semaphore index %d (key 0x%x) is not currently acquired", id, sem_ptr->key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semaphore %d (key 0x%x) is not currently acquired", Z_LVAL_PP(arg_id), sem_ptr->key);
 		RETURN_FALSE;
 	}
 
@@ -356,7 +347,6 @@ PHP_FUNCTION(sem_release)
 PHP_FUNCTION(sem_remove)
 {
 	pval **arg_id;
-	int id,type;
 	sysvsem_sem *sem_ptr;
 #if HAVE_SEMUN
 	union semun un;
@@ -366,33 +356,25 @@ PHP_FUNCTION(sem_remove)
 	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg_id) == FAILURE) {
 			WRONG_PARAM_COUNT;
 	}
-	convert_to_long_ex(arg_id);
 
-	id = Z_LVAL_PP(arg_id);
-
-	sem_ptr = (sysvsem_sem *) zend_list_find(id, &type);
-
-	if (type!=php_sysvsem_module.le_sem) {
-			php_error(E_WARNING, "%d is not a SysV semaphore index", id);
-			RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(sem_ptr, sysvsem_sem *, arg_id, -1, "SysV semphore", php_sysvsem_module.le_sem);
 
 #if HAVE_SEMUN
 	un.buf = &buf;
-	if(semctl(sem_ptr->semid, 0, IPC_STAT, &un) < 0) {
+	if(semctl(sem_ptr->semid, 0, IPC_STAT, un) < 0) {
 #else
 	if(semctl(sem_ptr->semid, 0, IPC_STAT, NULL) < 0) {
 #endif
-		php_error(E_WARNING, "%d is not a existing SysV Semaphore Id", id);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SysV semphore %d does not (any longer) exist", Z_LVAL_PP(arg_id));
 		RETURN_FALSE;
 	}
 
 #if HAVE_SEMUN
-	if(semctl(sem_ptr->semid, 0, IPC_RMID, &un) < 0) {
+	if(semctl(sem_ptr->semid, 0, IPC_RMID, un) < 0) {
 #else
 	if(semctl(sem_ptr->semid, 0, IPC_RMID, NULL) < 0) {
 #endif
-		php_error(E_WARNING, "sem_remove() failed for id %d: %s", id, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for SysV sempphore %d: %s", Z_LVAL_PP(arg_id), strerror(errno));
 		RETURN_FALSE;
 	}
 	
