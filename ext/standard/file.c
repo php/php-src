@@ -838,6 +838,7 @@ PHP_FUNCTION(popen)
 
 		if (!fp) {
 			php_error_docref2(NULL TSRMLS_CC, buf, p, E_WARNING, "%s", strerror(errno));
+			efree(p);
 			RETURN_FALSE;
 		}
 	} else {
