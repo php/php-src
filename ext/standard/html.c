@@ -232,38 +232,37 @@ static entity_table_t ent_uni_8592_9002[] = {
 	NULL, NULL, "pr", "sc", "cupre", "sscue", "prsim", "scsim",
 	/* 8832 (0x2280) */
 	"npr", "nsc", "sub", "sup", "nsub", "nsup", "sube", "supe",
-	/* 8840 - 8852 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8853 */
-	"oplus", NULL, "otimes",
-	/* 8856 - 8868 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	/* 8869 */
-	"perp",
-	/* 8870 - 8901 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL,
-	/* 8901 */
-	"sdot",
-	/* 8902 - 8967 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL,
-	/* 8968 */
-	"lceil", "rceil", "lfloor", "rfloor",
-	/* 8969 - 9000 */
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-	NULL,
-	/* 9001 */
-	"lang", "rang",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8848 (0x2290) */
+	NULL, NULL, NULL, NULL, NULL, "oplus", NULL, "otimes",
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8864 (0x22a0) */
+	NULL, NULL, NULL, NULL, NULL, "perp", NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8880 (0x22b0) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8896 (0x22c0) */
+	NULL, NULL, NULL, NULL, NULL, "sdot", NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8912 (0x22d0) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8928 (0x22e0) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8944 (0x22f0) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8960 (0x2300) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	"lceil", "rceil", "lfloor", "rfloor", NULL, NULL, NULL, NULL,
+	/* 8976 (0x2310) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	/* 8992 (0x2320) */
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, "lang", "rang"
 };
 
 static entity_table_t ent_uni_9674[] = {
@@ -398,7 +397,7 @@ static const struct html_entity_map entity_map[] = {
 	{ cs_8859_15, 		0xa0, 0xff, ent_iso_8859_15 },
 	{ cs_utf_8, 		0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_utf_8, 		338,  402,  ent_uni_338_402 },
-	{ cs_utf_8, 		710,  732,  ent_uni_spacing },
+	{ cs_utf_8, 		710,  731,  ent_uni_spacing },
 	{ cs_utf_8, 		913,  982,  ent_uni_greek },
 	{ cs_utf_8, 		8194, 8260, ent_uni_punct },
 	{ cs_utf_8, 		8364, 8364, ent_uni_euro }, 
