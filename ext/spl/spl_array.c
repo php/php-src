@@ -127,6 +127,7 @@ typedef struct _spl_array_object {
 	zend_object       std;
 	zval              *array;
 	HashPosition      pos;
+	int               is_ref;
 } spl_array_object;
 
 /* {{{ spl_array_object_free_storage */
@@ -162,9 +163,11 @@ static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, s
 	if (orig) {
 		intern->array = orig->array;
 		ZVAL_ADDREF(intern->array);
+		intern->is_ref = 1;
 	} else {
 		MAKE_STD_ZVAL(intern->array);
 		array_init(intern->array);
+		intern->is_ref = 0;
 	}
 	zend_hash_internal_pointer_reset_ex(HASH_OF(intern->array), &intern->pos);
 
@@ -497,11 +500,16 @@ static int spl_array_next(spl_array_object *intern TSRMLS_DC) /* {{{ */
 {
 	HashTable *aht = HASH_OF(intern->array);
 
-	zend_hash_move_forward_ex(aht, &intern->pos);
-	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
-		return spl_array_skip_protected(intern TSRMLS_CC);
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
+		return FAILURE;
 	} else {
-		return zend_hash_has_more_elements_ex(aht, &intern->pos);
+		zend_hash_move_forward_ex(aht, &intern->pos);
+		if (Z_TYPE_P(intern->array) == IS_OBJECT) {
+			return spl_array_skip_protected(intern TSRMLS_CC);
+		} else {
+			return zend_hash_has_more_elements_ex(aht, &intern->pos);
+		}
 	}
 } /* }}} */
 
@@ -532,7 +540,7 @@ static int spl_array_it_valid(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 		return FAILURE;
 	}
 
-	if (object->pos && object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->pos && object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::valid(): Array was modified outside object and internal position is no longer valid");
 		return FAILURE;
 	} else {
@@ -564,7 +572,7 @@ static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_k
 		return HASH_KEY_NON_EXISTANT;
 	}
 
-	if (object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::current(): Array was modified outside object and internal position is no longer valid");
 		return HASH_KEY_NON_EXISTANT;
 	}
@@ -585,7 +593,7 @@ static void spl_array_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* {
 		return;
 	}
 
-	if (object->array->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
+	if (object->is_ref && spl_hash_verify_pos(object TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "ArrayIterator::next(): Array was modified outside object and internal position is no longer valid");
 	} else {
 		spl_array_next(object TSRMLS_CC);
@@ -791,7 +799,7 @@ SPL_METHOD(Array, current)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		return;
 	}
@@ -820,7 +828,7 @@ SPL_METHOD(Array, key)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		return;
 	}
@@ -851,11 +859,7 @@ SPL_METHOD(Array, next)
 		return;
 	}
 
-	if (intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
-	} else {
-		spl_array_next(intern TSRMLS_CC);
-	}
+	spl_array_next(intern TSRMLS_CC);
 }
 /* }}} */
 
@@ -872,7 +876,7 @@ SPL_METHOD(Array, valid)
 		return;
 	}
 
-	if (intern->pos && intern->array->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+	if (intern->pos && intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
 		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Array was modified outside object and internal position is no longer valid");
 		RETURN_FALSE;
 	} else {
