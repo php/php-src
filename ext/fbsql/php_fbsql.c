@@ -521,12 +521,6 @@ PHPFBLink* phpfbConnect(INTERNAL_FUNCTION_PARAMETERS, char *hostName, char *user
 	{
 		FBCExecHandler* execHandler = fbcehHandlerForHost(hostName,128);
 		list_entry le;
-		if (execHandler == NULL)
-		{
-			php_error(E_WARNING,"Cannot connect to host '%s'",hostName);
-			php_error(E_WARNING,fbcehClassErrorMessage());
-//			return NULL;
-		}
 		result = malloc(sizeof(PHPFBLink));
 		result->retainCount     = 1;
 		result->persistant      = persistant;
@@ -1115,7 +1109,15 @@ PHP_FUNCTION(fbsql_select_db)
 		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
 	}
 	if (phpLink == NULL) RETURN_FALSE;
-/*	printf("Select db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
+	if (phpLink->execHandler == NULL)
+	{
+		int port = atoi(name);
+		if (port == 0 || port > 64535) {
+			php_error(E_WARNING,"Cannot connect to FBExec for database '%s'",name);
+			php_error(E_WARNING,fbcehClassErrorMessage());
+			RETURN_FALSE;
+		}
+	}
 
 	database = phpfbSelectDB(INTERNAL_FUNCTION_PARAM_PASSTHRU,name,phpLink);
 	if (database == NULL) RETURN_FALSE;
