@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
+- Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
+  exhaustion. (Andrei)
 - Improved performance of switch statement. (Dmitry)
 - Removed garbage manager in Zend Engine which results in more aggressive
   freeing of data. (Dmitry, Andi)
