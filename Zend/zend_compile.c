@@ -1103,6 +1103,9 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 	ce->parent = parent_ce;
+	ce->handle_property_get = parent_ce->handle_property_get;
+	ce->handle_property_set = parent_ce->handle_property_set;
+	ce->handle_function_call = parent_ce->handle_function_call;
 	do_inherit_parent_constructor(ce);
 }
 
