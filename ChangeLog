@@ -1,3 +1,33 @@
+2000-02-14  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/pgsql.php:    Added PostgreSQL support for DB submitted by Rui Hirokawa
+    <louis@cityfujisawa.ne.jp>
+
+    * main.c:    Made auto_prepend_file and auto_append_file accept "none" as parameter
+    to disable, like in PHP 3.0.
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB/storage.php
+      pear/DB.php:    Added DB/storage to PEAR.
+    Introduced DB warnings
+    Revert to using Javadoc-style comments.
+    DB_common now returns references in the appropriate places
+
+2000-02-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/standard/filestat.c: Fix for filesize() and others on sockets.
+
+2000-02-14  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/imap/imap.c:
+    imap_delet(),imap_undelete() and imap_move() will now optionaly accept UDIs
+
+2000-02-14  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/roxen.c: Use sapi_free_header.
+
 2000-02-13  Zeev Suraski  <zeev@php.net>
 
     * sapi/isapi/php4isapi.c: Fix a few memory leaks
