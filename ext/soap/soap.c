@@ -1285,6 +1285,7 @@ PHP_METHOD(soapserver, handle)
 				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
 				    Z_TYPE(retval) == IS_STRING) {
 					doc_request = soap_xmlParseMemory(Z_STRVAL(retval),Z_STRLEN(retval));
+					zval_dtor(&retval);
 				} else {
 					php_error(E_ERROR,"Can't uncompress compressed request");
 				}
