@@ -225,7 +225,10 @@ ARG_ENABLE("memory-limit", "Enable memory limit checking code", "no");
 AC_DEFINE('MEMORY_LIMIT', PHP_MEMORY_LIMIT == "yes" ? 1 : 0);
 
 ARG_ENABLE("zend-multibyte", "Enable Zend multibyte encoding support", "no");
-AC_DEFINE('ZEND_MULTIBYTE', PHP_ZEND_MULTIBYTE == "yes" ? 1 : 0);
+if (PHP_ZEND_MULTIBYTE == "yes") {
+	STDOUT.WriteLine("Enabling Zend multibyte encoding support");
+	AC_DEFINE('ZEND_MULTIBYTE', 1);
+}
 
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
