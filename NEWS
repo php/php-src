@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added the Cyrus-IMAP extension, which allows a direct interface to Cyrus' 
+  more advanced capabilities. (Sterling)
 - Enhance read_exif_data() to support multiple comment tags (Rasmus)
 - Fixed a crash bug in array_map() when NULL callback was passed in. (Andrei)
 - Change from E_ERROR to E_WARNING in the exif extension (Rasmus)
