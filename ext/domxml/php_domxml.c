@@ -3238,19 +3238,20 @@ PHP_FUNCTION(domxml_dump_mem)
 	xmlDoc *docp;
 	xmlChar *mem;
 	int format = 0;
-	int size;
+	int size, keepblanks;
 	int encoding_len = 0;
 	char *encoding;
 
 
 	DOMXML_PARAM_THREE(docp, id, le_domxmldocp, "|ls", &format, &encoding, &encoding_len);
 	if (format) {
-		xmlKeepBlanksDefault(0);
+		keepblanks = xmlKeepBlanksDefault(0);
 		if (encoding_len) {
 			xmlDocDumpFormatMemoryEnc(docp, &mem, &size, encoding, format);
 		} else {
 			xmlDocDumpFormatMemory(docp, &mem, &size, format);
 		}
+        xmlKeepBlanksDefault(keepblanks);
 	} else {
 		if (encoding_len) {
 			xmlDocDumpMemoryEnc(docp, &mem, &size, encoding);
