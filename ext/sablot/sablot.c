@@ -1166,8 +1166,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     zval **argv = NULL,
           *errorHandler;
     
-    php_sablot_error *errors,
-                      errors_start;
+    php_sablot_error *errors;
     php_sablot       *handle = NULL;
     
     char *sep = NULL;
@@ -1183,7 +1182,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         SABLOT_FREE_ERROR_HANDLE(SABLOTG_HANDLE);
         
         SABLOTG(errors_start).next = NULL;
-        SABLOTG(errors) = &SABLOTG(errors_start);
+        SABLOTG(errors)            = &SABLOTG(errors_start);
         
         errors        = SABLOTG(errors);
         errorHandler  = SABLOTG(errorHandler);
@@ -1193,7 +1192,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         SABLOT_FREE_ERROR_HANDLE(*handle);
         
         handle->errors_start.next = NULL;
-        handle->errors = &errors_start;
+        handle->errors            = &handle->errors_start;
         
         errors        = handle->errors;
         errorHandler  = handle->errorHandler;
@@ -1223,9 +1222,9 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
     }
     
     if (isAdvanced)
-        handle->last_errno = (int)code;
+        handle->last_errno = (int) code;
     else
-        SABLOTG(last_errno) = (int)code;
+        SABLOTG(last_errno) = (int) code;
     
     if (errorHandler) {
         zval *retval;
@@ -1249,7 +1248,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
             
             array_init(argv[3]);
             errors = handle->errors_start.next;
-            while (errors->next) {
+            while (errors) {
                 add_assoc_string(argv[3], errors->key, errors->value, 1);
                 errors = errors->next;
             }
@@ -1272,7 +1271,11 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
         zval_dtor(retval);
         efree(retval);
     } else {
-        _php_sablot_standard_error(errors, isAdvanced ? handle->errors_start : SABLOTG(errors_start), code, level);
+    	if (level == MH_LEVEL_CRITICAL ||
+    	    level == MH_LEVEL_ERROR    ||
+    	    level == MH_LEVEL_WARN) {
+        	_php_sablot_standard_error(errors, isAdvanced ? handle->errors_start : SABLOTG(errors_start), code, level);
+        }
     }
 
     return(0);
@@ -1288,7 +1291,6 @@ static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_erro
     SABLOTLS_FETCH();
     
     errors = errors_start.next;
-    
     while (errors) {
         len = pos + strlen(errors->key) + sizeof(": ") + strlen(errors->value) + sizeof("\n");
         
