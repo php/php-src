@@ -1,3 +1,138 @@
+2003-06-15  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/xmlrpc/xmlrpc.dsp:
+      Fixed win32 build (link to external expat).
+
+2003-06-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/php_dom.c:
+      Add an error handler (thx to timm for the idea)
+
+2003-06-15  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/openssl/openssl.dsp
+      ext/openssl/xp_ssl.c
+      main/php_network.h
+      main/streams/xp_socket.c:
+      Win32 build fixes for openssl
+
+    * ext/standard/file.h:
+      This needs to be exported for dynamic extensions
+
+    * ext/exif/exif.c
+      ext/exif/exif.dsp
+      ext/shmop/shmop.dsp
+      sapi/pi3web/php4pi3web.dsp
+      sapi/pi3web/pi3web_sapi.c:
+      Fixed win32 build
+
+2003-06-15  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      missing entries, cleanup
+
+2003-06-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xml/compat.c:
+      remove leftover parser->mem_hdlrs - compiles now
+
+2003-06-15  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/compat.c
+      ext/xml/expat_compat.h:
+      Removed xmlMemSetup() code as it doesn't help at all.
+
+2003-06-15  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * ext/gd/CREDITS:
+      add Marcus, enough work done
+
+2003-06-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/php_gd.h
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/xbm.c:
+      Add ImageXBM
+
+2003-06-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/element.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/text.c
+      ext/dom/xml_common.h:
+      remove code no longer needed
+      fix format Output property
+
+2003-06-15  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/tests/conv_test.xbm:
+      Better use '_' instead of '.'
+
+    * ext/gd/config.m4:
+      Better configure output
+
+2003-06-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsl.dsp:
+      should be multithreaded and correct lib naming
+
+2003-06-15  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+      Added TODO and IDEAS to makerpm
+
+    * pear/PEAR/Command/Package.php:
+      Fix makerpm (again)
+      Build an independant filelist tree
+      (this command still needs some work)
+
+2003-06-15  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/dbx/dbx.c
+      ext/exif/exif.c
+      ext/fam/fam.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/hwapi/hwapi.cpp
+      ext/hyperwave/hw.c:
+      proto fixes
+
+2003-06-15  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsl.dsp:
+      be nice if i named the dll correctly and put it somewhere
+
+    * ext/xsl/xsl.dsp:
+      fix xsl release build
+      link libxml2 and libxslt dynamically for consistancy
+
+    * ext/dom/dom.dsp:
+      link libxml2 dynamically for consistancy
+
+2003-06-15  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/interbase/interbase.c
+      sapi/nsapi/nsapi.c:
+      Fixed ZTS build
+
+    * sapi/nsapi/nsapi.c:
+      No need for this in the HEAD branch
+
+    * sapi/apache/php4apache.dsp:
+      Fixed win32 build (mod_php4 -> mod_php5)
+
+    * ext/domxml/domxml.dsp:
+      Switch to dynamic linking of php_domxml.dll due to the libxml2 dependency
+      already being present for the core php4ts.dll.
+
 2003-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/standard/tests/serialize/005.phpt:
