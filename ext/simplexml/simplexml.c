@@ -692,7 +692,7 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	xmlSchemaPtr            sptr;
 	xmlSchemaValidCtxtPtr   vptr;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", source) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &source) == FAILURE) {
 		return;
 	}
 
