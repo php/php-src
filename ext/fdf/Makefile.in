@@ -2,5 +2,6 @@
 LTLIBRARY_NAME    = libfdf.la
 LTLIBRARY_SOURCES = fdf.c
 LTLIBRARY_SHARED_NAME = fdf.la
+LTLIBRARY_SHARED_LIBADD = $(FDFTK_SHARED_LIBADD)
 
 include $(top_srcdir)/build/dynlib.mk
