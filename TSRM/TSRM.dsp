@@ -155,6 +155,10 @@ SOURCE=.\tsrm_win32.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\readdir.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TSRM.h
 # End Source File
 # Begin Source File
