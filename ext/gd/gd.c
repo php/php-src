@@ -692,7 +692,7 @@ PHP_FUNCTION(imagesetstyle)
 	convert_to_array_ex(styles);
 
 	/* copy the style values in the stylearr */
-	stylearr = emalloc(sizeof(int) * zend_hash_num_elements(HASH_OF(*styles)));
+	stylearr = safe_emalloc(sizeof(int), zend_hash_num_elements(HASH_OF(*styles)), 0);
 
 	zend_hash_internal_pointer_reset_ex(HASH_OF(*styles), &pos);
 
@@ -2472,7 +2472,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		RETURN_FALSE;
 	}
 
-	points = (gdPointPtr) emalloc(npoints * sizeof(gdPoint));
+	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
 
 	for (i = 0; i < npoints; i++) {
 		if (zend_hash_index_find(Z_ARRVAL_PP(POINTS), (i * 2), (void **) &var) == SUCCESS) {
