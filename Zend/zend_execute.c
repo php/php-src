@@ -76,6 +76,8 @@ if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT) && (!(*(obj)
 		(*(obj))->is_ref = 1;			\
 	}
 
+#define RETURN_VALUE_USED(opline) (!((opline)->result.u.EA.type & EXT_TYPE_UNUSED))
+
 static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_free ELS_DC)
 {
 	switch(node->op_type) {
@@ -1473,7 +1475,7 @@ overloaded_function_call_cont:
 do_fcall_common:
 				{
 					zval **original_return_value;
-					int return_value_used = !(opline->result.u.EA.type & EXT_TYPE_UNUSED);
+					int return_value_used = RETURN_VALUE_USED(opline);
 
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
 
@@ -1938,7 +1940,10 @@ send_by_ref:
 			case ZEND_INCLUDE_OR_EVAL: {
 					zend_op_array *new_op_array=NULL;
 					zval **original_return_value = EG(return_value_ptr_ptr);
+					int return_value_used;
 					CLS_FETCH();
+					
+					return_value_used = RETURN_VALUE_USED(opline);
 
 					switch (opline->op2.u.constant.value.lval) {
 						case ZEND_INCLUDE:
@@ -1959,12 +1964,18 @@ send_by_ref:
 						EG(active_op_array) = new_op_array;
 
 						zend_execute(new_op_array ELS_CC);
-
-						if (!Ts[opline->result.u.var].var.ptr) { /* there was no return statement */
-							Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
-							INIT_PZVAL(Ts[opline->result.u.var].var.ptr);
-							Ts[opline->result.u.var].var.ptr->value.lval = 1;
-							Ts[opline->result.u.var].var.ptr->type = IS_LONG;
+						
+						if (!return_value_used) {
+							if (Ts[opline->result.u.var].var.ptr) {
+								zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
+							} 
+						} else { /* return value is used */
+							if (!Ts[opline->result.u.var].var.ptr) { /* there was no return statement */
+								Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
+								INIT_PZVAL(Ts[opline->result.u.var].var.ptr);
+								Ts[opline->result.u.var].var.ptr->value.lval = 1;
+								Ts[opline->result.u.var].var.ptr->type = IS_LONG;
+							}
 						}
 
 						EG(opline_ptr) = &opline;
@@ -1973,8 +1984,10 @@ send_by_ref:
 						destroy_op_array(new_op_array);
 						efree(new_op_array);
 					} else {
-						Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
-						INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+						if (return_value_used) {
+							Ts[opline->result.u.var].var.ptr = (zval *) emalloc(sizeof(zval));
+							INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+						}
 					}
 					EG(return_value_ptr_ptr) = original_return_value;
 				}
