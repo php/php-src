@@ -221,7 +221,7 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ void _close_odbc_pcon
+/* {{{ void _close_odbc_pconn
  */
 static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
