@@ -1919,11 +1919,11 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 			return FALSE;
 		}
 	}
-/*  Possible fix for bug #
- *  Needs testing on UnixODBC < 2.0.5 though.
- *	 #if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC)
- *  Uncomment the line above, and comment line below to fully test */
-#ifdef HAVE_EMPRESS
+/*  Possible fix for bug #10250
+ *  Needs testing on UnixODBC < 2.0.5 though. */
+ #if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC)
+/* *  Uncomment the line above, and comment line below to fully test 
+ * #ifdef HAVE_EMPRESS */
 	{
 		int     direct = 0;
 		char    dsnbuf[300];
