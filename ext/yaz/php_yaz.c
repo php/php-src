@@ -2059,7 +2059,7 @@ PHP_FUNCTION(yaz_record)
 			}
 			else if (!strcmp (type, "array"))
 			{
-				Z_External *ext = (Z_External *) ZOOM_record_get (r, "raw", 0);
+				Z_External *ext = (Z_External *) ZOOM_record_get (r, "ext", 0);
 				oident *ent = oid_getentbyoid(ext->direct_reference);
 
 				if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1)
