@@ -581,7 +581,11 @@ PHP_FUNCTION(xslt_error)
 	}
 	ZEND_FETCH_RESOURCE(handle, php_xslt *, processor_p, -1, le_xslt_name, le_xslt);
 
-	RETURN_STRING(XSLT_ERRSTR(handle), 1);	
+	if(XSLT_ERRSTR(handle)) {
+		RETURN_STRING(XSLT_ERRSTR(handle), 1);	
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
