@@ -511,11 +511,12 @@ static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *va
 			return;
 
 		case IS_DOUBLE: {
-				char s[256];
+				char *s;
 				ulong slen;
 
-				slen = sprintf(s, "d:%.252g;", Z_DVAL_PP(struc));
+				slen = spprintf(&s, 0, "d:%.100g;", Z_DVAL_PP(struc));
 				smart_str_appendl(buf, s, slen);
+				efree(s);
 				return;
 			}
 
