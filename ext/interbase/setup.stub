@@ -1,7 +1,0 @@
-# $Source$
-# $Id$
-
-define_option with-interbase 'InterBase support?' yesnodir \
-    'no /usr/interbase InterBase base install' \
-'     Whether to build PHP with InterBase support. More\n
-      information about InterBase can be found at http://www.interbase.com/.'

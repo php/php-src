@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME    = libzlib.la
-LTLIBRARY_SOURCES = zlib.c zlib_fopen_wrapper.c
-LTLIBRARY_SHARED_NAME = zlib.la
-LTLIBRARY_SHARED_LIBADD = $(ZLIB_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,7 +1,0 @@
-
-LTLIBRARY_NAME = libpcre.la
-LTLIBRARY_SOURCES = maketables.c get.c study.c pcre.c
-
-EXTRA_INCLUDES = -DSUPPORT_UTF8
-
-include $(top_srcdir)/build/dynlib.mk

@@ -1,7 +1,0 @@
-CCVS Module ToDo List
-08/14/2000
-Brendan W. McAdams <bmcadams@php.net>
--------------------------------------
-- Return value of the final stats of an authorization should already be split out into a php aware associative
-  array, instead of having to do this at the PHP level. Right now we are splitting stuff out using text_value;
-  I'm evaluating the merits of having a seperate function for the 'finishing' of a sale....

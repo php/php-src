@@ -1,5 +1,0 @@
-# $Source$
-# $Id$
-
-define_option enable-sysvsem 'System V semaphores support? ' yesno no \
-'    Whether to use the System V semaphores (currently only solaris and linux).'

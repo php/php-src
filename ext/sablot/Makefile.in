@@ -1,8 +1,0 @@
-# $Id $
-
-LTLIBRARY_NAME        = libsablot.la
-LTLIBRARY_SOURCES     = sablot.c
-LTLIBRARY_SHARED_NAME = sablot.la
-LTLIBRARY_SHARED_LIBADD  = $(SABLOT_SHARED_LIBADD)
-
-include $(top_srcdir)/build/dynlib.mk
