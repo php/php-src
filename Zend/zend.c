@@ -405,7 +405,7 @@ static FILE *zend_fopen_wrapper(const char *filename, char **opened_path)
 
 static void register_standard_class(TSRMLS_D)
 {
-	zend_standard_class_def = malloc(sizeof(zend_class_entry));
+	zend_standard_class_def = calloc(1, sizeof(zend_class_entry));
 
 	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
 	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
