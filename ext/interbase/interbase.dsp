@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D ZEND_DEBUG=1 /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /I "..\..\..\bindlib_w32" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D "COMPILE_DL_INTERBASE" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"

@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Better Interbase blob, null and error handling (Patch by Jeremy Bettis)
 - Fixed a crash bug in array_map() if the input arrays had string or
   non-sequential keys. Also modified it so that if a single array is passed,
   its keys are preserved in the resulting array. (Andrei)
