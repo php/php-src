@@ -1555,12 +1555,6 @@ binary_assign_op_addr_obj:
 				{
 					zval **value_ptr_ptr = get_zval_ptr_ptr(&EX(opline)->op2, EX(Ts), BP_VAR_W);
 
-					if (value_ptr_ptr = EX(Ts)[EX(opline)->op2.u.var].var.ptr_ptr) {
-						if (!(*value_ptr_ptr != &EG(uninitialized_zval) && (PZVAL_IS_REF(*value_ptr_ptr) || (*value_ptr_ptr)->refcount == 1)))
-						{
-							zend_error(E_ERROR, "Can't assign by reference non-referencable value!");
-						}
-					}
 					zend_assign_to_variable_reference(&EX(opline)->result, get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W), value_ptr_ptr, EX(Ts) TSRMLS_CC);
 					NEXT_OPCODE();
 				}
