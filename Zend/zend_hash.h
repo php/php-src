@@ -182,4 +182,11 @@ void zend_hash_display(HashTable *ht);
 
 END_EXTERN_C()
 
+#define ZEND_INIT_SYMTABLE(ht)								\
+	ZEND_INIT_SYMTABLE_EX(ht, 2, 0)
+
+#define ZEND_INIT_SYMTABLE_EX(ht, n, persistent)			\
+	zend_hash_init(ht, n, NULL, ZVAL_PTR_DTOR, persistent)
+
+
 #endif							/* _HASH_ */
