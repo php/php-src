@@ -1,3 +1,52 @@
+2002-06-01  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Builder.php: * add some phpdoc
+
+2002-06-01  Stefan Roehrich  <stefan@roehri.ch>
+
+    * ext/snmp/config.m4
+      acinclude.m4
+      ext/domxml/config.m4
+      ext/imap/config.m4:
+    WS change to make very old compilers/preprocessors (e.g. HP/UX 9)
+    happy (thanks to Andreas Ley for recognizing this).
+
+2002-06-01  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Config.php
+      pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Installer.php:
+    add 'pear search'. introduce type 'mask' to config.
+
+2002-06-01  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/php_apache.c: Fix build
+
+2002-06-01  Andi Gutmans  <andi@zend.com>
+
+    * configure.in: - Fix build with Engine 2
+
+    * sapi/apache/php_apache.c: - Reapply netware patch
+
+2002-06-01  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache/php_apache.c:
+    Put Netware header and comment back in.  My CVS revision id got messed
+    up somehow.
+
+2002-06-01  Sander Roobol  <phy@wanadoo.nl>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Update cracklib path and comment it out (thanks to Urs Gehrig for the hint)
+
+2002-06-01  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mbstring/mbfilter.c:
+    Makring function declarations match implementations (ZTS compilation)
+
 2002-05-31  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
 
     * sapi/apache/php_apache.c: Oops
