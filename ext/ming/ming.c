@@ -2207,25 +2207,28 @@ PHP_METHOD(swfmovie, output)
 #ifdef HAVE_MING_ZLIB
 	zval **zlimit = NULL;
 	int limit = -1;
+	int argc = ZEND_NUM_ARGS();
 	int oldval = INT_MIN;
 	long out; 
 
-	if (zend_get_parameters_ex(1, &zlimit) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if(argc) {
+		if (zend_get_parameters_ex(1, &zlimit) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
 
-	convert_to_long_ex(zlimit);
-	limit = Z_LVAL_PP(zlimit);
+		convert_to_long_ex(zlimit);
+		limit = Z_LVAL_PP(zlimit);
 
-	if ((limit < 0) || (limit > 9)) {
-		php_error(E_WARNING,"compression level must be within 0..9");
-		RETURN_FALSE;
+		if ((limit < 0) || (limit > 9)) {
+			php_error(E_WARNING,"compression level must be within 0..9");
+			RETURN_FALSE;
+		}
 	}
     oldval = Ming_setSWFCompression(limit);			
 	out = SWFMovie_output(movie, &phpByteOutputMethod, NULL);
-	if (oldval >= -1 && oldval <= 9)
+	if (oldval >= -1 && oldval <= 9) {
 		Ming_setSWFCompression(oldval);
-	
+	}	
 	RETURN_LONG(out);
 #else
 	RETURN_LONG(SWFMovie_output(movie, &phpByteOutputMethod, NULL));
