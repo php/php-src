@@ -426,6 +426,34 @@ Changes in the Zend Engine 2.0
       one would have to explicitly call parent::__destruct() in the
       destructor body.
 
+    * Constants.
+
+      The Zend Engine 2.0 introduces per-class and per-namespace
+      constants.
+
+      Example:
+
+        <?php
+        class Foo {
+            const constant = 'constant';
+        }
+
+        echo 'Foo::constant = ' . Foo::constant . "\n";
+        ?>
+
+      The Zend Engine 2.0 allows for expressions within constants:
+
+        <?php
+        class Bar {
+            const a = 1<<0;
+            const b = 1<<1;
+            const c = a | b;
+        }
+        ?>
+
+      Old code that has no user-defined classes or functions 
+      named 'const' will run without modifications.
+
     * Exceptions.
 
       The Zend Engine 1.0 had no exception handling. The Zend Engine 2.0
@@ -464,8 +492,8 @@ Changes in the Zend Engine 2.0
         }
         ?>
 
-      Old code that has no user-defined functions 'catch', 'throw' and
-      'try' will run without modifications.
+      Old code that has no user-defined classes or functions 'catch', 
+      'throw' and 'try' will run without modifications.
 
     * Dereferencing objects returned from functions.
 
