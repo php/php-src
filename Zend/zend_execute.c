@@ -3386,6 +3386,9 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 		case ZEND_INCLUDE:
 		case ZEND_REQUIRE:
 			new_op_array = compile_filename(EX(opline)->op2.u.constant.value.lval, inc_filename TSRMLS_CC);
+			if (!new_op_array) {
+				zend_error(E_ERROR, "Parse error inside included file.");
+			}
 			break;
 		case ZEND_EVAL: {
 				char *eval_desc = zend_make_compiled_string_description("eval()'d code" TSRMLS_CC);
