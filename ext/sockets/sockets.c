@@ -99,11 +99,11 @@ function_entry sockets_functions[] = {
  */
 	PHP_FE(signal, 				NULL)
 #endif
-#if 0
 /* 
  * These are defined elsewhere.. 
  * would these be more appropriate?
  */
+#if 0
 	PHP_FE(gethostbyname, 			second_arg_force_ref)	/* OK */
 	PHP_FE(gethostbyaddr, 			second_arg_force_ref)	/* OK */
 #endif
@@ -656,10 +656,10 @@ PHP_FUNCTION(getsockname)
 }
 /* }}} */
 
-#if 0
 /* {{{ proto int gethostbyname(string name, string &addr)
    Given a hostname, sets addr to be a human-readable version of the host's address */
 
+#if 0
 /* Another lock to prevent multiple threads from grabbing gethostbyname() */
 volatile int gethostbyname_lock = 0;
 
@@ -669,6 +669,7 @@ PHP_FUNCTION(gethostbyname)
 	int ret;
 	char *tmp, *addr_string;
 	struct hostent *host_struct;
+	struct in_addr a;
 
 	if (ZEND_NUM_ARGS() != 2 || 
 	    zend_get_parameters_ex(2, &name, &addr) == FAILURE) {
@@ -692,7 +693,8 @@ PHP_FUNCTION(gethostbyname)
 	while (inet_ntoa_lock == 1);
 	inet_ntoa_lock = 1;
 
-	addr_string = inet_ntoa((struct in_addr) host_struct->h_addr);
+	a.s_addr = (int) (*(host_struct->h_addr_list[0]));
+	addr_string = inet_ntoa(a);
 	tmp = emalloc(strlen(addr_string) + 1);
 	strncpy(tmp, addr_string, strlen(addr_string));
 
@@ -751,10 +753,10 @@ PHP_FUNCTION(getpeername)
 }
 /* }}} */
 
-#if 0
 /* {{{ proto int gethostbyaddr(string addr, string &name)
    Given a human-readable address, sets name to be the host's name */
 
+#if 0
 /* Another lock to prevent multiple threads from grabbing gethostbyname() */
 volatile int gethostbyaddr_lock = 0;
 
@@ -782,7 +784,7 @@ PHP_FUNCTION(gethostbyaddr)
 	while (gethostbyaddr_lock == 1);
 	gethostbyaddr_lock = 1;
 
-	host_struct = gethostbyname((char *)&addr_buf, sizeof(addr_buf), AF_INET);
+	host_struct = gethostbyaddr((char *)&addr_buf, sizeof(addr_buf), AF_INET);
 
 	if (!host_struct) {
 		gethostbyaddr_lock = 0;
@@ -837,39 +839,75 @@ PHP_FUNCTION(socket)
 }
 /* }}} */
 
-/* {{{ proto int connect(int sockfd, string addr, int port)
+/* {{{ proto int connect(int sockfd, string addr [, int port])
    Opens a connection to addr:port on the socket specified by sockfd */
 PHP_FUNCTION(connect)
 {
 	zval **sockfd, **addr, **port;
-	struct sockaddr_in sa;
+	struct sockaddr sa;
+	struct sockaddr_in *sin;
+	struct sockaddr_un *sun;
 	int salen = sizeof(sa);
 	int ret;
 	struct in_addr addr_buf;
 	struct hostent *host_struct;
+	int args;
 
-	if (ZEND_NUM_ARGS() != 3 || 
-	    zend_get_parameters_ex(3, &sockfd, &addr, &port) == FAILURE) {
+	args = ZEND_NUM_ARGS();
+
+	if (args < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	v_convert_to_long_ex(2, sockfd, port);
-	convert_to_string_ex(addr);
 
-	bzero(&sa, sizeof(sa));
-	sa.sin_port = Z_LVAL_PP(port);
-
-	if (inet_aton(Z_STRVAL_PP(addr), &addr_buf) == 0) {
-		sa.sin_addr.s_addr = addr_buf.s_addr;
-	} else {
-		host_struct = gethostbyname(Z_STRVAL_PP(addr));
-		if (host_struct->h_addrtype != AF_INET) {
-			RETURN_LONG(-EINVAL);
-		}
-		sa.sin_addr.s_addr = (int) *(host_struct->h_addr_list[0]);
+	ret = zend_get_parameters_ex(args, &sockfd, &addr, &port);
+	if (ret == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 
-	ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *)&sa, salen);
+	convert_to_long_ex(sockfd)
+	convert_to_string_ex(addr);
+	if (args > 2) {
+		convert_to_long_ex(port);
+	}
+
+	bzero(&sa, sizeof(sa));
+
+	ret = getsockname(Z_LVAL_PP(sockfd), &sa, &salen);
+	if (ret < 0) {
+		RETURN_LONG(-errno);
+	}
+
+	switch(sa.sa_family) {
+		case AF_INET: {
+			sin = &sa;
+			sin->sin_port = htons((unsigned short int) Z_LVAL_PP(port));
+			if (inet_aton(Z_STRVAL_PP(addr), &addr_buf) == 0) {
+				sin->sin_addr.s_addr = addr_buf.s_addr;
+			} else {
+				char *q = (char *) &(sin->sin_addr.s_addr);
+				host_struct = gethostbyname(Z_STRVAL_PP(addr));
+				if (host_struct->h_addrtype != AF_INET) {
+					RETURN_LONG(-EINVAL);
+				}
+				q[0] = host_struct->h_addr_list[0][0];
+				q[1] = host_struct->h_addr_list[0][1];
+				q[2] = host_struct->h_addr_list[0][2];
+				q[3] = host_struct->h_addr_list[0][3];
+			}
 	
+			ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *) sin, salen);
+			break;
+		}
+	case AF_UNIX: {
+			sun = &sa;
+			snprintf(sun->sun_path, 108, "%s", Z_STRVAL_PP(addr));
+			ret = connect(Z_LVAL_PP(sockfd), (struct sockaddr *) sun, SUN_LEN(sun));
+			break;
+	}
+	default:
+		ret = -1;
+		errno = EINVAL;
+	}	
 	RETURN_LONG(((ret < 0) ? -errno : ret));
 }
 /* }}} */
