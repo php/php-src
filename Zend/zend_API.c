@@ -158,24 +158,6 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 }
 
 
-ZEND_API int ParameterPassedByReference(int ht, uint n)
-{
-	void **p;
-	ulong arg_count;
-	zval *arg;
-	TSRMLS_FETCH();
-
-	p = EG(argument_stack).elements+EG(argument_stack).top-2;
-	arg_count = (ulong) *p;
-
-	if (n>arg_count) {
-		return FAILURE;
-	}
-	arg = (zval *) *(p-arg_count+n-1);
-	return PZVAL_IS_REF(arg);
-}
-
-
 ZEND_API void wrong_param_count()
 {
 	zend_error(E_WARNING,"Wrong parameter count for %s()",get_active_function_name());

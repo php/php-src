@@ -69,9 +69,8 @@ static ZEND_FUNCTION(zend_test_func);
 #endif
 
 ZEND_API unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
-ZEND_API unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
 ZEND_API unsigned char second_arg_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-ZEND_API unsigned char second_arg_allow_ref[] = { 2, BYREF_NONE, BYREF_ALLOW };
+ZEND_API unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 static zend_function_entry builtin_functions[] = {
 	ZEND_FE(zend_version,		NULL)

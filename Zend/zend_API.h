@@ -120,10 +120,7 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, char *type_spec, ...);
 
-/* Parameter parsing API -- andrei */
-
-
-ZEND_API int ParameterPassedByReference(int ht, uint n);
+/* End of parameter parsing API -- andrei */
 
 int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type TSRMLS_DC);
 void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table TSRMLS_DC);
