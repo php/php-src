@@ -243,7 +243,7 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 				opline->opcode = ZEND_ASSIGN_BW_XOR_OBJ;
 				break;
 			default:
-				zend_error(E_ERROR, "Unknown binary op opcode %d", op);
+				zend_error(E_COMPILE_ERROR, "Unknown binary op opcode %d", op);
 		}
 		
 		opline->op2 = last_op->op2;
@@ -632,10 +632,10 @@ void zend_check_writable_variable(znode *variable)
 	zend_uint type = variable->u.EA.type;
 	
 	if (type & ZEND_PARSED_METHOD_CALL) {
-		zend_error(E_ERROR, "Can't use method return value in write context");
+		zend_error(E_COMPILE_ERROR, "Can't use method return value in write context");
 	}
 	if (type == ZEND_PARSED_FUNCTION_CALL) {
-		zend_error(E_ERROR, "Can't use function return value in write context");
+		zend_error(E_COMPILE_ERROR, "Can't use function return value in write context");
 	}
 }
 
@@ -717,11 +717,6 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_op *opline, *opline_ptr;
 	int num_of_created_opcodes = 0;
 
-	/*
-	if (zend_variable_buffer_empty(TSRMLS_C) && (type == BP_VAR_W || type == BP_VAR_RW)) {
-		zend_error(E_ERROR, "Method can't be used as l-value");
-	}
-	*/
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
 	le = fetch_list_ptr->head;
@@ -1186,7 +1181,7 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	
 	if (is_method && function_name && function_name->u.constant.value.lval == ZEND_CLONE) {
 		if (argument_list->u.constant.value.lval > 0) {
-			zend_error(E_ERROR, "Can't pass arguments to __clone()");
+			zend_error(E_COMPILE_ERROR, "Can't pass arguments to __clone()");
 		}
 		/* FIXME: throw_list */
 		zend_stack_del_top(&CG(function_call_stack));
@@ -1411,7 +1406,7 @@ static void throw_list_applier(long *opline_num, long *catch_opline)
 			opline->op2.u.opline_num = *catch_opline;
 			break;
 		default:
-			zend_error(E_ERROR, "Bad opcode in throw list");
+			zend_error(E_COMPILE_ERROR, "Bad opcode in throw list");
 			break;
 	}
 }
@@ -1554,7 +1549,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->parent = NULL;
 
 	if (zend_hash_update(class_table, new_class_entry->name, name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL) == FAILURE) {
-		zend_error(E_ERROR, "Can't create class. Fatal error, please report!");
+		zend_error(E_COMPILE_ERROR, "Can't create class. Fatal error, please report!");
 	}
 }
 
@@ -1593,7 +1588,7 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 	new_ce->refcount++;
 	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, &new_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
 		new_ce->refcount--;
-		zend_error(E_ERROR, "Cannot redeclare class %s", last);
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", last);
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -2096,7 +2091,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 
 	if (CG(active_class_entry)) {
 		if (runtime_inheritance) {
-			zend_error(E_ERROR, "Only first level classes can inherit from undefined classes");
+			zend_error(E_COMPILE_ERROR, "Only first level classes can inherit from undefined classes");
 		}
 		zend_hash_update(&CG(active_class_entry)->class_table, new_class_entry->name, new_class_entry->name_length+1, &new_class_entry, sizeof(zend_class_entry *), NULL);
 		CG(active_class_entry) = new_class_entry;
