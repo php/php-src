@@ -40,6 +40,7 @@
 #include "php3_dbm.h"
 #include "php3_cdb.h"
 #include "php3_db2.h"
+#include "php3_db3.h"
 
 function_entry dba_functions[] = {
 	PHP_FE(dba_open, NULL)
@@ -157,6 +158,9 @@ static dba_handler handler[] = {
 #endif
 #if DBA_DB2
 	DBA_HND(db2)
+#endif
+#if DBA_DB3
+	DBA_HND(db3)
 #endif
 	{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };

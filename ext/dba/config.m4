@@ -134,7 +134,7 @@ AC_ARG_WITH(db2,
       DB2_EXTRA="DB2_DB_H"
     fi
     
-    if test "$DB2_EXTRA" != ""; then
+    if test -n "$DB2_EXTRA"; then
       eval "AC_DEFINE($DB2_EXTRA, 1)"
     fi
 
@@ -150,6 +150,34 @@ AC_ARG_WITH(db2,
   fi
 ])
 AC_MSG_CHECKING(for Berkeley DB2 support)
+AC_DBA_STD_RESULT
+
+AC_ARG_WITH(db3,
+[  --with-db3[=DIR]        Include Berkeley DB3 support],[
+  if test "$withval" != "no"; then
+    for i in /usr/local /usr $withval; do
+      if test -f "$i/include/db.h" ; then
+        THIS_PREFIX="$i"
+        DB3_EXTRA="DB3_DB_H"
+      fi
+	done
+
+    if test -n "$DB3_EXTRA"; then
+      eval "AC_DEFINE($DB3_EXTRA, 1)"
+    fi
+
+    for LIB in db; do
+      AC_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
+      AC_CHECK_LIB($LIB, db_create, [AC_DEFINE(DBA_DB3,1) THIS_LIBS="$LIB"])
+      ])
+    done
+    
+    AC_DBA_STD_ASSIGN
+    AC_DBA_STD_CHECK
+    AC_DBA_STD_ATTACH
+  fi
+])
+AC_MSG_CHECKING(for Berkeley DB3 support)
 AC_DBA_STD_RESULT
 
 AC_ARG_WITH(dbm,
