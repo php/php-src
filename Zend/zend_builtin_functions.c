@@ -615,8 +615,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 	convert_to_string_ex(class_name);
 
-	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
-	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
+	lcname = zend_str_tolower_dup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
 
 	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
@@ -673,8 +672,7 @@ ZEND_FUNCTION(get_class_vars)
 	}
 
 	convert_to_string_ex(class_name);
-	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	lcname = zend_str_tolower_dup((*class_name)->value.str.val, (*class_name)->value.str.len);
 
 	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
@@ -786,8 +784,7 @@ ZEND_FUNCTION(method_exists)
 	}
 
 	convert_to_string_ex(method_name);
-	lcname = estrndup((*method_name)->value.str.val, (*method_name)->value.str.len);
-	zend_str_tolower(lcname, (*method_name)->value.str.len);
+	lcname = zend_str_tolower_dup((*method_name)->value.str.val, (*method_name)->value.str.len);
 	if (zend_hash_exists(&Z_OBJCE_PP(klass)->function_table, lcname, (*method_name)->value.str.len+1)) {
 		efree(lcname);
 		RETURN_TRUE;
@@ -808,8 +805,7 @@ static inline zend_namespace *get_namespace_from_zval(zval **namespace_name TSRM
 		return EG(global_namespace_ptr);
 	}
 
-	str_ns_name = estrndup(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
-	zend_str_tolower(str_ns_name, Z_STRLEN_PP(namespace_name));
+	str_ns_name = zend_str_tolower_dup(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
 	if(zend_hash_find(&EG(global_namespace_ptr)->class_table, str_ns_name, Z_STRLEN_PP(namespace_name)+1, (void **)&pns) == FAILURE || !CLASS_IS_NAMESPACE((*pns))) {
 		zend_error(E_WARNING, "Namespace '%s' is not defined!", Z_STRVAL_PP(namespace_name));
 		efree(str_ns_name);
@@ -833,8 +829,7 @@ ZEND_FUNCTION(class_exists)
 	}
 
 	convert_to_string_ex(class_name);
-	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	lcname = zend_str_tolower_dup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	if (zend_lookup_ns_class(lcname, Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == SUCCESS) {
 		efree(lcname);
 		RETURN_TRUE;
@@ -859,8 +854,7 @@ ZEND_FUNCTION(function_exists)
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	convert_to_string_ex(function_name);
-	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
-	zend_str_tolower(lcname, (*function_name)->value.str.len);
+	lcname = zend_str_tolower_dup((*function_name)->value.str.val, (*function_name)->value.str.len);
 
 	func_name_end = lcname + (*function_name)->value.str.len;
 	if((func_name = zend_memnstr(lcname, "::", sizeof("::")-1, func_name_end)) == NULL) {
