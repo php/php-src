@@ -218,7 +218,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			RETURN_FALSE;
 		}
 
-		zval_ptr_dtor(array);	/* start with clean array */
+		zval_dtor(*array);	/* start with clean array */
 		array_init(*array);
 
 		for (i = 0; i < NS; i++) {
