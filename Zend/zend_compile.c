@@ -945,6 +945,7 @@ void zend_do_pass_param(znode *param, int op, int offset CLS_DC)
 							 * as far as reference counting is concerned.  Treat them
 							 * as if they were variables here.
 							 */
+				break;
 			case IS_VAR:
 				op = ZEND_SEND_VAR_NO_REF;
 				break;

@@ -1643,11 +1643,18 @@ do_fcall_common:
 				}
 				{
 					zval *valptr;
+					zval *value;
+
+					value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 
 					ALLOC_ZVAL(valptr);
-					*valptr = Ts[opline->op1.u.var].tmp_var;
+					*valptr = *value;
+					if (!EG(free_op1)) {
+						zval_copy_ctor(valptr);
+					}
 					INIT_PZVAL(valptr);
 					zend_ptr_stack_push(&EG(argument_stack), valptr);
+					FREE_OP(&opline->op1, EG(free_op1));  /* for string offsets */
 				}
 				NEXT_OPCODE();
 			case ZEND_SEND_VAR:
