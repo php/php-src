@@ -9,7 +9,8 @@ if (!$result || preg_match('/EUC[^a-zA-Z]*JP/i', setlocale(LC_CTYPE, 0)) == 0) {
 ?>
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+default_charset=
+mbstring.internal_encoding=none
 --FILE--
 <?php
 	setlocale( LC_CTYPE, "ja_JP.EUC-JP", "ja_JP.eucJP" );
