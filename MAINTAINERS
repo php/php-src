@@ -1,0 +1,28 @@
+                     List of PHP maintainers
+                     =======================
+
+Status legend
+-------------
+	Supported:      Someone is actually paid to look after this.
+	Maintained:     Someone actually looks after it.
+	Odd Fixes:      It has a maintainer but they don't have time to do
+                	much other than throw the odd patch in. See below..
+	Orphan:         No current maintainer [but maybe you could take the
+                	role as you write your new code].
+	Obsolete:       Old code. Something tagged obsolete generally means
+                	it has been replaced by a better system and you
+                	should be using that.
+
+--------------------------------------------------------------------------------
+EXTENSION:           pcre
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           session
+PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
+EXTENSION:           wddx
+PRIMARY MAINTAINER:  Andrei Zmievski <andrei@ispi.net>
+STATUS:              Maintained
+--------------------------------------------------------------------------------
