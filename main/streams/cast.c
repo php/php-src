@@ -137,10 +137,6 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 #endif
 /* }}} */
 
-
-
-
-
 /* {{{ php_stream_cast */
 PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC)
 {
@@ -148,7 +144,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	castas &= ~PHP_STREAM_CAST_MASK;
 
 	/* synchronize our buffer (if possible) */
-	if (ret) {
+	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		php_stream_flush(stream);
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 			off_t dummy;
@@ -248,8 +244,8 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
-		static const char *cast_names[3] = {
-			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
+		static const char *cast_names[4] = {
+			"STDIO FILE*", "File Descriptor", "Socket Descriptor", "select()able descriptor"
 		};
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot represent a stream of type %s as a %s",

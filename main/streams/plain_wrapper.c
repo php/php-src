@@ -523,6 +523,16 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			}
 			return SUCCESS;
 
+		case PHP_STREAM_AS_FD_FOR_SELECT:
+			PHP_STDIOP_GET_FD(fd, data);
+			if (fd < 0) {
+				return FAILURE;
+			}
+			if (ret) {
+				*(int*)ret = fd;
+			}
+			return SUCCESS;
+
 		case PHP_STREAM_AS_FD:
 			PHP_STDIOP_GET_FD(fd, data);
 
