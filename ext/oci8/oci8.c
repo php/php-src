@@ -3068,7 +3068,7 @@ PHP_FUNCTION(ocicolumnisnull)
 }
 
 /* }}} */
-/* {{{ Proto void   OCIDebug(int onoff)
+/* {{{ proto void   OCIDebug(int onoff)
   Toggle internal debugging output for the OCI extension.
  */
 
@@ -3368,7 +3368,7 @@ PHP_FUNCTION(ocilogoff)
 }
 
 /* }}} */
-/* {{{ proto int    OCILogon(string user, string pass[, string db])
+/* {{{ proto int    OCINLogon(string user, string pass[, string db])
   Connect to an Oracle database and log on. returns a new session.
  */
 
@@ -3397,7 +3397,7 @@ PHP_FUNCTION(ocilogon)
 
 /* }}} */
 /* {{{ proto int    OCIPLogon(string user, string pass[, string db])
-  Connect to an Oracle database and log on. returns a new session.
+  Connect to an Oracle database using a persistent connection and log on. returns a new session.
  */
 
 /* Connects to an Oracle 8 database and logs on.  If the
