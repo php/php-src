@@ -543,6 +543,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "xslt"=..\ext\xmlrpc\xmlrpc.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "xslt"=..\ext\xslt\xslt.dsp - Package Owner=<4>
 
 Package=<5>
