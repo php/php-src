@@ -620,33 +620,49 @@ PHP_FUNCTION(pdf_show_xy) {
 }
 /* }}} */
 
-/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode)
+/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode, [string feature])
    Output text formated in a boxed */
 PHP_FUNCTION(pdf_show_boxed) {
-	pval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
-	int id, type;
+	pval **argv[8];
+	int id, type, argc;
 	int nr;
+	char *feature;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 7 || zend_get_parameters_ex(7, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	if((argc < 7) || (argc > 8))
 		WRONG_PARAM_COUNT;
-	}
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_double_ex(arg3);
-	convert_to_double_ex(arg4);
-	convert_to_double_ex(arg5);
-	convert_to_double_ex(arg6);
-	id=(*arg1)->value.lval;
+	convert_to_long_ex(argv[0]);
+	convert_to_string_ex(argv[1]);
+	convert_to_double_ex(argv[2]);
+	convert_to_double_ex(argv[3]);
+	convert_to_double_ex(argv[4]);
+	convert_to_double_ex(argv[5]);
+	convert_to_string_ex(argv[6]);
+	if(argc == 8) {
+		convert_to_string_ex(argv[7]);
+		feature = (*argv[7])->value.str.val;
+	} else {
+		feature = NULL;
+	}
+	id=(*argv[0])->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	nr = PDF_show_boxed(pdf, (*arg2)->value.str.val, (float) (*arg3)->value.dval, (float) (*arg4)->value.dval, (float) (*arg5)->value.dval, (float) (*arg6)->value.dval, (*arg7)->value.str.val, NULL);
+	nr = PDF_show_boxed(pdf, (*argv[1])->value.str.val,
+	                    (float) (*argv[2])->value.dval,
+	                    (float) (*argv[3])->value.dval,
+	                    (float) (*argv[4])->value.dval,
+	                    (float) (*argv[5])->value.dval,
+	                    (*argv[6])->value.str.val,
+	                    feature);
 
 	RETURN_LONG(nr);
 }
