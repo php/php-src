@@ -25,26 +25,43 @@
 #endif
 
 #include "php.h"
-#include "php_recode.h"
 #include "php_streams.h"
 
 #if HAVE_LIBRECODE
+
+/* For recode 3.5 */
+extern char *program_name;
+char *program_name = "php";
+
+#ifdef HAVE_STDBOOL_H
+# include <stdbool.h>
+#else
+  typedef enum {false = 0, true = 1} bool;
+#endif
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <recode.h>
+
+#include "php_recode.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
-#include "zend_list.h"
 
-
-#ifdef HAVE_BROKEN_RECODE
-extern char *program_name;
-char *program_name = "php";
-#endif
 /* }}} */
 
-#define SAFE_STRING(s) ((s)?(s):"")
+ZEND_BEGIN_MODULE_GLOBALS(recode)
+    RECODE_OUTER  outer;
+ZEND_END_MODULE_GLOBALS(recode)
 
+#ifdef ZTS
+# define ReSG(v) TSRMG(recode_globals_id, zend_recode_globals *, v)
+#else
+# define ReSG(v) (recode_globals.v)
+#endif
+    
 ZEND_DECLARE_MODULE_GLOBALS(recode);
-extern int le_fp,le_pp;
 
 /* {{{ module stuff */
 static zend_function_entry php_recode_functions[] = {
@@ -55,21 +72,17 @@ static zend_function_entry php_recode_functions[] = {
 };
 
 zend_module_entry recode_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"recode", 
-	php_recode_functions, 
+ 	php_recode_functions, 
 	PHP_MINIT(recode), 
 	PHP_MSHUTDOWN(recode), 
 	NULL,
 	NULL, 
 	PHP_MINFO(recode), 
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
-
-#if APACHE
-extern void timeout(int sig);
-#endif
 
 #ifdef COMPILE_DL_RECODE
 ZEND_GET_MODULE(recode)
@@ -84,13 +97,13 @@ PHP_MINIT_FUNCTION(recode)
 {
 	ZEND_INIT_MODULE_GLOBALS(recode, php_recode_init_globals, NULL);
 
-	ReSG(outer)	  = recode_new_outer(true);
-	if (ReSG(outer) == NULL)
+	ReSG(outer) = recode_new_outer(false);
+	if (ReSG(outer) == NULL) {
 		return FAILURE;
-	
+	}
+
 	return SUCCESS;
 }
-
 
 PHP_MSHUTDOWN_FUNCTION(recode)
 {
@@ -100,36 +113,33 @@ PHP_MSHUTDOWN_FUNCTION(recode)
 	return SUCCESS;
 }
 
-
 PHP_MINFO_FUNCTION(recode)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Recode Support", "enabled");
 	php_info_print_table_row(2, "Revision", "$Revision$");
 	php_info_print_table_end();
-
 }
 
 /* {{{ proto string recode_string(string request, string str)
    Recode string str according to request string */
-
 PHP_FUNCTION(recode_string)
 {
 	RECODE_REQUEST request = NULL;
 	char *r = NULL;
-	pval **str;
-	pval **req;
+	zval **str;
+	zval **req;
 	bool success;
 	int r_len=0, r_alen =0;
 
-	if (ZEND_NUM_ARGS() != 2
-	 || zend_get_parameters_ex(2, &req, &str) == FAILURE) {
-	 	WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &req, &str) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
 	convert_to_string_ex(req);
 
 	request = recode_new_request(ReSG(outer));
+
 	if (request == NULL) {
 		php_error(E_WARNING, "Cannot allocate request structure");
 		RETURN_FALSE;
@@ -168,20 +178,17 @@ PHP_FUNCTION(recode_file)
 {
 	RECODE_REQUEST request = NULL;
 	int success;
-	pval **req;
-	pval **input, **output;
+	zval **req;
+	zval **input, **output;
 	php_stream *instream, *outstream;
 	FILE  *in_fp,  *out_fp;
 	int    in_type, out_type;
 
-
-	if (ZEND_NUM_ARGS() != 3
-	 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
 	 	WRONG_PARAM_COUNT;
 	}
 
-	instream = zend_fetch_resource(input TSRMLS_CC,-1, "File-Handle", &in_type, 
-		1, php_file_le_stream());
+	instream = zend_fetch_resource(input TSRMLS_CC,-1, "File-Handle", &in_type, 1, php_file_le_stream());
 
 	if (!instream) {
 		php_error(E_WARNING,"Unable to find input file identifier");
@@ -192,8 +199,7 @@ PHP_FUNCTION(recode_file)
 		RETURN_FALSE;
 	}
 	
-	outstream = zend_fetch_resource(output TSRMLS_CC,-1, "File-Handle", &out_type,
-		1, php_file_le_stream());
+	outstream = zend_fetch_resource(output TSRMLS_CC,-1, "File-Handle", &out_type, 1, php_file_le_stream());
 	if (!outstream) {
 		php_error(E_WARNING,"Unable to find output file identifier");
 		RETURN_FALSE;
