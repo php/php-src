@@ -53,7 +53,7 @@ class Console_Getopt {
      * Long and short options can be mixed.
      *
      * Most of the semantics of this function are based on GNU getopt_long().
-     * 
+     *
      * @param $args array an array of command-line arguments
      * @param $short_options string specifies the list of allowed short options
      * @param $long_options array specifies the list of allowed long options
@@ -116,8 +116,8 @@ class Console_Getopt {
                 return new Getopt_Error("unrecognized option -- $opt\n");
             }
 
-            if ($spec{1} == ':') {
-                if ($spec{2} == ':') {
+            if (strlen($spec) > 1 && $spec{1} == ':') {
+                if (strlen($spec) > 2 && $spec{2} == ':') {
                     if ($i + 1 < strlen($arg)) {
                         /* Option takes an optional argument. Use the remainder of
                            the arg string if there is anything left. */
@@ -153,7 +153,7 @@ class Console_Getopt {
         for ($i = 0; $i < count($long_options); $i++) {
             $long_opt  = $long_options[$i];
             $opt_start = substr($long_opt, 0, $opt_len);
-            
+
             /* Option doesn't match. Go on to the next one. */
             if ($opt_start != $opt)
                 continue;
