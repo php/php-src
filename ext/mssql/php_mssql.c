@@ -1951,8 +1951,7 @@ PHP_FUNCTION(mssql_execute)
 	mssql_result *result;
 	int num_fields,num_rets,type;	
 	int blocks_initialized=1;
-	int i,j;
-	int *column_types;
+	int i;
 	int batchsize;
 	int ac = ZEND_NUM_ARGS();
 	char *parameter;
@@ -1995,61 +1994,16 @@ PHP_FUNCTION(mssql_execute)
 			}
 			
 			result = (mssql_result *) emalloc(sizeof(mssql_result));
-			column_types = (int *) emalloc(sizeof(int) * num_fields);
-			for (i=0; i<num_fields; i++) {
-				column_types[i] = coltype(i+1);
-			}
-			
+		
 			result->batchsize = batchsize;
+			result->blocks_initialized = 1;
 			result->data = (zval **) emalloc(sizeof(zval *)*MSSQL_ROWS_BLOCK);
 			result->mssql_ptr = mssql_ptr;
 			result->cur_field=result->cur_row=result->num_rows=0;
 			result->num_fields = num_fields;
 
-			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue);
-		
 			result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
-			j=0;
-			for (i=0; i<num_fields; i++) {
-				char *fname = (char *)dbcolname(mssql_ptr->link,i+1);
-				char computed_buf[16];
-				
-				if (*fname) {
-					result->fields[i].name = estrdup(fname);
-				} else {
-					if (j>0) {
-						snprintf(computed_buf,16,"computed%d",j);
-					} else {
-						strcpy(computed_buf,"computed");
-					}
-					result->fields[i].name = estrdup(computed_buf);
-					j++;
-				}
-				result->fields[i].max_length = dbcollen(mssql_ptr->link,i+1);
-				result->fields[i].column_source = estrdup(dbcolsource(mssql_ptr->link,i+1));
-				if (!result->fields[i].column_source) {
-					result->fields[i].column_source = empty_string;
-				}
-				result->fields[i].type = column_types[i];
-				/* set numeric flag */
-				switch (column_types[i]) {
-					case SQLINT1:
-					case SQLINT2:
-					case SQLINT4:
-					case SQLFLT8:
-					case SQLNUMERIC:
-					case SQLDECIMAL:
-						result->fields[i].numeric = 1;
-						break;
-					case SQLCHAR:
-					case SQLVARCHAR:
-					case SQLTEXT:
-					default:
-						result->fields[i].numeric = 0;
-						break;
-				}
-			}
-			efree(column_types);
+			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue);
 		}
 		retval_results=dbresults(mssql_ptr->link);
 	}
