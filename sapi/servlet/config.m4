@@ -12,15 +12,21 @@ AC_ARG_WITH(servlet,
     if test "$withval" = "yes"; then
       SERVLET_CLASSPATH=.
     else
+      if test -f $withval/lib/servlet.jar; then
+	SERVLET_CLASSPATH=$withval/lib/servlet.jar
+      fi
+
       if test -f $withval/lib/jsdk.jar; then
 	SERVLET_CLASSPATH=$withval/lib/jsdk.jar
-      else
-	if test -d $withval/javax; then
-	  SERVLET_CLASSPATH=$withval
-	else
-	  AC_MSG_RESULT(no)
-	  AC_MSG_ERROR(unable to find JSDK libraries)
-	fi
+      fi
+
+      if test -d $withval/javax; then
+	SERVLET_CLASSPATH=$withval
+      fi
+
+      if test -z "$JAVA_INCLUDE"; then
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR(unable to find servlet libraries)
       fi
     fi
 
