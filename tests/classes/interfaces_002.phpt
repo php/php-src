@@ -25,5 +25,5 @@ echo $foo->getMessage() . "\n";
 ?>
 --EXPECTF--
 
-Fatal error: Class exception_foo contains 1 abstract methods and must therefore be declared abstract (throwable::geterrno) in %s on line %d
+Fatal error: Class exception_foo contains 1 abstract methods and must therefore be declared abstract (throwable::getErrno) in %s on line %d
 

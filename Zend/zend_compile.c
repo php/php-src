@@ -963,6 +963,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	int name_len = function_name->u.constant.value.str.len;
 	int function_begin_line = function_token->u.opline_num;
 	zend_uint fn_flags;
+	char *lcname;
 
 	if (is_method) {
 		if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
@@ -977,7 +978,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	function_token->u.op_array = CG(active_op_array);
-	zend_str_tolower(name, name_len);
+	lcname = zend_str_tolower_dup(name, name_len);
 
 	init_op_array(&op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 
@@ -1002,7 +1003,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				short_class_name_length = strlen(short_class_name);
 			}
 		}
-		if (zend_hash_add(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
+		if (zend_hash_add(&CG(active_class_entry)->function_table, lcname, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
 			zend_op_array *child_op_array, *parent_op_array;
 			if (CG(active_class_entry)->parent
 					&& (zend_hash_find(&CG(active_class_entry)->function_table, name, name_len+1, (void **) &child_op_array) == SUCCESS)
@@ -1010,6 +1011,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 					&& (child_op_array == parent_op_array)) {
 				zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 			} else {
+				efree(lcname);
 				zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_class_entry)->name, name);
 			}
 		}
@@ -1022,30 +1024,32 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			fn_flags |= ZEND_ACC_PUBLIC;
 		}
 
-		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, name, name_len)) && !CG(active_class_entry)->constructor) {
+		if ((short_class_name_length == name_len) && (!memcmp(short_class_name, lcname, name_len)) && !CG(active_class_entry)->constructor) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CONSTRUCTOR_FUNC_NAME, sizeof(ZEND_CONSTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_DESTRUCTOR_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_DESTRUCTOR_FUNC_NAME, sizeof(ZEND_DESTRUCTOR_FUNC_NAME)))) {
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 			CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
 			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
+		} else if ((name_len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
 		}
+
+		efree(lcname);
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 		opline->opcode = ZEND_DECLARE_FUNCTION;
 		opline->op1.op_type = IS_CONST;
-		build_runtime_defined_function_key(&opline->op1.u.constant, function_name->u.constant.value.str.val, function_name->u.constant.value.str.len, opline TSRMLS_CC);
+		build_runtime_defined_function_key(&opline->op1.u.constant, lcname, name_len, opline TSRMLS_CC);
 		opline->op2.op_type = IS_CONST;
 		opline->op2.u.constant.type = IS_STRING;
-		opline->op2.u.constant.value.str.val = estrndup(name, name_len);
+		opline->op2.u.constant.value.str.val = lcname;
 		opline->op2.u.constant.value.str.len = name_len;
 		opline->op2.u.constant.refcount = 1;
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
