@@ -274,7 +274,7 @@ static SWFInput getInput(zval **zfile TSRMLS_DC)
 
 /* {{{ SWFAction
 */
-/* {{{ proto object swfaction_init(string)
+/* {{{ proto object swfaction::__construct(string)
    Returns a new SWFAction object, compiling the given script */
 PHP_METHOD(swfaction, __construct)
 {
@@ -323,7 +323,7 @@ static zend_function_entry swfaction_functions[] = {
 
 /* {{{ SWFBitmap 
 */
-/* {{{ proto class swfbitmap_init(mixed file [, mixed maskfile])
+/* {{{ proto class swfbitmap::__construct(mixed file [, mixed maskfile])
    Returns a new SWFBitmap object from jpg (with optional mask) or dbl file */
 PHP_METHOD(swfbitmap, __construct)
 {
@@ -391,7 +391,7 @@ static SWFBitmap getBitmap(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto float swfbitmap_getWidth(void)
+/* {{{ proto float swfbitmap::getWidth()
    Returns the width of this bitmap */
 PHP_METHOD(swfbitmap, getWidth)
 {
@@ -399,7 +399,7 @@ PHP_METHOD(swfbitmap, getWidth)
 }
 /* }}} */
 
-/* {{{ proto float swfbitmap_getHeight(void)
+/* {{{ proto float swfbitmap::getHeight()
    Returns the height of this bitmap */
 PHP_METHOD(swfbitmap, getHeight)
 {
@@ -418,7 +418,7 @@ static zend_function_entry swfbitmap_functions[] = {
 
 /* {{{ SWFButton
 */
-/* {{{ proto object swfbutton_init(void)
+/* {{{ proto object swfbutton::__construct()
    Returns a new SWFButton object */
 PHP_METHOD(swfbutton, __construct)
 {
@@ -449,7 +449,7 @@ static SWFButton getButton(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swfbutton_setHit(object SWFCharacter)
+/* {{{ proto void swfbutton::setHit(object SWFCharacter)
    Sets the character for this button's hit test state */
 PHP_METHOD(swfbutton, setHit)
 {
@@ -467,7 +467,7 @@ PHP_METHOD(swfbutton, setHit)
 }
 /* }}} */
 
-/* {{{ proto void swfbutton_setOver(object SWFCharacter)
+/* {{{ proto void swfbutton::setOver(object SWFCharacter)
    Sets the character for this button's over state */
 PHP_METHOD(swfbutton, setOver)
 {
@@ -485,7 +485,7 @@ PHP_METHOD(swfbutton, setOver)
 }
 /* }}} */
 
-/* {{{ proto void swfbutton_setUp(object SWFCharacter)
+/* {{{ proto void swfbutton::setUp(object SWFCharacter)
    Sets the character for this button's up state */
 PHP_METHOD(swfbutton, setUp)
 {
@@ -503,7 +503,7 @@ PHP_METHOD(swfbutton, setUp)
 }
 /* }}} */
 
-/* {{{ proto void swfbutton_setDown(object SWFCharacter)
+/* {{{ proto void swfbutton::setDown(object SWFCharacter)
    Sets the character for this button's down state */
 PHP_METHOD(swfbutton, setDown)
 {
@@ -521,7 +521,7 @@ PHP_METHOD(swfbutton, setDown)
 }
 /* }}} */
 
-/* {{{ proto void swfbutton_addShape(object SWFCharacter, int flags)
+/* {{{ proto void swfbutton::addShape(object SWFCharacter, int flags)
    Sets the character to display for the condition described in flags */
 PHP_METHOD(swfbutton, addShape)
 {
@@ -541,7 +541,7 @@ PHP_METHOD(swfbutton, addShape)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swfbutton_setMenu(int flag)
+/* {{{ proto void swfbutton::setMenu(int flag)
 	enable track as menu button behaviour */
 
 PHP_METHOD(swfbutton, setMenu)
@@ -557,7 +557,7 @@ PHP_METHOD(swfbutton, setMenu)
 /* }}} */
 #endif
 
-/* {{{ proto void swfbutton_setAction(object SWFAction)
+/* {{{ proto void swfbutton::setAction(object SWFAction)
    Sets the action to perform when button is pressed */
 PHP_METHOD(swfbutton, setAction)
 {
@@ -576,7 +576,7 @@ PHP_METHOD(swfbutton, setAction)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto SWFSoundInstance * swfbutton_addASound(SWFSound sound, int flags)
+/* {{{ proto SWFSoundInstance swfbutton::addASound(SWFSound sound, int flags)
    associates a sound with a button transition
 	NOTE: the transitions are all wrong _UP, _OVER, _DOWN _HIT  */
 
@@ -608,7 +608,7 @@ PHP_METHOD(swfbutton, addSound)
 /* }}} */
 #endif
 
-/* {{{ proto void swfbutton_addAction(object SWFAction, int flags)
+/* {{{ proto void swfbutton::addAction(object SWFAction, int flags)
    Sets the action to perform when conditions described in flags is met */
 PHP_METHOD(swfbutton, addAction)
 {
@@ -685,7 +685,7 @@ static SWFDisplayItem getDisplayItem(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_moveTo(int x, int y)
+/* {{{ proto void swfdisplayitem::moveTo(int x, int y)
    Moves this SWFDisplayItem to movie coordinates (x, y) */
 PHP_METHOD(swfdisplayitem, moveTo)
 {
@@ -701,7 +701,7 @@ PHP_METHOD(swfdisplayitem, moveTo)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_move(float dx, float dy)
+/* {{{ proto void swfdisplayitem::move(float dx, float dy)
    Displaces this SWFDisplayItem by (dx, dy) in movie coordinates */
 PHP_METHOD(swfdisplayitem, move)
 {
@@ -717,7 +717,7 @@ PHP_METHOD(swfdisplayitem, move)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_scaleTo(float xScale [, float yScale])
+/* {{{ proto void swfdisplayitem::scaleTo(float xScale [, float yScale])
    Scales this SWFDisplayItem by xScale in the x direction, yScale in the y, or both to xScale if only one arg */
 PHP_METHOD(swfdisplayitem, scaleTo)
 {
@@ -742,7 +742,7 @@ PHP_METHOD(swfdisplayitem, scaleTo)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_scale(float xScale, float yScale)
+/* {{{ proto void swfdisplayitem::scale(float xScale, float yScale)
    Multiplies this SWFDisplayItem's current x scale by xScale, its y scale by yScale */
 PHP_METHOD(swfdisplayitem, scale)
 {
@@ -758,7 +758,7 @@ PHP_METHOD(swfdisplayitem, scale)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_rotateTo(float degrees)
+/* {{{ proto void swfdisplayitem::rotateTo(float degrees)
    Rotates this SWFDisplayItem the given (clockwise) degrees from its original orientation */
 PHP_METHOD(swfdisplayitem, rotateTo)
 {
@@ -773,7 +773,7 @@ PHP_METHOD(swfdisplayitem, rotateTo)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_rotate(float degrees)
+/* {{{ proto void swfdisplayitem::rotate(float degrees)
    Rotates this SWFDisplayItem the given (clockwise) degrees from its current orientation */
 PHP_METHOD(swfdisplayitem, rotate)
 {
@@ -788,7 +788,7 @@ PHP_METHOD(swfdisplayitem, rotate)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_skewXTo(float xSkew)
+/* {{{ proto void swfdisplayitem::skewXTo(float xSkew)
    Sets this SWFDisplayItem's x skew value to xSkew */
 PHP_METHOD(swfdisplayitem, skewXTo)
 {
@@ -803,7 +803,7 @@ PHP_METHOD(swfdisplayitem, skewXTo)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_skewX(float xSkew)
+/* {{{ proto void swfdisplayitem::skewX(float xSkew)
    Adds xSkew to this SWFDisplayItem's x skew value */
 PHP_METHOD(swfdisplayitem, skewX)
 {
@@ -818,7 +818,7 @@ PHP_METHOD(swfdisplayitem, skewX)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_skewYTo(float ySkew)
+/* {{{ proto void swfdisplayitem::skewYTo(float ySkew)
    Sets this SWFDisplayItem's y skew value to ySkew */
 PHP_METHOD(swfdisplayitem, skewYTo)
 {
@@ -833,7 +833,7 @@ PHP_METHOD(swfdisplayitem, skewYTo)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_skewY(float ySkew)
+/* {{{ proto void swfdisplayitem::skewY(float ySkew)
    Adds ySkew to this SWFDisplayItem's y skew value */
 PHP_METHOD(swfdisplayitem, skewY)
 {
@@ -848,7 +848,7 @@ PHP_METHOD(swfdisplayitem, skewY)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_setMatrix(float a, float b, float c, float d, float x, float y)
+/* {{{ proto void swfdisplayitem::setMatrix(float a, float b, float c, float d, float x, float y)
    Sets the item's transform matrix */
 PHP_METHOD(swfdisplayitem, setMatrix)
 {
@@ -871,7 +871,7 @@ PHP_METHOD(swfdisplayitem, setMatrix)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_setDepth(int depth)
+/* {{{ proto void swfdisplayitem::setDepth(int depth)
    Sets this SWFDisplayItem's z-depth to depth.  Items with higher depth values are drawn on top of those with lower values */
 PHP_METHOD(swfdisplayitem, setDepth)
 {
@@ -886,7 +886,7 @@ PHP_METHOD(swfdisplayitem, setDepth)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_setRatio(float ratio)
+/* {{{ proto void swfdisplayitem::setRatio(float ratio)
    Sets this SWFDisplayItem's ratio to ratio.  Obviously only does anything if displayitem was created from an SWFMorph */
 PHP_METHOD(swfdisplayitem, setRatio)
 {
@@ -901,7 +901,7 @@ PHP_METHOD(swfdisplayitem, setRatio)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_addColor(int r, int g, int b [, int a])
+/* {{{ proto void swfdisplayitem::addColor(int r, int g, int b [, int a])
    Sets the add color part of this SWFDisplayItem's CXform to (r, g, b [, a]), a defaults to 0 */
 PHP_METHOD(swfdisplayitem, addColor)
 {
@@ -930,7 +930,7 @@ PHP_METHOD(swfdisplayitem, addColor)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_multColor(float r, float g, float b [, float a])
+/* {{{ proto void swfdisplayitem::multColor(float r, float g, float b [, float a])
    Sets the multiply color part of this SWFDisplayItem's CXform to (r, g, b [, a]), a defaults to 1.0 */
 PHP_METHOD(swfdisplayitem, multColor)
 {
@@ -959,7 +959,7 @@ PHP_METHOD(swfdisplayitem, multColor)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_setName(string name)
+/* {{{ proto void swfdisplayitem::setName(string name)
    Sets this SWFDisplayItem's name to name */
 PHP_METHOD(swfdisplayitem, setName)
 {
@@ -975,7 +975,7 @@ PHP_METHOD(swfdisplayitem, setName)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_addAction(object SWFAction, int flags)
+/* {{{ proto void swfdisplayitem::addAction(object SWFAction, int flags)
    Adds this SWFAction to the given SWFSprite instance */
 PHP_METHOD(swfdisplayitem, addAction)
 {
@@ -1008,7 +1008,7 @@ PHP_METHOD(swfdisplayitem, remove)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_setMaskLevel(int level)
+/* {{{ proto void swfdisplayitem::setMaskLevel(int level)
    defines a MASK layer at level */
 
 PHP_METHOD(swfdisplayitem, setMaskLevel)
@@ -1024,7 +1024,7 @@ PHP_METHOD(swfdisplayitem, setMaskLevel)
 }
 /* }}} */
 
-/* {{{ proto void swfdisplayitem_endMask()
+/* {{{ proto void swfdisplayitem::endMask()
    another way of defining a MASK layer */
 
 PHP_METHOD(swfdisplayitem, endMask)
@@ -1181,7 +1181,7 @@ static zend_function_entry swfdisplayitem_functions[] = {
 
 /* {{{ SWFFill
 */
-/* {{{ proto class swffill_init(void)
+/* {{{ proto class swffill::__construct()
    Returns a new SWFFill object */
 PHP_METHOD(swffill, __construct)
 {
@@ -1210,7 +1210,7 @@ static SWFFill getFill(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swffill_moveTo(float x, float y)
+/* {{{ proto void swffill::moveTo(float x, float y)
    Moves this SWFFill to shape coordinates (x,y) */
 PHP_METHOD(swffill, moveTo)
 {
@@ -1226,7 +1226,7 @@ PHP_METHOD(swffill, moveTo)
 }
 /* }}} */
 
-/* {{{ proto void swffill_scaleTo(float xScale [, float yScale])
+/* {{{ proto void swffill::scaleTo(float xScale [, float yScale])
    Scales this SWFFill by xScale in the x direction, yScale in the y, or both to xScale if only one arg */
 PHP_METHOD(swffill, scaleTo)
 {
@@ -1251,7 +1251,7 @@ PHP_METHOD(swffill, scaleTo)
 }
 /* }}} */
 
-/* {{{ proto void swffill_rotateTo(float degrees)
+/* {{{ proto void swffill::rotateTo(float degrees)
    Rotates this SWFFill the given (clockwise) degrees from its original orientation */
 PHP_METHOD(swffill, rotateTo)
 {
@@ -1265,7 +1265,7 @@ PHP_METHOD(swffill, rotateTo)
 }
 /* }}} */
 
-/* {{{ proto void swffill_skewXTo(float xSkew)
+/* {{{ proto void swffill::skewXTo(float xSkew)
    Sets this SWFFill's x skew value to xSkew */
 PHP_METHOD(swffill, skewXTo)
 {
@@ -1279,7 +1279,7 @@ PHP_METHOD(swffill, skewXTo)
 }
 /* }}} */
 
-/* {{{ proto void swffill_skewYTo(float ySkew)
+/* {{{ proto void swffill::skewYTo(float ySkew)
    Sets this SWFFill's y skew value to ySkew */
 PHP_METHOD(swffill, skewYTo)
 {
@@ -1326,7 +1326,7 @@ static void destroy_SWFFontCharacter_resource(zend_rsrc_list_entry *resource TSR
 	destroySWFBlock((SWFBlock)resource->ptr);
 }
 
-/* {{{ proto void swffontchar_addChars(string)
+/* {{{ proto void swffontcha::raddChars(string)
    adds characters to a font for exporting font */
 PHP_METHOD(swffontchar, addChars)
 {
@@ -1341,7 +1341,7 @@ PHP_METHOD(swffontchar, addChars)
 }
 /* }}} */
 
-/* {{{ proto void swffontchar_addChars(string)
+/* {{{ proto void swffontchar::addChars(string)
    adds characters to a font for exporting font */
 
 PHP_METHOD(swffontchar, addUTF8Chars)
@@ -1381,7 +1381,7 @@ static SWFFont getFont(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto object swffont_init(string filename)
+/* {{{ proto object swffont::__construct(string filename)
    Returns a new SWFFont object from given file */
 PHP_METHOD(swffont, __construct)
 {
@@ -1430,7 +1430,7 @@ static void destroy_SWFFont_resource(zend_rsrc_list_entry *resource TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto float swffont_getWidth(string str)
+/* {{{ proto float swffont::getWidth(string str)
    Calculates the width of the given string in this font at full height */
 PHP_METHOD(swffont, getWidth)
 {
@@ -1447,7 +1447,7 @@ PHP_METHOD(swffont, getWidth)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto int swffont_getUTF8Width(string)
+/* {{{ proto int swffont::getUTF8Width(string)
    Calculates the width of the given string in this font at full height */
 
 PHP_METHOD(swffont, getUTF8Width)
@@ -1467,7 +1467,7 @@ PHP_METHOD(swffont, getUTF8Width)
 
 /* }}} */
 /* not sure about 0 bytes !!!!!!!!! */
-/* {{{ proto int swffont_getWideWidth(string)
+/* {{{ proto int swffont::getWideWidth(string)
    Calculates the width of the given string in this font at full height */
 /*
 PHP_METHOD(swffont, getWideWidth)
@@ -1488,7 +1488,7 @@ PHP_METHOD(swffont, getWideWidth)
 /* }}} */
 #endif
 
-/* {{{ proto float swffont_getAscent(void)
+/* {{{ proto float swffont::getAscent()
    Returns the ascent of the font, or 0 if not available */
 PHP_METHOD(swffont, getAscent)
 {
@@ -1496,7 +1496,7 @@ PHP_METHOD(swffont, getAscent)
 }
 /* }}} */
 
-/* {{{ proto float swffont_getDescent(void)
+/* {{{ proto float swffont::getDescent()
    Returns the descent of the font, or 0 if not available */
 PHP_METHOD(swffont, getDescent)
 {
@@ -1504,7 +1504,7 @@ PHP_METHOD(swffont, getDescent)
 }
 /* }}} */
 
-/* {{{ proto float swffont_getLeading(void)
+/* {{{ proto float swffont::getLeading()
    Returns the leading of the font, or 0 if not available */
 PHP_METHOD(swffont, getLeading)
 {
@@ -1513,7 +1513,7 @@ PHP_METHOD(swffont, getLeading)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swffont_addChars(string)
+/* {{{ proto void swffont::addChars(string)
    adds characters to a font required within textfields */
 /*
 PHP_METHOD(swffont, addChars)
@@ -1530,9 +1530,8 @@ PHP_METHOD(swffont, addChars)
 */
 /* }}} */
 
-/* {{{ proto char *swffont_getShape(code)
+/* {{{ proto string swffont::getShape(code)
    Returns the glyph shape of a char as a text string */
-
 PHP_METHOD(swffont, getShape)
 {
 	zval **zcode;
@@ -1572,7 +1571,7 @@ static zend_function_entry swffont_functions[] = {
 
 /* {{{ SWFGradient
 */
-/* {{{ proto class swfgradient_init(void)
+/* {{{ proto class swfgradient::__construct()
    Returns a new SWFGradient object */
 PHP_METHOD(swfgradient, __construct)
 {
@@ -1603,7 +1602,7 @@ static SWFGradient getGradient(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swfgradient_addEntry(float ratio, int r, int g, int b [, int a])
+/* {{{ proto void swfgradient::addEntry(float ratio, int r, int g, int b [, int a])
    Adds given entry to the gradient */
 PHP_METHOD(swfgradient, addEntry)
 {
@@ -1647,7 +1646,7 @@ static zend_function_entry swfgradient_functions[] = {
 
 /* {{{ SWFMorph 
 */
-/* {{{ proto object swfmorph_init(void)
+/* {{{ proto object swfmorph::__construct()
    Returns a new SWFMorph object */
 PHP_METHOD(swfmorph, __construct)
 {
@@ -1678,7 +1677,7 @@ static SWFMorph getMorph(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto object swfmorph_getShape1(void)
+/* {{{ proto object swfmorph::getShape1()
    Return's this SWFMorph's start shape object */
 PHP_METHOD(swfmorph, getShape1)
 {
@@ -1692,7 +1691,7 @@ PHP_METHOD(swfmorph, getShape1)
 }
 /* }}} */
 
-/* {{{ proto object swfmorph_getShape2(void)
+/* {{{ proto object swfmorph::getShape2()
    Return's this SWFMorph's start shape object */
 PHP_METHOD(swfmorph, getShape2)
 {
@@ -1730,7 +1729,7 @@ SWFSound getSound(zval *id TSRMLS_DC)
 }
 
 /* }}} */
-/* {{{ proto class swfsound_init(string filename, int flags)
+/* {{{ proto class swfsound::__construct(string filename, int flags)
    Returns a new SWFSound object from given file */
 PHP_METHOD(swfsound, __construct)
 {
@@ -1884,7 +1883,7 @@ static zend_function_entry swfsoundinstance_functions[] = {
 
 /* {{{ SWFMovie
 */
-/* {{{ proto object swfmovie_init(int version) 
+/* {{{ proto object swfmovie::__construct(int version) 
   Creates swfmovie object according to the passed version */
 PHP_METHOD(swfmovie, __construct)
 {
@@ -1928,7 +1927,7 @@ static SWFMovie getMovie(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_nextframe(void)  
+/* {{{ proto void swfmovie::nextframe()  
 */
 PHP_METHOD(swfmovie, nextFrame)
 {
@@ -1936,7 +1935,7 @@ PHP_METHOD(swfmovie, nextFrame)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_labelframe(string label)
+/* {{{ proto void swfmovie::labelframe(string label)
    Labels frame */
 PHP_METHOD(swfmovie, labelFrame)
 {
@@ -1950,7 +1949,7 @@ PHP_METHOD(swfmovie, labelFrame)
 }
 /* }}} */
 
-/* {{{ proto object swfmovie_add(object SWFBlock) 
+/* {{{ proto object swfmovie::add(object SWFBlock) 
 */
 PHP_METHOD(swfmovie, add)
 {
@@ -1984,7 +1983,7 @@ PHP_METHOD(swfmovie, add)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_labelframe(object SWFBlock)
+/* {{{ proto void swfmovie::labelframe(object SWFBlock)
 */
 PHP_METHOD(swfmovie, remove)
 {
@@ -2001,7 +2000,7 @@ PHP_METHOD(swfmovie, remove)
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_output([int compression])
+/* {{{ proto int swfmovie::output([int compression])
 */
 static void phpByteOutputMethod(byte b, void *data)
 {
@@ -2038,7 +2037,7 @@ PHP_METHOD(swfmovie, output)
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_saveToFile(stream x [, int compression])
+/* {{{ proto int swfmovie::saveToFile(stream x [, int compression])
 */
 static void phpStreamOutputMethod(byte b, void * data)
 {
@@ -2087,7 +2086,7 @@ PHP_METHOD(swfmovie, saveToFile)
 }
 /* }}} */
 
-/* {{{ proto int swfmovie_save(mixed where [, int compression])
+/* {{{ proto int swfmovie::save(mixed where [, int compression])
   Saves the movie. 'where' can be stream and the movie will be saved there otherwise it is treated as string and written in file with that name */
 PHP_METHOD(swfmovie, save)
 {
@@ -2148,7 +2147,7 @@ PHP_METHOD(swfmovie, save)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_setBackground(int r, int g, int b)
+/* {{{ proto void swfmovie::setBackground(int r, int g, int b)
    Sets background color (r,g,b) */
 PHP_METHOD(swfmovie, setBackground)
 {
@@ -2166,7 +2165,7 @@ PHP_METHOD(swfmovie, setBackground)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_setRate(float rate)
+/* {{{ proto void swfmovie::setRate(float rate)
    Sets movie rate */
 PHP_METHOD(swfmovie, setRate)
 {
@@ -2182,7 +2181,7 @@ PHP_METHOD(swfmovie, setRate)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_setDimension(float x, float y)
+/* {{{ proto void swfmovie::setDimension(float x, float y)
    Sets movie dimension */
 PHP_METHOD(swfmovie, setDimension)
 {
@@ -2199,7 +2198,7 @@ PHP_METHOD(swfmovie, setDimension)
 }
 /* }}} */
 
-/* {{{ proto void swfmovie_setFrames(int frames)
+/* {{{ proto void swfmovie::setFrames(int frames)
    Sets number of frames */
 PHP_METHOD(swfmovie, setFrames)
 {
@@ -2216,7 +2215,7 @@ PHP_METHOD(swfmovie, setFrames)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swfmovie_streamMP3(mixed file)
+/* {{{ proto void swfmovie::streamMP3(mixed file)
    Sets sound stream of the SWF movie. The parameter can be stream or string. */
 PHP_METHOD(swfmovie, streamMP3)
 {
@@ -2431,7 +2430,7 @@ static zend_function_entry swfmovie_functions[] = {
 
 /* {{{ SWFShape
 */
-/* {{{ proto object swfshape_init(void)
+/* {{{ proto object swfshape::__construct()
    Returns a new SWFShape object */
 PHP_METHOD(swfshape, __construct)
 {
@@ -2463,7 +2462,7 @@ static SWFShape getShape(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_setline(int width, int r, int g, int b [, int a])
+/* {{{ proto void swfshape::setline(int width, int r, int g, int b [, int a])
    Sets the current line style for this SWFShape */
 PHP_METHOD(swfshape, setLine)
 {
@@ -2502,7 +2501,7 @@ PHP_METHOD(swfshape, setLine)
 }
 /* }}} */
 
-/* {{{ proto object swfshape_addfill(mixed arg1, int arg2, [int b [, int a]])
+/* {{{ proto object swfshape::addfill(mixed arg1, int arg2, [int b [, int a]])
    Returns a fill object, for use with swfshape_setleftfill and swfshape_setrightfill. If 1 or 2 parameter(s) is (are) passed first should be object (from gradient class) and the second int (flags). Gradient fill is performed. If 3 or 4 parameters are passed : r, g, b [, a]. Solid fill is performed. */
 PHP_METHOD(swfshape, addFill)
 {
@@ -2583,7 +2582,7 @@ PHP_METHOD(swfshape, addFill)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_setleftfill(int arg1 [, int g ,int b [,int a]])
+/* {{{ proto void swfshape::setleftfill(int arg1 [, int g ,int b [,int a]])
    Sets the left side fill style to fill in case only one parameter is passed. When 3 or 4 parameters are passed they are treated as : int r, int g, int b, int a . Solid fill is performed in this case before setting left side fill type. */
 PHP_METHOD(swfshape, setLeftFill)
 {
@@ -2634,7 +2633,7 @@ PHP_METHOD(swfshape, setLeftFill)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_setleftfill(int arg1 [, int g ,int b [,int a]])
+/* {{{ proto void swfshape::setleftfill(int arg1 [, int g ,int b [,int a]])
    Sets the right side fill style to fill in case only one parameter is passed. When 3 or 4 parameters are passed they are treated as : int r, int g, int b, int a . Solid fill is performed in this case before setting right side fill type. */
 PHP_METHOD(swfshape, setRightFill)
 {
@@ -2684,7 +2683,7 @@ PHP_METHOD(swfshape, setRightFill)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_movepento(float x, float y)
+/* {{{ proto void swfshape::movepento(float x, float y)
    Moves the pen to shape coordinates (x, y) */
 PHP_METHOD(swfshape, movePenTo)
 {
@@ -2699,7 +2698,7 @@ PHP_METHOD(swfshape, movePenTo)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_movepen(float x, float y)
+/* {{{ proto void swfshape::movepen(float x, float y)
    Moves the pen from its current location by vector (x, y) */
 PHP_METHOD(swfshape, movePen)
 {
@@ -2714,7 +2713,7 @@ PHP_METHOD(swfshape, movePen)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawlineto(float x, float y)
+/* {{{ proto void swfshape::drawlineto(float x, float y)
    Draws a line from the current pen position to shape coordinates (x, y) in the current line style */
 PHP_METHOD(swfshape, drawLineTo)
 {
@@ -2729,7 +2728,7 @@ PHP_METHOD(swfshape, drawLineTo)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawline(float dx, float dy)
+/* {{{ proto void swfshape::drawline(float dx, float dy)
    Draws a line from the current pen position (x, y) to the point (x+dx, y+dy) in the current line style */
 PHP_METHOD(swfshape, drawLine)
 {
@@ -2744,7 +2743,7 @@ PHP_METHOD(swfshape, drawLine)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawcurveto(float ax, float ay, float bx, float by [, float dx, float dy])
+/* {{{ proto void swfshape::drawcurveto(float ax, float ay, float bx, float by [, float dx, float dy])
    Draws a curve from the current pen position (x,y) to the point (bx, by) in the current line style, using point (ax, ay) as a control point. Or draws a cubic bezier to point (dx, dy) with control points (ax, ay) and (bx, by) */
 PHP_METHOD(swfshape, drawCurveTo)
 {
@@ -2785,7 +2784,7 @@ PHP_METHOD(swfshape, drawCurveTo)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawcurve(float adx, float ady, float bdx, float bdy [, float cdx, float cdy])
+/* {{{ proto void swfshape::drawcurve(float adx, float ady, float bdx, float bdy [, float cdx, float cdy])
    Draws a curve from the current pen position (x, y) to the point (x+bdx, y+bdy) in the current line style, using point (x+adx, y+ady) as a control point or draws a cubic bezier to point (x+cdx, x+cdy) with control points (x+adx, y+ady) and (x+bdx, y+bdy) */
 PHP_METHOD(swfshape, drawCurve)
 {
@@ -2826,7 +2825,7 @@ PHP_METHOD(swfshape, drawCurve)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawglyph(SWFFont font, string character [, int size])
+/* {{{ proto void swfshape::drawglyph(SWFFont font, string character [, int size])
    Draws the first character in the given string into the shape using the glyph definition from the given font */
 PHP_METHOD(swfshape, drawGlyph)
 {
@@ -2851,7 +2850,7 @@ PHP_METHOD(swfshape, drawGlyph)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawcircle(float r)
+/* {{{ proto void swfshape::drawcircle(float r)
    Draws a circle of radius r centered at the current location, in a counter-clockwise fashion */
 PHP_METHOD(swfshape, drawCircle)
 {
@@ -2865,7 +2864,7 @@ PHP_METHOD(swfshape, drawCircle)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawarc(float r, float startAngle, float endAngle)
+/* {{{ proto void swfshape::drawarc(float r, float startAngle, float endAngle)
    Draws an arc of radius r centered at the current location, from angle startAngle to angle endAngle measured counterclockwise from 12 o'clock */
 PHP_METHOD(swfshape, drawArc)
 {
@@ -2883,7 +2882,7 @@ PHP_METHOD(swfshape, drawArc)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
+/* {{{ proto void swfshape::drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given points as control points */
 PHP_METHOD(swfshape, drawCubic)
 {
@@ -2905,7 +2904,7 @@ PHP_METHOD(swfshape, drawCubic)
 }
 /* }}} */
 
-/* {{{ proto void swfshape_drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
+/* {{{ proto void swfshape::drawcubic(float bx, float by, float cx, float cy, float dx, float dy)
    Draws a cubic bezier curve using the current position and the three given points as control points */
 PHP_METHOD(swfshape, drawCubicTo)
 {
@@ -2951,7 +2950,7 @@ static zend_function_entry swfshape_functions[] = {
 
 /* {{{ SWFSprite
 */
-/* {{{ proto class swfsprite_init(void)
+/* {{{ proto class swfsprite::__construct()
    Returns a new SWFSprite object */
 PHP_METHOD(swfsprite, __construct)
 {
@@ -2982,7 +2981,7 @@ static SWFMovieClip getSprite(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto object swfsprite_add(object SWFCharacter)
+/* {{{ proto object swfsprite::add(object SWFCharacter)
    Adds the character to the sprite, returns a displayitem object */
 PHP_METHOD(swfsprite, add)
 {
@@ -3015,7 +3014,7 @@ PHP_METHOD(swfsprite, add)
 }
 /* }}} */
 
-/* {{{ proto void swfsprite_remove(object SWFDisplayItem)
+/* {{{ proto void swfsprite::remove(object SWFDisplayItem)
    Remove the named character from the sprite's display list */
 PHP_METHOD(swfsprite, remove)
 {
@@ -3032,7 +3031,7 @@ PHP_METHOD(swfsprite, remove)
 }
 /* }}} */
 
-/* {{{ proto void swfsprite_nextFrame(void)
+/* {{{ proto void swfsprite::nextFrame()
    Moves the sprite to the next frame */
 PHP_METHOD(swfsprite, nextFrame)
 {
@@ -3040,7 +3039,7 @@ PHP_METHOD(swfsprite, nextFrame)
 }
 /* }}} */
 
-/* {{{ proto void swfsprite_labelFrame(string label)
+/* {{{ proto void swfsprite::labelFrame(string label)
    Labels frame */
 PHP_METHOD(swfsprite, labelFrame)
 {
@@ -3054,7 +3053,7 @@ PHP_METHOD(swfsprite, labelFrame)
 }
 /* }}} */
 
-/* {{{ proto void swfsprite_setFrames(int frames)
+/* {{{ proto void swfsprite::setFrames(int frames)
    Sets the number of frames in this SWFSprite */
 PHP_METHOD(swfsprite, setFrames)
 {
@@ -3134,7 +3133,7 @@ static zend_function_entry swfsprite_functions[] = {
 
 /* {{{ SWFText
 */
-/* {{{ proto class swftext_init(void)
+/* {{{ proto class swftext::__construct()
    Returns new SWFText object */
 PHP_METHOD(swftext, __construct)
 {
@@ -3165,7 +3164,7 @@ static SWFText getText(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swftext_setFont(object font)
+/* {{{ proto void swftext::setFont(object font)
    Sets this SWFText object's current font to given font */
 PHP_METHOD(swftext, setFont)
 {
@@ -3182,7 +3181,7 @@ PHP_METHOD(swftext, setFont)
 }
 /* }}} */
 
-/* {{{ proto void swftext_setHeight(float height)
+/* {{{ proto void swftext::setHeight(float height)
    Sets this SWFText object's current height to given height */
 PHP_METHOD(swftext, setHeight)
 {
@@ -3197,7 +3196,7 @@ PHP_METHOD(swftext, setHeight)
 }
 /* }}} */
 
-/* {{{ proto void swftext_setSpacing(float spacing)
+/* {{{ proto void swftext::setSpacing(float spacing)
    Sets this SWFText object's current letterspacing to given spacing */
 PHP_METHOD(swftext, setSpacing)
 {
@@ -3212,7 +3211,7 @@ PHP_METHOD(swftext, setSpacing)
 }
 /* }}} */
 
-/* {{{ proto void swftext_setColor(int r, int g, int b [, int a])
+/* {{{ proto void swftext::setColor(int r, int g, int b [, int a])
    Sets this SWFText object's current color to the given color */
 PHP_METHOD(swftext, setColor)
 {
@@ -3243,7 +3242,7 @@ PHP_METHOD(swftext, setColor)
 }
 /* }}} */
 
-/* {{{ proto void swftext_moveTo(float x, float y)
+/* {{{ proto void swftext::moveTo(float x, float y)
    Moves this SWFText object's current pen position to (x, y) in text coordinates */
 PHP_METHOD(swftext, moveTo)
 {
@@ -3259,7 +3258,7 @@ PHP_METHOD(swftext, moveTo)
 }
 /* }}} */
 
-/* {{{ proto void swftext_addString(string text)
+/* {{{ proto void swftext::addString(string text)
    Writes the given text into this SWFText object at the current pen position, using the current font, height, spacing, and color */
 PHP_METHOD(swftext, addString)
 {
@@ -3276,7 +3275,7 @@ PHP_METHOD(swftext, addString)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swftext_addUTF8String(string text)
+/* {{{ proto void swftext::addUTF8String(string text)
    Writes the given text into this SWFText object at the current pen position,
    using the current font, height, spacing, and color */
 
@@ -3294,7 +3293,7 @@ PHP_METHOD(swftext, addUTF8String)
 }
 
 /* }}} */
-/* {{{ proto void swftext_addWideString(string text)
+/* {{{ proto void swftext::addWideString(string text)
    Writes the given text into this SWFText object at the current pen position,
    using the current font, height, spacing, and color */
 /*
@@ -3314,7 +3313,7 @@ PHP_METHOD(swftext, addWideString)
 /* }}} */
 #endif
 
-/* {{{ proto float swftext_getWidth(string str)
+/* {{{ proto float swftext::getWidth(string str)
    Calculates the width of the given string in this text objects current font and size */
 PHP_METHOD(swftext, getWidth)
 {
@@ -3329,7 +3328,7 @@ PHP_METHOD(swftext, getWidth)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto double swftext_getUTF8Width(string)
+/* {{{ proto double swftext::getUTF8Width(string)
    calculates the width of the given string in this text objects current font and size */
 
 PHP_METHOD(swftext, getUTF8Width)
@@ -3348,7 +3347,7 @@ PHP_METHOD(swftext, getUTF8Width)
 }
 
 /* }}} */
-/* {{{ proto double swftext_getWideWidth(string)
+/* {{{ proto double swftext::getWideWidth(string)
    calculates the width of the given string in this text objects current font and size */
 /*
 PHP_METHOD(swftext, getWideWidth)
@@ -3369,7 +3368,7 @@ PHP_METHOD(swftext, getWideWidth)
 /* }}} */
 #endif
 
-/* {{{ proto float swftext_getAscent(void)
+/* {{{ proto float swftext::getAscent()
    Returns the ascent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getAscent)
 {
@@ -3377,7 +3376,7 @@ PHP_METHOD(swftext, getAscent)
 }
 /* }}} */
 
-/* {{{ proto float swftext_getDescent(void)
+/* {{{ proto float swftext::getDescent()
    Returns the descent of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getDescent)
 {
@@ -3385,7 +3384,7 @@ PHP_METHOD(swftext, getDescent)
 }
 /* }}} */
 
-/* {{{ proto float swftext_getLeading(void)
+/* {{{ proto float swftext::getLeading()
    Returns the leading of the current font at its current size, or 0 if not available */
 PHP_METHOD(swftext, getLeading)
 {
@@ -3420,7 +3419,7 @@ static zend_function_entry swftext_functions[] = {
 
 /* {{{ SWFTextField
 */
-/* {{{ proto object swftextfield_init([int flags])
+/* {{{ proto object swftextfield::__construct([int flags])
    Returns a new SWFTextField object */
 PHP_METHOD(swftextfield, __construct)
 {
@@ -3460,7 +3459,7 @@ static SWFTextField getTextField(zval *id TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setFont(object font)
+/* {{{ proto void swftextfield::setFont(object font)
    Sets the font for this textfield */
 PHP_METHOD(swftextfield, setFont)
 {
@@ -3475,7 +3474,7 @@ PHP_METHOD(swftextfield, setFont)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setBounds(float width, float height)
+/* {{{ proto void swftextfield::setBounds(float width, float height)
    Sets the width and height of this textfield */
 PHP_METHOD(swftextfield, setBounds)
 {
@@ -3491,7 +3490,7 @@ PHP_METHOD(swftextfield, setBounds)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_align(int alignment)
+/* {{{ proto void swftextfield::align(int alignment)
    Sets the alignment of this textfield */
 PHP_METHOD(swftextfield, align)
 {
@@ -3506,7 +3505,7 @@ PHP_METHOD(swftextfield, align)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setHeight(float height)
+/* {{{ proto void swftextfield::setHeight(float height)
    Sets the font height of this textfield */
 PHP_METHOD(swftextfield, setHeight)
 {
@@ -3521,7 +3520,7 @@ PHP_METHOD(swftextfield, setHeight)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setLeftMargin(float margin)
+/* {{{ proto void swftextfield::setLeftMargin(float margin)
    Sets the left margin of this textfield */
 PHP_METHOD(swftextfield, setLeftMargin)
 {
@@ -3536,7 +3535,7 @@ PHP_METHOD(swftextfield, setLeftMargin)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setRightMargin(float margin)
+/* {{{ proto void swftextfield::setRightMargin(float margin)
    Sets the right margin of this textfield */
 PHP_METHOD(swftextfield, setRightMargin)
 {
@@ -3551,7 +3550,7 @@ PHP_METHOD(swftextfield, setRightMargin)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setMargins(float left, float right)
+/* {{{ proto void swftextfield::setMargins(float left, float right)
    Sets both margins of this textfield */
 PHP_METHOD(swftextfield, setMargins)
 {
@@ -3568,7 +3567,7 @@ PHP_METHOD(swftextfield, setMargins)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setIndentation(float indentation)
+/* {{{ proto void swftextfield::setIndentation(float indentation)
    Sets the indentation of the first line of this textfield */
 PHP_METHOD(swftextfield, setIndentation)
 {
@@ -3583,7 +3582,7 @@ PHP_METHOD(swftextfield, setIndentation)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setLineSpacing(float space)
+/* {{{ proto void swftextfield::setLineSpacing(float space)
    Sets the line spacing of this textfield */
 PHP_METHOD(swftextfield, setLineSpacing)
 {
@@ -3598,7 +3597,7 @@ PHP_METHOD(swftextfield, setLineSpacing)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setColor(int r, int g, int b [, int a])
+/* {{{ proto void swftextfield::setColor(int r, int g, int b [, int a])
    Sets the color of this textfield */
 PHP_METHOD(swftextfield, setColor)
 {
@@ -3626,7 +3625,7 @@ PHP_METHOD(swftextfield, setColor)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_setName(string var_name)
+/* {{{ proto void swftextfield::setName(string var_name)
    Sets the variable name of this textfield */
 PHP_METHOD(swftextfield, setName)
 {
@@ -3641,7 +3640,7 @@ PHP_METHOD(swftextfield, setName)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_addString(string str)
+/* {{{ proto void swftextfield::addString(string str)
    Adds the given string to this textfield */
 PHP_METHOD(swftextfield, addString)
 {
@@ -3657,7 +3656,7 @@ PHP_METHOD(swftextfield, addString)
 /* }}} */
 
 #ifdef HAVE_NEW_MING
-/* {{{ proto void swftextfield_setPadding(float padding)
+/* {{{ proto void swftextfield::setPadding(float padding)
    Sets the padding of this textfield */
 PHP_METHOD(swftextfield, setPadding)
 {
@@ -3673,7 +3672,7 @@ PHP_METHOD(swftextfield, setPadding)
 }
 /* }}} */
 
-/* {{{ proto void swftextfield_addChars(string)
+/* {{{ proto void swftextfield::addChars(string)
    adds characters to a font that will be available within a textfield */
 PHP_METHOD(swftextfield, addChars)
 {
