@@ -1286,26 +1286,6 @@ PHP_FUNCTION(mysqli_get_metadata)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_read_query_result(object link)
-*/
-PHP_FUNCTION(mysqli_read_query_result)
-{
-	MYSQL		*mysql;
-	zval 		*mysql_link;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
-		return;
-	}
-	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
-
-	if (mysql_read_query_result(mysql)) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
-}
-/* }}} */
-
 /* {{{ proto bool mysqli_real_connect(object link [,string hostname [,string username [,string passwd [,string dbname [,int port [,string socket [,int flags]]]]]]])
    Open a connection to a mysql server */ 
 PHP_FUNCTION(mysqli_real_connect)
@@ -1732,19 +1712,23 @@ PHP_FUNCTION(mysqli_ssl_set)
 }
 /* }}} */
   
-/* {{{ proto string mysqli_stat(object link) 
+/* {{{ proto mixed mysqli_stat(object link) 
    Get current system status */
 PHP_FUNCTION(mysqli_stat)
 {
 	MYSQL 		*mysql;
 	zval  		*mysql_link;
+	char		*stat;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
-	RETURN_STRING((char *)mysql_stat(mysql), 1);
+	if (stat = (char *)mysql_stat(mysql)) {
+		RETURN_STRING(stat, 1);
+	}
+	RETURN_FALSE;
 }
 
 /* }}} */
@@ -1781,7 +1765,7 @@ PHP_FUNCTION(mysqli_stmt_error)
 }
 /* }}} */
 
-/* {{{ proto object mysqli_stmt_store_result(stmt)
+/* {{{ proto bool mysqli_stmt_store_result(stmt)
 */
 PHP_FUNCTION(mysqli_stmt_store_result)
 {
@@ -1873,7 +1857,7 @@ PHP_FUNCTION(mysqli_thread_safe)
 
 /* }}} */
 
-/* {{{ proto object mysqli_use_result(object link)
+/* {{{ proto mixed mysqli_use_result(object link)
    Directly retrieve query results - do not buffer results on client side */
 PHP_FUNCTION(mysqli_use_result)
 {
