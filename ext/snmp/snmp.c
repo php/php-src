@@ -276,9 +276,11 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	session.community_len = Z_STRLEN_PP(a2);
 	session.retries = retries;
 	session.timeout = timeout;
-	
 	session.authenticator = NULL;
+
+#ifndef HAVE_NET_SNMP
 	snmp_synch_setup(&session);
+#endif
 
 	if ((ss = snmp_open(&session)) == NULL) {
 		php_error(E_WARNING,"Could not open snmp\n");
@@ -446,7 +448,11 @@ PHP_FUNCTION(snmp_get_quick_print)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_LONG(snmp_get_quick_print() ? 1 : 0);
+#ifdef HAVE_NET_SNMP
+	RETURN_BOOL(netsnmp_ds_get_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT));
+#else
+	RETURN_BOOL(snmp_get_quick_print());
+#endif
 }
 /* }}} */
 
@@ -461,7 +467,11 @@ PHP_FUNCTION(snmp_set_quick_print)
 		return;
 	}
 
+#ifdef HAVE_NET_SNMP
+	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, (int) a1);
+#else
 	snmp_set_quick_print((int)a1);
+#endif
 }
 /* }}} */
 
