@@ -26,7 +26,7 @@ function fubar($text){
 --EXPECT--
 array(1) {
   ["foo"]=>
-  string(4) "test"
+  &string(4) "test"
 }
 array(1) {
   ["foo"]=>
