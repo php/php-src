@@ -1,3 +1,265 @@
+2002-03-18  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/ftp/ftp.c: MFH (rev. 1.49)
+
+    * ext/ftp/ftp.c: Fix ftp_size() returning bogus results.
+
+2002-03-18  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/crypt_win32.c
+      win32/crypt_win32.h: Fugbix typo.
+
+2002-03-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/fsock.c: MFH socket fix
+
+    * ext/standard/fsock.c: - MFH for bugfix for bug #10001
+
+2002-03-18  Frank M. Kromann  <frank@frontbase.com>
+
+    * win32/crypt_win32.c
+      win32/crypt_win32.h:
+    Adding note about permission to distribute this code under the PHP license
+
+    * main/config.w32.h:
+    Adding HAVE_SHUTDOWN on win32. Needed for the sockets extension to compile
+
+2002-03-18  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/oci8/oci8.c:
+    - Let OCIError() also return the sql statement which failed and the exact
+      position into the statement where it failed (if applicable).
+      Patch by Daniel Ceregatti <vi@sh.nu>.
+
+2002-03-18  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/fsock.c:
+    fix error message which appeared even if no ssl mode was selected
+
+    * main/network.c:
+    Fix for bug #10001: a timeout event prevents further reads.
+    The Bug DB has a patch that should be applied to fsock.c on the
+    4.2 branch.
+
+2002-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_streams.h
+      main/streams.c: Fix build under Release_TS
+    Maybe separating TSRMLS away wasn't such a good idea (sorry Wez :)
+
+2002-03-18  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/network.c: Fix for bugs #16148, #11199, #10092:
+    fread from socket will never free memory.
+    This patch should also be applied to php_sockread_internal in
+    fsock.c in the 4.2 branch.
+
+    * main/streams.c: fix non-TS build...
+
+    * main/php_globals.h: Shouldn't have made it into my last commit.
+
+    * main/php_globals.h
+      main/php_memory_streams.h
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      main/memory_streams.c
+      main/network.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/main.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/standard/fsock.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/standard/php_image.h
+      ext/standard/file.h
+      ext/standard/file.c
+      ext/mailparse/mailparse.c
+      ext/ftp/ftp.c
+      ext/exif/exif.c: TSRMLS related work on streams, as discussed with Zeev.
+
+2002-03-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/.cvsignore
+      pear/scripts/pear-get.in
+      pear/scripts/pearcmd-common.php
+      pear/scripts/pearcmd-help.php
+      pear/scripts/pearcmd-info.php
+      pear/scripts/pearcmd-install.php
+      pear/scripts/pearcmd-list.php
+      pear/scripts/pearcmd-package.php
+      pear/scripts/pearcmd-remote-list.php
+      pear/scripts/pearcmd-show-config.php
+      pear/scripts/pearcmd-uninstall.php: * get rid of this hack
+
+2002-03-18  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/curl/curl.c: proto fixes
+
+2002-03-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_config.phpt
+      pear/PEAR/CommandUI/CLI.php
+      pear/scripts/pear.in
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Login.php
+      pear/PEAR/Command.php
+      pear/PEAR/Config.php
+      pear/PEAR/Remote.php
+      pear/DB/common.php
+      pear/Makefile.frag
+      pear/DB.php: * Refactoring of "pear" command internals.  Highlights:
+     - user interface abstraction, making a Gtk installer should only be
+       a matter of implementing PEAR_CommandUI_Gtk plus a "pear-gtk" executable
+     - separated code into command classes, able to specify one or more
+       commands
+     - no more "pear-get" :-)
+    * fixed use of PEAR_Config::singleton to avoid object copying
+
+2002-03-18  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: MFH
+
+    * NEWS: -r is in the release branch.
+
+2002-03-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/config.m4: If --with-ircg=foo was specified, default to
+    --with-ircg-config=foo/bin/ircg-config.
+
+2002-03-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in: - MFH: backing out requirement on C++ compiler
+
+2002-03-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * regex/Makefile.in: unused makefile.in
+
+2002-03-18  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/zlib/zlib_fopen_wrapper.c: fix warning
+
+    * main/memory_streams.c: fix TSRM build
+
+    * ext/recode/php_recode.h
+      ext/recode/recode.c: Fix build.
+    Warning about TSRM testing still applies.
+
+    * main/memory_streams.c
+      main/php_memory_streams.h: tidyup use of STREAMS_DC macros
+
+    * ext/standard/basic_functions.c: having streams is now the default
+
+2002-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dllts.dsp: Move stream files into the right folders
+
+2002-03-18  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/zlib/zlib.dsp: Update .dsp
+
+    * ext/dotnet/dotnet.dsp: Fix build
+
+    * ext/bz2/bz2.dsp: Update .dsp
+
+2002-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Fix build
+
+    * main/streams.c: Make Sebastian happy
+
+2002-03-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/basic_functions.c
+      main/php.h: Rename HAVE_PHP_STREAM to PHP_HAVE_STREAMS, because
+
+    1.) a PHP-specific symbol should be in the php namespace, and
+    2.) there are multiple streams and the old configure parameter was plural, too.
+
+    * ext/standard/var_unserializer.c: touch file
+
+2002-03-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/zlib/zlib.c
+      main/main.c
+      main/php_streams.h
+      main/streams.c
+      ext/standard/basic_functions.c
+      ext/standard/file.c:
+    Fix the build and all of the outstanding VC++ warnings
+
+2002-03-18  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * README.TESTING: -c option is for path.
+
+    * ext/mbstring/tests/002.inc
+      ext/mbstring/tests/003.inc
+      ext/mbstring/tests/004.inc
+      ext/mbstring/tests/005.inc
+      ext/mbstring/tests/006.inc
+      ext/mbstring/tests/008.inc
+      ext/mbstring/tests/009.inc
+      ext/mbstring/tests/010.inc
+      ext/mbstring/tests/011.inc
+      ext/mbstring/tests/012.inc
+      ext/mbstring/tests/013.inc
+      ext/mbstring/tests/014.inc
+      ext/mbstring/tests/015.inc
+      ext/mbstring/tests/016.inc
+      ext/mbstring/tests/017.inc
+      ext/mbstring/tests/018.inc
+      ext/mbstring/tests/019.inc:
+    Use common.inc instead of common.php for ease of use (rm -f *.php for failed
+    test files)
+
+2002-03-18  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -streams are no longer an option
+
+    * main/memory_streams.c
+      main/php_memory_streams.h: -temp streams are now clean (Thanks to Wez)
+
+2002-03-18  Shane Caraveo  <shane@caraveo.com>
+
+    * php.ini-dist
+      php.ini-recommended: add new ini item for fastcgi
+
+    * sapi/cgi/cgi_main.c
+      sapi/cgi/libfcgi/include/fcgios.h
+      sapi/cgi/libfcgi/os_win32.c:
+    add security impersonation feature for running under IIS security
+
+    * sapi/fastcgi/fastcgi.c: Add impersonation feature for running under IIS
+
+2002-03-18  jim winstead  <jimw@apache.org>
+
+    * Makefile.global:
+    make test: '-c' flag doesn't work like this expects (it takes a
+    directory, not a file), and this isn't necessary.
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/wordwrap.phpt: MFH
+
+    * ext/standard/tests/strings/wordwrap.phpt
+      ext/standard/string.c:
+    Fix calculation of output buffer size in wordwrap(). (Thanks to Wez.)
+
+2002-03-18  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * README.STREAMS: correct grammar
+
+    * README.STREAMS: Add some rules for stream implementors.
+
+2002-03-18  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -use php_stream_make_seekable
+
 2002-03-17  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/memory_streams.c
