@@ -402,21 +402,32 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		php_stream_write_string(stream, "/");
 	}
 	php_stream_write_string(stream, "\r\n");
+	
+	/* open the data channel */
+	if (hoststart == NULL) {
+		hoststart = resource->host;
+	}
+	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
+	if (datastream == NULL) {
+		goto errexit;
+	}
 
+	result = GET_FTP_RESULT(stream);
+	if (result != 150) {
+		/* Could not retrieve or send the file 
+		 * this data will only be sent to us after connection on the data port was initiated.
+		 */
+		php_stream_close(datastream);
+		datastream = NULL;
+		goto errexit;	
+	}
+	
 	/* close control connection if not in ssl mode */
 	if (!use_ssl) {
 		php_stream_write_string(stream, "QUIT\r\n");
 		php_stream_close(stream);
 		stream = NULL;
 	}
-
-	/* open the data channel */
-	if (hoststart == NULL) {
-		hoststart = resource->host;
-	}
-	datastream = php_stream_sock_open_host(hoststart, portno, SOCK_STREAM, 0, 0);
-	if (datastream == NULL)
-		goto errexit;
 		
 	php_stream_context_set(datastream, context);
 	php_stream_notify_progress_init(context, 0, file_size);
