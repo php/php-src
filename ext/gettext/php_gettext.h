@@ -30,6 +30,7 @@ extern zend_module_entry php_gettext_module_entry;
 #define gettext_module_ptr &php_gettext_module_entry
 
 PHP_MINFO_FUNCTION(gettext);
+PHP_MINIT_FUNCTION(gettext);
 
 PHP_FUNCTION(textdomain);
 PHP_FUNCTION(gettext);
