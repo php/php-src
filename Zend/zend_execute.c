@@ -436,7 +436,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						zval tmp;
 						zval *final_value = value;
 
-						if ((T->EA.data.str_offset.offset < 0)) {
+						if (((int)T->EA.data.str_offset.offset < 0)) {
 							zend_error(E_WARNING, "Illegal string offset:  %d", T->EA.data.str_offset.offset);
 							break;
 						}
@@ -2330,7 +2330,6 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zend_uint class_name_strlen = 0;
 	zval *class_name;					
 	zval tmp;
-	int retval;
 	
 	if (EX(opline)->op2.op_type == IS_UNUSED) {
 		if (EX(opline)->extended_value == ZEND_FETCH_CLASS_SELF) {
@@ -2376,6 +2375,8 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	
 	if (!ce) {
+		int retval;
+
 		if (EX(opline)->op1.op_type == IS_UNUSED && EX(opline)->extended_value != ZEND_FETCH_CLASS_GLOBAL) {
 			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
 
@@ -2404,7 +2405,7 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
-	if (retval == FAILURE) {
+	if (!ce) {
 		zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
 	} else {
 		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
