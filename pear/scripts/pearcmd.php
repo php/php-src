@@ -168,7 +168,7 @@ if ($fetype == 'Gtk') {
     } else {
         $tmp = Console_Getopt::getopt($options[1], $short_args, $long_args);
     }
-    if (PEAR::isError()) {
+    if (PEAR::isError($tmp)) {
         break;
     }
     list($tmpopt, $params) = $tmp;
