@@ -41,11 +41,6 @@
 #define sprintf php_sprintf
 #endif
 
-extern unsigned char first_arg_force_ref[];   
-extern unsigned char first_arg_allow_ref[];
-extern unsigned char second_arg_force_ref[];
-extern unsigned char second_arg_allow_ref[];
-
 #ifdef PHP_WIN32
 #include "win95nt.h"
 #	ifdef PHP_EXPORTS
@@ -59,6 +54,11 @@ extern unsigned char second_arg_allow_ref[];
 #define THREAD_LS
 #define PHP_DIR_SEPARATOR '/'
 #endif
+
+PHPAPI extern unsigned char first_arg_force_ref[];
+PHPAPI extern unsigned char first_arg_allow_ref[];
+PHPAPI extern unsigned char second_arg_force_ref[];
+PHPAPI extern unsigned char second_arg_allow_ref[];
 
 #include "php_regex.h"
 
