@@ -2582,7 +2582,8 @@ static int copy_request_variable(void *pDest, int num_args, va_list args, zend_h
 	memcpy(new_key, prefix, prefix_len);
 	memcpy(new_key+prefix_len, hash_key->arKey, hash_key->nKeyLength);
 
-	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, 0, 1);
+	zend_hash_del(&EG(symbol_table), new_key, new_key_len);
+	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), new_key, new_key_len, *var, (*var)->refcount+1, 0);
 
 	efree(new_key);
 	return 0;
