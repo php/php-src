@@ -218,6 +218,8 @@ static void _close_odbc_conn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	for(i = 1; i < nument; i++) {
 		ptr = zend_list_find(i, &type);
 		if (ptr && (type == le_result)) {
+			odbc_result *res;
+
 			res = (odbc_result *)ptr;
 			if (res->conn_ptr == conn) {
 				zend_list_delete(i);
@@ -243,6 +245,8 @@ static void _close_odbc_pconn(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	for(i = 1; i < nument; i++) {
 		ptr = zend_list_find(i, &type);
 		if (ptr && (type == le_result)) {
+			odbc_result *res;
+
 			res = (odbc_result *)ptr;
 			if (res->conn_ptr == conn) {
 				zend_list_delete(i);
