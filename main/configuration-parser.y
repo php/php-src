@@ -127,7 +127,7 @@ static void yyerror(char *str)
 	
 	sprintf(error_buf, "Error parsing %s on line %d\n", currently_parsed_filename, cfglineno);
 #ifdef PHP_WIN32
-	MessageBox(NULL, error_buf, "PHP Error", MB_OK);
+	MessageBox(NULL, error_buf, "PHP Error", MB_OK|MB_SERVICE_NOTIFICATION|MB_TOPMOST);
 #else
 	fprintf(stderr, "PHP:  %s", error_buf);
 #endif
