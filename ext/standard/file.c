@@ -1446,7 +1446,8 @@ PHP_FUNCTION(fscanf)
 {
 	int  result;
 	zval **file_handle, **format_string;
-	int len, type;
+	size_t len;
+	int type;
 	char *buf;
 	void *what;
 
