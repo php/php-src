@@ -423,8 +423,9 @@ php_stream_ops	php_stream_temp_ops = {
 	NULL /* set_option */
 };
 
+/* }}} */
 
-/* {{{ */
+/* {{{ _php_stream_temp_create */
 PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STREAMS_DC TSRMLS_DC)
 {
 	php_stream_temp_data *self;
@@ -442,7 +443,7 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 /* }}} */
 
 
-/* {{{ */
+/* {{{ _php_stream_temp_open */
 PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char *buf, size_t length STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
@@ -460,6 +461,7 @@ PHPAPI php_stream *_php_stream_temp_open(int mode, size_t max_memory_usage, char
 	return stream;
 }
 /* }}} */
+
 
 /*
  * Local variables:
