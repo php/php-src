@@ -2522,16 +2522,30 @@ PHP_FUNCTION(cpdf_place_inline_image)
 	}
 
 	count = 3 * im->sx * im->sy;
-	if(NULL == (buffer = (unsigned char *) emalloc(count)))
-		RETURN_FALSE;
+	buffer = (unsigned char *) safe_emalloc(3 * im->sx, im->sy, 0);
 
 	ptr = buffer;
 	for(i=0; i<im->sy; i++) {
 		for(j=0; j<im->sx; j++) {
-			color = im->pixels[i][j];
-			*ptr++ = im->red[color];
-			*ptr++ = im->green[color];
-			*ptr++ = im->blue[color];
+#if HAVE_LIBGD20
+			if(gdImageTrueColor(im)) {
+				if (im->tpixels && gdImageBoundsSafe(im, j, i)) {
+					color = gdImageTrueColorPixel(im, j, i);
+					*ptr++ = (color >> 16) & 0xFF;
+					*ptr++ = (color >> 8) & 0xFF;
+					*ptr++ = color & 0xFF;
+				}
+			} else {
+#endif
+				if (im->pixels && gdImageBoundsSafe(im, j, i)) {
+					color = im->pixels[i][j];
+					*ptr++ = im->red[color];
+					*ptr++ = im->green[color];
+					*ptr++ = im->blue[color];
+				}
+#if HAVE_LIBGD20
+			}
+#endif
 		}
 	}
 

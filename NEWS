@@ -4,6 +4,8 @@ PHP 4                                                                      NEWS
 - Upgraded bundled GD library to 2.0.23. (Ilia)
 - Fixed possible crash inside pg_copy_(to|from) function if delimiter is more
   then 1 character long. (Ilia)
+- Fixed crash inside cpdf_place_inline_image() when working with truecolor
+  images. (Ilia)
 - Fixed handling of return values from storred procedures in mssql_execute()
   with multiple result sets returned. (Frank)
 - Fixed logic bug in session_register() which allowed registering _SESSION
