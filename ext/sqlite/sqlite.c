@@ -1,23 +1,23 @@
 /*
-  +----------------------------------------------------------------------+
-  | PHP Version 4                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2003 The PHP Group                                |
-  +----------------------------------------------------------------------+
-  | This source file is subject to version 2.02 of the PHP license,      |
-  | that is bundled with this package in the file LICENSE, and is        |
-  | available at through the world-wide-web at                           |
-  | http://www.php.net/license/2_02.txt.                                 |
-  | If you did not receive a copy of the PHP license and are unable to   |
-  | obtain it through the world-wide-web, please send a note to          |
-  | license@php.net so we can mail you a copy immediately.               |
-  +----------------------------------------------------------------------+
-  | Authors: Wez Furlong <wez@thebrainroom.com>                          |
-  |          Tal Peer <tal@php.net>                                      |
-  |          Marcus Boerger <helly@php.net>                              |
-  +----------------------------------------------------------------------+
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Wez Furlong <wez@thebrainroom.com>                          |
+   |          Tal Peer <tal@php.net>                                      |
+   |          Marcus Boerger <helly@php.net>                              |
+   +----------------------------------------------------------------------+
 
-  $Id$ 
+   $Id$ 
 */
 
 #ifdef HAVE_CONFIG_H
@@ -770,7 +770,7 @@ PHP_FUNCTION(sqlite_popen)
 			return;
 		}
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "some other type of persistent resource is using this hash key!?");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Some other type of persistent resource is using this hash key!?");
 		RETURN_FALSE;
 	}
 
@@ -1078,10 +1078,9 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 		if (rowdata[j] == NULL) {
 			ZVAL_NULL(decoded);
 		} else if (decode_binary && rowdata[j][0] == '\x01') {
-			int l = strlen(rowdata[j]);
-			Z_STRVAL_P(decoded) = emalloc(l);
-			Z_STRLEN_P(decoded) = l = sqlite_decode_binary(rowdata[j]+1, Z_STRVAL_P(decoded));
-			Z_STRVAL_P(decoded)[l] = '\0';
+			Z_STRVAL_P(decoded) = emalloc(strlen(rowdata[j]));
+			Z_STRLEN_P(decoded) = sqlite_decode_binary(rowdata[j]+1, Z_STRVAL_P(decoded));
+			Z_STRVAL_P(decoded)[Z_STRLEN_P(decoded)] = '\0';
 			Z_TYPE_P(decoded) = IS_STRING;
 			if (!buffered) {
 				efree((char*)rowdata[j]);
@@ -1095,10 +1094,12 @@ static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend
 		}
 
 		if (mode & PHPSQLITE_NUM) {
-			add_index_zval(return_value, j, decoded);
 			if (mode & PHPSQLITE_ASSOC) {
+				add_index_zval(return_value, j, decoded);
 				ZVAL_ADDREF(decoded);
 				add_assoc_zval(return_value, (char*)colnames[j], decoded);
+			} else {
+				add_next_index_zval(return_value, decoded);
 			}
 		} else {
 			add_assoc_zval(return_value, (char*)colnames[j], decoded);
@@ -1300,11 +1301,25 @@ PHP_FUNCTION(sqlite_fetch_string)
 	}
 
 	if (decode_binary && rowdata[0] != NULL && rowdata[0][0] == '\x01') {
-		decoded = do_alloca(strlen(rowdata[0]));
+		decoded = emalloc(strlen(rowdata[0]));
 		decoded_len = sqlite_decode_binary(rowdata[0]+1, decoded);
+		if (!res->buffered) {
+			efree((char*)rowdata[0]);
+			rowdata[0] = NULL;
+		}
 	} else {
-		decoded = (char*)rowdata[0];
-		decoded_len = decoded ? strlen(decoded) : 0;
+		if (rowdata[0]) {
+			decoded_len = strlen((char*)rowdata[0]);
+			if (res->buffered) {
+				decoded = estrndup((char*)rowdata[0], decoded_len);
+			} else {
+				decoded = (char*)rowdata[0];
+				rowdata[0] = NULL;
+			}
+		} else {
+			decoded_len = 0;
+			decoded = NULL;
+		}
 	}
 
 	if (!res->buffered) {
@@ -1317,7 +1332,7 @@ PHP_FUNCTION(sqlite_fetch_string)
 	if (decoded == NULL) {
 		RETURN_NULL();
 	} else {
-		RETURN_STRINGL(decoded, decoded_len, 1);
+		RETURN_STRINGL(decoded, decoded_len, 0);
 	}
 }
 /* }}} */
