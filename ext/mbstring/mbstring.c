@@ -1304,7 +1304,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 		} else {
 			name = mbfl_no2preferred_mime_name(no_encoding);
 			if (name == NULL || *name == '\0') {
-				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "no name for that encoding");
+				php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "No MIME preferred name corresponding to that encoding");
 				RETVAL_FALSE;
 			} else {
 				RETVAL_STRING((char *)name, 1);
@@ -1415,7 +1415,7 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create converter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
 		}
 	}
 
@@ -1740,7 +1740,7 @@ PHP_FUNCTION(mb_parse_str)
 			mbfl_encoding_detector_delete(identd TSRMLS_CC);
 		}
 		if (from_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to detect encoding");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
 			from_encoding = mbfl_no_encoding_pass;
 		}
 	}
@@ -1751,7 +1751,7 @@ PHP_FUNCTION(mb_parse_str)
 			mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
 			mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar) TSRMLS_CC);
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create converter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
 		}
 	}
 
@@ -2371,7 +2371,7 @@ PHP_FUNCTION(mb_strimwidth)
 	convert_to_long_ex(arg2);
 	from = Z_LVAL_PP(arg2);
 	if (from < 0 || from > Z_STRLEN_PP(arg1)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "start not contained in string");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Start position is out of reange");
 		RETURN_FALSE;
 	}
 
@@ -2379,7 +2379,7 @@ PHP_FUNCTION(mb_strimwidth)
 	width = Z_LVAL_PP(arg3);
 
 	if (width < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "width has negative value");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Width is negative value");
 		RETURN_FALSE;
 	}
 
@@ -2447,13 +2447,13 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 			if (from_encoding != mbfl_no_encoding_invalid) {
 				string.no_encoding = from_encoding;
 			} else {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to detect character encoding");
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect character encoding");
 				from_encoding = mbfl_no_encoding_pass;
 				to_encoding = from_encoding;
 				string.no_encoding = from_encoding;
 			}
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal character encoding specified");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal character encoding specified");
 		}
 		if (list != NULL) {
 			efree((void *)list);
@@ -2463,7 +2463,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len TSRMLS_CC);
 	if (convd == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create character encoding converter");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create character encoding converter");
 		return NULL;
 	}
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
@@ -2679,7 +2679,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			break;
 		}
 		if (size <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "illegal argument");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal argument");
 		}
 	}
 
@@ -3053,7 +3053,7 @@ detect_end:
 			efree(stack);
 		}
 		if (from_encoding == mbfl_no_encoding_invalid) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to detect encoding");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to detect encoding");
 			from_encoding = mbfl_no_encoding_pass;
 		}
 	}
@@ -3065,7 +3065,7 @@ detect_end:
 	if (from_encoding != mbfl_no_encoding_pass) {
 		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0 TSRMLS_CC);
 		if (convd == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to create converter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create converter");
 			RETURN_FALSE;
 		}
 		mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode) TSRMLS_CC);
@@ -3297,7 +3297,7 @@ PHP_FUNCTION(mb_send_mail)
 	if (Z_STRVAL_PP(argv[0])) {
 		to = Z_STRVAL_PP(argv[0]);
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no to field");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing To: field");
 		err = 1;
 	}
 
@@ -3318,7 +3318,7 @@ PHP_FUNCTION(mb_send_mail)
 			subject = Z_STRVAL_PP(argv[1]);
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no subject field");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing Subject: field");
 		err = 1;
 	}
 
@@ -3340,7 +3340,7 @@ PHP_FUNCTION(mb_send_mail)
 		}
 	} else {
 		/* this is not really an error, so it is allowed. */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no message string");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty message body");
 		message = NULL;
 	}
 
