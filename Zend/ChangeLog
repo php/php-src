@@ -1,3 +1,54 @@
+2003-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_builtin_functions.c
+      zend_constants.c
+      zend_object_handlers.c:
+      Make use optimized string lowering
+
+    * zend_operators.c
+      zend_operators.h:
+      Use same parameter order as strcpy()
+
+    * zend_API.c
+      zend_execute.c
+      zend_execute_API.c
+      zend_operators.c
+      zend_operators.h:
+      Make zend_str_tolower_copy() a copy function (like stccpy).
+      Supply a dup version (like estrdup).
+      Fix tolower() handling.
+
+2003-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * zend_builtin_functions.c:
+      Fixed bug #23619 (set_error_handler() registered handler not called for
+      object instances). (Jani, waboring@qualys.com)
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_operators.c:
+      optimize loops.  The check only exists for integers because that's the more
+      common optimization, and you actually lose performance if you check for
+      a double too (wierd but true).
+
+    * zend_mm.h:
+      add some logic to detect zend_mm, which is really only useful when thread
+      safety support is enabled.
+
+    * zend_mm.h:
+      leave this off until its more ready/stable
+      php5 actually beats php4.3.* in my benchmarks now
+      
+
+    * zend_API.c:
+      use zend_str_tolower_copy()
+
+    * zend_execute.c:
+      Bottom drawer optimization to avoid this comparison, but this OP is
+      executed
+      quite often (all of the fetch_* ops)
+
 2003-05-20  Sterling Hughes  <sterling@bumblebury.com>
 
     * zend_operators.c:

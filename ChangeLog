@@ -1,3 +1,213 @@
+2003-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      - This branch is now PHP 4.3.3-dev. (no more RCs!)
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/interface.c:
+      move all the other callbacks
+
+2003-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with PHP 4.3.2RC4
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h:
+      switch over to using fast_call_user_function() with the callbacks
+
+2003-05-21  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/pspell/pspell.c:
+      Fix segfault in pspell_new_config(). Also fix grammar
+      in error messages.
+
+2003-05-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/main.c:
+      MFB
+
+    * (PHP_4_3)
+      main/main.c:
+      Fixed bug #23744
+
+2003-05-21  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/informix/ifx.ec:
+      MFH: Fixed bug #23738 (ifx_copy_blob() crash). (Jani)
+
+    * ext/informix/ifx.ec:
+      Fixed bug #23738 (ifx_copy_blob() crash). (Jani)
+
+    * NEWS:
+      style polizei
+
+2003-05-21  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c:
+      Setup FG(default_context) in RINIT/RSHUTDOWN instead of fg_ctor/fg_dtor.
+      Frees context at right time without double freeing.
+
+2003-05-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php.1.in:
+      -Fix notice
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/string.c:
+      seems there is only the stupid way to be stupid (implode copying array
+      elements)
+      at least we check for IS_STRING, which should clear this up 90% of the
+      time
+
+    * ext/standard/string.c:
+      be stupid, but at least be smart about being stupid.
+
+2003-05-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fdf/fdf.c:
+      Added missing open_basedir & safe_mode checks
+
+2003-05-21  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * ext/zlib/zlib.c:
+      Remove bogus commit here too
+
+    * (PHP_4_3)
+      ext/zlib/zlib.c:
+      Revert bogus commit
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/string.c:
+      make brian happy
+
+2003-05-21  Sander Roobol  <phy@wanadoo.nl>
+
+    * (PHP_4_3)
+      ext/zlib/zlib.c:
+      MFH (ob_gzhandler and zlib.output_compression should send a Content-Length
+      header if the length of the complete compressed output is known)
+
+    * ext/zlib/zlib.c:
+      ob_gzhandler and zlib.output_compression should send a Content-Length
+      header if the length of the complete compressed  output is known
+
+2003-05-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/config.m4:
+      ilia's request is my command
+
+2003-05-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      MFB context refcounting and text-mode fopen fixes
+
+    * (PHP_4_3)
+      main/streams.c:
+      Allow win32 people to fopen($filename, 'rt') to explicitly chose text-mode
+      files again.
+      
+      The functionality was accidentally dropped when we introduced our own
+      fopen
+      mode string parser.
+
+2003-05-21  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      Fix typo
+
+    * (PHP_4_3)
+      main/php_streams.h
+      main/streams.c:
+      Remove php_stream_open_wrapper_as_file_handle, it was fd-patch specific
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      main/main.c
+      main/php_ini.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c:
+      Revert PHP part of the fd patch
+
+2003-05-21  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c:
+      MYSQL_NEED_DATA isn't defined anymore in mysql.h
+
+2003-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/serialize/003.phpt:
+      This depends on libc and CPU used
+
+2003-05-21  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      main/streams/php_stream_context.h:
+      Implement default contexts. For the moment this is useless
+      but it will be used soon for connection pooling.
+
+2003-05-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      readd essential line for multiple sessions inside one request
+
+2003-05-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/cpdf/cpdf.c
+      ext/pdf/pdf.c:
+      Added missing safe_mode checks and corrected a typo in stdout check.
+
+2003-05-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      Fix build
+
+2003-05-21  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      Fix for bug 23402. Crash when mssql?bind was used incorrectly
+
 2003-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/dba/tests/skipif.inc:
