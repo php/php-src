@@ -428,7 +428,7 @@ ZEND_API void zend_error(int type, const char *format, ...);
 
 void zenderror(char *error);
 
-/* The following #define is used for code duality in PHP for Engine 1 & 2
+/* The following #define is used for code duality in PHP for Engine 1 & 2 */
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern zend_utility_values zend_uv;
