@@ -516,6 +516,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int op
 	smart_str *pbuf;
 	int i, err, eval, n;
 	UChar *pos;
+	UChar *string_lim;
 	char *description = NULL;
 	char pat_buf[2];
 
@@ -579,9 +580,10 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int op
 	/* do the actual work */
 	err = 0;
 	pos = string;
+	string_lim = (UChar*)(string + string_len);
 	regs = php_mb_regex_region_new();
 	while (err >= 0) {
-		err = php_mb_regex_search(re, (UChar *)string, (UChar *)(string + string_len), pos, (UChar *)(string + string_len), regs, 0);
+		err = php_mb_regex_search(re, (UChar *)string, (UChar *)string_lim, pos, (UChar *)string_lim, regs, 0);
 		if (err <= -2) {
 			UChar err_str[REG_MAX_ERROR_MESSAGE_LEN];
 			php_mb_regex_error_code_to_str(err_str, err);
@@ -636,16 +638,15 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int op
 			if ((size_t)(pos - (UChar *)string) < n) {
 				pos = string + n;
 			} else {
-				smart_str_appendl(&out_buf, pos, 1); 
+				if (pos < string_lim) {
+					smart_str_appendl(&out_buf, pos, 1); 
+				}
 				pos++;
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
-			int l = (UChar *)(string + string_len) - pos;
-			if (l > 0) {
-				smart_str_appendl(&out_buf, pos, l);
-			} else {
-				out_buf.len += l;
+			if (string_lim - pos > 0) {
+				smart_str_appendl(&out_buf, pos, string_lim - pos);
 			}
 		}
 		php_mb_regex_region_free(regs, 0);
