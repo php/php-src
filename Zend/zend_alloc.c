@@ -563,7 +563,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		}
 	}
 
-	if (grand_total_leaks > 0) {
+	if (!silent && grand_total_leaks > 0) {
 		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &grand_total_leaks);
 	}
 
