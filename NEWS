@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed and improved shared-memory session storage module (Sascha)
 - Add config option (always_populate_raw_post_data) which when enabled
   will always populate $HTTP_RAW_POST_DATA regardless of the post mime
   type (Rasmus)
