@@ -1,3 +1,84 @@
+2000-05-28  Jim Winstead  <jimw@php.net>
+
+    * MAINTAINERS: Add maintainer info for dbase extension.
+
+    * calendar.mak
+      crypt.mak
+      dbase.mak
+      dbm.mak
+      filepro.mak
+      gd.mak
+      hyperwave.mak
+      imap4.mak
+      ldap.mak
+      makeall.bat
+      makeparser.bat
+      msql.mak
+      msql1.mak
+      mtparser.bat
+      mysql.mak
+      php_custom_build.mak
+      snmp.mak
+      zlib.mak: Remove old, unused files.
+
+    * header: fix license version number in sample header
+
+2000-05-28  Andi Gutmans  <andi@php.net>
+
+    * configure.in: - This should have been done for 4.0.0.
+    - Default build is without debug now. Use --enable-debug if you want a
+    - debug build which includes leak/memory overwrite etc. detection
+
+2000-05-28  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c: Changed parameter naming some function prototypes
+
+2000-05-28  Andi Gutmans  <andi@php.net>
+
+    * main.c: - Move zend_activate_modules() to later on.
+
+2000-05-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_syslog.h:
+    Remove win32/php_registry.h from include list. That slipped in by accident.
+
+    * ext/standard/syslog.c
+      main.c
+      php_syslog.h:
+    Use php_syslog() for system call. On OpenServer 5, syslog is defined to
+    var_syslog/sys_syslog which causes various problems.
+
+    Submitted by: Paul Gardiner <I.T.Manager@barleychalu.co.uk>
+
+    * ext/standard/basic_functions.h
+      ext/standard/php_ext_syslog.h
+      ext/standard/php_standard.h
+      ext/standard/php_syslog.h
+      ext/standard/syslog.c: Make syslog module thread-safe.
+
+2000-05-28  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * tests/odbc-display.php
+      tests/odbc-t1.php
+      tests/odbc-t2.php
+      tests/odbc-t3.php
+      tests/odbc-t4.php
+      tests/odbc-t5.php: Test scripts for ODBC added
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h: Cosmetic changes.
+
+2000-05-28  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c: (php_execute_script) fix leak for phpinfo() images.
+
+2000-05-28  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.dsp
+      ext/informix/ifx.dsw: - added COMPILE_DL_INFORMIX to WIN32 project file
+
+    * ext/informix/ifx.ec:  - Name correction.
+
 2000-05-27  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/gd/config.m4:
