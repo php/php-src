@@ -869,7 +869,8 @@ PHP_FUNCTION(preg_replace)
 /* }}} */
 
 
-/* {{{ proto preg_split(string pattern, string subject [, int limit ]) */
+/* {{{ proto array preg_split(string pattern, string subject [, int limit ]) 
+    split string into an array using a perl-style regular expression as a delimiter */
 PHP_FUNCTION(preg_split)
 {
 	zval			*regex,				/* Regular expression to split by */
