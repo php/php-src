@@ -394,7 +394,7 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
 		return sizeof(struct sockaddr_in);
-#ifdef AF_INET6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 		return sizeof(struct sockaddr_in6);
 #endif
