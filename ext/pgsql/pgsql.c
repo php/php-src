@@ -2296,7 +2296,7 @@ PHP_FUNCTION(pg_put_line)
 }
 /* }}} */
 
-/* {{{ proto array pg_copy_to(int connection, string table_name [, string delimiter [, string null_as]])
+/* {{{ proto array pg_copy_to(resource connection, string table_name [, string delimiter [, string null_as]])
    Copy table to array */
 PHP_FUNCTION(pg_copy_to)
 {
@@ -2357,7 +2357,7 @@ PHP_FUNCTION(pg_copy_to)
 				while (!copydone)
 				{
 					if ((ret = PQgetline(pgsql, copybuf, COPYBUFSIZ))) {
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "getline failed: %s", PQerrorMessage(pgsql));
 						RETURN_FALSE;
 					}
 			
@@ -2391,7 +2391,7 @@ PHP_FUNCTION(pg_copy_to)
 					}
 				}
 				if (PQendcopy(pgsql)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "endcopy failed: %s", PQerrorMessage(pgsql));
 					RETURN_FALSE;
 				}
 				while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2404,14 +2404,14 @@ PHP_FUNCTION(pg_copy_to)
 			break;
 		default:
 			PQclear(pgsql_result);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "COPY command failed: %s", PQerrorMessage(pgsql));
 			RETURN_FALSE;
 			break;
 	}
 }
 /* }}} */
 
-/* {{{ proto bool pg_copy_from(int connection, string table_name , array rows [, string delimiter [, string null_as]])
+/* {{{ proto bool pg_copy_from(resource connection, string table_name , array rows [, string delimiter [, string null_as]])
    Copy table from array */
 PHP_FUNCTION(pg_copy_from)
 {
@@ -2468,21 +2468,22 @@ PHP_FUNCTION(pg_copy_from)
 					convert_to_string_ex(tmp);
 					query = (char *)emalloc(Z_STRLEN_PP(tmp) +2);
 					strcpy(query, Z_STRVAL_PP(tmp));
-					if(*(query+Z_STRLEN_PP(tmp)-1) != '\n') strcat(query, "\n");
+					if(*(query+Z_STRLEN_PP(tmp)-1) != '\n')
+						strcat(query, "\n");
 					if (PQputline(pgsql, query)) {
 						efree(query);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "copy failed: %s", PQerrorMessage(pgsql));
 						RETURN_FALSE;
 					}
 					efree(query);
 					zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
 				}
-				if (PQputline(pgsql, "\\.\n")) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+				if (PQputline(pgsql, "\\.\n") == EOF) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "putline failed: %s", PQerrorMessage(pgsql));
 					RETURN_FALSE;
 				}
 				if (PQendcopy(pgsql)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "endcopy failed: %s", PQerrorMessage(pgsql));
 					RETURN_FALSE;
 				}
 				while ((pgsql_result = PQgetResult(pgsql))) {
@@ -2496,7 +2497,7 @@ PHP_FUNCTION(pg_copy_from)
 			break;
 		default:
 			PQclear(pgsql_result);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Query failed: %s", PQerrorMessage(pgsql));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "COPY command failed: %s", PQerrorMessage(pgsql));
 			RETURN_FALSE;
 			break;
 	}
