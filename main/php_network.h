@@ -17,7 +17,12 @@
  */
 /* $Id$ */
 
-int php_hostconnect(char *host, int port, int socktype, int timeout);
+#ifndef _PHP_NETWORK_H
+#define _PHP_NETWORK_H
+
+int php_hostconnect(char *host, unsigned short port, int socktype, int timeout);
+
+#endif /* _PHP_NETWORK_H */
 
 /*
  * Local variables:

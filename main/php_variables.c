@@ -57,7 +57,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 	zend_bool free_index;
 	HashTable *symtable1=NULL;
 	HashTable *symtable2=NULL;
-	
+
 	if (PG(register_globals)) {
 		symtable1 = EG(active_symbol_table);
 	}
@@ -69,7 +69,7 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 		}
 	}
 	if (!symtable1) {
-		/* we don't need track_vars, and we're not setting GPC globals either. */
+		/* Nothing to do */
 		zval_dtor(val);
 		return;
 	}
@@ -220,23 +220,19 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 		case PARSE_POST:
 		case PARSE_GET:
 		case PARSE_COOKIE:
-			if (PG(track_vars)) {
-				ALLOC_ZVAL(array_ptr);
-				array_init(array_ptr);
-				INIT_PZVAL(array_ptr);
-				switch (arg) {
-					case PARSE_POST:
-						PG(http_globals).post = array_ptr;
-						break;
-					case PARSE_GET:
-						PG(http_globals).get = array_ptr;
-						break;
-					case PARSE_COOKIE:
-						PG(http_globals).cookie = array_ptr;
-						break;
-				}
-			} else {
-				array_ptr=NULL;
+			ALLOC_ZVAL(array_ptr);
+			array_init(array_ptr);
+			INIT_PZVAL(array_ptr);
+			switch (arg) {
+				case PARSE_POST:
+					PG(http_globals)[TRACK_VARS_POST] = array_ptr;
+					break;
+				case PARSE_GET:
+					PG(http_globals)[TRACK_VARS_GET] = array_ptr;
+					break;
+				case PARSE_COOKIE:
+					PG(http_globals)[TRACK_VARS_COOKIE] = array_ptr;
+					break;
 			}
 			break;
 		default:
@@ -309,12 +305,10 @@ void php_import_environment_variables(ELS_D PLS_DC)
 	char **env, *p, *t;
 	zval *array_ptr=NULL;
 
-	if (PG(track_vars)) {
-		ALLOC_ZVAL(array_ptr);
-		array_init(array_ptr);
-		INIT_PZVAL(array_ptr);
-		PG(http_globals).environment = array_ptr;
-	}
+	ALLOC_ZVAL(array_ptr);
+	array_init(array_ptr);
+	INIT_PZVAL(array_ptr);
+	PG(http_globals)[TRACK_VARS_ENV] = array_ptr;
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
