@@ -1988,7 +1988,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		int free_msg = 0;
 
 		if (wrapper) {
-			if (wrapper->err_count) {
+			if (wrapper->err_count > 0) {
 				int i;
 				size_t l;
 				int brlen;
@@ -2038,6 +2038,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		if (wrapper->err_stack)
 			efree(wrapper->err_stack);
 		wrapper->err_stack = NULL;
+		wrapper->err_count = 0;
 	}
 #if ZEND_DEBUG
 	if (stream == NULL && copy_of_path != NULL)

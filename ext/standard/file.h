@@ -115,6 +115,7 @@ typedef struct {
 	int auto_detect_line_endings;
 	int default_socket_timeout;
 	char *user_agent;
+	char *user_stream_current_filename; /* for simple recursion protection */
 } php_file_globals;
 
 #ifdef ZTS
