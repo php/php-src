@@ -450,7 +450,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 	char *tpath, *ttpath;
 	int body = 0;
 	int reqok = 0;
-	int i;
+	int i, len;
 
 	FILE *fp = NULL;
 	struct sockaddr_in server;
@@ -504,22 +504,26 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 #endif							/*win32 */
 
 		strcpy(hdr_line, "GET ");
+		len = 4;
 		/* tell remote http which file to get */
 		if (resource->path != NULL) {
-			strncat(hdr_line, resource->path, sizeof(hdr_line));
+			strncat(hdr_line, resource->path, sizeof(hdr_line)-len);
+			len += strlen(resource->path);
 		} else {
-			strncat(hdr_line, "/", sizeof(hdr_line));
+			strncat(hdr_line, "/", sizeof(hdr_line)-len);
+			len++;
 		}
-
 		/* append the query string, if any */
 		if (resource->query != NULL) {
-			strncat(hdr_line, "?", sizeof(hdr_line));
-			strncat(hdr_line, resource->query, sizeof(hdr_line));
+			strncat(hdr_line, "?", sizeof(hdr_line)-len);
+			len++;
+			strncat(hdr_line, resource->query, sizeof(hdr_line)-len);
+			len += strlen(resource->query);
 		}
-		strncat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line));
+		strncat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line)-len);
 		hdr_line[sizeof(hdr_line)-1] = '\0';
 		SOCK_WRITE(hdr_line, *socketd);
-
+		
 		/* send authorization header if we have user/pass */
 		if (resource->user != NULL && resource->pass != NULL) {
 			scratch = (char *) emalloc(strlen(resource->user) + strlen(resource->pass) + 2);
@@ -532,49 +536,43 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			strcat(scratch, resource->pass);
 			tmp = _php3_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
 
-			strcpy(hdr_line, "Authorization: Basic ");
-			/* output "user:pass" as base64-encoded string */
-			strncat(hdr_line, (char *)tmp, sizeof(hdr_line));
-			strncat(hdr_line, "\r\n", sizeof(hdr_line));
-			hdr_line[sizeof(hdr_line)-1] = '\0';
-			SOCK_WRITE(hdr_line, *socketd);
+			if (snprintf(hdr_line, sizeof(hdr_line),
+						 "Authorization: Basic %s\r\n", tmp) > 0) {
+				SOCK_WRITE(hdr_line, *socketd);
+			}
+
 			efree(scratch);
 			efree(tmp);
 		}
 		/* if the user has configured who they are, send a From: line */
 		if (cfg_get_string("from", &scratch) == SUCCESS) {
-			strcpy(hdr_line, "From: ");
-			strncat(hdr_line, scratch, sizeof(hdr_line));
-			strncat(hdr_line, "\r\n", sizeof(hdr_line));
-			hdr_line[sizeof(hdr_line)-1] = '\0';
-			SOCK_WRITE(hdr_line, *socketd);
+			if (snprintf(hdr_line, sizeof(hdr_line),
+						 "From: %s\r\n", scratch) > 0) {
+				SOCK_WRITE(hdr_line, *socketd);
+			}
 
 		}
 		/* send a Host: header so name-based virtual hosts work */
-		strcpy(hdr_line, "Host: ");
-		strncat(hdr_line, resource->host, sizeof(hdr_line));
 		if (resource->port != 80) {
-			sprintf(tmp_line, "%i", resource->port);
-			strncat(hdr_line, ":", sizeof(hdr_line));
-			strncat(hdr_line, tmp_line, sizeof(hdr_line));
+			len = snprintf(hdr_line, sizeof(hdr_line),
+						   "Host: %s:%i\r\n", resource->host, resource->port);
+		} else {
+			len = snprintf(hdr_line, sizeof(hdr_line),
+						   "Host: %s\r\n", resource->host);
 		}
-		strncat(hdr_line, "\r\n", sizeof(hdr_line));
-		hdr_line[sizeof(hdr_line)-1] = '\0';
-		SOCK_WRITE(hdr_line, *socketd);
+		if (len > 0) {
+			SOCK_WRITE(hdr_line, *socketd);
+		}
 
 		/* identify ourselves and end the headers */
-		strcpy(hdr_line, "User-Agent: PHP/");
-		strncat(hdr_line, PHP_VERSION, sizeof(hdr_line));
-		strncat(hdr_line, "\r\n\r\n", sizeof(hdr_line));
-		hdr_line[sizeof(hdr_line)-1] = '\0';
-		SOCK_WRITE(hdr_line, *socketd);
+		SOCK_WRITE("User-Agent: PHP/" PHP_VERSION "\r\n\r\n", *socketd);
 
 		body = 0;
 		location[0] = '\0';
 		if (!SOCK_FEOF(*socketd)) {
 			/* get response header */
 			if (SOCK_FGETS(tmp_line, sizeof(tmp_line), *socketd) != NULL) {
-				if (!strncmp(tmp_line + 8, " 200 ", 4)) {
+				if (strncmp(tmp_line + 8, " 200 ", 5) == NULL) {
 					reqok = 1;
 				}
 			}
