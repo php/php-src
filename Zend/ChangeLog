@@ -1,3 +1,8 @@
+2003-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * tests/bug26010.phpt:
+      Add test case for bug #26010
+
 2003-10-30  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.c:
