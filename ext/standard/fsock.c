@@ -219,7 +219,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 		
 	} else	
-		stream = php_stream_sock_open_unix(host, persistent, &tv);
+		stream = php_stream_sock_open_unix(host, host_len, persistent, &tv);
 
 	if (stream && persistent)	{
 		zend_hash_update(&FG(ht_persistent_socks), hashkey, strlen(hashkey) + 1,

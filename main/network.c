@@ -447,7 +447,7 @@ PHPAPI php_stream *php_stream_sock_open_host(const char *host, unsigned short po
 	return php_stream_sock_open_from_socket(socket, persistent);
 }
 
-PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int persistent, struct timeval *timeout)
+PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int pathlen, int persistent, struct timeval *timeout)
 {
 #if defined(AF_UNIX)
 	int socketd;
@@ -459,7 +459,19 @@ PHPAPI php_stream *php_stream_sock_open_unix(const char *path, int persistent, s
 
 	memset(&unix_addr, 0, sizeof(unix_addr));
 	unix_addr.sun_family = AF_UNIX;
-	strlcpy(unix_addr.sun_path, path, sizeof(unix_addr.sun_path));
+
+	/* we need to be binary safe for the on systems that support an abstract
+	 * namespace */
+	if (pathlen >= sizeof(unix_addr.sun_path)) {
+		/* On linux, when the path begins with a NUL byte we are
+		 * referring to an abstract namespace.  In theory we should
+		 * allow an extra byte below, since we don't need the NULL.
+		 * BUT, to get into this branch of code, the name is too long,
+		 * so we don't care. */
+		pathlen = sizeof(unix_addr.sun_path) - 1;
+	}
+	
+	memcpy(unix_addr.sun_path, path, pathlen);
 
 	if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), timeout) == SOCK_CONN_ERR) 
 		return NULL;
