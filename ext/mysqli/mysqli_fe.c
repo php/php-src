@@ -96,6 +96,10 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_info,									NULL)
 	PHP_FE(mysqli_insert_id,							NULL)
 	PHP_FE(mysqli_kill,									NULL)
+#ifndef PHP_WIN32
+	PHP_FE(mysqli_set_local_infile_default,				NULL)
+	PHP_FE(mysqli_set_local_infile_handler,				NULL)
+#endif
 	PHP_FE(mysqli_master_query,							NULL)
 	PHP_FE(mysqli_more_results,							NULL)
 	PHP_FE(mysqli_multi_query, 							NULL)
@@ -126,6 +130,7 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_fetch,							NULL)
 #ifndef HAVE_MYSQLI_OLDAPI
 	PHP_FE(mysqli_stmt_free_result,						NULL)
+	PHP_FE(mysqli_stmt_insert_id,						NULL)
 	PHP_FE(mysqli_stmt_reset,							NULL)
 #endif
 	PHP_FE(mysqli_stmt_param_count,						NULL)
@@ -200,6 +205,10 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_server_info,mysqli_get_server_info,NULL)
 	PHP_FALIAS(init,mysqli_init,NULL)
 	PHP_FALIAS(kill,mysqli_kill,NULL)
+#ifndef PHP_WIN32
+	PHP_FALIAS(set_local_infile_default,mysqli_set_local_infile_default,NULL)
+	PHP_FALIAS(set_local_infile_handler,mysqli_set_local_infile_handler,NULL)
+#endif
 	PHP_FALIAS(master_query,mysqli_master_query,NULL)
 	PHP_FALIAS(mysqli, mysqli_connect, NULL)
 	PHP_FALIAS(multi_query,mysqli_multi_query,NULL)
