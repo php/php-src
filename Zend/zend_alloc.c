@@ -139,7 +139,8 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 	CALCULATE_REAL_SIZE_AND_CACHE_INDEX(size);
 
-	if (!ZEND_DISABLE_MEMORY_CACHE && (CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] > 0)) {
+#if !ZEND_DISABLE_MEMORY_CACHE
+	if ((CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] > 0)) {
 		p = AG(cache)[CACHE_INDEX][--AG(cache_count)[CACHE_INDEX]];
 #if ZEND_DEBUG
 		p->filename = __zend_filename;
@@ -158,13 +159,16 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		p->size = size;
 		return (void *)((char *)p + sizeof(zend_mem_header) + MEM_HEADER_PADDING);
 	} else {
+#endif
 #if ZEND_DEBUG
 		if (CACHE_INDEX<MAX_CACHED_MEMORY) {
 			AG(cache_stats)[CACHE_INDEX][0]++;
 		}
 #endif
 		p  = (zend_mem_header *) ZEND_DO_MALLOC(sizeof(zend_mem_header) + MEM_HEADER_PADDING + SIZE + END_MAGIC_SIZE);
+#if !ZEND_DISABLE_MEMORY_CACHE
 	}
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 
@@ -257,9 +261,8 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	}
 	memset(ptr, 0x5a, p->size);
 #endif
-
-	if (!ZEND_DISABLE_MEMORY_CACHE 
-		&& (CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] < MAX_CACHED_ENTRIES)) {
+#if !ZEND_DISABLE_MEMORY_CACHE
+	if ((CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] < MAX_CACHED_ENTRIES)) {
 		AG(cache)[CACHE_INDEX][AG(cache_count)[CACHE_INDEX]++] = p;
 		p->cached = 1;
 #if ZEND_DEBUG
@@ -267,6 +270,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #endif
 		return;
 	}
+#endif
 	HANDLE_BLOCK_INTERRUPTIONS();
 #if ZEND_DEBUG || !defined(ZEND_MM)
 	REMOVE_POINTER_FROM_LIST(p);
