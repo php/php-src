@@ -1,5 +1,14 @@
 <?php
 
+/** @file searchiterator.inc
+ * @ingroup Examples
+ * @brief abstract class SearchIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
 /** @ingroup Examples
  * @brief Iterator to search for a specific element
  * @author  Marcus Boerger

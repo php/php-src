@@ -1,16 +1,14 @@
 <?php
 
-if (!class_exists('DirectoryTreeIterator', false)) {
-	require_once(dirname(__FILE__). '/directorytreeiterator.inc');
-}
-
-/** tree view example
+/** @file   directorytree.php
+ * @brief   Program Directory tree example
+ * @ingroup Examples
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
  *
- * Usage: php directorytree.php <path> [<start> [<count>]]
+ * Usage: php directorytree.php \<path\> [\<start\> [\<count\>]]
  *
- * Simply specify the path to tree with parameter <path>.
- *
- * (c) Marcus Boerger, 2003
+ * Simply specify the path to tree with parameter \<path\>.
  */
 
 if ($argc < 2) {
@@ -25,6 +23,8 @@ Displays a graphical directory tree for the given <path>.
 EOF;
 	exit(1);
 }
+
+if (!class_exists("DirectoryTreeIterator")) require_once("directorytreeiterator.inc");
 
 $length = $argc > 3 ? $argv[3] : -1;
 

@@ -1,6 +1,15 @@
 <?php
 
-/**
+/** @file regexfindfile.inc
+ * @ingroup Examples
+ * @brief class RegexFindFile
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   Find files by regular expression
  * @author  Marcus Boerger
  * @version 1.1

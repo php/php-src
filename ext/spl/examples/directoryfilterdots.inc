@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file directoryfilterdots.inc
+ * @ingroup Examples
+ * @brief class DirectoryFilterDots
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   A filtered DirectoryIterator
  * @author  Marcus Boerger
  * @version 1.0

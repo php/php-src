@@ -1,12 +1,14 @@
 <?php
 
-/** tree view example
+/** @file   tree.php
+ * @brief   Program Tree view example
+ * @ingroup Examples
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
  *
- * Usage: php tree.php <path>
+ * Usage: php tree.php \<path\>
  *
- * Simply specify the path to tree with parameter <path>.
- *
- * (c) Marcus Boerger, 2003 - 2004
+ * Simply specify the path to tree with parameter \<path\>.
  */
 
 // The following line only operates on classes which are converted to c already.

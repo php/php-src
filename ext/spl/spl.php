@@ -1,5 +1,14 @@
 <?php
 
+/** \file spl.php
+ * \ingroup SPL
+ * \brief Documentation of internal classes and interfaces
+ *
+ * SPL - Standard PHP Library
+ *
+ * (c) Marcus Boerger, 2003 - 2004
+ */
+
 /** \mainpage SPL - Standard PHP Library
  *
  * SPL - Standard PHP Library

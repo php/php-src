@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file appenditerator.inc
+ * @ingroup Examples
+ * @brief class AppendIterator
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   Iterator that iterates over several iterators one after the other
  * @author  Marcus Boerger
  * @version 1.0

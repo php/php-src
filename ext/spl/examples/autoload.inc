@@ -1,5 +1,14 @@
 <?php
 
+/** @file autoload.inc
+ * @ingroup Examples
+ * @brief function __autoload
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
 /** \internal
  * Tries to load class $classname from directory $dir.
  */

@@ -1,6 +1,15 @@
 <?php
 
-/** \ingroup Examples
+/** @file keyfilter.inc
+ * @ingroup Examples
+ * @brief class KeyFilter
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
+ *
+ * SPL - Standard PHP Library
+ */
+
+/** @ingroup Examples
  * @brief   Regular expression filter for string iterators
  * @author  Marcus Boerger
  * @version 1.1

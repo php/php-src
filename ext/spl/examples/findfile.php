@@ -1,14 +1,16 @@
 <?php
 
-/** Find a specific file by name.
+/** @file   findfile.php
+ * @brief   Program Find a specific file by name.
+ * @ingroup Examples
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
  *
- * Usage: php findfile.php <path> <name>
+ * Usage: php findfile.php \<path\> \<name\>
  *
- * <path>  Path to search in. You can specify multiple paths by separating
+ * \<path\>  Path to search in. You can specify multiple paths by separating
  *         them with ';'.
- * <name>  Filename to look for.
- *
- * (c) Marcus Boerger, 2003 - 2004
+ * \<name\>  Filename to look for.
  */
 
 if ($argc < 3) {
@@ -24,6 +26,8 @@ Find a specific file by name.
 EOF;
 	exit(1);
 }
+
+if (!class_exists("FindFile")) require_once("findfile.inc");
 
 foreach(new FindFile($argv[1], $argv[2]) as $file) echo $file->getPathname()."\n";
 ?>

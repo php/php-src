@@ -1,15 +1,17 @@
 <?php
 
-/** dba array utility
+/** @file   dba_array.php
+ * @brief   Program DBA array utility
+ * @ingroup Examples
+ * @author  Marcus Boerger
+ * @date    2003 - 2004
  *
- * Usage php dba_array.php <file> <handler> <key> [<value>]
+ * Usage php dba_array.php \<file\> \<handler\> \<key\> [\<value\>]
  *
- * If <value> is specified then <key> is set to <value> in <file>.
- * Else the value of <key> is printed only.
+ * If \<value\> is specified then \<key\> is set to \<value\> in \<file\>.
+ * Else the value of \<key\> is printed only.
  *
  * Note: configure with --enable-dba 
- *
- * (c) Marcus Boerger, 2003 - 2004
  */
 
 if ($argc < 4) {
