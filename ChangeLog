@@ -1,3 +1,29 @@
+2002-02-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/pi3web/pi3web_sapi.c
+      main/main.c:
+    - Let php_execute_script return 0 on failure and 1 on sucess, and change
+      SAPIs accordingly. (Andrei, Derick)
+
+2002-02-14  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Page.php:
+    changed html tags to lowercase and added Nils-Fredrik G. Kaland's
+    suggested array support to toHtml
+
+2002-02-14  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c: Turned implicit_flush on.
+    Cleaned up help text.
+
+    * sapi/cli/README: Added README file for CLI SAPI.
+
+2002-02-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ncurses/ncurses.c: - Remove duplicate constant
+
 2002-02-13  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/sockets/sockets.dsp: Fixing release and debug build on Win32

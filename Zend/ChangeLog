@@ -1,3 +1,14 @@
+2002-02-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h
+      zend_API.c: Pass TSRM to create_object
+
+2002-02-14  Andrei Zmievski  <andrei@ispi.net>
+
+    * zend_compile.c:
+    Fix the bug where the declared properties without init values were not
+    entered into the table.
+
 2002-02-13  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c
