@@ -415,6 +415,7 @@ int php_init_config()
 					if (S_ISREG(sb.st_mode)) {
 						if ((fh.handle.fp = VCWD_FOPEN(ini_file, "r"))) {
 							fh.filename = ini_file;
+							fh.type = ZEND_HANDLE_FP;
 							zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, &extension_lists);
 							/* Here, add it to the list of ini files read */
 							l = strlen(ini_file);
