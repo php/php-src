@@ -1,5 +1,4 @@
-Only in thttpd-2.21b-cool/: Makefile
-diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
+diff -u thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
 --- thttpd-2.21b/Makefile.in	Thu Mar 29 20:36:21 2001
 +++ thttpd-2.21b-cool/Makefile.in	Sun Jul 14 13:54:27 2002
 @@ -46,13 +46,15 @@
@@ -39,10 +38,22 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  
  tar:
  	@name=`sed -n -e '/SERVER_SOFTWARE/!d' -e 's,.*thttpd/,thttpd-,' -e 's, .*,,p' version.h` ; \
-diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
+diff -u thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
 --- thttpd-2.21b/config.h	Mon Apr  9 23:57:36 2001
-+++ thttpd-2.21b-cool/config.h	Sun Jul 14 13:54:27 2002
-@@ -316,7 +316,7 @@
++++ thttpd-2.21b-cool/config.h	Sun Jul 14 15:58:48 2002
+@@ -82,6 +82,11 @@
+ */
+ #define IDLE_READ_TIMELIMIT 60
+ 
++/* CONFIGURE: How many seconds to allow for reading the subsequent requests
++** on a keep-alive connection.  Should be simiar to LINGER_TIME
++*/
++#define IDLE_KEEPALIVE_TIMELIMIT 2
++
+ /* CONFIGURE: How many seconds before an idle connection gets closed.
+ */
+ #define IDLE_SEND_TIMELIMIT 300
+@@ -316,7 +321,7 @@
  /* CONFIGURE: A list of index filenames to check.  The files are searched
  ** for in this order.
  */
@@ -51,7 +62,7 @@ diff -ur thttpd-2.21b/config.h thttpd-2.21b-cool/config.h
  
  /* CONFIGURE: If this is defined then thttpd will automatically generate
  ** index pages for directories that don't have an explicit index file.
-diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
+diff -u thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
 --- thttpd-2.21b/fdwatch.c	Fri Apr 13 07:36:08 2001
 +++ thttpd-2.21b-cool/fdwatch.c	Sun Jul 14 13:54:27 2002
 @@ -460,7 +460,7 @@
@@ -74,9 +85,9 @@ diff -ur thttpd-2.21b/fdwatch.c thttpd-2.21b-cool/fdwatch.c
  	default: return 0;
  	}
      }
-diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
+diff -u thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
 --- thttpd-2.21b/libhttpd.c	Tue Apr 24 00:42:40 2001
-+++ thttpd-2.21b-cool/libhttpd.c	Sun Jul 14 15:41:06 2002
++++ thttpd-2.21b-cool/libhttpd.c	Sun Jul 14 19:37:05 2002
 @@ -85,6 +85,8 @@
  #include "match.h"
  #include "tdate_parse.h"
@@ -120,9 +131,239 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* Done initializing. */
      if ( hs->binding_hostname == (char*) 0 )
  	syslog( LOG_INFO, "%.80s starting on port %d", SERVER_SOFTWARE, hs->port );
-@@ -2353,7 +2361,10 @@
+@@ -582,6 +590,9 @@
+     /* And send it, if necessary. */
+     if ( hc->responselen > 0 )
+ 	{
++/*
++printf("**RESPONSE [%d]** len = %d\n%*.*s\n", hc->conn_fd, hc->responselen, hc->responselen, hc->responselen, hc->response); 
++*/
+ 	(void) write( hc->conn_fd, hc->response, hc->responselen );
+ 	hc->responselen = 0;
+ 	}
+@@ -657,9 +668,9 @@
+ 	(void) my_snprintf(
+ 	    fixed_type, sizeof(fixed_type), type, hc->hs->charset );
+ 	(void) my_snprintf( buf, sizeof(buf),
+-	    "%.20s %d %s\r\nServer: %s\r\nContent-Type: %s\r\nDate: %s\r\nLast-Modified: %s\r\nAccept-Ranges: bytes\r\nConnection: close\r\n",
++	    "%.20s %d %s\r\nServer: %s\r\nContent-Type: %s\r\nDate: %s\r\nLast-Modified: %s\r\nAccept-Ranges: bytes\r\n",
+ 	    hc->protocol, status, title, EXPOSED_SERVER_SOFTWARE, fixed_type,
+-	    nowbuf, modbuf );
++	    nowbuf, modbuf);
+ 	add_response( hc, buf );
+ 	if ( encodings[0] != '\0' )
+ 	    {
+@@ -681,6 +692,14 @@
+ 		"Content-Length: %d\r\n", length );
+ 	    add_response( hc, buf );
+ 	    }
++	else {
++		hc->do_keep_alive = 0;
++	}
++	if (hc->do_keep_alive) {
++	    add_response( hc, "Connection: keep-alive\r\n" );
++	} else {
++	    add_response( hc, "Connection: close\r\n" );
++	}
+ 	if ( extraheads[0] != '\0' )
+ 	    add_response( hc, extraheads );
+ 	add_response( hc, "\r\n" );
+@@ -1603,6 +1622,61 @@
+ 
+ 
+ int
++httpd_request_reset(httpd_conn* hc, int preserve_read_buf )
++{
++	if (!preserve_read_buf) {
++	    hc->read_idx = 0;
++    	hc->checked_idx = 0;
++	}
++    hc->checked_state = CHST_FIRSTWORD;
++    hc->method = METHOD_UNKNOWN;
++    hc->status = 0;
++    hc->bytes_to_send = 0;
++    hc->bytes_sent = 0;
++    hc->encodedurl = "";
++    hc->decodedurl[0] = '\0';
++    hc->protocol = "UNKNOWN";
++    hc->origfilename[0] = '\0';
++    hc->expnfilename[0] = '\0';
++    hc->encodings[0] = '\0';
++    hc->pathinfo[0] = '\0';
++    hc->query[0] = '\0';
++    hc->referer = "";
++    hc->useragent = "";
++    hc->accept[0] = '\0';
++    hc->accepte[0] = '\0';
++    hc->acceptl = "";
++    hc->cookie = "";
++    hc->contenttype = "";
++    hc->reqhost[0] = '\0';
++    hc->hdrhost = "";
++    hc->hostdir[0] = '\0';
++    hc->authorization = "";
++    hc->remoteuser[0] = '\0';
++    hc->response[0] = '\0';
++#ifdef TILDE_MAP_2
++    hc->altdir[0] = '\0';
++#endif /* TILDE_MAP_2 */
++    hc->responselen = 0;
++    hc->if_modified_since = (time_t) -1;
++    hc->range_if = (time_t) -1;
++    hc->contentlength = -1;
++    hc->type = "";
++    hc->hostname = (char*) 0;
++    hc->mime_flag = 1;
++    hc->one_one = 0;
++    hc->got_range = 0;
++    hc->tildemapped = 0;
++    hc->init_byte_loc = 0;
++    hc->end_byte_loc = -1;
++    hc->keep_alive = 0;
++    hc->do_keep_alive = 0;
++    hc->should_linger = 0;
++    hc->file_address = (char*) 0;
++    return GC_OK;
++}
++
++int
+ httpd_get_conn( httpd_server* hs, int listen_fd, httpd_conn* hc )
      {
-     make_log_entry( hc, nowP );
+     httpd_sockaddr sa;
+@@ -1657,53 +1731,12 @@
+     hc->hs = hs;
+     memset( &hc->client_addr, 0, sizeof(hc->client_addr) );
+     memcpy( &hc->client_addr, &sa, sockaddr_len( &sa ) );
+-    hc->read_idx = 0;
+-    hc->checked_idx = 0;
+-    hc->checked_state = CHST_FIRSTWORD;
+-    hc->method = METHOD_UNKNOWN;
+-    hc->status = 0;
+-    hc->bytes_to_send = 0;
+-    hc->bytes_sent = 0;
+-    hc->encodedurl = "";
+-    hc->decodedurl[0] = '\0';
+-    hc->protocol = "UNKNOWN";
+-    hc->origfilename[0] = '\0';
+-    hc->expnfilename[0] = '\0';
+-    hc->encodings[0] = '\0';
+-    hc->pathinfo[0] = '\0';
+-    hc->query[0] = '\0';
+-    hc->referer = "";
+-    hc->useragent = "";
+-    hc->accept[0] = '\0';
+-    hc->accepte[0] = '\0';
+-    hc->acceptl = "";
+-    hc->cookie = "";
+-    hc->contenttype = "";
+-    hc->reqhost[0] = '\0';
+-    hc->hdrhost = "";
+-    hc->hostdir[0] = '\0';
+-    hc->authorization = "";
+-    hc->remoteuser[0] = '\0';
+-    hc->response[0] = '\0';
+-#ifdef TILDE_MAP_2
+-    hc->altdir[0] = '\0';
+-#endif /* TILDE_MAP_2 */
+-    hc->responselen = 0;
+-    hc->if_modified_since = (time_t) -1;
+-    hc->range_if = (time_t) -1;
+-    hc->contentlength = -1;
+-    hc->type = "";
+-    hc->hostname = (char*) 0;
+-    hc->mime_flag = 1;
+-    hc->one_one = 0;
+-    hc->got_range = 0;
+-    hc->tildemapped = 0;
+-    hc->init_byte_loc = 0;
+-    hc->end_byte_loc = -1;
+-    hc->keep_alive = 0;
+-    hc->should_linger = 0;
+-    hc->file_address = (char*) 0;
+-    return GC_OK;
++
++/*
++printf("doing httpd_get_con(%d)\n", hc->conn_fd);
++*/
++
++    return httpd_request_reset(hc, 0);
+     }
+ 
+ 
+@@ -1720,6 +1753,9 @@
+     {
+     char c;
+ 
++/*
++printf("**REQUEST [%d]**\n%*.*s\n", hc->conn_fd, hc->read_idx, hc->read_idx, hc->read_buf);
++*/
+     for ( ; hc->checked_idx < hc->read_idx; ++hc->checked_idx )
+ 	{
+ 	c = hc->read_buf[hc->checked_idx];
+@@ -1912,8 +1948,11 @@
+ 	    eol = strpbrk( protocol, " \t\n\r" );
+ 	    if ( eol != (char*) 0 )
+ 		*eol = '\0';
+-	    if ( strcasecmp( protocol, "HTTP/1.0" ) != 0 )
++	    if ( strcasecmp( protocol, "HTTP/1.0" ) != 0 ) {
+ 		hc->one_one = 1;
++		hc->keep_alive = 1;
++		hc->do_keep_alive = 1;
++		}
+ 	    }
+ 	}
+     /* Check for HTTP/1.1 absolute URL. */
+@@ -2129,6 +2168,7 @@
+ 		cp = &buf[11];
+ 		cp += strspn( cp, " \t" );
+ 		if ( strcasecmp( cp, "keep-alive" ) == 0 )
++		    hc->do_keep_alive = 1;
+ 		    hc->keep_alive = 1;
+ 		}
+ #ifdef LOG_UNKNOWN_HEADERS
+@@ -2168,6 +2208,9 @@
+ 	    }
+ 	}
+ 
++/*
++printf("one_one = %d   keep_alive = %d\n", hc->one_one, hc->keep_alive);
++*/
+     if ( hc->one_one )
+ 	{
+ 	/* Check that HTTP/1.1 requests specify a host, as required. */
+@@ -2177,14 +2220,14 @@
+ 	    return -1;
+ 	    }
+ 
+-	/* If the client wants to do keep-alives, it might also be doing
+-	** pipelining.  There's no way for us to tell.  Since we don't
+-	** implement keep-alives yet, if we close such a connection there
+-	** might be unread pipelined requests waiting.  So, we have to
+-	** do a lingering close.
++	/*
++	**  Disable keep alive support for bad browsers, 
++	**    list taken from Apache 1.3.19
+ 	*/
+-	if ( hc->keep_alive )
+-	    hc->should_linger = 1;
++	if ( hc->do_keep_alive && 
++	    ( strstr(hc->useragent, "Mozilla/2") != NULL ||
++	      strstr(hc->useragent, "MSIE 4.0b2;") != NULL))
++		hc->do_keep_alive = 0;
+ 	}
+ 
+     /* Ok, the request has been parsed.  Now we resolve stuff that
+@@ -2349,15 +2392,24 @@
+ 
+ 
+ void
+-httpd_close_conn( httpd_conn* hc, struct timeval* nowP )
+-    {
+-    make_log_entry( hc, nowP );
++httpd_complete_request( httpd_conn* hc, struct timeval* nowP, int logit )
++{
++	if (logit)
++		make_log_entry( hc, nowP );
  
 -    if ( hc->file_address != (char*) 0 )
 +	if ( hc->file_address == (char*) 1 )
@@ -132,7 +373,16 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	{
  	mmc_unmap( hc->file_address, &(hc->sb), nowP );
  	hc->file_address = (char*) 0;
-@@ -3026,11 +3037,9 @@
+ 	}
++	}
++
++void
++httpd_close_conn( httpd_conn* hc, struct timeval* nowP )
++{
+     if ( hc->conn_fd >= 0 )
+ 	{
+ 	(void) close( hc->conn_fd );
+@@ -3026,11 +3078,9 @@
  post_post_garbage_hack( httpd_conn* hc )
      {
      char buf[2];
@@ -146,7 +396,19 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      }
  
  
-@@ -3561,6 +3570,11 @@
+@@ -3313,6 +3363,11 @@
+     int r;
+     ClientData client_data;
+ 
++    /*
++    **  We are not going to leave the socket open after a CGI... too hard
++    */
++    hc->do_keep_alive = 0;
++
+     if ( hc->method == METHOD_GET || hc->method == METHOD_POST )
+ 	{
+ 	httpd_clear_ndelay( hc->conn_fd );
+@@ -3561,6 +3616,11 @@
  	 match( hc->hs->cgi_pattern, hc->expnfilename ) )
  	return cgi( hc );
  
@@ -158,7 +420,7 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
      /* It's not CGI.  If it's executable or there's pathinfo, someone's
      ** trying to either serve or run a non-CGI file as CGI.   Either case
      ** is prohibited.
-@@ -3611,14 +3625,18 @@
+@@ -3611,14 +3671,18 @@
  	}
      else
  	{
@@ -178,9 +440,9 @@ diff -ur thttpd-2.21b/libhttpd.c thttpd-2.21b-cool/libhttpd.c
  	    hc->sb.st_mtime );
  	}
  
-diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
+diff -u thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
 --- thttpd-2.21b/libhttpd.h	Tue Apr 24 00:36:50 2001
-+++ thttpd-2.21b-cool/libhttpd.h	Sun Jul 14 15:41:32 2002
++++ thttpd-2.21b-cool/libhttpd.h	Sun Jul 14 19:37:17 2002
 @@ -69,6 +69,7 @@
      char* server_hostname;
      int port;
@@ -189,7 +451,25 @@ diff -ur thttpd-2.21b/libhttpd.h thttpd-2.21b-cool/libhttpd.h
      char* charset;
      char* cwd;
      int listen4_fd, listen6_fd;
-diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
+@@ -132,7 +133,7 @@
+     int got_range;
+     int tildemapped;	/* this connection got tilde-mapped */
+     off_t init_byte_loc, end_byte_loc;
+-    int keep_alive;
++    int keep_alive, do_keep_alive;
+     int should_linger;
+     struct stat sb;
+     int conn_fd;
+@@ -229,6 +230,8 @@
+ ** If you don't have a current timeval handy just pass in 0.
+ */
+ extern void httpd_close_conn( httpd_conn* hc, struct timeval* nowP );
++void httpd_complete_request( httpd_conn* hc, struct timeval* nowP, int logit );
++int httpd_request_reset(httpd_conn* hc,int );
+ 
+ /* Call this to de-initialize a connection struct and *really* free the
+ ** mallocced strings.
+diff -u thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 --- thttpd-2.21b/mime_encodings.txt	Wed May 10 03:22:28 2000
 +++ thttpd-2.21b-cool/mime_encodings.txt	Sun Jul 14 13:54:27 2002
 @@ -3,6 +3,6 @@
@@ -201,7 +481,7 @@ diff -ur thttpd-2.21b/mime_encodings.txt thttpd-2.21b-cool/mime_encodings.txt
 +Z	compress
 +gz	gzip
  uu	x-uuencode
-diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
+diff -u thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 --- thttpd-2.21b/mime_types.txt	Sat Apr 14 04:53:30 2001
 +++ thttpd-2.21b-cool/mime_types.txt	Sun Jul 14 14:05:09 2002
 @@ -1,135 +1,138 @@
@@ -452,10 +732,18 @@ diff -ur thttpd-2.21b/mime_types.txt thttpd-2.21b-cool/mime_types.txt
 +avi	video/x-msvideo
 +movie	video/x-sgi-movie
 +ice	x-conference/x-cooltalk
-diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
+diff -u thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 --- thttpd-2.21b/thttpd.c	Tue Apr 24 00:41:57 2001
-+++ thttpd-2.21b-cool/thttpd.c	Sun Jul 14 15:45:23 2002
-@@ -111,12 +111,15 @@
++++ thttpd-2.21b-cool/thttpd.c	Sun Jul 14 19:41:05 2002
+@@ -95,6 +95,7 @@
+     httpd_conn* hc;
+     int tnums[MAXTHROTTLENUMS];         /* throttle indexes */
+     int numtnums;
++    int keep_alive;
+     long limit;
+     time_t started_at;
+     Timer* idle_read_timer;
+@@ -111,12 +112,15 @@
  static int httpd_conn_count;
  
  /* The connection states. */
@@ -477,7 +765,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  static httpd_server* hs = (httpd_server*) 0;
  int terminate = 0;
-@@ -140,6 +143,7 @@
+@@ -140,11 +144,12 @@
  static int handle_newconnect( struct timeval* tvP, int listen_fd );
  static void handle_read( connecttab* c, struct timeval* tvP );
  static void handle_send( connecttab* c, struct timeval* tvP );
@@ -485,7 +773,13 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static void handle_linger( connecttab* c, struct timeval* tvP );
  static int check_throttles( connecttab* c );
  static void clear_throttles( connecttab* c, struct timeval* tvP );
-@@ -157,6 +161,12 @@
+ static void update_throttles( ClientData client_data, struct timeval* nowP );
+-static void clear_connection( connecttab* c, struct timeval* tvP );
++static void clear_connection( connecttab* c, struct timeval* tvP, int );
+ static void really_clear_connection( connecttab* c, struct timeval* tvP );
+ static void idle_read_connection( ClientData client_data, struct timeval* nowP );
+ static void idle_send_connection( ClientData client_data, struct timeval* nowP );
+@@ -157,6 +162,12 @@
  static void logstats( struct timeval* nowP );
  static void thttpd_logstats( long secs );
  
@@ -498,7 +792,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
  static void
  handle_term( int sig )
-@@ -566,15 +576,17 @@
+@@ -566,15 +577,17 @@
  	    if ( c == (connecttab*) 0 )
  		continue;
  	    hc = c->hc;
@@ -525,7 +819,27 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    }
  	tmr_run( &tv );
  
-@@ -1297,12 +1309,36 @@
+@@ -1196,8 +1209,10 @@
+     logstats( &tv );
+     for ( cnum = 0; cnum < maxconnects; ++cnum )
+ 	{
+-	if ( connects[cnum].conn_state != CNST_FREE )
++	if ( connects[cnum].conn_state != CNST_FREE ) {
++	    httpd_complete_request( connects[cnum].hc, &tv, 1 );
+ 	    httpd_close_conn( connects[cnum].hc, &tv );
++	}
+ 	if ( connects[cnum].hc != (httpd_conn*) 0 )
+ 	    {
+ 	    httpd_destroy_conn( connects[cnum].hc );
+@@ -1285,6 +1300,7 @@
+ 	c->linger_timer = (Timer*) 0;
+ 	c->bytes_sent = 0;
+ 	c->numtnums = 0;
++	c->keep_alive = 0;
+ 
+ 	/* Set the connection file descriptor to no-delay mode. */
+ 	httpd_set_ndelay( c->hc->conn_fd );
+@@ -1297,12 +1313,38 @@
  	}
      }
  
@@ -554,6 +868,8 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +    fdwatch_add_fd( hc->conn_fd, c, FDW_WRITE );
 +}
 +
++static void handle_request( connecttab *c, struct timeval *tvP);
++
  
  static void
  handle_read( connecttab* c, struct timeval* tvP )
@@ -563,17 +879,117 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      httpd_conn* hc = c->hc;
  
      /* Is there room in our buffer to read more bytes? */
-@@ -1333,7 +1369,7 @@
- 	clear_connection( c, tvP );
+@@ -1311,7 +1353,7 @@
+ 	if ( hc->read_size > 5000 )
+ 	    {
+ 	    httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
+-	    clear_connection( c, tvP );
++	    clear_connection( c, tvP, 0 );
+ 	    return;
+ 	    }
+ 	httpd_realloc_str(
+@@ -1327,29 +1369,69 @@
+     ** EWOULDBLOCK; however, this apparently can happen if a packet gets
+     ** garbled.
+     */
+-    if ( sz == 0 || ( sz < 0 && ( errno != EWOULDBLOCK ) ) )
+-	{
+-	httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
+-	clear_connection( c, tvP );
++    if ( sz == 0 ) {
++    	if (! c->keep_alive) {
++		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
++	}
++	clear_connection( c, tvP, 0 );
++	return;
++    } else if ( sz < 0 ) {
++    	if (errno != EWOULDBLOCK) {
++		httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
++		clear_connection( c, tvP, 0 );
++	} 
  	return;
++    }
++    if (sz > 0) hc->read_idx += sz;
++
++    /* 
++    ** if we start getting new data on this socket, "promote" it 
++    **  to read timeout
++    */
++    if ( hc->keep_alive ) {
++		ClientData client_data;
++
++	    if ( c->idle_read_timer != (Timer*) 0 )
++		{
++		tmr_cancel( c->idle_read_timer );
++		c->idle_read_timer = 0;
++		}
++
++	client_data.p = c;
++	c->idle_read_timer = tmr_create(
++	    tvP, idle_read_connection, client_data, IDLE_READ_TIMELIMIT * 1000L,
++	    0 );
++	if ( c->idle_read_timer == (Timer*) 0 )
++	    {
++	    syslog( LOG_CRIT, "tmr_create(idle_read_connection) failed" );
++	    exit( 1 );
++	    }
++    	
++    	hc->keep_alive = 0;
++    }
++	handle_request(c, tvP);
  	}
 -    hc->read_idx += sz;
-+    if (sz > 0) hc->read_idx += sz;
  
-     /* Do we have a complete request yet? */
+-    /* Do we have a complete request yet? */
++static void
++handle_request( connecttab *c, struct timeval *tvP)
++{
++    httpd_conn* hc = c->hc;
++    
++	/* Do we have a complete request yet? */
      switch ( httpd_got_request( hc ) )
-@@ -1387,6 +1423,12 @@
- 	clear_connection( c, tvP );
+ 	{
+ 	case GR_NO_REQUEST:
+ 	return;
+ 	case GR_BAD_REQUEST:
+ 	httpd_send_err( hc, 400, httpd_err400title, "", httpd_err400form, "" );
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 0 );
+ 	return;
+ 	}
+ 
+     /* Yes.  Try parsing and resolving it. */
+     if ( httpd_parse_request( hc ) < 0 )
+ 	{
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 0 );
+ 	return;
+ 	}
+ 
+@@ -1358,7 +1440,7 @@
+ 	{
+ 	httpd_send_err(
+ 	    hc, 503, httpd_err503title, "", httpd_err503form, hc->encodedurl );
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 0 );
+ 	return;
+ 	}
+ 
+@@ -1366,7 +1448,7 @@
+     if ( httpd_start_request( hc, tvP ) < 0 )
+ 	{
+ 	/* Something went wrong.  Close down the connection. */
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 0 );
+ 	return;
+ 	}
+ 
+@@ -1384,37 +1466,26 @@
+ 	{
+ 	/* No file address means someone else is handling it. */
+ 	c->bytes_sent = hc->bytes_sent;
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 1 );
  	return;
  	}
 +	if (hc->file_address == (char *) 1) {
@@ -585,7 +1001,9 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
      if ( c->bytes_sent >= c->bytes_to_send )
  	{
  	/* There's nothing to send. */
-@@ -1395,26 +1437,9 @@
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 1 );
+ 	return;
  	}
  
      /* Cool, we have a valid connection and a file to send to it. */
@@ -613,7 +1031,26 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static void
  handle_send( connecttab* c, struct timeval* tvP )
      {
-@@ -1500,7 +1525,7 @@
+@@ -1443,6 +1514,9 @@
+ 	iv[1].iov_base = &(hc->file_address[c->bytes_sent]);
+ 	iv[1].iov_len = MIN( c->bytes_to_send - c->bytes_sent, c->limit );
+ 	sz = writev( hc->conn_fd, iv, 2 );
++/*
++printf("**RESPONSE2 [%d]** len = %d\n%*.*s\n", hc->conn_fd, hc->responselen, hc->responselen, hc->responselen, hc->response); 
++*/
+ 	}
+ 
+     if ( sz == 0 ||
+@@ -1486,7 +1560,7 @@
+ 	*/
+ 	if ( errno != EPIPE && errno != EINVAL && errno != ECONNRESET )
+ 	    syslog( LOG_ERR, "write - %m sending %.80s", hc->encodedurl );
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 0 );
+ 	return;
+ 	}
+ 
+@@ -1500,7 +1574,7 @@
  	    {
  	    /* Yes; move the unwritten part to the front of the buffer. */
  	    int newlen = hc->responselen - sz;
@@ -622,7 +1059,26 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  	    hc->responselen = newlen;
  	    sz = 0;
  	    }
-@@ -1569,6 +1594,35 @@
+@@ -1519,7 +1593,7 @@
+     if ( c->bytes_sent >= c->bytes_to_send )
+ 	{
+ 	/* This conection is finished! */
+-	clear_connection( c, tvP );
++	clear_connection( c, tvP, 1 );
+ 	return;
+ 	}
+ 
+@@ -1560,6 +1634,9 @@
+     char buf[1024];
+     int r;
+ 
++/*
++printf("*LINGER read\n");
++*/
+     /* In lingering-close mode we just read and ignore bytes.  An error
+     ** or EOF ends things, otherwise we go until a timeout.
+     */
+@@ -1569,6 +1646,37 @@
      }
  
  
@@ -631,11 +1087,13 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +{
 +	httpd_conn* hc = c->hc;
 +	int n = send(hc->conn_fd, hc->response, hc->responselen, 0);
-+
++	int dokeep = 1;
++	
 +	if (n < 0) {
 +		if (errno == EAGAIN)
 +			return;
 +
++		dokeep = 0;
 +		goto clear;
 +	}
 +
@@ -646,7 +1104,7 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
 +		hc->response = realloc(hc->response, hc->maxresponse + 1);
 +		hc->responselen = 0;
 +
-+		clear_connection(c, tvP);
++		clear_connection(c, tvP, dokeep);
 +		return;
 +	}
 +
@@ -658,8 +1116,15 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  static int
  check_throttles( connecttab* c )
      {
-@@ -1640,7 +1694,11 @@
+@@ -1635,12 +1743,17 @@
+ 
+ 
+ static void
+-clear_connection( connecttab* c, struct timeval* tvP )
++clear_connection( connecttab* c, struct timeval* tvP, int doKeep )
+     {
      ClientData client_data;
++    int		linger;
  
      /* If we haven't actually sent the buffered response yet, do so now. */
 -    httpd_write_response( c->hc );
@@ -671,3 +1136,100 @@ diff -ur thttpd-2.21b/thttpd.c thttpd-2.21b-cool/thttpd.c
  
      if ( c->idle_read_timer != (Timer*) 0 )
  	{
+@@ -1669,13 +1782,45 @@
+     ** circumstances that make a lingering close necessary.  If the flag
+     ** isn't set we do the real close now.
+     */
+-    if ( c->hc->should_linger )
++
++    if ( c->hc->do_keep_alive && doKeep)
+ 	{
+-	c->conn_state = CNST_LINGERING;
++		httpd_conn *hc = c->hc;
++	c->conn_state = CNST_READING;
++
++	client_data.p = c;
++	c->idle_read_timer = tmr_create(
++	    tvP, idle_read_connection, client_data, IDLE_KEEPALIVE_TIMELIMIT * 1000L,
++	    0 );
++	if ( c->idle_read_timer == (Timer*) 0 )
++	    {
++	    syslog( LOG_CRIT, "tmr_create(idle_read_connection) failed" );
++	    exit( 1 );
++	    }
++
++	c->bytes_sent = 0;
++	c->numtnums = 0;
++	c->keep_alive = 1;
++
++	httpd_complete_request( c->hc, tvP, 1 );
++
+ 	fdwatch_del_fd( c->hc->conn_fd );
+ 	fdwatch_add_fd( c->hc->conn_fd, c, FDW_READ );
++
++	httpd_request_reset( c->hc, 1 );
++
++	hc->read_idx -= hc->checked_idx;
++	memmove(hc->read_buf, hc->read_buf + hc->checked_idx, hc->read_idx);
++	hc->checked_idx = 0;
++	
+ 	/* Make sure we are still in no-delay mode. */
+ 	httpd_set_ndelay( c->hc->conn_fd );
++	handle_request(c, tvP);
++	}
++    else if ( c->hc->should_linger )
++        {
++	c->conn_state = CNST_LINGERING;
++
+ 	client_data.p = c;
+ 	c->linger_timer = tmr_create(
+ 	    tvP, linger_clear_connection, client_data, LINGER_TIME * 1000L, 0 );
+@@ -1684,9 +1829,19 @@
+ 	    syslog( LOG_CRIT, "tmr_create(linger_clear_connection) failed" );
+ 	    exit( 1 );
+ 	    }
++
++    	httpd_complete_request( c->hc, tvP, 1 );
++
++	fdwatch_del_fd( c->hc->conn_fd );
++	fdwatch_add_fd( c->hc->conn_fd, c, FDW_READ );
++	/* Make sure we are still in no-delay mode. */
++	httpd_set_ndelay( c->hc->conn_fd );
+ 	}
+-    else
++     else  
++        {
++    	httpd_complete_request( c->hc, tvP, !c->keep_alive );
+ 	really_clear_connection( c, tvP );
++	}
+     }
+ 
+ 
+@@ -1716,11 +1871,13 @@
+     c->idle_read_timer = (Timer*) 0;
+     if ( c->conn_state != CNST_FREE )
+ 	{
+-	syslog( LOG_INFO,
+-	    "%.80s connection timed out reading",
+-	    httpd_ntoa( &c->hc->client_addr ) );
+-	httpd_send_err( c->hc, 408, httpd_err408title, "", httpd_err408form, "" );
+-	clear_connection( c, nowP );
++	if (! c->keep_alive) {
++		syslog( LOG_INFO,
++		    "%.80s connection timed out reading",
++		    httpd_ntoa( &c->hc->client_addr ) );
++		httpd_send_err( c->hc, 408, httpd_err408title, "", httpd_err408form, "" );
++	}
++	clear_connection( c, nowP, 0 );
+ 	}
+     }
+ 
+@@ -1737,7 +1894,7 @@
+ 	syslog( LOG_INFO,
+ 	    "%.80s connection timed out sending",
+ 	    httpd_ntoa( &c->hc->client_addr ) );
+-	clear_connection( c, nowP );
++	clear_connection( c, nowP, 0 );
+ 	}
+     }
+ 
