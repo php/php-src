@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Made in_array() and search_array() allow the needle to be an array in
+  itself. (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
   or entries for the specified extension. (Jani)
 - Added mailparse_uudecode_all() which extracts all uuencoded attachments
