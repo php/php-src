@@ -114,6 +114,24 @@ typedef struct _php_mysql_conn {
 	int active_result_id;
 } php_mysql_conn;
 
+static int _rollback_mysql_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_mysql_conn *link;
+	char	query[128];
+	int		i;
+
+	/* check if its a persistent link */
+	if (Z_TYPE_P(rsrc) != le_plink) 
+		return 0;
+
+	link = (php_mysql_conn *) rsrc->ptr;
+
+	/* rollback possible transactions */
+	strcpy (query, "ROLLBACK");
+	mysql_real_query(&link->conn, query, strlen(query));
+
+	return 0;	
+}
 
 /* {{{ mysql_functions[]
  */
@@ -235,6 +253,8 @@ static void _free_mysql_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+
+
 /* {{{ php_mysql_set_default_link
  */
 static void php_mysql_set_default_link(int id TSRMLS_DC)
@@ -349,6 +369,11 @@ ZEND_MODULE_STARTUP_D(mysql)
 	REGISTER_LONG_CONSTANT("MYSQL_BOTH", MYSQL_BOTH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_USE_RESULT", MYSQL_USE_RESULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQL_STORE_RESULT", MYSQL_STORE_RESULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_COMPRESS", CLIENT_COMPRESS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_INTERACTIVE", CLIENT_INTERACTIVE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQL_CLIENT_IGNORE_SPACE", CLIENT_IGNORE_SPACE, CONST_CS | CONST_PERSISTENT); 
+
 
 #ifdef ZTS
 # if MYSQL_VERSION_ID >= 40000
@@ -392,6 +417,8 @@ PHP_RINIT_FUNCTION(mysql)
  */
 PHP_RSHUTDOWN_FUNCTION(mysql)
 {
+	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_mysql_transactions TSRMLS_CC);
+
 	if (MySG(connect_error)!=NULL) {
 		efree(MySG(connect_error));
 	}
@@ -441,9 +468,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *user=NULL, *passwd=NULL, *host_and_port=NULL, *socket=NULL, *tmp=NULL, *host=NULL;
 	char *hashed_details=NULL;
 	int hashed_details_length, port = MYSQL_PORT;
+	int client_flags = 0;
 	php_mysql_conn *mysql=NULL;
 	void (*handler) (int);
-	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL;
+	zval **z_host=NULL, **z_user=NULL, **z_passwd=NULL, **z_new_link=NULL, **z_client_flags=NULL;
 	zend_bool free_host=0, new_link=0;
 
 	socket = MySG(default_socket);
@@ -457,6 +485,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		hashed_details_length = strlen(user)+5+3;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
 		sprintf(hashed_details, "mysql__%s_", user);
+		client_flags = CLIENT_INTERACTIVE;
 	} else {
 		host_and_port = MySG(default_host);
 		user = MySG(default_user);
@@ -490,7 +519,30 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				}
 				break;
 			case 4: {
-					if (zend_get_parameters_ex(4, &z_host, &z_user, &z_passwd, &z_new_link) == FAILURE) {
+					if (!persistent) {
+						if (zend_get_parameters_ex(4, &z_host, &z_user, &z_passwd, &z_new_link) == FAILURE) {
+							MYSQL_DO_CONNECT_RETURN_FALSE();
+						}
+						convert_to_string_ex(z_user);
+						convert_to_string_ex(z_passwd);
+						user = Z_STRVAL_PP(z_user);
+						passwd = Z_STRVAL_PP(z_passwd);
+						new_link = Z_BVAL_PP(z_new_link);
+					}
+					else {
+						if (zend_get_parameters_ex(4, &z_host, &z_user, &z_passwd, &z_client_flags) == FAILURE) {
+							MYSQL_DO_CONNECT_RETURN_FALSE();
+						}
+						convert_to_string_ex(z_user);
+						convert_to_string_ex(z_passwd);
+						user = Z_STRVAL_PP(z_user);
+						passwd = Z_STRVAL_PP(z_passwd);
+						client_flags = Z_LVAL_PP(z_client_flags);
+					}
+				}
+				break;
+			case 5: {
+					if (zend_get_parameters_ex(5, &z_host, &z_user, &z_passwd, &z_new_link, &z_client_flags) == FAILURE) {
 						MYSQL_DO_CONNECT_RETURN_FALSE();
 					}
 					convert_to_string_ex(z_user);
@@ -498,6 +550,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					user = Z_STRVAL_PP(z_user);
 					passwd = Z_STRVAL_PP(z_passwd);
 					new_link = Z_BVAL_PP(z_new_link);
+					client_flags = Z_LVAL_PP(z_client_flags);
 				}
 				break;
 			default:
@@ -573,7 +626,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 			mysql_init(&mysql->conn);
-			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
+			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
 			if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
@@ -613,7 +666,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 				signal(SIGPIPE, handler);
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-				if (mysql_real_connect(le->ptr, host, user, passwd, NULL, port, socket, 0)==NULL) {
+				if (mysql_real_connect(le->ptr, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
 				if (mysql_connect(le->ptr, host, user, passwd)==NULL) {
 #endif
@@ -666,7 +719,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 		mysql_init(&mysql->conn);
-		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
+		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
 		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
