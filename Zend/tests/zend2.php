@@ -67,71 +67,7 @@ Example 2: Factory method (derefencing objects returned from functions)
 	
 ?>
 
-Example 3: Nested class
-=======================
-
-<?php
-	
-	class Database {
-		class MySQL {
-			var $host = "";
-			
-			function db_connect($user) {
-				print "Connecting to MySQL database '$this->host' as $user\n";
-			}
-		}
-		
-		class Oracle {
-			var $host = "localhost";
-			
-			function db_connect($user) {
-				print "Connecting to Oracle database '$this->host' as $user\n";
-			}
-			
-		}	
-	}
-	
-	$MySQL_obj = new Database::MySQL();
-	$MySQL_obj->db_connect("John");
-	
-	$Oracle_obj = new Database::Oracle();
-	$Oracle_obj->db_connect("Mark");
-
-	unset($MySQL_obj);
-	unset($Oracle_obj);
-?>
-	
-Example 3: Nested class suitable for a PEAR like hierarchy
-==========================================================
-
-<?php
-	
-	class DB::MySQL {
-		var $host = "";
-		
-		function db_connect($user) {
-			print "Connecting to MySQL database '$this->host' as $user\n";
-		}
-	}
-		
-	class DB::Oracle {
-		var $host = "localhost";
-		
-		function db_connect($user) {
-			print "Connecting to Oracle database '$this->host' as $user\n";
-		}
-		
-	}	
-	
-	$MySQL_obj = new DB::MySQL();
-	$MySQL_obj->db_connect("Susan");
-	
-	$Oracle_obj = new DB::Oracle();
-	$Oracle_obj->db_connect("Barbara");
-	
-?>
-
-Example 4: Class constants and class scope
+Example 3: Class constants and class scope
 ==========================================
 
 <?php
@@ -153,7 +89,7 @@ Example 4: Class constants and class scope
 
 ?>
 
-Example 5: Regular object method using both local and global functions
+Example 4: Regular object method using both local and global functions
 ======================================================================
 
 <?php
@@ -178,7 +114,7 @@ Example 5: Regular object method using both local and global functions
 	print "\n";
 ?>
 
-Example 6: Multiple derefencing of objects returned from methods
+Example 5: Multiple derefencing of objects returned from methods
 ================================================================
 
 <?php
@@ -214,7 +150,7 @@ Example 6: Multiple derefencing of objects returned from methods
 	
 ?>
 
-Example 7: Exception handling
+Example 6: Exception handling
 =============================
 
 <?
@@ -250,7 +186,7 @@ Example 7: Exception handling
 	
 ?>
 
-Example 8: __clone()
+Example 7: __clone()
 ===================
 
 <?
@@ -290,7 +226,7 @@ Example 8: __clone()
 	print "\n";
 ?>
 
-Example 9: Unified constructors
+Example 8: Unified constructors
 ===============================
 
 <?
@@ -316,7 +252,7 @@ Example 9: Unified constructors
 	
 ?>
 
-Example 10: Destructors
+Example 9: Destructors
 =======================
 
 <?php
