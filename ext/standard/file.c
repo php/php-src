@@ -2558,6 +2558,21 @@ PHP_FUNCTION(fgetcsv)
 
 			/* 2A. handle enclosure delimited field */
 			while (*bptr) {
+				/* we need to determine if the enclosure is 'real' or is it escaped */
+				if (*(bptr - 1) == '\\') {
+					int escape_cnt = 0;
+					char *bptr_p = bptr - 2;
+				
+					while (bptr_p > buf && *bptr_p == '\\') {
+						escape_cnt++;
+						bptr_p--;
+					}
+					if (!(escape_cnt % 2)) {
+						goto normal_char;
+						continue;
+					}
+				}
+			
 				if (*bptr == enclosure) {
 					/* handle the enclosure */
 					if ( *(bptr+1) == enclosure) {
@@ -2571,6 +2586,7 @@ PHP_FUNCTION(fgetcsv)
 						break;	/* .. from handling this field - resumes at 3. */
 					}
 				} else {
+normal_char:
 				/* normal character */
 					*tptr++ = *bptr++;
 
