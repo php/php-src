@@ -2882,8 +2882,7 @@ PHP_FUNCTION(ibase_blob_import)
 	ibase_blob_handle ib_blob;
 	ibase_db_link *ib_link;
 	char bl_data[IBASE_BLOB_SEG]; /* FIXME? blob_seg_size parameter?	 */
-	int type;
-	php_stream * stream;
+	php_stream *stream;
 
 	RESET_ERRMSG;
 
@@ -2926,7 +2925,7 @@ PHP_FUNCTION(ibase_blob_import)
 
 	size = 0;
 
-	while(b = php_stream_read(stream, bl_data, sizeof(bl_data)) > 0)	{
+	while( (b = php_stream_read(stream, bl_data, sizeof(bl_data)) ) > 0)	{
 		if (isc_put_segment(IB_STATUS, &ib_blob.bl_handle, b, bl_data)) {
 			_php_ibase_error(TSRMLS_C);
 			RETURN_FALSE;
