@@ -1,5 +1,3 @@
---FILE--
-<?php
 --TEST--
 Bug #20169
 --FILE--
