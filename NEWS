@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 May 2004, PHP 5 Release Candidate 3
+- Fixed problem with exceptions returning from include(). (Dmitry)
 - Changed class type hints for function parameters to not allow the passing of
   NULL values.
 - Fixed memory leak in memory manager. (Andi)
