@@ -52,6 +52,7 @@
 #include "ext/standard/php3_filestat.h"
 #include "ext/standard/php3_mail.h"
 #include "ext/standard/php3_syslog.h"
+#include "ext/standard/php_lcg.h"
 @EXT_INCLUDE_CODE@
 
 /* SNMP has to be moved to ext */
@@ -75,6 +76,7 @@ zend_module_entry *php3_builtin_modules[] = {
 	phpext_filestat_ptr,
 	phpext_mail_ptr,
 	phpext_syslog_ptr,
+	phpext_lcg_ptr,
 @EXT_MODULE_PTRS@
 };
 
