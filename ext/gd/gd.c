@@ -30,7 +30,6 @@
 #include <math.h>
 #include "SAPI.h"
 #include "php_gd.h"
-#include "ext/standard/fsock.h"
 #include "ext/standard/info.h"
 
 #if HAVE_SYS_WAIT_H
@@ -69,19 +68,25 @@ static int le_ps_font, le_ps_enc;
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int);
 #endif
 
-#ifdef GD2_VERS
+#if HAVE_LIBGD15
 /* it's >= 1.5, i.e. has IOCtx */
 #define USE_GD_IOCTX 1
 #else
 #undef USE_GD_IOCTX
 #endif
 
-#ifndef USE_GD_IOCTX
+#ifdef USE_GD_IOCTX
+#include "gd_ctx.c"
+#else
 #define gdImageCreateFromGifCtx NULL
 #define gdImageCreateFromJpegCtx NULL
 #define gdImageCreateFromPngCtx  NULL
 #define gdImageCreateFromWBMPCtx NULL
+typedef FILE gdIOCtx;
+#define CTX_PUTC(c,fp) fputc(c, fp)
 #endif
+
+static void _php_image_output_wbmp(gdImagePtr im, gdIOCtx *fp);
 
 #ifdef THREAD_SAFE
 DWORD GDlibTls;
@@ -662,26 +667,24 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	if(issock && socketd) {
 #ifdef USE_GD_IOCTX
 		gdIOCtx* io_ctx;
-#define  CHUNK_SIZE 8192
-		int read_len=0,buff_len=0,buff_size=5*CHUNK_SIZE;
-		char *buff,*buff_cur;
+		int buff_size;
+		char *buff,*buff_em;
 
+		buff_size = php_fread_all(&buff_em, socketd, fp, issock);
+
+		if(!buff_size) {
+			php_error(E_WARNING,"%s: Cannot read image data",get_active_function_name());
+			RETURN_FALSE;
+		}
+		
 		buff = malloc(buff_size); /* Should be malloc! GD uses free */
-		buff_cur = buff;
+		memcpy(buff, buff_em, buff_size);
+		efree(buff_em);
 
-		do {
-			if(buff_len > buff_size - CHUNK_SIZE) {
-				buff_size += CHUNK_SIZE;
-				buff = realloc(buff, buff_size);
-			}
-			read_len = SOCK_FREAD(buff_cur, CHUNK_SIZE, socketd);
-			buff_len += read_len;
-			buff_cur += read_len;
-		} while(read_len>0);
-
-		io_ctx = gdNewDynamicCtx(buff_len,buff);
+		io_ctx = gdNewDynamicCtx(buff_size,buff);
 		if(!io_ctx) {
 			php_error(E_WARNING,"%s: Cannot allocate GD IO context",get_active_function_name());
+			RETURN_FALSE;
 		}
 		im = (*ioctx_func_p)(io_ctx);
 		io_ctx->free(io_ctx);
@@ -888,7 +891,11 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 PHP_FUNCTION(imagegif)
 {
 #ifdef HAVE_GD_GIF
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
+#else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGif);
+#endif
 #else /* HAVE_GD_GIF */
 	php_error(E_WARNING, "ImageGif: No GIF support in this PHP build");
 	RETURN_FALSE;
@@ -901,7 +908,11 @@ PHP_FUNCTION(imagegif)
 PHP_FUNCTION(imagepng)
 {
 #ifdef HAVE_GD_PNG
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtx);
+#else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePng);
+#endif
 #else /* HAVE_GD_PNG */
 	php_error(E_WARNING, "ImagePng: No PNG support in this PHP build");
 	RETURN_FALSE;
@@ -915,7 +926,11 @@ PHP_FUNCTION(imagepng)
 PHP_FUNCTION(imagejpeg)
 {
 #ifdef HAVE_GD_JPG
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
+#else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpeg);
+#endif
 #else /* HAVE_GD_JPG */
 	php_error(E_WARNING, "ImageJpeg: No JPG support in this PHP build");
 	RETURN_FALSE;
@@ -927,29 +942,33 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
+#else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", _php_image_output_wbmp);
+#endif
 }
 /* }}} */
 
 /* {{{ _php_image_output_wbmp(gdImagePtr im, FILE *fp)
  */
-static void _php_image_output_wbmp(gdImagePtr im, FILE *fp)
+static void _php_image_output_wbmp(gdImagePtr im, gdIOCtx *fp)
 {
 	int x, y;
 	int c, p, width, height;
 
 	/* WBMP header, black and white, no compression */
-	fputc(0,fp); fputc(0,fp);
+	CTX_PUTC(0,fp); CTX_PUTC(0,fp);
 		
 	/* Width and height of image */
 	c = 1; width = im->sx;
 	while(width & 0x7f << 7*c) c++;
-	while(c > 1) fputc(0x80 | ((width >> 7*--c) & 0xff), fp);
-	fputc(width & 0x7f,fp);
+	while(c > 1) CTX_PUTC(0x80 | ((width >> 7*--c) & 0xff), fp);
+	CTX_PUTC(width & 0x7f,fp);
 	c = 1; height = im->sy;
 	while(height & 0x7f << 7*c) c++;
-	while(c > 1) fputc(0x80 | ((height >> 7*--c) & 0xff), fp);
-	fputc(height & 0x7f,fp);
+	while(c > 1) CTX_PUTC(0x80 | ((height >> 7*--c) & 0xff), fp);
+	CTX_PUTC(height & 0x7f,fp);
 		
 	/* Actual image data */
 	for(y = 0; y < im->sy; y++) {
@@ -961,11 +980,11 @@ static void _php_image_output_wbmp(gdImagePtr im, FILE *fp)
 			if(im->pixels[y][x] == 0) c = c | (1 << (7-p));
 #endif
 			if(++p == 8) {
-				fputc(c,fp);
+				CTX_PUTC(c,fp);
 				p = c = 0;
 			}
 		}
-		if(p) fputc(c,fp);
+		if(p) CTX_PUTC(c,fp);
 	}
 }
 /* }}} */
