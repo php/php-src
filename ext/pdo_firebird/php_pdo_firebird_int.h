@@ -60,6 +60,9 @@ typedef struct {
 	/* the transaction handle */
 	isc_tr_handle tr;
 
+	/* the last error that didn't come from the API */
+	char const *last_app_error;
+	
 } pdo_firebird_db_handle;
 
 

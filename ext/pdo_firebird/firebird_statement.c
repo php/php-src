@@ -34,6 +34,7 @@
 	
 #define RECORD_ERROR(stmt) _firebird_error(NULL, stmt,  __FILE__, __LINE__ TSRMLS_CC)
 
+/* free the allocated space for passing field values to the db and back */
 static void free_sqlda(XSQLDA const *sqlda)
 {
 	int i;
@@ -47,11 +48,13 @@ static void free_sqlda(XSQLDA const *sqlda)
 	}
 }
 	
+/* called by PDO to clean up a statement handle */
 static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	int i;
 	
+	/* clean up the fetch buffers if they have been used */
 	for (i = 0; i < S->out_sqlda.sqld; ++i) {
 		if (S->fetch_buf[i]) {
 			efree(S->fetch_buf[i]);
@@ -59,6 +62,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	efree(S->fetch_buf);
 	
+	/* clean up the input descriptor */
 	if (S->in_sqlda) {
 		free_sqlda(S->in_sqlda);
 		efree(S->in_sqlda);
@@ -70,6 +74,7 @@ static int firebird_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	return 1;
 }
 
+/* called by PDO to execute a prepared query */
 static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -96,6 +101,7 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			break;
 		}
 	
+		*S->name = 0;
 		S->exhausted = 0;
 		
 		return 1;
@@ -106,12 +112,16 @@ static int firebird_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	return 0;
 }
 
+/* called by PDO to fetch the next row from a statement */
 static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 
-	if (!S->exhausted) {
+	if (!stmt->executed) {
+		stmt->error_code = PDO_ERR_CANT_MAP;
+		H->last_app_error = "Cannot fetch from a closed cursor";
+	} else if (!S->exhausted) {
 
 		/* an EXECUTE PROCEDURE statement can be fetched from once, without calling the API, because
 		 * the result was returned in the execute call */
@@ -131,6 +141,7 @@ static int firebird_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
 	return 0;
 }
 
+/* called by PDO to retrieve information about the fields being returned */
 static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
@@ -149,6 +160,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	return 1;
 }
 
+/* internal function to override return types of parameters */
 static void set_param_type(enum pdo_param_type *param_type, XSQLVAR const *var)
 {
 	/* set the param type after the field type */
@@ -306,6 +318,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 
 	if (!sqlda || param->paramno >= sqlda->sqld) {
 		stmt->error_code = PDO_ERR_NOT_FOUND;
+		S->H->last_app_error = "Invalid parameter index";
 		return 0;
 	}
 

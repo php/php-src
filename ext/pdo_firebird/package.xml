@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package version="1.0"><!-- $Id: package.xml,v 1.2 2004-06-12 03:09:47 abies Exp $ -->
+<package version="1.0"><!-- $Id: package.xml,v 1.3 2004-06-12 16:58:20 abies Exp $ -->
  <name>PDO_Firebird</name>
  <summary>Firebird/InterBase support for PDO</summary>
  <maintainers>
@@ -20,16 +20,18 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>pre-alpha</state>
+  <state>alpha</state>
   <version>0.1</version>
-  <date>2004-06-11</date>
+  <date>2004-06-12</date>
 
   <notes>
    To compile and run this module, you will need to have the main PDO module and Firebird's
-   client library installed on your system.
+   client library installed on your system. (InterBase 6 or higher should work as well)
   </notes>
 
   <filelist>
+   <file role="doc" name="CREDITS"/>
+
    <file role="src" name="config.m4"/>
    <file role="src" name="config.w32"/>
    <file role="src" name="firebird_driver.c"/>
@@ -38,7 +40,12 @@
    <file role="src" name="php_pdo_firebird.h"/>
    <file role="src" name="php_pdo_firebird_int.h"/>
 
-   <file role="doc" name="CREDITS"/>
+   <dir name="tests">
+     <file role="test">connect.phpt</file>
+     <file role="test">ddl.phpt</file>
+     <file role="test">execute.phpt</file>
+   </dir>
+
   </filelist>
   <deps>
    <dep type="php" rel="ge" version="5.0.0RC3"/>
