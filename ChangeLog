@@ -1,3 +1,41 @@
+2000-04-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: This doesn't belong in NEWS.
+
+2000-04-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * php_reentrancy.h: Undefine HAVE_*_R, so that we get our replacements
+
+2000-04-16  Nick Gorham  <nick@easysoft.com>
+
+    * ext/odbc/php_odbc.c
+      NEWS:
+    Removed unnecessary FAR's (I am assuming we don't need to work under
+    16 bit windows). They break several ODBC builds.
+
+2000-04-16  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/calendar/calendar.c: The comma is also optional.
+
+2000-04-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * configure.in
+      ext/standard/config.m4:
+    Move this check to the main configure.in file.  Fixes #3979
+
+2000-04-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * TODO: Updates
+
+2000-04-16  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/calendar/Makefile.in
+      ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/calendar/php_calendar.h:
+    added unixtojd() and jdtounix() to convert from unix time_t to
+    Julian Days and vice versa
+
 2000-04-15  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
 
     * ext/calendar/Makefile.in
