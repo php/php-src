@@ -6,6 +6,7 @@ General
 
 SOAP
 ----
++ SOAP versioning model
 - support for SOAP headers
   - mustUnderstend attribute
 - make sure soap 1.1 and 1.2 are supported fully

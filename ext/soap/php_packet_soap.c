@@ -3,6 +3,7 @@
 /* SOAP client calls this function to parse response from SOAP server */
 int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunctionPtr fn, char *fn_name, zval *return_value TSRMLS_DC)
 {
+	char* envelope_ns;
 	xmlDocPtr response;
 	xmlNodePtr trav, /*trav2,*/ env, body, resp, cur, fault;
 	int param_count = 0;
@@ -21,14 +22,24 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	env = NULL;
 	trav = response->children;
 	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE &&
-		    node_is_equal_ex(trav,"Envelope","http://schemas.xmlsoap.org/soap/envelope/")) {
-	  	if (env != NULL) {
-				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
-				xmlFreeDoc(response);
-				return FALSE;
-	  	}
-	  	env = trav;
+		if (trav->type == XML_ELEMENT_NODE) {
+			if (node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
+		  	if (env != NULL) {
+					add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
+					xmlFreeDoc(response);
+					return FALSE;
+		  	}
+		  	env = trav;
+		  	envelope_ns = SOAP_1_1_ENV;
+		  } else if (node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
+		  	if (env != NULL) {
+					add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got XML with several \"Envelope\" elements\n", NULL, NULL TSRMLS_CC);
+					xmlFreeDoc(response);
+					return FALSE;
+		  	}
+		  	env = trav;
+		  	envelope_ns = SOAP_1_2_ENV;
+		  }
 	  }
 	  trav = trav->next;
 	}
@@ -43,7 +54,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	trav = env->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE &&
-		    node_is_equal_ex(trav,"Body","http://schemas.xmlsoap.org/soap/envelope/")) {
+		    node_is_equal_ex(trav,"Body",envelope_ns)) {
 	  	if (body != NULL) {
 				add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got \"Envelope\" with several \"Body\" elements\n", NULL, NULL TSRMLS_CC);
 				xmlFreeDoc(response);
@@ -60,7 +71,7 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	}
 
 	/* Check if <Body> contains <Fault> element */
-	fault = get_node_ex(body->children,"Fault","http://schemas.xmlsoap.org/soap/envelope/");
+	fault = get_node_ex(body->children,"Fault",envelope_ns);
 	if(fault != NULL) {
 		char *faultcode = NULL, *faultstring = NULL, *faultactor = NULL;
 		zval *details = NULL;

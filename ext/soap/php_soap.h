@@ -132,6 +132,9 @@ struct _soapService
 #define SOAP_PERSISTENCE_SESSION 1
 #define SOAP_PERSISTENCE_REQUEST 2
 
+#define SOAP_1_1 1
+#define SOAP_1_2 2
+
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable *defEncNs;
 	HashTable *defEncPrefix;
@@ -198,9 +201,9 @@ int soap_set_property_handler(zend_property_reference *property_reference, zval 
 void soap_destructor(void *jobject);
 #endif
 
-void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[] TSRMLS_DC);
-xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret TSRMLS_DC);
-xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count TSRMLS_DC);
+void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval **parameters[], int *version TSRMLS_DC);
+xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, int version TSRMLS_DC);
+xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval **arguments, int arg_count, int version TSRMLS_DC);
 xmlNodePtr seralize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style TSRMLS_DC);
 xmlNodePtr seralize_zval(zval *val, sdlParamPtr param, char *paramName, int style TSRMLS_DC);
 
