@@ -48,6 +48,7 @@ extern char *crypt(char *__key,char *__salt);
 
 #include "php_lcg.h"
 #include "php_crypt.h"
+#include "php_rand.h"
 
 /* 
    The capabilities of the crypt() function is determined by the test programs
