@@ -114,13 +114,22 @@ int main() {
       AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
     ])
 
+    AC_MSG_CHECKING([if your cpp allows macro usage in include lines])
+    AC_TRY_COMPILE([
+#define FOO <$PHP_ICONV_H_PATH>
+#include FOO
+    ], [], [
+      AC_MSG_RESULT([yes])
+      PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>])
+      AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+
     CFLAGS="$iconv_cflags_save"
     LDFLAGS="$iconv_ldflags_save"
 
-    PHP_DEFINE([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>])
-    AC_DEFINE_UNQUOTED([PHP_ICONV_H_PATH], [<$PHP_ICONV_H_PATH>], [Path to iconv.h])
-
-    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared)
+    PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-I\"$PHP_ICONV_PREFIX/include\"])
     PHP_SUBST(ICONV_SHARED_LIBADD)
   else
     AC_MSG_ERROR(Please reinstall the iconv library.)
