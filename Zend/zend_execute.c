@@ -4094,10 +4094,12 @@ int zend_handle_exception_handler(ZEND_OPCODE_HANDLER_ARGS)
 	int encapsulating_block=-1;
 	
 	for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
-		if (op_num >= EG(active_op_array)->try_catch_array[i].catch_op) {
+		if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
+			/* further blocks will not be relevant... */
 			break;
 		}
-		if (op_num >= EG(active_op_array)->try_catch_array[i].try_op) {
+		if (op_num >= EG(active_op_array)->try_catch_array[i].try_op
+			&& op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
 			encapsulating_block = i;
 		}
 	}
