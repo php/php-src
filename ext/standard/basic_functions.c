@@ -2286,6 +2286,7 @@ PHP_FUNCTION(extract)
 			if (getParameters(ht, 3, &var_array, &etype, &prefix) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
+			convert_to_long(etype);
 			extype = etype->value.lval;
 			break;
 
