@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("dio", "Enable the direct I/O support", "no");
-
-if (PHP_DIO != "no") {
-	EXTENSION("dio", "dio.c");
-	AC_DEFINE('HAVE_DIO', 1, 'dio support');
-}
