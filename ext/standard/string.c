@@ -202,7 +202,7 @@ PHP_FUNCTION(bin2hex)
 static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	char *s11, *s22;
-	long len1, len2, start, len;
+	int len1, len2, start, len;
 	
 	start = 0;
 	len = 0;
