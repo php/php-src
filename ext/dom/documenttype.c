@@ -33,6 +33,13 @@ struct _nodeIterator {
 	xmlNode *node;
 };
 
+typedef struct _notationIterator notationIterator;
+struct _notationIterator {
+	int cur;
+	int index;
+	xmlNotation *notation;
+};
+
 static void itemHashScanner (void *payload, void *data, xmlChar *name) {
 	nodeIterator *priv = (nodeIterator *)data;
 
@@ -43,6 +50,31 @@ static void itemHashScanner (void *payload, void *data, xmlChar *name) {
 			priv->node = (xmlNode *)payload;
 		}
 	}
+}
+
+/* {{{ static xmlEntityPtr create_notation(const xmlChar *name, 
+				const xmlChar *ExternalID, const xmlChar *SystemID) */
+static xmlNodePtr create_notation(const xmlChar *name, 
+									const xmlChar *ExternalID, const xmlChar *SystemID) {
+	xmlEntityPtr ret;
+
+	ret = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));
+    memset(ret, 0, sizeof(xmlEntity));
+    ret->type = XML_NOTATION_NODE;
+    ret->name = xmlStrdup(name);
+	ret->ExternalID = xmlStrdup(ExternalID);
+	ret->SystemID = xmlStrdup(SystemID);
+	ret->length = 0;
+	ret->content = NULL;
+	ret->URI = NULL;
+	ret->orig = NULL;
+	ret->children = NULL;
+	ret->parent = NULL;
+	ret->doc = NULL;
+	ret->_private = NULL;
+	ret->last = NULL;
+	ret->prev = NULL;
+	return((xmlNodePtr) ret);
 }
 
 /*
@@ -133,7 +165,8 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlDtdPtr doctypep;
 	xmlHashTable *notationht;
-	nodeIterator *iter;
+	notationIterator *iter;
+	xmlNotationPtr notep = NULL;
 	xmlNode *nodep = NULL;
 	int ret, htsize, index = 0;
 
@@ -149,12 +182,13 @@ int dom_documenttype_notations_read(dom_object *obj, zval **retval TSRMLS_DC)
 			while (index < htsize) {
 				iter->cur = 0;
 				iter->index = index;
-				iter->node = NULL;
+				iter->notation = NULL;
 				xmlHashScan(notationht, itemHashScanner, iter);
 				index++;
-				nodep = iter->node;
-				if (nodep != NULL) {
+				notep = iter->notation;
+				if (notep != NULL) {
 					zval *child;
+					nodep = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					MAKE_STD_ZVAL(child);
 					child = php_dom_create_object(nodep, &ret, NULL, child, obj TSRMLS_CC);
 					add_assoc_zval(*retval, (char *) nodep->name, child);
