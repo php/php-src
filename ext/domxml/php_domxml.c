@@ -1025,7 +1025,7 @@ static zval *php_xmlparser_new(xmlParserCtxtPtr obj, int *found TSRMLS_DC)
 
 /* {{{ php_xmlparser_make_params()
    Translates a PHP array to a xmlparser parameters array */
-static char **php_xmlparser_make_params(zval *idvars)
+static char **php_xmlparser_make_params(zval *idvars TSRMLS_DC)
 {
 	HashTable *parht;
 	int parsize;
@@ -4059,7 +4059,7 @@ PHP_FUNCTION(domxml_parser_start_element)
 		
 	DOMXML_PARAM_THREE(parserp, id, le_domxmlparserp,"s|a", &tagname, &tagname_len, &params);
 	if (params != NULL) {
-		atts = php_xmlparser_make_params(params);
+		atts = php_xmlparser_make_params(params TSRMLS_CC);
 	}
 	if (parserp->myDoc == NULL) {
 		php_error(E_WARNING, "%s(): Document was not started", get_active_function_name(TSRMLS_C));
