@@ -414,10 +414,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 						"-----------------------\n\n"
 						"[zval, %2ld]\t\t%d / %d (%.2f%%)\n"
 						"[hash, %2ld]\t\t%d / %d (%.2f%%)\n",
-						sizeof(zval),
+						(long) sizeof(zval),
 						AG(fast_cache_stats)[ZVAL_CACHE_LIST][1], AG(fast_cache_stats)[ZVAL_CACHE_LIST][0]+AG(fast_cache_stats)[ZVAL_CACHE_LIST][1],
 						((double) AG(fast_cache_stats)[ZVAL_CACHE_LIST][1] / (AG(fast_cache_stats)[ZVAL_CACHE_LIST][0]+AG(fast_cache_stats)[ZVAL_CACHE_LIST][1]))*100,
-						sizeof(HashTable),
+						(long) sizeof(HashTable),
 						AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][1], AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][0]+AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][1],
 						((double) AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][1] / (AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][0]+AG(fast_cache_stats)[HASHTABLE_CACHE_LIST][1]))*100);
 
