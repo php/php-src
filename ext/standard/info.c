@@ -642,10 +642,11 @@ PHP_FUNCTION(zend_logo_guid)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
-	if(sapi_module.name)
+	if (sapi_module.name) {
 		RETURN_STRING(sapi_module.name,1);
-	else
+	} else {
 		RETURN_FALSE;
+	}
 }
 
 /* }}} */
