@@ -674,7 +674,6 @@ static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
  */
 static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, php_per_dir_entry *orig_per_dir_entry, zend_hash_key *hash_key, void *pData)
 {
-	php_per_dir_entry *orig_per_dir_entry;
 	php_per_dir_entry *new_per_dir_entry;
 
 	if (zend_hash_find(target_ht, hash_key->arKey, hash_key->nKeyLength, (void **) &new_per_dir_entry)==FAILURE) {
@@ -718,7 +717,7 @@ static void *php_create_dir(pool *p, char *dummy)
 static void *php_merge_dir(pool *p, void *basev, void *addv)
 {
 	/* This function *must* return addv, and not modify basev */
-	zend_hash_merge_ex((HashTable *) addv, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (merge_checker_func_t) should_overwrite_per_dir_entry, NULL);
+	zend_hash_merge_ex((HashTable *) addv, (HashTable *) basev, (copy_ctor_func_t) copy_per_dir_entry, sizeof(php_per_dir_entry), (zend_bool (*)(void *, void *)) should_overwrite_per_dir_entry);
 	return addv;
 }
 /* }}} */
