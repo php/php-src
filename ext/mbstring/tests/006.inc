@@ -1,7 +1,7 @@
 <?php
 //$debug = true;
 ini_set('include_path','.');
-include_once('common.php');
+include_once('common.inc');
 
 // Note: It does not return TRUE/FALSE for setting char
 
