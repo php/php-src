@@ -76,7 +76,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 PHPAPI int php_is_url(char *path);
 PHPAPI char *php_strip_url_passwd(char *path);
 
-PHPAPI char *expand_filepath(char *filepath);
+PHPAPI char *expand_filepath(char *filepath,char *real_path);
 
 int php_init_fopen_wrappers(void); 
 int php_shutdown_fopen_wrappers(void); 
