@@ -282,7 +282,7 @@ PHP_FUNCTION(bcdiv)
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case -1: /* division by zero */
-			php_error(E_WARNING, "Division by zero");
+			php_error(E_WARNING, "%s(): Division by zero", get_active_function_name(TSRMLS_C));
 			break;
 	}
 	bc_free_num(&first);
@@ -323,7 +323,7 @@ PHP_FUNCTION(bcmod)
 			Z_TYPE_P(return_value) = IS_STRING;
 			break;
 		case -1:
-			php_error(E_WARNING, "Division by zero");
+			php_error(E_WARNING, "%s(): Division by zero", get_active_function_name(TSRMLS_C));
 			break;
 	}
 	bc_free_num(&first);
@@ -409,7 +409,7 @@ PHP_FUNCTION(bcsqrt)
 		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 		Z_TYPE_P(return_value) = IS_STRING;
 	} else {
-		php_error(E_WARNING, "Square root of negative number");
+		php_error(E_WARNING, "%s(): Square root of negative number", get_active_function_name(TSRMLS_C));
 	}
 	bc_free_num(&result);
 	return;

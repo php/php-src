@@ -318,7 +318,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		                           t->func,
 		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "Couldn't call the CURLOPT_WRITEFUNCTION");
+			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_WRITEFUNCTION", get_active_function_name(TSRMLS_C));
 			length = -1;
 		}
 		else {
@@ -372,7 +372,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		                           t->func,
 		                           retval, 3, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "Cannot call the CURLOPT_READFUNCTION");
+			php_error(E_WARNING, "%s(): Cannot call the CURLOPT_READFUNCTION", get_active_function_name(TSRMLS_C));
 			length = -1;
 		}
 		else {
@@ -431,7 +431,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		                           t->func,
 		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "Couldn't call the CURLOPT_HEADERFUNCTION");
+			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_HEADERFUNCTION", get_active_function_name(TSRMLS_C));
 			length = -1;
 		}
 		else {
@@ -475,12 +475,12 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	                           func,
 	                           retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
-		php_error(E_WARNING, "Couldn't call the CURLOPT_PASSWDFUNCTION");
+		php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_PASSWDFUNCTION", get_active_function_name(TSRMLS_C));
 		ret = -1;
 	}
 	else {
 		if (Z_STRLEN_P(retval) > buflen) {
-			php_error(E_WARNING, "Returned password is too long for libcurl to handle");
+			php_error(E_WARNING, "%s(): Returned password is too long for libcurl to handle", get_active_function_name(TSRMLS_C));
 			ret = -1;
 		}
 		else {
@@ -570,7 +570,7 @@ PHP_FUNCTION(curl_init)
 
 	ch->cp = curl_easy_init();
 	if (! ch->cp) {
-		php_error(E_WARNING, "Cannot initialize a new cURL handle");
+		php_error(E_WARNING, "%s(): Cannot initialize a new cURL handle", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -771,7 +771,7 @@ PHP_FUNCTION(curl_setopt)
 
 			postfields = HASH_OF(*zvalue);
 			if (! postfields) {
-				php_error(E_WARNING, "Couldn't get HashTable in CURLOPT_POSTFIELDS");
+				php_error(E_WARNING, "%s(): Couldn't get HashTable in CURLOPT_POSTFIELDS", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 
@@ -827,8 +827,8 @@ PHP_FUNCTION(curl_setopt)
 		ph = HASH_OF(*zvalue);
 		if (! ph) {
 			php_error(E_WARNING, 
-			          "You must pass either an object or an array with the CURLOPT_HTTPHEADER,"
-					  "CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments");
+			          "%s(): You must pass either an object or an array with the CURLOPT_HTTPHEADER,"
+					  "CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 
@@ -844,7 +844,7 @@ PHP_FUNCTION(curl_setopt)
 			slist = curl_slist_append(slist, indiv);
 			if (! slist) {
 				efree(indiv);
-				php_error(E_WARNING, "Couldn't build curl_slist from curl_setopt()");
+				php_error(E_WARNING, "%s(): Couldn't build curl_slist", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 			zend_llist_add_element(&ch->to_free.str, &indiv);

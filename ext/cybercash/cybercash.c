@@ -105,7 +105,7 @@ PHP_FUNCTION(cybercash_encr)
 	                   macbuff);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Return value from cybercash_encr could not be initialized");
+		php_error(E_WARNING, "%s(): Return value could not be initialized", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -156,7 +156,7 @@ PHP_FUNCTION(cybercash_decr)
 	                   macbuff);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Could not initialize Return value from cybercash_decr");
+		php_error(E_WARNING, "%s(): Could not initialize return value", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 

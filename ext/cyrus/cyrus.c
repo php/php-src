@@ -167,11 +167,11 @@ PHP_FUNCTION(cyrus_connect)
 		break;
 
 	case -1:
-		php_error(E_WARNING, "Invalid hostname: %s", host);
+		php_error(E_WARNING, "%s(): Invalid hostname: %s", get_active_function_name(TSRMLS_C), host);
 		RETURN_FALSE;
 	
 	case -2:
-		php_error(E_WARNING, "Invalid port: %d", port);
+		php_error(E_WARNING, "%s(): Invalid port: %d", get_active_function_name(TSRMLS_C), port);
 		RETURN_FALSE;
 	}
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(cyrus_authenticate)
 			if (! user) {
 				struct passwd *pwd = getpwuid(getuid());
 				if (! pwd) {
-				php_error(E_WARNING, "Couldn't determine user id");
+				php_error(E_WARNING, "%s(): Couldn't determine user id", get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 				}
 			
@@ -358,8 +358,8 @@ static void cyrus_generic_callback(struct imclient *client,
 
 		if (call_user_function_ex(EG(function_table), NULL, callback->function, 
                                   &retval, 4, argv, 0, NULL TSRMLS_CC) == FAILURE) {
-			php_error(E_WARNING, "Couldn't call the %s handler", 
-			          callback->trigger);
+			php_error(E_WARNING, "%s(): Couldn't call the %s handler",
+			          get_active_function_name(TSRMLS_C), callback->trigger);
 		}
 
 		zval_ptr_dtor(argv[0]);
@@ -398,7 +398,7 @@ PHP_FUNCTION(cyrus_bind)
 	hash = HASH_OF(*z_callback);
 	if (! hash) {
 		php_error(E_WARNING, 
-		          "Second argument to cyrus_bind() must be an array or object");
+		          "%s(): Second argument must be an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -425,12 +425,12 @@ PHP_FUNCTION(cyrus_bind)
 	}
 
 	if (! callback.trigger) {
-		php_error(E_WARNING, "You must specify a trigger in your callback");
+		php_error(E_WARNING, "%s(): You must specify a trigger in your callback", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	if (! callback.function) {
-		php_error(E_WARNING, "You must specify a function in your callback");
+		php_error(E_WARNING, "%s(): You must specify a function in your callback", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
