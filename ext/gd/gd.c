@@ -376,13 +376,13 @@ PHP_MINIT_FUNCTION(gd)
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION
  */
+#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 PHP_RSHUTDOWN_FUNCTION(gd)
 {
-#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 	gdFreeFontCache();
-#endif
 	return SUCCESS;
 }
+#endif
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION
