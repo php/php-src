@@ -341,6 +341,7 @@ getrusage \
 gettimeofday \
 gmtime_r \
 inet_aton \
+isascii \
 link \
 localtime_r \
 lockf \
