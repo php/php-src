@@ -1316,7 +1316,7 @@ PHP_FUNCTION(com_print_typeinfo)
 	comval *obj = NULL;
 	ITypeInfo *typeinfo;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsb", &arg1, &ifacename,
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/sb", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
 		RETURN_FALSE;
 	}
@@ -1328,7 +1328,7 @@ PHP_FUNCTION(com_print_typeinfo)
 	} else if (Z_TYPE_P(arg1) == IS_RESOURCE) {
 		ZEND_FETCH_RESOURCE(obj, comval*, &arg1, -1, "comval", IS_COM);
 	} else {
-		convert_to_string_ex(&arg1);
+		convert_to_string(arg1);
 		typelibname = Z_STRVAL_P(arg1);
 	}
 
@@ -1342,7 +1342,6 @@ PHP_FUNCTION(com_print_typeinfo)
 }
 /* }}} */
 
-
 /* {{{ proto bool com_event_sink(mixed comobject, object sinkobject [, mixed sinkinterface])
    Connect events from a COM object to a PHP object */
 PHP_FUNCTION(com_event_sink)
@@ -1355,7 +1354,7 @@ PHP_FUNCTION(com_event_sink)
 
 	RETVAL_FALSE;
 	
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z", &object, &sinkobject, &sink)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz|z/", &object, &sinkobject, &sink)) {
 		RETURN_FALSE;
 	}
 
@@ -1376,7 +1375,7 @@ PHP_FUNCTION(com_event_sink)
 		if (zend_hash_index_find(Z_ARRVAL_P(sink), 1, (void**)&tmp) == SUCCESS)
 			dispname = Z_STRVAL_PP(tmp);
 	} else if (sink != NULL) {
-		convert_to_string_ex(&sink);
+		convert_to_string(sink);
 		dispname = Z_STRVAL_P(sink);
 	}
 	
