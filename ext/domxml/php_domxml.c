@@ -2368,11 +2368,11 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 
 		/* Get the attributes of the current node and add it as a property */
 		if(node_attributes(&attributes, last TSRMLS_CC) >= 0)
-			zend_hash_update(child->value.obj.properties, "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
+			zend_hash_update(Z_OBJPROP_P(child), "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
 		/* Get recursively the children of the current node and add it as a property */
 		if(node_children(&mchildren, last->children TSRMLS_CC) >= 0)
-			zend_hash_update(child->value.obj.properties, "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
+			zend_hash_update(Z_OBJPROP_P(child), "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
 		count++;
 		last = last->next;
 	}
@@ -2420,7 +2420,7 @@ PHP_FUNCTION(xmltree)
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
 	if (node_children(&children, root TSRMLS_CC) >= 0) {
-		zend_hash_update(return_value->value.obj.properties, "children",
+		zend_hash_update(Z_OBJPROP_P(return_value), "children",
 						 sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 	}
 /*	xmlFreeDoc(docp); */
@@ -2572,7 +2572,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				child = php_domobject_new(node, &retnode TSRMLS_CC);
 				zend_hash_next_index_insert(arr->value.ht, &child, sizeof(zval *), NULL);
 			}
-			zend_hash_update(rv->value.obj.properties, "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
+			zend_hash_update(Z_OBJPROP_P(rv), "nodeset", sizeof("nodeset"), (void *) &arr, sizeof(zval *), NULL);
 			break;
 		}
 		case XPATH_BOOLEAN:
