@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2002 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -308,7 +308,7 @@ EXEC SQL END DECLARE SECTION;
 		EXEC SQL close database;
 		EXEC SQL DISCONNECT CURRENT;
 	}
-	free(link);
+	efree(link);
 	IFXG(num_persistent)--;
 	IFXG(num_links)--;
 }
@@ -495,7 +495,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 
 			/* create the link */
-			ifx = (char *) malloc(sizeof(IFX));
+			ifx = (char *) emalloc(sizeof(IFX));
 			IFXG(connectionid)++;
 			sprintf(ifx, "%s%x", SAFE_STRING(user), IFXG(connectionid));
 			
@@ -504,7 +504,7 @@ EXEC SQL END DECLARE SECTION;
 			if (ifx_check() == IFX_ERROR) {
 				IFXG(sv_sqlcode) = SQLCODE;
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ifx_error(ifx));
-				free(ifx);
+				efree(ifx);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -513,7 +513,7 @@ EXEC SQL END DECLARE SECTION;
 			new_le.type = le_plink;
 			new_le.ptr = ifx;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &new_le, sizeof(list_entry), NULL) == FAILURE) {
-				free(ifx);
+				efree(ifx);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -2406,7 +2406,7 @@ $endif;
 						php_printf("<td>%s</td>", nullstr);
 					} else {
 						/* need an extra byte for string terminator */
-						copy_content = malloc(lg + 1);
+						copy_content = emalloc(lg + 1);
 						if (copy_content == NULL) {
 							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not enough memory for TEXT column");
 							RETURN_FALSE;
@@ -2414,7 +2414,7 @@ $endif;
 						memcpy(copy_content, content, lg);
 						copy_content[lg] = 0;
 						php_printf("<td>%s</td>", copy_content);
-						free(copy_content);
+						efree(copy_content);
 					}
 					break;
 
