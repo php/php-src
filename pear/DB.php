@@ -186,11 +186,11 @@ class DB {
 			'username' => false,
 			'password' => false
 		);
-		if (ereg('^([^:]+)://', $dsn, &$arr)) {
+		if (preg_match('|^([^:]+)://|', $dsn, &$arr)) {
 			$dbtype = $arr[1];
-			$dsn = ereg_replace('^[^:]+://', '', $dsn);
+			$dsn = preg_replace('|^[^:]+://|', '', $dsn);
 			// match "phptype(dbsyntax)"
-			if (ereg('^([^\(]+)\((.+)\)$', $dbtype, &$arr)) {
+			if (preg_match('|^([^\(]+)\((.+)\)$|', $dbtype, &$arr)) {
 				$parsed['phptype'] = $arr[1];
 				$parsed['dbsyntax'] = $arr[2];
 			} else {
@@ -198,7 +198,7 @@ class DB {
 			}
 		} else {
 			// match "phptype(dbsyntax)"
-			if (ereg('^([^\(]+)\((.+)\)$', $dsn, &$arr)) {
+			if (preg_match('|^([^\(]+)\((.+)\)$|', $dsn, &$arr)) {
 				$parsed['phptype'] = $arr[1];
 				$parsed['dbsyntax'] = $arr[2];
 			} else {
@@ -207,21 +207,21 @@ class DB {
 			return $parsed; // XXX ADDREF
 		}
 
-		if (ereg('^(.*)/([^/]+)$', $dsn, &$arr)) {
+		if (preg_match('|^(.*)/([^/]+)$|', $dsn, &$arr)) {
 			$parsed['database'] = $arr[2];
 			$dsn = $arr[1];
 		}
 
-		if (ereg('^([^:]+):([^@]+)@?(.*)$', $dsn, &$arr)) {
+		if (preg_match('|^([^:]+):([^@]+)@?(.*)$|', $dsn, &$arr)) {
 			$parsed['username'] = $arr[1];
 			$parsed['password'] = $arr[2];
 			$dsn = $arr[3];
-		} elseif (ereg('^([^:]+)@(.*)$', $dsn, &$arr)) {
+		} elseif (preg_match('|^([^:]+)@(.*)$|', $dsn, &$arr)) {
 			$parsed['username'] = $arr[1];
 			$dsn = $arr[3];
 		}
 
-		if (ereg('^([^\+]+)\+(.*)$', $dsn, &$arr)) {
+		if (preg_match('|^([^\+]+)\+(.*)$|', $dsn, &$arr)) {
 			$parsed['protocol'] = $arr[1];
 			$dsn = $arr[2];
 		}
