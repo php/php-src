@@ -239,6 +239,9 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   ],[
     -L$OPENSSL_LIBDIR
   ])
+
+  AC_SUBST(OPENSSL_INCDIR)
+
 ])
 
 dnl PHP_EVAL_LIBLINE(LINE, SHARED-LIBADD)
@@ -1091,7 +1094,7 @@ EOF
 ])
 
 dnl
-dnl PHP_SELECT_SAPI(name, type[, sources])
+dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags]])
 dnl
 dnl Selects the SAPI name and type (static, shared, programm)
 dnl and optionally also the source-files for the SAPI-specific
@@ -1106,8 +1109,10 @@ AC_DEFUN(PHP_SELECT_SAPI,[
   bundle) PHP_BUILD_BUNDLE;;
   program) PHP_BUILD_PROGRAM;;
   esac
+    
+  ifelse($,,ac_extra=,[ac_extra=$4])
   
-  ifelse($3,,,[PHP_ADD_SOURCES(sapi/$1, $3,,sapi)])
+  ifelse($3,,,[PHP_ADD_SOURCES(sapi/$1, $3, $ac_extra, sapi)])
 ])
 
 dnl deprecated
