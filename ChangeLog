@@ -1,3 +1,56 @@
+2002-10-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/session/tests/008-php4.2.3.phpt: This test requires special settings
+
+2002-10-27  Shane Caraveo  <shane@caraveo.com>
+
+    * main/streams.c: dont memmove a null pointer.  caught by bounds checker.
+
+    * main/streams.c: fix Bug #20126
+    write returns an int, with < 0 being a failure.
+
+2002-10-27  Andrei Zmievski  <andrei@php.net>
+
+    * configure.in
+      main/php_version.h: Back to 4.3.0-dev.
+
+2002-10-27  Jani Taskinen  <sniper@iki.fi>
+
+    * build/buildcheck.sh:
+    We have to require bison version <= 1.30 >= 1.75 since any versions between are broken..
+
+2002-10-27  Andrei Zmievski  <andrei@php.net>
+
+    * configure.in
+      main/php_version.h: Update to -pre2.
+
+2002-10-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/classes/bug20120.phpt: - Add test case for bug 20120, bison bug.
+
+2002-10-27  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/ncurses/php_ncurses_fe.h: Expose some more ncurses functions.
+
+2002-10-27  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/htmlentities02.phpt
+      ext/standard/tests/strings/htmlentities04.phpt
+      ext/standard/tests/strings/htmlentities03.phpt: Add FreeBSD locale
+
+    * ext/sysvmsg/config.m4
+      ext/sysvmsg/php_sysvmsg.h
+      ext/sysvmsg/sysvmsg.c:
+    Avoid possible clash with mysql, but still make it work for BSD's.
+    Struct verified to be compatible with Linux, FreeBSD, BSDi, AIX 4.3.3 and
+    Solaris 5.7.
+
+2002-10-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/bug20087.phpt: Capitalized the title string
+
 2002-10-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * README.TESTING: Only in EXPECTREGEX
