@@ -680,14 +680,13 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 /* {{{ ftp_get
  */
 int
-ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
+ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	char			*ptr;
 	int			lastch;
 	size_t			rcvd;
 	char			arg[11];
-	TSRMLS_FETCH();
 
 	if (ftp == NULL) {
 		return 0;
@@ -767,14 +766,13 @@ bail:
 /* {{{ ftp_put
  */
 int
-ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
+ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos TSRMLS_DC)
 {
 	databuf_t		*data = NULL;
 	int			size;
 	char			*ptr;
 	int			ch;
 	char			arg[11];
-	TSRMLS_FETCH();
 
 	if (ftp == NULL) {
 		return 0;
@@ -1652,7 +1650,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	ftp->lastch = 0;
 	ftp->nb = 1;
 
-	return (ftp_nb_continue_read(ftp));
+	return (ftp_nb_continue_read(ftp TSRMLS_CC));
 
 bail:
 	data_close(ftp, data);
@@ -1663,14 +1661,13 @@ bail:
 /* {{{ ftp_nb_continue_read
  */
 int
-ftp_nb_continue_read(ftpbuf_t *ftp)
+ftp_nb_continue_read(ftpbuf_t *ftp TSRMLS_DC)
 {
 	databuf_t	*data = NULL;
 	char		*ptr;
 	int		lastch;
 	size_t		rcvd;
 	ftptype_t	type;
-	TSRMLS_FETCH();
 
 	data = ftp->data;
 
@@ -1769,7 +1766,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 	ftp->lastch = 0;
 	ftp->nb = 1;
 
-	return (ftp_nb_continue_write(ftp));
+	return (ftp_nb_continue_write(ftp TSRMLS_CC));
 
 bail:
 	data_close(ftp, data);
@@ -1781,12 +1778,11 @@ bail:
 /* {{{ ftp_nb_continue_write
  */
 int
-ftp_nb_continue_write(ftpbuf_t *ftp)
+ftp_nb_continue_write(ftpbuf_t *ftp TSRMLS_DC)
 {
 	int			size;
 	char			*ptr;
 	int 			ch;
-	TSRMLS_FETCH();
 
 	/* check if we can write more data */
 	if (!data_writeable(ftp, ftp->data->fd)) {

@@ -494,7 +494,7 @@ PHP_FUNCTION(ftp_fget)
 		}
 	}
 
-	if (!ftp_get(ftp, stream, file, xtype, resumepos)) {
+	if (!ftp_get(ftp, stream, file, xtype, resumepos TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -618,7 +618,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-	if (!ftp_get(ftp, outstream, remote, xtype, resumepos)) {
+	if (!ftp_get(ftp, outstream, remote, xtype, resumepos TSRMLS_CC)) {
 		php_stream_close(outstream);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
@@ -713,9 +713,9 @@ PHP_FUNCTION(ftp_nb_continue)
 	}
 
 	if (ftp->direction) {
-		ret=ftp_nb_continue_write(ftp);
+		ret=ftp_nb_continue_write(ftp TSRMLS_CC);
 	} else {
-		ret=ftp_nb_continue_read(ftp);
+		ret=ftp_nb_continue_read(ftp TSRMLS_CC);
 	}
 
 	if (ret != PHP_FTP_MOREDATA && ftp->closestream) {
@@ -767,7 +767,7 @@ PHP_FUNCTION(ftp_fput)
 		}
 	}
 
-	if (!ftp_put(ftp, remote, stream, xtype, startpos)) {
+	if (!ftp_put(ftp, remote, stream, xtype, startpos TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -869,7 +869,7 @@ PHP_FUNCTION(ftp_put)
 		}
 	}
 
-	if (!ftp_put(ftp, remote, instream, xtype, startpos)) {
+	if (!ftp_put(ftp, remote, instream, xtype, startpos TSRMLS_CC)) {
 		php_stream_close(instream);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ftp->inbuf);
 		RETURN_FALSE;
