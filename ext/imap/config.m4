@@ -6,20 +6,18 @@ AC_DEFUN(IMAP_LIB_CHK,[
 		str="$IMAP_DIR/$1/lib$lib.*"
 		for i in `echo $str`; do
 			if test -r $i; then
-				IMAP_LIB_DIR=$IMAP_DIR/$1
+				IMAP_LIBDIR=$IMAP_DIR/$1
 				break 2
 			fi
 		done
 		])
 
-RESULT=no
-AC_MSG_CHECKING(for IMAP support)
-AC_ARG_WITH(imap,
+PHP_ARG_WITH(imap,for IMAP support,
 [  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
-                          and c-client.a directory.],
-[
-  if test "$withval" != "no"; then  
-    for i in /usr/local /usr $withval; do
+                          and c-client.a directory.])
+
+  if test "$PHP_IMAP" != "no"; then  
+    for i in /usr/local /usr $PHP_IMAP; do
       IMAP_INC_CHK()
       el[]IMAP_INC_CHK(/include)
       el[]IMAP_INC_CHK(/include/imap)
@@ -45,18 +43,20 @@ AC_ARG_WITH(imap,
       IMAP_LIB_CHK(c-client)
     done
 
-    if test -z "$IMAP_LIB_DIR"; then
+    if test -z "$IMAP_LIBDIR"; then
       AC_MSG_ERROR(Cannot find imap library. Please check your IMAP installation)
     fi
 
     AC_ADD_INCLUDE($IMAP_INC_DIR)
-    AC_ADD_LIBPATH($IMAP_LIB_DIR)
-    AC_ADD_LIBRARY_DEFER($IMAP_LIB)
+    if test "$ext_shared" = "yes"; then
+      AC_ADD_LIBRARY_WITH_PATH($IMAP_LIB, $IMAP_LIBDIR, IMAP_SHARED_LIBADD)
+      PHP_SUBST(IMAP_SHARED_LIBADD)
+    else
+      AC_ADD_LIBPATH($IMAP_LIBDIR)
+      AC_ADD_LIBRARY_DEFER($IMAP_LIB)
+    fi
 
-    PHP_EXTENSION(imap)
+    PHP_EXTENSION(imap, $ext_shared)
 
     AC_DEFINE(HAVE_IMAP,1,[ ])
-    RESULT=yes
   fi
-])
-AC_MSG_RESULT($RESULT)
