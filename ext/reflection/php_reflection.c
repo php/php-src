@@ -1098,7 +1098,7 @@ ZEND_METHOD(reflection, export)
 	zval_ptr_dtor(&fname);
 
 	if (result == FAILURE) {
-		_DO_THROW("Invokation of method __toString() failed");
+		_DO_THROW("Invocation of method __toString() failed");
 		/* Returns from this function */
 	}
 
@@ -1380,7 +1380,7 @@ ZEND_METHOD(reflection_function, invoke)
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Invokation of method %s() failed", fptr->common.function_name);
+			"Invocation of method %s() failed", fptr->common.function_name);
 		return;
 	}
 
@@ -1935,7 +1935,7 @@ ZEND_METHOD(reflection_method, invoke)
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
-			"Invokation of method %s::%s() failed", mptr->common.scope->name, mptr->common.function_name);
+			"Invocation of method %s::%s() failed", mptr->common.scope->name, mptr->common.function_name);
 		return;
 	}
 
@@ -2632,7 +2632,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
 			zval_ptr_dtor(&retval_ptr);
-			zend_error(E_WARNING, "Invokation of %s's constructor failed", ce->name);
+			zend_error(E_WARNING, "Invocation of %s's constructor failed", ce->name);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
