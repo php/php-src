@@ -55,7 +55,7 @@ ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, 
 ZEND_API void zend_register_double_constant(char *name, uint name_len, double dval, int flags, int module_number ELS_DC);
 ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number ELS_DC);
 ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number ELS_DC);
-ZEND_API void zend_register_constant(zend_constant *c ELS_DC);
+ZEND_API int zend_register_constant(zend_constant *c ELS_DC);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 void copy_zend_constant(zend_constant *c);
 
