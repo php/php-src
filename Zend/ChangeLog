@@ -1,3 +1,13 @@
+2002-09-18  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c:
+    Fix the thread-safe initialization of the ZE2.  This should solve some
+    sporadic crashes, as well as the problem with the built-in constants.
+
+    * zend_constants.c: Remove dead code
+
+    * zend_builtin_functions.c: Add useful debugging function
+
 2002-09-17  Zeev Suraski  <zeev@zend.com>
 
     * zend_hash.c
