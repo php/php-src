@@ -160,7 +160,7 @@ PHP_MINFO_FUNCTION(miconv)
 	zval_dtor(&iconv_impl);
 	zval_dtor(&iconv_ver);
 }
-#
+
 #define PHP_ICONV_CONVERTER			1
 #define PHP_ICONV_WRONG_CHARSET		2
 #define PHP_ICONV_TOO_BIG			3
