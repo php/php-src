@@ -1,3 +1,170 @@
+2001-05-12  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/mbstring/mbfilter.c:
+    Took out a line that might cause problems if you try and uuencode; there is no
+    uuencode support yet.
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h: Added uudecode support (MIME name "x-uuencode")
+
+    * ext/bz2/bz2.c: modelines so code formatting is respected by vim.
+
+    * ext/standard/file.h: prototype for php_file_le_stream()
+
+    * ext/standard/file.c: expose streams to other extensions.
+
+2001-05-12  Andi Gutmans  <andi@zend.com>
+
+    * main/config.w32.h: - MFH
+
+    * main/config.w32.h:
+    - Fix bug. The INI system expects a string for default INI values.
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-05-12  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/php4dllts.dsp
+      ext/xml/expat/expat.dsw
+      ext/xml/expat/expat.mak
+      ext/xml/expat/winconfig.h: hopefully fix win32 build, untested
+
+2001-05-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dllts.dsp: Hopefully nuke the rest of the german commits.
+
+    * win32/php4dllts.dsp: Remove german comments from MS VisualStudio.
+
+    * win32/php4dllts.dsp: Make expat and ext/xml compile again on Win32.
+
+2001-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/satellite/corba.c
+      ext/satellite/php_orbit.c
+      build/rules_common.mk
+      configure.in: First step towards full libtool 1.4 portability
+
+    * build/build2.mk
+      configure.in
+      ltconfig: Remove ltconfig which is not used anymore by libtool 1.4
+
+    * sapi/thttpd/config.m4
+      sapi/fastcgi/config.m4
+      sapi/roxen/config.m4
+      sapi/apache/config.m4
+      sapi/caudium/config.m4
+      ext/zlib/config0.m4
+      sapi/aolserver/config.m4
+      ext/xml/config.m4
+      ext/yp/config.m4
+      ext/snmp/config.m4
+      ext/standard/config.m4
+      ext/saprfc/config.m4
+      ext/session/config.m4
+      ext/qtdom/config.m4
+      ext/recode/config.m4
+      ext/pcre/config.m4
+      ext/pdf/config.m4
+      ext/pgsql/config.m4
+      ext/odbc/config.m4
+      ext/oracle/config.m4
+      ext/mysql/config.m4
+      ext/oci8/config.m4
+      ext/java/config.m4
+      ext/ldap/config.m4
+      ext/msql/config.m4
+      ext/gettext/config.m4
+      ext/informix/config.m4
+      ext/fribidi/config.m4
+      ext/gd/config.m4
+      ext/cybercash/config.m4
+      ext/db/config.m4
+      ext/domxml/config.m4
+      ext/fbsql/config.m4
+      ext/ccvs/config.m4
+      ext/cpdf/config.m4
+      acinclude.m4
+      configure.in: Nuke more quotes
+
+    * acinclude.m4
+      configure.in
+      ext/dba/config.m4: Nuke some unneccessary quotes
+
+    * main/php_compat.h: These functions have been changed to macros.
+
+    * ext/wddx/php_wddx.h: Default to including expat.h
+
+2001-05-12  Anil Madhavapeddy  <anil@recoil.org>
+
+    * ltconfig: sync OpenBSD libtool 1.3.5 patches on the release branch
+
+2001-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: Moved to 4.0.6
+
+    * NEWS: Put this already in 4.0.6
+
+    * ext/session/mod_files.c: MFH fix for new-session-files-were-not-locked
+
+    * ltconfig
+      ltmain.sh: Revert libtool changes, so we are back to 1.3.5 now.
+
+    * sapi/isapi/config.m4
+      ext/zlib/zlib.m4
+      sapi/caudium/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/oracle/config.m4
+      ext/saprfc/config.m4
+      ext/ldap/config.m4
+      ext/mbstring/config.m4
+      ext/mcrypt/config.m4
+      ext/ming/config.m4
+      ext/mnogosearch/config.m4: MFH indentation patch
+
+    * ext/dba/config.m4
+      ext/zziplib/config.m4: Rename some custom macros from AC_* to PHP_*
+
+    * sapi/caudium/config.m4
+      sapi/isapi/config.m4
+      ext/oracle/config.m4
+      ext/saprfc/config.m4
+      ext/zlib/config0.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/ldap/config.m4
+      ext/mbstring/config.m4
+      ext/mcrypt/config.m4
+      ext/ming/config.m4
+      ext/mnogosearch/config.m4:
+    Fix indentation of ./configure --help messages.
+
+2001-05-12  Andi Gutmans  <andi@zend.com>
+
+    * build/buildcheck.sh: - Revert libtool 1.4 check and allow 1.3.x.
+    - I hope there is nothing else which needs changing!
+
+2001-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_files.c:
+    Replace ssize_t with long, as Win32 lacks proper support for that type.
+
+2001-05-12  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/xml/expat/expat.h: add missing file
+
+2001-05-12  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/pcre/php_pcre.c: Fixed leak.
+
+2001-05-12  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: MFH
+
+    * ext/gd/config.m4: Fixed bug: #10823
+
 2001-05-11  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/domxml/php_domxml.c: Open season on memory leaks, shoot all you can.
