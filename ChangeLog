@@ -1,3 +1,165 @@
+2003-11-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/common_sortPkgDeps1_package.xml
+      pear/tests/common_sortPkgDeps2_package.xml
+      pear/tests/common_sortPkgDeps3_package.xml
+      pear/tests/common_sortPkgDeps4_package.xml
+      pear/tests/common_sortPkgDeps5_package.xml
+      pear/tests/common_sortPkgDeps6_package.xml
+      pear/tests/pear_common_sortPkgDeps.phpt:
+      new unit test - test works, but there is a serious bug in sortPkgDeps to be
+      fixed, as unearthed by this test
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      finish unit test with non-working download test with callback
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      add in skip condition for internet offline, and callback test
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      first unsuccessful test works
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      first successful download test works :)
+
+    * pear/tests/testdownload.tgz:
+      beginning framework for PEAR_Common::downloadHttp test - binary test file
+
+    * pear/tests/pear_common_downloadHttp.phpt:
+      beginning framework for PEAR_Common::downloadHttp test
+
+    * pear/tests/pear_dependency_checkExtension.phpt
+      pear/tests/pear_dependency_checkPackage.phpt
+      pear/tests/pear_dependency_checkPackageUninstall.phpt:
+      tweak tests
+
+    * pear/PEAR/Command/Install-using-downloader.php:
+      remove old holdover code that has no purpose
+
+    * pear/PEAR/Installer-minus-download.php:
+      ...and with these changes, 100% BC is maintained.
+
+2003-11-30  Derick Rethans  <php@derickrethans.nl>
+
+    * README.input_filter:
+      - And fix the README too.
+
+    * main/SAPI.h:
+      - Fixed standard wrapper for input filter.
+
+2003-11-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/mail.c:
+      MFB: Fix for possible uninitialized usage of subject_r.
+
+    * main/network.c
+      main/streams/xp_socket.c:
+      Removed unused variables.
+
+2003-11-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php
+      ext/session/tests/001.phpt
+      ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/019.phpt
+      ext/standard/tests/file/fopencookie.phpt
+      ext/standard/tests/file/userstreams.phpt
+      ext/standard/tests/serialize/bug21957.phpt
+      tests/classes/__call_001.phpt
+      tests/classes/bug23951.phpt
+      tests/classes/bug24399.phpt
+      tests/classes/class_example.phpt
+      tests/classes/destructor_and_references.phpt
+      tests/classes/inheritance.phpt
+      tests/classes/interface_doubled.phpt
+      tests/classes/interface_implemented.phpt
+      tests/classes/interface_member.phpt
+      tests/classes/object_reference_001.phpt
+      tests/lang/bug21669.phpt
+      tests/lang/bug21961.phpt
+      tests/lang/bug22231.phpt
+      tests/lang/bug22367.phpt
+      tests/lang/bug22510.phpt
+      tests/lang/bug23922.phpt
+      tests/lang/bug24403.phpt
+      tests/lang/bug25652.phpt
+      tests/lang/bug26182.phpt
+      tests/run-test/test005.phpt
+      tests/run-test/test008.phpt
+      tests/run-test/test008a.phpt:
+      Fix tests for E_STRICT and check for E_STRICT in run-tests.php.
+
+    * ZendEngine2/zend_default_classes.c:
+      Check return value of exception::__tostring()
+
+    * ext/mbstring/tests/common.inc
+      ext/mbstring/tests/mb_convert_variables.phpt:
+      Fix tests
+
+    * ZendEngine2/tests/bug20240.phpt:
+      Fix test
+
+2003-11-30  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/php_dom.c:
+      remove call to xmlMemoryDump
+
+2003-11-30  Christian Stocker  <chregu@phant.ch>
+
+    * ext/dom/examples/dom1.php:
+      fixed typos
+
+    * ext/dom/tests/dom003.phpt:
+      output of uncaught exception changed
+
+2003-11-30  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      prototype fix for mysqli_ssl_set
+
+2003-11-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      New funcs
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-11-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR-new-Downloader.xml
+      pear/PEAR/Downloader.php
+      pear/PEAR/Installer-minus-download.php
+      pear/PEAR/Command/Install-using-downloader.php:
+      experimental code shuffling, moved download() into a new class,
+      PEAR_Downloader.
+      
+      Reasons:
+      - 7 parameters for a method with lots of pass by reference
+        implies the need to save state, i.e. use an object
+      - cleaner code.  download() can be easily split into 4 separate but
+      related methods
+      - Installer.php is now exclusively used for installation
+      - future extensibility: switching to channels or local package
+      repositories from
+        using PEAR_Remote is easy.  Simply extend the API for PEAR_Downloader:
+        no changes needed to the installer at all
+      
+      to install for testing purposes, use
+      
+      pear upgrade --force package-PEAR-new-Downloader.xml
+      
+      to uninstall, use
+      
+      pear upgrade --force package-PEAR.xml
+
+    * pear/tests/pear_system.phpt:
+      got it - the pattern ONLY needs addslashes for windows paths
+
 2003-11-29  Greg Beaver  <greg@chiaraquartet.net>
 
     * pear/tests/pear_system.phpt:
