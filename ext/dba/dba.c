@@ -424,7 +424,19 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	if (*pmode=='t') {
 		pmode++;
-		lock_mode |= LOCK_NB; /* test =: non blocking */
+		if (!lock_mode) {
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (testing)", hptr->name);
+				FREENOW;
+				RETURN_FALSE;
+			} else {
+				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (testing) obsolete", hptr->name);
+				FREENOW;
+				RETURN_FALSE;
+			}
+		} else {
+			lock_mode |= LOCK_NB; /* test =: non blocking */
+		}
 	}
 	if (*pmode || !modenr) {
 		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
