@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Fixed bug #30637 (compile with pear error). (Antony)
 - Fixed bug #30572 (crash when comparing SimpleXML attribute to a boolean).
   (Andi)
+- Fixed bug #30566 (attribute namespace URIs are inconsistent when parsing).
+  (Rob)
 - Fixed bug #30490 (PEAR installation fails). (Antony)
 - Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
