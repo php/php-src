@@ -88,6 +88,7 @@ PHP_INI_END()
 any = [\000-\377];
 N = (any\[<]);
 alpha = [a-zA-Z];
+alphadash = ([a-zA-Z] | "-");
 */
 
 #define YYFILL(n) goto done
@@ -175,8 +176,15 @@ enum {
 #define STD_PARA url_adapt_state_ex_t *ctx, char *start, char *YYCURSOR TSRMLS_DC
 #define STD_ARGS ctx, start, xp TSRMLS_CC
 
+#if SCANNER_DEBUG
+#define scdebug(x) printf x
+#else
+#define scdebug(x)
+#endif
+
 static inline void passthru(STD_PARA) 
 {
+	scdebug(("appending %d chars, starting with %c\n", YYCURSOR-start, *start));
 	smart_str_appendl(&ctx->result, start, YYCURSOR - start);
 }
 
@@ -243,12 +251,6 @@ static inline void handle_val(STD_PARA, char quotes, char type)
 	tag_arg(ctx, quotes, type TSRMLS_CC);
 }
 
-#ifdef SCANNER_DEBUG
-#define scdebug(x) printf x
-#else
-#define scdebug(x)
-#endif
-
 static inline void xx_mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen TSRMLS_DC)
 {
 	char *end, *q;
@@ -303,7 +305,7 @@ state_next_arg:
 state_arg:
 	start = YYCURSOR;
 /*!re2c
-  alpha+	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
+  alpha alphadash*	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
   any		{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; goto state_next_arg; }
 */
 
