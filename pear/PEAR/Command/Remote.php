@@ -135,7 +135,10 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     function doRemoteList($command, $options, $params)
     {
         $r = new PEAR_Remote($this->config);
-        $available = $r->call('package.listAll', true);
+        $list_options = false;
+        if ($this->config->get('preferred_state') == 'stable')
+            $list_options = true;
+        $available = $r->call('package.listAll', $list_options);
         if (PEAR::isError($available)) {
             return $this->raiseError($available);
         }
@@ -162,7 +165,10 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
     {
         $r = new PEAR_Remote($this->config);
         $reg = new PEAR_Registry($this->config->get('php_dir'));
-        $available = $r->call('package.listAll', true);
+        $list_options = false;
+        if ($this->config->get('preferred_state') == 'stable')
+            $list_options = true;
+        $available = $r->call('package.listAll', $list_options);
         if (PEAR::isError($available)) {
             return $this->raiseError($available);
         }
