@@ -364,11 +364,11 @@ if test "$PHP_GD" != "no"; then
   else
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_FCLAGS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
+  
+    PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
+      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
+    ], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   fi
-
-  PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
-    AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-  ], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 
   PHP_SUBST(GDLIB_CFLAGS)
   PHP_SUBST(GD_SHARED_LIBADD)
