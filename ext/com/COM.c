@@ -17,7 +17,6 @@
    +----------------------------------------------------------------------+
  */
 
-
 /*
  * This module implements support for COM components that support the IDispatch
  * interface.  Both local (COM) and remote (DCOM) components can be accessed.
@@ -93,22 +92,27 @@ static int php_COM_load_typelib(char *typelib_name, int mode);
 
 PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult)
 {
+/* TODO: doesn't work
 	if(obj->typelib) {
-		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
-											   wFlags, pDispParams, pVarResult, NULL, NULL);
-	} else {
 		return obj->i.typeinfo->lpVtbl->Invoke(obj->i.typeinfo, obj->i.dispatch, dispIdMember,
 											   wFlags, pDispParams, pVarResult, NULL, NULL);
-	}
+	} else {
+		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
+											   wFlags, pDispParams, pVarResult, NULL, NULL);
+	}*/
+		return obj->i.dispatch->lpVtbl->Invoke(obj->i.dispatch, dispIdMember, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
+											   wFlags, pDispParams, pVarResult, NULL, NULL);
 }
 
 PHPAPI HRESULT php_COM_get_ids_of_names(i_dispatch *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId)
 {
+/* TODO: doesn't work
 	if(obj->typelib) {
-		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
-	} else {
 		return obj->i.typeinfo->lpVtbl->GetIDsOfNames(obj->i.typeinfo, rgszNames, 1, rgDispId);
-	}
+	} else {
+		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
+	}*/
+		return obj->i.dispatch->lpVtbl->GetIDsOfNames(obj->i.dispatch, &IID_NULL, rgszNames, 1, LOCALE_SYSTEM_DEFAULT, rgDispId);
 }
 
 PHPAPI HRESULT php_COM_release(i_dispatch *obj)
@@ -128,7 +132,7 @@ PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup)
 	HRESULT hr;
 
 	obj->i.dispatch = pDisp;
-	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &obj->i.typeinfo));
+	obj->typelib = !FAILED(obj->i.dispatch->lpVtbl->GetTypeInfo(obj->i.dispatch, 0, LANG_NEUTRAL, &(obj->i.typeinfo)));
 
 	if(cleanup) {
 		pDisp = NULL;
@@ -701,7 +705,7 @@ VARIANT *_php_COM_get_property_handler(zend_property_reference *property_referen
 				break;
 
 			case OE_IS_METHOD:
-				var_result->pdispVal = obj_prop->i.dispatch;
+//				var_result->pdispVal = obj_prop->i.dispatch;
 				efree(obj_prop);
 				return var_result;
 				break;

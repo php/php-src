@@ -3,7 +3,7 @@
 
 #if PHP_WIN32
 
-#include "unknwn.h"
+#include "oleauto.h"
 
 typedef struct i_dispatch_ {
 	int typelib;
