@@ -40,13 +40,8 @@ static int reference_levdist(const char *s1, int l1,
 	if((l1>LEVENSHTEIN_MAX_LENTH)||(l2>LEVENSHTEIN_MAX_LENTH))
 		return -1;
 
-	if(!(p1=safe_emalloc((l2+1), sizeof(int), 0))) {
-		return -2;
-	}
-	if(!(p2=safe_emalloc((l2+1), sizeof(int), 0))) {
-		free(p1);
-		return -2;
-	}
+	p1 = safe_emalloc((l2+1), sizeof(int), 0);
+	p2 = safe_emalloc((l2+1), sizeof(int), 0);
 
 	for(i2=0;i2<=l2;i2++)
 		p1[i2] = i2*cost_ins;
