@@ -113,11 +113,16 @@ void php_save_umask(void)
 static int sapi_apache_ub_write(const char *str, uint str_length)
 {
 	int ret;
+	ap_bucket *b;
+	ap_bucket_brigade = *bb;
 	SLS_FETCH();
 	PLS_FETCH();
 		
 	if (SG(server_context)) {
-		ret = ap_rwrite(str, str_length, (request_rec *) SG(server_context));
+		bb = ap_brigade_create(r->pool);
+		b = ap_bucket_create_immortal(str, str_length);
+		AP_BRIGADE_INSERT_TAIL(bb, b);
+		ap_pass_brigade(SG(server_filter)->next, bb);
 	} else {
 		ret = fwrite(str, 1, str_length, stderr);
 	}
@@ -207,7 +212,7 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	}
 
 	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
-	send_http_header((request_rec *) SG(server_context));
+	ap_send_http_header((request_rec *) SG(server_context));
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -686,11 +691,12 @@ void php_init_handler(server_rec *s, pool *p)
 }
 
 typedef struct PHP_OUTPUT_FILTER_CTX {
-	ap_bucket_brigade *b;
+	ap_bucket_brigade *bb;
 } php_output_filter_ctx_t;
 
-static int php_filter(ap_filter_t *f, ap_bucket_brigade *b) {
+static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb) {
 	request_rec *r = f->r;
+	ap_bucket *b;
 	conn_rec *c = f->c;
 	php_output_filter_ctx_t *ctx = f->ctx;
 	apr_status_t rv;
@@ -702,32 +708,34 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *b) {
 	/* We don't accept OPTIONS requests, but take everything else */
 	if (r->method_number == M_OPTIONS) {
 		r->allowed |= (1 << METHODS) - 1;
-		return ap_pass_brigade(f->next, b);
+		return ap_pass_brigade(f->next, bb);
 	}
 	
 	if (ctx == NULL) {
 		f->ctx = ctx = apr_pcalloc(c->pool, sizeof(php_output_filter_ctx_t));
 		ctx->b = ap_brigade_create(c->pool); /* create an initial empty brigade */
+		SG(server_filter) = f;
 	}
 
-	AP_BRIGADE_CONCAT(ctx->b,b);
+	ap_save_brigade(f, ctx->bb, bb);
+
 	if(AP_BUCKET_IS_EOS(AP_BRIGADE_LAST(b))) {
 		/* Ok, we have all of our brigades, time to munch on the buckets */
-		AP_BRIGADE_FOREACH(e, b) {
-			rv = ap_bucket_read(e, &str, &n, 1);
+		AP_BRIGADE_FOREACH(b, bb) {
+			rv = ap_bucket_read(b, &str, &n, 1);
 		}
 		/* Because some of our buckets may be pipes, we can't actually get the
 		 * total size of our brigade on our first pass, so run through them all
 		 * again to get the total size of the brigade */
-		AP_BRIGADE_FOREACH(e, b) {
-			size += e->length;
+		AP_BRIGADE_FOREACH(b, bb) {
+			size += b->length;
 		}
 		/* Now that we have the size we can allocate a big chunk of memory
 		 * where we will memcpy all of the buckets into. */
 		content = p = apr_pcalloc(c->pool, size+1);		
 		/* And now we can copy the buckets into our buffer */
-		AP_BRIGADE_FOREACH(e, b) {
-			memcpy(p, e->data, e->length);
+		AP_BRIGADE_FOREACH(b, bb) {
+			memcpy(p, b->data, b->length);
 			p += e->length;
 		}
 		/* We should now have a flat buffer in 'content' that we somehow have
