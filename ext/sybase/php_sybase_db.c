@@ -1254,16 +1254,16 @@ PHP_MINFO_FUNCTION(sybase)
 	char maxp[32],maxl[32];
 	
 	if (php_sybase_module.max_persistent==-1) {
-		snprintf(maxp, 31, "%d/unlimited", php_sybase_module.num_persistent );
+		snprintf(maxp, 31, "%ld/unlimited", php_sybase_module.num_persistent );
 	} else {
-		snprintf(maxp, 31, "%d/%ld", php_sybase_module.num_persistent, php_sybase_module.max_persistent);
+		snprintf(maxp, 31, "%ld/%ld", php_sybase_module.num_persistent, php_sybase_module.max_persistent);
 	}
 	maxp[31]=0;
 
 	if (php_sybase_module.max_links==-1) {
-		snprintf(maxl, 31, "%d/unlimited", php_sybase_module.num_links );
+		snprintf(maxl, 31, "%ld/unlimited", php_sybase_module.num_links );
 	} else {
-		snprintf(maxl, 31, "%d/%ld", php_sybase_module.num_links, php_sybase_module.max_links);
+		snprintf(maxl, 31, "%ld/%ld", php_sybase_module.num_links, php_sybase_module.max_links);
 	}
 	maxl[31]=0;
 
