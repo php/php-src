@@ -24,22 +24,22 @@
 #include "SAPI.h"
 
 /* output functions */
-PHPAPI int (*zend_body_write)(const char *str, uint str_length);		/* string output */
-PHPAPI int (*zend_header_write)(const char *str, uint str_length);	/* unbuffer string output */
-static int zend_ub_body_write(const char *str, uint str_length);
-static int zend_ub_body_write_no_header(const char *str, uint str_length);
-static int zend_b_body_write(const char *str, uint str_length);
+PHPAPI int (*php_body_write)(const char *str, uint str_length);		/* string output */
+PHPAPI int (*php_header_write)(const char *str, uint str_length);	/* unbuffer string output */
+static int php_ub_body_write(const char *str, uint str_length);
+static int php_ub_body_write_no_header(const char *str, uint str_length);
+static int php_b_body_write(const char *str, uint str_length);
 
 /* output buffering */
 static char *ob_buffer;
 static uint ob_buffer_size;
 static uint ob_block_size;
 static uint ob_text_length;
-static void zend_ob_init(uint initial_size, uint block_size);
-static void zend_ob_destroy();
-static void zend_ob_append(const char *text, uint text_length);
-static void zend_ob_prepend(const char *text, uint text_length);
-static inline void zend_ob_send();
+static void php_ob_init(uint initial_size, uint block_size);
+static void php_ob_destroy();
+static void php_ob_append(const char *text, uint text_length);
+static void php_ob_prepend(const char *text, uint text_length);
+static inline void php_ob_send();
 
 
 /*
@@ -47,24 +47,24 @@ static inline void zend_ob_send();
  */
 
 /* Start output layer */
-PHPAPI void zend_output_startup()
+PHPAPI void php_output_startup()
 {
 	ob_buffer = NULL;
-	zend_body_write = zend_ub_body_write;
-	zend_header_write = sapi_module.ub_write;
+	php_body_write = php_ub_body_write;
+	php_header_write = sapi_module.ub_write;
 }
 
 
 /* Start output buffering */
-void zend_start_ob_buffering()
+void php_start_ob_buffering()
 {
-	zend_ob_init(4096, 1024);
-	zend_body_write = zend_b_body_write;
+	php_ob_init(4096, 1024);
+	php_body_write = php_b_body_write;
 }
 
 
 /* End output buffering */
-void zend_end_ob_buffering(int send_buffer)
+void php_end_ob_buffering(int send_buffer)
 {
 	SLS_FETCH();
 
@@ -72,14 +72,14 @@ void zend_end_ob_buffering(int send_buffer)
 		return;
 	}
 	if (SG(headers_sent) && !SG(request_info).headers_only) {
-		zend_body_write = zend_ub_body_write_no_header;
+		php_body_write = php_ub_body_write_no_header;
 	} else {
-		zend_body_write = zend_ub_body_write;
+		php_body_write = php_ub_body_write;
 	}
 	if (send_buffer) {
-		zend_ob_send();
+		php_ob_send();
 	}
-	zend_ob_destroy();
+	php_ob_destroy();
 }
 
 
@@ -87,7 +87,7 @@ void zend_end_ob_buffering(int send_buffer)
  * Output buffering - implementation
  */
 
-static inline void zend_ob_allocate()
+static inline void php_ob_allocate()
 {
 	if (ob_buffer_size<ob_text_length) {
 		while ((ob_buffer_size+=ob_block_size) < ob_text_length);
@@ -96,7 +96,7 @@ static inline void zend_ob_allocate()
 }
 
 
-static void zend_ob_init(uint initial_size, uint block_size)
+static void php_ob_init(uint initial_size, uint block_size)
 {
 	if (ob_buffer) {
 		return;
@@ -108,7 +108,7 @@ static void zend_ob_init(uint initial_size, uint block_size)
 }
 
 
-static void zend_ob_destroy()
+static void php_ob_destroy()
 {
 	if (ob_buffer) {
 		efree(ob_buffer);
@@ -117,27 +117,27 @@ static void zend_ob_destroy()
 }
 
 
-static void zend_ob_append(const char *text, uint text_length)
+static void php_ob_append(const char *text, uint text_length)
 {
 	char *target;
 	int original_ob_text_length=ob_text_length;
 
 	ob_text_length += text_length;
-	zend_ob_allocate();
+	php_ob_allocate();
 	target = ob_buffer+original_ob_text_length;
 	memcpy(target, text, text_length);
 	target[text_length]=0;
 }
 
 
-static void zend_ob_prepend(const char *text, uint text_length)
+static void php_ob_prepend(const char *text, uint text_length)
 {
 	char *p, *start;
 
 	ob_text_length += text_length;
-	zend_ob_allocate();
+	php_ob_allocate();
 
-	/* zend_ob_allocate() may change ob_buffer, so we can't initialize p&start earlier */
+	/* php_ob_allocate() may change ob_buffer, so we can't initialize p&start earlier */
 	p = ob_buffer+ob_text_length;
 	start = ob_buffer;
 
@@ -149,15 +149,15 @@ static void zend_ob_prepend(const char *text, uint text_length)
 }
 
 
-static inline void zend_ob_send()
+static inline void php_ob_send()
 {
 	/* header_write is a simple, unbuffered output function */
-	zend_body_write(ob_buffer, ob_text_length);
+	php_body_write(ob_buffer, ob_text_length);
 }
 
 
 /* Return the current output buffer */
-int zend_ob_get_buffer(pval *p)
+int php_ob_get_buffer(pval *p)
 {
 	if (!ob_buffer) {
 		return FAILURE;
@@ -175,20 +175,20 @@ int zend_ob_get_buffer(pval *p)
 
 
 /* buffered output function */
-static int zend_b_body_write(const char *str, uint str_length)
+static int php_b_body_write(const char *str, uint str_length)
 {
-	zend_ob_append(str, str_length);
+	php_ob_append(str, str_length);
 	return str_length;
 }
 
 
-static int zend_ub_body_write_no_header(const char *str, uint str_length)
+static int php_ub_body_write_no_header(const char *str, uint str_length)
 {
-	return zend_header_write(str, str_length);
+	return php_header_write(str, str_length);
 }
 
 
-static int zend_ub_body_write(const char *str, uint str_length)
+static int php_ub_body_write(const char *str, uint str_length)
 {
 	char *newstr = NULL;
 	uint new_length;
@@ -206,8 +206,8 @@ static int zend_ub_body_write(const char *str, uint str_length)
 			str_length = new_length;
 		}
 
-		zend_body_write = zend_ub_body_write_no_header;
-		result = zend_ub_body_write_no_header(str, str_length);
+		php_body_write = php_ub_body_write_no_header;
+		result = php_ub_body_write_no_header(str, str_length);
 
 		if (newstr) {
 			free(newstr);

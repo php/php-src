@@ -2175,25 +2175,25 @@ void test_class_startup()
 
 PHP_FUNCTION(ob_start)
 {
-	zend_start_ob_buffering();
+	php_start_ob_buffering();
 }
 
 
 PHP_FUNCTION(ob_end_flush)
 {
-	zend_end_ob_buffering(1);
+	php_end_ob_buffering(1);
 }
 
 
 PHP_FUNCTION(ob_end_clean)
 {
-	zend_end_ob_buffering(0);
+	php_end_ob_buffering(0);
 }
 
 
 PHP_FUNCTION(ob_get_contents)
 {
-	if (zend_ob_get_buffer(return_value)==FAILURE) {
+	if (php_ob_get_buffer(return_value)==FAILURE) {
 		RETURN_FALSE;
 	}
 }

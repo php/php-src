@@ -372,7 +372,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					break;
 				case 'h':
 				case '?':
-					zend_output_startup();
+					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					exit(1);
