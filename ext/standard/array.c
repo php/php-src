@@ -126,31 +126,31 @@ static int array_key_compare(const void *a, const void *b)
 	s = *((Bucket **) b);
 
 	if (f->nKeyLength == 0) {
-		first.type = IS_LONG;
-		first.value.lval = f->h;
+		Z_TYPE(first) = IS_LONG;
+		Z_LVAL(first) = f->h;
 	} else {
-		first.type = IS_STRING;
-		first.value.str.val = f->arKey;
-		first.value.str.len = f->nKeyLength;
+		Z_TYPE(first) = IS_STRING;
+		Z_STRVAL(first) = f->arKey;
+		Z_STRLEN(first) = f->nKeyLength;
 	}
 
 	if (s->nKeyLength == 0) {
-		second.type = IS_LONG;
-		second.value.lval = s->h;
+		Z_TYPE(second) = IS_LONG;
+		Z_LVAL(second) = s->h;
 	} else {
-		second.type = IS_STRING;
-		second.value.str.val = s->arKey;
-		second.value.str.len = s->nKeyLength;
+		Z_TYPE(second) = IS_STRING;
+		Z_STRVAL(second) = s->arKey;
+		Z_STRLEN(second) = s->nKeyLength;
 	}
  
     if (ARRAYG(compare_func)(&result, &first, &second) == FAILURE) {
         return 0;
     } 
 
-    if (result.type == IS_DOUBLE) {
-        if (result.value.dval < 0) {
+    if (Z_TYPE(result) == IS_DOUBLE) {
+        if (Z_DVAL(result) < 0) {
 			return -1;
-        } else if (result.value.dval > 0) {
+        } else if (Z_DVAL(result) > 0) {
 			return 1;
         } else {
 			return 0;
@@ -159,9 +159,9 @@ static int array_key_compare(const void *a, const void *b)
 
 	convert_to_long(&result);
 
-	if (result.value.lval < 0) {
+	if (Z_LVAL(result) < 0) {
 		return -1;
-	} else if (result.value.lval > 0) {
+	} else if (Z_LVAL(result) > 0) {
 		return 1;
 	} 
 
@@ -242,7 +242,7 @@ PHP_FUNCTION(count)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		if ((*array)->type == IS_NULL) {
+		if (Z_TYPE_PP(array) == IS_NULL) {
 			RETURN_LONG(0);
 		} else {
 			RETURN_LONG(1);
@@ -279,10 +279,10 @@ static int array_data_compare(const void *a, const void *b)
         return 0;
     } 
 
-    if (result.type == IS_DOUBLE) {
-        if (result.value.dval < 0) {
+    if (Z_TYPE(result) == IS_DOUBLE) {
+        if (Z_DVAL(result) < 0) {
 			return -1;
-        } else if (result.value.dval > 0) {
+        } else if (Z_DVAL(result) > 0) {
 			return 1;
         } else {
 			return 0;
@@ -291,9 +291,9 @@ static int array_data_compare(const void *a, const void *b)
 
 	convert_to_long(&result);
 
-	if (result.value.lval < 0) {
+	if (Z_LVAL(result) < 0) {
 		return -1;
-	} else if (result.value.lval > 0) {
+	} else if (Z_LVAL(result) > 0) {
 		return 1;
 	} 
 
@@ -319,21 +319,21 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 	sval = *((pval **) s->pData);
 	first = *fval;
 	second = *sval;
-	if (fval->type != IS_STRING) {
+	if (Z_TYPE_P(fval) != IS_STRING) {
 		zval_copy_ctor(&first);
 		convert_to_string(&first);
 	}
-	if (sval->type != IS_STRING) {
+	if (Z_TYPE_P(sval) != IS_STRING) {
 		zval_copy_ctor(&first);
 		convert_to_string(&second);
 	}
 
-	result = strnatcmp_ex(first.value.str.val, first.value.str.len,
-						  second.value.str.val, second.value.str.len, fold_case);
+	result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first),
+						  Z_STRVAL(second), Z_STRLEN(second), fold_case);
 
-	if (fval->type != IS_STRING)
+	if (Z_TYPE_P(fval) != IS_STRING)
 		zval_dtor(&first);
-	if (sval->type != IS_STRING)
+	if (Z_TYPE_P(sval) != IS_STRING)
 		zval_dtor(&second);
 	
 	return result;
@@ -367,18 +367,18 @@ static int array_type_data_compare(const void *a, const void *b)
 	first = *((pval **) f->pData);
 	second = *((pval **) s->pData);
 
-	diff = first->type - second->type;
-	if (diff && ((first->type == IS_STRING) || (second->type == IS_STRING)))
+	diff = Z_TYPE_P(first) - Z_TYPE_P(second);
+	if (diff && ((Z_TYPE_P(first) == IS_STRING) || (Z_TYPE_P(second) == IS_STRING)))
 		return diff;
 
     if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
         return 0;
     } 
 
-    if (result.type == IS_DOUBLE) {
-        if (result.value.dval < 0) {
+    if (Z_TYPE(result) == IS_DOUBLE) {
+        if (Z_DVAL(result) < 0) {
 			return -1;
-        } else if (result.value.dval > 0) {
+        } else if (Z_DVAL(result) > 0) {
 			return 1;
         } else {
 			return 0;
@@ -387,9 +387,9 @@ static int array_type_data_compare(const void *a, const void *b)
 
 	convert_to_long(&result);
 
-	if (result.value.lval < 0) {
+	if (Z_LVAL(result) < 0) {
 		return -1;
-	} else if (result.value.lval > 0) {
+	} else if (Z_LVAL(result) > 0) {
 		return 1;
 	} 
 
@@ -580,7 +580,7 @@ static int array_user_compare(const void *a, const void *b)
 		long retval;
 
 		convert_to_long_ex(&retval_ptr);
-		retval = retval_ptr->value.lval;
+		retval = Z_LVAL_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
 		return retval;
 	} else {
@@ -666,20 +666,20 @@ static int array_user_key_compare(const void *a, const void *b)
 	s = *((Bucket **) b);
 
 	if (f->nKeyLength) {
-		key1.value.str.val = estrndup(f->arKey, f->nKeyLength);
-		key1.value.str.len = f->nKeyLength-1;
-		key1.type = IS_STRING;
+		Z_STRVAL(key1) = estrndup(f->arKey, f->nKeyLength);
+		Z_STRLEN(key1) = f->nKeyLength-1;
+		Z_TYPE(key1) = IS_STRING;
 	} else {
-		key1.value.lval = f->h;
-		key1.type = IS_LONG;
+		Z_LVAL(key1) = f->h;
+		Z_TYPE(key1) = IS_LONG;
 	}
 	if (s->nKeyLength) {
-		key2.value.str.val = estrndup(s->arKey, s->nKeyLength);
-		key2.value.str.len = s->nKeyLength-1;
-		key2.type = IS_STRING;
+		Z_STRVAL(key2) = estrndup(s->arKey, s->nKeyLength);
+		Z_STRLEN(key2) = s->nKeyLength-1;
+		Z_TYPE(key2) = IS_STRING;
 	} else {
-		key2.value.lval = s->h;
-		key2.type = IS_LONG;
+		Z_LVAL(key2) = s->h;
+		Z_TYPE(key2) = IS_LONG;
 	}
 
 	status = call_user_function(CG(function_table), NULL, *BG(user_compare_func_name), &retval, 2, args);
@@ -689,7 +689,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	
 	if (status==SUCCESS) {
 		convert_to_long(&retval);
-		return retval.value.lval;
+		return Z_LVAL(retval);
 	} else {
 		return 0;
 	}
@@ -878,13 +878,10 @@ PHP_FUNCTION(key)
 	}
 	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 		case HASH_KEY_IS_STRING:
-			return_value->value.str.val = string_key;
-			return_value->value.str.len = strlen(string_key);
-			return_value->type = IS_STRING;
+			RETVAL_STRING(string_key, 0);
 			break;
 		case HASH_KEY_IS_LONG:
-			return_value->type = IS_LONG;
-			return_value->value.lval = num_key;
+			RETVAL_LONG(num_key);
 			break;
 		case HASH_KEY_NON_EXISTANT:
 			return;
@@ -907,10 +904,10 @@ PHP_FUNCTION(min)
 	if (argc == 1) {
 		pval **arr;
 
-		if (zend_get_parameters_ex(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
+		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 0, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -931,7 +928,7 @@ PHP_FUNCTION(min)
 
 		for (i=1; i<ZEND_NUM_ARGS(); i++) {
 			is_smaller_function(&result, *args[i], *min);
-			if (result.value.lval == 1) {
+			if (Z_LVAL(result) == 1) {
 				min = args[i];
 			}
 		}
@@ -959,10 +956,10 @@ PHP_FUNCTION(max)
 	if (argc == 1) {
 		pval **arr;
 
-		if (zend_get_parameters_ex(1, &arr) == FAILURE || (*arr)->type != IS_ARRAY) {
+		if (zend_get_parameters_ex(1, &arr) == FAILURE || Z_TYPE_PP(arr) != IS_ARRAY) {
 			WRONG_PARAM_COUNT;
 		}
-		if (zend_hash_minmax((*arr)->value.ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
+		if (zend_hash_minmax(Z_ARRVAL_PP(arr), array_data_compare, 1, (void **) &result)==SUCCESS) {
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
@@ -983,7 +980,7 @@ PHP_FUNCTION(max)
 
 		for (i=1; i<ZEND_NUM_ARGS(); i++) {
 			is_smaller_or_equal_function(&result, *args[i], *max);
-			if (result.value.lval == 0) {
+			if (Z_LVAL(result) == 0) {
 				max = args[i];
 			}
 		}
@@ -1019,12 +1016,12 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 	while(zend_hash_get_current_data(target_hash, (void **)&args[0]) == SUCCESS) {
 		/* Set up the key */
 		if (zend_hash_get_current_key(target_hash, &string_key, &num_key) == HASH_KEY_IS_LONG) {
-			key->type = IS_LONG;
-			key->value.lval = num_key;
+			Z_TYPE_P(key) = IS_LONG;
+			Z_LVAL_P(key) = num_key;
 		} else {
-			key->type = IS_STRING;
-			key->value.str.val = string_key;
-			key->value.str.len = strlen(string_key);
+			Z_TYPE_P(key) = IS_STRING;
+			Z_STRVAL_P(key) = string_key;
+			Z_STRLEN_P(key) = strlen(string_key);
 		}
 		
 		/* Call the userland function */
@@ -1038,7 +1035,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata)
 
 		/* Clean up the key */
 		if (zend_hash_get_current_key_type(target_hash) == HASH_KEY_IS_STRING)
-			efree(key->value.str.val);
+			efree(Z_STRVAL_P(key));
 		
 		zend_hash_move_forward(target_hash);
     }
@@ -1102,12 +1099,12 @@ PHP_FUNCTION(in_array)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*value)->type == IS_ARRAY || (*value)->type == IS_OBJECT) {
+	if (Z_TYPE_PP(value) == IS_ARRAY || Z_TYPE_PP(value) == IS_OBJECT) {
 		php_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
 		RETURN_FALSE;
 	}
 	
-	if ((*array)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(array) != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
 		RETURN_FALSE;
 	}
@@ -1183,7 +1180,7 @@ PHP_FUNCTION(extract)
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(etype);
-			extype = (*etype)->value.lval;
+			extype = Z_LVAL_PP(etype);
 			if (extype > EXTR_SKIP && extype <= EXTR_PREFIX_ALL) {
 				WRONG_PARAM_COUNT;
 			}
@@ -1194,7 +1191,7 @@ PHP_FUNCTION(extract)
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(etype);
-			extype = (*etype)->value.lval;
+			extype = Z_LVAL_PP(etype);
 			convert_to_string_ex(prefix);
 			break;
 
@@ -1208,15 +1205,15 @@ PHP_FUNCTION(extract)
 		RETURN_FALSE;
 	}
 	
-	if ((*var_array)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(var_array) != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype in call to extract()");
 		RETURN_FALSE;
 	}
 		
-	zend_hash_internal_pointer_reset((*var_array)->value.ht);
-	while(zend_hash_get_current_data((*var_array)->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(var_array));
+	while(zend_hash_get_current_data(Z_ARRVAL_PP(var_array), (void **)&entry) == SUCCESS) {
 
-		if (zend_hash_get_current_key((*var_array)->value.ht, &varname, &lkey) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key(Z_ARRVAL_PP(var_array), &varname, &lkey) == HASH_KEY_IS_STRING) {
 
 			if (_valid_var_name(varname)) {
 				finalname = NULL;
@@ -1234,8 +1231,8 @@ PHP_FUNCTION(extract)
 
 					case EXTR_PREFIX_ALL:
 						if (!finalname) {
-							finalname = emalloc(strlen(varname) + (*prefix)->value.str.len + 2);
-							strcpy(finalname, (*prefix)->value.str.val);
+							finalname = emalloc(strlen(varname) + Z_STRLEN_PP(prefix) + 2);
+							strcpy(finalname, Z_STRVAL_PP(prefix));
 							strcat(finalname, "_");
 							strcat(finalname, varname);
 						}
@@ -1260,7 +1257,7 @@ PHP_FUNCTION(extract)
 			efree(varname);
 		}
 
-		zend_hash_move_forward((*var_array)->value.ht);
+		zend_hash_move_forward(Z_ARRVAL_PP(var_array));
 	}
 }
 /* }}} */
@@ -1271,27 +1268,27 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 {
 	zval **value_ptr, *value, *data;
 	
-	if (entry->type == IS_STRING) {
-		if (zend_hash_find(eg_active_symbol_table, entry->value.str.val,
-						   entry->value.str.len+1, (void **)&value_ptr) != FAILURE) {
+	if (Z_TYPE_P(entry) == IS_STRING) {
+		if (zend_hash_find(eg_active_symbol_table, Z_STRVAL_P(entry),
+						   Z_STRLEN_P(entry)+1, (void **)&value_ptr) != FAILURE) {
 			value = *value_ptr;
 			ALLOC_ZVAL(data);
 			*data = *value;
 			zval_copy_ctor(data);
 			INIT_PZVAL(data);
 			
-			zend_hash_update(return_value->value.ht, entry->value.str.val,
-							 entry->value.str.len+1, &data, sizeof(zval *), NULL);
+			zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(entry),
+							 Z_STRLEN_P(entry)+1, &data, sizeof(zval *), NULL);
 		}
 	}
-	else if (entry->type == IS_ARRAY) {
-		zend_hash_internal_pointer_reset(entry->value.ht);
+	else if (Z_TYPE_P(entry) == IS_ARRAY) {
+		zend_hash_internal_pointer_reset(Z_ARRVAL_P(entry));
 
-		while(zend_hash_get_current_data(entry->value.ht, (void**)&value_ptr) == SUCCESS) {
+		while(zend_hash_get_current_data(Z_ARRVAL_P(entry), (void**)&value_ptr) == SUCCESS) {
 			value = *value_ptr;
 
 			_compact_var(eg_active_symbol_table, return_value, value);
-			zend_hash_move_forward(entry->value.ht);
+			zend_hash_move_forward(Z_ARRVAL_P(entry));
 		}
 	}
 }
@@ -1335,8 +1332,8 @@ PHP_FUNCTION(range)
 	}
 	convert_to_long_ex(zlow);
 	convert_to_long_ex(zhigh);
-	low = (*zlow)->value.lval;
-	high = (*zhigh)->value.lval;
+	low = Z_LVAL_PP(zlow);
+	high = Z_LVAL_PP(zhigh);
 
     /* allocate an array for return */
     if (array_init(return_value) == FAILURE) {
@@ -1375,11 +1372,11 @@ PHP_FUNCTION(shuffle)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if ((*array)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(array) != IS_ARRAY) {
 		php_error(E_WARNING, "Wrong datatype in shuffle() call");
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort((*array)->value.ht, (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
+	if (zend_hash_sort(Z_ARRVAL_PP(array), (sort_func_t)php_mergesort, array_data_shuffle, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1502,7 +1499,7 @@ PHP_FUNCTION(array_push)
 
 	/* Get first argument and check that it's an array */	
 	stack = *args[0];
-	if (stack->type != IS_ARRAY) {
+	if (Z_TYPE_P(stack) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_push() needs to be an array");
 		RETURN_FALSE;
 	}
@@ -1513,12 +1510,12 @@ PHP_FUNCTION(array_push)
 		new_var = *args[i];
 		new_var->refcount++;
 	
-		zend_hash_next_index_insert(stack->value.ht, &new_var, sizeof(zval *), NULL);
+		zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var, sizeof(zval *), NULL);
 	}
 	
 	/* Clean up and return the number of values in the stack */
 	efree(args);
-	RETVAL_LONG(zend_hash_num_elements(stack->value.ht));
+	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
 
@@ -1535,30 +1532,30 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*stack)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(stack) != IS_ARRAY) {
 		php_error(E_WARNING, "The argument needs to be an array");
 		return;
 	}
 
-	if (zend_hash_num_elements((*stack)->value.ht) == 0) {
+	if (zend_hash_num_elements(Z_ARRVAL_PP(stack)) == 0) {
 		return;
 	}
 		
 	/* Get the first or last value and copy it into the return value */
 	if (off_the_end)
-		zend_hash_internal_pointer_end((*stack)->value.ht);
+		zend_hash_internal_pointer_end(Z_ARRVAL_PP(stack));
 	else
-		zend_hash_internal_pointer_reset((*stack)->value.ht);
-	zend_hash_get_current_data((*stack)->value.ht, (void **)&val);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(stack));
+	zend_hash_get_current_data(Z_ARRVAL_PP(stack), (void **)&val);
 	*return_value = **val;
 	zval_copy_ctor(return_value);
 	INIT_PZVAL(return_value);
 	
 	/* Delete the first or last value */
-	new_hash = php_splice((*stack)->value.ht, (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
-	zend_hash_destroy((*stack)->value.ht);
-	efree((*stack)->value.ht);
-	(*stack)->value.ht = new_hash;
+	new_hash = php_splice(Z_ARRVAL_PP(stack), (off_the_end) ? -1 : 0, 1, NULL, 0, NULL);
+	zend_hash_destroy(Z_ARRVAL_PP(stack));
+	efree(Z_ARRVAL_PP(stack));
+	Z_ARRVAL_PP(stack) = new_hash;
 }
 /* }}} */
 
@@ -1606,21 +1603,21 @@ PHP_FUNCTION(array_unshift)
 	
 	/* Get first argument and check that it's an array */
 	stack = *args[0];
-	if (stack->type != IS_ARRAY) {
+	if (Z_TYPE_P(stack) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_unshift() needs to be an array");
 		RETURN_FALSE;
 	}
 
 	/* Use splice to insert the elements at the beginning.  Destroy old
 	   hashtable and replace it with new one */
-	new_hash = php_splice(stack->value.ht, 0, 0, &args[1], argc-1, NULL);
-	zend_hash_destroy(stack->value.ht);
-	efree(stack->value.ht);
-	stack->value.ht = new_hash;
+	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[1], argc-1, NULL);
+	zend_hash_destroy(Z_ARRVAL_P(stack));
+	efree(Z_ARRVAL_P(stack));
+	Z_ARRVAL_P(stack) = new_hash;
 
 	/* Clean up and return the number of elements in the stack */
 	efree(args);
-	RETVAL_LONG(zend_hash_num_elements(stack->value.ht));
+	RETVAL_LONG(zend_hash_num_elements(Z_ARRVAL_P(stack)));
 }
 /* }}} */
 
@@ -1655,7 +1652,7 @@ PHP_FUNCTION(array_splice)
 
 	/* Get first argument and check that it's an array */
 	array = *args[0];
-	if (array->type != IS_ARRAY) {
+	if (Z_TYPE_P(array) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_splice() should be an array");
 		efree(args);
 		return;
@@ -1664,21 +1661,21 @@ PHP_FUNCTION(array_splice)
 	/* Get the next two arguments.  If length is omitted,
 	   it's assumed to be until the end of the array */
 	convert_to_long_ex(args[1]);
-	offset = (*args[1])->value.lval;
+	offset = Z_LVAL_PP(args[1]);
 	if (argc > 2) {
 		convert_to_long_ex(args[2]);
-		length = (*args[2])->value.lval;
+		length = Z_LVAL_PP(args[2]);
 	} else
-		length = zend_hash_num_elements(array->value.ht);
+		length = zend_hash_num_elements(Z_ARRVAL_P(array));
 
 	if (argc == 4) {
 		/* Make sure the last argument, if passed, is an array */
 		convert_to_array_ex(args[3]);
 		
 		/* Create the array of replacement elements */
-		repl_num = zend_hash_num_elements((*args[3])->value.ht);
+		repl_num = zend_hash_num_elements(Z_ARRVAL_PP(args[3]));
 		repl = (zval ***)emalloc(repl_num * sizeof(zval **));
-		for (p=(*args[3])->value.ht->pListHead, i=0; p; p=p->pListNext, i++) {
+		for (p=Z_ARRVAL_PP(args[3])->pListHead, i=0; p; p=p->pListNext, i++) {
 			repl[i] = ((zval **)p->pData);
 		}
 	}
@@ -1687,14 +1684,14 @@ PHP_FUNCTION(array_splice)
 	array_init(return_value);
 	
 	/* Perform splice */
-	new_hash = php_splice(array->value.ht, offset, length,
+	new_hash = php_splice(Z_ARRVAL_P(array), offset, length,
 							repl, repl_num,
-							&return_value->value.ht);
+							&Z_ARRVAL_P(return_value));
 	
 	/* Replace input array's hashtable with the new one */
-	zend_hash_destroy(array->value.ht);
-	efree(array->value.ht);
-	array->value.ht = new_hash;
+	zend_hash_destroy(Z_ARRVAL_P(array));
+	efree(Z_ARRVAL_P(array));
+	Z_ARRVAL_P(array) = new_hash;
 	
 	/* Clean up */
 	if (argc == 4)
@@ -1728,7 +1725,7 @@ PHP_FUNCTION(array_slice)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_slice() should be an array");
 		return;
 	}
@@ -1737,18 +1734,18 @@ PHP_FUNCTION(array_slice)
 	   we want all entries from offset to the end if length
 	   is not passed */
 	convert_to_long_ex(offset);
-	offset_val = (*offset)->value.lval;
+	offset_val = Z_LVAL_PP(offset);
 	if (argc == 3) {
 		convert_to_long_ex(length);
-		length_val = (*length)->value.lval;
+		length_val = Z_LVAL_PP(length);
 	} else
-		length_val = zend_hash_num_elements((*input)->value.ht);
+		length_val = zend_hash_num_elements(Z_ARRVAL_PP(input));
 	
 	/* Initialize returned array */
 	array_init(return_value);
 	
 	/* Get number of entries in the input hash */
-	num_in = zend_hash_num_elements((*input)->value.ht);
+	num_in = zend_hash_num_elements(Z_ARRVAL_PP(input));
 	
 	/* Clamp the offset.. */
 	if (offset_val > num_in)
@@ -1767,33 +1764,33 @@ PHP_FUNCTION(array_slice)
 	
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
-	zend_hash_internal_pointer_reset((*input)->value.ht);
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
 	while(pos < offset_val &&
-		  zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+		  zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		pos++;
-		zend_hash_move_forward((*input)->value.ht);
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
 	}
 	
 	/* Copy elements from input array to the one that's returned */
 	while(pos < offset_val+length_val &&
-		  zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+		  zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		
 		(*entry)->refcount++;
 
-		switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
+		switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
 			case HASH_KEY_IS_STRING:
-				zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, strlen(string_key)+1,
 								 entry, sizeof(zval *), NULL);
 				efree(string_key);
 				break;
 	
 			case HASH_KEY_IS_LONG:
-				zend_hash_next_index_insert(return_value->value.ht,
+				zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
 											entry, sizeof(zval *), NULL);
 				break;
 		}
 		pos++;
-		zend_hash_move_forward((*input)->value.ht);
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
 	}
 }
 /* }}} */
@@ -1905,7 +1902,7 @@ PHP_FUNCTION(array_keys)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_keys() should be an array");
 		return;
 	}
@@ -1915,8 +1912,8 @@ PHP_FUNCTION(array_keys)
 	add_key = 1;
 	
 	/* Go through input array and add keys to the return array */
-	zend_hash_internal_pointer_reset((*input)->value.ht);
-	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
+	while(zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		if (search_value != NULL) {
      		is_equal_function(&res, *search_value, *entry);
 			add_key = zval_is_true(&res);
@@ -1925,25 +1922,25 @@ PHP_FUNCTION(array_keys)
 		if (add_key) {	
 			MAKE_STD_ZVAL(new_val);
 
-			switch (zend_hash_get_current_key((*input)->value.ht, &string_key, &num_key)) {
+			switch (zend_hash_get_current_key(Z_ARRVAL_PP(input), &string_key, &num_key)) {
 				case HASH_KEY_IS_STRING:
-					new_val->type = IS_STRING;
-					new_val->value.str.val = string_key;
-					new_val->value.str.len = strlen(string_key);
-					zend_hash_next_index_insert(return_value->value.ht, &new_val,
+					Z_TYPE_P(new_val) = IS_STRING;
+					Z_STRVAL_P(new_val) = string_key;
+					Z_STRLEN_P(new_val) = strlen(string_key);
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
 												sizeof(zval *), NULL);
 					break;
 
 				case HASH_KEY_IS_LONG:
-					new_val->type = IS_LONG;
-					new_val->value.lval = num_key;
-					zend_hash_next_index_insert(return_value->value.ht, &new_val,
+					Z_TYPE_P(new_val) = IS_LONG;
+					Z_LVAL_P(new_val) = num_key;
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val,
 												sizeof(zval *), NULL);
 					break;
 			}
 		}
 
-		zend_hash_move_forward((*input)->value.ht);
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
 	}
 }
 /* }}} */
@@ -1961,7 +1958,7 @@ PHP_FUNCTION(array_values)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "Argument to array_values() should be an array");
 		return;
 	}
@@ -1970,14 +1967,14 @@ PHP_FUNCTION(array_values)
 	array_init(return_value);
 
 	/* Go through input array and add values to the return array */	
-	zend_hash_internal_pointer_reset((*input)->value.ht);
-	while(zend_hash_get_current_data((*input)->value.ht, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset(Z_ARRVAL_PP(input));
+	while(zend_hash_get_current_data(Z_ARRVAL_PP(input), (void **)&entry) == SUCCESS) {
 		
 		(*entry)->refcount++;
-		zend_hash_next_index_insert(return_value->value.ht, entry,
+		zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry,
 											sizeof(zval *), NULL);
 
-		zend_hash_move_forward((*input)->value.ht);
+		zend_hash_move_forward(Z_ARRVAL_PP(input));
 	}
 }
 /* }}} */
@@ -1997,7 +1994,7 @@ PHP_FUNCTION(array_count_values)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "Argument to array_count_values() should be an array");
 		return;
 	}
@@ -2006,33 +2003,33 @@ PHP_FUNCTION(array_count_values)
 	array_init(return_value);
 
 	/* Go through input array and add values to the return array */	
-	myht = (*input)->value.ht;
+	myht = Z_ARRVAL_PP(input);
 	zend_hash_internal_pointer_reset(myht);
 	while (zend_hash_get_current_data(myht, (void **)&entry) == SUCCESS) {
-		if ((*entry)->type == IS_LONG) {
-			if (zend_hash_index_find(return_value->value.ht, 
-									 (*entry)->value.lval, 
+		if (Z_TYPE_PP(entry) == IS_LONG) {
+			if (zend_hash_index_find(Z_ARRVAL_P(return_value), 
+									 Z_LVAL_PP(entry), 
 									 (void**)&tmp) == FAILURE) {
 				zval *data;
 				MAKE_STD_ZVAL(data);
-				data->type = IS_LONG;
-				data->value.lval = 1;
-				zend_hash_index_update(return_value->value.ht,(*entry)->value.lval, &data, sizeof(data), NULL);
+				Z_TYPE_P(data) = IS_LONG;
+				Z_LVAL_P(data) = 1;
+				zend_hash_index_update(Z_ARRVAL_P(return_value),Z_LVAL_PP(entry), &data, sizeof(data), NULL);
 			} else {
-				(*tmp)->value.lval++;
+				Z_LVAL_PP(tmp)++;
 			}
-		} else if ((*entry)->type == IS_STRING) {
-			if (zend_hash_find(return_value->value.ht, 
-							   (*entry)->value.str.val, 
-							   (*entry)->value.str.len+1, 
+		} else if (Z_TYPE_PP(entry) == IS_STRING) {
+			if (zend_hash_find(Z_ARRVAL_P(return_value), 
+							   Z_STRVAL_PP(entry), 
+							   Z_STRLEN_PP(entry)+1, 
 							   (void**)&tmp) == FAILURE) {
 				zval *data;
 				MAKE_STD_ZVAL(data);
-				data->type = IS_LONG;
-				data->value.lval = 1;
-				zend_hash_update(return_value->value.ht,(*entry)->value.str.val,(*entry)->value.str.len + 1, &data, sizeof(data), NULL);
+				Z_TYPE_P(data) = IS_LONG;
+				Z_LVAL_P(data) = 1;
+				zend_hash_update(Z_ARRVAL_P(return_value),Z_STRVAL_PP(entry),Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
 			} else {
-				(*tmp)->value.lval++;
+				Z_LVAL_PP(tmp)++;
 			}
 		} else {
 			php_error(E_WARNING, "Can only count STRING and INTEGER values!");
@@ -2122,7 +2119,7 @@ PHP_FUNCTION(array_pad)
 	}
 	
 	/* Make sure arguments are of the proper type */
-	if ((*input)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(input) != IS_ARRAY) {
 		php_error(E_WARNING, "Argument to %s() should be an array",
 				  get_active_function_name());
 		return;
@@ -2130,8 +2127,8 @@ PHP_FUNCTION(array_pad)
 	convert_to_long_ex(pad_size);
 	
 	/* Do some initial calculations */
-	input_size = zend_hash_num_elements((*input)->value.ht);
-	pad_size_abs = abs((*pad_size)->value.lval);
+	input_size = zend_hash_num_elements(Z_ARRVAL_PP(input));
+	pad_size_abs = abs(Z_LVAL_PP(pad_size));
 	do_pad = (input_size >= pad_size_abs) ? 0 : 1;
 	
 	/* Copy the original array */
@@ -2149,16 +2146,16 @@ PHP_FUNCTION(array_pad)
 		pads[i] = pad_value;
 	
 	/* Pad on the right or on the left */
-	if ((*pad_size)->value.lval > 0)
-		new_hash = php_splice(return_value->value.ht, input_size, 0, pads, num_pads, NULL);
+	if (Z_LVAL_PP(pad_size) > 0)
+		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
 	else
-		new_hash = php_splice(return_value->value.ht, 0, 0, pads, num_pads, NULL);
+		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
 
 	
 	/* Copy the result hash into return value */
-	zend_hash_destroy(return_value->value.ht);
-	efree(return_value->value.ht);
-	return_value->value.ht = new_hash;
+	zend_hash_destroy(Z_ARRVAL_P(return_value));
+	efree(Z_ARRVAL_P(return_value));
+	Z_ARRVAL_P(return_value) = new_hash;
 	
 	/* Clean up */
 	efree(pads);
@@ -2191,20 +2188,20 @@ PHP_FUNCTION(array_flip)
 		MAKE_STD_ZVAL(data);
 		switch (zend_hash_get_current_key(target_hash, &string_key, &num_key)) {
 			case HASH_KEY_IS_STRING:
-				data->value.str.val = string_key;
-				data->value.str.len = strlen(string_key);
-				data->type = IS_STRING;
+				Z_STRVAL_P(data) = string_key;
+				Z_STRLEN_P(data) = strlen(string_key);
+				Z_TYPE_P(data) = IS_STRING;
 				break;
 			case HASH_KEY_IS_LONG:
-				data->type = IS_LONG;
-				data->value.lval = num_key;
+				Z_TYPE_P(data) = IS_LONG;
+				Z_LVAL_P(data) = num_key;
 				break;
 		}
 
-		if ((*entry)->type == IS_LONG) {
-			zend_hash_index_update(return_value->value.ht,(*entry)->value.lval, &data, sizeof(data), NULL);
-		} else if ((*entry)->type == IS_STRING) {
-			zend_hash_update(return_value->value.ht,(*entry)->value.str.val,(*entry)->value.str.len + 1, &data, sizeof(data), NULL);
+		if (Z_TYPE_PP(entry) == IS_LONG) {
+			zend_hash_index_update(Z_ARRVAL_P(return_value),Z_LVAL_PP(entry), &data, sizeof(data), NULL);
+		} else if (Z_TYPE_PP(entry) == IS_STRING) {
+			zend_hash_update(Z_ARRVAL_P(return_value),Z_STRVAL_PP(entry),Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
 		} else {
 			zval_dtor(data);
 			php_error(E_WARNING, "Can only flip STRING and INTEGER values!");
@@ -2259,9 +2256,9 @@ PHP_FUNCTION(array_unique)
 		} else {
 			p = *cmpdata;
 			if (p->nKeyLength)
-			        zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+			        zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 			else
-			        zend_hash_index_del(return_value->value.ht, p->h);  
+			        zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 		}
 	}
 	pefree(arTmp, target_hash->persistent);
@@ -2293,7 +2290,7 @@ PHP_FUNCTION(array_intersect)
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
     set_compare_func(SORT_REGULAR);
 	for (i=0; i<argc; i++) {
-		if ((*args[i])->type != IS_ARRAY) {
+		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
 			argc = i; /* only free up to i-1 */
 			goto out;
@@ -2327,9 +2324,9 @@ PHP_FUNCTION(array_intersect)
 					if (!p)
 						goto out;
 					if (p->nKeyLength)
-						zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+						zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 					else
-						zend_hash_index_del(return_value->value.ht, p->h);  
+						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				}
 			}
 			if (c)
@@ -2342,9 +2339,9 @@ PHP_FUNCTION(array_intersect)
 			for (;;) {
 				p = *ptrs[0];
 				if (p->nKeyLength)
-					zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 				else
-					zend_hash_index_del(return_value->value.ht, p->h);  
+					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
 				if (0 <= array_type_data_compare(ptrs[0], ptrs[i]))
@@ -2398,7 +2395,7 @@ PHP_FUNCTION(array_diff)
 	ptrs = (Bucket ***)emalloc(argc * sizeof(Bucket **));
     set_compare_func(SORT_REGULAR);
 	for (i=0; i<argc; i++) {
-		if ((*args[i])->type != IS_ARRAY) {
+		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
 			php_error(E_WARNING, "Argument #%d to array_diff() is not an array", i+1);
 			argc = i; /* only free up to i-1 */
 			goto out;
@@ -2438,9 +2435,9 @@ PHP_FUNCTION(array_diff)
 			for (;;) {
 				p = *ptrs[0];
 				if (p->nKeyLength)
-					zend_hash_del(return_value->value.ht, p->arKey, p->nKeyLength);  
+					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
 				else
-					zend_hash_index_del(return_value->value.ht, p->h);  
+					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
 				if (array_type_data_compare(ptrs[0]-1, ptrs[0]))
@@ -2486,7 +2483,7 @@ int multisort_compare(const void *a, const void *b)
 		set_compare_func(ARRAYG(multisort_flags)[MULTISORT_TYPE][r]);
 
 		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData));
-		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * temp.value.lval;
+		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
 		if (result != 0)
 			return result;
 		r++;
@@ -2650,7 +2647,7 @@ PHP_FUNCTION(array_multisort)
 	   taken from zend_hash_sort() function. */
 	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < num_arrays; i++) {
-		hash = (*arrays[i])->value.ht;
+		hash = Z_ARRVAL_PP(arrays[i]);
 		hash->pListHead = indirect[0][i];;
 		hash->pListTail = NULL;
 		hash->pInternalPointer = hash->pListHead;

@@ -111,7 +111,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	}
 	buf[0] = '\0';
 	if (type==2) {
-		if (array->type != IS_ARRAY) {
+		if (Z_TYPE_P(array) != IS_ARRAY) {
 			pval_destructor(array);
 			array_init(array);
 		}
@@ -209,13 +209,13 @@ PHP_FUNCTION(exec)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(0, (*arg1)->value.str.val, NULL,return_value);
+			ret = _Exec(0, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"Array argument to exec() not passed by reference");
 			}
-			ret = _Exec(2, (*arg1)->value.str.val,*arg2,return_value);
+			ret = _Exec(2, Z_STRVAL_PP(arg1),*arg2,return_value);
 			break;
 		case 3:
 			if (!ParameterPassedByReference(ht,2)) {
@@ -224,9 +224,9 @@ PHP_FUNCTION(exec)
 			if (!ParameterPassedByReference(ht,3)) {
 				php_error(E_WARNING,"return_status argument to exec() not passed by reference");
 			}
-			ret = _Exec(2,(*arg1)->value.str.val,*arg2,return_value);
-			(*arg3)->type = IS_LONG;
-			(*arg3)->value.lval=ret;
+			ret = _Exec(2,Z_STRVAL_PP(arg1),*arg2,return_value);
+			Z_TYPE_PP(arg3) = IS_LONG;
+			Z_LVAL_PP(arg3)=ret;
 			break;
 	}
 }
@@ -246,15 +246,15 @@ PHP_FUNCTION(system)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(1, (*arg1)->value.str.val, NULL,return_value);
+			ret = _Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(1, (*arg1)->value.str.val, NULL,return_value);
-			(*arg2)->type = IS_LONG;
-			(*arg2)->value.lval=ret;
+			ret = _Exec(1, Z_STRVAL_PP(arg1), NULL,return_value);
+			Z_TYPE_PP(arg2) = IS_LONG;
+			Z_LVAL_PP(arg2)=ret;
 			break;
 	}
 }
@@ -273,15 +273,15 @@ PHP_FUNCTION(passthru)
 	}
 	switch (arg_count) {
 		case 1:
-			ret = _Exec(3, (*arg1)->value.str.val, NULL,return_value);
+			ret = _Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
 			break;
 		case 2:
 			if (!ParameterPassedByReference(ht,2)) {
 				php_error(E_WARNING,"return_status argument to system() not passed by reference");
 			}
-			ret = _Exec(3, (*arg1)->value.str.val, NULL,return_value);
-			(*arg2)->type = IS_LONG;
-			(*arg2)->value.lval=ret;
+			ret = _Exec(3, Z_STRVAL_PP(arg1), NULL,return_value);
+			Z_TYPE_PP(arg2) = IS_LONG;
+			Z_LVAL_PP(arg2)=ret;
 			break;
 	}
 }
@@ -363,8 +363,8 @@ PHP_FUNCTION(escapeshellcmd)
 	}
 	
 	convert_to_string_ex(arg1);
-	if ((*arg1)->value.str.len) {
-		cmd = php_escape_shell_cmd((*arg1)->value.str.val);
+	if (Z_STRLEN_PP(arg1)) {
+		cmd = php_escape_shell_cmd(Z_STRVAL_PP(arg1));
 		RETVAL_STRING(cmd, 1);
 		efree(cmd);
 	}
@@ -383,8 +383,8 @@ PHP_FUNCTION(escapeshellarg)
 	}
 	
 	convert_to_string_ex(arg1);
-	if ((*arg1)->value.str.len) {
-		cmd = php_escape_shell_arg((*arg1)->value.str.val);
+	if (Z_STRLEN_PP(arg1)) {
+		cmd = php_escape_shell_arg(Z_STRVAL_PP(arg1));
 		RETVAL_STRING(cmd, 1);
 		efree(cmd);
 	}
@@ -398,6 +398,7 @@ PHP_FUNCTION(shell_exec)
 	FILE *in;
 	int readbytes,total_readbytes=0,allocated_space;
 	pval **cmd;
+	char *ret;
 	PLS_FETCH();
 
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&cmd)==FAILURE) {
@@ -411,29 +412,27 @@ PHP_FUNCTION(shell_exec)
 
 	convert_to_string_ex(cmd);
 #ifdef PHP_WIN32
-	if ((in=V_POPEN((*cmd)->value.str.val,"rt"))==NULL) {
+	if ((in=V_POPEN(Z_STRVAL_PP(cmd),"rt"))==NULL) {
 #else
-	if ((in=V_POPEN((*cmd)->value.str.val,"r"))==NULL) {
+	if ((in=V_POPEN(Z_STRVAL_PP(cmd),"r"))==NULL) {
 #endif
-		php_error(E_WARNING,"Unable to execute '%s'",(*cmd)->value.str.val);
+		php_error(E_WARNING,"Unable to execute '%s'",Z_STRVAL_PP(cmd));
 	}
 	allocated_space = EXEC_INPUT_BUF;
-	return_value->value.str.val = (char *) emalloc(allocated_space);
+	ret = (char *) emalloc(allocated_space);
 	while (1) {
-		readbytes = fread(return_value->value.str.val+total_readbytes,1,EXEC_INPUT_BUF,in);
+		readbytes = fread(ret+total_readbytes,1,EXEC_INPUT_BUF,in);
 		if (readbytes<=0) {
 			break;
 		}
 		total_readbytes += readbytes;
 		allocated_space = total_readbytes+EXEC_INPUT_BUF;
-		return_value->value.str.val = (char *) erealloc(return_value->value.str.val,allocated_space);
+		ret = (char *) erealloc(ret,allocated_space);
 	}
 	pclose(in);
-		
-	return_value->value.str.val = erealloc(return_value->value.str.val,total_readbytes+1);
-	return_value->value.str.val[total_readbytes]=0;
-	return_value->value.str.len = total_readbytes;
-	return_value->type = IS_STRING;
+	
+	RETVAL_STRINGL(ret, total_readbytes, 0);
+	Z_STRVAL_P(return_value)[total_readbytes] = '\0';	
 }
 /* }}} */
 

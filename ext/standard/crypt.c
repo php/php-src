@@ -169,10 +169,7 @@ PHP_FUNCTION(crypt)
 #endif
 	}
 
-	return_value->value.str.val = (char *) crypt(Z_STRVAL_PP(arg1), salt);
-	return_value->value.str.len = strlen(return_value->value.str.val);
-	return_value->type = IS_STRING;
-	pval_copy_constructor(return_value);
+	RETVAL_STRING(crypt(Z_STRVAL_PP(arg1), salt), 1);
 }
 /* }}} */
 #endif

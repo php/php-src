@@ -62,9 +62,7 @@ PHP_FUNCTION(gethostbyaddr)
 	}
 	convert_to_string_ex(arg);
 
-	return_value->value.str.val = php_gethostbyaddr((*arg)->value.str.val);
-	return_value->value.str.len = strlen(return_value->value.str.val);
-	return_value->type = IS_STRING;
+	RETVAL_STRING(php_gethostbyaddr(Z_STRVAL_PP(arg)), 0);
 }
 /* }}} */
 
@@ -102,9 +100,7 @@ PHP_FUNCTION(gethostbyname)
 	}
 	convert_to_string_ex(arg);
 
-	return_value->value.str.val = php_gethostbyname((*arg)->value.str.val);
-	return_value->value.str.len = strlen(return_value->value.str.val);
-	return_value->type = IS_STRING;
+	RETVAL_STRING(php_gethostbyname(Z_STRVAL_PP(arg)), 0);
 }
 /* }}} */
 
@@ -126,10 +122,10 @@ PHP_FUNCTION(gethostbynamel)
 		RETURN_FALSE;
 	}
 
-	hp = gethostbyname((*arg)->value.str.val);
+	hp = gethostbyname(Z_STRVAL_PP(arg));
 	if (hp == NULL || hp->h_addr_list == NULL) {
 #if PHP_DEBUG
-		php_error(E_WARNING, "Unable to resolve %s\n", (*arg)->value.str.val);
+		php_error(E_WARNING, "Unable to resolve %s\n", Z_STRVAL_PP(arg));
 #endif
 		return;
 	}
@@ -186,22 +182,22 @@ PHP_FUNCTION(checkdnsrr)
 		}
 		convert_to_string_ex(arg1);
 		convert_to_string_ex(arg2);
-		if ( !strcasecmp("A",(*arg2)->value.str.val) ) type = T_A;
-		else if ( !strcasecmp("NS",(*arg2)->value.str.val) ) type = T_NS;
-		else if ( !strcasecmp("MX",(*arg2)->value.str.val) ) type = T_MX;
-		else if ( !strcasecmp("PTR",(*arg2)->value.str.val) ) type = T_PTR;
-		else if ( !strcasecmp("ANY",(*arg2)->value.str.val) ) type = T_ANY;
-		else if ( !strcasecmp("SOA",(*arg2)->value.str.val) ) type = T_SOA;
-		else if ( !strcasecmp("CNAME",(*arg2)->value.str.val) ) type = T_CNAME;
+		if ( !strcasecmp("A",Z_STRVAL_PP(arg2)) ) type = T_A;
+		else if ( !strcasecmp("NS",Z_STRVAL_PP(arg2)) ) type = T_NS;
+		else if ( !strcasecmp("MX",Z_STRVAL_PP(arg2)) ) type = T_MX;
+		else if ( !strcasecmp("PTR",Z_STRVAL_PP(arg2)) ) type = T_PTR;
+		else if ( !strcasecmp("ANY",Z_STRVAL_PP(arg2)) ) type = T_ANY;
+		else if ( !strcasecmp("SOA",Z_STRVAL_PP(arg2)) ) type = T_SOA;
+		else if ( !strcasecmp("CNAME",Z_STRVAL_PP(arg2)) ) type = T_CNAME;
 		else {
-			php_error(E_WARNING,"Type '%s' not supported",(*arg2)->value.str.val);
+			php_error(E_WARNING,"Type '%s' not supported",Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
 		break;
 	default:
 		WRONG_PARAM_COUNT;
 	}
-	i = res_search((*arg1)->value.str.val,C_IN,type,ans,sizeof(ans));
+	i = res_search(Z_STRVAL_PP(arg1),C_IN,type,ans,sizeof(ans));
 	if ( i < 0 ) {
 		RETURN_FALSE;
 	}
@@ -270,7 +266,7 @@ PHP_FUNCTION(getmxrr)
     }
 
 	/* Go! */
-	i = res_search(host->value.str.val,C_IN,T_MX,(u_char *)&ans,sizeof(ans));
+	i = res_search(Z_STRVAL_P(host),C_IN,T_MX,(u_char *)&ans,sizeof(ans));
 	if ( i < 0 ) {
 		RETURN_FALSE;
 	}
