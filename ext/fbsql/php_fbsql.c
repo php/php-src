@@ -250,19 +250,6 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
 		if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
 		if (result->list)        fbcplRelease(result->list);
 		if (result->array)       fbaRelease(result->array);
-		if (result->link)
-		{
-		}
-		result->link        = 0;
-		result->fetchHandle = NULL;
-		result->metaData    = NULL;
-		result->rowHandler  = NULL;
-		result->batchSize   = 0;
-		result->rowCount    = -1;
-		result->columnIndex = 0;
-		result->row         = NULL;
-		result->array       = NULL;
-		result->list        = NULL;
 		efree(result);
 	}
 }
@@ -1498,8 +1485,9 @@ int mdOk(PHPFBLink* link, FBCMetaData* md)
 			else
 				php_error(E_WARNING,"No message");
 		}
-		link->errorText = emg;
+		link->errorText = estrdup(emg);
 		link->errorNo  = 1;
+		free(emg);
 		fbcemdRelease(emd);
 		result = 0;
 	}
@@ -1510,13 +1498,20 @@ static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 {
 	PHPFBResult*  result = NULL;
 	FBCMetaData*   md, *meta;
-	int            ok;
 	char*          tp;
 	char*          fh; 
 	unsigned int   sR = 1, cR = 0;
 	FBSQLLS_FETCH();
 
 	meta     = fbcdcExecuteDirectSQL(link->connection, sql);
+
+	if (!mdOk(link, meta))
+	{
+		return_value->value.lval = 0;
+		return_value->type       = IS_LONG;
+		fbcmdRelease(meta);
+		return 0;
+	}
 
 	if (fbcmdHasMetaDataArray(meta)) {
 		sR = fbcmdMetaDataArrayCount(meta);
@@ -1525,25 +1520,22 @@ static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 	else
 		md = meta;
 
-	ok     = mdOk(link, md);
 	tp     = fbcmdStatementType(md);
 
-
-	if (!ok)
-	{
-		return_value->value.lval = 0;
-		return_value->type       = IS_LONG;
-	}
-	else if ((tp[0] == 'C') || (tp[0] == 'R'))
+	if ((tp[0] == 'C') || (tp[0] == 'R'))
 	{
 		return_value->value.lval = 1;
 		return_value->type       = IS_LONG;
+		fbcmdRelease(meta);
+		return 1;
 	}
 	else if (tp[0] == 'I')
 	{
 		link->insert_id = fbcmdRowIndex(md);
 		return_value->value.lval = 1;
 		return_value->type       = IS_LONG;
+		fbcmdRelease(meta);
+		return 1;
 	}
 	else if ((fh = fbcmdFetchHandle(md)) || (tp[0] == 'E'))
 	{
@@ -1583,7 +1575,6 @@ static int phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 		ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 	}
 	if (link) link->affectedRows = fbcmdRowCount(md);
-	if (result == NULL) fbcmdRelease(meta);
 	return 1;
 }
 
