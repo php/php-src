@@ -81,7 +81,7 @@ Fixed Bugs:
       </dir>
       <dir name="scripts">
         <file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
-          <replace from="@prefix@/bin" to="bin_dir" type="pear-config"/>
+          <replace from="@prefix@/bin" to="PHP_BINDIR" type="php-const"/>
           <replace from="@pear_version@" to="version" type="package-info"/>
           <replace from="@include_path@" to="php_dir" type="pear-config"/>
         </file>
