@@ -50,7 +50,7 @@ _node_as_zval(php_sxe_object *sxe, xmlNodePtr node, zval *value)
 	char *contents;
 
 	contents = xmlNodeListGetString(sxe->document, node->xmlChildrenNode, 1);
-	if (contents) {
+	if (!xmlIsBlankNode(node->xmlChildrenNode) && contents) {
 		ZVAL_STRING(value, contents, 1);
 		xmlFree(contents);
 	} else {
