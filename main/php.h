@@ -65,9 +65,11 @@ extern unsigned char second_arg_allow_ref[];
 #	else
 #	define PHPAPI __declspec(dllimport) 
 #	endif
+#define PHP_SEPARATOR '\\'
 #else
 #define PHPAPI
 #define THREAD_LS
+#define PHP_SEPARATOR '/'
 #endif
 
 #include "php_regex.h"
