@@ -4,13 +4,32 @@ AC_MSG_CHECKING(for MySQL support)
 AC_ARG_WITH(mysql,
 [  --with-mysql[=DIR]      Include MySQL support.  DIR is the MySQL base
                           install directory, defaults to searching through
-                          a number of common places for the MySQL files.],
+                          a number of common places for the MySQL files.
+			  Set DIR to "shared" to build as a dl, or "shared,DIR"
+			  to build as a dl and still specify DIR.],
 [
+  	case $withval in
+	    shared)
+		shared=yes
+		withval=yes
+		;;
+	    shared,*)
+		shared=yes
+		withval=`echo $withval | sed -e 's/^shared,//'`      
+		;;
+	    *)
+		shared=no
+		;;
+	esac
 	if test "$withval" != "no"; then
 		if test "$withval" = "yes"; then
 			if test -f /usr/include/mysql/mysql.h; then
 				MYSQL_INCDIR=/usr/include/mysql
-				MYSQL_LIBDIR=/usr/lib/mysql
+				if test -d /usr/lib/mysql; then
+					MYSQL_LIBDIR=/usr/lib/mysql
+				else
+					MYSQL_LIBDIR=/usr/lib
+				fi
 			elif test -f /usr/include/mysql.h; then
 				MYSQL_INCDIR=/usr/include
 				MYSQL_LIBDIR=/usr/lib
@@ -42,11 +61,17 @@ AC_ARG_WITH(mysql,
 		MYSQL_INCLUDE=-I$MYSQL_INCDIR
 
 		AC_DEFINE(HAVE_MYSQL)
-		AC_MSG_RESULT(yes)
-
-		AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBDIR)
-        AC_ADD_INCLUDE($MYSQL_INCDIR)
-		PHP_EXTENSION(mysql)
+                if test "$shared" = "yes"; then
+      			AC_MSG_RESULT(yes (shared))
+			MYSQL_LFLAGS="-L$MYSQL_LIBDIR"
+			MYSQL_SHARED="mysql.la"
+    		else
+   			AC_MSG_RESULT(yes (static))
+			AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBDIR)
+		        AC_ADD_INCLUDE($MYSQL_INCDIR)
+			MYSQL_STATIC="libphpext_mysql.a"
+		fi
+		PHP_EXTENSION(mysql, $shared)
 
 		dnl check for errmsg.h, which isn't installed by some versions of 3.21
 		old_CPPFLAGS="$CPPFLAGS"
@@ -60,3 +85,7 @@ AC_ARG_WITH(mysql,
 ],[
   AC_MSG_RESULT(no)
 ])
+AC_SUBST(MYSQL_STATIC)
+AC_SUBST(MYSQL_SHARED)
+AC_SUBST(MYSQL_INCLUDE)
+AC_SUBST(MYSQL_LFLAGS)
