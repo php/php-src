@@ -211,6 +211,7 @@ extern ZEND_API zend_op_array *(*zend_v_compile_files)(int type CLS_DC, int file
 void zend_activate(CLS_D ELS_DC);
 void zend_deactivate(CLS_D ELS_DC);
 void zend_activate_modules(void);
+void zend_deactivate_modules(void);
 
 
 int lex_scan(zval *zendlval CLS_DC);
