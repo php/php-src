@@ -295,9 +295,9 @@ zend_module_entry tidy_module_entry = {
 	"tidy",
 	tidy_functions,
 	PHP_MINIT(tidy),
-	PHP_MSHUTDOWN(tidy),
+	NULL,
 	PHP_RINIT(tidy),
-	PHP_RSHUTDOWN(tidy),
+	NULL,
 	PHP_MINFO(tidy),
 	PHP_TIDY_MODULE_VERSION,
 	STANDARD_MODULE_PROPERTIES
@@ -324,7 +324,7 @@ void php_tidy_free(void *buf)
 
 void php_tidy_panic(ctmbstr msg)
 {
-    TSRMLS_FETCH();
+	TSRMLS_FETCH();
 	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not allocate memory for tidy! (Reason: %s)", (char *)msg);
 }
 
@@ -334,7 +334,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 	zval conv = *value;
 
 	if (!opt) {
-        	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
 		return FAILURE;
 	}
 	
@@ -375,7 +375,7 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value TSRMLS
 				zval_copy_ctor(&conv);
 				convert_to_long(&conv);
 			}
-			if (tidyOptSetBool(doc,  tidyOptGetId(opt), Z_LVAL(conv))) {
+			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
 				return SUCCESS;
 			}
 			break;
@@ -396,9 +396,9 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TidyDoc doc;
 	TidyBuffer *errbuf;
 	zval *config;
-	
-    TIDY_SET_CONTEXT;
-    
+
+	TIDY_SET_CONTEXT;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &arg1, &arg1_len, &config, &enc, &enc_len, &use_include_path) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -428,7 +428,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	TIDY_SET_DEFAULT_CONFIG(doc);
 	
 	/* We can't use TIDY_APPLY_CONFIG_ZVAL() here, it uses RETURN_FALSE */
-	
+
 	if (ZEND_NUM_ARGS() > 1) {
 		if(Z_TYPE_P(config) == IS_ARRAY) {
 			_php_tidy_apply_config_array(doc, HASH_OF(config) TSRMLS_CC);
@@ -604,7 +604,7 @@ static zval * tidy_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	if (!object) {
 		ALLOC_ZVAL(object);
 	}
-    
+
 	Z_TYPE_P(object) = IS_OBJECT;
 	object_init_ex(object, pce);
 	object->refcount = 1;
@@ -863,7 +863,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options TSRML
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not retrieve key from option array");
 			return FAILURE;
 		}
-        
+
 		if(opt_name) {
 			_php_tidy_set_tidy_opt(doc, opt_name, *opt_val TSRMLS_CC);
 			opt_name = NULL;
@@ -899,12 +899,12 @@ static int php_tidy_parse_string(PHPTidyObj *obj, char *string, char *enc TSRMLS
 
 static void tidy_globals_ctor(void *global TSRMLS_DC)
 {
-    
+
 }
 
 static void tidy_globals_dtor(void *global TSRMLS_DC)
 {
-    
+
 }
 
 PHP_MINIT_FUNCTION(tidy)
@@ -929,12 +929,6 @@ PHP_MINIT_FUNCTION(tidy)
 	return SUCCESS;
 }
 
-
-PHP_MSHUTDOWN_FUNCTION(tidy)
-{
-	return SUCCESS;
-}
-
 PHP_RINIT_FUNCTION(tidy)
 {
 	if (INI_BOOL("tidy.clean_output") == TRUE) {
@@ -943,11 +937,6 @@ PHP_RINIT_FUNCTION(tidy)
 		}
 	}
 
-	return SUCCESS;
-}
-
-PHP_RSHUTDOWN_FUNCTION(tidy)
-{
 	return SUCCESS;
 }
 
@@ -1019,8 +1008,8 @@ PHP_FUNCTION(tidy_parse_string)
 	zval *options = NULL;
 	
 	PHPTidyObj *obj;
-    
-    TIDY_SET_CONTEXT;
+
+	TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1080,7 +1069,7 @@ PHP_FUNCTION(tidy_parse_file)
 	zval *options = NULL;
 	
 	PHPTidyObj *obj;
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
@@ -1102,7 +1091,7 @@ PHP_FUNCTION(tidy_parse_file)
 		INIT_ZVAL(*return_value);
 		RETVAL_FALSE;
 	}
-    
+
 	efree(contents);
 }
 /* }}} */
@@ -1126,7 +1115,7 @@ PHP_FUNCTION(tidy_clean_repair)
    Repair a string using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_string)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
 /* }}} */
@@ -1135,7 +1124,7 @@ PHP_FUNCTION(tidy_repair_string)
    Repair a file using an optionally provided configuration file */
 PHP_FUNCTION(tidy_repair_file)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
 /* }}} */
@@ -1159,8 +1148,8 @@ PHP_FUNCTION(tidy_diagnose)
    Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release)
 {
-    TIDY_SET_CONTEXT;
-    
+	TIDY_SET_CONTEXT;
+
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1299,7 +1288,7 @@ PHP_FUNCTION(tidy_getopt)
 	TidyOption opt;
 	TidyOptionType optt;
 	
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 
 	if (object) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &optname, &optname_len) == FAILURE) {
@@ -1314,7 +1303,7 @@ PHP_FUNCTION(tidy_getopt)
 	obj = (PHPTidyObj *) zend_object_store_get_object(object TSRMLS_CC);
 
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
-    
+
 	if (!opt) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown Tidy Configuration Option '%s'", optname);
 		RETURN_FALSE;
@@ -1356,7 +1345,7 @@ TIDY_DOC_METHOD(__construct)
 	zval *options = NULL;
 	
 	PHPTidyObj *obj;
-    TIDY_SET_CONTEXT;	
+	TIDY_SET_CONTEXT;	
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|szsb", &inputfile, &input_len,
 							  &options, &enc, &enc_len, &use_include_path) == FAILURE) {
@@ -1365,20 +1354,18 @@ TIDY_DOC_METHOD(__construct)
 	
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 	
-    if(inputfile) {
-        
-        if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
-            php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
-            return;
-        }
-        
-        TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+	if (inputfile) {
+		if (!(contents = php_tidy_file_to_mem(inputfile, use_include_path TSRMLS_CC))) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot Load '%s' into memory %s", inputfile, (use_include_path) ? "(Using include path)" : "");
+			return;
+		}
 
-    	php_tidy_parse_string(obj, contents, enc TSRMLS_CC);
-	
-    	efree(contents);
-    }
-	
+		TIDY_APPLY_CONFIG_ZVAL(obj->ptdoc->doc, options);
+
+		php_tidy_parse_string(obj, contents, enc TSRMLS_CC);
+
+		efree(contents);
+	}
 }
 
 TIDY_DOC_METHOD(parseFile)
@@ -1388,10 +1375,10 @@ TIDY_DOC_METHOD(parseFile)
 	zend_bool use_include_path = 0;
 	char *contents;
 	zval *options = NULL;
-    PHPTidyObj *obj;
-    
-    TIDY_SET_CONTEXT;
-	
+	PHPTidyObj *obj;
+
+	TIDY_SET_CONTEXT;
+
 	obj = (PHPTidyObj *)zend_object_store_get_object(object TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zsb", &inputfile, &input_len,
@@ -1421,8 +1408,8 @@ TIDY_DOC_METHOD(parseString)
 	int input_len, enc_len = 0;
 	zval *options = NULL;
 	PHPTidyObj *obj;
-    
-    TIDY_SET_CONTEXT;
+
+	TIDY_SET_CONTEXT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zs", &input, &input_len, &options, &enc, &enc_len) == FAILURE) {
 		RETURN_FALSE;
@@ -1444,7 +1431,7 @@ TIDY_DOC_METHOD(parseString)
    Returns a TidyNode Object representing the root of the tidy parse tree */
 PHP_FUNCTION(tidy_get_root)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_root_node);
 }
 /* }}} */
@@ -1453,7 +1440,7 @@ PHP_FUNCTION(tidy_get_root)
    Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_html)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_html_node);
 }
 /* }}} */
@@ -1462,7 +1449,7 @@ PHP_FUNCTION(tidy_get_html)
    Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_head)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_head_node);
 }
 /* }}} */
@@ -1471,7 +1458,7 @@ PHP_FUNCTION(tidy_get_head)
    Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
 PHP_FUNCTION(tidy_get_body)
 {
-    TIDY_SET_CONTEXT;
+	TIDY_SET_CONTEXT;
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_body_node);
 }
 /* }}} */
