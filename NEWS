@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . magic method invocations. (Marcus)
 - Added new classes in mysqli: mysqli_driver, mysqli_warning, mysqli_exception,
   and mysqli_sql_exception. (Georg)
+- Changed mysqli_exception and sqlite_exception to use RuntimeException as base 
+  if extension SPL is present. (Georg, Marcus)
 - Added possibility to access INI variables from within .ini file. (Andrei)
 - Added constructors for mysqli_stmt and mysqli_result classes. (Georg)
 - Added variable $_SERVER['REQUEST_TIME'] containing request start time. (Ilia)
