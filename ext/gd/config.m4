@@ -106,6 +106,26 @@ dnl A whole whack of possible places where this might be
           AC_ADD_LIBRARY(png)
           AC_ADD_LIBRARY(z)
         fi
+
+        AC_MSG_CHECKING([for libjpeg (needed by gd-1.8+)])
+        AC_ARG_WITH(jpeg-dir,
+        [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
+          AC_MSG_RESULT(yes)
+          if test -z $withval; then
+            withval="/usr/local"
+          fi
+          old_LIBS=$LIBS
+          LIBS="$LIBS -L$withval/lib"
+          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
+          LIBS=$old_LIBS
+          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          LIBS="$LIBS -L$withval/lib -ljpeg"
+        ],[
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
+        ]) 
+        AC_CHECK_LIB(gd, gdImageCreateFromJpeg, [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
+
         ac_cv_lib_gd_gdImageLine=yes
       else
         AC_MSG_ERROR([Unable to find libgd.(a|so) anywhere under $withval])
