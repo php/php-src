@@ -287,7 +287,8 @@ function_entry basic_functions[] = {
 	PHP_FE(highlight_string,			NULL)
 	
 	PHP_FE(ini_get,						NULL)
-	PHP_FE(ini_alter,					NULL)
+	PHP_FE(ini_set,						NULL)
+	PHP_FALIAS(ini_alter,	ini_set,	NULL)
 	PHP_FE(ini_restore,					NULL)
 
 	PHP_FE(print_r,					NULL)
@@ -1323,7 +1324,7 @@ PHP_FUNCTION(ini_get)
 }
 
 
-PHP_FUNCTION(ini_alter)
+PHP_FUNCTION(ini_set)
 {
 	pval **varname, **new_value;
 	char *old_value;
