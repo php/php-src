@@ -492,7 +492,7 @@ PHP_FUNCTION(chop)
 	
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	zend_get_parameters_ex(2, &str, &what);
+	zend_get_parameters_ex(ZEND_NUM_ARGS(), &str, &what);
 	convert_to_string_ex(str);
 	if (ZEND_NUM_ARGS() == 2)
 		convert_to_string_ex(str);
@@ -512,7 +512,7 @@ PHP_FUNCTION(trim)
 	
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	zend_get_parameters_ex(2, &str, &what);
+	zend_get_parameters_ex(ZEND_NUM_ARGS(), &str, &what);
 	convert_to_string_ex(str);
 	if (ZEND_NUM_ARGS() == 2)
 		convert_to_string_ex(str);
@@ -529,7 +529,7 @@ PHP_FUNCTION(ltrim)
 	
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2)
 		WRONG_PARAM_COUNT;
-	zend_get_parameters_ex(2, &str, &what);
+	zend_get_parameters_ex(ZEND_NUM_ARGS(), &str, &what);
 	convert_to_string_ex(str);
 	if (ZEND_NUM_ARGS() == 2)
 		convert_to_string_ex(str);
