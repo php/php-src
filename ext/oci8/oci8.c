@@ -16,6 +16,7 @@
    |          Thies C. Arntzen <thies@thieso.net>						  |
    |																	  |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
+   | Temporary LOB support by David Benson <dbenson@mancala.com>		  |
    +----------------------------------------------------------------------+
  */
 
@@ -51,10 +52,9 @@
 /* {{{ includes & stuff */
 
 #include "php.h"
-
-#include "ext/standard/head.h"
 #include "ext/standard/info.h"
 
+/* #define WITH_TEMP_LOBS 1 */
 #define WITH_COLLECTIONS 1
 
 #if HAVE_OCI8
@@ -209,6 +209,10 @@ PHP_FUNCTION(ociserverversion);
 PHP_FUNCTION(ocistatementtype);
 PHP_FUNCTION(ocirowcount);
 PHP_FUNCTION(ocisetprefetch);
+#ifdef WITH_TEMP_LOBS
+PHP_FUNCTION(ociwritetemporarylob);
+PHP_FUNCTION(ocicloselob);
+#endif
 #ifdef WITH_COLLECTIONS
 PHP_FUNCTION(ocinewcollection);
 PHP_FUNCTION(ocifreecoll);
@@ -324,6 +328,10 @@ static zend_function_entry php_oci_functions[] = {
 static zend_function_entry php_oci_lob_class_functions[] = {
     PHP_FALIAS(load,	    ociloadlob,       NULL)
     PHP_FALIAS(writetofile,	ociwritelobtofile,NULL)
+#ifdef WITH_TEMP_LOBS
+    PHP_FALIAS(writetemporary,	ociwritetemporarylob,NULL)
+    PHP_FALIAS(close,      	ocicloselob,      NULL)
+#endif
     PHP_FALIAS(save,	    ocisavelob,       NULL)
     PHP_FALIAS(savefile,    ocisavelobfile,   NULL)
     PHP_FALIAS(free,	    ocifreedesc,      NULL)
@@ -3174,6 +3182,151 @@ PHP_FUNCTION(ociwritelobtofile)
 }
 /* }}} */
 
+#ifdef WITH_TEMP_LOBS
+/* {{{ proto int ociwritetemporarylob(int stmt, int loc, string var)
+   Return the row count of an OCI statement */
+
+PHP_FUNCTION(ociwritetemporarylob)
+{
+    zval *id, **var;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descr;
+	ub4 offset = 1;
+	ub4 loblen;
+
+    oci_debug ("oci_write_temporary_lob");
+
+	if ((id = getThis()) == 0) {
+        RETURN_FALSE;
+    }
+
+    if (_oci_get_ocidesc(id,&descr) == 0) {
+        RETURN_FALSE;
+    }
+
+    mylob = (OCILobLocator *) descr->ocidescr;
+
+    if (! mylob) {
+        RETURN_FALSE;
+    }
+
+    connection = descr->conn;
+
+    if (zend_get_parameters_ex(1, &var) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    convert_to_string_ex(var);
+    
+    connection->error = 
+        OCILobCreateTemporary(connection->pServiceContext,
+                              connection->pError,
+                              mylob,
+                              OCI_DEFAULT,
+                              OCI_DEFAULT,
+                              OCI_TEMP_CLOB,
+                              TRUE,
+                              OCI_DURATION_SESSION);
+
+    if (connection->error) {
+        oci_error(connection->pError, "OCILobCreateTemporary", connection->error);
+        oci_handle_error(connection, connection->error);
+        RETURN_FALSE;
+    }
+
+    connection->error = 
+        OCILobOpen(connection->pServiceContext,
+                   connection->pError,
+                   mylob,
+                   OCI_LOB_READWRITE);
+
+    if (connection->error) {
+        oci_error(connection->pError, "OCILobOpen", connection->error);
+        oci_handle_error(connection, connection->error);
+        RETURN_FALSE;
+    }
+
+    convert_to_string_ex(var);
+    loblen = (*var)->value.str.len;
+	
+    if (loblen < 1) {
+        php_error(E_WARNING, "Cannot save a lob wich size is less than 1 byte");
+        RETURN_FALSE;
+    }
+
+    connection->error = 
+        OCILobWrite(connection->pServiceContext,
+					connection->pError,
+					mylob,
+					(ub4 *) &loblen,
+					(ub4) offset,
+					(dvoid *) (*var)->value.str.val,
+					(ub4) loblen,
+					OCI_ONE_PIECE,
+					(dvoid *)0,
+                    (sb4 (*)(dvoid *, dvoid *, ub4 *, ub1 *)) 0,
+					(ub2) 0,
+					(ub1) SQLCS_IMPLICIT );
+
+    if (connection->error) {
+        oci_error(connection->pError, "OCILobWrite", connection->error);
+        oci_handle_error(connection, connection->error);
+        RETURN_FALSE;
+    }
+
+    RETURN_TRUE;
+}
+
+/* }}} */
+
+/* {{{ proto string ocicloselob(object lob)
+   Closes lob descriptor */
+
+PHP_FUNCTION(ocicloselob)
+{
+	zval *id;
+	int inx;
+	OCILobLocator *mylob;
+	oci_connection *connection;
+	oci_descriptor *descriptor;
+
+	if ((id = getThis()) != 0) {
+		inx = _oci_get_ocidesc(id,&descriptor);
+		if (inx) {
+
+            mylob = (OCILobLocator *) descriptor->ocidescr;
+
+            if (! mylob) {
+                RETURN_FALSE;
+            }
+
+            connection = descriptor->conn;
+
+            connection->error = OCILobClose (connection->pServiceContext, 
+                                             connection->pError, 
+                                             mylob);
+
+            if (connection->error) {
+                oci_error(connection->pError, "OCILobClose", connection->error);
+                oci_handle_error(connection, connection->error);
+                RETURN_FALSE;
+            }
+
+			oci_debug("oci_close_lob: descr=%d",inx);
+			RETURN_TRUE;
+		}
+	}
+
+	php_error(E_NOTICE, "OCICloselob() should not be called like this. Use $somelob->close() to close a LOB");
+
+  	RETURN_FALSE;
+}
+
+/* }}} */
+
+#endif 
+
 /* {{{ proto string ocinewdescriptor(int connection [, int type])
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
 
@@ -3990,6 +4143,7 @@ PHP_FUNCTION(ociresult)
 }
 
 /* }}} */
+
 
 /* {{{ proto string ociserverversion(int conn)
    Return a string containing server version information */
