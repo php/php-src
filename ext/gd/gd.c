@@ -256,6 +256,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
 #endif
+#ifdef HAVE_GD_JPG
+	php_info_print_table_row(2, "JPG Support", "enabled");
+#endif
 	php_info_print_table_end();
 }
 

@@ -241,7 +241,7 @@ PHP_MINFO_FUNCTION(pdf)
 	char tmp[32];
 
 	snprintf(tmp, 31, "%d.%02d", PDF_get_majorversion(), PDF_get_minorversion() );
-	tmp[32]=0;
+	tmp[31]=0;
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDF Support", "enabled" );
