@@ -2,13 +2,16 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Improved handling of preg_replace() /F modifier so that it's possible to
+  specify array($obj, 'method') construct as a replacement function. (Andrei)
 - Added mysql_get_client_info(), mysql_get_server_info(),
   mysql_get_proto_info(), and mysql_get_host_info() functions. (Sean)
-- Added search cache and track query features.
+- Added search cache and track query features to mnogosearch extension.
+  (Sergey K)
 - Major change of the php pdf api. It could break some functions though
   backwards compatibility was tried to maintain. Adding some still
   missing functions as well. (Uwe)
-- mnoGoSearch extension module initial version has been added.
+- mnoGoSearch extension module initial version has been added. (Sergey K)
   This module currently at the alpha state, but it can be used already.
 - Allow url encoding in DB usernames and passwords (Stig, PEAR)
 - Added raiseError and setErrorHandling methods to PEAR class (Stig, PEAR)
