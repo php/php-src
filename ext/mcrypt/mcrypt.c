@@ -50,6 +50,10 @@ zend_module_entry mcrypt_module_entry = {
 	STANDARD_MODULE_PROPERTIES,
 };
 
+#ifdef COMPILE_DL_MCRYPT
+ZEND_GET_MODULE(mcrypt)
+#endif
+
 #if 0
 
 typedef struct mcrypt_global_struct {
