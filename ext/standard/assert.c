@@ -206,9 +206,9 @@ PHP_FUNCTION(assert)
 
 	if (ASSERTG(warning)) {
 		if (myeval) {
-			php_error(E_WARNING, "%s(): Assertion \"%s\" failed", get_active_function_name (TSRMLS_C), myeval);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion \"%s\" failed", myeval);
 		} else {
-			php_error(E_WARNING, "%s(): Assertion failed", get_active_function_name (TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion failed");
 		}
 	}
 
@@ -282,7 +282,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		php_error(E_WARNING, "%s(): Unknown value %d", get_active_function_name (TSRMLS_C), Z_LVAL_PP(what));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown value %d", Z_LVAL_PP(what));
 		break;
 	}
 

@@ -192,8 +192,7 @@ static void start_syslog(TSRMLS_D)
 PHP_FUNCTION(define_syslog_variables)
 {
 	if (ZEND_NUM_ARGS() != 0) {
-		php_error(E_WARNING, "%s() expects no parameters, %d given",
-				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects no parameters, %d given", ZEND_NUM_ARGS());
 		return;
 	}
 
@@ -234,8 +233,7 @@ PHP_FUNCTION(openlog)
 PHP_FUNCTION(closelog)
 {
 	if (ZEND_NUM_ARGS() != 0) {
-		php_error(E_WARNING, "%s() expects no parameters, %d given",
-				  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects no parameters, %d given", ZEND_NUM_ARGS());
 		return;
 	}
 

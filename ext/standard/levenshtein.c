@@ -138,7 +138,7 @@ PHP_FUNCTION(levenshtein)
 	}	
 
 	if(distance<0) {
-		php_error(E_WARNING, "%s(): Argument string(s) too long", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument string(s) too long");
 	}
 	
 	RETURN_LONG(distance);

@@ -85,9 +85,9 @@ PHP_FUNCTION(gethostbyaddr)
 #if HAVE_IPV6 && !defined(__MacOSX__)
 /* MacOSX at this time has support for IPv6, but not inet_pton()
  * so disabling IPv6 until further notice.  MacOSX 10.1.2 (kalowsky) */
-		php_error(E_WARNING, "%s(): Address is not a valid IPv4 or IPv6 address", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not a valid IPv4 or IPv6 address");
 #else
-		php_error(E_WARNING, "%s(): Address is not in a.b.c.d form", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Address is not in a.b.c.d form");
 #endif
 		RETVAL_FALSE;
 	} else {
@@ -236,7 +236,7 @@ PHP_FUNCTION(checkdnsrr)
 		else if ( !strcasecmp("SOA", Z_STRVAL_PP(arg2)) ) type = T_SOA;
 		else if ( !strcasecmp("CNAME", Z_STRVAL_PP(arg2)) ) type = T_CNAME;
 		else {
-			php_error(E_WARNING, "%s(): Type '%s' not supported", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(arg2));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type '%s' not supported", Z_STRVAL_PP(arg2));
 			RETURN_FALSE;
 		}
 		break;

@@ -218,7 +218,7 @@ PHP_FUNCTION(flock)
 
     act = Z_LVAL_PP(arg2) & 3;
     if (act < 1 || act > 3) {
-		php_error(E_WARNING, "%s(): Illegal operation argument", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal operation argument");
 		RETURN_FALSE;
     }
 
@@ -616,7 +616,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(ps[5], bytes_max);
 
 	if (FAILURE == call_user_function_ex(EG(function_table), NULL, callback, &retval, 6, ptps, 0, NULL TSRMLS_CC)) {
-		zend_error(E_WARNING, "failed to call user notifier");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to call user notifier");
 	}
 	if (retval)
 		zval_ptr_dtor(&retval);
@@ -731,8 +731,7 @@ PHP_FUNCTION(stream_context_set_option)
 				&optionname, &optionlen, &zvalue) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 					"ra", &zcontext, &options) == FAILURE) {
-			zend_error(E_WARNING, "%s() called with wrong number or type of parameters; please RTM",
-					get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "called with wrong number or type of parameters; please RTM");
 			RETURN_FALSE;
 		}
 	}
@@ -931,13 +930,13 @@ PHP_FUNCTION(popen)
 		efree(tmp);
 
 		if (!fp) {
-			php_error(E_WARNING, "%s(\"%s\", \"%s\") - %s", get_active_function_name(TSRMLS_C), buf, p, strerror(errno));
+			php_error_docref2(NULL TSRMLS_CC, buf, p, E_WARNING, "%s", strerror(errno));
 			RETURN_FALSE;
 		}
 	} else {
 		fp = VCWD_POPEN(Z_STRVAL_PP(arg1), p);
 		if (!fp) {
-			php_error(E_WARNING, "%s(\"%s\", \"%s\") - %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(arg1), p, strerror(errno));
+			php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
 			efree(p);
 			RETURN_FALSE;
 		}
@@ -945,7 +944,7 @@ PHP_FUNCTION(popen)
 	stream = php_stream_fopen_from_pipe(fp, p);
 
 	if (stream == NULL)	{
-		zend_error(E_WARNING, "popen(\"%s\", \"%s\"): %s", Z_STRVAL_PP(arg1), p, strerror(errno));
+		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), p, E_WARNING, "%s", strerror(errno));
 		RETVAL_FALSE;
 	} else {
 		php_stream_to_zval(stream, return_value);
@@ -1028,7 +1027,7 @@ PHP_FUNCTION(socket_set_blocking)
    Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(set_socket_blocking)
 {
-	php_error(E_NOTICE, "%s(): This function is deprecated, use socket_set_blocking() instead", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, use socket_set_blocking() instead");
 	PHP_FN(socket_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
@@ -1131,7 +1130,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	}
 
 	if (len < 0) {
-		php_error(E_WARNING, "%s(): Length parameter may not be negative", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
 	}
 
@@ -1230,7 +1229,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
     if (len < 0) {
-		php_error(E_WARNING, "%s(): Length parameter may not be negative", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
     }
 
@@ -1513,7 +1512,7 @@ PHP_FUNCTION(mkdir)
 
 	ret = VCWD_MKDIR(dir, (mode_t)mode);
 	if (ret < 0) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1543,7 +1542,7 @@ PHP_FUNCTION(rmdir)
 
 	ret = VCWD_RMDIR(Z_STRVAL_PP(arg1));
 	if (ret < 0) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1670,7 +1669,7 @@ PHP_FUNCTION(rename)
 	ret = VCWD_RENAME(old_name, new_name);
 
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1700,7 +1699,7 @@ PHP_FUNCTION(unlink)
 
 	ret = VCWD_UNLINK(Z_STRVAL_PP(filename));
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Clear stat cache */
@@ -1729,7 +1728,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	convert_to_long_ex(size);
 
 	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
-		php_error(E_WARNING, "%s(): Can't truncate sockets!", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't truncate sockets!");
 		RETURN_FALSE;
 	}
 	if (SUCCESS == php_stream_cast((php_stream*)what, PHP_STREAM_AS_FD, (void*)&fd, 1))	{
@@ -1898,7 +1897,7 @@ PHPAPI PHP_FUNCTION(fread)
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
     if (len < 0) {
-		php_error(E_WARNING, "%s(): Length parameter may not be negative", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
     }
 
@@ -1945,8 +1944,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error(E_WARNING, "%s(): Third parameter must be a character",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
 			return;
 		}
 		/* use first character from string */
@@ -1960,8 +1958,7 @@ PHP_FUNCTION(fgetcsv)
 		convert_to_string_ex(p_delim);
 		/* Make sure that there is at least one character in string */
 		if (Z_STRLEN_PP(p_delim) < 1) {
-			php_error(E_WARNING, "%s(): Third parameter must be a character",
-					  get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Third parameter must be a character");
 			return;
 		}
 		/* use first character from string */
@@ -1985,7 +1982,7 @@ PHP_FUNCTION(fgetcsv)
 	convert_to_long_ex(bytes);
 	len = Z_LVAL_PP(bytes);
 	if (len < 0) {
-		php_error(E_WARNING, "%s(): Length parameter may not be negative", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter may not be negative");
 		RETURN_FALSE;
 	}
 

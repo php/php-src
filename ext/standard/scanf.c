@@ -408,8 +408,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
         gotSequential = 1;
         if (gotXpg) {
             mixedXPG:
-              php_error(E_WARNING,
-                "cannot mix \"%\" and \"%n$\" conversion specifiers in %s", get_active_function_name(TSRMLS_C) );
+              php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot mix \"%\" and \"%n$\" conversion specifiers");
             goto error;
         }
 
@@ -642,8 +641,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
 			if ( ! PZVAL_IS_REF( *args[ i ] ) ) {	
-				php_error(E_WARNING, "Parameter %d to %s() must be passed by reference",
-								i, get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Parameter %d must be passed by reference", i);
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
 			}

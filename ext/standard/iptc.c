@@ -213,7 +213,7 @@ PHP_FUNCTION(iptcembed)
 	}
 
     if ((fp = VCWD_FOPEN(Z_STRVAL_PP(jpeg_file), "rb")) == 0) {
-        php_error(E_WARNING, "%s(): Unable to open %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(jpeg_file));
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open %s", Z_STRVAL_PP(jpeg_file));
         RETURN_FALSE;
     }
 
@@ -354,7 +354,7 @@ PHP_FUNCTION(iptcparse)
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
 			if (array_init(return_value) == FAILURE) {
-				php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
 				RETURN_FALSE;
 	  		}
 		}
@@ -363,7 +363,7 @@ PHP_FUNCTION(iptcparse)
 			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
-				php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
 				RETURN_FALSE;
 			}
 			

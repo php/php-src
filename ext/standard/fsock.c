@@ -190,7 +190,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 #if !HAVE_OPENSSL_EXT
 		if (ssl_flags != php_ssl_none)	{
-			zend_error(E_WARNING, "%s(): no SSL support in this build", get_active_function_name(TSRMLS_C));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "no SSL support in this build");
 		}
 		else
 #endif
@@ -202,8 +202,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 
 		if (stream == NULL) {
-			zend_error(E_WARNING, "%s(): unable to connect to %s:%d", 
-					get_active_function_name(TSRMLS_C), host, port);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d", host, port);
 		}
 		
 #if HAVE_OPENSSL_EXT
@@ -221,7 +220,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					break;
 			}
 			if (ssl_ret == FAILURE)
-				zend_error(E_WARNING, "%s(): failed to activate SSL mode %d", get_active_function_name(TSRMLS_C), ssl_flags);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to activate SSL mode %d", ssl_flags);
 		}
 #endif
 		

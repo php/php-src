@@ -198,7 +198,7 @@ PHP_FUNCTION(disk_total_space)
 		}
 	}
 	else {
-		php_error(E_WARNING, "%s(): Unable to load kernel32.dll", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
 		RETURN_FALSE;
 	}
 
@@ -301,7 +301,7 @@ PHP_FUNCTION(disk_free_space)
 		}
 	}
 	else {
-		php_error(E_WARNING, "%s(): Unable to load kernel32.dll", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to load kernel32.dll");
 		RETURN_FALSE;
 	}
 
@@ -348,7 +348,7 @@ PHP_FUNCTION(chgrp)
 	if (Z_TYPE_PP(group) == IS_STRING) {
 		gr = getgrnam(Z_STRVAL_PP(group));
 		if (!gr) {
-			php_error(E_WARNING, "%s(): Unable to find gid for %s", get_active_function_name(TSRMLS_C),
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s",
 					   Z_STRVAL_PP(group));
 			RETURN_FALSE;
 		}
@@ -369,7 +369,7 @@ PHP_FUNCTION(chgrp)
 
 	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), -1, gid);
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -396,7 +396,7 @@ PHP_FUNCTION(chown)
 	if (Z_TYPE_PP(user) == IS_STRING) {
 		pw = getpwnam(Z_STRVAL_PP(user));
 		if (!pw) {
-			php_error(E_WARNING, "%s(): Unable to find uid for %s", get_active_function_name(TSRMLS_C),
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s",
 					   Z_STRVAL_PP(user));
 			RETURN_FALSE;
 		}
@@ -417,7 +417,7 @@ PHP_FUNCTION(chown)
 
 	ret = VCWD_CHOWN(Z_STRVAL_PP(filename), uid, -1);
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 #endif
@@ -458,7 +458,7 @@ PHP_FUNCTION(chmod)
 
 	ret = VCWD_CHMOD(Z_STRVAL_PP(filename), imode);
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -510,7 +510,7 @@ PHP_FUNCTION(touch)
 	if (ret == -1) {
 		file = VCWD_FOPEN(Z_STRVAL_PP(filename), "w");
 		if (file == NULL) {
-			php_error(E_WARNING, "%s(): Unable to create file %s because %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename), strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create file %s because %s", Z_STRVAL_PP(filename), strerror(errno));
 			RETURN_FALSE;
 		}
 		fclose(file);
@@ -518,7 +518,7 @@ PHP_FUNCTION(touch)
 
 	ret = VCWD_UTIME(Z_STRVAL_PP(filename), newtime);
 	if (ret == -1) {
-		php_error(E_WARNING, "%s(): Utime failed: %s", get_active_function_name(TSRMLS_C), strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Utime failed: %s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -589,7 +589,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #endif
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
 			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || errno != ENOENT)) { /* fileexists() test must print no error */
-				php_error(E_WARNING, "%s(): Stat failed for %s (errno=%d - %s)", get_active_function_name(TSRMLS_C), BG(CurrentStatFile), errno, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
 			BG(CurrentStatFile) = NULL;
@@ -604,7 +604,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		/* do lstat if the buffer is empty */
 		if (VCWD_LSTAT(filename, &BG(lsb)) == -1) {
 			if (!IS_EXISTS_CHECK(type) || errno != ENOENT) { /* fileexists() test must print no error */
-				php_error(E_WARNING, "%s(): Lstat failed for %s (errno=%d - %s)", get_active_function_name(TSRMLS_C), BG(CurrentStatFile), errno, strerror(errno));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Lstat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			RETURN_FALSE;
 		}
@@ -675,7 +675,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		case S_IFSOCK: RETURN_STRING("socket", 1);
 #endif
 		}
-		php_error(E_WARNING, "%s(): Unknown file type (%d)", get_active_function_name(TSRMLS_C), BG(sb).st_mode&S_IFMT);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
 	case FS_IS_W:
 		if (getuid()==0) {
@@ -772,7 +772,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 		return;
 	}
-	php_error(E_WARNING, "%s(): Didn't understand stat call", get_active_function_name(TSRMLS_C));
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Didn't understand stat call");
 	RETURN_FALSE;
 }
 /* }}} */

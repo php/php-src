@@ -301,7 +301,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 
 	if (!ta) {			/* that really shouldn't happen... */
-		php_error(E_WARNING, "%s(): Unexpected error", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unexpected error");
 		RETURN_FALSE;
 	}
 	for (i = 0; i < Z_STRLEN_PP(format); i++) {
@@ -642,12 +642,11 @@ PHP_FUNCTION(localtime)
 			break;
 	}
 	if (NULL == (ta = php_localtime_r(&timestamp, &tmbuf))) {
-		php_error(E_WARNING, "%s(): Invalid local time",
-				  get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid local time");
 		RETURN_FALSE;
 	}
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "%s(): Cannot prepare return array from localtime", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot prepare return array from localtime");
 		RETURN_FALSE;
 	}
 
@@ -694,11 +693,11 @@ PHP_FUNCTION(getdate)
 
 	ta = php_localtime_r(&timestamp, &tmbuf);
 	if (!ta) {
-		php_error(E_WARNING, "%s(): Cannot perform date calculation", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot perform date calculation");
 		return;
 	}
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
 		return;
 	}
 	add_assoc_long(return_value, "seconds", ta->tm_sec);
@@ -879,7 +878,7 @@ PHP_FUNCTION(strtotime)
 
 	convert_to_string_ex(z_time);
 	if (Z_STRLEN_PP(z_time) == 0)
-		php_error (E_NOTICE, "%s(): Called with empty time parameter", get_active_function_name(TSRMLS_C));
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Called with empty time parameter");
 	if (argc == 2) {
 		convert_to_long_ex(z_now);
 		now = Z_LVAL_PP(z_now);

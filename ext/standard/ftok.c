@@ -41,12 +41,12 @@ PHP_FUNCTION(ftok)
     convert_to_string_ex(proj);
 
     if (Z_STRLEN_PP(pathname)==0){
-        php_error(E_WARNING, "%s(): First argument invalid", get_active_function_name(TSRMLS_C));
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument invalid");
         RETURN_LONG(-1);
     }
 
     if (Z_STRLEN_PP(proj)!=1){
-        php_error(E_WARNING, "%s(): Second argument invalid", get_active_function_name(TSRMLS_C));
+        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Second argument invalid");
         RETURN_LONG(-1);
     }
 
