@@ -236,6 +236,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	}
 	for (i = 0; i < (*format)->value.str.len; i++) {
 		switch ((*format)->value.str.val[i]) {
+			case 'O':		/* GMT offset in [+-]HHMM format */
+				size += 5;
+				break;
 			case 'U':		/* seconds since the epoch */
 				size += 10;
 				break;
@@ -404,6 +407,14 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 				break;
 			case 'w':		/* day of the week, numeric EXTENSION */
 				sprintf(tmp_buff, "%01d", ta->tm_wday);  /* SAFE */
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'O':		/* GMT offset in [+-]HHMM format */
+#if HAVE_TM_GMTOFF				
+				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( ta->tm_gmtoff % 3600));
+#else
+				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)<0)?'-':'+',abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
+#endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			case 'Z':		/* timezone offset in seconds */
