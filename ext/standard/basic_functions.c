@@ -611,6 +611,7 @@ function_entry basic_functions[] = {
 	PHP_FE(tempnam,															NULL)
 	PHP_STATIC_FE("tmpfile",		php_if_tmpfile,							NULL)
 	PHP_FE(file,															NULL)
+	PHP_FE(get_file_contents,												NULL)
 	PHP_FE(fgetcsv,															NULL)
 	PHP_FE(flock,															NULL)
 	PHP_FE(get_meta_tags,													NULL)
