@@ -155,7 +155,7 @@ PHP_MSHUTDOWN_FUNCTION(ldap)
 
 PHP_MINFO_FUNCTION(ldap)
 {
-	char maxl[16];
+	char maxl[32], tmp[32];
 #if HAVE_NSLDAP
 	LDAPVersion ver;
 	double SDKVersion;
@@ -169,33 +169,42 @@ PHP_MINFO_FUNCTION(ldap)
 #endif
 
 	if (LDAPG(max_links) == -1) {
-		strcpy(maxl, "Unlimited");
+		snprintf(maxl, 31, "%d/unlimited", LDAPG(num_links) );
 	} else {
-		snprintf(maxl, 15, "%ld", LDAPG(max_links));
-		maxl[15] = 0;
+		snprintf(maxl, 31, "%d/%ld", LDAPG(num_links), LDAPG(max_links));
 	}
+	maxl[31] = 0;
 
-	php_printf("<table>"
-				"<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
-		        "<tr><td>RCS Version:</td><td>$Id$</td></tr>\n"
+	php_info_print_table_start();
+	php_info_print_table_row(2, "LDAP Support", "enabled" );
+	php_info_print_table_row(2, "RCS Version", "$Id$" );
+	php_info_print_table_row(2, "Total Links", maxl );
+
 #if HAVE_NSLDAP
-				"<tr><td>SDK Version:</td><td>%f</td></tr>"
-				"<tr><td>Highest LDAP Protocol Supported:</td><td>%f</td></tr>"
-				"<tr><td>SSL Level Supported:</td><td>%f</td></tr>"
-#endif
-				,LDAPG(num_links), maxl
-#if HAVE_NSLDAP
-				,SDKVersion/100.0,ver.protocol_version/100.0,ver.SSL_version/100.0
-#endif
-				);
-#if HAVE_NSLDAP
+
+	snprintf(tmp, 31, "%f", SDKVersion/100.0 );
+	tmp[31]=0;
+	php_info_print_table_row(2, "SDK Version", tmp );
+
+	snprintf(tmp, 31, "%f", ver.protocol_version/100.0 );
+	tmp[31]=0;
+	php_info_print_table_row(2, "Highest LDAP Protocol Supported", tmp );
+
+	snprintf(tmp, 31, "%f", ver.SSL_version/100.0 );
+	tmp[31]=0;
+	php_info_print_table_row(2, "SSL Level Supported", tmp );
+
 	if ( ver.security_level != LDAP_SECURITY_NONE ) {
-	   php_printf( "<tr><td>Level of encryption:</td><td>%d bits</td></tr>\n", ver.security_level );
+		snprintf(tmp, 31, "%d", ver.security_level );
+		tmp[31]=0;
 	} else {
-	   php_printf( "<tr><td>SSL not enabled.</td><td></td></tr>\n" );
+		strcpy(tmp, "SSL not enabled" );
 	}
+	php_info_print_table_row(2, "Level of Encryption", tmp );
+
 #endif
-	php_printf("</table>\n");
+
+	php_info_print_table_end();
 
 }
 
