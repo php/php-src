@@ -178,7 +178,7 @@ static int _ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 				V_STAT(buf, &sbuf) == 0 &&
 				/* is it expired? */
 				(now - sbuf.st_atime) > maxlifetime) {
-			unlink(buf);
+			V_UNLINK(buf);
 			nrdels++;
 		}
 	}
@@ -276,7 +276,7 @@ PS_DESTROY_FUNC(files)
 	if (!_ps_files_path_create(buf, sizeof(buf), data, key))
 		return FAILURE;
 	
-	unlink(buf);
+	V_UNLINK(buf);
 
 	return SUCCESS;
 }

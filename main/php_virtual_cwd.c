@@ -471,6 +471,21 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf)
 
 #endif
 
+CWD_API int virtual_unlink(const char *path)
+{
+	cwd_state new_state;
+	int retval;
+	CWDLS_FETCH();
+
+	CWD_STATE_COPY(&new_state, &CWDG(cwd));
+
+	virtual_file_ex(&new_state, path, NULL);
+
+	retval = unlink(new_state.cwd);
+	CWD_STATE_FREE(&new_state);
+	return retval;
+}
+
 #if 0
 
 main(void)

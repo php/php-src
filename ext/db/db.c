@@ -399,7 +399,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 
 #if NFS_HACK
 		if (lockfn) {
-			unlink(lockfn);
+			V_UNLINK(lockfn);
 		}
 #endif
 		if (lockfn) efree(lockfn);
@@ -434,7 +434,7 @@ int php_dbm_close(dbm_info *info) {
 	dbf = info->dbf;
 
 #if NFS_HACK
-	unlink(info->lockfn);
+	V_UNLINK(info->lockfn);
 #else
 	if (info->lockfn) {
 		lockfd = V_OPEN((info->lockfn,O_RDWR,0644));
