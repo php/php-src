@@ -10,6 +10,9 @@ PHP 4                                                                      NEWS
   exif_thumbnail() to return also the image-type. (Marcus)
 - Added image_type_to_mime_type() which converts image-types to mime-types.
   (Marcus)
+- Made GD functions only exist if they are available. This means that for
+  example your GD build has no JPG support, none of the JPG functions would
+  actually exist, so you can safely test that with function_exists(). (Derick)
 - Added an optional parameter to the header() function which overrides the HTTP
   response code. (Derick)
 - Changed the order of which modules are unloaded to the reverse order of
@@ -126,7 +129,7 @@ PHP 4                                                                      NEWS
   . Added memory stream support. (Marcus)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
-- Made var_dump() handle recursive structures better. (Yasuo)
+- Made var_dump() handle recursive structures better. (Yasuo, Derick)
 - Added exif_imagetype() function. (Marcus)
 - New improved build system. Among other improvements, replaces the slow 
   recursive make with one global Makefile and eases the integration of proper
