@@ -2242,7 +2242,7 @@ PHP_FUNCTION(odbc_setoption)
  * metadata functions
  */
 
-/* {{{ proto int odbc_tables(int connection_id [, string catalog, string schema, string table, string table_types])
+/* {{{ proto int odbc_tables(int connection_id [, string qualifier, string owner, string name, string table_types])
    Call the SQLTables function */
 PHP_FUNCTION(odbc_tables)
 {
@@ -2324,7 +2324,7 @@ PHP_FUNCTION(odbc_tables)
 }
 /* }}} */
 
-/* {{{ proto int odbc_columns(int connection_id, string catalog, string schema, string table, string column)
+/* {{{ proto int odbc_columns(int connection_id, string qualifier, string owner, string table_name, string column_name)
    Returns a result identifier that can be used to fetch a list of column names in specified tables */
 PHP_FUNCTION(odbc_columns)
 {
@@ -2487,7 +2487,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table)
+/* {{{ proto int odbc_foreignkeys(int connection_id, string pk_qualifier, string pk_owner, string pk_table, string fk_qualifier, string fk_owner, string fk_table)
    Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
 {
@@ -2658,7 +2658,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 }
 /* }}} */
 
-/* {{{ proto int odbc_primarykeys(int connection_id, string database, string schema, string table)
+/* {{{ proto int odbc_primarykeys(int connection_id, string qualifier, string owner, string table)
    Returns a result identifier listing the column names that comprise the primary key for a table */
 PHP_FUNCTION(odbc_primarykeys)
 {
@@ -2734,7 +2734,7 @@ PHP_FUNCTION(odbc_primarykeys)
 /* }}} */
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column])
+/* {{{ proto int odbc_procedurecolumns(int connection_id [, string qualifier, string owner, string proc, string column])
    Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
@@ -2818,7 +2818,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 #endif /* HAVE_SOLID */
 
 #if !defined(HAVE_SOLID)
-/* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc])
+/* {{{ proto int odbc_procedures(int connection_id [, string qualifier, string owner, string name])
    Returns a result identifier containg the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
@@ -2898,7 +2898,7 @@ PHP_FUNCTION(odbc_procedures)
 /* }}} */
 #endif /* HAVE_SOLID */
 
-/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable)
+/* {{{ proto int odbc_specialcolumns(int connection_id, int type, string qualifier, string owner, string table, int scope, int nullable)
    Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
 {
@@ -2986,7 +2986,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 }
 /* }}} */
 
-/* {{{ proto int odbc_statistics(int connection_id, string catalog, string schema, string name, int unique, int reserved)
+/* {{{ proto int odbc_statistics(int connection_id, string qualifier, string owner, string name, int unique, int accuracy)
    Returns a result identifier that contains statistics about a single table and the indexes associated with the table */
 PHP_FUNCTION(odbc_statistics)
 {
@@ -3071,7 +3071,7 @@ PHP_FUNCTION(odbc_statistics)
 /* }}} */
 
 #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
-/* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table)
+/* {{{ proto int odbc_tableprivileges(int connection_id, string qualifier, string owner, string name)
    Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
 {
