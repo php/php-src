@@ -44,7 +44,7 @@
 int
 mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, s1, s2, w, flag;
+	int c1, w, flag;
 
 	switch (filter->status) {
 	case 0:
@@ -165,7 +165,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		}
 	} else {
 		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
+			CK(mbfl_filt_conv_illegal_output(c, filter TSRMLS_CC));
 		}
 	}
 
@@ -178,7 +178,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, s1, s2, w, flag;
+	int c1, w, flag;
 	const short ofst1[] = { 0x41, 0x61, 0x81, 0xa1}; 
 	const short ofst2[] = { 0x0,  0x1a, 0x34, 0x54}; 
 
@@ -269,7 +269,7 @@ mbfl_filt_conv_uhc_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_wchar_uhc(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, c2, s;
+	int c1, s;
 
 	s = 0;
 	if (c >= ucs_a1_uhc_table_min && c < ucs_a1_uhc_table_max) {
