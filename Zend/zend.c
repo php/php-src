@@ -611,6 +611,7 @@ void zend_post_startup(TSRMLS_D)
 	*GLOBAL_FUNCTION_TABLE = *compiler_globals->function_table;
 	*GLOBAL_CLASS_TABLE = *compiler_globals->class_table;
 	*GLOBAL_CONSTANTS_TABLE = *executor_globals->zend_constants;
+	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
 	executor_globals_ctor(executor_globals, tsrm_ls);
 }
