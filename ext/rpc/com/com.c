@@ -33,6 +33,8 @@
 #include <ocidl.h>
 
 
+static ZEND_FUNCTION(com_indexed_prop_set);
+
 /* protos */
 static int com_hash(rpc_string, rpc_string *, void *, int, char *, int);
 static int com_name(rpc_string, rpc_string *, void *, int);
@@ -93,6 +95,7 @@ RPC_FUNCTION_ENTRY_BEGIN(com)
 	ZEND_FE(com_message_pump,	NULL)
 	ZEND_FE(com_load_typelib,	NULL)
 	ZEND_FE(com_print_typeinfo,	NULL)
+	ZEND_FE(com_indexed_prop_set,	NULL)
 RPC_FUNCTION_ENTRY_END()
 
 zend_module_entry com_module_entry = {
@@ -826,6 +829,76 @@ static int com_get_properties(HashTable **properties, void *data)
 
 
 /* custom functions */
+
+static ZEND_FUNCTION(com_indexed_prop_set)
+{
+	zval *object;
+	rpc_internal *intern;
+	char *propname;
+	long propname_len;
+	zval **arguments;
+	int arg_count = ZEND_NUM_ARGS();
+	DISPPARAMS dispparams;
+	DISPID dispid, altdispid;
+	VARIANT *variant_args;
+	VARIANT result;
+	int current_arg, current_variant;
+	char *ErrString = NULL;
+	OLECHAR *olestr;
+
+	if (zend_parse_method_parameters(2 TSRMLS_CC, getThis(), "Os", &object, com_class_entry,
+		&propname, &propname_len) != SUCCESS) {
+		return;
+	}
+
+	if (ZEND_NUM_ARGS() < 3) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	if (GET_INTERNAL_EX(intern, object) != SUCCESS) {
+		/* TODO: exception */
+	}
+
+	arguments = (zval **) emalloc(sizeof(zval *) * ZEND_NUM_ARGS());
+	if (zend_get_parameters_array(ht, arg_count, arguments) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	olestr = php_char_to_OLECHAR(propname, propname_len, CP_ACP, FALSE);
+
+	if (FAILED(php_COM_get_ids_of_names((comval *) intern->data, olestr, &dispid))) {
+		RETURN_NULL();
+	}
+	variant_args = (VARIANT *) emalloc(sizeof(VARIANT) * (arg_count - 2));
+
+	for (current_arg = 2; current_arg < arg_count; current_arg++) {
+		current_variant = arg_count - current_arg - 1;
+		php_zval_to_variant(arguments[current_arg], &variant_args[current_variant],
+			C_CODEPAGE((comval *)intern->data));
+	}
+
+	dispparams.rgvarg = variant_args;
+	dispparams.rgdispidNamedArgs = NULL;
+	dispparams.cArgs = arg_count - 2;
+	dispparams.cNamedArgs = 0;
+	altdispid = DISPID_PROPERTYPUT;
+	dispparams.rgdispidNamedArgs = &altdispid;
+	dispparams.cNamedArgs = 1;
+
+	VariantInit(&result);
+
+	if (php_COM_invoke((comval*)intern->data, dispid, DISPATCH_PROPERTYPUT, &dispparams, &result, &ErrString)==FAILURE) {
+		VariantClear(&result);
+		RETVAL_NULL();
+	} else {
+		RETVAL_VARIANT(&result, C_CODEPAGE((comval*)intern->data));
+	}
+
+	efree(variant_args);
+	efree(arguments);
+	efree(olestr);
+
+}
 
 /* {{{ proto mixed com_addref(int module)
    Increases the reference counter on a COM object */
