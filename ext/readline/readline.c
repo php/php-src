@@ -115,21 +115,87 @@ PHP_FUNCTION(readline)
 
 PHP_FUNCTION(readline_info)
 {
+	zval **what;
+	zval **value;
+	int oldval;
+	char *oldstr;
 	int ac = ARG_COUNT(ht);
 
-	if (ac) {
+	if (ac < 0 || ac > 2 || getParametersEx(ac, &what, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
-	array_init(return_value);
-	add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer),1);
-	add_assoc_long(return_value,"point",rl_point);
-	add_assoc_long(return_value,"end",rl_end);
-	add_assoc_long(return_value,"mark",rl_mark);
-	add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
-	add_assoc_string(return_value,"library_version",SAFE_STRING(rl_library_version),1);
-	add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name),1);
-	add_assoc_string(return_value,"readline_name",SAFE_STRING(rl_readline_name),1);
+
+	if (ac == 0) {
+		array_init(return_value);
+		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer),1);
+		add_assoc_long(return_value,"point",rl_point);
+		add_assoc_long(return_value,"end",rl_end);
+		add_assoc_long(return_value,"mark",rl_mark);
+		add_assoc_long(return_value,"done",rl_done);
+		add_assoc_long(return_value,"pending_input",rl_pending_input);
+#if HAVE_ERASE_EMPTY_LINE
+		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
+#endif
+		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt),1);
+		add_assoc_string(return_value,"library_version",SAFE_STRING(rl_library_version),1);
+		add_assoc_string(return_value,"terminal_name",SAFE_STRING(rl_terminal_name),1);
+		add_assoc_string(return_value,"readline_name",SAFE_STRING(rl_readline_name),1);
+	} else {
+		convert_to_string_ex(what);
+
+		if (! strcasecmp((*what)->value.str.val,"line_buffer")) {
+			oldstr = rl_line_buffer;
+			if (ac == 2) {
+				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
+				convert_to_string_ex(value);
+				rl_line_buffer = strdup((*value)->value.str.val);
+			}
+			RETVAL_STRING(SAFE_STRING(oldstr),1);
+		} else if (! strcasecmp((*what)->value.str.val,"point")) {
+			RETVAL_LONG(rl_point);
+		} else if (! strcasecmp((*what)->value.str.val,"end")) {
+			RETVAL_LONG(rl_end);
+		} else if (! strcasecmp((*what)->value.str.val,"mark")) {
+			RETVAL_LONG(rl_mark);
+		} else if (! strcasecmp((*what)->value.str.val,"done")) {
+			oldval = rl_done;
+			if (ac == 2) {
+				convert_to_long_ex(value);
+				rl_done = (*value)->value.lval;
+			}
+			RETVAL_LONG(oldval);
+		} else if (! strcasecmp((*what)->value.str.val,"pending_input")) {
+			oldval = rl_pending_input;
+			if (ac == 2) {
+				convert_to_string_ex(value);
+				rl_pending_input = (*value)->value.str.val[0];
+			}
+			RETVAL_LONG(oldval);
+#if HAVE_ERASE_EMPTY_LINE
+		} else if (! strcasecmp((*what)->value.str.val,"erase_empty_line")) {
+			oldval = rl_erase_empty_line;
+			if (ac == 2) {
+				convert_to_long_ex(value);
+				rl_erase_empty_line = (*value)->value.lval;
+			}
+			RETVAL_LONG(oldval);
+#endif
+		} else if (! strcasecmp((*what)->value.str.val,"prompt")) {
+			RETVAL_STRING(SAFE_STRING(rl_prompt),1);
+		} else if (! strcasecmp((*what)->value.str.val,"library_version")) {
+			RETVAL_STRING(SAFE_STRING(rl_library_version),1);
+		} else if (! strcasecmp((*what)->value.str.val,"terminal_name")) {
+			RETVAL_STRING(SAFE_STRING(rl_terminal_name),1);
+		} else if (! strcasecmp((*what)->value.str.val,"readline_name")) {
+			oldstr = rl_readline_name;
+			if (ac == 2) {
+				/* XXX if (rl_readline_name) free(rl_readline_name); */
+				convert_to_string_ex(value);
+				rl_readline_name = strdup((*value)->value.str.val);;
+			}
+			RETVAL_STRING(SAFE_STRING(oldstr),1);
+		} 
+	}
 }
 
 /* }}} */
