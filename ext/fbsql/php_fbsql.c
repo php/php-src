@@ -1867,6 +1867,24 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 		fbcemdRelease(emd);
 		result = 0;
 	}
+	else if (fbcmdWarningsFound(md))
+	{
+		FBCErrorMetaData* emd = fbcdcErrorMetaData(c, md);
+		char*             emg = fbcemdAllErrorMessages(emd);
+		if (FB_SQL_G(generateWarnings))
+		{
+			if (emg)
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Warning in statement: '%s' %s", sql, emg);
+			else
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
+		}
+		link->errorText = strdup(emg);
+		link->errorNo = fbcemdErrorCodeAtIndex(emd, 0);
+		free(emg);
+		fbcemdRelease(emd);
+		result = 1;
+	}
+	return result;
 	return result;
 }
 /* }}} */
