@@ -66,6 +66,10 @@ DLEXPORT PHP_FUNCTION(udm_check_stored);
 DLEXPORT PHP_FUNCTION(udm_close_stored);
 #endif
 
+#if UDM_VERSION_ID >= 30204
+DLEXPORT PHP_FUNCTION(udm_parse_query_string);
+#endif
+
 DLEXPORT PHP_FUNCTION(udm_alloc_agent);
 DLEXPORT PHP_FUNCTION(udm_set_agent_param);
 
