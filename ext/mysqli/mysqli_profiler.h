@@ -137,8 +137,8 @@ extern PR_MAIN *prmain;
 #define MYSQLI_PR_RESULT		6
 
 /*** PROFILER MACROS ***/
-#define MYSQLI_PROFILER_STARTTIME(ptr) gettimeofday(&ptr##->header.starttime, NULL)
-#define MYSQLI_PROFILER_ELAPSEDTIME(ptr) php_mysqli_profiler_timediff(ptr##->header.starttime, &ptr##->header.elapsedtime)
+#define MYSQLI_PROFILER_STARTTIME(ptr) gettimeofday(&ptr->header.starttime, NULL)
+#define MYSQLI_PROFILER_ELAPSEDTIME(ptr) php_mysqli_profiler_timediff(ptr->header.starttime, &ptr->header.elapsedtime)
 #define MYSQLI_PROFILER_LIFETIME(ptr) php_mysqli_profiler_timediff((ptr)->starttime, &(ptr)->lifetime)
 #define MYSQLI_PROFILER_NEW(parent, type, time) php_mysqli_profiler_new_object((PR_COMMON *)parent, type, time)
 #define MYSQLI_PROFILER_COMMAND_START(cmd,parent)\
