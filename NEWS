@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - Changed array_search() to accept also objects as a needle. (Moriyoshi)
 - Changed ext/mcrypt to require libmcrypt version 2.5.6 or greater. (Derick)
 - Changed uniqid() parameters to be optional and allow any prefix length. (Marcus)
+- Added encoding detection feature for expat XML parser. (Adam Dickmeiss, Moriyoshi)
 - Added missing multibyte(unicode) support and numeric entity support to
   html_entity_decode(). (Moriyoshi)
 - Added opendir() and stat() related support to ftp:// wrapper. (Sara)
