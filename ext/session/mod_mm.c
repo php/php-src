@@ -74,11 +74,10 @@ static unsigned int ps_sd_hash(const char *data)
 {
 	unsigned int val, i;
 	
-	for(val = 0; *data; data++) {
+	for (val = 0; *data; data++) {
 		val = (val << ONE_EIGTH) + *data;
-		if((i = val & HIGH_BITS) != 0) {
+		if ((i = val & HIGH_BITS) != 0)
 			val = (val ^ (i >> THREE_QUARTERS)) & -HIGH_BITS;
-		}
 	}
 	
 	return val;
@@ -93,13 +92,12 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 	h = ps_sd_hash(key) % HASH_SIZE;
 	
 	sd = mm_malloc(data->mm, sizeof(*sd));
-	if(!sd) {
+	if (!sd)
 		return NULL;
-	}
 	sd->ctime = 0;
 	
 	sd->data = mm_malloc(data->mm, sdatalen);
-	if(!sd->data) {
+	if (!sd->data) {
 		mm_free(data->mm, sd);
 		return NULL;
 	}
@@ -107,7 +105,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 	sd->datalen = sdatalen;
 	
 	sd->key = mm_strdup(data->mm, key);
-	if(!sd->key) {
+	if (!sd->key) {
 		mm_free(data->mm, sd->data);
 		mm_free(data->mm, sd);
 		return NULL;
@@ -115,7 +113,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key, const void *sdata, size_t 
 	
 	memcpy(sd->data, sdata, sdatalen);
 	
-	if((sd->next = data->hash[h]))
+	if ((sd->next = data->hash[h]))
 		sd->next->prev = sd;
 	sd->prev = NULL;
 	
@@ -132,16 +130,17 @@ static void ps_sd_destroy(ps_mm *data, ps_sd *sd)
 
 	h = ps_sd_hash(sd->key) % HASH_SIZE;
 	
-	if(sd->next)
+	if (sd->next)
 		sd->next->prev = sd->prev;
-	if(sd->prev)
+	if (sd->prev)
 		sd->prev->next = sd->next;
 	
-	if(data->hash[h] == sd)
+	if (data->hash[h] == sd)
 		data->hash[h] = sd->next;
 		
 	mm_free(data->mm, sd->key);
-	if(sd->data) mm_free(data->mm, sd->data);
+	if (sd->data) 
+		mm_free(data->mm, sd->data);
 	mm_free(data->mm, sd);
 }
 
@@ -152,10 +151,11 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 
 	h = ps_sd_hash(key) % HASH_SIZE;
 
-	for(ret = data->hash[h]; ret; ret = ret->next)
-		if(!strcmp(ret->key, key)) break;
+	for (ret = data->hash[h]; ret; ret = ret->next)
+		if (!strcmp(ret->key, key)) 
+			break;
 
-	if(ret && rw && ret != data->hash[h]) {
+	if (ret && rw && ret != data->hash[h]) {
 		data->hash[h]->prev = ret;
 		ret->next = data->hash[h];
 		data->hash[h] = ret;
@@ -187,12 +187,11 @@ static void ps_mm_destroy(ps_mm *data)
 	int h;
 	ps_sd *sd, *next;
 
-	for(h = 0; h < HASH_SIZE; h++) {
-		for(sd = data->hash[h]; sd; sd = next) {
+	for (h = 0; h < HASH_SIZE; h++)
+		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_sd_destroy(data, sd);
 		}
-	}
 	
 	mm_free(data->mm, data->hash);
 	mm_destroy(data->mm);
@@ -216,9 +215,8 @@ PS_OPEN_FUNC(mm)
 {
 	ps_mm_debug("open: ps_mm_instance=%x\n", ps_mm_instance);
 	
-	if(!ps_mm_instance) {
+	if (!ps_mm_instance)
 		return FAILURE;
-	}
 	
 	PS_SET_MOD_DATA(ps_mm_instance);
 	
@@ -241,7 +239,7 @@ PS_READ_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RD);
 	
 	sd = ps_sd_lookup(data, key, 0);
-	if(sd) {
+	if (sd) {
 		*vallen = sd->datalen;
 		*val = emalloc(sd->datalen);
 		memcpy(*val, sd->data, sd->datalen);
@@ -261,7 +259,7 @@ PS_WRITE_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RW);
 
 	sd = ps_sd_lookup(data, key, 1);
-	if(!sd) {
+	if (!sd) {
 		sd = ps_sd_new(data, key, val, vallen);
 		ps_mm_debug(stderr, "new one for %s\n", key);
 	} else {
@@ -269,15 +267,15 @@ PS_WRITE_FUNC(mm)
 		mm_free(data->mm, sd->data);
 		sd->datalen = vallen;
 		sd->data = mm_malloc(data->mm, vallen);
-		if(!sd->data) {
+		if (!sd->data) {
 			ps_sd_destroy(data, sd);
 			sd = NULL;
-		} else {
+		} else
 			memcpy(sd->data, val, vallen);
-		}
 	}
 
-	if(sd) time(&sd->ctime);
+	if (sd)
+		time(&sd->ctime);
 
 	mm_unlock(data->mm);
 	
@@ -292,9 +290,8 @@ PS_DESTROY_FUNC(mm)
 	mm_lock(data->mm, MM_LOCK_RW);
 	
 	sd = ps_sd_lookup(data, key, 0);
-	if(sd) {
+	if (sd)
 		ps_sd_destroy(data, sd);
-	}
 	
 	mm_unlock(data->mm);
 	
@@ -314,15 +311,13 @@ PS_GC_FUNC(mm)
 	
 	time(&now);
 
-	for(h = 0; h < HASH_SIZE; h++) {
-		for(sd = data->hash[h]; sd; sd = next) {
+	for (h = 0; h < HASH_SIZE; h++)
+		for (sd = data->hash[h]; sd; sd = next) {
 			next = sd->next;
 			ps_mm_debug("looking at %s\n", sd->key);
-			if((now - sd->ctime) > maxlifetime) {
+			if ((now - sd->ctime) > maxlifetime)
 				ps_sd_destroy(data, sd);
-			}
 		}
-	}
 
 	mm_unlock(data->mm);
 	
