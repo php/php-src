@@ -1,5 +1,5 @@
 --TEST--
-gzdeflate()/gzinflate()
+gzencode()/base64_encode()
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --POST--
