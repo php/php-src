@@ -100,7 +100,7 @@ PHP_FUNCTION(mt_rand);
 PHP_FUNCTION(mt_getrandmax);
 
 PHPAPI long   php_rand(void);
-PHPAPI long   php_rand_range(long min, long max TSRMLS_D);
+PHPAPI long   php_rand_range(long min, long max TSRMLS_DC);
 PHPAPI double php_drand(void);
 PHPAPI long   php_randmax(void);
 
