@@ -88,8 +88,8 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(the_request);
 		ADD_STRING(status_line);
 		ADD_STRING(method);
-		ADD_LONG((long) mtime);
-		ADD_LONG((long) clength);
+		ADD_LONG(mtime);
+		ADD_LONG(clength);
 		ADD_STRING(boundary);
 		ADD_STRING(range);
 		ADD_LONG(chunked);
