@@ -99,7 +99,6 @@ typedef struct PHPFBLink PHPFBLink;
 /* Some functions which should be exported from FBCAccess */
 
 void*        fbaObjectAtIndex();
-void         fbcInitialize();
 void         fbaRelease();
 unsigned int fbaCount();
 
@@ -2333,7 +2332,7 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 
 /* {{{ phpfbSqlResult 
  */
-void phpfbSqlResult (INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int  columnIndex)
+void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int  columnIndex)
 {
 	void** row;
 	if (result->list)
