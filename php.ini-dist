@@ -176,7 +176,7 @@ register_globals	=	On		; Whether or not to register the EGPCS variables as globa
 								; most sense when coupled with track_vars - in which case you can
 								; access all of the GPC variables through the $HTTP_*_VARS[],
 								; variables.
-register_argv_argc	=	On		; This directive tells PHP whether to declare the argv&argc
+register_argc_argv	=	On		; This directive tells PHP whether to declare the argv&argc
 								; variables (that would contain the GET information).  If you
 								; don't use these variables, you should turn it off for
 								; increased performance
