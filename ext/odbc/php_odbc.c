@@ -461,17 +461,20 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 	SDWORD	error;        /* Not used */
 	char	errormsg[255];
 	SWORD	errormsgsize; /* Not used */
+    SQLRETURN ret;
 	ODBCLS_FETCH();
-	
-	SQLError(henv, conn, stmt, state,
-			 &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
-	if (func) {
-		php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
+
+    do {
+	    SQLError(henv, conn, stmt, state,
+			    &error, errormsg, sizeof(errormsg)-1, &errormsgsize);
+	    if (func) {
+		    php_error(E_WARNING, "SQL error: %s, SQL state %s in %s",
 				   errormsg, state, func);
-	} else {
-		php_error(E_WARNING, "SQL error: %s, SQL state %s",
-				   errormsg, state);
-	}
+	    } else {
+		    php_error(E_WARNING, "SQL error: %s, SQL state %s",
+				    errormsg, state);
+	    }
+    } while ( SQL_SUCCEEDED( ret ));
 }
 
 void php3_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
