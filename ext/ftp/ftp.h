@@ -100,6 +100,9 @@ const char*	ftp_syst(ftpbuf_t *ftp);
 /* returns the present working directory (NULL on error) */
 const char*	ftp_pwd(ftpbuf_t *ftp);
 
+/* exec a command [special features], return true on success, false on error */
+int 	ftp_exec(ftpbuf_t *ftp, const char *cmd);
+
 /* changes directories, return true on success, false on error */
 int		ftp_chdir(ftpbuf_t *ftp, const char *dir);
 
