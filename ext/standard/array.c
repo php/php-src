@@ -1125,12 +1125,12 @@ static int php_valid_var_name(char *var_name)
 	
 	len = strlen(var_name);
 	
-	if (!isalpha((int)var_name[0]) && var_name[0] != '_')
+	if (!isalpha((int)((unsigned char *)var_name)[0]) && var_name[0] != '_')
 		return 0;
 	
 	if (len > 1) {
 		for (i=1; i<len; i++) {
-			if (!isalnum((int)var_name[i]) && var_name[i] != '_') {
+			if (!isalnum((int)((unsigned char *)var_name)[i]) && var_name[i] != '_') {
 				return 0;
 			}
 		}

@@ -250,7 +250,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 				/* strip trailing whitespaces */	
 				l = strlen(buf);
 				t = l;
-				while (l-- && isspace((int)buf[l]));
+				while (l-- && isspace(((unsigned char *)buf)[l]));
 				if (l < t) {
 					buf[l + 1] = '\0';
 				}
@@ -261,7 +261,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		/* strip trailing spaces */
 		l = strlen(buf);
 		t = l;
-		while (l && isspace((int)buf[l - 1])) {
+		while (l && isspace(((unsigned char *)buf)[l - 1])) {
 			l--;
 		}
 		if (l < t) buf[l] = '\0';
