@@ -90,6 +90,7 @@ struct _zend_compiler_globals {
 
 	zend_bool short_tags;
 	zend_bool asp_tags;
+	zend_bool allow_call_time_pass_reference;
 
 	/* For extensions support */
 	zend_bool extended_info;	/* generate extension information for debugger/profiler */
