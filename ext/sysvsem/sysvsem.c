@@ -27,6 +27,10 @@
  * sas: Works for me on Linux 2.0.36 and FreeBSD 3.0-current
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 
 #if HAVE_SYSVSEM

@@ -26,6 +26,10 @@
   web site at http://www.fileproplus.com/
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "safe_mode.h"
 #include "fopen_wrappers.h"

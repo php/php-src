@@ -28,10 +28,13 @@
  */
 
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include <php.h>
-#include <php_ini.h>
-#include <php_muscat.h>
+#include "php.h"
+#include "php_ini.h"
+#include "php_muscat.h"
 
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.

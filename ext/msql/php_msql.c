@@ -18,6 +18,10 @@
  
 /* $Id$ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "php.h"
 #include "php_msql.h"
 #include "ext/standard/php_standard.h"
