@@ -75,11 +75,7 @@ function_entry session_functions[] = {
 };
 /* }}} */
 
-#ifdef ZTS
-int ps_globals_id;
-#else
-php_ps_globals ps_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(ps);
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
