@@ -242,7 +242,7 @@ PHP_FUNCTION(ftp_chdir)
 /* }}} */
 
 /* {{{ proto bool ftp_exec(resource stream, string command)
-   Requests execution of a program on the ftp server */
+   Requests execution of a program on the FTP server */
 PHP_FUNCTION(ftp_exec)
 {
 	pval		*z_ftp;
@@ -267,7 +267,7 @@ PHP_FUNCTION(ftp_exec)
 /* }}} */
 
 /* {{{ proto string ftp_mkdir(resource stream, string directory)
-   Creates a directory. Returns the absolute path for the new directory or false on error. */
+   Creates a directory and returns the absolute path for the new directory or false on error */
 PHP_FUNCTION(ftp_mkdir)
 {
 	zval		*z_ftp;
@@ -743,7 +743,7 @@ static char *ze_zval_type_name(zval *arg)
 
 
 /* {{{ proto bool ftp_set_option(resource stream, int option, mixed value)
-   Sets an FTP option. */
+   Sets an FTP option */
 PHP_FUNCTION(ftp_set_option)
 {
 	zval	*z_ftp, *z_value;
@@ -780,7 +780,7 @@ PHP_FUNCTION(ftp_set_option)
 /* }}} */
 
 /* {{{ proto mixed ftp_get_option(resource stream, int option)
-   Gets an FTP option. */
+   Gets an FTP option */
 PHP_FUNCTION(ftp_get_option)
 {
 	zval	*z_ftp;
