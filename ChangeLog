@@ -1,3 +1,19 @@
+1999-12-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * build.mk: Don't search for config.h.stubs in sapi
+
+    * sapi/servlet/config.h.stub
+      sapi/servlet/config.m4
+      sapi/roxen/config.h.stub
+      sapi/roxen/config.m4
+      sapi/phttpd/config.h.stub
+      sapi/phttpd/config.m4
+      sapi/cgi/config.h.in
+      sapi/apache/config.h.stub
+      sapi/aolserver/config.h.stub
+      sapi/aolserver/config.m4:
+    Get rid of some config.h.stubs. Comments are placed into AC_DEFINE()
+
 1999-12-28  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/apache/mod_php4.c:
