@@ -3,8 +3,6 @@ SPL: NoRweindIterator
 --FILE--
 <?php
 
-require_once('examples.inc');
-
 echo "===Current===\n";
 
 $it = new NoRewindIterator(new ArrayIterator(array(0 => 'A', 1 => 'B', 2 => 'C')));
