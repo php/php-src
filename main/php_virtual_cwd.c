@@ -555,6 +555,40 @@ CWD_API DIR *virtual_opendir(const char *pathname)
 	return retval;
 }
 
+CWD_API FILE *virtual_popen(const char *command, const char *type)
+{
+	int command_length;
+	char *command_line;
+	char *ptr;
+	FILE *retval;
+	CWDLS_FETCH();
+
+	command_length = strlen(command);
+
+	ptr = command_line = (char *) malloc(command_length + sizeof("cd  ; ") + CWDG(cwd).cwd_length+1);
+	if (!command_line) {
+		return NULL;
+	}
+	memcpy(ptr, "cd ", sizeof("cd ")-1);
+	ptr += sizeof("cd ");
+
+	if (CWDG(cwd).cwd_length == 0) {
+		*ptr++ = DEFAULT_SLASH;
+	} else {
+		memcpy(ptr, CWDG(cwd).cwd, CWDG(cwd).cwd_length);
+		ptr += CWDG(cwd).cwd_length;
+	}
+	
+	*ptr++ = ' ';
+	*ptr++ = ';';
+	*ptr++ = ' ';
+
+	memcpy(ptr, command, command_length+1);
+	retval = popen(command_line, type);
+	free(command_line);
+	return retval;
+}
+
 #if 0
 
 main(void)
