@@ -1,3 +1,6 @@
+/* $Source$ */
+/* $Id$ */
+
 /* 
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
@@ -29,9 +32,6 @@
    |  Further development by  Sergey Kartashoff <gluke@biosys.net>        |
    +----------------------------------------------------------------------+
  */
-
-/* $Id: php_mnogo.h,v 0.3 2001/01/27 15:30:00 */
-
 
 #ifndef _PHP_MNOGO_H
 #define _PHP_MNOGO_H

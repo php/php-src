@@ -1,5 +1,5 @@
+dnl $Source$
 dnl $Id$
-
 
 PHP_ARG_WITH(mnogosearch,for mnoGoSearch support,
 [  --with-mnogosearch[=DIR]       Include mnoGoSearch support.  DIR is the mnoGoSearch base
