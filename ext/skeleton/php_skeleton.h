@@ -21,7 +21,7 @@
 #ifndef _PHP__EXTNAME__H
 #define _PHP__EXTNAME__H
 
-#if COMPILE_DL
+#ifdef COMPILE_DL__EXTNAME_
 #undef HAVE__EXTNAME_
 #define HAVE__EXTNAME_ 1
 #endif
