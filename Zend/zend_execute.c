@@ -2557,7 +2557,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			/* clean before putting into the cache, since clean
 			   could call dtors, which could use cached hash */
-			zend_hash_clean(*EG(symtable_cache_ptr));
+			zend_hash_clean(EX(function_state).function_symbol_table);
 			*(++EG(symtable_cache_ptr)) = EX(function_state).function_symbol_table;
 		}
 		EG(active_symbol_table) = calling_symbol_table;
