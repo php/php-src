@@ -218,7 +218,6 @@ function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_row,mysqli_fetch_row,NULL)
 	PHP_FALIAS(field_count,mysqli_field_count,NULL)
 	PHP_FALIAS(field_seek,mysqli_field_seek,NULL)
-	PHP_FALIAS(field_tell,mysqli_field_tell,NULL)
 	PHP_FALIAS(free_result,mysqli_free_result,NULL)
 	{NULL, NULL, NULL}
 };

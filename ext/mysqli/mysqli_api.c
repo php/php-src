@@ -1229,7 +1229,7 @@ PHP_FUNCTION(mysqli_ping)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_prepare(object link, string query)
+/* {{{ proto mixed mysqli_prepare(object link, string query)
    Prepare a SQL statement for execution */
 PHP_FUNCTION(mysqli_prepare)
 {
@@ -1261,7 +1261,7 @@ PHP_FUNCTION(mysqli_prepare)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_get_metadata(object stmt)
+/* {{{ proto mixed mysqli_get_metadata(object stmt)
    return result set from statement */
 PHP_FUNCTION(mysqli_get_metadata)
 {
