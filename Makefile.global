@@ -49,6 +49,7 @@ install-su: install-pear install-tester
 test: $(SAPI_CLI_PATH)
 	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PATH) \
 	 TEST_PHP_SRCDIR=$(top_srcdir) \
+	 CC=$(CC) \
 			$(top_builddir)/$(SAPI_CLI_PATH) $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
