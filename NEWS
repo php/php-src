@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Changed foreach() to throw an exception if IteratorAggregate::getIterator()
   does not return an Iterator. (Marcus)
 - Changed phpize not to require libtool. (Jani)
+- Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
+  api function returns -1 (Georg)
 - Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed build system to always use bundled libtool files. (Jani)
 - Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
