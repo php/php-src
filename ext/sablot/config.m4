@@ -25,10 +25,10 @@ if test "$PHP_SABLOT" != "no"; then
     AC_MSG_ERROR(Please reinstall the Sablotron distribution)
   fi
 
-  AC_ADD_INCLUDE($SABLOT_DIR/include)
+  PHP_ADD_INCLUDE($SABLOT_DIR/include)
 
   PHP_SUBST(SABLOT_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH(sablot, $SABLOT_DIR/lib, SABLOT_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(sablot, $SABLOT_DIR/lib, SABLOT_SHARED_LIBADD)
 
   if test -z "$PHP_EXPAT_DIR"; then
     PHP_EXPAT_DIR=""
@@ -38,16 +38,16 @@ if test "$PHP_SABLOT" != "no"; then
   for i in $PHP_EXPAT_DIR $SABLOT_DIR; do
     if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.so; then
       AC_DEFINE(HAVE_LIBEXPAT2,1,[ ])
-      AC_ADD_LIBRARY_WITH_PATH(expat, $i/lib)
-      AC_ADD_INCLUDE($i/include)
+      PHP_ADD_LIBRARY_WITH_PATH(expat, $i/lib)
+      PHP_ADD_INCLUDE($i/include)
       AC_CHECK_LIB(sablot, SablotSetEncoding, AC_DEFINE(HAVE_SABLOT_SET_ENCODING,1,[ ]))
       testval=yes
     fi
   done
 
   if test "$testval" = "no"; then
-    AC_ADD_LIBRARY(xmlparse)
-    AC_ADD_LIBRARY(xmltok)
+    PHP_ADD_LIBRARY(xmlparse)
+    PHP_ADD_LIBRARY(xmltok)
   fi
   
   AC_DEFINE(HAVE_SABLOT,1,[ ])

@@ -20,8 +20,8 @@ if test "$PHP_MM" != "no"; then
     AC_MSG_ERROR(cannot find mm library)
   fi
   
-  AC_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/lib, SESSION_SHARED_LIBADD)
-  AC_ADD_INCLUDE($MM_DIR/include)
+  PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/lib, SESSION_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($MM_DIR/include)
   AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])
   PHP_MODULE_PTR(phpext_ps_mm_ptr)
 fi

@@ -10,7 +10,7 @@ AC_ARG_WITH(phttpd,
 	fi
 	PHP_BUILD_THREAD_SAFE
 	PHTTPD_DIR=$withval
-	AC_ADD_INCLUDE($PHTTPD_DIR/include)
+	PHP_ADD_INCLUDE($PHTTPD_DIR/include)
 	AC_DEFINE(HAVE_PHTTPD,1,[Whether you have phttpd])
 	PHP_SAPI=phttpd
 	PHP_BUILD_SHARED

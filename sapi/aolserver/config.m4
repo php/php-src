@@ -20,7 +20,7 @@ if test "$PHP_AOLSERVER" != "no"; then
     AC_MSG_ERROR(Please specify the path to the root of AOLserver using --with-aolserver=DIR)
   fi
   PHP_BUILD_THREAD_SAFE
-  AC_ADD_INCLUDE($PHP_AOLSERVER_SRC/include)
+  PHP_ADD_INCLUDE($PHP_AOLSERVER_SRC/include)
   AC_DEFINE(HAVE_AOLSERVER,1,[Whether you have AOLserver])
   PHP_SAPI=aolserver
   PHP_BUILD_SHARED

@@ -17,7 +17,7 @@ if test "$PHP_MCRYPT" != "no"; then
     AC_MSG_ERROR(Please reinstall libmcrypt - I cannot find mcrypt.h)
   fi
 
-  AC_ADD_INCLUDE($MCRYPT_DIR/include)
+  PHP_ADD_INCLUDE($MCRYPT_DIR/include)
   PHP_SUBST(MCRYPT_SHARED_LIBADD)
   old_LDFLAGS="$LDFLAGS"
   LDFLAGS="$LDFLAGS $ld_runpath_switch$MCRYPT_DIR/lib -L$MCRYPT_DIR/lib"
@@ -28,14 +28,14 @@ if test "$PHP_MCRYPT" != "no"; then
   LIBS=$old_LIBS
   LDFLAGS="$old_LDFLAGS"
   if test "$ac_cv_lib_mcrypt_mcrypt_module_open" = "yes"; then
-    AC_ADD_LIBRARY(ltdl)
+    PHP_ADD_LIBRARY(ltdl)
     AC_DEFINE(HAVE_LIBMCRYPT24,1,[ ])
   elif test "$ac_cv_lib_mcrypt_init_mcrypt" = "yes"; then
     AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
   else
     AC_MSG_ERROR(Sorry, I was not able to diagnose which libmcrypt version you have installed.)
   fi
-  AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
   AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 
   PHP_EXTENSION(mcrypt, $ext_shared)

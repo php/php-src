@@ -8,7 +8,7 @@ if test "$PHP_MCAL" != "no"; then
   if test "$PHP_MCAL" = "yes"; then
     MCAL_DIR=$MCAL_DEFAULT_SEARCH
   else
-    AC_EXPAND_PATH($PHP_MCAL, MCAL_DIR)
+    PHP_EXPAND_PATH($PHP_MCAL, MCAL_DIR)
   fi
 
   for i in $MCAL_DIR $MCAL_DIR/mcal $MCAL_DIR/mcal/include $MCAL_DIR/include/mcal $MCAL_DIR/include; do
@@ -39,8 +39,8 @@ if test "$PHP_MCAL" != "no"; then
     AC_MSG_ERROR(Unable to locate your libmcal library files - libmcal.a should be in the directory you specify or in the lib/ subdirectory below it - default search location is $MCAL_DEFAULT_SEARCH)
   fi
 
-  AC_ADD_INCLUDE($MCAL_INCLUDE)
-  AC_ADD_LIBRARY_WITH_PATH(mcal, $MCAL_LIBRARY, MCAL_SHARED_LIBADD)
+  PHP_ADD_INCLUDE($MCAL_INCLUDE)
+  PHP_ADD_LIBRARY_WITH_PATH(mcal, $MCAL_LIBRARY, MCAL_SHARED_LIBADD)
   PHP_SUBST(MCAL_SHARED_LIBADD)
   AC_DEFINE(HAVE_MCAL,1,[ ])
   PHP_EXTENSION(mcal,$ext_shared)

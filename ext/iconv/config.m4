@@ -23,13 +23,13 @@ if test "$PHP_ICONV" != "no"; then
     AC_MSG_ERROR(Please reinstall the iconv library)
   fi
   
-  AC_ADD_INCLUDE($ICONV_DIR/include)
+  PHP_ADD_INCLUDE($ICONV_DIR/include)
 
   PHP_SUBST(ICONV_SHARED_LIBADD)
 
   if test -f $ICONV_DIR/lib/libconv.a -o -f $ICONV_DIR/lib/libiconv.so ; then
     AC_CHECK_LIB(iconv, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
-    AC_ADD_LIBRARY_WITH_PATH(iconv, $ICONV_DIR/lib, ICONV_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(iconv, $ICONV_DIR/lib, ICONV_SHARED_LIBADD)
   else
     AC_CHECK_LIB(c, iconv_open, AC_DEFINE(HAVE_ICONV, 1, [ ]))
   fi

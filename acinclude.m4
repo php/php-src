@@ -35,20 +35,20 @@ AC_DEFUN(PHP_SETUP_OPENSSL,[
   ])
   CPPFLAGS=$old_CPPFLAGS
 
-  AC_ADD_LIBPATH($OPENSSL_DIR/lib)
+  PHP_ADD_LIBPATH($OPENSSL_DIR/lib)
 
   AC_CHECK_LIB(crypto, CRYPTO_free, [
-    AC_ADD_LIBRARY(crypto)
+    PHP_ADD_LIBRARY(crypto)
   ],[
     AC_MSG_ERROR(libcrypto not found!)
   ])
 
   AC_CHECK_LIB(ssl, SSL_CTX_set_ssl_version, [
-    AC_ADD_LIBRARY(ssl)
+    PHP_ADD_LIBRARY(ssl)
   ],[
     AC_MSG_ERROR(libssl not found!)
   ])
-  AC_ADD_INCLUDE($OPENSSL_INC)
+  PHP_ADD_INCLUDE($OPENSSL_INC)
 ])
 
 dnl PHP_EVAL_LIBLINE(LINE, SHARED-LIBADD)
@@ -62,11 +62,11 @@ AC_DEFUN(PHP_EVAL_LIBLINE,[
     case "$ac_i" in
     -l*)
       ac_ii=`echo $ac_i|cut -c 3-`
-      AC_ADD_LIBRARY($ac_ii,,$2)
+      PHP_ADD_LIBRARY($ac_ii,,$2)
     ;;
     -L*)
       ac_ii=`echo $ac_i|cut -c 3-`
-      AC_ADD_LIBPATH($ac_ii,$2)
+      PHP_ADD_LIBPATH($ac_ii,$2)
     ;;
     esac
   done
@@ -82,7 +82,7 @@ AC_DEFUN(PHP_EVAL_INCLINE,[
     case "$ac_i" in
     -I*)
       ac_ii=`echo $ac_i|cut -c 3-`
-      AC_ADD_INCLUDE($ac_ii)
+      PHP_ADD_INCLUDE($ac_ii)
     ;;
     esac
   done
@@ -522,11 +522,11 @@ AC_DEFUN(AC_PHP_ONCE,[
 ])
 
 dnl
-dnl AC_EXPAND_PATH(path, variable)
+dnl PHP_EXPAND_PATH(path, variable)
 dnl
 dnl expands path to an absolute path and assigns it to variable
 dnl
-AC_DEFUN(AC_EXPAND_PATH,[
+AC_DEFUN(PHP_EXPAND_PATH,[
   if test -z "$1" || echo "$1" | grep '^/' >/dev/null ; then
     $2="$1"
   else
@@ -539,13 +539,13 @@ AC_DEFUN(AC_EXPAND_PATH,[
 ])
 
 dnl
-dnl AC_ADD_LIBPATH(path[, shared-libadd])
+dnl PHP_ADD_LIBPATH(path[, shared-libadd])
 dnl
 dnl add a library to linkpath/runpath
 dnl
-AC_DEFUN(AC_ADD_LIBPATH,[
+AC_DEFUN(PHP_ADD_LIBPATH,[
   if test "$1" != "/usr/lib"; then
-    AC_EXPAND_PATH($1, ai_p)
+    PHP_EXPAND_PATH($1, ai_p)
     if test "$ext_shared" = "yes" && test -n "$2"; then
       $2="-R$1 -L$1 [$]$2"
     else
@@ -559,11 +559,11 @@ AC_DEFUN(AC_ADD_LIBPATH,[
 ])
 
 dnl
-dnl AC_BUILD_RPATH()
+dnl PHP_BUILD_RPATH()
 dnl
 dnl builds RPATH from PHP_RPATHS
 dnl
-AC_DEFUN(AC_BUILD_RPATH,[
+AC_DEFUN(PHP_BUILD_RPATH,[
   if test "$PHP_RPATH" = "yes" && test -n "$PHP_RPATHS"; then
     OLD_RPATHS="$PHP_RPATHS"
     PHP_RPATHS=""
@@ -576,13 +576,13 @@ AC_DEFUN(AC_BUILD_RPATH,[
 ])
 
 dnl
-dnl AC_ADD_INCLUDE(path)
+dnl PHP_ADD_INCLUDE(path)
 dnl
 dnl add a include path
 dnl
-AC_DEFUN(AC_ADD_INCLUDE,[
+AC_DEFUN(PHP_ADD_INCLUDE,[
   if test "$1" != "/usr/include"; then
-    AC_EXPAND_PATH($1, ai_p)
+    PHP_EXPAND_PATH($1, ai_p)
     AC_PHP_ONCE(INCLUDEPATH, $ai_p, [
       INCLUDES="$INCLUDES -I$ai_p"
     ])
@@ -594,11 +594,11 @@ AC_DEFUN(PHP_X_ADD_LIBRARY,[
 ])
 
 dnl
-dnl AC_ADD_LIBRARY(library[, append[, shared-libadd]])
+dnl PHP_ADD_LIBRARY(library[, append[, shared-libadd]])
 dnl
 dnl add a library to the link line
 dnl
-AC_DEFUN(AC_ADD_LIBRARY,[
+AC_DEFUN(PHP_ADD_LIBRARY,[
  case "$1" in
  c|c_r|pthread*) ;;
  *)
@@ -608,7 +608,7 @@ ifelse($3,,[
    if test "$ext_shared" = "yes"; then
      PHP_X_ADD_LIBRARY($1,$2,$3)
    else
-     AC_ADD_LIBRARY($1,$2)
+     PHP_ADD_LIBRARY($1,$2)
    fi
 ])
   ;;
@@ -616,49 +616,52 @@ ifelse($3,,[
 ])
 
 dnl
-dnl AC_ADD_LIBRARY_DEFER(library[, append])
+dnl PHP_ADD_LIBRARY_DEFER(library[, append])
 dnl
 dnl add a library to the link line (deferred)
-AC_DEFUN(AC_ADD_LIBRARY_DEFER,[
+AC_DEFUN(PHP_ADD_LIBRARY_DEFER,[
   ifelse($#, 1, DLIBS="-l$1 $DLIBS", DLIBS="$DLIBS -l$1")
 ])
 
 dnl
-dnl AC_ADD_LIBRARY_WITH_PATH(library, path[, shared-libadd])
+dnl PHP_ADD_LIBRARY_WITH_PATH(library, path[, shared-libadd])
 dnl
 dnl add a library to the link line and path to linkpath/runpath.
 dnl if shared-libadd is not empty and $ext_shared is yes,
 dnl shared-libadd will be assigned the library information
 dnl
-AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH,[
+AC_DEFUN(PHP_ADD_LIBRARY_WITH_PATH,[
 ifelse($3,,[
   if test -n "$2"; then
-    AC_ADD_LIBPATH($2)
+    PHP_ADD_LIBPATH($2)
   fi
-  AC_ADD_LIBRARY($1)
+  PHP_ADD_LIBRARY($1)
 ],[
   if test "$ext_shared" = "yes"; then
     $3="-l$1 [$]$3"
     if test -n "$2"; then
-      AC_ADD_LIBPATH($2,$3)
+      PHP_ADD_LIBPATH($2,$3)
     fi
   else
-    AC_ADD_LIBRARY_WITH_PATH($1,$2)
+    PHP_ADD_LIBRARY_WITH_PATH($1,$2)
   fi
 ])
 ])
 
 dnl
-dnl AC_ADD_LIBRARY_DEFER_WITH_PATH(library, path)
+dnl PHP_ADD_LIBRARY_DEFER_WITH_PATH(library, path)
 dnl
 dnl add a library to the link line (deferred)
 dnl and path to linkpath/runpath (not deferred)
 dnl
-AC_DEFUN(AC_ADD_LIBRARY_DEFER_WITH_PATH,[
-  AC_ADD_LIBPATH($2)
-  AC_ADD_LIBRARY_DEFER($1)
+AC_DEFUN(PHP_ADD_LIBRARY_DEFER_WITH_PATH,[
+  PHP_ADD_LIBPATH($2)
+  PHP_ADD_LIBRARY_DEFER($1)
 ])
 
+dnl
+dnl Set libtool variable
+dnl
 AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
   LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
 ])
@@ -666,7 +669,7 @@ AC_DEFUN(AM_SET_LIBTOOL_VARIABLE,[
 dnl
 dnl Check for cc option
 dnl
-AC_DEFUN(AC_CHECK_CC_OPTION,[
+AC_DEFUN(PHP_CHECK_CC_OPTION,[
   echo "main(){return 0;}" > conftest.$ac_ext
   opt="$1"
   changequote({,})
@@ -711,7 +714,7 @@ PHP_SUBST(HSREGEX)
 dnl
 dnl See if we have broken header files like SunOS has.
 dnl
-AC_DEFUN(AC_MISSING_FCLOSE_DECL,[
+AC_DEFUN(PHP_MISSING_FCLOSE_DECL,[
   AC_MSG_CHECKING([for fclose declaration])
   AC_TRY_COMPILE([#include <stdio.h>],[int (*func)() = fclose],[
     AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
@@ -725,7 +728,7 @@ AC_DEFUN(AC_MISSING_FCLOSE_DECL,[
 dnl
 dnl Check for broken sprintf()
 dnl
-AC_DEFUN(AC_BROKEN_SPRINTF,[
+AC_DEFUN(PHP_AC_BROKEN_SPRINTF,[
   AC_CACHE_CHECK(whether sprintf is broken, ac_cv_broken_sprintf,[
     AC_TRY_RUN([main() {char buf[20];exit(sprintf(buf,"testing 123")!=11); }],[
       ac_cv_broken_sprintf=no
@@ -842,7 +845,7 @@ dnl http://www.sas.com/standards/large.file/x_open.20Mar96.html
 
 dnl Written by Paul Eggert <eggert@twinsun.com>.
 
-AC_DEFUN(AC_SYS_LFS,
+AC_DEFUN(PHP_SYS_LFS,
 [dnl
   # If available, prefer support for large files unless the user specified
   # one of the CPPFLAGS, LDFLAGS, or LIBS variables.
@@ -877,7 +880,7 @@ AC_DEFUN(AC_SYS_LFS,
   esac
 ])
 
-AC_DEFUN(AC_SOCKADDR_SA_LEN,[
+AC_DEFUN(PHP_SOCKADDR_SA_LEN,[
   AC_CACHE_CHECK([for field sa_len in struct sockaddr],ac_cv_sockaddr_sa_len,[
     AC_TRY_COMPILE([#include <sys/types.h>
 #include <sys/socket.h>],

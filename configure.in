@@ -213,10 +213,10 @@ INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
 
 
 AC_CHECK_LIB(socket, socket, [
- AC_ADD_LIBRARY(socket)
+ PHP_ADD_LIBRARY(socket)
  AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
   AC_CHECK_LIB(socket, htonl, [
-   AC_ADD_LIBRARY(socket)
+   PHP_ADD_LIBRARY(socket)
    ])])
 
 dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
@@ -231,27 +231,27 @@ unset ac_cv_func_yp_get_default_domain
 if test "$php_no_nsl_checks" != "yes"; then
 
 AC_CHECK_LIB(nsl, gethostname, [
- AC_ADD_LIBRARY(nsl)
+ PHP_ADD_LIBRARY(nsl)
  AC_DEFINE(HAVE_LIBNSL,1,[ ]) ],[
  AC_CHECK_LIB(nsl, gethostbyaddr, [
-  AC_ADD_LIBRARY(nsl)
+  PHP_ADD_LIBRARY(nsl)
   AC_DEFINE(HAVE_LIBNSL,1,[ ]) ], [])
 ])
 
 fi
 
 AC_CHECK_LIB(crypt, crypt, [
- AC_ADD_LIBRARY(crypt)
+ PHP_ADD_LIBRARY(crypt)
  AC_DEFINE(HAVE_LIBCRYPT,1,[ ]) ], [])
 
-AC_CHECK_LIB(dl, dlopen,[AC_ADD_LIBRARY(dl)])
+AC_CHECK_LIB(dl, dlopen,[PHP_ADD_LIBRARY(dl)])
 
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
 AC_CHECK_LIB(m, sin)
 
 AC_CHECK_LIB(bind, inet_aton, [
-  AC_ADD_LIBRARY(bind)
+  PHP_ADD_LIBRARY(bind)
   AC_DEFINE(HAVE_LIBBIND,1,[Whether you have bind]) ], [
     AC_CHECK_LIB(bind, __inet_aton, [], [
       AC_CHECK_LIB(resolv, inet_aton)
@@ -285,7 +285,7 @@ if test "`uname -s 2>/dev/null`" != "QNX"; then
 else
 	AC_CHECK_HEADERS(dirent.h)
 fi
-AC_MISSING_FCLOSE_DECL
+PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS(
 alloca.h \
@@ -334,7 +334,7 @@ PHP_SOCKLEN_T
 AC_CHECK_SIZEOF(long, 8)
 AC_CHECK_SIZEOF(int, 4)
 
-test -d /usr/ucblib && AC_ADD_LIBPATH(/usr/ucblib)
+test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -435,7 +435,7 @@ fi
 AC_REPLACE_FUNCS(strlcat strlcpy getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
-AC_BROKEN_SPRINTF
+PHP_AC_BROKEN_SPRINTF
 PHP_DECLARED_TIMEZONE
 PHP_TIME_R_TYPE
 PHP_READDIR_R_TYPE
@@ -566,8 +566,8 @@ if test "$PHP_LIBGCC" = "yes"; then
   if test -z "$libgcc_libpath"; then
     AC_MSG_ERROR(Cannot locate libgcc. Make sure that gcc is in your path)
   fi
-  AC_ADD_LIBPATH($libgcc_libpath)
-  AC_ADD_LIBRARY(gcc, yes)
+  PHP_ADD_LIBPATH($libgcc_libpath)
+  PHP_ADD_LIBRARY(gcc, yes)
 fi
 
 PHP_ARG_ENABLE(short-tags,whether to enable short tags by default,
@@ -589,7 +589,7 @@ PHP_ARG_ENABLE(dmalloc,whether to enable dmalloc,
 
 if test "$PHP_DMALLOC" = "yes"; then
   AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
-  AC_ADD_LIBRARY(dmalloc)
+  PHP_ADD_LIBRARY(dmalloc)
   CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
 fi
 
@@ -720,7 +720,7 @@ PEAR_INSTALLDIR="$prefix/lib/php"
 
 INCLUDE_PATH=".:$PEAR_INSTALLDIR"
 
-AC_BUILD_RPATH
+PHP_BUILD_RPATH
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 

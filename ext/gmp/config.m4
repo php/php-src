@@ -18,10 +18,10 @@ if test "$PHP_GMP" != "no"; then
   if test -z "$GMP_DIR"; then
     AC_MSG_ERROR(Unable to locate gmp.h)
   fi
-  AC_ADD_INCLUDE($GMP_DIR/include)
+  PHP_ADD_INCLUDE($GMP_DIR/include)
 	
 
   PHP_EXTENSION(gmp, $ext_shared)
   AC_DEFINE(HAVE_GMP, 1, [ ])
-  AC_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/lib)
+  PHP_ADD_LIBRARY_WITH_PATH(gmp, $GMP_DIR/lib)
 fi

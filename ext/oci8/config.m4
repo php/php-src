@@ -43,16 +43,16 @@ if test "$PHP_OCI8" != "no"; then
   fi
 
   if test -d "$OCI8_DIR/rdbms/public"; then
-  	AC_ADD_INCLUDE($OCI8_DIR/rdbms/public)
+  	PHP_ADD_INCLUDE($OCI8_DIR/rdbms/public)
   fi
   if test -d "$OCI8_DIR/rdbms/demo"; then
-  	AC_ADD_INCLUDE($OCI8_DIR/rdbms/demo)
+  	PHP_ADD_INCLUDE($OCI8_DIR/rdbms/demo)
   fi
   if test -d "$OCI8_DIR/network/public"; then
-  	AC_ADD_INCLUDE($OCI8_DIR/network/public)
+  	PHP_ADD_INCLUDE($OCI8_DIR/network/public)
   fi
   if test -d "$OCI8_DIR/plsql/public"; then
-  	AC_ADD_INCLUDE($OCI8_DIR/plsql/public)
+  	PHP_ADD_INCLUDE($OCI8_DIR/plsql/public)
   fi
 
   if test -f "$OCI8_DIR/lib/sysliblist"; then
@@ -64,15 +64,15 @@ if test "$PHP_OCI8" != "no"; then
   AC_OCI8_VERSION($OCI8_DIR)
   case $OCI8_VERSION in
 	8.0)
-  	  AC_ADD_LIBRARY_WITH_PATH(nlsrtl3, "", OCI8_SHARED_LIBADD)
-  	  AC_ADD_LIBRARY_WITH_PATH(core4, "", OCI8_SHARED_LIBADD)
-  	  AC_ADD_LIBRARY_WITH_PATH(psa, "", OCI8_SHARED_LIBADD)
-  	  AC_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBRARY_WITH_PATH(nlsrtl3, "", OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBRARY_WITH_PATH(core4, "", OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBRARY_WITH_PATH(psa, "", OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBRARY_WITH_PATH(clntsh, $OCI8_DIR/lib, OCI8_SHARED_LIBADD)
 	  ;;
 
 	8.1)
-  	  AC_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
-  	  AC_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBRARY(clntsh, 1, OCI8_SHARED_LIBADD)
+  	  PHP_ADD_LIBPATH($OCI8_DIR/lib, OCI8_SHARED_LIBADD)
 	  ;;
 	*)
       AC_MSG_ERROR(Unsupported Oracle version!)

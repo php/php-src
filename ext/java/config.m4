@@ -28,8 +28,8 @@ AC_ARG_WITH(java,
     fi
 
     if test -d $withval/lib/kaffe; then
-      AC_ADD_LIBPATH($withval/lib)
-      AC_ADD_LIBPATH($withval/lib/kaffe)
+      PHP_ADD_LIBPATH($withval/lib)
+      PHP_ADD_LIBPATH($withval/lib/kaffe)
 
       JAVA_CFLAGS="-DKAFFE"
       JAVA_INCLUDE=-I$withval/include/kaffe
@@ -73,10 +73,10 @@ AC_ARG_WITH(java,
         if test -f $i/$java_libext; then 
           JAVA_LIB=java
           JAVA_LIBPATH=$i
-          test -d $i/hotspot && AC_ADD_LIBPATH($i/hotspot)
-          test -d $i/classic && AC_ADD_LIBPATH($i/classic)
-          test -d $i/server && AC_ADD_LIBPATH($i/server)
-          test -d $i/native_threads && AC_ADD_LIBPATH($i/native_threads)
+          test -d $i/hotspot && PHP_ADD_LIBPATH($i/hotspot)
+          test -d $i/classic && PHP_ADD_LIBPATH($i/classic)
+          test -d $i/server && PHP_ADD_LIBPATH($i/server)
+          test -d $i/native_threads && PHP_ADD_LIBPATH($i/native_threads)
         fi
       done
 
@@ -89,14 +89,14 @@ AC_ARG_WITH(java,
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
-    AC_ADD_LIBPATH($JAVA_LIBPATH)
+    PHP_ADD_LIBPATH($JAVA_LIBPATH)
     JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/$java_libext\"'"
 
     if test "$PHP_SAPI" != "servlet"; then
       PHP_EXTENSION(java, shared)
 
       if test "$PHP_SAPI" = "cgi"; then
-        AC_ADD_LIBRARY($JAVA_LIB)
+        PHP_ADD_LIBRARY($JAVA_LIB)
       fi
 
       INSTALL_IT="$INSTALL_IT; \$(srcdir)/build/shtool mkdir -p -f -m 0755 \$(libdir)"

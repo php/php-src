@@ -44,7 +44,7 @@ if test "$PHP_DOM" != "no"; then
 
   PHP_DOM_CHECK_VERSION
 
-  AC_ADD_INCLUDE($DOMXML_DIR/include)
+  PHP_ADD_INCLUDE($DOMXML_DIR/include)
 
   if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.s? ; then
     DOM_LIBNAME="xml2"
@@ -53,7 +53,7 @@ if test "$PHP_DOM" != "no"; then
   fi
 
   PHP_SUBST(DOMXML_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
 
   if test $HAVE_ZLIB; then
     AC_MSG_CHECKING([for zlib (needed by DOM support)])
@@ -65,7 +65,7 @@ if test "$PHP_DOM" != "no"; then
      fi
      LIBS="$LIBS -L$withval/lib -lz"
      AC_CHECK_LIB(z,deflate, ,[AC_MSG_RESULT(no)],)
-     AC_ADD_LIBRARY_WITH_PATH(z, $withval/lib)
+     PHP_ADD_LIBRARY_WITH_PATH(z, $withval/lib)
     ],[
      AC_MSG_RESULT(no)
      AC_MSG_WARN(If configure fails try --with-zlib=<DIR>)
@@ -76,7 +76,7 @@ if test "$PHP_DOM" != "no"; then
   fi
 
   AC_DEFINE(HAVE_DOMXML,1,[ ])
-  AC_ADD_LIBRARY(z)
+  PHP_ADD_LIBRARY(z)
 
   PHP_EXTENSION(domxml, $ext_shared)
 fi

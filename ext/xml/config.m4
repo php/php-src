@@ -30,8 +30,8 @@ if test "$PHP_XML" != "no"; then
     LIB_BUILD($ext_builddir/expat,$ext_shared,yes)
     LIB_BUILD($ext_builddir/expat/xmlparse,$ext_shared,yes)
     LIB_BUILD($ext_builddir/expat/xmltok,$ext_shared,yes)
-    AC_ADD_INCLUDE($ext_srcdir/expat/xmltok)
-    AC_ADD_INCLUDE($ext_srcdir/expat/xmlparse)
+    PHP_ADD_INCLUDE($ext_srcdir/expat/xmltok)
+    PHP_ADD_INCLUDE($ext_srcdir/expat/xmlparse)
     PHP_FAST_OUTPUT($ext_builddir/expat/Makefile $ext_builddir/expat/xmlparse/Makefile $ext_builddir/expat/xmltok/Makefile)
 
   else
@@ -39,14 +39,14 @@ if test "$PHP_XML" != "no"; then
     EXPAT_DIR="$withval"
     if test -f $EXPAT_DIR/lib/libexpat.a -o -f $EXPAT_DIR/lib/libexpat.so ; then
         AC_DEFINE(HAVE_LIBEXPAT2, 1, [ ])
-        AC_ADD_INCLUDE($EXPAT_DIR/include)
+        PHP_ADD_INCLUDE($EXPAT_DIR/include)
     else
         AC_MSG_RESULT(not found)
         AC_MSG_ERROR(Please reinstall the expat distribution)
     fi
 
     PHP_SUBST(EXPAT_SHARED_LIBADD)
-    AC_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, EXPAT_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, EXPAT_SHARED_LIBADD)
     PHP_EXTENSION(xml, $ext_shared)
   fi
 fi

@@ -14,7 +14,7 @@ AC_DEFUN(PHP_GD_JPEG,[
             GD_LIBS="$GD_LIBS -ljpeg"
             GD_LFLAGS="$GD_LFLAGS -L$withval/lib"
           else
-            AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+            PHP_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
           fi
           LIBS="$LIBS -L$withval/lib -ljpeg"
         ],[
@@ -36,8 +36,8 @@ AC_DEFUN(PHP_GD_XPM,[
           LIBS="$LIBS -L$withval/lib -lX11"
           AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [LIBS="$LIBS -L$withval/lib -lXpm"],[AC_MSG_RESULT(no)],)
           LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(Xpm, $withval/lib)
-          AC_ADD_LIBRARY_WITH_PATH(X11, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(Xpm, $withval/lib)
+          PHP_ADD_LIBRARY_WITH_PATH(X11, $withval/lib)
           LIBS="$LIBS -L$withval/lib -lXpm -L$withval/lib -lX11"
         ],[
           AC_MSG_RESULT(no)
@@ -47,11 +47,11 @@ AC_DEFUN(PHP_GD_XPM,[
 
 
 AC_DEFUN(PHP_GD_CHECK_VERSION,[
+        AC_CHECK_LIB(z,  compress,      LIBS="-lz $LIBS",,)
+        AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15,1,[ ]) ])
         AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,1,[ ]) ])
-        AC_CHECK_LIB(z,  compress,      LIBS="-lz $LIBS",,)
-        AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
         AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE,1,[ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,  1, [ ])])
         AC_CHECK_LIB(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF,  1, [ ])])
@@ -100,7 +100,7 @@ AC_ARG_WITH(gd,
         GD_LIBS="-lgd $GD_LIBS"
       else
         AC_MSG_RESULT(yes (static))
-        AC_ADD_LIBRARY(gd)
+        PHP_ADD_LIBRARY(gd)
       fi
 
       old_LDFLAGS=$LDFLAGS
@@ -112,8 +112,8 @@ dnl Check the capabilities of GD lib...
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
       if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-        AC_ADD_LIBRARY(png)
-        AC_ADD_LIBRARY(z)
+        PHP_ADD_LIBRARY(png)
+        PHP_ADD_LIBRARY(z)
         if test "$shared" = "yes"; then
           GD_LIBS="$GD_LIBS -lpng -lz"
         fi
@@ -153,7 +153,7 @@ dnl A whole whack of possible places where this might be
           GD_LFLAGS="-L$GD_LIB $GD_LFLAGS"
         else
           AC_MSG_RESULT(yes (static))
-          AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
+          PHP_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
         fi
         old_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -L$GD_LIB"
@@ -165,8 +165,8 @@ dnl Check the capabilities of GD lib...
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
         if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-          AC_ADD_LIBRARY(z)
-          AC_ADD_LIBRARY(png)
+          PHP_ADD_LIBRARY(z)
+          PHP_ADD_LIBRARY(png)
           if test "$shared" = "yes"; then
             GD_LIBS="$GD_LIBS -lpng -lz"
           fi
@@ -210,12 +210,12 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
         GD_LIBS="$GD_LIBS -lttf"
         GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
       else
-        AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
+        PHP_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
       fi
       if test -z "$TTF_INC_DIR"; then
         TTF_INC_DIR="$TTF_DIR/include"
       fi
-      AC_ADD_INCLUDE($TTF_INC_DIR)
+      PHP_ADD_INCLUDE($TTF_INC_DIR)
       AC_MSG_RESULT(yes)
     else
       AC_MSG_RESULT(no)
@@ -242,12 +242,12 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       fi
       
       if test "$T1_DIR" != "no"; then
-        AC_ADD_INCLUDE("$T1_DIR/include")
+        PHP_ADD_INCLUDE("$T1_DIR/include")
         if test "$shared" = "yes"; then
           GD_LIBS="$GD_LIBS -lt1"
           GD_LFLAGS="$GD_LFLAGS -L$T1_DIR/lib"
         else
-          AC_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib")
+          PHP_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib")
         fi
         LIBS="$LIBS -L$T1_DIR/lib -lt1"
       fi 
@@ -271,8 +271,8 @@ dnl SuSE 6.x package structure
     GD_INCLUDE="/usr/include/gd"
   fi
 
-  AC_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
-  AC_ADD_INCLUDE($GD_INCLUDE)
+  PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
+  PHP_ADD_INCLUDE($GD_INCLUDE)
   PHP_EXTENSION(gd, $shared)
   if test "$shared" != "yes"; then
     GD_STATIC="libphpext_gd.la"

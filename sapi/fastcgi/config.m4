@@ -10,7 +10,7 @@ AC_ARG_WITH(fastcgi,
   test -f "$FASTCGIPATH/include/fastcgi.h" || AC_MSG_ERROR(Unable to find fastcgi.h in $FASTCGIPATH/include)
   PHP_SAPI=fastcgi
   PHP_LIBS=$FASTCGIPATH/lib/libfcgi.a
-  AC_ADD_INCLUDE($FASTCGIPATH/include)
+  PHP_ADD_INCLUDE($FASTCGIPATH/include)
   EXT_PROGRAM_LDADD="$EXT_PROGRAM_LDADD $FASTCGIPATH/lib/libfcgi.a"
   INSTALL_IT="\$(INSTALL) -m 0755 $SAPI_PROGRAM \$(bindir)/$SAPI_FASTCGI"
   RESULT="yes"
