@@ -501,9 +501,16 @@ ZEND_FUNCTION(get_class)
 		RETURN_FALSE;
 	}
 
-	if(Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
+	if (Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
 	   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
-		RETURN_FALSE;
+		zend_class_entry *ce, **_ce;
+
+		if (((_ce = zend_get_class_entry(*arg)) == NULL) || ((ce = *_ce) == NULL)) {
+			RETURN_FALSE;
+		}
+
+		name = ce->name;
+		name_len = ce->name_length;
 	}
 
 	RETURN_STRINGL(name, name_len, 1);
@@ -526,9 +533,16 @@ ZEND_FUNCTION(get_parent_class)
 		char *name;
 		zend_uint name_length;
 		
-		if(Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
+		if (Z_OBJ_HT_PP(arg)->get_class_name == NULL ||
 		   Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) != SUCCESS) {
-			RETURN_FALSE;
+			zend_class_entry *ce, **_ce;
+
+			if (!(_ce = zend_get_class_entry(*arg)) || !(ce = *_ce) || !(ce = ce->parent)) {
+				RETURN_FALSE;
+			}
+
+			name = ce->name;
+			name_length = ce->name_length;
 		}
 		RETURN_STRINGL(name, name_length, 1);
 	} else if (Z_TYPE_PP(arg) == IS_STRING) {

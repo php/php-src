@@ -198,6 +198,25 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 	}
 }
 
+ZEND_API zend_class_entry **zend_get_class_entry(zval *zobject)
+{
+	zend_class_entry **ce;
+
+	if (Z_OBJ_HT_P(zobject)->get_class_entry) {
+		TSRMLS_FETCH();
+		ce = Z_OBJ_HT_P(zobject)->get_class_entry(zobject TSRMLS_CC);
+	} else {
+		if(!IS_ZEND_STD_OBJECT(*zobject)) {
+			zend_error(E_ERROR, "Class entry required for an object without class");
+			return NULL;
+		}
+
+		ce = &(Z_OBJ_P(zobject)->ce);
+	}
+
+	return ce;
+}
+
 static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 {
 	zend_class_entry *ce;
@@ -206,16 +225,12 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 		return 0;
 	}
 
-	/* TBI!! new object handlers */
-	if(!IS_ZEND_STD_OBJECT(*obj)) {
-		return 0;
-	}
-	
 	for (ce = Z_OBJCE_P(obj); ce != NULL; ce = ce->parent) {
 		if (ce == expected_ce) {
 			return 1;
 		}
 	}
+
 	return 0;
 }
 
@@ -402,7 +417,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
 			{
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
-				if (Z_TYPE_PP(arg) != IS_OBJECT || !zend_check_class(*arg, ce)) {
+				if (!zend_check_class(*arg, ce)) {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
