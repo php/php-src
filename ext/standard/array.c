@@ -77,6 +77,7 @@ php_array_globals array_globals;
 
 #define DIFF_NORMAL			0
 #define DIFF_ASSOC			1
+#define DIFF_KEY			2
 #define DIFF_COMP_DATA_INTERNAL 0
 #define DIFF_COMP_DATA_USER     1
 #define DIFF_COMP_KEY_INTERNAL  0
@@ -84,6 +85,7 @@ php_array_globals array_globals;
 
 #define INTERSECT_NORMAL		0
 #define INTERSECT_ASSOC			1
+#define INTERSECT_KEY			2
 #define INTERSECT_COMP_DATA_INTERNAL 0
 #define INTERSECT_COMP_DATA_USER     1
 #define INTERSECT_COMP_KEY_INTERNAL  0
@@ -2797,12 +2799,17 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;
 		}
-	} else if (behavior == INTERSECT_ASSOC) {
+	} else if ((behavior == INTERSECT_ASSOC)
+		||(behavior == INTERSECT_KEY)) {
+		/*
+			INTERSECT_KEY is subset of INTERSECT_ASSOC. When having the former
+			no comparison of the data is done (part of INTERSECT_ASSOC)
+		*/
 		intersect_key_compare_func = array_key_compare;
 		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL
 				&&
 			key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
-			/* array_intersect_assoc() */
+			/* array_intersect_assoc() or array_intersect_key() */
 			
 			if (argc < 2) {
 				efree(args);
@@ -2833,7 +2840,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		} else if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL
 				&&
 				key_compare_type == INTERSECT_COMP_KEY_USER) {
-				/* array_intersect_uassoc() */
+				/* array_intersect_uassoc() or array_intersect_ukey() */
 				
 				if (argc < 3) {
 					efree(args);
@@ -2910,7 +2917,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		*list = NULL;
 		if (behavior == INTERSECT_NORMAL) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), intersect_data_compare_func TSRMLS_CC);
-		} else if (behavior == INTERSECT_ASSOC) {
+		} else if ((behavior == INTERSECT_ASSOC) || (behavior == INTERSECT_KEY)) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), intersect_key_compare_func TSRMLS_CC);
 		}
 	}
@@ -2926,7 +2933,8 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
-		if (behavior == INTERSECT_ASSOC
+		if ((behavior == INTERSECT_ASSOC
+			|| behavior == INTERSECT_KEY)
 				&&
 			key_compare_type == INTERSECT_COMP_KEY_USER) {
 
@@ -2938,12 +2946,18 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				while (*ptrs[i] && (0 < (c = intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
-			} else if (behavior == INTERSECT_ASSOC) {
+			} else if (behavior == INTERSECT_ASSOC || behavior == INTERSECT_KEY) {
 				while (*ptrs[i] && (0 < (c = intersect_key_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
-				if (!c && *ptrs[i]) { /* this means that ptrs[i] is not NULL so we can compare */
-					/* and "c==0" is from last operation */
+				if ((!c && *ptrs[i]) && (behavior == INTERSECT_ASSOC)) {
+					/* 
+						this means that ptrs[i] is not NULL so we can compare
+						and "c==0" is from last operation
+						in this branch of code we enter only when INTERSECT_ASSOC
+						since when we have INTERSECT_KEY compare of data is not
+						wanted. 
+					*/ 
 					if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 						BG(user_compare_func_name) = args[arr_argc];
 					}
@@ -2951,7 +2965,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 				 		c = 1;
 				 		if (key_compare_type == INTERSECT_COMP_KEY_USER) {
 				 			BG(user_compare_func_name) = args[argc - 1];
-				 			/* When KEY_USER the last parameter is always the callback */
+				 			/* When KEY_USER, the last parameter is always the callback */
 				 		}
 				 		/* we are going to the break */
 				 	} else {
@@ -2996,7 +3010,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					if (0 <= intersect_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == INTERSECT_ASSOC) {
+				} else if (behavior == INTERSECT_ASSOC || behavior == INTERSECT_KEY) {
 					/* no need of looping because indexes are unique */
 					break;
 				}
@@ -3012,7 +3026,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 					if (intersect_data_compare_func(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == INTERSECT_ASSOC) {
+				} else if (behavior == INTERSECT_ASSOC || behavior == INTERSECT_KEY) {
 					/* no need of looping because indexes are unique */
 					break;
 				}
@@ -3031,6 +3045,23 @@ out:
 	efree(lists);
 	efree(args);
 }
+
+/* {{{ proto array array_intersect_key(array arr1, array arr2 [, array ...], callback data_compare_func)
+   Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). Equivalent of array_intersect_assoc() but does not do compare of the data. */
+PHP_FUNCTION(array_intersect_key)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY,
+				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_INTERNAL);
+}
+
+/* {{{ proto array array_intersect_ukey(array arr1, array arr2 [, array ...], callback key_compare_func)
+   Returns the entries of arr1 that have keys which are present in all the other arguments. Kind of equivalent to array_diff(array_keys($arr1), array_keys($arr2)[,array_keys(...)]). The comparison of the keys is performed by a user supplied function. Equivalent of array_intersect_uassoc() but does not do compare of the data. */
+PHP_FUNCTION(array_intersect_ukey)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_KEY,
+				INTERSECT_COMP_DATA_INTERNAL, INTERSECT_COMP_KEY_USER);
+}
+
 
 /* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
    Returns the entries of arr1 that have values which are present in all the other arguments */
@@ -3151,12 +3182,16 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
 			return;		
 		}
-	} else if (behavior == DIFF_ASSOC) {
+	} else if ((behavior == DIFF_ASSOC) || (behavior == DIFF_KEY)) {
+		/*
+			DIFF_KEY is subset of DIFF_ASSOC. When having the former
+			no comparison of the data is done (part of DIFF_ASSOC)
+		*/
 		diff_key_compare_func = array_key_compare;
 		if (data_compare_type == DIFF_COMP_DATA_INTERNAL 
 				&& 
 			key_compare_type == DIFF_COMP_KEY_INTERNAL) {
-			/* array_diff_assoc() */
+			/* array_diff_assoc() or array_diff_key() */
 			
 			if (argc < 2) {
 				efree(args);
@@ -3187,7 +3222,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL 
 				&& 
 			key_compare_type == DIFF_COMP_KEY_USER) {
-			/* array_diff_uassoc() */
+			/* array_diff_uassoc() or array_diff_ukey() */
 			
 			if (argc < 3) {
 				efree(args);
@@ -3264,7 +3299,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		*list = NULL;
 		if (behavior == DIFF_NORMAL) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), diff_data_compare_func TSRMLS_CC);
-		} else if (behavior == DIFF_ASSOC) {
+		} else if (behavior == DIFF_ASSOC || behavior == DIFF_KEY) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), diff_key_compare_func TSRMLS_CC);
 		}
 	}
@@ -3280,7 +3315,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	
 	/* go through the lists and look for values of ptr[0] that are not in the others */
 	while (*ptrs[0]) {
-		if (behavior == DIFF_ASSOC
+		if ((behavior == DIFF_ASSOC || behavior == DIFF_KEY)
 				&&
 			key_compare_type == DIFF_COMP_KEY_USER) {
 			
@@ -3292,7 +3327,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 				while (*ptrs[i] && (0 < (c = diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
-			} else if (behavior == DIFF_ASSOC) {
+			} else if (behavior == DIFF_ASSOC || behavior == DIFF_KEY) {
 				while (*ptrs[i] && (0 < (c = diff_key_compare_func(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
@@ -3304,19 +3339,36 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 					}
 					break;
 				} else if (behavior == DIFF_ASSOC) {
+					/*
+						In this branch is execute only when DIFF_ASSOC. If behavior == DIFF_KEY
+						data comparison is not needed - skipped.
+					*/
 					if (*ptrs[i]) {
 						if (data_compare_type == DIFF_COMP_DATA_USER) {
 							BG(user_compare_func_name) = args[arr_argc];
 						}
 						if (diff_data_compare_func(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
+							/* the data is not the same */
 							c = -1;
 							if (key_compare_type == DIFF_COMP_KEY_USER) {
 								BG(user_compare_func_name) = args[argc - 1];
 							}
 						} else {
 							break;
+							/*
+								we have found the element in other arrays thus we don't want it 
+								in the return_value -> delete from there
+							*/
 						}
 					}
+				} else if (behavior == DIFF_KEY) {
+					/*
+						the behavior here differs from INTERSECT_KEY in php_intersect
+						since in the "diff" case we have to remove the entry from
+						return_value while when doing intersection the entry must not
+						be deleted.
+					*/
+					break; /* remove the key */
 				}
 			}
 		}
@@ -3337,7 +3389,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 					if (diff_data_compare_func(ptrs[0] - 1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == DIFF_ASSOC) {
+				} else if (behavior == DIFF_ASSOC || behavior == DIFF_KEY) {
 					/* in this case no array_key_compare is needed */
 					break;
 				}
@@ -3353,7 +3405,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 					if (diff_data_compare_func(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == DIFF_ASSOC) {
+				} else if (behavior == DIFF_ASSOC || behavior == DIFF_KEY) {
 					/* in this case no array_key_compare is needed */
 					break;
 				}
@@ -3372,6 +3424,25 @@ out:
 	efree(lists);
 	efree(args);
 }
+
+
+/* {{{ proto array array_diff_key(array arr1, array arr2 [, array ...])
+   Returns the entries of arr1 that have keys which are not present in any of the others arguments. This function is like array_diff() but works on the keys instead of the values. The associativity is preserved. */
+PHP_FUNCTION(array_diff_key)
+{
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_KEY,
+			 DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_INTERNAL);
+}
+/* }}} */
+
+/* {{{ proto array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
+   Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. */
+PHP_FUNCTION(array_diff_ukey)
+{
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_KEY,
+			 DIFF_COMP_DATA_INTERNAL, DIFF_COMP_KEY_USER);
+}
+/* }}} */
 
 
 /* {{{ proto array array_diff(array arr1, array arr2 [, array ...])
