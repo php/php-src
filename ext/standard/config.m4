@@ -114,6 +114,10 @@ AC_CHECK_LIB(bind, inet_aton, [
   EXTRA_LIBS="$EXTRA_LIBS -lbind"
   AC_DEFINE(HAVE_LIBBIND) ], []) 
 
+AC_CHECK_LIB(crypt, crypt, [
+ AC_ADD_LIBRARY(crypt)
+ AC_DEFINE(HAVE_LIBCRYPT) ], [])
+
 
 divert(3)
 
