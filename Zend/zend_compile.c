@@ -1384,6 +1384,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	CG(class_entry).name_length = class_name->u.constant.value.str.len;
 	CG(class_entry).refcount = (int *) emalloc(sizeof(int));
 	*CG(class_entry).refcount = 1;
+	CG(class_entry).constants_updated = 0;
 	
 	zend_str_tolower(CG(class_entry).name, CG(class_entry).name_length);
 
