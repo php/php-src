@@ -38,7 +38,9 @@ PHP_FUNCTION(readline);
 PHP_FUNCTION(readline_add_history);
 PHP_FUNCTION(readline_info);
 PHP_FUNCTION(readline_clear_history);
+#ifndef HAVE_LIBEDIT
 PHP_FUNCTION(readline_list_history);
+#endif
 PHP_FUNCTION(readline_read_history);
 PHP_FUNCTION(readline_write_history);
 PHP_FUNCTION(readline_completion_function);
@@ -57,7 +59,7 @@ static zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_info,  	            NULL)
 	PHP_FE(readline_add_history, 		NULL)
 	PHP_FE(readline_clear_history, 		NULL)
-#ifdef HAVE_LIBREADLINE
+#ifndef HAVE_LIBEDIT
 	PHP_FE(readline_list_history, 		NULL)
 #endif
 	PHP_FE(readline_read_history, 		NULL)
@@ -256,7 +258,7 @@ PHP_FUNCTION(readline_clear_history)
 /* }}} */
 /* {{{ proto array readline_list_history(void) 
    Lists the history */
-#ifdef HAVE_LIBREADLINE
+#ifndef HAVE_LIBEDIT
 PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
