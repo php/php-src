@@ -16,6 +16,6 @@ configuration-parser.h configuration-parser.c: $(srcdir)/configuration-parser.y
 configuration-scanner.c: $(srcdir)/configuration-scanner.l
 	$(LEX) -Pcfg -o$@ -i $<
 
-internal_functions.c: internal_functions.c.in $(top_builddir)/config.status
+internal_functions.c: $(srcdir)/internal_functions.c.in $(top_builddir)/config.status
 	cd $(top_builddir) && \
-	CONFIG_FILES= CONFIG_HEADERS= ./config.status
+	CONFIG_FILES=main/internal_functions.c CONFIG_HEADERS= ./config.status
