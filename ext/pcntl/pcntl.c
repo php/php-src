@@ -220,27 +220,21 @@ PHP_FUNCTION(pcntl_fork)
    Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_waitpid)
 {
-	zval **pid, **status, **options;
-	int temp_options, temp_status = 0;
-	pid_t temp_id;
+	long pid, options = 0;
+	zval *z_status = NULL;
+	int status;
+	pid_t child_id;
 
-	if (ZEND_NUM_ARGS() > 3 || ZEND_NUM_ARGS() < 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &pid, &status, &options) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lz|l", &pid, &z_status, &options) == FAILURE)
+		return;
 
-	convert_to_long_ex(pid);
-	convert_to_long_ex(options);
-	convert_to_long_ex(status);
+	status = Z_LVAL_P(z_status);
 
-	if (ZEND_NUM_ARGS() == 2) {
-		temp_options = 0;
-	} else {
-		temp_options = Z_LVAL_PP(options);
-	}
-	
-	temp_id = waitpid((pid_t) Z_LVAL_PP(pid), &temp_status, temp_options);
-	Z_LVAL_PP(status) = temp_status;
-	RETURN_LONG((long) temp_id);
+	child_id = waitpid((pid_t) pid, &status, options);
+
+	Z_LVAL_P(z_status) = status;
+
+	RETURN_LONG((long) child_id);
 }
 /* }}} */
 
