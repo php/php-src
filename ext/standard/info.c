@@ -123,13 +123,8 @@ PHPAPI void php_print_info(int flag)
 	char **env,*tmp1,*tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
-
 	time_t the_time;
 	struct tm *ta, tmbuf;
-
-	the_time = time(NULL);
-	ta = localtime_r(&the_time, &tmbuf);
-
 #ifdef PHP_WIN32
 	char php_windows_uname[256];
 	DWORD dwBuild=0;
@@ -140,6 +135,8 @@ PHPAPI void php_print_info(int flag)
 	ELS_FETCH();
 	SLS_FETCH();
 
+	the_time = time(NULL);
+	ta = localtime_r(&the_time, &tmbuf);
 	
 	if (flag & PHP_INFO_GENERAL) {
 #ifdef PHP_WIN32
