@@ -16,6 +16,7 @@
    |          Derick Rethans <d.rethans@jdimedia.nl>                      |
    +----------------------------------------------------------------------+
  */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
