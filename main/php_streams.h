@@ -514,7 +514,9 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int opt
 
 /* for user-space streams */
 PHPAPI extern php_stream_ops php_stream_userspace_ops;
+PHPAPI extern php_stream_ops php_stream_userspace_dir_ops;
 #define PHP_STREAM_IS_USERSPACE	&php_stream_userspace_ops
+#define PHP_STREAM_IS_USERSPACE_DIR	&php_stream_userspace_dir_ops
 
 PHPAPI void php_stream_context_free(php_stream_context *context);
 PHPAPI php_stream_context *php_stream_context_alloc(void);

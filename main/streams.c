@@ -133,6 +133,72 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 	return PHP_STREAM_PERSISTENT_NOT_EXIST;
 }
 
+static void display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC)
+{
+	char *tmp = estrdup(path);
+	char *msg;
+	int free_msg = 0;
+
+	if (wrapper) {
+		if (wrapper->err_count > 0) {
+			int i;
+			size_t l;
+			int brlen;
+			char *br;
+
+			if (PG(html_errors)) {
+				brlen = 7;
+				br = "<br />\n";
+			} else {
+				brlen = 1;
+				br = "\n";
+			}
+
+			for (i = 0, l = 0; i < wrapper->err_count; i++) {
+				l += strlen(wrapper->err_stack[i]);
+				if (i < wrapper->err_count - 1)
+					l += brlen;
+			}
+			msg = emalloc(l + 1);
+			msg[0] = '\0';
+			for (i = 0; i < wrapper->err_count; i++) {
+				strcat(msg, wrapper->err_stack[i]);
+				if (i < wrapper->err_count - 1)
+					strcat(msg, br);
+			}
+
+			free_msg = 1;
+		} else {
+			msg = strerror(errno);
+		}
+	} else {
+		msg = "no suitable wrapper could be found";
+	}
+
+	php_strip_url_passwd(tmp);
+	php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s: %s", caption, msg);
+	efree(tmp);
+	if (free_msg)
+		efree(msg);
+}
+
+static void tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
+{
+	if (wrapper) {
+		/* tidy up the error stack */
+		int i;
+
+		for (i = 0; i < wrapper->err_count; i++)
+			efree(wrapper->err_stack[i]);
+		if (wrapper->err_stack)
+			efree(wrapper->err_stack);
+		wrapper->err_stack = NULL;
+		wrapper->err_count = 0;
+	}
+}
+
+
+
 /* allocate a new stream for a particular ops */
 PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC) /* {{{ */
 {
@@ -1858,28 +1924,21 @@ PHPAPI php_stream *_php_stream_opendir(char *path, int options,
 
 	if (wrapper && wrapper->wops->dir_opener)	{
 		stream = wrapper->wops->dir_opener(wrapper,
-				path_to_open, "r", options, NULL,
+				path_to_open, "r", options ^ REPORT_ERRORS, NULL,
 				context STREAMS_REL_CC TSRMLS_CC);
 
 		if (stream) {
 			stream->wrapper = wrapper;
 			stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
 		}
+	} else if (wrapper) {
+		php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS TSRMLS_CC, "not implemented");
 	}
-
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		char *tmp = estrdup(path);
-		char *msg;
-
-		if (wrapper)
-			msg = strerror(errno);
-		else
-			msg = "no suitable wrapper could be found";
-		
-		php_strip_url_passwd(tmp);
-		php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s", msg);
-		efree(tmp);
+		display_wrapper_errors(wrapper, path, "failed to open dir" TSRMLS_CC);
 	}
+	tidy_wrapper_error_log(wrapper TSRMLS_CC);
+
 	return stream;
 }
 /* }}} */
@@ -1983,63 +2042,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 		}
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		char *tmp = estrdup(path);
-		char *msg;
-		int free_msg = 0;
-
-		if (wrapper) {
-			if (wrapper->err_count > 0) {
-				int i;
-				size_t l;
-				int brlen;
-				char *br;
-
-				if (PG(html_errors)) {
-					brlen = 7;
-					br = "<br />\n";
-				} else {
-					brlen = 1;
-					br = "\n";
-				}
-
-				for (i = 0, l = 0; i < wrapper->err_count; i++) {
-					l += strlen(wrapper->err_stack[i]);
-					if (i < wrapper->err_count - 1)
-						l += brlen;
-				}
-				msg = emalloc(l + 1);
-				msg[0] = '\0';
-				for (i = 0; i < wrapper->err_count; i++) {
-					strcat(msg, wrapper->err_stack[i]);
-					if (i < wrapper->err_count - 1)
-						strcat(msg, br);
-				}
-				
-				free_msg = 1;
-			} else {
-				msg = strerror(errno);
-			}
-		} else {
-			msg = "no suitable wrapper could be found";
-		}
-		
-		php_strip_url_passwd(tmp);
-		php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "failed to create stream: %s", msg);
-		efree(tmp);
-		if (free_msg)
-			efree(msg);
+		display_wrapper_errors(wrapper, path, "failed to create stream" TSRMLS_CC);
 	}
-	if (wrapper) {
-		/* tidy up the error stack */
-		int i;
-
-		for (i = 0; i < wrapper->err_count; i++)
-			efree(wrapper->err_stack[i]);
-		if (wrapper->err_stack)
-			efree(wrapper->err_stack);
-		wrapper->err_stack = NULL;
-		wrapper->err_count = 0;
-	}
+	tidy_wrapper_error_log(wrapper TSRMLS_CC);
 #if ZEND_DEBUG
 	if (stream == NULL && copy_of_path != NULL)
 		efree(copy_of_path);
