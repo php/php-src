@@ -1057,7 +1057,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 				} else {
 					strcpy(ex_class_name, "Unknown Exception");
 				}
-#if 1 /* support set_exception_handler() */
 				if (EG(user_exception_handler)) {
 					zval *orig_user_exception_handler;
 					zval ***params, *retval2, *old_exception;
@@ -1090,11 +1089,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 					zval_ptr_dtor(EG(return_value_ptr_ptr));
 					local_retval = NULL;
 				}
-#else
-				zend_exception_error(EG(exception) TSRMLS_CC);
-				zval_ptr_dtor(&EG(exception));
-				EG(exception) = NULL;
-#endif
 			} else if (!retval) {
 				zval_ptr_dtor(EG(return_value_ptr_ptr));
 				local_retval = NULL;

@@ -1200,6 +1200,10 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC)
 		}
 		EG(exception) = exception;
 	}
+	if (!EG(current_execute_data)) {
+		zend_error(E_ERROR, "Exception thrown without a stack frame");
+	}
+
 	if ((EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
 		/* no need to rethrow the exception */
 		return;
