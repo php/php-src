@@ -3919,7 +3919,7 @@ PHP_FUNCTION(pg_convert)
 		return;
 	}
 	if (option & ~PGSQL_CONV_OPTS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is spedified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
 	if (!table_name_len) {
@@ -4078,7 +4078,7 @@ PHP_FUNCTION(pg_insert)
 		return;
 	}
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is spedified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
 	
@@ -4227,7 +4227,7 @@ PHP_FUNCTION(pg_update)
 		return;
 	}
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is spedified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
 	
@@ -4315,7 +4315,7 @@ PHP_FUNCTION(pg_delete)
 		return;
 	}
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is spedified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
 	
@@ -4452,7 +4452,7 @@ PHP_FUNCTION(pg_select)
 		return;
 	}
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is spedified");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid option is specified");
 		RETURN_FALSE;
 	}
 	
