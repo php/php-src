@@ -135,7 +135,7 @@ int  XML_GetCurrentByteIndex(XML_Parser);
 const XML_Char *XML_ExpatVersion(void);
 void XML_ParserFree(XML_Parser);
 
-#else 
+#elif defined(HAVE_LIBEXPAT)
 #include <expat.h>
 #endif /* HAVE_LIBEXPAT */
 
