@@ -284,8 +284,12 @@ class PEAR_Installer extends PEAR_Common
             if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
                 $this->log(3, "md5sum ok: $final_dest_file");
             } else {
-                return $this->raiseError("bad md5sum for file $final_dest_file",
-                                         PEAR_INSTALLER_FAILED);
+                if (empty($options['force'])) {
+                    return $this->raiseError("bad md5sum for file $final_dest_file",
+                                             PEAR_INSTALLER_FAILED);
+                } else {
+                    $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                }
             }
         }
         if (!OS_WINDOWS) {
