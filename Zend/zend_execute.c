@@ -2196,6 +2196,13 @@ int zend_add_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
+static int zend_import_check_function(HashTable *target_ht, zend_function *function, zend_hash_key *hash_key, void *param)
+{
+	if(zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
+		zend_error(E_ERROR, "Import: function %s() already exists in current scope", function->common.function_name?function->common.function_name:"main");
+	}
+	return 1; /* OK */
+}
 
 int zend_import_function_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -2219,13 +2226,18 @@ int zend_import_function_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		function_add_ref(function);
 	} else {
-		zend_function tmp_zend_function;
-
-		zend_hash_copy(EG(function_table), &ce->function_table, (copy_ctor_func_t) function_add_ref, &tmp_zend_function, sizeof(zend_function));
+		zend_hash_merge_ex(EG(function_table), &ce->function_table, (copy_ctor_func_t) function_add_ref, sizeof(zend_function), (merge_checker_func_t)zend_import_check_function, NULL);
 	}
 	NEXT_OPCODE();
 }
 
+static int zend_import_check_class(HashTable *target_ht, zend_class_entry **ce, zend_hash_key *hash_key, void *param)
+{
+	if(zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
+		zend_error(E_ERROR, "Import: class '%s' already exists in current scope", (*ce)->name);
+	}
+	return 1; /* OK */
+}
 
 int zend_import_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
@@ -2249,9 +2261,7 @@ int zend_import_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 		zend_class_add_ref(import_ce);
 	} else {
-		zend_class_entry *tmp_zend_class_entry;
-
-		zend_hash_copy(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_zend_class_entry, sizeof(zend_class_entry *));
+		zend_hash_merge_ex(EG(class_table), &ce->class_table, (copy_ctor_func_t) zend_class_add_ref, sizeof(zend_class_entry *), (merge_checker_func_t)zend_import_check_class, NULL);
 	}
 
 	NEXT_OPCODE();
