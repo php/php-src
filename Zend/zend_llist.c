@@ -148,6 +148,43 @@ ZEND_API void zend_llist_apply(zend_llist *l, void (*func)(void *data))
 	}
 }
 
+ZEND_API void zend_llist_sort(zend_llist *l, llist_compare_func_t comp_func)
+{
+	int list_size=0, i;
+
+	zend_llist_element **elements;
+	zend_llist_element *element, **ptr;
+
+	for (element=l->head; element; element=element->next) {
+		list_size++;
+	}
+
+	if (list_size == 0) {
+		return;
+	}
+
+	elements = (zend_llist_element **) emalloc(list_size*sizeof(zend_llist_element *));
+
+	ptr = &elements[0];
+
+	for (element=l->head; element; element=element->next) {
+		*ptr++ = element;
+	}
+
+	qsort(elements, list_size, sizeof(zend_llist_element *), (compare_func_t) comp_func);
+
+	l->head = elements[0];
+	elements[0]->prev = NULL;
+
+	for (i=1; i<list_size; i++) {
+		elements[i]->prev = elements[i-1];
+		elements[i-1]->next = elements[i];
+	}
+	elements[i-1]->next = NULL;
+	l->tail = elements[i-1];
+	efree(elements);
+}
+
 
 ZEND_API void zend_llist_apply_with_argument(zend_llist *l, void (*func)(void *data, void *arg), void *arg)
 {
