@@ -112,6 +112,10 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
   PHP_ARG_WITH(freetype-dir, for freetype(2),
   [  --with-freetype-dir=DIR   GD: Set the path to freetype2 install prefix.])
 
+  if test "$PHP_TTF" != "no"; then
+    PHP_FREETYPE_DIR="no"
+  fi
+
   if test "$PHP_FREETYPE_DIR" != "no"; then
     for i in /usr /usr/local $PHP_FREETYPE_DIR; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
@@ -169,6 +173,8 @@ AC_DEFUN(PHP_GD_TTSTR,[
 ])
 
 AC_DEFUN(PHP_GD_CHECK_VERSION,[
+  save_LIBS="$LIBS"
+  LIBS="$GD_SHARED_LIBADD $LIBS" 
   AC_CHECK_LIB(gd, gdImageString16,        [AC_DEFINE(HAVE_LIBGD13, 1, [ ])])
   AC_CHECK_LIB(gd, gdImagePaletteCopy,     [AC_DEFINE(HAVE_LIBGD15, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,  1, [ ])])
@@ -187,6 +193,7 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])])
   AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageGifCtx,          [AC_DEFINE(HAVE_GD_GIF_CTX,  1, [ ])])
+  LIBS=$save_LIBS
 ])
 
 
@@ -201,6 +208,7 @@ if test "$PHP_GD" != "no"; then
   PHP_SUBST(GD_SHARED_LIBADD)
 
 dnl Various checks for GD features
+  PHP_SHLIB_SUFFIX_NAME
   PHP_GD_TTSTR
   PHP_GD_JPEG
   PHP_GD_PNG
