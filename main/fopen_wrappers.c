@@ -214,45 +214,44 @@ PHPAPI int php_check_open_basedir_ex(const char *path, int warn TSRMLS_DC)
  */
 PHPAPI int php_check_safe_mode_include_dir(char *path TSRMLS_DC)
 {
-	/* Only check when safe_mode or open_basedir is on and safe_mode_include_dir is available */
-	if (((PG(open_basedir) && *PG(open_basedir)) || PG(safe_mode)) && 
-			PG(safe_mode_include_dir) && *PG(safe_mode_include_dir))
-	{
-		char *pathbuf;
-		char *ptr;
-		char *end;
-		char resolved_name[MAXPATHLEN];
+	if (PG(safe_mode)) {
+		if (PG(safe_mode_include_dir) && *PG(safe_mode_include_dir)) {
+			char *pathbuf;
+			char *ptr;
+			char *end;
+			char resolved_name[MAXPATHLEN];
 
-		/* Resolve the real path into resolved_name */
-		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL)
-			return -1;
+			/* Resolve the real path into resolved_name */
+			if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL)
+				return -1;
 
-		pathbuf = estrdup(PG(safe_mode_include_dir));
+			pathbuf = estrdup(PG(safe_mode_include_dir));
 
-		ptr = pathbuf;
+			ptr = pathbuf;
 
-		while (ptr && *ptr) {
-			end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
-			if (end != NULL) {
-				*end = '\0';
-				end++;
-			}
+			while (ptr && *ptr) {
+				end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
+				if (end != NULL) {
+					*end = '\0';
+					end++;
+				}
 
-			/* Check the path */
+				/* Check the path */
 #ifdef PHP_WIN32
-			if (strncasecmp(ptr, resolved_name, strlen(ptr)) == 0)
+				if (strncasecmp(ptr, resolved_name, strlen(ptr)) == 0)
 #else
-			if (strncmp(ptr, resolved_name, strlen(ptr)) == 0)
+				if (strncmp(ptr, resolved_name, strlen(ptr)) == 0)
 #endif
-			{
-				/* File is in the right directory */
-				efree(pathbuf);
-				return 0;
-			}
+				{
+					/* File is in the right directory */
+					efree(pathbuf);
+					return 0;
+				}
 
-			ptr = end;
+				ptr = end;
+			}
+			efree(pathbuf);
 		}
-		efree(pathbuf);
 		return -1;
 	}
 
