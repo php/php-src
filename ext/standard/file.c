@@ -481,7 +481,7 @@ PHP_FUNCTION(file)
 		break;
 	case 2:
 		if (zend_get_parameters_ex(2, &filename, &arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
+			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(arg2);
 		use_include_path = Z_LVAL_PP(arg2);
@@ -527,13 +527,13 @@ PHP_FUNCTION(file)
 		}
 		if (!reached_eof) {
 			target_len += strlen(target_buf+target_len);
-			if (target_buf[target_len-1]!='\n') {
+			if (target_buf[target_len-1] != '\n') {
 				continue;
 			}
 		}
 		if (PG(magic_quotes_runtime)) {
 			slashed = php_addslashes(target_buf, target_len, &len, 1 TSRMLS_CC); /* 1 = free source string */
-            add_index_stringl(return_value, i++, slashed, len, 0);
+			add_index_stringl(return_value, i++, slashed, len, 0);
 		} else {
 			target_buf = erealloc(target_buf, target_len+1); /* do we really want to do that? */
 			add_index_stringl(return_value, i++, target_buf, target_len, 0);
