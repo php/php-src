@@ -236,7 +236,7 @@ PHP_FUNCTION(getmxrr)
 
 	switch(ARG_COUNT(ht)) {
 	case 2:
-		if (getParameters(ht, 2, &host, &mx_list) == FAILURE) {
+		if (zend_get_parameters(ht, 2, &host, &mx_list) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2)) {
@@ -245,7 +245,7 @@ PHP_FUNCTION(getmxrr)
 		}
         break;
     case 3:
-		if (getParameters(ht, 3, &host, &mx_list, &weight_list) == FAILURE) {
+		if (zend_get_parameters(ht, 3, &host, &mx_list, &weight_list) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		if (!ParameterPassedByReference(ht, 2) || !ParameterPassedByReference(ht, 3)) {
