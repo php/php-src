@@ -606,7 +606,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			pgsql = (PGconn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
-	} else { // Non persistent connection
+	} else { /* Non persistent connection */
 		list_entry *index_ptr,new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
