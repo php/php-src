@@ -118,6 +118,7 @@ PHP_FUNCTION(imagesx);
 PHP_FUNCTION(imagesy);
 PHP_FUNCTION(imagecreatefrompng);
 PHP_FUNCTION(imagepng);
+PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagewbmp);
 void php_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
