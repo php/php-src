@@ -384,12 +384,6 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	int allow_overwrite = 0;
 	int read_write = 0;
 
-	if (context &&
-		php_stream_context_get_option(context, "ftp", "proxy", &tmpzval) == SUCCESS) {
-		/* Use http wrapper to proxy ftp request */
-		return php_stream_url_wrap_http(wrapper, path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
-	}
-
 	tmp_line[0] = '\0';
 
 	if (strpbrk(mode, "r+")) {
@@ -410,6 +404,18 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		/* No mode specified? */
 		php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unknown file open mode.");
 		return NULL;
+	}
+
+	if (context &&
+		php_stream_context_get_option(context, "ftp", "proxy", &tmpzval) == SUCCESS) {
+		if (read_write == 1) {
+			/* Use http wrapper to proxy ftp request */
+			return php_stream_url_wrap_http(wrapper, path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
+		} else {
+			/* ftp proxy is read-only */
+			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "FTP proxy may only be used in read mode");
+			return NULL;
+		}
 	}
 
 	stream = php_ftp_fopen_connect(wrapper, path, mode, options, opened_path, context, &reuseid, &resource, &use_ssl, &use_ssl_on_data TSRMLS_CC);
