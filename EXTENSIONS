@@ -386,8 +386,8 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           shmop
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Unknown
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>
+MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
