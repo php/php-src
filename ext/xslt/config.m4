@@ -15,6 +15,9 @@ PHP_ARG_WITH(xslt-sablot, for XSLT Sablotron backend,
 PHP_ARG_WITH(expat-dir, libexpat dir for Sablotron XSL support,
 [  --with-expat-dir=DIR      XSLT: libexpat dir for Sablotron 0.50])
 
+PHP_ARG_WITH(sablot-js, enable JavaScript for Sablotron,
+[  --with-sablot-js=DIR    Sablotron: enable JavaScript support for Sablotron])
+
 if test "$PHP_XSLT" != "no"; then
 
   PHP_EXTENSION(xslt, $ext_shared)
@@ -81,6 +84,14 @@ if test "$PHP_XSLT" != "no"; then
       AC_MSG_ERROR([iconv not found, in order to build sablotron you need the iconv library])
     fi
  
+    if test "$PHP_SABLOT_JS" != "no"; then
+      found_js=no
+      AC_CHECK_LIB(js, JS_GetRuntime, found_js=yes)
+      if test "$found_js" = "yes"; then
+        PHP_ADD_LIBRARY(js)
+      fi
+    fi
+
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
     if test "$found_expat" = "yes"; then
      old_LIBS=$LIBS
