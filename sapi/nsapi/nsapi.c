@@ -90,6 +90,9 @@ typedef struct nsapi_request_context {
 	Session	*sn;
 	Request	*rq;
 	int	read_post_bytes;
+	char *path_info;
+	int fixed_script; /* 0 if script is from URI, 1 if script is from "script" parameter */
+	short http_error; /* 0 in normal mode; for errors the HTTP error code */
 } nsapi_request_context;
 
 /*
@@ -118,8 +121,6 @@ static nsapi_equiv nsapi_reqpb[] = {
 static size_t nsapi_reqpb_size = sizeof(nsapi_reqpb)/sizeof(nsapi_reqpb[0]);
 
 static nsapi_equiv nsapi_vars[] = {
-	{ "PATH_INFO",			"path-info" },
-	{ "SCRIPT_FILENAME",	"path" },
 	{ "AUTH_TYPE",			"auth-type" },
 	{ "CLIENT_CERT",		"auth-cert" },
 	{ "REMOTE_USER",		"auth-user" }
@@ -134,7 +135,8 @@ static nsapi_equiv nsapi_client[] = {
 };
 static size_t nsapi_client_size = sizeof(nsapi_client)/sizeof(nsapi_client[0]);
 
-static char *nsapi_exclude_from_ini_entries[] = { "fn", "type", "method", "directive", NULL };
+/* this parameters to "Service"/"Error" are NSAPI ones which should not be php.ini keys and are excluded */
+static char *nsapi_exclude_from_ini_entries[] = { "fn", "type", "method", "directive", "code", "reason", "script", NULL };
 
 static char *nsapi_strdup(char *str)
 {
@@ -480,8 +482,6 @@ static int sapi_nsapi_header_handler(sapi_header_struct *sapi_header, sapi_heade
 	if (!strcasecmp(header_name, "Content-Type")) {
 		param_free(pblock_remove("content-type", rc->rq->srvhdrs));
 		pblock_nvinsert("content-type", header_content, rc->rq->srvhdrs);
-	} else if (!strcasecmp(header_name, "Set-Cookie")) {
-		pblock_nvinsert("set-cookie", header_content, rc->rq->srvhdrs);
 	} else {
 		pblock_nvinsert(header_name, header_content, rc->rq->srvhdrs);
 	}
@@ -588,6 +588,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 {
 	nsapi_request_context *rc = (nsapi_request_context *)SG(server_context);
 	register size_t i;
+	int pos;
 	char *value,*p;
 	char buf[NS_BUF_SIZE + 1];
 	struct pb_entry *entry;
@@ -657,39 +658,49 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 	/* DOCUMENT_ROOT */
 	if (value = request_translate_uri("/", rc->sn)) {
-	  	value[strlen(value) - 1] = 0;
+	  	value[strlen(value) - 1] = '\0';
 		php_register_variable("DOCUMENT_ROOT", value, track_vars_array TSRMLS_CC);
 		nsapi_free(value);
 	}
 
-	/* PATH_TRANSLATED */
-	if (value = pblock_findval("path-info", rc->rq->vars)) {
-		if (value = request_translate_uri(value, rc->sn)) {
+	/* PATH_INFO / PATH_TRANSLATED */
+	if (rc->path_info) {
+		if (value = request_translate_uri(rc->path_info, rc->sn)) {
 			php_register_variable("PATH_TRANSLATED", value, track_vars_array TSRMLS_CC);
 			nsapi_free(value);
 		}
+		php_register_variable("PATH_INFO", rc->path_info, track_vars_array TSRMLS_CC);
 	}
 
-	/* Create full Request-URI */
-	if (value = pblock_findval("uri", rc->rq->reqpb)) {
-		strncpy(buf, value, NS_BUF_SIZE);
+	/* Create full Request-URI & Script-Name */
+	if (SG(request_info).request_uri) {
+		strncpy(buf, SG(request_info).request_uri, NS_BUF_SIZE);
 		buf[NS_BUF_SIZE]='\0';
-		if (value = pblock_findval("query", rc->rq->reqpb)) {
+		if (SG(request_info).query_string) {
 		  	p = strchr(buf, 0);
-			snprintf(p, NS_BUF_SIZE-(p-buf), "?%s", value);
+			snprintf(p, NS_BUF_SIZE-(p-buf), "?%s", SG(request_info).query_string);
 			buf[NS_BUF_SIZE]='\0';
 		}
 		php_register_variable("REQUEST_URI", buf, track_vars_array TSRMLS_CC);
-  	}
 
-	/* Create Script-Name */
-	if (value = pblock_findval("uri", rc->rq->reqpb)) {
-		strncpy(buf, value, NS_BUF_SIZE);
+		strncpy(buf, SG(request_info).request_uri, NS_BUF_SIZE);
 		buf[NS_BUF_SIZE]='\0';
-		if (value = pblock_findval("path-info", rc->rq->vars)) {
-			buf[strlen(buf) - strlen(value)] = '\0';
+		if (rc->path_info) {
+			pos = strlen(SG(request_info).request_uri) - strlen(rc->path_info);
+			if (pos>=0 && pos<=NS_BUF_SIZE && rc->path_info) {
+				buf[pos] = '\0';
+			} else {
+				buf[0]='\0';
+			}
 		}
 		php_register_variable("SCRIPT_NAME", buf, track_vars_array TSRMLS_CC);
+	}
+	php_register_variable("SCRIPT_FILENAME", SG(request_info).path_translated, track_vars_array TSRMLS_CC);
+
+	/* special variables in error mode */
+	if (rc->http_error) {
+		sprintf(buf, "%d", rc->http_error);
+		php_register_variable("ERROR_TYPE", buf, track_vars_array TSRMLS_CC);
 	}
 }
 
@@ -785,6 +796,13 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 	log_error(LOG_INFORM, "php4_close", NULL, NULL, "Shutdown PHP Module");
 }
 
+/*********************************************************
+/ init SAF
+/
+/ Init fn="php4_init" [php_ini="/path/to/php.ini"]
+/   Initialize the NSAPI module in magnus.conf
+/
+/*********************************************************/
 int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
@@ -817,6 +835,21 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 	return REQ_PROCEED;
 }
 
+/*********************************************************
+/ normal use in Service directive:
+/
+/ Service fn="php4_execute" type=... method=... [inikey=inivalue inikey=inivalue...]
+/
+/ use in Service for a directory to supply a php-made directory listing instead of server default:
+/
+/ Service fn="php4_execute" type="magnus-internal/directory" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/
+/ use in Error SAF to display php script as error page:
+/
+/ Error fn="php4_execute" code=XXX script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/ Error fn="php4_execute" reason="Reason" script="/path/to/script.php" [inikey=inivalue inikey=inivalue...]
+/
+/*********************************************************/
 int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
@@ -824,23 +857,47 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	zend_file_handle file_handle = {0};
 	struct stat fst;
 
+	char *path_info;
 	char *query_string    = pblock_findval("query", rq->reqpb);
 	char *uri             = pblock_findval("uri", rq->reqpb);
-	char *path_info       = pblock_findval("path-info", rq->vars);
 	char *request_method  = pblock_findval("method", rq->reqpb);
 	char *content_type    = pblock_findval("content-type", rq->headers);
 	char *content_length  = pblock_findval("content-length", rq->headers);
-	char *path_translated = pblock_findval("path", rq->vars);
+	char *directive       = pblock_findval("Directive", pb);
+	int error_directive   = (directive && !strcasecmp(directive, "error"));
+	int fixed_script      = 1;
+
+	/* try to use script parameter -> Error or Service for directory listing */
+	char *path_translated = pblock_findval("script", pb);
 
 	TSRMLS_FETCH();
+
+	/* if script parameter is missing: normal use as Service SAF  */
+	if (!path_translated) {
+		path_translated = pblock_findval("path", rq->vars);
+		path_info       = pblock_findval("path-info", rq->vars);
+		fixed_script = 0;
+		if (error_directive) {
+			/* go to next error directive if script parameter is missing */
+			log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Missing 'script' parameter");
+			return REQ_NOACTION;
+		}
+	} else {
+		/* in error the path_info is the uri to the requested page */
+		path_info = pblock_findval("uri", rq->reqpb);
+	}
 
 	/* check if this uri was included in an other PHP script with nsapi_virtual()
 	   by looking for a request context in the current thread */
 	if (SG(server_context)) {
 		/* send 500 internal server error */
 		log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot make nesting PHP requests with nsapi_virtual()");
-		protocol_status(sn, rq, 500, NULL);
-		return REQ_ABORTED;
+		if (error_directive) {
+			return REQ_NOACTION;
+		} else {
+			protocol_status(sn, rq, 500, NULL);
+			return REQ_ABORTED;
+		}
 	}
 
 	request_context = (nsapi_request_context *)MALLOC(sizeof(nsapi_request_context));
@@ -848,6 +905,9 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	request_context->sn = sn;
 	request_context->rq = rq;
 	request_context->read_post_bytes = 0;
+	request_context->fixed_script = fixed_script;
+	request_context->http_error = (error_directive) ? rq->status_num : 0;
+	request_context->path_info = nsapi_strdup(path_info);
 
 	SG(server_context) = request_context;
 	SG(request_info).query_string = nsapi_strdup(query_string);
@@ -856,7 +916,7 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	SG(request_info).path_translated = nsapi_strdup(path_translated);
 	SG(request_info).content_type = nsapi_strdup(content_type);
 	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
-	SG(sapi_headers).http_response_code = 200;
+	SG(sapi_headers).http_response_code = (error_directive) ? rq->status_num : 200;
 
 	nsapi_php_ini_entries(NSLS_C TSRMLS_CC);
 
@@ -873,16 +933,25 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 		} else {
 			/* send 500 internal server error */
 			log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot prepare PHP engine!");
-			protocol_status(sn, rq, 500, NULL);
-			retval=REQ_ABORTED;
+			if (error_directive) {
+				retval=REQ_NOACTION;
+			} else {
+				protocol_status(sn, rq, 500, NULL);
+				retval=REQ_ABORTED;
+			}
 		}
 	} else {
 		/* send 404 because file not found */
-		log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
-		protocol_status(sn, rq, 404, NULL);
-		retval=REQ_ABORTED;
+		log_error(LOG_WARN, pblock_findval("fn", pb), sn, rq, "Cannot execute PHP script: %s (File not found)", SG(request_info).path_translated);
+		if (error_directive) {
+			retval=REQ_NOACTION;
+		} else {
+			protocol_status(sn, rq, 404, NULL);
+			retval=REQ_ABORTED;
+		}
 	}
 
+	nsapi_free(request_context->path_info);
 	nsapi_free(SG(request_info).query_string);
 	nsapi_free(SG(request_info).request_uri);
 	nsapi_free((void*)(SG(request_info).request_method));
