@@ -122,7 +122,7 @@ if test "$PHP_IMAP" != "no"; then
       ln -s "$IMAP_DIR/lib/c-client.a" "$IMAP_DIR/lib/libc-client.a" >/dev/null 2>&1
     fi
 
-    for lib in imap c-client4 c-client; do
+    for lib in c-client4 c-client imap; do
       IMAP_LIB=$lib
       IMAP_LIB_CHK(lib)
       IMAP_LIB_CHK(c-client)
