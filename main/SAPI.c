@@ -23,6 +23,9 @@
 
 #include "php.h"
 #include "SAPI.h"
+#include "ext/standard/php_string.h"
+#include "ext/standard/pageinfo.h"
+#include "ext/pcre/php_pcre.h"
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -372,6 +375,8 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 	int retval, free_header = 0;
 	sapi_header_struct sapi_header;
 	char *colon_offset;
+	int result_len = 0;
+	long myuid = 0L;
 
 	if (SG(headers_sent) && !SG(request_info).no_headers) {
 		char *output_start_filename = php_get_output_start_filename(TSRMLS_C);
@@ -441,7 +446,59 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 					SG(sapi_headers).http_response_code = 302;
 				   }
 			} else if (!STRCASECMP(header_line, "WWW-Authenticate")) { /* HTTP Authentication */
+				zval *repl_temp;
+				char *result, *newheader, *ptr = colon_offset+1;
+				int newlen, ptr_len=0;
+
 				SG(sapi_headers).http_response_code = 401; /* authentication-required */
+				if(PG(safe_mode)) {
+					myuid = php_getuid();
+
+					ptr_len = strlen(ptr);
+					MAKE_STD_ZVAL(repl_temp);
+					Z_STRVAL_P(repl_temp) = emalloc(32);
+					Z_STRLEN_P(repl_temp) = sprintf(Z_STRVAL_P(repl_temp), "realm=\"\\1-%ld\"", myuid);
+					/* Modify quoted realm value */
+					result = php_pcre_replace("/realm=\"(.*?)\"/i", 16,
+											 ptr, ptr_len,
+											 repl_temp,
+											 0, &result_len, -1 TSRMLS_CC);
+					if(result_len==ptr_len) {
+						efree(result);
+						sprintf(Z_STRVAL_P(repl_temp), "realm=\\1-%ld\\2", myuid);
+						/* modify unquoted realm value */
+						result = php_pcre_replace("/realm=([^\\s]+)(.*)/i", 21, 
+											 	ptr, ptr_len,
+											 	repl_temp,
+											 	0, &result_len, -1 TSRMLS_CC);
+						if(result_len==ptr_len) {
+							char *lower_temp = estrdup(ptr);	
+							char conv_temp[32];
+							int conv_len;
+
+							php_strtolower(lower_temp,strlen(lower_temp));
+							/* If there is no realm string at all, append one */
+							if(!strstr(lower_temp,"realm")) {
+								efree(result);
+								conv_len = sprintf(conv_temp," realm=\"%ld\"",myuid);		
+								result = emalloc(ptr_len+conv_len+1);
+								memcpy(result, ptr, ptr_len);	
+								memcpy(result+ptr_len, conv_temp, conv_len);
+								*(result+ptr_len+conv_len) = '\0';
+							}
+							efree(lower_temp);
+						}
+					}
+					newlen = sizeof("WWW-Authenticate: ") + result_len;
+					newheader = emalloc(newlen+1);
+					sprintf(newheader,"WWW-Authenticate: %s", result);
+					efree(header_line);
+					sapi_header.header = newheader;
+					sapi_header.header_len = newlen;
+					efree(result);
+					efree(Z_STRVAL_P(repl_temp));
+					efree(repl_temp);
+				}
 			}
 			*colon_offset = ':';
 		}
