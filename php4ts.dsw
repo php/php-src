@@ -15,6 +15,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "java"=.\ext\java\java.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "ZendTS"=.\Zend\ZendTS.dsp - Package Owner=<4>
 
 Package=<5>
@@ -92,6 +104,24 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name mysql
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name java
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name servlet
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "servlet"=.\sapi\servlet\servlet.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
 }}}
 
 ###############################################################################
