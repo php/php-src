@@ -1,3 +1,57 @@
+2000-08-25  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: added the ifx (informix) extension
+
+    * ext/informix/ifx.dsp: updated dsp to build with custom build step
+
+    * ext/informix/ifx.dsw
+      ext/informix/ifx_custom_build.dsp
+      ext/informix/ifx_custom_build.dsw: lets keep it in one dsp
+
+2000-08-25  Hénot David  <henot@iie.cnam.fr>
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/php_ii.h: Copyright modification.
+
+2000-08-25  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c:    This fixes bug #6346, that would truncate subject string if the
+    first argument was en empty array.
+
+2000-08-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Use request_uri as PHP_SELF. decodedurl also includes the query string.
+
+    * sapi/aolserver/aolserver.c: Use SAPI' register_server_variables hook.
+
+    Defines PHP_SELF now.
+
+    * sapi/thttpd/thttpd.c: php_register_variables(.. ELS_CC ..)
+
+    * sapi/thttpd/thttpd.c:
+    Make proper use of SAPI's register_environment functionality.
+
+    * build/rules.mk
+      build/rules_pear.mk
+      configure.in: Add autoconf check for awk and use proper macro $(AWK)
+
+    * build/rules_pear.mk
+      pear/Makefile.in
+      pear/phpize.in:
+    Add new depend rule to rules_pear.mk and install mkdep.awk.
+
+    * scripts/.cvsignore: Remove old .cvsignore file
+
+2000-08-25  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/basic_functions.c
+      ext/standard/output.c
+      ext/standard/php_output.h:    Added ob_get_length() function (returns size of buffer)
+
+    * ext/snmp/config.m4: compile fix (RedHat 6.2)
+
 2000-08-24  Dan Kalowsky  <dkalowsky@wgate.com>
 
     * ext/odbc/config.m4:
