@@ -1326,11 +1326,15 @@ void zend_do_begin_class_member_function_call(TSRMLS_D)
 		} else {
 			zend_lowercase_znode_if_const(&last_op->op2);
 		}
-	} else { /* indirect method call */
+	} else if (last_op->opcode == ZEND_FETCH_R) { /* indirect method call */
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+		last_op->op2.u.EA.type = ZEND_FETCH_LOCAL;
 		opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
 		opline->op1 = last_op->op2;
 		opline->op2 = last_op->result;
+	} else {
+		zend_error(E_COMPILE_ERROR, "Internal compiler error - please report!");
 	}
 
 
