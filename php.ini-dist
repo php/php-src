@@ -309,7 +309,7 @@ variables_order = "EGPCS"
 ; You should do your best to write your scripts so that they do not require
 ; register_globals to be on;  Using form variables as globals can easily lead
 ; to possible security problems, if the code is not very well thought of.
-register_globals = On
+register_globals = Off
 
 ; This directive tells PHP whether to declare the argv&argc variables (that
 ; would contain the GET information).  If you don't use these variables, you
