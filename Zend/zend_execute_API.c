@@ -162,6 +162,8 @@ void init_executor(TSRMLS_D)
 
 	EG(user_error_handler) = NULL;
 
+	EG(current_execute_data) = NULL;
+
 	zend_ptr_stack_init(&EG(user_error_handlers));
 	zend_ptr_stack_init(&EG(user_exception_handlers));
 
