@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Updated OCI8 to use the new high-performance Zend function API. (Thies)
 - Configure speedup (Stig)
 - Fixed LOB/Persistent-Connection related OCI8-Crash (Thies)
 - Generalized server-API build procedure on UNIX (Stig)
