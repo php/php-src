@@ -246,6 +246,9 @@ if (isset($argc) && $argc > 1) {
 					}
 					$pass_option_n = true;
 					break;
+				case 'd':
+					$ini_overwrites[] = $argv[++$i];
+					break;
 				default:
 					echo "Illegal switch specified!\n";
 				case "h":
@@ -268,6 +271,9 @@ Options:
     -a <file>   Same as -w but append rather then truncating <file>.
 
     -n          Pass -n option to the php binary (Do not use a php.ini).
+
+    -d foo=bar  Pass -d option to the php binary (Define INI entry foo
+                with value 'bar')
 
     -h <file>   This Help.
 
