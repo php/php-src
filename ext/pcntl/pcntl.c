@@ -256,7 +256,6 @@ PHP_FUNCTION(pcntl_signal)
 /* }}} */
 
 /* Note Old */
-/* Our custom signal handler that calls the appropriate php_function */
 static void old_pcntl_signal_handler(int signo)
 {
 	char *func_name;
@@ -286,7 +285,7 @@ static void old_pcntl_signal_handler(int signo)
 	return;
 }
 
-
+/* Our custom signal handler that calls the appropriate php_function */
 static void pcntl_signal_handler(int signo)
 {
 	long signal_num=signo;
@@ -362,12 +361,13 @@ void pcntl_zend_extension_statement_handler(zend_op_array *op_array) {
 
 	/* Traverse through our signal queue and call the appropriate php functions */
 	for (element=(&PCNTL_G(php_signal_queue))->head; element; element=element->next) {
-		if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) *element->data, (void *) &func_name)==FAILURE) {
+		long *signal_num=(long *)&element->data;
+		if (zend_hash_index_find(&PCNTL_G(php_signal_table), *signal_num, (void *) &func_name)==FAILURE) {
 			continue;
 		}
 		convert_to_long_ex(&param);
 		convert_to_string_ex(&call_name);
-		ZVAL_LONG(param, (long) *element->data);
+		ZVAL_LONG(param, *signal_num);
 		ZVAL_STRING(call_name, func_name, 0);
 	   
 		/* Call php singal handler - Note that we do not report errors, and we ignore the return value */ 
