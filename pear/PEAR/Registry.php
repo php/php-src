@@ -149,7 +149,7 @@ class PEAR_Registry
             if ($ent{0} == "." || substr($ent, -4) != ".inf") {
                 continue;
             }
-            $pkglist[] = substr($entry, 0, -4);
+            $pkglist[] = substr($ent, 0, -4);
         }
         return $pkglist;
     }
