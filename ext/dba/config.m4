@@ -215,6 +215,7 @@ AC_ARG_WITH(cdb,
 [  --with-cdb[=DIR]        Include CDB support],[
   if test "$withval" = "yes"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
+    AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
     AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
     AC_DEFINE(DBA_CDB, 1, [ ])
     cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
