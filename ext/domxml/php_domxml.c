@@ -68,12 +68,12 @@
 													DOMXML_GET_OBJ(ret, zval, le);
 
 #define DOMXML_NO_ARGS()							if (ZEND_NUM_ARGS() != 0) { \
-														php_error(E_WARNING, "%s() expects exactly 0 parameters, %d given", \
+														php_error(E_WARNING, "%s(): expects exactly 0 parameters, %d given", \
 																  get_active_function_name(TSRMLS_C), ZEND_NUM_ARGS()); \
 														return; \
 													}
 
-#define DOMXML_NOT_IMPLEMENTED()					php_error(E_WARNING, "%s() not yet implemented", \
+#define DOMXML_NOT_IMPLEMENTED()					php_error(E_WARNING, "%s(): not yet implemented", \
 															  get_active_function_name(TSRMLS_C)); \
 													return;
 
@@ -728,7 +728,7 @@ void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type
 	int type;
 
 	if (NULL == wrapper) {
-		php_error(E_WARNING, "xsltstylesheet_get_object() invalid wrapper object passed");
+		php_error(E_WARNING, "xsltstylesheet_get_object() invalid wrapper object passed", get_active_function_name(TSRMLS_C));
 		return NULL;
 	}
 
@@ -1049,7 +1049,7 @@ static char **php_xmlparser_make_params(zval *idvars TSRMLS_DC)
 		zend_hash_move_forward(parht)) {
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
-			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+			php_error(E_WARNING, "%s(): Invalid argument or parameter array",
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
@@ -4277,7 +4277,7 @@ PHP_FUNCTION(domxml_parser_end)
 	DOMXML_PARAM_TWO(parserp, id, le_domxmlparserp,"|s", &chunk, &chunk_len);
 	error = xmlParseChunk(parserp, chunk, chunk_len, 1);
 	if (error != 0) {
-		php_error(E_ERROR,"error: %d",error);
+		php_error(E_ERROR, "%s(): error: %d", get_active_function_name(TSRMLS_C), error);
 		RETURN_FALSE;
 	}
 	if (parserp->myDoc != NULL) {
@@ -4870,7 +4870,7 @@ static char *php_domxslt_string_to_xpathexpr(const char *str TSRMLS_DC)
 
 	if (xmlStrchr(string, '"')) {
 		if (xmlStrchr(string, '\'')) {
-			php_error(E_WARNING, "Cannot create XPath expression (string contains both quote and double-quotes) in %s",
+			php_error(E_WARNING, "%s(): Cannot create XPath expression (string contains both quote and double-quotes)",
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
@@ -4908,7 +4908,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 		zend_hash_move_forward(parht)) {
 
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
-			php_error(E_WARNING, "Invalid argument or parameter array to %s",
+			php_error(E_WARNING, "%s(): Invalid argument or parameter array",
 					  get_active_function_name(TSRMLS_C));
 			return NULL;
 		}
