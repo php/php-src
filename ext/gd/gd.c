@@ -68,7 +68,8 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 #endif
 #ifdef ENABLE_GD_TTF
 # ifdef HAVE_LIBFREETYPE
-#  include <freetype/freetype.h>
+#  include <ft2build.h>
+#  include FT_FREETYPE_H
 # else
 #  ifdef HAVE_LIBTTF
 #   include <freetype.h>
