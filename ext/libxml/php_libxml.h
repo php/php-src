@@ -56,6 +56,9 @@ PHP_FUNCTION(libxml_set_streams_context);
 #define LIBXML(v) (libxml_globals.v)
 #endif
 
+PHP_LIBXML_API void php_libxml_initialize();
+PHP_LIBXML_API void php_libxml_shutdown();
+
 #endif /* PHP_LIBXML_H */
 
 /*

@@ -32,6 +32,7 @@
 #include "dom_properties.h"
 
 #include "ext/standard/info.h"
+#include "ext/libxml/php_libxml.h"
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
@@ -702,7 +703,7 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("DOM_INVALID_ACCESS_ERR",	INVALID_ACCESS_ERR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_VALIDATION_ERR",		VALIDATION_ERR,			CONST_CS | CONST_PERSISTENT);
 
-	xmlInitParser();
+	php_libxml_initialize();
 
 	return SUCCESS;
 }
@@ -724,13 +725,17 @@ PHP_MINFO_FUNCTION(dom)
 #if defined(LIBXML_XPTR_ENABLED)
 	php_info_print_table_row(2, "XPointer Support", "enabled");
 #endif
+#ifdef LIBXML_SCHEMAS_ENABLED
+	php_info_print_table_row(2, "Schema Support", "enabled");
+	php_info_print_table_row(2, "RelaxNG Support", "enabled");
+#endif
 	php_info_print_table_end();
 }
 /* }}} */
 
 PHP_MSHUTDOWN_FUNCTION(dom)
 {
-	xmlCleanupParser();
+	php_libxml_shutdown();
 
 	zend_hash_destroy(&dom_domstringlist_prop_handlers);
 	zend_hash_destroy(&dom_namelist_prop_handlers);
