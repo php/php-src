@@ -169,8 +169,6 @@ PHPAPI void php_session_set_id(char *id TSRMLS_DC);
 #define PS_DEL_VARL(name,namelen) \
 	zend_hash_del(&PS(vars), name, namelen + 1);
 
-#define PS_DEL_VAR(name) PS_DEL_VARL(name, strlen(name))
-
 #define PS_ENCODE_VARS 											\
 	char *key;													\
 	uint key_length;											\
