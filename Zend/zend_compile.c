@@ -3333,7 +3333,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *as_token, znode *fore
 		value = tmp;
 	}
 
-	if (key->u.EA.type & ZEND_PARSED_REFERENCE_VARIABLE) {
+	if ((key->op_type != IS_UNUSED) && (key->u.EA.type & ZEND_PARSED_REFERENCE_VARIABLE)) {
 		zend_error(E_COMPILE_ERROR, "Key element cannot be a reference");
 	}
 	
