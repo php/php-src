@@ -457,6 +457,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 					goto errexit;
 				}
 			} else {
+				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Remote file already exists and overwrite context option not specified.");
 				errno = EEXIST;
 				goto errexit;
 			}
