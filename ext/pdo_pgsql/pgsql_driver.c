@@ -314,11 +314,12 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_begin,
 	pgsql_handle_commit,
 	pgsql_handle_rollback,
-	NULL,
+	NULL, /* set_attr */
 	pdo_pgsql_last_insert_id,
 	pdo_pgsql_fetch_error_func,
 	pdo_pgsql_get_attribute,
-	NULL	/* check_liveness */
+	NULL,	/* check_liveness */
+	NULL  /* get_driver_methods */
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
