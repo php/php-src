@@ -394,7 +394,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
-		char temp_api[9];
+		char temp_api[10];
 		char *logo_guid;
 
 		php_uname = php_get_uname('a');
