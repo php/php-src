@@ -1446,6 +1446,9 @@ re_compile_pattern(pattern, size, bufp)
 	snprintf(error_msg, ERROR_MSG_MAX_SIZE, 
 		 "invalid regular expression; there's no previous pattern, to which '%c' would define cardinality at %d", 
 		 c, p-pattern);
+	if (bufp->buffer) {
+		xfree(bufp->buffer);
+	}	
 	FREE_AND_RETURN(stackb, error_msg);
       }
       /* If there is a sequence of repetition chars,
