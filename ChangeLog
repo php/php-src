@@ -1,3 +1,77 @@
+2003-03-11  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      sapi/apache2handler/php_functions.c:
+      OnUpdateLong is only in php5/HEAD. (oops! :)
+
+2003-03-11  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/xml/expat/expat.h:
+      Fixed bug #22634 (broken cygwin build)
+
+2003-03-11  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      This went to 4_3 branch
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/odbc/config.m4:
+      MFH: - Fixed bug #20715 (odbc could not be compiled as shared extension)
+
+    * ext/odbc/config.m4:
+      - Fixed bug #20715 (odbc could not be compiled as shared extension)
+
+2003-03-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re:
+      fix sizeof(size_t) > sizeof(uint) issue
+
+2003-03-11  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/imap/config.m4:
+      MFH: Fixed bug #22616 (Wrong order of -lssl and -lcrypto with IMAP)
+
+    * ext/imap/config.m4:
+      Fixed bug #22616 (Wrong order of -lssl and -lcrypto with IMAP)
+
+2003-03-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re:
+      reverting jani's non-sense commits
+
+2003-03-11  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysqli/config.m4:
+      added new profiler-files
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_profiler.c
+      ext/mysqli/mysqli_profiler.h
+      ext/mysqli/mysqli_profiler_com.c
+      ext/mysqli/mysqli_profiler_com.h
+      ext/mysqli/php_mysqli.h:
+      profiler:
+      moved profiler stuff from php_mysql.h to separate include file
+      added port communication
+      added xml support for file and port output
+
 2003-03-10  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/url_scanner_ex.c:

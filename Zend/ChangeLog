@@ -1,3 +1,9 @@
+2003-03-11  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_object_handlers.c:
+      Fix handling of ::func()
+
 2003-03-10  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
