@@ -48,7 +48,7 @@ static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
 	PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
 	PHP_FALIAS(ming_useswfversion,      ming_useSWFVersion,      NULL)
-	PHP_FALIAS(swfbutton_keypress,      swfbutton_keypress,      NULL)
+	PHP_FALIAS(ming_keypress,           ming_keypress,           NULL)
 #ifdef HAVE_NEW_MING
 	PHP_FALIAS(ming_useconstants,		ming_useConstants,       NULL)
 #endif
@@ -627,9 +627,9 @@ PHP_METHOD(swfbutton, addAction)
 }
 /* }}} */
 
-/* {{{ proto int swfbutton_keypress(string str)
+/* {{{ proto int ming_keypress(string str)
    Returns the action flag for keyPress(char) */
-PHP_FUNCTION(swfbutton_keypress)
+PHP_FUNCTION(ming_keypress)
 {
 	zval **key;
 	char c;
