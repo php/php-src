@@ -52,7 +52,7 @@
 #include "php_ini.h"
 #include "php_globals.h"
 #include "php_main.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #ifdef PHP_WIN32
 #include <io.h>

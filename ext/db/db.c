@@ -25,7 +25,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "safe_mode.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "ext/standard/flock_compat.h" 
 #include "ext/standard/info.h"
 

@@ -161,7 +161,7 @@ typedef unsigned int socklen_t;
 char *strerror(int);
 #endif
 
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 
 #if (REGEX == 1 || REGEX == 0) && !defined(NO_REGEX_EXTRA_H)
 #include "regex/regex_extra.h"

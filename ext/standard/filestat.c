@@ -20,7 +20,7 @@
 
 #include "php.h"
 #include "safe_mode.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "php_globals.h"
 
 #include <stdlib.h>

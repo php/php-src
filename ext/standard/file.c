@@ -69,7 +69,7 @@
 #include <sys/time.h>
 #endif
 #include "fsock.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 #include "php_globals.h"
 
 #ifdef HAVE_SYS_FILE_H

@@ -21,7 +21,7 @@
 
 #include "php.h"
 #include "php_zlib.h"
-#include "fopen-wrappers.h"
+#include "fopen_wrappers.h"
 
 #if HAVE_FOPENCOOKIE 
 
