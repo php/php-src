@@ -937,7 +937,7 @@ PHP_RINIT_FUNCTION(session)
 	if(PS(mod) == NULL) {
 		/* current status is unusable */
 		PS(nr_open_sessions) = -1;
-		return FAILURE;
+		return SUCCESS;
 	}
 
 	if(INI_INT("session.auto_start")) {
