@@ -916,6 +916,10 @@ void php_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 
+	/* EG(opline_ptr) points into nirvana and therefore cannot be safely accessed
+	   inside zend_executor callback functions. */
+	EG(opline_ptr) = NULL;
+
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
 	} zend_end_try();
