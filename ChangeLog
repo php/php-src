@@ -1,3 +1,114 @@
+2001-01-03  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h: Prepare 4.0.4pl1-RC1
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+    * sapi/apache/mod_php4.c:
+    Fix last couple of problematic execution paths that could corrupt the INI values
+
+    * sapi/apache/mod_php4.c:
+    Merge Apache module fixes - engine = off propogating to other vhosts
+    and possible INI entries corruption
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-03  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail.php
+      pear/Mail/rfc822.php:
+    Mail.php: use the Mail_rfc822:: class to parse addresses. There is a small
+    performance penalty, but it handles rfc822 groups, which
+    imap_rfc822_parse_adrlist doesn't.
+
+    rfc822.php: Style fixes, some small tweaks/optimizations, and work around a
+    bit of object weirdness that caused the test for $this (to see if we were
+    being called statically) to not be sufficient.
+
+2001-01-03  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4:
+    Added better checking for OpenSSL's libraries. Now configure stops
+    if the libs aren't found.
+
+2001-01-03  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sockets/sockets.c:
+    Make socket support compile under Solaris 8 with the Sun WorkShop compiler.
+
+    PR: 8468
+
+2001-01-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/pdf/pdf.c: I missed this function..
+
+    * ext/curl/curl.c: Fix pr #8305.
+
+    * ext/pdf/pdf.c
+      ext/pdf/php_pdf.h: Trying to bring pdf extension a bit more up to date.
+
+2001-01-03  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pdf/pdf.c: fix filepath handling
+
+2001-01-03  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Makefile.in:
+    add Numbers/Roman.php, Net/Curl.php, and XML/RPC.php to the install rules.
+
+2001-01-03  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    These changes are to reflect those in the 4.0.5 development branch.  Mainly adding in compile capability for the OPENLINK system (changed a SQLINTEGER to an SDWORD to allow compile), and re-added in a #define for SOLID 3.0 systems... both are needed for proper functionality.
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
+2001-01-03  Zeev Suraski  <zeev@zend.com>
+
+    * main/SAPI.h
+      sapi/apache/mod_php4.c:
+    Fix Apache module and remove excess elements from the SAPI structure
+
+2001-01-03  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pdf/pdf.c: fix bug 8341 & 8394
+
+2001-01-03  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/mod_php4.c: Fix compile.
+
+2001-01-03  Stanislav Malyshev  <stas@zend.com>
+
+    * main/rfc1867.c:
+    Fix #8486 (name= without quotes in MIME Content-Disposition header)
+    Ported fix by kk/sas from PHP 3
+
+2001-01-03  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Date/Human.php
+      pear/Makefile.in:
+    add allan@lodestone.co.za's Date_Human calculator class.
+
+    * pear/Mail/rfc822.php
+      pear/Makefile.in:
+    here's an initial version of Richard Heyes' rfc822 email address parser.
+
+    * pear/Benchmark/Timer.php:
+    match coding standards, and be nice enough to work when bcmath isn't loaded.
+
+    * pear/Crypt/HCEMD5.php:
+    fix silly bug introduced by wrong order of arguments. this is slightly more
+    elegant, anyway...
+
 2001-01-02  Zeev Suraski  <zeev@zend.com>
 
     * ext/com/COM.c: Import COM patch from Harald Radi <h.radi@nme.at>
