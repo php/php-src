@@ -10,7 +10,6 @@
 #include <sys/types.h>
 typedef int uid_t;
 typedef int gid_t;
-typedef int mode_t;
 typedef char * caddr_t;
 #define lstat(x, y) stat(x, y)
 #define		_IFIFO	0010000	/* fifo */
