@@ -2094,6 +2094,11 @@ PHP_METHOD(SoapClient, SoapClient)
 #endif
 			add_property_zval(this_ptr, "_classmap", class_map);
 		}
+
+		if (zend_hash_find(ht, "connection_timeout", sizeof("connection_timeout"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_LONG && Z_LVAL_PP(tmp) > 0) {
+			add_property_long(this_ptr, "_connection_timeout", Z_LVAL_PP(tmp));
+		}
 	} else if (wsdl == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are requred in nonWSDL mode");
 		return;
