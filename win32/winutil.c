@@ -20,8 +20,12 @@
 
 PHPAPI char *php_win_err(int error)
 {
-	char *buf;
+	static char *buf = NULL;
 
+	if (buf) {
+		free(buf);
+		buf = NULL;
+	}
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),	(LPTSTR)&buf, 0, NULL
