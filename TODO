@@ -3,9 +3,7 @@ parenthesis means that person has taken on this project.
 
 Zend
 ----
-    For PHP 4.3.0:
-    * Allow foreach ($array as $k => &$val) syntax. right now we cannot 
-      traverse an array without copying each element.
+    For PHP 5.0.0:
     * Allow foreach ($array as $k => list($a, $b)) syntax for multi
       dimensional arrays.
     * Look at replacing c-lib call tolower().
@@ -16,8 +14,8 @@ Zend
     * Add configure test to determine if dlsym() requires underscore and set
       DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
       for example. (DONE?)
-
-    For PHP 5.0.0:
+    * Allow foreach ($array as $k => &$val) syntax. right now we cannot 
+      traverse an array without copying each element.
     * Native large number support (probably with GNU GMP)
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
@@ -27,17 +25,8 @@ Zend
 global
 ------
     For PHP 4.3.0:
-    * Add aliases to functions to conform to new naming conventions, e.g.
-      str_to_upper().
-    * Make all extensions thread-safe.
-    * Make everything on the language-level independent of your locale 
-      settings.
-    * Change PHP error messages, so that they point to pages or sections 
-      in the PHP Manual.
     * Make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
-    * Activate all extensions by default that don't rely on external
-      dependencies. (eg ftp) (DONE?)
     * on some platforms unimplemented function will just do nothing 
       (e.g. symlink) they should print a warning or not even be defined!
       (DONE ?)

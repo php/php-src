@@ -797,7 +797,7 @@ PHP_FUNCTION(socket_read)
 	}
 	
 	tmpbuf = erealloc(tmpbuf, retval + 1);
-	tmpbuf[ retval ] = '\0' ;
+	tmpbuf[retval] = '\0' ;
 
 	RETURN_STRINGL(tmpbuf, retval, 0);
 }
@@ -1069,7 +1069,8 @@ PHP_FUNCTION(socket_bind)
 			}
 		
 		default:
-			php_error(E_WARNING, "%s() unsupported socket type '%d', must be AF_UNIX or AF_INET", get_active_function_name(TSRMLS_C), php_sock->type);
+			php_error(E_WARNING, "%s() unsupported socket type '%d', must be AF_UNIX or AF_INET", 
+                     get_active_function_name(TSRMLS_C), php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -2025,6 +2026,6 @@ PHP_FUNCTION(socket_clear_error)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
+ * vim600: fdm=marker
+ * vim: noet sw=4 ts=4
  */
