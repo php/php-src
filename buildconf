@@ -7,10 +7,16 @@ if test "$supplied_flag" = "--copy"; then
     automake_flags=--copy
 fi
 
-if test -d "ZendEngine2"; then
-    mv ZendEngine2 Zend
+if test "$supplied_flag" = "--ZendEngine2"; then
+    ZENDDIR=ZendEngine2
+    echo "Using Zend Engine 2 code"
 fi
 
+if test "$ZENDDIR" = ""; then
+    ZENDDIR=Zend
+    echo "using Zend Engine 1 code"
+fi
+ 
 ## build.mk does not check aclocal exit status yet
 ##
 #mv aclocal.m4 aclocal.m4.old 2>/dev/null
@@ -37,4 +43,4 @@ case "`uname`" in
     ./build/bsd_makefile;;
 esac
 
-${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags"
+${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
