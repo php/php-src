@@ -64,7 +64,7 @@ typedef struct {
 } php_pfpro_globals;
 
 #ifdef ZTS
-#define PFPROG(v) TSRMG(gd_pfpro_id, php_pfpro_globals *, v)
+#define PFPROG(v) TSRMG(pfpro_globals_id, php_pfpro_globals *, v)
 #else
 #define PFPROG(v) (pfpro_globals.v)
 #endif
