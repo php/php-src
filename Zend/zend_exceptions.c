@@ -329,11 +329,16 @@ ZEND_METHOD(exception, tostring)
 
 /* All functions that may be used in uncaught exception handlers must be final
  * and must not throw exceptions. Otherwise we would need a facility to handle
- * such exceptions in that handler.
+ * such exceptions in that handler. 
+ * Also all getXY() methods are final because thy serve as read only access to
+ * their corresponding properties, no more, no less. If after all you need to 
+ * override somthing then it is method toString().
+ * And never try to change the state of exceptions and never implement anything
+ * that gives the user anything to accomplish this.
  */
 static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, __construct, NULL, 0)
-	ZEND_ME(exception, getmessage, NULL, 0) /* non final for now */
+	ZEND_ME(exception, getmessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getcode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getfile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getline, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
