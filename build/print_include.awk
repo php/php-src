@@ -1,6 +1,6 @@
 /phpext_/ {
 	if (old_filename != FILENAME) {
-		printf "#include \"" FILENAME "\"\\\\n"
+		printf "#include \"" FILENAME "\"@NEWLINE@"
 		old_filename = FILENAME
 	}
 }
