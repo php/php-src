@@ -1,3 +1,39 @@
+2004-06-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ldap/ldap.c:
+      Removed pointless allocation check.
+
+2004-06-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * INSTALL:
+      Fix #28921 (Bad grammar in INSTALL).
+
+2004-06-28  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/datetime.c:
+      - MFH: Fixed bug with leap year checking.
+
+    * ext/standard/datetime.c:
+      - Fixed bug with leap year checking.
+
+2004-06-28  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * NEWS:
+      Revert at Derick's request
+
+    * NEWS
+      NEWS:
+      BFN
+
+    * ext/interbase/ibase_query.c:
+      MFB Fixed bug #28897 (-1 returned as -0.000 for 64-bit scaled int)
+
+    * (PHP_4_3)
+      ext/interbase/interbase.c:
+      Fixed bug #28897 (-1 returned as -0.000 for 64-bit scaled int)
+
 2004-06-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/basic_functions.c:
