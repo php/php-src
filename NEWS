@@ -11,7 +11,8 @@ PHP 4                                                                      NEWS
   . ext/icap
   . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
-- Added imagerotate() to bundled libgd (Pierre-Alain Joye, Ilia).
+- Added imagerotate() which is available only when bundled libgd is used.
+  (Pierre-Alain Joye, Ilia)
 - Fixed bug #17497 (mssql extension crashes if magic_quotes_runtime is on).
   (Sterling)
 - Remove $_FILES from $_REQUEST (import_request_variables is not modified), 
