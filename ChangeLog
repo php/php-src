@@ -1,3 +1,46 @@
+2002-07-31  jason  <jason@pb1.pair.com>
+
+    * NEWS: perhaps this tiem i will get it right
+
+    * NEWS: Fix unwrapped entry
+
+    * NEWS: Fix my broken entry
+
+2002-07-31  Sterling Hughes  <sterling@pb1.pair.com>
+
+    * ext/curl/curl.c: add support for the curl dns cache
+
+2002-07-31  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: -fix warnings in windows build
+
+    * main/SAPI.c: -problem with CLI/mbstring/output buffering
+
+2002-07-31  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * main/php_variables.c: Fix for non-mbstring builds.  Bad Yasuo! :)
+
+    * ext/mbstring/mbstring.c: Fix crash
+
+2002-07-31  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc_includes.h: WS
+
+    * ext/odbc/php_odbc.c:
+    Just adding in an error check that seems to work here well.
+
+2002-07-31  sniper  <sniper@pb1.pair.com>
+
+    * ext/standard/array.c:
+    Reverted the patch..it breaks the original behaviour of at least array_shift.
+
+2002-07-31  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    removing the useless +1's on sizeof() and adding the mail_parameter for the
+    getquot inside the imap_get_quotaroot function.  thank Jani.
+
 2002-07-30  kalowsky  <kalowsky@pb1.pair.com>
 
     * ext/imap/php_imap.c:
