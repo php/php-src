@@ -202,6 +202,8 @@ SAPI_API void sapi_activate(SLS_D)
 				sapi_module.sapi_error(E_COMPILE_ERROR, "No content-type in POST request");
 			}
 			sapi_read_post_data(SLS_C);
+		} else {
+			SG(request_info).content_type_dup = NULL;
 		}
 		SG(request_info).cookie_data = sapi_module.read_cookies(SLS_C);
 		if (sapi_module.activate) {

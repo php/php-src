@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "IMAP_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "IMAP_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -95,7 +95,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /FR /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -120,7 +120,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "IMAP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /D "NDEBUG" /D "ZTS" /D "IMAP_EXPORTS" /D "COMPILE_DL_IMAP" /D HAVE_IMAP=1 /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -146,27 +146,7 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=.\imap.c
-
-!IF  "$(CFG)" == "imap - Win32 Release"
-
 # ADD CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-
-!ELSEIF  "$(CFG)" == "imap - Win32 Debug"
-
-# ADD CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-
-!ELSEIF  "$(CFG)" == "imap - Win32 Debug_TS"
-
-# ADD BASE CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-# ADD CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-
-!ELSEIF  "$(CFG)" == "imap - Win32 Release_TS"
-
-# ADD BASE CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-# ADD CPP /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\..\IMAP\c-client" /I "..\..\TSRM"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files"
