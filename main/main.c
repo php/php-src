@@ -64,9 +64,13 @@
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
 #include <io.h>
-#include <fcntl.h>
 #include "win32/php_registry.h"
 #endif
+
+#if defined(HAVE_FCNTL_H)
+#include <fcntl.h>
+#endif
+
 #include "php_syslog.h"
 
 #if PHP_SIGCHILD
@@ -1551,12 +1555,6 @@ PHPAPI int php_handle_special_queries(TSRMLS_D)
 	return 0;
 }
 /* }}} */
-
-#ifdef HAVE_BROKEN_GETCWD
-# ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-# endif
-#endif
 
 /* {{{ php_execute_script
  */
