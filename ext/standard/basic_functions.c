@@ -297,6 +297,12 @@ function_entry basic_functions[] = {
 	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
 	PHP_FE(compact,						NULL)
+	PHP_FE(push,						first_arg_force_ref)
+	PHP_FE(pop,							first_arg_force_ref)
+	PHP_FE(shift,						first_arg_force_ref)
+	PHP_FE(unshift,						first_arg_force_ref)
+	PHP_FE(splice,						first_arg_force_ref)
+	PHP_FE(slice,						NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -2396,7 +2402,7 @@ static void _compact_var(HashTable *eg_active_symbol_table, zval *return_value, 
 /* }}} */
 
 
-/* {{{ proto void compact(string var_name | array var_names [, ... ])
+/* {{{ proto array compact(string var_name | array var_names [, ... ])
    Creates a hash containing variables and their values */
 PHP_FUNCTION(compact)
 {
@@ -2419,6 +2425,404 @@ PHP_FUNCTION(compact)
 	}
 	
 	efree(args);
+}
+/* }}} */
+
+
+/* HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
+						   zval **list, int list_count, HashTable **removed) */
+HashTable* _phpi_splice(HashTable *in_hash, int offset, int length,
+						zval **list, int list_count, HashTable **removed)
+{
+	HashTable 	*out_hash = NULL;	/* Output hashtable */
+	int			 num_in,			/* Number of entries in the input hashtable */
+				 pos,				/* Current position in the hashtable */
+				 i;					/* Loop counter */
+	Bucket		*p;					/* Pointer to hash bucket */
+	zval		*entry;				/* Hash entry */
+	
+	/* If input hash doesn't exist, we have nothing to do */
+	if (!in_hash)
+		return NULL;
+	
+	/* Get number of entries in the input hash */
+	num_in = zend_hash_num_elements(in_hash);
+	
+	/* Clamp the offset.. */
+	if (offset > num_in)
+		offset = num_in;
+	else if (offset < 0 && (offset=num_in+offset) < 0)
+		offset = 0;
+	
+	/* ..and the length */
+	if (length < 0 || offset+length > num_in)
+		length = num_in-offset;
+
+	/* Create and initialize output hash */
+	out_hash = (HashTable *)emalloc(sizeof(HashTable));
+	zend_hash_init(out_hash, 0, NULL, PVAL_PTR_DTOR, 0);
+	
+	/* Start at the beginning of the input hash and copy
+	   entries to output hash until offset is reached */
+	for (pos=0, p=in_hash->pListHead; pos<offset && p ; pos++, p=p->pListNext) {
+		/* Get entry and increase reference count */
+		entry = *((zval **)p->pData);
+		entry->refcount++;
+		
+		/* Update output hash depending on key type */
+		if (p->nKeyLength)
+			zend_hash_update(out_hash, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+		else
+			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
+	}
+	
+	/* If hash for removed entries exists, go until offset+length
+	   and copy the entries to it */
+	if (removed != NULL) {
+		for( ; pos<offset+length && p; pos++, p=p->pListNext) {
+			entry = *((zval **)p->pData);
+			entry->refcount++;
+			if (p->nKeyLength)
+				zend_hash_update(*removed, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+			else
+				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
+		}
+	} else /* otherwise just skip those entries */
+		for( ; pos<offset+length && p; pos++, p=p->pListNext);
+	
+	/* If there are entries to insert.. */
+	if (list != NULL) {
+		/* ..for each one, create a new zval, copy entry into it
+		   and copy it into the output hash */
+		for (i=0; i<list_count; i++) {
+			entry = list[i];
+			entry->is_ref = 1;
+			entry->refcount++;
+			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
+		}
+	}
+	
+	/* Copy the remaining input hash entries to the output hash */
+	for ( ; p ; p=p->pListNext) {
+		entry = *((zval **)p->pData);
+		entry->refcount++;
+		if (p->nKeyLength)
+			zend_hash_update(out_hash, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
+		else
+			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
+	}
+
+	zend_hash_internal_pointer_reset(out_hash);
+	return out_hash;
+}
+/* }}} */
+
+
+/* {{{ proto int push(array stack, mixed var [, ...])
+   Pushes elements onto the end of the array */
+PHP_FUNCTION(push)
+{
+	zval	   **args,		/* Function arguments array */
+				*stack,		/* Input array */
+				*new_var;	/* Variable to be pushed */
+	int			 i,			/* Loop counter */
+				 argc;		/* Number of function arguments */
+
+	/* Get the argument count and check it */
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval **)emalloc(argc * sizeof(zval *));
+	if (getParametersArray(ht, argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+
+	/* Get first argument and check that it's an array */	
+	stack = args[0];
+	if (stack->type != IS_ARRAY) {
+		zend_error(E_WARNING, "First argument to push() needs to be an array");
+		RETURN_FALSE;
+	}
+
+	/* For each subsequent argument, make it a reference, increase refcount,
+	   and add it to the end of the array */
+	for (i=1; i<argc; i++) {
+		new_var = args[i];
+		new_var->is_ref = 1;
+		new_var->refcount++;
+	
+		zend_hash_next_index_insert(stack->value.ht, &new_var, sizeof(zval *), NULL);
+	}
+	
+	/* Clean up and return the number of values in the stack */
+	efree(args);
+	RETVAL_LONG(zend_hash_num_elements(stack->value.ht));
+}
+/* }}} */
+
+
+/* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int which_end) */
+static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
+{
+	zval		*stack,			/* Input stack */
+			   **val;			/* Value to be popped */
+	char		*string_key;	
+	ulong		 num_key;
+	
+	/* Get the arguments and do error-checking */
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &stack) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (stack->type != IS_ARRAY) {
+		zend_error(E_WARNING, "The argument needs to be an array");
+		return;
+	}
+	
+	/* Get the first or last value and copy it into the return value */
+	if (off_the_end)
+		zend_hash_internal_pointer_end(stack->value.ht);
+	else
+		zend_hash_internal_pointer_reset(stack->value.ht);
+	zend_hash_get_current_data(stack->value.ht, (void **)&val);
+	*return_value = **val;
+	zval_copy_ctor(return_value);
+	return_value->refcount=1;
+	return_value->is_ref=0;
+	
+	/* Delete the first or last value */
+	switch (zend_hash_get_current_key(stack->value.ht, &string_key, &num_key)) {
+		case HASH_KEY_IS_STRING:
+			zend_hash_del(stack->value.ht, string_key, strlen(string_key)+1);
+			efree(string_key);
+			break;
+			
+		case HASH_KEY_IS_LONG:
+			zend_hash_index_del(stack->value.ht, num_key);
+			break;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto mixed pop(array stack)
+   Pops an element off the end of the array */
+PHP_FUNCTION(pop)
+{
+	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+
+/* {{{ proto mixed shift(array stack)
+   Pops an element off the beginning of the array */
+PHP_FUNCTION(shift)
+{
+	_phpi_pop(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+
+/* {{{ proto int unshift(array stack, mixed var [, ...])
+   Pushes elements onto the beginning of the array */
+PHP_FUNCTION(unshift)
+{
+	zval	   **args,		/* Function arguments array */
+				*stack;		/* Input stack */
+	HashTable	*new_hash;	/* New hashtable for the stack */
+	int			 argc;		/* Number of function arguments */
+	
+
+	/* Get the argument count and check it */	
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval **)emalloc(argc * sizeof(zval *));
+	if (getParametersArray(ht, argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Get first argument and check that it's an array */
+	stack = args[0];
+	if (stack->type != IS_ARRAY) {
+		zend_error(E_WARNING, "First argument to push() needs to be an array");
+		RETURN_FALSE;
+	}
+
+	/* Use splice to insert the elements at the beginning.  Destroy old
+	   hashtable and replace it with new one */
+	new_hash = _phpi_splice(stack->value.ht, 0, 0, &args[1], argc-1, NULL);
+	zend_hash_destroy(stack->value.ht);
+	efree(stack->value.ht);
+	stack->value.ht = new_hash;
+
+	/* Clean up and return the number of elements in the stack */
+	efree(args);
+	RETVAL_LONG(zend_hash_num_elements(stack->value.ht));
+}
+/* }}} */
+
+
+/* {{{ proto array splice(array input, int offset [, int length, mixed var [, ...] ])
+   Removes the elements designated by offset and length and replace them with
+   var's if supplied */
+PHP_FUNCTION(splice)
+{
+	zval	   **args,				/* Function arguments array */
+				*array;				/* Input array */
+	HashTable	*removed = NULL,	/* Hash for removed elements */
+				*new_hash = NULL;	/* Output array's hash */
+	int			 argc,				/* Number of function arguments */
+				 offset,
+				 length;
+
+	/* Get the argument count and check it */
+	argc = ARG_COUNT(ht);
+	if (argc < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	/* Allocate arguments array and get the arguments, checking for errors. */
+	args = (zval **)emalloc(argc * sizeof(zval *));
+	if (getParametersArray(ht, argc, args) == FAILURE) {
+		efree(args);
+		WRONG_PARAM_COUNT;
+	}
+
+	/* Get first argument and check that it's an array */
+	array = args[0];
+	if (array->type != IS_ARRAY) {
+		zend_error(E_WARNING, "First argument to splice() should be an array");
+		efree(args);
+		return;
+	}
+	
+	/* Get the next two arguments.  If length is omitted,
+	   it's assumed to be -1 */
+	convert_to_long(args[1]);
+	offset = args[1]->value.lval;
+	if (argc > 2) {
+		convert_to_long(args[2]);
+		length = args[2]->value.lval;
+	} else
+		length = -1;
+
+	/* Initialize return value */
+	array_init(return_value);
+	
+	/* Perform splice */
+	new_hash = _phpi_splice(array->value.ht, offset, length,
+					(argc>3) ? &args[3] : NULL , argc-3,
+					&return_value->value.ht);
+	
+	/* Replace input array's hashtable with the new one */
+	zend_hash_destroy(array->value.ht);
+	efree(array->value.ht);
+	array->value.ht = new_hash;
+	
+	/* Clean up */
+	efree(args);
+}
+/* }}} */
+
+
+/* {{{ proto array slice(array input, int offset [, int length])
+   Returns elements specified by offset and length */
+PHP_FUNCTION(slice)
+{
+	zval		*input,			/* Input array */
+				*offset,		/* Offset to get elements from */
+				*length,		/* How many elements to get */
+			   **entry;			/* An array entry */
+	int			 offset_val,	/* Value of the offset argument */
+				 length_val,	/* Value of the length argument */
+				 num_in,		/* Number of elements in the input array */
+				 pos,			/* Current position in the array */
+				 argc,			/* Number of function arguments */
+				 i;				/* Loop counter */
+	char		*string_key;
+	ulong		 num_key;
+	
+
+	/* Get the arguments and do error-checking */	
+	argc = ARG_COUNT(ht);
+	if (argc < 2 || argc > 3 || getParameters(ht, argc, &input, &offset, &length)) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (input->type != IS_ARRAY) {
+		zend_error(E_WARNING, "First argument to slice() should be an array");
+		return;
+	}
+	
+	/* Make sure offset and length are integers and assume
+	   we want all entries from offset to the end if length
+	   is not passed */
+	convert_to_long(offset);
+	offset_val = offset->value.lval;
+	if (argc == 3) {
+		convert_to_long(length);
+		length_val = length->value.lval;
+	} else
+		length_val = -1;
+	
+	/* Initialize returned array */
+	array_init(return_value);
+	
+	/* Get number of entries in the input hash */
+	num_in = zend_hash_num_elements(input->value.ht);
+	
+	/* Clamp the offset.. */
+	if (offset_val > num_in)
+		return;
+	else if (offset_val < 0 && (offset_val=num_in+offset_val) < 0)
+		offset_val = 0;
+	
+	/* ..and the length */
+	if (length_val < 0 || offset_val+length_val > num_in)
+		length_val = num_in-offset_val;
+	
+	if (length_val == 0)
+		return;
+	
+	/* Start at the beginning and go until we hit offset */
+	pos = 0;
+	zend_hash_internal_pointer_reset(input->value.ht);
+	while(pos < offset_val &&
+		  zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		pos++;
+		zend_hash_move_forward(input->value.ht);
+	}
+	
+	/* Copy elements from input array to the one that's returned */
+	while(pos < offset_val+length_val &&
+		  zend_hash_get_current_data(input->value.ht, (void **)&entry) == SUCCESS) {
+		
+		(*entry)->refcount++;
+
+		switch (zend_hash_get_current_key(input->value.ht, &string_key, &num_key)) {
+			case HASH_KEY_IS_STRING:
+				zend_hash_update(return_value->value.ht, string_key, strlen(string_key)+1,
+								 entry, sizeof(zval *), NULL);
+				efree(string_key);
+				break;
+	
+			case HASH_KEY_IS_LONG:
+				zend_hash_next_index_insert(return_value->value.ht,
+											entry, sizeof(zval *), NULL);
+				break;
+		}
+		pos++;
+		zend_hash_move_forward(input->value.ht);
+	}
 }
 /* }}} */
 

@@ -122,6 +122,12 @@ PHP_FUNCTION(function_exists);
 PHP_FUNCTION(in_array);
 PHP_FUNCTION(extract);
 PHP_FUNCTION(compact);
+PHP_FUNCTION(push);
+PHP_FUNCTION(pop);
+PHP_FUNCTION(shift);
+PHP_FUNCTION(unshift);
+PHP_FUNCTION(splice);
+PHP_FUNCTION(slice);
 
 #if HAVE_PUTENV
 typedef struct {

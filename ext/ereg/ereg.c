@@ -564,7 +564,6 @@ PHP_FUNCTION(split)
 
 	/* churn through str, generating array entries as we go */
 	while ((count == -1 || count > 0) && !(err = regexec(&re, strp, 1, subs, 0))) {
-		printf("In the loop...\n");
 		if (subs[0].rm_so == 0 && subs[0].rm_eo) {
 			/* match is at start of string, return empty string */
 			add_next_index_stringl(return_value, empty_string, 0, 1);
