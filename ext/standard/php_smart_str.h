@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <zend.h>
 
-#define smart_str_0(x) do { if ((x)->c) { (x)->c[(x)->len] = '\0'; } } while (0);
+#define smart_str_0(x) do { if ((x)->c) { (x)->c[(x)->len] = '\0'; } } while (0)
 
 #ifndef SMART_STR_PREALLOC
 #define SMART_STR_PREALLOC 128
