@@ -452,7 +452,7 @@ function_entry basic_functions[] = {
 	PHP_FE(chdir,				NULL)
 	PHP_FE(getcwd,				NULL)
 	PHP_FE(rewinddir,			NULL)
-	PHP_FE(readdir,				NULL)
+	PHP_STATIC_FE("readdir", php_if_readdir, NULL)
 	PHP_FALIAS(dir,		getdir,	NULL)
 
 	/* functions from filestat.c */
