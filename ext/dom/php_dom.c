@@ -879,14 +879,15 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 /* }}} */
 #endif
 
-void dom_nnodemap_objects_free_storage(void *object TSRMLS_DC)
+static void dom_nnodemap_object_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
-	dom_nnodemap_object *objmap;
 	zval *baseobj;
-	dom_object *intern = (dom_object *)object;
+	dom_object *intern;
+	dom_nnodemap_object *objmap;
 
-	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
+	intern = (dom_object *)object;
 	objmap = (dom_nnodemap_object *)intern->ptr;
+
 	if (objmap) {
 		if (objmap->local) {
 			xmlFree(objmap->local);
@@ -899,7 +900,17 @@ void dom_nnodemap_objects_free_storage(void *object TSRMLS_DC)
 			zval_ptr_dtor((zval **)&baseobj);
 		}
 		efree(objmap);
+		intern->ptr = NULL;
 	}
+
+
+}
+
+void dom_nnodemap_objects_free_storage(void *object TSRMLS_DC)
+{
+	dom_object *intern = (dom_object *)object;
+
+	php_libxml_decrement_doc_ref((php_libxml_node_object *)intern TSRMLS_CC);
 
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
@@ -923,7 +934,7 @@ zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_D
 	objmap->local = NULL;
 	objmap->ns = NULL;
 
-	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, dom_nnodemap_object_dtor, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 
