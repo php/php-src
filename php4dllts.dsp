@@ -279,6 +279,10 @@ SOURCE=.\ext\standard\array.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\assert.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\base64.c
 # End Source File
 # Begin Source File
