@@ -50,6 +50,10 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 		sdl->types = malloc(sizeof(HashTable));
 		zend_hash_init(sdl->types, 0, NULL, delete_type, 1);
 	}
+	if (!sdl->elements) {
+		sdl->elements = malloc(sizeof(HashTable));
+		zend_hash_init(sdl->elements, 0, NULL, delete_type, 1);
+	}
 
 	tns = get_attribute(schema->properties, "targetNamespace");
 
@@ -866,7 +870,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		newType->max_occurs = 1;
 
 		if (cur_type == NULL) {
-			addHash = sdl->types;
+			addHash = sdl->elements;
 			smart_str_appends(&key, newType->namens);
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, newType->name);
@@ -926,17 +930,10 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		xmlNsPtr nsptr;
 
 		parse_namespace(curattr->children->content, &cptype, &str_ns);
-/*
-		if (str_ns) {
-*/
-			nsptr = xmlSearchNs(element->doc, element, str_ns);
-/*
-		} else {
-			nsptr = xmlSearchNsByHref(element->doc, element, ns->children->content);
+		nsptr = xmlSearchNs(element->doc, element, str_ns);
+		if (nsptr != NULL) {
+			cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, (char *)cptype);
 		}
-*/
-
-		cur_type->encode = get_create_encoder(sdl, cur_type, (char *)nsptr->href, (char *)cptype);
 		if (str_ns) {efree(str_ns);}
 		if (cptype) {efree(cptype);}
 	}
@@ -1037,16 +1034,20 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 
 			parse_namespace(newAttr->ref, &value, &prefix);
 			ns = xmlSearchNs(attrType->doc, attrType, prefix);
-			smart_str_appends(&key, ns->href);
-			smart_str_appendc(&key, ':');
+			if (ns != NULL) {
+				smart_str_appends(&key, ns->href);
+				smart_str_appendc(&key, ':');
+			}
 			smart_str_appends(&key, value);
 
 			if (value) {efree(value);}
 			if (prefix) {efree(prefix);}
 		} else {
 			ns = node_find_ns(attrType);
-			smart_str_appends(&key, ns->href);
-			smart_str_appendc(&key, ':');
+			if (ns != NULL) {
+				smart_str_appends(&key, ns->href);
+				smart_str_appendc(&key, ':');
+			}
 			smart_str_appends(&key, newAttr->name);
 		}
 
