@@ -12,12 +12,17 @@ AC_ARG_WITH(dom,
     yes)
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(domxml)
+      old_LIBS=$LIBS
+      LIBS="$LIBS -lgz"
       AC_CHECK_LIB(xml, xmlNewDoc, [AC_DEFINE(HAVE_DOMXML)],
         [AC_MSG_ERROR(DOM module requires libxml >= 1.0)])
+      LIBS=$old_LIBS
       AC_ADD_LIBRARY(xml)
+      AC_ADD_LIBRARY(gz)
+      AC_ADD_INCLUDE(/usr/local/include)
       ;;
     *)
-      test -f $withval/include/gnome-xml/tree.h && DOMXML_INCLUDE="$withval/include/gnome-xml"
+      test -f $withval/include/gnome-xml/tree.h && DOMXML_INCLUDE="$withval/include"
       test -f $withval/include/tree.h && DOMXML_INCLUDE="$withval/include"
       if test -n "$DOMXML_INCLUDE" ; then
         AC_MSG_RESULT(yes)
