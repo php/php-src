@@ -431,9 +431,9 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 	if (op1->type == IS_ARRAY && op2->type == IS_ARRAY) {
 		zval tmp;
 		
-		zend_hash_merge(op1->value.ht,op2->value.ht,(void (*)(void *pData)) zval_copy_ctor, (void *) &tmp, sizeof(zval), 0);
 		*result = *op1;
-		zval_dtor(op2);
+		zval_copy_ctor(result);
+		zend_hash_merge(result->value.ht,op2->value.ht,(void (*)(void *pData)) zval_copy_ctor, (void *) &tmp, sizeof(zval), 0);
 		return SUCCESS;
 	}
 	zendi_convert_scalar_to_number(op1, op1_copy);

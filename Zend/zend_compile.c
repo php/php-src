@@ -1418,7 +1418,7 @@ void do_add_array_element(znode *result, znode *expr, znode *offset CLS_DC)
 
 
 
-void do_add_static_array_element(znode *result, znode *expr, znode *offset)
+void do_add_static_array_element(znode *result, znode *offset, znode *expr)
 {
 	zval *element = (zval *) emalloc(sizeof(zval));
 
