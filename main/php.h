@@ -33,6 +33,10 @@
 #ifndef _PHP_H
 #define _PHP_H
 
+#ifdef HAVE_DMALLOC
+#include <dmalloc.h>
+#endif
+
 #define PHP_API_VERSION 19990421
 
 #define YYDEBUG 0

@@ -10,6 +10,8 @@
 #define CONFIGURATION_FILE_PATH "php3.ini"
 #define USE_CONFIG_FILE 1
 
+#undef HAVE_DMALLOC
+
 /* Some global constants defined by conigure */
 #undef PHP_BUILD_DATE
 #undef PHP_OS
