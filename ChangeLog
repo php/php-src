@@ -1,3 +1,55 @@
+2000-10-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/imap/config.m4:
+    Add --with-imap-ssl to support SSL'ized imap library in RH7 and others
+
+2000-10-02  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/url.c: - Now really fix it.
+
+    * NEWS: - Update NEWS
+
+    * ext/standard/url.c: - Fix bug in parse_url()
+
+2000-10-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sablot/config.m4
+      ext/shmop/config.m4
+      ext/sockets/config.m4
+      ext/curl/config.m4
+      ext/cybercash/config.m4
+      ext/java/config.m4
+      ext/pfpro/config.m4
+      ext/pgsql/config.m4
+      configure.in
+      ext/ccvs/config.m4: Clean up the alignment of configure --help output
+
+2000-10-02  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: - Aiming for thursday to release 4.0.3
+
+    * main/php_version.h:
+    - Darn file is needed for Windows. Maybe it should be called
+      php_version.w32.h?
+
+    * main/php_version.h:
+    - Any reason why php_version.h is in the CVS? I'm removing it so if I'm
+      screwing something up scream *now* :)
+
+2000-10-02  Daniel Beulshausen  <daniel@php4win.de>
+
+    * NEWS: forgot that a while ago...
+
+    * ext/mcrypt/mcrypt.dsp: fixed unresolved externals.
+
+2000-10-02  Stig Venaas  <venaas@uninett.no>
+
+    * NEWS: *** empty log message ***
+
+2000-10-02  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c: Tiny change in copying of buffer.
+
 2000-10-01  James Moore  <James@phpuk.org>
 
     * INSTALL:
