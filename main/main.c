@@ -81,22 +81,6 @@ php_core_globals core_globals;
 #else
 PHPAPI int core_globals_id;
 #endif
-
-#define NO_GLOBAL_LOCK
-
-/* temporary workaround for thread-safety issues in Zend */
-#if defined(ZTS) && !defined(NO_GLOBAL_LOCK)
-static MUTEX_T global_lock;
-#define global_lock() tsrm_mutex_lock(global_lock)
-#define global_unlock() tsrm_mutex_unlock(global_lock);
-#define global_lock_init() global_lock = tsrm_mutex_alloc()
-#define global_lock_destroy() tsrm_mutex_free(global_lock)
-#else
-#define global_lock()
-#define global_unlock()
-#define global_lock_init()
-#define global_lock_destroy()
-#endif
  
 
 static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC);
@@ -598,8 +582,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 #endif
 
 	PG(during_request_startup) = 1;
-
-	global_lock();
 	
 	php_output_startup();
 
@@ -685,10 +667,6 @@ void php_request_shutdown(void *dummy)
 
 	if (setjmp(EG(bailout))==0) { 
 		zend_unset_timeout();
-	}
-
-	if (setjmp(EG(bailout))==0) { 
-		global_unlock();
 	}
 }
 
@@ -791,7 +769,6 @@ int php_module_startup(sapi_module_struct *sf)
     php_os=PHP_OS;
 #endif
 
-	global_lock_init();
 	sapi_initialize_empty_request(SLS_C);
 	sapi_activate(SLS_C);
 
@@ -915,7 +892,6 @@ void php_module_shutdown()
 	php_shutdown_ticks(PLS_C);
 	sapi_flush();
 
-	global_lock_destroy();
 	zend_shutdown();
 	php_shutdown_fopen_wrappers();
 	php_shutdown_info_logos();
