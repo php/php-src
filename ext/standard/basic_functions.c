@@ -36,6 +36,9 @@
 #else
 #include <strings.h>
 #endif
+#if HAVE_LOCALE_H
+#include <locale.h>
+#endif
 #include "safe_mode.h"
 #if WIN32|WINNT
 #include "win32/unistd.h"
@@ -424,6 +427,7 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 PHP_RINIT_FUNCTION(basic)
 {
 	strtok_string = NULL;
+	locale_string = NULL;
 #ifdef HAVE_PUTENV
 	if (zend_hash_init(&putenv_ht, 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
@@ -441,6 +445,12 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 #ifdef HAVE_PUTENV
 	zend_hash_destroy(&putenv_ht);
 #endif
+	/* Check if locale was changed and change it back
+	   to the value in startup environment */
+	if (locale_string != NULL) {
+		setlocale(LC_ALL, "");
+	}
+	STR_FREE(locale_string);
 
 	return SUCCESS;
 }
