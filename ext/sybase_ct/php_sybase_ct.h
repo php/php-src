@@ -65,10 +65,14 @@ ZEND_BEGIN_MODULE_GLOBALS(sybase)
 	char *appname;
 	char *hostname;
 	char *server_message;
-	int le_link,le_plink,le_result;
 	long min_server_severity, min_client_severity;
+<<<<<<< php_sybase_ct.h
+	CS_CONTEXT *context;
+ZEND_END_MODULE_GLOBALS(sybase)
+=======
 	long cfg_min_server_severity, cfg_min_client_severity;
 ZEND_END_MODULE_GLOBALS(sybase)
+>>>>>>> 1.7
 
 typedef struct {
 	CS_CONNECTION *connection;
@@ -95,6 +99,22 @@ typedef struct {
 	int num_rows,num_fields;
 } sybase_result;
 
+
+#ifdef ZTS
+# define SybCtLS_D	zend_sybase_globals *sybase_globals
+# define SybCtLS_DC	, SybCtLS_D
+# define SybCtLS_C	sybase_globals
+# define SybCtLS_CC , SybCtLS_C
+# define SybCtG(v) (sybase_globals->v)
+# define SybCtLS_FETCH()	zend_sybase_globals *sybase_globals = ts_resource(sybase_globals_id)
+#else
+# define SybCtLS_D
+# define SybCtLS_DC
+# define SybCtLS_C
+# define SybCtLS_CC
+# define SybCtG(v) (sybase_globals.v)
+# define SybCtLS_FETCH()
+#endif
 
 #else
 
