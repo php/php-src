@@ -161,7 +161,7 @@ ZEND_API int getParametersArrayEx(int param_count, zval ***argument_array)
 }
 
 
-ZEND_API int getThis(zval **this)
+ZEND_API int getThis(zval **this_ptr)
 {
 	/* NEEDS TO BE IMPLEMENTED FOR ZEND */
 	/*

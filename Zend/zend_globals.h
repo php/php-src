@@ -50,7 +50,7 @@ typedef struct _zend_alloc_globals zend_alloc_globals;
 # define CLS_C	compiler_globals
 # define CLS_CC , CLS_C
 # define CG(v) (((zend_compiler_globals *) compiler_globals)->v)
-# define CLS_FETCH()	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id)
+# define CLS_FETCH()	zend_compiler_globals *compiler_globals = (zend_compiler_globals *) ts_resource(compiler_globals_id)
 # define YYPARSE_PARAM compiler_globals
 # define YYLEX_PARAM compiler_globals
 int zendparse(void *compiler_globals);
@@ -73,7 +73,7 @@ int zendparse();
 # define ELS_C	executor_globals
 # define ELS_CC , ELS_C
 # define EG(v) (executor_globals->v)
-# define ELS_FETCH()	zend_executor_globals *executor_globals = ts_resource(executor_globals_id)
+# define ELS_FETCH()	zend_executor_globals *executor_globals = (zend_executor_globals *) ts_resource(executor_globals_id)
 #else
 # define ELS_D
 # define ELS_DC
@@ -92,7 +92,7 @@ extern ZEND_API zend_executor_globals executor_globals;
 # define ALS_C	alloc_globals
 # define ALS_CC , ALS_C
 # define AG(v) (((zend_alloc_globals *) alloc_globals)->v)
-# define ALS_FETCH()	zend_alloc_globals *alloc_globals = ts_resource(alloc_globals_id)
+# define ALS_FETCH()	zend_alloc_globals *alloc_globals = (zend_alloc_globals *) ts_resource(alloc_globals_id)
 #else
 # define ALS_D
 # define ALS_DC

@@ -61,7 +61,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "." /D "WIN32" /D "_Debug_TS" /D "_MBCS" /D "_LIB" /D "COMPILE_LIBZEND" /D "ZTS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x40d /d "_Debug_TS"
 # ADD RSC /l 0x40d /d "_Debug_TS"
 BSC32=bscmake.exe
@@ -86,7 +86,7 @@ SOURCE=".\zend-parser.c"
 # End Source File
 # Begin Source File
 
-SOURCE=".\zend-scanner.c"
+SOURCE=".\zend-scanner.cpp"
 # End Source File
 # Begin Source File
 
@@ -171,6 +171,10 @@ SOURCE=.\zend_variables.c
 # Begin Source File
 
 SOURCE=.\config.w32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
 
@@ -314,8 +318,8 @@ SOURCE=".\zend-scanner.l"
 # Begin Custom Build
 InputPath=".\zend-scanner.l"
 
-"zend-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -i -Pzend -ozend-scanner.c zend-scanner.l
+"zend-scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -+ -i -Sflex.skl -Pzend -ozend-scanner.cpp zend-scanner.l
 
 # End Custom Build
 
