@@ -145,6 +145,16 @@ static mbfl_language mbfl_language_japanese = {
 	mbfl_no_encoding_7bit
 };
 
+static mbfl_language mbfl_language_korean = {
+	mbfl_no_language_korean,
+	"Korean",
+	"ko",
+	NULL,
+	mbfl_no_encoding_2022kr,
+	mbfl_no_encoding_base64,
+	mbfl_no_encoding_7bit
+};
+
 static mbfl_language mbfl_language_english = {
 	mbfl_no_language_english,
 	"English",
@@ -155,12 +165,22 @@ static mbfl_language mbfl_language_english = {
 	mbfl_no_encoding_8bit
 };
 
-static mbfl_language mbfl_language_chinese = {
-	mbfl_no_language_chinese,
-	"Chinese",
-	"zh",
+static mbfl_language mbfl_language_simplified_chinese = {
+	mbfl_no_language_simplified_chinese,
+	"Simplified Chinese",
+	"zh-cn",
 	NULL,
-	mbfl_no_encoding_2022jp,
+	mbfl_no_encoding_hz,
+	mbfl_no_encoding_base64,
+	mbfl_no_encoding_7bit
+};
+
+static mbfl_language mbfl_language_traditional_chinese = {
+	mbfl_no_language_traditional_chinese,
+	"Traditional Chinese",
+	"zh-tw",
+	NULL,
+	mbfl_no_encoding_hz,
 	mbfl_no_encoding_base64,
 	mbfl_no_encoding_7bit
 };
@@ -168,7 +188,9 @@ static mbfl_language mbfl_language_chinese = {
 static mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_uni,
 	&mbfl_language_japanese,
-	&mbfl_language_chinese,
+	&mbfl_language_korean,
+	&mbfl_language_simplified_chinese,
+	&mbfl_language_traditional_chinese,
 	&mbfl_language_english,
 	NULL
 };
@@ -707,6 +729,15 @@ static mbfl_encoding mbfl_encoding_cp936 = {
 	MBFL_ENCTYPE_MBCS
 };
 
+static mbfl_encoding mbfl_encoding_hz = {
+	mbfl_no_encoding_hz,
+	"HZ",
+	"HZ-GB-2312",
+	NULL,
+	NULL,
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+};
+
 #endif /* HAVE_MBSTR_CN */
 
 #if defined(HAVE_MBSTR_TW)
@@ -967,6 +998,7 @@ static mbfl_encoding *mbfl_encoding_ptr_list[] = {
 #if defined(HAVE_MBSTR_CN)
 	&mbfl_encoding_euc_cn,
 	&mbfl_encoding_cp936,
+	&mbfl_encoding_hz,
 #endif
 #if defined(HAVE_MBSTR_TW)
 	&mbfl_encoding_euc_tw,
@@ -1072,6 +1104,7 @@ static int mbfl_filt_ident_2022jp(int c, mbfl_identify_filter *filter TSRMLS_DC)
 #if defined(HAVE_MBSTR_CN)
 static int mbfl_filt_ident_euccn(int c, mbfl_identify_filter *filter TSRMLS_DC);
 static int mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter TSRMLS_DC);
+static int mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter TSRMLS_DC);
 #endif /* HAVE_MBSTR_CN */
 
 #if defined(HAVE_MBSTR_TW)
@@ -1605,6 +1638,23 @@ static struct mbfl_convert_vtbl vtbl_wchar_cp936 = {
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_cp936,
 	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_hz_wchar = {
+	mbfl_no_encoding_hz,
+	mbfl_no_encoding_wchar,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_hz_wchar,
+	mbfl_filt_conv_common_flush };
+
+static struct mbfl_convert_vtbl vtbl_wchar_hz = {
+	mbfl_no_encoding_wchar,
+	mbfl_no_encoding_hz,
+	mbfl_filt_conv_common_ctor,
+	mbfl_filt_conv_common_dtor,
+	mbfl_filt_conv_wchar_hz,
+	mbfl_filt_conv_any_hz_flush };
+
 #endif /* HAVE_MBSTR_CN */
 
 #if defined(HAVE_MBSTR_TW)
@@ -1923,6 +1973,8 @@ static struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_euccn,
 	&vtbl_cp936_wchar,
 	&vtbl_wchar_cp936,
+	&vtbl_hz_wchar,
+	&vtbl_wchar_hz,
 #endif
 #if defined(HAVE_MBSTR_TW)
 	&vtbl_euctw_wchar,
@@ -2083,6 +2135,13 @@ static struct mbfl_identify_vtbl vtbl_identify_cp936 = {
 	mbfl_filt_ident_common_ctor,
 	mbfl_filt_ident_common_dtor,
 	mbfl_filt_ident_cp936 };
+
+static struct mbfl_identify_vtbl vtbl_identify_hz = {
+	mbfl_no_encoding_hz,
+	mbfl_filt_ident_common_ctor,
+	mbfl_filt_ident_common_dtor,
+	mbfl_filt_ident_hz };
+
 #endif /* HAVE_MBSTR_CN */
 
 #if defined(HAVE_MBSTR_TW)
@@ -2218,6 +2277,7 @@ static struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 #if defined(HAVE_MBSTR_CN)
 	&vtbl_identify_euccn,
 	&vtbl_identify_cp936,
+	&vtbl_identify_hz,
 #endif
 #if defined(HAVE_MBSTR_TW)
 	&vtbl_identify_euctw,
@@ -5751,6 +5811,53 @@ mbfl_filt_ident_cp936(int c, mbfl_identify_filter *filter TSRMLS_DC)
 		filter->status = 1;
 	} else {							/* bad */
 		filter->flag = 1;
+	}
+
+	return c;
+}
+
+static int
+mbfl_filt_ident_hz(int c, mbfl_identify_filter *filter TSRMLS_DC)
+{
+	switch (filter->status & 0xf) {
+/*	case 0x00:	 ASCII */
+/*	case 0x10:	 GB2312 */
+	case 0:
+		if (c == 0x7e) {
+			filter->status += 2;
+		} else if (filter->status == 0x10 && c > 0x20 && c < 0x7f) {		/* DBCS first char */
+			filter->status += 1;
+		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
+			;
+		} else {
+			filter->flag = 1;	/* bad */
+		}
+		break;
+
+/*	case 0x11:	 GB2312 second char */
+	case 1:
+		filter->status &= ~0xf;
+		if (c < 0x21 || c > 0x7e) {		/* bad */
+			filter->flag = 1;
+		}
+		break;
+
+	case 2:
+		if (c == 0x7d) {		/* '}' */
+			filter->status = 0;
+		} else if (c == 0x7b) {		/* '{' */
+			filter->status = 0x10;
+		} else if (c == 0x7e) {		/* '~' */
+			filter->status = 0;
+		} else {
+			filter->flag = 1;	/* bad */
+			filter->status &= ~0xf;
+		}
+		break;
+
+	default:
+		filter->status = 0;
+		break;
 	}
 
 	return c;

@@ -26,5 +26,8 @@ int mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
 int mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_hz_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter TSRMLS_DC);
+int mbfl_filt_conv_any_hz_flush(mbfl_convert_filter *filter TSRMLS_DC);
 
 #endif /* MBFL_MBFILTER_CN_H */
