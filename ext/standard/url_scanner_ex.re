@@ -236,7 +236,7 @@ static inline void handle_tag(STD_PARA)
 	ctx->tag.len = 0;
 	smart_str_appendl(&ctx->tag, start, YYCURSOR - start);
 	for (i = 0; i < ctx->tag.len; i++)
-		ctx->tag.c[i] = tolower(ctx->tag.c[i]);
+		ctx->tag.c[i] = tolower((int)(unsigned char)ctx->tag.c[i]);
 	if (zend_hash_find(ctx->tags, ctx->tag.c, ctx->tag.len, (void **) &ctx->lookup_data) == SUCCESS)
 		ok = 1;
 	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN;
