@@ -2,7 +2,7 @@
 // TODO: Add more tests
 //$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
 ini_set('include_path','.');
-include_once('common.inc');
+include_once('common.php');
 
 // SJIS string (BASE64 encoded)
 $sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
@@ -35,8 +35,7 @@ print("JIS: ".base64_encode($s)."\n"); // JIS
 // Using Encoding List Array 
 echo "== ARRAY ENCODING LIST ==\n";
 
-$a = array(0=>'UTF-8',1=>'EUC-JP', 2=>'SJIS', 3=>'JIS');
-
+$a = array(0=>'JIS', 1=>'UTF-8', 2=>'EUC-JP', 3=>'SJIS');
 $s = $jis;
 $s = mb_convert_encoding($s, 'EUC-JP', $a);
 print("EUC-JP: $s\n"); // EUC-JP
@@ -53,19 +52,16 @@ print("JIS: ".base64_encode($s)."\n"); // JIS
 // Using Detect Order 
 echo "== DETECT ORDER ==\n";
 
-mb_detect_order('auto');
-
-
 $s = $jis;
-$s = mb_convert_encoding($s, 'EUC-JP');
+$s = mb_convert_encoding($s, 'EUC-JP', 'auto');
 print("EUC-JP: $s\n"); // EUC-JP
 
 $s = $euc_jp;
-$s = mb_convert_encoding($s, 'SJIS');
+$s = mb_convert_encoding($s, 'SJIS', 'auto');
 print("SJIS: ".base64_encode($s)."\n");  // SJIS
 
 $s = $euc_jp;
-$s = mb_convert_encoding($s, 'JIS');
+$s = mb_convert_encoding($s, 'JIS', 'auto');
 print("JIS: ".base64_encode($s)."\n"); // JIS
 
 

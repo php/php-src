@@ -2,7 +2,7 @@
 //TODO: Add more encoding. Wrong paramter type test.
 //$debug = true;
 ini_set('include_path','.');
-include_once('common.inc');
+include_once('common.php');
 
 // Set HTTP output encoding to ASCII
 $r = mb_http_output('ASCII');

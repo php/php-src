@@ -3,7 +3,7 @@
 
 //$debug=true;
 ini_set('include_path','.');
-include_once('common.inc');
+include_once('common.php');
 
 
 // Test string
@@ -26,24 +26,32 @@ print  mb_strpos($euc_jp, 0, 15,       'EUC-JP') . "\n";
 // Note: PHP Warning - offset is negative.
 // Note: For offset(-15). It does not return position of latter string. (ie the same result as -50)
 echo "== NEGATIVE OFFSET ==\n";
-print  mb_strpos($euc_jp,'日本語', -15, 'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, '0', -15,     'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, 3, -15,       'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, 0, -15,       'EUC-JP') . "\n";
-print  mb_strpos($euc_jp,'日本語', -50, 'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, '0', -50,     'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, 3, -50,       'EUC-JP') . "\n";
-print  mb_strpos($euc_jp, 0, -50,       'EUC-JP') . "\n";
+$r = mb_strpos($euc_jp,'日本語', -15, 'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, '0', -15,     'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, 3, -15,       'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, 0, -15,       'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp,'日本語', -50, 'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, '0', -50,     'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, 3, -50,       'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
+$r = mb_strpos($euc_jp, 0, -50,       'EUC-JP');
+($r === FALSE) ? print "OK_NEGATIVE_OFFSET\n" : print "NG_NEGATIVE_OFFSET\n";
 
 // Out of range - should return false
 print ("== OUT OF RANGE ==\n");
-$r =  mb_strpos($euc_jp,'日本語', 40, 'EUC-JP') . "\n";
+$r =  mb_strpos($euc_jp,'日本語', 40, 'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, '0', 40,     'EUC-JP') . "\n";
+$r =  mb_strpos($euc_jp, '0', 40,     'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =  mb_strpos($euc_jp, 3, 40,       'EUC-JP') . "\n";
+$r =  mb_strpos($euc_jp, 3, 40,       'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
-$r =   mb_strpos($euc_jp, 0, 40,       'EUC-JP') . "\n";
+$r =   mb_strpos($euc_jp, 0, 40,       'EUC-JP');
 ($r === FALSE) ? print "OK_OUT_RANGE\n"     : print "NG_OUT_RANGE\n";
 // Note: Returned NULL string
 // echo gettype($r). ' val '. $r ."\n"; 
