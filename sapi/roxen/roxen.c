@@ -58,16 +58,15 @@
 #include <builtin_functions.h>
 #include <operators.h>
 
-
-/* sp and fp was changed to Pike_?p to avoid conflicts with embedded perl */
-#ifndef sp
-#define sp Pike_sp
-#define fp Pike_fp
-#endif
+#undef HIDE_GLOBAL_VARIABLES
+#undef REVEAL_GLOBAL_VARIABLES
+#define HIDE_GLOBAL_VARIABLES()
+#define REVEAL_GLOBAL_VARIABLES()
 
 /* php_roxen_request is per-request object storage */
 
-typedef struct {
+typedef struct
+{
   struct mapping *request_data;
   struct object *my_fd_obj;
   int my_fd;
@@ -91,7 +90,7 @@ static int roxen_globals_id;
 #else
 static php_roxen_request *current_request = NULL;
 
-# define GET_THIS() current_request = ((php_roxen_request *)fp->current_storage)
+# define GET_THIS() current_request = ((php_roxen_request *)Pike_fp->current_storage)
 # define THIS current_request
 #endif
 
@@ -117,13 +116,13 @@ static php_roxen_request *current_request = NULL;
  */
 static PIKE_MUTEX_T roxen_php_execution_lock;
 # define PHP_INIT_LOCK()	mt_init(&roxen_php_execution_lock)
-# define PHP_LOCK(X)	fprintf(stderr, "*** php lock (thr_id=%d, glob=%d).\n", th_self(), current_thread);THREADS_ALLOW();mt_lock(&roxen_php_execution_lock);fprintf(stderr, "*** php locked.\n");THREADS_DISALLOW()
-# define PHP_UNLOCK(X)	mt_unlock(&roxen_php_execution_lock);fprintf(stderr, "*** php unlocked (thr_id=%d, glob=%d).\n", th_self(), current_thread);
+# define PHP_LOCK(X)    THREADS_ALLOW();mt_lock(&roxen_php_execution_lock);THREADS_DISALLOW()
+# define PHP_UNLOCK(X)	mt_unlock(&roxen_php_execution_lock);
 # define PHP_DESTROY()	mt_destroy(&roxen_php_execution_lock)
 #else /* !_REENTRANT */
 # define PHP_INIT_LOCK()	
-# define PHP_LOCK(X)	fprintf(stderr, "*** php lock (thr_id=%d).\n", th_self());
-# define PHP_UNLOCK(X)		fprintf(stderr, "*** php unlock (thr_id=%d).\n", th_self());
+# define PHP_LOCK(X)
+# define PHP_UNLOCK(X)
 # define PHP_DESTROY()	
 #endif /* _REENTRANT */
 
@@ -135,32 +134,18 @@ static unsigned char roxen_php_initialized;
  */
 #define THREAD_SAFE_RUN(COMMAND, what)  do {\
   struct thread_state *state;\
-  fprintf(stderr,"threads: %d  disabled: %d  id: %d\n",num_threads, threads_disabled, th_self());\
  if((state = thread_state_for_id(th_self()))!=NULL) {\
     if(!state->swapped) {\
-       fprintf(stderr, "MT lock (%s).\n", what);\
       COMMAND;\
-       fprintf(stderr, "MT locked done (%s).\n", what);\
     } else {\
-       fprintf(stderr, "MT nonlock (%s).\n", what); \
       mt_lock(&interpreter_lock);\
       SWAP_IN_THREAD(state);\
-      fprintf(stderr, "MT locked.\n", what); \
       COMMAND;\
-      fprintf(stderr, "MT locked done.\n", what); \
       SWAP_OUT_THREAD(state);\
       mt_unlock(&interpreter_lock);\
-      fprintf(stderr, "MT unlocked.\n", what); \
     }\
   }\
 } while(0)
-
-/* Toggle debug printouts, for now... */
-/*#define MUCH_DEBUG */
-#ifndef MUCH_DEBUG
-void no_fprintf(){}
-#define fprintf no_fprintf
-#endif
 
 struct program *php_program;
 
@@ -201,13 +186,8 @@ INLINE static char *lookup_string_header(char *headername, char *default_value)
 {
   struct svalue *head = NULL;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
-  if(!head || head->type != PIKE_T_STRING) {
-    fprintf(stderr, "Header lookup for %s: default (%s)\n", headername,
-	    default_value);
+  if(!head || head->type != PIKE_T_STRING)
     return default_value;
-  }
-  fprintf(stderr, "Header lookup for %s: %s(%d)\n", headername,
-      head->u.string->str, head->u.string->len);
   return head->u.string->str;
 }
 
@@ -218,13 +198,8 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
 {
   struct svalue *head = NULL;
   THREAD_SAFE_RUN(head = lookup_header(headername), "header lookup");
-  if(!head || head->type != PIKE_T_INT) {
-    fprintf(stderr, "Header lookup for %s: default (%d)\n", headername,
-	    default_value);
+  if(!head || head->type != PIKE_T_INT)
     return default_value;
-  }
-  fprintf(stderr, "Header lookup for %s: %d \n", headername,
-	  head->u.integer); 
   return head->u.integer;
 }
 
@@ -252,15 +227,14 @@ php_roxen_low_ub_write(const char *str, uint str_length) {
   to_write = make_shared_binary_string(str, str_length);
   push_string(to_write);
   safe_apply(MY_FD_OBJ, "write", 1);
-  if(sp[-1].type == PIKE_T_INT)
-    sent_bytes = sp[-1].u.integer;
+  if(Pike_sp[-1].type == PIKE_T_INT)
+    sent_bytes = Pike_sp[-1].u.integer;
   pop_stack();
   if(sent_bytes != str_length) {
     /* This means the connection is closed. Dead. Gone. *sniff*  */
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
   }
-  /*  fprintf(stderr, "low_write done.\n");*/
   return sent_bytes;
 }
 
@@ -307,7 +281,6 @@ php_roxen_sapi_ub_write(const char *str, uint str_length)
     THREAD_SAFE_RUN(sent_bytes = php_roxen_low_ub_write(str, str_length),
 		    "write");
   }
-  /*  fprintf(stderr, "write done.\n"); */
   return sent_bytes;
 }
 
@@ -344,7 +317,6 @@ static void php_roxen_set_header(char *header_name, char *value, char *p)
   hsval.u.string = hval;
   mapping_string_insert(headermap, hind, &hsval);
 
-  fprintf(stderr, "Setting header %s to %s\n", hind->str, value);
   free_string(hval);
   free_string(ind);
   free_string(hind);
@@ -395,7 +367,6 @@ php_roxen_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
   ind = make_shared_string(" _headers");  
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
   free_string(ind);
-  fprintf(stderr, "Send Headers (%d)...\n", SG(sapi_headers).http_response_code);
   
   push_int(SG(sapi_headers).http_response_code);
   if(s_headermap && s_headermap->type == PIKE_T_MAPPING)
@@ -430,10 +401,9 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 #ifdef ZTS
   PLS_FETCH();
 #endif
-
-  fprintf(stderr, "read post (%d bytes max)\n", count_bytes);
   
-  if(!MY_FD_OBJ->prog) {
+  if(!MY_FD_OBJ->prog)
+  {
     PG(connection_status) = PHP_CONNECTION_ABORTED;
     zend_bailout();
     return -1;
@@ -441,8 +411,9 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
 
   push_int(count_bytes);
   safe_apply(MY_FD_OBJ, "read_post", 1);
-  if(sp[-1].type == PIKE_T_STRING) {
-    MEMCPY(buf, sp[-1].u.string->str, total_read = sp[-1].u.string->len);
+  if(Pike_sp[-1].type == PIKE_T_STRING) {
+    MEMCPY(buf, Pike_sp[-1].u.string->str,
+           (total_read = Pike_sp[-1].u.string->len));
     buf[total_read] = '\0';
   } else
     total_read = -1;
@@ -474,6 +445,7 @@ php_roxen_sapi_read_cookies(SLS_D)
 static void php_info_roxen(ZEND_MODULE_INFO_FUNC_ARGS)
 {
   /*  char buf[512]; */
+  extern void php_info_print_table_row( int, ... );
 	
   PUTS("<table border=5 width=600>\n");
   php_info_print_table_row(2, "SAPI module version", "$Id$");
@@ -597,7 +569,6 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
 	pval->type = IS_STRING;
 	pval->value.str.len = val->u.string->len;
 	pval->value.str.val = estrndup(val->u.string->str, pval->value.str.len);
-	fprintf(stderr, "Header: %s(%d)=%s\n", buf, buf_len, val->u.string->str);
 	
 	zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
       }
@@ -610,8 +581,6 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
     pval->type = IS_LONG;
     pval->value.lval = Ns_InfoBootTime();
     zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
-  
-    fprintf(stderr, "Set up header environment.\n");
   */
 }
 
@@ -636,7 +605,6 @@ static int php_roxen_module_main(SLS_D)
   file_handle.filename = THIS->filename;
   file_handle.free_filename = 0;
   THREADS_ALLOW();
-  fprintf(stderr, "Request Startup.\n");
   res = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
   THREADS_DISALLOW();
   if(res == FAILURE) {
@@ -644,7 +612,6 @@ static int php_roxen_module_main(SLS_D)
   }
   php_roxen_hash_environment(CLS_C ELS_CC PLS_CC SLS_CC);
   THREADS_ALLOW();
-  fprintf(stderr, "Script Execute.\n");
   php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
   php_request_shutdown(NULL);
   THREADS_DISALLOW();
@@ -723,7 +690,7 @@ void f_php_roxen_request_handler(INT32 args)
 /* Clear the object global struct */
 static void clear_struct(struct object *o)
 {
-  MEMSET(fp->current_storage, 0, sizeof(php_roxen_request));
+  MEMSET(Pike_fp->current_storage, 0, sizeof(php_roxen_request));
 }
 
 
