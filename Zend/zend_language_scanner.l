@@ -1167,6 +1167,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>"}" {
+	RESET_DOC_COMMENT();
 	/* This is a temporary fix which is dependant on flex and it's implementation */
 	if (yy_start_stack_ptr) {
 		yy_pop_state(TSRMLS_C);
