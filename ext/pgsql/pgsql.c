@@ -16,6 +16,7 @@
    |          Jouni Ahto <jouni.ahto@exdec.fi>                            |
    |          Yasuo Ohgaki <yohgaki@php.net>                              |
    |          Youichi Iwakiri <yiwakiri@st.rim.or.jp> (pg_copy_*)         | 
+   |          Chris Kings-Lynne <chriskl@php.net> (v3 protocol)           | 
    +----------------------------------------------------------------------+
  */
  
@@ -176,6 +177,9 @@ function_entry pgsql_functions[] = {
 	PHP_FE(pg_escape_string,NULL)
 	PHP_FE(pg_escape_bytea, NULL)
 	PHP_FE(pg_unescape_bytea, NULL)
+#endif
+#if HAVE_PQSETERRORVERBOSITY
+	PHP_FE(pg_set_error_verbosity,	NULL)
 #endif
 #if HAVE_PQCLIENTENCODING
 	PHP_FE(pg_client_encoding,		NULL)
@@ -466,6 +470,12 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INTRANS", PQTRANS_INTRANS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_INERROR", PQTRANS_INERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TRANSACTION_UNKNOWN", PQTRANS_UNKNOWN, CONST_CS | CONST_PERSISTENT);
+#endif
+#if HAVE_PQSETERRORVERBOSITY
+	/* For pg_set_error_verbosity() */
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_TERSE", PQERRORS_TERSE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_DEFAULT", PQERRORS_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_ERRORS_VERBOSE", PQERRORS_VERBOSE, CONST_CS | CONST_PERSISTENT);
 #endif
 	/* For lo_seek() */
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
@@ -2905,6 +2915,51 @@ PHP_FUNCTION(pg_lo_tell)
 }
 /* }}} */
 
+#if HAVE_PQSETERRORVERBOSITY
+/* {{{ proto int pg_set_error_verbosity([resource connection,] int verbosity)
+   Set error verbosity */
+PHP_FUNCTION(pg_set_error_verbosity)
+{
+	zval **verbosity, **pgsql_link = NULL;
+	long val;
+	int id = -1;
+	PGconn *pgsql;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &verbosity)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &pgsql_link, &verbosity)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_long_ex(verbosity);
+	val = Z_LVAL_PP(verbosity);
+	if (val & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE)) {
+		Z_LVAL_P(return_value) = PQsetErrorVerbosity(pgsql, val);
+		Z_TYPE_P(return_value) = IS_LONG;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
+
 #ifdef HAVE_PQCLIENTENCODING
 /* {{{ proto int pg_set_client_encoding([resource connection,] string encoding)
    Set client encoding */
@@ -2987,8 +3042,9 @@ PHP_FUNCTION(pg_client_encoding)
 /* }}} */
 #endif
 
-
+#if !HAVE_PQGETCOPYDATA
 #define	COPYBUFSIZ	8192
+#endif
 
 /* {{{ proto bool pg_end_copy([resource connection])
    Sync with backend. Completes the Copy command */
@@ -3064,7 +3120,6 @@ PHP_FUNCTION(pg_put_line)
 
 	convert_to_string_ex(query);
 	result = PQputline(pgsql, Z_STRVAL_PP(query));
-
 	if (result==EOF) {
 		PHP_PQ_ERROR("Query failed: %s", pgsql);
 		RETURN_FALSE;
@@ -3087,7 +3142,9 @@ PHP_FUNCTION(pg_copy_to)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 	int copydone = 0;
+#if !HAVE_PQGETCOPYDATA
 	char copybuf[COPYBUFSIZ];
+#endif
 	char *csv = (char *)NULL;
 	int ret;
 	int argc = ZEND_NUM_ARGS();
@@ -3128,6 +3185,26 @@ PHP_FUNCTION(pg_copy_to)
 			if (pgsql_result) {
 				PQclear(pgsql_result);
 				array_init(return_value);
+#if HAVE_PQGETCOPYDATA
+				while (!copydone)
+				{
+					ret = PQgetCopyData(pgsql, &csv, 0);
+					switch (ret) {
+						case -1:
+							copydone = 1;
+							break;
+						case 0:
+						case -2:
+							PHP_PQ_ERROR("getline failed: %s", pgsql);
+							RETURN_FALSE;
+							break;
+						default:
+							add_next_index_string(return_value, csv, 1);
+							PQfreemem(csv);
+							break;
+					}
+				}
+#else
 				while (!copydone)
 				{
 					if ((ret = PQgetline(pgsql, copybuf, COPYBUFSIZ))) {
@@ -3168,6 +3245,7 @@ PHP_FUNCTION(pg_copy_to)
 					PHP_PQ_ERROR("endcopy failed: %s", pgsql);
 					RETURN_FALSE;
 				}
+#endif
 				while ((pgsql_result = PQgetResult(pgsql))) {
 					PQclear(pgsql_result);
 				}
@@ -3238,13 +3316,33 @@ PHP_FUNCTION(pg_copy_from)
 			if (pgsql_result) {
 				PQclear(pgsql_result);
 				zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(pg_rows), &pos);
+#if HAVE_PQPUTCOPYDATA
 				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
 					convert_to_string_ex(tmp);
 					query = (char *)emalloc(Z_STRLEN_PP(tmp) +2);
 					strcpy(query, Z_STRVAL_PP(tmp));
 					if(*(query+Z_STRLEN_PP(tmp)-1) != '\n')
 						strcat(query, "\n");
-					if (PQputline(pgsql, query)) {
+					if (PQputCopyData(pgsql, query, strlen(query)) != 1) {
+						efree(query);
+						PHP_PQ_ERROR("copy failed: %s", pgsql);
+						RETURN_FALSE;
+					}
+					efree(query);
+					zend_hash_move_forward_ex(Z_ARRVAL_P(pg_rows), &pos);
+				}
+				if (PQputCopyEnd(pgsql, NULL) != 1) {
+					PHP_PQ_ERROR("putcopyend failed: %s", pgsql);
+					RETURN_FALSE;
+				}
+#else
+				while (zend_hash_get_current_data_ex(Z_ARRVAL_P(pg_rows), (void **) &tmp, &pos) == SUCCESS) {
+					convert_to_string_ex(tmp);
+					query = (char *)emalloc(Z_STRLEN_PP(tmp) +2);
+					strcpy(query, Z_STRVAL_PP(tmp));
+					if(*(query+Z_STRLEN_PP(tmp)-1) != '\n')
+						strcat(query, "\n");
+					if (PQputline(pgsql, query)==EOF) {
 						efree(query);
 						PHP_PQ_ERROR("copy failed: %s", pgsql);
 						RETURN_FALSE;
@@ -3260,6 +3358,7 @@ PHP_FUNCTION(pg_copy_from)
 					PHP_PQ_ERROR("endcopy failed: %s", pgsql);
 					RETURN_FALSE;
 				}
+#endif
 				while ((pgsql_result = PQgetResult(pgsql))) {
 					PQclear(pgsql_result);
 				}
@@ -3489,8 +3588,11 @@ PHP_FUNCTION(pg_result_error_field)
 	}
 	if (fieldcode & (PG_DIAG_SEVERITY|PG_DIAG_SQLSTATE|PG_DIAG_MESSAGE_PRIMARY|PG_DIAG_MESSAGE_DETAIL
 				|PG_DIAG_MESSAGE_HINT|PG_DIAG_STATEMENT_POSITION
-#if defined(PG_DIAG_INTERNAL_POSITION) && defined(PG_DIAG_INTERNAL_QUERY)
-				|PG_DIAG_INTERNAL_POSITION|PG_DIAG_INTERNAL_QUERY
+#if PG_DIAG_INTERNAL_POSITION
+				|PG_DIAG_INTERNAL_POSITION
+#endif
+#if PG_DIAG_INTERNAL_QUERY
+				|PG_DIAG_INTERNAL_QUERY
 #endif
 				|PG_DIAG_CONTEXT|PG_DIAG_SOURCE_FILE|PG_DIAG_SOURCE_LINE
 				|PG_DIAG_SOURCE_FUNCTION)) {

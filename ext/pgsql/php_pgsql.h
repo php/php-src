@@ -157,6 +157,9 @@ PHP_FUNCTION(pg_untrace);
 /* utility functions */
 PHP_FUNCTION(pg_client_encoding);
 PHP_FUNCTION(pg_set_client_encoding);
+#if HAVE_PQSETERRORVERBOSITY
+PHP_FUNCTION(pg_set_error_verbosity);
+#endif
 #if HAVE_PQESCAPE
 PHP_FUNCTION(pg_escape_string);
 PHP_FUNCTION(pg_escape_bytea);
