@@ -57,8 +57,6 @@ PHP_FUNCTION(uniqid)
 		convert_to_boolean(flags);
 	}
 
-	printf("flags->value.lval = %d\n", flags->value.lval);
-
 	/* Do some bounds checking since we are using a char array. */
 	if (prefix->value.str.len > 114) {
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
