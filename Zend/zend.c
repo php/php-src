@@ -532,7 +532,6 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
 	void ***tsrm_ls;
-#ifdef ZTS
 	extern ZEND_API ts_rsrc_id ini_scanner_globals_id;
 	extern ZEND_API ts_rsrc_id language_scanner_globals_id;
 #else
@@ -540,6 +539,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	extern zend_scanner_globals language_scanner_globals;
 #endif
 
+#ifdef ZTS
 	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, (ts_allocate_dtor) alloc_globals_dtor);
 #else
 	alloc_globals_ctor(&alloc_globals TSRMLS_CC);
