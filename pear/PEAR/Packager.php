@@ -26,7 +26,6 @@ require_once 'PEAR/Common.php';
  *
  * TODO:
  *  - add an extra param the dir where to place the created package
- *  - finish and test Windows support
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
@@ -35,51 +34,16 @@ class PEAR_Packager extends PEAR_Common
 {
     // {{{ properties
 
-    /** assoc with information about the package */
-    var $pkginfo = array();
-
-    /** name of the package directory, for example Foo-1.0 */
-    var $pkgdir;
-
-    /** directory where PHP code files go */
-    var $phpdir;
-
-    /** directory where PHP extension files go */
-    var $extdir;
-
-    /** directory where documentation goes */
-    var $docdir;
-
-    /** directory where system state information goes */
-    var $statedir;
-
     /** debug mode (integer) */
     var $debug = 0;
-
-    /** temporary directory */
-    var $tmpdir;
-
-    /** whether file list is currently being copied */
-    var $recordfilelist;
-
-    /** temporary space for copying file list */
-    var $filelist;
-
-    /** package name and version, for example "HTTP-1.0" */
-    var $pkgver;
 
     // }}}
 
     // {{{ constructor
 
-    function PEAR_Packager($phpdir = PEAR_INSTALL_DIR,
-                           $extdir = PEAR_EXTENSION_DIR,
-                           $docdir = '')
+    function PEAR_Packager()
     {
         $this->PEAR();
-        $this->phpdir = $phpdir;
-        $this->extdir = $extdir;
-        $this->docdir = $docdir;
     }
 
     // }}}
@@ -135,14 +99,15 @@ class PEAR_Packager extends PEAR_Common
                 return $this->raiseError("File $fname does not exist");
             } else {
                 $filelist[$i++] = $fname;
+                $this->log(2, "Adding file $fname");
             }
         }
         // XXX TODO: Rebuild the package file as the old method did?
 
         // TAR the Package -------------------------------------------
         $dest_package = $this->orig_pwd . DIRECTORY_SEPARATOR . "{$pkgver}.tgz";
-        $tar = new Archive_Tar($dest_package, true);
-        $tar->setErrorHandling(PEAR_ERROR_PRINT);
+        $tar =& new Archive_Tar($dest_package, true);
+        $tar->setErrorHandling(PEAR_ERROR_PRINT); // XXX Don't print errors
         // ----- Creates with the package.xml file
         if (!$tar->create($pkgfile)) {
             return $this->raiseError('an error ocurred during package creation');
