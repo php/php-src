@@ -99,17 +99,17 @@ compare_special_version_forms(char *form1, char *form2)
 		{"RC", 3},
 		{"#", 4},
 		{"pl", 5},
-		NULL,
+		{NULL, 0},
 	};
 	special_forms_t *pp;
 
-	for (pp = special_forms; pp; pp++) {
+	for (pp = special_forms; pp && pp->name; pp++) {
 		if (strncmp(form1, pp->name, strlen(pp->name)) == 0) {
 			found1 = pp->order;
 			break;
 		}
 	}
-	for (pp = special_forms; pp; pp++) {
+	for (pp = special_forms; pp && pp->name; pp++) {
 		if (strncmp(form2, pp->name, strlen(pp->name)) == 0) {
 			found2 = pp->order;
 			break;
