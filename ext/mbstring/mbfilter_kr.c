@@ -70,14 +70,14 @@ mbfl_filt_conv_euckr_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 			flag = 2;
 		}
 		if (flag > 0 && c >= 0xa1 && c <= 0xfe) {
-			if (flag == 1){
-				w = (c1 - 0xa1)*178 + (c - 0xa1) + 0x54;
+			if (flag == 1){ /* 1st: 0xa1..0xc6, 2nd: 0x41..0x7a, 0x81..0xfe */
+				w = (c1 - 0xa1)*190 + (c - 0x41);
 				if (w >= 0 && w < uhc2_ucs_table_size) {
 					w = uhc2_ucs_table[w];
 				} else {
 					w = 0;
 				}
-			} else {
+			} else { /* 1st: 0xc7..0xc8,0xca..0xfe, 2nd: 0xa1..0xfe */
 				if (c1 < 0xc9){
 					w = (c1 - 0xc7)*94 + c - 0xa1;
 				} else {
@@ -311,6 +311,8 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s = ucs_a3_uhc_table[c - ucs_a3_uhc_table_min];
 	} else if (c >= ucs_i_uhc_table_min && c < ucs_i_uhc_table_max) {
 		s = ucs_i_uhc_table[c - ucs_i_uhc_table_min];
+	} else if (c >= ucs_s_uhc_table_min && c < ucs_s_uhc_table_max) {
+		s = ucs_s_uhc_table[c - ucs_s_uhc_table_min];
 	} else if (c >= ucs_r1_uhc_table_min && c < ucs_r1_uhc_table_max) {
 		s = ucs_r1_uhc_table[c - ucs_r1_uhc_table_min];
 	} else if (c >= ucs_r2_uhc_table_min && c < ucs_r2_uhc_table_max) {
@@ -341,23 +343,23 @@ mbfl_filt_conv_wchar_2022kr(int c, mbfl_convert_filter *filter TSRMLS_DC)
 		s = -1;
 	}
 	if (s >= 0) {
-		if (s < 0x80) {	/* ASCII */
+		if (s < 0x80 && s > 0) {	/* ASCII */
 			if ((filter->status & 0x10) != 0) {
 				CK((*filter->output_function)(0x0f, filter->data TSRMLS_CC));		/* SI */
 				filter->status &= ~0x10;
 			}
 			CK((*filter->output_function)(s, filter->data TSRMLS_CC));
 		} else {
-			if ((filter->status & 0x10) == 0) {
-				CK((*filter->output_function)(0x0e, filter->data TSRMLS_CC));		/* SO */
-				filter->status |= 0x10;
-			}
 			if ( (filter->status & 0x100) == 0) {
 				CK((*filter->output_function)(0x1b, filter->data TSRMLS_CC));		/* ESC */
 				CK((*filter->output_function)(0x24, filter->data TSRMLS_CC));		/* '$' */
 				CK((*filter->output_function)(0x29, filter->data TSRMLS_CC));		/* ')' */
 				CK((*filter->output_function)(0x43, filter->data TSRMLS_CC));		/* 'C' */
 				filter->status |= 0x100;
+			}
+			if ((filter->status & 0x10) == 0) {
+				CK((*filter->output_function)(0x0e, filter->data TSRMLS_CC));		/* SO */
+				filter->status |= 0x10;
 			}
 			CK((*filter->output_function)((s >> 8) & 0xff, filter->data TSRMLS_CC));
 			CK((*filter->output_function)(s & 0xff, filter->data TSRMLS_CC));
