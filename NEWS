@@ -198,8 +198,6 @@ PHP 4                                                                      NEWS
   in itself. (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
   or entries for the specified extension. (Jani)
-- Added mailparse_uudecode_all() which extracts all uuencoded attachments. 
-  (Wez)
 - Added support for chinese encodings in htmlentities() and htmlspecialchars().
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
