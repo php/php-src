@@ -1212,9 +1212,9 @@ static const char php_sig_gd2[3] = {'g', 'd', '2'};
 static int _php_image_type (char data[8])
 {
 #ifdef HAVE_LIBGD15
-	/* Based on ext/standard/images.c */
+	/* Based on ext/standard/image.c */
 
-	if (data == NULL || strlen(data) <= 0)
+	if (data == NULL)
 		return -1;
 
 	if (!memcmp(data, php_sig_gd2, 3))
@@ -1273,7 +1273,11 @@ gdImagePtr _php_image_create_from_string(zval **data, char *tn, gdImagePtr (*ioc
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Passed data is not in '%s' format", tn);
 		return NULL;
 	}
-
+#if HAVE_LIBGD204
+	io_ctx->gd_free(io_ctx);
+#else
+	io_ctx->free(io_ctx);
+#endif	
 	return im;
 }
 /* }}} */
