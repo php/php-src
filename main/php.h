@@ -222,6 +222,14 @@ char *strerror(int);
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
+#ifndef INT_MAX
+#define INT_MAX 2147483647
+#endif
+
+#ifndef INT_MIN
+#define INT_MIN (- INT_MAX - 1)
+#endif
+
 #define PHP_GCC_VERSION ZEND_GCC_VERSION
 #define PHP_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_MALLOC
 #define PHP_ATTRIBUTE_FORMAT ZEND_ATTRIBUTE_FORMAT
