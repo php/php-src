@@ -15,8 +15,7 @@ PHP 4                                                                      NEWS
 - Fixed bugs #18167 and #16859 (SEGV with session_decode). (Ilia)
 - Fixed bugs #19573 and #13472 (Session, XHTML compliance and
   trans_sid). (Sascha)
-- Fix #19570 (last character was missing in
-  get_html_translation_table). (Wez)
+- Fix #19570 (last character was missing in get_html_translation_table). (Wez)
 - Upgraded PCRE to version 3.9. (Wez)
 - Fixed bug in OCIResult() which returned garbage when called on 
   empty result-sets. (Thies)
