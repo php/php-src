@@ -108,13 +108,15 @@ url *url_parse(char *str)
 
 	/* extract the username, pass, and port from the hostname */
 	if (subs[4].rm_so != -1 && subs[4].rm_so < length) {
+
+		int cerr;
 		/* extract username:pass@host:port from regex results */
 		result = estrndup(str + subs[4].rm_so, subs[4].rm_eo - subs[4].rm_so);
 		length = strlen(result);
 
 		regfree(&re);			/* free the old regex */
 		
-		if ((err=regcomp(&re, "^(([^@:]+)(:([^@:]+))?@)?([^:@]+)(:([^:@]+))?", REG_EXTENDED))
+		if ((cerr=regcomp(&re, "^(([^@:]+)(:([^@:]+))?@)?([^:@]+)(:([^:@]+))?", REG_EXTENDED))
 			|| (err=regexec(&re, result, 10, subs, 0))) {
 			STR_FREE(ret->scheme);
 			STR_FREE(ret->path);
@@ -123,7 +125,7 @@ url *url_parse(char *str)
 			efree(ret);
 			efree(result);
 			/*php_error(E_WARNING,"Unable to compile regex: %d\n", err);*/
-			regfree(&re);
+			if (!cerr) regfree(&re); 
 			return NULL;
 		}
 		/* now deal with all of the results */
