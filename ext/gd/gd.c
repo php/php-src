@@ -2149,8 +2149,6 @@ PHP_FUNCTION(imageline)
 	else 
 #endif	
 		gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
-	
-	gdImageLine(im, Z_LVAL_PP(x1), Z_LVAL_PP(y1), Z_LVAL_PP(x2), Z_LVAL_PP(y2), Z_LVAL_PP(col));
 	RETURN_TRUE;
 }
 /* }}} */	
