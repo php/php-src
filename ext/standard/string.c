@@ -1422,7 +1422,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 #define _isblank(c) (((((unsigned char) c)==' ' || ((unsigned char) c)=='\t')) ? 1 : 0)
 #define _isnewline(c) (((((unsigned char) c)=='\n' || ((unsigned char) c)=='\r')) ? 1 : 0)
 
-PHPAPI void _php3_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result)
+PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,pval *result)
 {
 	int char_count=0;
 	char *source,*target,*tmp,*source_end=str+len, *tmp_end=NULL;
@@ -1473,7 +1473,7 @@ _php3_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
-PHPAPI char *_php3_str_to_str(char *haystack, int length, 
+PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
 	char *p, *q;
@@ -1546,12 +1546,12 @@ PHP_FUNCTION(str_replace)
 	}
 
 	if((*needle)->value.str.len == 1) {
-		_php3_char_to_str((*haystack)->value.str.val,
-						  (*haystack)->value.str.len,
-						  (*needle)->value.str.val[0],
-						  (*str)->value.str.val,
-						  (*str)->value.str.len,
-						  return_value);
+		php_char_to_str((*haystack)->value.str.val,
+						(*haystack)->value.str.len,
+						(*needle)->value.str.val[0],
+						(*str)->value.str.val,
+						(*str)->value.str.len,
+						return_value);
 		return;
 	}
 
@@ -1560,9 +1560,9 @@ PHP_FUNCTION(str_replace)
 		RETURN_FALSE;
 	}
 
-	new = _php3_str_to_str((*haystack)->value.str.val, (*haystack)->value.str.len,
-						   (*needle)->value.str.val, (*needle)->value.str.len,
-						   (*str)->value.str.val, (*str)->value.str.len, &len);
+	new = php_str_to_str((*haystack)->value.str.val, (*haystack)->value.str.len,
+						 (*needle)->value.str.val, (*needle)->value.str.len,
+						 (*str)->value.str.val, (*str)->value.str.len, &len);
 	RETURN_STRINGL(new, len, 0);
 }
 /* }}} */
@@ -1724,7 +1724,7 @@ static void _php3_hebrev(INTERNAL_FUNCTION_PARAMETERS,int convert_newlines)
 	efree(heb_str);
 
 	if (convert_newlines) {
-		_php3_char_to_str(broken_str,(*str)->value.str.len,'\n',"<br>\n",5,return_value);
+		php_char_to_str(broken_str,(*str)->value.str.len,'\n',"<br>\n",5,return_value);
 		efree(broken_str);
 	} else {
 		return_value->value.str.val = broken_str;
@@ -1762,7 +1762,7 @@ PHP_FUNCTION(nl2br)
 	
 	convert_to_string_ex(str);
 	
-	_php3_char_to_str((*str)->value.str.val,(*str)->value.str.len,'\n',"<br>\n",5,return_value);
+	php_char_to_str((*str)->value.str.val,(*str)->value.str.len,'\n',"<br>\n",5,return_value);
 }
 /* }}} */
 
