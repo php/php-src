@@ -1,3 +1,78 @@
+2000-10-18  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/domxml/Makefile.in
+      ext/domxml/config.m4:
+    modified the configure scripts to make shared extension.
+
+2000-10-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c: Back out circular references protection patch.
+
+    This causes problems with serializing regular variables and object
+    properties.
+
+    We need a smarter way to tell whether we have serialized one node
+    already.
+
+    PR: #7291, #7294
+
+2000-10-18  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/bz2/Makefile.in
+      ext/bz2/bz2.c
+      ext/bz2/config.m4
+      ext/bz2/php_bz2.h
+      ext/bz2/.cvsignore:
+    Initial commit of the bz2 extension which gives PHP 4 Bzip2 compression
+    abilities.
+
+2000-10-18  Andrew Skalski  <askalski@chek.com>
+
+    * ext/mcal/php_mcal.c:
+    fixed logic error in the get parameters stage of mcal_list_alarms
+
+2000-10-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/session/mod_files.c
+      ext/standard/dir.c:
+    Fixed crash (bus error) in readdir() and session cleanup when compiled
+    with Sun CC.
+
+2000-10-18  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/fsock.c:
+    Removed some zval_dtor calls. There were two more than needed, and I had
+    just added two more...
+
+    * ext/standard/fsock.c:
+    Added some missing zval_dtor calls in php_fsockopen()
+
+2000-10-18  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-optimized:
+    url_rewriter.tags needs to have " around the parameter to work.
+
+2000-10-18  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Added destruction of return value parameter, and using ZVAL_LONG and
+    ZVAL_STRING to set return value in ldap_get_option.
+
+2000-10-18  Ron Chmara  <ron@opus1.com>
+
+    * CODING_STANDARDS:
+    As per andi, similar names are for legacy reasons only.
+
+2000-10-18  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/mhash/mhash.c: corrected authors notice
+
+2000-10-18  Ron Chmara  <ron@opus1.com>
+
+    * CODING_STANDARDS:
+    Updated naming standards as per 9/12 dev/doc discussion.
+
 2000-10-17  Monte Ohrt  <monte@ispi.net>
 
     * pear/Makefile.in: update for Date_Calc install
