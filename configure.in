@@ -168,7 +168,10 @@ AC_CHECK_LIB(nsl, gethostname, [
 
 AC_CHECK_LIB(socket, socket, [
  AC_ADD_LIBRARY(socket)
- AC_DEFINE(HAVE_LIBSOCKET) ], [])
+ AC_DEFINE(HAVE_LIBSOCKET) ], [
+  AC_CHECK_LIB(socket, htonl, [
+   AC_ADD_LIBRARY(socket)
+   ])])
 
 AC_CHECK_LIB(nsl, gethostbyaddr, [
  AC_ADD_LIBRARY(nsl)
@@ -181,6 +184,10 @@ AC_CHECK_LIB(crypt, crypt, [
 dnl The sin may be in a library which need not be specifed
 dnl as well as res_search resides in libsocket
 AC_CHECK_LIB(m, sin)
+
+AC_CHECK_LIB(bind, inet_aton, [
+  EXTRA_LIBS="$EXTRA_LIBS -lbind"
+  AC_DEFINE(HAVE_LIBBIND) ], []) 
 
 AC_CHECK_LIB(resolv, inet_aton)
 
