@@ -96,7 +96,7 @@ if test "$PHP_PDO_SQLITE" != "no"; then
         $CC -o $ext_srcdir/sqlite/tool/mkkeywordhash $ext_srcdir/sqlite/tool/mkkeywordhash.c
         $ext_srcdir/sqlite/tool/mkkeywordhash > $ext_srcdir/sqlite/src/keywordhash.h
       else
-        touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.y
+        touch $ext_srcdir/sqlite/src/parse.c $ext_srcdir/sqlite/src/parse.h
       fi
 
       if test "$ext_shared" = "no" -o "$ext_srcdir" != "$abs_srcdir"; then
