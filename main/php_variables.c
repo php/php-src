@@ -22,10 +22,12 @@
 #include <stdio.h>
 #include "php.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/credits.h"
 #include "php_variables.h"
 #include "php_globals.h"
 #include "php_content_types.h"
 #include "SAPI.h"
+#include "php_logos.h"
 
 #include "zend_globals.h"
 
