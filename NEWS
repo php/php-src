@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Mixing OCIPlogon and OCINLogon no longer leak Oracle-Sessions. (thies)
+- old $node->append_child() is now $node->append_sibling(), since
+  new append_child() now behaves like excepted (= W3C standard) (chregu, uwe)
 - Ini settings for encoding/decoding Unicode/JIS user comments (Marcus)
 - Both 'file' and 'path to php.ini' is allowed for "-c" cli/cgi option. (Yasuo)
 - Added version info to the dll and exe files created under Windows. (jtate)
