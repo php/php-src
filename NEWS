@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
 - NSAPI: added "bucket" parameter to list of non-php.ini-keys of php4_execute
   for doing performance stats without warnings in server-log. (Uwe Schindler)
 - Fixed bug #29581 (Typo inside php.ini comments for mysql.trace_mode). (Ilia)
+- Fixed bug #29493 (extract(array, EXTR_REFS) misbehaves with elements
+  referred twice or more times). (Moriyoshi)
 - Fixed bug #29443 (Sanity check for wbmp detection). (Ilia)
 - Fixed bug #29369 (Uploaded files with ' or " in their names get their names
   truncated at those characters). (Ilia)
