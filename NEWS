@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Modified get_parent_class() to accept a class name as well as a class
+  instance. (Andrei, Zend engine)
 - Added support for UNC style paths (\\server\share\file & //server/share/file)
   (Daniel, TSRM)
 - Changed C++ style comments to C-style comments (Marc)
