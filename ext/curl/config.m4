@@ -28,7 +28,12 @@ if test "$PHP_CURL" != "no"; then
   PHP_SUBST(CURL_SHARED_LIBADD)
   AC_ADD_LIBRARY_WITH_PATH(curl, $CURL_DIR/lib, CURL_SHARED_LIBADD)
 
-  AC_DEFINE(HAVE_CURL,1,[ ])
+  AC_CHECK_LIB(curl,curl_easy_perform, 
+  [ 
+    AC_DEFINE(HAVE_CURL,1,[ ])
+  ],[
+    AC_MSG_ERROR(Try adding --with-openssl[=DIR] into your configure line.)
+  ])
 
   PHP_EXTENSION(curl, $ext_shared)
 fi
