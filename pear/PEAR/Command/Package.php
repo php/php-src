@@ -585,10 +585,10 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $pkgdir = "$info[package]-$info[version]";
         $info['rpm_xml_dir'] = '/var/lib/pear';
         $this->config->set('verbose', $tmp);
-        if (!$tar->extractList("$pkgdir/package.xml", $tmpdir, $pkgdir)) {
+        if (!$tar->extractList("package.xml", $tmpdir, $pkgdir)) {
             return $this->raiseError("failed to extract $params[0]");
         }
-        if (!file_exists("package.xml")) {
+        if (!file_exists("$tmpdir/package.xml")) {
             return $this->raiseError("no package.xml found in $params[0]");
         }
         if (isset($options['spec-template'])) {
@@ -611,10 +611,26 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         foreach ($info['filelist'] as $name => $attr) {
             if ($attr['role'] == 'doc') {
                 $info['doc_files'] .= " $name";
-            } elseif ($attr['role'] == 'src') {
-                $srcfiles++;
+            // Map role to the rpm vars
+            } else {
+                $c_prefix = '%{_libdir}/php/pear';
+                switch ($attr['role']) {
+                    case 'php':
+                        $prefix = $c_prefix; break;
+                    case 'ext':
+                        $prefix = '%{_libdir}/php'; break; // XXX good place?
+                    case 'src':
+                        $srcfiles++;
+                        $prefix = '%{_includedir}/php'; break; // XXX good place?
+                    case 'test':
+                        $prefix = "$c_prefix/tests/" . $info['package']; break;
+                    case 'data':
+                        $prefix = "$c_prefix/data/" . $info['package']; break;
+                    case 'script':
+                        $prefix = '%{_bindir}'; break;
+                }
+                $info['files'] .= "$prefix/$name\n";
             }
-            $info['files'] .= "$attr[installed_as]\n";
         }
         if ($srcfiles > 0) {
             include_once "OS/Guess.php";
