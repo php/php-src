@@ -17,9 +17,11 @@ install-data-local:
 	$(INSTALL_DATA) $(srcdir)/DB/common.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/odbc.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/mysql.php $(pear_DBdir) && \
+    $(INSTALL_DATA) $(srcdir)/DB/mssql.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/pgsql.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/storage.php $(pear_DBdir) && \
-	$(INSTALL_DATA) $(srcdir)/HTTP.php $(peardir)
+	$(INSTALL_DATA) $(srcdir)/HTTP.php $(peardir) && \
+    $(INSTALL_DATA) $(srcdir)/File/Find.php $(peardir)
 
 phpincludedir = $(includedir)/php
 builddir = $(prefix)/lib/php/build
