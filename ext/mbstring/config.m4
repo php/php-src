@@ -96,7 +96,6 @@ int main() { return foo(10, "", 3.14); }
       oniguruma/reggnu.c
       oniguruma/regparse.c
       oniguruma/regenc.c
-      oniguruma/regposerr.c
       oniguruma/enc/ascii.c
       oniguruma/enc/utf8.c
       oniguruma/enc/euc_jp.c
