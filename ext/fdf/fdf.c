@@ -688,32 +688,26 @@ PHP_FUNCTION(fdf_set_javascript_action)
 
 /* {{{ fdf_set_encoding(int fdf_document, string encoding)
    Sets FDF encoding (either "Shift-JIS" or "Unicode") */  
-PHP_FUNCTION(fdf_set_encoding) {
-	pval **arg1, **arg2;
-	int id, type;
+PHP_FUNCTION(fdf_set_encoding) 
+{
+	zval **fdfp, **enc;
 	FDFDoc fdf;
 	FDFErc err;
-	FDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fdfp, &enc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	id=(*arg1)->value.lval;
-	fdf = zend_list_find(id,&type);
-	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
-		RETURN_FALSE;
-	}
+	ZEND_FETCH_RESOURCE(fdf, FDFDoc *, fdfp, -1, "fdf", le_fdf);
 
-	err = FDFSetEncoding(fdf, (*arg2)->value.str.val);
+	convert_to_string_ex(enc);
+
+	err = FDFSetEncoding(fdf, Z_STRVAL_PP(enc));
     
 	if(err != FDFErcOK) {
-		printf("error setting encoding\n");
+		php_error(E_WARNING,"Error setting FDF encoding: %s", Z_STRVAL_PP(enc));
+		RETURN_FALSE;
 	}
-
 	RETURN_TRUE;
 }
 /* }}} */
