@@ -157,6 +157,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		orig_buffer->value.str.len = OG(active_ob_buffer).text_length;
 		orig_buffer->type = IS_STRING;
 		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
+		orig_buffer->is_ref=1;
 
 		ALLOC_INIT_ZVAL(z_status);
 		Z_TYPE_P(z_status) = IS_LONG;
