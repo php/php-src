@@ -64,7 +64,7 @@ static int le_dirp;
 static zend_class_entry *dir_class_entry_ptr;
 
 #define FETCH_DIRP() \
-	if (ARG_COUNT(ht) == 0) { \
+	if (ZEND_NUM_ARGS() == 0) { \
 		myself = getThis(); \
 		if (myself) { \
 			if (zend_hash_find(myself->value.obj.properties, "handle", sizeof("handle"), (void **)&tmp) == FAILURE) { \
@@ -75,7 +75,7 @@ static zend_class_entry *dir_class_entry_ptr;
 		} else { \
 			ZEND_FETCH_RESOURCE(dirp,php_dir *,0,DIR(default_dir), "Directory", le_dirp); \
 		} \
-	} else if ((ARG_COUNT(ht) != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
+	} else if ((ZEND_NUM_ARGS() != 1) || zend_get_parameters_ex(1, &id) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} else { \
 		ZEND_FETCH_RESOURCE(dirp,php_dir *,id,-1, "Directory", le_dirp); \
@@ -129,7 +129,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	php_dir *dirp;
 	DIRLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -204,7 +204,7 @@ PHP_FUNCTION(chdir)
 	pval **arg;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -228,7 +228,7 @@ PHP_FUNCTION(getcwd)
 	char path[MAXPATHLEN];
 	char *ret=NULL;
 	
-	if (ARG_COUNT(ht) != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -907,7 +907,7 @@ PHP_FUNCTION(session_get_cookie_params)
 {
 	PSLS_FETCH();
 
-	if (ARG_COUNT(ht) != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -927,7 +927,7 @@ PHP_FUNCTION(session_get_cookie_params)
 PHP_FUNCTION(session_name)
 {
 	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	char *old;
 	PSLS_FETCH();
 
@@ -951,7 +951,7 @@ PHP_FUNCTION(session_name)
 PHP_FUNCTION(session_module_name)
 {
 	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	char *old;
 	PSLS_FETCH();
 
@@ -990,7 +990,7 @@ PHP_FUNCTION(session_set_save_handler)
 	ps_user *mdata;
 	PSLS_FETCH();
 
-	if (ARG_COUNT(ht) != 6 || zend_get_parameters_array_ex(6, args) == FAILURE)
+	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_array_ex(6, args) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
 	if (PS(nr_open_sessions) > 0)
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(session_set_save_handler)
 PHP_FUNCTION(session_save_path)
 {
 	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	char *old;
 	PSLS_FETCH();
 
@@ -1040,7 +1040,7 @@ PHP_FUNCTION(session_save_path)
 PHP_FUNCTION(session_id)
 {
 	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	char *old = empty_string;
 	PSLS_FETCH();
 
@@ -1088,7 +1088,7 @@ static void php_register_var(zval** entry PSLS_DC PLS_DC)
 PHP_FUNCTION(session_register)
 {
 	zval  ***args;
-	int      argc = ARG_COUNT(ht);
+	int      argc = ZEND_NUM_ARGS();
 	int      i;
 	PSLS_FETCH();
 	PLS_FETCH();
@@ -1123,7 +1123,7 @@ PHP_FUNCTION(session_register)
 PHP_FUNCTION(session_unregister)
 {
 	pval **p_name;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	PSLS_FETCH();
 
 	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
@@ -1144,7 +1144,7 @@ PHP_FUNCTION(session_is_registered)
 {
 	pval **p_name;
 	pval *p_var;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	PSLS_FETCH();
 
 	if (ac != 1 || zend_get_parameters_ex(ac, &p_name) == FAILURE)
@@ -1181,7 +1181,7 @@ PHP_FUNCTION(session_decode)
 	pval **str;
 	PSLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	convert_to_string_ex(str);

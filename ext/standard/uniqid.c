@@ -50,7 +50,7 @@ PHP_FUNCTION(uniqid)
 	int sec, usec, argc;
 	struct timeval tv;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc, &prefix, &flags)) {
 		WRONG_PARAM_COUNT;
 	}

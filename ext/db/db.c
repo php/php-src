@@ -253,7 +253,7 @@ PHP_FUNCTION(dbmopen) {
 	dbm_info *info=NULL;
 	int ret;
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters(ht,2,&filename,&mode)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters(ht,2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -413,7 +413,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 PHP_FUNCTION(dbmclose) {
 	pval *id;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht,1,&id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht,1,&id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -467,7 +467,7 @@ PHP_FUNCTION(dbminsert)
 	dbm_info *info;
 	int ret;
 
-	if (ARG_COUNT(ht)!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -525,7 +525,7 @@ PHP_FUNCTION(dbmreplace)
 	dbm_info *info;
 	int ret;
 
-	if (ARG_COUNT(ht)!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=3||zend_get_parameters(ht,3,&id,&key,&value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -583,7 +583,7 @@ PHP_FUNCTION(dbmfetch)
 	pval *id, *key;
 	dbm_info *info;
 
-	if (ARG_COUNT(ht)!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -657,7 +657,7 @@ PHP_FUNCTION(dbmexists)
 	dbm_info *info;
 	int ret;
 
-	if (ARG_COUNT(ht)!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -703,7 +703,7 @@ PHP_FUNCTION(dbmdelete)
 	dbm_info *info;
 	int ret;
 
-	if (ARG_COUNT(ht)!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);
@@ -748,7 +748,7 @@ PHP_FUNCTION(dbmfirstkey)
 	dbm_info *info;
 	char *ret;
 
-	if (ARG_COUNT(ht)!=1||zend_get_parameters(ht,1,&id)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1||zend_get_parameters(ht,1,&id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -808,7 +808,7 @@ PHP_FUNCTION(dbmnextkey)
 	dbm_info *info;
 	char *ret;
 
-	if (ARG_COUNT(ht)!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2||zend_get_parameters(ht,2,&id,&key)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(key);

@@ -560,7 +560,7 @@ PHP_FUNCTION(phpinfo)
 	zval **flag_arg;
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			flag = 0xFFFFFFFF;
 			break;
@@ -598,7 +598,7 @@ PHP_FUNCTION(phpcredits)
 	zval **flag_arg;
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			flag = 0xFFFFFFFF;
 			break;

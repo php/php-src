@@ -43,7 +43,7 @@ PHP_FUNCTION(imagepsloadfont)
 	zval **file;
 	int f_ind, l_ind;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -89,7 +89,7 @@ PHP_FUNCTION(imagepscopyfont)
 	int l_ind, type;
 	gd_ps_font *nf_ind, *of_ind;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters(ht, 1, &fnt) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters(ht, 1, &fnt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -142,7 +142,7 @@ PHP_FUNCTION(imagepsfreefont)
 	zval **fnt;
 	int type;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &fnt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -169,7 +169,7 @@ PHP_FUNCTION(imagepsencodefont)
 	int type;
 	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &enc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -207,7 +207,7 @@ PHP_FUNCTION(imagepsextendfont)
 	int type;
 	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &ext) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -237,7 +237,7 @@ PHP_FUNCTION(imagepsslantfont)
 	int type;
 	int f_ind;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fnt, &slt) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -275,7 +275,7 @@ PHP_FUNCTION(imagepstext)
 	T1_OUTLINE *char_path, *str_path;
 	T1_TMATRIX *transform = NULL;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 8:
 		if (zend_get_parameters_ex(8, &img, &str, &fnt, &sz, &fg, &bg, &px, &py) == FAILURE) {
 			RETURN_FALSE;
@@ -436,7 +436,7 @@ PHP_FUNCTION(imagepsbbox)
 	double angle, sin_a, cos_a;
 	BBox char_bbox, str_bbox = {0, 0, 0, 0};
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 3:
 		if (zend_get_parameters(ht, 3, &str, &fnt, &sz) == FAILURE) {
 			RETURN_FALSE;

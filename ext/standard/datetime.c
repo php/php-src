@@ -79,7 +79,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	pval **arguments[7];
 	struct tm *ta, tmbuf;
 	time_t t;
-	int i, gmadjust, seconds, arg_count = ARG_COUNT(ht);
+	int i, gmadjust, seconds, arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count > 7 || zend_get_parameters_array_ex(arg_count,arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -201,7 +201,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	int i, size = 0, length, h, beat;
 	char tmp_buff[16];
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &format) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -467,7 +467,7 @@ PHP_FUNCTION(localtime)
 	struct tm *ta, tmbuf;
 	time_t timestamp;
 	int assoc_array = 0;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count < 0 || arg_count > 2 ||
 		zend_get_parameters_ex(arg_count, &timestamp_arg, &assoc_array_arg) == FAILURE) {
@@ -527,9 +527,9 @@ PHP_FUNCTION(getdate)
 	struct tm *ta, tmbuf;
 	time_t timestamp;
 
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		timestamp = time(NULL);
-	} else if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1,&timestamp_arg) == FAILURE) {
+	} else if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1,&timestamp_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long_ex(timestamp_arg);
@@ -596,7 +596,7 @@ PHP_FUNCTION(checkdate)
 	pval **month, **day, **year;
 	int m, d, y;
 	
-	if (ARG_COUNT(ht) != 3 ||
+	if (ZEND_NUM_ARGS() != 3 ||
 		zend_get_parameters_ex(3, &month, &day, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -633,7 +633,7 @@ void _php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1,&format_arg)==FAILURE) {
 				RETURN_FALSE;
@@ -703,7 +703,7 @@ PHP_FUNCTION(strtotime)
 	int 	 ac;
 	struct timeval tv;
 
-	ac = ARG_COUNT(ht);
+	ac = ZEND_NUM_ARGS();
 
 	if (ac < 1 || ac > 2 || zend_get_parameters_ex(ac, &timep,&nowp)==FAILURE) {
 		WRONG_PARAM_COUNT;

@@ -259,7 +259,7 @@ static void php_sybase_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	int hashed_details_length;
 	sybase_link sybase,*sybase_ptr;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 0: /* defaults */
 			host=user=passwd=NULL;
 			hashed_details_length=6+3;
@@ -506,7 +506,7 @@ PHP_FUNCTION(sybase_close)
 	pval *sybase_link_index;
 	int id,type;
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = php_sybase_module.default_link;
 			break;
@@ -542,7 +542,7 @@ PHP_FUNCTION(sybase_select_db)
 	int id,type;
 	sybase_link  *sybase_ptr;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				RETURN_FALSE;
@@ -675,7 +675,7 @@ PHP_FUNCTION(sybase_query)
 	int i,j;
 	int *column_types;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -810,7 +810,7 @@ PHP_FUNCTION(sybase_free_result)
 	sybase_result *result;
 	int type;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -847,7 +847,7 @@ PHP_FUNCTION(sybase_num_rows)
 	int type,id;
 	sybase_result *result;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -873,7 +873,7 @@ PHP_FUNCTION(sybase_num_fields)
 	int type,id;
 	sybase_result *result;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -900,7 +900,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	sybase_result *result;
 	pval *field_content;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -937,7 +937,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	int i;
 	pval *tmp;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(sybase_data_seek)
 	int type,id;
 	sybase_result *result;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1081,7 +1081,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	int type,id,field_offset;
 	sybase_result *result;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &sybase_result_index)==FAILURE) {
 				RETURN_FALSE;
@@ -1115,7 +1115,7 @@ PHP_FUNCTION(sybase_fetch_field)
 	}
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
+		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
 			php_error(E_WARNING,"Sybase:  Bad column offset");
 		}
 		RETURN_FALSE;
@@ -1140,7 +1140,7 @@ PHP_FUNCTION(sybase_field_seek)
 	int type,id,field_offset;
 	sybase_result *result;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &sybase_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1175,7 +1175,7 @@ PHP_FUNCTION(sybase_result)
 	sybase_result *result;
 	
 
-	if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &sybase_result_index, &row, &field)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &sybase_result_index, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1261,7 +1261,7 @@ PHP_FUNCTION(sybase_min_error_severity)
 {
 	pval *severity;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &severity)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(severity);
@@ -1275,7 +1275,7 @@ PHP_FUNCTION(sybase_min_message_severity)
 {
 	pval *severity;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &severity)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(severity);

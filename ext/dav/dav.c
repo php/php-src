@@ -252,7 +252,7 @@ PHP_FUNCTION(dav_set_mkcol_handlers)
     pval *test, *create;
     DAV_TLS_VARS;
 
-    if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &test, &create) == FAILURE) {
+    if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &test, &create) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
     DAV_SET_HANDLER(mkcol_test, test);

@@ -275,7 +275,7 @@ void domxmltestnode_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_prope
 		pval_destructor(&overloaded_property->element);
 	}
 		
-	printf("%d arguments\n", ARG_COUNT(ht));
+	printf("%d arguments\n", ZEND_NUM_ARGS());
 	return_value->value.str.val = estrndup("testing", 7);
 	return_value->value.str.len = 7;
 	return_value->type = IS_STRING;
@@ -302,7 +302,7 @@ PHP_FUNCTION(domxml_test)
 {
 	zval *id;
 	
-	if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE)
+	if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	convert_to_long(id);
@@ -332,7 +332,7 @@ PHP_FUNCTION(domxml_attrname)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -343,7 +343,7 @@ PHP_FUNCTION(domxml_attrname)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -388,7 +388,7 @@ PHP_FUNCTION(domxml_node)
 	xmlNode *node;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg);
@@ -420,7 +420,7 @@ PHP_FUNCTION(domxml_lastchild)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -431,7 +431,7 @@ PHP_FUNCTION(domxml_lastchild)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -471,7 +471,7 @@ PHP_FUNCTION(domxml_parent)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -482,7 +482,7 @@ PHP_FUNCTION(domxml_parent)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -522,7 +522,7 @@ PHP_FUNCTION(domxml_children)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if ((zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) &&
@@ -534,7 +534,7 @@ PHP_FUNCTION(domxml_children)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -591,7 +591,7 @@ PHP_FUNCTION(domxml_getattr)
 	char *value;
 	int type;
 	
-	if ((ARG_COUNT(ht) == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
+	if ((ZEND_NUM_ARGS() == 1) && getParameters(ht, 1, &arg1) == SUCCESS) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -603,7 +603,7 @@ PHP_FUNCTION(domxml_getattr)
 			RETURN_FALSE;
 		}
 		convert_to_string(arg1);
-	} else if ((ARG_COUNT(ht) == 2) && getParameters(ht, 2, &id, &arg1) == SUCCESS) {
+	} else if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &id, &arg1) == SUCCESS) {
 		convert_to_long(id);
 		id_to_find = id->value.lval;
 		convert_to_string(arg1);
@@ -636,7 +636,7 @@ PHP_FUNCTION(domxml_setattr)
 	xmlAttr *attr;
 	int type;
 	
-	if ((ARG_COUNT(ht) == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
+	if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -649,7 +649,7 @@ PHP_FUNCTION(domxml_setattr)
 		}
 		convert_to_string(arg1);
 		convert_to_string(arg2);
-	} else if ((ARG_COUNT(ht) == 3) && getParameters(ht, 3, &id, &arg1, &arg2) == SUCCESS) {
+	} else if ((ZEND_NUM_ARGS() == 3) && getParameters(ht, 3, &id, &arg1, &arg2) == SUCCESS) {
 		convert_to_long(id);
 		id_to_find = id->value.lval;
 		convert_to_string(arg1);
@@ -683,7 +683,7 @@ PHP_FUNCTION(domxml_attributes)
 	xmlAttr *attr;
 	int type;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -694,7 +694,7 @@ PHP_FUNCTION(domxml_attributes)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -740,7 +740,7 @@ PHP_FUNCTION(domxml_rootnew)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
@@ -751,7 +751,7 @@ PHP_FUNCTION(domxml_rootnew)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -803,7 +803,7 @@ PHP_FUNCTION(domxml_root)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
@@ -814,7 +814,7 @@ PHP_FUNCTION(domxml_root)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -862,7 +862,7 @@ PHP_FUNCTION(domxml_intdtd)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
@@ -873,7 +873,7 @@ PHP_FUNCTION(domxml_intdtd)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -915,7 +915,7 @@ PHP_FUNCTION(domxml_dumpmem)
 	int size;
 	int type;
 	
-	if (ARG_COUNT(ht) == 0) {
+	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
@@ -926,7 +926,7 @@ PHP_FUNCTION(domxml_dumpmem)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -955,7 +955,7 @@ PHP_FUNCTION(xmldoc)
 	xmlDoc *docp;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg);
@@ -986,7 +986,7 @@ PHP_FUNCTION(xmldocfile)
 	xmlDoc *docp;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg);
@@ -1018,7 +1018,7 @@ PHP_FUNCTION(domxml_new_child)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
@@ -1031,7 +1031,7 @@ PHP_FUNCTION(domxml_new_child)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(domxml_add_root)
 	int type;
 	int ret;
 	
-	if (ARG_COUNT(ht) == 1) {
+	if (ZEND_NUM_ARGS() == 1) {
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
@@ -1090,7 +1090,7 @@ PHP_FUNCTION(domxml_add_root)
 		} else {
 			RETURN_FALSE;
 		}
-	} else if ((ARG_COUNT(ht) != 2) || getParameters(ht, 2, &id, &name) == FAILURE) {
+	} else if ((ZEND_NUM_ARGS() != 2) || getParameters(ht, 2, &id, &name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_long(id);
@@ -1130,7 +1130,7 @@ PHP_FUNCTION(domxml_new_xmldoc)
 	xmlDoc *docp;
 	int ret;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg);
@@ -1295,7 +1295,7 @@ PHP_FUNCTION(xmltree)
 	xmlDoc *docp;
 	xmlNode *root;
 	
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(arg);

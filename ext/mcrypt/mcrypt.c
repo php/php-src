@@ -186,7 +186,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	int i;
 	int n = 0;
 
-	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &size, &psource) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &size, &psource) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -232,7 +232,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 	pval **cipher;
 	char *str, *nstr;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -255,7 +255,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 {
 	pval **cipher;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -271,7 +271,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 {
 	pval **cipher;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -287,7 +287,7 @@ PHP_FUNCTION(mcrypt_ofb)
 {
 	MCRYPT_ARGS;
 	
-	if(ARG_COUNT(ht) != 5 || 
+	if(ZEND_NUM_ARGS() != 5 || 
 			zend_get_parameters_ex(5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -309,7 +309,7 @@ PHP_FUNCTION(mcrypt_cfb)
 {
 	MCRYPT_ARGS;
 
-	if(ARG_COUNT(ht) != 5 || 
+	if(ZEND_NUM_ARGS() != 5 || 
 			zend_get_parameters_ex(5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -331,7 +331,7 @@ PHP_FUNCTION(mcrypt_cfb)
 PHP_FUNCTION(mcrypt_cbc)
 {
 	MCRYPT_ARGS;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 
 	if(ac < 4 || ac > 5 || 
 			zend_get_parameters_ex(ac, &cipher, &key, &data, &mode, &iv) == FAILURE) {
@@ -362,7 +362,7 @@ PHP_FUNCTION(mcrypt_ecb)
 {
 	MCRYPT_ARGS2;
 
-	if(ARG_COUNT(ht) != 4 || 
+	if(ZEND_NUM_ARGS() != 4 || 
 			zend_get_parameters_ex(4, &cipher, &key, &data, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}

@@ -113,7 +113,7 @@ PHP_FUNCTION(recode_string)
 	bool  success;
 	
 	ReSLS_FETCH();
-	if (ARG_COUNT(ht) != 2
+	if (ZEND_NUM_ARGS() != 2
 	 || zend_get_parameters_ex(2, &req, &str) == FAILURE) {
 	 	WRONG_PARAM_COUNT;
 	}
@@ -165,7 +165,7 @@ PHP_FUNCTION(recode_file)
 	int    in_type, out_type;
 
 	ReSLS_FETCH();
-	if (ARG_COUNT(ht) != 3
+	if (ZEND_NUM_ARGS() != 3
 	 || zend_get_parameters_ex(3, &req, &input, &output) == FAILURE) {
 	 	WRONG_PARAM_COUNT;
 	}

@@ -140,10 +140,10 @@ PHP_FUNCTION(var_dump)
 	int argc;
 	int	i;
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	
 	args = (zval ***)emalloc(argc * sizeof(zval **));
-	if (ARG_COUNT(ht) == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
+	if (ZEND_NUM_ARGS() == 0 || zend_get_parameters_array_ex(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
@@ -559,7 +559,7 @@ PHP_FUNCTION(serialize)
 {
 	pval **struc;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &struc) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	return_value->type = IS_STRING;
@@ -577,7 +577,7 @@ PHP_FUNCTION(unserialize)
 {
 	pval **buf;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buf) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

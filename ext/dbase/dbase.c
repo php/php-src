@@ -117,7 +117,7 @@ PHP_FUNCTION(dbase_open) {
 	PLS_FETCH();
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbf_name,&options)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbf_name,&options)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(dbf_name);
@@ -150,7 +150,7 @@ PHP_FUNCTION(dbase_close) {
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -173,7 +173,7 @@ PHP_FUNCTION(dbase_numrecords) {
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -195,7 +195,7 @@ PHP_FUNCTION(dbase_numfields) {
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -217,7 +217,7 @@ PHP_FUNCTION(dbase_pack) {
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&dbh_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -246,7 +246,7 @@ PHP_FUNCTION(dbase_add_record) {
 	int i;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbh_id,&fields)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&fields)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -315,7 +315,7 @@ PHP_FUNCTION(dbase_replace_record)
 	int i;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht,3,&dbh_id,&fields,&recnum)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht,3,&dbh_id,&fields,&recnum)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -378,7 +378,7 @@ PHP_FUNCTION(dbase_delete_record) {
 	int dbh_type;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -415,7 +415,7 @@ PHP_FUNCTION(dbase_get_record) {
 	size_t cursize = 0;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -498,7 +498,7 @@ PHP_FUNCTION(dbase_get_record_with_names) {
 	char *data, *fnp, *str_value;
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&dbh_id,&record)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(dbh_id);
@@ -576,7 +576,7 @@ PHP_FUNCTION(dbase_create) {
 	PLS_FETCH();
 	DBase_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht,2,&filename,&fields)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&filename,&fields)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);

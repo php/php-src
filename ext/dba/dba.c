@@ -95,7 +95,7 @@ typedef struct dba_handler {
 #define DBA_ID_PARS 											\
 	pval **id; 													\
 	dba_info *info = NULL; 										\
-	int type, ac = ARG_COUNT(ht)
+	int type, ac = ZEND_NUM_ARGS()
 
 /* these are used to get the standard arguments */
 
@@ -238,7 +238,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
 	pval ***args = (pval ***) NULL;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	dba_mode_t modenr;
 	dba_info *info;
 	dba_handler *hptr;

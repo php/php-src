@@ -371,7 +371,7 @@ php_formatted_print(int ht, int *len)
 	int alignment, width, precision, currarg, adjusting;
 	char *format, *result, padding;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 
 	if (argc < 1) {
 		WRONG_PARAM_COUNT_WITH_RETVAL(NULL);

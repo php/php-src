@@ -230,7 +230,7 @@ void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	long flags=0;
 	int ind;
 	
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc < 3 || myargc > 4 || zend_get_parameters_ex(myargc, &calendar, &user, &passwd, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -345,7 +345,7 @@ PHP_FUNCTION(mcal_close)
 	zval **options, **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
-	int myargcount=ARG_COUNT(ht);
+	int myargcount=ZEND_NUM_ARGS();
 	long flags = 0;
 	
 	if (myargcount < 1 || myargcount > 2 || zend_get_parameters_ex(myargcount, &streamind, &options) == FAILURE) {
@@ -394,7 +394,7 @@ PHP_FUNCTION(mcal_reopen)
 	int ind, ind_type;
 	long flags=0;
 	long cl_flags=0;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	
 	if (myargc < 2 || myargc > 3 || zend_get_parameters_ex(myargc, &streamind, &calendar, &options) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -430,7 +430,7 @@ PHP_FUNCTION(mcal_expunge)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -457,7 +457,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
 	CALEVENT *myevent;
-	int myargcount=ARG_COUNT(ht);
+	int myargcount=ZEND_NUM_ARGS();
 	
 	if (myargcount < 1 || myargcount > 3 || zend_get_parameters_ex(myargcount, &streamind, &eventid, &options) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -490,7 +490,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 	zval **streamind;
 	int ind, ind_type;
 	pils *mcal_le_struct=NULL; 
-	int myargcount=ARG_COUNT(ht);
+	int myargcount=ZEND_NUM_ARGS();
 	
 	if (myargcount != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -519,7 +519,7 @@ PHP_FUNCTION(mcal_list_events)
 	datetime_t startdate=DT_INIT;
 	datetime_t enddate=DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if ((myargc != 1 && myargc != 7) || zend_get_parameters_ex(myargc, &streamind, &startyear, &startmonth, &startday, &endyear, &endmonth, &endday) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -571,7 +571,7 @@ PHP_FUNCTION(mcal_create_calendar)
 	zval **streamind, **calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-	int myargc = ARG_COUNT(ht);
+	int myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -605,7 +605,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 	zval **streamind, **src_calendar, **dest_calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &src_calendar, &dest_calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -638,7 +638,7 @@ PHP_FUNCTION(mcal_list_alarms)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	cal_list_t *my_cal_list;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc != 1 || myargc !=7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &day, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -687,7 +687,7 @@ PHP_FUNCTION(mcal_delete_calendar)
 	zval **streamind, **calendar;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -722,7 +722,7 @@ PHP_FUNCTION(mcal_delete_event)
 	zval **streamind, **uid;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -757,7 +757,7 @@ PHP_FUNCTION(mcal_append_event)
 	unsigned long uid;
 	CALEVENT *myevent=NULL;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -787,7 +787,7 @@ PHP_FUNCTION(mcal_store_event)
 	int myargc;
 	CALEVENT *myevent=NULL;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -814,7 +814,7 @@ PHP_FUNCTION(mcal_snooze)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -847,7 +847,7 @@ PHP_FUNCTION(mcal_event_set_category)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &category) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -874,7 +874,7 @@ PHP_FUNCTION(mcal_event_set_title)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &title) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -901,7 +901,7 @@ PHP_FUNCTION(mcal_event_set_description)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &description) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -929,7 +929,7 @@ PHP_FUNCTION(mcal_event_set_start)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc < 4 || myargc > 7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &date, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -970,7 +970,7 @@ PHP_FUNCTION(mcal_event_set_end)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc < 4 || myargc > 7 || zend_get_parameters_ex(myargc, &streamind, &year, &month, &date, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1007,7 +1007,7 @@ PHP_FUNCTION(mcal_event_set_alarm)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	myargc=ARG_COUNT(ht);
+	myargc=ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &alarm) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(mcal_event_init)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(mcal_event_set_class)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &class) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(mcal_event_add_attribute)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &attribute, &val) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1123,7 +1123,7 @@ PHP_FUNCTION(mcal_is_leap_year)
 	zval **year;
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 1 || zend_get_parameters_ex(1, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(mcal_days_in_month)
 	zval **month, **leap;
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 2 || zend_get_parameters_ex(2, &month, &leap) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1166,7 +1166,7 @@ PHP_FUNCTION(mcal_date_valid)
 	zval **year, **month, **day;
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(mcal_time_valid)
 	zval **hour, **min, **sec;
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &hour, &min, &sec) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1217,7 +1217,7 @@ PHP_FUNCTION(mcal_day_of_week)
 	int myargc;
 	datetime_t mydate;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1241,7 +1241,7 @@ PHP_FUNCTION(mcal_day_of_year)
 	int myargc;
 	datetime_t mydate;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &year, &month, &day) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1264,7 +1264,7 @@ PHP_FUNCTION(mcal_week_of_year)
 	zval **year, **month, **day;
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &day, &month, &year) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1291,7 +1291,7 @@ PHP_FUNCTION(mcal_date_compare)
 	int myargc;
 	datetime_t myadate, mybdate;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 6 || zend_get_parameters_ex(6, &ayear, &amonth, &aday, &byear, &bmonth, &bday) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1322,7 +1322,7 @@ PHP_FUNCTION(mcal_next_recurrence)
 	int myargc;
 	datetime_t mydate;
 	
-	myargc=ARG_COUNT(ht);
+	myargc=ZEND_NUM_ARGS();
 	if (myargc != 3 || zend_get_parameters_ex(3, &streamind, &weekstart, &next) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1397,7 +1397,7 @@ PHP_FUNCTION(mcal_event_set_recur_none)
 	pils *mcal_le_struct; 
 	int myargc;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 1 || zend_get_parameters_ex(1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
 	int myargc;
 	datetime_t endtime = DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1458,7 +1458,7 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 6 || zend_get_parameters_ex(6, &streamind, &year, &month, &day, &interval, &weekdays) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1492,7 +1492,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1525,7 +1525,7 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1558,7 +1558,7 @@ PHP_FUNCTION(mcal_event_set_recur_yearly)
 	int myargc;
 	datetime_t endtime=DT_INIT;
 	
-	myargc = ARG_COUNT(ht);
+	myargc = ZEND_NUM_ARGS();
 	if (myargc != 5 || zend_get_parameters_ex(5, &streamind, &year, &month, &day, &interval) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}

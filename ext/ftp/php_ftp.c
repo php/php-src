@@ -140,7 +140,7 @@ PHP_FUNCTION(ftp_connect)
 	/* arg1 - hostname
 	 * arg2 - [port]
 	 */
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 1:
 		if (getParameters(ht, 1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -179,7 +179,7 @@ PHP_FUNCTION(ftp_login)
 	 * arg2 - username
 	 * arg3 - password
 	 */
-	if (	ARG_COUNT(ht) != 3 ||
+	if (	ZEND_NUM_ARGS() != 3 ||
 		getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -210,7 +210,7 @@ PHP_FUNCTION(ftp_pwd)
 
 	/* arg1 - ftp
 	 */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -235,7 +235,7 @@ PHP_FUNCTION(ftp_cdup)
 
 	/* arg1 - ftp
 	 */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -260,7 +260,7 @@ PHP_FUNCTION(ftp_chdir)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -291,7 +291,7 @@ PHP_FUNCTION(ftp_mkdir)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -328,7 +328,7 @@ PHP_FUNCTION(ftp_rmdir)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -359,7 +359,7 @@ PHP_FUNCTION(ftp_nlist)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -393,7 +393,7 @@ PHP_FUNCTION(ftp_rawlist)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -428,7 +428,7 @@ PHP_FUNCTION(ftp_systype)
 	/* arg1 - ftp
 	 * arg2 - directory
 	 */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -458,7 +458,7 @@ PHP_FUNCTION(ftp_fget)
 	 * arg3 - remote file
 	 * arg4 - transfer mode
 	 */
-	if (	ARG_COUNT(ht) != 4 ||
+	if (	ZEND_NUM_ARGS() != 4 ||
 		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 	{
 			WRONG_PARAM_COUNT;
@@ -493,7 +493,7 @@ PHP_FUNCTION(ftp_pasv)
 	/* arg1 - ftp
 	 * arg2 - pasv
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -525,7 +525,7 @@ PHP_FUNCTION(ftp_get)
 	 * arg3 - source (remote) file
 	 * arg4 - transfer mode
 	 */
-	if (	ARG_COUNT(ht) != 4 ||
+	if (	ZEND_NUM_ARGS() != 4 ||
 		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -594,7 +594,7 @@ PHP_FUNCTION(ftp_fput)
 	 * arg3 - fp
 	 * arg4 - transfer mode
 	 */
-	if (	ARG_COUNT(ht) != 4 ||
+	if (	ZEND_NUM_ARGS() != 4 ||
 		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -629,7 +629,7 @@ PHP_FUNCTION(ftp_put)
 	 * arg3 - source (local) file
 	 * arg4 - transfer mode
 	 */
-	if (	ARG_COUNT(ht) != 4 ||
+	if (	ZEND_NUM_ARGS() != 4 ||
 		getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -671,7 +671,7 @@ PHP_FUNCTION(ftp_size)
 	/* arg1 - ftp
 	 * arg2 - path
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -695,7 +695,7 @@ PHP_FUNCTION(ftp_mdtm)
 	/* arg1 - ftp
 	 * arg2 - path
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -720,7 +720,7 @@ PHP_FUNCTION(ftp_rename)
 	 * arg2 - src
 	 * arg3 - dest
 	 */
-	if (	ARG_COUNT(ht) != 3 ||
+	if (	ZEND_NUM_ARGS() != 3 ||
 		getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -750,7 +750,7 @@ PHP_FUNCTION(ftp_delete)
 	/* arg1 - ftp
 	 * arg2 - path
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -779,7 +779,7 @@ PHP_FUNCTION(ftp_site)
 	/* arg1 - ftp
 	 * arg2 - cmd
 	 */
-	if (	ARG_COUNT(ht) != 2 ||
+	if (	ZEND_NUM_ARGS() != 2 ||
 		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -807,7 +807,7 @@ PHP_FUNCTION(ftp_quit)
 
 	/* arg1 - ftp
 	 */
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

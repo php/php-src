@@ -95,7 +95,7 @@ PHP_FUNCTION(gettimeofday)
 PHP_FUNCTION(getrusage)
 {
 	struct rusage usg;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	pval **pwho;
 	int who = RUSAGE_SELF;
 

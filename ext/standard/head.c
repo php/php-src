@@ -125,7 +125,7 @@ PHP_FUNCTION(setcookie)
 	pval **arg[6];
 	int arg_count;
 
-	arg_count = ARG_COUNT(ht);
+	arg_count = ZEND_NUM_ARGS();
 	if (arg_count < 1 || arg_count > 6 || zend_get_parameters_array_ex(arg_count, arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}

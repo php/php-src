@@ -205,7 +205,7 @@ PHP_FUNCTION(openlog)
 	pval **ident, **option, **facility;
 	BLS_FETCH();
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &ident, &option, &facility) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &ident, &option, &facility) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(ident);
@@ -241,7 +241,7 @@ PHP_FUNCTION(syslog)
 {
 	pval **priority, **message;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &priority, &message) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &priority, &message) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(priority);

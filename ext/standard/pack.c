@@ -101,7 +101,7 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	char *output;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 
 	if (argc < 1) {
 		WRONG_PARAM_COUNT;
@@ -480,7 +480,7 @@ PHP_FUNCTION(unpack)
 	int inputpos, inputlen;
 	int i;
 
-	if ((ARG_COUNT(ht) != 2) || zend_get_parameters_ex(2,&formatarg,&inputarg) == FAILURE) {
+	if ((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&formatarg,&inputarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

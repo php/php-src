@@ -175,7 +175,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (icase)
 		copts |= REG_ICASE;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		if (zend_get_parameters_ex(2, &regex, &findin) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -429,7 +429,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *replace;
 	char *ret;
 	
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg_pattern, &arg_replace, &arg_string) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -504,7 +504,7 @@ PHP_FUNCTION(split)
 	char *strp, *endp;
 	int err, size, count;
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 2:
 		if (zend_get_parameters_ex(2, &spliton, &str) == FAILURE)
 			WRONG_PARAM_COUNT;
@@ -600,7 +600,7 @@ PHPAPI PHP_FUNCTION(sql_regcase)
 	unsigned char c;
 	register int i, j;
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &string)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &string)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
