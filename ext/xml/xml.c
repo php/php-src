@@ -280,9 +280,7 @@ xml_parser_dtor(xml_parser *parser)
 {
 
 	if (parser->object) {
-/*
 		zval_del_ref(&parser->object);
-*/
 	}
 	
 	if (parser->parser) {
@@ -1055,15 +1053,11 @@ PHP_FUNCTION(xml_set_object)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
 
 	if (parser->object) {
-/*
 		zval_del_ref(&parser->object);
-*/
 	}
 	
 	parser->object = *mythis;
-/*
 	zval_add_ref(&parser->object);
-*/
 
 	RETVAL_TRUE;
 }
