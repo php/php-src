@@ -1,9 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
-- Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Changed phpize not to require libtool. (Jani)
+- Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
