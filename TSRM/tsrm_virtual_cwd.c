@@ -199,7 +199,7 @@ CWD_API void virtual_cwd_shutdown(void)
 	free(main_cwd_state.cwd); /* Don't use CWD_STATE_FREE because the non global states will probably use emalloc()/efree() */
 }
 
-CWD_API char *virtual_getcwd_ex(int *length)
+CWD_API char *virtual_getcwd_ex(size_t *length)
 {
 	cwd_state *state;
 	CWDLS_FETCH();
