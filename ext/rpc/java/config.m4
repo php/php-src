@@ -21,7 +21,7 @@ AC_DEFUN(JAVA_FIND_JAR, [
   dnl we have a custom path defined so use it
   dnl
     if test -d $PHP_JAVA/bin; then
-      JAVA_JAR="$PHP_JAVA/bin/javac cf"
+      JAVA_JAR="$PHP_JAVA/bin/jar cf"
     else
       AC_MSG_ERROR([Unable to locate $PHP_JAVA/bin])
     fi
