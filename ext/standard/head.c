@@ -244,7 +244,7 @@ static void php_head_apply_header_list_to_hash(void *data, void *arg TSRMLS_DC)
 	}
 }
 
-/* {{{ proto string headers_list(void)
+/* {{{ proto array headers_list(void)
    Return list of headers to be sent / already sent */
 PHP_FUNCTION(headers_list)
 {
