@@ -522,6 +522,7 @@ Changes in the Zend Engine 2.0
         ?>
 
     * __autoload(). TBD.
+	* Default values for pass-by-reference function parameters.
 
 Changes in the Zend Engine 1.0
 
