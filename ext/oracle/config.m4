@@ -28,9 +28,9 @@ PHP_ARG_WITH(oracle, for Oracle-ORACLE support,
 if test "$PHP_ORACLE" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
   if test "$PHP_ORACLE" = "yes"; then
-  	ORACLE_DIR="$ORACLE_HOME"
+  	ORACLE_DIR=$ORACLE_HOME
   else
-  	ORACLE_DIR="$PHP_ORACLE"
+  	ORACLE_DIR=$PHP_ORACLE
   fi
   AC_MSG_RESULT($ORACLE_DIR)
 

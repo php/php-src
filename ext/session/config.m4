@@ -12,7 +12,7 @@ PHP_ARG_ENABLE(session, whether to enable session support,
 if test "$PHP_MM" != "no"; then
   for i in /usr/local /usr $PHP_MM; do
     if test -f "$i/include/mm.h"; then
-      MM_DIR="$i"
+      MM_DIR=$i
     fi
   done
 

@@ -13,7 +13,7 @@ AC_DEFUN(PHP_MSQL_VERSION,[
     MSQL_VERSION="2.0 or newer"
   ],[
     AC_DEFINE(MSQL1,1,[ ])
-    MSQL_VERSION="1.0"
+    MSQL_VERSION=1.0
   ])
   CPPFLAGS=$ac_php_oldcppflags
   AC_MSG_RESULT($MSQL_VERSION)

@@ -3,7 +3,7 @@ dnl config.m4 for extension domxml
 
 AC_DEFUN(PHP_DOM_CHECK_VERSION,[
   old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="-I$DOMXML_DIR/include"
+  CPPFLAGS=-I$DOMXML_DIR/include
   AC_MSG_CHECKING(for libxml version)
   AC_EGREP_CPP(yes,[
   #include <libxml/xmlversion.h>
@@ -47,9 +47,9 @@ if test "$PHP_DOM" != "no"; then
   PHP_ADD_INCLUDE($DOMXML_DIR/include)
 
   if test -f $DOMXML_DIR/lib/libxml2.a -o -f $DOMXML_DIR/lib/libxml2.s? ; then
-    DOM_LIBNAME="xml2"
+    DOM_LIBNAME=xml2
   else
-    DOM_LIBNAME="xml"
+    DOM_LIBNAME=xml
   fi
 
   PHP_SUBST(DOMXML_SHARED_LIBADD)

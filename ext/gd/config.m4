@@ -76,12 +76,12 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
       if test -n "$PHP_TTF" ; then
         for i in /usr /usr/local "$PHP_TTF" ; do
           if test -f "$i/include/freetype.h" ; then
-            TTF_DIR="$i"
+            TTF_DIR=$i
             unset TTF_INC_DIR
           fi
           if test -f "$i/include/freetype/freetype.h"; then
-            TTF_DIR="$i"
-            TTF_INC_DIR="$i/include/freetype"
+            TTF_DIR=$i
+            TTF_INC_DIR=$i/include/freetype
           fi
         done
       fi
@@ -90,7 +90,7 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
         PHP_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib, GD_SHARED_LIBADD)
       fi
       if test -z "$TTF_INC_DIR"; then
-        TTF_INC_DIR="$TTF_DIR/include"
+        TTF_INC_DIR=$TTF_DIR/include
       fi
       PHP_ADD_INCLUDE($TTF_INC_DIR)
     else
@@ -106,8 +106,8 @@ AC_DEFUN(PHP_GD_FREETYPE2,[
   if test "$PHP_FREETYPE_DIR" != "no"; then
     for i in /usr /usr/local "$PHP_FREETYPE_DIR" ; do
       if test -f "$i/include/freetype2/freetype/freetype.h"; then
-        FREETYPE2_DIR="$i"
-        FREETYPE2_INC_DIR="$i/include/freetype2/freetype"
+        FREETYPE2_DIR=$i
+        FREETYPE2_INC_DIR=$i/include/freetype2/freetype
       fi
     done
     
@@ -131,7 +131,7 @@ AC_DEFUN(PHP_GD_T1LIB,[
   if test "$PHP_T1LIB" != "no"; then
     for i in /usr/local /usr $PHP_T1LIB; do
       if test -f "$i/include/t1lib.h"; then
-        T1_DIR="$i"
+        T1_DIR=$i
       fi
     done
 
@@ -192,7 +192,7 @@ dnl Various checks for GD features
   PHP_GD_FREETYPE1
   PHP_GD_T1LIB
 
-  case "$PHP_GD" in
+  case $PHP_GD in
     yes)
       PHP_ADD_LIBRARY(gd,, GD_SHARED_LIBADD)
       PHP_GD_CHECK_VERSION
@@ -201,11 +201,11 @@ dnl Various checks for GD features
     *)
 dnl A whole whack of possible places where these might be
       for i in include/gd1.3 include/gd include gd1.3 gd ""; do
-        test -f $PHP_GD/$i/gd.h && GD_INCLUDE="$PHP_GD/$i"
+        test -f $PHP_GD/$i/gd.h && GD_INCLUDE=$PHP_GD/$i
       done
 
       for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
-        test -f $PHP_GD/$i/libgd.so -o -f $PHP_GD/$i/libgd.a && GD_LIB="$PHP_GD/$i"
+        test -f $PHP_GD/$i/libgd.so -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
       done
 
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then
@@ -220,12 +220,12 @@ dnl A whole whack of possible places where these might be
 
 dnl NetBSD package structure
   if test -f /usr/pkg/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
-    GD_INCLUDE="/usr/pkg/include/gd"
+    GD_INCLUDE=/usr/pkg/include/gd
   fi
 
 dnl SuSE 6.x package structure
   if test -f /usr/include/gd/gd.h -a -z "$GD_INCLUDE" ; then
-    GD_INCLUDE="/usr/include/gd"
+    GD_INCLUDE=/usr/include/gd
   fi
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)

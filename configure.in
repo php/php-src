@@ -93,7 +93,7 @@ AC_AIX
 
 BSD_MAKEFILE=no
 
-case "$host_alias" in
+case $host_alias in
 *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
@@ -653,7 +653,7 @@ divert(6)
 enable_shared=yes
 enable_static=yes
 
-case "$php_build_target" in
+case $php_build_target in
 program)
     enable_shared=no
 ;;

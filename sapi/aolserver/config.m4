@@ -11,7 +11,7 @@ AC_MSG_RESULT($PHP_AOLSERVER)
 
 if test "$PHP_AOLSERVER" != "no"; then
   if test -d "$PHP_AOLSERVER/include"; then
-    PHP_AOLSERVER_SRC="$PHP_AOLSERVER"
+    PHP_AOLSERVER_SRC=$PHP_AOLSERVER
   fi
   if test -z "$PHP_AOLSERVER_SRC" || test ! -d $PHP_AOLSERVER_SRC/include; then
     AC_MSG_ERROR(Please specify the path to the source distribution of AOLserver using --with-aolserver-src=DIR)

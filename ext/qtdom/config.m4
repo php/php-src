@@ -6,7 +6,7 @@ AC_MSG_CHECKING(whether to include QDOM support)
 AC_ARG_WITH(qtdom,
 [  --with-qtdom            Include QtDOM support (requires Qt >= 2.2.0).],
 [
-case "$withval" in
+case $withval in
     no)
       AC_MSG_RESULT(no) ;;
     yes)

@@ -44,7 +44,7 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
     if test "$PHP_ZLIB" != "yes"; then
       PHP_ZLIB_DIR=$PHP_ZLIB
     else 
-      PHP_ZLIB_DIR="/usr/local"
+      PHP_ZLIB_DIR=/usr/local
     fi
   fi
 

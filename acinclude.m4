@@ -70,7 +70,7 @@ dnl notation.
 dnl
 AC_DEFUN(PHP_EVAL_LIBLINE,[
   for ac_i in $1; do
-    case "$ac_i" in
+    case $ac_i in
     -l*)
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_LIBRARY($ac_ii,,$2)
@@ -90,7 +90,7 @@ dnl build system which are only given in compiler notation.
 dnl
 AC_DEFUN(PHP_EVAL_INCLINE,[
   for ac_i in $1; do
-    case "$ac_i" in
+    case $ac_i in
     -I*)
       ac_ii=`echo $ac_i|cut -c 3-`
       PHP_ADD_INCLUDE($ac_ii)
@@ -142,7 +142,7 @@ int readdir_r(DIR *, struct dirent *);
       ac_cv_what_readdir_r=none
    ])
   ])
-    case "$ac_cv_what_readdir_r" in
+    case $ac_cv_what_readdir_r in
     POSIX)
       AC_DEFINE(HAVE_POSIX_READDIR_R,1,[whether you have POSIX readdir_r]);;
     old-style)
@@ -154,7 +154,7 @@ int readdir_r(DIR *, struct dirent *);
 AC_DEFUN(PHP_SHLIB_SUFFIX_NAME,[
   PHP_SUBST(SHLIB_SUFFIX_NAME)
   SHLIB_SUFFIX_NAME=so
-  case "$host_alias" in
+  case $host_alias in
   *hpux*)
 	SHLIB_SUFFIX_NAME=sl
 	;;
@@ -230,7 +230,7 @@ AC_DEFUN(PHP_LIBGCC_LIBPATH,[
 ])
 
 AC_DEFUN(PHP_ARG_ANALYZE,[
-case "[$]$1" in
+case [$]$1 in
 shared,*)
   ext_output="yes, shared"
   ext_shared=yes
@@ -612,7 +612,7 @@ dnl
 dnl add a library to the link line
 dnl
 AC_DEFUN(PHP_ADD_LIBRARY,[
- case "$1" in
+ case $1 in
  c|c_r|pthread*) ;;
  *)
 ifelse($3,,[
@@ -811,9 +811,9 @@ AC_DEFUN(PHP_SOLARIS_PIC_WEIRDNESS,[
   AC_MSG_CHECKING(whether -fPIC is required)
   if test -n "$EXT_SHARED"; then
     os=`uname -sr 2>/dev/null`
-    case "$os" in
+    case $os in
         "SunOS 5.6"|"SunOS 5.7")
-          case "$CC" in
+          case $CC in
 	    gcc*|egcs*) CFLAGS="$CFLAGS -fPIC";;
 	    *) CFLAGS="$CFLAGS -fpic";;
 	  esac

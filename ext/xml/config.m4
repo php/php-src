@@ -20,9 +20,9 @@ if test "$PHP_XML" != "no"; then
     AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
     AC_DEFINE(HAVE_LIBEXPAT_BUNDLED, 1, [ ])
     CPPFLAGS="$CPPFLAGS -DXML_BYTE_ORDER=$order"
-    EXPAT_INTERNAL_LIBADD="expat/libexpat.la"	    
+    EXPAT_INTERNAL_LIBADD=expat/libexpat.la
     PHP_SUBST(EXPAT_INTERNAL_LIBADD)
-    EXPAT_SUBDIRS="expat"	    
+    EXPAT_SUBDIRS=expat
     PHP_SUBST(EXPAT_SUBDIRS)
     PHP_SUBST(EXPAT_SHARED_LIBADD)
     PHP_EXTENSION(xml, $ext_shared)
@@ -30,7 +30,7 @@ if test "$PHP_XML" != "no"; then
     PHP_ADD_INCLUDE($ext_srcdir/expat)
     PHP_FAST_OUTPUT($ext_builddir/expat/Makefile)
   else
-    EXPAT_DIR="$withval"
+    EXPAT_DIR=$withval
     if test -f $EXPAT_DIR/lib/libexpat.a -o -f $EXPAT_DIR/lib/libexpat.so ; then
         AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
         PHP_ADD_INCLUDE($EXPAT_DIR/include)

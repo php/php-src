@@ -42,11 +42,11 @@ int main(int argc, char **argv)
 	exit(result);
 }
 ],[
-  ac_cv_flush_io="no"
+  ac_cv_flush_io=no
 ],[
-  ac_cv_flush_io="yes"
+  ac_cv_flush_io=yes
 ],[
-  ac_cv_flush_io="no"
+  ac_cv_flush_io=no
 ])])
   if test "$ac_cv_flush_io" = "yes"; then
     AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])

@@ -28,9 +28,9 @@ PHP_ARG_WITH(oci8, for Oracle-OCI8 support,
 if test "$PHP_OCI8" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
   if test "$PHP_OCI8" = "yes"; then
-  	OCI8_DIR="$ORACLE_HOME"
+  	OCI8_DIR=$ORACLE_HOME
   else
-  	OCI8_DIR="$PHP_OCI8"
+  	OCI8_DIR=$PHP_OCI8
   fi
   AC_MSG_RESULT($OCI8_DIR)
 
