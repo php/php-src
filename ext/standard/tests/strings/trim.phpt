@@ -6,21 +6,21 @@ trim() function
 <?php
 
 $tests = <<<TESTS
-'abc' ===  trim('abc')
-'abc' === ltrim('abc')
-'abc' === rtrim('abc')
-'abc' ===  trim(" \0\t\nabc \0\t\n")
-"abc \0\t\n" === ltrim(" \0\t\nabc \0\t\n")
-" \0\t\nabc" === rtrim(" \0\t\nabc \0\t\n")
-" \0\t\nabc \0\t\n" ===  trim(" \0\t\nabc \0\t\n",'')
-" \0\t\nabc \0\t\n" === ltrim(" \0\t\nabc \0\t\n",'')
-" \0\t\nabc \0\t\n" === rtrim(" \0\t\nabc \0\t\n",'')
-"abc\x50\xC1" === trim("abc\x50\xC1\x60\x90","\x51..\xC0")
-"abc\x50" === trim("abc\x50\xC1\x60\x90","\x51..\xC1")
-"abc" === trim("abc\x50\xC1\x60\x90","\x50..\xC1")
-"abc\x50\xC1" === trim("abc\x50\xC1\x60\x90","\x51..\xC0")
-"abc\x50" === trim("abc\x50\xC1\x60\x90","\x51..\xC1")
-"abc" === trim("abc\x50\xC1\x60\x90","\x50..\xC1")
+'ABC' ===  trim('ABC')
+'ABC' === ltrim('ABC')
+'ABC' === rtrim('ABC')
+'ABC' ===  trim(" \\0\\t\\nABC \\0\\t\\n")
+"ABC \\0\\t\\n" === ltrim(" \\0\\t\\nABC \\0\\t\\n")
+" \\0\\t\\nABC" === rtrim(" \\0\\t\\nABC \\0\\t\\n")
+" \\0\\t\\nABC \\0\\t\\n" ===  trim(" \\0\\t\\nABC \\0\\t\\n",'')
+" \\0\\t\\nABC \\0\\t\\n" === ltrim(" \\0\\t\\nABC \\0\\t\\n",'')
+" \\0\\t\\nABC \\0\\t\\n" === rtrim(" \\0\\t\\nABC \\0\\t\\n",'')
+"ABC\\x50\\xC1" === trim("ABC\\x50\\xC1\\x60\\x90","\\x51..\\xC0")
+"ABC\\x50" === trim("ABC\\x50\\xC1\\x60\\x90","\\x51..\\xC1")
+"ABC" === trim("ABC\\x50\\xC1\\x60\\x90","\\x50..\\xC1")
+"ABC\\x50\\xC1" === trim("ABC\\x50\\xC1\\x60\\x90","\\x51..\\xC0")
+"ABC\\x50" === trim("ABC\\x50\\xC1\\x60\\x90","\\x51..\\xC1")
+"ABC" === trim("ABC\\x50\\xC1\\x60\\x90","\\x50..\\xC1")
 TESTS;
 
 include('../../../../tests/quicktester.inc');
