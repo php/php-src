@@ -81,6 +81,6 @@ PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
 test -d modules || mkdir modules
 touch .deps
 
-AC_CONFIG_HEADER(php_config.h)
+AC_CONFIG_HEADER(config.h)
 
 AC_OUTPUT()
