@@ -77,7 +77,6 @@ dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
 AC_CHECK_TYPE( ulong, unsigned long )
 
-
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
 AC_FUNC_MEMCMP
@@ -91,10 +90,6 @@ ZEND_FP_EXCEPT
 	
 ])
 
-
-
-
-
 AC_DEFUN(LIBZEND_ENABLE_DEBUG,[
 
 AC_ARG_ENABLE(debug,
@@ -105,17 +100,6 @@ AC_ARG_ENABLE(debug,
 ])  
 
 ])
-
-
-
-
-
-
-
-
-
-
-
 
 AC_DEFUN(LIBZEND_OTHER_CHECKS,[
 
@@ -194,7 +178,6 @@ AC_C_INLINE
 AC_SUBST(INLINE_CFLAGS)
 
 ])
-
 
 AC_DEFUN(LIBZEND_CPLUSPLUS_CHECKS,[
 
