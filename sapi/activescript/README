@@ -19,7 +19,7 @@ Installation.
 
 Build and install it somewhere; then register the engine like this:
 
-  regsvr32 php4activescript.dll
+  regsvr32 php5activescript.dll
 
 Usage.
 ======

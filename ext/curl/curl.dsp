@@ -55,8 +55,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
-# ADD LINK32 php4ts.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /machine:I386 /nodefaultlib:"MSVCRT" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\curl\lib"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib /nologo /dll /machine:I386
+# ADD LINK32 php5ts.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /machine:I386 /nodefaultlib:"MSVCRT" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\curl\lib"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "curl - Win32 Debug_TS"
@@ -83,8 +83,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
-# ADD LINK32 php4ts_debug.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib wsock32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"MSVCRTD" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\curl\lib"
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php5ts.lib /nologo /dll /machine:I386
+# ADD LINK32 php5ts_debug.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib wsock32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"MSVCRTD" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\curl\lib"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "curl - Win32 Debug_TS_SSL"
@@ -111,9 +111,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts_debug.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS"
+# ADD BASE LINK32 php5ts_debug.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS"
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts_debug.lib libcurl.lib ssleay32.lib libeay32.lib msvcrt.lib ws2_32.lib winmm.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"MSVCRTD" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\curl\lib"
+# ADD LINK32 php5ts_debug.lib libcurl.lib ssleay32.lib libeay32.lib msvcrt.lib ws2_32.lib winmm.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"MSVCRTD" /out:"..\..\Debug_TS/php_curl.dll" /libpath:"..\..\Debug_TS" /libpath:"..\..\..\php_build\curl\lib"
 # SUBTRACT LINK32 /pdb:none /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "curl - Win32 Release_TS_SSL"
@@ -140,9 +140,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD BASE LINK32 php5ts.lib libcurl.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /nodefaultlib:"msvcrt.lib" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts.lib libcurl.lib ssleay32.lib libeay32.lib msvcrt.lib ws2_32.lib winmm.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /machine:I386 /nodefaultlib:"MSVCRT" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\curl\lib"
+# ADD LINK32 php5ts.lib libcurl.lib ssleay32.lib libeay32.lib msvcrt.lib ws2_32.lib winmm.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib /nologo /dll /machine:I386 /nodefaultlib:"MSVCRT" /out:"..\..\Release_TS/php_curl.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline" /libpath:"..\..\..\php_build\curl\lib"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 

@@ -52,10 +52,10 @@ class Child_mx2 extends Base_php5 {
   }
 }
 
-echo "### PHP4 style\n";
+echo "### PHP 4 style\n";
 $c4= new Child_php4();
 
-echo "### PHP5 style\n";
+echo "### PHP 5 style\n";
 $c5= new Child_php5();
 
 echo "### Mixed style 1\n";
@@ -65,10 +65,10 @@ echo "### Mixed style 2\n";
 $cm= new Child_mx2();
 ?>
 --EXPECT--
-### PHP4 style
+### PHP 4 style
 string(17) "Child constructor"
 string(16) "Base constructor"
-### PHP5 style
+### PHP 5 style
 string(17) "Child constructor"
 string(16) "Base constructor"
 ### Mixed style 1

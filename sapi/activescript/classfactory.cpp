@@ -32,8 +32,8 @@ HINSTANCE module_handle;
 
 #include <comcat.h>
 #include "TSRM.h"
-#include "php4as_classfactory.h"
-#include "php4as_scriptengine.h"
+#include "php5as_classfactory.h"
+#include "php5as_scriptengine.h"
 
 volatile LONG TPHPClassFactory::factory_count = 0;
 volatile LONG TPHPClassFactory::object_count = 0;

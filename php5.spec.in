@@ -1,6 +1,6 @@
 %define version @VERSION@
-%define so_version 4
-%define release 1
+%define so_version 5
+%define release 0
 
 Name: php
 Summary: PHP: Hypertext Preprocessor
@@ -8,7 +8,7 @@ Group: Development/Languages
 Version: %{version}
 Release: %{release}
 Copyright: The PHP license (see "LICENSE" file included in distribution)
-Source: http://www.php.net/version4/downloads/php-%{version}.tar.gz
+Source: http://www.php.net/get/php-%{version}.tar.gz/from/a/mirror
 Icon: php.gif
 URL: http://www.php.net/
 Packager: PHP Group <group@php.net>

@@ -14,7 +14,7 @@ Installer Layout:
 We have the following features:
 
     o PHP Core - Always installed.
-                 Includes php4ts.dll, php.ini + common dlls
+                 Includes php5ts.dll, php.ini + common dlls
                  and config files
 
     o SAPI

@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Danny Heijl  <Danny.Heijl@cevi.be> : initial cut (ODS 7.2x) |
-   |                                               PHP4 port              |
+   |                                               PHP 4 port             |
    |          Christian Cartus <chc@idgruppe.de> : blobs, and IUS 9       |
    |          Jouni Ahto <jouni.ahto@exdec.fi>   : configuration stuff    |
    |          Corne' Cornelius <cornec@reach.co.za> : input descriptors   |

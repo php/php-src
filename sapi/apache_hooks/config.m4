@@ -53,16 +53,16 @@ AC_ARG_WITH(apache-hooks,
   *aix*)
     APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
     ;;
   *darwin*)
     MH_BUNDLE_FLAGS="-dynamic -twolevel_namespace -bundle -bundle_loader $APXS_HTTPD"
     PHP_SUBST(MH_BUNDLE_FLAGS)
-    SAPI_SHARED=libs/libphp4.so
-    PHP_SELECT_SAPI(apache_hooks, bundle, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    SAPI_SHARED=libs/libphp5.so
+    PHP_SELECT_SAPI(apache_hooks, bundle, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
     ;;
   *)
-    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php4.c php_apache.c, -I$APXS_INCLUDEDIR)
+    PHP_SELECT_SAPI(apache_hooks, shared, sapi_apache.c mod_php5.c php_apache.c, -I$APXS_INCLUDEDIR)
     ;;
   esac
 
@@ -70,9 +70,9 @@ AC_ARG_WITH(apache-hooks,
   $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
 
   if test "$?" != "0"; then
-    APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED" # Old apxs does not have -S option
+    APACHE_INSTALL="$APXS -i -a -n php5 $SAPI_SHARED" # Old apxs does not have -S option
   else 
-    APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php4 $SAPI_SHARED"
+    APACHE_INSTALL="\$(mkinstalldirs) \"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" && $APXS -S LIBEXECDIR=\"\$(INSTALL_ROOT)`$APXS -q LIBEXECDIR`\" -i -a -n php5 $SAPI_SHARED"
   fi
 
   if test -z "`$APXS -q LD_SHLIB`" || test "`$APXS -q LIBEXECDIR`" = "modules"; then
@@ -86,7 +86,7 @@ AC_ARG_WITH(apache-hooks,
   AC_MSG_RESULT(no)
 ])
 
-APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php4.* sapi/apache_hooks/libphp4.module"
+APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php5.* sapi/apache_hooks/libphp5.module"
 
 if test "$PHP_SAPI" != "apache_hooks"; then
 AC_MSG_CHECKING(for Apache 1.x (hooks) module support)
@@ -106,7 +106,7 @@ AC_ARG_WITH(apache-hooks-static,
     if test -f $withval/src/httpd.h; then 
       APACHE_INCLUDE=-I$withval/src
       APACHE_TARGET=$withval/src
-      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php4.c php_apache.c, $APACHE_INCLUDE)
+      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
       APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
       PHP_LIBS="-L. -lphp3"
       AC_MSG_RESULT(yes - Apache 1.2.x)
@@ -122,13 +122,13 @@ AC_ARG_WITH(apache-hooks-static,
     elif test -f $withval/src/main/httpd.h; then
       APACHE_HAS_REGEX=1
       APACHE_INCLUDE="-I$withval/src/main -I$withval/src/os/unix -I$withval/src/ap"
-      APACHE_TARGET=$withval/src/modules/php4
+      APACHE_TARGET=$withval/src/modules/php5
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php4.c php_apache.c, $APACHE_INCLUDE)
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-      PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
+      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
       if test -f $withval/src/include/ap_config.h; then
@@ -148,13 +148,13 @@ AC_ARG_WITH(apache-hooks-static,
     elif test -f $withval/src/include/httpd.h; then
       APACHE_HAS_REGEX=1
       APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
-      APACHE_TARGET=$withval/src/modules/php4
+      APACHE_TARGET=$withval/src/modules/php5
       if test ! -d $APACHE_TARGET; then
         mkdir $APACHE_TARGET
       fi
-      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php4.c php_apache.c, $APACHE_INCLUDE)
-      PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
+      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
+      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache_hooks/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache_hooks/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
       AC_MSG_RESULT(yes - Apache 1.3.x)
       STRONGHOLD=
       if test -f $withval/src/include/ap_config.h; then
@@ -174,9 +174,9 @@ AC_ARG_WITH(apache-hooks-static,
     elif test -f $withval/apache/httpd.h; then
       APACHE_INCLUDE=-"I$withval/apache -I$withval/ssl/include"
       APACHE_TARGET=$withval/apache
-      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php4.c php_apache.c, $APACHE_INCLUDE)
-      PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
+      PHP_SELECT_SAPI(apache_hooks, static, sapi_apache.c mod_php5.c php_apache.c, $APACHE_INCLUDE)
+      PHP_LIBS="-Lmodules/php5 -L../modules/php5 -L../../modules/php5 -lmodphp5"
+      APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp5.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
       STRONGHOLD=-DSTRONGHOLD=1
       AC_MSG_RESULT(yes - StrongHold)
       if test -f $withval/apache/ap_config.h; then
@@ -206,7 +206,7 @@ AC_ARG_WITH(apache-hooks-static,
 fi
 
 if test "x$APXS" != "x" -a "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
-  APXS_EXP=-bE:sapi/apache_hooks/mod_php4.exp
+  APXS_EXP=-bE:sapi/apache_hooks/mod_php5.exp
 fi
 
 PHP_SUBST(APXS_EXP)
@@ -230,7 +230,7 @@ AC_ARG_WITH(mod_charset,
 if test -n "$APACHE_MODULE"; then
   PHP_TARGET_RDYNAMIC
   $php_shtool mkdir -p sapi/apache_hooks
-  PHP_OUTPUT(sapi/apache_hooks/libphp4.module)
+  PHP_OUTPUT(sapi/apache_hooks/libphp5.module)
 fi
 
 if test -n "$APACHE_INSTALL"; then

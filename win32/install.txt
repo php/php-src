@@ -54,9 +54,9 @@ Windows Manual installation from zip binary distribution
   Xitami
   SunONE Webserver, Netscape Enterprise Server, iPlanet
 
- PHP 4 for Windows comes in two flavours - a CGI executable (php.exe),
- and several SAPI modules (for exapmle php4isapi.dll). The latter form
- is new to PHP 4, and provides significantly improved performance and
+ PHP for Windows comes in two flavours - a CGI executable (php.exe),
+ and several SAPI modules (for exapmle php5isapi.dll). The latter form
+ is new to PHP, and provides significantly improved performance and
  some new functionality. However, please note that the SAPI modules
  are *NOT* yet considered to be production quality.
  In particular, with the ISAPI module, you are likely to encounter serious
@@ -65,7 +65,7 @@ Windows Manual installation from zip binary distribution
  such as ASP also failing. You have been warned!
 
  The reason for this is that the PHP SAPI modules are using the
- thread-safe version of the PHP code, which is new to PHP 4, and has
+ thread-safe version of the PHP code, which is new to PHP, and has
  not yet been tested and pounded enough to be considered completely
  stable, and there are actually a few known bugs. On the other hand,
  some people have reported very good results with the SAPI modules,
@@ -90,14 +90,14 @@ Windows Manual installation from zip binary distribution
 
   You need to ensure that the dlls which php uses can be found. The precise
   dlls involved depend on which web server you use and whether you want to
-  run php as a cgi or as a server module. php4ts.dll is always used. If you are
+  run php as a cgi or as a server module. php5ts.dll is always used. If you are
   using a server module (e.g. isapi or apache) then you will need the relevent
   dll from the sapi folder. If you are using any php extension dlls then you
   will need those as well. To make sure that the dlls can be found, you can
   either copy them to the system directory (e.g. winnt/system32 or 
   windows/system) or you can make sure that they live in the same directory
   as the main php executable or dll your web server will use (e.g. php.exe,
-  php4apache.dll).
+  php5apache.dll).
 
   Copy the file, php.ini-dist to your %WINDOWS% directory on
   Windows 95/98 or to your %SYSTEMROOT% directory under Windows NT,
@@ -178,7 +178,7 @@ Installation of Windows extensions
  libraries.
 
  Note:
- In PHP 4.0.5 MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE,
+ Since PHP 4.0.5 MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE,
  Session, WDDX and XML support is built-in. You don't need to
  load any additional extensions in order to use these functions.
 
@@ -214,7 +214,7 @@ Web server configuration
       http://www.php.net/manual/en/install.apache2.php
 
    With the basic difference being that when installing as a 
-   module you'll use php4apache2.dll instead of php4apache.dll
+   module you'll use php5apache2.dll instead of php5apache.dll
    Both files are included within this release.
   ------------------------------------------------------------
 
@@ -239,24 +239,24 @@ Web server configuration
   Now that version 4.1 introduces a safer sapi module, we recommend
   that you configure PHP as a module in Apache.
 
-  To accomplish this, you have to load the php4apache.dll in your
+  To accomplish this, you have to load the php5apache.dll in your
   Apache httpd.conf.
 
   !! NOTE !!
-  Whereever you load php4apache.dll from, php4apache.dll also
-  needs the php4ts.dll also included in the PHP4 distribution.
-  php4apache.dll depends on php4ts.dll which is loaded as soon as
-  Apache loads php4apache.dll. If php4ts.dll can't be found, you
+  Whereever you load php5apache.dll from, php5apache.dll also
+  needs the php5ts.dll also included in the PHP distribution.
+  php5apache.dll depends on php5ts.dll which is loaded as soon as
+  Apache loads php5apache.dll. If php5ts.dll can't be found, you
   usually get an error like (also see the "Problems?" section at
   the end of the file):
 
-    Cannot load c:/php/sapi/php4apache.dll into server
+    Cannot load c:/php/sapi/php5apache.dll into server
 
-  So where does php4ts.dll has to be to be properly loaded ?
-  php4ts.dll is searched in the following order:
+  So where does php5ts.dll has to be to be properly loaded ?
+  php5ts.dll is searched in the following order:
 
   1) in the directory where apache.exe is start from
-  2) in the directory where php4apache.dll is loaded from
+  2) in the directory where php5apache.dll is loaded from
   3) in your %SYSTEMROOT%\System32, %SYSTEMROOT%\system and
      %SYSTEMROOT% directory.
      Note: %SYSTEMROOT%\System32 only applies to Windows NT/2000/XP)
@@ -268,15 +268,15 @@ Web server configuration
   Usually you would just copy it over to %SYSTEMROOT%\System32.
   But if you want to have multiple PHP installations (for
   whatever reason) this is a bad idea. For this circumstance the
-  safest thing is to let php4ts.dll reside in the same directory
-  where php4apache.dll is loaded from (see point 2 above).
+  safest thing is to let php5ts.dll reside in the same directory
+  where php5apache.dll is loaded from (see point 2 above).
 
 
   After you've set up the file layout properly, you're ready to
-  finally configure Apache to load the PHP4 module. Just add the
+  finally configure Apache to load the PHP module. Just add the
   following lines to your httpd.conf:
 
-   LoadModule php5_module c:/php/sapi/php4apache.dll
+   LoadModule php5_module c:/php/sapi/php5apache.dll
    AddModule mod_php5.c
    AddType application/x-httpd-php .php
 
@@ -329,15 +329,15 @@ Web server configuration
   On Win-Apache, path names can contain either forward- or backslashes.
   Example:
 
-    LoadModule php5_module C:\php\sapi\php4apache.dll
+    LoadModule php5_module C:\php\sapi\php5apache.dll
 
   works as good as 
 
-    LoadModule php5_module C:/php/sapi/php4apache.dll
+    LoadModule php5_module C:/php/sapi/php5apache.dll
 
   You even can mix the slash-style:
 
-    LoadModule php5_module C:\php/sapi\php4apache.dll
+    LoadModule php5_module C:\php/sapi\php5apache.dll
 
 ----------------------------------------------------------
 
@@ -350,7 +350,7 @@ Web server configuration
   Windows and PWS/IIS 3 - including PWS on Win 9x/ME
 
    The recommended method for configuring these servers is to use
-   the REG file incuded with the distribution (pws-php4cgi.reg).
+   the REG file incuded with the distribution (pws-php5cgi.reg).
    You may want to edit this file and make sure the extensions and PHP
    install directories match your configuration - once you have done
    this, just double click on the file and it will update your registry.
@@ -466,11 +466,11 @@ Web server configuration
     If you don't want to perform HTTP Authentication using PHP,
     you can (and should) skip this step. Under ISAPI Filters,
     add a new ISAPI filter. Use PHP as the filter name, and
-    supply a path to the php4isapi.dll.
+    supply a path to the php5isapi.dll.
 
     Under 'Home Directory', click on the 'Configuration' button.
     Add a new entry to the Application Mappings. Use the path
-    to the php4isapi.dll as the Executable, supply .php as the
+    to the php5isapi.dll as the Executable, supply .php as the
     extension, leave Method exclusions blank, and check the
     Script engine checkbox.
 
@@ -524,7 +524,7 @@ Web server configuration
 
    From the List select "Associations" and enter the desired
    extension (".php") and the path to the CGI exe (ex. c:\php\php.exe)
-   or the ISAPI dll file (ex. c:\php\sapi\php4isapi.dll).
+   or the ISAPI dll file (ex. c:\php\sapi\php5isapi.dll).
 
    Select "Content Types" add the same extension ".php"
    and enter the content type. If you choose the CGI exe
@@ -623,7 +623,7 @@ Web server configuration
 
    Open mappings.ini and add the following line under [isapi]
 
-   *.php = c:\php\php4isapi.dll
+   *.php = c:\php\php5isapi.dll
     Note: The above assumes that PHP was installed in c:\php
 
    Restart the server
@@ -685,7 +685,7 @@ Problems?
    Once php is working at the command line, try accessing the php script via the browser again.
    If it still fails then it could be one of the following:
 
-   file permissions on your php script, php.exe, php4ts.dll, php.ini or any php
+   file permissions on your php script, php.exe, php5ts.dll, php.ini or any php
    extensions you are trying to load are such that the web server cannot access 
    them. For IIS, IUSR_<machinename> needs at least read access.
 
@@ -708,18 +708,18 @@ Problems?
 
   Example scenery:
 
-   Apache/PHP4 as module. Though I've properly configured
-   php4apache.dll in httpd.conf, I always get:
+   Apache/PHP as module. Though I've properly configured
+   php5apache.dll in httpd.conf, I always get:
 
    Syntax error on line 1025 of c:/apache/apache/conf/httpd.conf:
-   Cannot load c:/php/php-4.2.1-win32/sapi/php4apache.dll into server
+   Cannot load c:/php/php-4.2.1-win32/sapi/php5apache.dll into server
 
-   But c:/php/php-4.2.1-win32/sapi/php4apache.dll definitely
+   But c:/php/php-4.2.1-win32/sapi/php5apache.dll definitely
    exists:
 
-   dir c:\php\php-4.2.1-win32\sapi\php4apache.dll
+   dir c:\php\php-4.2.1-win32\sapi\php5apache.dll
     Directory of c:\php\php-4.2.1-win32\sapi
-    13.05.2002  00:01               24.576 php4apache.dll
+    13.05.2002  00:01               24.576 php5apache.dll
 
    'strace'ing the apache.exe binary revealed the following:
    c:
@@ -728,18 +728,18 @@ Problems?
 
    Then looking into strace.txt:
    [...]
-729 3348 3248 NtOpenSection (0xe, {24, 24, 0x40, 0, 0, "php4ts.dll"}, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
-731 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\c:\php\php-4.2.1-win32\sapi\php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
-733 3348 3248 NtQueryAttributesFile ({24, 108, 0x40, 0, 0, "php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
-735 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\C:\WINNT\System32\php4ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+729 3348 3248 NtOpenSection (0xe, {24, 24, 0x40, 0, 0, "php5ts.dll"}, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+731 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\c:\php\php-4.2.1-win32\sapi\php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+733 3348 3248 NtQueryAttributesFile ({24, 108, 0x40, 0, 0, "php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
+735 3348 3248 NtQueryAttributesFile ({24, 0, 0x40, 0, 0, "\??\C:\WINNT\System32\php5ts.dll"}, 1234824, ... ) == STATUS_OBJECT_NAME_NOT_FOUND
    [...]
 
    This went on quiet some time for all directories in the %PATH%
    environment variable. The solution finally was to copy
-   php4ts.dll in any of the directories searched by the System (I
+   php5ts.dll in any of the directories searched by the System (I
    prefered to use c:\php\php-4.2.1-win32\sapi).
 
-   Note: This does not only apply to php4ts.dll but in fact to every
+   Note: This does not only apply to php5ts.dll but in fact to every
          DLL which gets loaded through PHP too. So, if you've
          problems running your PHP CLI application because it
          can't load a certain library but you're sure it's there,

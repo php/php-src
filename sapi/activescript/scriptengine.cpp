@@ -42,13 +42,13 @@ extern "C" {
 #include "php_globals.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "php4activescript.h"
+#include "php5activescript.h"
 #include "ext/com_dotnet/php_com_dotnet.h"
 #include "ext/com_dotnet/php_com_dotnet_internal.h"
 }
 #include "php_ticks.h"
-#include "php4as_scriptengine.h"
-#include "php4as_classfactory.h"
+#include "php5as_scriptengine.h"
+#include "php5as_classfactory.h"
 #include <objbase.h>
 
 /* {{{ trace */

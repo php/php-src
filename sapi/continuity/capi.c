@@ -19,7 +19,7 @@
 /* For more information on Continuity: http://www.ashpool.com/ */
 
 /*
- * This code is based on the PHP4 SAPI module for NSAPI by Jayakumar
+ * This code is based on the PHP5 SAPI module for NSAPI by Jayakumar
  * Muthukumarasamy
  */
 

@@ -1,6 +1,6 @@
 last update Jan 2, 2002 (hackie@prohost.org/ilia@prohost.org)
 
-Shared Memory Operations Extension to PHP4
+Shared Memory Operations Extension to PHP
 
 	While developing a search deamon we needed a php based front end
 	to communicate the deamon via SHM. PHP already had a shared memory

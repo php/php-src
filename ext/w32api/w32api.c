@@ -19,8 +19,8 @@
 /* $Id$ */
 
 /*
- * Win32 API Extension for PHP 4
- * =============================
+ * Win32 API Extension for PHP
+ * ===========================
  *
  * This extension allows PHP Developers to access the underlying functions in the
  * Win32 API Dll's in a generic way, it provides a mechanism for the user to load

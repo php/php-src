@@ -3,7 +3,7 @@
 ** the original "#include <signal.h>" produces an infinite reinclusion
 ** of this file, instead of including the standard include-file.
 ** Under MS Visual Studio, there are occurences in the source where
-** <signal.h> gets included throughout the PHP4 sources, and this should
+** <signal.h> gets included throughout the PHP sources, and this should
 ** include THIS file, not the standard one which does not have the
 ** additional signals defined below.
 ** One way to remove the infinite reinclusion of this file (which is located

@@ -34,7 +34,7 @@ diff -ur thttpd-2.21b/Makefile.in thttpd-2.21b-cool/Makefile.in
  this:		$(ALL)
  
 -thttpd: $(OBJ)
-+thttpd: $(OBJ) libphp4.a
++thttpd: $(OBJ) libphp5.a
  	@rm -f $@
  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJ) $(LIBS) $(NETLIBS)
  

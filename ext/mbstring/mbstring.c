@@ -20,7 +20,7 @@
 /* $Id$ */
 
 /*
- * PHP4 Multibyte String module "mbstring"
+ * PHP 4 Multibyte String module "mbstring"
  *
  * History:
  *   2000.5.19  Release php-4.0RC2_jstring-1.0
