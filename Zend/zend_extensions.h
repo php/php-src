@@ -38,8 +38,8 @@ typedef struct _zend_extension zend_extension;
 /* Typedef's for zend_extension function pointers */
 typedef int (*startup_func_t)(zend_extension *extension);
 typedef void (*shutdown_func_t)(zend_extension *extension);
-typedef void (*activate_func_t)();
-typedef void (*deactivate_func_t)();
+typedef void (*activate_func_t)(void);
+typedef void (*deactivate_func_t)(void);
 
 typedef void (*message_handler_func_t)(int message, void *arg);
 

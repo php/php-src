@@ -14,8 +14,8 @@ public:
 #endif	/* ZTS && __cplusplus */
 
 BEGIN_EXTERN_C()
-int zend_ini_scanner_get_lineno();
-char *zend_ini_scanner_get_filename();
+int zend_ini_scanner_get_lineno(void);
+char *zend_ini_scanner_get_filename(void);
 int zend_ini_open_file_for_scanning(zend_file_handle *fh);
 void zend_ini_close_file(zend_file_handle *fh);
 int ini_lex(zval *ini_lval);
