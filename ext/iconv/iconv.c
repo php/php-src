@@ -2051,7 +2051,26 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 		}
 
 		if (header_name != NULL) {
-			add_assoc_stringl_ex(return_value, header_name, header_name_len, header_value, header_value_len, 1);
+			zval **elem;
+
+			if (zend_hash_find(Z_ARRVAL_P(return_value), header_name, header_name_len, (void **)&elem) == SUCCESS) {
+				if (Z_TYPE_PP(elem) != IS_ARRAY) {
+					zval *new_elem;
+
+					MAKE_STD_ZVAL(new_elem);
+					array_init(new_elem);
+
+					ZVAL_ADDREF(*elem);
+					add_next_index_zval(new_elem, *elem);
+
+					zend_hash_update(Z_ARRVAL_P(return_value), header_name, header_name_len, (void *)&new_elem, sizeof(new_elem), NULL);
+
+					elem = &new_elem;
+				}	
+				add_next_index_stringl(*elem, header_value, header_value_len, 1);
+			} else {
+				add_assoc_stringl_ex(return_value, header_name, header_name_len, header_value, header_value_len, 1);
+			}
 		}
 		encoded_str_len -= next_pos - encoded_str;
 		encoded_str = next_pos;	
