@@ -1438,6 +1438,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 	le = CG(list_llist).head;
 	while (le) {
 		do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value CLS_CC);
+		EG(active_op_array)->opcodes[EG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 		le = le->next;
 	}
 	zend_llist_destroy(&CG(dimension_llist));

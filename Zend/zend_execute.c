@@ -1453,6 +1453,7 @@ send_by_ref:
 							**varptr_ptr = *varptr;
 							varptr = *varptr_ptr;
 							varptr->refcount = 1;
+							zval_copy_ctor(varptr);
 						}
 						varptr->is_ref = 1;
 						/* at the end of this code refcount is always 1 */
