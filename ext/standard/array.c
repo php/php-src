@@ -360,8 +360,7 @@ static int array_natural_general_compare(const void *a, const void *b, int fold_
 		convert_to_string(&second);
 	}
 
-	result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first),
-						  Z_STRVAL(second), Z_STRLEN(second), fold_case);
+	result = strnatcmp_ex(Z_STRVAL(first), Z_STRLEN(first), Z_STRVAL(second), Z_STRLEN(second), fold_case);
 
 	if (Z_TYPE_P(fval) != IS_STRING)
 		zval_dtor(&first);
@@ -750,7 +749,7 @@ PHP_FUNCTION(next)
 		if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
 			RETURN_FALSE;
 		}
-	  
+
 		*return_value = **entry;
 		zval_copy_ctor(return_value);
 	}
@@ -949,7 +948,7 @@ static int php_array_walk(HashTable *target_hash, zval **userdata, int recursive
 		  *retval_ptr,			/* Return value - unused */
 		  *key;				/* Entry key */
 	char  *string_key;
-	uint  string_key_len;
+	uint   string_key_len;
 	ulong  num_key;
 	HashPosition pos;
 
@@ -1095,7 +1094,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	uint str_key_len;
    	char *string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
-	  	
+
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &value, &array, &strict) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1129,7 +1128,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				RETURN_TRUE;
 			} else {
 				/* Return current key */
-				switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 0,  &pos)) {
+				switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 0, &pos)) {
 					case HASH_KEY_IS_STRING:
 						RETURN_STRINGL(string_key, str_key_len-1, 1);
 						break;
@@ -1142,7 +1141,7 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 		
 		zend_hash_move_forward_ex(target_hash, &pos);
 	}
-   
+
 	RETURN_FALSE;
 }
 
@@ -1706,8 +1705,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 	ALLOC_HASHTABLE(out_hash);
 	zend_hash_init(out_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
-	/* Start at the beginning of the input hash and copy
-	   entries to output hash until offset is reached */
+	/* Start at the beginning of the input hash and copy entries to output hash until offset is reached */
 	for (pos=0, p=in_hash->pListHead; pos<offset && p ; pos++, p=p->pListNext) {
 		/* Get entry and increase reference count */
 		entry = *((zval **)p->pData);
@@ -1720,8 +1718,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 	}
 	
-	/* If hash for removed entries exists, go until offset+length
-	   and copy the entries to it */
+	/* If hash for removed entries exists, go until offset+length and copy the entries to it */
 	if (removed != NULL) {
 		for ( ; pos<offset+length && p; pos++, p=p->pListNext) {
 			entry = *((zval **)p->pData);
@@ -1736,8 +1733,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 	
 	/* If there are entries to insert.. */
 	if (list != NULL) {
-		/* ..for each one, create a new zval, copy entry into it
-		   and copy it into the output hash */
+		/* ..for each one, create a new zval, copy entry into it and copy it into the output hash */
 		for (i=0; i<list_count; i++) {
 			entry = *list[i];
 			if (entry->refcount>=1000) {
@@ -1776,10 +1772,10 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 PHP_FUNCTION(array_push)
 {
 	zval	  ***args,		/* Function arguments array */
-				*stack,		/* Input array */
-				*new_var;	/* Variable to be pushed */
-	int			 i,			/* Loop counter */
-				 argc;		/* Number of function arguments */
+		    *stack,		/* Input array */
+		    *new_var;		/* Variable to be pushed */
+	int          i,			/* Loop counter */
+		     argc;		/* Number of function arguments */
 
 	/* Get the argument count and check it */
 	argc = ZEND_NUM_ARGS();
@@ -1802,8 +1798,7 @@ PHP_FUNCTION(array_push)
 		RETURN_FALSE;
 	}
 
-	/* For each subsequent argument, make it a reference, increase refcount,
-	   and add it to the end of the array */
+	/* For each subsequent argument, make it a reference, increase refcount, and add it to the end of the array */
 	for (i=1; i<argc; i++) {
 		new_var = *args[i];
 		new_var->refcount++;
@@ -1821,8 +1816,8 @@ PHP_FUNCTION(array_push)
 /* {{{ void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int which_end) */
 static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 {
-	zval	   **stack,			/* Input stack */
-			   **val;			/* Value to be popped */
+	zval **stack,			/* Input stack */
+	     **val;			/* Value to be popped */
 	char *key = NULL;
 	int key_len = 0;
 	ulong index;
@@ -1906,9 +1901,9 @@ PHP_FUNCTION(array_shift)
 PHP_FUNCTION(array_unshift)
 {
 	zval	  ***args,		/* Function arguments array */
-				*stack;		/* Input stack */
-	HashTable	*new_hash;	/* New hashtable for the stack */
-	int			 argc;		/* Number of function arguments */
+		    *stack;		/* Input stack */
+	HashTable   *new_hash;		/* New hashtable for the stack */
+	int	     argc;		/* Number of function arguments */
 	
 
 	/* Get the argument count and check it */	
@@ -1932,7 +1927,7 @@ PHP_FUNCTION(array_unshift)
 		RETURN_FALSE;
 	}
 
-	/* Use splice to insert the elements at the beginning.  Destroy old
+	/* Use splice to insert the elements at the beginning. Destroy old
 	   hashtable and replace it with new one */
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[1], argc-1, NULL);
 	zend_hash_destroy(Z_ARRVAL_P(stack));
@@ -1950,16 +1945,16 @@ PHP_FUNCTION(array_unshift)
    Removes the elements designated by offset and length and replace them with supplied array */
 PHP_FUNCTION(array_splice)
 {
-	zval	  ***args,				/* Function arguments array */
-				*array,				/* Input array */
-			  ***repl = NULL;		/* Replacement elements */
-	HashTable	*new_hash = NULL;	/* Output array's hash */
-	Bucket		*p;					/* Bucket used for traversing hash */
-	int			 argc,				/* Number of function arguments */
-				 i,
-				 offset,
-				 length,
-				 repl_num = 0;		/* Number of replacement elements */
+	zval	***args,				/* Function arguments array */
+		  *array,				/* Input array */
+		***repl = NULL;				/* Replacement elements */
+	HashTable	*new_hash = NULL;		/* Output array's hash */
+	Bucket		*p;				/* Bucket used for traversing hash */
+	int		 argc,				/* Number of function arguments */
+			 i,
+			 offset,
+			 length,
+			 repl_num = 0;			/* Number of replacement elements */
 
 	/* Get the argument count and check it */
 	argc = ZEND_NUM_ARGS();
@@ -1982,8 +1977,7 @@ PHP_FUNCTION(array_splice)
 		return;
 	}
 	
-	/* Get the next two arguments.  If length is omitted,
-	   it's assumed to be until the end of the array */
+	/* Get the next two arguments.  If length is omitted, it's assumed to be until the end of the array */
 	convert_to_long_ex(args[1]);
 	offset = Z_LVAL_PP(args[1]);
 	if (argc > 2) {
@@ -2029,21 +2023,20 @@ PHP_FUNCTION(array_splice)
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
 {
-	zval	   **input,			/* Input array */
-			   **offset,		/* Offset to get elements from */
-			   **length,		/* How many elements to get */
-			   **entry;			/* An array entry */
-	int			 offset_val,	/* Value of the offset argument */
-				 length_val,	/* Value of the length argument */
-				 num_in,		/* Number of elements in the input array */
-				 pos,			/* Current position in the array */
-				 argc;			/* Number of function arguments */
+	zval	   **input,		/* Input array */
+		   **offset,		/* Offset to get elements from */
+		   **length,		/* How many elements to get */
+		   **entry;		/* An array entry */
+	int	     offset_val,	/* Value of the offset argument */
+		     length_val,	/* Value of the length argument */
+		     num_in,		/* Number of elements in the input array */
+		     pos,		/* Current position in the array */
+		     argc;		/* Number of function arguments */
 				 
-	char		*string_key;
-	uint		 string_key_len;
-	ulong		 num_key;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
 	HashPosition hpos;
-	
 
 	/* Get the arguments and do error-checking */	
 	argc = ZEND_NUM_ARGS();
@@ -2093,15 +2086,13 @@ PHP_FUNCTION(array_slice)
 	/* Start at the beginning and go until we hit offset */
 	pos = 0;
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &hpos);
-	while (pos < offset_val &&
-		  zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
+	while (pos < offset_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
 		pos++;
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &hpos);
 	}
 	
 	/* Copy elements from input array to the one that's returned */
-	while (pos < offset_val+length_val &&
-		  zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
+	while (pos < offset_val+length_val && zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&entry, &hpos) == SUCCESS) {
 		
 		(*entry)->refcount++;
 
@@ -2125,11 +2116,10 @@ PHP_FUNCTION(array_slice)
 
 PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS_DC)
 {
-	zval	  **src_entry,
-			  **dest_entry;
-	char	   *string_key;
-	uint		string_key_len;
-	ulong		num_key;
+	zval **src_entry, **dest_entry;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
 	HashPosition pos;
 
 	zend_hash_internal_pointer_reset_ex(src, &pos);
@@ -2137,8 +2127,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 		switch (zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
 				if (recursive &&
-					zend_hash_find(dest, string_key, string_key_len,
-								   (void **)&dest_entry) == SUCCESS) {
+					zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) == SUCCESS) {
 					if (*src_entry == *dest_entry) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
@@ -2171,9 +2160,8 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 
 static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 {
-	zval	  ***args = NULL;
-	int			 argc,
-				 i;
+	zval ***args = NULL;
+	int argc, i;
 
 	/* Get the argument count and check it */	
 	argc = ZEND_NUM_ARGS();
@@ -2222,15 +2210,15 @@ PHP_FUNCTION(array_merge_recursive)
    Return just the keys from the input array, optionally only for the specified search_value */
 PHP_FUNCTION(array_keys)
 {
-	zval	   **input,			/* Input array */
-			   **search_value,	/* Value to search for */
-			   **entry,			/* An entry in the input array */
-				 res,			/* Result of comparison */
-				*new_val;		/* New value */
-	int			 add_key;		/* Flag to indicate whether a key should be added */
-	char		*string_key;	/* String key */
-	uint		 string_key_len;
-	ulong		 num_key;		/* Numeric key */
+	zval **input,		/* Input array */
+	     **search_value,	/* Value to search for */
+	     **entry,		/* An entry in the input array */
+	       res,		/* Result of comparison */
+	      *new_val;		/* New value */
+	int    add_key;		/* Flag to indicate whether a key should be added */
+	char  *string_key;	/* String key */
+	uint   string_key_len;
+	ulong  num_key;		/* Numeric key */
 	HashPosition pos;
 
 	search_value = NULL;
@@ -2289,8 +2277,8 @@ PHP_FUNCTION(array_keys)
    Return just the values from the input array */
 PHP_FUNCTION(array_values)
 {
-	zval	   **input,		/* Input array */
-			   **entry;		/* An entry in the input array */
+	zval	**input,		/* Input array */
+		**entry;		/* An entry in the input array */
 	HashPosition pos;
 	
 	/* Get arguments and do error-checking */
@@ -2324,10 +2312,10 @@ PHP_FUNCTION(array_values)
    Return the value as key and the frequency of that value in input as value */
 PHP_FUNCTION(array_count_values)
 {
-	zval	   **input,		/* Input array */
-			   **entry;		/* An entry in the input array */
-	zval	   **tmp;
-	HashTable   *myht;
+	zval	**input,		/* Input array */
+		**entry,		/* An entry in the input array */
+		**tmp;
+	HashTable *myht;
 	HashPosition pos;
 	
 	/* Get arguments and do error-checking */
@@ -2360,10 +2348,7 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_PP(tmp)++;
 			}
 		} else if (Z_TYPE_PP(entry) == IS_STRING) {
-			if (zend_hash_find(Z_ARRVAL_P(return_value), 
-							   Z_STRVAL_PP(entry), 
-							   Z_STRLEN_PP(entry)+1, 
-							   (void**)&tmp) == FAILURE) {
+			if (zend_hash_find(Z_ARRVAL_P(return_value), Z_STRVAL_PP(entry), Z_STRLEN_PP(entry)+1, (void**)&tmp) == FAILURE) {
 				zval *data;
 				MAKE_STD_ZVAL(data);
 				Z_TYPE_P(data) = IS_LONG;
@@ -2386,18 +2371,17 @@ PHP_FUNCTION(array_count_values)
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
 {
-	zval	   **input,			  /* Input array */
-			   **z_preserve_keys, /* Flag: whether to preserve keys */
-			   **entry;			  /* An entry in the input array */
-	char		*string_key;
-	uint		 string_key_len;
-	ulong		 num_key;
-	zend_bool	 preserve_keys = 0;
+	zval	**input,			  /* Input array */
+		**z_preserve_keys, /* Flag: whether to preserve keys */
+		**entry;			  /* An entry in the input array */
+	char	 *string_key;
+	uint	  string_key_len;
+	ulong	  num_key;
+	zend_bool preserve_keys = 0;
 	HashPosition pos;
 	
 	/* Get arguments and do error-checking */
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &z_preserve_keys) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &z_preserve_keys) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2420,17 +2404,15 @@ PHP_FUNCTION(array_reverse)
 		
 		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
-				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len,
-								 entry, sizeof(zval *), NULL);
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, entry, sizeof(zval *), NULL);
 				break;
 
 			case HASH_KEY_IS_LONG:
-				if (preserve_keys)
-					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
-										   entry, sizeof(zval *), NULL);
-				else
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value),
-												entry, sizeof(zval *), NULL);
+				if (preserve_keys) {
+					zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, entry, sizeof(zval *), NULL);
+				} else {
+					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), entry, sizeof(zval *), NULL);
+				}
 				break;
 		}
 		
@@ -2444,16 +2426,16 @@ PHP_FUNCTION(array_reverse)
    Returns a copy of input array padded with pad_value to size pad_size */
 PHP_FUNCTION(array_pad)
 {
-	zval		**input;		/* Input array */
-	zval		**pad_size;		/* Size to pad to */
-	zval		**pad_value;	/* Padding value obviously */
-	zval	   ***pads;			/* Array to pass to splice */
-	HashTable	 *new_hash;		/* Return value from splice */
-	int			  input_size;	/* Size of the input array */
-	int			  pad_size_abs; /* Absolute value of pad_size */
-	int			  num_pads;		/* How many pads do we need */
-	int			  do_pad;		/* Whether we should do padding at all */
-	int			  i;
+	zval  **input;		/* Input array */
+	zval  **pad_size;	/* Size to pad to */
+	zval  **pad_value;	/* Padding value obviously */
+	zval ***pads;		/* Array to pass to splice */
+	HashTable *new_hash;	/* Return value from splice */
+	int	input_size;	/* Size of the input array */
+	int	pad_size_abs;	/* Absolute value of pad_size */
+	int	num_pads;	/* How many pads do we need */
+	int	do_pad;		/* Whether we should do padding at all */
+	int	i;
 	
 	/* Get arguments and do error-checking */
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &input, &pad_size, &pad_value) == FAILURE) {
@@ -2477,22 +2459,24 @@ PHP_FUNCTION(array_pad)
 	zval_copy_ctor(return_value);
 	
 	/* If no need to pad, no need to continue */
-	if (!do_pad)
+	if (!do_pad) {
 		return;
-	
+	}
+
 	/* Populate the pads array */
 	num_pads = pad_size_abs - input_size;
 	pads = (zval ***)emalloc(num_pads * sizeof(zval **));
-	for (i = 0; i < num_pads; i++)
+	for (i = 0; i < num_pads; i++) {
 		pads[i] = pad_value;
-	
-	/* Pad on the right or on the left */
-	if (Z_LVAL_PP(pad_size) > 0)
-		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
-	else
-		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
+	}
 
-	
+	/* Pad on the right or on the left */
+	if (Z_LVAL_PP(pad_size) > 0) {
+		new_hash = php_splice(Z_ARRVAL_P(return_value), input_size, 0, pads, num_pads, NULL);
+	} else {
+		new_hash = php_splice(Z_ARRVAL_P(return_value), 0, 0, pads, num_pads, NULL);
+	}
+
 	/* Copy the result hash into return value */
 	zend_hash_destroy(Z_ARRVAL_P(return_value));
 	efree(Z_ARRVAL_P(return_value));
@@ -2636,13 +2620,15 @@ PHP_FUNCTION(array_unique)
 	*return_value = **array;
 	zval_copy_ctor(return_value);
 
-	if (target_hash->nNumOfElements <= 1) /* nothing to do */
-			return;
+	if (target_hash->nNumOfElements <= 1) {	/* nothing to do */
+		return;
+	}
 
 	/* create and sort array with pointers to the target_hash buckets */
 	arTmp = (struct bucketindex *) pemalloc((target_hash->nNumOfElements + 1) * sizeof(struct bucketindex), target_hash->persistent);
-	if (!arTmp)
+	if (!arTmp) {
 		RETURN_FALSE;
+	}
 	for (i = 0, p = target_hash->pListHead; p; i++, p = p->pListNext) {
 		arTmp[i].b = p;
 		arTmp[i].i = i;
@@ -2655,7 +2641,7 @@ PHP_FUNCTION(array_unique)
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; cmpdata->b; cmpdata++) {
 		if (array_data_compare(lastkept, cmpdata TSRMLS_CC)) {
-				lastkept = cmpdata;
+			lastkept = cmpdata;
 		} else {
 			if (lastkept->i > cmpdata->i) {
 				p = lastkept->b;
@@ -2663,10 +2649,11 @@ PHP_FUNCTION(array_unique)
 			} else {
 				p = cmpdata->b;
 			}
-			if (p->nKeyLength)
-					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
-			else
-					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
+			if (p->nKeyLength) {
+				zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);
+			} else {
+				zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
+			}
 		}
 	}
 	pefree(arTmp, target_hash->persistent);
@@ -2725,13 +2712,15 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	while (*ptrs[0]) {
 		for (i=1; i<argc; i++) {
 			if (behavior == INTERSECT_NORMAL) {
-				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
+				}
 			} else if (behavior == INTERSECT_ASSOC) {
-				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
+				}
 				if (!c && *ptrs[i]) { /* this means that ptrs[i] is not NULL so we can compare */
-						/* and "c==0" is from last operation */
+					/* and "c==0" is from last operation */
 				 	if (array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
 				 		c = 1;
 				 		/* we are going to the break */
@@ -2746,12 +2735,14 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				/* the other arguments */
 				for (;;) {
 					p = *ptrs[0]++;
-					if (!p)
+					if (!p) {
 						goto out;
-					if (p->nKeyLength)
-						zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
-					else
-						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
+					}
+					if (p->nKeyLength) {
+						zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);
+					} else {
+						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
+					}
 				}
 			}
 			if (c) /* here we get if not all are equal */
@@ -2763,15 +2754,18 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 			/* with value < value of ptrs[i] */
 			for (;;) {
 				p = *ptrs[0];
-				if (p->nKeyLength)
+				if (p->nKeyLength) {
 					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
-				else
+				} else {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
-				if (!*++ptrs[0])
+				}
+				if (!*++ptrs[0]) { 
 					goto out;
+				}
 				if (behavior == INTERSECT_NORMAL) {
-					if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))
+					if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)) {
 						break;
+					}
 				} else if (behavior == INTERSECT_ASSOC) {
 					/* no need of looping because indexes are unique */
 					break;
@@ -2781,11 +2775,13 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 			/* ptrs[0] is present in all the arguments */
 			/* Skip all entries with same value as ptrs[0] */
 			for (;;) {
-				if (!*++ptrs[0])
+				if (!*++ptrs[0]) {
 					goto out;
+				}
 				if (behavior == INTERSECT_NORMAL) {
-					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
+					}
 				} else if (behavior == INTERSECT_ASSOC) {
 					/* no need of looping because indexes are unique */
 					break;
@@ -2871,8 +2867,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	*return_value = **args[0];
 	zval_copy_ctor(return_value);
 
-	/* go through the lists and look for values of ptr[0]
-		   that are not in the others */
+	/* go through the lists and look for values of ptr[0] that are not in the others */
 	while (*ptrs[0]) {
 		c = 1;
 		for (i = 1; i < argc; i++) {
@@ -2908,7 +2903,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 			for (;;) {
 				p = *ptrs[0];
 				if (p->nKeyLength) {
-					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);  
+					zend_hash_del(Z_ARRVAL_P(return_value), p->arKey, p->nKeyLength);
 				} else {
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);
 				}
@@ -2976,11 +2971,11 @@ PHP_FUNCTION(array_diff_assoc)
 
 int multisort_compare(const void *a, const void *b TSRMLS_DC)
 {
-	Bucket**	  ab = *(Bucket ***)a;
-	Bucket**	  bb = *(Bucket ***)b;
-	int			  r;
-	int			  result = 0;
-	zval		  temp;
+	Bucket **ab = *(Bucket ***)a;
+	Bucket **bb = *(Bucket ***)b;
+	int	 r;
+	int	 result = 0;
+	zval	 temp;
 	
 	r = 0;
 	do {
@@ -2988,10 +2983,12 @@ int multisort_compare(const void *a, const void *b TSRMLS_DC)
 
 		ARRAYG(compare_func)(&temp, *((zval **)ab[r]->pData), *((zval **)bb[r]->pData) TSRMLS_CC);
 		result = ARRAYG(multisort_flags)[MULTISORT_ORDER][r] * Z_LVAL(temp);
-		if (result != 0)
+		if (result != 0) {
 			return result;
+		}
 		r++;
 	} while (ab[r] != NULL);
+
 	return result;
 }
 
@@ -3014,8 +3011,7 @@ PHP_FUNCTION(array_multisort)
 	int				argc;
 	int				array_size;
 	int				num_arrays = 0;
-	int				parse_state[MULTISORT_LAST];   /* 0 - flag not allowed
-											 		  1 - flag allowed	 */
+	int				parse_state[MULTISORT_LAST];   /* 0 - flag not allowed 1 - flag allowed	 */
 	int				sort_order = SORT_ASC;
 	int				sort_type  = SORT_REGULAR;
 	int				i, k;
@@ -3041,10 +3037,10 @@ PHP_FUNCTION(array_multisort)
 	}
 
 	/* Here we go through the input arguments and parse them. Each one can
-	   be either an array or a sort flag which follows an array. If not
-	   specified, the sort flags defaults to SORT_ASC and SORT_REGULAR
-	   accordingly. There can't be two sort flags of the same type after an
-	   array, and the very first argument has to be an array.
+	 * be either an array or a sort flag which follows an array. If not
+	 * specified, the sort flags defaults to SORT_ASC and SORT_REGULAR
+	 * accordingly. There can't be two sort flags of the same type after an
+	 * array, and the very first argument has to be an array.
 	 */
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE_PP(args[i]) == IS_ARRAY) {
@@ -3059,8 +3055,9 @@ PHP_FUNCTION(array_multisort)
 			arrays[num_arrays++] = args[i];
 
 			/* Next one may be an array or a list of sort flags. */
-			for (k = 0; k < MULTISORT_LAST; k++)
+			for (k = 0; k < MULTISORT_LAST; k++) {
 				parse_state[k] = 1;
+			}
 		} else if (Z_TYPE_PP(args[i]) == IS_LONG) {
 			switch (Z_LVAL_PP(args[i])) {
 				case SORT_ASC:
@@ -3114,8 +3111,7 @@ PHP_FUNCTION(array_multisort)
 		}
 	}
 
-	/* If all arrays are empty or have only one entry,
-	   we don't need to do anything. */
+	/* If all arrays are empty or have only one entry, we don't need to do anything. */
 	if (array_size <= 1) {
 		for (k = 0; k < MULTISORT_LAST; k++)
 			efree(ARRAYG(multisort_flags)[k]);
@@ -3125,9 +3121,9 @@ PHP_FUNCTION(array_multisort)
 	}
 
 	/* Create the indirection array. This array is of size MxN, where 
-	   M is the number of entries in each input array and N is the number
-	   of the input arrays + 1. The last column is NULL to indicate the end
-	   of the row.
+	 * M is the number of entries in each input array and N is the number
+	 * of the input arrays + 1. The last column is NULL to indicate the end
+	 * of the row.
 	 */
 	indirect = (Bucket ***)emalloc(array_size * sizeof(Bucket **));
 	for (i = 0; i < array_size; i++)
@@ -3145,8 +3141,7 @@ PHP_FUNCTION(array_multisort)
 	/* Do the actual sort magic - bada-bim, bada-boom. */
 	zend_qsort(indirect, array_size, sizeof(Bucket **), multisort_compare TSRMLS_CC);
 	
-	/* Restructure the arrays based on sorted indirect - this is mostly
-	   taken from zend_hash_sort() function. */
+	/* Restructure the arrays based on sorted indirect - this is mostly taken from zend_hash_sort() function. */
 	HANDLE_BLOCK_INTERRUPTIONS();
 	for (i = 0; i < num_arrays; i++) {
 		hash = Z_ARRVAL_PP(arrays[i]);
@@ -3222,10 +3217,10 @@ PHP_FUNCTION(array_rand)
 	} else
 		num_req_val = 1;
 
-	/* Make the return value an array only if we need to pass back more than one
-	   result. */
-	if (num_req_val > 1)
+	/* Make the return value an array only if we need to pass back more than one result. */
+	if (num_req_val > 1) {
 		array_init(return_value);
+	}
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
@@ -3252,7 +3247,7 @@ PHP_FUNCTION(array_rand)
 		}
 		num_avail--;
 		zend_hash_move_forward_ex(Z_ARRVAL_PP(input), &pos);
-	}  
+	}
 
 	if (num_req_val == num_avail) {
 		array_data_shuffle(return_value TSRMLS_CC);
@@ -3262,7 +3257,6 @@ PHP_FUNCTION(array_rand)
 
 /* {{{ proto mixed array_sum(array input)
    Returns the sum of the array entries */
- 
 PHP_FUNCTION(array_sum)
 {
 	zval **input,
@@ -3412,8 +3406,9 @@ PHP_FUNCTION(array_filter)
 	}
 
 	array_init(return_value);
-	if (zend_hash_num_elements(Z_ARRVAL_PP(input)) == 0)
+	if (zend_hash_num_elements(Z_ARRVAL_PP(input)) == 0) {
 		return;
+	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(input), &pos);
 		 zend_hash_get_current_data_ex(Z_ARRVAL_PP(input), (void **)&operand, &pos) == SUCCESS;
@@ -3425,25 +3420,25 @@ PHP_FUNCTION(array_filter)
 				if (!zend_is_true(retval)) {
 					zval_ptr_dtor(&retval);
 					continue;
-				} else
+				} else {
 					zval_ptr_dtor(&retval);
+				}
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "An error occurred while invoking the filter callback");
 				return;
 			}
-		} else if (!zend_is_true(*operand))
+		} else if (!zend_is_true(*operand)) {
 			continue;
+		}
 
 		zval_add_ref(operand);
 		switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(input), &string_key, &string_key_len, &num_key, 0, &pos)) {
 			case HASH_KEY_IS_STRING:
-				zend_hash_update(Z_ARRVAL_P(return_value), string_key,
-								 string_key_len, operand, sizeof(zval *), NULL);
+				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, operand, sizeof(zval *), NULL);
 				break;
 
 			case HASH_KEY_IS_LONG:
-				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key,
-									   operand, sizeof(zval *), NULL);
+				zend_hash_index_update(Z_ARRVAL_P(return_value), num_key, operand, sizeof(zval *), NULL);
 				break;
 		}
 	}
@@ -3653,10 +3648,9 @@ PHP_FUNCTION(array_chunk)
 	zval **entry;
 	HashPosition pos;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "al|b", &input, &size,
-							  &preserve_keys) == FAILURE) 
+	if (zend_parse_parameters(argc TSRMLS_CC, "al|b", &input, &size, &preserve_keys) == FAILURE) {
 		return;
-
+	}
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Size parameter expected to be greater than 0");
@@ -3685,7 +3679,7 @@ PHP_FUNCTION(array_chunk)
 				add_index_zval(chunk, num_key, *entry);
 			}
 		} else {
-		   	add_next_index_zval(chunk, *entry);
+			add_next_index_zval(chunk, *entry);
 		}
 
 		/*
