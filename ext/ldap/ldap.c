@@ -1157,7 +1157,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 				zend_hash_index_find((*value)->value.ht,j, (void **) &ivalue);
 				convert_to_string_ex(ivalue);
 				ldap_mods[i]->mod_values[j] = (*ivalue)->value.str.val;
-				ldap_mods[i]->mod_values[j][(*value)->value.str.len] = '\0';
+				ldap_mods[i]->mod_values[j][(*ivalue)->value.str.len] = '\0';
 			}
 		}
 		ldap_mods[i]->mod_values[num_values] = NULL;
