@@ -1324,18 +1324,32 @@ ZEND_FUNCTION(debug_backtrace)
 			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			int fn = 1;
+			zend_bool have_function_name = 1;
 
 			switch (ptr->opline->op2.u.constant.value.lval) {
-				case ZEND_EVAL:         function_name = "eval"; fn = 0; break;
-				case ZEND_INCLUDE:      function_name = "include"; break;
-				case ZEND_REQUIRE:      function_name = "require"; break;
-				case ZEND_INCLUDE_ONCE: function_name = "include_once"; break;
-				case ZEND_REQUIRE_ONCE: function_name = "require_once"; break;
-				default:				function_name = "unknown - please report a bug";  fn = 0; break;
+				case ZEND_EVAL:
+					function_name = "eval";
+					have_function_name = 0;
+					break;
+				case ZEND_INCLUDE:
+					function_name = "include";
+					break;
+				case ZEND_REQUIRE:
+					function_name = "require";
+					break;
+				case ZEND_INCLUDE_ONCE:
+					function_name = "include_once";
+					break;
+				case ZEND_REQUIRE_ONCE:
+					function_name = "require_once";
+					break;
+				default:
+					function_name = "unknown - please report a bug";
+					have_function_name = 0;
+					break;
 			}
 
-			if (fn && include_filename) {
+			if (have_function_name && include_filename) {
 				/* include_filename always points to the last known filename.
 				   if we have called include in the frame above - this is the file we have included
 				 */
