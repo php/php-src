@@ -45,7 +45,7 @@ class DbaReader implements Iterator
 	 */
 	function rewind() {
 		$this->key = dba_firstkey($this->db);
-		fetch_data();
+		$this->fetch_data();
 	}
 
 	/**
@@ -55,7 +55,7 @@ class DbaReader implements Iterator
 	 */
 	function next() {
 		$this->key = dba_nextkey($this->db);
-		fetch_data();
+		$this->fetch_data();
 	}
 
     /**
