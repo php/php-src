@@ -215,7 +215,7 @@ static zval **
 sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 {
 	zval **property_ptr;
-	zval *property;
+	zval  *property;
 
 	property_ptr = emalloc(sizeof(zval **));
 
@@ -270,6 +270,7 @@ sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 static void
 sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 {
+	
 }
 /* }}} */
 
@@ -362,7 +363,7 @@ sxe_class_entry_get(zval *object TSRMLS_DC)
 /* {{{ sxe_class_name_get()
  */
 static int
-sxe_class_name_get(zval *object, char** class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+sxe_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	*class_name = estrdup("simplexml_element");
 	*class_name_len = sizeof("simplexml_element");
@@ -434,14 +435,40 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 		zval_dtor(writeobj);
 	}
 
-	contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
-	if (!xmlIsBlankNode(sxe->node->xmlChildrenNode) && contents) {
-		cast_empty_object(writeobj, type TSRMLS_CC);
+	if (sxe->node) {
+		contents = xmlNodeListGetString(sxe->document, sxe->node->xmlChildrenNode, 1);
+		if (!xmlIsBlankNode(sxe->node->xmlChildrenNode) && contents) {
+			cast_empty_object(writeobj, type TSRMLS_CC);
+		}
 	}
 
 	cast_object_with_contents(writeobj, type, contents);
 }
 /* }}} */
+
+/* {{{ sxe_object_set()
+ */
+static void
+sxe_object_set(zval **property, zval *value TSRMLS_DC)
+{
+	/* XXX: TODO
+	 * This call is not yet implemented in the engine
+	 * so leave them blank for now.
+	 */
+}
+/* }}} */
+
+/* {{{ sxe_object_get()
+ */
+static zval *
+sxe_object_get(zval *property TSRMLS_DC)
+{
+	/* XXX: TODO
+	 * This call is not yet implemented in the engine
+	 * so leave them blank for now.
+	 */
+	return NULL;
+}
 
 
 static zend_object_handlers sxe_object_handlers[] = {
@@ -449,9 +476,9 @@ static zend_object_handlers sxe_object_handlers[] = {
 	sxe_property_read,
 	sxe_property_write,
 	sxe_property_get_ptr,
-	NULL,
-	NULL,
-	NULL,
+	sxe_property_get_ptr,
+	sxe_object_get,
+	sxe_object_set,
 	sxe_property_exists,
 	sxe_property_delete,
 	sxe_properties_get,
@@ -551,8 +578,8 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
-/* {{{ proto bool simplexml_save_file(string filename, simplexml_element node)
-   Save a document from a SimpleXML node */
+/* {{{ proto bool simplexml_save_document_file(string filename, simplexml_element node)
+   Save a XML document to a file from a SimpleXML node */
 PHP_FUNCTION(simplexml_save_document_file)
 {
 	php_sxe_object *sxe;
@@ -572,9 +599,32 @@ PHP_FUNCTION(simplexml_save_document_file)
 }
 /* }}} */
 
+/* {{{ proto bool simplexml_save_document_string(string &var, simplexml_element node)
+   Save a document to a variable from a SimpleXML node */
+PHP_FUNCTION(simplexml_save_document_string)
+{
+	php_sxe_object *sxe;
+	zval           *data;
+	zval           *element;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &data, &element) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(element TSRMLS_CC);
+	xmlDocDumpMemory(sxe->document, (xmlChar **) &Z_STRVAL_P(data), &Z_STRLEN_P(data));
+	Z_TYPE_P(data) = IS_STRING;
+	zval_add_ref(&data);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
 	PHP_FE(simplexml_save_document_file, NULL)
+	PHP_FE(simplexml_save_document_string, first_arg_force_ref)
 	{NULL, NULL, NULL}
 };
 
