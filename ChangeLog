@@ -1,3 +1,37 @@
+2001-10-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/file.c:
+    Either sizeof(struct stat) or sizeof f_stat, but not sizeof stat.
+
+2001-10-13  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: Fixed thread-safe compile. Thanks to Jani Taskinen.
+
+2001-10-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/zip/zip.c: Fixed bug: #13652
+
+    * ext/msession/libs.mk: This file is generated.
+
+    * ext/gd/gd.c: ws fix.
+
+2001-10-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/README: * updated email adress
+
+2001-10-13  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: Fix backwards source compatibility.
+
+2001-10-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/scripts/pear.bat:
+    * fixed problem with copyright header on some systems.
+
+2001-10-13  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimePart.php: Initial commit of Mail_mimePart class
+
 2001-10-12  Martin Jansen  <mail@martin-jansen.de>
 
     * pear/scripts/pear.bat: * streamlined the copyright header
