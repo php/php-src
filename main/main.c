@@ -1162,6 +1162,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		return FAILURE;
 	}
 
+	zuv.html_errors = 1;
 	zuv.import_use_extension = ".php";
 	for (i=0; i<NUM_TRACK_VARS; i++) {
 		zend_register_auto_global(short_track_vars_names[i], short_track_vars_names_length[i]-1 TSRMLS_CC);
