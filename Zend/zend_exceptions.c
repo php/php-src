@@ -26,34 +26,29 @@ zend_class_entry *default_exception_ptr;
 
 ZEND_FUNCTION(exception)
 {
-	zval **message;
-	zval **code;
+	char  *message = NULL;
+	long   code = 0;
 	zval  *tmp;
 	zval  *object;
-	int    argc = ZEND_NUM_ARGS();
+	int    argc = ZEND_NUM_ARGS(), message_len;
 
-	if (zend_get_parameters_ex(argc, &message, &code) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|sl", &message, &message_len, &code) == FAILURE) {
+		zend_error(E_CORE_ERROR, "Wrong parameter count for exception([string $exception [, long $code ]])");
 	}
 
 	object = getThis();
 
-	if (argc > 0) {
-		convert_to_string_ex(message);
-		zval_add_ref(message);
-		zend_hash_update(Z_OBJPROP_P(object), "message", sizeof("message"), (void **) message, sizeof(zval *), NULL);
-	}
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_STRING(tmp, message ? message : "Unknown exception", 1);
+	zend_hash_update(Z_OBJPROP_P(object), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
 
-	if (argc > 1) {
-		convert_to_long_ex(code);
-		zval_add_ref(code);
-		zend_hash_update(Z_OBJPROP_P(object), "code", sizeof("code"), (void **) code, sizeof(zval *), NULL);
-	}
+	MAKE_STD_ZVAL(tmp);
+	ZVAL_LONG(tmp, code);
+	zend_hash_update(Z_OBJPROP_P(object), "code", sizeof("code"), (void **) &tmp, sizeof(zval *), NULL);
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
 	zend_hash_update(Z_OBJPROP_P(object), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
-	tmp = NULL;
 
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
