@@ -51,6 +51,11 @@ void php3api_var_dump(pval **struc, int level)
 	char buf[512];
 
 	switch ((*struc)->type) {
+		case IS_BOOL:
+			i = sprintf(buf, "%*cbool(%s)\n", level, ' ', ((*struc)->value.lval?"true":"false"));
+			PHPWRITE(&buf[1], i - 1);
+			break;
+
 		case IS_LONG:
 			i = sprintf(buf, "%*cint(%ld)\n", level, ' ', (*struc)->value.lval);
 			PHPWRITE(&buf[1], i - 1);
@@ -165,6 +170,11 @@ void php3api_var_serialize(pval *buf, pval **struc)
 	int i, ch;
 
 	switch ((*struc)->type) {
+		case IS_BOOL:
+			slen = sprintf(s, "b:%ld;", (*struc)->value.lval);
+			STR_CAT(buf, s, slen);
+			return;
+
 		case IS_LONG:
 			slen = sprintf(s, "i:%ld;", (*struc)->value.lval);
 			STR_CAT(buf, s, slen);
@@ -293,8 +303,10 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 	const char *q;
 	char *str;
 	int i;
+	char cur;
 
-	switch (**p) {
+	switch (cur = **p) {
+		case 'b': /* bool */
 		case 'i':
 			if (*((*p) + 1) != ':') {
 				return 0;
@@ -307,7 +319,11 @@ int php3api_var_unserialize(pval **rval, const char **p, const char *max)
 				return 0;
 			}
 			(*p)++;
-			(*rval)->type = IS_LONG;
+			if (cur == 'b') {
+				(*rval)->type = IS_BOOL;
+			} else {
+				(*rval)->type = IS_LONG;
+			}
 			(*rval)->refcount = 1;
 			(*rval)->is_ref = 0;
 			(*rval)->value.lval = atol(q + 2);
