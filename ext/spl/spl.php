@@ -11,13 +11,19 @@
  * \note Internal classes that implement this interface can be used in a 
  * foreach construct and do not need to implement IteratorAggregate or
  * Iterator.
+ *
+ * \note This is an engine internal interface.
  */
-interface Traversable {
+interface Traversable
+{
 }
 
 /** Interface to create an external Iterator.
+ *
+ * \note This is an engine internal interface.
  */ 
-interface IteratorAggregate implements Traversable {
+interface IteratorAggregate implements Traversable
+{
 	/** Return an Iterator for the implementing object.
 	 */
 	function getIterator();
@@ -25,8 +31,11 @@ interface IteratorAggregate implements Traversable {
 
 /** Interface for external iterators or objects that can be iterated 
  * themselves internally.
+ *
+ * \note This is an engine internal interface.
  */
-interface Iterator implements Traversable {
+interface Iterator implements Traversable
+{
 	/** Rewind the Iterator to the first element.
 	 */
 	function rewind();
@@ -51,7 +60,8 @@ interface Iterator implements Traversable {
 /** Interface for recursive traversal to be used with 
  * RecursiveIteratorIterator.
  */
-interface RecursiveIterator implements Iterator {
+interface RecursiveIterator implements Iterator
+{
 	/** \return whether current element can be iterated itself.
 	  */
 	function hasChildren();
@@ -66,7 +76,8 @@ interface RecursiveIterator implements Iterator {
  * instances of RecursiveIterator. Elements of those iterators may be 
  * traversable themselves. If so these sub elements are recursed into.
  */
-class RecursiveIteratorIterator implements Iterator {
+class RecursiveIteratorIterator implements Iterator
+{
 	/** Construct an instance form a RecursiveIterator.
 	 *
 	 * \param $iterator inner root iterator
@@ -97,8 +108,8 @@ class RecursiveIteratorIterator implements Iterator {
  *
  * \see ArrayIterator
  */
-class ArrayObject implements IteratorAggregate {
-
+class ArrayObject implements IteratorAggregate
+{
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
@@ -118,9 +129,10 @@ class ArrayObject implements IteratorAggregate {
  * over Arrays and Objects.
  *
  * To use this class you must instanciate ArrayObject.
+ * You cannot instanciate an ArrayIterator directly.
  */
-class ArrayIterator implements Iterator {
-
+class ArrayIterator implements Iterator
+{
 	/** Construct a new array iterator from anything that has a hash table.
 	 * That is any Array or Object.
 	 *
@@ -152,7 +164,8 @@ class ArrayIterator implements Iterator {
 /** Iterator that wrapps around another iterator and only returns selected
  * elements of the inner iterator.
  */
-abstract class FilterIterator implements Iterator {
+abstract class FilterIterator implements Iterator
+{
 	/** Construct an instance form a Iterator.
 	 *
 	 * \param $iterator inner iterator
@@ -188,7 +201,8 @@ abstract class FilterIterator implements Iterator {
 /** A recursive iterator that only returns elements that themselves can be 
  * trversed.
  */
-class ParentIterator extends FilterIterator implements RecursiveIterator {
+class ParentIterator extends FilterIterator implements RecursiveIterator
+{
 	/** Construct an instance form a RecursiveIterator.
 	 *
 	 * \param $iterator inner iterator
@@ -226,8 +240,8 @@ class ParentIterator extends FilterIterator implements RecursiveIterator {
 
 /** \brief Directory iterator
  */
-class DirectoryIterator implements Iterator {
-
+class DirectoryIterator implements Iterator
+{
 	/** Construct a directory iterator from a path-string.
 	 *
 	 * \param $path directory to iterate.
@@ -273,8 +287,24 @@ class DirectoryIterator implements Iterator {
 
 /** \brief recursive directory iterator
  */
-class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator {
+class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
+{
+	/** \copydoc Iterator::rewind
+	 */
+	function rewind();
 
+	/** \copydoc Iterator::current
+	 */
+	function current();
+
+	/** \copydoc Iterator::next
+	 */
+	function next();
+
+	/** \copydoc Iterator::hasMore
+	 */
+	function hasMore();
+	
 	/** \return whether the current is a directory (not '.' or '..').
 	 */
 	function hasChildren();	
@@ -282,7 +312,19 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	/** \return a RecursiveDirectoryIterator for the current entry.
 	 */
 	function getChildren();	
-	
+}
+
+/** \brief recursive SimpleXML_Element iterator
+ */
+class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
+{
+	/** \return whether the current node has sub nodes.
+	 */
+	function hasChildren();	
+
+	/** \return a SimpleXMLIterator for the current node.
+	 */
+	function getChildren();	
 }
 
 ?>
