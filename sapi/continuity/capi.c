@@ -93,7 +93,7 @@ zend_module_entry continuity_module_entry = {
         NULL,
         NULL,
         PHP_MINFO(continuity),
-        "$Revision$",
+        NO_VERSION_YET,
         STANDARD_MODULE_PROPERTIES
 };
 
@@ -110,7 +110,7 @@ PHP_MSHUTDOWN_FUNCTION(continuity)
 PHP_MINFO_FUNCTION(continuity)
 {
         php_info_print_table_start();
-        php_info_print_table_row(2, "Continuity Module Version", continuity_module_entry.version);
+        php_info_print_table_row(2, "Continuity Module Revision", "$Revision$");
         php_info_print_table_row(2, "Server Version", conFget_build());
 #ifdef CONTINUITY_CDPEXT
 	php_info_print_table_row(2,"CDP Extensions", "enabled");
