@@ -49,11 +49,12 @@ Encoding
 WSDL
 ----
 ? server part support for "document" style encoding
+? support for <fault>, <soap:fault>
+- <soap:headerfault>
 - <soap:body> parts attribute (with MIME/DIME binding)
 - MIME binding
 - DIME binding
 - support for portType/operation parameterOrder attribute
-- support for <fault>, <soap:fault>, <soap:headerfault>
 - support for binding operation input/output name attribute (part of overloading)
 - function/method overloading/redeclaration (test(int); test(string))
 - wsdl auto generation
