@@ -778,7 +778,8 @@ SOURCE=".\configuration-parser.y"
 InputPath=".\configuration-parser.y"
 
 BuildCmds= \
-	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
 
 "configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -793,7 +794,8 @@ BuildCmds= \
 InputPath=".\configuration-parser.y"
 
 BuildCmds= \
-	bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
+	if not"X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
+	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y
 
 "configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -816,7 +818,8 @@ InputPath=.\ext\standard\parsedate.y
 
 "ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd ext\standard 
-	bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
+	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y  \
+	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
 	
 # End Custom Build
 
