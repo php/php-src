@@ -12,6 +12,9 @@ debug_zval_dump($err);
 debug_zval_dump($s);
 
 $r = sqlite_query("create table foo (a INTEGER PRIMARY KEY, b INTEGER )", $s);
+debug_zval_dump(sqlite_last_error($s));
+debug_zval_dump(sqlite_error_string(sqlite_last_error($s)));
+
 $r = sqlite_query("select *, php('md5', sql) as o from sqlite_master", $s);
 debug_zval_dump($r);
 debug_zval_dump(sqlite_num_rows($r));

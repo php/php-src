@@ -42,6 +42,12 @@ struct php_sqlite_result {
 	int curr_row;
 };
 
+struct php_sqlite_db {
+	sqlite *db;
+	int last_err_code;
+	int is_persistent;
+};
+
 enum { PHPSQLITE_ASSOC = 1, PHPSQLITE_NUM = 2, PHPSQLITE_BOTH = PHPSQLITE_ASSOC|PHPSQLITE_NUM };
 
 function_entry sqlite_functions[] = {
@@ -59,6 +65,8 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_seek, NULL)
 	PHP_FE(sqlite_escape_string, NULL)
 	PHP_FE(sqlite_busy_timeout, NULL)
+	PHP_FE(sqlite_last_error, NULL)
+	PHP_FE(sqlite_error_string, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -88,9 +96,11 @@ ZEND_GET_MODULE(sqlite)
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_db_dtor)
 {
-	sqlite *db = (sqlite*)rsrc->ptr;
+	struct php_sqlite_db *db = (struct php_sqlite_db*)rsrc->ptr;
 	
-	sqlite_close(db);
+	sqlite_close(db->db);
+
+	efree(db);
 }
 
 static ZEND_RSRC_DTOR_FUNC(php_sqlite_result_dtor)
@@ -237,8 +247,9 @@ PHP_FUNCTION(sqlite_open)
 	char *filename;
 	long filename_len;
 	zval *errmsg = NULL;
-	sqlite *db = NULL;
 	char *errtext = NULL;
+	struct php_sqlite_db *db = NULL;
+	sqlite *sdb = NULL;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz/",
 				&filename, &filename_len, &mode, &errmsg)) {
@@ -253,9 +264,9 @@ PHP_FUNCTION(sqlite_open)
 		RETURN_FALSE;
 	}
 	
-	db = sqlite_open(filename, mode, &errtext);
+	sdb = sqlite_open(filename, mode, &errtext);
 
-	if (db == NULL) {
+	if (sdb == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 
 		if (errmsg) {
@@ -267,15 +278,19 @@ PHP_FUNCTION(sqlite_open)
 		RETURN_FALSE;
 	}
 
+	db = (struct php_sqlite_db *)emalloc(sizeof(struct php_sqlite_db));
+	db->is_persistent = 0;
+	db->db = sdb;
+	
 	/* register the PHP functions */
-	sqlite_create_function(db, "php", -1, php_sqlite_function_callback, 0);
+	sqlite_create_function(sdb, "php", -1, php_sqlite_function_callback, 0);
 
 	/* set default busy handler; keep retrying up until 1/2 second has passed,
 	 * then fail with a busy status code */
-	sqlite_busy_timeout(db, 500);
+	sqlite_busy_timeout(sdb, 500);
 
 	/* authorizer hook so we can enforce safe mode */
-	sqlite_set_authorizer(db, php_sqlite_authorizer, NULL);
+	sqlite_set_authorizer(sdb, php_sqlite_authorizer, NULL);
 	
 	ZEND_REGISTER_RESOURCE(return_value, db, le_sqlite_db);
 	
@@ -287,16 +302,16 @@ PHP_FUNCTION(sqlite_open)
 PHP_FUNCTION(sqlite_busy_timeout)
 {
 	zval *zdb;
-	sqlite *db;
+	struct php_sqlite_db *db;
 	long ms;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zdb, &ms)) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
 
-	sqlite_busy_timeout(db, ms);
+	sqlite_busy_timeout(db->db, ms);
 }
 /* }}} */
 
@@ -305,13 +320,13 @@ PHP_FUNCTION(sqlite_busy_timeout)
 PHP_FUNCTION(sqlite_close)
 {
 	zval *zdb;
-	sqlite *db;
+	struct php_sqlite_db *db;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
 	zend_list_delete(Z_RESVAL_P(zdb));
 }
 /* }}} */
@@ -321,7 +336,7 @@ PHP_FUNCTION(sqlite_close)
 PHP_FUNCTION(sqlite_query)
 {
 	zval *zdb;
-	sqlite *db;
+	struct php_sqlite_db *db;
 	char *sql;
 	long sql_len;
 	struct php_sqlite_result res, *rres;
@@ -332,15 +347,17 @@ PHP_FUNCTION(sqlite_query)
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
 
 	memset(&res, 0, sizeof(res));
 
-	ret = sqlite_get_table(db, sql, &res.table, &res.nrows, &res.ncolumns, &errtext);
+	ret = sqlite_get_table(db->db, sql, &res.table, &res.nrows, &res.ncolumns, &errtext);
+	db->last_err_code = ret;
 
 	if (ret != SQLITE_OK) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
 		sqlite_freemem(errtext);
+		
 		RETURN_FALSE;
 	}
 
@@ -429,15 +446,15 @@ PHP_FUNCTION(sqlite_libencoding)
 PHP_FUNCTION(sqlite_changes)
 {
 	zval *zdb;
-	sqlite *db;
+	struct php_sqlite_db *db;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
 
-	RETURN_LONG(sqlite_changes(db));
+	RETURN_LONG(sqlite_changes(db->db));
 }
 /* }}} */
 
@@ -446,15 +463,15 @@ PHP_FUNCTION(sqlite_changes)
 PHP_FUNCTION(sqlite_last_insert_rowid)
 {
 	zval *zdb;
-	sqlite *db;
+	struct php_sqlite_db *db;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
 		return;
 	}
 
-	ZEND_FETCH_RESOURCE(db, sqlite *, &zdb, -1, "sqlite database", le_sqlite_db);
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
 
-	RETURN_LONG(sqlite_last_insert_rowid(db));
+	RETURN_LONG(sqlite_last_insert_rowid(db->db));
 }
 /* }}} */
 
@@ -562,4 +579,40 @@ PHP_FUNCTION(sqlite_escape_string)
 }
 /* }}} */
 
+/* {{{ proto int sqlite_last_error(resource db)
+   Returns the error code of the last error for a database */
+PHP_FUNCTION(sqlite_last_error)
+{
+	zval *zdb;
+	struct php_sqlite_db *db;
 
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zdb)) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(db, struct php_sqlite_db *, &zdb, -1, "sqlite database", le_sqlite_db);
+
+	RETURN_LONG(db->last_err_code);
+}
+/* }}} */
+
+/* {{{ proto string sqlite_error_string(int error_code)
+   Returns the textual description of an error code */
+PHP_FUNCTION(sqlite_error_string)
+{
+	long code;
+	const char *msg;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code)) {
+		return;
+	}
+	
+	msg = sqlite_error_string(code);
+
+	if (msg) {
+		RETURN_STRING((char*)msg, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
