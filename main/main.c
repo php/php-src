@@ -204,7 +204,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("auto_prepend_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_prepend_file,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("auto_append_file",	NULL,			PHP_INI_ALL,		OnUpdateString,	auto_append_file,	php_core_globals,	core_globals)
 
-	STD_PHP_INI_BOOLEAN("y2k_compliance",		"0",			PHP_INI_ALL,		OnUpdateBool,		y2k_compliance,		php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("y2k_compliance",		"1",			PHP_INI_ALL,		OnUpdateBool,		y2k_compliance,		php_core_globals,	core_globals)
 
 	STD_PHP_INI_ENTRY("doc_root",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	doc_root,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("user_dir",			NULL,			PHP_INI_SYSTEM,		OnUpdateStringUnempty,	user_dir,		php_core_globals,	core_globals)
