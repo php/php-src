@@ -39,7 +39,7 @@ if test "$PHP_SQLITE" != "no"; then
     ],[
         AC_MSG_ERROR([wrong sqlite lib version or lib not found])
     ],[
-        -L$SQLITE_DIR/lib -lm -ldl
+        -L$SQLITE_DIR/lib -lm
     ])
  
     PHP_SUBST(SQLITE_SHARED_LIBADD)
