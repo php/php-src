@@ -1245,7 +1245,7 @@ PHP_FUNCTION(xmlwriter_open_memory)
 
 }
 
-/* {{{ proto string xmlwriter_output_memory(resource xmlwriter)
+/* {{{ proto string xmlwriter_output_memory(resource xmlwriter [,bool flush])
 Output current buffer as string */
 PHP_FUNCTION(xmlwriter_output_memory)
 {
@@ -1253,8 +1253,9 @@ PHP_FUNCTION(xmlwriter_output_memory)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr buffer;
+	int flush = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &pind, &flush) == FAILURE) {
 		return;
 	}
 
@@ -1265,7 +1266,9 @@ PHP_FUNCTION(xmlwriter_output_memory)
 	if (ptr && buffer) {
 		xmlTextWriterFlush(ptr);
 		RETVAL_STRING(buffer->content, 1);
-		xmlBufferEmpty(buffer);
+		if (flush) {
+			xmlBufferEmpty(buffer);
+		}
 		return;
 	}
 	
