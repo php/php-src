@@ -434,7 +434,7 @@ static zval *to_zval_stringc(encodeTypePtr type, xmlNodePtr data)
 static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style)
 {
 	xmlNodePtr ret;
-	char *str, *pstr;
+	char *str;
 	int new_len;
 	TSRMLS_FETCH();
 
