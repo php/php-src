@@ -74,6 +74,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_next_attribute,						NULL)
 	PHP_FE(ldap_get_attributes,						NULL)
 	PHP_FE(ldap_get_values,							NULL)
+	PHP_FE(ldap_get_values_len,						NULL)
 	PHP_FE(ldap_get_dn,								NULL)
 	PHP_FE(ldap_explode_dn,							NULL)
 	PHP_FE(ldap_dn2ufn,								NULL)
@@ -935,6 +936,58 @@ PHP_FUNCTION(ldap_get_values)
 	ldap_value_free(ldap_value);
 }
 /* }}} */
+
+/* {{{ proto array ldap_get_values_len(int link, int result, string attribute)
+   Get all values from a result entry */
+PHP_FUNCTION(ldap_get_values_len)
+{
+	pval **link, **result_entry, **attr;
+	LDAP* ldap;
+	LDAPMessage* ldap_result_entry;
+	char* attribute;
+	struct berval **ldap_value_len;
+	int i, num_values;
+	
+	if (ARG_COUNT(ht) != 3 ||
+	    zend_get_parameters_ex(3, &link, &result_entry, &attr) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if ((ldap = _get_ldap_link(link)) == NULL) {
+		RETURN_FALSE;
+	}
+	
+	ldap_result_entry = _get_ldap_result_entry(result_entry);
+	convert_to_string_ex(attr);
+	attribute = (*attr)->value.str.val;
+	
+	if ((ldap_value_len = ldap_get_values_len(ldap, ldap_result_entry, attribute)) == NULL) {
+#if !HAVE_NSLDAP
+#if LDAP_API_VERSION > 2000
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+#else
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap->ld_errno));
+#endif
+#else
+		php_error(E_WARNING, "LDAP: Cannot get the value(s) of attribute %s", ldap_err2string(ldap_get_lderrno(ldap,NULL,NULL)));
+#endif
+		RETURN_FALSE;
+	}
+	
+	num_values = ldap_count_values_len(ldap_value_len);
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_ERROR, "Cannot initialize return value");
+		RETURN_FALSE;
+	}
+	
+	for (i=0; i<num_values; i++) {
+		add_next_index_string(return_value, ldap_value_len[i]->bv_val, 1);
+	}
+	
+	add_assoc_long(return_value, "count", num_values);
+}
+/* }}} */
+		
 
 /* {{{ proto string ldap_get_dn(int link, int result)
    Get the DN of a result entry */
