@@ -281,7 +281,8 @@ gdImageCreateFromJpegCtx (gdIOCtx * infile)
   volatile JSAMPROW row = 0;
   volatile gdImagePtr im = 0;
   JSAMPROW rowptr[1];
-  int i, j, retval;
+  unsigned int i, j;
+  int retval;
   JDIMENSION nrows;
 
 #ifdef JPEG_DEBUG

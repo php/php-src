@@ -763,7 +763,7 @@ _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
       /* The zlib notes say output buffer size should be (input size) * 1.01 * 12 */
       /* - we'll use 1.02 to be paranoid. */
       /* */
-      compMax = cs * bytesPerPixel * cs * 1.02 + 12;
+      compMax = (int)(cs * bytesPerPixel * cs * 1.02f) + 12;
 
       /* */
       /* Allocate the buffers.  */
