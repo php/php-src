@@ -59,9 +59,7 @@ typedef struct {
 	zend_llist to_free;
 } php_curl;
 
-typedef struct {
 
-} php_curl_globals;
 
 #ifdef ZTS
 #define CURLG(v) (curl_globals->v)
