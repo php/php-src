@@ -525,7 +525,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 	
 	/* we pass additional args to the respective handler */
-	args = emalloc(ac * sizeof(zval *));
+	args = safe_emalloc(ac, sizeof(zval *), 0);
 	if (zend_get_parameters_array_ex(ac, args) != SUCCESS) {
 		FREENOW;
 		WRONG_PARAM_COUNT;
@@ -541,7 +541,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *le;
 		
 		/* calculate hash */
-		key = emalloc(keylen);
+		key = safe_emalloc(keylen, 1, 1);
+		key[keylen] = '\0';
 		keylen = 0;
 		
 		for(i = 0; i < ac; i++) {

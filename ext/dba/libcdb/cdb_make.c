@@ -79,8 +79,7 @@ int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datale
 
 	head = c->head;
 	if (!head || (head->num >= CDB_HPLIST)) {
-		head = (struct cdb_hplist *)
-			emalloc(sizeof(struct cdb_hplist));
+		head = (struct cdb_hplist *) emalloc(sizeof(struct cdb_hplist));
 		if (!head)
 			return -1;
 		head->num = 0;
@@ -172,8 +171,7 @@ int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 		return -1;
 	}
 
-	c->split = (struct cdb_hp *)
-		emalloc(memsize * sizeof(struct cdb_hp));
+	c->split = (struct cdb_hp *) safe_emalloc(memsize, sizeof(struct cdb_hp), 0);
 	if (!c->split)
 		return -1;
 
