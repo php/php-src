@@ -1036,15 +1036,19 @@ PHP_FUNCTION(preg_split)
 PHP_FUNCTION(preg_quote)
 {
 	zval    **in_str_arg;	/* Input string argument */
+	zval	**delim;		/* Additional delimiter argument */
 	char 	*in_str,		/* Input string */
 	        *in_str_end,    /* End of the input string */
 			*out_str,		/* Output string with quoted characters */
 		 	*p,				/* Iterator for input string */
 			*q,				/* Iterator for output string */
+			 delim_char,	/* Delimiter character to be quoted */
 		 	 c;				/* Current character */
+	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
 	/* Get the arguments and check for errors */
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &in_str_arg) == FAILURE) {
+	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
+		zend_get_parameters_ex(ARG_COUNT(ht), &in_str_arg, &delim) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1056,6 +1060,14 @@ PHP_FUNCTION(preg_quote)
 	/* Nothing to do if we got an empty string */
 	if (in_str == in_str_end) {
 		RETVAL_STRINGL(empty_string, 0, 0);
+	}
+
+	if (ARG_COUNT(ht) == 2) {
+		convert_to_string_ex(delim);
+		if (Z_STRLEN_PP(delim) > 0) {
+			delim_char = Z_STRVAL_PP(delim)[0];
+			quote_delim = 1;
+		}
 	}
 	
 	/* Allocate enough memory so that even if each character
@@ -1086,9 +1098,14 @@ PHP_FUNCTION(preg_quote)
 			case '|':
 			case ':':
 				*q++ = '\\';
-				/* break is missing _intentionally_ */
-			default:
 				*q++ = c;
+				break;
+
+			default:
+				if (c == delim_char && quote_delim)
+					*q++ = '\\';
+				*q++ = c;
+				break;
 		}
 	}
 	*q = '\0';
