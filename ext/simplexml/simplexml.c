@@ -269,7 +269,37 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 static HashTable *
 sxe_properties_get(zval *object TSRMLS_DC)
 {
-	return NULL;
+	zval           *return_value;
+	zval           *value;
+	php_sxe_object *sxe;
+	char           *name;
+	char           *contents;
+	xmlNodePtr      node;
+	xmlAttrPtr      attr;
+	int             counter = 0;
+
+	MAKE_STD_ZVAL(return_value);
+	array_init(return_value);
+
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+
+	GET_NODE(sxe, node);
+
+	node = node->xmlChildrenNode;
+	if (!sxe->node) {
+		sxe->node = node;
+	}
+
+	while (node) {
+		MAKE_STD_ZVAL(value);
+		_node_as_zval(sxe, node, value);
+
+		add_next_index_zval(return_value, value);
+
+		node = node->next;
+	}
+
+	return return_value;
 }
 /* }}} */
 
