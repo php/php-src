@@ -3,6 +3,9 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- Added replace parameter to header() (Sascha)
+- Fixed handling of single quotes in transparent session-id mode (Sascha)
+- Fixed "php://*" fopen handler (Sascha)
 - Made rename work in threadsafe enviroments (Daniel)
 - Made session_destroy() close files before unlinking (Daniel)
 - Added array_sum() function. (Andrei)
