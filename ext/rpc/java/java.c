@@ -689,7 +689,8 @@ JNIEXPORT void JNICALL Java_net_php_reflect_setResultFromObject
   /* wrapper the java object in a pval object */
   pval *presult = (pval*)(long)result;
   pval *handle;
-
+  TSRMLS_FETCH();
+  
   if (presult->type != IS_OBJECT) {
 	object_init_ex(presult, &java_class_entry);
 	presult->is_ref=1;
