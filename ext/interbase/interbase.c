@@ -136,6 +136,7 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_delete_user, NULL)
 #endif
 	PHP_FE(ibase_wait_event, NULL)
+	PHP_FE(ibase_set_event_handler, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -164,7 +165,7 @@ ZEND_GET_MODULE(ibase)
 #endif
 
 /* True globals, no need for thread safety */
-static int le_blob, le_link, le_plink, le_result, le_query, le_trans;
+static int le_blob, le_link, le_plink, le_result, le_query, le_trans, le_event;
 
 ZEND_DECLARE_MODULE_GLOBALS(ibase)
 
@@ -584,6 +585,34 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+/* {{{	_php_ibase_event_free() */
+static void _php_ibase_event_free(char *event_buf, char *result_buf)
+{
+	isc_free(event_buf);
+	isc_free(result_buf);
+}
+/* }}} */
+
+/* {{{ _php_ibase_free_event */
+static void _php_ibase_free_event(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	ibase_event *event = (ibase_event *) rsrc->ptr;
+	
+	IBDEBUG("Cleaning up event resource");
+
+	zval_dtor(event->callback);
+	event->callback = NULL;
+	
+	if (event->link->handle != NULL) {
+		if (isc_cancel_events(IB_STATUS, &event->link->handle, &event->event_id)) {
+			_php_ibase_error(TSRMLS_C);
+		}
+	}
+	_php_ibase_event_free(event->event_buffer,event->result_buffer);
+}
+		
+/* }}} */
+
 /* {{{ startup, shutdown and info functions */
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong, allow_persistent, zend_ibase_globals, ibase_globals)
@@ -617,6 +646,7 @@ PHP_MINIT_FUNCTION(ibase)
 	le_link = zend_register_list_destructors_ex(_php_ibase_close_link, NULL, "interbase link", module_number);
 	le_plink = zend_register_list_destructors_ex(php_ibase_commit_link_rsrc, _php_ibase_close_plink, "interbase link persistent", module_number);
 	le_trans = zend_register_list_destructors_ex(_php_ibase_free_trans, NULL, "interbase transaction", module_number);
+	le_event = zend_register_list_destructors_ex(_php_ibase_free_event, NULL, "interbase event", module_number);
 
 	REGISTER_LONG_CONSTANT("IBASE_DEFAULT", PHP_IBASE_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TEXT", PHP_IBASE_TEXT, CONST_PERSISTENT);
@@ -1910,7 +1940,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 {
 	ibase_trans *trans = NULL;
 	int res_id = 0;
-	ISC_STATUS result;
+	ISC_STATUS result = 0;
 
 	RESET_ERRMSG;
 
@@ -3829,14 +3859,6 @@ static void _php_ibase_event_block(ibase_db_link *ib_link, unsigned short count,
 }
 /* }}} */
 
-/* {{{	_php_ibase_event_free() */
-static void _php_ibase_event_free(char *event_buf, char *result_buf)
-{
-	isc_free(event_buf);
-	isc_free(result_buf);
-}
-/* }}} */
-
 /* {{{ proto string ibase_wait_event([resource link,] string event [, string event [, ...]])
    Waits for any one of the passed Interbase events to be posted by the database, and returns its name */
 PHP_FUNCTION(ibase_wait_event)
@@ -3865,12 +3887,15 @@ PHP_FUNCTION(ibase_wait_event)
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink);
 		i = 1;
 
-	} else if (ZEND_NUM_ARGS() > 15) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}				
+	} else {
 
-	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+		if (ZEND_NUM_ARGS() > 15) {
+			efree(args);
+			WRONG_PARAM_COUNT;
+		}
+
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+	}				
 		
 	for (; i < ZEND_NUM_ARGS(); ++i) {
 		convert_to_string_ex(args[i]);
@@ -3907,6 +3932,164 @@ PHP_FUNCTION(ibase_wait_event)
 }
 /* }}} */
 
+/* {{{ _php_ibase_callback() */
+static isc_callback _php_ibase_callback(ibase_event *event, unsigned short buffer_size, char *result_buf)
+{
+	/**
+	 * The callback function is called when the event is first registered and when the event
+	 * is cancelled. I consider this is a bug. By clearing event->callback, we make sure 
+	 * nothing happens if no event was actually posted.
+	 */
+	if (event->callback != NULL) {
+
+		unsigned short i;
+		ISC_STATUS occurred_event[15];
+		zval event_name, link_id, return_value, *args[2] = { &event_name, &link_id };
+
+		/* this function is called asynchronously by the Interbase client library. */
+		TSRMLS_FETCH_FROM_CTX(event->thread_ctx);
+	
+		/* copy the updated results into the result buffer */
+		memcpy(event->result_buffer, result_buf, buffer_size);
+		
+		INIT_ZVAL(event_name);
+		INIT_ZVAL(link_id);
+		ZVAL_RESOURCE(&link_id, event->link_res_id);
+
+		/* find out which event occurred */
+		isc_event_counts(occurred_event, buffer_size, event->event_buffer, event->result_buffer);
+		for (i = 0; i < event->event_count; ++i) {
+			if (occurred_event[i]) {
+				ZVAL_STRING(&event_name,event->events[i],0);
+				break;
+			}
+		}	
+
+		Z_TYPE(return_value) = IS_BOOL;
+		Z_BVAL(return_value) = 1;
+
+		/* call the callback provided by the user */
+		if (SUCCESS != call_user_function(EG(function_table), NULL, event->callback, &return_value, 2, args TSRMLS_CC)) {
+			_php_ibase_module_error("Error calling callback %s", Z_STRVAL_P(event->callback));
+			return 0;
+		}
+
+		if (! Z_BVAL(return_value)) {
+			return 0;
+		}			
+	}
+		
+	/* re-register the event */
+	if (isc_que_events(IB_STATUS, &event->link->handle, &event->event_id, buffer_size, 
+		event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
+
+		_php_ibase_error(TSRMLS_C);
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ proto resource ibase_set_event_handler([resource link,] callback handler, string event [, string event [, ...]])
+   Register the callback for handling each of the named events */
+PHP_FUNCTION(ibase_set_event_handler)
+{
+	/**
+	 * The callback passed to this function should take an event name (string) and a 
+	 * link resource id (int) as arguments. The value returned from the function is 
+	 * used to determine if the event handler should remain set.
+	 */
+
+	zval ***args, **cb_arg;
+	ibase_db_link *ib_link;
+	ibase_event *event;
+	char *callback_name;
+	unsigned short i = 1, buffer_size;
+	int link_res_id;
+		
+	RESET_ERRMSG;
+
+	/* no more than 15 events */
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 17) {
+		WRONG_PARAM_COUNT;
+	}
+
+	args = (zval ***) safe_emalloc(sizeof(zval **), ZEND_NUM_ARGS(), 0);
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+		efree(args);
+		RETURN_FALSE;
+	}
+
+	/* get a working link */
+	if (Z_TYPE_PP(args[0]) == IS_RESOURCE) {
+
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, args[0], -1, "InterBase link", le_link, le_plink);
+		i = 2;
+
+		convert_to_long_ex(args[0]);
+		link_res_id = Z_LVAL_PP(args[0]);
+		cb_arg = args[1];
+
+	} else {
+
+		if (ZEND_NUM_ARGS() > 16) {
+			efree(args);
+			WRONG_PARAM_COUNT;
+		}
+
+		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), "InterBase link", le_link, le_plink);
+		link_res_id = IBG(default_link);
+		cb_arg = args[0];
+	}				
+		
+	/* get the callback */
+	if (!zend_is_callable(*args[i-1], 0, &callback_name)) {
+		_php_ibase_module_error("Callback argument %s is not a callable function", callback_name);
+		efree(callback_name);
+		efree(args);
+		RETURN_FALSE;
+	}
+	efree(callback_name);
+		
+	/* allocate the event resource */
+	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
+	TSRMLS_SET_CTX(event->thread_ctx);
+	event->link_res_id = link_res_id;
+	event->link = ib_link;
+	event->event_count = 0;
+	event->callback = NULL;
+	event->events = (char **) safe_emalloc(sizeof(char *),ZEND_NUM_ARGS()-i,0);
+		
+	for (; i < ZEND_NUM_ARGS(); ++i) {
+		convert_to_string_ex(args[i]);
+		event->events[event->event_count++] = estrdup(Z_STRVAL_PP(args[i]));
+	}
+
+	/* fills the required data structure with information about the events */
+	_php_ibase_event_block(ib_link, event->event_count, event->events, 
+		&buffer_size, &event->event_buffer, &event->result_buffer);
+		
+	/* now register the events with the Interbase API */
+	if (isc_que_events(IB_STATUS, &ib_link->handle, &event->event_id, buffer_size, 
+		event->event_buffer,(isc_callback)_php_ibase_callback, (void *)event)) {
+			
+		_php_ibase_error(TSRMLS_C);
+		efree(args);
+		efree(event);
+		RETURN_FALSE;
+	}
+
+	ALLOC_ZVAL(event->callback);
+	*event->callback = **cb_arg;
+	INIT_PZVAL(event->callback);
+	zval_copy_ctor(event->callback);
+	
+	efree(args);
+
+	ZEND_REGISTER_RESOURCE(return_value, event, le_event);
+}
+   
+/* }}} */
+  
 #endif /* HAVE_IBASE */
 
 /*
