@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Added MDTM support to ftp_url_stat. (Sara)
 - Added zlib stream filter suport. (Sara)
 - Added bz2 stream filter support. (Sara)
+- Added support of parameter->value arrays to xsl_xsltprocessor_set_parameter() 
+  (Tony)
 - Fixed bug in mysql->client_version (Georg)
 - Changed the implementation of TRUE, FALSE, and NULL from constants to
   keywords. (Marcus)
