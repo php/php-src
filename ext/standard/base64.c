@@ -88,7 +88,7 @@ unsigned char *php_base64_decode(const unsigned char *string, int length, int *r
 		}
 	}
 
-	result = (unsigned char *)emalloc((length / 4 * 3 + 1) * sizeof(char));
+	result = (unsigned char *)emalloc(length + 1);
 	if (result == NULL) {
 		return NULL;
 	}
