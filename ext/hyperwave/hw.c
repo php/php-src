@@ -2278,9 +2278,131 @@ PHP_FUNCTION(hw_setlinkroot) {
 }
 /* }}} */
 
+/* {{{ proto hwdoc hw_pipedocument(int link, int objid [, array urlprefixes ] )
+   Returns document with links inserted. Optionally a array with five urlprefixes
+   may be passed, which will be inserted for the different types of anchors. This should
+   be a named array with the following keys: HW_DEFAULT_LINK, HW_IMAGE_LINK, HW_BACKGROUND_LINK, 
+   HW_INTAG_LINK, and HW_APPLET_LINK.
+*/
+PHP_FUNCTION(hw_pipedocument) {
+	pval *arg1, *arg2, *arg3;
+	int i, link, id, type, argc, mode;
+	int rootid = 0;
+	HashTable *prefixarray;
+	char **urlprefix;
+	hw_connection *ptr;
+	hw_document *doc;
+#if APACHE
+	server_rec *serv = ((request_rec *) SG(server_context))->server;
+#endif
+
+	argc = ZEND_NUM_ARGS();
+	switch(argc)
+	{
+	case 2:
+		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+			RETURN_FALSE;
+		break;
+	case 3:
+		if (getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
+			RETURN_FALSE;
+		break;
+	default:
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_long(arg2);
+	
+	link=arg1->value.lval;
+	id=arg2->value.lval;
+	ptr = zend_list_find(link,&type);
+	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
+		php_error(E_WARNING,"Unable to find file identifier %d", link);
+		RETURN_FALSE;
+	}
+
+	/* check for the array with urlprefixes */
+	if(argc == 3) {
+		convert_to_array(arg3);
+		prefixarray =arg3->value.ht;
+		if((prefixarray == NULL) || (zend_hash_num_elements(prefixarray) != 5)) {
+			php_error(E_WARNING,"You must provide 5 urlprefixes (you have provided %d)", zend_hash_num_elements(prefixarray));
+			RETURN_FALSE;
+		}
+
+		urlprefix = emalloc(5*sizeof(char *));
+		zend_hash_internal_pointer_reset(prefixarray);
+		for(i=0; i<5; i++) {
+			char *key;
+			zval *data, **dataptr;
+			ulong ind;
+			
+			zend_hash_get_current_key(prefixarray, &key, &ind);
+			zend_hash_get_current_data(prefixarray, (void *) &dataptr);
+			data = *dataptr;
+			if (data->type != IS_STRING) {
+				php_error(E_WARNING,"%s must be a String", key);
+				RETURN_FALSE;
+			} else if ( strcmp(key, "HW_DEFAULT_LINK") == 0 ) {
+				urlprefix[HW_DEFAULT_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_IMAGE_LINK") == 0 ) {
+				urlprefix[HW_IMAGE_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_BACKGROUND_LINK") == 0 ) {
+				urlprefix[HW_BACKGROUND_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_INTAG_LINK") == 0 ) {
+				urlprefix[HW_INTAG_LINK] = data->value.str.val;
+			} else if ( strcmp(key, "HW_APPLET_LINK") == 0 ) {
+				urlprefix[HW_APPLET_LINK] = data->value.str.val;
+			} else {
+				php_error(E_WARNING,"%s is not a valid urlprefix", key);
+				RETURN_FALSE;
+			}
+			efree(key);
+			zend_hash_move_forward(prefixarray);
+		}
+	} else {
+		urlprefix = NULL;
+	}
+
+	mode = 0;
+	if(ptr->linkroot > 0)
+		mode = 1;
+	rootid = ptr->linkroot;
+
+	set_swap(ptr->swap_on);
+	{
+	char *object = NULL;
+	char *attributes = NULL;
+	char *bodytag = NULL;
+	int count;
+	/* !!!! memory for object, bodytag and attributes is allocated with malloc !!!! */
+	if (0 != (ptr->lasterror =  send_pipedocument(ptr->socket,
+#if APACHE
+  serv->server_hostname,
+#else
+  getenv("HOSTNAME"),
+#endif
+   id, mode, rootid, &attributes, &bodytag, &object, &count, urlprefix)))
+		RETURN_FALSE;
+		
+	if(urlprefix) efree(urlprefix);
+
+	doc = malloc(sizeof(hw_document));
+	doc->data = object;
+	doc->attributes = attributes;
+	doc->bodytag = bodytag;
+	doc->size = count;
+/* fprintf(stderr, "size = %d\n", count); */
+	return_value->value.lval = zend_list_insert(doc,HwSG(le_document));
+	return_value->type = IS_LONG;
+	}
+}
+/* }}} */
+
 /* {{{ proto hwdoc hw_pipedocument(int link, int objid)
    Returns document */
-PHP_FUNCTION(hw_pipedocument) {
+PHP_FUNCTION(hw_oldpipedocument) {
 	pval *argv[3];
 	int link, id, type, argc, mode;
 	int rootid = 0;
