@@ -39,6 +39,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22585 (Do not terminate the script on minor errors). (Ilia)
 - Fixed bug #22550 (overflow protection for upload_max_filesize ini option). (Ilia)
 - Fixed bug #22544 (writing transparency to truecolor png images). (Ilia)
+- Fixed bug #22538 (failed stat on stdio/stdin/stderr streams). (Wez, Ilia)
 - Fixed bug #22520 (mcrypt_generic_deinit() was not available on Windows). (Edin)
 - Fixed bug #22508 (Added protection against circular HTML redirects). (Ilia)
 - Fixed bug #22473 (ISAPI Secure Server variables not available). (Christian Swoboda)
