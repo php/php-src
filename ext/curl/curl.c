@@ -24,6 +24,9 @@
 #if HAVE_CURL
 
 #include <stdio.h>
+#ifdef PHP_WIN32
+#include <winsock.h>
+#endif
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include "ext/standard/info.h"
@@ -34,6 +37,40 @@ int curl_globals_id;
 #else
 php_curl_globals curl_globals;
 #endif
+
+/* Basically grabbed from the source code of cURL */
+#ifdef PHP_WIN32
+static void win32_cleanup();
+static void win32_init();
+
+static void win32_cleanup()
+{
+	WSACleanup();
+}
+
+static CURLcode win32_init()
+{
+	WORD wVersionRequested;  
+	WSADATA wsaData; 
+	int err; 
+	wVersionRequested = MAKEWORD(1, 1); 
+    
+	err = WSAStartup(wVersionRequested, &wsaData); 
+    
+	if (err != 0) return CURLE_FAILED_INIT;
+
+	if ( LOBYTE( wsaData.wVersion ) != 1 || 
+	     HIBYTE( wsaData.wVersion ) != 1 ) { 
+		WSACleanup(); 
+		return CURLE_FAILED_INIT; 
+	}
+	return CURLE_OK;
+}
+#else
+static CURLcode win32_init(void) { return CURLE_OK; }
+#define win32_cleanup()
+#endif
+
 
 function_entry curl_functions[] = {
 	PHP_FE(curl_init,     NULL)
@@ -48,7 +85,7 @@ zend_module_entry curl_module_entry = {
 	"curl",
 	curl_functions,
 	PHP_MINIT(curl),
-	NULL,
+	PHP_MSHUTDOWN(curl),
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
@@ -62,11 +99,6 @@ ZEND_GET_MODULE (curl)
 static void php_curl_close(CURL *cp);
 static int php_curl_error_translator(CURLcode err);
 
-static void php_curl_close(CURL *cp)
-{
-	curl_easy_cleanup(cp);
-}
-
 PHP_MINFO_FUNCTION(curl)
 {
 	php_info_print_table_start();
@@ -78,8 +110,9 @@ PHP_MINFO_FUNCTION(curl)
 PHP_MINIT_FUNCTION(curl)
 {
 	CURLLS_FETCH();
-	
 	CURLG(le_curl) = register_list_destructors(php_curl_close, NULL);
+	
+	/* Constants for curl_setopt() */
 	REGISTER_LONG_CONSTANT("CURLOPT_PORT", CURLOPT_PORT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_FILE", CURLOPT_FILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_INFILE", CURLOPT_INFILE, CONST_CS | CONST_PERSISTENT);
@@ -123,6 +156,8 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT("CURLOPT_STDERR", CURLOPT_STDERR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_WRITEINFO", CURLOPT_WRITEINFO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLOPT_TRANSFERTEXT", CURLOPT_TRANSFERTEXT, CONST_CS | CONST_PERSISTENT);
+	
+	/* Error Constants */
 	REGISTER_LONG_CONSTANT("CURLE_OK", CE_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_UNSUPPORTED_PROTOCOL", CE_UNSUPPORTED_PROTOCOL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_FAILED_INIT", CE_FAILED_INIT, CONST_CS | CONST_PERSISTENT);
@@ -169,11 +204,20 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_LONG_CONSTANT("CURLE_BAD_FUNCTION_ARGUMENT", CE_BAD_FUNCTION_ARGUMENT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURLE_BAD_CALLING_ORDER", CE_BAD_CALLING_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CURL_LAST", C_LAST, CONST_CS | CONST_PERSISTENT);
+	
+	if (win32_init() != CURLE_OK)
+		return FAILURE;
 
 	return SUCCESS;
 }
 
-/* {{{ proto string curl_version ()
+PHP_MSHUTDOWN_FUNCTION(curl)
+{
+	win32_cleanup();
+}
+
+
+/* {{{ proto string curl_version (void)
    Return the CURL version string. */
 PHP_FUNCTION (curl_version)
 {
@@ -266,8 +310,12 @@ PHP_FUNCTION(curl_setopt)
 		FILE *fp;
 		ZEND_FETCH_RESOURCE(fp, FILE *, uCurlValue, -1, "File-handle", php_file_le_fopen());
 		ret = curl_easy_setopt(cp, option, fp);
+		
+		if (option & CURLOPT_FILE)
+			CURLG(use_file) = 1;
+
 	}
-	
+
 	RETURN_LONG(php_curl_error_translator(ret));
 }
 /* }}} */
@@ -287,8 +335,32 @@ PHP_FUNCTION (curl_exec)
 	}
 	
 	ZEND_FETCH_RESOURCE(cp, CURL *, uCurlId, -1, "CURL Handle", CURLG(le_curl));
-	ret = curl_easy_perform (cp);
 	
+	if (CURLG(use_file)) {
+		ret = curl_easy_perform (cp);
+	} else {
+		FILE *tmp;
+		char buf[4096];
+		int b;
+		
+		if ((tmp = tmpfile()) == NULL) {
+			php_error(E_WARNING, "Cannot create temporary file to stream output of cURL from");
+			RETURN_LONG(-1);
+		}
+		
+		curl_easy_setopt(cp, CURLOPT_FILE, tmp);
+		ret = curl_easy_perform (cp);
+		
+		if (ret != CURLE_OK)
+			RETURN_LONG(php_curl_error_translator(ret));
+		
+		fseek(tmp, 0, SEEK_SET);
+		
+		while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0)
+			php_write(buf, b);
+		
+		fclose(tmp);
+	}	
 	RETURN_LONG(php_curl_error_translator(ret));
 }
 /* }}} */
@@ -409,6 +481,11 @@ static int php_curl_error_translator(CURLcode err)
 		case CURL_LAST:
 			return(C_LAST);
 	}
+}
+
+static void php_curl_close(CURL *cp)
+{
+	curl_easy_cleanup(cp);
 }
 
 #endif

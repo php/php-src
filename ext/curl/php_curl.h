@@ -32,6 +32,7 @@ extern zend_module_entry curl_module_entry;
 #define curl_module_ptr &curl_module_entry
 
 PHP_MINIT_FUNCTION(curl);
+PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 PHP_FUNCTION(curl_version);
 PHP_FUNCTION(curl_init);
@@ -87,6 +88,7 @@ PHP_FUNCTION(curl_close);
 #define C_LAST 45
 
 typedef struct {
+	int use_file = 0;
 	int le_curl;
 } php_curl_globals;
 
