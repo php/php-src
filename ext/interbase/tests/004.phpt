@@ -8,9 +8,9 @@ InterBase: BLOB test
 <?
 /* $Id$ */
 
-    require("interbase/interbase.inc");
+    require(dirname(__FILE__)."/interbase.inc");
     
-	$test_base = "ibase_test.tmp";
+	$test_base = dirname(__FILE__)."/ibase_test.tmp";
     
     ibase_connect($test_base);
 

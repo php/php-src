@@ -8,9 +8,9 @@ InterBase: binding (may take a while)
 <?
 /* $Id$ */
 
-    require("interbase/interbase.inc");
+    require(dirname(__FILE__)."/interbase.inc");
     
-    $test_base = "ibase_test.tmp";
+	$test_base = dirname(__FILE__)."/ibase_test.tmp";
     
     ibase_connect($test_base);
 
@@ -18,7 +18,7 @@ InterBase: binding (may take a while)
     	"create table test6 (
             iter		integer,
             v_char		char(1000),
-            v_date      date,
+            v_date      timestamp,
             v_decimal   decimal(12,3),
             v_double  	double precision,
             v_float     float,
