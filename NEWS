@@ -1,13 +1,13 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
-- Fixed a crash bug in array_map() if the input arrays had string or
-  non-sequential keys. Also modified it so that if a single array is passed,
-  its keys are preserved in the resulting array. (Andrei)
 - Add support for chinese encodings to htmlentities() and htmlspecialchars()
   (Patch by Alan Knowles <alan_k@hklc.com> and Wez)
 
 ?? ??? 200?, Version 4.0.7
+- Fixed a crash bug in array_map() if the input arrays had string or
+  non-sequential keys. Also modified it so that if a single array is passed,
+  its keys are preserved in the resulting array. (Andrei)
 - Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com)
 - Fixed a crash in msql_result() (Zeev)
 - Added support for single dimensional SafeArrays and Enumerations.
