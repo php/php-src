@@ -551,14 +551,6 @@ PHP_MINIT_FUNCTION(imap)
 	/* next UID to be assigned */
 	REGISTER_MAIN_LONG_CONSTANT("SA_UIDVALIDITY",SA_UIDVALIDITY , CONST_PERSISTENT | CONST_CS);
 	/* UID validity value */
-#ifdef HAVE_IMAP2000
-	sa_all |= GET_QUOTA;
-        REGISTER_MAIN_LONG_CONSTANT("GET_QUOTA",GET_QUOTA , CONST_PERSISTENT | CONST_CS);
-     /* Disk space taken up by mailbox. */
-	sa_all |= GET_QUOTAROOT;
-        REGISTER_MAIN_LONG_CONSTANT("GET_QUOTAROOT",GET_QUOTAROOT , CONST_PERSISTENT | CONST_CS);
-#endif
-     /* Disk space taken up by all mailboxes owned by user. */
 	REGISTER_MAIN_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
      /* get all status information */
 		
@@ -1042,12 +1034,13 @@ PHP_FUNCTION(imap_get_quota)
 
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
-
 	if(!imap_getquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot))) {
 		php_error(E_WARNING, "c-client imap_getquota failed");
 		RETURN_FALSE;
 	}
 
+	/* MAKE_STD_ZVAL(quota_array); */
+	/* if (array_init(quota_array) != SUCCESS) { */
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_WARNING, "Unable to allocate array memory");
 		RETURN_FALSE;
@@ -1057,6 +1050,7 @@ PHP_FUNCTION(imap_get_quota)
 	add_assoc_long(return_value, "limit", IMAPG(quota_limit));
 }
 /* }}} */
+
 
 /* {{{ proto int imap_set_quota(int stream_id, string qroot, int mailbox_size)
    Will set the quota for qroot mailbox */
@@ -1085,7 +1079,7 @@ PHP_FUNCTION(imap_set_quota)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
-	RETURN_LONG(imap_setquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot), &limits));
+	RETURN_LONG(imap_setquota(imap_le_struct->imap_stream, Z_STRVAL_PP(qroot), &limits)); 
 }
 /* }}} */
 #endif
