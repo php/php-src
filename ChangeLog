@@ -1,3 +1,128 @@
+2000-07-26  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/posix/posix.c: Access to global variable safe_mode fixed.
+
+2000-07-26  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+    Changed syntax of pspell_new() (one more parameter - mode)
+
+    pspell_new() parameters that are empty ("") are now ignored
+
+    Removed pspell_mode() and pspell_runtogether() - their
+    functionality moved to pspell_new() because the ability
+    to dynamically change those settings is not in ISPELL, and
+    is likely do disappear from ASPELL, according to ASPELL
+    author.
+
+    Created a new constant - PSPELL_RUN_TOGETHER for pspell_new()
+
+    fixed a bug in pspell_new() that caused non-English dictionaries
+    to be ignored
+
+    removed a bogus line from pspell_new() that could result in
+    a memory leak
+
+2000-07-26  Kristian Köhntopp  <kk@shonline.de>
+
+    * ext/posix/config.m4
+      ext/posix/php_posix.h
+      ext/posix/posix.c:
+    Added seteuid and setegid functions on request by max@valkyrie.sscf.ucsb.edu.
+    Also fixed the function detection for the HAVE_ functions.
+
+2000-07-26  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/php_pspell.h: Removed pspell_mode() and pspell_runtogether()
+
+2000-07-26  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c:
+    Fix symbol clash which caused a DSO problem on OpenBSD
+
+2000-07-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/crypt.c: Get rid of unnecessary preprocessor constructs.
+
+    * ext/standard/crypt.c:
+    Use the lcg as another entropy source for seeding the PRNG when creating
+    a salt for crypt().
+
+    * acinclude.m4
+      configure.in: Clean up the mess WRT rebuilding a limited set of files.
+
+    Earlier changes were based upon a wrong assumption (that CONFIG_FILES
+    could be relied upon).
+
+2000-07-26  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/string.c: Protos fixed.
+
+2000-07-26  Joey Smith  <joey@joeysmith.com>
+
+    * configure.in:
+    OK, got ahead of myself. Go back to where we started this morning.
+
+2000-07-26  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ldap/ldap.c: Proto fixed.
+
+2000-07-26  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/browscap.c: Make proper object initialization
+
+2000-07-26  Joey Smith  <joey@joeysmith.com>
+
+    * configure.in:
+    OK, the fastgen stuff should be working OK, and normal configure should, too.
+    There is an annoying warning being generated due to null 1st arg to AC_OUTPUT,
+    but I don't know what to do a/b that.
+
+2000-07-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h: - Added new function: ldap_compare(). 
+
+2000-07-26  Joey Smith  <joey@joeysmith.com>
+
+    * configure.in: Make configure work again.
+    CONFIG_FILES is broken again, tho. (I think).
+    Will work with Stig to try and figure this out.
+
+2000-07-26  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php:
+    Multiple DB::connect or DB::factory calls using the same backend
+    should work now.
+
+2000-07-26  David Croft  <david@infotrek.co.uk>
+
+    * NEWS: tidy up news
+
+2000-07-26  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Just a little beutifuing.
+
+2000-07-26  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/standard/info.c
+      EXTENSIONS
+      NEWS: * EXTENSIONS -- update status on CURL & SWF
+    * NEWS --
+      1.  Change wording for the ibase and sybase DB announcement.
+      2.  Remove second pfpro announcement, if pfpro is being released with 4.0.2
+      entries about new features before 4.0.2 shouldn't be in there.
+      3.  Joey, that entry just doesn't seem incredibly relevant to the NEWS file,
+      I'll backport it if you want (or add a new entry).
+    * ext/standard/info.c -- Add a CREDIT_LINE() for CURL.
+
+    * ext/curl/curl.c: Add CURLOPT_TRANSFERTEXT option to curl_setopt().
+
+2000-07-26  Jon Parise  <jon@csh.rit.edu>
+
+    * README.CVS-RULES: MAINTAINERS has become EXTENSIONS
+
 2000-07-25  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/mcrypt/mcrypt.c: Read from /dev/u?random until the buffer is filled.
