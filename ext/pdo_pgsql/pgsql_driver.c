@@ -317,7 +317,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 {
 	pdo_pgsql_db_handle *H;
 	int ret = 0;
-	char *conn_str;
+	char *conn_str, *p, *e;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
 	dbh->driver_data = H;
@@ -325,15 +325,24 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 	
+	/* PostgreSQL wants params in the connect string to be separated by spaces,
+	 * if the PDO standard semicolons are used, we convert them to spaces
+	 */
+	e = (char *) dbh->data_source + strlen(dbh->data_source);
+	p = (char *) dbh->data_source;
+	while ((p = memchr(p, ';', (e - p)))) {
+		*p = ' ';
+	}
+
 	/* support both full connection string & connection string + login and/or password */
 	if (!dbh->username || !dbh->password) {
 		conn_str = (char *) dbh->data_source;
 	} else if (dbh->username && dbh->password) {
-		spprintf(&conn_str, 0, "%s;user=%s;password=%s", dbh->data_source, dbh->username, dbh->password);
+		spprintf(&conn_str, 0, "%s user=%s password=%s", dbh->data_source, dbh->username, dbh->password);
 	} else if (dbh->username) {
-		spprintf(&conn_str, 0, "%s;user=%s", dbh->data_source, dbh->username);
+		spprintf(&conn_str, 0, "%s user=%s", dbh->data_source, dbh->username);
 	} else {
-		spprintf(&conn_str, 0, "%s;password=%s", dbh->data_source, dbh->password);
+		spprintf(&conn_str, 0, "%s password=%s", dbh->data_source, dbh->password);
 	}
 
 	H->server = PQconnectdb(dbh->data_source);
