@@ -501,14 +501,11 @@ PHP_FUNCTION(com_load)
 	}
 
 	if (server_name != NULL) {
-		/* if a server is passed, one obviously wants to instanciate a
-		 * remote server
-		 */
-		flags = CLSCTX_REMOTE_SERVER;
-
 		/* What is server name? A String or an array? */
 
-		if (Z_TYPE_P(server_name) == IS_ARRAY) {
+		if (Z_TYPE_P(server_name) == IS_NULL) {
+			server_name = NULL;
+		} else if (Z_TYPE_P(server_name) == IS_ARRAY) {
 			pval **tmp;
 			/* DAB: 22 Sept 2001 */
 			/* Aha - we have a number of possible */
@@ -568,14 +565,12 @@ PHP_FUNCTION(com_load)
 				convert_to_long_ex(tmp);
 				flags = (CLSCTX) Z_LVAL_PP(tmp);
 			}
-		}
-		if (Z_TYPE_P(server_name) == IS_NULL) {
-			server_name = NULL;
 		} else {
 			if (!INI_INT("com.allow_dcom")) {
 				php_error(E_WARNING, "DCOM is disabled");
 				RETURN_FALSE;
 			} else {
+				flags = CLSCTX_REMOTE_SERVER;
 				convert_to_string_ex(&server_name);
 			}
 		}
