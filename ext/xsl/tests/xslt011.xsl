@@ -8,5 +8,14 @@
 <xsl:text>
 </xsl:text>
 <xsl:value-of select="php:function('foobar', /doc/@id)"/>
+<xsl:text>
+</xsl:text>
+<xsl:value-of select="php:function('nodeSet')"/>
+<xsl:text>
+</xsl:text>
+<xsl:value-of select="php:function('nodeSet',/doc)/i"/>
+<xsl:text>
+</xsl:text>
+<xsl:value-of select="php:function('nonDomNode')"/>
 </xsl:template>
 </xsl:stylesheet>
