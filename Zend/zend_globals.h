@@ -180,6 +180,12 @@ struct _zend_executor_globals {
 
 	zval *user_error_handler;
 
+	/* timeout support */
+	int timeout_seconds;
+#ifdef ZEND_WIN32
+	HWND timeout_window;
+#endif
+
 	int lambda_count;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
