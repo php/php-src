@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   of true. (Tony)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
   (Jani)
+- Fixed bug #31832 (SOAP encoding problem with complex types in WSDL mode with
+  multiple parts). (Dmitry)
 - Fixed bug #31797 (exif_read_data() uses too low nesting limit). (Ilia)
 - Fixed bug #31796 (readline completion handler does not handle empty return
   values). (Ilia)
