@@ -1,3 +1,57 @@
+1999-11-14  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mhash/mhash.c (PHP mhash): don't segfault, if mhash_end() returns NULL
+
+    * ext/db/config.m4
+      ext/db/db.c: Check for db1/ndbm.h and use it in db. Fixes #2647
+
+1999-11-14  Andi Gutmans  <andi@php.net>
+
+    * sapi/isapi/php4isapi.dsp
+      regex/engine.c
+      regex/regcomp.c: - Fixing warnings in regex
+
+1999-11-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS
+      ext/standard/array.c:
+    (PHP k[r]sort) now use compare_function from libzend to be consistent with the language-core.
+
+1999-11-14  Andi Gutmans  <andi@php.net>
+
+    * sapi/isapi/php4isapi.c
+      php4isapi/php4isapi.c
+      php4isapi/php4isapi.def
+      php4isapi/php4isapi.dsp
+      php4ts.dsw:
+    - Remove ISAPI project from main dir as it's been copied to sapi/isapi
+
+1999-11-14  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS: clearify
+
+    * ext/standard/string.c:    (PHP ucfirst,ucwords) no longer modify arg1
+
+    * ext/standard/string.c:    (PHP strtr) no longer modifies arg1.
+
+1999-11-14  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx_custom_build.dsp
+      ext/informix/ifx_custom_build.dsw
+      ext/informix/php_informix.h
+      ext/informix/ifx.dsp
+      ext/informix/ifx.dsw
+      ext/informix/ifx.ec:
+    (ext/informix) Added WIN32 build files for informix driver
+                   and make it compile with ZTS
+
+1999-11-14  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      configure.in
+      php.h:    Removed the mkstemp stuff and added tmpfile() function instead.
+
 1999-11-13  Andrei Zmievski  <zmievski@ispi.net>
 
     * internal_functions.c.in: These are inserted automatically now.
