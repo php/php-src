@@ -23,10 +23,13 @@ Add the following line to mime.types:
     type=magnus-internal/x-httpd-php	exts=php
 
 
-Add the following to obj.conf, shlib will vary depending on your OS, for
-Unix it will be something like:
+Add the following to obj.conf (for iPlanet/SunONE Web Server 6.0 and above however, you need to make the specified changes to the Init function
+in the server-id/config/magnus.conf file, and not the server-id/config/obj.conf file):
 
-    "<path-to-netscape-server>/bin/libphp4.so".
+"shlib" will vary depending on your OS:
+
+	Unix: "<path-to-netscape-server>/bin/libphp4.so".
+	Windows: "c:\path\to\PHP4\nsapiPHP4.dll"
 
 
 Note! Place following two lines after mime.types init:
@@ -49,7 +52,7 @@ Note! Place following two lines after mime.types init:
     <Object name="x-httpd-php">
     ObjectType fn="force-type" type="magnus-internal/x-httpd-php"
     Service fn=php4_execute
-    </Object>
+    </Object> 
 
 
 Authentication configuration
