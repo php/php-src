@@ -388,7 +388,7 @@ static void php_ob_prepend(const char *text, uint text_length)
 
 /* {{{ php_ob_get_buffer
  * Return the current output buffer */
-int php_ob_get_buffer(pval *p TSRMLS_DC)
+int php_ob_get_buffer(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level)==0) {
 		return FAILURE;
@@ -400,7 +400,7 @@ int php_ob_get_buffer(pval *p TSRMLS_DC)
 
 /* {{{ php_ob_get_length
  * Return the size of the current output buffer */
-int php_ob_get_length(pval *p TSRMLS_DC)
+int php_ob_get_length(zval *p TSRMLS_DC)
 {
 	if (OG(ob_nesting_level) == 0) {
 		return FAILURE;
@@ -537,6 +537,9 @@ PHP_FUNCTION(ob_start)
    Flush (send) the output buffer */
 PHP_FUNCTION(ob_flush)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	php_end_ob_buffer(1, 1 TSRMLS_CC);
 }
 /* }}} */
@@ -545,6 +548,9 @@ PHP_FUNCTION(ob_flush)
    Clean (erase) the output buffer */
 PHP_FUNCTION(ob_clean)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	php_end_ob_buffer(0, 1 TSRMLS_CC);
 }
 /* }}} */
@@ -553,6 +559,9 @@ PHP_FUNCTION(ob_clean)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	php_end_ob_buffer(1, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -561,6 +570,9 @@ PHP_FUNCTION(ob_end_flush)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	php_end_ob_buffer(0, 0 TSRMLS_CC);
 }
 /* }}} */
@@ -569,6 +581,9 @@ PHP_FUNCTION(ob_end_clean)
    Return the contents of the output buffer */
 PHP_FUNCTION(ob_get_contents)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	if (php_ob_get_buffer(return_value TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
@@ -579,6 +594,9 @@ PHP_FUNCTION(ob_get_contents)
    Return the nesting level of the output buffer */
 PHP_FUNCTION(ob_get_level)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	RETURN_LONG (OG(ob_nesting_level));
 }
 /* }}} */
@@ -587,6 +605,9 @@ PHP_FUNCTION(ob_get_level)
    Return the length of the output buffer */
 PHP_FUNCTION(ob_get_length)
 {
+	if (ZEND_NUM_ARGS() != 0)
+			WRONG_PARAM_COUNT;
+		
 	if (php_ob_get_length(return_value TSRMLS_CC)==FAILURE) {
 		RETURN_FALSE;
 	}
