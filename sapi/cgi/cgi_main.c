@@ -554,8 +554,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					CG(extended_info) = 1;
 					break;
 				case 'h':
-			    case '?':
-				    no_headers = 1;  
+				case '?':
+					no_headers = 1;  
 					php_output_startup();
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
@@ -618,7 +618,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 		if (!SG(request_info).path_translated && argc > ap_php_optind)
 			SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
-	} else if (cgi) {
+	} else {
 	/* If for some reason the CGI interface is not setting the
 	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
 	   We still call php_fopen_primary_script, because if you set doc_root
@@ -634,16 +634,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (cgi && !file_handle.handle.fp) {
 		PUTS("No input file specified.\n");
-#if 0	/* this is here for debuging under windows */
-		if (argc) {
-			i = 0;
-			php_printf("\nargc %d\n",argc); 
-			while (i <= argc) {
-				php_printf("%s\n",argv[i]); 
-				i++;
-			}
-		}
-#endif
 		php_request_shutdown((void *) 0);
 		php_module_shutdown();
 		return FAILURE;
@@ -665,7 +655,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		case PHP_MODE_STANDARD:
 			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
-		case PHP_MODE_HIGHLIGHT: {
+		case PHP_MODE_HIGHLIGHT:
+			{
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 				if (open_file_for_scanning(&file_handle CLS_CC)==SUCCESS) {
