@@ -4,6 +4,8 @@
  *
  * (c) Marcus Boerger, 2002
  *
+ * $Id$
+ *
  * Rename the file to test.php and read the instructions. If the
  * script cannot be executed or does not generate any output check
  * you error log. In most cases this would mean you found an error
@@ -16,6 +18,7 @@
 $file = array_key_exists('thumbnail',$_REQUEST) ? $_REQUEST['thumbnail'] : '';
 //$file = '/t/temp/kodak-dc4800.tif';
 //$file = '/t/temp/canon-ixus.jpg';
+//$file = '/t/temp/test2.jpg';
 if ( $file) {
 	$image = exif_thumbnail($file);
 	if ( $image!==false) {
@@ -63,6 +66,7 @@ function _search_file($root,&$possible,$path='') {
 					if ( $pos !== false
 					   && (  strtolower(substr($found,$pos+1))=='jpg'
 					      || strtolower(substr($found,$pos+1))=='tif'
+					      || strtolower(substr($found,$pos+1))=='gif'
 					      )
 					   )
 					{
@@ -112,6 +116,7 @@ function search_file() {
 // Searches for $file in document tree. The path is ignored.
 //
 function AddInfo($Name,$Value) {
+	if (is_array($Value)) $Value = 'Array: ('.join(',',$Value).')';
 	$Value = nl2br($Value);
 	return "<tr><td>$Name</td><td>$Value&nbsp;</td></tr>\n";
 }
@@ -217,7 +222,7 @@ if (function_exists('exif_tagname')) {
 <h2>function exif_read_data for <?=count($possible)?> images</h2>
 <table border='1' cellspacing='0' cellpadding='3' summary="EXIF information">
 <?php
-if (function_exists('read_exif_data')) {
+if (function_exists('exif_read_data')) {
 	$num = 0;
 	foreach($possible as $idx => $file) {
 		$num++;
@@ -234,6 +239,7 @@ if (function_exists('read_exif_data')) {
 		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true);",0);
 		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12',true);
 		$error = error_msg();// clear message
+		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12', true): $error",0);
 		//error_log("exif_read_data($file)",0);
 		$res   = '';
 		if ( $image === false) {
@@ -246,7 +252,7 @@ if (function_exists('read_exif_data')) {
 						$len++;
 						$res .= AddInfo($Name,'Array('.count($Value).')');
 						foreach( $Value as $idx => $Entry) {
-							if ($idx=='Thumbnail') $Entry = '&lt;data&gt;';
+							if ($idx==='Thumbnail') $Entry = '&lt;data&gt;';
 							$len++;
 							$res .= AddInfo($Name.':'.$idx,$Entry);
 						}
