@@ -671,10 +671,11 @@ ZEND_FUNCTION(get_class_vars)
 	if (zend_lookup_class(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
 	} else {
+		int count = zend_hash_num_elements(&ce->default_properties);
+
 		ce = *pce;
 		array_init(return_value);
 
-		int count = zend_hash_num_elements(&ce->default_properties);
 		if (count > 0) {
 			HashPosition pos;
 			zval **prop;
