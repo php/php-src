@@ -260,17 +260,6 @@ PHP_FUNCTION(pfpro_process_raw)
 		freeaddress = 1;
 	}
 
-#if 0
-	printf("Address: >%s<\n", address);
-	printf("Port: >%d<\n", port);
-	printf("Parmlist: >%s<\n", parmlist);
-	printf("Timeout: >%d<\n", timeout);
-	printf("Proxy address: >%s<\n", proxyAddress);
-	printf("Proxy port: >%d<\n", proxyPort);
-	printf("Proxy logon: >%s<\n", proxyLogon);
-	printf("Proxy password: >%s<\n", proxyPassword);
-#endif
-
 #if PFPRO_VERSION < 3
 	/* Blank the response buffer */
 	memset(response, 0, sizeof(response));
@@ -290,7 +279,6 @@ PHP_FUNCTION(pfpro_process_raw)
 #else
 	pfproCreateContext(&context, address, port, timeout, proxyAddress, proxyPort, proxyLogon, proxyPassword);
 	pfproSubmitTransaction(context, parmlist, strlen(parmlist), &response);
-	//pfproCompleteTransaction(response);
 	pfproDestroyContext(context);
 #endif
 
@@ -396,7 +384,7 @@ PHP_FUNCTION(pfpro_process)
 			address = (*args[1])->value.str.val;
 	}
 
-	/* Concatenate the passed array as specified by signio.
+	/* Concatenate the passed array as specified by Verisign.
 	   Basically it's all key=value&key=value, the only exception
 	   being if the value contains = or &, in which case we also
 	   encode the length, e.g. key[5]=bl&ah */
@@ -505,17 +493,6 @@ PHP_FUNCTION(pfpro_process)
 		freeaddress = 1;
 	}
 
-#if 0
-	printf("Address: >%s<\n", address);
-	printf("Port: >%d<\n", port);
-	printf("Parmlist: >%s<\n", parmlist);
-	printf("Timeout: >%d<\n", timeout);
-	printf("Proxy address: >%s<\n", proxyAddress);
-	printf("Proxy port: >%d<\n", proxyPort);
-	printf("Proxy logon: >%s<\n", proxyLogon);
-	printf("Proxy password: >%s<\n", proxyPassword);
-#endif
-
 	/* Allocate the array for the response now - so we catch any errors
 	   from this BEFORE we knock it off to the bank */
 
@@ -543,7 +520,6 @@ PHP_FUNCTION(pfpro_process)
 #else
 	pfproCreateContext(&context, address, port, timeout, proxyAddress, proxyPort, proxyLogon, proxyPassword);
 	pfproSubmitTransaction(context, parmlist, strlen(parmlist), &response);
-	//pfproCompleteTransaction(response);
 	pfproDestroyContext(context);
 #endif
 
