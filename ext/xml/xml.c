@@ -42,6 +42,9 @@
 
 /* Short-term TODO list:
  * - Implement XML_ExternalEntityParserCreate()
+ * - XML_SetCommentHandler
+ * - XML_SetCdataSectionHandler
+ * - XML_SetParamEntityParsing
  */
 
 /* Long-term TODO list:
