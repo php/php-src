@@ -198,18 +198,24 @@ AC_ARG_WITH(ibm-db2,
     if ! test -f "$ODBC_INCDIR/sqlcli1.h"; then
       AC_MSG_ERROR([IBM DB2 header files not found])
     fi
-
-    if ! test -f "$ODBC_LIBDIR/libdb2.so"; then
-      AC_MSG_ERROR([IBM DB2 required libraries not found])
-    fi
 	
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=db2
     ODBC_LIBS=-ldb2
-    AC_DEFINE(HAVE_IBMDB2,1,[ ])
 
-    AC_MSG_RESULT(yes)
+    PHP_TEST_BUILD(SQLExecute, [
+      AC_DEFINE(HAVE_IBMDB2,1,[ ])
+      AC_MSG_RESULT(yes)
+    ],
+    [
+      AC_MSG_RESULT(no)
+      AC_MSG_ERROR([build test failed. Please check the config.log for details.])
+    ],
+    [
+      $ODBC_LFLAGS $ODBC_LIBS
+    ])
+
   else
     AC_MSG_RESULT(no)
   fi
