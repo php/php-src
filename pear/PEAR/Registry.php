@@ -485,7 +485,7 @@ class PEAR_Registry extends PEAR
             }
             $pkgs = array();
             foreach ($path as $name => $attrs) {
-                if (isset($attrs['baseinstalldir'])) {
+                if (is_array($attrs) && isset($attrs['baseinstalldir'])) {
                     $name = $attrs['baseinstalldir'].DIRECTORY_SEPARATOR.$name;
                 }
                 $pkgs[$name] = $this->checkFileMap($name);
