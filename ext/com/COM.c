@@ -1710,7 +1710,7 @@ PHP_FUNCTION(com_propget)
 	int arg_count = ZEND_NUM_ARGS();
 	VARIANT *var_result;
 
-	if (arg_count<3) {
+	if (arg_count < 2) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 	arguments = (zval **) emalloc(sizeof(pval *)*arg_count);
