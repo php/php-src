@@ -375,7 +375,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 	MYSQL_RES		*result;
 	zval			*mysql_result;
 	int				fetchtype;
-	int				copyflag;
 	unsigned int	i;
 	MYSQL_FIELD		*fields;
 	MYSQL_ROW		row;
@@ -430,24 +429,26 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 	for (i = 0; i < mysql_num_fields(result); i++) {
 		if (row[i]) {
-			char	*column;
-			int	 column_len;
-			
+			zval *res;
+
+			MAKE_STD_ZVAL(res);
+
 			/* check if we need magic quotes */
 			if (PG(magic_quotes_runtime)) {
-				column = php_addslashes(row[i], field_len[i], &column_len, 0 TSRMLS_CC);
-				copyflag = 0;
+				Z_TYPE_P(res) = IS_STRING;
+				Z_STRVAL_P(res) = php_addslashes(row[i], field_len[i], &Z_STRLEN_P(res), 0 TSRMLS_CC);
 			} else {
-				column = row[i];
-				column_len = field_len[i];
-				copyflag = 1;
+				ZVAL_STRINGL(res, row[i], field_len[i], 1);	
 			}
+
 			if (fetchtype & MYSQLI_NUM) {
-				add_index_stringl(return_value, i, column, column_len, copyflag);
-				copyflag = 1;	
+				add_index_zval(return_value, i, res);
 			}
 			if (fetchtype & MYSQLI_ASSOC) {
-				add_assoc_stringl(return_value, fields[i].name, column, column_len, copyflag); 
+				if (fetchtype & MYSQLI_NUM) {
+					ZVAL_ADDREF(res);
+				}
+				add_assoc_zval(return_value, fields[i].name, res);
 			}
 		} else {
 			if (fetchtype & MYSQLI_NUM) {
