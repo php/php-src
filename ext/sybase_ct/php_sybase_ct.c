@@ -1667,7 +1667,7 @@ PHP_MINFO_FUNCTION(sybase)
 	SybCtLS_FETCH();
 	
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Sybase_CT Support", "enabled" );
+	php_info_print_table_header(2, "Sybase_CT Support", "enabled" );
 	sprintf(buf, "%ld", SybCtG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	sprintf(buf, "%ld", SybCtG(num_links));
