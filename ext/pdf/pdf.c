@@ -52,8 +52,8 @@ static int le_gd;
 #endif
 /* }}} */
 
-#if HAVE_PDFLIB
-
+#if HAVE_PDFLIB || HAVE_PDFLIB3
+#warning boo
 #include "php_pdf.h"
 
 static int le_pdf;

@@ -21,7 +21,7 @@
 #ifndef PHP_PDF_H
 #define PHP_PDF_H
 
-#if HAVE_PDFLIB
+#if HAVE_PDFLIB || HAVE_PDFLIB3
 
 /* with version 2.20 of pdflib PDF_open_mem isn't available unless
    the following define isn't there.
