@@ -172,7 +172,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 	
 	/* Parse through the leading whitespace, and display a warning if we
 	   get to the end without encountering a delimiter. */
-	while (isspace((int)*p)) p++;
+	while (isspace((int)*(unsigned char *)p)) p++;
 	if (*p == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
 		return NULL;
@@ -181,7 +181,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 	/* Get the delimiter and display a warning if it is alphanumeric
 	   or a backslash. */
 	delimiter = *p++;
-	if (isalnum((int)delimiter) || delimiter == '\\') {
+	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\') {
 		php_error_docref(NULL TSRMLS_CC,E_WARNING, "Delimiter must not be alphanumeric or backslash");
 		return NULL;
 	}
