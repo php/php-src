@@ -409,7 +409,7 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			break;
 	}
 	
-	if (persistent) {
+	if (persistent && PGG(allow_persistent)) {
 		list_entry *le;
 		
 		/* try to find if we already have this link in our persistent list */
