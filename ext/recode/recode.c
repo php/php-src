@@ -64,6 +64,10 @@ zend_module_entry recode_module_entry = {
 extern void timeout(int sig);
 #endif
 
+#ifdef COMPILE_DL_RECODE
+ZEND_GET_MODULE(recode)
+#endif
+
 PHP_MINIT_FUNCTION(recode)
 {
 	ReSLS_FETCH();
