@@ -8,7 +8,7 @@
 			$this->desc = empty($desc) ? "&warn.undocumented.func;" : $desc;
       $this->code = $code;
 			$this->role = empty($role) ? "public" : $role;
-			if($this->role === "public") $this->parse_proto($proto);
+			if($this->role === "public") $this->status = $this->parse_proto($proto);
 		} 
 		
 		function parse_proto($proto) {
@@ -32,9 +32,9 @@
 			$opts=0;
 			$params=array();
 			$return_type = ($this->is_type($tokens[$n])) ? $tokens[$n++] : "void";
-			if(! $this->is_name($tokens[$n])) die("$tokens[$n] is not a valid function name");
+			if(! $this->is_name($tokens[$n])) return("$tokens[$n] is not a valid function name");
 			$function_name = $tokens[$n++];
-			if($tokens[$n]!='(') die("'(' expected instead of '$tokens[$n]'");
+			if($tokens[$n]!='(') return("'(' expected instead of '$tokens[$n]'");
 			if($tokens[++$n]!=')') {			
 				for($param=0;$tokens[$n];$n++,$param++) {
 					if($tokens[$n]=='[') {
@@ -42,11 +42,11 @@
 						$opts++;
 						$n++;
 						if($param>0) { 
-							if ($tokens[$n]!=',') die("',' expected after '[' instead of $token[$n]");
+							if ($tokens[$n]!=',') return("',' expected after '[' instead of '$token[$n]'");
 							$n++;
 						}
 					}
-					if(!$this->is_type($tokens[$n])) die("type name expected instead of $tokens[$n]");
+					if(!$this->is_type($tokens[$n])) return("type name expected instead of '$tokens[$n]'");
 					$params[$param]['type']=$tokens[$n];
 					$n++;
 					if($this->is_name($tokens[$n])) {
@@ -67,13 +67,15 @@
 				$n++;
 				$opts--;
 			}
-			if($opts!=0) die ("'[' / ']' count mismatch");
-			if($tokens[$n] != ')') die ("')' expected instead of $tokens[$n]");
+			if($opts!=0) return ("'[' / ']' count mismatch");
+			if($tokens[$n] != ')') return("')' expected instead of '$tokens[$n]'");
 			
 			$this->name     = $function_name;
 			$this->returns  = $return_type;
 			$this->params   = $params;
 			$this->optional = $numopts;
+
+			return true;
 		}
 
 		function c_code() {
@@ -154,6 +156,7 @@
 							."  }\n";
 						break;
 					case "mixed":
+					case "callback":
 						$arg_string.="z";
 						$code .= "  zval * $name = NULL;\n";
 						break;
