@@ -95,7 +95,7 @@ typedef struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
-	uint read_post_bytes;
+	int read_post_bytes;
 	unsigned char headers_sent;
 	struct stat global_stat;
 	char *default_mimetype;
