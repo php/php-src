@@ -430,7 +430,7 @@ static void
 php_apache_server_startup(apr_pool_t *pchild, server_rec *s)
 {
 	tsrm_startup(1, 1, 0, NULL);
-	sapi_startup(&apache1_sapi_module);
+	sapi_startup(&apache2_sapi_module);
 	apache2_sapi_module.startup(&apache2_sapi_module);
 	apr_register_cleanup(pchild, NULL, php_apache_server_shutdown, NULL);
 	php_apache_register_module();
@@ -450,6 +450,5 @@ module MODULE_VAR_EXPORT php4_module = {
     NULL,			/* create per-server config structure */
     NULL,			/* merge per-server config structures */
     php_dir_cmds,			/* command apr_table_t */
-    NULL,          		/* handlers */
     php_register_hook		/* register hooks */
 };
