@@ -527,7 +527,7 @@ PHP_RSHUTDOWN_FUNCTION(sockets)
 }
 /* }}} */
 
-static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRMLS_DC)
+static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *max_fd TSRMLS_DC)
 {
 	zval		**element;
 	php_socket	*php_sock;
@@ -593,7 +593,7 @@ PHP_FUNCTION(socket_select)
 	struct timeval	tv;
 	struct timeval *tv_p = NULL;
 	fd_set			rfds, wfds, efds;
-	SOCKET			max_fd = 0;
+	PHP_SOCKET			max_fd = 0;
 	int			retval, sets = 0;
 	long			usec = 0;
 
@@ -2179,7 +2179,7 @@ PHP_FUNCTION(socket_create_pair)
 {
 	zval		*retval[2], *fds_array_zval;
 	php_socket	*php_sock[2];
-	SOCKET		fds_array[2];
+	PHP_SOCKET		fds_array[2];
 	long			domain, type, protocol;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE)
