@@ -714,7 +714,7 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 {
 	zend_llist *fetch_list_ptr;
 	zend_llist_element *le;
-	zend_op *opline, *opline_ptr;
+	zend_op *opline, *opline_ptr=NULL;
 	int num_of_created_opcodes = 0;
 
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
@@ -2161,7 +2161,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 {
 	zend_op opline;
 	zend_llist *fetch_list_ptr;
-	zend_op *opline_ptr;
+	zend_op *opline_ptr=NULL;
         
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
         
