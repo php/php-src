@@ -698,7 +698,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			char *data = charcol(offset);
 
 			length=dbdatlen(mssql_ptr->link,offset);
-			while (length>0 && charcol(offset)[length-1] == ' ') { /* nuke trailing whitespace */
+			while (length>0 && data[length-1] == ' ') { /* nuke trailing whitespace */
 				length--;
 			}
 			result->value.str.val = estrndup(data,length);
@@ -713,13 +713,14 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 		}
 		case SQLNUMERIC:
 		default: {
-			if (dbwillconvert(coltype(offset),SQLCHAR)) {
+			if (dbwillconvert(column_type,SQLCHAR)) {
 				char *res_buf;
-				int res_length = dbdatlen(mssql_ptr->link,offset);
+				int res_length = dbdatlen(mssql_ptr->link,offset) + 1;
+				if (column_type == SQLDATETIME) res_length += 10;
 			
-				res_buf = (char *) emalloc(res_length+1);
-				memset(res_buf, 0, res_length+1);
-				dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length,SQLCHAR,res_buf,-1);
+				res_buf = (char *) emalloc(res_length);
+				memset(res_buf, 0, res_length);
+				dbconvert(NULL,column_type,dbdata(mssql_ptr->link,offset), res_length,SQLCHAR,res_buf,-1);
 		
 				result->value.str.len = res_length;
 				result->value.str.val = res_buf;
