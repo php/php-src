@@ -569,7 +569,8 @@ class PEAR_Installer extends PEAR_Common
                     $this->log(2, "installing $bn");
                     $dest = $this->config->get('ext_dir') . DIRECTORY_SEPARATOR . $bn;
                     $this->log(3, "+ cp $ext[file] ext_dir");
-                    $copyto = $dest->_prependPath($dest, $this->installroot);
+                    //$copyto = $dest->_prependPath($dest, $this->installroot);
+                    $copyto = $dest;
                     if (!@copy($ext['file'], $copyto)) {
                         return $this->raiseError("failed to copy $bn to $copyto");
                     }
