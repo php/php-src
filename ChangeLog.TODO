@@ -42,7 +42,6 @@ March 1 1999, Version 3.0.7
   variables.
 - Clean up apxs build
 - Add INSTALL.REDHAT file to walk RedHat users through the install
-- Added YP/NIS module from Stephanie Wehner
 - Added optional second argument to mysql_fetch_array();  MYSQL_ASSOC will
   cause the resulting array to contain the associative indices only,
   MYSQL_NUM will cause the array to contain the numeric indices only (like
@@ -88,7 +87,5 @@ March 1 1999, Version 3.0.7
 - Constructors of parent classes weren't accessible to derived classes (as
   of 3.0.6).  Fixed.
 - Introduce simple regex compilation cache
-- Add gettimeofday() function
-- Add getrusage() function
 
 
