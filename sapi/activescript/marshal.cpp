@@ -69,6 +69,12 @@ static int get_script_dispatch_mdef[] = {
 	APHPT_TERM
 };
 
+static int parse_procedure_text_mdef[] = {
+	APHPT_UNK, 4, APHPM_IN,
+	APHPT_DISP, 9, APHPM_OUT,
+	APHPT_TERM
+};
+
 static int *mdef_by_func[APHP__Max] = {
 	parse_script_text_mdef,
 	NULL, /* InitNew */
@@ -78,6 +84,7 @@ static int *mdef_by_func[APHP__Max] = {
 	NULL,	/* Close */
 	NULL,	/* AddTypeLib */
 	NULL,	/* AddScriptlet */
+	parse_procedure_text_mdef,
 };
 
 static HRESULT do_marshal_in(int stub, void *args[16], int *mdef, LPSTREAM *ppstm)
@@ -254,6 +261,7 @@ static const char *func_names[APHP__Max] = {
 	"Close",
 	"AddTypeLib",
 	"AddScriptlet",
+	"ParseProcedureText",
 };
 
 HRESULT marshal_call(class TPHPScriptingEngine *engine, enum activephp_engine_func func, int nargs, ...)
@@ -389,6 +397,20 @@ HRESULT marshal_stub(LPARAM lparam)
 					(DWORD)msg->args[8],
 					(BSTR*)msg->args[9],
 					(EXCEPINFO*)msg->args[10]);
+			break;
+
+		case APHP_ParseProcedureText:
+			msg->ret = msg->engine->ParseProcedureText(
+					(LPCOLESTR)msg->args[0],
+					(LPCOLESTR)msg->args[1],
+					(LPCOLESTR)msg->args[2],
+					(LPCOLESTR)msg->args[3],
+					(IUnknown*)msg->args[4],
+					(LPCOLESTR)msg->args[5],
+					(DWORD)msg->args[6],
+					(ULONG)msg->args[7],
+					(DWORD)msg->args[8],
+					(IDispatch**)msg->args[9]);
 			break;
 
 		default:

@@ -62,21 +62,21 @@ static int clone_frags(void *pDest, void *arg TSRMLS_DC);
 	} \
 		trace("[direct] " #type "::" #method "\n"); 
 
-
-#define ASS_CALL(ret, method, args)	\
-	if (tsrm_thread_id() == m_basethread) { \
+#define ASS_CALL_(ret, eng, method, args)	\
+	if (tsrm_thread_id() == eng->m_basethread) { \
 		trace("Calling [direct] m_pass->" #method "\n"); \
-		ret = m_pass->method args; \
+		ret = eng->m_pass->method args; \
 	} else { \
 		IActiveScriptSite *ass; \
 		trace("Calling [marshall] m_pass->" #method "\n"); \
-		ret = GIT_get(m_asscookie, IID_IActiveScriptSite, (void**)&ass); \
+		ret = GIT_get(eng->m_asscookie, IID_IActiveScriptSite, (void**)&ass); \
 		if (SUCCEEDED(ret)) { \
 			ret = ass->method args; \
 			ass->Release(); \
 		} \
 	} \
 	trace("--- done calling m_pass->" #method "\n");
+#define ASS_CALL(ret, method, args)		ASS_CALL_(ret, this, method, args)
 
 /* {{{ trace */
 static inline void trace(char *fmt, ...)
@@ -281,7 +281,7 @@ static inline HRESULT GIT_put(IUnknown *unk, REFIID riid, DWORD *cookie)
 	return CoMarshalInterThreadInterfaceInStream(riid, unk, (LPSTREAM*)cookie);
 }
 
-static inline HRESULT GIT_revoke(DWORD cookie, IUnknown *unk)
+static inline HRESULT GIT_revoke(DWORD cookie, IUnknown *unk, int kill)
 {
 	IGlobalInterfaceTable *git;
 	HRESULT ret;
@@ -294,7 +294,9 @@ static inline HRESULT GIT_revoke(DWORD cookie, IUnknown *unk)
 		git->Release();
 	}
 	/* Kill remote clients */
-	return CoDisconnectObject(unk, 0);
+	if (kill)
+		return CoDisconnectObject(unk, 0);
+	return ret;
 }
 
 
@@ -371,20 +373,34 @@ public:
 	}
 };
 /* }}} */
-	STDMETHODIMP TPHPScriptingEngine::GetTypeInfoCount(unsigned int *  pctinfo) {
-		*pctinfo = 0;
-		trace("%08x: ScriptDispatch: GetTypeInfoCount\n", this);
-		return S_OK;
-	}
-	STDMETHODIMP TPHPScriptingEngine::GetTypeInfo( unsigned int iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
-		trace("%08x: ScriptDispatch: GetTypeInfo\n", this);
-		return DISP_E_BADINDEX;
-	}
+
+STDMETHODIMP TPHPScriptingEngine::GetTypeInfoCount(unsigned int *  pctinfo) {
+	*pctinfo = 0;
+	trace("%08x: ScriptDispatch: GetTypeInfoCount\n", this);
+	return S_OK;
+}
+
+STDMETHODIMP TPHPScriptingEngine::GetTypeInfo( unsigned int iTInfo, LCID lcid, ITypeInfo **ppTInfo) {
+	trace("%08x: ScriptDispatch: GetTypeInfo\n", this);
+	return DISP_E_BADINDEX;
+}
+
+static int function_exists(char *name TSRMLS_DC)
+{
+	int ex;
+	int l = strlen(name);
+	char *lcname;
+
+	lcname = zend_str_tolower_dup(name, l);
+	ex = zend_hash_exists(EG(function_table), lcname, l+1);
+	efree(lcname);
+
+	return ex;
+}
 
 int TPHPScriptingEngine::create_id(OLECHAR *name, DISPID *dispid TSRMLS_DC) 
 {
 	int ex = 0;
-	char *lcname;
 	int l;
 
 	if (m_ids >= 1023) {
@@ -394,12 +410,7 @@ int TPHPScriptingEngine::create_id(OLECHAR *name, DISPID *dispid TSRMLS_DC)
 
 	TWideString aname(name);
 
-	l = aname.ansi_len();
-	lcname = zend_str_tolower_dup(aname.ansi_string(), l);
-	ex = zend_hash_exists(EG(function_table), lcname, l+1);
-	efree(lcname);
-
-	if (!ex) {
+	if (!function_exists(aname.ansi_string() TSRMLS_CC)) {
 		trace("no such id %s\n", aname.ansi_string());
 		return 0;
 	}
@@ -450,7 +461,7 @@ STDMETHODIMP TPHPScriptingEngine::Invoke( DISPID  dispIdMember, REFIID  riid, LC
 	UINT i;
 	zval *retval = NULL;
 	zval ***params = NULL;
-	HRESULT ret = DISP_E_MEMBERNOTFOUND;
+	HRESULT dummy, ret = DISP_E_MEMBERNOTFOUND;
 	char *name;
 	int namelen;
 	TSRMLS_FETCH();
@@ -502,6 +513,8 @@ STDMETHODIMP TPHPScriptingEngine::Invoke( DISPID  dispIdMember, REFIID  riid, LC
 			ZVAL_STRINGL(zname, (char*)name, namelen, 1);
 			trace("invoke function %s\n", Z_STRVAL_P(zname));
 
+			ASS_CALL(dummy, OnEnterScript, ());
+			
 			zend_try {
 
 				if (SUCCESS == call_user_function_ex(CG(function_table), NULL, zname,
@@ -518,6 +531,8 @@ STDMETHODIMP TPHPScriptingEngine::Invoke( DISPID  dispIdMember, REFIID  riid, LC
 				/* need to populate the exception here */
 				trace("bork\n");
 			} zend_end_try();
+			
+			ASS_CALL(dummy, OnLeaveScript, ());
 			
 			zval_ptr_dtor(&zname);
 		} else {
@@ -569,10 +584,13 @@ public:
 		unsigned int FAR*  puArgErr)
 	{
 		TSRMLS_FETCH();
+		HRESULT dummy;
 
 		if (m_frag) {
 			trace("%08x: Procedure Dispatch: Invoke dispid %08x\n", this, dispIdMember);
+			ASS_CALL_(dummy, m_engine, OnEnterScript, ());
 			execute_code_fragment(m_frag, NULL, NULL TSRMLS_CC);
+			ASS_CALL_(dummy, m_engine, OnLeaveScript, ());
 		}
 		return S_OK;
 	}
@@ -672,7 +690,7 @@ static void free_code_fragment(code_frag *frag TSRMLS_DC)
 			if (frag->ptr) {
 				ScriptProcedureDispatch *disp = (ScriptProcedureDispatch*)frag->ptr;
 				disp->Release();
-				GIT_revoke(disp->m_gitcookie, (IDispatch*)disp);
+				GIT_revoke(disp->m_gitcookie, (IDispatch*)disp, 1);
 				frag->ptr = NULL;
 			}
 			break;
@@ -821,7 +839,6 @@ void TPHPScriptingEngine::do_clone(TPHPScriptingEngine *src)
 	zend_hash_apply_with_argument(&src->m_frags, clone_frags, this TSRMLS_CC); 
 }
 
-#if ACTIVEPHP_HAS_OWN_THREAD
 struct engine_startup {
 	HANDLE evt;
 	HRESULT ret;
@@ -898,12 +915,10 @@ static DWORD WINAPI script_thread(LPVOID param)
 
 	return 0;
 }
-#endif
 
 IUnknown *create_scripting_engine(TPHPScriptingEngine *tobecloned)
 {
 	IUnknown *punk = NULL;
-#if ACTIVEPHP_HAS_OWN_THREAD
 	struct engine_startup su;
 	HANDLE hthr;
 	DWORD thid;
@@ -922,9 +937,6 @@ IUnknown *create_scripting_engine(TPHPScriptingEngine *tobecloned)
 	}
 
 	CloseHandle(su.evt);
-#else
-	punk = (IActiveScript*)new TPHPScriptingEngine;
-#endif
 	return punk;
 }
 
@@ -976,10 +988,7 @@ TPHPScriptingEngine::TPHPScriptingEngine()
 	m_ids = 0;
 	TPHPClassFactory::AddToObjectCount();
 
-#if ACTIVEPHP_HAS_OWN_THREAD
 	setup_engine_state();
-#endif
-
 }
 
 TPHPScriptingEngine::~TPHPScriptingEngine()
@@ -997,6 +1006,8 @@ TPHPScriptingEngine::~TPHPScriptingEngine()
 	}
 
 	TPHPClassFactory::RemoveFromObjectCount();
+
+	DestroyWindow(m_queue);
 }
 
 /* Set some executor globals and execute a zend_op_array.
@@ -1212,16 +1223,12 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptSite(IActiveScriptSite *pass)
 
 	if (pass) {
 		m_basethread = tsrm_thread_id();
-#if ACTIVEPHP_HAS_OWN_THREAD
 		HRESULT ret = GIT_put(pass, IID_IActiveScriptSite, &m_asscookie);
-#endif
 	}
 	
 	if (m_pass) {
-#if ACTIVEPHP_HAS_OWN_THREAD
 		trace("killing off ass cookie\n");
-		GIT_revoke(m_asscookie, m_pass);
-#endif
+		GIT_revoke(m_asscookie, m_pass, 0);
 		m_pass->Release();
 		m_pass = NULL;
 	}
@@ -1238,10 +1245,6 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptSite(IActiveScriptSite *pass)
 		trace("----> %s", php_win_err(ret));
 		
 		if (SUCCEEDED(ret)) {
-
-#if !ACTIVEPHP_HAS_OWN_THREAD
-			setup_engine_state();
-#endif
 			SetScriptState(SCRIPTSTATE_INITIALIZED);
 		}
 	}
@@ -1283,19 +1286,14 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptState(SCRIPTSTATE ss)
 
 	if (start_running) {
 		/* run "main()", as described in the docs */	
-		if (m_pass) {
-			ASS_CALL(dummy, OnEnterScript, ());
-		}
+		ASS_CALL(dummy, OnEnterScript, ());
 		trace("%08x: apply execute main to m_frags\n", this);
 		m_in_main = 1;
 		m_stop_main = 0;
 		zend_hash_apply_with_argument(&m_frags, execute_main, this TSRMLS_CC);
 		m_in_main = 0;
 		trace("%08x: --- done execute main\n", this);
-
-		if (m_pass) {
-			ASS_CALL(dummy, OnLeaveScript, ());
-		}
+		ASS_CALL(dummy, OnLeaveScript, ());
 	}
 
 	/* inform host/site of the change */
@@ -1349,7 +1347,6 @@ STDMETHODIMP TPHPScriptingEngine::Close(void)
 		m_pass->OnStateChange(m_scriptstate);
 	}
 	
-	//GIT_revoke(m_asscookie, m_pass);
 	trace("%08x: release site \n", this);
 
 	if (m_pass && tsrm_thread_id() == m_basethread) {
@@ -1610,8 +1607,7 @@ trace("AddScriptlet\n");
 	/* lets invent a function name for the scriptlet */
 	char sname[256];
 
-	/* should check if the name is already used! */
-	if (pstrDefaultName) 
+	if (pstrDefaultName && !function_exists(default_name.ansi_string() TSRMLS_CC))
 		strcpy(sname, default_name.ansi_string());
 	else {
 		sname[0] = 0;
@@ -1629,8 +1625,9 @@ trace("AddScriptlet\n");
 	}
 
 
-	trace("%08x: AddScriptlet:\n state=%s\n name=%s\n code=%s\n item=%s\n subitem=%s\n event=%s\n delim=%s\n line=%d\n",
-			this, scriptstate_to_string(m_scriptstate),
+	trace("%08x: AddScriptlet: [%s]\n state=%s\n name=%s\n code=%s\n item=%s\n subitem=%s\n event=%s\n delim=%s\n line=%d\n",
+			this, sname, 
+			scriptstate_to_string(m_scriptstate),
 			default_name.safe_ansi_string(), code.safe_ansi_string(), item_name.safe_ansi_string(),
 			sub_item_name.safe_ansi_string(), event_name.safe_ansi_string(), delimiter.safe_ansi_string(),
 			ulStartingLineNumber);
@@ -1692,7 +1689,7 @@ trace("ParseScriptText\n");
 		code(pstrCode),
 		item_name(pstrItemName),
 		delimiter(pstrDelimiter);
-	HRESULT ret;
+	HRESULT ret, dummy;
 	TSRMLS_FETCH();
 
 	trace("pstrCode=%p pstrItemName=%p punkContext=%p pstrDelimiter=%p pvarResult=%p pexcepinfo=%p\n",
@@ -1739,8 +1736,10 @@ trace("ParseScriptText\n");
 
 		if (doexec) {
 			/* execute the code as an expression */
+			ASS_CALL(dummy, OnEnterScript, ());
 			if (!execute_code_fragment(frag, pvarResult, pexcepinfo TSRMLS_CC))
 				ret = DISP_E_EXCEPTION;
+			ASS_CALL(dummy, OnLeaveScript, ());
 		}
 
 		zend_hash_next_index_insert(&m_frags, &frag, sizeof(code_frag*), NULL);
@@ -1768,7 +1767,15 @@ STDMETHODIMP TPHPScriptingEngine::ParseProcedureText(
 		/* [in] */ DWORD dwFlags,
 		/* [out] */ IDispatch **ppdisp)
 {
+	TSRMLS_FETCH();
 trace("ParseProcedureText\n");
+
+	if (tsrm_thread_id() != m_enginethread)
+		return marshal_call(this, APHP_ParseProcedureText, 10,
+				pstrCode, pstrFormalParams, pstrProcedureName, pstrItemName,
+				punkContext, pstrDelimiter, dwSourceContextCookie,
+				ulStartingLineNumber, dwFlags, ppdisp);
+
 	ENGINE_THREAD_ONLY(IActiveScriptParseProcedure, ParseProcedureText);
 	/* This is the IActiveScriptParseProcedure implementation.
 	 * IE uses this to request for an IDispatch that it will invoke in
@@ -1783,8 +1790,6 @@ trace("ParseProcedureText\n");
 		item_name(pstrItemName),
 		delimiter(pstrDelimiter);
 	HRESULT ret;
-	TSRMLS_FETCH();
-
 	
 	trace("%08x: ParseProc:\n state=%s\nparams=%s\nproc=%s\nitem=%s\n delim=%s\n line=%d\n",
 			this, scriptstate_to_string(m_scriptstate),
@@ -1977,6 +1982,7 @@ void activescript_error_handler(int type, const char *error_filename,
 	TSRMLS_FETCH();
 	char *buf;
 	int buflen;
+	HRESULT dummy;
 	TPHPScriptingEngine *engine = (TPHPScriptingEngine*)SG(server_context);
 	
 	/* ugly way to detect an exception for an eval'd fragment */
@@ -1990,8 +1996,9 @@ void activescript_error_handler(int type, const char *error_filename,
 	
 	TActiveScriptError *eobj = new TActiveScriptError(error_filename, error_lineno, buf);
 	trace("raising error object!\n");
-	if (engine->m_pass)
-		engine->m_pass->OnScriptError(eobj);
+	if (engine->m_pass) {
+		ASS_CALL_(dummy, engine, OnScriptError, (eobj));
+	}
 	
 	switch(type) {
 		case E_ERROR:

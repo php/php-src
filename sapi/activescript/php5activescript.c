@@ -41,7 +41,7 @@ static int sapi_activescript_ub_write(const char *str, uint str_length TSRMLS_DC
 {
 	/* In theory, this is a blackhole.  In practice, I want to see the output
 	 * in the debugger! */
-
+#if ZEND_DEBUG
 	char buf[1024];
 	uint l, a = str_length;
 
@@ -54,7 +54,7 @@ static int sapi_activescript_ub_write(const char *str, uint str_length TSRMLS_DC
 		OutputDebugString(buf);
 		a -= l;
 	}
-
+#endif
 	return str_length;
 }
 
@@ -93,7 +93,7 @@ zend_module_entry php_activescript_module = {
 
 sapi_module_struct activescript_sapi_module = {
 	"activescript",						/* name */
-	"Active Script",					/* pretty name */
+	"ActiveScript",					/* pretty name */
 									
 	php_activescript_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
@@ -129,6 +129,22 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 			tsrm_startup(128, 32, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
 
+			/* useful behaviour for the host: we take the application path
+			 * and use that dir as the override for the php.ini, so that
+			 * we don't pick up a global .ini file */
+			{
+				char module_dir[MAXPATHLEN];
+				char *slash;
+
+				GetModuleFileName(0, module_dir, sizeof(module_dir));
+				slash = strrchr(module_dir, '\\');
+				if (slash) {
+					slash[1] = '\0';
+				}
+
+				activescript_sapi_module.php_ini_path_override = strdup(module_dir);
+			}
+			
 			sapi_startup(&activescript_sapi_module);
 			if (activescript_sapi_module.startup) {
 				activescript_sapi_module.startup(&sapi_module);
