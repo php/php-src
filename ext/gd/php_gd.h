@@ -66,7 +66,7 @@ PHP_MINIT_FUNCTION(gd);
 PHP_MSHUTDOWN_FUNCTION(gd);
 
 #ifndef HAVE_GDIMAGECOLORRESOLVE
-static int gdImageColorResolve(gdImagePtr, int, int, int);
+extern int gdImageColorResolve(gdImagePtr, int, int, int);
 #endif
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
