@@ -1298,7 +1298,7 @@ trace("Add %s to global namespace\n", name);
 			if (FAILED(typ->GetFuncDesc(i, &func)))
 				continue;
 
-			/* Look at it's type */
+			/* Look at its type */
 			if (func->invkind == INVOKE_PROPERTYGET
 					&& VT_PTR == func->elemdescFunc.tdesc.vt
 					&& VT_USERDEFINED == func->elemdescFunc.tdesc.lptdesc->vt
