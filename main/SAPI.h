@@ -41,6 +41,7 @@
 typedef struct {
 	char *header;
 	uint header_len;
+	zend_bool replace;
 } sapi_header_struct;
 
 
@@ -130,7 +131,9 @@ SAPI_API void sapi_activate(SLS_D);
 SAPI_API void sapi_deactivate(SLS_D);
 SAPI_API void sapi_initialize_empty_request(SLS_D);
 
-SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool duplicate);
+SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace);
+#define sapi_add_header(header_line, header_line_len, duplicate) \
+	sapi_add_header_ex((header_line), (header_line_len), (duplicate), 1)
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg SLS_DC);
