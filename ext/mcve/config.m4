@@ -51,6 +51,20 @@ yes
   ],[
     AC_MSG_ERROR([libmcve 3.2.2 or greater required.])
   ])
+
+  AC_MSG_CHECKING([for correct libmonetra 4.2 or higher])
+  AC_EGREP_CPP(yes,[
+#include "$MCVE_DIR/include/mcve.h"
+#ifdef MCVE_SetSSL_CAfile
+yes
+#endif
+  ],[
+    AC_MSG_RESULT([yes])
+  ],[
+    AC_DEFINE([LIBMONETRA_BELOW_4_2], 1, [Whether or not we're using libmonetra 4.2 or higher ])
+    AC_MSG_ERROR([no])
+  ])
+
   CPPFLAGS=$saved_CPPFLAGS
 
   PHP_ADD_INCLUDE($MCVE_DIR/include)

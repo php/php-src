@@ -25,6 +25,14 @@
 
 #include "php.h"
 
+#if PHP_WIN32
+#include "config.w32.h"
+#elif defined NETWARE
+#include "config.nw.h"
+#else
+#include "php_config.h"
+#endif
+
 #if HAVE_MCVE
 
 /* standard php include(s) */
@@ -719,23 +727,34 @@ PHP_FUNCTION(m_setssl)
 }
 /* }}} */
 
-/* {{{ proto int m_setssl_files(string sslkeyfile, string sslcertfile)
+/* {{{ proto int m_setssl_files(resource conn, string sslkeyfile, string sslcertfile)
    Set certificate key files and certificates if server requires client certificate
    verification
 */
 PHP_FUNCTION(m_setssl_files)
 {
+	MCVE_CONN *conn;
 	int retval;
-	zval **arg1, **arg2;
+	zval **arg1, **arg2, **arg3;
 
+#ifndef LIBMONETRA_BELOW_4_2
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+		WRONG_PARAM_COUNT;
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection", le_conn);
+#else
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
+#endif
 
-	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
 
+#ifndef LIBMONETRA_BELOW_4_2
+	convert_to_string_ex(arg3);
+	retval = MCVE_SetSSL_Files(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3));
+#else
+	convert_to_string_ex(arg1);	
 	retval = MCVE_SetSSL_Files(Z_STRVAL_PP(arg1), Z_STRVAL_PP(arg2));
-
+#endif
 	RETURN_LONG(retval);
 }
 /* }}} */
