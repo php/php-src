@@ -2,11 +2,12 @@
 PostgreSQL notice function
 --SKIPIF--
 <?php include("skipif.inc"); ?>
+--INI--
+pgsql.log_notice=1
+pgsql.ignore_notices=0
 --FILE--
 <?php
 include 'config.inc';
-
-ini_set('pgsql.log_notice',1);
 
 $db = pg_connect($conn_str);
 pg_query($db, "BEGIN;");
