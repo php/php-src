@@ -77,44 +77,44 @@ class HTTP {
         global $HTTP_SERVER_VARS;
 
         /* If the client has sent an Accept-Language: header, see if
-	     * it contains a language we support.
-	     */
-	    if (isset($HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'])) {
-	        $accepted = split(',[[:space:]]*', $HTTP_ACCEPT_LANGUAGE);
-	        for ($i = 0; $i < count($accepted); $i++) {
-		        if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], &$arr)) {
-		            $q = (double)$arr[2];
-		            $l = $arr[1];
-		        } else {
-		            $q = 42;
-		            $l = $accepted[$i];
-		        }
-		
-		        if (!empty($supported[$l]) && ($q > 0.0)) {
-		            if ($q == 42) {
-			            return $l;
-		            }
-		            $candidates[$l] = $q;
-		        }
-	        }	        
-	        if (isset($candidates)) {
-		        arsort($candidates);
-		        reset($candidates);
-		        return key($candidates);
-	        }
-	    }
+         * it contains a language we support.
+         */
+        if (isset($HTTP_SERVER_VARS['HTTP_ACCEPT_LANGUAGE'])) {
+            $accepted = split(',[[:space:]]*', $HTTP_ACCEPT_LANGUAGE);
+            for ($i = 0; $i < count($accepted); $i++) {
+                if (eregi('^([a-z]+);[[:space:]]*q=([0-9\.]+)', $accepted[$i], &$arr)) {
+                    $q = (double)$arr[2];
+                    $l = $arr[1];
+                } else {
+                    $q = 42;
+                    $l = $accepted[$i];
+                }
 
-	    /* Check for a valid language code in the top-level domain of
-	     * the client's host address.
-	     */
-	    if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], &$arr)) {
-	        $lang = strtolower($arr[1]);
-	        if (!empty($supported[$lang])) {
-		        return $lang;
-	        }
-	    }
+                if (!empty($supported[$l]) && ($q > 0.0)) {
+                    if ($q == 42) {
+                        return $l;
+                    }
+                    $candidates[$l] = $q;
+                }
+            }
+            if (isset($candidates)) {
+                arsort($candidates);
+                reset($candidates);
+                return key($candidates);
+            }
+        }
 
-	    return $default;
+        /* Check for a valid language code in the top-level domain of
+         * the client's host address.
+         */
+        if (ereg("\.[^\.]+$", $HTTP_SERVER_VARS['REMOTE_HOST'], &$arr)) {
+            $lang = strtolower($arr[1]);
+            if (!empty($supported[$lang])) {
+                return $lang;
+            }
+        }
+
+        return $default;
     }
 }
 ?>
