@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Functions that expect a resource but are passed something else now return 
+  NULL instead of FALSE. (Thies, Zend Engine)
 - Fixed gmmktime(), on certain systems it incorrectly adjusted for the timezone
   offset and daylight savings time. (Andrei)
 - Moved VC++ Win32 project and workspace files to the win32 directory
