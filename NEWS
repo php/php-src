@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.0
+- read_exif_data is now an alias for exif_read_data
+  important to differenciate old/new version for tests)
+- new function exif_tagname returns the names of tags
+  new function exif_thumbnail extracts embedded thumbnail (Marcus)
 - Introduced major modifications to the Sockets Extension and its API (Jason):
   . Fixed numerous bugs.
   . Added automatic host lookup capability to all functions that take addr's
