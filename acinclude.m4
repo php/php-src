@@ -188,7 +188,77 @@ X
     (eval echo \"$ac_link\"; eval $ac_link && ./conftest) >>$1 2>&1
     rm -fr conftest*
 ])
-	
+
+AC_DEFUN(PHP_MISSING_PREAD_DECL,[
+  AC_CACHE_CHECK(whether pread works without custom declaration,ac_cv_pread,[
+  AC_TRY_COMPILE([#include <unistd.h>],[size_t (*func)() = pread],[
+    ac_cv_pread=yes
+  ],[
+    echo test > conftest_in
+    AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+      main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
+    ],[
+      ac_cv_pread=yes
+    ],[
+      echo test > conftest_in
+      AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+        ssize_t pread(int, void *, size_t, off64_t);
+        main() { char buf[3]; return !(pread(open("conftest_in", O_RDONLY), buf, 2, 0) == 2); }
+      ],[
+        ac_cv_pread=64
+      ],[
+        ac_cv_pread=no
+      ])
+    ])
+  ])
+  ])
+  case $ac_cv_pread in
+  no) ac_cv_func_pread=no;;
+  64) AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default]);;
+  esac
+])
+
+AC_DEFUN(PHP_MISSING_PWRITE_DECL,[
+  AC_CACHE_CHECK(whether pwrite works without custom declaration,ac_cv_pwrite,[
+  AC_TRY_COMPILE([#include <unistd.h>],[size_t (*func)() = pwrite],[
+    ac_cv_pwrite=yes
+  ],[
+    AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+      main() { return !(pwrite(open("conftest_out", O_WRONLY|O_CREAT, 0600), "Ok", 2, 0) == 2); }
+    ],[
+      ac_cv_pwrite=yes
+    ],[
+      AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+        ssize_t pwrite(int, void *, size_t, off64_t);
+        main() { return !(pwrite(open("conftest_out", O_WRONLY|O_CREAT, 0600), "Ok", 2, 0) == 2); }
+      ],[
+        ac_cv_pwrite=64
+      ],[
+        ac_cv_pwrite=no
+      ])
+    ])
+  ])
+  ])
+  case $ac_cv_pwrite in
+  no) ac_cv_func_pwrite=no;;
+  64) AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default]);;
+  esac
+])
+
 AC_DEFUN(PHP_MISSING_TIME_R_DECL,[
   AC_MSG_CHECKING(for missing declarations of reentrant functions)
   AC_TRY_COMPILE([#include <time.h>],[struct tm *(*func)() = localtime_r],[

@@ -238,6 +238,14 @@ extern char **environ;
 #define php_sleep sleep
 #endif
 
+#ifdef PHP_PWRITE_64
+ssize_t pwrite(int, void *, size_t, off64_t);
+#endif
+
+#ifdef PHP_PREAD_64
+ssize_t pread(int, void *, size_t, off64_t);
+#endif
+
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size);
 PHPAPI int php_printf(const char *format, ...);
