@@ -304,6 +304,10 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 
 #endif
 
+#if 0
+/* FreeBSD floating point precision fix */
+#include <floatingpoint.h>
+#endif
 
 int zend_startup(zend_utility_functions *utility_functions, char **extensions, int start_builtin_functions)
 {
@@ -316,6 +320,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 	start_memory_manager(ALS_C);
 #endif
 
+#if 0
+	/* FreeBSD floating point precision fix */
+	fpsetmask(FP_X_IMP);
+#endif
+		
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
 	zend_printf = utility_functions->printf_function;
