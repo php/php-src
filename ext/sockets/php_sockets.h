@@ -102,9 +102,10 @@ typedef struct {
 } php_sockets_globals;
 
 /* Prototypes */
-int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
-int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
-int php_read(int bsd_socket, void *buf, size_t maxlen, int flags);
+static int php_open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
+static int php_accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
+static int php_read(int bsd_socket, void *buf, size_t maxlen, int flags);
+static char *php_strerror(int error TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
