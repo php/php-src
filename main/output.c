@@ -120,6 +120,12 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 	uint initial_size, block_size;
 
 	if (OG(ob_lock)) {
+		if (SG(headers_sent) && !SG(request_info).headers_only) {
+			OG(php_body_write) = php_ub_body_write_no_header;
+		} else {
+			OG(php_body_write) = php_ub_body_write;
+		}
+		OG(ob_nesting_level) = 0;
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
