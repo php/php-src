@@ -35,6 +35,7 @@
 #include "SAPI.h"
 #include "php_gd.h"
 #include "ext/standard/info.h"
+#include "php_open_temporary_file.h"
 
 #if HAVE_SYS_WAIT_H
 # include <sys/wait.h>
@@ -1767,7 +1768,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		FILE *tmp;
 		char  buf[4096];
 
-		tmp = tmpfile();
+		tmp = php_open_temporary_file("", "", NULL TSRMLS_CC);
 		if (tmp == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open temporary file");
 			RETURN_FALSE;
