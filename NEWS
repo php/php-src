@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.1
+- Fixed unloading of dynamically loaded extensions. 
+  (Marcus, kameshj at fastmail dot fm)
 - Fixed bug #29119 (html_entity_decode() misbehaves with UTF-8). (Moriyoshi)
 - Fixed bug #28895 (ReflectionClass::isAbstract always returns false). (Marcus)
 - Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
