@@ -123,7 +123,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	
 	if (!get_module) {
 		dlclose(handle);
-		php_error(E_CORE_WARNING,"Invalid library (maybe not a PHP3 library) '%s' ",file->value.str.val);
+		php_error(E_CORE_WARNING,"Invalid library (maybe not a PHP library) '%s' ",file->value.str.val);
 		RETURN_FALSE;
 	}
 	module_entry = get_module();
