@@ -2872,6 +2872,9 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			} else {
 				FREE_OP1_IF_VAR();
 			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
 		}

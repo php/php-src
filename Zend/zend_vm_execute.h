@@ -1968,6 +1968,9 @@ static int ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			} else {
 				;
 			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
+			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
 		}
@@ -4383,6 +4386,9 @@ static int ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				;
 			} else {
 				;
+			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
@@ -7461,6 +7467,9 @@ static int ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 			} else {
 				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
@@ -18237,6 +18246,9 @@ static int ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				;
 			} else {
 				;
+			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
@@ -30536,6 +30548,9 @@ static int ZEND_FE_RESET_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 			} else {
 				FREE_OP_IF_VAR(free_op1);
+			}
+			if (!EG(exception)) {
+				zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Object of type %s did not create an Iterator", ce->name);
 			}
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			ZEND_VM_NEXT_OPCODE();
