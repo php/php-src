@@ -28,7 +28,7 @@ EOF;
 	exit(1);
 }
 
-if (!class_exists("DirectoryTreeIterator")) require_once("directorytreeiterator.inc");
+if (!class_exists("DirectoryTreeIterator", false)) require_once("directorytreeiterator.inc");
 
 echo $argv[1]."\n";
 foreach(new DirectoryTreeIterator($argv[1]) as $file)

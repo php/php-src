@@ -26,8 +26,8 @@ EOF;
 	exit(1);
 }
 
-if (!class_exists("KeyFilter")) require_once("keyfilter.inc");
-if (!class_exists("IniGroups")) require_once("inigroups.inc");
+if (!class_exists("KeyFilter", false)) require_once("keyfilter.inc");
+if (!class_exists("IniGroups", false)) require_once("inigroups.inc");
 
 $it = new IniGroups($argv[1]);
 if ($argc>2) {

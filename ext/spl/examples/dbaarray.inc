@@ -9,7 +9,7 @@
  * SPL - Standard PHP Library
  */
 
-if (!class_exists("DbaReader")) require_once("dbareader.inc");
+if (!class_exists("DbaReader", false)) require_once("dbareader.inc");
 
 /** @ingroup Examples
  * @brief   This implements a DBA Array
