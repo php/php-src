@@ -1940,7 +1940,9 @@ void _php3_strip_tags(char *rbuf, int len, int state, char *allow) {
 		_php3_strtolower(allow);
 		tbuf = emalloc(PHP_TAG_BUF_SIZE+1);
 		tp = tbuf;
-	} else tp=NULL;
+	} else {
+		tbuf = tp = NULL;
+	}
 
 	while(i<len) {
 		switch (c) {
