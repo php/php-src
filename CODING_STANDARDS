@@ -115,11 +115,15 @@ Exceptions:
     cvs user foo.  This allows easier tracking of why code was commented out, 
     especially in bundled libraries.  
 
+[10] Do no define that is not available. For instance, if library available is 
+     missing function(s), do not define function nor raise error for missing 
+     function(s).
+
 Naming Conventions
 ------------------
 
 [1] Function names for user-level functions should be enclosed with in
-    the PHP_FUNCTION() macro. They should be in lowercase, with words
+    the ZEND_FUNCTION() macro. They should be in lowercase, with words
     underscore delimited, with care taken to minimize the letter count.
     Abbreviations should not be used when they greatly decrease the
     readability of the function name itself.
@@ -220,7 +224,7 @@ function does.  It would look like this:
 
 /* {{{ proto int abs(int number)
    Returns the absolute value of the number */
-PHP_FUNCTION(abs)
+ZEND_FUNCTION(abs)
 {
    ...
 }
