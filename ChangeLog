@@ -1,3 +1,71 @@
+2001-11-11  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * sapi/cgi/cgi_main.c: fixed output problem with output buffering handler.
+
+2001-11-11  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/file.c:
+    Fix all (at least, I tried to catch all) proto's in file.c
+
+    * ext/standard/file.c: Add warning when set_file_buffer() fails
+
+2001-11-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c
+      ext/standard/php_array.h: - Renaming key_exists to array_key_exists
+    - Renamed key_exists tp array_key_exists. 
+
+2001-11-11  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    more DB_ERROR_ALREADY_EXISTS error maping for Postgres 6.x
+
+2001-11-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c:
+    MFH: Fix crash bug on malformed .ini file
+
+    * ext/standard/basic_functions.c: Fix crash bug on malformed .ini file
+
+2001-11-11  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/sysvshm/sysvshm.c: compile fix
+
+2001-11-11  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c: MFH output buffering fixes
+
+2001-11-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/Console/Getopt.php: Add missing loop variable $i.
+
+    Suppress more warnings when using the option separator '--'.
+
+    * pear/Console/Getopt.php:
+    Suppress warning on long-options without an additional argument.
+
+2001-11-11  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/sysvshm/sysvshm.c: Fix for 14012
+
+2001-11-11  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c:
+    Make the filesize 0 when upload fails. And changed the error messages to be different from each other.
+
+    * main/rfc1867.c:
+    Fix for bug: #14008. Still needs some minor changes but should give idea about this.
+
+2001-11-11  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS
+      ext/gd/gd.c: MFH
+
+2001-11-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Clean up.
+
 2001-11-10  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: MFH
