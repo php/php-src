@@ -14,7 +14,7 @@ function __autoload($c)
 	}
 }
 
-$a = new Reflection_Class('autoload_class');
+$a = new ReflectionClass('autoload_class');
 
 if (is_object($a)) {
 	echo "OK\n";
