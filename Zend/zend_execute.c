@@ -1106,11 +1106,24 @@ static void zend_pre_incdec_property(znode *result, znode *op1, znode *op2, temp
 
 	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
+
+		if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+			zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+
+			if (z->refcount == 0) {
+				zval_dtor(z);
+				FREE_ZVAL(z);
+			}
+			z = value;
+		}
 		SEPARATE_ZVAL_IF_NOT_REF(&z);
 		incdec_op(z);
+		*retval = z;
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		if (z->refcount <= 1) {
+		SELECTIVE_PZVAL_LOCK(*retval, result);
+		if (z->refcount == 0) {
 			zval_dtor(z);
+			FREE_ZVAL(z);
 		}
 	}
 	
@@ -1153,13 +1166,23 @@ static void zend_post_incdec_property(znode *result, znode *op1, znode *op2, tem
 
 	if (!have_get_ptr) {
 		zval *z = Z_OBJ_HT_P(object)->read_property(object, property, 0 TSRMLS_CC);
-		SEPARATE_ZVAL_IF_NOT_REF(&z);
+
+		if (z->type == IS_OBJECT && Z_OBJ_HT_P(object)->get) {
+			zval *value = Z_OBJ_HT_P(object)->get(z TSRMLS_CC);
+
+			if (z->refcount == 0) {
+				zval_dtor(z);
+				FREE_ZVAL(z);
+			}
+			z = value;
+		}
 		*retval = *z;
 		zendi_zval_copy_ctor(*retval);
 		incdec_op(z);
 		Z_OBJ_HT_P(object)->write_property(object, property, z TSRMLS_CC);
-		if (z->refcount <= 1) {
+		if (z->refcount == 0) {
 			zval_dtor(z);
+			FREE_ZVAL(z);
 		}
 	}
 	
@@ -1560,6 +1583,15 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 					z = Z_OBJ_HT_P(object)->read_dimension(object, property, BP_VAR_W TSRMLS_CC);
 					break;
 			}
+			if (z->type == IS_OBJECT && Z_OBJ_HT_P(z)->get) {
+				zval *value = Z_OBJ_HT_P(z)->get(z TSRMLS_CC);
+
+				if (z->refcount == 0) {
+					zval_dtor(z);
+					FREE_ZVAL(z);
+				}
+				z = value;
+			}
 			SEPARATE_ZVAL_IF_NOT_REF(&z);
 			binary_op(z, z, value TSRMLS_CC);
 			switch (opline->extended_value) {
@@ -1572,8 +1604,9 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 			}
 			*retval = z;
 			SELECTIVE_PZVAL_LOCK(*retval, result);
-			if (z->refcount <= 1) {
+			if (z->refcount == 0) {
 				zval_dtor(z);
+				FREE_ZVAL(z);
 			}
 		}
 
