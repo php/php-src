@@ -2,12 +2,15 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
-- Fixed crash in OCIFetchStatement() when trying to read after
-  all data has already been read. (Thies)
-- fopen_wrappers() are now extensible via modules
+- Parse errors in the php.ini files under Windows will no longer mess up the
+  HTTP headers in CGI mode and are now displayed in a message box (Zeev)
+- Fixed a crash in OCIFetchStatement() when trying to read after all data
+  has already been read. (Thies)
+- fopen_wrappers() are now extensible via modules (Hartmut Holzgraefe)
 - Make trim strip \0 to match php 3 (Rasmus)
 - Added function imagecreatefromxbm(). (Jouni)
-- Added function imagewbmp(). (Jouni, based on patch from Rune Nordbøe Skillingstad)
+- Added function imagewbmp(). (Jouni, based on patch from Rune Nordbøe
+  Skillingstad)
 - Added str_pad() for padding a string with an arbitrary string on left or
   right. (Andrei)
 - Made the short_tags, asp_tags and allow_call_time_pass_reference INI
