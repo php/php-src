@@ -1,3 +1,86 @@
+2002-10-31  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/xslt_getopt.phpt: copy/waste error
+
+    * ext/xslt/config.m4
+      ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+    - Add constant XSLT_SABOPT_FILES_TO_HANDLER overriding the default
+      behavior of Sablotron to handle files itself, even if a scheme-handler
+      is registered.
+    - Implement xslt_getopt
+    - Modify behavior of xslt_setopt, so that it returns the previous value.
+
+
+    * ext/xslt/tests/xslt_setopt.phpt: Fix typo
+
+    * ext/xslt/tests/xslt_getopt.phpt: Add test for xslt_getopt
+
+
+2002-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/config.m4: Fixed library capability detection behaviour.
+
+2002-10-31  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: fix proto for clone_node
+
+2002-10-31  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/php_cli.c: Added built date and time to -v output.
+
+2002-10-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities.phpt
+      tests/strings/003.phpt: Moved the test into the suitable place
+
+2002-10-31  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * README.CVS-RULES: - Bah, Jani needs to be clearer next time ;P
+
+    * README.CVS-RULES: - Make Jani happy
+
+2002-10-31  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: jaws
+
+2002-10-31  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * Makefile.global
+      run-tests.php: Discuss first!
+
+2002-10-31  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * Makefile.global
+      run-tests.php: Fixed more ini settings.
+
+2002-10-31  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/calendar/calendar.c
+      ext/calendar/jewish.c
+      ext/calendar/sdncal.h:
+    - Added an aditional parameter to the jdtojewish() function which makes
+      the function return the symbolic hebrew name. (Patch by Moshe Doron
+      <mosdoron@netvision.net.il>)
+    - Added an aditional parameter to the jdtojewish() function which makes
+      the function return the symbolic hebrew name. (Moshe Doron, Derick)
+
+2002-10-31  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com/COM.c:
+    Correct a copy-n-paste bug.  Spotted by Michael Sisolak <msisolak@yahoo.com>
+
+2002-10-31  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/strings/004.phpt:
+    - Fix test, in some cases the first significant number in the time
+      was a 3
+
+2002-10-31  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    Patch for windows DSN less connection #20086 (by john@johnandlouise.com)
+
 2002-10-30  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/iconv/iconv.c: Prevent unnecessary notices on success
