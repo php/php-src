@@ -27,7 +27,7 @@
 #include "internal_functions_registry.h"
 #include "php_standard.h"
 #include "php_math.h"
-#include "http.h"
+#include "php_http.h"
 #include "php_incomplete_class.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
