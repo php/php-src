@@ -519,8 +519,8 @@ int php_init_config()
 					strcat(php_ini_scanned_files, *(char **)element->data);		
 					strcat(php_ini_scanned_files, element->next ? ",\n" : "\n");
 				}	
-				zend_llist_destroy(&scanned_ini_list);
 			}
+			zend_llist_destroy(&scanned_ini_list);
 		}
 	}
 	return SUCCESS;
