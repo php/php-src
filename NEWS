@@ -23,9 +23,11 @@ PHP 4                                                                      NEWS
 - Aliased dba_popen() to dba_open() until 4.3.1 when persistent STDIO streams
   are introduced. (Andrei)
 - Fixed a security bug in the bundled MySQL library. (Georg, Stefan)
-- ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
-  {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
-  installed as {PREFIX}/bin/php-cgi.
+- If you don't specify building any other SAPI "make install" will install the
+  CGI SAPI binary in {PREFIX}/bin/php. If you want to install CLI SAPI in that
+  location use "make install-cli" after "make install" or add --disable-cgi
+  to your configure options. In the Windows distribution CLI SAPI is included
+  in the "cli" folder. (Edin)
 - Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
