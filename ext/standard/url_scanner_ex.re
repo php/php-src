@@ -45,11 +45,24 @@ static inline void smart_str_append(smart_str *dest, smart_str *src)
 	
 	newlen = dest->len + src->len;
 	if (newlen >= dest->a) {
-		dest->c = realloc(dest->c, newlen + 101);
-		dest->a = newlen + 100;
+		dest->c = realloc(dest->c, newlen + 129);
+		dest->a = newlen + 128;
 	}
 	memcpy(dest->c + dest->len, src->c, src->len);
 	dest->c[dest->len = newlen] = '\0';
+}
+
+static inline void smart_str_appendc(smart_str *dest, char c)
+{
+	size_t newlen;
+
+	newlen = dest->len + 1;
+	if (newlen >= dest->a) {
+		dest->c = realloc(dest->c, newlen + 129);
+		dest->a = newlen + 128;
+	}
+	dest->c[dest->len++] = c;
+	dest->c[dest->len] = '\0';
 }
 
 static inline void smart_str_free(smart_str *s)
@@ -79,13 +92,6 @@ static inline void smart_str_appendl(smart_str *dest, const char *src, size_t le
 	smart_str_append(dest, &s);
 }
 
-static inline void smart_str_set(smart_str *dest, smart_str *src)
-{
-	dest->len = src->len;
-	dest->a = src->a;
-	dest->c = src->c;
-}
-
 static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
 {
 	dest->len = len;
@@ -95,32 +101,26 @@ static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
 
 #define smart_str_appends(dest, src) smart_str_appendl(dest, src, sizeof(src)-1)
 
-#if 0
-static inline void smart_str_copys(smart_str *dest, const char *src)
-{
-	smart_str_copyl(dest, src, strlen(src));
-}
-#endif
-
 static inline void smart_str_sets(smart_str *dest, const char *src)
 {
 	smart_str_setl(dest, src, strlen(src));
 }
 
-static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, const char *separator)
+static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
 	register const char *p, *q;
 	const char *bash = NULL;
-	const char *sep = "?";
+	char sep = "?";
 	
 	q = url->c + url->len;
 	
 	for (p = url->c; p < q; p++) {
 		switch(*p) {
 			case ':':
+				smart_str_append(dest, url);
 				return;
 			case '?':
-				sep = separator;
+				sep = *separator;
 				break;
 			case '#':
 				bash = p;
@@ -128,24 +128,18 @@ static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, c
 		}
 	}
 
-	if (bash) {
-		smart_str new = {0};
-		
-		smart_str_copyl(&new, url->c, bash - url->c);
-		smart_str_appendl(&new, sep, 1);
-		smart_str_append(&new, name);
-		smart_str_appendl(&new, "=", 1);
-		smart_str_append(&new, val);
-		smart_str_appendl(&new, bash, q - bash);
+	if (bash) 
+		smart_str_appendl(dest, url->c, bash - url->c);
+	else
+		smart_str_append(dest, url);
 
-		smart_str_free(url);
-		smart_str_set(url, &new);
-	} else {
-		smart_str_appendl(url, sep, 1);
-		smart_str_append(url, name);
-		smart_str_appendl(url, "=", 1);
-		smart_str_append(url, val);
-	}
+	smart_str_appendc(dest, sep);
+	smart_str_append(dest, name);
+	smart_str_appendc(dest, '=');
+	smart_str_append(dest, val);
+
+	if (bash)
+		smart_str_appendl(dest, bash, q - bash);
 }
 
 struct php_tag_arg {
@@ -184,9 +178,10 @@ static inline void tag_arg(url_adapt_state_ex_t *ctx PLS_DC)
 
 	smart_str_appends(&ctx->result, "\"");
 	if (f) {
-		attach_url(&ctx->val, &ctx->q_name, &ctx->q_value, PG(arg_separator));
+		append_modified_url(&ctx->val, &ctx->result, &ctx->q_name, &ctx->q_value, PG(arg_separator));
+	} else {
+		smart_str_append(&ctx->result, &ctx->val);
 	}
-	smart_str_append(&ctx->result, &ctx->val);
 	smart_str_appends(&ctx->result, "\"");
 }
 
@@ -228,24 +223,24 @@ enum {
  */
 
 #define HANDLE_TAG() {\
-	int __ok = 0; \
+	int ok = 0; \
 	int i; \
 	smart_str_setl(&ctx->tag, start, YYCURSOR - start); \
 	for (i = 0; check_tag_arg[i].tag; i++) { \
 		if (ctx->tag.len == check_tag_arg[i].taglen \
 				&& strncasecmp(ctx->tag.c, check_tag_arg[i].tag, ctx->tag.len) == 0) { \
-			__ok = 1; \
+			ok = 1; \
 			break; \
 		} \
 	} \
-	STATE = __ok ? STATE_NEXT_ARG : STATE_PLAIN; \
+	STATE = ok ? STATE_NEXT_ARG : STATE_PLAIN; \
 }
 
 #define HANDLE_ARG() {\
 	smart_str_setl(&ctx->arg, start, YYCURSOR - start); \
 }
 #define HANDLE_VAL(quotes) {\
-	smart_str_copyl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
+	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2); \
 	tag_arg(ctx PLS_CC); \
 }
 
@@ -402,7 +397,6 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 	smart_str_free(&ctx->buf);
 	smart_str_free(&ctx->c_tag);
 	smart_str_free(&ctx->c_arg);
-	smart_str_free(&ctx->val);
 
 	return SUCCESS;
 }

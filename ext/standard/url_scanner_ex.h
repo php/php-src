@@ -35,7 +35,7 @@ typedef struct {
 	/* Used by the mainloop of the scanner */
 	smart_str tag; /* read only */
 	smart_str arg; /* read only */
-	smart_str val;
+	smart_str val; /* read only */
 	smart_str buf;
 
 	/* Dito, but they are used only for preserving data across calls */
