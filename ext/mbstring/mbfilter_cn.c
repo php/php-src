@@ -44,7 +44,7 @@
 int
 mbfl_filt_conv_euccn_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, s1, s2, w;
+	int c1, w;
 
 	switch (filter->status) {
 	case 0:
@@ -154,7 +154,7 @@ mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, s1, s2, w;
+	int c1, w;
 
 	switch (filter->status) {
 	case 0:
@@ -212,7 +212,7 @@ mbfl_filt_conv_cp936_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_wchar_cp936(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, c2, s;
+	int c1, s;
 
 	s = 0;
 	if (c >= ucs_a1_cp936_table_min && c < ucs_a1_cp936_table_max) {

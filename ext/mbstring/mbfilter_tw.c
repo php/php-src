@@ -165,7 +165,7 @@ mbfl_filt_conv_euctw_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c0, c1, c2, s, plane;
+	int c1, s, plane;
 
 	s = 0;
 	if (c >= ucs_a1_cns11643_table_min && c < ucs_a1_cns11643_table_max) {
@@ -221,7 +221,7 @@ mbfl_filt_conv_wchar_euctw(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, s1, s2, w;
+	int c1, w;
 
 	switch (filter->status) {
 	case 0:
@@ -281,7 +281,7 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter TSRMLS_DC)
 int
 mbfl_filt_conv_wchar_big5(int c, mbfl_convert_filter *filter TSRMLS_DC)
 {
-	int c1, c2, s;
+	int c1, s;
 
 	s = 0;
 	if (c >= ucs_a1_big5_table_min && c < ucs_a1_big5_table_max) {
