@@ -215,7 +215,9 @@ class PEAR_Registry extends PEAR
         if (PEAR::isError($err = $this->_assertStateDir())) {
             return $err;
         }
-        $this->lock_fp = @fopen($this->lockfile, 'w');
+        // XXX People reported problems with LOCK_SH and 'w'
+        $open_mode = ($mode === LOCK_SH) ? 'r' : 'w';
+        $this->lock_fp = @fopen($this->lockfile, $open_mode);
         if (!is_resource($this->lock_fp)) {
             return $this->raiseError("could not create lock file: $php_errormsg");
         }
