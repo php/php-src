@@ -552,21 +552,30 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS
 }
 
 
-
-#if SUPPORT_INTERACTIVE
 void execute_new_code(CLS_D)
 {
     zend_op *opline, *end;
+	zend_op *ret_opline;
 	ELS_FETCH();
 
-	if (!EG(interactive)
+	if (!CG(interactive)
 		|| CG(active_op_array)->backpatch_count>0
 		|| CG(active_op_array)->function_name
 		|| CG(active_op_array)->type!=ZEND_USER_FUNCTION) {
 		return;
 	}
 
-    opline=CG(active_op_array)->opcodes + CG(active_op_array)->start_op_number;
+	ret_opline = get_next_op(CG(active_op_array) CLS_CC);
+	ret_opline->opcode = ZEND_RETURN;
+	ret_opline->op1.op_type = IS_CONST;
+	INIT_ZVAL(ret_opline->op1.u.constant);
+	SET_UNUSED(ret_opline->op2);
+
+	if (!CG(active_op_array)->start_op) {
+		CG(active_op_array)->start_op = CG(active_op_array)->opcodes;
+	}
+    
+	opline=CG(active_op_array)->start_op;
 	end=CG(active_op_array)->opcodes+CG(active_op_array)->last;
 
     while (opline<end) {
@@ -581,14 +590,12 @@ void execute_new_code(CLS_D)
         opline++;
     }
 
-	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;
-	CG(active_op_array)->end_op_number = CG(active_op_array)->last;
 	EG(active_op_array) = CG(active_op_array);
 	zend_execute(CG(active_op_array) ELS_CC);
 	zval_ptr_dtor(EG(return_value_ptr_ptr));
-	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;
+	CG(active_op_array)->last--;	/* get rid of that ZEND_RETURN */
+	CG(active_op_array)->start_op = CG(active_op_array)->opcodes+CG(active_op_array)->last;
 }
-#endif
 
 
 ZEND_API void zend_timeout(int dummy)

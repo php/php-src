@@ -277,6 +277,8 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	zend_set_default_compile_time_values(CLS_C);
+
+	CG(interactive) = 0;
 }
 
 
@@ -302,7 +304,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals)
 	zend_init_rsrc_plist(ELS_C);
 	EG(lambda_count)=0;
 	EG(user_error_handler) = NULL;
-	EG(interactive) = 0;
 	EG(in_execution) = 0;
 }
 

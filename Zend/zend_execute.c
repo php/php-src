@@ -971,10 +971,7 @@ typedef struct _object_info {
 
 ZEND_API void execute(zend_op_array *op_array ELS_DC)
 {
-	zend_op *opline = op_array->opcodes;
-#if SUPPORT_INTERACTIVE
-	zend_op *end = op_array->opcodes + op_array->last;
-#endif
+	zend_op *opline;
 	zend_function_state function_state;
 	zend_function *fbc=NULL;  /* Function Being Called */
 	object_info object = {NULL};
@@ -986,12 +983,11 @@ ZEND_API void execute(zend_op_array *op_array ELS_DC)
 	zend_bool original_in_execution=EG(in_execution);
 
 	EG(in_execution) = 1;
-#if SUPPORT_INTERACTIVE
-	if (EG(interactive)) {
-		opline = op_array->opcodes + op_array->start_op_number;
-		end = op_array->opcodes + op_array->end_op_number;
+	if (op_array->start_op) {
+		opline = op_array->start_op;
+	} else {
+		opline = op_array->opcodes;
 	}
-#endif
 
 	EG(opline_ptr) = &opline;
 
@@ -1017,11 +1013,7 @@ ZEND_API void execute(zend_op_array *op_array ELS_DC)
 		}
 	}
 
-#if SUPPORT_INTERACTIVE
-	while (opline<end) {
-#else
 	while (1) {
-#endif
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);
@@ -1683,9 +1675,6 @@ do_fcall_common:
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
 						}
 					}
-#if SUPPORT_INTERACTIVE
-					op_array->last_executed_op_number = opline-op_array->opcodes;
-#endif
 					free_alloca(Ts);
 					EG(in_execution) = original_in_execution;
 					return;
@@ -2418,12 +2407,5 @@ send_by_ref:
 
 		}
 	}
-#if SUPPORT_INTERACTIVE
-	ALLOC_INIT_ZVAL(*(EG(return_value_ptr_ptr)));
-	op_array->last_executed_op_number = opline-op_array->opcodes;
-	EG(in_execution) = original_in_execution;
-	free_alloca(Ts);
-#else
-	zend_error(E_ERROR,"Arrived at end of main loop which shouldn't happen");
-#endif
+	zend_error(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 }

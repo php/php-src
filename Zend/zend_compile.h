@@ -35,22 +35,14 @@
 
 #define DEBUG_ZEND 0
 
-#define SUPPORT_INTERACTIVE 1
-
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 #define FREE_OP(op, should_free) if (should_free) zval_dtor(&Ts[(op)->u.var].tmp_var);
 
 #define SET_UNUSED(op)  (op).op_type = IS_UNUSED
 
-#if SUPPORT_INTERACTIVE
-#define INC_BPC(op_array)	((op_array)->backpatch_count++)
-#define DEC_BPC(op_array)	((op_array)->backpatch_count--)
-#define HANDLE_INTERACTIVE()  if (EG(interactive)) { execute_new_code(CLS_C); }
-#else
-#define INC_BPC(op_array)
-#define DEC_BPC(op_array)
-#define HANDLE_INTERACTIVE()
-#endif
+#define INC_BPC(op_array)	if (CG(interactive)) { ((op_array)->backpatch_count++); }
+#define DEC_BPC(op_array)	if (CG(interactive)) { ((op_array)->backpatch_count--); }
+#define HANDLE_INTERACTIVE()  if (CG(interactive)) { execute_new_code(CLS_C); }
 
 typedef struct _zend_op_array zend_op_array;
 
@@ -109,11 +101,9 @@ struct _zend_op_array {
 	/* static variables support */
 	HashTable *static_variables;
 
-#if SUPPORT_INTERACTIVE
-	int start_op_number, end_op_number;
-	int last_executed_op_number;
+	zend_op *start_op;
 	int backpatch_count;
-#endif
+
 	zend_bool return_reference;
 	zend_bool done_pass_two;
 

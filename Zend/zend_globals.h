@@ -111,6 +111,7 @@ struct _zend_compiler_globals {
 	zend_bool ini_parser_unbuffered_errors;
 
 	zend_llist open_files;
+
 #if defined(ZTS) && defined(__cplusplus)
 	ZendFlexLexer *ZFL;
 	ZendIniFlexLexer *ini_scanner;
@@ -118,6 +119,8 @@ struct _zend_compiler_globals {
 	void *ZFL;
 	void *ini_parser;
 #endif
+
+	int interactive;
 };
 
 
@@ -195,9 +198,6 @@ struct _zend_executor_globals {
 	HashTable ini_directives;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
-#if SUPPORT_INTERACTIVE
-	int interactive;
-#endif
 };
 
 

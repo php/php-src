@@ -154,9 +154,8 @@ PHP_FUNCTION(var_dump)
 /* }}} */
 /* {{{ php_var_serialize */
 
-inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old);
-
-inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old) {
+static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old)
+{
 	ulong var_no;
 	char id[sizeof(void *)*2+3];
 

@@ -253,9 +253,7 @@ static void php_cgi_usage(char *argv0)
 				"  -v             Version number\n"
                 "  -C             Do not chdir to the script's directory\n"
 				"  -c <path>      Look for php.ini file in this directory\n"
-#if SUPPORT_INTERACTIVE
 				"  -a             Run interactively\n"
-#endif
 				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
 				"  -e             Generate extended information for debugger/profiler\n"
 				"  -z <file>      Load Zend extension <file>.\n"
@@ -379,9 +377,7 @@ int main(int argc, char *argv[])
 	char *argv0=NULL;
 	char *script_file=NULL;
 	zend_llist global_vars;
-#if SUPPORT_INTERACTIVE
 	int interactive=0;
-#endif
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -531,12 +527,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			switch (c) {
 				
   			case 'a':	/* interactive mode */
-#if SUPPORT_INTERACTIVE
 					printf("Interactive mode enabled\n\n");
 					interactive=1;
-#else
-					printf("Interactive mode not supported!\n\n");
-#endif
 					break;
 				
 			case 'C': /* don't chdir to the script directory */
@@ -645,9 +637,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 	}							/* not cgi */
 
-#if SUPPORT_INTERACTIVE
-	EG(interactive) = interactive;
-#endif
+	CG(interactive) = interactive;
 
 	if (!cgi) {
 		if (!SG(request_info).query_string) {
