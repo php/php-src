@@ -246,7 +246,7 @@ PHP_FUNCTION(headers_list)
 		RETURN_FALSE;
 	}
 	array_init(return_value);
-	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, php_head_apply_header_list_to_hash, return_value TSRMLS_CC);
 }
 /* }}} */
 
