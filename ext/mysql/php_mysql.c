@@ -1304,7 +1304,7 @@ PHP_FUNCTION(mysql_db_query)
 	}
 	
 	if (!strcasecmp(get_active_function_name(TSRMLS_C), "mysql")) {
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_db_query()");
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated; use mysql_query()");
 	}
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
