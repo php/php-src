@@ -24,20 +24,15 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
-#if !defined(PHP_API_VERSION) || PHP_API_VERSION < 19990421
-#include "internal_functions.h"
-#endif
-#if PHP_31 || PHP_API_VERSION >= 19990421
-# include "ext/standard/php_string.h"
-#else
-# include "php_string.h"
-#endif
+#include "ext/standard/php_string.h"
 #include "php_posix.h"
 
 #if HAVE_POSIX
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
 #include <unistd.h>
 #include <sys/resource.h>
 #include <sys/utsname.h>
@@ -48,9 +43,6 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#if !defined(PHP_API_VERSION) || PHP_API_VERSION < 19990421
-#include "php3_list.h"
-#endif
 
 #define SAFE_STRING(s) ((s)?(s):"")
 
