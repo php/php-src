@@ -115,6 +115,9 @@ if test "$ac_cv_c_const" = "yes" ; then
   LEX_CFLAGS="-DYY_USE_CONST"
 fi
 
+abs_srcdir=`(cd $srcdir; pwd)`
+abs_builddir=`pwd`
+
 sinclude(Zend/acinclude.m4)
 sinclude(Zend/Zend.m4)
 sinclude(TSRM/tsrm.m4)
@@ -410,9 +413,6 @@ fi
 divert(4)
 
 
-	
-abs_srcdir=`(cd $srcdir; pwd)`
-abs_builddir=`pwd`
 
 PHP_ARG_WITH(config-file-path,whether to use a configuration file,
 [  --with-config-file-path=PATH  
