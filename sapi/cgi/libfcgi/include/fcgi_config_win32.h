@@ -106,6 +106,3 @@
 /* Define as `__inline' if that's what the C compiler calls it, or to nothing
    if it is not supported. */
 /* #undef inline */
-
-/* Define to `int' if <sys/types.h> does not define. */
-#define ssize_t int
