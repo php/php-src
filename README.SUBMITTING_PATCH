@@ -89,7 +89,7 @@ If you are patching PEAR, send the patch to pear-dev@lists.php.net.
 Please add the prefix "[PATCH]" to your email subject and make sure
 to include the patch as a MIME attachment even if it is short. 
 
-NOTE: only MIME attachements of type 'text/*' are accepted. The
+NOTE: only MIME attachments of type 'text/*' are accepted. The
       easiest way to acclomplish this, is to make the extension
       '.txt'.
 
