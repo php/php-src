@@ -39,6 +39,7 @@
 #define SAPI_API
 #endif
 
+#undef shutdown
 
 typedef struct {
 	char *header;
