@@ -127,6 +127,9 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 
 		if (retval >= 0)
 			break;
+
+		if (php_socket_errno() != EINTR)
+			break;
 	}
 }
 

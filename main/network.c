@@ -1047,7 +1047,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 	php_socket_t max_fd = SOCK_ERR;
 	unsigned int i, n;
 	struct timeval tv;
-	
+
 	/* check the highest numbered descriptor */
 	for (i = 0; i < nfds; i++) {
 		if (ufds[i].fd > max_fd)
@@ -1061,19 +1061,14 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 	FD_ZERO(&eset);
 
 	for (i = 0; i < nfds; i++) {
-		if (ufds[i].fd >= FD_SETSIZE) {
-			/* unsafe to set */
-			ufds[i].revents = POLLNVAL;
-			continue;
-		}
 		if (ufds[i].events & PHP_POLLREADABLE) {
-			FD_SET(ufds[i].fd, &rset);
+			PHP_SAFE_FD_SET(ufds[i].fd, &rset);
 		}
 		if (ufds[i].events & POLLOUT) {
-			FD_SET(ufds[i].fd, &wset);
+			PHP_SAFE_FD_SET(ufds[i].fd, &wset);
 		}
 		if (ufds[i].events & POLLPRI) {
-			FD_SET(ufds[i].fd, &eset);
+			PHP_SAFE_FD_SET(ufds[i].fd, &eset);
 		}
 	}
 
@@ -1081,30 +1076,24 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		tv.tv_sec = timeout / 1000;
 		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 	}
-
 	n = select(max_fd + 1, &rset, &wset, &eset, timeout >= 0 ? &tv : NULL);
 
 	if (n >= 0) {
 		for (i = 0; i < nfds; i++) {
-			if (ufds[i].fd >= FD_SETSIZE) {
-				continue;
-			}
-
 			ufds[i].revents = 0;
 
-			if (FD_ISSET(ufds[i].fd, &rset)) {
+			if (PHP_SAFE_FD_ISSET(ufds[i].fd, &rset)) {
 				/* could be POLLERR or POLLHUP but can't tell without probing */
 				ufds[i].revents |= POLLIN;
 			}
-			if (FD_ISSET(ufds[i].fd, &wset)) {
+			if (PHP_SAFE_FD_ISSET(ufds[i].fd, &wset)) {
 				ufds[i].revents |= POLLOUT;
 			}
-			if (FD_ISSET(ufds[i].fd, &eset)) {
+			if (PHP_SAFE_FD_ISSET(ufds[i].fd, &eset)) {
 				ufds[i].revents |= POLLPRI;
 			}
 		}
 	}
-
 	return n;
 }
 
