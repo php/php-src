@@ -14,11 +14,11 @@ Fixed:
     unregister_tick_function (Rasmus)
     bcsub (Rasmus)
     mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi Koizumi)
+    xml_parser_create (Moriyoshi)
 
 Open:
 
     ob_start (3)
-    xml_parser_create (Unable to reproduce - Rasmus)
 
     Notes:
 
