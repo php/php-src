@@ -40,7 +40,10 @@ CC = @CC@
 AR = ar rc
 BINNAME = @BINNAME@
 INSTALL_IT = @INSTALL_IT@
-INCLUDE = -I$(srcdir) -I. -I$(ZEND_DIR)
+EXTRA_LIBS = @EXTRA_LIBS@
+EXT_LIBS = @EXT_LIBS@
+INCLUDES = @INCLUDES@
+INCLUDE = -I$(srcdir) -I. -I$(ZEND_DIR) $(INCLUDES)
 PROF_CFLAGS =
 CFLAGS_SHLIB = @CFLAGS_SHLIB@
 LDFLAGS_SHLIB = @LDFLAGS_SHLIB@
@@ -81,7 +84,7 @@ FUNCTIONS_SOURCE = functions/adabasd.c functions/apache.c functions/fhttpd.c \
 
 FUNCTIONS = $(FUNCTIONS_SOURCE:.c=.o)
 PHPLIBS = -L@top_srcdir@/libzend -lzend -L@top_srcdir@/ext -lphpext
-LIBS = $(PHPLIBS)  @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @DBASE_LIB@ @REGEX_LIB@ @DBM_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LFLAGS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
+LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @DBASE_LIB@ @REGEX_LIB@ @DBM_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LFLAGS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
 
 all: $(BINNAME)
 
@@ -97,22 +100,15 @@ all-recursive clean-recursive distclean-recursive:
 php: all-recursive $(OBJS) $(FUNCTIONS) @REGEX_LIB@ @FHTTPD_LIB@ @DBASE_LIB@
 	$(CC) $(CFLAGS) -o $(BINNAME) $(LDFLAGS) $(OBJS) $(FUNCTIONS) $(LIBS)
 
-# Apache 1.2 module
-libphp3.a: all-recursive $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	$(AR) $(BINNAME) $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	$(RANLIB) $(BINNAME)
-
-# Apache 1.3 static module
-libmodphp3.a: all-recursive $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	$(AR) $(BINNAME) $(OBJS) $(FUNCTIONS) @DBASE_LIB@
+# Apache modules
+libphp3.a libmodphp3.a libmodphp3-so.a: all-recursive $(OBJS) $(FUNCTIONS)
+	$(AR) $@.tmp $(OBJS) $(FUNCTIONS) @DBASE_LIB@
+	scripts/armerge $@ $@.tmp ext/libphpext.a libzend/libzend.a
+	@rm -f $@.tmp
 	$(RANLIB) $(BINNAME)
 
 # Apache 1.3 shared module
-libmodphp3-so.a: all-recursive $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	$(AR) libmodphp3-so.a $(OBJS) $(FUNCTIONS) @DBASE_LIB@
-	$(RANLIB) libmodphp3-so.a
-
-libphp3.so: mod_php3.c libmodphp3-so.a
+libphp3.so: $(srcdir)/mod_php3.c libmodphp3-so.a
 	$(APXS) -c -o libphp3.so $(APXS_LDFLAGS) mod_php3.c libmodphp3-so.a
 
 regex/libregex.a:
