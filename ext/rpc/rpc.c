@@ -27,7 +27,6 @@ static zend_object_value rpc_clone(zval *object TSRMLS_DC);
 static zval* rpc_read(zval *object, zval *member, int type TSRMLS_DC);
 static void rpc_write(zval *object, zval *member, zval *value TSRMLS_DC);
 static zval** rpc_get_property(zval *object, zval *member TSRMLS_DC);
-static zval** rpc_get_property_zval(zval *object, zval *member TSRMLS_DC);
 static zval* rpc_get(zval *property TSRMLS_DC);
 static void rpc_set(zval **property, zval *value TSRMLS_DC);
 static int rpc_has_property(zval *object, zval *member, int check_empty TSRMLS_DC);
@@ -48,7 +47,7 @@ static zend_object_handlers rpc_handlers = {
 	rpc_read,
 	rpc_write,
 	rpc_get_property,
-	rpc_get_property_zval,
+	NULL,
 	rpc_get,
 	rpc_set,
 	rpc_has_property,
@@ -74,11 +73,11 @@ zend_module_entry rpc_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"rpc",
 	rpc_functions,
-	PHP_MINIT(rpc),
-	PHP_MSHUTDOWN(rpc),
+	ZEND_MINIT(rpc),
+	ZEND_MSHUTDOWN(rpc),
 	NULL,
 	NULL,
-	PHP_MINFO(rpc),
+	ZEND_MINFO(rpc),
 	"0.1a",
 	STANDARD_MODULE_PROPERTIES
 };
@@ -120,7 +119,7 @@ static int rpc_global_startup(void)
 		/* create a class entry for every rpc handler */
 		INIT_OVERLOADED_CLASS_ENTRY((*(HANDLER.ce)),
 									HANDLER.name,
-									NULL,
+									HANDLER.methods,
 									NULL,
 									NULL,
 									NULL);
@@ -149,9 +148,9 @@ static void rpc_globals_ctor(zend_rpc_globals *rpc_globals TSRMLS_DC)
 {
 }
 
-/* {{{ PHP_MINIT_FUNCTION
+/* {{{ ZEND_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(rpc)
+ZEND_MINIT_FUNCTION(rpc)
 {
 	/* GINIT */
 	if (thread_count++ == 0) {
@@ -171,9 +170,9 @@ PHP_MINIT_FUNCTION(rpc)
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* {{{ ZEND_MSHUTDOWN_FUNCTION
  */
-PHP_MSHUTDOWN_FUNCTION(rpc)
+ZEND_MSHUTDOWN_FUNCTION(rpc)
 {
 	/* GSHUTDOWN */
 	if (--thread_count == 0) {
@@ -185,9 +184,9 @@ PHP_MSHUTDOWN_FUNCTION(rpc)
 }
 /* }}} */
 
-/* {{{ PHP_MINFO_FUNCTION
+/* {{{ ZEND_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(rpc)
+ZEND_MINFO_FUNCTION(rpc)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "rpc support", "enabled");
@@ -203,7 +202,9 @@ static void rpc_instance_dtor(void *pDest)
 	
 	intern = (rpc_internal **) pDest;
 
-	/* TODO: destruct intern */
+	/* TODO: destruct custom data */
+
+	pefree(*intern, TRUE);
 }
 
 static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_DC)
@@ -218,7 +219,8 @@ static zend_object_value rpc_create_object(zend_class_entry *class_type TSRMLS_D
 	/* set up the internal representation of our rpc instance */
 	intern = (rpc_internal *) pemalloc(sizeof(rpc_internal), TRUE);
 	intern->ce = class_type;
-	intern->refcount = 0;
+	intern->refcount = 1;
+	intern->clonecount = 1;
 	intern->data = NULL;
 	if (zend_hash_find(handlers, class_type->name, class_type->name_length + 1, (void **) &(intern->handlers)) == FAILURE) {
 		/* TODO: exception */
@@ -247,29 +249,48 @@ static void rpc_add_ref(zval *object TSRMLS_DC)
 
 static void rpc_del_ref(zval *object TSRMLS_DC)
 {
-	GET_INTERNAL(intern);
+	rpc_internal **intern;
 
-	if (RPC_REFCOUNT(intern) > 0) {
-		RPC_DELREF(intern);
-	}
+	if (GET_INTERNAL_EX(intern, object) == SUCCESS) {
+		if (RPC_REFCOUNT(intern) > 0) {
+			RPC_DELREF(intern);
+		}
 
-	if (RPC_REFCOUNT(intern) == 0) {
-		rpc_instance_dtor(intern);
+		if (RPC_REFCOUNT(intern) == 0) {
+			zend_hash_index_del(instance, Z_OBJ_HANDLE(*object));
+		}
 	}
 }
 
 static void rpc_delete(zval *object TSRMLS_DC)
 {
-	GET_INTERNAL(intern);
-	rpc_instance_dtor(intern);
+	rpc_internal **intern;
+	
+	if (GET_INTERNAL_EX(intern, object) == SUCCESS) {
+		if (RPC_CLONECOUNT(intern) > 0) {
+			RPC_DELCLONE(intern);
+		}
+
+		if (RPC_CLONECOUNT(intern) == 0) {
+			zend_hash_index_del(instance, Z_OBJ_HANDLE_P(object));
+		}
+	}
 }
 
 static zend_object_value rpc_clone(zval *object TSRMLS_DC)
 {
-//	TSRMLS_FETCH();
-//	GET_INTERNAL(intern);
+	GET_INTERNAL(intern);
 
-	/* FIXME */
+	/* cloning the underlaying resource is neither possible nor would it
+	 * make sense, therfore we return the old zend_object_value and increase
+	 * the clone count to not loose the clone when the original object gets
+	 * deleted.
+	 */
+	RPC_ADDCLONE(intern);
+	
+	/* also increase the refcounter as a clone is just another reference */
+	RPC_ADDREF(intern);
+
 	return object->value.obj;
 }
 
@@ -289,14 +310,8 @@ static void rpc_write(zval *object, zval *member, zval *value TSRMLS_DC)
 
 static zval** rpc_get_property(zval *object, zval *member TSRMLS_DC)
 {
-//	GET_INTERNAL(intern);
+/* no idea how to return an object - wait for andi */
 
-	/* FIXME */
-	return NULL;
-}
-
-static zval** rpc_get_property_zval(zval *object, zval *member TSRMLS_DC)
-{
 //	GET_INTERNAL(intern);
 
 	/* FIXME */
@@ -342,16 +357,16 @@ static HashTable* rpc_get_properties(zval *object TSRMLS_DC)
 static union _zend_function* rpc_get_method(zval *object, char *method, int method_len TSRMLS_DC)
 {
 	zend_function *function;
+	GET_INTERNAL(intern);
 
-	function = (zend_function *) emalloc(sizeof(zend_function));
-	function->type = ZEND_OVERLOADED_FUNCTION;
-	function->common.arg_types = NULL;
-	function->common.function_name = method;
-	function->common.scope = NULL;
+	if (zend_hash_find(&((*intern)->ce->function_table), method, method_len + 1, &function) == FAILURE) {
+		function = (zend_function *) emalloc(sizeof(zend_function));
+		function->type = ZEND_OVERLOADED_FUNCTION;
+		function->common.arg_types = NULL;
+		function->common.function_name = method;
+		function->common.scope = NULL;
+	}
 
-	//	GET_INTERNAL(intern);
-
-	/* FIXME */
 	return function;
 }
 
@@ -412,7 +427,7 @@ ZEND_FUNCTION(rpc_load)
 		/* the name of the rpc layer is prepended to '_load' so lets strip everything after
 		 * the first '_' away from the function name
 		 */
-		zend_class_entry *ce;
+		zend_class_entry **ce;
 		key = estrdup(get_active_function_name(TSRMLS_C));
 		key_len = strchr(key, '_') - key;
 		key[key_len] = '\0';
@@ -420,7 +435,6 @@ ZEND_FUNCTION(rpc_load)
 		/* get the class entry for the requested rpc layer */
 		if (zend_hash_find(CG(class_table), key, key_len + 1, (void **) &ce) == FAILURE) {
 			/* TODO: exception here */
-			RETURN_FALSE;
 		}
 
 		/* set up a new zval container */
@@ -428,18 +442,21 @@ ZEND_FUNCTION(rpc_load)
 		INIT_PZVAL(object);
 
 		Z_TYPE_P(object) = IS_OBJECT;
-		ZVAL_REFCOUNT(object) = 1;
-		PZVAL_IS_REF(object) = 1;
 
 		/* create a new object */
-		object->value.obj = rpc_create_object(ce TSRMLS_CC);
+		object->value.obj = rpc_create_object(*ce TSRMLS_CC);
 
+		/* return the newly created object */
 		return_value = object;
 
 		/* now everything is set up the same way as if we were called as a constructor */
 	}
 
-	GET_INTERNAL_EX(intern, object);
+	if (GET_INTERNAL_EX(intern, object) == FAILURE) {
+		/* TODO: exception */
+	}
+
+//	(*intern)->handlers.rpc_ctor(
 
 	/* FIXME */
 }
