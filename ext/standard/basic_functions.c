@@ -1568,7 +1568,7 @@ pval test_class_get_property(zend_property_reference *property_reference)
 
 	printf("Reading a property from a OverloadedTestClass object:\n");
 
-	for (element=property_reference->elements_list.head; element; element=element->next) {
+	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
@@ -1606,7 +1606,7 @@ int test_class_set_property(zend_property_reference *property_reference, pval *v
 	zend_print_variable(value);
 	printf("'\n");
 
-	for (element=property_reference->elements_list.head; element; element=element->next) {
+	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
@@ -1640,7 +1640,7 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 
 	printf("Invoking a method on OverloadedTestClass object:\n");
 
-	for (element=property_reference->elements_list.head; element; element=element->next) {
+	for (element=property_reference->elements_list->head; element; element=element->next) {
 		overloaded_property = (zend_overloaded_element *) element->data;
 		switch (overloaded_property->type) {
 			case OE_IS_ARRAY:
