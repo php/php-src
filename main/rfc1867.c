@@ -100,10 +100,10 @@ void destroy_uploaded_files_hash(TSRMLS_D)
 /*
  * Split raw mime stream up into appropriate components
  */
-static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr TSRMLS_DC)
+static void php_mime_split(char *buf, int cnt, char *boundary, int len, zval *array_ptr TSRMLS_DC)
 {
 	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *temp_filename;
-	int len, state = 0, Done = 0, rem, urem;
+	int state = 0, Done = 0, rem, urem;
 	int eolsize;
 	long bytes, max_file_size = 0;
 	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL, 
@@ -126,7 +126,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr T
 
 	ptr = buf;
 	rem = cnt;
-	len = strlen(boundary);
+
 	while ((ptr - buf < cnt) && !Done) {
 		switch (state) {
 			case 0:			/* Looking for mime boundary */
@@ -443,6 +443,22 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr T
 }
 
 
+/*
+ * Reads post data chunk
+ *
+ */
+static int read_post_data_chunk(char *buf TSRMLS_DC)
+{
+	int read_bytes;
+	
+	read_bytes = sapi_module.read_post(buf, SAPI_POST_BLOCK_SIZE TSRMLS_CC);
+		
+	SG(read_post_bytes) += read_bytes;
+		
+	return read_bytes;
+}
+
+
 SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 {
 	char *boundary;
@@ -451,6 +467,11 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 	if (!PG(file_uploads)) {
 		php_error(E_WARNING, "File uploads are disabled");
+		return;
+	}
+
+	if (SG(request_info).content_length > SG(post_max_size)) {
+		sapi_module.sapi_error(E_COMPILE_ERROR, "POST Content-Length of %d bytes exceeds the limit of %d bytes", SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
 
@@ -468,11 +489,39 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 		boundary[boundary_len] = '\0';
 	}
 
+	/* <FIXME> Temporary. Should be done same time as parsing. Maybe that Apache stuff.. */
+	{
+		int allocated_bytes=SAPI_POST_BLOCK_SIZE+1, read_bytes;
+		
+		SG(request_info).post_data = emalloc(allocated_bytes);
+
+		for (;;) {
+			read_bytes = read_post_data_chunk(SG(request_info).post_data+SG(read_post_bytes) TSRMLS_CC);
+
+			if(read_bytes <= 0 || read_bytes < SAPI_POST_BLOCK_SIZE) {
+				break; 
+			}
+
+			if (SG(read_post_bytes) > SG(post_max_size)) {
+				php_error(E_WARNING, "Actual POST length does not match Content-Length, and exceeds %d bytes", SG(post_max_size));
+				return;
+			}
+
+			if (SG(read_post_bytes) + SAPI_POST_BLOCK_SIZE >= allocated_bytes) {
+				allocated_bytes = SG(read_post_bytes)+SAPI_POST_BLOCK_SIZE+1;
+				SG(request_info).post_data = erealloc(SG(request_info).post_data, allocated_bytes);
+			}
+		}
+
+		SG(request_info).post_data[SG(read_post_bytes)] = 0;  /* terminating NULL */
+		SG(request_info).post_data_length = SG(read_post_bytes);
+	}
+	/* </FIXME> */
+
 	if (SG(request_info).post_data) {
-		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, array_ptr TSRMLS_CC);
+		php_mime_split(SG(request_info).post_data, SG(request_info).post_data_length, boundary, boundary_len, array_ptr TSRMLS_CC);
 	}
 }
-
 
 /*
  * Local variables:
