@@ -3158,10 +3158,14 @@ PHP_FUNCTION(imap_mail_compose)
 			mystring=tempstring;
 	} else {
 		efree(mystring);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto done;
 	}
 
 	RETVAL_STRINGL(tempstring, 0);  
+done:
+	mail_free_body(&topbod);
+	mail_free_envelope(&env);
 }
 /* }}} */
 
