@@ -22,9 +22,9 @@
  </description>
  <license>PHP</license>
  <release>
-  <state>alpha</state>
-  <version>0.1</version>
-  <date>2004-05-21</date>
+  <state>beta</state>
+  <version>0.2</version>
+  <date>2005-02-09</date>
 
   <notes>
    You need to install the PDO core module before you can make use of this one.
@@ -46,8 +46,8 @@
    <file role="doc" name="CREDITS"/>
   </filelist>
   <deps>
-   <dep type="php" rel="ge" version="5.0.0RC3dev"/>
-   <dep type="ext" rel="ge" name="pdo" version="0.1"/>
+   <dep type="php" rel="ge" version="5.0.3"/>
+   <dep type="ext" rel="ge" name="pdo" version="0.2"/>
   </deps>
  </release>
 </package>
