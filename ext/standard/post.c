@@ -27,136 +27,7 @@
 #include "zend_globals.h"
 
 
-/*
- * parse Get/Post/Cookie string and create appropriate variable
- *
- * This is a tad ugly because it was yanked out of the middle of
- * the old TreatData function.  This is a temporary measure filling 
- * the gap until a more flexible parser can be built to do this.
- */
 void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
-{
-	int var_type;
-	char *ind, *tmp = NULL, *array_index = NULL;
-	int var_len, val_len;
-	pval *gpc_element;
-	zend_bool do_insert;
-	
-	if (!PG(gpc_globals) && !track_vars_array) {
-		/* we don't need track_vars, and we're not setting GPC globals either. */
-		return;
-	}
-
-	var_type = php_check_ident_type(var);
-	if (var_type == GPC_INDEXED_ARRAY) {
-		ind = php_get_ident_index(var);
-		if (PG(magic_quotes_gpc)) {
-			array_index = php_addslashes(ind, 0, NULL, 1);
-		} else {
-			array_index = ind;
-		}
-	}
-	if (var_type & GPC_ARRAY) {		/* array (indexed or not) */
-		tmp = strchr(var, '[');
-		if (tmp) {
-			*tmp = '\0';
-		}
-	}
-	/* ignore leading spaces in the variable name */
-	while (*var && *var==' ') {
-		var++;
-	}
-	var_len = strlen(var);
-	if (var_len==0) { /* empty variable name, or variable name with a space in it */
-		return;
-	}
-
-	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
-	for (tmp=var; *tmp; tmp++) {
-		switch(*tmp) {
-			case ' ':
-			case '.':
-				*tmp='_';
-				break;
-		}
-	}
-
-	val_len = strlen(val);
-	if (PG(magic_quotes_gpc)) {
-		val = php_addslashes(val, val_len, &val_len, 0);
-	} else {
-		val = estrndup(val, val_len);
-	}
-
-	if (var_type & GPC_ARRAY) {
-		pval *gpc_element;
-		pval **arr_ptr_ptr;
-		pval *array_element;
-
-		if (zend_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr_ptr) == FAILURE) {
-			/* If the array doesn't exist, create it */
-			MAKE_STD_ZVAL(gpc_element);
-			array_init(gpc_element);
-			do_insert=1;
-		} else {
-			if ((*arr_ptr_ptr)->type!=IS_ARRAY) {
-				if (--(*arr_ptr_ptr)->refcount > 0) {
-					MAKE_STD_ZVAL(*arr_ptr_ptr);
-				} else {
-					zval_dtor(*arr_ptr_ptr);
-				}
-				array_init(*arr_ptr_ptr);
-			}
-			gpc_element = *arr_ptr_ptr;
-			do_insert=0;
-		}
-
-		/* Create the element */
-		ALLOC_ZVAL(array_element);
-		INIT_PZVAL(array_element);
-		array_element->value.str.val = val;
-		array_element->value.str.len = val_len;
-		array_element->type = IS_STRING;
-
-		/* Insert it */
-		if (array_index) {	
-			/* indexed array */
-			if (php_check_type(array_index) == IS_LONG) {
-				/* numeric index */
-				zend_hash_index_update(gpc_element->value.ht, atol(array_index), &array_element, sizeof(pval *), NULL);	/* s[array_index]=tmp */
-			} else {
-				/* associative index */
-				zend_hash_update(gpc_element->value.ht, array_index, strlen(array_index)+1, &array_element, sizeof(pval *), NULL);	/* s["ret"]=tmp */
-			}
-			efree(array_index);
-		} else {
-			/* non-indexed array */
-			zend_hash_next_index_insert(gpc_element->value.ht, &array_element, sizeof(pval *), NULL);
-		}
-	} else {			/* we have a normal variable */
-		MAKE_STD_ZVAL(gpc_element);
-		gpc_element->type = IS_STRING;
-		gpc_element->refcount = 0;
-		gpc_element->value.str.val = val;
-		gpc_element->value.str.len = val_len;
-		do_insert=1;
-	}
-
-	if (do_insert) {
-		gpc_element->refcount = 0;
-		if (PG(gpc_globals)) {
-			zend_hash_update(EG(active_symbol_table), var, var_len+1, &gpc_element, sizeof(pval *), NULL);
-			gpc_element->refcount++;
-		}
-		if (track_vars_array) {
-			zend_hash_update(track_vars_array->value.ht, var, var_len+1, &gpc_element, sizeof(pval *), NULL);
-			gpc_element->refcount++;
-		}
-	}
-}
-
-
-void php_parse_gpc_data2(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
@@ -393,7 +264,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				/* FIXME: XXX: not binary safe, discards returned length */
 				php_url_decode(var, strlen(var));
 				php_url_decode(val, strlen(val));
-				php_parse_gpc_data2(val,var,array_ptr ELS_CC PLS_CC);
+				php_parse_gpc_data(val,var,array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {
 				var = strtok_r(NULL, ";", &strtok_buf);
