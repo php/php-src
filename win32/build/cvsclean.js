@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: cvsclean.js,v 1.2 2004-01-08 17:33:29 sniper Exp $ */
+/* $Id: cvsclean.js,v 1.3 2004-04-07 18:48:23 fmk Exp $ */
 // Cleans up files that do not belong in CVS
 
 var FSO = WScript.CreateObject("Scripting.FileSystemObject");
@@ -30,6 +30,7 @@ function find_cvsignore(dirname)
 	var fc = new Enumerator(f.SubFolders);
 	
 	for (; !fc.atEnd(); fc.moveNext()) {
+		WScript.StdOut.WriteLine(fc.item());
 		find_cvsignore(fc.item());	
 	}
 
@@ -107,7 +108,9 @@ function kill_from_cvsignore(igfile)
 	while (!t.atEndOfStream) {
 		l = t.ReadLine();
 		// don't kill their config.nice file(s)
-		if (l.match("config\.nice.*"))
+		if (l.match("config\.nice.*") ||
+			l.match("") || 
+			l.match("*"))
 			continue;
 		rm_r(dir + l);
 	}
