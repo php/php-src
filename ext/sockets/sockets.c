@@ -785,8 +785,11 @@ PHP_FUNCTION(socket_read)
 #endif
 
 	if (retval <= 0) {
-		php_error(E_WARNING, "Couldn't read %d bytes from socket %d [%d]: %s",
-		          Z_LVAL_PP(arg2), php_sock->bsd_socket, errno, strerror(errno));
+		if (retval != 0) { 
+			/* Not EOF */
+			php_error(E_WARNING, "Couldn't read %d bytes from socket %d [%d]: %s",
+		          	Z_LVAL_PP(arg2), php_sock->bsd_socket, errno, strerror(errno));
+		}
 		efree(tmpbuf);
 		RETURN_FALSE;
 	}
