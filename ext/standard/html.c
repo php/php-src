@@ -228,7 +228,7 @@ static enum entity_charset determine_charset(char * charset_hint)
 
 	if (strlen(charset_hint) == 0)	{
 		/* try to detect the charset for the locale */
-#if HAVE_NL_LANGINFO
+#if HAVE_NL_LANGINFO && HAVE_LOCALE_H && defined(CODESET)
 		charset_hint = nl_langinfo(CODESET);
 #endif
 #if HAVE_LOCALE_H
