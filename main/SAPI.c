@@ -415,8 +415,8 @@ SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool 
 				if (newlen != 0) {
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
-					strlcpy(newheader, "Content-type: ", newlen);
-					strlcpy(newheader, mimetype, newlen);
+					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
+					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
 					sapi_header.header_len = newlen - 1;
 					colon_offset = strchr(newheader, ':');
