@@ -131,10 +131,10 @@ void _php_curl_cleanup_handle(php_curl *);
 
 /* streams support */
 
-PHPAPI extern php_stream_ops php_curl_stream_ops;
+extern php_stream_ops php_curl_stream_ops;
 #define PHP_STREAM_IS_CURL	&php_curl_stream_ops
 
-PHPAPI php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
+php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 extern php_stream_wrapper php_curl_wrapper;
