@@ -86,7 +86,14 @@ function_entry snmp_functions[] = {
 };
 
 zend_module_entry snmp_module_entry = {
-	"snmp",snmp_functions,PHP_MINIT(snmp),NULL,NULL,NULL,PHP_MINFO(snmp),STANDARD_MODULE_PROPERTIES
+	"snmp",
+	snmp_functions,
+	PHP_MINIT(snmp),
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(snmp),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_SNMP
@@ -210,9 +217,9 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	* memory it did not allocate
 	*/
 #ifdef UCD_SNMP_HACK
-	session.community = (u_char *) strdup((*a2)->value.str.val);
+	session.community = (u_char *)estrdup((*a2)->value.str.val);
 #else
-	session.community = (u_char *) (*a2)->value.str.val;
+	session.community = (u_char *)(*a2)->value.str.val;
 #endif
 	session.community_len = (*a2)->value.str.len;
 	session.retries = retries;
@@ -229,7 +236,10 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	if (st >= 2) {
 		memmove((char *)name, (char *)root, rootlen * sizeof(oid));
 		name_length = rootlen;
-		array_init(return_value); /* prepare result array */	
+		if (array_init(return_value) == FAILURE) {
+			php_error(E_WARNING, "Cannot prepare result array");
+			RETURN_FALSE;
+		}
 	}
 
 	while(keepwalking) {
