@@ -211,7 +211,7 @@ int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 }
 
 
-sapi_module_struct sapi_module = {
+static sapi_module_struct sapi_module = {
 	"Apache",						/* name */
 									
 	php_module_startup,				/* startup */
