@@ -189,12 +189,10 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal, ch
 # endif
 	
 	if ((n = getaddrinfo(host, NULL, &hints, &res)) || res == NULL) {
-		char *str = res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n);
-
 		if (error_string) {
-			spprintf(error_string, 0, "getaddrinfo: %s", str);
+			spprintf(error_string, 0, "getaddrinfo: %s", (res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n)));
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", str);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: getaddrinfo failed: %s", (res == NULL ? "null result pointer" : PHP_GAI_STRERROR(n)));
 		}
 		return 0;
 	}
