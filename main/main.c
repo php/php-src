@@ -947,6 +947,8 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	unsigned char _gpc_flags[3] = {0,0,0};
 	zend_bool have_variables_order;
 
+	PG(http_globals).post = PG(http_globals).get = PG(http_globals).cookie = PG(http_globals).server = PG(http_globals).environment = PG(http_globals).post_files = NULL;
+
 	if (PG(variables_order)) {
 		p = PG(variables_order);
 		have_variables_order=1;
@@ -955,8 +957,6 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 		have_variables_order=0;
 		php_import_environment_variables(ELS_C PLS_CC);
 	}
-
-	PG(http_globals).post = PG(http_globals).get = PG(http_globals).cookie = PG(http_globals).server = PG(http_globals).environment = PG(http_globals).post_files = NULL;
 
 	while(*p) {
 		switch(*p++) {
@@ -991,11 +991,13 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 				break;
 			case 's':
 			case 'S':
-				if (sapi_module.register_server_variables) {
-					php_register_server_variables(ELS_C SLS_CC PLS_CC);
-				}
+				php_register_server_variables(ELS_C SLS_CC PLS_CC);
 				break;
 		}
+	}
+
+	if (!have_variables_order) {
+		php_register_server_variables(ELS_C SLS_CC PLS_CC);
 	}
 
 	if (PG(http_globals).post) {
@@ -1015,10 +1017,6 @@ static int php_hash_environment(ELS_D SLS_DC PLS_DC)
 	}
 	if (PG(http_globals).post_files) {
 		zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), PG(http_globals).post_files, sizeof(zval *),NULL);
-	}
-
-	if (!have_variables_order) {
-		php_register_server_variables(ELS_C SLS_CC PLS_CC);
 	}
 
 	return SUCCESS;
