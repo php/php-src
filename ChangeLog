@@ -1,3 +1,23 @@
+2005-03-04  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * sapi/apache_hooks/config.m4:
+      Merge from sapi/apache/config.m4 and cleanup
+
+    * sapi/apache/config.m4:
+      Do not set apache stuff if not building apache
+
+    * acinclude.m4:
+      This did not work for some reason, better revert it
+
+    * scripts/phpize.m4:
+      Add missing subst
+
+2005-03-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/mbstring/mb_gpc.c:
+      Removed unused variables.
+
 2005-03-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
