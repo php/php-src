@@ -19,7 +19,9 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
+#ifndef PHP_WIN32
 #include "php_config.h"
+#endif
 
 #if HAVE_FOPENCOOKIE 
 #define _GNU_SOURCE
