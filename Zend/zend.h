@@ -21,7 +21,7 @@
 #ifndef _ZEND_H
 #define _ZEND_H
 
-#define ZEND_VERSION "0.99"
+#define ZEND_VERSION "1.00"
 
 #define ZEND_NEW_ERROR_HANDLING 0
 
