@@ -49,6 +49,8 @@
 * Installer now checks dependencies on package uninstall
 * Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
 * Added the command "download-all" (Alex Merz)
+* Made package dependency checking back to work
+* Added support for spaces in path names (Greg)
 * Added new pear "bundle" command, which downloads and uncompress a PECL package.
 The main purpouse of this command is for easily adding extensions to the PHP sources
 before compiling it.
