@@ -1133,6 +1133,30 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 
 #include "logos.h"
 
+PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
+{
+	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
+		&& PG(expose_php)) {
+		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
+			PHPWRITE(php_logo, sizeof(php_logo));
+			return 1;
+		} else if (!strcmp(SG(request_info).query_string+1, PHP_EGG_LOGO_GUID)) {
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
+			PHPWRITE(php_egg_logo, sizeof(php_egg_logo));
+			return 1;
+		} else if (!strcmp(SG(request_info).query_string+1, ZEND_LOGO_GUID)) {
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
+			PHPWRITE(zend_logo, sizeof(zend_logo));
+			return 1;
+		} else if (!strcmp(SG(request_info).query_string+1, "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000")) {
+			php_print_credits(PHP_CREDITS_ALL);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
@@ -1140,26 +1164,8 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	char *old_cwd;
 	SLS_FETCH();
 
-
-	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
-		&& PG(expose_php)) {
-		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(php_logo, sizeof(php_logo));
-			return;
-		} else if (!strcmp(SG(request_info).query_string+1, PHP_EGG_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(php_egg_logo, sizeof(php_egg_logo));
-			return;
-		} else if (!strcmp(SG(request_info).query_string+1, ZEND_LOGO_GUID)) {
-			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
-			PHPWRITE(zend_logo, sizeof(zend_logo));
-			return;
-		} else if (!strcmp(SG(request_info).query_string+1, "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000")) {
-			php_print_credits(PHP_CREDITS_ALL);
-			return;
-		}
-	}
+	if (php_handle_special_queries(SLS_C PLS_CC))
+		return;
 #define OLD_CWD_SIZE 4096
 	old_cwd = do_alloca(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
