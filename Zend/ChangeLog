@@ -1,3 +1,12 @@
+2002-08-13  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_execute_API.c:
+    - Fix crash when exception is raised in __autoload function
+
+2002-08-13  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * zend.h: MFZE1
+
 2002-08-08  sebastian  <sebastian@pb1.pair.com>
 
     * zend_objects.c: Fix warning.

@@ -1,3 +1,103 @@
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: Fix for Bug #17572
+
+    * ext/standard/pack.c:
+    Fixed another memory leak, patch provided by Ilia <ilia@prohost.org>
+
+    * ext/standard/pack.c:
+    Fixes a memory leak which results when an invalid format code is
+    specified.  Patch by Ilia <ilia@prohost.org>
+
+    * CODING_STANDARDS:
+    As per the suggestion on php-dev, now please #ifdef 0_<username here>
+
+    * NEWS: Updating to reflect ODBC additons and default timeout
+
+    * ext/odbc/php_odbc.c: fixing my misunderstanding of the php_error_docref
+
+    * ext/cpdf/cpdf.c: Removing the PHP_31 tag...
+
+2002-08-13  helly  <helly@pb1.pair.com>
+
+    * CODING_STANDARDS: -better use external example
+    -say NULL is intended
+    -correct example
+
+    * php.ini-dist
+      php.ini-recommended: docref_root and docref_ext for php_error_docref()
+
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * main/network.c:
+    Correcting as per discussion with Iliaa and Edin on efnet://#php.bugs
+
+    * main/network.c:
+    Bug Fix #16113, as reflective of a php-dev convo between wez and iliaa
+
+    * ext/odbc/php_odbc.c:
+    Fixing the php_error_docref's to be compliant with the standard.
+
+2002-08-13  helly  <helly@pb1.pair.com>
+
+    * CODING_STANDARDS: comments & php_error_docref
+
+    * ext/exif/exif.c: some work on the messages
+
+    * main/main.c: allow target anchor only for docref parameter
+
+2002-08-13  fujimoto  <fujimoto@pb1.pair.com>
+
+    * Makefile.global:
+    cleaning up include files created by PHP_DEFINE when 'make distclean'ed
+
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/qtdom/config.m4: Fix for Bug #18873
+
+2002-08-13  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * ext/standard/file.c
+      ext/standard/dir.c: Missing proto
+
+    * ext/oci8/oci8.c: Single-line comments please
+
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: spelling error
+
+    * ext/odbc/php_odbc.c: Added more folding markers....
+
+2002-08-13  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * ext/ldap/ldap.c
+      ext/standard/basic_functions.c
+      ext/mbstring/mbstring.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      main/output.c: bool not boolean
+
+    * main/output.c: Use int, not integer.
+
+    * ext/standard/dir.c: dir() returns an instantiated object, not a class.
+
+    * ext/mcve/mcve.c: Don't use long as a type
+
+    * ext/ftp/php_ftp.c: Fix typo
+
+    * ext/exif/exif.c: Don't use long as a type
+
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/db/db.c: Fix for Bug #18746 by sfox and I
+
+2002-08-13  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * sapi/apache/php_apache.c: Fix proto
+
+2002-08-13  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/odbc/php_odbc.c: Let to php_error_docref revolution begin
+
 2002-08-12  helly  <helly@pb1.pair.com>
 
     * ext/exif/exif.c: use of php_error_docref
