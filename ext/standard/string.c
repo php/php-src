@@ -4678,10 +4678,9 @@ PHP_FUNCTION(str_word_count)
 
 	convert_to_string_ex(str);
 	
-	p = s = Z_STRVAL_PP(str);
-	e = Z_STRVAL_PP(str) + Z_STRLEN_PP(str);
+	e = Z_STRLEN_PP(str) + (p = s = Z_STRVAL_PP(str));
 		
-	if (type == 1 || type == 2) {
+	if (type) {
 		array_init(return_value);
 	}
 	
