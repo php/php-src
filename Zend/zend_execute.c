@@ -1934,7 +1934,7 @@ send_by_ref:
 					array_offset = EX(opline)->op1.u.opline_num;
 					do {
 						if (array_offset==-1) {
-							zend_error(E_ERROR, "Cannot break/continue %d levels\n", original_nest_levels);
+							zend_error(E_ERROR, "Cannot break/continue %d level%s", original_nest_levels, (original_nest_levels == 1) ? "" : "s");
 						}
 						jmp_to = &op_array->brk_cont_array[array_offset];
 						if (nest_levels>1) {
