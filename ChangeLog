@@ -1,3 +1,28 @@
+2004-06-17  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      String length in parse_parameters should be int
+
+2004-06-17  Brad House  <brad@mainstreetsoftworks.com>
+
+    * (PHP_4_3)
+      ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      merge name change from mcve -> monetra
+      add compatability layer for v3.2 functionality, so existing scripts
+      will work without any migration needed.
+      This patch has been sitting in PHP 5 for some time, and seems to
+      be working quite well. A quick backport of that patch to php4.
+
+2004-06-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/soundex.c:
+      MFH: Properly handly high ascii values in soundex().
+
+    * ext/standard/soundex.c:
+      Properly handly high ascii values in soundex().
+
 2004-06-16  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/com_dotnet/com_com.c
