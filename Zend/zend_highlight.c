@@ -203,7 +203,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 		switch (token_type) {
 			case T_WHITESPACE:
 				if (!prev_space) {
-					putchar(' ');
+					zend_write(" ", sizeof(" ") - 1);
 					prev_space = 1;
 				}
 						/* lack of break; is intentional */
@@ -215,9 +215,9 @@ ZEND_API void zend_strip(TSRMLS_D)
 			case T_END_HEREDOC: {
 					char *ptr = LANG_SCNG(yy_text);
 
-					fwrite(ptr, LANG_SCNG(yy_leng) - 1, 1, stdout);
+					zend_write(ptr, LANG_SCNG(yy_leng) - 1);
 					/* The ensure that we only write one ; and that it followed by the required newline */
-					putchar('\n');
+					zend_write("\n", sizeof("\n") - 1);
 					if (ptr[LANG_SCNG(yy_leng) - 1] == ';') {
 						lex_scan(&token TSRMLS_CC);
 					}
@@ -226,7 +226,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				break;
 			
 			default:
-				fwrite(LANG_SCNG(yy_text), LANG_SCNG(yy_leng), 1, stdout);
+				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 		}
 
