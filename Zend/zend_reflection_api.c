@@ -1585,6 +1585,7 @@ ZEND_METHOD(reflection_class, newinstance)
 		zval ***params;
 		zval *fname;
 		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
 
 		params = safe_emalloc(sizeof(zval **), argc, 0);
 		if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
@@ -1592,35 +1593,30 @@ ZEND_METHOD(reflection_class, newinstance)
 			RETURN_FALSE;
 		}
 
-		/* Invoke the constructor
-		 *
-		 * FIXME(?): The creation of fname (NULL) is a workaround since function_name is 
-		 * _always_ checked for in zend_execute_API.c _even_ if a function pointer is given
-		 */
-		MAKE_STD_ZVAL(fname);
-		ZVAL_NULL(fname);
-
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
-		fci.function_name = fname;
+		fci.function_name = NULL;
 		fci.symbol_table = NULL;
 		fci.object_pp = &return_value;
 		fci.retval_ptr_ptr = &retval_ptr;
 		fci.param_count = argc;
 		fci.params = params;
 		fci.no_separation = 1;
-		/*fci.function_handler_cache = &ce->constructor;*/
 
-		if (zend_call_function(&fci, NULL TSRMLS_CC) == FAILURE) {
+		fcc.initialized = 1;
+		fcc.function_handler = ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.object_pp = &return_value;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 			efree(params);
-			zval_ptr_dtor(&fname);
+			zval_ptr_dtor(&retval_ptr);
 			zend_error(E_WARNING, "Invokation of %s's constructor failed\n", ce->name);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}
-		zval_ptr_dtor(&fname);
 		efree(params);
 	}
 }
