@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.23 2002-04-28 07:52:00 ssb Exp $
+     $Id: package.dtd,v 1.24 2002-04-28 07:58:41 ssb Exp $
 
      This is the PEAR package description, version 1.0b7.
      It should be used with the informal public identifier:
@@ -43,7 +43,7 @@
 
 <!ELEMENT changelog (release)+>
 
-<!ELEMENT release (version|license|state|date|notes|filelist|deps|provides)+>
+<!ELEMENT release (version|license|state|date|notes|filelist|deps|provides|script)+>
 
 <!ELEMENT version (#PCDATA)>
 
