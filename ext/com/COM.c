@@ -234,18 +234,18 @@ PHP_FUNCTION(COM_load)
 			codepage = CP_ACP;
 			break;
 		case 3:
-			if (!INI_INT("allow_dcom")) {
-				php_error(E_WARNING, "DCOM is disabled");
-				RETURN_FALSE;
-			}
 			getParameters(ht, 3, &module_name, &server_name, &code_page);
 
 			if (server_name->type == IS_NULL) {
 				efree(server_name);
 				server_name = NULL;
-			}
-			else
+			} else {
+				if (!INI_INT("allow_dcom")) {
+					php_error(E_WARNING, "DCOM is disabled");
+					RETURN_FALSE;
+				}
 				convert_to_string(server_name);
+			}
 
 			convert_to_long(code_page);
 			codepage = code_page->value.lval;
