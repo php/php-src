@@ -81,8 +81,13 @@ static int le_result,le_link,le_plink;
 #define MYSQL_NUM		1<<1
 #define MYSQL_BOTH		(MYSQL_ASSOC|MYSQL_NUM)
 
+#if MYSQL_VERSION_ID < 32224
 #define PHP_MYSQL_VALID_RESULT(mysql)		\
 	(mysql_num_fields(mysql)>0)
+#else
+#define PHP_MYSQL_VALID_RESULT(mysql)		\
+	(mysql_field_count(mysql)>0)
+#endif
 
 function_entry mysql_functions[] = {
 	PHP_FE(mysql_connect,								NULL)
