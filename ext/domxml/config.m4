@@ -26,11 +26,11 @@ PHP_ARG_WITH(dom, for DOM support,
 if test "$PHP_DOM" != "no"; then
 
   DOMXML_DIR_ADD=""
-  if test -r $PHP_DOM/include/libxml/tree.h; then
-    DOMXML_DIR=$PHP_DOM
-  elif test -r $PHP_DOM/include/libxml2/libxml/tree.h; then
+  if test -r $PHP_DOM/include/libxml2/libxml/tree.h; then
     DOMXML_DIR=$PHP_DOM
     DOMXML_DIR_ADD="/libxml2"
+  elif test -r $PHP_DOM/include/libxml/tree.h; then
+    DOMXML_DIR=$PHP_DOM
   else
     for i in /usr/local /usr; do
       test -r $i/include/libxml/tree.h && DOMXML_DIR=$i
