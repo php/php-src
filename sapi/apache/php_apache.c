@@ -203,9 +203,9 @@ PHP_MINFO_FUNCTION(apache)
 		if ((p = strrchr(name, '.'))) {
 			*p='\0'; /* Cut off ugly .c extensions on module names */
 		}
-		strcpy(modulenames, name);
+		strcat(modulenames, name);
 		if (modp->next) {
-			strcpy(modulenames, ", ");
+			strcat(modulenames, ", ");
 		}
 	}
 	php_info_print_table_row(2, "Loaded Modules", modulenames);
