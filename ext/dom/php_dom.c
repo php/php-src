@@ -102,8 +102,13 @@ int decrement_document_reference(dom_object *object TSRMLS_DC) {
 		object->document->refcount--;
 		ret_refcount = object->document->refcount;
 		if (ret_refcount == 0) {
-			dom_clean_nodes(object TSRMLS_CC);
-			node_free_resource(object->document->ptr TSRMLS_CC);
+			if (object->document->ptr != NULL) {
+				dom_clean_nodes(object TSRMLS_CC);
+				/* No references to Doc so can use xmlFreeDoc
+				node_free_resource(object->document->ptr TSRMLS_CC); */
+				xmlFreeDoc((xmlDoc *) object->document->ptr);
+				object->document->ptr = NULL;
+			}
 			efree(object->document);
 			object->document = NULL;
 		}
@@ -590,7 +595,7 @@ PHP_MINFO_FUNCTION(dom)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
 	php_info_print_table_row(2, "DOM/XML API Version", DOM_API_VERSION);
-	php_info_print_table_row(2, "libxml Version", xmlParserVersion);
+	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
 #if defined(LIBXML_HTML_ENABLED)
 	php_info_print_table_row(2, "HTML Support", "enabled");
 #endif
@@ -979,6 +984,10 @@ zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *
 
 
 	object_init_ex(wrapper, ce);
+	/* Add object properties not needing function calls */
+	if (obj->type == XML_DOCUMENT_NODE || obj->type == XML_HTML_DOCUMENT_NODE) {
+		add_property_bool(wrapper, "formatOutput", 0);
+	}
 	intern = (dom_object *)zend_objects_get_address(wrapper TSRMLS_CC);
 	if (obj->doc != NULL) {
 		if (domobj != NULL) {
@@ -1018,6 +1027,20 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child)
     return SUCCESS;
 }
 /* }}} end dom_hierarchy */
+
+/* {{{ dom_has_feature(char *feature, char *version) */
+int dom_has_feature(char *feature, char *version)
+{
+	int retval = 0;
+
+	if (!(strcmp (version, "1.0") && strcmp (version,"2.0") && strcmp(version, ""))) {
+		if ((!strcasecmp(feature, "Core") && strcmp (version, "1.0")) || !strcasecmp(feature, "XML"))
+			retval = 1;
+	}
+
+	return retval;
+}
+/* }}} end dom_has_feature */
 
 /* {{{ void dom_element_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval  TSRMLS_DC) */
 void dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, zval **retval, dom_object *intern  TSRMLS_DC)
