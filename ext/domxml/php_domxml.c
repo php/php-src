@@ -3274,7 +3274,7 @@ PHP_FUNCTION(domxml_dump_mem_file)
 {
 	zval *id;
 	xmlDoc *docp;
-	int file_len, bytes;
+	int file_len, bytes, keepblanks;
 	int format = 0;
 	int compressmode = 0;
 	char *file;
@@ -3284,8 +3284,9 @@ PHP_FUNCTION(domxml_dump_mem_file)
 	xmlSetCompressMode(compressmode);
 
 	if (format) {
-		xmlKeepBlanksDefault(0);
+		keepblanks = xmlKeepBlanksDefault(0);
 		bytes = xmlSaveFormatFile(file, docp, format);
+		xmlKeepBlanksDefault(keepblanks);
 	} else {
 		bytes = xmlSaveFile(file, docp);
 	}
