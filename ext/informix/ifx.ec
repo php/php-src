@@ -42,7 +42,7 @@
 
 #include "php.h"
 #include "php_globals.h"
-#include "ext/standard/php3_standard.h"
+#include "ext/standard/php_standard.h"
 #include "php_informix.h"
 #include "php_globals.h"
 #include "php_ini.h"
