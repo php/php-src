@@ -37,9 +37,9 @@ foreach($sxe->children() as $name=>$val) {
 ===DONE===
 --EXPECT--
 string(5) "elem1"
-string(17) "simplexml_element"
+string(16) "SimpleXMLElement"
 string(10) "Bla bla 1."
 string(6) "elem11"
-string(17) "simplexml_element"
+string(16) "SimpleXMLElement"
 string(10) "Bla bla 2."
 ===DONE===

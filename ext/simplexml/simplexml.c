@@ -1614,7 +1614,7 @@ PHP_MINIT_FUNCTION(simplexml)
 {
 	zend_class_entry sxe;
 
-	INIT_CLASS_ENTRY(sxe, "simplexml_element", sxe_functions);
+	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", sxe_functions);
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;

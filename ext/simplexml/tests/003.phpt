@@ -34,26 +34,26 @@ echo "---Done---\n";
 
 ?>
 --EXPECT--
-simplexml_element Object
+SimpleXMLElement Object
 (
-    [elem1] => simplexml_element Object
+    [elem1] => SimpleXMLElement Object
         (
-            [comment] => simplexml_element Object
+            [comment] => SimpleXMLElement Object
                 (
                 )
 
-            [elem2] => simplexml_element Object
+            [elem2] => SimpleXMLElement Object
                 (
-                    [elem3] => simplexml_element Object
+                    [elem3] => SimpleXMLElement Object
                         (
-                            [included-entity] => simplexml_element Object
+                            [included-entity] => SimpleXMLElement Object
                                 (
                                     [included-entity] => This is text included from an entity
                                 )
 
-                            [elem4] => simplexml_element Object
+                            [elem4] => SimpleXMLElement Object
                                 (
-                                    [test] => simplexml_element Object
+                                    [test] => SimpleXMLElement Object
                                         (
                                         )
 

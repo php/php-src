@@ -48,38 +48,38 @@ var_dump($a);
 ===Done===
 --EXPECTF--
 ===Property===
-object(simplexml_element)#%d (2) {
+object(SimpleXMLElement)#%d (2) {
   ["comment"]=>
-  object(simplexml_element)#%d (0) {
+  object(SimpleXMLElement)#%d (0) {
   }
   ["elem2"]=>
-  object(simplexml_element)#%d (1) {
+  object(SimpleXMLElement)#%d (1) {
     ["elem3"]=>
-    object(simplexml_element)#%d (1) {
+    object(SimpleXMLElement)#%d (1) {
       ["elem4"]=>
-      object(simplexml_element)#%d (1) {
+      object(SimpleXMLElement)#%d (1) {
         ["test"]=>
-        object(simplexml_element)#%d (0) {
+        object(SimpleXMLElement)#%d (0) {
         }
       }
     }
   }
 }
 ===Array===
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(5) "elem1"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(5) "first"
 }
 ===Set===
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(8) "Changed1"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "12"
 }

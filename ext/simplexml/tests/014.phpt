@@ -31,16 +31,16 @@ var_dump($people->person['age']);
 ?>
 ===DONE===
 --EXPECTF--
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(3) "Joe"
 }
 NULL
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(3) "XXX"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "30"
 }
@@ -49,11 +49,11 @@ object(simplexml_element)#%d (1) {
 NULL
 bool(false)
 ---Unsupported---
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "30"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(2) "35"
 }

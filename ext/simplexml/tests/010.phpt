@@ -5,7 +5,7 @@ SimpleXML: Simple Inheritance
 --FILE--
 <?php 
 
-class simplexml_inherited extends simplexml_element
+class simplexml_inherited extends SimpleXMLElement
 {
 }
 

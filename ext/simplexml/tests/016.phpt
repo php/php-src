@@ -29,28 +29,28 @@ var_dump($people->person[0]['name']);
 ?>
 ===DONE===
 --EXPECTF--
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(3) "Joe"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(6) "JoeFoo"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "JoeFooBar"
 }
 ---[0]---
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(3) "Joe"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(6) "JoeFoo"
 }
-object(simplexml_element)#%d (1) {
+object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "JoeFooBar"
 }
