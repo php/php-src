@@ -178,6 +178,7 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_
 %pure_parser
 %token TC_STRING
 %token TC_ENCAPSULATED_STRING
+%token BRACK
 %token SECTION
 %token CFG_TRUE
 %token CFG_FALSE
@@ -199,6 +200,14 @@ statement:
 			ZEND_INI_PARSER_CB(&$1, &$3, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
 			free($1.value.str.val);
 			free($3.value.str.val);
+		}
+	|	TC_STRING BRACK '=' string_or_value {
+#if DEBUG_CFG_PARSER
+			printf("'%s'[ ] = '%s'\n", $1.value.str.val, $4.value.str.val);
+#endif
+			ZEND_INI_PARSER_CB(&$1, &$4, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG);
+			free($1.value.str.val);
+			free($4.value.str.val);
 		}
 	|	TC_STRING { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); free($1.value.str.val); }
 	|	SECTION { ZEND_INI_PARSER_CB(&$1, NULL, ZEND_INI_PARSER_SECTION, ZEND_INI_PARSER_ARG); free($1.value.str.val); }

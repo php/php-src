@@ -108,6 +108,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 %%
 
+<INITIAL>[ ]*[\[][ ]*[\]][ ]* {
+	return BRACK;
+}
 
 <INITIAL>[ ]*("true"|"on"|"yes")[ ]* {
 	ini_lval->value.str.val = zend_strndup("1", 1);
@@ -166,7 +169,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<INITIAL>[^=\n\r\t;|&~()!"]+ {
+<INITIAL>[^=\n\r\t;|&~()!"\[]+ {
 	/* STRING */
 	register int i;
 
