@@ -11,7 +11,7 @@ VERSION=${2:-`echo $TARDIR | sed "s/$PREFIX-//g"`}
 if	[ "$VERSION" = "" ]
 then	cat <<"EOH"
 $PREFIX source needs to be installed in a folder that contains the version
-number, e.g. ${PREFIX}4 or ${PREFIX}4b2
+number, e.g. ${PREFIX}5 or ${PREFIX}5b2
 EOH
 fi
 	
@@ -32,25 +32,24 @@ sed -e "s/PVERSION/$VERSION/g" \
     -e "s/PRELEASE/$RELEASE/g" \
     -e "s/TARDIR/$TARDIR/g" \
     > $SPEC <<'EOF'
-Summary: PHP 4 - A powerful scripting language
-Name: mod_php4
+Summary: PHP 5 - A powerful scripting language
+Name: mod_php5
 Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
 Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
-Copyright: GPL
-BuildRoot: /tmp/php4-root
+Copyright: PHP License
+BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: webserver
 
 %description
-PHP4 is a powerful apache module that adds scripting and database connection
-capabilities to the apache server. This version includes the "php" binary
+PHP5 is a powerful apache module that adds scripting and database connection
+capabilities to the apache server. This version includes the "php_cgi" binary
 for suExec and stand alone php scripts too.
 
 %prep
 %setup -q -n TARDIR
 #mkdir manual; cd manual && tar xzf $RPM_SOURCE_DIR/php3-manual.tar.gz
-chown -R root.root .
 ./buildconf
 
 %build
@@ -58,49 +57,63 @@ chown -R root.root .
 # need to run this under sh or it breaks
 
 sh ./configure --prefix=/usr \
-	--with-config-file-path=/usr/lib \
+	--with-config-file-path=/etc \
+	--enable-cli \
 	--enable-force-cgi-redirect \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
-	--with-mysql=/usr \
-	--with-pdflib=/usr \
-	--with-zlib=/usr \
+	--with-mysql \
+	--with-zlib \
 	--enable-xml \
 	--enable-wddx 
 
 make
-mv php php.keepme
+mv sapi/cgi/php php.keepme
 
 # then the apache module 
-rm config.cache
+test -f config.cache && rm -f config.cache
 sh ./configure --prefix=/usr \
 	--with-apxs=/usr/sbin/apxs \
+	--enable-cli \
 	--enable-versioning \
-	--with-config-file-path=/usr/lib \
+	--with-config-file-path=/etc \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
-	--with-mysql=/usr \
-	--with-pdflib=/usr \
-	--with-zlib=/usr \
+	--with-mysql \
+	--with-zlib \
 	--enable-xml \
 	--enable-wddx 
 
 make clean
 make
 # restore cgi version
-mv php.keepme php
+mv php.keepme sapi/cgi/php
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/usr/lib/apache
-install -m 755 .libs/libphp4.so $RPM_BUILD_ROOT/usr/lib/apache
-mkdir -p $RPM_BUILD_ROOT/usr/bin
-install -m 755 php $RPM_BUILD_ROOT/usr/bin
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/apache
+install -m 0755 .libs/libphp5.so $RPM_BUILD_ROOT%{_libdir}/apache
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+install -m 0755 sapi/cli/php $RPM_BUILD_ROOT%{_bindir}
+install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT%{_bindir}/php_cgi
+mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
+install -m 0755 sapi/cli/php.1 $RPM_BUILD_ROOT%{_mandir}/man1
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
+install -m 0755 php.ini-recommended $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Oct 31 2003 Marcus Boerger <helly@php.net>
+- Update version to 5.
+- Remove unsure external requirements.
+- Remove non existing directories
+- Fix targets.
+- Install both CLI and CGI.
+- Install manpage.
+- Install ini.
+
 * Mon Mar 04 2002 Arjen Lentz <agl@bitbike.com>
 - Fix path and remove --with-imap due to conflicts with kerberos.
 
@@ -132,10 +145,14 @@ rm -rf $RPM_BUILD_ROOT
 - Made initial cut for PHP3.
 
 %files
-/usr/lib/apache/libphp4.so
-/usr/bin/php
-%doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE BUGS examples
-%doc manual/*
+%defattr(-,root,root)
+%{_libdir}/apache/libphp5.so
+%{_bindir}/php
+%{_bindir}/php_cgi
+%{_mandir}/man1/php.1*
+%{_sysconfdir}/php.ini
+
+%doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE NEWS
 EOF
 
 RPMDIR=/usr/src/redhat/RPMS
@@ -144,13 +161,13 @@ SRCDIR=/usr/src/redhat/SOURCES
 
 (
 make clean
-find . -name config.cache -exec rm -f '{}'
+find . -name config.cache -exec rm -f '{}' \;
 cd .. 
 tar czvf ${SRCDIR}/${TAR} $TARDIR )
 
 cp -a $SPEC $SPECDIR/${SPEC}
 #cp -a *.patch $SRCDIR
 cd $SRCDIR
-chown -R root.root ${TAR}
+#chown -R root.root ${TAR}
 cd $SPECDIR
 rpm -ba -v ${SPEC}
