@@ -12,7 +12,7 @@ AC_ARG_WITH(cybercash,
       if test -n "$MCK_DIR"; then
 	AC_MSG_RESULT(yes)
 	PHP_EXTENSION(cybercash)
-	LIBS="$LIBS -L$withval/lib"
+	LIBS="$LIBS -L$MCK_DIR/lib"
 	AC_ADD_LIBRARY_WITH_PATH(mckcrypto, $MCK_DIR/lib)
 	AC_ADD_INCLUDE($MCK_DIR)
 	AC_DEFINE(HAVE_MCK)
