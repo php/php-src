@@ -111,6 +111,9 @@ WSDL
 - function/method overloading (test(int); test(string))
 - wsdl caching
 - wsdl auto generation
+? SOAP binding
+- HTTP GET/POST binding
+- MIME binding
 
 Error Handling
 --------------
@@ -127,6 +130,7 @@ Transport
 - transport abstraction layer
 ? SoapAction HTTP header field
 ? HTTP status codes
+? HTTP chunked Transfer-Encoding
 
 UDDI
 ----

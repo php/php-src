@@ -171,54 +171,12 @@ zval *to_zval_after_user(encodeType type, zval *data);
 void whiteSpace_replace(char* str);
 void whiteSpace_collapse(char* str);
 
-/* zval type decode */
-zval *to_zval_double(encodeType type, xmlNodePtr data);
-zval *to_zval_long(encodeType type, xmlNodePtr data);
-zval *to_zval_ulong(encodeType type, xmlNodePtr data);
-zval *to_zval_bool(encodeType type, xmlNodePtr data);
 zval *to_zval_object(encodeType type, xmlNodePtr data);
-zval *to_zval_string(encodeType type, xmlNodePtr data);
-zval *to_zval_stringr(encodeType type, xmlNodePtr data);
-zval *to_zval_stringc(encodeType type, xmlNodePtr data);
 zval *to_zval_array(encodeType type, xmlNodePtr data);
-zval *to_zval_map(encodeType type, xmlNodePtr data);
-zval *to_zval_null(encodeType type, xmlNodePtr data);
-zval *guess_zval_convert(encodeType type, xmlNodePtr data);
-
-xmlNodePtr to_xml_long(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_double(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_bool(encodeType type, zval *data, int style);
-
-/* String encode */
-xmlNodePtr to_xml_string(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style);
-
-/* Null encode */
-xmlNodePtr to_xml_null(encodeType type, zval *data, int style);
-
-/* Struct encode */
-xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
-
-/* Array encode */
-xmlNodePtr guess_array_map(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_map(encodeType type, zval *data, int style);
 
 /* Try and guess for non-wsdl clients and servers */
+zval *guess_zval_convert(encodeType type, xmlNodePtr data);
 xmlNodePtr guess_xml_convert(encodeType type, zval *data, int style);
-
-/* Datetime encode/decode */
-xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style);
-xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_time(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_date(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_gday(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style);
-xmlNodePtr to_xml_duration(encodeType type, zval *data, int style);
 
 #define get_conversion(e) get_conversion_ex(SOAP_GLOBAL(defEncIndex), e)
 #define get_conversion_from_type(n, t) get_conversion_from_type_ex(SOAP_GLOBAL(defEnc), n, t)

@@ -1158,7 +1158,8 @@ PHP_METHOD(soapserver, handle)
 
 		if (call_status == SUCCESS) {
 			sdlFunctionPtr function;
-			function = get_function(get_binding_from_type(service->sdl, BINDING_SOAP), Z_STRVAL(function_name));
+			/* TODO: make 'strict' (use the sdl defnintions) */
+			function = get_function(service->sdl, Z_STRVAL(function_name));
 			SOAP_GLOBAL(overrides) = service->mapping;
 			doc_return = seralize_response_call(function, response_name, service->uri, &retval, soap_version TSRMLS_CC);
 			SOAP_GLOBAL(overrides) = NULL;
@@ -1312,8 +1313,6 @@ PHP_METHOD(soapobject, soapobject)
 			ret = zend_list_insert(sdl, le_sdl);
 
 			add_property_resource(thisObj, "sdl", ret);
-			/* FIXME: this is extremely bad practice */
-			add_property_resource(thisObj, "port", (long)get_binding_from_type(sdl, BINDING_SOAP));
 			zend_list_addref(ret);
 		}
 	}
@@ -1409,21 +1408,17 @@ static void do_soap_call(zval* thisObj,
 zend_try {
 	SOAP_GLOBAL(sdl) = sdl;
  	if (sdl != NULL) {
-		sdlBindingPtr binding;
-
- 		zval* this_ptr = thisObj;
- 		FETCH_THIS_PORT(binding);
-
  		php_strtolower(function, function_len);
- 		fn = get_function(binding, function);
+ 		fn = get_function(sdl, function);
  		if (fn != NULL) {
+			sdlBindingPtr binding = fn->binding;
  			if (binding->bindingType == BINDING_SOAP) {
  				sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
  				request = seralize_function_call(thisObj, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version TSRMLS_CC);
- 				ret = send_http_soap_request(thisObj, request, fnb->soapAction TSRMLS_CC);
+ 				ret = send_http_soap_request(thisObj, request, binding->location, fnb->soapAction TSRMLS_CC);
  			}	else {
  				request = seralize_function_call(thisObj, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version TSRMLS_CC);
- 				ret = send_http_soap_request(thisObj, request, NULL TSRMLS_CC);
+ 				ret = send_http_soap_request(thisObj, request, binding->location, NULL TSRMLS_CC);
  			}
 
  			xmlFreeDoc(request);
@@ -1445,15 +1440,17 @@ zend_try {
 			smart_str_free(&error);
 		}
 	} else {
-		zval **uri;
+		zval **uri, **location;
 		smart_str *action;
 
 		if (zend_hash_find(Z_OBJPROP_P(thisObj), "uri", sizeof("uri"), (void *)&uri) == FAILURE) {
-			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error finding uri in soap_call_function_handler", NULL, NULL TSRMLS_CC);
+			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error finding \"uri\" property", NULL, NULL TSRMLS_CC);
+		} else if (zend_hash_find(Z_OBJPROP_P(thisObj), "location", sizeof("location"),(void **) &location) == FAILURE) {
+			add_soap_fault(thisObj, "SOAP-ENV:Client", "Error could not find \"location\" property", NULL, NULL TSRMLS_CC);
 		} else {
 	 		request = seralize_function_call(thisObj, NULL, function, Z_STRVAL_PP(uri), real_args, arg_count, soap_version TSRMLS_CC);
 			action = build_soap_action(thisObj, function);
-			ret = send_http_soap_request(thisObj, request, action->c TSRMLS_CC);
+			ret = send_http_soap_request(thisObj, request, Z_STRVAL_PP(location), action->c TSRMLS_CC);
 
 	 		smart_str_free(action);
 			efree(action);
@@ -1596,17 +1593,14 @@ PHP_METHOD(soapobject, __getfunctions)
 	if (sdl) {
 		smart_str buf = {0};
 		sdlFunctionPtr *function;
-		sdlBindingPtr binding;
-
-		FETCH_THIS_PORT(binding);
 
 		array_init(return_value);
- 		zend_hash_internal_pointer_reset_ex(binding->functions, &pos);
-		while (zend_hash_get_current_data_ex(binding->functions, (void **)&function, &pos) != FAILURE) {
+ 		zend_hash_internal_pointer_reset_ex(&sdl->functions, &pos);
+		while (zend_hash_get_current_data_ex(&sdl->functions, (void **)&function, &pos) != FAILURE) {
 			function_to_string((*function), &buf);
 			add_next_index_stringl(return_value, buf.c, buf.len, 1);
-			zend_hash_move_forward_ex(binding->functions, &pos);
 			smart_str_free(&buf);
+			zend_hash_move_forward_ex(&sdl->functions, &pos);
 		}
 	}
 }
@@ -1811,15 +1805,12 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 		php_error(E_ERROR,"looks like we got \"Body\" without function call\n");
 	}
 
-	/* TODO: make 'strict' (use the sdl defnintions) */
-	binding = get_binding_from_type(sdl, BINDING_SOAP);
-
 	INIT_ZVAL(tmp_function_name);
 	ZVAL_STRING(&tmp_function_name, (char *)func->name, 1);
 
 	(*function_name) = tmp_function_name;
 
-	function = get_function(binding, php_strtolower((char *)func->name, strlen(func->name)));
+	function = get_function(sdl, php_strtolower((char *)func->name, strlen(func->name)));
 	if (sdl != NULL && function == NULL) {
 		php_error(E_ERROR, "Error function \"%s\" doesn't exists for this service \"%s\"", func->name, binding->location);
 	}
@@ -2003,7 +1994,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 	gen_ns = encode_new_ns();
 
 	if (function) {
-		if (function->bindingType == BINDING_SOAP) {
+		if (function->binding->bindingType == BINDING_SOAP) {
 			sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
 
 			style = fnb->style;
@@ -2048,7 +2039,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 		if (style == SOAP_RPC) {
 			xmlAddChild(method, param);
 		} else if (style == SOAP_DOCUMENT) {
-			if (function && function->bindingType == BINDING_SOAP) {
+			if (function && function->binding->bindingType == BINDING_SOAP) {
 				sdlParamPtr *sparam;
 
 				if (zend_hash_index_find(function->requestParameters, 0, (void **)&sparam) == SUCCESS) {
@@ -2146,11 +2137,11 @@ sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int 
 	return NULL;
 }
 
-sdlFunctionPtr get_function(sdlBindingPtr sdl, char *function_name)
+sdlFunctionPtr get_function(sdlPtr sdl, char *function_name)
 {
 	sdlFunctionPtr *tmp;
 	if (sdl != NULL) {
-		if (zend_hash_find(sdl->functions, function_name, strlen(function_name), (void **)&tmp) != FAILURE) {
+		if (zend_hash_find(&sdl->functions, function_name, strlen(function_name), (void **)&tmp) != FAILURE) {
 			return (*tmp);
 		}
 	}
@@ -2234,33 +2225,6 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 	smart_str_0(buf);
 }
 
-/* Deletes */
-void delete_sdl(void *handle)
-{
-	sdlPtr tmp = *((sdlPtr*)handle);
-
-	zend_hash_destroy(&tmp->docs);
-	if (tmp->source) {
-		free(tmp->source);
-	}
-	if (tmp->target_ns) {
-		free(tmp->target_ns);
-	}
-	if (tmp->encoders) {
-		zend_hash_destroy(tmp->encoders);
-		free(tmp->encoders);
-	}
-	if (tmp->types) {
-		zend_hash_destroy(tmp->types);
-		free(tmp->types);
-	}
-	if (tmp->bindings) {
-		zend_hash_destroy(tmp->bindings);
-		free(tmp->bindings);
-	}
-	free(tmp);
-}
-
 void delete_url(void *handle)
 {
 	php_url_free((php_url*)handle);
@@ -2290,115 +2254,4 @@ void delete_service(void *data)
 
 	efree(service->uri);
 	efree(service);
-}
-
-void delete_binding(void *data)
-{
-	sdlBindingPtr binding = *((sdlBindingPtr*)data);
-
-	if (binding->functions) {
-		zend_hash_destroy(binding->functions);
-		free(binding->functions);
-	}
-
-	if (binding->location) {
-		free(binding->location);
-	}
-	if (binding->name) {
-		free(binding->name);
-	}
-
-	if (binding->bindingType == BINDING_SOAP) {
-		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
-		free(soapBind->transport);
-	}
-}
-
-void delete_function(void *data)
-{
-	sdlFunctionPtr function = *((sdlFunctionPtr*)data);
-
-	if (function->functionName) {
-		free(function->functionName);
-	}
-	if (function->requestName) {
-		free(function->requestName);
-	}
-	if (function->responseName) {
-		free(function->responseName);
-	}
-	if (function->requestParameters) {
-		zend_hash_destroy(function->requestParameters);
-		free(function->requestParameters);
-	}
-	if (function->responseParameters) {
-		zend_hash_destroy(function->responseParameters);
-		free(function->responseParameters);
-	}
-
-	if (function->bindingType == BINDING_SOAP) {
-		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
-		if (soapFunction->soapAction) {
-			free(soapFunction->soapAction);
-		}
-		delete_sdl_soap_binding_function_body(soapFunction->input);
-		delete_sdl_soap_binding_function_body(soapFunction->output);
-		delete_sdl_soap_binding_function_body(soapFunction->falut);
-	}
-}
-
-void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body)
-{
-	if (body.ns) {
-		free(body.ns);
-	}
-	if (body.parts) {
-		free(body.parts);
-	}
-	if (body.encodingStyle) {
-		free(body.encodingStyle);
-	}
-}
-
-void delete_paramater(void *data)
-{
-	sdlParamPtr param = *((sdlParamPtr*)data);
-	if (param->paramName) {
-		free(param->paramName);
-	}
-	free(param);
-}
-
-void delete_mapping(void *data)
-{
-	soapMappingPtr map = (soapMappingPtr)data;
-
-	if (map->ns) {
-		efree(map->ns);
-	}
-	if (map->ctype) {
-		efree(map->ctype);
-	}
-
-	if (map->type == SOAP_MAP_FUNCTION) {
-		if (map->map_functions.to_xml_before) {
-			zval_ptr_dtor(&map->map_functions.to_xml_before);
-		}
-		if (map->map_functions.to_xml) {
-			zval_ptr_dtor(&map->map_functions.to_xml);
-		}
-		if (map->map_functions.to_xml_after) {
-			zval_ptr_dtor(&map->map_functions.to_xml_after);
-		}
-		if (map->map_functions.to_zval_before) {
-			zval_ptr_dtor(&map->map_functions.to_zval_before);
-		}
-		if (map->map_functions.to_zval) {
-			zval_ptr_dtor(&map->map_functions.to_zval);
-		}
-		if (map->map_functions.to_zval_after) {
-			zval_ptr_dtor(&map->map_functions.to_zval_after);
-		}
-	}
-	efree(map);
 }

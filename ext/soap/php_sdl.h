@@ -16,6 +16,7 @@
 
 struct _sdl {
 	HashTable	docs;				/* pointer to the parsed xml file */
+	HashTable functions;	/* array of sdlFunction */
 	HashTable *types;			/* array of sdlTypesPtr */
 	HashTable *encoders;	/* array of encodePtr */
 	HashTable *bindings;	/* array of sdlBindings (key'd by name) */
@@ -25,10 +26,9 @@ struct _sdl {
 
 struct _sdlBinding {
 	char *name;
-	HashTable *functions;
 	char *location;
 	int bindingType;
-	void *bindingAttributes;
+	void *bindingAttributes; /* sdlSoapBindingPtr */
 };
 
 /* Soap Binding Specfic stuff */
@@ -112,8 +112,9 @@ struct _sdlFunction {
 	char *responseName;
 	HashTable *requestParameters;		/* array of sdlParamPtr */
 	HashTable *responseParameters;		/* array of sdlParamPtr (this should only be one) */
-	int bindingType;
-	void *bindingAttributes;
+	struct _sdlBinding* binding;
+//	int bindingType;
+	void* bindingAttributes; /* sdlSoapBindingFunctionPtr */
 };
 
 struct _sdlAttribute {
@@ -129,9 +130,6 @@ struct _sdlAttribute {
 };
 
 sdlPtr get_sdl(char *uri);
-sdlPtr load_wsdl(char *struri);
-int load_sdl(char *struri, int force_load);
-int load_ms_sdl(char *struri, int force_load);
 
 encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const char *type);
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
@@ -145,9 +143,8 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval* data, int style);
 zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data);
 
-xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style);
-xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style);
-
+void delete_sdl(void *handle);
 void delete_type(void *type);
 void delete_attribute(void *attribute);
+void delete_mapping(void *data);
 #endif

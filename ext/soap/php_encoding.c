@@ -2,6 +2,49 @@
 
 #include "php_soap.h"
 
+/* zval type decode */
+static zval *to_zval_double(encodeType type, xmlNodePtr data);
+static zval *to_zval_long(encodeType type, xmlNodePtr data);
+static zval *to_zval_ulong(encodeType type, xmlNodePtr data);
+static zval *to_zval_bool(encodeType type, xmlNodePtr data);
+static zval *to_zval_string(encodeType type, xmlNodePtr data);
+static zval *to_zval_stringr(encodeType type, xmlNodePtr data);
+static zval *to_zval_stringc(encodeType type, xmlNodePtr data);
+static zval *to_zval_map(encodeType type, xmlNodePtr data);
+static zval *to_zval_null(encodeType type, xmlNodePtr data);
+
+static xmlNodePtr to_xml_long(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_double(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_bool(encodeType type, zval *data, int style);
+
+/* String encode */
+static xmlNodePtr to_xml_string(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style);
+
+/* Null encode */
+static xmlNodePtr to_xml_null(encodeType type, zval *data, int style);
+
+/* Struct encode */
+static xmlNodePtr to_xml_object(encodeType type, zval *data, int style);
+
+/* Array encode */
+static xmlNodePtr guess_array_map(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_array(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_map(encodeType type, zval *data, int style);
+
+/* Datetime encode/decode */
+static xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style);
+static xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_time(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_date(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_gday(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style);
+static xmlNodePtr to_xml_duration(encodeType type, zval *data, int style);
+
 encode defaultEncoding[] = {
 	{{UNKNOWN_TYPE, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
@@ -277,7 +320,7 @@ zval *to_zval_after_user(encodeType type, zval *data)
 
 /* TODO: get rid of "bogus".. ither by passing in the already created xmlnode or passing in the node name */
 /* String encode/decode */
-zval *to_zval_string(encodeType type, xmlNodePtr data)
+static zval *to_zval_string(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -290,7 +333,7 @@ zval *to_zval_string(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-zval *to_zval_stringr(encodeType type, xmlNodePtr data)
+static zval *to_zval_stringr(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -304,7 +347,7 @@ zval *to_zval_stringr(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-zval *to_zval_stringc(encodeType type, xmlNodePtr data)
+static zval *to_zval_stringc(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -318,7 +361,7 @@ zval *to_zval_stringc(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	char *str, *pstr;
@@ -352,7 +395,7 @@ xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 	return ret;
 }
 
-xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
@@ -376,7 +419,7 @@ xmlNodePtr to_xml_stringl(encodeType type, zval *data, int style)
 	return ret;
 }
 
-zval *to_zval_double(encodeType type, xmlNodePtr data)
+static zval *to_zval_double(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -391,7 +434,7 @@ zval *to_zval_double(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-zval *to_zval_long(encodeType type, xmlNodePtr data)
+static zval *to_zval_long(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -406,7 +449,7 @@ zval *to_zval_long(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-zval *to_zval_ulong(encodeType type, xmlNodePtr data)
+static zval *to_zval_ulong(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -422,7 +465,7 @@ zval *to_zval_ulong(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	zval tmp;
@@ -445,7 +488,7 @@ xmlNodePtr to_xml_long(encodeType type, zval *data, int style)
 	return ret;
 }
 
-xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	zval tmp;
@@ -469,7 +512,7 @@ xmlNodePtr to_xml_ulong(encodeType type, zval *data, int style)
 	return ret;
 }
 
-xmlNodePtr to_xml_double(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_double(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	zval tmp;
@@ -492,7 +535,7 @@ xmlNodePtr to_xml_double(encodeType type, zval *data, int style)
 	return ret;
 }
 
-zval *to_zval_bool(encodeType type, xmlNodePtr data)
+static zval *to_zval_bool(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -513,7 +556,7 @@ zval *to_zval_bool(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_bool(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_bool(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 	zval tmp;
@@ -545,7 +588,7 @@ xmlNodePtr to_xml_bool(encodeType type, zval *data, int style)
 }
 
 /* Null encode/decode */
-zval *to_zval_null(encodeType type, xmlNodePtr data)
+static zval *to_zval_null(encodeType type, xmlNodePtr data)
 {
 	zval *ret;
 	MAKE_STD_ZVAL(ret);
@@ -553,7 +596,7 @@ zval *to_zval_null(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_null(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_null(encodeType type, zval *data, int style)
 {
 	xmlNodePtr ret;
 
@@ -615,7 +658,7 @@ zval *to_zval_object(encodeType type, xmlNodePtr data)
 	return ret;
 }
 
-xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
 	HashTable *prop;
@@ -662,7 +705,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 			smart_str_free(ns);
 			efree(ns);
 		}
-	} else {
+	} else if (Z_TYPE_P(data) == IS_OBJECT) {
 		xmlParam = xmlNewNode(NULL, "BOGUS");
 		FIND_ZVAL_NULL(data, xmlParam, style);
 
@@ -697,7 +740,7 @@ xmlNodePtr to_xml_object(encodeType type, zval *data, int style)
 }
 
 /* Array encode/decode */
-xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
+static xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 {
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
@@ -716,7 +759,7 @@ xmlNodePtr guess_array_map(encodeType type, zval *data, int style)
 	return master_to_xml(enc, data, style);
 }
 
-xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 {
 	smart_str array_type_and_size = {0}, array_type = {0};
 	int i;
@@ -763,9 +806,9 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 			xmlAddChild(xmlParam, xparam);
 			zend_hash_move_forward(data->value.ht);
 		}
-	}
-	if (style == SOAP_ENCODED) {
-		set_ns_and_type(xmlParam, type);
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(xmlParam, type);
+		}
 	}
 	return xmlParam;
 }
@@ -934,7 +977,7 @@ zval *to_zval_array(encodeType type, xmlNodePtr data)
 }
 
 /* Map encode/decode */
-xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
 {
 	xmlNodePtr xmlParam;
 	int i;
@@ -989,15 +1032,15 @@ xmlNodePtr to_xml_map(encodeType type, zval *data, int style)
 			}
 			zend_hash_move_forward(data->value.ht);
 		}
-	}
-	if (style == SOAP_ENCODED) {
-		set_ns_and_type(xmlParam, type);
+		if (style == SOAP_ENCODED) {
+			set_ns_and_type(xmlParam, type);
+		}
 	}
 
 	return xmlParam;
 }
 
-zval *to_zval_map(encodeType type, xmlNodePtr data)
+static zval *to_zval_map(encodeType type, xmlNodePtr data)
 {
 	zval *ret, *key, *value;
 	xmlNodePtr trav, item, xmlKey, xmlValue;
@@ -1106,7 +1149,7 @@ zval *guess_zval_convert(encodeType type, xmlNodePtr data)
 }
 
 /* Time encode/decode */
-xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style)
+static xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int style)
 {
 	/* logic hacked from ext/standard/datetime.c */
 	struct tm *ta, tmbuf;
@@ -1167,49 +1210,49 @@ xmlNodePtr to_xml_datetime_ex(encodeType type, zval *data, char *format, int sty
 	return xmlParam;
 }
 
-xmlNodePtr to_xml_duration(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_duration(encodeType type, zval *data, int style)
 {
 	/* TODO: '-'?P([0-9]+Y)?([0-9]+M)?([0-9]+D)?T([0-9]+H)?([0-9]+M)?([0-9]+S)? */
 	return to_xml_string(type, data, style);
 }
 
-xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_datetime(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "%Y-%m-%dT%H:%M:%S", style);
 }
 
-xmlNodePtr to_xml_time(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_time(encodeType type, zval *data, int style)
 {
 	/* TODO: microsecconds */
 	return to_xml_datetime_ex(type, data, "%H:%M:%S", style);
 }
 
-xmlNodePtr to_xml_date(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_date(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "%Y-%m-%d", style);
 }
 
-xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_gyearmonth(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "%Y-%m", style);
 }
 
-xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_gyear(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "%Y", style);
 }
 
-xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_gmonthday(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "--%m-%d", style);
 }
 
-xmlNodePtr to_xml_gday(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_gday(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "---%d", style);
 }
 
-xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
+static xmlNodePtr to_xml_gmonth(encodeType type, zval *data, int style)
 {
 	return to_xml_datetime_ex(type, data, "--%m--", style);
 }
