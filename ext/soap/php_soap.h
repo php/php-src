@@ -47,6 +47,8 @@
 # define stricmp strcasecmp
 #endif
 
+extern int le_url;
+
 typedef struct _encodeType encodeType, *encodeTypePtr;
 typedef struct _encode encode, *encodePtr;
 

@@ -29,7 +29,7 @@
 #endif
 
 static int le_sdl = 0;
-static int le_url = 0;
+int le_url = 0;
 static int le_service = 0;
 
 typedef struct _soapHeader {
@@ -230,6 +230,8 @@ PHP_METHOD(SoapClient, SoapClient);
 PHP_METHOD(SoapClient, __call);
 PHP_METHOD(SoapClient, __getLastRequest);
 PHP_METHOD(SoapClient, __getLastResponse);
+PHP_METHOD(SoapClient, __getLastRequestHeaders);
+PHP_METHOD(SoapClient, __getLastResponseHeaders);
 PHP_METHOD(SoapClient, __getFunctions);
 PHP_METHOD(SoapClient, __getTypes);
 
@@ -297,6 +299,8 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __call, __call_args, 0)
 	PHP_ME(SoapClient, __getLastRequest, NULL, 0)
 	PHP_ME(SoapClient, __getLastResponse, NULL, 0)
+	PHP_ME(SoapClient, __getLastRequestHeaders, NULL, 0)
+	PHP_ME(SoapClient, __getLastResponseHeaders, NULL, 0)
 	PHP_ME(SoapClient, __getFunctions, NULL, 0)
 	PHP_ME(SoapClient, __getTypes, NULL, 0)
 	{NULL, NULL, NULL}
@@ -1345,7 +1349,7 @@ PHP_METHOD(SoapServer, handle)
 			/* Find the soap object and assign */
 			if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS &&
 			    Z_TYPE_PP(tmp_soap) == IS_OBJECT &&
-			    Z_OBJCE_PP(tmp_soap) == service->soap_class.ce) {				
+			    Z_OBJCE_PP(tmp_soap) == service->soap_class.ce) {
 				soap_obj = *tmp_soap;
 			}
 		}
@@ -1382,7 +1386,7 @@ PHP_METHOD(SoapServer, handle)
 			} else {
 #else
       {
-#endif 
+#endif
 				int class_name_len = strlen(service->soap_class.ce->name);
 				char *class_name = emalloc(class_name_len+1);
 
@@ -2185,6 +2189,26 @@ PHP_METHOD(SoapClient, __getLastResponse)
 	zval **tmp;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_response", sizeof("__last_response"), (void **)&tmp) == SUCCESS) {
+		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+	}
+	RETURN_NULL();
+}
+
+PHP_METHOD(SoapClient, __getLastRequestHeaders)
+{
+	zval **tmp;
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_request_headers", sizeof("__last_request_headers"), (void **)&tmp) == SUCCESS) {
+		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
+	}
+	RETURN_NULL();
+}
+
+PHP_METHOD(SoapClient, __getLastResponseHeaders)
+{
+	zval **tmp;
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "__last_response_headers", sizeof("__last_response_headers"), (void **)&tmp) == SUCCESS) {
 		RETURN_STRINGL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), 1);
 	}
 	RETURN_NULL();
