@@ -1,0 +1,137 @@
+#!/usr/bin/awk -f
+
+function gobble(s, x)
+{
+	sub(/^ /, "", line)
+	match(line, "^" "(" s ")")
+	x = substr(line, 1, RLENGTH)
+	line = substr(line, RLENGTH+1)
+	return x 
+}
+
+function convert(t, n)
+{
+	if (t == "int") x = "convert_to_long_ex(" n ");\n"
+	else if (t == "double") x = "convert_to_double_ex(" n ");\n"
+	else if (t == "string") x = "convert_to_string_ex(" n ");\n"
+	else if (t == "array") x = "convert_to_array_ex(" n ");\n"
+	else if (t == "resource") {
+		x = "/* " n ": fetching resources already handled. */\n"
+		resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n"
+		funcvals = funcvals "\tint " n "_id = -1;\n"
+	}
+	else x = "/* You must write your own code here to handle argument " n ". */\n"
+	return x
+}
+
+BEGIN {
+	name = "[_A-Za-z][_A-Za-z0-9]*"
+	type = "int|double|string|bool|array|object|resource|mixed|void"
+	num_funcs = 0
+}
+
+{
+	args_max = args_min = optional = 0
+	line = $0
+
+	func_type = gobble(type);
+	func_name = gobble(name);
+
+	if (gobble("\\(")) {
+		if (gobble("\\[")) optional = 1
+		while (arg_type = gobble(type)) {
+			arg_name = gobble(name)
+			argtypes[num_funcs,args_max] = arg_type
+			argnames[num_funcs,args_max] = arg_name
+
+			args_max++
+			if (!optional) args_min++
+
+			if (gobble("\\[")) optional = 1
+			gobble(",")
+		}
+	}
+
+	funcs[num_funcs]   = func_name
+	types[num_funcs]   = func_type
+	maxargs[num_funcs] = args_max
+	minargs[num_funcs] = args_min
+
+	num_funcs++
+}
+
+END {
+	for (i = 0; i < num_funcs; i++) {
+		
+		useswitch = maxargs[i] - minargs[i]
+		funcvals = resources = handleargs = ""
+
+		proto = "/* {{{ #proto " types[i] " " funcs[i] "("
+
+		if (maxargs[i]) {
+			zvals = "\tzval "
+			if (useswitch) {
+				funcvals = "\tint argc;\n"
+				fetchargs = "\targc = ZEND_NUM_ARGS();\n\tif (argc < " minargs[i] " || argc > " maxargs[i] " || zend_get_parameters_ex(argc, "
+			} else {
+				fetchargs = "\tif (ZEND_NUM_ARGS() != " maxargs[i] " || zend_get_parameters_ex(" maxargs[i] ", "
+			}
+		}
+
+		for (j = 0; j < maxargs[i]; j++) {
+
+			if (j) {
+				zvals = zvals ", "
+				fetchargs = fetchargs ", "
+			}
+
+			zvals = zvals "**" argnames[i,j]
+			fetchargs = fetchargs "&" argnames[i,j]
+
+			if (j > minargs[i]-1) {
+				proto = proto "["
+				closeopts = closeopts "]"
+			}
+
+			if (j) proto = proto ", "
+			proto = proto argtypes[i,j] " " argnames[i,j]
+
+			if (useswitch) {
+				if (j > minargs[i]-1) {
+					handleargs = "\t\tcase " j+1 ";\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) "\t\t\t/* Fall-through. */\n" handleargs
+				} else if (j >= minargs[i]-1) {
+					handleargs = "\t\tcase " j+1 ";\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
+				} else {
+					handleargs = "\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
+				}
+			} else {
+				handleargs = handleargs "\t" convert(argtypes[i,j], argnames[i,j])
+			}
+		}
+
+		proto = proto closeopts ")\n    */\nPHP_FUNCTION(" funcs[i] ")\n{"
+		if (maxargs[i]) {
+			zvals = zvals ";"
+			fetchargs = fetchargs ") == FAILURE) {\n\t\tWRONG_PARAM_COUNT();\n\t}\n"
+		}
+		if (resources ) funcvals = funcvals "\t???LS_FETCH();\n"
+		if (useswitch) handleargs = "\tswitch (argc) {\n" handleargs "\t\t\tbreak;\n\t}"
+
+		print proto > "function_stubs"
+		if (zvals) print zvals > "function_stubs"
+  	if (funcvals) print funcvals > "function_stubs"
+		if (fetchargs) print fetchargs > "function_stubs"
+		if (resources) print resources > "function_stubs"
+		if (handleargs) print handleargs > "function_stubs"
+		print "\n\tphp_error(E_WARNING, \"" funcs[i] ": not yet implemented\");" > "function_stubs"
+		print "}\n/* }}} */\n" > "function_stubs"
+		print "PHP_FUNCTION(" funcs[i] ");" > "function_declarations"
+		print "\tPHP_FE(" funcs[i] ",\tNULL)" > "function_entries"
+	}
+}
+
+#
+# Local variables:
+# tab-width: 2
+# End:
+#
