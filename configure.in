@@ -646,7 +646,27 @@ fi
 phplibdir="`pwd`/modules"
 test -d $phplibdir || mkdir $phplibdir
 phptempdir="`pwd`/libs"
-EXTENSION_DIR="$prefix/lib/php/modules"
+
+test "$prefix" = "NONE" && prefix="/usr/local"
+test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+dnl Build extension directory path
+
+if test "$PHP_DEBUG" = "1"; then
+  PART1=debug
+else
+  PART1=no-debug
+fi
+
+if test "$enable_experimental_zts" = "yes"; then
+  PART2=zts
+else
+  PART2=non-zts
+fi
+
+ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
+
+EXTENSION_DIR="$prefix/lib/php/extensions/$PART1-$PART2-$ZEND_MODULE_API_NO"
 
 AC_BUILD_RPATH
 
@@ -759,9 +779,6 @@ EOF
   CC="$abs_builddir/meta_cc"
 fi
 changequote([,])
-
-test "$prefix" = "NONE" && prefix="/usr/local"
-test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 
 PHP_CONFIGURE_PART(Generating files)
 
