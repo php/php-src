@@ -147,6 +147,19 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ifx"=.\ext\informix\ifx.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+
+###############################################################################
+
 Project: "interbase"=.\ext\interbase\interbase.dsp - Package Owner=<4>
 
 Package=<5>
@@ -231,7 +244,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
+Project: "pdf"=".\ext\pdf\pdf.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -243,7 +256,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "pdf"=".\ext\pdf\pdf.dsp" - Package Owner=<4>
+Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
