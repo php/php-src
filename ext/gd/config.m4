@@ -131,6 +131,11 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       fi
       if test -f "$i/include/freetype.h" ; then
         TTF_DIR="$i"
+        unset TTF_INC_DIR
+      fi
+      if test -f "$i/include/freetype/freetype.h"; then
+        TTF_DIR="$i"
+        TTF_INC_DIR="$i/include/freetype"
       fi
     done
     if test -n "$FREETYPE_DIR" ; then
@@ -152,7 +157,10 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
         else
           AC_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
         fi
-        AC_ADD_INCLUDE($TTF_DIR/include)
+        if test -z "$TTF_INC_DIR"; then
+          TTF_INC_DIR="$TTF_DIR/include"
+        fi
+        AC_ADD_INCLUDE($TTF_INC_DIR)
         AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
