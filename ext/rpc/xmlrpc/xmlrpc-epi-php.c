@@ -64,11 +64,9 @@
    gets defined.
 */
 
-#ifdef ZTS
-int xmlrpc_globals_id;
-#else
-php_xmlrpc_globals xmlrpc_globals;
-#endif
+ZEND_DECLARE_MODULE_GLOBALS(xmlrpc)
+
+static int le_xmlrpc_server;
 
 
 /* Every user visible function must have an entry in xmlrpc_functions[].
@@ -207,16 +205,18 @@ static void destroy_server_data(xmlrpc_server_data *server) {
 /* called when server is being destructed. either when xmlrpc_server_destroy
  * is called, or when request ends.
  */
-static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc) {
+static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc TSRMLS_DC) {
    if(rsrc && rsrc->ptr) {
       destroy_server_data((xmlrpc_server_data*)rsrc->ptr);
    }
 }
 
-static void xmlrpc_init_globals(php_xmlrpc_globals *xmlrpc_globals)
+/* notneeded 
+static void xmlrpc_init_globals(zend_xmlrpc_globals *xmlrpc_globals)
 {
     return;
 }
+*/
 
 /* module init */
 PHP_MINIT_FUNCTION(xmlrpc)
@@ -224,10 +224,13 @@ PHP_MINIT_FUNCTION(xmlrpc)
 /* Remove comments if you have entries in php.ini
         REGISTER_INI_ENTRIES();
 */
-   ZEND_INIT_MODULE_GLOBALS(xmlrpc, xmlrpc_init_globals, NULL);
-   XMLRPCG(le_xmlrpc_server) = zend_register_list_destructors_ex(xmlrpc_server_destructor, NULL, "xmlrpc server", module_number);
 
-   return SUCCESS;
+	/* notneeded 
+   	ZEND_INIT_MODULE_GLOBALS(xmlrpc, xmlrpc_init_globals, NULL);
+	*/
+   	le_xmlrpc_server = zend_register_list_destructors_ex(xmlrpc_server_destructor, NULL, "xmlrpc server", module_number);
+
+   	return SUCCESS;
 }
 
 /* module shutdown */
@@ -815,7 +818,7 @@ PHP_FUNCTION(xmlrpc_server_create) {
             XMLRPC_ServerRegisterIntrospectionCallback(server->server_ptr, php_xmlrpc_introspection_callback);
 
             /* store for later use */
-            ZEND_REGISTER_RESOURCE(return_value,server, XMLRPCG(le_xmlrpc_server));
+            ZEND_REGISTER_RESOURCE(return_value,server, le_xmlrpc_server);
          }
       }
    }
@@ -836,7 +839,7 @@ PHP_FUNCTION(xmlrpc_server_destroy) {
 
       xmlrpc_server_data *server = zend_list_find(Z_LVAL_P(arg1), &type);
 
-      if(server && type == XMLRPCG(le_xmlrpc_server)) {
+      if(server && type == le_xmlrpc_server) {
          bSuccess = zend_list_delete(Z_LVAL_P(arg1));
 
          /* called by hashtable destructor
@@ -868,7 +871,7 @@ static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRe
    /* Use same C function for all methods */
 
    /* php func prototype: function user_func($method_name, $xmlrpc_params, $user_params) */
-   call_user_function(CG(function_table), NULL, pData->php_function, pData->return_data, 3, callback_params);
+   call_user_function(CG(function_table), NULL, pData->php_function, pData->return_data, 3, callback_params TSRMLS_CC);
 
    pData->php_executed = 1;
 }
@@ -896,7 +899,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 
          /* php func prototype: function string user_func($user_params) */
          if(call_user_function(CG(function_table), NULL, *php_function, 
-                               retval_ptr, 1, callback_params) == SUCCESS) {
+                               retval_ptr, 1, callback_params TSRMLS_CC) == SUCCESS) {
             XMLRPC_VALUE xData;
             STRUCT_XMLRPC_ERROR err = {0};
 
@@ -954,7 +957,7 @@ PHP_FUNCTION(xmlrpc_server_register_method) {
 
    server = zend_list_find(Z_LVAL_P(handle), &type);
 
-   if(type == XMLRPCG(le_xmlrpc_server)) {
+   if(type == le_xmlrpc_server) {
       /* register with C engine. every method just calls our standard callback, 
        * and it then dispatches to php as necessary
        */
@@ -989,7 +992,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback) {
 
    server = zend_list_find(Z_LVAL_P(handle), &type);
 
-   if(type == XMLRPCG(le_xmlrpc_server)) {
+   if(type == le_xmlrpc_server) {
       {
          /* save for later use */
          MAKE_STD_ZVAL(method_name_save);
@@ -1041,7 +1044,7 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
 
    server = zend_list_find(Z_LVAL_P(handle), &type);
 
-   if(type == XMLRPCG(le_xmlrpc_server)) {
+   if(type == le_xmlrpc_server) {
       /* HACK: use output encoding for now */
       input_opts.xml_elem_opts.encoding = utf8_get_encoding_id_from_string(out.xmlrpc_out.xml_elem_opts.encoding);
 
@@ -1154,7 +1157,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data) {
 
    server = zend_list_find(Z_LVAL_P(handle), &type);
 
-   if (type == XMLRPCG(le_xmlrpc_server)) {
+   if (type == le_xmlrpc_server) {
       XMLRPC_VALUE xDesc = PHP_to_XMLRPC(desc);
       if (xDesc) {
          int retval = XMLRPC_ServerAddIntrospectionData(server->server_ptr, xDesc);

@@ -14,6 +14,7 @@ static const char rcsid[] = "#(@) $Id$";
 
 /*  ENCODE  --	Encode binary file into base64.  */
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "base64.h"
 
