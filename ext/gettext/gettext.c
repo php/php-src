@@ -173,7 +173,7 @@ PHP_FUNCTION(bindtextdomain)
 /* }}} */
 
 /* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
-   The `ngettext' function is similar to the `gettext' function as it finds the message catalogs in the same way.  But it takes two extra arguments.  The MSGID1 parameter must contain the singular form of the string to be converted.  It is also used as the key for the search in the catalog.  The MSGID2 parameter is the plural form.  The parameter N is used to determine the plural form.  If no message catalog is found MSGID1 is returned if `n == 1', otherwise `msgid2'.
+   Plural version of gettext().
 */
 PHP_FUNCTION(ngettext)
 {
@@ -200,7 +200,7 @@ PHP_FUNCTION(ngettext)
 /* }}} */
 
 /* {{{ proto string dngettext (string domain, string msgid1, string msgid2, long count)
-   The `dngettext' is similar to the `dgettext' function in the way the message catalog is selected.  The difference is that it takes two extra parameter to provide the correct plural form.  These two parameters are handled in the same way `ngettext' handles them.
+   Plural version of dgettext().
  */
 PHP_FUNCTION(dngettext)
 {
@@ -230,7 +230,7 @@ PHP_FUNCTION(dngettext)
 /* }}} */
 
 /* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, long n, int category)
-   The `dcngettext' is similar to the `dcgettext' function in the way the message catalog is selected.  The difference is that it takes two extra parameter to provide the correct plural form.  These two parameters are handled in the same way `ngettext' handles them.
+   Plural version of dcgettext().
 */								
 PHP_FUNCTION(dcngettext)
 {
