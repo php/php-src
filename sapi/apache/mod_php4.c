@@ -321,7 +321,7 @@ static char *php_apache_getenv(char *name, int name_len SLS_DC)
 }
 
 
-static sapi_module_struct sapi_module = {
+static sapi_module_struct sapi_module_conf = {
 	"apache",						/* name */
 	"Apache",						/* pretty name */
 									
@@ -576,8 +576,8 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 #ifdef ZTS
 		tsrm_startup(1, 1, 0);
 #endif
-		sapi_startup(&sapi_module);
-		php_apache_startup(&sapi_module);
+		sapi_startup(&sapi_module_conf);
+		php_apache_startup(&sapi_module_conf);
 	}
 	per_dir_entry.type = mode;
 
@@ -661,7 +661,7 @@ int php_xbithack_handler(request_rec * r)
 static void apache_php_module_shutdown_wrapper(void)
 {
 	apache_php_initialized = 0;
-	sapi_module.shutdown(&sapi_module);
+	sapi_module.shutdown(&sapi_module_conf);
 
 #if MODULE_MAGIC_NUMBER >= 19970728
 	/* This function is only called on server exit if the apache API
@@ -679,7 +679,7 @@ static void apache_php_module_shutdown_wrapper(void)
 static void php_child_exit_handler(server_rec *s, pool *p)
 {
 /*	apache_php_initialized = 0; */
-	sapi_module.shutdown(&sapi_module);
+	sapi_module.shutdown(&sapi_module_conf);
 
 #ifdef ZTS
 	tsrm_shutdown();
@@ -695,8 +695,8 @@ void php_init_handler(server_rec *s, pool *p)
 #ifdef ZTS
 		tsrm_startup(1, 1, 0);
 #endif
-		sapi_startup(&sapi_module);
-		php_apache_startup(&sapi_module);
+		sapi_startup(&sapi_module_conf);
+		php_apache_startup(&sapi_module_conf);
 	}
 #if MODULE_MAGIC_NUMBER >= 19980527
 	{
