@@ -338,10 +338,12 @@ parameter_list:
 non_empty_parameter_list:
 		T_VARIABLE				{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 TSRMLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE TSRMLS_CC); }
 	|	'&' T_VARIABLE			{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 TSRMLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE TSRMLS_CC); }
+	|	'&' T_VARIABLE '=' static_scalar			{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 TSRMLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); zend_do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$4, BYREF_FORCE TSRMLS_CC); }
 	|	T_CONST T_VARIABLE 		{ znode tmp;  fetch_simple_variable(&tmp, &$2, 0 TSRMLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE TSRMLS_CC); }
 	|	T_VARIABLE '=' static_scalar				{ znode tmp;  fetch_simple_variable(&tmp, &$1, 0 TSRMLS_CC); $$.op_type = IS_CONST; $$.u.constant.value.lval=1; $$.u.constant.type=IS_LONG; INIT_PZVAL(&$$.u.constant); zend_do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$3, BYREF_NONE TSRMLS_CC); }
 	|	non_empty_parameter_list ',' T_VARIABLE 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 TSRMLS_CC); $$=$1; $$.u.constant.value.lval++; zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE TSRMLS_CC); }
 	|	non_empty_parameter_list ',' '&' T_VARIABLE	{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 TSRMLS_CC); $$=$1; $$.u.constant.value.lval++; zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_FORCE TSRMLS_CC); }
+	|	non_empty_parameter_list ',' '&' T_VARIABLE	 '=' static_scalar { znode tmp;  fetch_simple_variable(&tmp, &$4, 0 TSRMLS_CC); $$=$1; $$.u.constant.value.lval++; zend_do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$6, BYREF_FORCE TSRMLS_CC); }
 	|	non_empty_parameter_list ',' T_CONST T_VARIABLE				{ znode tmp;  fetch_simple_variable(&tmp, &$4, 0 TSRMLS_CC); $$=$1; $$.u.constant.value.lval++; zend_do_receive_arg(ZEND_RECV, &tmp, &$$, NULL, BYREF_NONE TSRMLS_CC); }
 	|	non_empty_parameter_list ',' T_VARIABLE '=' static_scalar 	{ znode tmp;  fetch_simple_variable(&tmp, &$3, 0 TSRMLS_CC); $$=$1; $$.u.constant.value.lval++; zend_do_receive_arg(ZEND_RECV_INIT, &tmp, &$$, &$5, BYREF_NONE TSRMLS_CC); }
 ;

@@ -1524,7 +1524,7 @@ binary_assign_op_addr: {
 							zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 						}
 
-						if (zend_hash_find(EG(class_table), class_name->value.str.val, class_name->value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+						if (zend_hash_find(EG(class_table), class_name->value.str.val, class_name->value.str.len+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", class_name->value.str.val);
 						}
 						if (class_name == &tmp) {
@@ -1532,7 +1532,7 @@ binary_assign_op_addr: {
 						}
 						FREE_OP(EX(Ts), &EX(opline)->op2, EG(free_op2));
 					} else {
-						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
+						if (zend_hash_find(&EX(Ts)[EX(opline)->op1.u.var].EA.class_entry->class_table, EX(opline)->op2.u.constant.value.str.val, EX(opline)->op2.u.constant.value.str.len+1, (void **) &EX(Ts)[EX(opline)->result.u.var].EA.class_entry) == FAILURE) {
 							zend_error(E_ERROR, "Class '%s' not found", EX(opline)->op2.u.constant.value.str.val);
 						}
 					}
@@ -1992,14 +1992,14 @@ send_by_ref:
 							param = NULL;
 							assignment_value = &EX(opline)->op2.u.constant;
 						}
+						zend_assign_to_variable(NULL, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
 					} else {
 						assignment_value = *param;
-					}
-
-					if (PZVAL_IS_REF(assignment_value) && param) {
-						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
-					} else {
-						zend_assign_to_variable(NULL, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+						if (PZVAL_IS_REF(assignment_value)) {
+							zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&EX(opline)->result, EX(Ts), BP_VAR_W), param, NULL TSRMLS_CC);
+						} else {
+							zend_assign_to_variable(NULL, &EX(opline)->result, NULL, assignment_value, IS_VAR, EX(Ts) TSRMLS_CC);
+						}
 					}
 				}
 				NEXT_OPCODE();
