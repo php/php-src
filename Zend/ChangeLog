@@ -1,3 +1,9 @@
+2002-08-26  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c:
+    debug_backtrace(): show name of included file for include and require calls
+    plus some small fixes suggested by andi.
+
 2002-08-24  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_builtin_functions.c: - Whitespace
