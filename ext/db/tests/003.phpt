@@ -2,16 +2,18 @@
 DBM Insert/Replace/Fetch Test
 --SKIPIF--
 <?php if (!extension_loaded("db")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
-	dbmopen("./test.dbm","n");
-	dbminsert("./test.dbm","key1","This is a test insert");
-	dbmreplace("./test.dbm","key1","This is the replacement text");
-	$a = dbmfetch("./test.dbm","key1");
-	dbmclose("./test.dbm");
-	echo $a
+	require_once('test.inc');
+	if (dbmopen($db_file, "n")) {
+		dbminsert($db_file, "key1", "This is a test insert");
+		dbmreplace($db_file, "key1", "This is the replacement text");
+		$a = dbmfetch($db_file, "key1");
+		dbmclose($db_file);
+		echo $a;
+	} else {
+		echo "Error creating database\n";
+	}
 ?>
 --EXPECT--
 This is the replacement text
