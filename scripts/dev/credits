@@ -22,5 +22,5 @@ do
 END
   # Do not process skeleton #
   files=`find "$what" -name CREDITS | grep -v "$what"/skeleton/CREDITS`
-  awk "$awkprog" $files | sort -f | uniq >> $file
+  awk "$awkprog" $files | sort -f  >> $file
 done

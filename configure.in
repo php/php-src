@@ -231,7 +231,7 @@ SAPI_LIBTOOL=libphp4.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 
-esyscmd(./scripts/config-stubs sapi)
+esyscmd(./build/config-stubs sapi)
 
 dnl Show which main SAPI was selected
 AC_MSG_CHECKING([for chosen SAPI module])
@@ -617,7 +617,7 @@ PHP_ARG_WITH(pear, [whether to install PEAR, and where],
   --without-pear          Do not install PEAR], DEFAULT, no)
 
 if test "$PHP_PEAR" != "no" && test "$disable_cli" != "1"; then
-  install_pear="install-pear install-build install-headers install-programs"
+  install_pear="install-pear"
   PEAR_INSTALLDIR=$PHP_PEAR
 fi
 
@@ -778,7 +778,7 @@ AC_ARG_ENABLE(all,
 ])
 
 # reading config stubs
-esyscmd(./scripts/config-stubs ext)
+esyscmd(./build/config-stubs ext)
 
 
 dnl Other settings.
@@ -1084,7 +1084,7 @@ INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
 CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
 
 all_targets='$(OVERALL_TARGET) $(PHP_MODULES) $(PHP_CLI_TARGET)'
-install_targets="install-sapi install-modules $install_pear"
+install_targets="install-sapi install-modules $install_pear install-build install-headers install-programs"
 if test "$PHP_SAPI" != "cgi"; then
   install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
 fi
@@ -1103,7 +1103,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
 PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
 PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
 
-PHP_ADD_SOURCES(/Zend,  zend_language_parser.c zend_language_scanner.c \
+PHP_ADD_SOURCES(/Zend, zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c)
 
 PHP_ADD_SOURCES(Zend, \
@@ -1134,7 +1134,7 @@ PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend)
 
-
+PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
 
@@ -1144,8 +1144,10 @@ PHP_GEN_GLOBAL_MAKEFILE
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
 $php_shtool mkdir -p pear/scripts
+$php_shtool mkdir -p scripts
+
 ALL_OUTPUT_FILES="php4.spec main/build-defs.h \
-pear/scripts/phpize pear/scripts/php-config \
+scripts/phpize scripts/php-config \
 $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
