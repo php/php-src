@@ -1547,7 +1547,11 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 
 		smart_str_0(&key);
 		if (zend_hash_add(addHash, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
-			php_error(E_ERROR, "Error parsing schema (element '%s' already defined)",key.c);
+			if (cur_type == NULL) {
+				php_error(E_ERROR, "Error parsing schema (element '%s' already defined)",key.c);
+			} else {
+				zend_hash_next_index_insert(addHash, &newType, sizeof(sdlTypePtr), NULL);
+			}
 		}
 		smart_str_free(&key);
 
