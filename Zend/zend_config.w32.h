@@ -48,9 +48,10 @@ typedef unsigned int uint;
 
 #define zend_sprintf sprintf
 
-/* Visual C++ doesn't really work with inline for C */
-#define inline
-
+/* This will cause the compilation process to be MUCH longer, but will generate
+ * a much quicker PHP binary
+ */
+#define inline __forceinline
 
 #define DL_LOAD(libname)	LoadLibrary(libname)
 #define DL_FETCH_SYMBOL		GetProcAddress
