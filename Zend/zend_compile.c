@@ -1537,9 +1537,15 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 		function_add_ref(function);
 	}
 	ce->constructor = ce->parent->constructor;
-	ce->__get = ce->parent->__get;
-	ce->__set = ce->parent->__set;
-	ce->__call = ce->parent->__call;
+    if (!ce->__get) {
+        ce->__get   = ce->parent->__get;
+    }
+    if (!ce->__set) {
+        ce->__set = ce->parent->__set;
+    }
+    if (!ce->__call) {
+        ce->__call = ce->parent->__call;
+    }
 }
 
 
@@ -1621,15 +1627,6 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
 	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (copy_ctor_func_t) do_inherit_method, sizeof(zend_function), (zend_bool (*)(void *, void *)) do_inherit_method_check);
 	ce->parent = parent_ce;
-	if (!ce->__get) {
-		ce->__get	= parent_ce->__get;
-	}
-	if (!ce->__set) {
-		ce->__set = parent_ce->__set;
-	}
-	if (!ce->__call) {
-		ce->__call = parent_ce->__call;
-	}
 	do_inherit_parent_constructor(ce);
 }
 
