@@ -104,6 +104,5 @@ EOF
   fi
 
   AC_CHECK_FUNCS(usleep nanosleep)
-
   AC_CHECK_HEADERS(time.h)
 fi
