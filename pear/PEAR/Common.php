@@ -1115,24 +1115,24 @@ class PEAR_Common extends PEAR
                 $i++;
             }
         }
-        if (!empty($info['deps'])) {
+        if (!empty($info['release_deps'])) {
             $i = 1;
-            foreach ($info['deps'] as $d) {
+            foreach ($info['release_deps'] as $d) {
                 if (empty($d['type'])) {
                     $errors[] = "dependency $i: missing type";
                 } elseif (!in_array($d['type'], PEAR_Common::getDependencyTypes())) {
-                    $errors[] = "dependency $i: invalid type, should be one of: " .
+                    $errors[] = "dependency $i: invalid type '$d[type]', should be one of: " .
                         implode(' ', PEAR_Common::getDependencyTypes());
                 }
                 if (empty($d['rel'])) {
                     $errors[] = "dependency $i: missing relation";
                 } elseif (!in_array($d['rel'], PEAR_Common::getDependencyRelations())) {
-                    $errors[] = "dependency $i: invalid relation, should be one of: "
+                    $errors[] = "dependency $i: invalid relation '$d[rel]', should be one of: "
                         . implode(' ', PEAR_Common::getDependencyRelations());
                 }
                 if (!empty($d['optional'])) {
                     if (!in_array($d['optional'], array('yes', 'no'))) {
-                        $errors[] = "dependency $i: invalid relation optional attribute, should be one of: yes no";
+                        $errors[] = "dependency $i: invalid relation optional attribute '$d[optional]', should be one of: yes no";
                     }
                 }
                 if ($d['rel'] != 'has' && empty($d['version'])) {
