@@ -18,6 +18,13 @@
   $Id$ 
 */
 
+/* A little hack to prevent build break, when mysql is used together with
+ * c-client, which also defines LIST.
+ */
+#ifdef LIST
+#undef LIST
+#endif
+
 #include <mysql.h>
 
 #ifndef PHP_MYSQLI_H
