@@ -146,6 +146,8 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 	php_stream *reuseid=NULL;
 	char *tpath, *ttpath, *hoststart=NULL;
 	size_t file_size = 0;
+	zval **tmpzval;
+	int allow_overwrite = 0;
 
 	tmp_line[0] = '\0';
 
@@ -312,10 +314,25 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 			php_stream_notify_file_size(context, file_size, tmp_line, result);
 		}	
 	} else {
-		/* when writing file, it must NOT exist */
+		/* when writing file, it must NOT exist, unless a context option exists which allows it */
+		if (context && php_stream_context_get_option(context, "ftp", "overwrite", &tmpzval) == SUCCESS) {
+			allow_overwrite = Z_LVAL_PP(tmpzval);
+		}
 		if (result <= 299 && result >= 200) {
-			errno = EEXIST;
-			goto errexit;
+			if (allow_overwrite) {
+				/* Context permits overwritting file, 
+				   so we just delete whatever's there in preparation */
+				php_stream_write_string(stream, "DELE ");
+				php_stream_write_string(stream, resource->path);
+				php_stream_write_string(stream, "\r\n");
+				result = GET_FTP_RESULT(stream);
+				if (result >= 300 || result <= 199) {
+					goto errexit;
+				}
+			} else {
+				errno = EEXIST;
+				goto errexit;
+			}
 		}
 	}
 
