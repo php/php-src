@@ -248,6 +248,8 @@ int PHPMsessionDestroy(const char *session)
 	return ret;
 }
 
+/* {{{ proto bool msession_connect(string host, string port)
+ */
 PHP_FUNCTION(msession_connect)
 {
 	char *szhost;
@@ -275,12 +277,19 @@ PHP_FUNCTION(msession_connect)
 			RETURN_FALSE;
 		}
 }
+/* }}} */
+
+/* {{{ proto void msession_disconnect(void)
+ */
 PHP_FUNCTION(msession_disconnect)
 {
 	PHPMsessionDisconnect();
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto int msession_count(void)
+ */
 PHP_FUNCTION(msession_count)
 {
 	if(g_conn)
@@ -296,7 +305,10 @@ PHP_FUNCTION(msession_count)
 		}
 	RETURN_NULL();
 }
+/* }}} */
 
+/* {{{ proto bool msession_create(string session)
+ */
 PHP_FUNCTION(msession_create)
 {
 	int stat;
@@ -326,7 +338,10 @@ PHP_FUNCTION(msession_create)
 			RETURN_FALSE;
 		}
 }
+/* }}} */
 
+/* {{{ proto bool msession_destroy(string name)
+ */
 PHP_FUNCTION(msession_destroy)
 {
 	zval **session;
@@ -345,7 +360,10 @@ PHP_FUNCTION(msession_destroy)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int msession_lock(string name)
+ */
 PHP_FUNCTION(msession_lock)
 {
 	long key;
@@ -369,7 +387,10 @@ PHP_FUNCTION(msession_lock)
 
 	RETURN_LONG( key);
 }
+/* }}} */
 
+/* {{{ proto int msession_unlock(string session, int key)
+ */
 PHP_FUNCTION(msession_unlock)
 {
 	long lkey;
@@ -395,7 +416,10 @@ PHP_FUNCTION(msession_unlock)
 
 	RETURN_LONG( lkey);
 }
+/* }}} */
 
+/* {{{ proto bool msession_set(string session, string name, string value)
+ */
 PHP_FUNCTION(msession_set)
 {
 	zval **session;
@@ -427,7 +451,10 @@ PHP_FUNCTION(msession_set)
 			RETURN_FALSE;
 		}
 }
+/* }}} */
 
+/* {{{ proto string msession_get(string session, string name, string value)
+ */
 PHP_FUNCTION(msession_get)
 {
 	char *val;
@@ -459,7 +486,10 @@ PHP_FUNCTION(msession_get)
 
 	RETURN_STRING(val, 0);
 }
+/* }}} */
 
+/* {{{ proto string msession_uniq(int param)
+ */
 PHP_FUNCTION(msession_uniq)
 {
 	long val;
@@ -491,7 +521,10 @@ PHP_FUNCTION(msession_uniq)
 			RETURN_NULL();
 		}
 }
+/* }}} */
 
+/* {{{ proto string msession_randstr(int param)
+ */
 PHP_FUNCTION(msession_randstr)
 {
 	long val;
@@ -523,7 +556,10 @@ PHP_FUNCTION(msession_randstr)
 			RETURN_NULL();
 		}
 }
+/* }}} */
 
+/* {{{ proto array msession_find(string name, string value)
+ */
 PHP_FUNCTION(msession_find)
 {
 	zval **name;
@@ -564,7 +600,10 @@ PHP_FUNCTION(msession_find)
 			RETURN_NULL();
 		}
 }
+/* }}} */
 
+/* {{{ proto array msession_list(void)
+ */
 PHP_FUNCTION(msession_list)
 {
 	GET_REQB
@@ -596,7 +635,10 @@ PHP_FUNCTION(msession_list)
 			RETURN_NULL();
 		}
 }
+/* }}} */
 
+/* {{{ proto array msession_get_array(string session)
+ */
 PHP_FUNCTION(msession_get_array)
 {
 	zval **session;
@@ -642,7 +684,10 @@ PHP_FUNCTION(msession_get_array)
 				}
 		}
 }
+/* }}} */
 
+/* {{{ proto bool msession_set_array(string session, array tuples)
+ */
 PHP_FUNCTION(msession_set_array)
 {
 	zval **session;
@@ -719,7 +764,10 @@ PHP_FUNCTION(msession_set_array)
 	DoRequest(g_conn,&g_reqb);
 	efree((void *)pairs);
 }
+/* }}} */
 
+/* {{{ proto array msession_listvar(string name)
+ */
 PHP_FUNCTION(msession_listvar)
 {
 	zval **name;
@@ -765,7 +813,10 @@ PHP_FUNCTION(msession_listvar)
 				}
 		}
 }
+/* }}} */
 
+/* {{{ proto int msession_timeout(string session [, int param ])
+ */
 PHP_FUNCTION(msession_timeout)
 {
 	zval **session;
@@ -808,7 +859,10 @@ PHP_FUNCTION(msession_timeout)
 			RETURN_NULL();
 		}
 }
+/* }}} */
 
+/* {{{ proto string msession_inc(string session, string name) 
+ */
 PHP_FUNCTION(msession_inc)
 {
 	char *val;
@@ -841,7 +895,10 @@ PHP_FUNCTION(msession_inc)
 			RETURN_FALSE;
 		}
 }
+/* }}} */
 
+/* {{{ proto string msession_getdata(string session)
+ */
 PHP_FUNCTION(msession_getdata)
 {
 	char *val;
@@ -870,7 +927,10 @@ PHP_FUNCTION(msession_getdata)
 		}
 
 }
+/* }}} */
 
+/* {{{ proto bool msession_setdata(string session, string value)
+ */
 PHP_FUNCTION(msession_setdata)
 {
 	zval **session;
@@ -896,7 +956,10 @@ PHP_FUNCTION(msession_setdata)
 			RETURN_FALSE;
 		}
 }
+/* }}} */
 
+/* {{{ proto string msession_plugin(string session, string val [, string param ])
+ */
 PHP_FUNCTION(msession_plugin)
 {
 	int ret;
@@ -947,6 +1010,7 @@ PHP_FUNCTION(msession_plugin)
 		
 		}
 }
+/* }}} */
 
 #ifdef HAVE_PHP_SESSION
 
