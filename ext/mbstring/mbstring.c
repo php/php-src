@@ -1108,21 +1108,12 @@ PHP_MINFO_FUNCTION(mbstring)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
-#if defined(HAVE_MBSTR_JA)
 	php_info_print_table_row(2, "Japanese support", "enabled");	
-#endif
-#if defined(HAVE_MBSTR_CN)
 	php_info_print_table_row(2, "Simplified chinese support", "enabled");	
-#endif
-#if defined(HAVE_MBSTR_TW)
 	php_info_print_table_row(2, "Traditional chinese support", "enabled");	
-#endif
-#if defined(HAVE_MBSTR_KR)
 	php_info_print_table_row(2, "Korean support", "enabled");	
-#endif
-#if defined(HAVE_MBSTR_RU)
 	php_info_print_table_row(2, "Russian support", "enabled");	
-#endif
+
 	if (MBSTRG(encoding_translation)) {
 		php_info_print_table_row(2, "HTTP input encoding translation", "enabled");	
 	}
