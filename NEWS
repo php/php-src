@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
 
-? ? ??? 2003, PHP 5 Beta 1 
+29 Jun 2003, PHP 5 Beta 1 
 
 - Fixed corruption of multibyte character including 0x5c as second
   byte in multipart/form-data. (Rui)
