@@ -6,7 +6,7 @@
 
 #define ZEND_DEBUG_OBJECTS 0
 
-void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size)
+ZEND_API void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size)
 {
 	objects->object_buckets = (zend_object_store_bucket *) emalloc(init_size * sizeof(zend_object_store_bucket));
 	objects->top = 1; /* Skip 0 so that handles are true */
@@ -14,12 +14,12 @@ void zend_objects_store_init(zend_objects_store *objects, zend_uint init_size)
 	objects->free_list_head = -1;
 }
 
-void zend_objects_store_destroy(zend_objects_store *objects)
+ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
 {
 	efree(objects->object_buckets);
 }
 
-void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
+ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
 {
 	zend_uint i = 1;
 
@@ -37,7 +37,7 @@ void zend_objects_store_call_destructors(zend_objects_store *objects TSRMLS_DC)
 
 /* Store objects API */
 
-zend_object_handle zend_objects_store_put(void *object, zend_objects_store_dtor_t dtor, zend_objects_store_clone_t clone TSRMLS_DC)
+ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_store_dtor_t dtor, zend_objects_store_clone_t clone TSRMLS_DC)
 {
 	zend_object_handle handle;
 	struct _store_object *obj;
@@ -67,7 +67,7 @@ zend_object_handle zend_objects_store_put(void *object, zend_objects_store_dtor_
 	return handle;
 }
 
-void zend_objects_store_add_ref(zval *object TSRMLS_DC)
+ZEND_API void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 
@@ -81,7 +81,7 @@ void zend_objects_store_add_ref(zval *object TSRMLS_DC)
 #endif
 }
 
-void zend_objects_store_delete_obj(zval *zobject TSRMLS_DC)
+ZEND_API void zend_objects_store_delete_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
@@ -108,7 +108,7 @@ void zend_objects_store_delete_obj(zval *zobject TSRMLS_DC)
 			EG(objects_store).free_list_head = handle;													\
 			EG(objects_store).object_buckets[handle].valid = 0;
 
-void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
+ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 	struct _store_object *obj = &EG(objects_store).object_buckets[handle].bucket.obj;
@@ -137,7 +137,7 @@ void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 #endif
 }
 
-zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
+ZEND_API zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 {
 	zend_object_value retval;
 	void *new_object;
@@ -161,7 +161,7 @@ zend_object_value zend_objects_store_clone_obj(zval *zobject TSRMLS_DC)
 	return retval;
 }
 
-void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
+ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 {
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
@@ -182,14 +182,14 @@ typedef struct _zend_proxy_object {
 
 static zend_object_handlers zend_object_proxy_handlers;
 
-void zend_objects_proxy_dtor(zend_proxy_object *object, zend_object_handle handle TSRMLS_DC)
+ZEND_API void zend_objects_proxy_dtor(zend_proxy_object *object, zend_object_handle handle TSRMLS_DC)
 {
 	zval_ptr_dtor(&object->object);
 	zval_ptr_dtor(&object->property);
 	efree(object);
 }
 
-void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_object **object_clone TSRMLS_DC)
+ZEND_API void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_object **object_clone TSRMLS_DC)
 {
 	*object_clone = emalloc(sizeof(zend_proxy_object));
 	(*object_clone)->object = object->object;
@@ -198,7 +198,7 @@ void zend_objects_proxy_clone(zend_proxy_object *object, zend_proxy_object **obj
 	zval_add_ref(&(*object_clone)->object);
 }
 
-zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
+ZEND_API zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 {
 	zend_proxy_object *pobj = emalloc(sizeof(zend_proxy_object));
 	zval *retval, **pretval;
@@ -218,7 +218,7 @@ zval **zend_object_create_proxy(zval *object, zval *member TSRMLS_DC)
 	return pretval;
 }
 
-void zend_object_proxy_set(zval **property, zval *value TSRMLS_DC)
+ZEND_API void zend_object_proxy_set(zval **property, zval *value TSRMLS_DC)
 {
 	zend_proxy_object *probj = zend_object_store_get_object(*property TSRMLS_CC);
 
@@ -229,7 +229,7 @@ void zend_object_proxy_set(zval **property, zval *value TSRMLS_DC)
 	}
 }
 
-zval* zend_object_proxy_get(zval *property TSRMLS_DC)
+ZEND_API zval* zend_object_proxy_get(zval *property TSRMLS_DC)
 {
 	zend_proxy_object *probj = zend_object_store_get_object(property TSRMLS_CC);
 
