@@ -177,10 +177,36 @@ SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-SAPI_API void sapi_activate(SLS_D)
+/*
+ * Called from php_request_startup() for every request.
+ */
+SAPI_API void sapi_activate(SLS_D PLS_DC)
 {
+	int len;
+
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
+
+	if (PG(default_mimetype) != NULL) {
+		if (strncasecmp(PG(default_mimetype), "text/", 5) == 0) {
+			len = strlen(PG(default_mimetype)) + sizeof(";charset=") + strlen(PG(default_charset));
+			/* add charset for text output */
+			SG(sapi_headers).default_content_type = emalloc(len);
+			strcpy(SG(sapi_headers).default_content_type, PG(default_mimetype));
+			strlcat(SG(sapi_headers).default_content_type, ";charset=", len);
+			strlcat(SG(sapi_headers).default_content_type, PG(default_charset), len);
+		} else {
+			/* don't add charset */
+			len = strlen(PG(default_mimetype)) + 1;
+			SG(sapi_headers).default_content_type = emalloc(len);
+			strcpy(SG(sapi_headers).default_content_type, PG(default_mimetype));
+		}
+		SG(sapi_headers).default_content_type[len - 1] = '\0';
+		SG(sapi_headers).default_content_type_size = len;
+	} else {
+		SG(sapi_headers).default_content_type = NULL;
+		SG(sapi_headers).default_content_type_size = 0;
+	}
 	SG(sapi_headers).http_response_code = 200;
 	SG(sapi_headers).http_status_line = NULL;
 	SG(headers_sent) = 0;
@@ -230,6 +256,9 @@ SAPI_API void sapi_deactivate(SLS_D)
 	}
 	if (SG(request_info).current_user) {
 		efree(SG(request_info).current_user);
+	}
+	if (SG(sapi_headers).default_content_type) {
+		efree(SG(sapi_headers).default_content_type);
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate(SLS_C);
@@ -329,7 +358,6 @@ SAPI_API int sapi_send_headers()
 {
 	int retval;
 	int ret = FAILURE;
-	sapi_header_struct default_header = { SAPI_DEFAULT_CONTENT_TYPE, sizeof(SAPI_DEFAULT_CONTENT_TYPE)-1 };
 	SLS_FETCH();
 
 	if (SG(headers_sent)) {
@@ -357,7 +385,20 @@ SAPI_API int sapi_send_headers()
 			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
 			if(SG(sapi_headers).send_default_content_type) {
-				sapi_module.send_header(&default_header,SG(server_context));
+				if (SG(sapi_headers).default_content_type != NULL) {
+					sapi_header_struct default_header;
+					int len = SG(sapi_headers).default_content_type_size + sizeof("Content-type: ");
+
+					strcpy(default_header.header, "Content-type: ");
+					strlcat(default_header.header, SG(sapi_headers).default_content_type, len);
+					default_header.header[len - 1] = '\0';
+					default_header.header_len = len - 1;
+					sapi_module.send_header(&default_header,SG(server_context));
+					efree(default_header.header);
+				} else {
+					sapi_header_struct default_header = { SAPI_DEFAULT_CONTENT_TYPE_HEADER, sizeof(SAPI_DEFAULT_CONTENT_TYPE_HEADER) - 1 };
+					sapi_module.send_header(&default_header,SG(server_context));
+				}
 			}
 			sapi_module.send_header(NULL, SG(server_context));
 			SG(headers_sent) = 1;

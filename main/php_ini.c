@@ -480,3 +480,10 @@ PHPAPI PHP_INI_MH(OnUpdateStringUnempty)
 	*p = new_value;
 	return SUCCESS;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */
