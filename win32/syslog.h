@@ -1,16 +1,3 @@
-/*
- * This header borrowed from Cygnus GNUwin32 project
- *
- * Modified for use with functions to map syslog
- * calls to EventLog calls on the windows platform
- *
- * much of this is not used, but here for the sake of
- * error free compilation.  EventLogs will most likely
- * not behave as syslog does, but may be useful anyway.
- * much of what syslog does can be emulated here, but
- * that will have to be done later.
- */
-
 #ifndef SYSLOG_H
 #define	SYSLOG_H
 #define WIN32_LEAN_AND_MEAN
@@ -65,8 +52,6 @@
 
 extern void closelog(void);
 extern void openlog(const char *, int, int);
-/* setlogmask not implemented */
-/* extern int    setlogmask (int); */
 extern void syslog(int, const char *, ...);
 
 
