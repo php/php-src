@@ -75,8 +75,6 @@
 #include "mbregex.h"
 #endif
 
-#include "mbfilter.h"
-
 #if defined(HAVE_MBSTR_JA)
 static const enum mbfl_no_encoding php_mbstr_default_identify_list[] = {
 	mbfl_no_encoding_ascii,
@@ -1540,7 +1538,7 @@ PHP_FUNCTION(mb_parse_str)
 	} else {
 		/* auto detect */
 		from_encoding = mbfl_no_encoding_invalid;
-		identd = mbfl_encoding_detector_new((mbfl_no_encoding *)elist, elistsz TSRMLS_CC);
+		identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
 		if (identd != NULL) {
 			n = 0;
 			while (n < num) {
@@ -2262,7 +2260,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 			string.no_encoding = from_encoding;
 		} else if (size > 1) {
 			/* auto detect */
-			from_encoding = mbfl_identify_encoding_no(&string, (mbfl_no_encoding *)list, size TSRMLS_CC);
+			from_encoding = mbfl_identify_encoding_no(&string, list, size TSRMLS_CC);
 			if (from_encoding != mbfl_no_encoding_invalid) {
 				string.no_encoding = from_encoding;
 			} else {
@@ -2435,9 +2433,9 @@ PHP_FUNCTION(mb_detect_encoding)
 	}
 
 	if (size > 0 && list != NULL) {
-		elist = (mbfl_no_encoding *)list;
+		elist = list;
 	} else {
-		elist = (mbfl_no_encoding *)MBSTRG(current_detect_order_list);
+		elist = MBSTRG(current_detect_order_list);
 		size = MBSTRG(current_detect_order_list_size);
 	}
 
@@ -2744,7 +2742,7 @@ PHP_FUNCTION(mb_convert_variables)
 		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
 		if (stack != NULL) {
 			stack_level = 0;
-			identd = mbfl_encoding_detector_new((mbfl_no_encoding *)elist, elistsz TSRMLS_CC);
+			identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
 			if (identd != NULL) {
 				n = 2;
 				while (n < argc || stack_level > 0) {
@@ -3067,7 +3065,7 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = Z_STRVAL_PP(argv[1]);
 		orig_str.len = Z_STRLEN_PP(argv[1]);
-		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, (mbfl_no_encoding *)MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
+		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
 		if(orig_str.no_encoding == mbfl_no_encoding_invalid) {
 			orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		}
@@ -3089,7 +3087,7 @@ PHP_FUNCTION(mb_send_mail)
 		orig_str.no_language = MBSTRG(current_language);
 		orig_str.val = Z_STRVAL_PP(argv[2]);
 		orig_str.len = Z_STRLEN_PP(argv[2]);
-		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, (mbfl_no_encoding *)MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
+		orig_str.no_encoding = mbfl_identify_encoding_no(&orig_str, MBSTRG(current_detect_order_list), MBSTRG(current_detect_order_list_size) TSRMLS_CC);
 		if(orig_str.no_encoding == mbfl_no_encoding_invalid) {
 			orig_str.no_encoding = MBSTRG(current_internal_encoding);
 		}
