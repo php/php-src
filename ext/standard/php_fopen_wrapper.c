@@ -150,6 +150,7 @@ static void php_stream_apply_filter_list(php_stream *stream, char *filterlist, i
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	int fd = -1;
+	int mode_rw = 0;
 	php_stream * stream = NULL;
 	char *p, *token, *pathdup;
 
@@ -179,6 +180,13 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 	}
 
 	if (!strncasecmp(path, "filter/", 7)) {
+		/* Save time/memory when chain isn't specified */
+		if (strchr(mode, 'r') || strchr(mode, '+')) {
+			mode_rw |= PHP_STREAM_FILTER_READ;
+		}
+		if (strchr(mode, 'w') || strchr(mode, '+') || strchr(mode, 'a')) {
+			mode_rw |= PHP_STREAM_FILTER_WRITE;
+		}
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
@@ -200,7 +208,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 			} else if (!strncasecmp(p, "write=", 6)) {
 				php_stream_apply_filter_list(stream, p + 6, 0, 1 TSRMLS_CC);
 			} else {
-				php_stream_apply_filter_list(stream, p, 1, 1 TSRMLS_CC);
+				php_stream_apply_filter_list(stream, p, mode_rw & PHP_STREAM_FILTER_READ, mode_rw & PHP_STREAM_FILTER_WRITE TSRMLS_CC);
 			}
 			p = php_strtok_r(NULL, "/", &token);
 		}
