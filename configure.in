@@ -777,16 +777,8 @@ AC_ARG_ENABLE(all,
   PHP_ENABLE_ALL=$enableval
 ])
 
-AC_ARG_ENABLE(bundle-all,
-[  --disable-bundle-all    Disable all bundled libraries by default.
-], [
-  PHP_BUNDLE_ALL=$enableval
-])
-
 # reading config stubs
 esyscmd(./build/config-stubs ext)
-esyscmd(./build/config-stubs bundle)
-
 
 dnl Other settings.
 dnl -------------------------------------------------------------------------

@@ -578,23 +578,6 @@ AC_ARG_ENABLE($1,[$3],$5=[$]enableval,
 PHP_ARG_ANALYZE($5,[$2],$6)
 ])
 
-AC_DEFUN([PHP_ARG_BUNDLE],[
-PHP_REAL_ARG_BUNDLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_),[ifelse($5,,yes,$5)])
-])
-
-AC_DEFUN([PHP_REAL_ARG_BUNDLE],[
-ifelse([$2],,,[AC_MSG_CHECKING([$2])])
-AC_ARG_WITH($1,[$3],$5=[$]withval,
-[
-  $5=ifelse($4,,no,$4)
-
-  if test "$PHP_BUNDLE_ALL" && test "$6" = "yes"; then
-    $5=$PHP_BUNDLE_ALL
-  fi
-])
-PHP_ARG_ANALYZE($5,[$2],$6)
-])
-
 AC_DEFUN([PHP_MODULE_PTR],[
   EXTRA_MODULE_PTRS="$EXTRA_MODULE_PTRS $1,"
 ])
@@ -1713,6 +1696,41 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       PHP_ADD_INCLUDE($ICONV_DIR/include)
     fi
     $2
+ifelse([$3],[],,[else $3])
+  fi
+])
+
+dnl 
+dnl PHP_SETUP_LIBXML(shared-add [, action-found [, action-not-found]])
+dnl
+dnl Common setup macro for libxml
+dnl
+AC_DEFUN([PHP_SETUP_LIBXML], [
+
+  for i in $PHP_LIBXML_DIR /usr/local /usr; do
+    if test -x "$i/bin/xml2-config"; then
+      XML2_CONFIG="$i/bin/xml2-config"
+      break
+    fi
+  done
+
+  if test -x "$XML2_CONFIG"; then
+    libxml_full_version=`$XML2_CONFIG --version`
+    ac_IFS=$IFS
+    IFS="."
+    set $libxml_full_version
+    IFS=$ac_IFS
+    LIBXML_VERSION=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
+    if test "$LIBXML_VERSION" -ge "2004014"; then
+      LIBXML_LIBS=`$XML2_CONFIG --libs`
+      LIBXML_INCS=`$XML2_CONFIG --cflags`
+      PHP_EVAL_LIBLINE($LIBXML_LIBS, $shared_lib_add)
+      PHP_EVAL_INCLINE($LIBXML_INCS)
+      AC_DEFINE(HAVE_LIBXML, 1, [ ])
+      $2
+    else
+      AC_MSG_ERROR([libxml2 version 2.4.14 or greater required.])
+    fi
 ifelse([$3],[],,[else $3])
   fi
 ])
