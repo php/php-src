@@ -764,9 +764,7 @@ PHP_FUNCTION(dbase_get_header_info)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value)==FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	dbf = dbh->db_fields;
 	for (cur_f = dbf; cur_f < &dbh->db_fields[dbh->db_nfields]; ++cur_f) {
