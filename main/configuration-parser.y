@@ -357,6 +357,9 @@ statement:
 			$3.type = IS_STRING;
 			if (parsing_mode==PARSING_MODE_CFG) {
 				zend_hash_update(active_zend_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
+                                if (active_zend_hash_table == &configuration_hash) {
+				        php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM);
+                                }
 			} else if (parsing_mode==PARSING_MODE_BROWSCAP) {
 				php3_str_tolower($1.value.str.val,$1.value.str.len);
 				zend_hash_update(current_section->value.ht, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
