@@ -1464,7 +1464,8 @@ static int php_array_walk(pval **a)
 	return 0;
 }
 
-PHP_FUNCTION(array_walk) {
+PHP_FUNCTION(array_walk)
+{
 	pval *array, *old_walk_func_name;
 	HashTable *target_hash;
 
