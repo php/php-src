@@ -24,7 +24,7 @@ if test "$PHP_FDFTK" != "no"; then
   AC_ADD_INCLUDE($FDFTK_DIR/include)
   
   old_LIBS=$LIBS
-  LIBS="$LIBS -lm"
+  LIBS="$LIBS -L$FDFTK_DIR/lib -lm"
   AC_CHECK_LIB(FdfTk, FDFOpen, [AC_DEFINE(HAVE_FDFLIB,1,[ ])],
      [AC_MSG_ERROR(fdftk module requires fdftk 2.0)])
   LIBS=$old_LIBS
@@ -32,6 +32,6 @@ if test "$PHP_FDFTK" != "no"; then
   PHP_SUBST(FDFTK_SHARED_LIBADD)
   AC_ADD_LIBRARY_WITH_PATH(FdfTk, $FDFTK_DIR/lib, FDFTK_SHARED_LIBADD)
 
-  PHP_EXTENSION(fdftk, $ext_shared)
+  PHP_EXTENSION(fdf, $ext_shared)
 fi
 
