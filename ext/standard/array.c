@@ -614,7 +614,7 @@ static int array_user_key_compare(const void *a, const void *b)
 
 	if (f->nKeyLength) {
 		key1.value.str.val = estrndup(f->arKey, f->nKeyLength);
-		key1.value.str.len = f->nKeyLength;
+		key1.value.str.len = f->nKeyLength-1;
 		key1.type = IS_STRING;
 	} else {
 		key1.value.lval = f->h;
@@ -622,7 +622,7 @@ static int array_user_key_compare(const void *a, const void *b)
 	}
 	if (s->nKeyLength) {
 		key2.value.str.val = estrndup(s->arKey, s->nKeyLength);
-		key2.value.str.len = s->nKeyLength;
+		key2.value.str.len = s->nKeyLength-1;
 		key2.type = IS_STRING;
 	} else {
 		key2.value.lval = s->h;
