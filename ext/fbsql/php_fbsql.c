@@ -29,9 +29,6 @@
 	- Connect & set session 
 	- Autoreconnect when disconnected
 	- Comments and cleanup
-	- Documentation
-
-	- Format database error messages as HTML.
 
 	BUGS
 	- Select db with no arguments
@@ -1525,9 +1522,8 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 
 	if (!mdOk(link, meta))
 	{
-		return_value->value.lval = 0;
-		return_value->type       = IS_BOOL;
 		fbcmdRelease(meta);
+		ZVAL_BOOL(return_value, 0)
 	}
 	else {
 		if (fbcmdHasMetaDataArray(meta)) {
@@ -1541,18 +1537,10 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 
 		if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
-			return_value->value.lval = 1;
-			return_value->type       = IS_BOOL;
 			if (sR == 1 && md) fbcmdRelease(md);
+			ZVAL_BOOL(return_value, 1)
 		}
-		else if (tp[0] == 'I' || tp[0] == 'U' || tp[0] == 'A')
-		{
-			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
-			return_value->value.lval = 1;
-			return_value->type       = IS_BOOL;
-			if (sR == 1 && md) fbcmdRelease(md);
-		}
-		else if ((fh = fbcmdFetchHandle(md)) || (tp[0] == 'E'))
+		else if ((fh = fbcmdFetchHandle(md)) || tp[0] == 'E' || (tp[0] == 'U' && fh))
 		{
 			result = emalloc(sizeof(PHPFBResult));
 			result->link        = link;
@@ -1573,7 +1561,6 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 
 			if (tp[0] != 'E')
 			{
-				result->rowCount    = 0x7fffffff;
 				result->columnCount = fbcmdColumnCount(md);
 				result->fetchHandle = fh;
 				result->batchSize   = FB_SQL_G(batchSize);
@@ -1588,6 +1575,17 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 				}
 			}
 			ZEND_REGISTER_RESOURCE(return_value, result, le_result);
+		}
+		else if (tp[0] == 'I' || tp[0] == 'I')
+		{
+			if (tp[0] == 'I') link->insert_id = fbcmdRowIndex(md);
+			if (sR == 1 && md) fbcmdRelease(md);
+			ZVAL_BOOL(return_value, 1)
+		}
+		else if(tp[0] == 'A') 
+		{
+			if (sR == 1 && md) fbcmdRelease(md);
+			ZVAL_BOOL(return_value, 1)
 		}
 		if (link) link->affectedRows = fbcmdRowCount(md);
 	}
@@ -2548,7 +2546,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			}
 		}
 	}
-	result->rowIndex    = result->rowIndex+1;
+	result->rowIndex++;
 	result->columnIndex = 0;
 }
 /* }}} */
