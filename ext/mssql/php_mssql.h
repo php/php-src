@@ -80,12 +80,28 @@ PHP_FUNCTION(mssql_result);
 PHP_FUNCTION(mssql_next_result);
 PHP_FUNCTION(mssql_min_error_severity);
 PHP_FUNCTION(mssql_min_message_severity);
+PHP_FUNCTION(mssql_init);
+PHP_FUNCTION(mssql_bind);
+PHP_FUNCTION(mssql_execute);
 
 typedef struct mssql_link {
 	LOGINREC *login;
 	DBPROCESS *link;
 	int valid;
 } mssql_link;
+
+typedef struct mssql_statement {
+	int id;
+	mssql_link *link;
+	HashTable *binds;
+	int executed;
+} mssql_statement;
+
+typedef struct {
+	
+	zval *zval;
+	/* TODO: more data for special types (BLOBS, NUMERIC...) */
+} mssql_bind;
 
 ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	long default_link;
@@ -96,7 +112,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mssql)
 	char *server_message;
 	long min_error_severity, min_message_severity;
 	long cfg_min_error_severity, cfg_min_message_severity;
-	long compatability_mode, connect_timeout;
+	long compatability_mode, connect_timeout, timeout;
 	void (*get_column_content)(mssql_link *mssql_ptr,int offset,pval *result,int column_type);
 	long textsize, textlimit, batchsize;
 	HashTable *resource_list, *resource_plist;
