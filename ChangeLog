@@ -1,3 +1,41 @@
+2004-08-20  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/zend_ini_parser.y:
+      Fix compile
+
+2004-08-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      MFB: Removed unneeded bits.
+
+    * (PHP_5_0)
+      ext/curl/interface.c:
+      MFB: removed unneeded bits.
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      Removed unneeded bits.
+
+2004-08-20  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Order and removed a bugfix which was already in 5.0.2/
+
+    * (PHP_5_0)
+      NEWS:
+      - 78 chars please.
+
+2004-08-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/curl/interface.c:
+      Added more missing cURL options.
+
+    * (PHP_4_3)
+      NEWS
+      ext/mcal/php_mcal.c:
+      MFH: Fixed bug #29753 (mcal_fetch_event() allows 2nd argument to be
+      optional).
+
 2004-08-19  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_execute.c:
