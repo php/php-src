@@ -1,3 +1,61 @@
+2000-06-04  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    (pg_connect) Missed adding reference to link.
+
+2000-06-04  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/session/mod_files.c
+      ext/standard/dir.c
+      reentrancy.c
+      win32/readdir.c
+      win32/readdir.h: Fix Win32 build
+
+    * NEWS: *** empty log message ***
+
+2000-06-04  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - Added functions pg_loimport(), pg_loexport().
+    - Added functions pg_loimport(), pg_loexport(). 
+
+2000-06-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/image.c:    Add SWF support to getimagesize() function
+
+2000-06-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * Makefile.in: Redirect messages from cp modules/* to /dev/null
+
+2000-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/array.c: \0 is part of they key, but not of the variable
+
+2000-06-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+    Back out the last change by Andi which caused TSRM to be always configured.
+
+    This needs to be refined. It caused breakage on several platforms.
+
+2000-06-04  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/dir.c
+      php.h
+      php_virtual_cwd.c
+      php_virtual_cwd.h: add opendir to VIRTUAL_DIR
+
+    * php_virtual_cwd.c: chdir returns -1 on error, so should V_CHDIR
+
+    * ext/standard/dir.c: chdir returns 0 on success, compare against it
+
+2000-06-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * rfc1867.c:    Add support for both indexed and non-indexed arrays of file uploads
+    eg. name="file[]" type="file" (Rasmus)
+
 2000-06-03  Zeev Suraski  <zeev@php.net>
 
     * NEWS: *** empty log message ***
