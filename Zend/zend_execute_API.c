@@ -48,8 +48,8 @@ static void zend_handle_sigsegv(int dummy)
 				zend_get_executed_filename(ELS_C),
 				zend_get_executed_lineno(ELS_C));
 	}
-	original_sigsegv_handler(dummy);
 	*/
+	original_sigsegv_handler(dummy);
 }
 
 
