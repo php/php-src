@@ -99,6 +99,7 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 #endif
 
 
+#if ZEND_DEBUG || !defined(ZEND_MM)
 #define REMOVE_POINTER_FROM_LIST(p)				\
 	if (p==AG(head)) {							\
 		AG(head) = p->pNext;					\
@@ -108,14 +109,21 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 	if (p->pNext) {								\
 		p->pNext->pLast = p->pLast;				\
 	}
+#else
+#define REMOVE_POINTER_FROM_LIST(p)
+#endif
 
-#define ADD_POINTER_TO_LIST(p)		\
+#if ZEND_DEBUG || !defined(ZEND_MM)
+#define ADD_POINTER_TO_LIST(p)	\
 	p->pNext = AG(head);		\
 	if (AG(head)) {				\
 		AG(head)->pLast = p;	\
 	}							\
 	AG(head) = p;				\
 	p->pLast = (zend_mem_header *) NULL;
+#else
+#define ADD_POINTER_TO_LIST(p)
+#endif
 
 #define DECLARE_CACHE_VARS()	\
 	unsigned int real_size;		\
@@ -189,9 +197,7 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		return (void *)p;
 	}
 	p->cached = 0;
-#if ZEND_DEBUG
 	ADD_POINTER_TO_LIST(p);
-#endif
 	p->size = size; /* Save real size for correct cache output */
 #if ZEND_DEBUG
 	p->filename = __zend_filename;
@@ -272,9 +278,7 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	}
 #endif
 	HANDLE_BLOCK_INTERRUPTIONS();
-#if ZEND_DEBUG
 	REMOVE_POINTER_FROM_LIST(p);
-#endif
 
 #if MEMORY_LIMIT
 	AG(allocated_memory) -= SIZE;
@@ -337,9 +341,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 		AG(allocated_memory_peak) = AG(allocated_memory);
 	}
 #endif
-#if ZEND_DEBUG
 	REMOVE_POINTER_FROM_LIST(p);
-#endif
 	p = (zend_mem_header *) ZEND_DO_REALLOC(p, sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
 	if (!p) {
 		if (!allow_failure) {
@@ -350,15 +352,11 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 			exit(1);
 #endif
 		}
-#if ZEND_DEBUG
 		ADD_POINTER_TO_LIST(orig);
-#endif
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)NULL;
 	}
-#if ZEND_DEBUG
 	ADD_POINTER_TO_LIST(p);
-#endif
 #if ZEND_DEBUG
 	p->filename = __zend_filename;
 	p->lineno = __zend_lineno;
@@ -470,7 +468,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 
 ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 {
-#if ZEND_DEBUG
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	zend_mem_header *p, *t;
 #endif
 #if ZEND_DEBUG
@@ -489,9 +487,7 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #  if MEMORY_LIMIT
 				AG(allocated_memory) -= REAL_SIZE(ptr->size);
 #  endif
-#  if ZEND_DEBUG
 				REMOVE_POINTER_FROM_LIST(ptr);
-#  endif
 				ZEND_DO_FREE(ptr);
 			}
 			AG(cache_count)[i] = 0;
@@ -500,10 +496,11 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #endif /* !ZEND_DISABLE_MEMORY_CACHE */
 
 #if defined(ZEND_MM) && !ZEND_DEBUG
+	zend_mm_shutdown(&AG(mm_heap));
 	if (full_shutdown) {
-		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
+	zend_mm_startup(&AG(mm_heap), 256*1024);
 #elif defined(ZEND_WIN32) && !ZEND_DEBUG
 	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
@@ -528,13 +525,13 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 	}
 #endif /* ZEND_ENABLE_FAST_CACHE */
 
-#if ZEND_DEBUG
+#if ZEND_DEBUG || !defined(ZEND_MM)
 	p = AG(head);
 	t = AG(head);
 	while (t) {
 		if (!t->cached) {
 #if ZEND_DEBUG
-			if (!t->cached && !t->reported) {
+			if (!t->reported) {
 				zend_mem_header *iterator;
 				int total_leak=0, total_leak_count=0;
 
@@ -625,10 +622,11 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 #endif
 
 #if defined(ZEND_MM) && ZEND_DEBUG
+	zend_mm_shutdown(&AG(mm_heap));
 	if (full_shutdown) {
-		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
+	zend_mm_startup(&AG(mm_heap), 256*1024);
 #elif defined(ZEND_WIN32) && ZEND_DEBUG
 	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
