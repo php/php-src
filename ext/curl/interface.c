@@ -382,30 +382,32 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			smart_str_appendl(&t->buf, data, (int) length);
 			break;
 		case PHP_CURL_USER: {
-			zval *argv[2];
-			zval *retval;
+			zval **argv[2];
+			zval *retval_ptr = NULL;
+			zval *handle = NULL;
+			zval *zdata = NULL;
 			int   error;
 
-			MAKE_STD_ZVAL(argv[0]);
-			MAKE_STD_ZVAL(argv[1]);
-			MAKE_STD_ZVAL(retval);
-
-			ZVAL_RESOURCE(argv[0], ch->id);
+			MAKE_STD_ZVAL(handle);
+			ZVAL_RESOURCE(handle, ch->id);
 			zend_list_addref(ch->id);
-			ZVAL_STRINGL(argv[1], data, length, 1);
+			argv[0] = &handle;
+	
+			MAKE_STD_ZVAL(zdata);
+			ZVAL_STRINGL(zdata, data, length, 1);
+			argv[1] = &zdata;
 
-			error = call_user_function(EG(function_table), NULL, t->func, retval, 2, argv TSRMLS_CC);
-
+			error = fast_call_user_function(EG(function_table), NULL, t->func_name, &retval_ptr, 2, argv, 0, NULL, &t->func_ptr TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
 				length = -1;
 			} else {
-				length = Z_LVAL_P(retval);
+				length = Z_LVAL_P(retval_ptr);
 			}
 
-			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&retval);
+			zval_ptr_dtor(argv[0]);
+			zval_ptr_dtor(argv[1]);
+			zval_ptr_dtor(&retval_ptr);
 			break;
 		}
 	}
@@ -446,7 +448,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			zend_list_addref(t->fd);
 			ZVAL_LONG(argv[2], (int) size * nmemb);
 
-			error = call_user_function(EG(function_table), NULL, t->func, retval, 3, argv TSRMLS_CC);
+			error = call_user_function(EG(function_table), NULL, t->func_name, retval, 3, argv TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot call the CURLOPT_READFUNCTION"); 
 				length = -1;
@@ -501,7 +503,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			zend_list_addref(ch->id);
 			ZVAL_STRINGL(argv[1], data, length, 1);
 
-			error = call_user_function(EG(function_table), NULL, t->func, retval, 2, argv TSRMLS_CC);
+			error = call_user_function(EG(function_table), NULL, t->func_name, retval, 2, argv TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
@@ -856,27 +858,30 @@ PHP_FUNCTION(curl_setopt)
 			}
 			break;
 		case CURLOPT_WRITEFUNCTION:
-			if (ch->handlers->write->func) {
-				zval_ptr_dtor(&ch->handlers->write->func);
+			if (ch->handlers->write->func_name) {
+				zval_ptr_dtor(&ch->handlers->write->func_name);
+				ch->handlers->write->func_ptr = NULL;
 			}
 			zval_add_ref(zvalue);
-			ch->handlers->write->func   = *zvalue;
+			ch->handlers->write->func_name = *zvalue;
 			ch->handlers->write->method = PHP_CURL_USER;
 			break;
 		case CURLOPT_READFUNCTION:
-			if (ch->handlers->read->func) {
-				zval_ptr_dtor(&ch->handlers->read->func);
+			if (ch->handlers->read->func_name) {
+				zval_ptr_dtor(&ch->handlers->read->func_name);
+				ch->handlers->write->func_ptr = NULL;
 			}
 			zval_add_ref(zvalue);
-			ch->handlers->read->func   = *zvalue;
+			ch->handlers->read->func_name = *zvalue;
 			ch->handlers->read->method = PHP_CURL_USER;
 			break;
 		case CURLOPT_HEADERFUNCTION:
-			if (ch->handlers->write_header->func) {
-				zval_ptr_dtor(&ch->handlers->write_header->func);
+			if (ch->handlers->write_header->func_name) {
+				zval_ptr_dtor(&ch->handlers->write_header->func_name);
+				ch->handlers->write->func_ptr = NULL;
 			}
 			zval_add_ref(zvalue);
-			ch->handlers->write_header->func   = *zvalue;
+			ch->handlers->write_header->func_name = *zvalue;
 			ch->handlers->write_header->method = PHP_CURL_USER;
 			break;
 		case CURLOPT_PASSWDFUNCTION:
@@ -1252,14 +1257,14 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	zend_llist_clean(&ch->to_free.slist);
 	zend_llist_clean(&ch->to_free.post);
 
-	if (ch->handlers->write->func) {
-		zval_ptr_dtor(&ch->handlers->write->func);
+	if (ch->handlers->write->func_name) {
+		zval_ptr_dtor(&ch->handlers->write->func_name);
 	}
-	if (ch->handlers->read->func) {
-		zval_ptr_dtor(&ch->handlers->read->func);
+	if (ch->handlers->read->func_name) {
+		zval_ptr_dtor(&ch->handlers->read->func_name);
 	}
-	if (ch->handlers->write_header->func) {
-		zval_ptr_dtor(&ch->handlers->write_header->func);
+	if (ch->handlers->write_header->func_name) {
+		zval_ptr_dtor(&ch->handlers->write_header->func_name);
 	}
 	if (ch->handlers->passwd) {
 		zval_ptr_dtor(&ch->handlers->passwd);

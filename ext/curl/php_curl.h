@@ -78,18 +78,20 @@ PHP_FUNCTION(curl_multi_close);
 void _php_curl_multi_close(zend_rsrc_list_entry *);
 
 typedef struct {
-	zval         *func;
-	FILE         *fp;
-	smart_str     buf;
-	int           method;
-	int           type;
+	zval          *func_name;
+	zend_function *func_ptr;
+	FILE          *fp;
+	smart_str      buf;
+	int            method;
+	int            type;
 } php_curl_write;
 
 typedef struct {
-	zval         *func;
-	FILE         *fp;
-	long          fd;
-	int           method;
+	zval          *func_name;
+	zend_function *func_ptr;
+	FILE          *fp;
+	long           fd;
+	int            method;
 } php_curl_read;
 
 typedef struct {
