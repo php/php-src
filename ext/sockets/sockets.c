@@ -192,8 +192,7 @@ PHP_FUNCTION(confirm_sockets_compiled)
  */
 
 /* {{{ proto resource fd_alloc(void)
-   Allocate a file descriptor set
- */
+   Allocate a file descriptor set */
 PHP_FUNCTION(fd_alloc)
 {
 	fd_set *set;
@@ -211,9 +210,8 @@ PHP_FUNCTION(fd_alloc)
 /* }}} */
 
 /* {{{ proto void fd_dealloc(void)
-   De-allocate a file descriptor set
-   ** BUG: This is currently a no-op!
- */
+   De-allocate a file descriptor set */
+/*   ** BUG: This is currently a no-op! */
 PHP_FUNCTION(fd_dealloc)
 {
 	RETVAL_TRUE;
@@ -244,8 +242,7 @@ PHP_FUNCTION(fd_set)
 /* }}} */
 
 /* {{{ proto bool fd_clear(long fd, resource set)
-   Clear a file descriptor from a set
- */
+   Clear a file descriptor from a set */
 PHP_FUNCTION(fd_clear)
 {
 	zval **set, **fd;
@@ -268,7 +265,7 @@ PHP_FUNCTION(fd_clear)
 /* }}} */
 
 /* {{{ proto bool fd_isset(long fd, resource set)
-   Check to see if a file descriptor is set within the file descrirptor set */
+   Check to see if a file descriptor is set within the file descriptor set */
 PHP_FUNCTION(fd_isset)
 {
 	zval **set, **fd;
@@ -314,18 +311,22 @@ PHP_FUNCTION(fd_zero)
 /* }}} */
 
 /* {{{ proto void select(long max_fd, resource readfds, resource writefds, resource exceptfds, long tv_sec, long tv_usec)
-   Runs the select() system call on the sets mentioned with a timeout
-   specified by tv_sec and tv_usec. See select(2) man page for details.
+   Runs the select() system call on the sets mentioned with a timeout specified by tv_sec and tv_usec */
+/*
+   See select(2) man page for details.
 
    From man page:
    select waits for a number of file descriptors to change status.
 
-   Three independent sets of descriptors are watched.  Those in readfds will be watched to see if charac-
-   ters become avaliable for reading, those in writefds will be watched to see if it is ok to immediately
-   write on them, and those in exceptfds will be watched for exceptions.  On exit, the sets are modified
-   in place to indicate which descriptors actually changed status.
+   Three independent sets of descriptors are watched.  Those in
+   readfds will be watched to see if characters become avaliable for
+   reading, those in writefds will be watched to see if it is ok to
+   immediately write on them, and those in exceptfds will be watched
+   for exceptions.  On exit, the sets are modified in place to
+   indicate which descriptors actually changed status.
 
-   -1 is passed for any sets for which NULL would be passed to the system call.
+   -1 is passed for any sets for which NULL would be passed to the
+   system call. 
  */
 
 PHP_FUNCTION(select)
@@ -424,8 +425,7 @@ PHP_FUNCTION(open_listen_sok)
 /* }}} */
 
 /* {{{ proto int accept_connect(long fd)
-   accepts a connection on the listening socket fd
- */
+   Accepts a connection on the listening socket fd */
 int accept_connect(int fd, struct sockaddr *la)
 {
 	int foo, m;
@@ -458,8 +458,7 @@ PHP_FUNCTION(accept_connect)
 /* }}} */
 
 /* {{{ proto bool set_nonblock(long fd)
-   sets nonblocking mode for file descriptor fd
- */
+   Sets nonblocking mode for file descriptor fd */
 PHP_FUNCTION(set_nonblock)
 {
 	zval **fd;
@@ -480,8 +479,7 @@ PHP_FUNCTION(set_nonblock)
 /* }}} */
 
 /* {{{ proto bool listen(long fd, long backlog)
-   sets the maximum number of connections allowed to be waited for on
-   the socket specified by fd */
+   Sets the maximum number of connections allowed to be waited for on the socket specified by fd */
 PHP_FUNCTION(listen)
 {
 	zval **fd, **backlog;
@@ -579,8 +577,7 @@ PHP_FUNCTION(read)
 /* }}} */
 
 /* {{{ proto long getsockname(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port
-   int addr and port describing the local side of a socket. */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port int addr and port describing the local side of a socket */
 
 /* A lock to prevent inet_ntoa() from causing problems in threading */
 volatile int inet_ntoa_lock = 0;
@@ -673,8 +670,7 @@ PHP_FUNCTION(gethostbyname)
 #endif
 
 /* {{{ proto long getpeername(long fd, string &addr, long &port)
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port
-   int addr and port describing the remote side of a socket. */
+   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port int addr and port describing the remote side of a socket */
 
 PHP_FUNCTION(getpeername)
 {
@@ -765,8 +761,7 @@ PHP_FUNCTION(gethostbyaddr)
 #endif
 
 /* {{{ proto long socket(string domain, string type, long protocol)
-   Creates an endpoint for communication in the domain specified by domain, of type specified by type
- */
+   Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket)
 {
 	zval **domain, **type, **protocol;
@@ -877,9 +872,9 @@ PHP_FUNCTION(strerror)
 }
 /* }}} */
 
-/* {{{ proto long bind(long sockfd, string domain, ...)
-   Binds an open socket to a listening port
-	-- domain = "af_unix", 3rd arg is path to socket
+/* {{{ proto long bind(long sockfd, string domain [, string ...])
+   Binds an open socket to a listening port */
+/*	-- domain = "af_unix", 3rd arg is path to socket
 	-- domain = "af_inet", 3rd arg is address to bind to, 4th arg is port */
 PHP_FUNCTION(bind)
 {
