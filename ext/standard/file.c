@@ -1233,7 +1233,7 @@ PHP_FUNCTION(pclose)
 	zval **arg1;
 	php_stream *stream;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

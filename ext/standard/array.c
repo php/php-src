@@ -2625,7 +2625,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	Bucket ***lists, **list, ***ptrs, *p;
 
 	/* Get the argument count and check it */	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 2) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2773,7 +2773,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	Bucket ***lists, **list, ***ptrs, *p;
 
 	/* Get the argument count and check it */
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 2) {
 		WRONG_PARAM_COUNT;
 	}

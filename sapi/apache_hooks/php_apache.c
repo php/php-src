@@ -1029,7 +1029,7 @@ PHP_FUNCTION(apache_request_send_error_response)
     request_rec *r;
     int rec;
 
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             rec = 0;
             break;
@@ -1054,7 +1054,7 @@ PHP_FUNCTION(apache_request_set_content_length)
     zval *id;
     request_rec *r;
 
-    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &length) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &length) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(apache_request_rputs)
     zval *id;
     request_rec *r;
 
-    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &buffer) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &buffer) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(apache_request_log_error)
     request_rec *r;
     int facility = APLOG_ERR;
 
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 1:
             if(zend_get_parameters_ex(1, &z_errstr) == FAILURE) {
                 RETURN_FALSE;
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_uri)
     zval *id;
     zval **file;
     request_rec *r, *sub_r;
-    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(apache_request_sub_req_lookup_file)
     zval **file;
     request_rec *r, *sub_r;
 
-    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1214,7 +1214,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
     zval **file, **method;
     request_rec *r, *sub_r;
 
-    if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &method, &file) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &method, &file) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(apache_request_internal_redirect)
     zval **new_uri;
     request_rec *r;
 
-    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &new_uri) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_uri) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     APREQ_GET_REQUEST(id, r);
@@ -1268,7 +1268,7 @@ PHP_FUNCTION(apache_request_send_header_field)
     zval *id;
     request_rec *r;
 
-    if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fieldname, &fieldval) == FAILURE) {
+    if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &fieldname, &fieldval) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
     convert_to_string_ex(fieldname);
@@ -1547,7 +1547,7 @@ PHP_FUNCTION(apache_note)
 {
 	zval **arg_name, **arg_val;
 	char *note_val;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count<1 || arg_count>2 ||
 		zend_get_parameters_ex(arg_count, &arg_name, &arg_val) ==FAILURE ) {
@@ -1714,7 +1714,7 @@ PHP_FUNCTION(virtual)
 	pval **filename;
 	request_rec *rr = NULL;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -1821,7 +1821,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	pval **filename;
 	request_rec *rr=NULL;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -1896,7 +1896,7 @@ PHP_FUNCTION(apache_exec_uri)
 	request_rec *rr=NULL;
 	TSRMLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);

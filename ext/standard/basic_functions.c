@@ -2890,7 +2890,7 @@ PHP_FUNCTION(parse_ini_file)
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 
 		case 1:
 			if (zend_get_parameters_ex(1, &filename) == FAILURE) {

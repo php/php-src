@@ -3391,7 +3391,7 @@ PHP_FUNCTION(parse_str)
 	int argCount;
 	int old_rg;
 
-	argCount = ARG_COUNT(ht);
+	argCount = ZEND_NUM_ARGS();
 	if (argCount < 1 || argCount > 2 || zend_get_parameters_ex(argCount, &arg, &arrayArg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
