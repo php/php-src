@@ -173,9 +173,9 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, in
 
 int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *soapaction, int soap_version TSRMLS_DC)
 {
-	xmlChar *buf;
+	xmlChar *buf, *request;
 	smart_str soap_headers = {0};
-	int buf_size,err;
+	int buf_size, request_size, err;
 	php_url *phpurl = NULL;
 	php_stream *stream;
 	zval **trace, **tmp;
@@ -305,8 +305,62 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 				smart_str_append_const(&soap_headers, "\"\r\n");
 			}
 		}
+
+	  request = buf;
+	  request_size = buf_size;
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "compression", sizeof("compression"), (void **)&tmp) == SUCCESS && Z_TYPE_PP(tmp) == IS_LONG) {
+			int level = Z_LVAL_PP(tmp) & 0x0f;
+			int kind  = Z_LVAL_PP(tmp) & SOAP_COMPRESSION_DEFLATE;
+
+		  if ((Z_LVAL_PP(tmp) & SOAP_COMPRESSION_ACCEPT) != 0) {
+				smart_str_append_const(&soap_headers,"Accept-Encoding: gzip, deflate\r\n");
+		  }
+		  if (level > 0) {
+				zval func;
+				zval retval;
+  			zval param1, param2, param3;
+				zval *params[3];
+				int n;
+
+
+				params[0] = &param1;
+				INIT_PZVAL(params[0]);
+				params[1] = &param2;
+				INIT_PZVAL(params[1]);
+				params[2] = &param3;
+				INIT_PZVAL(params[2]);
+				ZVAL_STRINGL(params[0], buf, buf_size, 0);
+				ZVAL_LONG(params[1], level);
+		    if (kind == SOAP_COMPRESSION_DEFLATE) {
+		    	n = 2;
+					ZVAL_STRING(&func, "gzcompress", 0);
+					smart_str_append_const(&soap_headers,"Content-Encoding: deflate\r\n");
+		    } else {
+		      n = 3;
+					ZVAL_STRING(&func, "gzencode", 0);
+					smart_str_append_const(&soap_headers,"Content-Encoding: gzip\r\n");
+					ZVAL_LONG(params[2], 1);
+		      /* (SOAP_COMPRESSION_GZIP */
+		    }
+				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
+				    Z_TYPE(retval) == IS_STRING) {
+					request = Z_STRVAL(retval);
+					request_size = Z_STRLEN(retval);
+				} else {
+			php_url_free(phpurl);
+			if (request != buf) {efree(request);}
+			xmlFree(buf);
+			smart_str_free(&soap_headers);
+			php_stream_close(stream);
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"));
+			zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
+			add_soap_fault(this_ptr, "HTTP", "Compression Failed", NULL, NULL TSRMLS_CC);
+			return FALSE;
+				}
+		  }
+		}
 		smart_str_append_const(&soap_headers,"Content-Length: ");
-		smart_str_append_long(&soap_headers, buf_size);
+		smart_str_append_long(&soap_headers, request_size);
 		smart_str_append_const(&soap_headers, "\r\n");
 
 		/* HTTP Authentication */
@@ -358,12 +412,13 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 			}
 		}
 		smart_str_append_const(&soap_headers, "\r\n");
-		smart_str_appendl(&soap_headers, buf, buf_size);
+		smart_str_appendl(&soap_headers, request, request_size);
 		smart_str_0(&soap_headers);
 
 		err = php_stream_write(stream, soap_headers.c, soap_headers.len);
 		if (err != soap_headers.len) {
 			php_url_free(phpurl);
+			if (request != buf) {efree(request);}
 			xmlFree(buf);
 			smart_str_free(&soap_headers);
 			php_stream_close(stream);
@@ -376,6 +431,7 @@ int send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *location, char *so
 
 	}
 	php_url_free(phpurl);
+	if (request != buf) {efree(request);}
 	xmlFree(buf);
 	return TRUE;
 }
@@ -386,9 +442,10 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 	int http_header_size, http_body_size, http_close;
 	php_stream *stream;
 	zval **trace, **tmp;
-	char* connection;
+	char *connection;
 	int http_1_1 = 0;
 	int http_status = 0;
+	char *content_encoding;
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "httpsocket", sizeof("httpsocket"), (void **)&tmp) == SUCCESS) {
 		php_stream_from_zval_no_verify(stream,tmp);
@@ -471,11 +528,6 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		zend_hash_del(Z_OBJPROP_P(this_ptr), "_use_proxy", sizeof("_use_proxy"));
 		add_soap_fault(this_ptr, "HTTP", "Error Fetching http body, No Content-Length, connection closed or chunked data", NULL, NULL TSRMLS_CC);
 		return FALSE;
-	}
-
-	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
-	    Z_LVAL_PP(trace) > 0) {
-		add_property_stringl(this_ptr, "__last_response", http_body, http_body_size, 1);
 	}
 
 	/* See if the server requested a close */
@@ -591,8 +643,55 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		efree(cookie);
 	}
 
-	*buffer = http_body;
-	*buffer_len = http_body_size;
+	content_encoding = get_http_header_value(http_headers,"Content-Encoding: ");
+	if (content_encoding) {
+		zval func;
+		zval retval;
+	  zval param;
+		zval *params[1];
+
+		if ((strcmp(content_encoding,"gzip") == 0 ||
+		     strcmp(content_encoding,"x-gzip") == 0) &&
+		     zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate"))) {
+			ZVAL_STRING(&func, "gzinflate", 0);
+			params[0] = &param;
+			ZVAL_STRINGL(params[0], http_body+10, http_body_size-10, 0);
+			INIT_PZVAL(params[0]);
+		} else if (strcmp(content_encoding,"deflate") == 0 &&
+		           zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress"))) {
+			ZVAL_STRING(&func, "gzuncompress", 0);
+			params[0] = &param;
+			ZVAL_STRINGL(params[0], http_body, http_body_size, 0);
+			INIT_PZVAL(params[0]);
+		} else {
+			efree(content_encoding);
+			efree(http_headers);
+			efree(http_body);
+			add_soap_fault(this_ptr, "HTTP", "Unknown Content-Encoding", NULL, NULL TSRMLS_CC);
+			return FALSE;
+		}
+		if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
+		    Z_TYPE(retval) == IS_STRING) {
+			efree(http_body);
+			*buffer = Z_STRVAL(retval);
+			*buffer_len = Z_STRLEN(retval);
+		} else {
+			efree(content_encoding);
+			efree(http_headers);
+			efree(http_body);
+			add_soap_fault(this_ptr, "HTTP", "Can't uncompress compressed response", NULL, NULL TSRMLS_CC);
+			return FALSE;
+		}
+		efree(content_encoding);
+	} else {
+		*buffer = http_body;
+		*buffer_len = http_body_size;
+	}
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS &&
+	    Z_LVAL_PP(trace) > 0) {
+		add_property_stringl(this_ptr, "__last_response", *buffer, *buffer_len, 1);
+	}
+
 	efree(http_headers);
 	return TRUE;
 }

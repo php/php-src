@@ -88,7 +88,7 @@ Transport
 ---------
 ? HTTP status codes
 ? HTTP chunked Transfer-Encoding
-- support for HTTP compression (gzip,x-gzip,defalte)
+? support for HTTP compression (gzip,x-gzip,defalte)
 - transport abstraction layer???
 
 Interop Testing

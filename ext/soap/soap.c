@@ -505,6 +505,10 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("SOAP_ACTOR_NONE", SOAP_ACTOR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_ACTOR_UNLIMATERECEIVER", SOAP_ACTOR_UNLIMATERECEIVER, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("SOAP_COMPRESSION_ACCEPT", SOAP_COMPRESSION_ACCEPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_COMPRESSION_GZIP", SOAP_COMPRESSION_GZIP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_COMPRESSION_DEFLATE", SOAP_COMPRESSION_DEFLATE, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("UNKNOWN_TYPE", UNKNOWN_TYPE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("XSD_STRING", XSD_STRING, CONST_CS | CONST_PERSISTENT);
@@ -1251,7 +1255,42 @@ PHP_METHOD(soapserver, handle)
 	if (ZEND_NUM_ARGS() == 0) {
 		if (zend_hash_find(&EG(symbol_table), HTTP_RAW_POST_DATA, sizeof(HTTP_RAW_POST_DATA), (void **) &raw_post)!=FAILURE
 			&& ((*raw_post)->type==IS_STRING)) {
-			doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
+			zval **server_vars, **encoding;
+
+			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
+			    Z_TYPE_PP(server_vars) == IS_ARRAY &&
+			    zend_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
+			    Z_TYPE_PP(encoding) == IS_STRING) {
+				zval func;
+				zval retval;
+			  zval param;
+				zval *params[1];
+
+				if ((strcmp(Z_STRVAL_PP(encoding),"gzip") == 0 ||
+				     strcmp(Z_STRVAL_PP(encoding),"x-gzip") == 0) &&
+				    zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate"))) {
+					ZVAL_STRING(&func, "gzinflate", 0);
+					params[0] = &param;
+					ZVAL_STRINGL(params[0], Z_STRVAL_PP(raw_post)+10, Z_STRLEN_PP(raw_post)-10, 0);
+					INIT_PZVAL(params[0]);
+				} else if (strcmp(Z_STRVAL_PP(encoding),"deflate") == 0 &&
+		           zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress"))) {
+					ZVAL_STRING(&func, "gzuncompress", 0);
+					params[0] = &param;
+					ZVAL_STRINGL(params[0], Z_STRVAL_PP(raw_post), Z_STRLEN_PP(raw_post), 0);
+					INIT_PZVAL(params[0]);
+				} else {
+					php_error(E_ERROR,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
+				}
+				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
+				    Z_TYPE(retval) == IS_STRING) {
+					doc_request = soap_xmlParseMemory(Z_STRVAL(retval),Z_STRLEN(retval));
+				} else {
+					php_error(E_ERROR,"Can't uncompress compressed request");
+				}
+			} else {
+				doc_request = soap_xmlParseMemory(Z_STRVAL_PP(raw_post),Z_STRLEN_PP(raw_post));
+			}
 		} else {
 			if (!zend_ini_long("always_populate_raw_post_data", sizeof("always_populate_raw_post_data"), 0)) {
 				php_error(E_ERROR, "PHP-SOAP requires 'always_populate_raw_post_data' to be on please check your php.ini file");
@@ -1774,6 +1813,15 @@ PHP_METHOD(soapclient, soapclient)
 			add_property_bool(this_ptr, "_exceptions", 0);
 		}
 #endif
+		if (zend_hash_find(ht, "compression", sizeof("compression"), (void**)&tmp) == SUCCESS &&
+		    Z_TYPE_PP(tmp) == IS_LONG &&
+	      zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate")) &&
+	      zend_hash_exists(EG(function_table), "gzdeflate", sizeof("gzdeflate")) &&
+	      zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")) &&
+	      zend_hash_exists(EG(function_table), "gzcompress", sizeof("gzcompress")) &&
+	      zend_hash_exists(EG(function_table), "gzencode", sizeof("gzencode"))) {
+			add_property_long(this_ptr, "compression", Z_LVAL_PP(tmp));
+		}
 	} else if (wsdl == NULL) {
 		php_error(E_ERROR, "Can't create SoapClient. 'location' and 'uri' options are requred in nonWSDL mode.");
 		return;
