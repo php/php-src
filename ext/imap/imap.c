@@ -2841,7 +2841,7 @@ PHP_FUNCTION(imap_bodystruct)
    Read an overview of the information in the headers of the given message */ 
 PHP_FUNCTION(imap_fetch_overview)
 {
- 	pval *streamind, *sequence, *flags;
+ 	pval *streamind, *sequence, *pflags;
  	int ind, ind_type;
 	pils *imap_le_struct;
 	pval *myoverview;
