@@ -22,7 +22,6 @@
   $dataName = $request->getParameter("dataName");
   if ($dataName) {
     $dataValue = $request->getParameter("dataValue");
-    $dataValue = $request->getParameter("dataValue");
     $session->setAttribute($dataName, $dataValue);
   }
 
