@@ -1,3 +1,77 @@
+2004-04-30  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/sqlite/package.xml:
+      - HTML entity to ISO char.
+
+2004-04-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS
+      run-tests.php:
+      MFH Bugfix #28229 (PATCH run-tests tripped up by spaces in names)
+
+2004-04-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_registry.phpt:
+      fix to work with only the installed version of PEAR
+
+    * (PHP_4_3)
+      pear/PEAR/Downloader.php
+      pear/PEAR/Installer.php:
+      MFH fix included files and put error messages in PEAR_Downloader where they
+      are needed
+
+    * pear/PEAR/Downloader.php
+      pear/PEAR/Installer.php:
+      fix included files and put error messages in PEAR_Downloader where they are
+      needed
+
+2004-04-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/math.c
+      ext/standard/tests/math/bug28228.phpt:
+      MFH: Fixed bug #28228 (number_format() does not allow empty decimal
+      separator).
+
+    * ext/standard/math.c
+      ext/standard/tests/math/bug28228.phpt:
+      Fixed bug #28228 (number_format() does not allow empty decimal separator).
+
+2004-04-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Bugfix #28229 (PATCH run-tests tripped up by spaces in names)
+
+2004-04-30  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/user.input:
+      remove notices in E_ALL for config test in PHP 4.3.6
+
+    * pear/tests/pear_packager.phpt:
+      hopefully fix this test for all cases
+
+    * pear/package-PEAR.xml:
+      update to begin process for next release (release is not imminent)
+
+    * (PHP_4_3)
+      pear/package-PEAR.xml:
+      MFH update to begin process for next release (release is not imminent)
+
+    * pear/tests/pear_common_buildProvidesArray.phpt:
+      fix unit test to work with 1.3.2 (which will be needed)
+
+    * (PHP_4_3)
+      pear/PEAR/Common.php:
+      MFH fix 1186: notice in PEAR_Common undeclared $_packageName
+
+    * pear/PEAR/Common.php:
+      fix 1186: notice in PEAR_Common undeclared $_packageName
+
+    * pear/tests/pear_common_analyzeSC.phpt:
+      fix unit test with PEAR 1.3.1
+
 2004-04-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/sqlite/CREDITS:
