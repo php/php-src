@@ -1,3 +1,161 @@
+2002-03-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c:
+    - Make the 2nd parameter to pgsql_fetch_* support NULL in case 3 parameters
+      are supplied, but you do not want to provide a row number yourself.
+    - Make the 2nd parameter to pgsql_fetch_* support NULL in case 3
+      parameters are supplied, but you do not want to provide a row number
+      yourself. 
+
+2002-03-02  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/math.c: php has no 'double', only 'float'
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h: tab/space mixture cleand up,
+    editor config comments added,
+    minor proto fixes
+
+    * ext/standard/aggregation.c
+      main/output.c: typo fix
+
+2002-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c: MFH - crash bug fix
+
+    * ext/session/session.c: Fix another crash bug
+
+2002-03-02  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ctype/config.m4: enable ctype functions by default
+
+2002-03-02  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+    Wrong brackets by rasmus...but sorry the fault was mine because i missed them...
+
+    i also decided to call the first working version 1.0a
+
+    by the way: currently i am working on tiff files and it looks like it may work
+
+2002-03-02  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Bump those up too in case we ever release
+
+    * configure.in
+      main/php_version.h: Fix version number
+
+    * ext/session/session.c: MFH - crash bug fix
+
+    * ext/session/session.c: Fix a crash bug in the session module
+
+2002-03-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - Fix warning message for join().
+
+    * ext/mcve/CREDITS
+      ext/tokenizer/CREDITS
+      ext/dbx/CREDITS: - Fix CREDITS files
+
+    * ext/gd/gd.c:
+    - Make GD functions only available if they really exist (Patch by
+      matslin@orakel.ntnu.no)
+
+2002-03-02  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/tests/001.phpt
+      ext/mbstring/tests/002.inc
+      ext/mbstring/tests/002.phpt
+      ext/mbstring/tests/003.inc
+      ext/mbstring/tests/003.phpt
+      ext/mbstring/tests/004.inc
+      ext/mbstring/tests/004.phpt
+      ext/mbstring/tests/005.inc
+      ext/mbstring/tests/005.phpt
+      ext/mbstring/tests/006.inc
+      ext/mbstring/tests/006.phpt
+      ext/mbstring/tests/007.inc
+      ext/mbstring/tests/007.phpt
+      ext/mbstring/tests/008.inc
+      ext/mbstring/tests/008.phpt
+      ext/mbstring/tests/009.inc
+      ext/mbstring/tests/009.phpt
+      ext/mbstring/tests/010.inc
+      ext/mbstring/tests/010.phpt
+      ext/mbstring/tests/011.inc
+      ext/mbstring/tests/011.phpt
+      ext/mbstring/tests/012.inc
+      ext/mbstring/tests/012.phpt
+      ext/mbstring/tests/013.inc
+      ext/mbstring/tests/013.phpt
+      ext/mbstring/tests/014.inc
+      ext/mbstring/tests/014.phpt
+      ext/mbstring/tests/015.inc
+      ext/mbstring/tests/015.phpt
+      ext/mbstring/tests/016.inc
+      ext/mbstring/tests/016.phpt
+      ext/mbstring/tests/017.inc
+      ext/mbstring/tests/017.phpt
+      ext/mbstring/tests/018.inc
+      ext/mbstring/tests/018.phpt
+      ext/mbstring/tests/019.inc
+      ext/mbstring/tests/019.phpt
+      ext/mbstring/tests/common.php
+      ext/mbstring/tests/skipif.inc: Add mbstring tests
+
+    * build/rules.mk: Use php.ini-dist as default config file for testing.
+
+2002-03-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c: Fix a couple of warnings
+
+2002-03-02  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/iconv/iconv.c:
+    Improved iconv usage with libc's iconv. No overrun. More efficient memory
+    allocation.
+    Hopefully, all bugs reported for iconv will be resolved when users are using
+    libc iconv.
+
+    * ext/iconv/tests/eucjp2iso2022jp.inc
+      ext/iconv/tests/eucjp2iso2022jp.phpt
+      ext/iconv/tests/eucjp2sjis.inc
+      ext/iconv/tests/eucjp2sjis.phpt
+      ext/iconv/tests/eucjp2utf8.inc
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/002.phpt: Add more tests for iconv
+
+2002-03-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_autoloader.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_error.phpt
+      pear/tests/pear_error2.phpt
+      pear/tests/pear_error3.phpt
+      pear/tests/pear_error4.phpt
+      pear/tests/pear_registry.phpt: * more cli test fixes
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/DB/tests/db_parsedsn.phpt
+      pear/DB/tests/mysql/02fetch.phpt
+      pear/DB/tests/mysql/03simplequery.phpt
+      pear/DB/tests/mysql/04numcols.phpt
+      pear/DB/tests/mysql/05sequences.phpt
+      pear/DB/tests/mysql/06prepexec.phpt
+      pear/DB/tests/mysql/09numrows.phpt
+      pear/DB/tests/mysql/10errormap.phpt
+      pear/DB/tests/mysql/12tableinfo.phpt
+      pear/DB/tests/mysql/13limit.phpt
+      pear/DB/tests/mysql/14fetchmode_object.phpt
+      pear/tests/pear_config.phpt
+      pear/tests/pear_error.phpt: * updated tests to work with cli
+
+    * pear/tests/pear1.phpt: fix test
+
+    * run-tests.php: * work with sapi/cli
+
 2002-03-01  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/odbc/config.m4: In case we do a 4.1.3, add this trivial fix
