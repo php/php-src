@@ -1,17 +1,17 @@
-Module				Status
-------				------
-MySQL				Working
-COM					Working
-WDDX				Working
-PCRE				Working
-DBA					Working
-mcrypt				Working
-mhash				Working
-dbase				Working
-aspell				Working
-imap				Working
-ldap				Working
-oci8				Working (but no blob-support yet)
-oracle				Working
-iptc				Working
-informix                        being ported (compiles but does not work yet)
+Module              Status
+------              ------
+MySQL               Working
+COM                 Working
+WDDX                Working
+PCRE                Working
+DBA                 Working
+mcrypt              Working
+mhash               Working
+dbase               Working
+aspell              Working
+imap                Working
+ldap                Working
+oci8                Working (but no blob-support yet)
+oracle              Working
+iptc                Working
+informix            being ported (compiles but does not work yet)
