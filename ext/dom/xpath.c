@@ -85,8 +85,6 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	if (ctx) {
 		docp = (xmlDocPtr) ctx->doc;
-	} else {
-		printf("NONE");
 	}
 
 	ALLOC_ZVAL(*retval);

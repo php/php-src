@@ -1291,9 +1291,13 @@ PHP_FUNCTION(dom_node_clone_node)
 
 	node = xmlDocCopyNode(n, n->doc, recursive);
 
+	if (!node) {
+		RETURN_FALSE;
+	}
+
 	/* When deep is false Element nodes still require the attributes 
 	Following taken from libxml as xmlDocCopyNode doesnt do this */
-	if (node && n->type == XML_ELEMENT_NODE && recursive == 0) {
+	if (n->type == XML_ELEMENT_NODE && recursive == 0) {
 		if (n->nsDef != NULL) {
 			node->nsDef = xmlCopyNamespaceList(n->nsDef);
 		}
@@ -1319,8 +1323,9 @@ PHP_FUNCTION(dom_node_clone_node)
 		}
 	}
 
-	if (!node) {
-		RETURN_FALSE;
+	/* If document cloned we want a new document proxy */
+	if (node->doc != n->doc) {
+		intern = NULL;
 	}
 
 	DOM_RET_OBJ(rv, node, &ret, intern);

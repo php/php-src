@@ -338,6 +338,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
 	dom_object_handlers.get_property_ptr_ptr = NULL;
+	dom_object_handlers.clone_obj = zend_objects_store_clone_obj;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
@@ -720,13 +721,6 @@ void node_list_unlink(xmlNodePtr node TSRMLS_DC)
 }
 /* }}} end node_list_unlink */
 
-/* {{{ dom_objects_clone */
-void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
-{
-	/* TODO */
-}
-/* }}} */
-
 #if defined(LIBXML_XPATH_ENABLED)
 /* {{{ dom_xpath_objects_free_storage */
 void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
@@ -820,6 +814,36 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 
 	return intern;
 }
+
+/* {{{ dom_objects_clone */
+void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
+{
+	dom_object *intern = (dom_object *) object;
+	dom_object *clone;
+	xmlNodePtr node;
+	xmlNodePtr cloned_node;
+
+	clone = dom_objects_set_class(intern->std.ce TSRMLS_CC);
+
+	if (instanceof_function(intern->std.ce, dom_node_class_entry TSRMLS_CC)) {
+		node = (xmlNodePtr)dom_object_get_node((dom_object *) object);
+		if (node != NULL) {
+			cloned_node = xmlDocCopyNode(node, node->doc, 1);
+			if (cloned_node != NULL) {
+				/* If we cloned a document then we must create new doc proxy */
+				if (cloned_node->doc == node->doc) {
+					clone->document = intern->document;
+				}
+				php_libxml_increment_doc_ref((php_libxml_node_object *)clone, cloned_node->doc TSRMLS_CC);
+				php_libxml_increment_node_ptr((php_libxml_node_object *)clone, cloned_node, NULL TSRMLS_CC);
+			}
+
+		}
+	}
+
+	*object_clone = (void *) clone;
+}
+/* }}} */
 
 /* {{{ dom_objects_new */
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
