@@ -94,6 +94,12 @@ function_entry pgsql_functions[] = {
 	PHP_FALIAS(pg_clientencoding,		pg_client_encoding,			NULL)
 	PHP_FALIAS(pg_setclientencoding,	pg_set_client_encoding,	NULL)
 #endif
+	PHP_FE(pg_reset,				 NULL)
+	PHP_FE(pg_status,				 NULL)
+	PHP_FE(pg_send_query,			 NULL)
+	PHP_FE(pg_request_cancel,		 NULL)
+	PHP_FE(pg_get_result,			 NULL)
+	PHP_FE(pg_is_busy,				 NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -147,7 +153,17 @@ static void php_pgsql_set_default_link(int id)
 static void _close_pgsql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
+	PGresult *res;
 
+	PQsetnonblocking(link,1);
+	if (PQisBusy(link)) {
+		if (!PQrequestCancel(link)) {
+			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
+		}
+	}
+	while ((res = PQgetResult(link))) {
+		PQclear(res);
+	}
 	PQfinish(link);
 	PGG(num_links)--;
 }
@@ -158,7 +174,17 @@ static void _close_pgsql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link = (PGconn *)rsrc->ptr;
+	PGresult *res;
 
+	PQsetnonblocking(link,1);
+	if (PQisBusy(link)) {
+		if (!PQrequestCancel(link)) {
+			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
+		}
+	}
+	while ((res = PQgetResult(link))) {
+		PQclear(res);
+	}
 	PQfinish(link);
 	PGG(num_persistent)--;
 	PGG(num_links)--;
@@ -187,12 +213,22 @@ static void _notice_handler(void *arg, const char *message)
 static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	PGconn *link;
+	PGresult *res;
 
 	if (Z_TYPE_P(rsrc) != le_plink) 
 		return 0;
 
 	link = (PGconn *) rsrc->ptr;
 	
+	PQsetnonblocking(link,1);
+	if (PQisBusy(link)) {
+		if (!PQrequestCancel(link)) {
+			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
+		}
+	}
+	while ((res = PQgetResult(link))) {
+		PQclear(res);
+	}
 	PGG(ignore_notices) = 1;
 	PQexec(link,"BEGIN;ROLLBACK;");
 	PGG(ignore_notices) = 0;
@@ -261,6 +297,9 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -717,11 +756,12 @@ PHP_FUNCTION(pg_exec)
 {
 	zval **query, **pgsql_link = NULL;
 	int id = -1;
+	int leftover = 0;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
 	pgsql_result_handle *pg_result;
-
+	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
@@ -743,6 +783,17 @@ PHP_FUNCTION(pg_exec)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	convert_to_string_ex(query);
+	if (PQisBusy(pgsql)) {
+		php_error(E_NOTICE,"PostgreSQL: Cannot execute query while executing async query.");
+		RETURN_FALSE;
+	}
+	while ((pgsql_result = PQgetResult(pgsql))) {
+		PQclear(pgsql_result);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error(E_WARNING,"PostgreSQL: There are results on this connection. Use pg_get_result() to get results");
+	}
 	pgsql_result = PQexec(pgsql, Z_STRVAL_PP(query));
 	
 	if (pgsql_result) {
@@ -750,7 +801,6 @@ PHP_FUNCTION(pg_exec)
 	} else {
 		status = (ExecStatusType) PQstatus(pgsql);
 	}
-	
 	
 	switch (status) {
 		case PGRES_EMPTY_QUERY:
@@ -815,6 +865,8 @@ PHP_FUNCTION(pg_end_copy)
    RETURN_TRUE;
 }
 /* }}} */
+
+#define	COPYBUFSIZ	8192
 
 /* {{{ proto int pg_put_line([int connection,] string query)
    Send null-terminated string to backend server*/
@@ -1962,7 +2014,240 @@ PHP_FUNCTION(pg_client_encoding)
 }
 /* }}} */
 #endif
+
+
+/* {{{ proto long pg_status(resource conn)
+   Get connection status */
+PHP_FUNCTION(pg_status)
+{
+	zval **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	Z_LVAL_P(return_value) = PQstatus(pgsql);
+	Z_TYPE_P(return_value) = IS_LONG;
+}
+
+/* }}} */
+
+/* {{{ proto bool pg_reset(resource conn)
+   Reset connection */
+PHP_FUNCTION(pg_reset)
+{
+	zval **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	PQreset(pgsql);
+	if (PQstatus(pgsql) == CONNECTION_BAD) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
+/* }}} */
+
+/* Following functions are for asyncronous query
+ * Report bugs to yasuo_ohgaki@yahoo.com
+ */ 
+#define PHP_PG_ASYNC_IS_BUSY		1
+#define PHP_PG_ASYNC_REQUEST_CANCEL 2
+
+/* {{{ php_pgsql_do_async
+ */
+void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type) 
+{
+	zval **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	switch(entry_type) {
+		case PHP_PG_ASYNC_IS_BUSY:
+			PQconsumeInput(pgsql);
+			Z_LVAL_P(return_value) = PQisBusy(pgsql);
+			Z_TYPE_P(return_value) = IS_LONG;
+			break;
+		case PHP_PG_ASYNC_REQUEST_CANCEL:
+			Z_LVAL_P(return_value) = PQrequestCancel(pgsql);
+			Z_TYPE_P(return_value) = IS_LONG;
+			while ((pgsql_result = PQgetResult(pgsql))) {
+				PQclear(pgsql_result);
+			}
+			break;
+		default:
+			php_error(E_ERROR,"Pgsql module error. Report this error");
+			break;
+	}
+	convert_to_boolean_ex(&return_value);
+}
+/* }}} */
+
+/* {{{ proto bool pg_async_request_cancel([resource connection])
+   Cancel request */
+PHP_FUNCTION(pg_request_cancel)
+{
+	php_pgsql_do_async(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_ASYNC_REQUEST_CANCEL);
+}
+/* }}} */
+
+/* {{{ proto query bool pg_isbusy([resource connection])
+   Get connection is busy or not */
+PHP_FUNCTION(pg_is_busy)
+{
+	php_pgsql_do_async(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_PG_ASYNC_IS_BUSY);
+}
+/* }}} */
+
+/* {{{ proto bool pg_async_exec([resource connection], string qeury)
+   Send asynchronous query */
+PHP_FUNCTION(pg_send_query)
+{
+	zval **query, **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *res;
+	int leftover = 0;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 2:
+			if (zend_get_parameters_ex(2, &pgsql_link, &query)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
 	
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+
+	convert_to_string_ex(query);
+	if (PQsetnonblocking(pgsql, 1)) {
+		php_error(E_NOTICE,"PostgreSQL: Cannot set connection to nonblocking mode in pg_send_query()");
+	}
+	if (PQisBusy(pgsql)) {
+		php_error(E_WARNING,"PostgreSQL: Cannot send multiple query using pg_send_query()");
+		RETURN_FALSE;
+	}
+	while ((res = PQgetResult(pgsql))) {
+		PQclear(res);
+		leftover = 1;
+	}
+	if (leftover) {
+		php_error(E_NOTICE,"PostgreSQL: There are results on this connection. Call pg_get_result() until it returns false");
+	}
+	if (!PQsendQuery(pgsql, Z_STRVAL_PP(query))) {
+		RETURN_FALSE;
+	}
+	if (PQsetnonblocking(pgsql, 0)) {
+		php_error(E_NOTICE,"PostgreSQL: Cannot set connection to blocking mode in pg_send_query()");
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto query resouce pg_arync_result([resource connection])
+   Get asynchronous query result */
+PHP_FUNCTION(pg_get_result)
+{
+	zval **pgsql_link = NULL;
+	int id = -1;
+	PGconn *pgsql;
+	PGresult *pgsql_result;
+	pgsql_result_handle *pg_result;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = PGG(default_link);
+			CHECK_DEFAULT_LINK(id);
+			break;
+		case 1:
+			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
+	if (PQsetnonblocking(pgsql, 1)) {
+		php_error(E_NOTICE,"PostgreSQL: Cannot set connection to nonblocking mode in pg_get_result()");
+	}
+	pgsql_result = PQgetResult(pgsql);
+	if (!pgsql_result) {
+		/* no result */
+		RETURN_FALSE;
+	}
+	if (PQsetnonblocking(pgsql, 0)) {
+		php_error(E_NOTICE,"PostgreSQL: Cannot set connection to blocking mode in pg_get_result()");
+	}
+	pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+	pg_result->conn = pgsql;
+	pg_result->result = pgsql_result;
+	pg_result->row = -1;
+	ZEND_REGISTER_RESOURCE(return_value, pg_result, le_result);
+}
+/* }}} */
+
 #endif
 
 /*

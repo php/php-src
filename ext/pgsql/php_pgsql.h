@@ -94,6 +94,12 @@ PHP_FUNCTION(pg_end_copy);
 PHP_FUNCTION(pg_client_encoding);
 PHP_FUNCTION(pg_set_client_encoding);
 #endif
+PHP_FUNCTION(pg_reset);
+PHP_FUNCTION(pg_status);
+PHP_FUNCTION(pg_send_query);
+PHP_FUNCTION(pg_request_cancel);
+PHP_FUNCTION(pg_get_result);
+PHP_FUNCTION(pg_is_busy);
 
 void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent);
 int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS);
@@ -102,7 +108,7 @@ void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list);
 void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
 void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type);
-
+void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS,int entry_type);
 
 typedef struct pgLofp {
         PGconn *conn;
