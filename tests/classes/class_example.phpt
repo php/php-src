@@ -10,7 +10,7 @@ Classes general test
 
 class user {
   var $first_name,$family_name,$address,$phone_num;
-  cfunction display()
+  function display()
   {
     echo "User information\n";
     echo "----------------\n\n";
@@ -20,7 +20,7 @@ class user {
     echo "Phone:\t\t  ".$this->phone_num."\n";
     echo "\n\n";
   }
-  cfunction initialize($first_name,$family_name,$address,$phone_num)
+  function initialize($first_name,$family_name,$address,$phone_num)
   {
     $this->first_name = $first_name;
     $this->family_name = $family_name;
