@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 27 Feb 2002, Version 4.1.2
+- Fixed issues with force redirct under multithreaded compile (Posted Windows
+  binaries only!!) (Shane)
 - Fixed start up failure when mm save handler is used and there is multiple 
   SAPIs are working at the same time. (Yasuo)
 - Fixed the Roxen SAPI (Yasuo)
