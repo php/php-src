@@ -238,7 +238,7 @@ PHP_FUNCTION(mcve_initengine)
 }
 /* }}} */
 
-/* {{{ proto int mcve_initengine(string cafile)
+/* {{{ proto int mcve_initconn()
 
    create and initialize an MCVE_CONN structure
 */
