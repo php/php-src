@@ -252,7 +252,7 @@ PHP_FUNCTION(zip_entry_open)
     php_zzip_dirent  *entry = NULL;
     int               mode;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|s", &zzip_dp, &zzip_ent, &mode) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|l", &zzip_dp, &zzip_ent, &mode) == FAILURE)
     return;
 
     ZEND_FETCH_RESOURCE(archive_p, ZZIP_DIR *,        zzip_dp,  -1, le_zip_dir_name,   le_zip_dir);
