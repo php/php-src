@@ -1,3 +1,43 @@
+2003-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c
+      ext/mysql/php_mysql.c:
+      String format stuff.
+
+2003-09-22  Andrey Hristov  <andrey@hristov.com>
+
+    * ext/standard/array.c:
+      improve the fix for #25494. If more then one bad parameter is passed
+      an warning for all will be emitted.
+
+2003-09-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c:
+      set consistent pathing for libxml
+      set document url when loaded from memory to set base href
+
+    * ext/xsl/xsltprocessor.c:
+      set base href for copied, imported doc
+      set environment for imported stylesheet
+      add optional clone parameter for data to transform
+
+    * ext/xml/expat_compat.h:
+      move hash.h for libxml 2.6 compatibility
+
+2003-09-22  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/interbase/interbase.c:
+      proto thiko fix
+
+2003-09-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend.c
+      ZendEngine2/zend_language_scanner.l:
+      Added missing format.
+
+    * ext/standard/info.c:
+      String formatting stuff.
+
 2003-09-21  Sascha Schumann  <sascha@schumann.cx>
 
     * (PHP_4_3)
