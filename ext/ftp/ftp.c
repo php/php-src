@@ -66,11 +66,12 @@ static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *args);
 
 /* wrapper around send/recv to handle timeouts */
-static int		my_send(int s, void *buf, size_t len);
-static int		my_recv(int s, void *buf, size_t len);
-static int		my_connect(int s, const struct sockaddr *addr,
+static int		my_send(ftpbuf_t *ftp, int s, void *buf, size_t len);
+static int		my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len);
+static int		my_connect(ftpbuf_t *ftp, int s, const struct sockaddr *addr,
 				int addrlen);
-static int		my_accept(int s, struct sockaddr *addr, int *addrlen);
+static int		my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr,
+				int *addrlen);
 
 /* reads a line the socket , returns true on success, false on error */
 static int		ftp_readline(ftpbuf_t *ftp);
@@ -85,7 +86,7 @@ static int		ftp_type(ftpbuf_t *ftp, ftptype_t type);
 static databuf_t*	ftp_getdata(ftpbuf_t *ftp);
 
 /* accepts the data connection, returns updated data buffer */
-static databuf_t*	data_accept(databuf_t *data);
+static databuf_t*	data_accept(databuf_t *data, ftpbuf_t *ftp);
 
 /* closes the data connection, returns NULL */
 static databuf_t*	data_close(databuf_t *data);
@@ -104,7 +105,7 @@ union ipbox {
 /* {{{ ftp_open
  */
 ftpbuf_t*
-ftp_open(const char *host, short port)
+ftp_open(const char *host, short port, long timeout_sec)
 {
 	int			fd = -1;
 	ftpbuf_t		*ftp;
@@ -134,13 +135,16 @@ ftp_open(const char *host, short port)
 		return NULL;
 	}
 
+	/* Default Settings */
+	ftp->timeout_sec = timeout_sec;
+
 	/* connect */
 	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		goto bail;
 	}
 
-	if (my_connect(fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (my_connect(ftp, fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		perror("connect");
 		goto bail;
 	}
@@ -533,24 +537,30 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 	if (ftp == NULL)
 		return 0;
 
-	if (!ftp_type(ftp, type))
+	if (!ftp_type(ftp, type)) {
 		goto bail;
+	}
 
-	if ((data = ftp_getdata(ftp)) == NULL)
+	if ((data = ftp_getdata(ftp)) == NULL) {
 		goto bail;
+	}
 
-	if (!ftp_putcmd(ftp, "RETR", path))
+	if (!ftp_putcmd(ftp, "RETR", path)) {
 		goto bail;
-	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
+	}
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
 		goto bail;
+	}
 
-	if ((data = data_accept(data)) == NULL)
+	if ((data = data_accept(data, ftp)) == NULL) {
 		goto bail;
+	}
 
 	lastch = 0;
-	while ((rcvd = my_recv(data->fd, data->buf, FTP_BUFSIZE))) {
-		if (rcvd == -1)
+	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
+		if (rcvd == -1) {
 			goto bail;
+		}
 
 		if (type == FTPTYPE_ASCII) {
 			for (ptr = data->buf; rcvd; rcvd--, ptr++) {
@@ -571,11 +581,13 @@ ftp_get(ftpbuf_t *ftp, FILE *outfp, const char *path, ftptype_t type)
 
 	data = data_close(data);
 
-	if (ferror(outfp))
+	if (ferror(outfp)) {
 		goto bail;
+	}
 
-	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250))
+	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
 		goto bail;
+	}
 
 	return 1;
 bail:
@@ -608,7 +620,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, f
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
 		goto bail;
 
-	if ((data = data_accept(data)) == NULL)
+	if ((data = data_accept(data, ftp)) == NULL)
 		goto bail;
 
 	size = 0;
@@ -616,7 +628,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, f
 	while ((ch = FP_FGETC(insocket, infp, issock))!=EOF && !FP_FEOF(insocket, infp, issock)) {
 		/* flush if necessary */
 		if (FTP_BUFSIZE - size < 2) {
-			if (my_send(data->fd, data->buf, size) != size)
+			if (my_send(ftp, data->fd, data->buf, size) != size)
 				goto bail;
 			ptr = data->buf;
 			size = 0;
@@ -631,7 +643,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, FILE *infp, int insocket, int issock, f
 		size++;
 	}
 
-	if (size && my_send(data->fd, data->buf, size) != size)
+	if (size && my_send(ftp, data->fd, data->buf, size) != size)
 		goto bail;
 
 	if (!issock && ferror(infp))
@@ -792,7 +804,7 @@ ftp_putcmd(ftpbuf_t *ftp, const char *cmd, const char *args)
 	}
 
 	data = ftp->outbuf;
-	if (my_send(ftp->fd, data, size) != size)
+	if (my_send(ftp, ftp->fd, data, size) != size)
 		return 0;
 
 	return 1;
@@ -841,8 +853,9 @@ ftp_readline(ftpbuf_t *ftp)
 		}
 
 		data = eol;
-		if ((rcvd = my_recv(ftp->fd, data, size)) < 1)
+		if ((rcvd = my_recv(ftp, ftp->fd, data, size)) < 1) {
 			return 0;
+		}
 	} while (size);
 
 	return 0;
@@ -896,7 +909,7 @@ ftp_getresp(ftpbuf_t *ftp)
 /* {{{ my_send
  */
 int
-my_send(int s, void *buf, size_t len)
+my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
 {
 	fd_set		write_set;
 	struct timeval	tv;
@@ -904,7 +917,7 @@ my_send(int s, void *buf, size_t len)
 
 	size = len;
 	while (size) {
-		tv.tv_sec = FTP_TIMEOUT;
+		tv.tv_sec = ftp->timeout_sec;
 		tv.tv_usec = 0;
 
 		FD_ZERO(&write_set);
@@ -933,13 +946,13 @@ my_send(int s, void *buf, size_t len)
 /* {{{ my_recv
  */
 int
-my_recv(int s, void *buf, size_t len)
+my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 {
 	fd_set		read_set;
 	struct timeval	tv;
 	int		n;
 
-	tv.tv_sec = FTP_TIMEOUT;
+	tv.tv_sec = ftp->timeout_sec;
 	tv.tv_usec = 0;
 
 	FD_ZERO(&read_set);
@@ -960,7 +973,7 @@ my_recv(int s, void *buf, size_t len)
 /* {{{ my_connect
  */
 int
-my_connect(int s, const struct sockaddr *addr, int addrlen)
+my_connect(ftpbuf_t *ftp, int s, const struct sockaddr *addr, int addrlen)
 #ifndef PHP_WIN32
 {
 	fd_set		conn_set;
@@ -980,7 +993,7 @@ my_connect(int s, const struct sockaddr *addr, int addrlen)
 		FD_ZERO(&conn_set);
 		FD_SET(s, &conn_set);
 
-		tv.tv_sec = FTP_TIMEOUT;
+		tv.tv_sec = ftp->timeout_sec;
 		tv.tv_usec = 0;
 
 		n = select(s + 1, &conn_set, &conn_set, NULL, &tv);
@@ -1015,13 +1028,13 @@ my_connect(int s, const struct sockaddr *addr, int addrlen)
 /* {{{ my_accept
  */
 int
-my_accept(int s, struct sockaddr *addr, int *addrlen)
+my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 {
 	fd_set		accept_set;
 	struct timeval	tv;
 	int		n;
 
-	tv.tv_sec = FTP_TIMEOUT;
+	tv.tv_sec = ftp->timeout_sec;
 	tv.tv_usec = 0;
 	FD_ZERO(&accept_set);
 	FD_SET(s, &accept_set);
@@ -1078,7 +1091,7 @@ ftp_getdata(ftpbuf_t *ftp)
 		ftp->pasv = 1;
 
 		/* connect */
-		if (my_connect(fd, (struct sockaddr*) &ftp->pasvaddr,
+		if (my_connect(ftp, fd, (struct sockaddr*) &ftp->pasvaddr,
 			sizeof(ftp->pasvaddr)) == -1)
 		{
 			perror("connect");
@@ -1144,7 +1157,7 @@ bail:
 /* {{{ data_accept
  */
 databuf_t*
-data_accept(databuf_t *data)
+data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
 	struct sockaddr_in	addr;
 	int			size;
@@ -1153,7 +1166,7 @@ data_accept(databuf_t *data)
 		return data;
 
 	size = sizeof(addr);
-	data->fd = my_accept(data->listener, (struct sockaddr*) &addr, &size);
+	data->fd = my_accept(ftp, data->listener, (struct sockaddr*) &addr, &size);
 	closesocket(data->listener);
 	data->listener = -1;
 
@@ -1213,13 +1226,13 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path)
 		goto bail;
 
 	/* pull data buffer into tmpfile */
-	if ((data = data_accept(data)) == NULL)
+	if ((data = data_accept(data, ftp)) == NULL)
 		goto bail;
 
 	size = 0;
 	lines = 0;
 	lastch = 0;
-	while ((rcvd = my_recv(data->fd, data->buf, FTP_BUFSIZE))) {
+	while ((rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE))) {
 		if (rcvd == -1)
 			goto bail;
 
