@@ -42,7 +42,7 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 #endif
 
 #define STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, NULL
-#define ZE2_STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, &ini_entries
+#define ZE2_STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, ini_entries
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
 
