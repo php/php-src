@@ -1,3 +1,33 @@
+2003-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c
+      zend_default_classes.h
+      zend_reflection_api.c:
+      Allow zend_throw_exception() to also set the exception code
+
+    * zend_default_classes.c:
+      Exception has 4 protected default properties (message,code,file,line).
+      They are all initialized at c-level constructor correctly.
+
+    * zend_API.c
+      zend_API.h
+      zend_compile.c
+      zend_compile.h:
+      Internal classes can now have default properties.
+
+    * zend_reflection_api.c:
+      Show ctor/dtor information and those don't return anything
+
+    * zend_API.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c:
+      - Flag ctor/dtor methods
+      - Use this to prevent memleaks when an exception gets thrown in ctors.
+
+    * zend_default_classes.c:
+      Make exception code more robust
+
 2003-08-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c
