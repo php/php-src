@@ -132,6 +132,7 @@ PHP                                                                        NEWS
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30430 (odbc_next_result() doesn't bind values and that results 
   in segfault). (pdan-php at esync dot org, Tony)
+- Fixed bug #30266 (Invalid opcode 137/1/8). (Marcus)
 - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
   parameters). (Jani)
 - Fixed bug #29989 (type re_registers redefined in oniguruma.h). (Moriyoshi)
