@@ -631,6 +631,14 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	}
 }
 
+static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
+{
+	if (notifier && notifier->ptr) {
+		zval_ptr_dtor((zval **)&(notifier->ptr));
+		notifier->ptr = NULL;
+	}
+}
+
 static int parse_context_options(php_stream_context *context, zval *options)
 {
 	HashPosition pos, opos;
@@ -679,6 +687,7 @@ static int parse_context_params(php_stream_context *context, zval *params)
 		context->notifier->func = user_space_stream_notifier;
 		context->notifier->ptr = *tmp;
 		ZVAL_ADDREF(*tmp);
+		context->notifier->dtor = user_space_stream_notifier_dtor;
 	}
 	if (SUCCESS == zend_hash_find(Z_ARRVAL_P(params), "options", sizeof("options"), (void**)&tmp)) {
 		parse_context_options(context, *tmp);
