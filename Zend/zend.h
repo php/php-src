@@ -356,6 +356,7 @@ END_EXTERN_C()
 		memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));	\
 		EG(bailout_set) = orig_bailout_set;						\
 	}
+#define zend_first_try		EG(bailout_set)=0;	zend_try
 
 ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
