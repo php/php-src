@@ -1,3 +1,62 @@
+2001-10-31  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/RFC822.php:
+    validateMailbox() is a useful function to export. I'm changing it back to
+    the old name and marking it as public.
+
+2001-10-31  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Synch with persistant -> persistent changes to ext/fbsql.
+
+2001-10-31  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/tests/mysql/13limit.phpt
+      pear/DB/tests/pgsql/12limit.phpt
+      pear/DB/tests/limit.inc: added test for row limit support
+
+    * pear/DB/ibase.php
+      pear/DB/oci8.php
+      pear/DB/mysql.php
+      pear/DB/common.php
+      pear/DB/pgsql.php:
+    First implementation of the Row Limit support for Pear. All backends
+    supports it except Oracle and Interbase (for the moment)
+
+2001-10-31  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix.
+
+2001-10-31  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS
+      pear/DB/pgsql.php: added getListOf('functions') for postgres
+
+2001-10-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php: * pearweb xmlrpc layer now handles PEAR errors
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt
+      pear/PEAR/Registry.php
+      pear/tests/pear_error.phpt: * update tests
+
+    * pear/PEAR.php: * removed error_prepend and error_append properties
+
+    * pear/PEAR.php: renamed "debuginfo" property declaration to "userinfo"
+
+    * pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/scripts/pear.in:
+    * added "pear info" and "pear show-config" commands
+    * "pear install" now using the package registry
+
+2001-10-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/java.c: Works now with phpize
+
 2001-10-30  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/servlet/config.m4: ws fix
