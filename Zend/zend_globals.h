@@ -232,9 +232,6 @@ struct _zend_executor_globals {
 
 	zend_property_info std_property_info;
 
-	/* locale stuff */
-	char float_separator[1];
-
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
