@@ -613,11 +613,13 @@ static void init_request_info(TSRMLS_D)
 	char *env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",0 TSRMLS_CC);
 	char *script_path_translated = env_script_filename;
 
+#if !DISCARD_PATH
 	/* some broken servers do not have script_filename or argv0
 	   an example, IIS configured in some ways.  then they do more
 	   broken stuff and set path_translated to the cgi script location */
 	if (!script_path_translated && env_path_translated)
 		script_path_translated = env_path_translated; 
+#endif
 
 	/* initialize the defaults */
 	SG(request_info).path_translated = NULL;
@@ -636,10 +638,10 @@ static void init_request_info(TSRMLS_D)
 		const char *auth;
 		char *content_length = sapi_cgibin_getenv("CONTENT_LENGTH",0 TSRMLS_CC);
 		char *content_type = sapi_cgibin_getenv("CONTENT_TYPE",0 TSRMLS_CC);
-#if ENABLE_PATHINFO_CHECK
-		struct stat st;
 		char *env_path_info = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
 		char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
+#if ENABLE_PATHINFO_CHECK
+		struct stat st;
 		char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL",0 TSRMLS_CC);
 		char *env_document_root = sapi_cgibin_getenv("DOCUMENT_ROOT",0 TSRMLS_CC);
 
@@ -786,12 +788,22 @@ static void init_request_info(TSRMLS_D)
 				_sapi_cgibin_putenv("PATH_INFO",NULL TSRMLS_CC);
 				_sapi_cgibin_putenv("PATH_TRANSLATED",NULL TSRMLS_CC);
 			}
+			SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
+		} else {
+#endif
+			/* pre 4.3 behaviour, shouldn't be used but provides BC */
+			if (env_path_info)
+				SG(request_info).request_uri = env_path_info;
+			else
+				SG(request_info).request_uri = env_script_name;
+#if !DISCARD_PATH
+			script_path_translated = env_path_translated;
+#endif
+#if ENABLE_PATHINFO_CHECK
 		}
 #endif
-
 		SG(request_info).request_method = sapi_cgibin_getenv("REQUEST_METHOD",0 TSRMLS_CC);
 		SG(request_info).query_string = sapi_cgibin_getenv("QUERY_STRING",0 TSRMLS_CC);
-		SG(request_info).request_uri = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 		if (script_path_translated)
 			SG(request_info).path_translated = estrdup(script_path_translated);
 		SG(request_info).content_type = (content_type ? content_type : "" );
@@ -872,7 +884,6 @@ int main(int argc, char *argv[])
 	int no_headers=0;
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
-	char *argv0=NULL;
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
@@ -938,11 +949,6 @@ int main(int argc, char *argv[])
 		|| getenv("GATEWAY_INTERFACE")
 		|| getenv("REQUEST_METHOD")) {
 		cgi = 1;
-		if (argc > 1) {
-			argv0 = strdup(argv[1]);
-		} else {
-			argv0 = NULL;
-		}
 	}
 #if PHP_FASTCGI
 	}
@@ -1211,8 +1217,6 @@ consult the installation file that came with this distribution, or visit \n\
 
 		init_request_info(TSRMLS_C);
 
-		SG(request_info).argv0 = argv0;
-
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
 		CG(interactive) = 0;
@@ -1390,21 +1394,27 @@ consult the installation file that came with this distribution, or visit \n\
 				/* file is on command line, but not in -f opt */
 				SG(request_info).path_translated = estrdup(argv[ap_php_optind]);
 			}
-		}
+		} /* end !cgi && !fastcgi */
 
+		/* 
+			we never take stdin if we're (f)cgi, always
+			rely on the web server giving us the info
+			we need in the environment. 
+		*/
+		if (cgi 
 #if PHP_FASTCGI
-		if (fastcgi) {
+			|| fastcgi) 
+#endif
+		{
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.filename = SG(request_info).path_translated;
 			file_handle.handle.fp = NULL;
 		} else {
-#endif
 			file_handle.filename = "-";
 			file_handle.type = ZEND_HANDLE_FP;
 			file_handle.handle.fp = stdin;
-#if PHP_FASTCGI
 		}
-#endif
+
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 
@@ -1423,20 +1433,25 @@ consult the installation file that came with this distribution, or visit \n\
         zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars TSRMLS_CC);
         zend_llist_destroy(&global_vars);
 		
+		/* 
+			at this point path_translated will be set if:
+			1. we are running from shell and got filename was there
+			2. we are running as cgi or fastcgi
+		*/
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
-
-		if (cgi && (retval == FAILURE)) {
-			if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
-				PUTS("No input file specified.\n");
-				php_request_shutdown((void *) 0);
-				php_module_shutdown(TSRMLS_C);
-				return FAILURE;
-			}
-			file_handle.filename = argv0;
-			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
-		} 
+		/* 
+			if we are unable to open path_translated and we are not
+			running from shell (so fp == NULL), then fail.
+		*/
+		if (retval == FAILURE || file_handle.handle.fp == NULL) {
+			SG(sapi_headers).http_response_code = 404;
+			PUTS("No input file specified.\n");
+			php_request_shutdown((void *) 0);
+			php_module_shutdown(TSRMLS_C);
+			return FAILURE;
+		}
 
 		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 			/* #!php support */
