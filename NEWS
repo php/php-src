@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
   . ext/ccvs
   . ext/cybercash
   . ext/icap
+  . sapi/fhttpd
 - Moved ext/vpopmail to PECL. (James)
 - Added ICONV_IMPL and ICONV_VERSION constants to iconv extension to
   indicate which iconv implementation is used. (Moriyoshi)
