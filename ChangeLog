@@ -1,3 +1,68 @@
+2002-07-08  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/sablot.c: eek
+
+    * ext/xslt/sablot.c: commit petr's sax handler patch
+
+2002-07-08  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/file.h: - Add TSRMLS_DC to prototype.
+
+    * ext/standard/cyr_convert.c
+      ext/standard/file.c
+      ext/standard/type.c: - Fix TSRMLS_* stuff
+
+2002-07-08  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/Passwd.php:
+    * Use CRYPT_SALT_LENGTH instead of hardcoded value.
+
+    Patch by: "James E. Flemer" <jflemer@acm.jhu.edu>
+
+2002-07-08  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: news update
+
+    * ext/mysql/config.m4:
+    Fix shared build and made the logic of finding the socket location better.
+
+2002-07-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/formatted_print.c
+      ext/standard/ftok.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/image.c
+      ext/standard/iptc.c
+      ext/standard/levenshtein.c
+      ext/standard/aggregation.c
+      ext/standard/type.c: Unify error messages
+
+    * ext/standard/type.c:
+    - Add warning to is_*() functions if more than one argument was passed
+
+    * ext/standard/array.c: Silence warning
+
+    * ext/standard/array.c: Unify error messages
+
+    * ext/standard/array.c: - Fix for bug #14580: Made key() binary safe
+
+2002-07-08  Jani Taskinen  <sniper@iki.fi>
+
+    * main/main.c:
+    These two can not be set in script. (so that they would have any effect)
+
 2002-07-07  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/standard/filestat.c: fix win32 build
