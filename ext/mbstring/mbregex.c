@@ -330,7 +330,7 @@ init_syntax_once()
 		ch += 16;
 	}
 	sprintf(sp, "};");
-	php_error(E_NOTICE,"reverse_table:\n%s", s);
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "reverse_table:\n%s", s);
 	efree(s);
 }
 

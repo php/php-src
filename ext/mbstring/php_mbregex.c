@@ -156,11 +156,11 @@ php_mbregex_compile_pattern(mb_regex_t *pre, const char *pattern, int patlen, in
 			} else {
 				efree(pre->fastmap);
 				pre->fastmap = (char*)0;
-				php_error(E_WARNING, "mbregex compile err: %s", err_str);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex compile err: %s", err_str);
 				res = 1;
 			}
 		} else {
-			php_error(E_WARNING, "Unable to allocate memory in mbregex_compile_pattern");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory in mbregex_compile_pattern");
 			res = 1;
 		}
 	} else {
@@ -229,7 +229,7 @@ PHP_FUNCTION(mb_regex_encoding)
 		convert_to_string_ex(arg1);
 		mbctype = php_mbregex_name2mbctype(Z_STRVAL_PP(arg1));
 		if (mbctype < 0) {
-			php_error(E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unknown encoding \"%s\"", Z_STRVAL_PP(arg1));
 			RETVAL_FALSE;
 		} else {
 			MBSTRG(current_mbctype) = mbctype;
@@ -424,7 +424,7 @@ php_mbereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 	while (err >= 0) {
 		err = mbre_search(&re, string, string_len, pos, string_len - pos, &regs);
 		if (err <= -2) {
-			php_error(E_WARNING, "mbregex search failure in php_mbereg_replace_exec()");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in php_mbereg_replace_exec()");
 			break;
 		}
 		if (err >= 0) {
@@ -598,7 +598,7 @@ PHP_FUNCTION(mb_split)
 
 	/* see if we encountered an error */
 	if (err <= -2) {
-		php_error(E_WARNING, "mbregex search failure in mbsplit()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbsplit()");
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -721,11 +721,11 @@ php_mbereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (!MBSTRG(search_re)) {
-		php_error(E_WARNING, "no regex for search");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no regex for search");
 		RETURN_FALSE;
 	}
 	if (!str) {
-		php_error(E_WARNING, "no string for search");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no string for search");
 		RETURN_FALSE;
 	}
 	if (MBSTRG(search_regs)) {
@@ -738,7 +738,7 @@ php_mbereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	err = mbre_search(MBSTRG(search_re), str, len, pos, len - pos, MBSTRG(search_regs));
 
 	if (err <= -2) {
-		php_error(E_WARNING, "mbregex search failure in mbregex_search()");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbregex_search()");
 		RETVAL_FALSE;
 	} else if (err < 0) {
 		MBSTRG(search_pos) = len;
@@ -956,7 +956,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	convert_to_long_ex(arg_pos);
 	n = Z_LVAL_PP(arg_pos);
 	if (n < 0) {
-		php_error(E_WARNING, "position is minus value");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "position is minus value");
 		MBSTRG(search_pos) = 0;
 		RETVAL_FALSE;
 	} else {

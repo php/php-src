@@ -3537,7 +3537,7 @@ mbfl_filt_conv_html_enc(int c, mbfl_convert_filter *filter TSRMLS_DC)
 	if (c<256 && mblen_table_html[c]==1) {
 		CK((*filter->output_function)(c, filter->data TSRMLS_CC));
 	} else {
-		/*php_error(E_NOTICE, "%s() mbfl_filt_conv_html_enc(0x%08X = %d)", get_active_function_name(TSRMLS_C), c, c);*/
+		/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbfl_filt_conv_html_enc(0x%08X = %d)", c, c);*/
  		CK((*filter->output_function)('&', filter->data TSRMLS_CC));
 		while (1) {
 		    e = mbfl_html_entity_list[i].code;
@@ -3630,7 +3630,7 @@ mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter TSRMLS_DC)
 					ent = ent*10 + (buffer[pos] - '0');
 				CK((*filter->output_function)(ent, filter->data TSRMLS_CC));
 				filter->status = 0;
-				/*php_error(E_NOTICE,"%s() mbstring decoded '%s'=%d", get_active_function_name(TSRMLS_C), buffer, ent);*/
+				/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE, "mbstring decoded '%s'=%d", buffer, ent);*/
 			}
 			else
 			{
@@ -3650,14 +3650,14 @@ mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter TSRMLS_DC)
 					/* decoded */
 					CK((*filter->output_function)(ent, filter->data TSRMLS_CC));
 					filter->status = 0;
-					/*php_error(E_NOTICE,"%s() mbstring decoded '%s'=%d", get_active_function_name(TSRMLS_C), buffer, ent);*/
+					/*php_error_docref("ref.mbstring" TSRMLS_CC, E_NOTICE,"mbstring decoded '%s'=%d", buffer, ent);*/
 				}
 				else
 				{ 
 					/* failure */
 					buffer[filter->status++] = ';';
 					buffer[filter->status] = 0;
-					php_error(E_WARNING, "%s() mbstring cannot decode '%s'", get_active_function_name(TSRMLS_C), buffer);
+					php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring cannot decode '%s'", buffer);
 					mbfl_filt_conv_html_dec_flush(filter TSRMLS_CC);
 				}
 			}
@@ -3673,7 +3673,7 @@ mbfl_filt_conv_html_dec(int c, mbfl_convert_filter *filter TSRMLS_DC)
 				if (c=='&')
 					filter->status--;
 				buffer[filter->status] = 0;
-				php_error(E_WARNING, "%s() mbstring cannot decode '%s'", get_active_function_name(TSRMLS_C), buffer);
+				php_error_docref("ref.mbstring" TSRMLS_CC, E_WARNING, "mbstring cannot decode '%s'", buffer);
 				mbfl_filt_conv_html_dec_flush(filter TSRMLS_CC);
 				if (c=='&')
 				{
