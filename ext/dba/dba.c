@@ -211,11 +211,21 @@ static PHP_MSHUTDOWN_FUNCTION(dba)
 static PHP_MINFO_FUNCTION(dba)
 {
 	dba_handler *hptr;
+<<<<<<< dba.c
+	static char handlers[80];
+=======
 	smart_str handlers = {0};
+>>>>>>> 1.28
+
+	handlers[0] = '\0';
 
 	for(hptr = handler; hptr->name; hptr++) {
+<<<<<<< dba.c
+		strlcat(handlers, hptr->name, sizeof(handlers));
+=======
 		smart_str_appends(&handlers, hptr->name);
 		smart_str_appendc(&handlers, ' ');
+>>>>>>> 1.28
  	}
 
 	php_info_print_table_start();

@@ -203,7 +203,7 @@ php_phttpd_request_ctor(PHLS_D SLS_DC)
 
     SG(request_info).query_string = PHG(cip)->hip->request;
     SG(request_info).request_method = PHG(cip)->hip->method;
-	SG(request_info).path_translated = malloc(MAXPATHLEN+1);
+	SG(request_info).path_translated = malloc(MAXPATHLEN);
     SG(sapi_headers).http_response_code = 200;
 	if (url_expand(PHG(cip)->hip->url, SG(request_info).path_translated, MAXPATHLEN, &PHG(sb), NULL, NULL) == NULL) {
 		/* handle error */

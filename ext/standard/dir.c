@@ -259,7 +259,7 @@ PHP_FUNCTION(getcwd)
 	}
 
 #if HAVE_GETCWD
-	ret = V_GETCWD(path,MAXPATHLEN-1);
+	ret = V_GETCWD(path, MAXPATHLEN);
 #elif HAVE_GETWD
 	ret = V_GETWD(path);
 /*

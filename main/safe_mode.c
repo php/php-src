@@ -106,7 +106,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		}
 		duid = sb.st_uid;
 	} else {
-		char cwd[MAXPATHLEN+1];
+		char cwd[MAXPATHLEN];
 		if (!V_GETCWD(cwd, MAXPATHLEN)) {
 			php_error(E_WARNING, "Unable to access current working directory");
 			return 0;
