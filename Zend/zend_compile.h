@@ -28,7 +28,7 @@
 #endif
 
 #ifdef __cplusplus
-#include <istream.h>
+#include <iostream.h>
 #endif
 
 #include "zend_llist.h"
