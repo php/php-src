@@ -1588,7 +1588,7 @@ PHP_FUNCTION(chunk_split)
 	convert_to_string_ex(p_str);
 
 	if (argc > 1) {
-		convert_to_string_ex(p_chunklen);
+		convert_to_long_ex(p_chunklen);
 		chunklen = Z_LVAL_PP(p_chunklen);
 	}
 
