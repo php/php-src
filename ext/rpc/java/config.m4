@@ -18,9 +18,9 @@ AC_DEFUN(JAVA_FIND_JAR, [
       JAVA_JAR='zip -q0'
     fi
   else
-  dnl
-  dnl we have a custom path defined so use it
-  dnl
+    dnl
+    dnl we have a custom path defined so use it
+    dnl
     if test -x $PHP_JAVA/bin/jar; then
       JAVA_JAR="$PHP_JAVA/bin/jar cf"
     else
@@ -33,23 +33,20 @@ AC_DEFUN(JAVA_FIND_JAR, [
 
 AC_DEFUN(JAVA_FIND_C, [
  AC_MSG_CHECKING([Java C location])
-  JAVA_C=`which javac`
-  if test -z "$JAVA_C"; then
-  dnl
-  dnl we will auto assume that the bin directory is underneath
-  dnl the user provided directory, and it includes the javac
-  dnl directory.  
-  dnl
-    if test -z "$PHP_JAVA" != "yes"; then
-     if test -x $PHP_JAVA/bin/javac; then
-      JAVA_C=$PHP_JAVA/bin/javac
-     else
-      AC_MSG_ERROR([Unable to locate $PHP_JAVA/bin])
-     fi
-    fi
-  fi
-  if test -z "$JAVA_C"; then
-    AC_MSG_ERROR([Unable to locate the javac binary in your system path
+ if test "$PHP_JAVA" = "yes"; then
+   JAVA_C=`which javac`
+ else
+   dnl
+   dnl  We've been given a path to use, so use it
+   dnl
+   if test -x $PHP_JAVA/bin/javac; then
+     JAVA_C=$PHP_JAVA/bin/javac
+   else
+     AC_MSG_ERROR([Unable to locate $PHP_JAVA/bin])
+   fi
+ fi
+ if test -z "$JAVA_C"; then
+   AC_MSG_ERROR([Unable to locate the javac binary in your system path
 Either adjust your Java installation or provide the Java installation path,
 e.g. --with-java=/java expecting /java/bin/ to contain the binaries])
   fi
@@ -151,9 +148,10 @@ if test "$PHP_JAVA" != "no"; then
   if test "$platform" = "Darwin"; then
     AC_CHECK_HEADERS([JavaVM/JavaVM.h])
     AC_CHECK_HEADERS([JavaVM/jni.h])
-    JAVA_CLASSPATH=/System/Library/Frameworks/JavaVM.framework/Classes/classes.jar
+    dnl JAVA_CLASSPATH=/System/Library/Frameworks/JavaVM.framework/Classes/classes.jar
     PHP_CHECK_FRAMEWORK("JavaVM", JNI_CreateJavaVM,[AC_DEFINE(HAVE_JAVA,1,[ ])])
     PHP_ADD_FRAMEWORK("JavaVM")
+    JAVA_CFLAGS="-x objective-c"
   else
     JAVA_CHECK_LIB()
     AC_DEFINE(HAVE_JAVA,1,[ ])

@@ -34,10 +34,8 @@
 #include "php_ini.h"
 #include "php_globals.h"
 
-/* #if defined(__MacOSX__) */
 #if HAVE_JAVAVM_JAVAVM_H
 #include <JavaVM/JavaVM.h>
-#define JAVALIB "libjvm.dylib"
 #define JNI_12
 #else
 #include <jni.h>
