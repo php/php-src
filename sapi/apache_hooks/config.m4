@@ -4,7 +4,8 @@ dnl
 
 AC_MSG_CHECKING(for Apache 1.x module support via DSO through APXS)
 AC_ARG_WITH(apache-hooks,
-[  --with-apache-hooks[=FILE]      Build shared Apache 1.x module. FILE is the optional
+[  --with-apache-hooks[=FILE]      
+                          EXPERIMENTAL: Build shared Apache 1.x module. FILE is the optional
                           pathname to the Apache apxs tool; defaults to "apxs".],[
   if test "$withval" = "yes"; then
     APXS=apxs
@@ -89,8 +90,9 @@ APACHE_INSTALL_FILES="\$(srcdir)/sapi/apache_hooks/mod_php4.* sapi/apache_hooks/
 
 if test "$PHP_SAPI" != "apache_hooks"; then
 AC_MSG_CHECKING(for Apache 1.x module support)
-AC_ARG_WITH(apache,
-[  --with-apache_hooks-static[=DIR]     Build Apache 1.x module. DIR is the top-level Apache
+AC_ARG_WITH(apache-hooks-static,
+[  --with-apache-hooks-static[=DIR]     
+                          EXPERIMENTAL: Build Apache 1.x module. DIR is the top-level Apache
                           build directory, defaults to /usr/local/apache.],[
    AC_DEFINE(APACHE_HOOKS,1,[ ])
   if test "$withval" = "yes"; then
