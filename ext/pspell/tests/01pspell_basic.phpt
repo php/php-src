@@ -7,8 +7,6 @@ pspell basic tests (warning: may fail with pspell/aspell < GNU Aspell 0.50.3)
 		die("skip English dictionary is not avaliable");
 	}
 ?>
---POST--
---GET--
 --FILE--
 <?php // $Id$
 

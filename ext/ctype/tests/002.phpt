@@ -2,8 +2,6 @@
 ctype on strings
 --SKIPIF--
 <?php if (!extension_loaded("ctype")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 

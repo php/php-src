@@ -2,8 +2,6 @@
 InterBase: misc sql types (may take a while)
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

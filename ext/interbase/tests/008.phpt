@@ -5,8 +5,6 @@ InterBase: event handling
 if (PHP_OS == "WINNT") echo "skip";
 include("skipif.inc"); 
 ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

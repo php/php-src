@@ -1,7 +1,5 @@
 --TEST--
 levenshtein() function test
---POST--
---GET--
 --FILE--
 <?php 
 

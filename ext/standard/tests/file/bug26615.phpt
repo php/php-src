@@ -1,7 +1,5 @@
 --TEST--
 Bug #26615 (exec crash on long input lines)
---POST--
---GET--
 --FILE--
 <?php
 $out = array();

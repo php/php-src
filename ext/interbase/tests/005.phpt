@@ -2,8 +2,6 @@
 InterBase: transactions
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 

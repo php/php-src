@@ -2,8 +2,6 @@
 Check for gmp presence
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 echo "gmp extension is available";

@@ -6,8 +6,6 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip no symlinks on Windows');
 }
 ?>
---POST--
---GET--
 --FILE--
 <?php
 chdir(dirname(__FILE__));

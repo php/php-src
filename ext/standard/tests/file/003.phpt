@@ -1,7 +1,5 @@
 --TEST--
 is_*() and file_exists() return values are boolean.
---POST--
---GET--
 --FILE--
 <?php
 

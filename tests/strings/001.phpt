@@ -1,7 +1,5 @@
 --TEST--
 String functions
---POST--
---GET--
 --FILE--
 <?php 
 

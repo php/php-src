@@ -1,7 +1,5 @@
 --TEST--
 SHA1
---POST--
---GET--
 --FILE--
 <?php
 function test($str) {

@@ -5,8 +5,6 @@ Test pcntl wait functionality
 	if (!extension_loaded("pcntl")) print "skip"; 
 	if (!function_exists("posix_kill")) print "skip posix_kill() not avaliable";
 ?>
---POST--
---GET--
 --FILE--
 <?php 
 function test_exit_waits(){

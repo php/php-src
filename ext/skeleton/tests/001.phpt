@@ -2,9 +2,6 @@
 Check for extname presence
 --SKIPIF--
 <?php if (!extension_loaded("extname")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php 
 echo "extname extension is available";

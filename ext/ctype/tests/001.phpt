@@ -2,8 +2,6 @@
 ctype on integers
 --SKIPIF--
 <?php if (!extension_loaded("ctype")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
   setlocale(LC_ALL,"C"); 

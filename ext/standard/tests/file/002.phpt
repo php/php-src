@@ -1,7 +1,5 @@
 --TEST--
 File/Stream functions
---POST--
---GET--
 --FILE--
 <?php
 

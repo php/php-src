@@ -2,8 +2,6 @@
 Test for blowfish compatibility
 --SKIPIF--
 <?php if (!extension_loaded("mcrypt")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
 function hex2bin($data) {

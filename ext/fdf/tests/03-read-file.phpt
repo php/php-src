@@ -2,8 +2,6 @@
 FDF read file
 --SKIPIF--
 <?php if (!extension_loaded("fdf")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
 $fdf = fdf_open("ext/fdf/tests/simple.fdf");

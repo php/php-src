@@ -1,7 +1,5 @@
 --TEST--
 Simple math tests
---POST--
---GET--
 --FILE--
 <?php // $Id$
 

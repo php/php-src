@@ -2,8 +2,6 @@
 Check for number base recognition
 --SKIPIF--
 <?php if (!extension_loaded("gmp")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
         /* Binary */

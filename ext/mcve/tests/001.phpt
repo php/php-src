@@ -2,8 +2,6 @@
 Check for mcve presence
 --SKIPIF--
 <?php if (!extension_loaded("mcve")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 echo "mcve extension is available";
