@@ -109,7 +109,7 @@ STATUS:              Experimental
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           interbase
-PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
+PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>
 MAINTENANCE:         Odd Fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           pgsql
-PRIMARY MAINTAINER:  Jouni Ahto <jah@mork.net>
+PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
