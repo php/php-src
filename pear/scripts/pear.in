@@ -1,55 +1,58 @@
-#!@prefix@/bin/php -q
+#!@prefix@/bin/php -Cq
 <?php // -*- C++ -*-
 
 require_once "PEAR.php";
 require_once "PEAR/Installer.php";
+require_once "PEAR/Packager.php";
+require_once "Console/Getopt.php";
 
 error_reporting(7);
 
 $stderr = fopen("php://stderr", "w");
 
-$debug = 1;
-$optind = 1;
+PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, "usage");
 
-while ($optind < $argc && $argv[$optind][0] == "-") {
-    switch (substr($argv[$optind], 1)) {
-        case "v":
-            $debug = (int)$argv[++$optind];
-            break;
-        case "-":
-            $optind++;
-            break 2;
-        default:
-            fputs($stderr, "Unknown option: $argv[$optind]\n");
-            /* fall through */
-        case "?":
-        case "h":
-            usage();
-            break;
-    }
-    
-    $optind++;
+$options = Console_Getopt::getopt($argv, "hv:?");
+if (PEAR::isError($options)) {
+    usage($options);
 }
 
-$pkgfile = $argv[$optind];
+PEAR::setErrorHandling(PEAR_ERROR_PRINT);
 
-if (!$pkgfile) {
-    usage();
+$command = $options[1][1];
+switch ($command) {
+    case "install":
+        $package = $options[1][2];
+        $installer =& new PEAR_Installer();
+        $installer->Install($package);
+        print "install ok\n";
+        break;
+    case "package":
+        $pkginfofile = $options[1][2];
+        $packager =& new PEAR_Packager();
+        $packager->Package($pkginfofile);
+        print "package ok\n";
+        break;
+    default:
+        usage();
+        break;
 }
 
-$p = new PEAR_Installer();
-$p->debug = $debug;
-$p->install($pkgfile);
-
-function usage()
+function usage($obj = null)
 {
     global $stderr;
+    if ($obj !== null) {
+        fputs($stderr, $obj->getMessage());
+    }
     fputs($stderr,
-          "Usage: pear [-v n] [-h] <package>\n".
+          "Usage: pear [-v n] [-h] command <parameters>\n".
           "Options:\n".
           "     -v   set verbosity level to <n> (0-2, default 1)\n".
-          "     -h   display help/usage (this message)\n");
-    fclose($stderr);
+          "     -h   display help/usage (this message)\n".
+          "Commands:\n".
+          "   install <package file>\n".
+          "   package [package info file]\n".
+          "\n");
     exit;
 }
 

@@ -399,7 +399,11 @@ class PEAR_Error
             trigger_error($this->getMessage(), $this->level);
         }
         if ($this->mode & PEAR_ERROR_DIE) {
-            die($this->getMessage());
+            $msg = $this->getMessage();
+            if (substr($msg, -1) != "\n") {
+                $msg .= "\n";
+            }
+            die($msg);
         }
         if ($this->mode & PEAR_ERROR_CALLBACK) {
             if (is_string($this->callback) && strlen($this->callback)) {
