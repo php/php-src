@@ -909,7 +909,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	va_start(args, format);
 
 	/* if we don't have a user defined error handler */
-	if (!EG(user_error_handler)) {
+	if (!EG(user_error_handler)
+		|| !(EG(user_error_handler_error_reporting) & type)) {
 		zend_error_cb(type, error_filename, error_lineno, format, args);
 	} else switch (type) {
 		case E_ERROR:
