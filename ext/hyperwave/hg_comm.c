@@ -42,6 +42,7 @@
 # include <netdb.h>
 # include <unistd.h>
 # include <sys/param.h>
+# include <arpa/inet.h>
 #endif
 #include <fcntl.h>
 #include <errno.h>
@@ -5034,10 +5035,8 @@ int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, in
 	 
 	switch(hostptr->h_addrtype) {
 		struct in_addr *ptr1;
-		char *ptr;
 		case AF_INET:
-			ptr = hostptr->h_addr_list[0];
-			ptr1 = (struct in_addr *) ptr;
+			ptr1 = (struct in_addr *) hostptr->h_addr_list[0];
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
@@ -5221,10 +5220,8 @@ int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str
 	 
 	switch(hostptr->h_addrtype) {
 		struct in_addr *ptr1;
-		char *ptr;
 		case AF_INET:
-			ptr = hostptr->h_addr_list[0];
-			ptr1 = (struct in_addr *) ptr;
+			ptr1 = (struct in_addr *) hostptr->h_addr_list[0];
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
@@ -5403,10 +5400,8 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	 
 	switch(hostptr->h_addrtype) {
 		struct in_addr *ptr1;
-		char *ptr;
 		case AF_INET:
-			ptr = hostptr->h_addr_list[0];
-			ptr1 = (struct in_addr *) ptr;
+			ptr1 = (struct in_addr *) hostptr->h_addr_list[0];
 			hostip = inet_ntoa(*ptr1);
 			break;
 		default:
