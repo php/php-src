@@ -829,7 +829,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 				result->type = IS_STRING;
 			} else {
 				php_error(E_WARNING,"MS SQL:  column %d has unknown data type (%d)", offset, coltype(offset));
-				ZVAL_RESET(result);
+				ZVAL_BOOL(result, 0);
 			}
 		}
 	}
@@ -871,7 +871,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		result->type = IS_STRING;
 	} else {
 		php_error(E_WARNING,"MS SQL:  column %d has unknown data type (%d)", offset, coltype(offset));
-		ZVAL_RESET(result);
+		ZVAL_BOOL(result, 0);
 	}
 }
 

@@ -1321,7 +1321,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if(!zend_is_true(return_value))
 		{
-			ZVAL_RESET(object);
+			ZVAL_BOOL(object, 0);
 			return;
 		}
 		ALLOC_ZVAL(object_handle);
