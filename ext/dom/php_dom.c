@@ -830,7 +830,7 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	
 	intern = dom_objects_set_class(class_type TSRMLS_CC);
 
-	retval.handle = zend_objects_store_put(intern, NULL, dom_objects_free_storage, dom_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 
@@ -847,7 +847,7 @@ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	
 	intern = dom_objects_set_class(class_type TSRMLS_CC);
 
-	retval.handle = zend_objects_store_put(intern, NULL, dom_xpath_objects_free_storage, dom_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_xpath_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 
@@ -900,7 +900,7 @@ zend_object_value dom_nnodemap_objects_new(zend_class_entry *class_type TSRMLS_D
 	objmap->local = NULL;
 	objmap->ns = NULL;
 
-	retval.handle = zend_objects_store_put(intern, NULL, dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t)dom_nnodemap_objects_free_storage, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 
