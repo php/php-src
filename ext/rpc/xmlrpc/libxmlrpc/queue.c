@@ -476,7 +476,7 @@ void *Q_Next(queue *q)
    if(!q)
       return NULL;
 
-   if(q->cursor->next == NULL)
+   if(!q->cursor || q->cursor->next == NULL)
       return NULL;
 
    q->cursor = (node *)q->cursor->next;

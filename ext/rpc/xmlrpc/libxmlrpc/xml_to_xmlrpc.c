@@ -82,7 +82,8 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
             XMLRPC_AddValueToVector(current_val, xNextVal);
             iter = (xml_element*)Q_Next(&el->children);
          }
-      } else if (!strcmp(el->name, ELEM_STRUCT)) {
+		}
+		else if (!strcmp(el->name, ELEM_STRUCT)) {
          xml_element* iter = (xml_element*)Q_Head(&el->children);
          XMLRPC_SetIsVector(current_val, xmlrpc_vector_struct);
 
@@ -92,36 +93,46 @@ XMLRPC_VALUE xml_element_to_XMLRPC_REQUEST_worker(XMLRPC_REQUEST request, XMLRPC
             XMLRPC_AddValueToVector(current_val, xNextVal);
             iter = (xml_element*)Q_Next(&el->children);
          }
-      } else if (!strcmp(el->name, ELEM_STRING) || 
+		}
+		else if (!strcmp(el->name, ELEM_STRING) || 
                  (!strcmp(el->name, ELEM_VALUE) && Q_Size(&el->children) == 0)) {
          XMLRPC_SetValueString(current_val, el->text.str, el->text.len);
-      } else if (!strcmp(el->name, ELEM_NAME)) {
+		}
+		else if (!strcmp(el->name, ELEM_NAME)) {
          XMLRPC_SetValueID_Case(current_val, el->text.str, 0, xmlrpc_case_exact);
-      } else if (!strcmp(el->name, ELEM_INT) || !strcmp(el->name, ELEM_I4)) {
+		}
+		else if (!strcmp(el->name, ELEM_INT) || !strcmp(el->name, ELEM_I4)) {
          XMLRPC_SetValueInt(current_val, atoi(el->text.str));
-      } else if (!strcmp(el->name, ELEM_BOOLEAN)) {
+		}
+		else if (!strcmp(el->name, ELEM_BOOLEAN)) {
          XMLRPC_SetValueBoolean(current_val, atoi(el->text.str));
-      } else if (!strcmp(el->name, ELEM_DOUBLE)) {
+		}
+		else if (!strcmp(el->name, ELEM_DOUBLE)) {
          XMLRPC_SetValueDouble(current_val, atof(el->text.str));
-      } else if (!strcmp(el->name, ELEM_DATETIME)) {
+		}
+		else if (!strcmp(el->name, ELEM_DATETIME)) {
          XMLRPC_SetValueDateTime_ISO8601(current_val, el->text.str);
-      } else if (!strcmp(el->name, ELEM_BASE64)) {
+		}
+		else if (!strcmp(el->name, ELEM_BASE64)) {
          struct buffer_st buf;
          base64_decode(&buf, el->text.str, el->text.len);
          XMLRPC_SetValueBase64(current_val, buf.data, buf.offset);
          buffer_delete(&buf);
-      } else {
+		}
+		else {
          xml_element* iter;
 
          if (!strcmp(el->name, ELEM_METHODCALL)) {
             if (request) {
                XMLRPC_RequestSetRequestType(request, xmlrpc_request_call);
             }
-         } else if (!strcmp(el->name, ELEM_METHODRESPONSE)) {
+			}
+			else if (!strcmp(el->name, ELEM_METHODRESPONSE)) {
             if (request) {
                XMLRPC_RequestSetRequestType(request, xmlrpc_request_response);
             }
-         } else if (!strcmp(el->name, ELEM_METHODNAME)) {
+			}
+			else if (!strcmp(el->name, ELEM_METHODNAME)) {
             if (request) {
                XMLRPC_RequestSetMethodName(request, el->text.str);
             }
@@ -173,8 +184,10 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             Q_PushTail(&elem_val->children, next_el);
          }
          elem_val->name = strdup(bIsFault ? ELEM_FAULT : ELEM_PARAMS);
-      } else {
+		}
+		else {
          switch (type) {
+			case xmlrpc_empty: //  treat null value as empty string in xmlrpc.
          case xmlrpc_string:
             elem_val->name = strdup(ELEM_STRING);
             simplestring_addn(&elem_val->text, XMLRPC_GetValueString(node), XMLRPC_GetValueStringLen(node));
@@ -270,7 +283,8 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             /* yet another hack for the "fault" crap */
             if (XMLRPC_VectorGetValueWithID(node, ELEM_FAULTCODE)) {
                root = value;
-            } else {
+				}
+				else {
                xml_element* param = xml_elem_new();
                param->name = strdup(ELEM_PARAM);
 
@@ -279,7 +293,8 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
                root = param;
             }
             Q_PushTail(&value->children, elem_val);
-         } else if (vtype == xmlrpc_vector_struct || vtype == xmlrpc_vector_mixed) {
+			}
+			else if (vtype == xmlrpc_vector_struct || vtype == xmlrpc_vector_mixed) {
             xml_element* member = xml_elem_new();
             xml_element* name = xml_elem_new();
             xml_element* value = xml_elem_new();
@@ -295,7 +310,8 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             Q_PushTail(&value->children, elem_val);
 
             root = member;
-         } else if (vtype == xmlrpc_vector_array) {
+			}
+			else if (vtype == xmlrpc_vector_array) {
             xml_element* value = xml_elem_new();
 
             value->name = strdup(ELEM_VALUE);
@@ -303,10 +319,12 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
             Q_PushTail(&value->children, elem_val);
 
             root = value;
-         } else if (vtype == xmlrpc_vector_none) {
+			}
+			else if (vtype == xmlrpc_vector_none) {
             /* no parent.  non-op */
             root = elem_val;
-         } else {
+			}
+			else {
             xml_element* value = xml_elem_new();
 
             value->name = strdup(ELEM_VALUE);
@@ -335,13 +353,15 @@ xml_element* XMLRPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 
       if (request_type == xmlrpc_request_call) {
          pStr = ELEM_METHODCALL;
-      } else if (request_type == xmlrpc_request_response) {
+		}
+		else if (request_type == xmlrpc_request_response) {
          pStr = ELEM_METHODRESPONSE;
       }
       if (pStr) {
          wrapper->name = strdup(pStr);
       }
 
+		if(request_type == xmlrpc_request_call) {
       pStr = XMLRPC_RequestGetMethodName(request);
 
       if (pStr) {
@@ -350,10 +370,12 @@ xml_element* XMLRPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
          simplestring_add(&method->text, pStr);
          Q_PushTail(&wrapper->children, method);
       }
+		}
       if (xParams) {
          Q_PushTail(&wrapper->children, 
                     XMLRPC_to_xml_element_worker(NULL, XMLRPC_RequestGetData(request), XMLRPC_RequestGetRequestType(request), 0));
-      } else {
+		}
+		else {
          /* Despite the spec, the xml-rpc list folk want me to send an empty params element */
          xml_element* params = xml_elem_new();
          params->name = strdup(ELEM_PARAMS);
