@@ -39,12 +39,18 @@
 #define STR_PAD_LEFT	0
 #define STR_PAD_RIGHT	1
 #define STR_PAD_BOTH	2
+#define PHP_PATHINFO_BASENAME 0
+#define PHP_PATHINFO_DIRNAME 1
+#define PHP_PATHINFO_EXTENSION 2
 
 void register_string_constants(INIT_FUNC_ARGS)
 {
-	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("STR_PAD_RIGHT", STR_PAD_RIGHT, CONST_PERSISTENT|CONST_CS);
-	REGISTER_LONG_CONSTANT("STR_PAD_BOTH", STR_PAD_BOTH, CONST_PERSISTENT|CONST_CS);
+	REGISTER_LONG_CONSTANT("STR_PAD_LEFT", STR_PAD_LEFT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_PAD_RIGHT", STR_PAD_RIGHT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STR_PAD_BOTH", STR_PAD_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PATHINFO_BASENAME", PHP_PATHINFO_BASENAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PATHINFO_DIRNAME", PHP_PATHINFO_DIRNAME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PATHINFO_EXTENSION", PHP_PATHINFO_EXTENSION, CONST_CS | CONST_PERSISTENT);
 }
 
 int php_tag_find(char *tag, int len, char *set);
@@ -702,7 +708,7 @@ PHP_FUNCTION(dirname)
 	zval **str;
 	char *ret;
 	
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str)) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -717,6 +723,67 @@ PHP_FUNCTION(dirname)
 }
 /* }}} */
 
+/* {{{ proto array pathinfo(string path)
+   Return information about a certain string */
+PHP_FUNCTION(pathinfo)
+{
+	zval **str, **uopt, *tmp;
+	char *ret;
+	int argc = ZEND_NUM_ARGS(), opt, len;
+	
+	if (argc < 1 || argc > 2 ||
+	    zend_get_parameters_ex(argc, &str, &uopt) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(str);
+	len = Z_STRLEN_PP(str);
+	
+	if (argc > 1) {
+		convert_to_long_ex(uopt);
+		opt = Z_LVAL_PP(uopt);
+	}
+	
+	MAKE_STD_ZVAL(tmp);
+	array_init(tmp);
+	
+	if (opt == PHP_PATHINFO_BASENAME || argc < 2) {
+		ret = estrndup(Z_STRVAL_PP(str), len);
+		php_dirname(ret, len);
+		if (*ret)
+			add_assoc_string(tmp, "basename", ret, 1);
+		efree(ret);
+	}
+	
+	if (opt == PHP_PATHINFO_EXTENSION || argc < 2) {
+		char *p;
+		int idx;
+
+		ret = estrndup(Z_STRVAL_PP(str), len);
+		p = strrchr(ret, '.');
+		if (*p) {
+			idx = p - ret;
+			add_assoc_stringl(tmp, "extension", ret + idx + 1, len - idx - 1, 1);
+		}
+		efree(ret);
+	}
+	
+	if (opt == PHP_PATHINFO_DIRNAME || argc < 2) {
+		ret = php_basename(Z_STRVAL_PP(str), len);
+		add_assoc_string(tmp, "dirname", ret, 1);
+	}			
+	
+	if (zend_hash_num_elements(Z_ARRVAL_P(tmp)) == 1) {
+		zval **element;
+		zend_hash_get_current_data(Z_ARRVAL_P(tmp), (void **)&element);
+		*return_value = **element;
+	} else {
+		array_init(return_value);
+		*return_value = *tmp;
+	}
+
+	zval_copy_ctor(return_value);
+}
+/* }}} */
 
 /* case insensitve strstr */
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
