@@ -9,7 +9,7 @@ PHP_ARG_WITH(swf, for libswf support,
 
 if test "$PHP_SWF" != "no"; then
   for i in /usr/local /usr $PHP_SWF; do
-    if test -r $i/lib/libswf.a; then
+    if test -r $i/libswf.a; then
       SWF_DIR=$i
     fi
   done
@@ -21,7 +21,7 @@ if test "$PHP_SWF" != "no"; then
   AC_ADD_INCLUDE($SWF_DIR/include)
 
   PHP_SUBST(SWF_SHARED_LIBADD)
-  AC_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR/lib, SWF_SHARED_LIBADD)
+  AC_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR, SWF_SHARED_LIBADD)
   AC_DEFINE(HAVE_SWF,1,[ ])
 
   PHP_EXTENSION(swf, $ext_shared)
