@@ -108,7 +108,7 @@ zend_module_entry apache_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-/* {{{ proto bool string apache_child_terminate(void)
+/* {{{ proto bool apache_child_terminate(void)
    Terminate apache process after this request */
 PHP_FUNCTION(apache_child_terminate)
 {
