@@ -796,7 +796,7 @@ PHP_FUNCTION(pathinfo)
 		efree(ret);
 	}
 	
-	if (argc < 2 || opt == PHP_PATHINFO_BASENAME) 
+	if (argc < 2 || opt == PHP_PATHINFO_BASENAME) {
 		ret = php_basename(Z_STRVAL_PP(path), len);
 		add_assoc_string(tmp, "basename", ret, 0);
 	}			
