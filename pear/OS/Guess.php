@@ -79,7 +79,7 @@ class OS_Guess
     var $release;
     var $extra;
 
-    function OS_Guess()
+    function OS_Guess($uname = null)
     {
         static $sysmap = array(
             'HP-UX' => 'hpux',
@@ -90,7 +90,9 @@ class OS_Guess
             'i586' => 'i386',
             'i686' => 'i386',
         );
-        $uname = php_uname();
+        if ($uname === null) {
+            $uname = php_uname();
+        }
         $parts = preg_split('/\s+/', trim($uname));
         $n = count($parts);
 
