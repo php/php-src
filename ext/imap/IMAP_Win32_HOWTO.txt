@@ -5,8 +5,7 @@ Note 1:  You *must* use NT's cmd.exe for this job;  4NT.exe will NOT work proper
 Note 2:  During the entire build process, you can ignore warnings about
          inconsistent DLL linkage.
 
-- Open IMAP into a brother directory to php4.  Rename this directory
-  to 'IMAP'.
+- Open IMAP under php_build.  Rename this directory to 'IMAP'.
 - Change to the IMAP directory.
 - Edit .\src\osdep\nt\makefile.nt:
   Search for '/MT', and change it to '/MD'.
@@ -21,7 +20,7 @@ Note 2:  During the entire build process, you can ignore warnings about
 
 At this point, cclient.lib should be generated.
 
-Start Visual Studio, load php_modules.dsw, select the LDAP projects, and build
+Start Visual Studio, load php_modules.dsw, select the IMAP projects, and build
 it.
 
 
