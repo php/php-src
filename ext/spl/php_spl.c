@@ -29,6 +29,7 @@
 #include "spl_array.h"
 #include "spl_directory.h"
 #include "spl_iterators.h"
+#include "spl_sxe.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -85,6 +86,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_array)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
@@ -175,9 +177,13 @@ PHP_FUNCTION(spl_classes)
 	SPL_ADD_CLASS(FilterIterator);
 	SPL_ADD_CLASS(LimitIterator);
 	SPL_ADD_CLASS(ParentIterator);
+	SPL_ADD_CLASS(RecursiveDirectoryIterator);
 	SPL_ADD_CLASS(RecursiveIterator);
 	SPL_ADD_CLASS(RecursiveIteratorIterator);
 	SPL_ADD_CLASS(SeekableIterator);
+	if (spl_ce_SimpleXMLIterator) {
+	SPL_ADD_CLASS(SimpleXMLIterator);
+	}
 }
 /* }}} */
 
