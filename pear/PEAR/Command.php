@@ -88,7 +88,7 @@ $GLOBALS['_PEAR_Command_uiobject'] = null;
  *
  * - DON'T USE HTML! The text you return will be used from both Gtk,
  *   web and command-line interfaces, so for now, keep everything to
- *   plain text.  There may be a common (XML) markup format later.
+ *   plain text.
  *
  * - DON'T USE EXIT OR DIE! Always use pear errors.  From static
  *   classes do PEAR::raiseError(), from other classes do
