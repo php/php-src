@@ -12,7 +12,7 @@ Bug #30967 testcase (properties)
 	class mysql2 extends mysql1 {
 	}
 
-	$mysql = new mysql2($host, "root", "", "test");
+	$mysql = new mysql2($host, $user, $passwd, "test");
 
 	$mysql->query("THIS DOES NOT WORK");
 	printf("%d\n", $mysql->errno);
