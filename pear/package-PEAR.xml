@@ -31,50 +31,13 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0b1</version>
+    <version>1.0b2</version>
     <state>stable</state>
-    <date>2002-10-12</date>
+    <date>2002-11-11</date>
     <notes>
 New Features, Installer:
-* new command: "pear makerpm"
-* new command: "pear search"
-* new command: "pear upgrade-all"
-* new command: "pear config-help"
-* new command: "pear sign"
-* Windows support for "pear build" (requires
-  msdev)
-* new dependency type: "zend"
-* XML-RPC results may now be cached (see
-  cache_dir and cache_ttl config)
-* HTTP proxy authorization support
-* install/upgrade install-root support
-
-Bugfixes, Installer:
-* fix for XML-RPC bug that made some remote
-  commands fail
-* fix problems under Windows with
-  DIRECTORY_SEPARATOR
-* lots of other minor fixes
-* --force option did not work for "pear install
-  Package"
-* http downloader used "4.2.1" rather than
-  "PHP/4.2.1" as user agent
-* bending over a little more to figure out how
-  PHP is installed
-* "platform" file attribute was not included
-  during "pear package"
-
-New Features, PEAR Library:
-* added PEAR::loadExtension($ext)
-* added PEAR::delExpect()
-* System::mkTemp() now cleans up at shutdown
-* defined PEAR_ZE2 constant (boolean)
-* added PEAR::throwError() with a simpler API
-  than raiseError()
-
-Bugfixes, PEAR Library:
-* ZE2 compatibility fixes
-* use getenv() as fallback for $_ENV
+* installer aborts failed installs nicely (using
+  file "transactions")
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -125,6 +88,58 @@ Bugfixes, PEAR Library:
     </deps>
   </release>
   <changelog>
+   <release>
+     <version>1.0b1</version>
+     <state>stable</state>
+     <date>2002-10-12</date>
+     <notes>
+New Features, Installer:
+* new command: "pear makerpm"
+* new command: "pear search"
+* new command: "pear upgrade-all"
+* new command: "pear config-help"
+* new command: "pear sign"
+* Windows support for "pear build" (requires
+  msdev)
+* new dependency type: "zend"
+* XML-RPC results may now be cached (see
+  cache_dir and cache_ttl config)
+* HTTP proxy authorization support
+* install/upgrade install-root support
+
+Bugfixes, Installer:
+* fix for XML-RPC bug that made some remote
+  commands fail
+* fix problems under Windows with
+  DIRECTORY_SEPARATOR
+* lots of other minor fixes
+* --force option did not work for "pear install
+  Package"
+* http downloader used "4.2.1" rather than
+  "PHP/4.2.1" as user agent
+* bending over a little more to figure out how
+  PHP is installed
+* "platform" file attribute was not included
+  during "pear package"
+
+New Features, PEAR Library:
+* added PEAR::loadExtension($ext)
+* added PEAR::delExpect()
+* System::mkTemp() now cleans up at shutdown
+* defined PEAR_ZE2 constant (boolean)
+* added PEAR::throwError() with a simpler API
+  than raiseError()
+
+Bugfixes, PEAR Library:
+* ZE2 compatibility fixes
+* use getenv() as fallback for $_ENV
+</notes>
+     <deps>
+       <dep type="php" rel="ge" version="4.1"/>
+       <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
+       <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+     </deps>
+    </release>
     <release>
       <version>0.90</version>
       <state>beta</state>

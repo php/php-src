@@ -87,9 +87,17 @@ class PEAR_Installer extends PEAR_Common
     var $registry;
 
     /** List of file transactions queued for an install/upgrade/uninstall.
+     *
+     *  Format:
+     *    array(
+     *      0 => array("rename => array("from-file", "to-file")),
+     *      1 => array("delete" => array("file-to-delete")),
+     *      ...
+     *    )
+     *
      * @var array
      */
-    var $transactions = array();
+    var $file_operations = array();
 
     // }}}
 
@@ -104,7 +112,7 @@ class PEAR_Installer extends PEAR_Common
      */
     function PEAR_Installer(&$ui)
     {
-        $this->PEAR_Common();
+        parent::PEAR_Common();
         $this->setFrontendObject($ui);
         $this->debug = $this->config->get('verbose');
         $this->registry = &new PEAR_Registry($this->config->get('php_dir'));
@@ -156,6 +164,7 @@ class PEAR_Installer extends PEAR_Common
     function _installFile($file, $atts, $tmp_path)
     {
         static $os;
+        ini_set("track_errors", 1);
         if (isset($atts['platform'])) {
             if (empty($os)) {
                 include_once "OS/Guess.php";
@@ -188,7 +197,6 @@ class PEAR_Installer extends PEAR_Common
                 $this->source_files++;
                 return;
             default:
-                // Files with no role will end in "/"
                 return $this->raiseError("Invalid role `$atts[role]' for file $file");
         }
         if (!empty($atts['baseinstalldir'])) {
@@ -210,8 +218,9 @@ class PEAR_Installer extends PEAR_Common
                                                     DIRECTORY_SEPARATOR,
                                                     array($dest_file, $orig_file));
         $installed_as = $dest_file;
-        $dest_file = $this->_prependPath($dest_file, $this->installroot);
-        $dest_dir = dirname($dest_file);
+        $final_dest_file = $this->_prependPath($dest_file, $this->installroot);
+        $dest_dir = dirname($final_dest_file);
+        $dest_file = $dest_dir . DIRECTORY_SEPARATOR . '.tmp' . basename($final_dest_file);
         if (!@is_dir($dest_dir)) {
             if (!$this->mkDirHier($dest_dir)) {
                 return $this->raiseError("failed to mkdir $dest_dir",
@@ -255,23 +264,26 @@ class PEAR_Installer extends PEAR_Common
                     $subst_to[] = $to;
                 }
             }
-            $this->log(3, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
+            $this->log(3, "doing ".sizeof($subst_from)." substitution(s) for $final_dest_file");
             if (sizeof($subst_from)) {
                 $contents = str_replace($subst_from, $subst_to, $contents);
             }
             $wp = @fopen($dest_file, "w");
             if (!is_resource($wp)) {
-                return $this->raiseError("failed to create $dest_file",
+                return $this->raiseError("failed to create $dest_file: $php_errormsg",
                                          PEAR_INSTALLER_FAILED);
             }
-            fwrite($wp, $contents);
+            if (!fwrite($wp, $contents)) {
+                return $this->raiseError("failed writing to $dest_file: $php_errormsg",
+                                         PEAR_INSTALLER_FAILED);
+            }
             fclose($wp);
         }
         if (isset($md5sum)) {
             if ($md5sum == $atts['md5sum']) {
-                $this->log(3, "md5sum ok: $dest_file");
+                $this->log(3, "md5sum ok: $final_dest_file");
             } else {
-                $this->log(0, "warning : bad md5sum for file $dest_file");
+                $this->log(0, "warning : bad md5sum for file $final_dest_file");
             }
         }
         if (!OS_WINDOWS) {
@@ -281,16 +293,126 @@ class PEAR_Installer extends PEAR_Common
             } else {
                 $mode = 0666 & ~(int)octdec($this->config->get('umask'));
             }
+            $this->addFileOperation("chmod", array($mode, $dest_file));
             if (!@chmod($dest_file, $mode)) {
                 $this->log(0, "failed to change mode of $dest_file");
             }
         }
+        $this->addFileOperation("rename", array($dest_file, $final_dest_file));
 
+        // XXX SHOULD BE DONE ONLY AFTER COMMIT
         // Store the full path where the file was installed for easy unistall
         $this->pkginfo['filelist'][$file]['installed_as'] = $installed_as;
 
-        $this->log(2, "installed: $dest_file");
+        //$this->log(2, "installed: $dest_file");
         return PEAR_INSTALLER_OK;
+    }
+
+    // }}}
+    // {{{ addFileOperation()
+
+    function addFileOperation($type, $data)
+    {
+        $this->log(3, "adding to transaction: $type " . implode(" ", $data));
+        $this->file_operations[] = array($type, $data);
+    }
+
+    // }}}
+    // {{{ startFileTransaction()
+
+    function startFileTransaction($revert_in_case = false)
+    {
+        if (count($this->file_operations) && $revert_in_case) {
+            $this->revertFileTransaction();
+        }
+        $this->file_operations = array();
+    }
+
+    // }}}
+    // {{{ commitFileTransaction()
+
+    function commitFileTransaction()
+    {
+        $n = count($this->file_operations);
+        $this->log(2, "about to commit $n file operations");
+        // first, check permissions and such manually
+        $errors = array();
+        foreach ($this->file_operations as $tr) {
+            list($type, $data) = $tr;
+            switch ($type) {
+                case 'rename':
+                    // check that dest dir. is writable
+                    if (!is_writable(dirname($data[1]))) {
+                        $errors[] = "permission denied ($type): $data[1]";
+                    }
+                    break;
+                case 'chmod':
+                    // check that file is writable
+                    if (!is_writable($data[1])) {
+                        $errors[] = "permission denied ($type): $data[1]";
+                    }
+                    break;
+                case 'delete':
+                    // check that directory is writable
+                    if (!is_writable(dirname($data[0]))) {
+                        $errors[] = "permission denied ($type): $data[0]";
+                    }
+                    break;
+            }
+
+        }
+        $m = sizeof($errors);
+        if ($m > 0) {
+            foreach ($errors as $error) {
+                $this->log(1, $error);
+            }
+            return false;
+        }
+        // really commit the transaction
+        foreach ($this->file_operations as $tr) {
+            list($type, $data) = $tr;
+            switch ($type) {
+                case 'rename':
+                    @rename($data[0], $data[1]);
+                    break;
+                case 'chmod':
+                    @chmod($data[0], $data[1]);
+                    break;
+                case 'delete':
+                    @unlink($data[0]);
+                    break;
+            }
+        }
+        $this->log(2, "successfully commited $n file operations");
+        $this->file_operations = array();
+        return true;
+    }
+
+    // }}}
+    // {{{ revertFileTransaction()
+
+    function revertFileTransaction()
+    {
+        $n = count($this->file_operations);
+        $this->log(2, "reverting $n file operations");
+        foreach ($this->file_operations as $tr) {
+            list($type, $data) = $tr;
+            switch ($type) {
+                case 'rename':
+                    @unlink($data[0]);
+                    $this->log(3, "+ rm $data[0]");
+                    break;
+                case 'mkdir':
+                    @rmdir($data[0]);
+                    $this->log(3, "+ rmdir $data[0]");
+                    break;
+                case 'chmod':
+                    break;
+                case 'delete':
+                    break;
+            }
+        }
+        $this->file_operations = array();
     }
 
     // }}}
@@ -308,6 +430,15 @@ class PEAR_Installer extends PEAR_Common
             $package .= '?uncompress=yes';
         }
         return $package;
+    }
+
+    // }}}
+    // {{{ mkDirHier($dir)
+
+    function mkDirHier($dir)
+    {
+        $this->addFileOperation('mkdir', $dir);
+        return parent::mkDirHier($dir);
     }
 
     // }}}
@@ -550,6 +681,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->popExpect();
                 if (PEAR::isError($res)) {
                     if (empty($options['force'])) {
+                        $this->revertFileTransaction();
                         return $this->raiseError($res);
                     } else {
                         $this->log(0, "Warning: " . $res->getMessage());
@@ -567,6 +699,7 @@ class PEAR_Installer extends PEAR_Common
                 $bob->debug = $this->debug;
                 $built = $bob->build($descfile, array(&$this, '_buildCallback'));
                 if (PEAR::isError($built)) {
+                    $this->revertFileTransaction();
                     return $built;
                 }
                 foreach ($built as $ext) {
@@ -576,6 +709,7 @@ class PEAR_Installer extends PEAR_Common
                     $this->log(3, "+ cp $ext[file] ext_dir");
                     $copyto = $this->_prependPath($dest, $this->installroot);
                     if (!@copy($ext['file'], $copyto)) {
+                        $this->revertFileTransaction();
                         return $this->raiseError("failed to copy $bn to $copyto");
                     }
                     $pkginfo['filelist'][$bn] = array(
@@ -587,6 +721,11 @@ class PEAR_Installer extends PEAR_Common
                         );
                 }
             }
+        }
+
+        if (!$this->commitFileTransaction()) {
+            $this->revertFileTransaction();
+            return $this->raiseError("commit failed", PEAR_INSTALLER_FAILED);
         }
 
         // Register that the package is installed -----------------------
