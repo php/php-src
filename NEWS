@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Added support for user defined 'tick' callback functions. This helps
+  emulate background processing. (Andrei)
 - Fixed problem with having $this as the XML parser object. (Andrei)
 - Internal opened_path variable now uses the Zend memory manager so that full
   paths of files won't leak on unclean shutdown (Andi)
