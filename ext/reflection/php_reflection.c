@@ -260,6 +260,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 		string_printf(str, "%s%s [ ", indent, (ce->ce_flags & ZEND_ACC_INTERFACE) ? "Interface" : "Class");
 	}
 	string_printf(str, (ce->type == ZEND_USER_CLASS) ? "<user>  " : "<internal> ");
+	if (ce->get_iterator != NULL) {
+		string_printf(str, "<iterateable> ");
+	}
 	if (ce->ce_flags & ZEND_ACC_ABSTRACT_CLASS) {
 		string_printf(str, "abstract ");
 	}
@@ -2385,6 +2388,20 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 }
 /* }}} */
 
+/* {{{ proto public bool Reflection_Class::isIterateable()
+   Returns whether this class is iterateable (can be used inside foreach) */
+ZEND_METHOD(reflection_class, isIterateable)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	METHOD_NOTSTATIC;
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	RETURN_BOOL(ce->get_iterator != NULL);
+}
+/* }}} */
+
 /* {{{ proto public static mixed Reflection_Object::export(mixed argument, [, bool return]) throws Exception
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_object, export)
@@ -2949,6 +2966,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isSubclassOf, NULL, 0)
 	ZEND_ME(reflection_class, getStaticProperties, NULL, 0)
 	ZEND_ME(reflection_class, getDefaultProperties, NULL, 0)
+	ZEND_ME(reflection_class, isIterateable, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
