@@ -381,7 +381,7 @@ sys/ipc.h \
 #endif
 ])
 
-
+PHP_FOPENCOOKIE
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl -------------------------------------------------------------------------

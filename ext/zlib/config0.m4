@@ -50,5 +50,4 @@ if test "$PHP_ZLIB" != "no" -o "$PHP_ZLIB_DIR" != "no"; then
   PHP_ADD_LIBRARY(z,, ZLIB_SHARED_LIBADD)
   PHP_ADD_INCLUDE($ZLIB_INCDIR)
 
-  PHP_FOPENCOOKIE
 fi
