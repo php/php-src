@@ -1,3 +1,49 @@
+2000-06-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/Makefile.in
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/crc32.c:
+    Add a crc32 checksum function - used by the udm_search search engine
+    and currently run through a system call.  This will speed up the udm_search
+    php frontend significantly.
+
+2000-06-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Add alloca.h check
+
+    Remove some unused header checks
+
+    * main/config.w32.h: HAVE_MEMORY_H is not used by PHP.
+
+    * ext/standard/var.c
+      ext/wddx/wddx.c: Revert earlier commit.
+
+2000-06-21  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/php_var.h
+      ext/standard/var.c
+      ext/wddx/wddx.c:
+    unserialize() and wddx_deserialize() now create an empty class if they enconter
+    a class which's code is yet unknown. this makes sessionized data retain the
+    class name of objects even if you visited pages that don't have the classes
+    code available.
+
+2000-06-21  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * pear/DB/pgsql.php
+      pear/DB.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/odbc.php:
+    Here is a brief start towards getting the DB stuff up to speed and working
+    (I need it to move forward on some stuff, and I really do want to see PEAR
+    succeed, so I'm going to work with the official code to get it working. Hope
+    that's okay). I've replaced all instances of 'use' and 'import' with
+    'include_once' (and added the .php extension where necessary). This gets my
+    short test script working. More possibly to come.
+
 2000-06-20  Zeev Suraski  <zeev@php.net>
 
     * configure.in
