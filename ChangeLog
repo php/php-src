@@ -1,3 +1,136 @@
+2002-03-24  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c:
+    Added mysql_table_name() alias for mysql_tablename()
+    Improved logic of parameter parsing code for mysql_ping
+     - made test for no arguments more explicit
+     - combined to if blocks into one if/else if block
+
+2002-03-24  Jan Lehnardt  <jan@dasmoped.net>
+
+    * tests/func/006.phpt:  - MFH
+
+    * tests/func/006.phpt:  - added basic output buffering tests
+
+2002-03-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/mime_magic/CREDITS
+      ext/mime_magic/EXPERIMENTAL
+      ext/mime_magic/config.m4
+      ext/mime_magic/mime_magic.c
+      ext/mime_magic/php_mime_magic.h:
+    1st implementation of magic-file based mime_content_type(string filename)
+
+2002-03-24  Alex Waugh  <alex@alexwaugh.com>
+
+    * sapi/webjames/config.m4: MFH
+
+    * sapi/webjames/config.m4:
+    Backslashes caused the build to fail with autoconf 2.52
+
+2002-03-24  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dio/dio.c: fix freebsd compile
+
+2002-03-24  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/mysql/php_mysql.c:
+    Fixed tiny mistake in proto (tnx to Egon for spotting it).
+
+2002-03-24  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/streams.c
+      main/user_streams.c
+      main/php_streams.h
+      ext/zlib/zlib_fopen_wrapper.c
+      ext/zlib/zlib.c
+      ext/zlib/php_zlib.h
+      ext/standard/php_fopen_wrappers.h
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/bz2/php_bz2.h
+      ext/bz2/bz2.c: Phase 1 of wrapper OO cleanup.
+
+2002-03-24  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/mysql/php_mysql.c: Fix typo in proto.
+
+2002-03-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mysql/php_mysql.c: - Fix proto
+
+2002-03-24  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+    changed prototype for mysql_real_escape_string
+
+2002-03-24  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Added support for session manager ID creation, works with patch submitted earlier
+
+2002-03-24  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h: Added mysql_ping() function.
+
+2002-03-24  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    a) ws fixed
+    b) changed mysql_list_processes, mysql_stat (zend_parse_parameters)
+    c) New functions:
+    	1) mysql_real_escape_string	this function is similar to mysql_escape_string (deprecated).
+    					it needs a mysql-connection to escape a string according to the
+    					current character set
+
+    	2) mysql_character_set_name	returns the current character set for the connection
+
+    	3) mysql_thread_id		return the pid for the current connection. This function is usefull
+    					when using mysql_list_processes
+
+2002-03-24  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/README
+      sapi/cli/php_cli.c:
+    Override max_execution_time, setting it to unlimited.
+
+2002-03-24  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * NEWS: News updates.
+
+2002-03-24  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/pspell/tests/01pspell_basic.phpt:
+     - finally MFH. sorry for the inconveniance, especially Derick ;)
+
+    * ext/pspell/tests/01pspell_basic.phpt
+      ext/pspell/.cvsignore:  - initial checkin of basic testcases for pspell
+
+2002-03-24  Zak Greant  <zak@mysql.com>
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    (PHP mysql_list_processes) Returns a pointer to a result set containing
+                               information on the processes running in the
+                               MySQL server.
+    (PHP mysql_stat) Returns a string containing information on the status
+                     of the MySQL server.
+
+2002-03-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/curl.c:
+    - MFH for bug #16232 (Patch by Alan Knowles <alan@akbkhome.com>)
+
+    * ext/curl/curl.c:
+    - Fix for bug #16232 (Patch by Alan Knowles <alan@akbkhome.com>)
+
+2002-03-24  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Registry.php: * move logic to _assertStateDir
+
 2002-03-23  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/dio/dio.c: revert out accidental code
