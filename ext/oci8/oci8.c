@@ -2765,7 +2765,7 @@ PHP_FUNCTION(ocidefinebyname)
 
 /* }}} */
 
-/* {{{ proto int ocibindbyname(int stmt, string name, mixed &var, int maxlength [, int type])
+/* {{{ proto int ocibindbyname(int stmt, string name, mixed &var, [, int maxlength] [, int type])
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
