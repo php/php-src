@@ -2082,7 +2082,7 @@ PHP_FUNCTION(domxml_node_append_sibling)
 		RETURN_FALSE;
 	}
 
-	// FIXME reverted xmlAddChildList; crashes
+	/* FIXME reverted xmlAddChildList; crashes */
 	child = xmlAddSibling(nodep, new_child);
 
 	if (NULL == child) {
