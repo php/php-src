@@ -7,7 +7,5 @@ PHP_ARG_ENABLE(dbase,whether to enable the bundled dbase library,
 
 if test "$PHP_DBASE" = "yes"; then
   AC_DEFINE(DBASE,1,[ ])
-  PHP_EXTENSION(dbase)
-else
-  AC_DEFINE(DBASE,0,[ ])
+  PHP_EXTENSION(dbase, $ext_shared)
 fi
