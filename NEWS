@@ -33,6 +33,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22308 (optimized passthru, code is now ~40 times faster). (Ilia)
 - Fixed bug #22306 (pg_lo_seek($h, 0, PGSQL_SEEK_SET) succeeds but returns false).
   (Jani)
+- Fixed bug #22301 (htmlspecialchars() crashes Apache on Tru64). (Ilia)
 - Fixed bug #22299 (gethostbyname() with non-existing domain crashed on MacOSX).
   (Jani)
 - Fixed bug #22283 (possible crash when opening relative URLs). (Ilia)
