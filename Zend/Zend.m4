@@ -62,7 +62,7 @@ dnl Checks for library functions.
 AC_FUNC_VPRINTF
 AC_FUNC_MEMCMP
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite)
+AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass)
 AC_ZEND_BROKEN_SPRINTF
 
 AC_CHECK_FUNCS(finite isfinite isinf isnan)

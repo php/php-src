@@ -19,6 +19,10 @@
 # include <sys/types.h>
 #endif
 
+#ifdef HAVE_IEEEFP_H
+# include <ieeefp.h>
+#endif
+
 #ifdef HAVE_STRING_H
 # include <string.h>
 #else
@@ -37,6 +41,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #define zend_isnan(a) isnan(a)
 #elif defined(NAN)
 #define zend_isnan(a) (((a)==NAN)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
 #else
 #define zend_isnan(a) 0
 #endif
@@ -46,6 +52,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #elif defined(INFINITY)
 /* Might not work, but is required by ISO C99 */
 #define zend_isinf(a) (((a)==INFINITY)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
 #else
 #define zend_isinf(a) 0
 #endif
