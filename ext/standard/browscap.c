@@ -61,7 +61,7 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
 PHP_FUNCTION(get_browser)
 {
 	zval **agent_name,**agent;
-	zval *found_browser_entry;
+	zval *found_browser_entry,*tmp_copy;
 	char *lookup_browser_name;
 
 	if (!INI_STR("browscap")) {
@@ -99,17 +99,15 @@ PHP_FUNCTION(get_browser)
 		}
 	}
 	
-	*return_value = **agent;
-	return_value->type = IS_OBJECT;
-	zval_copy_ctor(return_value);
-	return_value->value.obj.properties->pDestructor = ZVAL_DESTRUCTOR;
-
+	object_init(return_value);
+	zend_hash_copy(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+	
 	while (zend_hash_find((*agent)->value.obj.properties, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		zval *tmp_copy;
 
 		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
+		
 		zend_hash_merge(return_value->value.obj.properties,(*agent)->value.obj.properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *), 0);
 	}
 }
