@@ -49,7 +49,7 @@ PHP_FUNCTION(yp_master);
 PHP_FUNCTION(yp_match);
 PHP_FUNCTION(yp_first);
 PHP_FUNCTION(yp_next);
-void php3_info_yp(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINFO_FUNCTION(yp);
 
 #else
 

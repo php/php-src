@@ -42,7 +42,7 @@ zend_module_entry yp_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	php3_info_yp,
+	PHP_MINFO(yp),
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -61,7 +61,7 @@ PHP_FUNCTION(yp_get_default_domain) {
 /* {{{ proto int yp_order(string domain, string map)            
 	Returns the order number or false */
 PHP_FUNCTION(yp_order) {
-	pval *domain, *map;
+	pval **domain, **map;
 
 #if SOLARIS_YP
 	unsigned long outval;
@@ -69,14 +69,14 @@ PHP_FUNCTION(yp_order) {
       int outval;
 #endif
 
-	if((ARG_COUNT(ht) != 2) || (getParameters(ht,2,&domain,&map) == FAILURE)) {
+	if((ARG_COUNT(ht) != 2) || getParametersEx(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(domain);
-	convert_to_string(map);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(map);
 
-	if(yp_order(domain->value.str.val,map->value.str.val,&outval)) {
+	if(yp_order((*domain)->value.str.val,(*map)->value.str.val,&outval)) {
 		RETURN_FALSE;
 	}
 
@@ -87,17 +87,17 @@ PHP_FUNCTION(yp_order) {
 /* {{{ proto string yp_master(string domain, string map)
 	Returns the machine name of the master */
 PHP_FUNCTION(yp_master) {
-	pval *domain, *map;
+	pval **domain, **map;
 	char *outname;
 
-	if((ARG_COUNT(ht) != 2) || (getParameters(ht,2,&domain,&map) == FAILURE)) {
+	if((ARG_COUNT(ht) != 2) || getParametersEx(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(domain);
-	convert_to_string(map);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(map);
 
-	if(yp_master(domain->value.str.val,map->value.str.val,&outname)) {
+	if(yp_master((*domain)->value.str.val,(*map)->value.str.val,&outname)) {
 		RETURN_FALSE;
 	}
 
@@ -108,19 +108,19 @@ PHP_FUNCTION(yp_master) {
 /* {{{ proto string yp_match(string domain, string map, string key)
 	Returns the matched line or false */
 PHP_FUNCTION(yp_match) {
-	pval *domain, *map, *key;
+	pval **domain, **map, **key;
 	char *outval;
 	int outvallen;
 
-	if((ARG_COUNT(ht) != 3) || (getParameters(ht,3,&domain,&map,&key) == FAILURE)) {
+	if((ARG_COUNT(ht) != 3) || getParametersEx(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(domain);
-	convert_to_string(map);
-	convert_to_string(key);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(map);
+	convert_to_string_ex(key);
 
-	if(yp_match(domain->value.str.val,map->value.str.val,key->value.str.val,key->value.str.len,&outval,&outvallen)) {
+	if(yp_match((*domain)->value.str.val,(*map)->value.str.val,(*key)->value.str.val,key->value.str.len,&outval,&outvallen)) {
 		RETURN_FALSE;
 	}
 
@@ -131,18 +131,18 @@ PHP_FUNCTION(yp_match) {
 /* {{{ proto array yp_first(string domain, string map)
 	Returns the first key as $var["key"] and the first line as $var["value"] */
 PHP_FUNCTION(yp_first) {
-	pval *domain, *map;
+	pval **domain, **map;
 	char *outval, *outkey;
 	int outvallen, outkeylen;
 
-	if((ARG_COUNT(ht) != 2) || (getParameters(ht,2,&domain,&map) == FAILURE)) {
+	if((ARG_COUNT(ht) != 2) || getParametersEx(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(domain);
-	convert_to_string(map);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(map);
 
-	if(yp_first(domain->value.str.val,map->value.str.val,&outkey,&outkeylen,&outval,&outvallen)) {
+	if(yp_first((*domain)->value.str.val,(*map)->value.str.val,&outkey,&outkeylen,&outval,&outvallen)) {
 		RETURN_FALSE;
 	}
 	array_init(return_value);
@@ -154,27 +154,28 @@ PHP_FUNCTION(yp_first) {
 /* {{{ proto array yp_next(string domain, string map, string key)
       Returns an array with $var[$key] and the the line as the value */
 PHP_FUNCTION(yp_next) {
-	pval *domain, *map, *key;
+	pval **domain, **map, **key;
 	char *outval, *outkey;
 	int outvallen, outkeylen;
 
-	if((ARG_COUNT(ht) != 3) || (getParameters(ht,3,&domain,&map, &key) == FAILURE)) {
+	if((ARG_COUNT(ht) != 3) || getParametersEx(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(domain);
-	convert_to_string(map);
-	convert_to_string(key);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(map);
+	convert_to_string_ex(key);
 
-	if(yp_next(domain->value.str.val,map->value.str.val,key->value.str.val,key->value.str.len,&outkey,&outkeylen,&outval,&outvallen)) {
+	if(yp_next((*domain)->value.str.val,(*map)->value.str.val,(*key)->value.str.val,(*key)->value.str.len,&outkey,&outkeylen,&outval,&outvallen)) {
 		RETURN_FALSE;
 	}
+	
 	array_init(return_value);
-      add_assoc_string(return_value,outkey,outval,1);
+	add_assoc_string(return_value,outkey,outval,1);
 }
 /* }}} */
 
-void php3_info_yp(ZEND_MODULE_INFO_FUNC_ARGS) {
+PHP_MINFO_FUNCTION(yp) {
 	PUTS("Compiled with YP Support.");
 }
 #endif /* HAVE_YP */
