@@ -7061,10 +7061,10 @@ mbfl_strimwidth(
 	n = string->len;
 	if (p != NULL) {
 		while (n > 0) {
+			n--;
 			if ((*encoder->filter_function)(*p++, encoder) < 0) {
 				break;
 			}
-			n--;
 		}
 		mbfl_convert_filter_flush(encoder);
 		if (pc.status != 0 && mkwidth > 0) {
