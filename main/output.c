@@ -189,7 +189,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 			orig_buffer->refcount-=2;
 		}
 		zval_ptr_dtor(&z_status);
-		zval_ptr_dtor(&OG(active_ob_buffer).output_handler);
 	}
 
 	if (!final_buffer) {
