@@ -147,7 +147,7 @@ PHP_MINFO_FUNCTION(notes)
 }
 
 /* {{{ proto bool notes_create_db(string database_name)
-   Create a Lotus Notes database */
+   Creates a Lotus Notes database */
 PHP_FUNCTION(notes_create_db)
 {
 
@@ -190,7 +190,7 @@ PHP_FUNCTION(notes_create_db)
 /* }}} */
 
 /* {{{ proto bool notes_drop_db(string database_name)
-   Drop a Lotus Notes database */
+   Drops a Lotus Notes database */
 PHP_FUNCTION(notes_drop_db)
 {
 
@@ -233,7 +233,7 @@ PHP_FUNCTION(notes_drop_db)
 /* }}} */
 
 /* {{{ proto string notes_version(string database_name)
-   Get the version Lotus Notes */
+   Gets the Lotus Notes version */
 PHP_FUNCTION(notes_version)
 {
 
@@ -306,7 +306,7 @@ PHP_FUNCTION(notes_version)
 /* }}} */
 
 /* {{{ proto string notes_create_note(string database_name, string form_name)
-   Create a note using form form_name */
+   Creates a note using form form_name */
 PHP_FUNCTION(notes_create_note)
 {
 
@@ -430,9 +430,7 @@ STATUS UndoUnreadStatus (
 
 
 /* {{{ proto string notes_mark_read(string database_name, string user_name, string note_id)
-   Mark a note_id as read for the User user_name 
-   Note: user_name must be fully distinguished user name
-*/
+   Marks a note_id as read for the User user_name.  Note: user_name must be fully distinguished user name */
 PHP_FUNCTION(notes_mark_read)
 {
 
@@ -518,9 +516,7 @@ PHP_FUNCTION(notes_mark_read)
 /* }}} */
 
 /* {{{ proto string notes_mark_unread(string database_name, string user_name, string note_id)
-   Mark a note_id as unread for the User user_name
-   Note: user_name must be fully distinguished user name
-*/
+   Marks a note_id as unread for the User user_name.  Note: user_name must be fully distinguished user name */
 PHP_FUNCTION(notes_mark_unread)
 {
 
@@ -848,8 +844,7 @@ STATUS UndoUnreadStatus (
 }
 
 /* {{{ proto string notes_unread(string database_name, string user_name)
-   Returns the unread note id's for the current User user_name 
-   Note: user_name must be fully distinguished user name*/
+   Returns the unread note id's for the current User user_name.  Note: user_name must be fully distinguished user name */
 PHP_FUNCTION(notes_unread)
 {
 
@@ -1206,8 +1201,7 @@ STATUS near pascal GetUniqueFileName(char *Drive, char *Ext,
 }
 
 /* {{{ proto array notes_body(string server, string mailbox, int msg_number)
-   Open the message msg_number in the specified mailbox on the specified server (leave server
-	blank for local) and returns an array of body text lines. */
+   Opens the message msg_number in the specified mailbox on the specified server (leave server blank for local) and returns an array of body text lines */
 PHP_FUNCTION(notes_body)
 {
 
@@ -1400,15 +1394,17 @@ PHP_FUNCTION(notes_body)
 }
 /* }}} */
 
-/* {{{ proto bool notes_find_note(string database_name, string name [, string type] )
-   Returns a note id found in database_name. Specify the name of the note. Leaving type blank
-	will default to all, otherwise specify:
+/* {{{ proto bool notes_find_note(string database_name, string name [, string type])
+   Returns a note id found in database_name */
+/*
+Specify the name of the note. Leaving type blank
+will default to all, otherwise specify:
 	
 		FORM
 		VIEW
 		FILTER
 		FIELD
-		*/
+*/
 PHP_FUNCTION(notes_find_note)
 {
 
@@ -1496,8 +1492,8 @@ PHP_FUNCTION(notes_find_note)
 }
 /* }}} */
 
-/* {{{ proto bool notes_nav_create(string database_name, string name )
-   Create a navigator name, in database_name  */
+/* {{{ proto bool notes_nav_create(string database_name, string name)
+   Creates a navigator name, in database_name */
 PHP_FUNCTION(notes_nav_create)
 {
 
@@ -1690,10 +1686,8 @@ PHP_FUNCTION(notes_nav_create)
 }
 /* }}} */
 
-/* {{{ proto string notes_search(string database_name, string keywords )
-   Find notes that match keywords in database_name
-   The note(s) that are returned must be converted to base 16
-   Example base_convert( $note_id, "10", "16" ) */
+/* {{{ proto string notes_search(string database_name, string keywords)
+   Finds notes that match keywords in database_name.  The note(s) that are returned must be converted to base 16. Example base_convert($note_id, "10", "16") */
 
 STATUS LNPUBLIC file_action (void *, SEARCH_MATCH *, ITEM_TABLE *);
 STATUS LNPUBLIC print_file_summary (ITEM_TABLE *);
@@ -1934,8 +1928,8 @@ PHP_FUNCTION(notes_search)
 }
 /* }}} */
 
-/* {{{ proto string notes_copy_db(string from_database_name, string to_database_name [, title])
-   Create a note using form form_name */
+/* {{{ proto string notes_copy_db(string from_database_name, string to_database_name [, string title])
+   Creates a note using form form_name */
 PHP_FUNCTION(notes_copy_db)
 {
 
