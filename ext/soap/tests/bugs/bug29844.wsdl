@@ -1,0 +1,66 @@
+<?xml version="1.0" ?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://davey.synapticmedia.net/php-mag/shafikdavey_automaticwebservices/src/Listing%201.php" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/" name="Crtx_SOAP_AutoDiscover_Example" targetNamespace="http://davey.synapticmedia.net/php-mag/shafikdavey_automaticwebservices/src/Listing%201.php">
+  <portType name="Crtx_SOAP_AutoDiscover_ExamplePort">
+    <operation name="hello">
+      <input message="tns:helloRequest" />
+      <output message="tns:helloResponse" />
+      <documentation>Say Hello to Somebody</documentation>
+    </operation>
+    <operation name="goodBye">
+      <input message="tns:goodByeRequest" />
+      <output message="tns:goodByeResponse" />
+      <documentation>Say Goodbye to Somebody</documentation>
+    </operation>
+  </portType>
+  <binding name="Crtx_SOAP_AutoDiscover_ExampleBinding"
+  type="tns:Crtx_SOAP_AutoDiscover_ExamplePort">
+    <soap:binding style="document"
+    transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="hello">
+      <input>
+        <soap:body use="encoded"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output>
+        <soap:body use="encoded"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <soap:operation soapAction="http://davey.synapticmedia.net/php-mag/shafikdavey_automaticwebservices/src/Listing%201.php#hello" />
+    </operation>
+    <soap:binding style="document"
+    transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="goodBye">
+      <input>
+        <soap:body use="encoded"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </input>
+      <output>
+        <soap:body use="encoded"
+        encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </output>
+      <soap:operation soapAction="http://davey.synapticmedia.net/php-mag/shafikdavey_automaticwebservices/src/Listing%201.php#goodBye" />
+    </operation>
+  </binding>
+  <service name="Crtx_SOAP_AutoDiscover_ExampleService">
+    <port name="tns:Crtx_SOAP_AutoDiscover_ExamplePort"
+    binding="tns:Crtx_SOAP_AutoDiscover_ExampleBinding">
+      <soap:address location="http://davey.synapticmedia.net/php-mag/shafikdavey_automaticwebservices/src/Listing%201.php" />
+    </port>
+  </service>
+  <message name="helloRequest">
+    <part name="to" type="xsd:string" />
+    <documentation>Say Hello to Somebody</documentation>
+  </message>
+  <message name="helloResponse">
+    <part name="helloReturn" type="xsd:string" />
+    <documentation>The greeting</documentation>
+  </message>
+  <message name="goodByeRequest">
+    <part name="to" type="xsd:string" />
+    <documentation>Say Goodbye to Somebody</documentation>
+  </message>
+  <message name="goodByeResponse">
+    <part name="goodByeReturn" type="xsd:string" />
+    <documentation>The goodbye</documentation>
+  </message>
+</definitions>
