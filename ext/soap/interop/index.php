@@ -6,10 +6,10 @@
 </head>
 <?php
 // get our endpoint
-$server = $_SERVER['SERVER_NAME'].':'.$_SERVER['SERVER_PORT'];
-$base = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/interop.wsdl.php";
-$groupb = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php";
-$groupc = 'http://'.$server.dirname($_SERVER['PHP_SELF'])."/echoheadersvc.wsdl.php";
+$server = $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];
+$base = (isset($_SERVER['HTTPS'])?"https://":"http://").$server.dirname($_SERVER['PHP_SELF'])."/interop.wsdl.php";
+$groupb = (isset($_SERVER['HTTPS'])?"https://":"http://").$server.dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php";
+$groupc = (isset($_SERVER['HTTPS'])?"https://":"http://").$server.dirname($_SERVER['PHP_SELF'])."/echoheadersvc.wsdl.php";
 ?>
 <body>
 

@@ -1,5 +1,10 @@
 <?php
 
+function hex_compare($f1, $f2)
+{
+  return strcasecmp($f1,$f2) == 0;
+}
+
 function number_compare($f1, $f2)
 {
     # figure out which has the least fractional digits

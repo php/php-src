@@ -64,7 +64,7 @@ class SOAP_Interop_GroupB {
 }
 
 $server = new SoapServer("http://test-uri");
-$server->bind("http://".$_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php");
+$server->bind((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/interopB.wsdl.php");
 $server->setClass("SOAP_Interop_GroupB");
 $server->handle();
 ?>

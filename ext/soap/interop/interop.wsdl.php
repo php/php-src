@@ -328,7 +328,7 @@ echo "\n";
 
   <service name="InteropTest">
     <port name="InteropTestPort" binding="tns:InteropTestBinding">
-			<soap:address location="http://<?php echo ($_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']));?>/server_round2_base.php"/>
+			<soap:address location="<?php echo ((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']));?>/server_round2_base.php"/>
     </port>
   </service>
 

@@ -12,7 +12,7 @@ echo "\n";
 	<service name="interopLabEchoHeader">
 
   		<port name="interopPortEchoHdr" binding="tns:InteropEchoHeaderBinding">
-    			<soap:address location="http://<?php echo ($_SERVER['SERVER_NAME'].dirname($_SERVER['PHP_SELF']));?>/server_round2.php"/>
+    			<soap:address location="<?php echo ((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']));?>/server_round2.php"/>
   		</port>
 
 	</service>
