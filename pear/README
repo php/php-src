@@ -1,12 +1,12 @@
-     PECL (pronounced "pickle") - PHP Extension and Code Library
-     -----------------------------------------------------------
+	      PEAR - PHP Extension and Add-on Repository
+	      ------------------------------------------
 
-WHAT IS PECL?
+WHAT IS PEAR?
 
-PECL is a code repository for PHP extensions and PHP library code
+PEAR is a code repository for PHP extensions and PHP library code
 similar to TeX's CTAN and Perl's CPAN.
 
-The intention behind PECL is to provide a means for library code
+The intention behind PEAR is to provide a means for library code
 authors to organize their code in a defined way shared by other
 developers, and to give the PHP community a single source for such
 code.
@@ -20,10 +20,12 @@ how functions and classes should be named.
 
 TOOLS
 
-This section will describe the tools provided to PECL users.
+This section will describe the tools provided to PEAR users.
 
 
 CODING RULES AND GUIDELINES
 
-* All PHP code _must_ use <?php ?>.  <? ?> and other formats are not
-  portable.
+* All PHP code must use <?php ?>.  This is the only really portable tag.
+
+* Before adding a new top-level directory ("DB" is one), discuss your
+  intentions on php4beta@lists.php.net.
