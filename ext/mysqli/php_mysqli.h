@@ -266,6 +266,7 @@ PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
 PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
+PHP_FUNCTION(mysqli_stmt_data_seek);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
 PHP_FUNCTION(mysqli_stmt_num_rows);
