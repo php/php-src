@@ -53,13 +53,6 @@ typedef struct {
 } sapi_globals_struct;
 
 
-SAPI_API void sapi_startup(sapi_module_struct *sf);
-SAPI_API void sapi_activate(SLS_D);
-SAPI_API void sapi_deactivate(SLS_D);
-
-SAPI_API int sapi_add_header(const char *header_line, uint header_line_len);
-SAPI_API int sapi_send_headers();
-
 #ifdef ZTS
 # define SLS_D	sapi_globals_struct *sapi_globals
 # define SLS_DC	, SLS_D
@@ -78,6 +71,13 @@ SAPI_API extern int sapi_globals_id;
 extern SAPI_API sapi_globals_struct sapi_globals;
 #endif
 
+
+SAPI_API void sapi_startup(sapi_module_struct *sf);
+SAPI_API void sapi_activate(SLS_D);
+SAPI_API void sapi_deactivate(SLS_D);
+
+SAPI_API int sapi_add_header(const char *header_line, uint header_line_len);
+SAPI_API int sapi_send_headers();
 
 
 struct _sapi_module_struct {
