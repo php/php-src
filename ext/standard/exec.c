@@ -747,15 +747,25 @@ PHP_FUNCTION(proc_open)
 			goto exit_fail;
 		} else {
 
-			zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype);
-			convert_to_string_ex(ztype);
+			if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 0, (void **)&ztype) == SUCCESS) {
+				convert_to_string_ex(ztype);
+			} else {
+				php_error (E_WARNING, "%s():  Missing handle qualifier in array",
+					get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+				goto exit_fail;
+			}
 
 			if (strcmp(Z_STRVAL_PP(ztype), "pipe") == 0) {
 				descriptor_t newpipe[2];
 				zval **zmode;
 
-				zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode);
-				convert_to_string_ex(zmode);
+				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zmode) == SUCCESS) {
+					convert_to_string_ex(zmode);
+				} else {
+					php_error (E_WARNING, "%s():  Missing mode parameter for 'pipe'",
+						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					goto exit_fail;
+				}
 
 				descriptors[ndesc].mode = DESC_PIPE;
 
@@ -793,11 +803,21 @@ PHP_FUNCTION(proc_open)
 
 				descriptors[ndesc].mode = DESC_FILE;
 
-				zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile);
-				convert_to_string_ex(zfile);
+				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 1, (void **)&zfile) == SUCCESS) {
+					convert_to_string_ex(zfile);
+				} else {
+					php_error (E_WARNING, "%s():  Missing file name parameter for 'file'",
+						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					goto exit_fail;
+				}
 
-				zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode);
-				convert_to_string_ex(zmode);
+				if (zend_hash_index_find(Z_ARRVAL_PP(descitem), 2, (void **)&zmode) == SUCCESS) {
+					convert_to_string_ex(zmode);
+				} else {
+					php_error (E_WARNING, "%s():  Missing mode parameter for 'file'",
+						get_active_function_name(TSRMLS_C), Z_STRVAL_PP(ztype));
+					goto exit_fail;
+				}
 
 				/* try a wrapper */
 
