@@ -1,0 +1,5 @@
+#!/bin/sh
+
+./scripts/preconfig
+aclocal
+autoconf
