@@ -130,7 +130,6 @@ void php3_apache_note(INTERNAL_FUNCTION_PARAMETERS)
 	pval *arg_name,*arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
-TLS_VARS;
 
 	if (arg_count<1 || arg_count>2 ||
 		getParameters(ht,arg_count,&arg_name,&arg_val) == FAILURE ) {
@@ -138,11 +137,11 @@ TLS_VARS;
 	}
 	
 	convert_to_string(arg_name);
-	note_val = (char *) table_get(GLOBAL(php3_rqst)->notes,arg_name->value.str.val);
+	note_val = (char *) table_get(php3_rqst->notes,arg_name->value.str.val);
 	
 	if (arg_count == 2) {
 		convert_to_string(arg_val);
-		table_set(GLOBAL(php3_rqst)->notes,arg_name->value.str.val,arg_val->value.str.val);
+		table_set(php3_rqst->notes,arg_name->value.str.val,arg_val->value.str.val);
 	}
 
 	if (note_val) {
@@ -159,7 +158,7 @@ void php3_info_apache(void) {
 	char name[64];
 	char *p;
 #endif
-	server_rec *serv = GLOBAL(php3_rqst)->server;
+	server_rec *serv = php3_rqst->server;
 	extern char server_root[MAX_STRING_LEN];
 	extern uid_t user_id;
 	extern char *user_name;
@@ -215,14 +214,13 @@ void php3_virtual(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *filename;
 	request_rec *rr = NULL;
-TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&filename) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string(filename);
 	
-	if (!(rr = sub_req_lookup_uri (filename->value.str.val, GLOBAL(php3_rqst)))) {
+	if (!(rr = sub_req_lookup_uri (filename->value.str.val, php3_rqst))) {
 		php3_error(E_WARNING, "Unable to include '%s' - URI lookup failed", filename->value.str.val);
 		if (rr) destroy_sub_req (rr);
 		RETURN_FALSE;
@@ -292,7 +290,7 @@ void php3_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	convert_to_string(filename);
 
-	if(!(rr = sub_req_lookup_uri(filename->value.str.val, GLOBAL(php3_rqst)))) {
+	if(!(rr = sub_req_lookup_uri(filename->value.str.val, php3_rqst))) {
 		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}
@@ -364,7 +362,7 @@ void php3_apache_exec_uri(INTERNAL_FUNCTION_PARAMETERS) {
 	}
 	convert_to_string(filename);
 
-	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, GLOBAL(php3_rqst)))) {
+	if(!(rr = ap_sub_req_lookup_uri(filename->value.str.val, php3_rqst))) {
 		php3_error(E_WARNING, "URI lookup failed", filename->value.str.val);
 		RETURN_FALSE;
 	}

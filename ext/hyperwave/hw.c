@@ -426,7 +426,6 @@ static void php3_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	hw_connection *ptr;
 	int do_swap;
 	int version = 0;
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 	switch(argc) {
@@ -694,7 +693,6 @@ void php3_hw_close(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	int id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -719,7 +717,6 @@ void php3_hw_info(INTERNAL_FUNCTION_PARAMETERS)
 	int id, type;
 	hw_connection *ptr;
 	char *str;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -752,7 +749,6 @@ void php3_hw_error(INTERNAL_FUNCTION_PARAMETERS)
 	pval *arg1;
 	int id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -776,7 +772,6 @@ void php3_hw_errormsg(INTERNAL_FUNCTION_PARAMETERS)
 	int id, type;
 	hw_connection *ptr;
 	char errstr[100];
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -861,7 +856,6 @@ void php3_hw_errormsg(INTERNAL_FUNCTION_PARAMETERS)
    Returns object id of root collection */
 void php3_hw_root(INTERNAL_FUNCTION_PARAMETERS)
 {
-	TLS_VARS;
 	return_value->value.lval = 0;
 	return_value->type = IS_LONG;
 }
@@ -871,7 +865,6 @@ char *php3_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	pval *arg1;
 	int link, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		return NULL;
@@ -1024,7 +1017,6 @@ void php3_hw_dummy(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2, *arg3;
 	int link, id, type, msgid;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1060,7 +1052,6 @@ void php3_hw_getobject(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1097,7 +1088,6 @@ void php3_hw_insertobject(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, type;
 	char *objrec, *parms;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1131,7 +1121,6 @@ void php3_hw_getandlock(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1164,7 +1153,6 @@ void php3_hw_unlock(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1193,7 +1181,6 @@ void php3_hw_deleteobject(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1223,7 +1210,6 @@ void php3_hw_changeobject(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_connection *ptr;
 	char *modification, *oldobjrec, buf[200];
 	HashTable *newobjarr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1304,7 +1290,6 @@ void php3_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 	HashTable *src_arr;
 	hw_connection *ptr;
 	int collIDcount, docIDcount, i, *docIDs, *collIDs;
-	TLS_VARS;
 
 	switch(mvcp) {
 		case MOVE: /* Move also has fromID */
@@ -1418,7 +1403,6 @@ void php3_hw_gettext(INTERNAL_FUNCTION_PARAMETERS) {
 	int rootid = 0;
 	hw_document *doc;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if((argc > 3) || (argc < 2))
@@ -1470,7 +1454,6 @@ void php3_hw_edittext(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, id, doc, type;
 	hw_connection *ptr;
 	hw_document *docptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1513,7 +1496,6 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_document *doc;
 	hw_connection *ptr;
 	char cgi_env_str[1000];
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1549,9 +1531,9 @@ void php3_hw_getcgi(INTERNAL_FUNCTION_PARAMETERS) {
 	                     getenv("QUERY_STRING"));
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
-	                     GLOBAL(request_info).request_method,
-	                     GLOBAL(request_info).path_info,
-	                     GLOBAL(request_info).query_string);
+	                     request_info.request_method,
+	                     request_info.path_info,
+	                     request_info.query_string);
 #endif
 	/* !!!! memory for object and attributes is allocated with malloc !!!! */
 	if (0 != (ptr->lasterror = send_getcgi(ptr->socket, id, cgi_env_str, &attributes, &object, &count)))
@@ -1574,7 +1556,6 @@ void php3_hw_getremote(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, id, type;
 	hw_document *doc;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1615,7 +1596,6 @@ void php3_hw_getremotechildren(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, type, i;
 	hw_connection *ptr;
 	char *objrec;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1673,7 +1653,6 @@ void php3_hw_setlinkroot(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, type, rootid;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1702,9 +1681,8 @@ void php3_hw_pipedocument(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_connection *ptr;
 	hw_document *doc;
 #if APACHE
-	server_rec *serv = GLOBAL(php3_rqst)->server;
+	server_rec *serv = php3_rqst->server;
 #endif
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if((argc > 2) || (argc < 2))
@@ -1770,9 +1748,8 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_document *doc;
 	char cgi_env_str[1000];
 #if APACHE
-	server_rec *serv = GLOBAL(php3_rqst)->server;
+	server_rec *serv = php3_rqst->server;
 #endif
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1800,9 +1777,9 @@ void php3_hw_pipecgi(INTERNAL_FUNCTION_PARAMETERS) {
 	                     getenv("QUERY_STRING"));
 #else
 	sprintf(cgi_env_str, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
-	                     GLOBAL(request_info).request_method,
-	                     GLOBAL(request_info).path_info,
-	                     GLOBAL(request_info).query_string);
+	                     request_info.request_method,
+	                     request_info.path_info,
+	                     request_info.query_string);
 #endif
 	/* !!!! memory for object, bodytag and attributes is allocated with malloc !!!! */
 	if (0 != (ptr->lasterror =  send_pipecgi(ptr->socket,
@@ -1832,9 +1809,8 @@ void php3_hw_insertdocument(INTERNAL_FUNCTION_PARAMETERS) {
 	hw_connection *ptr;
 	hw_document *docptr;
 #if APACHE
-	server_rec *serv = GLOBAL(php3_rqst)->server;
+	server_rec *serv = php3_rqst->server;
 #endif
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1902,7 +1878,6 @@ void php3_hw_free_document(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1925,7 +1900,6 @@ void php3_hw_output_document(INTERNAL_FUNCTION_PARAMETERS) {
 	int id, type, count;
 	hw_document *ptr;
 	char *ptr1;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1955,7 +1929,6 @@ void php3_hw_document_bodytag(INTERNAL_FUNCTION_PARAMETERS) {
 	int id, type, argc;
 	hw_document *ptr;
 	char *temp, *str = NULL;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if((argc > 2) || (argc < 1))
@@ -1994,7 +1967,6 @@ void php3_hw_document_content(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *argv[1];
 	int id, type, argc;
 	hw_document *ptr;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if(argc != 1)
@@ -2020,7 +1992,6 @@ void php3_hw_document_size(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2042,7 +2013,6 @@ void php3_hw_document_attributes(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	int id, type;
 	hw_document *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2067,7 +2037,6 @@ void php3_hw_getparentsobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2101,7 +2070,6 @@ void php3_hw_getparents(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2146,7 +2114,6 @@ void php3_hw_children(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2192,7 +2159,6 @@ void php3_hw_childrenobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2226,7 +2192,6 @@ void php3_hw_getchildcoll(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2272,7 +2237,6 @@ void php3_hw_getchildcollobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2305,7 +2269,6 @@ void php3_hw_docbyanchor(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2336,7 +2299,6 @@ void php3_hw_docbyanchorobj(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1, *arg2;
 	int link, id, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2374,7 +2336,6 @@ void php3_hw_getobjectbyquery(INTERNAL_FUNCTION_PARAMETERS) {
 	int count, i;
 	int  *childIDs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2417,7 +2378,6 @@ void php3_hw_getobjectbyqueryobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2455,7 +2415,6 @@ void php3_hw_getobjectbyquerycoll(INTERNAL_FUNCTION_PARAMETERS) {
 	int count, i;
 	hw_connection *ptr;
 	int  *childIDs = NULL;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2500,7 +2459,6 @@ void php3_hw_getobjectbyquerycollobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	hw_connection *ptr;
 	char  **childObjRecs = NULL;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2539,7 +2497,6 @@ void php3_hw_getchilddoccoll(INTERNAL_FUNCTION_PARAMETERS) {
 	int count, i;
 	int  *childIDs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2578,7 +2535,6 @@ void php3_hw_getchilddoccollobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2613,7 +2569,6 @@ void php3_hw_getanchors(INTERNAL_FUNCTION_PARAMETERS) {
 	int count, i;
 	int  *anchorIDs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2652,7 +2607,6 @@ void php3_hw_getanchorsobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **anchorObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2684,7 +2638,6 @@ void php3_hw_getusername(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	int link, type;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2710,7 +2663,6 @@ void php3_hw_identify(INTERNAL_FUNCTION_PARAMETERS) {
 	int link, type;
 	char *name, *passwd, *userdata;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2757,7 +2709,6 @@ void php3_hw_identify(INTERNAL_FUNCTION_PARAMETERS) {
    Returns object array of object record*/
 void php3_hw_objrec2array(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2772,7 +2723,6 @@ void php3_hw_objrec2array(INTERNAL_FUNCTION_PARAMETERS) {
 void php3_hw_array2objrec(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg1;
 	char *objrec, *retobj;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2795,7 +2745,6 @@ void php3_hw_incollections(INTERNAL_FUNCTION_PARAMETERS) {
 	int type, link, i;
 	hw_connection *ptr;
 	int cobjids, ccollids, *objectIDs, *collIDs, cretids, *retIDs, retcoll;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2857,7 +2806,6 @@ void php3_hw_inscoll(INTERNAL_FUNCTION_PARAMETERS) {
 	char *objrec;
 	int id, newid, type, link;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2896,7 +2844,6 @@ void php3_hw_insdoc(INTERNAL_FUNCTION_PARAMETERS) {
 	char *objrec, *text;
 	int id, newid, type, link, argc;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 	if((argc < 3) || (argc > 4))
@@ -2940,7 +2887,6 @@ void php3_hw_getsrcbydestobj(INTERNAL_FUNCTION_PARAMETERS) {
 	int count;
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2975,7 +2921,6 @@ void php3_hw_getrellink(INTERNAL_FUNCTION_PARAMETERS) {
 	int rootid, destid, sourceid;
 	char *anchorstr;
 	hw_connection *ptr;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;

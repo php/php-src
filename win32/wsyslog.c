@@ -63,9 +63,8 @@ static HANDLE loghdl = NULL;	/* handle of event source */
 
 void closelog(void)
 {
-	TLS_VARS;
-	DeregisterEventSource(GLOBAL(loghdl));
-	efree(GLOBAL(loghdr));
+	DeregisterEventSource(loghdl);
+	efree(loghdr);
 }
 
 /* Emulator for BSD syslog() routine
@@ -80,10 +79,9 @@ void syslog(int priority, const char *message,...)
 	LPTSTR strs[2];
 	char tmp[1024];				/* callers must be careful not to pop this */
 	unsigned short etype;
-	TLS_VARS;
 	
 	/* default event source */
-		if (!GLOBAL(loghdl))
+		if (!loghdl)
 		openlog("c-client", LOG_PID, LOG_MAIL);
 	switch (priority) {			/* translate UNIX type into NT type */
 		case LOG_ALERT:
@@ -97,10 +95,10 @@ void syslog(int priority, const char *message,...)
 	}
 	va_start(args, message);	/* initialize vararg mechanism */
 	vsprintf(tmp, message, args);	/* build message */
-	strs[0] = GLOBAL(loghdr);	/* write header */
+	strs[0] = loghdr;	/* write header */
 	strs[1] = tmp;				/* then the message */
 	/* report the event */
-	ReportEvent(GLOBAL(loghdl), etype, (unsigned short) priority, 2000, NULL, 2, 0, strs, NULL);
+	ReportEvent(loghdl, etype, (unsigned short) priority, 2000, NULL, 2, 0, strs, NULL);
 	va_end(args);
 }
 
@@ -114,12 +112,11 @@ void syslog(int priority, const char *message,...)
 void openlog(const char *ident, int logopt, int facility)
 {
 	char tmp[1024];
-	TLS_VARS;
 
-	if (GLOBAL(loghdl)) {
+	if (loghdl) {
 		closelog();
 	}
-	GLOBAL(loghdl) = RegisterEventSource(NULL, ident);
+	loghdl = RegisterEventSource(NULL, ident);
 	sprintf(tmp, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
-	GLOBAL(loghdr) = estrdup(tmp);	/* save header for later */
+	loghdr = estrdup(tmp);	/* save header for later */
 }

@@ -49,7 +49,6 @@
 void php3_strlen(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -125,7 +124,6 @@ void php3_chop(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	register int i;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -156,7 +154,6 @@ void php3_trim(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	register int i;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -198,7 +195,6 @@ void php3_ltrim(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	register int i;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -268,7 +264,6 @@ void php3_implode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg1, *arg2, *delim, *tmp, *arr;
 	int len = 0, count = 0;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -337,7 +332,6 @@ void php3_strtok(INTERNAL_FUNCTION_PARAMETERS)
 	char *token = NULL, *tokp=NULL;
 	char *first = NULL;
 	int argc;
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 
@@ -352,35 +346,35 @@ void php3_strtok(INTERNAL_FUNCTION_PARAMETERS)
 	if (argc == 2) {
 		convert_to_string(str);
 
-		STR_FREE(GLOBAL(strtok_string));
-		GLOBAL(strtok_string) = estrndup(str->value.str.val,str->value.str.len);
-		STATIC(strtok_pos1) = GLOBAL(strtok_string);
-		STATIC(strtok_pos2) = NULL;
+		STR_FREE(strtok_string);
+		strtok_string = estrndup(str->value.str.val,str->value.str.len);
+		strtok_pos1 = strtok_string;
+		strtok_pos2 = NULL;
 	}
-	if (STATIC(strtok_pos1) && *STATIC(strtok_pos1)) {
+	if (strtok_pos1 && *strtok_pos1) {
 		for ( /* NOP */ ; token && *token; token++) {
-			STATIC(strtok_pos2) = strchr(STATIC(strtok_pos1), (int) *token);
-			if (!first || (STATIC(strtok_pos2) && STATIC(strtok_pos2) < first)) {
-				first = STATIC(strtok_pos2);
+			strtok_pos2 = strchr(strtok_pos1, (int) *token);
+			if (!first || (strtok_pos2 && strtok_pos2 < first)) {
+				first = strtok_pos2;
 			}
 		}						/* NB: token is unusable now */
 
-		STATIC(strtok_pos2) = first;
-		if (STATIC(strtok_pos2)) {
-			*STATIC(strtok_pos2) = '\0';
+		strtok_pos2 = first;
+		if (strtok_pos2) {
+			*strtok_pos2 = '\0';
 		}
-		RETVAL_STRING(STATIC(strtok_pos1),1);
+		RETVAL_STRING(strtok_pos1,1);
 #if 0
 		/* skip 'token' white space for next call to strtok */
-		while (STATIC(strtok_pos2) && 
-			strchr(tokp, *(STATIC(strtok_pos2)+1))) {
-			STATIC(strtok_pos2)++;
+		while (strtok_pos2 && 
+			strchr(tokp, *(strtok_pos2+1))) {
+			strtok_pos2++;
 		}
 #endif
-		if (STATIC(strtok_pos2))
-			STATIC(strtok_pos1) = STATIC(strtok_pos2) + 1;
+		if (strtok_pos2)
+			strtok_pos1 = strtok_pos2 + 1;
 		else
-			STATIC(strtok_pos1) = NULL;
+			strtok_pos1 = NULL;
 	} else {
 		RETVAL_FALSE;
 	}
@@ -406,7 +400,6 @@ void php3_strtoupper(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg)) {
 		WRONG_PARAM_COUNT;
@@ -438,7 +431,6 @@ void php3_strtolower(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -456,7 +448,6 @@ void php3_basename(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret, *c;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -509,7 +500,6 @@ void php3_dirname(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
 	char *ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str)) {
 		WRONG_PARAM_COUNT;
@@ -544,7 +534,6 @@ void php3_stristr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -573,7 +562,6 @@ void php3_strstr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -608,7 +596,6 @@ void php3_strpos(INTERNAL_FUNCTION_PARAMETERS)
 	pval *haystack, *needle, *OFFSET;
 	int offset = 0;
 	char *found = NULL;
-	TLS_VARS;
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -657,7 +644,6 @@ void php3_strrpos(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -685,7 +671,6 @@ void php3_strrchr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *haystack, *needle;
 	char *found = NULL;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &haystack, &needle) ==
 		FAILURE) {
@@ -753,7 +738,6 @@ void php3_chunk_split(INTERNAL_FUNCTION_PARAMETERS)
 	char *end    = "\r\n";
 	int endlen   = 2;
 	int chunklen = 76;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 
@@ -799,7 +783,6 @@ void php3_substr(INTERNAL_FUNCTION_PARAMETERS)
 	pval *string, *from, *len;
 	int argc, l;
 	int f;
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 
@@ -858,7 +841,6 @@ void php3_quotemeta(INTERNAL_FUNCTION_PARAMETERS)
 	char *str, *old;
 	char *p, *q;
 	char c;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -902,7 +884,6 @@ void php3_quotemeta(INTERNAL_FUNCTION_PARAMETERS)
 void php3_ord(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -918,7 +899,6 @@ void php3_chr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *num;
 	char temp[2];
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -984,7 +964,6 @@ void php3_strtr(INTERNAL_FUNCTION_PARAMETERS)
 	unsigned char xlat[256];
 	unsigned char *str_from, *str_to, *string;
 	int i, len1, len2;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &str, &from, &to) ==
 		FAILURE) {
@@ -1117,7 +1096,6 @@ void php3_addslashes(INTERNAL_FUNCTION_PARAMETERS)
 void php3_stripslashes(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *str;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1141,8 +1119,8 @@ char *strerror(int errnum)
 #endif
 
 	if ((unsigned int)errnum < sys_nerr) return(sys_errlist[errnum]);
-	(void)sprintf(STATIC(str_ebuf), "Unknown error: %d", errnum);
-	return(STATIC(str_ebuf));
+	(void)sprintf(str_ebuf, "Unknown error: %d", errnum);
+	return(str_ebuf);
 }
 #endif
 #endif

@@ -109,10 +109,10 @@ PHPAPI int _php3_check_open_basedir(char *path)
 	
 		/* Special case basedir==".": Use script-directory */
 		if ((strcmp(PG(open_basedir), ".") == 0) && 
-			GLOBAL(request_info).filename &&
-			*GLOBAL(request_info).filename
+			request_info.filename &&
+			*request_info.filename
 		) {
-			strcpy(local_open_basedir, GLOBAL(request_info).filename);
+			strcpy(local_open_basedir, request_info.filename);
 			local_open_basedir_pos = strlen(local_open_basedir) - 1;
 
 			/* Strip filename */
@@ -206,8 +206,8 @@ FILE *php3_fopen_for_parser(void)
 	int l;
 	PLS_FETCH();
 
-	fn = GLOBAL(request_info).filename;
-	path_info = GLOBAL(request_info).path_info;
+	fn = request_info.filename;
+	path_info = request_info.path_info;
 #if HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir)
 		&& path_info && '/' == path_info[0] && '~' == path_info[1]) {
@@ -234,8 +234,8 @@ FILE *php3_fopen_for_parser(void)
 					strcat(fn, PG(user_dir));	/* safe */
 					strcat(fn, "/");	/* safe */
 					strcat(fn, s + 1);	/* safe (shorter than path_info) */
-					STR_FREE(GLOBAL(request_info).filename);
-					GLOBAL(request_info).filename = fn;
+					STR_FREE(request_info.filename);
+					request_info.filename = fn;
 				}
 			}
 		}
@@ -257,8 +257,8 @@ FILE *php3_fopen_for_parser(void)
 			if ('/' == path_info[0])
 				l--;
 			strcpy(fn + l, path_info);
-			STR_FREE(GLOBAL(request_info).filename);
-			GLOBAL(request_info).filename = fn;
+			STR_FREE(request_info.filename);
+			request_info.filename = fn;
 		}
 	}							/* if doc_root && path_info */
 	if (!fn) {
@@ -266,8 +266,8 @@ FILE *php3_fopen_for_parser(void)
 		   php3_destroy_request_info assumes that it will get
 		   freed when the include_names hash is emptied, but
 		   we're not adding it in this case */
-		STR_FREE(GLOBAL(request_info).filename);
-		GLOBAL(request_info).filename = NULL;
+		STR_FREE(request_info.filename);
+		request_info.filename = NULL;
 		return NULL;
 	}
 	fp = fopen(fn, "r");
@@ -279,7 +279,7 @@ FILE *php3_fopen_for_parser(void)
 	}
 	if (!fp) {
 		php3_error(E_CORE_ERROR, "Unable to open %s", fn);
-		STR_FREE(GLOBAL(request_info).filename);	/* for same reason as above */
+		STR_FREE(request_info.filename);	/* for same reason as above */
 		return NULL;
 	}
 	

@@ -109,9 +109,8 @@ int TSendMail(char *host, int *error,
 {
 	int ret;
 	char *RPath = NULL;
-	TLS_VARS;
 
-	GLOBAL(WinsockStarted) = FALSE;
+	WinsockStarted = FALSE;
 
 	if (host == NULL) {
 		*error = BAD_MAIL_HOST;
@@ -120,7 +119,7 @@ int TSendMail(char *host, int *error,
 		*error = BAD_MAIL_HOST;
 		return BAD_MAIL_HOST;
 	} else {
-		strcpy(GLOBAL(MailHost), host);
+		strcpy(MailHost, host);
 	}
 
 	if (INI_STR("sendmail_from")){
@@ -155,8 +154,6 @@ int TSendMail(char *host, int *error,
 //********************************************************************
 void TSMClose()
 {
-	TLS_VARS;
-
 	Post("QUIT\n");
 	Ack();
 	// to guarantee that the cleanup is not made twice and
@@ -202,7 +199,6 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	int res, i;
 	char *p;
-	TLS_VARS;
 
 	// check for NULL parameters
 	if (data == NULL)
@@ -217,27 +213,27 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if (strchr(mailTo, '@') == NULL)
 		return (BAD_MSG_DESTINATION);
 
-	sprintf(GLOBAL(Buffer), "HELO %s\n", GLOBAL(LocalHost));
+	sprintf(Buffer, "HELO %s\n", LocalHost);
 
 	// in the beggining of the dialog
 	// attempt reconnect if the first Post fail
-	if ((res = Post(GLOBAL(Buffer))) != SUCCESS) {
+	if ((res = Post(Buffer)) != SUCCESS) {
 		MailConnect();
-		if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+		if ((res = Post(Buffer)) != SUCCESS)
 			return (res);
 	}
 	if ((res = Ack()) != SUCCESS)
 		return (res);
 
-	sprintf(GLOBAL(Buffer), "MAIL FROM:<%s>\n", RPath);
-	if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+	sprintf(Buffer, "MAIL FROM:<%s>\n", RPath);
+	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
 		return (res);
 
 
-	sprintf(GLOBAL(Buffer), "RCPT TO:<%s>\n", mailTo);
-	if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+	sprintf(Buffer, "RCPT TO:<%s>\n", mailTo);
+	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
 		return (res);
@@ -272,12 +268,12 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 				i = strlen(p);
 
 			// put next chunk in buffer
-			strncpy(GLOBAL(Buffer), p, i);
-			GLOBAL(Buffer)[i] = '\0';
+			strncpy(Buffer, p, i);
+			Buffer[i] = '\0';
 			p += i;
 
 			// send chunk
-			if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+			if ((res = Post(Buffer)) != SUCCESS)
 				return (res);
 		}
 	}
@@ -315,9 +311,8 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	int zoneh = abs(_timezone);
 	int zonem, res;
 	char *p;
-	TLS_VARS;
 
-	p = GLOBAL(Buffer);
+	p = Buffer;
 	zoneh /= (60 * 60);
 	zonem = (abs(_timezone) / 60) - (zoneh * 60);
 
@@ -342,7 +337,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 		p += sprintf(p, "%s\r\n", xheaders);
 	}
 
-	if ((res = Post(GLOBAL(Buffer))) != SUCCESS)
+	if ((res = Post(Buffer)) != SUCCESS)
 		return (res);
 
 	if ((res = Post("\r\n")) != SUCCESS)
@@ -365,29 +360,27 @@ int MailConnect()
 {
 
 	int res;
-	TLS_VARS;
-
 
 	// Create Socket
-	if ((GLOBAL(sc) = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
+	if ((sc = socket(PF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET)
 		return (FAILED_TO_OBTAIN_SOCKET_HANDLE);
 
 	// Get our own host name
-	if (gethostname(GLOBAL(LocalHost), HOST_NAME_LEN))
+	if (gethostname(LocalHost, HOST_NAME_LEN))
 		return (FAILED_TO_GET_HOSTNAME);
 
 	// Resolve the servers IP
-	//if (!isdigit(GLOBAL(MailHost)[0])||!gethostbyname(GLOBAL(MailHost)))
+	//if (!isdigit(MailHost[0])||!gethostbyname(MailHost))
 	//{
 	//	return (FAILED_TO_RESOLVE_HOST);
 	//}
 
 	// Connect to server
-	GLOBAL(sock_in).sin_family = AF_INET;
-	GLOBAL(sock_in).sin_port = htons(25);
-	GLOBAL(sock_in).sin_addr.S_un.S_addr = GetAddr(GLOBAL(MailHost));
+	sock_in.sin_family = AF_INET;
+	sock_in.sin_port = htons(25);
+	sock_in.sin_addr.S_un.S_addr = GetAddr(MailHost);
 
-	if (connect(GLOBAL(sc), (LPSOCKADDR) & GLOBAL(sock_in), sizeof(GLOBAL(sock_in))))
+	if (connect(sc, (LPSOCKADDR) & sock_in, sizeof(sock_in)))
 		return (FAILED_TO_CONNECT);
 
 	// receive Server welcome message
@@ -413,10 +406,9 @@ int Post(LPCSTR msg)
 	int len = strlen(msg);
 	int slen;
 	int index = 0;
-	TLS_VARS;
 
 	while (len > 0) {
-		if ((slen = send(GLOBAL(sc), msg + index, len, 0)) < 1)
+		if ((slen = send(sc, msg + index, len, 0)) < 1)
 			return (FAILED_TO_SEND);
 		len -= slen;
 		index += slen;
@@ -442,7 +434,6 @@ int Ack()
 	int rlen;
 	int Index = 0;
 	int Received = 0;
-	TLS_VARS;
 
 	if (!buf)
 		if ((buf = (char *) malloc(1024 * 4)) == NULL)
@@ -450,7 +441,7 @@ int Ack()
 
   again:
 
-	if ((rlen = recv(GLOBAL(sc), buf + Index, ((1024 * 4) - 1) - Received, 0)) < 1)
+	if ((rlen = recv(sc, buf + Index, ((1024 * 4) - 1) - Received, 0)) < 1)
 		return (FAILED_TO_RECEIVE);
 
 	Received += rlen;

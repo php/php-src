@@ -197,8 +197,8 @@ static int zend_ub_body_write(const char *str, uint str_length)
 
 static int zend_apache_ub_write(const char *str, uint str_length)
 {
-	if (GLOBAL(php3_rqst)) {
-		return rwrite(str, str_length, GLOBAL(php3_rqst));
+	if (php3_rqst) {
+		return rwrite(str, str_length, php3_rqst);
 	} else {
 		return fwrite(str, 1, str_length, stdout);
 	}

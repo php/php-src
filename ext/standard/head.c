@@ -58,21 +58,19 @@ CookieList *php3_PopCookieList(void);
 
 int php3_init_head(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-	GLOBAL(php3_HeaderPrinted) = 0;
-	if (GLOBAL(header_called) == 0)
-		GLOBAL(php3_PrintHeader) = 1;
-	GLOBAL(top) = NULL;
-	GLOBAL(cont_type) = NULL;
+	php3_HeaderPrinted = 0;
+	if (header_called == 0)
+		php3_PrintHeader = 1;
+	top = NULL;
+	cont_type = NULL;
 
 	return SUCCESS;
 }
 
 void php3_noheader(void)
 {
-	TLS_VARS;
-	GLOBAL(php3_PrintHeader) = 0;
-	GLOBAL(header_called) = 1;
+	php3_PrintHeader = 0;
+	header_called = 1;
 }
 
 
@@ -87,7 +85,7 @@ void php4i_add_header_information(char *header_information)
 	char temp2[32];
 #endif
 
-	if (GLOBAL(php3_HeaderPrinted) == 1) {
+	if (php3_HeaderPrinted == 1) {
 #if DEBUG
 		php3_error(E_WARNING, "Cannot add more header information - the header was already sent "
 							  "(header information may be added only before any output is generated from the script - "
@@ -105,10 +103,10 @@ void php4i_add_header_information(char *header_information)
 		*r = '\0';
 		if (!strcasecmp(header_information, "Content-type")) {
 			if (*(r + 1) == ' ')
-				GLOBAL(php3_rqst)->content_type = pstrdup(GLOBAL(php3_rqst)->pool,r + 2);
+				php3_rqst->content_type = pstrdup(php3_rqst->pool,r + 2);
 			else
-				GLOBAL(php3_rqst)->content_type = pstrdup(GLOBAL(php3_rqst)->pool,r + 1);
-			GLOBAL(cont_type) = (char *)GLOBAL(php3_rqst)->content_type;
+				php3_rqst->content_type = pstrdup(php3_rqst->pool,r + 1);
+			cont_type = (char *)php3_rqst->content_type;
 		} else {
 			if (*(r + 1) == ' ') {
 				rr = r + 2;
@@ -127,36 +125,36 @@ void php4i_add_header_information(char *header_information)
 						temp = _php3_regreplace("$", temp2, rr, 0, 0);
 					}
 				}
-				table_set(GLOBAL(php3_rqst)->headers_out, header_information, temp);
+				table_set(php3_rqst->headers_out, header_information, temp);
 			} else
-				table_set(GLOBAL(php3_rqst)->headers_out, header_information, rr);
+				table_set(php3_rqst->headers_out, header_information, rr);
 		}
 		if (!strcasecmp(header_information, "location")) {
-			GLOBAL(php3_rqst)->status = REDIRECT;
+			php3_rqst->status = REDIRECT;
 		}
 		*r = ':';
-		GLOBAL(php3_HeaderPrinted) = 2;
+		php3_HeaderPrinted = 2;
 	}
 	if (!strncasecmp(header_information, "http/", 5)) {
 		if (strlen(header_information) > 9) {
-			GLOBAL(php3_rqst)->status = atoi(&((header_information)[9]));
+			php3_rqst->status = atoi(&((header_information)[9]));
 		}
 		/* Use a pstrdup here to get the memory straight from Apache's per-request pool to
 		 * avoid having our own memory manager complain about this memory not being freed
 		 * because it really shouldn't be freed until the end of the request and it isn't
 		 * easy for us to figure out when we allocated it vs. when something else might have.
 		 */
-		GLOBAL(php3_rqst)->status_line = pstrdup(GLOBAL(php3_rqst)->pool,&((header_information)[9]));
+		php3_rqst->status_line = pstrdup(php3_rqst->pool,&((header_information)[9]));
 	}
 #else
 	r = strchr(header_information, ':');
 	if (r) {
 		*r = '\0';
 		if (!strcasecmp(header_information, "Content-type")) {
-			if (GLOBAL(cont_type)) efree(GLOBAL(cont_type));
-			GLOBAL(cont_type) = estrdup(r + 1);
+			if (cont_type) efree(cont_type);
+			cont_type = estrdup(r + 1);
 #if 0 /*WIN32|WINNT / *M$ does us again*/
-			if (!strcmp(GLOBAL(cont_type)," text/html")){
+			if (!strcmp(cont_type," text/html")){
 				*r=':';
 				PUTS_H(header_information);
 				PUTS_H("\015\012");
@@ -169,7 +167,7 @@ void php4i_add_header_information(char *header_information)
 				char *tempstr=emalloc(strlen(header_information)+2);
 				
 				sprintf(tempstr,"%s\015\012",tempstr);
-				GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,tempstr);
+				sapi_rqst->header(sapi_rqst->scid,tempstr);
 				efree(tempstr);
 			}
 #elif FHTTPD
@@ -185,7 +183,7 @@ void php4i_add_header_information(char *header_information)
 		{
 		char *tempstr=emalloc(strlen(header_information)+2);
 		sprintf(tempstr,"%s\015\012",tempstr);
-		GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,tempstr);
+		sapi_rqst->header(sapi_rqst->scid,tempstr);
 		efree(tempstr);
 		}
 #elif FHTTPD
@@ -245,11 +243,11 @@ PHPAPI int php3_header(void)
 	}
 
 #if APACHE
-	if (!GLOBAL(php3_rqst)) {  /* we're not in a request, allow output */
+	if (!php3_rqst) {  /* we're not in a request, allow output */
 		PG(header_is_being_sent) = 0;
 		return 1;
 	}
-	if ((GLOBAL(php3_PrintHeader) && !GLOBAL(php3_HeaderPrinted)) || (GLOBAL(php3_PrintHeader) && GLOBAL(php3_HeaderPrinted) == 2)) {
+	if ((php3_PrintHeader && !php3_HeaderPrinted) || (php3_PrintHeader && php3_HeaderPrinted == 2)) {
 		cookie = php3_PopCookieList();
 		while (cookie) {
 			if (cookie->name)
@@ -306,7 +304,7 @@ PHPAPI int php3_header(void)
 			if (cookie->secure) {
 				strcat(tempstr, "; secure");
 			}
-			table_add(GLOBAL(php3_rqst)->headers_out, "Set-Cookie", tempstr);
+			table_add(php3_rqst->headers_out, "Set-Cookie", tempstr);
 			if (cookie->domain) efree(cookie->domain);
 			if (cookie->path) efree(cookie->path);
 			if (cookie->name) efree(cookie->name);
@@ -316,20 +314,20 @@ PHPAPI int php3_header(void)
 			cookie = php3_PopCookieList();
 			efree(tempstr);
 		}
-		GLOBAL(php3_HeaderPrinted) = 1;
-		GLOBAL(header_called) = 1;
-		send_http_header(GLOBAL(php3_rqst));
-		if (GLOBAL(php3_rqst)->header_only) {
+		php3_HeaderPrinted = 1;
+		header_called = 1;
+		send_http_header(php3_rqst);
+		if (php3_rqst->header_only) {
 			set_header_request(1);
 			PG(header_is_being_sent) = 0;
 			return(0);
 		}
 	}
 #else
-	if (GLOBAL(php3_PrintHeader) && !GLOBAL(php3_HeaderPrinted)) {
-		if (!GLOBAL(cont_type)) {
+	if (php3_PrintHeader && !php3_HeaderPrinted) {
+		if (!cont_type) {
 #if USE_SAPI
-			GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,"Content-type: text/html\015\012\015\012");
+			sapi_rqst->header(sapi_rqst->scid,"Content-type: text/html\015\012\015\012");
 #elif FHTTPD
 			php3_fhttpd_puts_header("Content-type: text/html\r\n");
 #else
@@ -337,30 +335,30 @@ PHPAPI int php3_header(void)
 #endif
 		} else {
 #if 0 /*WIN32|WINNT / *M$ does us again*/
-			if (!strcmp(GLOBAL(cont_type),"text/html")){
+			if (!strcmp(cont_type,"text/html")){
 #endif
 #if USE_SAPI
-			tempstr=emalloc(strlen(GLOBAL(cont_type))+18);
-			sprintf(tempstr,"Content-type: %s\015\012\015\012",GLOBAL(cont_type));
-			GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,tempstr);
+			tempstr=emalloc(strlen(cont_type)+18);
+			sprintf(tempstr,"Content-type: %s\015\012\015\012",cont_type);
+			sapi_rqst->header(sapi_rqst->scid,tempstr);
 			efree(tempstr);
 #elif FHTTPD
-			tempstr = emalloc(strlen(GLOBAL(cont_type))
+			tempstr = emalloc(strlen(cont_type)
 							  + sizeof("Content-type:") + 2);
 			if(tempstr) {
 				strcpy(tempstr, "Content-type:");
 				strcpy(tempstr + sizeof("Content-type:") - 1,
-					   GLOBAL(cont_type));
+					   cont_type);
 				strcat(tempstr, "\r\n");
 				php3_fhttpd_puts_header(tempstr);
 				efree(tempstr);
 			}
 #else
 			PUTS_H("Content-type:");
-			PUTS_H(GLOBAL(cont_type));
+			PUTS_H(cont_type);
 			PUTS_H("\015\012\015\012");
 #endif
-			efree(GLOBAL(cont_type));
+			efree(cont_type);
 #if 0 /*WIN32|WINNT / *M$ does us again*/
 			} else {
 				PUTS_H("\015\012");
@@ -368,12 +366,12 @@ PHPAPI int php3_header(void)
 #endif
 		}
 #if USE_SAPI
-		GLOBAL(sapi_rqst)->flush(GLOBAL(sapi_rqst)->scid);
+		sapi_rqst->flush(sapi_rqst->scid);
 #else
 		fflush(stdout);
 #endif
-		GLOBAL(php3_HeaderPrinted) = 1;
-		GLOBAL(header_called) = 1;
+		php3_HeaderPrinted = 1;
+		header_called = 1;
 	}
 #endif
 	PG(header_is_being_sent) = 0;
@@ -383,27 +381,25 @@ PHPAPI int php3_header(void)
 void php3_PushCookieList(char *name, char *value, time_t expires, char *path, char *domain, int secure)
 {
 	CookieList *new;
-	TLS_VARS;
 
 	new = emalloc(sizeof(CookieList));
-	new->next = GLOBAL(top);
+	new->next = top;
 	new->name = name;
 	new->value = value;
 	new->expires = expires;
 	new->path = path;
 	new->domain = domain;
 	new->secure = secure;
-	GLOBAL(top) = new;
+	top = new;
 }
 
 CookieList *php3_PopCookieList(void)
 {
 	CookieList *ret;
-	TLS_VARS;
 
-	ret = GLOBAL(top);
-	if (GLOBAL(top))
-		GLOBAL(top) = GLOBAL(top)->next;
+	ret = top;
+	if (top)
+		top = top->next;
 	return (ret);
 }
 
@@ -424,13 +420,12 @@ void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS)
 	int secure = 0;
 	pval *arg[6];
 	int arg_count;
-	TLS_VARS;
 
 	arg_count = ARG_COUNT(ht);
 	if (arg_count < 1 || arg_count > 6 || getParametersArray(ht, arg_count, arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if (GLOBAL(php3_HeaderPrinted) == 1) {
+	if (php3_HeaderPrinted == 1) {
 		php3_error(E_WARNING, "Oops, php3_SetCookie called after header has been sent\n");
 		return;
 	}
@@ -509,7 +504,7 @@ void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS)
 	{
 	char *tempstr2=emalloc(strlen(tempstr)+14);
 	sprintf(tempstr2,"Set-Cookie: %s\015\012",tempstr);
-	GLOBAL(sapi_rqst)->header(GLOBAL(sapi_rqst)->scid,tempstr2);
+	sapi_rqst->header(sapi_rqst->scid,tempstr2);
 	efree(tempstr2);
 	}
 #elif FHTTPD
@@ -538,8 +533,7 @@ void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS)
 
 int php3_headers_unsent(void)
 {
-	TLS_VARS;
-	if (GLOBAL(php3_HeaderPrinted)!=1 || !GLOBAL(php3_PrintHeader)) {
+	if (php3_HeaderPrinted!=1 || !php3_PrintHeader) {
 		return 1;
 	} else {
 		return 0;

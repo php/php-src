@@ -54,11 +54,9 @@ void php3_uniqid(INTERNAL_FUNCTION_PARAMETERS)
 {
 #ifdef HAVE_GETTIMEOFDAY
 	pval *prefix;
-
 	char uniqid[128];
 	int sec, usec;
 	struct timeval tv;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht,1,&prefix)==FAILURE) {
 		WRONG_PARAM_COUNT;

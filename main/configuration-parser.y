@@ -177,8 +177,8 @@ int php3_init_config(void)
 		}
 #if WIN32|WINNT
 		{
-			if (GLOBAL(php3_ini_path)) {
-				default_location = GLOBAL(php3_ini_path);
+			if (php3_ini_path) {
+				default_location = php3_ini_path;
 			} else {
 				default_location = (char *) malloc(512);
 			
@@ -189,17 +189,17 @@ int php3_init_config(void)
 			}
 		}
 #else
-		if (!GLOBAL(php3_ini_path)) {
+		if (!php3_ini_path) {
 			default_location = CONFIGURATION_FILE_PATH;
 		} else {
-			default_location = GLOBAL(php3_ini_path);
+			default_location = php3_ini_path;
 		}
 #endif
 
 /* build a path */
 		php_ini_path = (char *) malloc(sizeof(".")+strlen(env_location)+strlen(default_location)+2+1);
 
-		if (!GLOBAL(php3_ini_path)) {
+		if (!php3_ini_path) {
 #if WIN32|WINNT
 			sprintf(php_ini_path,".;%s;%s",env_location,default_location);
 #else
@@ -258,7 +258,7 @@ int php3_minit_browscap(INIT_FUNC_ARGS)
 	char *browscap = INI_STR("browscap");
 
 	if (browscap) {
-		if (_php3_hash_init(&GLOBAL(browser_hash), 0, NULL, (void (*)(void *))pvalue_browscap_destructor, 1)==FAILURE) {
+		if (_php3_hash_init(&browser_hash, 0, NULL, (void (*)(void *))pvalue_browscap_destructor, 1)==FAILURE) {
 			return FAILURE;
 		}
 
@@ -268,7 +268,7 @@ int php3_minit_browscap(INIT_FUNC_ARGS)
 			return FAILURE;
 		}
 		init_cfg_scanner();
-		active__php3_hash_table = &GLOBAL(browser_hash);
+		active__php3_hash_table = &browser_hash;
 		parsing_mode = PARSING_MODE_BROWSCAP;
 		currently_parsed_filename = browscap;
 		yyparse();
@@ -289,7 +289,7 @@ int php3_shutdown_config(void)
 int php3_mshutdown_browscap(SHUTDOWN_FUNC_ARGS)
 {
 	if (INI_STR("browscap")) {
-		_php3_hash_destroy(&GLOBAL(browser_hash));
+		_php3_hash_destroy(&browser_hash);
 	}
 	return SUCCESS;
 }

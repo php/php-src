@@ -1187,9 +1187,6 @@ PHP_FUNCTION(odbc_result)
 	UDWORD      crow;
 	UWORD       RowStatus[1];
 #endif
-#if !defined(COMPILE_DL) && defined(THREAD_SAFE)
-	TLS_VARS;
-#endif
 
 	field_ind = -1;
 	field = NULL;
@@ -1367,9 +1364,6 @@ PHP_FUNCTION(odbc_result_all)
 #if HAVE_SQL_EXTENDED_FETCH
 	UDWORD      crow;
 	UWORD       RowStatus[1];
-#endif
-#if !defined(COMPILE_DL) && defined(THREAD_SAFE)
-	TLS_VARS
 #endif
 
 	numArgs = ARG_COUNT(ht);

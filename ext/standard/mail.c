@@ -72,7 +72,6 @@ void php3_mail(INTERNAL_FUNCTION_PARAMETERS)
 	pval *argv[4];
 	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
 	int argc;
-	TLS_VARS;
 	
 	argc = ARG_COUNT(ht);
 	if (argc < 3 || argc > 4 || getParametersArray(ht, argc, argv) == FAILURE) {

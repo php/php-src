@@ -144,7 +144,6 @@ void php3_base64_encode(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *string;
 	unsigned char *result;
 	int ret_length;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -168,7 +167,6 @@ void php3_base64_decode(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *string;
 	unsigned char *result;
 	int ret_length;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht)!=1 || getParameters(ht,1,&string) == FAILURE) {
 		WRONG_PARAM_COUNT;

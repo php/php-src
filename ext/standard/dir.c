@@ -73,9 +73,7 @@ php3_module_entry php3_dir_module_entry = {
 
 int php3_minit_dir(INIT_FUNC_ARGS)
 {
-	TLS_VARS;
-	
-	GLOBAL(le_dirp) = register_list_destructors(closedir,NULL);
+	le_dirp = register_list_destructors(closedir,NULL);
 	return SUCCESS;
 }
 
@@ -86,7 +84,6 @@ void php3_opendir(INTERNAL_FUNCTION_PARAMETERS)
 	pval *arg;
 	DIR *dirp;
 	int ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -101,8 +98,8 @@ void php3_opendir(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno),errno);
 		RETURN_FALSE;
 	}
-	ret = php3_list_insert(dirp, GLOBAL(le_dirp));
-	GLOBAL(dirp_id) = ret;
+	ret = php3_list_insert(dirp, le_dirp);
+	dirp_id = ret;
 	RETURN_LONG(ret);
 }
 /* }}} */
@@ -115,7 +112,6 @@ void php3_closedir(INTERNAL_FUNCTION_PARAMETERS)
 	int id_to_find;
 	DIR *dirp;
 	int dirp_type;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) == 0) {
 		if (getThis(&id) == SUCCESS) {
@@ -125,7 +121,7 @@ void php3_closedir(INTERNAL_FUNCTION_PARAMETERS)
 			}
 			id_to_find = tmp->value.lval;
 		} else {
-			id_to_find = GLOBAL(dirp_id);
+			id_to_find = dirp_id;
 		}
 	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -135,7 +131,7 @@ void php3_closedir(INTERNAL_FUNCTION_PARAMETERS)
 	}
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != GLOBAL(le_dirp)) {
+	if (!dirp || dirp_type != le_dirp) {
 		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
@@ -149,7 +145,6 @@ void php3_chdir(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	int ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -173,7 +168,6 @@ void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS)
 	int id_to_find;
 	DIR *dirp;
 	int dirp_type;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) == 0) {
 		if (getThis(&id) == SUCCESS) {
@@ -183,7 +177,7 @@ void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS)
 			}
 			id_to_find = tmp->value.lval;
 		} else {
-			id_to_find = GLOBAL(dirp_id);
+			id_to_find = dirp_id;
 		}
 	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -193,7 +187,7 @@ void php3_rewinddir(INTERNAL_FUNCTION_PARAMETERS)
 	}
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != GLOBAL(le_dirp)) {
+	if (!dirp || dirp_type != le_dirp) {
 		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
@@ -210,7 +204,6 @@ void php3_readdir(INTERNAL_FUNCTION_PARAMETERS)
 	DIR *dirp;
 	int dirp_type;
 	struct dirent *direntp;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) == 0) {
 		if (getThis(&id) == SUCCESS) {
@@ -220,7 +213,7 @@ void php3_readdir(INTERNAL_FUNCTION_PARAMETERS)
 			}
 			id_to_find = tmp->value.lval;
 		} else {
-			id_to_find = GLOBAL(dirp_id);
+			id_to_find = dirp_id;
 		}
 	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -230,7 +223,7 @@ void php3_readdir(INTERNAL_FUNCTION_PARAMETERS)
 	}
 		
 	dirp = (DIR *)php3_list_find(id_to_find, &dirp_type);
-	if (!dirp || dirp_type != GLOBAL(le_dirp)) {
+	if (!dirp || dirp_type != le_dirp) {
 		php3_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
 		RETURN_FALSE;
 	}
@@ -248,7 +241,6 @@ void php3_getdir(INTERNAL_FUNCTION_PARAMETERS) {
 	pval *arg;
 	DIR *dirp;
 	int ret;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -263,8 +255,8 @@ void php3_getdir(INTERNAL_FUNCTION_PARAMETERS) {
 		php3_error(E_WARNING, "OpenDir: %s (errno %d)", strerror(errno), errno);
 		RETURN_FALSE;
 	}
-	ret = php3_list_insert(dirp, GLOBAL(le_dirp));
-	GLOBAL(dirp_id) = ret;
+	ret = php3_list_insert(dirp, le_dirp);
+	dirp_id = ret;
 
 	/* construct an object with some methods */
 	object_init(return_value);

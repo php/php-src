@@ -54,9 +54,8 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 	int file_upload = 0;
 	char *mb;
 	char boundary[100];
-	TLS_VARS;
 	
-	ctype = GLOBAL(request_info).content_type;
+	ctype = request_info.content_type;
 	if (!ctype) {
 		php3_error(E_WARNING, "POST Error: content-type missing");
 		return NULL;
@@ -81,7 +80,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 			return NULL;
 		}
 	}
-	length = GLOBAL(request_info).content_length;
+	length = request_info.content_length;
 	cnt = length;
 	buf = (char *) emalloc((length + 1) * sizeof(char));
 	if (!buf) {
@@ -93,23 +92,23 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
     buf[length]=0;
 #else
 #if MODULE_MAGIC_NUMBER > 19961007
-	if (should_client_block(GLOBAL(php3_rqst))) {
+	if (should_client_block(php3_rqst)) {
 		void (*handler) (int);
 		int dbsize, len_read, dbpos = 0;
 
-		hard_timeout("copy script args", GLOBAL(php3_rqst));	/* start timeout timer */
+		hard_timeout("copy script args", php3_rqst);	/* start timeout timer */
 		handler = signal(SIGPIPE, SIG_IGN);		/* Ignore sigpipes for now */
-		while ((len_read = get_client_block(GLOBAL(php3_rqst), argsbuffer, HUGE_STRING_LEN)) > 0) {
+		while ((len_read = get_client_block(php3_rqst, argsbuffer, HUGE_STRING_LEN)) > 0) {
 			if ((dbpos + len_read) > length)
 				dbsize = length - dbpos;
 			else
 				dbsize = len_read;
-			reset_timeout(GLOBAL(php3_rqst));	/* Make sure we don't timeout */
+			reset_timeout(php3_rqst);	/* Make sure we don't timeout */
 			memcpy(buf + dbpos, argsbuffer, dbsize);
 			dbpos += dbsize;
 		}
 		signal(SIGPIPE, handler);	/* restore normal sigpipe handling */
-		kill_timeout(GLOBAL(php3_rqst));	/* stop timeout timer */
+		kill_timeout(php3_rqst);	/* stop timeout timer */
 	}
 #else
 	cnt = 0;
@@ -121,7 +120,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 		bytes = fread(buf + cnt, 1, length - cnt, stdin);
 #endif
 #if USE_SAPI
-		bytes = GLOBAL(sapi_rqst)->readclient(GLOBAL(sapi_rqst)->scid,buf + cnt, 1, length - cnt);
+		bytes = sapi_rqst->readclient(sapi_rqst->scid,buf + cnt, 1, length - cnt);
 #endif
 		cnt += bytes;
 	} while (bytes && cnt < length);
@@ -143,7 +142,7 @@ static char *php3_getpost(pval *http_post_vars PLS_DC)
 		postdata_ptr->value.str.len = cnt;
 		postdata_ptr->refcount=1;
 		postdata_ptr->is_ref=0;
-		_php3_hash_add(&GLOBAL(symbol_table), "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
+		_php3_hash_add(&symbol_table, "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), postdata_ptr, sizeof(pval *),NULL);
 	}
 #endif
 	return (buf);
@@ -349,12 +348,12 @@ void php3_treat_data(int arg, char *str)
 	if (arg == PARSE_POST) {
 		res = php3_getpost(array_ptr PLS_CC);
 	} else if (arg == PARSE_GET) {		/* Get data */
-		var = GLOBAL(request_info).query_string;
+		var = request_info.query_string;
 		if (var && *var) {
 			res = (char *) estrdup(var);
 		}
 	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		var = (char *)GLOBAL(request_info).cookies;
+		var = (char *)request_info.cookies;
 		if (var && *var) {
 			res = (char *) estrdup(var);
 		}
@@ -408,27 +407,27 @@ void php3_TreatHeaders(void)
 	char *escaped_str;
 	PLS_FETCH();
 
-	if (GLOBAL(php3_rqst)->headers_in)
-		s = table_get(GLOBAL(php3_rqst)->headers_in, "Authorization");
+	if (php3_rqst->headers_in)
+		s = table_get(php3_rqst->headers_in, "Authorization");
 	if (!s)
 		return;
 
 	/* Check to make sure that this URL isn't authenticated
 	   using a traditional auth module mechanism */
-	if (auth_type(GLOBAL(php3_rqst))) {
+	if (auth_type(php3_rqst)) {
 		/*php3_error(E_WARNING, "Authentication done by server module\n");*/
 		return;
 	}
-	if (strcmp(t=getword(GLOBAL(php3_rqst)->pool, &s, ' '), "Basic")) {
+	if (strcmp(t=getword(php3_rqst->pool, &s, ' '), "Basic")) {
 		/* Client tried to authenticate using wrong auth scheme */
 		php3_error(E_WARNING, "client used wrong authentication scheme (%s)", t);
 		return;
 	}
-	t = uudecode(GLOBAL(php3_rqst)->pool, s);
+	t = uudecode(php3_rqst->pool, s);
 #if MODULE_MAGIC_NUMBER > 19961007
-	user = getword_nulls_nc(GLOBAL(php3_rqst)->pool, &t, ':');
+	user = getword_nulls_nc(php3_rqst->pool, &t, ':');
 #else
-	user = getword(GLOBAL(php3_rqst)->pool, &t, ':');
+	user = getword(php3_rqst->pool, &t, ':');
 #endif
 	type = "Basic";
 

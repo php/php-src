@@ -106,7 +106,7 @@ void _php3_info(void)
 
 
 	PUTS("<img src=\"");
-	/*PUTS(GLOBAL(php3_rqst)->uri);*/
+	/*PUTS(php3_rqst->uri);*/
 	PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"56\" align=\"right\">\n");
 	php3_printf("<center><h1>PHP Version %s</h1></center>\n", PHP_VERSION);
 	PUTS("<p>by <a href=\"mailto:rasmus@lerdorf.on.ca\">Rasmus Lerdorf</a>,\n");
@@ -134,7 +134,7 @@ void _php3_info(void)
 	PUTS("HSREGEX=" PHP_HSREGEX "</td></tr>\n");
 #endif
 
-	_php3_hash_apply(&GLOBAL(module_registry),(int (*)(void *))_display_module_info);
+	_php3_hash_apply(&module_registry,(int (*)(void *))_display_module_info);
 	PUTS("</table>\n");
 
 	SECTION("Configuration");
@@ -196,7 +196,7 @@ void _php3_info(void)
 	PUTS("</table>");
 
 #if USE_SAPI /* call a server module specific info function */
-	GLOBAL(sapi_rqst)->info(GLOBAL(sapi_rqst));
+	sapi_rqst->info(sapi_rqst);
 #endif
 
 	SECTION("Environment");
@@ -323,7 +323,7 @@ void _php3_info(void)
 #if APACHE
 	{
 		register int i;
-		array_header *arr = table_elts(GLOBAL(php3_rqst)->subprocess_env);
+		array_header *arr = table_elts(php3_rqst->subprocess_env);
 		table_entry *elts = (table_entry *)arr->elts;
 
 		SECTION("Apache Environment");	
@@ -350,9 +350,9 @@ void _php3_info(void)
 		PUTS("<table border=5 width=\"600\">\n");
 		PUTS(" <tr><th colspan=2 bgcolor=\"" HEADER_COLOR "\">HTTP Request Headers</th></tr>\n");
 		PUTS("<tr><td bgcolor=\"" ENTRY_NAME_COLOR "\">HTTP Request</td><td bgcolor=\"" CONTENTS_COLOR "\">");
-		PUTS(GLOBAL(php3_rqst)->the_request);
+		PUTS(php3_rqst->the_request);
 		PUTS("&nbsp;</td></tr>\n");
-		env_arr = table_elts(GLOBAL(php3_rqst)->headers_in);
+		env_arr = table_elts(php3_rqst->headers_in);
 		env = (table_entry *)env_arr->elts;
 		for (i = 0; i < env_arr->nelts; ++i) {
 			if (env[i].key) {
@@ -364,7 +364,7 @@ void _php3_info(void)
 			}
 		}
 		PUTS(" <tr><th colspan=2  bgcolor=\"" HEADER_COLOR "\">HTTP Response Headers</th></tr>\n");
-		env_arr = table_elts(GLOBAL(php3_rqst)->headers_out);
+		env_arr = table_elts(php3_rqst->headers_out);
 		env = (table_entry *)env_arr->elts;
 		for(i = 0; i < env_arr->nelts; ++i) {
 			if (env[i].key) {
@@ -385,7 +385,7 @@ void _php3_info(void)
 	PUTS("<table width=\"100%%\"><tr>\n");
 	php3_printf("<td><h2>Zend</h2>This program makes use of the Zend scripting language engine:<br><pre>%s</pre></td>", get_zend_version());
 	PUTS("<td width=\"100\"><a href=\"http://www.zend.com/\"><img src=\"");
-	/*PUTS(GLOBAL(php3_rqst)->uri);*/
+	/*PUTS(php3_rqst->uri);*/
 	PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" width=\"100\" height=\"89\"></a></td>\n");
 	PUTS("</tr></table>\n");
 
@@ -415,8 +415,6 @@ void _php3_info(void)
    Output a page of useful information about PHP and the current request */
 void php3_info(INTERNAL_FUNCTION_PARAMETERS)
 {
-	TLS_VARS;
-	
 	_php3_info();
 	RETURN_TRUE;
 }
@@ -426,8 +424,6 @@ void php3_info(INTERNAL_FUNCTION_PARAMETERS)
    Return the current PHP version */
 void php3_version(INTERNAL_FUNCTION_PARAMETERS)
 {
-	TLS_VARS;
-	
     RETURN_STRING(PHP_VERSION,1);
 }
 /* }}} */

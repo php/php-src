@@ -68,7 +68,6 @@ char *_php3_gethostbyname(char *name);
 void php3_gethostbyaddr(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -108,7 +107,6 @@ char *_php3_gethostbyaddr(char *ip)
 void php3_gethostbyname(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
-	TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -129,7 +127,6 @@ void php3_gethostbynamel(INTERNAL_FUNCTION_PARAMETERS)
 	struct hostent *hp;
 	struct in_addr in;
 	int i;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -185,7 +182,6 @@ void php3_checkdnsrr(INTERNAL_FUNCTION_PARAMETERS)
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
 #endif
 	u_char ans[MAXPACKET];
-	TLS_VARS;
 	
 	switch (ARG_COUNT(ht)) {
 	case 1:
@@ -270,7 +266,7 @@ void php3_getmxrr(INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_FALSE;
 		}
         need_weight = 1;
-		pval_destructor(weight_list _INLINE_TLS); /* start with clean array */
+		pval_destructor(weight_list); /* start with clean array */
 		if ( array_init(weight_list) == FAILURE ) {
 			RETURN_FALSE;
 		}
@@ -280,7 +276,7 @@ void php3_getmxrr(INTERNAL_FUNCTION_PARAMETERS)
     }
 
     convert_to_string( host );
-    pval_destructor(mx_list _INLINE_TLS); /* start with clean array */
+    pval_destructor(mx_list); /* start with clean array */
     if ( array_init(mx_list) == FAILURE ) {
         RETURN_FALSE;
     }

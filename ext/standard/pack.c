@@ -122,7 +122,6 @@ PHP_FUNCTION(pack)
 	int formatcount = 0;
 	int outputpos = 0, outputsize = 0;
 	char *output;
-	TLS_VARS;
 
 	argc = ARG_COUNT(ht);
 
@@ -502,7 +501,6 @@ PHP_FUNCTION(unpack)
 	int formatlen;
 	int inputpos, inputlen;
 	int i;
-	TLS_VARS;
 
 	if ((ARG_COUNT(ht) != 2) || getParameters(ht, 2, &formatarg, &inputarg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -811,7 +809,6 @@ int php3_minit_pack(INIT_FUNC_ARGS)
 {
 	int machine_endian_check = 1;
 	int i;
-	TLS_VARS;
 
 	machine_little_endian = ((char *)&machine_endian_check)[0];
 

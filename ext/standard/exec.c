@@ -111,7 +111,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 	buf[0] = '\0';
 	if (type==2) {
 		if (array->type != IS_ARRAY) {
-			pval_destructor(array _INLINE_TLS);
+			pval_destructor(array);
 			array_init(array);
 		}
 	}
@@ -121,9 +121,9 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 				if (output) PUTS(buf);
 #if APACHE
 #  if MODULE_MAGIC_NUMBER > 19970110
-				if (output) rflush(GLOBAL(php3_rqst));
+				if (output) rflush(php3_rqst);
 #  else
-				if (output) bflush(GLOBAL(php3_rqst)->connection->client);
+				if (output) bflush(php3_rqst->connection->client);
 #  endif
 #endif
 #if CGI_BINARY
@@ -133,7 +133,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
                                /* fhttpd doesn't flush */
 #endif
 #if USE_SAPI
-				GLOBAL(sapi_rqst)->flush(GLOBAL(sapi_rqst)->scid);
+				sapi_rqst->flush(sapi_rqst->scid);
 #endif
 			}
 			else if (type == 2) {
@@ -321,7 +321,6 @@ void php3_escapeshellcmd(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg1;
 	char *cmd;
-	TLS_VARS;
 
 	if (getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;

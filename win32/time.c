@@ -101,10 +101,9 @@ int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue
 {
 	int timeout = value->it_value.tv_sec * 1000 + value->it_value.tv_usec;
 	int repeat = TIME_ONESHOT;
-	TLS_VARS;
 
 	/*make sure the message queue is initialized */
-	PeekMessage(GLOBAL(phpmsg), NULL, WM_USER, WM_USER, PM_NOREMOVE);
+	PeekMessage(phpmsg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
 	if (timeout > 0) {
 		struct timer_msg *msg = malloc(sizeof(struct timer_msg));
 		msg->threadid = GetCurrentThreadId();
@@ -114,15 +113,15 @@ int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue
 		switch (which) {
 			case ITIMER_REAL:
 				msg->signal = SIGALRM;
-				GLOBAL(realtimer) = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
+				realtimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
 				break;
 			case ITIMER_VIRT:
 				msg->signal = SIGVTALRM;
-				GLOBAL(virttimer) = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
+				virttimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
 				break;
 			case ITIMER_PROF:
 				msg->signal = SIGPROF;
-				GLOBAL(proftimer) = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
+				proftimer = timeSetEvent(timeout, 100, (LPTIMECALLBACK) setitimer_timeout, (UINT) msg, repeat);
 				break;
 			default:
 				errno = EINVAL;
@@ -132,13 +131,13 @@ int setitimer(int which, const struct itimerval *value, struct itimerval *ovalue
 	} else {
 		switch (which) {
 			case ITIMER_REAL:
-				timeKillEvent(GLOBAL(realtimer));
+				timeKillEvent(realtimer);
 				break;
 			case ITIMER_VIRT:
-				timeKillEvent(GLOBAL(virttimer));
+				timeKillEvent(virttimer);
 				break;
 			case ITIMER_PROF:
-				timeKillEvent(GLOBAL(proftimer));
+				timeKillEvent(proftimer);
 				break;
 			default:
 				errno = EINVAL;

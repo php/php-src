@@ -161,7 +161,6 @@ void php3_parse_url(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *string;
 	url *resource;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &string) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -270,7 +269,6 @@ void php3_urlencode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *str;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -292,7 +290,6 @@ void php3_urldecode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	int len;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -367,7 +364,6 @@ void php3_rawurlencode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	char *str;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -389,7 +385,6 @@ void php3_rawurldecode(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *arg;
 	int len;
-	TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;

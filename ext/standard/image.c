@@ -331,7 +331,7 @@ void php3_getimagesize(INTERNAL_FUNCTION_PARAMETERS)
             RETURN_FALSE;
         }
 
-		pval_destructor(info _INLINE_TLS);
+		pval_destructor(info);
 		if (array_init(info) == FAILURE) {
 			return;
 		}

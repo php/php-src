@@ -149,7 +149,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 	}
 	
 	/* update the .request_started property... */
-	if (_php3_hash_find(&GLOBAL(module_registry),module_entry->name,strlen(module_entry->name)+1,(void **) &tmp)==FAILURE) {
+	if (_php3_hash_find(&module_registry,module_entry->name,strlen(module_entry->name)+1,(void **) &tmp)==FAILURE) {
 		php3_error(E_ERROR,"%s:  Loaded module got lost",module_entry->name);
 		RETURN_FALSE;
 	}
@@ -159,8 +159,9 @@ void php3_dl(pval *file,int type,pval *return_value)
 	RETURN_TRUE;
 }
 
-void php3_info_dl(void){
-	TLS_VARS;
+
+void php3_info_dl(void)
+{
 	PUTS("Dynamic Library support enabled.\n");
 }
 
