@@ -34,7 +34,8 @@
 
 #include "php.h"
 #include "php_session.h"
-#include "../standard/flock_compat.h"
+#include "mod_files.h"
+#include "ext/standard/flock_compat.h"
 
 typedef struct {
 	int fd;
