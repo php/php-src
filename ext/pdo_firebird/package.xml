@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE package SYSTEM "../pear/package.dtd">
-<package version="1.0"><!-- $Id: package.xml,v 1.6 2005-02-09 05:00:58 wez Exp $ -->
+<package version="1.0"><!-- $Id: package.xml,v 1.7 2005-02-09 05:26:38 wez Exp $ -->
  <name>PDO_FIREBIRD</name>
  <summary>Firebird/InterBase 6 driver for PDO</summary>
  <maintainers>
@@ -27,6 +27,8 @@
   <notes>
    To compile and run this module, you will need to have the main PDO module and Firebird's
    or InterBase's client library installed on your system.
+
+   Hope it works!
   </notes>
 
   <filelist>
