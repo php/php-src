@@ -760,8 +760,8 @@ PHP_FUNCTION(long2ip)
 		WRONG_PARAM_COUNT;
 	}
 	
-	convert_to_long_ex(num);
-	myaddr.s_addr = (*num)->value.lval;
+	convert_to_string_ex(num);
+	myaddr.s_addr = strtoul((*num)->value.str.val,NULL,10);
 
 	RETURN_STRING (inet_ntoa(myaddr), 1);
 }
