@@ -27,7 +27,7 @@ class test extends base {
 
 $obj = new test;
 $obj->p4 = 'A';
-$copy = $obj->__clone();
+$copy = clone $obj;
 echo "Object\n";
 print_r($obj);
 echo "Clown\n";
@@ -50,7 +50,7 @@ test Object
 (
     [p1] => test:1
     [p3] => test:3
-    [p4] => test:4
+    [p4] => A
     [p5] => clone:5
     [p2] => base:2
     [p6:private] => base:6

@@ -13,7 +13,7 @@ class test {
 $obj = new test;
 $obj->p2 = 'A';
 $obj->p3 = 'B';
-$copy = $obj->__clone();
+$copy = clone $obj;
 $copy->p3 = 'C';
 echo "Object\n";
 var_dump($obj);

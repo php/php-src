@@ -1,5 +1,5 @@
 --TEST--
-ZE2 __clone()
+ZE2 object cloning, 6
 --SKIPIF--
 <?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
@@ -13,7 +13,6 @@ class MyCloneable {
 	}
 
 	function __clone() {
-		$this->name = $that->name;
 		$this->address = "New York";
 		$this->id = self::$id++;
 	}
@@ -26,7 +25,7 @@ $original->address = "Tel-Aviv";
 
 echo $original->id . "\n";
 
-$clone = $original->__clone();
+$clone = clone $original;
 
 echo $clone->id . "\n";
 echo $clone->name . "\n";
