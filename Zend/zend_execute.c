@@ -426,7 +426,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	FREE_OP(Ts, op2, EG(free_op2));
 	if (result) {
 		T(result->u.var).var.ptr = value;
-		T(result->u.var).var.ptr_ptr = NULL; /* see if we can nuke this */
+		T(result->u.var).var.ptr_ptr = NULL; /* see if we can remove this */
 		SELECTIVE_PZVAL_LOCK(value, result);
 	}
 }
