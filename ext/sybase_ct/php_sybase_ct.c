@@ -243,30 +243,43 @@ static int _call_message_handler(zval *callback_name, CS_SERVERMSG *srvmsg TSRML
 	int handled = 0;
 
 	if (callback_name) {
-		zval *retval = NULL;
-		zval severity, msgnumber, state, line, text;
-		zval *ptrs[5]= {&msgnumber, &severity, &state, &line, &text};
-		zval **args[5]= {&ptrs[0], &ptrs[1], &ptrs[2], &ptrs[3], &ptrs[4]};
+		zval *msgnumber, *severity, *state, *line, *text, *retval = NULL;
+		zval **args[5];
 
-		INIT_ZVAL(msgnumber);
-		INIT_ZVAL(severity);
-		INIT_ZVAL(state);
-		INIT_ZVAL(line);
-		INIT_ZVAL(text);
-	
-		ZVAL_LONG(&msgnumber, srvmsg->msgnumber);
-		ZVAL_LONG(&severity, srvmsg->severity);
-		ZVAL_LONG(&state, srvmsg->state);
-		ZVAL_LONG(&line, srvmsg->line);
-		ZVAL_STRING(&text, srvmsg->text, 0);
+		MAKE_STD_ZVAL(msgnumber);
+		ZVAL_LONG(msgnumber, srvmsg->msgnumber);
+		args[0] = &msgnumber;
+
+		MAKE_STD_ZVAL(severity);
+		ZVAL_LONG(severity, srvmsg->severity);
+		args[1] = &severity;
+
+		MAKE_STD_ZVAL(state);
+		ZVAL_LONG(state, srvmsg->state);
+		args[2] = &state;
+
+		MAKE_STD_ZVAL(line);
+		ZVAL_LONG(line, srvmsg->line);
+		args[3] = &line;
+
+		MAKE_STD_ZVAL(text);	
+		ZVAL_STRING(text, srvmsg->text, 1);
+		args[4] = &text;
 			
 		if (call_user_function_ex(EG(function_table), NULL, callback_name, &retval, 5, args, 0, NULL TSRMLS_CC) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot call the messagehandler %s", Z_STRVAL_P(callback_name));
 		}
+
 		if (retval) {
 			handled= ((Z_TYPE_P(retval) != IS_BOOL) || (Z_BVAL_P(retval) != 0));
 			zval_ptr_dtor(&retval);
 		}
+
+		zval_ptr_dtor(&msgnumber);
+		zval_ptr_dtor(&severity);
+		zval_ptr_dtor(&state);
+		zval_ptr_dtor(&line);
+		zval_ptr_dtor(&text);
 	}
 
 	return handled;
