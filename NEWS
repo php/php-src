@@ -6,6 +6,8 @@ PHP 4                                                                      NEWS
 - Fixed several egregious leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
+- Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
+  (Jani)
 - Fixed bug #31797 (exif_read_data() uses too low nesting limit). (Ilia)
 - Fixed bug #31796 (readline completion handler does not handle empty return
   values). (Ilia)
