@@ -326,7 +326,8 @@ TSRM_API MUTEX_T tsrm_mutex_alloc( void )
     MUTEX_T mutexp;
 
 #ifdef WIN32
-    mutexp = CreateMutex(NULL,FALSE,NULL);
+    mutexp = malloc(sizeof(CRITICAL_SECTION));
+	InitializeCriticalSection(mutexp);
 #elif defined(GNUPTH)
 	mutexp = (MUTEX_T) malloc(sizeof(*mutexp));
 	pth_mutex_init(mutexp);
@@ -350,7 +351,7 @@ TSRM_API void tsrm_mutex_free( MUTEX_T mutexp )
 {
     if (mutexp) {
 #ifdef WIN32
-		CloseHandle(mutexp);
+		DeleteCriticalSection(mutexp);
 #elif defined(GNUPTH)
 		free(mutexp);
 #elif defined(PTHREADS)
@@ -375,7 +376,8 @@ TSRM_API int tsrm_mutex_lock( MUTEX_T mutexp )
 	tsrm_debug("Mutex locked thread: %ld\n",tsrm_thread_id());
 #endif
 #ifdef WIN32
-    return WaitForSingleObject(mutexp,1000);
+	EnterCriticalSection(mutexp);
+	return 1;
 #elif defined(GNUPTH)
 	return pth_mutex_acquire(mutexp, 0, NULL);
 #elif defined(PTHREADS)
@@ -395,7 +397,8 @@ TSRM_API int tsrm_mutex_unlock( MUTEX_T mutexp )
 	tsrm_debug("Mutex unlocked thread: %ld\n",tsrm_thread_id());
 #endif
 #ifdef WIN32
-    return ReleaseMutex(mutexp);
+	LeaveCriticalSection(mutexp);
+	return 1;
 #elif defined(GNUPTH)
 	return pth_mutex_release(mutexp);
 #elif defined(PTHREADS)
