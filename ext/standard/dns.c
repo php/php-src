@@ -159,12 +159,12 @@ char *php_gethostbyname(char *name)
 	return estrdup(inet_ntoa(in));
 }
 
-#if !defined(PHP_WIN32)||HAVE_BINDLIB
 
 /* {{{ proto int checkdnsrr(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */
 PHP_FUNCTION(checkdnsrr)
 {
+#if !defined(PHP_WIN32)||HAVE_BINDLIB
 	pval **arg1,**arg2;
 	int type,i;
 #ifndef MAXPACKET
@@ -206,8 +206,13 @@ PHP_FUNCTION(checkdnsrr)
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
+#else
+    PHP_NOT_IN_THIS_BUILD;
+#endif
 }
 /* }}} */
+
+#if !defined(PHP_WIN32)||HAVE_BINDLIB
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -220,11 +225,13 @@ PHP_FUNCTION(checkdnsrr)
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN  256
 #endif /* MAXHOSTNAMELEN */
+#endif
 
 /* {{{ proto int getmxrr(string hostname, array mxhosts [, array weight])
    Get MX records corresponding to a given Internet host name */
 PHP_FUNCTION(getmxrr)
 {
+#if !defined(PHP_WIN32)||HAVE_BINDLIB
 	pval *host, *mx_list, *weight_list;
 	int need_weight = 0;
 	int count,qdc;
@@ -307,10 +314,12 @@ PHP_FUNCTION(getmxrr)
 		}
 	}
 	RETURN_TRUE;
+#else
+    PHP_NOT_IN_THIS_BUILD;
+#endif
 }
 /* }}} */
 
-#endif
 /*
  * Local variables:
  * tab-width: 4

@@ -37,12 +37,12 @@
 
 void php_dl(pval *file,int type,pval *return_value);
 
-#ifdef HAVE_LIBDL
 
 /* dynamic loading functions */
 PHP_FUNCTION(dl);
-PHP_MINFO_FUNCTION(dl);
 
+#ifdef HAVE_LIBDL
+PHP_MINFO_FUNCTION(dl);
 #else
 
 #endif
