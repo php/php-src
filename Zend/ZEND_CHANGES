@@ -184,6 +184,38 @@ Changes in the Zend Engine 2.0
 
       Old code that has no user-defined classes or functions named 
       'interface' or 'implements' should run without modifications.
+      
+      An interface may extend one or more base interfaces (but not 
+      implement them). Neither a class nor an interface can inherit
+      methods of the same name from different root interfaces.
+
+      Example:
+
+        <?php
+        interface Printable {
+          function dump();
+        }
+        
+        interface Streamable {
+          function writeToStream();
+          static function readFromStream();
+        }
+
+        class PrintableExample implements Printable, Streamable {
+          public function dump() {
+            // ...
+          }
+          function writeToStream() {
+            // ...
+          }
+          static function readFromStream() {
+            // ...
+          }
+        }
+        ?>
+      
+      A class that does not implement all interface methods must be 
+      declared as an abstract class.
 
     * Class Type Hints.
 
