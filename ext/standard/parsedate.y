@@ -86,46 +86,9 @@
    then those parser generators need to be fixed instead of adding those
    names to this list. */
 
-#define yymaxdepth php_gd_maxdepth
 #define yyparse php_gd_parse
 #define yylex   php_gd_lex
-#define yyerror php_gd_error
-#define yylval  php_gd_lval
-#define yychar  php_gd_char
-#define yydebug php_gd_debug
-#define yypact  php_gd_pact
-#define yyr1    php_gd_r1
-#define yyr2    php_gd_r2
-#define yydef   php_gd_def
-#define yychk   php_gd_chk
-#define yypgo   php_gd_pgo
-#define yyact   php_gd_act
-#define yyexca  php_gd_exca
-#define yyerrflag php_gd_errflag
-#define yynerrs php_gd_nerrs
-#define yyps    php_gd_ps
-#define yypv    php_gd_pv
-#define yys     php_gd_s
-#define yy_yys  php_gd_yys
-#define yystate php_gd_state
-#define yytmp   php_gd_tmp
-#define yyv     php_gd_v
-#define yy_yyv  php_gd_yyv
-#define yyval   php_gd_val
-#define yylloc  php_gd_lloc
-#define yyreds  php_gd_reds          /* With YYDEBUG defined */
-#define yytoks  php_gd_toks          /* With YYDEBUG defined */
-#define yylhs   php_gd_yylhs
-#define yylen   php_gd_yylen
-#define yydefred php_gd_yydefred
-#define yydgoto php_gd_yydgoto
-#define yysindex php_gd_yysindex
-#define yyrindex php_gd_yyrindex
-#define yygindex php_gd_yygindex
-#define yytable  php_gd_yytable
-#define yycheck  php_gd_yycheck
 
-static int yylex ();
 static int yyerror ();
 
 #define EPOCH		1970
@@ -150,45 +113,46 @@ typedef enum _MERIDIAN {
     MERam, MERpm, MER24
 } MERIDIAN;
 
+struct date_yy {
+	const char	*yyInput;
+	int	yyDayOrdinal;
+	int	yyDayNumber;
+	int	yyHaveDate;
+	int	yyHaveDay;
+	int	yyHaveRel;
+	int	yyHaveTime;
+	int	yyHaveZone;
+	int	yyTimezone;
+	int	yyDay;
+	int	yyHour;
+	int	yyMinutes;
+	int	yyMonth;
+	int	yySeconds;
+	int	yyYear;
+	MERIDIAN	yyMeridian;
+	int	yyRelDay;
+	int	yyRelHour;
+	int	yyRelMinutes;
+	int	yyRelMonth;
+	int	yyRelSeconds;
+	int	yyRelYear;
+};
 
-/*
-**  Global variables.  We could get rid of most of these by using a good
-**  union as the yacc stack.  (This routine was originally written before
-**  yacc had the %union construct.)  Maybe someday; right now we only use
-**  the %union very rarely.
-*/
-static const char	*yyInput;
-static int	yyDayOrdinal;
-static int	yyDayNumber;
-static int	yyHaveDate;
-static int	yyHaveDay;
-static int	yyHaveRel;
-static int	yyHaveTime;
-static int	yyHaveZone;
-static int	yyTimezone;
-static int	yyDay;
-static int	yyHour;
-static int	yyMinutes;
-static int	yyMonth;
-static int	yySeconds;
-static int	yyYear;
-static MERIDIAN	yyMeridian;
-static int	yyRelDay;
-static int	yyRelHour;
-static int	yyRelMinutes;
-static int	yyRelMonth;
-static int	yyRelSeconds;
-static int	yyRelYear;
+typedef union _date_ll {
+    int			Number;
+    enum _MERIDIAN	Meridian;
+} date_ll;
+
+#define YYPARSE_PARAM parm
+#define YYLEX_PARAM parm
+#define YYSTYPE date_ll
+#define YYLTYPE void
 
 %}
 
 /* This grammar has 14 shift/reduce conflicts. */
 %expect 14
-
-%union {
-    int			Number;
-    enum _MERIDIAN	Meridian;
-}
+%pure_parser
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
@@ -206,94 +170,95 @@ spec	: /* NULL */
 	;
 
 item	: time {
-	    yyHaveTime++;
+	    ((struct date_yy *)parm)->yyHaveTime++;
 	}
 	| zone {
-	    yyHaveZone++;
+	    ((struct date_yy *)parm)->yyHaveZone++;
 	}
 	| date {
-	    yyHaveDate++;
+	    ((struct date_yy *)parm)->yyHaveDate++;
 	}
 	| day {
-	    yyHaveDay++;
+	    ((struct date_yy *)parm)->yyHaveDay++;
 	}
 	| rel {
-	    yyHaveRel++;
+	    ((struct date_yy *)parm)->yyHaveRel++;
 	}
 	| number
 	;
 
 time	: tUNUMBER tMERIDIAN {
-	    yyHour = $1;
-	    yyMinutes = 0;
-	    yySeconds = 0;
-	    yyMeridian = $2;
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = 0;
+	    ((struct date_yy *)parm)->yySeconds = 0;
+	    ((struct date_yy *)parm)->yyMeridian = $2;
 	}
 	| tUNUMBER ':' tUNUMBER o_merid {
-	    yyHour = $1;
-	    yyMinutes = $3;
-	    yySeconds = 0;
-	    yyMeridian = $4;
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yySeconds = 0;
+	    ((struct date_yy *)parm)->yyMeridian = $4;
 	}
 	| tUNUMBER ':' tUNUMBER tSNUMBER {
-	    yyHour = $1;
-	    yyMinutes = $3;
-	    yyMeridian = MER24;
-	    yyHaveZone++;
-	    yyTimezone = ($4 < 0
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	    ((struct date_yy *)parm)->yyHaveZone++;
+	    ((struct date_yy *)parm)->yyTimezone = ($4 < 0
 			  ? -$4 % 100 + (-$4 / 100) * 60
 			  : - ($4 % 100 + ($4 / 100) * 60));
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER o_merid {
-	    yyHour = $1;
-	    yyMinutes = $3;
-	    yySeconds = $5;
-	    yyMeridian = $6;
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yySeconds = $5;
+	    ((struct date_yy *)parm)->yyMeridian = $6;
 	}
 	| tUNUMBER ':' tUNUMBER ':' tUNUMBER tSNUMBER {
 	    /* ISO 8601 format.  hh:mm:ss[+-][0-9]{2}([0-9]{2})?.  */
-	    yyHour = $1;
-	    yyMinutes = $3;
-	    yySeconds = $5;
-	    yyMeridian = MER24;
-	    yyHaveZone++;
+	    ((struct date_yy *)parm)->yyHour = $1;
+	    ((struct date_yy *)parm)->yyMinutes = $3;
+	    ((struct date_yy *)parm)->yySeconds = $5;
+	    ((struct date_yy *)parm)->yyMeridian = MER24;
+	    ((struct date_yy *)parm)->yyHaveZone++;
 		if ($6 <= -100 || $6 >= 100) {
-			yyTimezone =  -$6 % 100 + (-$6 / 100) * 60;
+			((struct date_yy *)parm)->yyTimezone =  
+				-$6 % 100 + (-$6 / 100) * 60;
 		} else {
-			yyTimezone =  -$6 * 60;
+			((struct date_yy *)parm)->yyTimezone =  -$6 * 60;
 		}
 	}
 	;
 
 zone	: tZONE {
-	    yyTimezone = $1;
+	    ((struct date_yy *)parm)->yyTimezone = $1;
 	}
 	| tDAYZONE {
-	    yyTimezone = $1 - 60;
+	    ((struct date_yy *)parm)->yyTimezone = $1 - 60;
 	}
 	|
 	  tZONE tDST {
-	    yyTimezone = $1 - 60;
+	    ((struct date_yy *)parm)->yyTimezone = $1 - 60;
 	}
 	;
 
 day	: tDAY {
-	    yyDayOrdinal = 1;
-	    yyDayNumber = $1;
+	    ((struct date_yy *)parm)->yyDayOrdinal = 1;
+	    ((struct date_yy *)parm)->yyDayNumber = $1;
 	}
 	| tDAY ',' {
-	    yyDayOrdinal = 1;
-	    yyDayNumber = $1;
+	    ((struct date_yy *)parm)->yyDayOrdinal = 1;
+	    ((struct date_yy *)parm)->yyDayNumber = $1;
 	}
 	| tUNUMBER tDAY {
-	    yyDayOrdinal = $1;
-	    yyDayNumber = $2;
+	    ((struct date_yy *)parm)->yyDayOrdinal = $1;
+	    ((struct date_yy *)parm)->yyDayNumber = $2;
 	}
 	;
 
 date	: tUNUMBER '/' tUNUMBER {
-	    yyMonth = $1;
-	    yyDay = $3;
+	    ((struct date_yy *)parm)->yyMonth = $1;
+	    ((struct date_yy *)parm)->yyDay = $3;
 	}
 	| tUNUMBER '/' tUNUMBER '/' tUNUMBER {
 	  /* Interpret as YYYY/MM/DD if $1 >= 1000, otherwise as MM/DD/YY.
@@ -302,149 +267,157 @@ date	: tUNUMBER '/' tUNUMBER {
 	     you want portability, use the ISO 8601 format.  */
 	  if ($1 >= 1000)
 	    {
-	      yyYear = $1;
-	      yyMonth = $3;
-	      yyDay = $5;
+	      ((struct date_yy *)parm)->yyYear = $1;
+	      ((struct date_yy *)parm)->yyMonth = $3;
+	      ((struct date_yy *)parm)->yyDay = $5;
 	    }
 	  else
 	    {
-	      yyMonth = $1;
-	      yyDay = $3;
-	      yyYear = $5;
+	      ((struct date_yy *)parm)->yyMonth = $1;
+	      ((struct date_yy *)parm)->yyDay = $3;
+	      ((struct date_yy *)parm)->yyYear = $5;
 	    }
 	}
 	| tUNUMBER tSNUMBER tSNUMBER {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
-	    yyYear = $1;
-	    yyMonth = -$2;
-	    yyDay = -$3;
+	    ((struct date_yy *)parm)->yyYear = $1;
+	    ((struct date_yy *)parm)->yyMonth = -$2;
+	    ((struct date_yy *)parm)->yyDay = -$3;
 	}
 	| tUNUMBER tMONTH tSNUMBER {
 	    /* e.g. 17-JUN-1992.  */
-	    yyDay = $1;
-	    yyMonth = $2;
-	    yyYear = -$3;
+	    ((struct date_yy *)parm)->yyDay = $1;
+	    ((struct date_yy *)parm)->yyMonth = $2;
+	    ((struct date_yy *)parm)->yyYear = -$3;
 	}
 	| tMONTH tUNUMBER tUNUMBER {
-	    yyMonth = $1;
-	    yyDay = $2;
-		yyYear = $3;
+	    ((struct date_yy *)parm)->yyMonth = $1;
+	    ((struct date_yy *)parm)->yyDay = $2;
+		((struct date_yy *)parm)->yyYear = $3;
 	}
 	| tMONTH tUNUMBER {
-	    yyMonth = $1;
-	    yyDay = $2;
+	    ((struct date_yy *)parm)->yyMonth = $1;
+	    ((struct date_yy *)parm)->yyDay = $2;
 	}
 	| tMONTH tUNUMBER ',' tUNUMBER {
-	    yyMonth = $1;
-	    yyDay = $2;
-	    yyYear = $4;
+	    ((struct date_yy *)parm)->yyMonth = $1;
+	    ((struct date_yy *)parm)->yyDay = $2;
+	    ((struct date_yy *)parm)->yyYear = $4;
 	}
 	| tUNUMBER tMONTH {
-	    yyMonth = $2;
-	    yyDay = $1;
+	    ((struct date_yy *)parm)->yyMonth = $2;
+	    ((struct date_yy *)parm)->yyDay = $1;
 	}
 	| tUNUMBER tMONTH tUNUMBER {
-	    yyMonth = $2;
-	    yyDay = $1;
-	    yyYear = $3;
+	    ((struct date_yy *)parm)->yyMonth = $2;
+	    ((struct date_yy *)parm)->yyDay = $1;
+	    ((struct date_yy *)parm)->yyYear = $3;
 	}
 	;
 
 rel	: relunit tAGO {
-	    yyRelSeconds = -yyRelSeconds;
-	    yyRelMinutes = -yyRelMinutes;
-	    yyRelHour = -yyRelHour;
-	    yyRelDay = -yyRelDay;
-	    yyRelMonth = -yyRelMonth;
-	    yyRelYear = -yyRelYear;
+	    ((struct date_yy *)parm)->yyRelSeconds =
+			-((struct date_yy *)parm)->yyRelSeconds;
+	    ((struct date_yy *)parm)->yyRelMinutes =
+			-((struct date_yy *)parm)->yyRelMinutes;
+	    ((struct date_yy *)parm)->yyRelHour =
+			-((struct date_yy *)parm)->yyRelHour;
+	    ((struct date_yy *)parm)->yyRelDay =
+			-((struct date_yy *)parm)->yyRelDay;
+	    ((struct date_yy *)parm)->yyRelMonth =
+			-((struct date_yy *)parm)->yyRelMonth;
+	    ((struct date_yy *)parm)->yyRelYear =
+			-((struct date_yy *)parm)->yyRelYear;
 	}
 	| relunit
 	;
 
 relunit	: tUNUMBER tYEAR_UNIT {
-	    yyRelYear += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelYear += $1 * $2;
 	}
 	| tSNUMBER tYEAR_UNIT {
-	    yyRelYear += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelYear += $1 * $2;
 	}
 	| tYEAR_UNIT {
-	    yyRelYear += $1;
+	    ((struct date_yy *)parm)->yyRelYear += $1;
 	}
 	| tUNUMBER tMONTH_UNIT {
-	    yyRelMonth += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelMonth += $1 * $2;
 	}
 	| tSNUMBER tMONTH_UNIT {
-	    yyRelMonth += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelMonth += $1 * $2;
 	}
 	| tMONTH_UNIT {
-	    yyRelMonth += $1;
+	    ((struct date_yy *)parm)->yyRelMonth += $1;
 	}
 	| tUNUMBER tDAY_UNIT {
-	    yyRelDay += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelDay += $1 * $2;
 	}
 	| tSNUMBER tDAY_UNIT {
-	    yyRelDay += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelDay += $1 * $2;
 	}
 	| tDAY_UNIT {
-	    yyRelDay += $1;
+	    ((struct date_yy *)parm)->yyRelDay += $1;
 	}
 	| tUNUMBER tHOUR_UNIT {
-	    yyRelHour += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelHour += $1 * $2;
 	}
 	| tSNUMBER tHOUR_UNIT {
-	    yyRelHour += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelHour += $1 * $2;
 	}
 	| tHOUR_UNIT {
-	    yyRelHour += $1;
+	    ((struct date_yy *)parm)->yyRelHour += $1;
 	}
 	| tUNUMBER tMINUTE_UNIT {
-	    yyRelMinutes += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelMinutes += $1 * $2;
 	}
 	| tSNUMBER tMINUTE_UNIT {
-	    yyRelMinutes += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelMinutes += $1 * $2;
 	}
 	| tMINUTE_UNIT {
-	    yyRelMinutes += $1;
+	    ((struct date_yy *)parm)->yyRelMinutes += $1;
 	}
 	| tUNUMBER tSEC_UNIT {
-	    yyRelSeconds += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelSeconds += $1 * $2;
 	}
 	| tSNUMBER tSEC_UNIT {
-	    yyRelSeconds += $1 * $2;
+	    ((struct date_yy *)parm)->yyRelSeconds += $1 * $2;
 	}
 	| tSEC_UNIT {
-	    yyRelSeconds += $1;
+	    ((struct date_yy *)parm)->yyRelSeconds += $1;
 	}
 	;
 
 number	: tUNUMBER
           {
-	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
-	      yyYear = $1;
+	    if (((struct date_yy *)parm)->yyHaveTime && 
+			((struct date_yy *)parm)->yyHaveDate && 
+			!((struct date_yy *)parm)->yyHaveRel)
+	      ((struct date_yy *)parm)->yyYear = $1;
 	    else
 	      {
 		if ($1>10000)
 		  {
-		    yyHaveDate++;
-		    yyDay= ($1)%100;
-		    yyMonth= ($1/100)%100;
-		    yyYear = $1/10000;
+		    ((struct date_yy *)parm)->yyHaveDate++;
+		    ((struct date_yy *)parm)->yyDay= ($1)%100;
+		    ((struct date_yy *)parm)->yyMonth= ($1/100)%100;
+		    ((struct date_yy *)parm)->yyYear = $1/10000;
 		  }
 		else
 		  {
-		    yyHaveTime++;
+		    ((struct date_yy *)parm)->yyHaveTime++;
 		    if ($1 < 100)
 		      {
-			yyHour = $1;
-			yyMinutes = 0;
+			((struct date_yy *)parm)->yyHour = $1;
+			((struct date_yy *)parm)->yyMinutes = 0;
 		      }
 		    else
 		      {
-		    	yyHour = $1 / 100;
-		    	yyMinutes = $1 % 100;
+		    	((struct date_yy *)parm)->yyHour = $1 / 100;
+		    	((struct date_yy *)parm)->yyMinutes = $1 % 100;
 		      }
-		    yySeconds = 0;
-		    yyMeridian = MER24;
+		    ((struct date_yy *)parm)->yySeconds = 0;
+		    ((struct date_yy *)parm)->yyMeridian = MER24;
 		  }
 	      }
 	  }
@@ -714,7 +687,8 @@ ToYear (Year)
 }
 
 static int
-LookupWord (buff)
+LookupWord (lvalp,buff)
+	YYSTYPE *lvalp;
      char *buff;
 {
   register char *p;
@@ -730,12 +704,12 @@ LookupWord (buff)
 
   if (strcmp (buff, "am") == 0 || strcmp (buff, "a.m.") == 0)
     {
-      yylval.Meridian = MERam;
+      lvalp->Meridian = MERam;
       return tMERIDIAN;
     }
   if (strcmp (buff, "pm") == 0 || strcmp (buff, "p.m.") == 0)
     {
-      yylval.Meridian = MERpm;
+      lvalp->Meridian = MERpm;
       return tMERIDIAN;
     }
 
@@ -756,13 +730,13 @@ LookupWord (buff)
 	{
 	  if (strncmp (buff, tp->name, 3) == 0)
 	    {
-	      yylval.Number = tp->value;
+	      lvalp->Number = tp->value;
 	      return tp->type;
 	    }
 	}
       else if (strcmp (buff, tp->name) == 0)
 	{
-	  yylval.Number = tp->value;
+	  lvalp->Number = tp->value;
 	  return tp->type;
 	}
     }
@@ -770,7 +744,7 @@ LookupWord (buff)
   for (tp = TimezoneTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	lvalp->Number = tp->value;
 	return tp->type;
       }
 
@@ -780,7 +754,7 @@ LookupWord (buff)
   for (tp = UnitsTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	lvalp->Number = tp->value;
 	return tp->type;
       }
 
@@ -792,7 +766,7 @@ LookupWord (buff)
       for (tp = UnitsTable; tp->name; tp++)
 	if (strcmp (buff, tp->name) == 0)
 	  {
-	    yylval.Number = tp->value;
+	    lvalp->Number = tp->value;
 	    return tp->type;
 	  }
       buff[i] = 's';		/* Put back for "this" in OtherTable. */
@@ -801,7 +775,7 @@ LookupWord (buff)
   for (tp = OtherTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	lvalp->Number = tp->value;
 	return tp->type;
       }
 
@@ -811,7 +785,7 @@ LookupWord (buff)
       for (tp = MilitaryTable; tp->name; tp++)
 	if (strcmp (buff, tp->name) == 0)
 	  {
-	    yylval.Number = tp->value;
+	    lvalp->Number = tp->value;
 	    return tp->type;
 	  }
     }
@@ -827,70 +801,70 @@ LookupWord (buff)
     for (tp = TimezoneTable; tp->name; tp++)
       if (strcmp (buff, tp->name) == 0)
 	{
-	  yylval.Number = tp->value;
+	  lvalp->Number = tp->value;
 	  return tp->type;
 	}
 
   return tID;
 }
 
-static int
-yylex ()
+yylex (YYSTYPE *lvalp, void *parm)
 {
   register unsigned char c;
   register char *p;
   char buff[20];
   int Count;
   int sign;
+  struct date_yy * date = (struct date_yy *)parm;
 
   for (;;)
     {
-      while (ISSPACE ((unsigned char) *yyInput))
-	yyInput++;
+      while (ISSPACE ((unsigned char) *date->yyInput))
+	date->yyInput++;
 
-      if (ISDIGIT (c = *yyInput) || c == '-' || c == '+')
+      if (ISDIGIT (c = *date->yyInput) || c == '-' || c == '+')
 	{
 	  if (c == '-' || c == '+')
 	    {
 	      sign = c == '-' ? -1 : 1;
-	      if (!ISDIGIT (*++yyInput))
+	      if (!ISDIGIT (*++date->yyInput))
 		/* skip the '-' sign */
 		continue;
 	    }
 	  else
 	    sign = 0;
-	  for (yylval.Number = 0; ISDIGIT (c = *yyInput++);)
-	    yylval.Number = 10 * yylval.Number + c - '0';
-	  yyInput--;
+	  for (lvalp->Number = 0; ISDIGIT (c = *date->yyInput++);)
+	    lvalp->Number = 10 * lvalp->Number + c - '0';
+	  date->yyInput--;
 	  if (sign < 0)
-	    yylval.Number = -yylval.Number;
+	    lvalp->Number = -lvalp->Number;
 	  /* Ignore ordinal suffixes on numbers */
-	  c = *yyInput;
+	  c = *date->yyInput;
 	  if (c == 's' || c == 'n' || c == 'r' || c == 't') {
-	    c = *++yyInput;
+	    c = *++date->yyInput;
 	    if (c == 't' || c == 'd' || c == 'h') {
-	      yyInput++;
+	      date->yyInput++;
 	    } else {
-	      yyInput--;
+	      date->yyInput--;
 	    }
 	  }
 	  return sign ? tSNUMBER : tUNUMBER;
 	}
       if (ISALPHA (c))
 	{
-	  for (p = buff; (c = *yyInput++, ISALPHA (c)) || c == '.';)
+	  for (p = buff; (c = *date->yyInput++, ISALPHA (c)) || c == '.';)
 	    if (p < &buff[sizeof buff - 1])
 	      *p++ = c;
 	  *p = '\0';
-	  yyInput--;
-	  return LookupWord (buff);
+	  date->yyInput--;
+	  return LookupWord (lvalp, buff);
 	}
       if (c != '(')
-	return *yyInput++;
+	return *date->yyInput++;
       Count = 0;
       do
 	{
-	  c = *yyInput++;
+	  c = *date->yyInput++;
 	  if (c == '\0')
 	    return c;
 	  if (c == '(')
@@ -929,58 +903,60 @@ time_t php_parse_date(char *p, time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
+  struct date_yy date;
 
-  yyInput = p;
+  date.yyInput = p;
   Start = now ? *now : time ((time_t *) NULL);
   tmp = localtime (&Start);
   if (!tmp)
     return -1;
-  yyYear = tmp->tm_year + TM_YEAR_ORIGIN;
-  yyMonth = tmp->tm_mon + 1;
-  yyDay = tmp->tm_mday;
-  yyHour = tmp->tm_hour;
-  yyMinutes = tmp->tm_min;
-  yySeconds = tmp->tm_sec;
+  date.yyYear = tmp->tm_year + TM_YEAR_ORIGIN;
+  date.yyMonth = tmp->tm_mon + 1;
+  date.yyDay = tmp->tm_mday;
+  date.yyHour = tmp->tm_hour;
+  date.yyMinutes = tmp->tm_min;
+  date.yySeconds = tmp->tm_sec;
   tm.tm_isdst = tmp->tm_isdst;
-  yyMeridian = MER24;
-  yyRelSeconds = 0;
-  yyRelMinutes = 0;
-  yyRelHour = 0;
-  yyRelDay = 0;
-  yyRelMonth = 0;
-  yyRelYear = 0;
-  yyHaveDate = 0;
-  yyHaveDay = 0;
-  yyHaveRel = 0;
-  yyHaveTime = 0;
-  yyHaveZone = 0;
+  date.yyMeridian = MER24;
+  date.yyRelSeconds = 0;
+  date.yyRelMinutes = 0;
+  date.yyRelHour = 0;
+  date.yyRelDay = 0;
+  date.yyRelMonth = 0;
+  date.yyRelYear = 0;
+  date.yyHaveDate = 0;
+  date.yyHaveDay = 0;
+  date.yyHaveRel = 0;
+  date.yyHaveTime = 0;
+  date.yyHaveZone = 0;
 
-  if (yyparse ()
-      || yyHaveTime > 1 || yyHaveZone > 1 || yyHaveDate > 1 || yyHaveDay > 1)
+  if (yyparse ((void *)&date)
+      || date.yyHaveTime > 1 || date.yyHaveZone > 1 
+	  || date.yyHaveDate > 1 || date.yyHaveDay > 1)
     return -1;
 
-  tm.tm_year = ToYear (yyYear) - TM_YEAR_ORIGIN + yyRelYear;
-  tm.tm_mon = yyMonth - 1 + yyRelMonth;
-  tm.tm_mday = yyDay + yyRelDay;
-  if (yyHaveTime || (yyHaveRel && !yyHaveDate && !yyHaveDay))
+  tm.tm_year = ToYear (date.yyYear) - TM_YEAR_ORIGIN + date.yyRelYear;
+  tm.tm_mon = date.yyMonth - 1 + date.yyRelMonth;
+  tm.tm_mday = date.yyDay + date.yyRelDay;
+  if (date.yyHaveTime || (date.yyHaveRel && !date.yyHaveDate && !date.yyHaveDay))
     {
-      tm.tm_hour = ToHour (yyHour, yyMeridian);
+      tm.tm_hour = ToHour (date.yyHour, date.yyMeridian);
       if (tm.tm_hour < 0)
 	return -1;
-      tm.tm_min = yyMinutes;
-      tm.tm_sec = yySeconds;
+      tm.tm_min = date.yyMinutes;
+      tm.tm_sec = date.yySeconds;
     }
   else
     {
       tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
     }
-  tm.tm_hour += yyRelHour;
-  tm.tm_min += yyRelMinutes;
-  tm.tm_sec += yyRelSeconds;
+  tm.tm_hour += date.yyRelHour;
+  tm.tm_min += date.yyRelMinutes;
+  tm.tm_sec += date.yyRelSeconds;
 
   /* Let mktime deduce tm_isdst if we have an absolute timestamp,
      or if the relative timestamp mentions days, months, or years.  */
-  if (yyHaveDate | yyHaveDay | yyHaveTime | yyRelDay | yyRelMonth | yyRelYear)
+  if (date.yyHaveDate | date.yyHaveDay | date.yyHaveTime | date.yyRelDay | date.yyRelMonth | date.yyRelYear)
     tm.tm_isdst = -1;
 
   tm0 = tm;
@@ -998,18 +974,18 @@ time_t php_parse_date(char *p, time_t *now)
          we apply mktime to 1970-01-02 08:00:00 instead and adjust the time
          zone by 24 hours to compensate.  This algorithm assumes that
          there is no DST transition within a day of the time_t boundaries.  */
-      if (yyHaveZone)
+      if (date.yyHaveZone)
 	{
 	  tm = tm0;
 	  if (tm.tm_year <= EPOCH - TM_YEAR_ORIGIN)
 	    {
 	      tm.tm_mday++;
-	      yyTimezone -= 24 * 60;
+	      date.yyTimezone -= 24 * 60;
 	    }
 	  else
 	    {
 	      tm.tm_mday--;
-	      yyTimezone += 24 * 60;
+	      date.yyTimezone += 24 * 60;
 	    }
 	  Start = mktime (&tm);
 	}
@@ -1018,22 +994,22 @@ time_t php_parse_date(char *p, time_t *now)
 	return Start;
     }
 
-  if (yyHaveDay && !yyHaveDate)
+  if (date.yyHaveDay && !date.yyHaveDate)
     {
-      tm.tm_mday += ((yyDayNumber - tm.tm_wday + 7) % 7
-		     + 7 * (yyDayOrdinal - (0 < yyDayOrdinal)));
+      tm.tm_mday += ((date.yyDayNumber - tm.tm_wday + 7) % 7
+		     + 7 * (date.yyDayOrdinal - (0 < date.yyDayOrdinal)));
       Start = mktime (&tm);
       if (Start == (time_t) -1)
 	return Start;
     }
 
-  if (yyHaveZone)
+  if (date.yyHaveZone)
     {
       long delta;
       struct tm *gmt = gmtime (&Start);
       if (!gmt)
 	return -1;
-      delta = yyTimezone * 60L + difftm (&tm, gmt);
+      delta = date.yyTimezone * 60L + difftm (&tm, gmt);
       if ((Start + delta < Start) != (delta < 0))
 	return -1;		/* time_t overflow */
       Start += delta;
