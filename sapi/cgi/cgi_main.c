@@ -87,6 +87,26 @@ static int _print_module_info ( zend_module_entry *module, void *arg ) {
 	return 0;
 }
 
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO 1
+#endif
+
+static inline size_t sapi_cgibin_single_write(const char *str, uint str_length)
+{
+#ifdef PHP_WRITE_STDOUT
+	long ret;
+
+	ret = write(STDOUT_FILENO, str, str_length);
+	if (ret <= 0) return 0;
+	return ret;
+#else
+	size_t ret;
+
+	ret = fwrite(str, 1, MIN(str_length, 16384), stdout);
+	return ret;
+#endif
+}
+
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
 	const char *ptr = str;
@@ -95,7 +115,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length)
 
 	while (remaining > 0)
 	{
-		ret = fwrite(ptr, 1, MIN(remaining, 16384), stdout);
+		ret = sapi_cgibin_single_write(ptr, remaining);
 		if (!ret) {
 			php_handle_aborted_connection();
 		}
