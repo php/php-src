@@ -553,6 +553,10 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	char *stat_sb_names[13]={"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 			      "size", "atime", "mtime", "ctime", "blksize", "blocks"};
 
+	if (php_check_open_basedir(filename)) {
+		RETURN_FALSE;
+	}
+
 	stat_sb = &BG(sb);
 
 	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
