@@ -8,7 +8,7 @@ SimpleXML objects follow four basic rules:
 4) string conversion allows to access TEXT data
 
 When iterating proerties then the extension always iterates over
-all nodes with that elemtnt name. Thus method childen() must be 
+all nodes with that element name. Thus method childen() must be 
 called to iterate over subnodes. But also doing the following:
 foreach $obj->node_name as $elem) {
   // do something with $elem
