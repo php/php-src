@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Fixed crash in pathinfo()
+- OCI8 now supports binding of collections
+  (Patch by Andy Sautins <asautins@veripost.net>)
 - Added GD 2.0.1 support for truecolor and alpha channels, plus some other gd
   functions, both old and new - see docs for more info (Wez)
 - Added S/MIME sign/verify encrypt/decrypt functions to openssl extension,
