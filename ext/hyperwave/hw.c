@@ -1331,8 +1331,9 @@ PHP_FUNCTION(hw_errormsg)
    Returns object id of root collection */
 PHP_FUNCTION(hw_root)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	return_value->value.lval = 0;
 	return_value->type = IS_LONG;

@@ -476,8 +476,9 @@ PHP_FUNCTION(phpinfo)
    Return the current PHP version */
 PHP_FUNCTION(phpversion)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
     RETURN_STRING(PHP_VERSION, 1);
 }
@@ -506,8 +507,9 @@ PHP_FUNCTION(phpcredits)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
 }
@@ -517,8 +519,9 @@ PHP_FUNCTION(php_logo_guid)
    Return the special ID used to request the PHP logo in phpinfo screens*/
 PHP_FUNCTION(php_egg_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
 }
@@ -528,8 +531,9 @@ PHP_FUNCTION(php_egg_logo_guid)
    Return the special ID used to request the Zend logo in phpinfo screens*/
 PHP_FUNCTION(zend_logo_guid)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
@@ -539,8 +543,9 @@ PHP_FUNCTION(zend_logo_guid)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	if (sapi_module.name) {
 		RETURN_STRING(sapi_module.name, 1);
@@ -555,8 +560,9 @@ PHP_FUNCTION(php_sapi_name)
    Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+    if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_STRING(php_get_uname(), 0);
 }

@@ -292,8 +292,9 @@ PHP_FUNCTION(xslt_output_endtransform)
          *buffer = NULL;
     int ret = 0;
    
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
     /** 
      * Make sure that we don't have more than one output buffer going on
@@ -551,7 +552,6 @@ PHP_FUNCTION(xslt_process)
 }
 /* }}} */
 
-
 /* {{{ proto resource xslt_create(void)
    Create a new XSL processor and return a resource identifier. */
 PHP_FUNCTION(xslt_create)
@@ -560,8 +560,9 @@ PHP_FUNCTION(xslt_create)
     SablotHandle p;
     int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
     ret = SablotCreateProcessor(&p);
     

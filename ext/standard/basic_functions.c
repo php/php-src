@@ -1316,8 +1316,9 @@ PHP_FUNCTION(settype)
    Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_STRING(php_get_current_user(), 1);
 }
@@ -1342,7 +1343,6 @@ PHP_FUNCTION(get_cfg_var)
 	RETURN_STRING(value, 1);
 }
 /* }}} */
-
 
 /* {{{ proto bool set_magic_quotes_runtime(int new_setting)
    Set the current active configuration setting of magic_quotes_runtime and return previous */

@@ -402,8 +402,9 @@ PHP_FUNCTION(snmprealwalk)
    Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
 
 	RETURN_LONG(snmp_get_quick_print() ? 1 : 0);
 }
@@ -418,6 +419,7 @@ PHP_FUNCTION(snmp_set_quick_print)
 
 	if (zend_parse_parameters(argc, "l", &a1) == FAILURE)
 		return;
+
 	snmp_set_quick_print((int)a1);
 }
 /* }}} */
