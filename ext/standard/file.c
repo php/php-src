@@ -1658,6 +1658,7 @@ PHPAPI int php_copy_file(char *src, char *dest)
 {
 	char buffer[8192];
 	int fd_s,fd_t,read_bytes;
+	int ret = FAILURE;
 
 #ifdef PHP_WIN32
 	if ((fd_s=V_OPEN((src,O_RDONLY|_O_BINARY)))==-1) {
@@ -1677,18 +1678,36 @@ PHPAPI int php_copy_file(char *src, char *dest)
 		return FAILURE;
 	}
 
+#ifdef HAVE_MMAP
+	{
+		void *srcfile;
+		struct stat sbuf;
+
+		if (fstat(fd_s, &sbuf)) {
+			goto cleanup;
+		}
+		srcfile = mmap(NULL, sbuf.st_size, PROT_READ, MAP_SHARED, fd_s, 0);
+		if (srcfile) {
+			write(fd_t, srcfile, sbuf.st_size);
+			ret = SUCCESS;
+			munmap(srcfile, sbuf.st_size);
+			goto cleanup;
+		}
+	}
+#endif
+
 	while ((read_bytes=read(fd_s,buffer,8192))!=-1 && read_bytes!=0) {
 		if (write(fd_t,buffer,read_bytes)==-1) {
 			php_error(E_WARNING,"Unable to write to '%s':  %s", dest, strerror(errno));
-			close(fd_s);
-			close(fd_t);
-			return FAILURE;
+			goto cleanup;
 		}
 	}
+	ret = SUCCESS;
 	
+cleanup:
 	close(fd_s);
 	close(fd_t);
-	return SUCCESS;
+	return ret;
 }	
 
 
