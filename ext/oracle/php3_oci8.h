@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@guardian.no>                        |
+   | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |                                                                      |
    | Initial work sponsored by Thies Arntzen <thies@digicol.de> of        |
    | Digital Collections, http://www.digicol.de/                          |
@@ -49,19 +49,27 @@
 #  endif
 # endif /* osf alpha */
 
-# include <oci.h>
+#include <oci.h>
+#include <xa.h>
 
 typedef struct {
-	int id;
+	int num;
 	int persistent;
+	int open;
+	char *hashed_details;
+	int hashed_details_length;
 	char dbname[ 64 ];
     OCIError *pError;
     OCIServer *pServer;
+	OCIFocbkStruct failover;
 } oci8_server;
 
 typedef struct {
-	int id;
+	int num;
 	int persistent;
+	int open;
+	char *hashed_details;
+	int hashed_details_length;
 	oci8_server *server;
     OCIError *pError;
 	OCISession *pSession;
@@ -69,12 +77,19 @@ typedef struct {
 
 typedef struct {
 	int id;
+	int open;
 	oci8_session *session;
     OCISvcCtx *pServiceContext;
     OCIError *pError;
 	HashTable *descriptors;
 	int descriptors_count;
 } oci8_connection;
+
+typedef struct {
+	int id;
+	oci8_session *session;
+	OCITrans *pTrans;
+} oci8_xa;
 
 typedef struct {
 	dvoid *ocidescr;
@@ -138,33 +153,31 @@ typedef struct {
 
     long debug_mode;
 
+	/* XXX NYI
     long allow_persistent;
     long max_persistent;
     long max_links;
     long num_persistent;
     long num_links;
+	*/
 
     int le_conn; /* active connections */
     int le_stmt; /* active statements */
+    int le_trans; /* active transactions */
 
-	int le_server; /* server-handles */
-	int le_pserver; /* pesistent server-handles */
-
-	int le_session; /* session-handles */
-	int le_psession;/* pesistent session-handles */
+	int server_num;
+    HashTable *server;
+	int user_num;
+	HashTable *user;
 
     OCIEnv *pEnv;
 } oci8_module;
 
 extern php3_module_entry oci8_module_entry;
-# define oci8_module_ptr &oci8_module_entry
+#define oci8_module_ptr &oci8_module_entry
 
-# define OCI8_MAX_NAME_LEN 64
-# define OCI8_MAX_DATA_SIZE 2097152 /* two megs */
-
-/* this one has to be changed to include persistent connections as well */
-# define OCI8_SERVER_TYPE(x) (((x)==OCI8_GLOBAL(php3_oci8_module).le_server) || ((x)==OCI8_GLOBAL(php3_oci8_module).le_pserver))
-# define OCI8_SESSION_TYPE(x) (((x)==OCI8_GLOBAL(php3_oci8_module).le_session) || ((x)==OCI8_GLOBAL(php3_oci8_module).le_psession))
+#define OCI8_MAX_NAME_LEN 64
+#define OCI8_MAX_DATA_SIZE 2097152 /* two megs */
 
 # define OCI8_CONN_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_conn)
 # define OCI8_STMT_TYPE(x) ((x)==OCI8_GLOBAL(php3_oci8_module).le_stmt)
