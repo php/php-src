@@ -3478,6 +3478,7 @@ void zend_do_foreach_end(znode *foreach_token TSRMLS_DC)
 	SET_UNUSED(opline->op2);
 
 	CG(active_op_array)->opcodes[foreach_token->u.opline_num].op2.u.opline_num = get_next_op_number(CG(active_op_array));
+	CG(active_op_array)->opcodes[foreach_token->u.opline_num-1].op2.u.opline_num = get_next_op_number(CG(active_op_array)); /* FE_RESET */
 
 	do_end_loop(foreach_token->u.opline_num TSRMLS_CC);
 
