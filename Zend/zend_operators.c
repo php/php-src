@@ -32,10 +32,12 @@
 #include "zend_list.h"
 #include "zend_fast_cache.h"
 
-#ifndef HAVE_FINITE
+#if !HAVE_FINITE
 #ifndef finite  				/* in case it's already a macro */
 #define finite(a) isfinite(a)	/* HPUX 11 only has isfinite() */
 #endif
+#else
+#include <ieeefp.h>
 #endif
 
 #if WITH_BCMATH
