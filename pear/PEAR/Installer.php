@@ -145,15 +145,7 @@ class PEAR_Installer extends PEAR_Common
                 continue;
             }
             $path = $this->_prependPath($props['installed_as'], $this->installroot);
-            if (!@unlink($path)) {
-                $this->log(2, "unable to delete: $path");
-            } else {
-                $this->log(2, "deleted file $path");
-                // Delete package directory if it's empty
-                if (@rmdir(dirname($path))) {
-                    $this->log(3, "+ rmdir $path");
-                }
-            }
+            $this->addFileOperation('delete', array($path));
         }
         return true;
     }
@@ -320,10 +312,10 @@ class PEAR_Installer extends PEAR_Common
     // }}}
     // {{{ startFileTransaction()
 
-    function startFileTransaction($revert_in_case = false)
+    function startFileTransaction($rollback_in_case = false)
     {
-        if (count($this->file_operations) && $revert_in_case) {
-            $this->revertFileTransaction();
+        if (count($this->file_operations) && $rollback_in_case) {
+            $this->rollbackFileTransaction();
         }
         $this->file_operations = array();
     }
@@ -374,12 +366,19 @@ class PEAR_Installer extends PEAR_Common
             switch ($type) {
                 case 'rename':
                     @rename($data[0], $data[1]);
+                    $this->log(3, "+ mv $data[0] $data[1]");
                     break;
                 case 'chmod':
                     @chmod($data[0], $data[1]);
+                    $this->log(3, "+ chmod $data[0] $data[1]");
                     break;
                 case 'delete':
                     @unlink($data[0]);
+                    $this->log(3, "+ rm $data[0]");
+                    break;
+                case 'rmdir':
+                    @rmdir($data[0]);
+                    $this->log(3, "+ rmdir $data[0]");
                     break;
             }
         }
@@ -389,12 +388,12 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-    // {{{ revertFileTransaction()
+    // {{{ rollbackFileTransaction()
 
-    function revertFileTransaction()
+    function rollbackFileTransaction()
     {
         $n = count($this->file_operations);
-        $this->log(2, "reverting $n file operations");
+        $this->log(2, "rolling back $n file operations");
         foreach ($this->file_operations as $tr) {
             list($type, $data) = $tr;
             switch ($type) {
@@ -437,7 +436,7 @@ class PEAR_Installer extends PEAR_Common
 
     function mkDirHier($dir)
     {
-        $this->addFileOperation('mkdir', $dir);
+        $this->addFileOperation('mkdir', array($dir));
         return parent::mkDirHier($dir);
     }
 
@@ -681,7 +680,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->popExpect();
                 if (PEAR::isError($res)) {
                     if (empty($options['force'])) {
-                        $this->revertFileTransaction();
+                        $this->rollbackFileTransaction();
                         return $this->raiseError($res);
                     } else {
                         $this->log(0, "Warning: " . $res->getMessage());
@@ -699,7 +698,7 @@ class PEAR_Installer extends PEAR_Common
                 $bob->debug = $this->debug;
                 $built = $bob->build($descfile, array(&$this, '_buildCallback'));
                 if (PEAR::isError($built)) {
-                    $this->revertFileTransaction();
+                    $this->rollbackFileTransaction();
                     return $built;
                 }
                 foreach ($built as $ext) {
@@ -709,7 +708,7 @@ class PEAR_Installer extends PEAR_Common
                     $this->log(3, "+ cp $ext[file] ext_dir");
                     $copyto = $this->_prependPath($dest, $this->installroot);
                     if (!@copy($ext['file'], $copyto)) {
-                        $this->revertFileTransaction();
+                        $this->rollbackFileTransaction();
                         return $this->raiseError("failed to copy $bn to $copyto");
                     }
                     $pkginfo['filelist'][$bn] = array(
@@ -724,7 +723,7 @@ class PEAR_Installer extends PEAR_Common
         }
 
         if (!$this->commitFileTransaction()) {
-            $this->revertFileTransaction();
+            $this->rollbackFileTransaction();
             return $this->raiseError("commit failed", PEAR_INSTALLER_FAILED);
         }
 
@@ -763,7 +762,12 @@ class PEAR_Installer extends PEAR_Common
 
         // Delete the files
         if (PEAR::isError($err = $this->_deletePackageFiles($package))) {
+            $this->rollbackFileTransaction();
             return $this->raiseError($err);
+        }
+        if (!$this->commitFileTransaction()) {
+            $this->rollbackFileTransaction();
+            return $this->raiseError("uninstall failed");
         }
 
         // Register that the package is no longer installed
