@@ -86,6 +86,7 @@ void xsl_objects_clone(void *object, void **object_clone TSRMLS_DC)
 	clone->parameter = NULL;
 	clone->hasKeys = intern->hasKeys;
 	clone->registerPhpFunctions = 0;
+	clone->node_list = NULL;
 
 	ALLOC_HASHTABLE(clone->std.properties);
 	zend_hash_init(clone->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
