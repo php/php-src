@@ -27,6 +27,7 @@ PHP                                                                        NEWS
   (Tony)
 - Fixed bug in mysql->client_version (Georg)
 - Fixed ZTS destruction. (Marcus)
+- Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE on error). (Tony)
 - Fixed bug #29728 (Reflection API Feature: Default parameter value). (Marcus)
 - Fixed bug #29522 (accessing properties without connection). (Georg)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default). (Georg)
