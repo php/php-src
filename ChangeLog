@@ -1,3 +1,109 @@
+2003-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      TODO_SEGFAULTS:
+      GD stuff
+
+    * (PHP_4_3)
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gdft.c:
+      MFH (Syncronize bunbled GD with gd 2.0.14)
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gdft.c:
+      Syncronize bunbled GD with gd 2.0.14
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gdxpm.c:
+      MFH (Last set of integer overflow checks.)
+
+    * ext/gd/libgd/gd_gif_in.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gdxpm.c
+      ext/gd/libgd/wbmp.c:
+      Last set of integer overflow checks.
+
+    * ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_jpeg.c:
+      Integer overflow checks.
+
+2003-06-03  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN: Make Jani happy
+
+2003-06-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c:
+      touch again
+
+    * ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.c:
+      sync
+
+    * ext/ircg/ircg_scanner.re:
+      fix typos
+
+    * ext/ircg/ircg_scanner.re:
+      MFB arbitrary RGB colors
+
+    * (PHP_4_3)
+      ext/ircg/ircg_scanner.re:
+      Add arbitrary color handling
+
+2003-06-03  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/oci8/config.m4:
+      MFB
+
+    * (PHP_4_3)
+      ext/oci8/config.m4:
+      Fixed bug #23733.
+
+2003-06-03  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/standard/dir.c:
+      handle return value for "no matches" on systems that don't return
+      GLOB_NOMATCH consistent to those that do (return array(), not FALSE)
+
+2003-06-03  Edin Kadribasic  <edink@proventum.net>
+
+    * php.ini-dist
+      php.ini-recommended
+      main/SAPI.c
+      sapi/cgi/cgi_main.c:
+      Fix for #23902 by Shane.
+      Removed bogus recommendation from php.ini files.
+      
+
+2003-06-03  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/apache/mod_php5.c:
+      MFB - fix a couple of missing closing folding tags
+
+    * (PHP_4_3)
+      sapi/apache/mod_php4.c:
+      Fix a couple of closing folding tags
+
+2003-06-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/standard/css.c:
+      MFH: Fixed bug #23912 (Invalid CSS in phpinfo() output)
+
+    * ext/standard/css.c:
+      Fixed bug #23912 (Invalid CSS in phpinfo() output)
+
 2003-06-02  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/domxml/php_domxml.c
