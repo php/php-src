@@ -429,27 +429,14 @@ static void php_imap_init_globals(zend_imap_globals *imap_globals)
  */
 PHP_MINIT_FUNCTION(imap)
 {
-	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN |
-				SA_UIDNEXT | SA_UIDVALIDITY;
+	unsigned long sa_all =	SA_MESSAGES | SA_RECENT | SA_UNSEEN | SA_UIDNEXT | SA_UIDVALIDITY;
 
 	ZEND_INIT_MODULE_GLOBALS(imap, php_imap_init_globals, NULL)
 
-
-#if 1
 #ifndef PHP_WIN32
 	mail_link(&unixdriver);		/* link in the unix driver */
-#endif
-	mail_link(&imapdriver);		/* link in the imap driver */
-	mail_link(&nntpdriver);		/* link in the nntp driver */
-	mail_link(&pop3driver);		/* link in the pop3 driver */
-#ifndef PHP_WIN32
 	mail_link(&mhdriver);		/* link in the mh driver */
 	mail_link(&mxdriver);		/* link in the mx driver */
-#endif
-	mail_link(&mbxdriver);		/* link in the mbx driver */
-	mail_link(&tenexdriver);	/* link in the tenex driver */
-	mail_link(&mtxdriver);		/* link in the mtx driver */
-#ifndef PHP_WIN32
 	mail_link(&mmdfdriver);		/* link in the mmdf driver */
 	mail_link(&newsdriver);		/* link in the news driver */
 	mail_link(&philedriver);	/* link in the phile driver */
@@ -459,11 +446,13 @@ PHP_MINIT_FUNCTION(imap)
 	ssl_onceonlyinit ();
 #endif
 #endif
+	mail_link(&imapdriver);		/* link in the imap driver */
+	mail_link(&nntpdriver);		/* link in the nntp driver */
+	mail_link(&pop3driver);		/* link in the pop3 driver */
+	mail_link(&mbxdriver);		/* link in the mbx driver */
+	mail_link(&tenexdriver);	/* link in the tenex driver */
+	mail_link(&mtxdriver);		/* link in the mtx driver */
 	mail_link(&dummydriver);	/* link in the dummy driver */
-#else
-	/* link in the c-client mail and auth drivers */
-#include "linkage.c"
-#endif
 
 	/* lets allow NIL */
 
@@ -474,27 +463,20 @@ PHP_MINIT_FUNCTION(imap)
 
 	REGISTER_MAIN_LONG_CONSTANT("OP_DEBUG", OP_DEBUG, CONST_PERSISTENT | CONST_CS);
 	/* debug protocol negotiations */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_READONLY", OP_READONLY, CONST_PERSISTENT | CONST_CS);
 	/* read-only open */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_ANONYMOUS", OP_ANONYMOUS, CONST_PERSISTENT | CONST_CS);
 	/* anonymous open of newsgroup */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_SHORTCACHE", OP_SHORTCACHE, CONST_PERSISTENT | CONST_CS);
-
 	/* short (elt-only) caching */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_SILENT", OP_SILENT, CONST_PERSISTENT | CONST_CS);
 	/* don't pass up events (internal use) */
 	REGISTER_MAIN_LONG_CONSTANT("OP_PROTOTYPE", OP_PROTOTYPE, CONST_PERSISTENT | CONST_CS);
 	/* return driver prototype */
 	REGISTER_MAIN_LONG_CONSTANT("OP_HALFOPEN", OP_HALFOPEN, CONST_PERSISTENT | CONST_CS);
 	/* half-open (IMAP connect but no select) */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_EXPUNGE", OP_EXPUNGE, CONST_PERSISTENT | CONST_CS);
 	/* silently expunge recycle stream */
-
 	REGISTER_MAIN_LONG_CONSTANT("OP_SECURE", OP_SECURE, CONST_PERSISTENT | CONST_CS);
 	/* don't do non-secure authentication */
 
@@ -533,6 +515,7 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_MAIN_LONG_CONSTANT("ST_SET", ST_SET, CONST_PERSISTENT | CONST_CS);
 	/* set vs. clear */
 
+
 	/* Copy options */
 
 	REGISTER_MAIN_LONG_CONSTANT("CP_UID", CP_UID, CONST_PERSISTENT | CONST_CS);
@@ -554,6 +537,7 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_MAIN_LONG_CONSTANT("SO_NOSERVER", SO_NOSERVER, CONST_PERSISTENT | CONST_CS);
 	/* don't do server-based sort */
 
+
 	/* Status options */
 
 	REGISTER_MAIN_LONG_CONSTANT("SA_MESSAGES",SA_MESSAGES , CONST_PERSISTENT | CONST_CS);
@@ -569,7 +553,6 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_MAIN_LONG_CONSTANT("SA_ALL", sa_all, CONST_PERSISTENT | CONST_CS);
      /* get all status information */
 		
-
 
 	/* Bits for mm_list() and mm_lsub() */
 
@@ -604,7 +587,8 @@ PHP_MINIT_FUNCTION(imap)
 	REGISTER_MAIN_LONG_CONSTANT("TYPEIMAGE",TYPEIMAGE , CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("TYPEVIDEO",TYPEVIDEO , CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("TYPEOTHER",TYPEOTHER , CONST_PERSISTENT | CONST_CS);
-	/*      TYPETEXT                unformatted text
+	/*
+	TYPETEXT                unformatted text
 	TYPEMULTIPART           multiple part
 	TYPEMESSAGE             encapsulated message
 	TYPEAPPLICATION         application data
@@ -613,6 +597,7 @@ PHP_MINIT_FUNCTION(imap)
 	TYPEVIDEO               video
 	TYPEOTHER               unknown
 	*/
+
 	REGISTER_MAIN_LONG_CONSTANT("ENC7BIT",ENC7BIT , CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("ENC8BIT",ENC8BIT , CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("ENCBINARY",ENCBINARY , CONST_PERSISTENT | CONST_CS);
