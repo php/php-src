@@ -461,7 +461,7 @@ PHP_FUNCTION(file)
 {
 	char *filename;
 	int filename_len;
-	char *slashed, *target_buf, *p, *s, *e;
+	char *slashed, *target_buf=NULL, *p, *s, *e;
 	register int i = 0;
 	int target_len, len;
 	char eol_marker = '\n';
@@ -516,7 +516,9 @@ PHP_FUNCTION(file)
   		}
   	}
 
- 	efree(target_buf);
+ 	if (target_buf) {
+ 		efree(target_buf);
+ 	}	
 	php_stream_close(stream);
 }
 /* }}} */
