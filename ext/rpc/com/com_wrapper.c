@@ -81,7 +81,7 @@ PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames
 PHPAPI HRESULT php_COM_release(comval *obj);
 PHPAPI HRESULT php_COM_addref(comval *obj);
 PHPAPI HRESULT php_COM_destruct(comval *obj);
-PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* pDisp, int cleanup);
+PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* pDisp, int cleanup);
 PHPAPI HRESULT php_COM_clone(comval *obj, comval *clone, int cleanup);
 
 PHPAPI int php_COM_get_le_comval();
@@ -236,12 +236,19 @@ PHPAPI HRESULT php_COM_addref(comval *obj)
 	return obj->refcount;
 }
 
-PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* pDisp, int cleanup)
+PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup)
 {
 	HRESULT hr = 1;
 	DISPPARAMS dispparams;
 	VARIANT *var_result;
+	IDispatch FAR* pDisp;
 
+	pDisp = *ppDisp;
+	if(cleanup)
+	{
+		*ppDisp = NULL;
+	}
+	
 	C_REFCOUNT(obj) = 1;
 	C_DISPATCH(obj) = pDisp;
 	C_HASTLIB(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->GetTypeInfo(C_DISPATCH(obj), 0, LANG_NEUTRAL, &C_TYPEINFO(obj)));
@@ -610,7 +617,7 @@ PHP_FUNCTION(com_load)
 		}
 	}
 
-	php_COM_set(obj, C_DISPATCH(obj), TRUE);
+	php_COM_set(obj, &C_DISPATCH(obj), TRUE);
 
 	if(INI_INT("com.autoregister_casesensitive"))
 	{
@@ -865,7 +872,7 @@ PHP_FUNCTION(com_invoke)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, 0, codepage);
+	php_variant_to_pval(var_result, return_value, FALSE, codepage);
 
 	FREE_VARIANT(var_result);
 	efree(arguments);
@@ -1066,7 +1073,7 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 
 	if(SUCCEEDED(hr))
 	{
-		php_variant_to_pval(var_result, return_value, 0, codepage);
+		php_variant_to_pval(var_result, return_value, FALSE, codepage);
 	}
 	else
 	{
@@ -1112,7 +1119,7 @@ PHP_FUNCTION(com_propget)
 		RETURN_FALSE;
 	}
 
-	php_variant_to_pval(var_result, return_value, 0, codepage);
+	php_variant_to_pval(var_result, return_value, FALSE, codepage);
 
 	FREE_VARIANT(var_result);
 }
@@ -1261,7 +1268,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			}
 
 			obj = obj_prop;
-			php_COM_set(obj, V_DISPATCH(var_result), TRUE);
+			php_COM_set(obj, &V_DISPATCH(var_result), TRUE);
 
 			RETVAL_COM(obj);
 		}
@@ -1347,7 +1354,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 			}
 
 			obj = obj_prop;
-			php_COM_set(obj, V_DISPATCH(var_result), TRUE);
+			php_COM_set(obj, &V_DISPATCH(var_result), TRUE);
 		}
 		else
 		{
@@ -1449,11 +1456,10 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		}
 		else
 		{
-			php_variant_to_pval(var_result, return_value, 0, codepage);
+			php_variant_to_pval(var_result, return_value, FALSE, codepage);
 		}
 
-//		FREE_VARIANT(var_result);
-		efree(var_result);
+		FREE_VARIANT(var_result);
 		efree(arguments);
 	}
 
