@@ -471,10 +471,6 @@ SOURCE=..\ext\ctype\ctype.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\overload\overload.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\tokenizer\tokenizer.c
 # End Source File
 # Begin Source File
