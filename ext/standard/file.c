@@ -1513,7 +1513,7 @@ PHP_FUNCTION(mkdir)
 
 	ret = VCWD_MKDIR(dir, (mode_t)mode);
 	if (ret < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, dir, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(rmdir)
 
 	ret = VCWD_RMDIR(Z_STRVAL_PP(arg1));
 	if (ret < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(arg1), E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1670,7 +1670,7 @@ PHP_FUNCTION(rename)
 	ret = VCWD_RENAME(old_name, new_name);
 
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1700,7 +1700,7 @@ PHP_FUNCTION(unlink)
 
 	ret = VCWD_UNLINK(Z_STRVAL_PP(filename));
 	if (ret == -1) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
+		php_error_docref1(NULL TSRMLS_CC, Z_STRVAL_PP(filename), E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 	/* Clear stat cache */
