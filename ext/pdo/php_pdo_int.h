@@ -40,8 +40,8 @@ extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
 
 #define PDO_DBH_CLEAR_ERR()		dbh->error_code = PDO_ERR_NONE
 #define PDO_STMT_CLEAR_ERR()	stmt->error_code = PDO_ERR_NONE
-#define PDO_HANDLE_DBH_ERR()	pdo_handle_error(dbh, NULL TSRMLS_CC)
-#define PDO_HANDLE_STMT_ERR()	pdo_handle_error(stmt->dbh, stmt TSRMLS_CC)
+#define PDO_HANDLE_DBH_ERR()	if (dbh->error_code) { pdo_handle_error(dbh, NULL TSRMLS_CC); }
+#define PDO_HANDLE_STMT_ERR()	if (stmt->error_code) { pdo_handle_error(stmt->dbh, stmt TSRMLS_CC); }
 
 
 /*
