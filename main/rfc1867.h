@@ -5,8 +5,8 @@
 
 #define MULTIPART_CONTENT_TYPE "multipart/form-data"
 
-SAPI_POST_READER_FUNC(rfc1867_post_reader);
-SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
+SAPI_API SAPI_POST_READER_FUNC(rfc1867_post_reader);
+SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler);
 
 #define FILE_UPLOAD_INPUT_BUFFER_SIZE 8192
 

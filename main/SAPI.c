@@ -165,7 +165,7 @@ static void sapi_read_post_data(TSRMLS_D)
 }
 
 
-SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
+SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	int read_bytes;
 	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
