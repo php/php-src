@@ -520,39 +520,32 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 
 	no_language = mbfl_name2no_language(new_value);
 	if (no_language != mbfl_no_language_invalid) {
+		MBSTRG(language) = no_language;
 		switch (no_language) {
+		case mbfl_no_language_uni:
+			default_enc = "UTF-8";
+			break;
 		case mbfl_no_language_japanese:
-			MBSTRG(language) = mbfl_no_language_japanese;
-			MBSTRG(current_language) = mbfl_no_language_japanese;
 			default_enc = "EUC-JP";
 			break;
 		case mbfl_no_language_korean:
-			MBSTRG(language) = mbfl_no_language_korean;
-			MBSTRG(current_language) = mbfl_no_language_korean;
 			default_enc = "EUC-KR";
 			break;
 		case mbfl_no_language_simplified_chinese:
-			MBSTRG(language) = mbfl_no_language_simplified_chinese;
-			MBSTRG(current_language) = mbfl_no_language_simplified_chinese;
 			default_enc = "EUC-CN";
 			break;
 		case mbfl_no_language_traditional_chinese:
-			MBSTRG(language) = mbfl_no_language_traditional_chinese;
-			MBSTRG(current_language) = mbfl_no_language_traditional_chinese;
 			default_enc = "EUC-TW";
 			break;
 		case mbfl_no_language_russian:
-			MBSTRG(language) = mbfl_no_language_russian;
-			MBSTRG(current_language) = mbfl_no_language_russian;
 			default_enc = "KOI8-R";
 			break;
 		case mbfl_no_language_english:
 		default:
-			MBSTRG(language) = mbfl_no_language_english;
-			MBSTRG(current_language) = mbfl_no_language_english;
 			default_enc = "ISO-8859-1";
 			break;
 		}
+		MBSTRG(current_language) = MBSTRG(language);
 		if (default_enc) {
 			zend_alter_ini_entry("mbstring.internal_encoding",
 			                     sizeof("mbstring.internal_encoding"),
