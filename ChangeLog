@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Some more XML fixes/cleanups (Thies)
 - Updated preg_replace() so that if any argument passed in is an array
   it will make a copy of each entry before converting it to string so that
   the original is intact. If the subject is an array then it will preserve
