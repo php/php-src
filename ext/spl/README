@@ -24,3 +24,19 @@ SPL offers two advanced directory classes.
 
 class DirectoryIterator implements Iterator
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
+
+3) XML
+
+SPL offers an advanced XML handling class.
+
+class SimpleXMLIterator extends simplexml_element extends recursiveiterator
+
+4) Array Overloading
+
+SPL offers advanced Array overloading.
+
+class ArrayObject implements IteratorAggregate
+class ArrayIterator implements Iterator
+
+As the above suggest an ArrayObject creates an ArrayIterator when it comes to
+iteration (e.g. ArrayObject instance used inside foreach).

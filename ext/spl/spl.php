@@ -2,7 +2,7 @@
 
 /** Standard PHP Library
  *
- * (c) Marcus Boerger, 2003
+ * (c) Marcus Boerger, 2003 - 2004
  */
 
 /** Abstract base interface that cannot be implemented alone. Instead it
@@ -318,6 +318,22 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
  */
 class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
 {
+	/** \copydoc Iterator::rewind
+	 */
+	function rewind();
+
+	/** \copydoc Iterator::current
+	 */
+	function current();
+
+	/** \copydoc Iterator::next
+	 */
+	function next();
+
+	/** \copydoc Iterator::valid
+	 */
+	function valid();
+	
 	/** \return whether the current node has sub nodes.
 	 */
 	function hasChildren();	
