@@ -197,6 +197,23 @@ class reflect {
   public static void Invoke
     (Object object, String method, Object args[], long result)
   {
+
+    // Apparently, if a class is not declared "public" it is illegal to
+    // access a method of this class via Invoke.  We can't work around
+    // all such cases, but enumeration does appear to be a common case.
+    if (object instanceof Enumeration && args.length == 0) {
+
+      if (method.equalsIgnoreCase("hasMoreElements")) {
+        setResultFromBoolean(result, ((Enumeration)object).hasMoreElements());
+        return;
+      }
+
+      if (method.equalsIgnoreCase("nextElement")) {
+        setResultFromObject(result, ((Enumeration)object).nextElement());
+        return;
+      }
+    }
+
     try {
       Vector matches = new Vector();
 
