@@ -1,15 +1,15 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- A few additions to Apache 2 sapi (Ilia)
+- ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
+  {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
+  installed as {PREFIX}/bin/php-cgi.
+- Made a few additions and changes to Apache 2 sapi. (Ilia)
   . Added apache_response_headers(), apache_note(), apache_getenv() and 
     apache_setenv() functions.
   . Added more detailed error reporting to apache_lookup_uri() and virtual().
   . Renamed getallheaders() to apache_request_headers() and made an alias for BC.
   . Added php_apache_sapi_getenv() and php_apache_sapi_get_stat().
-- ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
-  {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
-  installed as {PREFIX}/bin/php-cgi.
 - Fixed bug #17825 (ob_start() chunk size option didn't work well). (Yasuo)
 - Fixed output buffering implicit flush. (Yasuo, Marcus) 
 - Added getopt() for parsing command line options and arguments. (Jon)
