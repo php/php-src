@@ -1433,7 +1433,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 #ifdef PHP_WIN32
 			if (*(*path_for_open + 1) != ':')
 #endif
-				*path_for_open--;
+				(*path_for_open)--;
 		}
 		
 		/* fall back on regular file access */
