@@ -1,6 +1,12 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Fixed __FILE__ in the CGI & Java servlet modes when used in the main script.
+  It only worked correctly in included files before this fix (Andi)
+- Improved the Zend hash table implementation to be much faster (Andi, Zend
+  Engine)
+- Updated PHP's file open function (used by include()) to check in the calling
+  script's directory in case the file can't be found in the include_path (Andi)
 - Fixed a corruption bug that could cause constants to become corrupted, and
   possibly prevent resources from properly being cleaned up at the end of
   a request (Zeev)
