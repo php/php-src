@@ -2272,9 +2272,13 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 
 		case FB_LongInteger:
 		{ 
-			long   v = *((long*)data);
+			FBLongInteger v = *((FBLongInteger*)data);
 			char  b[128];
-			sprintf(b, "%li", v);
+#ifdef PHP_WIN32
+			sprintf(b, "%i64", v);
+#else
+			sprintf(b, "%ll", v);
+#endif
 			phpfbestrdup(b, length, value);
 		}
 		break;
