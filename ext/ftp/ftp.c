@@ -35,6 +35,7 @@
 #include <winsock.h>
 #else
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #endif
@@ -68,8 +69,6 @@ static int		ftp_putcmd(	ftpbuf_t *ftp,
 /* wrapper around send/recv to handle timeouts */
 static int		my_send(ftpbuf_t *ftp, int s, void *buf, size_t len);
 static int		my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len);
-static int		my_connect(ftpbuf_t *ftp, int s, const struct sockaddr *addr,
-				int addrlen);
 static int		my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr,
 				int *addrlen);
 
@@ -107,25 +106,8 @@ union ipbox {
 ftpbuf_t*
 ftp_open(const char *host, short port, long timeout_sec)
 {
-	int			fd = -1;
 	ftpbuf_t		*ftp;
-	struct sockaddr_in	addr;
-	struct hostent		*he;
 	int			size;
-
-
-	/* set up the address */
-	if ((he = gethostbyname(host)) == NULL) {
-#if 0
-		herror("gethostbyname");
-#endif
-		return NULL;
-	}
-
-	memset(&addr, 0, sizeof(addr));
-	memcpy(&addr.sin_addr, he->h_addr, he->h_length);
-	addr.sin_family = AF_INET;
-	addr.sin_port = port ? port : htons(21);
 
 
 	/* alloc the ftp structure */
@@ -135,28 +117,20 @@ ftp_open(const char *host, short port, long timeout_sec)
 		return NULL;
 	}
 
+	ftp->fd = php_hostconnect(host, port ? port : 21, SOCK_STREAM, (int) timeout_sec);
+	if (ftp->fd == -1) {
+		goto bail;
+	}
+
 	/* Default Settings */
 	ftp->timeout_sec = timeout_sec;
 
-	/* connect */
-	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
-		perror("socket");
-		goto bail;
-	}
-
-	if (my_connect(ftp, fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
-		perror("connect");
-		goto bail;
-	}
-
-	size = sizeof(addr);
-	if (getsockname(fd, (struct sockaddr*) &addr, &size) == -1) {
+	size = sizeof(ftp->localaddr);
+	memset(&ftp->localaddr, 0, size);
+	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) == -1) {
 		perror("getsockname");
 		goto bail;
 	}
-
-	ftp->localaddr = addr.sin_addr;
-	ftp->fd = fd;
 
 	if (!ftp_getresp(ftp) || ftp->resp != 220) {
 		goto bail;
@@ -165,8 +139,8 @@ ftp_open(const char *host, short port, long timeout_sec)
 	return ftp;
 
 bail:
-	if (fd != -1)
-		closesocket(fd);
+	if (ftp->fd != -1)
+		closesocket(ftp->fd);
 	free(ftp);
 	return NULL;
 }
@@ -487,6 +461,8 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	union ipbox		ipbox;
 	unsigned long		b[6];
 	int			n;
+	struct sockaddr *sa;
+	struct sockaddr_in *sin;
 
 	if (ftp == NULL)
 		return 0;
@@ -497,6 +473,47 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	ftp->pasv = 0;
 	if (!pasv)
 		return 1;
+
+	n = sizeof(ftp->pasvaddr);
+	memset(&ftp->pasvaddr, 0, n);
+	sa = (struct sockaddr *) &ftp->pasvaddr;
+
+#ifdef HAVE_IPV6
+	if (getpeername(ftp->fd, sa, &n) < 0)
+		return 0;
+
+	if (sa->sa_family == AF_INET6) {
+		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sa;
+		char *endptr, delimiter;
+
+		/* try EPSV first */
+		if (!ftp_putcmd(ftp, "EPSV", NULL))
+			return 0;
+		if (!ftp_getresp(ftp))
+			return 0;
+
+		if (ftp->resp == 229) {
+			/* parse out the port */
+			for (ptr = ftp->inbuf; *ptr && *ptr != '('; ptr++);
+			if (!*ptr)
+				return 0;
+			delimiter = *++ptr;
+			for (n = 0; *ptr && n < 3; ptr++) {
+				if (*ptr == delimiter)
+					n++;
+			}
+
+			sin6->sin6_port = htons((unsigned short) strtol(ptr, &endptr, 10));
+			if (ptr == endptr || *endptr != delimiter)
+				return 0;
+
+			ftp->pasv = 2;
+			return 1;
+		}
+	}
+
+	/* fall back to PASV */
+#endif
 
 	if (!ftp_putcmd(ftp, "PASV", NULL))
 		return 0;
@@ -513,10 +530,10 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	for (n=0; n<6; n++)
 		ipbox.c[n] = (unsigned char) b[n];
 
-	memset(&ftp->pasvaddr, 0, sizeof(ftp->pasvaddr));
-	ftp->pasvaddr.sin_family = AF_INET;
-	ftp->pasvaddr.sin_addr.s_addr = ipbox.l[0];
-	ftp->pasvaddr.sin_port = ipbox.s[2];
+	sin = (struct sockaddr_in *) sa;
+	sin->sin_family = AF_INET;
+	sin->sin_addr.s_addr = ipbox.l[0];
+	sin->sin_port = ipbox.s[2];
 
 	ftp->pasv = 2;
 
@@ -970,61 +987,6 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 }
 /* }}} */
 
-/* {{{ my_connect
- */
-int
-my_connect(ftpbuf_t *ftp, int s, const struct sockaddr *addr, int addrlen)
-#ifndef PHP_WIN32
-{
-	fd_set		conn_set;
-	int		flags;
-	int		n;
-	int		error = 0;
-	struct timeval	tv;
-
-	flags = fcntl(s, F_GETFL, 0);
-	fcntl(s, F_SETFL, flags | O_NONBLOCK);
-
-	n = connect(s, addr, addrlen);
-	if (n == -1 && errno != EINPROGRESS)
-		return -1;
-
-	if (n) {
-		FD_ZERO(&conn_set);
-		FD_SET(s, &conn_set);
-
-		tv.tv_sec = ftp->timeout_sec;
-		tv.tv_usec = 0;
-
-		n = select(s + 1, &conn_set, &conn_set, NULL, &tv);
-		if (n < 1) {
-			if (n == 0)
-				errno = ETIMEDOUT;
-			return -1;
-		}
-
-		if (FD_ISSET(s, &conn_set)) {
-			n = sizeof(error);
-			n = getsockopt(s, SOL_SOCKET, SO_ERROR, &error, &n);
-			if (n == -1 || error) {
-				if (error)
-					errno = error;
-				return -1;
-			}
-		}
-	}
-
-	fcntl(s, F_SETFL, flags);
-
-	return 0;
-}
-#else
-{
-	return connect(s, addr, addrlen);
-}
-#endif
-/* }}} */
-
 /* {{{ my_accept
  */
 int
@@ -1059,10 +1021,12 @@ ftp_getdata(ftpbuf_t *ftp)
 {
 	int			fd = -1;
 	databuf_t		*data;
-	struct sockaddr_in	addr;
+	php_sockaddr_storage addr;
+	struct sockaddr *sa;
 	int			size;
 	union ipbox		ipbox;
 	char			arg[sizeof("255, 255, 255, 255, 255, 255")];
+	struct timeval	tv;
 
 
 	/* ask for a passive connection if we need one */
@@ -1079,11 +1043,14 @@ ftp_getdata(ftpbuf_t *ftp)
 	data->fd = -1;
 	Z_TYPE_P(data) = Z_TYPE_P(ftp);
 
+	sa = (struct sockaddr *) &ftp->localaddr;
 	/* bind/listen */
-	if ((fd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
+	if ((fd = socket(sa->sa_family, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		goto bail;
 	}
+
+	size = sizeof(php_sockaddr_storage);
 
 	/* passive connection handler */
 	if (ftp->pasv) {
@@ -1091,13 +1058,11 @@ ftp_getdata(ftpbuf_t *ftp)
 		ftp->pasv = 1;
 
 		/* connect */
-		if (my_connect(ftp, fd, (struct sockaddr*) &ftp->pasvaddr,
-			sizeof(ftp->pasvaddr)) == -1)
-		{
+		tv.tv_sec = ftp->timeout_sec;
+		tv.tv_usec = 0;
+		if (php_connect_nonb(fd, (struct sockaddr*) &ftp->pasvaddr, size, &tv) == -1) {
 			perror("connect");
-			closesocket(fd);
-			free(data);
-			return NULL;
+			goto bail;
 		}
 
 		data->fd = fd;
@@ -1109,17 +1074,13 @@ ftp_getdata(ftpbuf_t *ftp)
 	/* active (normal) connection */
 
 	/* bind to a local address */
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = INADDR_ANY;
-	addr.sin_port = 0;
+	php_any_addr(sa->sa_family, &addr, 0);
 
-	if (bind(fd, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
+	if (bind(fd, (struct sockaddr*) &addr, size) == -1) {
 		perror("bind");
 		goto bail;
 	}
 
-	size = sizeof(addr);
 	if (getsockname(fd, (struct sockaddr*) &addr, &size) == -1) {
 		perror("getsockname");
 		goto bail;
@@ -1132,9 +1093,27 @@ ftp_getdata(ftpbuf_t *ftp)
 
 	data->listener = fd;
 
+#ifdef HAVE_IPV6
+	if (sa->sa_family == AF_INET6) {
+		/* need to use EPRT */
+		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];
+		char out[INET6_ADDRSTRLEN];
+		inet_ntop(AF_INET6, &((struct sockaddr_in6*) sa)->sin6_addr, out, sizeof(out));
+		sprintf(eprtarg, "|2|%s|%hu|", out, ntohs(((struct sockaddr_in6 *) &addr)->sin6_port));
+
+		if (!ftp_putcmd(ftp, "EPRT", eprtarg))
+			goto bail;
+
+		if (!ftp_getresp(ftp) || ftp->resp != 200)
+			goto bail;
+
+		return data;
+	}
+#endif
+
 	/* send the PORT */
-	ipbox.l[0] = ftp->localaddr.s_addr;
-	ipbox.s[2] = addr.sin_port;
+	ipbox.l[0] = ((struct sockaddr_in*) sa)->sin_addr.s_addr;
+	ipbox.s[2] = ((struct sockaddr_in*) &addr)->sin_port;
 	sprintf(arg, "%u,%u,%u,%u,%u,%u",
 		ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3],
 		ipbox.c[4], ipbox.c[5]);
@@ -1159,7 +1138,7 @@ bail:
 databuf_t*
 data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
-	struct sockaddr_in	addr;
+	php_sockaddr_storage addr;
 	int			size;
 
 	if (data->fd != -1)
