@@ -203,7 +203,7 @@ PHPAPI char *php_get_uname(char mode)
  */
 PHPAPI void php_print_info(int flag TSRMLS_DC)
 {
-	char **env, *tmp1, *tmp2;
+	char **env, *tmp1, *tmp2, *charset = NULL;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
@@ -216,7 +216,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 	PUTS("<head>");
 	php_info_print_style();
-	PUTS("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\"></head><body>");
+	if (SG(default_charset)) {
+		charset = SG(default_charset);
+	}
+	if (!charset || !charset[0]) {
+		charset = "US-ASCII";
+	}
+	php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head><body>", charset);
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
