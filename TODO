@@ -140,7 +140,6 @@ ext/standard
     * NOT binary safe:
         strtok()
         basename()
-        dirname()
 
 ext/wddx
 --------

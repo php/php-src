@@ -1142,7 +1142,7 @@ PHP_FUNCTION(basename)
 
 /* {{{ php_dirname
    Returns directory name component of path */
-PHPAPI void php_dirname(char *path, int len)
+PHPAPI size_t php_dirname(char *path, size_t len)
 {
 	register char *end = path + len - 1;
 
@@ -1150,7 +1150,7 @@ PHPAPI void php_dirname(char *path, int len)
 	/* Note that on Win32 CWD is per drive (heritage from CP/M).
 	 * This means dirname("c:foo") maps to "c:." or "c:" - which means CWD on C: drive.
 	 */
-	if ((2 <= len) && isalpha(path[0]) && (':' == path[1])) {
+	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
 		/* Skip over the drive spec (if any) so as not to change */
 		path += 2;
 		if (2 == len) {
@@ -1158,14 +1158,14 @@ PHPAPI void php_dirname(char *path, int len)
 			 * It would be more consistent to return "c:." 
 			 * but that would require making the string *longer*.
 			 */
-			return;
+			return len;
 		}
 	}
 #endif
 
-	if (len <= 0) {
+	if (len == 0) {
 		/* Illegal use of this function */
-		return;
+		return 0;
 	}
 
 	/* Strip trailing slashes */
@@ -1176,7 +1176,7 @@ PHPAPI void php_dirname(char *path, int len)
 		/* The path only contained slashes */
 		path[0] = DEFAULT_SLASH;
 		path[1] = '\0';
-		return;
+		return 1;
 	}
 
 	/* Strip filename */
@@ -1187,7 +1187,7 @@ PHPAPI void php_dirname(char *path, int len)
 		/* No slash found, therefore return '.' */
 		path[0] = '.';
 		path[1] = '\0';
-		return;
+		return 1;
 	}
 
 	/* Strip slashes which came before the file name */
@@ -1197,9 +1197,11 @@ PHPAPI void php_dirname(char *path, int len)
 	if (end < path) {
 		path[0] = DEFAULT_SLASH;
 		path[1] = '\0';
-		return;
+		return 1;
 	}
 	*(end+1) = '\0';
+
+	return (size_t)(end + 1 - path);
 }
 /* }}} */
 
@@ -1209,16 +1211,17 @@ PHP_FUNCTION(dirname)
 {
 	zval **str;
 	char *ret;
-	
+	size_t ret_len;
+
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
 
 	ret = estrndup(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
-	php_dirname(ret, Z_STRLEN_PP(str));
+	ret_len = php_dirname(ret, Z_STRLEN_PP(str));
 
-	RETURN_STRING(ret, 0);
+	RETURN_STRINGL(ret, ret_len, 0);
 }
 /* }}} */
 
