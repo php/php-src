@@ -1,3 +1,278 @@
+2002-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: Nuke tabs.
+
+    * ext/standard/config.m4:
+    Removed tabs and combined those multiple AC_CHECK_FUNCS calls to one.
+
+2002-10-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/link.c: Fixed symlink/link functions on ZTS builds.
+    Made URL detection in symlink code use php_stream_locate_url_wrapper().
+
+2002-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/config.m4: Cleanup. (no tabs here!)
+
+2002-10-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/file.c
+      main/php_streams.h
+      main/streams.c:
+    Refine stream_select() to work with streams that have data in their read
+    buffers.
+    When selecting for read, the streams are examined; if any of them have
+    pending read data, no actual select(2) call is performed; instead the
+    streams with buffered data are returned; just like a regular select
+    call.
+    Prevent erroneous warning in stream_select when obtaining the fd.
+
+2002-10-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c: no need to double fetch
+
+2002-10-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * sapi/apache/mod_php4.c: this will be handled elsewhere
+
+    * ext/fdf/config.m4
+      ext/fdf/fdf.c
+      ext/fdf/php_fdf.h:    reworked some existing stuff
+    added some functions suporting stuff that have been added since fdftk 2.0
+    emulating read from/save to strings by transparently using temp. files
+      (activeX version of fdftk has this, but not plain C version :( )
+
+    * ext/standard/basic_functions.c:
+    fixed build for getopt_long-less platforms,
+    removed left-over todo comments
+
+2002-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4:
+    Changed --with-gd to behave same way as --with-mysql does.
+
+2002-10-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/mb_detect_encoding.phpt
+      ext/mbstring/tests/mb_detect_order.phpt
+      ext/mbstring/tests/mb_ereg.phpt
+      ext/mbstring/tests/mb_ereg_replace.phpt
+      ext/mbstring/tests/mb_ereg_search_xxx.phpt
+      ext/mbstring/tests/mb_http_input.phpt
+      ext/mbstring/tests/mb_http_output.phpt
+      ext/mbstring/tests/mb_internal_encoding.phpt
+      ext/mbstring/tests/mb_output_handler_euc_jp.phpt
+      ext/mbstring/tests/mb_preferred_mime_name.phpt
+      ext/mbstring/tests/mb_regex_set_options.phpt
+      ext/mbstring/tests/mb_split.phpt
+      ext/mbstring/tests/mb_strcut.phpt
+      ext/mbstring/tests/mb_strimwidth.phpt
+      ext/mbstring/tests/mb_strlen.phpt
+      ext/mbstring/tests/mb_strpos.phpt
+      ext/mbstring/tests/mb_strwidth.phpt
+      ext/mbstring/tests/mb_substitute_character.phpt
+      ext/mbstring/tests/mb_substr.phpt
+      ext/mbstring/tests/php_gr_jp_10830.phpt
+      ext/mbstring/tests/simpletest.phpt
+      ext/mbstring/tests/001.phpt
+      ext/mbstring/tests/002.inc
+      ext/mbstring/tests/002.phpt
+      ext/mbstring/tests/003.inc
+      ext/mbstring/tests/003.phpt
+      ext/mbstring/tests/004.inc
+      ext/mbstring/tests/004.phpt
+      ext/mbstring/tests/005.inc
+      ext/mbstring/tests/005.phpt
+      ext/mbstring/tests/006.inc
+      ext/mbstring/tests/006.phpt
+      ext/mbstring/tests/007.inc
+      ext/mbstring/tests/007.phpt
+      ext/mbstring/tests/008.inc
+      ext/mbstring/tests/008.phpt
+      ext/mbstring/tests/009.inc
+      ext/mbstring/tests/009.phpt
+      ext/mbstring/tests/010.inc
+      ext/mbstring/tests/010.phpt
+      ext/mbstring/tests/011.inc
+      ext/mbstring/tests/011.phpt
+      ext/mbstring/tests/012.inc
+      ext/mbstring/tests/012.phpt
+      ext/mbstring/tests/013.inc
+      ext/mbstring/tests/013.phpt
+      ext/mbstring/tests/014.inc
+      ext/mbstring/tests/014.phpt
+      ext/mbstring/tests/015.inc
+      ext/mbstring/tests/015.phpt
+      ext/mbstring/tests/016.inc
+      ext/mbstring/tests/016.phpt
+      ext/mbstring/tests/017.inc
+      ext/mbstring/tests/017.phpt
+      ext/mbstring/tests/018.inc
+      ext/mbstring/tests/018.phpt
+      ext/mbstring/tests/019.inc
+      ext/mbstring/tests/019.phpt
+      ext/mbstring/tests/020.phpt
+      ext/mbstring/tests/021.inc
+      ext/mbstring/tests/021.phpt
+      ext/mbstring/tests/022.inc
+      ext/mbstring/tests/022.phpt
+      ext/mbstring/tests/023.inc
+      ext/mbstring/tests/023.phpt
+      ext/mbstring/tests/024.inc
+      ext/mbstring/tests/024.phpt
+      ext/mbstring/tests/025.inc
+      ext/mbstring/tests/025.phpt
+      ext/mbstring/tests/026.inc
+      ext/mbstring/tests/026.phpt
+      ext/mbstring/tests/027.inc
+      ext/mbstring/tests/027.phpt
+      ext/mbstring/tests/casefold.phpt
+      ext/mbstring/tests/htmlent.phpt
+      ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt: Renamed the test cases.
+
+2002-10-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/SAPI.c: removed left-over unused variable
+
+2002-10-21  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/basic_functions.c:
+    Convert C++ style comments to C style comments.
+
+2002-10-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/php_fopen_wrapper.c:
+    killed some warnings identified by sebastian
+
+    * main/SAPI.c: removed bogus paranoid header checking
+
+    * ext/standard/php_fopen_wrapper.c
+      main/SAPI.c
+      main/main.c
+      main/php_content_types.c
+      main/php_globals.h:
+    some changes to how request input data (Content-Lenght >0) is handled
+    - webdav-specific stuff removed (should be handled using httpd.conf
+      LIMIT or equivalents)
+    - always_populate_raw_post_data now working on any method, not just
+      POST (and webdav methods with allow_webdav_methods), when
+    	Content-Length is greater zero
+    - raw input data is also available using php://input stream,
+      this way one doesn't have to care about memory_limit
+    - input data is now always consumed (although maybe ignored,
+      this fixes we had withproblems with keep-alive connections
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4:
+    getopt() now supports long options on platforms that have getopt_long()
+    getopt() now working independant of register_argc_argv settings
+
+    * build/build.mk: workaround for the "autoconf-cache-bug" workaround
+    -> don't remove config.nice
+
+2002-10-21  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: Tweak.
+
+2002-10-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/ncurses/php_ncurses.h: ZTS build fix
+
+2002-10-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_globals.h
+      php.ini-dist
+      php.ini-recommended
+      main/main.c:
+    Fixed bug #16880. Added an ini option max_input_time that allows the user
+    to specify how much time a script may spend parsing input data (POST, GET, etc..).
+
+2002-10-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * pear/scripts/phpize.in:
+    fix for #19712 & #19715 -> whitepsace in extension dir name
+
+2002-10-21  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+2002-10-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: More style fixes...
+
+    * ext/iconv/tests/001.phpt
+      ext/iconv/tests/bug16069.phpt
+      ext/iconv/tests/translit-failure.phpt
+      ext/iconv/tests/translit-utf8.phpt: Let them say why they are skipped
+
+    * run-tests.php: Fixed typo.
+
+    * run-tests.php: \s cannot be used with ereg()
+
+2002-10-21  Sander Roobol  <phy@wanadoo.nl>
+
+    * run-tests.php: The results of each test should go on a single line
+
+2002-10-21  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php: - Stijl polizei
+
+2002-10-21  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xml/tests/007.phpt:
+    Skip this when strtoupper doesn't behave as expected, because casefolding
+    depends on this.
+
+    * run-tests.php: Adds a 'reason' for skipping a test.
+
+2002-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: remove the remains of that comment.
+
+    * acinclude.m4
+      configure.in
+      sapi/cgi/config.m4
+      sapi/cgi/config9.m4:
+    - Moved CGI specific lines from configure.in to sapi/cgi/config9.m4
+      which is 'executed' last of the SAPI config.m4's.
+    - Added --disable-cgi option. (was possible only with above change)
+    - Made the sed check to not test for the possibly working sed on Solaris
+      since that would make the test quite useless. (compile would still fail)
+
+
+    * scripts/config-stubs: - Add one 'level' more (0 first, 9 last)
+
+    * ext/pdf/config.m4
+      ext/gd/config.m4
+      ext/mysql/config.m4
+      ext/domxml/config.m4:
+    - Prevent resetting the PHP_*_DIR variables if already set.
+
+2002-10-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: style keisatsu :)
+
+    * ext/mbstring/tests/027.inc
+      ext/mbstring/tests/027.phpt:
+    Added a new test case to confirm the inconsistent regex behaviour reported
+    on php-users@php.gr.jp (10830)
+
+    * ext/mbstring/mbstring.c: Changed the dafault option for consistency
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/tests/026.inc
+      ext/mbstring/tests/026.phpt: Added mb_strtolower() and mb_strtoupper()
+
+    * main/streams.c: MFH
+
+2002-10-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/config.m4: Align with other configure --help texts
+
+    * ext/standard/tests/file/001.phpt:
+    There is no point doing this test. Some systems think root can always execute so this is always true.
+
 2002-10-20  Sean Bright  <elixer@erols.com>
 
     * README.SELF-CONTAINED-EXTENSIONS: Fix some verbage.
