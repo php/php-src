@@ -1958,7 +1958,7 @@ int FCGX_IsCGI(void)
         int rc = FCGX_Init();
         if (rc) {
             /* exit() isn't great, but hey */
-            //exit((rc < 0) ? rc : -rc);
+            /* exit((rc < 0) ? rc : -rc); */
 			return 0;
         }
     }
