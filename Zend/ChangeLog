@@ -1,3 +1,22 @@
+2004-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      - Speed up by making null/false/true reserved word which allows to drop
+        an opcode (FETCH_CONSTANT) for every usage.
+
+    * zend_execute.c:
+      Bugfix #28464 catch() does not catch exceptions by interfaces
+
+2004-07-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_operators.h:
+      MFB: Fixed bug #28800 (strings beginning with "inf" improperly converted).
+
+    * (PHP_5_0)
+      zend_operators.h:
+      Fixed bug #28800 (strings beginning with "inf" improperly converted).
+
 2004-07-15  Andi Gutmans  <andi@zend.com>
 
     * zend_alloc.c

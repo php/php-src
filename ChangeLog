@@ -1,3 +1,69 @@
+2004-07-16  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/standard/filters.c:
+      MFH: convert.* filters not consuming buckets_in on PSFS_FLUSH_*
+
+    * ext/standard/filters.c:
+      convert.* filters not consuming buckets_in on PSFS_FLUSH_*
+
+2004-07-16  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/openssl/openssl.mak:
+      NetWare specific openssl build file
+
+2004-07-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS:
+      (IMO) Better NEWS entry for true/false/null implementation change.
+
+2004-07-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Correct version
+
+    * NEWS
+      NEWS
+      TODO-5.1:
+      BFN
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      - Speed up by making null/false/true reserved word which allows to drop
+        an opcode (FETCH_CONSTANT) for every usage.
+
+    * ZendEngine2/zend_execute.c:
+      Bugfix #28464 catch() does not catch exceptions by interfaces
+
+2004-07-16  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/filestat.c:
+      Bugfix# 29114  Potential double free in php_stat
+
+2004-07-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_operators.h
+      tests/lang/bug28800.phpt:
+      MFH: Fixed bug #28800 (strings beginning with "inf" improperly converted).
+
+    * ZendEngine2/zend_operators.h
+      tests/lang/bug28800.phpt:
+      MFB: Fixed bug #28800 (strings beginning with "inf" improperly converted).
+
+    * (PHP_5_0)
+      ZendEngine2/zend_operators.h
+      tests/lang/bug28800.phpt
+      tests/lang/bug28800.phpt:
+      Fixed bug #28800 (strings beginning with "inf" improperly converted).
+
 2004-07-15  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_alloc.c
