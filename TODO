@@ -22,8 +22,6 @@ Zend
     * Const'ify APIs. Right now, many functions leave parameters untouched,
       but don't declare those as const. This makes interaction with other
       interfaces difficult which pass const parameters to us.
-    * Add try..catch/throw exception handling.
-    * Fix Zend shallow copy issues with objects and arrays.
 
 
 global
@@ -123,7 +121,6 @@ ext/session
 
 ext/sockets
 -----------
-    * Make the extension work on windows (Daniel Beulshausen)
     * Make the extension work with Solaris and the Sun GCC
 
 ext/standard
@@ -141,8 +138,6 @@ ext/standard
         strrpos()
         strrchr()
         strip_tags()
-    * Rewrite win32 SMTP code to be usable for *ix to, maybe as a (default)
-      module of its own (Hartmut)
 
 ext/wddx
 --------
