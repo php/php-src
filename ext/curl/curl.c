@@ -418,7 +418,6 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 	}
 	case PHP_CURL_IGNORE:
 		length = size * nmemb;
-
 		break;
 	}
 	
