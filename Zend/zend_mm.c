@@ -408,6 +408,9 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 		/* segment size, size of block and size of guard block */
 		realloc_to_size = ZEND_MM_ALIGNED_SEGMENT_SIZE+true_size+ZEND_MM_ALIGNED_HEADER_SIZE;
 		segment = realloc(segment, realloc_to_size);
+		if (!segment) {
+			return NULL;
+		}
 
 		if (segment != segment_copy) {
 			if (heap->segments_list == segment_copy) {
