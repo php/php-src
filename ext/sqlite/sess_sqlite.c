@@ -20,6 +20,9 @@
 /* $Id$ */
 
 #include "php.h"
+
+#if HAVE_PHP_SESSION
+
 #include "ext/session/php_session.h"
 #include <sqlite.h>
 
@@ -71,9 +74,7 @@ static int ps_sqlite_valid_key(const char *key)
 
 PS_OPEN_FUNC(sqlite) 
 {
-	char *filepath;
 	char *errmsg = NULL;
-	int spath_len, sname_len, fp_len;
 	sqlite *db;
 
 	/* TODO: do we need a safe_mode check here? */
@@ -202,6 +203,8 @@ PS_GC_FUNC(sqlite)
 	return SQLITE_OK == sqlite_exec_printf(db, GC_QUERY, NULL, NULL, NULL, t, maxlifetime) ?
 		SUCCESS : FAILURE;
 }
+
+#endif /* HAVE_PHP_SESSION */
 
 /*
  * Local variables:

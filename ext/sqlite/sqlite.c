@@ -58,8 +58,10 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(sqlite)
 
+#if HAVE_PHP_SESSION
 extern ps_module ps_mod_sqlite;
 #define ps_sqlite_ptr &ps_mod_sqlite
+#endif
 
 extern int sqlite_encode_binary(const unsigned char *in, int n, unsigned char *out);
 extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
@@ -882,7 +884,9 @@ PHP_MINIT_FUNCTION(sqlite)
 
 	REGISTER_INI_ENTRIES();
 
+#if HAVE_PHP_SESSION
 	php_session_register_module(ps_sqlite_ptr);
+#endif
 	
 	le_sqlite_db = zend_register_list_destructors_ex(php_sqlite_db_dtor, NULL, "sqlite database", module_number);
 	le_sqlite_pdb = zend_register_list_destructors_ex(NULL, php_sqlite_db_dtor, "sqlite database (persistent)", module_number);
