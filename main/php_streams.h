@@ -499,11 +499,8 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 /* this flag is only used by include/require functions */
 #define STREAM_OPEN_FOR_INCLUDE		128
 
-#ifdef PHP_WIN32
-# define IGNORE_URL_WIN STREAM_MUST_SEEK
-#else
-# define IGNORE_URL_WIN 0
-#endif
+/* Antique - no longer has meaning */
+#define IGNORE_URL_WIN 0
 
 int php_init_stream_wrappers(int module_number TSRMLS_DC);
 int php_shutdown_stream_wrappers(int module_number TSRMLS_DC);

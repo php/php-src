@@ -1193,6 +1193,8 @@ typedef struct {
 	int fd;					/* underlying file descriptor */
 	int is_process_pipe;	/* use pclose instead of fclose */
 	int is_pipe;			/* don't try and seek */
+	char *temp_file_name;	/* if non-null, this is the path to a temporary file that
+							 * is to be deleted when the stream is closed */
 #if HAVE_FLUSHIO
 	char last_op;
 #endif
@@ -1218,21 +1220,24 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 
 PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 {
-	FILE *fp;
-	php_stream *stream;
+	char *opened_path = NULL;
+	FILE *fp = php_open_temporary_file(NULL, "php", &opened_path TSRMLS_CC);
 
-	fp = tmpfile();
-	if (fp == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
-		return NULL;
-	}
-	stream = php_stream_fopen_from_file_rel(fp, "r+");
-	if (stream == NULL)	{
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "tmpfile(): %s", strerror(errno));
+	if (fp)	{
+		php_stream *stream = php_stream_fopen_from_file_rel(fp, "r+b");
+		if (stream) {
+			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
+
+			self->temp_file_name = opened_path;
+			return stream;
+		}
 		fclose(fp);
+
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate stream");
+
 		return NULL;
 	}
-	return stream;
+	return NULL;
 }
 
 
@@ -1335,6 +1340,10 @@ static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
 			ret = pclose(data->file);
 		} else {
 			ret = fclose(data->file);
+		}
+		if (data->temp_file_name) {
+			unlink(data->temp_file_name);
+			efree(data->temp_file_name);
 		}
 	} else {
 		ret = 0;
@@ -1694,7 +1703,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 
 			return ret;
 		}
-		err:
+err:
 		fclose(fp);
 	}
 	efree(realpath);
@@ -1824,42 +1833,39 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		return FAILURE;
 #endif
 
-	}
+		if (flags & PHP_STREAM_CAST_TRY_HARD) {
+			php_stream *newstream;
 
-	if (stream->filterhead && (flags & PHP_STREAM_CAST_TRY_HARD) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
-		return FAILURE;
-	} else if (!stream->filterhead) {
-		if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {
-			goto exit_success;
-		}
-	}
+			newstream = php_stream_fopen_tmpfile();
+			if (newstream) {
+				size_t copied = php_stream_copy_to_stream(stream, newstream, PHP_STREAM_COPY_ALL);
 
-	if ((flags & PHP_STREAM_CAST_TRY_HARD) && castas == PHP_STREAM_AS_STDIO) {
-		php_stream *newstream;
+				if (copied == 0) {
+					php_stream_close(newstream);
+				} else {
+					int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
 
-		newstream = php_stream_fopen_tmpfile();
-		if (newstream) {
-			size_t copied = php_stream_copy_to_stream(stream, newstream, PHP_STREAM_COPY_ALL);
+					if (retcode == SUCCESS)
+						rewind((FILE*)*ret);
+					
+					/* do some specialized cleanup */
+					if (flags & PHP_STREAM_CAST_RELEASE) {
+						php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE);
+					}
 
-			if (copied == 0) {
-				php_stream_close(newstream);
-			} else {
-				int retcode = php_stream_cast(newstream, castas | flags, ret, show_err);
-
-				if (retcode == SUCCESS)
-					rewind((FILE*)*ret);
-				
-				/* do some specialized cleanup */
-				if (flags & PHP_STREAM_CAST_RELEASE) {
-					php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE | PHP_STREAM_FREE_CLOSE);
+					return retcode;
 				}
-
-				return retcode;
 			}
 		}
 	}
-	
+
+	if (stream->filterhead) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot cast a filtered stream on this system");
+		return FAILURE;
+	} else if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS) {
+		goto exit_success;
+	}
+
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char *cast_names[3] = {
@@ -1900,7 +1906,7 @@ exit_success:
 		if (stream->fclose_stdiocast != PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* ask the implementation to release resources other than
 			 * the underlying handle */
-			php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE | PHP_STREAM_FREE_CLOSE);
+			php_stream_free(stream, PHP_STREAM_FREE_PRESERVE_HANDLE);
 		}
 	}
 
@@ -2296,6 +2302,28 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 
 	if (stream == NULL)
 		return NULL;
+
+#ifdef PHP_WIN32
+	/* Avoid possible strange problems when working with socket based streams */
+	if ((options & STREAM_OPEN_FOR_INCLUDE) && php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		char buf[CHUNK_SIZE];
+
+		fp = php_open_temporary_file(NULL, "php", NULL TSRMLS_CC);
+		if (fp) {
+			while (!php_stream_eof(stream)) {
+				size_t didread = php_stream_read(stream, buf, sizeof(buf));
+				if (didread > 0) {
+					fwrite(buf, 1, didread, fp);
+				} else {
+					break;
+				}
+			}
+			php_stream_close(stream);
+			rewind(fp);
+			return fp;
+		}
+	}
+#endif
 	
 	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
 				(void**)&fp, REPORT_ERRORS) == FAILURE)
