@@ -68,6 +68,11 @@
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
+/* Additional headers for NetWare */
+#if defined(NETWARE) && defined(NEW_LIBC) && !defined(USE_WINSOCK)
+#include <sys/select.h>
+#endif
+
 /* sends an ftp command, returns true on success, false on error.
  * it sends the string "cmd args\r\n" if args is non-null, or
  * "cmd\r\n" if args is null
