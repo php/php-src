@@ -83,6 +83,12 @@ PHP_INI_END()
 
 #define DB_FROM_ZVAL(db, zv)	ZEND_FETCH_RESOURCE2(db, struct php_sqlite_db *, zv, -1, "sqlite database", le_sqlite_db, le_sqlite_pdb)
 
+#define PHP_SQLITE_EMPTY_QUERY \
+	if (!sql_len) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute empty query."); \
+		RETURN_FALSE; \
+	}
+
 struct php_sqlite_result {
 	struct php_sqlite_db *db;
 	sqlite_vm *vm;
@@ -1051,6 +1057,8 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 
 	DB_FROM_ZVAL(db, &zdb);
 
+	PHP_SQLITE_EMPTY_QUERY;
+
 	/* avoid doing work if we can */
 	if (!return_value_used) {
 		db->last_err_code = sqlite_exec(db->db, sql, NULL, NULL, &errtext);
@@ -1083,6 +1091,8 @@ PHP_FUNCTION(sqlite_query)
 		return;
 	}
 	DB_FROM_ZVAL(db, &zdb);
+
+	PHP_SQLITE_EMPTY_QUERY;
 
 	/* avoid doing work if we can */
 	if (!return_value_used) {
@@ -1297,6 +1307,8 @@ PHP_FUNCTION(sqlite_array_query)
 	}
 	DB_FROM_ZVAL(db, &zdb);
 
+	PHP_SQLITE_EMPTY_QUERY;
+
 	/* avoid doing work if we can */
 	if (!return_value_used) {
 		db->last_err_code = sqlite_exec(db->db, sql, NULL, NULL, &errtext);
@@ -1399,6 +1411,8 @@ PHP_FUNCTION(sqlite_single_query)
 		return;
 	}
 	DB_FROM_ZVAL(db, &zdb);
+
+	PHP_SQLITE_EMPTY_QUERY;
 
 	/* avoid doing work if we can */
 	if (!return_value_used) {
