@@ -42,6 +42,7 @@ if test "$DBM_LIB" = "-lgdbm"; then
       ])
     ])  
   ])
+fi
 
 if test -n "$DBM_LIB"; then
   INCLUDES="$INCLUDES $GDBM_INCLUDE"
