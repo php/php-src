@@ -242,6 +242,9 @@ function run_tests_in_dir($dir = '.')
         return true;
     }
     $oskipped = $skipped;
+    if (sizeof($testfiles) == 0) {
+        return;
+    }
     writeln("%bRunning tests in $dir%B");
     writeln("=================".str_repeat("=", strlen($dir)));
     sort($testfiles);
@@ -261,7 +264,7 @@ function run_tests_in_dir($dir = '.')
         $total++;
     }
     if ($oskipped + (isset($tests_in_dir[$dir])?$tests_in_dir[$dir]:0)  == $skipped) {
-        writeln("(all skipped)");
+        writeln("[all $skipped test(s) skipped]");
     }
     writeln("");
     return true;
