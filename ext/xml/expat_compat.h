@@ -24,7 +24,6 @@
 #if !defined(HAVE_LIBEXPAT) && defined(HAVE_LIBXML)
 #define LIBXML_EXPAT_COMPAT 1
 
-#include <libxml.h>
 #include <libxml/hash.h>
 #include <libxml/parser.h>
 #include <libxml/parserInternals.h>
@@ -58,6 +57,10 @@ typedef struct _XML_Parser {
 	void *user;
 	xmlParserCtxtPtr parser;
 
+	char *last_error_msg;
+	
+	XML_Memory_Handling_Suite        mem_hdlrs;
+
 	XML_StartElementHandler          h_start_element;
 	XML_EndElementHandler            h_end_element;
 	XML_CharacterDataHandler         h_cdata;
@@ -68,8 +71,46 @@ typedef struct _XML_Parser {
 	XML_ExternalEntityRefHandler     h_external_entity_ref;
 	XML_StartNamespaceDeclHandler    h_start_ns;
 	XML_EndNamespaceDeclHandler      h_end_ns;
-	XML_Memory_Handling_Suite        mem_hdlrs;
 } *XML_Parser;
+
+enum XML_Error {
+  XML_ERROR_NONE,
+  XML_ERROR_NO_MEMORY,
+  XML_ERROR_SYNTAX,
+  XML_ERROR_NO_ELEMENTS,
+  XML_ERROR_INVALID_TOKEN,
+  XML_ERROR_UNCLOSED_TOKEN,
+  XML_ERROR_PARTIAL_CHAR,
+  XML_ERROR_TAG_MISMATCH,
+  XML_ERROR_DUPLICATE_ATTRIBUTE,
+  XML_ERROR_JUNK_AFTER_DOC_ELEMENT,
+  XML_ERROR_PARAM_ENTITY_REF,
+  XML_ERROR_UNDEFINED_ENTITY,
+  XML_ERROR_RECURSIVE_ENTITY_REF,
+  XML_ERROR_ASYNC_ENTITY,
+  XML_ERROR_BAD_CHAR_REF,
+  XML_ERROR_BINARY_ENTITY_REF,
+  XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF,
+  XML_ERROR_MISPLACED_XML_PI,
+  XML_ERROR_UNKNOWN_ENCODING,
+  XML_ERROR_INCORRECT_ENCODING,
+  XML_ERROR_UNCLOSED_CDATA_SECTION,
+  XML_ERROR_EXTERNAL_ENTITY_HANDLING,
+  XML_ERROR_NOT_STANDALONE,
+  XML_ERROR_UNEXPECTED_STATE,
+  XML_ERROR_ENTITY_DECLARED_IN_PE,
+  XML_ERROR_FEATURE_REQUIRES_XML_DTD,
+  XML_ERROR_CANT_CHANGE_FEATURE_ONCE_PARSING
+};
+
+enum XML_Content_Type {
+  XML_CTYPE_EMPTY = 1,
+  XML_CTYPE_ANY,
+  XML_CTYPE_MIXED,
+  XML_CTYPE_NAME,
+  XML_CTYPE_CHOICE,
+  XML_CTYPE_SEQ
+};
 
 XML_Parser XML_ParserCreate(const XML_Char *);
 XML_Parser XML_ParserCreateNS(const XML_Char *, const XML_Char);
@@ -86,36 +127,13 @@ void XML_SetExternalEntityRefHandler(XML_Parser, XML_ExternalEntityRefHandler);
 void XML_SetStartNamespaceDeclHandler(XML_Parser, XML_StartNamespaceDeclHandler);
 void XML_SetEndNamespaceDeclHandler(XML_Parser, XML_EndNamespaceDeclHandler);
 int  XML_Parse(XML_Parser, const XML_Char *, int data_len, int is_final);
-int  XML_GetErrorCode(XML_Parser);
+int XML_GetErrorCode(XML_Parser);
 const XML_Char *XML_ErrorString(int);
 int  XML_GetCurrentLineNumber(XML_Parser);
 int  XML_GetCurrentColumnNumber(XML_Parser);
 int  XML_GetCurrentByteIndex(XML_Parser);
 const XML_Char *XML_ExpatVersion(void);
 void XML_ParserFree(XML_Parser);
-
-#define XML_ERROR_NONE 0
-#define XML_ERROR_NO_MEMORY 0
-#define XML_ERROR_SYNTAX 0
-#define XML_ERROR_NO_ELEMENTS 0
-#define XML_ERROR_INVALID_TOKEN 0
-#define XML_ERROR_UNCLOSED_TOKEN 0
-#define XML_ERROR_PARTIAL_CHAR 0
-#define XML_ERROR_TAG_MISMATCH 0
-#define XML_ERROR_DUPLICATE_ATTRIBUTE 0
-#define XML_ERROR_JUNK_AFTER_DOC_ELEMENT 0
-#define XML_ERROR_PARAM_ENTITY_REF 0
-#define XML_ERROR_UNDEFINED_ENTITY 0
-#define XML_ERROR_RECURSIVE_ENTITY_REF 0
-#define XML_ERROR_ASYNC_ENTITY 0
-#define XML_ERROR_BAD_CHAR_REF 0
-#define XML_ERROR_BINARY_ENTITY_REF 0
-#define XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF 0
-#define XML_ERROR_MISPLACED_XML_PI 0
-#define XML_ERROR_UNKNOWN_ENCODING 0
-#define XML_ERROR_INCORRECT_ENCODING 0
-#define XML_ERROR_UNCLOSED_CDATA_SECTION 0
-#define XML_ERROR_EXTERNAL_ENTITY_HANDLING 0
 
 #else 
 #include <expat.h>
