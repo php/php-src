@@ -52,8 +52,8 @@ static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
-static ZEND_FUNCTION(user_error);
-static ZEND_FUNCTION(set_user_error_handler);
+static ZEND_FUNCTION(trigger_error);
+static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
@@ -89,8 +89,9 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
-	ZEND_FE(user_error,			NULL)
-	ZEND_FE(set_user_error_handler,		NULL)
+	ZEND_FE(trigger_error,		NULL)
+	ZEND_FALIAS(user_error,		trigger_error,		NULL)
+	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(get_declared_classes, NULL)
 	{ NULL, NULL, NULL }
 };
@@ -708,9 +709,9 @@ ZEND_FUNCTION(get_included_files)
 /* }}} */
 
 
-/* {{{ proto void user_error(string messsage [, int error_type])
+/* {{{ proto void trigger_error(string messsage [, int error_type])
    Generates a user-level error/warning/notice message */
-ZEND_FUNCTION(user_error)
+ZEND_FUNCTION(trigger_error)
 {
 	int error_type = E_USER_NOTICE;
 	zval **z_error_type, **z_error_message;
@@ -746,7 +747,9 @@ ZEND_FUNCTION(user_error)
 /* }}} */
 
 
-ZEND_FUNCTION(set_user_error_handler)
+/* {{{ proto int set_error_handler(string error_handler)
+   Sets a user-defined error handler function */
+ZEND_FUNCTION(set_error_handler)
 {
 	zval **error_handler;
 
@@ -761,11 +764,19 @@ ZEND_FUNCTION(set_user_error_handler)
 		ALLOC_ZVAL(EG(user_error_handler));
 	}
 
+	if (Z_STRLEN_PP(error_handler)==0) { /* unset user-defined handler */
+		FREE_ZVAL(EG(user_error_handler));
+		EG(user_error_handler) = NULL;
+		RETURN_TRUE;
+	}
+
 	*EG(user_error_handler) = **error_handler;
 	zval_copy_ctor(EG(user_error_handler));
 
 	RETURN_TRUE;
 }
+/* }}} */
+
 
 static int copy_class_name(zend_class_entry *ce, zval *array)
 {
