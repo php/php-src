@@ -153,33 +153,10 @@ AC_AIX
 
 dnl AC_PROG_CXX
 dnl AC_PROG_CXXCPP
+
 dnl check for -R, etc. switch
-AC_MSG_CHECKING([whether compiler supports -R])
-AC_CACHE_VAL(php_cv_cc_dashr,[
-  SAVE_LIBS=$LIBS
-  LIBS="-R /usr/lib $LIBS"
-  AC_TRY_LINK([], [], php_cv_cc_dashr=yes, php_cv_cc_dashr=no)
-  LIBS=$SAVE_LIBS
-])
-AC_MSG_RESULT([$php_cv_cc_dashr])
-if test $php_cv_cc_dashr = "yes"; then
-  ld_runpath_switch=-R
-else
-  AC_MSG_CHECKING([whether compiler supports -Wl,-rpath,])
-  AC_CACHE_VAL(php_cv_cc_rpath, [
-    SAVE_LIBS=$LIBS
-    LIBS="-Wl,-rpath,/usr/lib $LIBS"
-    AC_TRY_LINK([], [], php_cv_cc_rpath=yes, php_cv_cc_rpath=no)
-    LIBS=$SAVE_LIBS
-  ])
-  AC_MSG_RESULT([$php_cv_cc_rpath])
-  if test $php_cv_cc_rpath = "yes"; then
-    ld_runpath_switch=-Wl,-rpath,
-  else
-    dnl something innocuous
-    ld_runpath_switch=-L
-  fi
-fi
+PHP_RUNPATH_SWITCH
+
 AC_PROG_RANLIB
 AC_PROG_LN_S
 AC_PROG_AWK
