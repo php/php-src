@@ -2667,6 +2667,8 @@ PHP_FUNCTION(ibase_blob_add)
 {
 	zval **blob_arg, **string_arg;
 	ibase_blob_handle *ib_blob;
+	unsigned long put_cnt = 0, rem_cnt;
+	unsigned short chunk_size;
 
 	RESET_ERRMSG;
 
@@ -2678,9 +2680,15 @@ PHP_FUNCTION(ibase_blob_add)
 	
 	convert_to_string_ex(string_arg);
 
-	if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, (unsigned short) Z_STRLEN_PP(string_arg), Z_STRVAL_PP(string_arg))) {
-		_php_ibase_error(TSRMLS_C);
-		RETURN_FALSE;
+	for (rem_cnt = Z_STRLEN_PP(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
+		
+		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : rem_cnt;
+
+		if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, chunk_size, &Z_STRVAL_PP(string_arg)[put_cnt] )) {
+			_php_ibase_error(TSRMLS_C);
+			RETURN_FALSE;
+		}
+		put_cnt += chunk_size;
 	}
 	RETURN_TRUE;
 }
