@@ -13,8 +13,8 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 
 $root->register_ns('myns', 'reserved-ns');
 
-echo $root->child['reserved:attribute'];
-echo $root->child['myns:attribute'];
+echo $root->child->attributes('reserved')['attribute'];
+echo $root->child->attributes('myns')['attribute'];
 echo "\n---Done---\n";
 ?>
 --EXPECT--

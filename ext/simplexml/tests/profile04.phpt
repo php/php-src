@@ -10,7 +10,7 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->reserved->child;
+echo $root->children('reserved')->child;
 echo "\n---Done---\n";
 ?>
 --EXPECT--
