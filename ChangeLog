@@ -1,3 +1,70 @@
+2003-02-01  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/image.c:
+      avoid warnings
+
+    * ext/gd/config.m4:
+      Bundled version has XBM support as well as external.
+
+    * ext/gd/gd.c:
+      Show if XPM support is available & Set availability bit only when
+      available.
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+      
+
+    * ext/dba/config.m4:
+      Change DBM detection order
+
+    * (PHP_4_3)
+      ext/dba/config.m4
+      ext/dba/dba_cdb.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c:
+      MFH: include file handling and dbm fixes
+
+    * ext/dba/config.m4
+      ext/dba/dba_cdb.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c:
+      - unify configure mechanisms (include file handling)
+      - fix dbm
+      - allow dbm to be based on gdbm
+
+2003-02-01  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * run-tests.php:
+      Make it easier to diff results of several runs in one day.
+
+2003-02-01  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Correct required mcrypt version
+
+2003-02-01  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * (PHP_4_3)
+      INSTALL:
+      MFH: Bug #21892 (links to apache2 install instructions missing)
+
+    * INSTALL:
+      Fix Bug #21892 (links to apache2 install instructions missing)
+      
+
+2003-02-01  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command/Registry.php:
+      - displayLine() is deprecated, so better use displayError() here.
+
+2003-02-01  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/var.c:
+      Don't assume that objects have class entries (in the ZE1 sense) when
+      determining the class name.
+      Additionally, don't assume that objects have a properties hash either.
+
 2003-01-31  Melvyn Sopacua  <msopacua@idg.nl>
 
     * ext/mcrypt/config.m4:

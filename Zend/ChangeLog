@@ -1,3 +1,84 @@
+2003-02-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_ini_scanner.l
+      zend_language_scanner.l:
+      Fix build.
+
+2003-02-01  Jani Taskinen  <sniper@iki.fi>
+
+    * acconfig.h
+      zend.c
+      zend.h
+      zend_API.c
+      zend_API.h
+      zend_alloc.c
+      zend_alloc.h
+      zend_builtin_functions.c
+      zend_builtin_functions.h
+      zend_compile.c
+      zend_compile.h
+      zend_config.nw.h
+      zend_config.w32.h
+      zend_constants.c
+      zend_constants.h
+      zend_dynamic_array.c
+      zend_dynamic_array.h
+      zend_errors.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_execute_locks.h
+      zend_extensions.c
+      zend_extensions.h
+      zend_fast_cache.h
+      zend_globals.h
+      zend_globals_macros.h
+      zend_hash.c
+      zend_hash.h
+      zend_highlight.c
+      zend_highlight.h
+      zend_indent.c
+      zend_indent.h
+      zend_ini.c
+      zend_ini.h
+      zend_ini_parser.y
+      zend_ini_scanner.h
+      zend_ini_scanner.l
+      zend_istdiostream.h
+      zend_language_parser.y
+      zend_language_scanner.h
+      zend_language_scanner.l
+      zend_list.c
+      zend_list.h
+      zend_llist.c
+      zend_llist.h
+      zend_mm.c
+      zend_mm.h
+      zend_modules.h
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.c
+      zend_objects.h
+      zend_objects_API.c
+      zend_objects_API.h
+      zend_opcode.c
+      zend_operators.c
+      zend_operators.h
+      zend_ptr_stack.c
+      zend_ptr_stack.h
+      zend_qsort.h
+      zend_sprintf.c
+      zend_stack.c
+      zend_stack.h
+      zend_static_allocator.c
+      zend_static_allocator.h
+      zend_ts_hash.c
+      zend_ts_hash.h
+      zend_types.h
+      zend_variables.c
+      zend_variables.h:
+      - Added some missing CVS $Id$ tags, headers and footers.
+
 2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_operators.c:
