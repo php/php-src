@@ -1,20 +1,14 @@
 dnl $Id$
 dnl config.m4 for extension wddx
 
-AC_MSG_CHECKING(whether to include WDDX support)
-AC_ARG_ENABLE(wddx,
-[  --enable-wddx           Include WDDX support],[
-  if test "$enableval" = "yes"; then
-    if test "${enable_xml+set}" != "set" -o "$enable_xml" = "no"; then
-		AC_MSG_ERROR(WDDX requires --enable-xml)
-    else
-        AC_DEFINE(HAVE_WDDX, 1, [ ])
-        AC_MSG_RESULT(yes)
-        PHP_EXTENSION(wddx)
-    fi
-  else
-    AC_MSG_RESULT(no)
+PHP_ARG_ENABLE(wddx,whether to enable WDDX support,
+[  --enable-wddx           Enable WDDX support])
+
+if test "$PHP_WDDX" = "yes"; then
+  if test "$enable_xml" = "no"; then
+    AC_MSG_WARN(Activating XML)
+    enable_xml=yes
   fi
-],[
-  AC_MSG_RESULT(no)
-]) 
+  AC_DEFINE(HAVE_WDDX, 1, [ ])
+  PHP_EXTENSION(wddx)
+fi
