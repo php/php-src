@@ -166,7 +166,7 @@ PHP_FUNCTION(posix_kill)
 }
 /* }}} */
 
-/* {{{ proto long posix_getpid(void) 
+/* {{{ proto int posix_getpid(void) 
    Get the current process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getpid)
 {
@@ -177,7 +177,7 @@ PHP_FUNCTION(posix_getpid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getppid(void) 
+/* {{{ proto int posix_getppid(void) 
    Get the parent process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getppid)
 {
@@ -188,7 +188,7 @@ PHP_FUNCTION(posix_getppid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getuid(void) 
+/* {{{ proto int posix_getuid(void) 
    Get the current user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getuid)
 {
@@ -199,7 +199,7 @@ PHP_FUNCTION(posix_getuid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getgid(void) 
+/* {{{ proto int posix_getgid(void) 
    Get the current group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getgid)
 {
@@ -210,7 +210,7 @@ PHP_FUNCTION(posix_getgid)
 }
 /* }}} */
 
-/* {{{ proto long posix_geteuid(void) 
+/* {{{ proto int posix_geteuid(void) 
    Get the current effective user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_geteuid)
 {
@@ -221,7 +221,7 @@ PHP_FUNCTION(posix_geteuid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getegid(void) 
+/* {{{ proto int posix_getegid(void) 
    Get the current effective group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getegid)
 {
@@ -232,7 +232,7 @@ PHP_FUNCTION(posix_getegid)
 }
 /* }}} */
 
-/* {{{ proto long posix_setuid(long uid)
+/* {{{ proto int posix_setuid(long uid)
    Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
@@ -257,7 +257,7 @@ PHP_FUNCTION(posix_setuid)
 }
 /* }}} */
 
-/* {{{ proto long posix_setgid(long uid)
+/* {{{ proto int posix_setgid(long uid)
    Set group id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setgid)
 {
@@ -282,7 +282,7 @@ PHP_FUNCTION(posix_setgid)
 }
 /* }}} */
 
-/* {{{ proto long posix_seteuid(long uid)
+/* {{{ proto int posix_seteuid(long uid)
    Set effective user id */
 PHP_FUNCTION(posix_seteuid)
 {
@@ -311,7 +311,7 @@ PHP_FUNCTION(posix_seteuid)
 }
 /* }}} */
 
-/* {{{ proto long posix_setegid(long uid)
+/* {{{ proto int posix_setegid(long uid)
    Set effective group id */
 PHP_FUNCTION(posix_setegid)
 {
@@ -340,7 +340,7 @@ PHP_FUNCTION(posix_setegid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getgroups(void) 
+/* {{{ proto int posix_getgroups(void) 
    Get supplementary group id's (POSIX.1, 4.2.3) */
 PHP_FUNCTION(posix_getgroups)
 {
@@ -381,7 +381,7 @@ PHP_FUNCTION(posix_getlogin)
 }
 /* }}} */
 
-/* {{{ proto long posix_getpgrp(void) 
+/* {{{ proto int posix_getpgrp(void) 
    Get current process group id (POSIX.1, 4.3.1) */
 PHP_FUNCTION(posix_getpgrp)
 {
@@ -392,7 +392,7 @@ PHP_FUNCTION(posix_getpgrp)
 }
 /* }}} */
 
-/* {{{ proto long posix_setsid(void) 
+/* {{{ proto int posix_setsid(void) 
    Create session and set process group id (POSIX.1, 4.3.2) */
 PHP_FUNCTION(posix_setsid)
 {
@@ -407,7 +407,7 @@ PHP_FUNCTION(posix_setsid)
 }
 /* }}} */
 
-/* {{{ proto long posix_setpgid(long pid, long pgid) 
+/* {{{ proto int posix_setpgid(long pid, long pgid) 
    Set process group id for job control (POSIX.1, 4.3.3) */
 PHP_FUNCTION(posix_setpgid)
 {
@@ -435,7 +435,7 @@ PHP_FUNCTION(posix_setpgid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getpgid(void) 
+/* {{{ proto int posix_getpgid(void) 
    Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally) */
 PHP_FUNCTION(posix_getpgid)
 {
@@ -464,7 +464,7 @@ PHP_FUNCTION(posix_getpgid)
 }
 /* }}} */
 
-/* {{{ proto long posix_getsid(void) 
+/* {{{ proto int posix_getsid(void) 
    Get process group id of session leader (This is not a POSIX function, but a SVR4ism, so be compile conditionally) */
 PHP_FUNCTION(posix_getsid)
 {
@@ -922,7 +922,7 @@ struct limitlist {
 
 #endif /* HAVE_GETRLIMIT */
 
-/* {{{ proto long posix_getrlimit(void) 
+/* {{{ proto int posix_getrlimit(void) 
    Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
 PHP_FUNCTION(posix_getrlimit)
 {
