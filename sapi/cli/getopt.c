@@ -13,7 +13,6 @@
 char *ap_php_optarg;
 int ap_php_optind = 1;
 static int ap_php_opterr = 1;
-static int ap_php_optopt;
 
 static int
 ap_php_optiserr(int argc, char * const *argv, int oint, const char *optstr,
@@ -38,7 +37,6 @@ ap_php_optiserr(int argc, char * const *argv, int oint, const char *optstr,
             break;
         }
     }
-    ap_php_optopt = argv[oint][optchr];
     return('?');
 }
     
