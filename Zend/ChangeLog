@@ -1,3 +1,13 @@
+2004-01-14  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Don't allow interfaces to implement anything
+
+2004-01-14  Andi Gutmans  <andi@zend.com>
+
+    * zend_operators.h:
+      - Remove bogus macros
+
 2004-01-13  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_ini_parser.y:
