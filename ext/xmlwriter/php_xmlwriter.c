@@ -37,9 +37,13 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_set_indent,		NULL)
 	PHP_FE(xmlwriter_set_indent_string, NULL)
 #endif
+#if LIBXML_VERSION >= 20616
+	PHP_FE(xmlwriter_start_comment,	NULL)
+	PHP_FE(xmlwriter_end_comment,		NULL)
+#endif
 	PHP_FE(xmlwriter_start_attribute,	NULL)
-	PHP_FE(xmlwriter_end_attribute,		NULL)
 	PHP_FE(xmlwriter_start_attribute_ns,	NULL)
+	PHP_FE(xmlwriter_end_attribute,	NULL)
 	PHP_FE(xmlwriter_write_attribute,	NULL)
 	PHP_FE(xmlwriter_write_attribute_ns,	NULL)
 	PHP_FE(xmlwriter_start_element,		NULL)
@@ -741,6 +745,59 @@ PHP_FUNCTION(xmlwriter_text)
 	
 	RETURN_FALSE;
 }
+
+/* {{{ proto bool xmlwriter_start_comment(resource xmlwriter)
+Create start comment - returns FALSE on error */
+PHP_FUNCTION(xmlwriter_start_comment)
+{
+	zval *pind;
+	xmlwriter_object *intern;
+	xmlTextWriterPtr ptr;
+	int retval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
+	ptr = intern->ptr;
+
+	if (ptr) {
+		retval = xmlTextWriterStartComment(ptr);
+		if (retval != -1) {
+			RETURN_TRUE;
+		}
+	}
+	
+	RETURN_FALSE;
+}
+
+/* {{{ proto bool xmlwriter_end_comment(resource xmlwriter)
+Create end comment - returns FALSE on error */
+PHP_FUNCTION(xmlwriter_end_comment)
+{
+	zval *pind;
+	xmlwriter_object *intern;
+	xmlTextWriterPtr ptr;
+	int retval;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &pind) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
+	ptr = intern->ptr;
+
+	if (ptr) {
+		retval = xmlTextWriterEndComment(ptr);
+		if (retval != -1) {
+			RETURN_TRUE;
+		}
+	}
+	
+	RETURN_FALSE;
+}
+
 
 /* {{{ proto bool xmlwriter_write_comment(resource xmlwriter, string content)
 Write full comment tag - returns FALSE on error */
