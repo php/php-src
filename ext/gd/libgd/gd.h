@@ -420,7 +420,7 @@ void* gdImageGdPtr(gdImagePtr im, int *size);
 /* Best to free this memory with gdFree(), not free() */
 void* gdImageGd2Ptr(gdImagePtr im, int cs, int fmt, int *size);
 
-void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int color);
+void gdImageEllipse(gdImagePtr im, int cx, int cy, int w, int h, int c);
 
 /* Style is a bitwise OR ( | operator ) of these.
 	gdArc and gdChord are mutually exclusive;
