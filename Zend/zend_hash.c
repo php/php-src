@@ -153,11 +153,6 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 		}																	\
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));						\
 		(p)->pData = &(p)->pDataPtr;										\
-	} else if (nDataSize == 0) {											\
-		if (!(p)->pDataPtr) {												\
-			pefree((p)->pData, (ht)->persistent);							\
-		}																	\
-		(p)->pData = &(p)->pDataPtr;										\
 	} else {																\
 		if ((p)->pDataPtr) {												\
 			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
@@ -169,9 +164,6 @@ ZEND_API ulong hashpjw(char *arKey, uint nKeyLength)
 #define INIT_DATA(ht, p, pData, nDataSize);								\
 	if (nDataSize == sizeof(void*)) {									\
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));					\
-		(p)->pData = &(p)->pDataPtr;									\
-	} else if (nDataSize == 0) {										\
-		(p)->pDataPtr = (void *) 1;										\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
 		(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
@@ -384,6 +376,14 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 	ht->nNumOfElements++;
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 	return SUCCESS;
+}
+
+
+ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLength)
+{
+	void *dummy=NULL;
+
+	return zend_hash_add(ht, arKey, nKeyLength, &dummy, sizeof(void *), NULL);
 }
 
 
@@ -1243,6 +1243,7 @@ ZEND_API ulong zend_hash_next_free_element(HashTable *ht)
 	return ht->nNextFreeElement;
 
 }
+
 
 #if ZEND_DEBUG
 void zend_hash_display_pListTail(HashTable *ht)
