@@ -11,8 +11,8 @@ function test() {
 
 class LocalSoapClient extends SoapClient {
 
-  function LocalSoapClient($wsdl, $options) {
-    $this->SoapClient($wsdl, $options);
+  function __construct($wsdl, $options) {
+    parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
     $this->server->addFunction('test');
   }
