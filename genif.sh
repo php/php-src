@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.9 2000-06-27 16:22:26 sas Exp $
+# $Id: genif.sh,v 1.10 2000-12-20 16:29:07 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -9,6 +9,8 @@ srcdir="$1"
 shift
 extra_module_ptrs="$1"
 shift
+awk="$1"
+shift
 
 if test "$infile" = "" -o "$srcdir" = ""; then
 	echo "please supply infile and srcdir"
@@ -16,19 +18,16 @@ if test "$infile" = "" -o "$srcdir" = ""; then
 fi
 
 module_ptrs="$extra_module_ptrs"
-includes=""
-
+header_list=""
 olddir=`pwd`
 cd $srcdir
 
 for ext in ${1+"$@"} ; do
 	module_ptrs="	phpext_${ext}_ptr,\\\n$module_ptrs"
-	for header in ext/$ext/*.h ; do
-		if grep phpext_ $header >/dev/null 2>&1 ; then
-			includes="#include \"$header\"\\\n$includes"
-		fi
-	done
+	header_list="$header_list ext/$ext/*.h"
 done
+
+includes=`$awk -f $srcdir/build/print_include.awk $header_list`
 
 cd $olddir
 

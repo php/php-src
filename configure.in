@@ -865,7 +865,7 @@ if test -n "\$REDO_ALL"; then
   echo "creating main/internal_functions.c"
   extensions=\`grep '^s.@EXT_STATIC@' \$0|sed -e 's/^.*@% *//' -e 's/%.*$//'\`
 dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
-  sh $srcdir/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" \$extensions > main/internal_functions.c
+  sh $srcdir/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
 dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
 dnl      echo "main/internal_functions.c is unchanged"
 dnl      mv main/internal_functions.c.old main/internal_functions.c
