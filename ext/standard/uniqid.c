@@ -38,7 +38,7 @@
 #include "php_lcg.h"
 #include "uniqid.h"
 
-#define MORE_ENTROPY (argc == 2 && (*flags)->value.lval)
+#define MORE_ENTROPY (argc == 2 && Z_LVAL_PP(flags))
 
 /* {{{ proto string uniqid(string prefix, [bool more_entropy])
    Generate a unique id */
@@ -60,7 +60,7 @@ PHP_FUNCTION(uniqid)
 	}
 
 	/* Do some bounds checking since we are using a char array. */
-	if ((*prefix)->value.str.len > 114) {
+	if (Z_STRLEN_PP(prefix) > 114) {
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
@@ -77,9 +77,9 @@ PHP_FUNCTION(uniqid)
 	 * digits for usecs.
 	 */
 	if (MORE_ENTROPY) {
-		sprintf(uniqid, "%s%08x%05x%.8f", (*prefix)->value.str.val, sec, usec, php_combined_lcg(TSRMLS_C) * 10);
+		sprintf(uniqid, "%s%08x%05x%.8f", Z_STRVAL_PP(prefix), sec, usec, php_combined_lcg(TSRMLS_C) * 10);
 	} else {
-		sprintf(uniqid, "%s%08x%05x", (*prefix)->value.str.val, sec, usec);
+		sprintf(uniqid, "%s%08x%05x", Z_STRVAL_PP(prefix), sec, usec);
 	}
 
 	RETURN_STRING(uniqid, 1);
