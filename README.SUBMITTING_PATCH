@@ -52,13 +52,11 @@ Recommended ~/.cvsrc file setting is:
 cvs -z3
 update -d -P
 checkout -P
-diff -u -b -w -B
+diff -u
+
 ------
-diff -u -b -w -B means:
- -b     Ignore changes in amount of white space.
- -B     Ignore changes that just insert or delete blank lines.
+diff -u means:
  -u     Use the unified output format.
- -w     Ignore white space when comparing lines.
 
 With this CVS setting, you don't have to worry about adding/deleting
 newlines and spaces.
