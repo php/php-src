@@ -6,7 +6,11 @@ PHP_ARG_WITH(mysqli, for MySQLi support,
 [  --with-mysqli[=FILE]    Include MySQLi support. FILE is the optional 
                           pathname to mysql_config.])
 
-if test "$PHP_MYSQLI" != "no"; then
+PHP_ARG_WITH(embedded_mysqli, for embedded MySQLi support,
+[  --with-embedded-mysqli[=FILE]    Include embedded MySQLi support. FILE is the optional 
+                          pathname to mysql_config.])
+
+if test "$PHP_MYSQLI" != "no" '-o' "$PHP_EMBEDDED_MYSQLI" != "no"; then
 
   if test "$PHP_MYSQL" = "yes"; then
     AC_MSG_ERROR([--with-mysql (using bundled libs) can not be used together with --with-mysqli.])
@@ -15,12 +19,23 @@ if test "$PHP_MYSQLI" != "no"; then
   if test "$PHP_MYSQLI" = "yes"; then
     MYSQL_CONFIG=`$php_shtool path mysql_config`
   else
-    MYSQL_CONFIG=$PHP_MYSQLI
+  	if test "$PHP_MYSQLI" != "no"; then
+      MYSQL_CONFIG=$PHP_MYSQLI
+    else
+      MYSQL_CONFIG=$PHP_EMBEDDED_MYSQLI
+    fi
+  fi
+
+  if test "$PHP_MYSQLI" != "no"; then
+    MYSQL_LIB_CFG='--libs'
+  else
+	AC_DEFINE([HAVE_EMBEDDED_MYSQLI],[1], [embedded MySQL support enabled])
+    MYSQL_LIB_CFG='--libmysqld-libs'
   fi
   
-  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG --libs > /dev/null 2>&1; then
+  if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | sed -e "s/'//g"`
-    MYSQLI_LIBLINE=`$MYSQL_CONFIG --libs   | sed -e "s/'//g"`
+    MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | sed -e "s/'//g"`
   else
     AC_MSG_RESULT([mysql_config not found])
     AC_MSG_ERROR([Please reinstall the mysql distribution])
