@@ -134,6 +134,7 @@ function_entry basic_functions[] = {
 	PHP_FE(stristr,									NULL)
 	PHP_FE(strrchr,									NULL)
 	PHP_FE(substr,									NULL)
+	PHP_FE(substr_replace,							NULL)
 	PHP_FE(quotemeta,								NULL)
 	PHP_FE(ucfirst,									NULL)
 	PHP_FE(ucwords,									NULL)

@@ -85,6 +85,7 @@ PHP_FUNCTION(bin2hex);
 PHP_FUNCTION(similar_text);
 PHP_FUNCTION(strip_tags);
 PHP_FUNCTION(str_repeat);
+PHP_FUNCTION(substr_replace);
 
 extern PHPAPI char *php_strtoupper(char *s);
 extern PHPAPI char *php_strtolower(char *s);
