@@ -26,7 +26,6 @@ main() {
   if test "$ac_cv_crypt_des" = "yes"; then
     ac_result=1
   else
-    PHP_DEBUG_MACRO(debug.log)
     ac_result=0
   fi
   AC_DEFINE_UNQUOTED(PHP_STD_DES_CRYPT, $ac_result, [Whether the system supports standard DES salt])
@@ -82,6 +81,9 @@ main() {
   if test "$ac_cv_crypt_md5" = "yes"; then
     ac_result=1
   else
+    if test "$ac_cv_crypt_des" != "yes"; then
+      PHP_DEBUG_MACRO(debug.log)
+    fi
     ac_result=0
   fi
   AC_DEFINE_UNQUOTED(PHP_MD5_CRYPT, $ac_result, [Whether the system supports MD5 salt])
