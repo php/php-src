@@ -55,7 +55,7 @@ foreach ($install_files as $package => $instfile) {
     if ($reg->packageExists($package)) {
         $info = $installer->infoFromAny($instfile);
         if (PEAR::isError($info)) {
-            $ui->displayLine(sprintf("[PEAR] %s: %s", $package, $info->getMessage()));
+            $ui->outputData(sprintf("[PEAR] %s: %s", $package, $info->getMessage()));
             continue;
         }
         $new_ver = $info['version'];
@@ -63,30 +63,30 @@ foreach ($install_files as $package => $instfile) {
         if (version_compare($new_ver, $old_ver, 'gt')) {
             $err = $installer->install($instfile, array('upgrade' => true));
             if (PEAR::isError($err)) {
-                $ui->displayLine(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
+                $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
                 continue;
             }
-            $ui->displayLine(sprintf("[PEAR] %-15s- upgraded:  %s", $package, $new_ver));
+            $ui->outputData(sprintf("[PEAR] %-15s- upgraded:  %s", $package, $new_ver));
         } else {
             if (@$argv[1] == '--force') {
                 $err = $installer->install($instfile, array('force' => true));
                 if (PEAR::isError($err)) {
-                    $ui->displayLine(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
+                    $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
                     continue;
                 }
-                $ui->displayLine(sprintf("[PEAR] %-15s- installed: %s", $package, $new_ver));
+                $ui->outputData(sprintf("[PEAR] %-15s- installed: %s", $package, $new_ver));
             } else {
-                $ui->displayLine(sprintf("[PEAR] %-15s- already installed: %s", $package, $old_ver));
+                $ui->outputData(sprintf("[PEAR] %-15s- already installed: %s", $package, $old_ver));
             }
         }
     } else {
         $err = $installer->install($instfile);
         if (PEAR::isError($err)) {
-            $ui->displayLine(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
+            $ui->outputData(sprintf("[PEAR] %s: %s", $package, $err->getMessage()));
             continue;
         }
         $new_ver = $reg->packageInfo($package, 'version');
-        $ui->displayLine(sprintf("[PEAR] %-15s- installed: %s", $package, $new_ver));
+        $ui->outputData(sprintf("[PEAR] %-15s- installed: %s", $package, $new_ver));
     }
 }
 
