@@ -197,6 +197,8 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'j':		/* day of the month, numeric, no leading zeros */
 			case 'H':		/* hour, numeric, 24 hour format */
 			case 'h':		/* hour, numeric, 12 hour format */
+			case 'G':		/* hour, numeric, 24 hour format, no leading zeroes */
+			case 'g':		/* hour, numeric, 12 hour format, no leading zeroes */
 			case 'i':		/* minutes, numeric */
 			case 's':		/* seconds, numeric */
 			case 'A':		/* AM/PM */
@@ -276,6 +278,15 @@ _php3_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			case 'h':		/* hour, numeric, 12 hour format */
 				h = ta->tm_hour % 12; if (h==0) h = 12;
 				sprintf(tmp_buff, "%02d", h);  /* SAFE */
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'G':      /* hour, numeric, 24 hour format, no leading zeros */
+				sprintf(tmp_buff, "%d", ta->tm_hour);  /* SAFE */
+				strcat(return_value->value.str.val, tmp_buff);
+				break;
+			case 'g':      /* hour, numeric, 12 hour format, no leading zeros */
+				h = ta->tm_hour % 12; if (h==0) h = 12;
+				sprintf(tmp_buff, "%d", h);  /* SAFE */
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
 			case 'i':		/* minutes, numeric */
