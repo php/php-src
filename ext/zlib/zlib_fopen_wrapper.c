@@ -42,28 +42,23 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 	return gzread(self->gz_file, buf, count); 
 }
 
-static char *php_gziop_gets(php_stream *stream, char *buf, size_t size TSRMLS_DC)
-{
-	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-	return gzgets(self->gz_file, buf, size);
-}
-
-
 static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	return gzwrite(self->gz_file, (char*)buf, count); 
 }
 
-static int php_gziop_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
+static int php_gziop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-
-	assert(self != NULL);
-	if (offset == 0 && whence == SEEK_CUR)
-		return gztell(self->gz_file);
+	int ret;
 	
-	return gzseek(self->gz_file, offset, whence);
+	assert(self != NULL);
+	
+	ret = gzseek(self->gz_file, offset, whence);
+	*newoffs = gztell(self->gz_file);
+	
+	return ret;
 }
 
 static int php_gziop_close(php_stream *stream, int close_handle TSRMLS_DC)
@@ -89,8 +84,10 @@ php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
 	"ZLIB",
-	php_gziop_seek, php_gziop_gets,
-	NULL, NULL
+	php_gziop_seek, 
+	NULL, /* cast */
+	NULL, /* stat */
+	NULL  /* set_option */
 };
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode,

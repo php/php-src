@@ -148,8 +148,7 @@ typedef struct _php_stream_ops  {
 	const char *label; /* label for this ops structure */
 	
 	/* these are optional */
-	int    (*seek)(php_stream *stream, off_t offset, int whence TSRMLS_DC);
-	char *(*gets)(php_stream *stream, char *buf, size_t size TSRMLS_DC);
+	int (*seek)(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC);
 	int (*cast)(php_stream *stream, int castas, void **ret TSRMLS_DC);
 	int (*stat)(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	int (*set_option)(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
@@ -217,7 +216,12 @@ struct _php_stream_filter {
 	(thisfilter)->next ? (thisfilter)->next->fops->eof((stream), (thisfilter) TSRMLS_CC) \
 	: (stream)->ops->read((stream), NULL, 0 TSRMLS_CC) == EOF ? 1 : 0
 
+#define PHP_STREAM_FLAG_NO_SEEK						1
+#define PHP_STREAM_FLAG_NO_BUFFER					2
 
+#define PHP_STREAM_FLAG_EOL_UNIX					0 /* also includes DOS */
+#define PHP_STREAM_FLAG_DETECT_EOL					4
+#define PHP_STREAM_FLAG_EOL_MAC						8
 	
 struct _php_stream  {
 	php_stream_ops *ops;
@@ -245,6 +249,17 @@ struct _php_stream  {
 #endif
 
 	php_stream_context *context;
+	int flags;	/* PHP_STREAM_FLAG_XXX */
+
+	/* buffer */
+	off_t position; /* of underlying stream */
+	unsigned char *readbuf;
+	size_t readbuflen;
+	size_t readpos;
+	size_t writepos;
+	
+	/* how much data to read when filling buffer */
+	size_t chunk_size;
 
 }; /* php_stream */
 /* state definitions when closing down; these are private to streams.c */

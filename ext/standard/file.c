@@ -1094,26 +1094,25 @@ PHP_FUNCTION(socket_set_timeout)
 PHP_FUNCTION(socket_get_status)
 {
 	zval **socket;
-	int type;
-	void *what;
+	php_stream *stream;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &socket) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	what = zend_fetch_resource(socket TSRMLS_CC, -1, "File-Handle", &type, 1, le_stream);
-	ZEND_VERIFY_RESOURCE(what);
+	php_stream_from_zval(stream, socket);
+	
 
 	array_init(return_value);
 
-	if (php_stream_is((php_stream*)what, PHP_STREAM_IS_SOCKET))	{
+	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET))	{
 
-		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM((php_stream*)what);
+		php_netstream_data_t *sock = PHP_NETSTREAM_DATA_FROM_STREAM(stream);
 
 		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
 		add_assoc_bool(return_value, "blocked", sock->is_blocked);
 		add_assoc_bool(return_value, "eof", sock->eof);
-		add_assoc_long(return_value, "unread_bytes", sock->writepos - sock->readpos);
+		add_assoc_long(return_value, "unread_bytes", stream->writepos - stream->readpos);
 
 	}
 	else	{

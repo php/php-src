@@ -59,10 +59,10 @@ php_stream_ops php_stream_output_ops = {
 	php_stream_output_close,
 	php_stream_output_flush,
 	"Output",
-	NULL,
-	NULL,
-	NULL,
-	NULL
+	NULL, /* seek */
+	NULL, /* cast */
+	NULL, /* stat */
+	NULL  /* set_option */
 };
 
 php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
