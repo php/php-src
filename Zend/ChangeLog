@@ -1,3 +1,14 @@
+2002-03-19  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y
+      zend.h:
+    - Finish covering all parsed methods to check for validity in parser.
+    - Change zval's refcount to zend_uint (If it doesn't slow down the Engine
+    - too much it should probably stay this way). If anyone has time to test
+    - the difference in speed between zend_ushort & zend_uint in zend.h of
+    - the struct _zval_struct (one line change) I'd be glad to get some
+    - figures.
+
 2002-03-18  Andi Gutmans  <andi@zend.com>
 
     * zend_compile.c

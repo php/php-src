@@ -1,3 +1,256 @@
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/main.c
+      main/memory_streams.c
+      main/php_streams.h
+      main/streams.c: Improve behaviour of the stream casting operation.
+    Improve interaction with fopencookie.
+
+2002-03-19  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/tests/test1.php
+      ext/rpc/com/com.c
+      ext/rpc/handler.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h: pass function signature in zend_parse_parameters style
+    lookup cache works now per signature (not only method name)
+    reviewed resource management
+
+2002-03-19  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mssql/php_mssql.c: Minor change to allocated lengths for dates
+
+2002-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * .cvsignore: missing entry
+
+2002-03-19  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/vpopmail/php_vpopmail.c
+      ext/vpopmail/config.m4: - Support vpopmail 5.2 (fixes #16120).
+
+2002-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * acinclude.m4: - MFH iconv fix
+
+    * acinclude.m4:
+    - Fix the iconv detection when the functions are prefixed with lib.
+      (e.g. in freebsd)
+
+2002-03-19  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Oops.. This should make I64 work on WIn32 as well
+
+    * ext/fbsql/php_fbsql.c:
+    Changing the LongInteger to return 64 bit integers as string values with all 64 bit
+
+2002-03-19  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/ming/ming.c: - Fix bug spotted by Lukas Schroeder <lukas@edeal.de>.
+
+2002-03-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag: * install PEAR_Command_Package
+
+    * pear/PEAR/Command/Package.php: * re-add "package" command
+
+    * pear/PEAR/Command/Login.php: * "pear login" finally works
+
+    * pear/PEAR/Remote.php: * fix http auth bug
+
+    * pear/PEAR/CommandUI/CLI.php:
+    * add optional default parameter to userDialog method
+
+2002-03-19  Zeev Suraski  <zeev@zend.com>
+
+    * main/memory_streams.c:
+    Possibly fix a crash - Marcus, please take a look at it...
+
+    * sapi/isapi/php4isapi.c
+      win32/php4dllts.dsp
+      main/memory_streams.c:
+    - Fix whitespace (guys, please try to stick with the php4 tree style as far
+      as indentation/newlines go, and also as far as using {} even on if's
+      that have single statements)
+    - Fix Windows build
+
+2002-03-19  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/com/com.c
+      ext/rpc/tests/test1.php
+      ext/rpc/rpc.h
+      ext/rpc/handler.h
+      ext/rpc/rpc.c: fixed memleaks
+    added method lookup caching
+    pass function signature to hash function callback
+
+2002-03-19  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c:
+    Adding support for TinyInteger and LongInteger database types
+
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_streams.h
+      main/streams.c
+      main/php_network.h
+      main/main.c
+      main/network.c
+      ext/standard/file.c
+      ext/standard/file.h: fix for bug #16168
+
+2002-03-19  Harald Radi  <h.radi@nme.at>
+
+    * win32/php4dllts.dsp: MFH
+
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/user_streams.c: make buffer length warnings more verbose
+
+2002-03-19  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
+
+    * ext/interbase/tests/001.phpt
+      ext/interbase/tests/002.phpt
+      ext/interbase/tests/003.phpt
+      ext/interbase/tests/004.phpt
+      ext/interbase/tests/005.phpt
+      ext/interbase/tests/006.phpt: Fixed include of interbase.inc
+    Fixed test database path
+    Changed v_date field in test table definition to timestamp type
+    Reduced maximum length of double precision type to 18
+
+    Tests 001 002 003 006 pass
+    Test 004 (BLOB test) still needs to be fixed
+    Test 005 (Transaction) gives the right output but issues a warning
+
+2002-03-19  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c:
+    fixed floating number incorrectly rendered (as mentioned by giancarlo@niccolai.ws in BUG #14755)
+
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_streams.h
+      main/streams.c
+      main/user_streams.c
+      ext/standard/basic_functions.c
+      ext/standard/file.h: register some constants for user streams
+
+2002-03-19  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/php_fdf.h:
+    - the fdf include file shipped with the FDF toolkit is spelled
+      in lower case (at least in version 5.0)
+
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/user_streams.c: correct copy/paste typo
+
+    * main/user_streams.c:
+    avoid possible buffer overruns when write returns a value larger than the buffer
+
+    * main/streams.c
+      main/user_streams.c:
+    Make file_get_wrapper_data return the underlying PHP object for
+    user-space streams.
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/basic_functions.c: s/fgetwrapperdata/file_get_wrapper_data/
+
+2002-03-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h: Remove trailing ;
+
+    The macro can now safely be used in constructs such as
+
+    if (..) foo() else bar();
+
+    * README.SUBMITTING_PATCH:
+    some typo fixing, and following The Little Book, omitting needless words
+
+    * Makefile.global:
+    Somewhere along the build changes, -export-dynamic was lost.
+
+    Readd it.
+
+    Noticed by: Stanislav Malyshev
+
+    * ext/standard/url_scanner_ex.c:
+    touch file. Please commit first the .re file and afterwards the .c source. Otherwise, timestamps will be broken.
+
+2002-03-19  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/php_smart_str.h
+      ext/standard/var.c:
+    fix #12793 - serialize will now spit a notice if the return value of __sleep is
+    bogus.
+
+2002-03-19  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cli/.cvsignore: added missing .libs entry
+
+    * ext/iconv/Makefile.in: - Not needed anymore.
+
+2002-03-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * CODING_STANDARDS
+      README.SUBMITTING_PATCH:
+    Added README.SUBMITTING_PATCH file. Please fix/add/change.
+    Added more description for use of assert().
+
+2002-03-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Add streams.c/user_streams.c to MSVC projects.
+
+2002-03-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/zlib/zlib.c
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c: Implement user-space streams.
+    There's probably room for improvement,
+    docs will following some time this week.
+
+    * configure.in: add sys/poll.h header detection
+
+    * main/network.c: make feof more useful on network streams
+
+2002-03-19  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/com/com.c
+      ext/rpc/handler.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.dsp
+      ext/rpc/rpc.h
+      ext/rpc/tests/test1.php:
+    added lookup caching and now make use of the new thread
+    safe hashtables (not in cvs right now)
+
+2002-03-19  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * run-tests.php: WS fix
+
+2002-03-19  Jon Parise  <jon@csh.rit.edu>
+
+    * configure.in: Give one last reference to pear-get.
+
+2002-03-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag: * pear-get gone
+
+    * ext/xmlrpc/config.m4
+      ext/xslt/config.m4
+      ext/iconv/config.m4
+      acinclude.m4: MFH: Jani's fix to my iconv fix
+
 2002-03-18  Vlad Krupin  <phpdevel@echospace.com>
 
     * ext/ftp/ftp.c: MFH (rev. 1.49)
