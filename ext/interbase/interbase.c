@@ -1571,6 +1571,8 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 				var->sqltype = SQL_TEXT;
 			}
 
+			var->sqldata = (void*)&buf[i];
+			
 			switch (var->sqltype & ~1) {
 				struct tm t;
 
@@ -1579,9 +1581,9 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 					if (Z_LVAL_P(b_var) > SHRT_MAX || Z_LVAL_P(b_var) < SHRT_MIN) {
 						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
 						rv = FAILURE;
+						break;
 					}
 					buf[i].val.sval = (short) Z_LVAL_P(b_var);
-					var->sqldata = (void *) &buf[i].val.sval;
 					break;
 				case SQL_LONG:
 					convert_to_long(b_var);
@@ -1590,10 +1592,10 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 					if (Z_LVAL_P(b_var) > ISC_LONG_MAX || Z_LVAL_P(b_var) < ISC_LONG_MIN) {
 						_php_ibase_module_error("Parameter %d exceeds field width" TSRMLS_CC, i+1);
 						rv = FAILURE;
+						break;
 					}
 #endif
 					buf[i].val.lval = (ISC_LONG) Z_LVAL_P(b_var);
-					var->sqldata = (void *) &buf[i].val.lval;
 					break;
 #if defined(SQL_INT64) && (SIZEOF_LONG == 8)
 				case SQL_INT64:
@@ -1604,7 +1606,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 				case SQL_FLOAT:
 	 				convert_to_double(b_var);
 					buf[i].val.fval = (float) Z_DVAL_P(b_var);
-					var->sqldata = (void *) &buf[i].val.fval;
 					break;
 				case SQL_DOUBLE:
 					convert_to_double(b_var);
@@ -1660,22 +1661,16 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 
 #ifndef SQL_TIMESTAMP
 					isc_encode_date(&t, &buf[i].val.qval);
-					var->sqldata = (void *) (&buf[i].val.qval);
 #else
 					switch (var->sqltype & ~1) {
 						default: /* == case SQL_TIMESTAMP */
 							isc_encode_timestamp(&t, &buf[i].val.tsval);
-							var->sqldata = (void *) (&buf[i].val.tsval);
 							break;
 						case SQL_TYPE_DATE:
-							strptime(Z_STRVAL_P(b_var), IBG(dateformat), &t);
 							isc_encode_sql_date(&t, &buf[i].val.dtval);
-							var->sqldata = (void *) (&buf[i].val.dtval);
 							break;
 						case SQL_TYPE_TIME:
-							strptime(Z_STRVAL_P(b_var), IBG(timeformat), &t);
 							isc_encode_sql_time(&t, &buf[i].val.tmval);
-							var->sqldata = (void *) (&buf[i].val.tmval);
 							break;
 #endif
 					}
@@ -1705,7 +1700,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 						}
 						buf[i].val.qval = ib_blob.bl_qd;
 					}
-					var->sqldata = (void *) &buf[i].val.qval;
 					break;
 				case SQL_ARRAY:
 					if (Z_TYPE_P(b_var) != IS_ARRAY) {
@@ -1747,7 +1741,6 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 						buf[i].val.qval = array_id;
 						efree(array_data);
 					}				
-					var->sqldata = (void *) &buf[i].val.qval;
 					break;
 				default:
 php_ibase_bind_default:
