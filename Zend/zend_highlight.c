@@ -102,7 +102,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 	int token_type;
 	char *last_color = syntax_highlighter_ini->highlight_html;
 	char *next_color;
-	int in_string=0;
+	int in_string=0, post_heredoc = 0;
 
 	zend_printf("<code>");
 	zend_printf("<span style=\"color: %s\">\n", last_color);
@@ -159,15 +159,14 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		switch (token_type) {
 			case T_END_HEREDOC:
 				zend_html_puts(token.value.str.val, token.value.str.len TSRMLS_CC);
-				{
-					char *ptr = LANG_SCNG(yy_text);
-					if (ptr[LANG_SCNG(yy_leng) - 1] != ';') {
-						zend_html_putc('\n');
-					}
-				}
+				post_heredoc = 1;
 				break;
 			default:
 				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
+				if (post_heredoc) {
+					 zend_html_putc('\n');
+					 post_heredoc = 0;
+				}
 				break;
 		}
 
