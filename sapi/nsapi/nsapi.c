@@ -19,6 +19,8 @@
 /*
  * PHP includes
  */
+#define NSAPI 1
+
 #include "php.h"
 
 #include "ext/standard/info.h"
@@ -39,6 +41,11 @@
 #include "frame/protocol.h"  /* protocol_start_response */
 #include "base/util.h"       /* is_mozilla, getline */
 #include "frame/log.h"       /* log_error */
+
+/* for unix */
+#ifndef WINAPI
+#define WINAPI
+#endif
 
 /*
  * Timeout for net_read(). This should probably go into php.ini
@@ -128,7 +135,7 @@ sapi_nsapi_ub_write(const char *str, unsigned int str_length)
 
 	SLS_FETCH();
 	rc = (nsapi_request_context *)SG(server_context);
-	retval = net_write(rc->sn->csd, str, str_length);
+	retval = net_write(rc->sn->csd, (char *)str, str_length);
 	if (retval == IO_ERROR /*-1*/ || retval == IO_EOF /*0*/)
 		return -1;
 	else
@@ -252,7 +259,7 @@ sapi_nsapi_read_cookies(SLS_D)
 	return cookie_string;
 }
 
-static sapi_module_struct nsapi_sapi_module = {
+static sapi_module_struct sapi_module = {
 	"NSAPI",				/* name */
 
 	php_module_startup,			/* startup */
@@ -315,7 +322,7 @@ nsapi_add_string(const char *name, const char *buf)
 	pval->type = IS_STRING;
 	pval->value.str.len = strlen(buf);
 	pval->value.str.val = estrndup(buf, pval->value.str.len);
-	zend_hash_update(&EG(symbol_table), name, strlen(name) + 1, &pval, sizeof(zval *), NULL);
+	zend_hash_update(&EG(symbol_table), (char *)name, strlen(name) + 1, &pval, sizeof(zval *), NULL);
 }
 
 static void
@@ -420,7 +427,7 @@ nsapi_request_dtor(NSLS_D SLS_DC)
 	nsapi_free(SG(request_info).content_type);
 }
 
-static int
+int 
 nsapi_module_main(NSLS_D SLS_DC)
 {
 	int result;
@@ -455,7 +462,18 @@ nsapi_module_main(NSLS_D SLS_DC)
 	return SUCCESS;
 }
 
-int
+void WINAPI 
+php4_close(void *vparam)
+{
+	if (sapi_module.shutdown) {
+		sapi_module.shutdown(&sapi_module);
+	}
+	IF_ZTS(
+		tsrm_shutdown();
+	)
+}
+
+int WINAPI
 php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	PLS_FETCH();
@@ -467,8 +485,8 @@ php4_init(pblock *pb, Session *sn, Request *rq)
 		tsrm_startup(1, 1, 0);
 	)
 
-	sapi_startup(&nsapi_sapi_module);
-	sapi_module.startup(&nsapi_sapi_module);
+	sapi_startup(&sapi_module);
+	sapi_module.startup(&sapi_module);
 
 	PG(expose_php) = 0;
 
@@ -480,7 +498,7 @@ php4_init(pblock *pb, Session *sn, Request *rq)
 	return REQ_PROCEED;
 }
 
-int
+int WINAPI
 php4_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
@@ -519,4 +537,27 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 	free(request_context);
 
 	return (retval == SUCCESS) ? REQ_PROCEED : REQ_EXIT;
+}
+
+/*********************************************************
+/ authentication
+/
+/ we have to make a 'fake' authenticator for netscape so it
+/ will pass authentication through to php, and allow us to
+/ check authentication with our scripts.
+/
+/ php4_auth_trans
+/   main function called from netscape server to authenticate
+/   a line in obj.conf:
+/		funcs=php4_auth_trans shlib="path/to/this/phpnsapi.dll"
+/	and:
+/		<Object ppath="path/to/be/authenticated/by/php/*">
+/		AuthTrans fn="php4_auth_trans"
+/*********************************************************/
+int WINAPI 
+php4_auth_trans(pblock * pb, Session * sn, Request * rq)
+{
+	/*This is a DO NOTHING function that allows authentication information
+	to be passed through to PHP scripts.*/
+	return REQ_PROCEED;
 }
