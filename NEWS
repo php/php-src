@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 14 Aug 2003, Version 4.3.3RC4
+- Fixed bug #25093 (Various leaks due to non-freed queries). (Ilia)
 - Fixed bug #25084 (Make refer check not dependant on register_globals). (Ilia)
 - Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields). (Ilia)
 - Fixed bug #25044 (header("Location:") changing HTTP status). (Marcus)
