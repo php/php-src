@@ -1478,7 +1478,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 								break;
 
 							case PHP_ICONV_ENC_SCHEME_QPRINT:
-								decoded_text = (char *)php_quot_print_decode((unsigned char*)encoded_text, (int)encoded_text_len, &decoded_text_len);
+								decoded_text = (char *)php_quot_print_decode((unsigned char*)encoded_text, (int)encoded_text_len, &decoded_text_len, 1);
 								break;
 						}
 

@@ -21,7 +21,7 @@
 #ifndef QUOT_PRINT_H
 #define QUOT_PRINT_H
 
-PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t length, size_t *ret_length);
+PHPAPI unsigned char *php_quot_print_decode(const unsigned char *str, size_t length, size_t *ret_length, int replace_us_by_ws);
 
 PHP_FUNCTION(quoted_printable_decode);
 
