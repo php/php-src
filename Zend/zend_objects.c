@@ -45,8 +45,8 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 		/* FIXME: Optimize this so that we use the old_object->ce->destructor function pointer instead of the name */
 		MAKE_STD_ZVAL(destructor_func_name);
 		destructor_func_name->type = IS_STRING;
-		destructor_func_name->value.str.val = estrndup("_destruct", sizeof("_destruct")-1);
-		destructor_func_name->value.str.len = sizeof("_destruct")-1;
+		destructor_func_name->value.str.val = estrndup("__destruct", sizeof("__destruct")-1);
+		destructor_func_name->value.str.len = sizeof("__destruct")-1;
 
 		ZEND_INIT_SYMTABLE(&symbol_table);
 		
@@ -218,8 +218,8 @@ zend_object_value zend_objects_clone_obj(zend_object_handle handle)
 		/* FIXME: Optimize this so that we use the old_object->ce->clone function pointer instead of the name */
 		MAKE_STD_ZVAL(clone_func_name);
 		clone_func_name->type = IS_STRING;
-		clone_func_name->value.str.val = estrndup("_clone", sizeof("_clone")-1);
-		clone_func_name->value.str.len = sizeof("_clone")-1;
+		clone_func_name->value.str.val = estrndup("__clone", sizeof("__clone")-1);
+		clone_func_name->value.str.len = sizeof("__clone")-1;
 
 		ALLOC_HASHTABLE(new_object->properties);
 		zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
