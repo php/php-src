@@ -3985,7 +3985,7 @@ PHP_FUNCTION(ociexecute)
 /* }}} */
 
 /* {{{ proto bool ocicancel(resource stmt)
-   Prepare a new row of data for reading */
+   Cancel reading from a cursor */
 
 PHP_FUNCTION(ocicancel)
 {
@@ -4096,9 +4096,8 @@ PHP_FUNCTION(ocifetchinto)
 
 /* }}} */
 
-/* {{{ proto int ocifetchstatement(resource stmt, array &output[, int skip][, int maxrows][, int flags])
+/* {{{ proto int ocifetchstatement(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
    Fetch all rows of result data into an array */
-
 PHP_FUNCTION(ocifetchstatement)
 {
 	zval **stmt, **array, *element, **zskip, **zmaxrows, **zflags, *tmp;
@@ -4537,9 +4536,8 @@ PHP_FUNCTION(ocipasswordchange)
 
 /* }}} */
 
-/* {{{ proto int ocinewcursor(resource conn)
+/* {{{ proto resource ocinewcursor(resource conn)
    Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
-
 PHP_FUNCTION(ocinewcursor)
 {
 	zval **conn;
