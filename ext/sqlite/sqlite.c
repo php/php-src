@@ -252,7 +252,7 @@ zend_module_entry sqlite_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
-	"sqlite",
+	"SQLite",
 	sqlite_functions,
 	PHP_MINIT(sqlite),
 	NULL,

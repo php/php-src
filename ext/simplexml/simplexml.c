@@ -1582,7 +1582,7 @@ function_entry simplexml_functions[] = {
 
 zend_module_entry simplexml_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"simplexml",
+	"SimpleXML",
 	simplexml_functions,
 	PHP_MINIT(simplexml),
 	PHP_MSHUTDOWN(simplexml),
