@@ -1,0 +1,30 @@
+;
+;	@(#)named.rev	1.1	(Berkeley)	86/02/05
+;
+
+@	IN	SOA	ucbvax.berkeley.edu kjd.ucbvax.berkeley.edu (
+				1986020501 ; Serial
+				10800	; Refresh 3 hours
+				3600	; Retry   1 hour
+				3600000 ; Expire  1000 hours
+				86400 )	; Minimum 24 hours
+	IN	NS	ucbvax.Berkeley.EDU.
+; RFC 1101 stuff
+0.0	IN	PTR	Berkeley-net.Berkeley.EDU.
+	IN	A	255.255.255.0
+; real hosts
+0.130	IN	PTR	csdiv-net.Berkeley.EDU.
+2.129	IN	PTR	monet.Berkeley.EDU.
+2.140	IN	PTR	ucbarpa.Berkeley.EDU.
+3.132	IN	PTR	cad.Berkeley.EDU.
+4.0	IN	PTR	ucbarpa.Berkeley.EDU.
+5.0	IN	PTR	cad.Berkeley.EDU.
+6.0	IN	PTR	ernie.Berkeley.EDU.
+6.130	IN	PTR	monet-cs.Berkeley.EDU.
+7.0	IN	PTR	monet.Berkeley.EDU.
+7.130	IN	PTR	kim.Berkeley.EDU.
+9.0	IN	PTR	esvax.Berkeley.EDU.
+10.0	IN	PTR	ucbvax.Berkeley.EDU.
+11.0	IN	PTR	kim.Berkeley.EDU.
+11.156	IN	PTR 	esvax-156.Berkeley.EDU.
+38.131	IN	PTR	monet.Berkeley.EDU.
