@@ -66,8 +66,8 @@ Check list for submitting patch
 -------------------------------
  - Did you run "make test" to check if your patch didn't break
    other features?
- - Did you compile PHP with --enable-debug and check php/webserver 
-   error logs when you test your patch?
+ - Did you compile PHP with --enable-debug and check the PHP and
+   web server error logs when you test your patch?
  - Did you build PHP for multi-threaded web servers. (Optional)
  - Did you create test script for "make test"? (Recommended)
  - Did you check your patch is unified format and it does not 
