@@ -2123,7 +2123,7 @@ PHP_FUNCTION(xmldoc)
    Creates DOM object of XML document in file*/
 PHP_FUNCTION(xmldocfile)
 {
-	zval *arg;
+	zval *arg, *rv;
 	xmlDoc *docp;
 	int ret;
 	
@@ -2138,8 +2138,11 @@ PHP_FUNCTION(xmldocfile)
 	}
 	ret = zend_list_insert(docp, le_domxmldocp);
 
-	/* construct an object with some methods */
-	object_init_ex(return_value, domxmldoc_class_entry);
+	rv = php_domobject_new((xmlNodePtr) docp, &ret);
+	SEPARATE_ZVAL(&rv);
+	*return_value = *rv;
+	FREE_ZVAL(rv);
+
 	add_property_resource(return_value, "doc", ret);
 	if(docp->name)
 		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
