@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2005, PHP 5.0.4
+- Fixed bug #31056 (php_std_date() returns invalid formatted date if 
+  y2k_compliance is On). (Ilia)
 
 15 Dec 2004, PHP 5.0.3
 - Added the %F modifier to *printf to render a non-locale-aware representation
