@@ -223,8 +223,10 @@ if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
 
 preg->re_erroffset = (size_t)(-1);   /* Only has meaning after compile */
 
-rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string), options,
-  (int *)pmatch, nmatch * 2);
+rc = pcre_exec(preg->re_pcre, NULL, string, (int)strlen(string),
+			   string, // const char *strbeg (added for vi-like 'g' replace flag)
+			   options, (int *)pmatch, nmatch * 2,
+			   0); // int minlen (added for vi-like 'g' replace flag)
 
 if (rc == 0) return 0;    /* All pmatch were filled in */
 
