@@ -1757,6 +1757,9 @@ do_fcall_common:
 					opline->op1.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
 				EG(exception) = NULL;
 				NEXT_OPCODE();
+			case ZEND_NAMESPACE:
+				fprintf(stderr, "Namespace '%s'\n", opline->op1.u.constant.value.str.val);
+				NEXT_OPCODE();
 			case ZEND_SEND_VAL: 
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
 					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
