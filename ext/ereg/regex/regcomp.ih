@@ -14,9 +14,9 @@ static void p_bracket(register struct parse *p);
 static void p_b_term(register struct parse *p, register cset *cs);
 static void p_b_cclass(register struct parse *p, register cset *cs);
 static void p_b_eclass(register struct parse *p, register cset *cs);
-static char p_b_symbol(register struct parse *p);
-static char p_b_coll_elem(register struct parse *p, int endc);
-static char othercase(int ch);
+static unsigned char p_b_symbol(register struct parse *p);
+static unsigned char p_b_coll_elem(register struct parse *p, int endc);
+static unsigned char othercase(int ch);
 static void bothcases(register struct parse *p, int ch);
 static void ordinary(register struct parse *p, register int ch);
 static void nonnewline(register struct parse *p);
@@ -27,11 +27,11 @@ static void freeset(register struct parse *p, register cset *cs);
 static int freezeset(register struct parse *p, register cset *cs);
 static int firstch(register struct parse *p, register cset *cs);
 static int nch(register struct parse *p, register cset *cs);
-static void mcadd(register struct parse *p, register cset *cs, register char *cp);
+static void mcadd(register struct parse *p, register cset *cs, register unsigned char *cp);
 #if 0
-static void mcsub(register cset *cs, register char *cp);
-static int mcin(register cset *cs, register char *cp);
-static char *mcfind(register cset *cs, register char *cp);
+static void mcsub(register cset *cs, register unsigned char *cp);
+static int mcin(register cset *cs, register unsigned char *cp);
+static unsigned char *mcfind(register cset *cs, register unsigned char *cp);
 #endif
 static void mcinvert(register struct parse *p, register cset *cs);
 static void mccase(register struct parse *p, register cset *cs);
