@@ -369,7 +369,7 @@ void php_print_credits(int flag)
 		php_info_print_table_end();
 	}
 
-	if (flag & PHP_CREDITS_GENERAL) {
+	if (flag & PHP_CREDITS_SAPI) {
 		/* SAPI Modules */
 
 		php_info_print_table_start();
