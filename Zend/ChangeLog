@@ -1,3 +1,7 @@
+2002-04-25  Harald Radi  <h.radi@nme.at>
+
+    * zend_config.w32.h: unbreak the win32 build
+
 2002-04-24  Harald Radi  <h.radi@nme.at>
 
     * zend_API.c: MFZE1 saschas 'Avoid exceeding buffer limits' patch
