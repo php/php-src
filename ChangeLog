@@ -1,3 +1,10 @@
+2003-11-09  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/standard/base64.c
+      ext/standard/base64.h:
+      - Expose the base64 functions to external extensions on windows.
+
 2003-11-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
