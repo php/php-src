@@ -100,12 +100,6 @@ int zend_load_extension(char *path)
 		return FAILURE;
 	}
 
-	if (new_extension->startup) {
-		if (new_extension->startup(new_extension)!=SUCCESS) {
-			DL_UNLOAD(handle);
-			return FAILURE;
-		}
-	}
 	return zend_register_extension(new_extension, handle);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
@@ -117,6 +111,13 @@ int zend_load_extension(char *path)
 int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 {
 	zend_extension extension;
+
+	if (new_extension->startup) {
+		if (new_extension->startup(new_extension)!=SUCCESS) {
+			DL_UNLOAD(handle);
+			return FAILURE;
+		}
+	}
 
 	extension = *new_extension;
 	extension.handle = handle;
