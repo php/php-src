@@ -90,10 +90,9 @@ Windows Manual installation from zip binary distribution
 
   You need to ensure that the dlls which php uses can be found. The precise
   dlls involved depend on which web server you use and whether you want to
-  run php as a cgi or as a server module. php5ts.dll is always used. If you are
-  using a server module (e.g. isapi or apache) then you will need the relevent
-  dll from the sapi folder. If you are using any php extension dlls then you
-  will need those as well. To make sure that the dlls can be found, you can
+  run php as a cgi or as a server module. php5ts.dll is always used.
+  To make sure that the dlls can be found, you can add your PHP folder
+  (ex: c:\php) to your system PATH. Alternatively you can
   either copy them to the system directory (e.g. winnt/system32 or 
   windows/system) or you can make sure that they live in the same directory
   as the main php executable or dll your web server will use (e.g. php-cgi.exe,
@@ -112,7 +111,7 @@ Windows Manual installation from zip binary distribution
 
    You will need to change the 'extension_dir' setting to
    point to your php-install-dir, or where you have placed
-   your 'php_*.dll' files. ex: c:\php
+   your 'php_*.dll' files. ex: c:\php\ext
 
    If you are using OmniHTTPd, do not follow the next step.
    Set the 'doc_root' to point to your webservers
@@ -155,9 +154,17 @@ Installation of Windows extensions
 
 
  ATTENTION! ATTENTION! ATTENTION!
-   Some extra DLLs are required for some PHP extensions. Please copy the
-   bundled dlls from the 'dlls/' directory in distribution package to your
-   windows/system (Win9.x) or winnt/system32 (WinNT, Win2000, XP) directory.
+   Some extra DLLs are required for some PHP extensions.
+   
+   In order for PHP to be able to find them they need to be located
+   in a directory that is included in the system PATH. The recommended
+   way to do this is to add PHP installation folder (ex: c:\php) to your
+   PATH.
+   
+   Alternatively you can copy the bundled dlls from the root directory
+   in distribution package to your windows/system (Win9.x) or 
+   winnt/system32 (WinNT, Win2000, XP) directory.
+   
    If you already have these DLLs installed on your system,
    overwrite them only if something is not working correctly.
    Before overwriting them, it is a good idea to backup them or move them to
@@ -178,8 +185,9 @@ Installation of Windows extensions
  libraries.
 
  Note:
- Since PHP 4.0.5 MySQL, ODBC, FTP, Calendar, BCMath, COM, PCRE,
- Session, WDDX and XML support is built-in. You don't need to
+ Since PHP 5.0.0 bcmath, calendar, com_dotnet, ctype, dom, ftp,
+ iconv, odbc, pcre, session, SimpleXML, SPL, SQLite, tokenizer,
+ wddx, xml and zlib extensions are built-in. You don't need to
  load any additional extensions in order to use these functions.
 
  Examples of PHP Extensions
@@ -192,7 +200,6 @@ Installation of Windows extensions
   php_ldap.dll      LDAP functions
   php_mssql.dll     MSSQL client (requires MSSQL DB-Libraries)
   php_snmp.dll      SNMP get and walk functions (NT only!)
-  php_zlib.dll      ZLib compression functions
 
  For more information see the section about Windows extensions at
  http://www.php.net/manual/en/install.windows.php#install.windows.extensions
