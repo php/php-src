@@ -79,22 +79,6 @@ ZEND_API void *_zend_list_find(int id, int *type TSRMLS_DC)
 	}
 }
 
-ZEND_API int zend_list_id_by_pointer(void *p, int type TSRMLS_DC)
-{
-	zend_rsrc_list_entry *le;
-	HashPosition pos;
-
-	for (zend_hash_internal_pointer_reset_ex(&EG(regular_list), &pos);
-		 zend_hash_get_current_data_ex(&EG(regular_list), (void *) &le, &pos) == SUCCESS;
-		 zend_hash_move_forward_ex(&EG(regular_list), &pos)) {
-		if (le->type == type && le->ptr == p) {
-			return le->id;
-		} 
-	}
-
-	return -1;
-}
-		
 ZEND_API int _zend_list_addref(int id TSRMLS_DC)
 {
 	zend_rsrc_list_entry *le;
