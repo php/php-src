@@ -71,7 +71,7 @@ ext/session
 ext/standard
 ------------
     * add a version number to data serialized via serialize().
-    * array_add(), array_uniq(). (Andrei)
+    * array_add(). (Andrei)
     * implement pathinfo()
         $a = pathinfo("/some/file.bla");
 
