@@ -2384,23 +2384,31 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_ISSET_ISEMPTY: {
 					zval **var = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_IS);
+					zval *value;
 					int isset;
 
 					if (!var) {
-						if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
-							if (Ts[opline->op1.u.var].EA.data.str_offset.offset>=0
-								&& Ts[opline->op1.u.var].EA.data.str_offset.offset<Ts[opline->op1.u.var].EA.data.str_offset.str->value.str.len) {
-								isset = 1;
-							} else {
+						if (Ts[opline->op1.u.var].EA.type == IS_STRING_OFFSET) {
+							PZVAL_LOCK(Ts[opline->op1.u.var].EA.data.str_offset.str);
+							value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_IS);
+							if (value->value.str.val == empty_string) {
 								isset = 0;
+							} else {
+								isset = 1;
 							}
-						} else {
-							isset = 1;
+						} else { /* IS_OVERLOADED_OBJECT */
+							value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_IS);
+							if (value->type == IS_NULL) {
+								isset = 0;
+							} else {
+								isset = 1;
+							}
 						}
-					} else if (*var==EG(uninitialized_zval_ptr)
-						|| ((*var)->type == IS_NULL)) {
+					} else if (*var==EG(uninitialized_zval_ptr) || ((*var)->type == IS_NULL)) {
+						value = *var;
 						isset = 0;
 					} else {
+						value = *var;
 						isset = 1;
 					}
 
@@ -2409,14 +2417,7 @@ send_by_ref:
 							Ts[opline->result.u.var].tmp_var.value.lval = isset;
 							break;
 						case ZEND_ISEMPTY:
-							if (!var) {
-								if (!isset
-									|| Ts[opline->op1.u.var].EA.data.str_offset.str->value.str.val[Ts[opline->op1.u.var].EA.data.str_offset.offset]=='0') {
-									Ts[opline->result.u.var].tmp_var.value.lval = 1;
-								} else {
-									Ts[opline->result.u.var].tmp_var.value.lval = 0;
-								}
-							} else if (!isset || !zend_is_true((*var))) {
+							if (!isset || !zend_is_true(value)) {
 								Ts[opline->result.u.var].tmp_var.value.lval = 1;
 							} else {
 								Ts[opline->result.u.var].tmp_var.value.lval = 0;
@@ -2424,6 +2425,9 @@ send_by_ref:
 							break;
 					}
 					Ts[opline->result.u.var].tmp_var.type = IS_BOOL;
+					if (!var) {
+						FREE_OP(&opline->op1, EG(free_op1));
+					}
 				}
 				NEXT_OPCODE();
 			case ZEND_EXIT:
