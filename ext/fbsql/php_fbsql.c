@@ -259,12 +259,12 @@ static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 	FBSQLLS_FETCH();
 	if (link)
 	{
-		if (link->hostName) efree(link->hostName);
-		if (link->userName) efree(link->userName);
-		if (link->userPassword) efree(link->userPassword);
-		if (link->databasePassword) efree(link->databasePassword);
-		if (link->databaseName) efree(link->databaseName);
-		if (link->errorText) efree(link->errorText);
+		if (link->hostName) free(link->hostName);
+		if (link->userName) free(link->userName);
+		if (link->userPassword) free(link->userPassword);
+		if (link->databasePassword) free(link->databasePassword);
+		if (link->databaseName) free(link->databaseName);
+		if (link->errorText) free(link->errorText);
 		if (link->connection) {
 			fbcdcClose(link->connection);
 			fbcdcRelease(link->connection);
@@ -280,17 +280,17 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 	FBSQLLS_FETCH();
 	if (link)
 	{
-		if (link->hostName) efree(link->hostName);
-		if (link->userName) efree(link->userName);
-		if (link->userPassword) efree(link->userPassword);
-		if (link->databasePassword) efree(link->databasePassword);
-		if (link->databaseName) efree(link->databaseName);
-		if (link->errorText) efree(link->errorText);
+		if (link->hostName) free(link->hostName);
+		if (link->userName) free(link->userName);
+		if (link->userPassword) free(link->userPassword);
+		if (link->databasePassword) free(link->databasePassword);
+		if (link->databaseName) free(link->databaseName);
+		if (link->errorText) free(link->errorText);
 		if (link->connection) {
 			fbcdcClose(link->connection);
 			fbcdcRelease(link->connection);
 		}
-		efree(link);
+		free(link);
 		FB_SQL_G(linkCount)--;
 		FB_SQL_G(persistantCount)--;
 	}
@@ -363,6 +363,7 @@ PHP_MINIT_FUNCTION(fbsql)
 	le_result   = zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
 	le_link     = zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
 	le_plink    = zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
+	fbsql_module_entry.type = type;
 
 	REGISTER_LONG_CONSTANT("FBSQL_ASSOC", FBSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_NUM",   FBSQL_NUM,   CONST_CS | CONST_PERSISTENT);
@@ -476,12 +477,12 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 				RETURN_FALSE;
 			}
 
-			phpLink = emalloc(sizeof(PHPFBLink));
+			phpLink = malloc(sizeof(PHPFBLink));
 			phpLink->persistant       = persistant;
-			phpLink->hostName         = estrdup(hostName);
-			phpLink->userName         = estrdup(userName);
-			phpLink->userPassword     = estrdup(userPassword);
-			phpLink->databasePassword = estrdup(FB_SQL_G(databasePassword));
+			phpLink->hostName         = strdup(hostName);
+			phpLink->userName         = strdup(userName);
+			phpLink->userPassword     = strdup(userPassword);
+			phpLink->databasePassword = strdup(FB_SQL_G(databasePassword));
 			phpLink->databaseName	  = NULL;
 			phpLink->execHandler      = fbcehHandlerForHost(hostName,128);
 			phpLink->affectedRows     = 0;
@@ -495,11 +496,11 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 			le.type = le_plink;
 			if (zend_hash_update(&EG(persistent_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 			{
-				efree(phpLink->hostName);
-				efree(phpLink->userName);
-				efree(phpLink->userPassword);
-				efree(phpLink->databasePassword);
-				efree(phpLink);
+				free(phpLink->hostName);
+				free(phpLink->userName);
+				free(phpLink->userPassword);
+				free(phpLink->databasePassword);
+				free(phpLink);
 				RETURN_FALSE;
 			}
 			FB_SQL_G(linkCount)++;
@@ -517,7 +518,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 			RETURN_FALSE;
 		}
 
-			if (zend_hash_find(&EG(regular_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
+		if (zend_hash_find(&EG(regular_list), name, strlen(name) + 1, (void **)&lep) == SUCCESS)
 		{
 			int type, link;
 			void *ptr;
@@ -556,10 +557,10 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 		le.type = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 		{
-			efree(phpLink->hostName);
-			efree(phpLink->userName);
-			efree(phpLink->userPassword);
-			efree(phpLink->databasePassword);
+			free(phpLink->hostName);
+			free(phpLink->userName);
+			free(phpLink->userPassword);
+			free(phpLink->databasePassword);
 			efree(phpLink);
 			RETURN_FALSE;
 		}
@@ -676,7 +677,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link)
 				php_error(E_WARNING, emg);
 			else
 				php_error(E_WARNING,"No message");
-			efree(emg);
+			free(emg);
 			fbcemdRelease(emd);
 			fbcmdRelease(md);
 			fbcdcClose(c);
@@ -702,8 +703,8 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link)
 			fbcdcRelease(link->connection);
 		}
 		link->connection = c;
-		if (link->databaseName) efree(link->databaseName);
-		link->databaseName = estrdup(databaseName);
+		if (link->databaseName) free(link->databaseName);
+		link->databaseName = strdup(databaseName);
 	}
 	return 1;
 }
@@ -871,8 +872,8 @@ PHP_FUNCTION(fbsql_hostname)
 	if (host_name)
 	{
 		convert_to_string_ex(host_name);
-		if (phpLink->hostName) efree(phpLink->hostName);
-		phpLink->hostName = estrndup(Z_STRVAL_PP(host_name), Z_STRLEN_PP(host_name));
+		if (phpLink->hostName) free(phpLink->hostName);
+		phpLink->hostName = strdup(Z_STRVAL_PP(host_name));
 	}
 	RETURN_STRING(phpLink->hostName, 1);
 }
@@ -907,8 +908,8 @@ PHP_FUNCTION(fbsql_database)
 	if (dbname)
 	{
 		convert_to_string_ex(dbname);
-		if (phpLink->databaseName) efree(phpLink->databaseName);
-		phpLink->databaseName = estrndup(Z_STRVAL_PP(dbname), Z_STRLEN_PP(dbname));
+		if (phpLink->databaseName) free(phpLink->databaseName);
+		phpLink->databaseName = strdup(Z_STRVAL_PP(dbname));
 	}
 	RETURN_STRING(phpLink->databaseName, 1);
 }
@@ -943,8 +944,8 @@ PHP_FUNCTION(fbsql_database_password)
 	if (db_password)
 	{
 		convert_to_string_ex(db_password);
-		if (phpLink->databasePassword) efree(phpLink->databasePassword);
-		phpLink->databasePassword = estrndup(Z_STRVAL_PP(db_password), Z_STRLEN_PP(db_password));
+		if (phpLink->databasePassword) free(phpLink->databasePassword);
+		phpLink->databasePassword = strdup(Z_STRVAL_PP(db_password));
 	}
 	RETURN_STRING(phpLink->databasePassword, 1);
 }
@@ -979,8 +980,8 @@ PHP_FUNCTION(fbsql_username)
 	if (username)
 	{
 		convert_to_string_ex(username);
-		if (phpLink->userName) efree(phpLink->userName);
-		phpLink->userName = estrndup(Z_STRVAL_PP(username), Z_STRLEN_PP(username));
+		if (phpLink->userName) free(phpLink->userName);
+		phpLink->userName = strdup(Z_STRVAL_PP(username));
 	}
 	RETURN_STRING(phpLink->userName, 1);
 }
@@ -1015,8 +1016,8 @@ PHP_FUNCTION(fbsql_password)
 	if (password)
 	{
 		convert_to_string_ex(password);
-		if (phpLink->userPassword) efree(phpLink->userPassword);
-		phpLink->userPassword = estrndup(Z_STRVAL_PP(password), Z_STRLEN_PP(password));
+		if (phpLink->userPassword) free(phpLink->userPassword);
+		phpLink->userPassword = strdup(Z_STRVAL_PP(password));
 	}
 	RETURN_STRING(phpLink->userPassword, 1);
 }
@@ -1133,8 +1134,8 @@ PHP_FUNCTION(fbsql_change_user)
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, buffer, phpLink);
 	if (return_value->value.lval)
 	{
-		efree(phpLink->userName);
-		phpLink->userName = estrdup(userName);
+		free(phpLink->userName);
+		phpLink->userName = strdup(userName);
 	}
 }
 /* }}} */
@@ -1470,13 +1471,13 @@ int mdOk(PHPFBLink* link, FBCMetaData* md)
 	link->errorNo = 0;
 	if (link->errorText)
 	{
-		efree(link->errorText);
+		free(link->errorText);
 		link->errorText = NULL;
 	}
 	if (md == NULL)
 	{
-		link->errorNo  = 1;
-		link->errorText  = estrdup("Connection to database server was lost");
+		link->errorNo = 1;
+		link->errorText = strdup("Connection to database server was lost");
 		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, link->errorText);
 		result = 0;
 	}
