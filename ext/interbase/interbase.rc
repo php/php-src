@@ -37,6 +37,7 @@
 #endif
 
 #define VERSION_INFO_ONLY
+#define PHP_H
 #include "interbase.c"
 
 #ifndef _MAC
