@@ -218,6 +218,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					break;
 				default:
 					/* unknown ?? */
+					break;
 			}
 			if (ssl_ret == FAILURE)
 				zend_error(E_WARNING, "%s(): failed to activate SSL mode %d", get_active_function_name(TSRMLS_C), ssl_flags);
