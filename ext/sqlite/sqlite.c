@@ -191,9 +191,6 @@ function_entry sqlite_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-#define PHP_ME_MAPPING(name, func_name, arg_types) \
-	ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
-
 function_entry sqlite_funcs_db[] = {
 	PHP_ME_MAPPING(sqlite_db, sqlite_open, NULL)
 /*	PHP_ME_MAPPING(close, sqlite_close, NULL)*/
