@@ -273,6 +273,18 @@ document printzops
 	dump operands of the current opline
 end
 
+define zbacktrace
+	____executor_globals
+	dump_bt $eg.current_execute_data
+end
+
+document zbacktrace
+	prints backtrace.
+	This command is almost a short cut for
+	> (gdb) ____executor_globals
+	> (gdb) dump_bt $eg.current_execute_data
+end
+
 define zmemcheck
 	set $p = alloc_globals.head
 	set $stat = "?"
@@ -345,4 +357,3 @@ document zmemcheck
 	usage: zmemcheck [ptr].
 	if ptr is 0, all blocks will be listed.
 end
-
