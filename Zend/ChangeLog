@@ -1,3 +1,11 @@
+2005-03-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_vm_execute.h:
+      - Second part of removing temp solution
+
+    * zend_vm_def.h:
+      - Remove potential bad solution for now
+
 2005-03-23  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_execute.c:
