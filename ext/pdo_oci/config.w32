@@ -22,16 +22,18 @@ if (PHP_PDO_OCI != "no") {
 		php_oci_inc_paths += php_oci_dirs[i] + "\\include;";
 	}
 
-	if (CHECK_HEADER_ADD_INCLUDE("oci.h", "CFLAGS_PDO_OCI", php_oci_inc_paths) &&
-			CHECK_LIB("oci.lib", "pdo_oci", php_oci_lib_paths)
-			) {
+	pdo_oci_header = CHECK_HEADER_ADD_INCLUDE("oci.h", "CFLAGS_PDO_OCI", php_oci_inc_paths);
+
+	if (pdo_oci_header && CHECK_LIB("oci.lib", "pdo_oci", php_oci_lib_paths)) {
 
 		EXTENSION('pdo_oci', 'pdo_oci.c oci_driver.c oci_statement.c');
 		ADD_FLAG('CFLAGS_PDO_OCI', "/I ..\\pecl");
 
-		/* LOCAL HACKS: assume you have OCI 9.2 */
-		AC_DEFINE('HAVE_OCIENVCREATE', 1);
-		AC_DEFINE('HAVE_OCIENVNLSCREATE', 1);
+		/* probe for some functions not present in older versions */
+		pdo_oci_inc_dir = FSO.GetFolder(pdo_oci_header);
+		CHECK_FUNC_IN_HEADER('oci.h', 'OCIEnvCreate', pdo_oci_inc_dir);
+		CHECK_FUNC_IN_HEADER('ociap.h', 'OCIEnvNlsCreate', pdo_oci_inc_dir);
+
 	} else {
 		WARNING("pdo-oci not enabled; libraries and headers not found");
 	}
