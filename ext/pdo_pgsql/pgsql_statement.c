@@ -72,7 +72,6 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 
 static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_dbh_t *dbh = stmt->dbh;
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	pdo_pgsql_db_handle *H = S->H;
 	ExecStatusType status;
@@ -84,6 +83,8 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 			S->result = NULL;
 		}
 	}
+	
+	S->current_row = 0;
 
 	if (S->cursor_name) {
 		char *q = NULL;
@@ -127,7 +128,7 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
 	if (S->cursor_name) {
-		char *ori_str = NULL;
+		char *ori_str;
 		char *q = NULL;
 		ExecStatusType status;
 
@@ -135,12 +136,11 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			case PDO_FETCH_ORI_NEXT: 	ori_str = "NEXT"; break;
 			case PDO_FETCH_ORI_PRIOR:	ori_str = "PRIOR"; break;
 			case PDO_FETCH_ORI_REL:		ori_str = "RELATIVE"; break;
-		}
-		if (!ori_str) {
-			return 0;
+			default:
+				return 0;
 		}
 		
-		spprintf(&q, 0, "FETCH %s %d FROM %s", ori_str, offset, S->cursor_name);
+		spprintf(&q, 0, "FETCH %s %ld FROM %s", ori_str, offset, S->cursor_name);
 		S->result = PQexec(S->H->server, q);
 		status = PQresultStatus(S->result);
 

@@ -89,7 +89,7 @@ bool(true)
 string(7) "String0"
 bool(true)
 bool(true)
-string(1) "0"
+int(0)
 array(1) {
   [1]=>
   string(7) "String1"
@@ -99,7 +99,7 @@ bool(true)
 string(7) "String1"
 bool(true)
 bool(true)
-string(1) "1"
+int(1)
 array(1) {
   [2]=>
   string(7) "String2"
@@ -109,7 +109,7 @@ bool(true)
 string(7) "String2"
 bool(true)
 bool(true)
-string(1) "2"
+int(2)
 ===REBIND/CONFLICT===
 string(7) "String0"
 string(7) "String1"
