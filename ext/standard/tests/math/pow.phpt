@@ -117,14 +117,22 @@ FALSE === pow( 0.0,-1)
  1.0  === pow( 2.0, 0)
  2.0  === pow( 2.0, 1)
  4.0  === pow( 2.0, 2)
-LONG_MAX === pow(LONG_MAX,1);
-LONG_MIN === pow(LONG_MIN,1);
-LONG_MAX*LONG_MAX === pow(LONG_MAX,2);
-LONG_MIN*LONG_MIN === pow(LONG_MIN,2);
-(float)LONG_MAX === pow(LONG_MAX,1.0);
-FALSE === pow(LONG_MIN,1.0);
-LONG_MAX*LONG_MAX === pow(LONG_MAX,2.0);
-FALSE === pow(LONG_MIN,2.0);
+LONG_MAX-1 === pow(LONG_MAX-1,1)
+LONG_MIN+1 === pow(LONG_MIN+1,1)
+(LONG_MAX-1)*(LONG_MAX-1) === pow(LONG_MAX-1,2)
+(LONG_MIN+1)*(LONG_MIN+1) === pow(LONG_MIN+1,2)
+(float)(LONG_MAX-1) === pow(LONG_MAX-1,1.0)
+FALSE === pow(LONG_MIN+1,1.0)
+(LONG_MAX-1)*(LONG_MAX-1) === pow(LONG_MAX-1,2.0)
+FALSE === pow(LONG_MIN+1,2.0)
+LONG_MAX === pow(LONG_MAX,1)
+LONG_MIN === pow(LONG_MIN,1)
+LONG_MAX*LONG_MAX === pow(LONG_MAX,2)
+LONG_MIN*LONG_MIN === pow(LONG_MIN,2)
+(float)LONG_MAX === pow(LONG_MAX,1.0)
+FALSE === pow(LONG_MIN,1.0)
+LONG_MAX*LONG_MAX === pow(LONG_MAX,2.0)
+FALSE === pow(LONG_MIN,2.0)
 TESTS;
 
  echo "On failure, please mail result to jeroen@php.net\n";
@@ -132,5 +140,5 @@ TESTS;
 
 --EXPECT--
 1,1,0,0
-On failure, please contact jeroen@php.net
+On failure, please mail result to jeroen@php.net
 OK
