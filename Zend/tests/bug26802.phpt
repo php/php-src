@@ -1,5 +1,5 @@
 --TEST--
-#26802 (Can't call static method using a variable)
+Bug #26802 (Can't call static method using a variable)
 --FILE--
 <?php
 	

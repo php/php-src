@@ -2470,8 +2470,25 @@ int zend_init_fcall_by_name_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	lcname = zend_str_tolower_dup(function_name_strval, function_name_strlen);
 	if (zend_hash_find(EG(function_table), lcname, function_name_strlen+1, (void **) &function)==FAILURE) {
-		efree(lcname);
-		zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
+		char *method;
+		zend_class_entry **pce;
+
+		if ((method = strstr(lcname, "::")) != NULL) {
+			*method = '\0';
+			method +=2;
+			if (zend_lookup_class(lcname, strlen(lcname), &pce TSRMLS_CC) == SUCCESS) {
+				if (zend_hash_find(&(*pce)->function_table, method, strlen(method)+1, (void **) &function) == FAILURE) {
+					efree(lcname);
+					zend_error(E_ERROR, "Call to undefined method %s()", function_name_strval);
+				}
+			} else {
+				efree(lcname);
+				zend_error(E_ERROR, "Call to method of undefined class %s()", function_name_strval);
+			}
+		} else {
+			efree(lcname);
+			zend_error(E_ERROR, "Call to undefined function %s()", function_name_strval);
+		}
 	}
 
 	efree(lcname);
