@@ -291,7 +291,7 @@ extends_from:
 
 declaration_class_name:
 	|	parse_class_name_entry T_STRING { do_fetch_class_name(&$$, &$1, &$2, 0 TSRMLS_CC); }
-	|	T_STRING { $$ = $1; zend_str_tolower_nlc($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
+	|	T_STRING { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
 foreach_optional_arg:
@@ -577,7 +577,7 @@ parse_class_entry:
 
 parse_class_name_entry:
 		parse_class_name_entry T_STRING T_PAAMAYIM_NEKUDOTAYIM { do_fetch_class_name(&$$, &$1, &$2, 0 TSRMLS_CC); }
-	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; zend_str_tolower_nlc($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
+	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
 
 catch_or_import_class_entry:

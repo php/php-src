@@ -531,7 +531,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 			int found;
 
 			lc_class = estrndup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-			zend_str_tolower_nlc(lc_class, Z_STRLEN_PP(object_pp));
+			zend_str_tolower(lc_class, Z_STRLEN_PP(object_pp));
 			found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
 			efree(lc_class);
 			if (found == FAILURE)
@@ -550,7 +550,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 
 	function_name_copy = *function_name;
 	zval_copy_ctor(&function_name_copy);
-	zend_str_tolower_nlc(function_name_copy.value.str.val, function_name_copy.value.str.len);
+	zend_str_tolower(function_name_copy.value.str.val, function_name_copy.value.str.len);
 
 	original_function_state_ptr = EG(function_state_ptr);
 	if (zend_hash_find(function_table, function_name_copy.value.str.val, function_name_copy.value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
