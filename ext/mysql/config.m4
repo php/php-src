@@ -46,7 +46,6 @@ if test "$PHP_MYSQL" != "no"; then
 fi
 
 if test "$PHP_MYSQL" = "yes"; then
-  PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
   MYSQL_MODULE_TYPE=builtin
   sources="libmysql/libmysql.c libmysql/errmsg.c libmysql/net.c libmysql/violite.c libmysql/password.c \
 	libmysql/my_init.c libmysql/my_lib.c libmysql/my_static.c libmysql/my_malloc.c libmysql/my_realloc.c libmysql/my_create.c \
@@ -62,6 +61,7 @@ if test "$PHP_MYSQL" = "yes"; then
 	libmysql/longlong2str.c libmysql/strtoull.c libmysql/strtoll.c libmysql/charset.c libmysql/ctype.c"
 
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $sources $ext_shared,,-I@ext_srcdir@/libmysql)
+  PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
 
 elif test "$PHP_MYSQL" != "no"; then
 
