@@ -72,18 +72,22 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 
 #define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { AG(allocated_memory) += rs;\
 								if (AG(memory_limit)<AG(allocated_memory)) {\
-									if ((AG(memory_limit)+1048576)<AG(allocated_memory)) { \
-										/* failed to handle this gracefully, exit() */ \
-										exit(1);	\
-									}	\
-									if (!AG(memory_exhausted)) {	\
-										if (!file) { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit), s); \
+									int php_mem_limit = AG(memory_limit); \
+									if (AG(memory_limit)+1048576 > AG(allocated_memory) - rs) { \
+										AG(memory_limit) = AG(allocated_memory) + 1048576; \
+										if (file) { \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", php_mem_limit, s); \
 										} else { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", AG(memory_limit), file, lineno, s); \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", php_mem_limit, file, lineno, s); \
 										} \
-										AG(memory_exhausted)=1;	\
-									}	\
+									} else { \
+										if (file) { \
+											fprintf(stderr, "Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)\n", php_mem_limit, file, lineno, s); \
+										} else { \
+											fprintf(stderr, "Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)\n", php_mem_limit, s); \
+										} \
+										exit(1); \
+									} \
 								} \
 							}
 # endif
