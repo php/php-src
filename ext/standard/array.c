@@ -1435,24 +1435,68 @@ PHP_FUNCTION(range)
 /* }}} */
 
 
-static int array_data_shuffle(const void *a, const void *b TSRMLS_DC) 
-{
-	return (php_rand(TSRMLS_C) % 2) ? 1 : -1;
-}
-
-
 /* {{{ proto bool shuffle(array array_arg)
    Randomly shuffle the contents of an array */
 PHP_FUNCTION(shuffle)
 {
 	zval *array;
+	Bucket **elems, *temp;
+	HashTable *hash;
+	int j, n_elems, cur_elem = 0, rnd_idx, n_left;
+	TSRMLS_FETCH();
 
 	if (zend_parse_parameters(1 TSRMLS_CC, "a", &array) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (zend_hash_sort(Z_ARRVAL_PP(&array), (sort_func_t)php_mergesort, array_data_shuffle, 1 TSRMLS_CC) == FAILURE) {
-		RETURN_FALSE;
+
+	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
+	if (n_elems <= 1) {
+		RETURN_TRUE;
 	}
+
+	elems = (Bucket **)emalloc(n_elems * sizeof(Bucket *));
+	hash = Z_ARRVAL_P(array);
+	n_left = n_elems;
+
+	for (j = 0, temp = hash->pListHead; temp; temp = temp->pListNext)
+		elems[j++] = temp;
+	while (--n_left) {
+		rnd_idx = php_rand(TSRMLS_C);
+		RAND_RANGE(rnd_idx, cur_elem, n_left, PHP_RAND_MAX);
+		if (rnd_idx != cur_elem) {
+			temp = elems[cur_elem];
+			elems[cur_elem] = elems[rnd_idx];
+			elems[rnd_idx] = temp;
+		}
+		cur_elem++;
+	}
+
+	HANDLE_BLOCK_INTERRUPTIONS();
+	hash->pListHead = elems[0];
+	hash->pListTail = NULL;
+	hash->pInternalPointer = hash->pListHead;
+
+	for (j = 0; j < n_elems; j++) {
+		if (hash->pListTail) {
+			hash->pListTail->pListNext = elems[j];
+		}
+		elems[j]->pListLast = hash->pListTail;
+		elems[j]->pListNext = NULL;
+		hash->pListTail = elems[j];
+	}
+	temp = hash->pListHead;
+	j = 0;
+	while (temp != NULL) {
+		temp->nKeyLength = 0;
+		temp->h = j++;
+		temp = temp->pListNext;
+	}
+	hash->nNextFreeElement = n_elems;
+	zend_hash_rehash(hash);
+	HANDLE_UNBLOCK_INTERRUPTIONS();
+
+	efree(elems);
+	
 	RETURN_TRUE;
 }
 /* }}} */
