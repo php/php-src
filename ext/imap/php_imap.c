@@ -646,7 +646,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 		if (EG(error_reporting) & E_NOTICE) {
 			ecur = IMAPG(imap_errorstack);
 			while (ecur != NIL) {
-				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s (errflg=%d)", ecur->LTEXT, ecur->errflg);
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s (errflg=%ld)", ecur->LTEXT, ecur->errflg);
 				ecur = ecur->next;
 			}
 		}
