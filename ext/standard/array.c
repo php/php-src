@@ -260,11 +260,16 @@ PHP_FUNCTION(count)
 	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE)
 		return;
 	
-	if (Z_TYPE_P(array) == IS_ARRAY) {
-		RETURN_LONG (php_count_recursive (array, mode));
-	} else {
-		/* return 1 for non-array arguments */
-		RETURN_LONG(1);
+	switch (Z_TYPE_P(array)) {
+		case IS_NULL:
+			RETURN_LONG(0);
+			break;
+		case IS_ARRAY:
+			RETURN_LONG (php_count_recursive (array, mode));
+			break;
+		default:
+			RETURN_LONG(1);
+			break;
 	}
 }
 /* }}} */
