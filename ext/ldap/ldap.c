@@ -61,40 +61,40 @@ static int le_link;
 
 function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,							NULL)
-	PHP_FALIAS(ldap_close,		ldap_unbind,				NULL)
-	PHP_FE(ldap_bind,							NULL)
-	PHP_FE(ldap_unbind,							NULL)
-	PHP_FE(ldap_read,							NULL)
-	PHP_FE(ldap_list,							NULL)
-	PHP_FE(ldap_search,							NULL)
+	PHP_FALIAS(ldap_close,		ldap_unbind,		NULL)
+	PHP_FE(ldap_bind,								NULL)
+	PHP_FE(ldap_unbind,								NULL)
+	PHP_FE(ldap_read,								NULL)
+	PHP_FE(ldap_list,								NULL)
+	PHP_FE(ldap_search,								NULL)
 	PHP_FE(ldap_free_result,						NULL)
 	PHP_FE(ldap_count_entries,						NULL)
 	PHP_FE(ldap_first_entry,						NULL)
 	PHP_FE(ldap_next_entry,							NULL)
 	PHP_FE(ldap_get_entries,						NULL)
-	PHP_FE(ldap_first_attribute,					third_argument_force_ref)
-	PHP_FE(ldap_next_attribute,					third_argument_force_ref)
+	PHP_FE(ldap_first_attribute,third_argument_force_ref)
+	PHP_FE(ldap_next_attribute,	third_argument_force_ref)
 	PHP_FE(ldap_get_attributes,						NULL)
 	PHP_FE(ldap_get_values,							NULL)
 	PHP_FE(ldap_get_values_len,						NULL)
-	PHP_FE(ldap_get_dn,							NULL)
+	PHP_FE(ldap_get_dn,								NULL)
 	PHP_FE(ldap_explode_dn,							NULL)
-	PHP_FE(ldap_dn2ufn,							NULL)
-	PHP_FE(ldap_add,							NULL)
-	PHP_FE(ldap_delete,							NULL)
-	PHP_FE(ldap_modify,							NULL)
+	PHP_FE(ldap_dn2ufn,								NULL)
+	PHP_FE(ldap_add,								NULL)
+	PHP_FE(ldap_delete,								NULL)
+	PHP_FE(ldap_modify,								NULL)
 /* additional functions for attribute based modifications, Gerrit Thomson */
 	PHP_FE(ldap_mod_add,							NULL)
 	PHP_FE(ldap_mod_replace,						NULL)
 	PHP_FE(ldap_mod_del,							NULL)
 /* end gjt mod */
-	PHP_FE(ldap_errno,							NULL)
+	PHP_FE(ldap_errno,								NULL)
 	PHP_FE(ldap_err2str,							NULL)
-	PHP_FE(ldap_error,							NULL)
+	PHP_FE(ldap_error,								NULL)
 	PHP_FE(ldap_compare,							NULL)
 
 #if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
-	PHP_FE(ldap_get_option,						third_argument_force_ref)
+	PHP_FE(ldap_get_option,		third_argument_force_ref)
 	PHP_FE(ldap_set_option,							NULL)
 #endif
 	
@@ -1266,7 +1266,8 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			ldap_mods[i]->mod_type = estrdup(attribute);
 			efree(attribute);
 		} else {
-			php_error(E_WARNING, "LDAP: Unknown Attribute in the data");
+			php_error(E_ERROR, "LDAP: Unknown Attribute in the data");
+			RETURN_FALSE;
 		}
 
 		zend_hash_get_current_data((*entry)->value.ht, (void **)&value);
