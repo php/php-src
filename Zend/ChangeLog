@@ -1,3 +1,20 @@
+2003-06-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_object_handlers.c:
+      Fixed bug #24279 (__get() crash when no value is returned)
+
+2003-06-29  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Remove namespace references.
+
+2003-06-29  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_operators.c:
+      Very simple, but very effective optimization.  Provides a signifigant speed
+      improvement to matches done via '=='.  This checks that the lengths of two
+      strings are equal before performing a memcmp() on them.
+
 2003-06-23  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute.c:
