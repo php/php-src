@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Changed y2k_compliance to default to 1 now. (Sascha)
 - Added platform independent socket error constants for better error handling.
 - Fixed include() and require() to work with remote files under win32. (Wez)
 - Added php.ini option "auto_detect_line_endings" which enables PHP to detect
