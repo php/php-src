@@ -286,6 +286,24 @@ int virtual_chdir(char *path)
 	return virtual_file_ex(&CWDG(cwd), path, php_is_dir_ok);
 }
 
+int virtual_chdir_file(char *path)
+{
+	int length = strlen(path);
+
+	if (length == 0) {
+		return 1; /* Can't CD to empty string */
+	}	
+	while(--length >= 0 && !IS_SLASH(path[length])) {
+	}
+
+	if (length == -1) {
+		return virtual_chdir(path);
+	}
+	path[length] = DEFAULT_SLASH;
+	return virtual_chdir(path);
+}
+
+
 int virtual_filepath(char *path, char **filepath)
 {
 	cwd_state new_state;
