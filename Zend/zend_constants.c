@@ -79,13 +79,6 @@ void clean_module_constants(int module_number TSRMLS_DC)
 
 int zend_startup_constants(TSRMLS_D)
 {
-#ifdef ZEND_WIN32
-	DWORD dwBuild=0;
-	DWORD dwVersion = GetVersion();
-	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
-	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
-#endif
-
 	EG(zend_constants) = &CG(main_class).constants_table;
 
 	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
