@@ -2359,6 +2359,10 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
+	if (php_check_open_basedir(Z_STRVAL_PP(new_path) TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	VCWD_UNLINK(Z_STRVAL_PP(new_path));
 	if (rename(Z_STRVAL_PP(path), Z_STRVAL_PP(new_path)) == 0) {
 		successful = 1;
