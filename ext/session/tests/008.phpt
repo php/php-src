@@ -12,7 +12,6 @@ session.bug_compat_warn=0
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
 
-ob_start();
 session_id("abtest");
 
 ### Phase 1 cleanup

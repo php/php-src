@@ -52,8 +52,6 @@ class foo {
     function method() { $this->yes++; }
 }
 
-ob_start();
-
 session_set_save_handler(array($hnd, "open"), array($hnd, "close"), array($hnd, "read"), array($hnd, "write"), array($hnd, "destroy"), array($hnd, "gc"));
 
 session_id("abtest");
