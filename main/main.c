@@ -625,7 +625,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 	}
 
-	if (PG(output_handler)) {
+	if (PG(output_handler) && PG(output_handler)[0]) {
 		zval *output_handler;
 
 		ALLOC_INIT_ZVAL(output_handler);
