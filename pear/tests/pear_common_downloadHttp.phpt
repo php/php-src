@@ -93,7 +93,7 @@ function cleanall($dir)
         if ($ent == '.' || $ent == '..') {
             continue;
         }
-        if (is_dir($ent)) {
+        if (is_dir($dir . DIRECTORY_SEPARATOR . $ent)) {
             cleanall($dir . DIRECTORY_SEPARATOR . $ent);
         } else {
             unlink($dir . DIRECTORY_SEPARATOR . $ent);
