@@ -634,11 +634,11 @@ static int array_key_compare(const void *a, const void *b)
 	first = *((Bucket **) a);
 	second = *((Bucket **) b);
 
-	if (first->arKey == NULL && second->arKey == NULL) {
+	if (first->nKeyLength == 0 && second->nKeyLength == 0) {
 		return (first->h - second->h);
-	} else if (first->arKey == NULL) {
+	} else if (first->nKeyLength == 0) {
 		return -1;
-	} else if (second->arKey == NULL) {
+	} else if (second->nKeyLength == 0) {
 		return 1;
 	}
 	min = MIN(first->nKeyLength, second->nKeyLength);
