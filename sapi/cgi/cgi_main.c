@@ -369,6 +369,7 @@ static int _sapi_cgibin_putenv(char *name, char *value TSRMLS_DC)
 	} else {
 		snprintf(buf,len-1,"%s=", name);
 	}
+
 #if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
@@ -597,8 +598,10 @@ static void init_request_info(TSRMLS_D)
 			struct stat st;
 			char *env_script_name = sapi_cgibin_getenv("SCRIPT_NAME",0 TSRMLS_CC);
 			char *env_path_info = sapi_cgibin_getenv("PATH_INFO",0 TSRMLS_CC);
+			char *env_redirect_url = sapi_cgibin_getenv("REDIRECT_URL",0 TSRMLS_CC);
 			if (env_path_info) env_path_info = estrdup(env_path_info);
-			if (sapi_cgibin_getenv("REDIRECT_URL",0 TSRMLS_CC) ||
+
+			if (env_redirect_url ||
 				(env_script_name && env_path_info &&
 				strcmp(env_path_info,env_script_name)==0)) {
 				/*
@@ -611,6 +614,8 @@ static void init_request_info(TSRMLS_D)
 				 */
 				_sapi_cgibin_putenv("SCRIPT_FILENAME",env_path_translated TSRMLS_CC);
 				_sapi_cgibin_putenv("PATH_INFO",NULL TSRMLS_CC);
+				if (env_redirect_url)
+					_sapi_cgibin_putenv("SCRIPT_NAME",env_redirect_url TSRMLS_CC);
 			}
 
 			if (stat( env_path_translated, &st ) == -1 ) {
@@ -620,7 +625,7 @@ static void init_request_info(TSRMLS_D)
 
 				while( (ptr = strrchr(pt,'/')) || (ptr = strrchr(pt,'\\')) ) {
 					*ptr = 0;
-					if ( lstat(pt, &st) == 0 && S_ISREG(st.st_mode) ) {
+					if ( stat(pt, &st) == 0 && S_ISREG(st.st_mode) ) {
 						/*
 						 * okay, we found the base script!
 						 * work out how many chars we had to strip off;
