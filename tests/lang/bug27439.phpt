@@ -1,5 +1,5 @@
 --TEST--
-bug27439: foreach() with $this
+Bug #27439 (foreach() with $this segfaults)
 --FILE--
 <?php
 
