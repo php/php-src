@@ -135,14 +135,18 @@ php_stream_wrapper php_stream_ftp_wrapper =	{
  */
 php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
-	php_stream *stream=NULL, *datastream=NULL, *reuseid=NULL;
+	php_stream *stream=NULL, *datastream=NULL;
 	php_url *resource=NULL;
 	char tmp_line[512];
 	char ip[sizeof("123.123.123.123")];
 	unsigned short portno;
 	char *scratch;
 	int result;
-	int i, use_ssl, use_ssl_on_data=0;
+	int i, use_ssl;
+#if HAVE_OPENSSL_EXT	
+	int use_ssl_on_data=0;
+	php_stream *reuseid=NULL;
+#endif	
 	char *tpath, *ttpath, *hoststart=NULL;
 	size_t file_size = 0;
 
