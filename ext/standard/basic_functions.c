@@ -309,6 +309,7 @@ function_entry basic_functions[] = {
 	PHP_FE(get_magic_quotes_gpc,					NULL)
 	PHP_FE(get_magic_quotes_runtime,				NULL)
 	
+	PHP_FE(is_null,                                 first_arg_allow_ref)
 	PHP_FE(is_resource,								first_arg_allow_ref)
 	PHP_FE(is_bool,									first_arg_allow_ref)
 	PHP_FE(is_long,									first_arg_allow_ref)
@@ -1305,6 +1306,14 @@ void php_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 		RETURN_FALSE;
 	}
 }
+
+/* {{{ proto bool is_null(mixed var)
+   Returns true if variable is null */
+PHP_FUNCTION(is_null)
+{
+    php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_NULL);
+}
+/* }}} */
 
 /* {{{ proto bool is_resource(mixed var)
    Returns true if variable is a resource */ 
