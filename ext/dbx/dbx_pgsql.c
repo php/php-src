@@ -138,13 +138,14 @@ int dbx_pgsql_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS
     return 1;
 }
 
-int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
     /* returns 1 as long or a result identifier as resource on success  
 	   or 0 as long on failure */
     int nargs=2;
     zval **args[2];
     zval *returned_zval=NULL, *num_rows_zval=NULL;
 
+    // db_name is not used in this function
     args[0]=dbx_handle;
     args[1]=sql_statement;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_exec", &returned_zval, nargs, args);

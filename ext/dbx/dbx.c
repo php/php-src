@@ -51,9 +51,11 @@ int get_module_identifier(char * module_name) {
     return DBX_UNKNOWN;
     }
 
-int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** pdbx_module) {
+int split_dbx_handle_object(zval ** dbx_object, zval *** pdbx_handle, zval *** pdbx_module, zval *** pdbx_database) {
     convert_to_object_ex(dbx_object);
-    if (zend_hash_find((*dbx_object)->value.obj.properties, "handle", 7, (void **) pdbx_handle)==FAILURE || zend_hash_find((*dbx_object)->value.obj.properties, "module", 7, (void **) pdbx_module)==FAILURE) {
+    if (zend_hash_find((*dbx_object)->value.obj.properties, "handle", 7, (void **) pdbx_handle)==FAILURE
+    || zend_hash_find((*dbx_object)->value.obj.properties, "module", 7, (void **) pdbx_module)==FAILURE
+    || zend_hash_find((*dbx_object)->value.obj.properties, "database", 9, (void **) pdbx_database)==FAILURE) {
         return 0;
         }
     return 1;
@@ -85,7 +87,7 @@ int switch_dbx_pconnect(zval ** rv, zval ** host, zval ** db, zval ** username, 
     /*/ returns persistent connection handle as resource on success or 0 as long on failure /*/
 int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns 1 as long on success or 0 as long on failure /*/
-int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns 1 as long or result identifier as resource on success or 0 as long on failure /*/
 int switch_dbx_getcolumncount(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns column-count as long on success or 0 as long on failure /*/
@@ -97,26 +99,7 @@ int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERN
     /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
 int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns string /*/
-/*
-#ifdef ZTS
-int dbx_globals_id;
-#else
-ZEND_DBX_API zend_dbx_globals dbx_globals;
-#endif
-*/
-/* If you declare any globals in php_dbx.h uncomment this: */
-/* ZEND_DECLARE_MODULE_GLOBALS(dbx) */
-/* True global resources - no need for thread safety here */
-/*
-static int le_dbx;
-*/
-/*
-static void zend_dbx_init_globals(PGLS_D)
-{
-	DBXG(row_count) = 0;
-	DBXG(num_rows) = 0;
-}
-*/
+
 /* Every user visible function must have an entry in dbx_functions[].
 */
 function_entry dbx_functions[] = {
@@ -128,8 +111,6 @@ function_entry dbx_functions[] = {
     ZEND_FE(dbx_sort,    NULL)
     ZEND_FE(dbx_cmp_asc,    NULL)
     ZEND_FE(dbx_cmp_desc,    NULL)
-
-    ZEND_FE(dbx_test,	    NULL)
 
 	{NULL, NULL, NULL}	/* Must be the last line in dbx_functions[] */
     };
@@ -149,19 +130,8 @@ zend_module_entry dbx_module_entry = {
 ZEND_GET_MODULE(dbx)
 #endif
 
-/*/ZEND_INI_BEGIN()
-/ /    ZEND_INI_ENTRY("dbx.defaulttype", "mysql", ZEND_INI_SYSTEM, NULL)
-/ /ZEND_INI_END()
-/*/
 ZEND_MINIT_FUNCTION(dbx)
 {
-/*
-#ifdef ZTS
-	dbx_globals_id = ts_allocate_id(sizeof(zend_dbx_globals), (ts_allocate_ctor) zend_dbx_init_globals, NULL);
-#else
-	zend_dbx_init_globals(DBXLS_C);
-#endif
-*/
 /*/	REGISTER_INI_ENTRIES(); /*/
 
     REGISTER_LONG_CONSTANT("DBX_PERSISTENT", DBX_PERSISTENT, CONST_CS | CONST_PERSISTENT);
@@ -218,6 +188,7 @@ ZEND_FUNCTION(dbx_connect)
     int result;
     long module_identifier;
     zval * dbx_module;
+    zval * db_name;
     zval * rv_dbx_handle;
     int persistent=0;
 
@@ -248,6 +219,8 @@ ZEND_FUNCTION(dbx_connect)
     convert_to_string_ex(arguments[2]);
     convert_to_string_ex(arguments[3]);
     convert_to_string_ex(arguments[4]);
+    MAKE_STD_ZVAL(db_name); 
+    ZVAL_STRING(db_name, (*arguments[2])->value.str.val, 1);
     if (persistent) {
         result = switch_dbx_pconnect(&rv_dbx_handle, arguments[1], arguments[2], arguments[3], arguments[4], INTERNAL_FUNCTION_PARAM_PASSTHRU, &dbx_module);
         }
@@ -256,6 +229,7 @@ ZEND_FUNCTION(dbx_connect)
         }
     if (!result) {
         FREE_ZVAL(dbx_module);
+        FREE_ZVAL(db_name);
         FREE_ZVAL(rv_dbx_handle);
         RETURN_LONG(0);
         }
@@ -263,12 +237,14 @@ ZEND_FUNCTION(dbx_connect)
     if (object_init(return_value) != SUCCESS) {
         zend_error(E_ERROR, "dbx: unable to create resulting object...");
         FREE_ZVAL(dbx_module);
+        FREE_ZVAL(db_name);
         FREE_ZVAL(rv_dbx_handle);
         RETURN_LONG(0);
         }
 
     zend_hash_update(return_value->value.obj.properties, "handle", 7, (void *)&(rv_dbx_handle), sizeof(zval *), NULL);
     zend_hash_update(return_value->value.obj.properties, "module", 7, (void *)&(dbx_module), sizeof(zval *), NULL);
+    zend_hash_update(return_value->value.obj.properties, "database", 9, (void *)&(db_name), sizeof(zval *), NULL);
 }
 /* }}} */
 
@@ -282,12 +258,13 @@ ZEND_FUNCTION(dbx_close)
     int result;
     zval ** dbx_handle;
     zval ** dbx_module;
+    zval ** dbx_database;
     zval * rv_success;
 
     if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	    }
-    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module)) {
+    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
         zend_error(E_WARNING, "dbx_close: not a valid dbx_handle-object...");
         RETURN_LONG(0);
         }
@@ -319,27 +296,24 @@ ZEND_FUNCTION(dbx_query)
     int result;
     zval ** dbx_handle;
     zval ** dbx_module;
+    zval ** dbx_database;
     zval * rv_result_handle;
     zval * rv_column_count;
     long col_index;
     long row_count;
     zval * info;
     long info_flags;
-/*/    long result_row_offset; /*/
-/*/    long result_row_count; /*/
     zval * data;
 
     if (ZEND_NUM_ARGS()<min_number_of_arguments || ZEND_NUM_ARGS()>number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	    }
-    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module)) {
+    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
         zend_error(E_WARNING, "dbx_query: not a valid dbx_handle-object...");
         RETURN_LONG(0);
         }
     /*/ default values /*/
     info_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
-/*/    result_row_offset = 0; /*/
-/*/    result_row_count = -1; /*/
     /*/ parameter overrides /*/
     if (ZEND_NUM_ARGS()>2) {
         convert_to_long_ex(arguments[2]);
@@ -349,20 +323,10 @@ ZEND_FUNCTION(dbx_query)
             info_flags |= DBX_RESULT_INFO;
             }
         }
- /*/
-/ /    if (ZEND_NUM_ARGS()>3) {
-/ /        convert_to_long_ex(arguments[3]);
-/ /        result_row_offset = (*arguments[3])->value.lval;
-/ /        }
-/ /    if (ZEND_NUM_ARGS()>4) {
-/ /        convert_to_long_ex(arguments[4]);
-/ /        result_row_count = (*arguments[4])->value.lval;
-/ /        }
- /*/
     MAKE_STD_ZVAL(rv_result_handle); 
     ZVAL_LONG(rv_result_handle, 0);
     convert_to_string_ex(arguments[1]);
-    result = switch_dbx_query(&rv_result_handle, dbx_handle, arguments[1], INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+    result = switch_dbx_query(&rv_result_handle, dbx_handle, dbx_database, arguments[1], INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
     /*/ boolean return value means either failure for any query or success for queries that don't return anything  /*/
     if (!result || (rv_result_handle && rv_result_handle->type==IS_BOOL)) {
         result = (result && rv_result_handle->value.lval)?1:0;
@@ -463,7 +427,6 @@ ZEND_FUNCTION(dbx_query)
         ZVAL_LONG(rv_row, 0);
         result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
         if (result) {
-/*/            if (row_count>=result_row_offset && (result_row_count==-1 || row_count<result_row_offset+result_row_count)) { /*/
                 zval ** row_ptr;
                 zend_hash_index_update(data->value.ht, row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
                 /*/ associate results with fieldnames /*/
@@ -480,12 +443,6 @@ ZEND_FUNCTION(dbx_query)
                         zend_assign_to_variable_reference(NULL, reference_ptr, actual_ptr, NULL ELS_CC);
                         }
                     }
- /*/
-/ /                }
-/ /            else {
-/ /                FREE_ZVAL(rv_row);
-/ /                }
- /*/
             ++row_count;
             }
         else {
@@ -508,12 +465,13 @@ ZEND_FUNCTION(dbx_error)
     int result;
     zval ** dbx_handle;
     zval ** dbx_module;
+    zval ** dbx_database;
     zval * rv_errormsg;
 
     if (ZEND_NUM_ARGS() !=number_of_arguments || zend_get_parameters_array_ex(number_of_arguments, arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	    }
-    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module)) {
+    if (!split_dbx_handle_object(arguments[0], &dbx_handle, &dbx_module, &dbx_database)) {
         zend_error(E_WARNING, "dbx_error: not a valid dbx_handle-object...");
         RETURN_LONG(0);
         }
@@ -528,6 +486,7 @@ ZEND_FUNCTION(dbx_error)
     MOVE_RETURNED_TO_RV(&return_value, rv_errormsg);
 }
 /* }}} */
+
 /*/
 / /       dbx functions that are database independent... like sorting result_objects!
 /*/
@@ -685,18 +644,6 @@ ZEND_FUNCTION(dbx_sort)
 
 /***********************************/
 
-/* {{{ proto long dbx_test(???)
-   */
-ZEND_FUNCTION(dbx_test)
-{
-}
-/* }}} */
-
-
-
-
-
-
 /*/
 / / switch_dbx functions
 /*/
@@ -733,12 +680,12 @@ int switch_dbx_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETER
     return 0;
     }
 
-int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
     /*/ returns 1 as long or result identifier as resource on success or 0 as long on failure /*/
     switch ((*dbx_module)->value.lval) {
-        case DBX_MYSQL: return dbx_mysql_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
-        case DBX_ODBC: return dbx_odbc_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
-        case DBX_PGSQL: return dbx_pgsql_query(rv, dbx_handle, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_MYSQL: return dbx_mysql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_ODBC: return dbx_odbc_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_query(rv, dbx_handle, db_name, sql_statement, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_query: not supported in this module");
     return 0;

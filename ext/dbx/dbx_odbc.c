@@ -78,13 +78,14 @@ int dbx_odbc_close(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
     return 1;
     }
 
-int dbx_odbc_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_odbc_query(zval ** rv, zval ** dbx_handle, zval ** db_name, zval ** sql_statement, INTERNAL_FUNCTION_PARAMETERS) {
     /*/ returns 1 as long or a result identifier as resource on success  or 0 as long on failure /*/
     int number_of_arguments=2;
     zval ** arguments[2];
     zval * queryresult_zval=NULL;
     zval * num_fields_zval=NULL;
 
+    // db_name is not used in this function
     arguments[0]=dbx_handle;
     arguments[1]=sql_statement;
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "odbc_exec", &queryresult_zval, number_of_arguments, arguments);
