@@ -2161,7 +2161,7 @@ PHP_FUNCTION(fgetcsv)
 	/* first section exactly as php_fgetss */
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
-	int len, temp_len;
+	int len, temp_len, buf_len;
 	char *buf;
 	php_stream *stream;
 
@@ -2225,7 +2225,7 @@ PHP_FUNCTION(fgetcsv)
 	/* needed because recv/read/gzread doesnt set null char at end */
 	memset(buf, 0, len + 1);
 
-	if (php_stream_gets(stream, buf, len) == NULL) {
+	if (php_stream_get_line(stream, buf, len, &buf_len) == NULL) {
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -2236,7 +2236,7 @@ PHP_FUNCTION(fgetcsv)
 
 	lineEnd = emalloc(len + 1);
 	bptr = buf;
-	tptr = buf + strlen(buf) -1;
+	tptr = buf + buf_len -1;
 	while ( isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr) ) tptr--;
 	tptr++;
 	strcpy(lineEnd, tptr);
@@ -2299,17 +2299,25 @@ normal_char:
 					*tptr++ = *bptr++;
 
 					if (*bptr == 0) {       /* embedded line end? */
+						if ((bptr - buf) < buf_len) {
+							while (*bptr == '\0') {
+								*tptr++ = *bptr++;
+							}
+							continue;
+						}
+					
 						*(tptr-1)=0;            /* remove space character added on reading line */
 						strcat(temp, lineEnd);   /* add the embedded line end to the field */
 
 						/* read a new line from input, as at start of routine */
 						memset(buf, 0, len+1);
 
-						if (php_stream_gets(stream, buf, len) == NULL) {
+						if (php_stream_get_line(stream, buf, len, &buf_len) == NULL) {
 							/* we've got an unterminated enclosure, assign all the data
 							 * from the start of the enclosure to end of data to the last element
 							 */
 							if (temp_len > len) { 
+								*tptr = 0;
 								break;
 							}
 							
@@ -2323,7 +2331,7 @@ normal_char:
 						temp_len += len;
 						temp = erealloc(temp, temp_len+1);
 						bptr = buf;
-						tptr = buf + strlen(buf) -1;
+						tptr = buf + buf_len -1;
 						while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr)) 
 							tptr--;
 						tptr++; 
@@ -2339,14 +2347,17 @@ normal_char:
 			}
 		} else {
 			/* 2B. Handle non-enclosure field */
-			while ((*bptr != delimiter) && *bptr) 
+			while ((*bptr != delimiter) && ((bptr - buf) < buf_len)) 
 				*tptr++ = *bptr++;
 			*tptr=0;	/* terminate temporary string */
 
-			if (strlen(temp)) {
+			if ((tptr - temp)) {
 				tptr--;
 				while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter)) 
 					*tptr-- = 0;	/* strip any trailing spaces */
+				if (*tptr) {
+					tptr++;
+				}
 			}
 			
 			if (*bptr == delimiter) 
@@ -2354,7 +2365,11 @@ normal_char:
 		}
 
 		/* 3. Now pass our field back to php */
-		add_next_index_string(return_value, temp, 1);
+		if (*tptr == '\0') {
+			add_next_index_stringl(return_value, temp, (tptr - temp), 1);
+		} else {
+			add_next_index_string(return_value, temp, 1);
+		}
 		tptr = temp;
 	} while (*bptr);
 

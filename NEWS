@@ -17,6 +17,7 @@ PHP 4                                                                      NEWS
   after every mcrypt_generic_init() call). (Ilia)
 - Fixed bug #26025 (Segfault on glob() without GLOB_NOCHECK or GLOB_NOMAGIC
   under *BSD platforms). (Moriyoshi)
+- Fixed bug #26003 (Make fgetcsv() binary safe). (Ilia)
 - Fixed bug #25581 (getimagesize () return incorrect values on bitmap
   (os2) files). (Marcus)
 
