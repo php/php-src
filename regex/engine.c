@@ -270,7 +270,7 @@ sopno stopst;
 		/* figure out what it matched */
 		switch (OP(m->g->strip[ss])) {
 		case OEND:
-			assert(nope);
+			assert(PHP_REGEX_NOPE);
 			break;
 		case OCHAR:
 			sp++;
@@ -286,7 +286,7 @@ sopno stopst;
 			break;
 		case OBACK_:
 		case O_BACK:
-			assert(nope);
+			assert(PHP_REGEX_NOPE);
 			break;
 		/* cases where length of match is hard to find */
 		case OQUEST_:
@@ -389,7 +389,7 @@ sopno stopst;
 		case OOR1:
 		case OOR2:
 		case O_CH:
-			assert(nope);
+			assert(PHP_REGEX_NOPE);
 			break;
 		case OLPAREN:
 			i = OPND(m->g->strip[ss]);
@@ -402,7 +402,7 @@ sopno stopst;
 			m->pmatch[i].rm_eo = sp - m->offp;
 			break;
 		default:		/* uh oh */
-			assert(nope);
+			assert(PHP_REGEX_NOPE);
 			break;
 		}
 	}
@@ -606,12 +606,12 @@ sopno lev;			/* PLUS nesting level */
 		return(NULL);
 		break;
 	default:		/* uh oh */
-		assert(nope);
+		assert(PHP_REGEX_NOPE);
 		break;
 	}
 
 	/* "can't happen" */
-	assert(nope);
+	assert(PHP_REGEX_NOPE);
 	/* NOTREACHED */
 	return((unsigned char *)NULL);	/* dummy */
 }
@@ -914,7 +914,7 @@ register states aft;		/* states already known reachable after */
 			FWD(aft, aft, 1);
 			break;
 		default:		/* ooooops... */
-			assert(nope);
+			assert(PHP_REGEX_NOPE);
 			break;
 		}
 	}
