@@ -1,5 +1,5 @@
 --TEST--
-sqlite-oo: fetch string
+sqlite-oo: fetch single
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--

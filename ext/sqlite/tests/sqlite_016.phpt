@@ -1,5 +1,5 @@
 --TEST--
-sqlite: fetch string
+sqlite: fetch single
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--
@@ -23,12 +23,12 @@ foreach ($data as $str) {
 echo "====BUFFERED====\n";
 $r = sqlite_query("SELECT a, b from strings", $db);
 while (sqlite_has_more($r)) {
-	var_dump(sqlite_fetch_string($r));
+	var_dump(sqlite_fetch_single($r));
 }
 echo "====UNBUFFERED====\n";
 $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
 while (sqlite_has_more($r)) {
-	var_dump(sqlite_fetch_string($r));
+	var_dump(sqlite_fetch_single($r));
 }
 echo "DONE!\n";
 ?>
