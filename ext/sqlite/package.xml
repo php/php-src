@@ -20,7 +20,7 @@
       <user>helly</user>
       <name>Marcus B&ouml;rger</name>
       <email>helly@php.net</email>
-      <role>developer</role>
+      <role>lead</role>
     </maintainer>
   </maintainers>
   <description>
@@ -32,8 +32,8 @@
   <license>PHP</license>
   <release>
     <state>beta</state>
-    <version>0.9b</version>
-    <date>2003-04-21</date>
+    <version>0.9c</version>
+    <date>2003-06-05</date>
 	<notes>
 		Added:
 			sqlite_popen() for persistent db connections.
@@ -43,6 +43,7 @@
 			sqlite_create_aggregate() for registering aggregating SQL functions.
 			sqlite_create_function() for registering regular SQL functions.
 			sqlite_fetch_string() for speedy access to first column of result sets.
+			sqlite_fetch_all() to receive all rowsets from a query as an array.
 			iteration interface
 
 			sqlite_query() functions accept resource/query string in either order,
