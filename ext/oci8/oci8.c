@@ -3595,7 +3595,7 @@ PHP_FUNCTION(ociplogon)
 
 /* }}} */
 
-/* {{{ proto int ocierror([int stmt|conn|global])
+/* {{{ proto array ocierror([int stmt|conn|global])
    Return the last error of stmt|conn|global. If no error happened returns false. */
 
 PHP_FUNCTION(ocierror)
