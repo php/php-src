@@ -194,7 +194,7 @@ PHP 4                                                                      NEWS
   do 'LIST -R' instead of 'LIST'. (Jani)
 - Disabled the fifth parameter in mail() when safe-mode is turned on. (Derick)
 - Changed getimagesize() to always set unknown fields to 0 and added support
-  iff imagetype. (Marcus)
+  for iff imagetype. (Marcus)
 - Added runtime Apache2 thread check to ensure we don't run a non-threaded
   PHP inside a threaded Apache2 MPM.  (Rasmus)
 - Made getimagesize() and exif_read_data() to return also the mime-type and 
