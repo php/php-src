@@ -47,7 +47,7 @@ typedef struct {
 
 #ifdef ZTS
 #define EXTNAMEG(v) (extname_globals->v)
-#define EXTNAMELS_FETCH() php_extname_globals *extname_globals = ts_resource(gd_extname_id)
+#define EXTNAMELS_FETCH() php_extname_globals *extname_globals = ts_resource(extname_globals_id)
 #else
 #define EXTNAMEG(v) (extname_globals.v)
 #define EXTNAMELS_FETCH()
