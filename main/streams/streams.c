@@ -602,6 +602,12 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 		return 0;
 	}
 
+	if (!stream->eof && PHP_STREAM_OPTION_RETURN_ERR ==
+		   	php_stream_set_option(stream, PHP_STREAM_OPTION_CHECK_LIVENESS,
+		   	0, NULL)) {
+		stream->eof = 1;
+	}
+
 	return stream->eof;
 }
 
@@ -1113,7 +1119,7 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 				break;
 				
 			default:
-				ret = PHP_STREAM_OPTION_RETURN_ERR;
+				;
 		}
 	}
 
