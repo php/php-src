@@ -20,7 +20,7 @@ gdImageCreateFromXpm (char *filename)
 
 #else
 
-#include "xpm.h"
+#include <X11/xpm.h>
 #include <string.h>
 
 gdImagePtr
