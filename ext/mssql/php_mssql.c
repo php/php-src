@@ -436,6 +436,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			new_le.type = le_plink;
 			new_le.ptr = mssql_ptr;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length + 1, &new_le, sizeof(list_entry), NULL)==FAILURE) {
+				new_le.refcount++;
 				efree(mssql_ptr);
 				efree(hashed_details);
 				dbfreelogin(mssql.login);
@@ -552,6 +553,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length + 1,(void *) &new_index_ptr, sizeof(list_entry),NULL)==FAILURE) {
+			new_index_ptr.refcount++;
 			efree(hashed_details);
 			RETURN_FALSE;
 		}
@@ -990,6 +992,7 @@ PHP_FUNCTION(mssql_fetch_row)
 		*field_content = result->data[result->cur_row][i];
 		ZVAL_COPY_CTOR(field_content);
 		zend_hash_index_update(return_value->value.ht, i, (void *) &field_content, sizeof(zval *), NULL);
+		field_content->refcount++;
 	}
 	result->cur_row++;
 }
@@ -1028,7 +1031,9 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 			tmp->value.str.val = php_addslashes(tmp->value.str.val, tmp->value.str.len, &tmp->value.str.len,1);
 		}
 		zend_hash_index_update(return_value->value.ht, i, (void *) &tmp, sizeof(zval *), NULL);
+		tmp->refcount++;
 		zend_hash_update(return_value->value.ht, result->fields[i].name, strlen(result->fields[i].name)+1, (void *) &tmp, sizeof(zval *), NULL);
+		tmp->refcount++;
 	}
 	result->cur_row++;
 }
