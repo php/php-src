@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.6
+- Added support to getimagesize to return dimensions of BMP and PSD
+  files (Derick)
+- Added Japanese multibyte string functions support. (Rui)
 - Added Mac OS X "\r" line ending support to the Zend Engine (Andi)
 - Fixed a bug regarding the $PHP_SELF being incorrectly registered when
   force-cgi-redirect was not enabled. (Sterling)
