@@ -360,7 +360,6 @@ class PEAR
         // The error is yet a PEAR error object
         if (is_object($message)) {
             $code        = $message->getCode();
-            $mode        = $message->getMode();
             $userinfo    = $message->getUserInfo();
             $error_class = $message->getType();
             $message     = $message->getMessage();
