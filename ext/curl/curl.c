@@ -38,7 +38,7 @@ int curl_globals_id;
 php_curl_globals curl_globals;
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 static void win32_cleanup();
 static void win32_init();
 
