@@ -1,4 +1,4 @@
-<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code)*>
+<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources|code|streams)*>
 
 <!ELEMENT name (#PCDATA)>
 
@@ -103,3 +103,14 @@
 	alloc      (yes|no) "no"
 >
 <!ELEMENT destruct (#PCDATA)>
+
+<!ELEMENT streams (stream)*>
+<!ELEMENT stream (description?, ops?, data?)>
+<!ATLIST stream
+  name CDATA #REQUIRED
+>
+<!ELEMENT ops (op)*>
+<!ELEMENT op (#PCDATA)>
+<!ATLIST op
+  name CDATA #REQUIRED
+>
