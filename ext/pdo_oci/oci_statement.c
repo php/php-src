@@ -46,7 +46,7 @@
 	}
 
 
-static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
+static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	HashTable *BC = stmt->bound_columns;
@@ -98,9 +98,9 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 	efree(S);
 
 	return 1;
-}
+} /* }}} */
 
-static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
+static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	ub4 rowcount;
@@ -149,10 +149,9 @@ static int oci_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	stmt->row_count = (long)rowcount;
 
 	return 1;
-}
+} /* }}} */
 
-static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp,
-		ub4 *alenp, ub1 *piecep, dvoid **indpp)
+static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 *alenp, ub1 *piecep, dvoid **indpp) /* {{{ */
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
@@ -182,10 +181,9 @@ static sb4 oci_bind_input_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dv
 
 	*piecep = OCI_ONE_PIECE;
 	return OCI_CONTINUE;
-}
+} /* }}} */
 
-static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp,
-		ub1 *piecep, dvoid **indpp, ub2 **rcodepp)
+static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, dvoid **bufpp, ub4 **alenpp, ub1 *piecep, dvoid **indpp, ub2 **rcodepp) /* {{{ */
 {
 	struct pdo_bound_param_data *param = (struct pdo_bound_param_data*)ctx;
 	pdo_oci_bound_param *P = (pdo_oci_bound_param*)param->driver_data;
@@ -214,10 +212,9 @@ static sb4 oci_bind_output_cb(dvoid *ctx, OCIBind *bindp, ub4 iter, ub4 index, d
 	*indpp = &P->indicator;
 
 	return OCI_CONTINUE;
-}
+} /* }}} */
 
-static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
-		enum pdo_param_event event_type TSRMLS_DC)
+static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param, enum pdo_param_event event_type TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 
@@ -302,10 +299,9 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 	}
 	
 	return 1;
-}
+} /* }}} */
 
-static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
-	long offset TSRMLS_DC)
+static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,	long offset TSRMLS_DC) /* {{{ */
 {
 #if HAVE_OCISTMTFETCH2
 	ub4 ociori;
@@ -343,9 +339,9 @@ static int oci_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori,
 	oci_stmt_error("OCIStmtFetch");
 
 	return 0;
-}
+} /* }}} */
 
-static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
+static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	OCIParam *param = NULL;
@@ -418,9 +414,9 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	}
 	
 	return 1;
-}
+} /* }}} */
 
-static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC)
+static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned long *len, int *caller_frees TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_stmt *S = (pdo_oci_stmt*)stmt->driver_data;
 	pdo_oci_column *C = &S->cols[colno];
@@ -444,7 +440,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned lo
 		*len = C->fetched_len;
 		return 1;
 	}
-}
+} /* }}} */
 
 struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_dtor,
