@@ -5,9 +5,9 @@
  */
 
   // Change if needed
-  define('HOST',     'php3');
-  define('USER',     'news');
-  define('PASSWORD', 'stuemper');
+  define('HOST',     '****');
+  define('USER',     '****');
+  define('PASSWORD', '****');
 
   // {{{ bool sybase_msg_handler(int msgnumber, int severity, int state, int line, string text)
   //     Handles server messages
@@ -52,7 +52,7 @@
   //     Connect to the sybase server using the defines HOST, USER and PASSWORD
   function sybase_connect_ex($charset= NULL, $appname= NULL) {
     sybase_min_server_severity(11);       // Suppress "changed database context"
-    if (!($db= sybase_connect(HOST, USER, PASSWORD, $charset, $appname))) {
+    if (!($db= sybase_connect(HOST, USER, PASSWORD, $charset ? $charset : 'iso_1', $appname))) {
       die('Connect to '.USER.'@'.HOST.' failed (using password: '.(PASSWORD ? 'yes' : 'no').')');
     }
     return $db;
