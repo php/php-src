@@ -115,10 +115,12 @@ PHP_FUNCTION(pdf_set_transition);
 PHP_FUNCTION(pdf_set_duration);
 PHP_FUNCTION(pdf_open_jpeg);
 PHP_FUNCTION(pdf_open_tiff);
+PHP_FUNCTION(pdf_open_png);
 #if HAVE_LIBGD13
 PHP_FUNCTION(pdf_open_memory_image);
 #endif
 PHP_FUNCTION(pdf_open_gif);
+PHP_FUNCTION(pdf_open_image_file);
 PHP_FUNCTION(pdf_close_image);
 PHP_FUNCTION(pdf_place_image);
 PHP_FUNCTION(pdf_put_image);
