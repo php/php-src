@@ -59,7 +59,7 @@ static void register_http_post_files_variable_ex(char *var, zval *val, zval *htt
  */
 static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 {
-	char *ptr, *loc, *loc2, *s, *name, *filename, *u, *fn;
+	char *ptr, *loc, *loc2, *loc3, *s, *name, *filename, *u, *fn;
 	int len, state = 0, Done = 0, rem, urem;
 	int eolsize;
 	long bytes, max_file_size = 0;
@@ -111,7 +111,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					if (rem < 31) {
 						SAFE_RETURN;
 					}
-					php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
+					php_error(E_WARNING, "File Upload Mime headers garbled ptr: [%c%c%c%c%c]", *ptr, *(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4));
 					SAFE_RETURN;
 				}
 				loc = memchr(ptr, '\n', rem);
@@ -120,7 +120,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					name += 7;
 					s = memchr(name, '\"', loc - name);
 					if (!s) {
-						php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
+						php_error(E_WARNING, "File Upload Mime headers garbled name: [%c%c%c%c%c]", *name, *(name + 1), *(name + 2), *(name + 3), *(name + 4));
 						SAFE_RETURN;
 					}
 					if (namebuf) {
@@ -157,7 +157,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					filename += 11;
 					s = memchr(filename, '\"', loc - filename);
 					if (!s) {
-						php_error(E_WARNING, "File Upload Mime headers garbled [%c%c%c%c%c]", *filename, *(filename + 1), *(filename + 2), *(filename + 3), *(filename + 4));
+						php_error(E_WARNING, "File Upload Mime headers garbled filename: [%c%c%c%c%c]", *filename, *(filename + 1), *(filename + 2), *(filename + 3), *(filename + 4));
 						SAFE_RETURN;
 					}
 					if (filenamebuf) {
@@ -201,8 +201,18 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 							*(loc2 - 1) = '\0';
 							s = loc+15;
 						}
-						rem -= 2;
-						ptr += 2;
+						loc3=memchr(loc2+1, '\n', rem-1);
+						if (loc3==NULL) {
+						    php_error(E_WARNING, "File Upload Mime headers garbled header3: [%c%c%c%c%c]", *loc2, *(loc2 + 1), *(loc2 + 2), *(loc2 + 3), *(loc2 + 4));
+						    SAFE_RETURN;
+						}
+						if (loc3 - loc2 > 2) { /* we have a third header */
+						    rem -= (ptr-loc3)+3;
+						    ptr = loc3+3;
+						} else {
+							rem -= (ptr-loc3)+1;
+							ptr = loc3+1;
+						}
 					}
 
 					/* Add $foo_type */
