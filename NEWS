@@ -18,6 +18,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #28175 (build problem for people using FreeType 2.1.0-2.1.2).
   (Ilia)
 - Fixed bug #28147 (Crash with drawing anti-aliased lines). (Derick)
+- Fixed bug #28122 (dba_open db3: Permission denied). (Marcus)
 - Fixed bug #28112 (sqlite_query() crashing apache on malformed query). (Ilia,
   Marcus)
 - Fixed bug #28055 (timeout duration too long in feof()/pfsockopen() liveness
