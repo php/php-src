@@ -77,7 +77,7 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 		member = &tmp_member;
 	}
 
-	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member), (void **) &variable_ptr) == SUCCESS) {
+	if (zend_hash_find(zobj->properties, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &variable_ptr) == SUCCESS) {
 		if (*variable_ptr == EG(error_zval_ptr) || member == EG(error_zval_ptr)) {
 			/* variable_ptr = EG(uninitialized_zval_ptr); */
 /*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
