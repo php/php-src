@@ -3,7 +3,7 @@
 extname="$1"
 EXTNAME=`echo $1|tr a-z A-Z`
 
-function givup() {
+givup() {
 	echo $*
 	exit 1
 }
@@ -23,9 +23,9 @@ mkdir $extname || givup "Cannot create directory $extname"
 cd $extname
 chmod 755 .
 
-echo -n "Creating basic files:"
+echo "Creating basic files:\c"
 
-echo -n " config.m4"
+echo " config.m4\c"
 cat >config.m4 <<eof
 dnl \$Id\$
 dnl config.m4 for extension $extname
@@ -33,17 +33,7 @@ dnl don't forget to call PHP_EXTENSION($extname)
 
 eof
 
-echo -n " setup.stub"
-cat >setup.stub <<eof
-# \$Source\$
-# \$Id\$
-
-define_option with-$extname '$extname support?' yesnodir no \\
-'    Whether to build the $extname extension.'
-	
-eof
-
-echo -n " Makefile.am"
+echo " Makefile.am\c"
 cat >Makefile.am <<eof
 # \$Id\$
 
@@ -54,14 +44,14 @@ libphpext_${extname}_a_SOURCES=$extname.c
 eof
 
 
-echo -n " .cvsignore"
+echo " .cvsignore\c"
 cat >.cvsignore <<eof
 .deps
 Makefile.in
 Makefile
 eof
 
-echo -n " config.h.stub"
+echo " config.h.stub\c"
 cat >config.h.stub<<eof
 /* define if you want to use the $extname extension */
 /* #undef HAVE_LIB$EXTNAME */
