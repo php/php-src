@@ -614,27 +614,32 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 			break;
 
 		case VT_DATE: {
+				BOOL success;
 				SYSTEMTIME wintime;
 				struct tm phptime;
 
 				if (V_ISBYREF(var_arg)) {
-					VariantTimeToSystemTime(*V_DATEREF(var_arg), &wintime);
+					success = VariantTimeToSystemTime(*V_DATEREF(var_arg), &wintime);
 				} else {
-					VariantTimeToSystemTime(V_DATE(var_arg), &wintime);
+					success = VariantTimeToSystemTime(V_DATE(var_arg), &wintime);
 				}
 
-				memset(&phptime, 0, sizeof(phptime));
+				if (success) {
+					memset(&phptime, 0, sizeof(phptime));
 
-				phptime.tm_year  = wintime.wYear - 1900;
-				phptime.tm_mon   = wintime.wMonth - 1;
-				phptime.tm_mday  = wintime.wDay;
-				phptime.tm_hour  = wintime.wHour;
-				phptime.tm_min   = wintime.wMinute;
-				phptime.tm_sec   = wintime.wSecond;
-				phptime.tm_isdst = -1;
+					phptime.tm_year  = wintime.wYear - 1900;
+					phptime.tm_mon   = wintime.wMonth - 1;
+					phptime.tm_mday  = wintime.wDay;
+					phptime.tm_hour  = wintime.wHour;
+					phptime.tm_min   = wintime.wMinute;
+					phptime.tm_sec   = wintime.wSecond;
+					phptime.tm_isdst = -1;
 
-				tzset();
-				ZVAL_LONG(pval_arg, mktime(&phptime));
+					tzset();
+					ZVAL_LONG(pval_arg, mktime(&phptime));
+				} else {
+					ret = FAILURE;
+				}
 			}
 			break;
 
