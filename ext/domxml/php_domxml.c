@@ -1579,18 +1579,14 @@ PHP_FUNCTION(domxml_node_children)
 }
 /* }}} */
 
-/* {{{ proto object domxml_node_unlink_node(void)
+/* {{{ proto object domxml_node_nlink_node(void)
    Deletes node */
 PHP_FUNCTION(domxml_node_unlink_node)
 {
 	zval *id;
 	xmlNode *nodep;
 
-	DOMXML_NO_ARGS();
-
-	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
-
-	DOMXML_NO_ARGS();
+	DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
 
 	xmlUnlinkNode(nodep);
 	xmlFreeNode(nodep);
