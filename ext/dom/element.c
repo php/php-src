@@ -387,11 +387,12 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 	ctxp = xmlXPathNewContext(docp);
 
 	ctxp->node = nodep;
-	str = (char*) emalloc((name_len+3) * sizeof(char)) ;
-	sprintf(str ,"//%s",name);
+	str = (char*) emalloc((name_len+13) * sizeof(char)) ;
+	sprintf(str ,"descendant::%s",name);
 
 	xpathobjp = xmlXPathEval(str, ctxp);
 	efree(str);
+	ctxp->node = NULL;
 
 	if (!xpathobjp) {
 		RETURN_FALSE;
