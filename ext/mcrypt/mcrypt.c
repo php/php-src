@@ -340,11 +340,11 @@ static PHP_MSHUTDOWN_FUNCTION(mcrypt)
 
 PHP_MINFO_FUNCTION(mcrypt)
 {
-	MCLS_FETCH();
 #if HAVE_LIBMCRYPT24
 	char **modules;
 	int i, count;
 	char *tmp, *tmp2;
+	MCLS_FETCH();
 
 	tmp = emalloc (2048);
 	memset (tmp, 0, sizeof(tmp));
