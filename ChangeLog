@@ -1,3 +1,39 @@
+2004-07-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_constants.c:
+      MFHZE2: Do not use alloca() where it can be easily abused by the users.
+
+    * ZendEngine2/zend_constants.c:
+      Do not use alloca() where it can be easily abused by the users.
+      
+
+2004-07-01  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_4_3)
+      main/php_ini.c:
+      MFH (more or less) registry-based setting for the location of php.ini
+
+2004-07-01  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/curl/interface.c:
+      fix bug wrt to CURLOPT_POSTFIELDS where if you passed it code like:
+      
+      $fields = array('foo' => 'bar');
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+      curl_exec($ch);
+      as opposed to :
+      
+      curl_setopt($ch, CURLOPT_POSTFIELDS, array('foo' => 'bar'));
+      
+      you'll get a segv or no results, depending on the mood and cycle of the
+      moon.
+
+2004-07-01  Sara Golemon  <php@alphaweb.net>
+
+    * ext/cpdf/cpdf.c:
+      That hashtable should never have been an argument....
+
 2004-06-30  Frank M. Kromann  <frank@kromann.info>
 
     * NEWS
