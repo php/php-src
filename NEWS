@@ -1,9 +1,15 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
-- Made handler parameter of dba_(p)open() optional. (Marcus)
-- Added php.ini option 'dba.default_handler' to specify a default handler.
-  (Marcus)
+- Improved dba extension (Marcus)
+  . Made handler parameter of dba_(p)open() optional.
+  . Added php.ini option 'dba.default_handler' to specify a default handler.
+  . Added parameter full_info to dba_handlers() that can be set true to 
+    receive information about the handlers such like the library version.
+  . Disallow Berkeley db versions 4.1.0 to 4.1.24 due to locking problems.
+  . Disallow linkage of Berkeley db submodules against libraries with 
+    different major version.
+  . Disallow configuring of more than one Berkeley db handler.
 - Fixed bug #17098 (make Apache aware that PHP scripts represent dynamic data
   and should not be cached). (Ilia)
 - Make uniqid() parameters optional and allow any prefix length. (Marcus)
