@@ -149,7 +149,7 @@ static void php_VARIANT_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend
 
 		ALLOC_ZVAL(object_handle);
 		*object_handle = *return_value;
-		pval_copy_constructor(object_handle);
+		zval_copy_ctor(object_handle);
 		INIT_PZVAL(object_handle);
 		zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
 		zval_dtor(&function_name->element);
@@ -195,9 +195,10 @@ static pval php_VARIANT_get_property_handler(zend_property_reference *property_r
 				php_error(E_WARNING, "Unknown method.");
 				break;
 
-				zval_dtor(&overloaded_property->element);
 		}
 	}
+
+	zval_dtor(&overloaded_property->element);
 
 	return result;
 }
