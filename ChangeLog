@@ -1,3 +1,55 @@
+2003-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/pgsql/pgsql.c:
+      MFH: Fixed bug #25963 (PostgreSQL error message include \n characters).
+
+2003-11-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/pcre/php_pcre.c:
+      style fix
+
+2003-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      Replace fopen() inside domxml_xslt_process() with streams code to prevent
+      a possible crash and enforce safe_mode & open_basedir restrictions.
+      
+      Revert workaround for bug #26384, which is due to a bug in libxslt.
+      Christian will commit a better workaround shortly.
+
+2003-11-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/parsedate.y:
+      'Fix' for bison 1.875.
+
+2003-11-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      tests/lang/bug26182.phpt:
+      MFH: for regression..this works in PHP 4
+
+    * tests/lang/bug26182.phpt:
+      
+      test case for bug #26182
+
+    * (PHP_4_3)
+      NEWS
+      ext/odbc/config.m4:
+      MFH: - Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails)
+
+    * ext/odbc/config.m4:
+      - Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails)
+
+2003-11-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/domxml/php_domxml.c:
+      Fixed bug #26384 (crash inside domxslt->process() due to a double free).
+
 2003-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.c
