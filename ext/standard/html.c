@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Jaakko Hyvätti <jaakko.hyvatti@iki.fi>                      |
+   |          Wez Furlong <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
 */
 
@@ -25,6 +26,9 @@
 
 #if HAVE_LOCALE_H
 #include <locale.h>
+#endif
+#if HAVE_LANGINFO_H
+#include <langinfo.h>
 #endif
 
 /* This must be fixed to handle the input string according to LC_CTYPE.
@@ -218,41 +222,50 @@ static enum entity_charset determine_charset(char * charset_hint)
 	enum entity_charset charset = cs_8859_1;
 	int len;
 
-#if HAVE_LOCALE_H
+	/* Guarantee default behaviour */
 	if (charset_hint == NULL)
-	{
-		/* try to figure out the charset from the locale */
-		char * localename;
-		char * dot, * at;
+		return cs_8859_1;
 
-		/* lang[_territory][.codeset][@modifier] */
-		localename = setlocale(LC_CTYPE, NULL);
-
-		dot = strchr(localename, '.');
-		if (dot)	{
-			dot++;
-			/* locale specifies a codeset */
-			at = strchr(dot, '@');
-			if (at)
-				len = at - dot;
-			else
-				len = strlen(dot);
-			charset_hint = dot;
-		}
-		else	{
-			/* no explicit name; see if the name itself
-			 * is the charset */
-			charset_hint = localename;
-			len = strlen(charset_hint);
-		}
-	}
-	else
-		len = strlen(charset_hint);
-#else
-	if (charset_hint)
-		len = strlen(charset_hint);
+	if (strlen(charset_hint) == 0)	{
+		/* try to detect the charset for the locale */
+#if HAVE_NL_LANGINFO
+		charset_hint = nl_langinfo(CODESET);
 #endif
+#if HAVE_LOCALE_H
+		if (charset_hint == NULL)
+		{
+			/* try to figure out the charset from the locale */
+			char * localename;
+			char * dot, * at;
 
+			/* lang[_territory][.codeset][@modifier] */
+			localename = setlocale(LC_CTYPE, NULL);
+
+			dot = strchr(localename, '.');
+			if (dot)	{
+				dot++;
+				/* locale specifies a codeset */
+				at = strchr(dot, '@');
+				if (at)
+					len = at - dot;
+				else
+					len = strlen(dot);
+				charset_hint = dot;
+			}
+			else	{
+				/* no explicit name; see if the name itself
+				 * is the charset */
+				charset_hint = localename;
+				len = strlen(charset_hint);
+			}
+		}
+		else
+			len = strlen(charset_hint);
+#else
+		if (charset_hint)
+			len = strlen(charset_hint);
+#endif
+	}
 	if (charset_hint)	{
 		/* now walk the charset map and look for the codeset */
 		for (i = 0; charset_map[i].codeset; i++)	{
@@ -262,7 +275,6 @@ static enum entity_charset determine_charset(char * charset_hint)
 			}
 		}
 	}
-	
 	return charset;
 }
 /* }}} */

@@ -66,6 +66,7 @@ PHP_FUNCTION(ord);
 PHP_FUNCTION(nl2br);
 PHP_FUNCTION(setlocale);
 PHP_FUNCTION(localeconv);
+PHP_FUNCTION(nl_langinfo);
 PHP_FUNCTION(stristr);
 PHP_FUNCTION(chunk_split);
 PHP_FUNCTION(parse_str);
@@ -87,6 +88,9 @@ PHP_FUNCTION(strcoll);
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
+#endif
+#if HAVE_NL_LANGINFO
+PHP_MINIT_FUNCTION(nl_langinfo);
 #endif
 
 #define strnatcmp(a, b) \
