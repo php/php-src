@@ -134,9 +134,11 @@ TSRM_API FILE* popen(const char *command, const char *type)
 
 
 	if (read) {
+		in = dupHandle(in, FALSE);
 		startup.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
 		startup.hStdOutput = out;
 	} else {
+		out = dupHandle(out, FALSE);
 		startup.hStdInput  = in;
 		startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	}
@@ -152,11 +154,9 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	proc = process_get(NULL);
 
 	if (read) {
-		in = dupHandle(in, FALSE);
 		fno = _open_osfhandle((long)in, _O_RDONLY | mode);
 		CloseHandle(out);
 	} else {
-		out = dupHandle(out, FALSE);
 		fno = _open_osfhandle((long)out, _O_WRONLY | mode);
 		CloseHandle(in);
 	}
