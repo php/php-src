@@ -865,6 +865,7 @@ static void php_message_handler_for_zend(long message, void *data)
 void php_on_timeout(int seconds TSRMLS_DC)
 {
 	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
+	zend_set_timeout(EG(timeout_seconds));
 }
 
 #if PHP_SIGCHILD
