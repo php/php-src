@@ -1,3 +1,70 @@
+2000-07-21  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c
+      ext/java/reflect.java:
+    Pass PHP arrays to Java as hash tables; minor cleanup
+
+2000-07-21  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+    INI stuff labelled sybase.* should be sybct.*.
+    Thanks to dean.bennett@home.com.
+
+2000-07-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    - Added four additional arguments: attrsonly, sizelimit, timelimit, deref which
+      were missing in ldap_search(), ldap_list() and ldap_read() functions 
+    - Fixed a bug in ldap_search/list/read() which prevented returning the partial
+      results when 'Sizelimit exceeded' error occurred. (Jani Taskinen)
+
+
+2000-07-21  Sterling Hughes  <stirling@bestweb.net>
+
+    * pear/File/Find.php
+      pear/Makefile.in
+      pear/PEAR_ERROR.php
+      pear/PEAR_Error.php: New naming sequence for PEAR_Error
+      - PEAR_ERROR -> PEAR_Error
+      - $CLASSNAME -> $classname
+
+    New naming sequence for Exceptions
+      - ExceptionFileFind -> FileFindException.
+
+2000-07-21  Rasmus Lerdorf  <rasmus@php.net>
+
+    * pear/README: Fix this address
+
+2000-07-21  Zeev Suraski  <zeev@php.net>
+
+    * main/config.w32.h: Fix Win32 build
+
+2000-07-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/imap/php_imap.c:
+    column size for date in imap_headers increased (see bug id #5699)
+
+2000-07-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c:
+    (php_addslashes) Fixed stop condition - it should only take into account
+    the length of the string, not the characters.
+
+2000-07-21  Sterling Hughes  <stirling@bestweb.net>
+
+    * pear/Makefile.in
+      pear/PEAR_ERROR.php:
+    Add PEAR_ERROR class for returning exception objects.
+
+
+    * pear/File/Find.php: Beautify, simplify, and make use of PEAR_ERROR.
+
+2000-07-21  Ken Coar  <ken.coar@golux.com>
+
+    * ext/standard/formatted_print.c:
+    	Undo numerical format regression introduced by the fix of the
+    	zero-precison %s formatting.
+
 2000-07-20  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/string.c: fix for bug #5707
