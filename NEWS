@@ -45,6 +45,7 @@ PHP 4                                                                      NEWS
   argument was passed as result_type). (Derick)
 - Fixed bug #23606 (Unable to build --with-db4 (db4.1.25)). (Marcus)
 - Fixed bug #23567 (pfsockopen() returns dead connections). (Wez)
+- Fixed bug #23539 (curl_exec() produces strange results). (daniel@haxx.se)
 - Fixed bug #23527 (PostScript Type 1 fonts do not render properly).
   (nid@home.se, Ilia)
 - Fixed bug #23371 (configure falsely detects c-client using SSL). (Jani)
