@@ -925,3 +925,31 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
     va_end(symbol_table_list);
     return SUCCESS;
 }
+
+
+
+
+/* Disabled functions support */
+
+static ZEND_FUNCTION(display_disabled_function)
+{
+	zend_error(E_WARNING, "%s() has been disabled for security reasons.", get_active_function_name());
+}
+
+
+static zend_function_entry disabled_function[] =  {
+	ZEND_FE(display_disabled_function,			NULL)
+	{ NULL, NULL, NULL }
+};
+
+
+ZEND_API int zend_disable_function(char *function_name, uint function_name_length)
+{
+	CLS_FETCH();
+
+	if (zend_hash_del(CG(function_table), function_name, function_name_length+1)==FAILURE) {
+		return FAILURE;
+	}
+	disabled_function[0].fname = function_name;
+	return zend_register_functions(disabled_function, CG(function_table));
+}
