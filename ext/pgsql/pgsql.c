@@ -1144,7 +1144,7 @@ PHP_FUNCTION(pg_query)
 }
 /* }}} */
 
-#if HAVE_PQEXECPARAMS || HAVE_PQEXECPREPARED
+#if HAVE_PQEXECPARAMS || HAVE_PQEXECPREPARED || HAVE_PQSENDQUERYPARAMS || HAVE_PQSENDQUERYPREPARED
 /* {{{ _php_pgsql_free_params */
 static void _php_pgsql_free_params(char **params, int num_params)
 {
