@@ -3,6 +3,18 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "TSRM"=..\TSRM\TSRM.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "Zend"=..\Zend\Zend.dsp - Package Owner=<4>
 
 Package=<5>
@@ -55,6 +67,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libmysql
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TSRM
     End Project Dependency
 }}}
 

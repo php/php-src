@@ -49,11 +49,6 @@ PHPAPI int php_handle_auth_data(const char *auth SLS_DC);
 
 extern void php_call_shutdown_functions(void);
 
-
-/* configuration module */
-extern int php_init_config(void);
-extern int php_shutdown_config(void);
-
 /* environment module */
 extern int php_init_environ(void);
 extern int php_shutdown_environ(void);

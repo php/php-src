@@ -44,7 +44,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "SAPI_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=1 /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /I "..\TSRM" /D "_DEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "SAPI_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=1 /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib libmysql.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /nodefaultlib:"libcmtd" /out:"..\Debug\php4nts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug" /libpath:"..\Zend\Debug" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib Zend.lib resolv.lib libmysql.lib TSRM.lib /nologo /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /nodefaultlib:"libcmtd" /out:"..\Debug\php4nts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug"
 
 !ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
 
@@ -70,7 +70,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLL_EXPORTS" /D "PHP_EXPORTS" /D "SAPI_EXPORTS" /D "LIBZEND_EXPORTS" /D ZEND_DEBUG=0 /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /I "..\TSRM" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLL_EXPORTS" /D "PHP_EXPORTS" /D "SAPI_EXPORTS" /D "LIBZEND_EXPORTS" /D ZEND_DEBUG=0 /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -97,7 +97,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex" /I "..\bindlib_w32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "MSVC5" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "SAPI_EXPORTS" /D ZEND_DEBUG=0 /D "TSRM_EXPORTS" /D "WIN32" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex" /I "..\bindlib_w32" /I "main" /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "SAPI_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "Zend" /I "." /I "regex" /I "..\bindlib_w32" /I "main" /I ".." /I "..\main" /I "..\Zend" /I "..\regex" /I "..\..\bindlib_w32" /I "..\TSRM" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "PHP4DLLTS_EXPORTS" /D "PHP_EXPORTS" /D "LIBZEND_EXPORTS" /D "SAPI_EXPORTS" /D "TSRM_EXPORTS" /D ZEND_DEBUG=0 /D "ZEND_WIN32_FORCE_INLINE" /D "MSVC5" /D "WIN32" /D "_MBCS" /D "ZEND_WIN32" /D "PHP_WIN32" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -124,14 +124,6 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE="..\main\configuration-parser.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\main\configuration-scanner.c"
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\cyr_convert.c
 # End Source File
 # Begin Source File
@@ -153,6 +145,10 @@ SOURCE=..\main\mergesort.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\network.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\output.c
 # End Source File
 # Begin Source File
@@ -165,15 +161,15 @@ SOURCE=..\main\php_ini.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_open_temporary_file.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_ticks.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\main\php_variables.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\php_virtual_cwd.c
 # End Source File
 # Begin Source File
 
@@ -210,10 +206,6 @@ SOURCE=..\main\strlcpy.c
 # Begin Source File
 
 SOURCE=..\main\config.w32.h
-# End Source File
-# Begin Source File
-
-SOURCE="..\main\configuration-parser.h"
 # End Source File
 # Begin Source File
 
@@ -261,6 +253,10 @@ SOURCE=..\main\php_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\php_open_temporary_file.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_realpath.h
 # End Source File
 # Begin Source File
@@ -270,10 +266,6 @@ SOURCE=..\main\php_ticks.h
 # Begin Source File
 
 SOURCE=..\main\php_variables.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\php_virtual_cwd.h
 # End Source File
 # Begin Source File
 
@@ -373,11 +365,19 @@ SOURCE=..\ext\standard\fsock.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\ftp_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\head.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\ext\standard\html.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\http_fopen_wrapper.c
 # End Source File
 # Begin Source File
 
@@ -453,6 +453,10 @@ SOURCE=..\ext\standard\parsedate.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\php_fopen_wrapper.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\mysql\php_mysql.c
 # ADD CPP /I "..\ext\mysql\libmysql"
 # End Source File
@@ -518,6 +522,14 @@ SOURCE=..\ext\standard\uniqid.c
 # Begin Source File
 
 SOURCE=..\ext\standard\url.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner_ex.c
 # End Source File
 # Begin Source File
 
@@ -609,6 +621,10 @@ SOURCE=..\ext\standard\php_filestat.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\php_fopen_wrappers.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\ldap\php_ldap.h
 # End Source File
 # Begin Source File
@@ -666,6 +682,14 @@ SOURCE=..\ext\standard\uniqid.h
 # Begin Source File
 
 SOURCE=..\ext\standard\url.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\url_scanner_ex.h
 # End Source File
 # End Group
 # Begin Group "Regular Expressions"
@@ -887,6 +911,86 @@ SOURCE=..\ext\xml\expat\xmltok\xmltok_ns.c
 # End Group
 # End Group
 # End Group
+# Begin Group "FTP"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 6"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\ftp\ftp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\ftp\php_ftp.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 6"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\ftp\ftp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\ftp\php_ftp.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "Calendar"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 7"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\calendar\cal_unix.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\calendar.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\dow.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\easter.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\french.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\gregor.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\jewish.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\julian.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 7"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\calendar\php_calendar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\calendar\sdncal.h
+# End Source File
+# End Group
+# End Group
 # End Group
 # Begin Group "Win32"
 
@@ -989,67 +1093,6 @@ SOURCE=..\win32\wfile.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE="..\main\configuration-parser.y"
-
-!IF  "$(CFG)" == "php4dll - Win32 Debug"
-
-# Begin Custom Build
-InputPath="..\main\configuration-parser.y"
-
-BuildCmds= \
-	cd ..\main \
-	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
-	
-
-"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
-
-# Begin Custom Build
-InputPath="..\main\configuration-parser.y"
-
-BuildCmds= \
-	cd ..\main \
-	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
-	
-
-"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
-
-# Begin Custom Build
-InputPath="..\main\configuration-parser.y"
-
-BuildCmds= \
-	cd ..\main \
-	if not "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p cfg configuration-parser.y \
-	if "X%CYGWIN%"=="X" bison --output=configuration-parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p cfg configuration-parser.y \
-	
-
-"..\main\configuration-parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"..\main\configuration-parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\parsedate.y
 
 !IF  "$(CFG)" == "php4dll - Win32 Debug"
@@ -1095,46 +1138,6 @@ InputPath=..\ext\standard\parsedate.y
 # Begin Group "Scanners"
 
 # PROP Default_Filter ""
-# Begin Source File
-
-SOURCE="..\main\configuration-scanner.l"
-
-!IF  "$(CFG)" == "php4dll - Win32 Debug"
-
-# Begin Custom Build
-InputPath="..\main\configuration-scanner.l"
-
-"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\main 
-	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
-
-# Begin Custom Build
-InputPath="..\main\configuration-scanner.l"
-
-"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\main 
-	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
-
-# Begin Custom Build
-InputPath="..\main\configuration-scanner.l"
-
-"..\main\configuration-scanner.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd ..\main 
-	flex -i -Pcfg -oconfiguration-scanner.c configuration-scanner.l 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
 # End Group
 # Begin Group "Text Files"
 
