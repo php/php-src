@@ -516,7 +516,7 @@ PHP_FUNCTION(imagecreatefromxbm)
 }
 /* }}} */
 
-/* {{{ droto int imagecreatefromxpm(string filename)
+/* {{{ proto int imagecreatefromxpm(string filename)
    Create a new image from XPM file or URL */
 PHP_FUNCTION(imagecreatefromxpm)
 {
@@ -1764,7 +1764,7 @@ PHP_FUNCTION(imagecopy)
 /* }}} */
 
 /* {{{ proto int imagecopymerge(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
-   Merge one part of an image with another*/
+   Merge one part of an image with another */
 PHP_FUNCTION(imagecopymerge)
 {
 #if HAVE_LIBGD13
