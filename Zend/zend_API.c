@@ -690,7 +690,7 @@ ZEND_API inline int add_property_stringl(zval *arg, char *key, char *str, uint l
 }
 
 
-int zend_startup_module(zend_module_entry *module)
+ZEND_API int zend_startup_module(zend_module_entry *module)
 {
 	if (module) {
 		module->module_number = zend_next_free_module();

@@ -88,7 +88,7 @@ ZEND_API void wrong_param_count(void);
 #define DLEXPORT
 #endif
 
-int zend_startup_module(zend_module_entry *module);
+ZEND_API int zend_startup_module(zend_module_entry *module);
 
 ZEND_API int array_init(zval *arg);
 ZEND_API int object_init(zval *arg);
