@@ -305,6 +305,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	char *res = NULL, *var, *val;
 	pval *array_ptr;
 	int free_buffer=0;
+	char *strtok_buf = NULL;
 	
 	switch (arg) {
 		case PARSE_POST:
@@ -375,11 +376,11 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	} else {
 #endif
 		if (arg == PARSE_COOKIE) {
-			var = strtok(res, ";");
+			var = strtok_r(res, ";", &strtok_buf);
 		} else if (arg == PARSE_POST) {
-			var = strtok(res, "&");
+			var = strtok_r(res, "&", &strtok_buf);
 		} else {
-			var = strtok(res, PG(arg_separator));
+			var = strtok_r(res, PG(arg_separator), &strtok_buf);
 		}
 
 		while (var) {
@@ -392,11 +393,11 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				php_parse_gpc_data2(val,var,array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {
-				var = strtok(NULL, ";");
+				var = strtok_r(NULL, ";", &strtok_buf);
 			} else if (arg == PARSE_POST) {
-				var = strtok(NULL, "&");
+				var = strtok_r(NULL, "&", &strtok_buf);
 			} else {
-				var = strtok(NULL, PG(arg_separator));
+				var = strtok_r(NULL, PG(arg_separator), &strtok_buf);
 			}
 		}
 #if HAVE_FDFLIB
