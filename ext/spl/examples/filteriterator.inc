@@ -5,10 +5,9 @@
  * @author  Marcus Boerger
  * @version 1.0
  *
- * Instances of this class act as a filter around iterators whose elements
- * are strings. In other words you can put an iterator into the constructor
- * and the instance will only return elements which match the given regular 
- * expression.
+ * Instances of this class act as a filter around iterators. In other words 
+ * you can put an iterator into the constructor and the instance will only 
+ * return selected (accepted) elements.
  */
 abstract class FilterIterator implements Iterator
 {
@@ -20,17 +19,26 @@ abstract class FilterIterator implements Iterator
 	 * method is called.
 	 *
 	 * @param it     Object that implements at least spl_forward
-	 * @patam regex  Regular expression used as a filter.
 	 */
 	function __construct(Iterator $it) {
 		$this->it = $it;
 	}
 
+	/**
+	 * Rewind the inner iterator.
+	 */
 	function rewind() {	
 		$this->it->rewind();
 		$this->fetch();
 	}
 
+	/**
+	 * Accept function to decide whether an element of the inner iterator
+	 * should be accessible through the Filteriterator.
+	 *
+	 * @return whether or not to expose the current element of the inner
+	 *         iterator.
+	 */
 	abstract function accept();
 
 	/**
