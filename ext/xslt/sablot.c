@@ -1260,7 +1260,7 @@ static SAX_RETURN sax_enddoc(void *ctx)
 	zval        *retval;                     /* Return value from the end document function */
 	php_xslt    *handle = (php_xslt *) ctx;  /* A PHP-XSLT processor */
     TSRMLS_FETCH();
-    
+
 	/* If no end document function exists, exit */
 	if (!XSLT_SAX(handle).doc_end) {
 		return;
@@ -1280,6 +1280,73 @@ static SAX_RETURN sax_enddoc(void *ctx)
 	
 	/* Cleanup */
 	zval_ptr_dtor(&retval);
+}
+/* }}} */
+
+
+/* {{{ _error_parse()
+   Parse an char ** array into an _error_fields structure */
+#define MIN(__a, __b) ((__a) < (__b) ? (__a) : (__b))
+
+struct _error_fields {
+	char *message;
+	char *type;
+	char *line;
+};
+
+static int
+_error_parse (char **fields, struct _error_fields *xse)
+{
+	char *val;
+	char *p;
+	int   pos;
+	int   len;
+
+	/* Prep structure */
+	memset(xse, 0, sizeof(struct _error_fields));
+
+	while (*fields) {
+		p = strchr(*fields, ':');
+		if (p == NULL)
+			continue;
+
+		len = strlen(*fields);
+
+		pos = p - *fields;
+		val = estrndup(*fields + pos + 1, len - pos);
+
+		if (!strncmp(*fields, "msg", MIN(3, pos+1))) {
+			xse->message = val;
+		}
+		else if (!strncmp(*fields, "type", MIN(4, pos+1))) {
+			xse->type = val;
+		}
+		else if (!strncmp(*fields, "line", MIN(4, pos+1))) {
+			xse->line = val;
+		}
+
+		++fields;
+	}
+
+	if (!xse->type) 
+		xse->type = estrdup("unknown error type");
+
+	if (!xse->line)
+		xse->line = estrdup("unknown line");
+
+	if (!xse->message)
+		xse->message = estrdup("unknown error");
+}
+/* }}} */
+
+/* {{{ _free_error_field_struct()
+   Free an error field structure created by _error_parse() */
+static void
+_free_error_field_struct(struct _error_fields *xse)
+{
+	if (xse->message) efree(xse->message);
+	if (xse->type) efree(xse->type);
+	if (xse->line) efree(xse->line);
 }
 /* }}} */
 
@@ -1303,85 +1370,28 @@ static MH_ERROR error_log(void *user_data,
 						  MH_LEVEL level, 
 						  char **fields)
 {
-	php_xslt *handle = (php_xslt *) user_data;                              /* A PHP-XSLT processor */
-	char     *errmsg  = NULL;                                               /* Error message*/
-	char     *errtype = NULL;                                               /* Error type */
-	char     *errline = NULL;                                               /* Error line */
-	char     *msgbuf  = NULL;                                               /* Message buffer */
-	char      msgformat[] = "Sablotron Message on line %s, level %s: %s\n"; /* Message format */
-	int       error = 0;                                                    /* Error container */
+	php_xslt             *handle = (php_xslt *) user_data;  /* A PHP-XSLT processor */
+	struct _error_fields  err;                              /* Error structure */
+	char                 *msgbuf;                           /* Message buffer */
+	int                   msgbuf_len;                       /* Message buffer len */
+	int                   error = 0;                        /* Error container */
 
+#define msgformat "Sablotron message on line %s, level %s: %s\n"
+
+	/* Skip, if logging is disabled */
 	if (!XSLT_LOG(handle).do_log)
 		return 0;
 	
-	/* Parse the error array */
-	/* Loop through the error array */
-	if (fields) {
-		while (*fields) {
-			char *key;  /* Key to for the message */
-			char *val;  /* The message itself */
-			char *ptr;  /* Pointer to the location of the ':' (separator) */
-			int   pos;  /* Position of the ':' (separator) */
-			int   len;  /* Length of the string */
+	/* parse error list into a structure */
+	_error_parse(fields, &err);
 
-			len = strlen(*fields);
-
-			/* Grab the separator's position */
-			ptr = strchr(*fields, ':');
-			if (!ptr) {
-				continue;
-			}
-			pos = ptr - *fields;
-
-			/* Allocate the key and value and copy the data onto them */
-			key = emalloc(pos + 1);
-			val = emalloc((len - pos) + 1);
-
-			strlcpy(key, *fields, pos + 1);
-			strlcpy(val, *fields + pos + 1, len - pos);
-
-			/* Check to see whether or not we want to save the data */
-			if (!strcmp(key, "msg")) {
-				errmsg = estrndup(val, len - pos);
-			}
-			else if (!strcmp(key, "type")) {
-				errtype = estrndup(val, len - pos);
-			}
-			else if (!strcmp(key, "line")) {
-				errline = estrndup(val, len - pos);
-			}
-			
-			/* Cleanup */
-			if (key) efree(key);
-			if (val) efree(val);
-
-			/* Next key:value pair please :) */
-			fields++;
-		}
-	}
-	
-	/* If no error line is given, then place none in the 
-	   file */
-	if (!errline) {
-		errline = estrndup("none", sizeof("none") - 1);
-	}
-	
-	/* Default type is a log handle */
-	if (!errtype) {
-		errtype = estrndup("log", sizeof("log") - 1);
-	}
-	
-	/* No error message, no cry */
-	if (!errmsg) {
-		errmsg = estrndup("unknown error", sizeof("unknown error") - 1);
-	}
-	
 	/* Allocate the message buf and copy the data into it */
-	msgbuf = emalloc((sizeof(msgformat) - 6) +
-	                 strlen(errmsg) +
-	                 strlen(errline) +
-	                 strlen(errtype) + 1);
-	sprintf(msgbuf, msgformat, errline, errtype, errmsg);
+	msgbuf_len = (sizeof(msgformat) - 6) +
+	              strlen(err.message) +
+	              strlen(err.line) +
+	              strlen(err.type);
+	msgbuf = emalloc(msgbuf_len + 1);
+	snprintf(msgbuf, msgbuf_len, msgformat, err.line, err.type, err.message);
 
 	/* If the error is serious enough, copy it to our error buffer 
 	   which will show up when someone calls the xslt_error() function */
@@ -1391,7 +1401,7 @@ static MH_ERROR error_log(void *user_data,
 		if (XSLT_ERRSTR(handle))
 			efree(XSLT_ERRSTR(handle));
 		
-		XSLT_ERRSTR(handle) = estrdup(errmsg);
+		XSLT_ERRSTR(handle) = estrndup(msgbuf, msgbuf_len);
 	}
 
 	/* If we haven't allocated and opened the file yet */
@@ -1416,7 +1426,7 @@ static MH_ERROR error_log(void *user_data,
 	}
 	
 	/* Write the error to the file */
-	error = write(XSLT_LOG(handle).fd, msgbuf, strlen(msgbuf));
+	error = write(XSLT_LOG(handle).fd, msgbuf, msgbuf_len);
 	if (error == -1) {
 		php_error(E_WARNING, "Cannot write data to log file, %s, with fd, %d [%d]: %s",
 		          (XSLT_LOG(handle).path ? XSLT_LOG(handle).path : "stderr"),
@@ -1427,10 +1437,8 @@ static MH_ERROR error_log(void *user_data,
 	}
 
 	/* Cleanup */
-	if (msgbuf)  efree(msgbuf);
-	if (errtype) efree(errtype);
-	if (errline) efree(errline);
-	if (errmsg)  efree(errmsg);
+	if (msgbuf) efree(msgbuf);
+	_free_error_field_struct(&err);
 	
 	return 0;
 }
@@ -1444,8 +1452,11 @@ static MH_ERROR error_print(void *user_data,
 							MH_LEVEL level, 
 							char **fields)
 {
-	php_xslt *handle = (php_xslt *) user_data;   /* A PHP-XSLT processor */
+	php_xslt             *handle = (php_xslt *) user_data;  /* A PHP-XSLT processor */
+	struct _error_fields  err;                              /* Error field structure */
 	
+	_error_parse(fields, &err);
+
 	if (XSLT_ERROR(handle)) {
 		zval   *argv[4];   /* Arguments to the error function */
 		zval   *retval;    /* Return value from the error function */
@@ -1468,41 +1479,9 @@ static MH_ERROR error_print(void *user_data,
 		ZVAL_LONG(argv[1], level);
 		ZVAL_LONG(argv[2], code);
 
-		if (fields) {
-			while (*fields) {
-				char *key;  /* Key to for the message */
-				char *val;  /* The message itself */
-				char *ptr;  /* Pointer to the location of the ':' (separator) */
-				int   pos;  /* Position of the ':' (separator) */
-				int   len;  /* Length of the string */
-				
-				len = strlen(*fields);
-			
-				/* Grab the separator's position */
-				ptr = strchr(*fields, ':');
-				if (!ptr) {
-					continue;
-				}
-				pos = ptr - *fields;
-
-				/* Allocate the key and value and copy the data onto them */
-				key = emalloc(pos + 1);
-				val = emalloc((len - pos) + 1);
-
-				strlcpy(key, *fields, pos + 1);
-				strlcpy(val, *fields + pos + 1, len - pos);
-
-				/* Add it */				
-				add_assoc_stringl_ex(argv[3], key, pos, val, len - pos - 1, 1);
-
-				/* Cleanup */
-				efree(key);
-				efree(val);
-
-				/* Next field please */
-				fields++;
-			}
-		}
+		add_assoc_string_ex(argv[3], "type", sizeof("type") - 1, err.type, 0);
+		add_assoc_string_ex(argv[3], "message", sizeof("message") - 1, err.message, 0);
+		add_assoc_long_ex(argv[3], "line", sizeof("line") - 1, atoi(err.line));
 
 		/* Call the function */
 		xslt_call_function("error handler", XSLT_ERROR(handle),
@@ -1512,10 +1491,10 @@ static MH_ERROR error_print(void *user_data,
 		zval_ptr_dtor(&retval);
 	}
 	else {
-		char *errmsg  = NULL;                                  /* Error message */
-		char *errline = NULL;                                  /* Error line */
-		char *msgbuf  = NULL;                                  /* Message buffer */
-		char  msgformat[] = "Sablotron error on line %s: %s";  /* Message format */
+		char   *msgbuf;     /* Message buffer */
+		size_t  msgbuf_len; /* Message buffer length */
+
+#define msgformat "Sablotron error on line %s: %s"
 
 		/* If the error is not serious, exit out */
 		if (code == MH_LEVEL_WARN  || 
@@ -1524,75 +1503,27 @@ static MH_ERROR error_print(void *user_data,
 			return 0;
 		}
 
-		/* Loop through and extract the error message and the 
-		   error line */
-		if (fields) {
-			while (fields && *fields) {
-				char *key;  /* Key to for the message */
-				char *val;  /* The message itself */
-				char *ptr;  /* Pointer to the location of the ':' (separator) */
-				int   pos;  /* Position of the ':' (separator) */
-				int   len;  /* Length of the string */
-			
-				len = strlen(*fields);
-			
-				/* Grab the separator's position */
-				ptr = strchr(*fields, ':');
-				if (!ptr) {
-					continue;
-				}
-				pos = ptr - *fields;
-			
-				/* Allocate the key and value and copy the data onto them */
-				key = emalloc(pos + 1);
-				val = emalloc((len - pos) + 1);
-			
-				strlcpy(key, *fields, pos + 1);
-				strlcpy(val, *fields + pos + 1, len - pos);
-			
-				/* Check to see whether or not we want to save the data */
-				if (!strcmp(key, "msg")) {
-					errmsg = estrndup(val, len - pos);
-				}
-				else if (!strcmp(key, "line")) {
-					errline = estrndup(val, len - pos);
-				}
-
-				/* Cleanup */
-				if (key) efree(key);
-				if (val) efree(val);
-			
-				/* Next key:value pair please :) */
-				fields++;
-			}
-		}
-		
-		if (!errline) {
-			errline = estrndup("none", sizeof("none") - 1);
-		}
-
-		if (!errmsg) {
-			errmsg = estrndup("unkown error", sizeof("unkown error") - 1);
-		}
-
 		/* Allocate the message buffer and copy the data onto it */
-		msgbuf = emalloc((sizeof(msgformat) - 4) + strlen(errmsg) + strlen(errline) + 1);
-		sprintf(msgbuf, msgformat, errline, errmsg);
+		msgbuf_len = (sizeof(msgformat) - 4) + 
+			strlen(err.message) + 
+			strlen(err.line);
+		msgbuf = emalloc(msgbuf_len + 1);
+
+		snprintf(msgbuf, msgbuf_len, msgformat, err.line, err.message);
 
 		/* Copy the error message onto the handle for use when 
 		   the xslt_error function is called */
-		XSLT_ERRSTR(handle) = estrdup(errmsg);
+		XSLT_ERRSTR(handle) = estrndup(msgbuf, msgbuf_len);
 
 		/* Output a warning */
 		php_error(E_WARNING, msgbuf);
 
 		/* Cleanup */
 		efree(msgbuf);
-		efree(errmsg);
-		efree(errline);
+		_free_error_field_struct(&err);
 	}
 
-	return(0);
+	return 0;
 }
 /* }}} */
 
