@@ -1,5 +1,5 @@
 --TEST--
-Bug #24482: GLOB_ONLYDIR not working
+Bug #24482 (GLOB_ONLYDIR not working)
 --SKIPIF--
 <?php
 if (!function_exists("glob")) {
