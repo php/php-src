@@ -54,7 +54,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 
-/* #define WITH_TEMP_LOBS 1 */
+/* #define HAVE_OCI8_TEMP_LOB 1 */
 #define WITH_COLLECTIONS 1
 
 #if HAVE_OCI8
@@ -209,7 +209,7 @@ PHP_FUNCTION(ociserverversion);
 PHP_FUNCTION(ocistatementtype);
 PHP_FUNCTION(ocirowcount);
 PHP_FUNCTION(ocisetprefetch);
-#ifdef WITH_TEMP_LOBS
+#ifdef HAVE_OCI8_TEMP_LOB
 PHP_FUNCTION(ociwritetemporarylob);
 PHP_FUNCTION(ocicloselob);
 #endif
@@ -328,7 +328,7 @@ static zend_function_entry php_oci_functions[] = {
 static zend_function_entry php_oci_lob_class_functions[] = {
     PHP_FALIAS(load,	    ociloadlob,       NULL)
     PHP_FALIAS(writetofile,	ociwritelobtofile,NULL)
-#ifdef WITH_TEMP_LOBS
+#ifdef HAVE_OCI8_TEMP_LOB
     PHP_FALIAS(writetemporary,	ociwritetemporarylob,NULL)
     PHP_FALIAS(close,      	ocicloselob,      NULL)
 #endif
@@ -3182,7 +3182,7 @@ PHP_FUNCTION(ociwritelobtofile)
 }
 /* }}} */
 
-#ifdef WITH_TEMP_LOBS
+#ifdef HAVE_OCI8_TEMP_LOB
 /* {{{ proto int ociwritetemporarylob(int stmt, int loc, string var)
    Return the row count of an OCI statement */
 
