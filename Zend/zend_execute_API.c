@@ -138,6 +138,7 @@ void init_executor(TSRMLS_D)
 
 	EG(in_execution) = 0;
 	EG(in_autoload) = NULL;
+	EG(autoload_func) = NULL;
 
 	zend_ptr_stack_init(&EG(argument_stack));
 	zend_ptr_stack_push(&EG(argument_stack), (void *) NULL);
@@ -878,6 +879,8 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	char *lc_name;
 	zval *exception;
 	char dummy = 1;
+	zend_fcall_info fcall_info;
+	zend_fcall_info_cache fcall_cache;
 	
 	lc_name = do_alloca(name_length + 1);
 	zend_str_tolower_copy(lc_name, name, name_length);
@@ -911,10 +914,26 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 	ZVAL_STRINGL(class_name_ptr, name, name_length, 0);
 	
 	args[0] = &class_name_ptr;
+	
+	fcall_info.size = sizeof(fcall_info);
+	fcall_info.function_table = EG(function_table);
+	fcall_info.function_name = &autoload_function;
+	fcall_info.symbol_table = NULL;
+	fcall_info.retval_ptr_ptr = &retval_ptr;
+	fcall_info.param_count = 1;
+	fcall_info.params = args;
+	fcall_info.object_pp = NULL;
+	fcall_info.no_separation = 1;
+
+	fcall_cache.initialized = EG(autoload_func) ? 1 : 0;
+	fcall_cache.function_handler = EG(autoload_func);
+	fcall_cache.calling_scope = NULL;
+	fcall_cache.object_pp = NULL;
 
 	exception = EG(exception);
 	EG(exception) = NULL;
-	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
+	retval = zend_call_function(&fcall_info, &fcall_cache TSRMLS_CC);
+	EG(autoload_func) = fcall_cache.function_handler;
 
 	zend_hash_del(EG(in_autoload), lc_name, name_length+1);
 
