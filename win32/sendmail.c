@@ -493,9 +493,12 @@ int Ack()
 
 	/* Check for newline */
 	Index += rlen;
-	if ((buf[Received - 2] != '\r') || (buf[Received - 1] != '\n'))
+	
+	if ((buf[Received - 4] == ' ' && buf[Received - 3] == '-') ||
+	    (buf[Received - 2] != '\r') || (buf[Received - 1] != '\n'))
 		/* err_msg          fprintf(stderr,"Incomplete server message. Awaiting CRLF\n"); */
-		goto again;				/* Incomplete data. Line must be terminated by CRLF */
+		goto again;				/* Incomplete data. Line must be terminated by CRLF
+		                           And not contain a space followed by a '-' */
 
 	if (buf[0] > '3')
 		return (SMTP_SERVER_ERROR);
