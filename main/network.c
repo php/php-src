@@ -670,16 +670,6 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 
 #endif
 
-PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout TSRMLS_DC)
-{
-	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-
-	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET))
-		return;
-	
-	sock->timeout = *timeout;
-	sock->timeout_event = 0;
-}
 
 PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 {
@@ -710,20 +700,6 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 #endif
       return ret;
 }
-
-PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC)
-{
-	size_t oldsize;
-
-	oldsize = stream->chunk_size;
-	stream->chunk_size = size;
-
-	return oldsize;
-}
-
-#define TOREAD(sock) ((sock)->writepos - (sock)->readpos)
-#define READPTR(sock) ((sock)->readbuf + (sock)->readpos)
-#define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
 
 static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
@@ -897,10 +873,15 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 				return oldmode;
 			}
 
-			return -1;
+			return PHP_STREAM_OPTION_RETURN_ERR;
+
+		case PHP_STREAM_OPTION_READ_TIMEOUT:
+			sock->timeout = *(struct timeval*)ptrparam;
+			sock->timeout_event = 0;
+			return PHP_STREAM_OPTION_RETURN_OK;
 
 		default:
-			return -1;
+			return PHP_STREAM_OPTION_RETURN_NOTIMPL;
 	}
 }
 

@@ -138,10 +138,6 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, con
 
 /* }}} */
 
-PHPAPI void php_stream_sock_set_timeout(php_stream *stream, struct timeval *timeout TSRMLS_DC);
-/* set the chunk size for the stream; return the old chunk size */
-PHPAPI size_t php_stream_sock_set_chunk_size(php_stream *stream, size_t size TSRMLS_DC);
-
 #if HAVE_OPENSSL_EXT
 PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC);
 #define php_stream_sock_ssl_activate(stream, activate)	php_stream_sock_ssl_activate_with_method((stream), (activate), SSLv23_client_method(), NULL TSRMLS_CC)
