@@ -74,8 +74,8 @@ extern int le_fp;
 
 #define FREE_SOCK if(socketd >= 0) close(socketd); efree(sock); if (key) efree(key)
 
-#define SEARCHCR \
-	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen - 1));
+#define SEARCHCR() \
+	p = memchr(READPTR(sock), '\n', MIN(TOREAD(sock), maxlen));
 
 #if WIN32|WINNT
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -598,17 +598,22 @@ char *_php3_sock_fgets(char *buf, size_t maxlen, int socket)
 	size_t amount = 0;
 	SOCK_FIND(sock, socket);
 
-	SEARCHCR;
+	if (maxlen==0) {
+		buf[0] = 0;
+		return buf;
+	}
+
+	SEARCHCR();
 
 	if(!p) {
 		if(sock->is_blocked) {
-			while(!p && !sock->eof && TOREAD(sock) < maxlen - 1) {
+			while(!p && !sock->eof && TOREAD(sock) < maxlen) {
 				_php3_sock_read_internal(sock);
-				SEARCHCR;
+				SEARCHCR();
 			}
 		} else {
 			_php3_sock_read(sock);
-			SEARCHCR;
+			SEARCHCR();
 		}
 	}
 
@@ -619,7 +624,7 @@ char *_php3_sock_fgets(char *buf, size_t maxlen, int socket)
 		amount = TOREAD(sock);
 	}
 	
-	amount = MIN(amount, maxlen - 1);
+	amount = MIN(amount, maxlen);
 
 	if(amount > 0) {
 		memcpy(buf, READPTR(sock), amount);
@@ -693,14 +698,12 @@ size_t _php3_sock_fread(char *ptr, size_t size, int socket)
 /* }}} */
 /* {{{ module start/shutdown functions */
 
-	/* {{{ _php3_sock_destroy */
-#ifndef ZTS
-static int _php3_msock_destroy(int *data)
+	/* {{{ php_msock_destroy */
+int php_msock_destroy(int *data)
 {
 	close(*data);
 	return 1;
 }
-#endif
 /* }}} */
 	/* {{{ php3_minit_fsock */
 
@@ -708,7 +711,7 @@ PHP_MINIT_FUNCTION(fsock)
 {
 #ifndef ZTS
 	zend_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
-	zend_hash_init(&PG(ht_fsock_socks), 0, NULL, (int (*)(void *))_php3_msock_destroy, 1);
+	zend_hash_init(&PG(ht_fsock_socks), 0, NULL, (int (*)(void *))php_msock_destroy, 1);
 #endif
 	return SUCCESS;
 }
