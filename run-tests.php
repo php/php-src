@@ -99,6 +99,7 @@ $php_ini = realpath("php.ini-dist");
 if(realpath(get_cfg_var('cfg_file_path')) != $php_ini) {
 	error("php.ini-dist was not used!");
 }
+$php .= " -c $php_ini";
 
 // Determine the tests to be run.
 
