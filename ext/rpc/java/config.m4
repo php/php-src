@@ -91,7 +91,7 @@ AC_DEFUN(JAVA_CHECK_LIB, [
      test -f $i/jni_md.h && JAVA_INCLUDE="$JAVA_INCLUDE $i"
    done
 dnl
-dnl sample JDK v 1.3 path
+dnl sample JDK v 1.4 path
 dnl /usr/java/j2sdk1.4.0_01/jre/lib/i386/libjava.so
 dnl
  else
