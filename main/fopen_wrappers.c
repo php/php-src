@@ -440,7 +440,7 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 	if(protocol) {
 		php_fopen_url_wrapper_t *wrapper=NULL;
 
-		if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, protocol, n, (void **)&wrapper)) {
+		if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, (char *)protocol, n, (void **)&wrapper)) {
 			wrapper=NULL;
 			protocol=NULL;
 		}
