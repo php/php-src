@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Recover gracefully in ISAPI after the client prematurely presses STOP (Andi)
 - Fix bug in unset() on array offsets which are referenced more than once
   (Andi, Zend library)
 - Improved ISAPI module - it should no longer be necessary to set PHP as
