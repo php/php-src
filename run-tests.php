@@ -77,11 +77,17 @@ if (function_exists('is_executable') && !@is_executable($php)) {
 }
 
 // Check whether a detailed log is wanted.
-
 if (getenv('TEST_PHP_DETAILED')) {
 	define('DETAILED', getenv('TEST_PHP_DETAILED'));
 } else {
 	define('DETAILED', 0);
+}
+
+// Check whether user test dirs are requested.
+if (getenv('TEST_PHP_USER')) {
+	$user_tests = explode (',', getenv('TEST_PHP_USER'));
+} else {
+	$user_tests = NULL;
 }
 
 // Write test context information.
@@ -95,6 +101,11 @@ PHP_VERSION : " . PHP_VERSION . "
 PHP_OS      : " . PHP_OS . "
 INI actual  : " . realpath(get_cfg_var('cfg_file_path')) . "
 More .INIs  : " . str_replace("\n","", php_ini_scanned_files()) . "
+Extra dirs  : ";
+foreach ($user_tests as $test_dir) {
+	echo "{$test_dir}\n              ";
+}
+echo "
 =====================================================================
 ";
 
@@ -138,6 +149,10 @@ $test_dirs = array('tests', 'pear', 'ext');
 
 foreach ($test_dirs as $dir) {
 	find_files("{$cwd}/{$dir}", ($dir == 'ext'));
+}
+
+foreach ($user_tests as $dir) {
+	find_files("{$dir}", ($dir == 'ext'));
 }
 
 function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
