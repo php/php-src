@@ -2,6 +2,9 @@
 
 extname="$1"
 EXTNAME=`echo $1|tr a-z A-Z`
+if [ ! -z $2 -a -r $2 ]; then
+    functions=`cat $2`
+fi
 
 givup() {
 	echo $*
@@ -9,7 +12,7 @@ givup() {
 }
 
 if test "$extname" = ""; then
-	givup "usage: $0 extension-name"
+	givup "usage: $0 extension-name [function-names]"
 fi
 
 if test -d "$extname" ; then
@@ -27,12 +30,43 @@ else
     ECHO_C='\c'
 fi
 
+ECHO_E="echo -e"	# Any portability problems? If, how to test.
+
 echo "Creating directory"
 
 mkdir $extname || givup "Cannot create directory $extname"
 
 cd $extname
 chmod 755 .
+
+touch function_entries
+touch function_declarations
+touch function_stubs
+
+if [ $2 ] ; then
+    cat > function_stubs <<EOF
+/* Don't forget to remove the '#'-mark before protos when you have finished
+   with your function, so PHP's documentation system recognizes it. And
+   you really documented your function, didn't you?
+*/
+
+EOF
+    for f in $functions; do
+	$ECHO_E "\tPHP_FE($f,\tNULL)" >> function_entries
+	$ECHO_E "PHP_FUNCTION($f);" >> function_declarations
+	cat >> function_stubs <<EOF
+
+/* {{{ #proto $f()
+   */
+PHP_FUNCTION($f)
+{
+    php_error(E_WARNING, "$f: not yet implemented");
+}
+/* }}} */
+
+EOF
+    done
+fi
 
 $ECHO_N "Creating basic files:$ECHO_C"
 
@@ -92,13 +126,31 @@ libs.mk
 eof
 
 $ECHO_N " $extname.c$ECHO_C"
-cat ../skeleton/skeleton.c | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > $extname.c
+cat ../skeleton/skeleton.c | sed \
+-e "s/extname/$extname/g" \
+-e "s/EXTNAME/$EXTNAME/g" \
+-e '/__function_entries_here__/r function_entries' \
+-e '/__function_stubs_here__/r function_stubs' \
+-e '/__function_entries_here__/D' \
+-e '/__function_stubs_here__/D' \
+> $extname.c
 
 $ECHO_N " php_$extname.h$ECHO_C"
-cat ../skeleton/php_skeleton.h | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > php_$extname.h
+cat ../skeleton/php_skeleton.h | sed \
+-e "s/extname/$extname/g" \
+-e "s/EXTNAME/$EXTNAME/g" \
+-e '/__function_declarations_here__/r function_declarations' \
+-e '/__function_declarations_here__/D' \
+> php_$extname.h
 
 $ECHO_N " $extname.php$ECHO_C"
-cat ../skeleton/skeleton.php | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > $extname.php
+cat ../skeleton/skeleton.php | sed \
+-e "s/extname/$extname/g" \
+> $extname.php
+
+rm function_entries
+rm function_declarations
+rm function_stubs
 
 chmod 644 *
 
