@@ -207,7 +207,12 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 			case IS_STRING:
 				zend_hash_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &data, sizeof(data), NULL);
 				break;
-
+			default:
+				zval_dtor(key);
+				FREE_ZVAL(key);
+				zval_dtor(data);
+				FREE_ZVAL(data);
+				return 0;
 		}
 		
 		zval_dtor(key);
