@@ -21,7 +21,7 @@ CC="$(CL)"
 LD="$(LINK)"
 MC="$(MC)"
 
-MCFILE=$(BUILD_DIR)\wsyslog.res
+MCFILE=$(BUILD_DIR)\wsyslog.rc
 
 all: generated_files $(EXT_TARGETS) $(PECL_TARGETS) $(SAPI_TARGETS)
 
@@ -55,15 +55,17 @@ PHPDLL_RES=$(BUILD_DIR)\$(PHPDLL).res
 
 $(MCFILE): win32\build\wsyslog.mc
 	$(MC) -h win32\ -r $(BUILD_DIR)\ -x $(BUILD_DIR)\ win32\build\wsyslog.mc
-	$(RC) /fo $(MCFILE) $(BUILD_DIR)\wsyslog.rc
+
+#	$(RC) /fo $(MCFILE) $(BUILD_DIR)\wsyslog.rc
 
 $(PHPDLL_RES): win32\build\template.rc
 	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
+		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
 		win32\build\template.rc 
 
 $(BUILD_DIR)\$(PHPDLL): $(PHPDEF) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(PHPDLL_RES) $(MCFILE)
-	$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES) $(MCFILE)
+	$(LD) /out:$(BUILD_DIR)\$(PHPDLL) $(PHP_LDFLAGS) $(LDFLAGS) $(STATIC_EXT_LDFLAGS) $(PHP_GLOBAL_OBJS) $(STATIC_EXT_OBJS) $(STATIC_EXT_LIBS) $(LIBS) $(PHPDLL_RES)
 	
 $(BUILD_DIR)\$(PHPLIB): $(BUILD_DIR)\$(PHPDLL)
 	

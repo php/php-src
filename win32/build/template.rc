@@ -62,3 +62,8 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
+
+#ifdef MC_INCLUDE
+#include MC_INCLUDE
+#endif
+
