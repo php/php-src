@@ -63,12 +63,6 @@ PHP                                                                        NEWS
 - Changed uniqid() parameters to be optional and allow any prefix length.
   (Marcus)
 
-- Added new methods to ext/domxml: (Rob Richards, Chregu, Lukas Schröder)
-  . domdocument->create_document_fragment()
-  . documentfragment->open_mem()
-  . domelement->set_attribute_node()
-  . domxmlnode->get_path()
-
 - Added new iconv functions. (Moriyoshi)
   . iconv_strlen()
   . iconv_substr()
