@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   is passed. (Tony)
 - Fixed bug #31710 (Wrong return values for mysqli_autocommit/commit/rollback).
   (Georg)
+- Fixed bug #31705 (parse_url() does not recognize http://foo.com#bar). (Ilia)
 - Fixed bug #31684 (dio_tcsetattr(): misconfigured termios settings).
   (elod at itfais dot com)
 - Fixed bug #31699 (unserialize() float problem on non-English locales). (Ilia)
