@@ -85,6 +85,7 @@ zend_module_entry rpc_module_entry = {
 static HashTable *handlers;
 static WormHashTable *instance;
 static WormHashTable *classes;
+static zend_llist *classes_list;
 
 #ifdef COMPILE_DL_RPC
 ZEND_GET_MODULE(rpc);
@@ -108,11 +109,13 @@ ZEND_MINIT_FUNCTION(rpc)
 	handlers = (HashTable *) pemalloc(sizeof(HashTable), TRUE);
 	instance = (WormHashTable *) pemalloc(sizeof(WormHashTable), TRUE);
 	classes = (WormHashTable *) pemalloc(sizeof(WormHashTable), TRUE);
+	classes_list = (zend_llist *) pemalloc(sizeof(zend_llist), TRUE);
 
 	zend_hash_init(handlers, 0, NULL, NULL, TRUE);	
 	zend_worm_hash_init(instance, 0, NULL, rpc_instance_dtor, TRUE);
-	zend_worm_hash_init(classes, 0, NULL, rpc_class_dtor, TRUE);
-	
+	zend_worm_hash_init(classes, 0, NULL, NULL, TRUE);
+	zend_llist_init(classes_list, sizeof(rpc_class_hash **), rpc_class_dtor, TRUE);
+
 	FOREACH_HANDLER {
 		HANDLER.rpc_handler_init();
 		
@@ -145,10 +148,11 @@ ZEND_MINIT_FUNCTION(rpc)
  */
 ZEND_MSHUTDOWN_FUNCTION(rpc)
 {
+	/* destroy instances first */
 	zend_worm_hash_destroy(instance);
 	zend_worm_hash_destroy(classes);
 
-	/* destroy instances first ! */
+	zend_llist_destroy(classes_list);
 	zend_hash_destroy(handlers);
 
 	pefree(handlers, TRUE);
@@ -197,7 +201,7 @@ static void rpc_class_dtor(void *pDest)
 	zend_worm_hash_destroy(&((*hash)->properties));
 
 	free((*hash)->name.str);
-	pefree(*hash, TRUE);
+	pefree((*hash), TRUE);
 }
 
 static void rpc_string_dtor(void *pDest)
@@ -436,7 +440,9 @@ ZEND_FUNCTION(rpc_load)
 	rpc_class_hash *class_hash;
 	rpc_class_hash **class_hash_find = NULL;
 	rpc_internal **intern;
-	int retval;
+	rpc_string hash_val;
+	int retval, append = 0;
+	char *arg_types;
 
 	/* check if we were called as a constructor or as a function */
 	if (!object) {
@@ -463,7 +469,7 @@ ZEND_FUNCTION(rpc_load)
 	}
 
 	/* fetch further parameters */
-	GET_ARGS_EX(num_args, args, args_free, 2);
+	GET_ARGS_EX(num_args, args, args_free, 1);
 
 	/* if classname != integer */
 	if ((zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 1 TSRMLS_CC, "l", &((*intern)->class_name_len)) != SUCCESS) ||
@@ -481,26 +487,31 @@ ZEND_FUNCTION(rpc_load)
 			/* hash classname if hashing function exists */
 			if ((*(*intern)->handlers)->rpc_hash) {
 
+				GET_CTOR_SIGNATURE(intern, hash_val, num_args, arg_types);
+
 				/* check if already hashed */	
-				if (zend_worm_hash_find(classes, (*intern)->class_name, (*intern)->class_name_len + 1, (void **) &class_hash_find) != SUCCESS) {
+				if (zend_worm_hash_find(classes, hash_val.str, hash_val.len + 1, (void **) &class_hash_find) != SUCCESS) {
 					class_hash = pemalloc(sizeof(rpc_class_hash), TRUE);
 
 					/* set up the cache */
 					zend_worm_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
 					zend_worm_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
 
-					if ((*(*intern)->handlers)->hash_type & HASH_WITH_SIGNATURE) {
-						/* TODO: add signature to hash key */
-					}
 
 					/* do hashing */
 					if ((*(*intern)->handlers)->rpc_hash((*intern)->class_name, (*intern)->class_name_len, &(class_hash->name.str),
-														 &(class_hash->name.len), num_args, args, CLASS) != SUCCESS) {
+														 &(class_hash->name.len), num_args, arg_types, CLASS) != SUCCESS) {
 						/* TODO: exception */
 					}
 
-					/* register with non-hashed key */
-					zend_worm_hash_add(classes, (*intern)->class_name, (*intern)->class_name_len + 1, &class_hash, sizeof(rpc_class_hash *), NULL);
+					/* register with non-hashed key 
+					 * also track all instaces in a llist for destruction later on, because there might be duplicate entries in
+					 * the hashtable and we can't determine if a pointer references to an already freed element
+					 */
+					zend_worm_hash_add(classes, hash_val.str, hash_val.len + 1, &class_hash, sizeof(rpc_class_hash *), (void **) &class_hash_find);
+					tsrm_mutex_lock(classes->mx_writer);
+					zend_llist_add_element(classes_list, class_hash_find);
+					tsrm_mutex_unlock(classes->mx_writer);
 
 					if (class_hash->name.str) {
 						/* register string hashcode */
@@ -512,6 +523,8 @@ ZEND_FUNCTION(rpc_load)
 				} else {
 					class_hash = *class_hash_find;
 				}
+
+				FREE_SIGNATURE(hash_val, arg_types);
 			}
 		}
 	} else {
@@ -525,10 +538,6 @@ ZEND_FUNCTION(rpc_load)
 
 			zend_worm_hash_init(&(class_hash->methods), 0, NULL, rpc_string_dtor, TRUE);
 			zend_worm_hash_init(&(class_hash->properties), 0, NULL, rpc_string_dtor, TRUE);
-
-			if ((*(*intern)->handlers)->hash_type & HASH_WITH_SIGNATURE) {
-				/* TODO: add signature to hash key */
-			}
 
 			/* register int hashcode, we don't know more */
 			zend_worm_hash_index_update(classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
@@ -564,7 +573,7 @@ ZEND_FUNCTION(rpc_call)
 	zval *object = getThis();
 	zval ***args, ***args_free;
 	zend_uint num_args = ZEND_NUM_ARGS(); 
-	char *hash = NULL;
+	char *hash = NULL, *arg_types;
 	int hash_len, retval, strip = 0;
 
 	/* check if we were called as a method or as a function */
@@ -592,7 +601,7 @@ ZEND_FUNCTION(rpc_call)
 	
 	/* scope for internal data */
 	{
-		rpc_string *method_hash, **method_hash_find;
+		rpc_string hash_val, *method_hash, **method_hash_find;
 		GET_INTERNAL(intern);
 
 		method_hash = (rpc_string *) pemalloc(sizeof(rpc_string), TRUE);
@@ -602,28 +611,27 @@ ZEND_FUNCTION(rpc_call)
 		if ((*intern)->hash) {
 			/* cache method table lookups */
 		
-			if ((*(*intern)->handlers)->hash_type & HASH_WITH_SIGNATURE) {
-				/* TODO: add signature to hash key */
-			}
-
 			if (!hash && !((*(*intern)->handlers)->hash_type & HASH_AS_INT)) {
 				/* TODO: exception */
 			} else if(hash) {
-				/* string method */
+				/* string passed */
+				GET_METHOD_SIGNATURE(intern, method_hash, hash_val, num_args, arg_types);
 
 				/* check if already hashed */	
-				if (zend_worm_hash_find(&((*intern)->hash->methods), hash, hash_len + 1, (void **) &method_hash_find) != SUCCESS) {
+				if (zend_worm_hash_find(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, (void **) &method_hash_find) != SUCCESS) {
 					if ((*(*intern)->handlers)->rpc_hash(hash, hash_len, &(method_hash->str), &(method_hash->len),
-														 num_args, args, METHOD) != SUCCESS) {
+														 num_args, arg_types, METHOD) != SUCCESS) {
 						/* TODO: exception */
 					}
 
 					/* register with non-hashed key */
-					zend_worm_hash_add(&((*intern)->hash->methods), hash, hash_len + 1, &method_hash, sizeof(rpc_string *), NULL);
+					zend_worm_hash_add(&((*intern)->hash->methods), hash_val.str, hash_val.len + 1, &method_hash, sizeof(rpc_string *), NULL);
 				} else {
 					pefree(method_hash, TRUE);
 					method_hash = *method_hash_find;
 				}
+
+				FREE_SIGNATURE(hash_val, arg_types);
 			}
 		}
 

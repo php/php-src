@@ -56,7 +56,7 @@
 typedef struct _rpc_object_handlers {
 	const zend_bool pool_instances;
 	const zend_uint hash_type;
-	int (*rpc_hash)(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int num_args, zval **args[], int type);
+	int (*rpc_hash)(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int num_args, char *arg_types, int type);
 	int (*rpc_ctor)(char *class_name, zend_uint class_name_len, void **data, int num_args, zval **args[]);
 	int (*rpc_dtor)(void **data);
 	int (*rpc_call)(char *method_name, zend_uint method_name_len, void **data, zval **return_value, int num_args, zval **args[]);

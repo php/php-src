@@ -1,7 +1,7 @@
 #include "com.h"
 
 /* protos */
-static int com_hash(char *, zend_uint, char **, zend_uint *, int, zval ***, int);
+static int com_hash(char *, zend_uint, char **, zend_uint *, int, char *, int);
 static int com_ctor(char *, zend_uint, void **, int , zval ***);
 static int com_dtor(void **);
 static int com_call(char *, zend_uint, void **, zval **, int, zval ***);
@@ -17,7 +17,7 @@ static int com_get_properties(HashTable **, void **);
 /* register rpc callback function */
 RPC_REGISTER_HANDLERS_START(com)
 POOL,
-HASH_AS_INT,
+HASH_AS_INT_WITH_SIGNATURE,
 com_hash,
 com_ctor,
 com_dtor,
@@ -51,7 +51,7 @@ RPC_INIT_FUNCTION(com)
 
 /* rpc handler functions */
 
-static int com_hash(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int num_args, zval **args[], int type)
+static int com_hash(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int num_args, char *arg_types, int type)
 {
 	*hash = strdup(name);
 	*hash_len = name_len;
