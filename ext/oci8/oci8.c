@@ -5840,7 +5840,7 @@ PHP_FUNCTION(oci_new_connect)
    Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_connect)
 {
-	oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 0);
+	oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, 1);
 }
 /* }}} */
 
