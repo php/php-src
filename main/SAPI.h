@@ -119,6 +119,7 @@ SAPI_API void sapi_deactivate(SLS_D);
 
 SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
 SAPI_API int sapi_send_headers(void);
+SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 
 SAPI_API int sapi_register_post_readers(sapi_post_content_type_reader *post_content_type_readers);
 SAPI_API int sapi_register_post_reader(sapi_post_content_type_reader *post_content_type_reader);
