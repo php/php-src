@@ -63,7 +63,6 @@
 
 #include "php_regex.h"
 
-#ifndef PHP_WIN32
 #if HAVE_ASSERT_H
 #if PHP_DEBUG
 #undef NDEBUG
@@ -74,7 +73,6 @@
 #else /* HAVE_ASSERT_H */
 #define assert(expr) ((void) (0))
 #endif /* HAVE_ASSERT_H */
-#endif /* PHP_WIN32 */
 
 #define APACHE 0
 
