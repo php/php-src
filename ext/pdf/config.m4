@@ -90,15 +90,15 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl #
   dnl # The main PDFlib configure
   dnl #
+  case $host_alias in
+    *darwin*)
+      PHP_ADD_FRAMEWORK(CoreServices)
+      PHP_ADD_FRAMEWORK(ApplicationServices)
+      ;;
+  esac
 
   case $PHP_PDFLIB in
     yes)
-	  case $host_alias in
-	    *darwin*)
-		  PHP_ADD_FRAMEWORK(CoreServices)
-		  PHP_ADD_FRAMEWORK(ApplicationServices)
-		  ;;
-	  esac
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
         AC_DEFINE(HAVE_PDFLIB,1,[ ])
         PHP_ADD_LIBRARY(pdf,, PDF_SHARED_LIBADD)
