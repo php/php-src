@@ -24,13 +24,6 @@
 
 #include <stdlib.h>
 
-#ifdef PHP_WIN32
-# ifndef WIN32_LEAN_AND_MEAN
-#  define WIN32_LEAN_AND_MEAN
-# endif
-# include <windows.h>
-#endif
-
 #if defined(NETWARE) && !defined(NEW_LIBC)  /* For getpid() used below */
 #include "netware/pwd.h"
 #endif

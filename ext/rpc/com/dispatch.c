@@ -23,6 +23,8 @@
  * them as objects implementing IDispatch.
  * */
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "../rpc.h"
 
 #include "php.h"

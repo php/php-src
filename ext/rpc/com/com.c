@@ -19,6 +19,8 @@
 #define _WIN32_DCOM
 #define COBJMACROS
 
+#define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
+
 #include "../rpc.h"
 #include "../handler.h"
 

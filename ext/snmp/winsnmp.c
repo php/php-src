@@ -10,8 +10,6 @@ Created from the snmputil sample in the Microsoft SDK for NT
 #include "php_snmp.h"
 #include <sys/types.h>
 
-#include <windows.h>
-
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
