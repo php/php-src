@@ -346,6 +346,8 @@ static struct pdo_dbh_methods oci_methods = {
 	oci_handle_set_attribute,
 	NULL,
 	pdo_oci_fetch_error_func,
+	NULL,	/* get_attr */
+	NULL	/* check_liveness */
 };
 
 static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
