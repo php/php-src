@@ -1506,7 +1506,7 @@ DLEXPORT PHP_FUNCTION(udm_find)
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
 	convert_to_string_ex(yyquery);
 	
-#if UDM_VERSION_ID < 30200		
+#if UDM_VERSION_ID < 30200
 	if ((Res=UdmFind(Agent,UdmTolower(Z_STRVAL_PP(yyquery),Agent->charset)))) {
 #else
 	if ((Res=UdmFind(Agent,Z_STRVAL_PP(yyquery)))) {
@@ -1546,64 +1546,124 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 	if(row<Res->num_rows){
 		switch(field){
 			case UDM_FIELD_URL: 		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,"URL",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].url)?(Res->Doc[row].url):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_CONTENT: 	
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Content-Type",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].content_type)?(Res->Doc[row].content_type):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_TITLE:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Title",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].title)?(Res->Doc[row].title):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_KEYWORDS:	
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Keywords",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].keywords)?(Res->Doc[row].keywords):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_DESC:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Meta.Description",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].description)?(Res->Doc[row].description):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_TEXT:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Body",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].text)?(Res->Doc[row].text):"",1);
+#endif
 				break;
 				
 			case UDM_FIELD_SIZE:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Content-Length",0));
+#else
 				RETURN_LONG((Res->Doc[row].size));
+#endif
 				break;
 				
-			case UDM_FIELD_URLID:		
+			case UDM_FIELD_URLID:
+#if UDM_VERSION_ID >= 30204
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"ID",0));
+#else
 				RETURN_LONG((Res->Doc[row].url_id));
+#endif
 				break;
 				
 			case UDM_FIELD_RATING:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Score",""),1);
+#else
 				RETURN_LONG((Res->Doc[row].rating));
+#endif
 				break;
 				
 			case UDM_FIELD_MODIFIED:	
+#if UDM_VERSION_ID >= 30204
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Last-Modified",0));
+#else
 				RETURN_LONG((Res->Doc[row].last_mod_time));
+#endif
 				break;
 
 			case UDM_FIELD_ORDER:	
+#if UDM_VERSION_ID >= 30204
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Order",0));
+#else
 				RETURN_LONG((Res->Doc[row].order));
+#endif
 				break;
 				
 			case UDM_FIELD_CRC:	
+#if UDM_VERSION_ID >= 30204
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"crc32",0));
+#else
 				RETURN_LONG((Res->Doc[row].crc32));
+#endif
 				break;
 				
 			case UDM_FIELD_CATEGORY:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Category",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].category)?(Res->Doc[row].category):"",1);
+#endif
 				break;
 
 #if UDM_VERSION_ID >= 30203		
 			case UDM_FIELD_LANG:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Content-Language",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].lang)?(Res->Doc[row].lang):"",1);
+#endif
 				break;
 
 			case UDM_FIELD_CHARSET:		
+#if UDM_VERSION_ID >= 30204
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Charset",""),1);
+#else
 				RETURN_STRING((Res->Doc[row].charset)?(Res->Doc[row].charset):"",1);
+#endif
 				break;
 #endif
 				
