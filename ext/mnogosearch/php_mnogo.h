@@ -3,14 +3,14 @@
 
 /* 
    +----------------------------------------------------------------------+
-   | PHP Version 5                                                        |
+   | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2004 The PHP Group                                |
+   | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 3.0 of the PHP license,       |
+   | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_0.txt.                                  |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -57,11 +57,6 @@ DLEXPORT PHP_MINFO_FUNCTION(mnogosearch);
 DLEXPORT PHP_FUNCTION(udm_api_version);
 #if UDM_VERSION_ID >= 30200
 DLEXPORT PHP_FUNCTION(udm_check_charset);
-#if UDM_VERSION_ID == 30203
-DLEXPORT PHP_FUNCTION(udm_open_stored);
-DLEXPORT PHP_FUNCTION(udm_check_stored);
-DLEXPORT PHP_FUNCTION(udm_close_stored);
-#endif
 #if UDM_VERSION_ID >= 30203
 DLEXPORT PHP_FUNCTION(udm_crc32);
 #endif
@@ -69,11 +64,15 @@ DLEXPORT PHP_FUNCTION(udm_crc32);
 DLEXPORT PHP_FUNCTION(udm_parse_query_string);
 DLEXPORT PHP_FUNCTION(udm_make_excerpt);
 DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex);
+DLEXPORT PHP_FUNCTION(udm_get_agent_param_ex);
 DLEXPORT PHP_FUNCTION(udm_get_res_field_ex);
 #endif
 #if UDM_VERSION_ID >= 30211
 DLEXPORT PHP_FUNCTION(udm_hash32);
 DLEXPORT PHP_FUNCTION(udm_alloc_agent_array);
+#endif
+#if UDM_VERSION_ID >= 30216
+DLEXPORT PHP_FUNCTION(udm_store_doc_cgi);
 #endif
 #endif
 
