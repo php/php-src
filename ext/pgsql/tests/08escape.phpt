@@ -7,4 +7,5 @@ PostgreSQL escape functions
 include("escape.inc");
 ?>
 --EXPECT--
-OK
+pg_escape_string() is Ok
+pg_escape_bytea() is Ok
