@@ -495,6 +495,7 @@ static size_t php_sockread_internal(php_sockbuf *sock)
 
 static void php_sockread_total(php_sockbuf *sock, size_t maxread)
 {
+	sock->timeout_event = 0;
 	while(!sock->eof && TOREAD(sock) < maxread && !sock->timeout_event) {
 		php_sockread_internal(sock);
 	}
@@ -555,6 +556,8 @@ static char * php_sock_fgets_internal(char * buf, size_t maxlen, php_sockbuf * s
 	}
 
 	SEARCHCR();
+
+	sock->timeout_event = 0;
 
 	if(!p) {
 		if(sock->is_blocked) {
