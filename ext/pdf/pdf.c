@@ -29,7 +29,7 @@
 
 /* $Id$ */
 
-/* pdflib 2.01 is subject to the ALADDIN FREE PUBLIC LICENSE.
+/* pdflib 2.02 is subject to the ALADDIN FREE PUBLIC LICENSE.
    Copyright (C) 1997 Thomas Merz. */
 
 /* Note that there is no code from the pdflib package in this file */
