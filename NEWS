@@ -17,7 +17,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #24142 (workaround for a gcc bug affecting round()). (Marcus, Ilia)
 - Fixed bug #24063 (serialize() missing 0 after the . on scientific notation).
   (Marcus, Ilia)
-- Fixed bug #23936 (fail to select and fetch). (Ard)
+- Fixed bug #23936 (ext/interbase: fail to select and fetch). (Ard)
 - Fixed bug #22947 (Ack() inside win32/sendmail.c may stall in certain
   situations). (Ilia)
 - Fixed bug #22245 (References inside $_SESSION not being handled). (Ilia)
