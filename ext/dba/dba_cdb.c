@@ -32,12 +32,13 @@
 #include <fcntl.h>
 
 #include <cdb.h>
-#include <cdbmake.h>
+#include <uint32.h>
 
 #define CDB_INFO \
 	dba_cdb *cdb = (dba_cdb *) info->dbf
 
 typedef struct {
+	struct cdb c;
 	int fd;
 	uint32 eod; /* size of constant database */
 	uint32 pos; /* current position for traversing */
@@ -46,10 +47,11 @@ typedef struct {
 DBA_OPEN_FUNC(cdb)
 {
 	int gmode = 0;
+	int fd;
 	dba_cdb *cdb;
 	dba_info *pinfo = (dba_info *) info;
 
-	switch(info->mode) {
+	switch (info->mode) {
 		case DBA_READER: 
 			gmode = O_RDONLY; break;
 		/* currently not supported: */
@@ -61,14 +63,16 @@ DBA_OPEN_FUNC(cdb)
 			return FAILURE;
 	}
 
+	fd = VCWD_OPEN(info->path, gmode);
+	if (fd < 0) {
+		return FAILURE;
+	}
+	
 	cdb = malloc(sizeof *cdb);
 	memset(cdb, 0, sizeof *cdb);
 
-	cdb->fd = VCWD_OPEN(info->path, gmode);
-	if(cdb->fd < 0) {
-		free(cdb);
-		return FAILURE;
-	}
+	cdb_init(&cdb->c, fd);
+	cdb->fd = fd;
 	
 	pinfo->dbf = cdb;
 	return SUCCESS;
@@ -78,6 +82,8 @@ DBA_CLOSE_FUNC(cdb)
 {
 	CDB_INFO;
 
+	/* cdb_free does not close associated fd */
+	cdb_free(&cdb->c);
 	close(cdb->fd);
 	free(cdb);
 }
@@ -85,16 +91,23 @@ DBA_CLOSE_FUNC(cdb)
 DBA_FETCH_FUNC(cdb)
 {
 	CDB_INFO;
-	int len;
-	char *new = NULL;
+	unsigned int len;
+	char *new_entry = NULL;
 	
-	if(cdb_seek(cdb->fd, key, keylen, &len) == 1) {
-		new = emalloc(len);
-		read(cdb->fd, new, len);
-		if(newlen) *newlen = len;
+	if (cdb_find(&cdb->c, key, keylen) == 1) {
+		len = cdb_datalen(&cdb->c);
+		new_entry = emalloc(len);
+		
+		if (cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
+			free(new_entry);
+			return NULL;
+		}
+		
+		if (newlen) 
+			*newlen = len;
 	}
 	
-	return new;
+	return new_entry;
 }
 
 DBA_UPDATE_FUNC(cdb)
@@ -106,9 +119,8 @@ DBA_UPDATE_FUNC(cdb)
 DBA_EXISTS_FUNC(cdb)
 {
 	CDB_INFO;
-	int len;
 
-	if(cdb_seek(cdb->fd, key, keylen, &len) == 1)
+	if (cdb_find(&cdb->c, key, keylen) == 1)
 		return SUCCESS;
 	return FAILURE;
 }
@@ -119,35 +131,48 @@ DBA_DELETE_FUNC(cdb)
 }
 
 
-#define CREAD(n) if(read(cdb->fd, buf, n) < n) return NULL
-#define CSEEK(n) \
-	if(n >= cdb->eod) return NULL; \
-	if(lseek(cdb->fd, (off_t)n, SEEK_SET) != (off_t) n) return NULL
+#define CREAD(n) do { \
+	if (read(cdb->fd, buf, n) < n) return NULL; \
+} while (0)
+
+#define CSEEK(n) do { \
+	if (n >= cdb->eod) return NULL; \
+	if (lseek(cdb->fd, (off_t)n, SEEK_SET) != (off_t) n) return NULL; \
+} while (0)
+
 
 DBA_FIRSTKEY_FUNC(cdb)
 {
 	CDB_INFO;
-	uint32 len;
+	uint32 klen, dlen;
 	char buf[8];
 	char *key;
 
 	cdb->eod = -1;
 	CSEEK(0);
 	CREAD(4);
-	cdb->eod = cdb_unpack(buf);
+	
+	/* Total length of file in bytes */
+	uint32_unpack(buf, &cdb->eod);
 	
 	CSEEK(2048);
 	CREAD(8);
-	len = cdb_unpack(buf);
+	
+	/* The first four bytes contain the length of the key */
+	uint32_unpack(buf, &klen);
+	uint32_unpack(buf + 4, &dlen);
 
-	key = emalloc(len + 1);
-	if(read(cdb->fd, key, len) < len) {
+	key = emalloc(klen + 1);
+	if (read(cdb->fd, key, klen) < klen) {
 		efree(key);
 		key = NULL;
-	} else
-		key[len] = '\0';
+	} else {
+		key[klen] = '\0';
+		if (newlen) *newlen = klen;
+	}
+
 	/*       header + klenlen + dlenlen + klen + dlen */
-	cdb->pos = 2048 + 4       + 4       + len  + cdb_unpack(buf + 4);
+	cdb->pos = 2048 + 4       + 4       + klen + dlen;
 		
 	return key;
 }
@@ -155,48 +180,27 @@ DBA_FIRSTKEY_FUNC(cdb)
 DBA_NEXTKEY_FUNC(cdb)
 {
 	CDB_INFO;
-	uint32 len;
+	uint32 klen, dlen;
 	char buf[8];
-	char *nkey;
+	char *key;
 
 	CSEEK(cdb->pos);
 	CREAD(8);
-	len = cdb_unpack(buf);
+	uint32_unpack(buf, &klen);
+	uint32_unpack(buf + 4, &dlen);
 	
-	nkey = emalloc(len + 1);
-	if(read(cdb->fd, nkey, len) < len) {
-		efree(nkey);
-		return NULL;
+	key = emalloc(klen + 1);
+	if (read(cdb->fd, key, klen) < klen) {
+		efree(key);
+		key = NULL;
+	} else {
+		key[klen] = '\0';
+		if (newlen) *newlen = klen;
 	}
-	nkey[len] = '\0';
-	if(newlen) *newlen = len;
 	
-	cdb->pos += 8 + len + cdb_unpack(buf + 4);
+	cdb->pos += 8 + klen + dlen;
 	
-	return nkey;
-#if 0
-	/* this code cdb_seeks and is thus slower than directly seeking
-	   in the file */
-	CDB_INFO;
-	char *nkey = NULL;
-	uint32 len;
-	char buf[8];
-	
-	if(cdb_seek(cdb->fd, key, keylen, &len) == 1) {
-		if(lseek(cdb->fd, (off_t) len, SEEK_CUR) >= (off_t) cdb->eod) 
-			return NULL;
-		CREAD(8);
-		len = cdb_unpack(buf);
-
-		nkey = emalloc(len + 1);
-		if(read(cdb->fd, nkey, len) < len) {
-			efree(nkey);
-			nkey = NULL;
-		} else
-			nkey[len] = '\0';
-	}
-	return nkey;
-#endif
+	return key;
 }
 
 DBA_OPTIMIZE_FUNC(cdb)
