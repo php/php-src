@@ -84,7 +84,11 @@ PHPAPI extern char *php_ini_path;
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "ac:d:ef:g:hilnqs?vz:"
+#define OPTSTRING "ac:d:ef:g:hilmnqs?vz:"
+
+static int _print_module_info ( zend_module_entry *module, void *arg ) {
+	php_printf("%s\n", module->name);
+}
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
@@ -261,6 +265,7 @@ static void php_cgi_usage(char *argv0)
 				"  -e             Generate extended information for debugger/profiler\n"
 				"  -z<file>       Load Zend extension <file>.\n"
 				"  -l             Syntax check only (lint)\n"
+				"  -m             Show compiled in modules\n"
 				"  -i             PHP information\n"
 				"  -h             This help\n", prog);
 }
@@ -590,6 +595,19 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					no_headers = 1;
 					behavior=PHP_MODE_LINT;
 					break;
+
+			case 'm': /* list compiled in modules */
+		          	php_output_startup();
+                                SG(headers_sent) = 1;
+				php_printf("Running PHP %s\n%s\n", PHP_VERSION , get_zend_version());
+				php_printf("[PHP Modules]\n");
+				zend_hash_apply_with_argument(&module_registry, (int (*)(void *, void *)) _print_module_info, NULL);
+				php_printf("\n[Zend Modules]\n");			
+				zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) _print_module_info, NULL);
+				php_printf("\n");
+                             	php_end_ob_buffers(1);
+                                exit(1);
+				break;
 
 #if 0 /* not yet operational, see also below ... */
   			case 'n': /* generate indented source mode*/ 
