@@ -23,7 +23,5 @@ $err = new PEAR_Error("test error!!\n", -42, PEAR_ERROR_DIE);
 print $err->toString() . "\n";
 
 ?>
---GET--
---POST--
 --EXPECT--
 mode=die: test error!!

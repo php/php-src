@@ -1,7 +1,5 @@
 --TEST--
 Looped regression test (may take a while)
---POST--
---GET--
 --FILE--
 <?php 
 for ($jdk=0; $jdk<50; $jdk++) {

@@ -1,7 +1,5 @@
 --TEST--
 chr() and ord() functions
---POST--
---GET--
 --FILE--
 <?php
 echo "Testing ord() & chr()...";

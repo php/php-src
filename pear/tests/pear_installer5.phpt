@@ -187,8 +187,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 array(2) {
   [0]=>

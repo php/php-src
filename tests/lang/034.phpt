@@ -6,8 +6,6 @@ if (setlocale(LC_NUMERIC, "de_DE", "de", "german", "ge") === FALSE) {
 	print "skip";
 }
 ?>
---POST--
---GET--
 --FILE--
 <?php 
 # activate the german locale

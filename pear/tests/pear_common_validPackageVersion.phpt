@@ -64,8 +64,6 @@ $a = '1.1alpha.4';
 echo "$a ";
 echo (PEAR_Common::validPackageVersion($a)) ? "valid\n" : "invalid\n";
 ?>
---GET--
---POST--
 --EXPECT--
 ==Valid Tests==
 1 valid

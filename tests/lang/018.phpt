@@ -1,7 +1,5 @@
 --TEST--
 eval() test
---POST--
---GET--
 --FILE--
 <?php 
 

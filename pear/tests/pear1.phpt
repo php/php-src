@@ -69,8 +69,6 @@ print "script exiting...\n";
 print "..\n";
 
 ?>
---GET--
---POST--
 --EXPECT--
 testing plain destructors
 PEAR constructor called, class=testpear

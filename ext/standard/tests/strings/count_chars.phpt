@@ -1,7 +1,5 @@
 --TEST--
 count_chars() function
---POST--
---GET--
 --FILE--
 <?php
 $s = "het leven is net erwtensoep - je kunt er geen touw aan vastknopen";

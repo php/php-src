@@ -1,7 +1,5 @@
 --TEST--
 explode() function
---POST--
---GET--
 --INI--
 error_reporting=2047
 --FILE--

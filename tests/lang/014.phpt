@@ -1,7 +1,5 @@
 --TEST--
 Testing eval function inside user-defined function
---POST--
---GET--
 --FILE--
 <?php 
 function F ($a) { 

@@ -1,7 +1,5 @@
 --TEST--
 Test empty result buffer in reg_replace
---POST--
---GET--
 --FILE--
 <?php 
 	$a="abcd";

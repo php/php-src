@@ -3,8 +3,6 @@ gzfile(), gzreadfile()
 --SKIPIF--
 <?php /* $Id$ */
 if (!extension_loaded("zlib")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
 $original = <<<EOD

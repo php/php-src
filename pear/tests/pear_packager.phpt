@@ -152,8 +152,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Analyzing multiplepackages/pkg1file.php
 Analyzing pkg1/randomfile.php

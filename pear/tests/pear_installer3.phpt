@@ -335,8 +335,6 @@ rmdir($temp_path . DIRECTORY_SEPARATOR . 'tmp');
 rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin');
 rmdir($temp_path);
 ?>
---GET--
---POST--
 --EXPECT--
 test addFileOperation():
 invalid input to addFileOperation():

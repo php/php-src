@@ -2,8 +2,6 @@
 gzcompress()/gzuncompress()
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php /* $Id$ */
 $original = str_repeat("hallo php",4096);

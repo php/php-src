@@ -1,7 +1,5 @@
 --TEST--
 Test split()
---POST--
---GET--
 --FILE--
 <?php
 	$a=split("[[:space:]]","this is	a

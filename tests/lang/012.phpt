@@ -1,7 +1,5 @@
 --TEST--
 Testing stack after early function return
---POST--
---GET--
 --FILE--
 <?php 
 function F () { 

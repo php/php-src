@@ -4,7 +4,6 @@ Simple POST Method test
 <?php if (php_sapi_name()=='cli') echo 'skip'; ?>
 --POST--
 a=Hello+World
---GET--
 --FILE--
 <?php
 echo $_POST['a']; ?>

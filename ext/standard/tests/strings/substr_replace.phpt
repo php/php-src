@@ -1,7 +1,5 @@
 --TEST--
 substr_replace() function
---POST--
---GET--
 --FILE--
 <?php
 $str = "try this";

@@ -1,7 +1,5 @@
 --TEST--
 strrpos() function
---POST--
---GET--
 --FILE--
 <?php
 	var_dump(strrpos("test test string", "test"));

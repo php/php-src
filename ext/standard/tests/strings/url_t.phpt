@@ -1,7 +1,5 @@
 --TEST--
 parse_url() function
---POST--
---GET--
 --FILE--
 <?php
 $sample_urls = array (

@@ -1,7 +1,5 @@
 --TEST--
 Nested If/ElseIf/Else Test
---POST--
---GET--
 --FILE--
 <?php
 $a=1;

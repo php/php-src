@@ -1,7 +1,5 @@
 --TEST--
 wordwrap() function
---POST--
---GET--
 --FILE--
 <?php
 

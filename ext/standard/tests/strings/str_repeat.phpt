@@ -1,7 +1,5 @@
 --TEST--
 str_repeat() function
---POST--
---GET--
 --FILE--
 <?php
 $input = array('a', 'foo', 'barbazbax');

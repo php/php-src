@@ -1,7 +1,5 @@
 --TEST--
 Simple If/Else Test
---POST--
---GET--
 --FILE--
 <?php
 $a=1; 

@@ -1,7 +1,5 @@
 --TEST--
 strstr() function
---POST--
---GET--
 --FILE--
 <?php
 	var_dump(strstr("test string", "test"));

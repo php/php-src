@@ -1,7 +1,5 @@
 --TEST--
 Testing eval function
---POST--
---GET--
 --FILE--
 <?php 
 error_reporting(0);

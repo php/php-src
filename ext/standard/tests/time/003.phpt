@@ -1,8 +1,5 @@
 --TEST--
 Check for mktime with out-of-range parameters
---SKIPIF--
---POST--
---GET--
 --FILE--
 <?php 
   # MacOS/X libc implementation doesn't treat out-of-range values

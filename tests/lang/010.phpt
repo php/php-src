@@ -1,7 +1,5 @@
 --TEST--
 Testing function parameter passing with a return value
---POST--
---GET--
 --FILE--
 <?php
 function test ($b) {

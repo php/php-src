@@ -2,9 +2,6 @@
 Accessing the error buffer via $obj->error_buf...
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php 
    	$a = tidy_parse_string("<HTML><asd asdf></HTML>");

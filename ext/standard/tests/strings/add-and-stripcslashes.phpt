@@ -1,7 +1,5 @@
 --TEST--
 addcslashes() and stripcslashes() function
---POST--
---GET--
 --FILE--
 <?php
 echo addcslashes("", "")."\n";

@@ -2,9 +2,6 @@
 tidy_clean_repair()
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php 
 

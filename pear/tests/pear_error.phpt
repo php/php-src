@@ -128,8 +128,6 @@ $err = new PEAR_Error("test error", -42, PEAR_ERROR_TRIGGER, E_USER_ERROR);
 print $err->toString() . "\n";
 
 ?>
---GET--
---POST--
 --EXPECT--
 specify error class: [foo_error: message="test error" code=0 mode=return level=notice prefix="Foo_Error prefix" info=""]
 default PEAR_Error: [pear_error: message="unknown error" code=0 mode=return level=notice prefix="" info=""]

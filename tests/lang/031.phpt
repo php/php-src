@@ -1,7 +1,5 @@
 --TEST--
 Internal hash position bug on assignment (Bug #16227)
---POST--
---GET--
 --FILE--
 <?php
 // reported by php.net@alienbill.com

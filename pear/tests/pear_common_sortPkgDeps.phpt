@@ -52,8 +52,6 @@ function dumpPacks($p)
     echo ")\n";
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Test Install Sort:
 Packages(

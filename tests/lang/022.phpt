@@ -1,7 +1,5 @@
 --TEST--
 Switch test 3
---POST--
---GET--
 --FILE--
 <?php 
 

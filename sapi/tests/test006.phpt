@@ -1,6 +1,5 @@
 --TEST--
 Multipart Form POST Data
---CGI--
 --HEADERS--
 return <<<END
 Content-Type=multipart/form-data; boundary=---------------------------240723202011929
@@ -45,7 +44,6 @@ phpinfo();
 ?>
 -----------------------------240723202011929--
 
---GET--
 --FILE--
 <?php 
 error_reporting(0);

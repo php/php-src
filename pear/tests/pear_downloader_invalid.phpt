@@ -253,8 +253,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 -=-=-=-=-=-=-=-=- Failure Tests -=-=-=-=-=-=-=-=-=-=-
 Test invalid package name:

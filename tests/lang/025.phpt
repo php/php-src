@@ -1,7 +1,5 @@
 --TEST--
 Mean recursion test
---POST--
---GET--
 --FILE--
 <?php 
 function RekTest ($nr) {

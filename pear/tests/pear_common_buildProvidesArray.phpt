@@ -62,8 +62,6 @@ $common->buildProvidesArray($ret);
 var_dump($common->pkginfo);
 rmdir($testdir);
 ?>
---GET--
---POST--
 --EXPECT--
 pre-test: returns false with valid PHP? no
 array(6) {

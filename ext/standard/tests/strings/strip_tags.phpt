@@ -1,7 +1,5 @@
 --TEST--
 strip_tags() function
---POST--
---GET--
 --FILE--
 <?php
 	echo strip_tags('NEAT <? cool < blah ?> STUFF');

@@ -155,8 +155,6 @@ function cleanall()
 }
 
 ?>
---GET--
---POST--
 --EXPECT--
 uninstall ok? yes
 
