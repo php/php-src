@@ -39,7 +39,6 @@
 #include <openssl/pem.h>
 #include <openssl/err.h>
 #include <openssl/conf.h>
-#include <openssl/e_os.h>
 #include <openssl/rand.h>
 
 #define DEFAULT_KEY_LENGTH	512
@@ -576,10 +575,12 @@ PHP_MINIT_FUNCTION(openssl)
 	config_filename = getenv("OPENSSL_CONF");
 	if (config_filename == NULL)
 		config_filename = getenv("SSLEAY_CONF");
-	if (config_filename == NULL)	{
+
+	/* default to 'openssl.cnf' if no environment variable is set */
+	if (config_filename == NULL) {
 		snprintf(default_ssl_conf_filename, sizeof(default_ssl_conf_filename), "%s/%s",
 				X509_get_default_cert_area(),
-				OPENSSL_CONF);
+				"openssl.cnf");
 	}
 	else
 		strncpy(default_ssl_conf_filename, config_filename, sizeof(default_ssl_conf_filename));
