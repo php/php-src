@@ -527,9 +527,9 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents)
 ZEND_API void zend_error(int type, const char *format, ...)
 {
 	va_list args;
-	zval **params;
-	zval retval;
-	zval error_type, error_message;
+	zval ***params;
+	zval *retval;
+	zval *error_type, *error_message;
 	char *error_filename;
 	uint error_lineno;
 	ELS_FETCH();
@@ -589,33 +589,34 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			break;
 		default:
 			/* Handle the error in user space */
-			INIT_PZVAL(&error_message);
-			INIT_PZVAL(&error_type);
-			error_message.value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
+			ALLOC_INIT_ZVAL(error_message);
+			ALLOC_INIT_ZVAL(error_type);
+			error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
 #ifdef HAVE_VSNPRINTF
-			error_message.value.str.len = vsnprintf(error_message.value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
+			error_message->value.str.len = vsnprintf(error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
 #else
 			/* This is risky... */
-			error_message.value.str.len = vsprintf(error_message.value.str.val, format, args);
+			error_message->value.str.len = vsprintf(error_message->value.str.val, format, args);
 #endif
-			error_message.type = IS_STRING;
+			error_message->type = IS_STRING;
 
-			error_type.value.lval = type;
-			error_type.type = IS_LONG;
+			error_type->value.lval = type;
+			error_type->type = IS_LONG;
 
-			params = (zval **) emalloc(sizeof(zval *)*2);
+			params = (zval ***) emalloc(sizeof(zval **)*2);
 			params[0] = &error_type;
 			params[1] = &error_message;
 
-			if (call_user_function(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params)==SUCCESS) {
-				zval_dtor(&retval);
+			if (call_user_function_ex(CG(function_table), NULL, EG(user_error_handler), &retval, 2, params, 1, NULL)==SUCCESS) {
+				zval_ptr_dtor(&retval);
 			} else {
 				/* The user error handler failed, use built-in error handler */
 				zend_error_cb(type, error_filename, error_lineno, format, args);
 			}
 			efree(params);
-			efree(error_message.value.str.val);
+			zval_ptr_dtor(&error_message);
+			zval_ptr_dtor(&error_type);
 			break;
 	}
 

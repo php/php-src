@@ -460,6 +460,8 @@ static inline int prepare_string_for_scanning(zval *str CLS_DC)
 
 	CG(ZFL)->switch_streams(input_stream, &cout);
 #endif
+	zend_set_compiled_filename("Eval code");
+	CG(zend_lineno) = 1;
 	return SUCCESS;
 }
 
