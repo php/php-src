@@ -209,7 +209,7 @@ xml_element* XMLRPC_to_xml_element_worker(XMLRPC_VALUE current_vector, XMLRPC_VA
 		}
 		else {
          switch (type) {
-			case xmlrpc_empty: //  treat null value as empty string in xmlrpc.
+			case xmlrpc_empty: /*  treat null value as empty string in xmlrpc. */
          case xmlrpc_string:
             elem_val->name = strdup(ELEM_STRING);
             simplestring_addn(&elem_val->text, XMLRPC_GetValueString(node), XMLRPC_GetValueStringLen(node));

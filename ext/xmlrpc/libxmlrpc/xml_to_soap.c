@@ -59,8 +59,7 @@ static const char rcsid[] = "#(@) $Id:";
 #define TOKEN_SOAP_FAULTACTOR    "actor"
 
 
-// determine if a string represents a soap type, as used in
-// element names
+/* determine if a string represents a soap type, as used in element names */
 static inline int is_soap_type(const char* soap_type) {
 	return(strstr(soap_type, "SOAP-ENC:") || strstr(soap_type, "xsd:")) ? 1 : 0;
 }
@@ -199,25 +198,25 @@ static XMLRPC_VALUE gen_fault_xmlrpc(XMLRPC_VALUE node, xml_element* el_target) 
 
 	/* rough mapping of xmlrpc fault codes to soap codes */
 	switch (XMLRPC_GetValueInt(xCode)) {
-	case -32700:		  // "parse error. not well formed",
-	case -32701:		  // "parse error. unsupported encoding"
-	case -32702:		  // "parse error. invalid character for encoding"
-	case -32600:		  // "server error. invalid xml-rpc.  not conforming to spec."
-	case -32601:		  // "server error. requested method not found"
-	case -32602:		  // "server error. invalid method parameters"
+	case -32700:		  /* "parse error. not well formed", */
+	case -32701:		  /* "parse error. unsupported encoding" */
+	case -32702:		  /* "parse error. invalid character for encoding" */
+	case -32600:		  /* "server error. invalid xml-rpc.  not conforming to spec." */
+	case -32601:		  /* "server error. requested method not found" */
+	case -32602:		  /* "server error. invalid method parameters" */
 		XMLRPC_SetValueString(xCode, "SOAP-ENV:Client", 0);
 		break;
-	case -32603:		  // "server error. internal xml-rpc error"
-	case -32500:		  // "application error"
-	case -32400:		  // "system error"
-	case -32300:		  // "transport error
+	case -32603:		  /* "server error. internal xml-rpc error" */
+	case -32500:		  /* "application error" */
+	case -32400:		  /* "system error" */
+	case -32300:		  /* "transport error */
 		XMLRPC_SetValueString(xCode, "SOAP-ENV:Server", 0);
 		break;
 	}
 	return xDup;
 }
 
-// returns a new XMLRPC_VALUE representing a soap fault, comprised of a struct with four keys.
+/* returns a new XMLRPC_VALUE representing a soap fault, comprised of a struct with four keys. */
 static XMLRPC_VALUE gen_soap_fault(const char* fault_code, const char* fault_string, 
 											  const char* actor, const char* details) {
 	XMLRPC_VALUE xReturn = XMLRPC_CreateVector(TOKEN_FAULT, xmlrpc_vector_struct);
@@ -239,63 +238,63 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 																int depth) {
 	XMLRPC_REQUEST_TYPE rtype = xmlrpc_request_none;
 
-	// no current element on first call
+	/* no current element on first call */
 	if (!xCurrent) {
 		xCurrent = XMLRPC_CreateValueEmpty();
 	}
 
-	// increment recursion depth guage
+	/* increment recursion depth guage */
 	depth ++;
 
-	// safety first. must have a valid element
+	/* safety first. must have a valid element */
 	if (el && el->name) {
 		const char* id = NULL;
 		const char* type = NULL, *arrayType=NULL, *actor = NULL;
 		xml_element_attr* attr_iter = Q_Head(&el->attrs);
 		int b_must_understand = 0;
 		
-		// in soap, types may be specified in either element name -or- with xsi:type attribute.
+		/* in soap, types may be specified in either element name -or- with xsi:type attribute. */
 		if (is_soap_type(el->name)) {
 			type = el->name;
 		}
-		// if our parent node, by definition a vector, is not an array, then
-		// our element name must be our key identifier.
+		/* if our parent node, by definition a vector, is not an array, then
+		   our element name must be our key identifier. */
 		else if (XMLRPC_GetVectorType(xParent) != xmlrpc_vector_array) {
 			id = el->name;
 			if(!strcmp(id, "item")) {
 			}
 		}
 
-		// iterate through element attributes, pick out useful stuff.
+		/* iterate through element attributes, pick out useful stuff. */
 		while (attr_iter) {
-			// element's type
+			/* element's type */
 			if (!strcmp(attr_iter->key, TOKEN_TYPE)) {
 				type = attr_iter->val;
 			}
-			// array type
+			/* array type */
 			else if (!strcmp(attr_iter->key, TOKEN_ARRAY_TYPE)) {
 				arrayType = attr_iter->val;
 			}
-			// must understand, sometimes present in headers.
+			/* must understand, sometimes present in headers. */
 			else if (!strcmp(attr_iter->key, TOKEN_MUSTUNDERSTAND)) {
 				b_must_understand = strchr(attr_iter->val, '1') ? 1 : 0;
 			}
-			// actor, used in conjuction with must understand.
+			/* actor, used in conjuction with must understand. */
 			else if (!strcmp(attr_iter->key, TOKEN_ACTOR)) {
 				actor = attr_iter->val;
 			}
 			attr_iter = Q_Next(&el->attrs);
 		}
 
-		// check if caller says we must understand something in a header.
+		/* check if caller says we must understand something in a header. */
 		if (b_must_understand) {
-			// is must understand actually indended for us?
-			// BUG: spec says we should also determine if actor is our URL, but
-			//      we do not have that information.
+			/* is must understand actually indended for us?
+			   BUG: spec says we should also determine if actor is our URL, but
+			        we do not have that information. */
 			if (!actor || !strcmp(actor, TOKEN_ACTOR_NEXT)) {
-				// TODO: implement callbacks or other mechanism for applications
-				// to "understand" these headers. For now, we just bail if we
-				// get a mustUnderstand header intended for us.
+				/* TODO: implement callbacks or other mechanism for applications
+				   to "understand" these headers. For now, we just bail if we
+				   get a mustUnderstand header intended for us. */
 				XMLRPC_RequestSetError(request, 
 											  gen_soap_fault("SOAP-ENV:MustUnderstand",
 																  "SOAP Must Understand Error",
@@ -304,21 +303,21 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 			}
 		}
 
-		// set id (key) if one was found.
+		/* set id (key) if one was found. */
 		if (id) {
 			XMLRPC_SetValueID_Case(xCurrent, id, 0, xmlrpc_case_exact);
 		}
 
-		// according to soap spec, 
-		// depth 1 = Envelope, 2 = Header, Body & Fault, 3 = methodcall or response.
+		/* according to soap spec, 
+		   depth 1 = Envelope, 2 = Header, Body & Fault, 3 = methodcall or response. */
 		if (depth == 3) {
 			const char* methodname = el->name;
 			char* p = NULL;
 
-			// BUG: we determine request or response type using presence of "Response" in element name.
-			// According to spec, this is only recommended, not required. Apparently, implementations
-			// are supposed to know the type of action based on state, which strikes me as a bit lame.
-			// Anyway, we don't have that state info, thus we use Response as a heuristic.
+			/* BUG: we determine request or response type using presence of "Response" in element name.
+			   According to spec, this is only recommended, not required. Apparently, implementations
+			   are supposed to know the type of action based on state, which strikes me as a bit lame.
+			   Anyway, we don't have that state info, thus we use Response as a heuristic. */
 			rtype =
 #ifdef strcasestr
 			strcasestr(el->name, "response") ? xmlrpc_request_response : xmlrpc_request_call;
@@ -327,7 +326,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 #endif
 			XMLRPC_RequestSetRequestType(request, rtype);
 
-			// Get methodname.  strip xml namespace crap.
+			/* Get methodname.  strip xml namespace crap. */
 			p = strchr(el->name, ':');
 			if (p) {
 				methodname = p + 1;
@@ -338,8 +337,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 		}
 
 
-		// Next, we begin to convert actual values.
-		// if no children, then must be a scalar value.
+		/* Next, we begin to convert actual values. if no children, then must be a scalar value. */
 		if (!Q_Size(&el->children)) {
 			if (!type && parent_array && parent_array->kids_type[0]) {
 				type = parent_array->kids_type;
@@ -358,7 +356,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 				XMLRPC_SetValueDouble(xCurrent, atof(el->text.str));
 			}
 			else if (!strcmp(type, TOKEN_NULL)) {
-				// already an empty val. do nothing.
+				/* already an empty val. do nothing. */
 			}
 			else if (!strcmp(type, TOKEN_DATETIME)) {
 				XMLRPC_SetValueDateTime_ISO8601(xCurrent, el->text.str);
@@ -370,7 +368,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 				buffer_delete(&buf);
 			}
 		}
-		// Element has children, thus a vector, or "compound type" in soap-speak.
+		/* Element has children, thus a vector, or "compound type" in soap-speak. */
 		else {
 			struct array_info* ai = NULL;
 			xml_element* iter = (xml_element*)Q_Head(&el->children);
@@ -379,27 +377,27 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 				XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_struct);
 			}
 			else if (!strcmp(type, TOKEN_ARRAY) || arrayType != NULL) {
-				// determine magic associated with soap array type.
-				// this is passed down as we recurse, so our children have access to the info.
+				/* determine magic associated with soap array type.
+				   this is passed down as we recurse, so our children have access to the info. */
 				ai = parse_array_type_info(arrayType);	// alloc'ed ai free'd below.
 				XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_array);
 			}
 			else {
-				// mixed is probably closest thing we have to compound type.
+				/* mixed is probably closest thing we have to compound type. */
 				XMLRPC_SetIsVector(xCurrent, xmlrpc_vector_mixed);
 			}
-			// Recurse, adding values as we go.  Check for error during recursion
-			// and if found, bail.  this short-circuits us out of the recursion.
+			/* Recurse, adding values as we go.  Check for error during recursion
+			   and if found, bail.  this short-circuits us out of the recursion. */
 			while ( iter && !XMLRPC_RequestGetError(request) ) {
 				XMLRPC_VALUE xNext = NULL;
-				// top level elements don't actually represent values, so we just pass the
-				// current value along until we are deep enough.
+				/* top level elements don't actually represent values, so we just pass the
+				   current value along until we are deep enough. */
 				if ( depth <= 2 ||
 					  (rtype == xmlrpc_request_response && depth <= 3) ) {
 					xml_element_to_SOAP_REQUEST_worker(request, NULL, ai, xCurrent, iter, depth);
 				}
-				// ready to do some actual de-serialization. create a new empty value and
-				// pass that along to be init'd, then add it to our current vector.
+				/* ready to do some actual de-serialization. create a new empty value and
+				   pass that along to be init'd, then add it to our current vector. */
 				else {
 					xNext = XMLRPC_CreateValueEmpty();
 					xml_element_to_SOAP_REQUEST_worker(request, xCurrent, ai, xNext, iter, depth);
@@ -407,7 +405,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 				}
 				iter = (xml_element*)Q_Next(&el->children);
 			}
-			// cleanup
+			/* cleanup */
 			if (ai) {
 				free(ai);
 			}
@@ -416,13 +414,13 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 	return xCurrent;
 }
 
-// Convert soap xml dom to XMLRPC_VALUE, sans request info.  untested.
+/* Convert soap xml dom to XMLRPC_VALUE, sans request info.  untested. */
 XMLRPC_VALUE xml_element_to_SOAP_VALUE(xml_element* el)
 {
 	return xml_element_to_SOAP_REQUEST_worker(NULL, NULL, NULL, NULL, el, 0);
 }
 
-// Convert soap xml dom to XMLRPC_REQUEST
+/* Convert soap xml dom to XMLRPC_REQUEST */
 XMLRPC_VALUE xml_element_to_SOAP_REQUEST(XMLRPC_REQUEST request, xml_element* el)
 {
 	if (request) {
@@ -442,7 +440,7 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 		XMLRPC_VALUE_TYPE_EASY type = XMLRPC_GetValueTypeEasy(node);
 		char* pName = NULL, *pAttrType = NULL;
 
-		// create our return value element
+		/* create our return value element */
 		elem_val = xml_elem_new();
 
 		switch (type) {
@@ -450,14 +448,14 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 		case xmlrpc_type_mixed:
 		case xmlrpc_type_array:
 			if (type == xmlrpc_type_array) {
-				// array's are _very_ special in soap.
-				// TODO: Should handle sparse/partial arrays here.
+				/* array's are _very_ special in soap.
+				   TODO: Should handle sparse/partial arrays here. */
 
-				// determine soap array type.
+				/* determine soap array type. */
 				const char* type = get_array_soap_type(node);
 				xml_element_attr* attr_array_type = NULL;
 
-				// specify array kids type and array size.  
+				/* specify array kids type and array size. */
 				snprintf(buf, sizeof(buf), "%s[%i]", type, XMLRPC_VectorSize(node));
 				attr_array_type = new_attr(TOKEN_ARRAY_TYPE, buf);
 
@@ -465,14 +463,14 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 
 				pAttrType = TOKEN_ARRAY;
 			}
-			// check for fault, which is a rather special case. 
-			// (can't these people design anything consistent/simple/elegant?)
+			/* check for fault, which is a rather special case. 
+			   (can't these people design anything consistent/simple/elegant?) */
 			else if (type == xmlrpc_type_struct) {
 				int fault_type = get_fault_type(node);
 				if (fault_type) {
 					if (fault_type == 1) {
-						// gen fault from xmlrpc style fault codes              
-						// notice that we get a new node, which must be freed herein.
+						/* gen fault from xmlrpc style fault codes              
+						    notice that we get a new node, which must be freed herein. */
 						node = gen_fault_xmlrpc(node, elem_val);
 						bFreeNode = 1;
 					}
@@ -494,7 +492,7 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 
 			break;
 
-			// handle scalar types
+			/* handle scalar types */
 		case xmlrpc_type_empty:
 			pAttrType = TOKEN_NULL;
 			break;
@@ -541,25 +539,24 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 			break;
 		}
 
-		// determining element's name is a bit tricky, due to soap semantics.
+		/* determining element's name is a bit tricky, due to soap semantics. */
 		if (!pName) {
-			// if the value's type is known...
+			/* if the value's type is known... */
 			if (pAttrType) {
-				// see if it has an id (key). If so, use that as name, 
-				// and type as an attribute.
+				/* see if it has an id (key). If so, use that as name, and type as an attribute. */
 				pName = (char*)XMLRPC_GetValueID(node);
 				if (pName) {
 					Q_PushTail(&elem_val->attrs, new_attr(TOKEN_TYPE, pAttrType));
 				}
 
-				// otherwise, use the type as the name.
+				/* otherwise, use the type as the name. */
 				else {
 					pName = pAttrType;
 				}
 			}
-			// if the value's type is not known... (a rare case?)
+			/* if the value's type is not known... (a rare case?) */
 			else {
-				// see if it has an id (key). otherwise, default to generic "item"
+				/* see if it has an id (key). otherwise, default to generic "item" */
 				pName = (char*)XMLRPC_GetValueID(node);
 				if (!pName) {
 					pName = "item";
@@ -568,7 +565,7 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 		}
 		elem_val->name = strdup(pName);
 
-		// cleanup
+		/* cleanup */
 		if (bFreeNode) {
 			XMLRPC_CleanupValue(node);
 		}
@@ -576,16 +573,16 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 	return elem_val;
 }
 
-// convert XMLRPC_VALUE to soap xml dom.  untested.
+/* convert XMLRPC_VALUE to soap xml dom.  untested. */
 xml_element* SOAP_VALUE_to_xml_element(XMLRPC_VALUE node) {
 	return SOAP_to_xml_element_worker(NULL, node);
 }
 
-// convert XMLRPC_REQUEST to soap xml dom.  
+/* convert XMLRPC_REQUEST to soap xml dom. */
 xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 	xml_element* root = xml_elem_new();
 
-	// safety first.
+	/* safety first. */
 	if (root) {
 		xml_element* body = xml_elem_new();
 		root->name = strdup("SOAP-ENV:Envelope");
@@ -599,11 +596,11 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 		Q_PushTail(&root->attrs, new_attr("xmlns:ns6", "http://testuri.org"));
 		Q_PushTail(&root->attrs, new_attr("SOAP-ENV:encodingStyle", "http://schemas.xmlsoap.org/soap/encoding/"));
 
-		//Q_PushHead(&root->attrs, new_attr("xmlns:ks", "http://kitchen.sink.org/soap/everything/under/sun"));
-		//      JUST KIDDING!! :-)  ---->                -------------------------------------------------
+		/* Q_PushHead(&root->attrs, new_attr("xmlns:ks", "http://kitchen.sink.org/soap/everything/under/sun"));
+		       JUST KIDDING!! :-)  ---->                ------------------------------------------------- */
 
 		if (body) {
-			// go ahead and serialize first...
+			/* go ahead and serialize first... */
 			xml_element* el_serialized =  
 			SOAP_to_xml_element_worker(request, 
 												XMLRPC_RequestGetData(request));
@@ -612,7 +609,7 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 			if (el_serialized && !strcmp(el_serialized->name, TOKEN_FAULT)) {
 				Q_PushTail(&body->children, el_serialized);
 			}
-			// usual case: not a fault. Add Response element in between.
+			/* usual case: not a fault. Add Response element in between. */
 			else {
 				xml_element* rpc = xml_elem_new();
 
@@ -620,15 +617,15 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 					const char* methodname = XMLRPC_RequestGetMethodName(request);
 					XMLRPC_REQUEST_TYPE rtype = XMLRPC_RequestGetRequestType(request);
 
-					// if we are making a request, we want to use the methodname as is.
+					/* if we are making a request, we want to use the methodname as is. */
 					if (rtype == xmlrpc_request_call) {
 						if (methodname) {
 							rpc->name = strdup(methodname);
 						}
 					}
-					// if it's a response, we append "Response". Also, given xmlrpc-epi
-					// API/architecture, it's likely that we don't have a methodname for
-					// the response, so we have to check that.
+					/* if it's a response, we append "Response". Also, given xmlrpc-epi
+					   API/architecture, it's likely that we don't have a methodname for
+					   the response, so we have to check that. */
 					else {
 						char buf[128];
 						snprintf(buf, sizeof(buf), "%s%s", 
@@ -638,8 +635,8 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 						rpc->name = strdup(buf);
 					}
 
-					// add serialized data to method call/response.
-					// add method call/response to body element
+					/* add serialized data to method call/response.
+					   add method call/response to body element */
 					if (rpc->name) {
 						if(el_serialized) {
 							if(Q_Size(&el_serialized->children) && rtype == xmlrpc_request_call) {
@@ -658,8 +655,8 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 						Q_PushTail(&body->children, rpc);
 					}
 					else {
-						// no method name?!
-						// TODO: fault here...?
+						/* no method name?!
+						   TODO: fault here...? */
 					}
 				}
 			}
