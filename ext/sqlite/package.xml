@@ -16,6 +16,12 @@
       <email>tal@php.net</email>
       <role>developer</role>
     </maintainer>
+    <maintainer>
+      <user>helly</user>
+      <name>Marcus B&ouml;rger</name>
+      <email>helly@php.net</email>
+      <role>developer</role>
+    </maintainer>
   </maintainers>
   <description>
 	SQLite is a C library that implements an embeddable SQL database engine.
