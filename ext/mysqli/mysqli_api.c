@@ -36,8 +36,7 @@ PHP_FUNCTION(mysqli_affected_rows)
 {
 	MYSQL 			*mysql;
 	zval  			*mysql_link;
-	my_ulonglong	rc;
-	char			ret[40];
+	my_ulonglong		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -46,11 +45,7 @@ PHP_FUNCTION(mysqli_affected_rows)
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 
 	rc = mysql_affected_rows(mysql);
-	if (rc != (long)rc) {
-		sprintf((char *)&ret, "%llu", rc);
-		RETURN_STRING(ret,1);
-	} 
-	RETURN_LONG(rc);
+	MYSQLI_RETURN_LONG_LONG(rc);
 }
 /* }}} */
 
@@ -648,7 +643,7 @@ PHP_FUNCTION(mysqli_fetch)
 							my_ulonglong lval;
 							memcpy (&lval, stmt->bind[i].buffer, sizeof(my_ulonglong));
 							if (lval != (long)lval) {
-								sprintf((char *)&tmp, "%lld", lval);
+								sprintf((char *)&tmp, "%llu", lval);
 								ZVAL_STRING(stmt->vars[i], tmp, 1);
 							} else {
 								ZVAL_LONG(stmt->vars[i], lval);
@@ -1000,8 +995,7 @@ PHP_FUNCTION(mysqli_init)
 PHP_FUNCTION(mysqli_insert_id)
 {
 	MYSQL		 	*mysql;
-	my_ulonglong 	rc;
-	char  			ret[50];
+	my_ulonglong 		rc;
 	zval  			*mysql_link;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -1009,12 +1003,7 @@ PHP_FUNCTION(mysqli_insert_id)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
 	rc = mysql_insert_id(mysql);
-
-	if (rc != (long)rc) {
-		sprintf((char *)&ret, "%llu", rc);
-		RETURN_STRING(ret,1);
-	} 
-	RETURN_LONG(rc);
+	MYSQLI_RETURN_LONG_LONG(rc)
 }
 /* }}} */
 
@@ -1503,8 +1492,7 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 {
 	STMT 			*stmt;
 	zval    		*mysql_stmt;
-	my_ulonglong	rc;
-	char			ret[50];
+	my_ulonglong		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
@@ -1512,12 +1500,7 @@ PHP_FUNCTION(mysqli_stmt_affected_rows)
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt");
 
 	rc = mysql_stmt_affected_rows(stmt->stmt);
-	if (rc != (long)rc) {
-		sprintf((char *)&ret, "%llu", rc);
-		RETURN_STRING(ret, 1); 
-	}
-
-	RETURN_LONG(rc);
+	MYSQLI_RETURN_LONG_LONG(rc)
 }
 /* }}} */
 

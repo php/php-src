@@ -121,6 +121,17 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	intern->ptr = NULL; \
 }
 
+#define MYSQLI_RETURN_LONG_LONG(__val) \
+{ \
+	if ((__val) < LONG_MAX) {		\
+		RETURN_LONG((__val));		\
+	} else {				\
+		char ret[40];			\
+		sprintf(ret, "%llu", (__val));	\
+		RETURN_STRING(ret,1);		\
+	}					\
+}
+
 #define MYSQLI_STORE_RESULT 	0
 #define MYSQLI_USE_RESULT 	1
 
