@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include "gd.h"
+#include <stdlib.h>
 
 /* A short program which converts a .png file into a .gd file, for
    your convenience in creating images on the fly from a

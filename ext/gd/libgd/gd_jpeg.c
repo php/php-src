@@ -813,7 +813,7 @@ term_destination (j_compress_ptr cinfo)
   /* Write any data remaining in the buffer */
   if (datacount > 0)
     {
-      if (gdPutBuf (dest->buffer, datacount, dest->outfile) != datacount)
+      if ((size_t)gdPutBuf (dest->buffer, datacount, dest->outfile) != datacount)
 	ERREXIT (cinfo, JERR_FILE_WRITE);
     }
 }
