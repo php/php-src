@@ -3103,6 +3103,8 @@ static long php_intifx_init_blob_infile(loc_t *blob, long new TSRMLS_DC)
 {
 	char *filename;
 
+	blob->loc_loctype = LOCFNAME;
+
 	if (new) {
 
 		filename = php_intifx_create_tmpfile(TSRMLS_C);
