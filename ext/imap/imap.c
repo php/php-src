@@ -2534,6 +2534,7 @@ PHP_FUNCTION(imap_clearflag_full)
 		RETURN_FALSE;
 	}
 	mail_clearflag_full(imap_le_struct->imap_stream,sequence->value.str.val,flag->value.str.val,myargc == 4 ? flags->value.lval : NIL);
+        RETURN_TRUE;
 }
 /* }}} */
 
