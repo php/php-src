@@ -30,6 +30,7 @@
 #include "php_ini.h"
 #include "php_dbx.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_string.h"
 
 /* defines for supported databases */
 #define DBX_UNKNOWN 0
@@ -168,8 +169,14 @@ zend_module_entry dbx_module_entry = {
 ZEND_GET_MODULE(dbx)
 #endif
 
+ZEND_INI_BEGIN()
+    ZEND_INI_ENTRY("dbx.colnames_case", "unchanged", ZEND_INI_SYSTEM, NULL)
+ZEND_INI_END()
+
 ZEND_MINIT_FUNCTION(dbx)
 {
+    REGISTER_INI_ENTRIES();
+
 	REGISTER_LONG_CONSTANT("DBX_MYSQL", DBX_MYSQL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_ODBC", DBX_ODBC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_PGSQL", DBX_PGSQL, CONST_CS | CONST_PERSISTENT);
@@ -184,6 +191,10 @@ ZEND_MINIT_FUNCTION(dbx)
 	REGISTER_LONG_CONSTANT("DBX_RESULT_INDEX", DBX_RESULT_INDEX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_RESULT_ASSOC", DBX_RESULT_ASSOC, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("DBX_COLNAMES_UNCHANGED", DBX_COLNAMES_UNCHANGED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DBX_COLNAMES_UPPERCASE", DBX_COLNAMES_UPPERCASE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DBX_COLNAMES_LOWERCASE", DBX_COLNAMES_LOWERCASE, CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("DBX_CMP_NATIVE", DBX_CMP_NATIVE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_CMP_TEXT", DBX_CMP_TEXT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_CMP_NUMBER", DBX_CMP_NUMBER, CONST_CS | CONST_PERSISTENT);
@@ -195,6 +206,7 @@ ZEND_MINIT_FUNCTION(dbx)
 
 ZEND_MSHUTDOWN_FUNCTION(dbx)
 {
+    UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
@@ -215,6 +227,7 @@ ZEND_MINFO_FUNCTION(dbx)
 	php_info_print_table_row(2, "dbx version", "1.0.0");
 	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (oci8)\nSybase-CT");
 	php_info_print_table_end();
+    DISPLAY_INI_ENTRIES();
 }
 
 /*
@@ -353,10 +366,20 @@ ZEND_FUNCTION(dbx_query)
 	long col_index;
 	long row_count;
 	zval *info;
-	long info_flags;
+	long query_flags;
+	long result_flags;
 	zval *data;
 	zval **row_ptr;
 	zval **inforow_ptr;
+	/* default values for colname-case */
+	char * colnames_case = INI_STR("dbx.colnames_case");
+	long colcase = DBX_COLNAMES_UNCHANGED;
+	if (!strcmp(colnames_case, "uppercase")) {
+		colcase = DBX_COLNAMES_UPPERCASE;
+	}
+	if (!strcmp(colnames_case, "lowercase")) {
+		colcase = DBX_COLNAMES_LOWERCASE;
+	}
 
 	if (ZEND_NUM_ARGS()<min_number_of_arguments || ZEND_NUM_ARGS()>number_of_arguments || zend_get_parameters_array_ex(ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -366,14 +389,26 @@ ZEND_FUNCTION(dbx_query)
 		RETURN_LONG(0);
 	}
 	/* default values */
-	info_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
+	result_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
 	/* parameter overrides */
 	if (ZEND_NUM_ARGS()>2) {
 		convert_to_long_ex(arguments[2]);
-		info_flags = Z_LVAL_PP(arguments[2]);
+		query_flags = Z_LVAL_PP(arguments[2]);
 		/* fieldnames are needed for association! */
-		if (info_flags & DBX_RESULT_ASSOC) {
-			info_flags |= DBX_RESULT_INFO;
+		result_flags = (query_flags & DBX_RESULT_INFO) | (query_flags & DBX_RESULT_INDEX) | (query_flags & DBX_RESULT_ASSOC);
+		if (result_flags & DBX_RESULT_ASSOC) {
+			result_flags |= DBX_RESULT_INFO;
+		}
+		if (!result_flags) result_flags = DBX_RESULT_INFO | DBX_RESULT_INDEX | DBX_RESULT_ASSOC;
+		/* override ini-setting for colcase */
+		if (query_flags & DBX_COLNAMES_UNCHANGED) {
+			colcase = DBX_COLNAMES_UNCHANGED;
+		}
+		if (query_flags & DBX_COLNAMES_UPPERCASE) {
+			colcase = DBX_COLNAMES_UPPERCASE;
+		}
+		if (query_flags & DBX_COLNAMES_LOWERCASE) {
+			colcase = DBX_COLNAMES_LOWERCASE;
 		}
 	}
 	MAKE_STD_ZVAL(rv_result_handle); 
@@ -398,7 +433,7 @@ ZEND_FUNCTION(dbx_query)
 	/* add result_handle property to return_value */
 	zend_hash_update(Z_OBJPROP_P(return_value), "handle", 7, (void *)&(rv_result_handle), sizeof(zval *), NULL);
 	/* init info property as array and add to return_value as a property */
-	if (info_flags & DBX_RESULT_INFO) {
+	if (result_flags & DBX_RESULT_INFO) {
 		MAKE_STD_ZVAL(info); 
 		if (array_init(info) != SUCCESS) {
 			zend_error(E_ERROR, "dbx_query: unable to create info-array for results...");
@@ -426,7 +461,7 @@ ZEND_FUNCTION(dbx_query)
 	}
 	zend_hash_update(Z_OBJPROP_P(return_value), "cols", 5, (void *)&(rv_column_count), sizeof(zval *), NULL);
 	/* fill the info array with columnnames and types (indexed and assoc) */
-	if (info_flags & DBX_RESULT_INFO) {
+	if (result_flags & DBX_RESULT_INFO) {
 		zval *info_row_name;
 		zval *info_row_type;
 		MAKE_STD_ZVAL(info_row_name);
@@ -450,6 +485,13 @@ ZEND_FUNCTION(dbx_query)
 			MAKE_STD_ZVAL(rv_column_name);
 			ZVAL_LONG(rv_column_name, 0);
 			result = switch_dbx_getcolumnname(&rv_column_name, &rv_result_handle, col_index, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+			/* modify case if requested */
+			if (colcase==DBX_COLNAMES_UPPERCASE) {
+				php_strtoupper(Z_STRVAL_P(rv_column_name), Z_STRLEN_P(rv_column_name));
+				}
+			if (colcase==DBX_COLNAMES_LOWERCASE) {
+				php_strtolower(Z_STRVAL_P(rv_column_name), Z_STRLEN_P(rv_column_name));
+				}
 			if (result) { 
 				zend_hash_index_update(Z_ARRVAL_P(info_row_name), col_index, (void *)&(rv_column_name), sizeof(zval *), NULL);
 			} else {
@@ -479,7 +521,7 @@ ZEND_FUNCTION(dbx_query)
 		if (result) {
 			zend_hash_index_update(Z_ARRVAL_P(data), row_count, (void *)&(rv_row), sizeof(zval *), (void **) &row_ptr);
 			/* associate results with fieldnames */
-			if (info_flags & DBX_RESULT_ASSOC) {
+			if (result_flags & DBX_RESULT_ASSOC) {
 				zval **columnname_ptr, **actual_ptr;
 				for (col_index=0; col_index<Z_LVAL_P(rv_column_count); ++col_index) {
 					zend_hash_index_find(Z_ARRVAL_PP(inforow_ptr), col_index, (void **) &columnname_ptr);
