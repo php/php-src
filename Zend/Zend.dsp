@@ -7,20 +7,20 @@
 CFG=Zend - Win32 Release_inline
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
-!MESSAGE 
+!MESSAGE
 !MESSAGE NMAKE /f "Zend.mak".
-!MESSAGE 
+!MESSAGE
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
-!MESSAGE 
+!MESSAGE
 !MESSAGE NMAKE /f "Zend.mak" CFG="Zend - Win32 Release_inline"
-!MESSAGE 
+!MESSAGE
 !MESSAGE Possible choices for configuration are:
-!MESSAGE 
+!MESSAGE
 !MESSAGE "Zend - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "Zend - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "Zend - Win32 Release_inline" (based on "Win32 (x86) Static Library")
-!MESSAGE 
+!MESSAGE
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
@@ -95,7 +95,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ENDIF 
+!ENDIF
 
 # Begin Target
 
@@ -128,6 +128,14 @@ SOURCE=.\zend_compile.c
 # Begin Source File
 
 SOURCE=.\zend_constants.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_default_classes.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_dynamic_array.c
 # End Source File
 # Begin Source File
 
@@ -183,6 +191,14 @@ SOURCE=.\zend_llist.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_mm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_object_handlers.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_objects.c
 # End Source File
 # Begin Source File
@@ -212,6 +228,14 @@ SOURCE=.\zend_sprintf.c
 # Begin Source File
 
 SOURCE=.\zend_stack.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_stream.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ts_hash.c
 # End Source File
 # Begin Source File
 
@@ -255,11 +279,23 @@ SOURCE=.\zend_constants.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_default_classes.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_dynamic_array.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_errors.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\zend_execute.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_execute_locks.h
 # End Source File
 # Begin Source File
 
@@ -272,6 +308,10 @@ SOURCE=.\zend_fast_cache.h
 # Begin Source File
 
 SOURCE=.\zend_globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_globals_macros.h
 # End Source File
 # Begin Source File
 
@@ -291,6 +331,18 @@ SOURCE=.\zend_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_ini_parser.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ini_scanner.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_istdiostream.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.h"
 # End Source File
 # Begin Source File
@@ -307,7 +359,23 @@ SOURCE=.\zend_llist.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_mm.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_modules.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_object_handlers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_objects.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_objects_API.h
 # End Source File
 # Begin Source File
 
@@ -324,6 +392,14 @@ SOURCE=.\zend_qsort.h
 # Begin Source File
 
 SOURCE=.\zend_stack.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_stream.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\zend_ts_hash.h
 # End Source File
 # Begin Source File
 
@@ -357,7 +433,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
 
-!ENDIF 
+!ENDIF
 
 # End Source File
 # Begin Source File
@@ -412,7 +488,7 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
-!ENDIF 
+!ENDIF
 
 # End Source File
 # End Group
@@ -441,7 +517,7 @@ InputPath=.\zend_ini_scanner.l
 
 !ELSEIF  "$(CFG)" == "Zend - Win32 Release_inline"
 
-!ENDIF 
+!ENDIF
 
 # End Source File
 # Begin Source File
@@ -478,7 +554,7 @@ InputPath=".\zend_language_scanner.l"
 
 # End Custom Build
 
-!ENDIF 
+!ENDIF
 
 # End Source File
 # End Group
