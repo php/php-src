@@ -434,9 +434,15 @@ void java_call_function_handler
 
     jmethodID co = (*jenv)->GetMethodID(jenv, JG(reflect_class), "CreateObject",
       "(Ljava/lang/String;[Ljava/lang/Object;J)V");
-    jstring className=(*jenv)->NewStringUTF(jenv, arguments[0]->value.str.val);
+    jstring className;
     (pval*)(long)result = object;
 
+    if (ZEND_NUM_ARGS() < 1) {
+      php_error(E_ERROR, "Missing classname in new Java() call");
+      return;
+    }
+
+    className=(*jenv)->NewStringUTF(jenv, arguments[0]->value.str.val);
     (*jenv)->CallVoidMethod(jenv, JG(php_reflect), co,
       className, _java_makeArray(arg_count-1, arguments+1 JG_CC), result);
 
