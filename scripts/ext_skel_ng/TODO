@@ -24,3 +24,4 @@
   - dual/multiple licensing?
 - full support for stream wrappers and filters
 - DTD support for creating custom tests
+- VC++ 7 (VS.net) project files
