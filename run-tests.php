@@ -575,7 +575,7 @@ function system_with_timeout($commandline)
 
 function run_test($php,$file)
 {
-	global $log_format, $info_params, $ini_overwrites;
+	global $log_format, $info_params, $ini_overwrites, $cwd;
 
 	if (DETAILED) echo "
 =================
@@ -608,7 +608,7 @@ TEST $file
 	}
 	fclose($fp);
 
-	$shortname = str_replace($GLOBALS['cwd'].'/', '', $file);
+	$shortname = str_replace($cwd.'/', '', $file);
 	$tested = trim($section_text['TEST'])." [$shortname]";
 
 	$tmp = realpath(dirname($file));
