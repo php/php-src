@@ -1,5 +1,20 @@
 History
 
+2004/03/04: Version 2.2.4
+
+2004/03/04: [impl] (thanks Moriyoshi Koizumi)
+                   fix many warning in Win32 VC++ with /W3 option.
+
+2004/03/02: Version 2.2.3
+
+2004/03/02: [bug]  (thanks Isao Sonobe)
+                   return invalid capture region value if capture history
+                   is used. (OP_MEMORY_END_PUSH_REC bug)
+                   ex. /\\g<p>(?@<p>\\(\\g<s>\\)){0}(?<s>(?:\\g<p>)*|){0}/
+                       .match("((())())")
+2004/03/02: [impl] add :nodoc: to onig_stat_print() for RDoc.
+2004/03/02: [impl] don't use ONIG_SOURCE_IS_WRAPPED.
+
 2004/02/27: Version 2.2.2
 
 2004/02/27: [impl] fix the position of onig_stat_print().
@@ -8,7 +23,8 @@ History
 
 2004/02/26: Version 2.2.1
 
-2004/02/26: [bug]  invalid definition at onig_error_code_to_str()
+2004/02/26: [bug]  [bugs.php.net:#26677] (thanks behrens)
+                   invalid definition at onig_error_code_to_str()
                    in the case of NOT HAVE_STDARG_PROTOTYPES.
 
 2004/02/25: Version 2.2.0

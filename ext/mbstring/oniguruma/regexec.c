@@ -935,6 +935,9 @@ static int MaxStackDepth = 0;
 } while (0)
 
 #ifdef RUBY_PLATFORM
+/*
+ * :nodoc:
+ */
 static VALUE onig_stat_print()
 {
   onig_print_statistics(stderr);
@@ -951,7 +954,7 @@ extern void onig_statistics_init()
   MaxStackDepth = 0;
 
 #ifdef RUBY_PLATFORM
-  ONIG_RUBY_DEFINE_GLOBAL_FUNCTION("onig_stat_print", onig_stat_print, 0);
+  rb_define_global_function("onig_stat_print", onig_stat_print, 0);
 #endif
 }
 
@@ -984,7 +987,7 @@ extern int
 onig_is_in_code_range(UChar* p, OnigCodePoint code)
 {
   OnigCodePoint n, *data;
-  int low, high, x;
+  OnigCodePoint low, high, x;
 
   GET_CODE_POINT(n, p);
   data = (OnigCodePoint* )p;
@@ -1779,8 +1782,8 @@ match_at(regex_t* reg, UChar* str, UChar* end, UChar* sstart,
 #ifdef USE_SUBEXP_CALL
     case OP_MEMORY_END_PUSH_REC:  STAT_OP_IN(OP_MEMORY_END_PUSH_REC);
       GET_MEMNUM_INC(mem, p);
+      STACK_GET_MEM_START(mem, stkp); /* should be before push mem-end. */
       STACK_PUSH_MEM_END(mem, s);
-      STACK_GET_MEM_START(mem, stkp);
       mem_start_stk[mem] = GET_STACK_INDEX(stkp);
       STAT_OP_OUT;
       continue;
@@ -1790,7 +1793,12 @@ match_at(regex_t* reg, UChar* str, UChar* end, UChar* sstart,
       GET_MEMNUM_INC(mem, p);
       mem_end_stk[mem] = (StackIndex )((void* )s);
       STACK_GET_MEM_START(mem, stkp);
-      mem_start_stk[mem] = GET_STACK_INDEX(stkp);
+
+      if (BIT_STATUS_AT(reg->bt_mem_start, mem))
+	mem_start_stk[mem] = GET_STACK_INDEX(stkp);
+      else
+	mem_start_stk[mem] = (StackIndex )((void* )stkp->u.mem.pstr);
+
       STACK_PUSH_MEM_END_MARK(mem);
       STAT_OP_OUT;
       continue;
@@ -3044,11 +3052,11 @@ onig_search(regex_t* reg, UChar* str, UChar* end,
       semi_end = end;
 
     end_buf:
-      if (semi_end - str < reg->anchor_dmin)
+      if ((OnigDistance )(semi_end - str) < reg->anchor_dmin)
 	goto mismatch_no_msa;
 
       if (range > start) {
-	if (semi_end - start > reg->anchor_dmax) {
+	if ((OnigDistance )(semi_end - start) > reg->anchor_dmax) {
 	  start = semi_end - reg->anchor_dmax;
 	  if (start < end)
 	    start = onigenc_get_right_adjust_char_head(reg->enc, str, start);
@@ -3056,17 +3064,17 @@ onig_search(regex_t* reg, UChar* str, UChar* end,
 	    start = onigenc_get_prev_char_head(reg->enc, str, end);
 	  }
 	}
-	if (semi_end - (range - 1) < reg->anchor_dmin) {
+	if ((OnigDistance )(semi_end - (range - 1)) < reg->anchor_dmin) {
 	  range = semi_end - reg->anchor_dmin + 1;
 	}
 
 	if (start >= range) goto mismatch_no_msa;
       }
       else {
-	if (semi_end - range > reg->anchor_dmax) {
+	if ((OnigDistance )(semi_end - range) > reg->anchor_dmax) {
 	  range = semi_end - reg->anchor_dmax;
 	}
-	if (semi_end - start < reg->anchor_dmin) {
+	if ((OnigDistance )(semi_end - start) < reg->anchor_dmin) {
 	  start = semi_end - reg->anchor_dmin;
 	  start = ONIGENC_LEFT_ADJUST_CHAR_HEAD(reg->enc, str, start);
 	  if (range > start) goto mismatch_no_msa;

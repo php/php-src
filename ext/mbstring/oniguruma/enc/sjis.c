@@ -53,8 +53,8 @@ sjis_code_to_mbc(OnigCodePoint code, UChar *buf)
 {
   UChar *p = buf;
 
-  if ((code & 0xff00) != 0) *p++ = ((code >>  8) & 0xff);
-  *p++ = (code & 0xff);
+  if ((code & 0xff00) != 0) *p++ = (UChar )(((code >>  8) & 0xff));
+  *p++ = (UChar )(code & 0xff);
 
 #if 0
   if (enc_len(ONIG_ENCODING_SJIS, buf[0]) != (p - buf))

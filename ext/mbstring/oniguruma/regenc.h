@@ -8,10 +8,9 @@
 #ifndef REGENC_H
 #define REGENC_H
 
-#ifndef ONIG_SOURCE_IS_WRAPPED
+#ifndef RUBY_PLATFORM
 #include "config.h"
 #endif
-
 #include "oniguruma.h"
 
 #ifndef NULL

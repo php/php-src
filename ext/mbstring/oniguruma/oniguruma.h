@@ -13,7 +13,7 @@
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   2
 #define ONIGURUMA_VERSION_MINOR   2
-#define ONIGURUMA_VERSION_TEENY   2
+#define ONIGURUMA_VERSION_TEENY   4
 
 #ifndef P_
 #if defined(__STDC__) || defined(_WIN32)

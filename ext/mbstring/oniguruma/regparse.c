@@ -1585,7 +1585,7 @@ add_code_range_to_buf(BBuf** pbuf, OnigCodePoint from, OnigCodePoint to)
       to = data[(high - 1)*2 + 1];
   }
 
-  if (inc_n != 0 && high < n) {
+  if (inc_n != 0 && (OnigCodePoint )high < n) {
     int from_pos = SIZE_CODE_POINT * (1 + high * 2);
     int to_pos   = SIZE_CODE_POINT * (1 + (low + 1) * 2);
     int size = (n - high) * 2 * SIZE_CODE_POINT;
@@ -1666,8 +1666,8 @@ not_code_range_buf(BBuf* bbuf, BBuf** pbuf)
 static int
 or_code_range_buf(BBuf* bbuf1, int not1, BBuf* bbuf2, int not2, BBuf** pbuf)
 {
-  int i, r;
-  OnigCodePoint n1, *data1;
+  int r;
+  OnigCodePoint i, n1, *data1;
   OnigCodePoint from, to;
 
   *pbuf = (BBuf* )NULL;
@@ -1762,8 +1762,8 @@ and_code_range1(BBuf** pbuf, OnigCodePoint from1, OnigCodePoint to1,
 static int
 and_code_range_buf(BBuf* bbuf1, int not1, BBuf* bbuf2, int not2, BBuf** pbuf)
 {
-  int i, j, r;
-  OnigCodePoint n1, n2, *data1, *data2;
+  int r;
+  OnigCodePoint i, j, n1, n2, *data1, *data2;
   OnigCodePoint from, to, from1, to1, from2, to2;
 
   *pbuf = (BBuf* )NULL;
@@ -3212,8 +3212,9 @@ static int
 add_ctype_to_cc_by_list(CClassNode* cc, int ctype, int not,
 			OnigEncoding enc)
 {
-  int i, j, r, nsb, nmb;
+  int i, r, nsb, nmb;
   OnigCodePointRange *sbr, *mbr;
+  OnigCodePoint j;
 
   r = ONIGENC_GET_CTYPE_CODE_RANGE(enc, ctype, &nsb, &nmb, &sbr, &mbr);
   if (r != 0) return r;

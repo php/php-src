@@ -8,8 +8,6 @@
 /*
  * Source wrapper for Ruby.
  */
-#define ONIG_SOURCE_IS_WRAPPED
-
 #include "regint.h"
 #include "regex.h"
 
