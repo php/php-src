@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.0.5
 - Fixed bug #32530 (chunk_split() does not append endstr if chunklen is  
   longer then the original string). (Ilia)
+- Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
+  (kameshj at fastmail dot fm)
 
 31 Mar 2005, PHP 5.0.4
 - Added SNMPv2 support. (harrie)
