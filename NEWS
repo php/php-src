@@ -86,6 +86,8 @@ PHP                                                                        NEWS
 - Fixed bug #28598 (Lost support for MS Symbol fonts). (Pierre)
 - Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
   characters). (Moriyoshi)
+- Fixed bug #28228 (NULL decimal separator is not being handled correctly).
+  (Ilia)
 - Fixed bug #28209 (strtotime("now")). (Derick)
 - Fixed bug #27798 (private / protected variables not exposed by 
   get_object_vars() inside class). (Marcus)
