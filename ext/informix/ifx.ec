@@ -923,7 +923,7 @@ EXEC SQL END DECLARE SECTION;
 						}
 						len++;
 
-						EXEC SQL SET DESCRIPTOR :descrpid VALUE :i 
+						EXEC SQL SET DESCRIPTOR :i_descrpid VALUE :i 
 							DATA= :char_tmp, 
 							LENGTH= :len, 
 							INDICATOR= :indicator, 
