@@ -73,7 +73,7 @@ LIBOBJS=@LIBOBJS@
 SOURCE = main.c internal_functions.c snprintf.c php3_sprintf.c \
        configuration-parser.c configuration-scanner.c request_info.c \
        safe_mode.c fopen-wrappers.c php3_realpath.c alloca.c output.c \
-       php_ini.c SAPI.c cgi_main.c rfc1867.c dlist.c
+       php_ini.c SAPI.c cgi_main.c rfc1867.c dlist.c php_content_types.c
 OBJS = $(SOURCE:.c=.o) $(LIBOBJS)
 PHPLIBS = -Llibzend -lzend -Lext -lphpext
 LIBS = $(PHPLIBS) $(EXTRA_LIBS) @LIBS@
