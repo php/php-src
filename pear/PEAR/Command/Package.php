@@ -376,7 +376,8 @@ List all depencies the package has.'
         if (is_array($info['release_deps'])) {
             $this->ui->startTable(array('caption' => 'Dependencies for ' . $info['package'],
                                         'border' => true));
-            $this->ui->tableRow(array("Type", "Name", "Relation", "Version"));
+            $this->ui->tableRow(array("Type", "Name", "Relation", "Version"),
+                                array('bold' => true));
 
             foreach ($info['release_deps'] as $d) {
 
