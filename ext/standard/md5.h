@@ -53,7 +53,7 @@
    documentation and/or software.
  */
 
-#include "global.h"
+#include "php_global.h"
 
 /* MD5 context. */
 typedef struct {
