@@ -77,6 +77,9 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 				supp = estrndup(Z_STRVAL_PP(item), Z_STRLEN_PP(item));
 			}
 		}
+
+		zval_ptr_dtor(&info);
+		info = NULL;
 	}
 
 	if (supp) {

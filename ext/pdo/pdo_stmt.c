@@ -984,10 +984,11 @@ static PHP_METHOD(PDOStatement, nextRowset)
 	stmt->columns = NULL;
 
 	if (!stmt->methods->next_rowset(stmt TSRMLS_CC)) {
+		stmt->column_count = 0;
 		PDO_HANDLE_STMT_ERR();
 		RETURN_FALSE;
 	}
-
+	
 	pdo_stmt_describe_columns(stmt TSRMLS_CC);
 
 	RETURN_TRUE;
@@ -1186,15 +1187,13 @@ static void free_statement(pdo_stmt_t *stmt TSRMLS_DC)
 		efree(stmt->query_string);
 	}
 
-	if (stmt->column_count) {
+	if (stmt->columns) {
 		int i;
 		struct pdo_column_data *cols = stmt->columns;
 
 		for (i = 0; i < stmt->column_count; i++) {
 			efree(cols[i].name);
 		}
-	}
-	if (stmt->columns) {
 		efree(stmt->columns);
 	}
 
