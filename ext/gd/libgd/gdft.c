@@ -349,7 +349,7 @@ fontTest (void *element, void *key)
   return (strcmp (a->fontlist, b->fontlist) == 0);
 }
 
-static void *fontFetch (char **error, void *key)
+static void *fontFetch (char **error, void *key TSRMLS_DC)
 {
 	font_t *a;
 	fontkey_t *b = (fontkey_t *) key;
