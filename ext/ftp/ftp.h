@@ -49,8 +49,10 @@ typedef struct databuf
 	int		fd;			/* data connection */
 	ftptype_t	type;			/* transfer type */
 	char		buf[FTP_BUFSIZE];	/* data buffer */
+#if HAVE_OPENSSL_EXT
 	SSL		*ssl_handle;	/* ssl handle */
 	int		ssl_active;		/* flag if ssl is active or not */
+#endif
 } databuf_t;
 
 typedef struct ftpbuf
