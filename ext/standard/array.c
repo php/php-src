@@ -137,7 +137,7 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 	} else {
 		Z_TYPE(first) = IS_STRING;
 		Z_STRVAL(first) = f->arKey;
-		Z_STRLEN(first) = f->nKeyLength;
+		Z_STRLEN(first) = f->nKeyLength-1;
 	}
 
 	if (s->nKeyLength == 0) {
@@ -146,7 +146,7 @@ static int array_key_compare(const void *a, const void *b TSRMLS_DC)
 	} else {
 		Z_TYPE(second) = IS_STRING;
 		Z_STRVAL(second) = s->arKey;
-		Z_STRLEN(second) = s->nKeyLength;
+		Z_STRLEN(second) = s->nKeyLength-1;
 	}
  
     if (ARRAYG(compare_func)(&result, &first, &second TSRMLS_CC) == FAILURE) {
