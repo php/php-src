@@ -1,4 +1,6 @@
 Module				Status
 ------				------
 MySQL				Working
-COM					Working
+COM				Working
+WDDX				Not yet ported
+PCRE				Working
