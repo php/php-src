@@ -2,6 +2,14 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added a new parameter to mail() which appends aditional command line
+  parameters to the mail program. (Derick)
+- Added Udm_Clear_Search_Limits mnoGoSearch extension function.
+- Fixed default search path. (gluke)
+- Added new Udm_Add_Search_Limit mnoGoSearch extension function.
+  Some bugfixes and example update. (gluke)
+- Fixed mnogosearch protos. Fixed mnogosearch functions return values.
+  A bug with capital letters break search has been fixed. (gluke)
 - Static methods can now be called via call_user_method_* functions, e.g.
   call_user_method('method', 'class'), and also array('class', 'method')
   constructs (for array_walk(), for example). (Andrei, Zend Engine)
