@@ -12,6 +12,7 @@
 /** @brief seekable iterator
  * @author  Marcus Boerger
  * @version 1.0
+ * @since PHP 5.0
  *
  * Turns a normal iterator ino a seekable iterator. When there is a way
  * to seek on an iterator LimitIterator can use this to efficiently rewind

@@ -13,6 +13,7 @@
  * @brief   Iterator that iterates over several iterators one after the other
  * @author  Marcus Boerger
  * @version 1.0
+ * @since PHP 5.1
  */
 class AppendIterator implements OuterIterator
 {

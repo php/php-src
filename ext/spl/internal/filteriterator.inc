@@ -13,6 +13,7 @@
  * @brief   Regular expression filter for string iterators
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.0
  *
  * Instances of this class act as a filter around iterators. In other words 
  * you can put an iterator into the constructor and the instance will only 

@@ -129,6 +129,7 @@
 
 /** @ingroup ZendEngine
  * @brief Basic Exception class.
+ * @since PHP 5.0
  */
 class Exception
 {
@@ -221,6 +222,7 @@ class Exception
 
 /** @ingroup SPL
  * @brief Exception that represents error in the program logic.
+ * @since PHP 5.1
  *
  * This kind of exceptions should directly leed to a fix in your code.
  */
@@ -230,6 +232,7 @@ class LogicException extends Exception
 
 /** @ingroup SPL
  * @brief Exception thrown when a function call was illegal.
+ * @since PHP 5.1
  */
 class BadFunctionCallException extends LogicException
 {
@@ -237,6 +240,7 @@ class BadFunctionCallException extends LogicException
 
 /** @ingroup SPL
  * @brief Exception thrown when a method call was illegal.
+ * @since PHP 5.1
  */
 class BadMethodCallException extends BadFunctionCallException
 {
@@ -244,6 +248,7 @@ class BadMethodCallException extends BadFunctionCallException
 
 /** @ingroup SPL
  * @brief Exception that denotes a value not in the valid domain was used.
+ * @since PHP 5.1
  *
  * This kind of exception should be used to inform about domain erors in 
  * mathematical sense.
@@ -254,6 +259,7 @@ class DomainException extends LogicException
 
 /** @ingroup SPL
  * @brief Exception that denotes invalid arguments were passed.
+ * @since PHP 5.1
  */
 class InvalidArgumentException extends LogicException
 {
@@ -261,6 +267,7 @@ class InvalidArgumentException extends LogicException
 
 /** @ingroup SPL
  * @brief Exception thrown when a parameter exceeds the allowed length.
+ * @since PHP 5.1
  *
  * This can be used for strings length, array size, file size, number of 
  * elements read from an Iterator and so on.
@@ -271,6 +278,7 @@ class LengthException extends LogicException
 
 /** @ingroup SPL
  * @brief Exception thrown when an illegal index was requested.
+ * @since PHP 5.1
  *
  * This represents errors that should be detected at compile time.
  *
@@ -282,6 +290,7 @@ class OutOfRangeException extends LogicException
 
 /** @ingroup SPL
  * @brief Exception thrown for errors that are only detectable at runtime. 
+ * @since PHP 5.1
  */
 class RuntimeException extends Exception
 {
@@ -289,6 +298,7 @@ class RuntimeException extends Exception
 
 /** @ingroup SPL
  * @brief Exception thrown when an illegal index was requested.
+ * @since PHP 5.1
  *
  * This represents errors that cannot be detected at compile time.
  *
@@ -300,6 +310,7 @@ class OutOfBoundsException extends RuntimeException
 
 /** @ingroup SPL
  * @brief Exception thrown to indicate arithmetic/buffer overflow.
+ * @since PHP 5.1
  */
 class OverflowException extends RuntimeException
 {
@@ -307,6 +318,7 @@ class OverflowException extends RuntimeException
 
 /** @ingroup SPL
  * @brief Exception thrown to indicate range errors during program execution.
+ * @since PHP 5.1
  *
  * Normally this means there was an arithmetic error other than under/overflow.
  */
@@ -316,6 +328,7 @@ class RangeException extends RuntimeException
 
 /** @ingroup SPL
  * @brief Exception Exception thrown to indicate arithmetic/buffer underflow.
+ * @since PHP 5.1
  */
 class UnderflowException extends RuntimeException
 {
@@ -323,6 +336,7 @@ class UnderflowException extends RuntimeException
 
 /** @ingroup ZendEngine
  * @brief Interface to override array access of objects.
+ * @since PHP 5.0
  */
 interface ArrayAccess
 {
@@ -348,6 +362,7 @@ interface ArrayAccess
 
 /** @ingroup ZendEngine
  * @brief Interface to detect a class is traversable using foreach.
+ * @since PHP 5.0
  *
  * Abstract base interface that cannot be implemented alone. Instead it
  * must be implemented by either IteratorAggregate or Iterator. 
@@ -366,6 +381,7 @@ interface Traversable
 
 /** @ingroup ZendEngine
  * @brief Interface to create an external Iterator.
+ * @since PHP 5.0
  *
  * @note This is an engine internal interface.
  */ 
@@ -378,6 +394,7 @@ interface IteratorAggregate extends Traversable
 
 /** @ingroup ZendEngine
  * @brief Basic iterator
+ * @since PHP 5.0
  *
  * Interface for external iterators or objects that can be iterated 
  * themselves internally.
@@ -409,6 +426,7 @@ interface Iterator extends Traversable
 
 /** @ingroup SPL
  * @brief This Interface allows to hook into the global count() function.
+ * @since PHP 5.1
  */
 interface Countable
 {
@@ -419,6 +437,7 @@ interface Countable
 
 /** @ingroup SPL
  * @brief An Array wrapper
+ * @since PHP 5.0
  *
  * This array wrapper allows to recursively iterate over Arrays and public 
  * Object properties.
@@ -478,6 +497,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 
 /** @ingroup SPL
  * @brief An Array iterator
+ * @since PHP 5.0
  *
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
@@ -539,6 +559,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 
 /** @ingroup SPL
  * @brief Directory iterator
+ * @since PHP 5.0
  */
 class DirectoryIterator implements Iterator
 {
@@ -631,6 +652,7 @@ class DirectoryIterator implements Iterator
 
 /** @ingroup SPL
  * @brief recursive directory iterator
+ * @since PHP 5.0
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
@@ -645,6 +667,7 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 
 /** @ingroup SPL
  * @brief recursive SimpleXML_Element iterator
+ * @since PHP 5.0
  *
  * The SimpleXMLIterator implements the RecursiveIterator interface. This 
  * allows iteration over all elements using foreach or an appropriate while
@@ -666,6 +689,7 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 
 /** @ingroup SPL
  * @brief observer of the observer pattern
+ * @since PHP 5.1
  *
  * For a detailed explanation see Observer pattern in
  * <em>
@@ -683,6 +707,7 @@ interface Observer
 
 /** @ingroup SPL
  * @brief ubject to the observer pattern
+ * @since PHP 5.1
  * @see Observer
  */
 interface Subject

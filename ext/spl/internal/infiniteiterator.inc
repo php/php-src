@@ -13,6 +13,7 @@
  * @brief   An infinite Iterator
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.1
  *
  * This Iterator takes another Iterator and infinitvely iterates it by
  * rewinding it when its end is reached.

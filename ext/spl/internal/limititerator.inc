@@ -13,6 +13,7 @@
  * @brief   Limited Iteration over another Iterator
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.0
  *
  * A class that starts iteration at a certain offset and only iterates over
  * a specified amount of elements.

@@ -11,6 +11,7 @@
 
 /** @ingroup SPL
  * @brief Basic Iterator wrapper
+ * @since PHP 5.1
  */
 class IteratorIterator implements OuterIterator
 {

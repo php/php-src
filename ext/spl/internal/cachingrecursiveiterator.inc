@@ -13,6 +13,7 @@
  * @brief   Cached recursive iteration over another Iterator
  * @author  Marcus Boerger
  * @version 1.1
+ * @since PHP 5.0
  *
  * @see CachingIterator
  */

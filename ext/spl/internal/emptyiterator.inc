@@ -13,7 +13,7 @@
  * @brief   An empty Iterator
  * @author  Marcus Boerger
  * @version 1.0
- *
+ * @since PHP 5.1
  */
 class EmptyIterator implements Iterator
 {
