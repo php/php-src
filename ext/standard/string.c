@@ -654,30 +654,25 @@ PHP_FUNCTION(wordwrap)
 		for (current = 0; current < textlen; current++) {
 			if (text[current] == breakchar[0]) {
 				laststart = lastspace = current;
-			}
-			else if (text[current] == ' ') {
+			} else if (text[current] == ' ') {
 				if (current - laststart >= linelength) {
 					newtext[current] = breakchar[0];
 					laststart = current;
 				}
 				lastspace = current;
-			}
-			else if (current - laststart >= linelength
-					&& laststart != lastspace) {
+			} else if (current - laststart >= linelength && laststart != lastspace) {
 				newtext[lastspace] = breakchar[0];
 				laststart = lastspace;
 			}
 		}
 
 		RETURN_STRINGL(newtext, textlen, 0);
-	}
-	else {
+	} else {
 		/* Multiple character line break or forced cut */
 		if (linelength > 0) {
 			/* Add extra 10% to accomodate strings with unpredicatable number of breaks */
 			newtextlen = textlen + (int)((textlen/linelength + 1) * breakcharlen * 1.1) + 1;
-		}
-		else {
+		} else {
 			newtextlen = textlen * (breakcharlen + 1) + 1;
 		}
 		newtext = emalloc(newtextlen);
@@ -950,8 +945,7 @@ PHP_FUNCTION(strtok)
 		STRTOK_TABLE(token++) = 1;
 
 	/* Skip leading delimiters */
-	while (STRTOK_TABLE(p))
-	{
+	while (STRTOK_TABLE(p)) {
 		if (++p >= pe) {
 			/* no other chars left */
 			BG(strtok_last) = NULL;
@@ -1478,8 +1472,7 @@ PHP_FUNCTION(strrpos)
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
 		found = strrchr(Z_STRVAL_PP(haystack), *Z_STRVAL_PP(needle));
-	}
-	else {
+	} else {
 		convert_to_long_ex(needle);
 		found = strrchr(Z_STRVAL_PP(haystack), (char) Z_LVAL_PP(needle));
 	}
@@ -1508,8 +1501,7 @@ PHP_FUNCTION(strrchr)
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
 		found = strrchr(Z_STRVAL_PP(haystack), *Z_STRVAL_PP(needle));
-	}
-	else {
+	} else {
 		convert_to_long_ex(needle);
 		found = strrchr(Z_STRVAL_PP(haystack), (char) Z_LVAL_PP(needle));
 	}
@@ -1690,8 +1682,7 @@ PHP_FUNCTION(substr_replace)
 	if (argc > 3) {
 		convert_to_long_ex(len);
 		l = Z_LVAL_PP(len);
-	}
-	else {
+	} else {
 		l = Z_STRLEN_PP(str);
 	}
 	
@@ -1705,8 +1696,9 @@ PHP_FUNCTION(substr_replace)
 		if (f < 0) {
 			f = 0;
 		}
-	} else if (f > Z_STRLEN_PP(str))
+	} else if (f > Z_STRLEN_PP(str)) {
 		f = Z_STRLEN_PP(str);
+	}
 
 
 	/* if "length" position is negative, set it to the length
@@ -2066,8 +2058,7 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2,
 	*max = 0;
 	for (p = (char *) txt1; p < end1; p++) {
 		for (q = (char *) txt2; q < end2; q++) {
-			for (l = 0; (p + l < end1) && (q + l < end2) && (p[l] == q[l]); 
-				 l++);
+			for (l = 0; (p + l < end1) && (q + l < end2) && (p[l] == q[l]); l++);
 			if (l > *max) {
 				*max = l;
 				*pos1 = p - txt1;
@@ -2193,9 +2184,9 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 				l--;
 			}
 		} else {
-			if (s != t)
+			if (s != t) {
 				*s++ = *t++;
-			else {
+			} else {
 				s++;
 				t++;
 			}
@@ -2790,8 +2781,9 @@ PHP_FUNCTION(str_replace)
 	if (Z_TYPE_PP(search) != IS_ARRAY) {
 		convert_to_string_ex(search);
 		convert_to_string_ex(replace);
-	} else if (Z_TYPE_PP(replace) != IS_ARRAY)
+	} else if (Z_TYPE_PP(replace) != IS_ARRAY) {
 		convert_to_string_ex(replace);
+	}
 
 	/* if subject is an array */
 	if (Z_TYPE_PP(subject) == IS_ARRAY) {
