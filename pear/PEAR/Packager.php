@@ -109,7 +109,6 @@ class PEAR_Packager extends PEAR_Common
         $np = @fopen($newpkgfile, "w");
         if (!$np) {
             chdir($oldcwd);
-            system("ls -l ".dirname($newpkgfile));
             return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile as $newpkgfile");
         }
         fwrite($np, $new_xml);
