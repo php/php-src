@@ -27,11 +27,8 @@
 #include "zend_list.h"
 
 
-ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (zvalue->type==IS_LONG) {
-		return;
-	}
 	switch (zvalue->type & ~IS_CONSTANT_INDEX) {
 		case IS_STRING:
 		case IS_CONSTANT:
@@ -104,7 +101,7 @@ ZEND_API void zval_add_ref(zval **p)
 }
 
 
-ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
+ZEND_API int _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	switch (zvalue->type) {
 		case IS_RESOURCE: {
