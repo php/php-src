@@ -705,15 +705,16 @@ PHP_FUNCTION(ksort)
 
 PHP_FUNCTION(count)
 {
-	pval *array;
+	pval **array;
 	HashTable *target_hash;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &array) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	target_hash = HASH_OF(array);
+
+	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		if (array->type == IS_STRING && array->value.str.val==undefined_variable_string) {
+		if ((*array)->type == IS_STRING && (*array)->value.str.val==undefined_variable_string) {
 			RETURN_LONG(0);
 		} else {
 			RETURN_LONG(1);

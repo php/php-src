@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- count() speedup. (Thies)
 - OCI8 supports appending and positioning when saving LOBs (Thies)
 - Added metaphone support (Thies)
 - OCI8 doesn't use define callbacks any longer. (Thies) 
