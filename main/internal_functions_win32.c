@@ -47,6 +47,7 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_output.h"
 #include "ext/standard/php_array.h"
+#include "ext/standard/php_assert.h"
 #include "ext/COM/php_COM.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
@@ -84,7 +85,8 @@ zend_module_entry *php3_builtin_modules[] = {
 	phpext_lcg_ptr,
 	phpext_session_ptr,
 	phpext_output_ptr,
-	phpext_array_ptr
+	phpext_array_ptr,
+	phpext_assert_ptr
 };
 
 	
