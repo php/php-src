@@ -33,6 +33,7 @@
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"
 #include "zend_ini.h"
+#include "zend_exceptions.h"
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free TSRMLS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts TSRMLS_CC)
