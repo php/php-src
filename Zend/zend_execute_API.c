@@ -499,7 +499,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 	}
 
 	if (result && (result->op_type != IS_UNUSED)) {
-		Ts[result->u.var].var = variable_ptr_ptr;
+		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
 		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
 	}
 }

@@ -81,10 +81,10 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, int *should_fr
 			return &Ts[node->u.var].tmp_var;
 			break;
 		case IS_VAR:
-			if (Ts[node->u.var].var) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var);
+			if (Ts[node->u.var].var.ptr_ptr) {
+				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 				*should_free = 0;
-				return *Ts[node->u.var].var;
+				return *Ts[node->u.var].var.ptr_ptr;
 			} else {
 				*should_free = 1;
 
@@ -139,10 +139,10 @@ static inline zval **_get_zval_ptr_ptr(znode *node, temp_variable *Ts ELS_DC)
 {
 	switch(node->op_type) {
 		case IS_VAR:
-			if (Ts[node->u.var].var) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var);
+			if (Ts[node->u.var].var.ptr_ptr) {
+				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 			}
-			return Ts[node->u.var].var;
+			return Ts[node->u.var].var.ptr_ptr;
 			break;
 		default:
 			return NULL;
@@ -159,10 +159,10 @@ static inline zval *_get_object_zval_ptr(znode *node, temp_variable *Ts, int *sh
 			return &Ts[node->u.var].tmp_var;
 			break;
 		case IS_VAR:
-			if (Ts[node->u.var].var) {
-				PZVAL_UNLOCK(*Ts[node->u.var].var);
+			if (Ts[node->u.var].var.ptr_ptr) {
+				PZVAL_UNLOCK(*Ts[node->u.var].var.ptr_ptr);
 				*should_free = 0;
-				*object_ptr_ptr = Ts[node->u.var].var;
+				*object_ptr_ptr = Ts[node->u.var].var.ptr_ptr;
 				return **object_ptr_ptr;
 			} else {
 				*should_free = 1;
@@ -286,8 +286,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				}
 				break;
 		}
-		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
-		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
+		Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
 		return;
 	}
 
@@ -295,8 +295,8 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 
 	if (variable_ptr == EG(error_zval_ptr)) {
 		if (result) {
-			Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
-			SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
+			Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
+			SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
 		}
 		return;
 	}
@@ -398,7 +398,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		(*variable_ptr_ptr)->EA.is_ref=0;
 	}
 	if (result) {
-		Ts[result->u.var].var = variable_ptr_ptr;
+		Ts[result->u.var].var.ptr_ptr = variable_ptr_ptr;
 		SELECTIVE_PZVAL_LOCK(*variable_ptr_ptr, result);
 	} 
 }
@@ -498,7 +498,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 	if (varname == &tmp_varname) {
 		zval_dtor(varname);
 	}
-	Ts[result->u.var].var = retval;	
+	Ts[result->u.var].var.ptr_ptr = retval;	
 	SELECTIVE_PZVAL_LOCK(*retval, result);
 }
 
@@ -583,7 +583,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
 	zval *container;
-	zval ***retval = &Ts[result->u.var].var;
+	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 
 
 	if (container_ptr == NULL) {
@@ -716,13 +716,13 @@ static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znod
 	zval *container = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
 
 	if (container->type != IS_ARRAY) {
-		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
-		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
+		Ts[result->u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
 		return;
 	}
 
-	Ts[result->u.var].var = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, BP_VAR_R ELS_CC);
-	SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
+	Ts[result->u.var].var.ptr_ptr = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, BP_VAR_R ELS_CC);
+	SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var.ptr_ptr, result);
 }
 
 
@@ -731,7 +731,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 	int free_op2;
 	zval **container_ptr = get_zval_ptr_ptr(op1, Ts, type);
 	zval *container;
-	zval ***retval = &Ts[result->u.var].var;
+	zval ***retval = &Ts[result->u.var].var.ptr_ptr;
 
 
 	if (container_ptr == NULL) {
@@ -1047,8 +1047,8 @@ binary_assign_op_addr: {
 						zend_error(E_ERROR, "Cannot use assign-op operators with overloaded objects nor string offsets");
 					}
 					if (*var_ptr == EG(error_zval_ptr)) {
-						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
-						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var, &opline->result);
+						Ts[opline->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
+						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var.ptr_ptr, &opline->result);
 						opline++;
 						continue;
 					}
@@ -1067,7 +1067,7 @@ binary_assign_op_addr: {
 					previous_lock_count = (*var_ptr)->EA.locks;
 					EG(binary_op)(*var_ptr, *var_ptr, get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R));
 					(*var_ptr)->EA.locks = previous_lock_count;
-					Ts[opline->result.u.var].var = var_ptr;
+					Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 					SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 					FREE_OP(&opline->op2, EG(free_op2));
 				}
@@ -1083,8 +1083,8 @@ binary_assign_op_addr: {
 						zend_error(E_ERROR, "Cannot increment/decrement overloaded objects nor string offsets");
 					}
 					if (*var_ptr == EG(error_zval_ptr)) {
-						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
-						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var, &opline->result);
+						Ts[opline->result.u.var].var.ptr_ptr = &EG(uninitialized_zval_ptr);
+						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var.ptr_ptr, &opline->result);
 						opline++;
 						continue;
 					}
@@ -1114,7 +1114,7 @@ binary_assign_op_addr: {
 					switch (opline->opcode) {
 						case ZEND_PRE_INC:
 						case ZEND_PRE_DEC:
-							Ts[opline->result.u.var].var = var_ptr;
+							Ts[opline->result.u.var].var.ptr_ptr = var_ptr;
 							SELECTIVE_PZVAL_LOCK(*var_ptr, &opline->result);
 							break;
 					}
@@ -1144,7 +1144,7 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_FETCH_DIM_R:
 				if (opline->extended_value == ZEND_FETCH_ADD_LOCK) {
-					PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+					PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 				}
 				zend_fetch_dimension_address(&opline->result, &opline->op1, &opline->op2, Ts, BP_VAR_R ELS_CC);
 				break;
@@ -1334,10 +1334,10 @@ binary_assign_op_addr: {
 						/* constructor call */
 
 						if (opline->op1.op_type == IS_VAR) {
-							PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+							PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 						}
 						if (opline->op2.op_type==IS_VAR) {
-							PZVAL_LOCK(*Ts[opline->op2.u.var].var);
+							PZVAL_LOCK(*Ts[opline->op2.u.var].var.ptr_ptr);
 						}
 					}
 					function_name = get_zval_ptr(&opline->op2, Ts, &EG(free_op2), BP_VAR_R);
@@ -1592,7 +1592,7 @@ send_by_ref:
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						zend_error(E_NOTICE, "Missing argument %d for %s()\n", opline->op1.u.constant.value.lval, get_active_function_name());
 						if (opline->result.op_type == IS_VAR) {
-							PZVAL_UNLOCK(*Ts[opline->result.u.var].var);
+							PZVAL_UNLOCK(*Ts[opline->result.u.var].var.ptr_ptr);
 						}
 					} else if (PZVAL_IS_REF(*param)) {
 						zend_assign_to_variable_reference(NULL, get_zval_ptr_ptr(&opline->result, Ts, BP_VAR_W), param, NULL ELS_CC);
@@ -1607,7 +1607,7 @@ send_by_ref:
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
 						if (opline->op2.op_type == IS_UNUSED) {
 							if (opline->result.op_type == IS_VAR) {
-								PZVAL_UNLOCK(*Ts[opline->result.u.var].var);
+								PZVAL_UNLOCK(*Ts[opline->result.u.var].var.ptr_ptr);
 							}
 							break;
 						}
@@ -1686,8 +1686,8 @@ send_by_ref:
 					int switch_expr_is_overloaded=0;
 
 					if (opline->op1.op_type==IS_VAR) {
-						if (Ts[opline->op1.u.var].var) {
-							PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+						if (Ts[opline->op1.u.var].var.ptr_ptr) {
+							PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 						} else {
 							switch_expr_is_overloaded = 1;
 							if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
@@ -1707,14 +1707,14 @@ send_by_ref:
 						 * are allocated at each get_zval_ptr())
 						 */
 						FREE_OP(&opline->op1, EG(free_op1));
-						Ts[opline->op1.u.var].var = NULL;
+						Ts[opline->op1.u.var].var.ptr_ptr = NULL;
 					}
 				}
 				break;
 			case ZEND_SWITCH_FREE:
 				switch (opline->op1.op_type) {
 					case IS_VAR:
-						if (!Ts[opline->op1.u.var].var) {
+						if (!Ts[opline->op1.u.var].var.ptr_ptr) {
 							get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 							FREE_OP(&opline->op1, EG(free_op1));
 						}
@@ -1978,7 +1978,7 @@ send_by_ref:
 					zval *object;
 
 					if (opline->op1.op_type == IS_VAR) {
-						PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+						PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 					}
 					
 					object = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
