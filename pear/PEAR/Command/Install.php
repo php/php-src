@@ -148,6 +148,9 @@ specified at once.
 
     function doInstall($command, $options, $params)
     {
+        if (sizeof($params) < 1) {
+            return $this->raiseError('Missing package to install. Try "help install"');
+        }
         if (empty($this->installer)) {
             $this->installer = &new PEAR_Installer($ui);
         }

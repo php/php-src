@@ -133,7 +133,7 @@ if ($fetype == 'Gtk') {
     Gtk::main();
 } else do {
     if ($command == 'help') {
-        usage(null, @$options[1][0]);
+        usage(null, @$options[1][1]);
     }
 
     PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
