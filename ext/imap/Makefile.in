@@ -5,6 +5,6 @@ srcdir    = @srcdir@
 VPATH     = @srcdir@
 
 LTLIBRARY_NAME    = libimap.la
-LTLIBRARY_SOURCES = imap.c
+LTLIBRARY_SOURCES = php_imap.c
 
 include $(topsrcdir)/build/ltlib.mk
