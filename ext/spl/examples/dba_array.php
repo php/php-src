@@ -4,7 +4,7 @@
  * @brief   Program DBA array utility
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2004
+ * @date    2003 - 2005
  *
  * Usage php dba_array.php \<file\> \<handler\> \<key\> [\<value\>]
  *

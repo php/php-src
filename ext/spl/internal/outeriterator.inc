@@ -4,7 +4,7 @@
  * @ingroup SPL
  * @brief class OuterIterator
  * @author  Marcus Boerger
- * @date    2003 - 2004
+ * @date    2003 - 2005
  *
  * SPL - Standard PHP Library
  */

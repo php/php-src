@@ -4,7 +4,7 @@
  * @brief   Program Dir without CVS subdirs
  * @ingroup Examples
  * @author  Marcus Boerger
- * @date    2003 - 2004
+ * @date    2003 - 2005
  *
  * Usage: php nocvsdir.php \<path\>
  *
