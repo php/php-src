@@ -71,10 +71,10 @@ AM_MAINTAINER_MODE
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 test -z "$CFLAGS" && auto_cflags=1
 
-dnl If we're using cc on HP-UX, add the -Ae to CFLAGS
-if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
-   test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
-fi
+dnl If we're using cc on HP-UX, add -Ae -D_HPUX_SOURCE [obsolete]
+dnl if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
+dnl   test -n "$GCC" || CFLAGS="-Ae $CFLAGS -D_HPUX_SOURCE"
+dnl fi
 
 dnl Checks for programs.
 AM_PROG_LIBTOOL
@@ -97,6 +97,8 @@ dnl ## there has to be a better way...
 dnl## OLDLIBS=$LIBS; LIBS=""
 AC_PROG_CC
 dnl## LIBS=$OLDLIBS
+
+AM_PROG_CC_STDC
 
 AC_PROG_RANLIB
 AC_PROG_CC_C_O
