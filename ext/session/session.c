@@ -803,7 +803,7 @@ static void php_session_start(PSLS_D)
 	int lensess;
 	ELS_FETCH();
 
-	if (PS(nr_open_sessions) != 0) 
+	if (PS(session_status) != php_session_none) 
 		return;
 
 	lensess = strlen(PS(session_name));
@@ -902,7 +902,7 @@ static void php_session_start(PSLS_D)
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
 	PS(define_sid) = define_sid;
 
-	PS(nr_open_sessions)++;
+	PS(session_status)= php_session_active;
 
 	php_session_cache_limiter(PSLS_C);
 	php_session_initialize(PSLS_C);
@@ -926,7 +926,7 @@ static zend_bool php_session_destroy(PSLS_D)
 {
 	zend_bool retval = SUCCESS;
 
-	if (PS(nr_open_sessions) == 0) {
+	if (PS(session_status) != php_session_active) {
 		php_error(E_WARNING, "Trying to destroy uninitialized session");
 		return FAILURE;
 	}
@@ -1069,7 +1069,7 @@ PHP_FUNCTION(session_set_save_handler)
 	if (ZEND_NUM_ARGS() != 6 || zend_get_parameters_array_ex(6, args) == FAILURE)
 		WRONG_PARAM_COUNT;
 	
-	if (PS(nr_open_sessions) > 0)
+	if (PS(session_status) != php_session_none) 
 		RETURN_FALSE;
 	
 	zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
@@ -1199,7 +1199,7 @@ PHP_FUNCTION(session_register)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (PS(nr_open_sessions) == 0)
+	if (PS(session_status) == php_session_none)
 		php_session_start(PSLS_C);
 
 	for (i = 0; i < argc; i++) {
@@ -1315,7 +1315,7 @@ void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newl
 {
 	PSLS_FETCH();
 
-	if (PS(define_sid) && PS(nr_open_sessions) > 0)
+	if (PS(define_sid) && (PS(session_status) == php_session_active))
 		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen);
 }
 
@@ -1323,7 +1323,7 @@ void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newle
 {
 	PSLS_FETCH();
 
-	if (PS(define_sid) && PS(nr_open_sessions) > 0)
+	if (PS(define_sid) && (PS(session_status) == php_session_active))
 		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
 }
 
@@ -1347,7 +1347,7 @@ PHP_FUNCTION(session_unset)
 	ulong     num_key;
 	PSLS_FETCH();
 	
-	if (PS(nr_open_sessions) == 0)
+	if (PS(session_status) == php_session_none)
 		RETURN_FALSE;
 	
 	for (zend_hash_internal_pointer_reset(&PS(vars));
@@ -1368,7 +1368,7 @@ static void php_rinit_session_globals(PSLS_D)
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(define_sid) = 0;
 	PS(id) = NULL;
-	PS(nr_open_sessions) = 0;
+	PS(session_status) = php_session_none;
 	PS(mod_data) = NULL;
 }
 
@@ -1398,7 +1398,7 @@ PHP_RINIT_FUNCTION(session)
 
 		if (!PS(mod)) {
 			/* current status is unusable */
-			PS(nr_open_sessions) = -1;
+			PS(session_status) = php_session_disabled;
 			return SUCCESS;
 		}
 	}
@@ -1412,9 +1412,9 @@ PHP_RINIT_FUNCTION(session)
 
 static void php_session_flush(PSLS_D)
 {
-	if (PS(nr_open_sessions) > 0) {
+	if(PS(session_status)==php_session_active) {
 		php_session_save_current_state(PSLS_C);
-		PS(nr_open_sessions)--;
+		PS(session_status)=php_session_none;
 	}
 }
 
