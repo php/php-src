@@ -68,8 +68,7 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	status = PQresultStatus(S->result);
 
 	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
-		H->last_err = PQerrorMessage(H->server);
-		pdo_pgsql_error("pgsql_stmt_execute", H->last_err);
+		pdo_pgsql_error_stmt(stmt, status);
 		return 0;
 	}
 
@@ -126,7 +125,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 
 	/* We have already increased count by 1 in pgsql_stmt_fetch() */
 	*ptr = PQgetvalue(S->result, S->current_row - 1, colno);
-	*len = strlen(*ptr);
+	*len = PQgetlength(S->result, S->current_row - 1, colno);
 
 	return 1;
 }

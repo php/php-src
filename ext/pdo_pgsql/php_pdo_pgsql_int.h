@@ -25,12 +25,19 @@
 
 #include <libpq-fe.h>
 
+typedef struct {
+	const char *file;
+	int line;
+	unsigned int errcode;
+	char *errmsg;
+} pdo_pgsql_error_info;
+
 /* stuff we use in a pgsql database handle */
 typedef struct {
 	PGconn		*server;
-	char		*last_err;
 	unsigned 	attached:1;
 	unsigned 	_reserved:31;
+	pdo_pgsql_error_info	einfo;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -41,7 +48,6 @@ typedef struct {
 	pdo_pgsql_db_handle     *H;
 	PGresult                *result;
 	int                     current_row;
-	char                    *last_err;
 	pdo_pgsql_column        *cols;
 } pdo_pgsql_stmt;
 
@@ -54,9 +60,9 @@ typedef struct {
 
 extern pdo_driver_t pdo_pgsql_driver;
 
-extern int _pdo_pgsql_error(char *what, char *errmsg, const char *file, int line TSRMLS_DC);
-#define pdo_pgsql_error(w,s)	_pdo_pgsql_error(w, s, __FILE__, __LINE__ TSRMLS_CC)
-extern int pgsql_handle_error(pdo_dbh_t *dbh, pdo_pgsql_db_handle *H, int errcode);
+extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *file, int line TSRMLS_DC);
+#define pdo_pgsql_error(d,e)	_pdo_pgsql_error(d, NULL, e, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_stmt(s,e)	_pdo_pgsql_error(s->dbh, s, e, __FILE__, __LINE__ TSRMLS_CC)
 
 extern struct pdo_stmt_methods pgsql_stmt_methods;
 
