@@ -543,6 +543,14 @@ static int array_user_compare(const void *a, const void *b TSRMLS_DC)
 	}
 }
 
+/* check is comparison function is valid */
+#define PHP_ARRAY_CMP_FUNC_CHECK(func_name)	\
+	if (!zend_is_callable(*func_name, 0, NULL)) {	\
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid comparison function.");	\
+		BG(user_compare_func_name) = old_compare_func;	\
+		RETURN_FALSE;	\
+	}	\
+
 /* {{{ proto bool usort(array array_arg, string cmp_function)
    Sort an array by values using a user-defined comparison function */
 PHP_FUNCTION(usort)
@@ -562,6 +570,9 @@ PHP_FUNCTION(usort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
+
+	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+	
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 1 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
@@ -590,6 +601,9 @@ PHP_FUNCTION(uasort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
+
+	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_compare, 0 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
@@ -665,6 +679,9 @@ PHP_FUNCTION(uksort)
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
+
+	PHP_ARRAY_CMP_FUNC_CHECK(BG(user_compare_func_name))
+
 	if (zend_hash_sort(target_hash, zend_qsort, array_user_key_compare, 0 TSRMLS_CC) == FAILURE) {
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
