@@ -366,15 +366,22 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 			char leakbuf[512];
 			snprintf(leakbuf, sizeof(leakbuf), __FILE__ "(%d) : Stream of type '%s' 0x%08X (path:%s) was not closed\n", __LINE__, stream->ops->label, (unsigned int)stream, stream->__orig_path);
 
-			STR_FREE(stream->__orig_path);
-			
+			if (stream->__orig_path) {
+				pefree(stream->__orig_path, stream->is_persistent);
+				stream->__orig_path = NULL;
+			}
+	
 # if defined(PHP_WIN32)
 			OutputDebugString(leakbuf);
 # else
 			fprintf(stderr, "%s", leakbuf);
 # endif
 		} else {
-			STR_FREE(stream->__orig_path);
+			if (stream->__orig_path) {
+				pefree(stream->__orig_path, stream->is_persistent);
+				stream->__orig_path = NULL;
+			}
+
 			pefree(stream, stream->is_persistent);
 		}
 #else
@@ -2532,6 +2539,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	php_stream *stream = NULL;
 	php_stream_wrapper *wrapper = NULL;
 	char *path_to_open;
+	int persistent = options & STREAM_OPEN_PERSISTENT;
 #if ZEND_DEBUG
 	char *copy_of_path = NULL;
 #endif
@@ -2572,7 +2580,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 
 #if ZEND_DEBUG
 	if (stream) {
-		copy_of_path = estrdup(path);
+		copy_of_path = pestrdup(path, persistent);
 		stream->__orig_path = copy_of_path;
 	}
 #endif
@@ -2587,7 +2595,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 				return stream;
 			case PHP_STREAM_RELEASED:
 #if ZEND_DEBUG
-				newstream->__orig_path = estrdup(path);
+				newstream->__orig_path = pestrdup(path, persistent);
 #endif
 				return newstream;
 			default:
@@ -2620,7 +2628,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	tidy_wrapper_error_log(wrapper TSRMLS_CC);
 #if ZEND_DEBUG
 	if (stream == NULL && copy_of_path != NULL) {
-		efree(copy_of_path);
+		pefree(copy_of_path, persistent);
 	}
 #endif
 	return stream;
