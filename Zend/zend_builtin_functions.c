@@ -1332,7 +1332,6 @@ ZEND_FUNCTION(debug_backtrace)
 			if (ptr->object) {
 				class_name = Z_OBJCE(*ptr->object)->name;
 				call_type = "->";
-				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
 			} else if (ptr->function_state.function->common.scope) {
 				class_name = ptr->function_state.function->common.scope->name;
 				call_type = "::";
