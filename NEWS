@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Made iconv() work well with libiconv or libgconv. (Moriyoshi, Yasuo)
+- Made iconv() work well with both libiconv or libgiconv. (Moriyoshi, Yasuo)
 - Fixed socket_set_timeout() on win32. (Jason, Edin, Jani)
 - Added domxml_node_namespace_uri(). (Rui Lopes)
 - Fixed win32 memory leak in /ext/sockets that would occur on any error 
