@@ -1,3 +1,96 @@
+2003-11-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      tests/classes/array_access_001.phpt
+      tests/classes/array_access_002.phpt
+      tests/classes/array_access_003.phpt
+      tests/classes/array_access_004.phpt:
+      Add new interface ArrayAccess to use objects as Arrays
+
+2003-11-24  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_constants.c:
+      - Fix newly introduced bug which stopped class constants from working.
+      - Thanks to Jan Lehnardt for reporting it.
+
+2003-11-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      fixed -> fixed section, added -> added section..etc.
+
+2003-11-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/RFCs/004.txt:
+      No longer needed.
+
+2003-11-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/Makefile.frag:
+      Make sure zend stuff is built first.
+
+2003-11-24  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Now we're getting closer to an RC we should start giving more detail
+      - about engine changes in NEWS.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_reflection_api.c:
+      - Fix __autoload() to preserve class case.
+      - Heads up, this patch might break stuff so please let me know if you
+      - bump into any problems.
+
+2003-11-24  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/gmp/gmp.c:
+      MFH: Fix build for other archs than x86.
+
+    * ext/gmp/gmp.c:
+      Fix the build for other than x86 archs.
+
+2003-11-24  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c:
+      added/fixed write property
+
+2003-11-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c:
+      Fix bug #26159 - SimpleXML XPath support (patch by Adam Trachtenberg)
+      a few fixes to memory corruption
+
+2003-11-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/compat.c:
+      Partial fix for bug #25803 (xml_get_current_byte_index() always returns 0)
+
+2003-11-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      MFH: Fixed bug #26355 (flock() doesn't initialize the wouldblock argument)
+
+    * ext/standard/file.c:
+      Fixed bug #26355 (flock() doesn't initialize the wouldblock argument)
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Added php_strip_whitespace() and php_check_syntax() functions.
+
 2003-11-23  Sara Golemon  <php@alphaweb.net>
 
     * main/streams/streams.c:
