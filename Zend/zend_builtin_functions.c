@@ -1247,6 +1247,27 @@ ZEND_FUNCTION(get_defined_constants)
 /* }}} */
 
 
+static zval *debug_backtrace_get_args(void ***curpos, int andjustonly TSRMLS_DC) {
+	void **p = *curpos - 2;
+	zval *arg_array, **arg;
+	int arg_count = (ulong) *p;
+
+	*curpos -= (arg_count+2); 
+
+	if (! andjustonly) {
+		MAKE_STD_ZVAL(arg_array);
+		array_init(arg_array);
+		p -= arg_count;
+    	while (--arg_count>=0) {
+			arg = (zval **) p++;
+			(*arg)->is_ref = 1;
+			(*arg)->refcount++;
+			add_next_index_zval(arg_array, *arg);
+		}
+		return arg_array;
+	}
+}
+
 /* {{{ proto void debug_backtrace(void)
    Prints out a backtrace */
 ZEND_FUNCTION(debug_backtrace)
@@ -1257,11 +1278,13 @@ ZEND_FUNCTION(debug_backtrace)
 	char *filename;
 	char *class_name;
 	zval *stack_frame;
+	void **cur_arg_pos = EG(argument_stack).top_element;
 
 	ptr = EG(current_execute_data);
 
 	/* Skip debug_backtrace() itself */
 	ptr = ptr->prev_execute_data;
+	debug_backtrace_get_args(&cur_arg_pos, 1 TSRMLS_CC);
 	
 	array_init(return_value);
 
@@ -1294,6 +1317,8 @@ ZEND_FUNCTION(debug_backtrace)
 		if (class_name) {
 			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
 		}
+
+		add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
 
 		add_next_index_zval(return_value, stack_frame);
 
