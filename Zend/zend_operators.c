@@ -33,6 +33,41 @@
 #include "ext/bcmath/number.h"
 #endif
 
+ZEND_API zend_bool zend_is_numeric_key(zval *zvalue, long *val)
+{
+	char *tmp; 
+	long length; 
+	
+	tmp = zvalue->value.str.val;
+	length = zvalue->value.str.len;
+
+	if ((*tmp>='0' && *tmp<='9')) { /* possibly a numeric index */
+		char *end=tmp+length;	
+		ulong idx;
+		
+		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */
+			return 0;
+		}
+		
+		while (tmp<end) {
+			if (!(*tmp>='0' && *tmp<='9')) {
+				break;
+			}
+			tmp++;
+		}
+
+		if (tmp==end && *tmp=='\0') { /* a numeric index */
+			idx = strtol(zvalue->value.str.val, NULL, 10);
+			if (idx!=LONG_MAX) {
+				*val = idx;
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
 ZEND_API int zend_atoi(const char *str, int str_len)
 {
 	int retval;

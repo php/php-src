@@ -21,32 +21,6 @@
 
 #include "zend.h"
 
-#define HANDLE_NUMERIC(key, length, func) {												\
-	register char *tmp=key;																\
-																						\
-	if ((*tmp>='0' && *tmp<='9')) do { /* possibly a numeric index */					\
-		char *end=tmp+length-1;															\
-		ulong idx;																		\
-																						\
-		if (*tmp++=='0' && length>2) { /* don't accept numbers with leading zeros */	\
-			break;																		\
-		}																				\
-		while (tmp<end) {																\
-			if (!(*tmp>='0' && *tmp<='9')) {											\
-				break;																	\
-			}																			\
-			tmp++;																		\
-		}																				\
-		if (tmp==end && *tmp=='\0') { /* a numeric index */								\
-			idx = strtol(key, NULL, 10);													\
-			if (idx!=LONG_MAX) {														\
-				return func;															\
-			}																			\
-		}																				\
-	} while (0);																			\
-}
-
-
 #define CONNECT_TO_BUCKET_DLLIST(element, list_head)		\
 	(element)->pNext = (list_head);							\
 	(element)->pLast = NULL;								\
@@ -224,8 +198,6 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 		return FAILURE;
 	}
 
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_update_or_next_insert(ht, idx, pData, nDataSize, pDest, flag));
-	
 	h = zend_inline_hash_func(arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
 
@@ -474,7 +446,6 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 	IS_CONSISTENT(ht);
 
 	if (flag == HASH_DEL_KEY) {
-		HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_del_key_or_index(ht, arKey, nKeyLength, idx, HASH_DEL_INDEX));
 		h = zend_inline_hash_func(arKey, nKeyLength);
 	}
 	nIndex = h & ht->nTableMask;
@@ -866,8 +837,6 @@ ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **
 
 	IS_CONSISTENT(ht);
 
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_find(ht, idx, pData));
-
 	h = zend_inline_hash_func(arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
 
@@ -920,8 +889,6 @@ ZEND_API int zend_hash_exists(HashTable *ht, char *arKey, uint nKeyLength)
 
 	IS_CONSISTENT(ht);
 
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
-
 	h = zend_inline_hash_func(arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
 
@@ -948,8 +915,6 @@ ZEND_API int zend_hash_quick_exists(HashTable *ht, char *arKey, uint nKeyLength,
 	}
 
 	IS_CONSISTENT(ht);
-
-	HANDLE_NUMERIC(arKey, nKeyLength, zend_hash_index_exists(ht, idx));
 
 	nIndex = h & ht->nTableMask;
 
