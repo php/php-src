@@ -1,9 +1,5 @@
 #include "php.h"
 #include "php_ini.h"
-#include "php_registry.h"
-
-#define MAX_NAMEBUF_LEN		512
-#define MAX_VALUE_LEN		512
 
 void UpdateIniFromRegistry(char *path)
 {
@@ -53,23 +49,36 @@ void UpdateIniFromRegistry(char *path)
 
 	while (p) {
 		HKEY hKey;
-		char namebuf[MAX_NAMEBUF_LEN], valuebuf[MAX_VALUE_LEN];
 		DWORD lType;
-		DWORD namebuf_length=MAX_NAMEBUF_LEN, valuebuf_length=MAX_VALUE_LEN;
-		DWORD i=0;
-
+		DWORD values = 0, max_name = 0, max_value = 0, i = 0;
+		
 		if (p>path) {
 			*(p-1) = '\\'; /* restore the slash */
 		}
+
 		if (RegOpenKeyEx(MainKey, path, 0, KEY_READ, &hKey)!=ERROR_SUCCESS) {
 			break;
 		}
-		while (RegEnumValue(hKey, i++, namebuf, &namebuf_length, NULL, &lType, valuebuf, &valuebuf_length)==ERROR_SUCCESS) {
-			if (lType != REG_SZ) {
-				continue;
+
+		if(RegQueryInfoKey(hKey, NULL, NULL, NULL, NULL, NULL, NULL, &values, &max_name, &max_value, NULL, NULL) == ERROR_SUCCESS) {
+			LPTSTR namebuf = (LPTSTR)emalloc(max_name + 1);
+			PBYTE valuebuf = (PBYTE)emalloc(max_value);
+
+			while (i < values) {
+				DWORD namebuf_len  = max_name + 1;
+				DWORD valuebuf_len = max_value;
+
+				RegEnumValue(hKey, i, namebuf, &namebuf_len, NULL, &lType, valuebuf, &valuebuf_len);
+
+				if ((lType == REG_SZ) || (lType == REG_EXPAND_SZ)) {
+					zend_alter_ini_entry(namebuf, namebuf_len + 1, valuebuf, valuebuf_len, PHP_INI_PERDIR, PHP_INI_STAGE_ACTIVATE);
+				}
+
+				i++;
 			}
-			/*printf("%s -> %s\n", namebuf, valuebuf);*/
-			zend_alter_ini_entry(namebuf, namebuf_length+1, valuebuf, valuebuf_length+1, PHP_INI_PERDIR, PHP_INI_STAGE_ACTIVATE);
+
+			efree(namebuf);
+			efree(valuebuf);
 		}
 
 		RegCloseKey(hKey);
