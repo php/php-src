@@ -96,6 +96,7 @@ void _php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 {
 	MBSTRG(default_mbctype) = MBCTYPE_EUC;
 	MBSTRG(current_mbctype) = MBCTYPE_EUC;
+	zend_hash_init(&(MBSTRG(ht_rc)), 0, NULL, (void (*)(void *)) php_mb_regex_free_cache, 1);
 	MBSTRG(search_str) = (zval**)0;
 	MBSTRG(search_str_val) = (zval*)0;
 	MBSTRG(search_re) = (mb_regex_t*)0;
@@ -107,6 +108,7 @@ void _php_mb_regex_globals_ctor(zend_mbstring_globals *pglobals TSRMLS_DC)
 /* {{{ _php_mb_regex_globals_dtor */
 void _php_mb_regex_globals_dtor(zend_mbstring_globals *pglobals TSRMLS_DC) 
 {
+	zend_hash_destroy(&MBSTRG(ht_rc));
 }
 /* }}} */
 
@@ -136,7 +138,6 @@ PHP_MSHUTDOWN_FUNCTION(mb_regex)
 PHP_RINIT_FUNCTION(mb_regex)
 {
 	MBSTRG(regex_default_options) = MBRE_OPTION_POSIXLINE;
-	zend_hash_init(&(MBSTRG(ht_rc)), 0, NULL, (void (*)(void *)) php_mb_regex_free_cache, 0);
 
 	return SUCCESS;
 }
@@ -166,7 +167,7 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 		efree(MBSTRG(search_regs));
 		MBSTRG(search_regs) = (struct mbre_registers*)0;
 	}
-	zend_hash_destroy(&MBSTRG(ht_rc));
+	zend_hash_clean(&MBSTRG(ht_rc));
 
 	return SUCCESS;
 }
@@ -233,7 +234,7 @@ php_mbregex_compile_pattern(mb_regex_t *pre, const char *pattern, int patlen, in
 	const char *err_str = NULL;
 	mb_regex_t *rc = NULL;
 
-	if(zend_hash_find(&MBSTRG(ht_rc), (char *)pattern, patlen+1, (void **) &rc) == FAILURE ||
+	if(1 || zend_hash_find(&MBSTRG(ht_rc), (char *)pattern, patlen+1, (void **) &rc) == FAILURE ||
 			rc->options != options || rc->mbctype != mbctype) {
 		memset(pre, 0, sizeof(*pre));
 		pre->fastmap = (char*)emalloc((1 << MBRE_BYTEWIDTH)*sizeof(char));
