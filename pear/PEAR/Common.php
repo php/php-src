@@ -123,9 +123,8 @@ class PEAR_Common extends PEAR
 
     function mkTempDir()
     {
-        $tmpdir = System::mktemp('-d pear');
-        if (PEAR::isError($tmpdir)) {
-            return $tmpdir;
+        if (!$tmpdir = System::mktemp('-d pear')) {
+            return false;
         }
         $this->addTempFile($tmpdir);
         return $tmpdir;
