@@ -83,24 +83,11 @@ ZEND_DECLARE_MODULE_GLOBALS(iconv)
 ZEND_GET_MODULE(iconv)
 #endif
 
-/* {{{ typedef enum php_iconv_err_t */
-typedef enum _php_iconv_err_t {
-	PHP_ICONV_ERR_SUCCESS           = SUCCESS,
-	PHP_ICONV_ERR_CONVERTER         = 1,
-	PHP_ICONV_ERR_WRONG_CHARSET     = 2,
-	PHP_ICONV_ERR_TOO_BIG           = 3,
-	PHP_ICONV_ERR_ILLEGAL_SEQ       = 4,
-	PHP_ICONV_ERR_ILLEGAL_CHAR      = 5,
-	PHP_ICONV_ERR_UNKNOWN           = 6
-} php_iconv_err_t;
-/* }}} */
-
 #ifdef HAVE_LIBICONV
 #define iconv libiconv
 #endif
 
 /* {{{ prototypes */ 
-static php_iconv_err_t php_iconv_string(const char * in_p, size_t in_len, char **out, size_t *out_len, const char *in_charset, const char *out_charset);
 static void _php_iconv_show_error(php_iconv_err_t err, const char *in_charset, const char *out_charset TSRMLS_DC);
 /* }}} */
 
@@ -185,7 +172,7 @@ PHP_MINFO_FUNCTION(miconv)
 
 /* {{{ php_iconv_string
  */
-php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
+PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
 							const char *in_charset, const char *out_charset)
 {
