@@ -36,11 +36,10 @@
 #include "ext/standard/php_standard.h"
 
 /*
- * If neither XP_UNIX not XP_WIN32 is defined, try to guess which one.
- * Ideally, this should be done by the configure script.
+ * If neither XP_UNIX not XP_WIN32 is defined use PHP_WIN32
  */
 #if !defined(XP_UNIX) && !defined(XP_WIN32)
-#if defined(WIN32)
+#ifdef PHP_WIN32
 #define XP_WIN32
 #else
 #define XP_UNIX
@@ -581,7 +580,7 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 /*********************************************************/
 int NSAPI_PUBLIC php4_auth_trans(pblock * pb, Session * sn, Request * rq)
 {
-	/* This is a DO NOTHING function that allows authentication 
+	/* This is a DO NOTHING function that allows authentication
 	 * information
 	 * to be passed through to PHP scripts.
 	 */
@@ -596,4 +595,3 @@ int NSAPI_PUBLIC php4_auth_trans(pblock * pb, Session * sn, Request * rq)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-       
