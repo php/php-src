@@ -4,8 +4,6 @@ PHP 4                                                                      NEWS
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
-- Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
-  parameters to conform documentation. (Stefan)
 - Added exif_imagetype() function. (Marcus)
 - Added domxml functions:
     domxml_elem_get_elements_by_tagname() 
@@ -49,6 +47,8 @@ PHP 4                                                                      NEWS
           $r=socket_select($rfds, $wfds, NULL, 1);
           print "Ready to read:\n"; var_dump($rfds);
     ?>
+- Added optional 3rd parameter "int encoding_mode" to gzencode() and fixed 
+  parameters to conform documentation. (Stefan)
 - Changed read_exif_data() to be an alias of exif_read_data(). (Marcus)
 - Added exif_tagname() function which returns the names of tags and
   exif_thumbnail() function to extract embedded thumbnails. (Marcus)
