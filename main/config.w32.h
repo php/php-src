@@ -44,7 +44,7 @@
 #define PHP_URL_FOPEN 1
 
 /* set to enable overload extension */
-#define HAVE_OVERLOAD 1
+#define HAVE_OVERLOAD 0
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
