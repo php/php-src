@@ -1,0 +1,31 @@
+To Do List
+
+This informal list is the working list for the php sablotron extension.  It is
+maintained and used by the people on sab-php@gingerall.cz.  See 
+http://www.gingerall.org/charlie/ga/xml/m_ml.xml for more information.
+
+The numbering of the items on the list does not imply priority.  Rather it is
+simply a means for efficient communication on the mailing lists.
+
+$Id$
+
+Short Term
+==========
+1. something about arg:/foo and arg:foo that i haven't figured out yet
+	- Melvyn
+	- i think this might be done ?
+2. SDOM_* stuff which does xpath queries.
+	- Melvyn
+3. SablotGetLibs() function
+	-- sorta available.. but i don't know how.
+
+
+Long Term
+=========
+1. Documentation of the wide variety of functions now available.
+	- Roy Huggins
+2. remove TSRMLS_FETCH() and expand user_data parameter to forward the
+actual tsrmls value.
+	- suggested by Marcus Boerger
+
+
