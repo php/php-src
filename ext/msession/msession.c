@@ -176,6 +176,8 @@ PHP_MINFO_FUNCTION(msession)
 
 int PHPMsessionConnect(const char *szhost, int nport)
 {
+	TSRMLS_FETCH();
+	
 	if(!s_reqb)
 		s_reqb = AllocateRequestBuffer(2048);
 
@@ -185,7 +187,7 @@ int PHPMsessionConnect(const char *szhost, int nport)
 	if(s_conn)
 	{
 		CloseReqConn(s_conn);
-		php_log_err("Call to connect with non-null s_conn");
+		php_log_err("Call to connect with non-null s_conn" TSRMLS_CC);
 	}
 	if(strcmp(s_szhost, szhost))
 	{
