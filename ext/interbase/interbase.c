@@ -1783,11 +1783,22 @@ static int _php_ibase_var_pval(pval *val, void *data, int type, int len, int sca
 			break;
 #ifdef SQL_INT64
 		case SQL_INT64:
-			Z_TYPE_P(val) = IS_STRING;
-			Z_STRLEN_P(val) = sprintf(string_data, "%Ld.%0*Ld",
-										 (ISC_INT64) (*((ISC_INT64 *)data) / (int) pow(10.0, (double) -scale)), -scale,
-										 (ISC_INT64) abs((int) (*((ISC_INT64 *)data) % (int) pow(10.0, (double) -scale))));
-			Z_STRVAL_P(val) = estrdup(string_data);
+			val->type = IS_STRING;
+
+			if (scale) {
+				int i, len;
+				char dt[20];
+				double number = (double) ((ISC_INT64) (*((ISC_INT64 *)data)));
+
+				number /= - 10 * scale;
+				sprintf(dt, "%%0.%df", -scale);
+				val->value.str.len = sprintf (string_data, dt, number);
+			} else {
+				val->value.str.len = sprintf (string_data, "%Ld",
+					(ISC_INT64) (*((ISC_INT64 *)data)));
+			}
+
+			val->value.str.val = estrdup(string_data);
 			break;
 #endif
 #ifndef SQL_TIMESTAMP
