@@ -84,7 +84,7 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_error, NULL)
 	PHP_FE(odbc_errormsg, NULL)
 	PHP_FE(odbc_exec, NULL)
-#ifdef HAVE_DBMAKER
+#if defined(HAVE_DBMAKER) || defined(PHP_WIN32)
 	PHP_FE(odbc_fetch_array, NULL)
 	PHP_FE(odbc_fetch_object, NULL)
 #endif
@@ -1346,7 +1346,7 @@ PHP_FUNCTION(odbc_exec)
 }
 /* }}} */
 
-#ifdef HAVE_DBMAKER
+#if defined(HAVE_DBMAKER) || defined(PHP_WIN32)
 #define ODBC_NUM  1
 #define ODBC_OBJECT  2
 
