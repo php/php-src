@@ -109,7 +109,7 @@ static inline zend_bool is_numeric_string(char *str, int length, long *lval, dou
 				register char *ptr=str, *end=str+length;
 				
 				while (ptr<end) {
-					switch(*ptr++) {
+					switch (*ptr++) {
 						case 'e':
 						case 'E':
 							/* scientific notation, not handled by the BC library */

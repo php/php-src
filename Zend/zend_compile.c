@@ -208,7 +208,7 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 
 	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
 		
-		switch(op) {
+		switch (op) {
 			case ZEND_ASSIGN_ADD:
 				opline->opcode = ZEND_ASSIGN_ADD_OBJ;
 				break;
@@ -287,10 +287,10 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
-		if(zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+		if (zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 		} else {
-			if(CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 				opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC;
 			} 
 		}
@@ -1304,7 +1304,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC)
 	}
 
 	if (original_op == ZEND_SEND_VAR) {
-		switch(op) {
+		switch (op) {
 			case ZEND_SEND_VAR_NO_REF:
 				zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
 				break;
@@ -2222,7 +2222,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 			SET_UNUSED(opline_ptr->op1); /* this means $this for objects */
 			opline_ptr->op2 = *property;
 			/* if it was usual fetch, we change it to object fetch */
-			switch(opline_ptr->opcode) {
+			switch (opline_ptr->opcode) {
 				case ZEND_FETCH_W:
 					opline_ptr->opcode = ZEND_FETCH_OBJ_W;
 					break;
@@ -2550,7 +2550,7 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 			opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 			if (dimension == tmp_dimension_llist->head) { /* first */
 				last_container = *expr;
-				switch(expr->op_type) {
+				switch (expr->op_type) {
 					case IS_VAR:
 						opline->opcode = ZEND_FETCH_DIM_R;
 						break;
@@ -2606,7 +2606,7 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 
 	ALLOC_ZVAL(tmp);
 	convert_to_string(&varname->u.constant);
-	if(static_assignment) {
+	if (static_assignment) {
 		*tmp = static_assignment->u.constant;
 	} else {
 		INIT_ZVAL(*tmp);
@@ -3090,7 +3090,7 @@ int zendlex(znode *zendlval TSRMLS_DC)
 
 	zendlval->u.constant.type = IS_LONG;
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
-	switch(retval) {
+	switch (retval) {
 		case T_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:

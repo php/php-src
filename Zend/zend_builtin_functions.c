@@ -433,7 +433,7 @@ ZEND_FUNCTION(define)
 	int case_sensitive;
 	zend_constant c;
 	
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters_ex(2, &var, &val)==FAILURE) {
 				RETURN_FALSE;
@@ -456,7 +456,7 @@ ZEND_FUNCTION(define)
 			break;
 	}
 
-	switch((*val)->type) {
+	switch ((*val)->type) {
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_STRING:
@@ -897,7 +897,7 @@ ZEND_FUNCTION(trigger_error)
 	int error_type = E_USER_NOTICE;
 	zval **z_error_type, **z_error_message;
 
-	switch(ZEND_NUM_ARGS()) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &z_error_message)==FAILURE) {
 				ZEND_WRONG_PARAM_COUNT();

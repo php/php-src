@@ -504,7 +504,7 @@ ZEND_API void convert_to_array(zval *op)
 {
 	TSRMLS_FETCH();
 
-	switch(op->type) {
+	switch (op->type) {
 		case IS_ARRAY:
 			return;
 			break;
@@ -538,7 +538,7 @@ ZEND_API void convert_to_array(zval *op)
 
 ZEND_API void convert_to_object(zval *op)
 {
-	switch(op->type) {
+	switch (op->type) {
 		case IS_ARRAY:
 			{
 				/* OBJECTS_OPTIMIZE */
@@ -1540,7 +1540,7 @@ ZEND_API int decrement_function(zval *op1)
 				op1->type = IS_LONG;
 				break;
 			}
-			switch(is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, &dval, 0)) {
+			switch (is_numeric_string(op1->value.str.val, op1->value.str.len, &lval, &dval, 0)) {
 				case IS_LONG:
 					STR_FREE(op1->value.str.val);
 					if (lval == LONG_MIN) {

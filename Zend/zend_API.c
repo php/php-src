@@ -1174,7 +1174,7 @@ int module_registry_request_startup(zend_module_entry *module TSRMLS_DC)
  */
 int module_registry_cleanup(zend_module_entry *module TSRMLS_DC)
 {
-	switch(module->type) {
+	switch (module->type) {
 		case MODULE_PERSISTENT:
 			if (module->request_shutdown_func) {
 #if 0
