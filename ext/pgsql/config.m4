@@ -3,8 +3,23 @@ dnl $Id$
 AC_MSG_CHECKING(for PostgresSQL support)
 AC_ARG_WITH(pgsql,
 [  --with-pgsql[=DIR]      Include PostgresSQL support.  DIR is the PostgresSQL
-                          base install directory, defaults to /usr/local/pgsql.],
+                          base install directory, defaults to /usr/local/pgsql.
+			  Set DIR to "shared" to build as a dl, or "shared,DIR" 
+                          to build as a dl and still specify DIR.],
 [
+  case $withval in
+    shared)
+      shared=yes
+      withval=yes
+      ;;
+    shared,*)
+      shared=yes
+      withval=`echo $withval | sed -e 's/^shared,//'`      
+      ;;
+    *)
+      shared=no
+      ;;
+  esac
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
       PGSQL_INCDIR=/usr/local/pgsql/include
@@ -19,21 +34,32 @@ AC_ARG_WITH(pgsql,
     PGSQL_INCLUDE=-I$PGSQL_INCDIR
     PGSQL_LFLAGS=-L$PGSQL_LIBDIR
     PGSQL_LIBS=-lpq
-    AC_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR)
-    AC_ADD_INCLUDE($PGSQL_INCDIR)
 
     old_CFLAGS=$CFLAGS; old_LDFLAGS=$LDFLAGS; old_LIBS=$LIBS
     CFLAGS="$CFLAGS $PGSQL_INCLUDE"
     LDFLAGS="$LDFLAGS $PGSQL_LFLAGS"
     LIBS="$LIBS $PGSQL_LIBS"
     AC_DEFINE(HAVE_PGSQL)
-    AC_MSG_RESULT(yes)
+    if test "$shared" = "yes"; then
+      AC_MSG_RESULT(yes (shared))
+      PGSQL_SHARED="pgsql.la"
+    else 
+      AC_MSG_RESULT(yes (static))
+      AC_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR)
+      AC_ADD_INCLUDE($PGSQL_INCDIR)
+      PGSQL_STATIC="libphpext_pgsql.a"
+    fi
     AC_CHECK_FUNC(PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES))
     CFLAGS=$old_CFLAGS; LDFLAGS=$old_LDFLAGS; LIBS=$old_LIBS
-    PHP_EXTENSION(pgsql)
+    PHP_EXTENSION(pgsql,$shared)
   else
     AC_MSG_RESULT(no)
   fi
 ],[
   AC_MSG_RESULT(no)
 ])
+AC_SUBST(PGSQL_LIBS)
+AC_SUBST(PGSQL_LFLAGS)
+AC_SUBST(PGSQL_INCLUDE)
+AC_SUBST(PGSQL_STATIC)
+AC_SUBST(PGSQL_SHARED)
