@@ -60,6 +60,7 @@ PHP_FUNCTION(stream_select);
 PHP_FUNCTION(stream_set_timeout);
 PHP_FUNCTION(stream_set_write_buffer);
 PHP_FUNCTION(stream_get_wrappers);
+PHP_FUNCTION(stream_get_line);
 PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);

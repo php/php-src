@@ -1128,6 +1128,37 @@ PHP_FUNCTION(stream_filter_append)
 	apply_filter_to_stream(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
+
+/* {{{ proto string stream_get_line(resource stream, int maxlen, string ending)
+   Read up to maxlen bytes from a stream or until the ending string is found */
+PHP_FUNCTION(stream_get_line)
+{
+	char *str;
+	int str_len;
+	long max_length;
+	zval *zstream;
+	char *buf;
+	size_t buf_size;
+	php_stream *stream;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &zstream, &max_length, &str, &str_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (max_length < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The maximum allowed length must be greater then or equal to zero.");
+		RETURN_FALSE;
+	}
+
+	php_stream_from_zval(stream, &zstream);
+
+	if ((buf = php_stream_get_record(stream, max_length, &buf_size, str, str_len TSRMLS_CC))) {
+		RETURN_STRINGL(buf, buf_size, 0);
+	} else {
+		RETURN_FALSE;
+	}
+}
+
 /* }}} */
 
 /* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])

@@ -681,6 +681,7 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(socket_set_blocking, stream_set_blocking,					NULL)
 
 	PHP_FE(stream_get_meta_data,											NULL)
+	PHP_FE(stream_get_line,												NULL)
 	PHP_FE(stream_register_wrapper,											NULL)
 	PHP_FE(stream_get_wrappers,												NULL)
 	PHP_FE(get_headers,													NULL)
