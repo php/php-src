@@ -55,6 +55,8 @@ PEAR Installer:
 
  * Bug #534  pear search doesn't list unstable releases
  * Bug #933  CMD Usability Patch 
+ * Bug #937  throwError() treats every call as static 
+ * Bug #964 PEAR_ERROR_EXCEPTION causes fatal error 
  * Bug #1008 safe mode raises warning
 
 PEAR_ErrorStack:
