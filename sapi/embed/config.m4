@@ -1,14 +1,30 @@
-PHP_ARG_ENABLE(embed,whether to enable the embedded SAPI module,
-[  --enable-embed])
+dnl
+dnl $Id$
+dnl
 
-PHP_ARG_ENABLE(embed-shared,whether to build it as shared library,
-[  --enable-embed-shared])
+AC_MSG_CHECKING(for embedded SAPI library support)
 
-if test "$PHP_EMBED" = "yes"; then
-  if test "$PHP_EMBED_SHARED" = "yes"; then
-    ac_type=shared
-  else
-    ac_type=static
-  fi
-  PHP_SELECT_SAPI(embed, $ac_type, php_embed.c)
+AC_ARG_ENABLE(embed,
+[  --enable-embed[=TYPE]   Enable building embedded SAPI library of PHP
+                          TYPE is either 'shared' or 'static'. Defaults to 'static' library.],
+[ 
+  case $enableval in
+    yes|static)
+      PHP_EMBED_TYPE=static
+      ;;
+    shared)
+      PHP_EMBED_TYPE=shared
+      ;;
+    *)
+      PHP_EMBED_TYPE=no
+      ;;
+  esac
+],[
+  PHP_EMBED=no
+])
+
+AC_MSG_RESULT($PHP_EMBED_TYPE)
+
+if test "$PHP_EMBED_TYPE" != "no"; then
+  PHP_SELECT_SAPI(embed, $PHP_EMBED_TYPE, php_embed.c)
 fi
