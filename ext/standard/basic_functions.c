@@ -1230,7 +1230,7 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
-/* {{{ proto int settype(string var, string type)
+/* {{{ proto int settype(mixed var, string type)
    Set the type of the variable */
 PHP_FUNCTION(settype)
 {
