@@ -11,12 +11,13 @@ PHP 4                                                                      NEWS
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
-- Removed extensions: (Jan, Jani)
+- Removed extensions: (Jan, Jani, Sebastian)
   . ext/aspell
   . ext/ccvs
   . ext/cybercash
   . ext/icap
   . sapi/fhttpd
+  . sapi/fastcgi
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
