@@ -35,6 +35,10 @@
 
 #if HAVE_ZLIB
 
+typedef struct {
+	int gzgetss_state;
+} php_zlib_globals;
+
 extern php3_module_entry php3_zlib_module_entry;
 #define zlib_module_ptr &php3_zlib_module_entry
 
@@ -55,6 +59,16 @@ PHP_FUNCTION(gzseek);
 PHP_FUNCTION(gzpassthru);
 PHP_FUNCTION(readgzfile);
 PHP_FUNCTION(gzfile);
+
+#ifdef ZTS
+#define ZLIBLS_D php_zlib_globals *zlib_globals
+#define ZLIBG(v) (zlib_globals->v)
+#define ZLIBLS_FETCH() php_zlib_globals *zlib_globals = ts_resource(zlib_globals_id)
+#else
+#define ZLIBLS_D
+#define ZLIBG(v) (zlib_globals.v)
+#define ZLIBLS_FETCH()
+#endif
 
 #else
 #define zlib_module_ptr NULL

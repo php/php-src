@@ -17,9 +17,6 @@
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
-#if !PHP_31 && defined(THREAD_SAFE)
-#undef THREAD_SAFE
-#endif
 #define IS_EXT_MODULE
 
 #include "php.h"
@@ -34,11 +31,7 @@
 #include <windows.h>
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
-#if PHP_31
-#include "os/nt/param.h"
-#else
 #include "win32/param.h"
-#endif
 #else
 #include <sys/param.h>
 /* #include <sys/uio.h> */
@@ -64,11 +57,7 @@
 #include <zlib.h>
 
 #if COMPILE_DL
-#if PHP_31
-#include "ext/phpdl.h"
-#else
 #include "dl/phpdl.h"
-#endif
 #ifndef PUTS
 #define PUTS(a) php_printf("%s",a)
 #endif
@@ -80,30 +69,15 @@
 #endif
 #endif
 
-
-
-#if defined(THREAD_SAFE)
-typedef struct zlib_global_struct{
-#endif
-	int gzgetss_state;
-	int le_zp;
-#if defined(THREAD_SAFE)
-}zlib_global_struct;
-#endif
-
-#if defined(THREAD_SAFE)
-DWORD ZLIBtls;
-static int numthreads=0;
-void *zlib_mutex;
-
-#define ZLIB_GLOBAL(a) zlib_globals->a
-
-#define ZLIB_TLS_VARS zlib_global_struct *PHP3_TLS_GET(ZLIBtls,zlib_globals); 
-
+#ifdef ZTS
+int zlib_globals_id;
 #else
-#define ZLIB_GLOBAL(a) a
-#define ZLIB_TLS_VARS
+static php_zlib_globals zlib_globals;
 #endif
+
+
+/* True globals, no need for thread safety */
+static int le_zp;
 
 function_entry php3_zlib_functions[] = {
 	PHP_FE(readgzfile,					NULL)
@@ -143,45 +117,26 @@ static void phpi_destructor_gzclose(gzFile *zp) {
 	(void)gzclose(zp);
 }
 
+#ifdef ZTS
+static void php_zlib_init_globals(ZLIBLS_D)
+{
+        ZLIBG(gzgetss_state) = 0;
+}
+#endif
+
 PHP_MINIT_FUNCTION(zlib)
 {
-#ifdef THREAD_SAFE
-	zlib_global_struct *zlib_globals;
-	PHP3_MUTEX_ALLOC(zlib_mutex);
-	PHP3_MUTEX_LOCK(zlib_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(ZLIBtls)){
-			PHP3_MUTEX_UNLOCK(zlib_mutex);
-			PHP3_MUTEX_FREE(zlib_mutex);
-			return FAILURE;
-		}
-	}
-	PHP3_MUTEX_UNLOCK(zlib_mutex);
-	if(!PHP3_TLS_THREAD_INIT(ZLIBtls,zlib_globals,zlib_global_struct)){
-		PHP3_MUTEX_FREE(zlib_mutex);
-		return FAILURE;
-	}
+#ifdef ZTS
+        zlib_globals_id = ts_allocate_id(sizeof(php_zlib_globals), php_zlib_init_globals, NULL);
+#else
+        ZLIBG(gzgetss_state)=0;
 #endif
-	ZLIB_GLOBAL(le_zp) = register_list_destructors(phpi_destructor_gzclose,NULL);
+	le_zp = register_list_destructors(phpi_destructor_gzclose,NULL);
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(zlib)
 {
-#if defined(THREAD_SAFE)
-	ZLIB_TLS_VARS;
-	PHP3_TLS_THREAD_FREE(zlib_globals);
-	PHP3_MUTEX_LOCK(zlib_mutex);
-	numthreads--;
-	if (numthreads<1){
-		PHP3_TLS_PROC_SHUTDOWN(ZLIBtls);
-		PHP3_MUTEX_UNLOCK(zlib_mutex);
-		PHP3_MUTEX_FREE(zlib_mutex);
-		return SUCCESS;
-	}
-	PHP3_MUTEX_UNLOCK(zlib_mutex);
-#endif
 	return SUCCESS;
 }
 
@@ -198,7 +153,8 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 
 static gzFile php3_gzopen_wrapper(char *path, char *mode, int options)
 {
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
+	
 	if (options & USE_PATH && PG(include_path) != NULL) {
 		return php3_gzopen_with_path(path, mode, PG(include_path), NULL);
 	}
@@ -221,7 +177,7 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	char trypath[MAXPATHLEN + 1];
 	struct stat sb;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
 	
 	if (opened_path) {
 		*opened_path = NULL;
@@ -322,7 +278,7 @@ PHP_FUNCTION(gzfile) {
 	char *slashed, buf[8192];
 	register int i=0;
 	int use_include_path = 0;
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
 
 	/* check args */
 	switch (ARG_COUNT(ht)) {
@@ -377,7 +333,7 @@ PHP_FUNCTION(gzopen) {
 	gzFile *zp;
 	char *p;
 	int use_include_path = 0;
-	ZLIB_TLS_VARS;
+	ZLIBLS_FETCH();
 	
 	switch(ARG_COUNT(ht)) {
 	case 2:
@@ -410,9 +366,9 @@ PHP_FUNCTION(gzopen) {
 		efree(p);
 		RETURN_FALSE;
 	}
-	ZLIB_GLOBAL(gzgetss_state)=0;
+	ZLIBG(gzgetss_state)=0;
 	efree(p);
-	ZEND_REGISTER_RESOURCE(return_value, zp, ZLIB_GLOBAL(le_zp));
+	ZEND_REGISTER_RESOURCE(return_value, zp, le_zp);
 }	
 /* }}} */
 
@@ -421,12 +377,11 @@ Close an open .gz-file pointer */
 PHP_FUNCTION(gzclose) {
 	pval *arg1;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 	zend_list_delete(arg1->value.lval);
 	RETURN_TRUE;
 }
@@ -437,12 +392,11 @@ Test for end-of-file on a .gz-file pointer */
 PHP_FUNCTION(gzeof) {
 	pval *arg1;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	if ((gzeof(zp))) {
 		RETURN_TRUE;
@@ -459,7 +413,7 @@ PHP_FUNCTION(gzgets) {
 	gzFile *zp;
 	int len;
 	char *buf;
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -467,7 +421,7 @@ PHP_FUNCTION(gzgets) {
 	convert_to_long(arg2);
 	len = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
@@ -495,13 +449,12 @@ PHP_FUNCTION(gzgetc) {
 	gzFile *zp;
 	int c;
 	char *buf;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * 2);
 	if ((c=gzgetc(zp)) == (-1)) {
@@ -527,7 +480,7 @@ PHP_FUNCTION(gzgetss)
 	gzFile *zp;
 	int len, br;
 	char *buf, *p, *rbuf, *rp, c, lc;
-	ZLIB_TLS_VARS;
+	ZLIBLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &fd, &bytes) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -537,7 +490,7 @@ PHP_FUNCTION(gzgetss)
 
 	len = bytes->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, fd, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, fd, -1, "Zlib file", le_zp);
 
 	buf = emalloc(sizeof(char) * (len + 1));
 	/*needed because recv doesnt set null char at end*/
@@ -557,67 +510,67 @@ PHP_FUNCTION(gzgetss)
 	while (c) {
 		switch (c) {
 			case '<':
-				if (ZLIB_GLOBAL(gzgetss_state) == 0) {
+				if (ZLIBG(gzgetss_state) == 0) {
 					lc = '<';
-					ZLIB_GLOBAL(gzgetss_state) = 1;
+					ZLIBG(gzgetss_state) = 1;
 				}
 				break;
 
 			case '(':
-				if (ZLIB_GLOBAL(gzgetss_state) == 2) {
+				if (ZLIBG(gzgetss_state) == 2) {
 					if (lc != '\"') {
 						lc = '(';
 						br++;
 					}
-				} else if (ZLIB_GLOBAL(gzgetss_state) == 0) {
+				} else if (ZLIBG(gzgetss_state) == 0) {
 					*(rp++) = c;
 				}
 				break;	
 
 			case ')':
-				if (ZLIB_GLOBAL(gzgetss_state) == 2) {
+				if (ZLIBG(gzgetss_state) == 2) {
 					if (lc != '\"') {
 						lc = ')';
 						br--;
 					}
-				} else if (ZLIB_GLOBAL(gzgetss_state) == 0) {
+				} else if (ZLIBG(gzgetss_state) == 0) {
 					*(rp++) = c;
 				}
 				break;	
 
 			case '>':
-				if (ZLIB_GLOBAL(gzgetss_state) == 1) {
+				if (ZLIBG(gzgetss_state) == 1) {
 					lc = '>';
-					ZLIB_GLOBAL(gzgetss_state) = 0;
-				} else if (ZLIB_GLOBAL(gzgetss_state) == 2) {
+					ZLIBG(gzgetss_state) = 0;
+				} else if (ZLIBG(gzgetss_state) == 2) {
 					if (!br && lc != '\"') {
-						ZLIB_GLOBAL(gzgetss_state) = 0;
+						ZLIBG(gzgetss_state) = 0;
 					}
 				}
 				break;
 
 			case '\"':
-				if (ZLIB_GLOBAL(gzgetss_state) == 2) {
+				if (ZLIBG(gzgetss_state) == 2) {
 					if (lc == '\"') {
 						lc = '\0';
 					} else if (lc != '\\') {
 						lc = '\"';
 					}
-				} else if (ZLIB_GLOBAL(gzgetss_state) == 0) {
+				} else if (ZLIBG(gzgetss_state) == 0) {
 					*(rp++) = c;
 				}
 				break;
 
 			case '?':
-				if (ZLIB_GLOBAL(gzgetss_state)==1) {
+				if (ZLIBG(gzgetss_state)==1) {
 					br=0;
-					ZLIB_GLOBAL(gzgetss_state)=2;
+					ZLIBG(gzgetss_state)=2;
 					break;
 				}
 				/* fall-through */
 
 			default:
-				if (ZLIB_GLOBAL(gzgetss_state) == 0) {
+				if (ZLIBG(gzgetss_state) == 0) {
 					*(rp++) = c;
 				}	
 		}
@@ -637,7 +590,7 @@ PHP_FUNCTION(gzwrite) {
 	gzFile *zp;
 	int ret;
 	int num_bytes;
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
 
 	switch (ARG_COUNT(ht)) {
 		case 2:
@@ -660,7 +613,7 @@ PHP_FUNCTION(gzwrite) {
 			/* NOTREACHED */
 			break;
 	}				
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	/* strip slashes only if the length wasn't specified explicitly */
 	if (!arg3 && PG(magic_quotes_runtime)) {
@@ -681,13 +634,12 @@ Rewind the position of a .gz-file pointer */
 PHP_FUNCTION(gzrewind) {
 	pval *arg1;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	gzrewind(zp);
 	RETURN_TRUE;
@@ -700,13 +652,12 @@ PHP_FUNCTION(gztell) {
 	pval *arg1;
 	long pos;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	pos = gztell(zp);
 	RETURN_LONG(pos);
@@ -720,7 +671,6 @@ PHP_FUNCTION(gzseek) {
 	int ret;
 	long pos;
 	gzFile *zp;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -728,7 +678,7 @@ PHP_FUNCTION(gzseek) {
 	convert_to_long(arg2);
 	pos = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
  	ret = gzseek(zp,pos,SEEK_SET);
 	RETURN_LONG(ret);
@@ -796,13 +746,12 @@ PHP_FUNCTION(gzpassthru) {
 	gzFile *zp;
 	char buf[8192];
 	int size, b;
-	ZLIB_TLS_VARS;
 	
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	size = 0;
 	while((b = gzread(zp, buf, sizeof(buf))) > 0) {
@@ -822,7 +771,7 @@ PHP_FUNCTION(gzread)
 	pval *arg1, *arg2;
 	gzFile *zp;
 	int len;
-	ZLIB_TLS_VARS;
+	PLS_FETCH();
 	
 	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -830,7 +779,7 @@ PHP_FUNCTION(gzread)
 	convert_to_long(arg2);
 	len = arg2->value.lval;
 
-	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", ZLIB_GLOBAL(le_zp));
+	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
 
 	return_value->value.str.val = emalloc(sizeof(char) * (len + 1));
 	/* needed because recv doesnt put a null at the end*/
