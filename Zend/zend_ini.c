@@ -305,25 +305,15 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 				display_string = ini_entry->orig_value;
 				display_string_length = ini_entry->orig_value_length;
 			} else {
-				if(zend_uv.html_errors) {
-					display_string = "<i>no value</i>";
-					display_string_length = sizeof("<i>no value</i>")-1;
-				} else {
-					display_string = "no value";
-					display_string_length = sizeof("no value")-1;
-				}	
+				display_string = "<i>no value</i>";
+				display_string_length = sizeof("<i>no value</i>")-1;
 			}
 		} else if (ini_entry->value && ini_entry->value[0]) {
 			display_string = ini_entry->value;
 			display_string_length = ini_entry->value_length;
 		} else {
-			if(zend_uv.html_errors) {
-				display_string = "<i>no value</i>";
-				display_string_length = sizeof("<i>no value</i>")-1;
-			} else {
-				display_string = "no value";
-				display_string_length = sizeof("no value")-1;
-			}	
+			display_string = "<i>no value</i>";
+			display_string_length = sizeof("<i>no value</i>")-1;
 		}
 		ZEND_WRITE(display_string, display_string_length);
 	}
@@ -361,17 +351,9 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb)
 		value = NULL;
 	}
 	if (value) {
-		if (zend_uv.html_errors) {
-			zend_printf("<font color=\"%s\">%s</font>", value, value);
-		} else {
-			ZEND_PUTS(value);
-		}   
+		zend_printf("<font color=\"%s\">%s</font>", value, value);
 	} else {
-		if (zend_uv.html_errors) {
-			ZEND_PUTS("<i>no value</i>;");
-		} else {
-			ZEND_PUTS("no value");
-		}	
+		ZEND_PUTS("<i>no value</i>;");
 	}
 }
 
