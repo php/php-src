@@ -194,9 +194,13 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	} 
 	
 	t = mktime(ta); 
-	if (t == -1) {
+
+#ifdef PHP_WIN32
+	if (t < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows does not support negative values for this function");
 		RETURN_LONG(-1);
 	}
+#endif
 
 	seconds = t - chgsecs;
 
@@ -646,7 +650,15 @@ PHP_FUNCTION(localtime)
 			assoc_array = Z_LVAL_PP(assoc_array_arg);
 			break;
 	}
-	if (timestamp < 0 || NULL == (ta = php_localtime_r(&timestamp, &tmbuf))) {
+	
+#ifdef PHP_WIN32
+	if (timestamp < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows does not support negative values for this function");
+		RETURN_FALSE
+	}
+#endif
+	
+	if (NULL == (ta = php_localtime_r(&timestamp, &tmbuf))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid local time");
 		RETURN_FALSE;
 	}
