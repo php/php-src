@@ -565,7 +565,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 /* }}} */
 
 /* {{{ proto resource file_get_wrapper_data(resource fp)
- */
+    Retrieves header/meta data from "wrapped" file pointers */
 PHP_FUNCTION(file_get_wrapper_data)
 {
 	zval **arg1;
