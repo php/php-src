@@ -1,3 +1,22 @@
+2003-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_language_parser.y:
+      Fix ~ operator in class constants.
+
+    * zend_compile.c
+      zend_compile.h
+      zend_operators.c:
+      Faster interface inheritance & faster inheritance checks
+
+    * zend_language_scanner.l:
+      CS
+
+2003-05-29  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_compile.c:
+      Fix Bug #23285 (Potential Stack Overflow in zendlex).
+
 2003-05-28  Sterling Hughes  <sterling@bumblebury.com>
 
     * zend_alloc.c:

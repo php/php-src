@@ -1,3 +1,103 @@
+2003-05-29  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      Nuke the rest of headers-sent code
+
+2003-05-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h:
+      Fixed compiler warnings.
+
+2003-05-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      fix of incomplete windows fix
+
+2003-05-29  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * main/streams/userspace.c:
+      fix for crashbug with user level wrapper implementations of stream_stat
+
+2003-05-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      Changes for compilation under windows
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi.c:
+      Changes for compilation on windows
+
+2003-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php:
+      Execute --SKIPIF-- like --FILE--
+
+2003-05-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      fix prototype
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      Always send a new session cookie upon regenerating id
+
+    * (PHP_4_3)
+      sapi/cgi/config9.m4
+      sapi/cgi/libfcgi/include/fcgi_config.h:
+      Fix VPATH builds
+
+2003-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cli/php_cli.c:
+      Simply print errors
+
+    * sapi/cli/README:
+      Update
+
+    * (PHP_4_3)
+      ext/exif/exif.c:
+      MFH
+
+    * ext/dba/config.m4:
+      Fix builddir entry
+
+    * ext/standard/basic_functions.c:
+      MFB
+
+2003-05-29  Dan Kalowsky  <dank@deadmime.org>
+
+    * (PHP_4_3)
+      ext/odbc/php_odbc.c:
+      ODBC standards compliance is a good thing.
+
+2003-05-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      MFB (these parts were missing)
+
+2003-05-29  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      sapi/nsapi/nsapi.c:
+      MFH: php.ini values in magnus/obj.conf; virtual() similar to apache;...
+
+    * sapi/nsapi/nsapi.c:
+      Added php.ini value: nsapi.read_timeout; Included the apache-like virtual()
+      function to make sub-request on server (thanks to Chris Elving from Sun)
+
+2003-05-29  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Sync with PHP 4.3.2 NEWS
+
+    * (PHP_4_3)
+      NEWS:
+      Added the header for 4.3.3
+
 2003-05-28  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * ext/mysql/php_mysql.c:
