@@ -30,7 +30,7 @@ interface if_f extends if_e implements if_a, if_b, if_c, if_d, if_e {
 
 class base {
 	function test($class) {
-		echo "is_a(" . class_name($this) . ", $class) ". (is_a($this, $class) ? "yes\n" : "no\n");
+		echo "is_a(" . get_class($this) . ", $class) ". (is_a($this, $class) ? "yes\n" : "no\n");
 	}
 }
 
