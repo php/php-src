@@ -99,7 +99,7 @@ zend_module_entry vpopmail_module_entry = {
 	PHP_RINIT(vpopmail),
 	PHP_RSHUTDOWN(vpopmail),
 	PHP_MINFO(vpopmail),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
