@@ -39,8 +39,10 @@
 
 #ifdef ZEND_WIN32
 # include "zend_config.w32.h"
+# define ZEND_PATHS_SEPARATOR		';'
 #else
 # include "zend_config.h"
+# define ZEND_PATHS_SEPARATOR		':'
 #endif
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
