@@ -18,9 +18,7 @@ CFG=gd - Win32 Release_TS GD2
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "gd - Win32 Release_TS GD2" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "gd - Win32 Release_TS GD1" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "gd - Win32 Debug_TS GD2" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "gd - Win32 Debug_TS GD1" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -35,8 +33,8 @@ RSC=rc.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "gd___Win32_Release_TS_GD2"
-# PROP BASE Intermediate_Dir "gd___Win32_Release_TS_GD2"
+# PROP BASE Output_Dir "gd___Win32_Release_TS_GD2_bundled"
+# PROP BASE Intermediate_Dir "gd___Win32_Release_TS_GD2_bundled"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -45,8 +43,9 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D HAVE_LIBTTF=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D HAVE_LIBGD15=1 /D HAVE_LIBGD20=1 /D "USE_GD_IOCTX" /D HAVE_LIBFREETYPE=1 /D "USE_GD_IMGSTRTTF" /D HAVE_GD_STRINGTTF=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD204=1 /D HAVE_LIBGD=1 /D "HAVE_GD_GD2" /D HAVE_GD_STRINGFTEX=1 /D HAVE_GD_IMAGESETBRUSH=1 /D HAVE_GD_IMAGESETTILE=1 /FR /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GD_GIF_READ=1 /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D "HAVE_GD_XBM" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /D HAVE_LIBGD204=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "libgd" /D ZEND_DEBUG=0 /D HAVE_LIBGD15=1 /D HAVE_LIBGD204=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GD_GIF_READ=1 /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D "HAVE_GD_XBM" /D HAVE_LIBGD=1 /D HAVE_LIBGD13=1 /D HAVE_LIBGD20=1 /D "USE_GD_IOCTX" /D HAVE_LIBFREETYPE=1 /D "USE_GD_IMGSTRTTF" /D HAVE_GD_STRINGTTF=1 /D HAVE_GD_BUNDLED=1 /D "MSWIN32" /D "HAVE_LIBPNG" /D "HAVE_LIBJPEG" /D "HAVE_GD_GD2" /D HAVE_GD_STRINGFTEX=1 /D HAVE_GD_IMAGESETBRUSH=1 /D HAVE_GD_IMAGESETTILE=1 /FR /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -55,46 +54,17 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts.lib freetype.lib gd.lib libjpeg.lib libtiff.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD BASE LINK32 php4ts.lib libjpeg.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd2.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts.lib freetype2.lib gd.lib libjpeg.lib libtiff.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
-# SUBTRACT LINK32 /pdb:none
-
-!ELSEIF  "$(CFG)" == "gd - Win32 Release_TS GD1"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "gd___Win32_Release_TS_GD1"
-# PROP BASE Intermediate_Dir "gd___Win32_Release_TS_GD1"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_TS"
-# PROP Intermediate_Dir "Release_TS"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D HAVE_LIBTTF=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=0 /D HAVE_LIBTTF=1 /D HAVE_LIBGD15=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D "HAVE_GD_GD2" /FR /YX /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x406 /d "NDEBUG"
-# ADD RSC /l 0x406 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 php4ts.lib freetype.lib gd.lib libjpeg.lib libtiff.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
-# SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts.lib freetype.lib gd.lib libjpeg.lib libtiff.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
+# ADD LINK32 php4ts.lib freetype2.lib libjpeg.lib libpng.lib zlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_gd2.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "gd___Win32_Debug_TS_GD2"
-# PROP BASE Intermediate_Dir "gd___Win32_Debug_TS_GD2"
+# PROP BASE Output_Dir "gd___Win32_Debug_TS_GD2_bundled"
+# PROP BASE Intermediate_Dir "gd___Win32_Debug_TS_GD2_bundled"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -103,8 +73,9 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D HAVE_LIBTTF=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /FR /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "HAVE_LIBGD15" /D HAVE_LIBGD20=1 /D "USE_GD_IOCTX" /D HAVE_LIBFREETYPE=1 /D "USE_GD_IMGSTRTTF" /D HAVE_GD_STRINGTTF=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD204=1 /D HAVE_LIBGD=1 /D "HAVE_GD_GD2" /D HAVE_GD_STRINGFTEX=1 /D HAVE_GD_IMAGESETBRUSH=1 /D HAVE_GD_IMAGESETTILE=1 /FR /YX /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GD_GIF_READ=1 /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /D HAVE_LIBGD204=1 /FR /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "libgd" /D ZEND_DEBUG=1 /D "HAVE_LIBGD15" /D HAVE_LIBGD204=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GD_GIF_READ=1 /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD=1 /D HAVE_LIBGD13=1 /D HAVE_LIBGD20=1 /D "USE_GD_IOCTX" /D HAVE_LIBFREETYPE=1 /D "USE_GD_IMGSTRTTF" /D HAVE_GD_STRINGTTF=1 /D HAVE_GD_BUNDLED=1 /D "MSWIN32" /D "HAVE_LIBPNG" /D "HAVE_LIBJPEG" /D "HAVE_GD_GD2" /D HAVE_GD_STRINGFTEX=1 /D HAVE_GD_IMAGESETBRUSH=1 /D HAVE_GD_IMAGESETTILE=1 /FR /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x406 /d "NDEBUG"
@@ -113,38 +84,9 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 php4ts_debug.lib gd.lib libjpeg.lib freetype.lib libtiff.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd.dll" /libpath:"..\..\Debug_TS"
+# ADD BASE LINK32 php4ts_debug.lib libjpeg.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd2.dll" /libpath:"..\..\Debug_TS"
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts_debug.lib gd.lib libjpeg.lib freetype2.lib libtiff.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd.dll" /libpath:"..\..\Debug_TS"
-# SUBTRACT LINK32 /pdb:none
-
-!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD1"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "gd___Win32_Debug_TS_GD1"
-# PROP BASE Intermediate_Dir "gd___Win32_Debug_TS_GD1"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Debug_TS"
-# PROP Intermediate_Dir "Debug_TS"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D HAVE_LIBTTF=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D HAVE_LIBGD15=1 /FR /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "..\.." /I "..\..\main" /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /D ZEND_DEBUG=1 /D HAVE_LIBTTF=1 /D HAVE_LIBGD15=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "COMPILE_DL_GD" /D ZTS=1 /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_GDIMAGECOLORRESOLVE=1 /D "HAVE_GD_PNG" /D "HAVE_GD_JPG" /D "HAVE_GD_WBMP" /D HAVE_LIBGD13=1 /D HAVE_LIBGD=1 /D "HAVE_GD_GD2" /FR /YX /FD /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x406 /d "NDEBUG"
-# ADD RSC /l 0x406 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 php4ts_debug.lib gd.lib libjpeg.lib freetype.lib libtiff.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd.dll" /libpath:"..\..\Debug_TS"
-# SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 php4ts_debug.lib gd.lib libjpeg.lib freetype.lib libtiff.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd.dll" /libpath:"..\..\Debug_TS"
+# ADD LINK32 php4ts_debug.lib libpng.lib zlib.lib libjpeg.lib freetype2.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /out:"..\..\Debug_TS/php_gd2.dll" /libpath:"..\..\Debug_TS"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
@@ -152,19 +94,13 @@ LINK32=link.exe
 # Begin Target
 
 # Name "gd - Win32 Release_TS GD2"
-# Name "gd - Win32 Release_TS GD1"
 # Name "gd - Win32 Debug_TS GD2"
-# Name "gd - Win32 Debug_TS GD1"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
 SOURCE=.\gd.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\gdcache.c
 # End Source File
 # Begin Source File
 
@@ -190,6 +126,471 @@ SOURCE=.\php_gd.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# End Group
+# Begin Group "libgd"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 1"
+
+# PROP Default_Filter "*.c"
+# Begin Source File
+
+SOURCE=.\libgd\gd.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd2copypal.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_arc_f_buggy.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_gd.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_gd2.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_gif_in.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_io.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_io_dp.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_io_file.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_io_ss.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_jpeg.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_png.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_ss.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_topal.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_wbmp.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdcache.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontg.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontl.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontmb.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfonts.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontt.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdft.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdhelpers.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdkanji.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdtables.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdxpm.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\wbmp.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\xbm.c
+
+!IF  "$(CFG)" == "gd - Win32 Release_TS GD2"
+
+# PROP Intermediate_Dir "Release_TS_bundled"
+
+!ELSEIF  "$(CFG)" == "gd - Win32 Debug_TS GD2"
+
+# PROP Intermediate_Dir "Debug_TS_bundled"
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "Header Files No. 1"
+
+# PROP Default_Filter "*.h"
+# Begin Source File
+
+SOURCE=.\libgd\gd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gd_io.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdcache.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontmb.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfonts.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdfontt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\gdhelpers.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\jisx0208.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\libgd\wbmp.h
+# End Source File
+# End Group
 # End Group
 # End Target
 # End Project
