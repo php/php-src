@@ -432,28 +432,83 @@ BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 {
 	zend_file_handle file_handle;
+	zend_bool stack_overflown=0;
 	SLS_FETCH();
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
 	if (setjmp(EG(bailout))!=0) {
+		php_request_shutdown(NULL);
 		return HSE_STATUS_ERROR;
 	}
 
-	init_request_info(sapi_globals, lpECB);
-	SG(server_context) = lpECB;
+	__try {
+		init_request_info(sapi_globals, lpECB);
+		SG(server_context) = lpECB;
 
-	file_handle.filename = sapi_globals->request_info.path_translated;
-	file_handle.free_filename = 0;
-	file_handle.type = ZEND_HANDLE_FILENAME;
+		file_handle.filename = sapi_globals->request_info.path_translated;
+		file_handle.free_filename = 0;
+		file_handle.type = ZEND_HANDLE_FILENAME;
 
-	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
-	if (SG(request_info).cookie_data) {
-		efree(SG(request_info).cookie_data);
+		php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
+		php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+		if (SG(request_info).cookie_data) {
+			efree(SG(request_info).cookie_data);
+		}
+	} __except(EXCEPTION_EXECUTE_HANDLER) {
+		if (_exception_code()==EXCEPTION_STACK_OVERFLOW) {
+			LPBYTE lpPage;
+			static SYSTEM_INFO si;
+			static MEMORY_BASIC_INFORMATION mi;
+			static DWORD dwOldProtect;
+			HSE_SEND_HEADER_EX_INFO header_info;
+
+			GetSystemInfo(&si);
+
+			/* Get page ESP is pointing to */
+			_asm mov lpPage, esp;
+
+			/* Get stack allocation base */
+			VirtualQuery(lpPage, &mi, sizeof(mi));
+
+			/* Go to the page below the current page */
+			lpPage = (LPBYTE) (mi.BaseAddress) - si.dwPageSize;
+
+			/* Free pages below current page */
+			if (!VirtualFree(mi.AllocationBase, (LPBYTE)lpPage - (LPBYTE) mi.AllocationBase, MEM_DECOMMIT)) {
+				ExitThread(0);
+			}
+
+			/* Restore the guard page */
+			if (!VirtualProtect(lpPage, si.dwPageSize, PAGE_GUARD | PAGE_READWRITE, &dwOldProtect)) {
+				ExitThread(0);
+			}
+
+			CG(unclean_shutdown)=1;
+
+			header_info.pszStatus = "500 Internal Server Error";
+#ifndef WITH_ZEUS
+			header_info.cchStatus = strlen(header_info.pszStatus);
+#endif
+			header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
+			header_info.cchHeader = strlen(header_info.pszHeader);
+
+			lpECB->dwHttpStatusCode = 500;
+			lpECB->ServerSupportFunction(lpECB->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &header_info, NULL, NULL);
+			SG(headers_sent)=1;
+			sapi_isapi_ub_write("Stack Overflow", sizeof("Stack Overflow")-1);		
+		} else {
+			ExitThread(0);
+		}
 	}
-	php_request_shutdown(NULL);
+
+	__try {
+		php_request_shutdown(NULL);
+	} __except(EXCEPTION_EXECUTE_HANDLER) {
+		ExitThread(0);
+	}
+
 	return HSE_STATUS_SUCCESS;
 }
 
