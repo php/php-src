@@ -788,8 +788,8 @@ ingres.default_user =
 ingres.default_password =
 
 [Verisign Payflow Pro]
-; Default Signio server.
-pfpro.defaulthost = "test.signio.com"
+; Default Payflow Pro server.
+pfpro.defaulthost = "test-payflow.verisign.com"
 
 ; Default port to connect to.
 pfpro.defaultport = 443
