@@ -118,7 +118,7 @@ function_entry posix_functions[] = {
 static PHP_MINFO_FUNCTION(posix);
 
 zend_module_entry posix_module_entry = {
-	"Posix", 
+	"posix", 
 	posix_functions, 
 	NULL,
 	NULL,

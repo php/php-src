@@ -76,7 +76,7 @@ function_entry pgsql_functions[] = {
 };
 
 zend_module_entry pgsql_module_entry = {
-	"PostgreSQL", pgsql_functions, PHP_MINIT(pgsql), PHP_MSHUTDOWN(pgsql), PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"pgsql", pgsql_functions, PHP_MINIT(pgsql), PHP_MSHUTDOWN(pgsql), PHP_RINIT(pgsql), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

@@ -95,7 +95,7 @@ function_entry icap_functions[] = {
 
 
 zend_module_entry php_icap_module_entry = {
-	CALVER, icap_functions, PHP_MINIT(icap), NULL, NULL, NULL, PHP_MINFO(icap), 0, 0, 0, NULL
+    "icap", icap_functions, PHP_MINIT(icap), NULL, NULL, NULL, PHP_MINFO(icap), 0, 0, 0, NULL
 };
 
 
@@ -940,5 +940,3 @@ void cc_vdlog(const char *fmt,va_list ap)
  * c-basic-offset: 4
  * End:
  */
-
-

@@ -98,7 +98,7 @@ function_entry ldap_functions[] = {
 
 
 zend_module_entry ldap_module_entry = {
-	"LDAP", ldap_functions, PHP_MINIT(ldap), PHP_MSHUTDOWN(ldap), NULL, NULL,
+	"ldap", ldap_functions, PHP_MINIT(ldap), PHP_MSHUTDOWN(ldap), NULL, NULL,
 			PHP_MINFO(ldap), STANDARD_MODULE_PROPERTIES
 };
 

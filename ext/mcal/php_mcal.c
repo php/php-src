@@ -121,7 +121,7 @@ function_entry mcal_functions[] = {
 };
 
 zend_module_entry php_mcal_module_entry = {
-	"Modular Calendar Access Library", mcal_functions, PHP_MINIT(mcal), NULL, NULL, NULL, PHP_MINFO(mcal), STANDARD_MODULE_PROPERTIES
+	"mcal", mcal_functions, PHP_MINIT(mcal), NULL, NULL, NULL, PHP_MINFO(mcal), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

@@ -79,7 +79,7 @@ function_entry sybase_functions[] = {
 };
 
 zend_module_entry sybase_module_entry = {
-	"Sybase SQL", sybase_functions, PHP_MINIT(sybase), PHP_MSHUTDOWN(sybase), PHP_RINIT(sybase), PHP_RSHUTDOWN(sybase), PHP_MINFO(sybase), STANDARD_MODULE_PROPERTIES
+	"sybase", sybase_functions, PHP_MINIT(sybase), PHP_MSHUTDOWN(sybase), PHP_RINIT(sybase), PHP_RSHUTDOWN(sybase), PHP_MINFO(sybase), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

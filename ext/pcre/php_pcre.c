@@ -1200,7 +1200,7 @@ function_entry pcre_functions[] = {
 };
 
 zend_module_entry pcre_module_entry = {
-   "PCRE", pcre_functions,
+   "pcre", pcre_functions,
 		   PHP_MINIT(pcre),
 		   PHP_MSHUTDOWN(pcre),
 		   PHP_RINIT(pcre),

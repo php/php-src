@@ -726,7 +726,7 @@ function_entry dbase_functions[] = {
 };
 
 zend_module_entry dbase_module_entry = {
-	"DBase", dbase_functions, PHP_MINIT(dbase), PHP_MSHUTDOWN(dbase), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"dbase", dbase_functions, PHP_MINIT(dbase), PHP_MSHUTDOWN(dbase), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 

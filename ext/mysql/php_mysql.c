@@ -146,7 +146,7 @@ function_entry mysql_functions[] = {
 };
 
 zend_module_entry mysql_module_entry = {
-	"MySQL", mysql_functions, PHP_MINIT(mysql), PHP_MSHUTDOWN(mysql), PHP_RINIT(mysql), NULL, 
+	"mysql", mysql_functions, PHP_MINIT(mysql), PHP_MSHUTDOWN(mysql), PHP_RINIT(mysql), NULL, 
 			 PHP_MINFO(mysql), STANDARD_MODULE_PROPERTIES
 };
 

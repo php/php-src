@@ -26,11 +26,15 @@
 
 #include "php.h"
 #include "php_globals.h"
+
 #include "ext/standard/info.h"
+
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_standard.h"
+
 #include "php_odbc.h"
 #include "php_globals.h"
+
 
 #if HAVE_UODBC
 
@@ -112,7 +116,7 @@ function_entry odbc_functions[] = {
 };
 
 zend_module_entry odbc_module_entry = {
-    "ODBC", 
+    "odbc", 
 	odbc_functions, 
 	PHP_MINIT(odbc), 
 	PHP_MSHUTDOWN(odbc),

@@ -137,7 +137,7 @@ function_entry oracle_functions[] = {
 };
 
 zend_module_entry oracle_module_entry = {
-	"Oracle",
+	"oracle",
 	oracle_functions,
 	PHP_MINIT(oracle),       /* extension-wide startup function */
     PHP_MSHUTDOWN(oracle),   /* extension-wide shutdown function */

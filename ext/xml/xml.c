@@ -123,7 +123,7 @@ function_entry xml_functions[] = {
 };
 
 zend_module_entry xml_module_entry = {
-    "XML",                /* extension name */
+    "xml",                /* extension name */
     xml_functions,        /* extension function list */
     PHP_MINIT(xml),       /* extension-wide startup function */
     PHP_MSHUTDOWN(xml),   /* extension-wide shutdown function */

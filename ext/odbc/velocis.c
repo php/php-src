@@ -60,7 +60,7 @@ function_entry velocis_functions[] = {
 };
 
 zend_module_entry velocis_module_entry = {
-	"Velocis", velocis_functions, PHP_MINIT(velocis), PHP_MSHUTDOWN(velocis),
+	"velocis", velocis_functions, PHP_MINIT(velocis), PHP_MSHUTDOWN(velocis),
 		PHP_RINIT(velocis), NULL, PHP_MINFO(velocis), STANDARD_MODULE_PROPERTIES
 };
 

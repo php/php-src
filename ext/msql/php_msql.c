@@ -101,7 +101,7 @@ function_entry msql_functions[] = {
 
 
 zend_module_entry msql_module_entry = {
-	"mSQL", msql_functions, PHP_MINIT(msql), NULL, PHP_RINIT(msql), NULL,
+	"msql", msql_functions, PHP_MINIT(msql), NULL, PHP_RINIT(msql), NULL,
 			PHP_MINFO(msql), STANDARD_MODULE_PROPERTIES
 };
 

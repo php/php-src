@@ -85,7 +85,7 @@ function_entry snmp_functions[] = {
 };
 
 zend_module_entry snmp_module_entry = {
-	"SNMP",snmp_functions,PHP_MINIT(snmp),NULL,NULL,NULL,PHP_MINFO(snmp),STANDARD_MODULE_PROPERTIES
+	"snmp",snmp_functions,PHP_MINIT(snmp),NULL,NULL,NULL,PHP_MINFO(snmp),STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

@@ -109,7 +109,7 @@ static void php_rinit_session_globals(PSLS_D);
 static void php_rshutdown_session_globals(PSLS_D);
 
 zend_module_entry session_module_entry = {
-	"Session Management",
+	"session",
 	session_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),

@@ -36,7 +36,7 @@ function_entry yp_functions[] = {
 };
 
 zend_module_entry yp_module_entry = {
-	"YP",
+	"yp",
 	yp_functions,
 	NULL,
 	NULL,
