@@ -154,14 +154,14 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(xmldoc,														NULL)
 	PHP_FE(xmldocfile,													NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FE(htmldoc,														NULL)
-	PHP_FE(htmldocfile,													NULL)
+	PHP_FE(html_doc,														NULL)
+	PHP_FE(html_doc_file,													NULL)
 #endif
 	PHP_FE(xmltree,														NULL)
 	PHP_FE(domxml_add_root,												NULL)
 	PHP_FE(domxml_dumpmem,												NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FE(domxml_htmldumpmem,												NULL)
+	PHP_FE(domxml_html_dump_mem,												NULL)
 #endif
 	PHP_FE(domxml_node_attributes,										NULL)
 	PHP_FE(domxml_elem_get_attribute,									NULL)
@@ -223,7 +223,7 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dumpmem,					NULL)
 #if defined(LIBXML_HTML_ENABLED)
-	PHP_FALIAS(htmldumpmem,					domxml_htmldumpmem,					NULL)
+	PHP_FALIAS(html_dump_mem,					domxml_html_dump_mem,					NULL)
 #endif
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
@@ -2479,9 +2479,9 @@ PHP_FUNCTION(xmldocfile)
 /* }}} */
 
 #if defined(LIBXML_HTML_ENABLED)
-/* {{{ proto string domxml_htmldumpmem([int doc_handle])
-   Dumps document into string */
-PHP_FUNCTION(domxml_htmldumpmem)
+/* {{{ proto string domxml_html_dump_mem([int doc_handle])
+   Dumps document into string as HTML */
+PHP_FUNCTION(domxml_html_dump_mem)
 {
 	zval *id;
 	xmlDoc *docp;
@@ -2498,9 +2498,9 @@ PHP_FUNCTION(domxml_htmldumpmem)
 }
 /* }}} */
 
-/* {{{ proto object htmldoc(string htmldoc)
+/* {{{ proto object html_doc(string html_doc)
    Creates DOM object of HTML document */
-PHP_FUNCTION(htmldoc)
+PHP_FUNCTION(html_doc)
 {
 	zval *rv;
 	xmlDoc *docp;
@@ -2525,9 +2525,9 @@ PHP_FUNCTION(htmldoc)
 }
 /* }}} */
 
-/* {{{ proto object htmldocfile(string filename)
-   Creates DOM object of HTML document in file*/
-PHP_FUNCTION(htmldocfile)
+/* {{{ proto object html_doc_file(string filename)
+   Creates DOM object of HTML document in file */
+PHP_FUNCTION(html_doc_file)
 {
 	zval *rv;
 	xmlDoc *docp;

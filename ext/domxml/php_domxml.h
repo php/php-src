@@ -51,8 +51,8 @@ PHP_FUNCTION(domxml_version);
 PHP_FUNCTION(xmldoc);
 PHP_FUNCTION(xmldocfile);
 #if defined(LIBXML_HTML_ENABLED)
-PHP_FUNCTION(htmldoc);
-PHP_FUNCTION(htmldocfile);
+PHP_FUNCTION(html_doc);
+PHP_FUNCTION(html_doc_file);
 #endif
 PHP_FUNCTION(xmltree);
 PHP_FUNCTION(domxml_new_xmldoc);
@@ -73,7 +73,7 @@ PHP_FUNCTION(domxml_add_root);
 PHP_FUNCTION(domxml_intdtd);
 PHP_FUNCTION(domxml_dumpmem);
 #if defined(LIBXML_HTML_ENABLED)
-PHP_FUNCTION(domxml_htmldumpmem);
+PHP_FUNCTION(domxml_html_dump_mem);
 #endif
 
 /* Class DocumentType methods */
