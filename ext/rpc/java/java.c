@@ -192,8 +192,7 @@ static int jvm_create(TSRMLS_D)
     dl_handle = DL_LOAD(javalib);
 
     if (!dl_handle) {
-      php_error(E_ERROR, "Unable to load Java Library %s, error: %s", 
-        javalib, DL_ERROR());
+      php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to load Java Library %s, error: %s", javalib, DL_ERROR());
       return -1;
     }
   }
@@ -208,7 +207,7 @@ static int jvm_create(TSRMLS_D)
     DL_FETCH_SYMBOL(dl_handle, "JNI_CreateJavaVM");
 
   if (!JNI_CreateVM) {
-    php_error(E_ERROR, "Unable to locate CreateJavaVM function");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to locate CreateJavaVM function");
     return -1;
   }
 
@@ -235,7 +234,7 @@ static int jvm_create(TSRMLS_D)
     DL_FETCH_SYMBOL(dl_handle, "JNI_GetDefaultJavaVMInitArgs");
 
   if (!JNI_DefaultArgs) {
-    php_error(E_ERROR, "Unable to locate GetDefaultJavaVMInitArgs function");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to locate GetDefaultJavaVMInitArgs function");
     return -1;
   }
 
@@ -254,7 +253,7 @@ static int jvm_create(TSRMLS_D)
   rc = (*JNI_CreateVM)(&JG(jvm), &JG(jenv), &vm_args);
 
   if (rc) {
-    php_error(E_ERROR, "Unable to create Java Virtual Machine");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to create Java Virtual Machine");
     return rc;
   }
 
@@ -273,7 +272,7 @@ static int jvm_create(TSRMLS_D)
       "()Ljava/lang/String;");
     errString = (*jenv)->CallObjectMethod(jenv, error, toString);
     errAsUTF = (*jenv)->GetStringUTFChars(jenv, errString, &isCopy);
-    php_error(E_ERROR, "%s", errAsUTF);
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", errAsUTF);
     if (isCopy) (*jenv)->ReleaseStringUTFChars(jenv, error, errAsUTF);
     jvm_destroy(TSRMLS_C);
     return -1;
@@ -411,7 +410,7 @@ static jobjectArray _java_makeArray(int argc, pval** argv TSRMLS_DC)
 static int checkError(pval *value)
 {
   if (Z_TYPE_P(value) == IS_EXCEPTION) {
-    php_error(E_WARNING, "%s", Z_STRVAL_P(value));
+    php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", Z_STRVAL_P(value));
     efree(Z_STRVAL_P(value));
     ZVAL_FALSE(value);
     return 1;
@@ -458,7 +457,7 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
     result = (jlong)(long)object;
 
     if (ZEND_NUM_ARGS() < 1) {
-      php_error(E_ERROR, "Missing classname in new Java() call");
+      php_error_docref(NULL TSRMLS_CC, E_ERROR, "Missing classname in new Java() call");
       return;
     }
 
@@ -571,8 +570,7 @@ static pval _java_getset_property
   Z_TYPE(presult) = IS_NULL;
 
   if (!obj || (type!=le_jobject)) {
-    php_error(E_ERROR,
-      "Attempt to access a Java property on a non-Java object");
+    php_error_docref(NULL TSRMLS_CC, E_ERROR, "Attempt to access a Java property on a non-Java object");
   } else {
     /* invoke the method */
     jmethodID gsp = (*jenv)->GetMethodID(jenv, JG(reflect_class), "GetSetProp",

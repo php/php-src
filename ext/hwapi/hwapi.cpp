@@ -341,15 +341,15 @@ static void *php_hwapi_get_object(zval *wrapper, int rsrc_type1) {
 	int type;
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
-		php_error(E_ERROR, "Wrapper is not an object");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Wrapper is not an object");
 	}
 	if (zend_hash_find(Z_OBJPROP_P(wrapper), "this", sizeof("this"), (void **)&handle) == FAILURE) {
-		php_error(E_ERROR, "Underlying object missing");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Underlying object missing");
 	}
 
 	obj = zend_list_find(Z_LVAL_PP(handle), &type);
 	if (!obj || (type != rsrc_type1)) {
-		php_error(E_ERROR, "Underlying object missing or of invalid type");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Underlying object missing or of invalid type");
 	}
 	return obj;
 }
@@ -4255,7 +4255,7 @@ PHP_FUNCTION(hwapi_object_attribute) {
 			error = objp->attribute(HW_API_String(Z_STRVAL_PP(arg1)), attr);
 			break;
 		default:
-			php_error(E_WARNING, "HW_API_Object::attribute() needs string or long as parameter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "HW_API_Object::attribute() needs string or long as parameter");
 			RETURN_FALSE;
 	}
 
@@ -4643,7 +4643,7 @@ PHP_FUNCTION(hwapi_error_reason) {
 		RETURN_FALSE;
 	}
 	if(!objp->error())
-		php_error(E_WARNING, "This is not an error");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This is not an error");
 
 	error = objp->reason(Z_LVAL_PP(arg1), reason);
 	if(error) {

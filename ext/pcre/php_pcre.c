@@ -633,7 +633,7 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, int co
 		result_len = Z_STRLEN_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
 	} else {
-		php_error(E_WARNING, "Unable to call custom replacement function");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call custom replacement function");
 		result_len = offsets[1] - offsets[0];
 		*result = estrndup(&subject[offsets[0]], result_len);
 	}
@@ -776,7 +776,7 @@ PHPAPI char *php_pcre_replace(char *regex,   int regex_len,
 	eval = preg_options & PREG_REPLACE_EVAL;
 	if (is_callable_replace) {
 		if (eval) {
-			php_error(E_WARNING, "/e modifier cannot be used with replacement callback");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "/e modifier cannot be used with replacement callback");
 			return NULL;
 		}
 	} else {
@@ -1054,8 +1054,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_callabl
 		convert_to_string_ex(replace);
 	if (is_callable_replace) {
 		if (!zend_is_callable(*replace, 0, &callback_name)) {
-			php_error(E_WARNING, "%s() requires argument 2, '%s', to be a valid callback",
-					  get_active_function_name(TSRMLS_C), callback_name);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "requires argument 2, '%s', to be a valid callback", callback_name);
 			efree(callback_name);
 			*return_value = **subject;
 			zval_copy_ctor(return_value);

@@ -126,7 +126,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	/* Release the semaphore if it has been acquired but not released. */
 
 	if (sem_ptr->count) {
-		php_error(E_WARNING, "Releasing SysV semaphore id %d key 0x%x in request cleanup", sem_ptr->id, sem_ptr->key);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Releasing SysV semaphore id %d key 0x%x in request cleanup", sem_ptr->id, sem_ptr->key);
 
 		sop[1].sem_num = SYSVSEM_SEM;
 		sop[1].sem_op  = sem_ptr->count;
@@ -135,7 +135,7 @@ static void release_sysvsem_sem(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		opcount++;
 	}
 	if (semop(sem_ptr->semid, sop, opcount) == -1) {
-		php_error(E_WARNING, "semop() failed in release_sysvsem_sem for key 0x%x: %s", sem_ptr->key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed in release_sysvsem_sem for key 0x%x: %s", sem_ptr->key, strerror(errno));
 	}
 
 	efree(sem_ptr);
@@ -185,7 +185,7 @@ PHP_FUNCTION(sem_get)
 
     semid = semget(key, 3, perm|IPC_CREAT);
 	if (semid == -1) {
-		php_error(E_WARNING, "semget() failed for key 0x%x: %s", key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -217,7 +217,7 @@ PHP_FUNCTION(sem_get)
 	sop[2].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 3) == -1) {
 		if (errno != EINTR) {
-			php_error(E_WARNING, "semop() failed acquiring SYSVSEM_SETVAL for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed acquiring SYSVSEM_SETVAL for key 0x%x: %s", key, strerror(errno));
 			break;
 		}
 	}
@@ -229,7 +229,7 @@ PHP_FUNCTION(sem_get)
 	count = semctl(semid, SYSVSEM_USAGE, GETVAL, NULL);
 #endif
 	if (count == -1) {
-		php_error(E_WARNING, "semctl(GETVAL) failed for key 0x%x: %s", key, strerror(errno));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 	}
 
 	/* If we are the only user, then take this opportunity to set the max. */
@@ -240,17 +240,17 @@ PHP_FUNCTION(sem_get)
 		union semun semarg;
 		semarg.val = max_acquire;
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, semarg) == -1) {
-			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 		}
 #elif defined(SETVAL_WANTS_PTR)
 		/* This is correct for Solaris 2.6 which does not have union semun. */
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, &max_acquire) == -1) {
-			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 		}
 #else
 		/* This works for i.e. AIX */
 		if (semctl(semid, SYSVSEM_SEM, SETVAL, max_acquire) == -1) {
-			php_error(E_WARNING, "semctl(SETVAL) failed for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s", key, strerror(errno));
 		}
 #endif
 	}
@@ -262,7 +262,7 @@ PHP_FUNCTION(sem_get)
 	sop[0].sem_flg = SEM_UNDO;
 	while (semop(semid, sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error(E_WARNING, "semop() failed releasing SYSVSEM_SETVAL for key 0x%x: %s", key, strerror(errno));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed releasing SYSVSEM_SETVAL for key 0x%x: %s", key, strerror(errno));
 			break;
 		}
 	}
@@ -309,7 +309,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
     while (semop(sem_ptr->semid, &sop, 1) == -1) {
 		if (errno != EINTR) {
-			php_error(E_WARNING, "semop(%s) failed for key 0x%x: %s",
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed for key 0x%x: %s",
 					   acquire ? "acquire" : "release",  sem_ptr->key, strerror(errno));
 			RETURN_FALSE;
 		}

@@ -1428,15 +1428,15 @@ static size_t strfilter_convert_write(php_stream *stream, php_stream_filter *thi
 					break;
 
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error(E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
 					return 0;
 	
  				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error(E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
 					return 0;
 
 				default:
@@ -1482,15 +1482,15 @@ static size_t strfilter_convert_read(php_stream *stream, php_stream_filter *this
 
 			switch (err) {
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error(E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid base64 sequence", inst->filtername, err);
 					return 0;
 
 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error(E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername, err);
 					return 0;
 
 				default:
@@ -1527,7 +1527,7 @@ static int strfilter_convert_flush(php_stream *stream, php_stream_filter *thisfi
 					out_p = bucket_buf;
 					out_left = sizeof(bucket_buf);
 				} else {
-					php_error(E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
 					return 0;
 				}
 			}
@@ -1764,7 +1764,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, const
 	if (filterparams != NULL) {
 		options = strfilter_convert_parse_parameters(filterparams);
 		if (options == NULL) {
-			php_error(E_WARNING, "stream filter (%s): invalid filter parameter \"%s\"", filtername, filterparams);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter \"%s\"", filtername, filterparams);
 		}
 	}
 

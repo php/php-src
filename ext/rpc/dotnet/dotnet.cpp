@@ -143,13 +143,13 @@ PHP_FUNCTION(dotnet_load)
 	if (FAILED(hr)) {
 		char *error_message;
 		error_message = php_COM_error_message(hr TSRMLS_CC);
-		php_error(E_WARNING, "Error obtaining .Net class for %s in assembly %s: %s", datatype_name->value.str.val, assembly_name->value.str.val, error_message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error obtaining .Net class for %s in assembly %s: %s", datatype_name->value.str.val, assembly_name->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(obj);
 		RETURN_FALSE;
 	}
 	if (C_DISPATCH(obj) == NULL) {
-		php_error(E_WARNING, "Unable to locate %s in assembly %s", datatype_name->value.str.val, assembly_name->value.str.val);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate %s in assembly %s", datatype_name->value.str.val, assembly_name->value.str.val);
 		efree(obj);
 		RETURN_FALSE;
 	}
