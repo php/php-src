@@ -483,6 +483,7 @@ static int php_ob_init(uint initial_size, uint block_size, zval *output_handler,
 		/* do we have array(object,method) */
 		if (zend_is_callable(output_handler, 1, &handler_name)) {
 			SEPARATE_ZVAL(&output_handler);
+			output_handler->refcount++;
 			result = php_ob_init_named(initial_size, block_size, handler_name, output_handler, chunk_size, erase TSRMLS_CC);
 			efree(handler_name);
 		} else {
