@@ -287,10 +287,10 @@ int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 		if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, namelen+1, (void **) state_var)==SUCCESS) {
 			return SUCCESS;
 		}
-	} else if (!PG(register_globals)) {
-		/* register_globals is disabled, but we don't have http_session_vars */
-		return FAILURE;
-	}	
+	}
+	
+	/* register_globals is disabled, but we don't have http_session_vars */
+	return FAILURE;
 }
 
 #define PS_BIN_NR_OF_BITS 8
