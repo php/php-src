@@ -1493,11 +1493,11 @@ static size_t php_passthru_fd(int socketd, FILE *fp, int issock)
 		fd = fileno(fp);
 		fstat(fd, &sbuf);
 	
-		if(sbuf.st_size > sizeof(buf)) {
+		if (sbuf.st_size > sizeof(buf)) {
 			off = ftell(fp);
 			len = sbuf.st_size - off;
 			p = mmap(0, len, PROT_READ, MAP_PRIVATE, fd, off);
-			if(p!=MAP_FAILED) {
+			if (p != (void *) MAP_FAILED) {
 				PHPWRITE(p, len);
 				munmap(p, len);
 				bcount += len;
