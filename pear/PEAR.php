@@ -174,6 +174,27 @@ class PEAR
     }
 
     // }}}
+    // {{{ getStaticProperty()
+
+    /**
+    * If you have a class that's mostly/entirely static, and you need static
+    * properties, you can use this method to simulate them. Eg. in your method(s)
+    * do this: $myVar = &PEAR::getStaticProperty('myVar');
+    * You MUST use a reference, or they will not persist!
+    *
+    * @access public
+    * @param  string $class The calling classname, to prevent clashes
+    * @param  string $var   The variable to retrieve.
+    * @return mixed         A reference to the variable. If not set it will be 
+    *                       auto initialised to NULL.
+    */
+    function &getStaticProperty($class, $var)
+    {
+        static $properties;
+        return $properties[$class][$var];
+    }
+
+    // }}}
     // {{{ registerShutdownFunc()
 
     /**
