@@ -107,7 +107,9 @@ class PEAR_Packager extends PEAR
 
     // }}}
 
-    function Package($pkgfile = "package.xml")
+    // {{{ package()
+
+    function package($pkgfile = "package.xml")
     {
         $pwd = getcwd();
         $fp = @fopen($pkgfile, "r");
@@ -175,6 +177,8 @@ class PEAR_Packager extends PEAR
         $pkgver = quotemeta($this->pkgver);
         system("tar -cvzf $pwd/${pkgver}.tgz $pkgver");
     }
+
+    // }}}
 
     // {{{ mkDirHier()
 
