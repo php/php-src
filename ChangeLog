@@ -1,3 +1,35 @@
+2002-07-24  sesser  <sesser@pb1.pair.com>
+
+    * main/php_variables.c: MFH
+
+    * main/php_variables.c: break out if there is no data to work on.
+
+2002-07-24  derick  <derick@pb1.pair.com>
+
+    * ext/standard/head.c: - MFH for fix for bug #16626
+
+    * main/SAPI.c: - MFH for fix for bug #18268
+
+2002-07-24  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/type.c:
+    is_object() returns FALSE if object is a "incomplete object".
+    Raise E_NOTICE, instead of E_ERROR, for setting/getting properties
+    to/from a "incomplete object".
+
+2002-07-24  steinm  <steinm@pb1.pair.com>
+
+    * ext/hyperwave/hw.c: - removed unused variable
+
+2002-07-24  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: -naming convention
+    -better notices
+    -(D)WORD are unsigned datatypes
+    -started to split tygs into different arrays that would allow to handle vendor specific tags after detection of their markers
+
 2002-07-23  Jim Winstead  <jimw@pb1.pair.com>
 
     * ext/standard/credits.c:

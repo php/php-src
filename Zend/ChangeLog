@@ -1,3 +1,14 @@
+2002-07-24  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_mm.c: - Fix some compile problems with the new configure checks.
+
+2002-07-24  James Cox  <imajes@pb1.pair.com>
+
+    * Zend.m4
+      zend_mm.c: move testing for the alignment values into configure.
+
+    * Zend.m4: ws fixes.
+
 2002-07-23  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_hash.c: - Fix WS.
