@@ -2857,7 +2857,6 @@ void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS
 void zend_do_declare_begin(TSRMLS_D)
 {
 	zend_stack_push(&CG(declare_stack), &CG(declarables), sizeof(zend_declarables));
-	CG(declarables).beginop = get_next_op_number(CG(active_op_array));
 }
 
 
@@ -2873,13 +2872,13 @@ void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC)
 }
 
 
-void zend_do_declare_end(TSRMLS_D)
+void zend_do_declare_end(znode *declare_token TSRMLS_DC)
 {
 	zend_declarables *declarables;
 
 	zend_stack_top(&CG(declare_stack), (void **) &declarables);
 	/* We should restore if there was more than (current - start) - (ticks?1:0) opcodes */
-	if ((get_next_op_number(CG(active_op_array)) - CG(declarables).beginop) - ((CG(declarables).ticks.value.lval)?1:0)) {
+	if ((get_next_op_number(CG(active_op_array)) - declare_token->u.opline_num) - ((CG(declarables).ticks.value.lval)?1:0)) {
 		CG(declarables) = *declarables;
 	}
 }

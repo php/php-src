@@ -366,7 +366,7 @@ void zend_do_foreach_end(znode *foreach_token, znode *open_brackets_token TSRMLS
 
 void zend_do_declare_begin(TSRMLS_D);
 void zend_do_declare_stmt(znode *var, znode *val TSRMLS_DC);
-void zend_do_declare_end(TSRMLS_D);
+void zend_do_declare_end(znode *declare_token TSRMLS_DC);
 
 void zend_do_end_heredoc(TSRMLS_D);
 
