@@ -29,8 +29,8 @@ switch ($connection) {
         $module=DBX_PGSQL;
         $host="";
         $database="dbx_test";
-        $username="";
-        $password="";
+        $username="dbx_testuser";
+        $password="dbx_testpassword";
         $module_name="pgsql";
         break;
     }
