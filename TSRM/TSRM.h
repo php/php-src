@@ -98,6 +98,11 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 #define TSRM_ERROR_LEVEL_ERROR	1
 #define TSRM_ERROR_LEVEL_CORE	2
 #define TSRM_ERROR_LEVEL_INFO	3
+
+typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id, void ***tsrm_ls);
+typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id, void ***tsrm_ls);
+
+
 TSRM_API int tsrm_error(int level, const char *format, ...);
 TSRM_API void tsrm_error_set(int level, char *debug_filename);
 
@@ -108,8 +113,8 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp);
 TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp);
 
-TSRM_API void *tsrm_set_new_thread_begin_handler(void (*new_thread_begin_handler)(THREAD_T thread_id));
-TSRM_API void *tsrm_set_new_thread_end_handler(void (*new_thread_end_handler)(THREAD_T thread_id));
+TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
+TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
 #define TSRM_UNSHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)-1)
