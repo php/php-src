@@ -248,6 +248,7 @@ php_apache_sapi_flush(void *server_context)
 	apr_bucket_brigade *brigade;
 	apr_bucket *bucket;
 	request_rec *r;
+	TSRMLS_FETCH();
 
 	ctx = server_context;
 
