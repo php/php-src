@@ -1,7 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- New constants: PHP_PREFIX and PHP_SHLIB_SUFFIX (Stig)
+- Fixed is_a() to properly work on extension registered classes. (Andrei)
+- New constants: PHP_PREFIX and PHP_SHLIB_SUFFIX. (Stig)
 - Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
   streams to their respective I/O counterparts. (Edin)
 - Added pctnl_alarm() function. (Edin)
