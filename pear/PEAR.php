@@ -533,7 +533,7 @@ class PEAR_Error
     var $level                = E_USER_NOTICE;
     var $code                 = -1;
     var $message              = '';
-    var $debuginfo            = '';
+    var $userinfo             = '';
 
     // Wait until we have a stack-groping function in PHP.
     //var $file    = '';
