@@ -52,6 +52,7 @@ PHP_FUNCTION(xslt_process);
 PHP_FUNCTION(xslt_create);
 PHP_FUNCTION(xslt_run);
 PHP_FUNCTION(xslt_set_sax_handler);
+PHP_FUNCTION(xslt_set_scheme_handler);
 PHP_FUNCTION(xslt_set_error_handler);
 #ifdef HAVE_SABLOT_SET_ENCODING
 PHP_FUNCTION(xslt_set_encoding);
@@ -97,6 +98,9 @@ typedef struct {
 	zval *charactersHandler;
 	zval *endDocHandler;
 	
+    /* Scheme Handling */
+	zval *getAllHandler;
+
 	/* Sablotron Related */
 	SablotHandle p;
 

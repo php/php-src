@@ -54,6 +54,14 @@ static MH_ERROR _php_sablot_make_code(void *, SablotHandle, int, unsigned short,
 static MH_ERROR _php_sablot_error(void *, SablotHandle, MH_ERROR, MH_LEVEL, char **);
 static void _php_sablot_standard_error(php_sablot_error *, php_sablot_error, int, int);
 
+/* Scheme Handling Functions */
+static int _php_sablot_sh_getAll(void *userData,  SablotHandle p, const char *scheme, const char *rest, char **buffer, int *byteCount);
+static int _php_sablot_sh_freeMemory(void *userData,  SablotHandle p, char *buffer);
+static int _php_sablot_sh_open(void *userData,  SablotHandle p, const char *scheme, const char *rest, int *handle);
+static int _php_sablot_sh_get(void *userData,  SablotHandle p, int handle, char *buffer, int *byteCount);
+static int _php_sablot_sh_put(void *userData,  SablotHandle p, int handle, const char *buffer, int *byteCount);
+static int _php_sablot_sh_close(void *userData,  SablotHandle p, int handle);
+
 /* PHP Utility Functions */
 static void _php_sablot_ht_char(HashTable *, char **);
 static zval *_php_sablot_string_zval(const char *);
@@ -137,6 +145,19 @@ static MessageHandler mh = {
     _php_sablot_error
 };
 
+/**
+ * Scheme Handler structure for use when Sablotron
+ * call rhe document Xpath function.
+ */
+static SchemeHandler sh = {
+  _php_sablot_sh_getAll,
+  _php_sablot_sh_freeMemory,
+  _php_sablot_sh_open,
+  _php_sablot_sh_get,
+  _php_sablot_sh_put,
+  _php_sablot_sh_close
+};
+
 #ifdef ZTS
 int sablot_globals_id;
 #else
@@ -158,6 +179,7 @@ function_entry sablot_functions[] = {
     PHP_FE(xslt_openlog,                  NULL)
     PHP_FE(xslt_closelog,                 NULL)
     PHP_FE(xslt_set_sax_handler,          NULL)
+    PHP_FE(xslt_set_scheme_handler,       NULL)
     PHP_FE(xslt_set_error_handler,        NULL)
     PHP_FE(xslt_set_base,                 NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
@@ -571,6 +593,13 @@ PHP_FUNCTION(xslt_create)
         RETURN_FALSE;
     }
     
+	ret = SablotRegHandler(handle->p, HLR_SCHEME, (void *)&sh, (void *)handle);
+
+	if (ret) {
+		SABLOTG(last_errno) = ret;
+		RETURN_FALSE;
+	}
+
     ZEND_REGISTER_RESOURCE(return_value, handle, le_sablot);
     handle->index = Z_LVAL_P(return_value);
 }
@@ -804,6 +833,11 @@ PHP_FUNCTION(xslt_set_sax_handler)
         zend_get_parameters_ex(2, &xh, &handlers) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
+    
+    if ((*handlers)->type != IS_ARRAY) {
+		php_error(E_ERROR, "The second parameter must be an array");
+	}
+    
     ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
     
     handlers_list = HASH_OF(*handlers);
@@ -847,6 +881,54 @@ PHP_FUNCTION(xslt_set_sax_handler)
 }
 /* }}} */
 
+
+/* {{{ proto void xslt_set_scheme_handler(resource xh, array handlers)
+   Set SAX Handlers on the resource handle given by xh. */
+PHP_FUNCTION(xslt_set_scheme_handler)
+{
+    zval **xh,
+         **handlers,
+         **indiv_handlers;
+    php_sablot *handle;
+    HashTable *handlers_list;
+    char *string_key = NULL;
+    ulong num_key;
+    SABLOTLS_FETCH();
+
+    if (ZEND_NUM_ARGS() != 2 ||
+        zend_get_parameters_ex(2, &xh, &handlers) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+
+    if ((*handlers)->type != IS_ARRAY) {
+		php_error(E_ERROR, "The second parameter must be an array");
+	}
+
+    ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", le_sablot);
+
+    handlers_list = HASH_OF(*handlers);
+
+    for (zend_hash_internal_pointer_reset(handlers_list);
+         zend_hash_get_current_data(handlers_list, (void **)&indiv_handlers) == SUCCESS;
+         zend_hash_move_forward(handlers_list)) {
+
+        SEPARATE_ZVAL(indiv_handlers);
+
+        if (zend_hash_get_current_key(handlers_list, &string_key, &num_key, 0) == HASH_KEY_IS_LONG) {
+            php_error(E_WARNING, "The Keys of the first dimension of your array must be strings");
+            RETURN_FALSE;
+        }
+
+        if (!strcasecmp("getall", string_key)) {
+			zval_add_ref(indiv_handlers);
+			handle->getAllHandler = *indiv_handlers;
+        } else {
+            php_error(E_WARNING, "Invalid option: %s", string_key);
+        }
+
+    }
+}
+/* }}} */
 
 #ifdef HAVE_SABLOT_SET_ENCODING
 
@@ -1422,6 +1504,81 @@ static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_erro
 
 /* }}} */
 
+/* {{{ Sablotron Scheme Handler functions */
+
+static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *scheme, const char *rest, char **buffer, int *byteCount) {
+	php_sablot *handle = (php_sablot *)userData;
+
+	if (handle->getAllHandler) {
+    	zval *retval;
+		zval *args[4];
+		char *mybuff;
+	    int i;
+        int argc;
+
+        argc=4;
+		args[0] = _php_sablot_resource_zval(handle->index);
+		args[1] = _php_sablot_string_zval(scheme);
+		args[2] = _php_sablot_string_zval(rest);
+		args[3] = _php_sablot_string_zval("");
+
+		MAKE_STD_ZVAL(retval);
+
+    	if (call_user_function(EG(function_table), NULL, handle->getAllHandler, retval, argc, args) == FAILURE) {
+        	php_error(E_WARNING, "Sorry, couldn't call %s handler", "scheme getAll");
+    	}
+
+    	zval_dtor(retval);
+    	efree(retval);
+
+        /**
+         * do not destroy xml data.
+         */
+		*buffer=Z_STRVAL_P(args[3]);
+		*byteCount=Z_STRLEN_P(args[3]);
+        /**
+         * destroy zvals
+         */
+	    for (i=0; i<3; i++) {
+		    zval_del_ref(&(args[i]));
+	    }
+	}
+};
+
+static int _php_sablot_sh_freeMemory(void *userData, SablotHandle p, char *buffer) {
+    /**
+     * here we should destroy the buffer containing the xml data
+     * buffer to zval and zval-del_ref
+     * we should destroy the zval not the pointer.
+     */
+};
+
+static int _php_sablot_sh_open(void *userData, SablotHandle p, const char *scheme, const char *rest, int *handle) {
+    /**
+     * Not implemented
+     */
+};
+
+static int _php_sablot_sh_get(void *userData, SablotHandle p, int handle, char *buffer, int *byteCount) {
+    /**
+     * Not implemented
+     */
+};
+
+static int _php_sablot_sh_put(void *userData, SablotHandle p, int handle, const char *buffer, int *byteCount) {
+    /**
+     * Not implemented
+     */
+};
+
+static int _php_sablot_sh_close(void *userData, SablotHandle p, int handle) {
+    /**
+     * Not implemented
+     */
+};
+
+/* }}} */
+
 /* {{{ List Handling functions */
 
 /* {{{ _php_sablot_free_processor()
@@ -1432,6 +1589,7 @@ static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
     if (handle->p) {
         SablotUnregHandler(handle->p, HLR_MESSAGE, NULL, NULL);
         SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);
+        SablotUnregHandler(handle->p, HLR_SCHEME, NULL, NULL);
         SablotDestroyProcessor(handle->p);
     }
     
@@ -1444,6 +1602,7 @@ static void _php_sablot_free_processor(zend_rsrc_list_entry *rsrc)
     FUNCH_FREE(handle->PIHandler);
     FUNCH_FREE(handle->charactersHandler);
     FUNCH_FREE(handle->endDocHandler);
+    FUNCH_FREE(handle->getAllHandler);
 
     SABLOT_FREE_ERROR_HANDLE(*handle);
     efree(handle);
