@@ -778,8 +778,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
 	zval **args[1];
-	zval *autoload_function;
-	zval *class_name;
+	zval autoload_function;
+	zval class_name, *class_name_ptr = &class_name;
 	zval *retval_ptr;
 	int retval;
 
@@ -787,17 +787,14 @@ ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***
 		return SUCCESS;
 	}
 
-	MAKE_STD_ZVAL(autoload_function);
-	ZVAL_STRINGL(autoload_function, "__autoload", sizeof("__autoload")-1,  1);
+	ZVAL_STRINGL(&autoload_function, "__autoload", sizeof("__autoload")-1,  0);
 
-	MAKE_STD_ZVAL(class_name);
-	ZVAL_STRINGL(class_name, name, name_length, 1);
-	args[0] = &class_name;
+	INIT_PZVAL(class_name_ptr);
+	ZVAL_STRINGL(class_name_ptr, name, name_length, 0);
+	
+	args[0] = &class_name_ptr;
 
-	retval = call_user_function_ex(EG(function_table), NULL, autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
-
-	zval_ptr_dtor(&autoload_function);
-	zval_ptr_dtor(&class_name);
+	retval = call_user_function_ex(EG(function_table), NULL, &autoload_function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC);
 
 	if (retval == FAILURE) {
 		return FAILURE;
