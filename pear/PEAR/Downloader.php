@@ -26,6 +26,12 @@ require_once 'PEAR/Dependency.php';
 require_once 'PEAR/Remote.php';
 require_once 'System.php';
 
+
+define('PEAR_INSTALLER_OK',       1);
+define('PEAR_INSTALLER_FAILED',   0);
+define('PEAR_INSTALLER_SKIPPED', -1);
+define('PEAR_INSTALLER_ERROR_NO_PREF_STATE', 2);
+
 /**
  * Administration class used to download PEAR packages and maintain the
  * installed package database.
