@@ -80,11 +80,12 @@
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
 #define PHP_MODE_LINT		4
+#define PHP_MODE_STRIP		5
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aCc:d:ef:g:hilmnqs?vz:"
+#define OPTSTRING "aCc:d:ef:g:hilmnqsw?vz:"
 
 static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
@@ -254,6 +255,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] |  {<file> [args...]}\n"
 				"  -q             Quiet-mode.  Suppress HTTP Header output.\n"
 				"  -s             Display colour syntax highlighted source.\n"
+				"  -w             Display source with stripped comments and whitespace.\n"
 				"  -f <file>      Parse <file>.  Implies `-q'\n"
 				"  -v             Version number\n"
                 "  -C             Do not chdir to the script's directory\n"
@@ -628,6 +630,10 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						exit(1);
 						break;
 
+  				case 'w': 
+						behavior=PHP_MODE_STRIP;
+						break;
+
 				case 'z': /* load extension file */
 						zend_load_extension(ap_php_optarg);
 						break;
@@ -754,6 +760,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				} else {
 					zend_printf("Errors parsing %s\n", file_handle.filename);
 				}
+				break;
+			case PHP_MODE_STRIP:
+				if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
+					zend_strip(TSRMLS_C);
+					fclose(file_handle.handle.fp);
+				}
+				return SUCCESS;
 				break;
 			case PHP_MODE_HIGHLIGHT:
 				{
