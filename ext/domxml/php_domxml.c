@@ -411,9 +411,14 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node)
 {
 	while (node != NULL) {
 		node_list_wrapper_dtor(node->children);
-		// FIXME temporary fix; think of something better
-		if (node->type != XML_ATTRIBUTE_DECL && node->type != XML_DTD_NODE) {
-			attr_list_wrapper_dtor(node->properties);
+		switch (node->type) {
+			/* Skip property freeing for the following types */
+			case XML_ATTRIBUTE_DECL:
+			case XML_DTD_NODE:
+			case XML_ENTITY_DECL:
+				break;
+			default:
+				attr_list_wrapper_dtor(node->properties);
 		}
 		node_wrapper_dtor(node);
 		node = node->next;
@@ -817,7 +822,6 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 			xmlNodePtr nodep = obj;
 			object_init_ex(wrapper, domxmlentityref_class_entry);
 			rsrc_type = le_domxmlentityrefp;
-			content = xmlNodeGetContent(nodep);
 			add_property_stringl(wrapper, "name", (char *) nodep->name, strlen(nodep->name), 1);
 			break;
 		}
@@ -932,12 +936,12 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlelementp =	zend_register_list_destructors_ex(php_free_xml_node, NULL, "domelement", module_number);
 	le_domxmldtdp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdtd", module_number);
 	le_domxmlcdatap = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcdata", module_number);
+	le_domxmlentityrefp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domentityref", module_number);
 
 	/* Not yet initialized le_*s */
 	le_domxmldoctypep   = -10000;
 	le_domxmlpip        = -10002;
 	le_domxmlnotationp  = -10003;
-	le_domxmlentityrefp = -10004;
 
 #if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpathcontext", module_number);
