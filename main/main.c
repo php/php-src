@@ -813,14 +813,12 @@ static void sigchld_handler(int apar)
 
 static int php_hash_environment(TSRMLS_D);
 
-/* {{{ php_request_startup
+/* {{{ php_start_sapi()
  */
-int php_request_startup(TSRMLS_D)
-{           
-    int retval = SUCCESS;
-#if PHP_SIGCHILD
-    signal(SIGCHLD, sigchld_handler);
-#endif          
+static int php_start_sapi()
+{
+	int retval = SUCCESS;
+
     if(!SG(sapi_started)) {
         zend_try {
             PG(during_request_startup) = 1;
@@ -837,11 +835,31 @@ int php_request_startup(TSRMLS_D)
         } zend_catch {
             retval = FAILURE;
         } zend_end_try();
+
         SG(sapi_started) = 1;
     }           
+	return retval;
+}
+
+/* }}} */
+
+/* {{{ php_request_startup
+ */
+int php_request_startup(TSRMLS_D)
+{           
+    int retval = SUCCESS;
+
+#if PHP_SIGCHILD
+    signal(SIGCHLD, sigchld_handler);
+#endif          
+
+	if (php_start_sapi() == FAILURE)
+		return FAILURE;
+
     php_output_activate(TSRMLS_C);
     sapi_activate(TSRMLS_C);
     php_hash_environment(TSRMLS_C);
+
     zend_try {
         if (PG(expose_php)) {
             sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
@@ -869,25 +887,16 @@ int php_request_startup(TSRMLS_D)
 int php_request_startup_for_hook(TSRMLS_D)
 {
 	int retval = SUCCESS;
+
 #if PHP_SIGCHLD
 	signal(SIGCHLD, sigchld_handler);
 #endif
-    if(!SG(sapi_started)) {
-    	zend_try {
-    		PG(during_request_startup) = 1;
-    		PG(modules_activated) = 0;
-    		PG(header_is_being_sent) = 0;
-    		PG(connection_status) = PHP_CONNECTION_NORMAL;
-    		zend_activate(TSRMLS_C);
-    		zend_activate_modules(TSRMLS_C);
-    		PG(modules_activated) = 1;
-    	} zend_catch {
-    		retval = FAILURE;
-    	} zend_end_try();
-        SG(sapi_started) = 1;
-    }
+
+	if (php_start_sapi() == FAILURE)
+		return FAILURE;
+
+    php_output_activate(TSRMLS_C);
     sapi_activate(TSRMLS_C);
-    zend_set_timeout(EG(timeout_seconds));
     php_hash_environment(TSRMLS_C);
 
 	return retval;
