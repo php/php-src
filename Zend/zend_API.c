@@ -661,7 +661,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 	
 	arg->type = IS_OBJECT;
 	if (class_type->create_object == NULL) {
-		arg->value.obj = zend_objects_new(&object, class_type);
+		arg->value.obj = zend_objects_new(&object, class_type TSRMLS_CC);
 		if (properties) {
 			object->properties = properties;
 		} else {
@@ -1432,7 +1432,7 @@ static zend_object_value display_disabled_class(zend_class_entry *class_type TSR
 {
 	zend_object_value retval;
 	zend_object *intern;
-	retval = zend_objects_new(&intern, class_type);
+	retval = zend_objects_new(&intern, class_type TSRMLS_CC);
 	ALLOC_HASHTABLE(intern->properties);
 	zend_hash_init(intern->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", class_type->name);

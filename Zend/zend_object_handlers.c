@@ -29,7 +29,7 @@
 
 #define DEBUG_OBJECT_HANDLERS 0
 
-#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p)
+#define Z_OBJ_P(zval_p) zend_objects_get_address(zval_p TSRMLS_CC)
 
 /*
   __X accessors explanation:
