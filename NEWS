@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- IMAP quota support (imap_set_quota, imap_get_quota) enabled/added via
+  c-client2000
 - Upgraded PCRE to version 3.4. (Andrei)
 - Added array_search which works similar to in_array but returns
   the key instead of a boolean. (jason@php.net)
