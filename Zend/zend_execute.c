@@ -1592,14 +1592,29 @@ send_by_ref:
 					continue;
 				}
 				break;
-			case ZEND_CASE:
-				if (opline->op1.op_type == IS_VAR) {
-					PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+			case ZEND_CASE: {
+					int switch_expr_is_overloaded=0;
+
+					if (opline->op1.op_type==IS_VAR) {
+						if (Ts[opline->op1.u.var].var) {
+							PZVAL_LOCK(*Ts[opline->op1.u.var].var);
+						} else {
+							switch_expr_is_overloaded = 1;
+							if (Ts[opline->op1.u.var].EA.type==IS_STRING_OFFSET) {
+								Ts[opline->op1.u.var].EA.str->refcount++;
+							}
+						}
+					}
+					is_equal_function(&Ts[opline->result.u.var].tmp_var, 
+								 get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R),
+								 get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R));
+
+					FREE_OP(&opline->op1, free_op1);
+					FREE_OP(&opline->op2, free_op2);
+					if (switch_expr_is_overloaded) {
+						Ts[opline->op1.u.var].var = NULL;
+					}
 				}
-				is_equal_function(&Ts[opline->result.u.var].tmp_var, 
-							 get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R),
-							 get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R) );
-				FREE_OP(&opline->op2, free_op2);
 				break;
 			case ZEND_NEW: {
 					zval *tmp = get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
