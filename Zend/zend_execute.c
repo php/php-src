@@ -3549,20 +3549,20 @@ int zend_fe_reset_handler(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	}
 
+	PZVAL_LOCK(array_ptr);
+	EX_T(EX(opline)->result.u.var).var.ptr = array_ptr;
+	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
+
 	if ((fe_ht = HASH_OF(array_ptr)) != NULL) {
 		/* probably redundant */
 		zend_hash_internal_pointer_reset(fe_ht);
 	} else {
 		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 		
-		EX(opline) = op_array->opcodes+EX(opline)->op1.u.opline_num;
+		EX(opline)++;
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
-
-	PZVAL_LOCK(array_ptr);
-	EX_T(EX(opline)->result.u.var).var.ptr = array_ptr;
-	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
 
 	NEXT_OPCODE();
 }
