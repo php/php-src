@@ -278,6 +278,9 @@ struct _pdo_stmt_t {
 
 	/* not always meaningful */
 	long row_count;
+
+	/* used only when PDO is emulating prepare for the driver */
+	char *query_string;
 };
 
 /* call this in MINIT to register your PDO driver */

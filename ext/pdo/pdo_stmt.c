@@ -283,14 +283,21 @@ static PHP_METHOD(PDOStatement, execute)
 			zend_hash_move_forward(Z_ARRVAL_P(input_params));
 		}
 	}
-	
-	if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE TSRMLS_CC)) {
+
+	if (stmt->dbh->emulate_prepare) {
+		/* XXX: here we need to:
+		 *  - walk stmt->bound_params, quoting each zval value
+		 *    (without modifying the zval)
+		 *  - substitute these values according to name/position
+		 *  - stash that into stmt->query_string
+		 *
+		 *  When the executer() is called, it will use that query string */
+
+	} else if (!dispatch_param_event(stmt, PDO_PARAM_EVT_EXEC_PRE TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	
 	if (stmt->methods->executer(stmt TSRMLS_CC)) {
-		printf("Execute ok: flag=%d\n", stmt->executed);
-
 		if (!stmt->executed) {
 			/* this is the first execute */
 
