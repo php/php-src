@@ -352,6 +352,7 @@ ZEND_FUNCTION(each)
 {
 	zval **array, *entry, **entry_ptr, *tmp;
 	char *string_key;
+	uint string_key_len;
 	ulong num_key;
 	zval **inserted_pointer;
 	HashTable *target_hash;
@@ -386,9 +387,9 @@ ZEND_FUNCTION(each)
 	entry->refcount++;
 
 	/* add the key elements */
-	switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
+	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 1, NULL)) {
 		case HASH_KEY_IS_STRING:
-			add_get_index_string(return_value, 0, string_key, (void **) &inserted_pointer, 0);
+			add_get_index_stringl(return_value, 0, string_key, string_key_len-1, (void **) &inserted_pointer, 0);
 			break;
 		case HASH_KEY_IS_LONG:
 			add_get_index_long(return_value, 0, num_key, (void **) &inserted_pointer);
