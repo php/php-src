@@ -1577,7 +1577,7 @@ void imap_add_body( pval *arg, BODY *body )
 	}
 	if ( body->id ){
 		add_property_long( arg, "ifid", 1 );
-		if(body->description) add_property_string( arg, "id",  body->description, 1 );
+		add_property_string( arg, "id",  body->id, 1 );
 	} else {
 		add_property_long( arg, "ifid", 0 );
 	}
