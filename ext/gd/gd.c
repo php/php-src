@@ -478,117 +478,119 @@ PHP_FUNCTION(imagetypes)
 	RETURN_LONG(ret);
 }
 
-static int _php_image_type ( char data[8] )
+static int _php_image_type (char data[8])
 {
 	/* Based on ext/standard/images.c */
 
-        if (data == NULL)
-                return -1;
+	if (data == NULL)
+		return -1;
 
-        if (!memcmp(data, php_sig_jpg, 3))
-                return PHP_GDIMG_TYPE_JPG;
-        else if (!memcmp(data, php_sig_png, 3)) {
-                if (!memcmp(data, php_sig_png, 8))
-                        return PHP_GDIMG_TYPE_PNG;
-        } else if (!memcmp(data, php_sig_gif, 3))
-                return PHP_GDIMG_TYPE_GIF;
-        else {
-                gdIOCtx *io_ctx;
-                io_ctx = gdNewDynamicCtx ( 8, data );
-                if (io_ctx) {
+	if (!memcmp(data, php_sig_jpg, 3))
+		return PHP_GDIMG_TYPE_JPG;
+	else if (!memcmp(data, php_sig_png, 3)) {
+		if (!memcmp(data, php_sig_png, 8))
+			return PHP_GDIMG_TYPE_PNG;
+	}
+	else if (!memcmp(data, php_sig_gif, 3))
+		return PHP_GDIMG_TYPE_GIF;
+	else {
+		gdIOCtx *io_ctx;
+		io_ctx = gdNewDynamicCtx (8, data);
+		if (io_ctx) {
 			if (getmbi(gdGetC, io_ctx) == 0 && skipheader(gdGetC, io_ctx) == 0 ) {
-                                io_ctx->free(io_ctx);
-                                return PHP_GDIMG_TYPE_WBM;
-                        } else
-                                io_ctx->free(io_ctx);
-                }
-        }
+				io_ctx->free(io_ctx);
+				return PHP_GDIMG_TYPE_WBM;
+			} else
+				io_ctx->free(io_ctx);
+		}
+	}
 	return -1;
 }
 
-gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() ) {
-        gdImagePtr im;
-        gdIOCtx *io_ctx;
+gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*ioctx_func_p)())
+{
+	gdImagePtr im;
+	gdIOCtx *io_ctx;
         
-	io_ctx = gdNewDynamicCtx ( (*Data)->value.str.len  ,
-                                   (*Data)->value.str.val );
+	io_ctx = gdNewDynamicCtx ((*data)->value.str.len,
+	                          (*data)->value.str.val);
         
-	if(!io_ctx) { 
-		return NULL; 
+	if(!io_ctx) {
+		return NULL;
 	}
         
 	im = (*ioctx_func_p)(io_ctx);
-        if (!im) {
+	if (!im) {
 		php_error(E_WARNING, "%s: Passed data is not in '%s' format", get_active_function_name(), tn);
-                return NULL;
-        }
+		return NULL;
+	}
 
-        return im;
+	return im;
 }
 
+/* {{{ proto int imagecreatefromstring(string image)
+   Create a new image from the image stream in the string */
 PHP_FUNCTION (imagecreatefromstring)
 {
-        zval **Data;
-        gdImagePtr im;
-        int imtype;
-        char sig[8];
+	zval **data;
+	gdImagePtr im;
+	int imtype;
+	char sig[8];
 
-        if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &Data) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &data) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-        convert_to_string_ex( Data );
-        memcpy(sig, (*Data)->value.str.val, 8);
+	convert_to_string_ex (data);
+	memcpy(sig, (*data)->value.str.val, 8);
 
-        imtype = _php_image_type ( sig );
+	imtype = _php_image_type (sig);
 
-        switch ( imtype ) {
-                case PHP_GDIMG_TYPE_JPG: {
-          		#ifdef HAVE_GD_JPG
-				im = _php_image_create_from_string ( Data, "JPEG", gdImageCreateFromJpegCtx);
-          		#else
-				php_error(E_WARNING, "No JPEG support in this PHP build");
-          		#endif
-                        break;
-                }
+	switch (imtype) {
+		case PHP_GDIMG_TYPE_JPG:
+#ifdef HAVE_GD_JPG
+			im = _php_image_create_from_string (data, "JPEG", gdImageCreateFromJpegCtx);
+#else
+			php_error(E_WARNING, "No JPEG support in this PHP build");
+#endif
+			break;
 
-                case PHP_GDIMG_TYPE_PNG: {
-          		#ifdef HAVE_GD_PNG
-				im = _php_image_create_from_string ( Data, "PNG", gdImageCreateFromPngCtx);
-          		#else
-				php_error(E_WARNING, "No PNG support in this PHP build");
-          		#endif
-                        break;
-                }
+		case PHP_GDIMG_TYPE_PNG:
+#ifdef HAVE_GD_PNG
+			im = _php_image_create_from_string (data, "PNG", gdImageCreateFromPngCtx);
+#else
+			php_error(E_WARNING, "No PNG support in this PHP build");
+#endif
+			break;
+			
+		case PHP_GDIMG_TYPE_GIF:
+#ifdef HAVE_GD_GIF
+			im = _php_image_create_from_string (data, "GIF", gdImageCreateFromGifCtx);
+#else
+			php_error(E_WARNING, "No GIF support in this PHP build");
+#endif
+			break;
 
-                case PHP_GDIMG_TYPE_GIF: {
-	        	#ifdef HAVE_GD_GIF
-				im = _php_image_create_from_string ( Data, "GIF", gdImageCreateFromGifCtx);
-          		#else
-				php_error(E_WARNING, "No GIF support in this PHP build");
-          		#endif
-                        break;
-                }
-                case PHP_GDIMG_TYPE_WBM: {
-          		#ifdef HAVE_GD_WBMP
-				im = _php_image_create_from_string ( Data, "WBMP",gdImageCreateFromWBMPCtx );
-          		#else
-				php_error(E_WARNING, "No WBMP support in this PHP build");
-         		#endif
-                        break;
-                }
+		case PHP_GDIMG_TYPE_WBM:
+#ifdef HAVE_GD_WBMP
+			im = _php_image_create_from_string (data, "WBMP",gdImageCreateFromWBMPCtx );
+#else
+			php_error(E_WARNING, "No WBMP support in this PHP build");
+#endif
+			 break;
 
-                default:
-        		php_error(E_WARNING, "Data is not in a recognized format.");
-                        RETURN_FALSE;
+		default:
+			php_error(E_WARNING, "Data is not in a recognized format.");
+            RETURN_FALSE;
 
-        }
-        if (!im) {
-                php_error(E_WARNING, "Couldn't create GD Image Stream out of Data");
+	}
+	if (!im) {
+		php_error(E_WARNING, "Couldn't create GD Image Stream out of Data");
 		RETURN_FALSE;
-        }
+	}
 
-        ZEND_REGISTER_RESOURCE(return_value, im, GDG (le_gd));
+	ZEND_REGISTER_RESOURCE(return_value, im, GDG (le_gd));
 }
+/* }}} */
 
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)()) {
 	zval **file;
