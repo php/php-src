@@ -226,6 +226,8 @@ AC_ARG_WITH(regex,
   REGEX_TYPE=php
 ])
 
+PHP_REGEX
+
 AC_FUNC_FNMATCH	
 
 dnl Take a look and see if there is a support means of creating a new process
