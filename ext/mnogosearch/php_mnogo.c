@@ -72,6 +72,7 @@
 /* True globals, no need for thread safety */
 static int le_link,le_res;
 
+#include <udm_config.h>
 #include <udmsearch.h>
 
 function_entry mnogosearch_functions[] = {
