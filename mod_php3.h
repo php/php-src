@@ -60,8 +60,6 @@ typedef struct {
     char *upload_tmp_dir;
 	long upload_max_filesize;
     char *extension_dir;
-    long  short_open_tag;
-    long asp_tags;
     char *error_log;
     long sql_safe_mode;
     long xbithack;

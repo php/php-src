@@ -130,8 +130,8 @@ PHP_INI_MH(OnSetPrecision)
 
 
 PHP_INI_BEGIN()
-	PHP_INI_ENTRY("short_open_tag",		"1",		PHP_INI_ALL,		NULL,			NULL)
-	PHP_INI_ENTRY("asp_tags",			"0",		PHP_INI_ALL,		NULL,			NULL)
+	PHP_INI_ENTRY("short_open_tag",		"1",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, short_tags))
+	PHP_INI_ENTRY("asp_tags",			"0",		PHP_INI_ALL,		OnUpdateInt,			(void *) XtOffsetOf(php_core_globals, asp_tags))
 	PHP_INI_ENTRY("precision",			"14",		PHP_INI_ALL,		OnSetPrecision,	NULL)
 
 	PHP_INI_ENTRY("highlight.comment",	HL_COMMENT_COLOR,	PHP_INI_ALL,		NULL,			NULL)
@@ -775,12 +775,6 @@ static int php3_config_ini_startup(ELS_D)
 				php3_ini.doc_root = NULL;
 			}
 		}
-		if (cfg_get_long("short_open_tag", &php3_ini.short_open_tag) == FAILURE) {
-			php3_ini.short_open_tag = DEFAULT_SHORT_OPEN_TAG;
-		}
-		if (cfg_get_long("asp_tags", &php3_ini.asp_tags) == FAILURE) {
-			php3_ini.asp_tags = 0;
-		}
 		if (cfg_get_string("user_dir", &php3_ini.user_dir) == FAILURE) {
 			if ((temp = getenv("PHP_USER_DIR"))) {
 				php3_ini.user_dir = temp;
@@ -914,10 +908,7 @@ int php3_module_startup(CLS_D ELS_DC)
 	zuf.block_interruptions = BLOCK_INTERRUPTIONS;
 	zuf.unblock_interruptions = UNBLOCK_INTERRUPTIONS;
 
-	zuv.short_tags = DEFAULT_SHORT_OPEN_TAG;
-	zuv.asp_tags = 0;
-
-	zend_startup(&zuf, &zuv, NULL);
+	zend_startup(&zuf, NULL);
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -938,18 +929,16 @@ int php3_module_startup(CLS_D ELS_DC)
 	le_index_ptr = _register_list_destructors(NULL, NULL, 0);
 	FREE_MUTEX(gLock);
 
-
-
-	/* We cannot do the config starup until after all the above
-	happens, otherwise loading modules from ini file breaks */
-#if !USE_SAPI
 	if (php3_config_ini_startup(ELS_C) == FAILURE) {
 		return FAILURE;
 	}
-#endif	
 
 	php_ini_mstartup();
 	REGISTER_INI_ENTRIES();
+
+	zuv.short_tags = (unsigned char) PG(short_tags);
+	zuv.asp_tags = (unsigned char) PG(asp_tags);
+	zend_set_utility_values(&zuv);
 
 	if (module_startup_modules() == FAILURE) {
 		php3_printf("Unable to start modules\n");

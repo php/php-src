@@ -320,7 +320,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->upload_tmp_dir != orig.upload_tmp_dir) new->upload_tmp_dir = add->upload_tmp_dir;
 	if (add->upload_max_filesize != orig.upload_max_filesize) new->upload_max_filesize = add->upload_max_filesize;
 	if (add->extension_dir != orig.extension_dir) new->extension_dir = add->extension_dir;
-	if (add->short_open_tag != orig.short_open_tag) new->short_open_tag = add->short_open_tag;
 	if (add->error_log != orig.error_log) new->error_log = add->error_log;
 	/* skip the highlight stuff */
 	if (add->sql_safe_mode != orig.sql_safe_mode) new->sql_safe_mode = add->sql_safe_mode;
@@ -336,7 +335,6 @@ static void *php3_merge_dir(pool *p, void *basev, void *addv)
 	if (add->error_append_string != orig.error_append_string) new->error_append_string = add->error_append_string;
 	if (add->open_basedir != orig.open_basedir) new->open_basedir = add->open_basedir;
 	if (add->enable_dl != orig.enable_dl) new->enable_dl = add->enable_dl;
-	if (add->asp_tags != orig.asp_tags) new->asp_tags = add->asp_tags;
 	if (add->dav_script != orig.dav_script) new->dav_script = add->dav_script;
 	
 	return new;
@@ -354,9 +352,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 	switch (c) {
 		case 0:
 			conf->track_errors = val;
-			break;
-		case 3:
-			conf->short_open_tag = val;
 			break;
 		case 4:
 			conf->safe_mode = val;
@@ -384,9 +379,6 @@ char *php3flaghandler(cmd_parms * cmd, php3_ini_structure * conf, int val)
 			break;
 		case 13:
 			conf->enable_dl = val;
-			break;
-		case 14:
-			conf->asp_tags = val;
 			break;
 	}
 	return NULL;
@@ -611,7 +603,6 @@ command_rec php3_commands[] =
 	 "Lets PHP handle DAV requests by parsing this script."},
 #endif
 	{"php3_track_errors", php3flaghandler, (void *)0, OR_OPTIONS, FLAG, "on|off"},
-	{"php3_short_open_tag", php3flaghandler, (void *)3, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_safe_mode", php3flaghandler, (void *)4, ACCESS_CONF|RSRC_CONF, FLAG, "on|off"},
 	{"php3_track_vars", php3flaghandler, (void *)5, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_sql_safe_mode", php3flaghandler, (void *)6,  ACCESS_CONF|RSRC_CONF, FLAG, "on|off"},
@@ -621,7 +612,6 @@ command_rec php3_commands[] =
 	{"php3_log_errors", php3flaghandler, (void *)10, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_display_errors", php3flaghandler, (void *)11, OR_OPTIONS, FLAG, "on|off"},
 	{"php3_enable_dl", php3flaghandler, (void *)13, RSRC_CONF|ACCESS_CONF, FLAG, "on|off"},
-	{"php3_asp_tags", php3flaghandler, (void *)14, OR_OPTIONS, FLAG, "on|off"},
 	{NULL}
 };
 
