@@ -15,11 +15,22 @@ libphp4_la_SOURCES = \
        php_ini.c SAPI.c rfc1867.c dlist.c php_content_types.c strlcpy.c \
 	   strlcat.c
 
-libphp4_la_LIBADD = libzend/libzend.la \
+libphp4_la_LIBADD = \
+		libzend/libzend.la \
 		sapi/$(PHP_SAPI)/libphpsapi_$(PHP_SAPI).la \
-		regex/libregex.la $(EXT_LTLIBS) $(TSRM_LIB) $(EXTRA_LIBS)
+		regex/libregex.la \
+		$(EXT_LTLIBS) \
+		$(TSRM_LIB) \
+		$(EXTRA_LIBS)
 libphp4_la_LDFLAGS = -avoid-version $(BUILDLDFLAGS) $(PHP_RPATHS)		
 
+libphp4_la_DEPENDENCIES = \
+		libzend/libzend.la \
+		sapi/$(PHP_SAPI)/libphpsapi_$(PHP_SAPI).la \
+		regex/libregex.la \
+		$(EXT_LTLIBS) \
+		$(TSRM_LIB)
+	
 configuration-parser.h configuration-parser.c: configuration-parser.y
 	$(YACC) -p cfg -v -d $< -o configuration-parser.c
 
