@@ -281,7 +281,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 {
 	FILE *fp;
 	struct stat st;
-	char *temp, *path_info, *filename;
+	char *path_info, *filename;
 	int length;
 	PLS_FETCH();
 	SLS_FETCH();
@@ -358,13 +358,7 @@ PHPAPI FILE *php_fopen_primary_script(void)
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
 		return NULL;
 	}
-	
-	temp = estrdup(filename);
-	php_dirname(temp, strlen(temp));
-	if (*temp) {
-		V_CHDIR(temp);
-	}
-	efree(temp);
+	V_CHDIR_FILE(filename);
 	SG(request_info).path_translated = filename;
 
 	return fp;
