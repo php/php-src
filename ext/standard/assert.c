@@ -160,7 +160,10 @@ PHP_FUNCTION(assert)
 			EG(error_reporting) = 0;
 		}
 
-		zend_eval_string(myeval, &retval CLS_CC ELS_CC);
+		if (zend_eval_string(myeval, &retval CLS_CC ELS_CC) == FAILURE) {
+			zend_error(E_ERROR, "Failure evaluating code:\n%s\n", myeval);
+			/* zend_error() does not return in this case. */
+		}
 
 		if (ASSERT(quiet_eval)) {
 			EG(error_reporting) = old_error_reporting;
