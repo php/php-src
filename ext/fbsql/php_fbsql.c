@@ -184,73 +184,74 @@ char *DigestPassword(char *user, char *password)
 /* {{{ fbsql_functions[]
  */
 function_entry fbsql_functions[] = {
-	PHP_FE(fbsql_connect,		NULL)
-	PHP_FE(fbsql_pconnect,		NULL)
-	PHP_FE(fbsql_close,			NULL)
-	PHP_FE(fbsql_select_db,		NULL)
-	PHP_FE(fbsql_create_db,		NULL)
-	PHP_FE(fbsql_drop_db,		NULL)
-	PHP_FE(fbsql_start_db,		NULL)
-	PHP_FE(fbsql_stop_db,		NULL)
-	PHP_FE(fbsql_db_status,		NULL)
-	PHP_FE(fbsql_query,			NULL)
-	PHP_FE(fbsql_db_query,		NULL)
-	PHP_FE(fbsql_list_dbs,		NULL)
-	PHP_FE(fbsql_list_tables,	NULL)
-	PHP_FE(fbsql_list_fields,	NULL)
-	PHP_FE(fbsql_error,			NULL)
-	PHP_FE(fbsql_errno,			NULL)
-	PHP_FE(fbsql_affected_rows,	NULL)
-	PHP_FE(fbsql_rows_fetched,	NULL)
-	PHP_FE(fbsql_insert_id,		NULL)
-	PHP_FE(fbsql_result,		NULL)
-	PHP_FE(fbsql_next_result,	NULL)
-	PHP_FE(fbsql_num_rows,		NULL)
-	PHP_FE(fbsql_num_fields,	NULL)
-	PHP_FE(fbsql_fetch_row,		NULL)
-	PHP_FE(fbsql_fetch_array,	NULL)
-	PHP_FE(fbsql_fetch_assoc,	NULL)
-	PHP_FE(fbsql_fetch_object,	NULL)
-	PHP_FE(fbsql_data_seek,		NULL)
-	PHP_FE(fbsql_fetch_lengths,	NULL)
-	PHP_FE(fbsql_fetch_field,	NULL)
-	PHP_FE(fbsql_field_seek,	NULL)
-	PHP_FE(fbsql_free_result,	NULL)
-	PHP_FE(fbsql_field_name,	NULL)
-	PHP_FE(fbsql_field_table,	NULL)
-	PHP_FE(fbsql_field_len,		NULL)
-	PHP_FE(fbsql_field_type,	NULL)
-	PHP_FE(fbsql_field_flags,	NULL) 
-	PHP_FE(fbsql_table_name,	NULL) 
+	PHP_FE(fbsql_connect,			NULL)
+	PHP_FE(fbsql_pconnect,			NULL)
+	PHP_FE(fbsql_close,				NULL)
+	PHP_FE(fbsql_select_db,			NULL)
+	PHP_FE(fbsql_set_characterset,	NULL)
+	PHP_FE(fbsql_create_db,			NULL)
+	PHP_FE(fbsql_drop_db,			NULL)
+	PHP_FE(fbsql_start_db,			NULL)
+	PHP_FE(fbsql_stop_db,			NULL)
+	PHP_FE(fbsql_db_status,			NULL)
+	PHP_FE(fbsql_query,				NULL)
+	PHP_FE(fbsql_db_query,			NULL)
+	PHP_FE(fbsql_list_dbs,			NULL)
+	PHP_FE(fbsql_list_tables,		NULL)
+	PHP_FE(fbsql_list_fields,		NULL)
+	PHP_FE(fbsql_error,				NULL)
+	PHP_FE(fbsql_errno,				NULL)
+	PHP_FE(fbsql_affected_rows,		NULL)
+	PHP_FE(fbsql_rows_fetched,		NULL)
+	PHP_FE(fbsql_insert_id,			NULL)
+	PHP_FE(fbsql_result,			NULL)
+	PHP_FE(fbsql_next_result,		NULL)
+	PHP_FE(fbsql_num_rows,			NULL)
+	PHP_FE(fbsql_num_fields,		NULL)
+	PHP_FE(fbsql_fetch_row,			NULL)
+	PHP_FE(fbsql_fetch_array,		NULL)
+	PHP_FE(fbsql_fetch_assoc,		NULL)
+	PHP_FE(fbsql_fetch_object,		NULL)
+	PHP_FE(fbsql_data_seek,			NULL)
+	PHP_FE(fbsql_fetch_lengths,		NULL)
+	PHP_FE(fbsql_fetch_field,		NULL)
+	PHP_FE(fbsql_field_seek,		NULL)
+	PHP_FE(fbsql_free_result,		NULL)
+	PHP_FE(fbsql_field_name,		NULL)
+	PHP_FE(fbsql_field_table,		NULL)
+	PHP_FE(fbsql_field_len,			NULL)
+	PHP_FE(fbsql_field_type,		NULL)
+	PHP_FE(fbsql_field_flags,		NULL) 
+	PHP_FE(fbsql_table_name,		NULL) 
 
 /*	Fontbase additions:  */
 	PHP_FE(fbsql_set_transaction,	NULL)
-	PHP_FE(fbsql_autocommit,	NULL)
-	PHP_FE(fbsql_commit,		NULL)
-	PHP_FE(fbsql_rollback,		NULL)
+	PHP_FE(fbsql_autocommit,		NULL)
+	PHP_FE(fbsql_commit,			NULL)
+	PHP_FE(fbsql_rollback,			NULL)
 
-	PHP_FE(fbsql_create_blob,	NULL)
-	PHP_FE(fbsql_create_clob,	NULL)
-	PHP_FE(fbsql_set_lob_mode,	NULL)
-	PHP_FE(fbsql_read_blob,		NULL)
-	PHP_FE(fbsql_read_clob,		NULL)
-	PHP_FE(fbsql_blob_size,		NULL)
-	PHP_FE(fbsql_clob_size,		NULL)
+	PHP_FE(fbsql_create_blob,		NULL)
+	PHP_FE(fbsql_create_clob,		NULL)
+	PHP_FE(fbsql_set_lob_mode,		NULL)
+	PHP_FE(fbsql_read_blob,			NULL)
+	PHP_FE(fbsql_read_clob,			NULL)
+	PHP_FE(fbsql_blob_size,			NULL)
+	PHP_FE(fbsql_clob_size,			NULL)
 
-	PHP_FE(fbsql_hostname,		NULL)
-	PHP_FE(fbsql_database,		NULL)
+	PHP_FE(fbsql_hostname,			NULL)
+	PHP_FE(fbsql_database,			NULL)
 	PHP_FE(fbsql_database_password,	NULL)
-	PHP_FE(fbsql_username,		NULL)
-	PHP_FE(fbsql_password,		NULL)
-	PHP_FE(fbsql_warnings,		NULL)
+	PHP_FE(fbsql_username,			NULL)
+	PHP_FE(fbsql_password,			NULL)
+	PHP_FE(fbsql_warnings,			NULL)
 	PHP_FE(fbsql_set_password,		NULL)
 
 	PHP_FE(fbsql_get_autostart_info,	NULL)
 /*	PHP_FE(fbsql_set_autostart_info,	NULL) */
 
 /*	Aliases:  */
-	PHP_FALIAS(fbsql, fbsql_db_query, NULL)
-	PHP_FALIAS(fbsql_tablename, fbsql_table_name, NULL)
+	PHP_FALIAS(fbsql, 			fbsql_db_query,		NULL)
+	PHP_FALIAS(fbsql_tablename,	fbsql_table_name,	NULL)
 
 	{NULL, NULL, NULL}
 };
@@ -382,7 +383,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_results",					"128",		PHP_INI_SYSTEM, OnUpdateLong,	maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY_EX ("fbsql.batchsize",					"1000",		PHP_INI_USER,   OnUpdateLong,	batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.batchsize",					"1000",		PHP_INI_ALL,    OnUpdateLong,	batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY    ("fbsql.default_host",					NULL,		PHP_INI_SYSTEM, OnUpdateString, hostName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_user",					"_SYSTEM",	PHP_INI_SYSTEM, OnUpdateString, userName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_password",				"",         PHP_INI_SYSTEM, OnUpdateString, userPassword,     zend_fbsql_globals, fbsql_globals)
@@ -434,6 +435,9 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_REPEATABLE_READ", FBSQL_ISO_REPEATABLE_READ, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_SERIALIZABLE", FBSQL_ISO_SERIALIZABLE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FBSQL_ISO_VERSIONED", FBSQL_ISO_VERSIONED, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("FBSQL_UTF8", 0, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("FBSQL_ISO8859_1", FBC_ISO8859_1, CONST_CS | CONST_PERSISTENT);
 
 	/* Register Status constants */
 	REGISTER_LONG_CONSTANT("FBSQL_UNKNOWN", FBUnknownStatus, CONST_CS | CONST_PERSISTENT);
@@ -1430,6 +1434,43 @@ PHP_FUNCTION(fbsql_select_db)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* {{{ proto void fbsql_set_characterset(resource link_identifier, long charcterset [, long in_out_both]])
+   Change input/output character set */
+PHP_FUNCTION(fbsql_set_characterset)
+{
+	PHPFBLink* phpLink = NULL;
+	zval **fbsql_link_index, **zcharset, **zin_out;
+	int id;
+	int charset = -1, in_out_both = 3;
+
+	switch (ZEND_NUM_ARGS()) {
+		case 2:
+			if (zend_get_parameters_ex(2, &fbsql_link_index, &zcharset)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		case 3:
+			if (zend_get_parameters_ex(3, &fbsql_link_index, &zcharset, &zin_out)==FAILURE) {
+				RETURN_FALSE;
+			}
+			in_out_both = Z_LVAL_PP(zin_out);
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
+	
+	charset = Z_LVAL_PP(zcharset);
+	
+	if (in_out_both & 1) {
+		fbcdcSetInputCharacterSet(phpLink->connection, charset);
+	}
+	if (in_out_both & 2) {
+		fbcdcSetOutputCharacterSet(phpLink->connection, charset);
+	}
+}
 
 /* {{{ proto int fbsql_change_user(string user, string password [, string database [, resource link_identifier]])
    Change the user for a session */
