@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added new aysnchronous FTP functions (Stefan)
+- Added optional 5th parameter to FTP functions to support resuming (Stefan)
 - Added optional 2nd parameter to print_r() to make it return the variable
   representation instead of echoing it. (Derick)
 - Added mysql_ping(), mysql_real_escape_string(), mysql_character_set_name(), 
