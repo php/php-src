@@ -384,6 +384,15 @@ PHP_FUNCTION(mysqli_close)
 	}
 
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link"); 
+
+	/*
+	 * Don't free initial struct if there exist 
+	 * non closed statements
+	 */
+	if (mysql->stmts) {
+		mysql->free_me = 0;
+	}
+
 	mysql_close(mysql);
 	MYSQLI_CLEAR_RESOURCE(&mysql_link);	
 	RETURN_TRUE;
@@ -1519,7 +1528,7 @@ PHP_FUNCTION(mysqli_stmt_close)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
-
+	mysql_stmt_close(stmt->stmt);
 	php_clear_stmt_bind(stmt); 
 	MYSQLI_CLEAR_RESOURCE(&mysql_stmt);
 	RETURN_TRUE;
