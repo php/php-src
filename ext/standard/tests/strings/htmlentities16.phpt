@@ -5,9 +5,9 @@ output_handler=
 --SKIPIF--
 <?php
 	extension_loaded("mbstring") or die("skip mbstring not available\n");
-	if (!mb_internal_encoding('cp1251') ||
+	if (!@mb_internal_encoding('cp1251') ||
 		@htmlentities("\x88\xa9\xd2\xcf\xd3\xcb\xcf\xdb\xce\xd9\xca", ENT_QUOTES, '') == '') {
-		die("skip cp1251 character set is not available in this build.\n");
+		die("SKIP cp1251 character set is not available in this build.\n");
 	}
 ?>
 --FILE--
