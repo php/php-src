@@ -64,7 +64,9 @@ class PEAR_Remote extends PEAR
         if ($username && $password) {
             $c->setCredentials($username, $password);
         }
-//        $c->setDebug(1);
+        if ($this->config->get('verbose') >= 3) {
+            $c->setDebug(1);
+        }
         $r = $c->send($f);
         if (!$r) {
             return $this->raiseError("XML_RPC send failed");
@@ -73,6 +75,7 @@ class PEAR_Remote extends PEAR
         if ($e = $r->faultCode()) {
             return $this->raiseError($r->faultString(), $e);
         }
+
         return XML_RPC_decode($v);
     }
 
@@ -193,10 +196,10 @@ class PEAR_Remote extends PEAR
     {
         global $XML_RPC_Boolean, $XML_RPC_Int, $XML_RPC_Double;
         global $XML_RPC_String, $XML_RPC_Array, $XML_RPC_Struct;
-        
+
         $type = gettype($php_val);
         $xmlrpcval = new XML_RPC_value;
-        
+
         switch($type) {
             case "array":
                 reset($php_val);
