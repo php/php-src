@@ -19,9 +19,7 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
-#ifndef PHP_WIN32
-#include "php_config.h"
-#endif
+#include "php.h"
 
 #if HAVE_FOPENCOOKIE 
 #define _GNU_SOURCE
@@ -29,10 +27,6 @@
 #include "libio.h"
 #endif 
 
-#include "php.h"
-
-
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
