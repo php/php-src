@@ -323,14 +323,14 @@ PHP_FUNCTION(imagepstext)
 	bg_img = zend_list_find(Z_LVAL_PP(img), &type);
 
 	if (!bg_img || type != GD_GLOBAL(le_gd)) {
-		php_error(E_WARNING, "Unable to find image pointer");
+		php_error(E_WARNING, "%s(): Unable to find image pointer", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	f_ind = zend_list_find(Z_LVAL_P(fnt), &type);
 
 	if (!f_ind || type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", Z_LVAL_P(fnt));
+		php_error(E_WARNING, "%s(): %d is not a Type 1 font index", get_active_function_name(TSRMLS_C), Z_LVAL_P(fnt));
 		RETURN_FALSE;
 	}
 
@@ -360,7 +360,7 @@ PHP_FUNCTION(imagepstext)
 		T1_AASetLevel(T1_AA_HIGH);
 		break;
 	default:
-		php_error(E_WARNING, "Invalid value %d as number of steps for antialiasing", aa_steps);
+		php_error(E_WARNING, "%s(): Invalid value %d as number of steps for antialiasing", get_active_function_name(TSRMLS_C), aa_steps);
 		RETURN_FALSE;
 	}
 
@@ -385,7 +385,7 @@ PHP_FUNCTION(imagepstext)
 	}
 	str_img = T1_AAFillOutline(str_path, 0);
 #else
-	php_error(E_WARNING, "Setting space between characters in function ImagePSText is supported only with t1lib version 0.9 or above");
+	php_error(E_WARNING, "%s(): Setting space between characters in function ImagePSText is supported only with t1lib version 0.9 or above", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
 #endif
 	} else {
@@ -469,7 +469,7 @@ PHP_FUNCTION(imagepsbbox)
 	f_ind = zend_list_find(Z_LVAL_P(fnt), &type);
 
 	if (type != GD_GLOBAL(le_ps_font)) {
-		php_error(E_WARNING, "%d is not a Type 1 font index", Z_LVAL_P(fnt));
+		php_error(E_WARNING, "%s(): %d is not a Type 1 font index", get_active_function_name(TSRMLS_C), Z_LVAL_P(fnt));
 		RETURN_FALSE;
 	}
 
