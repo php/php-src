@@ -405,7 +405,7 @@ PHP_FUNCTION(vpopmail_add_domain_ex)
 	strcat(cmd,escdomain);
 	strcat(cmd," ");
 	strcat(cmd,escpasswd);
-	retval=php_Exec(0,cmd,NULL,return_value);
+	retval=php_Exec(0,cmd,NULL,return_value TSRMLS_CC);
 	efree(cmd);
 	efree(escdomain);
 	efree(escpasswd);
@@ -452,7 +452,7 @@ PHP_FUNCTION(vpopmail_del_domain_ex) {
 		RETURN_FALSE;
 	}
 	sprintf(cmd,VPOPMAIL_BIN_DIR VPOPMAIL_DELD"%s",escdomain);
-	retval=php_Exec(0,cmd,NULL,return_value);
+	retval=php_Exec(0,cmd,NULL,return_value TSRMLS_CC);
 	efree(escdomain);
 	efree(cmd);
 
@@ -503,7 +503,7 @@ PHP_FUNCTION(vpopmail_add_alias_domain_ex) {
 		RETURN_FALSE;
 	}
 	sprintf(cmd,"%s%s %s",VPOPMAIL_BIN_DIR VPOPMAIL_ADAD,escolddomain,escnewdomain);
-	retval=php_Exec(0,cmd,NULL,return_value);
+	retval=php_Exec(0,cmd,NULL,return_value TSRMLS_CC);
 	efree(cmd);
 	efree(escnewdomain);
 	efree(escolddomain);
