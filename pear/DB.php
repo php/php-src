@@ -89,6 +89,33 @@ define("DB_BINMODE_RETURN",         2);
 define("DB_BINMODE_CONVERT",        3);
 
 // }}}
+// {{{ Get modes: flags that control the layout of query result structures
+
+/**
+ * Column data indexed by numbers, ordered from 0 and up
+ */
+define('DB_GETMODE_ORDERED', 1);
+/**
+ * Column data indexed by column names
+ */
+define('DB_GETMODE_ASSOC',   2);
+/**
+ * For multi-dimensional results: normally the first level of arrays
+ * is the row number, and the second level indexed by column number or name.
+ * DB_GETMODE_FLIPPED switches this order, so the first level of arrays
+ * is the column name, and the second level the row number.
+ */
+define('DB_GETMODE_FLIPPED', 4);
+
+/**
+ * This constant DB's default get mode.  It is possible to override by
+ * defining in your scripts before including DB.
+ */
+if (!defined('DB_GETMODE_DEFAULT')) {
+	define('DB_GETMODE_DEFAULT', DB_GETMODE_ORDERED);
+}
+
+// }}}
 
 /**
  * The main "DB" class is simply a container class with some static
@@ -395,8 +422,8 @@ class DB_result {
 	 * Fetch and return a row of data.
 	 * @return  array   a row of data, or false on error
 	 */
-    function fetchRow() {
-		return $this->dbh->fetchRow($this->result);
+    function fetchRow($getmode = DB_GETMODE_DEFAULT) {
+		return $this->dbh->fetchRow($this->result, $getmode);
     }
 
     // }}}
@@ -408,8 +435,8 @@ class DB_result {
 	 * @param   $arr    reference to data array
 	 * @return  int     error code
 	 */
-    function fetchInto(&$arr) {
-		return $this->dbh->fetchInto($this->result, &$arr);
+    function fetchInto(&$arr, $getmode = DB_GETMODE_DEFAULT) {
+		return $this->dbh->fetchInto($this->result, &$arr, $getmode);
     }
 
     // }}}
