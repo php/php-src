@@ -989,6 +989,11 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	opline++;				\
 	continue;
 
+#define RETURN_FROM_EXECUTE_LOOP()									\
+	free_alloca(Ts);												\
+	EG(in_execution) = original_in_execution;						\
+	return;
+
 typedef struct _object_info {
 	zval *ptr;
 } object_info;
@@ -1633,11 +1638,14 @@ do_fcall_common:
 						zend_execute(EG(active_op_array) TSRMLS_CC);
 
 						if (return_value_used && !Ts[opline->result.u.var].var.ptr) {
-							ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
-							INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+							if (!EG(exception)) {
+								ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
+								INIT_ZVAL(*Ts[opline->result.u.var].var.ptr);
+							}
 						} else if (!return_value_used && Ts[opline->result.u.var].var.ptr) {
 							zval_ptr_dtor(&Ts[opline->result.u.var].var.ptr);
 						}
+
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
 						EG(return_value_ptr_ptr)=original_return_value;
@@ -1666,7 +1674,16 @@ do_fcall_common:
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
 					zend_ptr_stack_clear_multiple(TSRMLS_C);
-				}
+
+					if (EG(exception)) {
+						if (opline->op2.u.opline_num == -1) {
+							RETURN_FROM_EXECUTE_LOOP();
+						} else {
+							opline = &op_array->opcodes[opline->op2.u.opline_num];
+							continue;
+						}
+					}
+ 				}
 				NEXT_OPCODE();
 			case ZEND_RETURN: {
 					zval *retval_ptr;
@@ -1703,11 +1720,43 @@ do_fcall_common:
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
 						}
 					}
-					free_alloca(Ts);
-					EG(in_execution) = original_in_execution;
-					return;
+					RETURN_FROM_EXECUTE_LOOP();
 				}
 				break;
+			case ZEND_THROW:
+				{
+					zval *value;
+					zval *exception;
+
+					value = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					
+					// Not sure if a complete copy is what we want here
+					MAKE_STD_ZVAL(exception);
+					*exception = *value;
+					if (!EG(free_op1)) {
+						zval_copy_ctor(exception);
+					}
+					INIT_PZVAL(exception);
+					EG(exception) = exception;
+					
+					if (opline->op2.u.opline_num == -1) {
+						RETURN_FROM_EXECUTE_LOOP();
+					} else {
+						opline = &op_array->opcodes[opline->op2.u.opline_num];
+						continue;
+					}
+				}
+				NEXT_OPCODE();
+			case ZEND_CATCH:
+				// Check if this is really an exception, if not, jump over code
+				if (EG(exception) == NULL) {
+						opline = &op_array->opcodes[opline->op2.u.opline_num];
+						continue;
+				}
+				zend_hash_update(EG(active_symbol_table), opline->op1.u.constant.value.str.val,
+					opline->op1.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
+				EG(exception) = NULL;
+				NEXT_OPCODE();
 			case ZEND_SEND_VAL: 
 				if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
 					&& ARG_SHOULD_BE_SENT_BY_REF(opline->op2.u.opline_num, fbc, fbc->common.arg_types)) {
@@ -2490,7 +2539,6 @@ send_by_ref:
 			case ZEND_NOP:
 				NEXT_OPCODE();
 			EMPTY_SWITCH_DEFAULT_CASE()
-
 		}
 	}
 	zend_error(E_ERROR, "Arrived at end of main loop which shouldn't happen");

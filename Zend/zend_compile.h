@@ -48,6 +48,7 @@ typedef struct _zend_op_array zend_op_array;
 
 typedef struct _znode {
 	int op_type;
+	zend_llist *throw_list; // Try and save this space later on
 	union {
 		zval constant;
 
@@ -280,6 +281,12 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
+
+void zend_do_try(znode *try_token CLS_DC);
+void zend_do_begin_catch(znode *try_token, znode *catch_var CLS_DC);
+void zend_do_end_catch(znode *try_token CLS_DC);
+void zend_do_throw(znode *expr CLS_DC);
+
 ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 void zend_do_early_binding(TSRMLS_D);
@@ -529,6 +536,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_TICKS					105
 
 #define ZEND_SEND_VAR_NO_REF		106
+
+#define ZEND_CATCH					107
+#define ZEND_THROW					108
 
 /* end of block */
 
