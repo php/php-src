@@ -31,6 +31,7 @@ PHP                                                                        NEWS
   of true. (Tony)   
 - Fixed bug #32160 (file truncation in copy() when source & destination are
   the same). (Ilia)
+- Fixed bug #32134 (Overloading offsetGet/offsetSet). (Marcus)
 - Fixed bug #32130 (ArrayIterator::seek() does not throw an Exception on 
   invalid index). (Marcus)
 - Fixed bug #32081 (in mysqli default socket value is not being used). (Ilia)
