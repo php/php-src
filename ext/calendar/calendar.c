@@ -456,20 +456,21 @@ static char *heb_number_to_chars(int n, int fl)
 }
 /* }}} */
 
-/* {{{ proto string jdtojewish(int juliandaycount [, int fl])
+/* {{{ proto string jdtojewish(int juliandaycount [, bool hebrew [, int fl]])
    Converts a julian day count to a jewish calendar date */
 PHP_FUNCTION(jdtojewish)
 {
 	long julday, fl = 0;
+	zend_bool heb   = 0;
 	int year, month, day;
 	char date[10], hebdate[25];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &julday, &fl) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|bl", &julday, &heb, &fl) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	SdnToJewish(julday, &year, &month, &day);
-	if (!fl) {
+	if (!heb) {
 		sprintf(date, "%i/%i/%i", month, day, year);
 		RETURN_STRING(date, 1);
 	} else {
