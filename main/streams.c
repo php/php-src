@@ -1864,7 +1864,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
 
-		switch(php_stream_make_seekable_rel(stream, &newstream, PHP_STREAM_NO_PREFERENCE)) {
+		switch(php_stream_make_seekable_rel(stream, &newstream,
+					(options & STREAM_WILL_CAST)
+						? PHP_STREAM_PREFER_STDIO : PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
 				return stream;
 			case PHP_STREAM_RELEASED:
