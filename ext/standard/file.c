@@ -639,6 +639,130 @@ PHP_FUNCTION(file_get_meta_data)
 }
 /* }}} */
 
+static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, int *max_fd TSRMLS_DC)
+{
+	zval **elem;
+	php_stream *stream;
+	int this_fd;
+
+	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+		return 0;
+
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
+		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
+		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
+
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL)
+			continue;
+
+		/* get the fd */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&this_fd, 1)) {
+			FD_SET(this_fd, fds);
+			if (this_fd > *max_fd) {
+				*max_fd = this_fd;
+			}
+		}
+	}
+
+	return 1;
+
+}
+
+static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
+{
+	zval **elem, **dest_elem;
+	php_stream *stream;
+	HashTable *new_hash;
+	int this_fd;
+
+	if (Z_TYPE_P(stream_array) != IS_ARRAY)
+		return 0;
+
+	ALLOC_HASHTABLE(new_hash);
+	zend_hash_init(new_hash, 0, NULL, ZVAL_PTR_DTOR, 0);
+	
+	for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(stream_array));
+		 zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == SUCCESS;
+		 zend_hash_move_forward(Z_ARRVAL_P(stream_array))) {
+
+		php_stream_from_zval_no_verify(stream, elem);
+		if (stream == NULL)
+			continue;
+
+		/* get the fd */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&this_fd, 1)) {
+			if (FD_ISSET(this_fd, fds)) {
+				zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
+				if (dest_elem)
+					zval_add_ref(dest_elem);
+			}
+		}
+	}
+
+	/* destroy old array and add new one */
+	zend_hash_destroy(Z_ARRVAL_P(stream_array));
+	efree(Z_ARRVAL_P(stream_array));
+
+	zend_hash_internal_pointer_reset(new_hash);
+	Z_ARRVAL_P(stream_array) = new_hash;
+	
+	return 1;
+
+}
+
+
+/* {{{ proto int stream_select(array &read_streams, array &write_streams, array &except_streams, int tv_sec[, int tv_usec])
+   Runs the select() system call on the sets of streams with a timeout specified by tv_sec and tv_usec */
+PHP_FUNCTION(stream_select)
+{
+	zval			*r_array, *w_array, *e_array, *sec;
+	struct timeval	tv;
+	struct timeval *tv_p = NULL;
+	fd_set			rfds, wfds, efds;
+	int				max_fd = 0;
+	int				retval, sets = 0, usec = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
+		return;
+
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	FD_ZERO(&efds);
+
+	if (r_array != NULL) sets += stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
+	if (w_array != NULL) sets += stream_array_to_fd_set(w_array, &wfds, &max_fd TSRMLS_CC);
+	if (e_array != NULL) sets += stream_array_to_fd_set(e_array, &efds, &max_fd TSRMLS_CC);
+
+	if (!sets) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
+		RETURN_FALSE;
+	}
+
+	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
+	if (sec != NULL) {
+		convert_to_long_ex(&sec);
+		tv.tv_sec = Z_LVAL_P(sec);
+		tv.tv_usec = usec;
+		tv_p = &tv;
+	}
+
+	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
+
+	if (retval == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to select [%d]: %s",
+				errno, strerror(errno));
+		RETURN_FALSE;
+	}
+
+	if (r_array != NULL) stream_array_from_fd_set(r_array, &rfds TSRMLS_CC);
+	if (w_array != NULL) stream_array_from_fd_set(w_array, &wfds TSRMLS_CC);
+	if (e_array != NULL) stream_array_from_fd_set(e_array, &efds TSRMLS_CC);
+
+	RETURN_LONG(retval);
+}
+
+
 /* {{{ stream_context related functions */
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
 		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
@@ -846,6 +970,7 @@ PHP_FUNCTION(stream_context_create)
 }
 /* }}} */
 
+/* {{{ streams filter functions */
 static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *zstream;
@@ -887,6 +1012,7 @@ PHP_FUNCTION(stream_filter_append)
 {
 	apply_filter_to_stream(1, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
+/* }}} */
 /* }}} */
 
 /* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
@@ -1045,9 +1171,9 @@ PHPAPI PHP_FUNCTION(feof)
 }
 /* }}} */
 
-/* {{{ proto bool socket_set_blocking(resource socket, int mode)
+/* {{{ proto bool stream_set_blocking(resource socket, int mode)
    Set blocking/non-blocking mode on a socket or stream */
-PHP_FUNCTION(socket_set_blocking)
+PHP_FUNCTION(stream_set_blocking)
 {
 	zval **arg1, **arg2;
 	int block;
@@ -1073,8 +1199,8 @@ PHP_FUNCTION(socket_set_blocking)
    Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(set_socket_blocking)
 {
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, use socket_set_blocking() instead");
-	PHP_FN(socket_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "This function is deprecated, use stream_set_blocking() instead");
+	PHP_FN(stream_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
