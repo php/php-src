@@ -38,11 +38,13 @@
 #define PHP_XML_INTERNAL
 #include "ext/xml/php_xml.h"
 #include "ext/standard/php_incomplete_class.h"
+#include "ext/standard/base64.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"
 
 #define EL_ARRAY				"array"
+#define EL_BINARY				"binary"
 #define EL_BOOLEAN				"boolean"
 #define EL_CHAR					"char"
 #define EL_CHAR_CODE			"code"
@@ -82,6 +84,7 @@ typedef struct {
 		ST_NULL,
 		ST_NUMBER,
 		ST_STRING,
+		ST_BINARY,
 		ST_STRUCT
 	} type;
 	char *varname;
@@ -634,6 +637,16 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 		ent.data->value.str.val = empty_string;
 		ent.data->value.str.len = 0;
 		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
+	} else if (!strcmp(name, EL_BINARY)) {
+		ent.type = ST_BINARY;
+		SET_STACK_VARNAME;
+		
+		ALLOC_ZVAL(ent.data);
+		INIT_PZVAL(ent.data);
+		ent.data->type = IS_STRING;
+		ent.data->value.str.val = empty_string;
+		ent.data->value.str.len = 0;
+		wddx_stack_push((wddx_stack *)stack, &ent, sizeof(st_entry));
 	} else if (!strcmp(name, EL_CHAR)) {
 		int i;
 		char tmp_buf[2];
@@ -721,11 +734,22 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 
 	if (stack->top == 0)
 		return;
-	
+
 	if (!strcmp(name, EL_STRING) || !strcmp(name, EL_NUMBER) ||
 		!strcmp(name, EL_BOOLEAN) || !strcmp(name, EL_NULL) ||
-	  	!strcmp(name, EL_ARRAY) || !strcmp(name, EL_STRUCT)) {
+	  	!strcmp(name, EL_ARRAY) || !strcmp(name, EL_STRUCT) ||
+		!strcmp(name, EL_BINARY)) {
 		wddx_stack_top(stack, (void**)&ent1);
+
+		if (!strcmp(name, EL_BINARY)) {
+			int new_len=0;
+			unsigned char *new_str;
+
+			new_str = php_base64_decode(Z_STRVAL_P(ent1->data), Z_STRLEN_P(ent1->data), &new_len);
+			efree(Z_STRVAL_P(ent1->data));
+			Z_STRVAL_P(ent1->data) = new_str;
+			Z_STRLEN_P(ent1->data) = new_len;
+		}
 
 		/* Call __wakeup() method on the object. */
 		if (ent1->data->type == IS_OBJECT) {
@@ -833,6 +857,17 @@ static void php_wddx_process_data(void *user_data, const char *s, int len)
 				}
 
 				efree(decoded_value);
+				break;
+
+			case ST_BINARY:
+				if (Z_STRLEN_P(ent->data) == 0) {
+					Z_STRVAL_P(ent->data) = estrndup(s, len + 1);
+				} else {
+					Z_STRVAL_P(ent->data) = erealloc(Z_STRVAL_P(ent->data), Z_STRLEN_P(ent->data) + len + 1);
+					memcpy(Z_STRVAL_P(ent->data) + Z_STRLEN_P(ent->data), s, len);
+				}
+				Z_STRLEN_P(ent->data) += len;
+				Z_STRVAL_P(ent->data)[Z_STRLEN_P(ent->data)] = '\0';
 				break;
 
 			case ST_NUMBER:

@@ -23,6 +23,8 @@
 
 #define WDDX_ARRAY_S			"<array length='%d'>"
 #define WDDX_ARRAY_E			"</array>"
+#define WDDX_BINARY_S			"<binary>"
+#define WDDX_BINARY_E			"</binary>"
 #define WDDX_BOOLEAN			"<boolean value='%s'/>"
 #define WDDX_CHAR				"<char code='%02X'/>"
 #define WDDX_COMMENT_S			"<comment>"
