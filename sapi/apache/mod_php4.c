@@ -358,7 +358,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	 * directive, then decline to handle this request
 	 */
 	if (!php_apache_info.engine) {
-		r->content_type = "text/html";
+		r->content_type = "text/html;charset=iso-8859-1";
 		r->allowed |= (1 << METHODS) - 1;
 		return DECLINED;
 	}
@@ -390,7 +390,7 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	}
 	/* Assume output will be HTML.  Individual scripts may change this 
 	   further down the line */
-	r->content_type = "text/html";
+	r->content_type = "text/html;charset=iso-8859-1";
 
 	/* Init timeout */
 	hard_timeout("send", r);
