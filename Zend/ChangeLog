@@ -1,3 +1,19 @@
+2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_operators.c:
+      Fixed compiler warning regarding signed/unsigned int comparisons.
+
+2003-01-30  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_ts_hash.c
+      zend_ts_hash.h:
+      fix non-zts build for wez
+
+2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute_API.c:
+      Fix ZTS build.
+
 2003-01-29  Stanislav Malyshev  <stas@zend.com>
 
     * zend_compile.h

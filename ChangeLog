@@ -1,3 +1,74 @@
+2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/session/session.c:
+      Fix compiler warning.
+
+2003-01-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      Revert this part, the new one adds more problems than it solves.
+
+2003-01-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      main/streams.c
+      main/streams.c:
+      Partial MFH: Fix sticky eof issue, and avoid calling system stat macro
+
+    * main/streams.c:
+      Fix sticky EOF problem
+      
+      Sometimes streams signal a temporary EOF, because all current data
+      has been consumed. But that does not preclude the possibility that
+      more data will become available later.
+      
+      Thus we must not treat eof in the read path as final.
+      
+      Now, "tail -f" like scripts work again.
+
+2003-01-30  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/string.c:
+      Unify str_replace and str_ireplace using INTERNAL_FUNCTION_PARAM_PASSTHRU
+      -- reduce codebase/maintenance complexity
+
+2003-01-30  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/ifx.ec:
+      fix bug: #21945 (zts build failed)
+
+2003-01-30  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/config.m4:
+      MFH: Allow to link against chosen modules correctly
+
+    * ext/dba/config.m4:
+      Allow to link against chosen modules correctly
+
+2003-01-30  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Feature Request # 5919 - Addition of str_ireplace()
+      Also removed deprecated BM str replace menthod
+      Also rewrote php_str_to_str to use more processor/memory efficient method
+      (ilia)
+
+2003-01-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dbx/dbx.c
+      ext/fbsql/php_fbsql.c
+      ext/imap/php_imap.c
+      ext/mcal/php_mcal.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c:
+      Removed pointless checks.
+
 2003-01-29  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Installer.php:
