@@ -56,6 +56,11 @@ Build and execution instructions:
    another JVM/platform combination, please let me know, particularly if
    a unique build or execution setup was required.
 
+   Note for Windows users: semi-colons (";") mark the beginning of 
+   comments in php.ini files, so if you wish to add to the classpath,
+   make sure that the entire string is in quotes.  See the JDK 1.1.8
+   instructions below for an example.
+
    This function has been tested in both CGI and Apache (apxs) modes.  As
    the current design requires shared libraries, this support can not be
    linked statically into Apache.
