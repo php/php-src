@@ -29,9 +29,14 @@
  */
 
 #include "php.h"
-#include "php_globals.h"
 
 #if HAVE_FTP
+
+#ifndef ZEND_VERSION
+#include "internal_functions.h"
+#include "php3_list.h"
+#define php_error php3_error
+#endif
 
 #include "php_ftp.h"
 #include "ftp.h"
@@ -48,7 +53,7 @@ function_entry php3_ftp_functions[] = {
 	PHP_FE(ftp_mkdir,			NULL)
 	PHP_FE(ftp_rmdir,			NULL)
 	PHP_FE(ftp_nlist,			NULL)
-	PHP_FE(ftp_listraw,			NULL)
+	PHP_FE(ftp_rawlist,			NULL)
 	PHP_FE(ftp_systype,			NULL)
 	PHP_FE(ftp_get,				NULL)
 	PHP_FE(ftp_put,				NULL)
@@ -59,7 +64,11 @@ function_entry php3_ftp_functions[] = {
 php3_module_entry php3_ftp_module_entry = {
 	"FTP Functions",
 	php3_ftp_functions,
+#ifdef ZEND_VERSION
 	PHP_MINIT(ftp),
+#else
+	PHP_MINIT_FUNCTION,
+#endif
 	NULL,
 	NULL,
 	NULL,
@@ -72,7 +81,11 @@ static void ftp_destructor_ftpbuf(ftpbuf_t *ftp)
 	ftp_close(ftp);
 }
 
+#ifdef ZEND_VERSION
 PHP_MINIT_FUNCTION(ftp)
+#else
+int PHP_MINIT_FUNCTION(INIT_FUNC_ARGS)
+#endif
 {
 	le_ftpbuf = register_list_destructors(ftp_destructor_ftpbuf, NULL);
 	REGISTER_MAIN_LONG_CONSTANT("FTP_ASCII", FTPTYPE_ASCII,
@@ -379,9 +392,9 @@ PHP_FUNCTION(ftp_nlist)
 }
 /* }}} */
 
-/* {{{ proto array ftp_listraw(int stream, string directory)
+/* {{{ proto array ftp_rawlist(int stream, string directory)
    Returns a detailed listing of a directory as an array of output lines */
-PHP_FUNCTION(ftp_listraw)
+PHP_FUNCTION(ftp_rawlist)
 {
 	pval		*arg1, *arg2;
 	int		id, type;
