@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - ATTENTION! "make install" will *by default* install the CLI SAPI binary in 
   {PREFIX}/bin/php. If you don't disable the CGI binary, it will be
   installed as {PREFIX}/bin/php-cgi.
+- Added ftp_ssl_connect() to ext/ftp for FTP over SSL support. (Stefan Esser)
 - Made a few additions and changes to Apache 2 sapi. (Ilia)
   . Added apache_response_headers(), apache_note(), apache_getenv() and 
     apache_setenv() functions.
