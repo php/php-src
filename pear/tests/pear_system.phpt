@@ -12,6 +12,10 @@ error_reporting(E_ALL);
 require_once 'System.php';
 
 $sep = DIRECTORY_SEPARATOR;
+$ereg_sep = $sep;
+if (OS_WINDOWS) {
+    $ereg_sep .= $sep;
+}
 
 /*******************
         mkDir
@@ -58,11 +62,12 @@ $tmpfile = System::mkTemp('tst');
 $tmpenv = System::tmpDir();
 if (!@is_file($tmpfile) || !ereg("^$tmpenv{$sep}tst", $tmpfile)) {
     print "System::mkTemp('tst') failed\n";
+    var_dump(is_file($tmpfile), $tmpfile, "^$tmpenv{$sep}tst", !ereg("^$tmpenv{$ereg_sep}tst", $tmpfile));
 }
 
 // Create a temporal dir in "dir1" with default prefix "tmp"
 $tmpdir  = System::mkTemp('-d -t dir1');
-if (!@is_dir($tmpdir) || !ereg("^dir1{$sep}tmp", $tmpdir)) {
+if (!@is_dir($tmpdir) || !ereg("^dir1{$ereg_sep}tmp", $tmpdir)) {
     print "System::mkTemp('-d -t dir1') failed\n";
 }
 
