@@ -56,6 +56,7 @@
 #if HAVE_MBSTRING
 
 #include "mbfilter.h"
+#include "SAPI.h"
 
 #define PHP_MBSTRING_API 20020405
 
@@ -126,6 +127,7 @@ int php_mbregex_name2mbctype(const char *pname);
 
 char *mbstr_strrchr(const char *s, char c TSRMLS_DC);
 int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC);
+int mbstr_encoding_translation(TSRMLS_DC) ;
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
@@ -154,6 +156,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
 	long func_overload;
+	int encoding_translation;
 	mbfl_buffer_converter *outconv;
 #if HAVE_MBREGEX
 	int default_mbctype;
@@ -193,6 +196,9 @@ int php_mbstring_encoding_converter(char **to, int *to_length, char *from,
 		TSRMLS_DC);
 int php_mbstring_oddlen(char *string, int length, const char *encoding TSRMLS_DC);
 #endif /* ZEND_MULTIBYTE */
+
+SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
+SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 #else	/* HAVE_MBSTRING */
 

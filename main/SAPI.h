@@ -173,6 +173,7 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D));
+SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC));
 
 SAPI_API int sapi_flush(TSRMLS_D);
 SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
@@ -215,6 +216,7 @@ struct _sapi_module_struct {
 	void (*unblock_interruptions)(void);
 
 	void (*default_post_reader)(TSRMLS_D);
+	void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC);
 	char *executable_location;
 };
 
@@ -243,8 +245,11 @@ struct _sapi_post_entry {
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(TSRMLS_D)
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
+#define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
+
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
+SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data);
 
 #define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL
 

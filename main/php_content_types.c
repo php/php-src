@@ -51,6 +51,7 @@ int php_startup_sapi_content_types(void)
 {
 	sapi_register_post_entries(php_post_entries);
 	sapi_register_default_post_reader(php_default_post_reader);
+	sapi_register_treat_data(php_default_treat_data);
 	return SUCCESS;
 }
 /* }}} */

@@ -763,6 +763,13 @@ SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRML
 }
 
 
+SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC))
+{
+	sapi_module.treat_data = treat_data;
+	return SUCCESS;
+}
+
+
 SAPI_API int sapi_flush(TSRMLS_D)
 {
 	if (sapi_module.flush) {
