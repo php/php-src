@@ -211,22 +211,24 @@ PHP_FUNCTION(ltrim)
 
 PHPAPI void php_explode(pval *delim, pval *str, pval *return_value) 
 {
-	char *work_str, *p1, *p2;
+	char *p1, *p2, *endp;
 	int i = 0;
 
-	work_str = p1 = estrndup(str->value.str.val,str->value.str.len);
-	p2 = strstr(p1, delim->value.str.val);
+	endp = str->value.str.val + str->value.str.len;
+
+	p1 = str->value.str.val;
+	p2 = php_memnstr(str->value.str.val, delim->value.str.val, delim->value.str.len, endp);
+
 	if (p2 == NULL) {
-		add_index_string(return_value, i++, p1, 1);
+		add_index_stringl(return_value, i++, p1, str->value.str.len, 1);
 	} else do {
-		p2[0] = 0;
-		add_index_string(return_value, i++, p1, 1);
+		add_index_stringl(return_value, i++, p1, p2-p1, 1);
 		p1 = p2 + delim->value.str.len;
-	} while ((p2 = strstr(p1, delim->value.str.val)) && p2 != work_str);
-	if (p1 != work_str) {
-		add_index_string(return_value, i++, p1, 1);
+	} while (p2 = php_memnstr(p1, delim->value.str.val, delim->value.str.len, endp));
+
+	if (p1 <= endp) {
+		add_index_stringl(return_value, i++, p1, endp-p1, 1);
 	}
-	efree(work_str);
 }
 
 /* {{{ proto array explode(string separator, string str)
@@ -238,17 +240,19 @@ PHP_FUNCTION(explode)
 	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &delim, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
 	convert_to_string_ex(str);
 	convert_to_string_ex(delim);
 
-	if (strlen((*delim)->value.str.val)==0) {
-		/* the delimiter must be a valid C string that's at least 1 character long */
+	if (! (*delim)->value.str.len) {
 		php_error(E_WARNING,"Empty delimiter");
 		RETURN_FALSE;
 	}
+
 	if (array_init(return_value) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
+
 	php_explode(*delim, *str, return_value);
 }
 /* }}} */
