@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Added proc_nice() function, which allows changing priority of the current
+  process. (Ilia)
+- Added pcntl_getpriority() & pcntl_setpriority(), which can be used to
+  fetch & change priority of any process. (Ilia)
 - new idate() function.
   new date_sunrise() function.
   new date_sunset() function.
