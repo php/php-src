@@ -14,11 +14,12 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
-// |                                                                      |
+// |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // +----------------------------------------------------------------------+
 //
+// $Id$
 
-require_once "PEAR.php";
+require_once 'PEAR/Common.php';
 
 /**
  * Administration class used to make a PEAR release tarball.
@@ -26,7 +27,7 @@ require_once "PEAR.php";
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
-class PEAR_Packager extends PEAR
+class PEAR_Packager extends PEAR_Common
 {
     // {{{ properties
 
@@ -109,14 +110,83 @@ class PEAR_Packager extends PEAR
 
     // {{{ package()
 
-    function package($pkgfile = "package.xml")
+    function package($pkgfile = 'package.xml')
+    {
+        $pkginfo = $this->infoFromDescriptionFile($pkgfile);
+        if (PEAR::isError($pkginfo)) {
+            return $pkginfo;
+        }
+        // TMP DIR -------------------------------------------------
+        $pwd = getcwd();
+        $new_pwd = dirname($pkgfile);
+        // We allow calls like "pear package /home/cox/mypack/package.xml"
+        if ($new_pwd != '.') {
+            chdir($new_pwd);
+            $new_pwd = getcwd();
+            $orig_pwd = $pwd;
+            $pwd = $new_pwd;
+            $pkgfile = basename($pkgfile);
+        }
+        $pkgver = $pkginfo['package'] . '-' . $pkginfo['version'];
+        // don't want strange characters
+        $pkgver = ereg_replace ('[^a-zA-Z0-9._-]', '_', $pkgver);
+        $this->tmpdir = $pwd . DIRECTORY_SEPARATOR . $pkgver;
+        if (file_exists($this->tmpdir)) {
+            return $this->raiseError('Tmpdir: ' . $this->tmpdir .' already exists',
+                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
+        }
+        if (!mkdir($this->tmpdir, 0755)) {
+            return $this->raiseError("Unable to create temporary directory $this->tmpdir.",
+                              null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
+        } else {
+            $this->log(2, "...TmpDir created at: " . $this->tmpdir);
+        }
+        $this->_tempfiles[] = $this->tmpdir;
+
+        // Copy files -----------------------------------------------
+        $files = &$pkginfo['filelist'];
+        foreach ($files as $fname => $atts) {
+            $file = $this->tmpdir . DIRECTORY_SEPARATOR . $fname;
+            $dir = dirname($file);
+            if (!@is_dir($dir)) {
+                if (!$this->mkDirHier($dir)) {
+                    return $this->raiseError("could not mkdir $dir");
+                }
+            }
+            if (!@copy($fname, $file)) {
+                $this->log(0, "could not copy $fname to $file");
+            } else {
+                $this->log(2, "...copying from $fname to $file");
+            }
+        }
+        // XXX TODO: Rebuild the package file as the old method did?
+        if (!@copy($pkgfile, $this->tmpdir . DIRECTORY_SEPARATOR . $pkgfile)) {
+            return $this->raiseError("could not copy $pkgfile to " . $this->tmpdir);
+        }
+        $this->log(2, "...copying package $pkgfile to " . $this->tmpdir);
+
+        // TAR the Package -------------------------------------------
+        chdir(dirname($this->tmpdir));
+        // XXX FIXME Windows and non-GNU tar
+        $pwd = (isset($orig_pwd)) ? $orig_pwd : $pwd;
+        $cmd = "tar -cvzf $pwd/${pkgver}.tgz $pkgver";
+        // XXX TODO: add an extra param where to leave the package?
+        $this->log(1, `$cmd`);
+        $this->log(1, "Package $pwd/${pkgver}.tgz done");
+        if (isset($orig_pwd)) {
+            chdir($orig_pwd);
+        }
+    }
+
+    /* XXXX REMOVEME: this is the old code
+    function _package($pkgfile = "package.xml")
     {
         $pwd = getcwd();
         $fp = @fopen($pkgfile, "r");
         if (!is_resource($fp)) {
             return $this->raiseError($php_errormsg);
         }
-        
+
         $xp = xml_parser_create();
         if (!$xp) {
             return $this->raiseError("Unable to create XML parser.");
@@ -130,7 +200,7 @@ class PEAR_Packager extends PEAR
         $this->element_stack = array();
         $this->pkginfo = array();
         $this->current_element = false;
-        
+
         $data = fread($fp, filesize($pkgfile));
         fclose($fp);
         if (!xml_parse($xp, $data, true)) {
@@ -178,36 +248,6 @@ class PEAR_Packager extends PEAR
         $cmd = "tar -cvzf $pwd/${pkgver}.tgz $pkgver";
         $this->log(1, `$cmd`);
         $this->log(1, "Package $pwd/${pkgver}.tgz done");
-    }
-
-    // }}}
-
-    // {{{ mkDirHier()
-
-    function mkDirHier($dir)
-    {
-        $dirstack = array();
-        while (!is_dir($dir) && $dir != DIRECTORY_SEPARATOR) {
-            array_unshift($dirstack, $dir);
-            $dir = dirname($dir);
-        }
-        while ($newdir = array_shift($dirstack)) {
-            if (mkdir($newdir, 0777)) {
-                $this->log(1, "created dir $newdir");
-            } else {
-                return $this->raiseError("mkdir($newdir) failed");
-            }
-        }
-    }
-
-    // }}}
-    // {{{ log()
-
-    function log($level, $msg)
-    {
-        if ($this->debug >= $level) {
-            print "$msg\n";
-        }
     }
 
     // }}}
@@ -309,7 +349,7 @@ class PEAR_Packager extends PEAR
                 break;
         }
     }
-
+    */
     // }}}
 }
 
