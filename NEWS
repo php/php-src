@@ -33,6 +33,7 @@ PHP 4                                                                      NEWS
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #22709 (Crash in interbase when database unavailable). (Vladimir Michl)
 - Fixed bug #22681 (Crash when reading from invalid file pointer). (Ilia)
+- Fixed bug #22672 (User not logged under Apache2). (Ian) 
 - Fixed bug #22616 (Wrong order of -lssl and -lcrypto with IMAP). (Jani)
 - Fixed bug #22613 (imagettfbox() does not add the kerning distance to the
   running position). (Ilia)
