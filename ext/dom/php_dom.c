@@ -103,6 +103,7 @@ int dom_node_children_valid(xmlNodePtr node) {
 		case XML_COMMENT_NODE:
 		case XML_TEXT_NODE:
 		case XML_CDATA_SECTION_NODE:
+		case XML_NOTATION_NODE:
 			return FAILURE;
 			break;
 		default:
