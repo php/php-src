@@ -13,7 +13,7 @@ fi
 PHP_ARG_WITH(libexpat-dir, libexpat install dir,
 [  --with-libexpat-dir=DIR   XML: libexpat install prefix (deprecated)], no, no)
 
-if test "$PHP_XML" != "no"; then
+if test "$PHP_XML" != "no" && test "$PHP_LIBXML" != "no" -o "$PHP_LIBEXPAT_DIR" != "no"; then
   dnl 
   dnl Default to libxml2.
   dnl
@@ -24,7 +24,7 @@ if test "$PHP_XML" != "no"; then
       AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
     fi
   ])
-
+  
   dnl
   dnl Check for expat only if --with-libexpat-dir is used.
   dnl

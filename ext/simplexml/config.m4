@@ -9,7 +9,7 @@ if test -z "$PHP_LIBXML_DIR"; then
   [  --with-libxml-dir=DIR     SimpleXML: libxml2 install prefix], no, no)
 fi
 
-if test "$PHP_SIMPLEXML" != "no"; then
+if test "$PHP_SIMPLEXML" != "no" && test "$PHP_LIBXML" != "no"; then
 
   PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [
     AC_DEFINE(HAVE_SIMPLEXML,1,[ ])
