@@ -505,7 +505,7 @@ PHP_FUNCTION(ncurses_slk_touch)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_attroff(int intarg)
+/* {{{ proto int ncurses_attroff(int attributes)
    Turn off the given attributes */
 PHP_FUNCTION(ncurses_attroff)
 {
@@ -519,7 +519,7 @@ PHP_FUNCTION(ncurses_attroff)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_attron(int intarg)
+/* {{{ proto int ncurses_attron(int attributes)
    Turn on the given attributes */
 PHP_FUNCTION(ncurses_attron)
 {
@@ -533,7 +533,7 @@ PHP_FUNCTION(ncurses_attron)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_attrset(int intarg)
+/* {{{ proto int ncurses_attrset(int attributes)
    Set given attributes */
 PHP_FUNCTION(ncurses_attrset)
 {
@@ -547,7 +547,7 @@ PHP_FUNCTION(ncurses_attrset)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_bkgd(int intarg)
+/* {{{ proto int ncurses_bkgd(int attrchar)
    Set background property for terminal screen */
 PHP_FUNCTION(ncurses_bkgd)
 {
@@ -561,7 +561,7 @@ PHP_FUNCTION(ncurses_bkgd)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_curs_set(int intarg)
+/* {{{ proto int ncurses_curs_set(int visibility)
    Set cursor state */
 PHP_FUNCTION(ncurses_curs_set)
 {
@@ -575,7 +575,7 @@ PHP_FUNCTION(ncurses_curs_set)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_delay_output(int intarg)
+/* {{{ proto int ncurses_delay_output(int milliseconds)
    Delay output on terminal using padding characters */
 PHP_FUNCTION(ncurses_delay_output)
 {
@@ -589,7 +589,7 @@ PHP_FUNCTION(ncurses_delay_output)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_echochar(int intarg)
+/* {{{ proto int ncurses_echochar(int character)
    Single character output including refresh */
 PHP_FUNCTION(ncurses_echochar)
 {
@@ -603,7 +603,7 @@ PHP_FUNCTION(ncurses_echochar)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_halfdelay(int intarg)
+/* {{{ proto int ncurses_halfdelay(int tenth)
    Put terminal into halfdelay mode */
 PHP_FUNCTION(ncurses_halfdelay)
 {
@@ -617,7 +617,7 @@ PHP_FUNCTION(ncurses_halfdelay)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_has_key(int intarg)
+/* {{{ proto int ncurses_has_key(int keycode)
    Check for presence of a function key on terminal keyboard */
 PHP_FUNCTION(ncurses_has_key)
 {
@@ -631,7 +631,7 @@ PHP_FUNCTION(ncurses_has_key)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_insch(int intarg)
+/* {{{ proto int ncurses_insch(int character)
    Insert character moving rest of line including character at current position */
 PHP_FUNCTION(ncurses_insch)
 {
@@ -645,7 +645,7 @@ PHP_FUNCTION(ncurses_insch)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_insdelln(int intarg)
+/* {{{ proto int ncurses_insdelln(int count)
    Insert lines before current line scrolling down (negative numbers delete and scroll up) */
 PHP_FUNCTION(ncurses_insdelln)
 {
@@ -659,7 +659,7 @@ PHP_FUNCTION(ncurses_insdelln)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_mouseinterval(int intarg)
+/* {{{ proto int ncurses_mouseinterval(int milliseconds)
    Set timeout for mouse button clicks */
 PHP_FUNCTION(ncurses_mouseinterval)
 {
@@ -673,8 +673,8 @@ PHP_FUNCTION(ncurses_mouseinterval)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_napms(int intarg)
-   µs sleep */
+/* {{{ proto int ncurses_napms(int milliseconds)
+   Sleep */
 PHP_FUNCTION(ncurses_napms)
 {
 	long intarg;
@@ -687,7 +687,7 @@ PHP_FUNCTION(ncurses_napms)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_scrl(int intarg)
+/* {{{ proto int ncurses_scrl(int count)
    Scroll window content up or down without changing current position */
 PHP_FUNCTION(ncurses_scrl)
 {
@@ -776,7 +776,7 @@ PHP_FUNCTION(ncurses_slk_init)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_typeahead(int intarg)
+/* {{{ proto int ncurses_typeahead(int fd)
    Specify different filedescriptor for typeahead checking */
 PHP_FUNCTION(ncurses_typeahead)
 {
@@ -790,7 +790,7 @@ PHP_FUNCTION(ncurses_typeahead)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_ungetch(int intarg)
+/* {{{ proto int ncurses_ungetch(int keycode)
    Put a character back into the input stream */
 PHP_FUNCTION(ncurses_ungetch)
 {
@@ -818,7 +818,7 @@ PHP_FUNCTION(ncurses_vidattr)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_use_extended_names(int intarg)
+/* {{{ proto int ncurses_use_extended_names(bool flag)
    Control use of extended names in terminfo descriptions */
 PHP_FUNCTION(ncurses_use_extended_names)
 {
@@ -837,7 +837,7 @@ PHP_FUNCTION(ncurses_use_extended_names)
 }
 /* }}} */
 
-/* {{{ proto void ncurses_bkgdset(int intarg)
+/* {{{ proto void ncurses_bkgdset(int attrchar)
    Control screen background */
 PHP_FUNCTION(ncurses_bkgdset)
 {
@@ -875,7 +875,7 @@ PHP_FUNCTION(ncurses_qiflush)
 }
 /* }}} */
 
-/* {{{ proto void ncurses_timeout(int intarg)
+/* {{{ proto void ncurses_timeout(int millisec)
    Set timeout for special key sequences */
 PHP_FUNCTION(ncurses_timeout)
 {
@@ -889,7 +889,7 @@ PHP_FUNCTION(ncurses_timeout)
 }
 /* }}} */
 
-/* {{{ proto void ncurses_use_env(int intarg)
+/* {{{ proto void ncurses_use_env(bool flag)
    Control use of environment information about terminal size */
 PHP_FUNCTION(ncurses_use_env)
 {
@@ -933,7 +933,7 @@ PHP_FUNCTION(ncurses_putp)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_scr_dump(string text)
+/* {{{ proto int ncurses_scr_dump(string filename)
    Dump screen content to file */
 PHP_FUNCTION(ncurses_scr_dump)
 {
@@ -948,7 +948,7 @@ PHP_FUNCTION(ncurses_scr_dump)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_scr_init(string text)
+/* {{{ proto int ncurses_scr_init(string filename)
    Initialize screen from file dump */
 PHP_FUNCTION(ncurses_scr_init)
 {
@@ -963,7 +963,7 @@ PHP_FUNCTION(ncurses_scr_init)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_scr_restore(string text)
+/* {{{ proto int ncurses_scr_restore(string filename)
    Restore screen from file dump */
 PHP_FUNCTION(ncurses_scr_restore)
 {
@@ -978,7 +978,7 @@ PHP_FUNCTION(ncurses_scr_restore)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_scr_set(string text)
+/* {{{ proto int ncurses_scr_set(string filename)
    Inherit screen from file dump */
 PHP_FUNCTION(ncurses_scr_set)
 {
@@ -1161,7 +1161,7 @@ PHP_FUNCTION(ncurses_mvinch)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_insstr(string)
+/* {{{ proto int ncurses_insstr(string text)
    Insert string at current position, moving rest of line right */
 PHP_FUNCTION(ncurses_insstr)
 {
@@ -1176,8 +1176,10 @@ PHP_FUNCTION(ncurses_insstr)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_instr(string)
- */
+#if 0
+/* TODO return by reference */
+/* {{{ proto int ncurses_instr(string buffer)
+   Read string from terminal screen */
 PHP_FUNCTION(ncurses_instr)
 {
 	char *str;
@@ -1190,9 +1192,10 @@ PHP_FUNCTION(ncurses_instr)
 	RETURN_LONG(instr(str));
 }
 /* }}} */
+#endif
 
-/* {{{ proto int ncurses_mvhline(int,int,int,int)
- */
+/* {{{ proto int ncurses_mvhline(int y, int x, int attrchar, int n)
+   Set new position and draw a horizontal line using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_mvhline)
 {
 	long i1,i2,i3,i4;
@@ -1205,8 +1208,22 @@ PHP_FUNCTION(ncurses_mvhline)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_mvcur(int,int,int,int)
- */
+/* {{{ proto int ncurses_mvvline(int y, int x, int attrchar, int n)
+   Set new position and draw a vertical line using an attributed character and max. n characters long */
+PHP_FUNCTION(ncurses_mvvline)
+{
+	long i1,i2,i3,i4;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llll",&i1,&i2,&i3,&i4)==FAILURE) {
+        return;
+	}
+	
+	RETURN_LONG(mvvline(i1,i2,i3,i4));
+}
+/* }}} */
+
+/* {{{ proto int ncurses_mvcur(int old_y,int old_x, int new_y, int new_x)
+   Move cursor immediately */
 PHP_FUNCTION(ncurses_mvcur)
 {
 	long i1,i2,i3,i4;
@@ -1219,8 +1236,8 @@ PHP_FUNCTION(ncurses_mvcur)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_init_color(int,int,int,int)
- */
+/* {{{ proto int ncurses_init_color(int color, int r, int g, int b)
+   Set new RGB value for color */
 PHP_FUNCTION(ncurses_init_color)
 {
 	long i1,i2,i3,i4;
@@ -1233,8 +1250,8 @@ PHP_FUNCTION(ncurses_init_color)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_border(int,int,int,int,int,int,int,int)
- */
+/* {{{ proto int ncurses_border(int left, int right, int top, int bottom, int tl_corner, int tr_corner, int bl_corner, int br_corner)
+   Draw a border around the screen using attributed characters */
 PHP_FUNCTION(ncurses_border)
 {
 	long i1,i2,i3,i4,i5,i6,i7,i8;
@@ -1247,8 +1264,8 @@ PHP_FUNCTION(ncurses_border)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_assume_default_colors(int,int)
- */
+/* {{{ proto int ncurses_assume_default_colors(int fg, int bg)
+   Define default colors for color 0 */
 PHP_FUNCTION(ncurses_assume_default_colors)
 {
 #ifdef HAVE_NCURSES_ASSUME_DEFAULT_COLORS
@@ -1266,8 +1283,8 @@ PHP_FUNCTION(ncurses_assume_default_colors)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_define_key(string,int)
- */
+/* {{{ proto int ncurses_define_key(string definition, int keycode)
+   Define a keycode */
 PHP_FUNCTION(ncurses_define_key)
 {
 	long n;
@@ -1282,8 +1299,8 @@ PHP_FUNCTION(ncurses_define_key)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_hline(int,int)
- */
+/* {{{ proto int ncurses_hline(int charattr, int n)
+   Draw a horizontal line at current position using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_hline)
 {
 	long i1,i2;
@@ -1296,8 +1313,8 @@ PHP_FUNCTION(ncurses_hline)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_vline(int,int)
- */
+/* {{{ proto int ncurses_vline(int charattr, int n)
+   Draw a vertical line at current position using an attributed character and max. n characters long */
 PHP_FUNCTION(ncurses_vline)
 {
 	long i1,i2;
@@ -1310,8 +1327,8 @@ PHP_FUNCTION(ncurses_vline)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_keyok(int,bool)
- */
+/* {{{ proto int ncurses_keyok(int keycode, bool enable)
+   Enable or disable a keycode */
 PHP_FUNCTION(ncurses_keyok)
 {
 	long i,b;
@@ -1325,7 +1342,7 @@ PHP_FUNCTION(ncurses_keyok)
 /* }}} */
 
 /* {{{ proto int ncurses_mvwaddstr(resource window, int y, int x, string text)
- */
+   Add string at new position in window */
 PHP_FUNCTION(ncurses_mvwaddstr)
 {
 	zval **handle, **x, **y, **text;
@@ -1347,7 +1364,7 @@ PHP_FUNCTION(ncurses_mvwaddstr)
 /* }}} */
 
 /* {{{ proto int ncurses_wrefresh(resource window)
- */
+   Refresh window on terminal screen */
 PHP_FUNCTION(ncurses_wrefresh)
 {
 	zval **handle;
