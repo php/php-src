@@ -63,7 +63,7 @@ static int browser_reg_compare(pval *browser)
 
 PHP_FUNCTION(get_browser)
 {
-	pval *agent_name,*agent,tmp;
+	pval **agent_name,**agent,tmp;
 	ELS_FETCH();
 
 	if (!INI_STR("browscap")) {
@@ -73,12 +73,12 @@ PHP_FUNCTION(get_browser)
 	switch(ARG_COUNT(ht)) {
 		case 0:
 			if (zend_hash_find(&EG(symbol_table), "HTTP_USER_AGENT", sizeof("HTTP_USER_AGENT"), (void **) &agent_name)==FAILURE) {
-				agent_name = &tmp;
-				var_reset(agent_name);
+				*agent_name = &tmp;
+				var_reset(*agent_name);
 			}
 			break;
 		case 1:
-			if (getParameters(ht, 1, &agent_name)==FAILURE) {
+			if (zend_get_parameters_ex(1,&agent_name)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
@@ -87,30 +87,30 @@ PHP_FUNCTION(get_browser)
 			break;
 	}
 	
-	convert_to_string(agent_name);
+	convert_to_string_ex(agent_name);
 
-	if (zend_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
-		lookup_browser_name = agent_name->value.str.val;
+	if (zend_hash_find(&browser_hash, (*agent_name)->value.str.val,(*agent_name)->value.str.len+1, (void **) &agent)==FAILURE) {
+		lookup_browser_name = (*agent_name)->value.str.val;
 		found_browser_entry = NULL;
 		zend_hash_apply(&browser_hash,(int (*)(void *)) browser_reg_compare);
 		
 		if (found_browser_entry) {
-			agent = found_browser_entry;
+			*agent = found_browser_entry;
 		} else if (zend_hash_find(&browser_hash, "Default Browser", sizeof("Default Browser"), (void **) &agent)==FAILURE) {
 			RETURN_FALSE;
 		}
 	}
 	
-	*return_value = *agent;
+	*return_value = **agent;
 	return_value->type = IS_OBJECT;
 	pval_copy_constructor(return_value);
 	return_value->value.ht->pDestructor = PVAL_DESTRUCTOR;
 
-	while (zend_hash_find(agent->value.ht, "parent", sizeof("parent"), (void **) &agent_name)==SUCCESS) {
-		if (zend_hash_find(&browser_hash, agent_name->value.str.val, agent_name->value.str.len+1, (void **) &agent)==FAILURE) {
+	while (zend_hash_find((*agent)->value.ht, "parent",sizeof("parent"), (void **) &agent_name)==SUCCESS) {
+		if (zend_hash_find(&browser_hash,(*agent_name)->value.str.val, (*agent_name)->value.str.len+1, (void **)&agent)==FAILURE) {
 			break;
 		}
-		zend_hash_merge(return_value->value.ht, agent->value.ht, PVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
+		zend_hash_merge(return_value->value.ht,(*agent)->value.ht, PVAL_COPY_CTOR, (void *) &tmp, sizeof(pval), 0);
 	}
 }
 

@@ -191,15 +191,15 @@ void php4i_add_header_information(char *header_information, uint header_length)
 /* Implementation of the language Header() function */
 PHP_FUNCTION(Header)
 {
-	pval *arg1;
+	pval **arg1;
 
-	if (getParameters(ht, 1, &arg1) == FAILURE) {
+	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(arg1);
-	php4i_add_header_information(arg1->value.str.val, arg1->value.str.len);
-	arg1->type = IS_LONG; /* change arg1's type so that it doesn't get freed */
-	arg1->value.lval = 0;
+	convert_to_string_ex(arg1);
+	php4i_add_header_information((*arg1)->value.str.val,(*arg1)->value.str.len);
+	(*arg1)->type = IS_LONG; /* change arg1's type so that it doesn't get freed */
+	(*arg1)->value.lval = 0;
 }
 
 
@@ -409,11 +409,11 @@ PHP_FUNCTION(setcookie)
 	char *name = NULL, *value = NULL, *path = NULL, *domain = NULL;
 	time_t expires = 0;
 	int secure = 0;
-	pval *arg[6];
+	pval **arg[6];
 	int arg_count;
 
 	arg_count = ARG_COUNT(ht);
-	if (arg_count < 1 || arg_count > 6 || getParametersArray(ht, arg_count, arg) == FAILURE) {
+	if (arg_count < 1 || arg_count > 6 || zend_get_parameters_array_ex(arg_count, arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	if (php_header_printed == 1) {
@@ -422,28 +422,28 @@ PHP_FUNCTION(setcookie)
 	}
 	switch (arg_count) {
 		case 6:
-			convert_to_boolean(arg[5]);
-			secure = arg[5]->value.lval;
+			convert_to_boolean_ex(arg[5]);
+			secure = (*arg[5])->value.lval;
 			/* break missing intentionally */
 		case 5:
-			convert_to_string(arg[4]);
-			domain = estrndup(arg[4]->value.str.val,arg[4]->value.str.len);
+			convert_to_string_ex(arg[4]);
+			domain = estrndup((*arg[4])->value.str.val,(*arg[4])->value.str.len);
 			/* break missing intentionally */
 		case 4:
-			convert_to_string(arg[3]);
-			path = estrndup(arg[3]->value.str.val,arg[3]->value.str.len);
+			convert_to_string_ex(arg[3]);
+			path = estrndup((*arg[3])->value.str.val,(*arg[3])->value.str.len);
 			/* break missing intentionally */
 		case 3:
-			convert_to_long(arg[2]);
-			expires = arg[2]->value.lval;
+			convert_to_long_ex(arg[2]);
+			expires = (*arg[2])->value.lval;
 			/* break missing intentionally */
 		case 2:
-			convert_to_string(arg[1]);
-			value = estrndup(arg[1]->value.str.val,arg[1]->value.str.len);
+			convert_to_string_ex(arg[1]);
+			value = estrndup((*arg[1])->value.str.val,(*arg[1])->value.str.len);
 			/* break missing intentionally */
 		case 1:
-			convert_to_string(arg[0]);
-			name = estrndup(arg[0]->value.str.val,arg[0]->value.str.len);
+			convert_to_string_ex(arg[0]);
+			name = estrndup((*arg[0])->value.str.val,(*arg[0])->value.str.len);
 			break;
 	}
 #if 0
