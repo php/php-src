@@ -571,6 +571,25 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array TSRMLS_D
 			}
 			php_register_variable("DOCUMENT_ROOT", humi.lpszPath, track_vars_array TSRMLS_CC);
 		}
+
+		if (!SG(request_info).auth_user || !SG(request_info).auth_password || 
+			!SG(request_info).auth_user[0] || !SG(request_info).auth_password[0]) {
+			DWORD variable_len;
+			char static_variable_buf[ISAPI_SERVER_VAR_BUF_SIZE];
+
+			variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
+			if (lpECB->GetServerVariable(lpECB->ConnID, "HTTP_AUTHORIZATION", static_variable_buf, &variable_len)
+				&& static_variable_buf[0]) {
+				php_handle_auth_data(static_variable_buf TSRMLS_CC);
+			}
+		}
+	
+		if (SG(request_info).auth_user)  {
+			php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, track_vars_array TSRMLS_CC );
+		}
+		if (SG(request_info).auth_password) {
+			php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, track_vars_array TSRMLS_CC );
+		}
 	}
 #endif
 }
