@@ -149,6 +149,9 @@ class ArrayIterator implements Iterator {
 	function hasMore();
 }
 
+/** Iterator that wrapps around another iterator and only returns selected
+ * elements of the inner iterator.
+ */
 abstract class FilterIterator implements Iterator {
 	/** Construct an instance form a Iterator.
 	 *
@@ -182,6 +185,9 @@ abstract class FilterIterator implements Iterator {
 	function hasMore();
 }
 
+/** A recursive iterator that only returns elements that themselves can be 
+ * trversed.
+ */
 class ParentIterator extends FilterIterator implements RecursiveIterator {
 	/** Construct an instance form a RecursiveIterator.
 	 *
@@ -265,7 +271,7 @@ class DirectoryIterator implements Iterator {
 	function isDot();	
 }
 
-/** \brief Directory iterator
+/** \brief recursive directory iterator
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator {
 
