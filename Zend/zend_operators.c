@@ -1688,7 +1688,6 @@ ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2)
 		return;
 	}
 	zend_compare_symbol_tables(result, Z_OBJPROP_P(o1), Z_OBJPROP_P(o2));
-#endif
 }
 
 
