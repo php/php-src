@@ -1337,12 +1337,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
    Fetch a result row as an object */
 PHP_FUNCTION(odbc_fetch_object)
 {
- php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
- if (return_value->type==IS_ARRAY) {
-  return_value->type=IS_OBJECT;
-  return_value->value.obj.properties = return_value->value.ht;
-  return_value->value.obj.ce = &zend_standard_class_def;
- }
+	/* OBJECTS_FIXME */
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	if (Z_TYPE_P(return_value) == IS_ARRAY) {
+		Z_TYPE_P(return_value) = IS_OBJECT;
+		Z_OBJPROP_P(return_value) = return_value->value.ht;
+		Z_OBJCE_P(return_value) = &zend_standard_class_def;
+	}
 }
 /* }}} */
 
@@ -1350,7 +1351,7 @@ PHP_FUNCTION(odbc_fetch_object)
    Fetch a result row as an associative array */
 PHP_FUNCTION(odbc_fetch_array)
 {
-        php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
+	php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, ODBC_OBJECT);
 }
 /* }}} */
 #endif
