@@ -113,6 +113,7 @@ ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename)
 	CLS_FETCH();
 
 	if (zend_hash_find(&CG(filenames_table), new_compiled_filename, length+1, (void **) &pp)==SUCCESS) {
+		CG(compiled_filename) = *pp;
 		return *pp;
 	}
 	p = estrndup(new_compiled_filename, length);
