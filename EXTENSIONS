@@ -286,7 +286,7 @@ SINCE:               4.0.5
 COMMENT:             Not tested against windows, only core API completed, rest under development
 -------------------------------------------------------------------------------
 EXTENSION:           openssl
-PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>
+PRIMARY MAINTAINER:  Wez Furlong <wez@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.4
