@@ -256,6 +256,8 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 void php_var_export(zval **struc, int level TSRMLS_DC)
 {
 	HashTable *myht;
+	char*     tmp_str;
+	int       tmp_len;
 
 	switch (Z_TYPE_PP(struc)) {
 	case IS_BOOL:
@@ -271,9 +273,11 @@ void php_var_export(zval **struc, int level TSRMLS_DC)
 		php_printf("%.*G", (int) EG(precision), Z_DVAL_PP(struc));
 		break;
 	case IS_STRING:
+		tmp_str = php_addslashes(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc), &tmp_len, 0 TSRMLS_CC);
 		PUTS ("'");
-		PHPWRITE(Z_STRVAL_PP(struc), Z_STRLEN_PP(struc));
+		PHPWRITE(tmp_str, tmp_len);
 		PUTS ("'");
+		efree (tmp_str);
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
