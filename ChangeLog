@@ -1,3 +1,25 @@
+2000-12-16  Andi Gutmans  <andi@zend.com>
+
+    * ext/dba/dba.c:
+    - How did CVS let me commit this? Probably it confused with the branch
+      merge
+
+    * ext/dba/dba_dbm.c:
+    - In PHP we're supposed to only use MAXPATHLEN (defined in php.h)
+
+    * ext/standard/dir.c
+      main/fopen-wrappers.c
+      main/safe_mode.c
+      sapi/phttpd/phttpd.c
+      sapi/servlet/servlet.c
+      ext/dba/dba.c:
+    - Make all places use MAXPATHLEN in the same way. It includes the
+      terminating NULL.
+
+2000-12-16  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c: AIX's XlC++ does not allow casts as an lvalue.
+
 2000-12-15  Hartmut Holzgraefe  <hartmut@six.de>
 
     * run-tests.php:
