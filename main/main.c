@@ -500,7 +500,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 #if HAVE_SETITIMER
 static void php3_timeout(int dummy)
 {
-	TLS_VARS;
+	PLS_FETCH();
 
 	php3_error(E_ERROR, "Maximum execution time of %d seconds exceeded", PG(max_execution_time));
 }
