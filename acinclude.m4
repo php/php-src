@@ -78,7 +78,7 @@ AC_DEFUN(AC_ADD_LIBPATH,[
   if test "$1" != "/usr/lib"; then
     AC_EXPAND_PATH($1, ai_p)
     AC_PHP_ONCE(LIBPATH, $ai_p, [
-      LIBS="$LIBS -L$ai_p"
+      LDFLAGS="$LDFLAGS -L$ai_p"
       PHP_RPATHS="$PHP_RPATHS $ai_p"
     ])
   fi
@@ -121,7 +121,7 @@ dnl add a library to the link line
 dnl
 AC_DEFUN(AC_ADD_LIBRARY,[
   AC_PHP_ONCE(LIBRARY, $1, [
-    LIBS="$LIBS -l$1"
+    LIBS="-l$1 $LIBS"
   ])
 ])
 
