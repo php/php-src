@@ -158,7 +158,7 @@ void _discard(_muscat_handle * handle) {
 /* }}} */
 
 
-/* {{{ proto resource setup_muscat(int size [, string muscat_dir])
+/* {{{ proto resource muscat_setup(int size [, string muscat_dir])
    Creates a new muscat session and returns the handle. Size is the ammount of memory in bytes to allocate for muscat muscat_dir is the muscat installation dir e.g. "/usr/local/empower", it defaults to the compile time muscat directory */
 PHP_FUNCTION(muscat_setup)
 {
@@ -200,7 +200,7 @@ PHP_FUNCTION(muscat_setup)
 }
 /* }}} */
 
-/* {{{ proto resource setup_muscat_net(string muscat_host, int port)
+/* {{{ proto resource muscat_setup_net(string muscat_host, int port)
    Creates a new muscat session and returns the handle. muscat_host is the hostname to connect to port is the port number to connect to - actually takes exactly the same args as fsockopen */
 PHP_FUNCTION(muscat_setup_net)
 {

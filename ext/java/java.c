@@ -480,6 +480,8 @@ void java_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
 /***************************************************************************/
 
+/* {{{ proto object java_last_exception_get(void)
+	 Get last Java exception */
 PHP_FUNCTION(java_last_exception_get)
 {
   jlong result = 0;
@@ -495,8 +497,12 @@ PHP_FUNCTION(java_last_exception_get)
   (*JG(jenv))->CallVoidMethod(JG(jenv), JG(php_reflect), lastEx, result);
 }
 
+/* }}} */
+
 /***************************************************************************/
 
+/* {{{ proto void java_last_exception_clear(void)
+	 Clear last java extension */
 PHP_FUNCTION(java_last_exception_clear)
 {
   jlong result = 0;
@@ -511,6 +517,8 @@ PHP_FUNCTION(java_last_exception_clear)
 
   (*JG(jenv))->CallVoidMethod(JG(jenv), JG(php_reflect), clearEx);
 }
+
+/* }}} */
 
 /***************************************************************************/
 
