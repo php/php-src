@@ -62,7 +62,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz, char *mode, 
 #define php_stream_bz2open_from_BZFILE(bz, mode, innerstream)	_php_stream_bz2open_from_BZFILE((bz), (mode), (innerstream) STREAMS_CC TSRMLS_CC)
 #define php_stream_bz2open(wrapper, path, mode, options, opened_path)	_php_stream_bz2open((wrapper), (path), (mode), (options), (opened_path), NULL STREAMS_CC TSRMLS_CC)
 
-php_stream_ops php_stream_bz2io_ops;
+extern php_stream_ops php_stream_bz2io_ops;
 #define PHP_STREAM_IS_BZIP2	&php_stream_bz2io_ops
 
 #endif
