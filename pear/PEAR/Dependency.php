@@ -116,7 +116,7 @@ class PEAR_Dependency
      * @return mixed bool false if no error or the error string
      */
     function checkPackage(&$errmsg, $name, $req = null, $relation = 'has',
-        $opt = false)
+                          $opt = false)
     {
         if (substr($relation, 0, 2) == 'v.') {
             $relation = substr($relation, 2);
