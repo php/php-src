@@ -41,7 +41,7 @@ invalid.
 Object access - read
 --------------------
 
-get_property is used to read object's property. This value is not
+read_property is used to read object's property. This value is not
 meant to be changed. The handler returns zval * with the value.
 
 Object access - write
@@ -61,6 +61,9 @@ get_property_ptr is used to obtain zval ** for future writing to
 it. If your object properties are stored as zval*, return real place
 where the property is stored. If the aren't, the best way is to create 
 proxy object and handle it via get and set methods (see below). 
+This method is meant to be used for send-by-reference and assign-by-reference
+use of object properties. If you don;t want to implement property
+referencing for your objects, you can set this handler to NULL. 
 
 get and set handlers are used when engine needs to access the object
 as a value. E.g., in the following situation:
