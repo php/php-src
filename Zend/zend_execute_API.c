@@ -210,6 +210,28 @@ void shutdown_executor(TSRMLS_D)
 
 		zend_hash_destroy(&EG(symbol_table));
 	} zend_end_try();
+
+	zend_try {
+		zval *zeh;
+		/* remove error handlers before destroying classes and functions,
+		   so that if handler used some class, crash would not happen */
+		if (EG(user_error_handler)) {
+			zeh = EG(user_error_handler);
+			EG(user_error_handler) = NULL;
+			zval_dtor(zeh);
+			FREE_ZVAL(zeh);
+		}
+
+		if (EG(user_exception_handler)) {
+			zeh = EG(user_exception_handler);
+			EG(user_exception_handler) = NULL;
+			zval_dtor(zeh);
+			FREE_ZVAL(zeh);
+		}
+
+		zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
+		zend_ptr_stack_clean(&EG(user_exception_handlers), ZVAL_DESTRUCTOR, 1);
+	} zend_end_try();
 	
 	zend_try {
 		/* Cleanup static data for functions and arrays.
@@ -264,22 +286,8 @@ void shutdown_executor(TSRMLS_D)
 
 		zend_hash_destroy(&EG(included_files));
 
-		if (EG(user_error_handler)) {
-			zval_dtor(EG(user_error_handler));
-			FREE_ZVAL(EG(user_error_handler));
-		}
-
-		if (EG(user_exception_handler)) {
-			zval_dtor(EG(user_exception_handler));
-			FREE_ZVAL(EG(user_exception_handler));
-		}
-
-		zend_ptr_stack_clean(&EG(user_error_handlers), ZVAL_DESTRUCTOR, 1);
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
-
-		zend_ptr_stack_clean(&EG(user_exception_handlers), ZVAL_DESTRUCTOR, 1);
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
-
 		zend_objects_store_destroy(&EG(objects_store));
 	} zend_end_try();
 }
