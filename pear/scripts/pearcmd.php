@@ -270,7 +270,7 @@ function cmdHelp($command)
             return "$progname $command [options] $help[0]\n$help[1]";
         }
     }
-    return "No such command";
+    return "Command '$command' is not valid, try 'pear help'";
 }
 
 // }}}
