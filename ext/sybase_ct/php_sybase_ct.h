@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2003 The PHP Group                                |
+   | Copyright (c) 1997-2004 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,6 +65,7 @@ ZEND_BEGIN_MODULE_GLOBALS(sybase)
 	long default_link;
 	long num_links,num_persistent;
 	long max_links,max_persistent;
+	long login_timeout;
 	long allow_persistent;
 	char *appname;
 	char *hostname;
@@ -83,6 +84,7 @@ typedef struct {
 	int dead;
 	int active_result_index;
 	long affected_rows;
+	zval *callback_name;
 } sybase_link;
 
 #define SYBASE_ROWS_BLOCK 128
