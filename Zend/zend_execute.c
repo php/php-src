@@ -1413,6 +1413,7 @@ do_fcall_common:
 
 							zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), NULL, sizeof(zval *), (void **) &this_ptr);
 							*this_ptr = object_ptr;
+							object_ptr->EA.is_ref=1;
 							object_ptr->refcount++;
 							object_ptr = NULL;
 						}
