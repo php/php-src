@@ -6,6 +6,7 @@ STD='make -f Makefile.am LEX=flex YACC="bison -y" srcdir=.'
 
 files="Makefile ext/standard/Makefile"
 sh build/fastgen.sh . yes $files
+touch .deps ext/standard/libs.mk
 
 cat > config_vars.mk <<EOF
 LEX=flex
@@ -15,6 +16,6 @@ EOF
 make configuration-parser.c configuration-scanner.c
 (cd ext/standard && make parsedate.c)
 
-rm config_vars.mk $files
+rm config_vars.mk .deps ext/standard/libs.mk $files
 
 	
