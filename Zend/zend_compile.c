@@ -172,7 +172,7 @@ ZEND_API zend_bool zend_is_compiling()
 }
 
 
-static int get_temporary_variable(zend_op_array *op_array)
+static zend_uint get_temporary_variable(zend_op_array *op_array)
 {
 	return (op_array->T)++;
 }
