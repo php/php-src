@@ -421,8 +421,8 @@ ftp_chdir(ftpbuf_t *ftp, const char *dir)
 {
 	if (ftp == NULL)
 		return 0;
-
-	efree(ftp->pwd);
+	if (ftp->pwd)
+		efree(ftp->pwd);
 	ftp->pwd = NULL;
 
 	if (!ftp_putcmd(ftp, "CWD", dir))
@@ -442,7 +442,8 @@ ftp_cdup(ftpbuf_t *ftp)
 	if (ftp == NULL)
 		return 0;
 
-	efree(ftp->pwd);
+	if (ftp->pwd)
+		efree(ftp->pwd);
 	ftp->pwd = NULL;
 
 	if (!ftp_putcmd(ftp, "CDUP", NULL))
