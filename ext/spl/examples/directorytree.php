@@ -11,8 +11,8 @@
 
 $length = $argc > 3 ? $argv[3] : NULL;
 
-foreach(new RecursiveIteratorIterator(new DirectoryTreeIterator($argv[1])) as $pathname => $file) {
-	echo "$pathname\n";
+foreach(new LimitIterator(new DirectoryTreeIterator($argv[1]), @$argv[2], $length) as $pathname => $file) {
+	echo "$file\n";
 }
 
 ?>
