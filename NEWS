@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . "mail.force_extra_paramaters". (Derick)
 
 - Improved streams support: (Wez)
+  . Added context property to userspace streams object. (sara)
   . stream_socket_client() - similar to fsockopen(), but more powerful. 
   . stream_socket_server() - Creates a server socket. 
   . stream_socket_accept() - Accept a client connection.
