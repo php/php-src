@@ -2716,8 +2716,8 @@ PHP_FUNCTION(imap_bodystruct)
 	}
 	
 	body=mail_body(imap_le_struct->imap_stream, Z_LVAL_PP(msg), Z_STRVAL_PP(section));
-	if (Z_TYPE_P(body) <= TYPEMAX) {
-		add_property_long(return_value, "type", Z_TYPE_P(body));
+	if (body->type <= TYPEMAX) {
+		add_property_long(return_value, "type", body->type);
 	}
 	if (body->encoding <= ENCMAX) {
 		add_property_long(return_value, "encoding", body->encoding);
@@ -2751,9 +2751,9 @@ PHP_FUNCTION(imap_bodystruct)
 		add_property_long(return_value, "bytes", body->size.bytes);
 	}
 #ifdef IMAP41
-	if (Z_TYPE(body->disposition)) {
+	if (body->disposition.type) {
 		add_property_long(return_value, "ifdisposition", 1);
-		add_property_string(return_value, "disposition", Z_TYPE(body->disposition), 1);
+		add_property_string(return_value, "disposition", body->disposition.type, 1);
 	} else {
 		add_property_long(return_value, "ifdisposition", 0);
 	}
@@ -2985,7 +2985,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 		if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
-			Z_TYPE_P(bod) = (short) Z_LVAL_PP(pvalue);
+			bod->type = (short) Z_LVAL_PP(pvalue);
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "encoding", sizeof("encoding"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
@@ -3013,8 +3013,8 @@ PHP_FUNCTION(imap_mail_compose)
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 			convert_to_string_ex(pvalue);
-			Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-			memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+			bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+			memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 			if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3071,7 +3071,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 			if (zend_hash_find(Z_ARRVAL_PP(data), "type", sizeof("type"), (void **) &pvalue)== SUCCESS) {
 				convert_to_long_ex(pvalue);
-				Z_TYPE_P(bod) = (short) Z_LVAL_PP(pvalue);
+				bod->type = (short) Z_LVAL_PP(pvalue);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "encoding", sizeof("encoding"), (void **) &pvalue)== SUCCESS) {
 				convert_to_long_ex(pvalue);
@@ -3099,8 +3099,8 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition.type", sizeof("disposition.type"), (void **) &pvalue)== SUCCESS) {
 				convert_to_string_ex(pvalue);
-				Z_TYPE(bod->disposition) = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
-				memcpy(Z_TYPE(bod->disposition), Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
+				bod->disposition.type = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
+				memcpy(bod->disposition.type, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "disposition", sizeof("disposition"), (void **) &pvalue)== SUCCESS) {
 				if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
@@ -3166,7 +3166,7 @@ PHP_FUNCTION(imap_mail_compose)
 
 	bod = topbod;
 
-	if (bod && Z_TYPE_P(bod) == TYPEMULTIPART) {	
+	if (bod && bod->type == TYPEMULTIPART) {	
 
 		/* first body part */
 			part = bod->nested.part;	
@@ -3712,8 +3712,8 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	PARAMETER *par, *dpar;
 	PART *part;
 	
-	if (Z_TYPE_P(body) <= TYPEMAX) {
-		add_property_long(arg, "type", Z_TYPE_P(body));
+	if (body->type <= TYPEMAX) {
+		add_property_long(arg, "type", body->type);
 	}
 
 	if (body->encoding <= ENCMAX) {
@@ -3750,9 +3750,9 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 
 #ifdef IMAP41
-	if (Z_TYPE(body->disposition)) {
+	if (body->disposition.type) {
 		add_property_long(arg, "ifdisposition", 1);
-		add_property_string(arg, "disposition", Z_TYPE(body->disposition), 1);
+		add_property_string(arg, "disposition", body->disposition.type, 1);
 	} else {
 		add_property_long(arg, "ifdisposition", 0);
 	}
@@ -3800,7 +3800,7 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	add_assoc_object(arg, "parameters", parametres);
 
 	/* multipart message ? */
-	if (Z_TYPE_P(body) == TYPEMULTIPART) {
+	if (body->type == TYPEMULTIPART) {
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
 		for (part = body->CONTENT_PART; part; part = part->next) {
@@ -3813,7 +3813,7 @@ void _php_imap_add_body(zval *arg, BODY *body TSRMLS_DC)
 	}
 	
 	/* encapsulated message ? */
-	if ((Z_TYPE_P(body) == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
+	if ((body->type == TYPEMESSAGE) && (!strcasecmp(body->subtype, "rfc822"))) {
 		body = body->CONTENT_MSG_BODY;
 		MAKE_STD_ZVAL(parametres);
 		array_init(parametres);
