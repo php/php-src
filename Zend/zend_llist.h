@@ -38,7 +38,8 @@ typedef void (*llist_apply_func_t)(void * TSRMLS_DC);
 typedef struct _zend_llist {
 	zend_llist_element *head;
 	zend_llist_element *tail;
-	size_t size;
+    size_t count;
+    size_t size;
 	llist_dtor_func_t dtor;
 	unsigned char persistent;
 	zend_llist_element *traverse_ptr;
