@@ -29,11 +29,6 @@
 #if HAVE_ASPELL
 
 #include "php_aspell.h"
-#if APACHE
-#  ifndef DEBUG
-#  undef palloc
-#  endif
-#endif
 #include <aspell-c.h>
 
 function_entry aspell_functions[] = {

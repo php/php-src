@@ -145,27 +145,8 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 
 		
 			if (type == 1) {
-#if APACHE
-				SLS_FETCH();
-#endif
-				
 				if (output) PUTS(buf);
-#if APACHE
-#  if MODULE_MAGIC_NUMBER > 19970110
-				if (output) rflush(((request_rec *) SG(server_context)));
-#  else
-				if (output) bflush(((request_rec *) SG(server_context))->connection->client);
-#  endif
-#endif
-#if CGI_BINARY
-				fflush(stdout);
-#endif
-#if FHTTPD
-                               /* fhttpd doesn't flush */
-#endif
-#if USE_SAPI
-				sapi_rqst->flush(sapi_rqst->scid);
-#endif
+				sapi_flush();
 			}
 			else if (type == 2) {
 				/* strip trailing whitespaces */	

@@ -664,7 +664,7 @@ PHP_FUNCTION(sleep)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(num);
-	sleep((*num)->value.lval);
+	php_sleep((*num)->value.lval);
 }
 
 PHP_FUNCTION(usleep)

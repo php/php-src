@@ -28,12 +28,6 @@
 #include "php_mail.h"
 #include "php_ini.h"
 
-#if APACHE
-#  ifndef DEBUG
-#  undef palloc
-#  endif
-#endif
-
 #if HAVE_SENDMAIL
 #if MSVC5
 #include "win32/sendmail.h"

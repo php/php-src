@@ -30,8 +30,6 @@
 
 #define YYDEBUG 0
 
-#define CGI_BINARY (!APACHE && !USE_SAPI && !FHTTPD)
-
 #include "php_version.h"
 #include "zend.h"
 
@@ -89,6 +87,8 @@ extern unsigned char second_arg_allow_ref[];
 #define inline
 #endif
 
+#define APACHE 0
+#define CGI_BINARY 0
 
 #if HAVE_UNIX_H
 #include <unix.h>
@@ -115,19 +115,6 @@ typedef unsigned int socklen_t;
 #endif
 
 #include "request_info.h"
-
-#if HAVE_LIBDL
-# if MSVC5
-#  include <windows.h>
-#  define dlclose FreeLibrary
-#  define dlopen(a,b) LoadLibrary(a)
-#  define dlsym GetProcAddress
-# else
-#if HAVE_DLFCN_H && !((defined(_AIX) || defined(AIX)) && APACHE)
-#  include <dlfcn.h>
-#endif
-# endif
-#endif
 
 #define CREATE_MUTEX(a,b)
 #define SET_MUTEX(a)
@@ -180,35 +167,6 @@ extern char *strerror(int);
 
 #include "fopen-wrappers.h"
 
-#if APACHE /* apache httpd */
-# if HAVE_AP_CONFIG_H
-#include "ap_config_auto.h"
-#ifdef RHAPSODY
-#undef HAVE_SNPRINTF
-#endif
-#include "ap_config.h"
-#ifdef RHAPSODY
-#undef HAVE_SNPRINTF
-#define HAVE_SNPRINTF 1
-#endif
-# endif
-# if HAVE_OLD_COMPAT_H
-#include "compat.h"
-# endif
-# if HAVE_AP_COMPAT_H
-#include "ap_compat.h"
-# endif
-#include "httpd.h"
-#include "http_main.h"
-#include "http_core.h"
-#include "http_request.h"
-#include "http_protocol.h"
-#include "http_config.h"
-#include "http_log.h"
-#define BLOCK_INTERRUPTIONS block_alarms
-#define UNBLOCK_INTERRUPTIONS unblock_alarms
-#endif
-
 #if REGEX == 1 || REGEX == 0
 #include "regex/regex_extra.h"
 #endif
@@ -221,10 +179,6 @@ extern char *strerror(int);
 #include <pwd.h>
 #include <sys/param.h>
 # endif
-#endif
-#if CGI_BINARY /* CGI version */
-#define BLOCK_INTERRUPTIONS		NULL
-#define UNBLOCK_INTERRUPTIONS	NULL
 #endif
 
 #if HAVE_LIMITS_H
@@ -292,6 +246,7 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 extern pval *data;
 #if !(PHP_WIN32)
 extern char **environ;
+#define php_sleep sleep
 #endif
 
 extern void phperror(char *error);

@@ -16,17 +16,17 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef _PHP3_SNPRINTF_H
-#define _PHP3_SNPRINTF_H
+#ifndef _PHP_SNPRINTF_H
+#define _PHP_SNPRINTF_H
 
 #ifndef HAVE_SNPRINTF
-extern int ap_snprintf(char *, size_t, const char *, ...);
-#define snprintf ap_snprintf
+extern int ap_php_snprintf(char *, size_t, const char *, ...);
+#define snprintf ap_php_snprintf
 #endif
 
 #ifndef HAVE_VSNPRINTF
-extern int ap_vsnprintf(char *, size_t, const char *, va_list ap);
-#define vsnprintf ap_vsnprintf
+extern int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
+#define vsnprintf ap_php_vsnprintf
 #endif
 
 #if BROKEN_SPRINTF
@@ -35,7 +35,7 @@ int php_sprintf (char* s, const char* format, ...);
 #define php_sprintf sprintf
 #endif
 
-#endif /* _PHP3_SNPRINTF_H */
+#endif /* _PHP_SNPRINTF_H */
 
 /*
  * Local variables:

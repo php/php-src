@@ -1642,7 +1642,7 @@ oci_failover_callback(dvoid *svchp,
 		case OCI_FO_ERROR:
 			{
 				printf(" Failover error gotten. Sleeping...\n");
-				sleep(3);
+				php_sleep(3);
 				/* cannot find this blody define !!! return OCI_FO_RETRY; */
 				break;
 			}

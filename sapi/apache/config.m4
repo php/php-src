@@ -36,7 +36,6 @@ AC_ARG_WITH(apxs,
 		PHP_APXS_BROKEN=yes
 	fi
 	STRONGHOLD=
-	AC_DEFINE(APACHE)
 	AC_DEFINE(HAVE_AP_CONFIG_H)
 	AC_DEFINE(HAVE_AP_COMPAT_H)
 	AC_MSG_RESULT(yes)
@@ -66,7 +65,6 @@ AC_ARG_WITH(apache,
 			PHP_SAPI=apache
 			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_INSTALL_FILES $APACHE_TARGET"
 			PHP_LIBS="-L. -lphp3"
-			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.2.x)
 			STRONGHOLD=
 			if test -f $withval/src/ap_config.h; then
@@ -84,7 +82,6 @@ AC_ARG_WITH(apache,
 			PHP_SAPI=apache
 			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 2.0.X)
 			STRONGHOLD=
 			if test -f $withval/src/include/ap_config.h; then
@@ -111,7 +108,6 @@ AC_ARG_WITH(apache,
 			PHP_SAPI=apache
 			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
-			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.3.x)
 			STRONGHOLD=
 			if test -f $withval/src/include/ap_config.h; then
@@ -141,7 +137,6 @@ AC_ARG_WITH(apache,
 			PHP_SAPI=apache
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET; cp $srcdir/sapi/apache/apMakefile.tmpl $APACHE_TARGET/Makefile.tmpl; cp $srcdir/sapi/apache/apMakefile.libdir $APACHE_TARGET/Makefile.libdir"
-			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - Apache 1.3.x)
 			STRONGHOLD=
 			if test -f $withval/src/include/ap_config.h; then
@@ -165,7 +160,6 @@ AC_ARG_WITH(apache,
 			PHP_LIBS="-Lmodules/php4 -L../modules/php4 -L../../modules/php4 -lmodphp4"
 			APACHE_INSTALL="mkdir -p $APACHE_TARGET; cp $SAPI_STATIC $APACHE_TARGET/libmodphp4.a; cp $APACHE_INSTALL_FILES $APACHE_TARGET"
 			STRONGHOLD=-DSTRONGHOLD=1
-			AC_DEFINE(APACHE)
 			AC_MSG_RESULT(yes - StrongHold)
 			if test -f $withval/apache/ap_config.h; then
 				AC_DEFINE(HAVE_AP_CONFIG_H)

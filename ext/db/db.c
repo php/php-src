@@ -317,7 +317,7 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 #if NFS_HACK 
 		while((last_try = stat(lockfn,&sb))==0) {
 			retries++;
-			sleep(1);
+			php_sleep(1);
 			if (retries>30) break;
 		}	
 		if (last_try!=0) {

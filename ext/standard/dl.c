@@ -104,7 +104,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	}
 
 	/* load dynamic symbol */
-	handle = dlopen(libpath, RTLD_LAZY);
+	handle = DL_LOAD(libpath);
 	if (!handle) {
 		int error_type;
 
@@ -120,10 +120,10 @@ void php_dl(pval *file,int type,pval *return_value)
 #endif
 		RETURN_FALSE;
 	}
-	get_module = (zend_module_entry *(*)(void)) dlsym(handle, "get_module");
+	get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "get_module");
 	
 	if (!get_module) {
-		dlclose(handle);
+		DL_UNLOAD(handle);
 		php_error(E_CORE_WARNING,"Invalid library (maybe not a PHP library) '%s' ",file->value.str.val);
 		RETURN_FALSE;
 	}
@@ -133,7 +133,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	if (module_entry->module_startup_func) {
 		if (module_entry->module_startup_func(type, module_entry->module_number ELS_CC)==FAILURE) {
 			php_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
-			dlclose(handle);
+			DL_UNLOAD(handle);
 			RETURN_FALSE;
 		}
 	}
@@ -143,7 +143,7 @@ void php_dl(pval *file,int type,pval *return_value)
 	if (module_entry->request_startup_func) {
 		if (module_entry->request_startup_func(type, module_entry->module_number ELS_CC)) {
 			php_error(E_CORE_WARNING,"%s:  Unable to initialize module",module_entry->name);
-			dlclose(handle);
+			DL_UNLOAD(handle);
 			RETURN_FALSE;
 		}
 	}

@@ -1503,8 +1503,7 @@ PHP_FUNCTION(stripslashes)
 /* }}} */
 
 #ifndef HAVE_STRERROR
-#if !APACHE
-char *strerror(int errnum) 
+char *php_strerror(int errnum) 
 {
 	extern int sys_nerr;
 	extern char *sys_errlist[];
@@ -1514,7 +1513,6 @@ char *strerror(int errnum)
 	(void)sprintf(BG(str_ebuf), "Unknown error: %d", errnum);
 	return(BG(str_ebuf));
 }
-#endif
 #endif
 
 PHPAPI void php_stripcslashes(char *str, int *len)

@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <ctype.h>
 
-#if APACHE
+#include "remains.h"
 #include "http_request.h"
 #include "build-defs.h"
 
@@ -438,8 +438,6 @@ PHP_FUNCTION(apache_exec_uri)
 	RETVAL_LONG(ap_run_sub_req(rr));
 	ap_destroy_sub_req(rr);
 }
-#endif
-
 #endif
 
 /*

@@ -74,9 +74,6 @@
 /* Define if you have the sendmail program available */
 #define HAVE_SENDMAIL 0
 
-/* Define if you are compiling PHP as an Apache module */
-#define APACHE 0
-
 /* Define if you are compiling PHP as an Apache module with mod_charset patch applied (aka Russian Apache)*/
 #define USE_TRANSFER_TABLES 0
 

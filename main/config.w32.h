@@ -97,8 +97,6 @@
    will move to the "don't touch" list below eventualy.
    ---------------------------------------------------------------*/
 
-/*#define APACHE 0 defined in preprocessor section*/
-
 
 /* ----------------------------------------------------------------
    The following should never need to be played with

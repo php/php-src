@@ -25,9 +25,7 @@ typedef char * caddr_t;
 #define mkdir(a,b)	_mkdir(a)
 #define rmdir		_rmdir
 #define getpid		_getpid
-#if !(APACHE)
-#define sleep(t)	Sleep(t*1000)
-#endif
+#define php_sleep(t)	Sleep(t*1000)
 #define getcwd		_getcwd
 #define snprintf	_snprintf
 #define off_t		_off_t
