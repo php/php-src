@@ -107,7 +107,8 @@ case "$host_alias" in
 *bsdi*)
     BSD_MAKEFILE=yes;;
 *beos*)
-	LIBS="$LIBS -lbe -lroot"
+	beos_threads=1
+	LIBS="$LIBS -lbe -lroot";;
 esac
 
 AM_PROG_CC_STDC
@@ -253,7 +254,9 @@ AC_CHECK_LIB(bind, inet_aton, [
   AC_ADD_LIBRARY(bind)
   AC_DEFINE(HAVE_LIBBIND,1,[Whether you have bind]) ], [
     AC_CHECK_LIB(resolv, inet_aton)
-  ]) 
+  ])
+AC_CHECK_LIB(bind, __inet_aton)
+
 
 dnl The res_search may be in libsocket as well, and if it is
 dnl make sure to check for dn_skipname in libresolv, or if res_search
