@@ -1,3 +1,6 @@
+Please send e-mail to yohgaki@php.net if you have comments for 
+pgsql module. I appreciate your feedback.
+
 ==== Note For PostgreSQL 7.2 beta ====
 Current CVS version (probably 4.0.6 or later) compiles without
 modefication.
