@@ -217,7 +217,6 @@ function cmdHelp($command)
         "     -h, -?     display help/usage (this message)\n";
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {
-            $help = preg_replace('/{config\s+([^\}]+)}/e', "\$config->get('\1')", $help);
             return "Usage : $help";
         }
         return "Usage : $progname $command {$help[0]}\n{$help[1]}";
