@@ -510,42 +510,7 @@ PHP_FUNCTION(exp)
 }
 
 /* }}} */
-/* {{{ proto double exp2(double number)
-   Returns 2 raised to the power of the number */
 
-PHP_FUNCTION(exp2)
-{
-	zval **num;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_double_ex(num);
-	// libc function is broken in RH Linux 6.1, glibc 2.1.3
-	//Z_DVAL_P(return_value) = exp2(Z_DVAL_PP(num));
-	Z_DVAL_P(return_value) = pow(2.0, Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
-}
-
-/* }}} */
-/* {{{ proto double exp10(double number)
-   Returns 10 raised to the power of the number */
-
-PHP_FUNCTION(exp10)
-{
-	zval **num;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_double_ex(num);
-	// libc function is broken in RH Linux 6.1, glibc 2.1.3
-	//Z_DVAL_P(return_value) = exp10(Z_DVAL_PP(num));
-	Z_DVAL_P(return_value) = pow(10.0, Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
-}
-
-/* }}} */
 
 #ifndef PHP_WIN32
 /* {{{ proto double expm1(double number)
@@ -596,24 +561,6 @@ PHP_FUNCTION(log)
 	}
 	convert_to_double_ex(num);
 	Z_DVAL_P(return_value) = log(Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
-}
-
-/* }}} */
-/* {{{ proto double log2(double number)
-   Returns the base-2 logarithm of the number */
-
-PHP_FUNCTION(log2)
-{
-	zval **num;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_double_ex(num);
-	// libc function is broken in RH Linux 6.1, glibc 2.1.3
-	//Z_DVAL_P(return_value) = log2(Z_DVAL_PP(num));
-	Z_DVAL_P(return_value) = log(Z_DVAL_PP(num))/log(2.0);
 	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
