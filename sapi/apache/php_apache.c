@@ -52,7 +52,7 @@
 #include "build-defs.h"
 #endif
 
-#define SECTION(name)  PUTS("<H2>" name "</H2>\n")
+#define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
 extern module *top_module;
 
