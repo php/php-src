@@ -1,5 +1,5 @@
 --TEST--
-Do not call destructors if constructor fails
+ZE2 Do not call destructors if constructor fails
 --FILE--
 <?php
 
