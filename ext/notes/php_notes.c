@@ -1912,14 +1912,14 @@ PHP_FUNCTION(notes_search)
    pNoteID = (NOTEID *) (((char *) pSearchResults)
            + sizeof(FT_SEARCH_RESULTS));
    
-   //pSearchResults->NumHits
+   /* pSearchResults->NumHits */
    array_init(return_value);
 
    pScores = (BYTE *) (pNoteID + pSearchResults->NumHits);
    for (i = 0; i < pSearchResults->NumHits; i++, pNoteID++, pScores++){
 
 	    add_next_index_long(return_value, (long) *pNoteID );
-		//RETVAL_LONG( (long) *pNoteID );
+		/* RETVAL_LONG( (long) *pNoteID ); */
    }
 
    OSUnlockObject (SearchResults_handle);

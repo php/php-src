@@ -1849,7 +1849,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 			obj = obj_prop;
 			php_COM_set(obj, &V_DISPATCH(var_result), TRUE TSRMLS_CC);
-			VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
+			VariantInit(var_result);	/* to protect C_DISPATCH(obj) from being freed when var_result is destructed */
 		} else {
 			php_variant_to_pval(var_result, &retval, codepage TSRMLS_CC);
 
@@ -1934,7 +1934,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 			return FAILURE;
 		}
 
-		VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
+		VariantInit(var_result);	/* to protect C_DISPATCH(obj) from being freed when var_result is destructed */
 		zval_dtor(&overloaded_property->element);
 	}
 	FREE_VARIANT(var_result);

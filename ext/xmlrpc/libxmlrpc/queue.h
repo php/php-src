@@ -76,8 +76,8 @@ q_iter Q_Iter_Tail(queue *q);
 q_iter Q_Iter_Next(q_iter qi);
 q_iter Q_Iter_Prev(q_iter qi);
 void*  Q_Iter_Get(q_iter qi);
-int    Q_Iter_Put(q_iter qi, void* data); // not read only! here for completeness.
-void*  Q_Iter_Del(queue *q, q_iter iter); // not read only! here for completeness.
+int    Q_Iter_Put(q_iter qi, void* data); /* not read only! here for completeness. */
+void*  Q_Iter_Del(queue *q, q_iter iter); /* not read only! here for completeness. */
 
 /* Fast (macro'd) versions of above */
 #define Q_Iter_Head_F(q) (q ? (q_iter)((queue*)q)->head : NULL)

@@ -119,7 +119,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, VARTYPE ty
 			var_arg = V_VARIANTREF(var_arg);		/* put the array in that VARIANT */
 		}
 		if (!type) {
-			// if no type is given we take the variant type
+			/* if no type is given we take the variant type */
 			type = VT_VARIANT;
 		}
 
