@@ -1148,7 +1148,7 @@ void WriteJpegFile(char *FileName, Section_t *Sections, int *SectionsRead, int *
 }
 #endif
 
-PHPAPI int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll) {
+int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll) {
 	Section_t Sections[20];
 	int SectionsRead;
 	char *LastExifRefd=NULL;
