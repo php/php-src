@@ -2,8 +2,8 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 26 Jun 2003, Version 4.3.3RC2
 - Upgraded the bundled PCRE library to version 4.3. (Andrei)
-- Added a new parameter to preg_match* that can be used to specify the starting
-  offset in the subject string to match from. (Andrei)
+- Added a new parameter to preg_match*() that can be used to specify 
+  the starting offset in the subject string to match from. (Andrei)
 - Fixed FastCGI IIS document root problem. (Shane)
 - Fixed corruption of multibyte character including 0x5c as second
   byte in multipart/form-data. (Rui)
