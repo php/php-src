@@ -232,6 +232,7 @@ function_entry file_functions[] = {
 	PHP_FE(rename,				NULL)
 	PHP_FE(copy,				NULL)
 	PHP_FE(tempnam,				NULL)
+	PHP_FE(tmpfile,				NULL)
 	PHP_FE(file,				NULL)
 	PHP_FE(fgetcsv,				NULL)
     PHP_FE(flock,				NULL)
@@ -591,6 +592,23 @@ PHP_FUNCTION(tempnam)
 }
 
 /* }}} */
+/* {{{ proto int tmpfile()
+   Create a temporary file that will be deleted automatically after use. */
+PHP_FUNCTION(tmpfile)
+{
+	FILE *fp;
+	if (ARG_COUNT(ht) != 0) {
+		WRONG_PARAM_COUNT;
+	}
+	fp = tmpfile();
+	if (fp == NULL) {
+		php_error(E_WARNING, "tmpfile: %s", strerror(errno));
+		RETURN_FALSE;
+	}
+	ZEND_REGISTER_RESOURCE(return_value, fp, le_fopen);
+}
+/* }}} */
+
 /* {{{ proto int fopen(string filename, string mode [, int use_include_path])
    Open a file or a URL and return a file pointer */
 

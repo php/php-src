@@ -40,6 +40,7 @@ extern zend_module_entry file_module_entry;
 extern PHP_MINIT_FUNCTION(file);
 
 PHP_FUNCTION(tempnam);
+PHP_FUNCTION(tmpfile);
 PHP_FUNCTION(fopen);
 PHP_FUNCTION(fclose);
 PHP_FUNCTION(popen);
