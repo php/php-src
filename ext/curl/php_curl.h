@@ -113,6 +113,7 @@ struct _php_curl_free {
 typedef struct {
 	struct _php_curl_error   err;
 	struct _php_curl_free    to_free;
+	void ***thread_ctx;
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
 	long                     id;
