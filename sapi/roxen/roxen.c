@@ -335,11 +335,12 @@ php_roxen_sapi_header_handler(sapi_header_struct *sapi_header,
   header_name = sapi_header->header;
   header_content = p = strchr(header_name, ':');
   
-  if(!p) return 0;
+  if(p) {
   do {
     header_content++;
   } while(*header_content == ' ');
-  THREAD_SAFE_RUN(php_roxen_set_header(header_name, header_content, p), "header handler");
+    THREAD_SAFE_RUN(php_roxen_set_header(header_name, header_content, p), "header handler");
+  }
   sapi_free_header(sapi_header);
   return 0;
 }
@@ -409,7 +410,6 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
     zend_bailout();
     return -1;
   }
-
   push_int(count_bytes);
   safe_apply(MY_FD_OBJ, "read_post", 1);
   if(Pike_sp[-1].type == PIKE_T_STRING) {
@@ -417,7 +417,7 @@ INLINE static int php_roxen_low_read_post(char *buf, uint count_bytes)
            (total_read = Pike_sp[-1].u.string->len));
     buf[total_read] = '\0';
   } else
-    total_read = -1;
+    total_read = 0;
   pop_stack();
   return total_read;
 }
@@ -492,32 +492,24 @@ static int php_roxen_startup(sapi_module_struct *sapi_module)
 
 static sapi_module_struct sapi_module = {
   "Roxen",
-
-  php_module_startup,						/* startup */
-  php_module_shutdown_wrapper,				/* shutdown */
-
-  NULL,										/* activate */
-  NULL,										/* deactivate */
-
-  php_roxen_sapi_ub_write,					/* unbuffered write */
-  NULL,										/* flush */
-  NULL,										/* get uid */
-  NULL,										/* getenv */
-
-  php_error,								/* error handler */
-
-  php_roxen_sapi_header_handler,			/* header handler */
-  php_roxen_sapi_send_headers,				/* send headers handler */
-  NULL,										/* send header handler */
-
-  php_roxen_sapi_read_post,					/* read POST data */
-  php_roxen_sapi_read_cookies,				/* read Cookies */
-
-  NULL,										/* register server variables */
-  NULL,										/* Log message */
-
-  NULL,										/* Block interruptions */
-  NULL,										/* Unblock interruptions */
+  php_module_startup,			/* startup */
+  php_module_shutdown_wrapper,		/* shutdown */
+  NULL,					/* activate */
+  NULL,					/* deactivate */
+  php_roxen_sapi_ub_write,		/* unbuffered write */
+  NULL,					/* flush */
+  NULL,					/* get uid */
+  NULL,					/* getenv */
+  php_error,				/* error handler */
+  php_roxen_sapi_header_handler,	/* header handler */
+  php_roxen_sapi_send_headers,		/* send headers handler */
+  NULL,					/* send header handler */
+  php_roxen_sapi_read_post,		/* read POST data */
+  php_roxen_sapi_read_cookies,		/* read Cookies */
+  NULL,					/* register server variables */
+  NULL,					/* Log message */
+  NULL,					/* Block interruptions */
+  NULL,					/* Unblock interruptions */
 
   STANDARD_SAPI_MODULE_PROPERTIES
 };
@@ -588,7 +580,8 @@ php_roxen_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
 
 static int php_roxen_module_main(SLS_D)
 {
-  int res;
+  int res, len;
+  char *dir;
   zend_file_handle file_handle;
 #ifdef ZTS
   CLS_FETCH();
@@ -598,9 +591,25 @@ static int php_roxen_module_main(SLS_D)
   GET_THIS();
 #endif
 #endif
+
+  /* Change virtual directory, if the feature is enabled */
+#ifdef VIRTUAL_DIR
+  dir = malloc(len = strlen(THIS->filename));
+  strcpy(dir, THIS->filename);
+  while(--len >= 0 && dir[len] != '/')
+    ;
+  /* VERY BAD, but should work */
+  if(len > 0) {
+    dir[len] = '\0';
+    PHP_CHDIR(dir);
+  }
+  free(dir);
+#endif
+
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename;
   file_handle.free_filename = 0;
+
   THREADS_ALLOW();
   res = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
   THREADS_DISALLOW();
@@ -633,7 +642,7 @@ void f_php_roxen_request_handler(INT32 args)
 #endif
 
   if(current_thread == th_self())
-    error("PHP4.Interpetor->run: Tried to run a PHP-script from a PHP "
+    error("PHP4.Interpreter->run: Tried to run a PHP-script from a PHP "
 	  "callback!");
   get_all_args("PHP4.Interpreter->run", args, "%S%m%O%*", &script,
 	       &request_data, &my_fd_obj, &done_callback);
@@ -648,17 +657,22 @@ void f_php_roxen_request_handler(INT32 args)
   THIS->my_fd_obj = my_fd_obj;
   THIS->filename = script->str;
   current_thread = th_self();
-  SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);;
+  SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);
   SG(server_context) = (void *)1; /* avoid server_context == NULL */
-  /* path_translated is the absolute path to the file */
+
+  /* path_translated is apparently the absolute path to the file, not
+     the translated PATH_INFO
+  */
   SG(request_info).path_translated =
-    lookup_string_header("PATH_TRANSLATED", NULL);
+    lookup_string_header("SCRIPT_FILENAME", NULL);
   SG(request_info).request_uri = lookup_string_header("DOCUMENT_URI", NULL);
   if(!SG(request_info).request_uri)
     SG(request_info).request_uri = lookup_string_header("SCRIPT_NAME", NULL);
   SG(request_info).request_method = lookup_string_header("REQUEST_METHOD", "GET");
-  SG(request_info).content_length = lookup_integer_header("CONTENT_LENGTH", 0);
-  SG(request_info).content_type = "text/html";
+  SG(request_info).content_length = lookup_integer_header("HTTP_CONTENT_LENGTH", 0);
+  SG(request_info).content_type = lookup_string_header("HTTP_CONTENT_TYPE", NULL);
+  
+  /* FIXME: Check for auth stuff needs to be fixed... */ 
   SG(request_info).auth_user = NULL; 
   SG(request_info).auth_password = NULL;
   
@@ -697,7 +711,7 @@ static void clear_struct(struct object *o)
  * This functions allocates basic structures
  */
 
-void pike_module_init()
+void pike_module_init( void )
 {
   if (!roxen_php_initialized) {
 #ifdef ZTS
