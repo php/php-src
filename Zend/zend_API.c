@@ -1388,6 +1388,8 @@ ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *
 {
 	zend_class_entry *register_class;
 	zend_namespace *orig_namespace = NULL;
+	HashTable *orig_class_table = NULL;
+	int restore_orig = 0;
 
 	if (!ns && ns_name) {
 		zend_namespace **pns;
@@ -1404,16 +1406,18 @@ ZEND_API zend_class_entry *zend_register_internal_class_in_ns(zend_class_entry *
 	}
 
 	if (EG(active_namespace) != ns) {
+		restore_orig = 1;
 		orig_namespace = EG(active_namespace);
 		EG(active_namespace) = ns;
+		orig_class_table = CG(class_table);
 		CG(class_table) = &ns->class_table;
 	}
 	register_class = zend_register_internal_class_ex(class_entry, parent_ce, NULL TSRMLS_CC);
-	if (orig_namespace) {
+	if (restore_orig) {
 		EG(active_namespace) = orig_namespace;
-		CG(class_table) = &orig_namespace->class_table;
+		CG(class_table) = orig_class_table;
 	}
-
+	
 	return register_class;
 }
 
