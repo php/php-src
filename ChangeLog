@@ -1,3 +1,19 @@
+2000-12-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/string.c:
+    - Changed setlocale() to use LC_* constants. 
+
+2000-12-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c: No need for GCC extensions in non-debugging mode.
+
+    PR: #8345
+
+    * configure.in:
+    Some AC_SUBST substitutions were removed which are still needed.
+
+    Submitted by: Andrei Zmievski
+
 2000-12-20  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/Makefile.in: install the Math/* files.
