@@ -6,11 +6,16 @@ AC_DEFUN(PHP_GD_JPEG,[
           if test "$withval" = "yes"; then
             withval="/usr/local"
           fi
-          old_LIBS=$LIBS
+          jold_LIBS=$LIBS
           LIBS="$LIBS -L$withval/lib"
           AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -ljpeg"],[AC_MSG_RESULT(no)],)
-          LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          LIBS=$jold_LIBS
+          if test "$shared" = "yes"; then
+            GD_LIBS="$GD_LIBS -ljpeg"
+            GD_LFLAGS="$GD_LFLAGS -L$withval/lib"
+          else
+            AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          fi
           LIBS="$LIBS -L$withval/lib -ljpeg"
         ],[
           AC_MSG_RESULT(no)
@@ -93,7 +98,7 @@ AC_ARG_WITH(gd,
       AC_DEFINE(HAVE_LIBGD,1,[ ])
       if test "$shared" = "yes"; then
         AC_MSG_RESULT(yes (shared))
-        GD_LIBS="-lgd"
+        GD_LIBS="-lgd $GD_LIBS"
       else
         AC_MSG_RESULT(yes (static))
         AC_ADD_LIBRARY(gd)
@@ -110,6 +115,9 @@ dnl Check the capabilities of GD lib...
       if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
         AC_ADD_LIBRARY(png)
         AC_ADD_LIBRARY(z)
+        if test "$shared" = "yes"; then
+          GD_LIBS="$GD_LIBS -lpng -lz"
+        fi
       fi
 
       ac_cv_lib_gd_gdImageLine=yes
@@ -142,8 +150,8 @@ dnl A whole whack of possible places where this might be
         AC_DEFINE(HAVE_LIBGD,1,[ ])
         if test "$shared" = "yes"; then
           AC_MSG_RESULT(yes (shared))
-          GD_LIBS="-lgd"
-          GD_LFLAGS="-L$GD_LIB"
+          GD_LIBS="-lgd $GD_LIBS"
+          GD_LFLAGS="-L$GD_LIB $GD_LFLAGS"
         else
           AC_MSG_RESULT(yes (static))
           AC_ADD_LIBRARY_WITH_PATH(gd, $GD_LIB)
@@ -160,6 +168,9 @@ dnl Check the capabilities of GD lib...
         if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
           AC_ADD_LIBRARY(z)
           AC_ADD_LIBRARY(png)
+          if test "$shared" = "yes"; then
+            GD_LIBS="$GD_LIBS -lpng -lz"
+          fi
         fi
 
         ac_cv_lib_gd_gdImageLine=yes
@@ -222,18 +233,30 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
       if test "$withval" = "yes"; then
         for i in /usr/local /usr; do
           if test -f "$i/include/t1lib.h"; then
-            AC_ADD_LIBRARY_WITH_PATH(t1, "$i/lib")
-            AC_ADD_INCLUDE("$i/include")
+            T1_DIR="$i"
           fi
         done
       else
         if test -f "$withval/include/t1lib.h"; then
-          AC_ADD_LIBRARY_WITH_PATH(t1, "$withval/lib")
-          AC_ADD_INCLUDE("$withval/include")
+          T1_DIR="$withval"
         fi
       fi
+      
+      told_LIBS="$LIBS"
+      if test "$T1_DIR" != "no"; then
+        AC_ADD_INCLUDE("$T1_DIR/include")
+        if test "$shared" = "yes"; then
+          GD_LIBS="$GD_LIBS -lt1"
+          GD_LFLAGS="$GD_LFLAGS -L$T1_DIR/lib"
+        else
+          AC_ADD_LIBRARY_WITH_PATH(t1, "$T1_DIR/lib")
+        fi
+        LIBS="$LIBS -L$T1_DIR/lib -lt1"
+      fi 
+
       AC_MSG_RESULT(yes)
       AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
+      LIBS="$told_LIBS"
     else
       AC_MSG_RESULT(no)
     fi
