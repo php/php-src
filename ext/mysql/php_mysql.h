@@ -81,11 +81,14 @@ PHP_FUNCTION(mysql_field_len);
 PHP_FUNCTION(mysql_field_type);
 PHP_FUNCTION(mysql_field_flags);
 PHP_FUNCTION(mysql_escape_string);
+PHP_FUNCTION(mysql_real_escape_string);
 PHP_FUNCTION(mysql_get_client_info);
 PHP_FUNCTION(mysql_get_host_info);
 PHP_FUNCTION(mysql_get_proto_info);
 PHP_FUNCTION(mysql_get_server_info);
 PHP_FUNCTION(mysql_stat);
+PHP_FUNCTION(mysql_thread_id);
+PHP_FUNCTION(mysql_character_set_name);
 
 ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long default_link;

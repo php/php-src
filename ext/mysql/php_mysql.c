@@ -154,13 +154,16 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_field_len,								NULL)
 	PHP_FE(mysql_field_type,							NULL)
 	PHP_FE(mysql_field_flags,							NULL)
-	PHP_FE(mysql_escape_string,						NULL)
-  PHP_FE(mysql_stat,										NULL)
+	PHP_FE(mysql_escape_string,							NULL)
+	PHP_FE(mysql_real_escape_string,					NULL)
+	PHP_FE(mysql_stat,									NULL)
+	PHP_FE(mysql_thread_id,								NULL)
+	PHP_FE(mysql_character_set_name,					NULL)
 #ifdef HAVE_GETINFO_FUNCS
-	PHP_FE(mysql_get_client_info,							NULL)
+	PHP_FE(mysql_get_client_info,						NULL)
 	PHP_FE(mysql_get_host_info,							NULL)
-	PHP_FE(mysql_get_proto_info,							NULL)
-	PHP_FE(mysql_get_server_info,							NULL)
+	PHP_FE(mysql_get_proto_info,						NULL)
+	PHP_FE(mysql_get_server_info,						NULL)
 #endif
 	 
 	/* for downwards compatability */
@@ -193,14 +196,14 @@ function_entry mysql_functions[] = {
 zend_module_entry mysql_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"mysql",
-    mysql_functions,
-    ZEND_MODULE_STARTUP_N(mysql),
-    PHP_MSHUTDOWN(mysql),
-    PHP_RINIT(mysql),
-    PHP_RSHUTDOWN(mysql),
-    PHP_MINFO(mysql),
-    NO_VERSION_YET,
-    STANDARD_MODULE_PROPERTIES
+	mysql_functions,
+	ZEND_MODULE_STARTUP_N(mysql),
+	PHP_MSHUTDOWN(mysql),
+	PHP_RINIT(mysql),
+	PHP_RSHUTDOWN(mysql),
+	PHP_MINFO(mysql),
+	NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
@@ -243,7 +246,7 @@ static void php_mysql_set_default_link(int id TSRMLS_DC)
 static void _close_mysql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link = (php_mysql_conn *)rsrc->ptr;
-	void (*handler) (int);   
+	void (*handler) (int); 
 
 	handler = signal(SIGPIPE, SIG_IGN);
 	mysql_close(&link->conn);
@@ -904,14 +907,12 @@ PHP_FUNCTION(mysql_get_server_info)
 }
 /* }}} */
 
-/* {{{ proto string mysql_stat([int link_identifier])
-   Returns a string containing status information */
-PHP_FUNCTION(mysql_stat)
+/* {{{ proto int mysql_thread_id([int link_identifier])
+	Returns the thread id of current connection */
+PHP_FUNCTION(mysql_thread_id)
 {
-	zval **mysql_link;
-	char *stat;
-	char *key, *val;
-	int id;
+	zval *mysql_link = NULL;
+	int  id = -1;
 	php_mysql_conn *mysql;
 
 	switch(ZEND_NUM_ARGS()) {
@@ -920,7 +921,65 @@ PHP_FUNCTION(mysql_stat)
 			CHECK_LINK(id);
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1,&mysql_link)==FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	RETURN_LONG(mysql_thread_id(&mysql->conn));
+}
+/* }}} */
+
+/* {{{ proto string mysql_stat([int link_identifier])
+	Returns a string containing status information */
+PHP_FUNCTION(mysql_stat)
+{
+	zval *mysql_link = NULL;
+	int id = -1;
+	php_mysql_conn *mysql;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+
+	RETURN_STRING(mysql_stat(&mysql->conn), 1);
+}
+/* }}} */
+
+/* {{{ proto string mysql_character_set_name([int link_identifier])
+	Returns the default character set for the current connection */
+PHP_FUNCTION(mysql_character_set_name)
+{
+	zval *mysql_link;
+	int id = -1;
+	php_mysql_conn *mysql;
+
+	switch(ZEND_NUM_ARGS()) {
+		case 0:
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",&mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -930,18 +989,12 @@ PHP_FUNCTION(mysql_stat)
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	stat = mysql_stat(&mysql->conn);
-
-	// split string in array
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	RETURN_STRING(stat, 1);
+	RETURN_STRING((char *)mysql_character_set_name(&mysql->conn), 1);
 }
 /* }}} */
+
 
 #endif
 
@@ -1291,11 +1344,11 @@ PHP_FUNCTION(mysql_list_fields)
 /* }}} */
 
 /* {{{ proto resource mysql_list_processes([int link_identifier])
-   Returns a result set describing the current server threads */
+	Returns a result set describing the current server threads */
 PHP_FUNCTION(mysql_list_processes)
 {
-	zval **mysql_link;
-	int id;
+	zval *mysql_link;
+	int id = -1;
 	php_mysql_conn *mysql;
 	MYSQL_RES *mysql_result;
 
@@ -1305,17 +1358,16 @@ PHP_FUNCTION(mysql_list_processes)
 			CHECK_LINK(id);
 			break;
 		case 1:
-			if (zend_get_parameters_ex(1, &mysql_link)==FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r",&mysql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
-			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
 			break;
 	}
 
-	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if ((mysql_result=mysql_list_processes(&mysql->conn))==NULL) {
 		php_error(E_WARNING, "Unable to save MySQL query result");
@@ -1455,6 +1507,43 @@ PHP_FUNCTION(mysql_escape_string)
 }
 /* }}} */
 
+/* {{{ proto string mysql_real_escape_string(string to_be_escaped, [int link_identifier])
+	Escape string for mysql_query */
+PHP_FUNCTION(mysql_real_escape_string)
+{
+	zval *mysql_link = NULL;
+	char *str;
+	int id = -1, str_len;
+	php_mysql_conn *mysql;
+	switch(ZEND_NUM_ARGS())
+	{
+		case 1:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",&str, &str_len)==FAILURE) {
+				RETURN_FALSE;
+			}
+			id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+			CHECK_LINK(id);
+			break;
+		case 2:
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sr",&str, &str_len, &mysql_link)==FAILURE) {
+				RETURN_FALSE;
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+
+	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
+	
+	/* the maximum size of the new string is 2x the length of the 
+	 * original string (every chas to be scaped)
+	 */
+	Z_STRVAL_P(return_value) = (char *)emalloc(str_len * 2 + 1);  // one extra byte for '\0'
+	Z_STRLEN_P(return_value) = mysql_real_escape_string(&mysql->conn, Z_STRVAL_P(return_value), str, str_len);
+	Z_TYPE_P(return_value) = IS_STRING;
+}
+/* }}} */
 
 /* {{{ proto int mysql_insert_id([int link_identifier])
    Gets the ID generated from the previous INSERT operation */
