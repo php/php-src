@@ -36,9 +36,7 @@
       <file role="doc">EXPERIMENTAL</file>
       <file role="doc">TODO</file>
       <file role="src">config.m4</file>
-      <file role="src">Makefile</file>
       <file role="src">Makefile.in</file>
-      <file role="src">libs.mk</file>
       <file role="src">php_encoding.c</file>
       <file role="src">php_encoding.h</file>
       <file role="src">php_http.c</file>
