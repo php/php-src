@@ -394,6 +394,7 @@ mkstemp \
 mmap \
 nl_langinfo \
 putenv \
+realpath \
 random \
 rand_r \
 regcomp \
