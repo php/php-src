@@ -2323,6 +2323,7 @@ PHP_FUNCTION(pdf_open_gif) {
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+	char *image;
 	PDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -2338,7 +2339,9 @@ PHP_FUNCTION(pdf_open_gif) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "gif", (*arg2)->value.str.val, "", 0);
+	virtual_filepath((*arg2)->value.str.val, &image);
+
+	pdf_image = PDF_open_image_file(pdf, "gif", image, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2357,6 +2360,7 @@ PHP_FUNCTION(pdf_open_jpeg) {
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+	char *image;
 	PDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -2372,7 +2376,9 @@ PHP_FUNCTION(pdf_open_jpeg) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "jpeg", (*arg2)->value.str.val, "", 0);
+	virtual_filepath((*arg2)->value.str.val, &image);
+
+	pdf_image = PDF_open_image_file(pdf, "jpeg", image, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2391,6 +2397,7 @@ PHP_FUNCTION(pdf_open_png) {
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+	char *image;
 	PDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -2406,7 +2413,9 @@ PHP_FUNCTION(pdf_open_png) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "png", (*arg2)->value.str.val, "", 0);
+	virtual_filepath((*arg2)->value.str.val, &image);
+
+	pdf_image = PDF_open_image_file(pdf, "png", image, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2425,6 +2434,7 @@ PHP_FUNCTION(pdf_open_tiff) {
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+	char *image;
 	PDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
@@ -2440,7 +2450,9 @@ PHP_FUNCTION(pdf_open_tiff) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, "tiff", (*arg2)->value.str.val, "", 0);
+	virtual_filepath((*arg2)->value.str.val, &image);
+
+	pdf_image = PDF_open_image_file(pdf, "tiff", image, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
@@ -2459,6 +2471,7 @@ PHP_FUNCTION(pdf_open_image_file) {
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+	char *image;
 	PDF_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
@@ -2475,7 +2488,9 @@ PHP_FUNCTION(pdf_open_image_file) {
 		RETURN_FALSE;
 	}
 
-	pdf_image = PDF_open_image_file(pdf, (*arg2)->value.str.val, (*arg3)->value.str.val, "", 0);
+	virtual_filepath((*arg3)->value.str.val, &image);
+
+	pdf_image = PDF_open_image_file(pdf, (*arg2)->value.str.val, image, "", 0);
 
 	if(pdf_image < 0) {
 		php_error(E_WARNING, "Could not open image");
