@@ -39,4 +39,6 @@ void php_var_dump(pval **struc, int level);
 void php_var_serialize(pval *buf, pval **struc);
 int php_var_unserialize(pval **rval, const char **p, const char *max);
 
+PHPAPI zend_class_entry *php_create_empty_class(char *class_name,int len);
+
 #endif /* _PHPVAR_H */
