@@ -1,3 +1,152 @@
+2004-07-10  Jon Parise  <jon+php@csh.rit.edu>
+
+    * (PHP_4_3)
+      Zend/zend.c:
+      MFH 1.286:
+      
+      DragonFly BSD is derived from FreeBSD and requires the same floating point
+      precision fix.
+
+    * ZendEngine2/zend.c:
+      DragonFly BSD is derived from FreeBSD and requires the same floating point
+      precision fix.
+
+2004-07-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PECL_4_3)
+      ext/sqlite/package.xml:
+      tweak release notes
+
+    * ext/sqlite/config.m4
+      ext/sqlite/config.m4:
+      Fix #28402: no need for -ldl
+
+    * ext/sqlite/package.xml
+      ext/sqlite/sqlite.c:
+      Bump PHP 5 sqlite extension number to 2.0
+      (put some distance between it and the 4.3 version)
+
+    * ext/sqlite/Makefile.frag
+      ext/sqlite/config.m4
+      ext/sqlite/config.m4
+      ext/sqlite/package.xml
+      ext/sqlite/package.xml
+      ext/sqlite/php_sqlite.def
+      ext/sqlite/sqlite.c
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree_rb.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/opcodes.c
+      ext/sqlite/libsqlite/src/opcodes.c
+      ext/sqlite/libsqlite/src/opcodes.h
+      ext/sqlite/libsqlite/src/opcodes.h
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/os.h
+      ext/sqlite/libsqlite/src/os.h
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/parse.c
+      ext/sqlite/libsqlite/src/parse.c
+      ext/sqlite/libsqlite/src/parse.h
+      ext/sqlite/libsqlite/src/parse.h
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqlite.w32.h
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/table.c
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/trigger.c
+      ext/sqlite/libsqlite/src/trigger.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/vdbeInt.h
+      ext/sqlite/libsqlite/src/vdbeInt.h
+      ext/sqlite/libsqlite/src/vdbeaux.c
+      ext/sqlite/libsqlite/src/vdbeaux.c
+      ext/sqlite/libsqlite/src/where.c
+      ext/sqlite/libsqlite/src/where.c:
+      Upgrade bundled library to 2.8.14 + misc fixes
+      (http://www.sqlite.org/cvstrac/chngview?cn=1742)
+
+    * (PECL_4_3)
+      ext/sqlite/Makefile.frag:
+      this is no longer needed
+
+    * main/streams/streams.c:
+      RIP: greedy ready problems
+      This allows people to use fread($fp, filesize($filename)) for regular
+      files,
+      but packet-based non-greedy reads for everything else.
+
+2004-07-10  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_variables.c
+      ext/mssql/php_mssql.c
+      ext/session/session.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/w32api/w32api.c
+      main/php_variables.c
+      main/rfc1867.c
+      sapi/apache/mod_php5.c
+      sapi/apache_hooks/mod_php5.c:
+      - Better stability during premature shutdown of request startup
+
 2004-07-08  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
