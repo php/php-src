@@ -794,12 +794,11 @@ ZEND_API void rpc_error(int type, const char *format, ...)
 
 ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
-	zend_object_value *zov;
+	zend_object_value zov;
 	rpc_internal *intern;
 	
 	/* set up the object value struct */
-	zov = (zend_object_value*) pemalloc(sizeof(zend_object_value), TRUE);
-	zov->handlers = &rpc_handlers;
+	zov.handlers = &rpc_handlers;
 
 	/* set up the internal representation of our rpc instance */
 	intern = (rpc_internal *) pecalloc(1, sizeof(rpc_internal), TRUE);
@@ -816,9 +815,9 @@ ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_D
 		/* TODO: exception */
 	}
 
-	zov->handle = zend_objects_store_put(intern, rpc_objects_delete, NULL TSRMLS_CC);
+	zov.handle = zend_objects_store_put(intern, rpc_objects_delete, NULL TSRMLS_CC);
 
-	return *zov;
+	return zov;
 }
 
 /*******************/
