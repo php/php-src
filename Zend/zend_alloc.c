@@ -378,7 +378,8 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 				}
 				t->reported = 1;
 				for (iterator=t->pNext; iterator; iterator=iterator->pNext) {
-					if (iterator->filename==t->filename
+					if (!iterator->cached
+						&& iterator->filename==t->filename
 						&& iterator->lineno==t->lineno) {
 						total_leak += iterator->size;
 						total_leak_count++;
