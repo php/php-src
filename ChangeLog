@@ -1,3 +1,56 @@
+2001-07-19  Joey Smith  <joey@joeysmith.com>
+
+    * ext/ext_skel: I just got annoyed by this, eventually. :)
+
+2001-07-19  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_odbc.c:
+    Added the error-message functionality (new in odbc module) (Mc)
+
+    * ext/dbx/tests/005.phpt
+      ext/dbx/dbx.c:
+    changed implementation of creating reference to a value by columnname (Mc)
+    added a test for changing the referenced value (Mc)
+
+2001-07-19  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Function yaz_record handles MARC records that have identifers in 00X.
+
+2001-07-19  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Installer.php:
+    move the package list handler methods to the new Packlist.php also removed
+    the unused code
+
+    * pear/PEAR/Packlist.php:
+    This class will handle the pear packages database (it's experimental now)
+
+    * pear/PEAR/Common.php:
+    added TODO and checks before try to open the package.xml file
+
+2001-07-19  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/formatted_print.c: Fix warnings
+
+2001-07-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS: update
+
+    * ext/session/mod_mm.c:
+    Fix a serious long-standing bug which deleted the shared memory segment
+    when an Apache children died.
+
+    Dynamically resize hash-table.
+
+    The hash key is now stored as part of the hash entry structure which
+    saves a mm_malloc.
+
+    ps_sd_new has been restructured to avoid code duplication.
+
+    A bug concerning moving existing entries to the top of a linked list
+    has been fixed.
+
 2001-07-18  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/mod_mm.c:
