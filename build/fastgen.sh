@@ -23,7 +23,7 @@
 # EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##############################################################################
-# $Id: fastgen.sh,v 1.3 2000-04-30 03:10:34 sas Exp $ 
+# $Id: fastgen.sh,v 1.4 2000-05-04 16:08:10 sas Exp $ 
 #
 
 srcdir=$1
@@ -44,7 +44,7 @@ fi
 for makefile in $@; do
   echo "creating $makefile"
 # portable dirname
-  dir=`echo $makefile|sed 's%[^/][^/]*$%%'`
+  dir=`echo $makefile|sed 's%/*[^/][^/]*$%%'`
   test -d "$dir/" || $mkdir_p "$dir/"
 
   (cat <<EOF
