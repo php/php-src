@@ -30,22 +30,108 @@
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
-int _pdo_mysql_error(char *what, int mysql_errno, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_mysql_error(pdo_dbh_t *dbh, const char *file, int line TSRMLS_DC) /* {{{ */
 {
-	switch (mysql_errno) {
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	enum pdo_error_type *pdo_err = &dbh->error_code;
+	pdo_mysql_error_info *einfo = &H->einfo;
+
+	einfo->errcode = mysql_errno(H->server);
+	einfo->file = file;
+	einfo->line = line;
+
+	if (einfo->errmsg) {
+		efree(einfo->errmsg);
+		einfo->errmsg = NULL;
+	}
+
+	if (einfo->errcode) {
+		einfo->errmsg = estrdup(mysql_error(H->server));
+	} else { /* no error */
+		*pdo_err = PDO_ERR_NONE;
+		return 0;
+	}
+
+	switch (einfo->errcode) {
+		case 1007: /* database already exists */
+		case 1050: /* table already exists */
+		case 1086: /* file already exists */
+		case 1125: /* function already exists */
+			*pdo_err = PDO_ERR_ALREADY_EXISTS;
+			break;
+
+		case 1008: /* database does not exist */
+		case 1029: /* view does not exist */
+		case 1072: /* key column does not exist */
+		case 1091: /* column/key does not exist */
+		case 1146: /* table does not exist */
+		case 1176: /* key not found in table */
+			*pdo_err = PDO_ERR_NOT_FOUND;
+			break;	
+
+		case 1152: /* aborted connection */
+		case 1154: /* cannot read from connection pipe */
+		case 1184: /* aborted new connection */
+		case 1159: /* timeout */
+		case 1160: /* timeout */
+		case 1161: /* timeout */
+			*pdo_err = PDO_ERR_DISCONNECTED;
+			break;
+
+		case 1089: /* unsupported sub-key */
+		case 1163: /* blob/text not supported inside table */
+		case 1164: /* no auto-incremenet support */
+		case 1174: /* no RAID support */
+		case 1178: /* table handler does not support something */
+		case 1185: /* binary dump not supported */
+		case 1214: /* FULLTEXT not supported */
+		case 1235: /* something not supported by MySQL version */
+			*pdo_err = PDO_ERR_NOT_IMPLEMENTED;
+			break;
+
+		case 1252: /* character set mismatch */
+			*pdo_err = PDO_ERR_MISMATCH;
+			break;
+
+		case 1264: /* data truncated */
+			*pdo_err = PDO_ERR_TRUNCATED;
+			break;
+	
+		case 1169: /* unique constraint */
+		case 1216: /* foreign key constraint */
+		case 1217: /* foreign key constraint */
+			*pdo_err = PDO_ERR_CONSTRAINT;
+			break;
+
+		case 1064: /* query parse error */
+		case 1065: /* empty query */
+		/* XXX: MySQL has all sorts of errors that can be considered syntax errors, specifically
+			dealing with table creation & modifications, do we want to include them here?
+		 */
+			*pdo_err = PDO_ERR_SYNTAX;
+			break;
+
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s:%d) %s: %d", file, line, what, mysql_errno);
+			*pdo_err = PDO_ERR_CANT_MAP;
 			break;
 	}
-	return mysql_errno;
+
+	return einfo->errcode;
 }
 /* }}} */
 
-int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode) /* {{{ */
+static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
-	return 0;
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	pdo_mysql_error_info *einfo = &H->einfo;
+
+	if (einfo->errcode) {
+		add_next_index_long(info, einfo->errcode);
+		add_next_index_string(info, einfo->errmsg, 1);
+	}
+
+	return 1;
 }
-/* }}} */
 
 static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
@@ -55,9 +141,9 @@ static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		mysql_close(H->server);
 		H->server = NULL;
 	}
-	if (H->mysql_error) {
-		efree(H->mysql_error);
-		H->mysql_error = NULL;
+	if (H->einfo.errmsg) {
+		efree(H->einfo.errmsg);
+		H->einfo.errmsg = NULL;
 	}
 	return 0;
 }
@@ -80,7 +166,7 @@ static long mysql_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 
 	if (mysql_real_query(H->server, sql, sql_len)) {
-		pdo_mysql_error(H);
+		pdo_mysql_error(dbh);
 		return -1;
 	} else {
 		return mysql_affected_rows(H->server);
@@ -116,7 +202,8 @@ static struct pdo_dbh_methods mysql_methods = {
 	NULL,
 	NULL,
 	NULL,
-	pdo_mysql_last_insert_id
+	pdo_mysql_last_insert_id,
+	pdo_mysql_fetch_error_func
 };
 
 static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
@@ -140,6 +227,9 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 	
+	H->einfo.errcode = 0;
+	H->einfo.errmsg = NULL;
+
 	/* allocate an environment */
 	
 	/* handle for the server */
@@ -151,12 +241,12 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 
 		if (mysql_options(H->server, MYSQL_OPT_CONNECT_TIMEOUT, (const char *)&connect_timeout)) {
-			pdo_mysql_error(H);
+			pdo_mysql_error(dbh);
 			goto cleanup;
 		}
 	}
 
-	if(vars[2].optval && strcmp("localhost", vars[2].optval)) {
+	if (vars[2].optval && strcmp("localhost", vars[2].optval)) {
 		host = vars[2].optval;
 		port = atoi(vars[3].optval); 
 	} else {
@@ -164,9 +254,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		unix_socket = vars[4].optval;  
 	}
 	dbname = vars[1].optval;
-	if(mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, 0) == NULL) 
-	{
-		pdo_mysql_error(H);
+	if (mysql_real_connect(H->server, host, dbh->username, dbh->password, dbname, port, unix_socket, 0) == NULL) {
+		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
 

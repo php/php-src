@@ -23,14 +23,21 @@
 
 #include <mysql.h>
 
+typedef struct {
+	const char *file;
+	int line;
+	unsigned int errcode;
+	char *errmsg;
+} pdo_mysql_error_info;
+
 /* stuff we use in a mySQL database handle */
 typedef struct {
 	MYSQL 		*server;
-	int	last_err;
-	unsigned int mysql_errno;
-	char *mysql_error;
+
 	unsigned attached:1;
 	unsigned _reserved:31;
+
+	pdo_mysql_error_info einfo;
 } pdo_mysql_db_handle;
 
 typedef struct {
@@ -42,7 +49,6 @@ typedef struct {
 	MYSQL_RES		*result;
 	MYSQL_ROW		current_data;
 	long			*current_lengths;
-	int		last_err;
 	pdo_mysql_column 	*cols;
 } pdo_mysql_stmt;
 
@@ -55,16 +61,8 @@ typedef struct {
 
 extern pdo_driver_t pdo_mysql_driver;
 
-extern int _pdo_mysql_error(char *what, int mysql_errno, const char *file, int line TSRMLS_DC);
-#define pdo_mysql_error(s) \
-	s->mysql_errno = mysql_errno(s->server);	\
-	if (s->mysql_error) {	\
-		efree(s->mysql_error);	\
-	}	\
-	s->mysql_error = estrdup(mysql_error(s->server));
-
-
-extern int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode);
+extern int _pdo_mysql_error(pdo_dbh_t *dbh, const char *file, int line TSRMLS_DC);
+#define pdo_mysql_error(s) _pdo_mysql_error(s, __FILE__, __LINE__ TSRMLS_DC)
 
 extern struct pdo_stmt_methods mysql_stmt_methods;
 #endif
