@@ -1,7 +1,7 @@
 <?php
 
 /** @file filteriterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class FilterIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
@@ -108,6 +108,16 @@ abstract class FilterIterator implements OuterIterator
 	function getInnerIterator()
 	{
 		return $this->it;
+	}
+
+	/** Aggregate the inner iterator
+	 *
+	 * @param func    Name of method to invoke
+	 * @param params  Array of parameters to pass to method
+	 */
+	function __call($func, $params)
+	{
+		return call_user_func_array(array($this->it, $func), $params);
 	}
 }
 

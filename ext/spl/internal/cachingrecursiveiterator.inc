@@ -1,7 +1,7 @@
 <?php
 
 /** @file cachingrecursiveiterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class CachingRecursiveIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
@@ -10,9 +10,11 @@
  */
 
 /**
- * @brief   
+ * @brief   Cached recursive iteration over another Iterator
  * @author  Marcus Boerger
  * @version 1.1
+ *
+ * @See CachingIterator
  */
 class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
 {

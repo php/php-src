@@ -1,7 +1,7 @@
 <?php
 
 /** @file recursiveiterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class RecursiveIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004

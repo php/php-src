@@ -1,7 +1,7 @@
 <?php
 
 /** @file parentiterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class FilterIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004

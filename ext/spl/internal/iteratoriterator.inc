@@ -77,6 +77,16 @@ class IteratorIterator implements OuterIterator
 		return $this->iterator->rewind();
 	}
 
+	/** Aggregate the inner iterator
+	 *
+	 * @param func    Name of method to invoke
+	 * @param params  Array of parameters to pass to method
+	 */
+	function __call($func, $params)
+	{
+		return call_user_func_array(array($this->it, $func), $params);
+	}
+
 	/** The inner iterator must be private because when this class will be
 	 * converted to c code it won't no longer be available.
 	 */

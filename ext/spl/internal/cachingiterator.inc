@@ -1,7 +1,7 @@
 <?php
 
 /** @file cachingiterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class CachingIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
@@ -13,10 +13,19 @@ define('CIT_CALL_TOSTRING', 1);
 define('CIT_CATCH_GET_CHILD', 2);
 
 /**
- * @brief   Cached Iteration over another Iterator
+ * @brief   Cached iteration over another Iterator
  * @author  Marcus Boerger
  * @version 1.1
  *
+ * This iterator wrapper does a one ahead iteration. This way it knows whether
+ * the inner iterator has one more element.
+ *
+ * @note If you want to convert the elements into strings and the inner 
+ *       Iterator is an internal Iterator then you need to provide the 
+ *       flag CIT_CALL_TOSTRING to do the conversion when the actual element
+ *       is being fetched. Otherwise the conversion would happen with the
+ *       already changed iterator. If you do not need this then it you should
+ *       omit this flag because it costs unneccessary work and time.
  */
 class CachingIterator implements OuterIterator
 {
@@ -98,6 +107,9 @@ class CachingIterator implements OuterIterator
 	}
 
 	/** Aggregate the inner iterator
+	 *
+	 * @param func    Name of method to invoke
+	 * @param params  Array of parameters to pass to method
 	 */
 	function __call($func, $params)
 	{
