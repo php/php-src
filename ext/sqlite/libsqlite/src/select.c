@@ -479,16 +479,19 @@ static int selectInnerLoop(
     ** item into the set table with bogus data.
     */
     case SRT_Set: {
-      int lbl = sqliteVdbeMakeLabel(v);
+      int addr1 = sqliteVdbeCurrentAddr(v);
+      int addr2;
       assert( nColumn==1 );
-      sqliteVdbeAddOp(v, OP_IsNull, -1, lbl);
+      sqliteVdbeAddOp(v, OP_NotNull, -1, addr1+3);
+      sqliteVdbeAddOp(v, OP_Pop, 1, 0);
+      addr2 = sqliteVdbeAddOp(v, OP_Goto, 0, 0);
       if( pOrderBy ){
         pushOntoSorter(pParse, v, pOrderBy);
       }else{
         sqliteVdbeAddOp(v, OP_String, 0, 0);
         sqliteVdbeAddOp(v, OP_PutStrKey, iParm, 0);
       }
-      sqliteVdbeResolveLabel(v, lbl);
+      sqliteVdbeChangeP2(v, addr2, sqliteVdbeCurrentAddr(v));
       break;
     }
 
@@ -588,7 +591,9 @@ static void generateSortTail(
     }
     case SRT_Set: {
       assert( nColumn==1 );
-      sqliteVdbeAddOp(v, OP_IsNull, -1, sqliteVdbeCurrentAddr(v)+3);
+      sqliteVdbeAddOp(v, OP_NotNull, -1, sqliteVdbeCurrentAddr(v)+3);
+      sqliteVdbeAddOp(v, OP_Pop, 1, 0);
+      sqliteVdbeAddOp(v, OP_Goto, 0, sqliteVdbeCurrentAddr(v)+3);
       sqliteVdbeAddOp(v, OP_String, 0, 0);
       sqliteVdbeAddOp(v, OP_PutStrKey, iParm, 0);
       break;

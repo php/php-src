@@ -618,10 +618,12 @@ int sqliteRbtreeOpen(
 ){
   Rbtree **ppRbtree = (Rbtree**)ppBtree;
   *ppRbtree = (Rbtree *)sqliteMalloc(sizeof(Rbtree));
+  if( sqlite_malloc_failed ) goto open_no_mem;
   sqliteHashInit(&(*ppRbtree)->tblHash, SQLITE_HASH_INT, 0);
 
   /* Create a binary tree for the SQLITE_MASTER table at location 2 */
   btreeCreateTable(*ppRbtree, 2);
+  if( sqlite_malloc_failed ) goto open_no_mem;
   (*ppRbtree)->next_idx = 3;
   (*ppRbtree)->pOps = &sqliteRbtreeOps;
   /* Set file type to 4; this is so that "attach ':memory:' as ...."  does not
@@ -630,6 +632,10 @@ int sqliteRbtreeOpen(
   (*ppRbtree)->aMetaData[2] = 4;
   
   return SQLITE_OK;
+
+open_no_mem:
+  *ppBtree = 0;
+  return SQLITE_NOMEM;
 }
 
 /*
@@ -642,11 +648,13 @@ static int memRbtreeCreateTable(Rbtree* tree, int* n)
 
   *n = tree->next_idx++;
   btreeCreateTable(tree, *n);
+  if( sqlite_malloc_failed ) return SQLITE_NOMEM;
 
   /* Set up the rollback structure (if we are not doing this as part of a
    * rollback) */
   if( tree->eTransState != TRANS_ROLLBACK ){
     BtRollbackOp *pRollbackOp = sqliteMalloc(sizeof(BtRollbackOp));
+    if( pRollbackOp==0 ) return SQLITE_NOMEM;
     pRollbackOp->eOp = ROLLBACK_DROP;
     pRollbackOp->iTab = *n;
     btreeLogRollbackOp(tree, pRollbackOp);
@@ -671,6 +679,7 @@ static int memRbtreeDropTable(Rbtree* tree, int n)
 
   if( tree->eTransState != TRANS_ROLLBACK ){
     BtRollbackOp *pRollbackOp = sqliteMalloc(sizeof(BtRollbackOp));
+    if( pRollbackOp==0 ) return SQLITE_NOMEM;
     pRollbackOp->eOp = ROLLBACK_CREATE;
     pRollbackOp->iTab = n;
     btreeLogRollbackOp(tree, pRollbackOp);
@@ -712,6 +721,7 @@ static int memRbtreeCursor(
   RbtCursor *pCur;
   assert(tree);
   pCur = *ppCur = sqliteMalloc(sizeof(RbtCursor));
+  if( sqlite_malloc_failed ) return SQLITE_NOMEM;
   pCur->pTree  = sqliteHashFind(&tree->tblHash, 0, iTable);
   pCur->pRbtree = tree;
   pCur->iTree  = iTable;
@@ -755,6 +765,7 @@ static int memRbtreeInsert(
   /* Take a copy of the input data now, in case we need it for the 
    * replace case */
   pData = sqliteMallocRaw(nData);
+  if( sqlite_malloc_failed ) return SQLITE_NOMEM;
   memcpy(pData, pDataInput, nData);
 
   /* Move the cursor to a node near the key to be inserted. If the key already
@@ -771,8 +782,10 @@ static int memRbtreeInsert(
   memRbtreeMoveto( pCur, pKey, nKey, &match);
   if( match ){
     BtRbNode *pNode = sqliteMalloc(sizeof(BtRbNode));
+    if( pNode==0 ) return SQLITE_NOMEM;
     pNode->nKey = nKey;
     pNode->pKey = sqliteMallocRaw(nKey);
+    if( sqlite_malloc_failed ) return SQLITE_NOMEM;
     memcpy(pNode->pKey, pKey, nKey);
     pNode->nData = nData;
     pNode->pData = pData; 
@@ -804,10 +817,12 @@ static int memRbtreeInsert(
     /* Set up a rollback-op in case we have to roll this operation back */
     if( pCur->pRbtree->eTransState != TRANS_ROLLBACK ){
       BtRollbackOp *pOp = sqliteMalloc( sizeof(BtRollbackOp) );
+      if( pOp==0 ) return SQLITE_NOMEM;
       pOp->eOp = ROLLBACK_DELETE;
       pOp->iTab = pCur->iTree;
       pOp->nKey = pNode->nKey;
       pOp->pKey = sqliteMallocRaw( pOp->nKey );
+      if( sqlite_malloc_failed ) return SQLITE_NOMEM;
       memcpy( pOp->pKey, pNode->pKey, pOp->nKey );
       btreeLogRollbackOp(pCur->pRbtree, pOp);
     }
@@ -819,9 +834,11 @@ static int memRbtreeInsert(
     /* Set up a rollback-op in case we have to roll this operation back */
     if( pCur->pRbtree->eTransState != TRANS_ROLLBACK ){
       BtRollbackOp *pOp = sqliteMalloc( sizeof(BtRollbackOp) );
+      if( pOp==0 ) return SQLITE_NOMEM;
       pOp->iTab = pCur->iTree;
       pOp->nKey = pCur->pNode->nKey;
       pOp->pKey = sqliteMallocRaw( pOp->nKey );
+      if( sqlite_malloc_failed ) return SQLITE_NOMEM;
       memcpy( pOp->pKey, pCur->pNode->pKey, pOp->nKey );
       pOp->nData = pCur->pNode->nData;
       pOp->pData = pCur->pNode->pData;
@@ -924,6 +941,7 @@ static int memRbtreeDelete(RbtCursor* pCur)
    * deletion */
   if( pCur->pRbtree->eTransState != TRANS_ROLLBACK ){
     BtRollbackOp *pOp = sqliteMalloc( sizeof(BtRollbackOp) );
+    if( pOp==0 ) return SQLITE_NOMEM;
     pOp->iTab = pCur->iTree;
     pOp->nKey = pZ->nKey;
     pOp->pKey = pZ->pKey;
@@ -1029,6 +1047,7 @@ static int memRbtreeClearTable(Rbtree* tree, int n)
         sqliteFree( pNode->pData );
       }else{
         BtRollbackOp *pRollbackOp = sqliteMallocRaw(sizeof(BtRollbackOp));
+        if( pRollbackOp==0 ) return SQLITE_NOMEM;
         pRollbackOp->eOp = ROLLBACK_INSERT;
         pRollbackOp->iTab = n;
         pRollbackOp->nKey = pNode->nKey;

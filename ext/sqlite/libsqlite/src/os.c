@@ -164,6 +164,39 @@ static unsigned int elapse;
 ** structure.  The fcntl() system call is only invoked to set a 
 ** POSIX lock if the internal lock structure transitions between
 ** a locked and an unlocked state.
+**
+** 2004-Jan-11:
+** More recent discoveries about POSIX advisory locks.  (The more
+** I discover, the more I realize the a POSIX advisory locks are
+** an abomination.)
+**
+** If you close a file descriptor that points to a file that has locks,
+** all locks on that file that are owned by the current process are
+** released.  To work around this problem, each OsFile structure contains
+** a pointer to an openCnt structure.  There is one openCnt structure
+** per open inode, which means that multiple OsFiles can point to a single
+** openCnt.  When an attempt is made to close an OsFile, if there are
+** other OsFiles open on the same inode that are holding locks, the call
+** to close() the file descriptor is deferred until all of the locks clear.
+** The openCnt structure keeps a list of file descriptors that need to
+** be closed and that list is walked (and cleared) when the last lock
+** clears.
+**
+** First, under Linux threads, because each thread has a separate
+** process ID, lock operations in one thread do not override locks
+** to the same file in other threads.  Linux threads behave like
+** separate processes in this respect.  But, if you close a file
+** descriptor in linux threads, all locks are cleared, even locks
+** on other threads and even though the other threads have different
+** process IDs.  Linux threads is inconsistent in this respect.
+** (I'm beginning to think that linux threads is an abomination too.)
+** The consequence of this all is that the hash table for the lockInfo
+** structure has to include the process id as part of its key because
+** locks in different threads are treated as distinct.  But the 
+** openCnt structure should not include the process id in its
+** key because close() clears lock on all threads, not just the current
+** thread.  Were it not for this goofiness in linux threads, we could
+** combine the lockInfo and openCnt structures into a single structure.
 */
 
 /*
@@ -180,69 +213,147 @@ struct lockKey {
 };
 
 /*
-** An instance of the following structure is allocated for each inode.
+** An instance of the following structure is allocated for each open
+** inode on each thread with a different process ID.  (Threads have
+** different process IDs on linux, but not on most other unixes.)
+**
 ** A single inode can have multiple file descriptors, so each OsFile
 ** structure contains a pointer to an instance of this object and this
 ** object keeps a count of the number of OsFiles pointing to it.
 */
 struct lockInfo {
   struct lockKey key;  /* The lookup key */
-  int cnt;              /* 0: unlocked.  -1: write lock.  1...: read lock. */
+  int cnt;             /* 0: unlocked.  -1: write lock.  1...: read lock. */
+  int nRef;            /* Number of pointers to this structure */
+};
+
+/*
+** An instance of the following structure serves as the key used
+** to locate a particular openCnt structure given its inode.  This
+** is the same as the lockKey except that the process ID is omitted.
+*/
+struct openKey {
+  dev_t dev;   /* Device number */
+  ino_t ino;   /* Inode number */
+};
+
+/*
+** An instance of the following structure is allocated for each open
+** inode.  This structure keeps track of the number of locks on that
+** inode.  If a close is attempted against an inode that is holding
+** locks, the close is deferred until all locks clear by adding the
+** file descriptor to be closed to the pending list.
+*/
+struct openCnt {
+  struct openKey key;   /* The lookup key */
   int nRef;             /* Number of pointers to this structure */
+  int nLock;            /* Number of outstanding locks */
+  int nPending;         /* Number of pending close() operations */
+  int *aPending;        /* Malloced space holding fd's awaiting a close() */
 };
 
 /* 
-** This hash table maps inodes (in the form of lockKey structures) into
-** pointers to lockInfo structures.
+** These hash table maps inodes and process IDs into lockInfo and openCnt
+** structures.  Access to these hash tables must be protected by a mutex.
 */
 static Hash lockHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
-
-/*
-** Given a file descriptor, locate a lockInfo structure that describes
-** that file descriptor.  Create a new one if necessary.  NULL might
-** be returned if malloc() fails.
-*/
-static struct lockInfo *findLockInfo(int fd){
-  int rc;
-  struct lockKey key;
-  struct stat statbuf;
-  struct lockInfo *pInfo;
-  rc = fstat(fd, &statbuf);
-  if( rc!=0 ) return 0;
-  memset(&key, 0, sizeof(key));
-  key.dev = statbuf.st_dev;
-  key.ino = statbuf.st_ino;
-  key.pid = getpid();
-  pInfo = (struct lockInfo*)sqliteHashFind(&lockHash, &key, sizeof(key));
-  if( pInfo==0 ){
-    struct lockInfo *pOld;
-    pInfo = sqliteMalloc( sizeof(*pInfo) );
-    if( pInfo==0 ) return 0;
-    pInfo->key = key;
-    pInfo->nRef = 1;
-    pInfo->cnt = 0;
-    pOld = sqliteHashInsert(&lockHash, &pInfo->key, sizeof(key), pInfo);
-    if( pOld!=0 ){
-      assert( pOld==pInfo );
-      sqliteFree(pInfo);
-      pInfo = 0;
-    }
-  }else{
-    pInfo->nRef++;
-  }
-  return pInfo;
-}
+static Hash openHash = { SQLITE_HASH_BINARY, 0, 0, 0, 0, 0 };
 
 /*
 ** Release a lockInfo structure previously allocated by findLockInfo().
 */
-static void releaseLockInfo(struct lockInfo *pInfo){
-  pInfo->nRef--;
-  if( pInfo->nRef==0 ){
-    sqliteHashInsert(&lockHash, &pInfo->key, sizeof(pInfo->key), 0);
-    sqliteFree(pInfo);
+static void releaseLockInfo(struct lockInfo *pLock){
+  pLock->nRef--;
+  if( pLock->nRef==0 ){
+    sqliteHashInsert(&lockHash, &pLock->key, sizeof(pLock->key), 0);
+    sqliteFree(pLock);
   }
 }
+
+/*
+** Release a openCnt structure previously allocated by findLockInfo().
+*/
+static void releaseOpenCnt(struct openCnt *pOpen){
+  pOpen->nRef--;
+  if( pOpen->nRef==0 ){
+    sqliteHashInsert(&openHash, &pOpen->key, sizeof(pOpen->key), 0);
+    sqliteFree(pOpen->aPending);
+    sqliteFree(pOpen);
+  }
+}
+
+/*
+** Given a file descriptor, locate lockInfo and openCnt structures that
+** describes that file descriptor.  Create a new ones if necessary.  The
+** return values might be unset if an error occurs.
+**
+** Return the number of errors.
+*/
+int findLockInfo(
+  int fd,                      /* The file descriptor used in the key */
+  struct lockInfo **ppLock,    /* Return the lockInfo structure here */
+  struct openCnt **ppOpen   /* Return the openCnt structure here */
+){
+  int rc;
+  struct lockKey key1;
+  struct openKey key2;
+  struct stat statbuf;
+  struct lockInfo *pLock;
+  struct openCnt *pOpen;
+  rc = fstat(fd, &statbuf);
+  if( rc!=0 ) return 1;
+  memset(&key1, 0, sizeof(key1));
+  key1.dev = statbuf.st_dev;
+  key1.ino = statbuf.st_ino;
+  key1.pid = getpid();
+  memset(&key2, 0, sizeof(key2));
+  key2.dev = statbuf.st_dev;
+  key2.ino = statbuf.st_ino;
+  pLock = (struct lockInfo*)sqliteHashFind(&lockHash, &key1, sizeof(key1));
+  if( pLock==0 ){
+    struct lockInfo *pOld;
+    pLock = sqliteMallocRaw( sizeof(*pLock) );
+    if( pLock==0 ) return 1;
+    pLock->key = key1;
+    pLock->nRef = 1;
+    pLock->cnt = 0;
+    pOld = sqliteHashInsert(&lockHash, &pLock->key, sizeof(key1), pLock);
+    if( pOld!=0 ){
+      assert( pOld==pLock );
+      sqliteFree(pLock);
+      return 1;
+    }
+  }else{
+    pLock->nRef++;
+  }
+  *ppLock = pLock;
+  pOpen = (struct openCnt*)sqliteHashFind(&openHash, &key2, sizeof(key2));
+  if( pOpen==0 ){
+    struct openCnt *pOld;
+    pOpen = sqliteMallocRaw( sizeof(*pOpen) );
+    if( pOpen==0 ){
+      releaseLockInfo(pLock);
+      return 1;
+    }
+    pOpen->key = key2;
+    pOpen->nRef = 1;
+    pOpen->nLock = 0;
+    pOpen->nPending = 0;
+    pOpen->aPending = 0;
+    pOld = sqliteHashInsert(&openHash, &pOpen->key, sizeof(key2), pOpen);
+    if( pOld!=0 ){
+      assert( pOld==pOpen );
+      sqliteFree(pOpen);
+      releaseLockInfo(pLock);
+      return 1;
+    }
+  }else{
+    pOpen->nRef++;
+  }
+  *ppOpen = pOpen;
+  return 0;
+}
+
 #endif  /** POSIX advisory lock work-around **/
 
 /*
@@ -349,6 +460,7 @@ int sqliteOsOpenReadWrite(
   int *pReadonly
 ){
 #if OS_UNIX
+  int rc;
   id->dirfd = -1;
   id->fd = open(zFilename, O_RDWR|O_CREAT|O_LARGEFILE|O_BINARY, 0644);
   if( id->fd<0 ){
@@ -361,9 +473,9 @@ int sqliteOsOpenReadWrite(
     *pReadonly = 0;
   }
   sqliteOsEnterMutex();
-  id->pLock = findLockInfo(id->fd);
+  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
   sqliteOsLeaveMutex();
-  if( id->pLock==0 ){
+  if( rc ){
     close(id->fd);
     return SQLITE_NOMEM;
   }
@@ -471,6 +583,7 @@ int sqliteOsOpenReadWrite(
 */
 int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 #if OS_UNIX
+  int rc;
   if( access(zFilename, 0)==0 ){
     return SQLITE_CANTOPEN;
   }
@@ -481,9 +594,9 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
     return SQLITE_CANTOPEN;
   }
   sqliteOsEnterMutex();
-  id->pLock = findLockInfo(id->fd);
+  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
   sqliteOsLeaveMutex();
-  if( id->pLock==0 ){
+  if( rc ){
     close(id->fd);
     unlink(zFilename);
     return SQLITE_NOMEM;
@@ -561,15 +674,16 @@ int sqliteOsOpenExclusive(const char *zFilename, OsFile *id, int delFlag){
 */
 int sqliteOsOpenReadOnly(const char *zFilename, OsFile *id){
 #if OS_UNIX
+  int rc;
   id->dirfd = -1;
   id->fd = open(zFilename, O_RDONLY|O_LARGEFILE|O_BINARY);
   if( id->fd<0 ){
     return SQLITE_CANTOPEN;
   }
   sqliteOsEnterMutex();
-  id->pLock = findLockInfo(id->fd);
+  rc = findLockInfo(id->fd, &id->pLock, &id->pOpen);
   sqliteOsLeaveMutex();
-  if( id->pLock==0 ){
+  if( rc ){
     close(id->fd);
     return SQLITE_NOMEM;
   }
@@ -763,15 +877,36 @@ int sqliteOsTempFileName(char *zBuf){
 }
 
 /*
-** Close a file
+** Close a file.
 */
 int sqliteOsClose(OsFile *id){
 #if OS_UNIX
-  close(id->fd);
+  sqliteOsUnlock(id);
   if( id->dirfd>=0 ) close(id->dirfd);
   id->dirfd = -1;
   sqliteOsEnterMutex();
+  if( id->pOpen->nLock ){
+    /* If there are outstanding locks, do not actually close the file just
+    ** yet because that would clear those locks.  Instead, add the file
+    ** descriptor to pOpen->aPending.  It will be automatically closed when
+    ** the last lock is cleared.
+    */
+    int *aNew;
+    struct openCnt *pOpen = id->pOpen;
+    pOpen->nPending++;
+    aNew = sqliteRealloc( pOpen->aPending, pOpen->nPending*sizeof(int) );
+    if( aNew==0 ){
+      /* If a malloc fails, just leak the file descriptor */
+    }else{
+      pOpen->aPending = aNew;
+      pOpen->aPending[pOpen->nPending-1] = id->fd;
+    }
+  }else{
+    /* There are no outstanding locks so we can close the file immediately */
+    close(id->fd);
+  }
   releaseLockInfo(id->pLock);
+  releaseOpenCnt(id->pOpen);
   sqliteOsLeaveMutex();
   TRACE2("CLOSE   %-3d\n", id->fd);
   OpenCounter(-1);
@@ -1159,6 +1294,7 @@ int sqliteOsReadLock(OsFile *id){
     if( !id->locked ){
       id->pLock->cnt++;
       id->locked = 1;
+      id->pOpen->nLock++;
     }
     rc = SQLITE_OK;
   }else if( id->locked || id->pLock->cnt==0 ){
@@ -1172,8 +1308,11 @@ int sqliteOsReadLock(OsFile *id){
       rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
+      if( !id->locked ){
+        id->pOpen->nLock++;
+        id->locked = 1;
+      }
       id->pLock->cnt = 1;
-      id->locked = 1;
     }
   }else{
     rc = SQLITE_BUSY;
@@ -1276,8 +1415,11 @@ int sqliteOsWriteLock(OsFile *id){
       rc = (errno==EINVAL) ? SQLITE_NOLFS : SQLITE_BUSY;
     }else{
       rc = SQLITE_OK;
+      if( !id->locked ){
+        id->pOpen->nLock++;
+        id->locked = 1;
+      }
       id->pLock->cnt = -1;
-      id->locked = 1;
     }
   }else{
     rc = SQLITE_BUSY;
@@ -1389,6 +1531,24 @@ int sqliteOsUnlock(OsFile *id){
     }else{
       rc = SQLITE_OK;
       id->pLock->cnt = 0;
+    }
+  }
+  if( rc==SQLITE_OK ){
+    /* Decrement the count of locks against this same file.  When the
+    ** count reaches zero, close any other file descriptors whose close
+    ** was deferred because of outstanding locks.
+    */
+    struct openCnt *pOpen = id->pOpen;
+    pOpen->nLock--;
+    assert( pOpen->nLock>=0 );
+    if( pOpen->nLock==0 && pOpen->nPending>0 ){
+      int i;
+      for(i=0; i<pOpen->nPending; i++){
+        close(pOpen->aPending[i]);
+      }
+      sqliteFree(pOpen->aPending);
+      pOpen->nPending = 0;
+      pOpen->aPending = 0;
     }
   }
   sqliteOsLeaveMutex();

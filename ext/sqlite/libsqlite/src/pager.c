@@ -594,7 +594,7 @@ static int pager_playback(Pager *pPager, int useJournalSize){
     goto end_playback;
   }
   if( format>=JOURNAL_FORMAT_3 ){
-    rc = read32bits(format, &pPager->jfd, &nRec);
+    rc = read32bits(format, &pPager->jfd, (u32*)&nRec);
     if( rc ) goto end_playback;
     rc = read32bits(format, &pPager->jfd, &pPager->cksumInit);
     if( rc ) goto end_playback;

@@ -17,6 +17,15 @@
 */
 
 /*
+** When converting from the native format to the key format and back
+** again, in addition to changing the byte order we invert the high-order
+** bit of the most significant byte.  This causes negative numbers to
+** sort before positive numbers in the memcmp() function.
+*/
+#define keyToInt(X)   (sqliteVdbeByteSwap(X) ^ 0x80000000)
+#define intToKey(X)   (sqliteVdbeByteSwap((X) ^ 0x80000000))
+
+/*
 ** The makefile scans this source file and creates the following
 ** array of string constants which are the names of all VDBE opcodes.
 ** This array is defined in a separate source code file named opcode.c
@@ -62,6 +71,8 @@ struct Cursor {
   Bool nullRow;         /* True if pointing to a row with no data */
   Bool nextRowidValid;  /* True if the nextRowid field is valid */
   Bool pseudoTable;     /* This is a NEW or OLD pseudo-tables of a trigger */
+  Bool deferredMoveto;  /* A call to sqliteBtreeMoveto() is needed */
+  int movetoTarget;     /* Argument to the deferred sqliteBtreeMoveto() */
   Btree *pBt;           /* Separate file holding temporary table */
   int nData;            /* Number of bytes in pData */
   char *pData;          /* Data for a NEW or OLD pseudo-table */
@@ -294,6 +305,8 @@ void sqliteVdbeSorterReset(Vdbe*);
 void sqliteVdbeAggReset(Agg*);
 void sqliteVdbeKeylistFree(Keylist*);
 void sqliteVdbePopStack(Vdbe*,int);
+int sqliteVdbeCursorMoveto(Cursor*);
+int sqliteVdbeByteSwap(int);
 #if !defined(NDEBUG) || defined(VDBE_PROFILE)
 void sqliteVdbePrintOp(FILE*, int, Op*);
 #endif
