@@ -64,6 +64,7 @@
 #include "rfc1867.h"
 #include "php_content_types.h"
 #include "SAPI.h"
+#include "php_unicode.h"
 
 #ifdef ZEND_MULTIBYTE
 #include "zend_multibyte.h"
@@ -176,6 +177,7 @@ const struct def_mbctype_tbl mbctype_tbl[] = {
 #endif
 
 function_entry mbstring_functions[] = {
+	PHP_FE(mb_convert_case,				NULL)
 	PHP_FE(mb_language,					NULL)
 	PHP_FE(mb_internal_encoding,		NULL)
 	PHP_FE(mb_http_input,				NULL)
@@ -717,6 +719,9 @@ PHP_MINIT_FUNCTION(mbstring)
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_REGEX", MB_OVERLOAD_REGEX, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("MB_CASE_UPPER", PHP_UNICODE_CASE_UPPER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_LOWER", PHP_UNICODE_CASE_LOWER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MB_CASE_TITLE", PHP_UNICODE_CASE_TITLE, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -2475,6 +2480,29 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
+
+/* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
+   Returns a case-folded version of sourcestring */
+PHP_FUNCTION(mb_convert_case)
+{
+	char *str, *from_encoding = (char*)mbfl_no2preferred_mime_name(MBSTRG(current_internal_encoding));
+	long str_len, from_encoding_len;
+	long case_mode = 0;
+	char *newstr;
+	size_t ret_len;
+
+	RETVAL_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|s!", &str, &str_len,
+				&case_mode, &from_encoding, &from_encoding_len) == FAILURE)
+		RETURN_FALSE;
+
+	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, from_encoding TSRMLS_CC);
+
+	if (newstr)
+		RETVAL_STRINGL(newstr, ret_len, 0);
+	
+}
+/* }}} */
 
 /* {{{ proto string mb_detect_encoding(string str [, mixed encoding_list])
    Encodings of the given string is returned (as a string) */
