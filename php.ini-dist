@@ -617,7 +617,7 @@ smtp_port = 25
 ; Force the addition of the specified parameters to be passed as extra parameters
 ; to the sendmail binary. These parameters will always replace the value of
 ; the 5th parameter to mail(), even in safe mode.
-;mail.force_extra_paramaters =
+;mail.force_extra_parameters =
 
 [SQL]
 sql.safe_mode = Off
