@@ -91,6 +91,14 @@ if test "$PHP_PDFLIB" != "no"; then
   dnl # The main PDFlib configure
   dnl #
 
+  dnl # MacOSX requires this
+  case $host_alias in
+    *darwin*)
+      PHP_ADD_FRAMEWORK(CoreServices)
+      PHP_ADD_FRAMEWORK(ApplicationServices)
+      ;;
+  esac
+
   case $PHP_PDFLIB in
     yes)
       AC_CHECK_LIB(pdf, PDF_show_boxed, [
