@@ -510,13 +510,15 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
 			*resp++ = start[++i];
 		} else {
-			*resp++ = start[i];
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
 				size_t j = php_mb_mbchar_bytes(start+i TSRMLS_CC);
 				while (j-- > 0) {
-					*resp++ = start[++i];
+					*resp++ = start[i++];
 				}
+				--i;
+			} else {
+				*resp++ = start[i];
 			}
 #endif
 		}
