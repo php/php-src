@@ -836,7 +836,7 @@ static PHP_METHOD(PDO, query)
 	ZVAL_NULL(&stmt->lazy_object_ref);
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, NULL TSRMLS_CC)) {
-		if (1) {//ZEND_NUM_ARGS() > 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
+		if (ZEND_NUM_ARGS() > 1 || SUCCESS == pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 1)) {
 			PDO_STMT_CLEAR_ERR();
 
 			/* now execute the statement */
