@@ -1,3 +1,55 @@
+2000-08-26  Daniel Beulshausen  <daniel@php4win.de>
+
+    * php_modules.dsw: updated with cybercash and dotnet
+
+    * ext/dotnet/dotnet.dsp:
+    added sam's readme and played with the directory's
+
+    * ext/cybercash/cybercash.dsp: dsp for cybercash
+
+2000-08-26  Stig Venaas  <venaas@uninett.no>
+
+    * NEWS: News about ldap.c change to allow building with OpenLDAP 2.0
+
+    * ext/ldap/ldap.c:
+    Makes it work with OpenLDAP 2.0 and reduces number of ifdefs
+
+2000-08-26  Zeev Suraski  <zeev@php.net>
+
+    * php.ini-dist
+      php.ini-optimized:
+    Advise people to use error logging instead of error displaying on production web sites
+
+2000-08-26  Andi Gutmans  <andi@php.net>
+
+    * ext/ingres_ii/ii.c:
+    - Also change constants. Note: PHP tries to make names intuitive.
+    - PHP extensions don't necessarily need to use the exact C counter part, it
+    - should be easy to read and not be short names such as II_*
+
+    * ext/ingres_ii/ii.c
+      ext/ingres_ii/php_ii.h:
+    - Asked the author a long time already to change the function names to
+    - something which won't take up all of the ii_* names (not verbose enough).
+    - I'm doing it myself now so it really has to be checked as I can't compile.
+    - Changed both the function names and INI parameter names.
+
+2000-08-26  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/mkdep.perl: mkdep.perl was replaced by mkdep.awk
+
+2000-08-26  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/dotnet/README
+      ext/dotnet/dotnet.cpp
+      ext/dotnet/dotnet.dsp
+      ext/dotnet/dotnet.php
+      ext/dotnet/php_dotnet.h
+      ext/standard/info.c
+      EXTENSIONS
+      ext/com/COM.c:
+    Add ***EXPERIMENTAL*** Zend OO Extension support for Microsoft.Net
+
 2000-08-25  Daniel Beulshausen  <daniel@php4win.de>
 
     * php_modules.dsw: added the ifx (informix) extension
