@@ -88,9 +88,9 @@ typedef struct _zend_brk_cont_element {
 } zend_brk_cont_element;
 
 
-#define FN_IS_STATIC 0x00000001
+#define FN_IS_STATIC 0x01
 
-#define FN_ABSTRACT  0x00000002
+#define FN_ABSTRACT  0x02
 
 struct _zend_op_array {
 	zend_uchar type;			/* MUST be the first element of this struct! */
@@ -98,7 +98,7 @@ struct _zend_op_array {
 	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
 	char *function_name;		/* MUST be the third element of this struct! */
 	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
-	int fn_flags;				/* MUST be the fifth element of this struct! */
+	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
 
 	zend_uint *refcount;
 
@@ -133,7 +133,7 @@ typedef struct _zend_internal_function {
 	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
 	char *function_name;		/* MUST be the third element of this struct! */
 	zend_class_entry *scope;	/* MUST be the fourth element of this struct! */
-	int fn_flags;				/* MUST be the fifth element of this struct! */
+	zend_uint fn_flags;				/* MUST be the fifth element of this struct! */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
 } zend_internal_function;
@@ -148,7 +148,7 @@ typedef union _zend_function {
 		zend_uchar *arg_types;
 		char *function_name;
 		zend_class_entry *scope;
-		int fn_flags;
+		zend_uint fn_flags;
 	} common;
 	
 	zend_op_array op_array;
@@ -295,7 +295,7 @@ void zend_do_add_char(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_string(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, znode *op1, znode *op2 TSRMLS_DC);
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, int fn_flags TSRMLS_DC);
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags TSRMLS_DC);
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initialization, zend_uchar pass_type TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);

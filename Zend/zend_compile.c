@@ -909,7 +909,7 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, int fn_flags  TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, zend_uint fn_flags  TSRMLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -1530,12 +1530,12 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 }
 
 static zend_bool do_inherit_method_check(zend_function *child, zend_function *parent) {
-	register zend_uint child_flags  = child->common.fn_flags;
-	register zend_uint parent_flags = parent->common.fn_flags;
+	zend_uint child_flags  = child->common.fn_flags;
+	zend_uint parent_flags = parent->common.fn_flags;
 
 	/* You cannot change from static to non static and vice versa.
 	 */
-	if ((child_flags&FN_IS_STATIC) != (parent_flags&FN_IS_STATIC)) {
+	if ((child_flags & FN_IS_STATIC) != (parent_flags & FN_IS_STATIC)) {
 		if (child->common.fn_flags & FN_IS_STATIC) {
 			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
 		} else {
