@@ -335,6 +335,25 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 	}
 }
 
+
+static void zend_std_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC)
+{
+	zend_error("Cannot use object as array");
+#if 0
+	zend_printf("Assigning to object:  ");
+	zend_print_zval(object, 0);
+
+	zend_printf("\n with offset:  ");
+	zend_print_zval(offset, 0);
+
+	zend_printf("\n the value:  ");
+	zend_print_zval(value, 0);
+#endif
+
+	zend_printf("\n");
+}
+
+
 static zval **zend_std_get_property_ptr(zval *object, zval *member TSRMLS_DC)
 {
 	zend_object *zobj;
@@ -816,6 +835,7 @@ zend_object_handlers std_object_handlers = {
 	
 	zend_std_read_property,                  /* read_property */
 	zend_std_write_property,                 /* write_property */
+	zend_std_write_dimension,                /* write_dimension */
 	zend_std_get_property_ptr,               /* get_property_ptr */
 	zend_std_get_property_ptr,               /* get_property_zval_ptr */
 	NULL,                                    /* get */
