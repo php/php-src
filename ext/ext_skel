@@ -13,7 +13,7 @@ givup() {
 }
 
 if test "$extname" = ""; then
-	givup "usage: $0 extension-name [/full/path/to/function-list]"
+	givup "usage: $0 extension-name [function-list]"
 fi
 
 if test -d "$extname" ; then
