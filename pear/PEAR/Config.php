@@ -45,6 +45,22 @@ define('PEAR_CONFIG_DEFAULT_DATADIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
 define('PEAR_CONFIG_DEFAULT_TESTDIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
+if (@is_dir(PHP_SYSCONFDIR)) {
+    define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
+} else {
+    if (OS_WINDOWS) {
+        if (@is_dir('c:\php')) {
+            define('PEAR_CONFIG_SYSCONFDIR', 'c:\php');
+        } elseif (@is_dir('c:\php4')) {
+            define('PEAR_CONFIG_SYSCONFDIR', 'c:\php4');
+        } elseif (@is_dir('c:\program files\php')) {
+            define('PEAR_CONFIG_SYSCONFDIR', 'c:\program files\php');
+        }
+    }
+    if (!defined('PEAR_CONFIG_SYSCONFDIR')) {
+        define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
+    }
+}
 define('PEAR_DEFAULT_UMASK', umask());
 
 /**
