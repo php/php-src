@@ -1,3 +1,28 @@
+2003-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_hash.c:
+      This is meant to be used in for(;has_more;next)
+
+    * zend_hash.c
+      zend_hash.h:
+      Add missing function to ease implementations
+
+2003-07-19  Jani Taskinen  <sniper@iki.fi>
+
+    * zend.h:
+      Fix the HPUX alloca fix as suggested by Sascha
+
+2003-07-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_objects.c
+      zend_objects.h:
+      Shuffle code to ease writing clone handlers
+
+2003-07-19  Andi Gutmans  <andi@zend.com>
+
+    * zend.h:
+      - Don't use alloca on HP-UX (Moriyoshi Koizumi <moriyoshi@at.wakwak.com>)
+
 2003-07-16  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c:
