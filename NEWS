@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, Version 4.3.4RC2
 - Fixed bug #25703 (openssl checks failed). (Jani)
+- Fixed bug #25701 (On flush() set headers_sent in apache2handler). (Ilia)
 - Fixed bug #25669 (eregi() with non-ascii characters). (Moriyoshi)
 
 29 Sep 2003, Version 4.3.4RC1

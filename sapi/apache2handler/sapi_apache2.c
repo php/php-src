@@ -262,6 +262,7 @@ php_apache_sapi_flush(void *server_context)
 	brigade = ctx->brigade;
 
 	r->status = SG(sapi_headers).http_response_code;
+	SG(headers_sent) = 1;
 
 	/* Send a flush bucket down the filter chain. */
 	bucket = apr_bucket_flush_create(r->connection->bucket_alloc);
