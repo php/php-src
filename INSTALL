@@ -296,6 +296,47 @@ Installing PHP can be done in four simple steps:
    Note!  If a line has a # at the beginning, then it is commented out
    and you need to remove the # for that line to take effect.
 
+WHY DISABLING -fPIC WORKS ON LINUX
+
+    From: Martin v. Loewis <martin@loewis.home.cs.tu-berlin.de>
+    To: glibc-linux@ricardo.ecn.wfu.edu
+    Subject: Re: Shared library -shared vs. -fpic
+
+    [In reply to Kaz Kylheku <kaz@ashi.footprints.net>]
+
+    > PIC stands for Position-Independent Code. 
+
+    Correct.
+
+    > Code isn't position-independent (or ``relocatable'') cannot be
+    > loaded at an arbitrary address;
+
+    Wrong.
+
+    > it requires some references to be patched at load time.
+
+    Correct.
+
+    > Shared libraries need to be relocatable because it's not known
+    > beforehand what address they will be loaded at
+
+    Correct, depending on the meaning of "relocatable". PIC code typically
+    does not contain relocations; that's why its position-independent.
+
+    > Just because you don't specify -fPIC doesn't mean that the compiler
+    > won't emit position-independent code; the option prevents it from
+    > emitting position-dependent code in situations where it otherwise
+    > would.
+
+    Correct. However, a non-trivial shared library typically won't be
+    position-independent unless explicitly compiled with
+    -fPIC. Linux/glibc indeed does not require a shared library to be
+    position-independent; instead, it will perform the relocations in the
+    binary, even if they refer to code pages. As a result, those relocated
+    pages won't be shared across processes, anymore.
+
+    Regards,
+    Martin
 
 USING PHP 3 AND PHP 4 AS CONCURRENT APACHE MODULES
 
