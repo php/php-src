@@ -334,18 +334,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #endif
 
 #ifdef __FreeBSD__
-	{
-		/* FreeBSD floating point precision fix */
-#ifdef HAVE_FP_EXCEPT
-		fp_except
-#else
-		fp_except_t
-#endif
-		mask;
-
-		mask = fpgetmask();
-		fpsetmask(mask & ~FP_X_IMP);
-	} 
+	/* FreeBSD floating point precision fix */
+	fpsetmask(0);
 #endif
 
 	zend_startup_extensions_mechanism();
