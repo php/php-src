@@ -123,6 +123,7 @@ AC_CACHE_VAL(php_cv_cc_dashr,[
 AC_MSG_RESULT($php_cv_cc_dashr)
 if test $php_cv_cc_dashr = "yes"; then
 	ld_runpath_switch="-R"
+	raw_runpath_switch="-R"
 	apxs_runpath_switch="-Wl,-R'"
 else
 	AC_MSG_CHECKING([if compiler supports -Wl,-rpath,])
@@ -134,10 +135,12 @@ else
 	AC_MSG_RESULT($php_cv_cc_rpath)
 	if test $php_cv_cc_rpath = "yes"; then
 		ld_runpath_switch="-Wl,-rpath,"
+		raw_runpath_switch="-rpath "
 		apxs_runpath_switch="-Wl,'-rpath "
 	else
 		dnl something innocuous
 		ld_runpath_switch="-L"
+		raw_runpath_switch="-L"
 		apxs_runpath_switch="-L'"
 	fi
 fi
@@ -416,6 +419,7 @@ AC_ARG_WITH(shared-apache,
 	  withval=/usr/local/etc/httpd
 	fi
 	if test "$withval" != "no"; then
+      rpath_raw=yes
 	  if test -f $withval/src/include/httpd.h; then
         AC_EXPAND_PATH($withval, withval)
 	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
@@ -474,6 +478,7 @@ AC_ARG_WITH(apache,
 	  withval=/usr/local/etc/httpd
 	fi
 	if test "$withval" != "no"; then
+      rpath_raw=yes
 # For Apache 1.2.x
       AC_EXPAND_PATH($withval, withval)
 	  if test -f $withval/src/httpd.h; then 
