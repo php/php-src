@@ -1,3 +1,43 @@
+2001-04-18  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB.php: * fix handling of broken DSNs like Colin suggested
+
+2001-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH (bug #8839 again)
+
+    * ext/mcrypt/mcrypt.c:
+    - Fixed some more problems with keys being chopped off (fix for bug #8839)
+
+2001-04-18  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Function yaz_record returns database for record if type is "database".
+
+2001-04-18  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_pgsql.c: Removed some old commented code (Mc)
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h:
+    Added DBX_CMP_TEXT and DBX_CMP_NUMBER constants and support for them in
+    the dbx_cmp_desc and dbx_cmp_asc functions. The old method of passing a
+    string "number" is now no longer valid. (Mc)
+
+2001-04-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h:
+    Support notice which should be used to query bots etc.
+
+2001-04-18  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * README.STREAMS: Information about php streams
+
+2001-04-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcrypt/mcrypt.c: - MFH (Bug #8839)
+
 2001-04-17  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/ircg/ircg.c:
