@@ -1548,7 +1548,7 @@ void php_module_shutdown(TSRMLS_D)
 PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 {
 	zend_file_handle *prepend_file_p, *append_file_p;
-	zend_file_handle prepend_file, append_file;
+	zend_file_handle prepend_file = {0}, append_file = {0};
 #if HAVE_BROKEN_GETCWD 
 	int old_cwd_fd = -1;
 #else
