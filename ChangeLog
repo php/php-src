@@ -1,3 +1,110 @@
+2002-04-28  Jani Taskinen  <sniper@iki.fi>
+
+    * build/rules.mk: Fixed bug: #16858
+
+2002-04-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c: touch file
+
+    * ext/standard/url_scanner_ex.c: Touch generated file
+
+2002-04-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c
+      win32/php4dll.dsp
+      win32/php4dllts.dsp:
+    Enable bundled build of ext/ctype and ext/mbstring on Win32.
+
+2002-04-28  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re
+      ext/standard/var.c: MFH: serializer/unserializer fix
+
+    * ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re: Fix couple of nasty serializer bugs:
+    a) When array unserializer encounters less data than it expects (like:
+    a:1:{}) it crashes. I don't understand exactly why it does, but the fact
+    is it does. So now it should catch "}" and bail out.
+    b) When array/object data are serialized, the count is written by hash
+    count. However, it can be that in-loop check fails and less data than
+    expected will then be written into the array. Which, due to a), would
+    crash on unserialize. So now it will write empty entries in place of
+    entries it cannot serialize (the other choice would be make two passes on
+    the data, which I don't like).
+
+2002-04-28  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/url_scanner_ex.c: timestamp
+
+    * NEWS
+      ext/session/php_session.h
+      ext/session/session.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re:
+    revert session_set_userdata - diffent patch will come shortly
+
+2002-04-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * forgot script element in release contents
+
+    * pear/PEAR/Common.php
+      pear/package.dtd: * package.dtd: version 1.0b7
+      - added <provides> element
+      - added <script> element
+
+    * pear/PEAR/Command/Remote.php:
+    * implemented "list-remote-packages" command
+
+    * pear/PEAR/Remote.php:
+    * implemented stub for XML_RPC fallback if xmlrpc-epi is not installed
+
+2002-04-28  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/HTML/IT.php
+      pear/HTML/ITX.php
+      pear/HTML/IT_Error.php: Move IT[X] to /pear.
+
+    * pear/HTML/Menu.php
+      pear/HTML/Menu_Browser.php: Move Menu* to /pear.
+
+2002-04-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/php_mysql.c:
+    - Added optional 3rd parameter to mysql_select_db() which makes it return
+      the previously selected database name. 
+
+    * ext/mysql/php_mysql.c: kill a compile warning
+
+    * acinclude.m4
+      sapi/apache/libphp4.module.in: Fix build when openssl is enabled.
+
+    * ext/standard/url_scanner_ex.c:
+    touch file. Please commit first the .re file and afterwards the .c source. Otherwise, timestamps will be broken.
+
+    * Makefile.global: Missing dependancies..
+
+2002-04-28  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/odbc.php:
+    Fix odbc_fetch_into() compat for 4.2.0 (reported by Nate Ward)
+
+2002-04-28  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: - Cleaned out the CVS commit conflicts..
+
+    * acinclude.m4: Fix bug: #16823
+
+    * ext/iconv/iconv.c: ws fix
+
+2002-04-28  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/tests/file/003.phpt
+      ext/standard/tests/file/003.inc: Add test case for file_exist/is_file
+
 2002-04-27  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/zlib/zlib.c: s/len/xln/ was necessary here
