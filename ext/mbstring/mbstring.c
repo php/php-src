@@ -288,7 +288,12 @@ php_mbstring_parse_encoding_list(const char *value, int value_length, int **retu
 		return 0;
 	} else {
 		/* copy the value string for work */
-		tmpstr = (char *)estrndup(value, value_length);
+		if (value[0]=='"' && value[value_length-1]=='"' && value_length>2) {
+			tmpstr = (char *)estrndup(value+1, value_length-2);
+			value_length -= 2;
+		}
+		else
+			tmpstr = (char *)estrndup(value, value_length);
 		if (tmpstr == NULL) {
 			return 0;
 		}
@@ -644,7 +649,7 @@ PHP_INI_BEGIN()
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
 #if !defined(COMPILE_DL_MBSTRING)
-	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0", PHP_INI_SYSTEM, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
+	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0", PHP_INI_ALL, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
 #endif /* !defined(COMPILE_DL_MBSTRING) */
 PHP_INI_END()
 
@@ -995,7 +1000,7 @@ PHP_FUNCTION(mb_http_input)
 {
 	pval **arg1;
 	int result=0, retname, n, *entry;
-	char *name;
+	char *name, *list, *temp;
 
 	retname = 1;
 	if (ZEND_NUM_ARGS() == 0) {
@@ -1034,6 +1039,32 @@ PHP_FUNCTION(mb_http_input)
 				entry++;
 				n--;
 			}
+			retname = 0;
+			break;
+		case 'L':
+		case 'l':
+			entry = MBSTRG(http_input_list);
+			n = MBSTRG(http_input_list_size);
+			list = NULL;
+			while (n > 0) {
+				name = (char *)mbfl_no_encoding2name(*entry);
+				if (name) {
+					if (list) {
+						temp = list;
+						spprintf(&list, 0, "%s,%s", temp, name);
+						efree(temp);
+						if (!list) 
+							break;
+					} else {
+						list = estrdup(name);
+					}
+				}
+				entry++;
+				n--;
+			}
+			if (!list)
+				RETURN_FALSE;
+			RETVAL_STRING(list, 0);
 			retname = 0;
 			break;
 		default:
