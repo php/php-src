@@ -1,14 +1,6 @@
 ## Process this file with automake to produce Makefile.in -*- makefile -*-
 AUTOMAKE_OPTIONS=foreign
-zendlibdir = $(libdir)/zend
-zendlib_LIBRARIES=libzend.a
-zendincludedir = $(includedir)/zend
-zendinclude_HEADERS=zend.h zend_llist.h zend_config.h config.unix.h \
-                    zend_errors.h zend_alloc.h zend_hash.h zend_API.h \
-                    modules.h zend_list.h zend_globals.h zend_stack.h \
-                    zend_ptr_stack.h zend_compile.h zend_execute.h \
-                    zend-parser.h zend_operators.h zend_variables.h \
-                    zend_constants.h
+noinst_LIBRARIES=libzend.a
 libzend_a_SOURCES=\
 	zend-parser.y zend-scanner.l \
 	zend_alloc.c zend_compile.c zend_constants.c \
