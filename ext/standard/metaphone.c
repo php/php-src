@@ -183,12 +183,12 @@ static int metaphone(char *word, int word_len, int max_phonemes, char **phoned_w
 /*-- Allocate memory for our phoned_phrase --*/
 	if (max_phonemes == 0) {	/* Assume largest possible */
 		max_buffer_len = word_len;
-		*phoned_word = emalloc(sizeof(char) * word_len + 1);
+		*phoned_word = safe_emalloc(sizeof(char), word_len, 1);
 		if (!*phoned_word)
 			return -1;
 	} else {
 		max_buffer_len = max_phonemes;
-		*phoned_word = emalloc(sizeof(char) * max_phonemes + 1);
+		*phoned_word = safe_emalloc(sizeof(char), max_phonemes, 1);
 		if (!*phoned_word)
 			return -1;
 	}

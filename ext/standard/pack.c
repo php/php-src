@@ -122,7 +122,7 @@ PHP_FUNCTION(pack)
 		WRONG_PARAM_COUNT;
 	}
 
-	argv = emalloc(argc * sizeof(zval **));
+	argv = safe_emalloc(sizeof(zval **), argc, 0);
 
 	if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		efree(argv);
@@ -134,8 +134,8 @@ PHP_FUNCTION(pack)
 	formatlen = Z_STRLEN_PP(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
-	formatcodes = emalloc(formatlen * sizeof(*formatcodes));
-	formatargs = emalloc(formatlen * sizeof(*formatargs));
+	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
+	formatargs = safe_emalloc(formatlen, sizeof(*formatargs), 0);
 	currentarg = 1;
 
 	/* Preprocess format into formatcodes and formatargs */
