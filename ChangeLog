@@ -1,3 +1,20 @@
+2000-03-08  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c
+      ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c
+      tests/testhyperwave: - several fixes and cleanups in hw module
+
+2000-03-08  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Typo.
+
+    * NEWS: blah
+
+    * ext/session/session.c:
+    Anything in $HTTP_SESSION_VARS[] is auto-registered, if register_globals
+    is turned off.
+
 2000-03-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
 
     * ext/pdf/pdf.c: - support for pdflib 3.0
