@@ -1932,7 +1932,7 @@ PHP_FUNCTION(call_user_func_array)
 	}
 
 	if (!zend_is_callable(*func, 0, &name)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argumented is expected to be a valid callback, '%s' was given", name);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "First argument is expected to be a valid callback, '%s' was given", name);
 		efree(name);
 		RETURN_NULL();
 	}
