@@ -416,6 +416,7 @@ static char *exif_get_tagformat(int format)
 /* 0x5090 - 0x5091 */
 /* 0x5100 - 0x5101 */
 /* 0x5110 - 0x5113 */
+/* 0x80E3 - 0x80E6 */
 /* 0x828d - 0x828F */
 #define TAG_COPYRIGHT                   0x8298
 #define TAG_EXPOSURETIME                0x829A
@@ -451,6 +452,8 @@ static char *exif_get_tagformat(int format)
 #define TAG_SUB_SEC_TIME                0x9290
 #define TAG_SUB_SEC_TIME_ORIGINAL       0x9291
 #define TAG_SUB_SEC_TIME_DIGITIZED      0x9292
+/* 0x923F */
+/* 0x935C */
 #define TAG_XP_TITLE                    0x9C9B
 #define TAG_XP_COMMENTS                 0x9C9C
 #define TAG_XP_AUTHOR                   0x9C9D
@@ -608,7 +611,7 @@ static const tag_info_array tag_table_IFD = {
   { 0x0212, "YCbCrSubSampling"},
   { 0x0213, "YCbCrPositioning"},
   { 0x0214, "ReferenceBlackWhite"},
-/*{ 0x02BC, "Photoshop/RDF"},*/
+  { 0x02BC, "ExtensibleMetadataPlatform"}, /* XAP: Extensible Authoring Publishing, obsoleted by XMP: Extensible Metadata Platform */
   { 0x0301, "Gamma"}, 
   { 0x0302, "ICCProfileDescriptor"}, 
   { 0x0303, "SRGBRenderingIntent"}, 
@@ -678,6 +681,10 @@ static const tag_info_array tag_table_IFD = {
   { 0x5113, "PaletteHistogram"}, 
   { 0x1000, "RelatedImageFileFormat"},
   { 0x800D, "ImageID"},
+  { 0x80E3, "Matteing"},   /* obsoleted by ExtraSamples */
+  { 0x80E4, "DataType"},   /* obsoleted by SampleFormat */
+  { 0x80E5, "ImageDepth"},
+  { 0x80E6, "TileDepth"},
   { 0x828D, "CFARepeatPatternDim"},
   { 0x828E, "CFAPattern"},
   { 0x828F, "BatteryLevel"},
@@ -724,11 +731,13 @@ static const tag_info_array tag_table_IFD = {
   { 0x9215, "ExposureIndex"},               /* 0xA215    -  -    */
   { 0x9216, "TIFF/EPStandardID"},
   { 0x9217, "SensingMethod"},               /* 0xA217    -  -    */
+  { 0x923F, "StoNits"},
   { 0x927C, "MakerNote"},
   { 0x9286, "UserComment"},
   { 0x9290, "SubSecTime"},
   { 0x9291, "SubSecTimeOriginal"},
   { 0x9292, "SubSecTimeDigitized"},
+  { 0x935C, "ImageSourceData"},             /* "Adobe Photoshop Document Data Block": 8BIM... */
   { 0x9c9b, "Title" },                      /* Win XP specific, Unicode  */
   { 0x9c9c, "Comments" },                   /* Win XP specific, Unicode  */
   { 0x9c9d, "Author" },                     /* Win XP specific, Unicode  */
@@ -3271,7 +3280,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					  && entry_offset == dir_offset + ifd_size) {
 						ifd_size = entry_offset + entry_length - dir_offset;
 #ifdef EXIF_DEBUG
-						php_error(E_NOTICE, "%s(): Correcting: 0x%08X + 0x%08X - 0x%08X", get_active_function_name(TSRMLS_C), entry_offset, entry_length, dir_offset);
+						php_error(E_NOTICE, "%s(): Resize struct: x%04X + x%04X - x%04X = x%04X", get_active_function_name(TSRMLS_C), entry_offset, entry_length, dir_offset, ifd_size);
 #endif
 					}
 				}
