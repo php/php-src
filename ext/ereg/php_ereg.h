@@ -22,7 +22,7 @@
 #ifndef REG_H
 #define REG_H
 
-char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
+PHPAPI char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended);
 
 PHP_FUNCTION(ereg);
 PHP_FUNCTION(eregi);
