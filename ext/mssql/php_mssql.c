@@ -1903,7 +1903,7 @@ PHP_FUNCTION(mssql_bind)
 	mssql_link *mssql_ptr;
 	mssql_statement *statement;
 	mssql_bind bind,*bindp;
-	int id = 0, status = 0;
+	int status = 0;
 	LPBYTE value = NULL;
 
 	/* BEGIN input validation */
@@ -2062,7 +2062,6 @@ PHP_FUNCTION(mssql_execute)
 	mssql_statement *statement;
 	mssql_result *result;
 	int num_fields;
-	int blocks_initialized=1;
 	int batchsize;
 	int ac = ZEND_NUM_ARGS();
 
