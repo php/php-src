@@ -114,9 +114,9 @@ fi
 
 ./scripts/preconfig
 
-rm -f ltmain.sh
+rm -f ltmain.sh ltconfig
 libtoolize --automake --copy --force
-patch ltmain.sh < patch-ltmain.sh
+cat patch-?? | patch
 
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
