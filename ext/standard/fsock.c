@@ -55,6 +55,9 @@
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include <string.h>
 #include <errno.h>
