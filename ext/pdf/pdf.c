@@ -53,7 +53,7 @@ static int le_gd;
 /* }}} */
 
 #if HAVE_PDFLIB || HAVE_PDFLIB3
-#warning boo
+
 #include "php_pdf.h"
 
 static int le_pdf;
