@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Fixed bug #19482 (Segfault with PCRE and locale). (Andrei)
 - Make ImageTruecolorToPalette() in bundled GD2 library actually work. (Rasmus)
 - Fix ImageCopy() in bundled GD2 library to handle copying from truecolor to
   palette-based.  (Wez, Rasmus)
