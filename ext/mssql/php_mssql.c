@@ -800,6 +800,10 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			char *data = charcol(offset);
 
 			length=dbdatlen(mssql_ptr->link,offset);
+			if (!length) {
+				ZVAL_EMPTY_STRING(result);
+				break;
+			}
 #if ilia_0
 			while (length>0 && data[length-1] == ' ') { /* nuke trailing whitespace */
 				length--;
