@@ -1,3 +1,61 @@
+2005-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_db1.c
+      ext/dba/php_db1.h
+      ext/dba/tests/dba_db1.phpt:
+      - Add support for db1 through emulation
+
+2005-02-25  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/mssql/php_mssql.c:
+      MFH: FreeTDS does not have support for DBTEXTLIMIT
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      FreeTDS does not have support for DBTEXTLIMIT
+
+2005-02-25  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/domxml/php_domxml.c:
+      no message
+
+2005-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/config.m4:
+      - Align
+
+2005-02-25  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/config.m4:
+      fix bug preventing from building oci8 as shared module
+      (patch by stanislav dot voroniy at portavita dot nl)
+
+2005-02-25  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/tests/bug30967.phpt
+      ext/mysqli/tests/bug30967.phpt:
+      fix for bug #31939
+
+2005-02-25  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/sendmail_nw.h:
+      changing the windows style path seperator in netinet\in.h to netinet/in.h
+
+    * win32/sendmail.c:
+      time.h is available in NetWare LibC.
+      path sperator has been changed from \ to / while including
+      netware\sendmail_nw.h
+
+2005-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/config.w32:
+      - Change to enable (synch with unix build system)
+
 2005-02-24  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
