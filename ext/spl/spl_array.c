@@ -378,23 +378,19 @@ zval *spl_array_read_dimension(zval *object, zval *offset TSRMLS_DC)
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		if (!zend_is_numeric_key(offset, &index)) {
-			if (zend_hash_find(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
-				return EG(uninitialized_zval_ptr);
-			} else {
-				return *retval;
-			}
-			break;
+		if (zend_symtable_find(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
+			zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+			return EG(uninitialized_zval_ptr);
+		} else {
+			return *retval;
 		}
-		/* NO break */
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL: 
 	case IS_LONG: 
 		if (offset->type == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
-		} else if (offset->type != IS_STRING) {
+		} else {
 			index = Z_LVAL_P(offset);
 		}
 		if (zend_hash_index_find(HASH_OF(intern->array), index, (void **) &retval) == FAILURE) {
@@ -419,18 +415,15 @@ void spl_array_write_dimension(zval *object, zval *offset, zval *value TSRMLS_DC
 
 	switch(Z_TYPE_P(offset)) {
 	case IS_STRING:
-		if (!zend_is_numeric_key(offset, &index)) {
-			add_assoc_zval(intern->array, Z_STRVAL_P(offset), value);
-			return;
-		}
-		/* NO break */
+		zend_symtable_update(HASH_OF(intern->array), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
+		return;
 	case IS_DOUBLE:
 	case IS_RESOURCE:
 	case IS_BOOL: 
 	case IS_LONG: 
 		if (offset->type == IS_DOUBLE) {
 			index = (long)Z_DVAL_P(offset);
-		} else if (offset->type != IS_STRING) {
+		} else {
 			index = Z_LVAL_P(offset);
 		}
 		add_index_zval(intern->array, index, value);
