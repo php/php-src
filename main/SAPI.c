@@ -301,7 +301,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 
 			&& !strcmp(SG(request_info).request_method, "POST")) {
-			if (!SG(request_info).content_type) {
+			if (!SG(request_info).content_type && !PG(always_populate_raw_post_data)) {
 				sapi_module.sapi_error(E_WARNING, "No content-type in POST request");
 				SG(request_info).content_type_dup = NULL;
 			} else {
