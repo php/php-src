@@ -20,7 +20,7 @@ AC_ARG_WITH(cpdflib,
       test -f $withval/include/cpdflib.h && CPDFLIB_INCLUDE=$withval/include
       if test -n "$CPDFLIB_INCLUDE" ; then
         AC_MSG_RESULT(yes)
-        PHP_EXTENSION(cpdf, cpdf.c)
+        PHP_NEW_EXTENSION(cpdf, cpdf.c)
         old_LIBS=$LIBS
         old_withval=$withval
 
