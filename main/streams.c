@@ -737,7 +737,7 @@ static int php_stdiop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 	return fstat(fd, &ssb->sb);
 }
 
-php_stream_ops	php_stream_stdio_ops = {
+PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
 	php_stdiop_close, php_stdiop_flush,
 	"STDIO",

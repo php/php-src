@@ -276,7 +276,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * src STREAMS_DC TSRMLS_DC);
 #define php_stream_error(stream)	(0)
 
 /* operations for a stdio FILE; use the php_stream_fopen_XXX funcs below */
-extern php_stream_ops php_stream_stdio_ops;
+PHPAPI extern php_stream_ops php_stream_stdio_ops;
 /* like fopen, but returns a stream */
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC TSRMLS_DC);
 #define php_stream_fopen(filename, mode, opened)	_php_stream_fopen((filename), (mode), (opened) STREAMS_CC TSRMLS_CC)

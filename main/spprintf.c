@@ -605,7 +605,7 @@ static int xbuf_format_converter(register xbuffy * xbuf, const char *fmt, va_lis
 /*
  * This is the general purpose conversion function.
  */
-int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
+PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap)
 {
 	xbuffy xbuf;
 	int cc;
