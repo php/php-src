@@ -1048,20 +1048,20 @@ inline static void gdImageSetAAPixelColor(gdImagePtr im, int x, int y, int color
 
 void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 {
-/* keep them as 32bits */
-long x, y, inc;
+	/* keep them as 32bits */
+	long x, y, inc;
 	long dx, dy,tmp;
 
 	if (y1 < 0 && y2 < 0) {
 		return;
 	}
 	if (y1 < 0) {
-	x1 += (y1 * (x1 - x2)) / (y2 - y1);
+		x1 += (y1 * (x1 - x2)) / (y2 - y1);
 		y1 = 0;
 	}
 	if (y2 < 0) {
 		x2 += (y2 * (x1 - x2)) / (y2 - y1);
-	y2 = 0;
+		y2 = 0;
 	}
 
 	/* bottom edge */
