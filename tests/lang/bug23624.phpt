@@ -9,4 +9,4 @@ Bug #23624 (foreach leaves current array key as null)
 ?>
 --EXPECT--
 string(3) "one"
-string(5) "three"
+bool(false)
