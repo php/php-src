@@ -1573,6 +1573,11 @@ PHP_FUNCTION(strtr)
 
 	convert_to_string_ex(str);
 
+	/* shortcut for empty string */
+	if(Z_STRLEN_PP(str) == 0) {
+		RETURN_EMPTY_STRING();
+	}
+
 	if (ac == 2) {
 		php_strtr_array(return_value,(*str)->value.str.val,(*str)->value.str.len,HASH_OF(*from));
 	} else {
