@@ -648,10 +648,12 @@ class PEAR_Installer extends PEAR_Common
                     continue;
                 }
             }
-            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors,
-                $version, $origpkgfile, $state);
-            if (PEAR::isError($pkgfile)) {
-                return $pkgfile;
+            if (!@is_file($pkgfile)) {
+                $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors,
+                                                $version, $origpkgfile, $state);
+                if (PEAR::isError($pkgfile)) {
+                    return $pkgfile;
+                }
             }
             $tempinfo = $this->infoFromAny($pkgfile);
             if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
@@ -661,7 +663,7 @@ class PEAR_Installer extends PEAR_Common
                 }
             }
             $installpackages[] = array('pkg' => $tempinfo['package'],
-                'file' => $pkgfile, 'info' => $tempinfo);
+                                       'file' => $pkgfile, 'info' => $tempinfo);
         }
 
         // extract dependencies from downloaded files and then download them
