@@ -1633,6 +1633,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int optio
 	}
 
 	if (stream) {
+		if (stream->orig_path) {
+			pefree(stream->orig_path, persistent);
+		}
 		copy_of_path = pestrdup(path, persistent);
 		stream->orig_path = copy_of_path;
 	}
