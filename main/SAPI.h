@@ -123,7 +123,6 @@ SAPI_API extern int sapi_globals_id;
 extern SAPI_API sapi_globals_struct sapi_globals;
 #endif
 
-
 SAPI_API void sapi_startup(sapi_module_struct *sf);
 SAPI_API void sapi_shutdown(void);
 SAPI_API void sapi_activate(TSRMLS_D);

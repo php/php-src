@@ -39,9 +39,6 @@
 
 static HashTable known_post_content_types;
 
-SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
-
-
 #ifdef ZTS
 SAPI_API int sapi_globals_id;
 #else
@@ -55,7 +52,6 @@ static void sapi_globals_ctor(sapi_globals_struct *sapi_globals TSRMLS_DC)
 
 /* True globals (no need for thread safety) */
 SAPI_API sapi_module_struct sapi_module;
-SAPI_API void (*sapi_error)(int error_type, const char *message, ...);
 
 
 SAPI_API void sapi_startup(sapi_module_struct *sf)
