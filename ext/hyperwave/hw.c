@@ -776,7 +776,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 
 		return_value->value.lval = zend_list_insert(ptr,HwSG(le_psocketp));
-		return_value->type = IS_LONG;
+		return_value->type = IS_RESOURCE;
 	
 	} else {
 		list_entry *index_ptr,new_index_ptr;
@@ -848,7 +848,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		ptr->username = strdup("anonymous");
 	
 		return_value->value.lval = zend_list_insert(ptr,HwSG(le_socketp));
-		return_value->type = IS_LONG;
+		return_value->type = IS_RESOURCE;
 	
 		new_index_ptr.ptr = (void *) return_value->value.lval;
 		new_index_ptr.type = le_index_ptr;
