@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Improved round() to allow specification of rounding precision.
+  (Andrei, Todd Kirby <kirbyt@yahoo.com>)
 - Added SORT_REGULAR, SORT_NUMERIC, SORT_STRING flags that can be used with
   non-user sort functions for precise sorting behavior. (Andrei)
 - Fixed two 64-bit issues (startup crash, gethostbyaddr). (Sascha)
