@@ -69,7 +69,7 @@ PHP_ARG_ENABLE(dba,whether to enable DBA,
 [  --enable-dba            Build DBA with builtin modules])
 
 AC_ARG_WITH(gdbm,
-[  --with-gdbm[=DIR]       Include GDBM support],[
+[  --with-gdbm[=DIR]         DBA: Include GDBM support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     for i in $withval /usr/local /usr; do
@@ -100,7 +100,7 @@ AC_ARG_WITH(gdbm,
 AC_DBA_STD_RESULT(gdbm)
 
 AC_ARG_WITH(ndbm,
-[  --with-ndbm[=DIR]       Include NDBM support],[
+[  --with-ndbm[=DIR]         DBA: Include NDBM support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     for i in $withval /usr/local /usr; do
@@ -168,7 +168,7 @@ int main() {
 ])
 
 AC_ARG_WITH(db4,
-[  --with-db4[=DIR]        Include Berkeley DB4 support],[
+[  --with-db4[=DIR]          DBA: Include Berkeley DB4 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     for i in $withval /usr/local/BerkeleyDB.4.1 /usr/local/BerkeleyDB.4.0 /usr/local /usr; do
@@ -200,7 +200,7 @@ AC_ARG_WITH(db4,
 AC_DBA_STD_RESULT(db4,Berkeley DB4)
 
 AC_ARG_WITH(db3,
-[  --with-db3[=DIR]        Include Berkeley DB3 support],[
+[  --with-db3[=DIR]          DBA: Include Berkeley DB3 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     if test "$HAVE_DB4" = "1"; then
@@ -235,7 +235,7 @@ AC_ARG_WITH(db3,
 AC_DBA_STD_RESULT(db3,Berkeley DB3)
 
 AC_ARG_WITH(db2,
-[  --with-db2[=DIR]        Include Berkeley DB2 support],[
+[  --with-db2[=DIR]          DBA: Include Berkeley DB2 support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     if test "$HAVE_DB3" = "1" -o "$HAVE_DB4" = "1"; then
@@ -270,7 +270,7 @@ AC_ARG_WITH(db2,
 AC_DBA_STD_RESULT(db2,Berkeley DB2)
 
 AC_ARG_WITH(dbm,
-[  --with-dbm[=DIR]        Include DBM support],[
+[  --with-dbm[=DIR]          DBA: Include DBM support],[
   if test "$withval" != "no"; then
     PHP_DBA_STD_BEGIN
     for i in $withval /usr/local /usr; do
@@ -311,7 +311,7 @@ AC_DEFUN(PHP_DBA_BUILTIN_CDB,[
 ])
 
 AC_ARG_WITH(cdb,
-[  --with-cdb[=DIR]        Include CDB support],[
+[  --with-cdb[=DIR]          DBA: Include CDB support],[
   if test "$withval" != "no"; then
     PHP_DBA_BUILTIN_CDB
   elif test "$withval" != "no"; then
@@ -359,7 +359,7 @@ dnl
 dnl FlatFile check must be the last one.
 dnl
 AC_ARG_WITH(flatfile,
-[  --with-flatfile         Include FlatFile support],[
+[  --with-flatfile           DBA: Include FlatFile support],[
   if test "$withval" != "no"; then
     PHP_DBA_BUILTIN_FLATFILE
   fi
