@@ -280,8 +280,6 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
  */
 SAPI_API void sapi_activate(TSRMLS_D)
 {
-	void (*post_reader_func)(TSRMLS_D);
-
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
