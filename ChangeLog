@@ -1,3 +1,116 @@
+2001-02-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/rand.c:
+    - Fix for bug 9277, two the same boundaries make sense in some cases
+
+2001-02-19  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c:
+    Bug fix: number of records in yaz_range wrongly set to zero.
+
+2001-02-19  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/attachment.c: Small typo fixed.
+
+2001-02-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Simpler fix for the InvalidOid thing by Tom Lane.
+
+    He assured me that InvalidOid has always expanded to (Oid) 0, so this
+    should be safe.
+
+2001-02-19  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/article.c
+      ext/midgard/page.c
+      ext/midgard/topic.c: fixed bug #81, for more details, see:
+    http://www.midgard-project.org/bugs/?id=81
+
+2001-02-19  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zziplib/php_zziplib.h
+      ext/zziplib/zziplib.c:
+2001-02-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/pgsql/011.phpt
+      pear/DB/tests/transactions.inc
+      pear/DB/ibase.php
+      pear/DB/msql.php
+      pear/DB/mssql.php
+      pear/DB/mysql.php
+      pear/DB/oci8.php
+      pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/sybase.php
+      pear/DB/common.php:    also added "dsn" property in all backends
+
+2001-02-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    Include <sys/uio.h>.  Apparently, the header cleanup in glibc 2.2.2
+    caused that file to be included by accident.
+
+    * ext/pgsql/config.m4
+      ext/pgsql/php_pgsql.h: Fix incompatibility with PostgreSQL CVS.
+
+    We now perform a check whether we need to include <postgres.h> to
+    succesfully compile.
+
+    PR: #9328
+
+    * ext/pgsql/pgsql.c: Fix warning
+
+    * ext/pgsql/config.m4: Allow passing relative paths to --with-pgsql
+
+2001-02-19  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/tests/oci8/.cvsignore: ignore "sqlnet.log" file
+
+    * pear/DB/tests/pgsql/002.phpt
+      pear/DB/tests/pgsql/README
+      pear/DB/tests/pgsql/connect.inc
+      pear/DB/tests/pgsql/mktable.inc
+      pear/DB/tests/fetchmodes.inc
+      pear/DB/tests/fetchrow.inc
+      pear/DB/tests/ibase/.cvsignore
+      pear/DB/tests/ibase/002.phpt
+      pear/DB/tests/ibase/connect.inc
+      pear/DB/tests/ibase/mktable.inc
+      pear/DB/tests/ibase/skipif.inc
+      pear/DB/tests/mysql/002.phpt
+      pear/DB/tests/mysql/README
+      pear/DB/tests/mysql/mktable.inc
+      pear/DB/tests/odbc/002.phpt
+      pear/DB/tests/odbc/mktable.inc:
+    * added "fetchRow returns NULL at end of resultset" tests
+
+    * pear/DB/tests/numrows.inc
+      pear/DB/tests/oci8/001.phpt
+      pear/DB/tests/oci8/002.phpt
+      pear/DB/tests/oci8/003.phpt
+      pear/DB/tests/oci8/004.phpt
+      pear/DB/tests/oci8/005.phpt
+      pear/DB/tests/oci8/006.phpt
+      pear/DB/tests/oci8/007.phpt
+      pear/DB/tests/oci8/008.phpt
+      pear/DB/tests/oci8/009.phpt
+      pear/DB/tests/oci8/010.phpt
+      pear/DB/tests/oci8/connect.inc
+      pear/DB/tests/oci8/mktable.inc
+      pear/DB/tests/oci8/skipif.inc:
+    * added oci8 tests (haven't run them myself yet)
+
+    * pear/DB/tests/db_error.phpt
+      pear/DB/tests/db_error2.phpt: updated some line numbers
+
+    * pear/DB/odbc.php
+      pear/DB/pgsql.php
+      pear/DB/storage.php: odbc.php: load "odbc" extension on demand
+    pgsql.php: unix domain socket support (set hostname to "unix")
+    storage.php: inherit PEAR
+
 2001-02-18  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/thttpd/thttpd.c:
