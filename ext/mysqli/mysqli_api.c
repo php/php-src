@@ -641,7 +641,7 @@ PHP_FUNCTION(mysqli_error)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_execute(object stmt)
+/* {{{ proto bool mysqli_execute(object stmt)
    Execute a prepared statement */
 PHP_FUNCTION(mysqli_execute)
 {
@@ -679,7 +679,10 @@ PHP_FUNCTION(mysqli_execute)
 		}
 	}
 
-	RETURN_LONG(mysql_execute(stmt->stmt));
+	if (mysql_execute(stmt->stmt)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
