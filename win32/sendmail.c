@@ -356,7 +356,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 					 tm->tm_hour,
 					 tm->tm_min,
 					 tm->tm_sec,
-					 (_timezone > 0) ? "+" : (_timezone < 0) ? "-" : "",
+					 (_timezone <= 0) ? "+" : (_timezone > 0) ? "-" : "",
 					 zoneh,
 					 zonem);
 	}
