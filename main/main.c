@@ -617,10 +617,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);
 
-#ifdef VIRTUAL_DIR
-	virtual_cwd_activate(SG(request_info).path_translated);
-#endif
-	
 	zend_set_timeout(EG(timeout_seconds));
 
 	if (PG(expose_php)) {

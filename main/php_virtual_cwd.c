@@ -182,16 +182,6 @@ CWD_API void virtual_cwd_startup(void)
 #endif
 }
 
-CWD_API void virtual_cwd_activate(const char *filename)
-{
-#if VIRTUAL_CWD_DEBUG
-	fprintf(stderr, "Changing dir to %s\n", filename);
-#endif
-	if (filename) {
-		virtual_chdir_file(filename);
-	}
-}
-
 CWD_API void virtual_cwd_shutdown(void)
 {
 #ifndef ZTS
