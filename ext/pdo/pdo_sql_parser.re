@@ -67,11 +67,19 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 	int t;
 	int bindno = 0;
 	int newbuffer_len;
+	int padding;
 	HashTable *params = stmt->bound_params;
 	struct pdo_bound_param_data *param;
 
 	/* allocate buffer for query with expanded binds, ptr is our writing pointer */
 	newbuffer_len = inquery_len;
+
+	/* calculate the possible padding factor due to quoting */
+	if(stmt->dbh->max_escaped_char_length) {
+		padding = stmt->dbh->max_escaped_char_length;
+	} else {
+		padding = 3;
+	}
 	if(params) {
 		zend_hash_internal_pointer_reset(params);
 		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
@@ -81,7 +89,7 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
                    bind placeholders are at least 2 characters, so
                    the accomodate their own "'s
                 */
-				newbuffer_len += 2 * Z_STRLEN_P(param->parameter);
+				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
 			}
 			zend_hash_move_forward(params);
 		}
@@ -113,11 +121,6 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 				int quotedstrlen;
 				/* currently everything is a string here */
 				
-				/* add leading quote */
-				*ptr = '"';
-				ptr++;
-				(*outquery_len)++;
-
 				/* quote the bind value if necessary */
 				if(stmt->dbh->methods->quoter(stmt->dbh, Z_STRVAL_P(param->parameter), 
 					Z_STRLEN_P(param->parameter), &quotedstr, &quotedstrlen TSRMLS_CC))
@@ -131,10 +134,6 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 					ptr += Z_STRLEN_P(param->parameter);
 					*outquery_len += (Z_STRLEN_P(param->parameter));
 				}
-				/* add trailing quote */
-				*ptr = '"';
-				ptr++;
-				(*outquery_len)++;
 			}
 			else {
 				/* error and cleanup */
