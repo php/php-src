@@ -9,7 +9,7 @@ COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS) $(PHP_FRAMEWORK
 all: $(all_targets) 
 	@echo
 	@echo "Build complete."
-	@echo "(It is safe to ignore warnings about tempnam)."
+	@echo "(It is safe to ignore warnings about tempnam and tmpnam)."
 	@echo
 	
 build-modules: $(PHP_MODULES)
