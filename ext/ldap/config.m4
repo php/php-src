@@ -110,7 +110,10 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Check for 3 arg ldap_set_rebind_proc
   _SAVE_CPPFLAGS=$CPPFLAGS
+  _SAVE_LDFLAGS=$LDFLAGS
   CPPFLAGS="$CPPFLAGS -I$LDAP_INCDIR"
+  LDFLAGS="$LDFLAGS $LDAP_SHARED_LIBADD"
+
   AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc], ac_cv_3arg_setrebindproc,
   [AC_TRY_COMPILE([#include <ldap.h>], [ldap_set_rebind_proc(0,0,0)],
   ac_cv_3arg_setrebindproc=yes, ac_cv_3arg_setrebindproc=no)])
@@ -122,4 +125,5 @@ if test "$PHP_LDAP" != "no"; then
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have
   dnl ldap_parse_reference() nor ldap_start_tls_s()
   AC_CHECK_FUNCS([ldap_parse_reference ldap_start_tls_s])
+  LDFLAGS=$_SAVE_LDFLAGS
 fi 
