@@ -14,7 +14,6 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Sebastian Bergmann <sb@phpOpenTracker.de>                   |
-// |          (based upon code by Allan Kent <allan@itsolutions.co.za>)   |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -35,7 +34,7 @@
   *   $timer->set_marker( "Marker 1" );
   *   $timer->stop();
   * 
-  *   $timer->profiling_information();
+  *   $profiling = $timer->get_profiling();
   * 
   * @author   Sebastian Bergmann <sb@phpOpenTracker.de>
   * @version  1.0 28/09/00
@@ -48,6 +47,7 @@
 
     /**
     * Contains the markers
+    *
     * @var    array
     * @access public
     */
@@ -59,6 +59,7 @@
 
     /**
     * Set "Start" marker.
+    *
     * @brother  stop()
     * @access   public
     */
@@ -73,6 +74,7 @@
 
     /**
     * Set "Stop" marker.
+    *
     * @brother  start()
     * @access   public
     */
@@ -87,6 +89,8 @@
 
     /**
     * Set marker.
+    *
+    * @param    string  name of the marker to be set
     * @brother  stop()
     * @access   public
     */
@@ -102,6 +106,7 @@
 
     /**
     * Returns the time elapsed betweens two markers.
+    *
     * @param  string  $start        start marker, defaults to "Start"
     * @param  string  $end          end marker, defaults to "Stop"
     * @return double  $time_elapsed time elapsed between $start and $end
@@ -114,22 +119,28 @@
     }
     
     // }}}
-    // {{{ profiling_information()
+    // {{{ get_profiling()
 
     /**
-    * Prints profiling information.
+    * Returns profiling information.
+    *
+    * $profiling[ x ][ "name"  ] = name of marker x
+    * $profiling[ x ][ "time"  ] = time index of marker x
+    * $profiling[ x ][ "diff"  ] = execution time from marker x-1 to this marker x
+    * $profiling[ x ][ "total" ] = total execution time up to marker x
+    *
+    * @return array $profiling
     * @access public
     */
 
-    function profiling_information()
+    function get_profiling()
     {
-      print "<table border=\"0\" cellSpacing=\"3\" cellPadding=\"3\"><tr><td><b>Marker</b></td><td><b>Time</b></td><td><b>Diff</b></td></tr>";
+      $i = 0;
+      $total = 0;
+      $result = array();
 
       while( list( $marker, $time ) = each( $this->markers ) )
       {
-        print "<tr><td>" . $marker . "</td>";
-        print "<td>" . $time . "</td>";
-
         if( $marker == "Start" )
         {
           $diff = "-";
@@ -137,15 +148,20 @@
 
         else
         {
-          $diff = bcsub( $time, $temp, 6 );
+          $diff  = bcsub( $time,  $temp, 6 );
+          $total = bcadd( $total, $diff, 6 );
         }
 
-        print "<td>" . $diff . "</td></tr>";
+        $result[ $i ][ "name"  ] = $marker;
+        $result[ $i ][ "time"  ] = $time;
+        $result[ $i ][ "diff"  ] = $diff;
+        $result[ $i ][ "total" ] = $total;
 
         $temp = $time;
+        $i++;
       }
 
-      print "<tr><td>&nbsp;</td><td align=\"right\">Total:</td><td>" . $this->time_elapsed() . "</td></tr></table>";
+      return $result;
     }
 
     // }}}
