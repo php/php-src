@@ -625,11 +625,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 
 	/* initialize global variables */
 	PG(header_is_being_sent)=0;
-
-	if (php_init_request_info(NULL)) {
-		php_printf("Unable to initialize request info.\n");
-		return FAILURE;
-	}
 	
 	zend_activate(CLS_C ELS_CC);
 	sapi_activate(SLS_C);	
@@ -674,7 +669,6 @@ void php_request_shutdown(void *dummy)
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
-	php_destroy_request_info(NULL);
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
 	php_unset_timeout();
 

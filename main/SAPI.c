@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Design:  Shane Caraveo <shane@caraveo.com>                           |
+   | Original design:  Shane Caraveo <shane@caraveo.com>                  |
    | Authors: Andi Gutmans <andi@zend.com>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
@@ -176,6 +176,8 @@ SAPI_API void sapi_activate(SLS_D)
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
+	SG(request_info).current_user = NULL;
+	SG(request_info).current_user_length = 0;
 
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
@@ -204,6 +206,9 @@ SAPI_API void sapi_deactivate(SLS_D)
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
+	}
+	if (SG(request_info).current_user) {
+		efree(SG(request_info).current_user);
 	}
 	if (sapi_module.deactivate) {
 		sapi_module.deactivate(SLS_C);

@@ -114,8 +114,8 @@ PHPAPI char *php_get_current_user()
 	struct stat *pstat;
 	SLS_FETCH();
 
-	if (request_info.current_user) {
-		return request_info.current_user;
+	if (SG(request_info).current_user) {
+		return SG(request_info).current_user;
 	}
 
 	/* FIXME: I need to have this somehow handled if
@@ -131,8 +131,8 @@ PHPAPI char *php_get_current_user()
 	if ((pwd=getpwuid(pstat->st_uid))==NULL) {
 		return empty_string;
 	}
-	request_info.current_user_length = strlen(pwd->pw_name);
-	request_info.current_user = estrndup(pwd->pw_name,request_info.current_user_length);
+	SG(request_info).current_user_length = strlen(pwd->pw_name);
+	SG(request_info).current_user = estrndup(pwd->pw_name, SG(request_info).current_user_length);
 	
-	return request_info.current_user;		
+	return SG(request_info).current_user;		
 }	
