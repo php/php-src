@@ -26,6 +26,7 @@
 #include "zend_API.h"
 #include "zend_fast_cache.h"
 
+#define IN_NAMESPACE() (CG(active_namespace) != &CG(global_namespace))
 
 ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
@@ -985,6 +986,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->__get = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_SET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_SET_FUNC_NAME, sizeof(ZEND_SET_FUNC_NAME)))) {
 			CG(active_class_entry)->__set = (zend_function *) CG(active_op_array);
+		}
+	} else if(IN_NAMESPACE()) {
+		if (zend_hash_add(&CG(active_namespace)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array)) == FAILURE) {
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s()", CG(active_namespace)->name, name);
 		}
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -3196,21 +3201,27 @@ void zend_init_namespace(zend_namespace *ns TSRMLS_DC)
 
 void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 {
-	zend_namespace *ns = emalloc(sizeof(zend_namespace));
+	zend_namespace *ns, **pns;
 	zend_op *opline;
 	
 	zend_str_tolower(ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len);
-	ns->name = ns_name->u.constant.value.str.val;
-	ns->name_length = ns_name->u.constant.value.str.len;
 
-	if(zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL) != SUCCESS) {
-		efree(ns);
-		zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
+	if(zend_hash_find(&CG(global_namespace).class_table, ns_name->u.constant.value.str.val, ns_name->u.constant.value.str.len+1, (void **)&pns) == SUCCESS) {
+		ns = *pns;
+		if(ns->type != ZEND_NAMESPACE || ns == CG(active_namespace)) {
+			zend_error(E_COMPILE_ERROR, "Cannot redefine namespace '%s' - class or namespace with this name already defined", ns->name);
+		} 
+	} else {
+		ns = emalloc(sizeof(zend_namespace));
+		ns->name = ns_name->u.constant.value.str.val;
+		ns->name_length = ns_name->u.constant.value.str.len;
+		zend_hash_add(&CG(global_namespace).class_table, ns->name, ns->name_length+1, (void **)&ns, sizeof(zend_namespace *), NULL);
+		zend_init_namespace(ns TSRMLS_CC);
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = ZEND_DECLARE_NAMESPACE;
+	opline->opcode = ZEND_START_NAMESPACE;
 	opline->op1.op_type = IS_CONST;
 	opline->op1.u.constant.type = IS_STRING;
 	opline->op1.u.constant.value.str.val = estrndup(ns->name, ns->name_length);
@@ -3218,15 +3229,8 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 	opline->op1.u.constant.refcount = 1;
 	SET_UNUSED(opline->op2);
 
-	zend_init_namespace(ns TSRMLS_CC);
 
-	ns->constructor = emalloc(sizeof(zend_op_array));
-	init_op_array((zend_op_array *)ns->constructor, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
-	ns->constructor->op_array.ns = CG(active_namespace);
-
-	ns_token->u.op_array = CG(active_op_array);	
-	
-	CG(active_op_array) = &ns->constructor->op_array;
+	ns_token->u.previously_active_namespace = CG(active_namespace);	
 	CG(active_namespace) = ns;
 
 	/* new symbol tables */
@@ -3236,20 +3240,25 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 
 void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
 {
-	zend_namespace *ns = CG(active_op_array)->ns;
-	int handle = CG(handle_op_arrays);
+	zend_namespace *ns = ns_token->u.previously_active_namespace;
+	zend_op *opline;
 
-	
-	zend_do_return(NULL, 0 TSRMLS_CC);
-	CG(handle_op_arrays) = 0;
-	pass_two(CG(active_op_array) TSRMLS_CC);
-	CG(handle_op_arrays) = handle;
-	
-	CG(active_op_array)->ns = CG(active_namespace);
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
+	opline->opcode = ZEND_START_NAMESPACE;
+	if(ns != &CG(global_namespace)) {
+		opline->op1.op_type = IS_CONST;
+		opline->op1.u.constant.type = IS_STRING;
+		opline->op1.u.constant.value.str.val = estrndup(ns->name, ns->name_length);
+		opline->op1.u.constant.value.str.len = ns->name_length;
+		opline->op1.u.constant.refcount = 1;
+	} else {
+		SET_UNUSED(opline->op1);
+	}
+	SET_UNUSED(opline->op2);
+	
 	CG(active_namespace) = ns;
-	CG(active_op_array) = ns_token->u.op_array;
-	/* restore symbol tables */
+    /* restore symbol tables */
 	CG(class_table) = &CG(active_namespace)->class_table;
 	CG(function_table) = &CG(active_namespace)->function_table;
 }

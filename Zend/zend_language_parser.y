@@ -302,7 +302,7 @@ namespace_statement_list:
 namespace_statement:
 		T_VAR namespace_var_declaration_list ';'
 	|	namespace_const_declaration ';'
-	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
+	|	function_declaration_statement
 	|	class_declaration_statement
 	|	namespace_declaration_statement
 ;

@@ -181,8 +181,6 @@ ZEND_API void destroy_zend_namespace(zend_namespace **pns)
 	zend_hash_destroy(&ns->constants_table);
 	zend_hash_destroy(ns->static_members);
 	FREE_HASHTABLE(ns->static_members);
-	destroy_op_array(ns->constructor);
-	efree(ns->constructor);
 	efree(ns->name);
 	efree(ns);
 }
