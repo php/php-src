@@ -813,13 +813,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval *local_retval=NULL;
-	zend_execute_data execute_data;
-
-	EX(prev_execute_data) = NULL;
-	EG(current_execute_data) = &execute_data;
-	EX(object) = NULL;
-	EX(opline) = NULL;
-
+	
 	va_start(files, file_count);
 	for (i=0; i<file_count; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
@@ -829,7 +823,6 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE TSRMLS_CC);
 		zend_destroy_file_handle(file_handle TSRMLS_CC);
 		if (EG(active_op_array)) {
-			EX(function_state).function = (zend_function *) EG(active_op_array);
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 			if (EG(exception)) {
