@@ -39,7 +39,6 @@ AC_ARG_WITH(java,
       fi
 
     elif test -f $withval/lib/libjava.so; then
-      AC_ADD_LIBPATH($withval/lib)
       JAVA_LIB=java
       JAVA_LIBPATH=$withval/lib
       JAVA_INCLUDE="-I$withval/include"
@@ -66,7 +65,6 @@ AC_ARG_WITH(java,
 	if test -f $i/libjava.so; then 
           JAVA_LIB=java
           JAVA_LIBPATH=$i
-	  AC_ADD_LIBPATH($i)
 	  test -d $i/classic && AC_ADD_LIBPATH($i/classic)
 	  test -d $i/native_threads && AC_ADD_LIBPATH($i/native_threads)
 	fi
@@ -81,6 +79,7 @@ AC_ARG_WITH(java,
     fi
 
     AC_DEFINE(HAVE_JAVA,1,[ ])
+    AC_ADD_LIBPATH($JAVA_LIBPATH)
     JAVA_CFLAGS="$JAVA_CFLAGS '-DJAVALIB=\"$JAVA_LIBPATH/lib$JAVA_LIB.so\"'"
 
     if test "$PHP_SAPI" != "servlet"; then
