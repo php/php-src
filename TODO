@@ -3,6 +3,10 @@ parenthesis means that person has taken on this project.
 
 global
 ------
+	* activate all extensions by default that don't rely on external
+	  dependices. (eg ftp)
+	* --enable-all in configure. (--enable-shared=max ...)
+	* make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
       reentrant-save functions
     * there is only one current directory per process; to make
