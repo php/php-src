@@ -91,6 +91,13 @@ PHPAPI void php_print_credits(int flag)
 		php_info_print_table_end();
 	}
 
+	if (flag & PHP_CREDITS_QA) {
+		php_info_print_table_start();
+		php_info_print_table_header(1, "PHP Quality Assurance Team");
+		php_info_print_table_row(1, "Andre Langhorst, Hellekin O. Wolf, Jalal Pushman, James Moore, Jani Taskinen, Joey Smith, Olivier Cahagne, Phil Driscoll, Zak Greant");
+		php_info_print_table_end();
+	}
+
 	if (flag & PHP_CREDITS_FULLPAGE) {
 		PUTS("</body></html>\n");
 	}
