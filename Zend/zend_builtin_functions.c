@@ -460,6 +460,7 @@ ZEND_FUNCTION(get_class_vars)
 	char *lcname;
 	zend_class_entry *ce;
 	zval *tmp;
+	CLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
 		RETURN_FALSE;
