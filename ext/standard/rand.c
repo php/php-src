@@ -311,7 +311,7 @@ PHP_FUNCTION(mt_srand)
  * -RL
  */    
 
-/* {{{ proto int rand(int min, int max)
+/* {{{ proto int rand([int min, int max])
    Returns a random number */
 PHP_FUNCTION(rand)
 {
@@ -336,7 +336,7 @@ PHP_FUNCTION(rand)
 }
 /* }}} */
 
-/* {{{ proto int mt_rand(int min, int max)
+/* {{{ proto int mt_rand([int min, int max])
    Returns a random number from Mersenne Twister */
 PHP_FUNCTION(mt_rand)
 {
