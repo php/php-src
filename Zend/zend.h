@@ -435,6 +435,7 @@ END_EXTERN_C()
 	}
 #define zend_first_try		EG(bailout_set)=0;	zend_try
 
+BEGIN_EXTERN_C()
 ZEND_API char *get_zend_version(void);
 ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_copy);
 ZEND_API int zend_print_zval(zval *expr, int indent);
@@ -443,6 +444,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_print_flat_zval_r(zval *expr TSRMLS_DC);
 ZEND_API void zend_print_zval_r_ex(zend_write_func_t write_func, zval *expr, int indent TSRMLS_DC);
 ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+END_EXTERN_C()
 
 void zend_activate(TSRMLS_D);
 void zend_deactivate(TSRMLS_D);

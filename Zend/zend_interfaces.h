@@ -24,6 +24,8 @@
 #include "zend.h"
 #include "zend_API.h"
 
+BEGIN_EXTERN_C()
+
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
@@ -49,6 +51,8 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 	zend_call_method(obj, obj_ce, fn_proxy, function_name, sizeof(function_name)-1, retval, 2, arg1, arg2 TSRMLS_CC)
 
 ZEND_API void zend_register_interfaces(TSRMLS_D);
+
+END_EXTERN_C()
 
 #endif /* ZEND_INTERFACES_H */
 
