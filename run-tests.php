@@ -249,7 +249,7 @@ define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
 /* We got failed Tests, offer the user to send and e-mail to QA team */
-if ($sum_results['FAILED']) {
+if ($sum_results['FAILED'] && !getenv("DONT_ASK_QA")) {
 	$fp = fopen("php://stdin", "r+");
 	fwrite($fp, "Some tests have failed, would you like to send the\nreport to PHP's QA team? [Yn]: ");
 	fflush($fp);
@@ -281,7 +281,7 @@ if ($sum_results['FAILED']) {
 		}
 		
 		$failed_tests_data .= $sep . "PHPINFO" . $sep;
-		$failed_tests_data .= shell_exec($php.' -i');
+		$failed_tests_data .= shell_exec($php.' -dhtml_errors=0 -i');
 		
 		$compression = 0;
 		
