@@ -94,7 +94,7 @@ object(t)#%d (1) {
 __sleep called
 O:1:"s":2:{s:1:"a";s:5:"hallo";s:1:"c";s:5:"world";}
 __wakeup called
-object(s)#%d (2) {
+object(s)#%d (3) {
   ["a"]=>
   string(5) "hallo"
   ["b"]=>
