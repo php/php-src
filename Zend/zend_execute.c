@@ -1937,7 +1937,10 @@ do_fcall_common:
 					zval *exception;
 
 					value = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					
+			
+					if (value->type != IS_OBJECT) {
+						zend_error(E_ERROR, "Can only throw objects");
+					}
 					/* Not sure if a complete copy is what we want here */
 					MAKE_STD_ZVAL(exception);
 					*exception = *value;
@@ -1956,15 +1959,31 @@ do_fcall_common:
 				}
 				NEXT_OPCODE();
 			case ZEND_CATCH:
-				/* Check if this is really an exception, if not, jump over code */
-				if (EG(exception) == NULL) {
-						EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+				{
+					zend_class_entry *ce;
+
+					/* Check if this is really an exception, if not, jump over code */
+					if (EG(exception) == NULL) {
+						EX(opline) = &op_array->opcodes[EX(opline)->extended_value];
 						continue;
+					}
+					ce = Z_OBJCE_P(EG(exception));
+					if (ce != EX(Ts)[EX(opline)->op1.u.var].EA.class_entry) {
+						while (ce->parent) {
+							if (ce->parent == EX(Ts)[EX(opline)->op1.u.var].EA.class_entry) {
+								goto exception_should_be_taken;
+							}
+							ce = ce->parent;
+						}
+						EX(opline) = &op_array->opcodes[EX(opline)->extended_value];
+						continue;
+					}
+exception_should_be_taken:
+					zend_hash_update(EG(active_symbol_table), EX(opline)->op2.u.constant.value.str.val,
+						EX(opline)->op2.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
+					EG(exception) = NULL;
+					NEXT_OPCODE();
 				}
-				zend_hash_update(EG(active_symbol_table), EX(opline)->op1.u.constant.value.str.val,
-					EX(opline)->op1.u.constant.value.str.len+1, &EG(exception), sizeof(zval *), (void **) NULL);
-				EG(exception) = NULL;
-				NEXT_OPCODE();
 			case ZEND_NAMESPACE:
 				{
 #if 0
