@@ -18,7 +18,8 @@
 //
 // $Id$
 
-require_once 'Cache/Error.php';
+require_once('PEAR.php');
+require_once('Cache/Error.php');
 
 /**
 * Cache is a base class for cache implementations.
@@ -270,7 +271,7 @@ class Cache extends PEAR {
     * @param    string  cache group, if empty all groups will be flashed
     * @return   integer number of removed datasets
     */
-    function flush($group = '') {
+    function flush($group = 'default') {
         if (!$this->caching)
             return true;
 
