@@ -933,7 +933,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr)
 
 PHP_FUNCTION(sybase_query)
 {
-	pval *query,*sybase_link_index;
+	pval **query, **sybase_link_index;
 	int id;
 	sybase_link *sybase_ptr;
 	sybase_result *result;
@@ -947,13 +947,13 @@ PHP_FUNCTION(sybase_query)
 	
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
-			if (getParameters(ht, 1, &query)==FAILURE) {
+			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = sybase_globals.default_link;
 			break;
 		case 2:
-			if (getParameters(ht, 2, &query, &sybase_link_index)==FAILURE) {
+			if (zend_get_parameters_ex(2, &query, &sybase_link_index)==FAILURE) {
 				RETURN_FALSE;
 			}
 			id = -1;
@@ -963,9 +963,9 @@ PHP_FUNCTION(sybase_query)
 			break;
 	}
 	
-	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
 	
-	convert_to_string(query);
+	convert_to_string_ex(query);
 	
 	/* Fail if we already marked this connection dead. */
 
@@ -983,7 +983,7 @@ PHP_FUNCTION(sybase_query)
 		/* On Solaris 11.5, ct_command() can be moved outside the
 		 * loop, but not on Linux 11.0.
 		 */
-		if (ct_command(sybase_ptr->cmd, CS_LANG_CMD, query->value.str.val, CS_NULLTERM, CS_UNUSED)!=CS_SUCCEED) {
+		if (ct_command(sybase_ptr->cmd, CS_LANG_CMD, (*query)->value.str.val, CS_NULLTERM, CS_UNUSED)!=CS_SUCCEED) {
 			/* If this didn't work, the connection is screwed but
 			 * ct-lib might not set CS_CONSTAT_DEAD.  So set our own
 			 * flag.  This happens sometimes when the database is restarted
