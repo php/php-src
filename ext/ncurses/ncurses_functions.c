@@ -83,7 +83,7 @@ PHP_FUNCTION(ncurses_color_set)
 	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(color_set(pair,NULL));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this build");
 	RETURN_FALSE;
 #endif
 }
@@ -1047,7 +1047,7 @@ PHP_FUNCTION(ncurses_slk_color)
 	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(slk_color(intarg));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this build");
 	RETURN_FALSE;
 #endif
 }
@@ -1122,7 +1122,7 @@ PHP_FUNCTION(ncurses_use_extended_names)
 	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(use_extended_names(intarg));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this build");
 	RETURN_FALSE;
 #endif  
 }
@@ -1660,7 +1660,7 @@ PHP_FUNCTION(ncurses_assume_default_colors)
 	IS_NCURSES_INITIALIZED();
 	RETURN_LONG(assume_default_colors(i1,i2));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this build");
 	RETURN_FALSE;
 #endif  
 }
@@ -2072,7 +2072,7 @@ PHP_FUNCTION(ncurses_wcolor_set)
 
 	RETURN_LONG(wcolor_set(*win, Z_LVAL_PP(color_pair), 0));
 #else
-	php_error_docref(NULL TSRMLS_CC, E_WARNING,"%s not supported in this build");
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "not supported in this build");
 	RETURN_FALSE;
 #endif
 }
