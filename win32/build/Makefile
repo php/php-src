@@ -76,6 +76,10 @@ clean: clean-sapi
 	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip > NUL
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
 
+clean-pecl:
+	@echo Cleaning PECL targets only
+	-rmdir /s /q $(BUILD_DIR)\pecl
+
 test:
 	<<test_suite_uses_lame_env_vars.bat
 set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\php.exe
