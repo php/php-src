@@ -761,7 +761,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #if defined(HAVE_MYSQL_ERRNO)
 			MySG(connect_errno)=mysql_errno(&mysql->conn);
 #endif
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "MySQL Connection Failed: %s\n", mysql_error(&mysql->conn));
 			efree(hashed_details);
 			efree(mysql);
 			MYSQL_DO_CONNECT_RETURN_FALSE();
