@@ -37,6 +37,9 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+
+#include <math.h>
+
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
@@ -4296,9 +4299,43 @@ PHP_FUNCTION(money_format) {
 
 	RETURN_STRINGL(erealloc(str, str_len + 1), str_len, 0);
 }
-
 /* }}} */
 #endif
+
+/* {{{ proto array str_split(string str [, int split_length])
+   Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
+PHP_FUNCTION(str_split) {
+	char *str;
+	int str_len;
+	long split_length = 1;
+	char *p;
+	int n_reg_segments;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &split_length) == FAILURE) {
+		return;
+	}
+
+	if (split_length <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The the length of each segment must be greater then zero.");
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+
+	n_reg_segments = floor(str_len / split_length);
+	p = str;
+
+	while (n_reg_segments-- > 0) {
+		add_next_index_stringl(return_value, p, split_length, 1);
+		p += split_length;
+	}
+
+	if (p != (str + str_len)) {
+		add_next_index_stringl(return_value, p, (str + str_len - p), 1);
+	}
+}
+/* }}} */
+
 
 /*
  * Local variables:
