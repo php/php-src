@@ -1,0 +1,126 @@
+Credits:
+Ben Mansell, Stephen Landamore, Daniel Silverstone, Shane Caraveo
+
+Running the FastCGI PHP module
+------------------------------
+
+There are two ways to run the resulting 'php' binary after the fastcgi
+version has been built:
+
+1) Configure your web server to run the PHP binary itself.
+
+This is the simplest method, obviously you will have to configure your
+web server appropriately. Some web servers may also not support this method,
+or may not be as efficient.
+
+2) Run PHP separately from the web server.
+
+In this setup, PHP is started as a separate process entirely from the web
+server. It will listen on a socket for new FastCGI requests, and deliver
+PHP pages as appropriate. This is the recommended way of running PHP-FastCGI.
+To run this way, you must start the PHP binary running by giving it a port
+number to listen to on the command line, e.g.:
+
+./php -b 8002
+
+(you can also specify a bind address, e.g. ./php -b localhost:8002. However, this
+ relies on the FastCGI devkit and does not seem to work properly)
+
+You must also configure your web server to connect to the appropriate port
+in order to talk to the PHP FastCGI process.
+
+The advantage of running PHP in this way is that it entirely separates the
+web server and PHP process, so that one cannot disrupt the other. It also
+allows PHP to be on an entirely separate machine from the web server if need
+be, you could even have several web servers utilising the same running PHP
+process if required!
+
+
+Using FastCGI PHP with Apache
+=============================
+
+First of all, you may well ask 'Why?'. After all, Apache already has mod_php.
+However, there are advantages to running PHP with FastCGI. Separating the
+PHP code from the web server removes 'bloat' from the main server, and should
+improve the performance of non-PHP requests. Secondly, having one permanent
+PHP process as opposed to one per apache process means that shared resources
+like persistent database connections are used more efficiently.
+
+First of all, make sure that the FastCGI module is enabled. You should have
+a line in your config like:
+
+    LoadModule fastcgi_module /usr/lib/apache/2.0/mod_fastcgi.so
+
+Don't load mod_php, by the way. Make sure it is commented out!
+
+    #LoadModule php4_module /usr/lib/apache/2.0/libphp4.so
+
+Now, we'll create a fcgi-bin directory, just like you would do with normal
+CGI scripts. You'll need to create a directory somewhere to store your
+FastCGI binaries. We'll use /space/fcgi-bin/ for this example. Remember to
+copy the FastCGI-PHP binary in there. (named just 'php')
+
+    ScriptAlias /fcgi-bin/ /space/fcgi-bin/
+    <Location /fcgi-bin/>
+        Options ExecCGI
+        SetHandler fastcgi-script
+    </Location>
+
+To have mod_fastcgi manage your php fastcgi processes for you, use the 
+configuration directive FCGIServer (see mod_fastcgi docs for more
+configuration information):
+
+    FastCgiServer /fcgi-bin/php-cgi -processes 5
+
+Next, we need to tell Apache to use the FastCGI binary /fcgi-bin/php to
+deliver PHP pages. All that is needed is:
+
+    AddType application/x-httpd-fastphp .php
+    Action application/x-httpd-fastphp /fcgi-bin/php-cgi
+
+Now, if you restart Apache, php pages should now be delivered!
+
+Using FastCGI PHP with IIS or iPlanet
+=====================================
+
+FastCGI server plugins are available at www.caraveo.com/fastcgi/
+Documentation on these are sparse.  iPlanet is not very tested,
+and no makefile exists yet for unix based iPlanet servers.
+
+
+Security
+--------
+
+Be sure to run the php binary as an appropriate userid. Also, firewall out
+the port that PHP is listening on. In addition, you can set the environment
+variable FCGI_WEB_SERVER_ADDRS to control who can connect to the FastCGI.
+Set it to a comma separated list of IP addresses, e.g.:
+
+export FCGI_WEB_SERVER_ADDRS=199.170.183.28,199.170.183.71
+
+
+Tuning
+------
+
+There are a few tuning parameters that can be tweaked to control the
+performance of FastCGI PHP. The following are environment variables that can
+be set before running the PHP binary:
+
+PHP_FCGI_CHILDREN  (default value: 8)
+
+This controls how many child processes the PHP process spawns. When the
+fastcgi starts, it creates a number of child processes which handle one
+page request at a time. So by default, you will be able to handle 8
+concurrent PHP page requests. Further requests will be queued.
+Increasing this number will allow for better concurrency, especially if you
+have pages that take a significant time to create, or supply a lot of data
+(e.g. downloading huge files via PHP). On the other hand, having more
+processes running will use more RAM, and letting too many PHP pages be
+generated concurrently will mean that each request will be slow.
+
+PHP_FCGI_MAX_REQUESTS (default value: 500)
+
+This controls how many requests each child process will handle before
+exitting. When one process exits, another will be created. This tuning is
+necessary because several PHP functions are known to have memory leaks. If the
+PHP processes were left around forever, they would be become very inefficient.
