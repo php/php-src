@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "ext/standard/head.h"
+#include "ext/session/php_session.h"
 #include "SAPI.h"
 
 /* output functions */
@@ -189,17 +190,31 @@ static int zend_ub_body_write_no_header(const char *str, uint str_length)
 
 static int zend_ub_body_write(const char *str, uint str_length)
 {
+	char *newstr = NULL;
+	uint new_length;
+	int result = 0;
 	SLS_FETCH();
 
 	if (SG(request_info).headers_only) {
 		zend_bailout();
 	}
 	if (php3_header()) {
+		session_adapt_uris(str, str_length, &newstr, &new_length);
+		
+		if (newstr) {
+			str = newstr;
+			str_length = new_length;
+		}
+		
 		zend_body_write = zend_ub_body_write_no_header;
-		return zend_header_write(str, str_length);
-	} else {
-		return 0;
+		result = zend_header_write(str, str_length);
+		
+		if (newstr) {
+			free(newstr);
+		}
 	}
+
+	return result;
 }
 
 

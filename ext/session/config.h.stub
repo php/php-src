@@ -1,3 +1,4 @@
 /* define if you want to use the session extension */
 
+#undef TRANS_SID
 #undef HAVE_LIBMM

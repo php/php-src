@@ -39,6 +39,7 @@
 #include "ext/standard/php3_var.h"
 #include "ext/standard/datetime.h"
 #include "ext/standard/php_lcg.h"
+#include "ext/standard/url_scanner.h"
 
 #ifdef ZTS
 int ps_globals_id;
@@ -504,6 +505,7 @@ static void _php_session_start(PSLS_D)
 	} else {
 		REGISTER_STRING_CONSTANT("SID", empty_string, 0);
 	}
+	PS(define_sid) = define_sid;
 
 	PS(nr_open_sessions)++;
 
@@ -528,7 +530,6 @@ static void _php_session_destroy(PSLS_D)
 	PS(mod)->destroy(&PS(mod_data), PS(id));
 	php_rshutdown_session_globals(PSLS_C);
 	php_rinit_session_globals(PSLS_C);
-	PS(nr_open_sessions)--;
 }
 
 /* {{{ proto string session_name([string newname])
@@ -756,6 +757,22 @@ PHP_FUNCTION(session_destroy)
 }
 /* }}} */
 
+#ifdef TRANS_SID
+void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
+{
+	char *data;
+	size_t len;
+	char buf[512];
+	PSLS_FETCH();
+
+	if(PS(define_sid) && PS(nr_open_sessions) > 0) {
+		snprintf(buf, sizeof(buf), "%s=%s", PS(session_name), PS(id));
+		data = url_adapt(src, srclen, buf, &len);
+		*new = data;
+		*newlen = len;
+	}
+}
+#endif
 
 /* {{{ proto session_unset()
    Unset all registered variables */
@@ -784,6 +801,7 @@ static void php_rinit_session_globals(PSLS_D)
 		_php_find_ps_serializer(INI_STR("session.serialize_handler") PSLS_CC);
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
+	PS(define_sid) = 0;
 	PS(save_path) = estrdup(INI_STR("session.save_path"));
 	PS(session_name) = estrdup(INI_STR("session.name"));
 	PS(entropy_file) = estrdup(INI_STR("session.entropy_file"));
