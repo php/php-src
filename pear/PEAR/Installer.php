@@ -125,7 +125,7 @@ class PEAR_Installer extends PEAR_Common
     // {{{ _deletePackageFiles()
 
     /**
-     * Delete a package's installed files, remove empty directories.
+     * Delete a package's installed files, does not remove empty directories.
      *
      * @param string $package package name
      *
