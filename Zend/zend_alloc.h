@@ -156,11 +156,19 @@ ZEND_API char *_estrndup(const char *s, unsigned int length ZEND_FILE_LINE_DC ZE
 
 /* Selective persistent/non persistent allocation macros */
 #define pemalloc(size, persistent)		malloc(size)
+#define safe_pemalloc(nmemb, size, offset, persistent)		malloc((nmemb) * (size) + (offset))
 #define pefree(ptr, persistent)			free(ptr)
 #define pecalloc(nmemb, size, persistent)		calloc((nmemb), (size))
 #define perealloc(ptr, size, persistent)		realloc((ptr), (size))
 #define perealloc_recoverable(ptr, size, persistent)	realloc((ptr), (size))
 #define pestrdup(s, persistent)			strdup(s)
+
+#define pemalloc_rel(size, persistent)		malloc(size)
+#define pefree_rel(ptr, persistent)			free(ptr)
+#define pecalloc_rel(nmemb, size, persistent)		calloc((nmemb), (size))
+#define perealloc_rel(ptr, size, persistent)		realloc((ptr), (size))
+#define perealloc_recoverable_rel(ptr, size, persistent)	realloc((ptr), (size))
+#define pestrdup_rel(s, persistent)			strdup(s)
 
 #define safe_estrdup(ptr)  ((ptr)?(strdup(ptr)):(empty_string))
 #define safe_estrndup(ptr, len) ((ptr)?(strndup((ptr), (len))):(empty_string))
