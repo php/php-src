@@ -12,6 +12,17 @@ AC_DEFUN(IMAP_LIB_CHK,[
 		done
 		])
 
+PHP_ARG_WITH(kerberos,for Kerberos support in IMAP,
+[  --with-kerberos[=DIR]   Include Kerberos support in IMAP.])
+
+if test "$PHP_KERBEROS" = "yes"; then
+  test -d /usr/kerberos && PHP_KERBEROS=/usr/kerberos
+fi
+
+if test "$PHP_KERBEROS" != "no"; then
+  PHP_KERBEROS_LIBDIR=$PHP_KERBEROS/lib
+fi
+
 PHP_ARG_WITH(imap,for IMAP support,
 [  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
                           and c-client.a directory.])
@@ -56,6 +67,14 @@ PHP_ARG_WITH(imap,for IMAP support,
     else
       AC_ADD_LIBPATH($IMAP_LIBDIR)
       AC_ADD_LIBRARY_DEFER($IMAP_LIB)
+    fi
+
+    if test "$PHP_KERBEROS" != "no"; then
+      AC_ADD_LIBPATH($PHP_KERBEROS_LIBDIR, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(com_err,, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(k5crypto,, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(krb5,, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(gssapi_krb5,, IMAP_SHARED_LIBADD)
     fi
 
     PHP_EXTENSION(imap, $ext_shared)
