@@ -824,9 +824,11 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 				model_to_zval_object(ret, *tmp, data, sdl TSRMLS_CC);
 				zend_hash_move_forward(model->u.content);
 			}
+			break;
 		}
 		case XSD_CONTENT_GROUP:
 			model_to_zval_object(ret, model->u.group->model, data, sdl TSRMLS_CC);
+			break;
 		default:
 		  break;
 	}
