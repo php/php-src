@@ -512,7 +512,7 @@ PHP_FUNCTION(pdf_show_xy) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, int encoding)
+/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, int encoding, [int embed])
    Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font) {
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
