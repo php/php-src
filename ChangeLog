@@ -1,3 +1,130 @@
+2004-08-24  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      new incompatibilities. maybe someone from the doc group will update the
+      migrating guide. also Derick may add new slides to his talk :)
+
+2004-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pcre/php_pcre.c:
+      MFB: TSRM fix
+
+    * (PHP_5_0)
+      ext/pcre/php_pcre.c:
+      TSRM fix
+
+    * (PHP_5_0)
+      tests/lang/bug29566.phpt:
+      Add new test
+
+    * tests/lang/bug29566.phpt:
+      
+      Add new test
+
+2004-08-24  Andrei Zmievski  <andreiz@gmail.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/pcre/php_pcre.c:
+      MFB
+
+    * NEWS
+      ext/pcre/php_pcre.c:
+      MFB.
+
+    * (PHP_4_3)
+      NEWS
+      ext/pcre/php_pcre.c:
+      Implement periodic PCRE compiled regexp cache cleanup, to avoid memory
+      exhaustion.
+
+2004-08-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c:
+      - Add missing brackets
+
+2004-08-24  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/fbsql/php_fbsql.c:
+      Fix a possible crash in fbsql_database() if the function was called before
+      a connection was made.
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+      Add fbsql_rows_fetched() - returns the total number of rows fetched.
+      Fix a possible crash in fbsql_database() if the function was called before
+      a connection was made.
+
+2004-08-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/uuencode.c:
+      MFH: Fixed bug #29821 (Fixed possible crashes in convert_uudecode() on
+      invalid data).
+
+    * ext/standard/uuencode.c:
+      Fixed bug #29821 (Fixed possible crashes in convert_uudecode() on invalid
+      data).
+
+2004-08-24  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/php_xsl.c:
+      fix segfault when object cloned
+
+2004-08-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/readline/config.m4
+      ext/readline/readline.c:
+      Add support for the readline callback interface, allowing you to interleave
+      IO and user input.  Sample script:
+      
+      <?php
+      dl("readline.so");
+      
+      function handle_user_input($line)
+      {
+         echo "You typed: '$line'\n";
+         if ($line == 'exit')
+            exit;
+      }
+      
+      readline_callback_handler_install('type! > ', 'handle_user_input');
+      
+      while (true) {
+         $n = stream_select($r = array(STDIN), $w = null, $e = null, null);
+      
+         if ($n && in_array(STDIN, $r)) {
+            readline_callback_read_char();
+         }
+      }
+
+2004-08-24  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/readline/config.m4:
+      - No tabs here please
+
+2004-08-24  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/readline/config.m4:
+      use dependent libs while probing for functions
+
+2004-08-24  Christian Stocker  <chregu@phant.ch>
+
+    * (PHP_5_0)
+      ext/xsl/EXPERIMENTAL:
+      MFH ;)
+      (This extension is no more experimental)
+
+    * ext/xsl/EXPERIMENTAL:
+      This extension is no more experimental
+
+2004-08-24  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Fix typo
+
 2004-08-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_compile.c:
