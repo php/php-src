@@ -332,7 +332,7 @@ ZEND_API ZEND_FUNCTION(display_disabled_class);
 
 #define ZVAL_BOOL(z, b) {				\
 		(z)->type = IS_BOOL;	        \
-		(z)->value.lval = (b != 0);     \
+		(z)->value.lval = ((b) != 0);   \
 	}
 
 #define ZVAL_NULL(z) {					\
