@@ -271,11 +271,11 @@ unticked_declaration_statement:
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_CLASS decleration_class_name { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+	|	T_CLASS declaration_class_name { zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 	|	T_CLASS T_STRING T_EXTENDS T_STRING { zend_do_begin_class_declaration(&$1, &$2, &$4 TSRMLS_CC); } '{' class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
-decleration_class_name:
+declaration_class_name:
 	|	parse_class_name_entry T_STRING { do_fetch_class_name(&$$, &$1, &$2, 0 TSRMLS_CC); }
 	|	T_STRING { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
 ;
@@ -426,8 +426,8 @@ class_statement_list:
 
 
 class_statement:
-		class_variable_decleration ';'
-	|	class_constant_decleration ';'
+		class_variable_declaration ';'
+	|	class_constant_declaration ';'
 	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); }
@@ -441,20 +441,20 @@ is_reference:
 	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
 ;
 
-class_variable_decleration:
-		class_variable_decleration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, $1.op_type TSRMLS_CC); }
-	|	class_variable_decleration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5, $1.op_type TSRMLS_CC); }
-	|	class_decleration_type T_VARIABLE						{ $$ = $1; zend_do_declare_property(&$2, NULL, $1.op_type TSRMLS_CC); }
-	|	class_decleration_type T_VARIABLE '=' static_scalar	{ $$ = $1; zend_do_declare_property(&$2, &$4, $1.op_type TSRMLS_CC); }
+class_variable_declaration:
+		class_variable_declaration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, $1.op_type TSRMLS_CC); }
+	|	class_variable_declaration ',' T_VARIABLE '=' static_scalar	{ zend_do_declare_property(&$3, &$5, $1.op_type TSRMLS_CC); }
+	|	class_declaration_type T_VARIABLE						{ $$ = $1; zend_do_declare_property(&$2, NULL, $1.op_type TSRMLS_CC); }
+	|	class_declaration_type T_VARIABLE '=' static_scalar	{ $$ = $1; zend_do_declare_property(&$2, &$4, $1.op_type TSRMLS_CC); }
 ;
 
-class_decleration_type:
+class_declaration_type:
 		T_VAR		{ $$.op_type = T_VAR; }
 	|	T_STATIC	{ $$.op_type = T_STATIC; }
 	|	T_PRIVATE	{ $$.op_type = T_PRIVATE; }
 ;
 
-class_constant_decleration:
+class_constant_declaration:
 	|	T_CONST ',' T_STRING '=' static_scalar	{ zend_do_declare_property(&$3, &$5, T_CONST TSRMLS_CC); }
 	|	T_CONST T_STRING '=' static_scalar	{ zend_do_declare_property(&$2, &$4, T_CONST TSRMLS_CC); }
 ;
