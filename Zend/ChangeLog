@@ -1,3 +1,8 @@
+2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_strtod.c:
+      Better fix for endian compile problems.
+
 2004-12-17  Andi Gutmans  <andi@zend.com>
 
     * zend_object_handlers.c:

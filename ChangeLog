@@ -1,3 +1,73 @@
+2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * acinclude.m4
+      configure.in
+      ZendEngine2/zend_strtod.c:
+      Better fix for endian compile problems.
+
+    * (PHP_4_3)
+      build/build2.mk
+      build/build2.mk
+      build/buildcheck.sh
+      build/buildcheck.sh:
+      MFH: Fix buildconf when multiple autoconf versions installed
+
+    * build/build2.mk
+      build/buildcheck.sh:
+      Fix buildconf when multiple autoconf versions installed
+
+2004-12-20  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/aolserver/aolserver.c
+      sapi/apache2handler/mod_php5.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/isapi/php5isapi.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c:
+      Add the new request_time sapi struct entry to all the sapis.  Some of these
+      may have ways of getting the request time without the extra syscall, but
+      for now let's just make sure we don't crash and people will eventually
+      fill these in where applicable.
+
+2004-12-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/url.c:
+      Fixed bug #31174 (compile warning in url.c).
+
+2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      MFH: Use FREE_HASHTABLE() instead of efree()
+
+2004-12-20  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c:
+      MFH: Fixed type conversion for NULL values in mysql_stmt_execute
+
+    * ext/mysqli/mysqli_api.c:
+      prevent type conversion during mysql_stmt_execute for NULL variables
+
+2004-12-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      typofix
+
 2004-12-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
