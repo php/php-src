@@ -175,9 +175,7 @@ dnl Main config
 dnl
 
 PHP_ARG_ENABLE(mbstring, whether to enable multibyte string support,
-[  --enable-mbstring[=LANG]
-                          Enable multibyte string support.
-                          LANG can be any one of ja, cn, tw, kr, ru, or "all".])
+[  --enable-mbstring       Enable multibyte string support.])
 
 PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 [  --disable-mbregex         MBSTRING: Disable multibyte regex support], yes, no)
@@ -188,22 +186,6 @@ PHP_ARG_WITH(libmbfl, [for external libmbfl],
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE(HAVE_MBSTRING,1,[whether to have multibyte string support])
-
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "ja"; then
-    AC_DEFINE([HAVE_MBSTR_JA],1,[whether to have japanese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "cn"; then
-    AC_DEFINE([HAVE_MBSTR_CN],1,[whether to have simplified chinese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "tw"; then
-    AC_DEFINE([HAVE_MBSTR_TW],1,[whether to have traditional chinese support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTIRNG" = "kr"; then
-    AC_DEFINE([HAVE_MBSTR_KR],1,[whether to have korean support])
-  fi
-  if test "$PHP_MBSTRING" = "all" -o "$PHP_MBSTRING" = "ru"; then
-    AC_DEFINE([HAVE_MBSTR_RU],1,[whether to have russian support])
-  fi
 
   PHP_MBSTRING_ADD_SOURCES([mbstring.c php_unicode.c])
 
