@@ -3,7 +3,7 @@ LTLIBRARY_NAME          = libxml.la
 LTLIBRARY_SOURCES       = xml.c
 LTLIBRARY_LIBADD        = expat/libexpat.la
 LTLIBRARY_SHARED_NAME   = xml.la
-LTLIBRARY_SHARED_LIBADD = $(XML_LIBS)
+LTLIBRARY_SHARED_LIBADD = expat/libexpat.la
 
 SUBDIRS = expat
 
