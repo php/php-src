@@ -123,7 +123,15 @@ class OS_Guess
                 $release = "$parts[3].$parts[2]";
                 break;
             case 'Windows':
-                $release = $parts[3];
+                switch ($parts[1]) {
+                    case '95/98':
+                        $release = '9x';
+                        break;
+                    default:
+                        $release = $parts[1];
+                        break;
+                }
+                $cpu = 'i386';
                 break;
             case 'Linux':
                 $extra = $this->_detectGlibcVersion();
@@ -241,7 +249,7 @@ class OS_Guess
     {
         if (strcspn($fragment, '*?') < strlen($fragment)) {
             $reg = '^' . str_replace(array('*', '?', '/'), array('.*', '.', '\\/'), $fragment) . '$';
-            return eregi($preg, $value);
+            return eregi($reg, $value);
         }
         return ($fragment == '*' || !strcasecmp($fragment, $value));
     }
