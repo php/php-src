@@ -451,6 +451,7 @@ cuserid \
 crypt \
 flock \
 ftok \
+funopen \
 gai_strerror \
 gcvt \
 getlogin \

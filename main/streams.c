@@ -72,6 +72,25 @@
 #endif
 /* }}} */
 
+/* Under BSD, emulate fopencookie using funopen */
+#if HAVE_FUNOPEN
+typedef struct {
+	int (*reader)(void *, char *, int);
+	int (*writer)(void *, const char *, int);
+	fpos_t (*seeker)(void *, fpos_t, int);
+	int (*closer)(void *);
+} COOKIE_IO_FUNCTIONS_T;
+
+FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
+{
+	return funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
+}
+# define HAVE_FOPENCOOKIE 1
+# define PHP_STREAM_COOKIE_FUNCTIONS	&stream_cookie_functions
+#elif HAVE_FOPENCOOKIE
+# define PHP_STREAM_COOKIE_FUNCTIONS	stream_cookie_functions
+#endif
+	
 static HashTable url_stream_wrappers_hash;
 static int le_stream = FAILURE; /* true global */
 static int le_pstream = FAILURE; /* true global */
@@ -1784,7 +1803,39 @@ err:
 /* }}} */
 
 /* {{{ STDIO with fopencookie */
-#if HAVE_FOPENCOOKIE
+#if HAVE_FUNOPEN
+/* use our fopencookie emulation */
+static int stream_cookie_reader(void *cookie, char *buffer, int size)
+{
+	int ret;
+	TSRMLS_FETCH();
+	ret = php_stream_read((php_stream*)cookie, buffer, size);
+	return ret;
+}
+
+static int stream_cookie_writer(void *cookie, const char *buffer, int size)
+{
+	TSRMLS_FETCH();
+	return php_stream_write((php_stream *)cookie, (char *)buffer, size);
+}
+
+static fpos_t stream_cookie_seeker(void *cookie, off_t position, int whence)
+{
+	TSRMLS_FETCH();
+	return (fpos_t)php_stream_seek((php_stream *)cookie, position, whence);
+}
+
+static int stream_cookie_closer(void *cookie)
+{
+	php_stream *stream = (php_stream*)cookie;
+	TSRMLS_FETCH();
+
+	/* prevent recursion */
+	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
+	return php_stream_close(stream);
+}
+
+#elif HAVE_FOPENCOOKIE
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 {
 	ssize_t ret;
@@ -1827,7 +1878,9 @@ static int stream_cookie_closer(void *cookie)
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 	return php_stream_close(stream);
 }
+#endif /* elif HAVE_FOPENCOOKIE */
 
+#if HAVE_FOPENCOOKIE
 static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 {
 	stream_cookie_reader, stream_cookie_writer,
@@ -1880,7 +1933,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		if (ret == NULL)
 			goto exit_success;
 
-		*ret = fopencookie(stream, stream->mode, stream_cookie_functions);
+		*ret = fopencookie(stream, stream->mode, PHP_STREAM_COOKIE_FUNCTIONS);
 
 		if (*ret != NULL) {
 			off_t pos;
