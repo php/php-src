@@ -2120,9 +2120,6 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	int l;
 	char escape_char='\\';
 
-	if (PG(magic_quotes_sybase)) {
-		escape_char='\'';
-	}
 
 	if (len != NULL) {
 		l = *len;
@@ -2131,6 +2128,25 @@ PHPAPI void php_stripslashes(char *str, int *len TSRMLS_DC)
 	}
 	s = str;
 	t = str;
+
+	if (PG(magic_quotes_sybase)) {
+		while (l >= 0) {
+			if(*t=='\'') {
+				if((l>0) && (t[1]=='\'')) {
+					t++;
+					if (len != NULL)
+						(*len)--;
+					l--;
+				}
+			} 
+			*s++ = *t++;
+			l--;
+		}
+		*s = '\0';
+		
+		return;
+	}
+
 	while (l > 0) {
 		if (*t == escape_char) {
 			t++;				/* skip the slash */
