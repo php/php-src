@@ -1,3 +1,188 @@
+2002-04-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/mbstring.c:
+    interpret empty to_encoding as encoding not set what results in current_internal_encoding
+
+2002-04-11  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Fixed (again) the news entry..NEWS file is not a manual.
+
+2002-04-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    fixed a bug which causes crash when charset is not set.
+
+2002-04-11  Harald Radi  <h.radi@nme.at>
+
+    * ext/gd/gd.c: fixed typo
+
+    * ext/gd/gd.c: fixed type
+
+2002-04-11  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Fix a problem where php-generated data was pushed down the entire output
+    filter chain instead of just down the rest of the chain. This fix will
+    speed up some unnecessary overhead introduced in the last patch.
+
+    Suggested by:  Cliff Woolley <jwoolley@apache.org>
+
+2002-04-11  Harald Radi  <h.radi@nme.at>
+
+    * ext/gd/gd.c: fixed type
+
+2002-04-11  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    PHP filters and Apache 2 aren't quite a perfect match yet, so we have
+    to do some trickery with the server_context to make sure it is always
+    valid within the current thread.
+
+    This patch makes sure the server_context is created in apache's
+    post_read_request hook phase, and then registeres a cleanup that
+    will NULL out the server context when the request goes out of scope.
+    Then, inside the output filters, if the server_context is null we
+    throw an error. Finally, instead of saving the output filter in
+    the server_context, now we store the entire request_rec pointer
+    in there.
+
+    POST bodies appear to be working now, although they are very inefficient.
+    The input filter is still just realloc()ing for whatever data comes
+    down the input pipe, and then sending this to PHP. This means that
+    we are doing some really nasty memory management on big POST bodies.
+    For now this it allows for unlimited input bodies, which means that
+    a big POST could potentially DoS a box by making it run out of memory.
+    We might want to put a limit on here just in case, at least until
+    we figure out how to consume input data more efficiently into php.
+
+2002-04-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/config.w32.h
+      win32/php4dll.dsp
+      win32/php4dllts.dsp: Disable ext/overload.
+
+2002-04-11  Joseph Tate  <jtate@mi-corporation.com>
+
+    * win32/php4dllts.dsp
+      win32/php4ts.dsp
+      win32/php4ts_cli.dsp: Fixing project files so that they load
+
+2002-04-11  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Don't depend on the context provided by the filter (f->ctx) anymore. In
+    Apache 2 the input and output filter contexts are kept unique. We now
+    only depend on SG(server_context) for each request, and assume that
+    the same thread will process the entire request. At some point it
+    would be wise to separate the input and output contexts.
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Return the number of bytes consumed, not the number of bytes left.
+
+    Suggested by:  Brian Havard <brianh@kheldar.apana.org.au>
+
+2002-04-11  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/domxml/tests/001.phpt:
+     - add quotes. Cought by: Roman Neuhauser <neuhauser@mail.cz>
+
+2002-04-11  Aaron Bannert  <aaron@apache.org>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Return the number of bytes consumed, not the number of bytes left.
+
+    Suggested by:  Brian Havard <brianh@kheldar.apana.org.au>
+
+2002-04-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/README: MFH (Update README).
+
+    * sapi/apache2filter/README: Update README.
+
+2002-04-11  Joseph Tate  <jtate@mi-corporation.com>
+
+    * win32/php4ts.dsp
+      win32/php4ts.rc
+      win32/php4ts.rc2
+      win32/php4ts_cli.dsp
+      win32/php4ts_cli.rc
+      win32/php4ts_cli.rc2
+      win32/resource.h
+      win32/php4dllts.rc
+      win32/php4dllts.rc2
+      win32/php4dllts.dsp:
+    Added versioning to dll and exe files created under windows.
+
+
+
+2002-04-11  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_version.h: sync with PHP_MAJOR_VERSION changes to configure.in
+
+    * configure.in: Apply patch for MAJOR_VERSION etc. by Joseph Tate
+
+2002-04-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/mbstring/mbstring.c: Fix ZTS build
+
+2002-04-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/overload/config.m4
+      configure.in
+      ext/standard/basic_functions.h
+      ext/standard/aggregation.c
+      ext/standard/aggregation.h
+      ext/standard/basic_functions.c
+      ext/standard/config.m4:
+    - Mark Apache2, overload and aggregation as experimental
+
+2002-04-11  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/user_streams.c
+      ext/standard/php_fopen_wrapper.c: Fix declarations (Thanks Sebastian)
+
+2002-04-11  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/Archive/Tar.php: use DIRECTORY_SEPERATOR
+
+2002-04-11  Stig Bakken  <ssb@fast.no>
+
+    * configure.in: * no more pear/scripts/pear-get
+
+2002-04-11  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/base64.c: thread safe
+
+    * main/snprintf.c: fix build (hopefully for BSD, too)
+
+    * ext/standard/image.c: fix warning
+
+    * ext/standard/tests/file/002.phpt: fix testproblem
+
+2002-04-11  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    MFH (Patch by Aaron Bannert <aaron@clove.org> and Cliff Woolley <jwoolley@virginia.edu>).
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    Patch by Aaron Bannert <aaron@clove.org> and Cliff Woolley <jwoolley@virginia.edu>.
+
+2002-04-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: properly reset ac_extra in PHP_NEW_EXTENSION
+
+    redirect stderr to /dev/null to silence xargs
+
+    Noticed by: Andrei
+
+2002-04-11  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/skeleton/php_skeleton.h: TSRMG => TSRMLS
+
 2002-04-10  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/iconv/iconv.c: fix warning
