@@ -11,7 +11,7 @@ class Bar {
   }
 }
 
-$class = new Reflection_Class('bar');
+$class = new ReflectionClass('bar');
 $methods = $class->getMethods();
 $params = $methods[0]->getParameters();
 
