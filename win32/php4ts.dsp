@@ -124,7 +124,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_CONSOLE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /Fr /FD /c
 # SUBTRACT BASE CPP /YX /Yc /Yu
-# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\sapi\cgi\libfcgi\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_CONSOLE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /Fr /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /I "..\sapi\cgi\libfcgi\include" /D "FCGI_STATIC" /D "PHP_FASTCGI" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_CONSOLE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /Fr /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -169,47 +169,14 @@ SOURCE=..\sapi\cgi\php_getopt.h
 # Begin Source File
 
 SOURCE=..\sapi\cgi\libfcgi\fcgi_stdio.c
-
-!IF  "$(CFG)" == "php4ts - Win32 Release_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Debug_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TS_inline"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TSDbg"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\sapi\cgi\libfcgi\fcgiapp.c
-
-!IF  "$(CFG)" == "php4ts - Win32 Release_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Debug_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TS_inline"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TSDbg"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
 SOURCE=..\sapi\cgi\libfcgi\os_win32.c
-
-!IF  "$(CFG)" == "php4ts - Win32 Release_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Debug_TS"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TS_inline"
-
-!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TSDbg"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # End Target
