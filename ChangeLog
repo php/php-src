@@ -1,3 +1,43 @@
+2002-08-07  georg  <georg@pb1.pair.com>
+
+    * ext/mysql/CREDITS
+      ext/mysql/php_mysql.c:
+    added zend_error messages for deprecated functions
+    inserted zak and me in author list/credits
+
+    * ext/mysql/php_mysql.c:
+    removed unsued constants (MYSQL_USE_RESULT and MYSQL_STORE_RESULT)
+
+2002-08-07  helly  <helly@pb1.pair.com>
+
+    * main/php.h
+      main/main.c:
+    -new functions php_error_func<0> to support unified error messages
+
+2002-08-07  phanto  <phanto@pb1.pair.com>
+
+    * sapi/cgi/cgi_main.c: dump memory leaks on shutdown
+
+2002-08-07  jtate  <jtate@pb1.pair.com>
+
+    * ext/domxml/php_domxml.c: php_domxml.c
+
+    * ext/domxml/php_domxml.c:
+2002-08-07  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: left on debug infos
+
+    * ext/exif/exif.c: Ignore additional thumbnails
+
+2002-08-07  bradmssw  <bradmssw@pb1.pair.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h: more syncing with libmcve-3.0
+
+2002-08-07  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/gettext/gettext.c: Fixed crash. Patch by <kilbi@rad.rwth-aachen.de>
+
 2002-08-06  kalowsky  <kalowsky@pb1.pair.com>
 
     * ext/java/java.c: A folding we will go, a folding we will go,
