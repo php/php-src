@@ -1241,9 +1241,12 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <INITIAL>"<?php_track_vars?>"([\n]|"\r\n")? {
-	zend_message_dispatcher(ZMSG_ENABLE_TRACK_VARS, NULL);
+	zend_error(E_WARNING, "<?php_track_vars?> is no longer supported - please use the track_vars INI directive instead");
 	HANDLE_NEWLINE(yytext[yyleng-1]);
-	return T_PHP_TRACK_VARS;
+	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
+	zendlval->value.str.len = yyleng;
+	zendlval->type = IS_STRING;
+	return T_INLINE_HTML;
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL} {

@@ -2289,7 +2289,6 @@ int zendlex(znode *zendlval CLS_DC)
 		case T_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:
-		case T_PHP_TRACK_VARS:
 			retval = zendlex(zendlval CLS_CC);
 			break;
 		case T_CLOSE_TAG:
