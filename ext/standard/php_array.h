@@ -75,6 +75,7 @@ PHP_FUNCTION(array_change_key_case);
 PHP_FUNCTION(array_rand);
 PHP_FUNCTION(array_unique);
 PHP_FUNCTION(array_intersect);
+PHP_FUNCTION(array_intersect_assoc);
 PHP_FUNCTION(array_diff);
 PHP_FUNCTION(array_diff_assoc);
 PHP_FUNCTION(array_sum);

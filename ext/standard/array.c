@@ -78,6 +78,9 @@ php_array_globals array_globals;
 #define DIFF_NORMAL			0
 #define DIFF_ASSOC			1
 
+#define INTERSECT_NORMAL		0
+#define INTERSECT_ASSOC			1
+
 PHP_MINIT_FUNCTION(array)
 {
 #ifdef ZTS
@@ -2519,9 +2522,7 @@ PHP_FUNCTION(array_unique)
 }
 /* }}} */
 
-/* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
-   Returns the entries of arr1 that have values which are present in all the other arguments */
-PHP_FUNCTION(array_intersect)
+static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
 	zval ***args = NULL;
 	HashTable *hash;
@@ -2558,7 +2559,11 @@ PHP_FUNCTION(array_intersect)
 		for (p = hash->pListHead; p; p = p->pListNext)
 			*list++ = p;
 		*list = NULL;
-		zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+		if (behavior == INTERSECT_NORMAL) {
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
+		} else if (behavior == INTERSECT_ASSOC) {
+			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_key_compare TSRMLS_CC);
+		}
 	}
 
 	/* copy the argument array */
@@ -2568,11 +2573,26 @@ PHP_FUNCTION(array_intersect)
 	/* go through the lists and look for common values */
 	while (*ptrs[0]) {
 		for (i=1; i<argc; i++) {
-			while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
-				ptrs[i]++;
+			if (behavior == INTERSECT_NORMAL) {
+				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+					ptrs[i]++;
+			} else if (behavior == INTERSECT_ASSOC) {
+				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC))))
+					ptrs[i]++;
+				if (!c && *ptrs[i]) { /* this means that ptrs[i] is not NULL so we can compare */
+						/* and "c==0" is from last operation */
+				 	if (array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
+				 		c = 1;
+				 		/* we are going to the break */
+				 	} else {
+				 		/* continue looping */
+				 	}
+				}
+			}
 			if (!*ptrs[i]) {
 				/* delete any values corresponding to remains of ptrs[0] */
-				/* and exit */
+				/* and exit because they do not present in at least one of */
+				/* the other arguments */
 				for (;;) {
 					p = *ptrs[0]++;
 					if (!p)
@@ -2583,7 +2603,7 @@ PHP_FUNCTION(array_intersect)
 						zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				}
 			}
-			if (c)
+			if (c) /* here we get if not all are equal */
 				break;
 			ptrs[i]++;
 		}
@@ -2598,8 +2618,13 @@ PHP_FUNCTION(array_intersect)
 					zend_hash_index_del(Z_ARRVAL_P(return_value), p->h);  
 				if (!*++ptrs[0])
 					goto out;
-				if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))
+				if (behavior == INTERSECT_NORMAL) {
+					if (0 <= array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC))
+						break;
+				} else if (behavior == INTERSECT_ASSOC) {
+					/* no need of looping because indexes are unique */
 					break;
+				}
 			}
 		} else {
 			/* ptrs[0] is present in all the arguments */
@@ -2607,8 +2632,13 @@ PHP_FUNCTION(array_intersect)
 			for (;;) {
 				if (!*++ptrs[0])
 					goto out;
-				if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+				if (behavior == INTERSECT_NORMAL) {
+					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC))
+						break;
+				} else if (behavior == INTERSECT_ASSOC) {
+					/* no need of looping because indexes are unique */
 					break;
+				}
 			}
 		}
 	}
@@ -2622,7 +2652,23 @@ out:
 	efree(lists);
 	efree(args);
 }
+
+/* {{{ proto array array_intersect(array arr1, array arr2 [, array ...])
+   Returns the entries of arr1 that have values which are present in all the other arguments */
+PHP_FUNCTION(array_intersect)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_NORMAL);
+}
 /* }}} */
+
+/* {{{ proto array array_intersect_assoc(array arr1, array arr2 [, array ...])
+   Returns the entries of arr1 that have values which are present in all the other arguments. Keys are used to do more restrctive check */
+PHP_FUNCTION(array_intersect_assoc)
+{
+	php_array_intersect(INTERNAL_FUNCTION_PARAM_PASSTHRU, INTERSECT_ASSOC);
+}
+/* }}} */
+
 
 static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 {
