@@ -25,7 +25,7 @@ generated_lists:
 	@echo makefile_am_files = Makefile.am Zend/Makefile.am \
 		TSRM/Makefile.am `find ext sapi regex pear -name Makefile.am` > $@
 	@echo config_h_files = Zend/acconfig.h TSRM/acconfig.h \
-		ext/*/config.h.stub sapi/*/config.h.stub >> $@
+		ext/*/config.h.stub >> $@
 	@echo config_m4_files = Zend/Zend.m4 TSRM/tsrm.m4 \
 		Zend/acinclude.m4 ext/*/config.m4 sapi/*/config.m4 >> $@
 
