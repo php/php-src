@@ -340,7 +340,8 @@ PHP_FUNCTION(imageloadfont) {
 
 /* {{{ proto int imagecreate(int x_size, int y_size)
 Create a new image */
-PHP_FUNCTION(imagecreate) {
+PHP_FUNCTION(imagecreate)
+{
 	pval *x_size, *y_size;
 	int ind;
 	gdImagePtr im;
@@ -362,7 +363,8 @@ PHP_FUNCTION(imagecreate) {
 
 /* {{{ proto int imagecreatefromgif(string filename)
 Create a new image from file or URL */
-PHP_FUNCTION(imagecreatefromgif ) {
+PHP_FUNCTION(imagecreatefromgif )
+{
 	pval *file;
 	int ind;
 	gdImagePtr im;
@@ -404,7 +406,8 @@ PHP_FUNCTION(imagecreatefromgif ) {
 
 /* {{{ proto int imagedestroy(int im)
 Destroy an image */
-PHP_FUNCTION(imagedestroy) {
+PHP_FUNCTION(imagedestroy)
+{
 	pval *imgind;
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &imgind) == FAILURE) {
@@ -421,7 +424,8 @@ PHP_FUNCTION(imagedestroy) {
 
 /* {{{ proto int imagecolorallocate(int im, int red, int green, int blue)
 Allocate a color for an image */
-PHP_FUNCTION(imagecolorallocate) {
+PHP_FUNCTION(imagecolorallocate)
+{
 	pval *imgind, *red, *green, *blue;
 	int ind, ind_type;
 	int col;
@@ -457,7 +461,8 @@ PHP_FUNCTION(imagecolorallocate) {
 /* im, x, y */
 /* {{{ proto int imagecolorat(int im, int x, int y)
 Get the index of the color of a pixel */
-PHP_FUNCTION(imagecolorat) {
+PHP_FUNCTION(imagecolorat)
+{
 	pval *imgind, *x, *y;
 	int ind, ind_type;
 	gdImagePtr im;
@@ -493,7 +498,8 @@ PHP_FUNCTION(imagecolorat) {
 
 /* {{{ proto int imagecolorclosest(int im, int red, int green, int blue)
 Get the index of the closest color to the specified color */
-PHP_FUNCTION(imagecolorclosest) {
+PHP_FUNCTION(imagecolorclosest)
+{
 	pval *imgind, *red, *green, *blue;
 	int ind, ind_type;
 	int col;
@@ -528,7 +534,8 @@ PHP_FUNCTION(imagecolorclosest) {
 
 /* {{{ proto int imagecolordeallocate(int im, int index)
 De-allocate a color for an image */
-PHP_FUNCTION(imagecolordeallocate) {
+PHP_FUNCTION(imagecolordeallocate)
+{
 	pval *imgind, *index;
 	int ind, ind_type, col;
 	gdImagePtr im;
@@ -562,7 +569,8 @@ PHP_FUNCTION(imagecolordeallocate) {
 
 /* {{{ proto int imagecolorresolve(int im, int red, int green, int blue)
 Get the index of the specified color or its closest possible alternative */
-PHP_FUNCTION(imagecolorresolve) {
+PHP_FUNCTION(imagecolorresolve)
+{
 	pval *imgind, *red, *green, *blue;
 	int ind, ind_type;
 	int col;
@@ -597,7 +605,8 @@ PHP_FUNCTION(imagecolorresolve) {
 
 /* {{{ proto int imagecolorexact(int im, int red, int green, int blue)
 Get the index of the specified color */
-PHP_FUNCTION(imagecolorexact) {
+PHP_FUNCTION(imagecolorexact)
+{
 	pval *imgind, *red, *green, *blue;
 	int ind, ind_type;
 	int col;
@@ -632,7 +641,8 @@ PHP_FUNCTION(imagecolorexact) {
 
 /* {{{ proto int imagecolorset(int im, int col, int red, int green, int blue)
 Set the color for the specified palette index */
-PHP_FUNCTION(imagecolorset) {
+PHP_FUNCTION(imagecolorset)
+{
 	pval *imgind, *color, *red, *green, *blue;
 	int ind, ind_type;
 	int col;
@@ -674,7 +684,8 @@ PHP_FUNCTION(imagecolorset) {
 
 /* {{{ proto array imagecolorsforindex(int im, int col)
 Get the colors for an index */
-PHP_FUNCTION(imagecolorsforindex) {
+PHP_FUNCTION(imagecolorsforindex)
+{
 	pval *imgind, *index;
 	int col, ind, ind_type;
 	gdImagePtr im;
@@ -712,7 +723,8 @@ PHP_FUNCTION(imagecolorsforindex) {
 
 /* {{{ proto int imagegif(int im, string filename)
 Output image to browser or file */
-PHP_FUNCTION(imagegif ) {
+PHP_FUNCTION(imagegif )
+{
 	pval *imgind, *file;
 	gdImagePtr im;
 	char *fn=NULL;
@@ -791,7 +803,8 @@ PHP_FUNCTION(imagegif ) {
 
 /* {{{ proto int imagesetpixel(int im, int x, int y, int col)
 Set a single pixel */
-PHP_FUNCTION(imagesetpixel) {
+PHP_FUNCTION(imagesetpixel)
+{
 	pval *imarg, *xarg, *yarg, *colarg;
 	gdImagePtr im;
 	int col, y, x;
@@ -828,7 +841,8 @@ PHP_FUNCTION(imagesetpixel) {
 /* im, x1, y1, x2, y2, col */
 /* {{{ proto int imageline(int im, int x1, int y1, int x2, int y2, int col)
 Draw a line */
-PHP_FUNCTION(imageline) {
+PHP_FUNCTION(imageline)
+{
 	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
@@ -867,7 +881,8 @@ PHP_FUNCTION(imageline) {
 
 /* {{{ proto int imagedashedline(int im, int x1, int y1, int x2, int y2, int col)
 Draw a dashed line */
-PHP_FUNCTION(imagedashedline) {
+PHP_FUNCTION(imagedashedline)
+{
 	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
@@ -906,7 +921,8 @@ PHP_FUNCTION(imagedashedline) {
 /* im, x1, y1, x2, y2, col */
 /* {{{ proto int imagerectangle(int im, int x1, int y1, int x2, int y2, int col)
 Draw a rectangle */
-PHP_FUNCTION(imagerectangle) {
+PHP_FUNCTION(imagerectangle)
+{
 	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
@@ -946,7 +962,8 @@ PHP_FUNCTION(imagerectangle) {
 /* im, x1, y1, x2, y2, col */
 /* {{{ proto int imagefilledrectangle(int im, int x1, int y1, int x2, int y2, int col)
 Draw a filled rectangle */
-PHP_FUNCTION(imagefilledrectangle) {
+PHP_FUNCTION(imagefilledrectangle)
+{
 	pval *IM, *COL, *X1, *Y1, *X2, *Y2;
 	gdImagePtr im;
 	int col, y2, x2, y1, x1;
@@ -985,7 +1002,8 @@ PHP_FUNCTION(imagefilledrectangle) {
 
 /* {{{ proto int imagearc(int im, int cx, int cy, int w, int h, int s, int e, int col)
 Draw a partial ellipse */
-PHP_FUNCTION(imagearc) {
+PHP_FUNCTION(imagearc)
+{
 	pval *COL, *E, *ST, *H, *W, *CY, *CX, *IM;
 	gdImagePtr im;
 	int col, e, st, h, w, cy, cx;
@@ -1036,7 +1054,8 @@ PHP_FUNCTION(imagearc) {
 /* im, x, y, border, col */
 /* {{{ proto int imagefilltoborder(int im, int x, int y, int border, int col)
 Flood fill to specific color */
-PHP_FUNCTION(imagefilltoborder) {
+PHP_FUNCTION(imagefilltoborder)
+{
 	pval *IM, *X, *Y, *BORDER, *COL;
 	gdImagePtr im;
 	int col, border, y, x;
@@ -1074,7 +1093,8 @@ PHP_FUNCTION(imagefilltoborder) {
 /* im, x, y, col */
 /* {{{ proto int imagefill(int im, int x, int y, int col)
 Flood fill */
-PHP_FUNCTION(imagefill) {
+PHP_FUNCTION(imagefill)
+{
 	pval *IM, *X, *Y, *COL;
 	gdImagePtr im;
 	int col, y, x;
@@ -1109,7 +1129,8 @@ PHP_FUNCTION(imagefill) {
 
 /* {{{ proto int imagecolorstotal(int im)
 Find out the number of colors in an image's palette */
-PHP_FUNCTION(imagecolorstotal) {
+PHP_FUNCTION(imagecolorstotal)
+{
 	pval *IM;
 	gdImagePtr im;
 	int ind_type;
@@ -1133,7 +1154,8 @@ PHP_FUNCTION(imagecolorstotal) {
 /* im, col */
 /* {{{ proto int imagecolortransparent(int im [, int col])
 Define a color as transparent */
-PHP_FUNCTION(imagecolortransparent) {
+PHP_FUNCTION(imagecolortransparent)
+{
 	pval *IM, *COL = NULL;
 	gdImagePtr im;
 	int col;
@@ -1175,7 +1197,8 @@ PHP_FUNCTION(imagecolortransparent) {
 /* im, interlace */
 /* {{{ proto int imageinterlace(int im [, int interlace])
 Enable or disable interlace */
-PHP_FUNCTION(imageinterlace) {
+PHP_FUNCTION(imageinterlace)
+{
 	pval *IM, *INT = NULL;
 	gdImagePtr im;
 	int interlace;
@@ -1218,7 +1241,7 @@ PHP_FUNCTION(imageinterlace) {
    arg = 1  filled polygon */
 /* im, points, num_points, col */
 static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
-	pval *IM, *POINTS, *NPOINTS, *COL, *var;
+	pval *IM, *POINTS, *NPOINTS, *COL, **var;
 	gdImagePtr im;
 	gdPoint points[PolyMaxPoints];	
 	int npoints, col, nelem, i;
@@ -1279,12 +1302,14 @@ static void _php3_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled) {
 
 	for (i = 0; i < npoints; i++) {
 		if (_php3_hash_index_find(POINTS->value.ht, (i * 2), (void **)&var) == SUCCESS) {
-			convert_to_long(var);
-			points[i].x = var->value.lval;
+			SEPARATE_ZVAL(var);
+			convert_to_long(*var);
+			points[i].x = (*var)->value.lval;
 		}
 		if (_php3_hash_index_find(POINTS->value.ht, (i * 2) + 1, (void **)&var) == SUCCESS) {
-			convert_to_long(var);
-			points[i].y = var->value.lval;
+			SEPARATE_ZVAL(var);
+			convert_to_long(*var);
+			points[i].y = (*var)->value.lval;
 		}
 	}
 
