@@ -145,6 +145,7 @@
 %token T_NULL
 %token T_FALSE
 %token T_TRUE
+%token T_GOTO
 
 %% /* Rules */
 
@@ -223,6 +224,8 @@ unticked_statement:
 		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
+	|	T_GOTO expr	';' { zend_do_goto(&$2 TSRMLS_CC); }
+	|	T_STRING ':'	{ zend_do_label(&$1 TSRMLS_CC); }
 ;
 
 
