@@ -613,49 +613,27 @@ PHP_FUNCTION(ltrim)
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
-	zval **ptext, **plinelength, **pbreakchar, **cut;
-	long i = 0, l = 0, pgr = 0, linelength = 0, last = 0, breakcharlen, docut = 0;
-	char *text, *breakchar, *newtext; 
-	int argc = ZEND_NUM_ARGS();
+	char *text, *breakchar = "\n", *newtext;
+	int textlen, breakcharlen = 1, newtextlen;
+	long linelength = 75, i = 0, l = 0, pgr = 0, last = 0;
+	zend_bool docut = 0;
 
-	if (argc < 1 || argc > 4 || 
-		zend_get_parameters_ex(ZEND_NUM_ARGS(), &ptext, &plinelength, &pbreakchar, &cut) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lsb", &text, &textlen, &linelength, &breakchar, &breakcharlen, &docut) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(ptext);
-	
-	if (Z_STRVAL_PP(ptext) == 0)
+
+	if (textlen == 0)
 		RETURN_FALSE;
 
-	text = Z_STRVAL_PP(ptext);
-
-	if (argc > 1) {
-		convert_to_long_ex(plinelength);
-		linelength = Z_LVAL_PP(plinelength);
-	}
-	else {
-		linelength = 75;
-	}
-
-	if (argc > 2) {
-		convert_to_string_ex(pbreakchar);
-		breakchar = Z_STRVAL_PP(pbreakchar);
-		breakcharlen = Z_STRLEN_PP(pbreakchar);
-	}
-	else {
-		breakchar = "\n";
-		breakcharlen = 1;
-	}
-
-	if (argc > 3) {
-		convert_to_long_ex(cut);
-		docut = Z_LVAL_PP(cut);
+	if (linelength == 0 && docut) {
+		php_error(E_WARNING, "%s() can't force cut when width is zero",get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
 	}
 
 	/* Special case for a single-character break as it needs no
 	   additional storage space */
-	if (breakcharlen == 1 && docut == 0) {
-		newtext = estrndup(text, Z_STRLEN_PP(ptext));
+	if (breakcharlen == 1 && !docut) {
+		newtext = estrndup(text, textlen);
 		while (newtext[i] != '\0') {
 
 			/* prescan line to see if it is greater than linelength */
@@ -697,12 +675,12 @@ PHP_FUNCTION(wordwrap)
 			i += l + 1;
 		}
 
-		RETVAL_STRINGL(newtext, strlen(newtext), 1);
-		efree(newtext);
+		RETURN_STRINGL(newtext, textlen, 0);
 	}
 	else {
 		/* Multiple character line break */
-		newtext = emalloc(Z_STRLEN_PP(ptext) * (breakcharlen + 1) + 1);
+		newtextlen = textlen * (breakcharlen + 1) + 1;
+		newtext = emalloc(newtextlen);
 		newtext[0] = '\0';
 
 		i = 0;
@@ -726,7 +704,7 @@ PHP_FUNCTION(wordwrap)
 				while (l >= 0) {
 					if (text[i+l] == ' ') {
 						strncat(newtext, text+last, i+l-last);
-						strcat(newtext, breakchar);
+						strncat(newtext, breakchar, breakcharlen);
 						last = i + l + 1;
 						break;
 					}
@@ -737,19 +715,22 @@ PHP_FUNCTION(wordwrap)
 					/* couldn't break it backwards, try looking forwards */
 					l = linelength - 1;
 					while (l <= pgr) {
-						if (docut == 0) {
+						if (!docut) {
 							if (text[i+l] == ' ') {
 								strncat(newtext, text+last, i+l-last);
-								strcat(newtext, breakchar);
+								strncat(newtext, breakchar, breakcharlen);
 								last = i + l + 1;
+								++l;
 								break;
 							}
 						}
-						if (docut == 1) {
+						/* cut if longer than allowed */
+						else {
 							if (text[i+l] == ' ' || l > i-last) {
 								strncat(newtext, text+last, i+l-last+1);
-								strcat(newtext, breakchar);
+								strncat(newtext, breakchar, breakcharlen);
 								last = i + l + 1;
+								++l;
 								break;
 							}
 						}
@@ -764,11 +745,10 @@ PHP_FUNCTION(wordwrap)
 		}
 
 		if (i + l > last) {
-			strcat(newtext, text+last);
+			strncat(newtext, text+last, i+l-last);
 		}
 
-		RETVAL_STRINGL(newtext, strlen(newtext), 1);
-		efree(newtext);
+		RETURN_STRINGL(newtext, strlen(newtext), 0);
 	}
 }
 /* }}} */
