@@ -1,5 +1,5 @@
 LTLIBRARY_NAME = libphp4cli.la
-LTLIBRARY_SOURCES = $(top_srcdir)/stub.c php_cli.c getopt.c
+LTLIBRARY_SOURCES = php_cli.c getopt.c
 
 LTLIBRARY_DEPENDENCIES = \
 		$(top_srcdir)/Zend/libZend.la \
@@ -13,7 +13,7 @@ LTLIBRARY_LIBADD = $(LTLIBRARY_DEPENDENCIES) $(EXTRA_LIBS)
 
 
 PROGRAM_NAME         = php
-PROGRAM_SOURCES      = $(top_srcdir)/stub.c
+PROGRAM_SOURCES      = 
 PROGRAM_LDADD        = libphp4cli.la $(EXT_PROGRAM_LDADD)
 PROGRAM_LDFLAGS      = -export-dynamic
 PROGRAM_DEPENDENCIES = $(PROGRAM_LDADD)
