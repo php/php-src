@@ -377,14 +377,24 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 	zend_mm_block *next_block;
 	size_t true_size = MAX(ZEND_MM_ALIGNED_SIZE(size)+ZEND_MM_ALIGNED_HEADER_SIZE, ZEND_MM_ALIGNED_FREE_HEADER_SIZE);
 
+	next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
+
 	if (true_size <= mm_block->size) {
 		zend_mm_create_new_free_block(heap, mm_block, true_size);
-		/* We don't yet merge this free block with the following one */
 
+		if (next_block->type == ZEND_MM_FREE_BLOCK) {
+			zend_mm_block *new_next_block;
+
+			new_next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
+			if (new_next_block != next_block) { /* A new free block was created */
+				zend_mm_remove_from_free_list(heap, (zend_mm_free_block *) next_block);
+				new_next_block->size += next_block->size;
+				/* update the next block's prev_size */
+				ZEND_MM_BLOCK_AT(mm_block, new_next_block->size)->prev_size = new_next_block->size;
+			}
+		}
 		return p;
 	}
-
-	next_block = ZEND_MM_BLOCK_AT(mm_block, mm_block->size);
 
 	if ((mm_block->prev_size == 0) && (next_block->type == ZEND_MM_USED_BLOCK) &&
 		(next_block->guard_block)) {
