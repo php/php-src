@@ -19,13 +19,16 @@ if test "$PHP_READLINE" != "no"; then
 
   PHP_ADD_INCLUDE($READLINE_DIR/include)
 
+  PHP_READLINE_LIBS=""
   AC_CHECK_LIB(ncurses, tgetent,
   [
     PHP_ADD_LIBRARY(ncurses,,READLINE_SHARED_LIBADD)
+	 PHP_READLINE_LIBS="$PHP_READLINE_LIBS -lncurses"
   ],[
     AC_CHECK_LIB(termcap, tgetent,
     [
       PHP_ADD_LIBRARY(termcap,,READLINE_SHARED_LIBADD)
+	 	PHP_READLINE_LIBS="$PHP_READLINE_LIBS -ltermcap"
     ])
   ])
 
@@ -35,7 +38,7 @@ if test "$PHP_READLINE" != "no"; then
   ], [
     AC_MSG_ERROR(readline library not found)
   ], [
-    -L$READLINE_DIR/lib 
+    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
   ])
 
   PHP_CHECK_LIBRARY(history, add_history,
@@ -44,7 +47,7 @@ if test "$PHP_READLINE" != "no"; then
   ], [
     AC_MSG_ERROR(history library required by readline not found)
   ], [
-    -L$READLINE_DIR/lib 
+    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
   ])
 
   PHP_NEW_EXTENSION(readline, readline.c, $ext_shared, cli)
