@@ -34,8 +34,8 @@ struct _tsrm_tls_entry {
 
 typedef struct {
 	size_t size;
-	void (*ctor)(void *resource);
-	void (*dtor)(void *resource);
+	ts_allocate_ctor ctor;
+	ts_allocate_dtor dtor;
 } tsrm_resource_type;
 
 
@@ -89,7 +89,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 
 
 /* Shutdown TSRM (call once for the entire process) */
-TSRM_API void tsrm_shutdown()
+TSRM_API void tsrm_shutdown(void)
 {
 	int i;
 
@@ -120,7 +120,7 @@ TSRM_API void tsrm_shutdown()
 
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource))
+TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor)
 {
 	ts_rsrc_id new_id;
 	int i;
@@ -245,7 +245,7 @@ void *ts_resource(ts_rsrc_id id)
 
 
 /* frees all resources allocated for the current thread */
-void ts_free_thread()
+void ts_free_thread(void)
 {
 	THREAD_T thread_id = tsrm_thread_id();
 	int hash_value;

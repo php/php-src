@@ -60,6 +60,7 @@ typedef int ts_rsrc_id;
 #endif
 
 typedef void (*ts_allocate_ctor)(void *);
+typedef void (*ts_allocate_dtor)(void *);
 
 #define THREAD_HASH_OF(thr,ts)  (unsigned long)thr%(unsigned long)ts
 
@@ -69,16 +70,16 @@ extern "C" {
 
 /* startup/shutdown */
 TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debug_status);
-TSRM_API void tsrm_shutdown();
+TSRM_API void tsrm_shutdown(void);
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, void (*dtor)(void *resource));
+TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, ts_allocate_dtor dtor);
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource(ts_rsrc_id id);
 
 /* frees all resources allocated for the current thread */
-TSRM_API void ts_free_thread();
+TSRM_API void ts_free_thread(void);
 
 /* deallocates all occurrences of a given id */
 TSRM_API void ts_free_id(ts_rsrc_id id);
