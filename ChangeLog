@@ -1,3 +1,60 @@
+2004-06-06  Pierre-Alain Joye  <pierre@dotgeek.org>
+
+    * pear/go-pear-list.php:
+      - No more Pager
+
+    * pear/go-pear-list.php:
+      - Update for 5.0RC3
+
+2004-06-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c:
+      MFH: Fixed bug #28649 (Proper glob() return value on Linux when there are
+      no matches).
+
+    * ext/standard/dir.c:
+      Fixed bug #28649 (Proper glob() return value on Linux when there are no
+      matches).
+
+2004-06-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/PEAR_test_mock_pearweb.php.inc
+      pear/tests/download_test.config.inc
+      pear/tests/package-PEARtests.xml
+      pear/tests/pear_downloader_invalid.phpt:
+      update unit tests for PEAR 1.4.0dev6, using new getDownloadURL() xml-rpc
+      call
+
+    * pear/scripts/pearcmd.php:
+      add missing $tmp to PEAR::isError()
+
+    * pear/scripts/pearcmd.php:
+      eliminate the annoyance of upgrading from crapster versions of PEAR once
+      and for all.
+      
+      Now, if getopt2 exists, it is used, otherwise getopt is used.
+
+2004-06-06  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/php_mysqli.h:
+      removed conditional defines for load_data_infile_handlers on windows
+      (4.1.2 windows build is fixed now on mysql.com)
+
+2004-06-06  Stefan Esser  <sesser@suspekt.org>
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_opcode.c:
+      Fixed Zend Function Destructor to use correct TSRM handle.
+
+2004-06-06  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/mysqli/mysqli.c:
+      ZTS fixes.
+
 2004-06-05  Georg Richter  <georg@mysql.com>
 
     * NEWS:

@@ -1,3 +1,9 @@
+2004-06-06  Stefan Esser  <sesser@suspekt.org>
+
+    * zend_compile.h
+      zend_opcode.c:
+      Fixed Zend Function Destructor to use correct TSRM handle.
+
 2004-06-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.c:
