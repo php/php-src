@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2002 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available at through the world-wide-web at                           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -1869,7 +1869,7 @@ int zend_jmp_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", EX(opline)->op1.u.opline_num);
 #endif
-	EX(opline) = &op_array->opcodes[EX(opline)->op1.u.opline_num];
+	EX(opline) = EX(opline)->op1.u.jmp_addr;
 	return 0; /* CHECK_ME */
 }
 
@@ -1881,7 +1881,7 @@ int zend_jmpz_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", EX(opline)->op2.u.opline_num);
 #endif
-		EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+		EX(opline) = EX(opline)->op2.u.jmp_addr;
 		FREE_OP(EX(Ts), op1, EG(free_op1));
 		return 0; /* CHECK_ME */
 	}
@@ -1898,7 +1898,7 @@ int zend_jmpnz_handler(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 		printf("Conditional jmp to %d\n", EX(opline)->op2.u.opline_num);
 #endif
-		EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+		EX(opline) = EX(opline)->op2.u.jmp_addr;
 		FREE_OP(EX(Ts), op1, EG(free_op1));
 		return 0; /* CHECK_ME */
 	}

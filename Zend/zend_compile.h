@@ -41,6 +41,7 @@
 #define HANDLE_INTERACTIVE()  if (CG(interactive)) { execute_new_code(TSRMLS_C); }
 
 typedef struct _zend_op_array zend_op_array;
+typedef struct _zend_op zend_op;
 
 typedef struct _znode {
 	int op_type;
@@ -52,6 +53,7 @@ typedef struct _znode {
 		zend_uint opline_num; /*  Needs to be signed */
 		zend_op_array *op_array;
 		zend_class_entry *previously_active_class_entry; /* Used at compile-time */
+		zend_op *jmp_addr;
 		struct {
 			zend_uint var;	/* dummy */
 			zend_uint type;
@@ -68,7 +70,7 @@ typedef int (*opcode_handler_t) (ZEND_OPCODE_HANDLER_ARGS);
 
 extern opcode_handler_t zend_opcode_handlers[512];
 
-typedef struct _zend_op {
+struct _zend_op {
 	zend_uchar opcode;
 	znode result;
 	znode op1;
@@ -76,7 +78,7 @@ typedef struct _zend_op {
 	ulong extended_value;
 	uint lineno;
 	opcode_handler_t handler;
-} zend_op;
+};
 
 
 typedef struct _zend_brk_cont_element {
