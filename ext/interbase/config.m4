@@ -1,29 +1,20 @@
 dnl $Id$
 
-AC_MSG_CHECKING(for InterBase support)
-AC_ARG_WITH(interbase,
+PHP_ARG_WITH(interbase,for InterBase support,
 [  --with-interbase[=DIR]  Include InterBase support.  DIR is the InterBase base
-                          install directory, defaults to /usr/interbase],
-[
-  if test "$withval" != "no"; then
-    if test "$withval" = "yes"; then
-      IBASE_INCDIR=/usr/interbase/include
-      IBASE_LIBDIR=/usr/interbase/lib
-    else
-      IBASE_INCDIR=$withval/include
-      IBASE_LIBDIR=$withval/lib
-    fi
-    IBASE_INCLUDE=-I$IBASE_INCDIR
-    IBASE_LFLAGS=-L$IBASE_LIBDIR
-    IBASE_LIBS="-lgds"
-    AC_DEFINE(HAVE_IBASE,1,[ ])
-    AC_MSG_RESULT(yes)
-    EXTRA_LIBS="$EXTRA_LIBS $IBASE_LFLAGS $IBASE_LIBS"
-    INCLUDES="$INCLUDES $IBASE_INCLUDE"
-    PHP_EXTENSION(interbase)
+                          install directory, defaults to /usr/interbase])
+
+if test "$PHP_INTERBASE" != "no"; then
+  if test "$PHP_INTERBASE" = "yes"; then
+    IBASE_INCDIR=/usr/interbase/include
+    IBASE_LIBDIR=/usr/interbase/lib
   else
-    AC_MSG_RESULT(no)
+    IBASE_INCDIR=$PHP_INTERBASE/include
+    IBASE_LIBDIR=$PHP_INTERBASE/lib
   fi
-],[
-  AC_MSG_RESULT(no)
-])
+  AC_ADD_LIBRARY_WITH_PATH(gds, $IBASE_LIBDIR, INTERBASE_SHARED_LIBADD)
+  AC_ADD_INCLUDE($IBASE_INCDIR)
+  AC_DEFINE(HAVE_IBASE,1,[ ])
+  PHP_EXTENSION(interbase, $ext_shared)
+  PHP_SUBST(INTERBASE_SHARED_LIBADD)
+fi
