@@ -30,7 +30,8 @@ fi
 
 # unixODBC
 if test "$option_value_with_solid" = "no" -a \
-        "$option_value_with_empress" = "no"; then
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no"; then
 define_option with-unixODBC 'unixODBC support?' yesnodir \
     'no /usr/local unixODBC install' \
 '    Whether to build PHP with unixODBC support.  This feature was first\n
@@ -43,7 +44,9 @@ fi
 
 # ESOOB
 if test "$option_value_with_solid" = "no" -a \
-        "$option_value_with_empress" = "no"; then
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no"; then
 define_option with-esoob 'Easysoft ODBC-ODBC Bridge support?' yesnodir \
     'no /usr/local/easysoft/oob/client ESOOB install' \
 '    Whether to build PHP with Easysoft ODBC-ODBC Bridge support.\n
@@ -54,7 +57,9 @@ fi
 # OpenLink
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
-        "$option_value_with_iodbc" = "no"; then
+        "$option_value_with_iodbc"" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \
+        "$option_value_with_esoob" = "no"; then
 define_option with-openlink 'OpenLink ODBC support?' yesnodir \
     'no /usr/local/openlink OpenLink install' \
 '    Whether to build PHP with OpenLink ODBC support.  See
@@ -65,6 +70,8 @@ fi
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \ 
+        "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no"; then
 define_option with-adabas 'Adabas D support?' yesnodir \
     'no /usr/local Adabas D install root' \
@@ -76,6 +83,8 @@ fi
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \ 
+        "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no"; then
 define_option with-velocis 'Velocis support?' yesnodir \
@@ -88,6 +97,8 @@ fi
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \
+        "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
         "$option_value_with_velocis" = "no"; then
@@ -97,17 +108,37 @@ define_option with-dbmaker 'DBMaker support?' yesnodir \
      More information about DBMaker can be found at http://www.casemaker.com/.'
 fi
 
+# SAP DB
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no" -a \
+        "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \
+        "$option_value_with_esoob" = "no" -a \
+        "$option_value_with_openlink" = "no" -a \
+        "$option_value_with_adabas" = "no" -a \
+        "$option_value_with_velocis" = "no" -a \
+        "$option_value_with_dbmaker" = "no"; then
+define_option with-sapdb 'SAP DB support?' yesnodir \
+    'no /usr/local SAP DB install' \
+'    Whether to build PHP with SAP DB support. \n
+     More information about SAP DB can be found at http://www.sapdb.org.'
+fi
+
 # Custom ODBC
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
+        "$option_value_with_unixODBC" = "no" -a \
+        "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
-        "$option_value_with_velocis" = "no"; -a \
-        "$option_value_with_dbmaker" = "no"; then
+        "$option_value_with_velocis" = "no" -a \
+        "$option_value_with_dbmaker" = "no" -a \
+        "$option_value_with_sapdb" = "no"; then
 define_option with-custom-odbc 'custom ODBC support?' yesnodir \
     'no /usr/local CODBC install' \
 '    Whether to build PHP with CODBC support.  This feature was first
     developed for Sybase SQL Anywhere 5.5 on QNX, but may be used for
     any unknown ODBC driver on all flavors of UNIX.'
 fi
+

@@ -107,6 +107,32 @@ AC_ARG_WITH(adabas,
 fi
 
 if test -z "$ODBC_TYPE"; then
+AC_MSG_CHECKING(for SAP DB support)
+AC_ARG_WITH(sapdb,
+[  --with-sapdb[=DIR]      Include SAP DB support.  DIR is SAP DB base
+                          install directory, defaults to /usr/local.],
+[
+  if test "$withval" = "yes"; then
+    withval=/usr/local
+  fi
+  if test "$withval" != "no"; then
+    AC_ADD_INCLUDE($withval/incl)
+	AC_ADD_LIBPATH($withval/lib)
+	AC_ADD_LIBRARY(sqlod)
+	AC_ADD_LIBRARY(sqlrte)
+    ODBC_TYPE=sapdb
+    AC_DEFINE(HAVE_SAPDB,1,[ ])
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+],[
+  AC_MSG_RESULT(no)
+])
+fi
+
+
+if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Solid support)
 AC_ARG_WITH(solid,
 [  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
