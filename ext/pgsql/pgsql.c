@@ -2026,7 +2026,8 @@ PHP_FUNCTION(pg_lo_write)
 	if (argc > 2) {
 		convert_to_long_ex(z_len);
 		if (Z_LVAL_PP(z_len) > Z_STRLEN_PP(str)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %ld. Tried to write %ld.", Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %ld.",
+							Z_STRLEN_PP(str), Z_LVAL_PP(z_len));
 			RETURN_FALSE;
 		}
 		if (Z_LVAL_PP(z_len) < 0) {
