@@ -1070,7 +1070,7 @@ PHP_FUNCTION(curl_exec)
 }
 /* }}} */
 
-/* {{{ proto string curl_getinfo(resource ch, int opt)
+/* {{{ proto mixed curl_getinfo(resource ch, int opt)
    Get information regarding a specific transfer */
 PHP_FUNCTION(curl_getinfo)
 {
