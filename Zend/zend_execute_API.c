@@ -492,6 +492,9 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	char *function_name_lc;
 	zval *current_this;
 	zend_execute_data execute_data;
+	zval *method_name;
+	zval *params_array;
+	int call_via_handler = 0;
 
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
@@ -573,8 +576,20 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 
 		original_function_state_ptr = EG(function_state_ptr);
 		if (zend_hash_find(function_table, function_name_lc, function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
-			efree(function_name_lc);
-			return FAILURE;
+			/* try calling __call */
+			if(calling_scope && calling_scope->__call) {
+				EX(function_state).function = calling_scope->__call;
+				/* prepare params */
+				ALLOC_INIT_ZVAL(method_name);
+				ZVAL_STRING(method_name, function_name_lc, 1);
+				
+				ALLOC_INIT_ZVAL(params_array);
+				array_init(params_array);
+				call_via_handler = 1;
+			} else {
+				efree(function_name_lc);
+				return FAILURE;
+			}
 		}
 		efree(function_name_lc);
 		*function_pointer = EX(function_state).function;
@@ -614,7 +629,17 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 			*param = **(params[i]);
 			INIT_PZVAL(param);
 		}
-		zend_ptr_stack_push(&EG(argument_stack), param);
+		if(call_via_handler) {
+			add_next_index_zval(params_array, param);
+		} else {
+			zend_ptr_stack_push(&EG(argument_stack), param);
+		}
+	}
+
+	if(call_via_handler) {
+		zend_ptr_stack_push(&EG(argument_stack), method_name);
+		zend_ptr_stack_push(&EG(argument_stack), params_array);
+		param_count = 2;
 	}
 
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
@@ -684,6 +709,10 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
+	if(call_via_handler) {
+		zval_ptr_dtor(&method_name);
+		zval_ptr_dtor(&params_array);
+	}
 	EG(function_state_ptr) = original_function_state_ptr;
 
 	if (EG(This)) {

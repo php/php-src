@@ -1535,12 +1535,18 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 
 					if (ce) {
 						lcname = zend_str_tolower_dup(Z_STRVAL_PP(method), Z_STRLEN_PP(method));
-						if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1))
+						if (zend_hash_exists(&ce->function_table, lcname, Z_STRLEN_PP(method)+1)) {
 							retval = 1;
+						}
+						/* check for __call too */
+						if (retval == 0 && ce->__call != 0) {
+							retval = 1;
+						}
 						efree(lcname);
 					}
-				} else if (callable_name)
+				} else if (callable_name) {
 					*callable_name = estrndup("Array", sizeof("Array")-1);
+				}
 			}
 			break;
 
