@@ -1,0 +1,14 @@
+// This interface was copied from http://random.org/corba.html, where you can
+// also find the current IOR of the server.
+// See client.cc for details.
+
+// IDL
+interface Random {
+
+    // return non-negative long integer in the interval [0, 2^31)
+    long lrand48();
+
+    // return signed long integer in the interval [-2^31, 2^31)
+    long mrand48();
+};
+
