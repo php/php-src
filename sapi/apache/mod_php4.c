@@ -534,7 +534,7 @@ static int send_php(request_rec *r, int display_source_mode, char *filename)
 	TSRMLS_FETCH();
 
 	if (AP(in_request)) {
-		zend_file_handle fh = {0};
+		zend_file_handle fh;
 
 		fh.filename = r->filename;
 		fh.opened_path = NULL;

@@ -28,7 +28,7 @@
 int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC)
 {
 	int retval = OK;	
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;

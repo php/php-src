@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
 	int c;
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
 	int no_headers=1;
@@ -725,7 +725,7 @@ int main(int argc, char *argv[])
 			ap_php_optind++;
 		}
 		if (script_file) {
-			if (!(file_handle.handle.fd = VCWD_OPEN(script_file, O_RDONLY | O_BINARY))) {
+			if (!(file_handle.handle.fp = VCWD_FOPEN(script_file, "rb"))) {
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 				php_printf("Could not open input file: %s.\n", script_file);
@@ -734,30 +734,27 @@ int main(int argc, char *argv[])
 			file_handle.filename = script_file;
 			script_filename = script_file;
 			/* #!php support */
-			c = 0;
-			read(file_handle.handle.fd, &c, 1);
+			c = fgetc(file_handle.handle.fp);
 			if (c == '#') {
 				while (c != 10 && c != 13) {
-					/* skip to end of line */
-					if (read(file_handle.handle.fd, &c, 1) != 1) 
-					   	break;
+					c = fgetc(file_handle.handle.fp);       /* skip to end of line */
 				}
 				/* handle situations where line is terminated by \r\n */
 				if (c == 13) {
-					if (read(file_handle.handle.fd, &c, 1) == 1 && c != 10) {
+					if (fgetc(file_handle.handle.fp) != 10) {
 						long pos = ftell(file_handle.handle.fp);
 						fseek(file_handle.handle.fp, pos - 1, SEEK_SET);
 					}
 				}
 				is_hashbang = 1;
 			} else {
-				lseek(file_handle.handle.fd, 0, SEEK_SET);
+				rewind(file_handle.handle.fp);
 			}
 		} else {
 			file_handle.filename = "-";
-			file_handle.handle.fd = STDIN_FILENO;
+			file_handle.handle.fp = stdin;
 		}
-		file_handle.type = ZEND_HANDLE_FD;
+		file_handle.type = ZEND_HANDLE_FP
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 		php_self = file_handle.filename;
@@ -773,7 +770,7 @@ int main(int argc, char *argv[])
 
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			*arg_excp = arg_free;
-			zend_file_handle_dtor(&file_handle);
+			fclose(file_handle.handle.fp);
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 			php_request_shutdown((void *) 0);
@@ -816,7 +813,7 @@ int main(int argc, char *argv[])
 		case PHP_MODE_STRIP:
 			if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 				zend_strip(TSRMLS_C);
-				zend_file_handle_dtor(&file_handle);
+				fclose(file_handle.handle.fp);
 			}
 			goto out;
 			break;
@@ -827,7 +824,7 @@ int main(int argc, char *argv[])
 				if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 					php_get_highlight_struct(&syntax_highlighter_ini);
 					zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
-					zend_file_handle_dtor(&file_handle);
+					fclose(file_handle.handle.fp);
 				}
 				goto out;
 			}
@@ -837,7 +834,7 @@ int main(int argc, char *argv[])
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle TSRMLS_CC);
 			zend_indent();
-			zend_file_handle_dtor(&file_handle);
+			fclose(file_handle.handle.fp);
 			goto out;
 			break;
 #endif

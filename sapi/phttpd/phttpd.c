@@ -247,7 +247,7 @@ php_phttpd_request_dtor(TSRMLS_D TSRMLS_DC)
 int php_doit(TSRMLS_D TSRMLS_DC)
 {
 	struct stat sb;
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 	struct httpinfo *hip = PHG(cip)->hip;
 	TSRMLS_FETCH();
 

@@ -2840,7 +2840,7 @@ static void php_ini_parser_cb_with_sections(zval *arg1, zval *arg2, int callback
 PHP_FUNCTION(parse_ini_file)
 {
 	zval **filename, **process_sections;
-	zend_file_handle fh = {0};
+	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
 	switch (ARG_COUNT(ht)) {

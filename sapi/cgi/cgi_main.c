@@ -894,7 +894,7 @@ int main(int argc, char *argv[])
 {
 	int exit_status = SUCCESS;
 	int cgi = 0, c, i, len;
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 	int retval = FAILURE;
 	char *s;
 /* temporary locals */

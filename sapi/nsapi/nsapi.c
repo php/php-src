@@ -493,7 +493,7 @@ static void nsapi_request_dtor(NSLS_D TSRMLS_DC)
 
 int nsapi_module_main(NSLS_D TSRMLS_DC)
 {
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;

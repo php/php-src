@@ -387,7 +387,7 @@ static sapi_module_struct pi3web_sapi_module = {
 
 DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 {
-	zend_file_handle file_handle = {0};
+	zend_file_handle file_handle;
 	int iRet = PIAPI_COMPLETED;
 	TSRMLS_FETCH();
 
