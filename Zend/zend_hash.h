@@ -89,6 +89,8 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 		zend_hash_add_or_update(ht,arKey,nKeyLength,pData,nDataSize,pDest,HASH_ADD)
 #define zend_hash_update_ptr(ht,arKey,nKeyLength,pData,nDataSize,pDest) \
 		zend_hash_add_or_update(ht,arKey,nKeyLength,pData,0,pDest,(HASH_UPDATE|HASH_ADD_PTR))
+#define zend_hash_add_ptr(ht,arKey,nKeyLength,pData,nDataSize,pDest) \
+		zend_hash_add_or_update(ht,arKey,nKeyLength,pData,nDataSize,pDest,(HASH_ADD|HASH_ADD_PTR))
 
 ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest,int flag);
 #define zend_hash_quick_update(ht,arKey,nKeyLength,h,pData,nDataSize,pDest) \
