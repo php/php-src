@@ -66,10 +66,10 @@ void list_entry_destructor(void *ptr);
 void plist_entry_destructor(void *ptr);
 
 void zend_clean_module_rsrc_dtors(int module_number);
-int zend_init_rsrc_list(ELS_D);
-int zend_init_rsrc_plist(ELS_D);
-void zend_destroy_rsrc_list(ELS_D);
-void zend_destroy_rsrc_plist(ELS_D);
+int zend_init_rsrc_list(TSRMLS_D);
+int zend_init_rsrc_plist(TSRMLS_D);
+void zend_destroy_rsrc_list(TSRMLS_D);
+void zend_destroy_rsrc_plist(TSRMLS_D);
 int zend_init_rsrc_list_dtors(void);
 void zend_destroy_rsrc_list_dtors(void);
 

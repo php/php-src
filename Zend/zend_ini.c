@@ -60,7 +60,7 @@ static int zend_restore_ini_entry_cb(zend_ini_entry *ini_entry, int stage)
 /*
  * Startup / shutdown
  */
-ZEND_API int zend_ini_startup(ELS_D)
+ZEND_API int zend_ini_startup(TSRMLS_D)
 {
 	registered_zend_ini_directives = &EG(ini_directives);
 	if (zend_hash_init_ex(registered_zend_ini_directives, 100, NULL, NULL, 1, 0)==FAILURE) {
@@ -70,21 +70,21 @@ ZEND_API int zend_ini_startup(ELS_D)
 }
 
 
-ZEND_API int zend_ini_shutdown(ELS_D)
+ZEND_API int zend_ini_shutdown(TSRMLS_D)
 {
 	zend_hash_destroy(&EG(ini_directives));
 	return SUCCESS;
 }
 
 
-ZEND_API int zend_ini_deactivate(ELS_D)
+ZEND_API int zend_ini_deactivate(TSRMLS_D)
 {
 	zend_hash_apply_with_argument(&EG(ini_directives), (int (*)(void *, void *)) zend_restore_ini_entry_cb, (void *) ZEND_INI_STAGE_DEACTIVATE);
 	return SUCCESS;
 }
 
 
-ZEND_API int zend_copy_ini_directives(ELS_D)
+ZEND_API int zend_copy_ini_directives(TSRMLS_D)
 {
 	zend_ini_entry ini_entry;
 
@@ -92,7 +92,7 @@ ZEND_API int zend_copy_ini_directives(ELS_D)
 		return FAILURE;
 	}
 	zend_hash_copy(&EG(ini_directives), registered_zend_ini_directives, NULL, &ini_entry, sizeof(zend_ini_entry));
-	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP ELS_CC);
+	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -117,7 +117,7 @@ static int ini_key_compare(const void *a, const void *b)
 }
 
 
-ZEND_API void zend_ini_sort_entries(ELS_D)
+ZEND_API void zend_ini_sort_entries(TSRMLS_D)
 {
 	zend_hash_sort(&EG(ini_directives), qsort, ini_key_compare, 0);
 }
@@ -170,7 +170,7 @@ static int zend_ini_refresh_cache(zend_ini_entry *p, int stage)
 }
 
 
-ZEND_API void zend_ini_refresh_caches(int stage ELS_DC)
+ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC)
 {
 	zend_hash_apply_with_argument(&EG(ini_directives), (int (*)(void *, void *)) zend_ini_refresh_cache, (void *)(long) stage);
 }
@@ -180,7 +180,7 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 {
 	zend_ini_entry *ini_entry;
 	char *duplicate;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==FAILURE) {
 		return FAILURE;
@@ -214,7 +214,7 @@ ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value,
 ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage)
 {
 	zend_ini_entry *ini_entry;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==FAILURE) {
 		return FAILURE;
@@ -246,7 +246,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
 ZEND_API long zend_ini_long(char *name, uint name_length, int orig)
 {
 	zend_ini_entry *ini_entry;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->modified) {
@@ -263,7 +263,7 @@ ZEND_API long zend_ini_long(char *name, uint name_length, int orig)
 ZEND_API double zend_ini_double(char *name, uint name_length, int orig)
 {
 	zend_ini_entry *ini_entry;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->modified) {
@@ -280,7 +280,7 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig)
 ZEND_API char *zend_ini_string(char *name, uint name_length, int orig)
 {
 	zend_ini_entry *ini_entry;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->modified) {
@@ -297,7 +297,7 @@ ZEND_API char *zend_ini_string(char *name, uint name_length, int orig)
 zend_ini_entry *get_ini_entry(char *name, uint name_length)
 {
 	zend_ini_entry *ini_entry;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_hash_find(&EG(ini_directives), name, name_length, (void **) &ini_entry)==SUCCESS) {
 		return ini_entry;

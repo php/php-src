@@ -8,9 +8,9 @@ static inline void zend_pzval_lock_func(zval *z)
 	((z)->refcount++);
 }
 
-#define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z ELS_CC)
+#define PZVAL_UNLOCK(z) zend_pzval_unlock_func(z TSRMLS_CC)
 
-static inline void zend_pzval_unlock_func(zval *z ELS_DC)
+static inline void zend_pzval_unlock_func(zval *z TSRMLS_DC)
 {
 	((z)->refcount--);
 	if (!(z)->refcount) {
@@ -20,7 +20,7 @@ static inline void zend_pzval_unlock_func(zval *z ELS_DC)
 	}
 }
 
-static inline void zend_clean_garbage(ELS_D)
+static inline void zend_clean_garbage(TSRMLS_D)
 {
 	while (EG(garbage_ptr)) {
 		zval_ptr_dtor(&EG(garbage)[--EG(garbage_ptr)]);

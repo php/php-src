@@ -426,7 +426,7 @@ ZEND_FUNCTION(define)
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
-	if (zend_register_constant(&c ELS_CC) == SUCCESS) {
+	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 	  RETURN_TRUE;
 	} else {
 	  RETURN_FALSE;
@@ -945,7 +945,7 @@ ZEND_FUNCTION(create_function)
 	sprintf(eval_code, "function " LAMBDA_TEMP_FUNCNAME "(%s){%s}", Z_STRVAL_PP(z_function_args), Z_STRVAL_PP(z_function_code));
 
 	eval_name = zend_make_compiled_string_description("runtime-created function");
-	retval = zend_eval_string(eval_code, NULL, eval_name CLS_CC ELS_CC);
+	retval = zend_eval_string(eval_code, NULL, eval_name CLS_CC TSRMLS_CC);
 	efree(eval_code);
 	efree(eval_name);
 

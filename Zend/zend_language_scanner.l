@@ -380,7 +380,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type CLS
 }
 
 
-zend_op_array *compile_filename(int type, zval *filename CLS_DC ELS_DC)
+zend_op_array *compile_filename(int type, zval *filename CLS_DC TSRMLS_DC)
 {
 	zend_file_handle file_handle;
 	zval tmp;

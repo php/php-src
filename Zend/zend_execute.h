@@ -47,22 +47,22 @@ typedef union _temp_variable {
 } temp_variable;
 
 
-ZEND_API extern void (*zend_execute)(zend_op_array *op_array ELS_DC);
+ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 
-void init_executor(CLS_D ELS_DC);
-void shutdown_executor(ELS_D);
-ZEND_API void execute(zend_op_array *op_array ELS_DC);
+void init_executor(CLS_D TSRMLS_DC);
+void shutdown_executor(TSRMLS_D);
+ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
 static inline void safe_free_zval_ptr(zval *p)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (p!=EG(uninitialized_zval_ptr)) {
 		FREE_ZVAL(p);
 	}
 }
 
-ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC ELS_DC);
+ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name CLS_DC TSRMLS_DC);
 static inline int i_zend_is_true(zval *op)
 {
 	int result;
@@ -103,7 +103,7 @@ static inline int i_zend_is_true(zval *op)
 ZEND_API int zval_update_constant(zval **pp, void *arg);
 
 /* dedicated Zend executor functions - do not use! */
-static inline void zend_ptr_stack_clear_multiple(ELS_D)
+static inline void zend_ptr_stack_clear_multiple(TSRMLS_D)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int delete_count = (ulong) *p;
@@ -115,7 +115,7 @@ static inline void zend_ptr_stack_clear_multiple(ELS_D)
 	EG(argument_stack).top_element = p;
 }
 
-static inline int zend_ptr_stack_get_arg(int requested_arg, void **data ELS_DC)
+static inline int zend_ptr_stack_get_arg(int requested_arg, void **data TSRMLS_DC)
 {
 	void **p = EG(argument_stack).top_element-2;
 	int arg_count = (ulong) *p;
@@ -132,8 +132,8 @@ void execute_new_code(CLS_D);
 
 /* services */
 ZEND_API char *get_active_function_name(void);
-ZEND_API char *zend_get_executed_filename(ELS_D);
-ZEND_API uint zend_get_executed_lineno(ELS_D);
+ZEND_API char *zend_get_executed_filename(TSRMLS_D);
+ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(void);
 
 ZEND_API void zend_set_timeout(long seconds);
@@ -152,7 +152,7 @@ void zend_shutdown_timeout_thread();
 
 #define active_opline (*EG(opline_ptr))
 
-void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC);
+void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts TSRMLS_DC);
 
 #define IS_OVERLOADED_OBJECT 1
 #define IS_STRING_OFFSET 2

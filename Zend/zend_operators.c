@@ -411,7 +411,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC)
 {
 	long lval;
 	double dval;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	switch (op->type) {
 		case IS_NULL:

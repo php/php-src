@@ -82,17 +82,17 @@ struct _zend_ini_entry {
 };
 
 
-ZEND_API int zend_ini_startup(ELS_D);
-ZEND_API int zend_ini_shutdown(ELS_D);
-ZEND_API int zend_ini_deactivate(ELS_D);
+ZEND_API int zend_ini_startup(TSRMLS_D);
+ZEND_API int zend_ini_shutdown(TSRMLS_D);
+ZEND_API int zend_ini_deactivate(TSRMLS_D);
 
-ZEND_API int zend_copy_ini_directives(ELS_D);
+ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 
-ZEND_API void zend_ini_sort_entries(ELS_D);
+ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
 ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number);
 ZEND_API void zend_unregister_ini_entries(int module_number);
-ZEND_API void zend_ini_refresh_caches(int stage ELS_DC);
+ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
 ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);

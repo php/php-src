@@ -261,7 +261,7 @@ static void zend_set_default_compile_time_values(CLS_D)
 
 
 #ifdef ZTS
-static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
+static void compiler_globals_ctor(zend_compiler_globals *compiler_globals TSRMLS_DC)
 {
 	zend_function tmp_func;
 	zend_class_entry tmp_class;
@@ -282,7 +282,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 }
 
 
-static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
+static void compiler_globals_dtor(zend_compiler_globals *compiler_globals TSRMLS_DC)
 {
 	if (compiler_globals->function_table != global_function_table) {
 		zend_hash_destroy(compiler_globals->function_table);
@@ -295,28 +295,28 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 }
 
 
-static void executor_globals_ctor(zend_executor_globals *executor_globals)
+static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
 	if (global_constants_table) {
-		zend_startup_constants(ELS_C);
-		zend_copy_constants(executor_globals->zend_constants, global_constants_table);
+		zend_startup_constants(TSRMLS_C);
+		zend_copy_constants(EG(zend_constants), global_constants_table);
 	}
-	zend_init_rsrc_plist(ELS_C);
+	zend_init_rsrc_plist(TSRMLS_C);
 	EG(lambda_count)=0;
 	EG(user_error_handler) = NULL;
 	EG(in_execution) = 0;
 }
 
 
-static void executor_globals_dtor(zend_executor_globals *executor_globals)
+static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
-	zend_shutdown_constants(ELS_C);
-	zend_destroy_rsrc_plist(ELS_C);
-	zend_ini_shutdown(ELS_C);
+	zend_shutdown_constants(TSRMLS_C);
+	zend_destroy_rsrc_plist(TSRMLS_C);
+	zend_ini_shutdown(TSRMLS_C);
 }
 
 
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals TSRMLS_DC)
 {
 	start_memory_manager(ALS_C);
 }
@@ -331,10 +331,10 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #ifdef ZTS
 static void zend_new_thread_end_handler(THREAD_T thread_id)
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
-	zend_copy_ini_directives(ELS_C);
-	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP ELS_CC);
+	zend_copy_ini_directives(TSRMLS_C);
+	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 }
 #endif
 
@@ -344,8 +344,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
 	zend_executor_globals *executor_globals;
+	void ***tsrm_ls;
 
-	alloc_globals_id = ts_allocate_id(sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, NULL);
+	ts_allocate_id(&alloc_globals_id, sizeof(zend_alloc_globals), (ts_allocate_ctor) alloc_globals_ctor, NULL);
 #else
 	start_memory_manager(ALS_C);
 #endif
@@ -393,31 +394,32 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
 
 #ifdef ZTS
 	global_constants_table = NULL;
-	compiler_globals_id = ts_allocate_id(sizeof(zend_compiler_globals), (void (*)(void *)) compiler_globals_ctor, (void (*)(void *)) compiler_globals_dtor);
-	executor_globals_id = ts_allocate_id(sizeof(zend_executor_globals), (void (*)(void *)) executor_globals_ctor, (void (*)(void *)) executor_globals_dtor);
+	ts_allocate_id(&compiler_globals_id, sizeof(zend_compiler_globals), (ts_allocate_ctor) compiler_globals_ctor, (ts_allocate_dtor) compiler_globals_dtor);
+	ts_allocate_id(&executor_globals_id, sizeof(zend_executor_globals), (ts_allocate_ctor) executor_globals_ctor, (ts_allocate_dtor) executor_globals_dtor);
 	compiler_globals = ts_resource(compiler_globals_id);
 	executor_globals = ts_resource(executor_globals_id);
-	compiler_globals_dtor(compiler_globals);
+	tsrm_ls = ts_resource_ex(0, NULL);
+	compiler_globals_dtor(compiler_globals, tsrm_ls);
 	compiler_globals->function_table = GLOBAL_FUNCTION_TABLE;
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
-	zend_startup_constants(executor_globals);
+	zend_startup_constants(tsrm_ls);
 	GLOBAL_CONSTANTS_TABLE = EG(zend_constants);
 #else
 	zend_startup_constants();
 	zend_set_default_compile_time_values(CLS_C);
 	EG(user_error_handler) = NULL;
 #endif
-	zend_register_standard_constants(ELS_C);
+	zend_register_standard_constants(TSRMLS_C);
 
 #ifndef ZTS
-	zend_init_rsrc_plist(ELS_C);
+	zend_init_rsrc_plist(TSRMLS_C);
 #endif
 
 	if (start_builtin_functions) {
 		zend_startup_builtin_functions();
 	}
 
-	zend_ini_startup(ELS_C);
+	zend_ini_startup(TSRMLS_C);
 
 #ifdef ZTS
 	tsrm_set_new_thread_end_handler(zend_new_thread_end_handler);
@@ -467,7 +469,7 @@ BEGIN_EXTERN_C()
 ZEND_API void _zend_bailout(char *filename, uint lineno)
 {
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (!EG(bailout_set)) {
 		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
@@ -508,11 +510,11 @@ ZEND_API char *get_zend_version()
 }
 
 
-void zend_activate(CLS_D ELS_DC)
+void zend_activate(CLS_D TSRMLS_DC)
 {
 	EG(bailout_set) = 0;
-	init_compiler(CLS_C ELS_CC);
-	init_executor(CLS_C ELS_CC);
+	init_compiler(CLS_C TSRMLS_CC);
+	init_executor(CLS_C TSRMLS_CC);
 	startup_scanner(CLS_C);
 }
 
@@ -524,7 +526,7 @@ void zend_activate_modules()
 
 void zend_deactivate_modules()
 {
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
 	zend_try {
@@ -532,7 +534,7 @@ void zend_deactivate_modules()
 	} zend_end_try();
 }
 
-void zend_deactivate(CLS_D ELS_DC)
+void zend_deactivate(CLS_D TSRMLS_DC)
 {
 	/* we're no longer executing anything */
 	EG(opline_ptr) = NULL; 
@@ -543,14 +545,14 @@ void zend_deactivate(CLS_D ELS_DC)
 	} zend_end_try();
 
 	/* shutdown_executor() takes care of its own bailout handling */
-	shutdown_executor(ELS_C);
+	shutdown_executor(TSRMLS_C);
 
 	zend_try {
 		shutdown_compiler(CLS_C);
 	} zend_end_try();
 
 	zend_try {
-		zend_ini_deactivate(ELS_C);
+		zend_ini_deactivate(TSRMLS_C);
 	} zend_end_try();
 }
 
@@ -586,7 +588,7 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	char *error_filename;
 	uint error_lineno;
 	zval *orig_user_error_handler;
-	ELS_FETCH();
+	TSRMLS_FETCH();
 	CLS_FETCH();
 
 	/* Obtain relevant filename and lineno */
@@ -609,8 +611,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 				error_filename = zend_get_compiled_filename(CLS_C);
 				error_lineno = zend_get_compiled_lineno(CLS_C);
 			} else if (zend_is_executing()) {
-				error_filename = zend_get_executed_filename(ELS_C);
-				error_lineno = zend_get_executed_lineno(ELS_C);
+				error_filename = zend_get_executed_filename(TSRMLS_C);
+				error_lineno = zend_get_executed_lineno(TSRMLS_C);
 			} else {
 				error_filename = NULL;
 				error_lineno = 0;
@@ -740,7 +742,7 @@ ZEND_API void zend_output_debug_string(zend_bool trigger_break, char *format, ..
 }
 
 
-ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
+ZEND_API int zend_execute_scripts(int type CLS_DC TSRMLS_DC, int file_count, ...)
 {
 	va_list files;
 	int i;
@@ -756,7 +758,7 @@ ZEND_API int zend_execute_scripts(int type CLS_DC ELS_DC, int file_count, ...)
 		EG(active_op_array) = zend_compile_file(file_handle, ZEND_INCLUDE CLS_CC);
 		zend_destroy_file_handle(file_handle CLS_CC);
 		if (EG(active_op_array)) {
-			zend_execute(EG(active_op_array) ELS_CC);
+			zend_execute(EG(active_op_array) TSRMLS_CC);
 			zval_ptr_dtor(EG(return_value_ptr_ptr));
 			EG(return_value_ptr_ptr) = &EG(global_return_value_ptr);
 			EG(global_return_value_ptr) = NULL;
@@ -782,14 +784,14 @@ ZEND_API char *zend_make_compiled_string_description(char *name)
 	int cur_lineno;
 	char *compiled_string_description;
 	CLS_FETCH();
-	ELS_FETCH();
+	TSRMLS_FETCH();
 
 	if (zend_is_compiling()) {
 		cur_filename = zend_get_compiled_filename(CLS_C);
 		cur_lineno = zend_get_compiled_lineno(CLS_C);
 	} else if (zend_is_executing()) {
-		cur_filename = zend_get_executed_filename(ELS_C);
-		cur_lineno = zend_get_executed_lineno(ELS_C);
+		cur_filename = zend_get_executed_filename(TSRMLS_C);
+		cur_lineno = zend_get_executed_lineno(TSRMLS_C);
 	} else {
 		cur_filename = "Unknown";
 		cur_lineno = 0;

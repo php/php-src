@@ -84,10 +84,10 @@ void zend_init_compiler_data_structures(CLS_D)
 }
 
 
-void init_compiler(CLS_D ELS_DC)
+void init_compiler(CLS_D TSRMLS_DC)
 {
 	zend_init_compiler_data_structures(CLS_C);
-	zend_init_rsrc_list(ELS_C);
+	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
 	zend_llist_init(&CG(open_files), sizeof(zend_file_handle), (void (*)(void *)) zend_file_handle_dtor, 0);
 	CG(unclean_shutdown) = 0;
