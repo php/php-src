@@ -1,3 +1,0 @@
-#ifndef HAVE_MYSQL
-#define HAVE_MYSQL 0
-#endif
