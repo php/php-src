@@ -32,7 +32,6 @@ typedef struct _zend_rsrc_list_entry {
 	void *ptr;
 	int type;
 	int refcount;
-	zend_bool valid;
 } zend_rsrc_list_entry;
 
 typedef void (*rsrc_dtor_func_t)(zend_rsrc_list_entry *rsrc);
@@ -79,12 +78,10 @@ ZEND_API int zend_plist_insert(void *ptr, int type);
 ZEND_API int zend_list_addref(int id);
 ZEND_API int zend_list_delete(int id);
 ZEND_API int zend_plist_delete(int id);
-ZEND_API int zend_list_convert_to_number(int id);
 ZEND_API void *zend_list_find(int id, int *type);
 ZEND_API void *zend_plist_find(int id, int *type);
 
 ZEND_API int zend_register_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
-ZEND_API int zend_register_false_resource(zval *rsrc_result, void *rsrc_pointer, int rsrc_type);
 ZEND_API void *zend_fetch_resource(zval **passed_id, int default_id, char *resource_type_name, int *found_resource_type, int num_resource_types, ...);
 
 ZEND_API char *zend_rsrc_list_get_rsrc_type(int resource);
