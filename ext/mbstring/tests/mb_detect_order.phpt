@@ -2,6 +2,8 @@
 mb_detect_order()  
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+--INI--
+mbstring.language=Japanese
 --FILE--
 <?php
 //$debug = true;
