@@ -18,7 +18,10 @@
 
 /* $Id$ */
 
+/* conflict between PHP and aolserver */
+#define Debug php_Debug
 #include "php.h"
+#undef Debug
 
 #ifdef HAVE_AOLSERVER
 
@@ -27,19 +30,9 @@
 #include "SAPI.h"
 #include "main.h"
 
-/* conflict between PHP and aolserver */
-#define Debug DEBUG_UNUSED
 #include "ns.h"
-#undef Debug
 
 #include "php_version.h"
-
-#if 0
-#define HERE \
-	Ns_Log(Notice, "in %s:%d", __FUNCTION__, __LINE__);
-#else
-#define HERE
-#endif
 
 int Ns_ModuleVersion = 1;
 
@@ -60,7 +53,6 @@ php_ns_sapi_ub_write(const char *str, uint str_length)
 	php_ns_context *ctx;
 	SLS_FETCH();
 
-	HERE;
 	ctx = (php_ns_context *) SG(server_context);
 
 	Ns_DStringInit(&dstr);
@@ -129,8 +121,17 @@ php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 static char *
 php_ns_sapi_read_cookies(SLS_D)
 {
-	HERE;
-	return NULL;
+	Ns_Set *headers;
+	char *http_cookie;
+	php_ns_context *ctx = (php_ns_context *) SG(server_context);
+	
+	headers = Ns_ConnHeaders(conn);
+	
+	if(headers) {
+		http_cookie = Ns_SetGet(headers, "HTTP_COOKIE");
+	}
+
+	return http_cookie;
 }
 
 static sapi_module_struct sapi_module = {
@@ -161,8 +162,6 @@ php_ns_module_main(php_ns_context *ctx SLS_DC)
 	ELS_FETCH();
 	PLS_FETCH();
 
-	HERE;
-
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;
 	
@@ -179,7 +178,6 @@ php_ns_request_ctor(php_ns_context *ctx SLS_DC)
 	char *server;
 	Ns_DString ds;
 	char *root;
-	HERE;
 	
 	server = Ns_ConnServer(ctx->conn);
 	
@@ -204,8 +202,6 @@ php_ns_request_ctor(php_ns_context *ctx SLS_DC)
 static void
 php_ns_request_dtor(php_ns_context *ctx SLS_DC)
 {
-	HERE;
-	
 	free(SG(request_info).path_translated);
 	Ns_DStringFree(&ctx->content_type);
 }
@@ -217,7 +213,6 @@ php_ns_request_handler(void *context, Ns_Conn *conn)
 	int status = NS_OK;
 	SLS_FETCH();
 	
-	HERE;
 	ctx->conn = conn;
 	
 	php_ns_request_ctor(ctx SLS_CC);
@@ -279,7 +274,6 @@ php_ns_server_shutdown(void *context)
 {
 	php_ns_context *ctx = (php_ns_context *) context;
 	
-	HERE;
 	ctx->sapi_module->shutdown(ctx->sapi_module);
 	sapi_shutdown();
 	tsrm_shutdown();
@@ -288,7 +282,6 @@ php_ns_server_shutdown(void *context)
 	free(ctx->ns_server);
 	free(ctx);
 }
-
 
 int Ns_ModuleInit(char *server, char *module)
 {
