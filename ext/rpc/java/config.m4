@@ -15,15 +15,15 @@ if test "$PHP_JAVA" != "no"; then
     HP-UX) java_libext=libjava.sl ;;
   esac  
 
-  if test "$withval" = "yes"; then
+  if test "$PHP_JAVA" = "yes"; then
     if JAVA_JAR=`which jar 2>/dev/null`; then
       JAVA_JAR="$JAVA_JAR cf"
     else
       JAVA_JAR=
     fi
-    withval=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
+    PHP_JAVA=`cd \`dirname \\\`which javac\\\`\`/..;pwd`
   else
-    test -x $withval/bin/jar && JAVA_JAR="$withval/bin/jar cf"
+    test -x $PHP_JAVA/bin/jar && JAVA_JAR="$PHP_JAVA/bin/jar cf"
   fi
     
   # substitute zip for systems which don't have jar
@@ -31,10 +31,10 @@ if test "$PHP_JAVA" != "no"; then
     JAVA_JAR='zip -q0'
   fi
 
-  if test -x $withval/bin/javac; then
-    JAVA_C=$withval/bin/javac
+  if test -x $PHP_JAVA/bin/javac; then
+    JAVA_C=$PHP_JAVA/bin/javac
   else
-    AC_MSG_ERROR([Can not find the javac binary under $withval/bin/])
+    AC_MSG_ERROR([Can not find the javac binary under $PHP_JAVA/bin/])
   fi
 
   if test -d $PHP_JAVA/lib/kaffe; then
