@@ -42,9 +42,10 @@
 extern php3_module_entry fdf_module_entry;
 #define phpext_fdf_ptr &fdf_module_entry
 
-extern int php3_minit_fdf(INIT_FUNC_ARGS);
-extern int php3_mend_fdf(void);
-void php3_info_fdf(ZEND_MODULE_INFO_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(fdf);
+extern PHP_MSHUTDOWN_FUNCTION(fdf);
+PHP_MINFO_FUNCTION(fdf);
+
 PHP_FUNCTION(fdf_open);
 PHP_FUNCTION(fdf_close);
 PHP_FUNCTION(fdf_create);

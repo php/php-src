@@ -40,7 +40,8 @@
 extern php3_module_entry php3_gettext_module_entry;
 #define gettext_module_ptr &php3_gettext_module_entry
 
-void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINFO_FUNCTION(gettext);
+
 PHP_FUNCTION(textdomain);
 PHP_FUNCTION(gettext);
 PHP_FUNCTION(dgettext);

@@ -72,7 +72,7 @@ static FP_FIELD *fp_fieldlist = NULL;		/* List of fields */
 #endif
 
 
-int php3_minit_filepro(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(filepro)
 {
 #ifdef THREAD_SAFE
 	fp_global_struct *fp_globals;
@@ -98,7 +98,8 @@ int php3_minit_filepro(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_mend_filepro(void){
+PHP_MSHUTDOWN_FUNCTION(filepro)
+{
 #ifdef THREAD_SAFE
 	fp_global_struct *fp_globals;
 	fp_globals = TlsGetValue(FPTls); 
@@ -120,18 +121,18 @@ int php3_mend_filepro(void){
 
 
 function_entry filepro_functions[] = {
-	{"filepro",				php3_filepro,				NULL},
-	{"filepro_rowcount",	php3_filepro_rowcount,		NULL},
-	{"filepro_fieldname",	php3_filepro_fieldname,		NULL},
-	{"filepro_fieldtype",	php3_filepro_fieldtype,		NULL},
-	{"filepro_fieldwidth",	php3_filepro_fieldwidth,	NULL},
-	{"filepro_fieldcount",	php3_filepro_fieldcount,	NULL},
-	{"filepro_retrieve",	php3_filepro_retrieve,		NULL},
+	PHP_FE(filepro,									NULL)
+	PHP_FE(filepro_rowcount,						NULL)
+	PHP_FE(filepro_fieldname,						NULL)
+	PHP_FE(filepro_fieldtype,						NULL)
+	PHP_FE(filepro_fieldwidth,						NULL)
+	PHP_FE(filepro_fieldcount,						NULL)
+	PHP_FE(filepro_retrieve,						NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry filepro_module_entry = {
-	"FilePro", filepro_functions, php3_minit_filepro, php3_mend_filepro, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"FilePro", filepro_functions, PHP_MINIT(filepro), PHP_MSHUTDOWN(filepro), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
