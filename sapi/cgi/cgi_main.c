@@ -130,7 +130,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes SLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
 
-	count_bytes = MIN(count_bytes, SG(request_info).content_length-SG(read_post_bytes));
+	count_bytes = MIN(count_bytes, (uint)SG(request_info).content_length-SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(0, buffer+read_bytes, count_bytes-read_bytes);
 		if (tmp_read_bytes<=0) {
