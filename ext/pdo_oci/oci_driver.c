@@ -30,7 +30,7 @@
 #include "php_pdo_oci.h"
 #include "php_pdo_oci_int.h"
 
-static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_error_info *einfo;
@@ -50,6 +50,7 @@ static int pdo_oci_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info
 
 	return 1;
 }
+/* }}} */
 
 ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, const char *file, int line TSRMLS_DC) /* {{{ */
 {
@@ -187,7 +188,7 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC)
+static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	pdo_oci_stmt *S = ecalloc(1, sizeof(*S));
@@ -217,8 +218,9 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	
 	return 1;
 }
+/* }}} */
 
-static long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC)
+static long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	OCIStmt		*stmt;
@@ -260,21 +262,24 @@ static long oci_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRMLS
 	
 	return ret;
 }
+/* }}} */
 
-static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC)
+static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen  TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
 	return 0;
 }
+/* }}} */
 
-static int oci_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
+static int oci_handle_begin(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	/* with Oracle, there is nothing special to be done */
 	return 1;
 }
+/* }}} */
 
-static int oci_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
+static int oci_handle_commit(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -286,8 +291,9 @@ static int oci_handle_commit(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	return 1;
 }
+/* }}} */
 
-static int oci_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
+static int oci_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -299,8 +305,9 @@ static int oci_handle_rollback(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	return 1;
 }
+/* }}} */
 
-static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC)
+static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 
@@ -325,6 +332,7 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_
 	}
 	
 }
+/* }}} */
 
 static struct pdo_dbh_methods oci_methods = {
 	oci_handle_closer,
