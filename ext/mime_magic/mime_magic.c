@@ -982,7 +982,7 @@ static int magic_process(char *filename TSRMLS_DC)
 		return result;
     }
 
-    stream = php_stream_open_wrapper(filename, "r", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+    stream = php_stream_open_wrapper(filename, "rb", IGNORE_PATH | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
 
     if (stream == NULL) {
 		/* We can't open it, but we were able to stat it. */
