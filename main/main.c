@@ -75,6 +75,10 @@
 #include "php_logos.h"
 #include "php_streams.h"
 
+#if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
+#include "ext/mbstring/mbstring.h"
+#endif /* defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING) */
+
 #include "SAPI.h"
 /* }}} */
 
@@ -1402,6 +1406,9 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 		} else {
 			append_file_p = NULL;
 		}
+#if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
+		php_mbstring_set_zend_encoding(TSRMLS_C);
+#endif /* ZEND_MULTIBYTE && HAVE_MBSTRING */
 		retval = (zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
 	} zend_end_try();
 
