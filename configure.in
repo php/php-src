@@ -669,7 +669,7 @@ else
 fi
 
 if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend -I\$(top_srcdir)"
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
   INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
 fi
 

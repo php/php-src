@@ -32,7 +32,7 @@ mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
 INSTALL_DATA = $(INSTALL) -m 644
 
-DEFS = -I. -I$(srcdir) -I$(top_builddir)/main
+DEFS = -I. -I$(srcdir) -I$(top_builddir)/main -I$(top_srcdir)
 
 moduledir    = $(EXTENSION_DIR)
 
