@@ -38,6 +38,7 @@
 #endif
 
 #include <errno.h>
+#include <limits.h>
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_language_parser.h"
@@ -1002,10 +1003,17 @@ ANY_CHAR (.|[\n])
 
 <ST_IN_SCRIPTING>{LNUM}|{HNUM} {
 	errno = 0;
-	zendlval->value.lval = strtol(yytext, NULL, 0);
+	zendlval->value.lval = strtoul(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		zendlval->value.dval = strtod(yytext,NULL);
-		zendlval->type = IS_DOUBLE;
+		if(yytext[0] == 0 && (yytext[1] == 'x' || yytext[1] == 'X') ) {
+			/* strtod for 0x'es returns trash */
+			zendlval->value.lval = LONG_MAX; /* maximal long */
+			zendlval->type = IS_LONG;
+			zend_error(E_NOTICE,"Hex number is too big: %s",yytext);
+		} else {
+			zendlval->value.dval = strtod(yytext,NULL);
+			zendlval->type = IS_DOUBLE;
+		}
 		return T_DNUMBER;
 	} else {
 		zendlval->type = IS_LONG;
