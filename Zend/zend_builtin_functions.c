@@ -1273,24 +1273,28 @@ ZEND_FUNCTION(debug_backtrace)
 
 		if (ptr->object) {
 			class_name = Z_OBJCE(*ptr->object)->name;
-		}
-		if (ptr->function_state.function->common.scope) {
+			add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
+		} else if (ptr->function_state.function->common.scope) {
 			class_name = ptr->function_state.function->common.scope->name;
+			add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 		}
 		function_name = ptr->function_state.function->common.function_name;
 		
-		filename = ptr->op_array->filename;
-		lineno = ptr->opline->lineno;
+		if (ptr->op_array) {
+			filename = ptr->op_array->filename;
+			lineno = ptr->opline->lineno;
+			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+		}
 
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 		}
+
 		if (class_name) {
 			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
 		}
-		add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
-		add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
-		/* add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1); */
+
 		add_next_index_zval(return_value, stack_frame);
 
 		ptr = ptr->prev_execute_data;
