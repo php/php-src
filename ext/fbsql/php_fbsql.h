@@ -57,6 +57,7 @@ PHP_FUNCTION(fbsql_list_fields);
 PHP_FUNCTION(fbsql_error);
 PHP_FUNCTION(fbsql_errno);
 PHP_FUNCTION(fbsql_affected_rows);
+PHP_FUNCTION(fbsql_rows_fetched);
 PHP_FUNCTION(fbsql_insert_id);
 PHP_FUNCTION(fbsql_result);
 PHP_FUNCTION(fbsql_next_result);
