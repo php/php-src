@@ -134,7 +134,7 @@ ZEND_GET_MODULE(mcrypt)
 	nsize = nr * bsize
 
 #define MCRYPT_CHECK_TD_CPY 									\
-	if(td == -1) { 												\
+	if(td < 0) { 												\
 		php_error(E_WARNING, MCRYPT_FAILED); 					\
 		RETURN_FALSE; 											\
 	} 															\
@@ -613,7 +613,7 @@ PHP_FUNCTION(mcrypt_module_close)
 	
 	MCRYPT_GET_TD_ARG
 
-	if (mcrypt_module_close (td) == -1) {
+	if (mcrypt_module_close (td) < 0) {
 		php_error (E_WARNING, "could not close module");
 		RETURN_FALSE
 	} else {
@@ -633,7 +633,7 @@ PHP_FUNCTION(mcrypt_generic_end)
 	
 	MCRYPT_GET_TD_ARG
 
-	if (mcrypt_generic_end (td) == -1) {
+	if (mcrypt_generic_end (td) < 0) {
 		php_error (E_WARNING, "could not terminate encryption specifier");
 		RETURN_FALSE
 	}
@@ -1294,7 +1294,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 		memcpy (data_s, (*data)->value.str.val, (*data)->value.str.len);
 	}
 	
-	if (mcrypt_generic_init (td, key_s, use_key_length, iv_s) == -1) {
+	if (mcrypt_generic_init (td, key_s, use_key_length, iv_s) < 0) {
 		php_error (E_ERROR, "generic_init failed");
 	}
 	if (dencrypt == MCRYPT_ENCRYPT)
