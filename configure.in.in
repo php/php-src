@@ -382,9 +382,10 @@ AC_ARG_ENABLE(versioning,
 [  --enable-versioning],
 [
   if test "$enableval" = "yes" ; then
-    RPATHS="-Wl,--version-script=\$(srcdir)/php.map $RPATHS"
+    VERSION_SCRIPT="-Wl,--version-script=\$(abs_srcdir)/php.map"
   fi
 ])
+AC_SUBST(VERSION_SCRIPT)
 
 APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
 
