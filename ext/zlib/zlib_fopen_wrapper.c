@@ -33,7 +33,6 @@ static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
 	int read;
 	
-	memset(buf, 0, count);
 	read = gzread(self->gz_file, buf, count);
 	
 	if (gzeof(self->gz_file))
