@@ -21,7 +21,7 @@
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;
-static int last_resource_number;
+static int last_resource_number=0;
 
 int zend_load_extensions(char **extension_paths)
 {
@@ -162,9 +162,9 @@ void zend_extension_dtor(zend_extension *extension)
 
 ZEND_API int zend_get_resource_handle(zend_extension *extension)
 {
-	if (last_resource_number<4) {
+	if (last_resource_number<ZEND_MAX_RESERVED_RESOURCES) {
 		extension->resource_number = last_resource_number;
-		return last_resource_number;
+		return last_resource_number++;
 	} else {
 		return -1;
 	}
