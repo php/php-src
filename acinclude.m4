@@ -375,13 +375,27 @@ AC_DEFUN(AC_ADD_LIBRARY_DEFER,[
 ])
 
 dnl
-dnl AC_ADD_LIBRARY_WITH_PATH(library, path)
+dnl AC_ADD_LIBRARY_WITH_PATH(library, path[, shared-libadd])
 dnl
-dnl add a library to the link line and path to linkpath/runpath
+dnl add a library to the link line and path to linkpath/runpath.
+dnl if shared-libadd is not empty and $ext_shared is yes,
+dnl shared-libadd will be assigned the library information
 dnl
 AC_DEFUN(AC_ADD_LIBRARY_WITH_PATH,[
+ifelse($3,,[
   AC_ADD_LIBPATH($2)
   AC_ADD_LIBRARY($1)
+],[
+  if test "$ext_shared" = "yes"; then
+    if test -n "$2"; then
+      $3="[$]$3 -R$2 -L$2"
+    fi
+    $3="[$]$3 -l$1"
+  else
+   AC_ADD_LIBPATH($2)
+   AC_ADD_LIBRARY($1)
+ fi
+])
 ])
 
 dnl
