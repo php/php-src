@@ -1,3 +1,166 @@
+2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      Fix property inheritance by using dedicated new function
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h:
+      - Add zend_merge_properties() which is designed to serve *_fetch_object().
+      - Explain drawbacks of object_and_properties_init and
+      zend_merge_properties.
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Use zend_fcall_info_cache in invoke() to improve speed.
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/sqlite.c:
+      Throw exception if user wants to pass arguments to an non existing
+      constructor
+
+2003-08-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/scripts/pear.bat:
+      One more fix for spaces in paths
+
+2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/sqlite/sqlite.c:
+      Allow to pass arguments to the constructor
+
+2003-08-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.h:
+      fix case for include
+
+2003-08-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/PEAR/Dependency.php
+      pear/PEAR/Installer.php:
+      fix optional dependencies in Dependency.php, remove ugly hack in Installer,
+      add note about Cox's cool addition to pear install, remove noise of who
+      did what from package.xml, fix #25008
+
+2003-08-29  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Command/Install.php:
+      This patch allows:
+      
+      pear install DB-1.2     -> specific version
+      pear install DB-stable  -> latest stable version
+                                 (stable, beta, alpha, ..)
+      pear install DB-1.2.tar -> download in tar format
+      
+      Currently only "install" and "upgrade" support this
+      more will come shortly.
+
+2003-08-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+      fix builds using libxml 2.5.10+
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.c:
+      workaround for bug #25268. libxslt issue with xsl:key
+
+2003-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/sybase_ct/php_sybase_ct.h:
+      header sync
+
+2003-08-29  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php:
+      snapshot < devel (betterStates())
+
+2003-08-29  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - A mnogosearch extension is updated to work with mnogosearch-3.2.15+
+
+2003-08-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      MFH
+      
+      Fix a segfault which occured when using a storage format not capable
+      of expressing references (e.g. WDDX) and deserializing a session variable
+      whose name conflicted with an existing symbol in the global scope.
+      
+      PR: #25307
+      Submitted by: Jani Taskinen
+      Speling fixes: me
+
+    * ext/session/session.c:
+      Fix a segfault which occured when using a storage format not capable
+      of expressing references (e.g. WDDX) and deserializing a session variable
+      whose name conflicted with an existing symbol in the global scope.
+      
+      PR: #25307
+      Submitted by: Jani Taskinen
+      Speling fixes: me
+
+2003-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/tests/04-POST.phpt:
+      - skip with CLI
+
+    * tests/lang/bug25145.phpt:
+      - Skip with CLI
+
+2003-08-29  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Fix a problem in implicit public properties and inheritance
+
+2003-08-29  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/zlib/zlib.c:
+      improve format string
+
+    * ZendEngine2/zend_hash.c:
+      improve a number of zend_debug format strings
+
+2003-08-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      add note about fix for spaces in paths for an installation into a directory
+      with spaces
+
+    * pear/scripts/pear.bat:
+      fix spaces in paths for an installation into a directory with spaces
+
+2003-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mcve/mcve.c:
+      MFB
+
+    * (PHP_4_3)
+      ext/mcve/mcve.c:
+      fix build
+
+2003-08-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php.h:
+      Add define to reset error handling more easily
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_default_classes.c:
+      Need to tell zend_fetch_debug_backtrace() whether to skip top function or
+      not.
+
 2003-08-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_default_classes.c:
