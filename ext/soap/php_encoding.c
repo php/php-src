@@ -558,7 +558,7 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 
 		if(style == SOAP_ENCODED)
 		{
-			get_array_type(data, &array_type);
+			get_array_type(data, &array_type TSRMLS_CC);
 			smart_str_append(&array_type_and_size, &array_type);
 			smart_str_appendc(&array_type_and_size, '[');
 			smart_str_append_long(&array_type_and_size, i);
@@ -1021,13 +1021,13 @@ int is_map(zval *array)
 	return FALSE;
 }
 
-void get_array_type(zval *array, smart_str *type)
+void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 {
-	HashTable *ht = array->value.ht;
+	HashTable *ht = HASH_OF(array);
 	int i, count, cur_type, prev_type, different;
 	char *name = NULL;
 	zval **tmp;
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();*/
 
 	if(!array || Z_TYPE_P(array) != IS_ARRAY)
 		smart_str_appendl(type, "xsd:ur-type", 11);

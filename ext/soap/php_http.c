@@ -1,6 +1,6 @@
 #include "php_soap.h"
 
-void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, char *soapaction)
+void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, char *soapaction TSRMLS_DC)
 {
 	xmlChar *buf;
 	char *soap_headers;
@@ -10,7 +10,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	SOAP_STREAM stream;
 	zval **trace;
 
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();*/
 
 	FETCH_THIS_SOCKET(stream);
 	FETCH_THIS_URL(phpurl);
@@ -149,7 +149,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	xmlFree(buf);
 }
 
-void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
+void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS_DC)
 {
 	char *http_headers, *http_body, *content_type, *http_version, http_status[4], *cookie_itt;
 	int http_header_size, http_body_size, http_close;
@@ -158,7 +158,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 	SOAP_STREAM stream;
 	zval **trace;
 
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();*/
 
 	FETCH_THIS_SDL(sdl);
 
@@ -167,7 +167,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 		FETCH_SOCKET_RES(stream, socket_ref);
 	}
 
-	if(!get_http_headers(stream, &http_headers, &http_header_size))
+	if(!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC))
 		php_error(E_ERROR, "Error Fetching http headers");
 
 	//Check to see what HTTP status was sent
@@ -200,7 +200,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 			ZVAL_STRING(err, http_body, 1);
 			http_err = emalloc(strlen("HTTP request failed ()") + 4);
 			sprintf(http_err, "HTTP request failed (%s)", http_status);
-			add_soap_fault(thisObj, "SOAP-ENV:Client", http_err, NULL, err);
+			add_soap_fault(thisObj, "SOAP-ENV:Client", http_err, NULL, err TSRMLS_CC);
 			efree(http_err);
 			return;
 		}*/
@@ -208,14 +208,14 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 		//Try and get headers again
 		if(!strcmp(http_status, "100"))
 		{
-			if(!get_http_headers(stream, &http_headers, &http_header_size))
+			if(!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC))
 				php_error(E_ERROR, "Error Fetching http headers");
 		}
 
 		efree(http_version);
 	}
 	
-	if(!get_http_body(stream, http_headers, &http_body, &http_body_size))
+	if(!get_http_body(stream, http_headers, &http_body, &http_body_size TSRMLS_CC))
 		php_error(E_ERROR, "Error Fetching http body");
 
 	if(zend_hash_find(Z_OBJPROP_P(this_ptr), "trace", sizeof("trace"), (void **) &trace) == SUCCESS
@@ -271,7 +271,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len)
 				zval *err;
 				MAKE_STD_ZVAL(err);
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
-				add_soap_fault(this_ptr, "SOAP-ENV:Client", "Didn't recieve an xml document", NULL, err);
+				add_soap_fault(this_ptr, "SOAP-ENV:Client", "Didn't recieve an xml document", NULL, err TSRMLS_CC);
 				efree(content_type);
 				return;
 			}
@@ -346,11 +346,11 @@ char *get_http_header_value(char *headers, char *type)
 	return var;
 }
 
-int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_size)
+int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_size TSRMLS_DC)
 {
 	char *trans_enc, *content_length, *http_buf;
 	int http_buf_size = 0;
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();*/
 
 	trans_enc = get_http_header_value(headers, "Transfer-Encoding: ");
 	content_length = get_http_header_value(headers, "Content-Length: ");
@@ -425,12 +425,12 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 	return TRUE;
 }
 
-int get_http_headers(SOAP_STREAM stream, char **response, int *out_size)
+int get_http_headers(SOAP_STREAM stream, char **response, int *out_size TSRMLS_DC)
 {
 	int done;
 	char chr;
 	smart_str tmp_response = {0};
-	TSRMLS_FETCH();
+/*	TSRMLS_FETCH();//i think this is not needed - even the parameter */
 
 	done = FALSE;
 

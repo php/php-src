@@ -218,7 +218,7 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, char
 encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type, int len);
 
 int is_map(zval *array);
-void get_array_type(zval *array, smart_str *out_type);
+void get_array_type(zval *array, smart_str *out_type TSRMLS_DC);
 
 void delete_encoder(void *handle);
 
