@@ -87,6 +87,7 @@ PHP_FUNCTION(fbsql_password);
 PHP_FUNCTION(fbsql_warnings);
 
 static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type);
+static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant);
 
 ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    long allowPersistent;
@@ -104,12 +105,8 @@ ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    char *userPassword;
    long persistantCount;
    long linkCount;
-   long databaseCount;
-   long resultCount;
+   long linkIndex;
 
-   unsigned int linkIndex;
-   int databaseIndex;
-   int resultIndex;
 ZEND_END_MODULE_GLOBALS(fbsql)
 
 #ifdef ZTS
