@@ -91,11 +91,14 @@ PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
 	local_lock(LOCALTIME_R);
 
 	tmp = localtime(timep);
-	memcpy(p_tm, tmp, sizeof(struct tm));
+	if (tmp) {
+		memcpy(p_tm, tmp, sizeof(struct tm));
+		tmp = p_tm;
+	}
 	
 	local_unlock(LOCALTIME_R);
 
-	return p_tm;
+	return tmp;
 }
 
 #endif
