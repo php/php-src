@@ -1,3 +1,66 @@
+2004-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/math/bug28228.phpt
+      ext/standard/tests/math/bug28228.phpt:
+      MFB: test fix.
+
+    * (PHP_4_3)
+      ext/standard/tests/math/bug28228.phpt:
+      Fixed test.
+
+    * (PHP_4_3)
+      ext/mssql/php_mssql.c:
+      Fixed build.
+
+2004-12-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/ming/config.m4
+      ext/ming/config.m4:
+      Fixed build with custom libming
+
+2004-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in:
+      4.3.10
+
+2004-12-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/pcntl.c:
+      Fixed build on linux-glibc21-i386
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30994 (SOAP server unable to handle request with references).
+
+2004-12-14  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      configure.in
+      ZendEngine2/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - MFH: Fixed compile error related to bug #28605.
+
+    * (PHP_4_3)
+      configure.in
+      Zend/zend_strtod.c:
+      - Fixed compile error related to bug #28605.
+
+2004-12-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/math.c
+      ext/standard/math.c:
+      MFH: Fixed bug #28228 (NULL decimal separator is not being handled
+      correctly).
+
+    * ext/standard/math.c:
+      Fixed bug #28228 (NULL decimal separator is not being handled correctly).
+
 2004-12-13  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/streamsfuncs.c:

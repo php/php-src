@@ -1,3 +1,9 @@
+2004-12-14  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - MFH: Fixed compile error related to bug #28605.
+
 2004-12-13  Derick Rethans  <php@derickrethans.nl>
 
     * zend_operators.c:
