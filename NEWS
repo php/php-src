@@ -3,6 +3,13 @@ PHP 4                                                                      NEWS
 ?? ??? ????, Version 4.3.11
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Changed phpize not to require libtool. (Jani)
+- Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
+  Fixed bugs:
+  . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
+  . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
+  . Bug #30573 (compiler warnings in libmbfl due to invalid type cast)
+  . Bug #30549 (incorrect character translations for some ISO8859 charsets)
+  . Bug #28220 (mb_strwidth() returns wrong width values for some hangul chars)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)  
@@ -10,8 +17,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
 - Fixed bug #31936 (set_h_errno() is redefined incompatibly). (Jani)
-- Fixed bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes).
-  (Moriyoshi)
 - Fixed bug #31858 (--disable-cli does not force --without-pear). (Jani)
 - Fixed bug #31842 (*date('r') does not return RFC2822 conforming date string).
   (Jani)
@@ -63,10 +68,6 @@ PHP 4                                                                      NEWS
 - Fixed bug #31055 (apache2filter: per request leak proportional to the full
   path of the request URI). (kameshj at fastmail dot fm)
 - Fixed bug #30726 (-.1 like numbers are not being handled correctly). (Ilia)
-- Fixed bug #30573 (compiler warnings in libmbfl due to invalid type cast).
-  (Moriyoshi)
-- Fixed bug #30549 (incorrect character translations for some ISO8859
-  charsets). (Moriyoshi)
 - Fixed bug #30446 (apache2handler: virtual() includes files out of sequence)
 - Fixed bug #30430 (odbc_next_result() doesn't bind values and that results 
   in segfault). (pdan-php at esync dot org, Tony)
@@ -82,8 +83,6 @@ PHP 4                                                                      NEWS
   (wendland at scan-plus dot de)
 - Fixed bug #28451 (corupt EXIF headers have unlimited recursive IFD directory
   entries). (Andrei)
-- Fixed bug #28220 (mb_strwidth() returns wrong width values for some hangul
-  characters). (Moriyoshi)
 - Fixed bug #28086 (crash inside overload() function). (Tony) 
 - Fixed bug #28074 (FastCGI: stderr should be written in a FCGI stderr stream).
   (chris at ex-parrot dot com)
