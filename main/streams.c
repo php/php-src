@@ -1469,12 +1469,7 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 {
 	zval **wrapperhash;
 
-printf("set option %s:%s:%p\n", wrappername, optionname, optionvalue);
-	
 	if (FAILURE == zend_hash_find(Z_ARRVAL_P(context->options), (char*)wrappername, strlen(wrappername)+1, (void**)&wrapperhash)) {
-		// Create the entry here
-		
-printf("creating a zval for wrapper:%s\n", wrappername);
 		
 		MAKE_STD_ZVAL(*wrapperhash);
 		array_init(*wrapperhash);
@@ -1483,8 +1478,6 @@ printf("creating a zval for wrapper:%s\n", wrappername);
 
 		ZVAL_ADDREF(optionvalue);
 	}
-printf("storing value with key %s in wrapper hash\n", optionname);
-
 	return zend_hash_update(Z_ARRVAL_PP(wrapperhash), (char*)optionname, strlen(optionname)+1, (void**)&optionvalue, sizeof(zval *), NULL);
 }
 
