@@ -1569,7 +1569,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_fetch_column_types(string table_name, resource db)
+/* {{{ proto resource sqlite_fetch_column_types(string table_name, [, int result_type] resource db)
    Return an array of column types from a particular table. */
 PHP_FUNCTION(sqlite_fetch_column_types)
 {
@@ -1581,10 +1581,10 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	zval *object = getThis();
 	struct php_sqlite_result res;
 	const char **rowdata, **colnames, *tail;
-	int i, ncols;
+	int i, ncols, result_type = PHPSQLITE_ASSOC;
 
 	if (object) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tbl, &tbl_len)) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &tbl, &tbl_len, &result_type)) {
 			return;
 		}
 		DB_FROM_OBJECT(db, object);
@@ -1627,7 +1627,12 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 			php_sqlite_strtolower(colname);
 		}
 
-		add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+		if (result_type == PHPSQLITE_ASSOC) {
+			add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+		}
+		if (result_type == PHPSQLITE_NUM) {
+			add_index_string(return_value, i, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+		}
 	}
 
 done:
