@@ -4,7 +4,7 @@ SPL: forward
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
-class c implements spl::forward_assoc {
+class c implements spl_forward_assoc {
 
 	public $max = 3;
 	public $num = 0;
@@ -36,7 +36,7 @@ $i = new c();
 
 $c_info = array(class_name($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
 print_r($c_info);
-$methods = get_class_methods("spl::forward_assoc");
+$methods = get_class_methods("spl_forward_assoc");
 sort($methods);
 print_r($methods);
 $methods = get_class_methods($i);
@@ -75,9 +75,9 @@ Array
 
             [implements] => Array
                 (
-                    [spl::forward_assoc] => spl::forward_assoc
-                    [spl::assoc] => spl::assoc
-                    [spl::forward] => spl::forward
+                    [spl_forward_assoc] => spl_forward_assoc
+                    [spl_assoc] => spl_assoc
+                    [spl_forward] => spl_forward
                 )
 
         )

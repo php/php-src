@@ -34,25 +34,14 @@ void spl_destroy_class(zend_class_entry ** ppce)
 }
 /* }}} */
 
-/* {{{ spl_register_namespace */
-void spl_register_namespace(zend_namespace ** ppns, char * namespace_name TSRMLS_DC)
-{
-	zend_namespace ns;
-
-	INIT_NAMESPACE(ns, namespace_name);
-	ns.name_length = strlen(namespace_name);
-	*ppns = zend_register_internal_namespace(&ns TSRMLS_CC);
-}
-/* }}} */
-
 /* {{{ spl_register_interface */
-void spl_register_interface(zend_class_entry ** ppce, zend_namespace * namespace_entry, char * class_name TSRMLS_DC)
+void spl_register_interface(zend_class_entry ** ppce, char * class_name TSRMLS_DC)
 {
 	zend_class_entry ce;
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
 	ce.name_length = strlen(class_name);
-	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
+	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* entries changed by initialize */
 	(*ppce)->ce_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_INTERFACE;
@@ -60,14 +49,14 @@ void spl_register_interface(zend_class_entry ** ppce, zend_namespace * namespace
 /* }}} */
 
 /* {{{ spl_register_std_class */
-void spl_register_std_class(zend_class_entry ** ppce, zend_namespace * namespace_entry, char * class_name, void * obj_ctor TSRMLS_DC)
+void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor TSRMLS_DC)
 {
 	zend_class_entry ce;
 	memset(&ce, 0, sizeof(zend_class_entry));
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
 	ce.name_length = strlen(class_name);
-	*ppce = zend_register_internal_ns_class(&ce, NULL, namespace_entry, NULL TSRMLS_CC);
+	*ppce = zend_register_internal_class(&ce TSRMLS_CC);
 
 	/* entries changed by initialize */
 	(*ppce)->create_object = obj_ctor;
@@ -86,7 +75,6 @@ void spl_register_interface_function(zend_class_entry * class_entry, char * fn_n
 	pfunction->function_name = fn_name;
 	pfunction->scope = class_entry;
 	pfunction->fn_flags = ZEND_ACC_ABSTRACT | ZEND_ACC_PUBLIC;
-	pfunction->ns = class_entry->ns;
 	pfunction->prototype = NULL;
 	zend_hash_add(&class_entry->function_table, fn_name, strlen(fn_name)+1, &function, sizeof(zend_function), (void**)&reg_function);
 }
@@ -118,14 +106,7 @@ void spl_register_functions(zend_class_entry * class_entry, function_entry * fun
 /* {{ spl_make_fully_qualyfied_name */
 char * spl_make_fully_qualyfied_name(zend_class_entry * pce TSRMLS_DC)
 {
-	if (pce->ns && (pce->ns != &CG(global_namespace))) {
-		char *retval;
-
-		spprintf(&retval, 0, "%s::%s", pce->ns->name, pce->name);
-		return retval;
-	} else {
-		return estrdup(pce->name);
-	}
+	return estrdup(pce->name);
 }
 /* }}} */
 

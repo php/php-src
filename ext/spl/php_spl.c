@@ -62,7 +62,6 @@ zend_module_entry spl_module_entry = {
 };
 /* }}} */
 
-zend_namespace   *spl_ns_spl;
 zend_class_entry *spl_ce_iterator;
 zend_class_entry *spl_ce_forward;
 zend_class_entry *spl_ce_assoc;
@@ -122,8 +121,6 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 PHP_MINIT_FUNCTION(spl)
 {
 	ZEND_INIT_MODULE_GLOBALS(spl, spl_init_globals, NULL);
-
-	REGISTER_SPL_NAMESPACE(spl);
 
 	REGISTER_SPL_INTERFACE(spl, iterator);
 	REGISTER_SPL_INTF_FUNC(spl, iterator, new_iterator);
@@ -294,11 +291,28 @@ PHP_FUNCTION(class_implements)
 }
 /* }}} */
 
+#define SPL_ADD_CLASS(class_name) \
+	spl_add_classes(&spl_ce_ ## class_name, return_value TSRMLS_CC)
+
 /* {{{ spl_classes */
 PHP_FUNCTION(spl_classes)
 {
 	array_init(return_value);
-	zend_hash_apply_with_argument(&spl_ns_spl->class_table, (apply_func_arg_t)spl_add_classes, return_value TSRMLS_CC);
+
+	SPL_ADD_CLASS(iterator);
+	SPL_ADD_CLASS(forward);
+	SPL_ADD_CLASS(sequence);
+	SPL_ADD_CLASS(assoc);
+	SPL_ADD_CLASS(forward_assoc);
+	SPL_ADD_CLASS(sequence_assoc);
+	SPL_ADD_CLASS(array_read);
+	SPL_ADD_CLASS(array_access);
+	SPL_ADD_CLASS(array_access_ex);
+	SPL_ADD_CLASS(array_writer);
+
+#ifdef SPL_ARRAY_WRITE
+	SPL_ADD_CLASS(array_writer_default);
+#endif
 }
 /* }}} */
 

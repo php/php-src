@@ -4,7 +4,7 @@ SPL: sequence
 <?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
-class c implements spl::iterator {
+class c implements spl_iterator {
 
 	public $max = 3;
 
@@ -14,7 +14,7 @@ class c implements spl::iterator {
 	}
 }
 
-class c_iter implements spl::sequence_assoc {
+class c_iter implements spl_sequence_assoc {
 
 	private $obj;
 	private $num = 0;
@@ -78,7 +78,7 @@ Array
 
             [implements] => Array
                 (
-                    [spl::iterator] => spl::iterator
+                    [spl_iterator] => spl_iterator
                 )
 
         )
@@ -91,11 +91,11 @@ Array
 
             [implements] => Array
                 (
-                    [spl::sequence_assoc] => spl::sequence_assoc
-                    [spl::forward_assoc] => spl::forward_assoc
-                    [spl::assoc] => spl::assoc
-                    [spl::forward] => spl::forward
-                    [spl::sequence] => spl::sequence
+                    [spl_sequence_assoc] => spl_sequence_assoc
+                    [spl_forward_assoc] => spl_forward_assoc
+                    [spl_assoc] => spl_assoc
+                    [spl_forward] => spl_forward
+                    [spl_sequence] => spl_sequence
                 )
 
         )

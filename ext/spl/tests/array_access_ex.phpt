@@ -3,11 +3,11 @@ SPL: array_access
 --SKIPIF--
 <?php
 	if (!extension_loaded("spl")) die("skip");
-	if (!in_array("spl::array_access",spl_classes())) die("skip spl::array_access not present");
+	if (!in_array("spl_array_access", spl_classes())) die("skip spl_array_access not present");
 ?>
 --FILE--
 <?php
-class array_write implements spl::array_writer {
+class array_write implements spl_array_writer {
 	private $obj;
 	private $idx;
 
@@ -22,7 +22,7 @@ class array_write implements spl::array_writer {
 	}
 }
 
-class c implements spl::array_access_ex {
+class c implements spl_array_access_ex {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 
@@ -104,11 +104,11 @@ c::get(4th)
 int(4)
 c::exists(5th)
 
-Notice: Undefined index:  5th in /usr/src/php5/ext/spl/tests/array_access_ex.php on line 49
+Notice: Undefined index:  5th in %sarray_access_ex.php on line %d
 NULL
 c::exists(6)
 
-Notice: Undefined index:  6 in /usr/src/php5/ext/spl/tests/array_access_ex.php on line 50
+Notice: Undefined index:  6 in %sarray_access_ex.php on line %d
 NULL
 WRITE 1
 c::exists(1)
