@@ -1012,6 +1012,19 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_FILE;
 }
 
+<ST_IN_SCRIPTING>"__NAMESPACE__" {
+	char *ns_name;
+	if(CG(active_namespace) == &CG(global_namespace)) {
+		ns_name = "";
+	} else {
+		ns_name = CG(active_namespace)->name;
+	}
+
+	zendlval->value.str.len = strlen(ns_name);
+	zendlval->value.str.val = estrndup(ns_name, zendlval->value.str.len);
+	zendlval->type = IS_STRING;
+	return T_NAMESPACE_C;
+}
 
 <INITIAL>(([^<]|"<"[^?%s<]){1,400})|"<s"|"<" {
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
