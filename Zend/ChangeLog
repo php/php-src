@@ -1,3 +1,24 @@
+2002-04-22  Harald Radi  <h.radi@nme.at>
+
+    * zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects.h
+      zend_operators.h
+      zend_API.c
+      zend_API.h
+      zend_builtin_functions.c: added get_class_entry callback handler to the
+    object handlers structure
+
+2002-04-22  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * Zend.m4: MFZE1: Change default value of inline-opt to yes (Sascha).
+
+2002-04-22  Harald Radi  <h.radi@nme.at>
+
+    * zend_config.w32.h
+      acconfig.h
+      flex.skl: fixed linkage warning under win32
+
 2002-04-20  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute_API.c: MFZE1
