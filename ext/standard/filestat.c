@@ -110,12 +110,6 @@
 #define FS_LSTAT   16
 #define FS_STAT    17
 
-/* From: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccore98/html/_crt__access.2c_._waccess.asp */
-#ifdef PHP_WIN32
-#define F_OK  0
-#define W_OK  2
-#define R_OK  4
-#endif
 
 PHP_RINIT_FUNCTION(filestat)
 {
@@ -563,6 +557,19 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		RETURN_FALSE;
 	}
 
+#ifndef PHP_WIN32
+    switch (type) {
+        case FS_IS_W:
+            RETURN_BOOL (!access (filename, W_OK));
+        case FS_IS_R:
+            RETURN_BOOL (!access (filename, R_OK));
+        case FS_IS_X:
+            RETURN_BOOL (!access (filename, X_OK));
+        case FS_EXISTS:
+            RETURN_BOOL (!access (filename, F_OK));
+    }
+#endif
+            
 	stat_sb = &BG(sb);
 
 	if (!BG(CurrentStatFile) || strcmp(filename, BG(CurrentStatFile))) {
@@ -668,6 +675,21 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		}
 		php_error(E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
+	case FS_IS_W:
+		if (getuid()==0) {
+			RETURN_TRUE; /* root */
+		}
+		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
+	case FS_IS_R:
+		if (getuid()==0) {
+			RETURN_TRUE; /* root */
+		}
+		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
+	case FS_IS_X:
+		if (getuid()==0) {
+			xmask = S_IXROOT; /* root */
+		}
+		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
 	case FS_IS_DIR:
@@ -678,6 +700,8 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #else
 		RETURN_FALSE;
 #endif
+	case FS_EXISTS:
+		RETURN_TRUE; /* the false case was done earlier */
 	case FS_LSTAT:
 #if HAVE_SYMLINK
 		stat_sb = &BG(lsb);
@@ -809,50 +833,18 @@ FileFunction(PHP_FN(filetype), FS_TYPE)
 
 /* {{{ proto bool is_writable(string filename)
    Returns true if file can be written */
-PHP_FUNCTION(is_writable)
-{
-	char *filename;
-	int filename_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-
-	RETURN_BOOL(!access (filename, W_OK));
-}
+FileFunction(PHP_FN(is_writable), FS_IS_W)
 /* }}} */
 
 /* {{{ proto bool is_readable(string filename)
    Returns true if file can be read */
-PHP_FUNCTION(is_readable)
-{
-	char *filename;
-	int filename_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-
-	RETURN_BOOL(!access (filename, R_OK));
-}
+FileFunction(PHP_FN(is_readable), FS_IS_R)
 /* }}} */
 
-#ifndef PHP_WIN32
 /* {{{ proto bool is_executable(string filename)
    Returns true if file is executable */
-PHP_FUNCTION(is_executable) 
-{
-	char *filename;
-	int filename_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-
-	RETURN_BOOL(!access (filename, X_OK));
-}
+FileFunction(PHP_FN(is_executable), FS_IS_X)
 /* }}} */
-#endif
 
 /* {{{ proto bool is_file(string filename)
    Returns true if file is a regular file */
@@ -871,17 +863,7 @@ FileFunction(PHP_FN(is_link), FS_IS_LINK)
 
 /* {{{ proto bool file_exists(string filename)
    Returns true if filename exists */
-PHP_FUNCTION(file_exists)
-{
-	char *filename;
-	int filename_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-	
-	RETURN_BOOL(!access (filename, F_OK));
-}
+FileFunction(PHP_FN(file_exists), FS_EXISTS)
 /* }}} */
 
 /* {{{ proto array lstat(string filename)
