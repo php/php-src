@@ -1,14 +1,24 @@
+
+dnl TSRM_CHECK_GCC_ARG(ARG, ACTION-IF-FOUND, ACTION-IF-NOT_FOUND)	
 AC_DEFUN(TSRM_CHECK_GCC_ARG,[
-  AC_MSG_CHECKING(whether $CC supports $1)
-  > conftest.c
+  gcc_arg_name=[ac_cv_gcc_arg]translit($1,A-Z-,a-z_)
+  AC_CACHE_CHECK([whether $CC supports $1], [ac_cv_gcc_arg]translit($1,A-Z-,a-z_), [
+  echo 'void somefunc() { };' > conftest.c
   cmd='$CC $1 -c conftest.c'
   if eval $cmd 2>&1 | egrep -e $1 >/dev/null ; then
-    $2=no
+    ac_result=no
   else
-    $2=yes
+    ac_result=yes
   fi
-  AC_MSG_RESULT($$2)
+  eval $gcc_arg_name=$ac_result
   rm -f conftest.*
+  ])
+  if eval test "\$$gcc_arg_name" = "yes"; then
+    $2
+  else
+    :
+    $3
+  fi
 ])
 
 AC_DEFUN(TSRM_BASIC_CHECKS,[
@@ -46,13 +56,12 @@ AC_DEFUN(TSRM_CHECK_PTHREADS,[
 old_CFLAGS="$CFLAGS"
 
 if test -n "$GCC"; then
-  for i in -pthread -pthreads; do
-    TSRM_CHECK_GCC_ARG($i, gcc_opt)
-    if test "$gcc_opt" = "yes"; then
-      CFLAGS="$CFLAGS $i"
-      break
-    fi
-  done
+  TSRM_CHECK_GCC_ARG(-pthread, [
+    CFLAGS="$CFLAGS -pthread"
+    ],[
+    TSRM_CHECK_GCC_ARG(-pthreads, [
+        CFLAGS="$CFLAGS -pthreads"
+        ])])
 fi
 
 AC_CHECK_FUNCS(pthread_kill)
