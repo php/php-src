@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fixed memory corruption in fgetss(), strip_tags() and gzgetss() (Zeev)
+- Updated calendar dynamic library to work with PHP4. (Evan)
 - Added strncmp() function, courtesy of Walter. (Andrei)
 - Made the output of var_dump() more informative. (Thies)
 - Fixed some OCIBindByName() problems. (Thies)
