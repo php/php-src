@@ -11,7 +11,7 @@ Bug #24155 (gdImageRotate270 rotation problem).
 ?>
 --FILE--
 <?php
-	$dest = dirname(realpath(__FILE__)) . 'bug24155.png';
+	$dest = dirname(realpath(__FILE__)) . '/bug24155.png';
 	@unlink($dest);
 
 	$im = imagecreatetruecolor(30, 50);

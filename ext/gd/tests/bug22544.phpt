@@ -11,7 +11,7 @@ Bug #22544 (TrueColor transparency in PNG images).
 ?>
 --FILE--
 <?php
-	$dest = dirname(realpath(__FILE__)) . 'bug22544.png';
+	$dest = dirname(realpath(__FILE__)) . '/bug22544.png';
 	@unlink($dest);
 	$image = imageCreateTruecolor(640, 100);
 	$transparent = imageColorAllocate($image, 0, 0, 0);
