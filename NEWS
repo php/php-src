@@ -60,6 +60,7 @@ PHP 4                                                                      NEWS
 - Fixed funny forking effect in FastCGI when PHP_FCGI_CHILDREN was not set.
 - Fixed bug #30050 (Possible crash inside php_shutdown_config()). 
   (Ilia, nw at softwarekombinat dot de)
+- Fixed bug #29954 (array_reduce segfaults when initial value is array). (Tony)
 - Fixed bug #29882 (isset crashes on arrays). (Marcus)
 - Fixed bug #29753 (mcal_fetch_event() allows 2nd argument to be optional).
   (Ilia, Vrana)
@@ -82,7 +83,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #29226 (ctype_* functions missing validation of numeric string
   representations). (Ilia)
 - Fixed bug #29209 (imap_fetchbody() doesn't check message index).
-  (Ilia, tony2001 at phpclub dot net)
+  (Ilia, Tony)
 - Fixed bug #29116 (Zend constant warning uses memory after free).
   (Marcus, jdolecek at NetBSD dot org)
 - Fixed bug #29114 (Potential double free in php_stat). (Sara)
