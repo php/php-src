@@ -286,15 +286,27 @@ static void function_dtor(void *pDest)
 	}
 }
 
+static PHP_FUNCTION(com_method_handler)
+{
+	Z_OBJ_HANDLER_P(getThis(), call_method)(
+			((zend_internal_function*)EG(function_state_ptr)->function)->function_name,
+			INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 static union _zend_function *com_method_get(zval *object, char *name, int len TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
 	union _zend_function *func;
+	DISPID dummy;
 
 	obj = CDNO_FETCH(object);
 
 	if (V_VT(&obj->v) != VT_DISPATCH) {
+		return NULL;
+	}
+
+	if (FAILED(php_com_get_id_of_name(obj, name, len, &dummy TSRMLS_CC))) {
 		return NULL;
 	}
 
@@ -306,6 +318,7 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 		f.scope = obj->ce;
 		f.fn_flags = 0;
 		f.function_name = estrndup(name, len);
+		f.handler = PHP_FN(com_method_handler);
 
 		fptr = &f;
 		
@@ -350,8 +363,6 @@ static union _zend_function *com_method_get(zval *object, char *name, int len TS
 							break;
 
 						case DESCKIND_NONE:
-						//default:
-						//	fptr = NULL;
 							break;
 					}
 					if (TI) {
