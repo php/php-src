@@ -1,3 +1,129 @@
+2001-03-20  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu_Browser.php: Warning: alpha code!
+
+    A simple filesystem scanner/browser that maps the filesystem structure into a menu hash so that you can build simple fusebox (?) like systems. Sebastian can you help me with the coding guides etc ?
+
+2001-03-20  Harald Radi  <h.radi@nme.at>
+
+    * php.ini-dist
+      php.ini-optimized: added [com] section
+
+    * ext/com/COM.c
+      ext/com/com.h
+      ext/com/php_COM.h
+      ext/com/typedef_VARIANT.c:    memory leak was reportet, i'm not sure that it is fixed by now, but it should be.
+
+    * win32/php4dllts.dsp: added com.h
+
+2001-03-20  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: 4.0.5RC2
+
+2001-03-20  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c:
+    remove some unneccessary casts, remove unneccessary error casts, standardize
+    the coding format for some of the stuff.
+
+2001-03-20  Fredrik Öhrn  <ohrn@chl.chalmers.se>
+
+    * ext/standard/rand.c:
+    Fix erronous out of bounds error message in rand(min,max)
+
+2001-03-20  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing crash when result conrains 0 rows
+
+2001-03-20  Andi Gutmans  <andi@zend.com>
+
+    * ext/midgard/config.m4:
+    - MFH - This is required for PHP to build. If anything else needs merging
+      for midgard that is related then please do it or rollback the latest
+      midgard fixes.
+
+2001-03-20  Fredrik Öhrn  <ohrn@chl.chalmers.se>
+
+    * ext/yp/yp.c: really fix the build
+
+2001-03-20  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Converting to c-style comments.
+    Adding prototypes to all exported function
+
+2001-03-20  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/qtdom/config.m4: make qtdom compile on Mandrake-cooker
+
+2001-03-20  Andi Gutmans  <andi@zend.com>
+
+    * Makefile.in
+      README.Zeus
+      configure.in
+      sapi/isapi/config.m4
+      sapi/fastcgi/CREDITS
+      sapi/fastcgi/Makefile.in
+      sapi/fastcgi/README.FastCGI
+      sapi/fastcgi/config.m4
+      sapi/fastcgi/fastcgi.c
+      sapi/fastcgi/php.sym
+      sapi/fastcgi/php_fastcgi.h: - MFH
+
+2001-03-20  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/pgsql/pgsql.dsp: fix dsp
+
+2001-03-20  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/domxml/php_domxml.c: Nuke another warning.
+
+2001-03-20  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c: - fixed lot of compiler warnings
+
+2001-03-20  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/registry.c: fix registry per directory values
+
+2001-03-20  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * NEWS: - news about domxml
+
+    * tests/testdom: - test script for rewritten domxml module
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: - complete rewrite of domxml module.
+      It is now mostly conform to DOM Level 2 though some classes and
+      methods are still missing
+
+2001-03-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/yp/yp.c: fix build
+
+2001-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/standard/dns.c
+      ext/standard/dns.h: MFH
+
+2001-03-20  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: Remove some unnecessary error checking
+
+2001-03-20  Jani Taskinen  <sniper@iki.fi>
+
+    * main/SAPI.c
+      configure.in
+      ext/fdf/fdf.c: MFH
+
+    * ext/xml/tests/004.phpt
+      ext/xml/tests/006.phpt
+      ext/xml/tests/skipif.php:
+    Removed skipif.php + Fixed tests to use skipif.inc instead.
+
+    * ext/cybermut/libs.mk: Removed unnessary file.
+
 2001-03-19  David Guerizec  <david@guerizec.net>
 
     * ext/midgard/php_midgard.h.in: deleted unneeded file
