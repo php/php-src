@@ -111,10 +111,10 @@ class PEAR_Installer extends PEAR_Common
         }
         foreach ($filelist as $file => $props) {
             $path = $props['installed_as'];
-            // XXX TODO: do a "rmdir -p dirname($path)" to maintain clean the fs
             if (!@unlink($path)) {
                 $this->log(2, "unable to delete: $path");
             } else {
+                @rmdir(dirname($path)); // Delete package directory if it's empty
                 $this->log(2, "+ deleted file: $path");
             }
         }
@@ -148,7 +148,7 @@ class PEAR_Installer extends PEAR_Common
             default:
                 break;
         }
-        if (isset($atts['baseinstalldir'])) {
+        if (isset($atts['baseinstalldir']) && $atts['role'] != 'doc') {
             $dest_dir .= DIRECTORY_SEPARATOR . $atts['baseinstalldir'];
         }
         if (dirname($file) != '.') {
