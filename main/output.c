@@ -527,10 +527,7 @@ PHP_FUNCTION(ob_list_handlers)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Unable to initialize array");
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	if (OG(ob_nesting_level)) {
 		if (OG(ob_nesting_level)>1) {
 			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_list_each, return_value);
@@ -913,9 +910,7 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 	zval *elem;
 
 	MAKE_STD_ZVAL(elem);
-	if (array_init(elem) == FAILURE) {
-		return FAILURE;
-	}
+	array_init(elem);
 
 	add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
 	if (!ob_buffer->chunk_size) {
@@ -949,9 +944,7 @@ PHP_FUNCTION(ob_get_status)
 	if (zend_parse_parameters(argc TSRMLS_CC, "|b", &full_status) == FAILURE )
 		RETURN_FALSE;
 	
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 
 	if (full_status) {
 		if (OG(ob_nesting_level)>1) {
