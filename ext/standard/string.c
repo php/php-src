@@ -867,8 +867,8 @@ PHP_FUNCTION(strtok)
 
 		zval_add_ref(str);
 		if (BG(strtok_zval))
-			zval_ptr_dtor(BG(strtok_zval));
-		BG(strtok_zval) = str;
+			zval_ptr_dtor(&BG(strtok_zval));
+		BG(strtok_zval) = *str;
 		
 		BG(strtok_last) = BG(strtok_string) = Z_STRVAL_PP(str);
 		BG(strtok_len) = Z_STRLEN_PP(str);

@@ -894,7 +894,7 @@ PHP_RINIT_FUNCTION(basic)
 PHP_RSHUTDOWN_FUNCTION(basic)
 {
 	if (BG(strtok_zval))
-		zval_ptr_dtor(BG(strtok_zval));
+		zval_ptr_dtor(&BG(strtok_zval));
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
 #ifdef HAVE_PUTENV
