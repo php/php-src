@@ -23,6 +23,7 @@
 #define PHP_INTERBASE_H
 
 #if HAVE_IBASE
+
 #include <ibase.h>
 
 extern zend_module_entry ibase_module_entry;
@@ -31,12 +32,12 @@ extern zend_module_entry ibase_module_entry;
 #ifdef PHP_WIN32
 #define PHP_IBASE_API __declspec(dllexport)
 #ifndef ISC_INT64_FORMAT
- #define ISC_INT64_FORMAT "I64"
+#define ISC_INT64_FORMAT "I64"
 #endif
 #else
 #define PHP_IBASE_API
 #ifndef ISC_INT64_FORMAT
- #define ISC_INT64_FORMAT "ll"
+#define ISC_INT64_FORMAT "ll"
 #endif
 #endif
 
@@ -168,18 +169,18 @@ enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
 	PHP_IBASE_TEXT 				= 1,
 	PHP_IBASE_UNIXTIME 			= 2,
-	PHP_IBASE_TIMESTAMP 			= 4,
+	PHP_IBASE_TIMESTAMP 		= 4,
 	PHP_IBASE_DATE 				= 8,
 	PHP_IBASE_TIME 				= 16,
-	/* transactions  */	
-	PHP_IBASE_WRITE 				= 2,
+	/* transactions */	
+	PHP_IBASE_WRITE 			= 2,
 	PHP_IBASE_READ 				= 4,
-	PHP_IBASE_COMMITTED 			= 8,
+	PHP_IBASE_COMMITTED 		= 8,
 	PHP_IBASE_CONSISTENCY 		= 16,
 	PHP_IBASE_CONCURRENCY 		= 32,
 	PHP_IBASE_REC_VERSION 		= 64,
 	PHP_IBASE_REC_NO_VERSION 	= 128,
-	PHP_IBASE_NOWAIT 				= 256,
+	PHP_IBASE_NOWAIT 			= 256,
 	PHP_IBASE_WAIT 				= 512
 };
 
