@@ -115,7 +115,8 @@ PHP_RINIT_FUNCTION(filestat)
 }
 
 PHP_RSHUTDOWN_FUNCTION(filestat) {
-	if (BG(CurrentStatFile)) { efree (BG(CurrentStatFile));
+	if (BG(CurrentStatFile)) {
+		efree (BG(CurrentStatFile));
 	}
 	return SUCCESS;
 }
@@ -692,7 +693,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		stat_sb = &BG(lsb);
 #endif
 		/* FALLTHROUGH */
-	case FS_STAT: /* stat */
+	case FS_STAT:
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
