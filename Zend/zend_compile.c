@@ -68,7 +68,7 @@ static void build_runtime_defined_function_key(zval *result, char *name, int nam
 	uint char_pos_len;
 	char *filename;
 
-	char_pos_len = zend_sprintf(char_pos_buf, "%x", zend_get_last_accepting_character_position(TSRMLS_C));
+	char_pos_len = zend_sprintf(char_pos_buf, "%x", (unsigned int) LANG_SCNG(_yy_last_accepting_cpos));
 	if (CG(active_op_array)->filename) {
 		filename = CG(active_op_array)->filename;
 	} else {

@@ -178,11 +178,6 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 #endif /* ZEND_MULTIBYTE */
 }
 
-char *zend_get_last_accepting_character_position(TSRMLS_D)
-{
-	return SCNG(_yy_last_accepting_cpos);
-}
-
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
