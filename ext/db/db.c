@@ -96,12 +96,12 @@
 #define DBM_CLOSE(dbf) dbm_close(dbf)
 #define DBM_STORE(dbf, key, value, mode) dbm_store(dbf, key, value, mode)
 #define DBM_FETCH(dbf, key) dbm_fetch(dbf, key)
-#define DBM_EXISTS(dbf, key) _php3_dbm_exists(dbf, key)
+#define DBM_EXISTS(dbf, key) php_dbm_exists(dbf, key)
 #define DBM_DELETE(dbf, key) dbm_delete(dbf, key)
 #define DBM_FIRSTKEY(dbf) dbm_firstkey(dbf)
 #define DBM_NEXTKEY(dbf, key) dbm_nextkey(dbf)
 
-static int _php3_dbm_exists(DBM *dbf, datum key_datum) {
+static int php_dbm_exists(DBM *dbf, datum key_datum) {
 	datum value_datum;
 	int ret;
 
@@ -171,7 +171,7 @@ static int le_db;
 /*needed for blocking calls in windows*/
 void *dbm_mutex;
 
-dbm_info *_php3_finddbm(pval *id,HashTable *list)
+dbm_info *php_find_dbm(pval *id,HashTable *list)
 {
 	list_entry *le;
 	dbm_info *info;
@@ -202,7 +202,7 @@ dbm_info *_php3_finddbm(pval *id,HashTable *list)
 	return info;
 }
 
-static char *php3_get_info_db(void)
+static char *php_get_info_db(void)
 {
 	static char temp1[128];
 	static char temp[256];
@@ -240,12 +240,12 @@ static char *php3_get_info_db(void)
 
 PHP_MINFO_FUNCTION(db)
 {
-	php_printf(php3_get_info_db());
+	php_printf(php_get_info_db());
 }
 
 PHP_FUNCTION(dblist)
 {
-	char *str = php3_get_info_db();
+	char *str = php_get_info_db();
 	RETURN_STRING(str,1);
 }
 
@@ -469,7 +469,7 @@ PHP_FUNCTION(dbminsert)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -522,7 +522,7 @@ PHP_FUNCTION(dbmreplace)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -576,7 +576,7 @@ PHP_FUNCTION(dbmfetch)
 	}
 	convert_to_string(key);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
@@ -648,17 +648,17 @@ PHP_FUNCTION(dbmexists)
 	}
 	convert_to_string(key);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
-	ret = _php3_dbmexists(info, key->value.str.val);
+	ret = php_dbm_exists(info, key->value.str.val);
 	RETURN_LONG(ret);
 }
 
-int _php3_dbmexists(dbm_info *info, char *key) {
+int php_dbm_exists(dbm_info *info, char *key) {
 	datum key_datum;
 	int ret;
 	DBM_TYPE dbf;
@@ -691,17 +691,17 @@ PHP_FUNCTION(dbmdelete)
 	}
 	convert_to_string(key);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
-	ret = _php3_dbmdelete(info, key->value.str.val);
+	ret = php_dbm_delete(info, key->value.str.val);
 	RETURN_LONG(ret);
 }
 
-int _php3_dbmdelete(dbm_info *info, char *key) {
+int php_dbm_delete(dbm_info *info, char *key) {
 	datum key_datum;
 	int ret;
 	DBM_TYPE dbf;
@@ -732,13 +732,13 @@ PHP_FUNCTION(dbmfirstkey)
 		WRONG_PARAM_COUNT;
 	}
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
-	ret = _php3_dbmfirstkey(info);
+	ret = php_dbm_first_key(info);
 	if (!ret) {
 		RETURN_FALSE;
 	} else {
@@ -748,7 +748,7 @@ PHP_FUNCTION(dbmfirstkey)
 	}
 }
 
-char *_php3_dbmfirstkey(dbm_info *info) {
+char *php_dbm_first_key(dbm_info *info) {
 	datum ret_datum;
 	char *ret;
 	DBM_TYPE dbf;
@@ -790,13 +790,13 @@ PHP_FUNCTION(dbmnextkey)
 	}
 	convert_to_string(key);
 
-	info = _php3_finddbm(id,list);
+	info = php_find_dbm(id,list);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", id->value.lval);
 		RETURN_FALSE;
 	}
 
-	ret = _php3_dbmnextkey(info, key->value.str.val);
+	ret = php_dbm_nextkey(info, key->value.str.val);
 	if (!ret) {
 		RETURN_FALSE;
 	} else {
@@ -806,7 +806,7 @@ PHP_FUNCTION(dbmnextkey)
 	}
 }
 
-char *_php3_dbmnextkey(dbm_info *info, char *key) {
+char *php_dbm_nextkey(dbm_info *info, char *key) {
 	datum key_datum, ret_datum;
 	char *ret;
 	DBM_TYPE dbf;
