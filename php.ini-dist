@@ -302,3 +302,10 @@ mssql.max_links				=	-1	; maximum number of links (persistent+non persistent).  
 mssql.min_error_severity	=	10	; minimum error severity to display
 mssql.min_message_severity	=	10	; minimum message severity to display
 mssql.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0.
+
+[Assertion]
+assert.active				=	Off	; assert(expr); does nothing by default
+assert.warning				=	On	; assert() will issue a PHP warning for each failed assertion.
+assert.bail					=	Off	; assert() will not bail out by default.
+assert.callback				=	0	; assert() will not call any user-defined PHP-Code by default.
+
