@@ -320,7 +320,12 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 
 int zend_init_rsrc_list_dtors(void)
 {
-	return zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+	int retval;
+
+	retval = zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+	list_destructors.nNextFreeElement=1;	/* we don't want resource type 0 */
+
+	return retval;
 }
 
 
