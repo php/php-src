@@ -427,7 +427,7 @@ static char *exif_get_tagformat(int format)
 /* 0x920B - 0x920D */
 /* 0x9211 - 0x9216 */
 #define TAG_SUBJECT_AREA                0x9214
-#define TAG_MARKER_NOTE                 0x927C
+#define TAG_MAKER_NOTE                  0x927C
 #define TAG_USERCOMMENT                 0x9286
 #define TAG_SUB_SEC_TIME                0x9290
 #define TAG_SUB_SEC_TIME_ORIGINAL       0x9291
@@ -904,7 +904,7 @@ typedef enum mn_byte_order_t {
 
 typedef enum mn_offset_mode_t {
 	MN_OFFSET_NORMAL,
-	MN_OFFSET_MARKER,
+	MN_OFFSET_MAKER,
 	MN_OFFSET_GUESS
 } mn_offset_mode_t;
 
@@ -917,13 +917,13 @@ typedef struct {
 	int              offset;
 	mn_byte_order_t  byte_order;
 	mn_offset_mode_t offset_mode;
-} marker_note_type;
+} maker_note_type;
 
-static const marker_note_type marker_note_array[] = {
+static const maker_note_type maker_note_array[] = {
   { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_INTEL,    MN_OFFSET_GUESS},
 /*  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},*/
   { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,                       0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
-  { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00", 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MARKER},
+  { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00", 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
   { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,                       0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
   { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",        8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
@@ -1253,7 +1253,7 @@ typedef struct {
 #define SECTION_INTEROP     10
 #define SECTION_APP12       11
 #define SECTION_WINXP       12
-#define SECTION_MARKERNOTE  13
+#define SECTION_MAKERNOTE   13
 #define SECTION_COUNT       14
 
 #define FOUND_FILE          (1<<SECTION_FILE)
@@ -1269,7 +1269,7 @@ typedef struct {
 #define FOUND_INTEROP       (1<<SECTION_INTEROP)
 #define FOUND_APP12         (1<<SECTION_APP12)
 #define FOUND_WINXP         (1<<SECTION_WINXP)
-#define FOUND_MARKERNOTE    (1<<SECTION_MARKERNOTE)
+#define FOUND_MAKERNOTE     (1<<SECTION_MAKERNOTE)
 
 static char *exif_get_sectionname(int section)
 {
@@ -1287,7 +1287,7 @@ static char *exif_get_sectionname(int section)
 		case SECTION_INTEROP:   return "INTEROP";
 		case SECTION_APP12:     return "APP12";
 		case SECTION_WINXP:     return "WINXP";
-		case SECTION_MARKERNOTE:return "MARKERNOTE";
+		case SECTION_MAKERNOTE: return "MAKERNOTE";
 	}
 	return "";
 }
@@ -2675,40 +2675,40 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 }
 /* }}} */
 
-/* {{{ exif_process_IFD_in_MARKERNOTE
- * Process nested IFDs directories in Marker Note. */
-static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement TSRMLS_DC)
+/* {{{ exif_process_IFD_in_MAKERNOTE
+ * Process nested IFDs directories in Maker Note. */
+static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement TSRMLS_DC)
 {
-	int de, i=0, section_index = SECTION_MARKERNOTE;
+	int de, i=0, section_index = SECTION_MAKERNOTE;
 	int NumDirEntries, old_motorola_intel, offset_diff;
-	const marker_note_type *marker_note;
+	const maker_note_type *maker_note;
 	char *dir_start;
 
-	for (i=0; i<=sizeof(marker_note_array)/sizeof(marker_note_type); i++) {
-		if (i==sizeof(marker_note_array)/sizeof(marker_note_type))
+	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
+		if (i==sizeof(maker_note_array)/sizeof(maker_note_type))
 			return FALSE;
-		marker_note = marker_note_array+i;
+		maker_note = maker_note_array+i;
 		
-		/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "check (%s,%s)", marker_note->make?marker_note->make:"", marker_note->model?marker_note->model:"");*/
-		if (marker_note->make && (!ImageInfo->make || strcmp(marker_note->make, ImageInfo->make)))
+		/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "check (%s,%s)", maker_note->make?maker_note->make:"", maker_note->model?maker_note->model:"");*/
+		if (maker_note->make && (!ImageInfo->make || strcmp(maker_note->make, ImageInfo->make)))
 			continue;
-		if (marker_note->model && (!ImageInfo->model || strcmp(marker_note->model, ImageInfo->model)))
+		if (maker_note->model && (!ImageInfo->model || strcmp(maker_note->model, ImageInfo->model)))
 			continue;
-		if (marker_note->id_string && strncmp(marker_note->id_string, value_ptr, marker_note->id_string_len))
+		if (maker_note->id_string && strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
 			continue;
 		break;
 	}
 
-	dir_start = value_ptr + marker_note->offset;
+	dir_start = value_ptr + maker_note->offset;
 
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+marker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (int)dir_start-(int)offset_base+marker_note->offset+displacement));
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "process %s @x%04X + 0x%04X=%d: %s", exif_get_sectionname(section_index), (int)dir_start-(int)offset_base+maker_note->offset+displacement, value_len, value_len, exif_char_dump(value_ptr, value_len, (int)dir_start-(int)offset_base+maker_note->offset+displacement));
 #endif
 
-	ImageInfo->sections_found |= FOUND_MARKERNOTE;
+	ImageInfo->sections_found |= FOUND_MAKERNOTE;
 
 	old_motorola_intel = ImageInfo->motorola_intel;
-	switch (marker_note->byte_order) {
+	switch (maker_note->byte_order) {
 		case MN_ORDER_INTEL:
 			ImageInfo->motorola_intel = 0;
 			break;
@@ -2722,14 +2722,14 @@ static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * val
 
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
-	switch (marker_note->offset_mode) {
-		case MN_OFFSET_MARKER:
+	switch (maker_note->offset_mode) {
+		case MN_OFFSET_MAKER:
 			offset_base = value_ptr;
 			break;
 		case MN_OFFSET_GUESS:
 			offset_diff = 2 + NumDirEntries*12 + 4 - php_ifd_get32u(dir_start+10, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
-			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+marker_note->offset+displacement) + offset_diff);
+			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+maker_note->offset+displacement) + offset_diff);
 #endif
 			offset_base = value_ptr + offset_diff;
 			break;
@@ -2745,14 +2745,14 @@ static int exif_process_IFD_in_MARKERNOTE(image_info_type *ImageInfo, char * val
 
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
-								  offset_base, IFDlength, displacement, section_index, 0, marker_note->tag_table TSRMLS_CC)) {
+								  offset_base, IFDlength, displacement, section_index, 0, maker_note->tag_table TSRMLS_CC)) {
 			return FALSE;
 		}
 	}
 	ImageInfo->motorola_intel = old_motorola_intel;
 /*	NextDirOffset (must be NULL) = php_ifd_get32u(dir_start+2+12*de, ImageInfo->motorola_intel);*/
 #ifdef EXIF_DEBUG
-	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "subsection %s done", exif_get_sectionname(SECTION_MARKERNOTE));
+	exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "subsection %s done", exif_get_sectionname(SECTION_MAKERNOTE));
 #endif
 	return TRUE;
 }
@@ -3006,8 +3006,8 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				ImageInfo->model = estrdup(value_ptr);
 				break;
 
-			case TAG_MARKER_NOTE:
-				exif_process_IFD_in_MARKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement TSRMLS_CC);
+			case TAG_MAKER_NOTE:
+				exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement TSRMLS_CC);
 				break;
 
 			case TAG_EXIF_IFD_POINTER:
@@ -4011,7 +4011,7 @@ PHP_FUNCTION(exif_read_data)
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_FPIX       TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_APP12      TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_WINXP      TSRMLS_CC);
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_MARKERNOTE TSRMLS_CC);
+	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_MAKERNOTE  TSRMLS_CC);
 
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL TSRMLS_CC, &ImageInfo, E_NOTICE, "discarding info");
