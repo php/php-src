@@ -90,44 +90,8 @@ class PEAR_Common extends PEAR
     var $pkginfo = array();
 
     /**
-     * Valid maintainer roles
-     * @var array
-     */
-    var $maintainer_roles = null;
-
-    /**
-     * Valid release states
-     * @var array
-     */
-    var $release_states = null;
-
-    /**
-     * Valid dependency types
-     * @var array
-     */
-    var $dependency_types = null;
-
-    /**
-     * Valid dependency relations
-     * @var array
-     */
-    var $dependency_relations = null;
-
-    /**
-     * Valid file roles
-     * @var array
-     */
-    var $file_roles = null;
-
-    /**
-     * Valid replacement types
-     * @var array
-     */
-    var $replacement_types = null;
-
-    /**
      * User Interface object (PEAR_Frontend_* class).  If null,
-     * log() uses print.
+     * the log() method uses print.
      * @var object
      */
     var $ui = null;
@@ -146,12 +110,6 @@ class PEAR_Common extends PEAR
     function PEAR_Common()
     {
         $this->PEAR();
-        $this->maintainer_roles = $GLOBALS['_PEAR_Common_maintainer_roles'];
-        $this->release_states = $GLOBALS['_PEAR_Common_release_states'];
-        $this->dependency_types = $GLOBALS['_PEAR_Common_dependency_types'];
-        $this->dependency_relations = $GLOBALS['_PEAR_Common_dependency_relations'];
-        $this->file_roles = $GLOBALS['_PEAR_Common_file_roles'];
-        $this->replacement_types = $GLOBALS['_PEAR_Common_replacement_types'];
     }
 
     // }}}
@@ -941,6 +899,12 @@ class PEAR_Common extends PEAR
 
     function validatePackageInfo($info, &$errors, &$warnings)
     {
+        global $_PEAR_Common_maintainer_roles,
+            $_PEAR_Common_release_states,
+            $_PEAR_Common_dependency_types,
+            $_PEAR_Common_dependency_relations,
+            $_PEAR_Common_file_roles,
+            $_PEAR_Common_replacement_types;
         if (PEAR::isError($info = $this->_infoFromAny($info))) {
             return $this->raiseError($info);
         }
@@ -968,8 +932,8 @@ class PEAR_Common extends PEAR
         }
         if (empty($info['release_state'])) {
             $errors[] = 'missing release state';
-        } elseif (!in_array($info['release_state'], $this->release_states)) {
-            $errors[] = "invalid release state `$info[release_state]', should be one of: ".implode(' ', $this->release_states);
+        } elseif (!in_array($info['release_state'], $_PEAR_Common_release_states)) {
+            $errors[] = "invalid release state `$info[release_state]', should be one of: ".implode(' ', $_PEAR_Common_release_states);
         }
         if (empty($info['release_date'])) {
             $errors[] = 'missing release date';
@@ -989,8 +953,8 @@ class PEAR_Common extends PEAR
                 }
                 if (empty($m['role'])) {
                     $errors[] = "maintainer $i: missing role";
-                } elseif (!in_array($m['role'], $this->maintainer_roles)) {
-                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: ".implode(' ', $this->maintainer_roles);
+                } elseif (!in_array($m['role'], $_PEAR_Common_maintainer_roles)) {
+                    $errors[] = "maintainer $i: invalid role `$m[role]', should be one of: ".implode(' ', $_PEAR_Common_maintainer_roles);
                 }
                 if (empty($m['name'])) {
                     $errors[] = "maintainer $i: missing name";
@@ -1006,13 +970,13 @@ class PEAR_Common extends PEAR
             foreach ($info['deps'] as $d) {
                 if (empty($d['type'])) {
                     $errors[] = "depenency $i: missing type";
-                } elseif (!in_array($d['type'], $this->dependency_types)) {
-                    $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $this->depenency_types);
+                } elseif (!in_array($d['type'], $_PEAR_Common_dependency_types)) {
+                    $errors[] = "dependency $i: invalid type, should be one of: ".implode(' ', $_PEAR_Common_depenency_types);
                 }
                 if (empty($d['rel'])) {
                     $errors[] = "dependency $i: missing relation";
-                } elseif (!in_array($d['rel'], $this->dependency_relations)) {
-                    $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $this->dependency_relations);
+                } elseif (!in_array($d['rel'], $_PEAR_Common_dependency_relations)) {
+                    $errors[] = "dependency $i: invalid relation, should be one of: ".implode(' ', $_PEAR_Common_dependency_relations);
                 }
                 if ($d['rel'] != 'has' && empty($d['version'])) {
                     $warnings[] = "dependency $i: missing version";
@@ -1033,8 +997,8 @@ class PEAR_Common extends PEAR
             foreach ($info['filelist'] as $file => $fa) {
                 if (empty($fa['role'])) {
                     $errors[] = "file $file: missing role";
-                } elseif (!in_array($fa['role'], $this->file_roles)) {
-                    $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $this->file_roles);
+                } elseif (!in_array($fa['role'], $_PEAR_Common_file_roles)) {
+                    $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $_PEAR_Common_file_roles);
                 } elseif ($fa['role'] == 'extsrc' && empty($fa['sources'])) {
                     $errors[] = "file $file: no source files";
                 }
