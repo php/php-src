@@ -216,6 +216,9 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const 
 
 	memset(ret, 0, sizeof(php_stream));
 
+	ret->readfilters.stream = ret;
+	ret->writefilters.stream = ret;
+
 #if STREAM_DEBUG
 fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persistent_id);
 #endif

@@ -283,7 +283,7 @@ PHPAPI void php_stream_filter_free(php_stream_filter *filter TSRMLS_DC)
 	pefree(filter, filter->is_persistent);
 }
 
-PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
 {
 	filter->next = chain->head;
 	filter->prev = NULL;
@@ -297,8 +297,10 @@ PHPAPI void php_stream_filter_prepend(php_stream_filter_chain *chain, php_stream
 	filter->chain = chain;
 }
 
-PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter)
+PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_filter *filter TSRMLS_DC)
 {
+	php_stream *stream = chain->stream;
+
 	filter->prev = chain->tail;
 	filter->next = NULL;
 	if (chain->tail) {
@@ -308,6 +310,75 @@ PHPAPI void php_stream_filter_append(php_stream_filter_chain *chain, php_stream_
 	}
 	chain->tail = filter;
 	filter->chain = chain;
+
+	if ((stream->writepos - stream->readpos) > 0) {
+		/* Let's going ahead and wind anything in the buffer through this filter */
+		php_stream_bucket_brigade brig_in = { NULL, NULL }, brig_out = { NULL, NULL };
+		php_stream_bucket_brigade *brig_inp = &brig_in, *brig_outp = &brig_out;
+		php_stream_filter_status_t status;
+		php_stream_bucket *bucket;
+		size_t consumed = 0;
+
+		bucket = php_stream_bucket_new(stream, stream->readbuf + stream->readpos, stream->writepos - stream->readpos, 0, 0 TSRMLS_CC);
+		php_stream_bucket_append(brig_inp, bucket TSRMLS_CC);
+		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL TSRMLS_CC);
+
+		if (stream->readpos + consumed > stream->writepos || consumed < 0) {
+			/* No behaving filter should cause this. */
+			status = PSFS_ERR_FATAL;
+		}
+
+		switch (status) {
+			case PSFS_ERR_FATAL:
+				/* If this first cycle simply fails then there's something wrong with the filter.
+				   Pull the filter off the chain and leave the read buffer alone. */
+				if (chain->head == filter) {
+					chain->head = NULL;
+					chain->tail = NULL;
+				} else {
+					filter->prev->next = NULL;
+					chain->tail = filter->prev;
+				}
+				php_stream_bucket_unlink(bucket TSRMLS_CC);
+				php_stream_bucket_delref(bucket TSRMLS_CC);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filter failed to process pre-buffered data.  Not adding to filterchain.");
+				break;
+			case PSFS_FEED_ME:
+				/* We don't actually need data yet,
+				   leave this filter in a feed me state until data is needed. 
+				   Reset stream's internal read buffer since the filter is "holding" it. */
+				stream->readpos = 0;
+				stream->writepos = 0;
+				break;
+			case PSFS_PASS_ON:
+				/* Put any filtered data onto the readbuffer stack.
+				   Previously read data has been at least partially consumed. */
+				stream->readpos += consumed;
+
+				if (stream->writepos == stream->readpos) {
+					/* Entirely consumed */
+					stream->writepos = 0;
+					stream->readpos = 0;
+				}
+
+				while (brig_outp->head) {
+					bucket = brig_outp->head;
+					/* Grow buffer to hold this bucket if need be.
+					   TODO: See warning in main/stream/streams.c::php_stream_fill_read_buffer */
+					if (stream->readbuflen - stream->writepos < bucket->buflen) {
+						stream->readbuflen += bucket->buflen;
+						stream->readbuf = perealloc(stream->readbuf, stream->readbuflen, stream->is_persistent);
+					}
+					memcpy(stream->readbuf + stream->writepos, bucket->buf, bucket->buflen);
+					stream->writepos += bucket->buflen;
+
+					php_stream_bucket_unlink(bucket TSRMLS_CC);
+					php_stream_bucket_delref(bucket TSRMLS_CC);
+				}
+				break;
+		}
+	}
+
 }
 
 PHPAPI php_stream_filter *php_stream_filter_remove(php_stream_filter *filter, int call_dtor TSRMLS_DC)
