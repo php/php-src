@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Add EscapeShellArg() function (Rasmus)
 - Add a php.ini option session.use_trans_sid to enable/disable trans-sid. (Sterling)
 - Quick-fix for the file upload security alert (Rasmus)
 - Fixed a potential security issue with HTTP file upload (Zeev)
