@@ -237,73 +237,73 @@ static sb4 oci_failover_callback(dvoid *svchp,dvoid* envhp,dvoid *fo_ctx,ub4 fo_
 /* }}} */
 /* {{{ extension function prototypes */
 
-PHP_FUNCTION(ocibindbyname);
-PHP_FUNCTION(ocidefinebyname);
-PHP_FUNCTION(ocicolumnisnull);
-PHP_FUNCTION(ocicolumnname);
-PHP_FUNCTION(ocicolumnsize);
-PHP_FUNCTION(ocicolumnscale);
-PHP_FUNCTION(ocicolumnprecision);
-PHP_FUNCTION(ocicolumntype);
-PHP_FUNCTION(ocicolumntyperaw);
-PHP_FUNCTION(ociexecute);
-PHP_FUNCTION(ocifetch);
-PHP_FUNCTION(ocicancel);
+PHP_FUNCTION(oci_bind_by_name);
+PHP_FUNCTION(oci_define_by_name);
+PHP_FUNCTION(oci_field_is_null);
+PHP_FUNCTION(oci_field_name);
+PHP_FUNCTION(oci_field_size);
+PHP_FUNCTION(oci_field_scale);
+PHP_FUNCTION(oci_field_precision);
+PHP_FUNCTION(oci_field_type);
+PHP_FUNCTION(oci_field_type_raw);
+PHP_FUNCTION(oci_execute);
+PHP_FUNCTION(oci_fetch);
+PHP_FUNCTION(oci_cancel);
 PHP_FUNCTION(ocifetchinto);
-PHP_FUNCTION(ocifetchstatement);
-PHP_FUNCTION(ocifreestatement);
-PHP_FUNCTION(ociinternaldebug);
-PHP_FUNCTION(ocilogoff);
-PHP_FUNCTION(ocilogon);
-PHP_FUNCTION(ocinlogon);
-PHP_FUNCTION(ociplogon);
-PHP_FUNCTION(ocierror);
-PHP_FUNCTION(ocifreedesc);
-PHP_FUNCTION(ocisavelob);
-PHP_FUNCTION(ocisavelobfile);
-PHP_FUNCTION(ociloadlob);
-PHP_FUNCTION(ocitelllob);
-PHP_FUNCTION(ociwritelob);
-PHP_FUNCTION(ociappendlob);
-PHP_FUNCTION(ocicopylob);
-PHP_FUNCTION(ocitruncatelob);
-PHP_FUNCTION(ocieraselob);
-PHP_FUNCTION(ociflushlob);
+PHP_FUNCTION(oci_fetch_all);
+PHP_FUNCTION(oci_free_statement);
+PHP_FUNCTION(oci_internal_debug);
+PHP_FUNCTION(oci_close);
+PHP_FUNCTION(oci_connect);
+PHP_FUNCTION(oci_new_connect);
+PHP_FUNCTION(oci_pconnect);
+PHP_FUNCTION(oci_error);
+PHP_FUNCTION(oci_free_descriptor);
+PHP_FUNCTION(oci_commit);
+PHP_FUNCTION(oci_rollback);
+PHP_FUNCTION(oci_new_descriptor);
+PHP_FUNCTION(oci_num_fields);
+PHP_FUNCTION(oci_parse);
+PHP_FUNCTION(oci_new_cursor);
+PHP_FUNCTION(oci_result);
+PHP_FUNCTION(oci_server_version);
+PHP_FUNCTION(oci_statement_type);
+PHP_FUNCTION(oci_num_rows);
+PHP_FUNCTION(oci_set_prefetch);
+PHP_FUNCTION(oci_password_change);
+PHP_FUNCTION(oci_lob_save);
+PHP_FUNCTION(oci_lob_import);
+PHP_FUNCTION(oci_lob_export);
+PHP_FUNCTION(oci_lob_load);
+PHP_FUNCTION(oci_lob_tell);
+PHP_FUNCTION(oci_lob_write);
+PHP_FUNCTION(oci_lob_append);
+PHP_FUNCTION(oci_lob_copy);
+PHP_FUNCTION(oci_lob_truncate);
+PHP_FUNCTION(oci_lob_erase);
+PHP_FUNCTION(oci_lob_flush);
 PHP_FUNCTION(ocisetbufferinglob);
 PHP_FUNCTION(ocigetbufferinglob);
-PHP_FUNCTION(ociisequallob);
-PHP_FUNCTION(ocirewindlob);
-PHP_FUNCTION(ocireadlob);
-PHP_FUNCTION(ocieoflob);
-PHP_FUNCTION(ociseeklob);
-PHP_FUNCTION(ocilobgetlength);
-PHP_FUNCTION(ociwritelobtofile);
-PHP_FUNCTION(ocicommit);
-PHP_FUNCTION(ocirollback);
-PHP_FUNCTION(ocinewdescriptor);
-PHP_FUNCTION(ocinumcols);
-PHP_FUNCTION(ociparse);
-PHP_FUNCTION(ocinewcursor);
-PHP_FUNCTION(ociresult);
-PHP_FUNCTION(ociserverversion);
-PHP_FUNCTION(ocistatementtype);
-PHP_FUNCTION(ocirowcount);
-PHP_FUNCTION(ocisetprefetch);
-PHP_FUNCTION(ocipasswordchange);
+PHP_FUNCTION(oci_lob_is_equal);
+PHP_FUNCTION(oci_lob_rewind);
+PHP_FUNCTION(oci_lob_read);
+PHP_FUNCTION(oci_lob_eof);
+PHP_FUNCTION(oci_lob_seek);
+PHP_FUNCTION(oci_lob_size);
 #ifdef HAVE_OCI8_TEMP_LOB
-PHP_FUNCTION(ociwritetemporarylob);
-PHP_FUNCTION(ocicloselob);
+PHP_FUNCTION(oci_lob_write_temporary);
+PHP_FUNCTION(oci_lob_close);
 #endif
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
-PHP_FUNCTION(ocinewcollection);
-PHP_FUNCTION(ocifreecollection);
-PHP_FUNCTION(ocicollappend);
-PHP_FUNCTION(ocicollgetelem);
-PHP_FUNCTION(ocicollassignelem);
-PHP_FUNCTION(ocicollassign);
-PHP_FUNCTION(ocicollsize);
-PHP_FUNCTION(ocicollmax);
-PHP_FUNCTION(ocicolltrim);
+PHP_FUNCTION(oci_new_collection);
+PHP_FUNCTION(oci_free_collection);
+PHP_FUNCTION(oci_collection_append);
+PHP_FUNCTION(oci_collection_element_get);
+PHP_FUNCTION(oci_collection_element_assign);
+PHP_FUNCTION(oci_collection_assign);
+PHP_FUNCTION(oci_collection_size);
+PHP_FUNCTION(oci_collection_max);
+PHP_FUNCTION(oci_collection_trim);
 #endif
 
 #define OCI_GET_STMT(statement,value) \
@@ -363,111 +363,157 @@ PHP_FUNCTION(ocicolltrim);
 #define OCI_FETCHSTATEMENT_BY           (OCI_FETCHSTATEMENT_BY_COLUMN | OCI_FETCHSTATEMENT_BY_ROW)
 
 static zend_function_entry php_oci_functions[] = {
-	PHP_FE(ocidefinebyname,        third_arg_force_ref)
-	PHP_FE(ocibindbyname,          third_arg_force_ref)
-	PHP_FE(ocicolumnisnull,        NULL)
-	PHP_FE(ocicolumnname,          NULL)
-	PHP_FE(ocicolumnsize,          NULL)
-	PHP_FE(ocicolumnscale,         NULL)
-	PHP_FE(ocicolumnprecision,     NULL)
-	PHP_FE(ocicolumntype,          NULL)
-	PHP_FE(ocicolumntyperaw,       NULL)
-	PHP_FE(ociexecute,             NULL)
-	PHP_FE(ocicancel,              NULL)
-	PHP_FE(ocifetch,               NULL)
-	PHP_FE(ocifetchinto,           second_arg_force_ref)
-	PHP_FE(ocifetchstatement,      second_arg_force_ref)
-	PHP_FE(ocifreestatement,       NULL)
-	PHP_FE(ociinternaldebug,       NULL)
-	PHP_FE(ocinumcols,             NULL)
-	PHP_FE(ociparse,               NULL)
-	PHP_FE(ocinewcursor,           NULL)
-	PHP_FE(ociresult,              NULL)
-	PHP_FE(ociserverversion,       NULL)
-	PHP_FE(ocistatementtype,       NULL)
-	PHP_FE(ocirowcount,            NULL)
-	PHP_FE(ocilogoff,              NULL)
-	PHP_FE(ocilogon,               NULL)
-	PHP_FE(ocinlogon,              NULL)
-	PHP_FE(ociplogon,              NULL)
-	PHP_FE(ocierror,               NULL)
-	PHP_FE(ocifreedesc,            NULL)
-	PHP_FE(ocisavelob,             NULL)
-	PHP_FE(ocisavelobfile,         NULL)
-	PHP_FE(ocilobgetlength,        NULL)	
-	PHP_FE(ociloadlob,             NULL)
-	PHP_FE(ocireadlob,             NULL)
-	PHP_FE(ocieoflob,              NULL)	
-	PHP_FE(ocitelllob,             NULL)
-	PHP_FE(ocitruncatelob,         NULL)
-	PHP_FE(ocieraselob,            NULL)
-	PHP_FE(ociflushlob,            NULL)
-	PHP_FE(ocisetbufferinglob,     NULL)
-	PHP_FE(ocigetbufferinglob,     NULL)
-	PHP_FE(ociisequallob,		   NULL)
-	PHP_FE(ocirewindlob,           NULL)
-	PHP_FE(ociwritelob,            NULL)
-	PHP_FE(ociappendlob,           NULL)
-	PHP_FE(ocicopylob,             NULL)
-	PHP_FE(ociwritelobtofile,      NULL)
-	PHP_FE(ocicommit,              NULL)
-	PHP_FE(ocirollback,            NULL)
-	PHP_FE(ocinewdescriptor,       NULL)
-	PHP_FE(ocisetprefetch,         NULL)
-	PHP_FE(ocipasswordchange,      NULL)
+	PHP_FE(oci_define_by_name,          third_arg_force_ref)
+	PHP_FE(oci_bind_by_name,            third_arg_force_ref)
+	PHP_FE(oci_field_is_null,           NULL)
+	PHP_FE(oci_field_name,              NULL)
+	PHP_FE(oci_field_size,              NULL)
+	PHP_FE(oci_field_scale,             NULL)
+	PHP_FE(oci_field_precision,         NULL)
+	PHP_FE(oci_field_type,              NULL)
+	PHP_FE(oci_field_type_raw,          NULL)
+	PHP_FE(oci_execute,                 NULL)
+	PHP_FE(oci_cancel,                  NULL)
+	PHP_FE(oci_fetch,                   NULL)
+	PHP_FE(ocifetchinto,                second_arg_force_ref)
+	PHP_FE(oci_fetch_all,               second_arg_force_ref)
+	PHP_FE(oci_free_statement,          NULL)
+	PHP_FE(oci_internal_debug,          NULL)
+	PHP_FE(oci_num_fields,              NULL)
+	PHP_FE(oci_parse,                   NULL)
+	PHP_FE(oci_new_cursor,              NULL)
+	PHP_FE(oci_result,                  NULL)
+	PHP_FE(oci_server_version,          NULL)
+	PHP_FE(oci_statement_type,          NULL)
+	PHP_FE(oci_num_rows,                NULL)
+	PHP_FE(oci_close,                   NULL)
+	PHP_FE(oci_connect,                 NULL)
+	PHP_FE(oci_new_connect,             NULL)
+	PHP_FE(oci_pconnect,                NULL)
+	PHP_FE(oci_error,                   NULL)
+	PHP_FE(oci_free_descriptor,         NULL)
+	PHP_FE(oci_lob_save,                NULL)
+	PHP_FE(oci_lob_import,              NULL)
+	PHP_FE(oci_lob_size,                NULL)	
+	PHP_FE(oci_lob_load,                NULL)
+	PHP_FE(oci_lob_read,                NULL)
+	PHP_FE(oci_lob_eof,                 NULL)	
+	PHP_FE(oci_lob_tell,                NULL)
+	PHP_FE(oci_lob_truncate,            NULL)
+	PHP_FE(oci_lob_erase,               NULL)
+	PHP_FE(oci_lob_flush,               NULL)
+	PHP_FE(ocisetbufferinglob,          NULL)
+	PHP_FE(ocigetbufferinglob,          NULL)
+	PHP_FE(oci_lob_is_equal,		    NULL)
+	PHP_FE(oci_lob_rewind,              NULL)
+	PHP_FE(oci_lob_write,               NULL)
+	PHP_FE(oci_lob_append,              NULL)
+	PHP_FE(oci_lob_copy,                NULL)
+	PHP_FE(oci_lob_export,              NULL)
+	PHP_FE(oci_commit,                  NULL)
+	PHP_FE(oci_rollback,                NULL)
+	PHP_FE(oci_new_descriptor,          NULL)
+	PHP_FE(oci_set_prefetch,            NULL)
+	PHP_FE(oci_password_change,         NULL)
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
-	PHP_FE(ocifreecollection,      NULL)
-	PHP_FE(ocicollappend,          NULL)
-	PHP_FE(ocicollgetelem,         NULL)
-	PHP_FE(ocicollassignelem,      NULL)
-	PHP_FE(ocicollassign,          NULL)
-	PHP_FE(ocicollsize,            NULL)
-	PHP_FE(ocicollmax,             NULL)
-	PHP_FE(ocicolltrim,            NULL)
-	PHP_FE(ocinewcollection,       NULL)
+	PHP_FE(oci_free_collection,         NULL)
+	PHP_FE(oci_collection_append,       NULL)
+	PHP_FE(oci_collection_element_get,      NULL)
+	PHP_FE(oci_collection_element_assign,   NULL)
+	PHP_FE(oci_collection_assign,       NULL)
+	PHP_FE(oci_collection_size,         NULL)
+	PHP_FE(oci_collection_max,          NULL)
+	PHP_FE(oci_collection_trim,         NULL)
+	PHP_FE(oci_new_collection,          NULL)
 #endif
 
-	PHP_FALIAS(ocifreecursor,ocifreestatement,NULL)
-
-	{NULL,NULL,NULL}
+	PHP_FALIAS(ocifreecursor,       oci_free_statement,       NULL)
+    PHP_FALIAS(ocibindbyname,       oci_bind_by_name,       third_arg_force_ref)
+    PHP_FALIAS(ocidefinebyname,     oci_define_by_name,     third_arg_force_ref)
+    PHP_FALIAS(ocicolumnisnull,     oci_field_is_null,      NULL)
+    PHP_FALIAS(ocicolumnname,       oci_field_name,         NULL)
+    PHP_FALIAS(ocicolumnsize,       oci_field_size,         NULL)
+    PHP_FALIAS(ocicolumnscale,      oci_field_scale,        NULL)
+    PHP_FALIAS(ocicolumnprecision,  oci_field_precision,    NULL)
+    PHP_FALIAS(ocicolumntype,       oci_field_type,         NULL)
+    PHP_FALIAS(ocicolumntyperaw,    oci_field_type_raw,     NULL)
+    PHP_FALIAS(ociexecute,          oci_execute,            NULL)
+    PHP_FALIAS(ocicancel,           oci_cancel,             NULL)
+    PHP_FALIAS(ocifetch,            oci_fetch,              NULL)
+    PHP_FALIAS(ocifetchstatement,   oci_fetch_all,          second_arg_force_ref)
+    PHP_FALIAS(ocifreestatement,    oci_free_statement,     NULL)
+    PHP_FALIAS(ociinternaldebug,    oci_internal_debug,     NULL)
+    PHP_FALIAS(ocinumcols,          oci_num_fields,         NULL)
+    PHP_FALIAS(ociparse,            oci_parse,              NULL)
+    PHP_FALIAS(ocinewcursor,        oci_new_cursor,         NULL)
+    PHP_FALIAS(ociresult,           oci_result,             NULL)
+    PHP_FALIAS(ociserverversion,    oci_server_version,     NULL)
+    PHP_FALIAS(ocistatementtype,    oci_statement_type,     NULL)
+    PHP_FALIAS(ocirowcount,         oci_num_rows,           NULL)
+    PHP_FALIAS(ocilogoff,           oci_close,              NULL)
+    PHP_FALIAS(ocilogon,            oci_connect,            NULL)
+    PHP_FALIAS(ocinlogon,           oci_new_connect,        NULL)
+    PHP_FALIAS(ociplogon,           oci_pconnect,           NULL)
+    PHP_FALIAS(ocierror,            oci_error,              NULL)
+    PHP_FALIAS(ocifreedesc,         oci_free_descriptor,    NULL)
+    PHP_FALIAS(ocisavelob,          oci_lob_save,           NULL)
+    PHP_FALIAS(ocisavelobfile,      oci_lob_import,         NULL)
+    PHP_FALIAS(ociwritelobtofile,   oci_lob_export,         NULL)
+    PHP_FALIAS(ociloadlob,          oci_lob_load,           NULL)
+    PHP_FALIAS(ocicommit,           oci_commit,             NULL)
+    PHP_FALIAS(ocirollback,         oci_rollback,           NULL)
+    PHP_FALIAS(ocinewdescriptor,    oci_new_descriptor,     NULL)
+    PHP_FALIAS(ocisetprefetch,      oci_set_prefetch,       NULL)
+    PHP_FALIAS(ocipasswordchange,   oci_password_change,    NULL)
+#ifdef PHP_OCI8_HAVE_COLLECTIONS
+    PHP_FALIAS(ocifreecollection,   oci_free_collection,    NULL)
+    PHP_FALIAS(ocinewcollection,    oci_new_collection,     NULL)
+    PHP_FALIAS(ocicollappend,       oci_collection_append,  NULL)
+    PHP_FALIAS(ocicollgetelem,      oci_collection_element_get,     NULL)
+    PHP_FALIAS(ocicollassignelem,   oci_collection_element_assign,  NULL)
+    PHP_FALIAS(ocicollsize,         oci_collection_size,    NULL)
+    PHP_FALIAS(ocicollmax,          oci_collection_max,     NULL)
+    PHP_FALIAS(ocicolltrim,         oci_collection_trim,    NULL)
+#endif
+    {NULL,NULL,NULL}
 };
 
 static zend_function_entry php_oci_lob_class_functions[] = {
-	PHP_FALIAS(load,        ociloadlob,             NULL)
-	PHP_FALIAS(tell,        ocitelllob,             NULL)
-	PHP_FALIAS(truncate,    ocitruncatelob,         NULL)
-	PHP_FALIAS(erase,       ocieraselob,            NULL)
-	PHP_FALIAS(flush,       ociflushlob,            NULL)
+	PHP_FALIAS(load,        oci_lob_load,           NULL)
+	PHP_FALIAS(tell,        oci_lob_tell,           NULL)
+	PHP_FALIAS(truncate,    oci_lob_truncate,       NULL)
+	PHP_FALIAS(erase,       oci_lob_erase,          NULL)
+	PHP_FALIAS(flush,       oci_lob_flush,          NULL)
 	PHP_FALIAS(setbuffering,ocisetbufferinglob,     NULL)
 	PHP_FALIAS(getbuffering,ocigetbufferinglob,     NULL)
-	PHP_FALIAS(rewind,      ocirewindlob,			NULL)
-	PHP_FALIAS(read,        ocireadlob,             NULL)
-	PHP_FALIAS(eof,         ocieoflob,              NULL)
-	PHP_FALIAS(seek,        ociseeklob,             NULL)	
-	PHP_FALIAS(write,       ociwritelob,            NULL)
-	PHP_FALIAS(append,      ociappendlob,           NULL)
-	PHP_FALIAS(getlength,   ocilobgetlength,        NULL)
-	PHP_FALIAS(writetofile, ociwritelobtofile,      NULL)
+	PHP_FALIAS(rewind,      oci_lob_rewind,			NULL)
+	PHP_FALIAS(read,        oci_lob_read,           NULL)
+	PHP_FALIAS(eof,         oci_lob_eof,            NULL)
+	PHP_FALIAS(seek,        oci_lob_seek,           NULL)	
+	PHP_FALIAS(write,       oci_lob_write,          NULL)
+	PHP_FALIAS(append,      oci_lob_append,         NULL)
+	PHP_FALIAS(size,        oci_lob_size,           NULL)
+	PHP_FALIAS(writetofile, oci_lob_export,         NULL)
 #ifdef HAVE_OCI8_TEMP_LOB
-	PHP_FALIAS(writetemporary, ociwritetemporarylob,NULL)
-	PHP_FALIAS(close,       ocicloselob,            NULL)
+	PHP_FALIAS(writetemporary,  oci_lob_write_temporary,    NULL)
+	PHP_FALIAS(close,           oci_lob_close,              NULL)
 #endif
-	PHP_FALIAS(save,        ocisavelob,             NULL)
-	PHP_FALIAS(savefile,    ocisavelobfile,         NULL)
-	PHP_FALIAS(free,        ocifreedesc,            NULL)
+	PHP_FALIAS(save,        oci_lob_save,           NULL)
+	PHP_FALIAS(savefile,    oci_lob_import,         NULL)
+	PHP_FALIAS(free,        oci_free_descriptor,    NULL)
 	{NULL,NULL,NULL}
 };
 
 #ifdef PHP_OCI8_HAVE_COLLECTIONS
 static zend_function_entry php_oci_coll_class_functions[] = {
-	PHP_FALIAS(append,        ocicollappend,        NULL)
-	PHP_FALIAS(getelem,       ocicollgetelem,       NULL)
-	PHP_FALIAS(assignelem,    ocicollassignelem,    NULL)
-	PHP_FALIAS(assign,        ocicollassign,        NULL)
-	PHP_FALIAS(size,          ocicollsize,          NULL)
-	PHP_FALIAS(max,           ocicollmax,           NULL)
-	PHP_FALIAS(trim,          ocicolltrim,          NULL)
-	PHP_FALIAS(free,          ocifreecollection,    NULL)
+	PHP_FALIAS(append,        oci_collection_append,            NULL)
+	PHP_FALIAS(getelem,       oci_collection_element_get,       NULL)
+	PHP_FALIAS(assignelem,    oci_collection_element_assign,    NULL)
+	PHP_FALIAS(assign,        oci_collection_assign,            NULL)
+	PHP_FALIAS(size,          oci_collection_size,              NULL)
+	PHP_FALIAS(max,           oci_collection_max,               NULL)
+	PHP_FALIAS(trim,          oci_collection_trim,              NULL)
+	PHP_FALIAS(free,          oci_free_collection,              NULL)
 	{NULL,NULL,NULL}
 };
 #endif
@@ -3132,12 +3178,12 @@ CLEANUP:
 
 /************************* EXTENSION FUNCTIONS *************************/
 
-/* {{{ proto bool ocidefinebyname(resource stmt, string name, mixed &var [, int type])
+/* {{{ proto bool oci_define_by_name(resource stmt, string name, mixed &var [, int type])
    Define a PHP variable to an Oracle column by name */
 /* if you want to define a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE defining!!!
  */
 
-PHP_FUNCTION(ocidefinebyname)
+PHP_FUNCTION(oci_define_by_name)
 {
 	zval **stmt, **name, **var, **type;
 	oci_statement *statement;
@@ -3191,12 +3237,12 @@ PHP_FUNCTION(ocidefinebyname)
 
 /* }}} */
 
-/* {{{ proto bool ocibindbyname(resource stmt, string name, mixed &var, [, int maxlength [, int type]])
+/* {{{ proto bool oci_bind_by_name(resource stmt, string name, mixed &var, [, int maxlength [, int type]])
    Bind a PHP variable to an Oracle placeholder by name */
 /* if you want to bind a LOB/CLOB etc make sure you allocate it via OCINewDescriptor BEFORE binding!!!
  */
 
-PHP_FUNCTION(ocibindbyname)
+PHP_FUNCTION(oci_bind_by_name)
 {
 	zval **stmt, **name, **var, **maxlen, **type;
 	oci_statement *statement;
@@ -3369,10 +3415,10 @@ break;
 
 /* }}} */
 
-/* {{{ proto bool ocifreedesc()
+/* {{{ proto bool oci_free_descriptor()
    Deletes large object description */
 
-PHP_FUNCTION(ocifreedesc)
+PHP_FUNCTION(oci_free_descriptor)
 {
 	zval *id;
 	int inx;
@@ -3387,16 +3433,16 @@ PHP_FUNCTION(ocifreedesc)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIFreeDesc() should not be called like this. Use $somelob->free() to free a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_free_descriptor() should not be called like this. Use $somelob->free() to free a LOB");
 
   	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto bool ocisavelob()
+/* {{{ proto bool oci_lob_save()
    Saves a large object */
 
-PHP_FUNCTION(ocisavelob)
+PHP_FUNCTION(oci_lob_save)
 {
 	zval *id, **arg,**oarg;
 	OCILobLocator *mylob;
@@ -3484,10 +3530,10 @@ PHP_FUNCTION(ocisavelob)
 
 /* }}} */
 
-/* {{{ proto bool ocisavelobfile()
-   Saves a large object file */
+/* {{{ proto bool oci_lob_import()
+   Saves a large object to file */
 
-PHP_FUNCTION(ocisavelobfile)
+PHP_FUNCTION(oci_lob_import)
 {
 	zval *id, **arg;
 	OCILobLocator *mylob;
@@ -3565,10 +3611,10 @@ PHP_FUNCTION(ocisavelobfile)
 
 /* }}} */
 
-/* {{{ proto string ociloadlob()
+/* {{{ proto string oci_lob_load()
    Loads a large object */
 
-PHP_FUNCTION(ociloadlob)
+PHP_FUNCTION(oci_lob_load)
 {
 	zval *id;
 	oci_descriptor *descr;
@@ -3589,16 +3635,16 @@ PHP_FUNCTION(ociloadlob)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCILoadLob() should not be called like this. Use $somelob->load() to load a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_load() should not be called like this. Use $somelob->load() to load a LOB");
 
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto string ocireadlob()
+/* {{{ proto string oci_lob_read()
    Reads particular part of a large object */
 
-PHP_FUNCTION(ocireadlob)
+PHP_FUNCTION(oci_lob_read)
 {
 	zval *id;
 	zval **len;
@@ -3625,15 +3671,15 @@ PHP_FUNCTION(ocireadlob)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIReadLob() should not be called like this. Use $somelob->read($len) to read a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_read() should not be called like this. Use $somelob->read($len) to read a LOB");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto bool ocieoflob()
+/* {{{ proto bool oci_lob_eof()
    Checks if EOF is reached */
 
-PHP_FUNCTION(ocieoflob)
+PHP_FUNCTION(oci_lob_eof)
 {
 	zval *id;
 	oci_descriptor *descr;
@@ -3656,15 +3702,15 @@ PHP_FUNCTION(ocieoflob)
 	    RETURN_FALSE;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIEofLob() should not be called like this. Use $somelob->eof() to check if end of LOB is reached");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_eof() should not be called like this. Use $somelob->eof() to check if end of LOB is reached");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto int ocitelllob()
+/* {{{ proto int oci_lob_tell()
    Tells LOB pointer position */
 
-PHP_FUNCTION(ocitelllob)
+PHP_FUNCTION(oci_lob_tell)
 {
 	zval *id;
 	oci_descriptor *descr;
@@ -3677,15 +3723,15 @@ PHP_FUNCTION(ocitelllob)
 		RETURN_LONG(descr->lob_current_position);	
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCITellLob() should not be called like this. Use $somelob->tell() to get current position of LOB pointer");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_tell() should not be called like this. Use $somelob->tell() to get current position of LOB pointer");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto bool ocirewindlob()
+/* {{{ proto bool oci_lob_rewind()
    Rewind pointer of a LOB */
 
-PHP_FUNCTION(ocirewindlob)
+PHP_FUNCTION(oci_lob_rewind)
 {
 	zval *id;
 	oci_descriptor *descr;
@@ -3699,15 +3745,15 @@ PHP_FUNCTION(ocirewindlob)
 		RETURN_TRUE;
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIRewindLob() should not be called like this. Use $somelob->rewind() to set current position of LOB pointer to beginning");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_rewind() should not be called like this. Use $somelob->rewind() to set current position of LOB pointer to beginning");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto bool ociseeklob()
+/* {{{ proto bool oci_lob_seek()
    Moves the pointer of a LOB */
 
-PHP_FUNCTION(ociseeklob)
+PHP_FUNCTION(oci_lob_seek)
 {
 	zval *id;
 	zval **arg1, **arg2;
@@ -3761,15 +3807,15 @@ PHP_FUNCTION(ociseeklob)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCISeekLob() should not be called like this. Use $somelob->seek($offset) to move pointer");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_seek() should not be called like this. Use $somelob->seek($offset) to move pointer");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto int ocilobgetlength()
+/* {{{ proto int oci_lob_size()
    Returns size of a large object */
 
-PHP_FUNCTION(ocilobgetlength)
+PHP_FUNCTION(oci_lob_size)
 {
 	zval *id;
 	oci_descriptor *descr;
@@ -3789,15 +3835,15 @@ PHP_FUNCTION(ocilobgetlength)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCILobGetLength() should not be called like this. Use $somelob->getLength() to get size of a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_size() should not be called like this. Use $somelob->size() to get size of a LOB");
 	RETURN_FALSE;
 }
 /* }}} */
 
-/* {{{ proto int ociwritelob()
+/* {{{ proto int oci_lob_write()
    Writes data to current position of a LOB */
 
-PHP_FUNCTION(ociwritelob)
+PHP_FUNCTION(oci_lob_write)
 {
 	zval *id, **data,**length;
 	OCILobLocator *mylob;
@@ -3858,7 +3904,7 @@ PHP_FUNCTION(ociwritelob)
 					(ub2) 0,
 					(ub1) SQLCS_IMPLICIT));
 
-		oci_debug("OCIsavedesc: size=%d offset=%d",loblen,descr->lob_current_position);
+		oci_debug("OCILobWrite: size=%d offset=%d",loblen,descr->lob_current_position);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobWrite", connection->error);
@@ -3879,16 +3925,16 @@ PHP_FUNCTION(ociwritelob)
 		RETURN_LONG(loblen);
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIWriteLob() should not be called like this. Use $somelob->write($data,$len) to write to a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_write() should not be called like this. Use $somelob->write($data,$len) to write to a LOB");
 	RETURN_FALSE;
 }
 
 /* }}} */
 
-/* {{{ proto bool ociappendlob()
+/* {{{ proto bool oci_lob_append()
    Appends data from a LOB to another LOB */
 
-PHP_FUNCTION(ociappendlob)
+PHP_FUNCTION(oci_lob_append)
 {
 	zval *id, **arg;
 	OCILobLocator *mylob,*my_fromlob;
@@ -3954,16 +4000,16 @@ PHP_FUNCTION(ociappendlob)
 	 	RETURN_TRUE;
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIAppendLob() should not be called like this. Use $somelob->append($LOB_from) to append data from a LOB to another LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_append() should not be called like this. Use $somelob->append($LOB_from) to append data from a LOB to another LOB");
 	RETURN_FALSE;
 }
 
 /* }}} */
 
-/* {{{ proto bool ocitruncatelob()
+/* {{{ proto bool oci_lob_truncate()
    Truncates a LOB */
 
-PHP_FUNCTION(ocitruncatelob)
+PHP_FUNCTION(oci_lob_truncate)
 {
 	zval *id, **length;
 	OCILobLocator *mylob;
@@ -4011,7 +4057,7 @@ PHP_FUNCTION(ocitruncatelob)
 					mylob,
 					trim_length));
 
-		oci_debug("OCIsavedesc: trim_length=%d",trim_length);
+		oci_debug("OCILobTrim: trim_length=%d",trim_length);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobTrim", connection->error);
@@ -4023,16 +4069,16 @@ PHP_FUNCTION(ocitruncatelob)
 		RETURN_TRUE;
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCITruncateLob() should not be called like this. Use $somelob->truncate($length) to truncate a LOB to a specified length");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_truncate() should not be called like this. Use $somelob->truncate($length) to truncate a LOB to a specified length");
 	RETURN_FALSE;
 }
 
 /* }}} */
 
-/* {{{ proto int ocieraselob()
+/* {{{ proto int oci_lob_erase()
    Erases a specified portion of the internal LOB, starting at a specified offset */
 
-PHP_FUNCTION(ocieraselob)
+PHP_FUNCTION(oci_lob_erase)
 {
 	zval *id, **length, **offset;
 	OCILobLocator *mylob;
@@ -4090,7 +4136,7 @@ PHP_FUNCTION(ocieraselob)
 					&erase_length,
 					erase_offset+1));
 
-		oci_debug("OCIsavedesc: erase_length=%d, erase_offset=%d",erase_length,erase_offset);
+		oci_debug("OCILobErase: erase_length=%d, erase_offset=%d",erase_length,erase_offset);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobErase", connection->error);
@@ -4101,16 +4147,16 @@ PHP_FUNCTION(ocieraselob)
 		RETURN_LONG(erase_length);
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIEraseLob() should not be called like this. Use $somelob->erase($offset, $length) to erase specified part of LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_erase() should not be called like this. Use $somelob->erase($offset, $length) to erase specified part of LOB");
 	RETURN_FALSE;
 }
 
 /* }}} */
 
-/* {{{ proto bool ociflushlob()
+/* {{{ proto bool oci_lob_flush()
    Flushes the LOB buffer */
 
-PHP_FUNCTION(ociflushlob)
+PHP_FUNCTION(oci_lob_flush)
 {
 	zval *id, **flag;
 	OCILobLocator *mylob;
@@ -4157,7 +4203,7 @@ PHP_FUNCTION(ociflushlob)
 					mylob,
 					flush_flag));
 
-		oci_debug("OCIsavedesc: flush_flag=%d",flush_flag);
+		oci_debug("OCILobFlushBuffer: flush_flag=%d",flush_flag);
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCILobFlushBuffer", connection->error);
@@ -4168,7 +4214,7 @@ PHP_FUNCTION(ociflushlob)
 		RETURN_TRUE;
 	}
 	
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCIFlushLob() should not be called like this. Use $somelob->flush() to flush LOB buffer");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_flush() should not be called like this. Use $somelob->flush() to flush LOB buffer");
 	RETURN_FALSE;
 }
 
@@ -4296,10 +4342,10 @@ PHP_FUNCTION(ocigetbufferinglob)
 
 /* }}} */
 
-/* {{{ proto bool ocicopylob()
+/* {{{ proto bool oci_lob_copy()
    Copies data from a LOB to another LOB */
 
-PHP_FUNCTION(ocicopylob)
+PHP_FUNCTION(oci_lob_copy)
 {
 	zval **arg1, **arg2, **arg3;
 	OCILobLocator *mylob,*my_fromlob;
@@ -4369,10 +4415,10 @@ PHP_FUNCTION(ocicopylob)
 
 /* }}} */
 
-/* {{{ proto bool ociisequallob()
+/* {{{ proto bool oci_lob_is_equal()
     Tests to see if two LOB/FILE locators are equal */
 
-PHP_FUNCTION(ociisequallob)
+PHP_FUNCTION(oci_lob_is_equal)
 {
 	zval **arg1, **arg2;
 	OCILobLocator *first_lob,*second_lob;
@@ -4425,10 +4471,10 @@ PHP_FUNCTION(ociisequallob)
 
 /* }}} */
 
-/* {{{ proto bool ociwritelobtofile([string filename [, int start [, int length]]])
+/* {{{ proto bool oci_lob_export([string filename [, int start [, int length]]])
    Writes a large object into a file */
 
-PHP_FUNCTION(ociwritelobtofile)
+PHP_FUNCTION(oci_lob_export)
 {
 	zval *id, **zfilename, **zstart, **zlength;
 	char *filename = NULL;
@@ -4611,10 +4657,10 @@ bail:
 /* }}} */
 
 #ifdef HAVE_OCI8_TEMP_LOB
-/* {{{ proto bool ociwritetemporarylob(string var [, int lob_type])
+/* {{{ proto bool oci_lob_write_temporary(string var [, int lob_type])
    Writes temporary blob */
 
-PHP_FUNCTION(ociwritetemporarylob)
+PHP_FUNCTION(oci_lob_write_temporary)
 {
 	zval *id, *var;
 	OCILobLocator *mylob;
@@ -4708,10 +4754,10 @@ PHP_FUNCTION(ociwritetemporarylob)
 
 /* }}} */
 
-/* {{{ proto bool ocicloselob()
+/* {{{ proto bool oci_lob_close()
    Closes lob descriptor */
 
-PHP_FUNCTION(ocicloselob)
+PHP_FUNCTION(oci_lob_close)
 {
 	zval *id;
 	int inx;
@@ -4768,7 +4814,7 @@ PHP_FUNCTION(ocicloselob)
 		}
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "OCICloselob() should not be called like this. Use $somelob->close() to close a LOB");
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "oci_lob_close() should not be called like this. Use $somelob->close() to close a LOB");
 
 	RETURN_FALSE;
 }
@@ -4776,10 +4822,10 @@ PHP_FUNCTION(ocicloselob)
 /* }}} */
 #endif 
 
-/* {{{ proto object ocinewdescriptor(resource connection [, int type])
+/* {{{ proto object oci_new_descriptor(resource connection [, int type])
    Initialize a new empty descriptor LOB/FILE (LOB is default) */
 
-PHP_FUNCTION(ocinewdescriptor)
+PHP_FUNCTION(oci_new_descriptor)
 {
 	zval **conn, **type;
 	oci_connection *connection;
@@ -4809,10 +4855,10 @@ PHP_FUNCTION(ocinewdescriptor)
 
 /* }}} */
 
-/* {{{ proto bool ocirollback(resource conn)
+/* {{{ proto bool oci_rollback(resource conn)
    Rollback the current context */
 
-PHP_FUNCTION(ocirollback)
+PHP_FUNCTION(oci_rollback)
 {
 	zval **conn;
 	oci_connection *connection;
@@ -4845,10 +4891,10 @@ PHP_FUNCTION(ocirollback)
 
 /* }}} */
 
-/* {{{ proto bool ocicommit(resource conn)
+/* {{{ proto bool oci_commit(resource conn)
    Commit the current context */
 
-PHP_FUNCTION(ocicommit)
+PHP_FUNCTION(oci_commit)
 {
 	zval **conn;
 	oci_connection *connection;
@@ -4881,10 +4927,10 @@ PHP_FUNCTION(ocicommit)
 
 /* }}} */
 
-/* {{{ proto string ocicolumnname(resource stmt, int col)
+/* {{{ proto string oci_field_name(resource stmt, int col)
    Tell the name of a column */
 
-PHP_FUNCTION(ocicolumnname)
+PHP_FUNCTION(oci_field_name)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -4906,10 +4952,10 @@ PHP_FUNCTION(ocicolumnname)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnsize(resource stmt, int col)
+/* {{{ proto int oci_field_size(resource stmt, int col)
    Tell the maximum data size of a column */
 
-PHP_FUNCTION(ocicolumnsize)
+PHP_FUNCTION(oci_field_size)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -4939,10 +4985,10 @@ PHP_FUNCTION(ocicolumnsize)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnscale(resource stmt, int col)
+/* {{{ proto int oci_field_scale(resource stmt, int col)
    Tell the scale of a column */
 
-PHP_FUNCTION(ocicolumnscale)
+PHP_FUNCTION(oci_field_scale)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -4963,10 +5009,10 @@ PHP_FUNCTION(ocicolumnscale)
 
 /* }}} */
 
-/* {{{ proto int ocicolumnprecision(resource stmt, int col)
+/* {{{ proto int oci_field_precision(resource stmt, int col)
    Tell the precision of a column */
 
-PHP_FUNCTION(ocicolumnprecision)
+PHP_FUNCTION(oci_field_precision)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -4987,10 +5033,10 @@ PHP_FUNCTION(ocicolumnprecision)
 
 /* }}} */
 
-/* {{{ proto mixed ocicolumntype(resource stmt, int col)
+/* {{{ proto mixed oci_field_type(resource stmt, int col)
    Tell the data type of a column */
 
-PHP_FUNCTION(ocicolumntype)
+PHP_FUNCTION(oci_field_type)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -5060,10 +5106,10 @@ PHP_FUNCTION(ocicolumntype)
 
 /* }}} */
 
-/* {{{ proto mixed ocicolumntyperaw(resource stmt, int col)
+/* {{{ proto mixed oci_field_type_raw(resource stmt, int col)
    Tell the raw oracle data type of a column */
 
-PHP_FUNCTION(ocicolumntyperaw)
+PHP_FUNCTION(oci_field_type_raw)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -5084,10 +5130,10 @@ PHP_FUNCTION(ocicolumntyperaw)
 
 /* }}} */
 
-/* {{{ proto bool ocicolumnisnull(resource stmt, int col)
+/* {{{ proto bool oci_field_is_null(resource stmt, int col)
    Tell whether a column is NULL */
 
-PHP_FUNCTION(ocicolumnisnull)
+PHP_FUNCTION(oci_field_is_null)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -5112,12 +5158,12 @@ PHP_FUNCTION(ocicolumnisnull)
 
 /* }}} */
 
-/* {{{ proto void ociinternaldebug(int onoff)
+/* {{{ proto void oci_internal_debug(int onoff)
    Toggle internal debugging output for the OCI extension */
 /* Disables or enables the internal debug output.
  * By default it is disabled.
  */
-PHP_FUNCTION(ociinternaldebug)
+PHP_FUNCTION(oci_internal_debug)
 {
 	zval **arg;
 
@@ -5131,10 +5177,10 @@ PHP_FUNCTION(ociinternaldebug)
 
 /* }}} */
 
-/* {{{ proto bool ociexecute(resource stmt [, int mode])
+/* {{{ proto bool oci_execute(resource stmt [, int mode])
    Execute a parsed statement */
 
-PHP_FUNCTION(ociexecute)
+PHP_FUNCTION(oci_execute)
 {
 	zval **stmt,**mode;
 	oci_statement *statement;
@@ -5160,10 +5206,10 @@ PHP_FUNCTION(ociexecute)
 
 /* }}} */
 
-/* {{{ proto bool ocicancel(resource stmt)
+/* {{{ proto bool oci_cancel(resource stmt)
    Cancel reading from a cursor */
 
-PHP_FUNCTION(ocicancel)
+PHP_FUNCTION(oci_cancel)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5183,10 +5229,10 @@ PHP_FUNCTION(ocicancel)
 
 /* }}} */
 
-/* {{{ proto bool ocifetch(resource stmt)
+/* {{{ proto bool oci_fetch(resource stmt)
    Prepare a new row of data for reading */
 
-PHP_FUNCTION(ocifetch)
+PHP_FUNCTION(oci_fetch)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5272,9 +5318,9 @@ PHP_FUNCTION(ocifetchinto)
 
 /* }}} */
 
-/* {{{ proto int ocifetchstatement(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
+/* {{{ proto int oci_fetch_all(resource stmt, array &output[, int skip[, int maxrows[, int flags]]])
    Fetch all rows of result data into an array */
-PHP_FUNCTION(ocifetchstatement)
+PHP_FUNCTION(oci_fetch_all)
 {
 	zval **stmt, **array, *element, **zskip, **zmaxrows, **zflags, *tmp;
 	oci_statement *statement;
@@ -5404,10 +5450,10 @@ PHP_FUNCTION(ocifetchstatement)
 
 /* }}} */
 
-/* {{{ proto bool ocifreestatement(resource stmt)
+/* {{{ proto bool oci_free_statement(resource stmt)
    Free all resources associated with a statement */
 
-PHP_FUNCTION(ocifreestatement)
+PHP_FUNCTION(oci_free_statement)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5425,10 +5471,10 @@ PHP_FUNCTION(ocifreestatement)
 
 /* }}} */
 
-/* {{{ proto bool ocilogoff(resource conn)
+/* {{{ proto bool oci_close(resource conn)
    Disconnect from database */
 
-PHP_FUNCTION(ocilogoff)
+PHP_FUNCTION(oci_close)
 {
 #if 0
 	this function does nothing any more. server-connections get automagiclly closed on 
@@ -5461,21 +5507,21 @@ PHP_FUNCTION(ocilogoff)
 
 /* }}} */
 
-/* {{{ proto resource ocinlogon(string user, string pass [, string db])
+/* {{{ proto resource oci_new_connect(string user, string pass [, string db])
    Connect to an Oracle database and log on. returns a new session */
 
 /* Connects to an Oracle 8/9 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(ocinlogon)
+PHP_FUNCTION(oci_new_connect)
 {
 	oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0,1);
 }
 
 /* }}} */
 
-/* {{{ proto resource ocilogon(string user, string pass [, string db])
+/* {{{ proto resource oci_connect(string user, string pass [, string db])
    Connect to an Oracle database and log on. Returns a new session.
  */
 
@@ -5483,31 +5529,31 @@ PHP_FUNCTION(ocinlogon)
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(ocilogon)
+PHP_FUNCTION(oci_connect)
 {
 	oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0,0);
 }
 
 /* }}} */
 
-/* {{{ proto resource ociplogon(string user, string pass [, string db])
+/* {{{ proto resource oci_pconnect(string user, string pass [, string db])
    Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 
 /* Connects to an Oracle 8/9 database and logs on.  If the
  * optional third parameter is not specified, PHP uses the environment
  * variable ORACLE_SID to determine which database to connect to.
  */
-PHP_FUNCTION(ociplogon)
+PHP_FUNCTION(oci_pconnect)
 {
 	oci_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1,0);
 }
 
 /* }}} */
 
-/* {{{ proto array ocierror([resource stmt|conn|global])
+/* {{{ proto array oci_error([resource stmt|conn|global])
    Return the last error of stmt|conn|global. If no error happened returns false. */
 
-PHP_FUNCTION(ocierror)
+PHP_FUNCTION(oci_error)
 {
 	zval **arg;
 	oci_statement *statement;
@@ -5590,10 +5636,10 @@ PHP_FUNCTION(ocierror)
 
 /* }}} */
 
-/* {{{ proto int ocinumcols(resource stmt)
+/* {{{ proto int oci_num_fields(resource stmt)
    Return the number of result columns in a statement */
 
-PHP_FUNCTION(ocinumcols)
+PHP_FUNCTION(oci_num_fields)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5609,10 +5655,10 @@ PHP_FUNCTION(ocinumcols)
 
 /* }}} */
 
-/* {{{ proto resource ociparse(resource conn, string query)
+/* {{{ proto resource oci_parse(resource conn, string query)
    Parse a query and return a statement */
 
-PHP_FUNCTION(ociparse)
+PHP_FUNCTION(oci_parse)
 {
 	zval **conn, **query;
 	oci_connection *connection;
@@ -5637,10 +5683,10 @@ PHP_FUNCTION(ociparse)
 
 /* }}} */
 
-/* {{{ proto bool ocisetprefetch(resource stmt, int prefetch_rows)
+/* {{{ proto bool oci_set_prefetch(resource stmt, int prefetch_rows)
   sets the number of rows to be prefetched on execute to prefetch_rows for stmt */
 
-PHP_FUNCTION(ocisetprefetch)
+PHP_FUNCTION(oci_set_prefetch)
 {
 	zval **stmt, **size;
 	oci_statement *statement;
@@ -5660,10 +5706,10 @@ PHP_FUNCTION(ocisetprefetch)
 
 /* }}} */
 
-/* {{{ proto bool ocipasswordchange(resource conn, string username, string old_password, string new_password)
+/* {{{ proto bool oci_password_change(resource conn, string username, string old_password, string new_password)
   Changes the password of an account*/
 
-PHP_FUNCTION(ocipasswordchange)
+PHP_FUNCTION(oci_password_change)
 {
 	zval **conn, **user_param, **pass_old_param, **pass_new_param;
 	text *user, *pass_old, *pass_new;
@@ -5712,9 +5758,9 @@ PHP_FUNCTION(ocipasswordchange)
 
 /* }}} */
 
-/* {{{ proto resource ocinewcursor(resource conn)
+/* {{{ proto resource oci_new_cursor(resource conn)
    Return a new cursor (Statement-Handle) - use this to bind ref-cursors! */
-PHP_FUNCTION(ocinewcursor)
+PHP_FUNCTION(oci_new_cursor)
 {
 	zval **conn;
 	oci_connection *connection;
@@ -5733,10 +5779,10 @@ PHP_FUNCTION(ocinewcursor)
 
 /* }}} */
 
-/* {{{ proto string ociresult(resource stmt, mixed column)
+/* {{{ proto string oci_result(resource stmt, mixed column)
    Return a single column of result data */
 
-PHP_FUNCTION(ociresult)
+PHP_FUNCTION(oci_result)
 {
 	zval **stmt, **col;
 	oci_statement *statement;
@@ -5759,10 +5805,10 @@ PHP_FUNCTION(ociresult)
 
 /* }}} */
 
-/* {{{ proto string ociserverversion(resource conn)
+/* {{{ proto string oci_server_version(resource conn)
    Return a string containing server version information */
 
-PHP_FUNCTION(ociserverversion)
+PHP_FUNCTION(oci_server_version)
 {
 	oci_connection *connection;
 	zval **conn;
@@ -5792,12 +5838,12 @@ PHP_FUNCTION(ociserverversion)
 
 /* }}} */
 
-/* {{{ proto string ocistatementtype(resource stmt)
+/* {{{ proto string oci_statement_type(resource stmt)
    Return the query type of an OCI statement */
  
 /* XXX it would be better with a general interface to OCIAttrGet() */
 
-PHP_FUNCTION(ocistatementtype)
+PHP_FUNCTION(oci_statement_type)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5857,10 +5903,10 @@ PHP_FUNCTION(ocistatementtype)
 }
 /* }}} */
 
-/* {{{ proto int ocirowcount(resource stmt)
+/* {{{ proto int oci_num_rows(resource stmt)
    Return the row count of an OCI statement */
 
-PHP_FUNCTION(ocirowcount)
+PHP_FUNCTION(oci_num_rows)
 {
 	zval **stmt;
 	oci_statement *statement;
@@ -5909,10 +5955,10 @@ static oci_collection *oci_get_coll(int ind TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto bool ocifreecollection()
+/* {{{ proto bool oci_free_collection()
    Deletes collection object*/
 
-PHP_FUNCTION(ocifreecollection)
+PHP_FUNCTION(oci_free_collection)
 {
 	zval *id;
 	int inx;
@@ -5949,10 +5995,10 @@ PHP_FUNCTION(ocifreecollection)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollappend(string value)
+/* {{{ proto bool oci_collection_append(string value)
    Append an object to the collection */
 
-PHP_FUNCTION(ocicollappend)
+PHP_FUNCTION(oci_collection_append)
 {
 	zval *id, **arg;
 	oci_connection *connection;
@@ -6095,10 +6141,10 @@ PHP_FUNCTION(ocicollappend)
 }
 /* }}} */
 
-/* {{{ proto string ocicollgetelem(int ndx)
+/* {{{ proto string oci_collection_element_get(int ndx)
    Retrieve the value at collection index ndx */
 
-PHP_FUNCTION(ocicollgetelem)
+PHP_FUNCTION(oci_collection_element_get)
 {
 	zval *id,**arg;
 	oci_connection *connection;
@@ -6201,10 +6247,10 @@ PHP_FUNCTION(ocicollgetelem)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollassign(object from)
+/* {{{ proto bool oci_collection_assign(object from)
    Assign a collection from another existing collection */
 
-PHP_FUNCTION(ocicollassign)
+PHP_FUNCTION(oci_collection_assign)
 {
 	zval *id,**from;
 	oci_connection *connection;
@@ -6243,10 +6289,10 @@ PHP_FUNCTION(ocicollassign)
 }
 /* }}} */
 
-/* {{{ proto bool ocicollassignelem(int index, string val)
+/* {{{ proto bool oci_collection_element_assign(int index, string val)
    Assign element val to collection at index ndx */
 
-PHP_FUNCTION(ocicollassignelem)
+PHP_FUNCTION(oci_collection_element_assign)
 {
 	zval *id,**index,**val;
 	oci_connection *connection;
@@ -6406,10 +6452,10 @@ PHP_FUNCTION(ocicollassignelem)
 }
 /* }}} */
 
-/* {{{ proto int ocicollsize()
+/* {{{ proto int oci_collection_size()
    Return the size of a collection */
 
-PHP_FUNCTION(ocicollsize)
+PHP_FUNCTION(oci_collection_size)
 {
 	zval *id;
 	oci_connection *connection;
@@ -6440,10 +6486,10 @@ PHP_FUNCTION(ocicollsize)
 }
 /* }}} */
 
-/* {{{ proto int ocicollmax()
+/* {{{ proto int oci_collection_max()
    Return the max value of a collection.  For a varray this is the maximum length of the array */
 
-PHP_FUNCTION(ocicollmax)
+PHP_FUNCTION(oci_collection_max)
 {
 	zval *id;
 	oci_collection *coll;
@@ -6462,10 +6508,10 @@ PHP_FUNCTION(ocicollmax)
 }
 /* }}} */
 
-/* {{{ proto bool ocicolltrim(int num)
+/* {{{ proto bool oci_collection_trim(int num)
    Trim num elements from the end of a collection */
 
-PHP_FUNCTION(ocicolltrim)
+PHP_FUNCTION(oci_collection_trim)
 {
 	zval *id,**arg;
 	oci_collection *coll;
@@ -6496,10 +6542,10 @@ PHP_FUNCTION(ocicolltrim)
 }
 /* }}} */
 
-/* {{{ proto object ocinewcollection(resource connection, string tdo [, string schema])
+/* {{{ proto object oci_new_collection(resource connection, string tdo [, string schema])
    Initialize a new collection */
 
-PHP_FUNCTION(ocinewcollection)
+PHP_FUNCTION(oci_new_collection)
 {
 	dvoid *dschp1;
 	dvoid *parmp1;
