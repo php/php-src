@@ -1047,9 +1047,6 @@ int php_shutdown_stream_wrappers(TSRMLS_D)
 
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	if (!PG(allow_url_fopen) && wrapper->is_url)
-		return FAILURE;
-
 	return zend_hash_add(&url_stream_wrappers_hash, protocol, strlen(protocol), wrapper, sizeof(*wrapper), NULL);
 }
 
