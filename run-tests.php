@@ -106,7 +106,20 @@ PHP_OS      : " . PHP_OS . "
 INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
 More .INIs  : " . str_replace("\n","", php_ini_scanned_files()); ?>';
 save_text($info_file, $php_info);
-$php_info = `$php -d 'output_handler=' -d 'zlib.output_compression=' $info_file`;
+$settings = array(
+		'open_basedir=',
+		'safe_mode=0',
+		'output_buffering=Off',
+		'output_handler=',
+		'zlib.output_compression=',
+		'auto_prepend_file=',
+		'auto_append_file=',
+		'disable_functions='
+	);
+$params = array();
+settings2array($settings,$params);
+settings2params($params);
+$php_info = `$php $params $info_file`;
 @unlink($info_file);
 
 // Write test context information.
@@ -511,36 +524,14 @@ TEST $file
 		"auto_prepend_file=",
 	);
 	$ini_settings = array();
-	foreach($settings as $setting) {
-		if (strpos($setting, '=')!==false) {
-			$setting = explode("=", $setting);
-			$name = trim(strtolower($setting[0]));
-			$value = trim($setting[1]);
-			$ini_settings[$name] = $value;
-		}
-	}
+	settings2array($settings, $ini_settings);
 
 	// Any special ini settings 
 	// these may overwrite the test defaults...
 	if (array_key_exists('INI', $section_text)) {
-		foreach(preg_split( "/[\n\r]+/", $section_text['INI']) as $setting) {
-			if (strpos($setting, '=')!==false) {
-				$setting = explode("=", $setting,2);
-				$name = trim(strtolower($setting[0]));
-				$value = trim($setting[1]);
-				$ini_settings[$name] = addslashes($value);
-			}
-		}
+		settings2array(preg_split( "/[\n\r]+/", $section_text['INI']), $ini_settings);
 	}
-	if (count($ini_settings)) {
-		$settings = '';
-		foreach($ini_settings as $name => $value) {
-			$settings .= " -d \"$name=$value\"";
-		}
-		$ini_settings = $settings;
-	} else {
-		$ini_settings = '';
-	}
+	settings2params($ini_settings);
 
 	// We've satisfied the preconditions - run the test!
 	save_text($tmp_file,$section_text['FILE']);
@@ -709,6 +700,32 @@ function error($message)
 {
 	echo "ERROR: {$message}\n";
 	exit(1);
+}
+
+function settings2array($settings, &$ini_settings)
+{
+	foreach($settings as $setting) {
+		if (strpos($setting, '=')!==false) {
+			$setting = explode("=", $setting);
+			$name = trim(strtolower($setting[0]));
+			$value = trim($setting[1]);
+			$ini_settings[$name] = $value;
+		}
+	}
+}
+
+function settings2params(&$ini_settings)
+{
+	if (count($ini_settings)) {
+		$settings = '';
+		foreach($ini_settings as $name => $value) {
+			$value = addslashes($value);
+			$settings .= " -d \"$name=$value\"";
+		}
+		$ini_settings = $settings;
+	} else {
+		$ini_settings = '';
+	}
 }
 
 /*
