@@ -217,8 +217,8 @@ PHPAPI void php_stream_bucket_unlink(php_stream_bucket *bucket TSRMLS_DC)
 
 
 /* We allow very simple pattern matching for filter factories:
- * if "charset.utf-8/sjis" is requested, we search first for an exact
- * match. If that fails, we try "charset.*".
+ * if "convert.charset.utf-8/sjis" is requested, we search first for an exact
+ * match. If that fails, we try "convert.charset.*", then "convert.*"
  * This means that we don't need to clog up the hashtable with a zillion
  * charsets (for example) but still be able to provide them all as filters */
 PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval *filterparams, int persistent TSRMLS_DC)
@@ -232,16 +232,23 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	
 	if (SUCCESS == zend_hash_find(&stream_filters_hash, (char*)filtername, n, (void**)&factory)) {
 		filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
-	} else if ((period = strchr(filtername, '.'))) {
+	} else if ((period = strrchr(filtername, '.'))) {
 		/* try a wildcard */
-		char wildname[128];
+		char *wildname;
 
-		PHP_STRLCPY(wildname, filtername, sizeof(wildname) - 1, period-filtername + 1);
-		strcat(wildname, "*");
-		
-		if (SUCCESS == zend_hash_find(&stream_filters_hash, wildname, strlen(wildname), (void**)&factory)) {
-			filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
+		wildname = estrdup(filtername);
+		period = wildname + (period - filtername);
+		while (period) {
+			*period = '\0';
+			strcat(wildname, ".*");
+			if (SUCCESS == zend_hash_find(&stream_filters_hash, wildname, strlen(wildname), (void**)&factory)) {
+				filter = factory->create_filter(filtername, filterparams, persistent TSRMLS_CC);
+			}
+
+			*period = '\0';
+			period = strrchr(wildname, '.');
 		}
+		efree(wildname);
 	}
 
 	if (filter == NULL) {
