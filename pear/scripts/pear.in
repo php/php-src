@@ -1,5 +1,5 @@
 #!@prefix@/bin/php -Cq
-<?php // -*- C++ -*-
+<?php // -*- PHP -*-
 //
 // +----------------------------------------------------------------------+
 // | PHP version 4.0                                                      |
@@ -19,6 +19,7 @@
 // +----------------------------------------------------------------------+
 //
 require_once 'PEAR.php';
+require_once 'PEAR/Common.php';
 require_once 'PEAR/Config.php';
 require_once 'PEAR/Remote.php';
 require_once 'PEAR/Registry.php';
@@ -30,7 +31,7 @@ PEAR::setErrorHandling(PEAR_ERROR_PRINT, "pear: %s\n");
 
 // {{{ config file and option parsing
 
-$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqv");
+$options = Console_Getopt::getopt($argv, "c:C:d:D:h?sSqu:v");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -78,6 +79,9 @@ foreach ($opts as $opt) {
         case 'S':
             $store_default_config = true;
             break;
+        case 'u':
+            $config->toDefault($param);
+            break;
         case 'v':
             $verbose++;
             break;
@@ -100,15 +104,18 @@ if ($store_user_config) {
 }
 
 $fallback_config = array(
-    'php_dir' => PEAR_INSTALL_DIR,
-    'ext_dir' => PEAR_EXTENSION_DIR,
-    'doc_dir' => '',
-    'verbose' => true,
+    'master_server' => 'pear.php.net',
+    'php_dir'       => PEAR_INSTALL_DIR,
+    'ext_dir'       => PEAR_EXTENSION_DIR,
+    'doc_dir'       => '',
+    'verbose'       => true,
 );
+$fallback_done = array();
 
 foreach ($fallback_config as $key => $value) {
     if (!$config->isDefined($key)) {
         $config->set($key, $value);
+        $fallback_done[$key] = true;
     }
 }
 
@@ -162,12 +169,25 @@ switch ($command) {
         include_once 'PEAR/Packager.php';
         $pkginfofile = $options[1][2];
         $packager =& new PEAR_Packager($script_dir, $ext_dir, $doc_dir);
+        $packager->setErrorHandling(PEAR_ERROR_DIE, "pear page: %s\n");
         $packager->debug = $verbose;
         if (PEAR::isError($packager->Package($pkginfofile))) {
             print "\npackage failed\n";
         } else {
             print "package ok\n";
         }
+        break;
+    }
+
+    // }}}
+    // {{{ info
+
+    case 'info': {
+        $parser = new PEAR_Common;
+        $parser->setErrorHandling(PEAR_ERROR_DIE, "pear info: %s\n");
+        $info = $parser->infoFromTgzFile($options[1][2]);
+        unset($info['filelist']);
+        present_array($info);
         break;
     }
 
@@ -222,6 +242,25 @@ switch ($command) {
     }
 
     // }}}
+    // {{{ show-config
+
+    case 'show-config': {
+        $keys = $config->getKeys();
+        foreach ($keys as $key) {
+            $value = $config->get($key);
+            $xi = "";
+            if ($config->isDefaulted($key)) {
+                $xi .= " (default)";
+            }
+            if ($fallback_done[$key]) {
+                $xi .= " (fallback)";
+            }
+            printf("%s = %s%s\n", $key, $value, $xi);
+        }
+        break;
+    }
+
+    // }}}
     default: {
         if (!$store_default_config && !$store_user_config) {
             usage();
@@ -251,12 +290,14 @@ function usage($error = null)
           "     -D foo=bar set system config variable `foo' to `bar'\n".
           "     -s         store user configuration\n".
           "     -s         store system configuration\n".
+          "     -u foo     unset `foo' in the user configuration\n".
           "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
           "   install <package file>\n".
           "   package [package info file]\n".
           "   list\n".
           "   list-remote\n".
+          "   show-config\n".
           "\n");
     fclose($stderr);
     exit;
@@ -264,4 +305,29 @@ function usage($error = null)
 
 // }}}
 
+function present_array(&$arr, $keys = null)
+{
+    if ($keys === null) {
+        $keys = array_keys($arr);
+    }
+    $longest_key = max(array_map("strlen", array_keys($arr)));
+    $format_string = "%{$longest_key}s : %s\n";
+    foreach ($keys as $k) {
+        if (is_array($arr[$k])) {
+            $v = implode(", ", $arr[$k]);
+        } else {
+            $v = $arr[$k];
+        }
+        printf($format_string, $k, $v);
+    }
+}
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: nil
+ * End:
+ */
 ?>

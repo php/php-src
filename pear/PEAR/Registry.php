@@ -92,7 +92,7 @@ class PEAR_Registry
     // }}}
     // {{{ addPackage()
 
-    function addPackage($package, $info)
+    function addPackage($package, &$info)
     {
         if ($this->packageExists($package)) {
             return false;
@@ -136,7 +136,7 @@ class PEAR_Registry
     // }}}
     // {{{ updatePackage()
 
-    function updatePackage($package, $info)
+    function updatePackage($package, &$info)
     {
         $oldinfo = $this->packageInfo($package);
         if (empty($oldinfo)) {
