@@ -8,7 +8,7 @@
 #ifdef TSRM_WIN32
 # include "tsrm_config.w32.h"
 #else
-# include <tsrm_config.h>
+# include "tsrm_config.h"
 # include <sys/param.h>
 #endif
 
