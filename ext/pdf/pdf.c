@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_globals.h"
+#include "zend/zend_list.h"
 #include "ext/standard/head.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -34,6 +35,7 @@
 #if HAVE_LIBGD13
 #include "ext/gd/php_gd.h"
 #include "gd.h"
+static int le_gd;
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -1897,7 +1899,12 @@ PHP_FUNCTION(pdf_open_memory_image)
 	}
 	
 	ZEND_FETCH_RESOURCE(pdf, PDF *, arg1, -1, "pdf object", le_pdf);
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, arg2, -1, "Image", phpi_get_le_gd());
+	ZEND_GET_RESOURCE_TYPE_ID(le_gd,"gd");
+	if(!le_gd)
+	{
+		php_error(E_ERROR, "Unable to find handle for GD image stream. Please check the GD extension is loaded.");
+	}
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, arg2, -1, "Image", le_gd);
 
 	count = 3 * im->sx * im->sy;
 	if(NULL == (buffer = (unsigned char *) emalloc(count))) {

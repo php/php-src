@@ -40,6 +40,7 @@
 
 #include "php.h"
 #include "php_globals.h"
+#include "zend/zend_list.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/head.h"
 #include <math.h>
@@ -66,6 +67,9 @@ static int numthreads=0;
 typedef struct cpdflib_global_struct{
 	int le_cpdf;
 	int le_outline;
+#if HAVE_LIBGD13
+    int le_gd;
+#endif
 } cpdflib_global_struct;
 
 # define CPDF_GLOBAL(a) cpdflib_globals->a
@@ -76,6 +80,9 @@ typedef struct cpdflib_global_struct{
 #  define CPDF_TLS_VARS
 static int le_cpdf;
 static int le_outline;
+#if HAVE_LIBGD13
+static int le_gd;
+#endif
 #endif
 
 function_entry cpdf_functions[] = {
@@ -2480,7 +2487,14 @@ PHP_FUNCTION(cpdf_place_inline_image) {
 
 	gid=argv[1]->value.lval;
 	im = zend_list_find(gid, &type);
-	if (!im || type != phpi_get_le_gd()) {
+	
+	ZEND_GET_RESOURCE_TYPE_ID(CPDF_GLOBAL(le_gd),"gd");
+	if(!CPDF_GLOBAL(le_gd))
+	{
+		php_error(E_ERROR, "Unable to find handle for GD image stream. Please check the GD extension is loaded.");
+	}
+
+	if (!im || type != CPDF_GLOBAL(le_gd)) {
 		php_error(E_WARNING, "cpdf: Unable to find image pointer");
 		RETURN_FALSE;
 	}
