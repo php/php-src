@@ -1,6 +1,7 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added session_cache_expire() function. (patch from anuradha@gnu.org)
 - Add array_init() function (Rasmus)
 - Hide Authorization header from phpinfo() output in safe_mode (Rasmus)
 - Re-instated safe-mode realm mangling (Rasmus)
