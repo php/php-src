@@ -496,7 +496,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						snprintf(bgstr, BUFFERLEN, " background='%s'", cur_ptr->link);
 						break;
 					case HW_INTAG_LINK:
-						snprintf(istr, BUFFERLEN, " %s='%s' start=%d", cur_ptr->tagattr, cur_ptr->link, cur_ptr->start);
+						snprintf(istr, BUFFERLEN, " %s='%s'", cur_ptr->tagattr, cur_ptr->link);
 						offset -= 4; /* because there is no closing tag </A> */
 /*						laststart = cur_ptr->start; */
 						break;
@@ -1809,8 +1809,8 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 	ptr = (int *) retmsg->buf;
 	if(*ptr == 0) {
 		attributes = estrdup(retmsg->buf+sizeof(int));
-		efree(retmsg);
 		efree(retmsg->buf);
+		efree(retmsg);
  	} else {
 		error = *ptr;
 		attributes = NULL;
