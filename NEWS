@@ -2,10 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
-- Removed the shm_* aliases, only the smhop_* function wiil be
-  supported (Derick)
-- Renamed the shm_* functions to shmop_* and added aliases for the
-  old functions (Derick)
+- Renamed the shm_* functions to shmop_* (Derick)
 - Added ldap_get_option() and ldap_set_option() functions (Stig Venaas)
 - Fixed a crash in CGI mode, in case no file was provided (Daniel Beulshausen
   & Zeev)
