@@ -1,3 +1,40 @@
+2001-11-16  David Reid  <dreid@jetnet.co.uk>
+
+    * configure.in: s/\t/    /
+
+2001-11-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+    Fix two incidents which have been reported about the new unserializer.
+
+        might lead to crash
+
+    PR: #14082
+
+2001-11-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/overload/overload.c: Add todo item.
+
+2001-11-16  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/gd.c: MFH
+    (I wish people would stop committing whitespace fixes to code that has
+     been around forever.  It really makes merging and checking diffs a pain
+     in the ass as real changes end up hidden within a sea of useless
+     whitespace fixes)
+
+    * ext/gd/gd.c: Use the macro here and add an E_NOTICE
+
+2001-11-16  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.c: - Nuked some memleaks
+    - Changed the error to be set always. Otherwise the index for error
+      wouldn't be correct in case of uploading multiple files within array.
+      ( <input type="file" name="test[]"> )
+
+    * main/rfc1867.c: No use of populating the hash if there is no file saved.
+
 2001-11-15  Jan Lehnardt  <jan@lehnardt.de>
 
     * pear/HTML/IT.php: whitespace fix.
