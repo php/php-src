@@ -1,3 +1,9 @@
+2003-11-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c
+      tests/bug26281.phpt:
+      Possible fix for bug #26281 & test case.
+
 2003-11-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_API.h:
