@@ -322,7 +322,7 @@ static inline void zend_assign_to_object(znode *result, znode *op1, znode *op2, 
 
 static inline void zend_assign_to_object_op(znode *result, znode *op1, znode *op2, zval *value, temp_variable *Ts, int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC) TSRMLS_DC)
 {
-	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W);
+	zval **object_ptr = get_obj_zval_ptr_ptr(op1, Ts, BP_VAR_W TSRMLS_CC);
 	zval *object;
 	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval tmp;
