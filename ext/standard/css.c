@@ -42,6 +42,7 @@ PHPAPI void php_info_print_css(TSRMLS_D)
 	PUTS(".e {background-color: #ccccff; font-weight: bold;}\n");
 	PUTS(".h {background-color: #9999cc; font-weight: bold;}\n");
 	PUTS(".v {background-color: #cccccc;}\n");
+	PUTS(".vr {background-color: #cccccc; text-align: right;}\n");
 	PUTS("i {color: #666666;}\n");
 	PUTS("img {float: right; border: 0px;}\n");
 	PUTS("hr {width: 600px; align: center; background-color: #cccccc; border: 0px; height: 1px;}\n");
