@@ -1091,12 +1091,8 @@ PHP_FUNCTION(imap_get_quota)
 		RETURN_FALSE;
 	}
 
-	if (array_init(return_value) == FAILURE) {
-		php_error(E_WARNING, "Unable to allocate array memory");
-		RETURN_FALSE;
-	}
-
-	add_next_index_zval(return_value, IMAPG(quota_return));
+	*return_value = *IMAPG(quota_return);
+	FREE_ZVAL(IMAPG(quota_return));
 
 }
 /* }}} */
