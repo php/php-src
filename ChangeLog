@@ -1,3 +1,154 @@
+2001-02-21  Shane Caraveo  <shane@php.net>
+
+    * ext/mysql/php_mysql.c:
+    Initalize some of the global vars.  Crashed under ms debugger without having them initialized.
+
+2001-02-21  James Moore  <James@phpuk.org>
+
+    * win32/php4dllts.dsp:
+    Adding crypt.c and php_crypt.h to win32 builds, they were missing..
+
+2001-02-21  Rainer Schaaf  <rjs@pdflib.com>
+
+    * ext/pdf/pdf.c:
+    When using pdf_get_buffer() and doing a correct cleanup by calling pdf_delete()
+    this always resulted in a coredump (after everything was finished, so only
+    visible in the logfile).
+    So it seems to be neccesary to copy the contents of the result of get_buffer,
+    to avoid this coredump.
+
+2001-02-21  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/Makefile.in
+      ext/midgard/article.c
+      ext/midgard/attachment.c
+      ext/midgard/element.c
+      ext/midgard/event.c
+      ext/midgard/eventmember.c
+      ext/midgard/file.c
+      ext/midgard/group.c
+      ext/midgard/host.c
+      ext/midgard/image.c
+      ext/midgard/member.c
+      ext/midgard/mgd_oop.h
+      ext/midgard/midgard.c
+      ext/midgard/oop.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/pagelink.c
+      ext/midgard/person.c
+      ext/midgard/preferences.c
+      ext/midgard/sitegroup.c
+      ext/midgard/snippet.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c: Centralized object fetching for get_object_by_guid
+
+2001-02-21  Shane Caraveo  <shane@php.net>
+
+    * main/main.c:
+    zend_compile_file returns a NULL on error, check for that before
+    calling destroy_op_array unless we like crashes :-)
+
+2001-02-21  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/imap/php_imap.c: fix possible leak.
+
+2001-02-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c:
+    If we cannot send the header, we don't need to continue with the page.
+
+    * ext/ircg/ircg.c:
+    Allow users to set the ident string which we use to register with
+    the IRC server.
+
+2001-02-21  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/PHPDoc/renderer/html/PhpdocHTMLDocumentRenderer.php: fix typo
+
+2001-02-21  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/config.m4: * dbmaker fix, shared support
+
+2001-02-21  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Fix memory leak.
+
+2001-02-21  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_ini.c: Add safety check
+
+2001-02-21  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c: used dynamic alloc to avoid segfault ;)
+
+2001-02-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/php_ini.h
+      main/php_ini.c:
+2001-02-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/php_getopt.h:
+    There is no need to declare ap_php_(opterr|optopt) with external linkage
+    as they are not used outside of getopt.c.
+
+    PR: #9364
+
+    * acinclude.m4:
+    Instead of assuming that sendmail lives in /usr/lib, if we don't find it,
+    we also check /usr/lib now.
+
+    PR: #9362
+
+    * ext/standard/file.c
+      ext/standard/filestat.c:
+    Correctly check for the existence of the st_rdev field.
+
+    Note that this field is required to exist for SUSv3 conformance.
+
+    Submitted by: amra@us.ibm.com
+    PR: #9358
+
+    * ext/pcre/config.m4: Preprocessor stuff should go into CPPFLAGS.
+
+2001-02-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS: Added note about PCRE update.
+
+2001-02-21  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Corrected News entry.
+
+2001-02-21  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/main.c
+      main/php_ini.c:
+    will now initialize dynamic extensions *after* static ones
+
+2001-02-21  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/config.m4:
+    Source files explicitly include midgard/something.h
+
+2001-02-21  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c: more explicit variable names.
+
+    * ext/midgard/article.c
+      ext/midgard/mgd_article.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/mgd_midgard.h
+      ext/midgard/mgd_page.h
+      ext/midgard/mgd_snippetdir.h
+      ext/midgard/mgd_style.h
+      ext/midgard/mgd_topic.h
+      ext/midgard/midgard.c
+      ext/midgard/page.c
+      ext/midgard/snippetdir.c
+      ext/midgard/style.c
+      ext/midgard/topic.c: mgd_walk_xxx_tree() functions implemented.
+
 2001-02-20  Emiliano Heyns  <emile@iris-advies.com>
 
     * ext/midgard/midgard.c:
