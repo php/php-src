@@ -43,6 +43,7 @@
 void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC);
 void php_import_environment_variables(ELS_D PLS_DC);
 PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array ELS_DC PLS_DC);
+PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array ELS_DC PLS_DC);
 
 
 #endif /* _PHP_VARIABLES_H */

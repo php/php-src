@@ -30,6 +30,27 @@
 #define NEW_BOUNDARY_CHECK 1
 #define SAFE_RETURN { if (namebuf) efree(namebuf); if (filenamebuf) efree(filenamebuf); if (lbuf) efree(lbuf); return; }
 
+
+static void register_http_post_files_variable(char *strvar, char *val, zval *http_post_files ELS_DC PLS_DC)
+{
+	int register_globals = PG(register_globals);
+	
+	PG(register_globals) = 0;
+	php_register_variable(strvar, val, http_post_files ELS_CC PLS_CC);
+	PG(register_globals) = register_globals;
+}
+
+
+static void register_http_post_files_variable_ex(char *var, zval *val, zval *http_post_files ELS_DC PLS_DC)
+{
+	int register_globals = PG(register_globals);
+	
+	PG(register_globals) = 0;
+	php_register_variable_ex(var, val, http_post_files ELS_CC PLS_CC);
+	PG(register_globals) = register_globals;
+}
+
+
 /*
  * Split raw mime stream up into appropriate components
  */
@@ -42,8 +63,17 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 	char *namebuf=NULL, *filenamebuf=NULL, *lbuf=NULL;
 	FILE *fp;
 	int itype;
+	zval *http_post_files=NULL;
 	ELS_FETCH();
 	PLS_FETCH();
+
+	if (PG(track_vars)) {
+		ALLOC_ZVAL(http_post_files);
+		array_init(http_post_files);
+		INIT_PZVAL(http_post_files);
+		zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_FILES", sizeof("HTTP_POST_FILES"), http_post_files, sizeof(zval *),NULL);
+	}
+
 
 	ptr = buf;
 	rem = cnt;
@@ -96,7 +126,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					if (lbuf) {
 						efree(lbuf);
 					}
-					lbuf = emalloc(s-name + MAX(MAX(sizeof("_name"),sizeof("_size")),sizeof("_type")));
+					lbuf = emalloc(s-name + MAX(MAX(sizeof("[name]"),sizeof("[size]")),sizeof("[type]")));
 					state = 2;
 					loc2 = memchr(loc + 1, '\n', rem);
 					rem -= (loc2 - ptr) + 1;
@@ -117,19 +147,37 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 						efree(filenamebuf);
 					}
 					filenamebuf = estrndup(filename, s-filename);
+
+					/* Add $foo_name */
 					sprintf(lbuf, "%s_name", namebuf);
 					s = strrchr(filenamebuf, '\\');
 					if (s && s > filenamebuf) {
-						SET_VAR_STRING(lbuf, estrdup(s + 1));
+						php_register_variable(lbuf, s+1, NULL ELS_CC PLS_CC);
 					} else {
-						SET_VAR_STRING(lbuf, estrdup(filenamebuf));
+						php_register_variable(lbuf, filenamebuf, NULL ELS_CC PLS_CC);
 					}
+
+					/* Add $foo[name] */
+					sprintf(lbuf, "%s[name]", namebuf);
+					if (s && s > filenamebuf) {
+						register_http_post_files_variable(lbuf, s+1, http_post_files ELS_CC PLS_CC);
+					} else {
+						register_http_post_files_variable(lbuf, filenamebuf, http_post_files ELS_CC PLS_CC);
+					}
+
 					state = 3;
 					if ((loc2 - loc) > 2) {
 						if (!strncasecmp(loc + 1, "Content-Type:", 13)) {
 							*(loc2 - 1) = '\0';
+
+							/* Add $foo_type */
 							sprintf(lbuf, "%s_type", namebuf);
-							SET_VAR_STRING(lbuf, estrdup(loc + 15));
+							php_register_variable(lbuf, loc+15, NULL ELS_CC PLS_CC);
+
+							/* Add $foo[type] */
+							sprintf(lbuf, "%s[type]", namebuf);
+							register_http_post_files_variable(lbuf, loc+15, http_post_files ELS_CC PLS_CC);
+
 							*(loc2 - 1) = '\n';
 						}
 						rem -= 2;
@@ -154,7 +202,6 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 				}
 				*(loc - 4) = '\0';
 
-				/* Magic function that figures everything out */
 				php_register_variable(namebuf, ptr, array_ptr ELS_CC PLS_CC);
 
 				/* And a little kludge to pick out special MAX_FILE_SIZE */
@@ -196,18 +243,16 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					php_error(E_WARNING, "File Upload Error - No Mime boundary found after start of file header");
 					SAFE_RETURN;
 				}
-					fn = tempnam(PG(upload_tmp_dir), "php");
+				bytes = 0;
+				fn = tempnam(PG(upload_tmp_dir), "php");
 				if ((loc - ptr - 4) > PG(upload_max_filesize)) {
 					php_error(E_WARNING, "Max file size of %ld bytes exceeded - file [%s] not saved", PG(upload_max_filesize),namebuf);
-					bytes=0;	
-					SET_VAR_STRING(namebuf, estrdup("none"));
+					fn = "none";
 				} else if (max_file_size && ((loc - ptr - 4) > max_file_size)) {
 					php_error(E_WARNING, "Max file size exceeded - file [%s] not saved", namebuf);
-					bytes = 0;
-					SET_VAR_STRING(namebuf, estrdup("none"));
+					fn = "none";
 				} else if ((loc - ptr - 4) <= 0) {
-					bytes = 0;
-					SET_VAR_STRING(namebuf, estrdup("none"));
+					fn = "none";
 				} else {
 					fp = fopen(fn, "wb");
 					if (!fp) {
@@ -220,10 +265,22 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					if (bytes < (loc - ptr - 4)) {
 						php_error(E_WARNING, "Only %d bytes were written, expected to write %ld", bytes, loc - ptr - 4);
 					}
-					SET_VAR_STRING(namebuf, estrdup(fn));
 				}
-				sprintf(lbuf, "%s_size", namebuf);
-				SET_VAR_LONG(lbuf, bytes);
+				php_register_variable(namebuf, fn, NULL ELS_CC PLS_CC);
+				{
+					zval file_size;
+
+					file_size.value.lval = bytes;
+					file_size.type = IS_LONG;
+
+					/* Add $foo_size */
+					sprintf(lbuf, "%s_size", namebuf);
+					php_register_variable_ex(lbuf, &file_size, NULL ELS_CC PLS_CC);
+
+					/* Add $foo[size] */
+					sprintf(lbuf, "%s[size]", namebuf);
+					register_http_post_files_variable_ex(lbuf, &file_size, http_post_files ELS_CC PLS_CC);
+				}
 				state = 0;
 				rem -= (loc - ptr);
 				ptr = loc;

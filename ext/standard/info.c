@@ -241,6 +241,7 @@ PHPAPI void php_print_info(int flag)
 		}
 		php_print_gpcse_array("HTTP_GET_VARS", sizeof("HTTP_GET_VARS")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_POST_VARS", sizeof("HTTP_POST_VARS")-1 ELS_CC);
+		php_print_gpcse_array("HTTP_POST_FILES", sizeof("HTTP_POST_FILES")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS")-1 ELS_CC);
 		php_print_gpcse_array("HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS")-1 ELS_CC);
