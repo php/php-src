@@ -25,14 +25,8 @@
 
 #include "php.h"
 
-#ifdef NETWARE
-#ifdef USE_WINSOCK
+#if defined(NETWARE) && defined(USE_WINSOCK)
 #include <novsock2.h>
-#else
-#ifndef NEW_LIBC
-#include <sys/socket.h>
-#endif
-#endif
 #endif
 
 #if HAVE_OPENSSL_EXT
