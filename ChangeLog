@@ -1,3 +1,31 @@
+1999-10-24  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/fsock.c: kill warning
+
+    * ext/standard/basic_functions.c:
+    folding fix (xemacs 21 loads the file again;-)
+
+1999-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pcre/config.h.stub
+      ext/pcre/config.m4:
+    Define USE_BCOPY, if memmove is not found (i.e. SunOS 4). Fix for #2480
+
+1999-10-24  rubys  <rubys@www>
+
+    * php4dllts.dsp
+      php4dll.dsp:
+    Allow CYGWIN directory to be specified as via environment variable
+
+1999-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c:
+    (PHP session_register, session_unregister) always return true
+
+1999-10-24  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
 1999-10-23  changelog  <changelog@www>
 
     * ChangeLog: ChangeLog update
