@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Package SYSTEM "F:\cvs\php4\pear\package.dtd">
+<Package Type="Source">
+	<Name>Cache</Name>
+	<Summary>The PEAR Cache Package is a generic data/content cache that can be used to cache data, output, function calls and dynamic graphic generation. </Summary>
+	<Maintainer>
+		<Initials>chregu</Initials>
+		<Name>Christian Stocker</Name>
+		<Email>chregu@phant.ch</Email>
+	</Maintainer>
+	<Release>
+		<Version>1.1</Version>
+		<Date>2001/03/27</Date>
+		<Notes>stable Code, SHM Implementation missing</Notes>
+	</Release>
+	<FileList>
+		<File Role="php">Cache.php</File>
+		<Dir>Cache/</Dir>
+	</FileList>
+</Package>
