@@ -279,15 +279,16 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 #define PHP_CURL_DIRECT 3
 #define PHP_CURL_RETURN 4
 
-static size_t curl_write(void *ctx, char *data, size_t size, size_t nmemb, FILE *fp)
+static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl       *ch     = (php_curl *) ctx;
-	php_curl_write *t      = ch->write;
+	php_curl_write *t      = ch->handlers->write;
 	size_t          length = size * nmemb;
+	ELS_FETCH();
 
 	switch (t->method) {
 	case PHP_CURL_FILE:
-		return fwrite(data, size, nmemb, fp);
+		return fwrite(data, size, nmemb, t->fp);
 	case PHP_CURL_RETURN:
 	case PHP_CURL_STDOUT:
 		smart_str_appendl(&t->buf, data, (int) length);
@@ -328,15 +329,16 @@ static size_t curl_write(void *ctx, char *data, size_t size, size_t nmemb, FILE 
 	return length;
 }
 
-static size_t curl_read(void *ctx, char *data, size_t size, size_t nmemb, FILE *fp)
+static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl       *ch = (php_curl *) ctx;
-	php_curl_read  *t  = ch->read;
+	php_curl_read  *t  = ch->handlers->read;
 	int             length = -1;
+	ELS_FETCH();
 
 	switch (t->method) {
 	case PHP_CURL_DIRECT:
-		length = fread(data, size, nmemb, fp);
+		length = fread(data, size, nmemb, t->fp);
 	case PHP_CURL_USER: {
 		zval *argv[3];
 		zval *retval;
@@ -362,8 +364,8 @@ static size_t curl_read(void *ctx, char *data, size_t size, size_t nmemb, FILE *
 			php_error(E_WARNING, "Cannot call the CURLOPT_READFUNCTION");
 			break;
 		}
-
-		data = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+		
+		memcpy(data, Z_STRVAL_P(retval), Z_STRLEN_P(retval));
 		length = Z_STRLEN_P(retval);
 
 		zval_ptr_dtor(&argv[0]);
@@ -378,14 +380,15 @@ static size_t curl_read(void *ctx, char *data, size_t size, size_t nmemb, FILE *
 	return length;
 }
 
-static size_t _php_curl_write_header(void *ctx, char *data, size_t size, size_t nmemb, FILE *fp)
+static size_t _php_curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
-	php_curl   *ch   = (php_curl *) ctx;
-	zval       *func = ch->handlers->write_header;
-	zval       *argv[2];
-	zval       *retval;
-	int         error;
-	int         length;
+	php_curl  *ch   = (php_curl *) ctx;
+	zval      *func = ch->handlers->write_header;
+	zval      *argv[2];
+	zval      *retval;
+	int        error;
+	int        length;
+	ELS_FETCH();
 
 	MAKE_STD_ZVAL(argv[0]);
 	MAKE_STD_ZVAL(argv[1]);
@@ -420,6 +423,7 @@ static size_t _php_curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	zval        *argv[3];
 	zval        *retval;
 	int          error;
+	ELS_FETCH();
 
 	MAKE_STD_ZVAL(argv[0]);
 	MAKE_STD_ZVAL(argv[1]);
@@ -493,12 +497,11 @@ PHP_FUNCTION(curl_init)
 	}
 
 	ch = emalloc(sizeof(php_curl));
-	ch->write    = emalloc(sizeof(php_curl_write));
-	ch->read     = emalloc(sizeof(php_curl_read));
 	ch->handlers = emalloc(sizeof(php_curl_handlers));
-	memset(ch->write, 0, sizeof(php_curl_write));
-	memset(ch->read,  0, sizeof(php_curl_read));
-	memset(ch->handlers, 0, sizeof(php_curl_handlers));
+	ch->handlers->write    = emalloc(sizeof(php_curl_write));
+	ch->handlers->read     = emalloc(sizeof(php_curl_read));
+	memset(ch->handlers->write, 0, sizeof(php_curl_write));
+	memset(ch->handlers->read,  0, sizeof(php_curl_read));
 
 	zend_llist_init(&ch->to_free.str, sizeof(char *), 
 	                (void(*)(void *)) curl_free_string, 0);
@@ -513,16 +516,16 @@ PHP_FUNCTION(curl_init)
 		RETURN_FALSE;
 	}
 
-	ch->write->method = PHP_CURL_STDOUT;
-	ch->read->method  = PHP_CURL_DIRECT;
+	ch->handlers->write->method = PHP_CURL_STDOUT;
+	ch->handlers->read->method  = PHP_CURL_DIRECT;
 
 	curl_easy_setopt(ch->cp, CURLOPT_NOPROGRESS,        1);
 	curl_easy_setopt(ch->cp, CURLOPT_VERBOSE,           0);
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION,     curl_write);
-	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTIONDATA, (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_FILE,              (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_READFUNCTION,      curl_read);
-	curl_easy_setopt(ch->cp, CURLOPT_READFUNCTIONDATA,  (void *) ch);
+	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	if (argc > 0) {
 		char *urlcopy;
 		convert_to_string_ex(url);
@@ -619,20 +622,24 @@ PHP_FUNCTION(curl_setopt)
 
 		break;
 	}
-	case CURLOPT_FILE:   
+	case CURLOPT_FILE:
 	case CURLOPT_INFILE: 
 	case CURLOPT_WRITEHEADER:
 	case CURLOPT_STDERR: {
 		FILE *fp;
 		ZEND_FETCH_RESOURCE(fp, FILE *, zvalue, -1, "File-Handle", php_file_le_fopen());
-
-		error = curl_easy_setopt(ch->cp, option, fp);
+		
 		if (option == CURLOPT_FILE) {
-			ch->write->method = PHP_CURL_FILE;
+			ch->handlers->write->fp = fp;
+			ch->handlers->write->method = PHP_CURL_FILE;
 		}
-
-		if (option == CURLOPT_INFILE) {
-			ch->read->fd = Z_LVAL_PP(zvalue);
+		else if (option == CURLOPT_INFILE) {
+			zend_list_addref(Z_LVAL_PP(zvalue));
+			ch->handlers->read->fp = fp;
+			ch->handlers->read->fd = Z_LVAL_PP(zvalue);
+		}
+		else {
+			error = curl_easy_setopt(ch->cp, option, fp);
 		}
 
 		break;
@@ -641,24 +648,24 @@ PHP_FUNCTION(curl_setopt)
 		convert_to_long_ex(zvalue);
 
 		if (Z_LVAL_PP(zvalue)) {
-			ch->write->method = PHP_CURL_RETURN;
+			ch->handlers->write->method = PHP_CURL_RETURN;
 		}
 		break;
 	case CURLOPT_WRITEFUNCTION:
 		zval_add_ref(zvalue);
-		ch->write->func = *zvalue;
-		ch->write->method = PHP_CURL_USER;
+		ch->handlers->write->func = *zvalue;
+		ch->handlers->write->method = PHP_CURL_USER;
 		break;
 	case CURLOPT_READFUNCTION:
 		zval_add_ref(zvalue);
-		ch->read->func   = *zvalue;
-		ch->read->method = PHP_CURL_USER;
+		ch->handlers->read->func   = *zvalue;
+		ch->handlers->read->method = PHP_CURL_USER;
 		break;
 	case CURLOPT_HEADERFUNCTION:
 		zval_add_ref(zvalue);
 		ch->handlers->write_header = *zvalue;
 		error = curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, _php_curl_write_header);
-		error = curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTIONDATA, (void *) ch);
+		error = curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER, (void *) ch);
 		break;
 	case CURLOPT_PASSWDFUNCTION:
 		zval_add_ref(zvalue);
@@ -785,15 +792,15 @@ PHP_FUNCTION(curl_exec)
 		RETURN_FALSE;
 	}
 
-	if (ch->write->method == PHP_CURL_RETURN) {
-		smart_str_0(&ch->write->buf);
-		RETURN_STRINGL(ch->write->buf.c, ch->write->buf.len, 1);
-		smart_str_free(&ch->write->buf);
+	if (ch->handlers->write->method == PHP_CURL_RETURN) {
+		smart_str_0(&ch->handlers->write->buf);
+		RETURN_STRINGL(ch->handlers->write->buf.c, ch->handlers->write->buf.len, 1);
+		smart_str_free(&ch->handlers->write->buf);
 	}
-	else if (ch->write->method == PHP_CURL_STDOUT) {
-		smart_str_0(&ch->write->buf);
-		PUTS(ch->write->buf.c);
-		smart_str_free(&ch->write->buf);
+	else if (ch->handlers->write->method == PHP_CURL_STDOUT) {
+		smart_str_0(&ch->handlers->write->buf);
+		PUTS(ch->handlers->write->buf.c);
+		smart_str_free(&ch->handlers->write->buf);
 	}
 
 	RETURN_TRUE;
@@ -953,13 +960,13 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 	zend_llist_clean(&ch->to_free.slist);
 	zend_llist_clean(&ch->to_free.post);
 
-	if (ch->write->func) zval_ptr_dtor(&ch->write->func);
-	if (ch->read->func)  zval_ptr_dtor(&ch->read->func);
+	if (ch->handlers->write->func) zval_ptr_dtor(&ch->handlers->write->func);
+	if (ch->handlers->read->func)  zval_ptr_dtor(&ch->handlers->read->func);
 	if (ch->handlers->write_header) zval_ptr_dtor(&ch->handlers->write_header);
 	if (ch->handlers->passwd) zval_ptr_dtor(&ch->handlers->passwd);
 
-	efree(ch->write);
-	efree(ch->read);
+	efree(ch->handlers->write);
+	efree(ch->handlers->read);
 	efree(ch->handlers);
 	efree(ch);
 }	
