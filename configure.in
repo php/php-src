@@ -1078,6 +1078,12 @@ fi
 
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
+
+PHP_ADD_SOURCES_X(main, php_embed.c,, PHP_LIB_OBJS)
+PHP_LIB_OBJS="$PHP_GLOBAL_OBJS $PHP_LIB_OBJS main/internal_functions_cli.lo"
+PHP_SUBST(PHP_LIB_OBJS)
+
+
 PHP_ADD_BUILD_DIR(main)
 PHP_ADD_BUILD_DIR(regex)
 PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
