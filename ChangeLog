@@ -2,6 +2,10 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ??? ?? 1999, Version 4.0 Beta 2
+- Fixed array_walk() to work in PHP4 (Andrey)
+- Ported all remaining date() format options from PHP3 (Andrey)
+- $php_errormsg now works (Andrey)
+- Added locale support for Perl Compatible Regexp functions (Andrey)
 - Informix module ported (Danny)
 - Removed --with-shared-apache (Sascha)
 - Added patch for reverse lookup table in base64_decode (Sascha)
