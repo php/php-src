@@ -276,7 +276,6 @@ typedef struct {
 	short sqlind;
 } BIND_BUF;
 
-
 static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 {
 	/* shortcut for most common case */
@@ -284,10 +283,12 @@ static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 		return sscanf(id, BLOB_ID_MASK, (ISC_UINT64 *) qd);
 	} else {
 		ISC_UINT64 res;
-		int n = sscanf(id, BLOB_ID_MASK, &res);
-		qd->gds_quad_high = (long) (res >> 0x20);
-		qd->gds_quad_low = (unsigned long) (res & 0xFFFFFFFF);
-		return n;
+		if (sscanf(id, BLOB_ID_MASK, &res)) {
+			qd->gds_quad_high = (ISC_LONG) (res >> 0x20);
+			qd->gds_quad_low = (ISC_ULONG) (res & 0xFFFFFFFF);
+			return 1;
+		}
+		return 0;
 	}
 }
 
@@ -1785,31 +1786,31 @@ PHP_FUNCTION(ibase_trans)
 					last_tpb[tpb_len++] = isc_tpb_version3;
 
 					/* access mode */
-					if (trans_argl & PHP_IBASE_READ) { /* READ ONLY TRANSACTION */
+					if (PHP_IBASE_READ == (trans_argl & PHP_IBASE_READ)) {
 						last_tpb[tpb_len++] = isc_tpb_read;
-					} else {
-						last_tpb[tpb_len++] = isc_tpb_write;  /* default access mode */
+					} else if (PHP_IBASE_WRITE == (trans_argl & PHP_IBASE_WRITE)) {
+						last_tpb[tpb_len++] = isc_tpb_write;
 					}
 
 					/* isolation level */
-					if (trans_argl & PHP_IBASE_COMMITTED) {
+					if (PHP_IBASE_COMMITTED == (trans_argl & PHP_IBASE_COMMITTED)) {
 						last_tpb[tpb_len++] = isc_tpb_read_committed;
-						if (trans_argl & PHP_IBASE_REC_VERSION) {
+						if (PHP_IBASE_REC_VERSION == (trans_argl & PHP_IBASE_REC_VERSION)) {
 							last_tpb[tpb_len++] = isc_tpb_rec_version;
-						} else {
-							last_tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
+						} else if (PHP_IBASE_REC_NO_VERSION == (trans_argl & PHP_IBASE_REC_NO_VERSION)) {
+							last_tpb[tpb_len++] = isc_tpb_no_rec_version; 
 						}	
-					} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
+					} else if (PHP_IBASE_CONSISTENCY == (trans_argl & PHP_IBASE_CONSISTENCY)) {
 						last_tpb[tpb_len++] = isc_tpb_consistency;
-					} else {
-						last_tpb[tpb_len++] = isc_tpb_concurrency;   /* default isolation level */ 
+					} else if (PHP_IBASE_CONCURRENCY == (trans_argl & PHP_IBASE_CONCURRENCY)) {
+						last_tpb[tpb_len++] = isc_tpb_concurrency;
 					}
 					
 					/* lock resolution */
-					if (trans_argl & PHP_IBASE_NOWAIT) {
+					if (PHP_IBASE_NOWAIT == (trans_argl & PHP_IBASE_NOWAIT)) {
 						last_tpb[tpb_len++] = isc_tpb_nowait;
-					} else {
-						last_tpb[tpb_len++] = isc_tpb_wait;  /* default lock resolution */
+					} else if (PHP_IBASE_WAIT == (trans_argl & PHP_IBASE_WAIT)) {
+						last_tpb[tpb_len++] = isc_tpb_wait;
 					}
 				}
 			}
@@ -3550,7 +3551,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	zval **blob_arg, **link_arg;
 	ibase_db_link *link;
 	ibase_trans *trans = NULL;		
-	ibase_blob ib_blob_id = { NULL, { 0, 0 }, 0 };
+	ibase_blob ib_blob_id = { NULL, { 0, 0 }, BLOB_OUTPUT };
 	char bl_data[IBASE_BLOB_SEG]; 
 	unsigned short seg_len;
 

@@ -180,23 +180,26 @@ typedef struct {
 
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
-	PHP_IBASE_UNIXTIME 			= 2,
-	PHP_IBASE_TIMESTAMP 		= 4,
-	PHP_IBASE_DATE 				= 8,
-	PHP_IBASE_TIME 				= 16,
-	/* fetch args */
+	/* fetch flags */
 	PHP_IBASE_FETCH_BLOBS		= 1,
 	PHP_IBASE_FETCH_ARRAYS      = 2,
-	/* transactions */	
-	PHP_IBASE_WRITE 			= 2,
-	PHP_IBASE_READ 				= 4,
-	PHP_IBASE_COMMITTED 		= 8,
-	PHP_IBASE_CONSISTENCY 		= 16,
-	PHP_IBASE_CONCURRENCY 		= 32,
-	PHP_IBASE_REC_VERSION 		= 64,
-	PHP_IBASE_REC_NO_VERSION 	= 128,
-	PHP_IBASE_NOWAIT 			= 256,
-	PHP_IBASE_WAIT 				= 512
+	PHP_IBASE_UNIXTIME 			= 4,
+	/* timefmt flags */
+	PHP_IBASE_TIMESTAMP 		= 1,
+	PHP_IBASE_DATE 				= 2,
+	PHP_IBASE_TIME 				= 4,
+	/* transaction access mode */	
+	PHP_IBASE_WRITE 			= 0, /* default */
+	PHP_IBASE_READ 				= 1,
+	/* transaction isolation level */
+	PHP_IBASE_CONCURRENCY 		= 0, /* default */
+	PHP_IBASE_COMMITTED 		= 2,
+	  PHP_IBASE_REC_NO_VERSION 	= 0, /* default */
+	  PHP_IBASE_REC_VERSION 	= 4,
+	PHP_IBASE_CONSISTENCY 		= 8,
+	/* transaction lock resolution */
+	PHP_IBASE_WAIT 				= 0, /* default */
+	PHP_IBASE_NOWAIT 			= 16
 };
 
 #ifdef ZTS
