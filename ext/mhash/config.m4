@@ -4,7 +4,7 @@ dnl don't forget to call PHP_EXTENSION(mhash)
 
 AC_MSG_CHECKING(for mhash support)
 AC_ARG_WITH(mhash,
-[  --with-mhash[=DIR]     Include mhash support.  DIR is the mhash
+[  --with-mhash[=DIR]      Include mhash support.  DIR is the mhash
                           install directory.],
 [
   if test "$withval" != "no"; then
