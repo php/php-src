@@ -99,10 +99,10 @@ PHP_FUNCTION(imagecopyresampled);
 
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imagerotate);
+PHP_FUNCTION(imageantialias);
 #endif
 
 PHP_FUNCTION(imagesetthickness);
-PHP_FUNCTION(imagesettile);
 PHP_FUNCTION(imagecopymergegray);
 PHP_FUNCTION(imagesetbrush);
 PHP_FUNCTION(imagesettile);
