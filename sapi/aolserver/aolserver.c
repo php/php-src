@@ -18,7 +18,6 @@
 
 /*
  * TODO:
- * - fix (?) POST handler (maybe AOLserver bug)
  * - write documentation
  */
 
@@ -53,7 +52,11 @@ int Ns_ModuleVersion = 1;
 #define NSG(v) (ns_context->v)
 #define NSLS_FETCH() ns_globals_struct *ns_context = ts_resource(ns_globals_id)
 
+/* TSRM id */
+
 static int ns_globals_id;
+
+/* php_ns_context is per-server (thus only once at all) */
 
 typedef struct {
 	sapi_module_struct *sapi_module;
@@ -61,12 +64,18 @@ typedef struct {
 	char *ns_module;
 } php_ns_context;
 
+/* ns_globals_struct is per-thread */
+
 typedef struct {
 	Ns_Conn *conn;
 	Ns_DString content_type;
 } ns_globals_struct;
 
 static void php_ns_config(php_ns_context *ctx);
+
+/*
+ * php_ns_sapi_ub_write() writes data to the client connection.
+ */
 
 static int
 php_ns_sapi_ub_write(const char *str, uint str_length)
@@ -78,6 +87,11 @@ php_ns_sapi_ub_write(const char *str, uint str_length)
 
 	return sent_bytes;
 }
+
+/*
+ * php_ns_sapi_header_handler() sets a HTTP reply header to be 
+ * sent to the client.
+ */
 
 static int
 php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
@@ -109,6 +123,11 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
 	return 0;
 }
 
+/*
+ * php_ns_sapi_send_headers() flushes the headers to the client.
+ * Called before real content is sent by PHP.
+ */
+
 static int
 php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
@@ -120,6 +139,11 @@ php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 	Ns_ConnFlushHeaders(NSG(conn), SG(sapi_headers).http_response_code);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
+
+/*
+ * php_ns_sapi_read_post() reads a specified number of bytes from
+ * the client. Used for POST/PUT requests.
+ */
 
 static int
 php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
@@ -135,6 +159,11 @@ php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 
 	return total_read;
 }
+
+/* 
+ * php_ns_sapi_read_cookies() returns the Cookie header from
+ * the HTTP request header
+ */
 	
 static char *
 php_ns_sapi_read_cookies(SLS_D)
@@ -143,13 +172,15 @@ php_ns_sapi_read_cookies(SLS_D)
 	char *http_cookie = NULL;
 	NSLS_FETCH();
 	
-	i = Ns_SetFind(NSG(conn->headers), "cookie");
+	i = Ns_SetIFind(NSG(conn->headers), "cookie");
 	if(i != -1) {
 		http_cookie = Ns_SetValue(NSG(conn->headers), i);
 	}
 
 	return http_cookie;
 }
+
+/* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
 	"PHP Language",
@@ -170,6 +201,12 @@ static sapi_module_struct sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
+
+/*
+ * php_ns_hash_environment() populates the php script environment
+ * with a number of variables. HTTP_* variables are created for
+ * the HTTP header data, so that a script can access these.
+ */
 
 static void
 php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
@@ -203,6 +240,11 @@ php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 	}
 }
 
+/*
+ * php_ns_module_main() is called by the per-request handler and
+ * "executes" the script
+ */
+
 static int
 php_ns_module_main(NSLS_D SLS_DC)
 {
@@ -222,12 +264,18 @@ php_ns_module_main(NSLS_D SLS_DC)
 	return NS_OK;
 }
 
+/*
+ * php_ns_request_ctor() initializes the per-request data structure
+ * and fills it with data provided by the web server
+ */
+
 static void 
 php_ns_request_ctor(NSLS_D SLS_DC)
 {
 	char *server;
 	Ns_DString ds;
 	char *root;
+	int index;
 	
 	server = Ns_ConnServer(NSG(conn));
 	
@@ -235,25 +283,36 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 
 	Ns_DStringInit(&ds);
 	Ns_UrlToFile(&ds, server, NSG(conn->request->url));
+	
+	/* path_translated is the absolute path to the file */
 	SG(request_info).path_translated = strdup(Ns_DStringValue(&ds));
 	Ns_DStringFree(&ds);
 	root = Ns_PageRoot(server);
 	SG(request_info).request_uri = SG(request_info).path_translated + strlen(root);
 	SG(request_info).request_method = NSG(conn)->request->method;
 	SG(request_info).content_length = Ns_ConnContentLength(NSG(conn));
-	Ns_DStringInit(&NSG(content_type));
-	Ns_ConnCopyToDString(NSG(conn), SG(request_info).content_length, &NSG(content_type));
-	SG(request_info).content_type = Ns_DStringValue(&NSG(content_type));
+	index = Ns_SetIFind(NSG(conn)->headers, "content-type");
+	SG(request_info).content_type = index == -1 ? NULL : 
+		Ns_SetValue(NSG(conn)->headers, index);
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
 }
 
+/*
+ * php_ns_request_dtor() destroys all data associated with
+ * the per-request structure 
+ */
+
 static void
 php_ns_request_dtor(NSLS_D SLS_DC)
 {
-	free(SG(request_info).path_translated);
 	Ns_DStringFree(&NSG(content_type));
 }
+
+/*
+ * The php_ns_request_handler() is called per request and handles
+ * everything for one request.
+ */
 
 static int
 php_ns_request_handler(void *context, Ns_Conn *conn)
@@ -274,6 +333,12 @@ php_ns_request_handler(void *context, Ns_Conn *conn)
 	
 	return status;
 }
+
+/*
+ * php_ns_config() fetches the configuration data.
+ *
+ * It understands the "map" and "php_value" command.
+ */
 
 static void 
 php_ns_config(php_ns_context *ctx)
@@ -318,6 +383,11 @@ php_ns_config(php_ns_context *ctx)
 	}
 }
 	
+/*
+ * php_ns_server_shutdown() performs the last steps before the
+ * server exists. Shutdowns basic services and frees memory
+ */
+
 static void
 php_ns_server_shutdown(void *context)
 {
@@ -332,6 +402,13 @@ php_ns_server_shutdown(void *context)
 	free(ctx);
 }
 
+/*
+ * Ns_ModuleInit() is called by AOLserver once at startup
+ *
+ * This functions allocates basic structures and initializes
+ * basic services.
+ */
+
 int Ns_ModuleInit(char *server, char *module)
 {
 	php_ns_context *ctx;
@@ -340,15 +417,19 @@ int Ns_ModuleInit(char *server, char *module)
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	
+	/* TSRM is used to allocate a per-thread structure */
 	ns_globals_id = ts_allocate_id(sizeof(ns_globals_struct), NULL, NULL);
 	
+	/* the context contains data valid for all threads */
 	ctx = malloc(sizeof *ctx);
 	ctx->sapi_module = &sapi_module;
 	ctx->ns_server = strdup(server);
 	ctx->ns_module = strdup(module);
 	
+	/* read the configuration */
 	php_ns_config(ctx);
 
+	/* register shutdown handler */
 	Ns_RegisterServerShutdown(server, php_ns_server_shutdown, ctx);
 
 	return NS_OK;
