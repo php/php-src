@@ -35,6 +35,7 @@
 char *_php_math_number_format(double, int, char , char);
 
 /* {{{ proto int abs(int number)
+
    Return the absolute value of the number */
 PHP_FUNCTION(abs) 
 {
@@ -698,6 +699,67 @@ _php_math_basetolong(zval *arg, int base) {
 /* }}} */
 /* {{{ _php_math_longtobase */
 
+/* {{{ _php_math_basetozval */
+
+/*
+ * Convert a string representation of a base(2-36) number to a zval.
+ */
+PHPAPI int
+_php_math_basetozval(zval *arg, int base, zval *ret) {
+	long mult = 1, num = 0, digit;
+	double fmult, fnum;
+	int i;
+	int f_mode = 0;
+	char c, *s;
+
+	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
+		return FAILURE;
+	}
+
+	s = Z_STRVAL_P(arg);
+
+	for (i = Z_STRLEN_P(arg) - 1; i >= 0; i--) {
+		c = toupper(s[i]);
+		if (c >= '0' && c <= '9') {
+			digit = (c - '0');
+		} else if (c >= 'A' && c <= 'Z') {
+			digit = (c - 'A' + 10);
+		} else {
+			continue;
+		}
+		if (digit >= base) {
+			continue;
+		}
+		if(!f_mode && (!mult || digit > LONG_MAX/mult || num > LONG_MAX-mult*digit)) {
+			f_mode = 1;
+			if(!mult) {
+				fmult = ULONG_MAX + 1;
+			} else {
+				fmult = (unsigned long)mult;
+			}
+			fnum = (unsigned long)num;
+		}
+		
+		if(f_mode) {
+			fnum += fmult * digit;
+			fmult *= base;
+		} else {
+			num += mult * digit;
+			mult *= base;
+		}
+	}
+
+	if(f_mode) {
+		ZVAL_DOUBLE(ret, fnum);
+	} else {
+		ZVAL_LONG(ret, num);
+	}
+	return SUCCESS;
+}
+
+/* }}} */
+/* {{{ _php_math_longtobase */
+
 /*
  * Convert a long to a string containing a base(2-36) representation of
  * the number.
@@ -737,22 +799,77 @@ _php_math_longtobase(zval *arg, int base)
 }	
 
 /* }}} */
+/* {{{ _php_math_zvaltobase */
+
+/*
+ * Convert a zval to a string containing a base(2-36) representation of
+ * the number.
+ */
+PHPAPI char *
+_php_math_zvaltobase(zval *arg, int base)
+{
+	static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	char *result, *ptr, *ret;
+	int len, digit;
+	unsigned long value;
+	double fvalue;
+	int f_mode;
+
+	if ((Z_TYPE_P(arg) != IS_LONG && Z_TYPE_P(arg) != IS_DOUBLE) || base < 2 || base > 36) {
+		return empty_string;
+	}
+
+	f_mode = (Z_TYPE_P(arg) == IS_DOUBLE);
+
+	if(f_mode) {
+		fvalue = floor(Z_DVAL_P(arg)); /* floor it just in case */
+	} else {
+		value = Z_LVAL_P(arg);
+	}
+
+	/* allocates space for the longest possible result with the lowest base */
+	len = (sizeof(Z_DVAL_P(arg)) * 8) + 1;
+	result = emalloc((sizeof(Z_DVAL_P(arg)) * 8) + 1);
+
+	ptr = result + len - 1;
+	*ptr-- = '\0';
+
+	do {
+		if(f_mode) {
+			double d = floor(fvalue/base);
+			digit = (int)ceil(fvalue - d*base);
+			*ptr = digits[digit];
+			fvalue = d;
+		} else {
+			digit = value % base;
+			*ptr = digits[digit];
+			value /= base;
+		}
+	}
+	while (ptr-- > result && (f_mode?(fabs(fvalue)>=1):value));
+	ptr++;
+	ret = estrdup(ptr);
+	efree(result);
+
+	return ret;
+}	
+
+/* }}} */
 /* {{{ proto int bindec(string binary_number)
    Returns the decimal equivalent of the binary number */
 
 PHP_FUNCTION(bindec)
 {
 	zval **arg;
-	long ret;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(arg);
-	ret = _php_math_basetolong(*arg, 2);
-
-	RETVAL_LONG(ret);
+	if(_php_math_basetozval(*arg, 2, return_value) != SUCCESS) {
+		RETURN_FALSE;
+	}
 }
 
 /* }}} */
@@ -762,7 +879,6 @@ PHP_FUNCTION(bindec)
 PHP_FUNCTION(hexdec)
 {
 	zval **arg;
-	long ret;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -770,8 +886,9 @@ PHP_FUNCTION(hexdec)
 
 	convert_to_string_ex(arg);
 
-	ret = _php_math_basetolong(*arg, 16);
-	RETVAL_LONG(ret);
+	if(_php_math_basetozval(*arg, 16, return_value) != SUCCESS) {
+		RETURN_FALSE;
+	}
 }
 
 /* }}} */
@@ -781,7 +898,6 @@ PHP_FUNCTION(hexdec)
 PHP_FUNCTION(octdec)
 {
 	zval **arg;
-	long ret;
 	
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -789,8 +905,9 @@ PHP_FUNCTION(octdec)
 
 	convert_to_string_ex(arg);
 
-	ret = _php_math_basetolong(*arg, 8);
-	RETVAL_LONG(ret);
+	if(_php_math_basetozval(*arg, 8, return_value) != SUCCESS) {
+		RETURN_FALSE;
+	}
 }
 
 /* }}} */
@@ -858,6 +975,7 @@ PHP_FUNCTION(dechex)
 
 /* }}} */
 /* {{{ proto string base_convert(string number, int frombase, int tobase)
+
    Converts a number in a string from any base <= 36 to any base <= 36.
 */
 
@@ -880,9 +998,11 @@ PHP_FUNCTION(base_convert)
 		php_error(E_WARNING, "base_convert: invalid `to base' (%d)", Z_LVAL_PP(tobase));
 		RETURN_FALSE;
 	}
-	Z_TYPE(temp) = IS_LONG;
-	Z_LVAL(temp) = _php_math_basetolong(*number, Z_LVAL_PP(frombase));
-	result = _php_math_longtobase(&temp, Z_LVAL_PP(tobase));
+
+	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp) != SUCCESS) {
+		RETURN_FALSE;
+	}
+	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase));
 	RETVAL_STRING(result, 0);
 } 
 
