@@ -153,6 +153,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = op_array->opcodes+op_array->last;
 
+	if (op_array->static_variables) {
+		zend_hash_destroy(op_array->static_variables);
+		efree(op_array->static_variables);
+	}
+
 	if (--(*op_array->refcount)>0) {
 		return;
 	}
@@ -183,10 +188,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
-	}
-	if (op_array->static_variables) {
-		zend_hash_destroy(op_array->static_variables);
-		efree(op_array->static_variables);
 	}
 	zend_llist_apply_with_argument(&zend_extensions, (void (*)(void *, void *)) zend_extension_op_array_dtor_handler, op_array);
 }
