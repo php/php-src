@@ -758,7 +758,7 @@ select_colors (gdImagePtr im, my_cquantize_ptr cquantize, int desired_colors)
 #ifdef ORIGINAL_LIB_JPEG
 	boxlist = (boxptr) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE, desired_colors * SIZEOF (box));
 #else
-	boxlist = (boxptr) gdMalloc (desired_colors * sizeof (box));
+	boxlist = (boxptr) safe_emalloc(desired_colors, sizeof(box), 0);
 #endif
 	/* Initialize one box containing whole space */
 	numboxes = 1;
@@ -1511,7 +1511,7 @@ init_error_limit (gdImagePtr im, my_cquantize_ptr cquantize)
 	my_cquantize_ptr cquantize = (my_cquantize_ptr) cinfo->cquantize;
 	table = (int *) (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_IMAGE, (MAXJSAMPLE * 2 + 1) * SIZEOF (int));
 #else
-	cquantize->error_limiter_storage = (int *) gdMalloc ((MAXJSAMPLE * 2 + 1) * sizeof (int));
+	cquantize->error_limiter_storage = (int *) safe_emalloc((MAXJSAMPLE * 2 + 1), sizeof(int), 0);
 	if (!cquantize->error_limiter_storage) {
 		return;
 	}
@@ -1712,9 +1712,9 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 	}
 	cquantize->needs_zeroed = TRUE;	/* histogram is garbage now */
 #else
-	cquantize->histogram = (hist3d) gdMalloc (HIST_C0_ELEMS * sizeof (hist2d));
+	cquantize->histogram = (hist3d) safe_emalloc(HIST_C0_ELEMS, sizeof(hist2d), 0);
 	for (i = 0; i < HIST_C0_ELEMS; i++) {
-		cquantize->histogram[i] = (hist2d) gdMalloc(HIST_C1_ELEMS * HIST_C2_ELEMS * sizeof (histcell));
+		cquantize->histogram[i] = (hist2d) safe_emalloc((HIST_C1_ELEMS * HIST_C2_ELEMS), sizeof(histcell), 0);
 	}
 #endif
 
@@ -1758,7 +1758,7 @@ gdImageTrueColorToPalette (gdImagePtr im, int dither, int colorsWanted)
 	}
 #else
 
-	cquantize->fserrors = (FSERRPTR) gdMalloc(3 * sizeof (FSERROR));
+	cquantize->fserrors = (FSERRPTR) gdMalloc(3 * sizeof(FSERROR));
 	init_error_limit (im, cquantize);
 	arraysize = (size_t) ((im->sx + 2) * (3 * sizeof (FSERROR)));
 	gdFree(cquantize->fserrors);
@@ -1884,7 +1884,7 @@ int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2)
 		return -3; /* the images are meant to be the same dimensions */
 	}
 
-	buf = (unsigned long *)gdMalloc( sizeof(unsigned long) * 5 * im2->colorsTotal );
+	buf = (unsigned long *)safe_emalloc(sizeof(unsigned long), (5 * im2->colorsTotal), 0);
 	memset( buf, 0, sizeof(unsigned long) * 5 * im2->colorsTotal );
 
 	for (x=0; x<im1->sx; x++) {

@@ -216,7 +216,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 		case PNG_COLOR_TYPE_GRAY:
 		case PNG_COLOR_TYPE_GRAY_ALPHA:
 			/* create a fake palette and check for single-shade transparency */
-			if ((palette = (png_colorp) gdMalloc (256 * sizeof (png_color))) == NULL) {
+			if ((palette = (png_colorp) safe_emalloc(256, sizeof(png_color), 0)) == NULL) {
 				php_gd_error("gd-png error: cannot allocate gray palette\n");
 				png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
@@ -281,9 +281,9 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 
 	/* allocate space for the PNG image data */
 	rowbytes = png_get_rowbytes(png_ptr, info_ptr);
-	image_data = (png_bytep) gdMalloc (rowbytes * height);
+	image_data = (png_bytep) safe_emalloc(rowbytes, height, 0);
 
-	row_pointers = (png_bytepp) gdMalloc (height * sizeof (png_bytep));
+	row_pointers = (png_bytepp) safe_emalloc(height, sizeof (png_bytep), 0);
 
 	/* set the individual row_pointers to point at the correct offsets */
 	for (h = 0; h < height; ++h) {
@@ -625,10 +625,10 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 		int channels = im->saveAlphaFlag ? 4 : 3;
 		/* Our little 7-bit alpha channel trick costs us a bit here. */
 		png_bytep *row_pointers;
-		row_pointers = gdMalloc(sizeof (png_bytep) * height);
+		row_pointers = safe_emalloc(sizeof(png_bytep), height, 0);
 		for (j = 0; j < height; ++j) {
 			int bo = 0;
-			row_pointers[j] = (png_bytep) gdMalloc(width * channels);
+			row_pointers[j] = (png_bytep) safe_emalloc(width, channels, 0);
 			for (i = 0; i < width; ++i) {
 				unsigned char a;
 				row_pointers[j][bo++] = gdTrueColorGetRed(im->tpixels[j][i]);
@@ -659,7 +659,7 @@ void gdImagePngCtxEx (gdImagePtr im, gdIOCtx * outfile, int level)
 	} else {
 		if (remap) {
 			png_bytep *row_pointers;
-			row_pointers = gdMalloc(sizeof (png_bytep) * height);
+			row_pointers = safe_emalloc(sizeof(png_bytep), height, 0);
 			for (j = 0; j < height; ++j) {
 				row_pointers[j] = (png_bytep) gdMalloc(width);
 				for (i = 0; i < width; ++i) {

@@ -125,8 +125,8 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
 	/* Row-major ever since gd 1.3 */
-	im->pixels = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
-	im->AA_opacity = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
+	im->pixels = (unsigned char **) safe_emalloc(sizeof(unsigned char *), sy, 0);
+	im->AA_opacity = (unsigned char **) safe_emalloc(sizeof(unsigned char *), sy, 0);
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
@@ -166,8 +166,8 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	gdImagePtr im;
 	im = (gdImage *) gdMalloc(sizeof(gdImage));
 	memset(im, 0, sizeof(gdImage));
-	im->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
-	im->AA_opacity = (unsigned char **) gdMalloc(sizeof(unsigned char *) * sy);
+	im->tpixels = (int **) safe_emalloc(sizeof(int *), sy, 0);
+	im->AA_opacity = (unsigned char **) safe_emalloc(sizeof(unsigned char *), sy, 0);
 	im->polyInts = 0;
 	im->polyAllocated = 0;
 	im->brush = 0;
@@ -2146,8 +2146,8 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	int *stx, *sty;
 	/* We only need to use floating point to determine the correct stretch vector for one line's worth. */
 	double accum;
-	stx = (int *) gdMalloc (sizeof (int) * srcW);
-	sty = (int *) gdMalloc (sizeof (int) * srcH);
+	stx = (int *) safe_emalloc(sizeof(int), srcW, 0);
+	sty = (int *) safe_emalloc(sizeof(int), srcH, 0);
 	accum = 0;
 	
 	for (i = 0; (i < srcW); i++) {
@@ -2854,7 +2854,7 @@ void gdImageFilledPolygon (gdImagePtr im, gdPointPtr p, int n, int c)
 	}
 	
 	if (!im->polyAllocated) {
-		im->polyInts = (int *) gdMalloc(sizeof(int) * n);
+		im->polyInts = (int *) safe_emalloc(sizeof(int), n, 0);
 		im->polyAllocated = n;
 	}
 	if (im->polyAllocated < n) {
@@ -2933,7 +2933,7 @@ void gdImageSetStyle (gdImagePtr im, int *style, int noOfPixels)
 	if (im->style) {
 		gdFree(im->style);
 	}
-	im->style = (int *) gdMalloc(sizeof(int) * noOfPixels);
+	im->style = (int *) safe_emalloc(sizeof(int), noOfPixels, 0);
 	memcpy(im->style, style, sizeof(int) * noOfPixels);
 	im->styleLength = noOfPixels;
 	im->stylePos = 0;
