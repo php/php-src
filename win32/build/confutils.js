@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.17 2003-12-05 02:41:00 wez Exp $
+// $Id: confutils.js,v 1.18 2003-12-06 00:00:31 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -427,14 +427,14 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 
 	if (typeof(p) == "string") {
 		ADD_FLAG(flag_name, '/I "' + p + '" ');
-		have = 1;
 	} else if (p == false) {
 		/* not found in the defaults or the explicit paths,
 		 * so check the general extra includes; if we find
 		 * it here, no need to add another /I for it as we
 		 * already have it covered */
 		p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
-	}
+	} 
+	have = p ? 1 : 0
 
 	sym = header_name.toUpperCase();
 	sym = sym.replace(new RegExp("[\\\\/\.-]", "g"), "_");

@@ -103,7 +103,7 @@ int inet_aton(const char *, struct in_addr *);
 # define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
 #ifdef HAVE_GAI_STRERROR
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
@@ -168,7 +168,7 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 {
 	struct sockaddr **sap;
 	int n;
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
 	struct addrinfo hints, *res, *sai;
 #else
@@ -179,13 +179,13 @@ static int php_network_getaddresses(const char *host, int socktype, struct socka
 	if (host == NULL) {
 		return 0;
 	}
-#ifdef HAVE_GETADDRINFO
+#if HAVE_GETADDRINFO
 	memset(&hints, '\0', sizeof(hints));
 		
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
 	hints.ai_socktype = socktype;
 		
-# ifdef HAVE_IPV6
+# if HAVE_IPV6
 	/* probe for a working IPv6 stack; even if detected as having v6 at compile
 	 * time, at runtime some stacks are slow to resolve or have other issues
 	 * if they are not correctly configured.
@@ -488,7 +488,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, long ad
 	struct sockaddr **psal;
 	int n;
 	char *errstr = NULL;
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	struct sockaddr_in6 *in6 = (struct sockaddr_in6*)sa;
 #endif
 
@@ -860,7 +860,7 @@ PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short 
 {
 	memset(addr, 0, sizeof(php_sockaddr_storage));
 	switch (family) {
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	case AF_INET6: {
 		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) addr;
 		sin6->sin6_family = AF_INET6;
@@ -888,7 +888,7 @@ PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
 		return sizeof(struct sockaddr_in);
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	case AF_INET6:
 		return sizeof(struct sockaddr_in6);
 #endif

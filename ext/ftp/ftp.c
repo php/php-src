@@ -714,7 +714,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	memset(&ftp->pasvaddr, 0, n);
 	sa = (struct sockaddr *) &ftp->pasvaddr;
 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	if (getpeername(ftp->fd, sa, &n) < 0) {
 		return 0;
 	}
@@ -1454,7 +1454,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 
 	data->listener = fd;
 
-#ifdef HAVE_IPV6
+#if HAVE_IPV6
 	if (sa->sa_family == AF_INET6) {
 		/* need to use EPRT */
 		char eprtarg[INET6_ADDRSTRLEN + sizeof("|x||xxxxx|")];

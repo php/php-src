@@ -467,6 +467,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
 
+#if HAVE_IPV6
+		php_info_print_table_row(2, "IPv6 Support", "enabled" );
+#else
+		php_info_print_table_row(2, "IPv6 Support", "disabled" );
+#endif
 		{
 			HashTable *url_stream_wrappers_hash;
 			char *stream_protocol, *stream_protocols_buf = NULL;
