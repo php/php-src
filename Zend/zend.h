@@ -284,16 +284,16 @@ END_EXTERN_C()
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 
-#define ALLOC_ZVAL() (zval *) emalloc(sizeof(zval))
+#define ALLOC_ZVAL(z) (z) = (zval *) emalloc(sizeof(zval))
 
 #define FREE_ZVAL(z) efree(z)
 
 #define ALLOC_INIT_ZVAL(zp)						\
-	(zp) = ALLOC_ZVAL();		\
+	ALLOC_ZVAL(zp);		\
 	INIT_ZVAL(*zp);
 
 #define MAKE_STD_ZVAL(zv)				 \
-	zv = ALLOC_ZVAL(); \
+	ALLOC_ZVAL(zv); \
 	INIT_PZVAL(zv);
 
 #define SEPARATE_ZVAL(ppzv)									\
@@ -302,7 +302,7 @@ END_EXTERN_C()
 															\
 		if (orig_ptr->refcount>1) {							\
 			orig_ptr->refcount--;							\
-			*(ppzv) = ALLOC_ZVAL();		\
+			ALLOC_ZVAL(*(ppzv));		\
 			**(ppzv) = *orig_ptr;							\
 			zval_copy_ctor(*(ppzv));						\
 			(*(ppzv))->refcount=1;							\

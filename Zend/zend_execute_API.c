@@ -344,7 +344,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 				if (no_separation) {
 					return FAILURE;
 				}
-				new_zval = ALLOC_ZVAL();
+				ALLOC_ZVAL(new_zval);
 				*new_zval = **params[i];
 				zval_copy_ctor(new_zval);
 				new_zval->refcount = 1;
@@ -358,7 +358,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 			(*params[i])->refcount++;
 			param = *params[i];
 		} else {
-			param = ALLOC_ZVAL();
+			ALLOC_ZVAL(param);
 			*param = **(params[i]);
 			INIT_PZVAL(param);
 		}
@@ -373,8 +373,9 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
 		zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
 		if (object) {
-			zval *dummy = ALLOC_ZVAL(), **this_ptr;
+			zval *dummy, **this_ptr;
 
+			ALLOC_ZVAL(dummy);
 			INIT_ZVAL(*dummy);
 			
 			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
@@ -494,7 +495,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 			/* break it away */
 			value_ptr->refcount--;
 			if (value_ptr->refcount>0) {
-				*value_ptr_ptr = ALLOC_ZVAL();
+				ALLOC_ZVAL(*value_ptr_ptr);
 				**value_ptr_ptr = *value_ptr;
 				value_ptr = *value_ptr_ptr;
 				zendi_zval_copy_ctor(*value_ptr);

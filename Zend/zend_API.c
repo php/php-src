@@ -58,7 +58,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count,...)
 		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
-			new_tmp = ALLOC_ZVAL();
+			ALLOC_ZVAL(new_tmp);
 			*new_tmp = *param_ptr;
 			zval_copy_ctor(new_tmp);
 			INIT_PZVAL(new_tmp);
@@ -95,7 +95,7 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 		if (!PZVAL_IS_REF(param_ptr) && param_ptr->refcount>1) {
 			zval *new_tmp;
 
-			new_tmp = ALLOC_ZVAL();
+			ALLOC_ZVAL(new_tmp);
 			*new_tmp = *param_ptr;
 			zval_copy_ctor(new_tmp);
 			INIT_PZVAL(new_tmp);
@@ -230,8 +230,9 @@ ZEND_API inline int add_assoc_function(zval *arg, char *key,void (*function_ptr)
 
 ZEND_API inline int add_assoc_long(zval *arg, char *key, long n)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
 	INIT_PZVAL(tmp);
@@ -241,8 +242,9 @@ ZEND_API inline int add_assoc_long(zval *arg, char *key, long n)
 
 ZEND_API inline int add_assoc_bool(zval *arg, char *key, int b)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_BOOL;
 	tmp->value.lval = b;
 	INIT_PZVAL(tmp);
@@ -252,8 +254,9 @@ ZEND_API inline int add_assoc_bool(zval *arg, char *key, int b)
 
 ZEND_API inline int add_assoc_resource(zval *arg, char *key, int r)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_RESOURCE;
 	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
@@ -263,8 +266,9 @@ ZEND_API inline int add_assoc_resource(zval *arg, char *key, int r)
 
 ZEND_API inline int add_assoc_double(zval *arg, char *key, double d)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
 	INIT_PZVAL(tmp);
@@ -274,8 +278,9 @@ ZEND_API inline int add_assoc_double(zval *arg, char *key, double d)
 
 ZEND_API inline int add_assoc_string(zval *arg, char *key, char *str, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -290,8 +295,9 @@ ZEND_API inline int add_assoc_string(zval *arg, char *key, char *str, int duplic
 
 ZEND_API inline int add_assoc_stringl(zval *arg, char *key, char *str, uint length, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {
@@ -306,8 +312,9 @@ ZEND_API inline int add_assoc_stringl(zval *arg, char *key, char *str, uint leng
 
 ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
 	INIT_PZVAL(tmp);
@@ -317,8 +324,9 @@ ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 
 ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_BOOL;
 	tmp->value.lval = b;
 	INIT_PZVAL(tmp);
@@ -328,8 +336,9 @@ ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
 
 ZEND_API inline int add_index_resource(zval *arg, uint index, int r)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_RESOURCE;
 	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
@@ -339,8 +348,9 @@ ZEND_API inline int add_index_resource(zval *arg, uint index, int r)
 
 ZEND_API inline int add_index_double(zval *arg, uint index, double d)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
 	INIT_PZVAL(tmp);
@@ -350,8 +360,9 @@ ZEND_API inline int add_index_double(zval *arg, uint index, double d)
 
 ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -366,8 +377,9 @@ ZEND_API inline int add_index_string(zval *arg, uint index, char *str, int dupli
 
 ZEND_API inline int add_index_stringl(zval *arg, uint index, char *str, uint length, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {
@@ -382,8 +394,9 @@ ZEND_API inline int add_index_stringl(zval *arg, uint index, char *str, uint len
 
 ZEND_API inline int add_next_index_long(zval *arg, long n)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
 	INIT_PZVAL(tmp);
@@ -393,8 +406,9 @@ ZEND_API inline int add_next_index_long(zval *arg, long n)
 
 ZEND_API inline int add_next_index_bool(zval *arg, int b)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_BOOL;
 	tmp->value.lval = b;
 	INIT_PZVAL(tmp);
@@ -404,8 +418,9 @@ ZEND_API inline int add_next_index_bool(zval *arg, int b)
 
 ZEND_API inline int add_next_index_resource(zval *arg, int r)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_RESOURCE;
 	tmp->value.lval = r;
 	INIT_PZVAL(tmp);
@@ -415,8 +430,9 @@ ZEND_API inline int add_next_index_resource(zval *arg, int r)
 
 ZEND_API inline int add_next_index_double(zval *arg, double d)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
 	INIT_PZVAL(tmp);
@@ -426,8 +442,9 @@ ZEND_API inline int add_next_index_double(zval *arg, double d)
 
 ZEND_API inline int add_next_index_string(zval *arg, char *str, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -442,8 +459,9 @@ ZEND_API inline int add_next_index_string(zval *arg, char *str, int duplicate)
 
 ZEND_API inline int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {
@@ -458,8 +476,9 @@ ZEND_API inline int add_next_index_stringl(zval *arg, char *str, uint length, in
 
 ZEND_API inline int add_get_assoc_string(zval *arg, char *key, char *str, void **dest, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -474,8 +493,9 @@ ZEND_API inline int add_get_assoc_string(zval *arg, char *key, char *str, void *
 
 ZEND_API inline int add_get_assoc_stringl(zval *arg, char *key, char *str, uint length, void **dest, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {
@@ -490,8 +510,9 @@ ZEND_API inline int add_get_assoc_stringl(zval *arg, char *key, char *str, uint 
 
 ZEND_API inline int add_get_index_long(zval *arg, uint index, long l, void **dest)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = l;
 	INIT_PZVAL(tmp);
@@ -501,8 +522,9 @@ ZEND_API inline int add_get_index_long(zval *arg, uint index, long l, void **des
 
 ZEND_API inline int add_get_index_double(zval *arg, uint index, double d, void **dest)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval= d;
 	INIT_PZVAL(tmp);
@@ -512,8 +534,9 @@ ZEND_API inline int add_get_index_double(zval *arg, uint index, double d, void *
 
 ZEND_API inline int add_get_index_string(zval *arg, uint index, char *str, void **dest, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -528,8 +551,9 @@ ZEND_API inline int add_get_index_string(zval *arg, uint index, char *str, void 
 
 ZEND_API inline int add_get_index_stringl(zval *arg, uint index, char *str, uint length, void **dest, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {
@@ -544,8 +568,9 @@ ZEND_API inline int add_get_index_stringl(zval *arg, uint index, char *str, uint
 
 ZEND_API inline int add_property_long(zval *arg, char *key, long n)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
 	INIT_PZVAL(tmp);
@@ -554,8 +579,9 @@ ZEND_API inline int add_property_long(zval *arg, char *key, long n)
 
 ZEND_API inline int add_property_resource(zval *arg, char *key, long n)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_RESOURCE;
 	tmp->value.lval = n;
 	INIT_PZVAL(tmp);
@@ -565,8 +591,9 @@ ZEND_API inline int add_property_resource(zval *arg, char *key, long n)
 
 ZEND_API inline int add_property_double(zval *arg, char *key, double d)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_DOUBLE;
 	tmp->value.dval = d;
 	INIT_PZVAL(tmp);
@@ -576,8 +603,9 @@ ZEND_API inline int add_property_double(zval *arg, char *key, double d)
 
 ZEND_API inline int add_property_string(zval *arg, char *key, char *str, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = strlen(str);
 	if (duplicate) {
@@ -592,8 +620,9 @@ ZEND_API inline int add_property_string(zval *arg, char *key, char *str, int dup
 
 ZEND_API inline int add_property_stringl(zval *arg, char *key, char *str, uint length, int duplicate)
 {
-	zval *tmp = ALLOC_ZVAL();
+	zval *tmp;
 
+	ALLOC_ZVAL(tmp);
 	tmp->type = IS_STRING;
 	tmp->value.str.len = length;
 	if (duplicate) {

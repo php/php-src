@@ -162,7 +162,7 @@ ZEND_FUNCTION(func_get_args)
 	for (i=0; i<arg_count; i++) {
 		zval *element;
 
-		element = ALLOC_ZVAL();
+		ALLOC_ZVAL(element);
 		*element = **((zval **) (p-(arg_count-i)));
 		zval_copy_ctor(element);
 		INIT_PZVAL(element);
@@ -239,7 +239,7 @@ ZEND_FUNCTION(each)
 
 	/* add value elements */
 	if (entry->is_ref) {
-		tmp = ALLOC_ZVAL();
+		ALLOC_ZVAL(tmp);
 		*tmp = *entry;
 		zval_copy_ctor(tmp);
 		tmp->is_ref=0;

@@ -356,7 +356,7 @@ PHP_FUNCTION(iptcparse)
 		}
 
 		if (zend_hash_find(return_value->value.ht,key,strlen(key) + 1,(void **) &element) == FAILURE) {
-			values = ALLOC_ZVAL();
+			ALLOC_ZVAL(values);
 			INIT_PZVAL(values);
 			if (array_init(values) == FAILURE) {
 				php_error(E_ERROR, "Unable to initialize array");
