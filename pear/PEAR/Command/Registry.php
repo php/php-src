@@ -258,16 +258,27 @@ installed package.'
                         $i = 0;
                         $dstr = '';
                         foreach ($info[$key] as $d) {
-                            if ($i++ > 0) {
-                                $dstr .= ", ";
-                            }
                             if (isset($this->_deps_rel_trans[$d['rel']])) {
-                                $d['rel'] = $this->_deps_rel_trans[$d['rel']];
+                                $rel = $this->_deps_rel_trans[$d['rel']];
+                            } else {
+                                $rel = $d['rel'];
                             }
-                            $dstr .= "$d[type] $d[rel]";
+
+                            if (isset($this->_deps_type_trans[$d['type']])) {
+                                $type = ucfirst($this->_deps_type_trans[$d['type']]);
+                            } else {
+                                $type = $d['type'];
+                            }
+
+                            if (isset($d['name'])) {
+                                $name = $d['name'] . ' ';
+                            }
                             if (isset($d['version'])) {
-                                $dstr .= " $d[version]";
+                                $version = $d['version'];
+                            } else {
+                                $version = '';
                             }
+                            $dstr .= "$type $name$rel $version\n";
                         }
                         $info[$key] = $dstr;
                         break;
@@ -278,9 +289,15 @@ installed package.'
                     }
                 }
             }
-            $info[$key] = trim($info[$key]);
-            if (in_array($key, $longtext)) {
-                $info[$key] = preg_replace('/  +/', ' ', $info[$key]);
+            if ($key == '_lastmodified') {
+                $hdate = date('Y-m-d', $info[$key]);
+                unset($info[$key]);
+                $info['Last Modified'] = $hdate;
+            } else {
+                $info[$key] = trim($info[$key]);
+                if (in_array($key, $longtext)) {
+                    $info[$key] = preg_replace('/  +/', ' ', $info[$key]);
+                }
             }
         }
         $caption = 'About ' . $info['package'] . '-' . $info['version'];
@@ -288,7 +305,7 @@ installed package.'
             'caption' => $caption,
             'border' => true);
         foreach ($info as $key => $value) {
-            $key = ucwords(str_replace('_', ' ', $key));
+            $key = ucwords(trim(str_replace('_', ' ', $key)));
             $data['data'][] = array($key, $value);
         }
 
