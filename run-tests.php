@@ -161,8 +161,10 @@ function initialize()
         }
     }
 
-    if (isset($GLOBALS["TOP_BUILDDIR"]) && @is_executable($GLOBALS["TOP_BUILDDIR"]."/php{$ext}")) {
-        $php = $GLOBALS["TOP_BUILDDIR"]."/php{$ext}";
+    if (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}")) {
+        $php = $_ENV["TOP_BUILDDIR"]."/sapi/cli/php{$ext}";
+    } elseif (isset($_ENV["TOP_BUILDDIR"]) && @is_executable($_ENV["TOP_BUILDDIR"]."/php{$ext}")) {
+        $php = $_ENV["TOP_BUILDDIR"]."/php{$ext}";
     } elseif (@is_executable("./php{$ext}")) {
         $php = getcwd() . "/php{$ext}";
     }
@@ -241,7 +243,7 @@ function do_testing($argc, &$argv)
             }
         }
     } else {
-        // $dir = $GLOBALS["TOP_SRCDIR"]; // XXX ??? where should this variable be set?
+        // $dir = $_ENV["TOP_SRCDIR"]; // XXX ??? where should this variable be set?
         $dir=str_replace('\\','/',trim(($windows_p ? getenv("TEST_DIR"):`pwd`)));
     }
     if (isset($dir) && $dir) {
@@ -376,6 +378,10 @@ function run_tests_in_dir($dir = '.')
 
 function skip_headers($fp)
 {
+    // "cli" version of PHP does not output headers
+    if (php_sapi_name() == "cli") {
+	return;
+    }
     while (!feof($fp)) {
         if (trim(fgets($fp, 1024)) == "") {
             break;
@@ -538,7 +544,6 @@ function run_test($file)
         delete_tmpfiles();
         return TEST_INTERNAL_ERROR;
     }
-    //echo $cmd;
     $cp = popen($cmd, "r");
     if (!$cp) {
         dowriteln("Error: could not execute: $cmd");
