@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2003, Version 4.3.5
+- Added support for --program-prefix and --program-suffix configure options.
+  (Jani)
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26467 (flock() does not force the "wouldblock" parameter to be 
