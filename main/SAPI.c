@@ -302,10 +302,10 @@ SAPI_API int sapi_send_headers()
 				http_status_line.header_len = strlen(SG(sapi_headers).http_status_line);
 				sapi_module.send_header(&http_status_line, SG(server_context));
 			}
-			if (SG(sapi_headers).send_default_content_type) {
-				sapi_module.send_header(&default_header, SG(server_context));
-			}
 			zend_llist_apply_with_argument(&SG(sapi_headers).headers, (void (*)(void *, void *)) sapi_module.send_header, SG(server_context));
+			if(SG(sapi_headers).send_default_content_type) {
+				sapi_module.send_header(&default_header,SG(server_context));
+			}
 			sapi_module.send_header(NULL, SG(server_context));
 			SG(headers_sent) = 1;
 			ret = SUCCESS;
