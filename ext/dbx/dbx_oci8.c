@@ -40,7 +40,7 @@ int dbx_oci8_connect(zval **rv, zval **host, zval **db, zval **username, zval **
 	arguments[0]=username;
 	arguments[1]=password;
 	arguments[2]=db;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCILogon", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_connect", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
@@ -59,7 +59,7 @@ int dbx_oci8_pconnect(zval **rv, zval **host, zval **db, zval **username, zval *
 	arguments[0]=username;
 	arguments[1]=password;
 	arguments[2]=db;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIPLogon", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_pconnect", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_RESOURCE) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
@@ -71,14 +71,14 @@ int dbx_oci8_pconnect(zval **rv, zval **host, zval **db, zval **username, zval *
 int dbx_oci8_close(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 {
 	/* returns 1 as long on success or 0 as long on failure */
-	/* actually, ocilogoff officially does nothing, so what should I return? */
+	/* actually, oci_close officially does nothing, so what should I return? */
 	/* I will just return NULL right now and change the test accordingly */
 	int number_of_arguments=1;
 	zval **arguments[1];
 	zval *returned_zval=NULL;
 
 	arguments[0]=dbx_handle;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCILogOff", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_close", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_BOOL) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
@@ -98,16 +98,16 @@ int dbx_oci8_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_stat
 
 	arguments[0]=dbx_handle;
 	arguments[1]=sql_statement;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIParse", &returned_zval, number_of_arguments, arguments);
-	/* OCIParse returns a bool for failure, or a statement_identifier for valid sql_statements */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_parse", &returned_zval, number_of_arguments, arguments);
+	/* oci_parse returns a bool for failure, or a statement_identifier for valid sql_statements */
 	if (!returned_zval || (Z_TYPE_P(returned_zval)!=IS_BOOL && Z_TYPE_P(returned_zval)!=IS_RESOURCE)) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
 	}
 	number_of_arguments=1;
 	arguments[0]=&returned_zval;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIExecute", &execute_zval, number_of_arguments, arguments);
-	/* OCIExecute returns a bool for success or failure */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_execute", &execute_zval, number_of_arguments, arguments);
+	/* oci_execute returns a bool for success or failure */
 	if (!execute_zval || Z_TYPE_P(execute_zval)!=IS_BOOL || Z_BVAL_P(execute_zval)==0) {
 		if (execute_zval) zval_ptr_dtor(&execute_zval);
 		zval_ptr_dtor(&returned_zval);
@@ -115,8 +115,8 @@ int dbx_oci8_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_stat
 	}
 	number_of_arguments=1;
 	arguments[0]=&returned_zval;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIStatementType", &statementtype_zval, number_of_arguments, arguments);
-	/* OCIStatementType returns a string. 'SELECT' means there are results */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_statement_type", &statementtype_zval, number_of_arguments, arguments);
+	/* oci_statement_type returns a string. 'SELECT' means there are results */
 	if (!statementtype_zval || Z_TYPE_P(statementtype_zval)!=IS_STRING) {
 		if (statementtype_zval) zval_ptr_dtor(&statementtype_zval);
 		if (execute_zval) zval_ptr_dtor(&execute_zval);
@@ -148,7 +148,7 @@ int dbx_oci8_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_P
 	zval *returned_zval=NULL;
 
 	arguments[0]=result_handle;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCINumCols", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_num_fields", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
@@ -170,8 +170,8 @@ int dbx_oci8_getcolumnname(zval **rv, zval **result_handle, long column_index, I
 	ZVAL_LONG(zval_column_index, column_index+1);
 	arguments[0]=result_handle;
 	arguments[1]=&zval_column_index;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIColumnName", &returned_zval, number_of_arguments, arguments);
-	/* OCIColumnName returns a string */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_field_name", &returned_zval, number_of_arguments, arguments);
+	/* oci_field_name returns a string */
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
@@ -195,8 +195,8 @@ int dbx_oci8_getcolumntype(zval **rv, zval **result_handle, long column_index, I
 	ZVAL_LONG(zval_column_index, column_index+1);
 	arguments[0]=result_handle;
 	arguments[1]=&zval_column_index;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIColumnType", &returned_zval, number_of_arguments, arguments);
-	/* OCIColumnType returns a string??? */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_field_type", &returned_zval, number_of_arguments, arguments);
+	/* oci_field_type returns a string??? */
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_column_index);
@@ -211,31 +211,23 @@ int dbx_oci8_getcolumntype(zval **rv, zval **result_handle, long column_index, I
 int dbx_oci8_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS)
 {
 	/* returns array[0..columncount-1] as strings on success or 0 as long on failure */
-	int number_of_arguments=3;
-	zval **arguments[3];
+	int number_of_arguments=2;
+	zval **arguments[2];
 	zval *zval_resulttype=NULL;
-	zval *zval_returned_array=NULL;
 	zval *returned_zval=NULL;
 
-	MAKE_STD_ZVAL(zval_returned_array); /* no value needed, it will be overwritten anyway */
-	ZVAL_EMPTY_STRING(zval_returned_array); /* there seems to be some weird mem-bug, so assigning a value anyway */
 	MAKE_STD_ZVAL(zval_resulttype);
 	ZVAL_LONG(zval_resulttype, OCI_NUM | OCI_RETURN_NULLS | OCI_RETURN_LOBS); /* no ASSOC, dbx handles that part */
 	arguments[0]=result_handle;
-	arguments[1]=&zval_returned_array;
-	arguments[2]=&zval_resulttype;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIFetchInto", &returned_zval, number_of_arguments, arguments);
-	/* OCIFetchInto returns the number of columns as an integer on success and FALSE */
-	/* on failure. The actual array is passed back in arg[1] */
-	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG || Z_LVAL_P(returned_zval)==0) {
+	arguments[1]=&zval_resulttype;
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_fetch_array", &returned_zval, number_of_arguments, arguments);
+	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_ARRAY) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		FREE_ZVAL(zval_resulttype);
-		FREE_ZVAL(zval_returned_array);
 		return 0;
 	}
 	FREE_ZVAL(zval_resulttype);
-	zval_ptr_dtor(&returned_zval);
-	MOVE_RETURNED_TO_RV(rv, zval_returned_array);
+	MOVE_RETURNED_TO_RV(rv, returned_zval);
 	return 1;
 }
 
@@ -251,8 +243,8 @@ int dbx_oci8_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 	zval *returned_message_zval=NULL;
 	arguments[0]=dbx_handle;
 	if (!dbx_handle) number_of_arguments=0;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "OCIError", &returned_zval, number_of_arguments, arguments);
-	/* OCIError should returns an assoc array containing code & message, dbx needs the message */
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "oci_error", &returned_zval, number_of_arguments, arguments);
+	/* oci_error should returns an assoc array containing code & message, dbx needs the message */
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_ARRAY) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
