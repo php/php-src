@@ -271,6 +271,11 @@ PHP_FUNCTION(fd_set)
 
 	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
 
+	if (Z_LVAL_PP(fd) < 0) {
+		php_error(E_WARNING, "Can't set negative fd falues in a set");
+		RETURN_FALSE;
+	}
+
 	FD_SET(Z_LVAL_PP(fd), the_set);
 
 	RETURN_TRUE;
@@ -293,6 +298,11 @@ PHP_FUNCTION(fd_clear)
 
 	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
 
+	if (Z_LVAL_PP(fd) < 0) {
+		php_error(E_WARNING, "Can't clear negative fd values in a set");
+		RETURN_FALSE;
+	}
+
 	FD_CLR(Z_LVAL_PP(fd), the_set);
 
 	RETURN_TRUE;
@@ -314,6 +324,11 @@ PHP_FUNCTION(fd_isset)
 	convert_to_long_ex(fd);
 
 	ZEND_FETCH_RESOURCE(the_set, fd_set *, set, -1, "File descriptor set", SOCKETSG(le_destroy));
+
+	if (Z_LVAL_PP(fd) < 0) {
+		php_error(E_WARNING, "Can't check for negative fd values in a set");
+		RETURN_FALSE;
+	}
 
 	if (FD_ISSET(Z_LVAL_PP(fd), the_set)) {
 		RETURN_TRUE;
