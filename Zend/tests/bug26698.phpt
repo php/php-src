@@ -3,6 +3,8 @@ Bug #26698 (Thrown exceptions while evaluting argument to pass as parameter cras
 --FILE--
 <?php
 
+ini_set("report_memleaks", 0);  // the exception thrown in this test results in a memory leak, which is fine
+
 class Object
 {
 	function getNone()
