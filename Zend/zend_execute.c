@@ -282,7 +282,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 		if (!PZVAL_IS_REF(*object_ptr)) {
 			SEPARATE_ZVAL(object_ptr);
 		}
-		zend_error(E_NOTICE, "Creating default object from empty value");
+		zend_error(E_STRICT, "Creating default object from empty value");
 		object_init(*object_ptr);
 	}
 }
