@@ -17,8 +17,12 @@
 #else
 #include <io.h>
 #endif
+
 #ifdef WIN32
 extern int access(const char *pathname, int mode);
+#ifndef R_OK
+#define R_OK 2
+#endif
 #endif
 
 /* number of antialised colors for indexed bitmaps */
