@@ -1406,8 +1406,10 @@ static int node_children(zval **children, xmlNode *nodep)
 		zend_hash_next_index_insert((*children)->value.ht, &child, sizeof(zval *), NULL);
 
 		/* Add name, content and type as properties */
-		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
-		add_property_long(child, "type", last->type);
+		if(last->name)
+			add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
+		if(last->type)
+			add_property_long(child, "type", last->type);
 		content = xmlNodeGetContent(last);
 		if(content)
 			add_property_stringl(child, "content", (char *) content, strlen(content), 1);
