@@ -31,7 +31,9 @@ loaded.
     <notes>Windows bugfix: used wrong directory separators</notes>
     <state>stable</state>
     <filelist>
-      <file role="php" baseinstalldir="Archive" name="Archive/Tar.php"/>
+     <dir name="Archive">
+      <file role="php" name="Tar.php"/>
+     </dir>
     </filelist>
   </release>
   <changelog>
