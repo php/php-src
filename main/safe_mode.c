@@ -49,6 +49,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	int ret;
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char *s;
+	PLS_FETCH();
 
 	if (!filename) {
 		return 0; /* path must be provided */
