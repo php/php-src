@@ -2777,6 +2777,7 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack)
 }
 /* End Rotate function */
 
+#if MBO_0
 gdImagePtr
 gdImageCreateFromXbm (FILE * fd)
 {
@@ -2902,6 +2903,7 @@ fail:
   gdImageDestroy (im);
   return 0;
 }
+#endif /* MBO_0 */
 
 void
 gdImagePolygon (gdImagePtr im, gdPointPtr p, int n, int c)
