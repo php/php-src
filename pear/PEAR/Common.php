@@ -156,7 +156,7 @@ class PEAR_Common extends PEAR
         $tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
         while ($file = array_shift($tempfiles)) {
             if (@is_dir($file)) {
-                System::rm("-rf $file");
+                System::rm(array('-rf', $file));
             } elseif (file_exists($file)) {
                 unlink($file);
             }
@@ -198,7 +198,7 @@ class PEAR_Common extends PEAR
     function mkDirHier($dir)
     {
         $this->log(2, "+ create dir $dir");
-        return System::mkDir("-p $dir");
+        return System::mkDir(array('-p', $dir));
     }
 
     // }}}
@@ -242,11 +242,12 @@ class PEAR_Common extends PEAR
     function mkTempDir($tmpdir = '')
     {
         if ($tmpdir) {
-            $topt = "-t $tmpdir ";
+            $topt = array('-t', $tmpdir);
         } else {
-            $topt = '';
+            $topt = array();
         }
-        if (!$tmpdir = System::mktemp($topt . '-d pear')) {
+        $topt = array_merge($topt, array('-d', 'pear'));
+        if (!$tmpdir = System::mktemp($topt)) {
             return false;
         }
         $this->addTempFile($tmpdir);
@@ -1155,7 +1156,7 @@ class PEAR_Common extends PEAR
      * Build a "provides" array from data returned by
      * analyzeSourceCode().  The format of the built array is like
      * this:
-     * 
+     *
      *  array(
      *    'class;MyClass' => 'array('type' => 'class', 'name' => 'MyClass'),
      *    ...
@@ -1168,7 +1169,7 @@ class PEAR_Common extends PEAR
      * @return void
      *
      * @access public
-     * 
+     *
      */
     function buildProvidesArray($srcinfo)
     {
@@ -1597,7 +1598,7 @@ class PEAR_Common extends PEAR
                                                                   $errno, $errstr));
                 }
                 return PEAR::raiseError("Connection to `$host:$port' failed: $errstr", $errno);
-            }            
+            }
             $request = "GET $path HTTP/1.0\r\n";
         }
         $request .= "Host: $host:$port\r\n".

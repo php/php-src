@@ -146,7 +146,7 @@ class PEAR_Registry extends PEAR
     function _assertStateDir()
     {
         if (!@is_dir($this->statedir)) {
-            if (!System::mkdir("-p {$this->statedir}")) {
+            if (!System::mkdir(array('-p', $this->statedir))) {
                 return $this->raiseError("could not create directory '{$this->statedir}'");
             }
         }

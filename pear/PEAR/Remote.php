@@ -56,14 +56,14 @@ class PEAR_Remote extends PEAR
         $id       = md5(serialize($args));
         $cachedir = $this->config->get('cache_dir');
         if (!file_exists($cachedir)) {
-            System::mkdir('-p '.$cachedir);
+            System::mkdir(array('-p', $cachedir));
         }
         $filename = $cachedir . DIRECTORY_SEPARATOR . 'xmlrpc_cache_' . $id;
         if (!file_exists($filename)) {
             return null;
         };
 
-        $fp = fopen($filename, "rb");
+        $fp = fopen($filename, 'rb');
         if ($fp === null) {
             return null;
         }
@@ -86,7 +86,7 @@ class PEAR_Remote extends PEAR
         $id       = md5(serialize($args));
         $cachedir = $this->config->get('cache_dir');
         if (!file_exists($cachedir)) {
-            System::mkdir('-p '.$cachedir);
+            System::mkdir(array('-p', $cachedir));
         }
         $filename = $cachedir.'/xmlrpc_cache_'.$id;
 
