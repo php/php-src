@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
+   |          Marcus Boerger <helly@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -76,5 +77,6 @@ PHP_FUNCTION(dbmexists);
 PHP_FUNCTION(dbmdelete);
 PHP_FUNCTION(dbmfirstkey);
 PHP_FUNCTION(dbmnextkey);
+PHP_FUNCTION(db_id_list);
 
 #endif /* PHP_DB_H */
