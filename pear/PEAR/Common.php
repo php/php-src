@@ -406,11 +406,7 @@ class PEAR_Common extends PEAR
                 $this->current_maintainer['email'] = $data;
                 break;
             case 'role':
-                if (!in_array($data, $this->maintainer_roles)) {
-                    trigger_error("The maintainer role: '$data' is not valid", E_USER_WARNING);
-                } else {
-                    $this->current_maintainer['role'] = $data;
-                }
+                $this->current_maintainer['role'] = $data;
                 break;
             case 'version':
                 $data = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $data);
@@ -435,9 +431,7 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'state':
-                /* if (!in_array($data, $this->release_states)) {
-                    trigger_error("The release state: '$data' is not valid", E_USER_WARNING);
-                } else*/if ($this->in_changelog) {
+                if ($this->in_changelog) {
                     $this->current_release['release_state'] = $data;
                 } else {
                     $this->pkginfo['release_state'] = $data;
