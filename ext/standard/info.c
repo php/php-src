@@ -439,10 +439,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				for (zend_hash_internal_pointer_reset(url_stream_wrappers_hash);
 						zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, NULL, 0, NULL) == HASH_KEY_IS_STRING;
 						zend_hash_move_forward(url_stream_wrappers_hash)) {
-					if (NULL == (stream_protocols_buf = erealloc(stream_protocols_buf,
-									stream_protocols_buf_len + stream_protocol_len + 2 /* ", " */ + 1 /* 0 byte at end */))) {
-						break;
-					}
+					stream_protocols_buf = erealloc(stream_protocols_buf, stream_protocols_buf_len + stream_protocol_len + 2 + 1);
 					memcpy(stream_protocols_buf + stream_protocols_buf_len, stream_protocol, stream_protocol_len);
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len] = ',';
 					stream_protocols_buf[stream_protocols_buf_len + stream_protocol_len + 1] = ' ';

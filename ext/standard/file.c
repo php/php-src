@@ -1495,7 +1495,7 @@ PHP_FUNCTION(fscanf)
 		WRONG_PARAM_COUNT;
 	}
 	args = (zval ***)emalloc(argCount * sizeof(zval **));
-	if (!args || (zend_get_parameters_array_ex(argCount, args) == FAILURE)) {
+	if (zend_get_parameters_array_ex(argCount, args) == FAILURE) {
 		efree( args );
 		WRONG_PARAM_COUNT;
 	}
