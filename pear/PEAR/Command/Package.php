@@ -93,11 +93,12 @@ class PEAR_Command_Package extends PEAR_Command_Common
                              'Creates a PEAR package from its description file (usually '.
                              "named as package.xml)\n".
                              "   -n    Return only the created package file name. Useful for\n".
-                             "         shell script operations.");
+                             "         shell script operations.\n".
+                             "   -Z    Do not compress the tar package");
             case 'package-list':
                 return array('<pear package>',
-                             'List the contents of a PEAR package');
-            case 'packge-info':
+                             'List the contents (the files) of a PEAR package');
+            case 'package-info':
                 return array('<pear package>',
                              'Shows information about a PEAR package');
             case 'package-validate':
@@ -170,7 +171,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-list
 
             case 'package-list': {
-                // $params[0] -> the PEAR package to list its contents
+                // $params[0] -> the PEAR package to list its files
                 if (sizeof($params) != 1) {
                     $failmsg = "Command package-list requires a valid PEAR package filename ".
                                " as the first argument. Try the command \"help package-list\"";
@@ -221,6 +222,13 @@ class PEAR_Command_Package extends PEAR_Command_Common
             // {{{ package-info
 
             case 'package-info': {
+                // $params[0] -> the PEAR package to list its information
+                if (sizeof($params) != 1) {
+                    $failmsg = "Command package-info requires a valid PEAR package filename ".
+                               " as the first argument. Try the command \"help package-info\"";
+                    break;
+                }
+
                 $obj = new PEAR_Common();
                 if (PEAR::isError($info = $obj->infoFromTgzFile($params[0]))) {
                     return $info;
