@@ -36,9 +36,12 @@
 #if COMPILE_DL
 #undef HAVE_MYSQL
 #define HAVE_MYSQL 1
-#	if WIN32||WINNT
-#	define PHP_MYSQL_API __declspec(dllexport)
-#	endif
+#endif
+
+#if WIN32||WINNT
+#define PHP_MYSQL_API __declspec(dllexport)
+#else
+#define PHP_MYSQL_API
 #endif
 
 #if HAVE_MYSQL
