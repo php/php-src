@@ -80,6 +80,7 @@ void fs_give (void **block);
 void *fs_get (size_t size);
 static int add_assoc_object(pval *arg, char *key, pval *tmp);
 int add_next_index_object(pval *arg, pval *tmp);
+void _php_make_header_object(zval *myzvalue, ENVELOPE *en);
 void _php_imap_add_body(pval *arg, BODY *body);
 void _php_imap_parse_address(ADDRESS *addresslist, char *fulladdress, pval *paddress);
 int imap_mail(char *to, char *subject, char *message, char *headers, char *cc, char *bcc, char *rpath);
@@ -128,8 +129,9 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_num_msg,		NULL)
 	PHP_FE(imap_num_recent,		NULL)
 	PHP_FE(imap_headers,		NULL)
-	PHP_FALIAS(imap_header,imap_headerinfo,			NULL)
+	PHP_FALIAS(imap_header, imap_headerinfo, NULL)
 	PHP_FE(imap_headerinfo,		NULL)
+	PHP_FE(imap_rfc822_parse_headers,	NULL)
 	PHP_FE(imap_body,			NULL)
 	PHP_FE(imap_fetchstructure,	NULL)
 	PHP_FE(imap_fetchbody,		NULL)
@@ -143,11 +145,11 @@ function_entry imap_functions[] = {
 	PHP_FE(imap_createmailbox,	NULL)
 	PHP_FE(imap_renamemailbox,	NULL)
 	PHP_FE(imap_deletemailbox,	NULL)
-	PHP_FALIAS(imap_listmailbox,imap_list,	NULL)
-	PHP_FALIAS(imap_getmailboxes,imap_list_full, NULL)
-	PHP_FALIAS(imap_scanmailbox,imap_listscan, NULL)
-	PHP_FALIAS(imap_listsubscribed,imap_lsub, NULL)
-	PHP_FALIAS(imap_getsubscribed,imap_lsub_full, NULL)
+	PHP_FALIAS(imap_listmailbox, imap_list,	NULL)
+	PHP_FALIAS(imap_getmailboxes, imap_list_full,	NULL)
+	PHP_FALIAS(imap_scanmailbox, imap_listscan,	NULL)
+	PHP_FALIAS(imap_listsubscribed, imap_lsub,	NULL)
+	PHP_FALIAS(imap_getsubscribed, imap_lsub_full,	NULL)
 	PHP_FE(imap_subscribe,		NULL)
 	PHP_FE(imap_unsubscribe,	NULL)
 	PHP_FE(imap_append,			NULL)
@@ -1590,15 +1592,15 @@ PHP_FUNCTION(imap_undelete)
    Read the header of the message */
 PHP_FUNCTION(imap_headerinfo)
 {
-	pval *streamind, *msgno, *paddress, *fromlength, *subjectlength, *defaulthost;
+	pval *streamind, *msgno, *fromlength, *subjectlength, *defaulthost;
 	int ind, ind_type;
 	unsigned long length;
 	pils *imap_le_struct;
-	MESSAGECACHE * cache;
+	MESSAGECACHE *cache;
 	char *mystring;
 	char dummy[2000];
-	char fulladdress[MAILTMPLEN];
 	ENVELOPE *en;
+	char fulladdress[MAILTMPLEN];
 	
 	int myargc = ARG_COUNT(ht);
 	if (myargc < 2 || myargc > 5 || getParameters(ht,myargc,&streamind,&msgno,&fromlength,&subjectlength,&defaulthost)==FAILURE) {
@@ -1627,8 +1629,6 @@ PHP_FUNCTION(imap_headerinfo)
 		RETURN_FALSE;
 	}
 	
-	object_init(return_value);
-	
     mystring = mail_fetchheader_full(imap_le_struct->imap_stream, msgno->value.lval, NIL, &length, NIL);
 	if (myargc == 5) {
 		rfc822_parse_msg(&en, NULL, mystring, length, NULL, defaulthost->value.str.val, NIL);
@@ -1636,73 +1636,12 @@ PHP_FUNCTION(imap_headerinfo)
 		rfc822_parse_msg(&en, NULL, mystring, length, NULL, "UNKNOWN", NIL);
 	}
 	
-    if (en->remail) add_property_string(return_value, "remail", en->remail,1);
-    if (en->date) add_property_string(return_value, "date", en->date,1);
-    if (en->date) add_property_string(return_value, "Date", en->date,1);
-    if (en->subject) add_property_string(return_value, "subject", en->subject,1);
-    if (en->subject) add_property_string(return_value, "Subject", en->subject,1);
-    if (en->in_reply_to) add_property_string(return_value, "in_reply_to", en->in_reply_to,1);
-    if (en->message_id) add_property_string(return_value, "message_id", en->message_id,1);
-    if (en->newsgroups) add_property_string(return_value, "newsgroups", en->newsgroups,1);
-    if (en->followup_to) add_property_string(return_value, "followup_to", en->followup_to,1);
-    if (en->references) add_property_string(return_value, "references", en->references,1);
+	/* call a function to parse all the text, so that we can use the
+       same function to parse text from other sources */
+	_php_make_header_object(return_value, en);
 	
-	if (en->to) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->to, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "toaddress", fulladdress, 1);
-		add_assoc_object(return_value, "to", paddress);
-	}
-	
-	if (en->from) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->from, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "fromaddress", fulladdress, 1);
-		add_assoc_object(return_value, "from", paddress);
-	}
-	
-	if (en->cc) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->cc, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "ccaddress", fulladdress, 1);
-		add_assoc_object(return_value, "cc", paddress);
-	}
-	
-	if (en->bcc) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->bcc, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "bccaddress", fulladdress, 1);
-		add_assoc_object(return_value, "bcc", paddress);
-	}
-	
-	if (en->reply_to) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->reply_to, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "reply_toaddress", fulladdress, 1);
-		add_assoc_object(return_value, "reply_to", paddress);
-	}
-
-	if (en->sender) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->sender, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "senderaddress", fulladdress, 1);
-		add_assoc_object(return_value, "sender", paddress);
-	}
-
-	if (en->return_path) {
-		MAKE_STD_ZVAL(paddress);
-		array_init(paddress);
-		_php_imap_parse_address(en->return_path, fulladdress, paddress);
-		if (fulladdress) add_property_string(return_value, "return_pathaddress", fulladdress, 1);
-		add_assoc_object(return_value, "return_path", paddress);
-	}
-	
+	/* now run through properties that are only going to be returned
+       from a server, not text headers */
 	add_property_string(return_value, "Recent", cache->recent ? (cache->seen ? "R": "N") : " ", 1);
 	add_property_string(return_value, "Unseen", (cache->recent | cache->seen) ? " " : "U", 1);
 	add_property_string(return_value, "Flagged", cache->flagged ? "F" : " ", 1);
@@ -1711,10 +1650,10 @@ PHP_FUNCTION(imap_headerinfo)
 	add_property_string(return_value, "Draft", cache->draft ? "X" : " ", 1);
 	
 	sprintf(dummy, "%4ld", cache->msgno);
-	add_property_string(return_value, "Msgno",dummy,1);
+	add_property_string(return_value, "Msgno", dummy, 1);
 	
 	mail_date(dummy, cache);
-	add_property_string(return_value, "MailDate", dummy,1);
+	add_property_string(return_value, "MailDate", dummy, 1);
 	
 	sprintf(dummy, "%ld", cache->rfc822_size); 
 	add_property_string(return_value, "Size", dummy, 1);
@@ -1731,6 +1670,33 @@ PHP_FUNCTION(imap_headerinfo)
 		mail_fetchsubject(fulladdress, imap_le_struct->imap_stream, msgno->value.lval, subjectlength->value.lval);
 		add_property_string(return_value, "fetchsubject", fulladdress, 1);
 	}
+}
+/* }}} */
+
+/* {{{ proto object imap_rfc822_parse_headers(string headers, string [default_host])
+   Parse a set of mail headers contained in a string, and return an object similar to imap_headerinfo() */
+PHP_FUNCTION(imap_rfc822_parse_headers)
+{
+	zval **headers, **defaulthost;
+	ENVELOPE *en;
+	
+	int myargc = ARG_COUNT(ht);
+	if (myargc < 1 || myargc > 2 || zend_get_parameters_ex(myargc, &headers, &defaulthost) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string_ex(headers);
+	if (myargc == 2) convert_to_string_ex(defaulthost);
+	
+	if (myargc == 5) {
+		rfc822_parse_msg(&en, NULL, (*headers)->value.str.val, (*headers)->value.str.len, NULL, (*defaulthost)->value.str.val, NIL);
+	} else {
+		rfc822_parse_msg(&en, NULL, (*headers)->value.str.val, (*headers)->value.str.len, NULL, "UNKNOWN", NIL);
+	}
+	
+	/* call a function to parse all the text, so that we can use the
+       same function no matter where the headers are from */
+	_php_make_header_object(return_value, en);
 }
 /* }}} */
 
@@ -3331,26 +3297,26 @@ PHP_FUNCTION(imap_search)
 /* Author: CJH */
 PHP_FUNCTION(imap_alerts)
 {
-  STRINGLIST *cur=NIL;
+	STRINGLIST *cur=NIL;
   
-  int arg_count = ARG_COUNT(ht);
+	int arg_count = ARG_COUNT(ht);
   
-  if (arg_count > 0) {
-    WRONG_PARAM_COUNT;
-  }
+	if (arg_count > 0) {
+		WRONG_PARAM_COUNT;
+	}
   
-  if (imap_alertstack == NIL) {
-    RETURN_FALSE;
-  }
+	if (imap_alertstack == NIL) {
+		RETURN_FALSE;
+	}
   
-  array_init(return_value);
-  cur = imap_alertstack;
-  while (cur != NIL) {
-    add_next_index_string(return_value,cur->LTEXT,1);
-    cur = cur->next;
-  }
-  mail_free_stringlist(&imap_alertstack);
-  imap_alertstack = NIL;
+	array_init(return_value);
+	cur = imap_alertstack;
+	while (cur != NIL) {
+		add_next_index_string(return_value,cur->LTEXT,1);
+		cur = cur->next;
+	}
+	mail_free_stringlist(&imap_alertstack);
+	imap_alertstack = NIL;
 }
 /* }}} */
 
@@ -3362,26 +3328,26 @@ PHP_FUNCTION(imap_alerts)
 /* Author: CJH */
 PHP_FUNCTION(imap_errors)
 {
-  ERRORLIST *cur=NIL;
+	ERRORLIST *cur=NIL;
   
-  int arg_count = ARG_COUNT(ht);
+	int arg_count = ARG_COUNT(ht);
   
-  if (arg_count > 0) {
-    WRONG_PARAM_COUNT;
-  }
+	if (arg_count > 0) {
+		WRONG_PARAM_COUNT;
+	}
   
-  if (imap_errorstack == NIL) {
-    RETURN_FALSE;
-  }
+	if (imap_errorstack == NIL) {
+		RETURN_FALSE;
+	}
   
-  array_init(return_value);
-  cur = imap_errorstack;
-  while (cur != NIL) {
-    add_next_index_string(return_value,cur->LTEXT,1);
-    cur = cur->next;
-  }
-  mail_free_errorlist(&imap_errorstack);
-  imap_errorstack = NIL;
+	array_init(return_value);
+	cur = imap_errorstack;
+	while (cur != NIL) {
+		add_next_index_string(return_value,cur->LTEXT,1);
+		cur = cur->next;
+	}
+	mail_free_errorlist(&imap_errorstack);
+	imap_errorstack = NIL;
 }
 /* }}} */
 
@@ -3390,25 +3356,25 @@ PHP_FUNCTION(imap_errors)
 /* Author: CJH */
 PHP_FUNCTION(imap_last_error)
 {
-  ERRORLIST *cur=NIL;
+	ERRORLIST *cur=NIL;
   
-  int arg_count = ARG_COUNT(ht);
+	int arg_count = ARG_COUNT(ht);
   
-  if (arg_count > 0) {
-    WRONG_PARAM_COUNT;
-  }
+	if (arg_count > 0) {
+		WRONG_PARAM_COUNT;
+	}
   
-  if (imap_errorstack == NIL) {
-    RETURN_FALSE;
-  }
+	if (imap_errorstack == NIL) {
+		RETURN_FALSE;
+	}
   
-  cur = imap_errorstack;
-  while (cur != NIL) {
-    if (cur->next == NIL) {
-      RETURN_STRING(cur->LTEXT, 1);
-    }
-    cur = cur->next;
-  }
+	cur = imap_errorstack;
+	while (cur != NIL) {
+		if (cur->next == NIL) {
+			RETURN_STRING(cur->LTEXT, 1);
+		}
+		cur = cur->next;
+	}
 }
 /* }}} */
 
@@ -3450,6 +3416,82 @@ void _php_imap_parse_address (ADDRESS *addresslist, char *fulladdress, pval *pad
 		if (addresstmp->host) add_property_string(tmpvals, "host", addresstmp->host, 1);
 		add_next_index_object(paddress, tmpvals);
 	} while ((addresstmp = addresstmp->next));
+}
+
+void _php_make_header_object(zval *myzvalue, ENVELOPE *en)
+{
+	zval *paddress;
+	char fulladdress[MAILTMPLEN];
+	
+	object_init(myzvalue);
+	
+    if (en->remail) add_property_string(myzvalue, "remail", en->remail,1);
+    if (en->date) add_property_string(myzvalue, "date", en->date,1);
+    if (en->date) add_property_string(myzvalue, "Date", en->date,1);
+    if (en->subject) add_property_string(myzvalue, "subject", en->subject,1);
+    if (en->subject) add_property_string(myzvalue, "Subject", en->subject,1);
+    if (en->in_reply_to) add_property_string(myzvalue, "in_reply_to", en->in_reply_to,1);
+    if (en->message_id) add_property_string(myzvalue, "message_id", en->message_id,1);
+    if (en->newsgroups) add_property_string(myzvalue, "newsgroups", en->newsgroups,1);
+    if (en->followup_to) add_property_string(myzvalue, "followup_to", en->followup_to,1);
+    if (en->references) add_property_string(myzvalue, "references", en->references,1);
+	
+	if (en->to) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->to, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "toaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "to", paddress);
+	}
+	
+	if (en->from) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->from, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "fromaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "from", paddress);
+	}
+	
+	if (en->cc) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->cc, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "ccaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "cc", paddress);
+	}
+	
+	if (en->bcc) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->bcc, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "bccaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "bcc", paddress);
+	}
+	
+	if (en->reply_to) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->reply_to, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "reply_toaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "reply_to", paddress);
+	}
+
+	if (en->sender) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->sender, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "senderaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "sender", paddress);
+	}
+
+	if (en->return_path) {
+		MAKE_STD_ZVAL(paddress);
+		array_init(paddress);
+		_php_imap_parse_address(en->return_path, fulladdress, paddress);
+		if (fulladdress) add_property_string(myzvalue, "return_pathaddress", fulladdress, 1);
+		add_assoc_object(myzvalue, "return_path", paddress);
+	}
+	
 }
 
 void _php_imap_add_body(pval *arg, BODY *body)
