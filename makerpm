@@ -63,7 +63,6 @@ sh ./configure --prefix=/usr \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql=/usr \
-	--with-imap=/usr \
 	--with-pdflib=/usr \
 	--with-zlib=/usr \
 	--enable-xml \
@@ -81,7 +80,6 @@ sh ./configure --prefix=/usr \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql=/usr \
-	--with-imap=/usr \
 	--with-pdflib=/usr \
 	--with-zlib=/usr \
 	--enable-xml \
@@ -95,7 +93,7 @@ mv php.keepme php
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/lib/apache
-install -m 755 libphp4.so $RPM_BUILD_ROOT/usr/lib/apache
+install -m 755 .libs/libphp4.so $RPM_BUILD_ROOT/usr/lib/apache
 mkdir -p $RPM_BUILD_ROOT/usr/bin
 install -m 755 php $RPM_BUILD_ROOT/usr/bin
 
@@ -103,6 +101,9 @@ install -m 755 php $RPM_BUILD_ROOT/usr/bin
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Mon Mar 04 2002 Arjen Lentz <agl@bitbike.com>
+- Fix path and remove --with-imap due to conflicts with kerberos.
+
 * Fri Jun 29 2001 Jani Taskinen <sniper@iki.fi>
 - Removed some useless configure options. Made the tar names correct.
 
