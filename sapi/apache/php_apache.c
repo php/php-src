@@ -179,7 +179,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	serv = ((request_rec *) SG(server_context))->server;
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	PUTS("Apache for Windows 95/NT<br>");
 	php_info_print_table_start();
 #else

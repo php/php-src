@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <string.h> 
 #include <sys/types.h>
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 # include <winsock2.h>
 # define EWOULDBLOCK WSAEWOULDBLOCK
 # define ETIMEDOUT WSAETIMEDOUT
@@ -873,7 +873,7 @@ static int fnCOpenDataCon(int sockfd, int *port)
   /*
   ** Make sure that address may be reused
   */
-#if defined(SUN) || (WIN32|WINNT)
+#if defined(SUN) || defined(PHP_WIN32)
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option));
 #else
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
@@ -920,7 +920,7 @@ static int fnCOpenDataCon(int sockfd, int *port)
  *  dec@essw.com
  *
  *====================================================================*/
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <time.h>
 #else
 #include <sys/fcntl.h>
@@ -930,13 +930,13 @@ static int fnCOpenDataCon(int sockfd, int *port)
 #include <errno.h>
 #include <signal.h>
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 static sigset_t newmask, oldmask, zeromask;
 #endif
 
 static int set_noblock(int fd)
 {
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	u_long argp=1;
 
 	return ioctlsocket (fd, FIONBIO , &argp); 
@@ -958,7 +958,7 @@ int write_to(int fd, void *buffer, int n, int timeout)
 	int nrem, nw=0;
 	char *bptr;
 	int  error=0;
-#if defined(SYSV) || (WIN32|WINNT)
+#if defined(SYSV) || defined(PHP_WIN32)
 	int    width = 20;
 #else
 	int    width = getdtablesize();
@@ -967,7 +967,7 @@ int write_to(int fd, void *buffer, int n, int timeout)
 	struct timeval select_timeout;
 
 	select_timeout.tv_sec = timeout;
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	select_timeout.tv_usec = 0;
 #else /* is this just a typo? */
 	select_timeout.tv_usec = 0.;
@@ -1010,7 +1010,7 @@ int write_to(int fd, void *buffer, int n, int timeout)
 			bptr += nw;
 		}
 	}
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0) return -1;
 #endif
 	if( ! error ) {
@@ -1029,7 +1029,7 @@ int read_to(int fd, char *buffer, int n, int timeout)
   char *bptr;
   int  error=0;
 
-#if defined(SYSV) || (WIN32|WINNT)
+#if defined(SYSV) || defined(PHP_WIN32)
   int    width = 20;
 #else
   int    width = getdtablesize();
@@ -1038,7 +1038,7 @@ int read_to(int fd, char *buffer, int n, int timeout)
   struct timeval select_timeout;
 
   select_timeout.tv_sec = timeout;
-#if WIN32|WINNT
+#ifdef PHP_WIN32
   select_timeout.tv_usec = 0;
 #else
   select_timeout.tv_usec = 0.;
@@ -1088,7 +1088,7 @@ int read_to(int fd, char *buffer, int n, int timeout)
       }
     }
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
   if (sigprocmask(SIG_SETMASK, &oldmask, NULL) < 0) return -1;
 #endif
   if( ! error )
@@ -1142,7 +1142,7 @@ int open_hg_connection(char *server_name, int port)
 		return(-3);
 	}
 
-#if defined(SUN) || (WIN32|WINNT)
+#if defined(SUN) || defined(PHP_WIN32)
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (char *)&option, sizeof(option));
 #else
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
@@ -1153,7 +1153,7 @@ int open_hg_connection(char *server_name, int port)
 		return(-4);
 	} 
 
-#if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 	if ( (sock_flags = fcntl(sockfd, F_GETFL, 0)) == -1 )
 #endif
 
@@ -1263,7 +1263,7 @@ int initialize_hg_connection(int sockfd, int *do_swap, int *version, char **user
 
 static int set_nonblocking(int fd)
 {
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	unsigned int argp=0;
 
 /*	if ( sock_flags == -1 )
@@ -1283,7 +1283,7 @@ static int set_nonblocking(int fd)
 
 static int set_blocking(int fd)
 {
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	unsigned int argp=1;
 
 	if(ioctlsocket (fd, FIONBIO , &argp) == -1)

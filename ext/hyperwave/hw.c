@@ -31,7 +31,7 @@
 #include "ext/standard/info.h"
 #include "SAPI.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include "build-defs.h"
@@ -2060,7 +2060,7 @@ PHP_FUNCTION(hw_getcgi) {
 	   string. It should contain any enviroment variable a cgi script
 	   requires.
 	*/
-#if (WIN32|WINNT)
+#ifdef PHP_WIN32
 	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     getenv("REQUEST_METHOD"),
 	                     getenv("PATH_INFO"),
@@ -2356,7 +2356,7 @@ PHP_FUNCTION(hw_pipecgi) {
 	char *attributes = NULL;
 	int count;
 
-#if (WIN32|WINNT)
+#ifdef PHP_WIN32
 	snprintf(cgi_env_str, BUFFERLEN, "CGI_REQUEST_METHOD=%s\nCGI_PATH_INFO=%s\nCGI_QUERY_STRING=%s",
 	                     getenv("REQUEST_METHOD"),
 	                     getenv("PATH_INFO"),

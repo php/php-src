@@ -29,7 +29,7 @@
 
 #if HAVE_LIBEXPAT
 
-# if !(WIN32|WINNT)
+#ifndef PHP_WIN32
 #  include "build-defs.h"
 # endif
 # include "ext/standard/head.h"
