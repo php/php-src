@@ -3,6 +3,7 @@
 #include "zend_variables.h"
 #include "zend_API.h"
 #include "zend_objects.h"
+#include "zend_objects_API.h"
 #include "zend_object_handlers.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
@@ -224,9 +225,9 @@ zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC)
 }
 
 zend_object_handlers std_object_handlers = {
-	zend_objects_add_ref,                    /* add_ref */
-	zend_objects_del_ref,                    /* del_ref */
-	zend_objects_delete_obj,                 /* delete_obj */
+	zend_objects_store_add_ref,              /* add_ref */
+	zend_objects_store_del_ref,              /* del_ref */
+	zend_objects_store_delete_obj,           /* delete_obj */
 	zend_objects_clone_obj,                  /* clone_obj */
 	
 	zend_std_read_property,                  /* read_property */

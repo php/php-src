@@ -32,6 +32,7 @@
 #include "zend_llist.h"
 #include "zend_fast_cache.h"
 #include "zend_objects.h"
+#include "zend_objects_API.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -200,7 +201,7 @@ struct _zend_executor_globals {
 	int lambda_count;
 
 	HashTable ini_directives;
-	zend_objects objects;
+	zend_objects_store objects_store;
 	zval *exception;
 
 	struct _zend_execute_data *current_execute_data;
