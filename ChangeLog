@@ -1,3 +1,99 @@
+2003-09-26  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/string.c:
+      MFH BugFix# 25671 subarray corruption in str_replace
+
+    * ext/standard/string.c:
+      Bug Fix#25671  Corruption in subarrays in subject when using str_replace
+
+2003-09-26  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/php_mbregex.c:
+      MFH(r-1.45): repatch fixes for the problem that was reported at
+      php-dev@php.gr.jp (#884)
+
+    * ext/mbstring/tests/php_gr_jp_dev_884-1.phpt
+      ext/mbstring/tests/php_gr_jp_dev_884-2.phpt:
+      Add test cases for the regex probles
+
+    * ext/mbstring/php_mbregex.c:
+      Repatch fixes for the problem that was reported at php-dev@php.gr.jp (#884)
+
+    * ext/mbstring/mbstring.h:
+      Forgot to commit this one.
+
+    * (PHP_4_3)
+      ext/domxml/php_domxml.h
+      ext/mbstring/tests/mb_send_mail01.phpt:
+      Fix typo
+
+    * ext/mbstring/tests/mb_convert_encoding.phpt
+      ext/mbstring/tests/mb_convert_variables.phpt
+      ext/mbstring/tests/mb_detect_encoding.phpt
+      ext/mbstring/tests/mb_detect_order.phpt:
+      Explicitly specify mbstring.language.
+
+    * ext/mbstring/mbstring.c:
+      Fix some incompatibilities with the pre-libmbfl behaviour regarding
+      encoding detection.
+
+    * ext/mbstring/tests/mb_send_mail01.phpt
+      ext/mbstring/tests/mb_send_mail05.phpt
+      ext/mbstring/tests/mb_send_mail06.phpt
+      ext/mbstring/tests/mb_send_mail07.phpt:
+      Specify full path to cat for mb_send_mail() tests
+
+2003-09-26  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+      Let client library pick its own transaction param defaults
+
+2003-09-26  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ext/yp/yp.c:
+      stupid typo fix
+
+2003-09-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/math/bug25665.phpt:
+      
+      typo
+
+    * ext/standard/tests/math/bug25665.phpt:
+      Test case for bug #25665
+
+2003-09-26  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ZendEngine2/zend_alloc.c
+      ext/standard/array.c
+      ext/standard/dir.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/pack.c
+      ext/xml/compat.c
+      ext/zlib/zlib.c
+      main/fopen_wrappers.c:
+      signed/unsigned compiler warning fixes
+
+    * ext/standard/parsedate.y:
+      silenced a compiler warning
+
+    * ext/yp/yp.c:
+      error message was missing an argument
+
+    * ext/mime_magic/mime_magic.c:
+      compiler warning fixes, one of them a potential crash bug
+
+2003-09-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      Fixed typo.
+
 2003-09-25  Georg Richter  <phpinfo@t-online.de>
 
     * ZendEngine2/zend_alloc.c:
