@@ -93,7 +93,7 @@ class PEAR_Packager extends PEAR
     // {{{ destructor
 
     function _PEAR_Packager() {
-	$this->_PEAR();
+        $this->_PEAR();
         while (is_array($this->_tempfiles) &&
                $file = array_shift($this->_tempfiles))
         {
@@ -117,19 +117,19 @@ class PEAR_Packager extends PEAR
             return $this->raiseError($php_errormsg);
         }
         
-	$xp = xml_parser_create();
-	if (!$xp) {
-	    return $this->raiseError("Unable to create XML parser.");
-	}
-	xml_set_object($xp, $this);
-	xml_set_element_handler($xp, "startHandler", "endHandler");
-	xml_set_character_data_handler($xp, "charHandler");
-	xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
-	xml_parser_set_option($xp, XML_OPTION_TARGET_ENCODING, "UTF-8");
+        $xp = xml_parser_create();
+        if (!$xp) {
+            return $this->raiseError("Unable to create XML parser.");
+        }
+        xml_set_object($xp, $this);
+        xml_set_element_handler($xp, "startHandler", "endHandler");
+        xml_set_character_data_handler($xp, "charHandler");
+        xml_parser_set_option($xp, XML_OPTION_CASE_FOLDING, false);
+        xml_parser_set_option($xp, XML_OPTION_TARGET_ENCODING, "UTF-8");
 
-	$this->element_stack = array();
-	$this->pkginfo = array();
-	$this->current_element = false;
+        $this->element_stack = array();
+        $this->pkginfo = array();
+        $this->current_element = false;
         
         $data = fread($fp, filesize($pkgfile));
         fclose($fp);
@@ -139,8 +139,8 @@ class PEAR_Packager extends PEAR
                            xml_get_current_line_number($xp));
             xml_parser_free($xp);
             return $this->raiseError($msg);
-	}
-	xml_parser_free($xp);
+        }
+        xml_parser_free($xp);
 
         $pkginfofile = $this->tmpdir . DIRECTORY_SEPARATOR . "package.xml";
         $fp = fopen($pkginfofile, "w");
@@ -214,9 +214,9 @@ class PEAR_Packager extends PEAR
 
     function startHandler($xp, $name, $attribs)
     {
-	array_push($this->element_stack, $name);
-	$this->current_element = $name;
-	$this->current_attributes = $attribs;
+        array_push($this->element_stack, $name);
+        $this->current_element = $name;
+        $this->current_attributes = $attribs;
         $this->tmpdata = '';
         if ($this->recordfilelist) {
             $this->filelist .= "<$name";
@@ -225,12 +225,12 @@ class PEAR_Packager extends PEAR
             }
             $this->filelist .= ">";
         }
-	switch ($name) {
-	    case "Package":
+        switch ($name) {
+            case "Package":
                 if ($attribs["Type"]) {
                     // warning
                 }
-		break;
+                break;
             case "FileList":
                 // XXX FIXME Windows
                 $this->recordfilelist = true;
@@ -252,7 +252,7 @@ class PEAR_Packager extends PEAR
                 }
                 $this->_tempfiles[] = $this->tmpdir;
                 break;
-	}
+        }
     }
 
     // }}}
@@ -260,8 +260,8 @@ class PEAR_Packager extends PEAR
 
     function endHandler($xp, $name)
     {
-	array_pop($this->element_stack);
-	$this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
+        array_pop($this->element_stack);
+        $this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
         switch ($name) {
             case "FileList":
                 $this->recordfilelist = false;
@@ -280,10 +280,10 @@ class PEAR_Packager extends PEAR
         if ($this->recordfilelist) {
             $this->filelist .= $data;
         }
-	switch ($this->current_element) {
-	    case "Dir":
-		break;
-	    case "File":
+        switch ($this->current_element) {
+            case "Dir":
+                break;
+            case "File":
                 $file = "$this->tmpdir/$data";
                 $dir = dirname($file);
                 if (!is_dir($dir)) {
@@ -303,7 +303,7 @@ class PEAR_Packager extends PEAR
                     $this->pkginfo[$id] = $data;
                 }
                 break;
-	}
+        }
     }
 
     // }}}
