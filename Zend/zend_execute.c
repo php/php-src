@@ -470,7 +470,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						if (op2) {
 							if (op2->op_type == IS_VAR) {
 								if (value == &T(op2->u.var).tmp_var) {
-									if(result->u.EA.type & EXT_TYPE_UNUSED) {
+									if (result->u.EA.type & EXT_TYPE_UNUSED) {
 										/* We are not going to use return value, drop it */
 										STR_FREE(value->value.str.val);
 									} else {
@@ -2208,7 +2208,7 @@ int zend_add_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 static int zend_import_check_function(HashTable *target_ht, zend_function *function, zend_hash_key *hash_key, void *param)
 {
-	if(zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
+	if (zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
 		zend_error(E_ERROR, "Import: function %s() already exists in current scope", function->common.function_name?function->common.function_name:"main");
 	}
 	return 1; /* OK */
@@ -2243,7 +2243,7 @@ int zend_import_function_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 static int zend_import_check_class(HashTable *target_ht, zend_class_entry **ce, zend_hash_key *hash_key, void *param)
 {
-	if(zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
+	if (zend_hash_quick_exists(target_ht, hash_key->arKey, hash_key->nKeyLength, hash_key->h)) {
 		zend_error(E_ERROR, "Import: class '%s' already exists in current scope", (*ce)->name);
 	}
 	return 1; /* OK */
@@ -3130,7 +3130,7 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 
-	if(Z_TYPE_P(obj) != IS_OBJECT) {
+	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error(E_WARNING, "__clone method called on non-object");
 		EX_T(EX(opline)->result.u.var).var.ptr = EG(error_zval_ptr);
 		EX_T(EX(opline)->result.u.var).var.ptr->refcount++;
