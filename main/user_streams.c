@@ -29,7 +29,7 @@ struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 };
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_wrapper_options *exoptions STREAMS_DC TSRMLS_DC);
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 static php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
@@ -115,7 +115,7 @@ function stream_open($path, $mode, $options, &$opened_path)
    
  * */
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_wrapper_options *exoptions STREAMS_DC TSRMLS_DC)
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
