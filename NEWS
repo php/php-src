@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Added snmp_read_mib() which reads a MIB file into the active MIB tree. (Jani)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
+- Fixed bug 24729 ($obj = new $className; causes crash when $className is not 
+  set). (Marcus)
 
 29 Jun 2003, PHP 5 Beta 1 
 - Removed the bundled MySQL client library. (Sterling)
