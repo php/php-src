@@ -523,6 +523,7 @@ static php_session_cache_limiter php_session_cache_limiters[] = {
 static void _php_session_cache_limiter(PSLS_D)
 {
 	php_session_cache_limiter *lim;
+	SLS_FETCH();
 
 	if (SG(headers_sent)) {
 		php_error(E_WARNING, "Cannot send session cache limiter - headers already sent");
@@ -549,6 +550,7 @@ static void _php_session_send_cookie(PSLS_D)
 	int domainlen;
 	char *cookie;
 	char *date_fmt = NULL;
+	SLS_FETCH();
 
 	if (SG(headers_sent)) {
 		php_error(E_WARNING, "Cannot send session cookie - headers already sent");
