@@ -603,14 +603,6 @@ int main(int argc, char *argv[])
 	zend_first_try {
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
-        /* Set some CLI defaults */
-		SG(options) |= SAPI_OPTION_NO_CHDIR;
-		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
-		INI_HARDCODED("register_argc_argv", "1");
-		INI_HARDCODED("html_errors", "0");
-		INI_HARDCODED("implicit_flush", "1");
-		INI_HARDCODED("max_execution_time", "0");
-
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
 		EG(uninitialized_zval_ptr) = NULL;
@@ -636,6 +628,63 @@ int main(int argc, char *argv[])
 				php_end_ob_buffers(1 TSRMLS_CC);
 				exit_status=1;
 				goto out_err;
+
+
+			case 'i': /* php info & quit */
+				if (php_request_startup(TSRMLS_C)==FAILURE) {
+					goto err;
+				}
+				if (no_headers) {
+					SG(headers_sent) = 1;
+					SG(request_info).no_headers = 1;
+				}
+				php_print_info(0xFFFFFFFF TSRMLS_CC);
+				php_end_ob_buffers(1 TSRMLS_CC);
+				exit_status=1;
+				goto out;
+
+			case 'm': /* list compiled in modules */
+				php_output_startup();
+				php_output_activate(TSRMLS_C);
+				SG(headers_sent) = 1;
+				php_printf("[PHP Modules]\n");
+				print_modules(TSRMLS_C);
+				php_printf("\n[Zend Modules]\n");
+				print_extensions(TSRMLS_C);
+				php_printf("\n");
+				php_end_ob_buffers(1 TSRMLS_CC);
+				exit_status=1;
+				goto out_err;
+
+			case 'v': /* show php version & quit */
+				no_headers = 1;
+				if (php_request_startup(TSRMLS_C)==FAILURE) {
+					goto err;
+				}
+				if (no_headers) {
+					SG(headers_sent) = 1;
+					SG(request_info).no_headers = 1;
+				}
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2003 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+				php_end_ob_buffers(1 TSRMLS_CC);
+				exit_status=1;
+				goto out;
+
+			default:
+				break;
+			}
+		}
+
+		/* Set some CLI defaults */
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
+		INI_HARDCODED("register_argc_argv", "1");
+		INI_HARDCODED("html_errors", "0");
+		INI_HARDCODED("implicit_flush", "1");
+		INI_HARDCODED("max_execution_time", "0");
+
+		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
+			switch (c) {
 
 			case 'a':	/* interactive mode */
 				printf("Interactive mode enabled\n\n");
@@ -688,19 +737,6 @@ int main(int argc, char *argv[])
 				}
 				break;
 
-			case 'i': /* php info & quit */
-				if (php_request_startup(TSRMLS_C)==FAILURE) {
-					goto err;
-				}
-				if (no_headers) {
-					SG(headers_sent) = 1;
-					SG(request_info).no_headers = 1;
-				}
-				php_print_info(0xFFFFFFFF TSRMLS_CC);
-				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
-				goto out;
-
 			case 'l': /* syntax check mode */
 				if (behavior != PHP_MODE_STANDARD) {
 					break;
@@ -708,19 +744,6 @@ int main(int argc, char *argv[])
 				no_headers = 1;
 				behavior=PHP_MODE_LINT;
 				break;
-
-			case 'm': /* list compiled in modules */
-				php_output_startup();
-				php_output_activate(TSRMLS_C);
-				SG(headers_sent) = 1;
-				php_printf("[PHP Modules]\n");
-				print_modules(TSRMLS_C);
-				php_printf("\n[Zend Modules]\n");
-				print_extensions(TSRMLS_C);
-				php_printf("\n");
-				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
-				goto out_err;
 
 #if 0 /* not yet operational, see also below ... */
 			case '': /* generate indented source mode*/
@@ -800,20 +823,6 @@ int main(int argc, char *argv[])
 				}
 				behavior=PHP_MODE_HIGHLIGHT;
 				break;
-
-			case 'v': /* show php version & quit */
-				no_headers = 1;
-				if (php_request_startup(TSRMLS_C)==FAILURE) {
-					goto err;
-				}
-				if (no_headers) {
-					SG(headers_sent) = 1;
-					SG(request_info).no_headers = 1;
-				}
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2003 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-				php_end_ob_buffers(1 TSRMLS_CC);
-				exit_status=1;
-				goto out;
 
 			case 'w':
 				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
