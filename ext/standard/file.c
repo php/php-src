@@ -192,7 +192,7 @@ PHP_MSHUTDOWN_FUNCTION(file)
 
 
 
-/* {{{ proto bool flock(resource fp, int operation [, int wouldblock])
+/* {{{ proto bool flock(resource fp, int operation [, int &wouldblock])
    Portable file locking */
 
 static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
