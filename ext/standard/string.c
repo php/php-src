@@ -1155,12 +1155,14 @@ PHP_FUNCTION(ucwords)
 
 	r=return_value->value.str.val;
 	r_end = r + (*str)->value.str.len;
-	while((r=php_memnstr(r, " ", 1, r_end)) != NULL){
-		if(r < r_end){
-			r++;
-			*r=toupper((unsigned char)*r);
-		} else {
-			break;
+	while(++r<r_end){
+		if(isspace(*r)) {
+			if(r < r_end){
+				r++;
+				*r=toupper((unsigned char)*r);
+			} else {
+				break;
+			}
 		}
 	}
 }
