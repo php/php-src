@@ -1,20 +1,24 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Fixed memory allocation problem in iconv. Fix is only available systems 
+  support iconv() in libc. (Yasuo)
+- Fixed var_dump() crash when there is recursive reference. (Yasuo)
 - Added optional 3rd parameter "int encoding_mode" to gzencode()
   and fixed parameters to conform documentation. (Stefan)
-- new function exif_imagetype
-  exif_thumbnail fupports thumbnails in TIFF format and can return size
+- Added exif_imagetype()
+  exif_thumbnail() supports thumbnails in TIFF format and can return size
   of thumbnail
-- implemented domxml_elem_get_elements_by_tagname
-  new function domxml_doc_get_elements_by_tagname
-  new function domxml_doc_get_element_by_id (chregu)
-- Fixed seg fault in domxml_unlink() (jtate)
-- implemented domxml_elem_get_attribute_node(attrname) (chregu)
-- domxml_elem_remove_attribute(attibutename) is now implemented (chregu)
+- Added domxml functions:
+    domxml_elem_get_elements_by_tagname() 
+    domxml_doc_get_elements_by_tagname()
+    domxml_doc_get_element_by_id()
+    domxml_elem_remove_attribute()
+    domxml_elem_get_attribute_node() (Chregu)
+- Fixed segfault in domxml_unlink() (jtate)
 - Added -r option to the CLI version of PHP which executes a piece of PHP
   code directly from the commmand line. (Edin)
-- added formatting option to domxml_dump_mem() (chregu)
+- Added formatting option to domxml_dump_mem() (Chregu)
 - New build system that, among other improvements, replaces the slow recursive
   make with one global Makefile and eases the integration of proper
   dependencies. automake is only needed for its aclocal tool. The
