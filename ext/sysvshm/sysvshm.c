@@ -227,7 +227,7 @@ PHP_FUNCTION(shm_put_var)
 	int type;
 	smart_str shm_var = {0};
 	int ret;	
-	php_unserialize_data_t var_hash;
+	php_serialize_data_t var_hash;
 
 	if(ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg_id, &arg_key,&arg_var) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -274,7 +274,7 @@ PHP_FUNCTION(shm_get_var)
 	char *shm_data;	
 	long shm_varpos;
 	sysvshm_chunk *shm_var;
-	php_serialize_data_t var_hash;
+	php_unserialize_data_t var_hash;
 	
 	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg_id, &arg_key) == FAILURE) {
 		WRONG_PARAM_COUNT;
