@@ -132,9 +132,11 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
                 }
                 $dest = preg_replace('!/+!', '/', $dest);
                 $file = preg_replace('!/+!', '/', $file);
+/*
                 $opts = array(0 => array('wrap' => 23),
                               1 => array('wrap' => 45)
                     );
+*/
                 if ($installed) {
                     $this->ui->tableRow(array($att['role'], $dest), null, $opts);
                 } else {
