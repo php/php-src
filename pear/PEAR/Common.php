@@ -14,6 +14,7 @@
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
 // | Authors: Stig Bakken <ssb@fast.no>                                   |
+// |          Tomas V.V.Cox <cox@idecnet.com>                             |
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
@@ -26,7 +27,7 @@ require_once 'PEAR.php';
 *   - check in inforFromDescFile that the minimal data needed is present
 *     (pack name, version, files, others?)
 *   - perhaps use parser folding to be less restrictive with the format
-      of the package.xml file
+*     of the package.xml file
 */
 class PEAR_Common extends PEAR
 {
@@ -47,6 +48,16 @@ class PEAR_Common extends PEAR
     /** assoc with information about a package */
     var $pkginfo = array();
 
+    /**
+    * Permitted maintainer roles
+    * @var array
+    */
+    var $maintainer_roles = array('lead','developer','contributor','helper');
+    /**
+    * Permitted release states
+    * @var array
+    */
+    var $releases_states  = array('alpha','beta','stable','snapshot');
     // }}}
 
     // {{{ constructor
@@ -119,6 +130,7 @@ class PEAR_Common extends PEAR
     {
         array_push($this->element_stack, $name);
         $this->current_element = $name;
+        $this->prev_element    = $this->element_stack[sizeof($this->element_stack)-2];
         $this->current_attributes = $attribs;
         switch ($name) {
             case 'Dir':
@@ -138,6 +150,30 @@ class PEAR_Common extends PEAR
             case 'LibFile':
                 $this->lib_atts = $attribs;
                 $this->lib_atts['Role'] = 'extension';
+                break;
+            case 'Maintainers':
+                $this->pkginfo['maintainers'] = array();
+                $this->m_i = 0; // maintainers array index
+                break;
+            case 'Maintainer':
+                // compatibility check
+                if (!isset($this->pkginfo['maintainers'])) {
+                    $this->pkginfo['maintainers'] = array();
+                    $this->m_i = 0;
+                }
+                $this->pkginfo['maintainers'][$this->m_i] = array();
+                $this->current_maintainer =& $this->pkginfo['maintainers'][$this->m_i];
+                break;
+            case 'Changelog':
+                $this->pkginfo['changelog'] = array();
+                $this->c_i = 0; // changelog array index
+                $this->in_changelog = true;
+                break;
+            case 'Release':
+                if ($this->in_changelog) {
+                    $this->pkginfo['changelog'][$this->c_i] = array();
+                    $this->current_release =& $this->pkginfo['changelog'][$this->c_i];
+                }
                 break;
         }
     }
@@ -190,6 +226,16 @@ class PEAR_Common extends PEAR
                 unset($this->lib_atts);
                 unset($this->lib_sources);
                 break;
+            case 'Maintainer':
+                $this->m_i++;
+                break;
+            case 'Release':
+                if ($this->in_changelog) {
+                    $this->c_i++;
+                }
+                break;
+            case 'Changelog':
+                $this->in_changelog = false;
         }
         array_pop($this->element_stack);
         $this->current_element = $this->element_stack[sizeof($this->element_stack)-1];
@@ -200,15 +246,14 @@ class PEAR_Common extends PEAR
 
     function _pkginfo_cdata($xp, $data)
     {
-        $prev = $this->element_stack[sizeof($this->element_stack)-2];
         switch ($this->current_element) {
             case 'Name':
-                switch ($prev) {
+                switch ($this->prev_element) {
                     case 'Package':
                         $this->pkginfo['package'] .= $data;
                         break;
                     case 'Maintainer':
-                        $this->pkginfo['maintainer_name'] .= $data;
+                        $this->current_maintainer['name'] .= $data;
                         break;
                 }
                 break;
@@ -216,26 +261,49 @@ class PEAR_Common extends PEAR
                 $this->pkginfo['summary'] .= $data;
                 break;
             case 'Initials':
-                $this->pkginfo['maintainer_handle'] .= $data;
+                $this->current_maintainer['handle'] .= $data;
                 break;
             case 'Email':
-                $this->pkginfo['maintainer_email'] .= $data;
+                $this->current_maintainer['email'] .= $data;
+                break;
+            case 'Role':
+                if (!in_array($data, $this->maintainer_roles)) {
+                    trigger_error("The maintainer role: '$data' is not valid", E_USER_WARNING);
+                } else {
+                    $this->current_maintainer['role'] .= $data;
+                }
                 break;
             case 'Version':
-                $this->pkginfo['version'] .= $data;
+                if ($this->in_changelog) {
+                    $this->current_release['version'] .= $data;
+                } else {
+                    $this->pkginfo['version'] .= $data;
+                }
                 break;
             case 'Date':
-                $this->pkginfo['release_date'] .= $data;
+                if ($this->in_changelog) {
+                    $this->current_release['release_date'] .= $data;
+                } else {
+                    $this->pkginfo['release_date'] .= $data;
+                }
                 break;
             case 'Notes':
-                $this->pkginfo['release_notes'] .= $data;
+                if ($this->in_changelog) {
+                    $this->current_release['release_notes'] .= $data;
+                } else {
+                    $this->pkginfo['release_notes'] .= $data;
+                }
+                break;
+            case 'State':
+                if (!in_array($data, $this->releases_states)) {
+                    trigger_error("The release state: '$data' is not valid", E_USER_WARNING);
+                } elseif ($this->in_changelog) {
+                    $this->current_release['release_state'] = $data;
+                } else {
+                    $this->pkginfo['release_state'] .= $data;
+                }
                 break;
             case 'Dir':
-                if (!$this->phpdir) {
-                    break;
-                }
-                $dir = trim($data);
-                // XXX add to file list
                 break;
             case 'File':
                 $role = strtolower($this->current_attributes['Role']);
@@ -272,12 +340,14 @@ class PEAR_Common extends PEAR
         $this->pkginfo = array();
         $this->current_element = false;
         $this->destdir = '';
-        $this->filelist = array();
+        $this->pkginfo['filelist'] = array();
+        $this->filelist =& $this->pkginfo['filelist'];
+        $this->in_changelog = false;
 
         // read the whole thing so we only get one cdata callback
         // for each block of cdata
         $data = fread($fp, filesize($descfile));
-        if (!@xml_parse($xp, $data, 1)) {
+        if (!xml_parse($xp, $data, 1)) {
             $msg = sprintf("XML error: %s at line %d",
                            xml_error_string(xml_get_error_code($xp)),
                            xml_get_current_line_number($xp));
@@ -288,12 +358,24 @@ class PEAR_Common extends PEAR
         xml_parser_free($xp);
 
         foreach ($this->pkginfo as $k => $v) {
-            $this->pkginfo[$k] = trim($v);
+            if (!is_array($v)) {
+                $this->pkginfo[$k] = trim($v);
+            }
         }
-        $this->pkginfo['filelist'] = &$this->filelist;
         return $this->pkginfo;
     }
-
     // }}}
+
+    /**
+    * Returns info from a tgz pear package
+    * (experimental)
+    */
+    function infoFromTgzFile($file)
+    {
+        // untar in temp
+        // chdir($tmp);
+        //return $this->infoFromDescriptionFile('package.xml');
+        // clean temp
+    }
 }
 ?>
