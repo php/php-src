@@ -48,6 +48,69 @@
 							/* TODO: exception */											\
 						}
 
+#define GET_CTOR_SIGNATURE(intern, hash_val, num_args, arg_types)													\
+			GET_SIGNATURE(intern, (*intern)->class_name, (*intern)->class_name_len, hash_val, num_args, arg_types)
+
+#define GET_METHOD_SIGNATURE(intern, method, hash_val, num_args, arg_types)											\
+			GET_SIGNATURE(intern, method->str, method->len, hash_val, num_args, arg_types)
+
+#define GET_SIGNATURE(intern, name, name_len, hash_val, num_args, arg_types)										\
+						hash_val.len = name_len;																	\
+																													\
+						if ((*(*intern)->handlers)->hash_type & HASH_WITH_SIGNATURE) {								\
+							zend_uint _signature_counter;															\
+																													\
+							arg_types = (char *) emalloc(sizeof(char) * (num_args + 1));							\
+							hash_val.len += num_args + 1;															\
+																													\
+							for (_signature_counter = 0; _signature_counter < num_args; _signature_counter++) {		\
+								switch (Z_TYPE_PP(args[_signature_counter])) {										\
+									case IS_NULL:																	\
+										arg_types[_signature_counter] = 'n';										\
+										break;																		\
+									case IS_LONG:																	\
+										arg_types[_signature_counter] = 'l';										\
+										break;																		\
+									case IS_DOUBLE:																	\
+										arg_types[_signature_counter] = 'd';										\
+										break;																		\
+									case IS_STRING:																	\
+										arg_types[_signature_counter] = 's';										\
+										break;																		\
+									case IS_ARRAY:																	\
+										arg_types[_signature_counter] = 'a';										\
+										break;																		\
+									case IS_OBJECT:																	\
+										arg_types[_signature_counter] = 'o';										\
+										break;																		\
+									case IS_BOOL:																	\
+										arg_types[_signature_counter] = 'b';										\
+										break;																		\
+									case IS_RESOURCE:																\
+										arg_types[_signature_counter] = 'r';										\
+										break;																		\
+									default:																		\
+										arg_types[_signature_counter] = 'u';										\
+								}																					\
+							}																						\
+																													\
+							arg_types[_signature_counter] = '\0';													\
+						} else {																					\
+							arg_types = (char *) emalloc(sizeof(char));												\
+							arg_types[0] = '\0';																	\
+						}																							\
+																													\
+						hash_val.str = (char *) emalloc(sizeof(char) * (hash_val.len + 2));							\
+						memcpy(hash_val.str, arg_types, num_args + 1);												\
+						memcpy(&hash_val.str[hash_val.len - name_len],												\
+							   name, name_len + 1);
+
+#define FREE_SIGNATURE(hash_val, arg_types)																			\
+						efree(arg_types);																			\
+						efree(hash_val.str);
+
+
+
 #define RPC_REFCOUNT(intern) ((*intern)->refcount)
 #define RPC_ADDREF(intern) (++RPC_REFCOUNT(intern))
 #define RPC_DELREF(intern) (--RPC_REFCOUNT(intern))
