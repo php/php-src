@@ -1,3 +1,12 @@
+2004-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      Fix __METHOD__ (noticed by Davey Sahfik)
+
+    * zend_reflection_api.c:
+      Fix problem with Reflection_Property (patch from Timm slightly modified).
+
 2004-02-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects_API.c:

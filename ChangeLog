@@ -1,3 +1,81 @@
+2004-02-26  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.h:
+      Adding function to change user passwords
+
+2004-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/abstract_derived.phpt:
+      Fixes for abstract classes
+
+    * ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      Fix __METHOD__ (noticed by Davey Sahfik)
+
+    * tests/lang/foreach_with_object_001.phpt:
+      Add new test (from pierre)
+
+2004-02-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_repl.c
+      ext/mysqli/mysqli_report.h
+      ext/mysqli/php_mysqli.h:
+      ws & cs fixes
+
+2004-02-26  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      prototype fix for mysqli_ping
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      added MySQLI ini entries
+      added ini parameter for mysql->reconnect
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_prop.c:
+      removed blocking calls to mysql_set_server_option (MYSQLI_DISABLE_MQ)
+      added mysqli_multi_query to function table
+      changed stmt->affected_rows property (http://bugs.mysql.com/?id=2247) for
+      4.1.2
+
+2004-02-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * tests/lang/bug27395.phpt
+      tests/lang/bug27395.phpt:
+      Remove bogus test: see bug #20993
+
+2004-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      Fix problem with Reflection_Property (patch from Timm slightly modified).
+
+2004-02-26  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/http_fopen_wrapper.c:
+      MFB: typofix
+
+    * (PHP_4_3)
+      ext/standard/http_fopen_wrapper.c:
+      typofix
+
+2004-02-26  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/http_fopen_wrapper.c:
+      MFH: Handle situation where feof() occurs before the HTTP header is
+      retrieved.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Handle situation where feof() occurs before the HTTP header is retrieved.
+
 2004-02-25  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/tests/general_functions/highlight_heredoc.phpt
