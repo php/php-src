@@ -93,6 +93,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
    for thread safety instead of using true globals.
 */
 typedef struct {
+	int x; /* fix error in msvc, cannot have empty structs */
 } zend_xmlrpc_globals;
 
 /* In every function that needs to use variables in zend_xmlrpc_globals,

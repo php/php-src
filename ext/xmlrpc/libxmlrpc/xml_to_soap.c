@@ -23,6 +23,9 @@
 
 static const char rcsid[] = "#(@) $Id:";
 
+#ifdef _WIN32
+#include "xmlrpc_win32.h"
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include "xml_to_soap.h"
