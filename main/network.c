@@ -289,10 +289,77 @@ ok:
 	}
 	return ret;
 #else /* !defined(PHP_WIN32) && ... */
+#ifdef PHP_WIN32
+	return php_connect_nonb_win32((SOCKET) sockfd, addr, addrlen, timeout);
+#endif
 	return connect(sockfd, addr, addrlen);
 #endif
 }
 /* }}} */
+
+#ifdef PHP_WIN32
+/* {{{ php_connect_nonb_win32 */
+PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
+						const struct sockaddr *addr,
+						socklen_t addrlen,
+						struct timeval *timeout)
+{
+	int error = 0, error_len, ret;
+	u_long non_block = TRUE, block = FALSE;
+
+	fd_set rset, wset;
+
+	if (timeout == NULL)	{
+		/* blocking mode */
+		return connect(sockfd, addr, addrlen);
+	}
+	
+	/* Set the socket to be non-blocking */
+	ioctlsocket(sockfd, FIONBIO, &non_block);
+
+	if (connect(sockfd, addr, addrlen) == SOCKET_ERROR) {
+		if (WSAGetLastError() != WSAEWOULDBLOCK) {
+			return SOCKET_ERROR;
+		}
+	}
+
+	FD_ZERO(&rset);
+	FD_SET(sockfd, &rset);
+
+	FD_ZERO(&wset);
+	FD_SET(sockfd, &wset);
+
+	if ((ret = select(sockfd + 1, &rset, &wset, NULL, timeout)) == 0) {
+		WSASetLastError(WSAETIMEDOUT);
+		return SOCKET_ERROR;
+	}
+
+	if (ret == SOCKET_ERROR) {
+		return SOCKET_ERROR;
+	}
+
+	if(FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
+		error_len = sizeof(error);
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char *) &error, &error_len) == SOCKET_ERROR) {
+			return SOCKET_ERROR;
+		}
+	} else {
+		/* whoops: sockfd has disappeared */
+		return SOCKET_ERROR;
+	}
+
+	/* Set the socket back to blocking */
+	ioctlsocket(sockfd, FIONBIO, &block);
+
+	if (error) { 
+		WSASetLastError(error);
+		return SOCKET_ERROR;
+	}
+
+	return 0;
+}
+/* }}} */
+#endif
 
 /* {{{ php_hostconnect
  * Creates a socket of type socktype and connects to the given host and
@@ -301,7 +368,7 @@ ok:
  */
 int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout)
 {	
-	int n, repeatto, s;
+	int n, repeatto, s, err;
 	struct sockaddr **sal, **psal;
 	struct timeval timeoutval;
 	
@@ -351,6 +418,10 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 					} 
 					break;
 			}
+#ifdef PHP_WIN32
+			/* Preserve the last error */
+			err = WSAGetLastError();
+#endif
 			close (s);
 		}
 		sal++;
@@ -361,6 +432,12 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 	}
 	php_network_freeaddresses(psal);
 	php_error(E_WARNING, "php_hostconnect: connect failed");
+
+#ifdef PHP_WIN32
+	/* Restore the last error */
+	WSASetLastError(err);
+#endif 
+
 	return -1;
 
  ok:

@@ -121,6 +121,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *host;
 	int host_len;
 	int port = -1;
+	int err;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = 60;
 	unsigned long conv;
@@ -152,7 +153,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		zval_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
-	if (zerrstr)	{
+	if (zerrstr) {
 		zval_dtor(zerrstr);
 		ZVAL_STRING(zerrno, "", 1);
 	}
@@ -192,6 +193,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		else
 #endif
 		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, (int)timeout, persistent);
+#ifdef PHP_WIN32
+		/* Preserve error */
+		err = WSAGetLastError();
+#endif
 
 		if (stream == NULL) {
 			zend_error(E_WARNING, "%s(): unable to connect to %s:%d", 
@@ -227,15 +232,32 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	efree(hashkey);
 	
 	if (stream == NULL)	{
-		if (zerrno)	{
+		if (zerrno) {
 			zval_dtor(zerrno);
+#ifndef PHP_WIN32
 			ZVAL_LONG(zerrno, errno);
+#else
+			ZVAL_LONG(zerrno, err);
+#endif
 		}
-		if (zerrstr)	{
+#ifndef PHP_WIN32
+		if (zerrstr) {
 			zval_dtor(zerrstr);
-			ZVAL_STRING(zerrno, strerror(errno), 1);
+			ZVAL_STRING(zerrstr, strerror(errno), 1);
 		}
+#else
+		if (zerrstr) {
+			char *buf;
 
+			if (! FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, 
+					Z_LVAL_P(zerrno), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&buf, 0, NULL)) {
+				RETURN_FALSE;
+			}
+
+			ZVAL_STRING(zerrstr, buf, 1);
+			LocalFree(buf);
+		}
+#endif
 		RETURN_FALSE;
 	}
 		
