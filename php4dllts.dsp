@@ -792,6 +792,10 @@ InputPath=".\configuration-scanner.l"
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\ChangeLog
+# End Source File
+# Begin Source File
+
 SOURCE=.\LICENSE
 # End Source File
 # Begin Source File
