@@ -118,7 +118,7 @@ struct _zend_op_array {
 	int backpatch_count;
 #endif
 
-	void *reserved[4];
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 
 
@@ -147,7 +147,7 @@ typedef union _zend_function {
 typedef struct _zend_function_state {
 	HashTable *function_symbol_table;
 	zend_function *function;
-	void *reserved[4];
+	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_function_state;
 
 

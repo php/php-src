@@ -260,4 +260,6 @@ extern zend_utility_values zend_uv;
 		}													\
 	}
 
+#define ZEND_MAX_RESERVED_RESOURCES	1
+
 #endif /* _ZEND_H */
