@@ -200,7 +200,7 @@ static void _free_ldap_result_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 /* {{{ PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY_EX("ldap.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_ldap_globals,		ldap_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("ldap.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateLong,		max_links,			zend_ldap_globals,		ldap_globals,	display_link_numbers)
 PHP_INI_END()
 /* }}} */
 

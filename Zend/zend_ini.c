@@ -436,7 +436,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool)
 }
 
 
-ZEND_API ZEND_INI_MH(OnUpdateInt)
+ZEND_API ZEND_INI_MH(OnUpdateLong)
 {
 	long *p;
 #ifndef ZTS

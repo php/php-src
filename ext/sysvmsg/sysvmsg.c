@@ -82,7 +82,7 @@ ZEND_GET_MODULE(sysvmsg)
  */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("sysvmsg.value",  "42",     PHP_INI_ALL, OnUpdateInt,    global_value,  zend_sysvmsg_globals, sysvmsg_globals)
+	STD_PHP_INI_ENTRY("sysvmsg.value",  "42",     PHP_INI_ALL, OnUpdateLong,    global_value,  zend_sysvmsg_globals, sysvmsg_globals)
 	STD_PHP_INI_ENTRY("sysvmsg.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_sysvmsg_globals, sysvmsg_globals)
 PHP_INI_END()
 */

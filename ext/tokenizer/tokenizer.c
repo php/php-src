@@ -136,7 +136,7 @@ ZEND_GET_MODULE(tokenizer)
  */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("tokenizer.global_value",      "42", PHP_INI_ALL, OnUpdateInt, global_value, zend_tokenizer_globals, tokenizer_globals)
+	STD_PHP_INI_ENTRY("tokenizer.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_tokenizer_globals, tokenizer_globals)
 	STD_PHP_INI_ENTRY("tokenizer.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_tokenizer_globals, tokenizer_globals)
 PHP_INI_END()
 */

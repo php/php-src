@@ -294,13 +294,13 @@ static CS_RETCODE CS_PUBLIC _server_message_handler(CS_CONTEXT *context, CS_CONN
 
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("sybct.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	zend_sybase_globals,	sybase_globals)
-	STD_PHP_INI_ENTRY_EX("sybct.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		zend_sybase_globals,	sybase_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("sybct.max_links",		"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_links,			zend_sybase_globals,	sybase_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY("sybct.min_server_severity",	"10",	PHP_INI_ALL,		OnUpdateInt,		min_server_severity,	zend_sybase_globals,	sybase_globals)
-	STD_PHP_INI_ENTRY("sybct.min_client_severity",	"10",	PHP_INI_ALL,		OnUpdateInt,		min_client_severity,	zend_sybase_globals,	sybase_globals)
+	STD_PHP_INI_BOOLEAN("sybct.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateLong,		allow_persistent,	zend_sybase_globals,	sybase_globals)
+	STD_PHP_INI_ENTRY_EX("sybct.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_persistent,		zend_sybase_globals,	sybase_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("sybct.max_links",		"-1",	PHP_INI_SYSTEM,		OnUpdateLong,		max_links,			zend_sybase_globals,	sybase_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY("sybct.min_server_severity",	"10",	PHP_INI_ALL,		OnUpdateLong,		min_server_severity,	zend_sybase_globals,	sybase_globals)
+	STD_PHP_INI_ENTRY("sybct.min_client_severity",	"10",	PHP_INI_ALL,		OnUpdateLong,		min_client_severity,	zend_sybase_globals,	sybase_globals)
 	STD_PHP_INI_ENTRY("sybct.hostname",			NULL,	PHP_INI_ALL,		OnUpdateString,		hostname,		zend_sybase_globals,		sybase_globals)
-	STD_PHP_INI_ENTRY_EX("sybct.deadlock_retry_count",	"-1",	PHP_INI_ALL,		OnUpdateInt,		deadlock_retry_count,	zend_sybase_globals,	sybase_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("sybct.deadlock_retry_count",	"-1",	PHP_INI_ALL,		OnUpdateLong,		deadlock_retry_count,	zend_sybase_globals,	sybase_globals, display_link_numbers)
 PHP_INI_END()
 
 

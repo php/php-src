@@ -172,6 +172,6 @@ zend_unregister_ini_entries,
 zend_wrong_param_count,
 zval_add_ref,
 OnUpdateBool,
-OnUpdateInt,
+OnUpdateLong,
 OnUpdateString,
 OnUpdateStringUnempty

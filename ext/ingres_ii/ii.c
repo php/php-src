@@ -86,9 +86,9 @@ ZEND_GET_MODULE(ingres_ii)
 /* php.ini entries
 */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("ingres.allow_persistent", "1", PHP_INI_SYSTEM,	OnUpdateInt, allow_persistent, zend_ii_globals, ii_globals)
-	STD_PHP_INI_ENTRY_EX("ingres.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_persistent, zend_ii_globals, ii_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("ingres.max_links", "-1", PHP_INI_SYSTEM, OnUpdateInt, max_links, zend_ii_globals, ii_globals, display_link_numbers)
+	STD_PHP_INI_BOOLEAN("ingres.allow_persistent", "1", PHP_INI_SYSTEM,	OnUpdateLong, allow_persistent, zend_ii_globals, ii_globals)
+	STD_PHP_INI_ENTRY_EX("ingres.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_persistent, zend_ii_globals, ii_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX("ingres.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ii_globals, ii_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY("ingres.default_database", NULL, PHP_INI_ALL, OnUpdateString, default_database, zend_ii_globals, ii_globals)
 	STD_PHP_INI_ENTRY("ingres.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ii_globals, ii_globals)
 	STD_PHP_INI_ENTRY("ingres.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ii_globals, ii_globals)
