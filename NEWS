@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Add zlib.output_compression_level option (Stig)
 - Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
 - Added support for dynamically loaded extensions on OS X / Darwin. 
   (dank, markonen)
