@@ -138,7 +138,17 @@ class PEAR_ErrorStack {
      * @access private
      */
     var $_errors = array();
-    
+
+    /**
+     * Storage of errors by level.
+     *
+     * Allows easy retrieval and deletion of only errors from a particular level
+     * @since PEAR 1.4.0dev
+     * @var array
+     * @access private
+     */
+    var $_errorsByLevel = array();
+
     /**
      * Package name this error stack represents
      * @var string
@@ -544,6 +554,7 @@ class PEAR_ErrorStack {
         }
         if ($push) {
             array_unshift($this->_errors, $err);
+            $this->_errorsByLevel[$err['level']][] = &$this->_errors[0];
         }
         if ($log) {
             if ($this->_logger || $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER']) {
@@ -555,6 +566,9 @@ class PEAR_ErrorStack {
         }
         if (class_exists($this->_exceptionClass)) {
             $exception = $this->_exceptionClass;
+            if (is_string($msg) && is_numeric($code)) {
+                $code = $code + 0;
+            }
             $ret = new $exception($msg, $code);
             $ret->errorData = $err;
         }
@@ -640,26 +654,52 @@ class PEAR_ErrorStack {
     
     /**
      * Determine whether there are any errors on the stack
+     * @param string|array Level name.  Use to determine if any errors
+     * of level (string), or levels (array) have been pushed
      * @return boolean
      */
-    function hasErrors()
+    function hasErrors($level = false)
     {
+        if ($level) {
+            return isset($this->_errorsByLevel[$level]);
+        }
         return count($this->_errors);
     }
     
     /**
      * Retrieve all errors since last purge
      * 
-     * @param boolean $purge set in order to empty the error stack
+     * @param boolean set in order to empty the error stack
+     * @param string level name, to return only errors of a particular severity
      * @return array
      */
-    function getErrors($purge = false)
+    function getErrors($purge = false, $level = false)
     {
         if (!$purge) {
-            return $this->_errors;
+            if ($level) {
+                if (!isset($this->_errorsByLevel[$level])) {
+                    return array();
+                } else {
+                    return $this->_errorsByLevel[$level];
+                }
+            } else {
+                return $this->_errors;
+            }
+        }
+        if ($level) {
+            $ret = $this->_errorsByLevel[$level];
+            foreach ($this->_errorsByLevel[$level] as $i => $unused) {
+                // entries are references to the $_errors array
+                $this->_errorsByLevel[$level][$i] = false;
+            }
+            // array_filter removes all entries === false
+            array_filter($this->_errors);
+            unset($this->_errorsByLevel[$level]);
+            return $ret;
         }
         $ret = $this->_errors;
         $this->_errors = array();
+        $this->_errorsByLevel = array();
         return $ret;
     }
     
@@ -669,19 +709,20 @@ class PEAR_ErrorStack {
      * The optional parameter can be used to test the existence of any errors without the need of
      * singleton instantiation
      * @param string|false Package name to check for errors
+     * @param string Level name to check for a particular severity
      * @return boolean
      * @static
      */
-    function staticHasErrors($package = false)
+    function staticHasErrors($package = false, $level = false)
     {
         if ($package) {
             if (!isset($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package])) {
                 return false;
             }
-            return $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->hasErrors();
+            return $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->hasErrors($level);
         }
         foreach ($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] as $package => $obj) {
-            if ($obj->hasErrors()) {
+            if ($obj->hasErrors($level)) {
                 return true;
             }
         }
@@ -690,21 +731,23 @@ class PEAR_ErrorStack {
     
     /**
      * Get a list of all errors since last purge, organized by package
+     * @since PEAR 1.4.0dev BC break! $level is now in the place $merge used to be
      * @param boolean $clearStack Set to purge the error stack of existing errors
+     * @param string  $level Set to a level name in order to retrieve only errors of a particular level
      * @param boolean $merge Set to return a flat array, not organized by package
      * @param array   $sortfunc Function used to sort a merged array - default
      *        sorts by time, and should be good for most cases
      * @static
      * @return array 
      */
-    function staticGetErrors($purge = false, $merge = false, $sortfunc = array('PEAR_ErrorStack', '_sortErrors'))
+    function staticGetErrors($purge = false, $level = false, $merge = false, $sortfunc = array('PEAR_ErrorStack', '_sortErrors'))
     {
         $ret = array();
         if (!is_callable($sortfunc)) {
             $sortfunc = array('PEAR_ErrorStack', '_sortErrors');
         }
         foreach ($GLOBALS['_PEAR_ERRORSTACK_SINGLETON'] as $package => $obj) {
-            $test = $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->getErrors($purge);
+            $test = $GLOBALS['_PEAR_ERRORSTACK_SINGLETON'][$package]->getErrors($purge, $level);
             if ($test) {
                 if ($merge) {
                     $ret = array_merge($ret, $test);
@@ -743,9 +786,9 @@ class PEAR_ErrorStack {
      * @return array|false either array('file' => file, 'line' => line,
      *         'function' => function name, 'class' => class name) or
      *         if this doesn't work, then false
-     * @param array Results of debug_backtrace()
      * @param unused
      * @param integer backtrace frame.
+     * @param array Results of debug_backtrace()
      * @static
      */
     function getFileLine($code, $params, $backtrace = null)
