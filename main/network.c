@@ -512,7 +512,6 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, struct 
 		
 	}
 	php_network_freeaddresses(psal);
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_hostconnect: connect failed");
 
 #ifdef PHP_WIN32
 	/* Restore the last error */
