@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Fixed a problem in ldap_add() and ldap_modify(), sometimes added trailing
+  garbage to the values (Stig Venaas) 
 - Fixed a problem with dbmopen() not handing 'c' correctly with dbm/db/ndbm
   databases. (JimJag)
 - Fixed a crash in number_format() when used with locales. (Andrei)
