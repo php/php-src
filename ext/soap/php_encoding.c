@@ -2600,13 +2600,28 @@ void delete_encoder(void *encode)
 {
 	encodePtr t = *((encodePtr*)encode);
 	if (t->details.ns) {
-		free(t->details.ns);
+		sdl_free(t->details.ns);
 	}
 	if (t->details.type_str) {
-		free(t->details.type_str);
+		sdl_free(t->details.type_str);
 	}
 	if (t->details.map) {
 		delete_mapping(t->details.map);
 	}
-	free(t);
+	sdl_free(t);
+}
+
+void delete_tmp_encoder(void *encode)
+{
+	encodePtr t = *((encodePtr*)encode);
+	if (t->details.ns) {
+		efree(t->details.ns);
+	}
+	if (t->details.type_str) {
+		efree(t->details.type_str);
+	}
+	if (t->details.map) {
+		delete_mapping(t->details.map);
+	}
+	efree(t);
 }

@@ -215,6 +215,7 @@ encodePtr get_conversion_from_type_ex(HashTable *encoding, xmlNodePtr node, cons
 encodePtr get_conversion_from_href_type_ex(HashTable *encoding, const char *type, int len);
 
 void delete_encoder(void *handle);
+void delete_tmp_encoder(void *encode);
 
 extern encode defaultEncoding[];
 

@@ -175,7 +175,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	if (!include) {
 		targetNamespace = get_attribute(definitions->properties, "targetNamespace");
 		if (targetNamespace) {
-			tmpsdl->target_ns = strdup(targetNamespace->children->content);
+			tmpsdl->target_ns = sdl_strdup(targetNamespace->children->content);
 		}
 	}
 
@@ -268,12 +268,12 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 
 		tmp = get_attribute(body->properties, "namespace");
 		if (tmp) {
-			binding->ns = strdup(tmp->children->content);
+			binding->ns = sdl_strdup(tmp->children->content);
 		}
 
 		tmp = get_attribute(body->properties, "parts");
 		if (tmp) {
-			binding->parts = strdup(tmp->children->content);
+			binding->parts = sdl_strdup(tmp->children->content);
 		}
 
 		if (binding->use == SOAP_ENCODED) {
@@ -285,7 +285,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			} else if (tmp == NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
 			} else {
-				binding->encodingStyle = strdup(tmp->children->content);
+				binding->encodingStyle = sdl_strdup(tmp->children->content);
 			}
 		}
 	}
@@ -319,9 +319,9 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing part '%s' in <message>",tmp->children->content);
 		}
 
-		h = malloc(sizeof(sdlSoapBindingFunctionHeader));
+		h = sdl_malloc(sizeof(sdlSoapBindingFunctionHeader));
 		memset(h, 0, sizeof(sdlSoapBindingFunctionHeader));
-		h->name = strdup(tmp->children->content);
+		h->name = sdl_strdup(tmp->children->content);
 
 		tmp = get_attribute(part->properties, "type");
 		if (tmp != NULL) {
@@ -345,7 +345,7 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 
 		tmp = get_attribute(header->properties, "namespace");
 		if (tmp) {
-			h->ns = strdup(tmp->children->content);
+			h->ns = sdl_strdup(tmp->children->content);
 		}
 
 		if (h->use == SOAP_ENCODED) {
@@ -357,13 +357,13 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 			} else if (tmp == NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Unspecified encodingStyle");
 			} else {
-				h->encodingStyle = strdup(tmp->children->content);
+				h->encodingStyle = sdl_strdup(tmp->children->content);
 			}
 		}
 
 		if (binding->headers == NULL) {
-			binding->headers = malloc(sizeof(HashTable));
-			zend_hash_init(binding->headers, 0, NULL, delete_header, 1);
+			binding->headers = sdl_malloc(sizeof(HashTable));
+			zend_hash_init(binding->headers, 0, NULL, delete_header, SDL_PERSISTENT);
 		}
 
 		if (h->ns) {
@@ -395,15 +395,15 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 	if (ctype) {efree(ctype);}
 	if (ns) {efree(ns);}
 
-	parameters = malloc(sizeof(HashTable));
-	zend_hash_init(parameters, 0, NULL, delete_paramater, 1);
+	parameters = sdl_malloc(sizeof(HashTable));
+	zend_hash_init(parameters, 0, NULL, delete_paramater, SDL_PERSISTENT);
 
 	trav = message->children;
 	FOREACHNODE(trav, "part", part) {
 		xmlAttrPtr element, type, name;
 		sdlParamPtr param;
 
-		param = malloc(sizeof(sdlParam));
+		param = sdl_malloc(sizeof(sdlParam));
 		memset(param,0,sizeof(sdlParam));
 		param->order = 0;
 
@@ -412,7 +412,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, char* message_name)
 			php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No name associated with <part> '%s'", message->name);
 		}
 
-		param->paramName = strdup(name->children->content);
+		param->paramName = sdl_strdup(name->children->content);
 
 		type = get_attribute(part->properties, "type");
 		if (type != NULL) {
@@ -439,10 +439,10 @@ static sdlPtr load_wsdl(char *struri)
 	int i,n;
 
 	memset(&ctx,0,sizeof(ctx));
-	ctx.sdl = malloc(sizeof(sdl));
+	ctx.sdl = sdl_malloc(sizeof(sdl));
 	memset(ctx.sdl, 0, sizeof(sdl));
-	ctx.sdl->source = strdup(struri);
-	zend_hash_init(&ctx.sdl->functions, 0, NULL, delete_function, 1);
+	ctx.sdl->source = sdl_strdup(struri);
+	zend_hash_init(&ctx.sdl->functions, 0, NULL, delete_function, SDL_PERSISTENT);
 
 	zend_hash_init(&ctx.docs, 0, NULL, delete_document, 0);
 	zend_hash_init(&ctx.messages, 0, NULL, NULL, 0);
@@ -472,7 +472,7 @@ static sdlPtr load_wsdl(char *struri)
 				sdlBindingPtr tmpbinding;
 				char *wsdl_soap_namespace = NULL;
 
-				tmpbinding = malloc(sizeof(sdlBinding));
+				tmpbinding = sdl_malloc(sizeof(sdlBinding));
 				memset(tmpbinding, 0, sizeof(sdlBinding));
 
 				bindingAttr = get_attribute(port->properties, "binding");
@@ -491,7 +491,7 @@ static sdlPtr load_wsdl(char *struri)
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: No location associated with <port>");
 				}
 
-				tmpbinding->location = strdup(location->children->content);
+				tmpbinding->location = sdl_strdup(location->children->content);
 
 				if (address->ns) {
 					if (!strncmp(address->ns->href, WSDL_SOAP11_NAMESPACE, sizeof(WSDL_SOAP11_NAMESPACE))) {
@@ -528,7 +528,7 @@ static sdlPtr load_wsdl(char *struri)
 					xmlNodePtr soapBindingNode;
 					xmlAttrPtr tmp;
 
-					soapBinding = malloc(sizeof(sdlSoapBinding));
+					soapBinding = sdl_malloc(sizeof(sdlSoapBinding));
 					memset(soapBinding, 0, sizeof(sdlSoapBinding));
 					soapBinding->style = SOAP_DOCUMENT;
 
@@ -544,7 +544,7 @@ static sdlPtr load_wsdl(char *struri)
 							if (strncmp(tmp->children->content, WSDL_HTTP_TRANSPORT, sizeof(WSDL_HTTP_TRANSPORT))) {
 								php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: PHP-SOAP doesn't support transport '%s'", tmp->children->content);
 							}
-							soapBinding->transport = strdup(tmp->children->content);
+							soapBinding->transport = sdl_strdup(tmp->children->content);
 						}
 					}
 					tmpbinding->bindingAttributes = (void *)soapBinding;
@@ -554,7 +554,7 @@ static sdlPtr load_wsdl(char *struri)
 				if (name == NULL) {
 					php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing 'name' attribute for <binding>");
 				}
-				tmpbinding->name = strdup(name->children->content);
+				tmpbinding->name = sdl_strdup(name->children->content);
 
 				type = get_attribute(binding->properties, "type");
 				if (type == NULL) {
@@ -586,8 +586,8 @@ static sdlPtr load_wsdl(char *struri)
 						php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Missing <portType>/<operation> with name '%s'", op_name->children->content);
 					}
 
-					function = malloc(sizeof(sdlFunction));
-					function->functionName = strdup(op_name->children->content);
+					function = sdl_malloc(sizeof(sdlFunction));
+					function->functionName = sdl_strdup(op_name->children->content);
 					function->requestParameters = NULL;
 					function->responseParameters = NULL;
 					function->responseName = NULL;
@@ -600,7 +600,7 @@ static sdlPtr load_wsdl(char *struri)
 						xmlNodePtr soapOperation;
 						xmlAttrPtr tmp;
 
-						soapFunctionBinding = malloc(sizeof(sdlSoapBindingFunction));
+						soapFunctionBinding = sdl_malloc(sizeof(sdlSoapBindingFunction));
 						memset(soapFunctionBinding, 0, sizeof(sdlSoapBindingFunction));
 						soapBinding = (sdlSoapBindingPtr)tmpbinding->bindingAttributes;
 						soapFunctionBinding->style = soapBinding->style;
@@ -609,7 +609,7 @@ static sdlPtr load_wsdl(char *struri)
 						if (soapOperation) {
 							tmp = get_attribute(soapOperation->properties, "soapAction");
 							if (tmp) {
-								soapFunctionBinding->soapAction = strdup(tmp->children->content);
+								soapFunctionBinding->soapAction = sdl_strdup(tmp->children->content);
 							}
 
 							tmp = get_attribute(soapOperation->properties, "style");
@@ -639,9 +639,9 @@ static sdlPtr load_wsdl(char *struri)
 
 						name = get_attribute(input->properties, "name");
 						if (name != NULL) {
-							function->requestName = strdup(name->children->content);
+							function->requestName = sdl_strdup(name->children->content);
 						} else {
-							function->requestName = strdup(function->functionName);
+							function->requestName = sdl_strdup(function->functionName);
 						}
 
 						if (tmpbinding->bindingType == BINDING_SOAP) {
@@ -665,11 +665,11 @@ static sdlPtr load_wsdl(char *struri)
 
 						name = get_attribute(output->properties, "name");
 						if (name != NULL) {
-							function->responseName = strdup(name->children->content);
+							function->responseName = sdl_strdup(name->children->content);
 						} else if (input == NULL) {
-							function->responseName = strdup(function->functionName);
+							function->responseName = sdl_strdup(function->functionName);
 						} else {
-							function->responseName = malloc(strlen(function->functionName) + sizeof("Response"));
+							function->responseName = sdl_malloc(strlen(function->functionName) + sizeof("Response"));
 							sprintf(function->responseName, "%sResponse", function->functionName);
 						}
 
@@ -702,8 +702,8 @@ static sdlPtr load_wsdl(char *struri)
 						efree(tmp);
 						if (function->requestName != NULL && strcmp(function->requestName,function->functionName) != 0) {
 							if (ctx.sdl->requests == NULL) {
-								ctx.sdl->requests = malloc(sizeof(HashTable));
-								zend_hash_init(ctx.sdl->requests, 0, NULL, NULL, 1);
+								ctx.sdl->requests = sdl_malloc(sizeof(HashTable));
+								zend_hash_init(ctx.sdl->requests, 0, NULL, NULL, SDL_PERSISTENT);
 							}
 							tmp = estrdup(function->requestName);
 							len = strlen(tmp);
@@ -715,8 +715,8 @@ static sdlPtr load_wsdl(char *struri)
 				ENDFOREACH(trav2);
 
 				if (!ctx.sdl->bindings) {
-					ctx.sdl->bindings = malloc(sizeof(HashTable));
-					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, 1);
+					ctx.sdl->bindings = sdl_malloc(sizeof(HashTable));
+					zend_hash_init(ctx.sdl->bindings, 0, NULL, delete_binding, SDL_PERSISTENT);
 				}
 
 				zend_hash_add(ctx.sdl->bindings, tmpbinding->name, strlen(tmpbinding->name), &tmpbinding, sizeof(sdlBindingPtr), NULL);
@@ -740,6 +740,7 @@ static sdlPtr load_wsdl(char *struri)
 
 sdlPtr get_sdl(char *uri)
 {
+#ifdef SDL_CACHE
 	sdlPtr tmp, *hndl;
 	TSRMLS_FETCH();
 
@@ -753,45 +754,53 @@ sdlPtr get_sdl(char *uri)
 	}
 
 	return tmp;
+#else
+	return load_wsdl(uri);
+#endif
 }
 
 /* Deletes */
 void delete_sdl(void *handle)
 {
-	sdlPtr tmp = *((sdlPtr*)handle);
+	sdlPtr tmp = (sdlPtr)handle;
 
 	zend_hash_destroy(&tmp->functions);
 	if (tmp->source) {
-		free(tmp->source);
+		sdl_free(tmp->source);
 	}
 	if (tmp->target_ns) {
-		free(tmp->target_ns);
+		sdl_free(tmp->target_ns);
 	}
 	if (tmp->elements) {
 		zend_hash_destroy(tmp->elements);
-		free(tmp->elements);
+		sdl_free(tmp->elements);
 	}
 	if (tmp->encoders) {
 		zend_hash_destroy(tmp->encoders);
-		free(tmp->encoders);
+		sdl_free(tmp->encoders);
 	}
 	if (tmp->types) {
 		zend_hash_destroy(tmp->types);
-		free(tmp->types);
+		sdl_free(tmp->types);
 	}
 	if (tmp->groups) {
 		zend_hash_destroy(tmp->groups);
-		free(tmp->groups);
+		sdl_free(tmp->groups);
 	}
 	if (tmp->bindings) {
 		zend_hash_destroy(tmp->bindings);
-		free(tmp->bindings);
+		sdl_free(tmp->bindings);
 	}
 	if (tmp->requests) {
 		zend_hash_destroy(tmp->requests);
-		free(tmp->requests);
+		sdl_free(tmp->requests);
 	}
-	free(tmp);
+	sdl_free(tmp);
+}
+
+void delete_sdl_ptr(void *handle)
+{
+	delete_sdl((sdlPtr*)handle);
 }
 
 static void delete_binding(void *data)
@@ -799,31 +808,36 @@ static void delete_binding(void *data)
 	sdlBindingPtr binding = *((sdlBindingPtr*)data);
 
 	if (binding->location) {
-		free(binding->location);
+		sdl_free(binding->location);
 	}
 	if (binding->name) {
-		free(binding->name);
+		sdl_free(binding->name);
 	}
 
 	if (binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
 		if (soapBind && soapBind->transport) {
-			free(soapBind->transport);
+			sdl_free(soapBind->transport);
 		}
+		sdl_free(soapBind);
 	}
-	free(binding);
+	sdl_free(binding);
 }
 
 static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body)
 {
 	if (body.ns) {
-		free(body.ns);
+		sdl_free(body.ns);
 	}
 	if (body.parts) {
-		free(body.parts);
+		sdl_free(body.parts);
 	}
 	if (body.encodingStyle) {
-		free(body.encodingStyle);
+		sdl_free(body.encodingStyle);
+	}
+	if (body.headers) {
+		zend_hash_destroy(body.headers);
+		sdl_free(body.headers);
 	}
 }
 
@@ -832,58 +846,59 @@ static void delete_function(void *data)
 	sdlFunctionPtr function = *((sdlFunctionPtr*)data);
 
 	if (function->functionName) {
-		free(function->functionName);
+		sdl_free(function->functionName);
 	}
 	if (function->requestName) {
-		free(function->requestName);
+		sdl_free(function->requestName);
 	}
 	if (function->responseName) {
-		free(function->responseName);
+		sdl_free(function->responseName);
 	}
 	if (function->requestParameters) {
 		zend_hash_destroy(function->requestParameters);
-		free(function->requestParameters);
+		sdl_free(function->requestParameters);
 	}
 	if (function->responseParameters) {
 		zend_hash_destroy(function->responseParameters);
-		free(function->responseParameters);
+		sdl_free(function->responseParameters);
 	}
 
 	if (function->bindingAttributes &&
 	    function->binding && function->binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
 		if (soapFunction->soapAction) {
-			free(soapFunction->soapAction);
+			sdl_free(soapFunction->soapAction);
 		}
 		delete_sdl_soap_binding_function_body(soapFunction->input);
 		delete_sdl_soap_binding_function_body(soapFunction->output);
 		delete_sdl_soap_binding_function_body(soapFunction->falut);
+		sdl_free(soapFunction);
 	}
-	free(function);
+	sdl_free(function);
 }
 
 static void delete_paramater(void *data)
 {
 	sdlParamPtr param = *((sdlParamPtr*)data);
 	if (param->paramName) {
-		free(param->paramName);
+		sdl_free(param->paramName);
 	}
-	free(param);
+	sdl_free(param);
 }
 
 static void delete_header(void *data)
 {
 	sdlSoapBindingFunctionHeaderPtr hdr = *((sdlSoapBindingFunctionHeaderPtr*)data);
 	if (hdr->name) {
-		free(hdr->name);
+		sdl_free(hdr->name);
 	}
 	if (hdr->ns) {
-		free(hdr->ns);
+		sdl_free(hdr->ns);
 	}
 	if (hdr->encodingStyle) {
-		free(hdr->encodingStyle);
+		sdl_free(hdr->encodingStyle);
 	}
-	free(hdr);
+	sdl_free(hdr);
 }
 
 static void delete_document(void *doc_ptr)
