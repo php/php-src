@@ -138,9 +138,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				strcat(p, "=");
 				strcat(p, data);
 				
-				if (PG(magic_quotes_gpc)) {
-					php_stripslashes(p, &l TSRMLS_CC);
-				}
 #ifndef PHP_WIN32
 				*ep = p;
 				++ep;
@@ -149,9 +146,6 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 				break;
 			case HASH_KEY_IS_LONG:
 				memcpy(p,data,el_len);
-				if (PG(magic_quotes_gpc)) {
-					php_stripslashes(p, &el_len TSRMLS_CC);
-				}
 #ifndef PHP_WIN32
 				*ep = p;
 				++ep;
