@@ -1912,14 +1912,11 @@ PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 		flags |= O_RDONLY;
 	}
 
-#ifdef O_BINARY
-	if (strchr(mode, 'b')) {
-		flags |= O_BINARY;
-	}
-#endif
-#ifdef _O_TEXT
+#if defined(_O_TEXT) && defined(O_BINARY)
 	if (strchr(mode, 't')) {
 		flags |= _O_TEXT;
+	} else {
+		flags |= O_BINARY;
 	}
 #endif
 
