@@ -81,6 +81,7 @@
 #include "ext/zlib/php_zlib.h"
 #endif
 #if HAVE_LIBXML
+#include "ext/libxml/php_libxml.h"
 #if HAVE_DOM
 #include "ext/dom/php_dom.h"
 #endif
@@ -136,6 +137,7 @@ zend_module_entry *php_builtin_extensions[] = {
 	,phpext_zlib_ptr
 #endif
 #if HAVE_LIBXML
+	,phpext_libxml_ptr
 #if HAVE_DOM
 	,phpext_dom_ptr
 #endif

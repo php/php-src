@@ -1847,10 +1847,6 @@ SOURCE=..\ext\standard\html.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\php_http.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\info.h
 # End Source File
 # Begin Source File
@@ -1888,6 +1884,10 @@ SOURCE=..\ext\standard\php_filestat.h
 # Begin Source File
 
 SOURCE=..\ext\standard\php_fopen_wrappers.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\php_http.h
 # End Source File
 # Begin Source File
 
@@ -2000,6 +2000,26 @@ SOURCE=..\ext\sqlite\sess_sqlite.c
 # Begin Source File
 
 SOURCE=..\ext\sqlite\sqlite.c
+# End Source File
+# End Group
+# End Group
+# Begin Group "LIBXML"
+
+# PROP Default_Filter ""
+# Begin Group "Header Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\libxml\php_libxml.h
+# End Source File
+# End Group
+# Begin Group "Source Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\libxml\libxml.c
 # End Source File
 # End Group
 # End Group

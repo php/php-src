@@ -1,0 +1,217 @@
+/*
+   +----------------------------------------------------------------------+
+   | PHP Version 4                                                        |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2003 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to version 3.0 of the PHP license,       |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
+   +----------------------------------------------------------------------+
+   | Authors: Shane Caraveo <shane@php.net>                               |
+   |          Wez Furlong <wez@thebrainroom.com>                          |
+   +----------------------------------------------------------------------+
+ */
+
+/* $Id$ */
+
+#define IS_EXT_MODULE
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+
+#define PHP_XML_INTERNAL
+#include "zend_variables.h"
+#include "ext/standard/php_string.h"
+#include "ext/standard/info.h"
+
+#if HAVE_LIBXML
+
+#include <libxml/parser.h>
+#include <libxml/parserInternals.h>
+#include <libxml/tree.h>
+#include <libxml/uri.h>
+#include <libxml/xmlerror.h>
+
+#include "php_libxml.h"
+
+#ifdef ZTS
+int libxml_globals_id;
+#else
+PHP_LIBXML_API php_libxml_globals libxml_globals;
+#endif
+
+/* {{{ dynamically loadable module stuff */
+#ifdef COMPILE_DL_LIBXML
+ZEND_GET_MODULE(libxml)
+# ifdef PHP_WIN32
+# include "zend_arg_defs.c"
+# endif
+#endif /* COMPILE_DL_LIBXML */
+/* }}} */
+
+/* {{{ function prototypes */
+PHP_MINIT_FUNCTION(libxml);
+PHP_RINIT_FUNCTION(libxml);
+PHP_MSHUTDOWN_FUNCTION(libxml);
+PHP_RSHUTDOWN_FUNCTION(libxml);
+PHP_MINFO_FUNCTION(libxml);
+
+/* }}} */
+
+/* {{{ extension definition structures */
+function_entry libxml_functions[] = {
+	PHP_FE(libxml_set_streams_context, NULL)
+	{NULL, NULL, NULL}
+};
+
+zend_module_entry libxml_module_entry = {
+    STANDARD_MODULE_HEADER,
+	"libxml",                /* extension name */
+	libxml_functions,        /* extension function list */
+	PHP_MINIT(libxml),       /* extension-wide startup function */
+	PHP_MSHUTDOWN(libxml),   /* extension-wide shutdown function */
+	PHP_RINIT(libxml),       /* per-request startup function */
+	PHP_RSHUTDOWN(libxml),   /* per-request shutdown function */
+	PHP_MINFO(libxml),       /* information function */
+    NO_VERSION_YET,
+	STANDARD_MODULE_PROPERTIES
+};
+
+/* }}} */
+
+/* {{{ startup, shutdown and info functions */
+#ifdef ZTS
+static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_DC)
+{
+	LIBXML(stream_context) = NULL;
+}
+#endif
+
+/* Channel libxml file io layer through the PHP streams subsystem.
+ * This allows use of ftps:// and https:// urls */
+
+int php_libxml_streams_IO_match_wrapper(const char *filename)
+{
+	TSRMLS_FETCH();
+	return php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ? 1 : 0;
+
+}
+
+void *php_libxml_streams_IO_open_wrapper(const char *filename)
+{
+	php_stream_context *context = NULL;
+	TSRMLS_FETCH();
+	if (LIBXML(stream_context)) {
+		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+		return php_stream_open_wrapper_ex((char *)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+	}
+	return php_stream_open_wrapper((char *)filename, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+}
+
+int php_libxml_streams_IO_read(void *context, char *buffer, int len)
+{
+	TSRMLS_FETCH();
+	return php_stream_read((php_stream*)context, buffer, len);
+}
+
+int php_libxml_streams_IO_write(void *context, const char *buffer, int len)
+{
+	TSRMLS_FETCH();
+	return php_stream_write((php_stream*)context, buffer, len);
+}
+
+int php_libxml_streams_IO_close(void *context)
+{
+	TSRMLS_FETCH();
+	return php_stream_close((php_stream*)context);
+}
+
+PHP_MINIT_FUNCTION(libxml)
+{
+	/* Enable php stream/wrapper support for libxml 
+	   we only use php streams, so we disable the libxml builtin
+	   io support.
+	*/
+	xmlCleanupInputCallbacks();
+	xmlRegisterInputCallbacks(
+		php_libxml_streams_IO_match_wrapper, 
+		php_libxml_streams_IO_open_wrapper,
+		php_libxml_streams_IO_read, 
+		php_libxml_streams_IO_close);
+
+	xmlCleanupOutputCallbacks();
+	xmlRegisterOutputCallbacks(
+		php_libxml_streams_IO_match_wrapper, 
+		php_libxml_streams_IO_open_wrapper,
+		php_libxml_streams_IO_write, 
+		php_libxml_streams_IO_close);
+	
+#ifdef ZTS
+	ts_allocate_id(&libxml_globals_id, sizeof(php_libxml_globals), (ts_allocate_ctor) php_libxml_init_globals, NULL);
+#else
+	LIBXML(stream_context) = NULL;
+#endif
+	return SUCCESS;
+}
+
+
+PHP_RINIT_FUNCTION(libxml)
+{
+    return SUCCESS;
+}
+
+
+PHP_MSHUTDOWN_FUNCTION(libxml)
+{
+	return SUCCESS;
+}
+
+
+PHP_RSHUTDOWN_FUNCTION(libxml)
+{
+	return SUCCESS;
+}
+
+
+PHP_MINFO_FUNCTION(libxml)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "libXML support", "active");
+	php_info_print_table_row(2, "libXML Version", LIBXML_DOTTED_VERSION);
+	php_info_print_table_row(2, "libXML streams", "enabled");
+	php_info_print_table_end();
+}
+/* }}} */
+
+
+/* {{{ proto void libxml_set_streams_context(resource streams_context) 
+   Set the streams context for the next libxml document load or write */
+PHP_FUNCTION(libxml_set_streams_context)
+{
+	zval *arg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+		return;
+	}
+	LIBXML(stream_context) = arg;
+}
+/* }}} */
+
+#endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */
