@@ -25,6 +25,7 @@ if test "$PHP_SNMP" != "no"; then
       PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
       PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
       AC_DEFINE(HAVE_NET_SNMP,1,[ ])
+      SNMP_LIBNAME=netsnmp
     else
       AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])
     fi
@@ -89,13 +90,22 @@ if test "$PHP_SNMP" != "no"; then
     AC_CHECK_LIB(kstat, kstat_read, [ PHP_ADD_LIBRARY(kstat,,SNMP_SHARED_LIBADD) ])
     PHP_ADD_INCLUDE($SNMP_INCDIR)
     PHP_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR, SNMP_SHARED_LIBADD)
+    SNMP_LIBNAME=snmp
   fi
 
   AC_CHECK_FUNCS(snmp_parse_oid)
 
+  PHP_CHECK_LIBRARY($SNMP_LIBNAME, init_snmp,
+  [
+    AC_DEFINE(HAVE_SNMP,1,[ ])
+  ], [
+    AC_MSG_ERROR([SNMP sanity check failed. Please check config.log for more information.])
+  ], [
+    $SNMP_SHARED_LIBADD
+  ])
+
   PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
   PHP_SUBST(SNMP_SHARED_LIBADD)
-  AC_DEFINE(HAVE_SNMP,1,[ ])
 fi
 
 
