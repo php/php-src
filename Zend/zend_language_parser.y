@@ -439,6 +439,7 @@ class_statement:
 is_reference:
 		/* empty */	{ $$.op_type = ZEND_RETURN_VAL; }
 	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
+;
 
 class_variable_decleration:
 		class_variable_decleration ',' T_VARIABLE					{ zend_do_declare_property(&$3, NULL, $1.op_type TSRMLS_CC); }
