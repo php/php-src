@@ -6,6 +6,10 @@ PHP_ARG_WITH(sybase-ct, for Sybase-CT support,
 [  --with-sybase-ct[=DIR]  Include Sybase-CT support.  DIR is the Sybase home
                           directory. Defaults to /home/sybase.])
 
+if test "$PHP_SYBASE" != "no"; then
+  AC_MSG_ERROR([You can not use both --with-sybase and --with-sybase-ct in same build!])
+fi
+
 if test "$PHP_SYBASE_CT" != "no"; then
   AC_DEFINE(HAVE_SYBASE_CT,1,[ ])
   PHP_NEW_EXTENSION(sybase_ct, php_sybase_ct.c, $ext_shared)
