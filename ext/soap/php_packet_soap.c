@@ -7,12 +7,19 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	xmlDocPtr response;
 	xmlNodePtr trav, env, head, body, resp, cur, fault;
 	int param_count = 0;
+	int old_error_reporting;
 
 	ZVAL_NULL(return_value);
+
+	old_error_reporting = EG(error_reporting);
+	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
 
 	/* Parse XML packet */
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
+	
+	EG(error_reporting) = old_error_reporting;
+	
 	if (!response) {
 		add_soap_fault(this_ptr, "SOAP-ENV:Client", "looks like we got no XML document", NULL, NULL TSRMLS_CC);
 		return FALSE;

@@ -647,11 +647,18 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, int include)
 	xmlDocPtr wsdl;
 	xmlNodePtr root, definitions, trav;
 	xmlAttrPtr targetNamespace;
+	int old_error_reporting;
 
 	/* TODO: WSDL Caching */
 
+	old_error_reporting = EG(error_reporting);
+	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
+
 	wsdl = xmlParseFile(struri);
 	xmlCleanupParser();
+
+	EG(error_reporting) = old_error_reporting;
+
 
 	if (!wsdl) {
 		php_error(E_ERROR, "SOAP-ERROR: Parsing WSDL: Couldn't load from %s", struri);
