@@ -28,6 +28,7 @@ require_once 'System.php';
 define('PEAR_INSTALLER_OK',       1);
 define('PEAR_INSTALLER_FAILED',   0);
 define('PEAR_INSTALLER_SKIPPED', -1);
+define('PEAR_INSTALLER_ERROR_NO_PREF_STATE', 2);
 
 /**
  * Administration class used to install PEAR packages and maintain the
@@ -271,7 +272,7 @@ class PEAR_Installer extends PEAR_Common
                     }
                 } elseif ($a['type'] == 'package-info') {
                     if (isset($this->pkginfo[$a['to']]) && is_string($this->pkginfo[$a['to']])) {
-                    $to = $this->pkginfo[$a['to']];
+                        $to = $this->pkginfo[$a['to']];
                     } else {
                         $this->log(0, "invalid package-info replacement: $a[to]");
                         continue;
@@ -306,10 +307,10 @@ class PEAR_Installer extends PEAR_Common
                     @unlink($dest_file);
                     return $this->raiseError("bad md5sum for file $final_dest_file",
                                              PEAR_INSTALLER_FAILED);
-            } else {
-                $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                } else {
+                    $this->log(0, "warning : bad md5sum for file $final_dest_file");
+                }
             }
-        }
         }
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
@@ -542,7 +543,6 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-
     // {{{ _prependPath($path, $prepend)
 
     function _prependPath($path, $prepend)
@@ -584,6 +584,7 @@ class PEAR_Installer extends PEAR_Common
      * @param string version/state
      * @param string original value passed to command-line
      * @param string preferred state (snapshot/devel/alpha/beta/stable)
+     * @return null|PEAR_Error|string
      * @access private
      */
     function _downloadFile($pkgfile, &$config, $options, &$errors, $version,
@@ -638,14 +639,15 @@ class PEAR_Installer extends PEAR_Common
                             return $this->raiseError('No releases of preferred state "'
                             . $state . '" exist for package ' . $origpkgfile .
                             '.  Use ' . $origpkgfile . '-state to install another' .
-                            ' state (like ' . $origpkgfile .'-beta)');
+                            ' state (like ' . $origpkgfile .'-beta)',
+                            PEAR_INSTALLER_ERROR_NO_PREF_STATE);
                         }
                     } else {
                         return $pkgfile;
                     }
                 } else {
-                return $this->raiseError($file);
-            }
+                    return $this->raiseError($file);
+                }
             }
             $pkgfile = $file;
         }
@@ -709,9 +711,11 @@ class PEAR_Installer extends PEAR_Common
             if (!is_file($pkgfile)) {
                 $origpkgfile = $pkgfile;
                 $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
+                $version_is_state = false;
                 if ($version === null) {
                     // use preferred state if no version number was specified
                     $version = $state;
+                    $version_is_state = true;
                 }
                 if ($this->validPackageName($pkgfile) && !isset($options['upgrade'])) {
                     if ($this->registry->packageExists($pkgfile)) {
@@ -720,10 +724,44 @@ class PEAR_Installer extends PEAR_Common
                         continue;
                     }
                 }
-                $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors,
-                                                $version, $origpkgfile, $state);
-                if (PEAR::isError($pkgfile)) {
-                    return $pkgfile;
+                if ($version_is_state) {
+                    $savepkgfile = $pkgfile;
+                    PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
+                    $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                    $errors, $version, $origpkgfile,
+                                                    $state);
+                    PEAR::popErrorHandling();
+                    if (PEAR::isError($pkgfile) &&
+                        $pkgfile->getCode() != PEAR_INSTALLER_ERROR_NO_PREF_STATE) {
+                        return $pkgfile;
+                    } elseif (PEAR::isError($pkgfile)) {
+                        $pkgfile = $savepkgfile;
+                        $states = $this->betterStates($state, false);
+                        $init = true;
+                        // try from stable down to preferred_state
+                        while(($init || (PEAR::isError($pkgfile) &&
+                              $pkgfile->getCode() == PEAR_INSTALLER_ERROR_NO_PREF_STATE))
+                              && count($states)) {
+                            $pkgfile = $savepkgfile;
+                            $init = false;
+                            $nextstate = array_pop($states);
+                            PEAR::pushErrorHandling(PEAR_ERROR_RETURN);
+                            $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                            $errors, $nextstate, $origpkgfile,
+                                                            $state);
+                            PEAR::popErrorHandling();
+                        }
+                        if (PEAR::isError($pkgfile)) {
+                            return $pkgfile;
+                        }
+                    }
+                } else {
+                    $pkgfile = $this->_downloadFile($pkgfile, $config, $options,
+                                                    $errors, $version, $origpkgfile,
+                                                    $state);
+                    if (PEAR::isError($pkgfile)) {
+                        return $pkgfile;
+                    }
                 }
             }
             $tempinfo = $this->infoFromAny($pkgfile);
@@ -868,7 +906,7 @@ class PEAR_Installer extends PEAR_Common
      * - alldeps       : install all dependencies
      * - onlyreqdeps   : install only required dependencies
      *
-     * @return array package info if successful, null if not
+     * @return array|PEAR_Error package info if successful
      */
 
     function install($pkgfile, $options = array())
@@ -1003,19 +1041,19 @@ class PEAR_Installer extends PEAR_Common
                 return $this->raiseError("$pkgname not installed");
             }*/
             if ($this->registry->packageExists($pkgname)) {
-            $v1 = $this->registry->packageInfo($pkgname, 'version');
-            $v2 = $pkginfo['version'];
-            $cmp = version_compare("$v1", "$v2", 'gt');
-            if (empty($options['force']) && !version_compare("$v2", "$v1", 'gt')) {
-                return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
-            }
-            if (empty($options['register-only'])) {
-                // when upgrading, remove old release's files first:
-                if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
-                    return $this->raiseError($err);
+                $v1 = $this->registry->packageInfo($pkgname, 'version');
+                $v2 = $pkginfo['version'];
+                $cmp = version_compare("$v1", "$v2", 'gt');
+                if (empty($options['force']) && !version_compare("$v2", "$v1", 'gt')) {
+                    return $this->raiseError("upgrade to a newer version ($v2 is not newer than $v1)");
+                }
+                if (empty($options['register-only'])) {
+                    // when upgrading, remove old release's files first:
+                    if (PEAR::isError($err = $this->_deletePackageFiles($pkgname))) {
+                        return $this->raiseError($err);
+                    }
                 }
             }
-        }
         }
 
         // Copy files to dest dir ---------------------------------------
@@ -1102,6 +1140,7 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError("commit failed", PEAR_INSTALLER_FAILED);
         }
 
+        $ret = false;
         // Register that the package is installed -----------------------
         if (empty($options['upgrade'])) {
             // if 'force' is used, replace the info in registry
@@ -1118,7 +1157,7 @@ class PEAR_Installer extends PEAR_Common
         }
         }
         if (!$ret) {
-            return null;
+            return $this->raiseError("Adding package $pkgname to registry failed");
         }
         return $pkginfo;
     }
