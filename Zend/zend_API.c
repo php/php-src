@@ -1055,6 +1055,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 		internal_function->arg_types = ptr->func_arg_types;
 		internal_function->function_name = ptr->fname;
 		internal_function->scope = NULL;
+		internal_function->is_static = 0;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
