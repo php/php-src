@@ -137,8 +137,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 	char *ini_value;
 
 	ini_value = php_ini_string("output_handler", sizeof("output_handler"), 0); 
-
-	if (new_value != NULL && strlen(ini_value) != 0) {
+	if (ini_value != NULL && new_value != NULL && strlen(ini_value) != 0) {
 		php_error(E_CORE_ERROR,"Cannot use both zlib.output_compression and output_handler together!!");
 		return FAILURE;
 	}
