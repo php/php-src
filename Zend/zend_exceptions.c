@@ -110,12 +110,19 @@ static zend_object_value zend_error_exception_new(zend_class_entry *class_type T
 	return zend_default_exception_new_ex(class_type, 2 TSRMLS_CC);
 }
 
+
+/* {{{ proto Exception Exception::__clone()
+   Clone the exception object */
 ZEND_METHOD(exception, __clone)
 {
 	/* Should never be executable */
 	zend_throw_exception(NULL, "Cannot clone object using __clone()", 0 TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto Exception::__construct(string message, int code)
+   Exception constructor */
 ZEND_METHOD(exception, __construct)
 {
 	char  *message = NULL;
@@ -137,7 +144,11 @@ ZEND_METHOD(exception, __construct)
 		zend_update_property_long(default_exception_ce, object, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 }
+/* }}} */
 
+
+/* {{{ proto ErrorException::__construct(string message, int code)
+   ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
 	char  *message = NULL;
@@ -161,6 +172,7 @@ ZEND_METHOD(error_exception, __construct)
 
 	zend_update_property_long(default_exception_ce, object, "severity", sizeof("severity")-1, severity TSRMLS_CC);
 }
+/* }}} */
 
 #define DEFAULT_0_PARAMS \
 	if (ZEND_NUM_ARGS() > 0) { \
@@ -177,47 +189,71 @@ static void _default_exception_get_entry(zval *object, char *name, int name_len,
 	zval_copy_ctor(return_value);
 }
 
+
+/* {{{ proto string Exception::getFile()
+   Get the file in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "file", sizeof("file")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto int Exception::getLine()
+   Get the line in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "line", sizeof("line")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto string Exception::getMessage()
+   Get the exception message */
 ZEND_METHOD(exception, getMessage)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "message", sizeof("message")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto int Exception::getCode()
+   Get the exception code */
 ZEND_METHOD(exception, getCode)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "code", sizeof("code")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto array Exception::getTrace()
+   Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "trace", sizeof("trace")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
+
+/* {{{ proto int Exception::getSeverity()
+   Get the exception severity */
 ZEND_METHOD(error_exception, getSeverity)
 {
 	DEFAULT_0_PARAMS;
 
 	_default_exception_get_entry(getThis(), "severity", sizeof("severity")-1, return_value TSRMLS_CC);
 }
+/* }}} */
 
 /* {{{ ZEND_METHOD(exception, gettraceasstring) */
 #define TRACE_APPEND_CHR(chr)                                            \
@@ -371,6 +407,9 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 	return ZEND_HASH_APPLY_KEEP;
 }
 
+
+/* {{{ proto string Exception::getTraceAsString()
+   Obtain the backtrace for the exception as a string (instead of an array) */
 ZEND_METHOD(exception, getTraceAsString)
 {
 	zval *trace;
@@ -401,6 +440,9 @@ static int zend_spprintf(char **message, int max_len, char *format, ...)
 	return len;
 }
 
+
+/* {{{ proto string Exception::__toString()
+   Obtain the string representation of the Exception object */
 ZEND_METHOD(exception, __toString)
 {
 	zval message, file, line, *trace;
@@ -459,6 +501,7 @@ ZEND_METHOD(exception, __toString)
 
 	RETURN_STRINGL(str, len, 0);
 }
+/* }}} */
 
 /* All functions that may be used in uncaught exception handlers must be final
  * and must not throw exceptions. Otherwise we would need a facility to handle
