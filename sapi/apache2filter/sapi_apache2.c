@@ -179,12 +179,18 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 	SLS_FETCH();
 
 	if (ctx == NULL) {
+		/* Initialize filter context */
 		SG(server_context) = f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
 		ctx->bb = ap_brigade_create(f->c->pool);
 	}
 
 	ctx->f = f;
-	
+
+	/* states:
+	 * 0: request startup
+	 * 1: collecting data
+	 * 2: script execution and request shutdown
+	 */
 	if (ctx->state == 0) {
 		char *content_type;
 		char *auth;
@@ -198,13 +204,13 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		
 		ctx->state++;
 
+		/* XXX: Lots of startup crap. Should be moved into its own func */
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
 		SG(request_info).query_string = f->r->args;
 		f->r->no_cache = f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);
-		f->r->content_type = apr_pstrdup(f->r->pool, 
-				content_type);
+		f->r->content_type = apr_pstrdup(f->r->pool, content_type);
 		efree(content_type);
 		apr_table_set(f->r->headers_in, "Connection", "close");
 		apr_table_unset(f->r->headers_out, "Content-Length");
@@ -212,9 +218,12 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		php_handle_auth_data(auth SLS_CC);
 	}
 
-	/* moves data from bb to ctx->bb */
+	/* moves all buckets from bb to ctx->bb */
 	ap_save_brigade(f, &ctx->bb, &bb);
 
+	/* If we have received all data from the previous filters,
+	 * we "flatten" the buckets by creating a single string buffer.
+	 */
 	if (ctx->state == 1 && AP_BUCKET_IS_EOS(AP_BRIGADE_LAST(ctx->bb))) {
 		int fd;
 		zend_file_handle zfd;
@@ -224,19 +233,35 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		ELS_FETCH();
 		PLS_FETCH();
 
+		/* We want to execute only one script per request.
+		 * A bug in Apache or other filters could cause us
+		 * to reenter php_filter during script execution, so
+		 * we protect ourselves here.
+		 */
 		ctx->state = 2;
 
+		/* Handle phpinfo/phpcredits/built-in images */
 		if (php_handle_special_queries(SLS_C PLS_CC)) 
 			goto skip_execution;
-		
+	
+		/* Loop through all buckets and put them into the buffer */	
 		AP_BRIGADE_FOREACH(b, ctx->bb) {
 			rv = ap_bucket_read(b, &str, &n, 1);
 			if (rv == APR_SUCCESS && n > 0)
 				smart_str_appendl(&content, str, n);
 		}
+		
+		/* Empty script */
 		if (!content.c) goto skip_execution;
+		
 		smart_str_0(&content);
 
+		/* 
+		 * This hack is used only for testing purposes and will
+		 * go away when the scripting engine will be able to deal
+		 * with something more complex than files/-handles.
+		 */
+		
 #if 1
 #define FFFF "/tmp/really_silly"
 		fd = open(FFFF, O_WRONLY|O_TRUNC|O_CREAT, 0600);
@@ -260,6 +285,7 @@ static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 skip_execution:
 		php_request_shutdown(NULL);
 
+		/* Pass EOS bucket to next filter to signal end of request */
 		eos = ap_bucket_create_eos();
 		AP_BRIGADE_INSERT_TAIL(bb, eos);
 		ap_pass_brigade(f->next, bb);
