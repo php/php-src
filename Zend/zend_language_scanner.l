@@ -368,8 +368,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		zend_do_handle_exception(TSRMLS_C);
 		CG(in_compilation) = original_in_compilation;
 		if (compiler_result==1) { /* parser error */
-			CG(unclean_shutdown) = 1;
-			retval = NULL;
+			zend_bailout();
 		}
 		compilation_successful=1;
 

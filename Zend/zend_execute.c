@@ -3365,9 +3365,6 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 						new_op_array = zend_compile_file(&file_handle, (opline->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
-						if (!new_op_array) {
-							zend_error(E_ERROR, "Parse error inside included file.");
-						}
 					} else {
 						zend_file_handle_dtor(&file_handle);
 						failure_retval=1;
