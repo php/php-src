@@ -88,7 +88,7 @@ void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type)
 /* }}} */
 
 /* {{{ php_clear_stmt_bind */
-void php_clear_stmt_bind(STMT *stmt)
+void php_clear_stmt_bind(MY_STMT *stmt)
 {
 	if (stmt->stmt) {
 		mysql_stmt_close(stmt->stmt);
@@ -105,6 +105,22 @@ void php_clear_stmt_bind(STMT *stmt)
 }
 /* }}} */
 
+/* {{{ php_clear_mysql */
+void php_clear_mysql(MY_MYSQL *mysql) {
+	int i;
+
+	for (i=0; i < 3; i++) {
+		if (&mysql->callback_func[i]) {
+			zval_dtor(&mysql->callback_func[i]);
+		}
+	}
+
+	if (mysql->local_infile) {
+		zval_ptr_dtor(&mysql->local_infile);
+	}
+}
+/* }}} */
+
 /* {{{ mysqli_objects_free_storage
  */
 static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
@@ -118,11 +134,15 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 	/* link object */
 	if (intern->zo.ce == mysqli_link_class_entry) {
 		if (my_res && my_res->ptr) {
-			mysql_close(my_res->ptr);
+			MY_MYSQL *mysql = (MY_MYSQL *)my_res->ptr;
+		
+			mysql_close(mysql->mysql);
+
+			php_clear_mysql(mysql);		
 		}
 	} else if (intern->zo.ce == mysqli_stmt_class_entry) { /* stmt object */
 		if (my_res && my_res->ptr) {
-			php_clear_stmt_bind((STMT *)my_res->ptr);
+			php_clear_stmt_bind((MY_STMT *)my_res->ptr);
 		}
 	} else if (intern->zo.ce == mysqli_result_class_entry) { /* result object */
 		if (my_res && my_res->ptr) {
@@ -131,14 +151,6 @@ static void mysqli_objects_free_storage(zend_object *object TSRMLS_DC)
 	}
 	my_efree(my_res);
 	efree(object);
-}
-/* }}} */
-
-/* {{{ mysqli_objects_clone
- */
-static void mysqli_objects_clone(void *object, void **object_clone TSRMLS_DC)
-{
-	/* TODO */
 }
 /* }}} */
 
@@ -264,15 +276,20 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_object_value retval;
 	mysqli_object *intern;
 	zval *tmp;
+	zend_class_entry *parent;
 
 	intern = emalloc(sizeof(mysqli_object));
+	memset(intern, 0, sizeof(mysqli_object));
 	intern->zo.ce = class_type;
 	intern->zo.in_get = 0;
 	intern->zo.in_set = 0;
 	intern->ptr = NULL;
 	intern->valid = 0;
 	intern->prop_handler = NULL;
-
+	if ((parent = class_type->parent))
+	{
+		zend_hash_find(&classes, parent->name, parent->name_length + 1, (void **) &intern->prop_handler);
+	}
 	zend_hash_find(&classes, class_type->name, class_type->name_length + 1, (void **) &intern->prop_handler);
 
 	ALLOC_HASHTABLE(intern->zo.properties);
@@ -280,7 +297,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, NULL, mysqli_objects_free_storage, NULL /*mysqli_objects_clone*/ TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, mysqli_objects_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
 
 	return retval;
@@ -353,7 +370,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_INI_ENTRIES();
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	mysqli_object_handlers.clone_obj = NULL /*zend_objects_store_clone_obj*/;
+	mysqli_object_handlers.clone_obj = NULL;
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = NULL;
@@ -681,6 +698,198 @@ PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRML
 		efree(MyG(error_msg));
 	}
 	MyG(error_msg) = estrdup(mysql_err);
+}
+/* }}} */
+
+#define ALLOC_CALLBACK_ARGS(a, b, c)\
+if (c) {\
+	a = (zval ***)safe_emalloc(c, sizeof(zval **), 0);\
+	for (i = b; i < c; i++) {\
+		a[i] = emalloc(sizeof(zval *));\
+		MAKE_STD_ZVAL(*a[i]);\
+	}\
+}
+
+#define FREE_CALLBACK_ARGS(a, b, c)\
+if (a) {\
+	for (i=b; i < c; i++) {\
+		zval_ptr_dtor(a[i]);\
+		efree(a[i]);\
+	}\
+	efree(a);\
+}
+
+#define LOCAL_INFILE_ERROR_MSG(source,dest)\
+memset(source, 0, LOCAL_INFILE_ERROR_LEN);\
+memcpy(source, dest, LOCAL_INFILE_ERROR_LEN-1);
+
+/* {{{ php_local_infile_init
+ */
+int php_local_infile_init(void **ptr, const char *filename, void *userdata)
+{
+	mysqli_local_infile			*data;
+	MY_MYSQL 					*mysql;
+	zval						***callback_args;
+	int							argc = 2;
+	int							i, rc = 0;
+
+	/* save pointer to MY_MYSQL structure (userdata) */
+	if (!(*ptr= data= ((mysqli_local_infile *)calloc(1, sizeof(mysqli_local_infile))))) {
+		return 1;
+	}
+
+	if (!(mysql = data->userdata = userdata)) {
+		LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(CR_UNKNOWN_ERROR));
+		return 1;
+	}
+
+	ALLOC_CALLBACK_ARGS(callback_args, 0, argc);
+
+	ZVAL_STRING(*callback_args[0], (char *)filename, 1);	
+	ZVAL_STRING(*callback_args[1], "", 1);	
+
+	if (call_user_function_ex(EG(function_table), 
+						NULL,
+						&mysql->callback_func[0],
+						&mysql->local_infile,
+						argc,	 	
+						callback_args,
+						0,
+						NULL TSRMLS_CC) == SUCCESS) {
+
+		/* check if user callback function returned a valid filehandle */ 
+		convert_to_string_ex(callback_args[1]);
+
+		if (Z_TYPE_P(mysql->local_infile) != IS_RESOURCE) {
+			if (!strlen(Z_STRVAL_P(*callback_args[1]))) {
+				LOCAL_INFILE_ERROR_MSG(data->error_msg, ER(CR_UNKNOWN_ERROR));
+			} else {
+				LOCAL_INFILE_ERROR_MSG(data->error_msg, Z_STRVAL_P(*callback_args[1]));
+			}
+			rc = 1;
+		} else {
+		}
+	} else {
+		LOCAL_INFILE_ERROR_MSG(data->error_msg, "Can't execute load data local init callback function");
+		rc = 1;
+	}
+
+	FREE_CALLBACK_ARGS(callback_args, 0, argc);
+
+	return rc;
+}
+/* }}} */
+
+int php_local_infile_read(void *ptr, char *buf, uint buf_len)
+{
+	mysqli_local_infile 		*data;
+	MY_MYSQL 					*mysql;
+	zval						***callback_args;
+	zval						*retval;	
+	int							argc = 4;
+	int							i;
+	long						rc;
+
+	data= (mysqli_local_infile *)ptr;
+
+	mysql = data->userdata;
+
+	ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
+	
+	/* set parameters: filepointer, buffer, buffer_len, errormsg */
+
+	callback_args[0] = &mysql->local_infile;	
+	ZVAL_STRING(*callback_args[1], "", 1);	
+	ZVAL_LONG(*callback_args[2], buf_len);	
+	ZVAL_STRING(*callback_args[3], "", 1);	
+	
+	if (call_user_function_ex(EG(function_table), 
+						NULL,
+						&mysql->callback_func[1],
+						&retval,
+						argc,	 	
+						callback_args,
+						0,
+						NULL TSRMLS_CC) == SUCCESS) {
+
+		rc = Z_LVAL_P(retval);
+		zval_ptr_dtor(&retval);
+
+		if (rc > 0) {
+			if (rc > buf_len) {
+				/* check buffer overflow */
+				LOCAL_INFILE_ERROR_MSG(data->error_msg, "Read buffer too large");
+				rc = -1;
+			} else {
+				memcpy(buf, Z_STRVAL_P(*callback_args[1]), rc);
+			}
+		}
+		if (rc < 0) {
+			LOCAL_INFILE_ERROR_MSG(data->error_msg, Z_STRVAL_P(*callback_args[3]));
+		}
+	} else {
+		LOCAL_INFILE_ERROR_MSG(data->error_msg, "Can't execute load data local init callback function");
+		rc = -1;
+	}
+	
+	FREE_CALLBACK_ARGS(callback_args, 1, argc);
+	return rc;
+}
+
+/* {{{ php_local_infile_error
+ */
+int php_local_infile_error(void *ptr, char *error_msg, uint error_msg_len)
+{
+	mysqli_local_infile *data = (mysqli_local_infile *) ptr;
+	if (data) {
+		strcpy(error_msg, data->error_msg);
+		return 2000;
+	} 
+	strcpy(error_msg, ER(CR_OUT_OF_MEMORY));
+	return CR_OUT_OF_MEMORY;
+}
+/* }}} */
+
+/* {{{ php_local_infile_end
+ */
+void php_local_infile_end(void *ptr) 
+{
+	mysqli_local_infile			*data;
+	MY_MYSQL 					*mysql;
+	zval						***callback_args;
+	zval						*retval;	
+	int							argc = 1;
+	int							i;
+
+	data= (mysqli_local_infile *)ptr;
+
+	mysql = data->userdata;
+
+	ALLOC_CALLBACK_ARGS(callback_args, 1, argc);
+	
+	/* set parameters: filepointer, buffer, buffer_len, errormsg */
+
+	callback_args[0] = &mysql->local_infile;	
+
+	call_user_function_ex(EG(function_table), 
+						NULL,
+						&mysql->callback_func[2],
+						&retval,
+						argc,	 	
+						callback_args,
+						0,
+						NULL TSRMLS_CC);
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+
+	if (mysql->local_infile) {
+		zval_ptr_dtor(&mysql->local_infile);
+	}
+
+	FREE_CALLBACK_ARGS(callback_args, 1, argc);
+//	efree(data);
 }
 /* }}} */
 

@@ -26,6 +26,7 @@
 #endif
 
 #include <mysql.h>
+#include <errmsg.h>
 
 #ifndef PHP_MYSQLI_H
 #define PHP_MYSQLI_H
@@ -38,9 +39,9 @@ typedef struct {
 
 typedef struct {
 	unsigned int	var_cnt;
-	VAR_BUFFER	*buf;
-	zval		**vars;
-	char		*is_null;
+	VAR_BUFFER		*buf;
+	zval			**vars;
+	char			*is_null;
 } BIND_BUFFER;
 
 typedef struct {
@@ -48,7 +49,14 @@ typedef struct {
 	BIND_BUFFER	param;
 	BIND_BUFFER	result;
 	char		*query;
-} STMT;
+} MY_STMT;
+
+typedef struct {
+	MYSQL		*mysql;
+	/* callback functions for load data local infile support */
+	zval		callback_func[3];
+	zval		*local_infile;
+} MY_MYSQL;
 
 typedef struct {
 	int			mode;
@@ -58,6 +66,7 @@ typedef struct {
 
 typedef struct {
 	void		*ptr;		/* resource: (mysql, result, stmt)   */
+	void		*info;		/* additional buffer				 */
 } MYSQLI_RESOURCE;
 
 typedef struct _mysqli_object {
@@ -73,13 +82,10 @@ typedef struct _mysqli_property_entry {
 	int (*w_func)(mysqli_object *obj, zval **retval TSRMLS_DC);
 } mysqli_property_entry;
 
-#define MYSQLI_PR_CONNECT		1
-#define MYSQLI_PR_QUERY			2
-#define MYSQLI_PR_QUERY_RESULT	3
-#define MYSQLI_PR_STMT			4
-#define MYSQLI_PR_STMT_RESULT	5
-#define MYSQLI_PR_COMMAND		6
-
+typedef struct {
+	char	error_msg[LOCAL_INFILE_ERROR_LEN];
+	void	*userdata;
+} mysqli_local_infile;
 
 #define phpext_mysqli_ptr &mysqli_module_entry
 
@@ -105,10 +111,14 @@ extern mysqli_property_entry mysqli_result_property_entries[];
 extern mysqli_property_entry mysqli_stmt_property_entries[];
 
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
-extern void php_clear_stmt_bind(STMT *stmt);
+extern void php_clear_stmt_bind(MY_STMT *stmt);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(char *sqlstate, int errorno, char *error TSRMLS_DC);
 extern void php_mysqli_report_index(char *query, unsigned int status TSRMLS_DC);
+extern int php_local_infile_init(void **, const char *, void *);
+extern int php_local_infile_read(void *, char *, uint);
+extern void php_local_infile_end(void *);
+extern int php_local_infile_error(void *, char *, uint);
 
 zend_class_entry *mysqli_link_class_entry;
 zend_class_entry *mysqli_stmt_class_entry;
@@ -121,12 +131,12 @@ zend_class_entry _mysqli_result_class_entry;
 PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRMLS_DC);
 
 #define MYSQLI_DISABLE_MQ if (MyG(multi_query)) { \
-	mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
+	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
 	MyG(multi_query) = 0; \
 } 
 
 #define MYSQLI_ENABLE_MQ if (!MyG(multi_query)) { \
-	mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
+	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
 	MyG(multi_query) = 1; \
 } 
 
@@ -170,7 +180,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 	} \
 	__ptr = (__type)my_res->ptr; \
 	if (!strcmp((char *)__name, "mysqli_stmt")) {\
-		if (!((STMT *)__ptr)->stmt->mysql) {\
+		if (!((MYSQL_STMT *)__ptr)->mysql) {\
   			php_error(E_WARNING, "Statement isn't valid anymore");\
 			RETURN_NULL();\
 		}\
@@ -300,6 +310,10 @@ PHP_FUNCTION(mysqli_info);
 PHP_FUNCTION(mysqli_insert_id);
 PHP_FUNCTION(mysqli_init);
 PHP_FUNCTION(mysqli_kill);
+#ifndef PHP_WIN32
+PHP_FUNCTION(mysqli_set_local_infile_default);
+PHP_FUNCTION(mysqli_set_local_infile_handler);
+#endif
 PHP_FUNCTION(mysqli_master_query);
 PHP_FUNCTION(mysqli_more_results);
 PHP_FUNCTION(mysqli_multi_query);
@@ -352,6 +366,7 @@ PHP_FUNCTION(mysqli_stmt_error);
 PHP_FUNCTION(mysqli_stmt_free_result);
 PHP_FUNCTION(mysqli_stmt_reset);
 #endif
+PHP_FUNCTION(mysqli_stmt_insert_id);
 PHP_FUNCTION(mysqli_stmt_num_rows);
 #if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_stmt_sqlstate);
