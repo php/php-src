@@ -23,13 +23,14 @@ if test "$PHP_YAZ" != "no"; then
     AC_DEFINE(HAVE_YAZ,1,[Whether you have YAZ])
     . $yazconfig
 
-    dnl Check version (2.0 or greater required)
+    dnl Check version (2.0.6 or greater required)
     AC_MSG_CHECKING([for YAZ version])
     yaz_version=`echo $YAZVERSION | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-    if test "$yaz_version" -ge 2000000; then
+    echo $yaz_version
+    if test "$yaz_version" -ge 2000006; then
       AC_MSG_RESULT([$YAZVERSION])
     else
-      AC_MSG_ERROR([YAZ version 2.0 or later required.])
+      AC_MSG_ERROR([YAZ version 2.0.6 or later required.])
     fi
 
     for c in $YAZLIB; do
