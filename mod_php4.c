@@ -341,10 +341,11 @@ int send_parsed_php_source(request_rec * r)
 }
 
 
-static void destroy_per_dir_entry(php_per_dir_entry *per_dir_entry)
+static int destroy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 {
 	free(per_dir_entry->key);
 	free(per_dir_entry->value);
+	return 1;
 }
 
 static void copy_per_dir_entry(php_per_dir_entry *per_dir_entry)
@@ -368,7 +369,7 @@ static void *php_create_dir(pool *p, char *dummy)
 	HashTable *per_dir_info;
 
 	per_dir_info = (HashTable *) malloc(sizeof(HashTable));
-	zend_hash_init(per_dir_info, 5, NULL, (void (*)(void *)) destroy_per_dir_entry, 1);
+	zend_hash_init(per_dir_info, 5, NULL, (int (*)(void *)) destroy_per_dir_entry, 1);
 	register_cleanup(p, (void *) per_dir_info, (void (*)(void *)) zend_hash_destroy, (void (*)(void *)) zend_hash_destroy);
 
 	return per_dir_info;
