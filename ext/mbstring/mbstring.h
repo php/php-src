@@ -143,7 +143,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int filter_illegal_substchar;
 	int current_filter_illegal_mode;
 	int current_filter_illegal_substchar;
-	int func_overload;
+	long func_overload;
 	mbfl_buffer_converter *outconv;
 #if HAVE_MBREGEX
 	int default_mbctype;
