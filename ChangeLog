@@ -1,3 +1,47 @@
+2000-07-06  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: WDDX now implements __sleep()/__wakeup() functionality.
+
+    * TODO: preg_replace() can be non-greedy now.
+
+2000-07-06  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/apache/mod_php4.c:
+    Fix #5432: should register all variables. Thanks jeroen@darius.demon.nl.
+
+2000-07-06  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/php_fdf.h: - still an error in my last patch (thanks Andi)
+
+2000-07-06  Andi Gutmans  <andi@php.net>
+
+    * ext/fdf/fdf.c
+      ext/fdf/php_fdf.h: - Use #ifdef PHP_WIN32 to detect Windows
+
+2000-07-06  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/zlib/zlib.c: - Fixed crash in gzopen(). 
+
+2000-07-06  Stig Bakken  <ssb@fast.no>
+
+    * ext/odbc/Makefile.in
+      ext/odbc/config.m4
+      ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Applied DBMaker patch by Jeffrey Lin <clin@lion.syscom.com.tw>
+
+    * ext/gd/gdttf.c:
+    Applied multiple character set support diff by Rob Goodwin
+
+2000-07-06  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/fdf/php_fdf.h:
+    - last commit indroduced a new compile warning, should be fixed now
+
+    * ext/fdf/php_fdf.h
+      ext/fdf/fdf.c:
+    - fixed compile problems on win32 (thanks to Gabriel Weisz <gweisz@l-speed.com>)
+
 2000-07-05  Jouni Ahto  <jah@mork.net>
 
     * ext/pgsql/pgsql.c:
