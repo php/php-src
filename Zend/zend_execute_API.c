@@ -135,6 +135,16 @@ void init_executor(TSRMLS_D)
 	zend_ptr_stack_init(&EG(argument_stack));
 
 	zend_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0);
+	{
+		zval *globals;
+
+		ALLOC_ZVAL(globals);
+		globals->refcount=1;
+		globals->is_ref=1;
+		globals->type = IS_ARRAY;
+		globals->value.ht = &EG(symbol_table);
+		zend_hash_update(&EG(symbol_table), "GLOBALS", sizeof("GLOBALS"), &globals, sizeof(zval *), NULL);
+	}
 	EG(active_symbol_table) = &EG(symbol_table);
 	
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);

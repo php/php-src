@@ -93,7 +93,6 @@ struct _zend_op_array {
 	zend_brk_cont_element *brk_cont_array;
 	zend_uint last_brk_cont;
 	zend_uint current_brk_cont;
-	zend_bool uses_globals;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -227,7 +226,6 @@ void fetch_simple_variable(znode *result, znode *varname, int bp TSRMLS_DC);
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRMLS_DC);
 void zend_do_indirect_references(znode *result, znode *num_references, znode *variable TSRMLS_DC);
 void zend_do_fetch_global_or_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC);
-void zend_do_fetch_globals(znode *varname TSRMLS_DC);
 
 void fetch_array_begin(znode *result, znode *varname, znode *first_dim TSRMLS_DC);
 void fetch_array_dim(znode *result, znode *parent, znode *dim TSRMLS_DC);

@@ -82,6 +82,7 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
+	zend_register_auto_global("GLOBALS", sizeof("GLOBALS")-1 TSRMLS_CC);
 }
 
 
@@ -194,18 +195,6 @@ void zend_do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 TSRM
 	*result = opline->result;
 }
 
-
-
-void zend_do_fetch_globals(znode *varname TSRMLS_DC)
-{
-	if (!CG(active_op_array)->uses_globals
-		&& varname->op_type == IS_CONST
-		&& varname->u.constant.type == IS_STRING
-		&& varname->u.constant.value.str.len == (sizeof("GLOBALS")-1)
-		&& !memcmp(varname->u.constant.value.str.val, "GLOBALS", sizeof("GLOBALS")-1)) {
-		CG(active_op_array)->uses_globals = 1;
-	}
-}
 
 void fetch_simple_variable_ex(znode *result, znode *varname, int bp, int op TSRMLS_DC)
 {

@@ -82,8 +82,6 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRML
 
 	op_array->static_variables = NULL;
 
-	op_array->uses_globals = 0;
-
 	op_array->return_reference = 0;
 	op_array->done_pass_two = 0;
 
