@@ -29,6 +29,7 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_odbc.h"
 #include "php_pdo_odbc_int.h"
+#include "zend_exceptions.h"
 
 static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
@@ -42,7 +43,7 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 		einfo = &S->einfo;
 	}
 
-	spprintf(&message, 0, "%s (%s[%d] at %s:%d)",
+	spprintf(&message, 0, "%s (%s[%ld] at %s:%d)",
 				einfo->last_err_msg,
 				einfo->what, einfo->last_error,
 				einfo->file, einfo->line);
@@ -129,6 +130,8 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 		sql = nsql;
 	} else if (ret == -1) {
 		/* couldn't grok it */
+		strcpy(dbh->error_code, stmt->error_code);
+		efree(S);
 		return 0;
 	}
 	
