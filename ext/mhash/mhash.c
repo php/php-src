@@ -203,6 +203,10 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lssl", &hash, &password, &password_len, &in_salt, &salt_len, &bytes) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	if (bytes <= 0){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "the byte parameter must be greater then 0");
+		RETURN_FALSE;
+	}
 	
 	salt_len = MIN(salt_len, SALT_SIZE);
 
