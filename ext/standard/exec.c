@@ -66,7 +66,7 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
-	void (*sig_handler)();
+	void (*sig_handler)() = NULL;
 #endif
 
 	if (PG(safe_mode)) {
@@ -177,7 +177,9 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 
 done:
 #if PHP_SIGCHILD
-	signal (SIGCHLD, sig_handler);
+	if (sig_handler) {
+		signal(SIGCHLD, sig_handler);
+	}
 #endif
 	if (d) {
 		efree(d);
