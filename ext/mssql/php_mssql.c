@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Frank M. Kromann <fmk@businesnet.dk>                        |
+   | Authors: Frank M. Kromann <fmk@swwwing.com>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -620,7 +620,11 @@ PHP_FUNCTION(mssql_close)
 			break;
 	}
 	ZEND_FETCH_RESOURCE2(mssql_ptr, mssql_link *, mssql_link_index, id, "MS SQL-Link", le_link, le_plink);
-	zend_list_delete((*mssql_link_index)->value.lval);
+
+	if (mssql_link_index) 
+		zend_list_delete((*mssql_link_index)->value.lval);
+	else 
+		zend_list_delete(id);
 
 	RETURN_TRUE;
 }
@@ -1048,6 +1052,8 @@ PHP_FUNCTION(mssql_fetch_object)
 	php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
+		return_value->value.obj.properties = return_value->value.ht;
+		return_value->value.obj.ce = &zend_standard_class_def;
 	}
 }
 
