@@ -331,10 +331,11 @@ void php_print_credits(int flag)
 		CREDIT_LINE("dBase", "Jim Winstead");
 		CREDIT_LINE("FDF", "Uwe Steinmann");
 		CREDIT_LINE("FilePro", "Chad Robinson");
+		CREDIT_LINE("FTP", "Andrew Skalski");
 		CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead");
 		CREDIT_LINE("GetText", "Alex Plotnick");
 		CREDIT_LINE("HyperWave", "Uwe Steinmann");
-		CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf");
+		CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski");
 		CREDIT_LINE("Informix", "Danny Heijl, Christian Cartus, Jouni Ahto");
 		CREDIT_LINE("Java", "Sam Ruby");
 		CREDIT_LINE("Interbase", "Jouni Ahto");
