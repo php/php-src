@@ -1,5 +1,5 @@
 --TEST--
-sqlite-spl: sqlite / spl integration
+sqlite-oo: sqlite / foreach
 --INI--
 sqlite.assoc_case=0
 --SKIPIF--
