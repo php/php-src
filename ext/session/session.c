@@ -327,17 +327,21 @@ static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
 	pval **data;
+	char *p;
 	int send_cookie = 1;
 	int define_sid = 1;
 	int module_number = PS(module_number);
 	int nrand;
+	int lensess;
 	ELS_FETCH();
 
 	if (PS(nr_open_sessions) > 0) return;
 
+	lensess = strlen(PS(session_name));
+	
 	if(!PS(id) &&
 			zend_hash_find(&EG(symbol_table), PS(session_name),
-				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
+				lensess + 1, (void **) &ppid) == SUCCESS) {
 		convert_to_string((*ppid));
 		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
 		send_cookie = 0;
@@ -348,8 +352,21 @@ static void _php_session_start(PSLS_D)
 				sizeof("HTTP_COOKIE_VARS"), (void **) &data) == SUCCESS &&
 			(*data)->type == IS_ARRAY &&
 			zend_hash_find((*data)->value.ht, PS(session_name),
-				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
+				lensess + 1, (void **) &ppid) == SUCCESS) {
 		define_sid = 0;
+	}
+
+	if(!PS(id) &&
+			zend_hash_find(&EG(symbol_table), "REQUEST_URI", 
+				sizeof("REQUEST_URI"), (void **) &data) == SUCCESS &&
+			(*data)->type == IS_STRING &&
+			(p = strstr((*data)->value.str.val, PS(session_name))) &&
+			p[lensess] == '=') {
+		char *q;
+
+		p += lensess + 1;
+		if((q = strpbrk(p, "/?\\")))
+			PS(id) = estrndup(p, q - p);
 	}
 	
 	if(!PS(id)) {
