@@ -2,6 +2,16 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fix overrun in strip_tags (Stas, Zend library)
+- Fixed crash in strip_tags() and related functions. (Thies)
+- Workaround for bogus POST-Data from IE/Mac. (Thies)
+- Patch by Alain Malek <alain@virtua.ch>
+- Finished the server abstraction layer;  All of the PHP code is now shared
+  across different servers (Apache, CGI, IIS, etc.), except for thin
+  interface modules (Zeev)
+- Added NULL-support in gettype(). (Thies)
+- base64_decode() will decode POST data correct. (Thies)
+  Patch submitted by: Turadg Aleahmad <turadg@wise.berkeley.edu>
 - Much more work on domxml. Build xml tree, create xml doc works (Uwe)
 - Made foreach() work on objects. (Thies, Zend library)
 - Added domxml extension based on libxml, still little functionality (Uwe)
