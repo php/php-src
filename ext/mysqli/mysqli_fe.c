@@ -124,6 +124,9 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_stmt_bind_param,						third_arg_force_by_ref_rest)
 	PHP_FE(mysqli_stmt_bind_result,						second_arg_force_by_ref_rest)
 	PHP_FE(mysqli_stmt_fetch,							NULL)
+#ifndef HAVE_MYSQLI_OLDAPI
+	PHP_FE(mysqli_stmt_free_result,						NULL)
+#endif
 	PHP_FE(mysqli_stmt_param_count,						NULL)
 	PHP_FE(mysqli_send_query,							NULL)
 #ifdef HAVE_EMBEDDED_MYSQLI
@@ -267,6 +270,7 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(send_long_data,mysqli_stmt_send_long_data,NULL)
 	PHP_FALIAS(stmt,mysqli_prepare,NULL)
 #ifndef HAVE_MYSQLI_OLDAPI
+	PHP_FALIAS(free_result,mysqli_stmt_free_result,NULL)
 	PHP_FALIAS(prepare,mysqli_stmt_prepare, NULL)
 #endif
 	PHP_FALIAS(store_result,mysqli_stmt_store_result,NULL)

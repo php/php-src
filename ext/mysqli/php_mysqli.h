@@ -347,6 +347,9 @@ PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_data_seek);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
+#ifndef HAVE_MYSQLI_OLDAPI
+PHP_FUNCTION(mysqli_stmt_free_result);
+#endif
 PHP_FUNCTION(mysqli_stmt_num_rows);
 #if MYSQL_VERSION_ID >= 40101
 PHP_FUNCTION(mysqli_stmt_sqlstate);
