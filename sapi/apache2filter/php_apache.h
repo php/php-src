@@ -38,6 +38,8 @@ typedef struct php_struct {
 	int post_len;
 	/* Index for reading from buffer */
 	int post_idx;
+	/* stat structure of the current file */	
+	struct stat finfo;
 	/* Buffer for request body filter */
 	char *post_data;
 	/* Whether or not we've processed PHP in the output filters yet. */

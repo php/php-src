@@ -149,6 +149,23 @@ php_apache_sapi_read_post(char *buf, uint count_bytes TSRMLS_DC)
 	return n;
 }
 
+static struct stat*
+php_apache_sapi_get_stat(TSRMLS_D)
+{
+	php_struct *ctx = SG(server_context);
+
+	ctx->finfo.st_uid = ctx->r->finfo.user;
+	ctx->finfo.st_gid = ctx->r->finfo.group;
+	ctx->finfo.st_ino = ctx->r->finfo.inode;
+	ctx->finfo.st_atime = ctx->r->finfo.atime/1000000;
+	ctx->finfo.st_mtime = ctx->r->finfo.mtime/1000000;
+	ctx->finfo.st_ctime = ctx->r->finfo.ctime/1000000;
+	ctx->finfo.st_size = ctx->r->finfo.size;
+	ctx->finfo.st_nlink = ctx->r->finfo.nlink;
+
+	return &ctx->finfo;
+}
+
 static char *
 php_apache_sapi_read_cookies(TSRMLS_D)
 {
@@ -264,7 +281,7 @@ static sapi_module_struct apache2_sapi_module = {
 
 	php_apache_sapi_ub_write,				/* unbuffered write */
 	php_apache_sapi_flush,					/* flush */
-	NULL,									/* get uid */
+	php_apache_sapi_get_stat,						/* get uid */
 	php_apache_sapi_getenv,					/* getenv */
 
 	php_error,								/* error handler */
