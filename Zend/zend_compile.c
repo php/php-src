@@ -810,7 +810,7 @@ int zend_do_begin_function_call(znode *function_name TSRMLS_DC)
 	zend_function *function;
 	
 	zend_str_tolower(function_name->u.constant.value.str.val, function_name->u.constant.value.str.len);
-	if (zend_hash_find(CG(function_table), function_name->u.constant.value.str.val,function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
+	if (zend_hash_find(CG(function_table), function_name->u.constant.value.str.val, function_name->u.constant.value.str.len+1, (void **) &function)==FAILURE) {
 		znode tmp = *function_name;
 
 		zval_copy_ctor(&tmp.u.constant);
@@ -1772,7 +1772,7 @@ void zend_do_shell_exec(znode *result, znode *cmd TSRMLS_DC)
 	opline->opcode = ZEND_DO_FCALL;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_VAR;
-	opline->op1.u.constant.value.str.val = estrndup("shell_exec",sizeof("shell_exec")-1);
+	opline->op1.u.constant.value.str.val = estrndup("shell_exec", sizeof("shell_exec")-1);
 	opline->op1.u.constant.value.str.len = sizeof("shell_exec")-1;
 	INIT_PZVAL(&opline->op1.u.constant);
 	opline->op1.u.constant.type = IS_STRING;

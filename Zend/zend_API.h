@@ -161,7 +161,7 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC);
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC TSRMLS_DC);
 
 /* no longer supported */
-ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
+ZEND_API int add_assoc_function(zval *arg, char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
 ZEND_API int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n);
 ZEND_API int add_assoc_null_ex(zval *arg, char *key, uint key_len);
@@ -240,7 +240,7 @@ ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   int is_ref, int num_symbol_tables, ...);
 
-#define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
+#define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 #if ZEND_DEBUG
 #define CHECK_ZVAL_STRING(z) \
@@ -252,12 +252,12 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 #define CHECK_ZVAL_STRING_REL(z)
 #endif
 
-#define ZVAL_RESOURCE(z,l) {			\
+#define ZVAL_RESOURCE(z, l) {			\
 		(z)->type = IS_RESOURCE;        \
 		(z)->value.lval = l;	        \
 	}
 
-#define ZVAL_BOOL(z,b) {				\
+#define ZVAL_BOOL(z, b) {				\
 		(z)->type = IS_BOOL;	        \
 		(z)->value.lval = b;	        \
 	}
@@ -266,27 +266,27 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		(z)->type = IS_NULL;	        \
 	}
 
-#define ZVAL_LONG(z,l) {				\
+#define ZVAL_LONG(z, l) {				\
 		(z)->type = IS_LONG;	        \
 		(z)->value.lval = l;	        \
 	}
 
-#define ZVAL_DOUBLE(z,d) {				\
+#define ZVAL_DOUBLE(z, d) {				\
 		(z)->type = IS_DOUBLE;	        \
 		(z)->value.dval = d;	        \
 	}
 
-#define ZVAL_STRING(z,s,duplicate) {	\
+#define ZVAL_STRING(z, s, duplicate) {	\
 		char *__s=(s);					\
 		(z)->value.str.len = strlen(__s);	\
-		(z)->value.str.val = (duplicate?estrndup(__s,(z)->value.str.len):__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s, (z)->value.str.len):__s);	\
 		(z)->type = IS_STRING;	        \
 	}
 
-#define ZVAL_STRINGL(z,s,l,duplicate) {	\
+#define ZVAL_STRINGL(z, s, l, duplicate) {	\
 		char *__s=(s); int __l=l;		\
 		(z)->value.str.len = __l;	    \
-		(z)->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s, __l):__s);	\
 		(z)->type = IS_STRING;		    \
 	}
 
@@ -296,63 +296,63 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		(z)->type = IS_STRING;		    \
 	}
 
-#define ZVAL_FALSE(z)  					ZVAL_BOOL(z,0)
-#define ZVAL_TRUE(z)  					ZVAL_BOOL(z,1)
+#define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
+#define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
 
-#define RETVAL_RESOURCE(l)				ZVAL_RESOURCE(return_value,l)
-#define RETVAL_BOOL(b)					ZVAL_BOOL(return_value,b)
+#define RETVAL_RESOURCE(l)				ZVAL_RESOURCE(return_value, l)
+#define RETVAL_BOOL(b)					ZVAL_BOOL(return_value, b)
 #define RETVAL_NULL() 					ZVAL_NULL(return_value)
-#define RETVAL_LONG(l) 					ZVAL_LONG(return_value,l)
-#define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value,d)
-#define RETVAL_STRING(s,duplicate) 		ZVAL_STRING(return_value,s,duplicate)
-#define RETVAL_STRINGL(s,l,duplicate) 	ZVAL_STRINGL(return_value,s,l,duplicate)
+#define RETVAL_LONG(l) 					ZVAL_LONG(return_value, l)
+#define RETVAL_DOUBLE(d) 				ZVAL_DOUBLE(return_value, d)
+#define RETVAL_STRING(s, duplicate) 		ZVAL_STRING(return_value, s, duplicate)
+#define RETVAL_STRINGL(s, l, duplicate) 	ZVAL_STRINGL(return_value, s, l, duplicate)
 #define RETVAL_EMPTY_STRING() 			ZVAL_EMPTY_STRING(return_value)
-#define RETVAL_FALSE  					ZVAL_BOOL(return_value,0)
-#define RETVAL_TRUE   					ZVAL_BOOL(return_value,1)
+#define RETVAL_FALSE  					ZVAL_BOOL(return_value, 0)
+#define RETVAL_TRUE   					ZVAL_BOOL(return_value, 1)
 
 #define RETURN_RESOURCE(l) 				{ RETVAL_RESOURCE(l); return; }
 #define RETURN_BOOL(b) 					{ RETVAL_BOOL(b); return; }
 #define RETURN_NULL() 					{ RETVAL_NULL(); return;}
 #define RETURN_LONG(l) 					{ RETVAL_LONG(l); return; }
 #define RETURN_DOUBLE(d) 				{ RETVAL_DOUBLE(d); return; }
-#define RETURN_STRING(s,duplicate) 		{ RETVAL_STRING(s,duplicate); return; }
-#define RETURN_STRINGL(s,l,duplicate) 	{ RETVAL_STRINGL(s,l,duplicate); return; }
+#define RETURN_STRING(s, duplicate) 	{ RETVAL_STRING(s, duplicate); return; }
+#define RETURN_STRINGL(s, l, duplicate) { RETVAL_STRINGL(s, l, duplicate); return; }
 #define RETURN_EMPTY_STRING() 			{ RETVAL_EMPTY_STRING(); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 
-#define SET_VAR_STRING(n,v)	{																				\
+#define SET_VAR_STRING(n, v) {																				\
 								{																			\
 									zval *var;																\
 									ALLOC_ZVAL(var);														\
-									ZVAL_STRING(var,v,0);													\
+									ZVAL_STRING(var, v, 0);													\
 									ZEND_SET_GLOBAL_VAR(n, var);											\
 								}																			\
 							}
 
-#define SET_VAR_STRINGL(n,v,l)	{														\
+#define SET_VAR_STRINGL(n, v, l) {														\
 									{													\
 										zval *var;										\
 										ALLOC_ZVAL(var);								\
-										ZVAL_STRINGL(var,v,l,0);						\
+										ZVAL_STRINGL(var, v, l, 0);						\
 										ZEND_SET_GLOBAL_VAR(n, var);					\
 									}													\
 								}
 
-#define SET_VAR_LONG(n,v)	{															\
+#define SET_VAR_LONG(n, v)	{															\
 								{														\
 									zval *var;											\
 									ALLOC_ZVAL(var);									\
-									ZVAL_LONG(var,v);									\
+									ZVAL_LONG(var, v);									\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
 								}														\
 							}
 
-#define SET_VAR_DOUBLE(n,v)	{															\
+#define SET_VAR_DOUBLE(n, v) {															\
 								{														\
 									zval *var;											\
 									ALLOC_ZVAL(var);									\
-									ZVAL_DOUBLE(var,v);									\
+									ZVAL_DOUBLE(var, v);								\
 									ZEND_SET_GLOBAL_VAR(n, var);						\
 								}														\
 							}

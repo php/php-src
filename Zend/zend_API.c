@@ -593,7 +593,7 @@ ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC)
 }
 
 
-ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
+ZEND_API int add_assoc_function(zval *arg, char *key, void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS))
 {
 	zend_error(E_WARNING, "add_assoc_function() is no longer supported");
 	return FAILURE;
@@ -686,7 +686,7 @@ ZEND_API int add_index_long(zval *arg, uint index, long n)
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_LONG(tmp, n);
 
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *),NULL);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -707,7 +707,7 @@ ZEND_API int add_index_bool(zval *arg, uint index, int b)
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_BOOL(tmp, b);
 	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *),NULL);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -718,7 +718,7 @@ ZEND_API int add_index_resource(zval *arg, uint index, int r)
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_RESOURCE(tmp, r);
 	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *),NULL);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -729,7 +729,7 @@ ZEND_API int add_index_double(zval *arg, uint index, double d)
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_DOUBLE(tmp, d);
 	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *),NULL);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -823,7 +823,7 @@ ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate)
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, str, duplicate);
 
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *),NULL);
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -834,7 +834,7 @@ ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int dupli
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRINGL(tmp, str, length, duplicate);
 
-	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *),NULL);
+	return zend_hash_next_index_insert(Z_ARRVAL_P(arg), &tmp, sizeof(zval *), NULL);
 }
 
 
@@ -895,7 +895,7 @@ ZEND_API int add_get_index_string(zval *arg, uint index, char *str, void **dest,
 	MAKE_STD_ZVAL(tmp);
 	ZVAL_STRING(tmp, str, duplicate);
 	
-	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *),dest);
+	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
 }
 
 
@@ -995,7 +995,7 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 			TSRMLS_FETCH();
 
 			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number TSRMLS_CC)==FAILURE) {
-				zend_error(E_CORE_ERROR,"Unable to start %s module",module->name);
+				zend_error(E_CORE_ERROR,"Unable to start %s module", module->name);
 				return FAILURE;
 			}
 		}
@@ -1012,7 +1012,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	zend_function_entry *ptr = functions;
 	zend_function function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
-	int count=0,unload=0;
+	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
 
@@ -1046,7 +1046,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(error_type, "Function registration failed - duplicate name - %s",ptr->fname);
+				zend_error(error_type, "Function registration failed - duplicate name - %s", ptr->fname);
 			}
 			ptr++;
 		}
@@ -1087,14 +1087,14 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 	TSRMLS_FETCH();
 
 #if 0
-	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
+	zend_printf("%s:  Registering module %d\n", module->name, module->module_number);
 #endif
 	if (module->functions && zend_register_functions(module->functions, NULL, module->type TSRMLS_CC)==FAILURE) {
-		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
+		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load", module->name);
 		return FAILURE;
 	}
 	module->module_started=1;
-	return zend_hash_add(&module_registry, module->name,strlen(module->name)+1,(void *)module,sizeof(zend_module_entry),NULL);
+	return zend_hash_add(&module_registry, module->name, strlen(module->name)+1, (void *)module, sizeof(zend_module_entry), NULL);
 }
 
 
@@ -1111,7 +1111,7 @@ void module_destructor(zend_module_entry *module)
 
 	if (module->module_started && module->module_shutdown_func) {
 #if 0
-		zend_printf("%s:  Module shutdown\n",module->name);
+		zend_printf("%s:  Module shutdown\n", module->name);
 #endif
 		module->module_shutdown_func(module->type, module->module_number TSRMLS_CC);
 	}
@@ -1133,7 +1133,7 @@ int module_registry_request_startup(zend_module_entry *module TSRMLS_DC)
 {
 	if (module->request_startup_func) {
 #if 0
-		zend_printf("%s:  Request startup\n",module->name);
+		zend_printf("%s:  Request startup\n", module->name);
 #endif
 		if (module->request_startup_func(module->type, module->module_number TSRMLS_CC)==FAILURE) {
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
@@ -1153,7 +1153,7 @@ int module_registry_cleanup(zend_module_entry *module TSRMLS_DC)
 		case MODULE_PERSISTENT:
 			if (module->request_shutdown_func) {
 #if 0
-				zend_printf("%s:  Request shutdown\n",module->name);
+				zend_printf("%s:  Request shutdown\n", module->name);
 #endif
 				module->request_shutdown_func(module->type, module->module_number TSRMLS_CC);
 			}

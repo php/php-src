@@ -61,7 +61,7 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 #  if ZEND_DEBUG
 #define CHECK_MEMORY_LIMIT(s, rs) _CHECK_MEMORY_LIMIT(s, rs, __zend_filename, __zend_lineno)
 #  else
-#define CHECK_MEMORY_LIMIT(s, rs)	_CHECK_MEMORY_LIMIT(s, rs, NULL,0)
+#define CHECK_MEMORY_LIMIT(s, rs)	_CHECK_MEMORY_LIMIT(s, rs, NULL, 0)
 #  endif
 
 #define _CHECK_MEMORY_LIMIT(s, rs, file, lineno) { AG(allocated_memory) += rs;\
@@ -72,7 +72,7 @@ static long mem_block_end_magic = MEM_BLOCK_END_MAGIC;
 									}	\
 									if (!AG(memory_exhausted)) {	\
 										if (!file) { \
-											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit),s); \
+											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted (tried to allocate %d bytes)", AG(memory_limit), s); \
 										} else { \
 											zend_error(E_ERROR,"Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes)", AG(memory_limit), file, lineno, s); \
 										} \
@@ -295,7 +295,7 @@ ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LIN
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	REMOVE_POINTER_FROM_LIST(p);
-	p = (zend_mem_header *) ZEND_DO_REALLOC(p,sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
+	p = (zend_mem_header *) ZEND_DO_REALLOC(p, sizeof(zend_mem_header)+MEM_HEADER_PADDING+SIZE+END_MAGIC_SIZE);
 	if (!p) {
 		if (!allow_failure) {
 			fprintf(stderr,"FATAL:  erealloc():  Unable to allocate %ld bytes\n", (long) size);

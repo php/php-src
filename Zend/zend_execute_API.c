@@ -692,7 +692,7 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			}
 			break;
 		default:
-			return DefWindowProc(hWnd,message,wParam,lParam);
+			return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
@@ -779,7 +779,7 @@ void zend_set_timeout(long seconds)
 		signal(SIGPROF, zend_timeout);
 		sigemptyset(&sigset);
 		sigaddset(&sigset, SIGPROF);
-		sigprocmask(SIG_UNBLOCK,&sigset,NULL);
+		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
 #	endif
 #endif

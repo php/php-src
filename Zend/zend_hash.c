@@ -97,7 +97,7 @@ static void _zend_is_inconsistent(HashTable *ht, char *file, int line)
     }
 	zend_bailout();
 }
-#define IS_CONSISTENT(a) _zend_is_inconsistent(a,__FILE__,__LINE__);
+#define IS_CONSISTENT(a) _zend_is_inconsistent(a, __FILE__, __LINE__);
 #define SET_INCONSISTENT(n) ht->inconsistent = n;
 #else
 #define IS_CONSISTENT(a)
@@ -1232,7 +1232,7 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 
 ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const void *), int flag, void **pData)
 {
-	Bucket *p,*res;
+	Bucket *p, *res;
 
 	IS_CONSISTENT(ht);
 
@@ -1244,11 +1244,11 @@ ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const 
 	res = p = ht->pListHead;
 	while ((p = p->pListNext)) {
 		if (flag) {
-			if (compar(&res,&p) < 0) { /* max */
+			if (compar(&res, &p) < 0) { /* max */
 				res = p;
 			}
 		} else {
-			if (compar(&res,&p) > 0) { /* min */
+			if (compar(&res, &p) > 0) { /* min */
 				res = p;
 			}
 		}

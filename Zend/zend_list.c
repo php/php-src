@@ -165,7 +165,7 @@ void list_entry_destructor(void *ptr)
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
 	
-	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
+	if (zend_hash_index_find(&list_destructors, le->type, (void **) &ld)==SUCCESS) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
 				if (ld->list_dtor) {
@@ -180,7 +180,7 @@ void list_entry_destructor(void *ptr)
 			EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)",le->type);
+		zend_error(E_WARNING,"Unknown list entry type in request shutdown (%d)", le->type);
 	}
 }
 
@@ -191,7 +191,7 @@ void plist_entry_destructor(void *ptr)
 	zend_rsrc_list_dtors_entry *ld;
 	TSRMLS_FETCH();
 
-	if (zend_hash_index_find(&list_destructors, le->type,(void **) &ld)==SUCCESS) {
+	if (zend_hash_index_find(&list_destructors, le->type, (void **) &ld)==SUCCESS) {
 		switch (ld->type) {
 			case ZEND_RESOURCE_LIST_TYPE_STD:
 				if (ld->plist_dtor) {
@@ -206,7 +206,7 @@ void plist_entry_destructor(void *ptr)
 				EMPTY_SWITCH_DEFAULT_CASE()
 		}
 	} else {
-		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)",le->type);
+		zend_error(E_WARNING,"Unknown persistent list entry type in module shutdown (%d)", le->type);
 	}
 }
 
@@ -325,7 +325,7 @@ ZEND_API int zend_register_list_destructors_ex(rsrc_dtor_func_t ld, rsrc_dtor_fu
 	lde.type = ZEND_RESOURCE_LIST_TYPE_EX;
 	lde.type_name = type_name;
 	
-	if (zend_hash_next_index_insert(&list_destructors,(void *) &lde, sizeof(zend_rsrc_list_dtors_entry),NULL)==FAILURE) {
+	if (zend_hash_next_index_insert(&list_destructors, (void *) &lde, sizeof(zend_rsrc_list_dtors_entry), NULL)==FAILURE) {
 		return FAILURE;
 	}
 	return list_destructors.nNextFreeElement-1;
@@ -340,7 +340,7 @@ ZEND_API int zend_fetch_list_dtor_id(char *type_name)
 	while(zend_hash_get_current_data_ex(&list_destructors, (void **)&lde, &pos) == SUCCESS) {
 		if(strcmp(type_name, lde->type_name) == 0) {
 #if 0
-			printf("Found resource id %d for resource type %s\n",(*lde).resource_id,type_name);
+			printf("Found resource id %d for resource type %s\n", (*lde).resource_id, type_name);
 #endif
 			return lde->resource_id;
 		}
