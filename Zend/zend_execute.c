@@ -1227,9 +1227,11 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	CHECK_SYMBOL_TABLES()	\
 	EX(opline) = new_op;
 
-#define INC_OPCODE()		\
-	CHECK_SYMBOL_TABLES()	\
-	EX(opline)++
+#define INC_OPCODE()			\
+	if (!EG(exception)) {		\
+		CHECK_SYMBOL_TABLES()	\
+		EX(opline)++;			\
+	}
 
 #define RETURN_FROM_EXECUTE_LOOP(execute_data)								\
 	free_alloca(EX(Ts));													\
