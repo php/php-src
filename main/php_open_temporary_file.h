@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #ifndef PHP_OPEN_TEMPORARY_FILE_H
 #define PHP_OPEN_TEMPORARY_FILE_H
 

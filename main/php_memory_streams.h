@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
  */
 
+/* $Id$ */
+
 #ifndef PHP_MEMORY_STREAM_H
 #define PHP_MEMORY_STREAM_H
 

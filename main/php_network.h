@@ -15,6 +15,7 @@
    | Author: Stig Venaas <venaas@uninett.no>                              |
    +----------------------------------------------------------------------+
  */
+
 /* $Id$ */
 
 #ifndef _PHP_NETWORK_H
