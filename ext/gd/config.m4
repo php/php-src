@@ -240,6 +240,9 @@ if test "$PHP_GD" = "php"; then
   PHP_NEW_EXTENSION(gd, gd.c gdttf.c $sources, $ext_shared,, \\$(GDLIB_CFLAGS))
   PHP_ADD_BUILD_DIR($ext_builddir/libgd)
 
+dnl check for fabsf and floorf which are available since C99
+  AC_CHECK_FUNCS(fabsf floorf)
+
 dnl PNG is required by GD library
   test "$PHP_PNG_DIR" = "no" && PHP_PNG_DIR=yes
       
