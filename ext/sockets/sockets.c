@@ -641,7 +641,7 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
-typedef int (*read_function)(int, void *, int);
+typedef int (*read_func)(int, void *, int);
 
 /* {{{ proto mixed socket_read(resource socket, int length [, int type])
    Reads length bytes from socket */
@@ -650,7 +650,7 @@ PHP_FUNCTION(socket_read)
 	zval **arg1, **arg2, **arg3;
 	char *tmpbuf;
 	php_socket *php_sock;
-	read_function = php_read;
+	read_func read_function = php_read;
 	int retval, argc = ZEND_NUM_ARGS();
 
 	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &arg1, &arg2, &arg3) == FAILURE) {
@@ -665,7 +665,7 @@ PHP_FUNCTION(socket_read)
 		switch (Z_LVAL_PP(arg3)) {
 			case PHP_SYSTEM_READ:
 			case PHP_BINARY_READ:
-				read_function = (read_function) read;
+				read_function = (read_func) read;
 				break;
 		}
 	}
