@@ -56,7 +56,6 @@ if test "$PHP_DOM" != "no"; then
   AC_ADD_LIBRARY_WITH_PATH($DOM_LIBNAME, $DOMXML_DIR/lib, DOMXML_SHARED_LIBADD)
 
   if test $HAVE_ZLIB; then
-    old_withval=$withval
     AC_MSG_CHECKING([for zlib (needed by DOM support)])
     AC_ARG_WITH(zlib-dir,
     [  --with-zlib-dir[=DIR]   zlib dir for libxml or include zlib support],[
@@ -71,10 +70,9 @@ if test "$PHP_DOM" != "no"; then
      AC_MSG_RESULT(no)
      AC_MSG_WARN(If configure fails try --with-zlib=<DIR>)
     ])
-    withval=$old_withval
   else
     echo "checking for libz needed by libxml ... already zlib support"
-    LIBS="$LIBS -L$withval/lib -lz"
+    LIBS="$LIBS -lz"
   fi
 
   AC_DEFINE(HAVE_DOMXML,1,[ ])
