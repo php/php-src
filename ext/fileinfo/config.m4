@@ -5,8 +5,8 @@ PHP_ARG_WITH(fileinfo, for fileinfo support,
 [  --with-fileinfo=DIR   Include fileinfo support])
 
 if test "$PHP_FILEINFO" != "no"; then
-  SEARCH_PATH="/usr/local /usr"
-  SEARCH_FOR="/include/magic.h"
+  SEARCH_PATH="/usr/local/include /usr/include /usr/share/file"
+  SEARCH_FOR="/magic.h"
   if test -r $PHP_FILEINFO/$SEARCH_FOR; then
     FILEINFO_DIR=$PHP_FILEINFO
   else
@@ -36,7 +36,7 @@ if test "$PHP_FILEINFO" != "no"; then
   ],[
     AC_MSG_ERROR([wrong magic lib version or lib not found])
   ],[
-    -L$FILEINFO_DIR/lib -lm -ldl
+    -L$FILEINFO_DIR/lib -lm -lz -ldl
   ])
 
   MAGIC_MIME_LOCATIONS="/usr/local/share/file/magic /usr/share/file/magic /usr/share/misc/file/magic /etc/magic"
