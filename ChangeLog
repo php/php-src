@@ -1,3 +1,30 @@
+2001-11-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/mcal/php_mcal.c: - Beautifying
+
+2001-11-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sysvshm/sysvshm.c: WS fix.
+
+2001-11-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/sysvshm/sysvshm.c:
+    - MFH crash bug in shm_remove (not critical enough to include in the release,
+      but critical enough to MFH)
+
+    * ext/sysvshm/sysvshm.c:
+    - Fix crach bug if the parameter to shm_remove is not a valid identifier.
+
+    * ext/mysql/php_mysql.c:
+    - Added a parameter to mysql_connect to force a new database link to be
+      created. (patch by Markus Fischer <mfischer@guru.josefine.at>)
+    - Added a parameter to mysql_connect to force a new database link to be
+      created. (Markus, Derick)
+
+    * ext/xslt/sablot.c: - MFH for crash bug #14169
+
+    * ext/xslt/sablot.c: - Fix for bug #14169
+
 2001-11-21  Frank M. Kromann  <frank@frontbase.com>
 
     * win32/winutil.c
