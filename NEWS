@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Added SORT_REGULAR, SORT_NUMERIC, SORT_STRING flags that can be used with
+  non-user sort functions for precise sorting behavior. (Andrei)
 - Fixed two 64-bit issues (startup crash, gethostbyaddr). (Sascha)
 - NULL values are now preserved in the return value of mysql_fetch_array()
   and mysql_fetch_object(). (Andrei)
