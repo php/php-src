@@ -122,6 +122,10 @@ define('PEAR_ERRORSTACK_LOG', 3);
  * If this is returned, then the error is completely ignored.
  */
 define('PEAR_ERRORSTACK_IGNORE', 4);
+/**
+ * If this is returned, then the error is logged and die() is called.
+ */
+define('PEAR_ERRORSTACK_DIE', 5);
 /**#@-*/
 
 /**
@@ -308,7 +312,11 @@ class PEAR_ErrorStack {
      */
     function setDefaultLogger(&$log)
     {
-        $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER'] = &$log;
+        if (is_object($log) && method_exists($log, 'log') ) {
+            $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER'] = &$log;
+        } elseif (is_callable($log)) {
+            $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER'] = &$log;
+	}
     }
     
     /**
@@ -317,7 +325,11 @@ class PEAR_ErrorStack {
      */
     function setLogger(&$log)
     {
-        $this->_logger = &$log;
+        if (is_object($log) && method_exists($log, 'log') ) {
+            $this->_logger = &$log;
+        } elseif (is_callable($log)) {
+            $this->_logger = &$log;
+        }
     }
     
     /**
@@ -369,7 +381,7 @@ class PEAR_ErrorStack {
     }
     
     /**
-     * Set an error code => error message mapping callback
+     * Set a callback that generates context information (location of error) for an error stack
      * 
      * This method sets the callback that can be used to generate context
      * information for an error.  Passing in NULL will disable context generation
@@ -446,10 +458,11 @@ class PEAR_ErrorStack {
      */
     function staticPopCallback()
     {
-        array_pop($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK']);
+        $ret = array_pop($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK']);
         if (!is_array($GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'])) {
             $GLOBALS['_PEAR_ERRORSTACK_OVERRIDE_CALLBACK'] = array();
         }
+        return $ret;
     }
     
     /**
@@ -536,6 +549,7 @@ class PEAR_ErrorStack {
             $err['repackage'] = $repackage;
         }
         $push = $log = true;
+        $die = false;
         // try the overriding callback first
         $callback = $this->staticPopCallback();
         if ($callback) {
@@ -564,6 +578,9 @@ class PEAR_ErrorStack {
             	case PEAR_ERRORSTACK_LOG: 
             		$push = false;
         		break;
+            	case PEAR_ERRORSTACK_DIE: 
+            		$die = true;
+        		break;
                 // anything else returned has the same effect as pushandlog
             }
         }
@@ -575,6 +592,9 @@ class PEAR_ErrorStack {
             if ($this->_logger || $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER']) {
                 $this->_log($err);
             }
+        }
+        if ($die) {
+            die();
         }
         if ($this->_compat && $push) {
             return $this->raiseError($msg, $code, null, null, $err);
@@ -626,7 +646,15 @@ class PEAR_ErrorStack {
      * @param array $levels Error level => Log constant map
      * @access protected
      */
-    function _log($err, $levels = array(
+    function _log($err)
+    {
+        if ($this->_logger) {
+            $logger = &$this->_logger;
+        } else {
+            $logger = &$GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER'];
+        }
+        if (is_a($logger, 'Log')) {
+            $levels = array(
                 'exception' => PEAR_LOG_CRIT,
                 'alert' => PEAR_LOG_ALERT,
                 'critical' => PEAR_LOG_CRIT,
@@ -634,17 +662,15 @@ class PEAR_ErrorStack {
                 'warning' => PEAR_LOG_WARNING,
                 'notice' => PEAR_LOG_NOTICE,
                 'info' => PEAR_LOG_INFO,
-                'debug' => PEAR_LOG_DEBUG))
-    {
-        if (isset($levels[$err['level']])) {
-            $level = $levels[$err['level']];
-        } else {
-            $level = PEAR_LOG_INFO;
-        }
-        if ($this->_logger) {
-            $this->_logger->log($err['message'], $level, $err);
-        } else {
-            $GLOBALS['_PEAR_ERRORSTACK_DEFAULT_LOGGER']->log($err['message'], $level, $err);
+                'debug' => PEAR_LOG_DEBUG);
+            if (isset($levels[$err['level']])) {
+                $level = $levels[$err['level']];
+            } else {
+                $level = PEAR_LOG_INFO;
+            }
+            $logger->log($err['message'], $level, $err);
+        } else { // support non-standard logs
+            call_user_func($logger, $err);
         }
     }
 
@@ -749,7 +775,8 @@ class PEAR_ErrorStack {
      * @static
      * @return array 
      */
-    function staticGetErrors($purge = false, $level = false, $merge = false, $sortfunc = array('PEAR_ErrorStack', '_sortErrors'))
+    function staticGetErrors($purge = false, $level = false, $merge = false,
+                             $sortfunc = array('PEAR_ErrorStack', '_sortErrors'))
     {
         $ret = array();
         if (!is_callable($sortfunc)) {

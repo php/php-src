@@ -314,7 +314,9 @@ class PEAR_Registry extends PEAR
     function _unlock()
     {
         $ret = $this->_lock(LOCK_UN);
-        fclose($this->lock_fp);
+        if (is_resource($this->lock_fp)) {
+            fclose($this->lock_fp);
+        }
         $this->lock_fp = null;
         return $ret;
     }

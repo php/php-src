@@ -48,26 +48,15 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3.3</version>
-    <date>2004-10-28</date>
+    <version>1.3.5</version>
+    <date>2005-02-18</date>
     <state>stable</state>
     <license>PHP License</license>
     <notes>
-Installer:
- * fix Bug #1186 raise a notice error on PEAR::Common $_packageName
- * fix Bug #1249 display the right state when using --force option
- * fix Bug #2189 upgrade-all stops if dependancy fails
- * fix Bug #1637 The use of interface causes warnings when packaging with PEAR
- * fix Bug #1420 Parser bug for T_DOUBLE_COLON
- * fix Request #2220 pear5 build fails on dual php4/php5 system
- * fix Bug #1163  pear makerpm fails with packages that supply role="doc"
-
-Other:
- * add PEAR_Exception class for PHP5 users
- * fix critical problem in package.xml for linux in 1.3.2
- * fix staticPopCallback() in PEAR_ErrorStack
- * fix warning in PEAR_Registry for windows 98 users
-</notes>
+ * fix Bug #3505: pecl can't install PDO
+ * enhance pear run-tests dramatically
+ * fix Bug #3506: pear install should export the pear version into the environment
+    </notes>
     <provides type="class" name="OS_Guess" />
     <provides type="class" name="System" />
     <provides type="function" name="md5_file" />
@@ -98,11 +87,14 @@ Other:
         <file role="php" name="Downloader.php"/>
         <file role="php" name="Exception.php"/>
         <file role="php" name="ErrorStack.php"/>
-        <file role="php" name="Builder.php"/>
+        <file role="php" name="Builder.php">
+         <replace from="@PEAR-VER@" to="version" type="package-info"/>
+        </file>
         <file role="php" name="Installer.php"/>
         <file role="php" name="Packager.php"/>
         <file role="php" name="Registry.php"/>
         <file role="php" name="Remote.php"/>
+        <file role="php" name="RunTest.php"/>
       </dir>
       <dir name="scripts" baseinstalldir="/">
         <file role="script" install-as="pear" name="pear.sh">
@@ -160,22 +152,49 @@ PEAR_ErrorStack:
     </notes>
   </release>
   <release>
-    <version>1.3</version>
-    <date>2004-02-20</date>
+    <version>1.3.3</version>
+    <date>2004-10-28</date>
     <state>stable</state>
     <notes>
-PEAR Installer:
+Installer:
+ * fix Bug #1186 raise a notice error on PEAR::Common $_packageName
+ * fix Bug #1249 display the right state when using --force option
+ * fix Bug #2189 upgrade-all stops if dependancy fails
+ * fix Bug #1637 The use of interface causes warnings when packaging with PEAR
+ * fix Bug #1420 Parser bug for T_DOUBLE_COLON
+ * fix Request #2220 pear5 build fails on dual php4/php5 system
+ * fix Bug #1163  pear makerpm fails with packages that supply role="doc"
 
-* Bug #171 --alldeps with a rel=&quot;eq&quot; should install the required version, if possible
-* Bug #249 installing from an url doesnt work
-* Bug #248 --force command does not work as expected
-* Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
-* Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
-* Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
-* Bug #521 Incorrect filename in naming warnings
-* Moved download code into its own class
-* Fully unit tested the installer, packager, downloader, and PEAR_Common
-
+Other:
+ * add PEAR_Exception class for PHP5 users
+ * fix critical problem in package.xml for linux in 1.3.2
+ * fix staticPopCallback() in PEAR_ErrorStack
+ * fix warning in PEAR_Registry for windows 98 users
+    </notes>
+   </release>
+  <release>
+    <version>1.3.3.1</version>
+    <date>2004-11-08</date>
+    <state>stable</state>
+    <notes>
+     add RunTest.php to package.xml, make run-tests display failed tests, and use ui
+    </notes>
+   </release>
+  <release>
+    <version>1.3.4</version>
+    <date>2005-01-01</date>
+    <state>stable</state>
+    <notes>
+ * fix a serious problem caused by a bug in all versions of PHP that caused multiple registration
+   of the shutdown function of PEAR.php
+ * fix Bug #2861: package.dtd does not define NUMBER
+ * fix Bug #2946: ini_set warning errors
+ * fix Bug #3026: Dependency type &quot;ne&quot; is needed, &quot;not&quot; is not handled
+   properly
+ * fix Bug #3061: potential warnings in PEAR_Exception
+ * implement Request #2848: PEAR_ErrorStack logger extends, PEAR_ERRORSTACK_DIE
+ * implement Request #2914: Dynamic Include Path for run-tests command
+ * make pear help listing more useful (put how-to-use info at the bottom of the listing)
     </notes>
    </release>
   </changelog>
