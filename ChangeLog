@@ -1,3 +1,62 @@
+2000-05-12  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/info.c: Add Meself for LibSWF.
+
+2000-05-12  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/info.c:
+
+2000-05-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * tests/foo4
+      tests/testhyperwave: Testing.
+
+    * tests/testobj: test
+
+    * tests/testfunc: Another test.
+
+    * tests/testfunc: Testing.
+
+    * tests/testarray2: test
+
+2000-05-12  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/java.c
+      ext/java/reflect.java: i18n, part I
+
+2000-05-12  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Changed ibase_num_fields to use high-performance api (which fixed a *very*
+    obscure bug).
+
+2000-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * build/fastgen.sh
+      dynlib.m4:
+    Remove directory test when creating directories using mkdir -p
+
+    * build/shtool:
+    Upgrade shtool to 1.4.9 and fix "mkdir -p" behaviour. Patch has been
+    sent to the author of shtool.
+
+2000-05-12  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/config.m4
+      ext/interbase/interbase.c
+      ext/interbase/php_interbase.h:
+    Fixed all (?) remaining issues with InterBase 6 datatypes, especially
+    with timestamp, date and time.
+    Incombatible change: renamed constant IBASE_TIMESTAMP to IBASE_UNIXTIME.
+    Incompatible change: renamed configuration directive ibase.timeformat
+    to ibase.timestampformat.
+    Added constants IBASE_TIMESTAMP, IBASE_DATE, IBASE_TIME.
+    Added configuration directives ibase.dateformat and ibase.timeformat.
+    ibase_timefmt() now takes an optional second argument specifying which
+    format to change, default is IBASE_TIMESTAMP (for even a little backwards
+    compatibility).
+
 2000-05-11  Jouni Ahto  <jah@mork.net>
 
     * ext/interbase/interbase.c:
