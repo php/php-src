@@ -24,6 +24,7 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_variables.h"
+#include "zend_operators.h"
 
 typedef union _temp_variable {
 	zval tmp_var;
@@ -91,7 +92,7 @@ static inline int i_zend_is_true(zval *op)
 			result = (zend_hash_num_elements(op->value.ht)?1:0);
 			break;
 		case IS_OBJECT:
-			result = (zend_hash_num_elements(op->value.obj.properties)?1:0);
+			result = (zend_hash_num_elements(Z_OBJPROP_P(op))?1:0);
 			break;
 		default:
 			result = 0;
