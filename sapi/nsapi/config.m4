@@ -22,7 +22,7 @@ if test "$PHP_NSAPI" != "no"; then
     AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
   fi
   if test -d $PHP_NSAPI/plugins/include ; then
-    NSAPI_INC_DIR="$NSAPI_INCLUDE"
+    test -n "$NSAPI_INCLUDE" && NSAPI_INC_DIR="-I$NSAPI_INCLUDE"
     NSAPI_INCLUDE="$PHP_NSAPI/plugins/include"
     AC_MSG_RESULT(iPlanet/4.x style)
     AC_CHECK_HEADERS([$NSAPI_INCLUDE/nsapi.h])
@@ -31,7 +31,8 @@ if test "$PHP_NSAPI" != "no"; then
   if test "$NSAPI_INCLUDE" = ""; then
     AC_MSG_ERROR(Please check you have nsapi.h in either $PHP_NSAPI/include or $PHP_NSAPI/plugins/include)
   fi
-  PHP_ADD_INCLUDE($NSAPI_INCLUDE)
+
+  PHP_EVAL_INCLINE($NSAPI_INCLUDE)
   PHP_BUILD_THREAD_SAFE
   AC_DEFINE(HAVE_NSAPI,1,[Whether you have a Netscape Server])
   PHP_SELECT_SAPI(nsapi, shared, nsapi.c)
