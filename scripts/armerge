@@ -59,7 +59,7 @@ mkdir $tmpdir || die "can not create temporary directory $tmpdir"
 ( cd $tmpdir;
 
 for archive in $in_archives; do
-    files=`ar t $cwd/$archive`
+    files=`ar t $cwd/$archive | sed -e 's/__\.SYMDEF SORTED//'`
     ar x $cwd/$archive
     dir=`dirname $archive`
     if test "$dir" = "."; then
