@@ -106,7 +106,6 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_prepare,								NULL)
 	PHP_FE(mysqli_report,								NULL)
 	PHP_FE(mysqli_query,								NULL)
-	PHP_FE(mysqli_read_query_result,					NULL)
 	PHP_FE(mysqli_real_connect,							NULL)
 	PHP_FE(mysqli_real_escape_string,					NULL)
 	PHP_FALIAS(mysqli_escape_string, 
@@ -182,7 +181,6 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(ping,mysqli_ping,NULL)
 	PHP_FALIAS(prepare,mysqli_prepare,NULL)
 	PHP_FALIAS(query,mysqli_query,NULL)
-	PHP_FALIAS(read_query_result,mysqli_read_query_result,NULL)
 	PHP_FALIAS(real_connect,mysqli_real_connect,NULL)
 	PHP_FALIAS(real_escape_string,mysqli_real_escape_string,NULL)
 	PHP_FALIAS(escape_string, mysqli_real_escape_string,NULL)
