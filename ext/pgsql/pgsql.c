@@ -1423,7 +1423,6 @@ PHP_FUNCTION(pg_data_seek)
 {
 	zval *result;
 	int row;
-	PGresult *pgsql_result;
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
@@ -1438,7 +1437,7 @@ PHP_FUNCTION(pg_data_seek)
 /* 	if (ZEND_NUM_ARGS() == 1) */
 /* 		RETURN_LONG(pg_result->row); */
 
-	if (row < 0 || row >= PQntuples(pg_result))
+	if (row < 0 || row >= PQntuples(pg_result->result))
 		RETURN_FALSE;
 	
 	/* seek to offset */
@@ -2613,6 +2612,133 @@ PHP_FUNCTION(pg_escape_bytea)
 
 	to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
 	RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
+	free(to);
+}
+/* }}} */
+
+/* PQunescapeBytea() from PostgreSQL 7.3 to provide bytea unescape feature to 7.2 users.
+   Renamed to php_pgsql_unescape_bytea() */
+/*
+ *		PQunescapeBytea - converts the null terminated string representation
+ *		of a bytea, strtext, into binary, filling a buffer. It returns a
+ *		pointer to the buffer which is NULL on error, and the size of the
+ *		buffer in retbuflen. The pointer may subsequently be used as an
+ *		argument to the function free(3). It is the reverse of PQescapeBytea.
+ *
+ *		The following transformations are reversed:
+ *		'\0' == ASCII  0 == \000
+ *		'\'' == ASCII 39 == \'
+ *		'\\' == ASCII 92 == \\
+ *
+ *		States:
+ *		0	normal		0->1->2->3->4
+ *		1	\			   1->5
+ *		2	\0			   1->6
+ *		3	\00
+ *		4	\000
+ *		5	\'
+ *		6	\\
+ */
+static unsigned char * php_pgsql_unescape_bytea(unsigned char *strtext, size_t *retbuflen)
+{
+	size_t		buflen;
+	unsigned char *buffer,
+			   *sp,
+			   *bp;
+	unsigned int state = 0;
+
+	if (strtext == NULL)
+		return NULL;
+	buflen = strlen(strtext);	/* will shrink, also we discover if
+								 * strtext */
+	buffer = (unsigned char *) malloc(buflen);	/* isn't NULL terminated */
+	if (buffer == NULL)
+		return NULL;
+	for (bp = buffer, sp = strtext; *sp != '\0'; bp++, sp++)
+	{
+		switch (state)
+		{
+			case 0:
+				if (*sp == '\\')
+					state = 1;
+				*bp = *sp;
+				break;
+			case 1:
+				if (*sp == '\'')	/* state=5 */
+				{				/* replace \' with 39 */
+					bp--;
+					*bp = '\'';
+					buflen--;
+					state = 0;
+				}
+				else if (*sp == '\\')	/* state=6 */
+				{				/* replace \\ with 92 */
+					bp--;
+					*bp = '\\';
+					buflen--;
+					state = 0;
+				}
+				else
+				{
+					if (isdigit(*sp))
+						state = 2;
+					else
+						state = 0;
+					*bp = *sp;
+				}
+				break;
+			case 2:
+				if (isdigit(*sp))
+					state = 3;
+				else
+					state = 0;
+				*bp = *sp;
+				break;
+			case 3:
+				if (isdigit(*sp))		/* state=4 */
+				{
+					int			v;
+
+					bp -= 3;
+					sscanf(sp - 2, "%03o", &v);
+					*bp = v;
+					buflen -= 3;
+					state = 0;
+				}
+				else
+				{
+					*bp = *sp;
+					state = 0;
+				}
+				break;
+		}
+	}
+	buffer = realloc(buffer, buflen);
+	if (buffer == NULL)
+		return NULL;
+
+	*retbuflen = buflen;
+	return buffer;
+}
+
+/* {{{ proto string pg_unescape_bytea(string data)
+   Unescape binary for bytea type  */
+PHP_FUNCTION(pg_unescape_bytea)
+{
+	char *from = NULL, *to = NULL;
+	size_t from_len, to_len;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+							  &from, &from_len) == FAILURE) {
+		return;
+	}
+
+	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, from_len);
+	if (!to) {
+		RETVAL_FALSE;
+	}
+	else {
+		RETVAL_STRINGL(to, to_len-1, 1); /* to_len includes addtional '\0' */
+	}
 	free(to);
 }
 /* }}} */
