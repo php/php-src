@@ -212,38 +212,38 @@ static int flock_values[] = { LOCK_SH, LOCK_EX, LOCK_UN };
 
 PHP_FUNCTION(flock)
 {
-    zval **arg1, **arg2, **arg3;
-    int fd, act, ret, arg_count = ZEND_NUM_ARGS();
+	zval *arg1, *arg3;
+	int fd, act, ret;
 	php_stream *stream;
+	long operation = 0;
 
-    if (arg_count > 3 || zend_get_parameters_ex(arg_count, &arg1, &arg2, &arg3) == FAILURE) {
-        WRONG_PARAM_COUNT;
-    }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &arg1, &operation, &arg3) == FAILURE) {
+		return;
+	}
 
-	php_stream_from_zval(stream, arg1);
+	php_stream_from_zval(stream, &arg1);
 
-	if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE)	{
+	if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 1) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	convert_to_long_ex(arg2);
-
-    act = Z_LVAL_PP(arg2) & 3;
-    if (act < 1 || act > 3) {
+	act = operation & 3;
+	if (act < 1 || act > 3) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Illegal operation argument");
 		RETURN_FALSE;
-    }
-
-    /* flock_values contains all possible actions
-       if (arg2 & 4) we won't block on the lock */
-    act = flock_values[act - 1] | (Z_LVAL_PP(arg2) & 4 ? LOCK_NB : 0);
-    if ((ret=flock(fd, act)) == -1) {
-        RETURN_FALSE;
-    }
-	if(ret == -1 && errno == EWOULDBLOCK && arg_count == 3) {
-		ZVAL_LONG(*arg3, 1);
 	}
-    RETURN_TRUE;
+
+	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
+	act = flock_values[act - 1] | (operation & 4 ? LOCK_NB : 0);
+	if ((ret = flock(fd, act)) == -1) {
+		if (errno == EWOULDBLOCK && operation) {
+			convert_to_long(arg3);
+			Z_LVAL_P(arg3) = 1;
+			RETURN_TRUE;
+		}
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 
 /* }}} */
