@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.11 2001-05-24 12:36:09 sas Exp $ 
+# $Id: buildcheck.sh,v 1.12 2001-06-20 18:21:03 david Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -58,13 +58,13 @@ else
 echo "buildconf: automake version $am_version (ok)"
 fi
 
-# libtool 1.3.3 or newer
+# libtool 1.4 or newer
 libtool=`which libtool`
 if test ! -f "$libtool"; then libtool=`which glibtool`; fi
 lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
-echo "           You need libtool version 1.3 or newer installed"
+echo "           You need libtool version 1.4 or newer installed"
 echo "           to build PHP from CVS."
 exit 1
 fi
