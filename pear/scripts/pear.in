@@ -129,8 +129,6 @@ if ($ok === false) {
     PEAR::raiseError("unknown command `$command'");
 }
 
-exit;
-
 // {{{ usage()
 
 function usage($error = null, $helpsubject = null)
