@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE LIST SYSTEM "dtdexample.dtd">
+<LIST>
+<MOVIE ID="x200338360">
+<TITLE>Move Title 1</TITLE>
+<ORGTITLE/><LOC>Location 1</LOC>
+<INFO/>
+</MOVIE>
+<MOVIE ID="m200338361">
+<TITLE>Move Title 2</TITLE>
+<ORGTITLE/>
+<LOC>Location 2</LOC>
+<INFO/>
+</MOVIE>
+</LIST>
