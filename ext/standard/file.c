@@ -264,8 +264,9 @@ PHP_FUNCTION(get_meta_tags)
 
 	php_stream_open_wrapper(filename, "rb", 0, NULL);
 
+	
 	md.stream = php_stream_open_wrapper(filename, "rb",
-			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	
 
@@ -412,7 +413,7 @@ PHP_FUNCTION(file_get_contents)
 	}
 
 	stream = php_stream_open_wrapper(filename, "rb", 
-			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (!stream) {
 		RETURN_FALSE;
@@ -459,7 +460,7 @@ PHP_FUNCTION(file)
 	}
 
 	stream = php_stream_open_wrapper(filename, "rb", 
-			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (!stream) {
 		RETURN_FALSE;
@@ -854,7 +855,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 	}
 	
 	stream = php_stream_open_wrapper_ex(filename, mode,
-				use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 				NULL, context);
 
 	if (stream == NULL)	{
@@ -1579,7 +1580,7 @@ PHP_FUNCTION(readfile)
 	convert_to_string_ex(arg1);
 
 	stream = php_stream_open_wrapper(Z_STRVAL_PP(arg1), "rb",
-			use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
 			NULL);
 	if (stream)	{
 		size = php_stream_passthru(stream);
