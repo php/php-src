@@ -15,7 +15,7 @@
 /* Include stuff ************************************************************ */
 #include <winsock2.h>
 #include <time.h>
-#include <php.h>
+#include "php.h"
 
 /* Struct stuff ************************************************************* */
 struct timezone {

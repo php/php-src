@@ -16,7 +16,7 @@
    +----------------------------------------------------------------------+
  */
 
-#include <php.h>
+#include "php.h"
 
 PHPAPI char *php_win_err(int error)
 {
