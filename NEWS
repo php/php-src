@@ -35,6 +35,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
+- Fixed bug #21815 (fpassthru ignored buffered data but then complained anyway). (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
 - Fixed bug #21597 (made glob() understand Windows paths). (Edin)
 - Fixed bug #21549 (problem with Ingres II persistent connections). (Jani)
