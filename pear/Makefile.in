@@ -10,6 +10,7 @@ include $(topsrcdir)/build/rules.mk
 
 peardir=$(prefix)/lib/php
 pear_DBdir=$(prefix)/lib/php/DB
+pear_Filedir=$(prefix)/lib/php/File
 
 install-data-local:
 	-@$(mkinstalldirs) $(peardir) $(pear_DBdir) && \
@@ -21,7 +22,7 @@ install-data-local:
 	$(INSTALL_DATA) $(srcdir)/DB/pgsql.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/DB/storage.php $(pear_DBdir) && \
 	$(INSTALL_DATA) $(srcdir)/HTTP.php $(peardir) && \
-	$(INSTALL_DATA) $(srcdir)/File/Find.php $(peardir)
+	$(INSTALL_DATA) $(srcdir)/File/Find.php $(pearFiledir)
 
 phpincludedir = $(includedir)/php
 builddir = $(prefix)/lib/php/build
