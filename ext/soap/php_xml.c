@@ -160,12 +160,12 @@ xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 			if (href->children->content[0] == '#') {
 				xmlNodePtr ret = get_node_with_attribute_recursive(data->doc->children, NULL, "id", &href->children->content[1]);
 				if (!ret) {
-					php_error(E_ERROR,"Unresolved reference '%s'",href->children->content);					
+					php_error(E_ERROR,"Unresolved reference '%s'",href->children->content);
 				}
 				return ret;
 			} else {
 				/*  TODO: External href....? */
-				php_error(E_ERROR,"External reference '%s'",href->children->content);					
+				php_error(E_ERROR,"External reference '%s'",href->children->content);
 			}
 		}
 		/* SOAP 1.2 enc:id enc:ref */
@@ -175,14 +175,14 @@ xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 			if (href->children->content[0] == '#') {
 				xmlNodePtr ret = get_node_with_attribute_recursive_ex(data->doc->children, NULL, NULL, "id", &href->children->content[1], SOAP_1_2_ENC_NAMESPACE);
 				if (!ret) {
-					php_error(E_ERROR,"Unresolved reference '%s'",href->children->content);					
+					php_error(E_ERROR,"Unresolved reference '%s'",href->children->content);
 				} else if (ret == data) {
-					php_error(E_ERROR,"Violation of id and ref information items '%s'",href->children->content);					
+					php_error(E_ERROR,"Violation of id and ref information items '%s'",href->children->content);
 				}
 				return ret;
 			} else {
 				/*  TODO: External href....? */
-				php_error(E_ERROR,"External reference '%s'",href->children->content);					
+				php_error(E_ERROR,"External reference '%s'",href->children->content);
 			}
 		}
 	}

@@ -386,7 +386,7 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 
 			if (sempos != NULL) {
 				cookie_len = sempos-(eqpos+1);
-			} else {	
+			} else {
 				cookie_len = strlen(cookie)-(eqpos-cookie)-1;
 			}
 
