@@ -1137,10 +1137,11 @@ PHP_FUNCTION(ibase_query)
 		    expected_n = ib_query.in_sqlda ? ib_query.in_sqlda->sqld : 0;
 		
 		if (bind_n != expected_n) {
-			_php_ibase_module_error("Statement expects %d arguments, %d given" TSRMLS_CC,
-			    expected_n, bind_n);
-			break;
-		
+			php_error_docref(NULL TSRMLS_CC, (bind_n < expected_n) ? E_WARNING : E_NOTICE,
+				"Statement expects %d arguments, %d given", expected_n, bind_n);
+			if (bind_n < expected_n) {
+				break;
+			}
 		} else if (bind_n > 0) {
 			bind_args = (zval ***) do_alloca(sizeof(zval **) * ZEND_NUM_ARGS());
 
@@ -1810,9 +1811,11 @@ PHP_FUNCTION(ibase_execute)
 			expected_n = ib_query->in_sqlda ? ib_query->in_sqlda->sqld : 0;
 
 		if (bind_n != expected_n) {
-			_php_ibase_module_error("Statement expects %d arguments, %d given" TSRMLS_CC,
-				expected_n, bind_n);
-			break;
+			php_error_docref(NULL TSRMLS_CC, (bind_n < expected_n) ? E_WARNING : E_NOTICE,
+				"Statement expects %d arguments, %d given", expected_n, bind_n);
+			if (bind_n < expected_n) {
+				break;
+			}
 
 		} else if (bind_n > 0) { /* have variables to bind */
 			args = (zval ***) do_alloca(ZEND_NUM_ARGS() * sizeof(zval **));
