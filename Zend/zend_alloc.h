@@ -70,7 +70,7 @@ typedef union _align_test {
 # define PLATFORM_ALIGNMENT (sizeof(align_test))
 #endif
 
-#if __GNUC__ -0 >= 3
+#if GCC_VERSION - 0 >= 2096
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((malloc))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
