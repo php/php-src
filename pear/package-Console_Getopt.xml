@@ -21,11 +21,18 @@ short and long options.</description>
       <name>Stig Bakken</name>
       <email>stig@php.net</email>
     </maintainer>
+    <maintainer>
+      <user>cellog</user>
+      <role>helper</role>
+      <name>Greg Beaver</name>
+      <email>cellog@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
-    <version>2.0</version>
-    <date>2003-12-06</date>
-    <notes>Revert of erroneous POSIX compatibility fix (BC break)</notes>
+    <version>1.2</version>
+    <date>2003-12-11</date>
+    <notes>Revert of erroneous POSIX compatibility fix in getopt().
+getopt2() must be used for POSIX compatibility (BC break).</notes>
     <state>stable</state>
     <filelist>
      <dir name="Console">
