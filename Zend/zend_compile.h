@@ -190,10 +190,11 @@ typedef struct _zend_file_handle {
 
 #define EXT_TYPE_UNUSED		(1<<0)
 
+BEGIN_EXTERN_C()
+
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
 
-BEGIN_EXTERN_C()
 extern ZEND_API zend_op_array *(*zend_compile_files)(int mark_as_ref CLS_DC, int file_count, ...);
 
 void zend_activate(CLS_D ELS_DC);
@@ -214,7 +215,6 @@ const char *zend_get_zendtext(CLS_D);
 int zend_get_zendleng(CLS_D);
 #endif
 
-END_EXTERN_C()
 
 /* parser-driven code generators */
 void do_binary_op(int op, znode *result, znode *op1, znode *op2 CLS_DC);
@@ -354,7 +354,6 @@ void do_ticks(CLS_D);
 
 
 /* helper functions in zend-scanner.l */
-BEGIN_EXTERN_C()
 ZEND_API int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC);	
 ZEND_API int require_filename(char *filename CLS_DC);
 ZEND_API int use_filename(char *filename, uint filename_length CLS_DC);
@@ -367,7 +366,6 @@ ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC);
 ZEND_API void zend_open_file_dtor(zend_file_handle *fh);
-END_EXTERN_C()
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry *ce);
@@ -381,15 +379,11 @@ void init_op(zend_op *op CLS_DC);
 int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
-BEGIN_EXTERN_C()
 int pass_two(zend_op_array *op_array);
 void pass_include_eval(zend_op_array *op_array);
-END_EXTERN_C()
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 
-
 int zendlex(znode *zendlval CLS_DC);
-
 
 #define ZEND_NOP					0
 									
@@ -628,5 +622,7 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1
+
+END_EXTERN_C()
 
 #endif /* _COMPILE_H */
