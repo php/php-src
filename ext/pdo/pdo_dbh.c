@@ -363,7 +363,7 @@ static PHP_METHOD(PDO, lastInsertId)
 
 	PDO_DBH_CLEAR_ERR();
 	if (!dbh->methods->last_id) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver last inserted id retrieval.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support last inserted id retrieval.");
 	} else {
 		RETURN_LONG(dbh->methods->last_id(dbh TSRMLS_CC));
 	}
