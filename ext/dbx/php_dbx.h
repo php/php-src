@@ -54,8 +54,8 @@ ZEND_FUNCTION(dbx_sort);
 ZEND_FUNCTION(dbx_compare);
 
 /* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+   Declare any global variables you may need between the BEGIN
+   and END macros here:     
 */
 
 /*
@@ -76,7 +76,7 @@ ZEND_END_MODULE_GLOBALS(dbx)
 #define DBXG(v) (dbx_globals.v)
 #endif
 
-#endif	/* ZEND_PHP_DBX_H */
+#endif /* ZEND_PHP_DBX_H */
 
 
 /*
