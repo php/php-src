@@ -25,6 +25,7 @@
 #include <winsock.h>
 #include "time.h"
 #include <string.h>
+#include <math.h>
 #include <malloc.h>
 #include <memory.h>
 #include <winbase.h>
@@ -34,6 +35,8 @@
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
 #endif
+
+#include "ext/standard/php_string.h"
 
 /*
    extern int _daylight;
@@ -63,6 +66,8 @@ static char *months[] =
 												efree(response); \
 											} \
 										}
+#define SMTP_SKIP_SPACE(str)	{ while (isspace(*str)) { str++; } }
+
 
 #ifndef THREAD_SAFE
 char Buffer[MAIL_BUFFER_SIZE];
@@ -124,6 +129,13 @@ static char *ErrorMessages[] =
  * occurences of \r\n between lines to a single \r\n) */
 #define PHP_WIN32_MAIL_RMVDBL_PATTERN	"/^\r\n|(\r\n)+$/m"
 #define PHP_WIN32_MAIL_RMVDBL_REPLACE	""
+
+/* This pattern escapes \n. inside the message body. It prevents
+ * premature end of message if \n.\n or \r\n.\r\n is encountered
+ * and ensures that \n. sequences are properly displayed in the
+ * message body. */
+#define PHP_WIN32_MAIL_DOT_PATTERN	"\n."
+#define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurences of \n or \r in \r\n
@@ -355,6 +367,8 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 	char *tempMailTo, *token, *pos1, *pos2;
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
+	char *data_cln;
+	int data_cln_len;
 
 	/* check for NULL parameters */
 	if (data == NULL)
@@ -452,6 +466,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
 		{
+			SMTP_SKIP_SPACE(token);
 			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
 			if ((res = Post(Buffer)) != SUCCESS)
 				return (res);
@@ -473,6 +488,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
 		{
+			SMTP_SKIP_SPACE(token);
 			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
 			if ((res = Post(Buffer)) != SUCCESS) {
 				efree(tempMailTo);
@@ -506,6 +522,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 			token = strtok(tempMailTo, ",");
 			while(token != NULL)
 			{
+				SMTP_SKIP_SPACE(token);
 				sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
 				if ((res = Post(Buffer)) != SUCCESS) {
 					return (res);
@@ -574,30 +591,43 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailB
 		return (res);
 	}
 
+	/* Escape \n. sequences
+	 * We use php_str_to_str() and not php_str_replace_in_subject(), since the latter
+	 * uses ZVAL as it's parameters */
+	data_cln = php_str_to_str(data, strlen(data), PHP_WIN32_MAIL_DOT_PATTERN, sizeof(PHP_WIN32_MAIL_DOT_PATTERN) - 1,
+					PHP_WIN32_MAIL_DOT_REPLACE, sizeof(PHP_WIN32_MAIL_DOT_REPLACE) - 1, &data_cln_len);
+
 	/* send message contents in 1024 chunks */
-	if (strlen(data) <= 1024) {
-		if ((res = Post(data)) != SUCCESS)
+	if (data_cln_len <= 1024) {
+		if ((res = Post(data_cln)) != SUCCESS) {
+			efree(data_cln);
 			return (res);
+		}
 	} else {
-		p = data;
-		while (1) {
-			if (*p == '\0')
-				break;
-			if (strlen(p) >= 1024)
-				i = 1024;
-			else
-				i = strlen(p);
+		int parts = (int) floor(data_cln_len / 1024);
+		p = data_cln;
 
-			/* put next chunk in buffer */
-			strncpy(Buffer, p, i);
-			Buffer[i] = '\0';
-			p += i;
-
+		for (i = 0; i < parts; i++) {
+			strlcpy(Buffer, p, 1024);
+			Buffer[1024] = '\0';
+			p += 1024;
+send_chunk:
 			/* send chunk */
-			if ((res = Post(Buffer)) != SUCCESS)
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(data_cln);
 				return (res);
+			}
+		}
+
+		if ((parts * 1024) < data_cln_len) {
+			i = data_cln_len - (parts * 1024);
+			strlcpy(Buffer, p, i);
+			Buffer[i] = '\0';
+			goto send_chunk;
 		}
 	}
+
+	efree(data_cln);
 
 	/*send termination dot */
 	if ((res = Post("\r\n.\r\n")) != SUCCESS)
