@@ -18,4 +18,7 @@ AC_CHECK_LIB(pthread, pthread_create, [
   AC_MSG_ERROR(You need pthreads to build TSRM.)
 ])
 
+AC_CHECK_HEADERS(stdarg.h)
+
 AC_OUTPUT(Makefile)
+
