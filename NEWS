@@ -2,22 +2,22 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
-- Add generic Win 32 API extension (jmoore)
-- Fix Bug 9878 (patch by bfoddy@mediaone.net) (jmoore)
+- Add generic Win 32 API extension. (jmoore)
+- Fix Bug 9878 (patch by bfoddy@mediaone.net). (jmoore)
 - Removed a warning message about a NONEXISTENT character set from
   mysql_connect(), when the server's default character set != latin1.
 - Add Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
-- Added Udm_Check_Charset function (gluke)
-- New SAPI module for the WebJames server on RISC OS (Alex Waugh)
+- Added Udm_Check_Charset function. (gluke)
+- New SAPI module for the WebJames server on RISC OS. (Alex Waugh)
 - Made ldap_add (and modify) give warning with illegal value arrays.
-  Previously seg faulted or added wrong value (Stig Venaas)
+  Previously seg faulted or added wrong value. (Stig Venaas)
 - mnoGoSearch module example updates for 3.2.x compatibility
 - Some mnogosearch-3.2.x compilation bugs fixes.
   Make crosswords and weight sections work with mnogosearch-3.2.x
   UDM_PARAM_HLBEG, UDM_PARAM_HLEND mnoGoSearch Agent parameters
-  has been added (gluke)
-- Fix bug 13885 (gmdate timezone handling on windows) (jmoore)
-- Fix behaviour of strtok. Bug 13866 (jmoore)
+  has been added. (gluke)
+- Fix bug 13885 (gmdate timezone handling on windows). (jmoore)
+- Fix behaviour of strtok. Bug 13866. (jmoore)
 - Made fbsql_num_rows() return the correct value on all select statements.
   (Frank)
 - Fixed HTTP file upload support to handle big files better. (Jani)
@@ -26,30 +26,29 @@ PHP 4.0                                                                    NEWS
 - $HTTP_RAW_POST_DATA was not populated on a missing content-type even when
   always_populate_raw_post_data was on - fixed. (Rasmus)
 - Added session_cache_expire() function. (patch from anuradha@gnu.org)
-- Add array_fill() function (Rasmus)
-- Hide Authorization header from phpinfo() output in safe_mode (Rasmus)
-- Re-instated safe-mode realm mangling (Rasmus)
+- Add array_fill() function. (Rasmus)
+- Hide Authorization header from phpinfo() output in safe_mode. (Rasmus)
+- Re-instated safe-mode realm mangling. (Rasmus)
 - Fixed a bug in preg_replace() that would change the type of the replacement
   array entries to string. (Andrei)
 - Added user-space object overloading extension. (Andrei)
-- Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x (gluke)
-- Added ldap_start_tls() function (Stig Venaas, patch by kuenne@rentec.com)
+- Make UDM_PARAM_ISPELL_PREFIXES work under mnogosearch-3.2.x. (gluke)
+- Added ldap_start_tls() function. (Stig Venaas, patch by kuenne@rentec.com)
 - Added support for word match mnogosearch-3.2 command and for stopfile
   command. StopTable will not be supported by mnogosearch-3.2.x
-- Added mmapfile(), read a file into a variabele with mmap (Ilia A, Derick)
 - Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
   not been called. (Sterling)
 - Don't throw a 'file does not exist' warning for the is_dir(), is_writeable(),
   is_readable(), is_executable(), is_link() and is_file() functions. (Sterling)
 - Added array_change_key_case() function that returns array with
-  with all string keys lowercased or uppercased (EdinK)
+  with all string keys lowercased or uppercased. (EdinK)
 - Added parameter to ircg_pconnect to suppress treating non-fatal errors
-  as fatal, and added conversion of Windows quotes to &quot; (Sascha)
+  as fatal, and added conversion of Windows quotes to &quot;. (Sascha)
 - Added new function pcntl_exec, which behaves similar to the system
   execve. (Jason)
 - initial support of mnogosearch-3.2.x has been added. Not all features
   are implemented currently.
-- Fix segfault and check for truecolor image in ImageColorAt (Rasmus)
+- Fix segfault and check for truecolor image in ImageColorAt. (Rasmus)
 - nl2br now handles all styles of line-endings in one string. (Boian,
   Derick)
 - Added mcrypt_generic_deinit to replace mcrypt_generic_end. (Derick)
@@ -80,37 +79,37 @@ PHP 4.0                                                                    NEWS
 - Fixed a crash in str_replace() that would happen if search parameter was an
   array and one of the replacements results in subject string being empty.
   (Andrei)
-- Fixed MySQL extension to work with MySQL 4.0 (Jani)
+- Fixed MySQL extension to work with MySQL 4.0. (Jani)
 - Fixed a crash bug within Cobalt systems. Patch by tomc@tripac.com. (Jani)
 - Now bundling Dan Libby's xmlrpc-epi extension
-- Introduced extension version numbers (Stig)
-- Added version_compare() function (Stig)
+- Introduced extension version numbers. (Stig)
+- Added version_compare() function. (Stig)
 - Fixed pg_last_notice() (could cause random crashes in PostgreSQL applications,
-  even if they didn't use pg_last_notice()) (Zeev)
+  even if they didn't use pg_last_notice()). (Zeev)
 - Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of 
   E_ERROR error's, this allows you to trap errors thrown by DOMXML functions.
   (Sterling)
 - Fixed a bug in the mcrypt extension, where list destructors were not
   properly being allocated. (Sterling)
-- Better Interbase blob, null and error handling (Patch by Jeremy Bettis)
+- Better Interbase blob, null and error handling. (Patch by Jeremy Bettis)
 - Fixed a crash bug in array_map() if the input arrays had string or
   non-sequential keys. Also modified it so that if a single array is passed,
   its keys are preserved in the resulting array. (Andrei)
-- Fixed a crash in dbase_replace_record (Patch by robin.marlow@dps-int.com)
-- Fixed a crash in msql_result() (Zeev)
+- Fixed a crash in dbase_replace_record. (Patch by robin.marlow@dps-int.com)
+- Fixed a crash in msql_result(). (Zeev)
 - Added support for single dimensional SafeArrays and Enumerations.
   Added an is_enum() function to check if a component implements an
   enumeration. (Alan, Harald)
 - Fixed a bug in dbase_get_record() and dbase_get_record_with_names().
   boolean fields are now returned correctly.
   Patch by Lawrence E. Widman <widman@cardiothink.com> (Jani)
-- Added --version option to php-config (Stig)
+- Added --version option to php-config. (Stig)
 - Improved support for thttpd-2.21b by incorporating patches for all known
-  bugs (Sascha)
+  bugs. (Sascha)
 - Added ircg_get_username, a roomkey argument to ircg_join, error fetching
   infrastructure, a tokenizer to speed up message processing, and fixed
-  a lot of bugs in the IRCG extension (Sascha)
-- Improved speed of the serializer/deserializer (Thies, Sascha)
+  a lot of bugs in the IRCG extension. (Sascha)
+- Improved speed of the serializer/deserializer. (Thies, Sascha)
 - Floating point numbers are better detected when converting from strings
   (Zeev, Zend Engine)
 - Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
