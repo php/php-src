@@ -49,11 +49,7 @@ if test "$PHP_PCRE_REGEX" != "no"; then
       AC_MSG_ERROR(Could not find libpcre.a in $PHP_PCRE_REGEX)
     fi
 
-    if test "$ext_shared" = "yes"; then
-      PCRE_SHARED_LIBADD="-R$PCRE_LIBDIR -L$PCRE_LIBDIR -lpcre"
-    else
-      AC_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
-    fi
+    AC_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR, PCRE_SHARED_LIBADD)
     
     AC_ADD_INCLUDE($PCRE_INCDIR)
     AC_DEFINE(HAVE_PCRE, 1, [ ])

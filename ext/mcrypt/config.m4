@@ -18,12 +18,8 @@ if test "$PHP_MCRYPT" != "no"; then
   fi
 
   AC_ADD_INCLUDE($MCRYPT_DIR/include)
-  if test "$ext_shared" = "yes"; then
-    MCRYPT_SHARED_LIBADD="-R$MCRYPT_DIR/lib -L$MCRYPT_DIR/lib -lmcrypt"
-    PHP_SUBST(MCRYPT_SHARED_LIBADD)
-  else
-    AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib)
-  fi
+  PHP_SUBST(MCRYPT_SHARED_LIBADD)
+  AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib, MCRYPT_SHARED_LIBADD)
 
   AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
 

@@ -34,11 +34,7 @@ if test "$PHP_PGSQL" != "no"; then
   
   AC_DEFINE(HAVE_PGSQL,1,[ ])
 
-  if test "$ext_shared" = "yes"; then
-    PGSQL_SHARED_LIBADD="-R$PGSQL_LIBDIR -L$PGSQL_LIBDIR -lpq"
-  else
-    AC_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR)
-  fi
+  AC_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR, PGSQL_SHARED_LIBADD)
   
   PHP_EXTENSION(pgsql,$ext_shared)
 fi

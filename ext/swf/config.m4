@@ -20,12 +20,8 @@ if test "$PHP_SWF" != "no"; then
 
   AC_ADD_INCLUDE($SWF_DIR)
 
-  if test "$ext_shared" = "yes"; then
-    SWF_SHARED_LIBADD="-R$SWF_DIR -L$SWF_DIR -lswf"
-    PHP_SUBST(SWF_SHARED_LIBADD)
-  else
-    AC_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR)
-  fi
+  PHP_SUBST(SWF_SHARED_LIBADD)
+  AC_ADD_LIBRARY_WITH_PATH(swf, $SWF_DIR, SWF_SHARED_LIBADD)
   AC_DEFINE(HAVE_SWF,1,[ ])
 
   PHP_EXTENSION(swf, $ext_shared)
