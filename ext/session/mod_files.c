@@ -61,6 +61,32 @@ ps_module ps_mod_files = {
 #define DIR_DELIMITER '/'
 #endif
 
+static int _ps_files_valid_key(const char *key)
+{
+	size_t len;
+	const char *p;
+	char c;
+	int ret = 1;
+
+	for(p = key; (c = *p); p++) {
+		/* valid characters are a..z,A..Z,0..9 */
+		if(!(c >= 'a' && c <= 'z') ||
+				(c >= 'A' && c <= 'Z') ||
+				(c >= '0' && c <= '9')) {
+			ret = 0;
+			break;
+		}
+	}
+
+	len = p - key;
+	
+	if(len == 0) {
+		ret = 0;
+	}
+	
+	return ret;
+}
+
 static char *_ps_files_path_create(char *buf, size_t buflen, ps_files *data, const char *key)
 {
 	int keylen;
@@ -98,7 +124,8 @@ static void _ps_files_open(ps_files *data, const char *key)
 			data->fd = -1;
 		}
 		
-		if(!_ps_files_path_create(buf, sizeof(buf), data, key))
+		if(!_ps_files_valid_key(key) || 
+				!_ps_files_path_create(buf, sizeof(buf), data, key))
 			return;
 		
 		data->lastkey = estrdup(key);
