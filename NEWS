@@ -13,6 +13,8 @@ PHP 4                                                                      NEWS
 - To PECL moved extensions: (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Added imagefilter() function which allows application of various filters.
+  This function is only available with bundled GD. (Pierre-Alain Joye, Ilia)
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
 - Modified log() to accept multiple bases. (Jason)
 - Added gd_info() which returns an array of gd support information. (Marcus)
