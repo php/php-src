@@ -243,16 +243,13 @@ extern encode defaultEncoding[];
 #define FIND_XML_NULL(xml,zval) \
 	{ \
 		xmlAttrPtr null; \
-		if(!xml) \
-		{ \
+		if (!xml) { \
 			ZVAL_NULL(zval); \
 			return zval; \
 		} \
-		if(xml->properties) \
-		{ \
+		if (xml->properties) { \
 			null = get_attribute(xml->properties, "nil"); \
-			if(null) \
-			{ \
+			if (null) { \
 				ZVAL_NULL(zval); \
 				return zval; \
 			} \
@@ -261,8 +258,7 @@ extern encode defaultEncoding[];
 
 #define FIND_ZVAL_NULL(zval, xml, style) \
 { \
-	if(!zval || Z_TYPE_P(zval) == IS_NULL) \
-	{ \
+	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
 	  if (style == SOAP_ENCODED) {\
 			xmlSetProp(xml, "xsi:nil", "1"); \
 		}\

@@ -14,8 +14,7 @@
 #define SOAP_ENCODED 1
 #define SOAP_LITERAL 2
 
-struct _sdl
-{
+struct _sdl {
 	xmlDocPtr doc;			/* pointer to the parsed xml file */
 	HashTable *types;		/* array of sdlTypesPtr */
 	HashTable *encoders;	/* array of encodePtr */
@@ -24,8 +23,7 @@ struct _sdl
 	char *source;
 };
 
-struct _sdlBinding
-{
+struct _sdlBinding {
 	char *name;
 	HashTable *functions;
 	char *location;
@@ -34,22 +32,19 @@ struct _sdlBinding
 };
 
 /* Soap Binding Specfic stuff */
-struct _sdlSoapBinding
-{
+struct _sdlSoapBinding {
 	char *transport;
 	int style;
 };
 
-struct _sdlSoapBindingFunctionBody
-{
+struct _sdlSoapBindingFunctionBody {
 	char *ns;
 	int use;
 	char *parts;			/* not implemented yet */
 	char *encodingStyle;	/* not implemented yet */
 };
 
-struct _sdlSoapBindingFunction
-{
+struct _sdlSoapBindingFunction {
 	char *soapAction;
 	int style;
 
@@ -66,22 +61,19 @@ struct _sdlHttpBinding
 };
 *********************************************/
 
-struct _sdlRestrictionInt
-{
+struct _sdlRestrictionInt {
 	int value;
 	char fixed;
 	char *id;
 };
 
-struct _sdlRestrictionChar
-{
+struct _sdlRestrictionChar {
 	char *value;
 	char fixed;
 	char *id;
 };
 
-struct _sdlRestrictions
-{
+struct _sdlRestrictions {
 	HashTable *enumeration;				/* array of sdlRestrictionCharPtr */
 	sdlRestrictionIntPtr minExclusive;
 	sdlRestrictionIntPtr minInclusive;
@@ -96,8 +88,7 @@ struct _sdlRestrictions
 	sdlRestrictionCharPtr pattern;
 };
 
-struct _sdlType
-{
+struct _sdlType {
 	char *name;
 	char *namens;
 	int nillable;
@@ -109,15 +100,13 @@ struct _sdlType
 	encodePtr encode;
 };
 
-struct _sdlParam
-{
+struct _sdlParam {
 	int order;
 	encodePtr encode;
 	char *paramName;
 };
 
-struct _sdlFunction
-{
+struct _sdlFunction {
 	char *functionName;
 	char *requestName;
 	char *responseName;
@@ -127,8 +116,7 @@ struct _sdlFunction
 	void *bindingAttributes;
 };
 
-struct _sdlAttribute
-{
+struct _sdlAttribute {
 	char *def;
 	char *fixed;
 	char *form;
