@@ -366,7 +366,7 @@ class PEAR
             $message     = $message->getMessage();
         }
 
-        if (sizeof($this->_expected_errors) > 0 && in_array($code, end($this->_expected_errors))) {
+        if (isset($this) && isset($this->_expected_errors) && sizeof($this->_expected_errors) > 0 && in_array($code, end($this->_expected_errors))) {
             $mode = PEAR_ERROR_RETURN;
         }
 
