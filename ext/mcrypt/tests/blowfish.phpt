@@ -13,7 +13,7 @@ function hex2bin($data) {
 
 print "key               plain             crypt             guess             stat\n";
 $null = "\0\0\0\0\0\0\0\0";
-$vectors = file("ext/mcrypt/tests/vectors.txt");
+$vectors = file(dirname(__FILE__) . "/vectors.txt");
 
 $td = mcrypt_module_open ("blowfish", "", MCRYPT_MODE_ECB, "");
 

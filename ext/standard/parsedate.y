@@ -419,6 +419,9 @@ relunit	: tUNUMBER tYEAR_UNIT {
 	    ((struct date_yy *)parm)->yyRelSeconds += $1;
 	}
 	;
+number	: tUNUMBER tUNUMBER {
+	printf("%d %d\n", $1, $2);
+}
 
 number	: tUNUMBER
           {
@@ -428,12 +431,25 @@ number	: tUNUMBER
 	      ((struct date_yy *)parm)->yyYear = $1;
 	    else
 	      {
+	      	printf("%ull\n", $1);
 		if ($1>10000)
 		  {
-		    ((struct date_yy *)parm)->yyHaveDate++;
-		    ((struct date_yy *)parm)->yyDay= ($1)%100;
-		    ((struct date_yy *)parm)->yyMonth= ($1/100)%100;
-		    ((struct date_yy *)parm)->yyYear = $1/10000;
+		  	if ($1 > 99999999) {
+		  		/* YYYYMMDDHHMMSS */
+		  		((struct date_yy *)parm)->yySeconds = ($1)%100;
+		  		((struct date_yy *)parm)->yyMinutes = ($1/100)%100;
+		  		((struct date_yy *)parm)->yyHour = ($1/10000)%10000;
+				((struct date_yy *)parm)->yyDay = ($1/1000000)%1000000;
+				((struct date_yy *)parm)->yyMonth = ($1/100000000)%10000000;
+				printf("%d:%d:%d", ((struct date_yy *)parm)->yyHour, ((struct date_yy *)parm)->yyMinutes, ((struct date_yy *)parm)->yySeconds);
+/*				((struct date_yy *)parm)->yyYear = $1/10000000000; */
+				((struct date_yy *)parm)->yyHaveDate++;
+		  	} else {
+			    ((struct date_yy *)parm)->yyHaveDate++;
+			    ((struct date_yy *)parm)->yyDay= ($1)%100;
+			    ((struct date_yy *)parm)->yyMonth= ($1/100)%100;
+			    ((struct date_yy *)parm)->yyYear = $1/10000;
+			}
 		  }
 		else
 		  {
