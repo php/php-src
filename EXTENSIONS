@@ -37,7 +37,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           apache2
-PRIMARY MAINTAINER:  Aaron Bannert <aaron@clove.org>
+PRIMARY MAINTAINER:  Aaron Bannert <aaron@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
 -------------------------------------------------------------------------------
