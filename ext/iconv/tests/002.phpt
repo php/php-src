@@ -1,5 +1,5 @@
 --TEST--
-iconv test
+UCS4BE to ASCII
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --POST--
@@ -7,6 +7,5 @@ iconv test
 --FILE--
 <?php include('002.inc'); ?>
 --EXPECT--
-Expected output:
 &#97;&#98;&#99;&#100;
 abcd
