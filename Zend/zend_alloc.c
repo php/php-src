@@ -253,14 +253,16 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-MEM_HEADER_PADDING);
-	zend_mem_header *orig = p;
+	zend_mem_header *p;
+	zend_mem_header *orig;
 	DECLARE_CACHE_VARS();
 	ALS_FETCH();
 
 	if (!ptr) {
 		return _emalloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+
+	p = orig = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-MEM_HEADER_PADDING);
 
 #if defined(ZTS) && ZEND_DEBUG
 	if (p->thread_id != tsrm_thread_id()) {
@@ -614,8 +616,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 	memcpy(&end_magic, (((char *) p)+sizeof(zend_mem_header)+MEM_HEADER_PADDING+p->size), sizeof(long));
 
 	if (valid_beginning && (end_magic != MEM_BLOCK_END_MAGIC)) {
-		long magic_num = MEM_BLOCK_END_MAGIC;
-		char *overflow_ptr, *magic_ptr=(char *) &magic_num;
+		char *overflow_ptr, *magic_ptr=(char *) &mem_block_end_magic;
 		int overflows=0;
 		int i;
 
@@ -623,7 +624,7 @@ ZEND_API int _mem_block_check(void *ptr, int silent ZEND_FILE_LINE_DC ZEND_FILE_
 			return _mem_block_check(ptr, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		}
 		had_problems = 1;
-		overflow_ptr = &end_magic;
+		overflow_ptr = (char *) &end_magic;
 
 		for (i=0; i<sizeof(long); i++) {
 			if (overflow_ptr[i]!=magic_ptr[i]) {
