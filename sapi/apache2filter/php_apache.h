@@ -5,7 +5,12 @@ typedef struct php_struct {
 	int state;
 	ap_bucket_brigade *bb;
 	ap_filter_t *f;
-	int post_index;
+	/* Length of post_data buffer */
+	int post_len;
+	/* Index for reading from buffer */
+	int post_idx;
+	/* Buffer for request body filter */
+	char *post_data;
 } php_struct;
 
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf);

@@ -88,22 +88,22 @@ php_apache_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 static int
 php_apache_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
-	long total;
-	long n;
-	long start;
+	int n;
+	int to_read;
 	php_struct *ctx = SG(server_context);
+
+	to_read = ctx->post_len - ctx->post_idx;
+	n = MIN(to_read, count_bytes);
 	
-	start = ctx->post_index;
-	for (total = 0; total < count_bytes; total += n) {
-		n = ap_get_req_body(ctx->f->r, count_bytes - total, &ctx->post_index);
-		if (n <= 0) break;
+	if (n > 0) {
+		memcpy(buf, ctx->post_data + ctx->post_idx, n);
+		ctx->post_idx += n;
+	} else {
+		if (ctx->post_data) free(ctx->post_data);
+		ctx->post_data = NULL;
 	}
 
-	if (total > 0) {
-		memcpy(buf, &ctx->f->r->req_body[start], total);
-	}
-
-	return total;
+	return n;
 }
 
 static char *
@@ -201,22 +201,50 @@ static sapi_module_struct sapi_module = {
 
 module MODULE_VAR_EXPORT php4_module;
 
+#define INIT_CTX \
+	if (ctx == NULL) { \
+		/* Initialize filter context */ \
+		SG(server_context) = f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));  \
+		ctx->bb = ap_brigade_create(f->c->pool); \
+	}
+
+static int php_rbody_filter(ap_filter_t *f, ap_bucket_brigade *bb)
+{
+	php_struct *ctx;
+	long old_index;
+	ap_bucket *b;
+	const char *str;
+	apr_ssize_t n;
+	SLS_FETCH();
+
+	ctx = SG(server_context);
+
+	INIT_CTX;
+
+	AP_BRIGADE_FOREACH(b, bb) {
+		ap_bucket_read(b, &str, &n, 1);
+		if (n > 0) {
+			old_index = ctx->post_len;
+			ctx->post_len += n;
+			ctx->post_data = realloc(ctx->post_data, ctx->post_len + 1);
+			memcpy(ctx->post_data + old_index, str, n);
+		}
+	}
+	return ap_pass_brigade(f->next, bb);
+}
+
 static int php_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 {
-	php_struct *ctx = f->ctx;
+	php_struct *ctx;
 	ap_bucket *b;
 	apr_status_t rv;
 	const char *str;
 	apr_ssize_t n;
-	void *conf = ap_get_module_config(f->r->per_dir_config,
-			&php4_module);
+	void *conf = ap_get_module_config(f->r->per_dir_config, &php4_module);
 	SLS_FETCH();
 
-	if (ctx == NULL) {
-		/* Initialize filter context */
-		SG(server_context) = f->ctx = ctx = apr_pcalloc(f->r->pool, sizeof(*ctx));
-		ctx->bb = ap_brigade_create(f->c->pool);
-	}
+	ctx = SG(server_context);
+	INIT_CTX;
 
 	ctx->f = f;
 
@@ -329,12 +357,12 @@ skip_execution:
 ok:
 		php_request_shutdown(NULL);
 
+		SG(server_context) = 0;
 		/* Pass EOS bucket to next filter to signal end of request */
-		eos = ap_bucket_create_flush();
-		AP_BRIGADE_INSERT_TAIL(bb, eos);
 		eos = ap_bucket_create_eos();
 		AP_BRIGADE_INSERT_TAIL(bb, eos);
-		ap_pass_brigade(f->next, bb);
+		
+		return ap_pass_brigade(f->next, bb);
 	} else
 		ap_brigade_destroy(bb);
 
@@ -363,6 +391,7 @@ static void php_register_hook(void)
 {
 	ap_hook_child_init(php_apache_server_startup, NULL, NULL, AP_HOOK_MIDDLE);
     ap_register_output_filter("PHP", php_filter, AP_FTYPE_CONTENT);
+    ap_register_rbody_filter("PHP", php_rbody_filter, AP_FTYPE_CONTENT);
 }
 
 module MODULE_VAR_EXPORT php4_module = {
