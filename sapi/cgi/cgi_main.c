@@ -598,7 +598,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	file_handle.handle.fp = stdin;
 
 	/* This actually destructs the elements of the list - ugly hack */
-	zend_llist_apply(&global_vars, php_register_command_line_global_vars);
+	zend_llist_apply(&global_vars, (llist_apply_func_t) php_register_command_line_global_vars);
 	zend_llist_destroy(&global_vars);
 
 	if (!cgi) {
