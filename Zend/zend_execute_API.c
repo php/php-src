@@ -419,7 +419,7 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 			efree(variable_ptr);
 		}
 
-		if (!value_ptr->EA) {
+		if (!PZVAL_IS_REF(value_ptr)) {
 			/* break it away */
 			value_ptr->refcount--;
 			if (value_ptr->refcount>0) {
@@ -428,8 +428,8 @@ ZEND_API inline void zend_assign_to_variable_reference(znode *result, zval **var
 				value_ptr = *value_ptr_ptr;
 				zendi_zval_copy_ctor(*value_ptr);
 			}
-			value_ptr->refcount=1;
-			value_ptr->EA=1;
+			value_ptr->refcount = 1;
+			value_ptr->EA = ZEND_EA_IS_REF;
 		}
 
 		*variable_ptr_ptr = value_ptr;

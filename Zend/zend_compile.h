@@ -544,4 +544,12 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_MEMBER_FUNC_CALL	1<<0
 #define ZEND_CTOR_CALL			1<<1
 
+
+/* Extended attributes for zval */
+#define ZEND_EA_IS_REF		(0<<1L)
+#define ZEND_EA_LOCKED		(0<<2L)
+
+#define PZVAL_IS_REF(z)		((z)->EA & ZEND_EA_IS_REF)
+#define PZVAL_IS_LOCKED(z)	((z)->EA & ZEND_EA_LOCKED)
+
 #endif /* _COMPILE_H */
