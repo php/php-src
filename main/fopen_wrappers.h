@@ -46,11 +46,11 @@
 #endif
 #define SOCK_WRITE(d,s) send(s,d,strlen(d),0)
 #define SOCK_WRITEL(d,l,s) send(s,d,l,0)
-#define SOCK_FGETC(s) _php3_sock_fgetc((s))
-#define SOCK_FGETS(b,l,s) _php3_sock_fgets((b),(l),(s))
-#define SOCK_FEOF(sock) _php3_sock_feof((sock))
-#define SOCK_FREAD(ptr,size,sock) _php3_sock_fread((ptr),(size),(sock))
-#define SOCK_FCLOSE(s) _php3_sock_close(s)
+#define SOCK_FGETC(s) php_sock_fgetc((s))
+#define SOCK_FGETS(b,l,s) php_sock_fgets((b),(l),(s))
+#define SOCK_FEOF(sock) php_sock_feof((sock))
+#define SOCK_FREAD(ptr,size,sock) php_sock_fread((ptr),(size),(sock))
+#define SOCK_FCLOSE(s) php_sock_close(s)
 
 #define FP_FGETS(buf,len,sock,fp,issock) \
 	((issock)?SOCK_FGETS(buf,len,sock):fgets(buf,len,fp))
@@ -66,17 +66,17 @@
 #define IS_SOCKET		1
 #define BAD_URL			2
 
-extern PHPAPI FILE *php3_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path);
+extern PHPAPI FILE *php_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path);
 
-PHPAPI FILE *php3_fopen_for_parser(void);
+PHPAPI FILE *php_fopen_primary_script(void);
 
-extern PHPAPI int _php3_check_open_basedir(char *path);
-extern PHPAPI int _php3_check_specific_open_basedir(char *basedir, char *path PLS_DC);
+extern PHPAPI int php_check_open_basedir(char *path);
+extern PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC);
 
-extern PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char **opened_path);
+extern PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path);
 
-extern PHPAPI int php3_isurl(char *path);
-extern PHPAPI char *php3_strip_url_passwd(char *path);
+extern PHPAPI int php_is_url(char *path);
+extern PHPAPI char *php_strip_url_passwd(char *path);
 
 extern PHPAPI char *expand_filepath(char *filepath);
 

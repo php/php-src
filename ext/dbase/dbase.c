@@ -123,11 +123,11 @@ PHP_FUNCTION(dbase_open) {
 	convert_to_string(dbf_name);
 	convert_to_long(options);
 
-	if (PG(safe_mode) && (!_php3_checkuid(dbf_name->value.str.val, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(dbf_name->value.str.val, 2))) {
 		RETURN_FALSE;
 	}
 	
-	if (_php3_check_open_basedir(dbf_name->value.str.val)) {
+	if (php_check_open_basedir(dbf_name->value.str.val)) {
 		RETURN_FALSE;
 	}
 
@@ -585,11 +585,11 @@ PHP_FUNCTION(dbase_create) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) && (!_php3_checkuid(filename->value.str.val, 2))) {
+	if (PG(safe_mode) && (!php_checkuid(filename->value.str.val, 2))) {
 		RETURN_FALSE;
 	}
 	
-	if (_php3_check_open_basedir(filename->value.str.val)) {
+	if (php_check_open_basedir(filename->value.str.val)) {
 		RETURN_FALSE;
 	}
 

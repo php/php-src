@@ -65,7 +65,7 @@
 #define PUTC(a) PUTS(a)
 #endif
 #ifndef PHPWRITE
-#define PHPWRITE(a,n) php3_write((a),(n))
+#define PHPWRITE(a,n) php_write((a),(n))
 #endif
 #endif
 
@@ -159,10 +159,10 @@ static gzFile php3_gzopen_wrapper(char *path, char *mode, int options)
 		return php3_gzopen_with_path(path, mode, PG(include_path), NULL);
 	}
 	else {
-		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path,1))) {
+		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!php_checkuid(path,1))) {
 			return NULL;
 		}
-		if (_php3_check_open_basedir(path)) return NULL;
+		if (php_check_open_basedir(path)) return NULL;
 		return gzopen(path, mode);
 	}
 }
@@ -185,10 +185,10 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 	
 	/* Relative path open */
 	if (*filename == '.') {
-		if (PG(safe_mode) &&(!_php3_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!php_checkuid(filename,2))) {
 			return(NULL);
 		}
-		if (_php3_check_open_basedir(filename)) return NULL;
+		if (php_check_open_basedir(filename)) return NULL;
 		zp = gzopen(filename, mode);
 		if (zp && opened_path) {
 			*opened_path = expand_filepath(filename);
@@ -208,26 +208,26 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 			} else {
 				strlcpy(trypath,filename,sizeof(trypath));
 			}
-			if (!_php3_checkuid(trypath,2)) {
+			if (!php_checkuid(trypath,2)) {
 				return(NULL);
 			}
-			if (_php3_check_open_basedir(trypath)) return NULL;
+			if (php_check_open_basedir(trypath)) return NULL;
 			zp = gzopen(trypath, mode);
 			if (zp && opened_path) {
 				*opened_path = expand_filepath(trypath);
 			}
 			return zp;
 		} else {
-			if (_php3_check_open_basedir(filename)) return NULL;
+			if (php_check_open_basedir(filename)) return NULL;
 			return gzopen(filename, mode);
 		}
 	}
 
 	if (!path || (path && !*path)) {
-		if (PG(safe_mode) &&(!_php3_checkuid(filename,2))) {
+		if (PG(safe_mode) &&(!php_checkuid(filename,2))) {
 			return(NULL);
 		}
-		if (_php3_check_open_basedir(filename)) return NULL;
+		if (php_check_open_basedir(filename)) return NULL;
 		zp = gzopen(filename, mode);
 		if (zp && opened_path) {
 			*opened_path = strdup(filename);
@@ -251,13 +251,13 @@ static gzFile *php3_gzopen_with_path(char *filename, char *mode, char *path, cha
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 		if (PG(safe_mode)) {
-			if (stat(trypath,&sb) == 0 &&(!_php3_checkuid(trypath,2))) {
+			if (stat(trypath,&sb) == 0 &&(!php_checkuid(trypath,2))) {
 				efree(pathbuf);
 				return(NULL);
 			}
 		}
 		if ((zp = gzopen(trypath, mode)) != NULL) {
-			if (_php3_check_open_basedir(trypath)) {
+			if (php_check_open_basedir(trypath)) {
 				gzclose(zp);
 				efree(pathbuf);
 				return NULL;

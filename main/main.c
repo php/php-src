@@ -289,7 +289,7 @@ void php3_apache_putc(char c)
 #endif
 #endif
 
-void php3_log_err(char *log_message)
+void php_log_err(char *log_message)
 {
 	FILE *log_file;
 	char error_time_str[128];
@@ -349,7 +349,7 @@ void php3_log_err(char *log_message)
 #define PRINTF_BUFFER_SIZE 1024*4
 
 /* wrapper for modules to use PHPWRITE */
-PHPAPI int php3_write(void *buf, int size)
+PHPAPI int php_write(void *buf, int size)
 {
 	return PHPWRITE(buf, size);
 }
@@ -452,7 +452,7 @@ PHPAPI void php_error(int type, const char *format,...)
 				char log_buffer[1024];
 
 				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
-				php3_log_err(log_buffer);
+				php_log_err(log_buffer);
 			}
 			if (PG(display_errors)) {
 				char *prepend_string = INI_STR("error_prepend_string");
@@ -584,7 +584,7 @@ static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path
 	FILE *retval;
 	
 	old_chunk_size = _php3_sock_set_def_chunk_size(1);
-	retval=php3_fopen_wrapper((char *) filename, "r", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path);
+	retval=php_fopen_wrapper((char *) filename, "r", USE_PATH|IGNORE_URL_WIN, &issock, &socketd, opened_path);
 	_php3_sock_set_def_chunk_size(old_chunk_size);
 	
 	if (issock) {
@@ -619,17 +619,17 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_FAILED_INCLUDE_FOPEN: {
 				PLS_FETCH();
 
-				php_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error(E_WARNING, "Failed opening '%s' for inclusion (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_REQUIRE_FOPEN: {
 				PLS_FETCH();
 
-				php_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php3_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
+				php_error(E_COMPILE_ERROR, "Failed opening required '%s' (include_path='%s')", php_strip_url_passwd((char *) data), STR_PRINT(PG(include_path)));
 			}
 			break;
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
-			php_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));
+			php_error(E_WARNING, "Failed opening '%s' for highlighting", php_strip_url_passwd((char *) data));
 			break;
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED: {
@@ -829,7 +829,7 @@ void php_request_shutdown(void *dummy)
 
 static int php3_config_ini_startup(void)
 {
-	if (php3_init_config() == FAILURE) {
+	if (php_init_config() == FAILURE) {
 		php_printf("PHP:  Unable to parse configuration file.\n");
 		return FAILURE;
 	}
@@ -838,7 +838,7 @@ static int php3_config_ini_startup(void)
 
 static void php3_config_ini_shutdown(void)
 {
-	php3_shutdown_config();
+	php_shutdown_config();
 }
 
 

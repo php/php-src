@@ -31,9 +31,9 @@
 #define S_ISDIR(mode)   (((mode)&S_IFMT) == S_IFDIR)
 #endif
 
-char *_php3_realpath(char *path, char resolved_path[]);
+char *php_realpath(char *path, char resolved_path[]);
 
-char *_php3_realpath(char *path, char resolved_path []) {
+char *php_realpath(char *path, char resolved_path []) {
 	char path_construction[MAXPATHLEN]; 	/* We build the result in here */
 	char *writepos;							/* Position to write next char */
 

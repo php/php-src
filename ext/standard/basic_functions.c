@@ -167,8 +167,8 @@ function_entry basic_functions[] = {
 	PHP_FE(parse_str,								NULL)
 	PHP_FALIAS(rtrim,			chop,				NULL)
 	PHP_FALIAS(strchr,			strstr,				NULL)
-	PHP_NAMED_FE(sprintf,		php3_user_sprintf,	NULL)
-	PHP_NAMED_FE(printf,		php3_user_printf,	NULL)
+	PHP_NAMED_FE(sprintf,		PHP_FN(user_sprintf),	NULL)
+	PHP_NAMED_FE(printf,		PHP_FN(user_printf),	NULL)
 	
 	PHP_FE(parse_url,								NULL)
 	PHP_FE(urlencode,								NULL)
@@ -291,7 +291,7 @@ function_entry basic_functions[] = {
 	PHP_FE(register_shutdown_function,	NULL)
 
 	PHP_FE(highlight_file,				NULL)	
-	PHP_NAMED_FE(show_source, php3_highlight_file, NULL)
+	PHP_NAMED_FE(show_source, PHP_FN(highlight_file), NULL)
 	PHP_FE(highlight_string,			NULL)
 	
 	PHP_FE(ini_get,						NULL)
@@ -760,7 +760,7 @@ PHP_FUNCTION(settype)
 
 PHP_FUNCTION(get_current_user)
 {
-	RETURN_STRING(_php3_get_current_user(),1);
+	RETURN_STRING(php_get_current_user(),1);
 }
 
 
@@ -959,7 +959,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 		return FAILURE;
 		break;
 	case 3: /*save to a file*/
-		logfile=php3_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd, NULL);
+		logfile=php_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd, NULL);
 		if(!logfile) {
 			php_error(E_WARNING,"error_log: Unable to write to %s",opt);
 			return FAILURE;
@@ -968,7 +968,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 		fclose(logfile);
 		break;
 	default:
-		php3_log_err(message);
+		php_log_err(message);
 		break;
 	}
 	return SUCCESS;

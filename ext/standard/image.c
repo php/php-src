@@ -336,7 +336,7 @@ PHP_FUNCTION(getimagesize)
 	}
 		
 	/* Check open_basedir */
-	if (_php3_check_open_basedir((*arg1)->value.str.val)) return;
+	if (php_check_open_basedir((*arg1)->value.str.val)) return;
 	
 	if ((fp = fopen((*arg1)->value.str.val,"rb")) == 0) {
 		php_error(E_WARNING, "Unable to open %s", (*arg1)->value.str.val);

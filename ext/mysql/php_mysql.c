@@ -377,7 +377,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			php_error(E_NOTICE,"SQL safe mode in effect - ignoring host/user/password information");
 		}
 		host=passwd=NULL;
-		user=_php3_get_current_user();
+		user=php_get_current_user();
 		hashed_details_length = strlen(user)+5+3;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
 		sprintf(hashed_details,"mysql__%s_",user);

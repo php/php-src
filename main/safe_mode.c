@@ -31,7 +31,7 @@
 #include "SAPI.h"
 
 /*
- * _php3_checkuid
+ * php_checkuid
  *
  * This function has four modes:
  * 
@@ -40,7 +40,7 @@
  * 2 - if file does not exist, check directory
  * 3 - only check directory (needed for mkdir)
  */
-PHPAPI int _php3_checkuid(const char *fn, int mode) {
+PHPAPI int php_checkuid(const char *fn, int mode) {
 	struct stat sb;
 	int ret;
 	long uid=0L, duid=0L;
@@ -108,7 +108,7 @@ PHPAPI int _php3_checkuid(const char *fn, int mode) {
 }
 
 
-PHPAPI char *_php3_get_current_user()
+PHPAPI char *php_get_current_user()
 {
 #if CGI_BINARY || USE_SAPI || FHTTPD
 	struct stat statbuf;

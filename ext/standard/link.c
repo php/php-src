@@ -113,7 +113,7 @@ PHP_FUNCTION(symlink)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !_php3_checkuid((*topath)->value.str.val, 2)) {
+	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 	if (!strncasecmp((*topath)->value.str.val,"http://",7) || !strncasecmp((*topath)->value.str.val,"ftp://",6)) {
@@ -146,7 +146,7 @@ PHP_FUNCTION(link)
 	convert_to_string_ex(topath);
 	convert_to_string_ex(frompath);
 
-	if (PG(safe_mode) && !_php3_checkuid((*topath)->value.str.val, 2)) {
+	if (PG(safe_mode) && !php_checkuid((*topath)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 	if (!strncasecmp((*topath)->value.str.val,"http://",7) || !strncasecmp((*topath)->value.str.val,"ftp://",6)) {
@@ -177,7 +177,7 @@ PHP_FUNCTION(unlink)
 	}
 	convert_to_string_ex(filename);
 
-	if (PG(safe_mode) && !_php3_checkuid((*filename)->value.str.val, 2)) {
+	if (PG(safe_mode) && !php_checkuid((*filename)->value.str.val, 2)) {
 		RETURN_FALSE;
 	}
 
@@ -187,7 +187,7 @@ PHP_FUNCTION(unlink)
 		RETURN_FALSE;
 	}
 	/* Clear stat cache */
-	php3_clearstatcache(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	PHP_FN(clearstatcache)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	RETURN_TRUE;
 }
 /* }}} */

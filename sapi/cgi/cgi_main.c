@@ -418,15 +418,15 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 	/* If for some reason the CGI interface is not setting the
 	   PATH_TRANSLATED correctly, SG(request_info).path_translated is NULL.
-	   We still call php3_fopen_for_parser, because if you set doc_root
+	   We still call php_fopen_primary_script, because if you set doc_root
 	   or user_dir configuration directives, PATH_INFO is used to construct
-	   the filename as a side effect of php3_fopen_for_parser.
+	   the filename as a side effect of php_fopen_primary_script.
 	 */
 	if(cgi) {
 		SG(request_info).path_translated = getenv("PATH_TRANSLATED");
 	}
 	if (cgi || SG(request_info).path_translated) {
-		file_handle.handle.fp = php3_fopen_for_parser();
+		file_handle.handle.fp = php_fopen_primary_script();
 		file_handle.filename = SG(request_info).path_translated;
 	}
 
