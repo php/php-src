@@ -170,9 +170,7 @@ typedef struct {
     long num_links;
 	*/
 
-	int server_num;
     HashTable *server;
-	int user_num;
 	HashTable *user;
 
     OCIEnv *pEnv;
