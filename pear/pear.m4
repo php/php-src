@@ -1,5 +1,8 @@
+dnl This file becomes configure.in for self-contained extensions.
 
-AC_INIT(Makefile.in)
+AC_INIT(config.m4)
+
+PHP_INIT_BUILD_SYSTEM
 
 AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_ARG_WITH(php-config,
@@ -23,20 +26,42 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   AC_MSG_CHECKING(for PHP extension directory)
   AC_MSG_RESULT($EXTENSION_DIR)
 ])
-
+dnl
+AC_DEFUN(PHP_EXT_BUILDDIR,[.])dnl
+AC_DEFUN(PHP_EXT_SRCDIR,[$abs_srcdir])dnl
+AC_DEFUN(PHP_ALWAYS_SHARED,[
+  ext_output="yes, shared"
+  ext_shared=yes
+  test "[$]$1" = "no" && $1=yes
+])dnl
+dnl
 abs_srcdir=`(cd $srcdir && pwd)`
-
-php_always_shared=yes
+abs_builddir=`pwd`
 
 PHP_CONFIG_NICE(config.nice)
 
 AC_PROG_CC
 AC_PROG_CC_C_O
 
+PHP_SHLIB_SUFFIX_NAME
 PHP_WITH_PHP_CONFIG
+
+PHP_BUILD_SHARED
 
 AC_PREFIX_DEFAULT()
 
+AC_ARG_WITH(openssl,
+[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ],
+[
+  if test "$withval" != "no"; then
+    PHP_WITH_SHARED
+    PHP_OPENSSL=$withval
+    ext_openssl_shared=yes
+    ext_shared=yes
+    PHP_SETUP_OPENSSL
+  fi
+])
+    
 sinclude(config.m4)
 
 enable_static=no
@@ -44,13 +69,17 @@ enable_shared=yes
 
 AC_PROG_LIBTOOL
 
-SHARED_LIBTOOL='$(LIBTOOL)'
-PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
+all_targets='$(PHP_MODULES)'
+install_targets=install-modules
 phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 
 test "$prefix" = "NONE" && prefix="/usr/local"
 test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+
+PHP_SUBST(PHP_MODULES)
+PHP_SUBST(all_targets)
+PHP_SUBST(install_targets)
 
 PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
@@ -72,14 +101,13 @@ PHP_SUBST(INCLUDES)
 PHP_SUBST(LEX)
 PHP_SUBST(LEX_OUTPUT_ROOT)
 PHP_SUBST(LFLAGS)
+PHP_SUBST(LDFLAGS)
 PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 
-PHP_FAST_OUTPUT(Makefile)
-
-PHP_GEN_CONFIG_VARS
-PHP_GEN_MAKEFILES($PHP_FAST_OUTPUT_FILES)
+PHP_GEN_BUILD_DIRS
+PHP_GEN_GLOBAL_MAKEFILE
 
 test -d modules || mkdir modules
 touch .deps

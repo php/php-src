@@ -25,14 +25,6 @@ class PEAR_Frontend_CLI extends PEAR
 {
     // {{{ properties
 
-    /**
-     * What type of user interface this frontend is for.
-     * @var string
-     * @access public
-     */
-    var $type = 'CLI';
-    var $lp = ''; // line prefix
-
     var $omode = 'plain';
     var $params = array();
     var $term = array(
@@ -64,28 +56,16 @@ class PEAR_Frontend_CLI extends PEAR
 
     // }}}
 
+    // For now, all the display functions print a "| " at the
+    // beginning of the line.  This is just a temporary thing, it
+    // is for discovering commands that use print instead of
+    // the UI layer.
+
     // {{{ displayLine(text)
 
     function displayLine($text)
     {
-        print "$this->lp$text\n";
-    }
-
-    // }}}
-    // {{{ displayError(eobj)
-
-    function displayError($eobj)
-    {
-        return $this->displayLine($eobj->getMessage());
-    }
-
-    // }}}
-    // {{{ displayFatalError(eobj)
-
-    function displayFatalError($eobj)
-    {
-        $this->displayError($eobj);
-        exit(1);
+        print "| $text\n";
     }
 
     // }}}
@@ -93,8 +73,8 @@ class PEAR_Frontend_CLI extends PEAR
 
     function displayHeading($title)
     {
-        print $this->lp.$this->bold($title)."\n";
-        print $this->lp.str_repeat("=", strlen($title))."\n";
+        print "| ".$this->bold($title)."\n";
+        print "| ".str_repeat("=", strlen($title))."\n";
     }
 
     // }}}
@@ -105,7 +85,7 @@ class PEAR_Frontend_CLI extends PEAR
         if ($type == 'password') {
             system('stty -echo');
         }
-        print "$this->lp$prompt ";
+        print "| $prompt ";
         if ($default) {
             print "[$default] ";
         }
@@ -130,7 +110,7 @@ class PEAR_Frontend_CLI extends PEAR
     {
         static $positives = array('y', 'yes', 'on', '1');
         static $negatives = array('n', 'no', 'off', '0');
-        print "$this->lp$prompt [$default] : ";
+        print "| $prompt [$default] : ";
         $fp = fopen("php://stdin", "r");
         $line = fgets($fp, 2048);
         fclose($fp);

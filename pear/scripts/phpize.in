@@ -3,8 +3,8 @@
 prefix='@prefix@'
 phpdir="$prefix/lib/php/build"
 builddir="`pwd`"
-FILES_BUILD="dynlib.mk fastgen.sh library.mk ltlib.mk mkdep.awk program.mk rules.mk rules_common.mk rules_pear.mk shtool"
-FILES="acinclude.m4 dynlib.m4"
+FILES_BUILD="mkdep.awk shtool"
+FILES="acinclude.m4 Makefile.global scan_makefile_in.awk"
 
 if test ! -r config.m4; then
   echo "Cannot find config.m4. "
@@ -16,8 +16,6 @@ test -d build || mkdir build
 
 (cd $phpdir && cp $FILES_BUILD $builddir/build)
 (cd $phpdir && cp $FILES $builddir)
-
-mv build/rules_pear.mk build/rules.mk
 
 sed \
 -e "s#@prefix@#$prefix#" \

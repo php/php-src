@@ -55,16 +55,6 @@ class PEAR_Command_Auth extends PEAR_Command_Common
     }
 
     // }}}
-
-    function getHelp($command)
-    {
-        switch ($command) {
-            case 'login':
-                return array(null, 'Connects to the remote server');
-            case 'logout':
-                return array(null, 'Disconnects from the remote server');
-        }
-    }
     // {{{ run()
 
     /**
@@ -83,27 +73,28 @@ class PEAR_Command_Auth extends PEAR_Command_Common
      */
     function run($command, $options, $params)
     {
+        $cf = $this->config;
         $failmsg = '';
-        $server = $this->config->get('master_server');
+        $server = $cf->get('master_server');
         switch ($command) {
             case 'login': {
-                $remote = new PEAR_Remote($this->config);
-                $username = $this->config->get('username');
+                $remote = new PEAR_Remote($cf);
+                $username = $cf->get('username');
                 if (empty($username)) {
                     $username = @$_ENV['USER'];
                 }
                 $this->ui->displayLine("Logging in to $server.");
                 $username = trim($this->ui->userDialog('Username', 'text', $username));
 
-                $this->config->set('username', $username);
+                $cf->set('username', $username);
                 $password = trim($this->ui->userDialog('Password', 'password'));
-                $this->config->set('password', $password);
+                $cf->set('password', $password);
                 $remote->expectError(401);
                 $ok = $remote->call('logintest');
                 $remote->popExpect();
                 if ($ok === true) {
                     $this->ui->displayLine("Logged in.");
-                    $this->config->store();
+                    $cf->store();
                 } else {
                     $this->ui->displayLine("Login failed!");
                 }
@@ -111,9 +102,9 @@ class PEAR_Command_Auth extends PEAR_Command_Common
             }
             case 'logout': {
                 $this->ui->displayLine("Logging out from $server.");
-                $this->config->remove('username');
-                $this->config->remove('password');
-                $this->config->store();
+                $cf->remove('username');
+                $cf->remove('password');
+                $cf->store();
                 break;
             }
             default: {

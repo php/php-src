@@ -28,25 +28,24 @@ require_once "PEAR/Installer.php";
  */
 class PEAR_Command_Install extends PEAR_Command_Common
 {
-    /** Stack of executing commands, to make run() re-entrant
-     * @var array
-     */
-    var $command_stack; // XXX UNUSED to make run() re-entrant
+    // {{{ properties
+    // }}}
 
-    /** Currently executing command.
-     * @var string
-     */
-    var $command; // XXX UNUSED
+    // {{{ constructor
 
     /**
      * PEAR_Command_Install constructor.
      *
      * @access public
      */
-    function PEAR_Command_Install()
+    function PEAR_Command_Install(&$ui, &$config)
     {
-        parent::PEAR_Command_Common();
+        parent::PEAR_Command_Common($ui, $config);
     }
+
+    // }}}
+
+    // {{{ getCommands()
 
     /**
      * Return a list of all the commands defined by this class.
@@ -58,41 +57,57 @@ class PEAR_Command_Install extends PEAR_Command_Common
         return array('install', 'uninstall', 'upgrade');
     }
 
+    // }}}
+    // {{{ run()
+
     function run($command, $options, $params)
     {
-        $installer =& new PEAR_Installer($options['php_dir'],
-                                         $options['ext_dir'],
-                                         $options['doc_dir']);
-        $installer->debug = @$options['verbose'];
-        $status = PEAR_COMMAND_SUCCESS;
-        ob_start();
+        $installer = &new PEAR_Installer($this->config->get('php_dir'),
+                                         $this->config->get('ext_dir'),
+                                         $this->config->get('doc_dir'));
+        $installer->debug = $this->config->get('verbose');
+
+        $failmsg = '';
+        $opts = array();
         switch ($command) {
-            case 'install':
-            case 'upgrade': {
-                if ($command == 'upgrade') {
-                    $options['upgrade'] = true;
+            case 'upgrade':
+                $opts['upgrade'] = true;
+                // fall through
+            case 'install': {
+                if (isset($options['f'])) {
+                    $opts['force'] = true;
                 }
-                if ($installer->install($params[0], $options, $this->config)) {
-                    print "install ok\n";
+                // XXX The ['nodeps'] option is still missing
+                if ($installer->install(@$params[0], $opts, $this->config)) {
+                    $this->ui->displayLine("install ok");
                 } else {
-                    print "install failed\n";
-                    $status = PEAR_COMMAND_FAILURE;
+                    $failmsg = "install failed";
                 }
                 break;
             }
             case 'uninstall': {
-                if ($installer->uninstall($params[0], $uninstall_options)) {
-                    print "uninstall ok\n";
+                if ($installer->uninstall($params[0], $options)) {
+                    $this->ui->displayLine("uninstall ok");
                 } else {
-                    print "uninstall failed\n";
-                    $status = PEAR_COMMAND_FAILURE;
+                    $failmsg = "uninstall failed";
                 }
                 break;
-            }                
+            }
+            default: {
+                return false;
+            }
         }
-        $output = ob_get_contents();
-        ob_end_clean();
-        return $this->makeResponse($status, $output);
+        if ($failmsg) {
+            return $this->raiseError($failmsg);
+        }
+        return true;
+    }
+
+    // }}}
+
+    function getOptions()
+    {
+        return array('f');
     }
 }
 

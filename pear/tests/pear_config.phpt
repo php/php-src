@@ -20,8 +20,11 @@ $config = new PEAR_Config("user.conf", "system.conf");
 dump_array("files", $config->files);
 
 print "#2 testing: singleton\n";
-$cf2 = PEAR_Config::singleton();
-dump_array("files", $cf2->files);
+$o1 = &PEAR_Config::singleton();
+$o1->blah = 'blah';
+$o2 = &PEAR_Config::singleton();
+var_dump($o1->blah);
+@var_dump($o2->blah);
 
 print "#3 testing: readConfigFile\n";
 $config->readConfigFile("user2.conf", "user");
@@ -167,7 +170,8 @@ function dump_config(&$obj, $layer = null) {
 #1 testing: constructor
 files: system="system.conf" user="user.conf"
 #2 testing: singleton
-files: system="system.conf" user="user.conf"
+string(4) "blah"
+string(4) "blah"
 #3 testing: readConfigFile
 user: verbose="2"
 system: master_server="pear.php.net"
@@ -196,7 +200,7 @@ string(9) "directory"
 #8 testing: getDocs
 master_server: name of the main PEAR server
 #9 testing: getKeys
-doc_dir ext_dir master_server password php_dir testset1 username verbose
+doc_dir ext_dir master_server password php_dir preferred_state username verbose
 #10 testing: definedBy
 string(7) "default"
 string(4) "user"

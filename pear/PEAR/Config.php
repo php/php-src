@@ -24,7 +24,7 @@ require_once 'PEAR.php';
  * Last created PEAR_Config instance.
  * @var object
  */
-$GLOBALS['_PEAR_Config_last_instance'] = null;
+$GLOBALS['_PEAR_Config_instance'] = null;
 
 define('PEAR_CONFIG_DEFAULT_DOCDIR',
        PHP_DATADIR.DIRECTORY_SEPARATOR.'pear'.DIRECTORY_SEPARATOR.'doc');
@@ -122,12 +122,22 @@ class PEAR_Config extends PEAR
             'default' => 1,
             'doc' => 'verbosity level',
             ),
+        'preferred_state' => array(
+            'type' => 'set',
+            'default' => 'stable',
+            'doc' => 'the installer will prefer releases with this state
+when installing packages without a version or state specified',
+            'valid_set' => array(
+                'stable', 'beta', 'alpha', 'devel', 'snapshot', 'any'),
+            ),
+/*
         'testset1' => array(
             'type' => 'set',
             'default' => 'foo',
             'doc' => 'test set',
             'valid_set' => array('foo', 'bar'),
             ),
+*/
         );
 
     // }}}
@@ -165,7 +175,6 @@ class PEAR_Config extends PEAR
         $this->layers = array_keys($this->configuration);
         $this->files['user'] = $user_file;
         $this->files['system'] = $system_file;
-        $GLOBALS['_PEAR_Config_last_instance'] = &$this;
         if ($user_file && file_exists($user_file)) {
             $this->readConfigFile($user_file);
         }
@@ -175,6 +184,7 @@ class PEAR_Config extends PEAR
         foreach ($this->configuration_info as $key => $info) {
             $this->configuration['default'][$key] = $info['default'];
         }
+        //$GLOBALS['_PEAR_Config_instance'] = &$this;
     }
 
     // }}}
@@ -197,11 +207,12 @@ class PEAR_Config extends PEAR
      */
     function &singleton($user_file = '', $system_file = '')
     {
-        if (empty($GLOBALS['_PEAR_Config_last_instance'])) {
-            $obj =& new PEAR_Config($user_file, $system_file);
-            $GLOBALS['_PEAR_Config_last_instance'] = &$obj;
+        if (is_object($GLOBALS['_PEAR_Config_instance'])) {
+            return $GLOBALS['_PEAR_Config_instance'];
         }
-        return $GLOBALS['_PEAR_Config_last_instance'];
+        $GLOBALS['_PEAR_Config_instance'] =
+             &new PEAR_Config($user_file, $system_file);
+        return $GLOBALS['_PEAR_Config_instance'];
     }
 
     // }}}
@@ -318,7 +329,7 @@ class PEAR_Config extends PEAR
         }
         $data = $this->configuration[$layer];
         $this->_encodeOutput($data);
-        if (!@is_writeable($file)) {
+        if (@file_exists($file) && !@is_writeable($file)) {
             return $this->raiseError("no write access to $file!");
         }
         $fp = @fopen($file, "w");
@@ -354,7 +365,7 @@ class PEAR_Config extends PEAR
         $size = filesize($file);
         $contents = fread($fp, $size);
         $version = '0.1';
-        if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, &$matches)) {
+        if (preg_match('/^#PEAR_Config\s+(\S+)\s+/si', $contents, $matches)) {
             $version = $matches[1];
             $contents = substr($contents, strlen($matches[0]));
         }
@@ -446,7 +457,7 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
-    // {{{ get(key)
+    // {{{ get(key, [layer])
 
     /**
      * Returns a configuration value, prioritizing layers as per the
@@ -458,12 +469,16 @@ class PEAR_Config extends PEAR
      *
      * @access public
      */
-    function get($key)
+    function get($key, $layer = null)
     {
-        foreach ($this->layers as $layer) {
-            if (isset($this->configuration[$layer][$key])) {
-                return $this->configuration[$layer][$key];
+        if ($layer === null) {
+            foreach ($this->layers as $layer) {
+                if (isset($this->configuration[$layer][$key])) {
+                    return $this->configuration[$layer][$key];
+                }
             }
+        } elseif (isset($this->configuration[$layer][$key])) {
+            return $this->configuration[$layer][$key];
         }
         return null;
     }
@@ -634,6 +649,23 @@ class PEAR_Config extends PEAR
     }
 
     // }}}
+    // {{{ store([layer])
+
+    /**
+     * Stores configuration data in a layer.
+     *
+     * @param string config layer to store
+     *
+     * @return bool TRUE on success, or PEAR error on failure
+     *
+     * @access public
+     */
+    function store($layer = 'user')
+    {
+        return $this->writeConfigFile(null, $layer);
+    }
+
+    // }}}
     // {{{ toDefault(key)
 
     /**
@@ -714,6 +746,23 @@ class PEAR_Config extends PEAR
             }
         }
         return false;
+    }
+
+    // }}}
+    // {{{ isDefinedLayer(key)
+
+    /**
+     * Tells whether a given config layer exists.
+     *
+     * @param string config layer
+     *
+     * @return bool whether <config layer> exists in this object
+     *
+     * @access public
+     */
+    function isDefinedLayer($layer)
+    {
+        return isset($this->configuration[$layer]);
     }
 
     // }}}
