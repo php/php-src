@@ -613,6 +613,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 		}
 
 		if (!instance_ce) {
+			efree(lcname);
 			RETURN_FALSE;
 		}
 
