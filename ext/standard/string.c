@@ -984,7 +984,7 @@ restore:
  */
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
-	char *c, *e;
+	unsigned char *c, *e;
 	
 	c = s;
 	e = c+len;
@@ -1018,7 +1018,7 @@ PHP_FUNCTION(strtoupper)
  */
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
-	char *c, *e;
+	unsigned char *c, *e;
 	
 	c = s;
 	e = c+len;
