@@ -6,6 +6,7 @@
   <description>The PEAR package contains:
  * the PEAR base class
  * the PEAR_Error error handling mechanism
+ * the alpha-quality PEAR_ErrorStack advanced error handling mechanism
  * the PEAR installer, for creating, distributing
    and installing packages
  * the OS_Guess class for retrieving info about the OS
