@@ -568,13 +568,6 @@ expr:
 	|	expr_without_variable	{ $$ = $1; }
 ;
 
-/*
-w_expr:
-		w_cvar					{ $$ = $1; }
-	|	expr_without_variable	{ $$ = $1; }
-;
-*/
-
 
 r_cvar:
 	cvar { zend_do_end_variable_parse(BP_VAR_R, 0 CLS_CC); $$ = $1; }
