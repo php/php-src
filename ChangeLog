@@ -1,3 +1,120 @@
+2002-04-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: removed calls to wctomb, wcstombs
+
+2002-04-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * win32/grp.h
+      win32/pwd.c
+      win32/pwd.h
+      win32/syslog.h: mfh
+
+    * win32/grp.h
+      win32/pwd.c
+      win32/pwd.h
+      win32/syslog.h: i of course am the brilliant author of these files
+
+    * win32/pwd.c
+      win32/pwd.h: replace with non-gpl implementation
+
+2002-04-04  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c:
+    Fixed sigfault in ibase_close (bug #15419-#15992)
+
+2002-04-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * win32/syslog.h: non gpl implementation
+
+    * win32/grp.h: replace grp.h with a new implementation (non-GPL)
+
+2002-04-04  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/tokenizer/Makefile.frag
+      ext/tokenizer/config.m4:
+    Fixed build with multiple concurrent jobs (make -j)
+
+    * README.UNIX-BUILD-SYSTEM: Fixed typo
+
+2002-04-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/escape.inc: MFH
+
+    * ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/escape.inc: Fix tests
+
+2002-04-04  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/bz2/php_bz2.h
+      ext/bz2/bz2.c: Fix #16428 problems.
+    Renamed the bz2 wrapper to bzip2://
+
+2002-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xml/tests/007.phpt: MFH
+
+    * ext/xml/tests/007.phpt: Revert the bogus patch.
+
+2002-04-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/escape.inc: Added pg_escape_*() test
+
+2002-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/bz2/tests/with_files.phpt: MFH
+
+    * ext/bz2/tests/with_files.phpt: added test case for file handling in bz2
+
+2002-04-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Clean up pg_escape_*()
+
+2002-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mbstring/tests/.cvsignore: missing .cvsignore
+
+2002-04-04  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    - fixed a lot of memory leaks (by Lukas Schroeder)
+    - get_attribute() returns False instead of empty string, if attribute not found
+
+2002-04-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Fixed crash with pg_escape_*()
+
+2002-04-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Add deferred libs to DLIBS instead of LIBS.
+
+    Noticed by: Jani Taskinen <sniper@iki.fi>
+
+2002-04-04  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c:
+    Fixed sigfault in ibase_close(). Bug #15419 #15992
+
+2002-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: minor fixes
+
+2002-04-04  Marko Karppinen  <karppinen@pobox.com>
+
+    * NEWS: Added news on the Mac OS X changes and removed a duplicate line
+
+2002-04-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/dl.c
+      configure.in:
+    - OS X support for dynamically loaded extensions. (patch by Marko)
+
+2002-04-04  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/curl/curl.c: MFH
+
 2002-04-03  Sterling Hughes  <sterling@bumblebury.com>
 
     * ext/curl/curl.c: fix bug #15150, thanks to daniel at haxx.se for the fix
