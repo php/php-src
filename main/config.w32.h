@@ -64,12 +64,12 @@
 #define HAVE_ORACLE 0
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
+#ifndef COMPILE_DL_MSQL
 #define HAVE_MSQL 0
-#define HAVE_PGSQL 0
+#endif
 #define HAVE_SYBASE 0
 #define HAVE_LIBGD 0
 #define HAVE_FILEPRO 0
-#define HAVE_ZLIB 0
 #endif
 /* ----------------------------------------------------------------
    The following may or may not be (or need to be) ported to the
