@@ -416,16 +416,31 @@ static void php_url_scanner_output_handler(char *output, uint output_len, char *
 {
 	size_t len;
 
-    if (BG(url_adapt_state_ex).url_app.len != 0) {
-        *handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & (PHP_OUTPUT_HANDLER_END|PHP_OUTPUT_HANDLER_CONT) ? 1 : 0) TSRMLS_CC);
+	if (BG(url_adapt_state_ex).url_app.len != 0) {
+		*handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
 		if (sizeof(uint) < sizeof(size_t)) {
 			if (len > UINT_MAX)
 				len = UINT_MAX;
 		}
 		*handled_output_len = len;
-    } else {
-        *handled_output = NULL;
-    }
+	} else if (BG(url_adapt_state_ex).url_app.len == 0) {
+		url_adapt_state_ex_t *ctx = &BG(url_adapt_state_ex);
+		if (ctx->buf.len) {
+			smart_str_appendl(&ctx->result, ctx->buf.c, ctx->buf.len);
+			smart_str_appendl(&ctx->result, output, output_len);
+
+			*handled_output = ctx->result.c;
+			*handled_output_len = ctx->buf.len + output_len;
+
+			ctx->result.c = NULL;
+			ctx->result.len = 0;
+			smart_str_free(&ctx->buf);
+		} else {
+			*handled_output = NULL;
+		}
+	} else {
+		*handled_output = NULL;
+	}
 }
 
 int php_url_scanner_add_var(char *name, int name_len, char *value, int value_len, int urlencode TSRMLS_DC)
