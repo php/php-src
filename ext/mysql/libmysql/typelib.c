@@ -42,7 +42,7 @@ int find_type(my_string x, TYPELIB *typelib, uint full_name)
       if (! *i)
 	DBUG_RETURN(pos+1);
     }
-    if (! *i)
+    if (! *i && (!*j || !(full_name & 1)))
     {
       find++;
       findpos=pos;
@@ -50,7 +50,7 @@ int find_type(my_string x, TYPELIB *typelib, uint full_name)
   }
   if (find == 0 && (full_name & 4) && x[0] == '#' && strend(x)[-1] == '#' &&
       (findpos=atoi(x+1)-1) >= 0 && (uint) findpos < typelib->count)
-	find=1;
+    find=1;
   else if (find == 0 || ! x[0])
   {
     DBUG_PRINT("exit",("Couldn't find type"));

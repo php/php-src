@@ -27,13 +27,6 @@ extern int NEAR my_errno;		/* Last error in mysys */
 
 #include <stdarg.h>  
 
-#ifdef __EMX__
-/* record loging flags (F_GETLK, F_SETLK, F_SETLKW) */
-#define F_RDLCK     1           /* FreeBSD: shared or read lock */
-#define F_UNLCK     2           /* FreeBSD: unlock */
-#define F_WRLCK     3           /* FreeBSD: exclusive or write lock */
-#endif
-
 #define MYSYS_PROGRAM_USES_CURSES()  { error_handler_hook = my_message_curses;	mysys_uses_curses=1; }
 #define MYSYS_PROGRAM_DONT_USE_CURSES()  { error_handler_hook = my_message_no_curses; mysys_uses_curses=0;}
 #define MY_INIT(name);		{ my_progname= name; my_init(); }
@@ -55,6 +48,8 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_DONT_CHECK_FILESIZE 128	/* Option to init_io_cache() */
 #define MY_LINK_WARNING 32	/* my_redel() gives warning if links */
 #define MY_COPYTIME	64	/* my_redel() copys time */
+#define MY_DELETE_OLD	256	/* my_create_with_symlink() */
+#define MY_RESOLVE_LINK 128	/* my_realpath(); Only resolve links */
 #define MY_HOLD_ORIGINAL_MODES 128  /* my_copy() holds to file modes */
 #define MY_REDEL_MAKE_BACKUP 256
 #define MY_SEEK_NOT_DONE 32	/* my_lock may have to do a seek */
@@ -155,7 +150,7 @@ void   __CDECL hfree(void *ptr);
 #else
 extern int errno;			/* declare errno */
 #endif
-extern const char ** NEAR errmsg[];
+extern const char ** NEAR my_errmsg[];
 extern char NEAR errbuff[NRERRBUFFS][ERRMSGSIZE];
 extern char *home_dir;			/* Home directory for user */
 extern char *my_progname;		/* program-name (printed in errors) */
@@ -371,6 +366,12 @@ extern File my_create(const char *FileName,int CreateFlags,
 		      int AccsesFlags, myf MyFlags);
 extern int my_close(File Filedes,myf MyFlags);
 extern int my_mkdir(const char *dir, int Flags, myf MyFlags);
+extern int my_readlink(char *to, const char *filename, myf MyFlags);
+extern int my_realpath(char *to, const char *filename, myf MyFlags);
+extern File my_create_with_symlink(const char *linkname, const char *filename,
+				   int createflags, int access_flags,
+				   myf MyFlags);
+extern int my_symlink(const char *content, const char *linkname, myf MyFlags);
 extern uint my_read(File Filedes,byte *Buffer,uint Count,myf MyFlags);
 extern uint my_pread(File Filedes,byte *Buffer,uint Count,my_off_t offset,
 		     myf MyFlags);
@@ -411,7 +412,7 @@ extern int my_printf_error _VARARGS((uint my_err, const char *format,
 				    __attribute__ ((format (printf, 2, 4))));
 extern int my_vsnprintf( char *str, size_t n,
                                 const char *format, va_list ap );
-
+extern int my_snprintf(char* to, size_t n, const char* fmt, ...);
 extern int my_message(uint my_err, const char *str,myf MyFlags);
 extern int my_message_no_curses(uint my_err, const char *str,myf MyFlags);
 extern int my_message_curses(uint my_err, const char *str,myf MyFlags);
@@ -421,8 +422,14 @@ extern int my_redel(const char *from, const char *to, int MyFlags);
 extern int my_copystat(const char *from, const char *to, int MyFlags);
 extern my_string my_filename(File fd);
 
+#ifndef THREAD
 extern void dont_break(void);
 extern void allow_break(void);
+#else
+#define dont_break()
+#define allow_break()
+#endif
+
 extern void my_remember_signal(int signal_number,sig_handler (*func)(int));
 extern void caseup(my_string str,uint length);
 extern void casedn(my_string str,uint length);

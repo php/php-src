@@ -15,6 +15,10 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #include <direct.h>
 #endif
 
+#ifdef __EMX__
+// chdir2 support also drive change
+#define chdir _chdir2
+#endif
 
 	/* Gets current working directory in buff. Directory is allways ended
 	   with FN_LIBCHAR */

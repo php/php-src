@@ -222,11 +222,16 @@ void symdirget(char *dir)
     *pos++=temp; *pos=0;	  /* Restore old filename */
     if (fp)
     {
-      if (fgets(buff, sizeof(buff), fp))
+      if (fgets(buff, sizeof(buff)-1, fp))
       {
 	for (pos=strend(buff);
 	     pos > buff && (iscntrl(pos[-1]) || isspace(pos[-1])) ;
 	     pos --);
+
+	/* Ensure that the symlink ends with the directory symbol */
+	if (pos == buff || pos[-1] != FN_LIBCHAR)
+	  *pos++=FN_LIBCHAR;
+
 	strmake(dir,buff, (uint) (pos-buff));
       }
       my_fclose(fp,MYF(0));

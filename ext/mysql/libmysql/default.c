@@ -208,7 +208,7 @@ static my_bool search_default_file(DYNAMIC_ARRAY *args, MEM_ROOT *alloc,
 				   const char *dir, const char *config_file,
 				   const char *ext, TYPELIB *group)
 {
-  char name[FN_REFLEN+10],buff[257],*ptr,*end,*value,*tmp;
+  char name[FN_REFLEN+10],buff[FN_REFLEN+1],*ptr,*end,*value,*tmp;
   FILE *fp;
   uint line=0;
   my_bool read_values=0,found_group=0;

@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 #define GLOB		0	/* Error maps */
-#define GLOBERRS	24	/* Max number of error messages in map's */
+#define GLOBERRS	27	/* Max number of error messages in map's */
 #define EE(X)	globerrs[ X ]	/* Defines to add error to right map */
 
 extern const char * NEAR globerrs[];	/* my_error_messages is here */
@@ -37,6 +37,9 @@ extern const char * NEAR globerrs[];	/* my_error_messages is here */
 #define EE_CANT_MKDIR		21
 #define EE_UNKNOWN_CHARSET	22
 #define EE_OUT_OF_FILERESOURCES	23
+#define EE_CANT_READLINK	24
+#define EE_CANT_SYMLINK		25
+#define EE_REALPATH		26
 
 #ifdef	__cplusplus
 }

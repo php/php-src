@@ -52,6 +52,7 @@ extern CHARSET_INFO  compiled_charsets[];
 #endif
 /* Don't include std ctype.h when this is included */
 #define _CTYPE_H
+#define _CTYPE_H_
 #define _CTYPE_INCLUDED
 #define __CTYPE_INCLUDED
 #define _CTYPE_USING   /* Don't put names in global namespace. */

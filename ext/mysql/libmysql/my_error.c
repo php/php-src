@@ -9,7 +9,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Define some external variables for error handling */
 
-const char ** NEAR errmsg[MAXMAPS]={0,0,0,0};
+const char ** NEAR my_errmsg[MAXMAPS]={0,0,0,0};
 char NEAR errbuff[NRERRBUFFS][ERRMSGSIZE];
 
 /* Error message to user */
@@ -28,10 +28,10 @@ int my_error(int nr,myf MyFlags, ...)
   va_start(ap,MyFlags);
   DBUG_PRINT("my", ("nr: %d  MyFlags: %d  errno: %d", nr, MyFlags, errno));
 
-  if (nr / ERRMOD == GLOB && errmsg[GLOB] == 0)
+  if (nr / ERRMOD == GLOB && my_errmsg[GLOB] == 0)
     init_glob_errs();
 
-  olen=(uint) strlen(tpos=errmsg[nr / ERRMOD][nr % ERRMOD]);
+  olen=(uint) strlen(tpos=my_errmsg[nr / ERRMOD][nr % ERRMOD]);
   endpos=ebuff;
 
   while (*tpos)
@@ -50,6 +50,8 @@ int my_error(int nr,myf MyFlags, ...)
     {
       /* Skipp if max size is used (to be compatible with printf) */
       while (isdigit(*tpos) || *tpos == '.' || *tpos == '-')
+	tpos++;
+      if (*tpos == 'l')				/* Skipp 'l' argument */
 	tpos++;
       if (*tpos == 's')				/* String parameter */
       {

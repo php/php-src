@@ -29,19 +29,8 @@ int safe_mutex_init(safe_mutex_t *mp,
 		    const pthread_mutexattr_t *attr __attribute__((unused)))
 {
   bzero((char*) mp,sizeof(*mp));
-#ifdef HAVE_LINUXTHREADS			/* Some extra safety */
-  {
-    pthread_mutexattr_t tmp;
-    pthread_mutexattr_init(&tmp);
-    pthread_mutexattr_setkind_np(&tmp,PTHREAD_MUTEX_ERRORCHECK_NP);
-    pthread_mutex_init(&mp->global,&tmp);
-    pthread_mutex_init(&mp->mutex, &tmp);
-    pthread_mutexattr_destroy(&tmp);
-  }
-#else
-  pthread_mutex_init(&mp->global,NULL);
+  pthread_mutex_init(&mp->global,MY_MUTEX_INIT_ERRCHK);
   pthread_mutex_init(&mp->mutex,attr);
-#endif
   return 0;
 }
 

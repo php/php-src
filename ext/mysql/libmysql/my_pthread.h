@@ -427,6 +427,7 @@ int safe_cond_timedwait(pthread_cond_t *cond, safe_mutex_t *mp,
 #define pthread_mutex_destroy(A) safe_mutex_destroy((A),__FILE__,__LINE__)
 #define pthread_cond_wait(A,B) safe_cond_wait((A),(B),__FILE__,__LINE__)
 #define pthread_cond_timedwait(A,B,C) safe_cond_timedwait((A),(B),(C),__FILE__,__LINE__)
+#define pthread_mutex_trylock(A) pthread_mutex_lock(A)
 #define pthread_mutex_t safe_mutex_t
 #endif /* SAFE_MUTEX */
 
@@ -484,11 +485,26 @@ extern	int	my_rw_unlock( my_rw_lock_t * );
 #define pthread_attr_setstacksize(A,B) pthread_dummy(0)
 #endif
 
+/* Define mutex types */
+#define MY_MUTEX_INIT_SLOW   NULL
+#define MY_MUTEX_INIT_FAST   NULL
+#define MY_MUTEX_INIT_ERRCHK NULL
+#ifdef PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP
+extern pthread_mutexattr_t my_fast_mutexattr;
+#undef  MY_MUTEX_INIT_FAST
+#define MY_MUTEX_INIT_FAST &my_fast_mutexattr
+#endif
+#ifdef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+extern pthread_mutexattr_t my_errchk_mutexattr;
+#undef MY_INIT_MUTEX_ERRCHK
+#define MY_INIT_MUTEX_ERRCHK &my_errchk_mutexattr
+#endif
+
 extern my_bool my_thread_global_init(void);
 extern void my_thread_global_end(void);
 extern my_bool my_thread_init(void);
 extern void my_thread_end(void);
-extern char *my_thread_name(void);
+extern const char *my_thread_name(void);
 extern long my_thread_id(void);
 extern int pthread_no_free(void *);
 extern int pthread_dummy(int);

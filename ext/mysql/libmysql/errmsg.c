@@ -22,7 +22,7 @@ const char *client_errors[]=
   "MySQL client got out of memory",
   "Wrong host info",
   "Localhost via UNIX socket",
-  "%s via TCP/IP",
+  "%-.64s via TCP/IP",
   "Error in server handshake",
   "Lost connection to MySQL server during query",
   "Commands out of sync; You can't run this command now",
@@ -48,11 +48,11 @@ const char *client_errors[]=
   "MySQL client run out of memory",
   "Wrong host info",
   "Localhost via UNIX socket",
-  "%s via TCP/IP",
+  "%-.64s via TCP/IP",
   "Error in server handshake",
   "Lost connection to MySQL server during query",
   "Commands out of sync;  You can't run this command now",
-  "%s via named pipe",
+  "%-.64s via named pipe",
   "Can't wait for named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't open named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't set state of named pipe to host: %-.64s  pipe: %-.32s (%lu)",
@@ -64,5 +64,5 @@ const char *client_errors[]=
 
 void init_client_errs(void)
 {
-  errmsg[CLIENT_ERRMAP] = &client_errors[0];
+  my_errmsg[CLIENT_ERRMAP] = &client_errors[0];
 }
