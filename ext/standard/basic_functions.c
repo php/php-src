@@ -541,8 +541,8 @@ function_entry basic_functions[] = {
 	PHP_FE(ini_restore,														NULL)
 
 	PHP_FE(setcookie,														NULL)
-	PHP_FE(header,															first_and_second__args_force_ref)
-	PHP_FE(headers_sent,													NULL)
+	PHP_FE(header,															NULL)
+	PHP_FE(headers_sent,  first_and_second__args_force_ref)
 
 	PHP_FE(connection_aborted,												NULL)
 	PHP_FE(connection_status,												NULL)
