@@ -15,7 +15,7 @@
  * @version 1.0
  *
  */
-class NoRewindIterator implements Iterator
+class NoRewindIterator implements OuterIterator
 {
 	protected $it;
 	
@@ -31,22 +31,27 @@ class NoRewindIterator implements Iterator
 
 	function valid()
 	{
-		return $this->it->valid();
+		return $this->getInnerIterator()->valid();
 	}
 
 	function current()
 	{
-		return $this->it->current();
+		return $this->getInnerIterator()->current();
 	}
 
 	function key()
 	{
-		return $this->it->key();
+		return $this->getInnerIterator()->key();
 	}
 
 	function next()
 	{
-		$this->it->next();
+		$this->getInnerIterator()->next();
+	}
+	
+	function getInnerIterator()
+	{
+		return $this->it;
 	}
 }
 

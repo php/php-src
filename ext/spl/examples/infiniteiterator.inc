@@ -29,7 +29,7 @@
  }
  \endverbatim
  */
-class InfiniteIterator implements Iterator
+class InfiniteIterator implements OuterIterator
 {
 	/** @internal 
 	 * The inner Iterator. */
@@ -55,28 +55,28 @@ class InfiniteIterator implements Iterator
 	 */
 	function rewind()
 	{
-		$this->it->rewind();
+		$this->getInnerIterator()->rewind();
 	}
 
 	/** @return whether the current element is valid
 	 */
 	function valid()
 	{
-		return $this->it->valid();
+		return $this->getInnerIterator()->valid();
 	}
 
 	/** @return the current value
 	 */
 	function current()
 	{
-		return $this->it->current();
+		return $this->getInnerIterator()->current();
 	}
 
 	/** @return the current key
 	 */
 	function key()
 	{
-		return $this->it->key();
+		return $this->getInnerIterator()->key();
 	}
 
 	/** Move the inner Iterator forward to its next element or rewind it.
@@ -84,10 +84,10 @@ class InfiniteIterator implements Iterator
 	 */
 	function next()
 	{
-		$this->it->next();
-		if (!$this->it->valid())
+		$this->getInnerIterator()->next();
+		if (!$this->getInnerIterator()->valid())
 		{
-			$this->it->rewind();
+			$this->getInnerIterator()->rewind();
 		}
 	}
 
@@ -95,7 +95,7 @@ class InfiniteIterator implements Iterator
 	 */	
 	function __call($func, $params)
 	{
-		return call_user_func_array(array($this->it, $func), $params);
+		return call_user_func_array(array($this->getInnerIterator(), $func), $params);
 	}
 }
 

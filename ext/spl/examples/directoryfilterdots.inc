@@ -31,28 +31,28 @@ class DirectoryFilterDots extends FilterIterator implements RecursiveIterator
 	 */	
 	function accept()
 	{
-		return !$this->it->isDot();
+		return !$this->getInnerIterator()->isDot();
 	}
 	
 	/** @return whether the current entry is a directory
 	 */
 	function hasChildren()
 	{
-		return $this->it->hasChildren();
+		return $this->getInnerIterator()->hasChildren();
 	}
 
 	/** @return the current subdirectory as a new DirectoryFilterDots instance.
 	 */
 	function getChildren()
 	{
-		return new DirectoryFilterDots($this->it->getPathname());
+		return new DirectoryFilterDots($this->getInnerIterator()->getPathname());
 	}
 	
 	/** @return the current entries path name
 	 */
 	function key()
 	{
-		return $this->it->getPathname();
+		return $this->getInnerIterator()->getPathname();
 	}
 }
 
