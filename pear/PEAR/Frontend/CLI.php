@@ -362,4 +362,3 @@ class PEAR_Frontend_CLI extends PEAR
 }
 
 ?>
-
