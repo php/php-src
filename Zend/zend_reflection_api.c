@@ -2029,7 +2029,7 @@ ZEND_METHOD(reflection_method, invokeArgs)
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oa", &object, &param_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o!a", &object, &param_array) == FAILURE) {
 		return;
 	}
 
@@ -2065,6 +2065,14 @@ ZEND_METHOD(reflection_method, invokeArgs)
 		object = NULL;
 		obj_ce = NULL;
 	} else {
+		if (!object) {
+			efree(params);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				"Trying to invoke non static method %s::%s without an object", 
+				mptr->common.scope->name, mptr->common.function_name);
+			return;
+		}
+		
 		obj_ce = Z_OBJCE_P(object);
 
 		if (!instanceof_function(obj_ce, mptr->common.scope TSRMLS_CC)) {
