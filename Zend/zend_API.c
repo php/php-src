@@ -1362,7 +1362,7 @@ zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callabl
 
 						lcname = estrndup(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
 						zend_str_tolower(lcname, Z_STRLEN_PP(obj));
-						if(zend_hash_find(EG(class_table), lcname, Z_STRLEN_PP(obj) + 1, (void**)&pce) == SUCCESS) {
+						if (zend_lookup_class(lcname, Z_STRLEN_PP(obj), &pce TSRMLS_CC) == SUCCESS) {
 							ce = *pce;
 						}
 						

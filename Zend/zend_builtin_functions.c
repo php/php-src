@@ -559,7 +559,7 @@ ZEND_FUNCTION(get_parent_class)
 		
 		SEPARATE_ZVAL(arg);
 		zend_str_tolower(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg));
-		if(zend_hash_find(EG(class_table), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg)+1, (void **)&pce) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -647,7 +647,7 @@ ZEND_FUNCTION(get_class_vars)
 	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
 	zend_str_tolower(lcname, (*class_name)->value.str.len);
 
-	if (zend_hash_find(EG(class_table), lcname, (*class_name)->value.str.len+1, (void **)&pce) == FAILURE) {
+	if (zend_lookup_class(lcname, Z_STRLEN_PP(class_name), &pce TSRMLS_CC) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
 	} else {
@@ -713,7 +713,8 @@ ZEND_FUNCTION(get_class_methods)
 	} else if (Z_TYPE_PP(class) == IS_STRING) {
 		SEPARATE_ZVAL(class);
 		zend_str_tolower(Z_STRVAL_PP(class), Z_STRLEN_PP(class));
-		if(zend_hash_find(EG(class_table), Z_STRVAL_PP(class), Z_STRLEN_PP(class)+1, (void **)&pce) == SUCCESS) {
+
+		if (zend_lookup_class(Z_STRVAL_PP(class), Z_STRLEN_PP(class), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}

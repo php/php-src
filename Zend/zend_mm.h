@@ -25,7 +25,7 @@
 #include "zend_types.h"
 
 /* Define this to enable Zend MM */
-#undef ZEND_MM
+#define ZEND_MM
 
 /* mm block type */
 typedef struct _zend_mm_block {
