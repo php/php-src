@@ -97,9 +97,9 @@ static int php_iconv_string(const char * in_str, unsigned int in_len, char ** ou
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-	 STD_PHP_INI_ENTRY("iconv.input_encoding",	  ICONV_INPUT_ENCODING,    PHP_INI_ALL, OnUpdateString,  input_encoding,	zend_iconv_globals,  iconv_globals)
-	 STD_PHP_INI_ENTRY("iconv.output_encoding",	  ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateString,  output_encoding,	zend_iconv_globals,  iconv_globals)
-	 STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateString,  internal_encoding,	zend_iconv_globals,  iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.input_encoding",    ICONV_INPUT_ENCODING,    PHP_INI_ALL, OnUpdateString, input_encoding,    zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.output_encoding",   ICONV_OUTPUT_ENCODING,   PHP_INI_ALL, OnUpdateString, output_encoding,   zend_iconv_globals, iconv_globals)
+	STD_PHP_INI_ENTRY("iconv.internal_encoding", ICONV_INTERNAL_ENCODING, PHP_INI_ALL, OnUpdateString, internal_encoding, zend_iconv_globals, iconv_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -156,7 +156,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 	*err = 0;
 	in_size = in_len;
 
-    /*
+	/*
 	  This is not the right way to get output size...
 	  This is not space efficient for large text.
 	  This is also problem for encoding like UTF-7/UTF-8/ISO-2022 which
@@ -371,12 +371,9 @@ PHP_FUNCTION(iconv_get_encoding)
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
 		}
-		add_assoc_string(return_value, "input_encoding",
-						 ICONVG(input_encoding), 1);
-		add_assoc_string(return_value, "output_encoding",
-						 ICONVG(output_encoding), 1);
-		add_assoc_string(return_value, "internal_encoding",
-						 ICONVG(internal_encoding), 1);
+		add_assoc_string(return_value, "input_encoding",    ICONVG(input_encoding), 1);
+		add_assoc_string(return_value, "output_encoding",   ICONVG(output_encoding), 1);
+		add_assoc_string(return_value, "internal_encoding", ICONVG(internal_encoding), 1);
 	} else if (!strcasecmp("input_encoding", type)) {
 		RETVAL_STRING(ICONVG(input_encoding), 1);
 	} else if (!strcasecmp("output_encoding", type)) {
