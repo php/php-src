@@ -628,7 +628,7 @@ PHP_FUNCTION(mysqli_execute)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_fetch(object stmt)
+/* {{{ proto mixed mysqli_fetch(object stmt)
    Fetch results from a prepared statement into the bound variables */
 PHP_FUNCTION(mysqli_fetch)
 {
@@ -670,7 +670,7 @@ PHP_FUNCTION(mysqli_fetch)
 							if (lval != (long)lval) {
 								/* even though lval is declared as unsigned, the value
 								 * may be negative. Therefor we cannot use %llu and must
-								 * user %lld.
+								 * use %lld.
 								 */
 								sprintf((char *)&tmp, "%lld", lval);
 								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
@@ -695,7 +695,17 @@ PHP_FUNCTION(mysqli_fetch)
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 	}
 
-	RETURN_LONG(ret);
+	switch (ret) {
+		case 0:
+			RETURN_TRUE;
+		break;
+		case 1:
+			RETURN_FALSE;
+		break;
+		default:
+			RETURN_LONG(ret);
+		break;
+	}
 }
 /* }}} */
 
@@ -861,7 +871,7 @@ PHP_FUNCTION(mysqli_field_count)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_field_seek(object link, int fieldnr)
+/* {{{ proto int mysqli_field_seek(object result, int fieldnr)
    Set result pointer to a specified field offset
 */
 PHP_FUNCTION(mysqli_field_seek)
