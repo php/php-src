@@ -187,7 +187,7 @@ int PHPMsessionConnect(const char *szhost, int nport)
 	if(s_conn)
 	{
 		CloseReqConn(s_conn);
-		php_log_err("Call to connect with non-null s_conn" TSRMLS_CC);
+		php_log_err("Call to connect with non-null s_conn");
 	}
 	if(strcmp(s_szhost, szhost))
 	{
@@ -824,7 +824,11 @@ PHP_FUNCTION(msession_set_array)
 	HashPosition pos;
 	zval **entry;
 	char *key;
+#if ZEND_MODULE_API_NO >= 20010901
 	uint keylen;
+#else
+	ulong keylen;
+#endif
 	ulong numndx;
 	int ndx=0;
 	char **pairs;
