@@ -227,7 +227,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
-	STD_PHP_INI_BOOLEAN("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	output_buffering,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateInt,	output_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_globals",		"1",		PHP_INI_ALL,		OnUpdateBool,			register_globals,		php_core_globals,	core_globals)
@@ -669,7 +669,11 @@ int php_request_startup(TSRMLS_D)
 			Z_TYPE_P(output_handler) = IS_STRING;
 			php_start_ob_buffer(output_handler, 0 TSRMLS_CC);
 		} else if (PG(output_buffering)) {
-			php_start_ob_buffer(NULL, 0 TSRMLS_CC);
+			if (PG(output_buffering)>1) {
+				php_start_ob_buffer(NULL, PG(output_buffering) TSRMLS_CC);
+			} else {
+				php_start_ob_buffer(NULL, 0 TSRMLS_CC);
+			}
 		} else if (PG(implicit_flush)) {
 			php_start_implicit_flush(TSRMLS_C);
 		}
