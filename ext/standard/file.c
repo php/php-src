@@ -114,6 +114,10 @@ php_file_globals file_globals;
 #include <fnmatch.h>
 #endif
 
+#ifdef HAVE_WCHAR_H
+#include <wchar.h>
+#endif
+
 /* }}} */
 /* {{{ ZTS-stuff / Globals / Prototypes */
 
@@ -1706,18 +1710,59 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
+#ifndef HAVE_MBLEN
+# define _php_mblen(ptr, len) 1
+#else
+# if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#  define _php_mblen(ptr, len) (ptr == NULL ? mbsinit(&BG(mblen_state)): (int)mbrlen(ptr, len, &BG(mblen_state)))
+# else
+#  define _php_mblen(ptr, len) mblen(ptr, len)
+# endif
+#endif
+
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter TSRMLS_DC)
+{
+	int inc_len;
+	size_t cnt = 0;
+
+	while (len > 0) {
+		switch ((inc_len = _php_mblen(ptr, len))) {
+			case -2:
+			case -1:
+				inc_len = 1;
+				break;
+			case 0:
+				goto quit_loop;
+			case 1:
+				if (delimiter != *ptr && isspace((int)*(const unsigned char *)ptr)) {
+					cnt++;
+					break;
+				}
+				/* break is omitted intentionally */
+			default:
+				cnt = 0;
+				break;
+		}
+		ptr += inc_len;
+		len -= inc_len;
+	}
+quit_loop:
+	return ptr - cnt;
+}
+
 /* {{{ proto array fgetcsv(resource fp, int length [, string delimiter [, string enclosure]])
    Get line from file pointer and parse for CSV fields */
 PHP_FUNCTION(fgetcsv)
 {
-	char *temp, *tptr, *bptr, *lineEnd;
+	char *temp, *tptr, *bptr, *line_end, *limit;
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
-
+	const char escape_char = '\\';
 	/* first section exactly as php_fgetss */
 
 	zval **fd, **bytes, **p_delim, **p_enclosure;
-	int len, temp_len;
+	long len;
+	size_t buf_len, temp_len, line_end_len;
 	char *buf;
 	php_stream *stream;
 
@@ -1778,34 +1823,27 @@ PHP_FUNCTION(fgetcsv)
 	}
 
 	buf = emalloc(len + 1);
-	/* needed because recv/read/gzread doesnt set null char at end */
-	memset(buf, 0, len + 1);
 
-	if (php_stream_gets(stream, buf, len) == NULL) {
+	if (php_stream_get_line(stream, buf, len, &buf_len) == NULL) {
 		efree(buf);
 		RETURN_FALSE;
 	}
+
+	/* initialize internal state */
+	_php_mblen(NULL, 0);
 
 	/* Now into new section that parses buf for delimiter/enclosure fields */
 
 	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
-	lineEnd = emalloc(len + 1);
 	bptr = buf;
-	tptr = buf + strlen(buf) -1;
-	while ( isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr) ) tptr--;
-	tptr++;
-	strcpy(lineEnd, tptr);
-
-	/* add single space - makes it easier to parse trailing null field */
-	*tptr++ = ' ';
-	*tptr = 0;
+	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+	line_end_len = buf_len - (size_t)(tptr - buf);
+	line_end = limit = tptr;
 
 	/* reserve workspace for building each individual field */
-
-	temp_len = len;
-	temp = emalloc(temp_len + 1);	/* unlikely but possible! */
-	tptr = temp;
+	temp_len = buf_len;
+	temp = emalloc(temp_len + line_end_len + 1);
 
 	/* Initialize return array */
 	array_init(return_value);
@@ -1813,113 +1851,229 @@ PHP_FUNCTION(fgetcsv)
 	/* Main loop to read CSV fields */
 	/* NB this routine will return a single null entry for a blank line */
 
-	do {
+	for (;;) {
+		int inc_len;
+		char *comp_end, *hunk_begin;
+
+		tptr = temp;
+
 		/* 1. Strip any leading space */
-		while(isspace((int)*(unsigned char *)bptr) && (*bptr!=delimiter)) bptr++;
+		for (;;) {
+			inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+			switch (inc_len) {
+				case -2:
+				case -1:
+					inc_len = 1;
+					_php_mblen(NULL, 0);
+					break;
+				case 0:
+					goto quit_loop_0;
+				case 1:
+					if (!isspace((int)*(unsigned char *)bptr) || *bptr == delimiter) {
+						goto quit_loop_1;
+					}
+					break;
+				default:
+					goto quit_loop_1;
+			}
+			bptr += inc_len;
+		}
+	quit_loop_1:
 		/* 2. Read field, leaving bptr pointing at start of next field */
-		if (enclosure && *bptr == enclosure) {
+		if (*bptr == enclosure) {
+			int state = 0;
+
 			bptr++;	/* move on to first character in field */
+			hunk_begin = bptr;
 
 			/* 2A. handle enclosure delimited field */
-			while (*bptr) {
-				/* we need to determine if the enclosure is 'real' or is it escaped */
-				if (*(bptr - 1) == '\\') {
-					int escape_cnt = 0;
-					char *bptr_p = bptr - 2;
-				
-					while (bptr_p > buf && *bptr_p == '\\') {
-						escape_cnt++;
-						bptr_p--;
-					}
-					if (!(escape_cnt % 2)) {
-						goto normal_char;
-						continue;
-					}
-				}
-			
-				if (*bptr == enclosure) {
-					/* handle the enclosure */
-					if ( *(bptr+1) == enclosure) {
-					/* embedded enclosure */
-						*tptr++ = *bptr; bptr +=2;
-					} else {
-					/* must be end of string - skip to start of next field or end */
-						while ( (*bptr != delimiter) && *bptr ) bptr++;
-						if (*bptr == delimiter) bptr++;
-						*tptr=0;	/* terminate temporary string */
-						break;	/* .. from handling this field - resumes at 3. */
-					}
-				} else {
-normal_char:
-				/* normal character */
-					*tptr++ = *bptr++;
+			for (;;) {
+				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+				switch (inc_len) {
+					case 0:
+						switch (state) {
+							case 2:
+								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+								tptr += (bptr - hunk_begin - 1);
+								hunk_begin = bptr;
+								goto quit_loop_2;
 
-					if (*bptr == 0) {		/* embedded line end? */
-						*(tptr-1)=0;		/* remove space character added on reading line */
-						strcat(temp, lineEnd);	/* add the embedded line end to the field */
+							case 1:
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								hunk_begin = bptr;
+								/* break is omitted intentionally */
 
-						/* read a new line from input, as at start of routine */
-						memset(buf, 0, len+1);
+							case 0: {
+								char *new_buf;
+								size_t new_len;
+								char *new_temp;
 
-						if (php_stream_gets(stream, buf, len) == NULL) {
-							/* we've got an unterminated enclosure, assign all the data
-							 * from the start of the enclosure to end of data to the last element
-							 */
-							if (temp_len > len) { 
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								hunk_begin = bptr;
+
+								/* add the embedded line end to the field */
+								memcpy(tptr, line_end, line_end_len);
+								tptr += line_end_len;
+
+								if ((new_buf = php_stream_get_line(stream, NULL, 0, &new_len)) == NULL) {
+									/* we've got an unterminated enclosure,
+									 * assign all the data from the start of
+									 * the enclosure to end of data to the
+									 * last element */
+									if ((size_t)temp_len > (size_t)(limit - buf)) { 
+										goto quit_loop_2;
+									}
+									zval_dtor(return_value);
+									RETVAL_FALSE;
+									goto out;
+								}
+								temp_len += new_len;
+								new_temp = erealloc(temp, temp_len);
+								tptr = new_temp + (size_t)(tptr - temp);
+								temp = new_temp;
+
+								efree(buf);
+								buf_len = new_len;
+								bptr = buf = new_buf;
+								hunk_begin = buf;
+
+								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter TSRMLS_CC);
+								line_end_len = buf_len - (size_t)(limit - buf); 
+
+								state = 0;
+							} break;
+						}
+						break;
+
+					case -2:
+					case -1:
+						_php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						/* we need to determine if the enclosure is
+						 * 'real' or is it escaped */
+						switch (state) {
+							case 1: /* escaped */
+								bptr++;
+								state = 0;
 								break;
-							}
-							
-							efree(lineEnd); 
-							efree(temp); 
-							efree(buf);
-							zval_dtor(return_value);
-							RETURN_FALSE;
+							case 2: /* embedded enclosure ? let's check it */
+								if (*bptr != enclosure) {
+									/* real enclosure */
+									memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+									tptr += (bptr - hunk_begin - 1);
+									goto quit_loop_2;
+								}
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								bptr++;
+								hunk_begin = bptr;
+								state = 0;
+								break;
+							default:
+								if (*bptr == escape_char) {
+									state = 1;
+								} else if (*bptr == enclosure) {
+									state = 2;
+								} else {
+								}
+								bptr++;
+								break;
 						}
+						break;
 
-						temp_len += len;
-						temp = erealloc(temp, temp_len+1);
-						bptr = buf;
-						tptr = buf + strlen(buf) -1;
-						while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter) && (tptr > bptr)) {
-							tptr--;
+					default:
+						switch (state) {
+							case 2:
+								/* real enclosure */
+								memcpy(tptr, hunk_begin, bptr - hunk_begin - 1);
+								tptr += (bptr - hunk_begin - 1);
+								goto quit_loop_2;
+							case 1:
+								bptr += inc_len;
+								memcpy(tptr, hunk_begin, bptr - hunk_begin);
+								tptr += (bptr - hunk_begin);
+								hunk_begin = bptr;
+								break;
+								/* break is missing intentionally */
+							default:
+								bptr += inc_len;
+								break;
 						}
-						tptr++; 
-						strcpy(lineEnd, tptr);
-						*tptr++ = ' ';
-						*tptr = 0;
-
-						tptr = temp;	/* reset temp pointer to end of field as read so far */
-						while (*tptr) {
-							tptr++;
-						}
-					}
+						break;
 				}
+			}
+		quit_loop_2:
+			/* look up for a delimiter */
+			for (;;) {
+				switch (inc_len) {
+					case 0:
+						goto quit_loop_3;
+					case -2:
+					case -1:
+						inc_len = 1;
+						_php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						if (*bptr == delimiter) {
+							goto quit_loop_3;
+						}
+						break;
+					default:
+						break;
+				}
+				bptr += inc_len;
+				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+			}
+		quit_loop_3:
+			comp_end = tptr;
+
+			if (*bptr == delimiter) {
+				bptr++;
 			}
 		} else {
 			/* 2B. Handle non-enclosure field */
-			while ((*bptr != delimiter) && *bptr) {
-				*tptr++ = *bptr++;
-			}
-			*tptr=0;	/* terminate temporary string */
 
-			if (strlen(temp)) {
-				tptr--;
-				while (isspace((int)*(unsigned char *)tptr) && (*tptr!=delimiter)) {
-					*tptr-- = 0;	/* strip any trailing spaces */
+			hunk_begin = bptr;
+
+			for (;;) {
+				inc_len = (bptr < limit ? _php_mblen(bptr, limit - bptr): 0);
+				switch (inc_len) {
+					case 0:
+						goto quit_loop_4;
+					case -2:
+					case -1:
+						inc_len = 1;
+						_php_mblen(NULL, 0);
+						/* break is omitted intentionally */
+					case 1:
+						if (*bptr == delimiter) {
+							goto quit_loop_4;
+						}
+						break;
+					default:
+						break;
 				}
+				bptr += inc_len;
 			}
-			
+		quit_loop_4:
+			memcpy(tptr, hunk_begin, bptr - hunk_begin);
+			tptr += (bptr - hunk_begin);
+
+			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter TSRMLS_CC);
 			if (*bptr == delimiter) {
 				bptr++;
 			}
 		}
 
 		/* 3. Now pass our field back to php */
-		add_next_index_string(return_value, temp, 1);
-		tptr = temp;
-	} while (*bptr);
-
-	efree(lineEnd);
+		*comp_end = '\0';
+		add_next_index_stringl(return_value, temp, comp_end - temp, 1);
+	}
+quit_loop_0:
+out:
 	efree(temp);
 	efree(buf);
 }
