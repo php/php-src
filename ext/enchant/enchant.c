@@ -232,7 +232,9 @@ PHP_MINFO_FUNCTION(enchant)
 	php_info_print_table_header(2, "enchant support", "enabled");
 	php_info_print_table_row(2, "Version", "@version@");
 	php_info_print_table_row(2, "Revision", "$Revision$");
-	php_info_print_table_row(1, "Provides");
+	php_info_print_table_end();
+
+	php_info_print_table_start();
 	enchant_broker_describe(pbroker, __enumerate_providers_fn, NULL);
 	php_info_print_table_end();
 }
