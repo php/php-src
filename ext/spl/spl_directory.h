@@ -26,6 +26,7 @@
 
 extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
+extern PHPAPI zend_class_entry *spl_ce_FileReader;
 
 PHP_MINIT_FUNCTION(spl_directory);
 
@@ -38,6 +39,27 @@ typedef struct _spl_ce_dir_object {
 	int               path_name_len;
 	int               index;
 } spl_ce_dir_object;
+
+typedef struct _spl_file_object {
+	zend_object        std;
+	php_stream         *stream;
+	php_stream_context *context;
+	zval               *zcontext;
+	char               *file_name;
+	int                file_name_len;
+	char               *open_mode;
+	int                open_mode_len;
+	zval               *current_zval;
+	char               *current_line;
+	size_t             current_line_len;
+	size_t             max_line_len;
+	long               current_line_num;
+	long               flags;
+	zval               zresource;
+	zend_function      *func_getCurr;
+} spl_file_object;
+
+#define SPL_FILE_OBJECT_DROP_NEW_LINE      0x00000001 /* drop new lines */
 
 #endif /* SPL_DIRECTORY_H */
 
