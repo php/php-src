@@ -1,3 +1,20 @@
+2002-07-07  Andi Gutmans  <andi@zend.com>
+
+    * zend_objects_API.c: - Path which should improve previous fix.
+
+    * zend_objects_API.c:
+    - First try at solving problem with different objects being allocated the
+    - same id.
+
+2002-07-07  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: name length should be strlen+1
+
+2002-07-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_language_parser.y:
+    Allow for 'class Namespace::Bar extends Foo' syntax. Patch by Timm Friebe <thekid@thekid.de>.
+
 2002-07-06  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c:

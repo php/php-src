@@ -1,3 +1,81 @@
+2002-07-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/filestat.c: fix win32 build
+
+2002-07-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php: * added "pear sign" command
+
+    * pear/PEAR/Installer.php: * use System::mktemp
+    * check if an install is about to overwrite existing files belonging
+      to other packages, bail out if not in "force" mode
+
+    * pear/scripts/pear.in:
+    * don't set include path if running 'pear.in' without substitutions
+      made by the installer
+    * sort command names in help output
+
+    * pear/PEAR/Registry.php
+      pear/tests/pear_registry.phpt:
+    * made rebuildFileMap method public, added caching and checkFileMap method
+
+2002-07-07  Shane Caraveo  <shane@caraveo.com>
+
+    * pear/PEAR/Builder.php:
+    Let 'pear build' work on windows for building pecl extensions.
+
+    A few notes:
+    Currently only supports release builds, and of course, requires msdev!
+    pecl packages must have package.xml and xxx.dsp files for this to work
+    the package name in package.xml must match the name of the dsp file, so
+    package iisfunc must have dsp iisfunc.dsp
+
+2002-07-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Packager.php:
+    * use System::mktemp rather than PEAR_Common::mkTempDir
+
+    * pear/PEAR/Frontend/CLI.php: * silence warning
+
+2002-07-07  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+     - Added domxml_node_namespace_uri() (Rui Lopes).
+
+2002-07-07  Jan Lehnardt  <jan@dasmoped.net>
+
+    * INSTALL:  - fix #16290
+
+2002-07-07  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache/config.m4: - Fix the version check again.
+
+    * NEWS: cleanup
+
+2002-07-07  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/standard/versioning.c: Fix warning.
+
+2002-07-07  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    Remove sleep workaround, and fix the actual win32 memory leak which
+    was occurring in the error reporting system. The reason why sleepex appeared
+    to be working was because it suppressed EWOULDBLOCK errors in the example
+    (which was non-blocking)
+
+2002-07-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dio/dio.c: ws fix
+
+    * ext/dio/dio.c: Fix the fix properly.
+
+    * acinclude.m4: MFH
+
+    * acinclude.m4: PHP_EVAL_LIBLINE must not reverse the order of libraries.
+
 2002-07-06  Jani Taskinen  <sniper@iki.fi>
 
     * ext/informix/.cvsignore: Added missing .libs entry
