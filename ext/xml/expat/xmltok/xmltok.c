@@ -1491,7 +1491,7 @@ int initScan(const ENCODING **encodingTable,
       break;
     }
   }
-  *encPtr = encodingTable[INIT_ENC_INDEX(enc)];
+  *encPtr = encodingTable[(int)INIT_ENC_INDEX(enc)];
   return XmlTok(*encPtr, state, ptr, end, nextTokPtr);
 }
 
