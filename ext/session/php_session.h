@@ -115,6 +115,7 @@ PHP_FUNCTION(session_set_save_handler);
 PHP_FUNCTION(session_cache_limiter);
 PHP_FUNCTION(session_set_cookie_params);
 PHP_FUNCTION(session_get_cookie_params);
+PHP_FUNCTION(session_write_close);
 
 #ifdef ZTS
 #define PSLS_D php_ps_globals *ps_globals

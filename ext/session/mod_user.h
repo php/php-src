@@ -20,14 +20,14 @@
 #define MOD_USER_H
 
 typedef union {
-	char *names[6];
+	zval *names[6];
 	struct {
-		char *ps_open;
-		char *ps_close;
-		char *ps_read;
-		char *ps_write;
-		char *ps_destroy;
-		char *ps_gc;
+		zval *ps_open;
+		zval *ps_close;
+		zval *ps_read;
+		zval *ps_write;
+		zval *ps_destroy;
+		zval *ps_gc;
 	} name;
 } ps_user;
 
