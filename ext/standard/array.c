@@ -1060,7 +1060,7 @@ PHP_FUNCTION(in_array)
 
 	target_hash = HASH_OF(*array);
 	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
-	while(zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
+	while(zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
      	compare_func(&res, *value, *entry);
 		if (Z_LVAL(res) == 1) {
 			RETURN_TRUE;
