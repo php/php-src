@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Zeev Suraski <zeev@zend.com>                                |
-   |          Jouni Ahto <jah@mork.net> (large object interface)          |
+   |          Jouni Ahto <jouni.ahto@exdec.fi> (large object interface)   |
    +----------------------------------------------------------------------+
  */
  
