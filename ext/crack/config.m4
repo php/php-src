@@ -9,6 +9,7 @@ if test "$PHP_CRACK" != "no"; then
 
   for i in $PHP_CRACK/lib $PHP_CRACK/cracklib /usr/local/lib /usr/lib; do
     test -f $i/libcrack.$SHLIB_SUFFIX_NAME -o -f $i/libcrack.a && CRACK_LIBDIR=$i && break
+    test -f $i/libcrack_krb5.$SHLIB_SUFFIX_NAME -o -f $i/libcrack_krb5.a && CRACK_LIBDIR=$i && break
   done
 
   if test -z "$CRACK_LIBDIR"; then
