@@ -1,3 +1,18 @@
+2000-10-06  Sebastian Bergmann  <sb@phpopentracker.de>
+
+    * php.ini-dist
+      php.ini-optimized: Removed obsolete entries from php.ini.
+
+2000-10-06  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: - News
+
+    * ext/calendar/calendar.dsp
+      ext/calendar/php_calendar.h
+      main/internal_functions_win32.c
+      win32/php4dllts.dsp
+      win32/php_modules.dsw: - Add calendar to default Win32 build.
+
 2000-10-05  Andi Gutmans  <andi@zend.com>
 
     * NEWS
