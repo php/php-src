@@ -1,3 +1,9 @@
+2002-02-26  Andi Gutmans  <andi@zend.com>
+
+    * zend_alloc.h
+      zend_alloc.c
+      zend.c: - MFZE1
+
 2002-02-21  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * ZEND_CHANGES:

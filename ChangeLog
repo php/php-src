@@ -1,3 +1,46 @@
+2002-02-26  Andi Gutmans  <andi@zend.com>
+
+    * main/php_main.h
+      main/main.c:
+    - Hopefully fix the shutdown_memory_manager() stuff. Part of my previous
+    - patch seems to have gotten lost
+
+2002-02-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/session.c: - Bring error message back
+
+2002-02-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/main.c: TSRM Cleanup.
+
+2002-02-26  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c
+      main/php_main.h: - Pass shutdown_memory_manager the TSRMLS context.
+
+2002-02-26  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: There are no fdf changes in this branch as far as I can see.  Not
+    sure where this NEWS item came from.
+
+    * NEWS: Remove gd NEWS item
+
+    * ext/gd/config.m4: This line makes no sense to me
+
+2002-02-26  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS: Beautify
+
+2002-02-26  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    Bug fix 15719 as submited by Joseph Southwell and allows NULL values in ODBC
+
+2002-02-26  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/dl.c:
+    Allow use of dl() when CLI is compiled with ZTS (bug #15717).
+
 2002-02-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * ext/pspell/pspell.c: Fix pspell function entry
