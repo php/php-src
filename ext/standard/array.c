@@ -1858,15 +1858,21 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	/* If we did a shift... re-index like it did before */
 	if (!off_the_end) {
 		int k = 0;
+		int should_rehash = 0;
 		Bucket *p = Z_ARRVAL_PP(stack)->pListHead;
 		while (p != NULL) {
 			if (p->nKeyLength == 0) {
-				p->h = k++;
+				if (p->h != k) {
+					p->h = k++;
+					should_rehash = 1;
+				} else {
+					k++;
+				}
 			}
 			p = p->pListNext;
 		}
 		Z_ARRVAL_PP(stack)->nNextFreeElement = k;
-		if (k) {
+		if (should_rehash) {
 			zend_hash_rehash(Z_ARRVAL_PP(stack));
 		}
 	} else if (!key_len) {
