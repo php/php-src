@@ -135,7 +135,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_options TSRMLS_DC)
 {
 	int compile_options;
-	return pcre_get_compiled_regex_ex(regex, extra, preg_options, &compile_options);
+	return pcre_get_compiled_regex_ex(regex, extra, preg_options, &compile_options TSRMLS_CC);
 }
 /* }}} */
 
