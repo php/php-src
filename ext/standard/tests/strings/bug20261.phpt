@@ -1,4 +1,4 @@
---FILE--
+--TEST--
 Bug #20261 (str_rot13() changes too much)
 --FILE--
 <?php
