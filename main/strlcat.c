@@ -1,4 +1,4 @@
-#include "php_config.h"
+#include "php.h"
 
 #ifndef HAVE_STRLCAT
 
