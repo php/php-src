@@ -35,6 +35,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 # define zend_sprintf sprintf
 #endif
 
+#include <math.h>
+
 #ifdef HAVE_ISNAN
 #define zend_isnan(a) isnan(a)
 #elif defined(NAN)
@@ -51,8 +53,6 @@ int zend_sprintf(char *buffer, const char *format, ...);
 #else
 #define zend_isinf(a) 0
 #endif
-
-#include <math.h>
 
 #ifdef HAVE_FINITE
 #define zend_finite(a) finite(a)
