@@ -537,7 +537,7 @@ PHP_FUNCTION(ldap_unbind)
 
 static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	pval *link, *base_dn, *filter, *attrs, *attr;
+	pval *link, *base_dn, *filter, *attrs, **attr;
 	char *ldap_base_dn, *ldap_filter;
 	LDAP *ldap;
 	char **ldap_attrs = NULL; 
@@ -589,8 +589,9 @@ static void php3_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					RETURN_FALSE;
 					return;
 				}
-				convert_to_string(attr);
-				ldap_attrs[i] = attr->value.str.val;
+				SEPARATE_ZVAL(attr);
+				convert_to_string(*attr);
+				ldap_attrs[i] = (*attr)->value.str.val;
 			}
 			ldap_attrs[num_attribs] = NULL;
 
