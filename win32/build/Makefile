@@ -65,7 +65,9 @@ $(BUILD_DIR) $(BUILD_DIRS_SUB):
 
 clean-sapi:
 	@echo Cleaning SAPI
-	@for %D in ($(EXT_TARGETS) $(SAPI_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
+	@for %D in ($(EXT_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
+	@for %D in ($(PECL_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
+	@for %D in ($(SAPI_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
 	@del /F /Q $(BUILD_DIR)\$(PHPDLL)
 
 clean: clean-sapi
