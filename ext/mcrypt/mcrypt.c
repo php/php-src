@@ -474,7 +474,6 @@ PHP_FUNCTION(mcrypt_generic_init)
 
 	if (Z_STRLEN_PP(key) == 0) {
 		php_error (E_WARNING, "key size is 0");
-		RETURN_FALSE;
 	}
 
 	key_s = emalloc (Z_STRLEN_PP(key));
@@ -521,7 +520,7 @@ PHP_FUNCTION(mcrypt_generic)
 	MCRYPT_CHECK_PARAM_COUNT (2,2)
 	
 	zend_get_parameters_ex(2, &mcryptind, &data);
-	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
+	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);
 	convert_to_string_ex (data);
 
 	/* Check blocksize */
