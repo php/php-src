@@ -214,7 +214,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if (strchr(mailTo, '@') == NULL)
 		return (BAD_MSG_DESTINATION);
 
-	sprintf(Buffer, "HELO %s\n", LocalHost);
+	sprintf(Buffer, "HELO %s\r\n", LocalHost);
 
 	/* in the beggining of the dialog */
 	/* attempt reconnect if the first Post fail */
@@ -226,20 +226,38 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	if ((res = Ack()) != SUCCESS)
 		return (res);
 
-	sprintf(Buffer, "MAIL FROM:<%s>\n", RPath);
-	if ((res = Post(Buffer)) != SUCCESS)
-		return (res);
-	if ((res = Ack()) != SUCCESS)
-		return (res);
+	// Send mail to all rcpt's
+	token = strtok(tempMailTo, ",");
+	while(token != NULL)
+	{
+		sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+		if ((res = Post(Buffer)) != SUCCESS)
+			return (res);
+		if ((res = Ack()) != SUCCESS)
+			return (res);
+		token = strtok(NULL, ",");
+	}
 
+	// Send mail to all Cc rcpt's
+	efree(tempMailTo);
+	if (headers && pos1 = strstr(headers, "Cc:")) {
+		pos2 = strstr(pos1, "\r\n");
+		tempMailTo = estrndup(pos1, pos2-pos1);
 
-	sprintf(Buffer, "RCPT TO:<%s>\n", mailTo);
-	if ((res = Post(Buffer)) != SUCCESS)
-		return (res);
-	if ((res = Ack()) != SUCCESS)
-		return (res);
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS)
+				return (res);
+			if ((res = Ack()) != SUCCESS)
+				return (res);
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
+	}
 
-	if ((res = Post("DATA\n")) != SUCCESS)
+	if ((res = Post("DATA\r\n")) != SUCCESS)
 		return (res);
 	if ((res = Ack()) != SUCCESS)
 		return (res);
