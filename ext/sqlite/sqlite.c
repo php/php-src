@@ -867,7 +867,11 @@ next_row:
 			ret = SQLITE_OK;
 			break;
 
+		case SQLITE_BUSY:
+		case SQLITE_ERROR:
+		case SQLITE_MISUSE:
 		case SQLITE_DONE:
+		default:
 			if (rres->vm) {
 				ret = sqlite_finalize(rres->vm, &errtext);
 			}
@@ -877,14 +881,6 @@ next_row:
 				sqlite_freemem(errtext);
 			}
 			break;
-
-		case SQLITE_BUSY:
-		case SQLITE_ERROR:
-		case SQLITE_MISUSE:
-		default:
-			/* fall through to finalize */
-			;
-
 	}
 	return ret;
 }
