@@ -1327,6 +1327,10 @@ PHP_FUNCTION(stristr)
 	    zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+
+	SEPERATE_ZVAL(haystack);
+	SEPERATE_ZVAL(needle);
+	
 	convert_to_string_ex(haystack);
 
 	if (!Z_STRLEN_PP(needle)) {
