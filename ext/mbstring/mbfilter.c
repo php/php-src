@@ -2638,7 +2638,7 @@ mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			break;
 		case uudec_state_skip_newline:
 			/* skip newline */
-			filter->status = 0;
+			filter->status = uudec_state_size;
 	}
 	return c;
 }
