@@ -203,7 +203,47 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 
 	return n_matches;
 }
-	
+
+static const char digit_vec[] = "0123456789";
+PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC)
+{
+	char buffer[65];
+	char outbuf[65] = "";
+	register char *p;
+	long long_val;
+	char *dst = outbuf;
+
+	if (i64 < 0) {
+		i64 = -i64;
+		*dst++ = '-';
+	}
+
+	if (i64 == 0) {
+		*dst++ = '0';
+		*dst++ = '\0';
+		return estrdup(outbuf);
+	}
+
+	p = &buffer[sizeof(buffer)-1];
+	*p = '\0';
+
+	while ((pdo_uint64_t)i64 > (pdo_uint64_t)LONG_MAX) {
+		pdo_uint64_t quo = (pdo_uint64_t)i64 / (unsigned int)10;
+		unsigned int rem = (unsigned int)(i64 - quo*10U);
+		*--p = digit_vec[rem];
+		i64 = (pdo_int64_t)quo;
+	}
+	long_val = (long)i64;
+	while (long_val != 0) {
+		long quo = long_val / 10;
+		*--p = digit_vec[(unsigned int)(long_val - quo * 10)];
+		long_val = quo;
+	}
+	while ((*dst++ = *p++) != 0)
+		;
+	*dst = '\0';
+	return estrdup(outbuf);
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo)

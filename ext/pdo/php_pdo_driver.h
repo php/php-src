@@ -28,6 +28,15 @@ typedef struct _pdo_dbh_t 	pdo_dbh_t;
 typedef struct _pdo_stmt_t	pdo_stmt_t;
 struct pdo_bound_param_data;
 
+#ifdef PHP_WIN32
+typedef __int64 pdo_int64_t;
+typedef unsigned __int64 pdo_uint64_t;
+#else
+typedef long long int pdo_int64_t;
+typedef unsigned long long int pdo_uint64_t;
+#endif
+PDO_API char *php_pdo_int64_to_str(pdo_int64_t i64 TSRMLS_DC);
+
 #ifndef TRUE
 # define TRUE 1
 #endif
@@ -35,7 +44,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20050222
+#define PDO_DRIVER_API	20050226
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -231,8 +240,9 @@ typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
 /* setting of attributes */
 typedef int (*pdo_dbh_set_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
 
-/* return last insert id */
-typedef long (*pdo_dbh_last_id_func)(pdo_dbh_t *dbh TSRMLS_DC);
+/* return last insert id.  NULL indicates error condition, otherwise, the return value
+ * MUST be an emalloc'd NULL terminated string. */
+typedef char *(*pdo_dbh_last_id_func)(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC);
 
 /* fetch error information.  if stmt is not null, fetch information pertaining
  * to the statement, otherwise fetch global error information.  The driver
@@ -460,10 +470,8 @@ struct pdo_column_data {
 	enum pdo_param_type param_type;
 	unsigned long precision;
 
-	/* don't touch the following fields unless your name is dbdo */
-	char *native_type_name;
-	int abstract_type;
-	int abstract_flags;
+	/* don't touch this unless your name is dbdo */
+	void *dbdo_stuff;
 };
 
 /* describes a bound parameter */

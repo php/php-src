@@ -752,13 +752,15 @@ static PHP_METHOD(PDO, exec)
 /* }}} */
 
 
-/* {{{ proto int PDO::lastInsertId()
-   Returns the number id of rows that we affected by the last call to PDO::exec().  Not always meaningful. */
+/* {{{ proto string PDO::lastInsertId([string seqname])
+   Returns the id of the last row that we affected on this connection.  Some databases require a sequence or table name to be passed in.  Not always meaningful. */
 static PHP_METHOD(PDO, lastInsertId)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *name = NULL;
+	int namelen;
 
-	if (ZEND_NUM_ARGS()) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!", &name, &namelen)) {
 		RETURN_FALSE;
 	}
 
@@ -767,7 +769,13 @@ static PHP_METHOD(PDO, lastInsertId)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
 		RETURN_FALSE;
 	} else {
-		RETURN_LONG(dbh->methods->last_id(dbh TSRMLS_CC));
+		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, &Z_STRLEN_P(return_value) TSRMLS_CC);
+		if (!Z_STRVAL_P(return_value)) {
+			PDO_HANDLE_DBH_ERR();
+			RETURN_FALSE;
+		} else {
+			Z_TYPE_P(return_value) = IS_STRING;
+		}
 	}
 }
 /* }}} */

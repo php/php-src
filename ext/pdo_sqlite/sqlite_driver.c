@@ -156,11 +156,14 @@ static long sqlite_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSR
 	}
 }
 
-static long pdo_sqlite_last_insert_id(pdo_dbh_t *dbh TSRMLS_DC)
+static char *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
-
-	return (long) sqlite3_last_insert_rowid(H->db);
+	char *id;
+	
+	id = php_pdo_int64_to_str(sqlite3_last_insert_rowid(H->db) TSRMLS_CC);
+	*len = strlen(id);
+	return id;
 }
 
 /* NB: doesn't handle binary strings... use prepared stmts for that */
