@@ -19,6 +19,11 @@ $ ./configure \
 	--with-aolserver-src=/path/to/source/distribution \
 	<other options>
 
+NOTE: While AOLserver 3.0 did not install its include directory, later
+      releases will do so. This effectively means that you do not need
+      to retain the source directory of AOLserver, if there is an
+      include directory in the installation directory.
+
 3.) Compiling and Installing PHP
 
 $ make install
