@@ -132,6 +132,8 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool 
 	if (chunk_size) {
 		initial_size = (chunk_size*3/2);
 		block_size = chunk_size/2;
+		if (block_size == 0)
+			block_size = 1;
 	} else {
 		initial_size = 40*1024;
 		block_size = 10*1024;

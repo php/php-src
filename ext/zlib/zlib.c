@@ -230,6 +230,8 @@ PHP_RINIT_FUNCTION(zlib)
 	ZLIBG(ob_gzhandler_status) = 0;
 	ZLIBG(ob_gzip_coding) = 0;
 	if (chunk_size) {
+		if (chunk_size == 1)
+			chunk_size = 0; /* use the default size */
 		php_enable_output_compression(chunk_size TSRMLS_CC);
 	}
 	return SUCCESS;
