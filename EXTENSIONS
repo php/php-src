@@ -137,8 +137,8 @@ STATUS:              Experimental
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           interbase
-PRIMARY MAINTAINER:  Jouni Ahto <jouni.ahto@exdec.fi>, Ard Biesheuvel <ard@ard.nu>
-MAINTENANCE:         Odd Fixes
+PRIMARY MAINTAINER:  Ard Biesheuvel <ard@ard.nu>, Jouni Ahto <jouni.ahto@exdec.fi>
+MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           msql
