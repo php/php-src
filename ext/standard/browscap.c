@@ -31,7 +31,7 @@ HashTable browser_hash;
 
 static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_hash_key *key)
 {
-	zval *browser_name;
+	zval **browser_name;
 	regex_t r;
 	char *lookup_browser_name = va_arg(args,char *);
 	zval **found_browser_entry = va_arg(args,zval **);
@@ -43,10 +43,10 @@ static int browser_reg_compare(zval **browser,int num_args, va_list args, zend_h
 		return 0;
 	}
 
-	if (!strchr(browser_name->value.str.val,'*')) {
+	if (!strchr((*browser_name)->value.str.val,'*')) {
 		return 0;
 	}
-	if (regcomp(&r,browser_name->value.str.val,REG_NOSUB)!=0) {
+	if (regcomp(&r,(*browser_name)->value.str.val,REG_NOSUB)!=0) {
 		return 0;
 	}
 	if (regexec(&r,lookup_browser_name,0,NULL,0)==0) {
@@ -93,7 +93,7 @@ PHP_FUNCTION(get_browser)
 		zend_hash_apply_with_arguments(&browser_hash,(int (*)(void *, int, va_list, zend_hash_key *)) browser_reg_compare,2,lookup_browser_name,&found_browser_entry);
 		
 		if (found_browser_entry) {
-			*agent = found_browser_entry;
+			agent = &found_browser_entry;
 		} else if (zend_hash_find(&browser_hash, DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME), (void **) &agent)==FAILURE) {
 			RETURN_FALSE;
 		}
