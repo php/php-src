@@ -955,7 +955,7 @@ PHP_FUNCTION(pgsql_fetch_row)
 /* }}} */
 
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
-/* {{{ proto array pg_fetch_array(int result, int row)
+/* {{{ proto array pg_fetch_array(int result, int row [, int result_type])
    Fetch a row as an array */
 PHP_FUNCTION(pgsql_fetch_array)
 {
@@ -963,7 +963,7 @@ PHP_FUNCTION(pgsql_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(int result, int row)
+/* {{{ proto object pg_fetch_object(int result, int row [, int result_type])
    Fetch a row as an object */
 PHP_FUNCTION(pgsql_fetch_object)
 {
