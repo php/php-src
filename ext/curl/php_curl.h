@@ -92,6 +92,7 @@ typedef struct {
 	struct _php_curl_error   err;
 	struct _php_curl_free    to_free;
 	long                     id;
+	unsigned int             uses;
 } php_curl;
 
 /* streams support */
