@@ -1478,49 +1478,50 @@ PHP_FUNCTION(fdf_get_attachment) {
 #endif 
 
 /* {{{ enum_values_callback */
-  static ASBool enum_values_callback(char *name, char *value, void *userdata) {
-	  zval *retval_ptr, *z_name, *z_value, **args[3];
-	  long retval = 0;
-	  int numargs = 2;
-	  TSRMLS_FETCH();
+static ASBool enum_values_callback(char *name, char *value, void *userdata)
+{
+	zval *retval_ptr, *z_name, *z_value, **args[3];
+	long retval = 0;
+	int numargs = 2;
+	TSRMLS_FETCH();
 
-	  MAKE_STD_ZVAL(z_name);
-	  ZVAL_STRING(z_name, name, 1);
-	  args[0] = &z_name;
+	MAKE_STD_ZVAL(z_name);
+	ZVAL_STRING(z_name, name, 1);
+	args[0] = &z_name;
 
-	  if(*value) { // simple value 
-		  MAKE_STD_ZVAL(z_value);
-		  ZVAL_STRING(z_value, value, 1);
-		  args[1] = &z_value;
-	  } else { // empty value *might* be an array
-		  // todo do it like fdf_get_value (or re-implement yourself?)
-	  }
-	  
-	  if(userdata) {
-		  args[2] = (zval **)userdata;
-		  numargs++;
-	  }
+	if (*value) { /* simple value */
+		MAKE_STD_ZVAL(z_value);
+		ZVAL_STRING(z_value, value, 1);
+		args[1] = &z_value;
+	} else { /* empty value *might* be an array */
+		/* TODO: do it like fdf_get_value (or re-implement yourself?) */
+	}
+	
+	if (userdata) {
+		args[2] = (zval **) userdata;
+		numargs++;
+	}
 
-	  if (call_user_function_ex(EG(function_table), 
+	if (call_user_function_ex(EG(function_table), 
 								NULL, 
 								FDF_G(enum_callback), 
 								&retval_ptr, 
 								numargs, args, 
-								0, NULL TSRMLS_CC)==SUCCESS
-		  && retval_ptr) {
-		  
-		  convert_to_long_ex(&retval_ptr);
-		  retval = Z_LVAL_P(retval_ptr);
-		  zval_ptr_dtor(&retval_ptr);
-	  } else {
+								0, NULL TSRMLS_CC) == SUCCESS
+		&& retval_ptr) {
+		
+		convert_to_long_ex(&retval_ptr);
+		retval = Z_LVAL_P(retval_ptr);
+		zval_ptr_dtor(&retval_ptr);
+	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "callback failed");
-	  }
+	}
 
-	  zval_ptr_dtor(&z_name);
-	  zval_ptr_dtor(&z_value);
+	zval_ptr_dtor(&z_name);
+	zval_ptr_dtor(&z_value);
 
-	  return retval;
-  }
+	return retval;
+}
 /* }}} */
 
 /* {{{ proto bool fdf_enum_values(resource fdfdoc, callback function [, mixed userdata])
