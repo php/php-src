@@ -698,19 +698,6 @@ static void php_free_xpath_context(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		xmlXPathFreeContext(ctx);
 	}
 }
-
-static void php_free_xpath_object(zend_rsrc_list_entry *rsrc TSRMLS_DC)
-{
-	xmlXPathObjectPtr obj = (xmlXPathObjectPtr) rsrc->ptr;
-
-	if (obj) {
-		if (obj->user) {
-			zval *wrapper = obj->user;
-			zval_ptr_dtor(&wrapper);
-		}
-		xmlXPathFreeObject(obj);
-	}
-}
 #endif
 
 static void php_free_xml_parser(zend_rsrc_list_entry *rsrc TSRMLS_DC)
@@ -843,79 +830,12 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_
 	return obj;
 }
 
-
-static void xpath_object_set_data(void *obj, zval *wrapper)
-{
-/*
-	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-	fprintf(stderr, "Adding %s to hash\n", tmp);
-*/
-	((xmlXPathObjectPtr) obj)->user = wrapper;
-}
-
-
-static zval *xpath_object_get_data(void *obj)
-{
-/*
-	char tmp[20];
-	sprintf(tmp, "%08X", obj);
-	fprintf(stderr, "Trying getting %s from hash ...", tmp);
-	if(((xmlXPathObjectPtr) obj)->user)
-		fprintf(stderr, " found\n");
-	else
-		fprintf(stderr, " not found\n");
-*/
-	return ((zval *) (((xmlXPathObjectPtr) obj)->user));
-}
-
-
-static void php_xpath_set_object(zval *wrapper, void *obj, int rsrc_type)
-{
-	zval *handle, *addr;
-
-	MAKE_STD_ZVAL(handle);
-	Z_TYPE_P(handle) = IS_LONG;
-	Z_LVAL_P(handle) = zend_list_insert(obj, rsrc_type);
-
-	MAKE_STD_ZVAL(addr);
-	Z_TYPE_P(addr) = IS_LONG;
-	Z_LVAL_P(addr) = (int) obj;
-
-	zend_hash_index_update(Z_OBJPROP_P(wrapper), 0, &handle, sizeof(zval *), NULL);
-	zend_hash_index_update(Z_OBJPROP_P(wrapper), 1, &addr, sizeof(zval *), NULL);
-	zval_add_ref(&wrapper);
-	xpath_object_set_data(obj, wrapper);
-}
-
 static zval *php_xpathobject_new(xmlXPathObjectPtr obj, int *found TSRMLS_DC)
 {
 	zval *wrapper;
 
-		*found = 0;
-
-	if (!obj) {
-		MAKE_STD_ZVAL(wrapper);
-		ZVAL_NULL(wrapper);
-		return wrapper;
-	}
-
-	if ((wrapper = (zval *) xpath_object_get_data((void *) obj))) {
-		zval_add_ref(&wrapper);
-		*found = 1;
-		return wrapper;
-	}
-
 	MAKE_STD_ZVAL(wrapper);
 	object_init_ex(wrapper, xpathobject_class_entry);
-
-/*
-	rsrc_type = le_xpathobjectp;
-	php_xpath_set_object(wrapper, (void *) obj, rsrc_type);
-*/
-
-	php_xpath_set_object(wrapper, (void *) obj, le_xpathobjectp);
-
 	return (wrapper);
 }
 
@@ -1575,7 +1495,7 @@ PHP_MINIT_FUNCTION(domxml)
 
 #if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpathcontext", module_number);
-	le_xpathobjectp = zend_register_list_destructors_ex(php_free_xpath_object, NULL, "xpathobject", module_number);
+	le_xpathobjectp = zend_register_list_destructors_ex(NULL, NULL, "xpathobject", module_number);
 #endif
 
 /*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
@@ -4853,6 +4773,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 			break;
 	}
 
+	xmlXPathFreeObject(xpathobjp);
 	*return_value = *rv;
 	FREE_ZVAL(rv);
 }
