@@ -405,7 +405,7 @@ php_mb_parse_encoding_list(const char *value, int value_length, enum mbfl_no_enc
 		}
 		size = n + identify_list_size;
 		/* make list */
-		list = (int *)pecalloc(size, sizeof(int), persistent);
+		list = (enum mbfl_no_encoding *)pecalloc(size, sizeof(int), persistent);
 		if (list != NULL) {
 			entry = list;
 			n = 0;
@@ -513,7 +513,7 @@ php_mb_parse_encoding_array(zval *array, enum mbfl_no_encoding **return_list, in
 		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
 		size = i + identify_list_size;
-		list = (int *)pecalloc(size, sizeof(int), persistent);
+		list = (enum mbfl_no_encoding *)pecalloc(size, sizeof(int), persistent);
 		if (list != NULL) {
 			entry = list;
 			bauto = 0;
@@ -624,7 +624,8 @@ static PHP_INI_MH(OnUpdate_mbstring_language)
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_detect_order) */
 static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 {
-	int *list, size;
+	enum mbfl_no_encoding *list;
+	int size;
 
 	if (php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1 TSRMLS_CC)) {
 		if (MBSTRG(detect_order_list) != NULL) {
@@ -643,7 +644,8 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
 static PHP_INI_MH(OnUpdate_mbstring_http_input)
 {
-	int *list, size;
+	enum mbfl_no_encoding *list;
+	int size;
 
 	if (php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1 TSRMLS_CC)) {
 		if (MBSTRG(http_input_list) != NULL) {
@@ -939,7 +941,8 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 /* {{{ PHP_RINIT_FUNCTION(mbstring) */
 PHP_RINIT_FUNCTION(mbstring)
 {
-	int n, *list=NULL, *entry;
+	int n;
+	enum mbfl_no_encoding *list=NULL, *entry;
 	zend_function *func, *orig;
 	const struct mb_overload_def *p;
 
@@ -996,7 +999,7 @@ PHP_RINIT_FUNCTION(mbstring)
 		list = MBSTRG(default_detect_order_list);
 		n = MBSTRG(default_detect_order_list_size);
 	}
-	entry = (int *)safe_emalloc(n, sizeof(int), 0);
+	entry = (enum mbfl_no_encoding *)safe_emalloc(n, sizeof(int), 0);
 	MBSTRG(current_detect_order_list) = entry;
 	MBSTRG(current_detect_order_list_size) = n;
 	while (n > 0) {
@@ -1201,7 +1204,8 @@ PHP_FUNCTION(mb_internal_encoding)
 PHP_FUNCTION(mb_http_input)
 {
 	pval **arg1;
-	int result=0, retname, n, *entry;
+	int result=0, retname, n;
+	enum mbfl_no_encoding *entry;
 	char *name, *list, *temp;
 
 	retname = 1;
@@ -1326,7 +1330,8 @@ PHP_FUNCTION(mb_http_output)
 PHP_FUNCTION(mb_detect_order)
 {
 	pval **arg1;
-	int n, size, *list, *entry;
+	int n, size;
+	enum mbfl_no_encoding *list, *entry;
 	char *name;
 
 	if (ZEND_NUM_ARGS() == 0) {
@@ -1467,8 +1472,8 @@ php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 	char *var, *val, *s1, *s2;
 	char *strtok_buf = NULL, **val_list;
 	zval *array_ptr = (zval *) arg;
-	int n, num, val_len, *len_list, *elist, elistsz;
-	enum mbfl_no_encoding from_encoding, to_encoding;
+	int n, num, val_len, *len_list, elistsz;
+	enum mbfl_no_encoding from_encoding, to_encoding, *elist;
 	mbfl_string string, resvar, resval;
 	mbfl_encoding_detector *identd = NULL; 
 	mbfl_buffer_converter *convd = NULL;
@@ -3792,7 +3797,8 @@ MBSTRING_API int php_mb_gpc_encoding_detector(char **arg_string, int *arg_length
 	enum mbfl_no_encoding encoding = mbfl_no_encoding_invalid;
 	mbfl_encoding_detector *identd = NULL; 
 
-	int size, *list;
+	int size;
+	enum mbfl_no_encoding *list;
 
 	if (MBSTRG(http_input_list_size) == 1 && 
 		MBSTRG(http_input_list)[0] == mbfl_no_encoding_pass) {
