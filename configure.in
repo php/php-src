@@ -410,9 +410,6 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 #include <sys/socket.h>
 #include <netinet/in.h>], [struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;],
   [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
-if test "$ac_cv_ipv6_support" = yes; then
-  AC_DEFINE(HAVE_IPV6,1,[Whether you have IPv6 support])
-fi
 
 
 
@@ -690,6 +687,13 @@ if test "$PHP_DMALLOC" = "yes"; then
   ], [
     AC_MSG_ERROR([Problem with enabling dmalloc. Please check config.log for details.])
   ])
+fi
+
+PHP_ARG_ENABLE(ipv6,whether to enable IPv6 support,
+[  --enable-ipv6           Enable IPv6 support],yes)
+
+if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
+  AC_DEFINE(HAVE_IPV6,1,[Whether to enable IPv6 support])
 fi
 
 AC_CHECK_LIB(crypt, crypt, [
