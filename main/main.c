@@ -743,6 +743,10 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	sapi_activate(SLS_C);	
 
 	php_set_timeout(PG(max_execution_time));
+	
+	if (PG(expose_php)) {
+		sapi_add_header(estrdup(SAPI_PHP_VERSION_HEADER), sizeof(SAPI_PHP_VERSION_HEADER) - 1);
+	}
 
 	if (PG(output_buffering)) {
 		php_start_ob_buffering();
