@@ -216,8 +216,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	}
 }
 
-
-void php_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
+SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 {
 	char *res = NULL, *var, *val, *separator=NULL;
 	const char *c_var;

@@ -137,15 +137,12 @@ static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 #if HAVE_MBREGEX
 static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 #endif
-#if defined(MBSTR_ENC_TRANS)
-SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
 
 static sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data,	php_mbstr_post_handler },
 	{ MULTIPART_CONTENT_TYPE,	sizeof(MULTIPART_CONTENT_TYPE)-1,	NULL,	rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
 };
-#endif
 
 static struct mb_overload_def mb_ovld[] = {
 	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", "mb_orig_mail"},
@@ -646,6 +643,9 @@ PHP_INI_BEGIN()
 #endif /* ZEND_MULTIBYTE */
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
+#if !defined(COMPILE_DL_MBSTRING)
+	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0", PHP_INI_SYSTEM, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
+#endif /* !defined(COMPILE_DL_MBSTRING) */
 PHP_INI_END()
 
 
@@ -704,6 +704,7 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals TSRMLS_DC)
 	MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	MBSTRG(current_filter_illegal_substchar) = 0x3f;	/* '?' */
 	MBSTRG(func_overload) = 0;
+	MBSTRG(encoding_translation) = 0;
 	pglobals->outconv = NULL;
 #if HAVE_MBREGEX
 	MBSTRG(default_mbctype) = MBCTYPE_EUC;
@@ -727,10 +728,12 @@ PHP_MINIT_FUNCTION(mbstring)
 
 	REGISTER_INI_ENTRIES();
 
-#if defined(MBSTR_ENC_TRANS)
-	sapi_unregister_post_entry(mbstr_post_entries);
-	sapi_register_post_entries(mbstr_post_entries);
-#endif
+
+	if(MBSTRG(encoding_translation)) {
+		sapi_unregister_post_entry(mbstr_post_entries);
+		sapi_register_post_entries(mbstr_post_entries);
+		sapi_register_treat_data(mbstr_treat_data);
+	}
 
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_MAIL", MB_OVERLOAD_MAIL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MB_OVERLOAD_STRING", MB_OVERLOAD_STRING, CONST_CS | CONST_PERSISTENT);
@@ -754,6 +757,10 @@ PHP_MSHUTDOWN_FUNCTION(mbstring)
 #endif /* ZEND_MULTIBYTE */
 	if (MBSTRG(detect_order_list)) {
 		free(MBSTRG(detect_order_list));
+	}
+
+	if(MBSTRG(encoding_translation)) {
+		sapi_register_treat_data(php_default_treat_data);
 	}
 
 #if HAVE_MBREGEX
@@ -899,9 +906,9 @@ PHP_MINFO_FUNCTION(mbstring)
 #if defined(HAVE_MBSTR_KR)
 	php_info_print_table_row(2, "korean support", "enabled");	
 #endif
-#if defined(MBSTR_ENC_TRANS)
-	php_info_print_table_row(2, "http input encoding translation", "enabled");	
-#endif
+	if(MBSTRG(encoding_translation)) {
+		php_info_print_table_row(2, "http input encoding translation", "enabled");	
+	}
 #if defined(HAVE_MBREGEX)
 	php_info_print_table_row(2, "multibyte (japanese) regex support", "enabled");	
 #endif
@@ -1227,7 +1234,6 @@ PHP_FUNCTION(mb_preferred_mime_name)
 }
 /* }}} */
 
-#if defined(MBSTR_ENC_TRANS)
 static void
 php_mbstr_encoding_handler(zval *arg, char *res, char *separator TSRMLS_DC)
 {
@@ -1412,7 +1418,7 @@ int mbstr_is_mb_leadbyte(const char *s TSRMLS_DC){
 }
 
 /* http input processing */
-void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
+SAPI_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data)
 {
 	char *res = NULL, *separator=NULL;
 	const char *c_var;
@@ -1526,7 +1532,6 @@ void mbstr_treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
 		efree(res);
 	}
 }
-#endif
 
 /* {{{ proto bool mb_parse_str(string encoded_string [, array result])
    Parses GET/POST/COOKIE data and sets global variables */
@@ -3335,6 +3340,9 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
+PHPAPI int mbstr_encoding_translation(TSRMLS_DC) {
+	return MBSTRG(encoding_translation);
+}
 
 #ifdef ZEND_MULTIBYTE
 PHPAPI int php_mbstring_set_zend_encoding(TSRMLS_D)
@@ -3380,13 +3388,13 @@ PHPAPI int php_mbstring_set_zend_encoding(TSRMLS_D)
 	encoding_converter = NULL;
 	multibyte_oddlen = php_mbstring_oddlen;
 
-#if defined(MBSTR_ENC_TRANS)
-	/* notify internal encoding to Zend Engine */
-	name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
-	zend_multibyte_set_internal_encoding(name, strlen(name) TSRMLS_CC);
+	if(MBSTRG(encoding_translation)) {
+		/* notify internal encoding to Zend Engine */
+		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
+		zend_multibyte_set_internal_encoding(name, strlen(name) TSRMLS_CC);
 
-	encoding_converter = php_mbstring_encoding_converter;
-#endif /* defined(MBSTR_ENC_TRANS) */
+		encoding_converter = php_mbstring_encoding_converter;
+	}
 
 	zend_multibyte_set_functions(encoding_detector, encoding_converter,
 			multibyte_oddlen TSRMLS_CC);
