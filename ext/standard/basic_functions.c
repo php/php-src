@@ -335,7 +335,6 @@ function_entry basic_functions[] = {
 	PHP_FE(array_values,				NULL)
 	PHP_FE(array_count_values,		   	NULL)
 	PHP_FE(array_reverse,				NULL)
-	PHP_FE(array_map,					NULL)
 
 	PHP_FE(connection_aborted,			NULL)
 	PHP_FE(connection_timeout,			NULL)
