@@ -197,6 +197,24 @@ static PHP_INI_MH(OnUpdateTimeout)
 }
 /* }}} */
 
+/* {{{ OnUpdateOutputBuffering
+ */
+static PHP_INI_MH(OnUpdateOutputBuffering)
+{
+	if(!strncasecmp(new_value, "off", sizeof("off"))) {
+		new_value = "0";
+		new_value_length = sizeof("0");
+	} else if(!strncasecmp(new_value, "on", sizeof("on"))) {
+		new_value = "1";
+		new_value_length = sizeof("1");
+	}
+	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	
+	return SUCCESS;
+}
+/* }}} */
+
+
 /* Need to convert to strings and make use of:
  * PHP_SAFE_MODE
  *
@@ -249,7 +267,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("magic_quotes_gpc",		"1",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_gpc,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
-	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateInt,	output_buffering,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateOutputBuffering,	output_buffering,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("double_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateOutputBuffering,	double_buffering,		php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_globals",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	register_globals,		php_core_globals,	core_globals)
@@ -826,12 +845,7 @@ int php_request_startup(TSRMLS_D)
 			php_start_ob_buffer_named(PG(output_handler), 0, 1 TSRMLS_CC);
 		}
 		else if (PG(output_buffering)) {
-			if (PG(output_buffering)>1) {
-				php_start_ob_buffer(NULL, PG(output_buffering), 0 TSRMLS_CC);
-			}
-			else {
-				php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
-			}
+			php_start_ob_buffer(NULL, 0, 1 TSRMLS_CC);
 		}
 		else if (PG(implicit_flush)) {
 			php_start_implicit_flush(TSRMLS_C);

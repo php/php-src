@@ -113,23 +113,39 @@ PHPAPI int php_header_write(const char *str, uint str_length TSRMLS_DC)
 	}
 }
 
+/* {{{ php_ob_default_buffer_size
+ * Start output buffering */
+PHPAPI int php_ob_default_buffer_size(TSRMLS_D)
+{
+	uint buffer_size = (uint)(PG(output_buffering) > 1 ? PG(output_buffering) : 4096);
+	if (OG(ob_nesting_level)==0 && PG(double_buffering)!=0) {
+		buffer_size = (uint)(PG(double_buffering) >= buffer_size ? PG(double_buffering) : 4*buffer_size);
+	}
+	return buffer_size;
+}
+/* }}} */
+
 /* {{{ php_start_ob_buffer
  * Start output buffering */
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size, zend_bool erase TSRMLS_DC)
 {
-	uint initial_size, block_size;
+	uint initial_chunk_size, initial_size, block_size;
 
 	if (OG(ob_lock)) {
 		php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
 		return FAILURE;
 	}
-	if (chunk_size) {
-		initial_size = (chunk_size*3/2);
-		block_size = chunk_size/2;
-	} else {
-		initial_size = 40*1024;
-		block_size = 10*1024;
+	if (OG(ob_nesting_level)==0 && PG(double_buffering)) {		
+		initial_chunk_size = php_ob_default_buffer_size(TSRMLS_C);
+		initial_size = 4*initial_chunk_size;
+		block_size = initial_chunk_size;
+		php_ob_init(initial_size, block_size, NULL, initial_chunk_size, erase TSRMLS_CC);
 	}
+	if (chunk_size<2) {
+		chunk_size = php_ob_default_buffer_size(TSRMLS_C);
+	}
+	initial_size = chunk_size;
+	block_size = chunk_size;
 	return php_ob_init(initial_size, block_size, output_handler, chunk_size, erase TSRMLS_CC);
 }
 /* }}} */
@@ -327,6 +343,9 @@ PHPAPI void php_end_implicit_flush(TSRMLS_D)
  */
 PHPAPI void php_ob_set_internal_handler(php_output_handler_func_t internal_output_handler, uint buffer_size, char *handler_name, zend_bool erase TSRMLS_DC)
 {
+	if (buffer_size<2) {
+		buffer_size = php_ob_default_buffer_size(TSRMLS_C);
+	}
 	if (OG(ob_nesting_level)==0 || OG(active_ob_buffer).internal_output_handler || strcmp(OG(active_ob_buffer).handler_name, OB_DEFAULT_HANDLER_NAME)) {
 		php_start_ob_buffer(NULL, buffer_size, erase TSRMLS_CC);
 	}
@@ -387,6 +406,10 @@ static int php_ob_init_named(uint initial_size, uint block_size, char *handler_n
 	if (!handler_gz || !handler_mb || !handler_ic) {
 		if (php_ob_handler_used(handler_name TSRMLS_CC)) {
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be used twice", handler_name);
+			return FAILURE;
+		}
+		if (!handler_gz && SG(headers_sent)) {
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "output handler '%s' cannot be activated - headers already sent", handler_name);
 			return FAILURE;
 		}
 		if (!handler_gz && php_ob_init_conflict(handler_name, "zlib output compression" TSRMLS_CC))
@@ -844,8 +867,8 @@ static int php_ob_buffer_status(php_ob_buffer *ob_buffer, zval *result)
 	else {
 		add_assoc_long(elem, "type", PHP_OUTPUT_HANDLER_USER);
 		add_assoc_long(elem, "initial_size", ob_buffer->size);
-		add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
 	}
+	add_assoc_long(elem, "chunk_size", ob_buffer->chunk_size);
 	add_assoc_long(elem, "status", ob_buffer->status);
 	add_assoc_string(elem, "name", ob_buffer->handler_name, 1);
 	add_assoc_bool(elem, "del", ob_buffer->erase);
