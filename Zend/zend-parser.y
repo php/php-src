@@ -595,15 +595,20 @@ object_property:
 ;
 
 scalar_object_property:
-		T_STRING			{ $$ = $1; }
-	|	'{' expr '}'	{ $$ = $2; }
+		variable_name	{ $$ = $1; }
 	|	cvar_without_objects { do_end_variable_parse(BP_VAR_R, 0 CLS_CC); $$ = $1; }
 ;
 
 
 object_dim_list:
 		object_dim_list '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
-	|	T_STRING { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
+	|	variable_name { znode tmp_znode, res;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&res, &tmp_znode, &$1 CLS_CC);  $1 = res; } '[' dim_offset ']' { fetch_array_dim(&$$, &$1, &$4 CLS_CC); }
+;
+
+
+variable_name:
+		T_STRING		{ $$ = $1; }
+	|	'{' expr '}'	{ $$ = $2; }
 ;
 
 
