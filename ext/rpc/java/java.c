@@ -1,4 +1,4 @@
-/*
+ /*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -52,12 +52,11 @@
 
 #ifdef PHP_WIN32
 #ifdef JNI_12
-#pragma comment(lib,"jvm.lib")
+#define JAVALIB "jvm.dll"
 #else
-#pragma comment(lib,"javai.lib")
+#define JAVALIB "javai.dll"
 #endif
 #else
-static void *javadl = 0;
 #endif
 
 /***************************************************************************/
@@ -67,12 +66,14 @@ static int le_jobject = 0;
 static char *classpath = 0;
 static char *libpath   = 0;
 static char *javahome  = 0;
+static char *javalib   = 0;
 
 static int iniUpdated  = 0;
 
 static JavaVM *jvm = 0;
 static JNIEnv *jenv = 0;
 static jclass php_reflect;
+static void *dl_handle = 0;
 
 static zend_class_entry java_class_entry;
 
@@ -91,6 +92,13 @@ PHP_INI_BEGIN()
   PHP_INI_ENTRY1("java.library.path",
     NULL, PHP_INI_ALL, OnIniUpdate, &libpath)
 #endif
+#ifdef JAVALIB
+  PHP_INI_ENTRY1("java.library",
+    JAVALIB, PHP_INI_ALL, OnIniUpdate, &javalib)
+#else
+  PHP_INI_ENTRY1("java.library",
+    NULL, PHP_INI_ALL, OnIniUpdate, &javalib)
+#endif
 PHP_INI_END()
 
 /***************************************************************************/
@@ -105,9 +113,7 @@ void jvm_destroy() {
     (*jvm)->DestroyJavaVM(jvm);
     jvm = 0;
   }
-#ifndef PHP_WIN32
-  if (javadl) dlclose(javadl);
-#endif
+  if (dl_handle) DL_UNLOAD(dl_handle);
   php_reflect = 0;
   jenv = 0;
 }
@@ -134,6 +140,11 @@ static int jvm_create() {
   jclass local_php_reflect;
   jthrowable error;
 
+  jint (JNICALL *JNI_CreateVM)(const void*,const void*,void*);
+#ifndef JNI_12
+  jint (JNICALL *JNI_DefaultArgs)(void*);
+#endif
+
 #ifdef JNI_11
   JDK1_1InitArgs vm_args;
 #else
@@ -144,6 +155,29 @@ static int jvm_create() {
 #endif
 
   iniUpdated=0;
+
+  if (javalib) {
+    dl_handle = DL_LOAD(javalib);
+
+    if (!dl_handle) {
+      php_error(E_ERROR, "Unable to load Java Library %s", javalib);
+      return -1;
+    }
+  }
+
+#ifndef JAVALIB
+  if (!dl_handle)
+    JNI_CreateVM = &JNI_CreateJavaVM;
+  else
+#endif
+
+  JNI_CreateVM = (jint (JNICALL *)(const void*,const void*,void*))
+    DL_FETCH_SYMBOL(dl_handle, "JNI_CreateJavaVM");
+
+  if (!JNI_CreateVM) {
+    php_error(E_ERROR, "Unable to locate CreateJavaVM function");
+    return -1;
+  }
 
 #ifdef JNI_12
 
@@ -156,12 +190,24 @@ static int jvm_create() {
   if (javahome)  addJVMOption(&vm_args, "-Djava.home=",         javahome);
   if (libpath)   addJVMOption(&vm_args, "-Djava.library.path=", libpath);
 
-  rc = JNI_CreateJavaVM(&jvm, (void**)&jenv, &vm_args);
-
 #else
 
+#ifndef JAVALIB
+  if (!dl_handle)
+    JNI_DefaultArgs = &JNI_GetDefaultJavaVMInitArgs;
+  else
+#endif
+
+  JNI_DefaultArgs = (jint (JNICALL *)(void*))
+    DL_FETCH_SYMBOL(dl_handle, "JNI_GetDefaultJavaVMInitArgs");
+
+  if (!JNI_DefaultArgs) {
+    php_error(E_ERROR, "Unable to locate GetDefaultJavaVMInitArgs function");
+    return -1;
+  }
+
   vm_args.version=0x00010001;
-  JNI_GetDefaultJavaVMInitArgs(&vm_args);
+  (*JNI_DefaultArgs)(&vm_args);
 
   if (!classpath) classpath = "";
   vm_args.classpath = classpath;
@@ -169,9 +215,10 @@ static int jvm_create() {
   vm_args.classhome = javahome;
   vm_args.libraryhome = libpath;
 #endif
-  rc = JNI_CreateJavaVM(&jvm, &jenv, &vm_args);
 
 #endif
+
+  rc = (*JNI_CreateVM)(&jvm, &jenv, &vm_args);
 
   if (rc) {
     php_error(E_ERROR, "Unable to create Java Virtual Machine");
