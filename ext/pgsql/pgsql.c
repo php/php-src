@@ -1045,7 +1045,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list TSRMLS_DC)
 	char *ret=NULL;
 
 	/* try to lookup the type in the resource list */
-	snprintf(hashed_oid_key,31,"pgsql_oid_%l", oid);
+	snprintf(hashed_oid_key,31,"pgsql_oid_%ld", oid);
 	hashed_oid_key[31]=0;
 
 	if (zend_hash_find(list,hashed_oid_key,strlen(hashed_oid_key)+1,(void **) &field_type)==SUCCESS) {
@@ -1495,7 +1495,7 @@ PHP_FUNCTION(pg_last_oid)
 		RETURN_FALSE;
 	} else if (oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%l", oid);
+		sprintf(oid_str, "%ld", oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)oid);
@@ -1638,7 +1638,7 @@ PHP_FUNCTION(pg_lo_create)
 	}
 	if (pgsql_oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%l", pgsql_oid);
+		sprintf(oid_str, "%ld", pgsql_oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)pgsql_oid);
@@ -1964,7 +1964,7 @@ PHP_FUNCTION(pg_lo_import)
 	} 
 	if (oid > LONG_MAX) {
 		oid_str = (char *)emalloc(PGSQL_MAX_LENGTH_OF_LONG+1);
-		sprintf(oid_str, "%l", oid);
+		sprintf(oid_str, "%ld", oid);
 		RETURN_STRING(oid_str, 0);
 	}
 	RETURN_LONG((long)oid);
