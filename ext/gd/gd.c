@@ -531,6 +531,8 @@ gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*io
 	}
 
 	return im;
+#else
+	return NULL;
 #endif
 }
 
