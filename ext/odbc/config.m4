@@ -82,6 +82,7 @@ AC_ARG_WITH(adabas,
 [  --with-adabas[=DIR]     Include Adabas D support.  DIR is the Adabas base
                           install directory, defaults to /usr/local.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local
   fi
@@ -113,6 +114,7 @@ AC_ARG_WITH(sapdb,
 [  --with-sapdb[=DIR]      Include SAP DB support.  DIR is SAP DB base
                           install directory, defaults to /usr/local.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local
   fi
@@ -139,6 +141,7 @@ AC_ARG_WITH(solid,
 [  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
                           install directory, defaults to /usr/local/solid],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local/solid
   fi
@@ -200,6 +203,7 @@ AC_ARG_WITH(empress,
 [  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
                           install directory, defaults to \$EMPRESSPATH],
 [
+  PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
       ODBC_INCDIR=$EMPRESSPATH/odbccl/include
@@ -227,6 +231,7 @@ AC_ARG_WITH(velocis,
 [  --with-velocis[=DIR]    Include Velocis support.  DIR is the Velocis base
                           install directory, defaults to /usr/local/velocis.],
 [
+  PHP_WITH_SHARED
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
       ODBC_INCDIR=/usr/local/velocis/include
@@ -296,6 +301,7 @@ AC_ARG_WITH(iodbc,
 [  --with-iodbc[=DIR]      Include iODBC support.  DIR is the iODBC base
                           install directory, defaults to /usr/local.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local
   fi
@@ -320,6 +326,7 @@ AC_ARG_WITH(esoob,
                           install directory,
                           defaults to /usr/local/easysoft/oob/client.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local/easysoft/oob/client
   fi
@@ -346,6 +353,7 @@ AC_ARG_WITH(unixODBC,
 [  --with-unixODBC[=DIR]   Include unixODBC support.  DIR is the unixODBC base
                           install directory, defaults to /usr/local.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local
   fi
@@ -373,6 +381,7 @@ AC_ARG_WITH(openlink,
                           OpenLink base install directory, defaults to
                           /usr/local/openlink.],
 [
+  PHP_WITH_SHARED
   if test "$withval" = "yes"; then
     withval=/usr/local/openlink
   fi
@@ -409,8 +418,8 @@ AC_ARG_WITH(dbmaker,
     # check DBMaker version (from 5.0 to 2.0)
     DBMAKER_VERSION=5.0
 
-    while [[ test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
-                 "$DBMAKER_VERSION" != "2.9" ]]; do
+    while test test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a \
+                 "$DBMAKER_VERSION" != "2.9"; do
         DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | awk '{ print $1-1;}'`
         MAJOR_V=`echo $DM_VER | awk '{ print $1/10; }' \
                  | awk  -F. '{ print $1; }'`
@@ -418,7 +427,7 @@ AC_ARG_WITH(dbmaker,
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
     done
 
-    if [[ "$DBMAKER_VERSION" = "2.9" ]]; then
+    if test "$DBMAKER_VERSION" = "2.9"; then
         withval=$DBMAKER_HOME
     else
         DBMAKER_PATH=$DBMAKER_HOME/$DBMAKER_VERSION
