@@ -165,7 +165,7 @@ ZEND_API int zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction
 
 	SET_INCONSISTENT(HT_OK);
 
-	while ((1 << i) < nSize) {
+	while ((1U << i) < nSize) {
 		i++;
 	}
 
