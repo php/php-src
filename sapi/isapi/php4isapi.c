@@ -86,6 +86,7 @@ static char *isapi_server_variables[] = {
 	"REMOTE_HOST",
 	"REMOTE_USER",
 	"REQUEST_METHOD",
+	"REQUEST_URI",
 	"SCRIPT_NAME",
 	"SERVER_NAME",
 	"SERVER_PORT",
