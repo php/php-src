@@ -1,3 +1,30 @@
+2001-11-24  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Added missing ini directive: always_populate_raw_po st_data
+
+    * main/SAPI.c: Added missing CVS Id tag.
+
+    * main/rfc1867.c: - Handle more error types when uploading files.
+
+2001-11-24  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c
+      main/php_variables.c: whitespace
+
+    * ext/imap/php_imap.c:
+    Honor error_reporting (in general and @ in particular) for IMAP notices
+
+    * ext/session/session.c:
+    Save entries in $_SESSION even if register_globals is on
+
+    * ext/session/session.c:
+    Entries registered with session_register() and altered by changing
+    $_SESSION (or $HTTP_SESSION_VARS) were not properly saved.  Fixed.
+
+    * ext/session/session.c: whitespace
+
 2001-11-23  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/common.php:
