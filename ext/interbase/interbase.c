@@ -42,6 +42,15 @@
 
 #ifndef SQL_DIALECT_CURRENT
 #define SQL_DIALECT_CURRENT 1 /* == SQL_DIALECT_V5 */
+
+/* IB < 6 doesn't define these */
+#ifdef PHP_WIN32
+typedef __int64 ISC_INT64;
+typedef unsigned __int64 ISC_UINT64;
+#else
+typedef long long ISC_INT64;
+typedef unsigned long long ISC_UINT64;
+#endif
 #endif
 
 #ifdef ZEND_DEBUG_
@@ -58,17 +67,11 @@
 #define ISC_LONG_MAX 2147483647
 
 #ifdef PHP_WIN32
-# ifndef ISC_INT64
-#  define ISC_INT64 __int64
-# endif
-# define LL_MASK "I64"
-# define LL_LIT(lit) lit ## I64
+#define LL_MASK "I64"
+#define LL_LIT(lit) lit ## I64
 #else
-# ifndef ISC_INT64
-#  define ISC_INT64 long long int
-# endif
-# define LL_MASK "ll"
-# define LL_LIT(lit) lit ## ll
+#define LL_MASK "ll"
+#define LL_LIT(lit) lit ## ll
 #endif
 
 #define QUERY_RESULT	1
@@ -319,10 +322,10 @@ typedef struct {
 static inline int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd)
 {
 	/* shortcut for most common case */
-	if (sizeof(ISC_QUAD) == sizeof(unsigned ISC_INT64)) {
-		return sscanf(id, BLOB_ID_MASK, (unsigned ISC_INT64 *) qd);
+	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
+		return sscanf(id, BLOB_ID_MASK, (ISC_UINT64 *) qd);
 	} else {
-		unsigned ISC_INT64 res;
+		ISC_UINT64 res;
 		if (sscanf(id, BLOB_ID_MASK, &res)) {
 			qd->gds_quad_high = (ISC_LONG) (res >> 0x20);
 			qd->gds_quad_low = (ISC_LONG) (res & 0xFFFFFFFF);
@@ -337,10 +340,10 @@ static inline char *_php_ibase_quad_to_string(ISC_QUAD const qd)
 	char *result = (char *) emalloc(BLOB_ID_LEN+1);
 
 	/* shortcut for most common case */
-	if (sizeof(ISC_QUAD) == sizeof(unsigned ISC_INT64)) {
-		sprintf(result, BLOB_ID_MASK, *(unsigned ISC_INT64*)(void *) &qd); 
+	if (sizeof(ISC_QUAD) == sizeof(ISC_UINT64)) {
+		sprintf(result, BLOB_ID_MASK, *(ISC_UINT64*)(void *) &qd); 
 	} else {
-		unsigned ISC_INT64 res = ((unsigned ISC_INT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
+		ISC_UINT64 res = ((ISC_UINT64) qd.gds_quad_high << 0x20) | qd.gds_quad_low;
 		sprintf(result, BLOB_ID_MASK, res);
 	}
 	result[BLOB_ID_LEN] = '\0';
@@ -718,6 +721,20 @@ PHP_MINFO_FUNCTION(ibase)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Interbase Support", "enabled");
+
+	php_info_print_table_row(2, "Client Library",
+#if (SQLDA_CURRENT_VERSION == 1 && SQL_DIALECT_CURRENT == 1)
+		"Interbase 5.6 or earlier");
+#elif (SQLDA_CURRENT_VERSION == 2 && SQL_DIALECT_CURRENT == 3)
+		"Interbase 7 or later");
+#elif !defined(DSC_null)
+		"Interbase 6");
+#elif !defined(FB_SQLDA)
+		"Firebird 1.0");
+#else
+		"Firebird 1.5 or later");
+#endif
+
 	php_info_print_table_row(2, "Revision", FILE_REVISION);
 #ifdef COMPILE_DL_INTERBASE
 	php_info_print_table_row(2, "Dynamic Module", "Yes");
@@ -725,19 +742,17 @@ PHP_MINFO_FUNCTION(ibase)
 	php_info_print_table_row(2, "Allow Persistent Links", (IBG(allow_persistent) ? "Yes" : "No"));
 
 	if (IBG(max_persistent) == -1) {
-		snprintf(tmp, 31, "%ld/unlimited", IBG(num_persistent));
+		sprintf(tmp, "%ld/unlimited", IBG(num_persistent));
 	} else {
-		snprintf(tmp, 31, "%ld/%ld", IBG(num_persistent), IBG(max_persistent));
+		sprintf(tmp, "%ld/%ld", IBG(num_persistent), IBG(max_persistent));
 	}
-	tmp[31] = 0;
 	php_info_print_table_row(2, "Persistent Links", tmp);
 
 	if (IBG(max_links) == -1) {
-		snprintf(tmp, 31, "%ld/unlimited", IBG(num_links));
+		sprintf(tmp, "%ld/unlimited", IBG(num_links));
 	} else {
-		snprintf(tmp, 31, "%ld/%ld", IBG(num_links), IBG(max_links));
+		sprintf(tmp, "%ld/%ld", IBG(num_links), IBG(max_links));
 	}
-	tmp[31] = 0;
 	php_info_print_table_row(2, "Total Links", tmp);
 
 	php_info_print_table_row(2, "Timestamp Format", IBG(timestampformat));
