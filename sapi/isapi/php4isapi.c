@@ -447,7 +447,7 @@ static void sapi_isapi_register_zeus_variables(LPEXTENSION_CONTROL_BLOCK lpECB, 
 	}
 	variable_len = ISAPI_SERVER_VAR_BUF_SIZE;
 	if ( lpECB->GetServerVariable(lpECB->ConnID, "AUTH_TYPE", static_variable_buf, &variable_len) && static_variable_buf[0] )  {
-		php_register_variable( "PHP_AUTH_TYPE", static_variable_buf, track_vars_array TSRMLS_CC );
+		php_register_variable( "AUTH_TYPE", static_variable_buf, track_vars_array TSRMLS_CC );
 	}
 	
 	/* And now, for the SSL variables (if applicable) */
