@@ -583,9 +583,10 @@ PHP_FUNCTION(sybase_select_db)
 
 static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pval **result_ptr, int column_type)
 {
-	zval *result = *result_ptr;
+	zval *result;
 
 	ALLOC_INIT_ZVAL(result);
+	*result_ptr = result;
 
 	if (dbdatlen(sybase_ptr->link,offset) == 0) {
 		var_reset(result);
