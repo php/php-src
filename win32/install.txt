@@ -277,7 +277,7 @@ Web server configuration
   following lines to your httpd.conf:
 
    LoadModule php5_module c:/php/sapi/php4apache.dll
-   AddModule mod_php4.c
+   AddModule mod_php5.c
    AddType application/x-httpd-php .php
 
   Note: Especially newer versions of Apache do not need the
