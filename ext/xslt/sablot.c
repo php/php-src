@@ -12,7 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Sterling Hughes <sterling@php.net>                           |
+   | Authors: Sterling Hughes <sterling@php.net>                          |
+   |          David Viner <dviner@php.net>                                |
+   |          Lehnar Lohmus <flex@php.net>                                |
+   |          Melvyn Sopacua <msopacua@php.net>                           |
    +----------------------------------------------------------------------+
  */
 
@@ -537,6 +540,7 @@ PHP_FUNCTION(xslt_process)
 		xslt_make_array(args_p, &args);
 		/* Can return NULL */
 		if (args) {
+			char *baseuri;
 			i=0;
 			while (args[i]) {
 				/* We can safely add args[i+1] since xslt_make_array sets args[i] to NULL if
@@ -545,6 +549,18 @@ PHP_FUNCTION(xslt_process)
 				SablotAddArgBuffer(XSLT_SITUATION(handle), XSLT_PROCESSOR(handle), args[i], args[i+1]);
 				i += 2;
 			}
+
+			/* Since we have args passed, we need to set the base uri, so pull in executor
+				globals and set the base, using the current filename, specifally for the
+				'arg' scheme */
+			TSRMLS_FETCH();
+			baseuri = (char *)emalloc(strlen(zend_get_executed_filename(TSRMLS_C))+7+1);
+			sprintf(baseuri, "file://%s", zend_get_executed_filename(TSRMLS_C));
+
+			SablotSetBaseForScheme(XSLT_PROCESSOR(handle), "arg", baseuri);
+
+			if(baseuri)
+				efree(baseuri);
 		}
 	}
 	
