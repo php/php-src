@@ -23,8 +23,12 @@ function message($msg) {
 }
 
 function error_msg() {
-	if (array_key_exists('php_errormsg',$GLOBALS)) return $GLOBALS['php_errormsg'];
-	return 'php.ini: track_errors is off';
+	$ret = '<b style="color:green">O.K.</b>';
+	if (array_key_exists('php_errormsg',$GLOBALS) && strlen($GLOBALS['php_errormsg'])) {
+		$ret = '<b style="color:red">'.$GLOBALS['php_errormsg'].'</b>';
+		$GLOBALS['php_errormsg'] = '';
+	}
+	return $ret;
 }
 
 /****************************************************************************/
@@ -39,17 +43,22 @@ function _search_file($root,&$possible,$path='') {
 			//error_log("search_file($root$path):$type=$found",0);
 			switch( $type) {
 				case 'file':
-				$pos = strpos($found,'.');
-				if ( $pos !== false && strtolower(substr($found,$pos+1))=='jpg') {
-					$possible[] = $root.$path.'/'.$found;
-					//error_log("search_file($root$path) add:$path/$found",0);
-				}
-				break;
+					$pos = strpos($found,'.');
+					if ( $pos !== false
+					   && (  strtolower(substr($found,$pos+1))=='jpg'
+					      || strtolower(substr($found,$pos+1))=='tif'
+					      )
+					   )
+					{
+						$possible[] = $root.$path.'/'.$found;
+						//error_log("search_file($root$path) add:$path/$found",0);
+					}
+					break;
 				case 'dir':
-				if ( $found!='.' && $found!='..') {
-					$sub[count($sub)] = $found;
-				}
-				break;
+					if ( $found!='.' && $found!='..') {
+						$sub[count($sub)] = $found;
+					}
+					break;
 			}
 		}
 		@closedir($dir);
@@ -70,8 +79,10 @@ function search_file() {
 
 	if ( array_key_exists('SCRIPT_FILENAME',$_SERVER)) {
 		$path = $_SERVER['SCRIPT_FILENAME'];
+		//error_log("SCRIPT_FILENAME($path)",0);
 	} else {
 		$path = $argv[0];
+		//error_log("argv($path)",0);
 	}
 	if ( ($p=strpos($path,'?')) !== false) $path = substr($path,0,$p);
 	if ( ($p=strrpos($path,'/')) < strlen($path)-1) $path = substr($path,0,$p);
@@ -91,10 +102,12 @@ function AddInfo($Name,$Value) {
 
 $possible = search_file();
 
+$title = "PHP module exif test page";
+
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional">
 <html>
 <head>
-<title>PHP moduls exif test page</title>
+<title><?=$title ?></title>
 <style type="text/css">
 body {
 	font-size: 12pt;
@@ -110,12 +123,14 @@ h2 {
 th {
 	text-align: left;
 }
+ul {
+	margin-bottom: 6pt;
+}
 </style>
 </head>
 <body>
-<h1>Test script for PHP module ext/exif</h1>
-<p>
-(c) Marcus Boerger, 2002
+<h1><?=$title ?></h1>
+<h2>(c) Marcus Boerger, 2002</h2>
 </p>
 <p>
 Images taken from <a href="http://www.exif.org">www.exif.org</a>,
@@ -139,12 +154,31 @@ What to look for in detail:
 <ul>
 <li>kodak-dc4800-plus-acdsee.jpg
 	<ul>
-	<li>should provide a long comment 'by marcus b&ouml;rger&lt;%04i&gt;'*n</li>
+	<li>should provide a <b>long</b> comment 'by marcus b&ouml;rger&lt;%04i&gt;'*n</li>
+	<li>this file returns an array but it also produces an errormessage because ACDSee destroys
+	    the integrity of IFD directory (size of directory and offsets of entries following any
+	    edited entry maybe wrong).
+	</li>
 	</ul>
 </li>
-<li>hp-photosmart
+<li>hp-photosmart.jpg
 	<ul>
-	<li>should provide a ***two line*** copyright notice</li>
+	<li>should provide a <b>two line</b> copyright notice</li>
+	</ul>
+</li>
+<li>olympus-d320l
+	<ul>
+	<li>should provide an <b>APP12</b> infoset</li>
+	</ul>
+</li>
+<li>unknown.jpg
+	<ul>
+	<li>should provide an <b>empty</b> comment, this is a comment section and not an IFD0, EXIF or GPS section</li>
+	</ul>
+</li>
+<li>some images
+	<ul>
+	<li>have empty fields, that is the tag is present but no data is stored</li>
 	</ul>
 </li>
 </ul>
@@ -164,7 +198,7 @@ if (function_exists('exif_headername')) {
 ?>
 </table>
 <br clear="all">
-<h2>function read_exif_data for <?=count($possible)?> images</h2>
+<h2>function exif_read_data for <?=count($possible)?> images</h2>
 <table border='1' cellspacing='0' cellpadding='3' summary="EXIF information">
 <?php
 if (function_exists('read_exif_data')) {
@@ -173,28 +207,33 @@ if (function_exists('read_exif_data')) {
 		$num++;
 		$res   = '';
 		$len   = 2;
-		$image = @read_exif_data($file,false);
+		error_log("exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');",0);
+		$image = exif_read_data($file,'COMMENT,IFD0,EXIF,APP12');
 		$error = error_msg();
-		//error_log("read_exif_data($file)",0);
-		foreach($image as $Name => $Value) {
-			if ( $Name!='Thumbnail') {
-				if ( is_array($Value)) {
-					$len++;
-					$res .= AddInfo($Name,'Array('.count($Value).')');
-					foreach( $Value as $idx => $Entry) {
+		//error_log("exif_read_data($file)",0);
+		if ( $image === false) {
+		    $error = '<b style="color:red">exif_read_data returned false</b><br>'.$error;
+		} else {
+			foreach($image as $Name => $Value) {
+				if ( $Name!='Thumbnail') {
+					if ( is_array($Value)) {
 						$len++;
-						$res .= AddInfo($Name.':'.$idx,$Entry);
+						$res .= AddInfo($Name,'Array('.count($Value).')');
+						foreach( $Value as $idx => $Entry) {
+							$len++;
+							$res .= AddInfo($Name.':'.$idx,$Entry);
+						}
+					} else {
+						$len++;
+						$res .= AddInfo($Name,$Value);
 					}
-				} else {
-					$len++;
-					$res .= AddInfo($Name,$Value);
 				}
 			}
 		}
 		echo "<tr><td rowspan='$len' valign='top'>$num</td></tr><tr><th>$file</th><td>$error</td></tr>\n$res";
 	}
 } else {
-	echo "<tr><td>function read_exif_data is not supported</td></tr>\n";
+	echo "<tr><td>function exif_read_data is not supported</td></tr>\n";
 }
 ?>
 </table>
