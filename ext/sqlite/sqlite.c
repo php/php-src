@@ -1969,6 +1969,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 	if (res->curr_row < res->nrows) {
 		php_sqlite_fetch_array(res, PHPSQLITE_ASSOC, decode_binary, 1, &dataset TSRMLS_CC);
 	} else {
+		php_std_error_handling();
 		RETURN_FALSE;
 	}
 
