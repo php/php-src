@@ -58,16 +58,21 @@ ZEND_API void zend_html_puts(const char *s, uint len)
 	const char *ptr=s, *end=s+len;
 	
 	while (ptr<end) {
-		if (*ptr==' '
-			&& len>1
-			&& !(((ptr+1)>=end) || (*(ptr+1)==' ')) /* next is not a space */
-			&& !((ptr==s) || (*(ptr-1)==' '))) /* last is not a space */ {
-			char c = *ptr++;
-
-			ZEND_PUTC(c);
-			continue;
+		if (*ptr==' ') {
+			/* Series of spaces should be displayed as &nbsp;'s
+			 * whereas single spaces should be displayed as a space
+			 */
+			if ((ptr+1) < end && *(ptr+1)==' ') {
+				do {
+					zend_html_putc(*ptr);
+				} while ((++ptr < end) && (*ptr==' '));
+			} else {
+				ZEND_PUTC(*ptr);
+				ptr++;
+			}
+		} else {
+			zend_html_putc(*ptr++);
 		}
-		zend_html_putc(*ptr++);
 	}
 }
 
