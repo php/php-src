@@ -41,6 +41,7 @@ PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
 
 struct php_unserialize_data {
 	void *first;
+	void *first_dtor;
 };
 
 typedef struct php_unserialize_data php_unserialize_data_t;
@@ -54,7 +55,8 @@ PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsig
    zend_hash_destroy(&(var_hash))
 
 #define PHP_VAR_UNSERIALIZE_INIT(var_hash) \
-	(var_hash).first = 0
+	(var_hash).first = 0; \
+	(var_hash).first_dtor = 0
 #define PHP_VAR_UNSERIALIZE_DESTROY(var_hash) \
 	var_destroy(&(var_hash))
 
