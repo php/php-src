@@ -1613,9 +1613,6 @@ PHP_MINIT_FUNCTION(simplexml)
 	INIT_CLASS_ENTRY(sxe, "simplexml_element", sxe_functions);
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
-#if HAVE_SPL && !defined(COMPILE_DL_SPL)
-	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, spl_ce_RecursiveIterator);
-#endif
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 	sxe_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
 	sxe_object_handlers.get_class_entry = zend_get_std_object_handlers()->get_class_entry;
@@ -1637,6 +1634,9 @@ PHP_MSHUTDOWN_FUNCTION(simplexml)
  */
 PHP_RINIT_FUNCTION(simplexml)
 {
+#if HAVE_SPL && !defined(COMPILE_DL_SPL)
+	zend_class_implements(sxe_class_entry TSRMLS_CC, 1, spl_ce_RecursiveIterator);
+#endif
 	return SUCCESS;
 }
 /* }}} */
