@@ -150,7 +150,8 @@ struct _sapi_module_struct {
 #define SAPI_HEADER_DO_SEND				2
 #define SAPI_HEADER_SEND_FAILED			3
 
-#define SAPI_DEFAULT_CONTENT_TYPE "Content-Type: text/html"
+#define SAPI_DEFAULT_CONTENT_TYPE	"Content-Type: text/html"
+#define SAPI_PHP_VERSION_HEADER		"PHP-Version: " PHP_VERSION
 
 #define SAPI_POST_READER_FUNC(post_reader) void post_reader(char *content_type_dup SLS_DC)
 
