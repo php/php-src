@@ -591,7 +591,8 @@ PHPAPI int php_raw_url_decode(char *str, int len)
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
-	char *url, *url_len;
+	char *url;
+	int url_len;
 	php_stream_context *context = NULL;
 	php_stream *stream;
 	zval **prev_val, **hdr = NULL;
