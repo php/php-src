@@ -6,8 +6,6 @@
 
 - Add user-space callback to handle busy databases.
 
-- Implement persistent "connections".
-
 - Test-suite
 
 vim:tw=78
