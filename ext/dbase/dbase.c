@@ -431,6 +431,8 @@ PHP_FUNCTION(dbase_get_record)
 	dbfield_t *dbf, *cur_f;
 	char *data, *fnp, *str_value;
 	size_t cursize = 0;
+	long overflow_test;
+	int errno_save;
 	DBase_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
@@ -476,7 +478,16 @@ PHP_FUNCTION(dbase_get_record)
 		case 'I':	/* FALLS THROUGH */
 		case 'N':
 			if (cur_f->db_fdc == 0) {
-				add_next_index_long(return_value, strtol(str_value, NULL, 10));
+				/* Large integers in dbase can be larger than long */
+				errno_save = errno;
+				overflow_test = strtol(str_value, NULL, 10);
+				if (errno == ERANGE) {
+				    /* If the integer is too large, keep it as string */
+				    add_next_index_string(return_value, str_value, 1);
+				} else {
+				    add_next_index_long(return_value, overflow_test);
+				}
+				errno = errno_save;
 			} else {
 				add_next_index_double(return_value, atof(str_value));
 			}
@@ -528,6 +539,8 @@ PHP_FUNCTION(dbase_get_record_with_names)
 	int dbh_type;
 	dbfield_t *dbf, *cur_f;
 	char *data, *fnp, *str_value;
+	long overflow_test;
+	int errno_save;
 	DBase_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &dbh_id, &record)==FAILURE) {
@@ -568,7 +581,16 @@ PHP_FUNCTION(dbase_get_record_with_names)
 			case 'I':	/* FALLS THROUGH */
 			case 'N':
 				if (cur_f->db_fdc == 0) {
-					add_assoc_long(return_value, cur_f->db_fname, strtol(str_value, NULL, 10));
+					/* Large integers in dbase can be larger than long */
+					errno_save = errno;
+					overflow_test = strtol(str_value, NULL, 10);
+					if (errno == ERANGE) {
+					    /* If the integer is too large, keep it as string */
+					    add_assoc_string(return_value, cur_f->db_fname, str_value, 1);
+					} else {
+					    add_assoc_long(return_value, cur_f->db_fname, overflow_test);
+					}
+					errno = errno_save;
 				} else {
 					add_assoc_double(return_value, cur_f->db_fname, atof(str_value));
 				}
