@@ -76,11 +76,17 @@ define('DB_WARNING_READ_ONLY', -1001);
  * There is one extension though, a "&" character means an opaque
  * parameter.  An opaque parameter is simply a file name, the real
  * data are in that file (useful for stuff like putting uploaded files
- * into your database).
+ * into your database). The "!" char means a parameter that must be left
+ * as it is.
+ * They modify the quote behavoir:
+ * DB_PARAM_SCALAR (?) => 'original string quoted'
+ * DB_PARAM_OPAQUE (&) => 'string from file quoted'
+ * DB_PARAM_MISC   (!) => original string
  */
 
 define('DB_PARAM_SCALAR', 1);
 define('DB_PARAM_OPAQUE', 2);
+define('DB_PARAM_MISC',   3);
 
 /*
  * These constants define different ways of returning binary data
