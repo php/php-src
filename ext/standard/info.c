@@ -146,14 +146,13 @@ PHPAPI char *php_get_uname()
 
 /* {{{ php_print_info
  */
-PHPAPI void php_print_info(int flag)
+PHPAPI void php_print_info(int flag TSRMLS_DC)
 {
 	char **env,*tmp1,*tmp2;
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
 	struct tm *ta, tmbuf;
-	TSRMLS_FETCH();
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
@@ -475,7 +474,7 @@ PHP_FUNCTION(phpinfo)
 			WRONG_PARAM_COUNT;
 			break;
 	}
-	php_print_info(flag);
+	php_print_info(flag TSRMLS_CC);
 	RETURN_TRUE;
 }
 
