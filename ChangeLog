@@ -1,3 +1,94 @@
+2002-03-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php: * per-command fold marks
+
+    * pear/PEAR/Packager.php: * regenerate package.xml with file checksums
+
+    * pear/package.dtd: * default dep rel attribute to 'has'
+
+    * pear/PEAR/Common.php: * accept optional tmpdir arg in mkTempDir
+    * handle changelog releases without filelist
+
+2002-03-28  Andrei Zmievski  <andrei@php.net>
+
+    * NEWS: Cleanup.
+
+2002-03-28  Joseph Tate  <jtate@mi-corporation.com>
+
+    * win32/php4ts.dsp: Fixed build of php4ts Release_TSDbg under Win32
+
+    * ext/crack/crack.dsp
+      ext/crack/CREDITS:
+    -Crack extension now available for Win32 platforms.  You will need to
+     acquire the cracklib libraries from
+     http://www.jtatesoftware.com/cracklib/.
+
+
+2002-03-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: * added preferred_state config keyword
+
+    * pear/PEAR/Common.php: * added phpdoc
+    * now ready to support multiple versions of the package format
+    * don't parse dependencies in changelog
+    * fix libfile parsing
+    * default maintainer roles to 'lead'
+    * added infoFromString() method
+    * added xmlFromInfo() method to regenerate package.xml files
+
+2002-03-28  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/HTML/Select.php:
+    Avoid warning message in toHtml() method when no default element specified
+
+2002-03-28  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * added "platform" and "md5sum" attributes to <file>
+
+2002-03-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in: - Back out broken patch
+
+    * configure.in: - Backout Makefile patch, it caused problems
+
+    * configure.in:
+    - MFB for fix build for BSD: BSD_MAKEFILE and resolver functions. (Patch by
+      Melvyn Sopacua <msopacua@idg.nl>)
+
+    * configure.in:
+    - Fix build for BSD: BSD_MAKEFILE and resolver functions. (Patch by Melvyn
+      Sopacua <msopacua@idg.nl>)
+
+    * ext/standard/string.c: - MFH for bug 16314
+
+    * ext/sysvsem/sysvsem.c: - MFB
+
+    * ext/sysvsem/sysvsem.c: - Fix build on BSDI
+
+2002-03-28  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/tests/file/002.phpt: add test for file_get_contents
+
+    * ext/openssl/tests/001.phpt
+      ext/openssl/openssl.c: Add subject hash to parsed x509 data.
+    Make the test use file_get_contents().
+
+    * main/memory_streams.c
+      main/network.c
+      main/php_streams.h
+      main/streams.c
+      main/user_streams.c
+      ext/standard/file.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/php_fopen_wrapper.c
+      ext/zlib/zlib_fopen_wrapper.c: Phase 3 of OO wrapper cleanup
+
+    * ext/mailparse/tests/004.phpt
+      ext/mailparse/tests/005.phpt
+      ext/mailparse/mailparse.c:
+    make quoted-printable encoding safe for use with digital signatures. Added some tests
+
 2002-03-27  Jani Taskinen  <sniper@iki.fi>
 
     * ext/gmp/gmp.c: MFH: fixed bug: #16237
