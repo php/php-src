@@ -158,9 +158,15 @@ xmlNodePtr check_and_resolve_href(xmlNodePtr data)
 		if (href) {
 			/*  Internal href try and find node */
 			if (href->children->content[0] == '#') {
-				return get_node_with_attribute_recursive(data->doc->children, NULL, "id", &href->children->content[1]);
+				xmlNodePtr ret = get_node_with_attribute_recursive(data->doc->children, NULL, "id", &href->children->content[1]);
+				if (!ret) {
+					php_error(E_ERROR,"Unresolved reference '%s'",href->children->content);					
+				}
+				data = ret;
+			} else {
+				/*  TODO: External href....? */
+				php_error(E_ERROR,"External reference '%s'",href->children->content);					
 			}
-			/*  TODO: External href....? */
 		}
 	}
 	return data;

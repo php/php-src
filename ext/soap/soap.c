@@ -1734,7 +1734,6 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 	int cur_param = 0,num_of_params = 0;
 	zval tmp_function_name, **tmp_parameters = NULL;
 	sdlFunctionPtr function;
-	sdlBindingPtr binding;
 
 	ZVAL_EMPTY_STRING(function_name);
 
@@ -1812,40 +1811,76 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 
 	function = get_function(sdl, php_strtolower((char *)func->name, strlen(func->name)));
 	if (sdl != NULL && function == NULL) {
-		php_error(E_ERROR, "Error function \"%s\" doesn't exists for this service \"%s\"", func->name, binding->location);
+		php_error(E_ERROR, "Error function \"%s\" doesn't exists for this service", func->name);
 	}
 
-	if (func->children) {
-		trav = func->children;
-		if (function == NULL) {
-			do {
-				if (trav->type == XML_ELEMENT_NODE) {
-					num_of_params++;
-				}
-			} while ((trav = trav->next));
-		} else {
-			num_of_params = zend_hash_num_elements(function->requestParameters);
-		}
+	if (function != NULL) {
+		sdlParamPtr *param;
+		xmlNodePtr val;
+		int	use_names = 0;
 
-		tmp_parameters = emalloc(num_of_params * sizeof(zval *));
-		trav = func->children;
-		do {
-			if (trav->type == XML_ELEMENT_NODE) {
-				encodePtr enc;
-				sdlParamPtr *param = NULL;
-				if (function != NULL &&
-				    zend_hash_index_find(function->requestParameters, cur_param, (void **)&param) == FAILURE) {
-					php_error(E_ERROR, "Error cannot find parameter");
-				}
-				if (param == NULL) {
-					enc = get_conversion(UNKNOWN_TYPE);
-				} else {
-					enc = (*param)->encode;
-				}
-				tmp_parameters[cur_param] = master_to_zval(enc, trav);
-				cur_param++;
+		num_of_params = zend_hash_num_elements(function->requestParameters);
+		zend_hash_internal_pointer_reset(function->requestParameters);
+		while (zend_hash_get_current_data(function->requestParameters, (void **)&param) == SUCCESS) {
+			zend_hash_move_forward(function->requestParameters);
+			if (get_node(func->children, (*param)->paramName) != NULL) {
+				use_names = 1;
 			}
-		} while ((trav = trav->next));
+			zend_hash_move_forward(function->requestParameters);
+		}
+		if (use_names) {
+			tmp_parameters = emalloc(num_of_params * sizeof(zval *));
+			zend_hash_internal_pointer_reset(function->requestParameters);
+			while (zend_hash_get_current_data(function->requestParameters, (void **)&param) == SUCCESS) {
+				val = get_node(func->children, (*param)->paramName);
+				if (!val) {
+					/* TODO: may be "nil" is not OK? */
+					MAKE_STD_ZVAL(tmp_parameters[cur_param]);
+					ZVAL_NULL(tmp_parameters[cur_param]);
+				} else {
+					tmp_parameters[cur_param] = master_to_zval((*param)->encode, val);
+				} 	
+				cur_param++;
+
+				zend_hash_move_forward(function->requestParameters);
+			}
+			(*parameters) = tmp_parameters;
+			(*num_params) = num_of_params;
+			return;
+		}
+	} 
+	if (func->children) {
+		num_of_params = 0;
+		trav = func->children;
+		while (trav != NULL) {
+			if (trav->type == XML_ELEMENT_NODE) {
+				num_of_params++;
+			}
+			trav = trav->next;
+		}
+		if (num_of_params > 0) {
+			tmp_parameters = emalloc(num_of_params * sizeof(zval *));
+
+			trav = func->children;
+			while (trav != 0 && cur_param < num_of_params) {
+				if (trav->type == XML_ELEMENT_NODE) {
+					encodePtr enc;
+					sdlParamPtr *param = NULL;
+					if (function != NULL &&
+					    zend_hash_index_find(function->requestParameters, cur_param, (void **)&param) == FAILURE) {
+						php_error(E_ERROR, "Error cannot find parameter");
+					}
+					if (param == NULL) {
+						enc = get_conversion(UNKNOWN_TYPE);
+					} else {
+						enc = (*param)->encode;
+					}
+					tmp_parameters[cur_param] = master_to_zval(enc, trav);
+					cur_param++;
+				}
+				trav = trav->next;
+			}
+		}
 	}
 	(*parameters) = tmp_parameters;
 	(*num_params) = num_of_params;
@@ -1854,7 +1889,7 @@ static void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *functi
 static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version TSRMLS_DC)
 {
 	xmlDoc *doc;
-	xmlNode *envelope,*body,*method, *param;
+	xmlNode *envelope,*body,*method = NULL, *param;
 	xmlNs *ns;
 	sdlParamPtr parameter = NULL;
 	smart_str *gen_ns = NULL;
@@ -1984,7 +2019,9 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);
 		} else if (version == SOAP_1_2) {
 			xmlSetProp(envelope, "xmlns:"SOAP_1_2_ENC_NS_PREFIX, SOAP_1_2_ENC_NAMESPACE);
-			/*xmlSetProp(envelope, SOAP_1_2_ENV_NS_PREFIX"encodingStyle", SOAP_1_2_ENC_NAMESPACE);*/
+			if (method) {
+				xmlSetProp(method, SOAP_1_2_ENV_NS_PREFIX":encodingStyle", SOAP_1_2_ENC_NAMESPACE);
+			}
 		}
 	}
 
@@ -2073,7 +2110,9 @@ static xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function,
 			xmlSetProp(envelope, SOAP_1_1_ENV_NS_PREFIX":encodingStyle", SOAP_1_1_ENC_NAMESPACE);
 		} else if (version == SOAP_1_2) {
 			xmlSetProp(envelope, "xmlns:"SOAP_1_2_ENC_NS_PREFIX, SOAP_1_2_ENC_NAMESPACE);
-			/*xmlSetProp(envelope, SOAP_1_2_ENV_NS_PREFIX":encodingStyle", SOAP_1_2_ENC_NAMESPACE);*/
+			if (method) {
+				xmlSetProp(method, SOAP_1_2_ENV_NS_PREFIX":encodingStyle", SOAP_1_2_ENC_NAMESPACE);
+			}
 		}
 	}
 
