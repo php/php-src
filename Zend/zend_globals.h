@@ -30,6 +30,7 @@
 #include "zend_ptr_stack.h"
 #include "zend_hash.h"
 #include "zend_llist.h"
+#include "zend_fast_cache.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -173,18 +174,17 @@ struct _zend_executor_globals {
 };
 
 
-
 struct _zend_alloc_globals {
 	zend_mem_header *head;		/* standard list */
 	zend_mem_header *phead;		/* persistent list */
 	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 	unsigned char cache_count[MAX_CACHED_MEMORY];
-	void *zval_list_head;
+	void *fast_cache_list_head[MAX_FAST_CACHE_TYPES];
 
 #if ZEND_DEBUG
 	/* for performance tuning */
 	int cache_stats[MAX_CACHED_MEMORY][2];
-	int zval_cache_stats[2];
+	int fast_cache_stats[MAX_FAST_CACHE_TYPES][2];
 #endif
 #if MEMORY_LIMIT
 	unsigned int memory_limit;

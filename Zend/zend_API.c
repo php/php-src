@@ -188,7 +188,8 @@ ZEND_API void wrong_param_count()
 	
 ZEND_API inline int array_init(zval *arg)
 {
-	arg->value.ht = (HashTable *) emalloc(sizeof(HashTable));
+	ALLOC_HASHTABLE(arg->value.ht);
+
 	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0)) {
 		zend_error(E_CORE_ERROR, "Cannot allocate memory for array");
 		return FAILURE;
@@ -206,7 +207,8 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 		zend_hash_apply(&class_type->default_properties, (int (*)(void *)) zval_update_constant);
 		class_type->constants_updated = 1;
 	}
-	arg->value.obj.properties = (HashTable *) emalloc(sizeof(HashTable));
+	
+	ALLOC_HASHTABLE(arg->value.obj.properties);
 	zend_hash_init(arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	arg->type = IS_OBJECT;

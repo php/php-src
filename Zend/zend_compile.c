@@ -25,7 +25,7 @@
 #include "zend_API.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
-#include "zend_zval_alloc.h"
+#include "zend_fast_cache.h"
 
 
 ZEND_API zend_op_array *(*zend_compile_files)(int mark_as_ref CLS_DC, int file_count, ...);
@@ -1006,7 +1006,7 @@ static void function_add_ref(zend_function *function)
 			HashTable *static_variables = op_array->static_variables;
 			zval *tmp_zval;
 
-			op_array->static_variables = (HashTable *) emalloc(sizeof(HashTable));
+			ALLOC_HASHTABLE(op_array->static_variables);
 			zend_hash_init(op_array->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_copy(op_array->static_variables, static_variables, (void (*)(void *)) zval_add_ref, (void *) &tmp_zval, sizeof(zval *));
 		}
@@ -1817,7 +1817,7 @@ void do_fetch_global_or_static_variable(znode *varname, znode *static_assignment
 		convert_to_string(&varname->u.constant);
 		*tmp = static_assignment->u.constant;
 		if (!CG(active_op_array)->static_variables) {
-			CG(active_op_array)->static_variables = (HashTable *) emalloc(sizeof(HashTable));
+			ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
 			zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 		}
 		zend_hash_update_ptr(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, tmp, sizeof(zval *), NULL);
