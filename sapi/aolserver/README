@@ -2,8 +2,16 @@ AOLserver README ($Id$)
 
 To compile PHP 4.0 as a module for AOLserver, you need:
 
-- AOLserver 3.0 source distribution
-- installed AOLserver 3.0 
+- AOLserver 3.0 source distribution (not required for AOLserver >= 3.1)
+- installed AOLserver 3.0 or later
+
+
+NOTE: You should not use this module in production. PHP is not 100% stable
+      yet in threaded mode. To increase reliability enable the Global Lock
+      by removing #define NO_GLOBAL_LOCK in main/main.c. Also don't use
+      php_value as it will lead to races in a sub-system (use an ini file
+      instead).
+
 
 1.) Configuring AOLserver
 

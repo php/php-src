@@ -557,6 +557,14 @@ php_ns_config(php_ns_context *ctx, char global)
 			Ns_RegisterRequest(ctx->ns_server, "GET", value, php_ns_request_handler, NULL, ctx, 0);
 			Ns_RegisterRequest(ctx->ns_server, "POST", value, php_ns_request_handler, NULL, ctx, 0);
 			Ns_RegisterRequest(ctx->ns_server, "HEAD", value, php_ns_request_handler, NULL, ctx, 0);
+
+	/* 
+	 * Deactivated for now. The ini system will cause random crashes when 
+	 * accessed from here (since there are no locks to protect the global 
+	 * known_directives) 
+	 */
+
+#if 0
 		} else if (!global && !strcasecmp(key, "php_value")) {
 			char *val;
 
@@ -575,6 +583,7 @@ php_ns_config(php_ns_context *ctx, char global)
 						strlen(val) + 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 				
 				efree(new_key);
+#endif
 			}
 		}
 		
