@@ -47,8 +47,8 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3b5</version>
-    <date>2003-12-19</date>
+    <version>1.3b6</version>
+    <date>2004-01-26</date>
     <state>beta</state>
     <notes>
 PEAR Installer:
@@ -58,6 +58,7 @@ PEAR Installer:
 * Bug #248 --force command does not work as expected
 * Bug #293 [Patch] PEAR_Error not calling static method callbacks for error-handler
 * Bug #324 pear -G gives Fatal Error (PHP-GTK not installed, but error is at engine level)
+* Bug #594 PEAR_Common::analyzeSourceCode fails on string with $var and {
 * Moved download code into its own class
 * Fully unit tested the installer, packager, downloader, and PEAR_Common
 
@@ -125,8 +126,8 @@ PEAR Installer:
       <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
       <dep type="pkg" rel="ge" version="1.2">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
-      <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
       <dep type="ext" rel="has">xml</dep>
+      <dep type="ext" rel="has">pcre</dep>
     </deps>
   </release>
 </package>

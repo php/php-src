@@ -21,6 +21,12 @@ short and long options.</description>
       <name>Stig Bakken</name>
       <email>stig@php.net</email>
     </maintainer>
+    <maintainer>
+      <user>cellog</user>
+      <role>helper</role>
+      <name>Greg Beaver</name>
+      <email>cellog@php.net</email>
+    </maintainer>
   </maintainers>
   <release>
     <version>1.2</version>
@@ -28,9 +34,9 @@ short and long options.</description>
     <notes>Fix to preserve BC with 1.0 and allow correct behaviour for new users</notes>
     <state>stable</state>
     <filelist>
-     <dir name="Console">
-      <file role="php" name="Getopt.php"/>
-     </dir>
+      <dir name="Console">
+        <file role="php" name="Getopt.php"/>
+      </dir>
     </filelist>
   </release>
   <changelog>
@@ -46,29 +52,29 @@ short and long options.</description>
       </filelist>
     </release>
    <release>
-     <version>0.11</version>
-     <date>2002-05-26</date>
-     <notes>POSIX getopt compatibility fix: treat first element of args
-       array as command name
-     </notes>
-     <state>beta</state>
-     <filelist>
-       <dir name="Console">
-         <file role="php" name="Getopt.php"/>
-       </dir>
-     </filelist>
-   </release>
-   <release>
-     <version>0.10</version>
-     <date>2002-05-12</date>
-     <notes>Packaging fix</notes>
-     <state>beta</state>
-   </release>
-   <release>
-     <version>0.9</version>
-     <date>2002-05-12</date>
-     <notes>Initial release</notes>
-     <state>beta</state>
-   </release>
+      <version>0.11</version>
+      <date>2002-05-26</date>
+      <notes>POSIX getopt compatibility fix: treat first element of args
+        array as command name
+      </notes>
+      <state>beta</state>
+      <filelist>
+        <dir name="Console">
+          <file role="php" name="Getopt.php"/>
+        </dir>
+      </filelist>
+    </release>
+    <release>
+      <version>0.10</version>
+      <date>2002-05-12</date>
+      <notes>Packaging fix</notes>
+      <state>beta</state>
+    </release>
+    <release>
+      <version>0.9</version>
+      <date>2002-05-12</date>
+      <notes>Initial release</notes>
+      <state>beta</state>
+    </release>
   </changelog>
- </package>
+</package>
