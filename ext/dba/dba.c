@@ -87,7 +87,7 @@ ZEND_GET_MODULE(dba)
 
 typedef struct dba_handler {
 	char *name; /* handler name */
-	int lock; /* whether and how dba does locking */
+	int flags; /* whether and how dba does locking and other flags*/
 	int (*open)(dba_info *, char **error TSRMLS_DC);
 	void (*close)(dba_info * TSRMLS_DC);
 	char* (*fetch)(dba_info *, char *, int, int, int * TSRMLS_DC);
@@ -152,14 +152,14 @@ typedef struct dba_handler {
 
 /* a DBA handler must have specific routines */
 
-#define DBA_NAMED_HND(name, x, lock) \
+#define DBA_NAMED_HND(name, x, flags) \
 {\
-	#name, lock, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
+	#name, flags, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
 	dba_exists_##x, dba_delete_##x, dba_firstkey_##x, dba_nextkey_##x, \
 	dba_optimize_##x, dba_sync_##x \
 },
 
-#define DBA_HND(x, lock) DBA_NAMED_HND(x, x, lock)
+#define DBA_HND(x, flags) DBA_NAMED_HND(x, x, flags)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
@@ -183,10 +183,10 @@ static dba_handler handler[] = {
 	DBA_HND(ndbm, DBA_LOCK_ALL) /* Could be done in library: filemode = 0644 + S_ENFMT */
 #endif
 #if DBA_CDB
-	DBA_HND(cdb, DBA_LOCK_ALL) /* No lock in lib */
+	DBA_HND(cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_CDB_BUILTIN
-    DBA_NAMED_HND(cdb_make, cdb, DBA_LOCK_ALL) /* No lock in lib */
+    DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_DB2
 	DBA_HND(db2, DBA_LOCK_ALL) /* No lock in lib */
@@ -195,7 +195,7 @@ static dba_handler handler[] = {
 	DBA_HND(db3, DBA_LOCK_ALL) /* No lock in lib */
 #endif
 #if DBA_FLATFILE
-	DBA_HND(flatfile, DBA_LOCK_ALL) /* No lock in lib */
+	DBA_HND(flatfile, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
 	{ NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -210,6 +210,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
 {
 	if (info->hnd) info->hnd->close(info TSRMLS_CC);
 	if (info->path) efree(info->path);
+	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
 		flock(info->lock.fd, LOCK_UN);
 		close(info->lock.fd);
@@ -312,7 +313,8 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *key = NULL, *error = NULL;
 	int keylen = 0;
 	int i;
-	int lock, lock_flag, lock_dbf = 0;
+	int lock_mode, lock_flag, lock_dbf = 0;
+	char *file_mode;
 	char mode[4], *pmode;
 	
 	if(ac < 3) {
@@ -382,42 +384,47 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	pmode = &mode[0];
 	if (pmode[0] && (pmode[1]=='d' || pmode[1]=='l')) { /* force lock on db file or lck file */
 		if (pmode[1]=='d') {
-			if ((hptr->lock & DBA_LOCK_ALL) == 0) {
+			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
 				php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_NOTICE, "Handler %s does locking internally", hptr->name);
 			}
 			lock_dbf = 1;
 		}
 		lock_flag = DBA_LOCK_ALL;
 	} else {
-		lock_flag = hptr->lock;
+		lock_flag = (hptr->flags&DBA_LOCK_ALL);
 	}
 	switch (*pmode++) {
 		case 'r': 
 			modenr = DBA_READER; 
-			lock = (lock_flag & DBA_LOCK_READER) ? LOCK_SH : 0;
+			lock_mode = (lock_flag & DBA_LOCK_READER) ? LOCK_SH : 0;
+			file_mode = "r";
 			break;
 		case 'w': 
 			modenr = DBA_WRITER; 
-			lock = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
+			lock_mode = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
+			file_mode = "r+b";
 			break;
 		case 'n':
 			modenr = DBA_TRUNC;
-			lock = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
+			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
+			file_mode = "w+b";
 			break;
 		case 'c': 
 			modenr = DBA_CREAT; 
-			lock = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
+			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
+			file_mode = "a+b";
 			break;
 		default:
-			lock = 0;
 			modenr = 0;
+			lock_mode = 0;
+			file_mode = "";
 	}
 	if (*pmode=='d' || *pmode=='l') {
 		pmode++; /* done already - skip here */
 	}
 	if (*pmode=='t') {
 		pmode++;
-		lock |= LOCK_NB; /* test =: non blocking */
+		lock_mode |= LOCK_NB; /* test =: non blocking */
 	}
 	if (*pmode || !modenr) {
 		php_error_docref2(NULL TSRMLS_CC, Z_STRVAL_PP(args[0]), Z_STRVAL_PP(args[1]), E_WARNING, "Illegal DBA mode");
@@ -432,20 +439,41 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->argc = ac - 3;
 	info->argv = args + 3;
 
-	if (lock) {
+	if (lock_mode) {
 		if (lock_dbf)
 			info->lock.name = estrdup(info->path);
 		else
 			spprintf(&info->lock.name, 0, "%s.lck", info->path);
-		info->lock.fp = php_stream_open_wrapper(info->lock.name, "a+b", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
-		if (info->lock.fp && php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE)	{
+		info->lock.fp = php_stream_open_wrapper(info->lock.name, "a+b", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
 			FREENOW;
 			RETURN_FALSE;
 		}
-		if (!info->lock.fp || flock(info->lock.fd, lock)) {
+		if (php_stream_cast(info->lock.fp, PHP_STREAM_AS_FD, (void*)&info->lock.fd, 1) == FAILURE)	{
+			dba_close(info TSRMLS_CC);
+			/* stream operation already wrote an error message */
+			FREENOW;
+			RETURN_FALSE;
+		}
+		if (flock(info->lock.fd, lock_mode)) {
 			error = "Unable to establish lock"; /* force failure exit */
+		}
+	}
+
+	/* centralised open stream for builtin */
+	if (!error && (hptr->flags&DBA_STREAM_OPEN)==DBA_STREAM_OPEN) {
+		if (info->lock.fp && lock_dbf) {
+			info->fp = info->lock.fp; /* use the same stream for locking and database access */
+		} else {
+			info->fp = php_stream_open_wrapper(info->path, file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		}
+		if (!info->fp) {
+			dba_close(info TSRMLS_CC);
+			/* stream operation already wrote an error message */
+			FREENOW;
+			RETURN_FALSE;
 		}
 	}
 

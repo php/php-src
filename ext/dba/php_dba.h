@@ -42,22 +42,25 @@ typedef struct dba_info {
 	void *dbf;               /* ptr to private data or whatever */
 	char *path;
 	dba_mode_t mode;
+	php_stream *fp;  /* this is the database stream for builtin handlers */
 	/* arg[cv] are only available when the dba_open handler is called! */
 	int argc;
 	zval ***argv;
 	/* private */
-	struct dba_handler *hnd;
+	struct dba_handler *hnd;	
 	dba_lock lock;
 } dba_info;
 
-#define DBA_LOCK_READER  (1)
-#define DBA_LOCK_WRITER  (2)
-#define DBA_LOCK_CREAT   (4)
-#define DBA_LOCK_TRUNC   (8)
+#define DBA_LOCK_READER  (0x0001)
+#define DBA_LOCK_WRITER  (0x0002)
+#define DBA_LOCK_CREAT   (0x0004)
+#define DBA_LOCK_TRUNC   (0x0008)
 
 #define DBA_LOCK_EXT     (0)
 #define DBA_LOCK_ALL     (DBA_LOCK_READER|DBA_LOCK_WRITER|DBA_LOCK_CREAT|DBA_LOCK_TRUNC)
 #define DBA_LOCK_WCT     (DBA_LOCK_WRITER|DBA_LOCK_CREAT|DBA_LOCK_TRUNC)
+
+#define DBA_STREAM_OPEN  (0x0010)
 
 extern zend_module_entry dba_module_entry;
 #define dba_module_ptr &dba_module_entry
