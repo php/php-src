@@ -56,7 +56,7 @@ Lists the packages available on the configured server along with the
 latest stable release of each package.',
             ),
         'search' => array(
-            'summary' => 'Search Packagesdatabase',
+            'summary' => 'Search remote package database',
             'function' => 'doSearch',
             'shortcut' => 'sp',
             'options' => array(),
