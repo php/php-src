@@ -3,6 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails). (Jani)
 - Fixed bug #26384 (crash in domxslt->process()). (Ilia)
 - Fixed bug #26355 (flock() doesn't initialize the wouldblock argument). (Ilia)
 - Fixed bug #26309 (Fixed argument parsing for imageftbbox()). (Ilia)
