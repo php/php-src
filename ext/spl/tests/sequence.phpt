@@ -52,8 +52,8 @@ class c_iter implements spl_sequence_assoc {
 $t = new c();
 $i = $t->new_iterator(); 
 
-$c_info = array(class_name($t) => array('inheits' => class_parents($t), 'implements' => class_implements($t)),
-                class_name($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
+$c_info = array(get_class($t) => array('inheits' => class_parents($t), 'implements' => class_implements($t)),
+                get_class($i) => array('inheits' => class_parents($i), 'implements' => class_implements($i)));
 print_r($c_info);
 
 foreach($i as $w) {

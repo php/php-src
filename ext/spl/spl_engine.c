@@ -174,7 +174,10 @@ spl_is_a spl_implements(zend_class_entry *ce)
 /* {{{ spl_call_method */
 int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int fname_len, zval **retval, HashTable *symbol_table TSRMLS_DC, int param_count, ...)
 {
-	int i;
+	int i, l;
+	zval *arg;
+	zval *param;
+	unsigned char *arg_types;
 	zval **original_return_value;
 	HashTable *calling_symbol_table;
 	zend_function_state *original_function_state_ptr;
@@ -213,40 +216,41 @@ int spl_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **
 	}
 
 	va_start(args, param_count);
-	for (i=0; i<param_count; i++) {
-		zval *arg;
-		zval *param;
-
-		arg = va_arg(args, zval*);
-
-		if (EX(function_state).function->common.arg_types
-			&& i<EX(function_state).function->common.arg_types[0]
-			&& EX(function_state).function->common.arg_types[i+1]==BYREF_FORCE
-			&& !PZVAL_IS_REF(arg)) {
-			if (arg->refcount > 1) {
-				zval *new_zval;
-
-				ALLOC_ZVAL(new_zval);
-				*new_zval = *arg;
-				zval_copy_ctor(new_zval);
-				new_zval->refcount = 2;
-				new_zval->is_ref = 1;
-				arg->refcount--;
-				param = new_zval;
-			} else {
-				arg->refcount++;
-				arg->is_ref = 1;
-				param = arg;
-			}
-		} else if (arg != &EG(uninitialized_zval)) {
-			arg->refcount++;
-			param = arg;
+	if (param_count) {
+		if ((arg_types = EX(function_state).function->common.arg_types) != NULL) {
+			l = arg_types[0];
 		} else {
-			ALLOC_ZVAL(param);
-			*param = *arg;
-			INIT_PZVAL(param);
+			l = 0;
 		}
-		zend_ptr_stack_push(&EG(argument_stack), param);
+		for (i=1; i<=param_count; i++) {
+			arg = va_arg(args, zval*);
+	
+			if (i<=l && arg_types[i]==BYREF_FORCE && !PZVAL_IS_REF(arg)) {
+				if (arg->refcount > 1) {
+					zval *new_zval;
+	
+					ALLOC_ZVAL(new_zval);
+					*new_zval = *arg;
+					zval_copy_ctor(new_zval);
+					new_zval->refcount = 2;
+					new_zval->is_ref = 1;
+					arg->refcount--;
+					param = new_zval;
+				} else {
+					arg->refcount++;
+					arg->is_ref = 1;
+					param = arg;
+				}
+			} else if (arg != &EG(uninitialized_zval)) {
+				arg->refcount++;
+				param = arg;
+			} else {
+				ALLOC_ZVAL(param);
+				*param = *arg;
+				INIT_PZVAL(param);
+			}
+			zend_ptr_stack_push(&EG(argument_stack), param);
+		}
 	}
 	va_end(args);
 

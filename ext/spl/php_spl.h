@@ -97,7 +97,6 @@ extern zend_class_entry *spl_ce_array_writer_default;
 #endif /* SPL_ARRAY_WRITE */
 
 PHP_FUNCTION(spl_classes);
-PHP_FUNCTION(class_name);
 PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
 

@@ -52,7 +52,6 @@ void spl_register_interface(zend_class_entry ** ppce, char * class_name TSRMLS_D
 void spl_register_std_class(zend_class_entry ** ppce, char * class_name, void * obj_ctor TSRMLS_DC)
 {
 	zend_class_entry ce;
-	memset(&ce, 0, sizeof(zend_class_entry));
 	
 	INIT_CLASS_ENTRY(ce, class_name, NULL);
 	ce.name_length = strlen(class_name);
@@ -103,26 +102,16 @@ void spl_register_functions(zend_class_entry * class_entry, function_entry * fun
 }
 /* }}} */
 
-/* {{ spl_make_fully_qualyfied_name */
-char * spl_make_fully_qualyfied_name(zend_class_entry * pce TSRMLS_DC)
-{
-	return estrdup(pce->name);
-}
-/* }}} */
-
 /* {{{ spl_add_class_name */
 void spl_add_class_name(zval * list, zend_class_entry * pce TSRMLS_DC)
 {
-	char * str = spl_make_fully_qualyfied_name(pce TSRMLS_CC); 
-	size_t len = strlen(str);
+	size_t len = strlen(pce->name);
 	zval *tmp;
 
-	if (zend_hash_find(Z_ARRVAL_P(list), str, len+1, (void*)&tmp) == FAILURE) {
+	if (zend_hash_find(Z_ARRVAL_P(list), pce->name, len+1, (void*)&tmp) == FAILURE) {
 		MAKE_STD_ZVAL(tmp);
-		ZVAL_STRING(tmp, str, 0);
-		zend_hash_add(Z_ARRVAL_P(list), str, len+1, &tmp, sizeof(zval *), NULL);
-	} else {
-		efree(str);
+		ZVAL_STRING(tmp, pce->name, 1);
+		zend_hash_add(Z_ARRVAL_P(list), pce->name, len+1, &tmp, sizeof(zval *), NULL);
 	}
 }
 /* }}} */

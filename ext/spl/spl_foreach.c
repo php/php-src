@@ -55,8 +55,9 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 {
 	zval **obj, *retval;
 	spl_foreach_proxy *proxy;
-	zend_class_entry *instance_ce;
+	zend_class_entry *instance_ce, *obj_ce;
 	spl_is_a is_a;
+	temp_variable *tmp;
 
 	obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 
@@ -68,11 +69,12 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 
 	if (is_a & SPL_IS_A_ITERATOR) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval TSRMLS_CC);
+		spl_begin_method_call_ex(obj, NULL, NULL, "new_iterator", sizeof("new_iterator")-1, &retval);
+		obj_ce = instance_ce;
 		instance_ce = spl_get_class_entry(retval TSRMLS_CC);
 		is_a = spl_implements(instance_ce);
 		if (!(is_a & SPL_IS_A_FORWARD)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by new_iterator() must implement spl_forward");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by %s::new_iterator() must implement spl_forward", obj_ce->name);
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
 		PZVAL_LOCK(retval);
@@ -100,8 +102,9 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 	retval->is_ref = 0;
 	retval->refcount = 2; /* lock two times */
 	/* return the created proxy container */
-	EX_T(EX(opline)->result.u.var).var.ptr = retval;
-	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
+	tmp = &EX_T(EX(opline)->result.u.var);
+	tmp->var.ptr = retval;
+	tmp->var.ptr_ptr = &tmp->var.ptr;
 
 	NEXT_OPCODE();
 }
@@ -133,8 +136,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 {
 	znode *op1 = &EX(opline)->op1;
-	zval **obj = spl_get_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
-	zval more, tmp, *value, *key, *result;
+ 	zval **obj = spl_get_zval_ptr_ptr(op1, EX(Ts) TSRMLS_CC);
+	zval *more, *value, *key, *result;
 	spl_foreach_proxy *proxy;
 
 	if (Z_TYPE_PP(obj) == IS_STRING) {
@@ -143,22 +146,28 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 		obj = &proxy->obj; /* will be optimized out */
 
 		if (proxy->index++) {
-			spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
+			spl_begin_method_call_no_retval(obj, proxy->obj_ce, &proxy->funcs.next, "next", sizeof("next")-1 TSRMLS_CC);
 		} else {
 			if (proxy->is_a & SPL_IS_A_SEQUENCE) {
-				spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
+				spl_begin_method_call_no_retval(obj, proxy->obj_ce, &proxy->funcs.rewind, "rewind", sizeof("rewind")-1 TSRMLS_CC);
 			}
 			op_array->opcodes[EX(opline)->op2.u.opline_num].op2 = *op1;
 		}
 
-		spl_begin_method_call_this(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
-		if (zend_is_true(&more)) {
+		spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.more, "has_more", sizeof("has_more")-1, &more);
+		if (!more->type == IS_BOOL && !more->type == IS_LONG) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Method %s::has_more implements spl_forward::has_more and should return a value of type boolean or int");
+			convert_to_boolean(more);
+		}
+		if (more->value.lval) {
+			zval_dtor(more);
+			FREE_ZVAL(more);
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 
-			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value TSRMLS_CC);
+			spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.current, "current", sizeof("current")-1, &value);
 
 			if (proxy->is_a & SPL_IS_A_ASSOC) {
-				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.key, "key", sizeof("key")-1, &key TSRMLS_CC);
+				spl_begin_method_call_ex(obj, proxy->obj_ce, &proxy->funcs.key, "key", sizeof("key")-1, &key);
 			} else {
 				MAKE_STD_ZVAL(key);
 				key->value.lval = proxy->index;
@@ -166,8 +175,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			}
 #ifndef OPTIMIZED_ARRAY_CONSTRUCT
 			array_init(result);
-			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
-			zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
+			add_next_index_zval(result, value);
+			add_next_index_zval(result, key);
 #else
 			{
 				Bucket *p;
@@ -217,6 +226,8 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 #endif
 			NEXT_OPCODE();
 		}
+		zval_dtor(more);
+		FREE_ZVAL(more);
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;
 	}
