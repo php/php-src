@@ -839,22 +839,6 @@ AC_ARG_ENABLE(discard_path,
 ]) 
 fi
 
-AC_MSG_CHECKING(whether to enable a memory limit)
-AC_ARG_ENABLE(memory-limit,
-[  --enable-memory-limit   Compile with memory limit support. ],
-[
-  if test "$enableval" = "yes"; then
-    AC_DEFINE(MEMORY_LIMIT, 1)
-    AC_MSG_RESULT(yes)
-  else
-    AC_DEFINE(MEMORY_LIMIT, 0)
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_DEFINE(MEMORY_LIMIT, 0)
-  AC_MSG_RESULT(no)
-]) 
-
 AC_MSG_CHECKING(whether to enable short tags by default)
 AC_ARG_ENABLE(short-tags,
 [  --disable-short-tags    Disable the short-form <? start tag by default.],
