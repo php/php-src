@@ -38,6 +38,7 @@ extern zend_module_entry curl_module_entry;
 #define curl_module_ptr &curl_module_entry
 
 #define CURLOPT_RETURNTRANSFER 19913
+#define CURLOPT_BINARYTRANSFER 19914
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
