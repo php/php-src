@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added session.extern_referer_chk which checks whether session ids were
+  referred to by an external site and eliminates them (Sascha)
+- Improved session id generation (Sascha)
 - Improved speed of uniqid() by using the combined LCG and removing
   the extra usleep() (Sascha)
 - Introduced general combined linear congruential generator (Sascha)
