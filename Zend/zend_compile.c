@@ -1460,6 +1460,7 @@ static void throw_list_applier(long *opline_num, long *catch_opline)
 		case ZEND_DO_FCALL:
 		case ZEND_DO_FCALL_BY_NAME:
 		case ZEND_THROW:
+		case ZEND_CLONE:
 			opline->op2.u.opline_num = *catch_opline;
 			break;
 		default:

@@ -143,7 +143,9 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zend_hash_destroy(&symbol_table);
 		zval_ptr_dtor(&new_obj);
 		zval_ptr_dtor(&clone_func_name);
-		zval_ptr_dtor(&retval_ptr);
+		if(retval_ptr) {
+			zval_ptr_dtor(&retval_ptr);
+		}
 	} else {
 		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	}

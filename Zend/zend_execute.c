@@ -3085,6 +3085,15 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 	EX_T(EX(opline)->result.u.var).var.ptr->value.obj = clone_call(obj TSRMLS_CC);
+	if (EG(exception)) {
+		FREE_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
+		if (EX(opline)->op2.u.opline_num == -1) {
+			RETURN_FROM_EXECUTE_LOOP(execute_data);
+		} else {
+			EX(opline) = &op_array->opcodes[EX(opline)->op2.u.opline_num];
+			return 0; /* CHECK_ME */
+		}
+	}
 	EX_T(EX(opline)->result.u.var).var.ptr->type = IS_OBJECT;
 	EX_T(EX(opline)->result.u.var).var.ptr->refcount=1;
 	EX_T(EX(opline)->result.u.var).var.ptr->is_ref=1;
