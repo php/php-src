@@ -620,7 +620,8 @@ ifx.nullformat = 0
 session.save_handler = files
 
 ; Argument passed to save_handler.  In the case of files, this is the path
-; where data files are stored.
+; where data files are stored. Note: Windows users have to change this 
+; variable in order to use PHP's session functions.
 session.save_path = /tmp
 
 ; Whether to use cookies.
