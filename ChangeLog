@@ -1,3 +1,151 @@
+2004-11-15  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      NEWS
+      main/php_streams.h
+      main/streams/streams.c:
+      MFH: Fixed bug #29801 (Set limit on the size of mmapable data).
+
+    * main/php_streams.h
+      main/streams/streams.c:
+      Fixed bug #29801 (Set limit on the size of mmapable data).
+
+    * ext/mssql/php_mssql.c:
+      MFB: fixed build.
+
+    * (PHP_5_0)
+      ext/mssql/php_mssql.c:
+      Fixed build.
+
+2004-11-15  Edin Kadribasic  <edink@emini.dk>
+
+    * php.ini-dist
+      php.ini-recommended:
+      iconv is built-in in php5
+
+2004-11-15  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      MFH: Avoid renaming of sprintf to php_sprintf
+
+    * (PHP_5_0)
+      ext/mssql/php_mssql.c:
+      MFH: Adding most of the changes suggested in #30280. Mostly fix's for
+      possible leaks.
+
+    * ext/mssql/php_mssql.c:
+      Adding most of the changes suggested in #30280. Mostly fix's for possible
+      leaks.
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.c:
+      Avoid renaming of sprintf to php_sprintf
+
+    * main/php.h
+      main/php.h
+      main/php_sprintf.c
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.c
+      main/snprintf.h
+      main/snprintf.h:
+      Fix win32 build.
+
+2004-11-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      Zend/zend_strtod.c
+      ZendEngine2/zend_strtod.c:
+      - MFH: Fixed bug #30779 (Compile of Zend/zend_strtod.c fails on Sparc)
+
+    * ZendEngine2/zend_strtod.c:
+      - Fixed bug #30779 (Compile of Zend/zend_strtod.c fails on Sparc)
+
+2004-11-15  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.h
+      ext/mnogosearch/php_mnogo.h:
+      
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+      
+
+    * (PHP_5_0)
+      ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/php_mnogo.h:
+      
+
+2004-11-15  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS:
+      - Those are also fixed with the same commit.
+
+    * ext/standard/parsedate.y:
+      - MF5.0: Fixed bug #28599 (strtotime fails with zero base time).
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/parsedate.y:
+      - Fixed bug #28599 (strtotime fails with zero base time).
+
+2004-11-15  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_5_0)
+      sapi/cli/php_cli.c:
+      MFH: fix CLI leaks when using malformed option string
+
+    * sapi/cli/php_cli.c:
+      fix CLI leaks when using malformed option string
+
+2004-11-15  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      ext/standard/formatted_print.c
+      main/php.h
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.h:
+      - MFH4.3: Cleaned up some of the locale mess:
+        * all internal use of sprintf, snprintf and the like will always
+          use the . as thousands seperator (if php.h is included only!).
+        * echo, printf() and sprintf() always render locale-aware
+        * added the %F modifier for non-locale aware rendering for floats
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ext/standard/formatted_print.c
+      main/php.h
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.h:
+      - MF4.3: Cleaned up some of the locale mess:
+        * all internal use of sprintf, snprintf and the like will always
+          use the . as thousands seperator (if php.h is included only!).
+        * echo, printf() and sprintf() always render locale-aware
+        * added the %F modifier for non-locale aware rendering for floats
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      Zend/Zend.m4
+      Zend/acconfig.h
+      Zend/zend_sprintf.c
+      ext/standard/formatted_print.c
+      ext/standard/var_unserializer.c
+      main/php.h
+      main/php_sprintf.c
+      main/snprintf.c
+      main/snprintf.h:
+      - Cleaned up some of the locale mess:
+        * all internal use of sprintf, snprintf and the like will always
+          use the . as thousands seperator (if php.h is included only!).
+        * echo, printf() and sprintf() always render locale-aware
+        * added the %F modifier for non-locale aware rendering for floats
+
 2004-11-14  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/curl/interface.c:
