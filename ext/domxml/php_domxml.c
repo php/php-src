@@ -455,7 +455,7 @@ zend_module_entry domxml_module_entry = {
 	PHP_RINIT(domxml),
 	NULL,
 	PHP_MINFO(domxml),
-	NO_VERSION_YET,
+	"20020510", //Extension versionnumber
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -4257,7 +4257,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params TSRMLS_DC)
 	return params;
 }
 
-/* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc [, array xslt_parameters [, bool xpath_parameters]])
+/* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc [, array xslt_parameters [, bool xpath_parameters [, string profileFilename]]])
    Perform an XSLT transformation */
 PHP_FUNCTION(domxml_xslt_process)
 {
@@ -4273,6 +4273,8 @@ PHP_FUNCTION(domxml_xslt_process)
 	xmlDocPtr docp;
 	char **params = NULL;
 	int ret;
+	char *filename;
+	int filename_len = 0;
 
 	DOMXML_GET_THIS(idxsl);
 
@@ -4283,7 +4285,7 @@ PHP_FUNCTION(domxml_xslt_process)
 		RETURN_FALSE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|ab", &idxml, &idparams, &xpath_params) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|abs", &idxml, &idparams, &xpath_params, &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -4293,7 +4295,14 @@ PHP_FUNCTION(domxml_xslt_process)
 		params = php_domxslt_make_params(idparams, xpath_params TSRMLS_CC);
 	}
 
-	docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
+	if (filename_len) {
+		FILE *f;
+		f = fopen (filename,"w");
+		docp = xsltProfileStylesheet(xsltstp, xmldocp, (const char**)params, f);
+		fclose(f);
+	} else {
+		docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
+	}
 
 	if (params) {
 		efree(params);
