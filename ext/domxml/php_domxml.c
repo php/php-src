@@ -31,44 +31,6 @@
 #define PHP_XPATH 1
 #define PHP_XPTR 2
 
-#define DOMXML_DOMOBJ_NEW(zval, obj, ret)			if (NULL == (zval = php_domobject_new(obj, ret TSRMLS_CC))) { \
-														php_error(E_WARNING, "%s() cannot create required DOM object", \
-																  get_active_function_name(TSRMLS_C)); \
-														RETURN_FALSE; \
-													}
-
-#define DOMXML_RET_ZVAL(zval)						SEPARATE_ZVAL(&zval); \
-													*return_value = *zval; \
-													FREE_ZVAL(zval);
-
-#define DOMXML_RET_OBJ(zval, obj, ret)				DOMXML_DOMOBJ_NEW(zval, obj, ret); \
-													DOMXML_RET_ZVAL(zval);
-
-#define DOMXML_GET_THIS(zval)						if (NULL == (zval = getThis())) { \
-														php_error(E_WARNING, "%s() underlying object missing", \
-																  get_active_function_name(TSRMLS_C)); \
-														RETURN_FALSE; \
-													}
-
-#define DOMXML_GET_OBJ(ret, zval, le)				if (NULL == (ret = php_dom_get_object(zval, le, 0 TSRMLS_CC))) { \
-														php_error(E_WARNING, "%s() cannot fetch DOM object", \
-																  get_active_function_name(TSRMLS_C)); \
-														RETURN_FALSE; \
-													}
-
-#define DOMXML_GET_THIS_OBJ(ret, zval, le)			DOMXML_GET_THIS(zval); \
-													DOMXML_GET_OBJ(ret, zval, le);
-
-#define DOMXML_NO_ARGS()							if (ZEND_NUM_ARGS() != 0) { \
-														php_error(E_WARNING, "%s() doesn't take any arguments", \
-																  get_active_function_name(TSRMLS_C)); \
-														return; \
-													}
-
-#define DOMXML_NOT_IMPLEMENTED()					php_error(E_WARNING, "%s() not yet implemented", \
-															  get_active_function_name(TSRMLS_C)); \
-													return;
-
 static int le_domxmldocp;
 static int le_domxmldoctypep;
 static int le_domxmldtdp;
@@ -354,6 +316,7 @@ static inline void node_wrapper_dtor(xmlNodePtr node)
 {
 	zval *wrapper;
 
+	// FIXME: type check probably unnecessary here?
 	if (!node || Z_TYPE_P(node) == XML_DTD_NODE)
 		return;
 
@@ -377,7 +340,10 @@ static inline void node_list_wrapper_dtor(xmlNodePtr node)
 {
 	while (node != NULL) {
 		node_list_wrapper_dtor(node->children);
-		attr_list_wrapper_dtor(node->properties);
+		// FIXME temporary fix; think of something better
+		if (node->type != XML_ATTRIBUTE_DECL && node->type != XML_DTD_NODE) {
+			attr_list_wrapper_dtor(node->properties);
+		}
 		node_wrapper_dtor(node);
 		node = node->next;
 	}
@@ -413,16 +379,26 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void php_free_xpath_context(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlXPathContextPtr ctx = (xmlXPathContextPtr) rsrc->ptr;
-	if (ctx)
+	if (ctx) {
+		if (ctx->user) {
+			zval *wrapper = ctx->user;
+			zval_ptr_dtor(&wrapper);
+		}
 		xmlXPathFreeContext(ctx);
+	}
 }
 
 static void php_free_xpath_object(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlXPathObjectPtr obj = (xmlXPathObjectPtr) rsrc->ptr;
 
-	if (obj)
+	if (obj) {
+		if (obj->user) {
+			zval *wrapper = obj->user;
+			zval_ptr_dtor(&wrapper);
+		}
 		xmlXPathFreeObject(obj);
+	}
 }
 #endif
 
@@ -432,7 +408,11 @@ void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_
 	void *obj;
 	zval **handle;
 	int type;
-	TSRMLS_FETCH();
+
+	if (NULL == wrapper) {
+		php_error(E_WARNING, "php_xpath_get_object() invalid wrapper object passed");
+		return NULL;
+	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "%s() wrapper is not an object", get_active_function_name(TSRMLS_C));
@@ -536,7 +516,11 @@ void *php_xpath_get_context(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS
 	void *obj;
 	zval **handle;
 	int type;
-	TSRMLS_FETCH();
+
+	if (NULL == wrapper) {
+		php_error(E_WARNING, "php_xpath_get_context() invalid wrapper object passed");
+		return NULL;
+	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "%s() wrapper is not an object", get_active_function_name(TSRMLS_C));
@@ -638,6 +622,11 @@ void *php_dom_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC
 	void *obj;
 	zval **handle;
 	int type;
+
+	if (NULL == wrapper) {
+		php_error(E_WARNING, "php_dom_get_object() invalid wrapper object passed");
+		return NULL;
+	}
 
 	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
 		php_error(E_WARNING, "%s() wrapper is not an object", get_active_function_name(TSRMLS_C));
@@ -841,7 +830,8 @@ static zval *php_domobject_new(xmlNodePtr obj, int *found TSRMLS_DC)
 		}
 
 		default: 
-			php_error(E_WARNING, "Unsupported Node type: %d\n", Z_TYPE_P(obj));
+			php_error(E_WARNING, "%s() unsupported node type: %d\n", get_active_function_name(TSRMLS_C), Z_TYPE_P(obj));
+			FREE_ZVAL(wrapper);
 			return NULL;
 	}
 
@@ -869,6 +859,14 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlattrp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domattribute", module_number);
 	le_domxmltextp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domtext", module_number);
 	le_domxmlelementp =	zend_register_list_destructors_ex(php_free_xml_node, NULL, "domelement", module_number);
+	le_domxmldtdp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdtd", module_number);
+	le_domxmlcdatap = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcdata", module_number);
+
+	/* Not yet initialized le_*s */
+	le_domxmldoctypep   = -10000;
+	le_domxmlpip        = -10002;
+	le_domxmlnotationp  = -10003;
+	le_domxmlentityrefp = -10004;
 
 #if defined(LIBXML_XPATH_ENABLED)
 	le_xpathctxp = zend_register_list_destructors_ex(php_free_xpath_context, NULL, "xpathcontext", module_number);
@@ -1547,6 +1545,11 @@ PHP_FUNCTION(domxml_node_add_child)
 
 	child = xmlAddChild(nodep, child);
 
+	if (NULL == child) {
+		php_error(E_WARNING, "%s() couldn't add child", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
 	DOMXML_RET_OBJ(rv, child, &ret);
 }
 /* }}} */
@@ -1566,7 +1569,13 @@ PHP_FUNCTION(domxml_node_append_child)
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
 	DOMXML_GET_OBJ(child, node, le_domxmlnodep);
 
-	child = xmlAddChildList(nodep, child);
+	// FIXME reverted xmlAddChildList; crashes
+	child = xmlAddSibling(nodep, child);
+
+	if (NULL == child) {
+		php_error(E_WARNING, "%s() couldn't add node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 
 	DOMXML_RET_OBJ(rv, child, &ret);
 }
@@ -1589,6 +1598,11 @@ PHP_FUNCTION(domxml_node_insert_before)
 	DOMXML_GET_OBJ(refp, ref, le_domxmlnodep);
 
 	child = xmlAddPrevSibling(refp, child);
+
+	if (NULL == child) {
+		php_error(E_WARNING, "%s() couldn't add newnode as the previous sibling of refnode", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 
 	DOMXML_RET_OBJ(rv, child, &ret);
 }
@@ -1693,9 +1707,12 @@ PHP_FUNCTION(domxml_node_set_content)
 
 	xmlNodeSetContent(nodep, content);
 
+	add_property_stringl(id, "content", content, content_len, 1);
 	/* FIXME: Actually the property 'content' of the node has to be updated
 	   as well. Since 'content' should disappear sooner or later and being
 	   replaces by a function 'content()' I skip this for now
+
+	   mfischer, 2001.12.01: well, for now we implement it
 	 */
 	RETURN_TRUE;
 }
@@ -2470,7 +2487,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 /*		if(0 <= (n = node_children(&children, attr->children TSRMLS_CC))) {
 			zend_hash_update(Z_OBJPROP_P(value), "children", sizeof("children"), (void *) &children, sizeof(zval *), NULL);
 		}
-*/ add_property_string(pattr, "name", (char *) (attr->name), 1);
+*/		add_property_string(pattr, "name", (char *) (attr->name), 1);
 		add_property_string(pattr, "value", xmlNodeGetContent((xmlNodePtr) attr), 1);
 		zend_hash_next_index_insert(Z_ARRVAL_PP(attributes), &pattr, sizeof(zval *), NULL);
 		attr = attr->next;
@@ -2503,24 +2520,26 @@ static int node_children(zval **children, xmlNode *nodep TSRMLS_DC)
 		zval *child;
 		int ret;
 
-		child = php_domobject_new(last, &ret TSRMLS_CC);
-		zend_hash_next_index_insert(Z_ARRVAL_PP(children), &child, sizeof(zval *), NULL);
+		if (NULL != (child = php_domobject_new(last, &ret TSRMLS_CC))) {
+			zend_hash_next_index_insert(Z_ARRVAL_PP(children), &child, sizeof(zval *), NULL);
 
-		/* Get the namespace of the current node and add it as a property */
-		/* XXX FIXME XXX */
+			/* Get the namespace of the current node and add it as a property */
+			/* XXX FIXME XXX */
 /*		
-		if(!node_namespace(&namespace, last))
-			zend_hash_update(Z_OBJPROP_P(child), "namespace", sizeof("namespace"), (void *) &namespace, sizeof(zval *), NULL);
+			if(!node_namespace(&namespace, last))
+				zend_hash_update(Z_OBJPROP_P(child), "namespace", sizeof("namespace"), (void *) &namespace, sizeof(zval *), NULL);
 */
 
-		/* Get the attributes of the current node and add it as a property */
-		if (node_attributes(&attributes, last TSRMLS_CC) >= 0)
-			zend_hash_update(Z_OBJPROP_P(child), "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
+			/* Get the attributes of the current node and add it as a property */
+			if (node_attributes(&attributes, last TSRMLS_CC) >= 0)
+				zend_hash_update(Z_OBJPROP_P(child), "attributes", sizeof("attributes"), (void *) &attributes, sizeof(zval *), NULL);
 
-		/* Get recursively the children of the current node and add it as a property */
-		if (node_children(&mchildren, last->children TSRMLS_CC) >= 0)
-			zend_hash_update(Z_OBJPROP_P(child), "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
-		count++;
+			/* Get recursively the children of the current node and add it as a property */
+			if (node_children(&mchildren, last->children TSRMLS_CC) >= 0)
+				zend_hash_update(Z_OBJPROP_P(child), "children", sizeof("children"), (void *) &mchildren, sizeof(zval *), NULL);
+
+			count++;
+		}
 		last = last->next;
 	}
 	return count;
@@ -2627,7 +2646,7 @@ PHP_FUNCTION(xptr_new_context)
  */
 static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 {
-	zval *id, *str, *rv, *contextnode;
+	zval *id, *str, *rv, *contextnode = NULL;
 	xmlXPathContextPtr ctxp;
 	xmlXPathObjectPtr xpathobjp;
 	xmlNode *contextnodep;
@@ -2636,6 +2655,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	contextnode = NULL;
 	contextnodep = NULL;
 
+	// FIXME: use zend_parse_parameters and clean up this mess
 	id = getThis();
 
 	if (!id) {
@@ -2648,6 +2668,23 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 
 		case 3:
 			if ((getParameters(ht, 3, &id, &str, &contextnode)) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+
+		default:
+			WRONG_PARAM_COUNT;
+		}
+	} else {
+		switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if ((getParameters(ht, 1, &str)) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			break;
+
+		case 2:
+			if ((getParameters(ht, 2, &str, &contextnode)) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
@@ -2674,10 +2711,11 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		xpathobjp = xmlXPtrEval(BAD_CAST Z_STRVAL_P(str), ctxp);
 	} else {
 #endif
-		if (expr)
+		if (expr) {
 			xpathobjp = xmlXPathEvalExpression(Z_STRVAL_P(str), ctxp);
-		else
+		} else {
 			xpathobjp = xmlXPathEval(Z_STRVAL_P(str), ctxp);
+		}
 #if defined(LIBXML_XPTR_ENABLED)
 	}
 #endif
