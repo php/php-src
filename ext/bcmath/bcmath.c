@@ -30,6 +30,8 @@
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(bcmath);
+
 function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									NULL)
 	PHP_FE(bcsub,									NULL)
@@ -47,7 +49,11 @@ zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bcmath",
 	bcmath_functions,
+#if ZTS
+	PHP_MODULE_STARTUP_N(bcmath),
+#else
 	NULL,
+#endif
 	NULL,
 	PHP_RINIT(bcmath),
 	PHP_RSHUTDOWN(bcmath),
@@ -64,32 +70,22 @@ ZEND_GET_MODULE(bcmath)
 static long bc_precision;
 #endif
 
-/* Storage used for special numbers. */
-extern bc_num _zero_;
-extern bc_num _one_;
-extern bc_num _two_;
-
-
-/* Make a copy of a number!  Just increments the reference count! */
-bc_num copy_num (bc_num num)
+#if ZTS
+PHP_MODULE_STARTUP_D(bcmath)
 {
-  num->n_refs++;
-  return num;
+	zend_bcmath_globals *bcmath_globals;
+
+	ts_allocate_id(&bcmath_globals_id, sizeof(zend_bcmath_globals), NULL, NULL);
+	bcmath_globals = ts_resource(bcmath_globals_id);
+	return SUCCESS;
 }
-
-
-/* Initialize a number NUM by making it a copy of zero. */
-void init_num (bc_num *num)
-{
-	*num = copy_num (_zero_);
-}
-
+#endif
 
 PHP_RSHUTDOWN_FUNCTION(bcmath)
 {
-	bc_free_num(&_zero_);
-	bc_free_num(&_one_);
-	bc_free_num(&_two_);
+	bc_free_num(&BCG(_zero_));
+	bc_free_num(&BCG(_one_));
+	bc_free_num(&BCG(_two_));
 
 	return SUCCESS;
 }
@@ -101,7 +97,7 @@ PHP_RINIT_FUNCTION(bcmath)
 		bc_precision=0;
 	}
 	
-	bc_init_numbers();
+	bc_init_numbers(TSRMLS_C);
 	
 	return SUCCESS;
 }
@@ -141,11 +137,11 @@ PHP_FUNCTION(bcadd)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
 	bc_add (first, second, &result, scale);
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
@@ -184,11 +180,11 @@ PHP_FUNCTION(bcsub)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
 	bc_sub (first, second, &result, scale);
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
@@ -227,12 +223,12 @@ PHP_FUNCTION(bcmul)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
-	bc_multiply (first, second, &result, scale);
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	bc_multiply (first, second, &result, scale TSRMLS_CC);
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -270,12 +266,12 @@ PHP_FUNCTION(bcdiv)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
-	switch (bc_divide (first, second, &result, scale)) {
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	switch (bc_divide (first, second, &result, scale TSRMLS_CC)) {
 		case 0: /* OK */
 			Z_STRVAL_P(return_value) = bc_num2str(result);
 			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
@@ -311,12 +307,12 @@ PHP_FUNCTION(bcmod)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), 0);
-	bc_str2num(&second, Z_STRVAL_PP(right), 0);
-	switch (bc_modulo(first, second, &result, 0)) {
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), 0 TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), 0 TSRMLS_CC);
+	switch (bc_modulo(first, second, &result, 0 TSRMLS_CC)) {
 		case 0:
 			Z_STRVAL_P(return_value) = bc_num2str(result);
 			Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
@@ -360,12 +356,12 @@ PHP_FUNCTION(bcpow)
 	}
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
-	bc_init_num(&result);
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
-	bc_raise (first, second, &result, scale); 
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
+	bc_raise (first, second, &result, scale TSRMLS_CC);
 	Z_STRVAL_P(return_value) = bc_num2str(result);
 	Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 	Z_TYPE_P(return_value) = IS_STRING;
@@ -402,9 +398,9 @@ PHP_FUNCTION(bcsqrt)
 				break;
 	}
 	convert_to_string_ex(left);
-	bc_init_num(&result);
-	bc_str2num(&result, Z_STRVAL_PP(left), scale);
-	if (bc_sqrt (&result, scale) != 0) {
+	bc_init_num(&result TSRMLS_CC);
+	bc_str2num(&result, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	if (bc_sqrt (&result, scale TSRMLS_CC) != 0) {
 		Z_STRVAL_P(return_value) = bc_num2str(result);
 		Z_STRLEN_P(return_value) = strlen(Z_STRVAL_P(return_value));
 		Z_TYPE_P(return_value) = IS_STRING;
@@ -444,11 +440,11 @@ PHP_FUNCTION(bccomp)
 
 	convert_to_string_ex(left);
 	convert_to_string_ex(right);
-	bc_init_num(&first);
-	bc_init_num(&second);
+	bc_init_num(&first TSRMLS_CC);
+	bc_init_num(&second TSRMLS_CC);
 
-	bc_str2num(&first, Z_STRVAL_PP(left), scale);
-	bc_str2num(&second, Z_STRVAL_PP(right), scale);
+	bc_str2num(&first, Z_STRVAL_PP(left), scale TSRMLS_CC);
+	bc_str2num(&second, Z_STRVAL_PP(right), scale TSRMLS_CC);
 	Z_LVAL_P(return_value) = bc_compare(first, second);
 	Z_TYPE_P(return_value) = IS_LONG;
 

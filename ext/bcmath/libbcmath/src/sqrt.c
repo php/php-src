@@ -42,16 +42,14 @@
    after the decimal place. */
 
 int
-bc_sqrt (num, scale)
-     bc_num *num;
-     int scale;
+bc_sqrt (bc_num *num, int scale TSRMLS_DC)
 {
   int rscale, cmp_res, done;
   int cscale;
   bc_num guess, guess1, point5, diff;
 
   /* Initial checks. */
-  cmp_res = bc_compare (*num, _zero_);
+  cmp_res = bc_compare (*num, BCG(_zero_));
   if (cmp_res < 0)
     return 0;		/* error */
   else
@@ -59,23 +57,23 @@ bc_sqrt (num, scale)
       if (cmp_res == 0)
 	{
 	  bc_free_num (num);
-	  *num = bc_copy_num (_zero_);
+	  *num = bc_copy_num (BCG(_zero_));
 	  return 1;
 	}
     }
-  cmp_res = bc_compare (*num, _one_);
+  cmp_res = bc_compare (*num, BCG(_one_));
   if (cmp_res == 0)
     {
       bc_free_num (num);
-      *num = bc_copy_num (_one_);
+      *num = bc_copy_num (BCG(_one_));
       return 1;
     }
 
   /* Initialize the variables. */
   rscale = MAX (scale, (*num)->n_scale);
-  bc_init_num(&guess);
-  bc_init_num(&guess1);
-  bc_init_num(&diff);
+  bc_init_num(&guess TSRMLS_CC);
+  bc_init_num(&guess1 TSRMLS_CC);
+  bc_init_num(&diff TSRMLS_CC);
   point5 = bc_new_num (1,1);
   point5->n_value[1] = 5;
 
@@ -84,7 +82,7 @@ bc_sqrt (num, scale)
   if (cmp_res < 0)
     {
       /* The number is between 0 and 1.  Guess should start at 1. */
-      guess = bc_copy_num (_one_);
+      guess = bc_copy_num (BCG(_one_));
       cscale = (*num)->n_scale;
     }
   else
@@ -93,9 +91,9 @@ bc_sqrt (num, scale)
       bc_int2num (&guess,10);
 
       bc_int2num (&guess1,(*num)->n_len);
-      bc_multiply (guess1, point5, &guess1, 0);
+      bc_multiply (guess1, point5, &guess1, 0 TSRMLS_CC);
       guess1->n_scale = 0;
-      bc_raise (guess, guess1, &guess, 0);
+      bc_raise (guess, guess1, &guess, 0 TSRMLS_CC);
       bc_free_num (&guess1);
       cscale = 3;
     }
@@ -106,9 +104,9 @@ bc_sqrt (num, scale)
     {
       bc_free_num (&guess1);
       guess1 = bc_copy_num (guess);
-      bc_divide (*num, guess, &guess, cscale);
+      bc_divide (*num, guess, &guess, cscale TSRMLS_CC);
       bc_add (guess, guess1, &guess, 0);
-      bc_multiply (guess, point5, &guess, cscale);
+      bc_multiply (guess, point5, &guess, cscale TSRMLS_CC);
       bc_sub (guess, guess1, &diff, cscale+1);
       if (bc_is_near_zero (diff, cscale))
 	{
@@ -121,7 +119,7 @@ bc_sqrt (num, scale)
 
   /* Assign the number and clean up. */
   bc_free_num (num);
-  bc_divide (guess,_one_,num,rscale);
+  bc_divide (guess,BCG(_one_),num,rscale TSRMLS_CC);
   bc_free_num (&guess);
   bc_free_num (&guess1);
   bc_free_num (&point5);
