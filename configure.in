@@ -160,8 +160,8 @@ if test "$LEX" ;then
 		sed -e 's/^.* //' -e 's/\./ /g'`
 	if test ! -z "$flexvers"; then
 		set $flexvers
-		if test "${1}" != "2" -o "${2}" != "5" -o "${3}" -lt "4"; then
-			AC_MSG_WARN(You will need flex 2.5.4 or later if you want to regenerate Zend/PHP lexical parsers.)
+		if test "${1}" != "2" -o "${2}" != "5" -o "${3}" != "4"; then
+			AC_MSG_WARN(You will need flex 2.5.4 if you want to regenerate Zend/PHP lexical parsers.)
 		fi
 	fi
 AC_MSG_RESULT(${1}.${2}.${3} (ok))
