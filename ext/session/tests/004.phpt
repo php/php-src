@@ -1,7 +1,7 @@
 --TEST--
 session_set_save_handler test
 --FILE--
-<?
+<?php
 error_reporting(~E_NOTICE);
 
 class handler {
