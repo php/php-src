@@ -20,36 +20,62 @@
 
 require_once 'PEAR.php';
 
+/**
+* Creates a (compressed) Tar archive
+*
+* @author   Vincent Blavet <vincent@blavet.net>
+* @version  $Revision$
+* @package  Archive
+*/
 class Archive_Tar extends PEAR
 {
+    /**
+    * @var string Name of the Tar
+    */
     var $_tarname;
+
+    /**
+    * @var boolean if true, the Tar file will be gzipped
+    */
     var $_compress;
 
-    // ----- File descriptor (when file is opened or 0 if closed)
+    /**
+    * @var file descriptor
+    */
     var $_file;
 
     // {{{ constructor
+    /**
+    * Archive_Tar Class constructor. This flavour of the constructor only
+    * declare a new Archive_Tar object, identifying it by the name of the
+    * tar file.
+    * If the compress argument is set the tar will be read or created as a
+    * gzip compressed TAR file.
+    *
+    * @param    string  $p_tarname  The name of the tar archive to create
+    * @param    boolean $p_compress if true, the archive will be gezip(ped)
+    * @access public
+    */
     function Archive_Tar($p_tarname, $p_compress = false)
     {
         $this->PEAR();
         $this->_tarname = $p_tarname;
+        if ($p_compress) { // assert zlib extension support
+            $extname = 'zlib';
+            if (!extension_loaded($extname)) {
+                $dlext = (substr(PHP_OS, 0, 3) == 'WIN') ? '.dll' : '.so';
+                @dl($extname . $dlext);
+            }
+            if (!extension_loaded($extname)) {
+                die("The extension '$extname' couldn't be loaded. ".
+                    'Probably you don\'t have support in your PHP '.
+                    'to this extension');
+                return false;
+            }
+        }
         $this->_compress = $p_compress;
     }
     // }}}
-
-/*
-    // {{{ constructor
-    function Archive_Tar($p_tarname, $p_filelist, $p_compress = false)
-    {
-        $this->PEAR();
-        $this->_tarname = $p_tarname;
-        $this->_compress = $p_compress;
-
-        if (!$this->create($p_filelist))
-          return 0;
-    }
-    // }}}
-*/
 
     // {{{ destructor
     function _Archive_Tar()
@@ -60,6 +86,25 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ create()
+    /**
+    * This method creates the archive file and add the files / directories
+    * that are listed in $p_filelist.
+    * If the file already exists and is writable, it is replaced by the
+    * new tar. It is a create and not an add. If the file exists and is
+    * read-only or is a directory it is not replaced. The method return
+    * false and a PEAR error text.
+    * The $p_filelist parameter can be an array of string, each string
+    * representing a filename or a directory name with their path if
+    * needed. It can also be a single string with names separated by a
+    * single blank.
+    * See also createModify() method for more details.
+    *
+    * @param array  $p_filelist An array of filenames and directory names, or a single
+    *                           string with names separated by a single blank space.
+    * @return                   true on success, false on error.
+    * @see createModify()
+    * @access public
+    */
     function create($p_filelist)
     {
         return $this->createModify($p_filelist, "", "");
@@ -98,6 +143,39 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ createModify()
+    /**
+    * This method creates the archive file and add the files / directories
+    * that are listed in $p_filelist.
+    * If the file already exists and is writable, it is replaced by the
+    * new tar. It is a create and not an add. If the file exists and is
+    * read-only or is a directory it is not replaced. The method return
+    * false and a PEAR error text.
+    * The $p_filelist parameter can be an array of string, each string
+    * representing a filename or a directory name with their path if
+    * needed. It can also be a single string with names separated by a
+    * single blank.
+    * The path indicated in $p_remove_dir will be removed from the
+    * memorized path of each file / directory listed when this path
+    * exists. By default nothing is removed (empty path "")
+    * The path indicated in $p_add_dir will be added at the beginning of
+    * the memorized path of each file / directory listed. However it can
+    * be set to empty "". The adding of a path is done after the removing
+    * of path.
+    * The path add/remove ability enables the user to prepare an archive
+    * for extraction in a different path than the origin files are.
+    * See also addModify() method for file adding properties.
+    *
+    * @param array  $p_filelist     An array of filenames and directory names, or a single
+    *                               string with names separated by a single blank space.
+    * @param string $p_add_dir      A string which contains a path to be added to the
+    *                               memorized path of each element in the list.
+    * @param string $p_remove_dir   A string which contains a path to be removed from
+    *                               the memorized path of each element in the list, when
+    *                               relevant.
+    * @return boolean               true on success, false on error.
+    * @access public
+    * @see addModify()
+    */
     function createModify($p_filelist, $p_add_dir, $p_remove_dir="")
     {
         $v_result = true;
@@ -130,6 +208,46 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ addModify()
+    /**
+    * This method add the files / directories listed in $p_filelist at the
+    * end of the existing archive. If the archive does not yet exists it
+    * is created.
+    * The $p_filelist parameter can be an array of string, each string
+    * representing a filename or a directory name with their path if
+    * needed. It can also be a single string with names separated by a
+    * single blank.
+    * The path indicated in $p_remove_dir will be removed from the
+    * memorized path of each file / directory listed when this path
+    * exists. By default nothing is removed (empty path "")
+    * The path indicated in $p_add_dir will be added at the beginning of
+    * the memorized path of each file / directory listed. However it can
+    * be set to empty "". The adding of a path is done after the removing
+    * of path.
+    * The path add/remove ability enables the user to prepare an archive
+    * for extraction in a different path than the origin files are.
+    * If a file/dir is already in the archive it will only be added at the
+    * end of the archive. There is no update of the existing archived
+    * file/dir. However while extracting the archive, the last file will
+    * replace the first one. This results in a none optimization of the
+    * archive size.
+    * If a file/dir does not exist the file/dir is ignored. However an
+    * error text is send to PEAR error.
+    * If a file/dir is not readable the file/dir is ignored. However an
+    * error text is send to PEAR error.
+    * If the resulting filename/dirname (after the add/remove option or
+    * not) string is greater than 99 char, the file/dir is
+    * ignored. However an error text is send to PEAR error.
+    *
+    * @param array      $p_filelist     An array of filenames and directory names, or a single
+    *                                   string with names separated by a single blank space.
+    * @param string     $p_add_dir      A string which contains a path to be added to the
+    *                                   memorized path of each element in the list.
+    * @param string     $p_remove_dir   A string which contains a path to be removed from
+    *                                   the memorized path of each element in the list, when
+    *                                   relevant.
+    * @return                           true on success, false on error.
+    * @access public
+    */
     function addModify($p_filelist, $p_add_dir, $p_remove_dir="")
     {
         $v_result = true;
@@ -154,6 +272,38 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ extractModify()
+    /**
+    * This method extract all the content of the archive in the directory
+    * indicated by $p_path. When relevant the memorized path of the
+    * files/dir can be modified by removing the $p_remove_path path at the
+    * beginning of the file/dir path.
+    * While extracting a file, if the directory path does not exists it is
+    * created.
+    * While extracting a file, if the file already exists it is replaced
+    * without looking for last modification date.
+    * While extracting a file, if the file already exists and is write
+    * protected, the extraction is aborted.
+    * While extracting a file, if a directory with the same name already
+    * exists, the extraction is aborted.
+    * While extracting a directory, if a file with the same name already
+    * exists, the extraction is aborted.
+    * While extracting a file/directory if the destination directory exist
+    * and is write protected, or does not exist but can not be created,
+    * the extraction is aborted.
+    * If after extraction an extracted file does not show the correct
+    * stored file size, the extraction is aborted.
+    * When the extraction is aborted, a PEAR error text is set and false
+    * is returned. However the result can be a partial extraction that may
+    * need to be manually cleaned.
+    *
+    * @param string $p_path         The path of the directory where the files/dir need to by
+    *                               extracted.
+    * @param string $p_remove_path  Part of the memorized path that can be removed if
+    *                               present at the beginning of the file/dir path.
+    * @return boolean               true on success, false on error.
+    * @access public
+    * @see extractList()
+    */
     function extractModify($p_path, $p_remove_path)
     {
         $v_result = true;
@@ -169,6 +319,22 @@ class Archive_Tar extends PEAR
     // }}}
 
     // {{{ extractList()
+    /**
+    * This method extract from the archive only the files indicated in the
+    * $p_filelist. These files are extracted in the current directory or
+    * in the directory indicated by the optional $p_path parameter.
+    * If indicated the $p_remove_path can be used in the same way as it is
+    * used in extractModify() method.
+    * @param array  $p_filelist     An array of filenames and directory names, or a single
+    *                               string with names separated by a single blank space.
+    * @param string $p_path         The path of the directory where the files/dir need to by
+    *                               extracted.
+    * @param string $p_remove_path  Part of the memorized path that can be removed if
+    *                               present at the beginning of the file/dir path.
+    * @return                       true on success, false on error.
+    * @access public
+    * @see extractModify()
+    */
     function extractList($p_filelist, $p_path="", $p_remove_path="")
     {
         $v_result = true;
@@ -333,7 +499,7 @@ class Archive_Tar extends PEAR
         if (!$this->_addFile($v_filename, $v_header, $p_add_dir, $p_remove_dir))
             return false;
 
-        if (is_dir($v_filename)) {
+        if (@is_dir($v_filename)) {
             if (!($p_hdir = opendir($v_filename))) {
                 $this->_warning("Directory '$v_filename' can not be read");
                 continue;
@@ -440,7 +606,7 @@ class Archive_Tar extends PEAR
 
         $v_mtime = sprintf("%11s", DecOct(filemtime($p_filename)));
 
-        if (is_dir($p_filename))
+        if (@is_dir($p_filename))
           $v_typeflag = "5";
         else
           $v_typeflag = "";
@@ -569,10 +735,11 @@ class Archive_Tar extends PEAR
     $v_result=true;
     $v_nb = 0;
     $v_extract_all = true;
-    $v_listing = false;
+    $v_listing = false;        
 
-    if (($p_path == "") || ((substr($p_path, 0, 1) != "/") && (substr($p_path, 0, 3) != "../")))
+    if ($p_path == "" || (substr($p_path, 0, 1) != "/" && substr($p_path, 0, 3) != "../" && substr($p_path, 1, 3) != ":\\")) {
       $p_path = "./".$p_path;
+    }
 
     // ----- Look for path to remove format (should end by /)
     if (($p_remove_path != "") && (substr($p_remove_path, -1) != '/'))
@@ -641,11 +808,10 @@ class Archive_Tar extends PEAR
 
       // ----- Look if this file need to be extracted
       if (($v_extract_file) && (!$v_listing))
-      {
+      {              
         if (($p_remove_path != "")
             && (substr($v_header[filename], 0, $p_remove_path_size) == $p_remove_path))
           $v_header[filename] = substr($v_header[filename], $p_remove_path_size);
-
         if (($p_path != "./") && ($p_path != "/")) {
           while (substr($p_path, -1) == "/")
             $p_path = substr($p_path, 0, strlen($p_path)-1);
@@ -655,18 +821,17 @@ class Archive_Tar extends PEAR
           else
             $v_header[filename] = $p_path."/".$v_header[filename];
         }
-
         if (file_exists($v_header[filename])) {
-          if ((is_dir($v_header[filename])) && ($v_header[typeflag] == "")) {
-            $this->_error("File '$v_header[filename]' already exists as a directory");
+          if ((@is_dir($v_header[filename])) && ($v_header[typeflag] == "")) {
+            $this->_error("File $v_header[filename] already exists as a directory");
             return false;
           }
           if ((is_file($v_header[filename])) && ($v_header[typeflag] == "5")) {
-            $this->_error("Directory '$v_header[filename]' already exists as a file");
+            $this->_error("Directory $v_header[filename] already exists as a file");
             return false;
           }
           if (!is_writeable($v_header[filename])) {
-            $this->_error("File '$v_header[filename]' already exists and is write protected");
+            $this->_error("File $v_header[filename] already exists and is write protected");
             return false;
           }
           if (filemtime($v_header[filename]) > $v_header[mtime]) {
@@ -676,7 +841,7 @@ class Archive_Tar extends PEAR
 
         // ----- Check the directory availability and create it if necessary
         elseif (($v_result = $this->_dirCheck(($v_header[typeflag] == "5"?$v_header[filename]:dirname($v_header[filename])))) != 1) {
-            $this->_error("Unable to create path for '$v_header[filename]'");
+            $this->_error("Unable to create path for $v_header[filename]");
             return false;
         }
 
@@ -684,13 +849,13 @@ class Archive_Tar extends PEAR
           if ($v_header[typeflag] == "5") {
             if (!@file_exists($v_header[filename])) {
                 if (!@mkdir($v_header[filename], 0777)) {
-                    $this->_error("Unable to create directory '".$v_header[filename]."'");
+                    $this->_error("Unable to create directory $v_header[filename]");
                     return false;
                 }
             }
           } else {
               if (($v_dest_file = @fopen($v_header[filename], "wb")) == 0) {
-                  $this->_error("Error while opening '$v_header[filename]' in write binary mode");
+                  $this->_error("Error while opening $v_header[filename] in write binary mode");
                   return false;
               } else {
                   $n = floor($v_header[size]/512);
@@ -719,7 +884,7 @@ class Archive_Tar extends PEAR
 
           // ----- Check the file size
           if (filesize($v_header[filename]) != $v_header[size]) {
-              $this->_error("Extracted file '$v_header[filename]' does not have the correct file size '".filesize($v_filename)."' ('$v_header[size]' expected). Archive may be corrupted.");
+              $this->_error("Extracted file $v_header[filename] does not have the correct file size '".filesize($v_filename)."' ($v_header[size] expected). Archive may be corrupted.");
               return false;
           }
           }
@@ -824,7 +989,7 @@ class Archive_Tar extends PEAR
     // {{{ _dirCheck()
     function _dirCheck($p_dir)
     {
-        if ((is_dir($p_dir)) || ($p_dir == ""))
+        if ((@is_dir($p_dir)) || ($p_dir == ""))
             return true;
 
         $p_parent_dir = dirname($p_dir);
