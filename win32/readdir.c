@@ -29,7 +29,8 @@ DIR *opendir(const char *dir)
 	filespec = malloc(strlen(dir) + 2 + 1);
 	strcpy(filespec, dir);
 	index = strlen(filespec) - 1;
-	if (index >= 0 && (filespec[index] == '/' || filespec[index] == '\\'))
+	if (index >= 0 && (filespec[index] == '/' || 
+	   (filespec[index] == '\\' && !IsDBCSLeadByte(filespec[index-1]))))
 		filespec[index] = '\0';
 	strcat(filespec, "/*");
 
