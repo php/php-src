@@ -161,21 +161,21 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 
 	if (!get_module)
 		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, "_get_module");
-#else	
+#else
 	/* NetWare doesn't support two NLMs exporting same symbol */
-    {
-        char symbol_name[64] = "\0";
-        int module_name_length = Z_STRLEN_P(file) - 4;  /* '.nlm' is 4 characters; knock it off */
+	{
+		char symbol_name[64] = "\0";
+		int module_name_length = Z_STRLEN_P(file) - 4;  /* '.nlm' is 4 characters; knock it off */
 
-        /* Take the module name (e.g.: 'php_ldap') and append '@get_module' to it */
-        strncpy(symbol_name, Z_STRVAL_P(file), module_name_length);
-        symbol_name[module_name_length] = '\0';
-        strcat(symbol_name, "@");
-        strcat(symbol_name, "get_module");
+		/* Take the module name (e.g.: 'php_ldap') and append '@get_module' to it */
+		strncpy(symbol_name, Z_STRVAL_P(file), module_name_length);
+		symbol_name[module_name_length] = '\0';
+		strcat(symbol_name, "@");
+		strcat(symbol_name, "get_module");
 
-        get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, symbol_name);
+		get_module = (zend_module_entry *(*)(void)) DL_FETCH_SYMBOL(handle, symbol_name);
 	}
-    /* NetWare doesn't prepend '_' to symbol names; so the corresponding portion of code is also
+	/* NetWare doesn't prepend '_' to symbol names; so the corresponding portion of code is also
 	   not required for NetWare */
 #endif
 
@@ -231,7 +231,7 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 					  "PHP    compiled with module API=%d, debug=%d, thread-safety=%d\n"
 					  "These options need to match\n",
 					  name, zend_api, zend_debug, zts,
-					  ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);		
+					  ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS);
 			DL_UNLOAD(handle);
 			RETURN_FALSE;
 	}
