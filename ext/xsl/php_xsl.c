@@ -256,7 +256,14 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
 		} 
 	} else {
-		if (retval->type == IS_BOOL) {
+		if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry)) {
+			xmlNode *nodep;
+			dom_object *obj;
+			obj = (dom_object *)zend_object_store_get_object(retval TSRMLS_CC);
+			nodep = dom_object_get_node(obj);
+			valuePush(ctxt, xmlXPathNewNodeSet(nodep));
+		}
+		else if (retval->type == IS_BOOL) {
 			valuePush(ctxt, xmlXPathNewBoolean(retval->value.lval));
 		} else {
 			convert_to_string_ex(&retval);
@@ -362,6 +369,7 @@ PHP_MSHUTDOWN_FUNCTION(xsl)
 	UNREGISTER_INI_ENTRIES();
 	*/
 	xsltCleanupGlobals();
+	//xmlMemoryDump();
 
 	return SUCCESS;
 }
