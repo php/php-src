@@ -566,11 +566,11 @@ static void php_session_save_current_state(TSRMLS_D)
 	ulong num_key;
 	HashPosition pos;
 	
-	if (!PG(register_globals)) {
-		if (!PS(http_session_vars)) {
-			return;
-		}
+	if (!PG(register_globals) && !PS(http_session_vars)) {
+		return;
+	}
 		
+	if (PS(http_session_vars)) {
 		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(PS(http_session_vars)), &pos);
 				zend_hash_get_current_key_ex(Z_ARRVAL_P(PS(http_session_vars)), &variable, &variable_len, &num_key, 0, &pos) == HASH_KEY_IS_STRING;
 				zend_hash_move_forward_ex(Z_ARRVAL_P(PS(http_session_vars)),&pos)) {
