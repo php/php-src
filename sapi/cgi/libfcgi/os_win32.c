@@ -295,7 +295,7 @@ int OS_SetImpersonate(void)
 {
 	char *os_name = NULL;
 	os_name = getenv("OS");
-	if (stricmp(os_name, "Windows_NT") == 0) {
+	if (os_name && stricmp(os_name, "Windows_NT") == 0) {
 		bImpersonate = TRUE;
 		return 1;
 	}
@@ -524,7 +524,6 @@ int OS_LibInit(int stdioFds[3])
     stdioHandles[STDOUT_FILENO] = GetStdHandle(STD_OUTPUT_HANDLE);
     if(!SetHandleInformation(stdioHandles[STDOUT_FILENO],
 			     HANDLE_FLAG_INHERIT, FALSE)) {
-        DebugBreak();
 	//exit(99);
 		return -1;
     }
@@ -543,7 +542,6 @@ int OS_LibInit(int stdioFds[3])
     stdioHandles[STDERR_FILENO] = GetStdHandle(STD_ERROR_HANDLE);
     if(!SetHandleInformation(stdioHandles[STDERR_FILENO],
 			     HANDLE_FLAG_INHERIT, FALSE)) {
-        DebugBreak();
 	//exit(99);
 		return -1;
     }
@@ -788,11 +786,6 @@ int OS_CreateLocalIpcFd(const char *bindPath, int backlog, int bCreateMutex)
     HANDLE mutex = INVALID_HANDLE_VALUE;
     char mutexEnvString[100];
 
-    if (mutex == NULL)
-    {
-        return -2;
-    }
-
 	if (bCreateMutex) {
 		mutex = CreateMutex(NULL, FALSE, NULL);
 		if (! SetHandleInformation(mutex, HANDLE_FLAG_INHERIT, TRUE))
@@ -983,7 +976,7 @@ int OS_FcgiConnect(char *bindPath)
             if (p) {
                 int len = p - bindPath + 1;
 
-                host = malloc(len);
+                host = (char *)malloc(len);
                 if (!host) {
                     fprintf(stderr, "Unable to allocate memory\n");
                     return -1;
@@ -1543,8 +1536,12 @@ int OS_Close(int fd)
         /*
          * CloseHandle returns: TRUE success, 0 failure
          */
+        /*
+        XXX don't close here, fcgi apps fail if we do so
+        need to examine resource leaks if any might exist
 		if (CloseHandle(fdTable[fd].fid.fileHandle) == FALSE)
 			ret = -1;
+	*/
         break;
     case FD_SOCKET_SYNC:
 	case FD_SOCKET_ASYNC:
