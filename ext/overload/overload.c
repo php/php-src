@@ -580,18 +580,16 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 		}
 
 		if (zval_is_true(retval)) {
-			*return_value = *result_ptr;
-			INIT_PZVAL(return_value);
+			REPLACE_ZVAL_VALUE(&return_value, result_ptr, 1);
 		} else {
 			zval_dtor(result_ptr);
 			php_error(E_WARNING, "Call to undefined method %s::%s()", Z_OBJCE_P(object)->name, Z_STRVAL(method_name));
 		}
 		zval_ptr_dtor(&retval);
 	} else {
-		ZVAL_STRINGL(&call_handler, Z_STRVAL(method->element), Z_STRLEN(method->element), 0);
 		call_result = call_user_function_ex(NULL,
 											&object,
-											&call_handler,
+											&method->element,
 											&retval,
 											ZEND_NUM_ARGS(), args,
 											0, NULL TSRMLS_CC);
@@ -602,8 +600,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 			return;
 		}
 
-		*return_value = *retval;
-		zval_copy_ctor(return_value);
+		REPLACE_ZVAL_VALUE(&return_value, retval, 1);
 		zval_ptr_dtor(&retval);
 	}
 	
