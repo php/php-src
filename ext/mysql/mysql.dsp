@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /machine:I386 /out:"Release/php_mysql.dll" /libpath:"..\..\..\MySQL\libmysql\Release" /libpath:"..\..\Release"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /machine:I386 /out:"Release/php_mysql.dll" /libpath:"..\..\..\MySQL\lib\opt" /libpath:"..\..\Release"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Debug"
 
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\libmysql\Debug" /libpath:"..\..\Debug"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4nts.lib /nologo /dll /debug /machine:I386 /out:"Debug/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\lib\Debug" /libpath:"..\..\Debug"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Debug_TS"
 
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\libmysql\Debug" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libmySQL.lib php4ts.lib /nologo /dll /debug /machine:I386 /out:"Debug_TS/php_mysql.dll" /pdbtype:sept /libpath:"..\..\..\MySQL\lib\Debug" /libpath:"..\..\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "mysql - Win32 Release_TS"
 

@@ -774,7 +774,7 @@ static int oci_ping(oci_server *server)
 
 /* {{{ oci_debug() */
 
-static void oci_debug(const char *format,...)
+static void oci_debug(const char *format, ...)
 {
 	OCILS_FETCH();
 

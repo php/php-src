@@ -73,7 +73,7 @@ void closelog(void)
  *      parameters
  */
 
-void syslog(int priority, const char *message,...)
+void syslog(int priority, const char *message, ...)
 {
 	va_list args;
 	LPTSTR strs[2];
