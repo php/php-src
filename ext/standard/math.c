@@ -515,7 +515,10 @@ PHP_FUNCTION(exp)
 #ifndef PHP_WIN32
 /* {{{ proto double expm1(double number)
    Returns exp(number) - 1, computed in a way that accurate even when 
-   the value of number is close to zero */
+   the value of number is close to zero 
+   WARNING: this function is expermental: it could change its name or 
+   disappear in the next version of PHP!
+   */
 
 PHP_FUNCTION(expm1)
 {
@@ -532,7 +535,10 @@ PHP_FUNCTION(expm1)
 /* }}} */
 /* {{{ proto double log1p(double number)
    Returns log(1 + number), computed in a way that accurate even when 
-   the value of number is close to zero */
+   the value of number is close to zero 
+   WARNING: this function is expermental: it could change its name or 
+   disappear in the next version of PHP!
+   */
 
 PHP_FUNCTION(log1p)
 {
@@ -598,27 +604,12 @@ PHP_FUNCTION(sqrt)
 
 /* }}} */
 
-#ifndef PHP_WIN32
-/* {{{ proto double cbrt(double number)
-   Returns the cubic root of the number */
-
-PHP_FUNCTION(cbrt)
-{
-	zval **num;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_double_ex(num);
-	Z_DVAL_P(return_value) = cbrt(Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
-}
-
-/* }}} */
-#endif
 
 /* {{{ proto double hypot(double num1, double num2)
-   Returns sqrt( num1*num1 + num2*num2) */
+   Returns sqrt( num1*num1 + num2*num2) 
+   WARNING: this function is expermental: it could change its name or 
+   disappear in the next version of PHP!
+   */
 
 PHP_FUNCTION(hypot)
 {
