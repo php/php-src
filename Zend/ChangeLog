@@ -1,3 +1,20 @@
+2004-05-28  Andrei Zmievski  <andreiz@gmail.com>
+
+    * zend.c:
+      Allow user-defined error handlers to indicate whether default error
+      handler should be re-invoked, by returning true or false.
+
+2004-05-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c:
+      Prevent possible problems with illegal properties
+
+2004-05-28  Derick Rethans  <php@derickrethans.nl>
+
+    * zend_builtin_functions.c:
+      - Make the default mask for user defined error handlers include ALL errors,
+        including E_STRICT.
+
 2004-05-27  Andi Gutmans  <andi@zend.com>
 
     * zend.h:

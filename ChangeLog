@@ -1,3 +1,89 @@
+2004-05-28  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h:
+      Changed default date format to ISO
+      Enable sync flag in connect()
+
+    * ext/interbase/interbase.c:
+      Fix commit/rollback of multi-link transactions
+      Some CS
+
+2004-05-28  Andrei Zmievski  <andreiz@gmail.com>
+
+    * ZendEngine2/zend.c:
+      Allow user-defined error handlers to indicate whether default error
+      handler should be re-invoked, by returning true or false.
+
+2004-05-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xsl/xsltprocessor.c:
+      Fixed memory leak on error.
+
+    * main/main.c:
+      The engine will take care out-of-memory situation for us.
+
+    * (PHP_4_3)
+      ext/gd/libgd/gd_topal.c:
+      MFH: Fixed bug #28311 (Transparency detection code is off by 1).
+
+2004-05-28  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Fixed off-by-one in http_fopen_wrapper
+
+2004-05-28  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/proc_open.c:
+      Hopefully resolve proc_open build issues.
+      
+      If we need anything more elaborate than this, then we can move to a
+      configure
+      time check as Sascha suggests.
+
+2004-05-28  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/xsltprocessor.c:
+      fix memleak in php callbacks
+
+2004-05-28  Stefan Esser  <sesser@suspekt.org>
+
+    * ext/standard/url.c:
+      Fixed off-by-one in php_parse_url.
+
+2004-05-28  Derick Rethans  <php@derickrethans.nl>
+
+    * TODO-5.1:
+      - Added date/time parser thingy.
+
+    * NEWS
+      ext/standard/basic_functions.c:
+      - Fixed ip2long() behavior if an invalid IP address was passed to the
+        function. This makes it possible to distingiush between
+      "255.255.255.255"
+        and a wrong one.
+
+2004-05-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * TODO-5.1:
+      Add more outstanding patches
+
+    * TODO
+      TODO-PHP5:
+      Remove finished tasks
+
+    * TODO-5.1:
+      Add more things
+
+    * ZendEngine2/zend_execute.c:
+      Prevent possible problems with illegal properties
+
+2004-05-28  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Make the default mask for user defined error handlers include ALL errors,
+        including E_STRICT.
+
 2004-05-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/session/tests/skipif.inc:
