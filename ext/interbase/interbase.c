@@ -116,7 +116,7 @@ function_entry ibase_functions[] = {
 #if HAVE_STRFTIME
 	PHP_FE(ibase_timefmt, NULL)
 #endif
-    PHP_FE(ibase_gen_id, NULL)
+	PHP_FE(ibase_gen_id, NULL)
 	PHP_FE(ibase_num_fields, NULL)
 	PHP_FE(ibase_num_params, NULL)
 #if abies_0
@@ -267,9 +267,9 @@ static void _php_ibase_module_error(char *msg TSRMLS_DC, ...)
 /* {{{ internal macros, functions and structures */
 
 typedef struct {
-    isc_db_handle *db_ptr;
-    long tpb_len;
-    char *tpb_ptr;
+	isc_db_handle *db_ptr;
+	long tpb_len;
+	char *tpb_ptr;
 } ISC_TEB;
 
 typedef struct {
