@@ -198,6 +198,11 @@ static void _close_mssql_plink(mssql_link *mssql_ptr)
 static void php_mssql_init_globals(php_mssql_globals *mssql_globals)
 {
 	MS_SQL_G(num_persistent) = 0;
+	if (MS_SQL_G(compatability_mode)) {
+		MS_SQL_G(get_column_content) = php_mssql_get_column_content_with_type;
+	} else {
+		MS_SQL_G(get_column_content) = php_mssql_get_column_content_without_type;	
+	}
 }
 #endif
 
@@ -223,11 +228,6 @@ PHP_MINIT_FUNCTION(mssql)
 	}
 	dberrhandle((DBERRHANDLE_PROC) php_mssql_error_handler);
 	dbmsghandle((DBMSGHANDLE_PROC) php_mssql_message_handler);
-	if (MS_SQL_G(compatability_mode)) {
-		MS_SQL_G(get_column_content) = php_mssql_get_column_content_with_type;
-	} else {
-		MS_SQL_G(get_column_content) = php_mssql_get_column_content_without_type;	
-	}
 	if (MS_SQL_G(connect_timeout) < 1) MS_SQL_G(connect_timeout) = 1;
 	dbsetlogintime(MS_SQL_G(connect_timeout));
 
