@@ -2110,7 +2110,11 @@ $ifdef HAVE_IFX_IUS;
             case SQLSERIAL8   :
             case SQLINT8   :
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int8_var = DATA;
+	        memset(string_data, ' ', sizeof(string_data));
                 ifx_int8toasc(&int8_var,string_data,200);
+                p = string_data;         /* rtrim string_data */
+                while ((*p != ' ') && (p < &string_data[sizeof(string_data) - 1])) ++p;
+                *p = 0;		
                 add_assoc_string(return_value, fieldname, string_data, DUP);
                 break;
             case SQLLVARCHAR:
@@ -2485,7 +2489,11 @@ $ifdef HAVE_IFX_IUS;
                 case SQLSERIAL8:
                 case SQLINT8   :
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :int8_var = DATA;
+                    memset(string_data, ' ', sizeof(string_data));
                     ifx_int8toasc(&int8_var,string_data,200);
+                    p = string_data;         /* rtrim string_data */
+                    while ((*p != ' ') && (p < &string_data[sizeof(string_data) - 1])) ++p;
+                    *p = 0;		
                     php_printf("<td>%s</td>", string_data);
                     break;
                 case SQLLVARCHAR:
