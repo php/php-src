@@ -227,7 +227,8 @@ dnl Find type of qsort
 AC_DEFUN(MYSQL_TYPE_QSORT,
 [AC_CACHE_CHECK([return type of qsort], mysql_cv_type_qsort,
 [AC_TRY_COMPILE([#include <stdlib.h>
-#ifdef __cplusplus                                                              extern "C"
+#ifdef __cplusplus
+extern "C"
 #endif
 void qsort(void *base, size_t nel, size_t width,
  int (*compar) (const void *, const void *));
@@ -237,7 +238,8 @@ AC_DEFINE_UNQUOTED(RETQSORTTYPE, $mysql_cv_type_qsort, [ ])
 if test "$mysql_cv_type_qsort" = "void"
 then
  AC_DEFINE_UNQUOTED(QSORT_TYPE_IS_VOID, 1, [ ])
-fi                                                                              ])
+fi
+])
 
 
 #---START: Used in for client configure
