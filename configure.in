@@ -964,7 +964,7 @@ PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
 
 if test "$PHP_SAPI_CLI" != "no"; then
-  PHP_CLI_TARGET=sapi/cli/php
+  PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
   PHP_INSTALL_CLI_TARGET="install-cli"
   PHP_ADD_SOURCES(sapi/cli, php_cli.c getopt.c,, cli)
 fi
