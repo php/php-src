@@ -1,3 +1,16 @@
+2000-07-31  James L. Pine  <jlp@valinux.com>
+
+    * pear/DB/oci8.php:
+    added affectedRows, which takes no arguements and returns the number of rows affected by the last query.  if the query was a select, returns 0.
+
+2000-07-31  Rasmus Lerdorf  <rasmus@php.net>
+
+    * sapi/apache/mod_php4.c: Missed a symbol
+
+2000-07-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * README.SELF-CONTAINED-EXTENSIONS: Add note about software requirements
+
 2000-07-30  Hartmut Holzgraefe  <hartmut@six.de>
 
     * ext/standard/math.c: fix for bug #5672
