@@ -148,6 +148,7 @@ typedef struct {
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
+	long auto_reset_persistent;
 	int le_lofp,le_string;
 	int ignore_notices;
 	char *last_notice;
