@@ -141,7 +141,7 @@ AC_ARG_WITH(ibm-db2,
     ODBC_INCLUDE=-I$ODBC_INCDIR
     ODBC_TYPE=db2
     ODBC_LIBS="-ldb2"
-    AC_DEFINE(HAVE_IBMDB2,,[ ])
+    AC_DEFINE(HAVE_IBMDB2,1,[ ])
 
     AC_MSG_RESULT(yes)
   else
