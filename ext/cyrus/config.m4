@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(cyrus, for cyrus imap support,
-[  --with-cyrus            Include Cyrus IMAP support])
+[  --with-cyrus[=dir]      Include Cyrus IMAP support])
 
 if test "$PHP_CYRUS" != "no"; then
   found_cyrus=no
@@ -19,12 +19,18 @@ if test "$PHP_CYRUS" != "no"; then
 
     if test -r $i/include/sasl.h && test "$found_sasl" = "no"; then
       PHP_ADD_INCLUDE($i/include)
-      PHP_ADD_LIBRARY_WITH_PATH(sasl, $i/lib, CYRUS_SHARED_LIBADD)
       found_sasl=yes
     elif test -r $i/include/sasl/sasl.h && test "$found_sasl" = "no"; then
       PHP_ADD_INCLUDE($i/include/sasl)
-      PHP_ADD_LIBRARY_WITH_PATH(sasl, $i/lib, CYRUS_SHARED_LIBADD)
       found_sasl=yes
+    fi
+
+    if test "$found_sasl" = "yes"; then
+      if test -f $i/lib/libsasl2.a || test -f $i/lib/libsasl2.$SHLIB_SUFFIX_NAME; then
+        PHP_ADD_LIBRARY_WITH_PATH(sasl2, $i/lib, CYRUS_SHARED_LIBADD)
+      else
+        PHP_ADD_LIBRARY_WITH_PATH(sasl, $i/lib, CYRUS_SHARED_LIBADD)
+      fi
     fi
 
     if test -r $i/include/openssl/ssl.h && test "$found_openssl" = "no" && test "$PHP_OPENSSL" = "no"; then
