@@ -132,6 +132,7 @@ PHP_FUNCTION(session_name);
 PHP_FUNCTION(session_module_name);
 PHP_FUNCTION(session_save_path);
 PHP_FUNCTION(session_id);
+PHP_FUNCTION(session_regenerate_id);
 PHP_FUNCTION(session_decode);
 PHP_FUNCTION(session_register);
 PHP_FUNCTION(session_unregister);

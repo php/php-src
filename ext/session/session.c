@@ -61,6 +61,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_module_name,       NULL)
 	PHP_FE(session_save_path,         NULL)
 	PHP_FE(session_id,                NULL)
+	PHP_FE(session_regenerate_id,     NULL)
 	PHP_FE(session_decode,            NULL)
 	PHP_FE(session_register,          NULL)
 	PHP_FE(session_unregister,        NULL)
@@ -1355,6 +1356,20 @@ PHP_FUNCTION(session_id)
 	}
 	
 	RETVAL_STRING(old, 0);
+}
+/* }}} */
+
+/* {{{ proto string session_regenerate_id()
+   Update the current session id with a newly generated one. */
+PHP_FUNCTION(session_regenerate_id)
+{
+	if (PS(mod)) {
+		if (PS(id)) efree(PS(id));
+	
+		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
