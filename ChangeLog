@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Improved speed of uniqid() by using the combined LCG and removing
+  the extra usleep() (Sascha)
+- Introduced general combined linear congruential generator (Sascha)
 - Made ldap_close back into an alias for ldap_unbind (Andrey)
 - OciFetchInto now resets the returned array in all cases (Thies)
 - Fixed mysql_errno() to work with recent versions of MySQL (Zeev)
