@@ -734,12 +734,12 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 		case SQLIMAGE: {
 			DBBINARY *bin;
 			unsigned char *res_buf;
-			int res_length = dbdatlen(mssql_ptr->link,offset);
+			int res_length = dbdatlen(mssql_ptr->link, offset);
 
 			res_buf = (unsigned char *) emalloc(res_length);
-			memset(res_buf, 0, res_length);
-			bin = ((DBBINARY *)dbdata(mssql_ptr->link,offset));
+			bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 			memcpy(res_buf,bin,res_length);
+			res_buf[res_length] = '\0';
 			result->value.str.len = res_length;
 			result->value.str.val = res_buf;
 			result->type = IS_STRING;
@@ -780,12 +780,12 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		column_type == SQLIMAGE) {
 		DBBINARY *bin;
 		unsigned char *res_buf;
-		int res_length = dbdatlen(mssql_ptr->link,offset);
+		int res_length = dbdatlen(mssql_ptr->link, offset);
 
 		res_buf = (unsigned char *) emalloc(res_length);
-		memset(res_buf, 0, res_length);
-		bin = ((DBBINARY *)dbdata(mssql_ptr->link,offset));
-		memcpy(res_buf,bin,res_length);
+		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
+		memcpy(res_buf, bin, res_length);
+		res_buf[res_length] = '\0';
 		result->value.str.len = res_length;
 		result->value.str.val = res_buf;
 		result->type = IS_STRING;
