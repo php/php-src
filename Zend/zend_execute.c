@@ -1428,6 +1428,7 @@ do_fcall_common:
                 			}
 							*this_ptr = object_ptr;
 							object_ptr->refcount++;
+							object_ptr = NULL;
 						}
 						original_return_value = EG(return_value);
 						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
