@@ -936,7 +936,7 @@ PHP_FUNCTION(mysqli_get_host_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
-	RETURN_STRING((char *)mysql_get_host_info(mysql), 1);
+	RETURN_STRING((mysql->host_info) ? mysql->host_info : empty_string, 1);
 }
 /* }}} */
 
@@ -995,7 +995,6 @@ PHP_FUNCTION(mysqli_get_server_version)
 PHP_FUNCTION(mysqli_info)
 {
 	MYSQL 		*mysql;
-	char  		*info = NULL;
 	zval  		*mysql_link = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
@@ -1003,11 +1002,7 @@ PHP_FUNCTION(mysqli_info)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
 
-	if (!(info = (char *)mysql_info(mysql))) {
-		RETURN_FALSE;
-	}
-
-	RETURN_STRING(info, 1);
+	RETURN_STRING((mysql->info) ? mysql->info : empty_string, 1);
 }
 /* }}} */
 
