@@ -250,6 +250,8 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		}
 	}
 	
+	module_entry->handle = handle;
+
 	RETURN_TRUE;
 }
 /* }}} */
