@@ -957,14 +957,14 @@ PHP_FUNCTION(ldap_get_values)
 	}
 	
 	add_assoc_long(return_value, "count", num_values);
-
 	ldap_value_free(ldap_value);
+
 }
 /* }}} */
 
 
 /* {{{ proto array ldap_get_values_len(int link, int result, string attribute)
-   Get the lengths for all values from a result entry */
+   Get all values with lengths from a result entry */
 PHP_FUNCTION(ldap_get_values_len)
 {
 	pval **link, **result_entry, **attr;
@@ -974,8 +974,7 @@ PHP_FUNCTION(ldap_get_values_len)
 	struct berval **ldap_value_len;
 	int i, num_values;
 	
-	if (ZEND_NUM_ARGS() != 3 ||
-	    zend_get_parameters_ex(3, &link, &result_entry, &attr) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &link, &result_entry, &attr) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1007,10 +1006,12 @@ PHP_FUNCTION(ldap_get_values_len)
 	}
 	
 	for (i=0; i<num_values; i++) {
-		add_next_index_string(return_value, ldap_value_len[i]->bv_val, 1);
+		add_next_index_stringl(return_value, ldap_value_len[i]->bv_val, ldap_value_len[i]->bv_len, 1);
 	}
 	
 	add_assoc_long(return_value, "count", num_values);
+	ldap_value_free_len(ldap_value_len);
+
 }
 /* }}} */
 		
