@@ -375,16 +375,21 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 
 static void php_session_track_init(void)
 {
+	zval **old_vars = NULL;
 	PSLS_FETCH();
 	ELS_FETCH();
 
-	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"),
-					   (void **)&PS(http_session_vars)) == FAILURE || PS(http_session_vars)->type != IS_ARRAY) {
-		MAKE_STD_ZVAL(PS(http_session_vars));
-		array_init(PS(http_session_vars));
-		ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 1, 0);
-	} else
-		zend_hash_clean(PS(http_session_vars)->value.ht);
+	if (zend_hash_find(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), (void **)&old_vars) == SUCCESS && (*old_vars)->type == IS_ARRAY) {
+	  PS(http_session_vars) = *old_vars;
+	  zend_hash_clean(PS(http_session_vars)->value.ht);
+	} else {
+	  if(old_vars) {
+		zend_hash_del(&EG(symbol_table), "HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"));
+	  }
+	  MAKE_STD_ZVAL(PS(http_session_vars));
+	  array_init(PS(http_session_vars));
+	  ZEND_SET_GLOBAL_VAR_WITH_LENGTH("HTTP_SESSION_VARS", sizeof("HTTP_SESSION_VARS"), PS(http_session_vars), 1, 0);
+	}
 }
 
 static char *_php_session_encode(int *newlen PSLS_DC)
