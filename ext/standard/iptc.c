@@ -164,7 +164,7 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
    Embed binary IPTC data into a JPEG image. */
 PHP_FUNCTION(iptcembed)
 {
-    pval *iptcdata, *jpeg_file, *spool_flag;
+    zval **iptcdata, **jpeg_file, **spool_flag; 
     FILE *fp;
 	unsigned int marker;
 	unsigned int spool = 0, done = 0, inx, len;	
@@ -173,21 +173,21 @@ PHP_FUNCTION(iptcembed)
 
     switch(ARG_COUNT(ht)){
     case 3:
-        if (getParameters(ht, 3, &iptcdata, &jpeg_file, &spool_flag) == FAILURE) {
+        if (getParametersEx(3, &iptcdata, &jpeg_file, &spool_flag) == FAILURE) {
             WRONG_PARAM_COUNT;
         }
-        convert_to_string(iptcdata);
-        convert_to_string(jpeg_file);
-        convert_to_long(spool_flag);
-		spool = spool_flag->value.lval;
+        convert_to_string_ex(iptcdata);
+        convert_to_string_ex(jpeg_file);
+        convert_to_long_ex(spool_flag);
+		spool = (*spool_flag)->value.lval;
         break;
 
     case 2:
-        if (getParameters(ht, 2, &iptcdata, &jpeg_file) == FAILURE) {
+        if (getParametersEx(2, &iptcdata, &jpeg_file) == FAILURE) {
             WRONG_PARAM_COUNT;
         }
-        convert_to_string(iptcdata);
-        convert_to_string(jpeg_file);
+        convert_to_string_ex(iptcdata);
+        convert_to_string_ex(jpeg_file);
         break;
 
     default:
@@ -195,11 +195,11 @@ PHP_FUNCTION(iptcembed)
         break;
     }
 
-    if (_php3_check_open_basedir(jpeg_file->value.str.val)) 
+    if (_php3_check_open_basedir((*jpeg_file)->value.str.val)) 
 		RETURN_FALSE;
 
-    if ((fp = fopen(jpeg_file->value.str.val,"rb")) == 0) {
-        php_error(E_WARNING, "Unable to open %s", jpeg_file->value.str.val);
+    if ((fp = fopen((*jpeg_file)->value.str.val,"rb")) == 0) {
+        php_error(E_WARNING, "Unable to open %s", (*jpeg_file)->value.str.val);
         RETURN_FALSE;
     }
 
@@ -213,7 +213,7 @@ PHP_FUNCTION(iptcembed)
 			}
 		}
 
-	len = iptcdata->value.str.len;
+	len = (*iptcdata)->value.str.len;
 
 	if (spool < 2) {
 		fstat(fileno(fp),&sb);
@@ -269,7 +269,7 @@ PHP_FUNCTION(iptcembed)
 				php3_iptc_put1(fp,spool,(unsigned char)(len&0xff),poi?&poi:0);
 					
 				for (inx = 0; inx < len; inx++)
-					php3_iptc_put1(fp,spool,iptcdata->value.str.val[inx],poi?&poi:0);
+					php3_iptc_put1(fp,spool,(*iptcdata)->value.str.val[inx],poi?&poi:0);
 				break;
 
 			case M_SOS:								
@@ -301,16 +301,16 @@ PHP_FUNCTION(iptcparse)
 	unsigned char *buffer;
 	unsigned char recnum, dataset;
 	unsigned char key[ 16 ];
-	pval *values, *str, **element;
+	zval *values, **str, **element;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string(str);
+	convert_to_string_ex(str);
 
 	inx = 0;
-	length = str->value.str.len;
-	buffer = str->value.str.val;
+	length = (*str)->value.str.len;
+	buffer = (*str)->value.str.val;
 
 	inheader = 0; /* have we already found the IPTC-Header??? */
 	tagsfound = 0; /* number of tags already found */
