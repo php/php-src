@@ -1129,7 +1129,7 @@ PHP_FUNCTION(mssql_query)
 		RETURN_FALSE;
 	}
 	
-	// Skip results not returning any columns
+	/* Skip results not returning any columns */
 	while ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && retvalue == SUCCEED) {
 		retvalue = dbresults(mssql_ptr->link);
 	}
@@ -2083,7 +2083,7 @@ PHP_FUNCTION(mssql_execute)
 			_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 		}
 		else {
-			// Skip results not returning any columns
+			/* Skip results not returning any columns */
 			while ((num_fields = dbnumcols(mssql_ptr->link)) <= 0 && retval_results == SUCCEED) {
 				retval_results = dbresults(mssql_ptr->link);
 			}
