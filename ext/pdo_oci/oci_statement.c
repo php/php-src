@@ -256,13 +256,21 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 				/* fixup stuff set in motion in oci_bind_output_cb */
 				if (P->indicator == -1) {
 					/* set up a NULL value */
-					if (Z_TYPE_P(param->parameter) == IS_STRING && Z_STRVAL_P(param->parameter) != empty_string) {
+					if (Z_TYPE_P(param->parameter) == IS_STRING
+#if ZEND_EXTENSION_API_NO < 220040718
+								&& Z_STRVAL_P(param->parameter) != empty_string
+#endif
+							) {
 						/* OCI likes to stick non-terminated strings in things */
 						*Z_STRVAL_P(param->parameter) = '\0';
 					}
 					zval_dtor(param->parameter);
 					ZVAL_NULL(param->parameter);
-				} else if (Z_TYPE_P(param->parameter) == IS_STRING && Z_STRVAL_P(param->parameter) != empty_string) {
+				} else if (Z_TYPE_P(param->parameter) == IS_STRING
+#if ZEND_EXTENSION_API_NO < 220040718
+							&& Z_STRVAL_P(param->parameter) != empty_string
+#endif
+						) {
 					Z_STRLEN_P(param->parameter) = P->actual_len;
 					Z_STRVAL_P(param->parameter) = erealloc(Z_STRVAL_P(param->parameter), P->actual_len+1);
 					Z_STRVAL_P(param->parameter)[P->actual_len] = '\0';
@@ -354,12 +362,12 @@ static int oci_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 				/* should be big enough for most date formats and numbers */
 				S->cols[colno].datalen = 512;
 			} else {
-				S->cols[colno].datalen = col->maxlen + 1; /* 1 for NUL terminator */
+				S->cols[colno].datalen = col->maxlen;
 			}
 			if (dtype == SQLT_BIN) {
 				S->cols[colno].datalen *= 3;
 			}
-			S->cols[colno].data = emalloc(S->cols[colno].datalen);
+			S->cols[colno].data = emalloc(S->cols[colno].datalen + 1);
 			dtype = SQLT_CHR;
 
 			/* returning data as a string */
