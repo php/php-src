@@ -60,6 +60,7 @@ static zend_function_entry domxml_functions[] = {
 	PHP_FE(domxml_children,	NULL)
 	PHP_FE(domxml_new_child,	NULL)
 	PHP_FE(domxml_node,	NULL)
+	PHP_FE(domxml_set_content,	NULL)
 	PHP_FE(domxml_new_xmldoc,	NULL)
 	PHP_FALIAS(new_xmldoc, domxml_new_xmldoc,	NULL)
 	PHP_FE(xpath_new_context, NULL)
@@ -96,6 +97,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
 	PHP_FALIAS(node,	domxml_node,	NULL)
+	PHP_FALIAS(set_content,	domxml_set_content,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -467,6 +469,7 @@ PHP_FUNCTION(domxml_node)
 {
 	zval *arg;
 	xmlNode *node;
+	xmlChar *content;
 	int ret;
 	
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg) == FAILURE) {
@@ -485,8 +488,9 @@ PHP_FUNCTION(domxml_node)
 	add_property_resource(return_value, "node", ret);
 	add_property_long(return_value, "type", node->type);
 	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
-	if(node->content)
-		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+	content = xmlNodeGetContent(node);
+	if(content)
+		add_property_stringl(return_value, "content", (char *) content, strlen(content), 1);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -498,6 +502,7 @@ PHP_FUNCTION(domxml_lastchild)
 	zval *id, **tmp;
 	int id_to_find;
 	xmlNode *nodep, *last;
+	xmlChar *content;
 	int type;
 	int ret;
 	
@@ -534,8 +539,9 @@ PHP_FUNCTION(domxml_lastchild)
 	add_property_resource(return_value, "node", ret);
 	add_property_long(return_value, "type", last->type);
 	add_property_stringl(return_value, "name", (char *) last->name, strlen(last->name), 1);
-	if(last->content)
-		add_property_stringl(return_value, "content", (char *) last->content, strlen(last->content), 1);
+	content = xmlNodeGetContent(last);
+	if(content)
+		add_property_stringl(return_value, "content", (char *) content, strlen(content), 1);
 }
 /* }}} */
 
@@ -546,6 +552,7 @@ PHP_FUNCTION(domxml_parent)
 	zval *id, **tmp;
 	int id_to_find;
 	xmlNode *nodep, *last;
+	xmlChar *content;
 	int type;
 	int ret;
 	
@@ -582,8 +589,9 @@ PHP_FUNCTION(domxml_parent)
 	add_property_resource(return_value, "node", ret);
 	add_property_long(return_value, "type", last->type);
 	add_property_stringl(return_value, "name", (char *) last->name, strlen(last->name), 1);
-	if(last->content)
-		add_property_stringl(return_value, "content", (char *) last->content, strlen(last->content), 1);
+	content = xmlNodeGetContent(last);
+	if(content)
+		add_property_stringl(return_value, "content", (char *) content, strlen(content), 1);
 }
 /* }}} */
 
@@ -639,6 +647,7 @@ PHP_FUNCTION(domxml_children)
 
 	while(last) {
 		zval *child;
+		xmlChar *content;
 		MAKE_STD_ZVAL(child);
 
 		ret = zend_list_insert(last, le_domxmlnodep);
@@ -646,8 +655,9 @@ PHP_FUNCTION(domxml_children)
 		/* construct a node object */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
 		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
-		if(last->content)
-			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
+		content = xmlNodeGetContent(last);
+		if(content)
+			add_property_stringl(child, "content", (char *) content, strlen(content), 1);
 		add_property_resource(child, "node", ret);
 		add_property_long(child, "type", last->type);
 		zend_hash_next_index_insert(return_value->value.ht, &child, sizeof(zval *), NULL);
@@ -842,6 +852,7 @@ PHP_FUNCTION(domxml_rootnew)
 
 	while(last) {
 		zval *child;
+		xmlChar *content;
 		MAKE_STD_ZVAL(child);
 
 		ret = zend_list_insert(last, le_domxmlnodep);
@@ -849,8 +860,9 @@ PHP_FUNCTION(domxml_rootnew)
 		/* construct a node object */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
 		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
-		if(last->content)
-			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
+		content = xmlNodeGetContent(last);
+		if(content)
+			add_property_stringl(child, "content", (char *) content, strlen(content), 1);
 		add_property_resource(child, "node", ret);
 		add_property_long(child, "type", last->type);
 		zend_hash_next_index_insert(return_value->value.ht, &child, sizeof(zval *), NULL);
@@ -897,6 +909,7 @@ PHP_FUNCTION(domxml_root)
 	}
 
 	while(node) {
+		xmlChar *content;
 		if(node->type == XML_ELEMENT_NODE) {
 			ret = zend_list_insert(node, le_domxmlnodep);
 
@@ -905,8 +918,9 @@ PHP_FUNCTION(domxml_root)
 			add_property_resource(return_value, "node", ret);
 			add_property_long(return_value, "type", node->type);
 			add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
-			if(node->content)
-				add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+			content = xmlNodeGetContent(node);
+			if(content)
+				add_property_stringl(return_value, "content", (char *) content, strlen(content), 1);
 			zend_list_addref(ret);
 			return;
 		}
@@ -1127,6 +1141,49 @@ PHP_FUNCTION(domxml_new_child)
 }
 /* }}} */
 
+/* {{{ proto string domxml_set_content([int node_handle,] string content)
+   Set content of a node */
+PHP_FUNCTION(domxml_set_content)
+{
+	zval *id, *content, **tmp;
+	int id_to_find;
+	xmlNode *nodep;
+	int type;
+	int ret;
+
+	if (ZEND_NUM_ARGS() == 1) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
+			if(getParameters(ht, 1, &content) == FAILURE)
+				WRONG_PARAM_COUNT;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ZEND_NUM_ARGS() != 2) || getParameters(ht, 2, &id, &content) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
+	}
+	convert_to_string(content);
+
+	if(content->value.str.len)
+		xmlNodeSetContent(nodep, content->value.str.val);
+
+	// FIXME: Actually the property 'content' of the node has to be updated
+	// as well. Since 'content' should disappear sooner or later and being
+	// replaces by a function 'content()' I skip this for now
+}
+/* }}} */
+
 /* {{{ proto string domxml_add_root([int doc_handle,] string name)
    Adds root node to document */
 PHP_FUNCTION(domxml_add_root)
@@ -1135,6 +1192,7 @@ PHP_FUNCTION(domxml_add_root)
 	int id_to_find;
 	xmlDoc *docp;
 	xmlNode *node;
+	xmlChar *content;
 	int type;
 	int ret;
 	
@@ -1174,8 +1232,9 @@ PHP_FUNCTION(domxml_add_root)
 	add_property_resource(return_value, "node", ret);
 	add_property_long(return_value, "type", node->type);
 	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
-	if(node->content)
-		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+	content = xmlNodeGetContent(node);
+	if(content)
+		add_property_stringl(return_value, "content", (char *) content, strlen(content), 1);
 	zend_list_addref(ret);
 }
 /* }}} */
@@ -1309,6 +1368,7 @@ static int node_children(zval **children, xmlNode *nodep)
 
 	while(last) {
 		zval *child;
+		xmlChar *content;
 		int ret;
 
 		/* Each child is a node object */
@@ -1324,8 +1384,9 @@ static int node_children(zval **children, xmlNode *nodep)
 		/* Add name, content and type as properties */
 		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
 		add_property_long(child, "type", last->type);
-		if(last->content)
-			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
+		content = xmlNodeGetContent(last);
+		if(content)
+			add_property_stringl(child, "content", (char *) content, strlen(content), 1);
 		add_property_resource(child, "node", ret);
 
 		/* Get the namespace of the current node and add it as a property */
@@ -1575,6 +1636,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 			for(i = 0;i < nodesetp->nodeNr;i++) {
 				xmlNodePtr node = nodesetp->nodeTab[i];
 				zval *child;
+				xmlChar *content;
 				int retnode;
 				MAKE_STD_ZVAL(child);
 
@@ -1584,8 +1646,9 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 				object_init_ex(child, domxmlnode_class_entry_ptr);
 				add_property_long(child, "type", node->type);
 				add_property_stringl(child, "name", (char *) node->name, strlen(node->name), 1);
-				if(node->content)
-					add_property_stringl(child, "content", (char *) node->content, strlen(node->content), 1);
+				content = xmlNodeGetContent(node);
+				if(content)
+					add_property_stringl(child, "content", (char *) content, strlen(content), 1);
 				add_property_resource(child, "node", retnode);
 				zend_hash_next_index_insert(arr->value.ht, &child, sizeof(zval *), NULL);
 			}
