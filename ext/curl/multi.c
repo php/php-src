@@ -195,6 +195,9 @@ PHP_FUNCTION(curl_multi_info_read)
 	CURLMsg   *tmp_msg;
 	int        queued_msgs;
 
+	// XXX: Not Implemented
+	return;
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_mh) == FAILURE) {
 		return;
 	}
