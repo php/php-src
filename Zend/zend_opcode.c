@@ -87,6 +87,8 @@ void init_op_array(zend_op_array *op_array, int type, int initial_ops_size TSRML
 	op_array->return_reference = 0;
 	op_array->done_pass_two = 0;
 
+	op_array->uses_this = 0;
+
 	op_array->start_op = NULL;
 
 	zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_op_array_ctor_handler, op_array TSRMLS_CC);
