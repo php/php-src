@@ -102,7 +102,7 @@ PHP_MINIT_FUNCTION(cyrus)
 PHP_MINFO_FUNCTION(cyrus)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Cyrus IMAP support", "enabled");
+	php_info_print_table_row(2, "Cyrus IMAP support", "enabled");
 	php_info_print_table_end();
 }
 
