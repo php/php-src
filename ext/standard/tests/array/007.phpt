@@ -2,6 +2,12 @@
 Test array_diff and array_diff_assoc behaviour
 --FILE--
 <?php
+//-=-=-=-=-
+$a = array();
+$b = 3;
+$c = array(5);
+array_diff($a, $b, $c);
+//-=-=-=-=-=-
 $a = array(1,"big"=>2,3,6,3,5,3,3,3,3,3,3,3,3,3,3);
 $b = array(2,2,3,3,3,3,3,3,3,3,3,3,3,3,3);
 $c = array(-1,1);
@@ -127,6 +133,7 @@ var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
 
 ?>
 --EXPECTF--
+Warning: array_diff(): Argument #2 is not an array in %s
 $a=array (
   0 => 1,
   'big' => 2,
