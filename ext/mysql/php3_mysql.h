@@ -87,7 +87,6 @@ typedef struct {
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
-	int le_result,le_link,le_plink;
 	long default_port;
 	char *default_host, *default_user, *default_password;
 } php_mysql_globals;
