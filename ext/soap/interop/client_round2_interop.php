@@ -263,21 +263,6 @@ class Interop_Client
         }
 
         $test_name = $soap_test->test_name;
-        // add header info to the test name
-        if ($soap_test->headers) {
-            foreach ($soap_test->headers as $h) {
-                $destination = 0;
-                if (get_class($h) == 'soap_header') {
-                    if ($h->attributes['SOAP-ENV:actor'] == 'http://schemas.xmlsoap.org/soap/actor/next') $destination = 1;
-                    $test_name .= ":{$h->name},$destination,{$h->attributes['SOAP-ENV:mustUnderstand']}";
-                } else {
-                    if (!$h[3] || $h[3] == 'http://schemas.xmlsoap.org/soap/actor/next') $destination = 1;
-                    if (!$h[2]) $h[2] = 0;
-                    $qn = new QName($h[0]);
-                    $test_name .= ":{$qn->name},$destination,".(int)$h[2];
-                }
-            }
-        }
 
         $sql = "delete from results where endpoint=$endpoint_id ".
                     "and class='$this->currentTest' and type='$this->paramType' ".
@@ -414,13 +399,13 @@ class Interop_Client
             }
             $soap = $endpoint_info['client'];
         }
-        // add headers to the test
-        if ($soap_test->headers) {
-            // $header is already a SOAP_Header class
-            foreach ($soap_test->headers as $header) {
-                $soap->addHeader($header);
-            }
-        }
+//        // add headers to the test
+//        if ($soap_test->headers) {
+//            // $header is already a SOAP_Header class
+//            foreach ($soap_test->headers as $header) {
+//              $soap->addHeader($header);
+//            }
+//        }
         // XXX no way to set encoding
         // this lets us set UTF-8, US-ASCII or other
         //$soap->setEncoding($soap_test->encoding);
@@ -432,7 +417,11 @@ class Interop_Client
             }
             $return = eval('return $soap->'.$soap_test->method_name.'('.$args.');');
         } else {
+        	if ($soap_test->headers || $soap_test->headers_expect) {
+            $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace, $soap_test->headers, $result_headers);
+          } else {
             $return = $soap->__call($soap_test->method_name,$soap_test->method_params,$soapaction, $namespace);
+          }
         }
 
 
@@ -449,36 +438,10 @@ class Interop_Client
             }
 
             // compare header results
-            $header_result = array();
             $headers_ok = TRUE;
-
-            # XXX need to implement header support!
-            #
-            #if ($soap_test->headers) {
-            #    // $header is already a SOAP_Header class
-            #    foreach ($soap_test->headers as $header) {
-            #        if (get_class($header) != 'soap_header') {
-            #            // assume it's an array
-            #            $header = new SOAP_Header($header[0], NULL, $header[1], $header[2], $header[3], $header[4]);
-            #        }
-            #        $expect = $soap_test->headers_expect[$header->name];
-            #        $header_result[$header->name] = array();
-            #        // XXX need to fix need_result to identify the actor correctly
-            #        $need_result = $hresult ||
-            #            ($header->attributes['SOAP-ENV:actor'] == 'http://schemas.xmlsoap.org/soap/actor/next'
-            #             && $header->attributes['SOAP-ENV:mustUnderstand']);
-            #        if ($expect) {
-            #            $hresult = $soap->headers[key($expect)];
-            #            $ok = !$need_result || $this->compareResult($hresult ,$expect[key($expect)]);
-            #        } else {
-            #            $hresult = $soap->headers[$header->name];
-            #            $expect = $this->decodeSoapval($header);
-            #            $ok = !$need_result || $this->compareResult($hresult ,$expect);
-            #        }
-            #        $header_result[$header->name]['ok'] = $ok;
-            #        if (!$ok) $headers_ok = FALSE;
-            #    }
-            #}
+            if ($soap_test->headers || $soap_test->headers_expect) {
+							$headers_ok = $this->compareResult($soap_test->headers_expect, $result_headers);            	
+            }
 
             # we need to decode what we sent so we can compare!
             $sent_d = $this->decodeSoapval($sent);
@@ -503,6 +466,10 @@ class Interop_Client
                     "RESPONSE:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastresponse()))."\n\n".
                     "EXPECTED:\n".var_dump_str($sent_d)."\n".
                     "RESULTL:\n".var_dump_str($return);
+						if ($soap_test->headers_expect) {
+							$wire .= "\nEXPECTED HEADERS:\n".var_dump_str($soap_test->headers_expect)."\n".
+							         "RESULT HEADERS:\n".var_dump_str($result_headers);
+						}
             #print "Wire:".htmlentities($wire);
 
             if($ok){
@@ -604,27 +571,6 @@ class Interop_Client
 
                 // if we're looking for a specific method, skip unless we have it
                 if ($this->testMethod && strcmp($this->testMethod,$soap_test->test_name) != 0) continue;
-                if ($this->testMethod && $this->currentTest == 'GroupC') {
-                    // we have to figure things out now
-                    if (!preg_match('/(.*):(.*),(\d),(\d)/',$this->testMethod, $m)) continue;
-
-                    // is the header in the headers list?
-                    $gotit = FALSE;
-                    foreach ($soap_test->headers as $header) {
-                        if (get_class($header) == 'soap_header') {
-                            if ($header->name == $m[2]) {
-                                $gotit = $header->attributes['SOAP-ENV:actor'] == ($m[3]?SOAP_TEST_ACTOR_NEXT:SOAP_TEST_ACTOR_OTHER);
-                                $gotit = $gotit && $header->attributes['SOAP-ENV:mustUnderstand'] == $m[4];
-                            }
-                        } else {
-                            if ($header[0] == $m[2]) {
-                                $gotit = $gotit && $header[3] == ($m[3]?SOAP_TEST_ACTOR_NEXT:SOAP_TEST_ACTOR_OTHER);
-                                $gotit = $gotit && $header[4] == $m[4];
-                            }
-                        }
-                    }
-                    if (!$gotit) continue;
-                }
 
                 // if we are skipping the rest of the tests (due to error) note a fault
                 if ($skipendpoint) {

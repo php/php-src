@@ -19,7 +19,6 @@
 // $Id$
 //
 
-define('SOAP_TEST_ACTOR_NEXT','http://schemas.xmlsoap.org/soap/actor/next');
 define('SOAP_TEST_ACTOR_OTHER','http://some/other/actor');
 
 class SOAP_Test {
@@ -90,18 +89,6 @@ class SOAP_Test {
         }
 
         echo "testing $this->test_name : ";
-        if ($this->headers) {
-            foreach ($this->headers as $h) {
-                if (get_class($h) == 'soap_header') {
-
-                    echo "\n    {$h->name},{$h->attributes['SOAP-ENV:actor']},{$h->attributes['SOAP-ENV:mustUnderstand']} : ";
-                } else {
-                    if (!$h[4]) $h[4] = SOAP_TEST_ACTOR_NEXT;
-                    if (!$h[3]) $h[3] = 0;
-                    echo "\n    $h[0],$h[4],$h[3] : ";
-                }
-            }
-        }
 
         if ($debug) {
             print "method params: ";
@@ -428,223 +415,192 @@ $soap_tests['GroupB'][] = new SOAP_Test('echoNestedArray',
         )),$arrstr);
 
 
-#//***********************************************************
-#// GROUP C header tests
-#
-#//***********************************************************
-#// echoMeStringRequest php val tests
-#
-#// echoMeStringRequest with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'hello world', 0,SOAP_TEST_ACTOR_NEXT);
-#$test->headers_expect['echoMeStringRequest'] = array('echoMeStringResponse'=>'hello world');
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'hello world', 1,SOAP_TEST_ACTOR_NEXT);
-#$this->type = 'soapval'; // force a soapval version of this test
-#$test->headers_expect['echoMeStringRequest'] = array('echoMeStringResponse'=>'hello world');
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'hello world', 0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStringRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'hello world', 1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStringRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#//***********************************************************
-#// echoMeStringRequest soapval tests
-#
-#// echoMeStringRequest with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'string', 'hello world');
-#$test->headers_expect['echoMeStringRequest'] = array('echoMeStringResponse'=>'hello world');
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'string', 'hello world', 1);
-#$this->type = 'soapval'; // force a soapval version of this test
-#$test->headers_expect['echoMeStringRequest'] = array('echoMeStringResponse'=>'hello world');
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'string', 'hello world', 0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStringRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStringRequest', 'string', 'hello world', 1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStringRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStringRequest with endpoint header destination, must understand,
-#// invalid namespace, should recieve a fault
-##$test = new SOAP_Test('echoVoid', NULL);
-##$test->type = 'soapval';
-##$test->headers[] = new SOAP_Header('{http://unknown.org/echoheader/}echoMeStringRequest', 'string', 'hello world',  1);
-##$test->headers_expect['echoMeStringRequest'] = array();
-##$test->expect_fault = TRUE;
-##$soap_tests['GroupC'][] = $test;
-#
-#//***********************************************************
-#// php val tests
-#// echoMeStructRequest with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStructRequest',
-#        array('varString'=>'arg', 'varInt'=>34, 'varFloat'=>325.325),
-#        0,SOAP_TEST_ACTOR_NEXT);
-#$test->headers_expect['echoMeStructRequest'] =
-#    array('echoMeStructResponse'=> array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStructRequest',
-#        array('varString'=>'arg', 'varInt'=>34, 'varFloat'=>325.325),
-#        1,SOAP_TEST_ACTOR_NEXT);
-#$test->headers_expect['echoMeStructRequest'] =
-#    array('echoMeStructResponse'=> array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStructRequest',
-#        array('varString'=>'arg', 'varInt'=>34, 'varFloat'=>325.325),
-#        0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStructRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeStructRequest',
-#        array('varString'=>'arg', 'varInt'=>34, 'varFloat'=>325.325),
-#        1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStructRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#//***********************************************************
-#// soapval tests
-#// echoMeStructRequest with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStructRequest',NULL,
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325)
-#            ));
-#$test->headers_expect['echoMeStructRequest'] =
-#    array('echoMeStructResponse'=> array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStructRequest',NULL,
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325)
-#            ), 1);
-#$test->headers_expect['echoMeStructRequest'] =
-#    array('echoMeStructResponse'=> array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStructRequest',NULL,
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325)
-#            ), 0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStructRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeStructRequest with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeStructRequest',NULL,
-#            array( #push struct elements into one soap value
-#                new SOAP_Value('varString','string','arg'),
-#                new SOAP_Value('varInt','int',34),
-#                new SOAP_Value('varFloat','float',325.325)
-#            ), 1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeStructRequest'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#//***********************************************************
-#// echoMeUnknown php val tests
-#// echoMeUnknown with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeUnknown', 'nobody understands me!',0,SOAP_TEST_ACTOR_NEXT);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeUnknown', 'nobody understands me!',1,SOAP_TEST_ACTOR_NEXT);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$test->expect_fault = TRUE;
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeUnknown', 'nobody understands me!',0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->headers[] = array('{http://soapinterop.org/echoheader/}echoMeUnknown', 'nobody understands me!', 1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#//***********************************************************
-#// echoMeUnknown soapval tests
-#// echoMeUnknown with endpoint as header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeUnknown','string','nobody understands me!');
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint as header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeUnknown','string','nobody understands me!',1);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$test->expect_fault = TRUE;
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint NOT header destination, doesn't have to understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeUnknown','string','nobody understands me!', 0, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
-#
-#// echoMeUnknown with endpoint NOT header destination, must understand
-#$test = new SOAP_Test('echoVoid', NULL);
-#$test->type = 'soapval';
-#$test->headers[] = new SOAP_Header('{http://soapinterop.org/echoheader/}echoMeUnknown','string','nobody understands me!', 1, SOAP_TEST_ACTOR_OTHER);
-#$test->headers_expect['echoMeUnknown'] = array();
-#$soap_tests['GroupC'][] = $test;
+//***********************************************************
+// GROUP C header tests
 
+//***********************************************************
+// echoMeStringRequest
 
+// echoMeStringRequest with endpoint as header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=0 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', 'hello world', 0, SOAP_ACTOR_NEXT);
+$test->headers_expect = array('echoMeStringResponse'=>'hello world');
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=0 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', new SoapVar('hello world',XSD_STRING), 0, SOAP_ACTOR_NEXT);
+$test->headers_expect = array('echoMeStringResponse'=>'hello world');
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStringRequest with endpoint as header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=1 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', 'hello world', 1, SOAP_ACTOR_NEXT);
+$test->headers_expect = array('echoMeStringResponse'=>'hello world');
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=1 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', new SoapVar('hello world',XSD_STRING), 1, SOAP_ACTOR_NEXT);
+$test->headers_expect = array('echoMeStringResponse'=>'hello world');
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStringRequest with endpoint NOT header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=0 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', 'hello world', 0, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=0 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', new SoapVar('hello world',XSD_STRING), 0, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStringRequest with endpoint NOT header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=1 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', 'hello world', 1, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStringRequest mustUnderstand=1 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStringRequest', new SoapVar('hello world', XSD_STRING), 1, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStringRequest with endpoint header destination, must understand,
+// invalid namespace, should recieve a fault
+$test = new SOAP_Test('echoVoid (echoMeStringRequest invalid namespace)', NULL);
+$test->headers[] = new SoapHeader('http://unknown.org/echoheader/','echoMeStringRequest', 'hello world', 1, SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$test->expect_fault = TRUE;
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStringRequest invalid namespace)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://unknown.org/echoheader/','echoMeStringRequest', new SoapVar('hello world', XSD_STRING), 1, SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$test->expect_fault = TRUE;
+$soap_tests['GroupC'][] = $test;
+
+//***********************************************************
+// echoMeStructRequest
+
+// echoMeStructRequest with endpoint as header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=0 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+        new SOAPStruct('arg',34,325.325), 0, SOAP_ACTOR_NEXT);
+$test->headers_expect =
+    array('echoMeStructResponse'=> (object)array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=0 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+            new SoapVar(new SOAPStruct('arg',34,325.325),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+            0, SOAP_ACTOR_NEXT);
+$test->headers_expect =
+    array('echoMeStructResponse'=> (object)array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStructRequest with endpoint as header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=1 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+        new SOAPStruct('arg',34,325.325), 1, SOAP_ACTOR_NEXT);
+$test->headers_expect =
+    array('echoMeStructResponse'=> (object)array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=1 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+            new SoapVar(new SOAPStruct('arg',34,325.325),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+            1, SOAP_ACTOR_NEXT);
+$test->headers_expect =
+    array('echoMeStructResponse'=> (object)array('varString'=>'arg','varInt'=>34,'varFloat'=>325.325));
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStructRequest with endpoint NOT header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=0 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+        new SOAPStruct('arg',34,325.325), 0, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=0 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+            new SoapVar(new SOAPStruct('arg',34,325.325),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+            0, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+// echoMeStructRequest with endpoint NOT header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=1 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+        new SOAPStruct('arg',34,325.325), 1, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeStructRequest mustUnderstand=1 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeStructRequest',
+            new SoapVar(new SOAPStruct('arg',34,325.325),SOAP_ENC_OBJECT,"SOAPStruct","http://soapinterop.org/xsd"),
+            1, SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+//***********************************************************
+// echoMeUnknown
+
+// echoMeUnknown with endpoint as header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=0 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', 'nobody understands me!',0,SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=0 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', new SoapVar('nobody understands me!',XSD_STRING),0,SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+// echoMeUnknown with endpoint as header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=1 actor=next)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', 'nobody understands me!',1,SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$test->expect_fault = TRUE;
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=1 actor=next)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', new SoapVar('nobody understands me!',XSD_STRING),1,SOAP_ACTOR_NEXT);
+$test->headers_expect = array();
+$test->expect_fault = TRUE;
+$soap_tests['GroupC'][] = $test;
+
+// echoMeUnknown with endpoint NOT header destination, doesn't have to understand
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=0 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', 'nobody understands me!',0,SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=0 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', new SoapVar('nobody understands me!',XSD_STRING),0,SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+// echoMeUnknown with endpoint NOT header destination, must understand
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=1 actor=other)', NULL);
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', 'nobody understands me!',1,SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
+
+$test = new SOAP_Test('echoVoid (echoMeUnknown mustUnderstand=1 actor=other)', NULL);
+$test->type = 'soapval';
+$test->headers[] = new SoapHeader('http://soapinterop.org/echoheader/','echoMeUnknown', new SoapVar('nobody understands me!',XSD_STRING),1,SOAP_TEST_ACTOR_OTHER);
+$test->headers_expect = array();
+$soap_tests['GroupC'][] = $test;
 ?>

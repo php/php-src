@@ -24,16 +24,24 @@ class SOAP_Interop_GroupC {
 
     function echoMeStringRequest($string)
     {
-	return new SOAP_Value('{'.$this->method_namespace.'}echoMeStringResponse','string',$string);
+//        return $string;
+        return new SoapVar($string, XSD_STRING, "string", XSD_NAMESPACE, "echoMeStringResponse", $this->method_namespace);
     }
 
     function echoMeStructRequest($struct)
     {
-	return new SOAP_Value('{'.$this->method_namespace.'}echoMeStructResponse','SOAPStruct',$struct);
+//        return $struct;
+        return new SoapVar($struct, SOAP_ENC_OBJECT, "SOAPStruct", "http://soapinterop.org/", "echoMeStructResponse",$this->method_namespace);
+//        new SOAP_Value('{'.$this->method_namespace.'}echoMeStructResponse','SOAPStruct',$struct);
+    }
+
+    function echoVoid()
+    {
     }
 }
 
-$server = new SoapServer("http://test-uri");
+$server = new SoapServer("http://soapinterop.org/");
+$server->bind((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/echoheadersvc.wsdl.php");
 $server->setClass("SOAP_Interop_GroupC");
 $server->handle();
 ?>

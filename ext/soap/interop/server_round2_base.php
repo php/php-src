@@ -99,7 +99,7 @@ class SOAP_Interop_Base {
     }
 }
 
-$server = new SoapServer("http://test-uri");
+$server = new SoapServer("http://soapinterop.org/");
 $server->bind((isset($_SERVER['HTTPS'])?"https://":"http://").$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF'])."/interop.wsdl.php");
 $server->setClass("SOAP_Interop_Base");
 $server->handle();
