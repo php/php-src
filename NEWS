@@ -13,18 +13,18 @@ PHP 4                                                                      NEWS
   . Bug #30573 (compiler warnings in libmbfl due to invalid type cast)
   . Bug #30549 (incorrect character translations for some ISO8859 charsets)
   . Bug #28220 (mb_strwidth() returns wrong width values for some hangul chars)
-- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
-  file). (Tony)
-- Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
-- Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
 - Fixed several leaks in ext/browscap and sapi/embed. (Andrei)
 - Fixed several leaks in ext/filepro. (Tony)
 - Fixed build system to always use bundled libtool files. (Jani)  
 - Fixed MacOSX shared extensions crashing on Apache startup. (Rasmus)
+- Fixed bug #32373 (segfault in bzopen() if supplied path to non-existent 
+  file). (Tony)
+- Fixed bug #32340 (insert_before($node,NULL) does not return). (Rob) 
 - Fixed bug #32200 (Prevent using both --with-apxs2 and --with-apxs2filter).
   (Jani)
 - Fixed bug #32160 (file truncation in copy() when source & destination are
   the same). (Ilia)
+- Fixed bug #32114 (DOM crashing when attribute appended to Document). (Rob)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
 - Fixed bug #31936 (set_h_errno() is redefined incompatibly). (Jani)
