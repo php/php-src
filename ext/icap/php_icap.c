@@ -170,7 +170,7 @@ void php_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	long flags=0;
 	long cl_flags=0;
 	int ind;
-        int myargc=ARG_COUNT(ht);
+        int myargc=ZEND_NUM_ARGS();
 
 	
 	if (myargc <3 || myargc >4 || getParameters(ht, myargc, &calendar,&user,&passwd,&options) == FAILURE) {
@@ -207,7 +207,7 @@ PHP_FUNCTION(icap_close)
         pval *options, *streamind;
         int ind, ind_type;
         pils *icap_le_struct=NULL; 
-        int myargcount=ARG_COUNT(ht);
+        int myargcount=ZEND_NUM_ARGS();
         long flags = 0;
 
         if (myargcount < 1 || myargcount > 2 || getParameters(ht, myargcount, &streamind, &options) == FAILURE) {
@@ -252,7 +252,7 @@ PHP_FUNCTION(icap_reopen)
 	int ind, ind_type;
 	long flags=0;
 	long cl_flags=0;
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 
 	if (myargc<2 || myargc>3 || getParameters(ht,myargc,&streamind, &calendar, &options) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -292,7 +292,7 @@ PHP_FUNCTION(icap_expunge)
 	pval *start,*end;
 	pils *icap_le_struct; 
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &streamind) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -321,7 +321,7 @@ PHP_FUNCTION(icap_fetch_event)
 	int ind, ind_type;
 	pils *icap_le_struct=NULL; 
 	CALEVENT *myevent;
-	int myargcount=ARG_COUNT(ht);
+	int myargcount=ZEND_NUM_ARGS();
 	
 	if (myargcount < 1 || myargcount > 3 || getParameters(ht, myargcount, &streamind, &eventid,&options) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -396,7 +396,7 @@ PHP_FUNCTION(icap_list_events)
 	cal_list_t *my_cal_list;
 	datetime_t begincal,endcal;
 	int myargc;
-	myargc=ARG_COUNT(ht);
+	myargc=ZEND_NUM_ARGS();
 	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&begindate,&enddate) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -476,7 +476,7 @@ PHP_FUNCTION(icap_create_calendar)
 	pval *streamind, *calendar;
 	int ind, ind_type;
 	pils *icap_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -511,7 +511,7 @@ PHP_FUNCTION(icap_rename_calendar)
 	pval *streamind, *src_calendar,*dest_calendar;
 	int ind, ind_type;
 	pils *icap_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&src_calendar,&dest_calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -549,7 +549,7 @@ PHP_FUNCTION(icap_list_alarms)
         unsigned int msgno;
         cal_list_t *my_cal_list;
 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc != 3 || getParameters(ht,myargc,&streamind,&date,&time) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -620,7 +620,7 @@ PHP_FUNCTION(icap_delete_calendar)
 	pval *streamind, *calendar;
 	int ind, ind_type;
 	pils *icap_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&calendar) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -655,7 +655,7 @@ PHP_FUNCTION(icap_delete_event)
 	pval *streamind, *uid;
 	int ind, ind_type;
 	pils *icap_le_struct; 
-	int myargc=ARG_COUNT(ht);
+	int myargc=ZEND_NUM_ARGS();
 	if (myargc <1 || myargc > 2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -707,7 +707,7 @@ PHP_FUNCTION(icap_store_event)
 	int myargc;
 	unsigned long uid;
 	CALEVENT *myevent;
-	myargc=ARG_COUNT(ht);
+	myargc=ZEND_NUM_ARGS();
 	if (myargc !=2 || getParameters(ht,myargc,&streamind,&storeobject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -852,7 +852,7 @@ PHP_FUNCTION(icap_snooze)
 	pils *icap_le_struct; 
 	pval **pvalue;
 	int myargc;
-	myargc=ARG_COUNT(ht);
+	myargc=ZEND_NUM_ARGS();
 	if (myargc !=2 || getParameters(ht,myargc,&streamind,&uid) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}

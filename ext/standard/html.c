@@ -92,7 +92,7 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
     int len;
 	char *new;
 
-    if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
     }
 
@@ -133,7 +133,7 @@ PHP_FUNCTION(get_html_translation_table)
 {
 	zval **whichone;
 	int which = 0;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	int inx;
 	char ind[ 2 ];
 

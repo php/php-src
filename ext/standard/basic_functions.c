@@ -757,7 +757,7 @@ PHP_FUNCTION(ip2long)
 {
 	zval **str;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -774,7 +774,7 @@ PHP_FUNCTION(long2ip)
 	zval **num;
 	struct in_addr myaddr;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -798,7 +798,7 @@ PHP_FUNCTION(getenv)
 	char *ptr;
 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -828,7 +828,7 @@ PHP_FUNCTION(putenv)
 	pval **str;
 	BLS_FETCH();
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
@@ -913,7 +913,7 @@ PHP_FUNCTION(intval)
 	pval **num, **arg_base;
 	int base;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &num) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -942,7 +942,7 @@ PHP_FUNCTION(doubleval)
 {
 	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	*return_value=**num;
@@ -957,7 +957,7 @@ PHP_FUNCTION(strval)
 {
 	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	*return_value=**num;
@@ -980,7 +980,7 @@ PHP_FUNCTION(sleep)
 {
 	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(num);
@@ -995,7 +995,7 @@ PHP_FUNCTION(usleep)
 #if HAVE_USLEEP
 	pval **num;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(num);
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(gettype)
 {
 	pval **arg;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	switch ((*arg)->type) {
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(settype)
 	pval **var, **type;
 	char *new_type;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &var, &type) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &var, &type) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(type);
@@ -1107,7 +1107,7 @@ PHP_FUNCTION(get_cfg_var)
 	pval **varname;
 	char *value;
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	pval **new_setting;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &new_setting)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &new_setting)==FAILURE) {
 		RETURN_FALSE;
 	}
 	convert_to_boolean_ex(new_setting);
@@ -1163,7 +1163,7 @@ void php_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 {
 	pval **arg;
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		RETURN_FALSE;
 	}
 	if ((*arg)->type == type) {
@@ -1236,7 +1236,7 @@ PHP_FUNCTION(is_numeric)
 	zval **arg;
 	int result;
 	
-	if (ARG_COUNT(ht) !=1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() !=1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1283,7 +1283,7 @@ PHP_FUNCTION(error_log)
 	int opt_err = 0;
 	char *message, *opt=NULL, *headers=NULL;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1,&string) == FAILURE) {
 			php_error(E_WARNING,"Invalid argument 1 in error_log");
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(call_user_func)
 {
 	pval ***params;
 	pval *retval_ptr;
-	int arg_count=ARG_COUNT(ht);
+	int arg_count=ZEND_NUM_ARGS();
 	CLS_FETCH();
 	
 	if (arg_count<1) {
@@ -1413,7 +1413,7 @@ PHP_FUNCTION(call_user_method)
 {
 	pval ***params;
 	pval *retval_ptr;
-	int arg_count=ARG_COUNT(ht);
+	int arg_count=ZEND_NUM_ARGS();
 	CLS_FETCH();
 	
 	if (arg_count<2) {
@@ -1499,7 +1499,7 @@ PHP_FUNCTION(register_shutdown_function)
 	int i;
 	BLS_FETCH();
 
-	shutdown_function_entry.arg_count = ARG_COUNT(ht);
+	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
 
 	if (shutdown_function_entry.arg_count<1) {
 		WRONG_PARAM_COUNT;
@@ -1540,7 +1540,7 @@ PHP_FUNCTION(highlight_file)
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &filename)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -1562,7 +1562,7 @@ PHP_FUNCTION(highlight_string)
 	pval **expr;
 	zend_syntax_highlighter_ini syntax_highlighter_ini;
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &expr)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &expr)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1682,7 +1682,7 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 		pval_destructor(&overloaded_property->element);
 	}
 		
-	printf("%d arguments\n", ARG_COUNT(ht));
+	printf("%d arguments\n", ZEND_NUM_ARGS());
 	return_value->value.str.val = estrndup("testing", 7);
 	return_value->value.str.len = 7;
 	return_value->type = IS_STRING;
@@ -1707,7 +1707,7 @@ PHP_FUNCTION(ini_get)
 {
 	pval **varname;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1732,7 +1732,7 @@ PHP_FUNCTION(ini_set)
 	pval **varname, **new_value;
 	char *old_value;
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &varname, &new_value)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &varname, &new_value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1758,7 +1758,7 @@ PHP_FUNCTION(ini_restore)
 {
 	pval **varname;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &varname)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1774,7 +1774,7 @@ PHP_FUNCTION(print_r)
 {
 	pval **expr;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &expr)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &expr)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1826,7 +1826,7 @@ PHP_FUNCTION(ignore_user_abort)
 	PLS_FETCH();
 
     old_setting = PG(ignore_user_abort);
-    switch (ARG_COUNT(ht)) {
+    switch (ZEND_NUM_ARGS()) {
         case 0:
             break;
         case 1:
@@ -1851,7 +1851,7 @@ PHP_FUNCTION(getservbyname)
 	pval **name,**proto;  
 	struct servent *serv;
 
-	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2,&name,&proto) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&name,&proto) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(name);
@@ -1874,7 +1874,7 @@ PHP_FUNCTION(getservbyport)
 	pval **port,**proto;
 	struct servent *serv;
 
-	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2,&port,&proto) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2,&port,&proto) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(port);
@@ -1897,7 +1897,7 @@ PHP_FUNCTION(getprotobyname)
 	pval **name;
 	struct protoent *ent;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &name) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1923,7 +1923,7 @@ PHP_FUNCTION(getprotobynumber)
 	pval **proto;
 	struct protoent *ent;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &proto) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &proto) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1950,7 +1950,7 @@ static int php_add_extension_info(zend_module_entry *module, void *arg)
    Return an array containing names of loaded extensions */
 PHP_FUNCTION(get_loaded_extensions)
 {
-	if (ARG_COUNT(ht) != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1966,7 +1966,7 @@ PHP_FUNCTION(extension_loaded)
 {
 	zval **extension_name;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &extension_name)) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1988,7 +1988,7 @@ PHP_FUNCTION(get_extension_funcs)
 	zend_module_entry *module;
 	zend_function_entry *func;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &extension_name)) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &extension_name)) {
 		WRONG_PARAM_COUNT;
 	}
 

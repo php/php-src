@@ -208,7 +208,7 @@ PHP_FUNCTION(velocis_connect)
 		php_error(E_WARNING,"Velocis: Too many open connections (%d)",php_velocis_module.num_links);
 		RETURN_FALSE;
 	}
-	if ( ARG_COUNT(ht) != 3 ||
+	if ( ZEND_NUM_ARGS() != 3 ||
 	   getParameters(ht,3,&serv,&user,&pass) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
@@ -245,7 +245,7 @@ PHP_FUNCTION(velocis_close)
 	pval *id;
 	VConn *conn;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -272,7 +272,7 @@ PHP_FUNCTION(velocis_exec)
 	SWORD cols,i,colnamelen;
 	SDWORD rows,coldesc;
 
-	if ( ARG_COUNT(ht) != 2 || getParameters(ht,2,&ind,&exec_str) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&exec_str) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
@@ -367,7 +367,7 @@ PHP_FUNCTION(velocis_fetch)
 	UDWORD  row;
 	UWORD   RowStat[1];
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
@@ -403,7 +403,7 @@ PHP_FUNCTION(velocis_result)
 	SWORD indx = -1;
 	char *field = NULL;
 
-	if ( ARG_COUNT(ht) != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
@@ -494,7 +494,7 @@ PHP_FUNCTION(velocis_freeresult)
 	pval *ind;
 	Vresult *res;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
@@ -514,7 +514,7 @@ PHP_FUNCTION(velocis_autocommit)
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -537,7 +537,7 @@ PHP_FUNCTION(velocis_off_autocommit)
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -560,7 +560,7 @@ PHP_FUNCTION(velocis_commit)
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -583,7 +583,7 @@ PHP_FUNCTION(velocis_rollback)
 	RETCODE stat;
 	VConn *conn;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&id) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&id) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
@@ -606,7 +606,7 @@ PHP_FUNCTION(velocis_fieldname)
 	Vresult *res;
 	SWORD indx;
 
-	if ( ARG_COUNT(ht) != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 2 || getParameters(ht,2,&ind,&col) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
@@ -629,7 +629,7 @@ PHP_FUNCTION(velocis_fieldnum)
 	pval *ind;
 	Vresult *res;
 
-	if ( ARG_COUNT(ht) != 1 || getParameters(ht,1,&ind) == FAILURE ) {
+	if ( ZEND_NUM_ARGS() != 1 || getParameters(ht,1,&ind) == FAILURE ) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);

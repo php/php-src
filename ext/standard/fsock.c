@@ -211,7 +211,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	pval **args[5];
 	int *sock=emalloc(sizeof(int));
 	int *sockp;
-	int arg_count=ARG_COUNT(ht);
+	int arg_count=ZEND_NUM_ARGS();
 	int socketd = -1;
 	unsigned char udp = 0;
 	struct timeval timeout = { 60, 0 };

@@ -74,7 +74,7 @@ PHP_FUNCTION(yp_order) {
       int outval;
 #endif
 
-	if((ARG_COUNT(ht) != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
+	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -95,7 +95,7 @@ PHP_FUNCTION(yp_master) {
 	pval **domain, **map;
 	char *outname;
 
-	if((ARG_COUNT(ht) != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
+	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -117,7 +117,7 @@ PHP_FUNCTION(yp_match) {
 	char *outval;
 	int outvallen;
 
-	if((ARG_COUNT(ht) != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
+	if((ZEND_NUM_ARGS() != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -140,7 +140,7 @@ PHP_FUNCTION(yp_first) {
 	char *outval, *outkey;
 	int outvallen, outkeylen;
 
-	if((ARG_COUNT(ht) != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
+	if((ZEND_NUM_ARGS() != 2) || zend_get_parameters_ex(2,&domain,&map) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -163,7 +163,7 @@ PHP_FUNCTION(yp_next) {
 	char *outval, *outkey;
 	int outvallen, outkeylen;
 
-	if((ARG_COUNT(ht) != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
+	if((ZEND_NUM_ARGS() != 3) || zend_get_parameters_ex(3,&domain,&map,&key) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

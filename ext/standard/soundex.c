@@ -61,7 +61,7 @@ PHP_FUNCTION(soundex)
 	 0,							/* Y */
 	 '2'};						/* Z */
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &parg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &parg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(parg);

@@ -190,7 +190,7 @@ PHP_FUNCTION(filepro)
 	PLS_FETCH();
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &dir) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dir) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -288,7 +288,7 @@ PHP_FUNCTION(filepro_rowcount)
 	PLS_FETCH();
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -344,7 +344,7 @@ PHP_FUNCTION(filepro_fieldname)
 	int i;
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -385,7 +385,7 @@ PHP_FUNCTION(filepro_fieldtype)
 	int i;
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -424,7 +424,7 @@ PHP_FUNCTION(filepro_fieldwidth)
 	int i;
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -460,7 +460,7 @@ PHP_FUNCTION(filepro_fieldcount)
 {
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 0) {
+	if (ZEND_NUM_ARGS() != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -495,7 +495,7 @@ PHP_FUNCTION(filepro_retrieve)
 	PLS_FETCH();
 	FP_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &rno, &fno) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &rno, &fno) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -157,7 +157,7 @@ PHP_FUNCTION(diskfreespace)
 	double bytesfree = 0;
 #endif /* WINDOWS */
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -235,7 +235,7 @@ PHP_FUNCTION(chgrp)
 	int ret;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&group)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&group)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -283,7 +283,7 @@ PHP_FUNCTION(chown)
 	struct passwd *pw = NULL;
 	PLS_FETCH();
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&user)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&user)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -327,7 +327,7 @@ PHP_FUNCTION(chmod)
 	int ret;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2,&filename,&mode)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(filename);
@@ -361,7 +361,7 @@ PHP_FUNCTION(touch)
 	struct stat sb;
 	FILE *file;
 	struct utimbuf *newtime = NULL;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	PLS_FETCH();
 	
 	if (ac == 1 && zend_get_parameters_ex(1,&filename) != FAILURE) {
@@ -608,7 +608,7 @@ static void php_stat(const char *filename, int type, pval *return_value)
 #define FileFunction(name, funcnum) \
 void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	pval **filename; \
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1,&filename) == FAILURE) { \
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&filename) == FAILURE) { \
 		WRONG_PARAM_COUNT; \
 	} \
 	convert_to_string_ex(filename); \

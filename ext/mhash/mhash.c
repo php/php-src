@@ -81,7 +81,7 @@ PHP_FUNCTION(mhash_get_block_size)
 {
 	pval **hash;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &hash) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -98,7 +98,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 	pval **hash;
 	char *name;
 
-	if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &hash) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -123,7 +123,7 @@ PHP_FUNCTION(mhash)
 	int bsize;
 	unsigned char *hash_data;
 
-	if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &hash, &data) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &hash, &data) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

@@ -74,7 +74,7 @@ PHP_FUNCTION(aspell_new)
 	aspell *sc;
 	int ind;
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 1 || argc > 2 || zend_get_parameters_ex(argc,&master,&personal) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -105,7 +105,7 @@ PHP_FUNCTION(aspell_suggest)
 	size_t i;
 
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -139,7 +139,7 @@ PHP_FUNCTION(aspell_check)
    aspell *sc;
 
    int argc;
-    argc = ARG_COUNT(ht);
+    argc = ZEND_NUM_ARGS();
     if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }
@@ -171,7 +171,7 @@ PHP_FUNCTION(aspell_check_raw)
   int argc;
   aspell *sc;
 
-    argc = ARG_COUNT(ht);
+    argc = ZEND_NUM_ARGS();
     if (argc != 2 || zend_get_parameters_ex(argc, &scin,&word) == FAILURE) {
         WRONG_PARAM_COUNT;
     }

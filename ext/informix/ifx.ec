@@ -519,7 +519,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
     PLS_FETCH();
     
     if (PG(sql_safe_mode)) {
-        if (ARG_COUNT(ht)>0) {
+        if (ZEND_NUM_ARGS()>0) {
             php_error(E_NOTICE,
             "SQL safe mode in effect - ignoring host/user/password information");
         }
@@ -533,7 +533,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         user = IFXG(default_user);
         passwd = IFXG(default_password);
         
-        switch(ARG_COUNT(ht)) {
+        switch(ZEND_NUM_ARGS()) {
             case 0: /* defaults */
                 break;
             case 1: {
@@ -805,7 +805,7 @@ EXEC SQL END DECLARE SECTION;
     
     id = -1;
 
-    switch (ARG_COUNT(ht)) {
+    switch (ZEND_NUM_ARGS()) {
         case 0:
             id = IFXG(default_link);
             break;
@@ -895,7 +895,7 @@ EXEC SQL END DECLARE SECTION;
         
     IFXLS_FETCH();
 
-    if(ARG_COUNT(ht)<2) {
+    if(ZEND_NUM_ARGS()<2) {
      WRONG_PARAM_COUNT;
     }
 
@@ -903,7 +903,7 @@ EXEC SQL END DECLARE SECTION;
 
     /* get the first 2 parameters, 
       php4 insists on the correct number of arguments */
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
       case 2:
         if (zend_get_parameters_ex(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
@@ -1012,11 +1012,11 @@ EXEC SQL END DECLARE SECTION;
       strcpy(Ifx_Result->descrpid, descrpid);
       strcpy(Ifx_Result->statemid, statemid);
 
-      if(ARG_COUNT(ht)>3) {
+      if(ZEND_NUM_ARGS()>3) {
          WRONG_PARAM_COUNT;      
       }
 
-      if(ARG_COUNT(ht)==3) {
+      if(ZEND_NUM_ARGS()==3) {
           if (zend_get_parameters_ex(3, &dummy, &dummy, &pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
               EXEC SQL DEALLOCATE DESCRIPTOR :descrpid;
@@ -1102,7 +1102,7 @@ EXEC SQL END DECLARE SECTION;
 
       ctype = 0;   /* preset */
 
-      switch(ARG_COUNT(ht)) {
+      switch(ZEND_NUM_ARGS()) {
        case 2:
          break;
        case 3:
@@ -1283,7 +1283,7 @@ EXEC SQL END DECLARE SECTION;
     
     IFXLS_FETCH();
 
-    if(ARG_COUNT(ht)<2) {
+    if(ZEND_NUM_ARGS()<2) {
      WRONG_PARAM_COUNT;
     }
 
@@ -1291,7 +1291,7 @@ EXEC SQL END DECLARE SECTION;
 
     /* get the first 2 parameters, 
       php4 insists on the correct number of arguments */
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
       case 2:
         if (zend_get_parameters_ex(2, &query, &ifx_link)==FAILURE)  
 	  RETURN_FALSE;
@@ -1401,10 +1401,10 @@ EXEC SQL END DECLARE SECTION;
       strcpy(Ifx_Result->descrpid, descrpid);
 
 
-      if(ARG_COUNT(ht)>3) {
+      if(ZEND_NUM_ARGS()>3) {
          WRONG_PARAM_COUNT;      
       }
-      if(ARG_COUNT(ht)==3) {
+      if(ZEND_NUM_ARGS()==3) {
           Ifx_Result->paramquery=1;
           if (zend_get_parameters_ex(3, &dummy, &dummy,&pblobidarr) == FAILURE) {
               php_error(E_WARNING,"Can't get blob array param");
@@ -1474,7 +1474,7 @@ EXEC SQL END DECLARE SECTION;
 
       ctype = 0;;   /* preset */
 
-      switch(ARG_COUNT(ht)) {
+      switch(ZEND_NUM_ARGS()) {
        case 2:
          break;
        case 3:
@@ -1562,7 +1562,7 @@ EXEC SQL END DECLARE SECTION;
     
     IFXLS_FETCH();
 
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             WRONG_PARAM_COUNT;
             break;
@@ -1711,7 +1711,7 @@ PHP_FUNCTION(ifx_error)
     IFXLS_FETCH();
 
     
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             id = IFXG(default_link);
             break;
@@ -1752,7 +1752,7 @@ PHP_FUNCTION(ifx_errormsg)
 
     IFXLS_FETCH();
     
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             if (IFXG(sv_sqlcode) == 0)
                 ifx_errorcode = SQLCODE;
@@ -1812,7 +1812,7 @@ PHP_FUNCTION(ifx_affected_rows)
 
     IFXLS_FETCH();
 
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             WRONG_PARAM_COUNT;
             break;
@@ -1905,7 +1905,7 @@ EXEC SQL END DECLARE SECTION;
     
     IFXLS_FETCH();
 
-    switch(ARG_COUNT(ht)) {
+    switch(ZEND_NUM_ARGS()) {
         case 0:
             WRONG_PARAM_COUNT;
             break;
@@ -2290,7 +2290,7 @@ EXEC SQL END DECLARE SECTION;
 
     IFXLS_FETCH();
 
-    switch (ARG_COUNT(ht)) {
+    switch (ZEND_NUM_ARGS()) {
         case 1:
             if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
@@ -2618,7 +2618,7 @@ EXEC SQL END DECLARE SECTION;
             
     IFXLS_FETCH();
 
-    switch (ARG_COUNT(ht)) {
+    switch (ZEND_NUM_ARGS()) {
         case 1:
             if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
@@ -2797,7 +2797,7 @@ EXEC SQL END DECLARE SECTION;
             
     IFXLS_FETCH();
 
-    switch (ARG_COUNT(ht)) {
+    switch (ZEND_NUM_ARGS()) {
         case 1:
             if (zend_get_parameters_ex(1, &result)==FAILURE) {
                 RETURN_FALSE;
@@ -2961,7 +2961,7 @@ PHP_FUNCTION(ifx_num_rows)
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+    if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -2996,7 +2996,7 @@ PHP_FUNCTION(ifx_getsqlca)
    
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+    if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3037,7 +3037,7 @@ PHP_FUNCTION(ifx_num_fields)
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+    if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3080,7 +3080,7 @@ EXEC SQL END DECLARE SECTION;
 
     IFXLS_FETCH();
 
-    if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+    if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
         WRONG_PARAM_COUNT;
     }
     
@@ -3178,7 +3178,7 @@ PHP_FUNCTION(ifx_create_blob) {
  long id;
  long mode,type;
   
- if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &ptype,&pmode,&pparam)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &ptype,&pmode,&pparam)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -3291,7 +3291,7 @@ PHP_FUNCTION(ifx_copy_blob) {
  pval *pbid;
  long newid;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -3398,7 +3398,7 @@ PHP_FUNCTION(ifx_free_blob) {
  pval *pid;
  long ret;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pid);
@@ -3518,7 +3518,7 @@ PHP_FUNCTION(ifx_get_blob) {
  long len;
  
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -3611,7 +3611,7 @@ PHP_FUNCTION(ifx_update_blob) {
  long ret;
  
   
- if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &pbid,&pparam)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid,&pparam)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -3744,7 +3744,7 @@ PHP_FUNCTION(ifx_blobinfile_mode) {
  
  IFXLS_FETCH();
 
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -3773,7 +3773,7 @@ PHP_FUNCTION(ifx_textasvarchar) {
  
  IFXLS_FETCH();
 
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -3803,7 +3803,7 @@ PHP_FUNCTION(ifx_byteasvarchar) {
  
  IFXLS_FETCH();
 
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -3833,7 +3833,7 @@ PHP_FUNCTION(ifx_nullformat) {
  IFXLS_FETCH();
 
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -3882,7 +3882,7 @@ PHP_FUNCTION(ifx_create_char) {
  pval *pparam;
  long id;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pparam)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pparam)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_string(pparam);
@@ -3954,7 +3954,7 @@ PHP_FUNCTION(ifx_get_char) {
  long len;
  
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -4012,7 +4012,7 @@ PHP_FUNCTION(ifx_free_char) {
  pval *pid;
  long ret;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pid);
@@ -4076,7 +4076,7 @@ PHP_FUNCTION(ifx_update_char) {
  long ret;
  
   
- if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &pbid,&pparam)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid,&pparam)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -4161,7 +4161,7 @@ PHP_FUNCTION(ifxus_create_slob) {
  long id;
  long mode,create_mode;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -4245,7 +4245,7 @@ PHP_FUNCTION(ifxus_free_slob) {
  pval *pid;
  long ret;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pid);
@@ -4313,7 +4313,7 @@ PHP_FUNCTION(ifxus_close_slob) {
  pval *pid;
  long ret;
   
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pid);
@@ -4385,7 +4385,7 @@ PHP_FUNCTION(ifxus_open_slob) {
  pval *pbid,*pmode;
  long mode,create_mode;
   
- if (ARG_COUNT(ht)!=2 || getParameters(ht, 1, &pbid,&pmode)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 1, &pbid,&pmode)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pmode);
@@ -4527,7 +4527,7 @@ PHP_FUNCTION(ifxus_tell_slob) {
  IFXLS_FETCH();
 
  
- if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &pbid)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -4577,7 +4577,7 @@ PHP_FUNCTION(ifxus_seek_slob) {
  
  IFXLS_FETCH();
 
- if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &pbid, &pmode, &poffset)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &pbid, &pmode, &poffset)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -4640,7 +4640,7 @@ PHP_FUNCTION(ifxus_read_slob) {
  IFXLS_FETCH();
 
 
- if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &pbid, &pnbytes)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid, &pnbytes)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);
@@ -4694,7 +4694,7 @@ PHP_FUNCTION(ifxus_write_slob) {
  IFXLS_FETCH();
 
 
- if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &pbid, &pcontent)==FAILURE) {
+ if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &pbid, &pcontent)==FAILURE) {
    WRONG_PARAM_COUNT;
  }
  convert_to_long(pbid);

@@ -328,7 +328,7 @@ void java_call_function_handler
   zend_overloaded_element *function_name = (zend_overloaded_element *)
     property_reference->elements_list->tail->data;
 
-  int arg_count = ARG_COUNT(ht);
+  int arg_count = ZEND_NUM_ARGS();
   jlong result = 0;
 
   pval **arguments = (pval **) emalloc(sizeof(pval *)*arg_count);

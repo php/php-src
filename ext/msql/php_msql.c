@@ -220,7 +220,7 @@ static void php_msql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 	int hashed_details_length;
 	int msql;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 0: /* defaults */
 			host=NULL;
 			hashed_details=estrndup("msql_",5);
@@ -389,7 +389,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 	int id;
 	int msql;
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = msql_globals.default_link;
 			break;
@@ -420,7 +420,7 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 	int id;
 	int msql;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				RETURN_FALSE;
@@ -460,7 +460,7 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 	int id;
 	int msql;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -498,7 +498,7 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 	int id;
 	int msql;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -537,7 +537,7 @@ DLEXPORT PHP_FUNCTION(msql_query)
 	int msql;
 	int af_rows;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &query)==FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -575,7 +575,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 	int msql;
 	int af_rows;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (getParameters(ht, 2, &db, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -618,7 +618,7 @@ DLEXPORT PHP_FUNCTION(msql_list_dbs)
 	int msql;
 	m_result *msql_result;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 0:
 			id = php_msql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 			break;
@@ -653,7 +653,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 	int msql;
 	m_result *msql_result;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &db)==FAILURE) {
 				RETURN_FALSE;
@@ -695,7 +695,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
 	int msql;
 	m_result *msql_result;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (getParameters(ht, 2, &db, &table)==FAILURE) {
 				RETURN_FALSE;
@@ -733,7 +733,7 @@ DLEXPORT PHP_FUNCTION(msql_list_fields)
    Returns the text of the error message from previous mSQL operation */
 PHP_FUNCTION(msql_error)
 {
-	if (ARG_COUNT(ht)) {
+	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
 	}
 	RETURN_STRING(msqlErrMsg,1);
@@ -751,7 +751,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 	int field_offset=0;
 	PLS_FETCH();
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			if (getParameters(ht, 2, &result, &row)==FAILURE) {
 				RETURN_FALSE;
@@ -852,7 +852,7 @@ DLEXPORT PHP_FUNCTION(msql_num_rows)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -870,7 +870,7 @@ DLEXPORT PHP_FUNCTION(msql_num_fields)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -891,7 +891,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	int i;
 	PLS_FETCH();
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &result)==FAILURE) {
 				RETURN_FALSE;
@@ -992,7 +992,7 @@ DLEXPORT PHP_FUNCTION(msql_data_seek)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1056,7 +1056,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_field)
 	m_field *msql_field;
 	m_query *msql_query;
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (getParameters(ht, 1, &result)==FAILURE) {
 				RETURN_FALSE;
@@ -1108,7 +1108,7 @@ DLEXPORT PHP_FUNCTION(msql_field_seek)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &result, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1140,7 +1140,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	m_field *msql_field;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &result, &field)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &result, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1267,7 +1267,7 @@ DLEXPORT PHP_FUNCTION(msql_free_result)
 	m_result *msql_result;
 	m_query *msql_query;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1285,7 +1285,7 @@ DLEXPORT PHP_FUNCTION(msql_affected_rows)
 	m_result *msql_result;
 	m_query *msql_query;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &result) == FAILURE) {
+	if(ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	MSQL_GET_QUERY(result);

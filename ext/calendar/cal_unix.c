@@ -32,7 +32,7 @@ PHP_FUNCTION(unixtojd)
   long jdate; 
   time_t t;
   struct tm *ta, tmbuf;
-  int myargc=ARG_COUNT(ht);
+  int myargc=ZEND_NUM_ARGS();
 	
   if ((myargc > 1) || (zend_get_parameters(ht,myargc, &timestamp) != SUCCESS)) {
     WRONG_PARAM_COUNT;
@@ -59,7 +59,7 @@ PHP_FUNCTION(jdtounix)
   pval *jday;
   long uday;
 
-  if ((ARG_COUNT(ht)!= 1) || (zend_get_parameters(ht,1, &jday) != SUCCESS)) {
+  if ((ZEND_NUM_ARGS()!= 1) || (zend_get_parameters(ht,1, &jday) != SUCCESS)) {
     WRONG_PARAM_COUNT;
   }
   

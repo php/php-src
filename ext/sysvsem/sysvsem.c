@@ -144,7 +144,7 @@ PHP_FUNCTION(sem_get)
 	max_acquire = 1;
 	perm = 0666;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &arg_key)==FAILURE) {
 				RETURN_FALSE;
@@ -287,7 +287,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	sysvsem_sem *sem_ptr;
     struct sembuf sop;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &arg_id)==FAILURE) {
 				RETURN_FALSE;

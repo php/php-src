@@ -34,7 +34,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	time_t the_time;
 	long year, golden, solar, lunar, pfm, dom, tmp, easter;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 0:
 		the_time = time(NULL);
 		ta = localtime(&the_time);

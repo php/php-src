@@ -339,7 +339,7 @@ PHP_FUNCTION(getimagesize)
 	char temp[64];
 	struct gfxinfo *result = NULL;
 	
-	switch(ARG_COUNT(ht)){
+	switch(ZEND_NUM_ARGS()){
 	case 1:
 		if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;

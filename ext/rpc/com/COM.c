@@ -248,7 +248,7 @@ PHP_FUNCTION(COM_load)
 	char *error_message;
 	char *clsid_str;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			getParameters(ht, 1, &module_name);
 			break;
@@ -546,7 +546,7 @@ PHP_FUNCTION(COM_invoke)
 	pval *object, *function_name;
 	IDispatch *i_dispatch;
 	int type;
-	int arg_count = ARG_COUNT(ht);
+	int arg_count = ZEND_NUM_ARGS();
 	VARIANTARG var_result;
 
 	if (arg_count<2) {
@@ -723,7 +723,7 @@ PHP_FUNCTION(com_propget)
 	IDispatch *i_dispatch;
 	VARIANTARG var_result;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &arg_idispatch, &arg_property)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &arg_idispatch, &arg_property)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -752,7 +752,7 @@ PHP_FUNCTION(com_propput)
 	int type;
 	IDispatch *i_dispatch;
 
-	if (ARG_COUNT(ht)!=3 || getParameters(ht, 3, &arg_idispatch, &arg_property, &arg_value)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || getParameters(ht, 3, &arg_idispatch, &arg_property, &arg_value)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -931,7 +931,7 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 	} else {
 		VARIANTARG object_handle = _php_COM_get_property_handler(property_reference);
 		pval **arguments;
-		int arg_count = ARG_COUNT(ht);
+		int arg_count = ZEND_NUM_ARGS();
 		VARIANTARG var_result;
 
 		if (object_handle.vt != VT_DISPATCH) {

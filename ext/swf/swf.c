@@ -153,7 +153,7 @@ PHP_FUNCTION(swf_openfile)
 {
 	zval **name, **sizeX, **sizeY, **frameRate, **r, **g, **b;
 	char *na;
-	if (ARG_COUNT(ht) != 7 ||
+	if (ZEND_NUM_ARGS() != 7 ||
 	    zend_get_parameters_ex(7, &name, &sizeX, &sizeY, &frameRate, &r, &g, &b) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -187,7 +187,7 @@ PHP_FUNCTION(swf_closefile)
 PHP_FUNCTION(swf_labelframe)
 {
 	zval **name;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &name) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -209,7 +209,7 @@ PHP_FUNCTION(swf_showframe)
 PHP_FUNCTION(swf_setframe)
 {
 	zval **frameno;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &frameno) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -229,7 +229,7 @@ PHP_FUNCTION(swf_getframe)
 
 void col_swf(INTERNAL_FUNCTION_PARAMETERS, int opt) {
 	zval **r, **g, **b, **a;
-	if (ARG_COUNT(ht) != 4 ||
+	if (ZEND_NUM_ARGS() != 4 ||
 	    zend_get_parameters_ex(4, &r, &g, &b, &a) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -265,7 +265,7 @@ PHP_FUNCTION(swf_addcolor)
 PHP_FUNCTION(swf_placeobject)
 {
 	zval **objid, **depth;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &objid, &depth) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -280,7 +280,7 @@ PHP_FUNCTION(swf_placeobject)
 PHP_FUNCTION(swf_modifyobject)
 {
 	zval **depth, **how;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &depth, &how) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -296,7 +296,7 @@ PHP_FUNCTION(swf_modifyobject)
 PHP_FUNCTION(swf_removeobject)
 {
 	zval **depth;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &depth) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -334,7 +334,7 @@ PHP_FUNCTION(swf_enddoaction)
 PHP_FUNCTION(swf_actiongotoframe)
 {
 	zval **frameno;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &frameno) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -349,7 +349,7 @@ PHP_FUNCTION(swf_actiongotoframe)
 PHP_FUNCTION(swf_actiongeturl)
 {
 	zval **url, **target;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &url, &target) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -405,7 +405,7 @@ PHP_FUNCTION(swf_actiontogglequality)
 PHP_FUNCTION(swf_actionwaitforframe)
 {
 	zval **frame, **skipcount;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &frame, &skipcount) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -421,7 +421,7 @@ PHP_FUNCTION(swf_actionwaitforframe)
 PHP_FUNCTION(swf_actionsettarget)
 {
 	zval **target;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &target) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -436,7 +436,7 @@ PHP_FUNCTION(swf_actionsettarget)
 PHP_FUNCTION(swf_actiongotolabel)
 {
 	zval **label;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &label) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -449,7 +449,7 @@ PHP_FUNCTION(swf_actiongotolabel)
 void php_swf_define(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **objid, **x1, **y1, **x2, **y2, **width;
-	if (ARG_COUNT(ht) != 6 ||
+	if (ZEND_NUM_ARGS() != 6 ||
 	    zend_get_parameters_ex(6, &objid, &x1, &y1, &x2, &y2, &width) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -494,7 +494,7 @@ PHP_FUNCTION(swf_definepoly)
 	int npoints, i;
 	float coords[256][2];
 	
-	if (ARG_COUNT(ht) != 4 ||
+	if (ZEND_NUM_ARGS() != 4 ||
 	    zend_get_parameters_ex(4, &obj_id, &coordinates, &NumPoints, &width) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -532,7 +532,7 @@ PHP_FUNCTION(swf_definepoly)
 PHP_FUNCTION(swf_startshape)
 {
 	zval **objid;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &objid) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -546,7 +546,7 @@ PHP_FUNCTION(swf_startshape)
 PHP_FUNCTION(swf_shapelinesolid)
 {
 	zval **r, **g, **b, **a, **width;
-	if (ARG_COUNT(ht) != 5 ||
+	if (ZEND_NUM_ARGS() != 5 ||
 	    zend_get_parameters_ex(5, &r, &g, &b, &a, &width) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -573,7 +573,7 @@ PHP_FUNCTION(swf_shapefilloff)
 PHP_FUNCTION(swf_shapefillsolid)
 {
 	zval **r, **g, **b, **a;
-	if (ARG_COUNT(ht) != 4 ||
+	if (ZEND_NUM_ARGS() != 4 ||
 	    zend_get_parameters_ex(4, &r, &g, &b, &a) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -590,7 +590,7 @@ PHP_FUNCTION(swf_shapefillsolid)
 void php_swf_fill_bitmap(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **bitmapid;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &bitmapid) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -622,7 +622,7 @@ PHP_FUNCTION(swf_shapefillbitmaptile)
 void php_swf_shape(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **x, **y;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &x, &y) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -657,7 +657,7 @@ PHP_FUNCTION(swf_shapelineto)
 PHP_FUNCTION(swf_shapecurveto)
 {
 	zval **x1, **y1, **x2, **y2;
-	if (ARG_COUNT(ht) != 4 ||
+	if (ZEND_NUM_ARGS() != 4 ||
 	    zend_get_parameters_ex(4, &x1, &y1, &x2, &y2) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -675,7 +675,7 @@ PHP_FUNCTION(swf_shapecurveto)
 PHP_FUNCTION(swf_shapecurveto3)
 {
 	zval **x1, **y1, **x2, **y2, **x3, **y3;
-	if (ARG_COUNT(ht) != 6 ||
+	if (ZEND_NUM_ARGS() != 6 ||
 	    zend_get_parameters_ex(6, &x1, &y1, &x2, &y2, &x3, &y3) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -696,7 +696,7 @@ PHP_FUNCTION(swf_shapecurveto3)
 PHP_FUNCTION(swf_shapearc)
 {
 	zval **x, **y, **r, **ang1, **ang2;
-	if (ARG_COUNT(ht) != 5 ||
+	if (ZEND_NUM_ARGS() != 5 ||
 	    zend_get_parameters_ex(5, &x, &y, &r, &ang1, &ang2) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -724,7 +724,7 @@ PHP_FUNCTION(swf_endshape)
 PHP_FUNCTION(swf_definefont)
 {
 	zval **fontid, **name;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &fontid, &name) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -740,7 +740,7 @@ PHP_FUNCTION(swf_definefont)
 PHP_FUNCTION(swf_setfont)
 {
 	zval **fontid;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &fontid) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -754,7 +754,7 @@ PHP_FUNCTION(swf_setfont)
 PHP_FUNCTION(swf_fontsize)
 {
 	zval **height;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &height) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -769,7 +769,7 @@ PHP_FUNCTION(swf_fontsize)
 PHP_FUNCTION(swf_fontslant)
 {
 	zval **slant;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &slant) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -784,7 +784,7 @@ PHP_FUNCTION(swf_fontslant)
 PHP_FUNCTION(swf_fonttracking)
 {
 	zval **track;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &track) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -813,7 +813,7 @@ PHP_FUNCTION(swf_getfontinfo)
 PHP_FUNCTION(swf_definetext)
 {
 	zval **objid, **str, **docCenter;
-	if (ARG_COUNT(ht) != 3 ||
+	if (ZEND_NUM_ARGS() != 3 ||
 	    zend_get_parameters_ex(3, &objid, &str, &docCenter) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -830,7 +830,7 @@ PHP_FUNCTION(swf_definetext)
 PHP_FUNCTION(swf_textwidth)
 {
 	zval **str;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &str) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -844,7 +844,7 @@ PHP_FUNCTION(swf_textwidth)
 PHP_FUNCTION(swf_definebitmap)
 {
 	zval **objid, **imgname;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &objid, &imgname) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -862,7 +862,7 @@ PHP_FUNCTION(swf_getbitmapinfo)
 	zval **bitmapid;
 	int size, width, height;
 	
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &bitmapid) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -885,7 +885,7 @@ PHP_FUNCTION(swf_getbitmapinfo)
 PHP_FUNCTION(swf_startsymbol)
 {
 	zval **objid;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &objid) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -908,7 +908,7 @@ PHP_FUNCTION(swf_endsymbol)
 PHP_FUNCTION(swf_startbutton)
 {
 	zval **objid, **type;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &objid, &type) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -924,7 +924,7 @@ PHP_FUNCTION(swf_startbutton)
 PHP_FUNCTION(swf_addbuttonrecord)
 {
 	zval **state, **objid, **depth;
-	if (ARG_COUNT(ht) != 3 ||
+	if (ZEND_NUM_ARGS() != 3 ||
 	    zend_get_parameters_ex(3, &state, &objid, &depth) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -941,7 +941,7 @@ PHP_FUNCTION(swf_addbuttonrecord)
 PHP_FUNCTION(swf_oncondition)
 {
 	zval **transitions;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &transitions) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -962,7 +962,7 @@ PHP_FUNCTION(swf_endbutton)
 void php_swf_geo_same(INTERNAL_FUNCTION_PARAMETERS, int opt)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
-	if (ARG_COUNT(ht) != 4 ||
+	if (ZEND_NUM_ARGS() != 4 ||
 	    zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -1007,7 +1007,7 @@ PHP_FUNCTION(swf_ortho2)
 PHP_FUNCTION(swf_ortho)
 {
 	zval **xmin, **xmax, **ymin, **ymax, **zmin, **zmax;
-	if (ARG_COUNT(ht) != 6 ||
+	if (ZEND_NUM_ARGS() != 6 ||
 	    zend_get_parameters_ex(6, &xmin, &xmax, &ymin, &ymax, &zmin, &zmax) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1045,7 +1045,7 @@ PHP_FUNCTION(swf_perspective)
 PHP_FUNCTION(swf_lookat)
 {
 	zval **vx, **vy, **vz, **px, **py, **pz, **twist;
-	if (ARG_COUNT(ht) != 7 ||
+	if (ZEND_NUM_ARGS() != 7 ||
 	    zend_get_parameters_ex(7, &vx, &vy, &vz, &px, &py, &pz, &twist) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -1083,7 +1083,7 @@ PHP_FUNCTION(swf_popmatrix)
 PHP_FUNCTION(swf_scale)
 {
 	zval **x, **y, **z;
-	if (ARG_COUNT(ht) != 3 ||
+	if (ZEND_NUM_ARGS() != 3 ||
 	    zend_get_parameters_ex(3, &x, &y, &z) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -1100,7 +1100,7 @@ PHP_FUNCTION(swf_scale)
 PHP_FUNCTION(swf_translate)
 {
 	zval **x, **y, **z;
-	if (ARG_COUNT(ht) != 3 ||
+	if (ZEND_NUM_ARGS() != 3 ||
 	    zend_get_parameters_ex(3, &x, &y, &z) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -1117,7 +1117,7 @@ PHP_FUNCTION(swf_translate)
 PHP_FUNCTION(swf_rotate)
 {
 	zval **angle, **axis;
-	if (ARG_COUNT(ht) != 2 ||
+	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &angle, &axis) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}
@@ -1133,7 +1133,7 @@ PHP_FUNCTION(swf_rotate)
 PHP_FUNCTION(swf_posround)
 {
 	zval **doit;
-	if (ARG_COUNT(ht) != 1 ||
+	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &doit) == FAILURE) {
 	    WRONG_PARAM_COUNT;
 	}

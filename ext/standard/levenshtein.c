@@ -102,7 +102,7 @@ PHP_FUNCTION(levenshtein)
 	zval **str1, **str2;
 	int l;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &str1, &str2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &str1, &str2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str1);

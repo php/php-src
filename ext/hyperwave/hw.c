@@ -653,7 +653,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int do_swap;
 	int version = 0;
 	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	switch(argc) {
 		case 2:
 		case 4:
@@ -917,7 +917,7 @@ PHP_FUNCTION(hw_close) {
 	int id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -941,7 +941,7 @@ PHP_FUNCTION(hw_info)
 	hw_connection *ptr;
 	char *str;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -973,7 +973,7 @@ PHP_FUNCTION(hw_error)
 	int id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -996,7 +996,7 @@ PHP_FUNCTION(hw_errormsg)
 	hw_connection *ptr;
 	char errstr[100];
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -1101,7 +1101,7 @@ char *php_hw_command(INTERNAL_FUNCTION_PARAMETERS, int comm) {
 	int link, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		return NULL;
 	}
 	convert_to_long_ex(arg1);
@@ -1260,7 +1260,7 @@ PHP_FUNCTION(hw_dummy) {
 	int link, id, type, msgid;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -1297,7 +1297,7 @@ PHP_FUNCTION(hw_getobject) {
 	char *query;
 	hw_connection *ptr;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if(argc < 2 || argc > 3)
 		WRONG_PARAM_COUNT;
 	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(hw_insertobject) {
 	char *objrec, *parms;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -1417,7 +1417,7 @@ PHP_FUNCTION(hw_getandlock) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -1448,7 +1448,7 @@ PHP_FUNCTION(hw_unlock) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -1476,7 +1476,7 @@ PHP_FUNCTION(hw_deleteobject) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -1506,7 +1506,7 @@ PHP_FUNCTION(hw_changeobject) {
 	char *modification, *oldobjrec, buf[BUFFERLEN];
 	HashTable *newobjarr;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1); /* Connection */
@@ -1597,7 +1597,7 @@ PHP_FUNCTION(hw_modifyobject) {
 	char *modification;
 	HashTable *remobjarr, *addobjarr;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc > 5) || (argc < 4))
 		WRONG_PARAM_COUNT;
 
@@ -1825,11 +1825,11 @@ void php_hw_mvcp(INTERNAL_FUNCTION_PARAMETERS, int mvcp) {
 
 	switch(mvcp) {
 		case MOVE: /* Move also has fromID */
-			if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+			if (ZEND_NUM_ARGS() != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
 				WRONG_PARAM_COUNT;
 			break;
 		case COPY:
-			if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
+			if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
 				WRONG_PARAM_COUNT;
 			break;
 	}
@@ -1931,7 +1931,7 @@ PHP_FUNCTION(hw_gettext) {
 	hw_document *doc;
 	hw_connection *ptr;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc > 3) || (argc < 2))
 		WRONG_PARAM_COUNT;
 		
@@ -1991,7 +1991,7 @@ PHP_FUNCTION(hw_edittext) {
 	hw_connection *ptr;
 	hw_document *docptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2033,7 +2033,7 @@ PHP_FUNCTION(hw_getcgi) {
 	hw_connection *ptr;
 	char cgi_env_str[BUFFERLEN];
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2094,7 +2094,7 @@ PHP_FUNCTION(hw_getremote) {
 	hw_document *doc;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2134,7 +2134,7 @@ PHP_FUNCTION(hw_getremotechildren) {
 	hw_connection *ptr;
 	char *objrec;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2237,7 +2237,7 @@ PHP_FUNCTION(hw_setlinkroot) {
 	int link, type, rootid;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2267,7 +2267,7 @@ PHP_FUNCTION(hw_pipedocument) {
 	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc > 2) || (argc < 2))
 		WRONG_PARAM_COUNT;
 		
@@ -2337,7 +2337,7 @@ PHP_FUNCTION(hw_pipecgi) {
 	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2401,7 +2401,7 @@ PHP_FUNCTION(hw_insertdocument) {
 	server_rec *serv = ((request_rec *) SG(server_context))->server;
 #endif
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2445,7 +2445,7 @@ PHP_FUNCTION(hw_new_document) {
 	char *ptr;
 	hw_document *doc;
 
-	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2479,7 +2479,7 @@ PHP_FUNCTION(hw_free_document) {
 	int id, type;
 	hw_document *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2505,7 +2505,7 @@ PHP_FUNCTION(hw_output_document) {
 	int id, type;
 	hw_document *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2535,7 +2535,7 @@ PHP_FUNCTION(hw_document_bodytag) {
 	hw_document *ptr;
 	char *temp, *str = NULL;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc > 2) || (argc < 1))
 		WRONG_PARAM_COUNT;
 		
@@ -2574,7 +2574,7 @@ PHP_FUNCTION(hw_document_content) {
 	int id, type, argc;
 	hw_document *ptr;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if(argc != 1)
 		WRONG_PARAM_COUNT;
 		
@@ -2601,7 +2601,7 @@ PHP_FUNCTION(hw_document_setcontent) {
 	hw_document *ptr;
 	char *str;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if(argc != 2)
 		WRONG_PARAM_COUNT;
 		
@@ -2640,7 +2640,7 @@ PHP_FUNCTION(hw_document_size) {
 	int id, type;
 	hw_document *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2666,7 +2666,7 @@ PHP_FUNCTION(hw_document_attributes) {
 	int id, type;
 	hw_document *ptr;
 
-	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2691,7 +2691,7 @@ PHP_FUNCTION(hw_getparentsobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2725,7 +2725,7 @@ PHP_FUNCTION(hw_getparents) {
 	int count;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(arg1);
@@ -2770,7 +2770,7 @@ PHP_FUNCTION(hw_children) {
 	int count;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2816,7 +2816,7 @@ PHP_FUNCTION(hw_childrenobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2850,7 +2850,7 @@ PHP_FUNCTION(hw_getchildcoll) {
 	int count;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2896,7 +2896,7 @@ PHP_FUNCTION(hw_getchildcollobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2929,7 +2929,7 @@ PHP_FUNCTION(hw_docbyanchor) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(ht, 2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2960,7 +2960,7 @@ PHP_FUNCTION(hw_docbyanchorobj) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -2998,7 +2998,7 @@ PHP_FUNCTION(hw_getobjectbyquery) {
 	int  *childIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3041,7 +3041,7 @@ PHP_FUNCTION(hw_getobjectbyqueryobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3079,7 +3079,7 @@ PHP_FUNCTION(hw_getobjectbyquerycoll) {
 	hw_connection *ptr;
 	int  *childIDs = NULL;
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3124,7 +3124,7 @@ PHP_FUNCTION(hw_getobjectbyquerycollobj) {
 	hw_connection *ptr;
 	char  **childObjRecs = NULL;
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3163,7 +3163,7 @@ PHP_FUNCTION(hw_getchilddoccoll) {
 	int  *childIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3202,7 +3202,7 @@ PHP_FUNCTION(hw_getchilddoccollobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3237,7 +3237,7 @@ PHP_FUNCTION(hw_getanchors) {
 	int  *anchorIDs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3276,7 +3276,7 @@ PHP_FUNCTION(hw_getanchorsobj) {
 	char  **anchorObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3308,7 +3308,7 @@ PHP_FUNCTION(hw_getusername) {
 	int link, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3333,7 +3333,7 @@ PHP_FUNCTION(hw_identify) {
 	char *name, *passwd, *userdata;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3379,7 +3379,7 @@ PHP_FUNCTION(hw_identify) {
 PHP_FUNCTION(hw_objrec2array) {
 	zval **arg1, **arg2;
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if(zend_get_parameters_ex(1, &arg1) == FAILURE)
 				WRONG_PARAM_COUNT;
@@ -3405,7 +3405,7 @@ PHP_FUNCTION(hw_array2objrec) {
 	pval **arg1;
 	char *objrec, *retobj;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_array_ex(arg1);
@@ -3427,7 +3427,7 @@ PHP_FUNCTION(hw_incollections) {
 	hw_connection *ptr;
 	int cobjids, ccollids, *objectIDs, *collIDs, cretids, *retIDs, retcoll;
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3488,7 +3488,7 @@ PHP_FUNCTION(hw_inscoll) {
 	int id, newid, type, link;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3526,7 +3526,7 @@ PHP_FUNCTION(hw_insdoc) {
 	int id, newid, type, link, argc;
 	hw_connection *ptr;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc < 3) || (argc > 4))
 		WRONG_PARAM_COUNT;
 
@@ -3569,7 +3569,7 @@ PHP_FUNCTION(hw_getsrcbydestobj) {
 	char  **childObjRecs = NULL;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3601,7 +3601,7 @@ PHP_FUNCTION(hw_mapid) {
 	int link, type, servid, id, virtid;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3634,7 +3634,7 @@ PHP_FUNCTION(hw_getrellink) {
 	char *anchorstr;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);
@@ -3679,7 +3679,7 @@ PHP_FUNCTION(hw_connection_info)
 	hw_connection *ptr;
 	int link, type;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);

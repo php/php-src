@@ -955,7 +955,7 @@ PHPAPI int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int Read
    Reads the EXIF header data from a JPEG file */ 
 PHP_FUNCTION(read_exif_data) {
     pval **p_name;
-    int ac = ARG_COUNT(ht), ret;
+    int ac = ZEND_NUM_ARGS(), ret;
 	ImageInfoType ImageInfo;
 	char tmp[64];
 

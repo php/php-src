@@ -324,7 +324,7 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 	
 	
 	/* Get function parameters and do error-checking. */
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if (global || zend_get_parameters_ex(2, &regex, &subject) == FAILURE) {
 				WRONG_PARAM_COUNT;
@@ -859,7 +859,7 @@ PHP_FUNCTION(preg_replace)
 	ulong			 num_key;
 	
 	/* Get function parameters and do error-checking. */
-	if (ARG_COUNT(ht) != 3 || zend_get_parameters_ex(3, &regex, &replace, &subject) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &regex, &replace, &subject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -934,7 +934,7 @@ PHP_FUNCTION(preg_split)
 					*last_match;		/* Location of last match */
 
 	/* Get function parameters and do error checking */	
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if (argc < 1 || argc > 4 || zend_get_parameters_ex(argc, &regex, &subject, &limit, &flags) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1047,8 +1047,8 @@ PHP_FUNCTION(preg_quote)
 	zend_bool quote_delim = 0; /* Whether to quote additional delim char */
 	
 	/* Get the arguments and check for errors */
-	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2 ||
-		zend_get_parameters_ex(ARG_COUNT(ht), &in_str_arg, &delim) == FAILURE) {
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &in_str_arg, &delim) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1062,7 +1062,7 @@ PHP_FUNCTION(preg_quote)
 		RETVAL_STRINGL(empty_string, 0, 0);
 	}
 
-	if (ARG_COUNT(ht) == 2) {
+	if (ZEND_NUM_ARGS() == 2) {
 		convert_to_string_ex(delim);
 		if (Z_STRLEN_PP(delim) > 0) {
 			delim_char = Z_STRVAL_PP(delim)[0];
@@ -1134,7 +1134,7 @@ PHP_FUNCTION(preg_grep)
 	
 	/* Get arguments and do error checking */
 	
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(ARG_COUNT(ht), &regex, &input) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &regex, &input) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	

@@ -287,7 +287,7 @@ PHP_FUNCTION(gzfile) {
 	PLS_FETCH();
 
 	/* check args */
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1,&filename) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -341,7 +341,7 @@ PHP_FUNCTION(gzopen) {
 	int use_include_path = 0;
 	ZLIBLS_FETCH();
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 	case 2:
 		if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -384,7 +384,7 @@ PHP_FUNCTION(gzclose) {
 	pval **arg1;
 	gzFile *zp;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
@@ -399,7 +399,7 @@ PHP_FUNCTION(gzeof) {
 	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(zp, gzFile *, arg1, -1, "Zlib file", le_zp);
@@ -421,7 +421,7 @@ PHP_FUNCTION(gzgets) {
 	char *buf;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
@@ -456,7 +456,7 @@ PHP_FUNCTION(gzgetc) {
 	int c;
 	char *buf;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -490,7 +490,7 @@ PHP_FUNCTION(gzgetss)
 	int allowed_tags_len=0;
 	ZLIBLS_FETCH();
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 2:
 			if(zend_get_parameters_ex(2, &fd, &bytes) == FAILURE) {
 				RETURN_FALSE;
@@ -540,7 +540,7 @@ PHP_FUNCTION(gzwrite) {
 	int num_bytes;
 	PLS_FETCH();
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			if (zend_get_parameters_ex(2, &arg1, &arg2)==FAILURE) {
 				RETURN_FALSE;
@@ -583,7 +583,7 @@ PHP_FUNCTION(gzrewind) {
 	pval **arg1;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -601,7 +601,7 @@ PHP_FUNCTION(gztell) {
 	long pos;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -619,7 +619,7 @@ PHP_FUNCTION(gzseek) {
 	int ret;
 	gzFile *zp;
 	
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
@@ -645,7 +645,7 @@ PHP_FUNCTION(readgzfile) {
 
 	
 	/* check args */
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1,&arg1) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -693,7 +693,7 @@ PHP_FUNCTION(gzpassthru) {
 	char buf[8192];
 	int size, b;
 	
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -720,7 +720,7 @@ PHP_FUNCTION(gzread)
 	int len;
 	PLS_FETCH();
 	
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg2);
@@ -752,7 +752,7 @@ PHP_FUNCTION(gzcompress)
 	unsigned long l2;
 	char *s2;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &data) == FAILURE)
 			WRONG_PARAM_COUNT;
@@ -802,7 +802,7 @@ PHP_FUNCTION(gzuncompress)
 	unsigned long plength=0,length;
 	char *s1=NULL,*s2=NULL;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 	case 1:
 		if (zend_get_parameters_ex(1, &data) == FAILURE)
 			WRONG_PARAM_COUNT;

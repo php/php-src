@@ -150,7 +150,7 @@ PHP_FUNCTION(fdf_open) {
 	FDF_TLS_VARS;
 
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -174,7 +174,7 @@ PHP_FUNCTION(fdf_close) {
 	FDFDoc fdf;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -222,7 +222,7 @@ PHP_FUNCTION(fdf_get_value) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -263,7 +263,7 @@ PHP_FUNCTION(fdf_set_value) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &arg1, &arg2,&arg3, &arg4) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -297,7 +297,7 @@ PHP_FUNCTION(fdf_next_field_name) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	argc = ARG_COUNT(ht);
+	argc = ZEND_NUM_ARGS();
 	if((argc > 2) || (argc < 1))
 		WRONG_PARAM_COUNT;
 
@@ -344,7 +344,7 @@ PHP_FUNCTION(fdf_set_ap) {
 	FDFAppFace face;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -392,7 +392,7 @@ PHP_FUNCTION(fdf_set_status) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -424,7 +424,7 @@ PHP_FUNCTION(fdf_get_status) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(fdf_set_file) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -491,7 +491,7 @@ PHP_FUNCTION(fdf_get_file) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg1) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -526,7 +526,7 @@ PHP_FUNCTION(fdf_save) {
 	FDFErc err;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -556,7 +556,7 @@ PHP_FUNCTION(fdf_add_template) {
 	pdfFileSpecRec filespec;
 	FDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(5, &arg1, &arg2,&arg3, &arg4, &arg5) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

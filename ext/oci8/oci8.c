@@ -2372,7 +2372,7 @@ PHP_FUNCTION(ocidefinebyname)
 	oci_statement *statement;
 	oci_define *define, *tmp_define;
 	ub2	ocitype = SQLT_CHR; /* zero terminated string */
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 
     if (ac < 3 || ac > 4 || zend_get_parameters_ex(ac, &stmt, &name, &var, &type) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -2436,7 +2436,7 @@ PHP_FUNCTION(ocibindbyname)
     OCIStmt *mystmt = 0;
 	dvoid *mydescr = 0;
 	sb4 value_sz = -1;
-	int ac = ARG_COUNT(ht), inx;
+	int ac = ZEND_NUM_ARGS(), inx;
 
     if (ac < 3 || ac > 5 || zend_get_parameters_ex(ac, &stmt, &name, &var, &maxlen, &type) == FAILURE) {        WRONG_PARAM_COUNT;
     }
@@ -2777,7 +2777,7 @@ PHP_FUNCTION(ociwritelobtofile)
 	oci_descriptor *descr;
 	char *buffer=0;
 	ub4 loblen;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	int fp = -1,inx;
 	OCILobLocator *mylob;
 	int coffs;
@@ -3367,7 +3367,7 @@ PHP_FUNCTION(ocifetchinto)
 	ub4 nrows = 1;
 	int i, used;
 	int mode = OCI_NUM;
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 	
     if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
         WRONG_PARAM_COUNT;
@@ -3438,7 +3438,7 @@ PHP_FUNCTION(ocifetchstatement)
 	int mode = OCI_NUM;
 	int rows = 0;
 	char namebuf[ 128 ];
-	int ac = ARG_COUNT(ht);
+	int ac = ZEND_NUM_ARGS();
 
 	if (ac < 2 || ac > 3 || zend_get_parameters_ex(ac, &stmt, &array, &fmode) == FAILURE) {
 		WRONG_PARAM_COUNT;

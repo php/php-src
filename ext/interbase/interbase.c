@@ -637,17 +637,17 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	ib_uname_len = ib_uname ? strlen(ib_uname) : 0;
 	ib_passwd_len = ib_passwd ? strlen(ib_passwd) : 0;
 	
-	if(ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 7){
+	if(ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 7){
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
-	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
+	args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 7:
 			convert_to_string_ex(args[6]);
 			ib_role = (*args[6])->value.str.val;
@@ -853,7 +853,7 @@ PHP_FUNCTION(ibase_close)
 	
 	RESET_ERRMSG;
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			link_id = IBG(default_link);
 			break;
@@ -1394,7 +1394,7 @@ PHP_FUNCTION(ibase_trans)
 	link_id = IBG(default_link);
 
 	/* TODO: multi-databases trans */
-	argn = ARG_COUNT(ht);
+	argn = ZEND_NUM_ARGS();
 	if (argn < 0 || argn > 2) {
 		WRONG_PARAM_COUNT;
 	}
@@ -1500,7 +1500,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 
 	RESET_ERRMSG;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			link_id = IBG(default_link);
 			break;
@@ -1569,12 +1569,12 @@ PHP_FUNCTION(ibase_query)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht) < 1) {
+	if (ZEND_NUM_ARGS() < 1) {
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
-	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
+	args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
@@ -1600,11 +1600,11 @@ PHP_FUNCTION(ibase_query)
 		RETURN_FALSE;
 	}
 
-	if (ARG_COUNT(ht) > i) { /* have variables to bind */
+	if (ZEND_NUM_ARGS() > i) { /* have variables to bind */
 		/* XXX Remove or fix??? Variable placeholders and binding makes
 		   absolutely no sense if not using a prepared SQL statement.
 		*/
-		bind_n = ARG_COUNT(ht) - i;
+		bind_n = ZEND_NUM_ARGS() - i;
 		bind_args = args[i];
 	}
 	
@@ -1842,14 +1842,14 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 	
 	RESET_ERRMSG;
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
-			if (ARG_COUNT(ht)==1 && zend_get_parameters_ex(1, &result_arg)==FAILURE) {
+			if (ZEND_NUM_ARGS()==1 && zend_get_parameters_ex(1, &result_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			break;
 		case 2:
-			if (ARG_COUNT(ht)==2 && zend_get_parameters_ex(2, &result_arg, &flag_arg)==FAILURE) {
+			if (ZEND_NUM_ARGS()==2 && zend_get_parameters_ex(2, &result_arg, &flag_arg)==FAILURE) {
 				RETURN_FALSE;
 			}
 			convert_to_long_ex(flag_arg);
@@ -2072,7 +2072,7 @@ PHP_FUNCTION(ibase_free_result)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2097,7 +2097,7 @@ PHP_FUNCTION(ibase_prepare)
 
 	RESET_ERRMSG;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query_arg) == FAILURE) {
 				RETURN_FALSE;
@@ -2150,23 +2150,23 @@ PHP_FUNCTION(ibase_execute)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht) < 1) {
+	if (ZEND_NUM_ARGS() < 1) {
 		WRONG_PARAM_COUNT;
 	}
 
-	args = (pval ***)emalloc(ARG_COUNT(ht) * sizeof(pval **));
-	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
+	args = (pval ***)emalloc(ZEND_NUM_ARGS() * sizeof(pval **));
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(ib_query, ibase_query *, args[0], -1, "InterBase query", IBG(le_query));
 
-	if (ARG_COUNT(ht) > 1) { /* have variables to bind */
+	if (ZEND_NUM_ARGS() > 1) { /* have variables to bind */
 		bind_args = args[1];
 	}
 	
-	if ( _php_ibase_exec(&ib_result, ib_query, ARG_COUNT(ht)-1, bind_args) == FAILURE) {
+	if ( _php_ibase_exec(&ib_result, ib_query, ZEND_NUM_ARGS()-1, bind_args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
@@ -2193,7 +2193,7 @@ PHP_FUNCTION(ibase_free_query)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &query_arg) == FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &query_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2217,17 +2217,17 @@ PHP_FUNCTION(ibase_timefmt)
 	RESET_ERRMSG; /* ??? */
 
 
-	if (ARG_COUNT(ht) < 1 || ARG_COUNT(ht) > 2){
+	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 2){
 		WRONG_PARAM_COUNT;
 	}
 	
-	args = (pval ***) emalloc(sizeof(pval **)*ARG_COUNT(ht));
-	if (zend_get_parameters_array_ex(ARG_COUNT(ht), args) == FAILURE) {
+	args = (pval ***) emalloc(sizeof(pval **)*ZEND_NUM_ARGS());
+	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		efree(args);
 		RETURN_FALSE;
 	}
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			convert_to_long_ex(args[1]);
 			type = (*args[1])->value.lval;
@@ -2275,7 +2275,7 @@ PHP_FUNCTION(ibase_num_fields)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &result)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2306,7 +2306,7 @@ PHP_FUNCTION(ibase_field_info)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &result_arg, &field_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &result_arg, &field_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2443,7 +2443,7 @@ PHP_FUNCTION(ibase_blob_create)
 
 	RESET_ERRMSG;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			link_id = IBG(default_link);
 			break;
@@ -2493,7 +2493,7 @@ PHP_FUNCTION(ibase_blob_open)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2532,7 +2532,7 @@ PHP_FUNCTION(ibase_blob_add)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=2 || getParameters(ht, 2, &blob_arg, &string_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || getParameters(ht, 2, &blob_arg, &string_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2563,7 +2563,7 @@ PHP_FUNCTION(ibase_blob_get)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &blob_arg, &len_arg) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &blob_arg, &len_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2614,7 +2614,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 
 	RESET_ERRMSG;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2673,7 +2673,7 @@ PHP_FUNCTION(ibase_blob_info)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2751,7 +2751,7 @@ PHP_FUNCTION(ibase_blob_echo)
 
 	RESET_ERRMSG;
 
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || getParameters(ht, 1, &blob_arg)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2813,7 +2813,7 @@ PHP_FUNCTION(ibase_blob_import)
 
 	RESET_ERRMSG;
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &file_arg) == FAILURE) {
 				RETURN_FALSE;

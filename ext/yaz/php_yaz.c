@@ -835,7 +835,7 @@ PHP_FUNCTION(yaz_connect)
 	char *cp;
 	char *zurl_str;
 	pval **zurl;
-	if (ARG_COUNT(ht) < 1 || zend_get_parameters_ex (1, &zurl) == FAILURE)
+	if (ZEND_NUM_ARGS() < 1 || zend_get_parameters_ex (1, &zurl) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -892,7 +892,7 @@ PHP_FUNCTION(yaz_close)
 {
 	pval **id;
 	int i;
-	if (ARG_COUNT(ht) != 1)
+	if (ZEND_NUM_ARGS() != 1)
 		WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex (1, &id) == FAILURE)
 		RETURN_FALSE;
@@ -914,7 +914,7 @@ PHP_FUNCTION(yaz_search)
 	pval **id, **type, **query;
 	Yaz_Association p;
 	Yaz_ResultSet r;
-	if (ARG_COUNT(ht) != 3)
+	if (ZEND_NUM_ARGS() != 3)
 		WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(3, &id, &type, &query) == FAILURE)
 	{
@@ -996,7 +996,7 @@ PHP_FUNCTION(yaz_errno)
 {
 	pval **id;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1015,7 +1015,7 @@ PHP_FUNCTION(yaz_error)
 {
 	pval **id;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(yaz_addinfo)
 {
 	pval **id;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(yaz_hits)
 {
 	pval **id;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &id) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(yaz_record)
 	int pos;
 	char *type;
 
-	if (ARG_COUNT(ht) != 3)
+	if (ZEND_NUM_ARGS() != 3)
 		WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(3, &pval_id, &pval_pos, &pval_type) == FAILURE)
 	{
@@ -1458,7 +1458,7 @@ PHP_FUNCTION(yaz_syntax)
 {
 	pval **pval_id, **pval_syntax;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 2 || 
+	if (ZEND_NUM_ARGS() != 2 || 
 		zend_get_parameters_ex(2, &pval_id, &pval_syntax) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -1479,7 +1479,7 @@ PHP_FUNCTION(yaz_element)
 {
 	pval **pval_id, **pval_element;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 2 || 
+	if (ZEND_NUM_ARGS() != 2 || 
 		zend_get_parameters_ex(2, &pval_id, &pval_element) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(yaz_range)
 {
 	pval **pval_id, **pval_start, **pval_number;
 	Yaz_Association p;
-	if (ARG_COUNT(ht) != 3 || 
+	if (ZEND_NUM_ARGS() != 3 || 
 		zend_get_parameters_ex(3, &pval_id, &pval_start, &pval_number) ==
 		FAILURE)
 	{

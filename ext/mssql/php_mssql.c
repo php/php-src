@@ -297,7 +297,7 @@ void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	MSSQLLS_FETCH();
 /*	PLS_FETCH(); */
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 0: /* defaults */
 			host=user=passwd=NULL;
 			hashed_details_length=5+3;
@@ -600,7 +600,7 @@ PHP_FUNCTION(mssql_close)
 	MSSQLLS_FETCH();
 
 	
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 0:
 			id = php_mssql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU MSSQLLS_CC);
 			CHECK_LINK(id);
@@ -633,7 +633,7 @@ PHP_FUNCTION(mssql_select_db)
 	MSSQLLS_FETCH();
 
 	
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &db)==FAILURE) {
 				RETURN_FALSE;
@@ -764,7 +764,7 @@ PHP_FUNCTION(mssql_query)
 	MSSQLLS_FETCH();
 
 
-	switch(ARG_COUNT(ht)) {
+	switch(ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &query)==FAILURE) {
 				RETURN_FALSE;
@@ -897,7 +897,7 @@ PHP_FUNCTION(mssql_free_result)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -932,7 +932,7 @@ PHP_FUNCTION(mssql_num_rows)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -953,7 +953,7 @@ PHP_FUNCTION(mssql_num_fields)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -975,7 +975,7 @@ PHP_FUNCTION(mssql_fetch_row)
 	zval *field_content;
 	MSSQLLS_FETCH();
 
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1007,7 +1007,7 @@ static void php_mssql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS)
 	PLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1066,7 +1066,7 @@ PHP_FUNCTION(mssql_data_seek)
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(mssql_fetch_field)
 	MSSQLLS_FETCH();
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
@@ -1185,7 +1185,7 @@ PHP_FUNCTION(mssql_fetch_field)
 	}
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
+		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
 			php_error(E_WARNING,"MS SQL:  Bad column offset");
 		}
 		RETURN_FALSE;
@@ -1213,7 +1213,7 @@ PHP_FUNCTION(mssql_field_length)
 	MSSQLLS_FETCH();
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
@@ -1247,7 +1247,7 @@ PHP_FUNCTION(mssql_field_length)
 	}
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
+		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
 			php_error(E_WARNING,"MS SQL:  Bad column offset");
 		}
 		RETURN_FALSE;
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(mssql_field_name)
 	MSSQLLS_FETCH();
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
@@ -1303,7 +1303,7 @@ PHP_FUNCTION(mssql_field_name)
 	}
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
+		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
 			php_error(E_WARNING,"MS SQL:  Bad column offset");
 		}
 		RETURN_FALSE;
@@ -1326,7 +1326,7 @@ PHP_FUNCTION(mssql_field_type)
 	MSSQLLS_FETCH();
 
 
-	switch (ARG_COUNT(ht)) {
+	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 				RETURN_FALSE;
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(mssql_field_type)
 	}
 	
 	if (field_offset<0 || field_offset >= result->num_fields) {
-		if (ARG_COUNT(ht)==2) { /* field specified explicitly */
+		if (ZEND_NUM_ARGS()==2) { /* field specified explicitly */
 			php_error(E_WARNING,"MS SQL:  Bad column offset");
 		}
 		RETURN_FALSE;
@@ -1383,7 +1383,7 @@ PHP_FUNCTION(mssql_field_seek)
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht)!=2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=2 || zend_get_parameters_ex(2, &mssql_result_index, &offset)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -1420,7 +1420,7 @@ PHP_FUNCTION(mssql_result)
 	MSSQLLS_FETCH();
 
 
-	if (ARG_COUNT(ht)!=3 || zend_get_parameters_ex(3, &mssql_result_index, &row, &field)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=3 || zend_get_parameters_ex(3, &mssql_result_index, &row, &field)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1479,7 +1479,7 @@ PHP_FUNCTION(mssql_min_error_severity)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(severity);
@@ -1496,7 +1496,7 @@ PHP_FUNCTION(mssql_min_message_severity)
 	MSSQLLS_FETCH();
 
 	
-	if (ARG_COUNT(ht)!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &severity)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(severity);
