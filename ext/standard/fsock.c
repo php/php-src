@@ -93,6 +93,8 @@ struct php3i_sockbuf {
 
 static struct php3i_sockbuf *phpsockbuf;
 
+typedef struct php3i_sockbuf php3i_sockbuf;
+
 static int php3_minit_fsock(INIT_FUNC_ARGS);
 static int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS);
 static int php3_rshutdown_fsock(SHUTDOWN_FUNC_ARGS);
@@ -290,23 +292,43 @@ PHP_FUNCTION(pfsockopen)
  *   (buffered data is not persistent)
  * - php3_fopen_url_wrapper() is still doing single-byte lookahead/read
  */
-/* {{{ _php3_sock_fgets() */
 
-int _php3_sock_fgets(char *buf, int maxlen, int socket)
+static php3i_sockbuf *_php3_sock_findsock(int socket)
 {
-	struct php3i_sockbuf *sockbuf = NULL, *tmpsockbuf;
-	int bytesread, toread, len, buflen, count = 0;
-	char *nl;
+	/* FIXME: O(n) could be improved */
 
-	tmpsockbuf = phpsockbuf;
-	while (tmpsockbuf) {
-		if (tmpsockbuf->socket == socket) {
-			sockbuf = tmpsockbuf;
+	php3i_sockbuf *buf = NULL, *tmp;
+	
+	for(tmp = phpsockbuf; tmp; tmp = tmp->next)
+		if(tmp->socket == socket) {
+			buf = tmp;
 			break;
 		}
-		tmpsockbuf = tmpsockbuf->next;
-	}
 
+	return buf;
+}
+
+int _php3_sock_eof(int socket)
+{
+	php3i_sockbuf *sockbuf;
+	int ret = 0;
+
+	sockbuf = _php3_sock_findsock(socket);
+	if(sockbuf) {
+		ret = (sockbuf->writepos - sockbuf->readpos) == 0 ? 1 : 0;
+	}
+	return ret;
+}
+
+/* {{{ _php3_sock_fgets() */
+int _php3_sock_fgets(char *buf, int maxlen, int socket)
+{
+	struct php3i_sockbuf *sockbuf;
+	int bytesread, toread, len, buflen, count = 0;
+	char *nl;
+	
+	sockbuf = _php3_sock_findsock(socket);
+	
 	if (sockbuf) {
 		toread = sockbuf->writepos - sockbuf->readpos;
 		if (toread > maxlen) {

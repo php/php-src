@@ -53,6 +53,7 @@ extern int lookup_hostname(const char *addr, struct in_addr *in);
 extern int _php3_sock_fgets(char *buf, int maxlen, int socket);
 extern int _php3_sock_fread(char *buf, int maxlen, int socket);
 extern int _php3_is_persistent_sock(int);
+int _php3_sock_eof(int socket);
 
 #define phpext_fsock_ptr fsock_module_ptr
 
