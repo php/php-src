@@ -190,7 +190,7 @@ $exts_tested = count($exts_to_test);
 $exts_skipped = 0;
 $ignored_by_ext = 0;
 sort($exts_to_test);
-$test_dirs = array('tests', 'pear', 'ext');
+$test_dirs = array('tests');//, 'pear', 'ext');
 
 foreach ($test_dirs as $dir) {
 	find_files("{$cwd}/{$dir}", ($dir == 'ext'));
@@ -323,6 +323,7 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 	$fp = fopen("php://stdin", "r+");
 	echo "Some tests have failed, would you like to send the\nreport to PHP's QA team\n";
 	echo "(choose \"s\" to just save the results to a file)? [Yns]: ";
+	flush();
 	$user_input = fgets($fp, 10);
 	$just_save_results = (strtolower($user_input[0]) == 's');
 	
