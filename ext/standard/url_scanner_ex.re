@@ -299,7 +299,7 @@ state_val:
 /*!re2c
   ["] (any\[">])* ["]	{ handle_val(STD_ARGS, 1, '"'); goto state_next_arg_begin; }
   ['] (any\['>])* [']	{ handle_val(STD_ARGS, 1, '\''); goto state_next_arg_begin; }
-  (any\[ \n>"'])+		{ handle_val(STD_ARGS, 0, '"'); goto state_next_arg_begin; }
+  (any\[ \n>])+		{ handle_val(STD_ARGS, 0, '\0'); goto state_next_arg_begin; }
   any					{ passthru(STD_ARGS); goto state_next_arg_begin; }
 */
 
