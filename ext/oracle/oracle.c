@@ -1710,7 +1710,6 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 
 		if (zend_hash_find(&EG(symbol_table), paramname, strlen(paramname) + 1, (void **)&pdata) == FAILURE){
 			php_error(E_WARNING, "Can't find variable for parameter");
-			efree(paramname);
 			return 0;
 		}
 
@@ -1725,8 +1724,6 @@ int ora_set_param_values(oraCursor *cursor, int isout)
 
 		strncpy(param->progv, (*pdata)->value.str.val, len);
 		param->progv[len] = '\0';
-
-		efree(paramname);
 	}
 
 	return 1;
