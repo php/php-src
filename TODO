@@ -50,6 +50,7 @@ ext/standard
     * strpad() (Andrei)
     * stri_replace() (Andrei)
     * realpath() (Andrei)
+    * socket_get_status (Andrei)
     * comparing arrays semantically (like Python) (Andrei)
     * NOT binary safe:
         strtok()
