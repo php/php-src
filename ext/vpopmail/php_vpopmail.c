@@ -37,6 +37,7 @@
 #include "vpopmail.h"
 
 #include "ext/standard/exec.h"
+#include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(vpopmail)
@@ -116,6 +117,10 @@ PHP_RINIT_FUNCTION(vpopmail)
 
 	return SUCCESS;
 }
+
+/* nasty but... */
+void vclose();
+/* ...we need this */
 
 PHP_RSHUTDOWN_FUNCTION(vpopmail)
 {
@@ -234,7 +239,6 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
 	char TmpBuf1[300];
 	char TmpBuf2[300];
 	int uid, gid;
-	int retval;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain, &aliasdomain) == FAILURE)
 		WRONG_PARAM_COUNT;
@@ -289,9 +293,9 @@ PHP_FUNCTION(vpopmail_add_alias_domain)
    Add a new virtual domain */
 PHP_FUNCTION(vpopmail_add_domain_ex) {
 	zval **domain, **passwd, **quota, **bounce, **apop;
-	int retval,len=0,argc=ZEND_NUM_ARGS(),Uid=VPOPMAILUID,Gid=VPOPMAILGID,is_bounce_email;
+	int retval,len=0,argc=ZEND_NUM_ARGS(),is_bounce_email;
 	int fr_bounce=0,fr_quota=0;
-	char *q,*bo,*cmd,*escdomain="",*escpasswd="",*escquota="",*escbounce="",*escapop="";
+	char *cmd,*escdomain="",*escpasswd="",*escquota="",*escbounce="",*escapop="";
 
 	if (argc < 2 || argc > 5 || zend_get_parameters_ex(argc, &domain, &passwd, &quota, &bounce, &apop) == FAILURE){
 		WRONG_PARAM_COUNT;
