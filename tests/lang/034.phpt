@@ -4,7 +4,7 @@ Locale settings affecting float parsing
 <?php  # try to activate a german locale
 $status = false;
 foreach(array("de_DE", "de", "german", "ge") as $lang) {
-  if($lang == setlocale("LC_ALL", $lang)) {
+  if($lang == setlocale(LC_ALL, $lang)) {
 	  $status = true; 
 	continue;
   }
@@ -17,12 +17,13 @@ if(!$status) print "skip";
 <?php 
 # try to activate a german locale
 foreach(array("de_DE", "de", "german", "ge") as $lang) {
-  if($lang == setlocale("LC_ALL", $lang)) {
+  if($lang == setlocale(LC_ALL, $lang)) {
 	  continue;
   }
 }
 
-echo (float)"3.14";
+echo (float)"3.14", "\n";
+
 ?>
 --EXPECT--
 3.14
