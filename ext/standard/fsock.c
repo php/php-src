@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Paul Panotzki - Bunyip Information Systems                  |
-   |          Jim Winstead (jimw@php.net)                                 |
+   |          Jim Winstead <jimw@php.net>                                 |
    |          Sascha Schumann <sascha@schumann.cx>                        |
    +----------------------------------------------------------------------+
 */
@@ -596,6 +596,7 @@ PHPAPI void php_sockset_timeout(int socket, struct timeval *timeout)
 	SOCK_FIND(sock, socket);
 
 	sock->timeout = *timeout;
+	sock->timeout_event = 0;
 }
 
 #define SOCK_FIND_AND_READ_MAX(max) \
