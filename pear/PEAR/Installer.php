@@ -76,15 +76,6 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
-    // {{{ destructor
-
-    function _PEAR_Installer()
-    {
-        chdir($this->pwd);
-        $this->_PEAR_Common();
-    }
-
-    // }}}
     // {{{ install()
 
     /**
@@ -99,7 +90,7 @@ class PEAR_Installer extends PEAR_Common
     {
         // XXX FIXME Add here code to manage packages database
         //$this->loadPackageList("$this->statedir/packages.lst");
-        $this->pwd = getcwd();
+        $oldcwd = getcwd();
         $need_download = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
@@ -144,34 +135,40 @@ class PEAR_Installer extends PEAR_Common
         $pkgfile = getcwd() . DIRECTORY_SEPARATOR . basename($pkgfile);
 
         if (PEAR::isError($tmpdir = $this->mkTempDir())) {
+            chdir($oldcwd);
             return $tmpdir;
         }
         $this->log(2, '+ tmp dir created at ' . $tmpdir);
 
         $tar = new Archive_Tar($pkgfile, true);
         if (!$tar->extract($tmpdir)) {
+            chdir($oldcwd);
             return $this->raiseError("Unable to unpack $pkgfile");
         }
         $file = basename($pkgfile);
         // Assume the decompressed dir name
         if (($pos = strrpos($file, '.')) === false) {
+            chdir($oldcwd);
             return $this->raiseError('package doesn\'t follow the package name convention');
         }
         $pkgdir = substr($file, 0, $pos);
         $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
 
         if (!is_file($descfile)) {
+            chdir($oldcwd);
             return $this->raiseError("No package.xml file after extracting the archive.");
         }
 
         // Parse xml file -----------------------------------------------
         $pkginfo = $this->infoFromDescriptionFile($descfile);
         if (PEAR::isError($pkginfo)) {
+            chdir($oldcwd);
             return $pkginfo;
         }
 
         // Copy files to dest dir ---------------------------------------
         if (!is_dir($this->phpdir)) {
+            chdir($oldcwd);
             return $this->raiseError("No script destination directory found\n",
                                      null, PEAR_ERROR_DIE);
         }
@@ -187,6 +184,7 @@ class PEAR_Installer extends PEAR_Common
             $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
             $this->_installFile($fname, $dest_dir, $atts);
         }
+        chdir($oldcwd);
         return true;
     }
 
@@ -228,6 +226,8 @@ class PEAR_Installer extends PEAR_Common
         $this->log(1, "installed file $dest_file");
         return true;
     }
+
     // }}}
 }
+
 ?>
