@@ -270,6 +270,8 @@ static void php_ora_init_globals(ORALS_D)
 	
 	ORA(conns) = malloc(sizeof(HashTable));
 	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
+	
+	memset((void*) &ORA(db_err_conn),0,sizeof(ORA(db_err_conn)));
 }
 
 PHP_MINIT_FUNCTION(oracle)
@@ -423,6 +425,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
 #endif
 				) {
+				ORA(db_err_conn) = *db_conn;
 				php_error(E_WARNING, "Unable to connect to ORACLE (%s)",ora_error(&db_conn->lda));
 				
 				if (persistent) {
@@ -463,6 +466,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
 #endif
 					) {
+					ORA(db_err_conn) = *db_conn;
 					php_error(E_WARNING, "Oracle: Link to server lost, unable to reconnect",ora_error(&db_conn->lda));
 					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
 					efree(hashed_details);
@@ -515,6 +519,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			orlon(&db_conn->lda, db_conn->hda, user,strlen(user), passwd, strlen(passwd), 0)
 #endif
 			) {
+			ORA(db_err_conn) = *db_conn;
 			php_error(E_WARNING,"Oracle: Connection Failed: %s\n",ora_error(&db_conn->lda));
 			efree(hashed_details);
 			efree(db_conn);
@@ -1460,19 +1465,26 @@ PHP_FUNCTION(ora_error)
 	oraConnection *conn;
 	void *res;
 	int what;
+	int argc = ZEND_NUM_ARGS();
+	ORALS_FETCH();
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (argc < 0 || argc >> 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
-	ZEND_VERIFY_RESOURCE(res);
 
-	if (what == le_cursor) {
-		cursor = (oraCursor *) res;
-		RETURN_STRING(ora_error(&cursor->cda),1);
+	if (argc == 1) {
+		res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+		ZEND_VERIFY_RESOURCE(res);
+
+		if (what == le_cursor) {
+			cursor = (oraCursor *) res;
+			RETURN_STRING(ora_error(&cursor->cda),1);
+		} else {
+			conn = (oraConnection *) res;
+			RETURN_STRING(ora_error(&conn->lda),1);
+		}
 	} else {
-		conn = (oraConnection *) res;
-		RETURN_STRING(ora_error(&conn->lda),1);
+		RETURN_STRING(ora_error(&ORA(db_err_conn).lda),1);
 	}
 }
 /* }}} */
@@ -1486,19 +1498,26 @@ PHP_FUNCTION(ora_errorcode)
 	oraConnection *conn;
 	void *res;
 	int what;
+	int argc = ZEND_NUM_ARGS();
+	ORALS_FETCH();
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE) {
+	if (argc < 0 || argc >> 1 || zend_get_parameters_ex(argc, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
-	ZEND_VERIFY_RESOURCE(res);
 
-	if (what == le_cursor) {
-		cursor = (oraCursor *) res;
-		RETURN_LONG(cursor->cda.rc);
+	if (argc == 1) {
+		res = zend_fetch_resource(arg, -1,"Oracle-Connection/Cursor",&what,3,le_conn, le_pconn, le_cursor);
+		ZEND_VERIFY_RESOURCE(res);
+
+		if (what == le_cursor) {
+			cursor = (oraCursor *) res;
+			RETURN_LONG(cursor->cda.rc);
+		} else {
+			conn = (oraConnection *) res;
+			RETURN_LONG(conn->lda.rc);
+		}
 	} else {
-		conn = (oraConnection *) res;
-		RETURN_LONG(conn->lda.rc);
+		RETURN_LONG(ORA(db_err_conn).lda.rc);
 	}
 }
 /* }}} */

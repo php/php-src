@@ -124,6 +124,7 @@ typedef struct {
 	long num_persistent;
 	long num_links;
 	HashTable *conns;
+	oraConnection db_err_conn; 
 } php_ora_globals;
 
 #else
