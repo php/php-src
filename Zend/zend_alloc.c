@@ -471,10 +471,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 {
 	zend_mem_header *p, *t;
-
-#if ZEND_DEBUG
-	int had_leaks = 0;
-#endif
+	zend_uint grand_total_leaks=0;
 
 #if defined(ZEND_MM) && !ZEND_DEBUG
 	if (clean_cache) {
@@ -534,7 +531,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 				zend_mem_header *iterator;
 				int total_leak=0, total_leak_count=0;
 
-				had_leaks = 1;
+				grand_total_leaks++;
 				if (!silent) {
 					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
 				}
@@ -563,6 +560,10 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		} else {
 			t = t->pNext;
 		}
+	}
+
+	if (grand_total_leaks > 0) {
+		zend_message_dispatcher(ZMSG_MEMORY_LEAKS_GRAND_TOTAL, &grand_total_leaks);
 	}
 
 #if MEMORY_LIMIT
