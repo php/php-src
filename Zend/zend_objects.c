@@ -107,7 +107,6 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		zval *clone_func_name;
 		zval *retval_ptr;
 		HashTable symbol_table;
-		zend_class_entry *ce = old_object->ce;
 
 		MAKE_STD_ZVAL(new_obj);
 		new_obj->type = IS_OBJECT;
