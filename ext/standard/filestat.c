@@ -124,6 +124,107 @@ PHP_RSHUTDOWN_FUNCTION(filestat)
 	return SUCCESS;
 }
 
+/* {{{ proto double disk_total_space(string path)
+   Get total disk space for filesystem that path is on */
+PHP_FUNCTION(disk_total_space)
+{
+	pval **path;
+#ifdef WINDOWS
+	double bytestotal;
+
+	HINSTANCE kernel32;
+	FARPROC gdfse;
+	typedef BOOL (WINAPI *gdfse_func)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER);
+	gdfse_func func;
+
+	/* These are used by GetDiskFreeSpaceEx, if available. */
+	ULARGE_INTEGER FreeBytesAvailableToCaller;
+	ULARGE_INTEGER TotalNumberOfBytes;
+  	ULARGE_INTEGER TotalNumberOfFreeBytes;
+
+	/* These are used by GetDiskFreeSpace otherwise. */
+	DWORD SectorsPerCluster;
+	DWORD BytesPerSector;
+	DWORD NumberOfFreeClusters;
+	DWORD TotalNumberOfClusters;
+
+#else /* not - WINDOWS */
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	struct statvfs buf;
+#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+	struct statfs buf;
+#endif
+	double bytestotal = 0;
+#endif /* WINDOWS */
+
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1,&path)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(path);
+
+	if (php_check_open_basedir((*path)->value.str.val)) RETURN_FALSE;
+
+#ifdef WINDOWS
+	/* GetDiskFreeSpaceEx is only available in NT and Win95 post-OSR2,
+	   so we have to jump through some hoops to see if the function
+	   exists. */
+	kernel32 = LoadLibrary("kernel32.dll");
+	if (kernel32) {
+		gdfse = GetProcAddress(kernel32, "GetDiskFreeSpaceExA");
+		/* It's available, so we can call it. */
+		if (gdfse) {
+			func = (gdfse_func)gdfse;
+			if (func((*path)->value.str.val,
+				&FreeBytesAvailableToCaller,
+				&TotalNumberOfBytes,
+				&TotalNumberOfFreeBytes) == 0) RETURN_FALSE;
+
+			/* i know - this is ugly, but i works (thies@thieso.net) */
+			bytestotal  = TotalNumberOfBytes.HighPart *
+				(double) (((unsigned long)1) << 31) * 2.0 +
+				TotalNumberOfBytes.LowPart;
+		}
+		/* If it's not available, we just use GetDiskFreeSpace */
+		else {
+			if (GetDiskFreeSpace((*path)->value.str.val,
+				&SectorsPerCluster, &BytesPerSector,
+				&NumberOfFreeClusters, &TotalNumberOfClusters) == 0) RETURN_FALSE;
+			bytestotal = (double)TotalNumberOfClusters * (double)SectorsPerCluster * (double)BytesPerSector;
+		}
+	}
+	else {
+		php_error(E_WARNING, "Unable to load kernel32.dll");
+		RETURN_FALSE;
+	}
+
+#elif defined(OS2)
+	{
+		FSALLOCATE fsinfo;
+  		char drive = (*path)->value.str.val[0] & 95;
+
+		if (DosQueryFSInfo( drive ? drive - 64 : 0, FSIL_ALLOC, &fsinfo, sizeof( fsinfo ) ) == 0)
+			bytestotal = (double)fsinfo.cbSector * fsinfo.cSectorUnit * fsinfo.cUnit;
+	}
+#else /* WINDOWS, OS/2 */
+#if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
+	if (statvfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	if (buf.f_frsize) {
+		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_frsize));
+	} else {
+		bytestotal = (((double)buf.f_blocks) * ((double)buf.f_bsize));
+	}
+
+#elif defined(HAVE_SYS_STATFS_H) && defined(HAVE_STATFS)
+	if (statfs((*path)->value.str.val,&buf)) RETURN_FALSE;
+	bytestotal = (((double)buf.f_bsize) * ((double)buf.f_blocks));
+#endif
+#endif /* WINDOWS */
+
+	RETURN_DOUBLE(bytestotal);
+}
+/* }}} */
+
 /* {{{ proto double disk_free_space(string path)
    Get free disk space for filesystem that path is on */
 PHP_FUNCTION(disk_free_space)
