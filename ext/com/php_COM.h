@@ -18,6 +18,9 @@ PHP_FUNCTION(com_propget);
 PHP_FUNCTION(com_propput);
 PHP_FUNCTION(com_load_typelib);
 PHP_FUNCTION(com_isenum);
+PHP_FUNCTION(com_event_sink);
+PHP_FUNCTION(com_message_pump);
+PHP_FUNCTION(com_print_typeinfo);
 
 PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DISPPARAMS FAR*  pDispParams, VARIANT FAR* pVarResult, char **ErrString TSRMLS_DC);
 PHPAPI HRESULT php_COM_get_ids_of_names(comval *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId TSRMLS_DC);
@@ -36,6 +39,7 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC);
 
 /* dispatch.c */
 PHPAPI IDispatch *php_COM_export_object(zval *val TSRMLS_DC);
+PHPAPI IDispatch *php_COM_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name TSRMLS_DC);
 int php_COM_dispatch_init(int module_number TSRMLS_DC);
 
 zend_module_entry COM_module_entry;
