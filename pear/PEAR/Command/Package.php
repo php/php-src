@@ -79,7 +79,7 @@ class PEAR_Command_Package extends PEAR_Command_Common
 
     function getOptions()
     {
-        return array('Z', 'n' /*, 'f', 'd', 'q', 'Q'*/);
+        return array('Z', 'n', 'F' /*, 'd', 'q', 'Q'*/);
     }
 
     // }}}
@@ -358,8 +358,8 @@ class PEAR_Command_Package extends PEAR_Command_Common
                 }
                 */
                 $command .= ' tag';
-                if (isset($options['f'])) {
-                    $command .= ' -f';
+                if (isset($options['F'])) {
+                    $command .= ' -F';
                 }
                 /* neither will this one:
                 if (isset($options['d'])) {
