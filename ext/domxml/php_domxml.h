@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
@@ -165,6 +165,7 @@ PHP_FUNCTION(domxml_is_blank_node);
 PHP_FUNCTION(domxml_attr_name);
 PHP_FUNCTION(domxml_attr_value);
 PHP_FUNCTION(domxml_attr_specified);
+PHP_FUNCTION(domxml_attr_set_value);
 
 /* Class Element methods */
 PHP_FUNCTION(domxml_elem_tagname);
