@@ -127,7 +127,9 @@ typedef struct _zend_function_entry {
 		class_container.__call = handle_fcall;	\
 		class_container.__get = handle_propget;	\
 		class_container.__set = handle_propset;	\
+		class_container.parent = NULL;          \
 		class_container.num_interfaces = 0;     \
+		class_container.interfaces = NULL;      \
 		class_container.get_iterator = NULL;    \
 		class_container.iterator_funcs.funcs = NULL;  \
 	}
