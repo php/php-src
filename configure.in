@@ -136,10 +136,10 @@ dnl -------------------------------------------------------------------------
 
 AC_PROG_CC
 AC_PROG_CC_C_O
-dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
-AM_PROG_CC_STDC
 AC_PROG_CPP
 AC_AIX
+dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
+AM_PROG_CC_STDC
 dnl AC_PROG_CXX
 dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
