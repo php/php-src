@@ -42,14 +42,20 @@
 #include <winsock.h>
 #else
 #include <netinet/in.h>
+#if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #include <netdb.h>
 #ifdef _OSD_POSIX
 #undef STATUS
 #undef T_UNSPEC
 #endif
+#if HAVE_ARPA_NAMESER_H
 #include <arpa/nameser.h>
+#endif
+#if HAVE_RESOLV_H
 #include <resolv.h>
+#endif
 #endif
 
 #include "dns.h"
