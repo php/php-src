@@ -885,12 +885,16 @@ ZEND_API void zend_error(int type, const char *format, ...)
 			z_error_message->value.str.val = (char *) emalloc(ZEND_ERROR_BUFFER_SIZE);
 
 #ifdef HAVE_VSNPRINTF
-			z_error_message->value.str.len = vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
-			if (z_error_message->value.str.len > ZEND_ERROR_BUFFER_SIZE-1) {
-				z_error_message->value.str.len = ZEND_ERROR_BUFFER_SIZE-1;
-			}
+			vsnprintf(z_error_message->value.str.val, ZEND_ERROR_BUFFER_SIZE, format, args);
+			/* this MUST be revisited, but for now handle ALL implementation 
+			 * out there correct. Since this is inside an error handler the 
+			 * performance loss by strlne is irrelevant. */
+			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
+			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
 #else
-			strncpy(z_error_message->value.str.val, format, ZEND_ERROR_BUFFER_SIZE);
+			strncpy(z_error_message->value.str.val, va_arg(format, char *), ZEND_ERROR_BUFFER_SIZE);
+			z_error_message->value.str.val[ZEND_ERROR_BUFFER_SIZE - 1] = '\0';
+			z_error_message->value.str.len = strlen(z_error_message->value.str.val);
 			/* This is risky... */
 			/* z_error_message->value.str.len = vsprintf(z_error_message->value.str.val, format, args); */
 #endif
@@ -910,7 +914,8 @@ ZEND_API void zend_error(int type, const char *format, ...)
 
 			z_context->value.ht = EG(active_symbol_table);
 			z_context->type = IS_ARRAY;
-			ZVAL_ADDREF(z_context);  /* we don't want this one to be freed */
+			z_context->is_ref = 1;
+			z_context->refcount = 2; /* we don't want this one to be freed */
 
 			params = (zval ***) emalloc(sizeof(zval **)*5);
 			params[0] = &z_error_type;
