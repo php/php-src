@@ -1,3 +1,58 @@
+2001-03-26  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php
+      pear/DB.php: pgsql.php
+    * connect() always use pg_connect string instead of the deprecated params
+    mode
+    * removed duplicated functions prepare() and execute() (now in common.php)
+    * pgsqlRaiseError() always fills native error param on DB_error objs
+    * added third param $rownum to fetchInto() so users can fetch also absolute
+    row numbers
+    * changed fetchRow() to use fetchInto() (can not erase, still used in get*()
+    from common.php
+
+    DB.php
+    * added third param $rownum to fetchInto()/fetchRow() so users can fetch
+    also absolute row numbers
+    * changed fetchRow() to use fetchInto()
+
+2001-03-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/php_domxml.c: Fixed a typo.
+
+    * configure.in: Fixed the problem with libbind (again).
+
+2001-03-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: More news.
+
+2001-03-26  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * NEWS: Nitpicking.
+
+2001-03-26  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Zend related news update.
+
+2001-03-26  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * FUNCTION_LIST.txt:
+    Remove FUNCTION_LIST.txt, the file is sadly out of date and not really used...
+
+2001-03-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4: Support Solaris 8 ldap.
+
+2001-03-26  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c:
+    Removed #include php_config.h, since it was not necessary (Mc)
+
+2001-03-26  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/pgsql/pgsql.c:
+    pg_close was undefining default_conn even if a ref to it was still there.
+
 2001-03-25  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/ifx.php:
