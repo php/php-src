@@ -71,7 +71,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 	add_next_index_long(info, 0);
 		
 	if (supp) {
-		spprintf(&message, 0, "SQLSTATE[%s]: %s: 0 %s", *pdo_err, msg, supp);
+		spprintf(&message, 0, "SQLSTATE[%s]: %s: %s", *pdo_err, msg, supp);
 	} else {
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}

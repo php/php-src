@@ -335,7 +335,9 @@ PHP_MINFO_FUNCTION(pdo)
 	php_info_print_table_header(2, "pdo support", "enabled");
 	php_info_print_table_end();
 
+#if 0
 	DISPLAY_INI_ENTRIES();
+#endif
 }
 /* }}} */
 
