@@ -1,3 +1,56 @@
+2002-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/basic_functions.c
+      ext/zlib/zlib.c: Use zend_ini_string instead of the 'alias'.
+
+2002-09-03  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/skeleton/create_stubs:
+    Check for uppercase function names in .def files - patch from David Viner
+
+2002-09-03  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: Fix warnings again....
+
+2002-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/gd.c: Patch by Melvyn to make ttf/ft string functions work again.
+
+2002-09-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: fix prototype
+
+2002-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: This does not belong here as it was MFHd..
+
+2002-09-03  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Update
+
+2002-09-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    removed #ifdef for mbstring.encoding_translation.
+
+2002-09-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/exif.c: - Fix #ifdefs
+
+2002-09-03  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Added mbstring.encoding_translation to php.ini-dist|recommended
+
+2002-09-03  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.dsp: *** empty log message ***
+
+    * ext/mbstring/config.m4
+      main/config.w32.h.in:
+    --enable-mbstr-enc-trans is abolished to prevent some problems about POST/GET/Cookie variables. the same functionality is controllable in php.ini option mbstring.encoding_translation (default:Off).
+
 2002-09-02  Jan Lehnardt  <jan@dasmoped.net>
 
     * sapi/cli/php_cli.c:
