@@ -223,7 +223,9 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal TSR
 		struct in_addr in;
 
 		if (!inet_aton(host, &in)) {
-			/* XXX NOT THREAD SAFE */
+			/* XXX NOT THREAD SAFE
+			 * (but it *is* thread safe under win32)
+			 */
 			host_info = gethostbyname(host);
 			if (host_info == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_network_getaddresses: gethostbyname failed");

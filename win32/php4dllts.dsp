@@ -270,7 +270,7 @@ SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\standard\config.w32.h
+SOURCE=..\main\config.w32.h
 # End Source File
 # Begin Source File
 
@@ -1876,6 +1876,10 @@ SOURCE=..\ext\standard\php_string.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\php_sunfuncs.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\php_syslog.h
 # End Source File
 # Begin Source File
@@ -1897,10 +1901,6 @@ SOURCE=..\ext\standard\scanf.h
 # Begin Source File
 
 SOURCE=..\ext\standard\sha1.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_sunfuncs.h
 # End Source File
 # Begin Source File
 
