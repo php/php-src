@@ -25,7 +25,6 @@
 
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
-#include "pi3web_sapi.h"
 #include "php.h"
 #include "php_main.h"
 #include "php_variables.h"
@@ -39,6 +38,8 @@
 #include "TSRM/TSRM.h"
 #include "PiAPI.h"
 #include "Pi3API.h"
+
+#include "pi3web_sapi.h"
 
 #define PI3WEB_SERVER_VAR_BUF_SIZE 1024
 
