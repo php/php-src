@@ -249,8 +249,8 @@ PHP_FUNCTION(dio_write)
 		return;
 	}
 
-	if (trunc_len <= 0 || trunc_len > data_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater then zero and less then the length of specified string.");
+	if (trunc_len < 0 || trunc_len > data_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater or equal to zero and less then the length of the specified string.");
 		RETURN_FALSE;
 	}
 
