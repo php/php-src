@@ -664,7 +664,7 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 		new_value_length = sizeof("1");
 	}
 
-	MBSTRG(encoding_translation) =  (zend_bool) atoi(new_value);
+	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (MBSTRG(encoding_translation)){
 		sapi_unregister_post_entry(php_post_entries);
@@ -693,7 +693,9 @@ PHP_INI_BEGIN()
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM |
 	 PHP_INI_PERDIR, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
 	 	 								  
-	 PHP_INI_ENTRY("mbstring.encoding_translation", "0", PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation)					 
+	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
+	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation, 
+	 encoding_translation, zend_mbstring_globals, mbstring_globals)					 
 PHP_INI_END()
 
 
