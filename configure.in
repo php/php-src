@@ -37,7 +37,7 @@ done
 AC_CANONICAL_HOST
 AC_CONFIG_HEADER(main/php_config.h)
 
-VERSION="4.2.1-dev"
+VERSION="4.3.0-dev"
 
 dnl Define where extension directories are located in the configure context
 AC_DEFUN(PHP_EXT_BUILDDIR,[ext/$1])dnl
