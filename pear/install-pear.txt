@@ -3,7 +3,7 @@
 | not installed:                                                       |
 |                                                                      |
 |   Self-contained Extension Support                                   |
-|   PEAR: PHP Extension and Add-on Repository                          |
+|   PEAR: PHP Extension and Application Repository                     |
 |                                                                      |
 | To install these components, become the superuser and execute:       |
 |                                                                      |
