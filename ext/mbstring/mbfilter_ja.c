@@ -6,6 +6,7 @@
  * Copyright (c) 1998,1999,2000,2001 HappySize, Inc. All rights reserved.
  *
  * This software is released under the GNU Lesser General Public License.
+ * (Version 2.1, February 1999)
  * Please read the following detail of the licence (in japanese).
  *
  * ◆使用許諾条件◆
@@ -47,10 +48,12 @@
  *
  * ◆著作権者の連絡先および使用条件についての問い合わせ先◆
  *
- * 〒112-0004東京都文京区後楽1-1-13小野ビル7F
+ * 〒102-0073
+ * 東京都千代田区九段北1-13-5日本地所第一ビル4F
  * 株式会社ハッピーサイズ
- * Phone: 03-5803-2964, Fax: 03-5803-2965
- * http://www.happysize.co.jp/ mailto:info@happysize.co.jp
+ * Phone: 03-3512-3655, Fax: 03-3512-3656
+ * Email: sales@happysize.co.jp
+ * Web: http://happysize.com/
  *
  * ◆著者◆
  *
