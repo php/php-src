@@ -477,8 +477,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		}
 	}
 
-	zval_dtor(retval);
-	FREE_ZVAL(retval);
+	zval_ptr_dtor(&retval);
 
 	return ret;
 }
