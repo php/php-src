@@ -13,7 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed two potential blocking issues in thttpd. (Sascha)
 - Fixed broken header file detection on Solaris. (Sascha)
 - Improved nss/socket-related symbol/library detection. (Jani, Sascha)
-- Made iconv() work well with both libiconv or libgiconv. (Moriyoshi, Yasuo)
+- Made iconv() work well with both libiconv and libgconv. (Moriyoshi, Yasuo)
 - Fixed socket_set_timeout() on win32. (Jason, Edin, Jani)
 - Added domxml_node_namespace_uri(). (Rui Lopes)
 - Fixed win32 memory leak in /ext/sockets that would occur on any error 
