@@ -1,4 +1,4 @@
-// $Id: buildconf.js,v 1.1 2003-12-02 23:17:04 wez Exp $
+// $Id: buildconf.js,v 1.2 2003-12-03 14:55:03 wez Exp $
 /*
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.1 2003-12-02 23:17:04 wez Exp $ */
+/* $Id: buildconf.js,v 1.2 2003-12-03 14:55:03 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -47,6 +47,13 @@ function find_config_w32(dirname)
 			modules += file_get_contents(c);
 		}
 	}
+}
+
+if (FSO.FileExists("ZendEngine2\\OBJECTS2_HOWTO")) {
+	if (FSO.FolderExists("Zend")) {
+		FSO.MoveFolder("Zend", "ZendEngine1");
+	}
+	FSO.MoveFolder("ZendEngine2", "Zend");
 }
 
 // Write the head of the configure script

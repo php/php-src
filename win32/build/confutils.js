@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.5 2003-12-03 14:29:45 wez Exp $
+// $Id: confutils.js,v 1.6 2003-12-03 14:55:03 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -473,7 +473,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 	if (shared) {
 		dllname = "php_" + extname + ".dll";
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB)");
-		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(" + EXT + "_LDFLAGS) $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS)");
+		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS)");
 		MFO.WriteBlankLines(1);
 
 		ADD_FLAG("EXT_TARGETS", dllname);
@@ -483,6 +483,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 	} else {
 		ADD_FLAG("STATIC_EXT_OBJS", "$(" + EXT + "_GLOBAL_OBJS)");
 		ADD_FLAG("STATIC_EXT_LIBS", "$(LIBS_" + EXT + ")");
+		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("CFLAGS_" + EXT, "$(CFLAGS_PHP)");
 
 		/* find the header that declars the module pointer,
