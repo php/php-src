@@ -21,8 +21,8 @@
  <license>PHP</license>
  <release>
   <state>alpha</state>
-  <version>0.1</version>
-  <date>2004-05-21</date>
+  <version>0.1.1</version>
+  <date>2004-05-22</date>
 
   <notes>
    You need to install the PDO core module before you can make use of this one.
@@ -30,6 +30,8 @@
 
    If you are running on windows, you can download the binary from here:
    http://snaps.php.net/win32/PECL_5_0/php_pdo_odbc.dll
+
+   This release features working error reporting(!) and ODBC connection pooling.
   </notes>
 
   <filelist>
