@@ -280,7 +280,7 @@ class Config  {
         if( empty( $datasrc ) ) {
             $datasrc = $this -> datasrc ;
         }
-        $this->container->data = $this->data
+        $this->container->data = $this->data;
         $this->container->writeInput($datasrc,$preserve);
     }
 
