@@ -222,7 +222,7 @@ sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 	property = sxe_property_read(object, member TSRMLS_CC);
 	zval_add_ref(&property);
 
-	memcpy(property_ptr, &property, sizeof(zval *));
+	*property_ptr = property;
 	
 	return property_ptr;
 }
