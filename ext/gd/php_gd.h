@@ -130,13 +130,14 @@ PHP_FUNCTION(imagepsextendfont);
 PHP_FUNCTION(imagepsslantfont);
 PHP_FUNCTION(imagepstext);
 PHP_FUNCTION(imagepsbbox);
-PHPAPI int phpi_get_le_gd(void);
 
 gdImagePtr _php_image_create_from_string ( zval **Data, char *tn, gdImagePtr (*ioctx_func_p)() );
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static void _php_image_output_wbmp(gdImagePtr im, FILE *fp);
 static int _php_image_type ( char data[8] );
+
+PHPAPI int phpi_get_le_gd(void);
 
 #ifdef ZTS
 #define GDLS_D php_gd_globals *gd_globals

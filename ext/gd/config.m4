@@ -232,12 +232,8 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
           AC_ADD_INCLUDE("$withval/include")
         fi
       fi
+      AC_MSG_RESULT(yes)
       AC_CHECK_LIB(t1, T1_GetExtend, [AC_DEFINE(HAVE_LIBT1,1,[ ])])
-      if test "$ac_cv_lib_t1_T1_GetExtend" = "yes"; then
-        AC_MSG_RESULT(yes)
-      else
-        AC_MSG_RESULT(no)
-      fi
     else
       AC_MSG_RESULT(no)
     fi
