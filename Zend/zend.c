@@ -204,12 +204,14 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals)
 static void executor_globals_ctor(zend_executor_globals *executor_globals)
 {
 	zend_startup_constants(ELS_C);
+	init_resource_plist(ELS_C);
 }
 
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals)
 {
 	zend_shutdown_constants(ELS_C);
+	destroy_resource_plist();
 }
 
 
@@ -275,7 +277,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	compiler_globals->class_table = GLOBAL_CLASS_TABLE;
 #endif
 
+#ifndef ZTS
 	init_resource_plist(ELS_C);
+#endif
 
 	return SUCCESS;
 }
@@ -283,7 +287,9 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 
 void zend_shutdown()
 {
+#ifndef ZTS
 	destroy_resource_plist();
+#endif
 	zend_hash_destroy(&list_destructors);
 	zend_hash_destroy(&module_registry);
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);

@@ -19,6 +19,7 @@
 
 #define INIT_FUNC_ARGS		int type, int module_number
 #define SHUTDOWN_FUNC_ARGS	int type, int module_number
+#define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *module
 
 #define STANDARD_MODULE_PROPERTIES 0, 0, 0, NULL, 0
 
@@ -26,19 +27,21 @@
 #define MODULE_PERSISTENT 1
 #define MODULE_TEMPORARY 2
 
-typedef struct {
+typedef struct _zend_module_entry zend_module_entry;
+
+struct _zend_module_entry {
 	char *name;
 	zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
 	int (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	int (*request_startup_func)(INIT_FUNC_ARGS);
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
-	void (*info_func)(void);
-	int request_started,module_started;
+	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
+	int request_started, module_started;
 	unsigned char type;
 	void *handle;
 	int module_number;
-} zend_module_entry;
+};
 
 
 extern HashTable module_registry;

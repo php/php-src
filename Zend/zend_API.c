@@ -675,7 +675,7 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 #if 0
 	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
 #endif
-	if (zend_register_functions(module->functions)==FAILURE) {
+	if (module->functions && zend_register_functions(module->functions)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
 		return FAILURE;
 	}
@@ -705,7 +705,9 @@ void module_destructor(zend_module_entry *module)
 		module->module_shutdown_func(module->type, module->module_number);
 	}
 	module->module_started=0;
-	zend_unregister_functions(module->functions,-1);
+	if (module->functions) {
+		zend_unregister_functions(module->functions,-1);
+	}
 
 #if HAVE_LIBDL
 	if (module->handle) {
@@ -760,7 +762,7 @@ int zend_next_free_module(void)
 }
 
 
-zend_class_entry *register_internal_class(zend_class_entry *class_entry)
+ZEND_API zend_class_entry *register_internal_class(zend_class_entry *class_entry)
 {
 	zend_class_entry *register_class;
 	char *lowercase_name = zend_strndup(class_entry->name, class_entry->name_length);
@@ -778,4 +780,16 @@ zend_class_entry *register_internal_class(zend_class_entry *class_entry)
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
 	free(lowercase_name);
 	return register_class;
+}
+
+
+ZEND_API zend_module_entry *zend_get_module(int module_number)
+{
+	zend_module_entry *module;
+
+	if (zend_hash_index_find(&module_registry, module_number, (void **) &module)==SUCCESS) {
+		return module;
+	} else {
+		return NULL;
+	}
 }
