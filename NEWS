@@ -1,7 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0.2
+?? ??? 2000, Version 4.0.2 
+- Fixed segfault with fgets(), fgetcsv(), fgetss(), and fread() when
+  called with negative length argument. (Torben)
 - Fix by-reference parameters passing for xml_ functions and for scanf functions (Stas)
 - Added experimental Oracle LDAP SDK support. 8.1.6 or later needed. Configure
   with something like --with-ldap=/usr/local/oracle/product/8.1.6 (Stig Venaas)
