@@ -21,9 +21,16 @@ are met:
 	 that work in conjunction with PHP.  In such a case the PHP
 	 name may be used to indicate that the product supports PHP.
  
-  4. The PHP Group reserves the right to modify the PHP license at
-     any time and without prior notice, as long as the changes keep
-	 the free and open source nature of PHP.
+  4. The PHP Group may publish revised and/or new versions of the
+     license from time to time. Each version will be given a
+	 distinguishing version number.
+     Once covered code has been published under a particular version
+	 of the license, you may always continue to use it under the
+	 terms of that version. You may also choose to use such covered
+	 code under the terms of any subsequent version of the license
+	 published by the PHP Group. No one other than the PHP Group has
+	 the right to modify the terms applicable to covered code created
+	 under this License.
 
   5. Redistributions of any form whatsoever must retain the following
      acknowledgment:
