@@ -221,5 +221,6 @@ extern zend_utility_values zend_uv;
 #define ZMSG_FAILED_REQUIRE_FOPEN		3L
 #define ZMSG_FAILED_HIGHLIGHT_FOPEN		4L
 #define ZMSG_MEMORY_LEAK_DETECTED		5L
+#define ZMSG_MEMORY_LEAK_REPEATED		6L
 
 #endif /* _ZEND_H */
