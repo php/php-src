@@ -71,10 +71,10 @@ extern SAPI_API sapi_module_struct sapi_module;  /* true global */
 typedef struct {
 	const char *request_method;
 	char *query_string;
-	char *post_data;
+	char *post_data, *raw_post_data;
 	char *cookie_data;
 	long content_length;
-	uint post_data_length;
+	uint post_data_length, raw_post_data_length;
 
 	char *path_translated;
 	char *request_uri;
