@@ -177,7 +177,11 @@ MYSQLI_MAP_PROPERTY_LONG_LONG(result_num_rows_read, MYSQL_RES, row_count);
 
 /* statement properties */
 
+#if MYSQL_VERSION_ID < 40102
 MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, STMT, stmt->mysql->last_used_con->affected_rows);
+#else
+MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_affected_rows_read, STMT, stmt->affected_rows);
+#endif
 MYSQLI_MAP_PROPERTY_LONG_LONG(stmt_num_rows_read, STMT, stmt->result->row_count);
 MYSQLI_MAP_PROPERTY_STRING(stmt_query_read, STMT, stmt->query);
 MYSQLI_MAP_PROPERTY_LONG(stmt_param_count_read, STMT, stmt->param_count);
