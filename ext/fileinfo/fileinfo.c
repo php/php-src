@@ -269,8 +269,8 @@ PHP_FUNCTION(finfo_open)
 
 	if (magic_load(finfo->magic, file) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database at '%s'.", file);
-		magic_close(finfo->magic);
 		efree(finfo);
+		magic_close(finfo->magic);
 		RETURN_FALSE;
 	}	
 
@@ -357,7 +357,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (mode) { /* file */
 		/* determine if the file is a local file or remote URL */
 		char *tmp2;
-		php_stream_wrapper *wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
+		php_stream_wrapper *wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_DC);
 		if (wrap && wrap->is_url) {
 #ifdef ZEND_ENGINE_2
 			php_stream_context *context = php_stream_context_from_zval(zcontext, 0);

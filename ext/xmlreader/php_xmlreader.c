@@ -760,40 +760,18 @@ PHP_METHOD(xmlreader, read)
 }
 /* }}} */
 
-/* {{{ proto boolean next([string localname])
+/* {{{ proto boolean read()
 Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, next)
 {
 	zval *id;
-	int retval, name_len=0;
+	int retval;
 	xmlreader_object *intern;
-	char *name = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
-		return;
-	}
 
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
 	if (intern != NULL && intern->ptr != NULL) {
 		retval = xmlTextReaderNext(intern->ptr);
-		while (name != NULL && retval == 1) {
-#ifdef PHP_WIN32
-			/* xmlTextReaderConstLocalName should be used once its added to win def libxml.def file.
-			Doing so will not require localname to be freed as its not allocated */
-			xmlChar *localname = xmlTextReaderLocalName(intern->ptr);
-			if (xmlStrEqual(localname, name)) {
-				xmlFree(localname);
-				RETURN_TRUE;
-			}
-			xmlFree(localname);
-#else
-			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), name)) {
-				RETURN_TRUE;
-			}
-#endif
-			retval = xmlTextReaderNext(intern->ptr); 
-		}
 		if (retval == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
 			RETURN_FALSE;

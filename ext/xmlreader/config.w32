@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("xmlreader", "XMLReader support", "no");
+ARG_WITH("xmlreader", "XMLReader support", "yes");
 
 if (PHP_XMLREADER == "yes" && PHP_LIBXML == "yes") {
 	EXTENSION("xmlreader", "php_xmlreader.c");
