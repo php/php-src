@@ -36,19 +36,6 @@ static void php_ob_append(const char *text, uint text_length TSRMLS_DC);
 static void php_ob_prepend(const char *text, uint text_length);
 #endif
 
-/* Add Content-Length: HTTP header */
-#include "ext/standard/php_smart_str.h"
-#define ADD_CL_HEADER(xln)  \
-{							\
-	smart_str str = {0};							\
-													\
-	smart_str_appends(&str, "Content-Length: ");	\
-	smart_str_append_long(&str, xln);				\
-	smart_str_0(&str);								\
-	sapi_add_header(str.c, str.len, 0);				\
-}
-
-
 #ifdef ZTS
 int output_globals_id;
 #else
@@ -250,9 +237,6 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 	OG(ob_nesting_level)--;
 
 	if (send_buffer) {
-		/* FIXME: chunked output behavior is needed to be checked. (Yasuo) */
-		if (OG(php_body_write) == php_ub_body_write && OG(ob_nesting_level) == 0 && !OG(active_ob_buffer).erase && status == (PHP_OUTPUT_HANDLER_START|PHP_OUTPUT_HANDLER_END))
-			ADD_CL_HEADER(final_buffer_length);
 		OG(php_body_write)(final_buffer, final_buffer_length TSRMLS_CC);
 	}
 
