@@ -27,8 +27,8 @@ PHPAPI void php_output_startup(void);
 PHPAPI int  php_body_write(const char *str, uint str_length);
 PHPAPI int  php_header_write(const char *str, uint str_length);
 PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size);
-PHPAPI void php_end_ob_buffer(int send_buffer);
-PHPAPI void php_end_ob_buffers(int send_buffer);
+PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush);
+PHPAPI void php_end_ob_buffers(zend_bool send_buffer);
 PHPAPI int php_ob_get_buffer(pval *p);
 PHPAPI int php_ob_get_length(pval *p);
 PHPAPI void php_start_implicit_flush(void);
@@ -52,6 +52,7 @@ typedef struct _php_ob_buffer {
 	int block_size;
 	zval *output_handler;
 	uint chunk_size;
+	int status;
 } php_ob_buffer;
 
 typedef struct _php_output_globals {
@@ -81,5 +82,8 @@ ZEND_API extern int output_globals_id;
 ZEND_API extern php_output_globals output_globals;
 #endif
 
+#define PHP_OUTPUT_HANDLER_START		(1<<0)
+#define PHP_OUTPUT_HANDLER_CONT			(1<<1)
+#define PHP_OUTPUT_HANDLER_END			(1<<2)
 
 #endif /* PHP_OUTPUT_H */

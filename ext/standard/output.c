@@ -68,11 +68,16 @@ PHP_GINIT_FUNCTION(output)
 PHPAPI void php_output_startup()
 {
 	OLS_FETCH();
+	ELS_FETCH();
 
 	OG(php_body_write) = php_ub_body_write;
 	OG(php_header_write) = sapi_module.ub_write;
 	OG(nesting_level) = 0;
 	OG(lock) = 0;
+
+	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_START", PHP_OUTPUT_HANDLER_START, CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_CONT", PHP_OUTPUT_HANDLER_CONT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_OUTPUT_HANDLER_END", PHP_OUTPUT_HANDLER_END, CONST_CS | CONST_PERSISTENT);
 }
 
 PHPAPI int php_body_write(const char *str, uint str_length)
@@ -102,7 +107,7 @@ PHPAPI int php_start_ob_buffer(zval *output_handler, uint chunk_size)
 
 
 /* End output buffering (one level) */
-PHPAPI void php_end_ob_buffer(int send_buffer)
+PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 {
 	char *final_buffer=NULL;
 	int final_buffer_length=0;
@@ -116,8 +121,9 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 	}
 
 	if (OG(active_ob_buffer).output_handler) {
-		zval **params[1];
+		zval **params[2];
 		zval *orig_buffer;
+		zval *z_status;
 		CLS_FETCH();
 
 		ALLOC_INIT_ZVAL(orig_buffer);
@@ -126,9 +132,23 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 		orig_buffer->type = IS_STRING;
 		orig_buffer->refcount=2;	/* don't let call_user_function() destroy our buffer */
 
+		ALLOC_INIT_ZVAL(z_status);
+		Z_TYPE_P(z_status) = IS_LONG;
+		Z_LVAL_P(z_status) = 0;
+		if (!OG(active_ob_buffer).status & PHP_OUTPUT_HANDLER_START) {
+			/* our first call */
+			Z_LVAL_P(z_status) |= PHP_OUTPUT_HANDLER_START;
+		}
+		if (just_flush) {
+			Z_LVAL_P(z_status) |= PHP_OUTPUT_HANDLER_CONT;
+		} else {
+			Z_LVAL_P(z_status) |= PHP_OUTPUT_HANDLER_END;
+		}
+
 		params[0] = &orig_buffer;
+		params[1] = &z_status;
 		OG(lock) = 1;
-		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 1, params, 1, NULL)==SUCCESS) {
+		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL)==SUCCESS) {
 			convert_to_string_ex(&alternate_buffer);
 			final_buffer = alternate_buffer->value.str.val;
 			final_buffer_length = alternate_buffer->value.str.len;
@@ -140,6 +160,7 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 		} else {
 			orig_buffer->refcount-=2;
 		}
+		zval_ptr_dtor(&z_status);
 	}
 
 	if (!final_buffer) {
@@ -157,16 +178,18 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
 
-	if (OG(nesting_level)>1) { /* restore previous buffer */
-		php_ob_buffer *ob_buffer_p;
+	if (!just_flush) {
+		if (OG(nesting_level)>1) { /* restore previous buffer */
+			php_ob_buffer *ob_buffer_p;
 
-		zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
-		OG(active_ob_buffer) = *ob_buffer_p;
-		zend_stack_del_top(&OG(ob_buffers));
-		if (OG(nesting_level)==2) { /* destroy the stack */
-			zend_stack_destroy(&OG(ob_buffers));
+			zend_stack_top(&OG(ob_buffers), (void **) &ob_buffer_p);
+			OG(active_ob_buffer) = *ob_buffer_p;
+			zend_stack_del_top(&OG(ob_buffers));
+			if (OG(nesting_level)==2) { /* destroy the stack */
+				zend_stack_destroy(&OG(ob_buffers));
+			}
 		}
-	} 
+	}
 
 	if (send_buffer) {
 		OG(php_body_write)(final_buffer, final_buffer_length);
@@ -176,19 +199,25 @@ PHPAPI void php_end_ob_buffer(int send_buffer)
 		zval_ptr_dtor(&alternate_buffer);
 	}
 
-	efree(to_be_destroyed_buffer);
+	if (!just_flush) {
+		efree(to_be_destroyed_buffer);
 
-	OG(nesting_level)--;
+		OG(nesting_level)--;
+	} else {
+		OG(active_ob_buffer).text_length = 0;
+		OG(active_ob_buffer).status |= PHP_OUTPUT_HANDLER_START;
+		OG(php_body_write) = php_b_body_write;
+	}
 }
 
 
 /* End output buffering (all buffers) */
-PHPAPI void php_end_ob_buffers(int send_buffer)
+PHPAPI void php_end_ob_buffers(zend_bool send_buffer)
 {
 	OLS_FETCH();
 
 	while (OG(nesting_level)!=0) {
-		php_end_ob_buffer(send_buffer);
+		php_end_ob_buffer(send_buffer, 0);
 	}
 }
 
@@ -197,7 +226,7 @@ PHPAPI void php_start_implicit_flush()
 {
 	OLS_FETCH();
 
-	php_end_ob_buffer(1);		/* Switch out of output buffering if we're in it */
+	php_end_ob_buffer(1, 0);		/* Switch out of output buffering if we're in it */
 	OG(implicit_flush)=1;
 }
 
@@ -245,6 +274,7 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 	OG(active_ob_buffer).text_length = 0;
 	OG(active_ob_buffer).output_handler = output_handler;
 	OG(active_ob_buffer).chunk_size = chunk_size;
+	OG(active_ob_buffer).status = 0;
 }
 
 
@@ -270,8 +300,7 @@ static void php_ob_append(const char *text, uint text_length)
 		if (output_handler) {
 			output_handler->refcount++;
 		}
-		php_end_ob_buffer(1);
-		php_start_ob_buffer(output_handler, chunk_size);
+		php_end_ob_buffer(1, 1);
 		return;
 	}
 }
@@ -453,7 +482,7 @@ PHP_FUNCTION(ob_start)
    Flush (send) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_flush)
 {
-	php_end_ob_buffer(1);
+	php_end_ob_buffer(1, 0);
 }
 /* }}} */
 
@@ -462,7 +491,7 @@ PHP_FUNCTION(ob_end_flush)
    Clean (erase) the output buffer, and turn off output buffering */
 PHP_FUNCTION(ob_end_clean)
 {
-	php_end_ob_buffer(0);
+	php_end_ob_buffer(0, 0);
 }
 /* }}} */
 
