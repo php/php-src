@@ -4405,6 +4405,11 @@ PHP_FUNCTION(ocipasswordchange)
 	text *user, *pass_old, *pass_new;
 	oci_connection *connection;
 
+	/*  Disalllow in Safe Mode  */
+	if (PG(safe_mode)) {
+		RETURN_FALSE;
+	}
+
 	if (zend_get_parameters_ex(4, &conn, &user_param, &pass_old_param, &pass_new_param) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
