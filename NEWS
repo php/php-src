@@ -1,6 +1,10 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added two new functions: mysql_list_processes and mysql_stat (Georg)
+- mysql_list_processes() fetches information on the processes running on
+  the MySQL server.
+  mysql_stat() returns status information for a MySQL server.
 - Added file_get_contents($filename), which will return the contents of a file
   as a string.  It can be used with URL wrappers. (Wez)
 - All special fopen wrappers ('php://', 'bz2://' and 'zlib://') now require the
