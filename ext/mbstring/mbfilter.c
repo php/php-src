@@ -6353,18 +6353,24 @@ mbfl_substr(
 			p = string->val;
 			if (p != NULL) {
 				/* search start position */
-				do {
+				while (k <= from) {
 					start = n;
+					if (n >= len) {
+						break;
+					}
 					m = mbtab[*p];
 					n += m;
 					p += m;
 					k++;
-				} while (k <= from && n < len);
+				}
 				/* detect end position */
 				k = 0;
 				end = start;
-				while (k < length && n <= len) {
+				while (k < length) {
 					end = n;
+					if (n >= len) {
+						break;
+					}
 					m = mbtab[*p];
 					n += m;
 					p += m;
@@ -6394,11 +6400,14 @@ mbfl_substr(
 		result->len = 0;
 		result->val = w = (unsigned char*)mbfl_malloc((n + 8)*sizeof(unsigned char));
 		if (w != NULL) {
-			result->len = n;
-			p = &(string->val[start]);
-			while (n > 0) {
-				*w++ = *p++;
-				n--;
+			p = string->val;
+			if (p != NULL) {
+				p += start;
+				result->len = n;
+				while (n > 0) {
+					*w++ = *p++;
+					n--;
+				}
 			}
 			*w++ = '\0';
 			*w++ = '\0';
