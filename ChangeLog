@@ -1,3 +1,19 @@
+2001-04-03  Wilfredo Sanchez  <wsanchez@mit.edu>
+
+    * Makefile.in
+      configure.in
+      php4/ext/java/config.m4
+      php4/pear/Makefile.in
+      php4/sapi/aolserver/config.m4
+      php4/sapi/apache/config.m4
+      php4/sapi/cgi/config.m4
+      php4/sapi/isapi/config.m4
+      php4/sapi/nsapi/config.m4
+      php4/sapi/phttpd/config.m4
+      php4/sapi/pi3web/config.m4:
+    Add INSTALL_ROOT variable to allow installation into a packageable
+    directory.
+
 2001-04-02  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/openssl/openssl.c:
