@@ -324,8 +324,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		}
 	}
 	
-	mysql_handle_autocommit(dbh TSRMLS_CC);
-
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {
 		unix_socket = vars[4].optval;  
 	} else {
@@ -336,6 +334,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		pdo_mysql_error(dbh);
 		goto cleanup;
 	}
+
+	mysql_handle_autocommit(dbh TSRMLS_CC);
 
 	H->attached = 1;
 
