@@ -213,6 +213,7 @@ AC_ARG_WITH(empress,
       ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=empress
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
     AC_MSG_RESULT(yes)
@@ -232,24 +233,21 @@ AC_ARG_WITH(velocis,
                           install directory, defaults to /usr/local/velocis.],
 [
   PHP_WITH_SHARED
+
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
-      ODBC_INCDIR=/usr/local/velocis/include
-      ODBC_LIBDIR=/usr/local/velocis
+        ODBC_INCDIR=/usr/local/velocis/include
+        ODBC_LIBDIR=/usr/local/velocis/lib
     else
-      ODBC_INCDIR=$withval/include
-      ODBC_LIBDIR=$withval
+        ODBC_INCDIR=$withval/include
+        ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBDIR="$ODBC_LIBDIR/bin"
-    case `uname` in
-      FreeBSD|BSD/OS)
-        ODBC_LIBS="$ODBC_LIBDIR/../lib/rdscli.a -lcompat";;
-      *)
-        ODBC_LIBS="-l_rdbc -l_sql";;
-    esac
     ODBC_TYPE=velocis
+    ODBC_LFLAGS=-L$ODBC_LIBDIR
+    ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
     AC_DEFINE(HAVE_VELOCIS,1,[ ])
+
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
