@@ -109,7 +109,7 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int state, char *allow, int allo
 PHPAPI void php_char_to_str(char *str, uint len, char from, char *to, int to_len, pval *result);
 
 PHPAPI void php_implode(pval *delim, pval *arr, pval *return_value);
-PHPAPI void php_explode(pval *delim, pval *str, pval *return_value, int limit);
+PHPAPI void php_explode(pval *delim, pval *str, pval *return_value);
 PHPAPI inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
 PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
 PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
