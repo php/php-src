@@ -45,10 +45,6 @@ static char EntTable[][7] =
 	"uuml","yacute","thorn","yuml"
 };
 
-#define ENT_COMPAT    1
-#define ENT_QUOTES    2
-#define ENT_NOQUOTES  4
-
 PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style)
 {
 	int i, maxlen, len;

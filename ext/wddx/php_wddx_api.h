@@ -59,7 +59,7 @@ wddx_packet *php_wddx_constructor(void);
 void 		 php_wddx_packet_start(wddx_packet *packet, char *comment, int comment_len);
 void 		 php_wddx_packet_end(wddx_packet *packet);
 
-void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name);
+void 		 php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name_len);
 int 		 php_wddx_deserialize_ex(char *, int, zval *return_value);
 #define php_wddx_gather(packet) estrndup(packet->c, packet->len)
 

@@ -21,6 +21,10 @@
 #ifndef HTML_H
 #define HTML_H
 
+#define ENT_COMPAT    1
+#define ENT_QUOTES    2
+#define ENT_NOQUOTES  4
+
 void register_html_constants(INIT_FUNC_ARGS);
 
 PHP_FUNCTION(htmlspecialchars);
