@@ -194,6 +194,7 @@ typedef struct {
 
 #define ENCODE_VARS 											\
 	char *key;													\
+	ulong key_length;											\
 	ulong num_key;												\
 	zval **struc;												\
 	ELS_FETCH();												\
@@ -201,9 +202,10 @@ typedef struct {
 
 #define ENCODE_LOOP(code)										\
 	for (zend_hash_internal_pointer_reset(&PS(vars));			\
-			zend_hash_get_current_key(&PS(vars), &key, &num_key, 0) == HASH_KEY_IS_STRING; \
+			zend_hash_get_current_key_ex(&PS(vars), &key, &key_length, &num_key, 0, NULL) == HASH_KEY_IS_STRING; \
 			zend_hash_move_forward(&PS(vars))) {				\
-		if (php_get_session_var(key, strlen(key), &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
+			key_length--;										\
+		if (php_get_session_var(key, key_length, &struc PLS_CC PSLS_CC ELS_CC) == SUCCESS) { \
 			code;		 										\
 		} 														\
 	}
@@ -270,22 +272,18 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	ENCODE_LOOP(
-			size_t slen = strlen(key);
-
-			if (slen > PS_BIN_MAX) continue;
-			strbuf[0] = slen;
-			memcpy(strbuf + 1, key, slen);
+			if (key_length > PS_BIN_MAX) continue;
+			strbuf[0] = key_length;
+			memcpy(strbuf + 1, key, key_length);
 			
-			STR_CAT(buf, strbuf, slen + 1);
+			STR_CAT(buf, strbuf, key_length + 1);
 			php_var_serialize(buf, struc, &var_hash);
 		} else {
-			size_t slen = strlen(key);
-
-			if (slen > PS_BIN_MAX) continue;
-			strbuf[0] = slen & PS_BIN_UNDEF;
-			memcpy(strbuf + 1, key, slen);
+			if (key_length > PS_BIN_MAX) continue;
+			strbuf[0] = key_length & PS_BIN_UNDEF;
+			memcpy(strbuf + 1, key, key_length);
 			
-			STR_CAT(buf, strbuf, slen + 1);
+			STR_CAT(buf, strbuf, key_length + 1);
 	);
 
 	if (newlen) *newlen = Z_STRLEN_P(buf);
@@ -349,23 +347,19 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 
 	ENCODE_LOOP(
-			size_t slen = strlen(key);
-
-			if (slen + 1 > MAX_STR) continue;
-			memcpy(strbuf, key, slen);
-			strbuf[slen] = PS_DELIMITER;
-			STR_CAT(buf, strbuf, slen + 1);
+			if (key_length + 1 > MAX_STR) continue;
+			memcpy(strbuf, key, key_length);
+			strbuf[key_length] = PS_DELIMITER;
+			STR_CAT(buf, strbuf, key_length + 1);
 			
 			php_var_serialize(buf, struc, &var_hash);
 		} else {
-			size_t slen = strlen(key);
-
-			if (slen + 2 > MAX_STR) continue;
+			if (key_length + 2 > MAX_STR) continue;
 			strbuf[0] = PS_UNDEF_MARKER;
-			memcpy(strbuf + 1, key, slen);
-			strbuf[slen + 1] = PS_DELIMITER;
+			memcpy(strbuf + 1, key, key_length);
+			strbuf[key_length + 1] = PS_DELIMITER;
 			
-			STR_CAT(buf, strbuf, slen + 2);
+			STR_CAT(buf, strbuf, key_length + 2);
 	);
 
 	if (newlen) *newlen = Z_STRLEN_P(buf);
@@ -431,7 +425,7 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	ENCODE_LOOP(
-		php_wddx_serialize_var(packet, *struc, key, strlen(key));
+		php_wddx_serialize_var(packet, *struc, key, key_length);
 	);
 	
 	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
@@ -450,6 +444,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	zval *retval;
 	zval **ent;
 	char *key;
+	ulong key_length;
 	char tmp[128];
 	ulong idx;
 	int hash_type;
@@ -465,7 +460,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(retval));
 			 zend_hash_get_current_data(Z_ARRVAL_P(retval), (void **) &ent) == SUCCESS;
 			 zend_hash_move_forward(Z_ARRVAL_P(retval))) {
-			hash_type = zend_hash_get_current_key(Z_ARRVAL_P(retval), &key, &idx, 0);
+			hash_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(retval), &key, &key_length, &idx, 0, NULL);
 
 			switch (hash_type) {
 				case HASH_KEY_IS_LONG:
@@ -473,7 +468,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 					key = tmp;
 					/* fallthru */
 				case HASH_KEY_IS_STRING:
-					php_set_session_var(key, strlen(key), *ent PSLS_CC);
+					php_set_session_var(key, key_length-1, *ent PSLS_CC);
 					PS_ADD_VAR(key);
 			}
 		}
