@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Fix bug in unset() on array offsets which are referenced more than once
+  (Andi, Zend library)
 - Improved ISAPI module - it should no longer be necessary to set PHP as
   an ISAPI filter, only as an ISAPI extension, unless you wish to perform
   authentication using PHP.  This didn't yet get enough testing, but it
