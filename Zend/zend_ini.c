@@ -132,7 +132,6 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 	zend_ini_entry *hashed_ini_entry;
 	zval *default_value;
 
-#if 0
 	while (p->name) {
 		p->module_number = module_number;
 		if (zend_hash_add(registered_zend_ini_directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
@@ -152,7 +151,6 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 		}
 		p++;
 	}
-#endif
 	return SUCCESS;
 }
 
