@@ -4,7 +4,7 @@ dnl Minimalistic configure.in for TSRM.
 dnl
 
 AC_INIT(TSRM.c)
-AM_INIT_AUTOMAKE(TSRM, 1.0)
+AM_INIT_AUTOMAKE(TSRM, 1.0, nodefine)
 AM_CONFIG_HEADER(tsrm_config.h)
 
 sinclude(tsrm.m4)
