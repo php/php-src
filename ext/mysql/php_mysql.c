@@ -778,7 +778,7 @@ static int php_mysql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto resource mysql_connect([string hostname[:port][:/path/to/socket]] [, string username] [, string password] [, bool new])
+/* {{{ proto resource mysql_connect([string hostname[:port][:/path/to/socket] [, string username [, string password [, bool new [, int flags]]]]])
    Opens a connection to a MySQL Server */
 PHP_FUNCTION(mysql_connect)
 {
@@ -786,7 +786,7 @@ PHP_FUNCTION(mysql_connect)
 }
 /* }}} */
 
-/* {{{ proto resource mysql_pconnect([string hostname[:port][:/path/to/socket]] [, string username] [, string password])
+/* {{{ proto resource mysql_pconnect([string hostname[:port][:/path/to/socket] [, string username [, string password [, int flags]]]])
    Opens a persistent connection to a MySQL Server */
 PHP_FUNCTION(mysql_pconnect)
 {
