@@ -21,9 +21,6 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
-#ifdef COMPILE_DL_SNMP
-#include "dl/phpdl.h"
-#endif
 #include "php_snmp.h"
 #include <sys/types.h>
 #ifdef PHP_WIN32

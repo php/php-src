@@ -20,10 +20,6 @@
 
 /* $Id$ */
 
-#ifdef COMPILE_DL_ODBC
-#include "dl/phpdl.h"
-#endif
-
 #include "php.h"
 #include "php_globals.h"
 

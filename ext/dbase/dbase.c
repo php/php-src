@@ -15,9 +15,6 @@
    | Authors: Jim Winstead (jimw@php.net)                                 |
    +----------------------------------------------------------------------+
  */
-#ifdef COMPILE_DL_DBASE
-#include "dl/phpdl.h"
-#endif
 
 #include <stdlib.h>
 

@@ -165,7 +165,6 @@ static php_gd_globals gd_globals;
 #endif
 
 #ifdef COMPILE_DL_GD
-# include "dl/phpdl.h"
 ZEND_GET_MODULE(gd)
 #endif
 

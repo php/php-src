@@ -17,9 +17,6 @@
  */
 
 /* $Id$ */
-#ifdef COMPILE_DL_HYPERWAVE
-#include "dl/phpdl.h"
-#endif
 
 #include <stdlib.h>
 #include <errno.h>

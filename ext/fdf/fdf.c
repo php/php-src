@@ -104,7 +104,6 @@ zend_module_entry fdf_module_entry = {
 };
 
 #ifdef COMPILE_DL_FDF
-#include "dl/phpdl.h"
 ZEND_GET_MODULE(fdf)
 #endif
 

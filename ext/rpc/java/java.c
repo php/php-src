@@ -21,7 +21,6 @@
  * components using JNI and reflection.
  */
 
-#include "dl/phpdl.h"
 
 #include "php.h"
 #include "zend_compile.h"

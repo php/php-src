@@ -57,7 +57,6 @@ PHP_XML_API php_xml_globals xml_globals;
 /* {{{ dynamically loadable module stuff */
 
 #ifdef COMPILE_DL_XML
-# include "dl/phpdl.h"
 ZEND_GET_MODULE(xml)
 #endif /* COMPILE_DL_XML */
 

@@ -137,7 +137,6 @@ zend_module_entry filepro_module_entry = {
 
 
 #ifdef COMPILE_DL_FILEPRO
-#include "dl/phpdl.h"
 ZEND_GET_MODULE(filepro)
 #if (WIN32|WINNT) && defined(THREAD_SAFE)
 

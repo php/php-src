@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #ifdef COMPILE_DL_MSSQL
-#include "dl/phpdl.h"
 #define HAVE_MSSQL 1
 #endif
 

@@ -175,7 +175,6 @@ zend_module_entry pdf_module_entry = {
 };
 
 #ifdef COMPILE_DL_PDF
-#include "dl/phpdl.h"
 ZEND_GET_MODULE(pdf)
 #endif
 
