@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 ?? ??? 2003, PHP 5 Beta 2
 - Added new COM extension with integrated .Net support. (Wez)
+- Improved the DBX extension: (Marc)
+  . Added DBX_RESULT_UNBUFFERED flag for dbx_query().
+  . Added dbx_fetch_row()
+  . Added SQLite support.
 - Improved the Interbase extension: (Ard Biesheuvel)
   . Added support for multiple databases into ibase_trans()
   . Added support for CREATE DATABASE, SET TRANSACTION and EXECUTE PROCEDURE
@@ -24,9 +28,6 @@ PHP                                                                        NEWS
 - Added "resume_pos" context option to "ftp://" wrapper. (Sara)
 - Added optional parameter to OCIWriteTemporaryLob() to specify the type of LOB
   (Patch by Novicky Marek <novicky@aarongroup.cz>). (Thies)
-- Added DBX_RESULT_UNBUFFERED flag for dbx_query. (Marc)
-- Added dbx_fetch_row() function to DBX. (Marc)
-- Added SQLite support to DBX. (Marc)
 - Added reflection API. (Andrei, George, Timm)
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
