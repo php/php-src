@@ -3192,7 +3192,10 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 				SEPARATE_ZVAL(subject_entry);
 				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
 			} else {
-				result = *subject_entry;
+				MAKE_STD_ZVAL(result);
+				SEPARATE_ZVAL(subject_entry);
+				*result = **subject_entry;
+				zval_copy_ctor(result);
 			}
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
