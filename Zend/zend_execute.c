@@ -2056,7 +2056,6 @@ send_by_ref:
 
 					switch (opline->op2.u.constant.value.lval) {
 						case ZEND_INCLUDE:
-						case ZEND_IMPORT:
 						case ZEND_REQUIRE:
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC ELS_CC);
 							break;

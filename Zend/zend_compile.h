@@ -549,8 +549,9 @@ int zendlex(znode *zendlval CLS_DC);
 
 #define ZEND_EVAL				(1<<0)
 #define ZEND_INCLUDE			(1<<1)
-#define ZEND_IMPORT				(1<<2)
+#define ZEND_INCLUDE_ONCE		(1<<2)
 #define ZEND_REQUIRE			(1<<3)
+#define ZEND_REQUIRE_ONCE		(1<<4)
 
 #define ZEND_ISSET				(1<<0)
 #define ZEND_ISEMPTY			(1<<1)
