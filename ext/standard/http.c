@@ -59,9 +59,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			/* We don't want that trailing NULL */
 			key_len -= 1;
 		}
-	
+
 		/* handling for private & protected object properties */
-		if (*key == '\0' && type != NULL) {
+		if (key && *key == '\0' && type != NULL) {
 			char *tmp;
 
 			zend_object *zobj = zend_objects_get_address(type TSRMLS_CC);
