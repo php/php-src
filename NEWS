@@ -25,6 +25,7 @@ PHP                                                                        NEWS
   function's name). (Marcus)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 - Fixed bug #27457 (handling of numeric indexes in strtr()). (Dmitry)
+- Fixed bug #27397 (debug_backtrace() not showing function arguments). (Zeev)
 - Fixed bug #26441 (When __set() returned a value it corrupted it). (Andi)
 
 18 March 2004, PHP 5 Release Candidate 1
