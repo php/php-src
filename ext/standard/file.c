@@ -827,7 +827,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
       
 #ifdef PHP_WIN32
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
-	  flags = block;
+	  flags = block ? 0 : 1;
 	  if (ioctlsocket(socketd,FIONBIO,&flags)==SOCKET_ERROR){
 		  php_error(E_WARNING,"%s",WSAGetLastError());
 		  ret = FALSE;
