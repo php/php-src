@@ -11,7 +11,7 @@ $is_debug = preg_match("/^debug/i", $build_dir);
 
 echo "Making dist for $build_dir\n";
 
-$dist_dir = $build_dir . "/_dist_";
+$dist_dir = $build_dir . "/php-" . phpversion();
 @mkdir($dist_dir);
 @mkdir("$dist_dir/sapi");
 @mkdir("$dist_dir/ext");
@@ -166,7 +166,8 @@ EOT
 );
 /* list build-in extensions */
 $exts = get_loaded_extensions();
-fprintf($fp, "\r\nBuild-in Extensions\r\n");
+fprintf($fp, "\r\nBuilt-in Extensions\r\n");
+fwrite($fp, "===========================\r\n");
 foreach ($exts as $ext) {
 	fprintf($fp, "%s\r\n", $ext);
 }
@@ -251,7 +252,7 @@ if (file_exists($snapshot_template)) {
 	}
 } else {
 	echo "WARNING: you don't have a snapshot template\n";
-	echo "         your dist will not complete\n";
+	echo "         your dist will not be complete\n";
 }
 
 ?>

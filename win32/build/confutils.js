@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.19 2003-12-07 02:58:56 wez Exp $
+// $Id: confutils.js,v 1.20 2003-12-19 12:50:11 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -36,8 +36,36 @@ if (!FSO.FileExists("README.CVS-RULES")) {
 	WScript.Quit(10);
 }
 
-// TODO: pick this up from configure.in
+/* defaults; we pick up the precise versions from configure.in */
 var PHP_VERSION = 5;
+var PHP_MINOR_VERSION = 0;
+var PHP_RELEASE_VERSION = 0;
+var PHP_EXTRA_VERSION = "";
+var PHP_VERSION_STRING = "5.0.0";
+
+function get_version_numbers()
+{
+	var cin = file_get_contents("configure.in");
+	
+	if (cin.match(new RegExp("MAJOR_VERSION=(\\d+)"))) {
+		PHP_VERSION = RegExp.$1;
+	}
+	if (cin.match(new RegExp("MINOR_VERSION=(\\d+)"))) {
+		PHP_MINOR_VERSION = RegExp.$1;
+	}
+	if (cin.match(new RegExp("RELEASE_VERSION=(\\d+)"))) {
+		PHP_RELEASE_VERSION = RegExp.$1;
+	}
+	PHP_VERSION_STRING = PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION;
+
+	if (cin.match(new RegExp("EXTRA_VERSION=\"([^\"]+)\""))) {
+		PHP_EXTRA_VERSION = RegExp.$1;
+		if (PHP_EXTRA_VERSION.length) {
+			PHP_VERSION_STRING += PHP_EXTRA_VERSION;
+		}
+	}
+	DEFINE('PHP_VERSION_STRING', PHP_VERSION_STRING);
+}
 
 configure_args = new Array();
 configure_subst = WScript.CreateObject("Scripting.Dictionary");
@@ -47,6 +75,8 @@ build_dirs = new Array();
 
 extension_include_code = "";
 extension_module_ptrs = "";
+
+get_version_numbers();
 
 function condense_path(path)
 {
@@ -59,6 +89,31 @@ function condense_path(path)
 			(path.charCodeAt(cd.length) == 92 || path.charCodeAt(cd.length) == 47)) {
 		return path.substr(cd.length + 1);
 	}
+
+	var a = cd.split("\\");
+	var b = path.split("\\");
+	var i, j;
+
+	for (i = 0; i < b.length; i++) {
+		if (a[i].toLowerCase() == b[i].toLowerCase())
+			continue;
+		if (i > 0) {
+			/* first difference found */
+			path = "";
+			for (j = 0; j < a.length - i; j++) {
+				path += "..\\";
+			}
+			for (j = i; j < b.length; j++) {
+				path += b[j];
+				if (j < b.length - 1)
+					path += "\\";
+			}
+			return path;
+		}
+		/* on a different drive */
+		break;
+	}
+	
 	return path;
 }
 
@@ -343,17 +398,26 @@ function search_paths(thing_to_find, explicit_path, env_name)
 	return place;
 }
 
-function PATH_PROG(progname, def, additional_paths)
+function PATH_PROG(progname, additional_paths)
 {
 	var exe;
 	var place;
+	var cyg_path = PHP_CYGWIN + "\\bin;" + PHP_CYGWIN + "\\usr\\local\\bin";
 
 	exe = progname + ".exe";
+
+	if (additional_paths == null) {
+		additional_paths = cyg_path;
+	} else {
+		additional_paths += ";" + cyg_path;
+	}
 
 	place = search_paths(exe, additional_paths, "PATH");
 
 	if (place == true) {
 		place = exe;
+	} else if (place != false) {
+		place = place + "\\" + exe;
 	}
 
 	if (place) {
@@ -409,10 +473,20 @@ function CHECK_LIB(libnames, target, path_to_check)
 
 }
 
-function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env)
+function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env, add_dir_part)
 {
+	var dir_part_to_add = "";
+	
 	if (use_env == null) {
 		use_env = true;
+	}
+
+	// if true, add the dir part of the header_name to the include path
+	if (add_dir_part == null) {
+		add_dir_part = false;
+	} else if (add_dir_part) {
+		var basename = FSO.GetFileName(header_name);
+		dir_part_to_add = "\\" + header_name.substr(0, header_name.length - basename.length - 1);
 	}
 
 	if (path_to_check == null) {
@@ -426,13 +500,17 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 	var sym;
 
 	if (typeof(p) == "string") {
-		ADD_FLAG(flag_name, '/I "' + p + '" ');
+		ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
 	} else if (p == false) {
 		/* not found in the defaults or the explicit paths,
 		 * so check the general extra includes; if we find
 		 * it here, no need to add another /I for it as we
-		 * already have it covered */
+		 * already have it covered, unless we are adding
+		 * the dir part.... */
 		p = search_paths(header_name, PHP_EXTRA_INCLUDES, null);
+		if (typeof(p) == "string" && add_dir_part) {
+			ADD_FLAG(flag_name, '/I "' + p + dir_part_to_add + '" ');
+		}
 	} 
 	have = p ? 1 : 0
 
@@ -453,13 +531,17 @@ function generate_version_info_resource(makefiletarget, creditspath)
 	var res_desc = "PHP " + makefiletarget;
 	var res_prod_name = res_desc;
 	var credits;
-	var thanks = "";
+	var thanks = null;
 	var logo = "";
 
 	if (FSO.FileExists(creditspath + '/CREDITS')) {
 		credits = FSO.OpenTextFile(creditspath + '/CREDITS', 1);
 		res_desc = credits.ReadLine();
-		thanks = credits.ReadLine();
+		try {
+			thanks = credits.ReadLine();
+		} catch (e) {
+			thanks = null;
+		}
 		if (thanks == null) {
 			thanks = "";
 		} else {
@@ -507,7 +589,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	resname = generate_version_info_resource(makefiletarget, configure_module_dirname);
 	
 	MFO.WriteLine(makefiletarget + ": $(BUILD_DIR)\\" + makefiletarget);
-	MFO.WriteLine("\t@echo SAPI " + configure_module_dirname + "/" + sapiname + " build complete");
+	MFO.WriteLine("\t@echo SAPI " + configure_module_dirname + " build complete");
 	MFO.WriteLine("$(BUILD_DIR)\\" + makefiletarget + ": $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
@@ -582,7 +664,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 		ADD_FLAG("STATIC_EXT_LDFLAGS", "$(LDFLAGS_" + EXT + ")");
 		ADD_FLAG("STATIC_EXT_CFLAGS", "$(CFLAGS_" + EXT + ")");
 
-		/* find the header that declars the module pointer,
+		/* find the header that declares the module pointer,
 		 * so we can include it in internal_functions.c */
 		var ext_dir = FSO.GetFolder(configure_module_dirname);
 		var fc = new Enumerator(ext_dir.Files);
@@ -630,25 +712,32 @@ function ADD_SOURCES(dir, file_list, target)
 	var re = new RegExp("\.[a-z0-9A-Z]+$");
 
 	dir = dir.replace(new RegExp("/", "g"), "\\");
-
-	var mangle_dir = dir.replace(new RegExp("[\\\\/.]", "g"), "_");
-
 	var objs_line = "";
 	var srcs_line = "";
 
 	var sub_build = "$(BUILD_DIR)\\";
 
-	sub_build += dir + "\\";
+	/* if module dir is not a child of the main source dir,
+	 * we need to tweak it; we should have detected such a
+	 * case in condense_path and rewritten the path to
+	 * be relative.
+	 * This probably breaks for non-sibling dirs, but that
+	 * is not a problem as buildconf only checks for pecl
+	 * as either a child or a sibling */
+	var build_dir = dir.replace(new RegExp("^..\\\\"), "");
 
-	var dirs = dir.split("\\");
+	var mangle_dir = build_dir.replace(new RegExp("[\\\\/.]", "g"), "_");
+	var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
+
+	var dirs = build_dir.split("\\");
 	var i, d = "";
 	for (i = 0; i < dirs.length; i++) {
 		d += dirs[i];
 		build_dirs[build_dirs.length] = d;
 		d += "\\";
 	}
+	sub_build += d;
 
-	var bd_flags_name = "CFLAGS_BD_" + mangle_dir.toUpperCase();
 
 	DEFINE(bd_flags_name, "/Fo" + sub_build + " /Fd" + sub_build + " /Fp" + sub_build + " /FR" + sub_build + " ");
 
@@ -818,7 +907,7 @@ function ADD_FLAG(name, flags, target)
 	if (configure_subst.Exists(name)) {
 		var curr_flags = configure_subst.Item(name);
 
-		if (curr_flags.match(flags)) {
+		if (curr_flags.indexOf(flags) >= 0) {
 			return;
 		}
 		
@@ -837,7 +926,7 @@ function get_define(name)
 function ADD_DEF_FILE(name)
 {
 	if (!configure_subst.Exists("PHPDEF")) {
-		DEFINE("PHPDEF", "win32\\phpts.def");
+		DEFINE("PHPDEF", "$(BUILD_DIR)\\$(PHPDLL).def");
 		ADD_FLAG("PHP_LDFLAGS", "/def:$(PHPDEF)");
 	}
 	ADD_FLAG("PHP_DLL_DEF_SOURCES", name);
@@ -867,5 +956,28 @@ function WARNING(msg)
 {
 	STDERR.WriteLine("WARNING: " + msg);
 	STDERR.WriteBlankLines(1);
+}
+
+function copy_and_subst(srcname, destname, subst_array)
+{
+	if (!FSO.FileExists(srcname)) {
+		STDOUT.WriteLine("copy_and_subst under " + configure_module_dirname);
+		srcname = configure_module_dirname + "\\" + srcname;
+		destname = configure_module_dirname + "\\" + destname;
+	}
+
+	var content = file_get_contents(srcname);
+	var i;
+
+	for (i = 0; i < subst_array.length; i+=2) {
+		var re = subst_array[i];
+		var rep = subst_array[i+1];
+
+		content = content.replace(re, rep);
+	}
+	
+	var f = FSO.CreateTextFile(destname, true);
+	f.Write(content);
+	f.Close();
 }
 
