@@ -981,7 +981,7 @@ PHPAPI char *php_strip_url_passwd(char *url)
 }
 
 
-#if 1
+#ifdef VIRTUAL_DIR
 
 PHPAPI char *expand_filepath(char *filepath)
 {
