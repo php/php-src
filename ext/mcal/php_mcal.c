@@ -122,8 +122,8 @@ ZEND_GET_MODULE(php_mcal)
    thread local_ storage
 */
 int le_mcal;
-char mcal_user[80]="";
-char mcal_password[80]="";
+char *mcal_user;
+char *mcal_password;
 
 CALSTREAM *cal_close_it (pils *mcal_le_struct)
 {
@@ -223,13 +223,16 @@ void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	convert_to_string_ex(calendar);
 	convert_to_string_ex(user);
 	convert_to_string_ex(passwd);
-	strcpy(mcal_user, (*user)->value.str.val);
-	strcpy(mcal_password, (*passwd)->value.str.val);
+    mcal_user = estrndup(Z_STRVAL_PP(user), Z_STRLEN_PP(user));
+    mcal_password = estrndup(Z_STRVAL_PP(passwd), Z_STRLEN_PP(passwd));
 	if (myargc == 4) {
 		convert_to_long_ex(options);
 		flags = (*options)->value.lval;
 	}
 	mcal_stream = cal_open(NULL, (*calendar)->value.str.val, 0);
+    efree(mcal_user);
+    efree(mcal_password);
+    
 	if (!mcal_stream) {
 		php_error(E_WARNING, "Couldn't open stream %s\n", (*calendar)->value.str.val);
 		RETURN_FALSE;
