@@ -121,6 +121,30 @@ void php_info_print_style(void)
 }
 
 
+PHPAPI char *php_get_uname()
+{
+	char *php_uname;
+#ifdef PHP_WIN32
+	char php_windows_uname[256];
+	DWORD dwBuild=0;
+	DWORD dwVersion = GetVersion();
+	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
+	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
+
+	/* Get build numbers for Windows NT or Win95 */
+	if (dwVersion < 0x80000000){
+		dwBuild = (DWORD)(HIWORD(dwVersion));
+		snprintf(php_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
+	} else {
+		snprintf(php_windows_uname,255,"%s %d.%d","Windows 95/98",dwWindowsMajorVersion,dwWindowsMinorVersion);
+	}
+	php_uname = php_windows_uname;
+#else
+	php_uname=PHP_UNAME;
+#endif
+	return estrdup(php_uname);
+}
+
 PHPAPI void php_print_info(int flag)
 {
 	char **env,*tmp1,*tmp2;
@@ -128,13 +152,6 @@ PHPAPI void php_print_info(int flag)
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
 	struct tm *ta, tmbuf;
-#ifdef PHP_WIN32
-	char php_windows_uname[256];
-	DWORD dwBuild=0;
-	DWORD dwVersion = GetVersion();
-	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
-	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
-#endif
 	ELS_FETCH();
 	SLS_FETCH();
 
@@ -146,18 +163,7 @@ PHPAPI void php_print_info(int flag)
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 
-#ifdef PHP_WIN32
-		/* Get build numbers for Windows NT or Win95 */
-		if (dwVersion < 0x80000000){
-			dwBuild = (DWORD)(HIWORD(dwVersion));
-			snprintf(php_windows_uname,255,"%s %d.%d build %d","Windows NT",dwWindowsMajorVersion,dwWindowsMinorVersion,dwBuild);
-		} else {
-			snprintf(php_windows_uname,255,"%s %d.%d","Windows 95/98",dwWindowsMajorVersion,dwWindowsMinorVersion);
-		}
-		php_uname = php_windows_uname;
-#else
-		php_uname=PHP_UNAME;
-#endif
+		php_uname = php_get_uname();
 
 		php_info_print_style();
 
@@ -219,6 +225,7 @@ PHPAPI void php_print_info(int flag)
 		zend_html_puts(zend_version, strlen(zend_version));
 		php_printf("</BR>\n");
 		php_info_print_box_end();
+		efree(php_uname);
 	}
 
 	if ((flag & PHP_INFO_CREDITS) && expose_php) {	
@@ -642,7 +649,7 @@ PHP_FUNCTION(zend_logo_guid)
 	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
 
-/* {{{ proto string sapi_module_name(void)
+/* {{{ proto string php_sapi_name(void)
    Return the current SAPI module name */
 PHP_FUNCTION(php_sapi_name)
 {
@@ -651,6 +658,15 @@ PHP_FUNCTION(php_sapi_name)
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+/* }}} */
+
+/* {{{ proto string php_uname(void)
+   Return information about the system PHP was built on */
+PHP_FUNCTION(php_uname)
+{
+	RETURN_STRING(php_get_uname(), 0);
 }
 
 /* }}} */
