@@ -20,7 +20,6 @@
 
 require_once "PEAR/Command/Common.php";
 require_once "PEAR/Installer.php";
-require_once "Console/Getopt.php";
 
 /**
  * PEAR commands for installation or deinstallation/upgrading of
