@@ -8,7 +8,7 @@ Parsing a file using constructor
 --FILE--
 <?php
         $tidy = new tidy("ext/tidy/tests/013.html", array("show-body-only"=>true));
-        $tidy->clean_repair();
+        $tidy->cleanRepair();
         echo $tidy;
 
 ?>
