@@ -1666,9 +1666,7 @@ PHP_FUNCTION(imap_lsub_full)
 
 	convert_to_string_ex(ref);
 	convert_to_string_ex(pat);
-	
-	delim = safe_emalloc(2, sizeof(char), 0);
-	
+
 	/* set flag for new, improved array of objects list */
 	IMAPG(folderlist_style) = FLIST_OBJECT;
 	
@@ -1679,6 +1677,7 @@ PHP_FUNCTION(imap_lsub_full)
 	}
 	
 	array_init(return_value);
+	delim = safe_emalloc(2, sizeof(char), 0);
 	cur=IMAPG(imap_sfolder_objects);
 	while (cur != NIL) {
 		MAKE_STD_ZVAL(mboxob);
@@ -3222,6 +3221,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		bufferLen += strlen(cc) + 6;
 	}
 
+#define PHP_IMAP_CLEAN	if (bufferTo) efree(bufferTo); if (bufferCc) efree(bufferCc); if (bufferBcc) efree(bufferBcc); if (bufferHeader) efree(bufferHeader);
+#define PHP_IMAP_BAD_DEST PHP_IMAP_CLEAN; efree(tempMailTo); return (BAD_MSG_DESTINATION);
+
 	bufferHeader = (char *)emalloc(bufferLen);
 	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
@@ -3234,9 +3236,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0)
-				return (BAD_MSG_DESTINATION);
-			else {
+			if (strcmp(addr->host, ERRHOST) == 0) {
+				PHP_IMAP_BAD_DEST;
+			} else {
 				offset += sprintf(bufferTo + offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
@@ -3257,9 +3259,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0)
-				return (BAD_MSG_DESTINATION);
-			else {
+			if (strcmp(addr->host, ERRHOST) == 0) {
+				PHP_IMAP_BAD_DEST;
+			} else {
 				offset += sprintf(bufferCc + offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
@@ -3277,9 +3279,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		addr = NULL;
 		rfc822_parse_adrlist(&addr, tempMailTo, NULL);
 		while (addr) {
-			if (strcmp(addr->host, ERRHOST) == 0)
-				return (BAD_MSG_DESTINATION);
-			else {
+			if (strcmp(addr->host, ERRHOST) == 0) {
+				PHP_IMAP_BAD_DEST;
+			} else {
 				offset += sprintf(bufferBcc + offset, "%s@%s,", addr->mailbox, addr->host);
 			}
 			addr = addr->next;
@@ -3301,20 +3303,10 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", GetSMErrorText(tsm_err));
 		}
+		PHP_IMAP_CLEAN;
 		return 0;
 	}
-	if (bufferTo) {
-		efree(bufferTo);
-	}
-	if (bufferCc) {
-		efree(bufferCc);
-	}
-	if (bufferBcc) {
-		efree(bufferBcc);
-	}
-	if (bufferHeader) {
-		efree(bufferHeader);
-	}
+	PHP_IMAP_CLEAN;
 #else
 	if (!INI_STR("sendmail_path")) {
 		return 0;
