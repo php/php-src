@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.39 2004-04-15 16:09:36 wez Exp $
+// $Id: confutils.js,v 1.40 2004-04-29 00:17:09 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -251,6 +251,7 @@ function conf_process_args()
 	var configure_help_mode = false;
 	var analyzed = false;
 	var nice = "cscript /nologo configure.js ";
+	var disable_all = false;
 	
 	args = WScript.Arguments;
 	for (i = 0; i < args.length; i++) {
@@ -260,6 +261,11 @@ function conf_process_args()
 			configure_help_mode = true;
 			break;
 		}
+		if (arg == "--disable-all") {
+			disable_all = true;
+			continue;
+		}
+
 		// If it is --foo=bar, split on the equals sign
 		arg = arg.split("=", 2);
 		argname = arg[0];
@@ -345,6 +351,7 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6'
 		);
+	var force;
 
 	// Now set any defaults we might have missed out earlier
 	for (i = 0; i < configure_args.length; i++) {
@@ -358,7 +365,6 @@ can be built that way. \
 		// Don't trust a default "yes" answer for a non-core module
 		// in a snapshot build
 		if (PHP_SNAPSHOT_BUILD != "no" && argval == "yes" && !shared) {
-			var force;
 
 			force = true;
 			for (j = 0; j < snapshot_build_exclusions.length; j++) {
@@ -386,8 +392,6 @@ can be built that way. \
 		}
 		
 		if (PHP_SNAPSHOT_BUILD != "no" && argval == "no") {
-			var force;
-
 			force = true;
 			for (j = 0; j < snapshot_build_exclusions.length; j++) {
 				if (snapshot_build_exclusions[j] == arg.optname) {
@@ -401,6 +405,21 @@ can be built that way. \
 				shared = true;
 			}
 		}
+
+		if (disable_all) {
+			force = true;
+			for (j = 0; j < snapshot_build_exclusions.length; j++) {
+				if (snapshot_build_exclusions[j] == arg.optname) {
+					force = false;
+					break;
+				}
+			}
+			if (force) {
+				argval = "no";
+				shared = false;
+			}
+		}
+
 		eval("PHP_" + arg.symval + " = argval;");
 		eval("PHP_" + arg.symval + "_SHARED = shared;");
 	}
