@@ -1195,12 +1195,8 @@ zend_object_value pdo_dbh_new(zend_class_entry *ce TSRMLS_DC)
 	zend_hash_init(dbh->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	retval.handle = zend_objects_store_put(dbh, zend_objects_destroy_object, pdo_dbh_free_storage, NULL TSRMLS_CC);
-	if(ce == pdo_dbh_ce) {
-		retval.handlers = &pdo_dbh_object_handlers;
-	}
-	else {
-		retval.handlers = &std_object_handlers;
-	}
+	retval.handlers = &pdo_dbh_object_handlers;
+
 	return retval;
 }
 
