@@ -871,10 +871,10 @@ static void php_rshutdown_session_globals(PSLS_D)
 {
 	if(PS(mod_data))
 		PS(mod)->close(&PS(mod_data));
-	efree(PS(entropy_file));
-	efree(PS(extern_referer_chk));
-	efree(PS(save_path));
-	efree(PS(session_name));
+	if(PS(entropy_file)) efree(PS(entropy_file));
+	if(PS(extern_referer_chk)) efree(PS(extern_referer_chk));
+	if(PS(save_path)) efree(PS(save_path));
+	if(PS(session_name)) efree(PS(session_name));
 	if(PS(id)) efree(PS(id));
 	zend_hash_destroy(&PS(vars));
 }
