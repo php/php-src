@@ -267,7 +267,7 @@ exit_success:
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 				"%ld bytes of buffered data lost during stream conversion!",
-				stream->writepos - stream->readpos);
+				(long)(stream->writepos - stream->readpos));
 	}
 	
 	if (castas == PHP_STREAM_AS_STDIO && ret)
