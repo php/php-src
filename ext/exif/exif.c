@@ -924,8 +924,9 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
 	Section_t Sections[20];
 	int SectionsRead;
 	char *LastExifRefd=NULL;
-	int ret, i;
+	int ret;
 	int thumbsize=0;
+	/* int i; */
 
 	ImageInfo->MotorolaOrder = 0;
 
