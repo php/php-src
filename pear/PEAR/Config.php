@@ -33,33 +33,33 @@ $GLOBALS['_PEAR_Config_instance'] = null;
 // PHP_ prefix is for some security, PHP protects environment
 // variables starting with PHP_*.
 
-if (isset($_ENV['PHP_PEAR_SYSCONF_DIR'])) {
-    define('PEAR_CONFIG_SYSCONFDIR', $_ENV['PHP_PEAR_SYSCONF_DIR']);
-} elseif (isset($_ENV['SystemRoot'])) {
-    define('PEAR_CONFIG_SYSCONFDIR', $_ENV['SystemRoot']);
+if (getenv('PHP_PEAR_SYSCONF_DIR')) {
+    define('PEAR_CONFIG_SYSCONFDIR', getenv('PHP_PEAR_SYSCONF_DIR'));
+} elseif (getenv('SystemRoot')) {
+    define('PEAR_CONFIG_SYSCONFDIR', getenv('SystemRoot'));
 } else {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
 }
 
 // Default for master_server
-if (isset($_ENV['PHP_PEAR_MASTER_SERVER'])) {
-    define('PEAR_CONFIG_DEFAULT_MASTER_SERVER', $_ENV['PHP_PEAR_MASTER_SERVER']);
+if (getenv('PHP_PEAR_MASTER_SERVER')) {
+    define('PEAR_CONFIG_DEFAULT_MASTER_SERVER', getenv('PHP_PEAR_MASTER_SERVER'));
 } else {
     define('PEAR_CONFIG_DEFAULT_MASTER_SERVER', 'pear.php.net');
 }
 
 // Default for http_proxy
-if (isset($_ENV['PHP_PEAR_HTTP_PROXY'])) {
-    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', $_ENV['PHP_PEAR_HTTP_PROXY']);
-} elseif (isset($_ENV['http_proxy'])) {
-    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', $_ENV['http_proxy']);
+if (getenv('PHP_PEAR_HTTP_PROXY')) {
+    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', getenv('PHP_PEAR_HTTP_PROXY'));
+} elseif (getenv('http_proxy')) {
+    define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', getenv('http_proxy'));
 } else {
     define('PEAR_CONFIG_DEFAULT_HTTP_PROXY', '');
 }
 
 // Default for php_dir
-if (isset($_ENV['PHP_PEAR_INSTALL_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_PHP_DIR', $_ENV['PHP_PEAR_INSTALL_DIR']);
+if (getenv('PHP_PEAR_INSTALL_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_PHP_DIR', getenv('PHP_PEAR_INSTALL_DIR'));
 } else {
     if (@is_dir(PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'lib')) {
         define('PEAR_CONFIG_DEFAULT_PHP_DIR',
@@ -70,46 +70,46 @@ if (isset($_ENV['PHP_PEAR_INSTALL_DIR'])) {
 }
 
 // Default for ext_dir
-if (isset($_ENV['PHP_PEAR_EXTENSION_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_EXT_DIR', $_ENV['PHP_PEAR_EXTENSION_DIR']);
+if (getenv('PHP_PEAR_EXTENSION_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_EXT_DIR', getenv('PHP_PEAR_EXTENSION_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_EXT_DIR', ini_get('extension_dir'));
 }
 
 // Default for doc_dir
-if (isset($_ENV['PHP_PEAR_DOC_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_DOC_DIR', $_ENV['PHP_PEAR_DOC_DIR']);
+if (getenv('PHP_PEAR_DOC_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_DOC_DIR', getenv('PHP_PEAR_DOC_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_DOC_DIR',
            PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'docs');
 }
 
 // Default for bin_dir
-if (isset($_ENV['PHP_PEAR_BIN_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_BIN_DIR', $_ENV['PHP_PEAR_BIN_DIR']);
+if (getenv('PHP_PEAR_BIN_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_BIN_DIR', getenv('PHP_PEAR_BIN_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_BIN_DIR', PHP_BINDIR);
 }
 
 // Default for data_dir
-if (isset($_ENV['PHP_PEAR_DATA_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_DATA_DIR', $_ENV['PHP_PEAR_DATA_DIR']);
+if (getenv('PHP_PEAR_DATA_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_DATA_DIR', getenv('PHP_PEAR_DATA_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_DATA_DIR',
            PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'data');
 }
 
 // Default for test_dir
-if (isset($_ENV['PHP_PEAR_TEST_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_TEST_DIR', $_ENV['PHP_PEAR_TEST_DIR']);
+if (getenv('PHP_PEAR_TEST_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_TEST_DIR', getenv('PHP_PEAR_TEST_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_TEST_DIR',
            PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
 }
 
 // Default for cache_dir
-if (isset($_ENV['PHP_PEAR_CACHE_DIR'])) {
-    define('PEAR_CONFIG_DEFAULT_CACHE_DIR', $_ENV['PHP_PEAR_CACHE_DIR']);
+if (getenv('PHP_PEAR_CACHE_DIR')) {
+    define('PEAR_CONFIG_DEFAULT_CACHE_DIR', getenv('PHP_PEAR_CACHE_DIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_CACHE_DIR',
            System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' .
@@ -117,51 +117,51 @@ if (isset($_ENV['PHP_PEAR_CACHE_DIR'])) {
 }
 
 // Default for php_bin
-if (isset($_ENV['PHP_PEAR_PHP_BIN'])) {
-    define('PEAR_CONFIG_DEFAULT_PHP_BIN', $_ENV['PHP_PEAR_PHP_BIN']);
+if (getenv('PHP_PEAR_PHP_BIN')) {
+    define('PEAR_CONFIG_DEFAULT_PHP_BIN', getenv('PHP_PEAR_PHP_BIN'));
 } else {
     define('PEAR_CONFIG_DEFAULT_PHP_BIN', PEAR_CONFIG_DEFAULT_BIN_DIR.
            DIRECTORY_SEPARATOR.'php'.(OS_WINDOWS ? '.exe' : ''));
 }
 
 // Default for verbose
-if (isset($_ENV['PHP_PEAR_VERBOSE'])) {
-    define('PEAR_CONFIG_DEFAULT_VERBOSE', $_ENV['PHP_PEAR_VERBOSE']);
+if (getenv('PHP_PEAR_VERBOSE')) {
+    define('PEAR_CONFIG_DEFAULT_VERBOSE', getenv('PHP_PEAR_VERBOSE'));
 } else {
     define('PEAR_CONFIG_DEFAULT_VERBOSE', 1);
 }
 
 // Default for preferred_state
-if (isset($_ENV['PHP_PEAR_PREFERRED_STATE'])) {
-    define('PEAR_CONFIG_DEFAULT_PREFERRED_STATE', $_ENV['PHP_PEAR_PREFERRED_STATE']);
+if (getenv('PHP_PEAR_PREFERRED_STATE')) {
+    define('PEAR_CONFIG_DEFAULT_PREFERRED_STATE', getenv('PHP_PEAR_PREFERRED_STATE'));
 } else {
     define('PEAR_CONFIG_DEFAULT_PREFERRED_STATE', 'stable');
 }
 
 // Default for umask
-if (isset($_ENV['PHP_PEAR_UMASK'])) {
-    define('PEAR_CONFIG_DEFAULT_UMASK', $_ENV['PHP_PEAR_UMASK']);
+if (getenv('PHP_PEAR_UMASK')) {
+    define('PEAR_CONFIG_DEFAULT_UMASK', getenv('PHP_PEAR_UMASK'));
 } else {
     define('PEAR_CONFIG_DEFAULT_UMASK', decoct(umask()));
 }
 
 // Default for cache_ttl
-if (isset($_ENV['PHP_PEAR_CACHE_TTL'])) {
-    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', $_ENV['PHP_PEAR_CACHE_TTL']);
+if (getenv('PHP_PEAR_CACHE_TTL')) {
+    define('PEAR_CONFIG_DEFAULT_CACHE_TTL', getenv('PHP_PEAR_CACHE_TTL'));
 } else {
     define('PEAR_CONFIG_DEFAULT_CACHE_TTL', 3600);
 }
 
 // Default for sig_type
-if (isset($_ENV['PHP_PEAR_SIG_TYPE'])) {
-    define('PEAR_CONFIG_DEFAULT_SIG_TYPE', $_ENV['PHP_PEAR_SIG_TYPE']);
+if (getenv('PHP_PEAR_SIG_TYPE')) {
+    define('PEAR_CONFIG_DEFAULT_SIG_TYPE', getenv('PHP_PEAR_SIG_TYPE'));
 } else {
     define('PEAR_CONFIG_DEFAULT_SIG_TYPE', 'gpg');
 }
 
 // Default for sig_bin
-if (isset($_ENV['PHP_PEAR_SIG_BIN'])) {
-    define('PEAR_CONFIG_DEFAULT_SIG_BIN', $_ENV['PHP_PEAR_SIG_BIN']);
+if (getenv('PHP_PEAR_SIG_BIN')) {
+    define('PEAR_CONFIG_DEFAULT_SIG_BIN', getenv('PHP_PEAR_SIG_BIN'));
 } else {
     define('PEAR_CONFIG_DEFAULT_SIG_BIN',
            System::which(
@@ -169,8 +169,8 @@ if (isset($_ENV['PHP_PEAR_SIG_BIN'])) {
 }
 
 // Default for sig_keydir
-if (isset($_ENV['PHP_PEAR_SIG_KEYDIR'])) {
-    define('PEAR_CONFIG_DEFAULT_SIG_KEYDIR', $_ENV['PHP_PEAR_SIG_KEYDIR']);
+if (getenv('PHP_PEAR_SIG_KEYDIR')) {
+    define('PEAR_CONFIG_DEFAULT_SIG_KEYDIR', getenv('PHP_PEAR_SIG_KEYDIR'));
 } else {
     define('PEAR_CONFIG_DEFAULT_SIG_KEYDIR',
            PEAR_CONFIG_SYSCONFDIR . DIRECTORY_SEPARATOR . 'pearkeys');
