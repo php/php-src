@@ -1219,7 +1219,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	
 	zend_str_tolower(CG(class_entry).name, CG(class_entry).name_length);
 
-	zend_hash_init(&CG(class_entry).function_table, 10, NULL, (void (*)(void *)) destroy_zend_function, 0);
+	zend_hash_init(&CG(class_entry).function_table, 10, NULL, ZEND_FUNCTION_DTOR, 0);
 	zend_hash_init(&CG(class_entry).default_properties, 10, NULL, PVAL_PTR_DTOR, 0);
 
 	/* code for inheritance from parent class */

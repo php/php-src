@@ -22,14 +22,14 @@ ZEND_API int zend_print_variable(zval *var);
 
 BEGIN_EXTERN_C()
 ZEND_API int zval_copy_ctor(zval *zvalue);
-ZEND_API void zval_dtor(zval *zvalue);
+ZEND_API int zval_dtor(zval *zvalue);
 END_EXTERN_C()
 
-ZEND_API void zval_ptr_dtor(zval **zval_ptr);
+ZEND_API int zval_ptr_dtor(zval **zval_ptr);
 void zval_add_ref(zval **p);
 
-#define PVAL_DESTRUCTOR (void (*)(void *)) zval_dtor
-#define PVAL_PTR_DTOR (void (*)(void *)) zval_ptr_dtor
+#define PVAL_DESTRUCTOR (int (*)(void *)) zval_dtor
+#define PVAL_PTR_DTOR (int (*)(void *)) zval_ptr_dtor
 #define PVAL_COPY_CTOR (void (*)(void *)) zval_copy_ctor
 
 ZEND_API void var_reset(zval *var);

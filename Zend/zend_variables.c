@@ -47,7 +47,7 @@ ZEND_API inline void var_uninit(zval *var)
 }
 		
 
-ZEND_API void zval_dtor(zval *zvalue)
+ZEND_API int zval_dtor(zval *zvalue)
 {
 	if (zvalue->type==IS_LONG) {
 		return;

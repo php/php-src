@@ -56,7 +56,7 @@ typedef struct hashtable {
 	Bucket *pListHead;
 	Bucket *pListTail;
 	Bucket **arBuckets;
-	void (*pDestructor) (void *pData);
+	int (*pDestructor) (void *pData);
 	unsigned char persistent;
 } HashTable;
 
@@ -64,7 +64,7 @@ typedef struct hashtable {
 BEGIN_EXTERN_C()
 
 /* startup/shutdown */
-ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), void (*pDestructor) (void *pData), int persistent);
+ZEND_API int zend_hash_init(HashTable *ht, uint nSize, ulong(*pHashFunction) (char *arKey, uint nKeyLength), int (*pDestructor) (void *pData), int persistent);
 ZEND_API void zend_hash_destroy(HashTable *ht);
 
 ZEND_API void zend_hash_clean(HashTable *ht);
