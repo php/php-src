@@ -249,10 +249,10 @@ PHP_FUNCTION(explode)
 }
 /* }}} */
 
+
 /* {{{ proto string join(array src, string glue)
    An alias for implode */
 /* }}} */
-
 void _php3_implode(pval *delim, pval *arr, pval *return_value) 
 {
 	pval **tmp;
@@ -261,8 +261,7 @@ void _php3_implode(pval *delim, pval *arr, pval *return_value)
 	/* convert everything to strings, and calculate length */
 	zend_hash_internal_pointer_reset(arr->value.ht);
 	while (zend_hash_get_current_data(arr->value.ht, (void **) &tmp) == SUCCESS) {
-		SEPARATE_ZVAL(tmp);
-		convert_to_string(*tmp);
+		convert_to_string_ex(tmp);
 		if ((*tmp)->type == IS_STRING && (*tmp)->value.str.val != undefined_variable_string) {
 			len += (*tmp)->value.str.len;
 			if (count>0) {
@@ -304,6 +303,7 @@ PHP_FUNCTION(implode)
 	}
 
 	if ((*arg1)->type == IS_ARRAY && (*arg2)->type == IS_STRING) {
+		SEPARATE_ZVAL(arg1);
 		arr = *arg1;
 		delim = *arg2;
 	} else if ((*arg2)->type == IS_ARRAY) {
