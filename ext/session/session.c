@@ -62,6 +62,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_unset, NULL)
 	PHP_FE(session_set_save_handler, NULL)
     PHP_FE(session_set_cookie_params, NULL)
+	PHP_FE(session_get_cookie_params, NULL)
 	{0}
 };
 
@@ -873,6 +874,27 @@ PHP_FUNCTION(session_set_cookie_params)
 }
 /* }}} */
 
+/* {{{ proto array session_get_cookie_params()
+   Return the session cookie parameters */ 
+
+PHP_FUNCTION(session_get_cookie_params) {
+	PSLS_FETCH();
+
+	if (ARG_COUNT(ht) != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_ERROR, "Cannot initialize return value from session_get_cookie_parameters");
+		RETURN_FALSE;
+	}
+
+	add_assoc_string(  return_value, "lifetime", PS(cookie_lifetime) );
+	add_assoc_string(  return_value, "path",     PS(cookie_path)     );
+	add_assoc_string(  return_value, "domain",   PS(cookie_domain)   );
+}
+
+/* }}} */
 
 /* {{{ proto string session_name([string newname])
    Return the current session name. if newname is given, the session name is replaced with newname */

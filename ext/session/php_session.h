@@ -112,6 +112,7 @@ PHP_FUNCTION(session_destroy);
 PHP_FUNCTION(session_unset);
 PHP_FUNCTION(session_set_save_handler);
 PHP_FUNCTION(session_set_cookie_params);
+PHP_FUNCTION(session_get_cookie_params);
 
 #ifdef ZTS
 #define PSLS_D php_ps_globals *ps_globals
