@@ -37,7 +37,10 @@
  *
  */
 #define NO_PIKE_SHORTHAND
-
+/* Define to run w/o th_farm. This allows for A LOT easier
+ * debugging due to stupid gdb...
+ */
+/*#define TEST_NO_THREADS*/
 #include <fdlib.h>
 #include <program.h>
 #include <pike_types.h>
@@ -208,7 +211,8 @@ INLINE static int lookup_integer_header(char *headername, int default_value)
  * interpreter for better threading.
  */
 
-static int php_caudium_low_ub_write(const char *str, uint str_length) {
+INLINE static int
+php_caudium_low_ub_write(const char *str, uint str_length) {
   int sent_bytes = 0;
   struct pike_string *to_write = NULL;
   PLS_FETCH();
@@ -234,7 +238,8 @@ static int php_caudium_low_ub_write(const char *str, uint str_length) {
 
 /*
  * php_caudium_sapi_ub_write() calls php_caudium_low_ub_write in a Pike thread
- * safe manner.
+ * safe manner or writes directly to the output FD if RXML post-parsing is
+ * disabled. 
  */
 
 static int
@@ -257,6 +262,7 @@ php_caudium_sapi_ub_write(const char *str, uint str_length)
 	  /* This means the connection is closed. Dead. Gone. *sniff*  */
 	  PG(connection_status) = PHP_CONNECTION_ABORTED;
 	  zend_bailout();
+	  THIS->written += sent_bytes;
 	  return sent_bytes;
 	 case EINTR: 
 	 case EWOULDBLOCK:
@@ -277,20 +283,21 @@ php_caudium_sapi_ub_write(const char *str, uint str_length)
 /* php_caudium_set_header() sets a header in the header mapping. Called in a
  * thread safe manner from php_caudium_sapi_header_handler.
  */
-static void php_caudium_set_header(char *header_name, char *value, char *p)
+INLINE static void
+php_caudium_set_header(char *header_name, char *value, char *p)
 {
   struct svalue hsval;
   struct pike_string *hval, *ind, *hind;
   struct mapping *headermap;
-  struct svalue *s_headermap;
+  struct svalue *s_headermap, *soldval;
   GET_THIS();
-  hval = make_shared_string(value);
+  //  hval = make_shared_string(value);
   ind = make_shared_string(" _headers");
   hind = make_shared_binary_string(header_name,
 				   (int)(p - header_name));
 
   s_headermap = low_mapping_string_lookup(REQUEST_DATA, ind);
-  if(!s_headermap)
+  if(!s_headermap || s_headermap->type != PIKE_T_MAPPING)
   {
     struct svalue mappie;                                           
     mappie.type = PIKE_T_MAPPING;
@@ -298,11 +305,23 @@ static void php_caudium_set_header(char *header_name, char *value, char *p)
     mappie.u.mapping = headermap;
     mapping_string_insert(REQUEST_DATA, ind, &mappie);
     free_mapping(headermap);
-  } else
+    hval = make_shared_string(value);
+  } else {
     headermap = s_headermap->u.mapping;
-
+#if 0
+    soldval = low_mapping_string_lookup(s_headermap, hind);
+    if(soldval != NULL && 
+       soldval->u.type == PIKE_T_STRING &&
+       soldval->u.string->size_shift == 0) {
+      /* Existing, valid header. Prepend.*/
+      hval = make_shared_string(value);
+    }
+#endif
+      hval = make_shared_string(value);
+  }
   hsval.type = PIKE_T_STRING;
   hsval.u.string = hval;
+
   mapping_string_insert(headermap, hind, &hsval);
 
   free_string(hval);
@@ -337,7 +356,7 @@ php_caudium_sapi_header_handler(sapi_header_struct *sapi_header,
  * Called before real content is sent by PHP.
  */
 
-static int
+INLINE static int
 php_caudium_low_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
   PLS_FETCH();
@@ -499,16 +518,7 @@ static sapi_module_struct sapi_module = {
  * with a number of variables. HTTP_* variables are created for
  * the HTTP header data, so that a script can access these.
  */
-#define ADD_STRING(name)										\
-	MAKE_STD_ZVAL(pval);										\
-	pval->type = IS_STRING;										\
-	pval->value.str.len = strlen(buf);							\
-	pval->value.str.val = estrndup(buf, pval->value.str.len);	\
-	zend_hash_update(&EG(symbol_table), name, sizeof(name), 	\
-			&pval, sizeof(zval *), NULL)
-
-static void
-php_caudium_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
+static void php_caudium_hash_environment(CLS_D ELS_DC PLS_DC SLS_DC)
 {
   int i;
   char buf[512];
@@ -577,6 +587,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   THIS->request_data = ureq->request_data;
   free(ureq);
   //  current_thread = th_self();
+#ifndef TEST_NO_THREADS
   mt_lock(&interpreter_lock);
   init_interpreter();
 #if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
@@ -600,7 +611,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   num_threads++;
   thread_table_insert(Pike_interpreter.thread_id);
 #endif
-
+#endif 
   SG(request_info).query_string = lookup_string_header("QUERY_STRING", 0);
   SG(server_context) = (void *)1; /* avoid server_context == NULL */
 
@@ -630,26 +641,21 @@ static void php_caudium_module_main(php_caudium_request *ureq)
    * Pike threads to run. We wait since the above would otherwise require
    * a lot of unlock/lock.
    */
+#ifndef TEST_NO_THREADS
   SWAP_OUT_CURRENT_THREAD();
   mt_unlock(&interpreter_lock);
+#endif
 
-
+  /* Change virtual work directory */
+  
 #ifdef VIRTUAL_DIR
   /* Change virtual directory, if the feature is enabled, which is
    * almost a requirement for PHP in Roxen. Might want to fail if it
-   * isn't.
+   * isn't. Not a problem though, since it's on by default when using ZTS.
    */
-  dir = malloc(len = THIS->filename->len);
-  strcpy(dir, THIS->filename->str);
-  while(--len >= 0 && dir[len] != '/')
-    ;
-  if(len > 0) {
-    dir[len] = '\0';
-  }
-  V_CHDIR(dir);
-  free(dir);
+  V_CHDIR_FILE(THIS->filename->str);
 #endif
-
+  
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename->str;
   file_handle.free_filename = 0;
@@ -674,6 +680,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
       free_struct(SLS_C);
     }, "positive run response");
   }
+#ifndef TEST_NO_THREADS
   mt_lock(&interpreter_lock);
   SWAP_IN_CURRENT_THREAD();
 #if PIKE_MAJOR_VERSION == 7 && PIKE_MINOR_VERSION < 1
@@ -692,6 +699,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   cleanup_interpret();
   num_threads--;
   mt_unlock(&interpreter_lock);
+#endif
 }
 
 /*
@@ -738,8 +746,11 @@ void f_php_caudium_request_handler(INT32 args)
     THIS->my_fd = fd;
   } else
     THIS->my_fd = 0;
+#ifdef TEST_NO_THREADS
+  php_caudium_module_main(THIS);
+#else
   th_farm((void (*)(void *))php_caudium_module_main, THIS);
-  
+#endif
   pop_n_elems(args);
 }
 
