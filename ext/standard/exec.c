@@ -314,7 +314,7 @@ char * php_escape_shell_cmd(char *str) {
 	cmd = emalloc(2 * l + 1);
 	strcpy(cmd, str);
 	for (x = 0; cmd[x]; x++) {
-		if (php_get_index("&;`'\"|*?~<>^()[]{}$\\\x0A\xFF", cmd[x]) != -1) {
+		if (php_get_index("#&;`'\"|*?~<>^()[]{}$\\\x0A\xFF", cmd[x]) != -1) {
 			for (y = l + 1; y > x; y--)
 				cmd[y] = cmd[y - 1];
 			l++;				/* length has been increased */
@@ -322,6 +322,32 @@ char * php_escape_shell_cmd(char *str) {
 			x++;				/* skip the character */
 		}
 	}
+	return cmd;
+}
+
+char * php_escape_shell_arg(char *str) {
+	register int x, y, l;
+	char *cmd;
+
+	l = strlen(str);
+	cmd = emalloc(4 * l + 3);
+	cmd[0] = '\'';
+	strcpy(cmd+1, str);
+	l++;
+
+	for (x = 1; cmd[x]; x++) {
+		if (cmd[x] == '\'') {
+			for (y = l + 3; y > x+1; y--) {
+				cmd[y] = cmd[y - 3];
+			}
+			cmd[++x] = '\\';
+			cmd[++x] = '\'';
+			cmd[++x] = '\'';
+			l+=3;				/* length was increased by 3 */
+		}
+	}
+	cmd[l++] = '\'';
+	cmd[l] = '\0';
 	return cmd;
 }
 
@@ -339,6 +365,26 @@ PHP_FUNCTION(escapeshellcmd)
 	convert_to_string_ex(arg1);
 	if ((*arg1)->value.str.len) {
 		cmd = php_escape_shell_cmd((*arg1)->value.str.val);
+		RETVAL_STRING(cmd, 1);
+		efree(cmd);
+	}
+}
+/* }}} */
+
+/* {{{ proto string escapeshellarg(string arg)
+   Quote and escape an argument for use in a shell command */
+PHP_FUNCTION(escapeshellarg)
+{
+	pval **arg1;
+	char *cmd = NULL;
+
+	if (zend_get_parameters_ex(1, &arg1) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string_ex(arg1);
+	if ((*arg1)->value.str.len) {
+		cmd = php_escape_shell_arg((*arg1)->value.str.val);
 		RETVAL_STRING(cmd, 1);
 		efree(cmd);
 	}

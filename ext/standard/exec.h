@@ -24,6 +24,7 @@
 PHP_FUNCTION(system);
 PHP_FUNCTION(exec);
 PHP_FUNCTION(escapeshellcmd);
+PHP_FUNCTION(escapeshellarg);
 PHP_FUNCTION(passthru);
 PHP_FUNCTION(shell_exec);
 
