@@ -3,6 +3,12 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Fixed shuffle() so that it no longer breaks on Solaris. (Andrei)
+- Added is_resource(), is_bool() functions. (Thies)
+- Cleaned up File-Module (Thies)
+- Upgraded math-funtions to use new Zend function API (Thies)
+- Fixed zombie problem in shell_exec() and $a = `some_command`
+  constructs. (Thies)
 - Thies introduced ZEND_FETCH_RESOURCE2 (Danny).
 - Added Informix driver to list of maintained extensions. (Danny).
 - Informix driver : Changed ifx.ec to use the new high-performance
