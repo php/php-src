@@ -177,8 +177,8 @@ PHP_MINIT_FUNCTION(fdf)
 /* }}} */
 
 /* {{{ RINIT */
-PHP_RINIT_FUNCTION(fdf) {
-	FDF_G(error) = FDFErcOK;
+PHP_RINIT_FUNCTION(fdf)
+{
 	return SUCCESS;
 }
 /* }}} */
