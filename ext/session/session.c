@@ -589,7 +589,7 @@ static char *bin_to_readable(char *in, size_t inlen, char *out, char nbits)
 	return out;
 }
 
-char *php_session_create_id(PS_CREATE_SID_ARGS)
+PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS)
 {
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;

@@ -32,7 +32,7 @@
 #define PS_CREATE_SID_ARGS void **mod_data, int *newlen TSRMLS_DC
 
 /* default create id function */
-char *php_session_create_id(PS_CREATE_SID_ARGS);
+PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS);
 
 typedef struct ps_module_struct {
 	const char *s_name;
