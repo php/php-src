@@ -16,7 +16,7 @@ EOH
 fi
 	
 echo "Usage:"
-echo "$0 <release>"
+echo "$0 <release> <version>"
 echo
 echo "e.g.:"
 echo "$0 2"
@@ -26,21 +26,26 @@ echo
 
 TAR=php-$VERSION.tar.gz
 SPEC=php-$VERSION.spec
+PREQUIRES=`rpm -q --provides apache|grep "\(webserver\|httpd\)"`
+if  [ "$PREQUIRES" = "" ]
+then PREQUIRES="webserver"
+fi
 
 # write out the .spec file
 sed -e "s/PVERSION/$VERSION/g" \
     -e "s/PRELEASE/$RELEASE/g" \
     -e "s/TARDIR/$TARDIR/g" \
+    -e "s/PREQUIRES/$PREQUIRES/g" \
     > $SPEC <<'EOF'
 Summary: PHP 5 - A powerful scripting language
-Name: mod_php5
+Name: php5
 Version: PVERSION
 Release: PRELEASE
 Group: Networking/Daemons
 Source0: http://www.php.net/distributions/php-%{PACKAGE_VERSION}.tar.gz
 Copyright: PHP License
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
-Requires: webserver
+Requires: PREQUIRES
 
 %description
 PHP5 is a powerful apache module that adds scripting and database connection
@@ -57,15 +62,18 @@ for suExec and stand alone php scripts too.
 # need to run this under sh or it breaks
 
 sh ./configure --prefix=/usr \
-	--with-config-file-path=/etc \
-	--enable-cli \
+	--with-config-file-path=%{_sysconfdir} \
+	--disable-cli \
+	--without-pear \
 	--enable-force-cgi-redirect \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql \
 	--with-zlib \
 	--enable-xml \
-	--enable-wddx 
+	--enable-wddx \
+	--with-gd \
+	--enable-shared \
 
 make
 mv sapi/cgi/php php.keepme
@@ -76,13 +84,17 @@ sh ./configure --prefix=/usr \
 	--with-apxs=/usr/sbin/apxs \
 	--enable-cli \
 	--enable-versioning \
-	--with-config-file-path=/etc \
+	--with-config-file-path=%{_sysconfdir} \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
 	--with-mysql \
 	--with-zlib \
 	--enable-xml \
-	--enable-wddx 
+	--enable-wddx \
+	--with-gd \
+	--enable-shared \
+
+#	--with-pgsql=shared \
 
 make clean
 make
@@ -100,11 +112,22 @@ mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 install -m 0755 sapi/cli/php.1 $RPM_BUILD_ROOT%{_mandir}/man1
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}
 install -m 0755 php.ini-recommended $RPM_BUILD_ROOT%{_sysconfdir}/php.ini
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/php/extensions
+install -m 0755 modules/*.so $RPM_BUILD_ROOT%{_libdir}/php/extensions
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Thu Nov 27 2003 Marcus Boerger <helly@php.net>
+- Fix requirements for older systems.
+- Fix rpm build directory for the major distributions.
+- Fix config dir.
+- Rename package to php.
+- Add gd extension.
+- Support building of shared extensions.
+- Build CLI only once.
+
 * Thu Oct 31 2003 Marcus Boerger <helly@php.net>
 - Update version to 5.
 - Remove unsure external requirements.
@@ -151,13 +174,22 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/php_cgi
 %{_mandir}/man1/php.1*
 %{_sysconfdir}/php.ini
+%{_libdir}/php/extensions/*.so
 
 %doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE NEWS
 EOF
 
-RPMDIR=/usr/src/redhat/RPMS
-SPECDIR=/usr/src/redhat/SPECS
-SRCDIR=/usr/src/redhat/SOURCES
+RPMBASE=/usr/src/redhat
+for i in /usr/src/redhat /usr/src/packages /usr/src/RPM; do
+  if test -d $i; then
+    RPMBASE=$i
+    break
+  fi
+done
+
+RPMDIR=${RPMBASE}/RPMS
+SPECDIR=${RPMBASE}/SPECS
+SRCDIR=${RPMBASE}/SOURCES
 
 (
 make clean
@@ -168,6 +200,5 @@ tar czvf ${SRCDIR}/${TAR} $TARDIR )
 cp -a $SPEC $SPECDIR/${SPEC}
 #cp -a *.patch $SRCDIR
 cd $SRCDIR
-#chown -R root.root ${TAR}
 cd $SPECDIR
 rpm -ba -v ${SPEC}
