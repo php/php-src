@@ -441,6 +441,10 @@ static void sapi_cgi_log_message(char *message)
 static int sapi_cgi_deactivate(TSRMLS_D)
 {
 	fflush(stdout);
+	if(SG(request_info).argv0) {
+		free(SG(request_info).argv0);
+		SG(request_info).argv0 = NULL;
+	}
 	return SUCCESS;
 }
 
@@ -822,6 +826,7 @@ int main(int argc, char *argv[])
 	int no_headers=0;
 	int orig_optind=ap_php_optind;
 	char *orig_optarg=ap_php_optarg;
+	char *argv0=NULL;
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
@@ -887,6 +892,11 @@ int main(int argc, char *argv[])
 		|| getenv("GATEWAY_INTERFACE")
 		|| getenv("REQUEST_METHOD")) {
 		cgi = 1;
+		if (argc > 1) {
+			argv0 = strdup(argv[1]);
+		} else {
+			argv0 = NULL;
+		}
 	}
 #if PHP_FASTCGI
 	}
@@ -991,7 +1001,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 #if ENABLE_PATHINFO_CHECK
 	if (cfg_get_long("cgi.fix_pathinfo", &fix_pathinfo) == FAILURE) {
-		fix_pathinfo = 0;
+		fix_pathinfo = 1;
 	}
 #endif
 
@@ -1166,6 +1176,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 		init_request_info(TSRMLS_C);
 
+		SG(request_info).argv0 = argv0;
+
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
 		CG(interactive) = 0;
@@ -1174,7 +1186,11 @@ consult the installation file that came with this distribution, or visit \n\
 #if PHP_FASTCGI
 			&& !fastcgi
 #endif
-			) {
+			) { /* never execute the arguments if you are a CGI */	
+			if (SG(request_info).argv0) {
+				free(SG(request_info).argv0);
+				SG(request_info).argv0 = NULL;
+			}
 
 			if (cgi_sapi_module.php_ini_path_override && cgi_sapi_module.php_ini_ignore) {
 				no_headers = 1;  
@@ -1345,20 +1361,18 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		}
 
-		if (cgi 
 #if PHP_FASTCGI
-			|| fastcgi
-#endif
-		) {
- 			file_handle.type = ZEND_HANDLE_FILENAME;
+		if (fastcgi) {
+			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.filename = SG(request_info).path_translated;
-			file_handle.handle.fp = NULL;
 		} else {
+#endif
 			file_handle.filename = "-";
 			file_handle.type = ZEND_HANDLE_FP;
 			file_handle.handle.fp = stdin;
+#if PHP_FASTCGI
 		}
-
+#endif
 		file_handle.opened_path = NULL;
 		file_handle.free_filename = 0;
 
@@ -1380,13 +1394,17 @@ consult the installation file that came with this distribution, or visit \n\
 		if (cgi || SG(request_info).path_translated) {
 			retval = php_fopen_primary_script(&file_handle TSRMLS_CC);
 		}
-		if (retval == FAILURE || file_handle.handle.fp == NULL) {
-			SG(sapi_headers).http_response_code = 404;
-			PUTS("No input file specified.\n");
-			php_request_shutdown((void *) 0);
-			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
-		}
+
+		if (cgi && (retval == FAILURE)) {
+			if(!argv0 || !(file_handle.handle.fp = VCWD_FOPEN(argv0, "rb"))) {
+				PUTS("No input file specified.\n");
+				php_request_shutdown((void *) 0);
+				php_module_shutdown(TSRMLS_C);
+				return FAILURE;
+			}
+			file_handle.filename = argv0;
+			file_handle.opened_path = expand_filepath(argv0, NULL TSRMLS_CC);
+		} 
 
 		if (file_handle.handle.fp && (file_handle.handle.fp != stdin)) {
 			/* #!php support */
