@@ -504,6 +504,9 @@ static void curl_free_slist(void **slist)
    Return the CURL version string. */
 PHP_FUNCTION(curl_version)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	RETURN_STRING(curl_version(), 1);
 }
 /* }}} */

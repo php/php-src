@@ -397,6 +397,9 @@ PHP_FUNCTION(socket_fd_alloc)
 {
 	php_fd_set *php_fd;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	php_fd = (php_fd_set*)emalloc(sizeof(php_fd_set));
 
 	FD_ZERO(&(php_fd->set));

@@ -1316,6 +1316,9 @@ PHP_FUNCTION(settype)
    Get the name of the owner of the current PHP script */
 PHP_FUNCTION(get_current_user)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	RETURN_STRING(php_get_current_user(), 1);
 }
 /* }}} */

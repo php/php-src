@@ -83,6 +83,9 @@ static PHP_MINIT_FUNCTION(mhash)
    Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	RETURN_LONG(mhash_count());
 }
 

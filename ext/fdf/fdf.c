@@ -209,6 +209,9 @@ PHP_FUNCTION(fdf_create)
 	FDFDoc fdf;
 	FDFErc err;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	err = FDFCreate(&fdf);
 
 	if(err != FDFErcOK || !fdf) {

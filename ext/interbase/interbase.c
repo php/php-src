@@ -236,6 +236,9 @@ typedef struct {
    Return error message */
 PHP_FUNCTION(ibase_errmsg)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	if (IBG(errmsg[0])) {
 		RETURN_STRING(IBG(errmsg), 1);
 	}

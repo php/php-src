@@ -291,7 +291,10 @@ PHP_FUNCTION(xslt_output_endtransform)
     char *tRes   = NULL,
          *buffer = NULL;
     int ret = 0;
-    
+   
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
     /** 
      * Make sure that we don't have more than one output buffer going on
      * at the same time.
@@ -556,7 +559,10 @@ PHP_FUNCTION(xslt_create)
     php_sablot *handle;
     SablotHandle p;
     int ret;
-    
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
     ret = SablotCreateProcessor(&p);
     
     if (ret) {
