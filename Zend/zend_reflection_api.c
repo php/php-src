@@ -249,7 +249,8 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 	}
 
 	if (ce->num_interfaces) {
-		int i;
+		zend_uint i;
+
 		string_printf(str, " implements %s", ce->interfaces[0]->name);
 		for (i = 1; i < ce->num_interfaces; ++i) {
 			string_printf(str, ", %s", ce->interfaces[i]->name);
@@ -337,7 +338,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 
 static void _function_parameter_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
-	int i;
+	zend_uint i;
 	struct _zend_arg_info *arg_info = fptr->common.arg_info;
 
 	if (!arg_info) return;
@@ -757,6 +758,7 @@ ZEND_FUNCTION(reflection_function_invoke)
 	zval *fname;
 	int result;
 	int argc = ZEND_NUM_ARGS();
+	zend_fcall_info fci;
 	
 	METHOD_NOTSTATIC;
 	GET_REFLECTION_OBJECT_PTR(fptr);
@@ -774,15 +776,18 @@ ZEND_FUNCTION(reflection_function_invoke)
 	 */
 	MAKE_STD_ZVAL(fname);
 	ZVAL_NULL(fname);
-	result = fast_call_user_function(
-		EG(function_table), NULL, fname,
-		&retval_ptr, 
-		argc, 
-		params, 
-		1, 
-		NULL, 
-		&fptr TSRMLS_CC
-	);
+
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.function_name = fname;
+	fci.symbol_table = NULL;
+	fci.object_pp = NULL;
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = argc;
+	fci.no_separation = 1;
+	/*fci.function_handler_cache = &fptr;*/
+
+	result = zend_call_function(&fci, NULL TSRMLS_CC);
 
 	zval_ptr_dtor(&fname);
 	efree(params);
@@ -983,6 +988,7 @@ ZEND_FUNCTION(reflection_method_invoke)
 	zval *fname;
 	int argc = ZEND_NUM_ARGS();
 	int result;
+	zend_fcall_info fci;
 	
 	METHOD_NOTSTATIC;
 
@@ -1032,17 +1038,19 @@ ZEND_FUNCTION(reflection_method_invoke)
 	 */
 	MAKE_STD_ZVAL(fname);
 	ZVAL_NULL(fname);
-	result = fast_call_user_function(
-		EG(function_table), 
-		object_pp,
-		fname,
-		&retval_ptr, 
-		argc - 1, 
-		params+ 1, 
-		1, 
-		NULL, 
-		&mptr TSRMLS_CC
-	);
+
+	fci.size = sizeof(fci);
+	fci.function_table = EG(function_table);
+	fci.function_name = fname;
+	fci.symbol_table = NULL;
+	fci.object_pp = object_pp;
+	fci.retval_ptr_ptr = &retval_ptr;
+	fci.param_count = argc-1;
+	fci.params = params+1;
+	fci.no_separation = 1;
+	/*fci.function_handler_cache = &mptr;*/
+
+	result = zend_call_function(&fci, NULL TSRMLS_CC);
 	
 	zval_ptr_dtor(&fname);
 	efree(params);
@@ -1611,6 +1619,7 @@ ZEND_FUNCTION(reflection_class_newinstance)
 	if (ce->constructor) {
 		zval ***params;
 		zval *fname;
+		zend_fcall_info fci;
 
 		params = safe_emalloc(sizeof(zval **), argc, 0);
 		if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
@@ -1625,9 +1634,19 @@ ZEND_FUNCTION(reflection_class_newinstance)
 		 */
 		MAKE_STD_ZVAL(fname);
 		ZVAL_NULL(fname);
-		if (fast_call_user_function(EG(function_table), &return_value, fname,
-								   &retval_ptr, argc, params, 
-								   1, NULL, &ce->constructor TSRMLS_CC) == FAILURE) {
+
+		fci.size = sizeof(fci);
+		fci.function_table = EG(function_table);
+		fci.function_name = fname;
+		fci.symbol_table = NULL;
+		fci.object_pp = &return_value;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = argc;
+		fci.params = params;
+		fci.no_separation = 1;
+		/*fci.function_handler_cache = &ce->constructor;*/
+
+		if (zend_call_function(&fci, NULL TSRMLS_CC) == FAILURE) {
 			efree(params);
 			zval_ptr_dtor(&fname);
 			zend_error(E_WARNING, "Invokation of %s's constructor failed\n", ce->name);

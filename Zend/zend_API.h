@@ -265,9 +265,33 @@ ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *valu
 #define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)       
 
+
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC);
-ZEND_API int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC);
+
+typedef struct _zend_fcall_info {
+	size_t size;
+	HashTable *function_table;
+	zval *function_name;
+	HashTable *symbol_table;
+	zval **retval_ptr_ptr;
+	zend_uint param_count;
+	zval ***params;
+	zval **object_pp;
+	zend_bool no_separation;
+} zend_fcall_info;
+
+typedef struct _zend_fcall_info_cache {
+	zend_bool initialized;
+	zend_function *function_handler;
+	zend_class_entry *calling_scope;
+	zval **object_pp;
+} zend_fcall_info_cache;
+
+ZEND_API extern zend_fcall_info_cache empty_fcall_info_cache;
+
+ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC);
+
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   zend_bool is_ref, int num_symbol_tables, ...);

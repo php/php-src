@@ -40,6 +40,8 @@ ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int 
 #ifdef ZEND_WIN32
 #include <process.h>
 /* true global */
+ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, 0 };
+
 static WNDCLASS wc;
 static HWND timeout_window;
 static HANDLE timeout_thread_event;
@@ -481,13 +483,23 @@ int call_user_function(HashTable *function_table, zval **object_pp, zval *functi
 
 int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table TSRMLS_DC)
 {
-	zend_function *function_pointer = NULL;
+	zend_fcall_info fci;
 
-	return fast_call_user_function(function_table, object_pp, function_name, retval_ptr_ptr, param_count, params, no_separation, symbol_table, &function_pointer TSRMLS_CC);
+	fci.size = sizeof(fci);
+	fci.function_table = function_table;
+	fci.object_pp = object_pp;
+	fci.function_name = function_name;
+	fci.retval_ptr_ptr = retval_ptr_ptr;
+	fci.param_count = param_count;
+	fci.params = params;
+	fci.no_separation = (zend_bool) no_separation;
+	fci.symbol_table = symbol_table;
+
+	return zend_call_function(&fci, NULL TSRMLS_CC);
 }
 
 
-int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, zend_uint param_count, zval **params[], int no_separation, HashTable *symbol_table, zend_function **function_pointer TSRMLS_DC)
+int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TSRMLS_DC)
 {
 	zend_uint i;
 	zval **original_return_value;
@@ -507,55 +519,63 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	zval *params_array;
 	int call_via_handler = 0;
 
+	switch (fci->size) {
+		case sizeof(zend_fcall_info):
+			break; /* nothing to do currently */
+		default:
+			zend_error(E_ERROR, "Corrupted fcall_info provided to zend_call_function()");
+			break;
+	}
+
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
 	EX(Ts) = NULL;
 	EX(op_array) = NULL;
 	EX(opline) = NULL;
-	*retval_ptr_ptr = NULL;
+	*fci->retval_ptr_ptr = NULL;
 
-	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
-		zval **tmp_object_ptr, **tmp_real_function_name;
+	if (!fci_cache || !fci_cache->initialized) {
+		if (fci->function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
+			zval **tmp_object_ptr, **tmp_real_function_name;
 
-		if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
-			return FAILURE;
-		}
-		if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
-			return FAILURE;
-		}
-		function_name = *tmp_real_function_name;
-		SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
-		object_pp = tmp_object_ptr;
-		(*object_pp)->is_ref = 1;
-	}
-
-	if (object_pp && !*object_pp) {
-		object_pp = NULL;
-	}
-
-	if (object_pp) {
-		/* TBI!! new object handlers */
-		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
-			if (!IS_ZEND_STD_OBJECT(**object_pp)) {
-				zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
+			if (zend_hash_index_find(fci->function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
 				return FAILURE;
 			}
-
-			calling_scope = Z_OBJCE_PP(object_pp);
-			function_table = &calling_scope->function_table;
-			EX(object) =  *object_pp;
+			if (zend_hash_index_find(fci->function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
+				return FAILURE;
+			}
+			fci->function_name = *tmp_real_function_name;
+			SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
+			fci->object_pp = tmp_object_ptr;
+			(*fci->object_pp)->is_ref = 1;
 		}
-	}
 
-	if (*function_pointer == NULL) {
-		if (object_pp) {
-			if (Z_TYPE_PP(object_pp) == IS_STRING) {
+		if (fci->object_pp && !*fci->object_pp) {
+			fci->object_pp = NULL;
+		}
+
+		if (fci->object_pp) {
+			/* TBI!! new object handlers */
+			if (Z_TYPE_PP(fci->object_pp) == IS_OBJECT) {
+				if (!IS_ZEND_STD_OBJECT(**fci->object_pp)) {
+					zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
+					return FAILURE;
+				}
+
+				calling_scope = Z_OBJCE_PP(fci->object_pp);
+				fci->function_table = &calling_scope->function_table;
+				EX(object) =  *fci->object_pp;
+			}
+		}
+
+		if (fci->object_pp) {
+			if (Z_TYPE_PP(fci->object_pp) == IS_STRING) {
 				zend_class_entry **ce;
 				char *lc_class;
 				int found = FAILURE;
 
-				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
+				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(fci->object_pp), Z_STRLEN_PP(fci->object_pp));
 				if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
 					ce = &(EG(active_op_array)->scope);
 					found = (*ce != NULL?SUCCESS:FAILURE);
@@ -563,32 +583,32 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 					ce = &(EG(active_op_array)->scope->parent);
 					found = (*ce != NULL?SUCCESS:FAILURE);
 				} else {
-					found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+					found = zend_lookup_class(lc_class, Z_STRLEN_PP(fci->object_pp), &ce TSRMLS_CC);
 				}
 				efree(lc_class);
 				if (found == FAILURE)
 					return FAILURE;
 
-				function_table = &(*ce)->function_table;
+				fci->function_table = &(*ce)->function_table;
 				calling_scope = *ce;
-				object_pp = NULL;
+				fci->object_pp = NULL;
 			}
 
-			if (function_table == NULL) {
+			if (fci->function_table == NULL) {
 				return FAILURE;
 			}
 		}
 
-		if (function_name->type!=IS_STRING) {
+		if (fci->function_name->type!=IS_STRING) {
 			return FAILURE;
 		}
 
-		function_name_lc = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
+		function_name_lc = zend_str_tolower_dup(fci->function_name->value.str.val, fci->function_name->value.str.len);
 
 		original_function_state_ptr = EG(function_state_ptr);
-		if (zend_hash_find(function_table, function_name_lc, function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
+		if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 			/* try calling __call */
-			if(calling_scope && calling_scope->__call) {
+			if (calling_scope && calling_scope->__call) {
 				EX(function_state).function = calling_scope->__call;
 				/* prepare params */
 				ALLOC_INIT_ZVAL(method_name);
@@ -603,55 +623,62 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 			}
 		}
 		efree(function_name_lc);
-		*function_pointer = EX(function_state).function;
+		EX(function_state).function;
+		if (fci_cache) {
+			fci_cache->function_handler = EX(function_state).function;
+			fci_cache->object_pp = fci->object_pp;
+			fci_cache->calling_scope = calling_scope;
+			fci_cache->initialized = 1;
+		}
 	} else {
-		EX(function_state).function = *function_pointer;
-		calling_scope= EX(function_state).function->common.scope;
+		EX(function_state).function = fci_cache->function_handler;
+		calling_scope = fci_cache->calling_scope;
+		fci->object_pp = fci_cache->object_pp;
 	}
 	
-	for (i=0; i<param_count; i++) {
+	for (i=0; i<fci->param_count; i++) {
 		zval *param;
 
 		if (ARG_SHOULD_BE_SENT_BY_REF(EX(function_state).function, i+1)
-			&& !PZVAL_IS_REF(*params[i])) {
-			if ((*params[i])->refcount>1) {
+			&& !PZVAL_IS_REF(*fci->params[i])) {
+			if ((*fci->params[i])->refcount>1) {
 				zval *new_zval;
 
-				if (no_separation) {
+				if (fci->no_separation) {
 					return FAILURE;
 				}
 				ALLOC_ZVAL(new_zval);
-				*new_zval = **params[i];
+				*new_zval = **fci->params[i];
 				zval_copy_ctor(new_zval);
 				new_zval->refcount = 1;
-				(*params[i])->refcount--;
-				*params[i] = new_zval;
+				(*fci->params[i])->refcount--;
+				*fci->params[i] = new_zval;
 			}
-			(*params[i])->refcount++;
-			(*params[i])->is_ref = 1;
-			param = *params[i];
-		} else if (*params[i] != &EG(uninitialized_zval)) {
-			(*params[i])->refcount++;
-			param = *params[i];
+			(*fci->params[i])->refcount++;
+			(*fci->params[i])->is_ref = 1;
+			param = *fci->params[i];
+		} else if (*fci->params[i] != &EG(uninitialized_zval)) {
+			(*fci->params[i])->refcount++;
+			param = *fci->params[i];
 		} else {
 			ALLOC_ZVAL(param);
-			*param = **(params[i]);
+			*param = **(fci->params[i]);
 			INIT_PZVAL(param);
 		}
-		if(call_via_handler) {
+		if (call_via_handler) {
 			add_next_index_zval(params_array, param);
 		} else {
 			zend_ptr_stack_push(&EG(argument_stack), param);
 		}
 	}
 
-	if(call_via_handler) {
+	if (call_via_handler) {
 		zend_ptr_stack_push(&EG(argument_stack), method_name);
 		zend_ptr_stack_push(&EG(argument_stack), params_array);
-		param_count = 2;
+		fci->param_count = 2;
 	}
 
-	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) param_count, NULL);
+	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) (long) fci->param_count, NULL);
 
 	EG(function_state_ptr) = &EX(function_state);
 
@@ -660,8 +687,8 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 
 	current_this = EG(This);
 
-	if (object_pp) {
-		EG(This) = *object_pp;
+	if (fci->object_pp) {
+		EG(This) = *fci->object_pp;
 
 		if (!PZVAL_IS_REF(EG(This))) {
 			EG(This)->refcount++; /* For $this pointer */
@@ -683,8 +710,8 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 
 	if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
-		if (symbol_table) {
-			EG(active_symbol_table) = symbol_table;
+		if (fci->symbol_table) {
+			EG(active_symbol_table) = fci->symbol_table;
 		} else {
 			ALLOC_HASHTABLE(EG(active_symbol_table));
 			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
@@ -692,7 +719,7 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 
 		original_return_value = EG(return_value_ptr_ptr);
 		original_op_array = EG(active_op_array);
-		EG(return_value_ptr_ptr) = retval_ptr_ptr;
+		EG(return_value_ptr_ptr) = fci->retval_ptr_ptr;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
 		orig_free_op1 = EG(free_op1);
@@ -700,7 +727,7 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 		orig_unary_op = EG(unary_op);
 		orig_binary_op = EG(binary_op);
 		zend_execute(EG(active_op_array) TSRMLS_CC);
-		if (!symbol_table) {
+		if (!fci->symbol_table) {
 			zend_hash_destroy(EG(active_symbol_table));
 			FREE_HASHTABLE(EG(active_symbol_table));
 		}
@@ -713,12 +740,12 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 		EG(unary_op) = orig_unary_op;
 		EG(binary_op) = orig_binary_op;
 	} else {
-		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) EX(function_state).function)->handler(param_count, *retval_ptr_ptr, (object_pp?*object_pp:NULL), 1 TSRMLS_CC);
-		INIT_PZVAL(*retval_ptr_ptr);
+		ALLOC_INIT_ZVAL(*fci->retval_ptr_ptr);
+		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, (fci->object_pp?*fci->object_pp:NULL), 1 TSRMLS_CC);
+		INIT_PZVAL(*fci->retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
-	if(call_via_handler) {
+	if (call_via_handler) {
 		zval_ptr_dtor(&method_name);
 		zval_ptr_dtor(&params_array);
 	}
@@ -729,10 +756,10 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	}
 	EG(scope) = current_scope;
 	EG(This) = current_this;
-	EG(current_execute_data) = EX(prev_execute_data);                       \
-
-																				return SUCCESS;
+	EG(current_execute_data) = EX(prev_execute_data);
+	return SUCCESS;
 }
+
 
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
 {
