@@ -189,6 +189,8 @@ typedef struct _zend_utility_functions {
 typedef struct _zend_utility_values {
 	unsigned char short_tags;
 	unsigned char asp_tags;
+	char *import_use_extension;
+	uint import_use_extension_length;
 } zend_utility_values;
 
 
@@ -242,13 +244,12 @@ extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 extern ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
-END_EXTERN_C()
-
-
+ 
 void zenderror(char *error);
 
 extern ZEND_API zend_class_entry zend_standard_class_def;
 extern zend_utility_values zend_uv;
+END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)
 

@@ -201,6 +201,12 @@ ZEND_API void zend_open_file_dtor(zend_file_handle *fh)
 			break;
 #endif
 	}
+	if (fh->opened_path) {
+		free(fh->opened_path);
+	}
+	if (fh->free_filename && fh->filename) {
+		efree(fh->filename);
+	}
 }
 
 
@@ -383,6 +389,7 @@ zend_op_array *compile_filename(zval *filename, zend_bool unique CLS_DC)
 		filename = &tmp;
 	}
 	file_handle.filename = filename->value.str.val;
+	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.opened_path = NULL;
 	retval = zend_compile_files(1 CLS_CC, 1, &file_handle);
@@ -467,13 +474,14 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 
 
 BEGIN_EXTERN_C()
-int require_filename(char *filename, zend_bool unique CLS_DC)
+int require_filename(char *filename CLS_DC)
 {
 	zend_file_handle file_handle;
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
-	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
+	file_handle.free_filename = 0;
+	if (require_file(&file_handle, 0 CLS_CC)==FAILURE) {
 		zend_bailout();
 		return FAILURE; /* will never get here */
 	}
@@ -481,21 +489,19 @@ int require_filename(char *filename, zend_bool unique CLS_DC)
 }
 
 
-int use_filename(char *filename, zend_bool unique CLS_DC)
+int use_filename(char *filename, uint filename_length CLS_DC)
 {
 	zend_file_handle file_handle;
-	int filenamelen;
-	char *newfile;
 
-	filenamelen = strlen(filename);
-	newfile = (char *) emalloc(filenamelen + 5);
-	strcpy(newfile, filename);
-	strcpy(newfile+filenamelen, ".php");
-	newfile[filenamelen+4] = '\0';
+	file_handle.filename = (char *) emalloc(filename_length + zend_uv.import_use_extension_length);
+	memcpy(file_handle.filename, filename, filename_length);
+	memcpy(file_handle.filename+filename_length, zend_uv.import_use_extension, zend_uv.import_use_extension_length);
+	file_handle.filename[filename_length+zend_uv.import_use_extension_length] = 0;
+	file_handle.free_filename = 1;
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = newfile;
-	if (require_file(&file_handle, unique CLS_CC)==FAILURE) {
+	if (require_file(&file_handle, 1 CLS_CC)==FAILURE) {
+		efree(file_handle.filename);
 		zend_bailout();
 		return FAILURE; /* will never get here */
 	}
@@ -515,15 +521,12 @@ int require_file(zend_file_handle *file_handle, zend_bool unique CLS_DC)
 	}
 	if (file_handle->opened_path) {
 		if (unique) {
-			zend_bool exists=1;
-
-			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, &exists, sizeof(zend_bool), NULL)==FAILURE) {
+			if (zend_hash_add(&CG(used_files), file_handle->opened_path, strlen(file_handle->opened_path)+1, file_handle, sizeof(zend_file_handle), NULL)==FAILURE) {
 				zend_close_file_handle(file_handle CLS_CC);
 				restore_lexical_state(&original_lex_state CLS_CC);
 				return SUCCESS;
 			}
 		}
-		free(file_handle->opened_path);
 	}
 	compiler_result = zendparse(CLS_C);
 	zend_close_file_handle(file_handle CLS_CC);
@@ -543,6 +546,7 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
+	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 	save_lexical_state(&original_lex_state CLS_CC);
 	if (open_file_for_scanning(&file_handle CLS_CC)==FAILURE) {
