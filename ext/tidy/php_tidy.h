@@ -81,7 +81,9 @@ struct _PHPTidyObj {
     TidyNode            node;
     TidyAttr            attr;
     PHPTidyDoc          *tdoc;
-    unsigned int        type;   
+    unsigned int        type;
+    zval                *obj_parent;
+    unsigned int        refcount;
 };
 
 
@@ -123,23 +125,34 @@ static void php_tidy_obj_clone(void *, void ** TSRMLS_DC);
 static void php_tidy_obj_dtor(void *, zend_object_handle TSRMLS_DC);
 
 zend_object_value php_tidy_create_obj(zend_class_entry * TSRMLS_DC);
+static zend_object_value php_tidy_register_object(PHPTidyObj *intern TSRMLS_DC);
 
+static zval *_php_tidy_create_obj_zval(unsigned int objtype,
+									   PHPTidyObj *parent,
+									   void *data
+									   TSRMLS_DC);
+static void _php_tidy_create_obj(zval *return_value,
+								  unsigned int objtype,
+								  PHPTidyObj *parent,
+							      void *data
+							      TSRMLS_DC);
 /* object handlers */
-zval * tidy_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC);
-void tidy_property_write(zval *obj, zval *member, zval *value TSRMLS_DC);
-zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC);
-zval * tidy_object_get(zval *property TSRMLS_DC);
-void tidy_object_set(zval **property, zval *value TSRMLS_DC);
-int tidy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC);
-void tidy_property_delete(zval *obj, zval *member TSRMLS_DC);
-HashTable * tidy_get_properties(zval *object TSRMLS_DC);
-union _zend_function * tidy_get_method(zval *obj, char *method, int method_len TSRMLS_DC);
-int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS);
-union _zend_function * tidy_get_constructor(zval *obj TSRMLS_DC);
-zend_class_entry * tidy_get_class_entry(zval *obj TSRMLS_DC);
-int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len, int parent TSRMLS_DC);
-int tidy_objects_compare(zval *obj_one, zval *obj_two TSRMLS_DC);
-void tidy_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+static zval * tidy_property_read(zval *object, zval *member, zend_bool silent TSRMLS_DC);
+static void tidy_property_write(zval *obj, zval *member, zval *value TSRMLS_DC);
+static zval ** tidy_property_get_ptr(zval *obj, zval *member TSRMLS_DC);
+static int tidy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC);
+static void tidy_property_delete(zval *obj, zval *member TSRMLS_DC);
+static HashTable * tidy_get_properties(zval *object TSRMLS_DC);
+static union _zend_function * tidy_get_method(zval *obj, char *method, int method_len TSRMLS_DC);
+static int tidy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS);
+static union _zend_function * tidy_get_constructor(zval *obj TSRMLS_DC);
+static zend_class_entry * tidy_get_class_entry(zval *obj TSRMLS_DC);
+static int tidy_get_class_name(zval *obj, char **class_name, zend_uint *name_len, int parent TSRMLS_DC);
+static int tidy_objects_compare(zval *obj_one, zval *obj_two TSRMLS_DC);
+static void tidy_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_DC);
+static void tidy_write_dim(zval *object, zval *offset, zval *value TSRMLS_DC);
+static void tidy_del_dim(zval *object, zval *offset TSRMLS_DC);
+static zval *tidy_read_dim(zval *object, zval *offset TSRMLS_DC);
 
 zend_bool _php_tidy_attr_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS);
 zend_bool _php_tidy_node_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS);
@@ -162,27 +175,7 @@ void _php_tidy_mem_panic(ctmbstr errmsg);
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 ZEND_END_MODULE_GLOBALS(tidy)
 
-static zend_object_handlers php_tidy_object_handlers = {
-	ZEND_OBJECTS_STORE_HANDLERS,
-	tidy_property_read,
-	tidy_property_write,
-	NULL,
-	NULL,
-	tidy_property_get_ptr,
-	tidy_property_get_ptr,
-	tidy_object_get,
-	tidy_object_set,
-	tidy_property_exists,
-	tidy_property_delete,
-	tidy_get_properties,
-	tidy_get_method,
-	tidy_call_method,
-	tidy_get_constructor,
-	tidy_get_class_entry,
-	tidy_get_class_name,
-	tidy_objects_compare,
-	tidy_object_cast
-};
+
 
 
 
