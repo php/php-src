@@ -1301,7 +1301,6 @@ ZEND_FUNCTION(debug_backtrace)
 			class_name = ptr->function_state.function->common.scope->name;
 			add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
 		}
-		function_name = ptr->function_state.function->common.function_name;
 		
 		if (ptr->op_array) {
 			filename = ptr->op_array->filename;
@@ -1310,15 +1309,30 @@ ZEND_FUNCTION(debug_backtrace)
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
 		}
 
+		function_name = ptr->function_state.function->common.function_name;
+
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
-		}
 
-		if (class_name) {
-			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
-		}
+			if (class_name) {
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+			}
 
-		add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
+			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
+		} else {
+			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
+
+			switch (ptr->opline->op2.u.constant.value.lval) {
+				case ZEND_EVAL:         function_name = "eval"; break;
+				case ZEND_INCLUDE:      function_name = "include"; break;
+				case ZEND_REQUIRE:      function_name = "require"; break;
+				case ZEND_INCLUDE_ONCE: function_name = "include_once"; break;
+				case ZEND_REQUIRE_ONCE: function_name = "require_once"; break;
+				default:				function_name = "unknown - please report a bug"; break;
+			}
+
+			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+		}
 
 		add_next_index_zval(return_value, stack_frame);
 
