@@ -1031,7 +1031,7 @@ PHP_FUNCTION(socket_bind)
 					RETURN_FALSE;
 				}
 				
-				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(sa_storage));
+				retval = bind(php_sock->bsd_socket, (struct sockaddr *)sa, sizeof(struct sockaddr_in));
 				break;
 			}
 		
