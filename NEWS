@@ -2,8 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
-<<<<<<< NEWS
-- Added restore_error_handler()
+- Added restore_error_handler(). (Zeev, Zend engine)
 - Fixed erroneous file names and line numbers in error situations under the
   multithreaded version of PHP - most noticeably Win32 (Zeev, Zend Engine)
 - Fix problem with CGI crashing on certain servers especially Windows Apache
