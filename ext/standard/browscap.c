@@ -141,7 +141,7 @@ PHP_MINIT_FUNCTION(browscap)
 
 		fh.handle.fp = V_FOPEN(browscap, "r");
 		if (!fh.handle.fp) {
-			php_error(E_WARNING,"Cannot open '%s' for reading", browscap);
+			php_error(E_CORE_WARNING,"Cannot open '%s' for reading", browscap);
 			return FAILURE;
 		}
 		fh.filename = browscap;
