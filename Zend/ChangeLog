@@ -1,3 +1,48 @@
+2002-03-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Consistency.
+
+    * ZEND_CHANGES: Add 'import statement' section.
+
+2002-03-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+    - Initial patch to support importing from class scopes (for Stig).
+    - It isn't complete yet but I want to work on it from another machine. It
+    - shouldn't break anything else so just don't try and use it.
+    - The following is a teaser of something that already works:
+    <?php
+
+    	class MyClass
+    	{
+    		function hello()
+    		{
+    			print "Hello, World\n";
+    		}
+    		class MyClass2
+    		{
+    			function hello()
+    			{
+    				print "Hello, World in MyClass2\n";
+    			}
+    		}
+    	}
+
+    	import function hello, class MyClass2 from MyClass;
+
+    	MyClass2::hello();
+    	hello();
+    ?>
+
+2002-03-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_builtin_functions.c: - MFZE1
+
 2002-03-01  Andrei Zmievski  <andrei@ispi.net>
 
     * zend_API.c: MFZE1
