@@ -65,6 +65,7 @@
 #define	EL_PACKET				"wddxPacket"
 #define EL_VERSION				"version"
 
+#define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
 
 static int le_wddx;
 
@@ -293,29 +294,31 @@ static void _php_wddx_serialize_string(wddx_packet *packet, zval *var)
 
 	_php_wddx_add_chunk(packet, WDDX_STRING_S);
 
-	i = 0;
-	buf = (char *)emalloc(var->value.str.len);
-	for(c=var->value.str.val; *c!='\0'; c++)
-	{
-		if (iscntrl((int)*c))
+	if (var->value.str.len > 0) {
+		i = 0;
+		buf = (char *)emalloc(var->value.str.len);
+		for(c=var->value.str.val; *c!='\0'; c++)
 		{
-			if (*buf)
+			if (iscntrl((int)*c))
 			{
-				buf[i] = '\0';
-				_php_wddx_add_chunk(packet, buf);
-				i = 0;
-				buf[i] = '\0';
+				if (*buf)
+				{
+					buf[i] = '\0';
+					_php_wddx_add_chunk(packet, buf);
+					i = 0;
+					buf[i] = '\0';
+				}
+				sprintf(control_buf, WDDX_CHAR, *c);
+				_php_wddx_add_chunk(packet, control_buf);
 			}
-			sprintf(control_buf, WDDX_CHAR, *c);
-			_php_wddx_add_chunk(packet, control_buf);
+			else
+				buf[i++] = *c;
 		}
-		else
-			buf[i++] = *c;
+		buf[i] = '\0';
+		if (*buf)
+			_php_wddx_add_chunk(packet, buf);				
+		efree(buf);
 	}
-	buf[i] = '\0';
-	if (*buf)
-		_php_wddx_add_chunk(packet, buf);				
-	efree(buf);
 	
 	_php_wddx_add_chunk(packet, WDDX_STRING_E);
 }
@@ -341,23 +344,26 @@ static void _php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 	char *key;
 	int hash_type, ent_type;
 	ulong idx;
-	char tmp_buf[WDDX_BUF_LEN];	
+	HashTable *target_hash;
+	char tmp_buf[WDDX_BUF_LEN];
 
-	zend_hash_internal_pointer_reset(var->value.ht);
+	target_hash = HASH_OF(var);
+	
+	zend_hash_internal_pointer_reset(target_hash);
 
-	hash_type = zend_hash_get_current_key(var->value.ht, &key, &idx);	
+	hash_type = zend_hash_get_current_key(target_hash, &key, &idx);	
 
 	if (hash_type == HASH_KEY_IS_STRING) {
 		_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 		efree(key);
 	} else {
-		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(var->value.ht));
+		sprintf(tmp_buf, WDDX_ARRAY_S, zend_hash_num_elements(target_hash));
 		_php_wddx_add_chunk(packet, tmp_buf);
 	}
 		
-	while(zend_hash_get_current_data(var->value.ht, (void**)&ent) == SUCCESS) {
+	while(zend_hash_get_current_data(target_hash, (void**)&ent) == SUCCESS) {
 		if (hash_type == HASH_KEY_IS_STRING) {
-			ent_type = zend_hash_get_current_key(var->value.ht, &key, &idx);
+			ent_type = zend_hash_get_current_key(target_hash, &key, &idx);
 
 			if (ent_type == HASH_KEY_IS_STRING) {
 				_php_wddx_serialize_var(packet, *ent, key);
@@ -369,7 +375,7 @@ static void _php_wddx_serialize_hash(wddx_packet *packet, zval *var)
 		} else
 			_php_wddx_serialize_var(packet, *ent, NULL);
 
-		zend_hash_move_forward(var->value.ht);
+		zend_hash_move_forward(target_hash);
 	}
 	
 	if (hash_type == HASH_KEY_IS_STRING)
@@ -417,6 +423,7 @@ static void _php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name)
 static void _php_wddx_add_var(wddx_packet *packet, zval *name_var)
 {
 	zval **val;
+	HashTable *target_hash;
 	ELS_FETCH();
 	
 	if (name_var->type & IS_STRING)
@@ -426,14 +433,16 @@ static void _php_wddx_add_var(wddx_packet *packet, zval *name_var)
 			_php_wddx_serialize_var(packet, *val, name_var->value.str.val);
 		}		
 	}
-	else if (name_var->type & IS_ARRAY)
+	else if (name_var->type == IS_ARRAY || name_var->type == IS_OBJECT)
 	{
-		zend_hash_internal_pointer_reset(name_var->value.ht);
+		target_hash = HASH_OF(name_var);
+		
+		zend_hash_internal_pointer_reset(target_hash);
 
-		while(zend_hash_get_current_data(name_var->value.ht, (void**)&val) == SUCCESS) {
+		while(zend_hash_get_current_data(target_hash, (void**)&val) == SUCCESS) {
 			_php_wddx_add_var(packet, *val);
 				
-			zend_hash_move_forward(name_var->value.ht);
+			zend_hash_move_forward(target_hash);
 		}
 	}
 }

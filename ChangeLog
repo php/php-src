@@ -2,6 +2,9 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Made WDDX serialize object properties properly (Andrey)
+- Fixed WDDX mem leak when undefined variable is passed in
+  for serialization (Andrey)
 - Added session_unset() function (Andrey)
 - Fixed double session globals shutdown crash (Andrey)
 - Fixed crash related to ignore_user_abort ini entry (Andrey)
