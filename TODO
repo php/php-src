@@ -31,6 +31,8 @@ global
     * find a better way to implement script timeouts. SIGVTALRM is used
       by some POSIX threads implementations (i.e. OpenBSD) and is not
       available in ZTS mode.
+    * add aliases to functions to conform to new naming conventions, e.g.
+      str_to_upper().
 
 documentation
 -------------

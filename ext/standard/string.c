@@ -2473,12 +2473,65 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 							 fold_case));
 }
 
+
+/* {{{ proto int strnatcmp(string s1, string s2)
+   Returns the result of string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcmp)
 {
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
+/* }}} */
 
+
+/* {{{ proto int strnatcasecmp(string s1, string s2)
+   Returns the result of case-insensitive string comparison using 'natural' algorithm */
 PHP_FUNCTION(strnatcasecmp)
 {
 	php_strnatcmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
+/* }}} */
+
+
+/* {{{ proto int str_count(string haystack, string needle)
+   Returns the number of times a substring occurs in the string. */
+PHP_FUNCTION(substr_count)
+{
+	zval **haystack, **needle;	
+	int i, length, count = 0;
+	char *p, *endp, cmp;
+
+	if (ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_string_ex(haystack);
+	convert_to_string_ex(needle);
+
+	if ((*needle)->value.str.len == 0) {
+		php_error(E_WARNING, "Empty substring");
+		RETURN_FALSE;
+	} else if ((*needle)->value.str.len == 1) {
+		// Special optimized case to avoid calls to php_memnstr
+		for (i = 0, p = (*haystack)->value.str.val, 
+		     length = (*haystack)->value.str.len, cmp = (*needle)->value.str.val[0]; 
+		     i < length; i++) {
+			if (p[i] == cmp) {
+				count++;
+			}
+		}
+	} else {
+ 		p = (*haystack)->value.str.val;
+		endp = p + (*haystack)->value.str.len;
+		while (p <= endp) {
+			if( (p = php_memnstr(p, (*needle)->value.str.val, (*needle)->value.str.len, endp)) != NULL ) {
+				p += (*needle)->value.str.len;
+				count++;
+			} else {
+				break;
+			}
+		}
+	}
+
+	RETURN_LONG(count);
+}
+/* }}} */	
