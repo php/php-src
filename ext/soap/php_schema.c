@@ -442,7 +442,6 @@ void delete_restriction_var_int(void *rvi)
 	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
 	if(ptr->id);
 		free(ptr->id);
-
 	free(ptr);
 }
 

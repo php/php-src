@@ -155,6 +155,7 @@ sdlBindingPtr get_binding_from_type(sdlPtr sdl, int type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
 xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval* data, int style);
+zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data);
 
 xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style);
 xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style);

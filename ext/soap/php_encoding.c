@@ -956,14 +956,14 @@ encodePtr get_conversion_ex(HashTable *encoding, int encode)
 	return *enc;
 }
 
-encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type)
+encodePtr get_conversion_from_href_type_ex(HashTable *encoding, char *type, int len)
 {
 	encodePtr *enc = NULL;
 
 	if(encoding == NULL)
 		return NULL;
 
-	if(zend_hash_find(encoding, type, strlen(type), (void **)&enc) == FAILURE)
+	if(zend_hash_find(encoding, type, len + 1, (void **)&enc) == FAILURE)
 		return NULL;
 
 	return (*enc);
