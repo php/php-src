@@ -449,16 +449,6 @@ EXEC SQL END DECLARE SECTION;
 			return;
 		}
 
-		if (!host) {
-			host = "";
-		}
-		if (!user) {
-			user = "";
-		}
-		if (!passwd) {
-			passwd = "";
-		}
-
 		hashed_details_length = sizeof("ifx___") - 1 + host_len + user_len + passwd_len;
 		hashed_details = (char *) emalloc(hashed_details_length+1);
 		sprintf(hashed_details,"ifx_%s_%s_%s", host, user, passwd);
