@@ -7,7 +7,7 @@ Switch test 3
 
 function switchtest ($i, $j)
 {
-	switch ($i):
+	switch ($i) {
 		case 0:
 				switch($j) {
 					case 0:
@@ -24,7 +24,7 @@ function switchtest ($i, $j)
 				break;
 		default:
 				echo "Default taken\n";
-	endswitch;
+	}
 }
 for ($i=0; $i<3; $i++) {
   for ($k=0; $k<10; $k++) {
