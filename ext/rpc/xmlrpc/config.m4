@@ -15,6 +15,9 @@ xmlrpc_ext_shared=$ext_shared
 PHP_ARG_WITH(expat-dir, libexpat dir for XMLRPC-EPI,
 [  --with-expat-dir=DIR      XMLRPC-EPI: libexpat dir for XMLRPC-EPI.])
 
+PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
+[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI.])
+
 if test "$PHP_XMLRPC" != "no"; then
 
   PHP_SUBST(XMLRPC_SHARED_LIBADD)
@@ -34,9 +37,14 @@ if test "$PHP_XMLRPC" != "no"; then
     AC_MSG_ERROR(XML-RPC support requires libexpat. Use --with-expat-dir=<DIR>)
   fi
 
+  if test "$PHP_ICONV_DIR" != "no"; then
+    PHP_ICONV=$PHP_ICONV_DIR
+  fi
+  
   if test "$PHP_ICONV" = "no"; then
     PHP_ICONV=yes
   fi
+  
   PHP_SETUP_ICONV(XMLRPC_SHARED_LIBADD, [], [
     AC_MSG_ERROR([iconv not found, in order to build xmlrpc you need the iconv library])
   ])
