@@ -90,7 +90,9 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(method);
 		ADD_LONG(mtime);
 		ADD_LONG(clength);
+#if !MODULE_MAGIC_AT_LEAST(20020506,0)
 		ADD_STRING(boundary);
+#endif
 		ADD_STRING(range);
 		ADD_LONG(chunked);
 		ADD_STRING(content_type);
