@@ -2993,7 +2993,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 		return PG_BIT;
 	if (!strcmp(type_name, "bit varying"))
 		return PG_VARBIT;
-	/* geometoric */
+	/* geometric */
 	if (!strcmp(type_name, "line"))
 		return PG_LINE;
 	if (!strcmp(type_name, "lseg"))
@@ -3119,7 +3119,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 		 zend_hash_get_current_data_ex(Z_ARRVAL_P(values), (void **)&val, &pos) == SUCCESS;
 		 zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos)) {
 		skip_field = 0;
-		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == FAILURE) {
+		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
 			php_error(E_WARNING, "%s() failed to get array key type",
 					  get_active_function_name(TSRMLS_C));
 			err = 1;
@@ -3799,7 +3799,7 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 				/* bit */
 			case PG_BIT:
 			case PG_VARBIT:
-				/* geometoric */
+				/* geometric */
 			case PG_LINE:
 			case PG_LSEG:
 			case PG_POINT:
