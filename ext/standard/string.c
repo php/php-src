@@ -3993,12 +3993,12 @@ static php_stream_filter_factory strfilter_rot13_factory = {
 
 PHP_MINIT_FUNCTION(string_filters)
 {
-	return php_stream_filter_register_factory("string.rot13", &strfilter_rot13_factory);
+	return php_stream_filter_register_factory("string.rot13", &strfilter_rot13_factory TSRMLS_CC);
 }
 
 PHP_MSHUTDOWN_FUNCTION(string_filters)
 {
-	return php_stream_filter_unregister_factory("string.rot13");
+	return php_stream_filter_unregister_factory("string.rot13" TSRMLS_CC);
 }
 /* }}} */
 
