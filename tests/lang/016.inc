@@ -1,5 +1,5 @@
 <?php 
-	old_function MyFunc $a (
-		echo $a;
-	);
+function MyFunc ($a) {
+	echo $a;
+}
 ?>

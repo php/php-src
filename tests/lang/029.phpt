@@ -6,11 +6,7 @@ OO Bug Test (Bug #7515)
 <?php
 class obj {
 	function method() {}
-    }
-
-function test($o_copy) {
-	$o_copy->root->set_in_copied_o=TRUE;
- 	var_dump($o_copy);?><BR><?php }
+}
 
 $o->root=new obj();
 

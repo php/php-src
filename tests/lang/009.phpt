@@ -3,9 +3,11 @@ Testing function parameter passing
 --POST--
 --GET--
 --FILE--
-<?php  old_function Test $a,$b (
-		echo $a+$b;	
-	);
-	Test(1,2)?>
+<?php
+function test ($a,$b) {
+	echo $a+$b;	
+}
+test(1,2);
+?>
 --EXPECT--
 3

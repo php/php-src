@@ -8,13 +8,17 @@ class foo {
 	function foo($name) {
      	$GLOBALS['List']= &$this;
      	$this->Name = $name;
-		$GLOBALS['List']->echoName(); }
+		$GLOBALS['List']->echoName();
+	}
 
 	function echoName() {
-     	$GLOBALS['names'][]=$this->Name; } }
+     	$GLOBALS['names'][]=$this->Name;
+	}
+}
 
-function &foo2(&$foo)	{
-	return $foo; }
+function &foo2(&$foo) {
+	return $foo;
+}
 
 
 $bar1 =& new foo('constructor');
@@ -28,6 +32,7 @@ $bar1->echoName();
 
 $List->echoName();
 
-print ($names==array('constructor','outside','outside','constructor','outside','outside')) ? 'success':'failure'; ?>
+print ($names==array('constructor','outside','outside','constructor','outside','outside')) ? 'success':'failure';
+?>
 --EXPECT--
 success
