@@ -1,3 +1,11 @@
+2001-10-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/README: typo fix by zoot@zotikos.com
+
+2001-10-02  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix.
+
 2001-10-01  Sascha Schumann  <sascha@schumann.cx>
 
     * Makefile.in:
