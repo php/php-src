@@ -274,14 +274,14 @@ void php_var_serialize(pval *buf, pval **struc)
 
 					switch (i) {
 						case HASH_KEY_IS_LONG:
-							ALLOC_ZVAL(d);	
+							MAKE_STD_ZVAL(d);	
 							d->type = IS_LONG;
 							d->value.lval = index;
 							php_var_serialize(buf, &d);
 							FREE_ZVAL(d);
 							break;
 						case HASH_KEY_IS_STRING:
-							ALLOC_ZVAL(d);	
+							MAKE_STD_ZVAL(d);	
 							d->type = IS_STRING;
 							d->value.str.val = key;
 							d->value.str.len = strlen(key);
@@ -465,8 +465,9 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 				pval *key;
 				pval *data;
 				
-				ALLOC_ZVAL(key);
-				ALLOC_ZVAL(data);
+				ALLOC_INIT_ZVAL(key);
+				ALLOC_INIT_ZVAL(data);
+
 				if (!php_var_unserialize(&key, p, max)) {
 				  	zval_dtor(key);
 				  	FREE_ZVAL(key);
