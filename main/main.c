@@ -396,6 +396,10 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	
 	vspprintf(&buffer, 0, format, args);
 	if (buffer) {
+		if (docref && docref[0] == '#') {
+			docref_target = strchr(docref, '#');
+			docref = NULL;
+		}
 		if (!docref) {
 			function = get_active_function_name(TSRMLS_C);
 			if (function) {
