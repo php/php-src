@@ -19,6 +19,16 @@
 
 #define ZEND_VERSION "0.80A"
 
+
+#ifdef __cplusplus
+#define BEGIN_EXTERN_C() extern "C" {
+#define END_EXTERN_C() }
+#else
+#define BEGIN_EXTERN_C()
+#define END_EXTERN_C()
+#endif
+
+
 #include <stdio.h>
 
 /*
@@ -174,13 +184,15 @@ ZEND_API extern char *undefined_variable_string;
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
 
+BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...);
 extern ZEND_API int (*zend_write)(const char *str, uint str_length);
 extern ZEND_API void (*zend_error)(int type, const char *format, ...);
 extern FILE *(*zend_fopen)(const char *filename);
-extern void (*zend_message_dispatcher)(long message, void *data);
 extern void (*zend_block_interruptions)();
 extern void (*zend_unblock_interruptions)();
+extern void (*zend_message_dispatcher)(long message, void *data);
+END_EXTERN_C()
 
 
 void zenderror(char *error);
@@ -193,8 +205,6 @@ extern zend_utility_values zend_uv;
 
 #define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
-
-
 
 
 /* Messages for applications of Zend */

@@ -20,8 +20,11 @@
 
 ZEND_API int zend_print_variable(zval *var);
 
+BEGIN_EXTERN_C()
 ZEND_API int zval_copy_ctor(zval *zvalue);
 ZEND_API void zval_dtor(zval *zvalue);
+END_EXTERN_C()
+
 ZEND_API void zval_ptr_dtor(zval **zval_ptr);
 void zval_add_ref(zval **p);
 

@@ -17,6 +17,17 @@
 #ifndef _LANGUAGE_SCANNER_H
 #define _LANGUAGE_SCANNER_H
 
+#ifdef ZTS
+class ZendFlexLexer : public yyFlexLexer
+{
+public:
+	int lex_scan(zval *zendlval CLS_DC);
+};
+
+#endif	/* ZTS */
+
+
+#ifndef ZTS
 typedef struct {
 	YY_BUFFER_STATE buffer_state;
 	int state;
@@ -25,5 +36,11 @@ typedef struct {
 	FILE *in;
 	char *filename;
 } zend_lex_state;
+#else
+typedef struct {
+	ZendFlexLexer *ZFL;
+	istream *input_file;
+} zend_lex_state;
+#endif
 
 #endif

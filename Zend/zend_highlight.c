@@ -20,9 +20,13 @@
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
 
+#ifndef ZTS
 extern char *zendtext;
 extern int zendleng;
-
+#else
+#define zendtext ((char *) zend_get_zendtext(CLS_C))
+#define zendleng zend_get_zendleng(CLS_C)
+#endif
 
 static void html_putc(char c)
 {
@@ -60,7 +64,6 @@ static void html_puts(char *s, uint len)
 		html_putc(*ptr++);
 	}
 }
-
 
 
 

@@ -86,6 +86,7 @@ static zend_alloc_globals alloc_globals;
 	p->pLast = (mem_header *) NULL;
 
 
+
 #if ZEND_DEBUG
 ZEND_API void *_emalloc(size_t size, char *filename, uint lineno)
 #else
@@ -514,7 +515,6 @@ ZEND_API void _persist_alloc(void *ptr)
 	ADD_POINTER_TO_LIST(p);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 }
-
 
 /*
  * Local variables:

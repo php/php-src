@@ -21,8 +21,14 @@
 #include "zend_compile.h"
 #include "zend_indent.h"
 
+#ifndef ZTS
 extern char *zendtext;
 extern int zendleng;
+#else
+#define zendtext ((char *) zend_get_zendtext(CLS_C))
+#define zendleng zend_get_zendleng(CLS_C)
+#endif
+
 
 static void handle_whitespace(int *emit_whitespace)
 {

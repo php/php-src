@@ -24,16 +24,22 @@
 #include "zend_hash.h"
 #include "zend_llist.h"
 
-
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
 
 #ifdef ZTS
 #include "../TSRM/TSRM.h"
 
+#ifdef __cplusplus
+class ZendFlexLexer;
+#endif
+
+BEGIN_EXTERN_C()
 extern int compiler_globals_id;
 extern int executor_globals_id;
 extern int alloc_globals_id;
+END_EXTERN_C()
+
 #endif
 
 typedef struct _zend_compiler_globals zend_compiler_globals;
@@ -53,7 +59,9 @@ typedef struct _zend_alloc_globals zend_alloc_globals;
 # define CLS_FETCH()	zend_compiler_globals *compiler_globals = (zend_compiler_globals *) ts_resource(compiler_globals_id)
 # define YYPARSE_PARAM compiler_globals
 # define YYLEX_PARAM compiler_globals
+BEGIN_EXTERN_C()
 int zendparse(void *compiler_globals);
+END_EXTERN_C()
 #else
 # define CLS_D
 # define CLS_DC
@@ -138,6 +146,14 @@ struct _zend_compiler_globals {
 	/* For extensions support */
 	unsigned char extended_info;	/* generate extension information for debugger/profiler */
 	unsigned char handle_op_arrays;	/* run op_arrays through op_array handlers */
+
+#ifdef ZTS
+#ifdef __cplusplus
+	ZendFlexLexer *ZFL;
+#else
+	void *ZFL;
+#endif
+#endif
 };
 
 

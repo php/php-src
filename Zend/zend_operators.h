@@ -45,6 +45,7 @@ ZEND_API int is_smaller_or_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
+BEGIN_EXTERN_C()
 ZEND_API void convert_scalar_to_number(zval *op);
 ZEND_API void convert_to_string(zval *op);
 ZEND_API void convert_to_long(zval *op);
@@ -55,6 +56,7 @@ ZEND_API void convert_to_object(zval *op);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API void convert_to_double(zval *op);
+END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2);

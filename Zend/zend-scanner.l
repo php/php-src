@@ -8,7 +8,7 @@
    +----------------------------------------------------------------------+
    | This source file is subject to the Zend license, that is bundled     |
    | with this package in the file LICENSE.  If you did not receive a     |
-   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | copy of the Zen license, please mail us at zend@zend.com so we can  |
    | send you a copy immediately.                                         |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
@@ -34,6 +34,10 @@
 
 #include <errno.h>
 
+#ifdef ZTS
+#include <fstream.h>
+#endif
+
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_compile.h"
@@ -47,10 +51,14 @@
 #include <stdarg.h>
 #endif
 
+#ifdef ZTS
+#define YY_DECL int ZendFlexLexer::lex_scan(zval *zendlval CLS_DC)
+#else
 #define YY_DECL int lex_scan(zval *zendlval CLS_DC)
+#endif
 #define ECHO { ZEND_WRITE( yytext, yyleng ); }
 
-#ifdef __cplusplus
+#ifdef ZTS
 #  define MY_INPUT yyinput
 #else
 #  define MY_INPUT input
@@ -86,6 +94,7 @@ do { \
 }
 		
 
+BEGIN_EXTERN_C()
 void startup_scanner(CLS_D)
 {
 	CG(heredoc) = NULL;
@@ -100,29 +109,26 @@ void shutdown_scanner(CLS_D)
 		CG(heredoc_len)=0;
 	}
 }
-
-
-void reset_scanner(CLS_D)
-{
-	YY_TLS_VARS
-
-	BEGIN(INITIAL);
-	CG(zend_lineno)=1;
-}
+END_EXTERN_C()
 
 
 static inline void save_lexical_state(zend_lex_state *lex_state CLS_DC)
 {
+#ifndef ZTS
 	memcpy(&lex_state->buffer_state,&YY_CURRENT_BUFFER,sizeof(YY_BUFFER_STATE));
 	lex_state->in = yyin;
 	lex_state->lineno = CG(zend_lineno);
 	lex_state->state = YYSTATE;
 	lex_state->filename = zend_get_compiled_filename();
+#else
+	lex_state->ZFL = CG(ZFL);
+#endif
 }
 
 
-static inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
+inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 {
+#ifndef ZTS
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
 
 	if (lex_state->buffer_state) {
@@ -136,11 +142,17 @@ static inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 	CG(zend_lineno) = lex_state->lineno;
 	BEGIN(lex_state->state);
 	zend_restore_compiled_filename(lex_state->filename);
+#else
+	delete(CG(ZFL));
+	CG(ZFL) = lex_state->ZFL;
+#endif
 }
 
 
+BEGIN_EXTERN_C()
 inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
+#ifndef ZTS
 	FILE *tmp;
 	YY_BUFFER_STATE buffer_state = YY_CURRENT_BUFFER;
 
@@ -167,8 +179,15 @@ inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	
 	zend_set_compiled_filename(file_handle->filename);
 	return SUCCESS;
-}
+#else
+	ifstream *input_file = new ifstream(file_handle->filename);
+	CG(ZFL) = new ZendFlexLexer;
 
+	CG(ZFL)->switch_streams(input_file, &cout);
+	return SUCCESS;
+#endif
+}
+END_EXTERN_C()
 
 
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...)
@@ -202,6 +221,7 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 		}
 		if (open_file_for_scanning(file_handle CLS_CC)==FAILURE) {
 			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+
 			destroy_op_array(op_array);
 			efree(op_array);
 			retval = NULL;
@@ -212,7 +232,9 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 				retval = NULL;
 				break;
 			} else {
+#ifndef ZTS
 				fclose(yyin);
+#endif
 				restore_lexical_state(&original_lex_state CLS_CC);
 				CG(active_op_array) = original_active_op_array;
 				retval = op_array;
@@ -253,18 +275,21 @@ zend_op_array *compile_filename(zval *filename CLS_DC)
 
 static inline int prepare_string_for_scanning(zval *str)
 {
+#ifndef ZTS
 	/* enforce two trailing NULLs for flex... */
 	str->value.str.val = (char *) erealloc(str->value.str.val,str->value.str.len+2);
 	str->value.str.val[str->value.str.len+1]=0;
 
 	yyin=NULL;
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2);
+#endif
 	return SUCCESS;
 }
 
 
 zend_op_array *compile_string(zval *source_string CLS_DC)
 {
+#ifndef ZTS
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
@@ -299,9 +324,13 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	zval_dtor(&tmp);
 
 	return retval;
+#else
+	return NULL;
+#endif
 }
 
 
+BEGIN_EXTERN_C()
 int require_filename(char *filename CLS_DC)
 {
 	zend_file_handle file_handle;
@@ -322,10 +351,13 @@ int require_file(zend_file_handle *file_handle CLS_DC)
 		return FAILURE;
 	}
 	zendparse(CLS_C);
+#ifndef ZTS
 	fclose(yyin);
+#endif
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }
+
 
 int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini)
 {
@@ -341,7 +373,9 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
+#ifndef ZTS
 	fclose(yyin);
+#endif
 	restore_lexical_state(&original_lex_state CLS_CC);
 	return SUCCESS;
 }
@@ -364,6 +398,40 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	zval_dtor(str);
 	return SUCCESS;
 }
+
+
+#ifdef ZTS
+int lex_scan(zval *zendlval CLS_DC)
+{
+	return CG(ZFL)->lex_scan(zendlval CLS_CC);
+}
+
+
+int yyFlexLexer::yylex()
+{
+	fprintf(stderr, "Error:  yyFlexLexer::yylex() called\n");
+	return -1;
+}
+
+#endif
+
+
+
+#ifdef ZTS
+const char *zend_get_zendtext(CLS_D)
+{
+	return CG(ZFL)->YYText();
+}
+
+
+int zend_get_zendleng(CLS_D)
+{
+	return CG(ZFL)->YYLeng();
+}
+#endif
+
+
+END_EXTERN_C()
 
 
 /* redefine YY_INPUT to handle urls for win32*/
@@ -422,9 +490,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 %option noyylineno
 %option noyywrap
 %%
-%{
-TLS_VARS;
-%}
 
 <IN_SCRIPTING>"exit" {
 	return T_EXIT;
