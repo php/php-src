@@ -2863,6 +2863,9 @@ PHP_FUNCTION(imap_fetch_overview)
 				if (env->references) {
 					add_property_string(myoverview, "references", env->references, 1);
 				}
+				if (env->in_reply_to) {
+					add_property_string(myoverview, "in_reply_to", env->in_reply_to, 1);
+				}
 				add_property_long(myoverview, "size", elt->rfc822_size);
 				add_property_long(myoverview, "uid", mail_uid(imap_le_struct->imap_stream, i));
 				add_property_long(myoverview, "msgno", i);
