@@ -646,7 +646,7 @@ static PHP_INI_MH(OnUpdate_mbstring_substitute_character)
 
 /* php.ini directive registration */
 PHP_INI_BEGIN()
-	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_ALL, OnUpdate_mbstring_language)
+	 PHP_INI_ENTRY("mbstring.language", NULL, PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_language)
 	 PHP_INI_ENTRY("mbstring.detect_order", NULL, PHP_INI_ALL, OnUpdate_mbstring_detect_order)
 	 PHP_INI_ENTRY("mbstring.http_input", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_input)
 	 PHP_INI_ENTRY("mbstring.http_output", NULL, PHP_INI_ALL, OnUpdate_mbstring_http_output)
@@ -655,8 +655,10 @@ PHP_INI_BEGIN()
 	 PHP_INI_ENTRY("mbstring.script_encoding", NULL, PHP_INI_ALL, OnUpdate_mbstring_script_encoding)
 #endif /* ZEND_MULTIBYTE */
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
-	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
-	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0", PHP_INI_ALL, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
+	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM |
+	 PHP_INI_PERDIR, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
+	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
+	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdateBool, encoding_translation, zend_mbstring_globals, mbstring_globals)
 PHP_INI_END()
 
 
