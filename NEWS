@@ -100,6 +100,7 @@ PHP                                                                        NEWS
 
 - Fixed is_executable() to be available also on Windows. (Shane)
 - Fixed dirname() and strip_tags() to be binary-safe. (Moriyoshi)
+- Fixed bug #24098 (crash in pathinfo()). (Ilia)
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
 - Fixed bug #21600 (Assign by reference function call changes variable 
   contents). (Zeev)
