@@ -1075,6 +1075,9 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 	int count = 0;
 	char *ss, *space;
 
+	if (!PG(register_globals) && !PG(track_vars))
+		return;
+	
 	ALLOC_ZVAL(arr);
 	array_init(arr);
 	INIT_PZVAL(arr);
