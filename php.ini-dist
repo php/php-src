@@ -491,7 +491,7 @@ SMTP = localhost
 ; For Win32 only.
 sendmail_from = me@localhost.com
 
-; For Unix only.  You may supply arguments as well (default: 'sendmail -t -i').
+; For Unix only.  You may supply arguments as well (default: "sendmail -t -i").
 ;sendmail_path =
 
 [Logging]
