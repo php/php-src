@@ -1,3 +1,50 @@
+2003-07-24  Jani Taskinen  <sniper@iki.fi>
+
+    * tests/bug19859.phpt
+      tests/bug20240.phpt
+      tests/bug20242.phpt
+      tests/bug21478.phpt
+      tests/bug21888.phpt
+      tests/bug22725.phpt
+      tests/bug24436.phpt:
+      cleanup (CS+ws)
+
+2003-07-24  Zeev Suraski  <zeev@zend.com>
+
+    * tests/bug24436.phpt:
+      Fix expectations :)
+
+    * zend_execute.c:
+      Fix logic and comments in ASSIGN_DIM
+
+    * zend_compile.c:
+      Fix another HANDLE_NUMERIC bug.  Looks like you opened Pandora's box,
+      Sterling ;)
+
+    * zend_builtin_functions.c:
+      Fix each() binary safety for keys
+
+    * zend_execute.c:
+      Fix assignments to numeric array indices
+
+    * zend_compile.c:
+      Remove useless code
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_language_parser.y:
+      Support references in foreach()
+      Syntax:
+        foreach ($arr as &$val)
+        foreach ($arr as $key => &$val)
+
+    * zend_execute.c:
+      Fix binary safety in foreach() keys (fixes bug #24783)
+
+    * zend.c:
+      Make print_r() binary safe with keys
+
 2003-07-23  Stanislav Malyshev  <stas@zend.com>
 
     * zend.h
