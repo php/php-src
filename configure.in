@@ -645,6 +645,11 @@ if test "$PHP_SAPI" = "cgi"; then
   PHP_PROGRAM=php
 fi
 
+if test "$PHP_SAPI" = "fastcgi"; then
+  PHP_PROGRAM=php
+fi
+
+
 PHP_REGEX
 
 PHP_CONFIGURE_PART(Configuring Zend)
