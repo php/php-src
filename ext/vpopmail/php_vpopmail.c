@@ -34,8 +34,6 @@
 
 #if HAVE_VPOPMAIL
 
-#include "vpopmail.h"
-
 #include "ext/standard/exec.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -47,8 +45,11 @@ ZEND_DECLARE_MODULE_GLOBALS(vpopmail)
 #undef VERSION
 #undef PACKAGE
 #include "vpopmail_config.h"
-#undef PACKAGE
 #include "vpopmail.h"
+#if HAVE_VPOPMAIL_VAUTH
+#include "vauth.h"
+#endif
+
 
 /* vpopmail does not export this, argh! */
 #define MAX_BUFF 500
@@ -70,6 +71,12 @@ function_entry vpopmail_functions[] = {
 	PHP_FE(vpopmail_passwd, NULL)
 	PHP_FE(vpopmail_set_user_quota, NULL)
 	PHP_FE(vpopmail_auth_user, NULL)
+	/* alias management */
+#if VALIAS
+	PHP_FE(vpopmail_alias_add, NULL)
+	PHP_FE(vpopmail_alias_del, NULL)
+	PHP_FE(vpopmail_alias_del_domain, NULL)
+#endif
 	/* error handling */
 	PHP_FE(vpopmail_error, NULL)
 	{NULL, NULL, NULL}
@@ -147,6 +154,11 @@ PHP_MINFO_FUNCTION(vpopmail)
 	php_info_print_table_row(2, "vpopmail vadddomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADDD);
 	php_info_print_table_row(2, "vpopmail vdeldomain", VPOPMAIL_BIN_DIR VPOPMAIL_DELD);
 	php_info_print_table_row(2, "vpopmail vaddaliasdomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADAD);
+#if VALIAS
+	php_info_print_table_row(2, "vpopmail valias support", "Enabled");
+#else
+	php_info_print_table_row(2, "vpopmail valias support", "Not supported by vpopmail");
+#endif
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -191,8 +203,7 @@ PHP_FUNCTION(vpopmail_add_domain)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -220,8 +231,7 @@ PHP_FUNCTION(vpopmail_del_domain)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -564,8 +574,7 @@ PHP_FUNCTION(vpopmail_add_user)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
         	php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -597,8 +606,7 @@ PHP_FUNCTION(vpopmail_del_user)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -641,8 +649,7 @@ PHP_FUNCTION(vpopmail_passwd)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -677,8 +684,7 @@ PHP_FUNCTION(vpopmail_set_user_quota)
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
@@ -693,11 +699,12 @@ PHP_FUNCTION(vpopmail_auth_user)
 	zval **domain;
 	zval **password;
 	zval **apop;
-	struct passwd *retval;
+	/* indeed we do not care of contents; newer vpopmail versions use struct vpasswd instead passwd */
+	void *retval;
 	int argc=ZEND_NUM_ARGS();
 
 	if (argc < 3 || argc > 4
-			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain, &password, &apop) == FAILURE)
+			|| zend_get_parameters_ex(argc, &user, &domain, &password, &apop) == FAILURE)
 		WRONG_PARAM_COUNT;
 
 	if (argc > 3)
@@ -712,9 +719,9 @@ PHP_FUNCTION(vpopmail_auth_user)
 	VPOPMAILG(vpopmail_errno) = 0;
 
 	retval = vauth_user(Z_STRVAL_PP(user),
-						Z_STRVAL_PP(domain),
-						Z_STRVAL_PP(password),
-						(argc>3)?Z_STRVAL_PP(apop):"");
+				Z_STRVAL_PP(domain),
+				Z_STRVAL_PP(password),
+				(argc>3)?Z_STRVAL_PP(apop):"");
 
 	/* 
 	 * we do not set vpopmail_errno here - it is considered auth_user cannot fail; insted it does not auth
@@ -723,15 +730,125 @@ PHP_FUNCTION(vpopmail_auth_user)
 
 	if (retval == NULL) {
 		RETURN_FALSE;
-	}
-	else {
+	} else {
 		RETURN_TRUE;
 	}
 }
 /* }}} */
 
+
+#if VALIAS
+
+/*
+ * Alias management functions
+ */
+
+
+/* {{{ proto bool vpopmail_alias_add(string user, string domain, string alias)
+   insert a virtual alias */
+PHP_FUNCTION(vpopmail_alias_add)
+{
+	zval **user;
+	zval **domain;
+	zval **alias;
+	int retval;
+
+	if (ZEND_NUM_ARGS() != 3
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain, &alias) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+
+	convert_to_string_ex(user);
+	convert_to_string_ex(domain);
+	convert_to_string_ex(alias);
+
+	VPOPMAILLS_FETCH();
+	VPOPMAILG(vpopmail_open) = 1;
+
+	retval = valias_insert(Z_STRVAL_PP(user),
+						   Z_STRVAL_PP(domain),
+						   Z_STRVAL_PP(alias));
+	
+	VPOPMAILG(vpopmail_errno)=retval;
+
+	if (retval == VA_SUCCESS) {
+		RETURN_TRUE;
+	} else {
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool vpopmail_alias_del(string user, string domain)
+   deletes all virtual aliases of a user */
+PHP_FUNCTION(vpopmail_alias_del)
+{
+	zval **user;
+	zval **domain;
+	int retval;
+
+	if (ZEND_NUM_ARGS() != 2
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+
+	convert_to_string_ex(user);
+	convert_to_string_ex(domain);
+
+	VPOPMAILLS_FETCH();
+	VPOPMAILG(vpopmail_open) = 1;
+
+	retval = valias_delete(Z_STRVAL_PP(user), Z_STRVAL_PP(domain));
+	
+	VPOPMAILG(vpopmail_errno)=retval;
+
+	if (retval == VA_SUCCESS) {
+		RETURN_TRUE;
+	} else {
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool vpopmail_alias_del_domain(string domain)
+   deletes all virtual aliases of a domain */
+PHP_FUNCTION(vpopmail_alias_del_domain)
+{
+	zval **domain;
+	int retval;
+
+	if (ZEND_NUM_ARGS() != 1
+			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &domain) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+
+	convert_to_string_ex(domain);
+
+	VPOPMAILLS_FETCH();
+	VPOPMAILG(vpopmail_open) = 1;
+
+	retval = valias_delete_domain(Z_STRVAL_PP(domain));
+	
+	VPOPMAILG(vpopmail_errno)=retval;
+
+	if (retval == VA_SUCCESS) {
+		RETURN_TRUE;
+	} else {
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
+
+/*
+ * Error handling helper
+ */
+
 /* {{{ proto string vpopmail_error(void)
-   Attempt to validate a username/domain/password. Returns true/false */
+   Get text message for last vpopmail error. Returns string */
 PHP_FUNCTION(vpopmail_error)
 {
 	if (ZEND_NUM_ARGS() != 0)
