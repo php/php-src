@@ -60,7 +60,7 @@
 %left '|'
 %left '^'
 %left '&'
-%nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL
+%nonassoc T_IS_EQUAL T_IS_NOT_EQUAL T_IS_IDENTICAL T_IS_NOT_IDENTICAL
 %nonassoc '<' T_IS_SMALLER_OR_EQUAL '>' T_IS_GREATER_OR_EQUAL
 %left T_SL T_SR
 %left '+' '-' '.'
@@ -454,6 +454,7 @@ expr_without_variable:
 	|	'!' expr { do_unary_op(ZEND_BOOL_NOT, &$$, &$2 CLS_CC); }
 	|	'~' expr { do_unary_op(ZEND_BW_NOT, &$$, &$2 CLS_CC); }
 	|	expr T_IS_IDENTICAL expr				{ do_binary_op(ZEND_IS_IDENTICAL, &$$, &$1, &$3 CLS_CC); }
+	|	expr T_IS_NOT_IDENTICAL expr		{ do_binary_op(ZEND_IS_NOT_IDENTICAL, &$$, &$1, &$3 CLS_CC); }
 	|	expr T_IS_EQUAL expr				{ do_binary_op(ZEND_IS_EQUAL, &$$, &$1, &$3 CLS_CC); }
 	|	expr T_IS_NOT_EQUAL expr 			{ do_binary_op(ZEND_IS_NOT_EQUAL, &$$, &$1, &$3 CLS_CC); }
 	|	expr '<' expr 					{ do_binary_op(ZEND_IS_SMALLER, &$$, &$1, &$3 CLS_CC); }

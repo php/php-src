@@ -999,6 +999,18 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 	return FAILURE;
 }
 
+
+ZEND_API int is_not_identical_function(zval *result, zval *op1, zval *op2)
+{
+   result->type = IS_BOOL;
+   if ( is_identical_function( result, op1, op2 ) == FAILURE ) {
+	  return FAILURE;
+   }
+   result->value.lval = !result->value.lval;
+   return SUCCESS;
+}
+
+
 ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2)
 {
 	if (compare_function(result, op1, op2) == FAILURE) {
