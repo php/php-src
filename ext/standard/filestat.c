@@ -570,6 +570,19 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 #ifndef PHP_WIN32
+#if VIRTUAL_DIR
+	do {
+		char *tmpname;
+
+		if (virtual_filepath(filename, &tmpname TSRMLS_CC)) {
+			php_error(E_WARNING, "Cannot get the virtual filepath of %s\n", filename);
+			RETURN_FALSE;
+		}
+
+		filename = tmpname;
+	} while (0);
+#endif
+
 	switch (type) {
 		case FS_IS_W:
 			RETURN_BOOL (!access (filename, W_OK));
