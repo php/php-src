@@ -191,7 +191,8 @@ PHPAPI void php_print_info(int flag)
 		if (zend_hash_find(&EG(symbol_table), "PHP_AUTH_PW", sizeof("PHP_AUTH_PW"), (void **) &data) != FAILURE) {
 			php_info_print_table_row(2, "PHP_AUTH_PW", (*data)->value.str.val);
 		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), (void **) &data)!=FAILURE
+			&& ((*data)->type==IS_ARRAY)) {
 			zend_hash_internal_pointer_reset((*data)->value.ht);
 			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				zval tmp2, *value_ptr;
@@ -229,7 +230,8 @@ PHPAPI void php_print_info(int flag)
 				}
 			}
 		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &data)!=FAILURE
+			&& ((*data)->type==IS_ARRAY)) {
 			zend_hash_internal_pointer_reset((*data)->value.ht);
 			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_string(*tmp);
@@ -249,7 +251,8 @@ PHPAPI void php_print_info(int flag)
 				zend_hash_move_forward((*data)->value.ht);
 			}
 		}
-		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), (void **) &data) != FAILURE) {
+		if (zend_hash_find(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), (void **) &data)!=FAILURE
+			&& ((*data)->type==IS_ARRAY)) {
 			zend_hash_internal_pointer_reset((*data)->value.ht);
 			while (zend_hash_get_current_data((*data)->value.ht, (void **) &tmp) == SUCCESS) {
 				convert_to_string(*tmp);
