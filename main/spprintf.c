@@ -123,6 +123,7 @@
 		size_t newlen;								\
 		smart_str_alloc(xbuf, (count), 0); 			\
 		memset(xbuf->c + xbuf->len, ch, (count));	\
+		xbuf->len += (count);				\
 	}												\
 } while (0)
 
