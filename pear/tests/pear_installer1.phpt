@@ -11,6 +11,11 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 
 require_once "PEAR/Installer.php";
 
+$temp_path = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'testinstallertemp';
+if (!is_dir($temp_path)) {
+    mkdir($temp_path);
+}
+touch($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
 // no UI is needed for these tests
 $ui = false;
 $installer = new PEAR_Installer($ui);
@@ -70,6 +75,8 @@ echo "\ntest checkDeps 2:\n";
 $res = '';
 var_dump($installer->checkDeps($fakerel, $res));
 var_dump($res);
+unlink($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
+rmdir($temp_path);
 ?>
 --GET--
 --POST--
