@@ -14,7 +14,7 @@ class Peoples implements ArrayAccess {
 		return array_key_exists($this->person, $index);
 	}
 
-	function offsetGet($index) {
+	function &offsetGet($index) {
 		return $this->person[$index];
 	}
 
