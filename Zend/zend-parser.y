@@ -356,7 +356,7 @@ echo_expr_list:
 
 for_expr:
 		/* empty */			{ $$.op_type = IS_CONST;  $$.u.constant.type = IS_BOOL;  $$.u.constant.value.lval = 1; }
-	|	for_expr ',' expr	{ $$ = $3; }
+	|	for_expr ',' { do_free(&$1 CLS_CC); } expr	{ $$ = $4; }
 	|	expr				{ $$ = $1; }
 ;
 
