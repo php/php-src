@@ -156,7 +156,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			FREE_HASHTABLE(ce->static_members);
 			zend_hash_destroy(&ce->constants_table);
 			zend_hash_destroy(&ce->class_table);
-			if (ce->num_interfaces > 0) {
+			if (ce->num_interfaces > 0 && ce->interfaces) {
 				efree(ce->interfaces);
 			}
 			if (ce->doc_comment) {
