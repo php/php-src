@@ -1,7 +1,7 @@
 --TEST--
 XML parser case folding test
 --SKIPIF--
-<?php include("skipif.php"); ?>
+<?php include("skipif.inc"); ?>
 --FILE--
 <?php
 $xp = xml_parser_create();
