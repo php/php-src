@@ -39,7 +39,15 @@ PHP_ARG_WITH(mysql, for MySQL support,
 [  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
                           If unspecified, the bundled MySQL library will be used.], yes)
 
+if test "$PHP_MYSQL" != "no"; then
+  PHP_MYSQL_SOCK
+  MYSQL_CHECKS
+  AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+fi
+
 if test "$PHP_MYSQL" = "yes"; then
+  PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
+  MYSQL_MODULE_TYPE=builtin
   sources="libmysql/libmysql.c libmysql/errmsg.c libmysql/net.c libmysql/violite.c libmysql/password.c \
 	libmysql/my_init.c libmysql/my_lib.c libmysql/my_static.c libmysql/my_malloc.c libmysql/my_realloc.c libmysql/my_create.c \
 	libmysql/my_delete.c libmysql/my_tempnam.c libmysql/my_open.c libmysql/mf_casecnv.c libmysql/my_read.c \
@@ -52,21 +60,13 @@ if test "$PHP_MYSQL" = "yes"; then
 	libmysql/is_prefix.c libmysql/int2str.c libmysql/str2int.c libmysql/strinstr.c \
 	libmysql/strcont.c libmysql/strcend.c libmysql/bchange.c libmysql/bmove.c libmysql/bmove_upp.c \
 	libmysql/longlong2str.c libmysql/strtoull.c libmysql/strtoll.c libmysql/charset.c libmysql/ctype.c"
-else
-  sources=
-fi
 
-if test "$PHP_MYSQL" != "no"; then
-  AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-  PHP_NEW_EXTENSION(mysql,php_mysql.c $sources, $ext_shared,,-I@ext_srcdir@/libmysql)
-fi
+  PHP_NEW_EXTENSION(mysql, php_mysql.c, $sources $ext_shared,,-I@ext_srcdir@/libmysql)
 
-if test "$PHP_MYSQL" = "yes"; then
-  PHP_MYSQL_SOCK
-  MYSQL_CHECKS
-  PHP_ADD_BUILD_DIR($ext_builddir/libmysql)
-  MYSQL_MODULE_TYPE=builtin
 elif test "$PHP_MYSQL" != "no"; then
+
+  PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
+
   for i in $PHP_MYSQL; do
     if test -r $i/include/mysql/mysql.h; then
       MYSQL_DIR=$i
@@ -91,10 +91,28 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
   fi
 
-  if test "$PHP_ZLIB_DIR" != "no"; then
-    PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
-    MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -z"
-  fi
+  PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],
+  [
+    if test "$PHP_ZLIB_DIR" != "no"; then
+      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY(mysqlclient, mysql_error, [], [
+        AC_MSG_ERROR([mysql configure failed. Please check config.log for more information.])
+      ], [
+        -L$PHP_ZLIB_DIR/lib -L$MYSQL_LIB_DIR 
+      ])  
+      MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -z"
+    else
+      PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY(mysqlclient, mysql_errno, [], [
+        AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
+      ], [
+        -L$MYSQL_LIB_DIR
+      ])   
+      MYSQL_LIBS="-z"
+    fi
+  ], [
+    -L$MYSQL_LIB_DIR 
+  ])
 
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
