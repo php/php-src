@@ -1758,7 +1758,7 @@ void do_add_list_element(znode *element CLS_DC)
 	if (element) {
 		lle.var = *element;
 		zend_llist_copy(&lle.dimensions, &CG(dimension_llist));
-		zend_llist_add_element(&CG(list_llist), &lle);
+		zend_llist_prepend_element(&CG(list_llist), &lle);
 	}
 	(*((int *)CG(dimension_llist).tail->data))++;
 }
@@ -1827,11 +1827,7 @@ void do_list_end(znode *result, znode *expr CLS_DC)
 		}
 		((list_llist_element *) le->data)->value = last_container;
 		zend_llist_destroy(&((list_llist_element *) le->data)->dimensions);
-		le = le->next;
-	}
-
-	le = CG(list_llist).head;
-	while (le) {
+		do_end_variable_parse(BP_VAR_W, 0 CLS_CC);
 		do_assign(result, &((list_llist_element *) le->data)->var, &((list_llist_element *) le->data)->value CLS_CC);
 		CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
 		le = le->next;
