@@ -163,6 +163,8 @@ function_entry mnogosearch_functions[] = {
 #if UDM_VERSION_ID >= 30204
 	PHP_FE(udm_parse_query_string,	NULL)
 	PHP_FE(udm_make_excerpt,	NULL)
+	PHP_FE(udm_set_agent_param_ex,	NULL)
+	PHP_FE(udm_get_res_field_ex,	NULL)
 #endif
 #endif
 
@@ -1663,6 +1665,104 @@ DLEXPORT PHP_FUNCTION(udm_make_excerpt)
 	}
 	
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int udm_set_agent_param_ex(int agent, string var, string val)
+   Set mnoGoSearch agent session parameters extended */
+DLEXPORT PHP_FUNCTION(udm_set_agent_param_ex)
+{
+	pval **yyagent, **yyvar, **yyval;
+	char *val, *var;
+	UDM_AGENT * Agent;
+
+	switch(ZEND_NUM_ARGS()){
+	
+		case 3: 		
+			if(zend_get_parameters_ex(3,&yyagent,&yyvar,&yyval)==FAILURE){
+				RETURN_FALSE;
+			}
+			convert_to_string_ex(yyvar);
+			convert_to_string_ex(yyval);
+			ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-agent", le_link);
+			var = Z_STRVAL_PP(yyvar);
+			val = Z_STRVAL_PP(yyval);
+			
+			break;
+			
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	UdmVarListReplaceStr(&Agent->Conf->Vars,var,val);
+	
+	if (!strcasecmp(var,"LocalCharset")) {
+		const char * charset=UdmVarListFindStr(&Agent->Conf->Vars,"LocalCharset","iso-8859-1");
+		Agent->Conf->lcs=UdmGetCharSet(charset);
+	} else if (!strcasecmp(var,"BrowserCharset")) {
+		const char * charset=UdmVarListFindStr(&Agent->Conf->Vars,"BrowserCharset","iso-8859-1");
+		Agent->Conf->bcs=UdmGetCharSet(charset);
+	} else if (!strcasecmp(var,"Synonym")) {
+		if (UdmSynonymListLoad(Agent->Conf,val)) {
+			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C),Agent->Conf->errstr);
+			RETURN_FALSE;
+		} else UdmSynonymListSort(&(Agent->Conf->Synonyms));
+	} else if (!strcasecmp(var,"Stopwordfile")) {
+		if (UdmStopListLoad(Agent->Conf,val)) {
+			php_error(E_WARNING, "%s(): %s", Agent->Conf->errstr, get_active_function_name(TSRMLS_C));
+			RETURN_FALSE;
+		}
+	} else if (!strcasecmp(var,"MinWordLen")) {
+		Agent->Conf->WordParam.min_word_len=atoi(val);
+	} else if (!strcasecmp(var,"MaxWordLen")) {
+		Agent->Conf->WordParam.max_word_len=atoi(val);
+	} else if (!strcasecmp(var,"VarDir")) {
+		snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
+	}
+
+	RETURN_TRUE;
+}
+
+/* {{{ proto string udm_get_res_field_ex(int res, int row, string field)
+   Fetch mnoGoSearch result field */
+DLEXPORT PHP_FUNCTION(udm_get_res_field_ex)
+{
+	pval **yyres, **yyrow_num, **yyfield_name;
+
+	UDM_RESULT * Res;
+	int row;
+	char *field;
+	
+	switch(ZEND_NUM_ARGS()){
+		case 3: {
+				if (zend_get_parameters_ex(3, &yyres,&yyrow_num,&yyfield_name)==FAILURE){
+					RETURN_FALSE;
+				}
+				convert_to_string_ex(yyrow_num);
+				convert_to_string_ex(yyfield_name);
+				field = Z_STRVAL_PP(yyfield_name);
+				row = atoi(Z_STRVAL_PP(yyrow_num));
+			}
+			break;
+		default:
+			WRONG_PARAM_COUNT;
+			break;
+	}
+	
+	ZEND_FETCH_RESOURCE(Res, UDM_RESULT *, yyres, -1, "mnoGoSearch-Result", le_res);
+	if(row<Res->num_rows){
+		if (!strcasecmp(field,"URL")) {
+		    char	*al;
+		    al = (char *)MyRemoveHiLightDup((const char *)(UdmVarListFindStr(&(Res->Doc[row].Sections), field, "")));
+		    UdmVarListReplaceStr(&Res->Doc[row].Sections,field,al);
+		    free(al);
+		}
+		RETURN_STRING((char *)UdmVarListFindStr(&Res->Doc[row].Sections,field,""),1);
+	} else {
+		php_error(E_WARNING,"%s(): row number too large", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 #endif
