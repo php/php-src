@@ -3144,10 +3144,22 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	char *tempMailTo;
 	char *tsm_errmsg = NULL;
 	ADDRESS *addr;
-	char *bufferTo = NULL, *bufferCc = NULL, *bufferBcc = NULL;
-	int offset;
+	char *bufferTo = NULL, *bufferCc = NULL, *bufferBcc = NULL, *bufferHeader = NULL;
+	int offset, bufferLen = 0;;
 
+	if (headers)
+		bufferLen += strlen(headers);
+	if (to)
+		bufferLen += strlen(to) + 6;
+	if (cc)
+		bufferLen += strlen(cc) + 6;
+
+	bufferHeader = (char *)emalloc(bufferLen);
+	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
+		strcat(bufferHeader, "To: ");
+		strcat(bufferHeader, to);
+		strcat(bufferHeader, "\r\n");
 		tempMailTo = estrdup(to);
 		bufferTo = (char *)emalloc(strlen(to));
 		offset = 0;
@@ -3168,6 +3180,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 	if (cc && *cc) {
+		strcat(bufferHeader, "Cc: ");
+		strcat(bufferHeader, cc);
+		strcat(bufferHeader, "\r\n");
 		tempMailTo = estrdup(cc);
 		bufferCc = (char *)emalloc(strlen(cc));
 		offset = 0;
@@ -3207,8 +3222,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 		}
 	}
 
+	strcat(bufferHeader, headers);
 
-	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, headers, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
+	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {
 		if (tsm_errmsg) {
 			php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), tsm_errmsg);
 			efree(tsm_errmsg);
@@ -3225,6 +3241,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	if (bufferBcc) {
 		efree(bufferBcc);
+	}
+	if (bufferHeader) {
+		efree(bufferHeader);
 	}
 #else
 	if (!INI_STR("sendmail_path")) {
