@@ -647,6 +647,12 @@ _oci_conn_list_dtor(oci_connection *connection)
 
 	oci_debug("START _oci_conn_list_dtor: id=%d",connection->id);
 
+	if (connection->session->exclusive) {
+		/* exclusive connection created via OCINLogon() close their 
+		   associated session when destructed */
+		zend_list_delete(connection->session->num);
+	}
+
 	if (connection->pServiceContext) {
 		/*
 		connection->error = 
@@ -1843,6 +1849,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 	session->persistent = persistent;
 	session->hashed_details = hashed_details;
 	session->server = server;
+	session->exclusive = exclusive;
 
 	/* allocate temporary Service Context */
 	OCI(error) = 
@@ -1924,12 +1931,6 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	if (exclusive) {
 		psession = session;
-		/*
-		zend_hash_next_index_insert(OCI(user),
-									(void *)session,
-									sizeof(oci_session),
-									(void**)&psession);
-		*/
 	} else {
 		zend_hash_update(OCI(user),
 						 session->hashed_details,
@@ -1944,7 +1945,7 @@ static oci_session *_oci_open_session(oci_server* server,char *username,char *pa
 
 	oci_debug("_oci_open_session new sess=%d user=%s",psession->num,username);
 
-	free(session);
+	if (! exclusive) free(session);
 
 	return psession;
 
