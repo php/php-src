@@ -22,7 +22,7 @@ if test "$PHP_MIME_MAGIC" != "no"; then
       AC_MSG_ERROR([File '$PHP_MIME_MAGIC' not found!])
     fi
   else
-    MAGIC_MIME_LOCATIONS="/usr/share/magic.mime /usr/share/misc/magic.mime /etc/magic.mime"
+    MAGIC_MIME_LOCATIONS="/usr/local/apache/conf/magic /usr/local/etc/apache/conf/magic /etc/apache/magic /etc/httpd/conf/magic /usr/share/magic.mime /usr/share/misc/magic.mime /etc/magic.mime"
 
     for i in $MAGIC_MIME_LOCATIONS; do
       if test -f $i; then
