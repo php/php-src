@@ -719,10 +719,7 @@ static void
 cast_object(zval *object, int type, char *contents TSRMLS_DC)
 {
 	if (contents) {
-		int len = strlen(contents);
-		ZVAL_STRINGL(object, contents, len, 1);
-	} else {
-		ZVAL_NULL(object);
+		ZVAL_STRINGL(object, contents, strlen(contents), 1);
 	}
 
 	switch (type) {
@@ -751,7 +748,6 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	char           *contents = NULL;
 
     sxe = php_sxe_fetch_object(readobj TSRMLS_CC);
-	
 	if (should_free) {
 		zval_dtor(writeobj);
 	}
