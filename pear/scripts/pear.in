@@ -35,8 +35,8 @@ $all_commands = PEAR_Command::getCommands();
 $cmd_options  = PEAR_Command::getOptions();
 $progname = basename(__FILE__);
 
-// XXX change Getopt to use raiseError() ?
 $argv = Console_Getopt::readPHPArgv();
+array_shift($argv);
 $options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v" . $cmd_options);
 if (PEAR::isError($options)) {
     usage($options);
