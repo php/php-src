@@ -35,10 +35,8 @@ Compiling
   
 Prerequisites
 =============
-1) FriBidi version 0.9.0 or later must be installed. Latest version can be obtained thru 
+1) FriBidi version 0.10.4 or later must be installed. Latest version can be obtained thru 
    http://fribidi.sourceforge.net/
-
-2) glib header files: glib.h and glibconfig.h.
 
 Note
 =====
