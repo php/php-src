@@ -77,7 +77,7 @@ PHP 4                                                                      NEWS
   . ext/cybermut
 - ZLIB extension is now built-in in the Windows distribution.
   External extension (php_zlib.dll) has been removed. (Edin)
-- Fixed  a crash when using invalid color index with imagecolortransparent().
+- Fixed a crash when using invalid color index with imagecolortransparent().
   (Pierre-Alain Joye)
 - Fixed bug #20987 (no handling for client certificates). (Ilia)
 - Fixed bug #21039 (crash when not supplying an IV to mcrypt_generic_init).
