@@ -404,93 +404,91 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent,
 	int ret = SUCCESS; 
 
 	/* Add SafeArray support */
-	switch(var_arg->vt & ~VT_BYREF)
-	{		
-		case VT_ARRAY:
+	if (var_arg->vt & VT_ARRAY)
+	{
+		SAFEARRAY *array = V_ARRAY(var_arg);
+		LONG indices[1];
+		LONG lbound=0, ubound;
+		VARTYPE vartype;
+		register int ii;
+		UINT Dims;
+		VARIANT vv;
+		pval *element;
+
+		/* TODO: Add support for multi-dimensional SafeArrays */
+		/* For now just validate that the SafeArray has one dimension */
+		if (1 != (Dims = SafeArrayGetDim(array)))
+		{
+			php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
+			var_reset(pval_arg);
+			return FAILURE;
+		}
+
+		/* This call has failed for everything I have tried */
+		/* But best leave it to be on the safe side */
+		if (S_OK != SafeArrayGetVartype(array, &vartype))
+		{
+			/* Fall back to what we do know */
+			/* Mask off the array bit and assume */
+			/* what is left is the type of the array */
+			/* elements */
+			vartype = var_arg->vt & ~VT_ARRAY;
+		}
+		SafeArrayGetUBound(array, 1, &ubound);
+		SafeArrayGetLBound(array, 1, &lbound);
+
+		/* Since COM returned an array we set up the php */
+		/* return value to be an array */
+		array_init(pval_arg);
+
+		/* Walk the safe array */
+		for (ii=lbound;ii<=ubound;ii++)
+		{
+			indices[0] = ii;
+			VariantInit(&vv); /* Docs say this just set the vt field, but you never know */
+			/* Set up a variant to pass to a recursive call */
+			/* So that we do not need to have two copies */
+			/* of the code */
+			vv.vt = vartype;
+			if (S_OK != SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal)))
+            {
+				/* Failure to retieve an element probably means the array is sparse */
+				/* So leave the php array sparse too */
+				continue;
+            }
+			/* Create an element to be added to the array */
+			ALLOC_ZVAL(element);
+			/* Call ourself again to handle the base type conversion */
+			/* If SafeArrayGetElement proclaims to allocate */
+			/* memory for a BSTR, so the recursive call frees */
+			/* the string correctly */
+			if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage))
 			{
-				SAFEARRAY *array = V_ARRAY(var_arg);
-				LONG indices[1];
-				LONG lbound=0, ubound;
-				VARTYPE vartype;
-				register int ii;
-				UINT Dims;
-				VARIANT vv;
-				pval *element;
-
-				/* TODO: Add support for multi-dimensional SafeArrays */
-				/* For now just validate that the SafeArray has one dimension */
-				if (1 != (Dims = SafeArrayGetDim(array)))
-				{
-					php_error(E_WARNING,"Unsupported: multi-dimensional (%d) SafeArrays", Dims);
-					var_reset(pval_arg);
-					return FAILURE;
-				}
-
-				/* This call has failed for everything I have tried */
-				/* But best leave it to be on the safe side */
-				if (S_OK != SafeArrayGetVartype(array, &vartype))
-				{
-					/* Fall back to what we do know */
-					/* Mask off the array bit and assume */
-					/* what is left is the type of the array */
-					/* elements */
-					vartype = var_arg->vt & ~VT_ARRAY;
-				}
-				SafeArrayGetUBound(array, 1, &ubound);
-				SafeArrayGetLBound(array, 1, &lbound);
-
-				/* Since COM returned an array we set up the php */
-				/* return value to be an array */
-				array_init(pval_arg);
-
-				/* Walk the safe array */
-				for (ii=lbound;ii<=ubound;ii++)
-				{
-					indices[0] = ii;
-					VariantInit(&vv); /* Docs say this just set the vt field, but you never know */
-					/* Set up a variant to pass to a recursive call */
-					/* So that we do not need to have two copies */
-					/* of the code */
-					vv.vt = vartype;
-					if (S_OK != SafeArrayGetElement(array, indices, (VOID *) &(vv.lVal)))
-                    {
-						/* Failure to retieve an element probably means the array is sparse */
-						/* So leave the php array sparse too */
-						continue;
-                    }
-					/* Create an element to be added to the array */
-					ALLOC_ZVAL(element);
-					/* Call ourself again to handle the base type conversion */
-					/* If SafeArrayGetElement proclaims to allocate */
-					/* memory for a BSTR, so the recursive call frees */
-					/* the string correctly */
-					if (FAILURE == php_variant_to_pval(&vv, element, persistent, codepage))
-					{
-						/* Error occurred setting up array element */
-						/* Error was displayed by the recursive call */
-						FREE_ZVAL(element);
-						/* TODO: Do we stop here, or go on and */
-						/* try to make sense of the rest of the array */
-						/* Going on leads to multiple errors displayed */
-						/* for the same conversion. For large arrays that */
-						/* could be very annoying */
-						/* And if we don't go on - what to do about */
-						/* the parts of the array that are OK? */
-						/* break; */
-					}
-					else
-					{
-						/* Just insert the element into our return array */
-						add_index_zval(pval_arg, ii, element);
-					}
-				}
-
-				/* Clean up the SafeArray since that is our responsibility */
-				SafeArrayDestroyData(array);
-				SafeArrayDestroyDescriptor(array);
+				/* Error occurred setting up array element */
+				/* Error was displayed by the recursive call */
+				FREE_ZVAL(element);
+				/* TODO: Do we stop here, or go on and */
+				/* try to make sense of the rest of the array */
+				/* Going on leads to multiple errors displayed */
+				/* for the same conversion. For large arrays that */
+				/* could be very annoying */
+				/* And if we don't go on - what to do about */
+				/* the parts of the array that are OK? */
+				/* break; */
 			}
-			break;
+			else
+			{
+				/* Just insert the element into our return array */
+				add_index_zval(pval_arg, ii, element);
+			}
+		}
 
+		/* Clean up the SafeArray since that is our responsibility */
+		SafeArrayDestroyData(array);
+		SafeArrayDestroyDescriptor(array);
+	}
+	else switch(var_arg->vt & ~VT_BYREF)
+	{		
 		case VT_EMPTY:
 			var_uninit(pval_arg);
 			break;
