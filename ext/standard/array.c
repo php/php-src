@@ -2173,8 +2173,10 @@ PHP_FUNCTION(array_flip)
 	zval **array, **entry, *data;
 	HashTable *target_hash;
 	char *string_key;
+	ulong str_key_len;
 	ulong num_key;
-	
+	HashPosition pos;
+					
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
@@ -2187,13 +2189,13 @@ PHP_FUNCTION(array_flip)
 	
 	array_init(return_value);
 
-	zend_hash_internal_pointer_reset(target_hash);
-	while (zend_hash_get_current_data(target_hash, (void **)&entry) == SUCCESS) {
+	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
+	while (zend_hash_get_current_data_ex(target_hash, (void **)&entry, &pos) == SUCCESS) {
 		MAKE_STD_ZVAL(data);
-		switch (zend_hash_get_current_key(target_hash, &string_key, &num_key, 1)) {
+		switch (zend_hash_get_current_key_ex(target_hash, &string_key, &str_key_len, &num_key, 1, &pos)) {
 			case HASH_KEY_IS_STRING:
 				Z_STRVAL_P(data) = string_key;
-				Z_STRLEN_P(data) = strlen(string_key);
+				Z_STRLEN_P(data) = str_key_len;
 				Z_TYPE_P(data) = IS_STRING;
 				break;
 			case HASH_KEY_IS_LONG:
@@ -2211,7 +2213,7 @@ PHP_FUNCTION(array_flip)
 			php_error(E_WARNING, "Can only flip STRING and INTEGER values!");
 		}
 	
-		zend_hash_move_forward(target_hash);
+		zend_hash_move_forward_ex(target_hash, &pos);
 	}
 }
 /* }}} */
