@@ -1,8 +1,11 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([libmbfl],[1.0.0])
-AM_INIT_AUTOMAKE
-AC_CONFIG_SRCDIR([mbfl/mbfilter.c])
-AC_CONFIG_HEADER([config.h])
+AC_INIT(mbfl/mbfilter.c)
+AM_INIT_AUTOMAKE(libmbfl, 1.0.0)
+AC_CONFIG_SRCDIR(mbfl/mbfilter.c)
+AM_CONFIG_HEADER(config.h)
+
+SHLIB_VERSION="1:0:0"
+AC_SUBST(SHLIB_VERSION)
 
 # Checks for programs.
 AC_PROG_CC
@@ -24,6 +27,12 @@ AC_TYPE_SIZE_T
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([strcasecmp strchr])
+
+AC_CHECK_PROGS([FETCH_VIA_FTP], [wget curl ncftpget])
+
+if test "$FETCH_VIA_FTP" = "curl"; then
+  FETCH_VIA_FTP="curl -O"
+fi
 
 AC_CONFIG_FILES([Makefile mbfl/Makefile filters/Makefile nls/Makefile])
 AC_OUTPUT

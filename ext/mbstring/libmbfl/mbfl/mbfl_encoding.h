@@ -97,6 +97,7 @@ enum mbfl_no_encoding {
 	mbfl_no_encoding_cp1251,
 	mbfl_no_encoding_cp866,
 	mbfl_no_encoding_koi8r,
+	mbfl_no_encoding_8859_16,
 	mbfl_no_encoding_charset_max
 };
 
@@ -117,6 +118,7 @@ typedef struct _mbfl_encoding {
 MBFLAPI extern const mbfl_encoding * mbfl_name2encoding(const char *name);
 MBFLAPI extern const mbfl_encoding * mbfl_no2encoding(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern enum mbfl_no_encoding mbfl_name2no_encoding(const char *name);
+MBFLAPI extern const mbfl_encoding ** mbfl_get_supported_encodings();
 MBFLAPI extern const char * mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern const char * mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding);
 MBFLAPI extern int mbfl_is_support_encoding(const char *name);

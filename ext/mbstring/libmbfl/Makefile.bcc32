@@ -5,12 +5,12 @@ SUBDIRS=mbfl nls filters
 all: mbfl.dll mbfl.lib
 
 mbfl.lib: mbfl.dll
-	implib mbfl.lib mbfl.dll
+	implib -a mbfl.lib mbfl.dll
 
-mbfl.dll: compile mbfl.def mbfl.res
+mbfl.dll: compile mbfl.res
 	@if exist linker.rsp del linker.rsp
 	@for %i in ($(SUBDIRS)) do @for %j in (%i\*.obj) do @echo %j+ >> linker.rsp
-	ilink32 $(LDFLAGS) @linker.rsp,mbfl.dll,,$(LIBS),mbfl.def,mbfl.res
+	ilink32 $(LDFLAGS) @linker.rsp,mbfl.dll,,$(LIBS),,mbfl.res
 	del linker.rsp
 
 mbfl.res: mbfl.rc
@@ -22,6 +22,8 @@ prepare: config.h.bcc32
 
 clean:
 	@for %i in ($(SUBDIRS)) do $(COMSPEC) /C mksbcc32.bat $(MAKE) %i clean
+	@if exist linker.rsp del linker.rsp
+	@if exist mbfl.RES del mbfl.RES
 	@if exist mbfl.dll del mbfl.dll
 	@if exist mbfl.lib del mbfl.lib
 	@if exist config.h del config.h

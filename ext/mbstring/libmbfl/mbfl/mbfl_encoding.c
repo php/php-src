@@ -80,6 +80,7 @@
 #include "filters/mbfilter_iso8859_13.h"
 #include "filters/mbfilter_iso8859_14.h"
 #include "filters/mbfilter_iso8859_15.h"
+#include "filters/mbfilter_iso8859_16.h"
 #include "filters/mbfilter_base64.h"
 #include "filters/mbfilter_qprint.h"
 #include "filters/mbfilter_uuencode.h"
@@ -163,6 +164,7 @@ static const mbfl_encoding *mbfl_encoding_ptr_list[] = {
 	&mbfl_encoding_8859_13,
 	&mbfl_encoding_8859_14,
 	&mbfl_encoding_8859_15,
+	&mbfl_encoding_8859_16,
 	&mbfl_encoding_euc_cn,
 	&mbfl_encoding_cp936,
 	&mbfl_encoding_hz,
@@ -264,6 +266,12 @@ mbfl_no_encoding2name(enum mbfl_no_encoding no_encoding)
 	}
 }
 
+const mbfl_encoding **
+mbfl_get_supported_encodings(void)
+{
+	return mbfl_encoding_ptr_list;
+}
+
 const char *
 mbfl_no2preferred_mime_name(enum mbfl_no_encoding no_encoding)
 {
@@ -289,7 +297,3 @@ mbfl_is_support_encoding(const char *name)
 		return 1;
 	}
 }
-
-
-
-
