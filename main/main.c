@@ -923,7 +923,7 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_MEMORY_LEAK_DETECTED:
 		case ZMSG_MEMORY_LEAK_REPEATED:
 #if ZEND_DEBUG
-			if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
+			if ((EG(error_reporting) & E_WARNING) && PG(report_memleaks)) {
 				char memory_leak_buf[512];
 
 				if (message==ZMSG_MEMORY_LEAK_DETECTED) {
