@@ -1,3 +1,43 @@
+2004-02-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      MFH: Fixed bug #27196 (Missing content_length initialization in apache 2
+      sapis).
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Fixed bug #27196 (Missing content_length initialization in apache 2 sapis).
+
+2004-02-09  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c
+      ext/fbsql/php_fbsql.c:
+      Delay creation of exec handle til it's needed
+
+2004-02-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/gmp/gmp.c:
+      MFH: Fixed bug #27172 (Possible floating point exception in gmp_powm()).
+
+    * ext/gmp/gmp.c:
+      Fixed bug #27172 (Possible floating point exception in gmp_powm()).
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      main/main.c:
+      MFH: Fixed bug #27175 (tzset() is not being called by PHP on startup).
+
+    * main/main.c:
+      Fixed bug #27175 (tzset() is not being called by PHP on startup).
+
 2004-02-08  Andi Gutmans  <andi@zend.com>
 
     * README.PHP4-TO-PHP5-THIN-CHANGES
