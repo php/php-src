@@ -151,7 +151,7 @@ PS_WRITE_FUNC(sqlite)
 	}
 	efree(binary);
 
-	SQLITE_RETVAL(rv);
+	return SQLITE_RETVAL(rv);
 }
 
 PS_DESTROY_FUNC(sqlite) 
@@ -161,7 +161,7 @@ PS_DESTROY_FUNC(sqlite)
 
 	rv = sqlite_exec_printf(db, "DELETE FROM session_data WHERE sess_id='%q'", NULL, NULL, NULL, key);
 	
-	SQLITE_RETVAL(rv);return rv == SQLITE_OK ? SUCCESS : FAILURE;
+	return SQLITE_RETVAL(rv);
 }
 
 PS_GC_FUNC(sqlite) 
@@ -174,7 +174,7 @@ PS_GC_FUNC(sqlite)
 			"DELETE FROM session_data WHERE (%d - updated) > %d", 
 			NULL, NULL, NULL, t, maxlifetime);
 	
-	SQLITE_RETVAL(rv);
+	return SQLITE_RETVAL(rv);
 }
 
 #endif /* HAVE_PHP_SESSION */
