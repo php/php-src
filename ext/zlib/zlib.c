@@ -1032,6 +1032,7 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 
 	*new_length = buf_used + 10 + 8;
 	*newstr = buffer;
+	deflateEnd(&ZLIBG(stream));
 
 	return SUCCESS;
 }
