@@ -17,10 +17,12 @@
  */
 /* $Id$ */
 
-#define _XOPEN_SOURCE 500
-#define __EXTENSIONS__ 1
-#define _BSD_SOURCE
-#define _OSF_SOURCE
+#if defined(__linux__) || defined(sun) || defined(__IRIX__)
+# define _BSD_SOURCE 		/* linux wants this when XOPEN mode is on */
+# define _BSD_COMPAT		/* irix: uint */
+# define _XOPEN_SOURCE 500  /* turn on Unix98 */
+# define __EXTENSIONS__	1	/* Solaris: uint */
+#endif
 
 #include "php.h"
 #include <stdio.h>
