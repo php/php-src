@@ -100,6 +100,7 @@ typedef struct _php_meta_tags_data {
   char *input_buffer;
   char *token_data;
   int token_len;
+  int in_meta;
 } php_meta_tags_data;
 
 php_meta_tags_token php_next_meta_token(php_meta_tags_data *);
