@@ -650,7 +650,7 @@ PHP_FUNCTION(socket_read)
 	zval **arg1, **arg2, **arg3;
 	char *tmpbuf;
 	php_socket *php_sock;
-	read_function php_read;
+	read_function = php_read;
 	int retval, argc = ZEND_NUM_ARGS();
 
 	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &arg1, &arg2, &arg3) == FAILURE) {
