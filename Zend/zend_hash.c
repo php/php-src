@@ -946,7 +946,7 @@ ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos)
 
 
 /* This function should be made binary safe  */
-ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong *num_index, HashPosition *pos)
+ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong *str_length, ulong *num_index, HashPosition *pos)
 {
 	Bucket *p;
    
@@ -958,6 +958,9 @@ ZEND_API int zend_hash_get_current_key_ex(HashTable *ht, char **str_index, ulong
 		if (p->nKeyLength) {
 			*str_index = (char *) pemalloc(p->nKeyLength, ht->persistent);
 			memcpy(*str_index, p->arKey, p->nKeyLength);
+			if (str_length) {
+				*str_length = p->nKeyLength;
+			}
 			return HASH_KEY_IS_STRING;
 		} else {
 			*num_index = p->h;
