@@ -687,10 +687,14 @@ PHP_FUNCTION(sybase_close)
 	
 	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", le_link, le_plink);
 	
-	if (sybase_link_index) {
-		zend_list_delete(sybase_link_index->value.lval);
-	} else {
-		zend_list_delete(id);
+	if (id==-1) { /* explicit resource number */
+		zend_list_delete(Z_RESVAL_P(sybase_link_index));
+	}
+
+	if (id!=-1 
+		|| (sybase_link_index && Z_RESVAL_P(sybase_link_index)==SybCtG(default_link))) {
+		zend_list_delete(SybCtG(default_link));
+		SybCtG(default_link) = -1;
 	}
 
 	RETURN_TRUE;

@@ -11,7 +11,6 @@
 #define FRM_VER				6
 #define MYSQL_VERSION_ID		32322
 #define MYSQL_PORT			3306
-#define MYSQL_UNIX_ADDR			"/tmp/mysql.sock"
 
 /* mysqld compile time options */
 #ifndef MYSQL_CHARSET

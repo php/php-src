@@ -466,7 +466,7 @@ PHP_FUNCTION(pg_pconnect)
 PHP_FUNCTION(pg_close)
 {
 	zval **pgsql_link = NULL;
-	int id = -1;
+	int id;
 	PGconn *pgsql;
 	PGLS_FETCH();
 	
@@ -479,6 +479,7 @@ PHP_FUNCTION(pg_close)
 			if (zend_get_parameters_ex(1, &pgsql_link)==FAILURE) {
 				RETURN_FALSE;
 			}
+			id = -1;
 			break;
 		default:
 			WRONG_PARAM_COUNT;
@@ -486,9 +487,15 @@ PHP_FUNCTION(pg_close)
 	}
 	
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-	zend_list_delete(Z_RESVAL_PP(pgsql_link));
-	if (Z_RESVAL_PP(pgsql_link)==PGG(default_link)) {
+
+	if (id==-1) { /* explicit resource number */
+		zend_list_delete(Z_RESVAL_PP(pgsql_link));
+	}
+
+	if (id!=-1 
+		|| (pgsql_link && Z_RESVAL_PP(pgsql_link)==PGG(default_link))) {
 		zend_list_delete(PGG(default_link));
+		PGG(default_link) = -1;
 	}
 
 	RETURN_TRUE;
