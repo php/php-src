@@ -19,6 +19,8 @@
 package net.php;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.Enumeration;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
@@ -51,15 +53,22 @@ public class servlet extends HttpServlet {
     /******************************************************************/
 
     String readPost(int bytes) {
-       try {
-         if (stream == null) stream=request.getInputStream();
-         byte[] data = new byte[bytes];
-         int len = stream.read(data, 0, bytes);
-         if (len <= 0) return "";
-         return new String(data, 0, len);
-       } catch (IOException e) {
-         return "";
-       }
+      String result;
+      if (!request.getMethod().equals("POST")) {
+        result = request.getQueryString();
+      } else { 
+        Enumeration e = request.getParameterNames();
+        result="";
+        String concat="";
+        while (e.hasMoreElements()) {
+          String name = (String)e.nextElement();
+          String value = request.getParameter(name);
+          result+=concat+name+"="+URLEncoder.encode(value);
+          concat="&";
+        }
+      }
+      if (result == null) return "";
+      return result; 
     }
 
     String readCookies() {
