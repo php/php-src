@@ -1,32 +1,21 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP HTML Embedded Scripting Language Version 3.0                     |
+   | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
+   | Copyright (c) 1997, 1998, 1999, 2000 The PHP Group                   |
    +----------------------------------------------------------------------+
-   | This program is free software; you can redistribute it and/or modify |
-   | it under the terms of one of the following licenses:                 |
-   |                                                                      |
-   |  A) the GNU General Public License as published by the Free Software |
-   |     Foundation; either version 2 of the License, or (at your option) |
-   |     any later version.                                               |
-   |                                                                      |
-   |  B) the PHP License as published by the PHP Development Team and     |
-   |     included in the distribution in the file: LICENSE                |
-   |                                                                      |
-   | This program is distributed in the hope that it will be useful,      |
-   | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
-   | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
-   | GNU General Public License for more details.                         |
-   |                                                                      |
-   | You should have received a copy of both licenses referred to here.   |
-   | If you did not, or have any questions about PHP licensing, please    |
-   | contact core@php.net.                                                |
+   | This source file is subject to version 2.02 of the PHP license,      |
+   | that is bundled with this package in the file LICENSE, and is        |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Mark Musone <musone@chek.com>                               |
    |          Chuck Hagenbuch <chuck@horde.org>                           |
    +----------------------------------------------------------------------+
- */
+*/
 
 #define MCAL1
 
@@ -711,20 +700,20 @@ PHP_FUNCTION(mcal_delete_calendar)
 }
 /* }}} */
 
-/* {{{ proto string mcal_delete_event(int stream_id, int uid)
+/* {{{ proto string mcal_delete_event(int stream_id, int event_id)
    Delete an event */
 PHP_FUNCTION(mcal_delete_event)
 {
-	zval **streamind, **uid;
+	zval **streamind, **event_id;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc=ZEND_NUM_ARGS();
-	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &uid) == FAILURE) {
+	if (myargc != 2 || zend_get_parameters_ex(2, &streamind, &event_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
 	convert_to_long_ex(streamind);
-	convert_to_long_ex(uid);
+	convert_to_long_ex(event_id);
 	
 	ind = (*streamind)->value.lval;
 	mcal_le_struct = (pils *)zend_list_find(ind, &ind_type);
@@ -733,7 +722,7 @@ PHP_FUNCTION(mcal_delete_event)
 		RETURN_FALSE;
 	}
 	
-	if (cal_remove(mcal_le_struct->mcal_stream, (*uid)->value.lval)) {
+	if (cal_remove(mcal_le_struct->mcal_stream, (*event_id)->value.lval)) {
 	    RETURN_TRUE;
 	}
 	else {
@@ -750,7 +739,7 @@ PHP_FUNCTION(mcal_append_event)
 	int ind, ind_type;
 	pils *mcal_le_struct; 
 	int myargc;
-	unsigned long uid;
+	unsigned long event_id;
 	CALEVENT *myevent=NULL;
 	
 	myargc = ZEND_NUM_ARGS();
@@ -767,9 +756,9 @@ PHP_FUNCTION(mcal_append_event)
 	}
 	
 	myevent = mcal_le_struct->event;
-	cal_append(mcal_le_struct->mcal_stream, "INBOX", &uid, myevent);
+	cal_append(mcal_le_struct->mcal_stream, "INBOX", &event_id, myevent);
 	calevent_free(myevent);
-	RETURN_LONG(uid);
+	RETURN_LONG(event_id);
 }
 /* }}} */
 
