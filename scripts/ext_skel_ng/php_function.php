@@ -134,7 +134,7 @@
 				$resource = $extension->resources[$returns[1]];
 				if($resource->alloc === "yes") {
 					$payload  = $resource->payload;
-					$code .= "\t$payload * return_res = ($payload *)emalloc(sizeof($payload));\n";
+					$code .= "  $payload * return_res = ($payload *)emalloc(sizeof($payload));\n";
 				}
 			}
 
@@ -208,14 +208,14 @@
 
 			if(isset($arg_string) && strlen($arg_string)) {
 				$code .= "  int argc = ZEND_NUM_ARGS();\n\n";
-				$code .= "\n  if (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
+				$code .= "  if (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
 						if($res_fetch) $code.="\n$res_fetch\n";
 			} else {
 				$code .= "  if (ZEND_NUM_ARGS()>0) { WRONG_PARAM_COUNT; }\n\n";
 			}
 
 			if($this->code) {
-				$code .= "\t{\n$this->code\t}\n"; // {...} for local variables ...
+				$code .= "  {\n$this->code  }\n"; // {...} for local variables ...
 			} else {
 				$code .= "  php_error(E_WARNING, \"{$this->name}: not yet implemented\"); RETURN_FALSE;\n\n";
 
@@ -224,43 +224,43 @@
 					break;
 				
 				case "bool":
-					$code .= "\tRETURN_FALSE;\n"; 
+					$code .= "  RETURN_FALSE;\n"; 
 					break;
 				
 				case "int":
-					$code .= "\tRETURN_LONG(0);\n"; 
+					$code .= "  RETURN_LONG(0);\n"; 
 					break;
 				
 				case "float":
-					$code .= "\tRETURN_DOUBLE(0.0);\n";
+					$code .= "  RETURN_DOUBLE(0.0);\n";
 					break;
 				
 				case "string":
-					$code .= "\tRETURN_STRINGL(\"\", 0, 1);\n";
+					$code .= "  RETURN_STRINGL(\"\", 0, 1);\n";
 					break;
 				
 				case "array":
-					$code .= "\tarray_init(return_value);\n";
+					$code .= "  array_init(return_value);\n";
 					break;
 				
 				case "object": 
-					$code .= "\tobject_init(return_value)\n";
+					$code .= "  object_init(return_value)\n";
 					break;
 				
 				case "resource":
 					if($returns[1]) {
-						$code .= "\tZEND_REGISTER_RESOURCE(return_value, return_res, le_$returns[1]);\n";
+						$code .= "  ZEND_REGISTER_RESOURCE(return_value, return_res, le_$returns[1]);\n";
 					} else {
-						$code .= "\t/* RETURN_RESOURCE(...); /*\n";
+						$code .= "  /* RETURN_RESOURCE(...); /*\n";
 					}
 					break;
 				
 				case "mixed":
-					$code .= "\t/* RETURN_...(...); /*\n";				
+					$code .= "  /* RETURN_...(...); /*\n";				
 					break;
 
 				default: 
-					$code .= "\t/* UNKNOWN RETURN TYPE '$this->returns' /*\n";
+					$code .= "  /* UNKNOWN RETURN TYPE '$this->returns' /*\n";
 					break;
 				}
 			}
