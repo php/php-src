@@ -578,7 +578,7 @@ JNIEXPORT jlong JNICALL Java_net_php_reflect_nextElement
 }
 
 JNIEXPORT void JNICALL Java_net_php_reflect_setException
-  (JNIEnv *jenv, jclass self, jlong result, jstring value)
+  (JNIEnv *jenv, jclass self, jlong result, jbyteArray value)
 {
   pval *presult = (pval*)(long)result;
   Java_net_php_reflect_setResultFromString(jenv, self, result, value);
