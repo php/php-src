@@ -2056,7 +2056,7 @@ send_by_ref:
 								
 								if (file_handle.handle.fp) {
 									if (!opened_path || zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
-										new_op_array = compile_files(ZEND_INCLUDE CLS_CC, 1, &file_handle);
+										new_op_array = zend_compile_files(ZEND_INCLUDE CLS_CC, 1, &file_handle);
 										if (new_op_array) {
 											pass_include_eval(new_op_array);
 										} else {

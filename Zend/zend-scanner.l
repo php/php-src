@@ -316,13 +316,13 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 END_EXTERN_C()
 
 
-ZEND_API zend_op_array *compile_files(int type CLS_DC, int file_count, ...)
+ZEND_API zend_op_array *zend_compile_files(int type CLS_DC, int file_count, ...)
 {
 	va_list files;
 	zend_op_array *op_array;
 
 	va_start(files, file_count);
-	op_array = v_compile_files(type CLS_CC, file_count, files);
+	op_array = zend_v_compile_files(type CLS_CC, file_count, files);
 	va_end(files);
 	return op_array;
 }
