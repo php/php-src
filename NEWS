@@ -5,6 +5,10 @@ PHP 4                                                                      NEWS
 - RFC-1867 file upload buffer overflow fixes
 - session crash bug fix
 - pspell crash bug fix
+- fixed configuration problem as shared extension for fdf.(Rui)
+- fixed configuration problem as shared extension for gd with freetype1.(Rui)
+- default output encoding of mbstring changed to 'pass' to fix 
+  initialization problem.(Rui)
 
 26 Dec 2001, Version 4.1.1
 - Fixed incompatibility with Windows .NET / IIS 6 - may improve stability
