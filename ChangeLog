@@ -1,3 +1,67 @@
+2005-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      - Fix severity (found by johannes)
+
+2005-01-28  Georg Richter  <georg@mysql.com>
+
+    * (PHP_5_0)
+      NEWS
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c:
+      MFH: Fix for mysql_affected_rows and mysql_stmt_affected_rows
+
+    * ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_prop.c:
+      fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows
+      in case affected_rows function returns (my_ulonglong) -1 for errors.
+      (Thanks to Antony Dovgal for reporting this bug)
+
+2005-01-28  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/standard/ftok.c
+      ext/standard/ftok.c
+      ext/standard/ftok.c:
+      improve CS & error messages
+
+    * ext/standard/ftok.c
+      ext/standard/ftok.c:
+      MFB: explain why ftok() failed
+
+    * (PHP_5_0)
+      ext/standard/ftok.c:
+      add warning explaining why ftok() failed
+
+    * (PHP_5_0)
+      NEWS:
+      BFN (#31732)
+
+    * ext/mbstring/mbstring.c:
+      MFB: fix #31732
+
+    * (PHP_5_0)
+      ext/mbstring/mbstring.c:
+      fix #31732 (mb_get_info causes segfault)
+
+    * (PHP_4_3)
+      ext/posix/posix.c
+      ext/posix/posix.c:
+      MFH: change return type from NULL to FALSE when parameter parsing failed
+
+    * ext/posix/posix.c:
+      change return type from NULL to FALSE when parameter parsing failed
+      (as was requested by Ilia)
+
+    * ext/posix/posix.c:
+      MFB: fix posix_getsid() & posix_getpgid()
+
+    * (PHP_5_0)
+      NEWS
+      ext/posix/posix.c:
+      fix posix_getsid() & posix_getpgid()
+      
+      /* looks like copy&paste error first introduced in PHP 3.0.10 (!) */
+
 2005-01-27  Frank M. Kromann  <frank@kromann.info>
 
     * (PHP_4_3)

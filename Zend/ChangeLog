@@ -1,3 +1,8 @@
+2005-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      - Fix severity (found by johannes)
+
 2005-01-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * zend.h:
