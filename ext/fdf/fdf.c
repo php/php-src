@@ -64,23 +64,24 @@ int le_fdf;
 #endif
 
 function_entry fdf_functions[] = {
-	{"fdf_open",				php3_fdf_open,				NULL},
-	{"fdf_create",				php3_fdf_create,			NULL},
-	{"fdf_close",				php3_fdf_close,				NULL},
-	{"fdf_save",				php3_fdf_save,				NULL},
-	{"fdf_get_value",			php3_fdf_get_value,			NULL},
-	{"fdf_set_value",			php3_fdf_set_value,			NULL},
-	{"fdf_next_field_name",			php3_fdf_next_field_name,			NULL},
-	{"fdf_set_ap",				php3_fdf_set_ap,			NULL},
-	{"fdf_set_status",			php3_fdf_set_status,		NULL},
-	{"fdf_get_status",			php3_fdf_get_status,		NULL},
-	{"fdf_set_file",			php3_fdf_set_file,		NULL},
-	{"fdf_get_file",			php3_fdf_get_file,		NULL},
+	PHP_FE(fdf_open,								NULL)
+	PHP_FE(fdf_create,								NULL)
+	PHP_FE(fdf_close,								NULL)
+	PHP_FE(fdf_save,								NULL)
+	PHP_FE(fdf_get_value,							NULL)
+	PHP_FE(fdf_set_value,							NULL)
+	PHP_FE(fdf_next_field_name,						NULL)
+	PHP_FE(fdf_set_ap,								NULL)
+	PHP_FE(fdf_set_status,							NULL)
+	PHP_FE(fdf_get_status,							NULL)
+	PHP_FE(fdf_set_file,							NULL)
+	PHP_FE(fdf_get_file,							NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry fdf_module_entry = {
-	"fdf", fdf_functions, php3_minit_fdf, php3_mend_fdf, NULL, NULL, php3_info_fdf, STANDARD_MODULE_PROPERTIES
+	"fdf", fdf_functions, PHP_MINIT(fdf), PHP_MSHUTDOWN(fdf), NULL, NULL,
+	PHP_MINFO(fdf), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -88,7 +89,7 @@ php3_module_entry fdf_module_entry = {
 DLEXPORT php3_module_entry *get_module(void) { return &fdf_module_entry; }
 #endif
 
-int php3_minit_fdf(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(fdf)
 {
 	FDFErc err;
 	FDF_GLOBAL(le_fdf) = register_list_destructors(FDFClose, NULL);
@@ -98,12 +99,14 @@ int php3_minit_fdf(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_info_fdf(ZEND_MODULE_INFO_FUNC_ARGS) {
+PHP_MINFO_FUNCTION(fdf)
+{
 	/* need to use a PHPAPI function here because it is external module in windows */
 	php3_printf("FdfTk Version %s", FDFGetVersion());
 }
 
-int php3_mend_fdf(void){
+PHP_MSHUTDOWN_FUNCTION(fdf)
+{
 	FDFErc err;
 	err = FDFFinalize();
 	if(err == FDFErcOK)

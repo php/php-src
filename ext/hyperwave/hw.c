@@ -43,75 +43,75 @@
 hw_module php3_hw_module;
 
 function_entry hw_functions[] = {
-	{"hw_connect",			php3_hw_connect,		NULL},
-	{"hw_pconnect",			php3_hw_pconnect,		NULL},
-	{"hw_close",			php3_hw_close,			NULL},
-	{"hw_root",			php3_hw_root,			NULL},
-	{"hw_info",			php3_hw_info,			NULL},
-	{"hw_connection_info",		php3_hw_connection_info,	NULL},
-	{"hw_error",			php3_hw_error,			NULL},
-	{"hw_errormsg",			php3_hw_errormsg,		NULL},
-	{"hw_getparentsobj",		php3_hw_getparentsobj,		NULL},
-	{"hw_getparents",		php3_hw_getparents,		NULL},
-	{"hw_children",			php3_hw_children,		NULL},
-	{"hw_childrenobj",		php3_hw_childrenobj,		NULL},
-	{"hw_getchildcoll",		php3_hw_getchildcoll,		NULL},
-	{"hw_getchildcollobj",		php3_hw_getchildcollobj,	NULL},
-	{"hw_getobject",		php3_hw_getobject,		NULL},
-	{"hw_getandlock",		php3_hw_getandlock,		NULL},
-	{"hw_unlock",			php3_hw_unlock,			NULL},
-	{"hw_gettext",			php3_hw_gettext,		NULL},
-	{"hw_edittext",			php3_hw_edittext,		NULL},
-	{"hw_getcgi",			php3_hw_getcgi,			NULL},
-	{"hw_getremote",		php3_hw_getremote,		NULL},
-	{"hw_getremotechildren",	php3_hw_getremotechildren,	NULL},
-	{"hw_pipedocument",		php3_hw_pipedocument,		NULL},
-	{"hw_pipecgi",			php3_hw_pipecgi,		NULL},
-	{"hw_insertdocument",		php3_hw_insertdocument,		NULL},
-	{"hw_mv",			php3_hw_mv,			NULL},
-	{"hw_cp",			php3_hw_cp,			NULL},
-	{"hw_deleteobject",		php3_hw_deleteobject,		NULL},
-	{"hw_changeobject",		php3_hw_changeobject,		NULL},
-	{"hw_docbyanchor",		php3_hw_docbyanchor,		NULL},
-	{"hw_docbyanchorobj",		php3_hw_docbyanchorobj,		NULL},
-	{"hw_getobjectbyquery",		php3_hw_getobjectbyquery,	NULL},
-	{"hw_getobjectbyqueryobj",	php3_hw_getobjectbyqueryobj,	NULL},
-	{"hw_getobjectbyquerycoll",	php3_hw_getobjectbyquerycoll,	NULL},
-	{"hw_getobjectbyquerycollobj",	php3_hw_getobjectbyquerycollobj,NULL},
-	{"hw_getchilddoccoll",		php3_hw_getchilddoccoll,	NULL},
-	{"hw_getchilddoccollobj",	php3_hw_getchilddoccollobj,	NULL},
-	{"hw_getanchors",		php3_hw_getanchors,		NULL},
-	{"hw_getanchorsobj",		php3_hw_getanchorsobj,		NULL},
-	{"hw_getusername",		php3_hw_getusername,		NULL},
-	{"hw_setlinkroot",		php3_hw_setlinkroot,		NULL},
-	{"hw_identify",			php3_hw_identify,		NULL},
-	{"hw_free_document",		php3_hw_free_document,		NULL},
-	{"hw_new_document",		php3_hw_new_document,		NULL},
-	{"hw_output_document",		php3_hw_output_document,	NULL},
-	{"hw_outputdocument",		php3_hw_output_document,	NULL},
-	{"hw_document_size",		php3_hw_document_size,		NULL},
-	{"hw_documentsize",		php3_hw_document_size,		NULL},
-	{"hw_document_attributes",	php3_hw_document_attributes,	NULL},
-	{"hw_documentattributes",	php3_hw_document_attributes,	NULL},
-	{"hw_document_bodytag",		php3_hw_document_bodytag,	NULL},
-	{"hw_documentbodytag",		php3_hw_document_bodytag,	NULL},
-	{"hw_document_content",		php3_hw_document_content,	NULL},
-	{"hw_objrec2array",		php3_hw_objrec2array,		NULL},
-	{"hw_array2objrec",		php3_hw_array2objrec,		NULL},
-	{"hw_incollections",		php3_hw_incollections,		NULL},
-	{"hw_inscoll",			php3_hw_inscoll,		NULL},
-	{"hw_insertobject",		php3_hw_insertobject,		NULL},
-	{"hw_insdoc",			php3_hw_insdoc,			NULL},
-	{"hw_getsrcbydestobj",		php3_hw_getsrcbydestobj,	NULL},
-	{"hw_getrellink",		php3_hw_getrellink,		NULL},
-	{"hw_who",			php3_hw_who,			NULL},
-	{"hw_stat",			php3_hw_stat,			NULL},
-	{"hw_dummy",			php3_hw_dummy,			NULL},
+	PHP_FE(hw_connect,								NULL)
+	PHP_FE(hw_pconnect,								NULL)
+	PHP_FE(hw_close,								NULL)
+	PHP_FE(hw_root,									NULL)
+	PHP_FE(hw_info,									NULL)
+	PHP_FE(hw_connection_info,						NULL)
+	PHP_FE(hw_error,								NULL)
+	PHP_FE(hw_errormsg,								NULL)
+	PHP_FE(hw_getparentsobj,						NULL)
+	PHP_FE(hw_getparents,							NULL)
+	PHP_FE(hw_children,								NULL)
+	PHP_FE(hw_childrenobj,							NULL)
+	PHP_FE(hw_getchildcoll,							NULL)
+	PHP_FE(hw_getchildcollobj,						NULL)
+	PHP_FE(hw_getobject,							NULL)
+	PHP_FE(hw_getandlock,							NULL)
+	PHP_FE(hw_unlock,								NULL)
+	PHP_FE(hw_gettext,								NULL)
+	PHP_FE(hw_edittext,								NULL)
+	PHP_FE(hw_getcgi,								NULL)
+	PHP_FE(hw_getremote,							NULL)
+	PHP_FE(hw_getremotechildren,					NULL)
+	PHP_FE(hw_pipedocument,							NULL)
+	PHP_FE(hw_pipecgi,								NULL)
+	PHP_FE(hw_insertdocument,						NULL)
+	PHP_FE(hw_mv,									NULL)
+	PHP_FE(hw_cp,									NULL)
+	PHP_FE(hw_deleteobject,							NULL)
+	PHP_FE(hw_changeobject,							NULL)
+	PHP_FE(hw_docbyanchor,							NULL)
+	PHP_FE(hw_docbyanchorobj,						NULL)
+	PHP_FE(hw_getobjectbyquery,						NULL)
+	PHP_FE(hw_getobjectbyqueryobj,					NULL)
+	PHP_FE(hw_getobjectbyquerycoll,					NULL)
+	PHP_FE(hw_getobjectbyquerycollobj,				NULL)
+	PHP_FE(hw_getchilddoccoll,						NULL)
+	PHP_FE(hw_getchilddoccollobj,					NULL)
+	PHP_FE(hw_getanchors,							NULL)
+	PHP_FE(hw_getanchorsobj,						NULL)
+	PHP_FE(hw_getusername,							NULL)
+	PHP_FE(hw_setlinkroot,							NULL)
+	PHP_FE(hw_identify,								NULL)
+	PHP_FE(hw_free_document,						NULL)
+	PHP_FE(hw_new_document,							NULL)
+	PHP_FE(hw_output_document,						NULL)
+	PHP_FE(hw_outputdocument,						NULL)
+	PHP_FE(hw_document_size,						NULL)
+	PHP_FE(hw_documentsize,							NULL)
+	PHP_FE(hw_document_attributes,					NULL)
+	PHP_FE(hw_documentattributes,					NULL)
+	PHP_FE(hw_document_bodytag,						NULL)
+	PHP_FE(hw_documentbodytag,						NULL)
+	PHP_FE(hw_document_content,						NULL)
+	PHP_FE(hw_objrec2array,							NULL)
+	PHP_FE(hw_array2objrec,							NULL)
+	PHP_FE(hw_incollections,						NULL)
+	PHP_FE(hw_inscoll,								NULL)
+	PHP_FE(hw_insertobject,							NULL)
+	PHP_FE(hw_insdoc,								NULL)
+	PHP_FE(hw_getsrcbydestobj,						NULL)
+	PHP_FE(hw_getrellink,							NULL)
+	PHP_FE(hw_who,									NULL)
+	PHP_FE(hw_stat,									NULL)
+	PHP_FE(hw_dummy,								NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry hw_module_entry = {
-	"HyperWave", hw_functions, php3_minit_hw, NULL, NULL, NULL, php3_info_hw, 0, 0, 0, NULL
+	"HyperWave", hw_functions, PHP_MINIT(hw), NULL, NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
 };
 
 void print_msg(hg_msg *msg, char *str, int txt);
@@ -382,7 +382,8 @@ static int * make_ints_from_array(HashTable *lht) {
 	return objrec;
 }
 
-int php3_minit_hw(INIT_FUNC_ARGS) {
+PHP_MINIT_FUNCTION(hw)
+{
 
 	if (cfg_get_long("hw.allow_persistent",&php3_hw_module.allow_persistent)==FAILURE) {
 		php3_hw_module.allow_persistent=1;
@@ -2952,7 +2953,7 @@ PHP_FUNCTION(hw_getrellink) {
 /* }}} */
 	
 
-void php3_info_hw(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(hw)
 {
 	php3_printf("HG-CSP Version: 7.17");
 }

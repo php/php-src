@@ -49,8 +49,9 @@ PHP_FUNCTION(filepro_fieldtype);
 PHP_FUNCTION(filepro_fieldwidth);
 PHP_FUNCTION(filepro_fieldcount);
 PHP_FUNCTION(filepro_retrieve);
-extern int php3_minit_filepro(INIT_FUNC_ARGS);
-extern int php3_mend_filepro(void);
+
+extern PHP_MINIT_FUNCTION(filepro);
+extern PHP_MSHUTDOWN_FUNCTION(filepro);
 #else
 #define phpext_filepro_ptr NULL
 #endif

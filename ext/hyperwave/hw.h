@@ -53,7 +53,9 @@ typedef struct {
 
 extern hw_connection php3_hw_connection;
 
-extern int php3_minit_hw(INIT_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(hw);
+PHP_MINFO_FUNCTION(hw);
+
 PHP_FUNCTION(hw_connect);
 PHP_FUNCTION(hw_pconnect);
 PHP_FUNCTION(hw_close);
@@ -109,7 +111,6 @@ PHP_FUNCTION(hw_document_content);
 PHP_FUNCTION(hw_objrec2array);
 PHP_FUNCTION(hw_array2objrec);
 PHP_FUNCTION(hw_connection_info);
-void php3_info_hw(ZEND_MODULE_INFO_FUNC_ARGS);
 PHP_FUNCTION(hw_getsrcbydestobj);
 PHP_FUNCTION(hw_getrellink);
 PHP_FUNCTION(hw_dummy);

@@ -82,51 +82,51 @@ int le_gd_font;
 #endif
 
 function_entry gd_functions[] = {
-	{"imagearc",				php3_imagearc,				NULL},
-	{"imagechar",				php3_imagechar,				NULL},
-	{"imagecharup",				php3_imagecharup,			NULL},
-	{"imagecolorallocate",		php3_imagecolorallocate,	NULL},
-	{"imagecolorat",		php3_imagecolorat,		NULL},
-	{"imagecolorclosest",		php3_imagecolorclosest,		NULL},
-	{"imagecolordeallocate",	php3_imagecolordeallocate,	NULL},
-	{"imagecolorresolve",		php3_imagecolorresolve,		NULL},
-	{"imagecolorexact",			php3_imagecolorexact,		NULL},
-	{"imagecolorset",		php3_imagecolorset,		NULL},
-	{"imagecolortransparent",	php3_imagecolortransparent,	NULL},
-	{"imagecolorstotal",		php3_imagecolorstotal,		NULL},
-	{"imagecolorsforindex",		php3_imagecolorsforindex,	NULL},
-	{"imagecopy",			php3_imagecopy,			NULL},
-	{"imagecopyresized",		php3_imagecopyresized,		NULL},
-	{"imagecreate",				php3_imagecreate,			NULL},
-	{"imagecreatefromgif",		php3_imagecreatefromgif,	NULL},
-	{"imagedestroy",			php3_imagedestroy,			NULL},
-	{"imagefill",				php3_imagefill,				NULL},
-	{"imagefilledpolygon",		php3_imagefilledpolygon,	NULL},
-	{"imagefilledrectangle",	php3_imagefilledrectangle,	NULL},
-	{"imagefilltoborder",		php3_imagefilltoborder,		NULL},
-	{"imagefontwidth",			php3_imagefontwidth,		NULL},
-	{"imagefontheight",			php3_imagefontheight,		NULL},
-	{"imagegif",				php3_imagegif,				NULL},
-	{"imageinterlace",			php3_imageinterlace,		NULL},
-	{"imageline",				php3_imageline,				NULL},
-	{"imageloadfont",			php3_imageloadfont,			NULL},
-	{"imagepolygon",			php3_imagepolygon,			NULL},
-	{"imagerectangle",			php3_imagerectangle,		NULL},
-	{"imagesetpixel",			php3_imagesetpixel,			NULL},
-	{"imagestring",				php3_imagestring,			NULL},
-	{"imagestringup",			php3_imagestringup,			NULL},
-	{"imagesx",					php3_imagesxfn,				NULL},
-	{"imagesy",					php3_imagesyfn,				NULL},
-	{"imagedashedline",			php3_imagedashedline,  		NULL},
+	PHP_FE(imagearc,								NULL)
+	PHP_FE(imagechar,								NULL)
+	PHP_FE(imagecharup,								NULL)
+	PHP_FE(imagecolorallocate,						NULL)
+	PHP_FE(imagecolorat,							NULL)
+	PHP_FE(imagecolorclosest,						NULL)
+	PHP_FE(imagecolordeallocate,					NULL)
+	PHP_FE(imagecolorresolve,						NULL)
+	PHP_FE(imagecolorexact,							NULL)
+	PHP_FE(imagecolorset,							NULL)
+	PHP_FE(imagecolortransparent,					NULL)
+	PHP_FE(imagecolorstotal,						NULL)
+	PHP_FE(imagecolorsforindex,						NULL)
+	PHP_FE(imagecopy,								NULL)
+	PHP_FE(imagecopyresized,						NULL)
+	PHP_FE(imagecreate,								NULL)
+	PHP_FE(imagecreatefromgif,						NULL)
+	PHP_FE(imagedestroy,							NULL)
+	PHP_FE(imagefill,								NULL)
+	PHP_FE(imagefilledpolygon,						NULL)
+	PHP_FE(imagefilledrectangle,					NULL)
+	PHP_FE(imagefilltoborder,						NULL)
+	PHP_FE(imagefontwidth,							NULL)
+	PHP_FE(imagefontheight,							NULL)
+	PHP_FE(imagegif,								NULL)
+	PHP_FE(imageinterlace,							NULL)
+	PHP_FE(imageline,								NULL)
+	PHP_FE(imageloadfont,							NULL)
+	PHP_FE(imagepolygon,							NULL)
+	PHP_FE(imagerectangle,							NULL)
+	PHP_FE(imagesetpixel,							NULL)
+	PHP_FE(imagestring,								NULL)
+	PHP_FE(imagestringup,							NULL)
+	PHP_FE(imagesx,									NULL)
+	PHP_FE(imagesy,									NULL)
+	PHP_FE(imagedashedline,							NULL)
 #ifdef ENABLE_GD_TTF
-	{"imagettfbbox",			php3_imagettfbbox,			NULL},
-	{"imagettftext",			php3_imagettftext,			NULL},
+	PHP_FE(imagettfbbox,							NULL)
+	PHP_FE(imagettftext,							NULL)
 #endif
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry gd_module_entry = {
-	"gd", gd_functions, php3_minit_gd, php3_mend_gd, NULL, NULL, php3_info_gd, STANDARD_MODULE_PROPERTIES
+	"gd", gd_functions, PHP_MINIT(gd), PHP_MSHUTDOWN(gd), NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -142,7 +142,7 @@ DLEXPORT php3_module_entry *get_module(void) { return &gd_module_entry; }
 #define PolyMaxPoints 256
 
 
-int php3_minit_gd(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(gd)
 {
 #if defined(THREAD_SAFE)
 	gdlib_global_struct *gdlib_globals;
@@ -167,7 +167,7 @@ int php3_minit_gd(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-void php3_info_gd(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(gd)
 {
 	/* need to use a PHPAPI function here because it is external module in windows */
 #if HAVE_LIBGD13
@@ -180,7 +180,7 @@ void php3_info_gd(ZEND_MODULE_INFO_FUNC_ARGS)
 #endif
 }
 
-int php3_mend_gd(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(gd)
 {
 	GD_TLS_VARS;
 #ifdef THREAD_SAFE
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(imagecopyresized)
 
 /* {{{ proto int imagesx(int im)
 Get image width */
-PHP_FUNCTION(imagesxfn)
+PHP_FUNCTION(imagesx)
 {
 	pval *IM;
 	gdImagePtr im;
@@ -1675,7 +1675,7 @@ PHP_FUNCTION(imagesxfn)
 
 /* {{{ proto int imagesy(int im)
 Get image height */
-PHP_FUNCTION(imagesyfn)
+PHP_FUNCTION(imagesy)
 {
 	pval *IM;
 	gdImagePtr im;

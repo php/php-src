@@ -52,9 +52,10 @@ extern php3_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry
 
 /* gd.c functions */
-void php3_info_gd(ZEND_MODULE_INFO_FUNC_ARGS);
-extern int php3_minit_gd(INIT_FUNC_ARGS);
-extern int php3_mend_gd(SHUTDOWN_FUNC_ARGS);
+PHP_MINFO_FUNCTION(gd);
+extern PHP_MINIT_FUNCTION(gd);
+extern PHP_MSHUTDOWN_FUNCTION(gd);
+
 extern int gdImageColorResolve(gdImagePtr, int, int, int);
 PHP_FUNCTION(imagearc);
 PHP_FUNCTION(imagechar);
@@ -89,8 +90,8 @@ PHP_FUNCTION(imagerectangle);
 PHP_FUNCTION(imagesetpixel);
 PHP_FUNCTION(imagestring);
 PHP_FUNCTION(imagestringup);
-PHP_FUNCTION(imagesxfn);
-PHP_FUNCTION(imagesyfn);
+PHP_FUNCTION(imagesx);
+PHP_FUNCTION(imagesy);
 void php3_free_gd_font(gdFontPtr);
 void _php3_gdimagecharup(gdImagePtr, gdFontPtr, int, int, int, int);
 PHP_FUNCTION(imagedashedline);
