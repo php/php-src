@@ -364,55 +364,49 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 	if (p->type == IS_CONSTANT) {
 		int refcount;
+		char *const_name;
 
 		SEPARATE_ZVAL(pp);
 		p = *pp;
 
 		refcount = p->refcount;
 
-		if (strchr(p->value.str.val, ':')) {
-			char *cur, *temp;
-			char *last;
+		if ((const_name = strchr(p->value.str.val, ':')) && const_name[1] == ':') {
 			zend_class_entry **ce;
 			zval **value;
+			int class_name_len = const_name-p->value.str.val;
+			char *class_name = estrndup(p->value.str.val, class_name_len);
+			int free_class_name = 1;
 
-			last = tsrm_strtok_r(p->value.str.val, ":", &temp);
-
-			if (strcasecmp(last, "self")==0) {
+			if (class_name_len == sizeof("self")-1 && strcasecmp(class_name, "self")==0) {
 				if (EG(scope)) {
-					last = EG(scope)->name;
+					class_name = EG(scope)->name;
+					free_class_name = 0;
 				} else {
 					zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
 				}
-			} else if (strcasecmp(last, "parent")==0) {
+			} else if (class_name_len == sizeof("parent")-1 && strcasecmp(class_name, "parent")==0) {
 				if (!EG(scope)) {
 					zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
 				} else if (!EG(scope)->parent) {
 					zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
 				} else {
-					last = EG(scope)->parent->name;
+					class_name = EG(scope)->parent->name;
+					free_class_name = 0;
 				}
 			}
 
-
-			if (zend_lookup_class(last, strlen(last), &ce TSRMLS_CC) == FAILURE) {
-				zend_error(E_ERROR, "Undefined class '%s'", last);
+			if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == FAILURE) {
+				zend_error(E_ERROR, "Undefined class '%s'", class_name);
 			}
-			
-			last = tsrm_strtok_r(NULL, ":", &temp);
 
-			for(;;) {
-				cur = tsrm_strtok_r(NULL, ":", &temp);
-				if (!cur) {
-					break;
-				}
-				if (zend_hash_find(&(*ce)->class_table, last, strlen(last)+1, (void **)&ce) == FAILURE) {
-					zend_error(E_ERROR, "Undefined sub-class '%s'", last);
-				}
-				last = cur;
+			if(free_class_name) {
+				efree(class_name);
 			}
-			if (zend_hash_find(&(*ce)->constants_table, last, strlen(last)+1, (void **) &value) == FAILURE) {
-				zend_error(E_ERROR, "Undefined class constant '%s'", last);
+			const_name += 2;
+
+			if (zend_hash_find(&(*ce)->constants_table, const_name, strlen(const_name)+1, (void **) &value) == FAILURE) {
+				zend_error(E_ERROR, "Undefined class constant '%s'", const_name);
 			}
 			const_value = **value;
 			zval_copy_ctor(&const_value);
