@@ -15,7 +15,7 @@ libzend_la_SOURCES=\
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
 	zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
-	zend_list.c zend_indent.c zend_builtin_functions.c
+	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c
 
 libzend_la_LIBADD = $(ZEND_SCANNER)
 libzend_la_LDFLAGS = @EXTRA_LIBS@
