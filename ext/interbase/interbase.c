@@ -550,13 +550,19 @@ PHP_MINIT_FUNCTION(ibase)
 	REGISTER_LONG_CONSTANT("IBASE_DEFAULT", PHP_IBASE_DEFAULT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TEXT", PHP_IBASE_TEXT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_UNIXTIME", PHP_IBASE_UNIXTIME, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_READ", PHP_IBASE_READ, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_COMMITTED", PHP_IBASE_COMMITTED, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_CONSISTENCY", PHP_IBASE_CONSISTENCY, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IBASE_NOWAIT", PHP_IBASE_NOWAIT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TIMESTAMP", PHP_IBASE_TIMESTAMP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_DATE", PHP_IBASE_DATE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IBASE_TIME", PHP_IBASE_TIME, CONST_PERSISTENT);
+	/* transactions */
+	REGISTER_LONG_CONSTANT("IBASE_WRITE", PHP_IBASE_WRITE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_READ", PHP_IBASE_READ, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_COMMITTED", PHP_IBASE_COMMITTED, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_CONSISTENCY", PHP_IBASE_CONSISTENCY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_CONCURRENCY", PHP_IBASE_CONCURRENCY, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_REC_VERSION", PHP_IBASE_REC_VERSION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_REC_NO_VERSION", PHP_IBASE_REC_NO_VERSION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_NOWAIT", PHP_IBASE_NOWAIT, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IBASE_WAIT", PHP_IBASE_WAIT, CONST_PERSISTENT);
 	
 	return SUCCESS;
 }
@@ -1541,27 +1547,34 @@ PHP_FUNCTION(ibase_trans)
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, link_id, "InterBase link", le_link, le_plink);
 	}
 
-	if (trans_argl ) {
+	if (trans_argl) {
 		tpb[tpb_len++] = isc_tpb_version3;
 		tpbp = tpb;
 		/* access mode */
-		if (trans_argl & PHP_IBASE_READ) /* READ ONLY TRANSACTION */
+		if (trans_argl & PHP_IBASE_READ) { /* READ ONLY TRANSACTION */
 			tpb[tpb_len++] = isc_tpb_read;
-		else
-			tpb[tpb_len++] = isc_tpb_write;
+		} else {
+			tpb[tpb_len++] = isc_tpb_write;  /* default  access mode */
+		}
 		/* isolation level */
 		if (trans_argl & PHP_IBASE_COMMITTED) {
 			tpb[tpb_len++] = isc_tpb_read_committed;
-		} else if (trans_argl & PHP_IBASE_CONSISTENCY)
+			if (trans_argl & PHP_IBASE_REC_VERSION) {
+				tpb[tpb_len++] = isc_tpb_rec_version;
+			}else{
+				tpb[tpb_len++] = isc_tpb_no_rec_version; /* default in read_committed  */ 
+			}	
+		} else if (trans_argl & PHP_IBASE_CONSISTENCY) {
 			tpb[tpb_len++] = isc_tpb_consistency;
-		else 
-			tpb[tpb_len++] = isc_tpb_concurrency;
+		} else {
+			tpb[tpb_len++] = isc_tpb_concurrency;   /* default isolation level */ 
+		}
 		/* lock resolution */
-		if (trans_argl & PHP_IBASE_NOWAIT)
+		if (trans_argl & PHP_IBASE_NOWAIT) {
 			tpb[tpb_len++] = isc_tpb_nowait;
-		else 
-			tpb[tpb_len++] = isc_tpb_wait;
-
+		} else {
+			tpb[tpb_len++] = isc_tpb_wait;  /* default lock resolution */
+		}
 	}
 
 	/* find empty transaction slot */
