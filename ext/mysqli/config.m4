@@ -39,11 +39,15 @@ if test "$PHP_MYSQLI" != "no"; then
   dnl
   dnl Check the library
   dnl
-  PHP_CHECK_LIBRARY(mysqlclient, mysql_bind_param,
+  PHP_CHECK_LIBRARY(mysqlclient, mysql_set_server_option,
   [
     PHP_EVAL_INCLINE($MYSQLI_INCLINE)
     PHP_EVAL_LIBLINE($MYSQLI_LIBLINE, MYSQLI_SHARED_LIBADD)
     AC_DEFINE(HAVE_MYSQLILIB,1,[ ])
+    PHP_CHECK_LIBRARY(mysqlclient, mysql_bind_param,
+    [
+       AC_DEFINE(HAVE_MYSQLI_OLDAPI,1,[ ])
+    ],[],[])
   ],[
     AC_MSG_ERROR([wrong mysql library version or lib not found. Check config.log for more information.])
   ],[

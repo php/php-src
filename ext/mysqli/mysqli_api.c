@@ -68,9 +68,9 @@ PHP_FUNCTION(mysqli_autocommit)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_bind_param(object stmt, string types, mixed variable [,mixed,....])
+/* {{{ proto bool mysqli_stmt_bind_param(object stmt, string types, mixed variable [,mixed,....])
    Bind variables to a prepared statement as parameters */
-PHP_FUNCTION(mysqli_bind_param)
+PHP_FUNCTION(mysqli_stmt_bind_param)
 {
 	zval 			***args;
 	int     		argc = ZEND_NUM_ARGS();
@@ -170,8 +170,11 @@ PHP_FUNCTION(mysqli_bind_param)
 		}
 		ofs++;
 	}
-	
+#ifndef HAVE_MYSQLI_OLDAPI	
+	rc = mysql_stmt_bind_param(stmt->stmt, bind);
+#else
 	rc = mysql_bind_param(stmt->stmt, bind);
+#endif
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 
 	if (rc) {
@@ -197,14 +200,14 @@ PHP_FUNCTION(mysqli_bind_param)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_bind_result(object stmt, mixed var, [,mixed, ...])
+/* {{{ proto bool mysqli_stmt_bind_result(object stmt, mixed var, [,mixed, ...])
    Bind variables to a prepared statement for result storage */
 
 /* TODO:
    do_alloca, free_alloca
 */
 
-PHP_FUNCTION(mysqli_bind_result)
+PHP_FUNCTION(mysqli_stmt_bind_result)
 {
 	zval 		***args;
 	int     	argc = ZEND_NUM_ARGS();
@@ -243,6 +246,7 @@ PHP_FUNCTION(mysqli_bind_result)
 
 	if (var_cnt != stmt->stmt->field_count) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statmement.");
+		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -266,9 +270,12 @@ PHP_FUNCTION(mysqli_bind_result)
 			case MYSQL_TYPE_FLOAT:
 				convert_to_double_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_DOUBLE;
-				stmt->result.buf[ofs].buflen = 0;
+				stmt->result.buf[ofs].buflen = sizeof(double);
+				
+				/* allocate buffer for double */
+				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(double));
 				bind[ofs].buffer_type = MYSQL_TYPE_DOUBLE;
-				bind[ofs].buffer = (gptr)&Z_DVAL_PP(args[i]);
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				break;
 
@@ -280,17 +287,18 @@ PHP_FUNCTION(mysqli_bind_result)
 				convert_to_long_ex(args[i]);
 				stmt->result.buf[ofs].type = IS_LONG;
 				stmt->result.buf[ofs].buflen = 0;
+				stmt->result.buf[ofs].val = (char *)emalloc(sizeof(long));
 				bind[ofs].buffer_type = MYSQL_TYPE_LONG;
-				bind[ofs].buffer = (gptr)&Z_LVAL_PP(args[i]);
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
 				stmt->result.buf[ofs].type = IS_STRING; 
 				stmt->result.buf[ofs].buflen = sizeof(my_ulonglong); 
-				stmt->result.buf[ofs].buffer = (char *)emalloc(stmt->result.buf[ofs].buflen);
+				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_LONGLONG;
-				bind[ofs].buffer = stmt->result.buf[ofs].buffer;
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				break;
@@ -307,9 +315,9 @@ PHP_FUNCTION(mysqli_bind_result)
 				stmt->result.buf[ofs].type = IS_STRING; 
 				stmt->result.buf[ofs].buflen =
 					(stmt->stmt->fields) ? (stmt->stmt->fields[ofs].length) ? stmt->stmt->fields[ofs].length + 1: 256: 256;
-				stmt->result.buf[ofs].buffer = (char *)emalloc(stmt->result.buf[ofs].buflen);
+				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
 				bind[ofs].buffer_type = MYSQL_TYPE_STRING;
-				bind[ofs].buffer = stmt->result.buf[ofs].buffer;
+				bind[ofs].buffer = stmt->result.buf[ofs].val;
 				bind[ofs].is_null = &stmt->result.is_null[ofs];
 				bind[ofs].buffer_length = stmt->result.buf[ofs].buflen;
 				bind[ofs].length = &stmt->result.buf[ofs].buflen;
@@ -317,7 +325,11 @@ PHP_FUNCTION(mysqli_bind_result)
 		}
 	}
 
+#ifndef HAVE_MYSQLI_OLDAPI	
+	rc = mysql_stmt_bind_result(stmt->stmt, bind);
+#else
 	rc = mysql_bind_result(stmt->stmt, bind);
+#endif
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 
 	if (rc) {
@@ -521,9 +533,9 @@ PHP_FUNCTION(mysqli_error)
 }
 /* }}} */
 
-/* {{{ proto bool mysqli_execute(object stmt)
+/* {{{ proto bool mysqli_stmt_execute(object stmt)
    Execute a prepared statement */
-PHP_FUNCTION(mysqli_execute)
+PHP_FUNCTION(mysqli_stmt_execute)
 {
 	STMT 			*stmt;
 	zval 			*mysql_stmt;
@@ -557,8 +569,11 @@ PHP_FUNCTION(mysqli_execute)
 			}	
 		}
 	}
-
+#ifndef HAVE_MYSQLI_OLDAPI	
+	if (mysql_stmt_execute(stmt->stmt)) {
+#else
 	if (mysql_execute(stmt->stmt)) {
+#endif
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 		RETURN_FALSE;
 	}
@@ -570,14 +585,18 @@ PHP_FUNCTION(mysqli_execute)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch(object stmt)
+/* {{{ proto mixed mysqli_stmt_fetch(object stmt)
    Fetch results from a prepared statement into the bound variables */
-PHP_FUNCTION(mysqli_fetch)
+PHP_FUNCTION(mysqli_stmt_fetch)
 {
 	STMT 			*stmt;
 	zval 			*mysql_stmt;
 	unsigned int 	i;
 	ulong 			ret;
+	long			lval;
+	double			dval;
+	my_ulonglong	llval;
+	
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
@@ -589,41 +608,44 @@ PHP_FUNCTION(mysqli_fetch)
 
 	for (i = 0; i < stmt->result.var_cnt; i++) {
 		if (stmt->result.buf[i].type == IS_STRING) {
-			memset(stmt->result.buf[i].buffer, 0, stmt->result.buf[i].buflen);
+			memset(stmt->result.buf[i].val, 0, stmt->result.buf[i].buflen);
 		}
 	}
-	
+#ifndef HAVE_MYSQLI_OLDAPI	
+	if (!(ret = mysql_stmt_fetch(stmt->stmt))) {
+#else
 	if (!(ret = mysql_fetch(stmt->stmt))) {
-
+#endif
 		for (i = 0; i < stmt->result.var_cnt; i++) {
+			if (stmt->result.vars[i]->type == IS_STRING && stmt->result.vars[i]->value.str.len) {
+		        efree(stmt->result.vars[i]->value.str.val);
+			}
 			if (!stmt->result.is_null[i]) {
 				switch (stmt->result.buf[i].type) {
 					case IS_LONG:
-						stmt->result.vars[i]->type = IS_LONG;
+						memcpy(&lval, stmt->result.buf[i].val, sizeof(long));
+						ZVAL_LONG(stmt->result.vars[i], lval);
 						break;
 					case IS_DOUBLE:
-						stmt->result.vars[i]->type = IS_DOUBLE;
+						memcpy(&dval, stmt->result.buf[i].val, sizeof(double));
+						ZVAL_DOUBLE(stmt->result.vars[i], dval);
 						break;
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG) {
 							char tmp[50];
-							my_ulonglong lval;
-							memcpy (&lval, stmt->result.buf[i].buffer, sizeof(my_ulonglong));
-							if (lval != (long)lval) {
+							memcpy (&llval, stmt->result.buf[i].val, sizeof(my_ulonglong));
+							if (llval != (long)llval) {
 								/* even though lval is declared as unsigned, the value
 								 * may be negative. Therefor we cannot use %llu and must
 								 * use %lld.
 								 */
-								sprintf((char *)&tmp, "%lld", lval);
+								sprintf((char *)&tmp, "%lld", llval);
 								ZVAL_STRING(stmt->result.vars[i], tmp, 1);
 							} else {
-								ZVAL_LONG(stmt->result.vars[i], lval);
+								ZVAL_LONG(stmt->result.vars[i], llval);
 							}
 						} else {
-							if (stmt->result.vars[i]->type == IS_STRING) {
-								efree(stmt->result.vars[i]->value.str.val);
-							} 
-							ZVAL_STRING(stmt->result.vars[i], stmt->result.buf[i].buffer, 1); 
+							ZVAL_STRING(stmt->result.vars[i], stmt->result.buf[i].val, 1); 
 						}
 						break;
 					default:
@@ -1128,7 +1150,7 @@ PHP_FUNCTION(mysqli_options)
 
 /* {{{ proto int mysqli_param_count(object stmt) {
    Return the number of parameter for the given statement */
-PHP_FUNCTION(mysqli_param_count)
+PHP_FUNCTION(mysqli_stmt_param_count)
 {
 	STMT 		*stmt;
 	zval		*mysql_stmt;
@@ -1138,7 +1160,11 @@ PHP_FUNCTION(mysqli_param_count)
 	}
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
 		
+#ifndef HAVE_MYSQLI_OLDAPI	
+	RETURN_LONG(mysql_stmt_param_count(stmt->stmt));
+#else
 	RETURN_LONG(mysql_param_count(stmt->stmt));
+#endif
 }
 /* }}} */
 
@@ -1181,8 +1207,16 @@ PHP_FUNCTION(mysqli_prepare)
 
 	stmt = (STMT *)ecalloc(1,sizeof(STMT));
 
+#ifdef HAVE_MYSQLI_OLDAPI
 	stmt->stmt = mysql_prepare(mysql, query, query_len); 
-
+#else
+    if ((stmt->stmt = mysql_stmt_init(mysql))) {
+		if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
+			mysql_stmt_close(stmt->stmt);
+			stmt->stmt = NULL;
+		}
+	} 
+#endif
 	if (!stmt->stmt) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql);
 		efree(stmt);
@@ -1192,31 +1226,6 @@ PHP_FUNCTION(mysqli_prepare)
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
 	mysqli_resource->ptr = (void *)stmt;
 	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
-}
-/* }}} */
-
-/* {{{ proto mixed mysqli_get_metadata(object stmt)
-   return result set from statement */
-PHP_FUNCTION(mysqli_get_metadata)
-{
-	STMT			*stmt;
-	MYSQL_RES		*result;
-	zval 			*mysql_stmt;
-	MYSQLI_RESOURCE	*mysqli_resource;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
-		return;
-	}
-	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
-	
-	if (!(result = mysql_get_metadata(stmt->stmt))){
-		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		RETURN_FALSE;
-	}
-
-	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
-	mysqli_resource->ptr = (void *)result;
-	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);	
 }
 /* }}} */
 
@@ -1355,7 +1364,7 @@ PHP_FUNCTION(mysqli_rollback)
 
 /* {{{ proto bool mysqli_send_long_data(object stmt, int param_nr, string data)
 */
-PHP_FUNCTION(mysqli_send_long_data)
+PHP_FUNCTION(mysqli_stmt_send_long_data)
 {
 	STMT 	*stmt;
 	zval  	*mysql_stmt;
@@ -1372,8 +1381,11 @@ PHP_FUNCTION(mysqli_send_long_data)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid parameter number");
 		RETURN_FALSE;
 	}
-
+#ifndef HAVE_MYSQLI_OLDAPI	
+	if (mysql_stmt_send_long_data(stmt->stmt, param_nr, data, data_len)) {
+#else
 	if (mysql_send_long_data(stmt->stmt, param_nr, data, data_len)) {
+#endif
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1602,6 +1614,85 @@ PHP_FUNCTION(mysqli_stmt_error)
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
 	
 	RETURN_STRING((char *)mysql_stmt_error(stmt->stmt),1);
+}
+/* }}} */
+
+#ifndef HAVE_MYSQLI_OLDAPI
+/* {{{ proto object mysqli_stmt_init(object link)
+   Initialize statement object
+*/
+PHP_FUNCTION(mysqli_stmt_init)
+{
+	MYSQL			*mysql;
+	STMT 			*stmt;
+	zval			*mysql_link;
+	MYSQLI_RESOURCE *mysqli_resource; 
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",&mysql_link, mysqli_link_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(mysql, MYSQL *, &mysql_link, "mysqli_link");
+
+	if (!(stmt->stmt = mysql_stmt_init(mysql))) {
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)stmt;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_stmt_class_entry);
+}
+/* }}} */
+
+/* {{{ proto bool mysqli_stmt_prepare(object link, string query)
+   prepare server side statement with query
+*/
+PHP_FUNCTION(mysqli_stmt_prepare)
+{
+	STMT 	*stmt;
+	zval 	*mysql_stmt;
+	char	*query;
+	int		query_len;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_stmt, mysqli_stmt_class_entry, &query, &query_len) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt");
+
+	if (mysql_stmt_prepare(stmt->stmt, query, query_len)) {
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
+/* {{{ proto mixed mysqli_stmt_result_metadata(object stmt)
+   return result set from statement */
+PHP_FUNCTION(mysqli_stmt_result_metadata)
+{
+	STMT			*stmt;
+	MYSQL_RES		*result;
+	zval 			*mysql_stmt;
+	MYSQLI_RESOURCE	*mysqli_resource;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE(stmt, STMT *, &mysql_stmt, "mysqli_stmt"); 
+
+#ifndef HAVE_MYSQLI_OLDAPI	
+	if (!(result = mysql_stmt_result_metadata(stmt->stmt))){
+#else
+	if (!(result = mysql_get_metadata(stmt->stmt))){
+#endif
+		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+		RETURN_FALSE;
+	}
+
+	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
+	mysqli_resource->ptr = (void *)result;
+	MYSQLI_RETURN_RESOURCE(mysqli_resource, mysqli_result_class_entry);	
 }
 /* }}} */
 
