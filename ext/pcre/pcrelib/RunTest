@@ -1,0 +1,94 @@
+#! /bin/sh
+
+# Run PCRE tests
+
+cf=diff
+
+# Select which tests to run; if no selection, run all
+
+do1=no
+do2=no
+do3=no
+do4=no
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+    1) do1=yes;;
+    2) do2=yes;;
+    3) do3=yes;;
+    4) do4=yes;;
+    *) echo "Unknown test number $1"; exit 1;;
+  esac
+  shift
+done
+
+if [ $do1 = no -a $do2 = no -a $do3 = no -a $do4 = no ] ; then
+  do1=yes
+  do2=yes
+  do3=yes
+  do4=yes
+fi
+
+# Primary test, Perl-compatible
+
+if [ $do1 = yes ] ; then
+  echo "Testing main functionality (Perl compatible)"
+  ./pcretest testinput1 testtry
+  if [ $? = 0 ] ; then
+    $cf testtry testoutput1
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
+  fi
+fi
+
+# PCRE tests that are not Perl-compatible - API & error tests, mostly
+
+if [ $do2 = yes ] ; then
+  echo "Testing API and error handling (not Perl compatible)"
+  ./pcretest -i testinput2 testtry
+  if [ $? = 0 ] ; then
+    $cf testtry testoutput2
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
+  fi
+fi
+
+# Additional Perl-compatible tests for Perl 5.005's new features
+
+if [ $do3 = yes ] ; then
+  echo "Testing Perl 5.005 features (Perl 5.005 compatible)"
+  ./pcretest testinput3 testtry
+  if [ $? = 0 ] ; then
+    $cf testtry testoutput3
+    if [ $? != 0 ] ; then exit 1; fi
+  else exit 1
+  fi
+fi
+
+if [ $do1 = yes -a $do2 = yes -a $do3 = yes ] ; then
+  echo "The three main tests all ran OK"
+  echo " " 
+fi
+
+# Locale-specific tests, provided the "fr" locale is available
+
+if [ $do4 = yes ] ; then
+  locale -a | grep '^fr$' >/dev/null
+  if [ $? -eq 0 ] ; then
+    echo "Testing locale-specific features (using 'fr' locale)"
+    ./pcretest testinput4 testtry
+    if [ $? = 0 ] ; then
+      $cf testtry testoutput4
+      if [ $? != 0 ] ; then exit 1; fi
+      echo "Locale test ran OK" 
+      echo " " 
+    else exit 1
+    fi
+  else
+    echo "Cannot test locale-specific features - 'fr' locale not found,"
+    echo "or the \"locale\" command is not available to check for it."
+    echo " " 
+  fi
+fi
+
+# End
