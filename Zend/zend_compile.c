@@ -3746,6 +3746,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->parent = NULL;
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
+		ce->module = NULL;
 	}
 }
 
