@@ -41,24 +41,24 @@ function_entry mhash_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-static PHP_MINIT_FUNCTION(mhash);
-
 zend_module_entry mhash_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"mhash",
 	mhash_functions,
 	PHP_MINIT(mhash), NULL,
 	NULL, NULL,
-	NULL,
-    NO_VERSION_YET,
+	PHP_MINFO(mhash),
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES,
 };
 
 #ifdef COMPILE_DL_MHASH
 ZEND_GET_MODULE(mhash)
 #endif
+
 #define MHASH_FAILED_MSG "mhash initialization failed"
 #define MHASH_KEYGEN_FAILED_MSG "mhash key generation failed"
+
 static PHP_MINIT_FUNCTION(mhash)
 {
 	int i;
@@ -77,6 +77,18 @@ static PHP_MINIT_FUNCTION(mhash)
 	}
 
 	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(mhash)
+{
+	char version[32];
+	
+	sprintf(version,"%d", MHASH_API_VERSION);
+	
+	php_info_print_table_start();
+	php_info_print_table_row(2, "MHASH support", "Enabled");
+	php_info_print_table_row(2, "MHASH API Version", version);
+	php_info_print_table_end();
 }
 
 /* {{{ proto int mhash_count(void)

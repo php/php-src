@@ -12,6 +12,8 @@
 extern zend_module_entry mhash_module_entry;
 #define mhash_module_ptr &mhash_module_entry
 
+static PHP_MINIT_FUNCTION(mhash);
+PHP_MINFO_FUNCTION(mhash);
 PHP_FUNCTION(mhash_get_block_size);
 PHP_FUNCTION(mhash_get_hash_name);
 PHP_FUNCTION(mhash_count);
