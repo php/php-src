@@ -1,0 +1,61 @@
+I've committed the build infrastructure for the 
+"real programmers don't need an IDE" build system for win32.
+
+Why?
+- It's frustrating to have to use VC6 to work on PHP if you
+  have a newer version that has incompatible project files.
+- It's annoying to mess around with libxml2 stuff until it
+  stabilizes :-) and a pain to have to remember to edit
+  the config.w32.h header each time, and a pain to have to
+  avoid accidentally committing those changes each time.
+- It's difficult to set up a fully working build environment
+  for PHP without installing everything.
+- It's difficult for people without VC6 to create a win32
+  project file for their extensions.
+
+Requirements:
+You need windows script host (cscript.exe) and JScript installed.
+This should be a standard config on windows machines since win98
+(perhaps optional under win98).
+
+You also need the Microsoft build tools (cl.exe, link.exe and nmake.exe).
+These are freely available as part of the Platform SDK, but also
+come with VC++/Visual Studio.
+
+Finally, you need the php_build dir that contains all the
+headers and libraries for the things that php is linked
+against; see [1] for details.
+
+Usage:
+Check out PHP 5 and run buildconf.bat from the root of the php
+source.  This script is roughly equivalent to the unix buildconf
+in that it scans ext/* and sapi/* for config.w32 files describing
+optional build components and generates a configure script
+named configure.js
+
+Now run "cscript configure.js --help" to get a list of configure
+options; enable and disable stuff as appropriate.
+
+Then type nmake to build the things you configured.
+
+You will find the various .exe and .dll files in the build dir
+that configure selects for you based on debug and zts settings;
+it will be one of the usual Debug_TS, Release_TS, Debug or Release
+dirs found under the source root.
+
+You can also run the test suite by running "nmake test".
+[we have some issues under win32 with current CVS!]
+
+TODO:
+- Write config.w32 files for more extensions and sapis.
+  They're quite easy (just a couple of javascript function calls)
+  and can be put together almost without thinking by copying the
+  guts of the config.m4 file from the same extension.
+- add those .rc files with version info the generated .dll's and .exe's
+- Test if it actually works under win98 (Steph?)
+  There are only two places that I suspect might have difficulty
+  under win98.
+
+[1] 
+http://www.php.net/manual/en/install.windows.php#install.windows.build
+
