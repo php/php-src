@@ -618,7 +618,8 @@ PHP_FUNCTION(ftp_fput)
 	pval		*arg1, *arg2, *arg3, *arg4;
 	ftpbuf_t	*ftp;
 	ftptype_t	xtype;
-	FILE		*fp;
+	int		type;
+	void		*rsrc;
 
 	/* arg1 - ftp
 	 * arg2 - remote file
@@ -633,10 +634,11 @@ PHP_FUNCTION(ftp_fput)
 
 	FTPBUF(ftp, arg1);
 	convert_to_string(arg2);
-	FILEP(fp, arg3);
+   	rsrc = zend_fetch_resource(&arg3,-1,"File-Handle",&type,3,php_file_le_fopen(),php_file_le_popen(),php_file_le_socket());
+	ZEND_VERIFY_RESOURCE(rsrc);   
 	XTYPE(xtype, arg4);
 
-	if (!ftp_put(ftp, Z_STRVAL_P(arg2), fp, xtype)) {
+	if (!ftp_put(ftp, Z_STRVAL_P(arg2), (FILE*)rsrc, *(int*) rsrc, (type==php_file_le_socket()), xtype)) {
 		php_error(E_WARNING, "ftp_put: %s", ftp->inbuf);
 		RETURN_FALSE;
 	}
@@ -679,7 +681,7 @@ PHP_FUNCTION(ftp_put)
 		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg3));
 		RETURN_FALSE;
 	}
-	if (	!ftp_put(ftp, Z_STRVAL_P(arg2), infp, xtype) ||
+	if (	!ftp_put(ftp, Z_STRVAL_P(arg2), infp, 0, 0, xtype) ||
 		ferror(infp))
 	{
 		fclose(infp);
