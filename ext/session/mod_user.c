@@ -58,14 +58,12 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 	MAKE_STD_ZVAL(retval);
 	if (call_user_function(EG(function_table), NULL, func, retval, 
 				argc, argv) == FAILURE) {
-		zval_dtor(retval);
-		FREE_ZVAL(retval);
+		zval_ptr_dtor(&retval);
 		retval = NULL;
 	}
 
 	for (i = 0; i < argc; i++) {
-		zval_dtor(argv[i]);
-		FREE_ZVAL(argv[i]);
+		zval_ptr_dtor(&argv[i]);
 	}
 
 	return retval;
@@ -84,8 +82,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 	if (retval) {							\
 		convert_to_long(retval);			\
 		ret = retval->value.lval;			\
-		zval_dtor(retval);					\
-		FREE_ZVAL(retval);					\
+		zval_ptr_dtor(&retval);				\
 	} 										\
 	return ret
 
@@ -133,8 +130,7 @@ PS_READ_FUNC(user)
 			*vallen = retval->value.str.len;
 			ret = SUCCESS;
 		}
-		zval_dtor(retval);
-		FREE_ZVAL(retval);
+		zval_ptr_dtor(&retval);
 	}
 
 	return ret;
