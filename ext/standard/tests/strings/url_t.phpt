@@ -63,7 +63,8 @@ $sample_urls = array (
 'foo://foo@bar',
 'mailto:me@mydomain.com',
 '/foo.php?a=b&c=d',
-'foo.php?a=b&c=d'
+'foo.php?a=b&c=d',
+'http://user:passwd@www.example.com:8080?bar=1&boom=0'
 );
 
     foreach ($sample_urls as $url) {
@@ -600,4 +601,18 @@ array(2) {
   string(7) "foo.php"
   ["query"]=>
   string(7) "a=b&c=d"
+}
+array(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(15) "www.example.com"
+  ["port"]=>
+  int(8080)
+  ["user"]=>
+  string(4) "user"
+  ["pass"]=>
+  string(6) "passwd"
+  ["query"]=>
+  string(12) "bar=1&boom=0"
 }

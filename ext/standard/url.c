@@ -157,12 +157,16 @@ PHPAPI php_url *php_url_parse(char *str)
 		goto nohost;
 	}
 	
-	if (!(e = strchr(s, '/'))) {
-		e = ue;
-	} else if (e && e == s) {
-		e = ue;
-	}
-
+	e = ue;
+	
+	if (!(p = strchr(s, '/'))) {
+		if ((p = strchr(s, '?'))) {
+			e = p;
+		}
+	} else {
+		e = p;
+	}	
+		
 	/* check for login and password */
 	if ((p = memchr(s, '@', (e-s)))) {
 		if ((pp = memchr(s, ':', (p-s)))) {
