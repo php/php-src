@@ -64,19 +64,19 @@
 #define IS_SOCKET		1
 #define BAD_URL			2
 
-extern PHPAPI FILE *php_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path);
+PHPAPI FILE *php_fopen_wrapper(char *filename, char *mode, int options, int *issock, int *socketd, char **opened_path);
 
 PHPAPI FILE *php_fopen_primary_script(void);
 
-extern PHPAPI int php_check_open_basedir(char *path);
-extern PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC);
+PHPAPI int php_check_open_basedir(char *path);
+PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC);
 
-extern PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path);
+PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **opened_path);
 
-extern PHPAPI int php_is_url(char *path);
-extern PHPAPI char *php_strip_url_passwd(char *path);
+PHPAPI int php_is_url(char *path);
+PHPAPI char *php_strip_url_passwd(char *path);
 
-extern PHPAPI char *expand_filepath(char *filepath);
+PHPAPI char *expand_filepath(char *filepath);
 
 #endif
 /*
