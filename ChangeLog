@@ -1,3 +1,71 @@
+2001-02-15  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/filestat.c: Small typo.
+
+2001-02-15  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/bz2/bz2.c
+      ext/bz2/php_bz2.h
+      ext/curl/curl.c
+      ext/curl/php_curl.h
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c: Change e-mail address
+
+
+2001-02-15  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/file.c
+      ext/standard/iptc.c
+      ext/oci8/oci8.c
+      ext/pdf/pdf.c
+      ext/cpdf/cpdf.c
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/hyperwave/hw.c
+      ext/interbase/interbase.c:
+    i nuked all unneded calls to php_header() - i'm not too sure how we do
+    handle HEAD Requests as they were only detected via php_header(). but calling
+    php_header from a module makes output-buffering unusable.
+
+    NOTICE: there is some EBSDIC stuff in gd.c - i think it's obsolete.
+
+    * ext/standard/string.c: 0..255
+
+    * ext/xml/xml.c:
+    fixed SEGFAULT when using xml_set_object. Zend does not yes support
+    cyclic references!
+
+2001-02-15  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    Added thow new mnoGoSearch agent session parameters:
+    UDM_PARAM_WEIGHT_FACTOR and UDM_PARAM_WORD_MATCH.
+
+2001-02-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/php_dir.h:
+    There might be more systems which do not support chroot, so we check
+    for the existence of it.
+
+    Additionally, if chroot is not supported, the warn_not_available function
+    is invoked now.
+
+2001-02-15  Zeev Suraski  <zeev@zend.com>
+
+    * ext/pgsql/pgsql.c: Fix the PostgreSQL fix...
+
+2001-02-15  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/php_dir.h: - chroot does not work on windows
+
 2001-02-14  Jani Taskinen  <sniper@iki.fi>
 
     * ext/oci8/config.m4
