@@ -31,6 +31,18 @@
 #include "spl_engine.h"
 #include "spl_foreach.h"
 
+#define ezalloc(size) \
+	memset(emalloc(size), 0, size)
+
+typedef struct {
+	zend_uint     index;
+	zend_function *f_next;
+	zend_function *f_rewind;
+	zend_function *f_more;
+	zend_function *f_current;
+	zend_function *f_key;
+} spl_foreach_proxy;
+
 /* {{{ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET) */
 ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 {
@@ -41,10 +53,10 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 		if (spl_implements(obj, spl_ce_iterator TSRMLS_CC)) {
 			spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 			MAKE_STD_ZVAL(retval);
-			spl_begin_method_call_this(obj, "new_iterator", retval TSRMLS_CC);
+			spl_begin_method_call_this(obj, NULL, "new_iterator", sizeof("new_iterator")-1, retval TSRMLS_CC);
 			EX_T(EX(opline)->result.u.var).var.ptr = retval;
 			EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
-			EX(opline)->op2.u.EA.type = 0; /* missuse as index */
+			/* EX(opline)->result.u.EA.type = 0; */
 
 			PZVAL_LOCK(retval);
 
@@ -54,7 +66,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 
 			EX_T(EX(opline)->result.u.var).var.ptr = *obj;
 			EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;	
-			EX(opline)->op2.u.EA.type = 0; /* missuse as index */
+			/* EX(opline)->result.u.EA.type = 0; */
 
 			(*obj)->refcount++;
 			PZVAL_LOCK(*obj);
@@ -71,38 +83,43 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 {
 	zval **obj = spl_get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 	zval more, tmp, *value, *key, *result;
+	spl_foreach_proxy *proxy;
 
 	if (spl_implements(obj, spl_ce_forward TSRMLS_CC)) {
-		zend_uint index = EX(opline)->op2.u.EA.type++;
+		proxy = (spl_foreach_proxy*)EX(opline)->op1.u.EA.type;
+		
+		if (!proxy) {
+			(spl_foreach_proxy*)EX(opline)->op1.u.EA.type = proxy = ezalloc(sizeof(spl_foreach_proxy));
+		}
 		
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		PZVAL_LOCK(*obj);
 
-		if (index) {
-			spl_begin_method_call_this(obj, "next", &more TSRMLS_CC);
+		if (proxy->index++) {
+			spl_begin_method_call_this(obj, &proxy->f_next, "next", sizeof("next")-1, &tmp TSRMLS_CC);
 		} else if (spl_implements(obj, spl_ce_sequence TSRMLS_CC)) {
-			spl_begin_method_call_this(obj, "rewind", &more TSRMLS_CC);
+			spl_begin_method_call_this(obj, &proxy->f_rewind, "rewind", sizeof("rewind")-1, &tmp TSRMLS_CC);
 		}
 
-		spl_begin_method_call_this(obj, "has_more", &more TSRMLS_CC);
+		spl_begin_method_call_this(obj, &proxy->f_more, "has_more", sizeof("has_more")-1, &more TSRMLS_CC);
 		if (zend_is_true(&more)) {
 			result = &EX_T(EX(opline)->result.u.var).tmp_var;
 			array_init(result);
 			ALLOC_ZVAL(value);
 
-			spl_begin_method_call_this(obj, "current", value TSRMLS_CC);
+			spl_begin_method_call_this(obj, &proxy->f_current, "current", sizeof("current")-1, value TSRMLS_CC);
 
 			zend_hash_index_update(result->value.ht, 0, &value, sizeof(zval *), NULL);
 		
 			if (spl_implements(obj, spl_ce_assoc TSRMLS_CC)) {
 				ALLOC_ZVAL(key);
-				spl_begin_method_call_this(obj, "key", key TSRMLS_CC);
+				spl_begin_method_call_this(obj, &proxy->f_key, "key", sizeof("key")-1, key TSRMLS_CC);
 			} else {
 				/* If someone makes a reference to this value then there is
 				 * a real problem. And the only way to avoid it is to alloc
 				 * dealloc this temporary zval then.
 				 */
-				tmp.value.lval = index;
+				tmp.value.lval = proxy->index;
 				tmp.type = IS_LONG;
 				tmp.refcount = 0;
 				tmp.is_ref = 0;
@@ -111,6 +128,9 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_FETCH)
 			zend_hash_index_update(result->value.ht, 1, &key, sizeof(zval *), NULL);
 
 			NEXT_OPCODE();
+		} else {
+			efree(proxy);
+			EX(opline)->op1.u.EA.type = 0;
 		}
 		EX(opline) = op_array->opcodes+EX(opline)->op2.u.opline_num;
 		return 0;

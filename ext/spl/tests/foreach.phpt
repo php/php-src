@@ -21,8 +21,9 @@ class c_iter implements spl::forward_assoc {
 		$this->num++;
 	}
 	function has_more() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
-		return $this->num < $this->obj->max;
+		$more = $this->num < $this->obj->max;
+		echo __CLASS__ . '::' . __FUNCTION__ . ' = ' .($more ? 'true' : 'false') . "\n";
+		return $more;
 	}
 	function key() {
 		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
@@ -74,111 +75,119 @@ print "Done\n";
 ?>
 --EXPECT--
 c::new_iterator
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 array:0
 array:1
 array:2
 c::new_iterator
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 c::new_iterator
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 c::new_iterator
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:0:1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:0:2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 c::new_iterator
+c_iter::has_more = true
+c_iter::current
+c_iter::key
+double:1:0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:1:1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:1:2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 c::new_iterator
+c_iter::has_more = true
+c_iter::current
+c_iter::key
+double:2:0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:2:1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 double:2:2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 c::new_iterator
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:1st=>0
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:2nd=>1
 c_iter::next
-c_iter::has_more
+c_iter::has_more = true
 c_iter::current
 c_iter::key
 object:3rd=>2
 c_iter::next
-c_iter::has_more
+c_iter::has_more = false
 Done

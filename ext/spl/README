@@ -1,4 +1,3 @@
-<pre>
 This is an extension that aims to implement some efficient data access 
 interfaces and classes.
 
@@ -35,5 +34,3 @@ There is no efficient way for "lazy or just in time evaluating" so 4) should
 be the best case. And 4) also enables the foreach trick.
 
 To implement 3) and 4) with other db extensions ask me and wait for LT to pass.
-
-</pre>
