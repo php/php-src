@@ -89,6 +89,8 @@ struct _php_core_globals {
 	short connection_status;
 	short ignore_user_abort;
 
+	long max_execution_time;
+
 	unsigned char header_is_being_sent;
 
 	zend_llist ll_post_request_startup;
