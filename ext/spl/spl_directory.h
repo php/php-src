@@ -26,7 +26,7 @@
 
 extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveDirectoryIterator;
-extern PHPAPI zend_class_entry *spl_ce_FileReader;
+extern PHPAPI zend_class_entry *spl_ce_File;
 
 PHP_MINIT_FUNCTION(spl_directory);
 
