@@ -46,5 +46,6 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 	STR_FREE(wg->login_name);
 	
 	memset(wg, 0, sizeof(*wg));
+	return SUCCESS;
 }
 
