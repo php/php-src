@@ -50,6 +50,10 @@
 #include <sys/socket.h>
 #endif
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 extern php3_module_entry fsock_module_entry;
 #define phpext_fsock_ptr &fsock_module_entry
 
