@@ -1588,15 +1588,17 @@ ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char 
 
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
-			if (callable_name)
+			if (callable_name) {
 				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-
-			if (syntax_only)
+			}
+			if (syntax_only) {
 				return 1;
+			}
 
 			lcname = zend_str_tolower_dup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) 
+			if (zend_hash_exists(EG(function_table), lcname, Z_STRLEN_P(callable)+1)) {
 				retval = 1;
+			}
 			efree(lcname);
 			break;
 
