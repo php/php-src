@@ -502,7 +502,8 @@ static void php_unset_timeout(void)
 #endif
 }
 
-
+/* {{{ proto void set_time_limit(int seconds)
+   Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
 	pval *new_timeout;
@@ -529,7 +530,7 @@ PHP_FUNCTION(set_time_limit)
 	php_unset_timeout();
 	php_set_timeout(new_timeout->value.lval);
 }
-
+/* }}} */
 
 static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
 {
