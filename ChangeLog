@@ -1,3 +1,111 @@
+2004-02-20  Sara Golemon  <php@alphaweb.net>
+
+    * ext/ftp/ftp.c:
+      s_addr is always unsigned 32bit, long is not.
+
+    * ext/standard/http.c:
+      Bug Fix #27335: Numeric indexes crashing http_build_query()
+
+2004-02-20  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      stupid oversight, no 4.2 dep
+
+2004-02-20  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      pear/packages/DB-1.6.0.tar
+      pear/packages/DB-1.6.0RC6.tar:
+      - Update to DB-1.6.0
+
+    * pear/packages/DB-1.6.0RC6.tar:
+      - Remove DB 1.6.0RC6
+
+    * pear/packages/DB-1.6.0.tar:
+      
+      - Update to DB-1.6.0 stable
+
+    * pear/package-PEAR.xml:
+      - MFB
+
+    * (PHP_4_3)
+      pear/package-PEAR.xml:
+      - 1.3b6=>1.3 stable, prepare stable release
+
+2004-02-20  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/config.m4
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_repl.c:
+      Moved functions for replication support in to file mysqli_repl.c
+        - these functions are marked as experimental now in documentation
+          not sure if we will replace or extend them with NDB support in
+          April
+
+2004-02-20  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      this should really fix compile failure with gcc 2.96
+
+2004-02-20  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h:
+      Fix some issues with persistent links
+
+2004-02-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * main/streams/php_stream_context.h
+      main/streams/php_stream_filter_api.h
+      main/streams/php_stream_mmap.h
+      main/streams/php_stream_plain_wrapper.h
+      main/streams/php_stream_transport.h:
+      EXTERN_C wrapping for PHPAPI prototypes
+      (Zend and main should now be ok)
+
+    * main/php_memory_streams.h
+      main/php_network.h
+      main/php_open_temporary_file.h
+      main/php_output.h
+      main/php_reentrancy.h
+      main/php_streams.h
+      main/php_ticks.h
+      main/safe_mode.h:
+      wrap all PHPAPI prototypes into BEGIN_EXTERN_C/END_EXTERN_C blocks
+      (else they won't be usable from C++ extensions)
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_variables.h:
+      more EXTERN_C wrapping of ZEND_API prototypes
+
+    * scripts/dev/extern_c.php:
+      A script that searches for PHPAPI and ZEND_API prototypes
+      not enclosed by BEGIN_EXTERN_C/END_EXTERN_C
+
+2004-02-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ZendEngine2/zend_opcode.c:
+      ws fix
+
+    * ext/oci8/oci8.c:
+      Fix compile failure
+
+    * ext/oci8/oci8.c:
+      Only use Z_TYPE* with zvals..
+
+2004-02-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/dio/dio.c:
+      MFH: missing safe_mode & open_basedir checks.
+
+    * ext/dio/dio.c:
+      Added missing safe_mode & open_basedir checks.
+
 2004-02-19  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

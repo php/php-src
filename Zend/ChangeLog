@@ -1,3 +1,17 @@
+2004-02-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * zend.h
+      zend_API.h
+      zend_iterators.h
+      zend_operators.h
+      zend_variables.h:
+      more EXTERN_C wrapping of ZEND_API prototypes
+
+2004-02-20  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_opcode.c:
+      ws fix
+
 2004-02-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
 
     * zend.h
