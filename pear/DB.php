@@ -17,11 +17,20 @@
 // |                                                                      |
 // +----------------------------------------------------------------------+
 //
+// $Id$
+//
 // Database independent query interface.
 //
 
 // {{{ Database independent error codes.
 
+/*
+ * The method mapErrorCode in each DB_dbtype implementation maps
+ * native error codes to one of these.
+ *
+ * If you add an error code here, make sure you also add a textual
+ * version of it in DB::errorMessage().
+ */
 define("DB_OK",                     0);
 define("DB_ERROR",                 -1);
 define("DB_ERROR_SYNTAX",          -2);
@@ -40,39 +49,80 @@ define("DB_ERROR_NODBSELECTED",   -14);
 define("DB_ERROR_CANNOT_CREATE",  -15);
 define("DB_ERROR_CANNOT_DELETE",  -16);
 define("DB_ERROR_CANNOT_DROP",    -17);
+define("DB_ERROR_NOSUCHTABLE",    -18);
+define("DB_ERROR_NOSUCHFIELD",    -19);
 
 // }}}
 // {{{ Prepare/execute parameter types
 
+/*
+ * These constants are used when storing information about prepared
+ * statements (using the "prepare" method in DB_dbtype).
+ *
+ * The prepare/execute model in DB is borrowed from the ODBC extension,
+ * in a query the "?" character means a scalar parameter, and a "*"
+ * character means an opaque parameter.  An opaque parameter is simply
+ * a file name, the real data are in that file (useful for large blob
+ * operations). 
+ */
 define("DB_PARAM_SCALAR",           1);
 define("DB_PARAM_OPAQUE",           2);
 
 // }}}
 // {{{ Binary data modes
 
+/*
+ * These constants define different ways of returning binary data
+ * from queries.  Again, this model has been borrowed from the ODBC
+ * extension.
+ *
+ * DB_BINMODE_PASSTHRU sends the data directly through to the browser
+ * when data is fetched from the database.
+ * DB_BINMODE_RETURN lets you return data as usual.
+ * DB_BINMODE_CONVERT returns data as well, only it is converted to
+ * hex format, for example the string "123" would become "313233".
+ */
 define("DB_BINMODE_PASSTHRU",       1);
 define("DB_BINMODE_RETURN",         2);
 define("DB_BINMODE_CONVERT",        3);
 
 // }}}
 
-// {{{ class DB
-
 /**
- * This class implements a factory method for creating DB objects,
- * as well as some "static methods".
+ * The main "DB" class is simply a container class with some static
+ * methods for creating DB objects as well as some utility functions
+ * common to all parts of DB.
  *
- * @version  100
+ * The object model of DB is as follows (indentation means inheritance):
+ *
+ * DB           The main DB class.  This is simply a utility class
+ *              with some "static" methods for creating DB objects as
+ *              well as common utility functions for other DB classes.
+ * 
+ * DB_common    The base for each DB implementation.  Provides default
+ * |            implementations (some would say virtual methods) for
+ * |            the actual DB implementations as well as a bunch of
+ * |            query utility functions.
+ * |
+ * +-DB_mysql   The DB implementation for MySQL.  Inherits DB_common.
+ *              When calling DB::factory or DB::connect for MySQL
+ *              connections, the object returned is an instance of this
+ *              class.
+ *
+ * @version  1.00
  * @author   Stig Bakken <ssb@fast.no>
- * @since    4.0b4
+ * @since    PHP 4.0
  */
 class DB {
     // {{{ factory()
 
 	/**
 	 * Create a new DB object for the specified database type.
+	 *
 	 * @param   $type   database type
-	 * @return  object  a newly created DB object, or false on error
+	 *
+	 * @return object a newly created DB object, or a DB error code on
+	 * error
 	 */
     function factory($type) {
 		global $USED_PACKAGES;
@@ -93,6 +143,19 @@ class DB {
     // }}}
     // {{{ connect()
 
+	/**
+	 * Create a new DB object and connect to the specified database.
+	 *
+	 * @param $dsn "data source name", see the parseDSN method for a
+	 * description of the dsn format.
+	 *
+	 * @param $persistent (optional) whether this connection should be
+	 * persistent.  Ignored if the backend extension does not support
+	 * persistent connections.
+	 *
+	 * @return object a newly created DB object, or a DB error code on
+	 * error
+	 */
 	function connect($dsn, $persistent = false) {
 		global $USED_PACKAGES;
 
@@ -109,7 +172,10 @@ class DB {
 		}
 		$classname = 'DB_' . $type;
 		$obj = new $classname;
-		$obj->connect(&$dsninfo, $persistent);
+		$err = $obj->connect(&$dsninfo, $persistent);
+		if (DB::isError($err)) {
+			return $err;
+		}
 		return $obj; // XXX ADDREF
 	}
 
@@ -118,10 +184,11 @@ class DB {
 
 	/**
 	 * Return the DB API version.
-	 * @return  int     the DB API version number
+	 *
+	 * @return double the DB API version number
 	 */
     function apiVersion() {
-		return 100;
+		return 1.00;
     }
 
     // }}}
@@ -129,8 +196,10 @@ class DB {
 
 	/**
 	 * Tell whether a result code from a DB method is an error.
-	 * @param   $code   result code
-	 * @return  bool    whether $code is an error
+	 *
+	 * @param $code result code
+	 *
+	 * @return bool whether $code is an error
 	 */
 	function isError($code) {
 		return is_int($code) && ($code < 0);
@@ -140,9 +209,12 @@ class DB {
     // {{{ errorMessage()
 
 	/**
-	 * Return a textual error message for an error code.
-	 * @param   $code   error code
-	 * @return  string  error message
+	 * Return a textual error message for a DB error code.
+	 *
+	 * @param $code error code
+	 *
+	 * @return string error message, or false if the error code was
+	 * not recognized
 	 */
 	function errorMessage($code) {
 		if (!is_array($errorMessages)) {
@@ -160,7 +232,12 @@ class DB {
 				DB_ERROR_INVALID_NUMBER => "invalid number",
 				DB_ERROR_INVALID_DATE   => "invalid date or time",
 				DB_ERROR_DIVZERO        => "division by zero",
-				DB_ERROR_NODBSELECTED   => "no database selected"
+				DB_ERROR_NODBSELECTED   => "no database selected",
+				DB_ERROR_CANNOT_CREATE  => "can not create",
+				DB_ERROR_CANNOT_DELETE  => "can not delete",
+				DB_ERROR_CANNOT_DROP    => "can not drop",
+				DB_ERROR_NOSUCHTABLE    => "no such table",
+				DB_ERROR_NOSUCHFIELD    => "no such field"
 			);
 		}
 		return $errorMessages[$code];
@@ -260,18 +337,18 @@ class DB {
     // }}}
 }
 
-// }}}
-// {{{ class DB_result
-
 /**
  * This class implements a wrapper for a DB result set.
  * A new instance of this class will be returned by the DB implementation
  * after processing a query that returns data.
  */
 class DB_result {
+    // {{{ properties
+
     var $dbh;
     var $result;
 
+    // }}}
     // {{{ DB_result()
 
     /**
@@ -324,7 +401,7 @@ class DB_result {
     // {{{ free()
 
     /**
-	 * Frees the resource for this result and reset ourselves.
+	 * Frees the resources allocated for this result set.
 	 * @return  int     error code
 	 */
     function free() {
@@ -338,8 +415,6 @@ class DB_result {
 
     // }}}
 }
-
-// }}}
 
 // Local variables:
 // tab-width: 4
