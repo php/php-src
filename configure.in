@@ -456,7 +456,7 @@ else
 fi
 
 PHP_ARG_ENABLE(debug, whether to include debugging symbols,
-[  --enable-debug         Compile with debugging symbols.], no)
+[  --enable-debug          Compile with debugging symbols.], no)
 
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1

@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension Sablot
 
 PHP_ARG_WITH(sablot, for Sablotron XSL support,
-[  --with-sablot[=DIR]        Include Sablotron support])
+[  --with-sablot[=DIR]     Include Sablotron support])
 
 if test "$PHP_SABLOT" != "no"; then
   if test -r $PHP_SABLOT/include/sablot.h; then
