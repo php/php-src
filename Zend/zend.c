@@ -494,7 +494,7 @@ void zend_shutdown(TSRMLS_D)
 	zend_hash_destroy(&module_registry);
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
-	zend_hash_destroy(GLOBAL_CLASS_TABLE);
+/*	zend_hash_destroy(GLOBAL_CLASS_TABLE); FIXME */
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
