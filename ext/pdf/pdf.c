@@ -115,7 +115,7 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_setrgbcolor_stroke, NULL)
 	PHP_FE(pdf_setrgbcolor, NULL)
 	PHP_FE(pdf_open_image_file, NULL)  /* new parameters: [char *stringpram, int intparam] */
-	PHP_FE(pdf_open_CCITT, NULL)	/* new function */
+	PHP_FE(pdf_open_ccitt, NULL)	/* new function */
 	PHP_FE(pdf_open_image, NULL)	/* new function */
 	PHP_FE(pdf_close_image, NULL)
 	PHP_FE(pdf_place_image, NULL)
@@ -375,9 +375,7 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 
 
 /* {{{ proto int pdf_open([int filedesc])
-   Opens a new pdf document. If filedesc is NULL, document is created in memory.
-   This is the old interface, only for compatibility 
-   use pdf_new + pdf_open_file instead */
+   Opens a new pdf document. If filedesc is NULL, document is created in memory. This is the old interface, only for compatibility use pdf_new + pdf_open_file instead */
 PHP_FUNCTION(pdf_open) 
 {
 	zval **file;
@@ -506,7 +504,7 @@ PHP_FUNCTION(pdf_show_xy)
 }
 /* }}} */
 
-/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode, [string feature])
+/* {{{ proto int pdf_show_boxed(int pdfdoc, string text, double x-koor, double y-koor, double width, double height, string mode [, string feature])
    Output text formated in a boxed */
 PHP_FUNCTION(pdf_show_boxed) 
 {
@@ -781,7 +779,7 @@ PHP_FUNCTION(pdf_set_word_spacing)
 /* }}} */
 
 /* {{{ proto void pdf_set_text_pos(int pdfdoc, double x, double y)
-   Set the position of text for the next pdf_show call */
+   Sets the position of text for the next pdf_show call */
 PHP_FUNCTION(pdf_set_text_pos) 
 {
 	zval **arg1, **arg2, **arg3;
@@ -820,7 +818,7 @@ PHP_FUNCTION(pdf_continue_text)
 /* }}} */
 
 /* {{{ proto double pdf_stringwidth(int pdfdoc, string text [, int font, double size])
-   Returns width of text in current font*/
+   Returns width of text in current font */
 PHP_FUNCTION(pdf_stringwidth)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1515,7 +1513,7 @@ PHP_FUNCTION(pdf_setgray)
 /* }}} */
 
 /* {{{ proto void pdf_setrgbcolor_fill(int pdfdoc, double red, double green, double blue)
-   Sets filling color to rgb color value */
+   Sets filling color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor_fill)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1536,7 +1534,7 @@ PHP_FUNCTION(pdf_setrgbcolor_fill)
 /* }}} */
 
 /* {{{ proto void pdf_setrgbcolor_stroke(int pdfdoc, double red, double green, double blue)
-   Sets drawing color to rgb color value */
+   Sets drawing color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor_stroke)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1557,7 +1555,7 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke)
 /* }}} */
 
 /* {{{ proto void pdf_setrgbcolor(int pdfdoc, double red, double green, double blue)
-   Sets drawing and filling color to rgb color value */
+   Sets drawing and filling color to RGB color value */
 PHP_FUNCTION(pdf_setrgbcolor)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1577,8 +1575,8 @@ PHP_FUNCTION(pdf_setrgbcolor)
 }
 /* }}} */
 
-/* {{{ proto int pdf_add_bookmark(int pdfdoc, string text [, int parent, int open]);
-   Add bookmark for current page */
+/* {{{ proto int pdf_add_bookmark(int pdfdoc, string text [, int parent, int open])
+   Adds bookmark for current page */
 PHP_FUNCTION(pdf_add_bookmark)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -1725,7 +1723,7 @@ static void _php_pdf_open_image(INTERNAL_FUNCTION_PARAMETERS, char *type)
 }
 
 /* {{{ proto int pdf_open_gif(int pdf, string giffile)
-   Opens a gif file and returns an image for placement in a pdf document */
+   Opens a GIF file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_gif)
 {
 	_php_pdf_open_image(INTERNAL_FUNCTION_PARAM_PASSTHRU,"gif");
@@ -1733,7 +1731,7 @@ PHP_FUNCTION(pdf_open_gif)
 /* }}} */
 
 /* {{{ proto int pdf_open_jpeg(int pdf, string jpegfile)
-   Opens a jpeg file and returns an image for placement in a pdf document */
+   Opens a JPEG file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_jpeg)
 {
 	_php_pdf_open_image(INTERNAL_FUNCTION_PARAM_PASSTHRU,"jpeg");
@@ -1741,7 +1739,7 @@ PHP_FUNCTION(pdf_open_jpeg)
 /* }}} */
 
 /* {{{ proto int pdf_open_png(int pdf, string pngfile)
-   Opens a png file and returns an image for placement in a pdf document */
+   Opens a PNG file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_png)
 {
 	_php_pdf_open_image(INTERNAL_FUNCTION_PARAM_PASSTHRU,"png");
@@ -1749,7 +1747,7 @@ PHP_FUNCTION(pdf_open_png)
 /* }}} */
 
 /* {{{ proto int pdf_open_tiff(int pdf, string tifffile)
-   Opens a tiff file and returns an image for placement in a pdf document */
+   Opens a TIFF file and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_tiff)
 {
 	_php_pdf_open_image(INTERNAL_FUNCTION_PARAM_PASSTHRU,"tiff");
@@ -1757,7 +1755,7 @@ PHP_FUNCTION(pdf_open_tiff)
 /* }}} */
 
 /* {{{ proto int pdf_open_image_file(int pdf, string type, string file, string stringparam, int intparam)
-   Opens an image file of the given type and returns an image for placement in a pdf document */
+   Opens an image file of the given type and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_image_file)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
@@ -1810,7 +1808,7 @@ PHP_FUNCTION(pdf_open_image_file)
 
 #if HAVE_LIBGD13
 /* {{{ proto int pdf_open_memory_image(int pdf, int image)
-   Takes an gd image and returns an image for placement in a pdf document */
+   Takes an GD image and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_memory_image)
 {
 	zval **arg1, **arg2;
@@ -1858,8 +1856,8 @@ PHP_FUNCTION(pdf_open_memory_image)
 /* }}} */
 #endif /* HAVE_LIBGD13 */
 
-/* {{{ proto void pdf_close_image(int *pdf, int pdfimage)
-   Closes the pdf image */
+/* {{{ proto void pdf_close_image(int pdf, int pdfimage)
+   Closes the PDF image */
 PHP_FUNCTION(pdf_close_image)
 {
 	zval **arg1, **arg2;
@@ -1877,7 +1875,7 @@ PHP_FUNCTION(pdf_close_image)
 /* }}} */
 
 /* {{{ proto void pdf_place_image(int pdf, int pdfimage, double x, double y, double scale)
-   Places image in the pdf document */
+   Places image in the PDF document */
 PHP_FUNCTION(pdf_place_image)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5;
@@ -1967,7 +1965,7 @@ PHP_FUNCTION(pdf_add_weblink)
 /* }}} */
 
 /* {{{ proto void pdf_add_pdflink(int pdfdoc, double llx, double lly, double urx, double ury, string filename, int page, string dest)
-   Adds link to pdf document */
+   Adds link to PDF document */
 PHP_FUNCTION(pdf_add_pdflink)
 {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8;
@@ -1999,7 +1997,7 @@ PHP_FUNCTION(pdf_add_pdflink)
 /* }}} */
 
 /* {{{ proto void pdf_set_border_style(int pdfdoc, string style, double width)
-   Set style of box surounding all kinds of annotations and link */
+   Sets style of box surounding all kinds of annotations and link */
 PHP_FUNCTION(pdf_set_border_style)
 {
 	zval **arg1, **arg2, **arg3;
@@ -2019,7 +2017,7 @@ PHP_FUNCTION(pdf_set_border_style)
 /* }}} */
 
 /* {{{ proto void pdf_set_border_color(int pdfdoc, double red, double green, double blue)
-   Set color of box surounded all kinds of annotations and links */
+   Sets color of box surounded all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_color)
 {
 	zval **arg1, **arg2, **arg3, **arg4;
@@ -2040,7 +2038,7 @@ PHP_FUNCTION(pdf_set_border_color)
 /* }}} */
 
 /* {{{ proto void pdf_set_border_dash(int pdfdoc, double black, double white)
-   Set the border dash style of all kinds of annotations and links */
+   Sets the border dash style of all kinds of annotations and links */
 PHP_FUNCTION(pdf_set_border_dash)
 {
 	zval **arg1, **arg2, **arg3;
@@ -2060,7 +2058,7 @@ PHP_FUNCTION(pdf_set_border_dash)
 /* }}} */
 
 /* {{{ proto void pdf_add_annotation(int pdfdoc, double xll, double yll, double xur, double xur, string title, string text)
-   Sets annotation (depreciated use pdf_add_note instead)*/
+   Sets annotation (depreciated use pdf_add_note instead) */
 PHP_FUNCTION(pdf_add_annotation)
 {
 	zval **argv[7];
@@ -2094,7 +2092,7 @@ PHP_FUNCTION(pdf_add_annotation)
 /* RJS: START OF NEW CODE */
 
 /* {{{ proto PDF *pdf_new()
-    Create a new PDF object */
+   Creates a new PDF object */
 PHP_FUNCTION(pdf_new) {
 	PDF *pdf;
 
@@ -2107,8 +2105,7 @@ PHP_FUNCTION(pdf_new) {
 /* }}} */
 
 /* {{{ proto void pdf_delete(int pdfdoc)
-
-   Deletes the pdf object */
+   Deletes the PDF object */
 PHP_FUNCTION(pdf_delete) {
 	zval **arg1;
 	PDF *pdf;
@@ -2127,10 +2124,8 @@ PHP_FUNCTION(pdf_delete) {
 
 /* }}} */
 
-/* {{{ proto int pdf_open_file(int pdfdoc [, char *filename])
-
-   Opens a new pdf document. If filename is NULL, document is created in memory.
-   This is not yet fully supported. */
+/* {{{ proto int pdf_open_file(int pdfdoc [, char filename])
+   Opens a new PDF document. If filename is NULL, document is created in memory. This is not yet fully supported */
 
 PHP_FUNCTION(pdf_open_file) {
 	zval **arg1, **arg2;
@@ -2173,9 +2168,8 @@ PHP_FUNCTION(pdf_open_file) {
 
 /* }}} */
 
-/* {{{ proto const char *pdf_get_buffer(int pdfdoc)
-
-   Fetch the full buffer containig the generated PDF data */
+/* {{{ proto int pdf_get_buffer(int pdfdoc)
+   Fetches the full buffer containig the generated PDF data */
 PHP_FUNCTION(pdf_get_buffer) {
 	zval **arg1;
 	long size;
@@ -2196,7 +2190,7 @@ PHP_FUNCTION(pdf_get_buffer) {
 /* }}} */
 
 /* {{{ proto int pdf_findfont(int pdfdoc, string fontname, string encoding [, int embed])
-   Prepare the font fontname for later use with pdf_setfont */
+   Prepares the font fontname for later use with pdf_setfont() */
 PHP_FUNCTION(pdf_findfont) {
 	zval **arg1, **arg2, **arg3, **arg4;
 	int id, embed, font;
@@ -2242,7 +2236,7 @@ PHP_FUNCTION(pdf_findfont) {
 /* }}} */
 
 /* {{{ proto void pdf_setfont(int pdfdoc, int font, float fontsize)
-   Set the curren font in the fiven fontsize */
+   Sets the current font in the fiven fontsize */
 PHP_FUNCTION(pdf_setfont) {
 	zval **arg1, **arg2, **arg3;
 	int font, argc;
@@ -2268,10 +2262,12 @@ PHP_FUNCTION(pdf_setfont) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_setpolydash(int pdfdoc, double *darray)
-   Sets more complicated dash pattern 
-   RJS: TODO: not yet working, dont know how to handle this pointer to an array ... 
-   maybe we have to ommit this from the interface ??? */
+/* {{{ proto void pdf_setpolydash(int pdfdoc, double darray)
+   Sets more complicated dash pattern */ 
+
+/*   RJS: TODO: not yet working, dont know how to handle this pointer 
+     to an array ... maybe we have to ommit this from the interface ??? */
+
 PHP_FUNCTION(pdf_setpolydash) {
 	zval **arg1, **arg2;
 	HashTable *array;
@@ -2316,7 +2312,7 @@ PHP_FUNCTION(pdf_setpolydash) {
 /* }}} */
 
 /* {{{ proto void pdf_concat(int pdf, double a, double b, double c, double d, double e, double f)
-   Concatenate a matrix to the curren transformation matrix for text and graphics */
+   Concatenates a matrix to the current transformation matrix for text and graphics */
 PHP_FUNCTION(pdf_concat) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
@@ -2345,9 +2341,9 @@ PHP_FUNCTION(pdf_concat) {
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_CCITT(int pdf, string filename, int width, int height, int BitReverse, int K, Int Blackls1)
-   Open an Image file with raw CCITTG3 or G4 compresed bitmap data */
-PHP_FUNCTION(pdf_open_CCITT) {
+/* {{{ proto int pdf_open_ccitt(int pdf, string filename, int width, int height, int bitreverse, int k, int blackls1)
+   Opens an image file with raw CCITT G3 or G4 compresed bitmap data */
+PHP_FUNCTION(pdf_open_ccitt) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7;
 	PDF *pdf;
 	int pdf_image, *img;
@@ -2372,7 +2368,7 @@ PHP_FUNCTION(pdf_open_CCITT) {
 	convert_to_long_ex(arg6);
 	convert_to_long_ex(arg7);
 
-	pdf_image = PDF_open_CCITT(pdf,
+	pdf_image = PDF_open_ccitt(pdf,
 	    image,
 	    Z_LVAL_PP(arg3),
 	    Z_LVAL_PP(arg4),
@@ -2384,10 +2380,8 @@ PHP_FUNCTION(pdf_open_CCITT) {
 }
 /* }}} */
 
-/* {{{ proto int pdf_open_image(int pdf, string type, string source,
-	string data, long length, int width, int height, int components,
-	int bpc, string params)
-   Opens an image of the given type and returns an image for placement in a pdf document */
+/* {{{ proto int pdf_open_image(int pdf, string type, string source, string data, long length, int width, int height, int components, int bpc, string params)
+   Opens an image of the given type and returns an image for placement in a PDF document */
 PHP_FUNCTION(pdf_open_image) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
 	PDF *pdf;
@@ -2431,10 +2425,8 @@ PHP_FUNCTION(pdf_open_image) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_attach_file(int pdf, double lly, double lly,
-	double urx, double ury, string filename,
-	string description, string author, string mimetype, string icon)
-   Add a file attachment annotation at the rectangle specified by his lower left and upper right corners */
+/* {{{ proto void pdf_attach_file(int pdf, double lly, double lly, double urx, double ury, string filename, string description, string author, string mimetype, string icon)
+   Adds a file attachment annotation at the rectangle specified by his lower left and upper right corners */
 PHP_FUNCTION(pdf_attach_file) {
 	zval **arg1, **arg2, **arg3, **arg4, **arg5, **arg6, **arg7, **arg8, **arg9, **arg10;
 	PDF *pdf;
