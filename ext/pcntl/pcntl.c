@@ -387,7 +387,7 @@ PHP_FUNCTION(pcntl_exec)
 	int path_len;
 	long key_num;
 		 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|aa", &path, &path_len, &args, &envs) == FAILURE) {
 		return;
 	}
 	
