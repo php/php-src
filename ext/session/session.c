@@ -854,7 +854,7 @@ static void _php_session_start(PSLS_D)
 		if (nrand < PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
 			if (nrdels != -1)
-				php_error(E_NOTICE, "Session gc: cleared %d\n", nrdels);
+				php_error(E_NOTICE, "purged %d expired session objects\n", nrdels);
 		}
 	}
 }
