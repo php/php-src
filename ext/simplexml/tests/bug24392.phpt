@@ -1,5 +1,5 @@
 --TEST--
-Checking bug #24392, empty namespaces causing confusion
+Bug #24392: empty namespaces causing confusion
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --POST--
@@ -7,7 +7,7 @@ Checking bug #24392, empty namespaces causing confusion
 --INI--
 --FILE--
 <?php 
-$s = simplexml_load_file('ext/simplexml/tests/002.xml');
+$s = simplexml_load_file('ext/simplexml/tests/bug24392.xml');
 foreach ($s->item as $item) {
 	echo $item->title . "\n";
 }
