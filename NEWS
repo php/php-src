@@ -2,8 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
-- Added PHP API for Zend's ticks
-- [placeholder]
+- Added PHP API for Zend's ticks. (Stig)
 
 29 Aug 2000, Version 4.0.2 
 - PHP 3 regression testing framework re-born (Stig)
