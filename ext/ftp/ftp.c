@@ -768,7 +768,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, i
 
 	size = 0;
 	ptr = data->buf;
-	while ((ch = php_stream_getc(instream))!=EOF && !php_stream_eof(instream)) {
+	while (!php_stream_eof(instream) && (ch = php_stream_getc(instream))!=EOF) {
 		/* flush if necessary */
 		if (FTP_BUFSIZE - size < 2) {
 			if (my_send(ftp, data->fd, data->buf, size) != size)
@@ -1728,7 +1728,7 @@ ftp_nb_continue_write(ftpbuf_t *ftp)
 
 	size = 0;
 	ptr = ftp->data->buf;
-	while ((ch = php_stream_getc(ftp->stream))!=EOF && !php_stream_eof(ftp->stream)) {
+	while (!php_stream_eof(ftp->stream) && (ch = php_stream_getc(ftp->stream))!=EOF) {
 
 		if (ch == '\n' && ftp->type == FTPTYPE_ASCII) {
 			*ptr++ = '\r';
