@@ -1,3 +1,24 @@
+2004-02-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * zend.h
+      zend_builtin_functions.h
+      zend_extensions.h
+      zend_indent.h
+      zend_interfaces.h
+      zend_object_handlers.h
+      zend_objects.h
+      zend_objects_API.h
+      zend_ptr_stack.h
+      zend_stack.h
+      zend_stream.h:
+      wrap ZEND_API prototypes into BEGIN_EXTERN_C/END_EXTERN_C
+      for C++ extension support
+
+2004-02-18  Zeev Suraski  <zeev@zend.com>
+
+    * zend.c:
+      Forward-port fixlet from PHP 4 (thanks to Michael Sisolak)
+
 2004-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * zend_list.c:

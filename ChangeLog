@@ -1,3 +1,76 @@
+2004-02-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_indent.h
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_ptr_stack.h
+      ZendEngine2/zend_stack.h
+      ZendEngine2/zend_stream.h:
+      wrap ZEND_API prototypes into BEGIN_EXTERN_C/END_EXTERN_C
+      for C++ extension support
+
+2004-02-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/xpath.c:
+      always return domnodelist unless error
+
+2004-02-18  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * main/php_logos.h:
+      be nice to C++ extensions
+
+2004-02-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/node.c:
+      correct implementation of prefix write property
+
+2004-02-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/mssql/php_mssql.c:
+      register_list_destructors -> zend_register_list_destructors_ex
+
+2004-02-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/scanf.c
+      ext/standard/tests/strings/bug27295.phpt:
+      MFH: Fixed bug #27295 (memory leak inside sscanf()).
+
+    * ext/standard/tests/strings/bug27295.phpt:
+      
+      Fixed bug #27295 (memory leak inside sscanf()).
+
+    * ext/standard/scanf.c:
+      Fixed bug #27295 (memory leak inside sscanf()).
+
+2004-02-18  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      changed return value of mysql_fetch
+        - instead of MYSQL_NO_DATA mysql_fetch will now return NULL
+
+2004-02-18  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend.c:
+      Forward-port fixlet from PHP 4 (thanks to Michael Sisolak)
+
+2004-02-18  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/info.c:
+      Show registered transports in phpinfo()
+
+2004-02-18  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/wddx/tests/bug27287.phpt:
+      
+      Test for bug #27287
+
 2004-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ZendEngine2/zend_list.c:
