@@ -159,5 +159,9 @@ SOURCE=.\php_imap.c
 SOURCE=.\php_imap.h
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\IMAP_Win32_HOWTO.txt
+# End Source File
 # End Target
 # End Project
