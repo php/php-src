@@ -41,6 +41,16 @@ define_option with-unixODBC 'unixODBC support?' yesnodir \
     http://www.unixodbc.org'
 fi
 
+# ESOOB
+if test "$option_value_with_solid" = "no" -a \
+        "$option_value_with_empress" = "no"; then
+define_option with-esoob 'Easysoft ODBC-ODBC Bridge support?' yesnodir \
+    'no /usr/local/easysoft/oob/client ESOOB install' \
+'    Whether to build PHP with Easysoft ODBC-ODBC Bridge support.\n
+    More info about the Easysoft ODBC-ODBC Bridge can be found on the\n
+    Easysoft home page at http://www.easysoft.com'
+fi
+
 # OpenLink
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
