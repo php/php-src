@@ -73,6 +73,8 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	int i, j;
 	int arows;
 	unsigned int size;
+	
+	dbsetuserdata(H->link, &S->err);
 
 	if (S->rows) {
 		/* clean them up */

@@ -32,6 +32,8 @@
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(dblib)
+
 function_entry pdo_dblib_functions[] = {
 	{NULL, NULL, NULL}
 };
@@ -47,7 +49,7 @@ zend_module_entry pdo_dblib_module_entry = {
 	PHP_MINIT(pdo_dblib),
 	PHP_MSHUTDOWN(pdo_dblib),
 	NULL,
-	NULL,
+	PHP_RSHUTDOWN(pdo_dblib),
 	PHP_MINFO(pdo_dblib),
 	"0.1-dev",
 	STANDARD_MODULE_PROPERTIES
@@ -60,9 +62,38 @@ ZEND_GET_MODULE(pdo_dblib)
 static int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr)
 {
+	pdo_dblib_err *einfo;
+	char *state = "HY000";
 	TSRMLS_FETCH();
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "dblib error: %s (severity %d)", dberrstr, severity);	
+	einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
+	if (!einfo) einfo = &DBLIB_G(err);
+
+	einfo->severity = severity;
+	einfo->oserr = oserr;
+	einfo->dberr = dberr;
+	if (einfo->oserrstr) {
+		efree(einfo->oserrstr);
+	}
+	if (einfo->dberrstr) {
+		efree(einfo->dberrstr);
+	}
+	einfo->oserrstr = estrdup(oserrstr);
+	einfo->dberrstr = estrdup(dberrstr);
+
+	switch (dberr) {
+		case SYBESEOF:
+		case SYBEFCON:	state = "01002"; break;
+		case SYBEMEM:	state = "HY001"; break;
+		case SYBEPWD:	state = "28000"; break;
+	}
+	strcpy(einfo->sqlstate, state);
+
+#if 0
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,
+		"dblib error: %d %s (severity %d)",
+		dberr, dberrstr, severity);	
+#endif
 
 	return INT_CANCEL;
 }
@@ -70,11 +101,47 @@ static int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 static int msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line)
 {
+	pdo_dblib_err *einfo;
 	TSRMLS_FETCH();
 
+	einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
+	if (!einfo) einfo = &DBLIB_G(err);
+
+	if (einfo->lastmsg) {
+		efree(einfo->lastmsg);
+	}
+
+	einfo->lastmsg = estrdup(msgtext);
+
+#if 0
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "dblib message: %s (severity %d)", msgtext, severity);
+#endif
 
 	return 0;
+}
+
+static int init_dblib_globals(zend_dblib_globals *g)
+{
+	memset(g, 0, sizeof(*g));
+	g->err.sqlstate = g->sqlstate;
+	return SUCCESS;
+}
+
+PHP_RSHUTDOWN_FUNCTION(pdo_dblib)
+{
+	if (DBLIB_G(err).oserrstr) {
+		efree(DBLIB_G(err).oserrstr);
+		DBLIB_G(err).oserrstr = NULL;
+	}
+	if (DBLIB_G(err).dberrstr) {
+		efree(DBLIB_G(err).dberrstr);
+		DBLIB_G(err).dberrstr = NULL;
+	}
+	if (DBLIB_G(err).lastmsg) {
+		efree(DBLIB_G(err).lastmsg);
+		DBLIB_G(err).lastmsg = NULL;
+	}
+	return SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(pdo_dblib)
@@ -86,6 +153,8 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {
 		return FAILURE;
 	}
+	
+	ZEND_INIT_MODULE_GLOBALS(dblib, init_dblib_globals, NULL);
 
 	/* TODO: 
 	
