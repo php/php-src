@@ -2641,7 +2641,7 @@ void zend_do_declare_property(znode *var_name, znode *value, zend_uint access_ty
 void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
 {
 	zval *property;
-
+	
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
 		zend_error(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
 	}
@@ -2655,8 +2655,10 @@ void zend_do_declare_class_constant(znode *var_name, znode *value TSRMLS_DC)
 		property->type = IS_NULL;
 	}
 
-	zend_hash_update(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL);
-
+	if (zend_hash_add(&CG(active_class_entry)->constants_table, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, &property, sizeof(zval *), NULL)==FAILURE) {
+		FREE_ZVAL(property);
+		zend_error(E_COMPILE_ERROR, "Cannot redefine class constant %s::%s", CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+	}
 	FREE_PNODE(var_name);
 }
 
