@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Fixed include_once() / require_once() on Windows to honor case-insensitivity
   of files. (Andi)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
+- Fixed bug #26528 (HTML entities are not being decoded by 
+  xml_parse()/xml_parse_into_struct()). (Ilia)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
 - Fixed bug #26083 (Non-working write support in ext/dom). (Ilia)
 - Fixed bug #26001 (serialize crashes when accessing an overloaded object that 

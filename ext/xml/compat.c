@@ -412,6 +412,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	} else {
 		parser->parser->charset = XML_CHAR_ENCODING_NONE;
 	}
+	parser->parser->replaceEntities=1;
 	if (sep != NULL) {
 		parser->use_namespace = 1;
 		parser->_ns_map = xmlHashCreate(10);
