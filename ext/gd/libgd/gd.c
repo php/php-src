@@ -86,6 +86,10 @@ extern int gdSinT[];
 
 static void gdImageBrushApply (gdImagePtr im, int x, int y);
 static void gdImageTileApply (gdImagePtr im, int x, int y);
+static int gdFullAlphaBlend(int dst, int src);
+static int gdLayerOverlay(int dst, int src);
+static int gdAlphaBlendColor(int b1, int b2, int a1, int a2);
+static int gdAlphaOverlayColor(int src, int dst, int max);
 
 gdImagePtr
 gdImageCreate (int sx, int sy)
@@ -2577,7 +2581,7 @@ gdImageSaveAlpha (gdImagePtr im, int saveAlphaArg)
   im->saveAlphaFlag = saveAlphaArg;
 }
 
-int
+static int
 gdFullAlphaBlend (int dst, int src)
 {
 	int a1, a2;
@@ -2591,7 +2595,7 @@ gdFullAlphaBlend (int dst, int src)
 		);
 }
 
-int
+static int
 gdAlphaBlendColor( int b1, int b2, int a1, int a2 )
 {
 	int c;
@@ -2617,7 +2621,7 @@ gdAlphaBlendColor( int b1, int b2, int a1, int a2 )
 	return ( a1 * b1 + ( gdAlphaMax - a1 ) * c ) / gdAlphaMax;
 }
 
-int
+static int
 gdLayerOverlay (int dst, int src)
 {
 	int a1, a2;
@@ -2630,7 +2634,7 @@ gdLayerOverlay (int dst, int src)
 		);
 }
 
-int
+static int
 gdAlphaOverlayColor( int src, int dst, int max )
 {
 	/* this function implements the algorithm

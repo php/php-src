@@ -29,6 +29,7 @@
 #include "gd.h"
 #include "gdhelpers.h"
 #include <string.h>
+#include <stdlib.h>
 
 /*
  * This module implements the well-known Heckbert paradigm for color
