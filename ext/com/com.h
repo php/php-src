@@ -21,20 +21,18 @@ typedef struct comval_ {
 
 #define ZVAL_COM(z,o) {																\
 			zval *handle;															\
+			HashTable *properties;													\
 																					\
-			/* OBJECTS_FIXME */														\
-			Z_TYPE_P(z) = IS_OBJECT;												\
-			Z_OBJCE_P(z) = &com_class_entry;										\
-																					\
-			ALLOC_HASHTABLE(Z_OBJPROP_P(z));										\
-			zend_hash_init(Z_OBJPROP_P(z), 0, NULL, ZVAL_PTR_DTOR, 0);				\
+			ALLOC_HASHTABLE(properties);											\
+			zend_hash_init(properties, 0, NULL, ZVAL_PTR_DTOR, 0);					\
 																					\
 			ALLOC_ZVAL(handle);														\
 			INIT_PZVAL(handle);														\
 			ZVAL_LONG(handle, zend_list_insert((o), IS_COM));						\
 																					\
 			zval_copy_ctor(handle);													\
-			zend_hash_index_update(Z_OBJPROP_P(z), 0, &handle, sizeof(zval *), NULL);	\
+			zend_hash_index_update(properties, 0, &handle, sizeof(zval *), NULL);	\
+			object_and_properties_init(z, &com_class_entry, properties);			\
 		}
 
 #define RETVAL_COM(o)	ZVAL_COM(&return_value, o)
