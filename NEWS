@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 - Fixed bug #28099 (ArrayObject doesn't implement ArrayAccess). (Marcus)
 - Fixed bug #27929 (SPL: change visibility of ArrayIterator::__construct).
   (Marcus)
+- Fixed bug #27640 (memory leak of registered_zend_ini_directives).  (Dmitry)
 - Fixed bug #27063 (SPL: ArrayObject does not handle PPP correctly). (Marcus)
 
 25 Apr 2004, PHP 5 Release Candidate 2
