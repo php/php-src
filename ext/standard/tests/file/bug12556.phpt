@@ -1,5 +1,5 @@
 --TEST--
-Bug #12556: fgetcvs ignores lengths when quotes not closed
+Bug #12556 (fgetcsv() ignores lengths when quotes not closed)
 --POST--
 --GET--
 --FILE--
