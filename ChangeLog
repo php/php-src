@@ -1,3 +1,61 @@
+2000-03-03  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/imap/imap.c: adding the fix for bug #3685 to php4 as well.
+
+2000-03-03  Stig Bakken  <ssb@fast.no>
+
+    * TODO: crazy idea brought on by someone at FAST
+
+2000-03-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in
+      reentrancy.c:
+    Support HP-UX 10.x non-standard time-related reentrant functions
+
+2000-03-03  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c:
+    (imagearc) - Fix #3706.
+
+2000-03-03  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testhyperwave
+      ext/domxml/domxml.c
+      tests/testdom: - tiny changes to testscript and domxml
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c: - more changes to use zend_llist
+
+2000-03-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/config.m4: make it work
+
+    * ext/imap/config.m4: Better lib check
+
+    * ext/imap/config.m4:
+    Also consider $i/include while searching for rfc822.h
+
+2000-03-03  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/domxml.c:
+    - xmltree() now returns an 'Dom Document' object with prop root and
+      children. root contains just the root element, children is an array
+      with all nodes on root level, e.g. comment, pi, element
+
+    * ext/domxml/domxml.c: - added property type to obejct xml doc
+
+2000-03-03  Zeev Suraski  <zeev@php.net>
+
+    * php.ini-dist: Fix spelling
+
+2000-03-03  Joe Martin  <joem@analytika.com>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+    Added functions to retrieve scale, precision and raw oracle data type for
+    columns.
+
 2000-03-02  David Hedbor  <david@hedbor.org>
 
     * sapi/roxen/README: Now recommend --enable-roxen-zts...
