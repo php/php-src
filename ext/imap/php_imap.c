@@ -2725,7 +2725,7 @@ PHP_FUNCTION(imap_fetch_overview)
 					rfc822_write_address(address, env->from);
 					add_property_string(myoverview, "from", address, 1);
 				}
-				if (env->to && _php_imap_address_size(env->from) < MAILTMPLEN) {
+				if (env->to && _php_imap_address_size(env->to) < MAILTMPLEN) {
 					env->to->next = NULL;
 					address[0] = '\0';
 					rfc822_write_address(address, env->to);
