@@ -45,3 +45,6 @@
 
 /* Define if you have broken sprintf function like SunOS 4 */
 #define BROKEN_SPRINTF 0
+
+/* Define to compile Zend thread safe */
+#undef ZTS
