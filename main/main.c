@@ -594,7 +594,8 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 /* }}} */
 
 /* {{{ php_suppress_errors */
-PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC) {
+PHPAPI void php_set_error_handling(error_handling_t error_handling, zend_class_entry *exception_class TSRMLS_DC)
+{
 	PG(error_handling) = error_handling;
 	PG(exception_class) = exception_class;
 	if (PG(last_error_message)) {
