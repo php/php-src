@@ -534,6 +534,10 @@ PHP_FUNCTION(curl_setopt)
 					SEPARATE_ZVAL(current);
 					convert_to_string_ex(current);
 					
+					if (Z_STRLEN_PP(current) < 1) {
+						continue;
+					}
+
 					indiv_command = estrndup(Z_STRVAL_PP(current), Z_STRLEN_PP(current));
 					commands = curl_slist_append(commands, indiv_command);
 					if (!commands) {
