@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
 - Fixed bug #27237 (Working with simplexml crashes apache2). (Rob)
+- Fixed bug #27227 (Mixed case class names causes Fatal Error in Constructor 
+  call). (Marcus)
 
 12 Feb 2004, PHP 5 Beta 4
 - Changed exceptions so that they must now inherit from the built-in Exception
