@@ -2112,7 +2112,12 @@ PHP_FUNCTION(register_shutdown_function)
 	if (zend_get_parameters_array(ht, shutdown_function_entry.arg_count, shutdown_function_entry.arguments) == FAILURE) {
 		RETURN_FALSE;
 	}
-	convert_to_string(shutdown_function_entry.arguments[0]);
+	
+	/* Prevent entering of anything but arrays/strings */
+	if (Z_TYPE_P(shutdown_function_entry.arguments[0]) != IS_ARRAY) {
+		convert_to_string(shutdown_function_entry.arguments[0]);
+	}
+	
 	if (!BG(user_shutdown_function_names)) {
 		ALLOC_HASHTABLE(BG(user_shutdown_function_names));
 		zend_hash_init(BG(user_shutdown_function_names), 0, NULL, (void (*)(void *)) user_shutdown_function_dtor, 0);
