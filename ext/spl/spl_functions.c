@@ -135,7 +135,7 @@ int spl_add_classes(zend_class_entry ** ppce, zval *list, int sub, int allow, in
 {
 	zend_class_entry *pce = *ppce;
 
-	if (!ppce) {
+	if (!pce) {
 		return 0;
 	}
 	spl_add_class_name(list, pce, allow, ce_flags TSRMLS_CC);
