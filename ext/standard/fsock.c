@@ -95,10 +95,6 @@
 
 #include "php_network.h"
 
-#ifdef ZTS
-static int fsock_globals_id;
-#endif
-
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #elif defined(NETWARE)
