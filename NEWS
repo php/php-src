@@ -3,11 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2005, PHP 5.0.4
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added length and charsetnr for field array and object in mysqli. (Georg)
+- Changed foreach() to throw an exception if IteratorAggregate::getIterator()
+  does not return an Iterator. (Marcus)
 - Changed phpize not to require automake and libtool. (Jani)
 - Fixed build system to always use bundled libtool files. (Jani)
 - Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
-- Changed foreach to throw an exception if IteratorAggregate::getIteraor() does
-  not return an Iterator. (Marcus)
 - Fixed bug #31651 (ReflectionClass::getDefaultProperties segfaults with arrays).
   (Marcus)
 - Fixed bug #31623 (OCILogin does not support password grace period).
