@@ -49,13 +49,12 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 
-	if (stmt->executed) {
-		/* ensure that we free any previous unfetched results */
-		if (S->result) {
-			mysql_free_result(S->result);
-			S->result = NULL;
-		}
+	/* ensure that we free any previous unfetched results */
+	if (S->result) {
+		mysql_free_result(S->result);
+		S->result = NULL;
 	}
+
 	if (mysql_real_query(H->server, stmt->active_query_string, stmt->active_query_stringlen) != 0) {
 		pdo_mysql_error_stmt(stmt);
 		return 0;
