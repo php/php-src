@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Danny Heijl  <Danny.Heijl@cevi.be> : initial cut (ODS 7.2x) |
+   |                                               PHP4 port              |
    |          Christian Cartus <chc@idgruppe.de> : blobs, and IUS 9       |
    |          Jouni Ahto <jah@mork.net>   : configuration stuff           |
    | Based on the MySQL code by:  Zeev Suraski <zeev@php.net>             |
@@ -25,90 +26,11 @@
  * you a very short one
  * -------------------------------------------------------------------
 */
-/*
- * I started with the mysql-driver, removed all stuff I did not need,
- * and changed all mysql-specific stuff to Informix-ESQL/C.
- * I used the X-open way of using ESQL/C (using an SQL descriptor and
- * not the Informix-specific way). It is perhaps a little bit slower,
- * but more verbose and less prone to coding errors.
- * This is the first time in my life I coded ESQL/C, so do not look too
- * closely and do not hesitate to point out errors/omissions etc...
- * Aug. 8, 1998 
- * Danny Heijl, Danny.Heijl@cevi.be
- */
 
 /* TODO:
  *
  * ? Safe mode implementation
- *
- * Jouni Ahto promised help and already did the configuration stuff
- * (Jouni Ahto <jah@mork.net>).
- *
  */
-
-
-/*
-Changes: 23.8.1998 (chc@idgruppe.de)
-- full blobsupport (TEXT and BYTE)
-- new functions: ifx_create_blob, ifx_copy_blob, ifx_free_blob, 
-                 ifx_update_blob, ifx_get_blob, ifx_blobinfile_mode
-- file and memory-support of blobs
-- load TEXT and BYTE in memory by default 
-  (controllable by "ifx.blobinfile" in php3.ini-file)
-- update all functions to support blobs (ifx_query, ifx_prepare, 
-  ifx_do, ifx_htmltbl_result, ifx_fetch_row)
-- minor bug-fixes
-- Test-Page (informix_blob.php3) which tests the blob-support
-
-
-Changes: 11.9.1998 (chc@idgruppe.de)
-- ifx_query and ifx_prepare: blob-paramters now as array
-- new funtions: ifx_textasvarchar, ifx_byteasvarchar, ifx_nullformat
-- new php.ini-variables: ifx.textasvarchar, ifx.byteasvarchar, ifx.nullformat
-- update all functions to support blobarray and new functions 
-  (ifx_query, ifx_prepare, ifx_do, ifx_htmltbl_result, ifx_fetch_row)
-- minor bug-fixes
-- Test-Page (informix_blob.php3) updated
-- begin with coding of slob-support
-  (still deactivated, not yet complete:  #undef HAVE_IFX_IUS in php3_ifx.h)
-- ifx_fetch_row returns always a blob-id (contains "NULL"-flag or content from db)
-  (except ifx_textasvarchar, ifx_byteasvarchar set to 1)
-
-Changes 14.9.1998 (chc@idgruppe.de)
-- supports now IUS- serial8,int8,boolean, nchar, nvchar, lvarchar
-- still incomplete slob-support
-
-Changes 25.9.1998 (danny.heijl@cevi.be)
-- cursory and non-cursory stored procedures
-
-Changes 24.10.1998 (chc@idgruppe.de)
-- changes the internal structure of IFX_BLOB and IFX_SLOB into one structure. 
-  it is now prepared for general-id-usage.
-- fixed a lvarchar-bug (i hate esql/c)
-
-Changes 12.11.1998 (danny.heijl@cevi.be)
-- added proto comments
-
-Changes 04/03/1999 (danny.heijl@cevi.be) 
-- added "SET CONNECTION" statement to ifx_fetch_row() so that you can now
-  fetch rows from different databases simultaneously
-  (ifx_query() & ifx_prepare() were already OK).
-
-Changes 05/03/1999 (danny.heijl@cevi.be)
-- made all sqlerrd[] fields of sqlca structure available 
-  with ifx_getsqlca($query_id) in a pseudo-row after a 
-  prepare (select statements) or insert/update (non-select statements).
-  gives access to affected rows and serial insert values
-- made all internal functions static
- 
-
-Changes 09/03/1999 (danny.heijl@cevi.be)
-- suppressed ESQL/C BLOB memory leak fix for ESQL/C 7.24 and higher
-  this is the same fix as in Perl DBD::Informix
-- really free an Ifx_Result now, do not wait for script termination
-- code cleanup
-
-*/
 
 
 #if defined(COMPILE_DL)
@@ -250,7 +172,7 @@ php3_module_entry ifx_module_entry = {
     STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
+#ifdef COMPILE_DL
 DLEXPORT php3_module_entry *get_module(void) { return &ifx_module_entry; }
 #if 0
 BOOL WINAPI DllMain(HANDLE hModule, 
@@ -393,73 +315,46 @@ char *a_result_id;
   return;
 }
 
+
+PHP_INI_BEGIN()
+    STD_PHP_INI_ENTRY("ifx.allow_persistent", "1", PHP_INI_SYSTEM, 
+                       OnUpdateInt, allow_persistent, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.max_persistent", "0", PHP_INI_SYSTEM, 
+                       OnUpdateInt, max_persistent, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.max_links", "0", PHP_INI_SYSTEM, 
+                       OnUpdateInt, max_links, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.default_host", NULL, PHP_INI_SYSTEM, 
+                       OnUpdateString, default_host, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.default_user", NULL, PHP_INI_SYSTEM, 
+                       OnUpdateString, default_user, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.default_password", NULL, PHP_INI_SYSTEM, 
+                       OnUpdateString, default_password, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.blobinfile", "1", PHP_INI_ALL, 
+                       OnUpdateInt, blobinfile, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.textasvarchar", "0", PHP_INI_ALL, 
+                       OnUpdateInt, textasvarchar, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.byteasvarchar", "0", PHP_INI_ALL, 
+                       OnUpdateInt, byteasvarchar, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.charasvarchar", "0", PHP_INI_ALL, 
+                       OnUpdateInt, charasvarchar, php_ifx_globals, ifx_globals)
+    STD_PHP_INI_ENTRY("ifx.nullformat", "0", PHP_INI_ALL, 
+                       OnUpdateInt, nullformat, php_ifx_globals, ifx_globals)
+PHP_INI_END()
+
 int php3_minit_ifx(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
-	ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
+    ifx_globals_id = ts_allocate_id(sizeof(php_ifx_globals), php_ifx_init_globals, NULL);
 #else
-	IFXG(num_persistent)=0;
+    IFXG(num_persistent)=0;
 #endif
 
-
-    if (cfg_get_long("ifx.blobinfile",
-                      &IFXG(blobinfile))==FAILURE) {
-        IFXG(blobinfile)=BLOBINFILE;
-    }
-
-    if (cfg_get_long("ifx.textasvarchar",
-                      &IFXG(textasvarchar))==FAILURE) {
-        IFXG(textasvarchar)=0;
-    }
-
-
-    if (cfg_get_long("ifx.byteasvarchar",
-                      &IFXG(byteasvarchar))==FAILURE) {
-        IFXG(byteasvarchar)=0;
-    }
-
-    if (cfg_get_long("ifx.charasvarchar",
-                      &IFXG(charasvarchar))==FAILURE) {
-        IFXG(charasvarchar)=0;
-    }
-
-    if (cfg_get_long("ifx.nullformat",
-                      &IFXG(nullformat))==FAILURE) {
-        IFXG(nullformat)=0;
-    }
+    REGISTER_INI_ENTRIES();
     
     IFXG(nullvalue) = malloc(1);
     IFXG(nullvalue)[0] = 0;
     IFXG(nullstring) = malloc(5);
     strcpy(IFXG(nullstring), "NULL");
-
-    if (cfg_get_long("ifx.allow_persistent",
-                      &IFXG(allow_persistent))==FAILURE) {
-        IFXG(allow_persistent)=1;
-    }
-    if (cfg_get_long("ifx.max_persistent",
-                      &IFXG(max_persistent))==FAILURE) {
-        IFXG(max_persistent)=-1;
-    }
-    if (cfg_get_long("ifx.max_links",
-                     &IFXG(max_links))==FAILURE) {
-        IFXG(max_links)=-1;
-    }
-    if (cfg_get_string("ifx.default_host",
-                      &IFXG(default_host))==FAILURE
-              || IFXG(default_host)[0]==0) {
-        IFXG(default_host)=NULL;
-    }
-    if (cfg_get_string("ifx.default_user",
-                       &IFXG(default_user))==FAILURE
-              || IFXG(default_user)[0]==0) {
-        IFXG(default_user)=NULL;
-    }
-    if (cfg_get_string("ifx.default_password",
-                        &IFXG(default_password))==FAILURE
-              || IFXG(default_password)[0]==0) {    
-        IFXG(default_password)=NULL;
-    }
 
     IFXG(num_persistent)=0;
     IFXG(sv_sqlcode)=0;
@@ -475,6 +370,7 @@ int php3_minit_ifx(INIT_FUNC_ARGS)
          IFXG(le_link),
          IFXG(le_plink));
 #endif
+
     ifx_module_entry.type = type;
 
     REGISTER_LONG_CONSTANT("IFX_SCROLL", IFX_SCROLL, CONST_CS | CONST_PERSISTENT);
@@ -494,6 +390,7 @@ $endif;
 
 int php3_mshutdown_ifx(SHUTDOWN_FUNC_ARGS){
 
+    UNREGISTER_INI_ENTRIES();
     return SUCCESS;
     
 }
@@ -531,22 +428,11 @@ void php3_info_ifx(ZEND_MODULE_INFO_FUNC_ARGS)
                 "<tr><td>Persistent links:</td><td>%d/%s</td></tr>\n"
                 "<tr><td>Total links:</td><td>%d/%s</td></tr>\n"
                 "<tr><td>Client API version:</td><td>%02.2f</td></tr>\n"
-#if !(WIN32|WINNT)
-                "<tr><td valign=\"top\">Compilation definitions:</td><td>"
-                "<tt>IFX_INCLUDE=%s<br>\n"
-                "IFX_LFLAGS=%s<br>\n"
-                "IFX_LIBS=%s<br></tt></td></tr>"
-#endif
                 "</table>\n",
                 (IFXG(allow_persistent)?"Yes":"No"),
                 IFXG(num_persistent),maxp,
                 IFXG(num_links),maxl,
                 (double)(CLIENT_SQLI_VER/100.0)
-#if !(WIN32|WINNT)
-                ,PHP_IFX_INCLUDE,
-                PHP_IFX_LFLAGS,
-                PHP_IFX_LIBS
-#endif
                 );
 }
 
