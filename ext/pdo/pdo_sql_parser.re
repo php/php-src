@@ -83,7 +83,6 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len,
 	int bindno = 0;
 	int ret = 0;
 	int newbuffer_len;
-	int padding;
 	HashTable *params;
 	struct pdo_bound_param_data *param;
 	int query_type = PDO_PLACEHOLDER_NONE;
