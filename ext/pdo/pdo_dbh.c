@@ -196,7 +196,7 @@ static PHP_FUNCTION(dbh_constructor)
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
-			zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "invalid data source name");
+			zend_throw_exception_ex(php_pdo_get_exception(), PDO_ERR_SYNTAX TSRMLS_CC, "invalid data source name (via uri)");
 			ZVAL_NULL(object);
 			return;
 		}
@@ -575,7 +575,7 @@ static PHP_METHOD(PDO, query)
 static PHP_METHOD(PDO, exec) /* FIXME: nuke on release */
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This is name deprecated, use PDO::query instead");
-	PHP_FN(PDO_exec)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	PHP_FN(PDO_query)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
@@ -777,10 +777,19 @@ static HashTable *dbh_get_properties(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *dbh_method_get(zval *object, char *method_name, int method_len TSRMLS_DC)
+static union _zend_function *dbh_method_get(
+#if PHP_API_VERSION >= 20041225
+	zval **object_pp,
+#else
+	zval *object,
+#endif
+	char *method_name, int method_len TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
+#if PHP_API_VERSION >= 20041225
+	zval *object = *object_pp;
+#endif
 	pdo_dbh_t *dbh = zend_object_store_get_object(object TSRMLS_CC);
 
 	lc_method_name = emalloc(method_len + 1);
