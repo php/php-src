@@ -129,8 +129,6 @@ static sapi_post_entry php_fdf_post_entry =	{
  */
 PHP_MINIT_FUNCTION(fdf)
 {
-	FDFErc err;
-	
 	le_fdf = zend_register_list_destructors_ex(phpi_FDFClose, NULL, "fdf", module_number);
 
  	/* add handler for Acrobat FDF form post requests */
@@ -172,9 +170,9 @@ PHP_MINIT_FUNCTION(fdf)
 	
 #ifdef PHP_WIN32
 	return SUCCESS;
+#else
+	return (FDFInitialize() == FDFErcOK) ? SUCCESS : FAILURE;
 #endif
-	if((err = FDFInitialize()) == FDFErcOK) return SUCCESS;
-	return FAILURE;
 }
 /* }}} */
 
@@ -201,16 +199,14 @@ PHP_MINFO_FUNCTION(fdf)
  */
 PHP_MSHUTDOWN_FUNCTION(fdf)
 {
-	FDFErc err;
-
 	/* remove handler for Acrobat FDF form post requests */
 	sapi_unregister_post_entry(&php_fdf_post_entry); 
 
 #ifdef PHP_WIN32
 	return SUCCESS;
+#else
+	return (FDFFinalize() == FDFErcOK) ? SUCCESS : FAILURE;
 #endif
-	if((err = FDFFinalize()) == FDFErcOK) return SUCCESS;
-	return FAILURE;
 }
 /* }}} */
 
@@ -898,7 +894,7 @@ PHP_FUNCTION(fdf_add_template)
 	filespec.ID[1] = NULL;
 	filespec.bVolatile = false;
 
-	err = FDFAddTemplate(fdf, Z_LVAL_PP(newpage), &filespec, Z_STRVAL_PP(template), Z_LVAL_PP(rename));
+	err = FDFAddTemplate(fdf, (unsigned short)(Z_LVAL_PP(newpage)), &filespec, Z_STRVAL_PP(template), (unsigned short)(Z_LVAL_PP(rename)));
 	if(err != FDFErcOK) {
 		FDF_FAILURE(err);
 	}
@@ -1520,7 +1516,7 @@ static ASBool enum_values_callback(char *name, char *value, void *userdata)
 	zval_ptr_dtor(&z_name);
 	zval_ptr_dtor(&z_value);
 
-	return retval;
+	return (ASBool)retval;
 }
 /* }}} */
 
