@@ -129,6 +129,11 @@
 																} \
 																DOMXML_GET_OBJ(ret, zval, le);
 
+#define DOMXML_LOAD_PARSING  0
+#define DOMXML_LOAD_VALIDATING 1
+#define DOMXML_LOAD_RECOVERING 2
+#define DOMXML_LOAD_SUBSTITUTE_ENTITIES 4
+#define DOMXML_LOAD_COMPLETE_ATTRS 8
 
 static int le_domxmldocp;
 static int le_domxmldoctypep;
@@ -1366,6 +1371,12 @@ PHP_MINIT_FUNCTION(domxml)
 	REGISTER_LONG_CONSTANT("XPATH_USERS",				XPATH_USERS,				CONST_CS | CONST_PERSISTENT);
 #endif
 
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_PARSING",		DOMXML_LOAD_PARSING,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_VALIDATING",	DOMXML_LOAD_VALIDATING,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_RECOVERING",	DOMXML_LOAD_RECOVERING,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_SUBSTITUTE_ENTITIES",	DOMXML_LOAD_SUBSTITUTE_ENTITIES,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("DOMXML_LOAD_COMPLETE_ATTRS",DOMXML_LOAD_COMPLETE_ATTRS,		CONST_CS | CONST_PERSISTENT);
+
 	xmlSetGenericErrorFunc(xmlGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
 #if HAVE_DOMXSLT
 	xsltSetGenericErrorFunc(xsltGenericErrorContext, (xmlGenericErrorFunc)domxml_error);
@@ -2182,6 +2193,7 @@ PHP_FUNCTION(domxml_node_replace_child)
 {
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
+	int foundoldchild = 0, foundnewchild = 0;
 	int ret;
 
 	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
@@ -2198,17 +2210,37 @@ PHP_FUNCTION(domxml_node_replace_child)
 		RETURN_FALSE;
 	}
 
+	/* check for the old child and wether the new child is already a child */
 	while (children) {
 		if (children == oldchild) {
-			zval *rv;
-			xmlNodePtr node;
-			node = xmlReplaceNode(oldchild, newchild);
-			DOMXML_RET_OBJ(rv, oldchild, &ret);
-			return;
+			foundoldchild = 1;
+		}
+		if(children == newchild) {
+			foundnewchild = 1;
 		}
 		children = children->next;
 	}
-	RETURN_FALSE
+	/* if the child to replace is existent and the new child isn't already
+	 * a child, then do the replacement
+	 */
+	if(foundoldchild && !foundnewchild) {
+		zval *rv;
+		xmlNodePtr node;
+		node = xmlReplaceNode(oldchild, newchild);
+		DOMXML_RET_OBJ(rv, oldchild, &ret);
+		return;
+	}
+	/* If the new child is already a child, then DOM requires to delete
+	 * the old one first, but this makes no sense here, since the old and
+	 * the new node are identical.
+	 */
+	if(foundnewchild) {
+		zval *rv;
+		DOMXML_RET_OBJ(rv, newchild, &ret);
+		return;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -2668,9 +2700,6 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 	idsIterator iter;
 	xmlHashTable *ids = NULL;
 	int retnode;
-
-	int name_len;
-	char *str, *name;
 
 	id = getThis();
 	DOMXML_GET_OBJ(docp, id, le_domxmldocp);
@@ -3289,7 +3318,7 @@ PHP_FUNCTION(domxml_doc_ids)
 }
 /* }}} */
 
-/* {{{ proto object xmldoc(string xmldoc [, bool from_file])
+/* {{{ proto object xmldoc(string xmldoc[, int mode])
    Creates DOM object of XML document */
 PHP_FUNCTION(xmldoc)
 {
@@ -3298,21 +3327,42 @@ PHP_FUNCTION(xmldoc)
 	int ret;
 	char *buffer;
 	int buffer_len;
-	zend_bool from_file = 0;
-	xmlDtdPtr dtd;
+	int mode = 0, prevSubstValue;
+	int oldvalue =  xmlDoValidityCheckingDefaultValue;
+/*	xmlDtdPtr dtd; */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &buffer, &buffer_len, &from_file) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &buffer, &buffer_len, &mode) == FAILURE) {
 		return;
 	}
 /*	Either of the following line force validation */
 /*	xmlLoadExtDtdDefaultValue = XML_DETECT_IDS; */
 /*	xmlDoValidityCheckingDefaultValue = 1; */
 
-	if (from_file) {
-		docp = xmlParseFile(buffer);
-	} else {
-		docp = xmlParseDoc(buffer);
+	if(mode & DOMXML_LOAD_SUBSTITUTE_ENTITIES)
+		prevSubstValue = xmlSubstituteEntitiesDefault (1);
+	else
+		prevSubstValue = xmlSubstituteEntitiesDefault (0);
+
+	if(mode & DOMXML_LOAD_COMPLETE_ATTRS)
+		xmlLoadExtDtdDefaultValue |= XML_COMPLETE_ATTRS;
+
+	switch (mode & (DOMXML_LOAD_PARSING | DOMXML_LOAD_VALIDATING | DOMXML_LOAD_RECOVERING)) {
+		case DOMXML_LOAD_PARSING:
+			xmlDoValidityCheckingDefaultValue = 0;
+			docp = xmlParseDoc(buffer);
+			break;
+		case DOMXML_LOAD_VALIDATING:
+			xmlDoValidityCheckingDefaultValue = 1;
+			docp = xmlParseDoc(buffer);
+			break;
+		case DOMXML_LOAD_RECOVERING:
+			xmlDoValidityCheckingDefaultValue = 0;
+			docp = xmlRecoverDoc(buffer);
+			break;
 	}
+	xmlSubstituteEntitiesDefault (prevSubstValue);
+	xmlDoValidityCheckingDefaultValue = oldvalue;
+
 	if (!docp)
 		RETURN_FALSE;
 
