@@ -67,8 +67,6 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 {
 	int ret = 1;
 
-	php_stream_flush(stream);
-	
 	if (stream->wrapper && stream->wrapper->destroy) {
 		stream->wrapper->destroy(stream);
 	}
@@ -87,6 +85,7 @@ PHPAPI int php_stream_free(php_stream *stream, int call_dtor) /* {{{ */
 		
 		php_stream_flush(stream);
 		ret = stream->ops->close(stream);
+		stream->abstract = NULL;
 	
 		/* tidy up any FILE* that might have been fdopened */
 		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FDOPEN && stream->stdiocast) {
@@ -448,6 +447,8 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
+	assert(data != NULL);
+	
 #if HAVE_FLUSHIO
 	if (data->last_op == 'r') {
 		fseek(data->file, 0, SEEK_CUR);
@@ -462,6 +463,8 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
+	assert(data != NULL);
+	
 	if (buf == NULL && count == 0)	{
 		/* check for EOF condition */
 		if (feof(data->file))	{
@@ -484,6 +487,8 @@ static int php_stdiop_close(php_stream *stream)
 	int ret;
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
+	assert(data != NULL);
+
 	if (data->is_pipe) {
 		ret = pclose(data->file);
 	} else {
@@ -497,18 +502,27 @@ static int php_stdiop_close(php_stream *stream)
 
 static int php_stdiop_flush(php_stream *stream)
 {
-	return fflush(((php_stdio_stream_data*)stream->abstract)->file);
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+
+	assert(data != NULL);
+	
+	return fflush(data->file);
 }
 
 static int php_stdiop_seek(php_stream *stream, off_t offset, int whence)
 {
-	return fseek(((php_stdio_stream_data*)stream->abstract)->file, offset, whence);
+	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+
+	assert(data != NULL);
+
+	return fseek(data->file, offset, whence);
 }
 
 static char *php_stdiop_gets(php_stream *stream, char *buf, size_t size)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 
+	assert(data != NULL);
 #if HAVE_FLUSHIO
 	if (data->last_op == 'w') {
 		fseek(data->file, 0, SEEK_CUR);
@@ -523,6 +537,8 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret)
 	int fd;
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
  
+	assert(data != NULL);
+
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret) {
