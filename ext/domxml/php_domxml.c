@@ -116,9 +116,7 @@ static zend_function_entry domxml_functions[] = {
 
 
 static function_entry php_domxmldoc_class_functions[] = {
-/*	PHP_FALIAS(domdocument, xmldoc, NULL) */
-	{"domdocument", PHP_FN(xmldoc), NULL},
-
+	PHP_NAMED_FE(domdocument, PHP_FN(xmldoc), NULL)
 	PHP_FALIAS(doctype, 				domxml_doc_doctype, 			NULL)
 	PHP_FALIAS(implementation,			domxml_doc_implementation,		NULL)
 	PHP_FALIAS(root,					domxml_doc_document_element,	NULL)	/* not DOM */
@@ -133,9 +131,6 @@ static function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(imported_node,			domxml_doc_imported_node,		NULL)
 	PHP_FALIAS(dtd,						domxml_intdtd,					NULL)
 	PHP_FALIAS(dumpmem,					domxml_dumpmem,					NULL)
-/*	
-	PHP_FALIAS(create_cdata_section,	domxml_create_cdata_section,	NULL)
-*/
 #if defined(LIBXML_XPATH_ENABLED)
 	PHP_FALIAS(xpath_init,				xpath_init,						NULL)
 	PHP_FALIAS(xpath_new_context,		xpath_new_context,				NULL)
@@ -146,13 +141,6 @@ static function_entry php_domxmldoc_class_functions[] = {
 
 static function_entry php_domxmldoctype_class_functions[] = {
 	PHP_FALIAS(name,					domxml_doctype_name,			NULL)
-/*	
-	PHP_FALIAS(entities,				domxml_doctype_entities,		NULL)
-	PHP_FALIAS(notations,				domxml_doctype_notations,		NULL)
-	PHP_FALIAS(system_id,				domxml_doctype_system_id,		NULL)
-	PHP_FALIAS(public_id,				domxml_doctype_public_id,		NULL)
-	PHP_FALIAS(internal_subset,			domxml_doctype_internal_subset,	NULL)
-*/ 
 	{NULL, NULL, NULL}
 };
 
@@ -225,11 +213,6 @@ static zend_function_entry php_domxmlentityref_class_functions[] = {
 };
 
 static zend_function_entry php_domxmlentity_class_functions[] = {
-/*	
-	PHP_FALIAS(public_id,				domxml_entity_public_id,		NULL)
-	PHP_FALIAS(system_id,				domxml_entity_system_id,		NULL)
-	PHP_FALIAS(notation_name,			domxml_entity_notation_name,	NULL)
-*/
 	{NULL, NULL, NULL}
 };
 
@@ -255,9 +238,6 @@ static zend_function_entry php_domxmlattr_class_functions[] = {
 	PHP_FALIAS(name,					domxml_attr_name,				NULL)
 	PHP_FALIAS(value,					domxml_attr_value,				NULL)
 	PHP_FALIAS(specified,				domxml_attr_specified,			NULL)
-/*	
-	PHP_FALIAS(owner_element,			domxml_attr_owner_element,		NULL)
-*/
 	{NULL, NULL, NULL}
 };
 
