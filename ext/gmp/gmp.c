@@ -915,7 +915,7 @@ ZEND_FUNCTION(gmp_gcdext)
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg);
-	FETCH_GMP_ZVAL(gmpnum_b, a_arg);
+	FETCH_GMP_ZVAL(gmpnum_b, b_arg);
 
 	INIT_GMP_NUM(gmpnum_g);
 	INIT_GMP_NUM(gmpnum_s);
