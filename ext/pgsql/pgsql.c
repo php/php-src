@@ -1049,11 +1049,11 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	for (i = 0, num_fields = PQnfields(pgsql_result); i<num_fields; i++) {
 		if (PQgetisnull(pgsql_result, Z_LVAL_PP(row), i)) {
 			if (result_type & PGSQL_NUM) {
-				add_index_unset(return_value, i);
+				add_index_null(return_value, i);
 			}
 			if (result_type & PGSQL_ASSOC) {
 				field_name = PQfname(pgsql_result, i);
-				add_assoc_unset(return_value, field_name);
+				add_assoc_null(return_value, field_name);
 			}
 		} else {
 			element = PQgetvalue(pgsql_result, Z_LVAL_PP(row), i);

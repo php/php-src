@@ -1065,10 +1065,10 @@ static void php_ii_fetch(INTERNAL_FUNCTION_PARAMETERS, II_LINK *ii_link, int res
 	  if(columnData[k-1].dv_null) { /* NULL value ? */
 
 	    if(result_type & II_NUM) {
-	      add_index_unset(return_value, i+k-1);
+	      add_index_null(return_value, i+k-1);
 	    }
 	    if(result_type & II_ASSOC) {
-	      add_assoc_unset(return_value, php_ii_field_name(ii_link, i+k-1));
+	      add_assoc_null(return_value, php_ii_field_name(ii_link, i+k-1));
 	    }
 
 	  } else { /* non NULL value */
