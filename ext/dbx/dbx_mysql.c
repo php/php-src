@@ -174,7 +174,7 @@ int dbx_mysql_getcolumntype(zval ** rv, zval ** result_handle, long column_index
     return 1;
     }
 
-int dbx_mysql_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_mysql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS) {
     /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
     int number_of_arguments=2;
     zval ** arguments[2];

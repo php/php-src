@@ -43,7 +43,7 @@ int dbx_odbc_getcolumnname(zval ** rv, zval ** result_handle, long column_index,
     /*/ returns column-name as string on success or 0 as long on failure /*/
 int dbx_odbc_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns column-type as string on success or 0 as long on failure /*/
-int dbx_odbc_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS);
+int dbx_odbc_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
 int dbx_odbc_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS);
     /*/ returns string /*/

@@ -104,6 +104,10 @@ SOURCE=.\dbx_mysql.c
 
 SOURCE=.\dbx_odbc.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\dbx_pgsql.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -119,6 +123,10 @@ SOURCE=.\dbx_mysql.h
 # Begin Source File
 
 SOURCE=.\dbx_odbc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dbx_pgsql.h
 # End Source File
 # Begin Source File
 

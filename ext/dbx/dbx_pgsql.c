@@ -20,13 +20,13 @@
 #include "php_dbx.h"
 #include "dbx_pgsql.h"
 #include <string.h>
-
+/*
 #ifdef ZTS
 extern int dbx_globals_id;
 #else
 extern ZEND_DBX_API zend_dbx_globals dbx_globals;
 #endif
-
+*/
 #define PGSQL_ASSOC		1<<0
 #define PGSQL_NUM		1<<1
 
@@ -153,7 +153,7 @@ int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTER
 		return 0;
 	}
     MOVE_RETURNED_TO_RV(rv, returned_zval);
-
+/*
 	if(strstr(Z_STRVAL_PP(sql_statement), "SELECT") ||
 	   strstr(Z_STRVAL_PP(sql_statement), "select")){
 		DBXG(row_count) = 0;
@@ -163,7 +163,7 @@ int dbx_pgsql_query(zval ** rv, zval ** dbx_handle, zval ** sql_statement, INTER
 		dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_numrows", &num_rows_zval, nargs, args);
 		DBXG(num_rows) = Z_LVAL_P(num_rows_zval);
 	} 
-
+*/
     return 1;
 }
 
@@ -229,7 +229,7 @@ int dbx_pgsql_getcolumntype(zval ** rv, zval ** result_handle, long column_index
     return 1;
 }
 
-int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS) {
+int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS) {
     /* returns array[0..columncount-1] as strings on success or 0 
 	   as long on failure */
     int number_of_arguments=2;
@@ -238,13 +238,15 @@ int dbx_pgsql_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAME
     zval * returned_zval=NULL;
 	
     MAKE_STD_ZVAL(zval_row);
-    ZVAL_LONG(zval_row, DBXG(row_count));
+    ZVAL_LONG(zval_row, row_number);
     arguments[0]=result_handle;
     arguments[1]=&zval_row;
+/*
 	DBXG(row_count)++;
 	if (DBXG(row_count)>DBXG(num_rows)){
 		return 0;
 	}
+*/
     dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fetch_array", &returned_zval, number_of_arguments, arguments);
     if (!returned_zval || returned_zval->type!=IS_ARRAY) {
         if (returned_zval) zval_ptr_dtor(&returned_zval);

@@ -96,27 +96,30 @@ int switch_dbx_getcolumnname(zval ** rv, zval ** result_handle, long column_inde
     /*/ returns column-name as string on success or 0 as long on failure /*/
 int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_index, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns column-type as string on success or 0 as long on failure /*/
-int switch_dbx_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
+int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
 int switch_dbx_error(zval ** rv, zval ** dbx_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module);
     /*/ returns string /*/
-
+/*
 #ifdef ZTS
 int dbx_globals_id;
 #else
 ZEND_DBX_API zend_dbx_globals dbx_globals;
 #endif
+*/
 /* If you declare any globals in php_dbx.h uncomment this: */
 /* ZEND_DECLARE_MODULE_GLOBALS(dbx) */
 /* True global resources - no need for thread safety here */
+/*
 static int le_dbx;
-
+*/
+/*
 static void zend_dbx_init_globals(PGLS_D)
 {
 	DBXG(row_count) = 0;
 	DBXG(num_rows) = 0;
 }
-
+*/
 /* Every user visible function must have an entry in dbx_functions[].
 */
 function_entry dbx_functions[] = {
@@ -155,13 +158,13 @@ ZEND_GET_MODULE(dbx)
 /*/
 ZEND_MINIT_FUNCTION(dbx)
 {
-
+/*
 #ifdef ZTS
 	dbx_globals_id = ts_allocate_id(sizeof(zend_dbx_globals), (ts_allocate_ctor) zend_dbx_init_globals, NULL);
 #else
 	zend_dbx_init_globals(DBXLS_C);
 #endif
-
+*/
 /*/	REGISTER_INI_ENTRIES(); /*/
 
     REGISTER_LONG_CONSTANT("DBX_PERSISTENT", DBX_PERSISTENT, CONST_CS | CONST_PERSISTENT);
@@ -455,7 +458,7 @@ ZEND_FUNCTION(dbx_query)
     while (result) {
         zval * rv_row;
         MAKE_STD_ZVAL(rv_row);
-        result = switch_dbx_getrow(&rv_row, &rv_result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
+        result = switch_dbx_getrow(&rv_row, &rv_result_handle, row_count, INTERNAL_FUNCTION_PARAM_PASSTHRU, dbx_module);
         if (result) {
 /*/            if (row_count>=result_row_offset && (result_row_count==-1 || row_count<result_row_offset+result_row_count)) { /*/
                 zval ** row_ptr;
@@ -762,12 +765,12 @@ int switch_dbx_getcolumntype(zval ** rv, zval ** result_handle, long column_inde
     return 0;
     }
 
-int switch_dbx_getrow(zval ** rv, zval ** result_handle, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
+int switch_dbx_getrow(zval ** rv, zval ** result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
     /*/ returns array[0..columncount-1] as strings on success or 0 as long on failure /*/
     switch ((*dbx_module)->value.lval) {
-        case DBX_MYSQL: return dbx_mysql_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
-        case DBX_ODBC: return dbx_odbc_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
-        case DBX_PGSQL: return dbx_pgsql_getrow(rv, result_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_MYSQL: return dbx_mysql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_ODBC: return dbx_odbc_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
+        case DBX_PGSQL: return dbx_pgsql_getrow(rv, result_handle, row_number, INTERNAL_FUNCTION_PARAM_PASSTHRU);        
         }
     zend_error(E_WARNING, "dbx_getrow: not supported in this module");
     return 0;
