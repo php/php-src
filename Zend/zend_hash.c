@@ -103,16 +103,16 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 #define UPDATE_DATA(ht, p, pData, nDataSize)											\
 	if (nDataSize == sizeof(void*)) {													\
 		if (!(p)->pDataPtr) {															\
-			pefree((p)->pData, (ht)->persistent);										\
+			pefree_rel((p)->pData, (ht)->persistent);										\
 		}																				\
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));									\
 		(p)->pData = &(p)->pDataPtr;													\
 	} else {																			\
 		if ((p)->pDataPtr) {															\
-			(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);				\
+			(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);				\
 			(p)->pDataPtr=NULL;															\
 		} else {																		\
-			(p)->pData = (void *) perealloc((p)->pData, nDataSize, (ht)->persistent);	\
+			(p)->pData = (void *) perealloc_rel((p)->pData, nDataSize, (ht)->persistent);	\
 			/* (p)->pDataPtr is already NULL so no need to initialize it */				\
 		}																				\
 		memcpy((p)->pData, pData, nDataSize);											\
@@ -123,9 +123,9 @@ ZEND_API ulong zend_hash_func(char *arKey, uint nKeyLength)
 		memcpy(&(p)->pDataPtr, pData, sizeof(void *));					\
 		(p)->pData = &(p)->pDataPtr;									\
 	} else {															\
-		(p)->pData = (void *) pemalloc(nDataSize, (ht)->persistent);	\
+		(p)->pData = (void *) pemalloc_rel(nDataSize, (ht)->persistent);	\
 		if (!(p)->pData) {												\
-			pefree(p, (ht)->persistent);								\
+			pefree_rel(p, (ht)->persistent);								\
 			return FAILURE;												\
 		}																\
 		memcpy((p)->pData, pData, nDataSize);							\
@@ -186,7 +186,7 @@ ZEND_API void zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProt
 
 
 
-ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag)
+ZEND_API int _zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	ulong h;
 	uint nIndex;
@@ -256,7 +256,7 @@ ZEND_API int zend_hash_add_or_update(HashTable *ht, char *arKey, uint nKeyLength
 	return SUCCESS;
 }
 
-ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag)
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	uint nIndex;
 	Bucket *p;
@@ -333,7 +333,7 @@ ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLe
 }
 
 
-ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag)
+ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC)
 {
 	uint nIndex;
 	Bucket *p;
@@ -374,7 +374,7 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 		}
 		p = p->pNext;
 	}
-	p = (Bucket *) pemalloc(sizeof(Bucket)-1, ht->persistent);
+	p = (Bucket *) pemalloc_rel(sizeof(Bucket)-1, ht->persistent);
 	if (!p) {
 		return FAILURE;
 	}
@@ -764,7 +764,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_fun
 }
 
 
-ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite)
+ZEND_API void _zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite ZEND_FILE_LINE_DC)
 {
 	Bucket *p;
 	void *t;
@@ -776,7 +776,7 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_fu
     p = source->pListHead;
 	while (p) {
 		if (p->nKeyLength>0) {
-			if (zend_hash_add_or_update(target, p->arKey, p->nKeyLength, p->pData, size, &t, mode)==SUCCESS && pCopyConstructor) {
+			if (_zend_hash_add_or_update(target, p->arKey, p->nKeyLength, p->pData, size, &t, mode ZEND_FILE_LINE_RELAY_CC)==SUCCESS && pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		} else {

@@ -645,7 +645,7 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 {
 	ALLOC_HASHTABLE_REL(arg->value.ht);
 
-	zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+	_zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
 	arg->type = IS_ARRAY;
 	return SUCCESS;
 }
