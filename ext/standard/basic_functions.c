@@ -2211,8 +2211,8 @@ PHP_FUNCTION(ignore_user_abort)
 			if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 				RETURN_FALSE;
 			}
-			convert_to_boolean_ex(arg);
-			PG(ignore_user_abort) = (zend_bool) Z_LVAL_PP(arg);
+			convert_to_string_ex(arg);
+			zend_alter_ini_entry("ignore_user_abort", sizeof("ignore_user_abort"), Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 			break;
 	
 		default:
