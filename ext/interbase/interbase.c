@@ -37,6 +37,7 @@
 #include "ext/standard/md5.h"
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
+#include "SAPI.h"
 
 #include <time.h>
 
@@ -420,13 +421,16 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static ZEND_INI_DISP(php_ibase_password_displayer_cb)
+/* TODO this function should be part of either Zend or PHP API */
+static PHP_INI_DISP(php_ibase_password_displayer_cb)
 {
-	if ((type == ZEND_INI_DISPLAY_ORIG && ini_entry->orig_value) 
-			|| (type != ZEND_INI_DISPLAY_ORIG && ini_entry->value)) {
-		ZEND_PUTS("********");
+	if ((type == PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) 
+			|| (type == PHP_INI_DISPLAY_ACTIVE && ini_entry->value)) {
+		PUTS("********");
+	} else if (!sapi_module.phpinfo_as_text) {
+		PUTS("<i>no value</i>");
 	} else {
-		ZEND_PUTS("no value");
+		PUTS("no value");
 	}
 }
 
@@ -569,10 +573,10 @@ PHP_MINFO_FUNCTION(ibase)
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
 	} while (0);
 #endif			
+	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
 
-	php_info_print_table_end();
 }
 /* }}} */
 
