@@ -1315,9 +1315,8 @@ PHP_FUNCTION(preg_grep)
 
 	if (ZEND_NUM_ARGS() > 2) {
 		convert_to_long_ex(flags);
-		invert = Z_LVAL_PP(flags) & PREG_GREP_INVERT;
+		invert = (Z_LVAL_PP(flags) & PREG_GREP_INVERT) ? 1 : 0;
 	}
-	printf("invert: %d\n", invert);
 	
 	/* Compile regex or get it from cache. */
 	if ((re = pcre_get_compiled_regex(Z_STRVAL_PP(regex), extra, &preg_options)) == NULL) {
