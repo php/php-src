@@ -79,10 +79,12 @@ PHPAPI extern char *php_ini_path;
 #define PHP_MODE_STANDARD	1
 #define PHP_MODE_HIGHLIGHT	2
 #define PHP_MODE_INDENT		3
+#define PHP_MODE_LINT		4
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
+#define OPTSTRING "ac:d:ef:g:hilnqs?vz:"
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
@@ -258,6 +260,7 @@ static void php_cgi_usage(char *argv0)
 				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
 				"  -e             Generate extended information for debugger/profiler\n"
 				"  -z<file>       Load Zend extension <file>.\n"
+				"  -l             Syntax check only (lint)\n"
 				"  -i             PHP information\n"
 				"  -h             This help\n", prog);
 }
@@ -359,6 +362,7 @@ void php_register_command_line_global_vars(char **arg)
 
 int main(int argc, char *argv[])
 {
+	int exit_status = SUCCESS;
 	int cgi = 0, c, i, len;
 	zend_file_handle file_handle;
 	char *s;
@@ -448,7 +452,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	if (!cgi) {
-		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
+		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 			switch (c) {
 				case 'c':
 					php_ini_path = strdup(ap_php_optarg);		/* intentional leak */
@@ -474,7 +478,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 
 	if (!cgi) {
-		while ((c=ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:"))!=-1) {
+		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
 			switch (c) {
 				case '?':
 					no_headers = 1;
@@ -503,9 +507,27 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			free(SG(request_info).argv0);
 			SG(request_info).argv0 = NULL;
 		}
-		while ((c = ap_php_getopt(argc, argv, "c:d:z:g:qvisnaeh?vf:")) != -1) {
+		while ((c = ap_php_getopt(argc, argv, OPTSTRING)) != -1) {
 			switch (c) {
-				case 'f':
+				
+  			case 'a':	/* interactive mode */
+#if SUPPORT_INTERACTIVE
+					printf("Interactive mode enabled\n\n");
+					interactive=1;
+#else
+					printf("Interactive mode not supported!\n\n");
+#endif
+					break;
+				
+			  case 'd':	/* define ini entries on command line */
+					define_command_line_ini_entry(ap_php_optarg);
+					break;
+					
+  			case 'e': /* enable extended info output */
+					CG(extended_info) = 1;
+					break;
+
+  			case 'f': /* parse file */
 					if (!cgi_started){ 
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
 							php_module_shutdown();
@@ -517,11 +539,62 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					cgi_started=1;
 					SG(request_info).path_translated = estrdup(ap_php_optarg);
-					/* break missing intentionally */
-				case 'q':
 					no_headers = 1;
 					break;
-				case 'v':
+
+  			case 'g': /* define global variables on command line */
+					{
+						char *arg = estrdup(ap_php_optarg);
+
+						zend_llist_add_element(&global_vars, &arg);
+					}
+					break;
+
+  			case 'h': /* help & quit */
+				case '?':
+					no_headers = 1;  
+					php_output_startup();
+					SG(headers_sent) = 1;
+					php_cgi_usage(argv[0]);
+					php_end_ob_buffering(1);
+					exit(1);
+					break;
+
+			case 'i': /* php info & quit */
+					if (!cgi_started) {
+						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
+							php_module_shutdown();
+							return FAILURE;
+						}
+					}
+					if (no_headers) {
+						SG(headers_sent) = 1;
+					}
+					cgi_started=1;
+					php_print_info(0xFFFFFFFF);
+					exit(1);
+					break;
+
+  			case 'l': /* syntax check mode */
+					no_headers = 1;
+					behavior=PHP_MODE_LINT;
+					break;
+
+#if 0 /* not yet operational, see also below ... */
+  			case 'n': /* generate indented source mode*/ 
+					behavior=PHP_MODE_INDENT;
+					break;
+#endif
+
+  			case 'q': /* do not generate HTTP headers */
+					no_headers = 1;
+					break;
+
+  			case 's': /* generate highlighted HTML from source */
+					behavior=PHP_MODE_HIGHLIGHT;
+					break;
+
+			case 'v': /* show php version & quit */
 					no_headers = 1;
 					if (!cgi_started) {
 						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
@@ -536,59 +609,11 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					php_end_ob_buffering(1);
 					exit(1);
 					break;
-				case 'i':
-					if (!cgi_started) {
-						if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {
-							php_module_shutdown();
-							return FAILURE;
-						}
-					}
-					if (no_headers) {
-						SG(headers_sent) = 1;
-					}
-					cgi_started=1;
-					php_print_info(0xFFFFFFFF);
-					exit(1);
-					break;
-				case 's':
-					behavior=PHP_MODE_HIGHLIGHT;
-					break;
-				case 'n':
-					behavior=PHP_MODE_INDENT;
-					break;
-				case 'a':
-#if SUPPORT_INTERACTIVE
-					printf("Interactive mode enabled\n\n");
-					interactive=1;
-#else
-					printf("Interactive mode not supported!\n\n");
-#endif
-					break;
-				case 'e':
-					CG(extended_info) = 1;
-					break;
-				case 'h':
-				case '?':
-					no_headers = 1;  
-					php_output_startup();
-					SG(headers_sent) = 1;
-					php_cgi_usage(argv[0]);
-					php_end_ob_buffering(1);
-					exit(1);
-					break;
-				case 'd':
-					define_command_line_ini_entry(ap_php_optarg);
-					break;
-				case 'g':
-					{
-						char *arg = estrdup(ap_php_optarg);
 
-						zend_llist_add_element(&global_vars, &arg);
-					}
-					break;
-				case 'z':
+			case 'z': /* load extension file */
 					zend_load_extension(ap_php_optarg);
 					break;
+
 				default:
 					break;
 			}
@@ -673,6 +698,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		case PHP_MODE_STANDARD:
 			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
+		case PHP_MODE_LINT:
+			exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			break;
 		case PHP_MODE_HIGHLIGHT:
 			{
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -682,7 +710,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					zend_highlight(&syntax_highlighter_ini);
 					fclose(file_handle.handle.fp);
 				}
-				return 0;
+				return SUCCESS;
 			}
 			break;
 #if 0
@@ -691,12 +719,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			open_file_for_scanning(&file_handle CLS_CC);
 			zend_indent();
 			fclose(file_handle.handle.fp);
-			return 0;
+			return SUCCESS;
 			break;
 #endif
 	}
 
 	php_header();			/* Make sure headers have been sent */
+
 	
 
 	if (SG(request_info).path_translated) {
@@ -711,6 +740,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
-	return SUCCESS;
+
+	return exit_status;
 }
 
