@@ -343,6 +343,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 				}
 				new_zval = (zval *) emalloc(sizeof(zval));
 				*new_zval = **params[i];
+				zval_copy_ctor(new_zval);
 				new_zval->refcount = 1;
 				new_zval->EA.locks = 0;
 				(*params[i])->refcount--;
