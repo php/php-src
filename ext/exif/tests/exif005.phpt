@@ -1,9 +1,10 @@
 --TEST--
 Check for exif_read_data, unusual IFD start
 --SKIPIF--
-<?php 
-	if (!extension_loaded('exif')) print 'skip exif extension not available';
-?>
+<?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
+--INI--
+output_handler=
+zlib.output_compression=0
 --FILE--
 <?php
 /* Do not change this test it is a REATME.TESTING example.
