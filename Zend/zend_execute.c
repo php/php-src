@@ -382,13 +382,20 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	}
 	
 	/* here we are sure we are dealing with an object */
-	if (EG(ze1_compatibility_mode)) {
-		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
-		object = *object_ptr;
-	}
 
 	/* separate our value if necessary */
-	if (value_op->op_type == IS_TMP_VAR) {
+	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
+		zval *orig_value = value;
+		
+		ALLOC_ZVAL(value);
+		*value = *orig_value;
+	 	value->is_ref = 0;
+		value->refcount = 0;
+		if (value->value.obj.handlers->clone_obj == NULL) {
+			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(orig_value)->name);
+		}
+		value->value.obj = orig_value->value.obj.handlers->clone_obj(orig_value TSRMLS_CC);
+	} else if (value_op->op_type == IS_TMP_VAR) {
 		zval *orig_value = value;
 
 		ALLOC_ZVAL(value);
@@ -404,6 +411,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		value->refcount = 0;
 		zval_copy_ctor(value);
 	}
+		
 
 	value->refcount++;
 	if (opcode == ZEND_ASSIGN_OBJ) {
@@ -543,7 +551,40 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 		return;
 	}
 	
-	if (PZVAL_IS_REF(variable_ptr)) {
+	if (EG(ze1_compatibility_mode) && Z_TYPE_P(value) == IS_OBJECT) {
+		if (value->value.obj.handlers->clone_obj == NULL) {
+			zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(value)->name);
+		} else if (PZVAL_IS_REF(variable_ptr)) {
+	      	if (variable_ptr != value) {
+				zend_uint refcount = variable_ptr->refcount;
+				zval garbage;
+
+				if (type != IS_TMP_VAR) {
+					value->refcount++;
+				}
+				garbage = *variable_ptr;
+				*variable_ptr = *value;
+				variable_ptr->refcount = refcount;
+				variable_ptr->is_ref = 1;
+				variable_ptr->value.obj = value->value.obj.handlers->clone_obj(value TSRMLS_CC);
+				if (type != IS_TMP_VAR) {
+					value->refcount--;
+				}
+				zendi_zval_dtor(garbage);
+			}
+		} else {
+			variable_ptr->refcount--;
+			if (variable_ptr->refcount == 0) {
+				zendi_zval_dtor(*variable_ptr);
+			} else {
+				ALLOC_ZVAL(variable_ptr);
+				*variable_ptr_ptr = variable_ptr;
+			}
+			*variable_ptr = *value;
+			INIT_PZVAL(variable_ptr);
+			variable_ptr->value.obj = value->value.obj.handlers->clone_obj(value TSRMLS_CC);
+		}
+	} else if (PZVAL_IS_REF(variable_ptr)) {
 		if (variable_ptr!=value) {
 			zend_uint refcount = variable_ptr->refcount;
 			zval garbage;
@@ -2386,17 +2427,9 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	/* We are not handling overloaded classes right now */
 	EX(object) = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-	if (!PZVAL_IS_REF(EX(object)) || !EG(ze1_compatibility_mode)) {
-		EX(object)->refcount++; /* For $this pointer */
-	} else {
-		zval *this_ptr;
 
-		ALLOC_ZVAL(this_ptr);
-		*this_ptr = *EX(object);
-		INIT_PZVAL(this_ptr);
-		zval_copy_ctor(this_ptr);
-		EX(object) = this_ptr;
-	}
+	/* New always returns the object as is_ref=0, therefore, we can just increment the reference count */
+	EX(object)->refcount++; /* For $this pointer */
 
 	EX(fbc) = EX(fbc_constructor);
 
@@ -2448,7 +2481,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) {
 		EX(object) = NULL;
 	} else {
-		if (!PZVAL_IS_REF(EX(object)) || !EG(ze1_compatibility_mode)) {
+		if (!PZVAL_IS_REF(EX(object))) {
 			EX(object)->refcount++; /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -2457,7 +2490,7 @@ int zend_init_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 			INIT_PZVAL(this_ptr);
 			zval_copy_ctor(this_ptr);
 			EX(object) = this_ptr;
-		}
+		}	
 	}
 
 	if (EX(fbc)->type == ZEND_USER_FUNCTION) {
@@ -2799,7 +2832,15 @@ int zend_return_handler(ZEND_OPCODE_HANDLER_ARGS)
 return_by_value:
 		retval_ptr = get_zval_ptr(&opline->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 	
-		if (!EG(free_op1)) { /* Not a temp var */
+		if (EG(ze1_compatibility_mode) && Z_TYPE_P(retval_ptr) == IS_OBJECT) {
+			ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
+			**EG(return_value_ptr_ptr) = *retval_ptr;
+			INIT_PZVAL(*EG(return_value_ptr_ptr));
+			if (retval_ptr->value.obj.handlers->clone_obj == NULL) {
+				zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s",  Z_OBJCE_P(retval_ptr)->name);
+			}
+			(*EG(return_value_ptr_ptr))->value.obj = retval_ptr->value.obj.handlers->clone_obj(retval_ptr TSRMLS_CC);
+		} else if (!EG(free_op1)) { /* Not a temp var */
 			if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
 				ALLOC_ZVAL(*(EG(return_value_ptr_ptr)));
 				**EG(return_value_ptr_ptr) = *retval_ptr;
@@ -3171,7 +3212,7 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 	ALLOC_ZVAL(EX_T(opline->result.u.var).var.ptr);
 	object_init_ex(EX_T(opline->result.u.var).var.ptr, EX_T(opline->op1.u.var).class_entry);
 	EX_T(opline->result.u.var).var.ptr->refcount=1;
-	EX_T(opline->result.u.var).var.ptr->is_ref=1;
+	EX_T(opline->result.u.var).var.ptr->is_ref=0;
 	
 	NEXT_OPCODE();
 }
