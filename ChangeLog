@@ -1,3 +1,145 @@
+2001-03-27  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/pi3web/config.m4
+      sapi/roxen/config.m4
+      sapi/thttpd/config.m4
+      sapi/isapi/config.m4
+      sapi/nsapi/config.m4
+      sapi/phttpd/config.m4
+      sapi/apache/config.m4
+      sapi/apache2filter/config.m4
+      sapi/caudium/config.m4
+      sapi/fastcgi/config.m4
+      ext/vpopmail/config.m4
+      ext/xml/config.m4
+      ext/zlib/config.m4
+      ext/zziplib/config.m4
+      sapi/aolserver/config.m4
+      ext/swf/config.m4
+      ext/sybase/config.m4
+      ext/sybase_ct/config.m4
+      ext/sablot/config.m4
+      ext/session/config.m4
+      ext/snmp/config.m4
+      ext/readline/config.m4
+      ext/recode/config.m4
+      ext/pgsql/config.m4
+      ext/pspell/config.m4
+      ext/qtdom/config.m4
+      ext/pdf/config.m4
+      ext/pfpro/config.m4
+      ext/oracle/config.m4
+      ext/ovrimos/config.m4
+      ext/pcre/config.m4
+      ext/mysql/config.m4
+      ext/oci8/config.m4
+      ext/odbc/config.m4
+      ext/mnogosearch/config.m4
+      ext/msql/config.m4
+      ext/muscat/config.m4
+      ext/midgard/config.m4
+      ext/midgard/config.m4.session
+      ext/ming/config.m4
+      ext/mcal/config.m4
+      ext/mcrypt/config.m4
+      ext/mhash/config.m4
+      ext/ircg/config.m4
+      ext/java/config.m4
+      ext/ldap/config.m4
+      ext/informix/config.m4
+      ext/ingres_ii/config.m4
+      ext/interbase/config.m4
+      ext/iconv/config.m4
+      ext/imap/config.m4
+      ext/gettext/config.m4
+      ext/gmp/config.m4
+      ext/icap/config.m4
+      ext/fribidi/config.m4
+      ext/gd/config.m4
+      ext/domxml/config.m4
+      ext/fbsql/config.m4
+      ext/fdf/config.m4
+      ext/cybercash/config.m4
+      ext/cybermut/config.m4
+      ext/dba/config.m4
+      ext/cpdf/config.m4
+      ext/crack/config.m4
+      ext/curl/config.m4
+      configure.in
+      ext/aspell/config.m4
+      ext/bz2/config.m4
+      ext/ccvs/config.m4
+      acinclude.m4:
+    Renamed the AC_ prefixed macros defined in acinclude.m4 to PHP_* prefixes.
+
+2001-03-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/formatted_print.c: - MFH (Fix for bug 10002)
+
+    * ext/standard/formatted_print.c: - 'Fix' for bug 10002
+
+2001-03-27  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/fastcgi.c:
+    Changed header handling; before, we were somehow losing
+    Content-Type: text/html
+
+2001-03-27  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    The last fix was missing a &, Marc Boeren either made the patch wrong, or I applied it improperly.  Anyways, Sebastian Bergmann discovered it, and supposedly is fixed with this.
+
+2001-03-27  Ben Mansell  <ben@zeus.com>
+
+    * sapi/fastcgi/fastcgi.c:
+    Changed header handling; before, we were somehow losing
+    Content-Type: text/html
+
+2001-03-27  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oracle/oracle.c: MFH
+
+    * ext/oracle/oracle.c: fixed newly introduced crash in ora_bind
+
+2001-03-27  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/fo2pdf.php: corrected Usage example
+
+2001-03-27  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    Fix for Bug #9272, as submitted by marc boeren (m.boeren@guidance.nl).
+    Applied by me, due to apparently a lack of cvs access to ext/odbc for him.
+
+2001-03-27  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_variables.c: MFH
+
+    * main/php_variables.c:
+    Fix the arg_separator behaviour. Only & or ; is allowed as separators so no need to use the ini setting here.
+
+2001-03-27  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/pgsql/pgsql.c:
+    pg_close was closing connection twice, pls insert in 4_0_5
+
+2001-03-27  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Experimental/XML/fo2pdf.php:
+    a class for rendering (xsl-)formatting objects files into a pdf.
+
+2001-03-27  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/common.php
+      pear/DB/ifx.php
+      pear/DB/pgsql.php: ifx.php
+    * Changed default fetchmode to ORDERED
+    * Remove extra checks in connect and added $dns property
+    * fetchRow() now uses fetchInto()
+
+    common.php & pgsql.php
+    style
+
 2001-03-26  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/pgsql.php
