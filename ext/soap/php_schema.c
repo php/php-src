@@ -37,17 +37,18 @@ static int schema_choice(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr choiceType, sdlT
 static int schema_group(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr groupType, sdlTypePtr cur_type, sdlContentModelPtr model);
 static int schema_any(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr extType, sdlTypePtr cur_type, sdlContentModelPtr model);
 static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTypePtr cur_type, sdlContentModelPtr model);
-static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
-static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type);
+static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
+static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx);
 
 static int schema_restriction_var_int(xmlNodePtr val, sdlRestrictionIntPtr *valptr);
 
 static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *valptr);
 
-static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type);
+static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type);
 
 static void delete_model(void *handle);
 static void delete_type(void *data);
+static void delete_extra_attribute(void *attribute);
 static void delete_attribute(void *attribute);
 static void delete_restriction_var_int(void *rvi);
 static void delete_schema_restriction_var_char(void *srvc);
@@ -115,9 +116,9 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char 
 	return enc;
 }
 
-static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
+static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
-	    !zend_hash_exists(&sdl->docs, location, strlen(location)+1)) {
+	    !zend_hash_exists(&ctx->docs, location, strlen(location)+1)) {
 		xmlDocPtr doc;
 		xmlNodePtr schema;
 		xmlAttrPtr new_tns;
@@ -153,8 +154,8 @@ static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlChar *location, xmlAt
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: can't include schema from '%s', different 'targetNamespace'",location);
 			}
 		}
-		zend_hash_add(&sdl->docs, location, strlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
-		load_schema(sdl, schema);
+		zend_hash_add(&ctx->docs, location, strlen(location)+1, (void**)&doc, sizeof(xmlDocPtr), NULL);
+		load_schema(ctx, schema);
 	}
 }
 
@@ -178,18 +179,22 @@ static void schema_load_file(sdlPtr sdl, xmlAttrPtr ns, xmlChar *location, xmlAt
   Content: ((include | import | redefine | annotation)*, (((simpleType | complexType | group | attributeGroup) | element | attribute | notation), annotation*)*)
 </schema>
 */
-int load_schema(sdlPtr sdl,xmlNodePtr schema)
+int load_schema(sdlCtx *ctx,xmlNodePtr schema)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr tns;
 
-	if (!sdl->types) {
-		sdl->types = malloc(sizeof(HashTable));
-		zend_hash_init(sdl->types, 0, NULL, delete_type, 1);
+	if (!ctx->sdl->types) {
+		ctx->sdl->types = malloc(sizeof(HashTable));
+		zend_hash_init(ctx->sdl->types, 0, NULL, delete_type, 1);
 	}
-	if (!sdl->elements) {
-		sdl->elements = malloc(sizeof(HashTable));
-		zend_hash_init(sdl->elements, 0, NULL, delete_type, 1);
+	if (!ctx->attributes) {
+		ctx->attributes = emalloc(sizeof(HashTable));
+		zend_hash_init(ctx->attributes, 0, NULL, delete_attribute, 0);
+	}
+	if (!ctx->attributeGroups) {
+		ctx->attributeGroups = emalloc(sizeof(HashTable));
+		zend_hash_init(ctx->attributeGroups, 0, NULL, delete_type, 0);
 	}
 
 	tns = get_attribute(schema->properties, "targetNamespace");
@@ -212,7 +217,7 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(sdl,NULL,uri,tns,0);
+				schema_load_file(ctx,NULL,uri,tns,0);
 		    xmlFree(uri);
 			}
 
@@ -232,7 +237,7 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 	    		uri = xmlBuildURI(location->children->content, base);
 			    xmlFree(base);
 				}
-				schema_load_file(sdl,NULL,uri,tns,0);
+				schema_load_file(ctx,NULL,uri,tns,0);
 		    xmlFree(uri);
 				/* TODO: <redefine> support */
 			}
@@ -257,7 +262,7 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 			    xmlFree(base);
 				}
 			}
-			schema_load_file(sdl,ns,uri,tns,1);
+			schema_load_file(ctx,ns,uri,tns,1);
 		  if (uri != NULL) {xmlFree(uri);}
 		} else if (node_is_equal(trav,"annotation")) {
 			/* TODO: <annotation> support */
@@ -276,17 +281,17 @@ int load_schema(sdlPtr sdl,xmlNodePtr schema)
 
 	while (trav != NULL) {
 		if (node_is_equal(trav,"simpleType")) {
-			schema_simpleType(sdl, tns, trav, NULL);
+			schema_simpleType(ctx->sdl, tns, trav, NULL);
 		} else if (node_is_equal(trav,"complexType")) {
-			schema_complexType(sdl, tns, trav, NULL);
+			schema_complexType(ctx->sdl, tns, trav, NULL);
 		} else if (node_is_equal(trav,"group")) {
-			schema_group(sdl, tns, trav, NULL, NULL);
+			schema_group(ctx->sdl, tns, trav, NULL, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tns, trav, NULL);
+			schema_attributeGroup(ctx->sdl, tns, trav, NULL, ctx);
 		} else if (node_is_equal(trav,"element")) {
-			schema_element(sdl, tns, trav, NULL, NULL);
+			schema_element(ctx->sdl, tns, trav, NULL, NULL);
 		} else if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tns, trav, NULL);
+			schema_attribute(ctx->sdl, tns, trav, NULL, ctx);
 		} else if (node_is_equal(trav,"notation")) {
 			/* TODO: <notation> support */
 		} else if (node_is_equal(trav,"annotation")) {
@@ -703,9 +708,9 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 	if (!simpleType) {
 		while (trav != NULL) {
 			if (node_is_equal(trav,"attribute")) {
-				schema_attribute(sdl, tsn, trav, cur_type);
+				schema_attribute(sdl, tsn, trav, cur_type, NULL);
 			} else if (node_is_equal(trav,"attributeGroup")) {
-				schema_attributeGroup(sdl, tsn, trav, cur_type);
+				schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 			} else if (node_is_equal(trav,"anyAttribute")) {
 				/* TODO: <anyAttribute> support */
 				trav = trav->next;
@@ -774,9 +779,9 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNode
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type);
+			schema_attribute(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -884,9 +889,9 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type);
+			schema_attribute(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -954,9 +959,9 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePt
 	}
 	while (trav != NULL) {
 		if (node_is_equal(trav,"attribute")) {
-			schema_attribute(sdl, tsn, trav, cur_type);
+			schema_attribute(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
-			schema_attributeGroup(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			/* TODO: <anyAttribute> support */
 			trav = trav->next;
@@ -1452,9 +1457,9 @@ static int schema_complexType(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compType, s
 			}
 			while (trav != NULL) {
 				if (node_is_equal(trav,"attribute")) {
-					schema_attribute(sdl, tsn, trav, cur_type);
+					schema_attribute(sdl, tsn, trav, cur_type, NULL);
 				} else if (node_is_equal(trav,"attributeGroup")) {
-					schema_attributeGroup(sdl, tsn, trav, cur_type);
+					schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 				} else if (node_is_equal(trav,"anyAttribute")) {
 					/* TODO: <anyAttribute> support */
 					trav = trav->next;
@@ -1542,6 +1547,10 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
 		newType->nillable = FALSE;
 
 		if (cur_type == NULL) {
+			if (sdl->elements == NULL) {
+				sdl->elements = malloc(sizeof(HashTable));
+				zend_hash_init(sdl->elements, 0, NULL, delete_type, 1);
+			}
 			addHash = sdl->elements;
 			smart_str_appends(&key, newType->namens);
 			smart_str_appendc(&key, ':');
@@ -1701,7 +1710,7 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr element, sdlTyp
   Content: (annotation?, (simpleType?))
 </attribute>
 */
-static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type)
+static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdlTypePtr cur_type, sdlCtx *ctx)
 {
 	sdlAttributePtr newAttr;
 	xmlAttrPtr attr, name, ref = NULL, type = NULL;
@@ -1749,11 +1758,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 		}
 
 		if (cur_type == NULL) {
-			if (sdl->attributes == NULL) {
-				sdl->attributes = malloc(sizeof(HashTable));
-				zend_hash_init(sdl->attributes, 0, NULL, delete_attribute, 1);
-			}
-			addHash = sdl->attributes;
+			addHash = ctx->attributes;
 		} else {
 			if (cur_type->attributes == NULL) {
 				cur_type->attributes = malloc(sizeof(HashTable));
@@ -1825,17 +1830,33 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 
 			if (strncmp(nsPtr->href, SCHEMA_NAMESPACE, sizeof(SCHEMA_NAMESPACE))) {
 				smart_str key2 = {0};
+				sdlExtraAttributePtr ext;
+				xmlNsPtr nsptr;
+				char *value, *ns;
+
+				ext = malloc(sizeof(sdlExtraAttribute));
+				memset(ext, 0, sizeof(sdlExtraAttribute));
+				parse_namespace(attr->children->content, &value, &ns);
+				nsptr = xmlSearchNs(attr->doc, attr->parent, ns);
+				if (nsptr) {
+					ext->ns = strdup(nsptr->href);
+					ext->val = strdup(value);
+				} else {
+					ext->val = strdup(attr->children->content);
+				}
+				if (ns) {efree(ns);}
+				efree(value);
 
 				if (!newAttr->extraAttributes) {
 					newAttr->extraAttributes = malloc(sizeof(HashTable));
-					zend_hash_init(newAttr->extraAttributes, 0, NULL, NULL, 1);
+					zend_hash_init(newAttr->extraAttributes, 0, NULL, delete_extra_attribute, 1);
 				}
 
 				smart_str_appends(&key2, nsPtr->href);
 				smart_str_appendc(&key2, ':');
 				smart_str_appends(&key2, attr->name);
 				smart_str_0(&key2);
-				zend_hash_add(newAttr->extraAttributes, key2.c, key2.len + 1, &attr, sizeof(xmlAttrPtr), NULL);
+				zend_hash_add(newAttr->extraAttributes, key2.c, key2.len + 1, &ext, sizeof(sdlExtraAttributePtr), NULL);
 				smart_str_free(&key2);
 			}
 		}
@@ -1871,7 +1892,7 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sdl
 	return TRUE;
 }
 
-static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGroup, sdlTypePtr cur_type)
+static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGroup, sdlTypePtr cur_type, sdlCtx *ctx)
 {
 	xmlNodePtr trav;
 	xmlAttrPtr name, ref = NULL;
@@ -1887,11 +1908,6 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			sdlTypePtr newType;
 			smart_str key = {0};
 
-			if (sdl->attributeGroups == NULL) {
-				sdl->attributeGroups = malloc(sizeof(HashTable));
-				zend_hash_init(sdl->attributeGroups, 0, NULL, delete_type, 1);
-			}
-
 			ns = get_attribute(attrGroup->properties, "targetNamespace");
 			if (ns == NULL) {
 				ns = tsn;
@@ -1906,7 +1922,7 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			smart_str_appends(&key, newType->name);
 			smart_str_0(&key);
 
-			if (zend_hash_add(sdl->attributeGroups, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
+			if (zend_hash_add(ctx->attributeGroups, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), NULL) != SUCCESS) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup '%s' already defined", key.c);
 			}
 			cur_type = newType;
@@ -1950,12 +1966,12 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
-			schema_attribute(sdl, tsn, trav, cur_type);
+			schema_attribute(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"attributeGroup")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
 			}
-			schema_attributeGroup(sdl, tsn, trav, cur_type);
+			schema_attributeGroup(sdl, tsn, trav, cur_type, NULL);
 		} else if (node_is_equal(trav,"anyAttribute")) {
 			if (ref != NULL) {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: attributeGroup has both 'ref' attribute and subattribute");
@@ -1974,14 +1990,30 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr attrGrou
 	return TRUE;
 }
 
-static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
+static void copy_extra_attribute(void *attribute) 
+{
+	sdlExtraAttributePtr *attr = (sdlExtraAttributePtr*)attribute;
+	sdlExtraAttributePtr new_attr;
+
+	new_attr = malloc(sizeof(sdlExtraAttribute));
+	memcpy(new_attr, *attr, sizeof(sdlExtraAttribute));
+	*attr = new_attr;
+	if (new_attr->ns) {
+		new_attr->ns = strdup(new_attr->ns);
+	}
+	if (new_attr->val) {
+		new_attr->val = strdup(new_attr->val);
+	}
+}
+
+static void schema_attribute_fixup(sdlCtx *ctx, sdlAttributePtr attr)
 {
 	sdlAttributePtr *tmp;
 
 	if (attr->ref != NULL) {
-		if (sdl->attributes != NULL) {
-			if (zend_hash_find(sdl->attributes, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
-				schema_attribute_fixup(sdl, *tmp);
+		if (ctx->attributes != NULL) {
+			if (zend_hash_find(ctx->attributes, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
+				schema_attribute_fixup(ctx, *tmp);
 				if ((*tmp)->name != NULL && attr->name == NULL) {
 					attr->name = strdup((*tmp)->name);
 				}
@@ -2001,9 +2033,8 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				  xmlNodePtr node;
 
 					attr->extraAttributes = malloc(sizeof(HashTable));
-
-					zend_hash_init(attr->extraAttributes, 0, NULL, NULL, 1);
-					zend_hash_copy(attr->extraAttributes, (*tmp)->extraAttributes, NULL, &node, sizeof(xmlNodePtr));
+					zend_hash_init(attr->extraAttributes, 0, NULL, delete_extra_attribute, 1);
+					zend_hash_copy(attr->extraAttributes, (*tmp)->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 				}
 				attr->encode = (*tmp)->encode;
 			}
@@ -2020,14 +2051,14 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 	}
 }
 
-static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTable *ht)
+static void schema_attributegroup_fixup(sdlCtx *ctx, sdlAttributePtr attr, HashTable *ht)
 {
 	sdlTypePtr *tmp;
 	sdlAttributePtr *tmp_attr;
 
 	if (attr->ref != NULL) {
-		if (sdl->attributeGroups != NULL) {
-			if (zend_hash_find(sdl->attributeGroups, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
+		if (ctx->attributeGroups != NULL) {
+			if (zend_hash_find(ctx->attributeGroups, attr->ref, strlen(attr->ref)+1, (void**)&tmp) == SUCCESS) {
 				if ((*tmp)->attributes) {
 					zend_hash_internal_pointer_reset((*tmp)->attributes);
 					while (zend_hash_get_current_data((*tmp)->attributes,(void**)&tmp_attr) == SUCCESS) {
@@ -2036,7 +2067,7 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 							uint key_len;
 							sdlAttributePtr newAttr;
 
-							schema_attribute_fixup(sdl,*tmp_attr);
+							schema_attribute_fixup(ctx,*tmp_attr);
 
 							newAttr = malloc(sizeof(sdlAttribute));
 							memcpy(newAttr, *tmp_attr, sizeof(sdlAttribute));
@@ -2046,9 +2077,8 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 							if (newAttr->extraAttributes) {
 							  xmlNodePtr node;
 								HashTable *ht = malloc(sizeof(HashTable));
-
-								zend_hash_init(ht, 0, NULL, NULL, 1);
-								zend_hash_copy(ht, newAttr->extraAttributes, NULL, &node, sizeof(xmlNodePtr));
+								zend_hash_init(ht, 0, NULL, delete_extra_attribute, 1);
+								zend_hash_copy(ht, newAttr->extraAttributes, copy_extra_attribute, &node, sizeof(xmlNodePtr));
 								newAttr->extraAttributes = ht;
 							}
 
@@ -2059,7 +2089,7 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 						} else {
 							ulong index;
 
-							schema_attributegroup_fixup(sdl,*tmp_attr, ht);
+							schema_attributegroup_fixup(ctx,*tmp_attr, ht);
 							zend_hash_get_current_key((*tmp)->attributes, NULL, &index, 0);
 							zend_hash_index_del((*tmp)->attributes, index);
 						}
@@ -2072,14 +2102,14 @@ static void schema_attributegroup_fixup(sdlPtr sdl, sdlAttributePtr attr, HashTa
 	}
 }
 
-static void schema_content_model_fixup(sdlPtr sdl, sdlContentModelPtr model)
+static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 {
 	switch (model->kind) {
 		case XSD_CONTENT_GROUP_REF: {
 			sdlTypePtr *tmp;
 
-			if (sdl->groups && zend_hash_find(sdl->groups, model->u.group_ref, strlen(model->u.group_ref)+1, (void**)&tmp) == SUCCESS) {
-				schema_type_fixup(sdl,*tmp);
+			if (ctx->sdl->groups && zend_hash_find(ctx->sdl->groups, model->u.group_ref, strlen(model->u.group_ref)+1, (void**)&tmp) == SUCCESS) {
+				schema_type_fixup(ctx,*tmp);
 				efree(model->u.group_ref);
 				model->kind = XSD_CONTENT_GROUP;
 				model->u.group = (*tmp)->model;
@@ -2095,7 +2125,7 @@ static void schema_content_model_fixup(sdlPtr sdl, sdlContentModelPtr model)
 
 			zend_hash_internal_pointer_reset(model->u.content);
 			while (zend_hash_get_current_data(model->u.content, (void**)&tmp) == SUCCESS) {
-				schema_content_model_fixup(sdl, *tmp);
+				schema_content_model_fixup(ctx, *tmp);
 				zend_hash_move_forward(model->u.content);
 			}
 			break;
@@ -2105,14 +2135,14 @@ static void schema_content_model_fixup(sdlPtr sdl, sdlContentModelPtr model)
 	}
 }
 
-static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
+static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type)
 {
 	sdlTypePtr *tmp;
 	sdlAttributePtr *attr;
 
 	if (type->ref != NULL) {
-		if (sdl->elements != NULL) {
-			if (zend_hash_find(sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
+		if (ctx->sdl->elements != NULL) {
+			if (zend_hash_find(ctx->sdl->elements, type->ref, strlen(type->ref)+1, (void**)&tmp) == SUCCESS) {
 				type->encode = (*tmp)->encode;
 				/* TODO: nillable */
 			} else {
@@ -2125,23 +2155,23 @@ static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
 	if (type->elements) {
 		zend_hash_internal_pointer_reset(type->elements);
 		while (zend_hash_get_current_data(type->elements,(void**)&tmp) == SUCCESS) {
-			schema_type_fixup(sdl,*tmp);
+			schema_type_fixup(ctx,*tmp);
 			zend_hash_move_forward(type->elements);
 		}
 	}
 	if (type->model) {
-		schema_content_model_fixup(sdl, type->model);
+		schema_content_model_fixup(ctx, type->model);
 	}
 	if (type->attributes) {
 		zend_hash_internal_pointer_reset(type->attributes);
 		while (zend_hash_get_current_data(type->attributes,(void**)&attr) == SUCCESS) {
 			if (zend_hash_get_current_key_type(type->attributes) == HASH_KEY_IS_STRING) {
-				schema_attribute_fixup(sdl,*attr);
+				schema_attribute_fixup(ctx,*attr);
 				zend_hash_move_forward(type->attributes);
 			} else {
 				ulong index;
 
-				schema_attributegroup_fixup(sdl,*attr,type->attributes);
+				schema_attributegroup_fixup(ctx,*attr,type->attributes);
 				zend_hash_get_current_key(type->attributes, NULL, &index, 0);
 				zend_hash_index_del(type->attributes, index);
 			}
@@ -2149,62 +2179,55 @@ static void schema_type_fixup(sdlPtr sdl, sdlTypePtr type)
 	}
 }
 
-int schema_pass2(sdlPtr sdl)
+void schema_pass2(sdlCtx *ctx)
 {
+	sdlPtr sdl = ctx->sdl;
 	sdlAttributePtr *attr;
 	sdlTypePtr *type;
 
-	if (sdl->attributes) {
-		zend_hash_internal_pointer_reset(sdl->attributes);
-		while (zend_hash_get_current_data(sdl->attributes,(void**)&attr) == SUCCESS) {
-			schema_attribute_fixup(sdl,*attr);
-			zend_hash_move_forward(sdl->attributes);
+	if (ctx->attributes) {
+		zend_hash_internal_pointer_reset(ctx->attributes);
+		while (zend_hash_get_current_data(ctx->attributes,(void**)&attr) == SUCCESS) {
+			schema_attribute_fixup(ctx,*attr);
+			zend_hash_move_forward(ctx->attributes);
 		}
 	}
-	if (sdl->attributeGroups) {
-		zend_hash_internal_pointer_reset(sdl->attributeGroups);
-		while (zend_hash_get_current_data(sdl->attributeGroups,(void**)&type) == SUCCESS) {
-			schema_type_fixup(sdl,*type);
-			zend_hash_move_forward(sdl->attributeGroups);
+	if (ctx->attributeGroups) {
+		zend_hash_internal_pointer_reset(ctx->attributeGroups);
+		while (zend_hash_get_current_data(ctx->attributeGroups,(void**)&type) == SUCCESS) {
+			schema_type_fixup(ctx,*type);
+			zend_hash_move_forward(ctx->attributeGroups);
 		}
 	}
 	if (sdl->elements) {
 		zend_hash_internal_pointer_reset(sdl->elements);
 		while (zend_hash_get_current_data(sdl->elements,(void**)&type) == SUCCESS) {
-			schema_type_fixup(sdl,*type);
+			schema_type_fixup(ctx,*type);
 			zend_hash_move_forward(sdl->elements);
 		}
 	}
 	if (sdl->groups) {
 		zend_hash_internal_pointer_reset(sdl->groups);
 		while (zend_hash_get_current_data(sdl->groups,(void**)&type) == SUCCESS) {
-			schema_type_fixup(sdl,*type);
+			schema_type_fixup(ctx,*type);
 			zend_hash_move_forward(sdl->groups);
 		}
 	}
 	if (sdl->types) {
 		zend_hash_internal_pointer_reset(sdl->types);
 		while (zend_hash_get_current_data(sdl->types,(void**)&type) == SUCCESS) {
-			schema_type_fixup(sdl,*type);
+			schema_type_fixup(ctx,*type);
 			zend_hash_move_forward(sdl->types);
 		}
 	}
-	return TRUE;
-}
-
-int schema_pass3(sdlPtr sdl)
-{
-	if (sdl->attributes) {
-		zend_hash_destroy(sdl->attributes);
-		free(sdl->attributes);
-		sdl->attributes = NULL;
+	if (ctx->attributes) {
+		zend_hash_destroy(ctx->attributes);
+		efree(ctx->attributes);
 	}
-	if (sdl->attributeGroups) {
-		zend_hash_destroy(sdl->attributeGroups);
-		free(sdl->attributeGroups);
-		sdl->attributeGroups = NULL;
+	if (ctx->attributeGroups) {
+		zend_hash_destroy(ctx->attributeGroups);
+		efree(ctx->attributeGroups);
 	}
-	return TRUE;
 }
 
 static void delete_model(void *handle)
@@ -2271,6 +2294,19 @@ static void delete_type(void *data)
 	free(type);
 }
 
+static void delete_extra_attribute(void *attribute)
+{
+	sdlExtraAttributePtr attr = *((sdlExtraAttributePtr*)attribute);
+
+	if (attr->ns) {
+		free(attr->ns);
+	}
+	if (attr->val) {
+		free(attr->val);
+	}
+	free(attr);
+}
+
 static void delete_attribute(void *attribute)
 {
 	sdlAttributePtr attr = *((sdlAttributePtr*)attribute);
@@ -2291,6 +2327,7 @@ static void delete_attribute(void *attribute)
 		zend_hash_destroy(attr->extraAttributes);
 		free(attr->extraAttributes);
 	}
+	free(attr);
 }
 
 static void delete_restriction_var_int(void *rvi)

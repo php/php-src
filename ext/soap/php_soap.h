@@ -139,10 +139,9 @@ struct _soapService {
 #define SOAP_1_2_ACTOR_UNLIMATERECEIVER "http://www.w3.org/2003/05/soap-envelope/role/ultimateReceiver"
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
-	HashTable *defEncNs;
-	HashTable *defEncPrefix;
-	HashTable *defEnc;
-	HashTable *defEncIndex;
+	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */
+	HashTable  defEnc;
+	HashTable  defEncIndex;
 	HashTable *sdls;
 	HashTable *overrides;
 	int        cur_uniq_ns;
