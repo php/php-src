@@ -1,0 +1,9 @@
+#!/bin/sh
+awkprog='
+BEGIN { FS = "\n"; RS = "" }
+{ print "CREDIT_LINE(\""$1"\",\""$2"\");" }'
+
+for what in ext sapi
+do
+  awk "$awkprog" $what/*/CREDITS | sort -f > ext/standard/credits_$what.h
+done
