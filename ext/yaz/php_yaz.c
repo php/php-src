@@ -25,6 +25,7 @@
 #include "php.h"
 
 #if HAVE_YAZ
+
 #include "ext/standard/info.h"
 #include "php_yaz.h"
 
@@ -32,23 +33,44 @@
 #include <yaz/tcpip.h>
 #include <yaz/pquery.h>
 
-#ifndef YAZ_DATE
+#ifdef YAZ_VERSIONL
+
+#if YAZ_VERSIONL >= 0x010808
+#define USE_ZOOM 1
+#endif
+
+#else
+
+#ifdef YAZ_DATE
+#define USE_ZOOM 0
+#endif
+
+#endif
+
+#ifndef USE_ZOOM
 #error YAZ version 1.8 or later must be used.
 #endif
 
-#include <yaz/sortspec.h>
 #include <yaz/diagbib1.h>
 #include <yaz/otherinfo.h>
 #include <yaz/marcdisp.h>
 #include <yaz/yaz-util.h>
 #include <yaz/yaz-version.h>
 #include <yaz/yaz-ccl.h>
+#if USE_ZOOM
+#include <yaz/zoom.h>
+#else
+#include <yaz/sortspec.h>
 #include <yaz/ill.h>
+#endif
 
 #define MAX_ASSOC 100
 
-typedef struct Yaz_ResultSetInfo *Yaz_ResultSet;
 typedef struct Yaz_AssociationInfo *Yaz_Association;
+
+#if USE_ZOOM
+#else
+typedef struct Yaz_ResultSetInfo *Yaz_ResultSet;
 typedef struct Yaz_RecordCacheInfo *Yaz_RecordCache;
 
 struct Yaz_RecordCacheInfo {
@@ -79,7 +101,16 @@ struct Yaz_ResultSetInfo {
 #define PHP_YAZ_ERROR_INIT (-5)
 #define PHP_YAZ_ERROR_TIMEOUT (-6)
 
+#endif
+
 struct Yaz_AssociationInfo {
+	CCL_parser ccl_parser;
+#if USE_ZOOM
+	ZOOM_connection zoom_conn;
+	ZOOM_resultset zoom_set;
+	ZOOM_scanset zoom_scan;
+    ZOOM_package zoom_package;
+#else
 	char *host_port;
 	int num_databaseNames;
 	char **databaseNames;
@@ -87,6 +118,7 @@ struct Yaz_AssociationInfo {
 	COMSTACK cs;
 	char *cookie_in;
 	char *cookie_out;
+    char *client_IP;
 	char *user;
 	char *group;
 	char *pass;
@@ -95,13 +127,9 @@ struct Yaz_AssociationInfo {
 	int error;
 	char *addinfo;
 	Yaz_ResultSet resultSets;
-	int persistent;
-	int in_use;
-	int order;
 	int state;
 	int mask_select;
 	int reconnect_flag;
-	char *sort_criteria;
 	ODR odr_in;
 	ODR odr_out;
 	ODR odr_scan;
@@ -119,14 +147,24 @@ struct Yaz_AssociationInfo {
 	char *preferredRecordSyntax;
 	char *schema;
 
-	CCL_parser ccl_parser;
 	char *ill_buf_out;
 	int ill_len_out;
+#endif
+	char *sort_criteria;
+	int persistent;
+	int in_use;
+	int order;
 };
 
 static Yaz_Association yaz_association_mk ()
 {
 	Yaz_Association p = xmalloc (sizeof(*p));
+#if USE_ZOOM
+	p->zoom_conn = ZOOM_connection_create (0);
+	p->zoom_set = 0;
+	p->zoom_scan = 0;
+    p->zoom_package = 0;
+#else
 	p->host_port = 0;
 	p->num_databaseNames = 0;
 	p->databaseNames = 0;
@@ -134,6 +172,7 @@ static Yaz_Association yaz_association_mk ()
 	p->cs = 0;
 	p->cookie_in = 0;
 	p->cookie_out = 0;
+    p->client_IP = 0;
 	p->user = 0;
 	p->group = 0;
 	p->pass = 0;
@@ -141,8 +180,6 @@ static Yaz_Association yaz_association_mk ()
 	p->error = 0;
 	p->addinfo = 0;
 	p->resultSets = 0;
-	p->in_use = 0;
-	p->order = 0;
 	p->state = PHP_YAZ_STATE_CLOSED;
 	p->mask_select = 0;
 	p->reconnect_flag = 0;
@@ -164,9 +201,13 @@ static Yaz_Association yaz_association_mk ()
 	p->elementSetName = 0;
 	p->preferredRecordSyntax = 0;
 	p->schema = 0;
+#endif
+	p->sort_criteria = 0;
+	p->in_use = 0;
+	p->order = 0;
+	p->persistent = 0;
 	p->ccl_parser = ccl_parser_create();
 	p->ccl_parser->bibset = 0;
-	p->sort_criteria = 0;
 	return p;
 }
 
@@ -175,6 +216,12 @@ static void yaz_association_destroy (Yaz_Association p)
 	int i;
 	if (!p)
 		return ;
+#if USE_ZOOM
+	ZOOM_resultset_destroy (p->zoom_set);
+	ZOOM_scanset_destroy (p->zoom_scan);
+    ZOOM_package_destroy (p->zoom_package);
+	ZOOM_connection_destroy (p->zoom_conn);
+#else
 	xfree (p->host_port);
 	xfree (p->local_databases);
 	for (i = 0; i<p->num_databaseNames; i++)
@@ -184,7 +231,7 @@ static void yaz_association_destroy (Yaz_Association p)
 		cs_close (p->cs);
 	xfree (p->cookie_in);
 	xfree (p->cookie_out);
-	xfree (p->sort_criteria);
+    xfree (p->client_IP);
 	xfree (p->user);
 	xfree (p->group);
 	xfree (p->pass);
@@ -201,10 +248,14 @@ static void yaz_association_destroy (Yaz_Association p)
 	xfree (p->elementSetName);
 	xfree (p->preferredRecordSyntax);
 	xfree (p->schema);
+#endif
+	xfree (p->sort_criteria);
 	ccl_qual_rm(&p->ccl_parser->bibset);
 	ccl_parser_destroy(p->ccl_parser);
 }
 
+#if USE_ZOOM
+#else
 static Yaz_ResultSet yaz_resultset_mk()
 {
 	ODR odr = odr_createmem (ODR_ENCODE);
@@ -227,6 +278,7 @@ static void yaz_resultset_destroy (Yaz_ResultSet p)
 	if (p->odr)
 		odr_destroy (p->odr);
 }
+#endif
 
 #ifdef ZTS
 static MUTEX_T yaz_mutex;
@@ -258,9 +310,9 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_element, NULL)
 	PHP_FE(yaz_range, NULL)
 	PHP_FE(yaz_itemorder, NULL)
+	PHP_FE(yaz_es_result, NULL)
 	PHP_FE(yaz_scan, NULL)
 	PHP_FE(yaz_scan_result, second_argument_force_ref)
-	PHP_FE(yaz_es_result, NULL)
 	PHP_FE(yaz_present, NULL)
 	PHP_FE(yaz_ccl_conf, NULL)
 	PHP_FE(yaz_ccl_parse, third_argument_force_ref)
@@ -302,6 +354,9 @@ static void release_assoc (Yaz_Association assoc)
 		tsrm_mutex_unlock(yaz_mutex);
 #endif
 }
+
+#if USE_ZOOM
+#else
 static void do_close (Yaz_Association p)
 {
 	p->mask_select = 0;
@@ -361,6 +416,7 @@ static void response_diag (Yaz_Association t, Z_DiagRec *p)
 		t->addinfo = xstrdup (addinfo);
 	t->error = *r->condition;
 }
+#endif
 
 static const char *array_lookup_string(HashTable *ht, const char *idx)
 {
@@ -407,6 +463,41 @@ static long *array_lookup_bool(HashTable *ht, const char *idx)
 static int send_present (Yaz_Association t);
 static int send_sort_present (Yaz_Association t);
 static int send_sort (Yaz_Association t);
+
+#if USE_ZOOM
+const char *option_get (Yaz_Association as, const char *name)
+{
+	if (!as)
+		return 0;
+	return ZOOM_connection_option_get (as->zoom_conn, name);
+}
+
+int option_get_int (Yaz_Association as, const char *name, int def)
+{
+	const char *v;
+	v = ZOOM_connection_option_get (as->zoom_conn, name);
+	if (!v)
+		return def;
+	return atoi(v);
+}
+
+void option_set (Yaz_Association as, const char *name, const char *value)
+{
+	if (as && value)
+		ZOOM_connection_option_set (as->zoom_conn, name, value);
+}
+
+void option_set_int (Yaz_Association as, const char *name, int v)
+{
+	if (as)
+	{
+		char s[30];
+
+		sprintf (s, "%d", v);
+		ZOOM_connection_option_set (as->zoom_conn, name, s);
+	}
+}
+#else
 
 static void handle_records (Yaz_Association t, Z_Records *sr,
 							int present_phase)
@@ -672,6 +763,12 @@ static int encode_APDU(Yaz_Association t, Z_APDU *a, ODR out)
 	if (a == 0)
 		abort();
 	sprintf (str, "send_APDU t=%p type=%d", t, a->which);
+    if (t->client_IP)
+    {
+        Z_OtherInformation **oi;
+        yaz_oi_APDU(a, &oi);
+        yaz_oi_set_string_oidval(oi, out, VAL_CLIENT_IP, 1, t->client_IP);
+    }
 	if (t->cookie_out)
 	{
 		Z_OtherInformation **oi;
@@ -765,7 +862,7 @@ static int send_search (Yaz_Association t)
 	Z_SearchRequest *sreq = apdu->u.searchRequest;
 	
 	/* resultSetPrepare (req, t, req->cur_pa); */
-	if (t->resultSetStartPoint == 1 && t->piggyback	 &&
+	if (t->resultSetStartPoint == 1 && t->piggyback  &&
 			t->numberOfRecordsRequested &&
 		(t->schema == 0 || *t->schema == 0) &&
 		(t->sort_criteria == 0 || *t->sort_criteria == 0) )
@@ -1053,7 +1150,7 @@ static int do_event (int *id, int timeout)
 		fd =cs_fileno(p->cs);
 		if (no <= 0)
 		{
-			if (p->mask_select)	   /* only mark for those still pending */
+			if (p->mask_select)    /* only mark for those still pending */
 			{
 				p->error = PHP_YAZ_ERROR_TIMEOUT;
 				do_close (p);
@@ -1090,6 +1187,9 @@ static int do_event (int *id, int timeout)
 	return no;
 }
 
+/* USE_ZOOM */
+#endif
+
 static int strcmp_null(const char *s1, const char *s2)
 {
 	if (s1 == 0 && s2 == 0)
@@ -1108,6 +1208,7 @@ PHP_FUNCTION(yaz_connect)
 	char *zurl_str;
 	const char *user_str = 0, *group_str = 0, *pass_str = 0;
 	const char *cookie_str = 0, *proxy_str = 0;
+    const char *client_IP = 0;
 	int persistent = 1;
 	int piggyback = 1;
 	pval **zurl, **user = 0;
@@ -1140,6 +1241,7 @@ PHP_FUNCTION(yaz_connect)
 			piggyback_val = array_lookup_bool(ht, "piggyback");
 			if (piggyback_val)
 				piggyback = *piggyback_val;
+            client_IP = array_lookup_string(ht, "clientIP");
 		}
 		else
 		{
@@ -1165,6 +1267,19 @@ PHP_FUNCTION(yaz_connect)
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
 		as = shared_associations[i];
+#if USE_ZOOM
+		if (persistent && as && !as->in_use &&
+			!strcmp_null(option_get(as, "host"), zurl_str) &&
+			!strcmp_null(option_get(as, "user"), user_str) &&
+			!strcmp_null(option_get(as, "group"), group_str) &&
+			!strcmp_null(option_get(as, "pass"), pass_str) &&
+			!strcmp_null(option_get(as, "cookie"), cookie_str))
+		{
+            option_set (as, "clientIP", client_IP);
+			ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
+			break;
+		}
+#else
 		if (persistent && as && !as->in_use &&
 			!strcmp_null (as->host_port, zurl_str) &&
 			!strcmp_null (as->user, user_str) &&
@@ -1173,6 +1288,7 @@ PHP_FUNCTION(yaz_connect)
 			!strcmp_null (as->proxy, proxy_str) &&
 			!strcmp_null (as->cookie_out, cookie_str))
 			break;
+#endif
 	}
 	if (i == MAX_ASSOC)
 	{
@@ -1203,6 +1319,14 @@ PHP_FUNCTION(yaz_connect)
 				yaz_association_destroy(shared_associations[i]);
 		}
 		shared_associations[i] = as = yaz_association_mk ();
+#if USE_ZOOM
+		option_set (as, "user", user_str);
+		option_set (as, "group", group_str);
+		option_set (as, "pass", pass_str);
+		option_set (as, "cookie", cookie_str);
+        option_set (as, "clientIP", client_IP);
+		ZOOM_connection_connect (as->zoom_conn, zurl_str, 0);
+#else
 		as->host_port = xstrdup (zurl_str);
 		if (cookie_str)
 			as->cookie_out = xstrdup (cookie_str);
@@ -1214,19 +1338,31 @@ PHP_FUNCTION(yaz_connect)
 			as->pass = xstrdup (pass_str);
 		if (proxy_str)
 			as->proxy = xstrdup (proxy_str);	
+#endif
 	}
-	as->action = 0;
 	as->in_use = 1;
 	as->persistent = persistent;
 	as->order = YAZSG(assoc_seq);
+#if USE_ZOOM
+#else
+	as->action = 0;
 	as->error = 0;
 	xfree (as->sort_criteria);
 	as->sort_criteria = 0;
+
 	as->piggyback = piggyback;
 	as->numberOfRecordsRequested = 10;
 	as->resultSetStartPoint = 1;
+
 	xfree (as->local_databases);
 	as->local_databases = 0;
+
+    xfree (as->client_IP);
+    as->client_IP = 0;
+    if (client_IP)
+        as->client_IP = xstrdup (client_IP);
+#endif
+
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
@@ -1260,7 +1396,10 @@ PHP_FUNCTION(yaz_search)
 	char *query_str, *type_str;
 	pval **id, **type, **query;
 	Yaz_Association p;
+#if USE_ZOOM
+#else
 	Yaz_ResultSet r;
+#endif
 	if (ZEND_NUM_ARGS() == 3)
 	{
 		if (zend_get_parameters_ex(3, &id, &type, &query) == FAILURE)
@@ -1277,11 +1416,29 @@ PHP_FUNCTION(yaz_search)
 	{
 		RETURN_FALSE;
 	}
-	p->action = 0;
 	convert_to_string_ex (type);
 	type_str = (*type)->value.str.val;
 	convert_to_string_ex (query);
 	query_str = (*query)->value.str.val;
+#if USE_ZOOM
+	ZOOM_resultset_destroy (p->zoom_set);
+	p->zoom_set = 0;
+	if (!strcmp (type_str, "rpn"))
+	{
+		ZOOM_query q = ZOOM_query_create ();
+		ZOOM_query_prefix (q, query_str);
+		if (p->sort_criteria)
+			ZOOM_query_sortby (q, p->sort_criteria);
+		p->zoom_set = ZOOM_connection_search (p->zoom_conn, q);
+		ZOOM_query_destroy (q);
+		RETVAL_TRUE;
+	}
+	else
+	{
+		RETVAL_FALSE;
+	}
+#else
+	p->action = 0;
 	yaz_resultset_destroy (p->resultSets);
 	r = p->resultSets = yaz_resultset_mk();
 	r->query = odr_malloc (r->odr, sizeof(*r->query));
@@ -1315,6 +1472,7 @@ PHP_FUNCTION(yaz_search)
 	}
 	if (p->resultSets)
 		p->action = send_search;
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1336,12 +1494,22 @@ PHP_FUNCTION(yaz_present)
 	{
 		RETURN_FALSE;
 	}
+#if USE_ZOOM
+	if (p->zoom_set)
+	{
+		size_t start = option_get_int (p, "start", 0);
+		size_t count = option_get_int (p, "count", 0);
+		if (count > 0)
+			ZOOM_resultset_records (p->zoom_set, 0 /* recs */, start, count);
+	}
+#else
 	p->action = 0;
 	if (p->resultSets)
 	{
 		p->resultSets->recordList = 0;
 		p->action = send_sort_present;
 	}
+#endif
 	release_assoc (p);
 	RETURN_TRUE;
 }
@@ -1351,6 +1519,10 @@ PHP_FUNCTION(yaz_present)
    Process events. */
 PHP_FUNCTION(yaz_wait)
 {
+#if USE_ZOOM
+	int no = 0;
+	ZOOM_connection conn_ar[MAX_ASSOC];
+#endif
 	int i, id, timeout = 15;
 	YAZSLS_FETCH();
 
@@ -1378,6 +1550,11 @@ PHP_FUNCTION(yaz_wait)
 #endif
 	for (i = 0; i<MAX_ASSOC; i++)
 	{
+#if USE_ZOOM
+		Yaz_Association p = shared_associations[i];
+		if (p && p->order == YAZSG(assoc_seq))
+			conn_ar[no++] = p->zoom_conn;
+#else
 		Yaz_Association p = shared_associations[i];
 		if (!p || p->order != YAZSG(assoc_seq) || !p->action
 			|| p->mask_select)
@@ -1391,12 +1568,19 @@ PHP_FUNCTION(yaz_wait)
 			p->reconnect_flag = 1;
 			(*p->action)(p);
 		}
+#endif
 	}
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
+#if USE_ZOOM
+	if (no)
+		while (ZOOM_event (no, conn_ar))
+			;
+#else
 	while (do_event(&id, timeout))
 		;
+#endif
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1416,7 +1600,11 @@ PHP_FUNCTION(yaz_errno)
 	{
 		RETURN_LONG(0);
 	}
+#if USE_ZOOM
+	RETVAL_LONG(ZOOM_connection_errcode (p->zoom_conn));
+#else
 	RETVAL_LONG(p->error);
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1432,6 +1620,19 @@ PHP_FUNCTION(yaz_error)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
+#if USE_ZOOM
+	if (p)
+	{
+		int code = ZOOM_connection_errcode (p->zoom_conn);
+		const char *msg = ZOOM_connection_errmsg (p->zoom_conn);
+		if (!code)
+			msg = "";
+		return_value->value.str.len = strlen(msg);
+		return_value->value.str.val =
+			estrndup(msg, return_value->value.str.len);
+		return_value->type = IS_STRING;
+	}
+#else
 	if (p && p->error)
 	{
 		const char *msg = 0;
@@ -1474,6 +1675,7 @@ PHP_FUNCTION(yaz_error)
 			estrndup(msg, return_value->value.str.len);
 		return_value->type = IS_STRING;
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1489,10 +1691,21 @@ PHP_FUNCTION(yaz_addinfo)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
+#if USE_ZOOM
+	if (p)
+	{
+		const char *addinfo = ZOOM_connection_addinfo (p->zoom_conn);
+		return_value->value.str.len = strlen(addinfo);
+		return_value->value.str.val =
+			estrndup(addinfo, return_value->value.str.len);
+		return_value->type = IS_STRING;
+	}		 
+#else
 	if (p && p->error > 0 && p->addinfo && *p->addinfo)
 	{
 		RETVAL_STRING(p->addinfo, 1);
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1508,6 +1721,16 @@ PHP_FUNCTION(yaz_hits)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, id, &p);
+#if USE_ZOOM
+	if (p && p->zoom_set)
+	{
+		RETVAL_LONG(ZOOM_resultset_size (p->zoom_set));
+	}
+	else
+	{
+		RETVAL_LONG(0);
+	}
+#else
 	if (!p || !p->resultSets)
 	{
 		RETVAL_LONG(0);
@@ -1516,11 +1739,12 @@ PHP_FUNCTION(yaz_hits)
 	{
 		RETVAL_LONG(p->resultSets->resultCount);
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
 
-static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o, Odr_oid *oid)
+static Z_GenericRecord *marc_to_grs1(const char *buf, ODR o)
 {
 	int entry_p;
 	int record_length;
@@ -1805,7 +2029,61 @@ PHP_FUNCTION(yaz_record)
 
 	convert_to_string_ex(pval_type);
 	type = (*pval_type)->value.str.val;
+#if USE_ZOOM
+	if (p && p->zoom_set)
+	{
+		ZOOM_record r = ZOOM_resultset_record (p->zoom_set, pos-1);
+		if (!strcmp(type, "string"))
+			type = "render";
+		if (r)
+		{
+			if (!strcmp (type, "syntax") ||
+				!strcmp (type, "database") ||
+				!strcmp (type, "render") ||
+				!strcmp (type, "xml"))
+			{
+				const char *info = ZOOM_record_get (r, type, 0);
 
+				return_value->value.str.len = strlen(info);
+				return_value->value.str.val =
+					estrndup(info, return_value->value.str.len);
+				return_value->type = IS_STRING;
+			}
+			else if (!strcmp (type, "array"))
+			{
+				Z_External *ext = (Z_External *) ZOOM_record_get (r, "raw", 0);
+				oident *ent = oid_getentbyoid(ext->direct_reference);
+
+				if (ext->which == Z_External_grs1 && ent->value == VAL_GRS1)
+				{
+					retval_grs1 (return_value, ext->u.grs1);
+				}
+				else if (ext->which == Z_External_octet)
+				{
+					char *buf = (char *) (ext->u.octet_aligned->buf);
+					ODR odr = odr_createmem (ODR_DECODE);
+					Z_GenericRecord *rec = 0;
+
+					switch (ent->value)
+					{
+					case VAL_SOIF:
+					case VAL_HTML:
+						break;
+					case VAL_TEXT_XML:
+					case VAL_APPLICATION_XML:
+						/* text2grs1 (&buf, &len, t->odr_in, 0, 0); */
+						break;
+					default:
+						rec = marc_to_grs1 (buf, odr);
+					}
+					if (rec)
+						retval_grs1 (return_value, rec);
+					odr_destroy (odr);
+				}
+			}
+		}
+	}
+#else
 	if (p && p->resultSets && p->resultSets->recordList &&
 		pos >= p->resultSetStartPoint &&
 		pos < p->resultSetStartPoint + p->resultSets->recordList->num_records)
@@ -1875,7 +2153,7 @@ PHP_FUNCTION(yaz_record)
 						/* text2grs1 (&buf, &len, t->odr_in, 0, 0); */
 						break;
 					default:
-						rec = marc_to_grs1 (buf, odr, r->direct_reference);
+						rec = marc_to_grs1 (buf, odr);
 					}
 					if (rec)
 						retval_grs1 (return_value, rec);
@@ -1884,6 +2162,7 @@ PHP_FUNCTION(yaz_record)
 			}
 		}
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1901,12 +2180,16 @@ PHP_FUNCTION(yaz_syntax)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	convert_to_string_ex (pval_syntax);
+#if USE_ZOOM
+	option_set (p, "preferredRecordSyntax", (*pval_syntax)->value.str.val);
+#else
 	if (p)
 	{
-		convert_to_string_ex (pval_syntax);
 		xfree (p->preferredRecordSyntax);
 		p->preferredRecordSyntax = xstrdup ((*pval_syntax)->value.str.val);
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1923,12 +2206,16 @@ PHP_FUNCTION(yaz_element)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	convert_to_string_ex (pval_element);
+#if USE_ZOOM
+	option_set (p, "elementSetName", (*pval_element)->value.str.val);
+#else
 	if (p)
 	{
-		convert_to_string_ex (pval_element);
 		xfree (p->elementSetName);
 		p->elementSetName = xstrdup ((*pval_element)->value.str.val);
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1945,12 +2232,16 @@ PHP_FUNCTION(yaz_schema)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	convert_to_string_ex (pval_element);
+#if USE_ZOOM
+		option_set (p, "schema", (*pval_element)->value.str.val);
+#else
 	if (p)
 	{
-		convert_to_string_ex (pval_element);
 		xfree (p->schema);
 		p->schema = xstrdup ((*pval_element)->value.str.val);
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1969,15 +2260,20 @@ PHP_FUNCTION(yaz_range)
 		WRONG_PARAM_COUNT;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+	convert_to_long_ex (pval_start);
+	convert_to_long_ex (pval_number);
+#if USE_ZOOM
+	option_set_int (p, "start",  (*pval_start)->value.lval - 1);
+	option_set_int (p, "count",  (*pval_number)->value.lval);
+#else
 	if (p)
 	{
-		convert_to_long_ex (pval_start);
 		p->resultSetStartPoint = (*pval_start)->value.lval;
 		if (p->resultSetStartPoint < 1)
 			p->resultSetStartPoint = 1;
-		convert_to_long_ex (pval_number);
 		p->numberOfRecordsRequested = (*pval_number)->value.lval;
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -1999,12 +2295,15 @@ PHP_FUNCTION(yaz_sort)
 	if (p)
 	{
 		convert_to_string_ex (pval_criteria);
+#if USE_ZOOM
+#else
 		if (p->resultSets && p->resultSets->sorted)
 		{
 			if (!p->sort_criteria || strcmp (p->sort_criteria,
 											 (*pval_criteria)->value.str.val))
 				p->resultSets->sorted = 0;
 		}
+#endif
 		xfree (p->sort_criteria);
 		p->sort_criteria = xstrdup ((*pval_criteria)->value.str.val);
 	}
@@ -2012,6 +2311,13 @@ PHP_FUNCTION(yaz_sort)
 }
 /* }}} */
 
+#if USE_ZOOM
+const char *ill_array_lookup (void *handle, const char *name)
+{
+	return array_lookup_string((HashTable *) handle, name);
+}
+
+#else
 static const char *ill_array_lookup (void *clientData, const char *idx)
 {
 	return array_lookup_string((HashTable *) clientData, idx+4);
@@ -2148,7 +2454,7 @@ static Z_APDU *encode_es_itemorder (Yaz_Association t, HashTable *ht)
 
 	return apdu;
 }
-
+#endif
 
 /* {{{ proto int yaz_itemorder(int id, array package)
    Sends Item Order request */
@@ -2171,6 +2477,16 @@ PHP_FUNCTION(yaz_itemorder)
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
 	if (p)
 	{
+#if USE_ZOOM
+        ZOOM_options options = ZOOM_options_create();
+        
+        ZOOM_options_set_callback (options, ill_array_lookup,
+                                   Z_ARRVAL_PP(pval_package));
+        ZOOM_package_destroy (p->zoom_package);
+        p->zoom_package = ZOOM_connection_package (p->zoom_conn, options);
+        ZOOM_package_send(p->zoom_package, "itemorder");
+        ZOOM_options_destroy (options);
+#else
 		Z_APDU *apdu;
 		p->action = 0;
 		
@@ -2188,11 +2504,15 @@ PHP_FUNCTION(yaz_itemorder)
 			memcpy (p->ill_buf_out, buf, p->ill_len_out);
 			p->action = send_packet;
 		}
+#endif
 	}
 	release_assoc (p);
 }
 /* }}} */
 
+
+#if USE_ZOOM
+#else
 static Z_APDU *encode_scan (Yaz_Association t, const char *type,
 							const char *query, HashTable *ht)
 {
@@ -2237,6 +2557,7 @@ static Z_APDU *encode_scan (Yaz_Association t, const char *type,
 	req->databaseNames = set_DatabaseNames (t, &req->num_databaseNames);
 	return apdu;
 }
+#endif
 
 /* {{{ proto int yaz_scan(int id, type, query [, flags])
    Sends Scan Request */
@@ -2276,6 +2597,17 @@ PHP_FUNCTION(yaz_scan)
 	convert_to_string_ex (pval_query);
 
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+#if USE_ZOOM
+	ZOOM_scanset_destroy (p->zoom_scan);
+	p->zoom_scan = 0;
+	if (p)
+	{
+		option_set (p, "number", array_lookup_string (flags_ht, "number"));
+		option_set (p, "position", array_lookup_string (flags_ht, "position"));
+		option_set (p, "stepSize", array_lookup_string (flags_ht, "stepsize"));
+		p->zoom_scan = ZOOM_connection_scan (p->zoom_conn,
+											 Z_STRVAL_PP(pval_query));}
+#else
 	if (p)
 	{
 		Z_APDU *apdu;
@@ -2295,6 +2627,7 @@ PHP_FUNCTION(yaz_scan)
 			p->action = send_packet;
 		}
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -2321,6 +2654,16 @@ PHP_FUNCTION(yaz_es_result)
 		RETURN_FALSE;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+#if USE_ZOOM
+    if (p && p->zoom_package)
+    {
+        const char *str = ZOOM_package_option_get(p->zoom_package,
+                                                  "targetReference");
+        if (str)
+            add_assoc_string (return_value, "targetReference", 
+                              (char*)str, 1);
+    }
+#else
 	if (p && p->es_response)
 	{
 		int i;
@@ -2337,9 +2680,9 @@ PHP_FUNCTION(yaz_es_result)
 								   id->buf, id->len, 1);
 		}
 	}
+#endif
 	release_assoc (p);
 }
-
 /* }}} */
 
 /* {{{ proto int yaz_scan_result(int id, array options)
@@ -2375,6 +2718,54 @@ PHP_FUNCTION(yaz_scan_result)
 		RETURN_FALSE;
 	}
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+#if USE_ZOOM
+	if (p && p->zoom_scan)
+	{
+		int pos = 0;
+		const char *term;
+		int occ, len;
+		int size = ZOOM_scanset_size (p->zoom_scan);
+		
+		for (pos = 0; pos < size; pos++)
+		{
+			const char *term =
+				ZOOM_scanset_term(p->zoom_scan, pos, &occ, &len);
+			zval *my_zval;
+			ALLOC_ZVAL(my_zval);
+			array_init(my_zval);
+			INIT_PZVAL(my_zval);
+			
+			add_next_index_string(my_zval, "term", 1);
+
+			if (term)
+				add_next_index_stringl (my_zval, (char*) term, len, 1);
+			else
+				add_next_index_string (my_zval, "?", 1);
+			add_next_index_long (my_zval, occ);
+			
+			zend_hash_next_index_insert (
+				return_value->value.ht, (void *) &my_zval, sizeof(zval *),
+				NULL);
+		}
+		if (pval_opt)
+		{
+			const char *v;
+			add_assoc_long(*pval_opt, "number", size);
+			
+			v = ZOOM_scanset_option_get (p->zoom_scan, "stepSize");
+			if (v)
+				add_assoc_long(*pval_opt, "stepsize", atoi(v));
+			
+			v = ZOOM_scanset_option_get (p->zoom_scan, "position");
+			if (v)
+				add_assoc_long(*pval_opt, "position", atoi(v));
+
+			v = ZOOM_scanset_option_get (p->zoom_scan, "scanStatus");
+			if (v)
+				add_assoc_long(*pval_opt, "status", atoi(v));
+		}
+	}
+#else
 	if (p && p->scan_response)
 	{
 		int i;
@@ -2420,6 +2811,7 @@ PHP_FUNCTION(yaz_scan_result)
 		}
 
 	}
+#endif
 	release_assoc (p);
 }
 /* }}} */
@@ -2546,6 +2938,10 @@ PHP_FUNCTION(yaz_database)
 	}
 	convert_to_string_ex (pval_database);
 	get_assoc (INTERNAL_FUNCTION_PARAM_PASSTHRU, pval_id, &p);
+#if USE_ZOOM
+	option_set (p, "databaseName", (*pval_database)->value.str.val);
+	RETVAL_TRUE;
+#else
 	if (p)
 	{
 		xfree (p->local_databases);
@@ -2554,6 +2950,7 @@ PHP_FUNCTION(yaz_database)
 	}
 	else
 		RETVAL_FALSE;
+#endif
 	release_assoc (p);
 }
 /* }}} */
