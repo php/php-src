@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? Feb 2004, Version 4.3.5
 - Fixed possible crashes inside socket extension, due to missing check inside
   allocation functions. (Ilia)
+- Fixed bug #27530 (broken http auth when safe_mode is on and PCRE is
+  disabled). (Ilia)
 - Fixed bug #27505 (htmlentities() does not handle BIG5 correctly). (Ilia, 
   ywliu at hotmail dot com)
 - Fixed bug #27460 (base64_decode() does not handle extra padding).
