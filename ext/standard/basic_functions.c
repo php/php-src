@@ -323,7 +323,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
-php3_module_entry basic_functions_module = {
+zend_module_entry basic_functions_module = {
 	"Basic Functions",			/* extension name */
 	basic_functions,			/* function list */
 	PHP_MINIT(basic),			/* process startup */
@@ -810,7 +810,7 @@ PHP_FUNCTION(get_magic_quotes_gpc)
 }
 
 
-void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
+void php_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 {
 	pval **arg;
 	
@@ -827,37 +827,37 @@ void php3_is_type(INTERNAL_FUNCTION_PARAMETERS,int type)
 
 PHP_FUNCTION(is_resource) 
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_RESOURCE);
 }
 
 PHP_FUNCTION(is_bool) 
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BOOL);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_BOOL);
 }
 
 PHP_FUNCTION(is_long) 
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_LONG);
 }
 
 PHP_FUNCTION(is_double)
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_DOUBLE);
 }
 
 PHP_FUNCTION(is_string)
 { 
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_STRING);
 }
 
 PHP_FUNCTION(is_array)
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_ARRAY);
 }
 
 PHP_FUNCTION(is_object)
 {
-	php3_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
+	php_is_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, IS_OBJECT);
 }
 
 

@@ -263,7 +263,7 @@ PHP_FUNCTION(dbmopen) {
 	convert_to_string(filename);
 	convert_to_string(mode);
 	
-	info = _php3_dbmopen(filename->value.str.val, mode->value.str.val);
+	info = php_dbm_open(filename->value.str.val, mode->value.str.val);
 	if (info) {
 		ret = zend_list_insert(info, DBM_GLOBAL(le_db));
 		RETURN_LONG(ret);
@@ -272,7 +272,7 @@ PHP_FUNCTION(dbmopen) {
 	}
 }
 
-dbm_info *_php3_dbmopen(char *filename, char *mode) {
+dbm_info *php_dbm_open(char *filename, char *mode) {
 	dbm_info *info;
 	int ret, lock=0;
 	char *lockfn = NULL;
@@ -289,7 +289,7 @@ dbm_info *_php3_dbmopen(char *filename, char *mode) {
 	PLS_FETCH();
 
 	if (filename == NULL) {
-		php_error(E_WARNING, "NULL filename passed to _php3_dbmopen()");
+		php_error(E_WARNING, "NULL filename passed to php_dbm_open()");
 		return NULL;
 	}
 
@@ -424,7 +424,7 @@ PHP_FUNCTION(dbmclose) {
 	}
 }
 
-int _php3_dbmclose(dbm_info *info) {
+int php_dbm_close(dbm_info *info) {
 	int ret = 0;
 	DBM_TYPE dbf;
 	int lockfd;
@@ -475,11 +475,11 @@ PHP_FUNCTION(dbminsert)
 		RETURN_FALSE;
 	}
 	
-	ret = _php3_dbminsert(info, key->value.str.val, value->value.str.val);
+	ret = php_dbm_insert(info, key->value.str.val, value->value.str.val);
 	RETURN_LONG(ret);
 }
 
-int _php3_dbminsert(dbm_info *info, char *key, char *value) {
+int php_dbm_insert(dbm_info *info, char *key, char *value) {
 	datum key_datum, value_datum;
 	int ret;
 	DBM_TYPE dbf;
@@ -528,11 +528,11 @@ PHP_FUNCTION(dbmreplace)
 		RETURN_FALSE;
 	}
 	
-	ret = _php3_dbmreplace(info, key->value.str.val, value->value.str.val);
+	ret = php_dbm_replace(info, key->value.str.val, value->value.str.val);
 	RETURN_LONG(ret);
 }
 
-int _php3_dbmreplace(dbm_info *info, char *key, char *value) {
+int php_dbm_replace(dbm_info *info, char *key, char *value) {
 	DBM_TYPE dbf;
 	int ret;
 	datum key_datum, value_datum;
@@ -582,7 +582,7 @@ PHP_FUNCTION(dbmfetch)
 		RETURN_FALSE;
 	}
 
-	return_value->value.str.val = _php3_dbmfetch(info, key->value.str.val);
+	return_value->value.str.val = php_dbm_fetch(info, key->value.str.val);
 	if (return_value->value.str.val) {
 		return_value->value.str.len = strlen(return_value->value.str.val);
 		return_value->type = IS_STRING;
@@ -591,7 +591,7 @@ PHP_FUNCTION(dbmfetch)
 	}
 }
 
-char *_php3_dbmfetch(dbm_info *info, char *key) {
+char *php_dbm_fetch(dbm_info *info, char *key) {
 	datum key_datum, value_datum;
 	char *ret;
 	DBM_TYPE dbf;
@@ -1099,7 +1099,7 @@ PHP_MINIT_FUNCTION(db)
 	}
 #endif
 
-	DBM_GLOBAL(le_db) = register_list_destructors(_php3_dbmclose,NULL);
+	DBM_GLOBAL(le_db) = register_list_destructors(php_dbm_close,NULL);
 	return SUCCESS;
 }
 
@@ -1144,12 +1144,12 @@ function_entry dbm_functions[] = {
 	{NULL,NULL,NULL}
 };
 
-php3_module_entry dbm_module_entry = {
+zend_module_entry dbm_module_entry = {
 	"DBM", dbm_functions, PHP_MINIT(db), PHP_MSHUTDOWN(db), PHP_RINIT(db), NULL, PHP_MINFO(db), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &dbm_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &dbm_module_entry; }
 #endif
 
 #endif

@@ -433,7 +433,7 @@ static PHP_MINFO_FUNCTION(java) {
   DISPLAY_INI_ENTRIES();
 }
 
-php3_module_entry java_module_entry = {
+zend_module_entry java_module_entry = {
   "java",
   java_functions,
   PHP_MINIT(java),

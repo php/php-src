@@ -117,7 +117,7 @@ function_entry posix_functions[] = {
 
 static PHP_MINFO_FUNCTION(posix);
 
-php3_module_entry posix_module_entry = {
+zend_module_entry posix_module_entry = {
 	"Posix", 
 	posix_functions, 
 	NULL,
@@ -129,7 +129,7 @@ php3_module_entry posix_module_entry = {
 };
 
 #ifdef COMPILE_DL
-DLEXPORT php3_module_entry *get_module(void) { return &posix__module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &posix__module_entry; }
 #endif
 
 #if APACHE
@@ -159,7 +159,7 @@ PHP_FUNCTION(posix_kill)
   
 	result = kill(pid->value.lval, sig->value.lval);
 	if (result< 0) {
-		php3_error(E_WARNING, "posix_kill(%d, %d) failed with '%s'",
+		php_error(E_WARNING, "posix_kill(%d, %d) failed with '%s'",
     		pid->value.lval,
 			sig->value.lval,
 			strerror(errno));
@@ -251,7 +251,7 @@ PHP_FUNCTION(posix_setuid)
   
 	result = setuid(uid->value.lval);
 	if (result < 0) {
-		php3_error(E_WARNING, "posix_setuid(%d) failed with '%s'. Must be root",
+		php_error(E_WARNING, "posix_setuid(%d) failed with '%s'. Must be root",
 	    	uid->value.lval,
 			strerror(errno));
 			RETURN_FALSE;
@@ -276,7 +276,7 @@ PHP_FUNCTION(posix_setgid)
   
 	result = setgid(gid->value.lval);
 	if (result < 0) {
-		php3_error(E_WARNING, "posix_setgid(%d) failed with '%s'. Must be root",
+		php_error(E_WARNING, "posix_setgid(%d) failed with '%s'. Must be root",
 	    	gid->value.lval,
 			strerror(errno));
 			RETURN_FALSE;
@@ -296,7 +296,7 @@ PHP_FUNCTION(posix_getgroups)
 
 	result = getgroups(NGROUPS_MAX, gidlist);
 	if (result < 0) {
-		php3_error(E_WARNING, "posix_getgroups() failed with '%s'",
+		php_error(E_WARNING, "posix_getgroups() failed with '%s'",
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -319,7 +319,7 @@ PHP_FUNCTION(posix_getlogin)
 	
 	p = getlogin();
 	if (p == NULL) {
-		php3_error(E_WARNING, "Cannot determine your login name. Something is really wrong here.");
+		php_error(E_WARNING, "Cannot determine your login name. Something is really wrong here.");
 		RETURN_FALSE;
 	}
 	
@@ -370,7 +370,7 @@ PHP_FUNCTION(posix_setpgid)
   
 	result = setpgid(pid->value.lval, pgid->value.lval);
 	if (result< 0) {
-		php3_error(E_WARNING, "posix_setpgid(%d, %d) failed with '%s'",
+		php_error(E_WARNING, "posix_setpgid(%d, %d) failed with '%s'",
     		pid->value.lval,
 			pgid->value.lval,
 			strerror(errno));
@@ -396,7 +396,7 @@ PHP_FUNCTION(posix_getpgid)
 	convert_to_long(pid);
 	pgid = getpgid(pid->value.lval);
 	if (pgid < 0) {
-		php3_error(E_WARNING, "posix_getpgid(%d) failed with '%s'", 
+		php_error(E_WARNING, "posix_getpgid(%d) failed with '%s'", 
 			pid->value.lval,
 			strerror(errno));
 		RETURN_FALSE;
@@ -425,7 +425,7 @@ PHP_FUNCTION(posix_getsid)
 	convert_to_long(pid);
 	sid = getsid(pid->value.lval);
 	if (sid < 0) {
-		php3_error(E_WARNING, "posix_getsid(%d) failed with '%s'", 
+		php_error(E_WARNING, "posix_getsid(%d) failed with '%s'", 
 			pid->value.lval,
 			strerror(errno));
 		RETURN_FALSE;
@@ -471,7 +471,7 @@ PHP_FUNCTION(posix_times)
 
 	ticks = times(&t);
 	if (ticks < 0) {
-		php3_error(E_WARNING, "posix_times failed with '%s'",
+		php_error(E_WARNING, "posix_times failed with '%s'",
 			strerror(errno));
 	}
 
@@ -500,7 +500,7 @@ PHP_FUNCTION(posix_ctermid)
 	
 	p = ctermid(buffer);
 	if (p == NULL) {
-		php3_error(E_WARNING, "posix_ctermid() failed with '%s'",
+		php_error(E_WARNING, "posix_ctermid() failed with '%s'",
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -526,7 +526,7 @@ PHP_FUNCTION(posix_ttyname)
 
 	p = ttyname(fd->value.lval);
 	if (p == NULL) {
-		php3_error(E_WARNING, "posix_ttyname(%d) failed with '%s'",
+		php_error(E_WARNING, "posix_ttyname(%d) failed with '%s'",
 			fd->value.lval,
 			strerror(errno));
 		RETURN_FALSE;
@@ -574,7 +574,7 @@ PHP_FUNCTION(posix_getcwd)
 
 	p = getcwd(buffer, MAXPATHLEN);
 	if (!p) {
-		php3_error(E_WARNING, "posix_getcwd() failed with '%s'",
+		php_error(E_WARNING, "posix_getcwd() failed with '%s'",
 			strerror(errno));
 		RETURN_FALSE;
 	}
@@ -609,7 +609,7 @@ PHP_FUNCTION(posix_mkfifo)
 	}
 	result = mkfifo(path->value.str.val, mode->value.lval);
 	if (result < 0) {
-		php3_error(E_WARNING, "posix_mkfifo(%s) failed with '%s'",
+		php_error(E_WARNING, "posix_mkfifo(%s) failed with '%s'",
 			path->value.str.val,
 			strerror(errno));
 		RETURN_FALSE;
@@ -652,7 +652,7 @@ PHP_FUNCTION(posix_getgrnam)
 
 	g = getgrnam(name->value.str.val);
 	if (!g) {
-		php3_error(E_WARNING, "posix_getgrnam(%s) failed with '%s'",
+		php_error(E_WARNING, "posix_getgrnam(%s) failed with '%s'",
 			name->value.str.val,
 			strerror(errno));
 		RETURN_FALSE;
@@ -688,7 +688,7 @@ PHP_FUNCTION(posix_getgrgid)
 
 	g = getgrgid(gid->value.lval);
 	if (!g) {
-		php3_error(E_WARNING, "posix_getgrgid(%d) failed with '%s'",
+		php_error(E_WARNING, "posix_getgrgid(%d) failed with '%s'",
 			gid->value.lval,
 			strerror(errno));
 		RETURN_FALSE;
@@ -720,7 +720,7 @@ PHP_FUNCTION(posix_getpwnam)
 
 	pw = getpwnam(name->value.str.val);
 	if (!pw) {
-		php3_error(E_WARNING, "posix_getpwnam(%s) failed with '%s'",
+		php_error(E_WARNING, "posix_getpwnam(%s) failed with '%s'",
 			name->value.str.val,
 			strerror(errno));
 		RETURN_FALSE;
@@ -752,7 +752,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 	pw = getpwuid(uid->value.lval);
 	if (!pw) {
-		php3_error(E_WARNING, "posix_getpwuid(%d) failed with '%s'",
+		php_error(E_WARNING, "posix_getpwuid(%d) failed with '%s'",
 			uid->value.lval,
 			strerror(errno));
 		RETURN_FALSE;
@@ -783,7 +783,7 @@ static int posix_addlimit(int limit, char *name, pval *return_value) {
 
 	result = getrlimit(limit, &rl);
 	if (result < 0) {
-		php3_error(E_WARNING, "posix_getrlimit failed to getrlimit(RLIMIT_CORE with '%s'", strerror(errno));
+		php_error(E_WARNING, "posix_getrlimit failed to getrlimit(RLIMIT_CORE with '%s'", strerror(errno));
 		return FAILURE;
 	}
 

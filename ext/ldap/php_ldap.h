@@ -43,7 +43,7 @@
 #include <lber.h>
 #include <ldap.h>
 
-extern php3_module_entry ldap_module_entry;
+extern zend_module_entry ldap_module_entry;
 #define ldap_module_ptr &ldap_module_entry
 
 /* LDAP functions */

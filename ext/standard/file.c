@@ -865,7 +865,7 @@ PHP_FUNCTION(set_socket_blocking)
 	if (_php3_set_sock_blocking(socketd, block) == FAILURE)
 		RETURN_FALSE;
 
-	_php3_sock_set_blocking(socketd, block == 0 ? 0 : 1);
+	php_sockset_blocking(socketd, block == 0 ? 0 : 1);
 	
 	RETURN_TRUE;
 }

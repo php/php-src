@@ -150,13 +150,13 @@ function_entry cpdf_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry cpdf_module_entry = {
+zend_module_entry cpdf_module_entry = {
 	"cpdf", cpdf_functions, PHP_MINIT(cpdf), PHP_MSHUTDOWN(cpdf), PHP_RINIT(cpdf), NULL, PHP_MINFO(cpdf), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT php3_module_entry *get_module(void) { return &cpdf_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &cpdf_module_entry; }
 #endif
 
 static void _free_outline(CPDFoutlineEntry *outline)
@@ -183,7 +183,7 @@ PHP_RINIT_FUNCTION(cpdf)
 
 PHP_MINFO_FUNCTION(cpdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php3_printf("Version %s", cpdf_version());
+	php_printf("Version %s", cpdf_version());
 }
 
 PHP_MSHUTDOWN_FUNCTION(cpdf){
@@ -208,7 +208,7 @@ PHP_FUNCTION(cpdf_set_creator) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -236,7 +236,7 @@ PHP_FUNCTION(cpdf_set_title) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -264,7 +264,7 @@ PHP_FUNCTION(cpdf_set_subject) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -292,7 +292,7 @@ PHP_FUNCTION(cpdf_set_keywords) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if (!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
+		php_error(E_WARNING,"Unable to find identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
@@ -323,7 +323,7 @@ PHP_FUNCTION(cpdf_set_viewer_preferences) {
 	pagemode=argv[1]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -377,7 +377,7 @@ PHP_FUNCTION(cpdf_open) {
 		convert_to_string(arg2);
 #if APACHE
 		if(strcmp(arg2->value.str.val, "-") == 0)
-			php3_error(E_WARNING,"Writing to stdout as described in the ClibPDF manual is not possible if php3 is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.");
+			php_error(E_WARNING,"Writing to stdout as described in the ClibPDF manual is not possible if php3 is used as an Apache module. Write to a memory stream and use cpdf_output_buffer() instead.");
 #endif
 		cpdf_setOutputFilename(cpdf, arg2->value.str.val);
 	}
@@ -404,7 +404,7 @@ PHP_FUNCTION(cpdf_close) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	zend_list_delete(id);
@@ -442,7 +442,7 @@ PHP_FUNCTION(cpdf_page_init) {
 	width = argv[4]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -477,7 +477,7 @@ PHP_FUNCTION(cpdf_finalize_page) {
 	pagenr=arg2->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -505,7 +505,7 @@ PHP_FUNCTION(cpdf_set_current_page) {
 	pagenr=arg2->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -531,7 +531,7 @@ PHP_FUNCTION(cpdf_begin_text) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -557,7 +557,7 @@ PHP_FUNCTION(cpdf_end_text) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -584,7 +584,7 @@ PHP_FUNCTION(cpdf_show) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -615,7 +615,7 @@ PHP_FUNCTION(cpdf_show_xy) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -649,7 +649,7 @@ PHP_FUNCTION(cpdf_continue_text) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -676,7 +676,7 @@ PHP_FUNCTION(cpdf_text) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -768,12 +768,12 @@ PHP_FUNCTION(cpdf_set_font) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
 	if(arg4->value.lval > 6) {
-		php3_error(E_WARNING,"Font encoding set to 5");
+		php_error(E_WARNING,"Font encoding set to 5");
 		arg4->value.lval = 5;
 	}
 	cpdf_setFont(pdf, arg2->value.str.val, arg4->value.str.val, (float) arg3->value.dval);
@@ -799,7 +799,7 @@ PHP_FUNCTION(cpdf_set_leading) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -826,7 +826,7 @@ PHP_FUNCTION(cpdf_set_text_rendering) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -853,7 +853,7 @@ PHP_FUNCTION(cpdf_set_horiz_scaling) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -880,7 +880,7 @@ PHP_FUNCTION(cpdf_set_text_rise) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -911,19 +911,19 @@ PHP_FUNCTION(cpdf_set_text_matrix) {
 	matrix=arg2->value.ht;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	if(_php3_hash_num_elements(matrix) != 6) {
-		 php3_error(E_WARNING,"Text matrix must have 6 elements");
+	if(zend_hash_num_elements(matrix) != 6) {
+		 php_error(E_WARNING,"Text matrix must have 6 elements");
 		RETURN_FALSE;
 	}
 
 	pdfmatrixptr = pdfmatrix;
-	_php3_hash_internal_pointer_reset(matrix);
-	for(i=0; i<_php3_hash_num_elements(matrix); i++) {
-		_php3_hash_get_current_data(matrix, (void *) &data);
+	zend_hash_internal_pointer_reset(matrix);
+	for(i=0; i<zend_hash_num_elements(matrix); i++) {
+		zend_hash_get_current_data(matrix, (void *) &data);
 		switch(data->type) {
 			case IS_DOUBLE:
 				*pdfmatrixptr++ = (float) data->value.dval;
@@ -932,7 +932,7 @@ PHP_FUNCTION(cpdf_set_text_matrix) {
 				*pdfmatrixptr++ = 0.0;
 				break;
 		}
-		_php3_hash_move_forward(matrix);
+		zend_hash_move_forward(matrix);
 	}
 
 	cpdf_setTextMatrix(pdf, pdfmatrix[0], pdfmatrix[1],
@@ -963,7 +963,7 @@ PHP_FUNCTION(cpdf_set_text_pos) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -997,7 +997,7 @@ PHP_FUNCTION(cpdf_rotate_text) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1024,7 +1024,7 @@ PHP_FUNCTION(cpdf_set_char_spacing) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1051,7 +1051,7 @@ PHP_FUNCTION(cpdf_set_word_spacing) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1079,7 +1079,7 @@ PHP_FUNCTION(cpdf_stringwidth) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(cpdf_save) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1131,7 +1131,7 @@ PHP_FUNCTION(cpdf_restore) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1159,7 +1159,7 @@ PHP_FUNCTION(cpdf_translate) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1187,7 +1187,7 @@ PHP_FUNCTION(cpdf_scale) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1214,7 +1214,7 @@ PHP_FUNCTION(cpdf_rotate) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1242,12 +1242,12 @@ PHP_FUNCTION(cpdf_setflat) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 100) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
+		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
@@ -1274,12 +1274,12 @@ PHP_FUNCTION(cpdf_setlinejoin) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
+		php_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
@@ -1306,12 +1306,12 @@ PHP_FUNCTION(cpdf_setlinecap) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php3_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
+		php_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
@@ -1338,12 +1338,12 @@ PHP_FUNCTION(cpdf_setmiterlimit) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if(arg2->value.dval < 1) {
-		php3_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
+		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
 		RETURN_FALSE;
 	}
 
@@ -1370,7 +1370,7 @@ PHP_FUNCTION(cpdf_setlinewidth) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1400,7 +1400,7 @@ PHP_FUNCTION(cpdf_setdash) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(cpdf_moveto) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1469,7 +1469,7 @@ PHP_FUNCTION(cpdf_rmoveto) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(cpdf_curveto) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1557,7 +1557,7 @@ PHP_FUNCTION(cpdf_lineto) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1594,7 +1594,7 @@ PHP_FUNCTION(cpdf_rlineto) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1632,7 +1632,7 @@ PHP_FUNCTION(cpdf_circle) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1672,7 +1672,7 @@ PHP_FUNCTION(cpdf_arc) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1711,7 +1711,7 @@ PHP_FUNCTION(cpdf_rect) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1750,7 +1750,7 @@ PHP_FUNCTION(cpdf_newpath) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1776,7 +1776,7 @@ PHP_FUNCTION(cpdf_closepath) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1802,7 +1802,7 @@ PHP_FUNCTION(cpdf_closepath_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1829,7 +1829,7 @@ PHP_FUNCTION(cpdf_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1855,7 +1855,7 @@ PHP_FUNCTION(cpdf_fill) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1881,7 +1881,7 @@ PHP_FUNCTION(cpdf_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1908,7 +1908,7 @@ PHP_FUNCTION(cpdf_closepath_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1936,7 +1936,7 @@ PHP_FUNCTION(cpdf_clip) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1963,7 +1963,7 @@ PHP_FUNCTION(cpdf_setgray_fill) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1990,7 +1990,7 @@ PHP_FUNCTION(cpdf_setgray_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2017,7 +2017,7 @@ PHP_FUNCTION(cpdf_setgray) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2046,7 +2046,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_fill) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2075,7 +2075,7 @@ PHP_FUNCTION(cpdf_setrgbcolor_stroke) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2104,7 +2104,7 @@ PHP_FUNCTION(cpdf_setrgbcolor) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2135,7 +2135,7 @@ PHP_FUNCTION(cpdf_set_page_animation) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2162,7 +2162,7 @@ PHP_FUNCTION(cpdf_finalize) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2190,7 +2190,7 @@ PHP_FUNCTION(cpdf_output_buffer) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2219,13 +2219,13 @@ PHP_FUNCTION(cpdf_save_to_file) {
 	id=arg1->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 #if APACHE
 	if(strcmp(arg2->value.str.val, "-") == 0)
-		php3_error(E_WARNING,"Writing to stdout as described in the ClibPDF manual is not possible if php3 is used as an Apache module. Use cpdf_output_buffer() instead.");
+		php_error(E_WARNING,"Writing to stdout as described in the ClibPDF manual is not possible if php3 is used as an Apache module. Use cpdf_output_buffer() instead.");
 #endif
 
 	cpdf_savePDFmemoryStreamToFile(pdf, arg2->value.str.val);
@@ -2266,7 +2266,7 @@ PHP_FUNCTION(cpdf_import_jpeg) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2331,14 +2331,14 @@ PHP_FUNCTION(cpdf_place_inline_image) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	gid=argv[1]->value.lval;
 	im = zend_list_find(gid, &type);
 	if (!im || type != phpi_get_le_gd()) {
-		php3_error(E_WARNING, "cpdf: Unable to find image pointer");
+		php_error(E_WARNING, "cpdf: Unable to find image pointer");
 		RETURN_FALSE;
 	}
 
@@ -2413,7 +2413,7 @@ PHP_FUNCTION(cpdf_add_annotation) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2472,7 +2472,7 @@ PHP_FUNCTION(cpdf_set_action_url) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2529,7 +2529,7 @@ PHP_FUNCTION(cpdf_add_outline) {
 	id=argv[0]->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=CPDF_GLOBAL(le_cpdf)) {
-		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		php_error(E_WARNING,"Unable to find identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -2537,7 +2537,7 @@ PHP_FUNCTION(cpdf_add_outline) {
 	lastoutline = zend_list_find(oid,&type);
 	if(!lastoutline || type!=CPDF_GLOBAL(le_outline)) {
 		lastoutline = NULL;
-/*		php3_error(E_WARNING,"Unable to find last outline entry %d",id);
+/*		php_error(E_WARNING,"Unable to find last outline entry %d",id);
 		RETURN_FALSE; */
 	}
 

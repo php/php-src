@@ -4,7 +4,7 @@
 #if HAVE_LIBMCRYPT
 
 #if PHP_API_VERSION < 19990421
-#define  zend_module_entry php3_module_entry
+#define  zend_module_entry zend_module_entry
 #include "modules.h"
 #include "internal_functions.h"
 #endif

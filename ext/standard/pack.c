@@ -56,7 +56,7 @@ function_entry pack_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry pack_module_entry = {
+zend_module_entry pack_module_entry = {
 	"PHP_pack", pack_functions, PHP_MINIT(pack), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 

@@ -131,14 +131,14 @@ function_entry filepro_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry filepro_module_entry = {
+zend_module_entry filepro_module_entry = {
 	"FilePro", filepro_functions, PHP_MINIT(filepro), PHP_MSHUTDOWN(filepro), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT php3_module_entry *get_module(void) { return &filepro_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &filepro_module_entry; }
 #if (WIN32|WINNT) && defined(THREAD_SAFE)
 
 /*NOTE: You should have an odbc.def file where you

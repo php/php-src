@@ -18,8 +18,8 @@
 #endif
 
 /* Functions accessable to PHP */
-//extern php3_module_entry php3_mcal_module_entry;
-extern php3_module_entry php3_mcal_module_entry;
+//extern zend_module_entry php3_mcal_module_entry;
+extern zend_module_entry php3_mcal_module_entry;
 #define php3_mcal_module_ptr &php3_mcal_module_entry
 #define phpext_mcal_ptr php3_mcal_module_ptr
 

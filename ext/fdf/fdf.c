@@ -80,14 +80,14 @@ function_entry fdf_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry fdf_module_entry = {
+zend_module_entry fdf_module_entry = {
 	"fdf", fdf_functions, PHP_MINIT(fdf), PHP_MSHUTDOWN(fdf), NULL, NULL,
 	PHP_MINFO(fdf), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
 #include "dl/phpdl.h"
-DLEXPORT php3_module_entry *get_module(void) { return &fdf_module_entry; }
+DLEXPORT zend_module_entry *get_module(void) { return &fdf_module_entry; }
 #endif
 
 static void phpi_FDFClose(FDFDoc fdf) {
@@ -548,7 +548,7 @@ PHP_FUNCTION(fdf_add_template) {
 	id=(*arg1)->value.lval;
 	fdf = zend_list_find(id,&type);
 	if(!fdf || type!=FDF_GLOBAL(le_fdf)) {
-		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 

@@ -39,7 +39,7 @@
 
 #if HAVE_PGSQL
 
-extern php3_module_entry pgsql_module_entry;
+extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
 

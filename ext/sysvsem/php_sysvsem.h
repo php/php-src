@@ -40,7 +40,7 @@
 
 #if HAVE_SYSVSEM
 
-extern php3_module_entry sysvsem_module_entry;
+extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry
 
 extern int php3_minit_sysvsem(INIT_FUNC_ARGS);

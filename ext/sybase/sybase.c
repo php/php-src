@@ -78,12 +78,12 @@ function_entry sybase_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry sybase_module_entry = {
+zend_module_entry sybase_module_entry = {
 	"Sybase SQL", sybase_functions, php3_minit_sybase, php3_mshutdown_sybase, php3_rinit_sybase, php3_rshutdown_sybase, php3_info_sybase, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
-php3_module_entry *get_module() { return &sybase_module_entry; }
+zend_module_entry *get_module() { return &sybase_module_entry; }
 #endif
 
 THREAD_LS sybase_module php3_sybase_module;

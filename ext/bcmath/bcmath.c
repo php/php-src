@@ -36,12 +36,12 @@ function_entry bcmath_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry bcmath_module_entry = {
+zend_module_entry bcmath_module_entry = {
 	"bcmath", bcmath_functions, NULL, NULL, PHP_RINIT(bcmath), PHP_RSHUTDOWN(bcmath), NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
-php3_module_entry *get_module() { return &bcmath_module_entry; };
+zend_module_entry *get_module() { return &bcmath_module_entry; };
 #endif
 
 #ifndef THREAD_SAFE

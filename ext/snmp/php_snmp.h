@@ -31,7 +31,7 @@
 #define DLEXPORT
 #endif
 
-extern php3_module_entry snmp_module_entry;
+extern zend_module_entry snmp_module_entry;
 #define snmp_module_ptr &snmp_module_entry
 
 extern int php3i_snmp_init(INIT_FUNC_ARGS);

@@ -46,7 +46,7 @@ function_entry ibase_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry ibase_module_entry =
+zend_module_entry ibase_module_entry =
 {
 	"InterBase",
 	ibase_functions,

@@ -39,7 +39,7 @@
 #ifndef _FILEPRO_H
 #define _FILEPRO_H
 #if HAVE_FILEPRO
-extern php3_module_entry filepro_module_entry;
+extern zend_module_entry filepro_module_entry;
 #define phpext_filepro_ptr &filepro_module_entry
 
 PHP_FUNCTION(filepro);

@@ -40,7 +40,7 @@
 #endif
 
 
-extern php3_module_entry dbm_module_entry;
+extern zend_module_entry dbm_module_entry;
 #define phpext_db_ptr &dbm_module_entry
 
 
@@ -63,11 +63,11 @@ typedef struct dbm_info {
 #endif
 
 dbm_info *_php3_finddbm(pval *id,HashTable *list);
-int _php3_dbmclose(dbm_info *info);
-dbm_info *_php3_dbmopen(char *filename, char *mode);
-int _php3_dbminsert(dbm_info *info, char *key, char *value);
-char *_php3_dbmfetch(dbm_info *info, char *key);
-int _php3_dbmreplace(dbm_info *info, char *key, char *value);
+int php_dbm_close(dbm_info *info);
+dbm_info *php_dbm_open(char *filename, char *mode);
+int php_dbm_insert(dbm_info *info, char *key, char *value);
+char *php_dbm_fetch(dbm_info *info, char *key);
+int php_dbm_replace(dbm_info *info, char *key, char *value);
 int _php3_dbmexists(dbm_info *info, char *key);
 int _php3_dbmdelete(dbm_info *info, char *key);
 char *_php3_dbmfirstkey(dbm_info *info);

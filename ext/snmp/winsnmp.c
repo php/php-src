@@ -28,12 +28,12 @@ function_entry snmp_functions[] = {
     {NULL,NULL,NULL}
 };
 
-php3_module_entry snmp_module_entry = {
+zend_module_entry snmp_module_entry = {
 	"SNMP",snmp_functions,NULL,NULL,NULL,NULL,NULL,0,0,0,NULL
 };
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &snmp_module_entry; }
+DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; }
 #endif
 
 #define GET     1

@@ -111,7 +111,7 @@ struct php3i_sockbuf {
 
 typedef struct php3i_sockbuf php3i_sockbuf;
 
-php3_module_entry fsock_module_entry = {
+zend_module_entry fsock_module_entry = {
 	"Socket functions",
 	fsock_functions,
 	PHP_MINIT(fsock),
@@ -411,10 +411,10 @@ static void php_cleanup_sockbuf(int persistent FLS_DC)
 #define SOCK_FIND(sock,socket) \
       php3i_sockbuf *sock; \
       FLS_FETCH(); \
-      sock = _php3_sock_find(socket FLS_CC); \
-      if(!sock) sock = _php3_sock_create(socket FLS_CC)
+      sock = php_sockfind(socket FLS_CC); \
+      if(!sock) sock = php_sockcreate(socket FLS_CC)
 
-static php3i_sockbuf *_php3_sock_find(int socket FLS_DC)
+static php3i_sockbuf *php_sockfind(int socket FLS_DC)
 {
 	php3i_sockbuf *buf = NULL, *tmp;
 
@@ -427,7 +427,7 @@ static php3i_sockbuf *_php3_sock_find(int socket FLS_DC)
 	return buf;
 }
 
-static php3i_sockbuf *_php3_sock_create(int socket FLS_DC)
+static php3i_sockbuf *php_sockcreate(int socket FLS_DC)
 {
 	php3i_sockbuf *sock;
 	int persistent = _php3_is_persistent_sock(socket);
@@ -457,13 +457,13 @@ size_t php_sock_set_def_chunk_size(size_t size)
 	return old;
 }
 
-int _php3_sock_destroy(int socket)
+int php_sockdestroy(int socket)
 {
 	int ret = 0;
 	php3i_sockbuf *sock;
 	FLS_FETCH();
 
-	sock = _php3_sock_find(socket FLS_CC);
+	sock = php_sockfind(socket FLS_CC);
 	if(sock) {
 		ret = 1;
 		SOCK_DESTROY(sock);
@@ -490,7 +490,7 @@ int php_sock_close(int socket)
 	php3i_sockbuf *sock;
 	FLS_FETCH();
 
-	sock = _php3_sock_find(socket FLS_CC);
+	sock = php_sockfind(socket FLS_CC);
 	if(sock) {
 		if(!sock->persistent) {
 			SOCK_CLOSE(sock->socket);
@@ -505,7 +505,7 @@ int php_sock_close(int socket)
 
 #define MAX_CHUNKS_PER_READ 10
 
-static void _php3_sock_wait_for_data(php3i_sockbuf *sock)
+static void php_sockwait_for_data(php3i_sockbuf *sock)
 {
 	fd_set fdr, tfdr;
 
@@ -519,7 +519,7 @@ static void _php3_sock_wait_for_data(php3i_sockbuf *sock)
 	}
 }
 
-static size_t _php3_sock_read_internal(php3i_sockbuf *sock)
+static size_t php_sockread_internal(php3i_sockbuf *sock)
 {
 	char buf[CHUNK_SIZE];
 	int nr_bytes;
@@ -534,7 +534,7 @@ static size_t _php3_sock_read_internal(php3i_sockbuf *sock)
 
 	
 	if(sock->is_blocked) {
-		_php3_sock_wait_for_data(sock);
+		php_sockwait_for_data(sock);
 	}
 
 	/* read at a maximum sock->chunk_size */
@@ -555,21 +555,21 @@ static size_t _php3_sock_read_internal(php3i_sockbuf *sock)
 	return nr_read;
 }
 
-static void _php3_sock_read_total(php3i_sockbuf *sock, size_t maxread)
+static void php_sockread_total(php3i_sockbuf *sock, size_t maxread)
 {
 	while(!sock->eof && TOREAD(sock) < maxread) {
-		_php3_sock_read_internal(sock);
+		php_sockread_internal(sock);
 	}
 }
 
-static size_t _php3_sock_read(php3i_sockbuf *sock)
+static size_t php_sockread(php3i_sockbuf *sock)
 {
 	size_t nr_bytes;
 	size_t nr_read = 0;
 	int i;
 	
 	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
-		nr_bytes = _php3_sock_read_internal(sock);
+		nr_bytes = php_sockread_internal(sock);
 		if(nr_bytes == 0) break;
 		nr_read += nr_bytes;
 	}
@@ -577,7 +577,7 @@ static size_t _php3_sock_read(php3i_sockbuf *sock)
 	return nr_read;
 }
 
-int _php3_sock_set_blocking(int socket, int mode)
+int php_sockset_blocking(int socket, int mode)
 {
 	int old;
 	SOCK_FIND(sock, socket);
@@ -591,7 +591,7 @@ int _php3_sock_set_blocking(int socket, int mode)
 
 #define SOCK_FIND_AND_READ_MAX(max) \
 	SOCK_FIND(sock, socket); \
-	if(sock->is_blocked) _php3_sock_read_total(sock, max); else _php3_sock_read(sock)
+	if(sock->is_blocked) php_sockread_total(sock, max); else php_sockread(sock)
 
 /* {{{ php_sock_fgets() */
 /*
@@ -614,11 +614,11 @@ char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 	if(!p) {
 		if(sock->is_blocked) {
 			while(!p && !sock->eof && TOREAD(sock) < maxlen) {
-				_php3_sock_read_internal(sock);
+				php_sockread_internal(sock);
 				SEARCHCR();
 			}
 		} else {
-			_php3_sock_read(sock);
+			php_sockread(sock);
 			SEARCHCR();
 		}
 	}
@@ -674,7 +674,7 @@ int php_sock_feof(int socket)
 	SOCK_FIND(sock, socket);
 
 	if(!sock->is_blocked)
-		_php3_sock_read(sock);
+		php_sockread(sock);
 	
 	if(!TOREAD(sock) && sock->eof) 
 		ret = 1;

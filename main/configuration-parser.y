@@ -50,7 +50,7 @@ static HashTable configuration_hash;
 extern HashTable browser_hash;
 PHPAPI extern char *php_ini_path;
 #endif
-static HashTable *active_zend_hash_table;
+static HashTable *activezend_hash_table;
 static pval *current_section;
 static char *currently_parsed_filename;
 
@@ -230,7 +230,7 @@ int php_init_config(void)
 		}
 			
 		init_cfg_scanner();
-		active_zend_hash_table = &configuration_hash;
+		activezend_hash_table = &configuration_hash;
 		parsing_mode = PARSING_MODE_CFG;
 		currently_parsed_filename = "php.ini";
 		yyparse();
@@ -258,7 +258,7 @@ PHP_MINIT_FUNCTION(browscap)
 			return FAILURE;
 		}
 		init_cfg_scanner();
-		active_zend_hash_table = &browser_hash;
+		activezend_hash_table = &browser_hash;
 		parsing_mode = PARSING_MODE_BROWSCAP;
 		currently_parsed_filename = browscap;
 		yyparse();
@@ -355,8 +355,8 @@ statement:
 #endif
 			$3.type = IS_STRING;
 			if (parsing_mode==PARSING_MODE_CFG) {
-				zend_hash_update(active_zend_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
-                                if (active_zend_hash_table == &configuration_hash) {
+				zend_hash_update(activezend_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
+                                if (activezend_hash_table == &configuration_hash) {
 				        php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM);
                                 }
 			} else if (parsing_mode==PARSING_MODE_BROWSCAP) {
@@ -406,7 +406,7 @@ statement:
 				tmp.value.ht = (HashTable *) malloc(sizeof(HashTable));
 				zend_hash_init(tmp.value.ht, 0, NULL, (int (*)(void *))pvalue_config_destructor, 1);
 				tmp.type = IS_OBJECT;
-				zend_hash_update(active_zend_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &tmp, sizeof(pval), (void **) &current_section);
+				zend_hash_update(activezend_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &tmp, sizeof(pval), (void **) &current_section);
 				tmp.value.str.val = zend_strndup($1.value.str.val,$1.value.str.len);
 				tmp.value.str.len = $1.value.str.len;
 				tmp.type = IS_STRING;

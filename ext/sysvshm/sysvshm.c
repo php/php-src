@@ -51,7 +51,7 @@ zend_module_entry sysvshm_module_entry = {
 
 
 #if COMPILE_DL
-php3_module_entry *get_module() { return &sysvshm_module_entry; }
+zend_module_entry *get_module() { return &sysvshm_module_entry; }
 #endif
 
 

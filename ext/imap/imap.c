@@ -2638,7 +2638,7 @@ PHP_FUNCTION(imap_search)
 	ind = streamind->value.lval;
 	imap_le_struct = (pils *)zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
-		php3_error(E_WARNING, "Unable to find stream pointer");
+		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
 	

@@ -40,7 +40,7 @@ typedef struct {
     char *mkcol_create_handler;
 } phpdav_module;
 
-extern php3_module_entry phpdav_module_entry;
+extern zend_module_entry phpdav_module_entry;
 #  define phpdav_module_ptr &phpdav_module_entry
 
 int phpdav_mkcol_test_handler(request_rec *);

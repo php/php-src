@@ -171,7 +171,7 @@ typedef struct {
     OCIEnv *pEnv;
 } php_oci_globals;
 
-extern php3_module_entry oci8_module_entry;
+extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
 
 #define OCI_MAX_NAME_LEN  64

@@ -365,7 +365,7 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *
  */
 static char *
-php3_formatted_print(int ht, int *len)
+php_formatted_print(int ht, int *len)
 {
 	pval ***args;
 	int argc, size = 240, inpos = 0, outpos = 0;
@@ -561,7 +561,7 @@ PHP_FUNCTION(user_sprintf)
 	char *result;
 	int len;
 	
-	if ((result=php3_formatted_print(ht,&len))==NULL) {
+	if ((result=php_formatted_print(ht,&len))==NULL) {
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(result,len,1);
@@ -576,7 +576,7 @@ PHP_FUNCTION(user_printf)
 	char *result;
 	int len;
 	
-	if ((result=php3_formatted_print(ht,&len))==NULL) {
+	if ((result=php_formatted_print(ht,&len))==NULL) {
 		RETURN_FALSE;
 	}
 	PHPWRITE(result,len);

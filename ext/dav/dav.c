@@ -70,7 +70,7 @@ phpdav_module php3_dav_module;
 /* {{{ dynamically loadable module stuff */
 
 # if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &phpdav_module_entry; };
+DLEXPORT zend_module_entry *get_module() { return &phpdav_module_entry; };
 # endif /* COMPILE_DL */
 
 /* }}} */
@@ -90,7 +90,7 @@ function_entry phpdav_functions[] = {
     {NULL, NULL, NULL}
 };
 
-php3_module_entry phpdav_module_entry = {
+zend_module_entry phpdav_module_entry = {
     "DAV",                   /* extension name */
     phpdav_functions,        /* extension function list */
     php3_minit_phpdav,       /* extension-wide startup function */

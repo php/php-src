@@ -61,7 +61,7 @@ PHP_FUNCTION(chmod);
 PHP_FUNCTION(touch);
 PHP_FUNCTION(clearstatcache);
 
-extern php3_module_entry php3_filestat_module_entry;
+extern zend_module_entry php3_filestat_module_entry;
 #define php3_filestat_module_ptr &php3_filestat_module_entry
 
 #define phpext_filestat_ptr php3_filestat_module_ptr

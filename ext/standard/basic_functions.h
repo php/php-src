@@ -38,7 +38,7 @@
 
 #include "zend_highlight.h"
 
-extern php3_module_entry basic_functions_module;
+extern zend_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
 
 PHP_MINIT_FUNCTION(basic);
@@ -68,7 +68,7 @@ PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
 
-void php3_is_type(INTERNAL_FUNCTION_PARAMETERS, int type);
+void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type);
 PHP_FUNCTION(is_resource);
 PHP_FUNCTION(is_bool);
 PHP_FUNCTION(is_long);

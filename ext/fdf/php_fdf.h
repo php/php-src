@@ -39,7 +39,7 @@
 
 #include <FdfTk.h>
 
-extern php3_module_entry fdf_module_entry;
+extern zend_module_entry fdf_module_entry;
 #define phpext_fdf_ptr &fdf_module_entry
 
 extern PHP_MINIT_FUNCTION(fdf);

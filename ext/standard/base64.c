@@ -68,7 +68,7 @@ unsigned char *php_base64_encode(const unsigned char *string, int length, int *r
 }
 
 /* as above, but backwards. :) */
-unsigned char *_php3_base64_decode(const unsigned char *string, int length, int *ret_length) {
+unsigned char *php_base64_decode(const unsigned char *string, int length, int *ret_length) {
 	const unsigned char *current = string;
 	int ch, i = 0, j = 0, k;
 	/* this sucks for threaded environments */
@@ -173,7 +173,7 @@ PHP_FUNCTION(base64_decode) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(string);
-	result = _php3_base64_decode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
+	result = php_base64_decode((*string)->value.str.val, (*string)->value.str.len, &ret_length);
 	if (result != NULL) {
 		return_value->value.str.val = result;
 		return_value->value.str.len = ret_length;

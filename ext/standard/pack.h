@@ -32,7 +32,7 @@
 #ifndef _PACK_H
 #define _PACK_H
 
-extern php3_module_entry pack_module_entry;
+extern zend_module_entry pack_module_entry;
 #define pack_module_ptr &pack_module_entry
 
 extern PHP_MINIT_FUNCTION(pack);

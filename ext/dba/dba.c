@@ -62,7 +62,7 @@ static PHP_MINIT_FUNCTION(dba);
 static PHP_MSHUTDOWN_FUNCTION(dba);
 static PHP_MINFO_FUNCTION(dba);
 
-php3_module_entry dba_module_entry = {
+zend_module_entry dba_module_entry = {
 	    "DataBase API", dba_functions, 
 		PHP_MINIT(dba), 
 		PHP_MSHUTDOWN(dba), 

@@ -21,7 +21,7 @@ extern PHP_MINIT_FUNCTION(icap);
 PHP_MINFO_FUNCTION(icap);
 
 /* Functions accessable to PHP */
-extern php3_module_entry php3_icap_module_entry;
+extern zend_module_entry php3_icap_module_entry;
 #define php3_icap_module_ptr &php3_icap_module_entry
 #define phpext_icap_ptr php3_icap_module_ptr
 

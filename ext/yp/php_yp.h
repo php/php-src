@@ -38,7 +38,7 @@
 
 #if HAVE_YP
 
-extern php3_module_entry yp_module_entry;
+extern zend_module_entry yp_module_entry;
 #define yp_module_ptr &yp_module_entry
 
 /* yp.c functions */

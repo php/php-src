@@ -121,7 +121,7 @@ function_entry xml_functions[] = {
     {NULL, NULL, NULL}
 };
 
-php3_module_entry xml_module_entry = {
+zend_module_entry xml_module_entry = {
     "XML",                /* extension name */
     xml_functions,        /* extension function list */
     PHP_MINIT(xml),       /* extension-wide startup function */

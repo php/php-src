@@ -136,7 +136,7 @@ function_entry oracle_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry oracle_module_entry = {
+zend_module_entry oracle_module_entry = {
 	"Oracle",
 	oracle_functions,
 	PHP_MINIT(oracle),       /* extension-wide startup function */
@@ -183,7 +183,7 @@ static const text *ora_func_tab[] =
 };
 
 #if COMPILE_DL
-DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
+DLEXPORT zend_module_entry *get_module() { return &oracle_module_entry; };
 #endif
 
 static int _close_oraconn(oraConnection *conn)

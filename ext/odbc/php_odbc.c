@@ -116,7 +116,7 @@ function_entry odbc_functions[] = {
 	{ NULL, NULL, NULL }
 };
 
-php3_module_entry odbc_module_entry = {
+zend_module_entry odbc_module_entry = {
     "ODBC", 
 	odbc_functions, 
 	PHP_MINIT(odbc), 
@@ -279,7 +279,7 @@ static PHP_INI_DISP(display_lrl)
 		if (atoi(value) <= 0) {
 			PUTS("Passthru");
 		} else {
-			php3_printf("return up to %s bytes", value);
+			php_printf("return up to %s bytes", value);
 		}
 	}
 }

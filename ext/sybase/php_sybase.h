@@ -40,7 +40,7 @@
 
 #if HAVE_SYBASE
 
-extern php3_module_entry sybase_module_entry;
+extern zend_module_entry sybase_module_entry;
 #define sybase_module_ptr &sybase_module_entry
 
 extern int php3_minit_sybase(INIT_FUNC_ARGS);
