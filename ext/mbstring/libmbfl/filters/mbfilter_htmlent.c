@@ -67,7 +67,7 @@ static const char *mbfl_encoding_html_ent_aliases[] = {"HTML", "html", NULL};
 const mbfl_encoding mbfl_encoding_html_ent = {
 	mbfl_no_encoding_html_ent,
 	"HTML-ENTITIES",
-	"US-ASCII",
+	"HTML-ENTITIES",
 	(const char *(*)[])&mbfl_encoding_html_ent_aliases,
 	NULL, /* mblen_table_html, Do not use table instead calulate length based on entities actually used */
 	MBFL_ENCTYPE_HTML_ENT
