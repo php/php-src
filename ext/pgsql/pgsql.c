@@ -466,9 +466,9 @@ PHP_MINFO_FUNCTION(pgsql)
 #if HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-	php_info_print_table_row(2, "Multibyte charater support", "enabled");
+	php_info_print_table_row(2, "Multibyte character support", "enabled");
 #else
-	php_info_print_table_row(2, "Multibyte charater support", "disabled");
+	php_info_print_table_row(2, "Multibyte character support", "disabled");
 #endif
 #ifdef USE_SSL
 	php_info_print_table_row(2, "SSL support", "enabled");
