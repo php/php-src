@@ -218,7 +218,7 @@ PHP_FUNCTION(iptcembed)
 	if (spool < 2) {
 		fstat(fileno(fp),&sb);
 
-		poi = spoolbuf = emalloc(len + 30 + sb.st_size);
+		poi = spoolbuf = emalloc(len + sizeof(psheader) + sb.st_size + 1024);
 
 		if (! spoolbuf) {
 			fclose(fp);
