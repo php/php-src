@@ -173,7 +173,6 @@ statement:
 		unticked_statement { zend_do_ticks(TSRMLS_C); }
 ;
 
-
 unticked_statement:
 		'{' inner_statement_list '}'
 	|	T_IF '(' expr ')' { zend_do_if_cond(&$3, &$4 TSRMLS_CC); } statement { zend_do_if_after_statement(&$4, 1 TSRMLS_CC); } elseif_list else_single { zend_do_if_end(TSRMLS_C); }
@@ -478,7 +477,7 @@ non_empty_for_expr:
 expr_without_variable:	
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	variable '=' expr		{ zend_check_writable_variable(&$$); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
-	|	variable '=' '&' w_variable	{ zend_check_writable_variable(&$$); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
+	|	variable '=' '&' variable { zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$4 TSRMLS_CC); }
 	|	variable '=' '&' T_NEW new_class_entry { zend_check_writable_variable(&$$); zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$4, &$5 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$3, &$4, &$7 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC); zend_do_assign_ref(&$$, &$1, &$3 TSRMLS_CC); }
 	|	T_NEW new_class_entry { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable T_PLUS_EQUAL expr 	{ zend_check_writable_variable(&$$); zend_do_end_variable_parse(BP_VAR_RW, 0 TSRMLS_CC); zend_do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 TSRMLS_CC); }
