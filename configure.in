@@ -888,7 +888,7 @@ datadir=`eval echo $datadir`
 
 dnl Build extension directory path
 
-ZEND_MODULE_API_NO=`grep -E '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=`egrep '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|sed 's/#define ZEND_MODULE_API_NO //'`
 
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO
