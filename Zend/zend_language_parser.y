@@ -286,7 +286,7 @@ unticked_class_declaration_statement:
 
 extends_from:
 		/* empty */			{ $$.op_type = IS_UNUSED; }
-	|	T_EXTENDS T_STRING	{ $$ = $2; }
+	|	T_EXTENDS catch_or_import_class_entry	{ $$ = $2; }
 ;
 
 declaration_class_name:

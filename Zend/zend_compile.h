@@ -305,7 +305,10 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 void zend_do_end_catch(znode *try_token TSRMLS_DC);
 void zend_do_throw(znode *expr TSRMLS_DC);
 
-ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
+ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time);
+ZEND_API int do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table);
+ZEND_API int do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce);
+
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce);
 void zend_do_early_binding(TSRMLS_D);
 
@@ -549,7 +552,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_FETCH_DIM_TMP_VAR		98
 #define ZEND_FETCH_CONSTANT			99
 
-#define ZEND_DECLARE_FUNCTION_OR_CLASS	100
+/* Hole - 100 */
 
 #define ZEND_EXT_STMT				101
 #define ZEND_EXT_FCALL_BEGIN		102
@@ -599,6 +602,10 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_MAKE_VAR				137
 
 #define ZEND_IS_CLASS				138
+
+#define ZEND_DECLARE_CLASS				139
+#define ZEND_DECLARE_INHERITED_CLASS	140
+#define ZEND_DECLARE_FUNCTION			141
 
 /* end of block */
 
@@ -666,10 +673,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_HANDLE_FP				2
 #define ZEND_HANDLE_STDIOSTREAM		3
 #define ZEND_HANDLE_FSTREAM			4
-
-#define ZEND_DECLARE_CLASS				1
-#define ZEND_DECLARE_FUNCTION			2
-#define ZEND_DECLARE_INHERITED_CLASS	3
 
 #define ZEND_FETCH_STANDARD		0
 #define ZEND_FETCH_ADD_LOCK		1

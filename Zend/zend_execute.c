@@ -3140,8 +3140,16 @@ send_by_ref:
 					zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) zend_extension_fcall_end_handler, op_array TSRMLS_CC);
 				}
 				NEXT_OPCODE();
-			case ZEND_DECLARE_FUNCTION_OR_CLASS:
-				do_bind_function_or_class(EX(opline), EG(function_table), EG(class_table), 0);
+			case ZEND_DECLARE_CLASS:
+				do_bind_class(EX(opline), EG(function_table), EG(class_table));
+				NEXT_OPCODE()
+				break;
+			case ZEND_DECLARE_INHERITED_CLASS:
+				do_bind_inherited_class(EX(opline), EG(function_table), EG(class_table), EX(Ts)[EX(opline)->extended_value].EA.class_entry);
+				NEXT_OPCODE();
+				break;
+			case ZEND_DECLARE_FUNCTION:
+				do_bind_function(EX(opline), EG(function_table), EG(class_table), 0);
 				NEXT_OPCODE();
 			case ZEND_TICKS:
 				if (++EG(ticks_count)>=EX(opline)->op1.u.constant.value.lval) {
