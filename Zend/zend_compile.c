@@ -1892,7 +1892,7 @@ void do_cast(znode *result, znode *expr, int type CLS_DC)
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->op1 = *expr;
 	SET_UNUSED(opline->op2);
-	opline->op2.u.constant.type = type;
+	opline->extended_value = type;
 	*result = opline->result;
 }
 

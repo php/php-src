@@ -2001,7 +2001,7 @@ send_by_ref:
 					if (!EG(free_op1)) {
 						zendi_zval_copy_ctor(*result);
 					}					
-					switch (opline->op2.u.constant.type) {
+					switch (opline->extended_value) {
 						case IS_NULL:
 							convert_to_null(result);
 							break;
