@@ -3422,10 +3422,11 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 				}
 				break;
 			case ZEND_UNSET_OBJ:
-				ht = NULL;
 				if (Z_TYPE_PP(container) == IS_OBJECT) {
 					Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
 				}
+			default:
+				ht = NULL;
 				break;
 		}
 		if (ht)	{
