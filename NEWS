@@ -94,6 +94,7 @@ PHP 4                                                                      NEWS
   get_browser()). (Ilia)
 - Fixed bug #21442 (crash in mail() on Windows when 1st parameter is empty). 
   (Edin)
+- Fixed bug #21410 (fixed handling of NULL or "" files on Win32). (Ilia)
 - Fixed bug #21378 (COM code crashes after update 4.2.1 to 4.3.0). (Harald)
 - Fixed bug #21338 (html_entity_decode() crashed when "" is passed). (Ilia)
 - Fixed bug #21297 (in CLI/CGI sapis on the #! it would leave a \n when the
