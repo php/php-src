@@ -1,3 +1,156 @@
+2001-08-17  Ryan Bloom  <rbb@apache.org>
+
+    * sapi/apache2filter/apache_config.c
+      sapi/apache2filter/sapi_apache2.c:
+    Fix a seg fault in PHP.  If a child process is created in the server,
+    using apr_proc_create, it will seg fault, because PHP is using a NULL
+    child cleanup.  To fix this, we have to use the special cleanup function,
+    apr_pool_cleanup_null.
+
+    This also fixes a compiler warning in the ap_log_error call.
+
+2001-08-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/smtp.php
+      pear/Net/SMTP.php:
+    Return an error when relaying is denied (or the RCPT TO: command fails for
+    any reason), and be more useful about the error message that is returned, as
+    well.
+
+2001-08-17  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/DB/odbc.php:
+    -Fixed a problem with odbc when using DB_FETCHMODE_ASSOC
+
+2001-08-17  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-recommended: MFH
+
+2001-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4
+      ext/xslt/config.m4: MFH
+
+2001-08-17  Zeev Suraski  <zeev@zend.com>
+
+    * php.ini-recommended: Update php.ini-recommended
+
+2001-08-17  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/php_dbx.h: whitespace, braces, coding style (Mc)
+
+2001-08-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: MFH 1.105
+
+2001-08-17  Andi Gutmans  <andi@zend.com>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/howto_extend_dbx.html:
+    - Use the same coding standards for pointers as the rest of PHP.
+    - For example, char ** foo should be char **foo
+
+2001-08-17  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/tests/002.phpt
+      ext/dbx/tests/dbx_test.p
+      ext/dbx/CREDITS
+      ext/dbx/Makefile.in
+      ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_oci8.h:
+    Added preliminary support framework for Oracle 8. (Mc)
+    Thies C. Arntzen will look into this to actually make it work,
+    as I don't have Oracle installed here. As I said, it is only a
+    framework for Oracle, and it will most likely crash if you
+    actually try to use the oracle functions before Thies (or
+    anyone else that wants to, of course) has had a chance to look
+    at it.
+
+2001-08-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/uniqid.c: Z_*_P{0,2} macro work.
+
+    * ext/standard/file.c:
+    1) update to the ZEND_NUM_ARGS() and Z_*_P{0,2} macros
+    2) minor ws improvements, removing unecessary error checking logic, and
+    making the error messages a bit nicer looking
+
+2001-08-17  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * pear/Makefile.in: Forgot to add DB.php.
+
+2001-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/Makefile.in: These files do not exist anymore.
+
+    * ext/sablot/config.m4
+      ext/xslt/config.m4: Look for iconv library also in $ICONV_DIR.
+
+2001-08-17  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c: MFH
+
+    * ext/com/conversion.c: fixed a buggy cast
+
+2001-08-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/var.c:
+    Cleanup of var_dump() with correct macro's, k&r indent, and removal of a
+    pair of unnecessary { }
+
+    * ext/standard/url.c: pval -> zval
+    Z_*_P{0,2} macros
+    easier way of doing urldecode(), from rawurldecode() (a tad faster too).
+
+    * ext/standard/fsock.c: ws fix.
+
+2001-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/config.m4: MFH
+
+    * ext/iconv/config.m4: HAVE_LIBICONV was never defined.
+
+2001-08-17  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/fsock.c:
+    Clean up the function for the Zend API (php3, early php4 relics removed).
+    Use PF_INET, instead of AF_INET, if present.
+    remove some code enclosed in #if 0 ... #endif that made no sense
+
+2001-08-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dbase/dbase.c: MFH
+
 2001-08-16  Zeev Suraski  <zeev@zend.com>
 
     * genfiles: MFH
