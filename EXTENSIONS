@@ -89,7 +89,7 @@ STATUS:              Experimental
 
 -------------------------------------------------------------------------------
 EXTENSION:           dba
-PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
+PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
