@@ -5,7 +5,8 @@ ARG_WITH("imap", "IMAP Support", "no");
 
 if (PHP_IMAP == "yes") {
 	if (CHECK_LIB("cclient.lib", "imap") &&
-			CHECK_HEADER_ADD_INCLUDE("rfc822.h", "CFLAGS_IMAP")) {
+			(CHECK_HEADER_ADD_INCLUDE("c-client.h", "CFLAGS_IMAP")||
+			CHECK_HEADER_ADD_INCLUDE("c-client/c-client.h", "CFLAGS_IMAP", null, null, true))) {
 		CHECK_LIB("winmm.lib", "imap");
 		CHECK_LIB("ws2_32.lib", "imap");
 		CHECK_LIB("Secur32.lib", "imap");
