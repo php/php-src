@@ -579,6 +579,9 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 				opline->extended_value = arg_offset;
 				break;
 			case BP_VAR_UNSET:
+				if (opline->opcode == ZEND_FETCH_DIM_W && opline->op2.op_type == IS_UNUSED) {
+					zend_error(E_COMPILE_ERROR, "Cannot use [] for unsetting");
+				}
 				opline->opcode += 12; /* 3+3+3+3 */
 				break;
 		}
