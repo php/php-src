@@ -40,7 +40,7 @@ char *php_realpath(char *path, char resolved_path []) {
 	char path_copy[MAXPATHLEN];				/* A work-copy of the path */
 	char *workpos;							/* working position in *path */
 
-#if !(PHP_WIN32)
+#if !defined(PHP_WIN32)
 	char buf[MAXPATHLEN];					/* Buffer for readlink */
 	int linklength;							/* The result from readlink */
 #endif
@@ -48,7 +48,7 @@ char *php_realpath(char *path, char resolved_path []) {
 	
 	struct stat filestat;					/* result from stat */
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	char *temppos;						/* position while counting '.' */
 	int dotcount;						/* number of '.' */
 	int t;								/* counter */
@@ -58,7 +58,7 @@ char *php_realpath(char *path, char resolved_path []) {
 	strcpy(path_copy, path);
 	workpos = path_copy;
 	
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* Find out where we start - Windows version */
 	if ((*workpos == '\\') || (*workpos == '/')) {
 		/* We start at the root of the current drive */
@@ -109,13 +109,13 @@ char *php_realpath(char *path, char resolved_path []) {
 	/* Go to the end, then stop */
 	while(*workpos != 0) {
 		/* Strip (back)slashes */
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		while(*workpos == '\\') workpos++;
 #else
 		while(*workpos == '/') workpos++;
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		/* reset dotcount */
 		dotcount = 0;
 
@@ -169,7 +169,7 @@ char *php_realpath(char *path, char resolved_path []) {
 			*writepos++ = *workpos++;
 		}
 		*writepos = 0;
-#else /* PHP_WIN32 */
+#else /* defined(PHP_WIN32) */
 		/* Look for .. */
 		if ((workpos[0] == '.') && (workpos[1] != 0)) {
 			if ((workpos[1] == '.') && ((workpos[2] == '/') || (workpos[2] == 0))) {
@@ -247,7 +247,7 @@ char *php_realpath(char *path, char resolved_path []) {
 			*writepos++ = *workpos++;
 		}
 		*writepos = 0;
-#endif /* PHP_WIN32 */
+#endif /* defined(PHP_WIN32) */
 	}
 
 	/* Check if the resolved path is a directory */

@@ -27,7 +27,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
@@ -42,7 +42,7 @@
 #include "php_zlib.h"
 #include "fopen-wrappers.h"
 #if HAVE_PWD_H
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
@@ -50,7 +50,7 @@
 #endif
 #include "snprintf.h"
 #if HAVE_ZLIB
-#if defined(HAVE_UNISTD_H) && PHP_WIN32
+#if defined(HAVE_UNISTD_H) && defined(PHP_WIN32)
 #undef HAVE_UNISTD_H
 #endif
 
@@ -197,7 +197,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 	}
 
 	/* Absolute path open - prepend document_root in safe mode */
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	if ((*filename == '\\')||(*filename == '/')||(filename[1] == ':')) {
 #else
 	if (*filename == '/') {
@@ -240,7 +240,7 @@ static gzFile *php_gzopen_with_path(char *filename, char *mode, char *path, char
 	ptr = pathbuf;
 
 	while (ptr && *ptr) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		end = strchr(ptr, ';');
 #else
 		end = strchr(ptr, ':');

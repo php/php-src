@@ -30,7 +30,7 @@
 #else
 #include <strings.h>
 #endif
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/unistd.h"
 #endif
 #include "zend_globals.h"

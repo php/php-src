@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
@@ -45,7 +45,7 @@
 #include "zend_compile.h"
 
 #if HAVE_PWD_H
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
@@ -61,7 +61,7 @@
 #define S_ISREG(mode)	(((mode)&S_IFMT) == S_IFREG)
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include <netinet/in.h>
@@ -69,7 +69,7 @@
 #include <arpa/inet.h>
 #endif
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #undef AF_UNIX
 #endif
 
@@ -105,7 +105,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 
 		/* Strip filename */
 		while ((
-#if PHP_WIN32
+#ifdef PHP_WIN32
 			(local_open_basedir[local_open_basedir_pos] != '\\') ||
 #endif
 			(local_open_basedir[local_open_basedir_pos] != '/')
@@ -122,7 +122,7 @@ PHPAPI int php_check_specific_open_basedir(char *basedir, char *path PLS_DC)
 	/* Resolve the real path into resolved_name */
 	if ((php_realpath(path, resolved_name) != NULL) && (php_realpath(local_open_basedir, resolved_basedir) != NULL)) {
 		/* Check the path */
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, strlen(resolved_basedir)) == 0) {
@@ -153,7 +153,7 @@ PHPAPI int php_check_open_basedir(char *path)
 		ptr = pathbuf;
 
 		while (ptr && *ptr) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 			end = strchr(ptr, ';');
 #else
 			end = strchr(ptr, ':');
@@ -338,7 +338,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 		return fp;
 	}
 	/* Absolute path open - prepend document_root in safe mode */
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	if ((*filename == '\\') || (*filename == '/') || (filename[1] == ':')) {
 #else
 	if (*filename == '/') {
@@ -379,7 +379,7 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	ptr = pathbuf;
 
 	while (ptr && *ptr) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		end = strchr(ptr, ';');
 #else
 		end = strchr(ptr, ':');

@@ -967,7 +967,7 @@ static int zend_check_symbol(zval **pz)
 #endif
 
 
-#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && (ZEND_WIN32))
+#if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(ZEND_WIN32))
 #	define do_alloca(p) alloca(p)
 #	define free_alloca(p)
 #else

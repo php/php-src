@@ -34,7 +34,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <windows.h>
 #include <winsock.h>
 #define O_RDONLY _O_RDONLY
@@ -49,7 +49,7 @@
 #include "php_string.h"
 #include "file.h"
 #if HAVE_PWD_H
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
@@ -58,7 +58,7 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include <netinet/in.h>
@@ -832,7 +832,7 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
       int flags;
       int myflag = 0;
       
-#if PHP_WIN32
+#ifdef PHP_WIN32
       /* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	  flags = block;
 	  if (ioctlsocket(socketd,FIONBIO,&flags)==SOCKET_ERROR){
@@ -1525,7 +1525,7 @@ PHP_FUNCTION(copy)
 		RETURN_FALSE;
 	}
 	
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	if ((fd_s=open((*source)->value.str.val,O_RDONLY|_O_BINARY))==-1) {
 #else
 	if ((fd_s=open((*source)->value.str.val,O_RDONLY))==-1) {
@@ -1533,7 +1533,7 @@ PHP_FUNCTION(copy)
 		php_error(E_WARNING,"Unable to open '%s' for reading:  %s",(*source)->value.str.val,strerror(errno));
 		RETURN_FALSE;
 	}
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	if ((fd_t=open((*target)->value.str.val,_O_WRONLY|_O_CREAT|_O_TRUNC|_O_BINARY,_S_IREAD|_S_IWRITE))==-1){
 #else
 	if ((fd_t=creat((*target)->value.str.val,0777))==-1) {

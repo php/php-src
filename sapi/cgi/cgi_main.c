@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include "php.h"
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/time.h"
 #include "win32/signal.h"
 #include <process.h>
@@ -249,7 +249,7 @@ static void init_request_info(SLS_D)
 	if (!script_filename) {
 		script_filename = SG(request_info).argv0;
 	}
-#if PHP_WIN32
+#ifdef PHP_WIN32
 	/* FIXME WHEN APACHE NT IS FIXED */
 	/* a hack for apache nt because it does not appear to set argv[1] and sets
 	   script filename to php.exe thus makes us parse php.exe instead of file.php

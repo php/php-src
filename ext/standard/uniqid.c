@@ -29,7 +29,7 @@
 #include <errno.h>
 
 #include <stdio.h>
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>
@@ -64,7 +64,7 @@ PHP_FUNCTION(uniqid)
 		php_error(E_WARNING, "The prefix to uniqid should not be more than 114 characters.");
 		return;
 	}
-#if HAVE_USLEEP && !(PHP_WIN32)
+#if HAVE_USLEEP && !defined(PHP_WIN32)
 	if (!MORE_ENTROPY) {
 		usleep(1);
 	}

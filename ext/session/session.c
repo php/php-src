@@ -19,7 +19,7 @@
 
 #include "php.h"
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>
