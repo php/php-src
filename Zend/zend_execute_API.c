@@ -789,7 +789,7 @@ ZEND_API int zend_lookup_ns_class(char *name, int name_length, zend_class_entry 
 	}
 	ns_name = zend_strndup(name, ns_name_length);
 
-	if (zend_hash_find(&EG(global_namespace_ptr)->class_table, ns_name, ns_name_length+1, (void **)&ns) == SUCCESS &&
+	if (zend_hash_find(&EG(global_namespace_ptr)->class_table, ns_name, ns_name_length+1, (void **)&ns) == SUCCESS && CLASS_IS_NAMESPACE(*ns) && 
 		zend_hash_find(&(*ns)->class_table, class_name, name_end - class_name + 1, (void **)ce) == SUCCESS) {
 		free(ns_name);
 		return SUCCESS;
