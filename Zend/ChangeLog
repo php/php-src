@@ -1,3 +1,18 @@
+2003-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend.h
+      zend_API.h
+      zend_compile.c
+      zend_iterators.h:
+      Fix class/iterator relationship & handling
+
+    * zend_iterators.c:
+      Fallback to old behavior until we have a default iterator that respects
+      visibility we do the array trick.
+
+    * zend_iterators.h:
+      Change order: Optional rewind() to end of structure
+
 2003-10-17  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendTS.dsp:

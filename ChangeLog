@@ -1,3 +1,32 @@
+2003-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend.h
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_iterators.h
+      ext/sqlite/sqlite.c:
+      Fix class/iterator relationship & handling
+
+    * ZendEngine2/zend_iterators.c:
+      Fallback to old behavior until we have a default iterator that respects
+      visibility we do the array trick.
+
+2003-10-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_iterator.c:
+      bah. does it really make any difference where rewind lives in the struct!?
+
+2003-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_iterators.h:
+      Change order: Optional rewind() to end of structure
+
+2003-10-18  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/ext_skel:
+      chech -> check
+
 2003-10-17  Uwe Schindler  <uwe@thetaphi.de>
 
     * sapi/nsapi/nsapi-readme.txt
