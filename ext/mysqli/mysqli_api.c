@@ -1691,7 +1691,7 @@ PHP_FUNCTION(mysqli_stmt_data_seek)
 
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
 
-	mysql_stmt_data_seek(stmt->stmt, offset);
+//	mysql_stmt_data_seek(stmt->stmt, offset);
 	return;
 }
 /* }}} */
@@ -1711,7 +1711,7 @@ PHP_FUNCTION(mysqli_stmt_num_rows)
 
 	MYSQLI_FETCH_RESOURCE(stmt, STMT *, prstmt, PR_STMT *, &mysql_stmt, "mysqli_stmt");
 
-	rc = mysql_stmt_num_rows(stmt->stmt);
+//	rc = mysql_stmt_num_rows(stmt->stmt);
 	MYSQLI_RETURN_LONG_LONG(rc)
 }
 /* }}} */
