@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Jouni Ahto <jouni.ahto@exdec.fi>                            |
    |          Andrew Avdeev <andy@rsc.mv.ru>                              |
-   |          Ard Biesheuvel <a.k.biesheuvel@its.tudelft.nl>              |
+   |          Ard Biesheuvel <a.k.biesheuvel@ewi.tudelft.nl>              |
    +----------------------------------------------------------------------+
  */
 
@@ -36,6 +36,7 @@
 
 #include "php_ini.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/md5.h"
 #include "php_interbase.h"
 #include "php_ibase_includes.h"
 
@@ -49,10 +50,8 @@
 #define IBDEBUG(a)
 #endif
 
-#define SAFE_STRING(s) ((s)?(s):"")
-
-#define ISC_LONG_MIN (-ISC_LONG_MAX - 1)
-#define ISC_LONG_MAX 2147483647
+#define ISC_LONG_MIN 	(1 << (8*sizeof(ISC_LONG)-1))
+#define ISC_LONG_MAX 	~ISC_LONG_MIN
 
 #define QUERY_RESULT	1
 #define EXECUTE_RESULT	2
@@ -63,8 +62,6 @@
 
 #define FETCH_ROW		1
 #define FETCH_ARRAY		2
-
-#define HASH_MASK		"ibase_%s_%s_%s_%s_%s_%s_%s"
 
 /* {{{ extension definition structures */
 function_entry ibase_functions[] = {
@@ -581,8 +578,10 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("ibase.allow_persistent", "1", PHP_INI_SYSTEM, OnUpdateLong, allow_persistent, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY_EX("ibase.max_persistent", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_persistent, zend_ibase_globals, ibase_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("ibase.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong, max_links, zend_ibase_globals, ibase_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY("ibase.default_db", NULL, PHP_INI_SYSTEM, OnUpdateString, default_db, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_user", NULL, PHP_INI_ALL, OnUpdateString, default_user, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.default_password", NULL, PHP_INI_ALL, OnUpdateString, default_password, zend_ibase_globals, ibase_globals)
+	STD_PHP_INI_ENTRY("ibase.default_charset", NULL, PHP_INI_ALL, OnUpdateString, default_charset, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.timestampformat", "%m/%d/%Y %H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timestampformat, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.dateformat", "%m/%d/%Y", PHP_INI_ALL, OnUpdateString, cfg_dateformat, zend_ibase_globals, ibase_globals)
 	STD_PHP_INI_ENTRY("ibase.timeformat", "%H:%M:%S", PHP_INI_ALL, OnUpdateString, cfg_timeformat, zend_ibase_globals, ibase_globals)
@@ -839,60 +838,31 @@ PHP_MINFO_FUNCTION(ibase)
 }
 /* }}} */
 
-int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *charset, /* {{{ */
-	int buffers, char *role, isc_db_handle *db TSRMLS_DC)
-{
-	char dpb_buffer[256], *dpb, *p;
-	int dpb_length, len;
-
-	dpb = dpb_buffer;
-
-	*dpb++ = isc_dpb_version1;
-
-	if (uname != NULL && (len = strlen(uname))) {
-		*dpb++ = isc_dpb_user_name;
-		*dpb++ = len;
-		for (p = uname; *p;) {
-			*dpb++ = *p++;
-		}
-	}
-
-	if (passwd != NULL && (len = strlen(passwd))) {
-		*dpb++ = isc_dpb_password;
-		*dpb++ = strlen(passwd);
-		for (p = passwd; *p;) {
-			*dpb++ = *p++;
-		}
-	}
-
-	if (charset != NULL && (len = strlen(charset))) {
-		*dpb++ = isc_dpb_lc_ctype;
-		*dpb++ = strlen(charset);
-		for (p = charset; *p;) {
-			*dpb++ = *p++;
-		}
-	}
-
-	if (buffers) {
-		*dpb++ = isc_dpb_num_buffers;
-		*dpb++ = 1;
-		*dpb++ = buffers;
-	}
-
+enum connect_args { DB = 0, USER = 1, PASS = 2, CSET = 3, ROLE = 4, BUF = 0, DLECT = 1 };
+	
+static char const dpb_args[] = { 0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype
 #ifdef isc_dpb_sql_role_name
-	if (role != NULL && (len = strlen(role))) {
-		*dpb++ = isc_dpb_sql_role_name;
-		*dpb++ = strlen(role);
-		for (p = role; *p;) {
-			*dpb++ = *p++;
+	, isc_dpb_sql_role_name
+#endif
+};
+	
+int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
+{
+	short i;
+	char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
+
+	dpb = dpb_buffer + 1;
+
+	for (i = 0; i < sizeof(dpb_args); ++i) {
+		if (dpb_args[i] && args[i]) {
+			dpb += sprintf(dpb, "%c%c%s", dpb_args[i],(unsigned char)len[i],args[i]);
 		}
 	}
-#endif
-
-	dpb_length = dpb - dpb_buffer;
-
-	if (isc_attach_database(IB_STATUS, (short)strlen(server), server, db, 
-			(short)dpb_length, dpb_buffer)) {
+	if (largs[BUF]) {
+		dpb += sprintf(dpb, "%c\2%c%c", isc_dpb_num_buffers, 
+			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
+	}
+	if (isc_attach_database(IB_STATUS, len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
 		_php_ibase_error(TSRMLS_C);
 		return FAILURE;
 	}
@@ -902,210 +872,134 @@ int _php_ibase_attach_db(char *server, char *uname, char *passwd, char *charset,
 
 static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* {{{ */
 {
-	zval **args[7];
-	char *ib_server = NULL, *ib_uname, *ib_passwd, *ib_charset = NULL, *ib_buffers = NULL,
-		*ib_dialect = NULL, *ib_role = NULL;
-	unsigned short sql_dialect = SQL_DIALECT_CURRENT;
-	int ib_uname_len, ib_passwd_len;
+	char hash[16], *args[] = { NULL, NULL, NULL, NULL, NULL };
+	int i, len[] = { 0, 0, 0, 0, 0 };
+	long largs[] = { 0, SQL_DIALECT_CURRENT };
+	PHP_MD5_CTX hash_context;
+	list_entry new_index_ptr, *le;
 	isc_db_handle db_handle = NULL;
-	char *hashed_details;
-	int hashed_details_length = 0;
-	ibase_db_link *ib_link = NULL;
-	
+	ibase_db_link *ib_link;
+
 	RESET_ERRMSG;
-		
-	ib_uname = IBG(default_user);
-	ib_passwd = IBG(default_password);
-	ib_uname_len = ib_uname ? strlen(ib_uname) : 0;
-	ib_passwd_len = ib_passwd ? strlen(ib_passwd) : 0;
-	
-	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 7) {
-		WRONG_PARAM_COUNT;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sssslls",
+			&args[DB], &len[DB], &args[USER], &len[USER], &args[PASS], &len[PASS],
+			&args[CSET], &len[CSET], &largs[BUF], &largs[DLECT], &args[ROLE], &len[ROLE])) {
+		RETURN_FALSE;
 	}
 	
-	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
+	/* restrict to the server/db in the .ini if in safe mode */
+	if ((!len[DB] || PG(sql_safe_mode)) && IBG(default_db)) { 
+		args[DB] = IBG(default_db);
+		len[DB] = strlen(IBG(default_db));
+	}
+	if (!len[USER] && IBG(default_user)) {
+		args[USER] = IBG(default_user);
+		len[USER] = strlen(args[USER]);
+	}
+	if (!len[PASS] && IBG(default_password)) {
+		args[PASS] = IBG(default_password);
+		len[PASS] = strlen(args[PASS]);
+	}
+	if (!len[CSET] && IBG(default_charset)) {
+		args[CSET] = IBG(default_charset);
+		len[CSET] = strlen(args[CSET]);
+	}
+	
+	/* don't want usernames and passwords floating around */
+	PHP_MD5Init(&hash_context);
+	for (i = 0; i < sizeof(args)/sizeof(char*); ++i) {
+		PHP_MD5Update(&hash_context,args[i],len[i]);
+	}
+	for (i = 0; i < sizeof(largs)/sizeof(long); ++i) {
+		PHP_MD5Update(&hash_context,(char*)&largs[i],sizeof(long));
+	}
+	PHP_MD5Final(hash, &hash_context);
+	
+	/* try to reuse a connection */
+	if (SUCCESS == zend_hash_find(&EG(regular_list), hash, sizeof(hash), (void *) &le)) {
+		long xlink;
+		int type;
+
+		if (Z_TYPE_P(le) != le_index_ptr) {
+			RETURN_FALSE;
+		}
+			
+		xlink = (long) le->ptr;
+		if (zend_list_find(xlink, &type) && ((!persistent && type == le_link) || type == le_plink)) {
+			zend_list_addref(xlink);
+			RETURN_RESOURCE(IBG(default_link) = xlink);
+		} else {
+			zend_hash_del(&EG(regular_list), hash, sizeof(hash));
+		}
+	}		
+	/* ... or a persistent one */
+	if (SUCCESS == zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
+		static char info[] = { isc_info_base_level, isc_info_end };
+		char result[8];
+
+		if (Z_TYPE_P(le) != le_plink) {
+			RETURN_FALSE;
+		}
+		/* check if connection has timed out */
+		ib_link = (ibase_db_link *) le->ptr;
+		if (isc_database_info(IB_STATUS, &ib_link->handle, sizeof(info), info, sizeof(result), result)) {
+			zend_hash_del(&EG(persistent_list), hash, sizeof(hash));
+		} else {
+			ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
+			goto register_link_resource;
+		}
+	}
+
+	/* no link found, so we have to open one */
+
+	if (IBG(max_links) != -1 && IBG(num_links) >= IBG(max_links)) {
+		_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
 		RETURN_FALSE;
 	}
 
-	switch (ZEND_NUM_ARGS()) {
-		unsigned short d;
-		
-		case 7:
-			convert_to_string_ex(args[6]);
-			ib_role = Z_STRVAL_PP(args[6]);
-			hashed_details_length += Z_STRLEN_PP(args[6]);
-			/* fallout */
-		case 6:
-			convert_to_string_ex(args[5]);
-			ib_dialect = Z_STRVAL_PP(args[5]);
-			if ((d = (unsigned short)strtoul(ib_dialect, NULL, 10))) 
-			{
-				sql_dialect = d;
-			}
-			hashed_details_length += Z_STRLEN_PP(args[5]);
-			/* fallout */
-		case 5:
-			convert_to_string_ex(args[4]);
-			ib_buffers = Z_STRVAL_PP(args[4]);
-			hashed_details_length += Z_STRLEN_PP(args[4]);
-			/* fallout */
-		case 4:
-			convert_to_string_ex(args[3]);
-			ib_charset = Z_STRVAL_PP(args[3]);
-			hashed_details_length += Z_STRLEN_PP(args[3]);
-			/* fallout */
-		case 3:
-			convert_to_string_ex(args[2]);
-			ib_passwd = Z_STRVAL_PP(args[2]);
-			hashed_details_length += Z_STRLEN_PP(args[2]);
-			/* fallout */
-		case 2:
-			convert_to_string_ex(args[1]);
-			ib_uname = Z_STRVAL_PP(args[1]);
-			hashed_details_length += Z_STRLEN_PP(args[1]);
-			/* fallout */
-		case 1:
-			convert_to_string_ex(args[0]);
-			ib_server = Z_STRVAL_PP(args[0]);
-			hashed_details_length += Z_STRLEN_PP(args[0]);
-	} /* case */
-	
-	hashed_details = (char *)emalloc(hashed_details_length+sizeof(HASH_MASK)+1);
-	sprintf(hashed_details, HASH_MASK, SAFE_STRING(ib_server), SAFE_STRING(ib_uname), 
-		SAFE_STRING(ib_passwd), SAFE_STRING(ib_charset), SAFE_STRING(ib_buffers), 
-		SAFE_STRING(ib_dialect), SAFE_STRING(ib_role));
-
-	if (persistent) {
-		list_entry *le;
-		int open_new_connection = 1;
-		
-		if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1,
-				(void *) &le) != FAILURE) {
-			static char info[] = {isc_info_base_level, isc_info_end};
-			char result[8]; /* Enough? Hope so... */ 
-
-			if (Z_TYPE_P(le) != le_plink) {
-				RETURN_FALSE;
-			}
-			/* Check if connection has timed out */
-			ib_link = (ibase_db_link *) le->ptr;
-			if (!isc_database_info(IB_STATUS, &ib_link->handle, sizeof(info), 
-					info, sizeof(result), result)) {
-				open_new_connection = 0;
-			}
-		}
-		
-		/* There was no previous connection to use or it has timed out */
-		if (open_new_connection) {
-			list_entry new_le;
-			
-			if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
-				_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
-				efree(hashed_details);
-				RETURN_FALSE;
-			}
-			if ((IBG(max_persistent) != -1) && (IBG(num_persistent) >= IBG(max_persistent))) {
-				_php_ibase_module_error("Too many open persistent links (%ld)"
-					TSRMLS_CC, IBG(num_persistent));
-				efree(hashed_details);
-				RETURN_FALSE;
-			}
-
-			/* create the ib_link */
-
-			if (_php_ibase_attach_db(ib_server, ib_uname, ib_passwd, ib_charset,
-									 (ib_buffers ? strtoul(ib_buffers, NULL, 0) : 0),
-									 ib_role, &db_handle TSRMLS_CC) == FAILURE) {
-				efree(hashed_details);
-				RETURN_FALSE;
-			}
-
-			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
-			ib_link->handle = db_handle;
-			ib_link->dialect = sql_dialect;
-			ib_link->tr_list = NULL;
-			ib_link->event_head = NULL;
-
-			/* hash it up */
-			Z_TYPE(new_le) = le_plink;
-			new_le.ptr = ib_link;
-			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1,
-					(void *) &new_le, sizeof(list_entry), NULL) == FAILURE) {
-				efree(hashed_details);
-				free(ib_link);
-				RETURN_FALSE;
-			}
-			IBG(num_links)++;
-			IBG(num_persistent)++;
-		}
-
-		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
-
-	} else {
-		list_entry *index_ptr, new_index_ptr;
-		
-		/* first we check the hash for the hashed_details key.	if it exists,
-		 * it should point us to the right offset where the actual ib_link sits.
-		 * if it doesn't, open a new ib_link, add it to the resource list,
-		 * and add a pointer to it with hashed_details as the key.
-		 */
-		if (zend_hash_find(&EG(regular_list), hashed_details, hashed_details_length+1,
-				(void *) &index_ptr) == SUCCESS) {
-			int type;
-			long xlink;
-			void *ptr;
-			
-			if (Z_TYPE_P(index_ptr) != le_index_ptr) {
-				RETURN_FALSE;
-			}
-			xlink = (long) index_ptr->ptr;
-			ptr = zend_list_find(xlink, &type);	 /* check if the xlink is still there */
-			if (ptr && (type == le_link || type == le_plink)) {
-				zend_list_addref(xlink);
-				Z_LVAL_P(return_value) = xlink;
-				Z_TYPE_P(return_value) = IS_RESOURCE;
-				IBG(default_link) = Z_LVAL_P(return_value);
-				efree(hashed_details);
-				return;
-			} else {
-				zend_hash_del(&EG(regular_list), hashed_details, hashed_details_length + 1);
-			}
-		}
-		if ((IBG(max_links) != -1) && (IBG(num_links) >= IBG(max_links))) {
-			_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
-			efree(hashed_details);
-			RETURN_FALSE;
-		}
-		/* create the ib_link */
-
-		if (_php_ibase_attach_db(ib_server, ib_uname, ib_passwd, ib_charset,
-								 (ib_buffers ? strtoul(ib_buffers, NULL, 0) : 0),
-								 ib_role, &db_handle TSRMLS_CC) == FAILURE) {
-			efree(hashed_details);
-			RETURN_FALSE;
-		}
-
-		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
-		ib_link->handle = db_handle;
-		ib_link->dialect = sql_dialect;
-		ib_link->tr_list = NULL;
-		ib_link->event_head = NULL;
-		
-		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
-
-		/* add it to the hash */
-		new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
-		Z_TYPE(new_index_ptr) = le_index_ptr;
-		if (zend_hash_update(&EG(regular_list), hashed_details, hashed_details_length + 1,
-				(void *) &new_index_ptr, sizeof(list_entry), NULL) == FAILURE) {
-			efree(hashed_details);
-			RETURN_FALSE;
-		}
-		IBG(num_links)++;
+	/* create the ib_link */
+	if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
-	efree(hashed_details);
-	zend_list_addref(Z_LVAL_P(return_value));
-	IBG(default_link) = Z_LVAL_P(return_value);
+
+	/* use non-persistent if allowed number of persistent links is exceeded */
+	if (!persistent || (IBG(max_persistent) != -1 && IBG(num_persistent) >= IBG(max_persistent))) {
+		ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
+		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_link);
+	} else {
+		list_entry new_le;
+		
+		ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
+
+		/* hash it up */
+		Z_TYPE(new_le) = le_plink;
+		new_le.ptr = ib_link;
+		if (FAILURE == zend_hash_update(&EG(persistent_list), hash, sizeof(hash),
+				(void *) &new_le, sizeof(list_entry), NULL)) {
+			free(ib_link);
+			RETURN_FALSE;
+		}
+		ZEND_REGISTER_RESOURCE(return_value, ib_link, le_plink);
+		++IBG(num_persistent);
+	}
+	ib_link->handle = db_handle;
+	ib_link->dialect = (unsigned short)largs[DLECT];
+	ib_link->tr_list = NULL;
+	ib_link->event_head = NULL;
+
+	++IBG(num_links);
+
+register_link_resource:
+
+	/* add it to the hash */
+	new_index_ptr.ptr = (void *) Z_LVAL_P(return_value);
+	Z_TYPE(new_index_ptr) = le_index_ptr;
+	if (FAILURE == zend_hash_update(&EG(regular_list), hash, sizeof(hash),
+			(void *) &new_index_ptr, sizeof(list_entry), NULL)) {
+		RETURN_FALSE;
+	}
+	zend_list_addref(IBG(default_link) = Z_LVAL_P(return_value));
 }
 /* }}} */
 
@@ -1121,7 +1015,7 @@ PHP_FUNCTION(ibase_connect)
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
-	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, IBG(allow_persistent));
 }
 /* }}} */
 

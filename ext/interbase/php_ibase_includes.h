@@ -61,13 +61,9 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	long num_links, num_persistent;
 	long max_links, max_persistent;
 	long allow_persistent;
-	char *default_user, *default_password;
-	char *timestampformat;
-	char *cfg_timestampformat;
-	char *dateformat;
-	char *cfg_dateformat;
-	char *timeformat;
-	char *cfg_timeformat;
+	char *default_db, *default_user, *default_password, *default_charset;
+	char *timestampformat, *dateformat, *timeformat;
+	char *cfg_timestampformat, *cfg_dateformat, *cfg_timeformat;
 	char errmsg[MAX_ERRMSG];
 	long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
