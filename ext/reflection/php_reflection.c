@@ -488,6 +488,8 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		}
 		string_printf(str, "%s  }\n", indent);
 	}
+
+	string_printf(str, "%s}\n", indent);
 }
 
 static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
