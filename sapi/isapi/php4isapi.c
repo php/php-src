@@ -43,6 +43,16 @@
 # define GetLastError() errno
 #endif
 
+/* 
+uncomment the following lines to turn off 
+exception trapping when running under a debugger 
+
+
+#ifdef _DEBUG
+#define NO_EXCEPTION_HANDLERS
+#endif
+*/
+
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
 #define ISAPI_SERVER_VAR_BUF_SIZE 1024
 #define ISAPI_POST_DATA_BUF 1024
@@ -426,7 +436,10 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 		/* Register SSL ISAPI variables */
 		sapi_isapi_register_server_variables2(isapi_secure_server_variable_names, lpECB, track_vars_array, NULL ELS_CC PLS_CC);
 	}
-	efree(isapi_special_server_variables[SPECIAL_VAR_HTTPS]);
+
+	if (isapi_special_server_variables[SPECIAL_VAR_HTTPS]) {
+		efree(isapi_special_server_variables[SPECIAL_VAR_HTTPS]);
+	}
 
 
 #ifdef WITH_ZEUS
@@ -624,7 +637,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
-#ifdef PHP_WIN32
+#if !defined (NO_EXCEPTION_HANDLERS) && defined(PHP_WIN32)
 	LPEXCEPTION_POINTERS e;
 #endif
 
@@ -633,7 +646,9 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		return HSE_STATUS_ERROR;
 	}
 
+#if !defined (NO_EXCEPTION_HANDLERS)
 	__try {
+#endif
 		init_request_info(sapi_globals, lpECB);
 		SG(server_context) = lpECB;
 
@@ -647,6 +662,7 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 		if (SG(request_info).cookie_data) {
 			efree(SG(request_info).cookie_data);
 		}
+#if !defined (NO_EXCEPTION_HANDLERS)
 #ifdef PHP_WIN32
 	} __except(exceptionhandler(&e,GetExceptionInformation())) {
 #else
@@ -700,6 +716,9 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 	} __except(EXCEPTION_EXECUTE_HANDLER) {
 		my_endthread();
 	}
+#else
+		php_request_shutdown(NULL);
+#endif
 
 	return HSE_STATUS_SUCCESS;
 }
