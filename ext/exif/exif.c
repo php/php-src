@@ -1129,10 +1129,14 @@ static double exif_convert_any_format(void *value, int format, int motorola_inte
 
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case TAG_FMT_SINGLE:
+#ifdef EXIF_DEBUG
 			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
+#endif
 			return (double)*(float *)value;
 		case TAG_FMT_DOUBLE:
+#ifdef EXIF_DEBUG
 			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
+#endif
 			return *(double *)value;
 	}
 	return 0;
@@ -1174,10 +1178,14 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 
 		/* Not sure if this is correct (never seen float used in Exif format) */
 		case TAG_FMT_SINGLE:
+#ifdef EXIF_DEBUG
 			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type single");
+#endif
 			return (size_t)*(float *)value;
 		case TAG_FMT_DOUBLE:
+#ifdef EXIF_DEBUG
 			php_error_docref( NULL TSRMLS_CC, E_NOTICE, "Found value of type double");
+#endif
 			return (size_t)*(double *)value;
 	}
 	return 0;
@@ -1556,7 +1564,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			if (!info_value->s) {
 				EXIF_ERRLOG_EALLOC
 				info_data->length = 0;
-				break; /* better return with "" instead of possible casing problems */
+				break; /* better return with "" instead of possible causing problems */
 			}
 			break;
 
@@ -1637,11 +1645,15 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 						break;
 
 					case TAG_FMT_SINGLE:
+#ifdef EXIF_DEBUG
 						php_error_docref( NULL TSRMLS_CC, E_WARNING, "Found value of type single");
+#endif
 						info_value->f = *(float *)value;
 
 					case TAG_FMT_DOUBLE:
+#ifdef EXIF_DEBUG
 						php_error_docref( NULL TSRMLS_CC, E_WARNING, "Found value of type double");
+#endif
 						info_value->d = *(double *)value;
 						break;
 				}
@@ -3426,7 +3438,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				return FALSE;
 			}
 			php_stream_read(ImageInfo->infile, ImageInfo->file.list[sn].data+2, dir_size-2);
-			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 1));*/
+			/*exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 0));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL TSRMLS_CC, ImageInfo, E_NOTICE, "read from TIFF done, next offset x%04X", next_offset);
@@ -4085,4 +4097,3 @@ PHP_FUNCTION(exif_imagetype)
  * vim600: sw=4 ts=4 tw=78 fdm=marker
  * vim<600: sw=4 ts=4 tw=78
  */
-
