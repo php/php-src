@@ -354,6 +354,7 @@ static int apprentice(void)
 
     char *fname;
     magic_server_config_rec *conf = &mime_global;
+    TSRMLS_FETCH();
 
     fname = conf->magicfile; /* todo cwd? */
     f = fopen(fname, "rb");
