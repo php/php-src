@@ -540,7 +540,7 @@ PHP_FUNCTION(file_put_contents)
 			if (Z_STRLEN_P(data)) {
 				numbytes = php_stream_write(stream, Z_STRVAL_P(data), Z_STRLEN_P(data));
 				if (numbytes != Z_STRLEN_P(data)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space.", numbytes, Z_STRLEN_P(data));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space", numbytes, Z_STRLEN_P(data));
 					numbytes = -1;
 				}
 			}
@@ -563,9 +563,9 @@ PHP_FUNCTION(file_put_contents)
 						bytes_written = php_stream_write(stream, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
 						if (bytes_written < 0 || bytes_written != Z_STRLEN_PP(tmp)) {
 							if (bytes_written < 0) {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s.",  Z_STRLEN_PP(tmp), filename);
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to write %d bytes to %s",  Z_STRLEN_PP(tmp), filename);
 							} else {
-								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space.",  bytes_written, Z_STRLEN_PP(tmp));
+								php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only %d of %d bytes written, possibly out of free disk space",  bytes_written, Z_STRLEN_PP(tmp));
 							}
 							numbytes = -1;
 							break;
@@ -577,7 +577,7 @@ PHP_FUNCTION(file_put_contents)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The 2nd parameter should be either a string or an array");
 			numbytes = -1;
 			break;
 	
@@ -618,7 +618,7 @@ PHP_FUNCTION(file)
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported.", flags);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "'%ld' flag is not supported", flags);
 		RETURN_FALSE;
 	}
 	
@@ -938,7 +938,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		len = Z_LVAL_PP(arg2);
 
 		if (len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -1045,7 +1045,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	if (bytes != NULL) {
 		convert_to_long_ex(bytes);
 		if (Z_LVAL_PP(bytes) <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -1422,17 +1422,17 @@ PHP_FUNCTION(rename)
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0 TSRMLS_CC);
 
 	if (!wrapper || !wrapper->wops) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate stream wrapper");
 		RETURN_FALSE;
 	}
 
 	if (!wrapper->wops->rename) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming.", wrapper->wops->label ? wrapper->wops->label : "Source");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s wrapper does not support renaming", wrapper->wops->label ? wrapper->wops->label : "Source");
 		RETURN_FALSE;
 	}
 
 	if (wrapper != php_stream_locate_url_wrapper(new_name, NULL, 0 TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rename a file across wrapper types");
 		RETURN_FALSE;
 	}
 
@@ -1660,7 +1660,7 @@ PHPAPI PHP_FUNCTION(fread)
 	convert_to_long_ex(arg2);
 	len = Z_LVAL_PP(arg2);
 	if (len <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
