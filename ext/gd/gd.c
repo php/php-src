@@ -855,8 +855,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, fp, q);
 				break;
 			case PHP_GDIMG_TYPE_WBM:
-				for(i=0; i < im->colorsTotal; i++) {
-					if(im->red[i] == 0) break;
+				for(i=0; i < gdImageColorsTotal(im); i++) {
+					if(gdImageRed(im, i) == 0) break;
 				}
 				(*func_p)(im, i, fp);
 				break;
@@ -886,8 +886,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 				(*func_p)(im, tmp, q);
 				break;
 			case PHP_GDIMG_TYPE_WBM:
-				for(i=0; i < im->colorsTotal; i++) {
-					if(im->red[i] == 0) break;
+				for(i=0; i < gdImageColorsTotal(im); i++) {
+					if(gdImageRed(im, i) == 0) break;
 				}
 				(*func_p)(im, q, tmp);
 				break;
