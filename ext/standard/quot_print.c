@@ -130,7 +130,7 @@ PHP_FUNCTION(quoted_printable_decode)
     
     RETVAL_STRINGL(str_out, j, 0);
 }
-/* }}} */i
+/* }}} */
 
 /*
  * Local variables:
