@@ -716,7 +716,7 @@ static int schema_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compCon
 	}
 
 	content = get_node(compCont->children, "extension");
-	if(content == NULL) {
+	if(content != NULL) {
 //		php_error(E_ERROR, "Error parsing schema (doesn't support extensions on complexContent)");
 		schema_extension_complexContent(sdl, tsn, content, cur_type);
 		return TRUE;
@@ -778,6 +778,9 @@ static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, 
 		cur_type = (*ptr);
 		create_encoder((*sdl), cur_type, ns->children->content, name->children->content);
 		smart_str_free(&key);
+		if (cur_type->encode == NULL) {
+			cur_type->encode = get_conversion(SOAP_ENC_OBJECT);
+		}
 	}
 
 	content = get_node(compType->children, "simpleContent");
@@ -816,9 +819,6 @@ static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, 
 		schema_sequence(sdl, tsn, content, cur_type);
 	}
 
-//	if (cur_type->encode == NULL) {
-//		cur_type->encode = get_conversion(SOAP_ENC_OBJECT);
-//	}
 	return TRUE;
 }
 /*

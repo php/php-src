@@ -98,19 +98,19 @@ zval *sdl_guess_convert_zval(encodeType enc, xmlNodePtr data)
 
 	type = enc.sdl_type;
 	if(type->encode) {
-//		if(type->encode->details.type == IS_ARRAY ||
-//			type->encode->details.type == SOAP_ENC_ARRAY) {
-//			return to_zval_array(enc, data);
-//		} else if (type->encode->details.type == IS_OBJECT ||
-//			type->encode->details.type == SOAP_ENC_OBJECT) {
-//			return to_zval_object(enc, data);
-//		} else {
+		if(type->encode->details.type == IS_ARRAY ||
+			type->encode->details.type == SOAP_ENC_ARRAY) {
+			return to_zval_array(enc, data);
+		} else if (type->encode->details.type == IS_OBJECT ||
+			type->encode->details.type == SOAP_ENC_OBJECT) {
+			return to_zval_object(enc, data);
+		} else {
 			if (memcmp(&type->encode->details,&enc,sizeof(enc))!=0) {
 				return master_to_zval(type->encode, data);
 			} else {
 				return master_to_zval(get_conversion(UNKNOWN_TYPE), data);
 			}
-//		}
+		}
 	} else if (type->elements) {
 		return to_zval_object(enc, data);
 	}	else {

@@ -341,6 +341,7 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("SOAP_ENC_OBJECT", SOAP_ENC_OBJECT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_ENC_ARRAY", SOAP_ENC_ARRAY, CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("XSD_ANYTYPE", XSD_ANYTYPE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_STRING", XSD_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_BOOLEAN", XSD_BOOLEAN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_DECIMAL", XSD_DECIMAL, CONST_CS | CONST_PERSISTENT);
@@ -370,7 +371,7 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("XSD_IDREF", XSD_IDREF, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_IDREFS", XSD_IDREFS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_ENTITY", XSD_ENTITY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("XSD_ENTITYS", XSD_ENTITYS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XSD_ENTITIES", XSD_ENTITIES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_INTEGER", XSD_INTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_NONPOSITIVEINTEGER", XSD_NONPOSITIVEINTEGER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XSD_NEGATIVEINTEGER", XSD_NEGATIVEINTEGER, CONST_CS | CONST_PERSISTENT);
@@ -1035,7 +1036,7 @@ PHP_METHOD(soapserver, handle)
 						INIT_ZVAL(readfile_ret);
 						MAKE_STD_ZVAL(param);
 
-						sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
+						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 						ZVAL_STRING(param, service->sdl->source, 1);
 						ZVAL_STRING(&readfile, "readfile", 1);
 						if(call_user_function(EG(function_table), NULL, &readfile, &readfile_ret, 1, &param  TSRMLS_CC) == FAILURE)
@@ -1050,7 +1051,7 @@ PHP_METHOD(soapserver, handle)
 					} else {
 						php_error(E_ERROR, "WSDL generation is not supported yet");
 /*
-						sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
+						sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 						PUTS("<?xml version=\"1.0\" ?>\n<definitions\n");
 						PUTS("    xmlns=\"http://schemas.xmlsoap.org/wsdl/\"\n");
 						PUTS("    targetNamespace=\"");
@@ -1194,7 +1195,7 @@ PHP_METHOD(soapserver, handle)
 			php_error(E_ERROR, "Dump memory failed");
 
 		sprintf(cont_len, "Content-Length: %d", size);
-		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 
 		/* Free Memory */
@@ -1274,7 +1275,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		xmlDocDumpMemory(doc_return, &buf, &size);
 		sprintf(cont_len,"Content-Length: %d", size);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
-		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
+		sapi_add_header("Content-Type: text/xml; charset=\"utf-8\"", sizeof("Content-Type: text/xml; charset=\"utf-8\""), 1);
 
 		/*
 		   Want to return HTTP 500 but apache wants to over write
@@ -1761,7 +1762,7 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval ***parameters, int *version TSRMLS_DC)
 {
 	char* envelope_ns;
-	xmlNodePtr trav,env,body,func;
+	xmlNodePtr trav,env,head,body,func;
 	int cur_param = 0,num_of_params = 0;
 	zval tmp_function_name, **tmp_parameters = NULL;
 	sdlFunctionPtr function;
@@ -1774,20 +1775,16 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 	trav = request->children;
 	while (trav != NULL) {
 		if (trav->type == XML_ELEMENT_NODE) {
-			if (node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
-		  	if (env != NULL) {
-		  		php_error(E_ERROR,"looks like we got XML with several \"Envelope\" elements\n");
-	  		}
+			if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_1_ENV)) {
 		  	env = trav;
 		  	*version = SOAP_1_1;
 		  	envelope_ns = SOAP_1_1_ENV;
-	  	} else if (node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
-		  	if (env != NULL) {
-		  		php_error(E_ERROR,"looks like we got XML with several \"Envelope\" elements\n");
-	  		}
+	  	} else if (env == NULL && node_is_equal_ex(trav,"Envelope",SOAP_1_2_ENV)) {
 		  	env = trav;
 		  	*version = SOAP_1_2;
 		  	envelope_ns = SOAP_1_2_ENV;
+		  } else {
+	  		php_error(E_ERROR,"looks like we got bad SOAP request\n");
 		  }
 	  }
 	  trav = trav->next;
@@ -1796,17 +1793,26 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 		php_error(E_ERROR,"looks like we got XML without \"Envelope\" element\n");
 	}
 
+	/* Get <Header> element */
+	head = NULL;
+	trav = env->children;
+	while (trav != NULL && trav->type != XML_ELEMENT_NODE) {
+	  trav = trav->next;
+	}
+	if (trav != NULL && node_is_equal_ex(trav,"Header",envelope_ns)) {
+	  head = trav;
+	  trav = trav->next;
+	}
 
 	/* Get <Body> element */
 	body = NULL;
-	trav = env->children;
 	while (trav != NULL) {
-		if (trav->type == XML_ELEMENT_NODE &&
-		    node_is_equal_ex(trav,"Body",envelope_ns)) {
-	  	if (body != NULL) {
-				php_error(E_ERROR,"looks like we got \"Envelope\" with several \"Body\" elements\n");
-	  	}
-	  	body = trav;
+		if (trav->type == XML_ELEMENT_NODE) {
+			if (body == NULL && node_is_equal_ex(trav,"Body",envelope_ns)) {
+		  	body = trav;
+		  } else {
+				php_error(E_ERROR,"looks like we got bad SOAP request\n");
+		  }
 	  }
 	  trav = trav->next;
 	}
