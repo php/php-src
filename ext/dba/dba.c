@@ -648,15 +648,23 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'c': 
 			modenr = DBA_CREAT; 
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
-			if (!lock_mode || !lock_dbf) {
-				file_mode = "a+b";
+			if (lock_mode) {
+				if (lock_dbf) {
+					/* the create/append check will be done on the lock
+					 * when the lib opens the file it is already created
+					 */
+					file_mode = "r+b";       /* read & write, seek 0 */
+					lock_file_mode = "a+b";  /* append */
+				} else {
+					file_mode = "a+b";       /* append */
+					lock_file_mode = "w+b";  /* create/truncate */
+				}
 			} else {
-				/* the create/append check will be done on the lock
-				 * when the lib opens the file it is already created
-				 */
-				file_mode = "w+b";
-				lock_file_mode = "a+b";
+				file_mode = "a+b";
 			}
+			/* In case of the 'a+b' append mode, the handler is responsible 
+			 * to handle any rewind problems (see flatfile handler).
+			 */
 			break;
 		case 'n':
 			modenr = DBA_TRUNC;
