@@ -369,6 +369,8 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			if (state->cwd[state->cwd_length-1]!=DEFAULT_SLASH) {
 				state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 			}
+#else
+			state->cwd[state->cwd_length++] = DEFAULT_SLASH;
 #endif
 			memcpy(&state->cwd[state->cwd_length], ptr, ptr_length+1);
 			state->cwd_length += ptr_length;		}
