@@ -93,7 +93,8 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 	return 1;
 }
 
-static int pgsql_stmt_fetch(pdo_stmt_t *stmt TSRMLS_DC)
+static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
+	enum pdo_fetch_orientation ori, long offset TSRMLS_DC)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
