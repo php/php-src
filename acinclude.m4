@@ -176,7 +176,7 @@ case "[$]$1" in
 shared,*)
   ext_output="yes, shared"
   ext_shared=yes
-  $1=`echo $ac_n "[$]$1$ac_c"|sed s/^shared,//`
+  $1=`echo "[$]$1"|sed 's/^shared,//'`
   ;;
 shared)
   ext_output="yes, shared"
