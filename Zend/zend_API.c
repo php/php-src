@@ -1304,6 +1304,12 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, zend_function_entr
 				zend_error(error_type, "Destructor %s::%s cannot be static", dtor->common.scope->name, dtor->common.function_name);
 			}
 		}
+		if (clone) {
+			clone->common.fn_flags |= ZEND_ACC_CLONE;
+			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
+				zend_error(error_type, "Constructor %s::%s cannot be static", clone->common.scope->name, clone->common.function_name);
+			}
+		}
 	}
 	return SUCCESS;
 }
