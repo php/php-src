@@ -1,3 +1,77 @@
+2002-07-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/standard/mail.c:
+    Add default arguments to new internal mail function.
+
+    * ext/imap/php_imap.c:
+    Make sure To addresses are parsed correct with RFC822.
+
+    * win32/sendmail.c: Oops. Last commit reverted some of sebastians changes.
+
+2002-07-02  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -fix datatypes for some vriables
+    -fix comment for function exif_process_CME
+    -force return parameters to be passed by reference
+
+2002-07-02  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/sendmail.c
+      win32/sendmail.h: Switch from imap_sendmail.* to sendmail.c under Win32
+
+    * ext/fbsql/php_fbsql.c:
+    Fixing compilation of FrontBase extension with ZTS
+
+2002-07-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/filestat.c:
+    use access instead of manually determining file permissions..
+
+2002-07-02  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/imap/imap.dsp
+      ext/imap/php_imap.c:
+    Switch from imap_sendmail.* to sendmail.c under Win32
+
+    * win32/imap_sendmail.c
+      win32/imap_sendmail.h:
+    These files are no longer needed as the imap module will use the standard sendmail function under Win32
+
+2002-07-02  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * main/rfc1867.c: *** empty log message ***
+
+    * ext/mbstring/mbstring.h:
+    fixed shift_jis character corruption including 0x5c as second byte on uploaded filename.
+
+    * ext/mbstring/mbstring.c:
+    fixed shift_jis character corruption including 0x5c as second byte.
+
+2002-07-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/mail.c:
+    - Be nice to users and allow them to check if the mail was send
+
+    * ext/standard/mail.c: - Disable 5th parameter to mail in safemode
+    - Disabled the fifth parameter to the mail function in safemode. 
+
+2002-07-02  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php:
+    make 'remote-info' use package.info. add deps to 'list-all'
+
+2002-07-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Avoid error messages, if the variable is empty.
+
+    ./config.status: test: !=: unary operator expected
+
+2002-07-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/file.c:
+    - Fix for bug #15547 (Patch by Justin Garrett <usjgarrett@byu.edu>)
+
 2002-07-01  Marko Karppinen  <karppinen@pobox.com>
 
     * Makefile.global
