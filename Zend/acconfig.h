@@ -60,16 +60,11 @@
 /* Define if you have stdiostream.h */
 #undef HAVE_STDIOSTREAM_H
 
-#ifdef HAVE_LIBDL
-# ifdef HAVE_DLFCN_H
-#  include <dlfcn.h>
-# endif
-# if !defined(RTLD_NOW) && defined(DL_NOW)
-#  define RTLD_NOW DL_NOW
-# endif
-# if !defined(RTLD_NOW) && defined(DL_LAZY)
-#  define RTLD_NOW DL_LAZY
-# endif
+#ifdef HAVE_DLFCN_H
+# include <dlfcn.h>
+#endif
+
+#if defined(HAVE_LIBDL) && defined(RTLD_NOW)
 # define DL_LOAD(libname)	dlopen(libname, RTLD_NOW)
 # define DL_UNLOAD		dlclose
 # define DL_FETCH_SYMBOL	dlsym
