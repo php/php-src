@@ -1604,6 +1604,7 @@ PHP_MINIT_FUNCTION(session)
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
 
+	PS(session_status) = php_session_none;
 	REGISTER_INI_ENTRIES();
 
 #ifdef HAVE_LIBMM
