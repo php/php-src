@@ -98,9 +98,9 @@ extern zend_module_entry tidy_module_entry;
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent, NULL TSRMLS_CC); \
 		tidy_ce_ ## name->ce_flags |= ZEND_ACC_FINAL_CLASS; \
-        memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
-    }
+	}
 
 #define TIDY_TAG_CONST(tag) REGISTER_LONG_CONSTANT("TIDY_TAG_" #tag, TidyTag_##tag, CONST_CS | CONST_PERSISTENT)
 #define TIDY_ATTR_CONST(attr) REGISTER_LONG_CONSTANT("TIDY_ATTR_" #attr, TidyAttr_##attr, CONST_CS | CONST_PERSISTENT)
@@ -148,8 +148,8 @@ if (!_obj->ptdoc->parsed) { \
 #define TIDY_PARSED_REPAIR_CHECK(_obj) \
 TIDY_PARSED_CHECK(_obj); \
 if (!_obj->ptdoc->repaired) { \
-    php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must clean and repair the document before executing this function."); \
-    RETURN_FALSE; \
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must clean and repair the document before executing this function."); \
+	RETURN_FALSE; \
 }
 
 #define TIDY_SAFE_MODE_CHECK(filename) \
@@ -168,34 +168,33 @@ typedef struct _PHPTidyDoc PHPTidyDoc;
 typedef struct _PHPTidyObj PHPTidyObj;
 
 typedef enum {
-    is_node,
-    is_attr,
-    is_doc,
-    is_exception
+	is_node,
+	is_attr,
+	is_doc,
+	is_exception
 } tidy_obj_type;
 
 typedef enum {
-    is_root_node,
-    is_html_node,
-    is_head_node,
-    is_body_node
+	is_root_node,
+	is_html_node,
+	is_head_node,
+	is_body_node
 } tidy_base_nodetypes;
 
 struct _PHPTidyDoc {
-    TidyDoc     doc;
-    TidyBuffer  *errbuf;
-    zend_bool   parsed;
-    zend_bool   repaired;
-    unsigned int ref_count;
+	TidyDoc     doc;
+	TidyBuffer  *errbuf;
+	zend_bool   parsed;
+	zend_bool   repaired;
+	unsigned int ref_count;
 };
 
 struct _PHPTidyObj {
-    zend_object         std;
-    TidyNode            node;
-    TidyAttr            attr;
-    tidy_obj_type       type;
-
-    PHPTidyDoc          *ptdoc;
+	zend_object         std;
+	TidyNode            node;
+	TidyAttr            attr;
+	tidy_obj_type       type;
+	PHPTidyDoc          *ptdoc;
 };
 
 static char *php_tidy_file_to_mem(char *, zend_bool TSRMLS_DC);
