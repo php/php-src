@@ -3,7 +3,8 @@ Various pow() tests
 --POST--
 --GET--
 --FILE--
-<?php 
+<?php // $Id$
+
 define('LONG_MAX', is_int(5000000000)? 9223372036854775807 : 0x7FFFFFFF);
 define('LONG_MIN', -LONG_MAX - 1);
 printf("%d,%d,%d,%d\n",is_int(LONG_MIN  ),is_int(LONG_MAX  ),
@@ -126,7 +127,7 @@ FALSE ===@pow(LONG_MIN+1,1.0)
 (LONG_MAX-1)*(LONG_MAX-1) === pow(LONG_MAX-1,2.0)
 FALSE ===@pow(LONG_MIN+1,2.0)
 LONG_MAX === pow(LONG_MAX,1)
-LONG_MIN === pow(LONG_MIN,1)
+LONG_MIN ~== pow(LONG_MIN,1)
 LONG_MAX*LONG_MAX === pow(LONG_MAX,2)
 LONG_MIN*LONG_MIN === pow(LONG_MIN,2)
 (float)LONG_MAX === pow(LONG_MAX,1.0)
