@@ -115,11 +115,13 @@ static void php_to64(char *s, long v, int n)	{
 		v >>= 6;
 	} 
 } 
+#endif /* HAVE_CRYPT */
 
 /* {{{ proto string crypt(string str [, string salt])
    Encrypt a string */
 PHP_FUNCTION(crypt)
 {
+#if HAVE_CRYPT
 	char salt[PHP_MAX_SALT_LEN+1];
 	pval **arg1, **arg2;
 
@@ -176,9 +178,11 @@ PHP_FUNCTION(crypt)
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);
+#else
+    PHP_NOT_IN_THIS_BUILD;
+#endif /* HAVE_CRYPT */
 }
 /* }}} */
-#endif
 
 
 

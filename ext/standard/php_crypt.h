@@ -21,8 +21,8 @@
 #ifndef PHP_CRYPT_H
 #define PHP_CRYPT_H
 
-#if HAVE_CRYPT
 PHP_FUNCTION(crypt);
+#if HAVE_CRYPT
 extern PHP_MINIT_FUNCTION(crypt);
 #endif
 

@@ -87,10 +87,8 @@ function_entry basic_functions[] = {
 	PHP_FE(time,									NULL)
 	PHP_FE(mktime,									NULL)
 	PHP_FE(gmmktime,								NULL)
-#if HAVE_STRFTIME
 	PHP_FE(strftime,								NULL)
 	PHP_FE(gmstrftime,								NULL)
-#endif
 	PHP_FE(strtotime,								NULL)
 	PHP_FE(date,									NULL)
 	PHP_FE(gmdate,									NULL)
@@ -202,10 +200,9 @@ function_entry basic_functions[] = {
 	PHP_FE(gethostbyaddr,							NULL)
 	PHP_FE(gethostbyname,							NULL)
 	PHP_FE(gethostbynamel,							NULL)
-#if !defined(PHP_WIN32)||HAVE_BINDLIB
+
 	PHP_FE(checkdnsrr,								NULL)
 	PHP_FE(getmxrr,									second_and_third_args_force_ref)
-#endif
 
 	PHP_FE(getmyuid,								NULL)
 	PHP_FE(getmypid,								NULL)
@@ -246,15 +243,12 @@ function_entry basic_functions[] = {
 	PHP_FE(long2ip,									NULL)
 
 	PHP_FE(getenv,									NULL)
-#ifdef HAVE_PUTENV
 	PHP_FE(putenv,									NULL)
-#endif
 
 	PHP_FE(microtime,								NULL)
 	PHP_FE(gettimeofday,							NULL)
-#ifdef HAVE_GETRUSAGE
+
 	PHP_FE(getrusage,								NULL)
-#endif
 	
 	PHP_FE(uniqid,									NULL)
 		
@@ -328,10 +322,8 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(join,			implode,			NULL)
 	PHP_FE(sql_regcase,								NULL)
 
-#ifdef HAVE_LIBDL
 	/* functions from dl.c */
 	PHP_FE(dl,							NULL)
-#endif
 
 	/* functions from file.c */
 	PHP_FE(pclose,				NULL)
@@ -367,9 +359,7 @@ function_entry basic_functions[] = {
 	   use socket_set_blocking() instead */
 	PHP_FE(set_socket_blocking,	NULL)
 	PHP_FE(socket_set_blocking,	NULL)
-#if HAVE_SYS_TIME_H
 	PHP_FE(socket_set_timeout,	NULL)
-#endif
 	PHP_FE(socket_get_status,	NULL)
 	PHP_FE(realpath,			NULL)
 
@@ -384,10 +374,8 @@ function_entry basic_functions[] = {
 	/* functions from browscap.c */
 	PHP_FE(get_browser,			NULL)
 
-#if HAVE_CRYPT
 	/* functions from crypt.c */
 	PHP_FE(crypt,				NULL)
-#endif
 
 	/* functions from dir.c */
 	PHP_FE(opendir,				NULL)
@@ -804,12 +792,12 @@ PHP_FUNCTION(getenv)
 }
 /* }}} */
 
-#ifdef HAVE_PUTENV
 
 /* {{{ proto void putenv(string setting)
    Set the value of an environment variable */
 PHP_FUNCTION(putenv)
 {
+#ifdef HAVE_PUTENV
 	pval **str;
 	BLS_FETCH();
 
@@ -883,9 +871,11 @@ PHP_FUNCTION(putenv)
 			RETURN_FALSE;
 		}
 	}
+#else
+    PHP_NOT_IN_THIS_BUILD;
+#endif
 }
 /* }}} */
-#endif
 
 
 /*******************
