@@ -1,3 +1,167 @@
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mysqli/mysqli_api.c:
+      - fix one warning
+      - fix some commit by accident?
+
+2003-05-31  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * (PHP_4_3)
+      NEWS:
+      A very minor thing, but we should still make a note of this change.
+
+2003-05-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c:
+      MFH(r-1.231): CGI SAPI should honour this setting (arg_separator.input)
+
+2003-05-31  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c
+      sapi/nsapi/nsapi.c:
+      zend_alter_ini_entry now with PHP_INI_USER
+
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/pgsql/tests/17result.phpt:
+      Fix the fix
+
+    * (PHP_4_3)
+      ext/pgsql/tests/17result.phpt:
+      Use ZE1 notation as expected result
+
+    * run-tests.php:
+      MFB: This is needed though
+
+    * ext/session/tests/003.phpt
+      ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/006.phpt
+      ext/session/tests/019.phpt:
+      Fix tests
+
+    * ext/pgsql/tests/README:
+      Update
+
+    * (PHP_4_3)
+      run-tests.php:
+      This is needed though
+
+    * run-tests.php:
+      MFB: Showing info/warning once is enough
+
+    * (PHP_4_3)
+      run-tests.php:
+      Showing info/warning once is enough
+
+2003-05-31  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/tests/iconv_mime_encode.phpt:
+      Fix test
+
+2003-05-31  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      additional check for unsecure connect options
+
+    * (PHP_4_3)
+      ext/mysql/php_mysql.c:
+      suggestion by Wez :)
+
+2003-05-31  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      Re-add this entry
+
+    * ext/xslt/tests/.cvsignore:
+      Missing entry
+
+    * ext/session/session.c:
+      MFB: fix proto
+
+    * ext/session/session.c:
+      MFB: Always send a new session cookie upon regenerating id
+
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      sapi/cli/php_cli.c:
+      Reapply this one, too.
+
+2003-05-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/odbc/php_odbc.c:
+      MFB
+
+    * (PHP_4_3)
+      NEWS:
+      missed this one..
+
+2003-05-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      sapi/cgi/cgi_main.c
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h:
+      Reapply long opts
+
+2003-05-31  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      main/main.c
+      main/php_ini.c
+      main/php_streams.h
+      main/streams.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/config9.m4
+      sapi/cgi/getopt.c
+      sapi/cgi/php_getopt.h
+      sapi/cli/README
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/cli/php_getopt.h
+      sapi/isapi/php4isapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c:
+      - Re-added the FD lexer patch.
+
+2003-05-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: Fixed bug #23913 (make rename() work across partitions on *nix)
+
+    * ext/standard/file.c:
+      Fixed bug #23913 (make rename() work across partitions on *nix)
+
 2003-05-30  Uwe Schindler  <uwe@thetaphi.de>
 
     * sapi/nsapi/nsapi.c
