@@ -4,13 +4,10 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.5
 - PostgreSQL now does a rollback at the end of a request on every
   persistent connection. This is done by doing an "empty" transaction
-  on the connection (This was advised by someone from the PostgreSQL
-  core-team). If you leave transactions open on your page you will see a
-  "NOTICE:  BEGIN: already a transaction in progress" message in your
-  apache error_log. This message is created by the PostgreSQL libs - we can
-  do nothing about it. (Thies)
-- fixes PostgeSQL pg_connect() bug. We would sometimes close the default
-  link by acciedent. (Patch by: aja@nlgroup.ca)
+  on the connection. This was advised by someone from the PostgreSQL
+  core-team. (Thies)
+- Fixed PostgeSQL pg_connect() bug. We would sometimes close the default
+  link by accident. (Patch by: aja@nlgroup.ca)
 - Improved OCI8 dead-session detection. (Patch by: George Schlossnagle)
 - Fixed get_meta_tags() multiline bug #4556 (Sean)
 - Prefer random() over *rand48() (JimJag)
