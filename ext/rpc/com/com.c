@@ -495,7 +495,7 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 	VARIANT *variant_args;
 	VARIANT result;
 	int current_arg, current_variant;
-	char *ErrString;
+	char *ErrString = NULL;
 	TSRMLS_FETCH();
 
 	/* if the length of the name is 0, we are dealing with a pointer to a dispid */
@@ -552,7 +552,7 @@ static int com_call(rpc_string method_name, void **data, zval *return_value, int
 
 static int com_get(rpc_string property_name, zval *return_value, void **data)
 {
-	char *ErrString;
+	char *ErrString = NULL;
 	VARIANT *result;
 	OLECHAR *propname;
 	DISPID dispid;
@@ -610,7 +610,7 @@ static int com_set(rpc_string property_name, zval *value, void **data)
 	DISPID dispid, mydispid = DISPID_PROPERTYPUT;
 	DISPPARAMS dispparams;
 	VARIANT *var;
-	char *error_message, *ErrString;
+	char *error_message, *ErrString = NULL;
 	TSRMLS_FETCH();
 
 	/* obtain property handler */

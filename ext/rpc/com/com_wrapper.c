@@ -125,8 +125,7 @@ ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, D
 						SysFreeString(ExceptInfo.bstrDescription);
 					}
 					
-					*ErrString = emalloc(srclen+desclen+50);
-					zend_sprintf(*ErrString, "<b>Source</b>: %s <b>Description</b>: %s", src, desc);
+					spprintf(ErrString, 0, "<b>Source</b>: %s <b>Description</b>: %s", src, desc);
 					efree(src);
 					efree(desc);
 					
@@ -138,8 +137,7 @@ ZEND_API HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, D
 				break;
 			case DISP_E_PARAMNOTFOUND:
 			case DISP_E_TYPEMISMATCH:
-				*ErrString = emalloc(25);
-				sprintf(*ErrString, "<b>Argument</b>: %d", pDispParams->cArgs-ArgErr+1);
+				spprintf(ErrString, 0, "<b>Argument</b>: %d", pDispParams->cArgs-ArgErr+1);
 				break;
 		}
 	}
@@ -247,7 +245,7 @@ ZEND_API HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanu
 
 ZEND_API char *php_COM_error_message(HRESULT hr)
 {
-	void *pMsgBuf;
+	void *pMsgBuf = NULL;
 
 	if (!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
 					   hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &pMsgBuf, 0, NULL)) {
