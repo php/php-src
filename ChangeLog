@@ -1,3 +1,74 @@
+2005-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * buildconf
+      build/build2.mk:
+      Added --debug option to buildconf
+
+    * build/build2.mk
+      build/build2.mk
+      build/build2.mk
+      build/buildcheck.sh
+      build/buildcheck.sh
+      build/buildcheck.sh:
+      Revert the multiple autoconf versions patch
+
+2005-01-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * win32/sendmail.c:
+      Stricter cc header check.
+
+2005-01-19  Derick Rethans  <php@derickrethans.nl>
+
+    * build/libtool.m4:
+      - Add the patched libtool.m4 from snaps so that Jani can play with it.
+
+2005-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      win32/sendmail.c
+      win32/sendmail.c:
+      MFH: - Fixed bug #28976 (use From: from headers if sendmail_from is empty)
+
+    * win32/sendmail.c:
+      - Fixed bug #28976 (use From: from headers if sendmail_from is empty)
+
+    * acinclude.m4
+      configure.in:
+      - Fix the pic patch
+
+    * ZendEngine2/zend_object_handlers.c:
+      - Fixed bug #29183 (Undefined symbol zend_check_private with Solaris CC)
+
+    * (PHP_5_0)
+      run-tests.php:
+      MFH: - Fixed bug #29136 (make test - libtool failure on MacOSX)
+
+    * run-tests.php:
+      - Fixed bug #29136 (make test - libtool failure on MacOSX)
+
+2005-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_ini_parser.y:
+      - Fix memleak
+
+2005-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/ldap/ldap.c:
+      MFH: - WS & CS fixes
+      MFH: - php_error -> php_error_docref
+      MFH: - Removed pointless checks (array_init, emalloc, etc.)
+      MFH: - Force ldapv3 for ldap_start_tls()
+
+    * ext/ldap/ldap.c:
+      - ldap_start_tls() requires ldapv3 protocol -> force it
+
 2005-01-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

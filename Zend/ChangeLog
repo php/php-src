@@ -1,3 +1,13 @@
+2005-01-19  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_object_handlers.c:
+      - Fixed bug #29183 (Undefined symbol zend_check_private with Solaris CC)
+
+2005-01-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_ini_parser.y:
+      - Fix memleak
+
 2005-01-18  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c:
