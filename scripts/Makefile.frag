@@ -47,7 +47,7 @@ install-headers:
 	done; \
 	cd $(top_srcdir)/sapi/embed && $(INSTALL_DATA) *.h $(INSTALL_ROOT)$(phpincludedir)/main
 
-install-programs:
+install-programs: $(builddir)/phpize $(builddir)/php-config 
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@for prog in $(bin_SCRIPTS); do \
 		echo "  program: $$prog"; \
