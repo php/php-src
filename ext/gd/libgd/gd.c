@@ -2000,9 +2000,7 @@ gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int sr
 	  else
 	    {
 	      dc = gdImageGetPixel (dst, tox, toy);
-	      g = 0.29900f * dst->red[dc]
-	        + 0.58700f * dst->green[dc]
-	        + 0.11400f * dst->blue[dc];
+	      g = (0.29900f * gdImageRed(dst, dc)) + (0.58700f * gdImageGreen(dst, dc)) + (0.11400f * gdImageBlue(dst, dc));
 
 	      ncR = (int)( gdImageRed (src, c) * (pct / 100.0f)
 	                 + gdImageRed (dst, dc) * g * ((100 - pct) / 100.0f));
