@@ -1146,7 +1146,9 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	zend_error(E_NOTICE, "%s is deprecated; use mysql_select_db() and mysql_query() instead", get_active_function_name(TSRMLS_C));
+	if (!strcasecmp(get_active_function_name(), "mysql")) {
+		zend_error(E_NOTICE, "%s is deprecated; use mysql_db_query()", get_active_function_name(TSRMLS_C));
+	}
 	
 	php_mysql_do_query_general(query, mysql_link, id, db, MYSQL_STORE_RESULT, return_value TSRMLS_CC);
 }
