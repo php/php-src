@@ -880,8 +880,10 @@ class Archive_Tar extends PEAR
       else
         $v_binary_data = @fread($this->_file, 512);
 
-      if (!$this->_readHeader($v_binary_data, $v_header))
+      if (!$this->_readHeader($v_binary_data, $v_header)) {
+        fclose($this->_file);
         return false;
+      }
 
       if ($v_header['filename'] == '')
         continue;
