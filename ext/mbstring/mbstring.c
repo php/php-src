@@ -1339,7 +1339,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 PHP_FUNCTION(mb_parse_str)
 {
 	zval *track_vars_array;
-	char *encstr = NULL, *separator = NULL;
+	char *encstr = NULL;
 	int encstr_len;
 	php_mb_encoding_handler_info_t info;
 	enum mbfl_no_encoding detected;
