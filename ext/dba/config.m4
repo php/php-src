@@ -242,8 +242,8 @@ AC_MSG_CHECKING(for CDB support)
 AC_DBA_STD_RESULT
 
 AC_ARG_WITH(flatfile,
-[  --with-flatfile[=DIR]   Include FlatFile support],[
-  if test "$withval" = "yes"; then
+[  --with-flatfile         Include FlatFile support],[
+  if test "$withval" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
     AC_DEFINE(DBA_FLATFILE, 1, [ ])
     flat_sources="dba_flatfile.c libflatfile/flatfile.c"
