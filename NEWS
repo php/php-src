@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Add support for multiple arguments in unset(). (Faisal, Zend Engine)
 - Functions that expect a resource but are passed something else now return 
   NULL instead of FALSE. (Thies, Zend Engine)
 - Fixed gmmktime(), on certain systems it incorrectly adjusted for the timezone
