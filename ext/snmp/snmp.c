@@ -195,7 +195,11 @@ PHP_MINFO_FUNCTION(snmp)
 * st=11  snmpset()  - query an agent and set a single value
 *
 */
-static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, struct snmp_session *session, char *objid) 
+static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, 
+							struct snmp_session *session,
+							char *objid,
+							char type,
+							char* value) 
 {
 	struct snmp_session *ss;
 	struct snmp_pdu *pdu=NULL, *response;
@@ -209,8 +213,6 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, struct snmp_
 	char buf[2048];
 	char buf2[2048];
 	int keepwalking=1;
-	char type = (char) 0;
-	char *value = (char *) 0;
 	char *err;
 
 	if (st >= 2) { /* walk */
@@ -265,7 +267,12 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st, struct snmp_
 		} else if (st == 11) {
 			pdu = snmp_pdu_create(SNMP_MSG_SET);
 			if (snmp_add_var(pdu, name, name_length, type, value)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s", name);
+#ifdef HAVE_NET_SNMP
+				snprint_objid(buf, sizeof(buf), name, name_length);
+#else
+				sprint_objid(buf, name, name_length);
+#endif
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not add variable: %s %c %s", buf, type, value);
 				snmp_close(ss);
 				RETURN_FALSE;
 			}
@@ -464,7 +471,7 @@ static void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st)
 	
 	session.authenticator = NULL;
 
-	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a3));
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a3), type, value);
 }
 /* }}} */
 
@@ -837,7 +844,7 @@ static void php_snmpv3(INTERNAL_FUNCTION_PARAMETERS, int st)
 	session.retries = retries;
 	session.timeout = timeout;
 
-	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a8));
+	php_snmp_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU, st, &session, Z_STRVAL_PP(a8), type, value);
 }
 /* }}} */
 
