@@ -1,3 +1,128 @@
+2000-02-23  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c
+      NEWS: Fix name
+
+2000-02-23  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/phpmod.pike:
+    The Roxen PHP4 module is now a part of the Roxen CVS which makes more sense.
+
+2000-02-23  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/basic_functions.c: Remove obsolete code
+
+2000-02-23  Stig Bakken  <ssb@fast.no>
+
+    * ext/standard/basic_functions.c
+      ext/standard/microtime.c:
+    (PHP getrusage) don't define this function at all if the getrusage() function
+    is not available on the system.
+
+2000-02-23  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.dsp
+      ext/informix/ifx.dsw
+      ext/informix/ifx.ec: - Win32 compile fixes
+
+2000-02-23  Andi Gutmans  <andi@php.net>
+
+    * ext/mysql/libmysql/libmysql.dsp
+      ext/mysql/libmysql/my_wincond.c
+      config.w32.h
+      internal_functions_win32.c
+      php4dllts.dsp
+      php4ts.dsw: - MySQL now compiles right into the PHP 4 binary on Windows
+
+2000-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ltmain.sh: Kill another warning
+
+    * ltmain.sh: Remove warning message
+
+    * NEWS: .
+
+2000-02-23  Stig Bakken  <ssb@fast.no>
+
+    * build/build2.mk: shut up cross compiling warnings
+
+2000-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/odbc/php_odbc.h: Define SQL_SUCCEEDED for Solid.
+
+    PR: #3383
+
+2000-02-23  Thies C. Arntzen  <thies@digicol.de>
+
+    * NEWS
+      configure.in
+      php_version.h: bump version number
+
+2000-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/microtime.c:
+    Include <sys/types.h> and <sys/time.h> before <sys/resource.h>
+
+2000-02-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/pdf/pdf.c
+      ext/pcre/php_pcre.c: More protos.
+
+2000-02-23  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    uodbc now uses zend's reference system. The crashes on request shutdown should be gone.
+
+2000-02-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/oracle/oracle.c
+      ext/odbc/php_odbc.c: More protos.
+
+    * ext/oci8/oci8.c: Thies, it looks now a little bit better.
+    Please correct my dummy entries.
+
+2000-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/microtime.c:
+    php.h should be the first file included, so that HAVE_* are defined
+
+2000-02-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ldap/ldap.c
+      ext/interbase/interbase.c: More protos.
+
+    * ext/pdf/pdf.c: Changed here also.
+
+2000-02-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/config.m4
+      ext/standard/microtime.c: Include <sys/resource.h> for getrusage(2)
+
+    PR: #3479
+
+    * ext/cybercash/cybercash.c: Fix include file path
+
+    Suggested by: stephen@ecoverage.com
+    PR: #3542
+
+    * ext/icap/php_icap.c:
+    Speling mistake, fix suggested by zeekamotay@hotmail.com in #3558
+
+    * configure.in: Proper check for getrusage(), it somehow disappeared.
+
+2000-02-23  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/informix/ifx.ec: More protos.
+
+2000-02-23  Andi Gutmans  <andi@php.net>
+
+    * ext/mysql/libmysql/config-win32.h
+      ext/mysql/libmysql/global.h
+      ext/mysql/libmysql/libmysql.dsp:
+    - Make libmsyql.lib compile. It fails with two unresolved symbols on link
+      with PHP 4 so I am not commiting the .dsw quite yet.
+
 2000-02-22  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/session/session.c: Revert part of the last commit
