@@ -196,6 +196,8 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   AC_CHECK_LIB(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,  1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH, 1, [ ])])
+  AC_CHECK_LIB(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,     1, [ ])])
+  AC_CHECK_LIB(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,      1, [ ])])
   AC_CHECK_LIB(gd, gdImageStringFTEx,      [AC_DEFINE(HAVE_GD_STRINGFTEX,    1, [ ])])
   AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])])
   AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])])
