@@ -1237,20 +1237,26 @@ static int node_children(zval **children, xmlNode *nodep)
 
 		/* construct a node object for each child */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
+
+		/* Add the node object to the array of children */
+		zend_hash_next_index_insert((*children)->value.ht, &child, sizeof(zval *), NULL);
+
+		/* Add name, content and type as properties */
 		add_property_stringl(child, "name", (char *) last->name, strlen(last->name), 1);
+		add_property_long(child, "type", last->type);
 		if(last->content)
 			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
 //		add_property_resource(child, "node", ret);
-		add_property_long(child, "type", last->type);
-		/* Add the node object to the array of children */
-		zend_hash_next_index_insert((*children)->value.ht, &child, sizeof(zval *), NULL);
-		/* Get the namespace of the current node */
+
+		/* Get the namespace of the current node and add it as a property */
 		if(!node_namespace(&namespace, last))
 			zend_hash_update(child->value.obj.properties, "namespace", strlen("namespace")+1, (void *) &namespace, sizeof(zval *), NULL);
-		/* Get the attributes of the current node */
+
+		/* Get the attributes of the current node and add it as a property */
 		if(!node_attributes(&attributes, last))
 			zend_hash_update(child->value.obj.properties, "attributes", strlen("attributes")+1, (void *) &attributes, sizeof(zval *), NULL);
-		/* Get recursively the children of the current node */
+
+		/* Get recursively the children of the current node and add it as a property */
 		if(!node_children(&mchildren, last->childs))
 			zend_hash_update(child->value.obj.properties, "children", strlen("children")+1, (void *) &mchildren, sizeof(zval *), NULL);
 
@@ -1296,9 +1302,29 @@ PHP_FUNCTION(xmltree)
 	   as root, you may have a comment, pi and and element as root.
 	   Thanks to Paul DuBois for pointing me at this.
 	*/
-	if(0 == node_children(&children, root))
-		zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &children, sizeof(zval *), NULL);
+	if(0 == node_children(&children, root)) {
+		int i, count;
+		HashTable *lht;
+		zend_hash_update(return_value->value.obj.properties, "children", strlen("children")+1, (void *) &children, sizeof(zval *), NULL);
 
+		/* Find the child of xml type element */
+		lht = children->value.ht;
+		count = zend_hash_num_elements(lht);
+		zend_hash_internal_pointer_reset(lht);
+		for(i=0; i<count; i++) {
+			zval **prop, **keydata;
+			zend_hash_get_current_data(lht, (void **) &keydata);
+			if((*keydata)->type == IS_OBJECT) {
+			  if (zend_hash_find((*keydata)->value.obj.properties, "type", sizeof("type"), (void **)&prop) == SUCCESS) {
+					if((*prop)->value.lval == XML_ELEMENT_NODE) {
+						root = *keydata;
+						zend_hash_update(return_value->value.obj.properties, "root", strlen("root")+1, (void *) &root, sizeof(zval *), NULL);
+					}
+				}
+			}
+			zend_hash_move_forward(lht);
+		}
+	}
 	xmlFreeDoc(docp);
 }
 /* }}} */
