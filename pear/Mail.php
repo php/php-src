@@ -123,6 +123,11 @@ class Mail extends PEAR {
                     return false;
                 }
                 $text_headers .= $key . ': ' . $val . "\n";
+            } else if ($key == 'Receieved') {
+                // put Received: headers at the top, since Receieved:
+                // after Subject: in the header order is somtimes used
+                // as a spam trap.
+                $text_headers = $key . ': ' . $val . "\n" . $text_headers;
             } else {
                 $text_headers .= $key . ': ' . $val . "\n";
             }
