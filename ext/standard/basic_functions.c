@@ -104,8 +104,8 @@ static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
-static unsigned char first_through_third_args_force_ref[] =
-{3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+static unsigned char first_through_third_args_force_ref[] = {3, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
+static unsigned char fourth_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 
 typedef struct _php_shutdown_function_entry {
@@ -365,8 +365,8 @@ function_entry basic_functions[] = {
 	PHP_FE(addslashes,														NULL)
 	PHP_FE(addcslashes,														NULL)
 	PHP_FE(rtrim,															NULL)
-	PHP_FE(str_replace,														NULL)
-	PHP_FE(str_ireplace,													NULL)
+	PHP_FE(str_replace,				fourth_arg_force_ref)
+	PHP_FE(str_ireplace,			fourth_arg_force_ref)
 	PHP_FE(str_repeat,														NULL)
 	PHP_FE(count_chars,														NULL)
 	PHP_FE(chunk_split,														NULL)

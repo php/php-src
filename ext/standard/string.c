@@ -2720,7 +2720,7 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 /* {{{ php_str_to_str_ex
  */
 PHPAPI char *php_str_to_str_ex(char *haystack, int length, 
-	char *needle, int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity)
+	char *needle, int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity, int *replace_count)
 {
 	char *new_str;
 
@@ -2736,6 +2736,9 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 				end = new_str + length;
 				for (p = new_str; (r = php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
 					memcpy(r, str, str_len);
+					if (replace_count) {
+						(*replace_count)++;
+					}
 				}
 			} else {
 				haystack_dup = estrndup(haystack, length);
@@ -2745,6 +2748,9 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 				end = haystack_dup + length;
 				for (p = haystack_dup; (r = php_memnstr(p, needle_dup, needle_len, end)); p = r + needle_len) {
 					memcpy(new_str + (r - haystack_dup), str, str_len);
+					if (replace_count) {
+						(*replace_count)++;
+					}
 				}
 				efree(haystack_dup);
 				efree(needle_dup);
@@ -2766,6 +2772,9 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					e += r - p;
 					memcpy(e, str, str_len);
 					e += str_len;
+					if (replace_count) {
+						(*replace_count)++;
+					}
 				}
 
 				if (p < end) {
@@ -2785,6 +2794,9 @@ PHPAPI char *php_str_to_str_ex(char *haystack, int length,
 					e += r - p;
 					memcpy(e, str, str_len);
 					e += str_len;
+					if (replace_count) {
+						(*replace_count)++;
+					}
 				}
 
 				if (p < end) {
@@ -2812,6 +2824,9 @@ nothing_todo:
 		} else {
 			*_new_length = str_len;
 			new_str = estrndup(str, str_len);
+			if (replace_count) {
+				(*replace_count)++;
+			}
 			return new_str;
 		}
 	}
@@ -2824,14 +2839,14 @@ nothing_todo:
 PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
-	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1);
+	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1, NULL);
 } 
 /* }}}
  */
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity, int *replace_count)
 {
 	zval		**search_entry,
 				**replace_entry = NULL,
@@ -2903,7 +2918,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 			} else if (Z_STRLEN_PP(search_entry) > 1) {
 				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
 														   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
-														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity);
+														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity, replace_count);
 			}
 
 			efree(Z_STRVAL_P(result));
@@ -2927,7 +2942,7 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 		} else if (Z_STRLEN_P(search) > 1) {
 			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
 													Z_STRVAL_P(search), Z_STRLEN_P(search),
-													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity);
+													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity, replace_count);
 		} else {
 			*result = **subject;
 			zval_copy_ctor(result);
@@ -2941,14 +2956,16 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
  */
 static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensitivity)
 {
-	zval **subject, **search, **replace, **subject_entry;
+	zval **subject, **search, **replace, **subject_entry, **zcount;
 	zval *result;
 	char *string_key;
 	uint string_key_len;
 	ulong num_key;
+	int count = 0;
+	int argc = ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() != 3 ||
-	   zend_get_parameters_ex(3, &search, &replace, &subject) == FAILURE) {
+	if (argc < 3 || argc > 4 ||
+	   zend_get_parameters_ex(argc, &search, &replace, &subject, &zcount) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2973,7 +2990,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
 			MAKE_STD_ZVAL(result);
-			php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity);
+			php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
@@ -2989,12 +3006,15 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			zend_hash_move_forward(Z_ARRVAL_PP(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity);
+		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
 	}	
+	if (argc > 3) {
+		Z_LVAL_PP(zcount) = count;
+	}
 }
 /* }}} */
 
-/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject)
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, int &replace_count])
    Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
@@ -3002,7 +3022,7 @@ PHP_FUNCTION(str_replace)
 }
 /* }}} */
 
-/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject)
+/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject [, int &replace_count])
    Replaces all occurrences of search in haystack with replace / case-insensitive */
 PHP_FUNCTION(str_ireplace)
 {
