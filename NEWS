@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Fixed support for <![CDATA[]]> fields within XML documents in ext/xml. 
   (Sterling)
 - Fixed visibility of __construct and __clone. (Marcus)
+- Fixed bug #24766 (strange result array from unpack()). (Moriyoshi)
 - Fixed bug #24729 ($obj = new $className; causes crash when $className is not 
   set). (Marcus)
 - Fixed bug #24565 (cannot read array elements recived via $_REQUEST). (Zeev)
