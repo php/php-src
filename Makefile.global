@@ -52,7 +52,7 @@ test: $(SAPI_CLI_PATH)
 
 clean:
 	find . -name \*.lo -o -name \*.o | xargs rm -f
-   	find . -name \*.la -o -name \*.a | xargs rm -f 
+	find . -name \*.la -o -name \*.a | xargs rm -f 
 	find . -name \*.so | xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
 	rm -f libphp4.la $(SAPI_CLI_PATH) $(OVERALL_TARGET) modules/* libs/*
