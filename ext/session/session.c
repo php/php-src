@@ -266,6 +266,34 @@ static ps_module *_php_find_ps_module(char *name)
 	return ret;
 }
 
+static void _php_session_start(void)
+{
+	pval **ppid;
+	int send_cookie = 1;
+	char *session_data;
+	int datalen;
+	PSLS_FETCH();
+	
+	if(!PS(id) &&
+		zend_hash_find(&EG(symbol_table), PS(session_name), 
+				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
+		convert_to_string((*ppid));
+		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
+		send_cookie = 0;
+	}
+	
+	if(!PS(id)) {
+		PS(id) = _php_create_id(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
+	}
+
+	if(send_cookie) {
+		_php_session_send_cookie();
+	}
+	PS(nr_open_sessions)++;
+
+	_php_session_initialize();
+}
+
 PHP_FUNCTION(session_name)
 {
 	pval *p_name;
@@ -418,30 +446,7 @@ PHP_FUNCTION(session_decode)
 
 PHP_FUNCTION(session_start)
 {
-	pval **ppid;
-	int send_cookie = 1;
-	char *session_data;
-	int datalen;
-	PSLS_FETCH();
-	
-	if(!PS(id) &&
-		zend_hash_find(&EG(symbol_table), PS(session_name), 
-				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
-		convert_to_string((*ppid));
-		PS(id) = estrndup((*ppid)->value.str.val, (*ppid)->value.str.len);
-		send_cookie = 0;
-	}
-	
-	if(!PS(id)) {
-		PS(id) = _php_create_id(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
-	}
-
-	if(send_cookie) {
-		_php_session_send_cookie();
-	}
-	PS(nr_open_sessions)++;
-
-	_php_session_initialize();
+	_php_session_start();
 }
 
 void php_rinit_globals(php_ps_globals *ps_globals)
