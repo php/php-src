@@ -1743,23 +1743,27 @@ static void php_dom_remove_xinclude_nodes(xmlNodePtr cur TSRMLS_DC) {
 	}
 }
 
-/* {{{ proto int dom_document_xinclude()
+/* {{{ proto int dom_document_xinclude([int options])
    Substitutues xincludes in a DomDocument */
 PHP_FUNCTION(dom_document_xinclude)
 {
 	zval *id;
 	xmlDoc *docp;
 	xmlNodePtr root;
-	int err; 
+	int err, flags = 0; 
 	dom_object *intern;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &id, dom_document_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|l", &id, dom_document_class_entry, &flags) == FAILURE) {
 		return;
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
+#if LIBXML_VERSION >= 20600
+	err = xmlXIncludeProcessFlags(docp, flags);
+#else
 	err = xmlXIncludeProcess (docp);
+#endif
 
 	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
 	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document 
