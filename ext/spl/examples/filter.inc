@@ -40,6 +40,10 @@ class filter implements spl_forward
 		unset($this->it);
 	}
 
+	protected function accept($curr) {
+		return ereg($this->regex, $curr);
+	}
+
 	/**
 	 * Fetch next element and store it.
 	 *
@@ -49,7 +53,7 @@ class filter implements spl_forward
 		$this->curr = false;
 		while ($this->it->has_more()) {
 			$curr = $this->it->current();
-			if (ereg($this->regex, $curr)) {
+			if ($this->accept($curr)) {
 				$this->curr = $curr;
 				return;
 			}
