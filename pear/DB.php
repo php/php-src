@@ -369,7 +369,7 @@ class DB {
 		if (!$parsed['database'])
 			$dsn = preg_replace('|/+$|', '', $dsn);
 
-		$parsed['hostspec'] = $dsn;
+		$parsed['hostspec'] = urldecode($dsn);
 
 		if (!$parsed['dbsyntax']) {
 			$parsed['dbsyntax'] = $parsed['phptype'];
