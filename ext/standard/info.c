@@ -238,7 +238,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS(SG(request_info).request_uri);
 		}
 		PUTS("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
-		PUTS("PHP 4.0 Credits");
+		PUTS("PHP 4 Credits");
 		PUTS("</a></h1>\n");
 	}
 
