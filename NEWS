@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 05 Oct 2000, Version 4.0.3
+- Fixed dirname() under certain conditions (Andi)
 - Add --with-imap-ssl to support SSL'ized imap library in RH7 and others
   (Rasmus)
 - Fix possible crash bug in parse_url() (Andi)
