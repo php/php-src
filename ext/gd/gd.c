@@ -766,6 +766,7 @@ PHP_FUNCTION(imagecolorallocate)
    Copy the palette from the src image onto the dst image */
 PHP_FUNCTION(imagepalettecopy)
 {
+#if HAVE_LIBGD13
 	zval **dstim, **srcim;
 	gdImagePtr dst, src;
 
@@ -778,6 +779,10 @@ PHP_FUNCTION(imagepalettecopy)
 	ZEND_FETCH_RESOURCE(src, gdImagePtr, srcim, -1, "Image", GDG(le_gd));
 
 	gdImagePaletteCopy(dst, src);
+#else
+	php_error(E_WARNING, "Sorry ImagePaletteCopy was introduced in GD version 1.5");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
@@ -845,6 +850,7 @@ PHP_FUNCTION(imagecolorclosest)
    Get the index of the color which has the hue, white and blackness nearest to the given color */
 PHP_FUNCTION(imagecolorclosesthwb)
 {
+#if HAVE_GDIMAGECOLORRESOLVE
 	zval **imgind, **r, **g, **b;
 	int col;
 	gdImagePtr im;
@@ -863,6 +869,10 @@ PHP_FUNCTION(imagecolorclosesthwb)
 
 	col = gdImageColorClosestHWB(im, Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b));
 	RETURN_LONG(col);
+#else
+	php_error(E_WARNING, "ImageColorClosestHWB functionality was added in GD 1.8");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
@@ -1754,9 +1764,10 @@ PHP_FUNCTION(imagecopy)
 /* }}} */
 
 /* {{{ proto int imagecopymerge(int src_im, int dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
-    */
+   Merge one part of an image with another*/
 PHP_FUNCTION(imagecopymerge)
 {
+#if HAVE_LIBGD13
 	zval **SIM, **DIM, **SX, **SY, **SW, **SH, **DX, **DY, **PCT;
 	gdImagePtr im_dst;
 	gdImagePtr im_src;
@@ -1789,6 +1800,10 @@ PHP_FUNCTION(imagecopymerge)
 
 	gdImageCopyMerge(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
+#else
+	php_error(E_WARNING, "ImageCopyMerge was introduced in GD version 1.5");
+	RETURN_FALSE;
+#endif
 }
 /* }}} */
 
