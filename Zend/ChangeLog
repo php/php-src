@@ -1,3 +1,33 @@
+2003-02-02  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * zend_API.c
+      zend_API.h:
+      extend the parameter parsing API by two functions
+      for parsing method parameters with automatic
+      detection if the function was called as such or as
+      a class method (with a valid this ptr).
+      if called as a function the first parameter has to be
+      the object it is operating on, if called as a method
+      this is used.
+      
+
+2003-02-02  Zeev Suraski  <zeev@zend.com>
+
+    * zend.h
+      zend_operators.h:
+      whitespace
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Core rearrangements - move Zend Objects specific code to their
+      specific implementation file
+
+2003-02-02  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c:
+      - Fix warning
+
 2003-02-01  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_ini_scanner.l
