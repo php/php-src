@@ -16,5 +16,7 @@ AC_MSG_RESULT($PHP_MYSQL)
 
 if test "$PHP_MYSQL" != "no"; then
   PHP_EXTENSION(mysql)
+  AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
+  AC_ADD_INCLUDE(${ext_src_base}libmysql)
   MYSQL_CHECKS
 fi
