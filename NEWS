@@ -2,8 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
 - Implement access to INI variables from within .ini file. (Andrei)
-- Added SAPI hook to get the current request time. (Rasmus)
 - PHP will now respect extension dependencies when initializing. (Wez)
+- Added SAPI hook to get the current request time. (Rasmus)
 - Added new functions:
   . array_diff_key() (Andrey)
   . array_diff_ukey() (Andrey)
@@ -28,7 +28,6 @@ PHP                                                                        NEWS
 - Fixed bug with raw_post_data not getting set (Brian)
 - Fixed bug in mysql->client_version (Georg)
 - Fixed ZTS destruction. (Marcus)
-- Fixed bug #29737 (ip2long should return -1 if IP is 255.255.255.255 and FALSE on error). (Tony)
 - Fixed bug #29728 (Reflection API Feature: Default parameter value). (Marcus)
 - Fixed bug #29522 (accessing properties without connection). (Georg)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default). (Georg)
