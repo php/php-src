@@ -1,3 +1,130 @@
+2002-10-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Remove some old code.
+
+    * main/network.c
+      main/php_network.h: A much better probable fix for #16114.
+
+    * main/network.c: Probable fix for #16114
+
+    * main/streams.c: Fix a nasty nasty bug:
+    When not enough data to satisfy a read was found in the buffer, fgets modifies
+    the buf pointer to point to the position to store the next chunk.  It then
+    returned the modified buf pointer, instead of a pointer to the start of the
+    buffer.
+
+    Also added some infrastructure for making fgets grow the buffer on-demand to
+    the correct line-size.  Since streams uses reasonable chunk sizes, the
+    performance of the realloc's should be pretty good; in the best case, the line
+    is already found completely in the buffer, so the returned buffer will be
+    allocated to precisely the correct size.
+
+    In the worst case, where the buffer only contains part of the line, we get a
+    realloc per buffer fill. The reallocs are either the size of the remainder
+    of the line, or the chunk_size (if the buffer sill does not contain a complete
+    line).  Each realloc adds an extra byte for a NUL terminator.
+
+    I think this will perform quite well using the default chunk size of 8K.
+
+    * main/php_network.h
+      ext/standard/fsock.c
+      main/network.c: (php_socket_errno) win32 errno compatible macro.
+    (php_socket_strerror) win32 compatible strerror replacement.
+    Add an E_NOTICE when a socket write fails.
+
+2002-10-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/dl.c:
+    - Fixed bug #19885, dl() no longer gives a fatal error when a module
+      could not be loaded. (Derick)
+
+2002-10-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch:
+    Redo the patch on Linux, the cygwin diff seems to be a bit broken.
+
+    * sapi/thttpd/thttpd_patch: PHP + thttpd (+IRCG) build using CYGWIN now
+
+    * sapi/thttpd/config.m4: Remove set .x
+
+    * sapi/thttpd/config.m4: Use if block rather than an or expression
+
+2002-10-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/session/tests/004.phpt
+      ext/session/tests/005.phpt
+      ext/session/tests/014.phpt
+      ext/session/tests/015.phpt
+      ext/session/tests/018.phpt
+      ext/session/tests/020.phpt
+      ext/session/tests/021.phpt: - Hardcode dependent ini setting
+
+2002-10-13  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/pear.m4: * Add missing PHP_SUBST(awk).
+
+2002-10-13  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c: Fixed proto. Clean up.
+
+    * ext/pgsql/pgsql.c: Need to init connstring when there are 2 args.
+
+2002-10-13  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/CREDITS
+      sapi/cgi/README.FastCGI
+      sapi/cgi/cgi_main.c:
+    make fastcgi usage threadsafe, ready for future multithreaded fastcgi implementation
+    get rid of environment overwriting but hooking into php's environment function
+    set $_ENV correctly for mod_fastcgi
+    add -b to specify binding for fastcgi
+    new readme file with information for running under apache2.0 and iis
+
+2002-10-13  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Introduce connect_type option to pg_connect().
+    pg_connect(conn_str, conn_type) is allowed.
+
+2002-10-13  Shane Caraveo  <shane@caraveo.com>
+
+    * main/php_variables.c
+      main/php_variables.h:
+    make php_import_environment_variables overwritable so fastcgi can correctly
+    set $_ENV.
+
+    * sapi/cgi/libfcgi/os_unix.c: fixes for unix, untested
+    remove exit calls
+    fix a couple function definitions
+
+2002-10-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/db/tests/.cvsignore: ignore test.dbm
+
+    * ext/standard/tests/file/.cvsignore: These should be ignored.
+
+2002-10-13  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/libfcgi/os_win32.c: fix shutdown issues
+
+    * sapi/cgi/libfcgi/os_win32.c:
+    fix invalid handle issue that shutdown php fastcgi prematurly
+    fix checking os name for impersonation
+
+2002-10-13  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/php_pgsql.h
+      ext/pgsql/pgsql.c: Enable pg_escape_bytea().
+
+2002-10-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/ftp.c: Fixed ZTS build
+    Fixed 2 ZTS related warnings
+
+2002-10-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/http_fopen_wrapper.c: Make PHP follow 301 correctly.
+
 2002-10-12  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: Add note about fhttpd removal.
