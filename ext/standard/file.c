@@ -1265,8 +1265,8 @@ PHP_FUNCTION(fwrite)
 		socketd = *(int *) what;
 	}
 
+	buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
 	if (!arg3 && PG(magic_quotes_runtime)) {
-		buffer = estrndup(Z_STRVAL_PP(arg2), Z_STRLEN_PP(arg2));
 		php_stripslashes(buffer, &num_bytes TSRMLS_CC);
 	}
 
