@@ -42,6 +42,10 @@
 /* Enable / Disable MBSTRING extension (default: enabled) */
 #define HAVE_MBSTRING 1
 #define HAVE_MBREGEX 1
+#define HAVE_MBSTR_CN 1
+#define HAVE_MBSTR_JA 1
+#define HAVE_MBSTR_KR 1
+#define HAVE_MBSTR_TW 1
 
 /* Enable / Disable MySQL extension (default: enabled) */
 #define HAVE_MYSQL 1
