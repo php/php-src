@@ -163,7 +163,7 @@ PHP_FUNCTION(apache_note)
  */
 PHP_MINFO_FUNCTION(apache)
 {
-	char *apv = ap_get_server_version();
+	char *apv = (char *) ap_get_server_version();
 	module *modp = NULL;
 	char output_buf[128];
 #if !defined(WIN32) && !defined(WINNT)
