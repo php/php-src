@@ -1,3 +1,119 @@
+2003-06-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/curl/.cvsignore:
+      Ignore some more win32 build files
+
+    * ext/curl/multi.c
+      ext/curl/php_curl.h:
+      ZTS Fixes
+
+    * ext/curl/interface.c
+      ext/curl/php_curl.h
+      ext/curl/streams.c:
+      Win32 build fixes
+
+2003-06-19  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/streamsfuncs.c:
+      Quiet down decode_context_param when stream (not context) is passed.
+      Switch stream_socket_*() to use macro for retrieving context from zval.
+
+2003-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/curl/curl.c:
+      Added missing safe_mode checks
+
+    * ext/curl/interface.c:
+      Added missing safe_mode checks.
+      Added support for additional libcurl options.
+      Set CURLOPT_NOSIGNAL by default for ZTS, for signal free operation.
+
+2003-06-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c:
+      Tidy up getaddrinfo() code so that it can handle broken ipv6 stacks and
+      only
+      returns TCP addresses for TCP and UDP addresses for UDP requests
+      respectively.
+      
+      Also, when a connect call "returns" EINPROGRESS and the full timeout limit
+      has not yet been reached, retry the select with the remaining time
+      interval.
+      This is a potential fix for Bug #21653.
+      
+
+2003-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/streamsfuncs.c:
+      Reverting previous patch (not necessary, thanks Pollita ;) )
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: Fixed memory leak, when invalid context is specified.
+
+    * ext/standard/streamsfuncs.c:
+      Fixed memory leak, when invalid context is specified.
+
+    * ext/standard/info.c
+      ext/standard/streamsfuncs.c
+      ext/standard/user_filters.c:
+      Fixed possible crashes in streams code
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Fixed a possible crash in parse_context_options()
+
+2003-06-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/tests/dba007.phpt:
+      MFH: Allow the extension to reside elsewhere
+
+2003-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/gd/gd.c:
+      MFH: Fixed a crash inside php_imagettftext_common();
+
+2003-06-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/dba007.phpt:
+      Allow the extension to reside elsewhere
+
+2003-06-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/gd.c:
+      Fixed a crash inside php_imagettftext_common();
+
+2003-06-19  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/xsltprocessor.c:
+      add xsl_xsltprocessor_transform_to_uri functionality
+      fix a few unhandled error conditions
+      fix compiler warnings
+
+2003-06-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/dba_db4.c:
+      to be precise
+
+2003-06-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/sockets/config.m4:
+      - Correct stray commit
+
+2003-06-19  Vincent Blavet  <vincent@blavet.net>
+
+    * pear/package-Archive_Tar.xml:
+      - Sync with pear/Archive_Tar/package.xml 1.12
+
+2003-06-19  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/sockets/config.m4:
+      enable sockets by default.
+
 2003-06-18  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
