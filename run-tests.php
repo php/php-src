@@ -74,7 +74,7 @@ if (isset($_ENV['TEST_PHP_LOG_FORMAT'])) {
 	$log_format = 'LEOD';
 }
 
-if (!@is_executable($php)) {
+if (function_exists('is_executable') && !@is_executable($php)) {
 	error("invalid PHP executable specified by TEST_PHP_EXECUTABLE  = " . $php);
 }
 
