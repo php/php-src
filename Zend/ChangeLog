@@ -1,3 +1,15 @@
+2004-02-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      Committing for Jan.
+
+2004-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_compile.c
+      tests/bug27145.phpt:
+      Fixed bug #27145 (Unmangle private/protected property names before printing
+      then inside error messages).
+
 2004-02-04  Zeev Suraski  <zeev@zend.com>
 
     * zend_execute_API.c:

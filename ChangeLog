@@ -1,3 +1,37 @@
+2004-02-05  Andrey Hristov  <andrey@webgate.bg>
+
+    * NEWS:
+      typo
+
+2004-02-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      Committing for Jan.
+
+2004-02-05  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c:
+      fix serialization
+
+    * ext/session/tests/019.phpt:
+      fix test - remove warning
+
+2004-02-05  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix bug #27149
+      (offset should start with 1)
+
+2004-02-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS:
+      Bug fixing news.
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/tests/bug27145.phpt:
+      Fixed bug #27145 (Unmangle private/protected property names before printing
+      then inside error messages).
+
 2004-02-04  Zeev Suraski  <zeev@zend.com>
 
     * ZendEngine2/zend_execute_API.c:
