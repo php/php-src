@@ -23,6 +23,7 @@
 
 #if HAVE_MING
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 #include "php_ming.h"
 
 static zend_function_entry ming_functions[] = {
@@ -2955,7 +2956,9 @@ PHP_MINIT_FUNCTION(ming)
   CONSTANT("SWFTEXTFIELD_WORDWRAP",       SWFTEXTFIELD_WORDWRAP);
   CONSTANT("SWFTEXTFIELD_DRAWBOX",        SWFTEXTFIELD_DRAWBOX);
   CONSTANT("SWFTEXTFIELD_NOSELECT",       SWFTEXTFIELD_NOSELECT);
+#ifdef SWFTEXTFIELD_HTML
   CONSTANT("SWFTEXTFIELD_HTML",           SWFTEXTFIELD_HTML);
+#endif
 
   /* flags for SWFTextField_align */
   CONSTANT("SWFTEXTFIELD_ALIGN_LEFT",     SWFTEXTFIELD_ALIGN_LEFT);
