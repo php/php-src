@@ -21,6 +21,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -411,8 +414,15 @@ int php_url_scanner_ex_deactivate(TSRMLS_D)
 
 static void php_url_scanner_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
 {
+	size_t len;
+
     if (BG(url_adapt_state_ex).url_app.len != 0) {
-        *handled_output = url_adapt_ext(output, output_len, handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+        *handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+		if (sizeof(uint) < sizeof(size_t)) {
+			if (len > UINT_MAX)
+				len = UINT_MAX;
+		}
+		*handled_output_len = len;
     } else {
         *handled_output = NULL;
     }

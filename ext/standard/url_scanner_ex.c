@@ -23,6 +23,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -86,7 +89,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
 PHP_INI_END()
 
-#line 92
+#line 95
 
 
 #define YYFILL(n) goto done
@@ -151,25 +154,25 @@ yy0:
 	if(yych >= ';')	goto yy4;
 yy2:	yych = *++YYCURSOR;
 yy3:
-#line 110
+#line 113
 	{ smart_str_append(dest, url); return; }
 yy4:	yych = *++YYCURSOR;
 yy5:
-#line 111
+#line 114
 	{ sep = separator; goto scan; }
 yy6:	yych = *++YYCURSOR;
 yy7:
-#line 112
+#line 115
 	{ bash = p - 1; goto done; }
 yy8:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 yy9:	if(yybm[0+yych] & 128)	goto yy8;
 yy10:
-#line 113
+#line 116
 	{ goto scan; }
 }
-#line 114
+#line 117
 
 done:
 	
@@ -382,17 +385,17 @@ yy11:
 	if(yybm[0+yych] & 128)	goto yy15;
 yy13:	yych = *++YYCURSOR;
 yy14:
-#line 282
+#line 285
 	{ passthru(STD_ARGS); STATE = STATE_TAG; goto state_tag; }
 yy15:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
 yy16:	if(yybm[0+yych] & 128)	goto yy15;
 yy17:
-#line 283
+#line 286
 	{ passthru(STD_ARGS); goto state_plain; }
 }
-#line 284
+#line 287
 
 
 state_tag:	
@@ -446,11 +449,11 @@ yy18:
 yy20:	yych = *++YYCURSOR;
 	goto yy25;
 yy21:
-#line 289
+#line 292
 	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
 yy22:	yych = *++YYCURSOR;
 yy23:
-#line 290
+#line 293
 	{ passthru(STD_ARGS); goto state_plain_begin; }
 yy24:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -458,7 +461,7 @@ yy24:	++YYCURSOR;
 yy25:	if(yybm[0+yych] & 128)	goto yy24;
 	goto yy21;
 }
-#line 291
+#line 294
 
 
 state_next_arg_begin:
@@ -529,20 +532,20 @@ yy26:
 	}
 yy28:	yych = *++YYCURSOR;
 yy29:
-#line 299
+#line 302
 	{ passthru(STD_ARGS); handle_form(STD_ARGS); goto state_plain_begin; }
 yy30:	yych = *++YYCURSOR;
 	goto yy37;
 yy31:
-#line 300
+#line 303
 	{ passthru(STD_ARGS); goto state_next_arg; }
 yy32:	yych = *++YYCURSOR;
 yy33:
-#line 301
+#line 304
 	{ --YYCURSOR; STATE = STATE_ARG; goto state_arg; }
 yy34:	yych = *++YYCURSOR;
 yy35:
-#line 302
+#line 305
 	{ passthru(STD_ARGS); goto state_plain_begin; }
 yy36:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -550,7 +553,7 @@ yy36:	++YYCURSOR;
 yy37:	if(yybm[0+yych] & 128)	goto yy36;
 	goto yy31;
 }
-#line 303
+#line 306
 
 
 state_arg:
@@ -604,11 +607,11 @@ yy38:
 yy40:	yych = *++YYCURSOR;
 	goto yy45;
 yy41:
-#line 308
+#line 311
 	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
 yy42:	yych = *++YYCURSOR;
 yy43:
-#line 309
+#line 312
 	{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; goto state_next_arg; }
 yy44:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -616,7 +619,7 @@ yy44:	++YYCURSOR;
 yy45:	if(yybm[0+yych] & 128)	goto yy44;
 	goto yy41;
 }
-#line 310
+#line 313
 
 
 state_before_val:
@@ -671,12 +674,12 @@ yy48:	yyaccept = 0;
 	if(yych == ' ')	goto yy55;
 	if(yych == '=')	goto yy53;
 yy49:
-#line 316
+#line 319
 	{ --YYCURSOR; goto state_next_arg_begin; }
 yy50:	yych = *++YYCURSOR;
 	goto yy54;
 yy51:
-#line 315
+#line 318
 	{ passthru(STD_ARGS); STATE = STATE_VAL; goto state_val; }
 yy52:	yych = *++YYCURSOR;
 	goto yy49;
@@ -695,7 +698,7 @@ yy57:	YYCURSOR = YYMARKER;
 	case 0:	goto yy49;
 	}
 }
-#line 317
+#line 320
 
 
 
@@ -765,7 +768,7 @@ yy60:	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
 	goto yy77;
 yy61:
-#line 325
+#line 328
 	{ handle_val(STD_ARGS, 0, '\0'); goto state_next_arg_begin; }
 yy62:	yyaccept = 0;
 	yych = *(YYMARKER = ++YYCURSOR);
@@ -774,7 +777,7 @@ yy63:	yych = *++YYCURSOR;
 	goto yy67;
 yy64:	yych = *++YYCURSOR;
 yy65:
-#line 326
+#line 329
 	{ passthru(STD_ARGS); goto state_next_arg_begin; }
 yy66:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -791,7 +794,7 @@ yy69:	if(yybm[0+yych] & 16)	goto yy68;
 yy70:	yych = *++YYCURSOR;
 	if(yybm[0+yych] & 8)	goto yy66;
 yy71:
-#line 324
+#line 327
 	{ handle_val(STD_ARGS, 1, '\''); goto state_next_arg_begin; }
 yy72:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -814,7 +817,7 @@ yy77:	if(yybm[0+yych] & 64)	goto yy76;
 yy78:	yych = *++YYCURSOR;
 	if(yybm[0+yych] & 8)	goto yy66;
 yy79:
-#line 323
+#line 326
 	{ handle_val(STD_ARGS, 1, '"'); goto state_next_arg_begin; }
 yy80:	++YYCURSOR;
 	if(YYLIMIT == YYCURSOR) YYFILL(1);
@@ -824,7 +827,7 @@ yy81:	if(yybm[0+yych] & 128)	goto yy80;
 yy82:	yych = *++YYCURSOR;
 	goto yy79;
 }
-#line 327
+#line 330
 
 
 stop:
@@ -912,8 +915,15 @@ int php_url_scanner_ex_deactivate(TSRMLS_D)
 
 static void php_url_scanner_output_handler(char *output, uint output_len, char **handled_output, uint *handled_output_len, int mode TSRMLS_DC)
 {
+	size_t len;
+
     if (BG(url_adapt_state_ex).url_app.len != 0) {
-        *handled_output = url_adapt_ext(output, output_len, handled_output_len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+        *handled_output = url_adapt_ext(output, output_len, &len, (zend_bool) (mode&PHP_OUTPUT_HANDLER_END ? 1 : 0) TSRMLS_CC);
+		if (sizeof(uint) < sizeof(size_t)) {
+			if (len > UINT_MAX)
+				len = UINT_MAX;
+		}
+		*handled_output_len = len;
     } else {
         *handled_output = NULL;
     }
