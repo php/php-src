@@ -154,10 +154,6 @@ SOURCE=..\..\ext\java\java.c
 
 SOURCE=.\servlet.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\..\..\win32\winutil.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -184,9 +180,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-  cd net\php
+	cd net\php 
 	$(JAVA_HOME)\bin\javac -O *.java 
-	cd ..\..
+	cd ..\.. 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -210,9 +206,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-  cd net\php
+	cd net\php 
 	$(JAVA_HOME)\bin\javac -g *.java 
-	cd ..\..
+	cd ..\.. 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -236,9 +232,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-  cd net\php
+	cd net\php 
 	$(JAVA_HOME)\bin\javac -g *.java 
-	cd ..\..
+	cd ..\.. 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
@@ -262,9 +258,9 @@ InputPath=.\servlet.java
 	copy ..\..\ext\java\reflect.java net\php > nul 
 	echo library=phpsrvlt>net/php/reflect.properties 
 	echo library=phpsrvlt>net/php/servlet.properties 
-  cd net\php
+	cd net\php 
 	$(JAVA_HOME)\bin\javac -O *.java 
-	cd ..\..
+	cd ..\.. 
 	$(JAVA_HOME)\bin\jar c0f $(OutDir)\phpsrvlt.jar net\php\*.class net\php\*.properties 
 	erase net\php\servlet.* 
 	erase net\php\formatter.* 
