@@ -463,6 +463,11 @@ static char *php_session_encode(int *newlen TSRMLS_DC)
 {
 	char *ret = NULL;
 
+	if (!PS(http_session_vars)) {
+		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot encode non-existent session.");
+		 return NULL;
+	}
+
 	if (PS(serializer)->encode(&ret, newlen TSRMLS_CC) == FAILURE)
 		ret = NULL;
 
@@ -1318,6 +1323,10 @@ PHP_FUNCTION(session_encode)
 	}
 
 	enc = php_session_encode(&len TSRMLS_CC);
+	if (enc == NULL) {
+		RETURN_FALSE;
+	}
+	
 	RETVAL_STRINGL(enc, len, 0);
 }
 /* }}} */
