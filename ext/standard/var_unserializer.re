@@ -374,12 +374,6 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	class_name = estrndup(YYCURSOR, len);
 	YYCURSOR += len;
 
-	while (len-- > 0) {
-		if (class_name[len] >= 'A' && class_name[len] <= 'Z') {
-			class_name[len] = class_name[len] - 'A' + 'a';
-		}
-	}
-	
 	do {
 		/* Try to find class directly */
 		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
