@@ -943,7 +943,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 PHP_FUNCTION(call_user_func)
 {
 	pval ***params;
-	pval retval;
+	pval *retval_ptr;
 	int arg_count=ARG_COUNT(ht);
 	CLS_FETCH();
 	
@@ -958,8 +958,9 @@ PHP_FUNCTION(call_user_func)
 	}
 	SEPARATE_ZVAL(params[0]);
 	convert_to_string(*params[0]);
-	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval, arg_count-1, params+1, 1)==SUCCESS) {
-		*return_value = retval;
+	if (call_user_function_ex(CG(function_table), NULL, *params[0], &retval_ptr, arg_count-1, params+1, 1)==SUCCESS
+		&& retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING,"Unable to call %s() - function does not exist", (*params[0])->value.str.val);
 	}
@@ -970,7 +971,7 @@ PHP_FUNCTION(call_user_func)
 PHP_FUNCTION(call_user_method)
 {
 	pval ***params;
-	pval retval;
+	pval *retval_ptr;
 	int arg_count=ARG_COUNT(ht);
 	CLS_FETCH();
 	
@@ -991,8 +992,9 @@ PHP_FUNCTION(call_user_method)
 	SEPARATE_ZVAL(params[0]);
 	SEPARATE_ZVAL(params[1]);
 	convert_to_string(*params[0]);
-	if (call_user_function_ex(CG(function_table), *params[1], *params[0], &retval, arg_count-2, params+2, 1)==SUCCESS) {
-		*return_value = retval;
+	if (call_user_function_ex(CG(function_table), *params[1], *params[0], &retval_ptr, arg_count-2, params+2, 1)==SUCCESS
+		&& retval_ptr) {
+		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
 	} else {
 		php_error(E_WARNING,"Unable to call %s() - function does not exist", (*params[0])->value.str.val);
 	}
