@@ -119,6 +119,12 @@ class PEAR_Common extends PEAR
 
     var $current_path = null;
 
+    /**
+     * PEAR_SourceAnalyzer instance
+     * @var object
+     */
+    var $source_analyzer = null;
+
     // }}}
 
     // {{{ constructor
@@ -418,13 +424,6 @@ class PEAR_Common extends PEAR
                     $this->filelist[$this->current_path]['replacements'][] = $attribs;
                 }
                 break;
-
-            case 'libfile':
-                if (!$this->in_changelog) {
-                    $this->lib_atts = $attribs;
-                    $this->lib_atts['role'] = 'extsrc';
-                }
-                break;
             case 'maintainers':
                 $this->pkginfo['maintainers'] = array();
                 $this->m_i = 0; // maintainers array index
@@ -563,9 +562,6 @@ class PEAR_Common extends PEAR
             case 'license':
                 $this->pkginfo['release_license'] = $data;
                 break;
-            case 'sources':
-                $this->lib_sources[] = $data;
-                break;
             case 'dep':
                 if ($data && !$this->in_changelog) {
                     $this->pkginfo['release_deps'][$this->d_i]['name'] = $data;
@@ -601,37 +597,6 @@ class PEAR_Common extends PEAR
                         $this->filelist[$path]['role'] = $this->dir_role;
                     }
                 }
-                break;
-            case 'libfile':
-                if ($this->in_changelog) {
-                    break;
-                }
-                $path = '';
-                if (!empty($this->dir_names)) {
-                    foreach ($this->dir_names as $dir) {
-                        $path .= $dir . DIRECTORY_SEPARATOR;
-                    }
-                }
-                $path .= $this->lib_name;
-                $this->filelist[$path] = $this->lib_atts;
-                // Set the baseinstalldir only if the file don't have this attrib
-                if (!isset($this->filelist[$path]['baseinstalldir']) &&
-                    isset($this->dir_install))
-                {
-                    $this->filelist[$path]['baseinstalldir'] = $this->dir_install;
-                }
-                if (isset($this->lib_sources)) {
-                    $this->filelist[$path]['sources'] = implode(' ', $this->lib_sources);
-                }
-                unset($this->lib_atts);
-                unset($this->lib_sources);
-                unset($this->lib_name);
-                break;
-            case 'libname':
-                if ($this->in_changelog) {
-                    break;
-                }
-                $this->lib_name = $data;
                 break;
             case 'maintainer':
                 if (empty($this->pkginfo['maintainers'][$this->m_i]['role'])) {
@@ -808,6 +773,44 @@ class PEAR_Common extends PEAR
         return $this->pkginfo;
     }
     // }}}
+    // {{{ infoFromAny()
+
+    /**
+     * Returns package information from different sources
+     *
+     * This method is able to extract information about a package
+     * from a .tgz archive or from a XML package definition file.
+     *
+     * @access public
+     * @param  string Filename of the source ('package.xml', '<package>.tgz')
+     * @return string
+     */
+    function infoFromAny($info)
+    {
+        if (is_string($info) && file_exists($info)) {
+            $tmp = substr($info, -4);
+            if ($tmp == '.xml') {
+                $info = $this->infoFromDescriptionFile($info);
+            } elseif ($tmp == '.tar' || $tmp == '.tgz') {
+                $info = $this->infoFromTgzFile($info);
+            } else {
+                $fp = fopen($info, "r");
+                $test = fread($fp, 5);
+                fclose($fp);
+                if ($test == "<?xml") {
+                    $info = $this->infoFromDescriptionFile($info);
+                } else {
+                    $info = $this->infoFromTgzFile($info);
+                }
+            }
+            if (PEAR::isError($info)) {
+                return $this->raiseError($info);
+            }
+        }
+        return $info;
+    }
+
+    // }}}
     // {{{ xmlFromInfo()
 
     /**
@@ -925,85 +928,40 @@ class PEAR_Common extends PEAR
         if (isset($pkginfo['filelist'])) {
             $ret .= "$indent    <filelist>\n";
             foreach ($pkginfo['filelist'] as $file => $fa) {
-                if (@$fa['role'] == 'extsrc') {
-                    $ret .= "$indent      <libfile>\n";
-                    $ret .= "$indent        <libname>$file</libname>\n";
-                    $ret .= "$indent        <sources>$fa[sources]</sources>\n";
-                    $ret .= "$indent      </libfile>\n";
+                @$ret .= "$indent      <file role=\"$fa[role]\"";
+                if (isset($fa['baseinstalldir'])) {
+                    $ret .= ' baseinstalldir="' .
+                        htmlspecialchars($fa['baseinstalldir']) . '"';
+                }
+                if (isset($fa['md5sum'])) {
+                    $ret .= " md5sum=\"$fa[md5sum]\"";
+                }
+                if (isset($fa['platform'])) {
+                    $ret .= " platform=\"$fa[platform]\"";
+                }
+                if (!empty($fa['install-as'])) {
+                    $ret .= ' install-as="' .
+                        htmlspecialchars($fa['install-as']) . '"';
+                }
+                $ret .= ' name="' . htmlspecialchars($file) . '"';
+                if (empty($fa['replacements'])) {
+                    $ret .= "/>\n";
                 } else {
-                    @$ret .= "$indent      <file role=\"$fa[role]\"";
-                    if (isset($fa['baseinstalldir'])) {
-                        $ret .= ' baseinstalldir="' .
-                             htmlspecialchars($fa['baseinstalldir']) . '"';
-                    }
-                    if (isset($fa['md5sum'])) {
-                        $ret .= " md5sum=\"$fa[md5sum]\"";
-                    }
-                    if (isset($fa['platform'])) {
-                        $ret .= " platform=\"$fa[platform]\"";
-                    }
-                    if (!empty($fa['install-as'])) {
-                        $ret .= ' install-as="' .
-                             htmlspecialchars($fa['install-as']) . '"';
-                    }
-                    $ret .= ' name="' . htmlspecialchars($file) . '"';
-                    if (empty($fa['replacements'])) {
-                        $ret .= "/>\n";
-                    } else {
-                        $ret .= ">\n";
-                        foreach ($fa['replacements'] as $r) {
-                            $ret .= "$indent        <replace";
-                            foreach ($r as $k => $v) {
-                                $ret .= " $k=\"" . htmlspecialchars($v) .'"';
-                            }
-                            $ret .= "/>\n";
+                    $ret .= ">\n";
+                    foreach ($fa['replacements'] as $r) {
+                        $ret .= "$indent        <replace";
+                        foreach ($r as $k => $v) {
+                            $ret .= " $k=\"" . htmlspecialchars($v) .'"';
                         }
-                        @$ret .= "$indent      </file>\n";
+                        $ret .= "/>\n";
                     }
+                    @$ret .= "$indent      </file>\n";
                 }
             }
             $ret .= "$indent    </filelist>\n";
         }
         $ret .= "$indent  </release>\n";
         return $ret;
-    }
-
-    // }}}
-    // {{{ infoFromAny()
-
-    /**
-     * Returns package information from different sources
-     *
-     * This method is able to extract information about a package
-     * from a .tgz archive or from a XML package definition file.
-     *
-     * @access public
-     * @param  string Filename of the source ('package.xml', '<package>.tgz')
-     * @return string
-     */
-    function infoFromAny($info)
-    {
-        if (is_string($info) && file_exists($info)) {
-            $tmp = substr($info, -4);
-            if ($tmp == '.xml') {
-                $info = $this->infoFromDescriptionFile($info);
-            } elseif ($tmp == '.tar' || $tmp == '.tgz') {
-                $info = $this->infoFromTgzFile($info);
-            } else {
-                $fp = fopen($info, "r");
-                $test = fread($fp, 5);
-                fclose($fp);
-                if ($test == "<?xml") {
-                    $info = $this->infoFromDescriptionFile($info);
-                } else {
-                    $info = $this->infoFromTgzFile($info);
-                }
-            }
-            if (PEAR::isError($info)) {
-                return $this->raiseError($info);
-            }
-        }
-        return $info;
     }
 
     // }}}
@@ -1131,12 +1089,10 @@ class PEAR_Common extends PEAR
                     $errors[] = "file $file: missing role";
                 } elseif (!in_array($fa['role'], $_PEAR_Common_file_roles)) {
                     $errors[] = "file $file: invalid role, should be one of: ".implode(' ', $_PEAR_Common_file_roles);
-                } elseif ($fa['role'] == 'extsrc' && empty($fa['sources'])) {
-                    $errors[] = "file $file: no source files";
                 }
                 // (ssb) Any checks we can do for baseinstalldir?
-                // (cox) Perhaps checks that either the target dir and baseInstall
-                //       doesn't cointain "../../"
+                // (cox) Perhaps checks that either the target dir and
+                //       baseInstall doesn't cointain "../../"
             }
         }
         return true;

@@ -1,10 +1,10 @@
 <!--
-     $Id: package.dtd,v 1.27 2002-07-21 07:06:56 ssb Exp $
+     $Id: package.dtd,v 1.28 2002-11-26 22:52:34 ssb Exp $
 
      This is the PEAR package description, version 1.0b9.
      It should be used with the informal public identifier:
 
-         "-//PHP Group//DTD PEAR Package 1.0b9//EN//XML"
+         "-//PHP Group//DTD PEAR Package 1.0b10//EN//XML"
 
      Copyright (c) 1997-2002 The PHP Group             
 
@@ -55,9 +55,9 @@
 
 <!ELEMENT notes (#PCDATA)>
 
-<!ELEMENT filelist (dir|file|libfile)+>
+<!ELEMENT filelist (dir|file)+>
 
-<!ELEMENT dir (dir|file|libfile)+>
+<!ELEMENT dir (dir|file)+>
 <!ATTLIST dir name           CDATA #REQUIRED
               baseinstalldir CDATA #IMPLIED>
 
@@ -78,14 +78,6 @@
 <!ATTLIST replace from        CDATA              #REQUIRED
                   to          CDATA              #REQUIRED
                   type        CDATA              #REQUIRED>
-
-<!ELEMENT libfile (libname|sources|includes|libadd)+>
-
-<!ELEMENT libname (#PCDATA)>
-
-<!ELEMENT sources (#PCDATA)>
-
-<!ELEMENT libadd (#PCDATA)>
 
 <!ELEMENT deps (dep)+>
 
