@@ -26,15 +26,9 @@
 #define HAS_OLOG 1
 
 #if defined(COMPILE_DL)
-# if PHP_31
-#  include "../phpdl.h"
-# else
-#  ifdef THREAD_SAFE
-#  undef THREAD_SAFE
-#  endif
-#  include "dl/phpdl.h"
-# endif
+# include "dl/phpdl.h"
 #endif
+
 #include "php.h"
 
 #if PHP_API_VERSION < 19990421 
@@ -72,28 +66,17 @@
 #define min(a, b) ((a) > (b) ? (b) : (a))
 #endif
 
-#ifdef THREAD_SAFE
-
-void *oracle_mutex;
-DWORD ORACLETls;
-static int numthreads=0;
-
-typedef struct oracle_global_struct {
-	oracle_module php3_oracle_module;
-} oracle_global_struct;
-
-#define ORACLE_GLOBAL(a) oracle_globals->a
-
-#define ORACLE_TLS_VARS \
-	oracle_global_struct *oracle_globals = TlsGetValue(ORACLETls); 
-
+#if WIN32||WINNT
+#define PHP_ORA_API __declspec(dllexport)
 #else
-oracle_module php3_oracle_module;
-#define ORACLE_GLOBAL(a) a
-#define ORACLE_TLS_VARS
-#endif
+#define PHP_ORA_API
+#endif                                   
 
-#undef ORACLE_DEBUG
+#ifdef ZTS
+int ora_globals_id;
+#else
+PHP_ORA_API php_ora_globals ora_globals;
+#endif
 
 #define DB_SIZE 65536
 
@@ -113,6 +96,37 @@ static int _ora_ping(oraConnection *conn);
 int ora_set_param_values(oraCursor *cursor, int isout);
 
 void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent);
+
+
+PHP_FUNCTION(ora_bind);
+PHP_FUNCTION(ora_close);
+PHP_FUNCTION(ora_commit);
+PHP_FUNCTION(ora_commitoff);
+PHP_FUNCTION(ora_commiton);
+PHP_FUNCTION(ora_do);
+PHP_FUNCTION(ora_error);
+PHP_FUNCTION(ora_errorcode);
+PHP_FUNCTION(ora_exec);
+PHP_FUNCTION(ora_fetch);
+PHP_FUNCTION(ora_fetch_into);
+PHP_FUNCTION(ora_columntype);
+PHP_FUNCTION(ora_columnname);
+PHP_FUNCTION(ora_columnsize);
+PHP_FUNCTION(ora_getcolumn);
+PHP_FUNCTION(ora_numcols);
+PHP_FUNCTION(ora_numrows);
+PHP_FUNCTION(ora_logoff);
+PHP_FUNCTION(ora_logon);
+PHP_FUNCTION(ora_plogon);
+PHP_FUNCTION(ora_open);
+PHP_FUNCTION(ora_parse);
+PHP_FUNCTION(ora_rollback);
+
+PHP_MINIT_FUNCTION(oracle);
+PHP_RINIT_FUNCTION(oracle);
+PHP_MSHUTDOWN_FUNCTION(oracle);
+PHP_RSHUTDOWN_FUNCTION(oracle);
+PHP_MINFO_FUNCTION(oracle);
 
 function_entry oracle_functions[] = {
 	PHP_FE(ora_bind,								NULL)
@@ -193,31 +207,31 @@ DLEXPORT php3_module_entry *get_module() { return &oracle_module_entry; };
 
 static int _close_oraconn(oraConnection *conn)
 {
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 	
 	conn->open = 0;
 
 	ologof(&conn->lda);
-	ORACLE_GLOBAL(php3_oracle_module).num_links--;
+	ORA(num_links)--;
 	efree(conn);
 
-	zend_hash_del(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&conn,sizeof(void*));
+	zend_hash_del(ORA(conns),(void*)&conn,sizeof(void*));
 
 	return 1;
 }
 
 static int _close_orapconn(oraConnection *conn)
 {
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
   
 	conn->open = 0;
 
 	ologof(&conn->lda);
 	free(conn);
-	ORACLE_GLOBAL(php3_oracle_module).num_links--;
-	ORACLE_GLOBAL(php3_oracle_module).num_persistent--;
+	ORA(num_links)--;
+	ORA(num_persistent)--;
 
-	zend_hash_del(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&conn,sizeof(void*));
+	zend_hash_del(ORA(conns),(void*)&conn,sizeof(void*));
 
 	return 1;
 }
@@ -235,7 +249,7 @@ pval_ora_param_destructor(oraParam *param)
 static int _close_oracur(oraCursor *cur)
 {
 	int i;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	if (cur){
 		if (cur->query){
@@ -258,7 +272,7 @@ static int _close_oracur(oraCursor *cur)
 		if (cur->open){
 			oraConnection *db_conn;
 
-			if (zend_hash_find(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&(cur->conn_ptr),sizeof(void*),(void **)&db_conn) == SUCCESS) {
+			if (zend_hash_find(ORA(conns),(void*)&(cur->conn_ptr),sizeof(void*),(void **)&db_conn) == SUCCESS) {
 				oclose(&cur->cda);
 			} 
 		}
@@ -271,52 +285,33 @@ static int _close_oracur(oraCursor *cur)
 
 PHP_MINIT_FUNCTION(oracle)
 {
-#if defined(THREAD_SAFE)
-	oracle_global_struct *oracle_globals;
-	PHP3_MUTEX_ALLOC(oracle_mutex);
-	PHP3_MUTEX_LOCK(oracle_mutex);
-	numthreads++;
-	if (numthreads==1){
-		if (!PHP3_TLS_PROC_STARTUP(ORACLETls)){
-			PHP3_MUTEX_UNLOCK(oracle_mutex);
-			PHP3_MUTEX_FREE(oracle_mutex);
-			return FAILURE;
-		}
-	}
-	PHP3_MUTEX_UNLOCK(oracle_mutex);
-	if(!PHP3_TLS_THREAD_INIT(ORACLETls,oracle_globals,oracle_global_struct)){
-		PHP3_MUTEX_FREE(oracle_mutex);
-		return FAILURE;
-	}
-#endif
-
 	if (cfg_get_long("oracle.allow_persistent",
-			 &ORACLE_GLOBAL(php3_oracle_module).allow_persistent)
+			 &ORA(allow_persistent))
 		== FAILURE) {
-	  ORACLE_GLOBAL(php3_oracle_module).allow_persistent = -1;
+	  ORA(allow_persistent) = -1;
 	}
 	if (cfg_get_long("oracle.max_persistent",
-					 &ORACLE_GLOBAL(php3_oracle_module).max_persistent)
+					 &ORA(max_persistent))
 	    == FAILURE) {
-		ORACLE_GLOBAL(php3_oracle_module).max_persistent = -1;
+		ORA(max_persistent) = -1;
 	}
 	if (cfg_get_long("oracle.max_links",
-					 &ORACLE_GLOBAL(php3_oracle_module).max_links)
+					 &ORA(max_links))
 	    == FAILURE) {
-		ORACLE_GLOBAL(php3_oracle_module).max_links = -1;
+		ORA(max_links) = -1;
 	}
 	
-	ORACLE_GLOBAL(php3_oracle_module).num_persistent = 0;
+	ORA(num_persistent) = 0;
 	
-	ORACLE_GLOBAL(php3_oracle_module).le_cursor =
+	ORA(le_cursor) =
 		register_list_destructors(_close_oracur, NULL);
-	ORACLE_GLOBAL(php3_oracle_module).le_conn =
+	ORA(le_conn) =
 		register_list_destructors(_close_oraconn, NULL);
-	ORACLE_GLOBAL(php3_oracle_module).le_pconn =
+	ORA(le_pconn) =
 		register_list_destructors(NULL, _close_orapconn);
 
-	ORACLE_GLOBAL(php3_oracle_module).conns = malloc(sizeof(HashTable));
-	zend_hash_init(ORACLE_GLOBAL(php3_oracle_module).conns, 13, NULL, NULL, 1);
+	ORA(conns) = malloc(sizeof(HashTable));
+	zend_hash_init(ORA(conns), 13, NULL, NULL, 1);
 
 	REGISTER_LONG_CONSTANT("ORA_BIND_INOUT", 0, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ORA_BIND_IN",    1, CONST_CS | CONST_PERSISTENT);
@@ -335,14 +330,14 @@ PHP_MINIT_FUNCTION(oracle)
 
 PHP_RINIT_FUNCTION(oracle)
 {
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 	
-	ORACLE_GLOBAL(php3_oracle_module).num_links = 
-		ORACLE_GLOBAL(php3_oracle_module).num_persistent;
+	ORA(num_links) = 
+		ORA(num_persistent);
 	/*
-	  ORACLE_GLOBAL(php3_oracle_module).defaultlrl = 0;
-	  ORACLE_GLOBAL(php3_oracle_module).defaultbinmode = 0;
-	  ORACLE_GLOBAL(php3_oracle_module).defaultconn = 0;
+	  ORA(defaultlrl) = 0;
+	  ORA(defaultbinmode) = 0;
+	  ORA(defaultconn) = 0;
 	*/
 	return SUCCESS;
 }
@@ -350,30 +345,17 @@ PHP_RINIT_FUNCTION(oracle)
 
 PHP_MSHUTDOWN_FUNCTION(oracle)
 {
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
-#ifdef THREAD_SAFE
-	PHP3_TLS_THREAD_FREE(oracle_globals);
-	PHP3_MUTEX_LOCK(oracle_mutex);
-	numthreads--;
-	if (numthreads<1) {
-		PHP3_TLS_PROC_SHUTDOWN(ORACLETls);
-		PHP3_MUTEX_UNLOCK(oracle_mutex);
-		PHP3_MUTEX_FREE(oracle_mutex);
-		return SUCCESS;
-	}
-	PHP3_MUTEX_UNLOCK(oracle_mutex);
-#endif
-
-	zend_hash_destroy(ORACLE_GLOBAL(php3_oracle_module).conns);
-	free(ORACLE_GLOBAL(php3_oracle_module).conns);
+	zend_hash_destroy(ORA(conns));
+	free(ORA(conns));
 
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(oracle)
 {
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	return SUCCESS;
 
@@ -426,7 +408,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	list_entry *index_ptr;
 	char *hashed_details;
 	int hashed_len, len, id;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -438,25 +420,25 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	user = arg1->value.str.val;
 	pwd = arg2->value.str.val;
 
-	if (!ORACLE_GLOBAL(php3_oracle_module).allow_persistent) {
+	if (!ORA(allow_persistent)) {
 		persistent = 0;
 	}
   
-	if (ORACLE_GLOBAL(php3_oracle_module).max_links != -1 &&
-		ORACLE_GLOBAL(php3_oracle_module).num_links >=
-		ORACLE_GLOBAL(php3_oracle_module).max_links) {
+	if (ORA(max_links) != -1 &&
+		ORA(num_links) >=
+		ORA(max_links)) {
 		php_error(E_WARNING, "Oracle: Too many open links (%d)",
-				   ORACLE_GLOBAL(php3_oracle_module).num_links);
+				   ORA(num_links));
 		RETURN_FALSE;
 	}
 
 	/* the user requested a persistent connection */
 	if (persistent && 
-		ORACLE_GLOBAL(php3_oracle_module).max_persistent != -1 &&
-		ORACLE_GLOBAL(php3_oracle_module).num_persistent >=
-		ORACLE_GLOBAL(php3_oracle_module).max_persistent) {
+		ORA(max_persistent) != -1 &&
+		ORA(num_persistent) >=
+		ORA(max_persistent)) {
 		php_error(E_WARNING,"Oracle: Too many open persistent links (%d)",
-				   ORACLE_GLOBAL(php3_oracle_module).num_persistent);
+				   ORA(num_persistent));
 		RETURN_FALSE;
 	}
 	
@@ -511,9 +493,9 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		
 		db_conn->open = 1;
 		if (persistent){
-			/*new_le.type = ORACLE_GLOBAL(php3_oracle_module).le_pconn;
+			/*new_le.type = ORA(le_pconn);
 			  new_le.ptr = db_conn;*/
-			RETVAL_RESOURCE(php3_plist_insert(db_conn, ORACLE_GLOBAL(php3_oracle_module).le_pconn));
+			RETVAL_RESOURCE(php3_plist_insert(db_conn, ORA(le_pconn)));
 			new_index_ptr.ptr = (void *) return_value->value.lval;
 #ifdef THREAD_SAFE
 			new_index_ptr.type = _php3_le_index_ptr();
@@ -528,13 +510,13 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				php_error(E_WARNING, "Can't update hashed details list");
 				RETURN_FALSE;
 			}
-			ORACLE_GLOBAL(php3_oracle_module).num_persistent++;
+			ORA(num_persistent)++;
 		} else {
 			/* non persistent, simply add to list */
-			RETVAL_RESOURCE(php3_list_insert(db_conn, ORACLE_GLOBAL(php3_oracle_module).le_conn));
+			RETVAL_RESOURCE(php3_list_insert(db_conn, ORA(le_conn)));
 		}
 		
-		ORACLE_GLOBAL(php3_oracle_module).num_links++;
+		ORA(num_links)++;
 		
 	} else {
 		int type;
@@ -552,8 +534,8 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		id = (int) index_ptr->ptr;
 		db_conn = (oraConnection *)php3_plist_find(id, &type);
     
-		if (db_conn && (type ==  ORACLE_GLOBAL(php3_oracle_module).le_conn ||
-					type == ORACLE_GLOBAL(php3_oracle_module).le_pconn)){
+		if (db_conn && (type ==  ORA(le_conn) ||
+					type == ORA(le_pconn))){
 			if(!_ora_ping(db_conn)) {
 				/* XXX Reinitialize lda, hda ? */
 #if HAS_OLOG
@@ -577,7 +559,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 		
-	zend_hash_add(ORACLE_GLOBAL(php3_oracle_module).conns,
+	zend_hash_add(ORA(conns),
 				   (void*)&db_conn,
 				   sizeof(void*),
 				   (void*)&db_conn,
@@ -594,7 +576,7 @@ PHP_FUNCTION(ora_logoff)
 	int type, ind;
 	oraConnection *conn;
 	pval *arg;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	if (getParameters(ht, 1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -604,8 +586,8 @@ PHP_FUNCTION(ora_logoff)
 	ind = (int)arg->value.lval;
 
 	conn = (oraConnection *)php3_list_find(ind, &type);
-	if (!conn || (type != ORACLE_GLOBAL(php3_oracle_module).le_conn &&
-				  type != ORACLE_GLOBAL(php3_oracle_module).le_pconn)) {
+	if (!conn || (type != ORA(le_conn) &&
+				  type != ORA(le_pconn))) {
 		return;
 	}
 	php3_list_delete(ind);
@@ -1650,14 +1632,14 @@ ora_get_conn(HashTable *list,HashTable *plist,int ind)
 {
 	oraConnection *conn = NULL;
 	int type;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	conn = (oraConnection *)php3_list_find(ind, &type);
-	if (conn && type == ORACLE_GLOBAL(php3_oracle_module).le_conn)
+	if (conn && type == ORA(le_conn))
 		return conn;
 
 	conn = (oraConnection *)php3_plist_find(ind, &type);
-	if (conn && type == ORACLE_GLOBAL(php3_oracle_module).le_pconn)
+	if (conn && type == ORA(le_pconn))
 		return conn;
 
 	php_error(E_WARNING,"Bad Oracle connection number (%d)", ind);
@@ -1666,8 +1648,8 @@ ora_get_conn(HashTable *list,HashTable *plist,int ind)
 
 int ora_add_cursor(HashTable *list, oraCursor *cursor)
 {
-	ORACLE_TLS_VARS;
-	return php3_list_insert(cursor, ORACLE_GLOBAL(php3_oracle_module).le_cursor);
+	ORALS_FETCH();
+	return php3_list_insert(cursor, ORA(le_cursor));
 }
 
 static oraCursor *
@@ -1676,15 +1658,15 @@ ora_get_cursor(HashTable *list, int ind)
 	oraCursor *cursor;
 	oraConnection *db_conn;
 	int type;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
 
 	cursor = php3_list_find(ind, &type);
-	if (!cursor || type != ORACLE_GLOBAL(php3_oracle_module).le_cursor) {
+	if (!cursor || type != ORA(le_cursor)) {
 		php_error(E_WARNING, "Invalid cursor index %d", ind);
 		return NULL;
 	}
 
-	if (zend_hash_find(ORACLE_GLOBAL(php3_oracle_module).conns,(void*)&(cursor->conn_ptr),sizeof(void*),(void **)&db_conn) == FAILURE) {
+	if (zend_hash_find(ORA(conns),(void*)&(cursor->conn_ptr),sizeof(void*),(void **)&db_conn) == FAILURE) {
 		php_error(E_WARNING, "Connection already closed for cursor index %d", ind);
 		return NULL;
 	}
@@ -1696,10 +1678,10 @@ void ora_del_cursor(HashTable *list, int ind)
 {
 	oraCursor *cursor;
 	int type;
-	ORACLE_TLS_VARS;
+	ORALS_FETCH();
   
 	cursor = (oraCursor *) php3_list_find(ind, &type);
-	if (!cursor || type != ORACLE_GLOBAL(php3_oracle_module).le_cursor) {
+	if (!cursor || type != ORA(le_cursor)) {
 		php_error(E_WARNING,"Can't find cursor %d",ind);
 		return;
 	}
