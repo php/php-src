@@ -3376,7 +3376,7 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 		entry++;
 		n--;
 	}
-	zend_multibyte_set_script_encoding(list, (list ? strlen(list) : 0));
+	zend_multibyte_set_script_encoding(list, (list ? strlen(list) : 0) TSRMLS_CC);
 	if (list) {
 		efree(list);
 	}
@@ -3388,10 +3388,10 @@ MBSTRING_API int php_mb_set_zend_encoding(TSRMLS_D)
 	if (MBSTRG(encoding_translation)) {
 		/* notify internal encoding to Zend Engine */
 		name = (char*)mbfl_no_encoding2name(MBSTRG(current_internal_encoding));
-		zend_multibyte_set_internal_encoding(name, strlen(name));
+		zend_multibyte_set_internal_encoding(name, strlen(name) TSRMLS_CC);
 	}
 
-	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen);
+	zend_multibyte_set_functions(encoding_detector, encoding_converter, encoding_oddlen TSRMLS_CC);
 
 	return 0;
 }
