@@ -311,9 +311,9 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 					php_stream_notify_file_size(context, file_size, http_header_line, 0);
 				}
 
-				if (http_header_line[0] == '\0')
+				if (http_header_line[0] == '\0') {
 					body = 1;
-				else	{
+				} else {
 					zval *http_header;
 
 					MAKE_STD_ZVAL(http_header);
@@ -322,9 +322,9 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 				
 					zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
 				}
-			}
-			else
+			} else {
 				break;
+			}
 		}
 	} 
 	
@@ -339,21 +339,30 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 
 			zval *entry, **entryp;
 			char new_path[HTTP_HEADER_BLOCK_SIZE];
+			char loc_path[HTTP_HEADER_BLOCK_SIZE];
 
 			*new_path='\0';
-			if (strlen(location)<8 || (strncasecmp(location, "http://", 7) && strncasecmp(location, "https://", 8))) {
-				strcpy(new_path, resource->scheme);
-				strlcat(new_path, resource->host, sizeof(new_path));
-				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
-					snprintf(new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, ":%d", resource->port);
-				}
+			if (strlen(location)<8 || (strncasecmp(location, "http://", sizeof("http://")-1) && strncasecmp(location, "https://", sizeof("https://")-1))) {
 				if (*location != '/') {
-					php_dirname(resource->path, strlen(resource->path));
-					snprintf (new_path+strlen(new_path), sizeof(new_path)-strlen(new_path)-1, "%s/", resource->path);
+					if (*(location+1) != '\0') {				
+						php_dirname(resource->path, strlen(resource->path));
+						if (resource->path && *(resource->path) == '/' && *(resource->path + 1) == '\0') {
+							snprintf(loc_path, sizeof(loc_path) - 1, "%s%s", resource->path, location);
+						} else {
+							snprintf(loc_path, sizeof(loc_path) - 1, "%s/%s", resource->path, location);
+						}
+					} else {
+						snprintf(loc_path, sizeof(loc_path) - 1, "/%s", location);
+					}
+				} else {
+					strlcpy(loc_path, location, sizeof(loc_path));
 				}
-				strlcat(new_path, location, sizeof(new_path));
-			}
-			else {
+				if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80)) {
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s:%d%s", resource->scheme, resource->host, resource->port, loc_path);
+				} else {
+					snprintf(new_path, sizeof(new_path) - 1, "%s://%s%s", resource->scheme, resource->host, loc_path);
+				}
+			} else {
 				strlcpy(new_path, location, sizeof(new_path));
 			}
 			stream = php_stream_url_wrap_http(NULL, new_path, mode, options, opened_path, context STREAMS_CC TSRMLS_CC);
@@ -370,9 +379,11 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 				}
 				zval_dtor(stream->wrapperdata);
 				FREE_ZVAL(stream->wrapperdata);
+			} else {
+				zval_dtor(response_header);
+				FREE_ZVAL(response_header);
 			}
 		} else {
-
 			zval_dtor(response_header);
 			FREE_ZVAL(response_header);
 
