@@ -33,6 +33,8 @@ typedef struct {
     z_stream stream;
     uLong crc;
 	int ob_gzhandler_status;
+	int ob_gzip_coding;
+	int output_compression;
 } php_zlib_globals;
 
 extern zend_module_entry php_zlib_module_entry;
@@ -64,6 +66,7 @@ PHP_FUNCTION(gzencode);
 PHP_FUNCTION(ob_gzhandler);
 
 FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
+int php_enable_output_compression(int buffer_size);
 
 
 #ifdef ZTS
