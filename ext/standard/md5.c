@@ -150,7 +150,8 @@ static unsigned char PADDING[64] =
  (a) += (b); \
   }
 
-/* MD5 initialization. Begins an MD5 operation, writing a new context.
+/* {{{ PHP_MD5Init
+ * MD5 initialization. Begins an MD5 operation, writing a new context.
  */
 void PHP_MD5Init(PHP_MD5_CTX * context)
 {
@@ -162,8 +163,10 @@ void PHP_MD5Init(PHP_MD5_CTX * context)
 	context->state[2] = 0x98badcfe;
 	context->state[3] = 0x10325476;
 }
+/* }}} */
 
-/* MD5 block update operation. Continues an MD5 message-digest
+/* {{{ PHP_MD5Update
+   MD5 block update operation. Continues an MD5 message-digest
    operation, processing another message block, and updating the
    context.
  */
@@ -202,8 +205,10 @@ void PHP_MD5Update(PHP_MD5_CTX * context, const unsigned char *input,
 		((unsigned char*) & context->buffer[index], (unsigned char*) & input[i],
 		 inputLen - i);
 }
+/* }}} */
 
-/* MD5 finalization. Ends an MD5 message-digest operation, writing the
+/* {{{ PHP_MD5Final
+   MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
 void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
@@ -230,8 +235,10 @@ void PHP_MD5Final(unsigned char digest[16], PHP_MD5_CTX * context)
 	 */
 	memset((unsigned char*) context, 0, sizeof(*context));
 }
+/* }}} */
 
-/* MD5 basic transformation. Transforms state based on block.
+/* {{{ MD5Transform
+ * MD5 basic transformation. Transforms state based on block.
  */
 static void MD5Transform(state, block)
 php_uint32 state[4];
@@ -321,8 +328,10 @@ const unsigned char block[64];
 	/* Zeroize sensitive information. */
 	memset((unsigned char*) x, 0, sizeof(x));
 }
+/* }}} */
 
-/* Encodes input (php_uint32) into output (unsigned char). Assumes len is
+/* {{{ Encode
+   Encodes input (php_uint32) into output (unsigned char). Assumes len is
    a multiple of 4.
  */
 static void Encode(output, input, len)
@@ -339,8 +348,10 @@ unsigned int len;
 		output[j + 3] = (unsigned char) ((input[i] >> 24) & 0xff);
 	}
 }
+/* }}} */
 
-/* Decodes input (unsigned char) into output (php_uint32). Assumes len is
+/* {{{ Decode
+   Decodes input (unsigned char) into output (php_uint32). Assumes len is
    a multiple of 4.
  */
 static void Decode(output, input, len)
@@ -354,11 +365,13 @@ unsigned int len;
 		output[i] = ((php_uint32) input[j]) | (((php_uint32) input[j + 1]) << 8) |
 			(((php_uint32) input[j + 2]) << 16) | (((php_uint32) input[j + 3]) << 24);
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

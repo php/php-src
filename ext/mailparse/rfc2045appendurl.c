@@ -33,6 +33,8 @@
 ** ---------------------------------------------------------------------
 */
 
+/* {{{ get_method_path
+ */
 static void get_method_path(const char *p,
 	const char **method,
 	unsigned *methodl,
@@ -58,7 +60,10 @@ static void get_method_path(const char *p,
 	*methodl=0;
 	*path=p;
 }
+/* }}} */
 
+/* {{{ rfc2045_append_url
+ */
 char *rfc2045_append_url(const char *base, const char *loc)
 {
 	const char *base_method;
@@ -115,6 +120,7 @@ char *rfc2045_append_url(const char *base, const char *loc)
 
 	return (buf);
 }
+/* }}} */
 
 char *rfc2045_content_base(struct rfc2045 *p)
 {
@@ -126,5 +132,6 @@ char *rfc2045_content_base(struct rfc2045 *p)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: tw=78 ts=4 sw=4
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

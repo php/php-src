@@ -584,6 +584,8 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 /* }}} */
 
 #if HAVE_PHP_STREAM
+/* {{{ PHP_FUNCTION
+ */
 PHP_FUNCTION(fopenstream)
 {
 	zval ** zfilename, ** zmode;
@@ -603,6 +605,7 @@ PHP_FUNCTION(fopenstream)
 	}
 	ZEND_REGISTER_RESOURCE(return_value, stream, le_stream);
 }
+/* }}} */
 #endif
 
 /* {{{ proto int fopen(string filename, string mode [, int use_include_path])
@@ -1729,7 +1732,6 @@ PHP_FUNCTION(rename)
 }
 /* }}} */
 
-
 /* {{{ proto int unlink(string filename)
    Delete a file */
 PHP_FUNCTION(unlink)
@@ -1757,7 +1759,6 @@ PHP_FUNCTION(unlink)
 	RETURN_TRUE;
 }
 /* }}} */
-
 
 /* {{{ proto int ftruncate (int fp, int size)
    Truncate file to 'size' length */
@@ -1874,7 +1875,6 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 }
 /* }}} */
 
-
 /* {{{ proto int copy(string source_file, string destination_file)
    Copy a file */
 
@@ -1915,7 +1915,8 @@ PHP_FUNCTION(copy)
 
 /* }}} */
 
-
+/* {{{ php_copy_file
+ */
 PHPAPI int php_copy_file(char *src, char *dest)
 {
 	char buffer[8192];
@@ -1971,9 +1972,7 @@ cleanup:
 	close(fd_t);
 	return ret;
 }
-
-
-
+/* }}} */
 
 /* {{{ proto string fread(int fp, int length)
    Binary-safe file read */
@@ -2028,6 +2027,7 @@ PHP_FUNCTION(fread)
 }
 
 /* }}} */
+
 /* {{{ proto array fgetcsv(int fp, int length [, string delimiter])
    Get line from file pointer and parse for CSV fields */
 
@@ -2222,7 +2222,8 @@ PHP_FUNCTION(realpath)
 
 static fd_set readfd;
 static int max_fd;
-
+/* {{{ PHP_FUNCTION(fd_set)
+ */
 PHP_FUNCTION(fd_set)
 {
 	pval **arg;
@@ -2274,7 +2275,10 @@ PHP_FUNCTION(fd_set)
 	}
 	RETURN_LONG(1);
 }
+/* }}} */
 
+/* {{{ PHP_FUNCTION(select)
+ */
 PHP_FUNCTION(select)
 {
 	pval **timeout;
@@ -2292,7 +2296,10 @@ PHP_FUNCTION(select)
 
 	RETURN_LONG(select(max_fd + 1,&readfd,NULL,NULL,((*timeout)->value.lval <= 0) ? NULL : &tv));
 }
+/* }}} */
 
+/* {{{ PHP_FUNCTION(fd_isset)
+ */
 PHP_FUNCTION(fd_isset)
 {
 	pval **fdarg;
@@ -2318,10 +2325,12 @@ PHP_FUNCTION(fd_isset)
 	}
 	RETURN_FALSE;
 }
+/* }}} */
 
 #endif
 
-/* Function reads all data from file or socket and puts it into the buffer */
+/* {{{ php_fread_all
+   Function reads all data from file or socket and puts it into the buffer */
 size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 	size_t ret;
 	char *ptr;
@@ -2351,11 +2360,13 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 
 	return len;
 }
+/* }}} */
 
 /* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
 #define PHP_META_HTML401_CHARS "-_.:"
 
-/* Tokenizes an HTML file for get_meta_tags */
+/* {{{ php_next_meta_token
+   Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *use_last_char, int *last_char, char **data, int *datalen) {
 	int ch, compliment;
 	char buff[META_DEF_BUFSIZE + 1];
@@ -2441,11 +2452,13 @@ php_meta_tags_token php_next_meta_token(FILE *fp, int socketd, int issock, int *
 
 	return TOK_EOF;
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: tw=78 sw=4 ts=4 fdm=marker
+ * vim600: tw=78 sw=4 ts=4 fdm=marker
+ * vim<600: tw=78 sw=4 ts=4
  */

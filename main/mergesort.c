@@ -97,7 +97,7 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
        	((u_char *)0 +							\
 	    (((u_char *)p + PSIZE - 1 - (u_char *) 0) & ~(PSIZE - 1)))
 
-/*
+/* {{{ php_mergesort
  * Arguments are as for qsort.
  */
 int php_mergesort(void *base, size_t nmemb, size_t size, int (*cmp)(const void *, const void *))
@@ -233,6 +233,7 @@ COPY:	    			b = t;
 	free(list2);
 	return (0);
 }
+/* }}} */
 
 #define	swap(a, b) {					\
 		s = b;					\
@@ -253,7 +254,7 @@ COPY:	    			b = t;
 	} while(bot < s);				\
 }
 
-/*
+/* {{{ setup
  * Optional hybrid natural/pairwise first pass.  Eats up list1 in runs of
  * increasing order, list2 in a corresponding linked list.  Checks for runs
  * when THRESHOLD/2 pairs compare with same sense.  (Only used when NATURAL
@@ -324,8 +325,9 @@ static void setup(u_char *list1, u_char *list2, size_t n, size_t size, int (*cmp
 	}
 #endif /* NATURAL */
 }
+/* }}} */
 
-/*
+/* {{{ insertionsort
  * This is to avoid out-of-bounds addresses in sorting the
  * last 4 elements.
  */
@@ -342,11 +344,13 @@ static void insertionsort(u_char *a, size_t n, size_t size, int (*cmp)(const voi
 			swap(u, t);
 		}
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

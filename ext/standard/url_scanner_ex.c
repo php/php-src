@@ -41,6 +41,8 @@
 
 #include "php_smart_str.h"
 
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnUpdateTags)
 {
 	url_adapt_state_ex_t *ctx;
@@ -84,11 +86,14 @@ static PHP_INI_MH(OnUpdateTags)
 
 	return SUCCESS;
 }
+/* }}} */
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=fakeentry", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
 PHP_INI_END()
 
+/* {{{ append_modified_url
+ */
 static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *name, smart_str *val, const char *separator)
 {
 	register const char *p, *q;
@@ -130,6 +135,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	if (bash)
 		smart_str_appendl(dest, bash, q - bash);
 }
+/* }}} */
 
 static inline void tag_arg(url_adapt_state_ex_t *ctx, char quote PLS_DC)
 {
@@ -221,6 +227,8 @@ static inline void handle_val(STD_PARA, char quotes, char type)
 #define scdebug(x)
 #endif
 
+/* {{{ mainloop
+ */
 static inline void mainloop(url_adapt_state_ex_t *ctx, const char *newdata, size_t newlen)
 {
 	char *end, *q;
@@ -657,7 +665,10 @@ stop:
 	if (rest) memmove(ctx->buf.c, start, rest);
 	ctx->buf.len = rest;
 }
+/* }}} */
 
+/* {{{ url_adapt_single_url
+ */
 char *url_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen)
 {
 	smart_str surl = {0};
@@ -677,7 +688,10 @@ char *url_adapt_single_url(const char *url, size_t urllen, const char *name, con
 	
 	return buf.c;
 }
+/* }}} */
 
+/* {{{ url_adapt_ext
+ */
 char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char *value, size_t *newlen)
 {
 	char *ret;
@@ -695,6 +709,7 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	ctx->result.len = 0;
 	return ctx->result.c;
 }
+/* }}} */
 
 PHP_RINIT_FUNCTION(url_scanner)
 {
@@ -753,5 +768,6 @@ PHP_MSHUTDOWN_FUNCTION(url_scanner)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

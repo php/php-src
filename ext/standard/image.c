@@ -66,7 +66,8 @@ struct gfxinfo {
 	unsigned int channels;
 };
 
-/* routine to handle GIF files. If only everything were that easy... ;} */
+/* {{{ php_handle_gif
+ * routine to handle GIF files. If only everything were that easy... ;} */
 static struct gfxinfo *php_handle_gif (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
@@ -85,8 +86,10 @@ static struct gfxinfo *php_handle_gif (int socketd, FILE *fp, int issock)
 
 	return result;
 }
+/* }}} */
 
-
+/* {{{ php_handle_psd
+ */
 static struct gfxinfo *php_handle_psd (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
@@ -110,8 +113,10 @@ static struct gfxinfo *php_handle_psd (int socketd, FILE *fp, int issock)
 
 	return result;
 }
+/* }}} */
 
-
+/* {{{ php_handle_bmp
+ */
 static struct gfxinfo *php_handle_bmp (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
@@ -130,9 +135,10 @@ static struct gfxinfo *php_handle_bmp (int socketd, FILE *fp, int issock)
 
 	return result;
 }
+/* }}} */
 
-
-/* routines to handle SWF files. */
+/* {{{ php_swf_get_bits
+ * routines to handle SWF files. */
 static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int pos, unsigned int count)
 {
 	unsigned int loop;
@@ -145,8 +151,10 @@ static unsigned long int php_swf_get_bits (unsigned char* buffer, unsigned int p
 	}
 	return result;
 }
+/* }}} */
 
-
+/* {{{ php_handle_swf
+ */
 static struct gfxinfo *php_handle_swf (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
@@ -165,8 +173,10 @@ static struct gfxinfo *php_handle_swf (int socketd, FILE *fp, int issock)
 		php_swf_get_bits (a, 5 + (2 * bits), bits)) / 20;
 	return result;
 }
+/* }}} */
 
-/* routine to handle PNG files */
+/* {{{ php_handle_png
+ * routine to handle PNG files */
 static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
@@ -190,6 +200,7 @@ static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 	result->height = (unsigned int) in_height;
 	return result;
 }
+/* }}} */
 
 /* routines to handle JPEG data */
 
@@ -227,6 +238,8 @@ static struct gfxinfo *php_handle_png (int socketd, FILE *fp, int issock)
 #define M_APP14 0xee
 #define M_APP15 0xef
 
+/* {{{ php_read2
+ */
 static unsigned short php_read2(int socketd, FILE *fp, int issock)
 {
 	unsigned char a[2];
@@ -236,7 +249,10 @@ static unsigned short php_read2(int socketd, FILE *fp, int issock)
 
 	return (((unsigned short) a[ 0 ]) << 8) + ((unsigned short) a[ 1 ]);
 }
+/* }}} */
 
+/* {{{ php_next_marker
+ */
 static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
 	 /* get next marker byte from file */
 {
@@ -250,7 +266,10 @@ static unsigned int php_next_marker(int socketd, FILE *fp, int issock)
 
 	return (unsigned int) c;
 }
+/* }}} */
 
+/* {{{ php_skip_variable
+ */
 static void php_skip_variable(int socketd, FILE *fp, int issock)
 	 /* skip over a variable-length block; assumes proper length marker */
 {
@@ -264,7 +283,10 @@ static void php_skip_variable(int socketd, FILE *fp, int issock)
 	FP_FREAD(tmp, (long) length, socketd, fp, issock); /* skip the header */
 	efree(tmp);
 }
+/* }}} */
 
+/* {{{ php_read_APP
+ */
 static void php_read_APP(int socketd, FILE *fp, int issock,unsigned int marker,pval *info)
 {
 	unsigned short length;
@@ -291,8 +313,10 @@ static void php_read_APP(int socketd, FILE *fp, int issock,unsigned int marker,p
 
 	efree(buffer);
 }
+/* }}} */
 
-/* main loop to parse JPEG structure */
+/* {{{ php_handle_jpeg
+   main loop to parse JPEG structure */
 static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval *info)
 {
 	struct gfxinfo *result = NULL;
@@ -369,6 +393,7 @@ static struct gfxinfo *php_handle_jpeg (int socketd, FILE *fp, int issock, pval 
 
 	return NULL;
 }
+/* }}} */
 
 /* main function */
 
@@ -500,5 +525,6 @@ PHP_FUNCTION(getimagesize)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

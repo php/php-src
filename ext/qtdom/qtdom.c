@@ -13,13 +13,11 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors:                                                             |
-   |                                                                      |
    +----------------------------------------------------------------------+
  */
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
+/* $Id$ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -59,8 +57,8 @@ zend_module_entry qtdom_module_entry = {
 	qtdom_functions,
 	PHP_MINIT(qtdom),
 	PHP_MSHUTDOWN(qtdom),
-	PHP_RINIT(qtdom),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(qtdom),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,
+	NULL,
 	PHP_MINFO(qtdom),
 	STANDARD_MODULE_PROPERTIES
 };
@@ -69,11 +67,8 @@ zend_module_entry qtdom_module_entry = {
 ZEND_GET_MODULE(qtdom)
 #endif
 
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-PHP_INI_END()
-*/
-
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(qtdom)
 {
 /* Remove comments if you have entries in php.ini
@@ -92,47 +87,31 @@ PHP_MINIT_FUNCTION(qtdom)
 
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
 PHP_MSHUTDOWN_FUNCTION(qtdom)
 {
-/* Remove comments if you have entries in php.ini
-	UNREGISTER_INI_ENTRIES();
-*/
     qdom_shutdown();
 
 	return SUCCESS;
 }
+/* }}} */
 
-/* Remove if there's nothing to do at request start */
-PHP_RINIT_FUNCTION(qtdom)
-{
-	return SUCCESS;
-}
-
-/* Remove if there's nothing to do at request end */
-PHP_RSHUTDOWN_FUNCTION(qtdom)
-{
-	return SUCCESS;
-}
-
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(qtdom)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "qtdom support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
+/* }}} */
 
-/* Remove the following function when you have succesfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* Helper function for creating the attributes, returns the number of attributes found
-   or -1 if an error occured */
-
+/* {{{ qdom_find_attributes
+ * Helper function for creating the attributes, returns the number 
+ * of attributes found or -1 if an error occured */
 int qdom_find_attributes( zval **children, struct qdom_attribute *attr )
 {
     zval *child;
@@ -161,11 +140,12 @@ int qdom_find_attributes( zval **children, struct qdom_attribute *attr )
 
     return count;
 }
+/* }}} */
 
-/* Helper function for recursively going trough the QDomNode tree and creating
+/* {{{ qdom_find_children
+   Helper function for recursively going trough the QDomNode tree and creating
    the same in PHP objects. Returns the number of children or -1 if an error
    occured. */
-
 int qdom_find_children( zval **children, struct qdom_node *orig_node )
 {
     zval *child;
@@ -230,6 +210,7 @@ int qdom_find_children( zval **children, struct qdom_node *orig_node )
     qdom_do_node_free( tmp_node );
     return count;
 }
+/* }}} */
 
 /* {{{ proto object qdom_tree( string )
    creates a tree of an xml string */
@@ -288,10 +269,11 @@ PHP_FUNCTION(qdom_error)
 
 #endif	/* HAVE_QTDOM */
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

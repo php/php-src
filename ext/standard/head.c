@@ -81,6 +81,8 @@ PHP_FUNCTION(Header)
 }
 /* }}} */
 
+/* {{{ php_header
+ */
 PHPAPI int php_header()
 {
 	SLS_FETCH();
@@ -91,8 +93,10 @@ PHPAPI int php_header()
 		return 1; /* allow output */
 	}
 }
+/* }}} */
 
-
+/* {{{ php_push_cookie_list
+ */
 void php_push_cookie_list(char *name, char *value, time_t expires, char *path, char *domain, int secure)
 {
 	CookieList *new;
@@ -107,7 +111,10 @@ void php_push_cookie_list(char *name, char *value, time_t expires, char *path, c
 	new->secure = secure;
 	top = new;
 }
+/* }}} */
 
+/* {{{ php_pop_cookie_list
+ */
 CookieList *php_pop_cookie_list(void)
 {
 	CookieList *ret;
@@ -117,6 +124,7 @@ CookieList *php_pop_cookie_list(void)
 		top = top->next;
 	return (ret);
 }
+/* }}} */
 
 /* php_set_cookie(name,value,expires,path,domain,secure) */
 /* {{{ proto void setcookie(string name [, string value [, int expires [, string path [, string domain [, string secure]]]]])
@@ -251,6 +259,8 @@ PHP_FUNCTION(setcookie)
 }
 /* }}} */
 
+/* {{{ php_headers_unsent
+ */
 int php_headers_unsent(void)
 {
 	if (php_header_printed!=1 || !php_print_header) {
@@ -259,6 +269,7 @@ int php_headers_unsent(void)
 		return 0;
 	}
 }
+/* }}} */
 
 /* {{{ proto int headers_sent(void)
    Return true if headers have already been sent, false otherwise */
@@ -279,5 +290,6 @@ PHP_FUNCTION(headers_sent)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -153,7 +153,8 @@ static char Lookahead(char *word, int how_far)
 /* Note is a letter is a 'break' in the word */
 #define Isbreak(c)  (!isalpha(c))
 
-
+/* {{{ metaphone
+ */
 static int metaphone(char *word, int max_phonemes, char **phoned_word, int traditional)
 {
 	int w_idx = 0;				/* point in the phonization we're at. */
@@ -460,11 +461,13 @@ static int metaphone(char *word, int max_phonemes, char **phoned_word, int tradi
 
 	return 0;
 }								/* END metaphone */
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

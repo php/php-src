@@ -46,6 +46,8 @@ typedef struct {
 	int cflags;
 } reg_cache;
 
+/* {{{ _php_regcomp
+ */
 static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 {
 	int r = 0;
@@ -70,6 +72,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
 	
 	return r;
 }
+/* }}} */
 
 static void _free_reg_cache(reg_cache *rc) 
 {
@@ -119,7 +122,7 @@ PHP_MINFO_FUNCTION(regex)
    call to ereg() or eregi() with the optional third argument. */
 #define  NS  10
 
-/*
+/* {{{ php_reg_eprint
  * php_reg_eprint - convert error number to name
  */
 static void php_reg_eprint(int err, regex_t *re) {
@@ -158,7 +161,10 @@ static void php_reg_eprint(int err, regex_t *re) {
 	STR_FREE(buf);
 	STR_FREE(message);
 }
+/* }}} */
 
+/* {{{ php_ereg
+ */
 static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **regex,			/* Regular expression */
@@ -263,6 +269,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 	regfree(&re);
 }
+/* }}} */
 
 /* {{{ proto int ereg(string pattern, string string [, array registers])
    Regular expression match */
@@ -280,7 +287,8 @@ PHP_FUNCTION(eregi)
 }
 /* }}} */
 
-/* this is the meat and potatoes of regex replacement! */
+/* {{{ php_reg_replace
+ * this is the meat and potatoes of regex replacement! */
 char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
 {
 	regex_t re;
@@ -418,7 +426,10 @@ char *php_reg_replace(const char *pattern, const char *replace, const char *stri
 	/* whew. */
 	return (buf);
 }
+/* }}} */
 
+/* {{{ php_ereg_replace
+ */
 static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **arg_pattern,
@@ -475,6 +486,7 @@ static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	STR_FREE(replace);
 	STR_FREE(pattern);
 }
+/* }}} */
 
 /* {{{ proto string ereg_replace(string pattern, string replacement, string string)
    Replace regular expression */
@@ -492,6 +504,8 @@ PHP_FUNCTION(eregi_replace)
 }
 /* }}} */
 
+/* {{{ php_split
+ */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **spliton, **str, **arg_count = NULL;
@@ -586,6 +600,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	regfree(&re);
 }
+/* }}} */
 
 /* ("root", "passwd", "uid", "gid", "other:stuff:like:/bin/sh")
    = split(":", $passwd_file, 5); */
@@ -650,5 +665,6 @@ PHPAPI PHP_FUNCTION(sql_regcase)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

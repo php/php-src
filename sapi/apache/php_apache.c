@@ -168,6 +168,8 @@ PHP_FUNCTION(apache_note)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
 PHP_MINFO_FUNCTION(apache)
 {
 	module *modp = NULL;
@@ -288,7 +290,10 @@ PHP_MINFO_FUNCTION(apache)
 		php_info_print_table_end();
 	}
 }
+/* }}} */
 
+/* {{{ proto int virtual(string filename)
+   Perform an Apache sub-request */
 /* This function is equivalent to <!--#include virtual...-->
  * in mod_include. It does an Apache sub-request. It is useful
  * for including CGI scripts or .shtml files, or anything else
@@ -297,8 +302,6 @@ PHP_MINFO_FUNCTION(apache)
  * as an Apache module, since it uses the Apache API for doing
  * sub requests.
  */
-/* {{{ proto int virtual(string filename)
-   Perform an Apache sub-request */
 PHP_FUNCTION(virtual)
 {
 	pval **filename;
@@ -466,4 +469,6 @@ PHP_FUNCTION(apache_exec_uri)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

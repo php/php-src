@@ -67,7 +67,6 @@ PHP_FUNCTION(microtime)
 }
 /* }}} */
 
-
 /* {{{ proto array gettimeofday(void)
    Returns the current time as array */
 PHP_FUNCTION(gettimeofday)
@@ -140,11 +139,11 @@ PHP_FUNCTION(getrusage)
 
 /* }}} */
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -38,7 +38,8 @@
 
 static char const *version UNUSED =
     "$Id$";
-
+/* {{{ compare_right
+ */
 static int
 compare_right(char const **a, char const *aend, char const **b, char const *bend)
 {
@@ -67,8 +68,10 @@ compare_right(char const **a, char const *aend, char const **b, char const *bend
 
      return 0;
 }
+/* }}} */
 
-
+/* {{{ compare_left
+ */
 static int
 compare_left(char const **a, char const *aend, char const **b, char const *bend)
 {
@@ -90,8 +93,10 @@ compare_left(char const **a, char const *aend, char const **b, char const *bend)
 	  
      return 0;
 }
+/* }}} */
 
-
+/* {{{ strnatcmp_ex
+ */
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case)
 {
 	char ca, cb;
@@ -156,11 +161,13 @@ PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len
 			return 1;
 	}
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

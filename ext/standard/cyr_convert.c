@@ -31,9 +31,6 @@
 
 #include <stdio.h>
 
-
-
-
 /*****************************************************************************
 * This is codetables for different Cyrillic charsets (relative to koi8-r). 
 * Each table contains data for 128-255 symbols from ASCII table.
@@ -50,6 +47,8 @@
 
 typedef unsigned char _cyr_charset_table[512];
 
+/* {{{ const static _cyr_charset_table _cyr_win1251
+ */
 const static _cyr_charset_table _cyr_win1251 = {
 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
 16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,
@@ -186,9 +185,9 @@ _cyr_mac = {
 158,128,129,150,132,133,148,131,149,136,137,138,139,140,141,142,
 143,159,144,145,146,147,134,130,156,155,135,152,157,153,151,154,
 };
+/* }}} */
 
-
-/*****************************************************************************
+/* {{{ php_convert_cyr_string
 * This is the function that performs real in-place conversion of the string 
 * between charsets. 
 * Parameters:
@@ -266,6 +265,7 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 	}
 	return (char *)str;
 }
+/* }}} */
 
 /* {{{ proto string convert_cyr_string(string str, string from, string to)
    Convert from one Cyrillic character set to another */
@@ -294,5 +294,6 @@ PHP_FUNCTION(convert_cyr_string)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

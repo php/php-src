@@ -127,7 +127,7 @@ static int	CharInSet(CharSet *cset, int ch);
 static void	ReleaseCharSet(CharSet *cset);
 
 
-/*
+/* {{{ BuildCharSet
  *----------------------------------------------------------------------
  *
  * BuildCharSet --
@@ -144,7 +144,6 @@ static void	ReleaseCharSet(CharSet *cset);
  *
  *----------------------------------------------------------------------
  */
-
 static char * BuildCharSet(CharSet *cset, char *format)
 {
     char *ch, start;
@@ -234,8 +233,9 @@ static char * BuildCharSet(CharSet *cset, char *format)
     }
     return format;
 }
+/* }}} */
 
-/*
+/* {{{ CharInSet
  *----------------------------------------------------------------------
  *
  * CharInSet --
@@ -250,7 +250,6 @@ static char * BuildCharSet(CharSet *cset, char *format)
  *
  *----------------------------------------------------------------------
  */
-
 static int CharInSet(CharSet *cset, int c)
 {
     char ch = (char) c;
@@ -273,8 +272,9 @@ static int CharInSet(CharSet *cset, int c)
     }
     return (cset->exclude ? !match : match);    
 }
+/* }}} */
 
-/*
+/* {{{ ReleaseCharSet
  *----------------------------------------------------------------------
  *
  * ReleaseCharSet --
@@ -289,7 +289,6 @@ static int CharInSet(CharSet *cset, int c)
  *
  *----------------------------------------------------------------------
  */
-
 static void ReleaseCharSet(CharSet *cset)
 {
     efree((char *)cset->chars);
@@ -297,8 +296,9 @@ static void ReleaseCharSet(CharSet *cset)
         efree((char *)cset->ranges);
     }
 }
+/* }}} */
 
-/*
+/* {{{ ValidateFormat
  *----------------------------------------------------------------------
  *
  * ValidateFormat --
@@ -319,8 +319,6 @@ static void ReleaseCharSet(CharSet *cset)
  *
  *----------------------------------------------------------------------
 */
-
-
 PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
 {
 #define STATIC_LIST_SIZE 16
@@ -577,10 +575,10 @@ PHPAPI int ValidateFormat(char *format,int numVars,int *totalSubs)
     return SCAN_ERROR_INVALID_FORMAT;
 #undef STATIC_LIST_SIZE
 }
+/* }}} */
 
-
-
-/* This is the internal function which does processing on behalf of
+/* {{{ php_sscanf_internal
+ * This is the internal function which does processing on behalf of
  * both sscanf() and fscanf()
  * 
  * parameters :
@@ -1227,7 +1225,7 @@ PHPAPI int php_sscanf_internal(	char *string,char *format,
 
     return result;
 }
-
+/* }}} */
 
 /* the compiler choked when i tried to make this a macro    */
 inline void scan_set_error_return(int numVars,pval **return_value) {
@@ -1247,5 +1245,6 @@ inline void scan_set_error_return(int numVars,pval **return_value) {
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

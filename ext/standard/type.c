@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf                                              |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -21,7 +21,7 @@
 #include "php.h"
 #include "type.h"
 
-/*
+/* {{{ php_check_type
  * Determines if 'str' is an integer (long), real number or a string
  *
  * Note that leading zeroes automatically force a STRING type
@@ -54,8 +54,9 @@ int php_check_type(char *str)
 
 	return (type);
 }								/* php_check_type */
+/* }}} */
 
-/*
+/* {{{ php_check_ident_type
  * 0 - simple variable
  * 1 - non-index array
  * 2 - index array
@@ -75,7 +76,10 @@ int php_check_ident_type(char *str)
 	}
 	return (GPC_INDEXED_ARRAY);
 }
+/* }}} */
 
+/* {{{ php_get_ident_index
+ */
 char *php_get_ident_index(char *str)
 {
 	char *temp;
@@ -96,11 +100,13 @@ char *php_get_ident_index(char *str)
 	}
 	return (temp);
 }
+/* }}} */
 
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -760,7 +760,6 @@ PHP_FUNCTION(mailparse_msg_get_part_data)
 }
 /* }}} */
 
-
 /* {{{ proto long mailparse_msg_get_part(resource rfc2045, string mimesection)
 	Return a handle on a given section in a mimemessage
 */
@@ -796,5 +795,6 @@ PHP_FUNCTION(mailparse_msg_get_part)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: tw=78 ts=4 sw=4
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

@@ -38,6 +38,8 @@
 
 static void start_syslog(BLS_D);
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
 PHP_MINIT_FUNCTION(syslog)
 {
 	/* error levels */
@@ -98,7 +100,7 @@ PHP_MINIT_FUNCTION(syslog)
 
 	return SUCCESS;
 }
-
+/* }}} */
 
 PHP_RINIT_FUNCTION(syslog)
 {
@@ -124,7 +126,8 @@ PHP_RSHUTDOWN_FUNCTION(syslog)
 	return SUCCESS;
 }
 
-
+/* {{{ start_syslog
+ */
 static void start_syslog(BLS_D)
 {
 	ELS_FETCH();
@@ -188,6 +191,7 @@ static void start_syslog(BLS_D)
 
 	BG(syslog_started)=1;
 }
+/* }}} */
 
 /* {{{ proto void define_syslog_variables(void)
    Initializes all syslog-related variables */
@@ -272,5 +276,6 @@ PHP_FUNCTION(syslog)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

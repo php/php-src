@@ -106,6 +106,8 @@ static const struct {
 	{ NULL }
 };
 
+/* {{{ get_next_char
+ */
 inline static unsigned short get_next_char(enum entity_charset charset,
 		unsigned char * str,
 		int * newpos,
@@ -205,8 +207,10 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	*mbseqlen = mbpos;
 	return this_char;
 }
+/* }}} */
 
-/* returns the charset identifier based on current locale or a hint.
+/* {{{ entity_charset determine_charset
+ * returns the charset identifier based on current locale or a hint.
  * defaults to iso-8859-1 */
 static enum entity_charset determine_charset(char * charset_hint)
 {
@@ -261,7 +265,10 @@ static enum entity_charset determine_charset(char * charset_hint)
 	
 	return charset;
 }
+/* }}} */
 
+/* {{{ php_escape_html_entities
+ */
 PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char * hint_charset)
 {
 	int i, maxlen, len;
@@ -347,7 +354,10 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 
 }
+/* }}} */
 
+/* {{{ php_html_entities
+ */
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	zval **arg, **quotes, **charset;
@@ -374,10 +384,13 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	new = php_escape_html_entities((*arg)->value.str.val, (*arg)->value.str.len, &len, all, quote_style, hint_charset);
 	RETVAL_STRINGL(new,len,0);
 }
+/* }}} */
 
 #define HTML_SPECIALCHARS 	0
 #define HTML_ENTITIES	 	1
 
+/* {{{ register_html_constants
+ */
 void register_html_constants(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("HTML_SPECIALCHARS", HTML_SPECIALCHARS, CONST_PERSISTENT|CONST_CS);
@@ -386,6 +399,7 @@ void register_html_constants(INIT_FUNC_ARGS)
 	REGISTER_LONG_CONSTANT("ENT_QUOTES", ENT_QUOTES, CONST_PERSISTENT|CONST_CS);
 	REGISTER_LONG_CONSTANT("ENT_NOQUOTES", ENT_NOQUOTES, CONST_PERSISTENT|CONST_CS);
 }
+/* }}} */
 
 /* {{{ proto string htmlspecialchars(string string [, int quote_style][, string charset])
    Convert special characters to HTML entities */
@@ -471,5 +485,6 @@ PHP_FUNCTION(get_html_translation_table)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

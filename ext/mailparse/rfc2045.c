@@ -1163,6 +1163,12 @@ unsigned rfc2045_mimepartcount(const struct rfc2045 *p)
 	for (q=p->firstpart; q; q=q->next)	++n;
 	return (n);
 }
+
 /*
- * vim:tw=78 sw=4 ts=4
- * */
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

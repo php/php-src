@@ -180,3 +180,12 @@ char *dbf_get_next(dbhead_t *dbh)
 {
 	return get_dbf_record(dbh, dbh->db_cur_rec + 1);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */

@@ -20,7 +20,8 @@
 
 /* $Id$ */
 
-
+/* {{{ includes
+ */
 #include "php.h"
 #include "php_main.h"
 #include "zend_modules.h"
@@ -60,7 +61,10 @@
 #include "ext/xml/php_xml.h"
 #include "ext/wddx/php_wddx.h"
 #include "ext/mysql/php_mysql.h"
+/* }}} */
 
+/* {{{ php_builtin_extensions[]
+ */
 zend_module_entry *php_builtin_extensions[] = {
 	phpext_standard_ptr,
 #if WITH_BCMATH
@@ -77,6 +81,7 @@ zend_module_entry *php_builtin_extensions[] = {
 	phpext_xml_ptr,
 	phpext_wddx_ptr
 };
+/* }}} */
 
 #define EXTCOUNT (sizeof(php_builtin_extensions)/sizeof(zend_module_entry *))
 
@@ -102,5 +107,6 @@ int php_global_shutdown_internal_extensions(void)
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim: sw=4 ts=4 tw=78 fdm=marker
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
  */

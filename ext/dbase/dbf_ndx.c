@@ -181,3 +181,11 @@ ndx_record_t *ndx_get_next_rec(ndx_header_t *hp, ndx_record_t *rp)
 	return rp;
 }
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 tw=78 fdm=marker
+ * vim<600: sw=4 ts=4 tw=78
+ */
