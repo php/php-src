@@ -12,3 +12,6 @@
 
 * renaming functions so that they all are conform to one standard form
 
+* allow foreach($arrray as $key => &value)
+
+* clean up "$instance = &new object" syntax.
