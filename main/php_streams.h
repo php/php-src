@@ -271,6 +271,11 @@ PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options,
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC);
 #define php_stream_make_seekable(origstream, newstream, flags)	_php_stream_make_seekable((origstream), (newstream), (flags) STREAMS_CC TSRMLS_CC)
 
+/* This is a utility API for extensions that are opening a stream, converting it
+ * to a FILE* and then closing it again.  Be warned that fileno() on the result
+ * will most likely fail on systems with fopencookie. */
+PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int options, char **opened_path STREAMS_DC TSRMLS_DC);
+#define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC TSRMLS_CC)
 
 /* for user-space streams */
 extern php_stream_ops php_stream_userspace_ops;

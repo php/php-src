@@ -291,6 +291,7 @@ PHPAPI char *_php_stream_memory_get_buffer(php_stream *stream, size_t *length ST
 }
 /* }}} */
 
+/* }}} */
 
 /* {{{ ------- TEMP stream implementation -------*/
 
@@ -344,12 +345,17 @@ static size_t php_stream_temp_read(php_stream *stream, char *buf, size_t count T
 static int php_stream_temp_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
 	php_stream_temp_data *ts;
+	int ret;
 
 	assert(stream != NULL);
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_close(ts->innerstream);
+	ret = php_stream_free(ts->innerstream, PHP_STREAM_FREE_CLOSE | (close_handle ? 0 : PHP_STREAM_FREE_PRESERVE_HANDLE));
+
+	efree(ts);
+	
+	return ret;
 }
 /* }}} */
 
@@ -400,12 +406,44 @@ char *php_stream_temp_gets(php_stream *stream, char *buf, size_t maxlen TSRMLS_D
 static int php_stream_temp_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 { 
 	php_stream_temp_data *ts;
+	php_stream *file;
+	size_t memsize;
+	char *membuf;
+	off_t pos;
 
 	assert(stream != NULL);
 	ts = stream->abstract;
 	assert(ts != NULL);
 
-	return php_stream_cast(ts->innerstream, castas, ret, 0);
+	if (php_stream_is(ts->innerstream, PHP_STREAM_IS_STDIO)) {
+		return php_stream_cast(ts->innerstream, castas, ret, 0);
+	}
+
+	/* we are still using a memory based backing. If they are if we can be
+	 * a FILE*, say yes because we can perform the conversion.
+	 * If they actually want to perform the conversion, we need to switch
+	 * the memory stream to a tmpfile stream */
+
+	if (ret == NULL && castas == PHP_STREAM_AS_STDIO) {
+		return SUCCESS;
+	}
+
+	/* say "no" to other stream forms */
+	if (ret == NULL) {
+		return FAILURE;
+	}
+	
+	/* perform the conversion and then pass the request on to the innerstream */
+	membuf = php_stream_memory_get_buffer(ts->innerstream, &memsize);
+	file = php_stream_fopen_tmpfile();
+	php_stream_write(file, membuf, memsize);
+	pos = php_stream_tell(ts->innerstream);
+	
+	php_stream_close(ts->innerstream);
+	ts->innerstream = file;
+	php_stream_seek(ts->innerstream, pos, SEEK_SET);
+	
+	return php_stream_cast(ts->innerstream, castas, ret, 1);
 }
 /* }}} */
 
@@ -425,13 +463,13 @@ PHPAPI php_stream *_php_stream_temp_create(int mode, size_t max_memory_usage STR
 	php_stream_temp_data *self;
 	php_stream *stream;
 
-	self = emalloc(sizeof(*self));
+	self = ecalloc(1, sizeof(*self));
 	assert(self != NULL);
 	self->smax = max_memory_usage;
 	self->mode = mode;
 	stream = php_stream_alloc(&php_stream_temp_ops, self, 0, "rwb");
 	self->innerstream = php_stream_memory_create(mode);
-	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC);
+//	php_stream_temp_write(stream, NULL, 0 TSRMLS_CC);
 	return stream;
 }
 /* }}} */

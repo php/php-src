@@ -42,8 +42,8 @@
 #include "build-defs.h"
 #endif
 
+/* {{{ some macros to help track leaks */
 #if ZEND_DEBUG
-/* some macros to help track leaks */
 #define emalloc_rel_orig(size)	\
 		( __php_stream_call_depth == 0 \
 		? _emalloc((size) ZEND_FILE_LINE_CC ZEND_FILE_LINE_RELAY_CC) \
@@ -62,6 +62,7 @@
 # define perealloc_rel_orig(ptr, size, persistent)			perealloc((ptr), (size), (persistent))
 # define emalloc_rel_orig(size)								emalloc((size))
 #endif
+/* }}} */
 
 static HashTable url_stream_wrappers_hash;
 
@@ -217,6 +218,9 @@ PHPAPI int _php_stream_flush(php_stream *stream TSRMLS_DC)
 
 PHPAPI size_t _php_stream_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
 {
+	assert(stream);
+	if (buf == NULL || count == 0)
+		return 0;
 	return stream->ops->write(stream, buf, count TSRMLS_CC);
 }
 
@@ -381,6 +385,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			readchunk = maxlen - haveread;
 
 		didread = php_stream_read(src, buf, readchunk);
+
 		if (didread) {
 			/* extra paranoid */
 			size_t didwrite, towrite;
@@ -392,7 +397,6 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 
 			while(towrite) {
 				didwrite = php_stream_write(dest, writeptr, towrite);
-
 				if (didwrite == 0)
 					return 0;	/* error */
 
@@ -400,7 +404,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 				writeptr += didwrite;
 			}
 		} else {
-			if ( !maxlen) {
+			if (maxlen == 0) {
 				return haveread;
 			} else {
 				return 0; /* error */
@@ -411,13 +415,10 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 			break;
 		}
 	}
-
 	return haveread;
 
 }
 /* }}} */
-
-
 
 /* {{{ ------- STDIO stream implementation -------*/
 
@@ -770,23 +771,31 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 #if HAVE_FOPENCOOKIE
 static ssize_t stream_cookie_reader(void *cookie, char *buffer, size_t size)
 {
+	ssize_t ret;
 	TSRMLS_FETCH();
-	return php_stream_read(((php_stream *)cookie), buffer, size);
+
+	ret = php_stream_read(((php_stream *)cookie), buffer, size);
+	return ret;
 }
 
-static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t size) {
+static ssize_t stream_cookie_writer(void *cookie, const char *buffer, size_t size)
+{
 	TSRMLS_FETCH();
 	return php_stream_write(((php_stream *)cookie), (char *)buffer, size);
 }
 
-static int stream_cookie_seeker(void *cookie, off_t position, int whence) {
+static int stream_cookie_seeker(void *cookie, off_t position, int whence)
+{
 	TSRMLS_FETCH();
-	return php_stream_seek(((php_stream *)cookie), position, whence);
+
+	return php_stream_seek((php_stream *)cookie, position, whence);
 }
 
-static int stream_cookie_closer(void *cookie) {
+static int stream_cookie_closer(void *cookie)
+{
 	php_stream *stream = (php_stream*)cookie;
 	TSRMLS_FETCH();
+
 	/* prevent recursion */
 	stream->fclose_stdiocast = PHP_STREAM_FCLOSE_NONE;
 	return php_stream_close(stream);
@@ -815,10 +824,15 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-		if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
+		/* if the stream is a stdio stream let's give it a chance to respond
+		 * first, to avoid doubling up the layers of stdio with an fopencookie */
+		if (php_stream_is(stream, PHP_STREAM_IS_STDIO) &&
+				stream->ops->cast &&
+				stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
+		{
 			goto exit_success;
-
-
+		}
+		
 #if HAVE_FOPENCOOKIE
 		/* if just checking, say yes we can be a FILE*, but don't actually create it yet */
 		if (ret == NULL)
@@ -827,7 +841,16 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		*ret = fopencookie(stream, stream->mode, stream_cookie_functions);
 
 		if (*ret != NULL) {
+			off_t pos;
+			
 			stream->fclose_stdiocast = PHP_STREAM_FCLOSE_FOPENCOOKIE;
+
+			/* If the stream position is not at the start, we need to force
+			 * the stdio layer to believe it's real location. */
+			pos = php_stream_tell(stream);
+			if (pos > 0)
+				fseek(*ret, pos, SEEK_SET);
+			
 			goto exit_success;
 		}
 
@@ -840,13 +863,10 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		return FAILURE;
 #endif
 
-		goto exit_fail;
 	}
 	if (stream->ops->cast && stream->ops->cast(stream, castas, ret TSRMLS_CC) == SUCCESS)
 		goto exit_success;
 
-
-exit_fail:
 	if (show_err) {
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char *cast_names[3] = {
@@ -866,7 +886,7 @@ exit_fail:
 exit_success:
 	if (castas == PHP_STREAM_AS_STDIO && ret)
 		stream->stdiocast = *ret;
-
+	
 	if (flags & PHP_STREAM_CAST_RELEASE) {
 		/* Something other than php_stream_close will be closing
 		 * the underlying handle, so we should free the stream handle/data
@@ -983,6 +1003,7 @@ PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options,
 
 	stream = php_stream_fopen_rel(path, mode, opened_path);
 out:
+
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
 
@@ -1012,6 +1033,27 @@ out:
 		efree(tmp);
 	}
 	return stream;
+}
+
+PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
+{
+	FILE *fp = NULL;
+	php_stream *stream = NULL;
+
+	stream = php_stream_open_wrapper(path, mode, options, opened_path);
+
+	if (stream == NULL)
+		return NULL;
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO|PHP_STREAM_CAST_TRY_HARD|PHP_STREAM_CAST_RELEASE,
+				(void**)&fp, REPORT_ERRORS) == FAILURE)
+	{
+		php_stream_close(stream);
+		if (opened_path && *opened_path)
+			efree(*opened_path);
+		return NULL;
+	}
+	return fp;
 }
 
 #define PHP_STREAM_MAX_MEM	2 * 1024 * 1024
@@ -1044,7 +1086,8 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	}
 
 	php_stream_close(origstream);
-
+	php_stream_seek(*newstream, 0, SEEK_SET);
+	
 	return PHP_STREAM_RELEASED;
 }
 
