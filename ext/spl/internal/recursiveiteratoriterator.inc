@@ -24,8 +24,8 @@ define('RIT_CHILD_FIRST', 2);
  */
 class RecursiveIteratorIterator implements OuterIterator
 {
-	protected $ait = array();
-	protected $count = 0;
+	private $ait = array();
+	private $count = 0;
 
 	/** Construct from RecursiveIterator
 	 *

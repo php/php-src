@@ -22,9 +22,9 @@
  */
 class LimitIterator implements OuterIterator
 {
-	protected $it;
-	protected $offset;
-	protected $count;
+	private $it;
+	private $offset;
+	private $count;
 	private $pos;
 
 	/** Construct

@@ -24,7 +24,7 @@
  */
 abstract class FilterIterator implements OuterIterator
 {
-	protected $it;
+	private $it;
 
 	/**
 	 * Constructs a filter around an iterator whose elemnts are strings.

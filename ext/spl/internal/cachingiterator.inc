@@ -29,11 +29,11 @@ define('CIT_CATCH_GET_CHILD', 2);
  */
 class CachingIterator implements OuterIterator
 {
-	protected $it;
-	protected $current;
-	protected $key;
-	protected $valid;
-	protected $strValue;
+	private $it;
+	private $current;
+	private $key;
+	private $valid;
+	private $strValue;
 
 	/** Construct from another iterator
 	 *
