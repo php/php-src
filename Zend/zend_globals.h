@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _T_GLOBALS_H
-#define _T_GLOBALS_H
+#ifndef ZEND_GLOBALS_H
+#define ZEND_GLOBALS_H
 
 
 #include <setjmp.h>
@@ -217,4 +217,4 @@ struct _zend_alloc_globals {
 #endif
 };
 
-#endif /* _T_GLOBALS_H */
+#endif /* ZEND_GLOBALS_H */

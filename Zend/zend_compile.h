@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _COMPILE_H
-#define _COMPILE_H
+#ifndef ZEND_COMPILE_H
+#define ZEND_COMPILE_H
 
 #include "zend.h"
 
@@ -624,4 +624,4 @@ int zendlex(znode *zendlval CLS_DC);
 
 END_EXTERN_C()
 
-#endif /* _COMPILE_H */
+#endif /* ZEND_COMPILE_H */

@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _ALLOC_H
-#define _ALLOC_H
+#ifndef ZEND_ALLOC_H
+#define ZEND_ALLOC_H
 
 #include <stdio.h>
 

@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _OPERATORS_H
-#define _OPERATORS_H
+#ifndef ZEND_OPERATORS_H
+#define ZEND_OPERATORS_H
 
 #include <errno.h>
 #include <math.h>

@@ -41,9 +41,9 @@
 //	#include <FlexLexer.h>
 //	...
 
-#ifndef __FLEX_LEXER_H
+#ifndef FLEXLEXER_H
 // Never included before - need to define base class.
-#define __FLEX_LEXER_H
+#define FLEXLEXER_H
 #include <iostream.h>
 
 extern "C++" {

@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _LIST_H
-#define _LIST_H
+#ifndef ZEND_LIST_H
+#define ZEND_LIST_H
 
 #include "zend_hash.h"
 #include "zend_globals.h"

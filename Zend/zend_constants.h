@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _CONSTANTS_H
-#define _CONSTANTS_H
+#ifndef ZEND_CONSTANTS_H
+#define ZEND_CONSTANTS_H
 
 #include "zend_globals.h"
 

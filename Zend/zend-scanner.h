@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _LANGUAGE_SCANNER_H
-#define _LANGUAGE_SCANNER_H
+#ifndef ZEND_SCANNER_H
+#define ZEND_SCANNER_H
 
 #ifdef ZTS
 class ZendFlexLexer : public yyFlexLexer

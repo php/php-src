@@ -18,8 +18,8 @@
 */
 
 
-#ifndef _VARIABLES_H
-#define _VARIABLES_H
+#ifndef ZEND_VARIABLES_H
+#define ZEND_VARIABLES_H
 
 
 ZEND_API int zend_print_variable(zval *var);

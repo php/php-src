@@ -16,8 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef _STATIC_ALLOCATOR_H
-#define _STATIC_ALLOCATOR_H
+#ifndef ZEND_STATIC_ALLOCATOR_H
+#define ZEND_STATIC_ALLOCATOR_H
 
 #define ALLOCATOR_BLOCK_SIZE 400000
 
@@ -42,4 +42,4 @@ void static_allocator_init(StaticAllocator *sa);
 char *static_allocator_allocate(StaticAllocator *sa, zend_uint size);
 void static_allocator_destroy(StaticAllocator *sa);
 
-#endif /* _STATIC_ALLOCATOR_H */
+#endif /* ZEND_STATIC_ALLOCATOR_H */
