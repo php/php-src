@@ -281,10 +281,15 @@ static int php_cli_startup(sapi_module_struct *sapi_module)
 
 /* {{{ sapi_cli_ini_defaults */
 
+/* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
 	ZVAL_STRING(tmp, value, 0);\
 	zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
 	Z_STRVAL_P(entry) = zend_strndup(Z_STRVAL_P(entry), Z_STRLEN_P(entry))
+
+/* hard coded ini settings must be set in main() */
+#define INI_HARDCODED(name,value)\
+		zend_alter_ini_entry(name, sizeof(name), value, strlen(value), PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 
 static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 {
@@ -292,12 +297,8 @@ static void sapi_cli_ini_defaults(HashTable *configuration_hash)
 	
 	MAKE_STD_ZVAL(tmp);
 
-	INI_DEFAULT("register_argc_argv", "1");
-	INI_DEFAULT("html_errors", "0");
 	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
-	INI_DEFAULT("implicit_flush", "1");
-	INI_DEFAULT("max_execution_time", "0");
 
 	FREE_ZVAL(tmp);
 }
@@ -605,7 +606,10 @@ int main(int argc, char *argv[])
         /* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
 		/* here is the place for hard coded defaults which cannot be overwritten in the ini file */
-		/*zend_alter_ini_entry("<name>", len, "<value>", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);*/
+		INI_HARDCODED("register_argc_argv", "1");
+		INI_HARDCODED("html_errors", "0");
+		INI_HARDCODED("implicit_flush", "1");
+		INI_HARDCODED("max_execution_time", "0");
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
 		CG(in_compilation) = 0; /* not initialized but needed for several options */
