@@ -1504,7 +1504,31 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 	array_init(return_value);
 
 	for (i = 0; i < ib_result->out_sqlda->sqld; ++i) {
+		char alias[METADATALENGTH+4];
 		XSQLVAR *var = &ib_result->out_sqlda->sqlvar[i];
+		
+		if (! (fetch_type & FETCH_ROW)) {
+			int i = 0;
+			char const *base = "FIELD"; /* use 'FIELD' if name is empty */
+			
+			/**
+			* Ensure no two columns have identical names: 
+			* keep generating new names until we find one that is unique.
+			*/
+			switch (*var->aliasname) {
+				void *p;
+				
+				default:
+					i = 1;
+					strcpy(alias, base = var->aliasname);
+					
+					while (SUCCESS == zend_symtable_find(Z_ARRVAL_P(return_value),alias,strlen(alias)+1,&p)) {
+				
+				case '\0':
+						sprintf(alias, "%s_%02d", base, i++);
+					}
+			}
+		}
 
 		if (((var->sqltype & 1) == 0) || *var->sqlind != -1) {
 			zval *result;
@@ -1614,13 +1638,13 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type) 
 			if (fetch_type & FETCH_ROW) {
 				add_index_zval(return_value, i, result);
 			} else {
-				add_assoc_zval(return_value, var->aliasname, result);
+				add_assoc_zval(return_value, alias, result);
 			}
 		} else {
 			if (fetch_type & FETCH_ROW) {
 				add_index_null(return_value, i);
 			} else {
-				add_assoc_null(return_value, var->aliasname);
+				add_assoc_null(return_value, alias);
 			}
 		}
 	} /* for field */
