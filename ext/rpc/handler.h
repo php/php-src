@@ -61,7 +61,7 @@ typedef struct _rpc_object_handlers {
 	int (*rpc_dtor)(void **data);
 	int (*rpc_call)(char *method_name, zend_uint method_name_len, void **data, zval **return_value, int num_args, zval **args[]);
 	int (*rpc_get)(char *property_name, zend_uint property_name_len, zval *return_value, void **data);
-	int (*rpc_set)(char *property_name, zend_uint property_name_len, zval *value, zval *return_value, void **data);
+	int (*rpc_set)(char *property_name, zend_uint property_name_len, zval *value, void **data);
 	int (*rpc_compare)(void **data1, void **data2);
 	int (*rpc_get_classname)(char **class_name, zend_uint *class_name_length, void **data);
 	int (*rpc_has_property)(char *property_name, zend_uint property_name_length, void **data);
@@ -71,12 +71,12 @@ typedef struct _rpc_object_handlers {
 
 /* handler entry */
 typedef struct _rpc_handler_entry {
-	char				*name;
+	char						*name;
 	void (*rpc_handler_init)();
 	rpc_object_handlers	*handlers;
-	zend_class_entry	*ce;
-	function_entry		*functions;
-	function_entry		*methods;
+	zend_class_entry		*ce;
+	function_entry			*functions;
+	function_entry			*methods;
 } rpc_handler_entry;
 
 /* string */
@@ -88,24 +88,30 @@ typedef struct _rpc_string {
 /* class/method/function hash */
 typedef struct _rpc_class_hash {
 	rpc_string name; /* must be first entry */
-	WormHashTable methods;
-	WormHashTable properties;
+	TsHashTable methods;
+	TsHashTable properties;
 } rpc_class_hash;
 
 /* internal data */
 typedef struct _rpc_internal {
-	char				*class_name;
-	zend_uint			class_name_len;
-	zend_class_entry	*ce;
+	char						*class_name;
+	zend_uint				class_name_len;
+	zend_class_entry		*ce;
 	rpc_object_handlers	**handlers;
-	void				*data;
-	zend_uint			refcount;
-	zend_uint			clonecount;
-	zend_bool			pool_instances;
-	rpc_class_hash		*hash;
-	WormHashTable		function_table;
-	MUTEX_T				mx_handler;
+	void						*data;
+	zend_uint				refcount;
+	zend_uint				clonecount;
+	zend_bool				pool_instances;
+	rpc_class_hash			*hash;
+	TsHashTable				function_table;
+	MUTEX_T					mx_handler;
 } rpc_internal;
+
+/* proxy data */
+typedef struct _rpc_proxy {
+	zend_uint				refcount;
+	zend_uint				clonecount;
+} rpc_proxy;
 
 
 #endif /* HANDLER_H */
