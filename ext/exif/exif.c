@@ -720,6 +720,7 @@ typedef struct {
 	int  motorola_intel; /* 1 Motorola; 0 Intel */
 
 	char *UserComment;
+	int  UserCommentLen;
 	char UserCommentEncoding[12];
 
 	char *Thumbnail;
@@ -808,6 +809,7 @@ void exif_add_image_info( image_info_type *image_info, int section_index, char *
 		case TAG_FMT_UNDEFINED:
 			if ( value) {
 				info_value->value.s = estrndup(value,length);
+				info_value->length = length;
 			} else {
 				info_value->length = 0;
 				info_value->value.s = estrdup("");
@@ -834,7 +836,7 @@ void exif_add_image_info( image_info_type *image_info, int section_index, char *
 
 		case TAG_FMT_SINGLE:
 			php_error(E_WARNING, "Found value of type single");
-			info_value->value.f = (double)*(float *)value;
+			info_value->value.f = *(float *)value;
 
 		case TAG_FMT_DOUBLE:
 			php_error(E_WARNING, "Found value of type double");
@@ -1280,7 +1282,7 @@ static int exif_process_user_comment(char **pszInfoPtr,char *szEncoding,char *sz
 	}
 
 	/* Olympus has this padded with trailing spaces.  Remove these first. */
-	if (a) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
+	if (ByteCount) for (a=ByteCount-1;a && szValuePtr[a]==' ';a--) (szValuePtr)[a] = '\0';
 
 	/* normal text without encoding */
 	return exif_process_string(pszInfoPtr, szValuePtr, ByteCount);
@@ -1421,7 +1423,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 		switch(tag) {
 			case TAG_COPYRIGHT:
 				if (byte_count>1 && (l=php_strnlen(value_ptr,byte_count)) > 0) {
-					if ( l<byte_count-1) {
+					if ( (size_t)l<byte_count-1) {
 						/* When there are any characters after the first NUL */
 						exif_add_image_info( ImageInfo, SECTION_COMPUTED, "Copyright.Photographer", TAG_COPYRIGHT, TAG_FMT_STRING, l, value_ptr);
 						exif_add_image_info( ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       TAG_COPYRIGHT, TAG_FMT_STRING, byte_count-l-1, value_ptr+l+1);
@@ -1433,7 +1435,9 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 				break;
 
 			case TAG_USERCOMMENT:
-				exif_process_user_comment(&(ImageInfo->UserComment),ImageInfo->UserCommentEncoding,value_ptr,byte_count);
+				ImageInfo->UserCommentLen = exif_process_user_comment(&(ImageInfo->UserComment),ImageInfo->UserCommentEncoding,value_ptr,byte_count);
+				if (ImageInfo->UserCommentLen)
+					ImageInfo->UserCommentLen--; /* We want number of characters not allocation size */
 				break;
 
 			/* this is only a comment if type is string! */
@@ -1661,7 +1665,7 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigne
 
 	if ( (l1 = php_strnlen(buffer+2,length-2)) > 0) {
 		exif_add_image_info( ImageInfo, SECTION_APP12, "Company", TAG_NONE, TAG_FMT_STRING, l1, buffer+2);
-		if ( length > 2+l1+1) {
+		if ( length > 2+(unsigned int)l1+1) {
 			l2 = php_strnlen(buffer+2+l1+1,length-2-l1+1);
 			exif_add_image_info( ImageInfo, SECTION_APP12, "Info", TAG_NONE, TAG_FMT_STRING, l2, buffer+2+l1+1);
 		}
@@ -2270,7 +2274,8 @@ PHP_FUNCTION(exif_read_data)
 		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "FocusDistance", TAG_NONE, TAG_FMT_STRING, strlen(tmp), tmp);
 	}
 	if (ImageInfo.UserComment) {
-		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_STRING, strlen(ImageInfo.UserComment), ImageInfo.UserComment);
+		/*exif_iif_add_int( &ImageInfo, SECTION_COMPUTED, "UserCommentLen",  ImageInfo.UserCommentLen);*/
+		exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserComment", TAG_NONE, TAG_FMT_UNDEFINED, ImageInfo.UserCommentLen, ImageInfo.UserComment);
 		if ( (len=strlen(ImageInfo.UserCommentEncoding))) {
 			exif_add_image_info( &ImageInfo, SECTION_COMPUTED, "UserCommentEncoding", TAG_NONE, TAG_FMT_STRING, len, ImageInfo.UserCommentEncoding);
 		}
@@ -2341,7 +2346,7 @@ PHP_FUNCTION(exif_thumbnail)
 	php_error(E_NOTICE,"Returning thumbnail(%d)", ImageInfo.ThumbnailSize);
 	#endif
 
-	ZVAL_STRINGL( return_value, ImageInfo.Thumbnail, ImageInfo.ThumbnailSize, 1);
+	RETVAL_STRINGL(ImageInfo.Thumbnail, ImageInfo.ThumbnailSize, 1);
 
 	#ifdef EXIF_DEBUG
 	php_error(E_NOTICE,"Discarding info");
