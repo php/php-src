@@ -59,9 +59,7 @@
 #if HAVE_PTSNAME && HAVE_GRANTPT && HAVE_UNLOCKPT && HAVE_SYS_IOCTL_H && HAVE_TERMIOS_H
 # include <sys/ioctl.h>
 # include <termios.h>
-# ifdef TIOCNOTTY
-#  define PHP_CAN_DO_PTS	1
-# endif
+# define PHP_CAN_DO_PTS	1
 #endif
 
 #include "proc_open.h"
@@ -754,8 +752,12 @@ PHP_FUNCTION(proc_open)
 		if (dev_ptmx >= 0) {
 			int my_pid = getpid();
 
+#ifdef TIOCNOTTY
 			/* detach from original tty. Might only need this if isatty(0) is true */
 			ioctl(0,TIOCNOTTY,NULL);
+#else
+			setsid();
+#endif
 			/* become process group leader */
 			setpgid(my_pid, my_pid);
 			tcsetpgrp(0, my_pid);
