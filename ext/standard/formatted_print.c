@@ -333,6 +333,31 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 			if (precision > 0)
 				numbuf[i++] = decimal_point;
 		}
+	} else if (fmt == 'e' || fmt == 'E') {
+		char *exp_p;
+		int dec2;
+		
+		decpt--;
+		
+		numbuf[i++] = cvt[j++];
+		numbuf[i++] = decimal_point;	
+
+		if (precision > 0) {
+			int k = precision;
+				
+			while (k-- && cvt[j]) {
+				numbuf[i++] = cvt[j++];
+			}
+		} else {
+			numbuf[i++] = '0';
+		}
+		
+		numbuf[i++] = fmt;
+		exp_p = php_convert_to_decimal(decpt, 0, &dec2, &sign, 0);
+		numbuf[i++] = sign ? '-' : '+';
+		while (*exp_p) {
+			numbuf[i++] = *(exp_p++);
+		}
 	} else {
 		numbuf[i++] = cvt[j++];
 		if (precision > 0)
