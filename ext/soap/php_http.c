@@ -372,7 +372,9 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		smart_str_appends(&soap_headers, phpurl->path);
+		if (phpurl->path) {
+			smart_str_appends(&soap_headers, phpurl->path);
+		}
 		if (phpurl->query) {
 			smart_str_appendc(&soap_headers, '?');
 			smart_str_appends(&soap_headers, phpurl->query);
@@ -452,7 +454,7 @@ try_again:
 						    Z_TYPE_PP(value) == IS_STRING) {
 						  zval **tmp;
 						  if (zend_hash_index_find(Z_ARRVAL_PP(data), 1, (void**)&tmp) == SUCCESS &&
-						      strncmp(phpurl->path,Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0 &&
+						      strncmp(phpurl->path?phpurl->path:"/",Z_STRVAL_PP(tmp),Z_STRLEN_PP(tmp)) == 0 &&
 						      zend_hash_index_find(Z_ARRVAL_PP(data), 2, (void**)&tmp) == SUCCESS &&
 						      in_domain(phpurl->host,Z_STRVAL_PP(tmp)) &&
 						      (use_ssl || zend_hash_index_find(Z_ARRVAL_PP(data), 3, (void**)&tmp) == FAILURE)) {
@@ -543,12 +545,13 @@ try_again:
 					  new_url->scheme = estrdup(phpurl->scheme);
 					  new_url->host = estrdup(phpurl->host);
 					  new_url->port = phpurl->port;
-						if (new_url->path[0] != '/') {
-						  char *p = strrchr(phpurl->path, '/');
-						  char *s = emalloc((p - phpurl->path) + strlen(new_url->path) + 2);
+						if (new_url->path && new_url->path[0] != '/') {
+						  char *t = phpurl->path?phpurl->path:"/";
+						  char *p = strrchr(t, '/');
+						  char *s = emalloc((p - t) + strlen(new_url->path) + 2);
 
-						  strncpy(s, phpurl->path, (p - phpurl->path) + 1);
-						  s[(p - phpurl->path) + 1] = 0;
+						  strncpy(s, t, (p - t) + 1);
+						  s[(p - t) + 1] = 0;
 						  strcat(s, new_url->path);
 						  efree(new_url->path);
 						  new_url->path = s;
@@ -661,9 +664,10 @@ try_again:
 				}
 			}
 			if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 1)) {
-				char *c = strrchr(phpurl->path, '/');
+				char *t = phpurl->path?phpurl->path:"/";
+				char *c = strrchr(t, '/');
 				if (c) {
-					add_index_stringl(zcookie, 1, phpurl->path, c-phpurl->path, 1);
+					add_index_stringl(zcookie, 1, t, c-t, 1);
 				}
 			}
 			if (!zend_hash_index_exists(Z_ARRVAL_P(zcookie), 2)) {
