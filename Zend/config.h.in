@@ -46,17 +46,8 @@
 /* define ulong by configure if it is missed (most probably is) */
 #undef ulong
 
-/* Define if you have the resolv library (-lresolv). */
-#define HAVE_LIBRESOLV 0
-
 /* Define if you have libdl (used for dynamic linking) */
 #define HAVE_LIBDL 0
-
-/* Define if you have and want to use libnsl */
-#define HAVE_LIBNSL 0
-
-/* Define if you have and want to use libsocket */
-#define HAVE_LIBSOCKET 0
 
 #undef ZEND_DEBUG
 
@@ -269,6 +260,3 @@
 
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
-
-/* Define if you have the resolv library (-lresolv).  */
-#undef HAVE_LIBRESOLV

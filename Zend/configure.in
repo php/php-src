@@ -70,11 +70,6 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
        LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
 
-AC_CHECK_LIB(c, socket, [:], [
- AC_CHECK_LIB(socket, socket, [
-  LIBS="-lsocket $LIBS"
-  AC_DEFINE(HAVE_LIBSOCKET) ], []) ])
-
 AC_CHECK_LIB(c, dlopen, [
  # fake it
  AC_DEFINE(HAVE_LIBDL) ], [
