@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Improved UNIX build system to support more vendor make tools (Sascha)
 - Updated natural comparison/sorting algorithm by Martin Pool
   <mbp@humbug.org.au>. (Andrei)
 - Fixed a crash in array_multisort() that happened when empty arrays

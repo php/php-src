@@ -1,9 +1,4 @@
 
-DEPTH     = ..
-topsrcdir = @topsrcdir@
-srcdir    = @srcdir@
-VPATH     = @srcdir@
-
 SUBDIRS = $(EXT_STATIC) $(EXT_SHARED)
 
 all:
@@ -18,4 +13,4 @@ all:
 
 NO_RECURSION = all
 	
-include $(topsrcdir)/build/rules.mk
+include $(top_srcdir)/build/rules.mk
