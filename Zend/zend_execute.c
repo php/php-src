@@ -2141,9 +2141,13 @@ send_by_ref:
 					
 					if (opline->extended_value) {
 						array_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
-						SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
-						array_ptr = *array_ptr_ptr;
-						array_ptr->refcount++;
+						if (array_ptr_ptr == NULL) {
+							MAKE_STD_ZVAL(array_ptr);
+						} else {
+							SEPARATE_ZVAL_IF_NOT_REF(array_ptr_ptr);
+							array_ptr = *array_ptr_ptr;
+							array_ptr->refcount++;
+						}
 					} else {
 						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 						if (EG(free_op1)) { /* IS_TMP_VAR */
