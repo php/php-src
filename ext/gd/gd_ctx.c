@@ -1,3 +1,6 @@
+#include "php_gd.h"
+
+
 #define CTX_PUTC(c,ctx) ctx->putC(ctx, c)
 	
 static void _php_image_output_putc(struct gdIOCtx *ctx, int c)
@@ -34,7 +37,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
 
 	if (argc > 1) {
 		convert_to_string_ex(file);
