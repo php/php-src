@@ -71,6 +71,10 @@ typedef struct _php_shutdown_function_entry {
 	int arg_count;
 } php_shutdown_function_entry;
 
+#ifdef ZTS
+#undef HAVE_PUTENV
+#endif
+
 /* some prototypes for local functions */
 int user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_entry);
 void php3_call_shutdown_functions(void);
@@ -323,10 +327,6 @@ php3_module_entry basic_functions_module = {
 	NULL,						/* extension info */
 	STANDARD_MODULE_PROPERTIES
 };
-
-#ifdef ZTS
-#undef HAVE_PUTENV
-#endif
 
 #if defined(HAVE_PUTENV)
 static HashTable putenv_ht;
