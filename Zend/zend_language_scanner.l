@@ -119,7 +119,7 @@ do { \
 }
 		
 
-#define ZEND_IS_OCT(c)  ((c)>='0' && (c)<'8')
+#define ZEND_IS_OCT(c)  ((c)>='0' && (c)<='7')
 #define ZEND_IS_HEX(c)  (((c)>='0' && (c)<='9') || ((c)>='a' && (c)<='f') || ((c)>='A' && (c)<='F'))
 
 
@@ -904,7 +904,6 @@ ANY_CHAR (.|[\n])
 	return T_CONCAT_EQUAL;
 }
 
-
 <ST_IN_SCRIPTING>"%=" {
 	return T_MOD_EQUAL;
 }
@@ -1059,7 +1058,7 @@ ANY_CHAR (.|[\n])
 		filename = "";
 	}
 	zendlval->value.str.len = strlen(filename);
-	zendlval->value.str.val = estrndup(filename,zendlval->value.str.len);
+	zendlval->value.str.val = estrndup(filename, zendlval->value.str.len);
 	zendlval->type = IS_STRING;
 	return T_FILE;
 }
@@ -1069,7 +1068,7 @@ ANY_CHAR (.|[\n])
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	HANDLE_NEWLINES(yytext,yyleng);
+	HANDLE_NEWLINES(yytext, yyleng);
 	return T_INLINE_HTML;
 }
 
@@ -1133,7 +1132,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<INITIAL>"<?php_track_vars?>"([\n]|"\r\n")? {
+<INITIAL>"<?php_track_vars?>"("\n"|"\r\n")? {
 	zend_error(E_WARNING, "&lt;?php_track_vars?&gt; is no longer supported - please use the track_vars INI directive instead");
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
@@ -1175,7 +1174,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>([#]|"//") {
+<ST_IN_SCRIPTING>"#"|"//" {
 	BEGIN(ST_ONE_LINE_COMMENT);
 	yymore();
 }
@@ -1227,7 +1226,7 @@ ANY_CHAR (.|[\n])
 	yymore();
 }
 
-<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">")([\n]|"\r\n")? {
+<ST_IN_SCRIPTING>("?>"|"</script"{WHITESPACE}*">")("\n"|"\r\n")? {
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -1237,7 +1236,7 @@ ANY_CHAR (.|[\n])
 }
 
 
-<ST_IN_SCRIPTING>"%>"([\n]|"\r\n")? {
+<ST_IN_SCRIPTING>"%>"("\n"|"\r\n")? {
 	if (CG(asp_tags)) {
 		BEGIN(INITIAL);
 		zendlval->value.str.len = yyleng;
