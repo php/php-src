@@ -31,11 +31,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#ifdef PHP_WIN32
-# define zend_finite(x) _finite(x)
-# define zend_isnan(x) _isnan(x)
-#endif
-
 /* {{{ proto int abs(int number)
    Return the absolute value of the number */
 
