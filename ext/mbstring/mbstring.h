@@ -198,9 +198,6 @@ int php_mb_encoding_converter(char **to, int *to_length, const char *from,
 int php_mb_oddlen(const char *string, int length, const char *encoding TSRMLS_DC);
 #endif /* ZEND_MULTIBYTE */
 
-SAPI_POST_HANDLER_FUNC(php_mb_post_handler);
-MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
-
 #else	/* HAVE_MBSTRING */
 
 #define mbstring_module_ptr NULL
