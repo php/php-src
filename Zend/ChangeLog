@@ -1,3 +1,13 @@
+2002-05-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c
+      zend_builtin_functions.c:
+    - Hopefully fix problems with debug_backtrace()
+
+2002-05-08  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_builtin_functions.c: - MFZE1
+
 2002-05-07  Andi Gutmans  <andi@zend.com>
 
     * zend.c
