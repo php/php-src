@@ -818,13 +818,21 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 #endif
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.opened_path = NULL;
+			/* some server configurations allow '..' to slip through in the
+			   translated path.   We'll just refuse to handle such a path. */
+			if (strstr(SG(request_info).path_translated,"..")) {
+				SG(sapi_headers).http_response_code = 404;
+				efree(SG(request_info).path_translated);
+				SG(request_info).path_translated = NULL;
+			}
 
 
 			php_execute_script(&file_handle TSRMLS_CC);
 			if (SG(request_info).cookie_data) {
 				efree(SG(request_info).cookie_data);
 			}
-			efree(SG(request_info).path_translated);
+			if (SG(request_info).path_translated)
+				efree(SG(request_info).path_translated);
 #ifdef PHP_ENABLE_SEH
 		} __except(exceptionhandler(&e, GetExceptionInformation())) {
 			char buf[1024];
