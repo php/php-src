@@ -667,7 +667,9 @@ static void pdo_dbh_free_storage(zend_object *object TSRMLS_DC)
 	if(dbh->properties) {
 		zend_hash_destroy(dbh->properties);
 	}
-	dbh->methods->closer(dbh TSRMLS_CC);
+	if (dbh->methods) {
+		dbh->methods->closer(dbh TSRMLS_CC);
+	}
 
 	if (dbh->data_source) {
 		pefree((char *)dbh->data_source, dbh->is_persistent);
