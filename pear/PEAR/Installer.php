@@ -190,8 +190,9 @@ class PEAR_Installer extends PEAR_Common
                          "/get/$pkgfile";
                 }
                 $need_download = true;
+            } else {
+                return $this->raiseError("could not open the package file: $pkgfile");
             }
-            return $this->raiseError("could not open the package file: $pkgfile");
         }
 
         // Download package -----------------------------------------------
@@ -206,6 +207,9 @@ class PEAR_Installer extends PEAR_Common
             if (!$fp = @fopen($pkgfile, 'r')) {
                 return $this->raiseError("$pkgfile: failed to download ($php_errormsg)");
             }
+            // XXX FIXME should check content-disposition header
+            // for now we set the "force" option to avoid an error
+            // because of a temp. package file called "Package"
             if (!$wp = @fopen($downloadfile, 'w')) {
                 return $this->raiseError("$downloadfile: write failed ($php_errormsg)");
             }
@@ -241,6 +245,7 @@ class PEAR_Installer extends PEAR_Common
             chdir($oldcwd);
             return $this->raiseError("unable to unpack $pkgfile");
         }
+/*
         $file = basename($pkgfile);
         // Assume the decompressed dir name
         if (($pos = strrpos($file, '.')) === false) {
@@ -248,6 +253,12 @@ class PEAR_Installer extends PEAR_Common
             return $this->raiseError("invalid package name");
         }
         $pkgdir = substr($file, 0, $pos);
+*/
+        $dp = opendir($tmpdir);
+        do {
+            $pkgdir = readdir($dp);
+        } while ($pkgdir{0} == '.');
+
         $descfile = $tmpdir . DIRECTORY_SEPARATOR . $pkgdir . DIRECTORY_SEPARATOR . 'package.xml';
 
         if (!is_file($descfile)) {
