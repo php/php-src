@@ -37,7 +37,8 @@ BUILD_FILES = \
 	scan_makefile_in.awk \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config phpextdist
+bin_SCRIPTS = phpize php-config
+bin_src_SCRIPTS = phpextdist
 
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
@@ -49,6 +50,10 @@ install-programs:
 	@for prog in $(bin_SCRIPTS); do \
 		echo "  program: $$prog"; \
 		$(INSTALL) -m 755 $(builddir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
+	done
+	@for prog in $(bin_src_SCRIPTS); do \
+		echo "  program: $$prog"; \
+		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done
 
 HEADER_DIRS = \
