@@ -331,9 +331,12 @@ Run regression tests with PHP\'s regression testing script (run-tests.php).',
         $run_tests = $this->config->get('php_dir') . DIRECTORY_SEPARATOR . 'run-tests.php';
         if (!file_exists($run_tests)) {
             $run_tests = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . 'run-tests.php';
+            if (!file_exists($run_tests)) {
+                return $this->raiseError("No `run-test.php' file found");
+            }
         }
         $plist = implode(" ", $params);
-        $cmd = "$php -d include_path=$cwd$ps$ip $run_tests $plist";
+        $cmd = "$php -C -d include_path=$cwd$ps$ip -f $run_tests -- $plist";
         system($cmd);
         return true;
     }
