@@ -91,7 +91,7 @@ class PEAR_Installer extends PEAR
         $this->extdir = $extdir;
         $this->docdir = $docdir;
         $this->statedir = "/var/lib/php"; // XXX FIXME Windows
-	$this->loadPackageList("$this->statedir/packagelist.xml");
+	$this->loadPackageList("$this->statedir/packages.lst");
     }
 
     // }}}
@@ -182,15 +182,26 @@ class PEAR_Installer extends PEAR
 
     function loadPackageList($file) {
 	$this->pkglist_file = $file;
+        $this->pkglist = array();
 	if (!file_exists($file)) {
-	    touch($file);
+	    if (!@touch($file)) {
+                return $this->raiseError("touch($file): $php_errormsg");
+            }
 	}
-	$fp = $this->pkglist_fp = fopen($file, "r");
+	$fp = $this->pkglist_fp = @fopen($file, "r");
+        if (!is_resource($fp)) {
+                return $this->raiseError("fopen($file): $php_errormsg");
+        }
 	$this->lockPackageList();
-	while ($line = fgets($fp, 2048)) {
-	    list($type, $name, $file) = explode(" ", trim($line));
-	    $this->pkglist[$type][$name] = $file;
-	}
+        $versionline = trim(fgets($fp, 2048));
+        if ($versionline == ";1") {
+            while ($line = fgets($fp, 2048)) {
+                list($name, $version, $file) = explode(";", trim($line));
+                $this->pkglist[$name]["version"] = $version;
+                $this->pkglist[$name]["files"][] = $file;
+            }
+        }
+        $this->unlockPackageList();
     }
 
     // }}}
@@ -198,19 +209,19 @@ class PEAR_Installer extends PEAR
 
     function savePackageList() {
 	$fp = $this->pkglist_fp;
-	$wfp = fopen($this->pkglist_file, "w");
-	if (!$wfp) {
-	    return false;
+	$wfp = @fopen($this->pkglist_file, "w");
+	if (!is_resource($wfp)) {
+	    return $this->raiseError("could not write $this->pkglist_file");
 	}
 	if (is_resource($fp)) {
 	    fclose($fp);
 	}
 	$this->pkglist_fp = $fp = $wfp;
-	reset($this->pkglist);
-	while (list($type, $entry) = each($this->pkglist)) {
-	    reset($entry);
-	    while (list($name, $file) = each($entry)) {
-		fwrite($fp, "$type $name $file\n");
+        fwrite($fp, ";1\n");
+        foreach ($this->pkglist as $name => $entry) {
+            $ver = $entry["version"];
+            foreach ($entry["files"] as $file) {
+		fwrite($fp, "$name;$ver;$file\n");
 	    }
 	}
 	fclose($fp);
@@ -338,14 +349,13 @@ class PEAR_Installer extends PEAR
 	$this->current_element = false;
 	$this->destdir = '';
 
-	while ($data = fread($fp, 2048)) {
-	    if (!xml_parse($xp, $data, feof($fp))) {
-		$err = $this->raiseError(sprintf("XML error: %s at line %d",
-                                                 xml_error_string(xml_get_error_code($xp)),
-                                                 xml_get_current_line_number($xp)));
-		xml_parser_free($xp);
-		return $err;
-	    }
+	$data = fread($fp, filesize($descfile));
+        if (!xml_parse($xp, $data, 1)) {
+            $msg = sprintf("XML error: %s at line %d",
+                           xml_error_string(xml_get_error_code($xp)),
+                           xml_get_current_line_number($xp));
+            xml_parser_free($xp);
+            return $this->raiseError($msg);
 	}
 
 	xml_parser_free($xp);
@@ -362,10 +372,12 @@ class PEAR_Installer extends PEAR
 	$this->current_attributes = $attribs;
 	switch ($name) {
 	    case "Package":
+/*
 		if (strtolower($attribs["Type"]) != "binary") {
 		    return $this->raiseError("Invalid package: only binary packages supported yet.");
 		}
 		$this->pkginfo['pkgtype'] = strtolower($attribs["Type"]);
+*/
 		break;
 	}
     }
@@ -382,10 +394,16 @@ class PEAR_Installer extends PEAR
     // {{{ charHandler()
 
     function charHandler($xp, $data) {
-        // XXX FIXME: $data may be incomplete, all of this code should
-        // actually be in endHandler.
-        //
+        $next = $this->element_stack[sizeof($this->element_stack)-1];
 	switch ($this->current_element) {
+            case "Name":
+                if ($next == "Package") {
+                    $this->pkginfo["name"] = $data;
+                }
+                break;
+            case "Version":
+                $this->pkginfo["version"] = $data;
+                break;
 	    case "Dir":
 		if (!$this->phpdir) {
 		    break;

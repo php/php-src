@@ -158,7 +158,7 @@ class PEAR_Packager extends PEAR
               "  <Summary>".$this->pkginfo["Package,Summary"]."</Summary>\n".
               "  <Maintainer>\n".
               "    <Initials>".$this->pkginfo["Maintainer,Initials"]."</Initials>\n".
-              "    <Name>".$this->pkginfo["Maintainer,Name"]."</Initials>\n".
+              "    <Name>".$this->pkginfo["Maintainer,Name"]."</Name>\n".
               "    <Email>".$this->pkginfo["Maintainer,Email"]."</Email>\n".
               "  </Maintainer>\n".
               "  <Release>\n".

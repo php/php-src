@@ -24,14 +24,20 @@ switch ($command) {
     case "install":
         $package = $options[1][2];
         $installer =& new PEAR_Installer();
-        $installer->Install($package);
-        print "install ok\n";
+        if (PEAR::isError($installer->Install($package))) {
+            print "\ninstall failed\n";
+        } else {
+            print "install ok\n";
+        }
         break;
     case "package":
         $pkginfofile = $options[1][2];
         $packager =& new PEAR_Packager();
-        $packager->Package($pkginfofile);
-        print "package ok\n";
+        if (PEAR::isError($packager->Package($pkginfofile))) {
+            print "\npackage failed\n";
+        } else {
+            print "package ok\n";
+        }
         break;
     default:
         usage();
