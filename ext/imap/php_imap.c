@@ -2978,6 +2978,10 @@ PHP_FUNCTION(imap_mail_compose)
 			bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 			memcpy(bod->contents.text.data, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue)+1);
 			bod->contents.text.size = Z_STRLEN_PP(pvalue);
+		} else {
+			bod->contents.text.data = (char *) fs_get(1);
+			bod->contents.text.data = "";
+			bod->contents.text.size = 0;
 		}
 		if (zend_hash_find(Z_ARRVAL_PP(data), "lines", sizeof("lines"), (void **) &pvalue)== SUCCESS) {
 			convert_to_long_ex(pvalue);
@@ -3081,6 +3085,10 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.data = (char *) fs_get(Z_STRLEN_PP(pvalue) + 1);
 				memcpy(bod->contents.text.data, Z_STRVAL_PP(pvalue), Z_STRLEN_PP(pvalue) + 1);
 				bod->contents.text.size = Z_STRLEN_PP(pvalue);
+			} else {
+				bod->contents.text.data = (char *) fs_get(1);
+				bod->contents.text.data = "";
+				bod->contents.text.size = 0;
 			}
 			if (zend_hash_find(Z_ARRVAL_PP(data), "lines", sizeof("lines"), (void **) &pvalue)== SUCCESS) {
 				convert_to_long_ex(pvalue);
