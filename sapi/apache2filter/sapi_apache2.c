@@ -298,9 +298,9 @@ static int php_output_filter(ap_filter_t *f, ap_bucket_brigade *bb)
 		/* XXX: Lots of startup crap. Should be moved into its own func */
 		PG(during_request_startup) = 0;
 		SG(sapi_headers).http_response_code = 200;
-		SG(request_info).content_type = (char *) apr_table_get(f->r->headers_in, "Content-Type");
+		SG(request_info).content_type = apr_table_get(f->r->headers_in, "Content-Type");
 		SG(request_info).query_string = f->r->args;
-		SG(request_info).request_method = (char *) f->r->method;
+		SG(request_info).request_method = f->r->method;
 		SG(request_info).request_uri = f->r->uri;
 		f->r->no_cache = f->r->no_local_copy = 1;
 		content_type = sapi_get_default_content_type(SLS_C);

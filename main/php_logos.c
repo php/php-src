@@ -68,7 +68,7 @@ int php_shutdown_info_logos(void)
 }
 
 #define CONTENT_TYPE_HEADER "Content-Type: "
-int php_info_logos(char *logo_string)
+int php_info_logos(const char *logo_string)
 {
 	php_info_logo *logo_image;
 	char *content_header;

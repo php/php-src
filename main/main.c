@@ -1140,10 +1140,9 @@ static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC)
 PHPAPI int php_handle_special_queries(SLS_D PLS_DC)
 {
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
-		&& PG(expose_php)) {
-		if(php_info_logos(SG(request_info).query_string+1))
-			{	
-				return 1;
+			&& PG(expose_php)) {
+		if (php_info_logos(SG(request_info).query_string+1)) {	
+			return 1;
 		} else if (!strcmp(SG(request_info).query_string+1, PHP_CREDITS_GUID)) {
 			php_print_credits(PHP_CREDITS_ALL);
 			return 1;

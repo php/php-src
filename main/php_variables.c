@@ -212,6 +212,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 {
 	char *res = NULL, *var, *val;
+	const char *c_var;
 	pval *array_ptr;
 	int free_buffer=0;
 	char *strtok_buf = NULL;
@@ -246,17 +247,17 @@ void php_treat_data(int arg, char *str, zval* destArray ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (arg == PARSE_GET) {		/* GET data */
-		var = SG(request_info).query_string;
-		if (var && *var) {
-			res = (char *) estrdup(var);
+		c_var = SG(request_info).query_string;
+		if (c_var && *c_var) {
+			res = (char *) estrdup(c_var);
 			free_buffer = 1;
 		} else {
 			free_buffer = 0;
 		}
 	} else if (arg == PARSE_COOKIE) {		/* Cookie data */
-		var = SG(request_info).cookie_data;
-		if (var && *var) {
-			res = (char *) estrdup(var);
+		c_var = SG(request_info).cookie_data;
+		if (c_var && *c_var) {
+			res = (char *) estrdup(c_var);
 			free_buffer = 1;
 		} else {
 			free_buffer = 0;
