@@ -1136,12 +1136,12 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	}
 #endif
 
-	/* avoid many reallocs by allocating a good sized chunk to begin with, if we can.
-	 * Note that the stream may be filtered, in which case the stat result may be inaccurate,
-	 * as the filter may inflate or deflate the number of bytes that we can read.
-	 * In order to avoid an upsize followed by a downsize of the buffer, overestimate by the
-	 * step size (which is 2K).
-	 * */
+	/* avoid many reallocs by allocating a good sized chunk to begin with, if
+	 * we can.  Note that the stream may be filtered, in which case the stat
+	 * result may be inaccurate, as the filter may inflate or deflate the
+	 * number of bytes that we can read.  In order to avoid an upsize followed
+	 * by a downsize of the buffer, overestimate by the step size (which is
+	 * 2K).  */
 	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
 		max_len = ssbuf.sb.st_size + step;
 	} else {
