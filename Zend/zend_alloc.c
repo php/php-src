@@ -467,7 +467,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 	}
 #endif /* ZEND_ENABLE_FAST_CACHE */
 
-#if !ZEND_DISABLE_MEMORY_CACHE
+#if !ZEND_DISABLE_MEMORY_CACHE && !defined(ZEND_MM)
 	if (1 || clean_cache) {
 		unsigned int i, j;
 		zend_mem_header *ptr;
