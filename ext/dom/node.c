@@ -194,7 +194,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 /* {{{ proto nodeType	unsigned short	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
-Since: 
+Since:
 */
 int dom_node_node_type_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
@@ -238,7 +238,7 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -311,7 +311,7 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object(first, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -344,7 +344,7 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object(last, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -374,7 +374,7 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object(prevsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -384,10 +384,10 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto nextSibling	node	
+/* {{{ proto nextSibling	node
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
-Since: 
+Since:
 */
 int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
@@ -404,7 +404,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object(nextsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -478,7 +478,7 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	ALLOC_ZVAL(*retval);
 
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -586,9 +586,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval TSRMLS_DC)
 					 strcmp (strURI, DOM_XMLNS_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp (nodep->name, "xmlns"))) {
 
-					/* TODO: throw error - find out how to without a return_value
-					php_dom_throw_error(NAMESPACE_ERR, &return_value TSRMLS_CC); */
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document) TSRMLS_CC);
 					return FAILURE;	
 				}
 				ns = xmlNewNs(NULL, nodep->ns->href, (xmlChar *)prefix);
@@ -649,8 +647,8 @@ int dom_node_local_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto baseURI	string	
-readonly=yes 
+/* {{{ proto baseURI	string
+readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
 Since: DOM Level 3
 */
@@ -704,14 +702,14 @@ int dom_node_text_content_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 /* {{{ proto domnode dom_node_insert_before(node newChild, node refChild);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
-Since: 
+Since:
 */
 PHP_FUNCTION(dom_node_insert_before)
 {
 	zval *id, *node, *ref, *rv = NULL;
 	xmlNodePtr child, new_child, parentp, refp;
 	dom_object *intern, *childobj, *refpobj;
-	int ret;
+	int ret, stricterror;
 
 	DOM_GET_THIS_OBJ(parentp, id, xmlNodePtr, intern);
 
@@ -723,21 +721,21 @@ PHP_FUNCTION(dom_node_insert_before)
 
 	new_child = NULL;
 
-	if (dom_node_is_read_only(parentp) == SUCCESS || 
+	stricterror = dom_get_strict_error(intern->document);
+
+	if (dom_node_is_read_only(parentp) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (dom_hierarchy(parentp, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (child->doc != parentp->doc && child->doc != NULL) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as it was created from a different document");
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -749,8 +747,7 @@ PHP_FUNCTION(dom_node_insert_before)
 	if (ref != NULL) {
 		DOM_GET_OBJ(refp, ref, xmlNodePtr, refpobj);
 		if (refp->parent != parentp) {
-			php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as refnode is not child of node");
+			php_dom_throw_error(NOT_FOUND_ERR, stricterror TSRMLS_CC);
 			RETURN_FALSE;
 		}
 
@@ -868,7 +865,7 @@ PHP_FUNCTION(dom_node_replace_child)
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
-	int foundoldchild = 0;
+	int foundoldchild = 0, stricterror;
 
 	int ret;
 
@@ -890,21 +887,21 @@ PHP_FUNCTION(dom_node_replace_child)
 		RETURN_FALSE;
 	}
 
+	stricterror = dom_get_strict_error(intern->document);
+
 	if (dom_node_is_read_only(nodep) == SUCCESS || 
 		(newchild->parent != NULL && dom_node_is_read_only(newchild->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (newchild->doc != nodep->doc && newchild->doc != NULL) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't add newnode as it was created from a different document");
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (dom_hierarchy(nodep, newchild) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -931,7 +928,7 @@ PHP_FUNCTION(dom_node_replace_child)
 		DOM_RET_OBJ(rv, oldchild, &ret, intern);
 		return;
 	} else {
-		php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -948,7 +945,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	zval *id, *node;
 	xmlNodePtr children, child, nodep;
 	dom_object *intern, *childobj;
-	int ret;
+	int ret, stricterror;
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -962,15 +959,17 @@ PHP_FUNCTION(dom_node_remove_child)
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
+	stricterror = dom_get_strict_error(intern->document);
+
 	if (dom_node_is_read_only(nodep) == SUCCESS || 
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	children = nodep->children;
 	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -984,7 +983,7 @@ PHP_FUNCTION(dom_node_remove_child)
 		children = children->next;
 	}
 
-	php_dom_throw_error(NOT_FOUND_ERR, &return_value TSRMLS_CC);
+	php_dom_throw_error(NOT_FOUND_ERR, stricterror TSRMLS_CC);
 	RETURN_FALSE
 }
 /* }}} end dom_node_remove_child */
@@ -1000,7 +999,7 @@ PHP_FUNCTION(dom_node_append_child)
 	xmlNodePtr child, nodep, new_child = NULL;
 	dom_object *intern, *childobj;
 	xmlNsPtr nsptr;
-	int ret;
+	int ret, stricterror;
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -1014,21 +1013,21 @@ PHP_FUNCTION(dom_node_append_child)
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS || 
+	stricterror = dom_get_strict_error(intern->document);
+
+	if (dom_node_is_read_only(nodep) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, &return_value TSRMLS_CC);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (dom_hierarchy(nodep, child) == FAILURE) {
-		php_dom_throw_error(HIERARCHY_REQUEST_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hierarchy Request Error");
+		php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	if (!(child->doc == NULL || child->doc == nodep->doc)) {
-		php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't append node, which is in a different document than the parent node");
+		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1083,7 +1082,7 @@ PHP_FUNCTION(dom_node_append_child)
 	new_child = xmlAddChild(nodep, child);
 
 	if (new_child == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't append node");
+		php_error(E_WARNING, "Couldn't append node");
 		RETURN_FALSE;
 	}
 
@@ -1147,7 +1146,7 @@ PHP_FUNCTION(dom_node_clone_node)
 		return;
 	}
 
-	node = xmlCopyNode(n, recursive);
+	node = xmlDocCopyNode(n, n->doc, recursive);
 	if (!node) {
 		RETURN_FALSE;
 	}
@@ -1351,7 +1350,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 			RETURN_STRING((char *) nsptr->href, 1);
 		}
 	}
-		
+
 	RETURN_NULL();
 }
 /* }}} end dom_node_lookup_namespace_uri */

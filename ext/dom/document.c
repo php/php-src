@@ -118,8 +118,6 @@ static void php_dom_ctx_error(void *ctx, const char *msg, ...) {
 	int len;
 	xmlParserCtxtPtr parser;
 
-	TSRMLS_FETCH();
-
 	parser = (xmlParserCtxtPtr) ctx;
 
 	va_start(ap, msg);
@@ -131,7 +129,7 @@ static void php_dom_ctx_error(void *ctx, const char *msg, ...) {
 		buf[len] = '\0';
 	}
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s in %s, line: %d", buf, parser->input->filename, parser->input->line);
+	php_error(E_WARNING, "%s in %s, line: %d", buf, parser->input->filename, parser->input->line);
 	efree(buf);
 }
 /* }}} end php_dom_ctx_error */
@@ -156,7 +154,7 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) dtdptr, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -203,7 +201,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 	if (NULL == (*retval = php_dom_create_object(root, &ret, NULL, *retval, obj TSRMLS_CC))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
+		php_error(E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -266,12 +264,12 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 		xmlFree((xmlChar *)docp->encoding);
 	}
 
-	docp->encoding = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
-    charset = (int)xmlParseCharEncoding((const char*) docp->encoding);
+    charset = (int)xmlParseCharEncoding((const xmlChar *) Z_STRVAL_P(newval));
     if (charset > 0) {
+		docp->encoding = xmlStrdup((const xmlChar *) Z_STRVAL_P(newval));
 		return SUCCESS;
     } else {
-        /* TODO: ERROR XML_CHAR_ENCODING_ERROR */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Document Encoding");
     }
 
 	return SUCCESS;
@@ -372,12 +370,23 @@ Since: DOM Level 3
 int dom_document_strict_error_checking_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	if (obj->document) {
+		ZVAL_BOOL(*retval, obj->document->stricterror);
+	} else {
+		ZVAL_FALSE(*retval);
+	}
 	return SUCCESS;
 }
 
 int dom_document_strict_error_checking_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
+	int stricterror;
+
+	if (obj->document && newval->type == IS_BOOL) {
+		stricterror = Z_LVAL_P(newval);
+		obj->document->stricterror = stricterror;
+	}
+
 	return SUCCESS;
 }
 
@@ -826,8 +835,7 @@ PHP_FUNCTION(dom_document_create_element_ns)
 		if (nodep != NULL) {
 			xmlFreeNode(nodep);
 		}
-		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -892,8 +900,7 @@ PHP_FUNCTION(dom_document_create_attribute_ns)
 		if (nodep != NULL) {
 			xmlFreeProp((xmlAttrPtr) nodep);
 		}
-		php_dom_throw_error(errorcode, &return_value TSRMLS_CC);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Namespace");
+		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document) TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1092,8 +1099,6 @@ static xmlDocPtr dom_document_parser(zval *id, int mode, char *source TSRMLS_DC)
 	ctxt->validate = validate;
     ctxt->loadsubset = resolve_externals;
     ctxt->keepBlanks = keep_blanks;
-    if (ctxt->keepBlanks == 0)
-		ctxt->sax->ignorableWhitespace = ignorableWhitespace;
 	ctxt->replaceEntities = substitute_ent;
 
 	ctxt->vctxt.error = php_dom_ctx_error;
@@ -1245,13 +1250,12 @@ PHP_FUNCTION(dom_document_savexml)
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, &return_value TSRMLS_CC);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Node not from same document");
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
 			RETURN_FALSE;
 		}
 		buf = xmlBufferCreate();
 		if (!buf) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not fetch buffer");
+			php_error(E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
 

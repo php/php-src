@@ -42,16 +42,11 @@ zend_function_entry php_dom_domexception_class_functions[] = {
 };
 
 /* {{{ php_dom_throw_error */
-void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC)
+void php_dom_throw_error(int error_code, int strict_error TSRMLS_DC)
 {
 	zval *dom_exception;
 	char *error_message;
 
-	ALLOC_ZVAL(dom_exception);
-	Z_TYPE_P(dom_exception) = IS_OBJECT;
-	object_init_ex(dom_exception, dom_domexception_class_entry);
-	dom_exception->refcount = 1;
-	dom_exception->is_ref = 1;
 	switch (error_code)
 	{
 		case INDEX_SIZE_ERR:
@@ -106,9 +101,18 @@ void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC)
 			error_message = "Unhandled Error";
 	}
 
-	add_property_long(dom_exception, "code", error_code);
-	add_property_stringl(dom_exception, "message", error_message, strlen(error_message), 1);
-	EG(exception) = dom_exception;
+	if (strict_error == 1) {
+		ALLOC_ZVAL(dom_exception);
+		Z_TYPE_P(dom_exception) = IS_OBJECT;
+		object_init_ex(dom_exception, dom_domexception_class_entry);
+		dom_exception->refcount = 1;
+		dom_exception->is_ref = 1;
+		add_property_long(dom_exception, "code", error_code);
+		add_property_stringl(dom_exception, "message", error_message, strlen(error_message), 1);
+		EG(exception) = dom_exception;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, error_message);
+	}
 }
 /* }}} end php_dom_throw_error */
 #endif

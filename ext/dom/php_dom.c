@@ -88,7 +88,11 @@ int dom_node_is_read_only(xmlNodePtr node) {
 			return SUCCESS;
 			break;
 		default:
-			return FAILURE;
+			if (node->doc == NULL) {
+				return SUCCESS;
+			} else {
+				return FAILURE;
+			}
 	}
 }
 /* }}} end dom_node_is_read_only */
@@ -110,6 +114,14 @@ int dom_node_children_valid(xmlNodePtr node) {
 }
 /* }}} end dom_node_children_valid */
 
+int dom_get_strict_error(dom_ref_obj *document) {
+	if (document) {
+		return document->stricterror;
+	} else {
+		return 1;
+	}
+}
+
 /* {{{ int increment_document_reference(dom_object *object) */
 int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 	int ret_refcount = -1;
@@ -122,6 +134,7 @@ int increment_document_reference(dom_object *object, xmlDocPtr docp TSRMLS_DC) {
 		object->document = emalloc(sizeof(dom_ref_obj));
 		object->document->ptr = docp;
 		object->document->refcount = ret_refcount;
+		object->document->stricterror = 1;
 	}
 
 	return ret_refcount;
@@ -344,6 +357,10 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 	}
 	if (ret == SUCCESS) {
 		hnd->write_func(obj, value TSRMLS_CC);
+		if (! PZVAL_IS_REF(value) && value->refcount == 0) {
+			value->refcount++;
+			zval_ptr_dtor(&value);
+		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value TSRMLS_CC);
