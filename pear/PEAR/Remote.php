@@ -209,7 +209,9 @@ class PEAR_Remote extends PEAR
             $proxy_user = @$proxy['user'];
             $proxy_pass = @$proxy['pass'];
             $fp = @fsockopen($proxy_host, $proxy_port);
+            $use_proxy = true;
         } else {
+            $use_proxy = false;
             $fp = @fsockopen($server_host, $server_port);
         }
         if (!$fp && $http_proxy) {
@@ -234,7 +236,7 @@ class PEAR_Remote extends PEAR
             $maxAge = '';
         };
 
-        if ($proxy_host != '' && $proxy_user != '') {
+        if ($use_proxy && $proxy_host != '' && $proxy_user != '') {
             $req_headers .= 'Proxy-Authorization: Basic '
                 .base64_encode($proxy_user.':'.$proxy_pass)
                 ."\r\n";
@@ -247,7 +249,7 @@ class PEAR_Remote extends PEAR
             var_dump($request);
         }
 
-        if ($proxy_host != '') {
+        if ($use_proxy && $proxy_host != '') {
             $post_string = "POST http://".$server_host;
             if ($proxy_port > '') {
                 $post_string .= ':'.$server_port;

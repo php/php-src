@@ -8,6 +8,10 @@
  * the PEAR_Error error handling mechanism
  * the PEAR installer, for creating, distributing
    and installing packages
+ * the OS_Guess class for retrieving info about the OS
+   where PHP is running on
+ * the System class for quick handling common operations
+   with files and directories
 </description>
   <license>PHP License</license>
   <maintainers>
@@ -43,46 +47,16 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.3b1</version>
-    <date>2003-09-29</date>
+    <version>1.3b3</version>
+    <date>2003-10-20</date>
     <state>beta</state>
     <notes>
-PEAR Base Class:
-
-* Fixed static calls to PEAR error-handling methods in classes
-* Added ability to use a static method callback for error-handling,
-  and removed use of inadvisable @ in setErrorHandling
-
 PEAR Installer:
 
-* Fixed #25117 - MD5 checksum should be case-insensitive
-* Added dependency on XML_RPC, and optional dependency on xmlrpc extension
-* Added --alldeps and --onlyreqdeps options to pear install/pear upgrade
-* Sorting of installation/uninstallation so package order on the command-line is
-  insignificant (fixes upgrade-all if every package is installed)
-* pear upgrade will now install if the package is not installed (necessary for
-  pear upgrade --alldeps, as installation is often necessary for new
-  dependencies)
-* fixed pear.bat if PHP is installed in a path like C:\Program Files\php
-* Added ability to specify &quot;pear install package-version&quot; or
-  &quot;pear install package-state&quot;. For example: &quot;pear install DB-1.2&quot;,
-  or &quot;pear install DB-stable&quot;
-* Fix #25008 - unhelpful error message
-* Fixed optional dependencies in Dependency.php
-* Fix #25322 - bad md5sum should be fatal error
-* Package uninstall now also removes empty directories
-* Fixed locking problems for reading commands (pear list, pear info)
-* Fixed #45 preferred_state works incorrectly
-
-OS_Guess Class:
-
-* Fixed #25131 - OS_Guess warnings on empty lines from
-  popen(&quot;/usr/bin/cpp $tmpfile&quot;, &quot;r&quot;);
-
-System Class:
-
-* Fixed recursion deep param in _dirToStruct()
-* Added the System::find() command (read API doc for more info)
+* Bug #25413 Add local installed packages to list-all (Christian DickMann)
+* Bug #23221 Pear installer - extension re-install segfault
+* Better error detecting and reporting in "install/upgrade"
+* Various other bugfixes and cleanups
 
     </notes>
     <provides type="class" name="OS_Guess" />
@@ -144,8 +118,8 @@ System Class:
     </filelist>
     <deps>
       <dep type="php" rel="ge" version="4.1"/>
-      <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
-      <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+      <dep type="pkg" rel="ge" version="1.1">Archive_Tar</dep>
+      <dep type="pkg" rel="ge" version="1.0">Console_Getopt</dep>
       <dep type="pkg" rel="ge" version="1.0.4">XML_RPC</dep>
       <dep type="ext" rel="has" optional="yes">xmlrpc</dep>
     </deps>

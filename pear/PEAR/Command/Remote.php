@@ -188,7 +188,8 @@ parameter.
             'border' => true,
             'headline' => array('Package', 'Latest', 'Local'),
             );
-
+        $local_pkgs = $reg->listPackages();
+        
         foreach ($available as $name => $info) {
             $installed = $reg->packageInfo($name);
             $desc = $info['summary'];
@@ -205,8 +206,12 @@ parameter.
                     && (!isset($installed['version']) || $installed['version'] == $info['stable']))
                 {
                     continue;
-                };
-            };
+                }
+            }
+            $pos = array_search(strtolower($name), $local_pkgs);
+            if ($pos !== false) {
+                unset($local_pkgs[$pos]);
+            }
 
             $data['data'][$info['category']][] = array(
                 $name,
@@ -216,6 +221,18 @@ parameter.
                 @$info['deps'],
                 );
         }
+        
+        foreach ($local_pkgs as $name) {
+            $info = $reg->packageInfo($name);
+            $data['data']['Local'][] = array(
+                $info['package'], 
+                '',
+                $info['version'],
+                $info['summary'],
+                @$info['release_deps']
+                );
+        }
+
         $this->ui->outputData($data, $command);
         return true;
     }
@@ -322,7 +339,7 @@ parameter.
             $latest = $remote->call("package.listLatestReleases");
         } else {
             $latest = $remote->call("package.listLatestReleases", $state);
-            $caption .= ' (' . $state . ')';
+            $caption .= ' (' . implode(', ', PEAR_Common::betterStates($state, true)) . ')';
         }
         $caption .= ':';
         if (PEAR::isError($latest)) {
@@ -342,7 +359,9 @@ parameter.
                 continue;
             }
             extract($info);
-            $inst_version = $reg->packageInfo($package, 'version');
+            $pkginfo = $reg->packageInfo($package);
+            $inst_version = $pkginfo['version'];
+            $inst_state   = $pkginfo['release_state'];
             if (version_compare("$version", "$inst_version", "le")) {
                 // installed version is up-to-date
                 continue;
@@ -356,7 +375,7 @@ parameter.
             } else {
                 $fs = "  -"; // XXX center instead
             }
-            $data['data'][] = array($pkg, $inst_version, $version, $fs);
+            $data['data'][] = array($pkg, "$inst_version ($inst_state)", "$version ($state)", $fs);
         }
         if (empty($data['data'])) {
             $this->ui->outputData('No upgrades available');

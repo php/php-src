@@ -129,15 +129,15 @@ class System
         closedir($dir);
         sort($list);
         if ($aktinst < $maxinst || $maxinst == 0) {
-        foreach($list as $val) {
-            $path = $sPath . DIRECTORY_SEPARATOR . $val;
-            if (is_dir($path)) {
+            foreach($list as $val) {
+                $path = $sPath . DIRECTORY_SEPARATOR . $val;
+                if (is_dir($path)) {
                     $tmp = System::_dirToStruct($path, $maxinst, $aktinst+1);
                     $struct = array_merge_recursive($tmp, $struct);
-            } else {
-                $struct['files'][] = $path;
+                } else {
+                    $struct['files'][] = $path;
+                }
             }
-        }
         }
         return $struct;
     }
@@ -424,8 +424,8 @@ class System
     */
     function which($program, $fallback = false)
     {
-    	// is_executable() is not available on windows
-    	if (OS_WINDOWS) {
+        // is_executable() is not available on windows
+        if (OS_WINDOWS) {
             $pear_is_executable = 'is_file';
         } else {
             $pear_is_executable = 'is_executable';
