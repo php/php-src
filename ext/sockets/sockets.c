@@ -772,7 +772,7 @@ PHP_FUNCTION(socket_read)
 /* }}} */
 
 /* {{{ proto bool socket_getsockname(resource socket, string &addr[, int &port])
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the local side of a socket */
+   Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getsockname)
 {
 	zval					*arg1, *addr, *port = NULL;
@@ -829,7 +829,7 @@ PHP_FUNCTION(socket_getsockname)
 /* }}} */
 
 /* {{{ proto bool socket_getpeername(resource socket, string &addr[, int &port])
-   Given an fd, stores a string representing sa.sin_addr and the value of sa.sin_port into addr and port describing the remote side of a socket */
+   Queries the remote side of the given socket which may either result in host/port or in a UNIX filesystem path, dependent on its type. */
 PHP_FUNCTION(socket_getpeername)
 {
 	zval					*arg1, *arg2, *arg3 = NULL;
