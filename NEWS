@@ -52,7 +52,6 @@ PHP                                                                        NEWS
 - Fixed bug #32001 (xml_parse_into_struct() function exceeds maximum 
   execution time). (Rob, Moriyoshi)
 - Fixed bug #31980 (Unicode exif data not available on Windows). (Edin)
-- Fixed bug #31792 (getrusage() does not provide ru_nswap value). (Ilia)
 - Fixed bug #31960 (msql_fetch_row() and msql_fetch_array() dropping columns
   with NULL values). (Daniel Convissor)
 - Fixed bug #31878 (Segmentation fault using clone keyword on nodes). (Rob)
@@ -64,6 +63,7 @@ PHP                                                                        NEWS
 - Fixed bug #31797 (exif_read_data() uses too low nesting limit). (Ilia)
 - Fixed bug #31796 (readline completion handler does not handle empty return
   values). (Ilia)
+- Fixed bug #31792 (getrusage() does not provide ru_nswap value). (Ilia)
 - Fixed bug #31755 (Cannot create SOAP header in no namespace). (Dmitry)
 - Fixed bug #31754 (dbase_open() fails for mode = 1). (Mehdi, Derick)
 - Fixed bug #31751 (pg_parameter_status() missing on Windows). (Edin)
