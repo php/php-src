@@ -74,9 +74,7 @@ static ProcessPair* process_get(FILE *stream)
 	TWLS_FETCH();
 	
 	for (ptr = TWG(process); ptr < (TWG(process) + TWG(process_size)); ptr++) {
-		if (stream != NULL && ptr->stream == stream) {
-			break;
-		} else if (stream == NULL && !ptr->inuse) {
+		if (ptr->stream == stream) {
 			break;
 		}
 	}
@@ -94,6 +92,14 @@ static ProcessPair* process_get(FILE *stream)
 	ptr = newptr + TWG(process_size);
 	TWG(process_size)++;
 	return ptr;
+}
+
+static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
+	HANDLE copy, self = GetCurrentProcess();
+	if (!DuplicateHandle(self, fh, self, &copy, 0, inherit, DUPLICATE_SAME_ACCESS|DUPLICATE_CLOSE_SOURCE)) {
+		return NULL;
+	}
+	return copy;
 }
 
 TSRM_API FILE* popen(const char *command, const char *type)
@@ -146,9 +152,11 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	proc = process_get(NULL);
 
 	if (read) {
+		in = dupHandle(in, FALSE);
 		fno = _open_osfhandle((long)in, _O_RDONLY | mode);
 		CloseHandle(out);
 	} else {
+		out = dupHandle(out, FALSE);
 		fno = _open_osfhandle((long)out, _O_WRONLY | mode);
 		CloseHandle(in);
 	}
@@ -156,7 +164,6 @@ TSRM_API FILE* popen(const char *command, const char *type)
 	stream = _fdopen(fno, type);
 	proc->prochnd = process.hProcess;
 	proc->stream = stream;
-	proc->inuse = 1;
 	return stream;
 }
 
@@ -172,13 +179,9 @@ TSRM_API int pclose(FILE* stream)
 	fflush(process->stream);
     fclose(process->stream);
 
+	WaitForSingleObject(process->prochnd, INFINITE);
 	GetExitCodeProcess(process->prochnd, &termstat);
-	if (termstat == STILL_ACTIVE) {
-		TerminateProcess(process->prochnd, termstat);
-	}
-
 	process->stream = NULL;
-	process->inuse = 0;
 	CloseHandle(process->prochnd);
 
 	return termstat;
