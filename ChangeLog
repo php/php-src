@@ -1,3 +1,28 @@
+2000-03-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * .cvsignore: Add generated file.
+
+    * TODO: Reminder.
+
+2000-03-10  Andi Gutmans  <andi@php.net>
+
+    * fopen-wrappers.c: - Use strlcpy() insted of strcpy()
+
+    * NEWS: *** empty log message ***
+
+2000-03-10  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c: - replaced some old code to access server variables
+
+2000-03-10  Andi Gutmans  <andi@php.net>
+
+    * ext/session/session.c: - Weird that this wasn't caught earlier
+
+2000-03-10  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c: - connection_aborted() and friends work again. 
+
 2000-03-09  Leo Baschy  <nirvana@got.net>
 
     * ext/odbc/php_odbc.c
