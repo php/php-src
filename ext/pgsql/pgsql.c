@@ -857,13 +857,6 @@ PHP_FUNCTION(pgsql_result)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetchrow(int result, int row)
-   Get a row as an enumerated array */ 
-PHP_FUNCTION(pgsql_fetch_row)
-{
-	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM);
-}
-/* }}} */
 
 static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 {
@@ -947,6 +940,14 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 }
 
+
+/* {{{ proto array pg_fetchrow(int result, int row)
+   Get a row as an enumerated array */ 
+PHP_FUNCTION(pgsql_fetch_row)
+{
+	php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, PGSQL_NUM);
+}
+/* }}} */
 
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
 /* {{{ proto array pg_fetch_array(int result, int row)
