@@ -176,7 +176,7 @@ int php_session_register_serializer(const char *name,
 	        int (*decode)(PS_SERIALIZER_DECODE_ARGS));
 
 #define PS_ADD_VARL(name,namelen) \
-	zend_hash_update(&PS(vars), name, namelen + 1, 0, 0, NULL)
+	zend_hash_add_empty_element(&PS(vars), name, namelen + 1)
 
 #define PS_ADD_VAR(name) PS_ADD_VARL(name, strlen(name))
 
