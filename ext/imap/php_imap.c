@@ -2690,6 +2690,11 @@ PHP_FUNCTION(imap_bodystruct)
  	convert_to_long_ex(msg);
 	convert_to_string_ex(section);
 
+	if (!Z_LVAL_PP(msg) || Z_LVAL_PP(msg) < 1 || (unsigned) Z_LVAL_PP(msg) > imap_le_struct->imap_stream->nmsgs) {
+                php_error(E_WARNING, "Bad message number");
+                RETURN_FALSE;
+        }
+
 	if (object_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
