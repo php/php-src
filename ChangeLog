@@ -1,3 +1,54 @@
+2004-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c
+      ZendEngine2/tests/bug29523.phpt:
+      - Fix bug #29523 (ReflectionParameter::isOptional() is incorrect)
+
+2004-08-04  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0)
+      ext/iconv/config.w32
+      ext/iconv/php_iconv.def:
+      MFH: Move iconv exports to the iconv extension and make libxml depend on
+      iconv
+
+    * ext/iconv/config.w32
+      ext/iconv/php_iconv.def:
+      Move iconv exports to the iconv extension
+
+2004-08-04  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/simplexml/simplexml.c:
+      nuke unused variable
+
+2004-08-04  Zeev Suraski  <zeev@zend.com>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/simplexml.c:
+      Fix prototypes
+
+2004-08-04  Georg Richter  <georg@mysql.com>
+
+    * ext/mysqli/mysqli.c:
+      forgot to remove debug variable :(  (Thx to Derick)
+
+    * NEWS
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli.c:
+      fixed bug #29522
+
+    * ext/mysqli/mysqli.c:
+      fixed properties when connect wasn't called
+
+2004-08-04  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0)
+      ext/standard/sunfuncs.c:
+      MFH: Fixed argument handling in sun* functions.
+
+    * ext/standard/sunfuncs.c:
+      Fixed argument handling in sun* functions.
+
 2004-08-03  Edin Kadribasic  <edink@emini.dk>
 
     * (PHP_5_0)
