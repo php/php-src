@@ -228,31 +228,17 @@ int dbx_pgsql_getcolumntype(zval **rv, zval **result_handle, long column_index, 
 int dbx_pgsql_getrow(zval **rv, zval **result_handle, long row_number, INTERNAL_FUNCTION_PARAMETERS)
 {
 	/* returns array[0..columncount-1] as strings on success or 0 as long on failure */
-	int number_of_arguments=2;
-	int save_error_reporting=0;
-	zval **arguments[2];
-	zval *zval_row=NULL;
+	int number_of_arguments=1;
+	zval **arguments[1];
 	zval *returned_zval=NULL;
 	
-	MAKE_STD_ZVAL(zval_row);
-	ZVAL_LONG(zval_row, row_number);
 	arguments[0]=result_handle;
-	arguments[1]=&zval_row;
 
-	if (EG(error_reporting) & E_WARNING){
-		save_error_reporting = EG(error_reporting);
-		EG(error_reporting) &= ~E_WARNING;
-	}
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fetch_array", &returned_zval, number_of_arguments, arguments);
-	if (save_error_reporting) {
-		EG(error_reporting) = save_error_reporting;
-	}
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_ARRAY) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
-		FREE_ZVAL(zval_row);
 		return 0;
 	}
-	FREE_ZVAL(zval_row);
 	MOVE_RETURNED_TO_RV(rv, returned_zval);
 	return 1;
 }
