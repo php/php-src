@@ -807,7 +807,7 @@ PHP_RINIT_FUNCTION(mbstring)
 		list = (int*)php_mb_default_identify_list;
 		n = php_mb_default_identify_list_size;
 	}
-	entry = (int *)emalloc(n*sizeof(int));
+	entry = (int *)safe_emalloc(n, sizeof(int), 0);
 	MBSTRG(current_detect_order_list) = entry;
 	MBSTRG(current_detect_order_list_size) = n;
 	while (n > 0) {
@@ -2391,7 +2391,7 @@ PHP_FUNCTION(mb_convert_variables)
 		/* auto detect */
 		from_encoding = mbfl_no_encoding_invalid;
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
+		stack = (pval ***)safe_emalloc(stack_max, sizeof(pval **), 0);
 		stack_level = 0;
 		identd = mbfl_encoding_detector_new(elist, elistsz TSRMLS_CC);
 		if (identd != NULL) {
@@ -2474,7 +2474,7 @@ detect_end:
 	/* convert */
 	if (convd != NULL) {
 		stack_max = PHP_MBSTR_STACK_BLOCK_SIZE;
-		stack = (pval ***)emalloc(stack_max*sizeof(pval **));
+		stack = (pval ***)safe_emalloc(stack_max, sizeof(pval **), 0);
 		stack_level = 0;
 		n = 2;
 		while (n < argc || stack_level > 0) {
@@ -2592,7 +2592,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
 		if (i > 0) {
-			convmap = (int *)emalloc(i*sizeof(int));
+			convmap = (int *)safe_emalloc(i, sizeof(int), 0);
 			mapelm = convmap;
 			mapsize = 0;
 			while (i > 0) {
