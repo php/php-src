@@ -1,3 +1,51 @@
+2000-12-12  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sockets/php_sockets.h: MFH
+
+2000-12-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/file.c:
+    Open files in binary mode - should fix readfile() on Windows
+
+    * ext/sockets/sockets.c: MFH
+
+2000-12-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS
+      configure.in
+      main/php_version.h: Preparing 4.0.4RC5
+
+2000-12-12  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/sockets/sockets.c: Fix memory leak
+
+    * ext/sockets/sockets.c: Fix socket read returning bad values.
+
+2000-12-12  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * tests/testhyperwave: - add test for hw_insertanchors()
+
+2000-12-12  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed bug in beginOfWeek()
+
+2000-12-12  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c:
+    - new function hw_insertanchors(). It takes a document, a list of anchors
+      and its destination and inserts the anchors into the text.
+
+2000-12-12  Stanislav Malyshev  <stas@zend.com>
+
+    * main/php_variables.c
+      main/php_variables.h: MFH
+
+    * main/php_variables.c
+      main/php_variables.h:
+    Fix #7987: POST/GET: string with \0(%00) values not parsed correctly
+
 2000-12-11  Jani Taskinen  <sniper@iki.fi>
 
     * INSTALL: MFH
