@@ -474,6 +474,24 @@ zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC)
 	return zobj->ce;
 }
 
+int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+{
+	zend_object *zobj;
+	zobj = Z_OBJ_P(object);
+
+	if(parent) {
+		if(!zobj->ce->parent) {
+			return FAILURE;
+		}
+		*class_name = zobj->ce->parent->name;
+		*class_name_len = zobj->ce->parent->name_length;
+	} else {
+		*class_name = zobj->ce->name;
+		*class_name_len = zobj->ce->name_length;
+	}
+	return SUCCESS;
+}
+
 zend_object_handlers std_object_handlers = {
 	zend_objects_store_add_ref,              /* add_ref */
 	zend_objects_store_del_ref,              /* del_ref */
@@ -493,7 +511,7 @@ zend_object_handlers std_object_handlers = {
 	NULL,                                    /* call_method */
 	zend_std_get_constructor,                /* get_constructor */
 	zend_std_object_get_class,               /* get_class_entry */
-	NULL,                                    /* get_class_name */
+	zend_std_object_get_class_name,          /* get_class_name */
 	zend_std_compare_objects                 /* compare_objects */
 };
 
