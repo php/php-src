@@ -25,7 +25,9 @@
 #define	PHP_RAND_H
 
 #include <stdlib.h>
+#include "basic_functions.h"
 
+/* System Rand functions */
 #ifndef RAND_MAX
 #define RAND_MAX (1<<15)
 #endif
@@ -57,5 +59,11 @@
 #define php_srand(seed) srand((unsigned int)seed)
 #endif
 #endif
+
+/* MT Rand */
+#define PHP_MT_RAND_MAX ((long)(0x7FFFFFFF)) /* (1<<31) - 1 */ 
+
+PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC);
+PHPAPI php_uint32 php_mt_rand(TSRMLS_D);
 
 #endif	/* PHP_RAND_H */
