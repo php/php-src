@@ -30,10 +30,20 @@ function get_depends($module)
 		'advapi32.dll', 'comdlg32.dll', 'gdi32.dll', 'kernel32.dll', 'ntdll.dll',
 		'odbc32.dll', 'ole32.dll', 'oleaut32.dll', 'rpcrt4.dll',
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
-		'comctl32.dll', 'winmm.dll', 'wsock32.dll',
+		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
+		'secur32.dll', 'netapi32.dll',
 
 		/* apache */
 		'apachecore.dll',
+
+		/* nsapi */
+		'ns-httpd30.dll', 'ns-httpd35.dll', 'ns-httpd36.dll', 'ns-httpd40.dll',
+
+		/* oracle */
+		'oci.dll', 'ociw32.dll',
+
+		/* sybase */
+		'libcs.dll', 'libct.dll',
 
 		/* visual C++; mscvrt.dll is present on everyones system,
 		 * but the debug version (msvcrtd.dll) and those from visual studio.net
@@ -89,7 +99,7 @@ function copy_file_list($source_dir, $dest_dir, $list)
 		echo "Copying $item from $source_dir to $dest_dir\n";
 		copy($source_dir . DIRECTORY_SEPARATOR . $item, $dest_dir . DIRECTORY_SEPARATOR . $item);
 		if ($is_debug) {
-			$itemdb = preg_replace("/\.(exe|dll)$/i", ".pdb", $item);
+			$itemdb = preg_replace("/\.(exe|dll|lib)$/i", ".pdb", $item);
 			if (file_exists("$source_dir/$itemdb")) {
 				copy("$source_dir/$itemdb", "$dist_dir/dev/$itemdb");
 			}

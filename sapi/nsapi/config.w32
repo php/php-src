@@ -7,20 +7,14 @@ ARG_WITH('nsapi-includes', 'Where to find NSAPI headers', null);
 ARG_WITH('nsapi-libs', 'Where to find NSAPI libraries', null);
 
 if (PHP_NSAPI != "no") {
-
 	if (PHP_ZTS == "no") {
-		ERROR("NSAPI module requires an --enable-zts build of PHP");
-	}
-
-	if (!CHECK_HEADER_ADD_INCLUDE("nsapi.h", "CFLAGS_NSAPI",
-		   	PHP_NSAPI + ';' + PHP_NSAPI_INCLUDES)) {
-		ERROR("Could not find NSAPI headers");
-	}
-
-	if (!CHECK_LIB("ns-httpd40.lib;ns-httpd36.lib;ns-httpd35.lib;ns-httpd30.lib",
+		WARNING("NSAPI module requires an --enable-zts build of PHP");
+	} else if (CHECK_HEADER_ADD_INCLUDE("nsapi.h", "CFLAGS_NSAPI",
+			PHP_NSAPI + ';' + PHP_NSAPI_INCLUDES) &&
+			CHECK_LIB("ns-httpd40.lib;ns-httpd36.lib;ns-httpd35.lib;ns-httpd30.lib",
 			"nsapi", PHP_NSAPI + ";" + PHP_NSAPI_LIBS)) {
-		ERROR("Could not find NSAPI libraries");
+		SAPI('nsapi', 'nsapi.c', 'php' + PHP_VERSION + 'nsapi.dll', '/D XP_WIN32 ');
+	} else {
+		WARNING("Could not find NSAPI headers/libraries");
 	}
-	
-	SAPI('nsapi', 'nsapi.c', 'php' + PHP_VERSION + 'nsapi.dll', '/D XP_WIN32 ');
 }

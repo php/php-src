@@ -1,0 +1,16 @@
+// vim:ft=javascript
+// $Id$
+
+ARG_WITH('pi3web', 'Pi3Web', 'no');
+
+if (PHP_PI3WEB != "no") {
+	if (CHECK_HEADER_ADD_INCLUDE('PiAPI/PiAPI.h', 'CFLAGS_PI3WEB', PHP_PI3WEB) &&
+		   CHECK_LIB('piapi.lib', 'pi3web') &&
+		   CHECK_LIB('pi2api.lib', 'pi3web') &&
+		   CHECK_LIB('pi3api.lib', 'pi3web')) {
+		SAPI('pi3web', 'pi3web_sapi.c', 'php' + PHP_VERSION + 'pi3web.dll', '/D PHP4PI3WEB_EXPORTS');
+		AC_DEFINE('WITH_PI3WEB', 1);
+	} else {
+		WARNING('Pi3Web not enabled; headers/libraries not found');
+	}
+}

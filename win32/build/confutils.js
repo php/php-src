@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.21 2003-12-19 16:55:59 wez Exp $
+// $Id: confutils.js,v 1.22 2003-12-19 20:39:02 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -398,7 +398,7 @@ function search_paths(thing_to_find, explicit_path, env_name)
 	return place;
 }
 
-function PATH_PROG(progname, additional_paths)
+function PATH_PROG(progname, additional_paths, symbol)
 {
 	var exe;
 	var place;
@@ -421,13 +421,23 @@ function PATH_PROG(progname, additional_paths)
 	}
 
 	if (place) {
-		DEFINE(progname.toUpperCase(), place);
+		if (symbol == null) {
+			symbol = progname.toUpperCase();
+		}
+		DEFINE(symbol, place);
 	}
 	return place;
 }
 
 function CHECK_LIB(libnames, target, path_to_check)
 {
+	if (target == null) {
+		target = "";
+	} else {
+		target = "_" + target.toUpperCase();
+	}
+
+	
 	if (path_to_check == null) {
 		path_to_check = php_usual_lib_suspects;
 	} else {
@@ -444,11 +454,11 @@ function CHECK_LIB(libnames, target, path_to_check)
 		p = search_paths(libname, path_to_check, "LIB");
 
 		if (typeof(p) == "string") {
-			ADD_FLAG("LDFLAGS_" + target.toUpperCase(), '/libpath:"' + p + '" ');
-			ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+			ADD_FLAG("LDFLAGS" + target, '/libpath:"' + p + '" ');
+			ADD_FLAG("LIBS" + target, libname);
 			have = 1;
 		} else if (p == true) {
-			ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+			ADD_FLAG("LIBS" + target, libname);
 			have = 1;
 		} else {
 			/* not found in the defaults or the explicit paths,
@@ -457,7 +467,7 @@ function CHECK_LIB(libnames, target, path_to_check)
 			 * already have it covered, but we need to add the lib
 			 * to LIBS_XXX */
 			if (false != search_paths(libname, PHP_EXTRA_LIBS, null)) {
-				ADD_FLAG("LIBS_" + target.toUpperCase(), libname);
+				ADD_FLAG("LIBS" + target, libname);
 				have = 1;
 			}
 		}
@@ -569,6 +579,7 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 	var SAPI = sapiname.toUpperCase();
 	var ldflags;
 	var resname;
+	var ld = "$(LD)";
 
 	STDOUT.WriteLine("Enabling SAPI " + configure_module_dirname);
 
@@ -594,11 +605,14 @@ function SAPI(sapiname, file_list, makefiletarget, cflags)
 
 	if (makefiletarget.match(new RegExp("\\.dll$"))) {
 		ldflags = "/dll $(LDFLAGS)";
+	} else if (makefiletarget.match(new RegExp("\\.lib$"))) {
+		ldflags = "$(LDFLAGS)";
+		ld = "$(MAKE_LIB)";
 	} else {
 		ldflags = "$(LDFLAGS)";
 	}
 	
-	MFO.WriteLine("\t$(LD) /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
+	MFO.WriteLine("\t" + ld + " /nologo /out:$(BUILD_DIR)\\" + makefiletarget + " " + ldflags + " $(" + SAPI + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LDFLAGS_" + SAPI + ") $(LIBS_" + SAPI + ") $(BUILD_DIR)\\" + resname);
 
 	DEFINE('CFLAGS_' + SAPI + '_OBJ', '$(CFLAGS_' + SAPI + ')');
 	ADD_FLAG("SAPI_TARGETS", makefiletarget);
@@ -951,7 +965,12 @@ function AC_DEFINE(name, value, comment, quote)
 		value = '""';
 	}
 	var item = new Array(value, comment);
-	configure_hdr.Add(name, item);
+	if (configure_hdr.Exists(name)) {
+		var orig_item = configure_hdr.Item(name);
+		STDOUT.WriteLine("AC_DEFINE[" + name + "]=" + value + ": is already defined to " + item[0]);
+	} else {
+		configure_hdr.Add(name, item);
+	}
 }
 
 function ERROR(msg)
