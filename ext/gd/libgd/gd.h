@@ -517,6 +517,42 @@ void* gdDPExtractData(struct gdIOCtx* ctx, int *size);
 #define GD2_FMT_RAW             1
 #define GD2_FMT_COMPRESSED      2
 
+
+/* filters section 
+ *
+ * Negate the imag src, white becomes black,
+ * The red, green, and blue intensities of an image are negated.
+ * White becomes black, yellow becomes blue, etc.
+ */
+int gdImageNegate(gdImagePtr src);
+
+/* Convert the image src to a grayscale image */
+int gdImageGrayScale(gdImagePtr src);
+
+/* Set the brightness level <brightness> for the image src */
+int gdImageBrightness(gdImagePtr src, int brightness);
+
+/* Set the contrast level <contrast> for the image <src> */
+int gdImageContrast(gdImagePtr src, double contrast);
+
+/* Simply adds or substracts respectively red, green or blue to a pixel */
+int gdImageColor(gdImagePtr src, int red, int green, int blue);
+
+/* Image convolution by a 3x3 custom matrix */
+int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
+
+int gdImageEdgeDetectQuick(gdImagePtr src);
+
+int gdImageGaussianBlur(gdImagePtr im);
+
+int gdImageSelectiveBlur( gdImagePtr src);
+
+int gdImageEmboss(gdImagePtr im);
+
+int gdImageMeanRemoval(gdImagePtr im);
+
+int gdImageSmooth(gdImagePtr im, float weight);
+
 /* Image comparison definitions */
 int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
 
