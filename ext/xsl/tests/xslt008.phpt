@@ -15,7 +15,7 @@ if(!$xsl) {
 }
 $xp = new domxpath($xsl);
 $res = $xp->query("/xsl:stylesheet/xsl:include/@href");
-$res[0]->value = "compress.zlib://".dirname(__FILE__)."/xslt.xsl.gz";
+$res->item(0)->value = "compress.zlib://".dirname(__FILE__)."/xslt.xsl.gz";
 $proc->importStylesheet($xsl);
 print "\n";
 print $proc->transformToXML($dom);
