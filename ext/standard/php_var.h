@@ -24,10 +24,12 @@
 #include "ext/standard/php_smart_str_public.h"
 
 PHP_FUNCTION(var_dump);
+PHP_FUNCTION(var_export);
 PHP_FUNCTION(serialize);
 PHP_FUNCTION(unserialize);
 
 void php_var_dump(zval **struc, int level TSRMLS_DC);
+void php_var_export(zval **struc, int level TSRMLS_DC);
 
 /* typdef HashTable php_serialize_data_t; */
 #define php_serialize_data_t HashTable
