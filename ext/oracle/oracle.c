@@ -1125,21 +1125,22 @@ PHP_FUNCTION(ora_fetch_into)
 		RETURN_FALSE;
 	}
 
-	if (arr->type != IS_ARRAY){
-		if (array_init(arr) == FAILURE){
-			php_error(E_WARNING, "Can't convert to type Array");
-			RETURN_FALSE;
-		}
-	}
-
 	if (ofetch(&cursor->cda)) {
 		if (cursor->cda.rc != NO_DATA_FOUND) {
-			php_error(E_WARNING, "Ora_Fetch_Into failed (%s)",
-					   ora_error(&cursor->cda));
+			php_error(E_WARNING, "Ora_Fetch_Into failed (%s)",ora_error(&cursor->cda));
 		}
 		RETURN_FALSE;
 	}
 	cursor->fetched++;
+
+	if (arr->type != IS_ARRAY){
+		pval_destructor(arr);
+	    if (array_init(arr) == FAILURE){
+			php_error(E_WARNING, "Can't convert to type Array");
+			RETURN_FALSE;
+		}
+	}
+	zend_hash_internal_pointer_reset(arr->value.ht);
 
 	for (i = 0; i < cursor->ncols; i++) {
        
