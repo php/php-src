@@ -7,7 +7,7 @@ PHP_ARG_WITH(dbplus, for dbplus support,
 
 if test "$PHP_DBPLUS" != "no"; then
   # --with-dbplus -> check with-path
-	SEARCH_PATH="/usr/dbplus"    
+  SEARCH_PATH="/usr/dbplus"    
   SEARCH_FOR="/include/dbconfig.h"  
   if test -r $PHP_DBPLUS/; then # path given as parameter
     DBPLUS_DIR=$PHP_DBPLUS
@@ -30,12 +30,12 @@ if test "$PHP_DBPLUS" != "no"; then
   AC_ADD_INCLUDE($DBPLUS_DIR/include)
 
   # --with-dbplus -> chech for lib and symbol presence 
-	LIBNAME=Ddb
+  LIBNAME=Ddb
   LIBSYMBOL=Db_Init
   old_LIBS=$LIBS
-  LIBS="$LIBS -L$DBPLUS_DIR/lib -ldl -lDmacc -lDracc"
+  LIBS="-L$DBPLUS_DIR/lib -lm -ldl -lDmacc -lDracc"
   AC_CHECK_LIB($LIBNAME, $LIBSYMBOL, [AC_DEFINE(HAVE_DBPLUSLIB,1,[ ])],
-	  [AC_MSG_ERROR(wrong dbplus lib version or lib not found)])
+    [AC_MSG_ERROR(wrong dbplus lib version or lib not found)])
   LIBS=$old_LIBS
   
   PHP_SUBST(DBPLUS_SHARED_LIBADD)
