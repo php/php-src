@@ -114,6 +114,13 @@ class PEAR_Remote extends PEAR
                                              null, null, $ret['userinfo']);
                 }
             }
+        } elseif (is_array($ret) && sizeof($ret) == 1 &&
+                  isset($ret[0]['faultString']) &&
+                  isset($ret[0]['faultCode'])) {
+            extract($ret[0]);
+            $faultString = "XML-RPC Server Fault: " .
+                 str_replace("\n", " ", $faultString);
+            return $this->raiseError($faultString, $faultCode);
         }
         return $ret;
     }
