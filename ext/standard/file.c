@@ -79,6 +79,10 @@ extern int fclose();
 #include <sys/mman.h>
 #endif
 
+#ifndef MAP_FAILED
+#define MAP_FAILED ((void *) -1)
+#endif
+
 static void _php3_closesocket(int *);
 
 #ifndef THREAD_SAFE

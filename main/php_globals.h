@@ -79,6 +79,8 @@ struct _php_core_globals {
 	char *arg_separator;
 	char *gpc_order;
 
+	zend_bool expose_php;
+
 	zend_bool track_vars;
 	zend_bool gpc_globals;
 
