@@ -4,10 +4,11 @@ mysqli connect
 <?
 	$user = "root";
 	$passwd = "";
+	$dbname = "test";
 	$test = "";
 	
 	/*** test mysqli_connect 127.0.0.1 ***/
-	$link = mysqli_connect($host, $user, $passwd);
+	$link = mysqli_connect("127.0.0.1", $user, $passwd);
 	$test .= ($link) ? "1" : "0";
 	mysqli_close($link);
 
