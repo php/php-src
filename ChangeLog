@@ -1,3 +1,164 @@
+2002-03-05  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * NEWS: - Added recent changes done in ext/posix
+
+2002-03-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/session/mod_mm.c: Fixed crash with mm save handler
+
+    * ext/session/session.c: Fix bug #15322 and fix a little memory leak
+
+2002-03-05  Zeev Suraski  <zeev@zend.com>
+
+    * ext/session/session.c: MFH
+
+    * ext/session/session.c:
+    Make $_SESSION and $HTTP_SESSION_VARS links to each other
+
+2002-03-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/pear_config.phpt: * PEAR_Config test complete
+
+2002-03-05  James Cox  <james@awpimajes.com>
+
+    * win32/install.txt: adding installation comments for 4.1.2
+
+2002-03-05  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -fixes
+    -changed internal data structures
+
+2002-03-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/tests/merge.input
+      pear/tests/pear_config.phpt
+      pear/tests/toonew.conf
+      pear/tests/user2.input: * update PEAR_Config test
+
+    * pear/PEAR/Config.php: * fix singleton() so it actually works
+    * insert file format version in written files
+    * add getSetValues() method for listing the valid values for a set value
+
+2002-03-05  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    Breaking BC, but making odbc_fetch_into behavior more consistent
+
+2002-03-05  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/posix/php_posix.h
+      ext/posix/posix.c:
+    - Introduced posix_errno() (get error number from last error message) and
+      posix_strerror() (convert error number into error string).
+
+    - Do not output any error message if any of the function fails with FALSE
+      return value. The proper way now is to call posix_errno() and
+      posix_strerror() after encountering an error condition.
+
+    - Function not support on a system no longer issue a 'not available' error
+      but simply don't exist so we can safely use 'function_exists'.
+
+    - Fixed protos.
+
+    - Use new parameter parsing API.
+
+    - posix_uname() may be aware of 'domainname' (GNU extension)
+
+    - posix_getgrnam(), posix_getgrgid(): the returned information does no
+      longer contains mixture of string and numbered keys (hash / array)
+      but contains key 'member' with an array of all members in a list
+      (or an empty array). This breaks BC but is the right thing IMHO.
+
+2002-03-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR.php:
+    * fix PEAR::setErrorHandling() settings so they apply when using raiseError()
+
+2002-03-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * pear/DB/tests/driver/15quote.phpt
+      pear/DB/tests/driver/02fetch.phpt
+      pear/DB/tests/driver/03simplequery.phpt
+      pear/DB/tests/driver/04numcols.phpt
+      pear/DB/tests/driver/05sequences.phpt
+      pear/DB/tests/driver/06prepexec.phpt
+      pear/DB/tests/driver/08affectedrows.phpt
+      pear/DB/tests/driver/09numrows.phpt
+      pear/DB/tests/driver/10errormap.phpt
+      pear/DB/tests/driver/13limit.phpt
+      pear/DB/tests/driver/14fetchmode_object.phpt
+      pear/DB/tests/driver/01connect.phpt
+      pear/DB/tests/db_factory.phpt
+      pear/DB/tests/db_ismanip.phpt
+      pear/DB/tests/db_parsedsn.phpt
+      ext/xml/tests/001.phpt
+      ext/xml/tests/002.phpt
+      ext/xml/tests/003.phpt
+      ext/xml/tests/004.phpt
+      pear/DB/tests/db_error.phpt
+      tests/basic/002.phpt: - More test fixes
+
+    * ext/standard/tests/array/array_search.phpt
+      ext/standard/tests/file/001.phpt
+      ext/standard/tests/general_functions/004.phpt
+      ext/standard/tests/math/abs.phpt
+      ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/round.phpt
+      ext/standard/tests/strings/trim.phpt
+      ext/standard/tests/strings/wordwrap.phpt
+      ext/standard/tests/array/001.phpt
+      ext/standard/tests/aggregation/aggregate.phpt
+      ext/standard/tests/aggregation/aggregate_methods.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_methods_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregate_properties.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_list.phpt
+      ext/standard/tests/aggregation/aggregate_properties_by_regexp.phpt
+      ext/standard/tests/aggregation/aggregation_info.phpt
+      ext/standard/tests/aggregation/deaggregate.phpt:
+    - Fix tests to work with CLI
+
+    * ext/mcrypt/tests/001.phpt: - Fix mcrypt tests
+
+2002-03-05  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * README.TESTING: Fixed wrong description about CLI sapi usage.
+    Currently "make test" is running test script as
+
+    ./sapi/cli/php -c php.ini-dist run-tests.php
+
+    "make test" does not work... I'm supposing this
+    will be changed to use CGI sapi for now.
+
+    * README.TESTING: Added README.TESTING
+
+2002-03-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/pws-php4cgi.reg
+      win32/install.txt: s/php.exe/php-cgi.exe/.
+
+2002-03-05  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/birdstep.c: Added a comment for future reference
+
+2002-03-05  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c: Style Improvement
+
+2002-03-05  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php
+      pear/tests/pear_config.phpt:
+    * fixed a couple of bugs in PEAR_Config revealed by test
+
+2002-03-05  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/dbase/dbase.c: Killing compiler warning
+
+    * ext/dbase/dbf_rec.c: Making dbase compule under WIn32
+
+    * main/php_ini.c: Killing compiler warning on Win32
+
 2002-03-04  Dan Kalowsky  <dank@deadmime.org>
 
     * ext/iconv/config.m4
