@@ -354,13 +354,8 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_exhausted)=0;
 #endif
 
-#if ZEND_DEBUG
-	memset(AG(cache_stats), 0, sizeof(AG(cache_stats)));
-	memset(AG(fast_cache_stats), 0, sizeof(AG(fast_cache_stats)));
-#endif
-
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
-	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
+	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned int));
 
 #ifndef ZTS
 	/* Initialize cache, to prevent fragmentation */
@@ -378,6 +373,12 @@ ZEND_API void start_memory_manager(ALS_D)
 		}
 	}
 #endif
+
+#if ZEND_DEBUG
+	memset(AG(cache_stats), 0, sizeof(AG(cache_stats)));
+	memset(AG(fast_cache_stats), 0, sizeof(AG(fast_cache_stats)));
+#endif
+
 }
 
 
