@@ -748,7 +748,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 			exit_status = php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 			break;
 		case PHP_MODE_LINT:
+			PG(during_request_startup) = 0;
 			exit_status = php_lint_script(&file_handle CLS_CC ELS_CC PLS_CC);
+			if (exit_status==SUCCESS) {
+				zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+			} else {
+				zend_printf("Errors parsing %s\n", file_handle.filename);
+			}
 			break;
 		case PHP_MODE_HIGHLIGHT:
 			{
