@@ -424,7 +424,7 @@ PS_SERIALIZER_DECODE_FUNC(php_binary)
 		
 		if (has_value) {
 			MAKE_STD_ZVAL(current);
-			if (php_var_unserialize(&current, &p, endptr, &var_hash TSRMLS_CC)) {
+			if (php_var_unserialize(&current, (const unsigned char **) &p, endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash  TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
@@ -504,7 +504,7 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		
 		if (has_value) {
 			ALLOC_INIT_ZVAL(current);
-			if (php_var_unserialize(&current, &q, endptr, &var_hash TSRMLS_CC)) {
+			if (php_var_unserialize(&current, (const unsigned char **) &q, endptr, &var_hash TSRMLS_CC)) {
 				php_set_session_var(name, namelen, current, &var_hash TSRMLS_CC);
 			}
 			zval_ptr_dtor(&current);
