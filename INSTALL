@@ -297,10 +297,10 @@ Installing PHP can be done in four simple steps:
    and you need to remove the # for that line to take effect.
 
 
-USING PHP3 AND PHP4 AS CONCURRENT APACHE MODULES
+USING PHP 3 AND PHP 4 AS CONCURRENT APACHE MODULES
 
    Recent operating systems provide the ability to perform versioning and
-   scoping. This features make it possible to let PHP3 and PHP4 run as
+   scoping. This features make it possible to let PHP 3 and PHP 4 run as
    concurrent modules in one Apache server. 
    
    This feature is known to work on the following platforms:
@@ -309,7 +309,7 @@ USING PHP3 AND PHP4 AS CONCURRENT APACHE MODULES
    - Solaris 2.5 or better
    - FreeBSD (3.2, 4.0 tested)
    
-   To enable it, configure PHP3 and PHP4 to use APXS (--with-apxs) and the
+   To enable it, configure PHP 3 and PHP 4 to use APXS (--with-apxs) and the
    necessary link extensions (--enable-versioning). Otherwise, all standard
    installations instructions apply. For example:
 
