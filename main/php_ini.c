@@ -117,7 +117,6 @@ static void pvalue_config_destructor(zval *pvalue)
     }
 }
 
-
 static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, void *arg)
 {
 	switch (callback_type) {
@@ -128,9 +127,13 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 					break;
 				}
 				if (!strcasecmp(Z_STRVAL_P(arg1), "extension")) { /* load function module */
-					zval dummy;
-
-					php_dl(arg2, MODULE_PERSISTENT, &dummy);
+					zval copy;
+					PLS_FETCH();
+					
+					copy = *arg2;
+					zval_copy_ctor(&copy);
+					copy.refcount = 0;
+					zend_llist_add_element(&PG(ini_extension_list), &copy);
 				} else if (!strcasecmp(Z_STRVAL_P(arg1), ZEND_EXTENSION_TOKEN)) { /* load Zend extension */
 					zend_load_extension(Z_STRVAL_P(arg2));
 				} else {
@@ -142,6 +145,15 @@ static void php_config_ini_parser_cb(zval *arg1, zval *arg2, int callback_type, 
 		case ZEND_INI_PARSER_SECTION:
 			break;
 	}
+}
+
+static void php_apply_ini_extension_list(void *dummy)
+{
+	zval *extension = (zval *) dummy;
+	zval zval;
+
+	php_dl(extension, MODULE_PERSISTENT, &zval);
+	zval_dtor(extension);
 }
 
 
@@ -158,6 +170,8 @@ int php_init_config(char *php_ini_path_override)
 		return FAILURE;
 	}
 
+	zend_llist_init(&PG(ini_extension_list), sizeof(zval), NULL, 1);
+	
 	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
 
@@ -209,6 +223,9 @@ int php_init_config(char *php_ini_path_override)
 
 	zend_parse_ini_file(&fh, 1, php_config_ini_parser_cb, NULL);
 
+	zend_llist_apply(&PG(ini_extension_list), php_apply_ini_extension_list);
+	zend_llist_destroy(&PG(ini_extension_list));
+	
 	if (php_ini_opened_path) {
 		zval tmp;
 		
