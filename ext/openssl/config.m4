@@ -2,7 +2,9 @@ dnl
 dnl $Id$
 dnl
 
-if test "$OPENSSL_DIR"; then
-  PHP_NEW_EXTENSION(openssl, openssl.c, $ext_shared)
+if test "$PHP_OPENSSL" != "no"; then
+  PHP_NEW_EXTENSION(openssl, openssl.c, $ext_openssl_shared)
+  OPENSSL_SHARED_LIBADD="-lcrypto -lssl"
+  PHP_SUBST(OPENSSL_SHARED_LIBADD)
   AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
 fi
