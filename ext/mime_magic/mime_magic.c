@@ -348,7 +348,7 @@ static int apprentice(void)
     magic_server_config_rec *conf = &mime_global;
 
     fname = conf->magicfile; /* todo cwd? */
-    f = fopen(fname, "rt");
+    f = fopen(fname, "rb");
     if (f == NULL) {
 		(int) conf->magic = -1;
 		return -1;
