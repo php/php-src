@@ -2,45 +2,68 @@ dnl
 dnl $Id$
 dnl
 
-AC_DEFUN(PGSQL_INC_CHK,[if test -r $i$1/libpq-fe.h; then PGSQL_DIR=$i; PGSQL_INCDIR=$i$1])
+AC_DEFUN(PHP_PGSQL_CHECK_FUNCTIONS,[
+])
 
 PHP_ARG_WITH(pgsql,for PostgreSQL support,
 [  --with-pgsql[=DIR]      Include PostgreSQL support.  DIR is the PostgreSQL
                           base install directory, defaults to /usr/local/pgsql.])
 
 if test "$PHP_PGSQL" != "no"; then
-  PHP_EXPAND_PATH($PHP_PGSQL, PHP_PGSQL)
-  for i in /usr /usr/local /usr/local/pgsql $PHP_PGSQL; do
-    PGSQL_INC_CHK(/include)
-    el[]PGSQL_INC_CHK(/include/pgsql)
-    el[]PGSQL_INC_CHK(/include/postgresql)
-    fi
-  done
+  PHP_EXPAND_PATH($PGSQL_INCLUDE, PGSQL_INCLUDE)
+
+  if test "$PHP_PGSQL" = "yes"; then
+    PGSQL_SEARCH_PATHS="/usr /usr/local /usr/local/pgsql"
+  else
+    PGSQL_SEARCH_PATHS=$PHP_PGSQL
+  fi
   
-  if test -z "$PGSQL_DIR"; then
-    AC_MSG_ERROR(Cannot find libpq-fe.h. Please specify the installation path of PostgreSQL)
+  for i in $PGSQL_SEARCH_PATHS; do
+    for j in include include/pgsql include/postgres include/postgresql src/include/libpq ""; do
+      if test -r "$i/$j/libpq-fe.h"; then
+        PGSQL_INC_BASE=$i
+        PGSQL_INCLUDE=$i/$j
+      fi
+    done
+
+    for j in lib lib/pgsql lib/postgres lib/postgresql src/interfaces/libpq ""; do
+      if test -f "$i/$j/libpq.so"; then 
+        PGSQL_LIBDIR=$i/$j
+      fi
+    done
+  done
+
+  if test -z "$PGSQL_INCLUDE"; then
+    AC_MSG_ERROR(Cannot find libpq-fe.h. Please specify correct PostgreSQL installation path)
   fi
 
-  PGSQL_INCLUDE=-I$PGSQL_INCDIR
-  PGSQL_LIBDIR=$PGSQL_DIR/lib
-  test -d $PGSQL_DIR/lib/pgsql && PGSQL_LIBDIR=$PGSQL_DIR/lib/pgsql
+  if test -z "$PGSQL_LIBDIR"; then
+    AC_MSG_ERROR(Cannot find libpq.so. Please specify correct PostgreSQL installation path)
+  fi
 
+  if test -z "$PGSQL_INCLUDE" -a -z "$PGSQL_LIBDIR" ; then
+    AC_MSG_ERROR([Unable to find libpq anywhere under $withval])
+  fi
+
+  AC_DEFINE(HAVE_PGSQL,1,[ ])
   old_LIBS=$LIBS
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$LDFLAGS -L$PGSQL_LIBDIR"
+  AC_CHECK_LIB(pq, PQescapeString,AC_DEFINE(HAVE_PQESCAPE,1,[ ]))
   AC_CHECK_LIB(pq, PQcmdTuples,AC_DEFINE(HAVE_PQCMDTUPLES,1,[ ]))
   AC_CHECK_LIB(pq, PQoidValue,AC_DEFINE(HAVE_PQOIDVALUE,1,[ ]))
   AC_CHECK_LIB(pq, PQclientEncoding,AC_DEFINE(HAVE_PQCLIENTENCODING,1,[ ]))
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[ ]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
-  
-  AC_DEFINE(HAVE_PGSQL,1,[ ])
 
   PHP_ADD_LIBRARY_WITH_PATH(pq, $PGSQL_LIBDIR, PGSQL_SHARED_LIBADD)
-  
-  PHP_EXTENSION(pgsql,$ext_shared)
   PHP_SUBST(PGSQL_SHARED_LIBADD)
+
+  PGSQL_INCLUDE=-I$PGSQL_INCLUDE
   PHP_SUBST(PGSQL_INCLUDE)
+
+  PHP_EXTENSION(pgsql,$ext_shared)
 fi
+
 

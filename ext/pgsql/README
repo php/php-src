@@ -1,9 +1,25 @@
+==== About This Module ===
+PostgreSQL module provides access to PostgreSQL server from 
+PHP script. This module uses PostgreSQL C client lib called libpq.
+It is important that you use libpq that is later than backend 
+(PostgreSQL Server) version. Otherwise, you may experience 
+strange problems. 
+
 Please send e-mail to yohgaki@php.net if you have comments for 
 pgsql module. I appreciate your feedback.
 
-==== Note For PostgreSQL 7.2 beta ====
-Current CVS version (probably 4.0.6 or later) compiles without
-modefication.
+==== API Change ===
+Older PHP than 4.2.0, pg_loimport()/pg_loexport() connection 
+parameter as last parameter, not like other functions. From 4.2.0,
+connection parameter became 1st parameter. Old syntax is preserved, 
+but it will raise NOTICE error message.
+
+pg_connect()/pg_pconnect() has obsolete multi parameter syntax.
+This will be deleted in 4.3.0 or later.
+
+Omitting connectin parameter is NOT recommended. Connection 
+parameter may be required for future PHP version. Specify connection
+always if you don't want to rewrite code when it is changed.
 
 ==== Function Name Change ==== 
 Function names are going to be changed to confirm coding
@@ -11,8 +27,8 @@ standard. MySQL module has been done this already. Function names will
 be changed as follows.
 
 pg_errormessage -> pg_error_message
-pg_cmdtuples -> pg_affected_rows
-pg_fieldnum -> pg_field_num
+pg_cmdtuples    -> pg_affected_rows
+pg_fieldnum     -> pg_field_num
 and so on. Except pg_cmdtuples, under scores '_'  will be added to 
 names. 
 
@@ -21,14 +37,23 @@ compatibility.
 
 Manual will be updated when this change is commited to CVS source.
 
-==== TODO ===
-Add pg_result_error_message() to get error messages associated with 
-result resource.
-Add pg_lotell(), pg_lolseek().
-Add pg_escape(). This function requires PostgreSQL 7.2 or later.
-Add pg_copy_to() and pg_copy_from() for easier use of copy command.
+==== Configure Option Notes ====
+You cannot specify PostgreSQL source directly to build PostgreSQL
+module with specific version. You need to install PostgreSQL 
+somewhere in your system to build PHP with PostgreSQL support.
 
-==== Experimental Async Functions =====
+==== Note For PostgreSQL 7.2 beta ====
+Current CVS version (probably 4.0.6 or later) compiles without
+modefication.
+
+==== TODO List ===
+pg_convert_array() - convert array elements for SQL statement.
+Support async connection create.
+
+==== Experimental Functions =====
+
+WARNING: API/behavior may be changed without notice.
+
 Async query can improve application performance
 *significantly*. Please test and report any failure to
 yohgaki@php.net 
@@ -95,4 +120,53 @@ Resets communication port to Postgresql server using the same
 connection parameter. It's useful for error recovery.
 
 --------------------------------------------------------------------
+
+Copy functions
+
+--------------------------------------------------------------------
+mixed pg_copy_to(int connection_id, string table_name,
+                  [, string delim [, string null_as]])
+
+nt pg_copy_from(int connection_id, string table_name, array rows
+                    [, string delim [, string null_as]])
+
+--------------------------------------------------------------------
+
+Utility functions
+
+--------------------------------------------------------------------
+string pg_escape_string(string data)
+Escape string or binary for SQL statemen (7.2 or later)
+
+
+string pg_escape_bytea(string data)
+Escape string or binary for SQL statement (7.2 or later)
+
+--------------------------------------------------------------------
+
+Large Object Functions
+
+--------------------------------------------------------------------
+int pg_lo_tell(resource large_object)
+Returns current position of large object 
+
+--------------------------------------------------------------------
+bool pg_lo_lseek(resource large_object, int offset[, int whence])
+Seeks position of large object
+
+--------------------------------------------------------------------
+
+Notice messge function
+
+--------------------------------------------------------------------
+
+string pg_last_notice(resource connection)
+Returns the last notice set by the backend 
+Currently pg_last_notice() does not return notice message associated
+with the connection.
+
+--------------------------------------------------------------------
+
+Again, experimental functions are subject to be changed without 
+notice.
 
