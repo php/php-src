@@ -189,8 +189,14 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		/* fall-through */ 
 	case 1: /* hour */
 		val = (*arguments[0])->value.lval; 
-		if (val < 1) { 
-			chgsecs += (1-val) * 60*60; val = 1; 
+		/*
+		   We don't use 1 here to work around problems in some mktime implementations
+		   when it comes to daylight savings time.  Setting it to 2 and working back from
+		   there with the chgsecs offset makes us immune to these problems.
+		   See http://bugs.php.net/27533 for more info.
+		*/
+		if (val < 2) { 
+			chgsecs += (2-val) * 60*60; val = 2; 
 		} 
 		ta->tm_hour = val; 
 		/* fall-through */ 
