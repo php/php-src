@@ -502,7 +502,9 @@ void zend_deactivate_modules()
 	ELS_FETCH();
 	EG(opline_ptr) = NULL; /* we're no longer executing anything */
 
-	zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
+	if (setjmp(EG(bailout))==0) {
+		zend_hash_apply(&module_registry, (int (*)(void *)) module_registry_cleanup);
+	}
 }
 
 void zend_deactivate(CLS_D ELS_DC)
@@ -511,9 +513,15 @@ void zend_deactivate(CLS_D ELS_DC)
 	EG(opline_ptr) = NULL; 
 	EG(active_symbol_table) = NULL;
 
-	shutdown_scanner(CLS_C);
-	shutdown_executor(ELS_C);
-	shutdown_compiler(CLS_C);
+	if (setjmp(EG(bailout))==0) {
+		shutdown_scanner(CLS_C);
+	}
+	if (setjmp(EG(bailout))==0) {
+		shutdown_executor(ELS_C);
+	}
+	if (setjmp(EG(bailout))==0) {
+		shutdown_compiler(CLS_C);
+	}
 }
 
 
