@@ -34,9 +34,7 @@ typedef struct {
 	size_t size;
 	ts_allocate_ctor ctor;
 	ts_allocate_dtor dtor;
-#ifdef MBO_0
 	int done;
-#endif
 } tsrm_resource_type;
 
 
@@ -162,11 +160,9 @@ TSRM_API void tsrm_shutdown(void)
 				next_p = p->next;
 				for (j=0; j<p->count; j++) {
 					if (p->storage[j]) {
-#ifdef MBO_0
 						if (resource_types_table && !resource_types_table[j].done && resource_types_table[j].dtor) {
 							resource_types_table[j].dtor(p->storage[j], &p->storage);
 						}
-#endif
 						free(p->storage[j]);
 					}
 				}
@@ -226,9 +222,7 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].ctor = ctor;
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].dtor = dtor;
-#ifdef MBO_0
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].done = 0;
-#endif
 
 	/* enlarge the arrays for the already active threads */
 	for (i=0; i<tsrm_tls_table_size; i++) {
@@ -283,11 +277,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 	for (i=0; i<id_count; i++) {
-#if MBO_0
 		if (resource_types_table[i].done) {
 			(*thread_resources_ptr)->storage[i] = NULL;
 		} else
-#endif
 		{
 			(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
 			if (resource_types_table[i].ctor) {
@@ -437,7 +429,6 @@ void ts_free_thread(void)
 /* deallocates all occurrences of a given id */
 void ts_free_id(ts_rsrc_id id)
 {
-#ifdef MBO_0
 	int i;
 	int j = TSRM_UNSHUFFLE_RSRC_ID(id);
 
@@ -466,7 +457,6 @@ void ts_free_id(ts_rsrc_id id)
 	tsrm_mutex_unlock(tsmm_mutex);
 
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
-#endif
 }
 
 
