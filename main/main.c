@@ -714,13 +714,6 @@ void php_request_shutdown(void *dummy)
 }
 /* }}} */
 
-/* {{{ php_config_ini_shutdown
- */
-static void php_config_ini_shutdown(void)
-{
-	php_shutdown_config();
-}
-/* }}} */
 
 /* {{{ php_body_write_wrapper
  */
@@ -952,7 +945,7 @@ void php_module_shutdown()
 	}
 
 	/* close down the ini config */
-	php_config_ini_shutdown();
+	php_shutdown_config();
 
 #ifdef PHP_WIN32
 	/*close winsock */
