@@ -314,6 +314,8 @@ zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_rewind
 };
 
+/* {{{ proto RecursiveIteratorIterator::__construct(RecursiveIterator $it)
+   Creates a RecursiveIteratorIterator from a RecursiveIterator. */
 SPL_METHOD(RecursiveIteratorIterator, __construct)
 {
 	zval                      *object = getThis();
@@ -341,22 +343,28 @@ SPL_METHOD(RecursiveIteratorIterator, __construct)
 	intern->iterators[0].state = RS_START;
 
 	php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto void RecursiveIteratorIterator::rewind()
+   Rewind the iterator to the first element of the top level inner iterator. */
 SPL_METHOD(RecursiveIteratorIterator, rewind)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_recursive_it_rewind_ex(object TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto bolean RecursiveIteratorIterator::valid()
+   Check whether the current position is valid */
 SPL_METHOD(RecursiveIteratorIterator, valid)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(spl_recursive_it_valid_ex(object TSRMLS_CC) == SUCCESS);
-}
+} /* }}} */
 
+/* {{{ proto mixed RecursiveIteratorIterator::key()
+   Access the current key */
 SPL_METHOD(RecursiveIteratorIterator, key)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -374,8 +382,10 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 	} else {
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
+/* {{{ proto mixed RecursiveIteratorIterator::current()
+   Access the current element value */
 SPL_METHOD(RecursiveIteratorIterator, current)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -384,22 +394,28 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 
 	iterator->funcs->get_current_data(iterator, &data TSRMLS_CC);
 	RETURN_ZVAL(*data, 1, 0);
-}
+} /* }}} */
 
+/* {{{ proto void RecursiveIteratorIterator::next()
+   Move forward to the next element */
 SPL_METHOD(RecursiveIteratorIterator, next)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_recursive_it_move_forward_ex(object TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto int RecursiveIteratorIterator::getDepth()
+   Get the current depth of the recursive iteration */
 SPL_METHOD(RecursiveIteratorIterator, getDepth)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	
 	RETURN_LONG(object->level);
-}
+} /* }}} */
 
+/* {{{ proto RecursiveIterator RecursiveIteratorIterator::getSubIterator()
+   The current active sub iterator */
 SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
@@ -412,7 +428,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 		RETURN_NULL();
 	}
 	RETURN_ZVAL(object->iterators[level].zobject, 1, 0);
-}
+} /* }}} */
 
 /* {{{ spl_RecursiveIteratorIterator_dtor */
 static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
@@ -548,7 +564,7 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	switch (dit_type) {
 		case DIT_LimitIterator: {
 			intern->u.limit.count = -1; /* get all */
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ll", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Ol|l", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
 				php_set_error_handling(EH_NORMAL, NULL TSRMLS_CC);
 				return NULL;
 			}
@@ -592,11 +608,18 @@ static INLINE spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAME
 	return intern;
 }
 
+/* {{{ proto FilterIterator::__construct(Iterator $it) 
+   Create an Iterator from another iterator */
 SPL_METHOD(dual_it, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_Default);
-}
+} /* }}} */
 
+/* {{{ proto Iterator FilterIterator::getInnerIterator() 
+       proto Iterator CachingIterator::getInnerIterator()
+       proto Iterator LimitIterator::getInnerIterator()
+       proto Iterator ParentIterator::getInnerIterator()
+   Get the inner iterator */
 SPL_METHOD(dual_it, getInnerIterator)
 {
 	spl_dual_it_object   *intern;
@@ -608,7 +631,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 	} else {
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
 static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
@@ -679,6 +702,9 @@ static INLINE void spl_dual_it_next(spl_dual_it_object *intern, int do_free TSRM
 	intern->current.pos++;
 }
 
+/* {{{ proto void ParentIterator::rewind()
+   Rewind the iterator
+   */
 SPL_METHOD(dual_it, rewind)
 {
 	spl_dual_it_object   *intern;
@@ -686,8 +712,11 @@ SPL_METHOD(dual_it, rewind)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_dual_it_rewind(intern TSRMLS_CC);
 	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto boolean FilterIterator::valid()
+       proto boolean ParentIterator::valid()
+   Check whether the current element is valid */
 SPL_METHOD(dual_it, valid)
 {
 	spl_dual_it_object   *intern;
@@ -695,8 +724,13 @@ SPL_METHOD(dual_it, valid)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(intern->current.data);
-}
+} /* }}} */
 
+/* {{{ proto mixed FilterIterator::key()
+       proto mixed CachingIterator::key()
+       proto mixed LimitIterator::key()
+       proto mixed ParentIterator::key()
+   Get the current key */
 SPL_METHOD(dual_it, key)
 {
 	spl_dual_it_object   *intern;
@@ -711,8 +745,13 @@ SPL_METHOD(dual_it, key)
 		}
 	}
 	RETURN_NULL();
-}
+} /* }}} */
 
+/* {{{ proto mixed FilterIterator::current()
+       proto mixed CachingIterator::current()
+       proto mixed LimitIterator::current()
+       proto mixed ParentIterator::current()
+   Get the current element value */
 SPL_METHOD(dual_it, current)
 {
 	spl_dual_it_object   *intern;
@@ -724,8 +763,10 @@ SPL_METHOD(dual_it, current)
 	} else {
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
+/* {{{ proto void ParentIterator::next()
+   Move the iterator forward */
 SPL_METHOD(dual_it, next)
 {
 	spl_dual_it_object   *intern;
@@ -734,7 +775,7 @@ SPL_METHOD(dual_it, next)
 
 	spl_dual_it_next(intern, 1 TSRMLS_CC);
 	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
-}
+} /* }}} */
 
 static INLINE void spl_filter_it_fetch(zval *zthis, spl_dual_it_object *intern TSRMLS_DC)
 {
@@ -767,27 +808,35 @@ static INLINE void spl_filter_it_next(zval *zthis, spl_dual_it_object *intern TS
 	spl_filter_it_fetch(zthis, intern TSRMLS_CC);
 }
 
+/* {{{ proto void FilterIterator::rewind()
+   Rewind the iterator */
 SPL_METHOD(FilterIterator, rewind)
 {
 	spl_dual_it_object   *intern;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filter_it_rewind(getThis(), intern TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto void FilterIterator::next()
+   Move the iterator forward */
 SPL_METHOD(FilterIterator, next)
 {
 	spl_dual_it_object   *intern;
 
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_filter_it_next(getThis(), intern TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto ParentIterator::__construct(RecursiveIterator $it)
+   Create a ParentIterator from a RecursiveIterator */
 SPL_METHOD(ParentIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveIterator, DIT_Default);
-}
+} /* }}} */
 
+/* {{{ proto boolean ParentIterator::hasChildren()
+   Check whether the inner iterator's current element has children */
 SPL_METHOD(ParentIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
@@ -797,8 +846,10 @@ SPL_METHOD(ParentIterator, hasChildren)
 
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "haschildren", &retval);
 	RETURN_ZVAL(retval, 0, 1);
-}
+} /* }}} */
 
+/* {{{ proto ParentIterator ParentIterator::getChildren()
+   Return the inner iterator's children contained in a ParentIterator */
 SPL_METHOD(ParentIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
@@ -809,7 +860,7 @@ SPL_METHOD(ParentIterator, getChildren)
 	zend_call_method_with_0_params(&intern->inner.zobject, intern->inner.ce, NULL, "getchildren", &retval);
 	spl_instantiate_arg_ex1(spl_ce_ParentIterator, &return_value, 0, retval TSRMLS_CC);
 	zval_ptr_dtor(&retval);
-}
+} /* }}} */
 
 /* {{{ spl_dual_it_free_storage */
 static INLINE void spl_dual_it_free_storage(void *_object TSRMLS_DC)
@@ -933,11 +984,15 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 	}
 }
 
+/* {{{ proto LimitIterator:__construct(Iterator $it, int $offset [, int $count])
+   Construct a LimitIterator from an Iterator with a given starting offset and optionally a maximum count */
 SPL_METHOD(LimitIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_LimitIterator);
-}
+} /* }}} */
 
+/* {{{ proto void LimitIterator::rewind() 
+   Rewind the iterator to the specified starting offset */
 SPL_METHOD(LimitIterator, rewind)
 {
 	spl_dual_it_object   *intern;
@@ -945,8 +1000,10 @@ SPL_METHOD(LimitIterator, rewind)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_dual_it_rewind(intern TSRMLS_CC);
 	spl_limit_it_seek(intern, intern->u.limit.offset TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto boolean LimitIterator::valid()
+   Check whether the current element is valid */
 SPL_METHOD(LimitIterator, valid)
 {
 	spl_dual_it_object   *intern;
@@ -955,8 +1012,10 @@ SPL_METHOD(LimitIterator, valid)
 
 /*	RETURN_BOOL(spl_limit_it_valid(intern TSRMLS_CC) == SUCCESS);*/
 	RETURN_BOOL((intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) && intern->current.data);
-}
+} /* }}} */
 
+/* {{{ proto void LimitIterator::next()
+   Move the iterator forward */
 SPL_METHOD(LimitIterator, next)
 {
 	spl_dual_it_object   *intern;
@@ -967,8 +1026,10 @@ SPL_METHOD(LimitIterator, next)
 	if (intern->u.limit.count == -1 || intern->current.pos < intern->u.limit.offset + intern->u.limit.count) {
 		spl_dual_it_fetch(intern, 1 TSRMLS_CC);
 	}
-}
+} /* }}} */
 
+/* {{{ proto void LimitIterator::seek(int $position)
+   Seek to the given position */
 SPL_METHOD(LimitIterator, seek)
 {
 	spl_dual_it_object   *intern;
@@ -981,14 +1042,16 @@ SPL_METHOD(LimitIterator, seek)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_limit_it_seek(intern, pos TSRMLS_CC);
 	RETURN_LONG(intern->current.pos);
-}
+} /* }}} */
 
+/* {{{ proto int LimitIterator::getPosition()
+   Return the current position */
 SPL_METHOD(LimitIterator, getPosition)
 {
 	spl_dual_it_object   *intern;
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	RETURN_LONG(intern->current.pos);
-}
+} /* }}} */
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_seekable_it_seek, 0) 
@@ -1113,11 +1176,15 @@ static INLINE void spl_caching_it_rewind(spl_dual_it_object *intern TSRMLS_DC)
 	spl_caching_it_next(intern TSRMLS_CC);
 }
 
+/* {{{ proto CachingIterator::__construct(Iterator $it)
+   Construct a CachingIterator from an Iterator */
 SPL_METHOD(CachingIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_CachingIterator);
-}
+} /* }}} */
 
+/* {{{ proto void CachingIterator::rewind()
+   Rewind the iterator */
 SPL_METHOD(CachingIterator, rewind)
 {
 	spl_dual_it_object   *intern;
@@ -1125,8 +1192,10 @@ SPL_METHOD(CachingIterator, rewind)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_caching_it_rewind(intern TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto boolean CachingIterator::valid()
+   Check whether the current element is valid */
 SPL_METHOD(CachingIterator, valid)
 {
 	spl_dual_it_object   *intern;
@@ -1134,8 +1203,10 @@ SPL_METHOD(CachingIterator, valid)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(spl_caching_it_valid(intern TSRMLS_CC) == SUCCESS);
-}
+} /* }}} */
 
+/* {{{ proto void CachingIterator::next()
+   Move the iterator forward */
 SPL_METHOD(CachingIterator, next)
 {
 	spl_dual_it_object   *intern;
@@ -1143,8 +1214,10 @@ SPL_METHOD(CachingIterator, next)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	spl_caching_it_next(intern TSRMLS_CC);
-}
+} /* }}} */
 
+/* {{{ proto boolean CachingIterator::hasNext()
+   Cehck whether the inner iterator has a valid next element */
 SPL_METHOD(CachingIterator, hasNext)
 {
 	spl_dual_it_object   *intern;
@@ -1152,8 +1225,10 @@ SPL_METHOD(CachingIterator, hasNext)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(spl_caching_it_has_next(intern TSRMLS_CC) == SUCCESS);
-}
+} /* }}} */
 
+/* {{{ proto string CachingIterator::__toString()
+   Retrun the string representation of the current element */
 SPL_METHOD(CachingIterator, __toString)
 {
 	spl_dual_it_object   *intern;
@@ -1168,7 +1243,7 @@ SPL_METHOD(CachingIterator, __toString)
 	} else {
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
 static
 ZEND_BEGIN_ARG_INFO(arginfo_caching_it___construct, 0) 
@@ -1189,11 +1264,15 @@ static zend_function_entry spl_funcs_CachingIterator[] = {
 	{NULL, NULL, NULL}
 };
 
+/* {{{ proto CachingRecursiveIterator::__constrcut(RecursiveIterator $it)
+   Create an iterator from a RecursiveIterator */
 SPL_METHOD(CachingRecursiveIterator, __construct)
 {
 	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, spl_ce_RecursiveIterator, DIT_CachingRecursiveIterator);
-}
+} /* }}} */
 
+/* {{{ proto bolean CachingRecursiveIterator::hasChildren()
+   Cehck whether the current element of the inner iterator has children */
 SPL_METHOD(CachingRecursiveIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
@@ -1201,8 +1280,10 @@ SPL_METHOD(CachingRecursiveIterator, hasChildren)
 	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	RETURN_BOOL(intern->u.caching.zchildren);
-}
+} /* }}} */
 
+/* {{{ proto CachingRecursiveIterator CachingRecursiveIterator::getChildren()
+  Return the inenr iteraor's children as a CachingRecursiveIterator */
 SPL_METHOD(CachingRecursiveIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
@@ -1214,7 +1295,7 @@ SPL_METHOD(CachingRecursiveIterator, getChildren)
 	} else {
 		RETURN_NULL();
 	}
-}
+} /* }}} */
 
 static
 ZEND_BEGIN_ARG_INFO_EX(arginfo_caching_rec_it___construct, 0, ZEND_RETURN_REFERENCE_AGNOSTIC, 2) 
