@@ -116,7 +116,7 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	fclose(fp);
 
 	if (raw_output) {
-		RETURN_STRINGL(digest, 20, 1);
+		RETURN_STRINGL(digest, 16, 1);
 	} else {
 		make_digest(md5str, digest);
 		RETVAL_STRING(md5str, 1);
