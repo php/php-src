@@ -437,10 +437,10 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2)
 	}
 	if ((op1->type == IS_DOUBLE && op2->type == IS_LONG)
 		|| (op1->type == IS_LONG && op2->type == IS_DOUBLE)) {
-		result->type = IS_DOUBLE;
 		result->value.dval = (op1->type == IS_LONG ?
 						 (((double) op1->value.lval) + op2->value.dval) :
 						 (op1->value.dval + ((double) op2->value.lval)));
+		result->type = IS_DOUBLE;
 		return SUCCESS;
 	}
 	if (op1->type == IS_DOUBLE && op2->type == IS_DOUBLE) {
@@ -474,10 +474,10 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2)
 	}
 	if ((op1->type == IS_DOUBLE && op2->type == IS_LONG)
 		|| (op1->type == IS_LONG && op2->type == IS_DOUBLE)) {
-		result->type = IS_DOUBLE;
 		result->value.dval = (op1->type == IS_LONG ?
 						 (((double) op1->value.lval) - op2->value.dval) :
 						 (op1->value.dval - ((double) op2->value.lval)));
+		result->type = IS_DOUBLE;
 		return SUCCESS;
 	}
 	if (op1->type == IS_DOUBLE && op2->type == IS_DOUBLE) {
@@ -511,10 +511,10 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2)
 	}
 	if ((op1->type == IS_DOUBLE && op2->type == IS_LONG)
 		|| (op1->type == IS_LONG && op2->type == IS_DOUBLE)) {
-		result->type = IS_DOUBLE;
 		result->value.dval = (op1->type == IS_LONG ?
 						 (((double) op1->value.lval) * op2->value.dval) :
 						 (op1->value.dval * ((double) op2->value.lval)));
+		result->type = IS_DOUBLE;
 		return SUCCESS;
 	}
 	if (op1->type == IS_DOUBLE && op2->type == IS_DOUBLE) {
@@ -550,10 +550,10 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2)
 	}
 	if ((op1->type == IS_DOUBLE && op2->type == IS_LONG)
 		|| (op1->type == IS_LONG && op2->type == IS_DOUBLE)) {
-		result->type = IS_DOUBLE;
 		result->value.dval = (op1->type == IS_LONG ?
 						 (((double) op1->value.lval) / op2->value.dval) :
 						 (op1->value.dval / ((double) op2->value.lval)));
+		result->type = IS_DOUBLE;
 		return SUCCESS;
 	}
 	if (op1->type == IS_DOUBLE && op2->type == IS_DOUBLE) {
@@ -895,8 +895,8 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 	}
 	if ((op1->type == IS_DOUBLE || op1->type == IS_LONG)
 		&& (op2->type == IS_DOUBLE || op2->type == IS_LONG)) {
-		result->type = IS_DOUBLE;
 		result->value.dval = (op1->type == IS_LONG ? (double) op1->value.lval : op1->value.dval) - (op2->type == IS_LONG ? (double) op2->value.lval : op2->value.dval);
+		result->type = IS_DOUBLE;
 		return SUCCESS;
 	}
 	if ((op1->type==IS_ARRAY || op1->type==IS_OBJECT)
