@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . stream_socket_enable_crypto()  (Wez)
   . SimpleXMLElement->registerXPathNamespace() (Christian)
   . mysqli->client_info property (Georg)
+  . inet_pton() (Sara)
+  . inet_ntop() (Sara)
 - PHP will now respect extension dependencies when initializing.  (Wez)
 - Added Cursor support for MySQL 5.0.x in mysqli (Georg)
 - Added proxy support to ftp wrapper via http. (Sara)
