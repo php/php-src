@@ -116,7 +116,7 @@ Changes in the Zend Engine 2.0
 
         class ImplementedClass extends AbstractClass {
           public function test() {
-            echo "ImplementedClass::test() aufgerufen.\n";
+            echo "ImplementedClass::test() called.\n";
           }
         }
 
@@ -192,7 +192,7 @@ Changes in the Zend Engine 2.0
       This means that
 
         function foo(Class $object) {
-          // ..
+          // ...
         }
 
       is equivalent to
