@@ -594,22 +594,36 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 
 		case UDM_PARAM_ISPELL_PREFIXES: 
-#if UDM_VERSION_ID < 30200				
+
 			switch (atoi(val)){
 				case UDM_PREFIXES_ENABLED:
+#if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
+#else
+					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
+#endif								
 					break;
 					
 				case UDM_PREFIXES_DISABLED:
+#if UDM_VERSION_ID < 30200												
 					Agent->Conf->ispell_mode &= ~UDM_ISPELL_USE_PREFIXES;
+#else
+					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);						
+#endif																	
 					break;
+
 				
 				default:
+#if UDM_VERSION_ID < 30200								
+					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
+#else
+					UdmAddIntVar(Env->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
+#endif												
 					php_error(E_WARNING,"Udm_Set_Agent_Param: Unknown ispell prefixes mode");
 					RETURN_FALSE;
 					break;
 			}
-#endif			
+
 			break;
 
 		case UDM_PARAM_CHARSET:
