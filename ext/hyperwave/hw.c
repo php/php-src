@@ -3664,7 +3664,10 @@ PHP_FUNCTION(hw_getrellink) {
 
 PHP_MINFO_FUNCTION(hw)
 {
-	php_printf("HG-CSP Version: 7.17<BR>\n");
+	php_info_print_table_start();
+	php_info_print_table_row(2, "Hyperwave Support", "enabled");
+	php_info_print_table_row(2, "HG-CSP Version", "7.17");
+	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
 
