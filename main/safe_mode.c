@@ -44,7 +44,7 @@
  * 5 - only check file
  */
 
-PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
+PHPAPI int php_checkuid_ex(const char *filename, char *fopen_mode, int mode, int flags)
 {
 	struct stat sb;
 	int ret, nofile=0;
@@ -85,12 +85,16 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
 			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+				if (flags & CHECKUID_NO_ERRORS == 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+				}
 				return 0;
 			} else if (mode == CHECKUID_ALLOW_FILE_NOT_EXISTS) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+				if (flags & CHECKUID_NO_ERRORS == 0) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+				}
 				return 1;
-			}
+			} 
 			nofile = 1;
 		} else {
 			uid = sb.st_uid;
@@ -129,7 +133,9 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		/* check directory */
 		ret = VCWD_STAT(path, &sb);
 		if (ret < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+			if (flags & CHECKUID_NO_ERRORS == 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to access %s", filename);
+			}
 			return 0;
 		}
 		duid = sb.st_uid;
@@ -162,15 +168,21 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		gid = dgid;
 		filename = path;
 	}
-	
-	if (PG(safe_mode_gid)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", php_getuid(), php_getgid(), filename, uid, gid);
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", php_getuid(), filename, uid);
-	}			
+
+	if (flags & CHECKUID_NO_ERRORS == 0) {
+		if (PG(safe_mode_gid)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid/gid is %ld/%ld is not allowed to access %s owned by uid/gid %ld/%ld", php_getuid(), php_getgid(), filename, uid, gid);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SAFE MODE Restriction in effect.  The script whose uid is %ld is not allowed to access %s owned by uid %ld", php_getuid(), filename, uid);
+		}			
+	}
+
 	return 0;
 }
 
+PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode) {
+	return php_checkuid_ex(filename, fopen_mode, mode, 0);
+}
 
 PHPAPI char *php_get_current_user()
 {
