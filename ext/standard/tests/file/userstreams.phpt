@@ -53,8 +53,6 @@ Wherever I May Roam
 
 EOD;
 
-var_dump(strlen($lyrics));
-
 // repeat the data a few times so that it grows larger than
 // the default cache chunk size and that we have something
 // to seek around... 
@@ -306,7 +304,6 @@ if ($fail_count == 0) {
 /**/
 ?>
 --EXPECT--
-int(1085)
 Not Registered
 Registered
 Registered
