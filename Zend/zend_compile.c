@@ -122,7 +122,6 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
-	CG(throw_list) = NULL;
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 
 #ifdef ZEND_MULTIBYTE
@@ -1085,8 +1084,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 
 		zend_stack_push(&CG(foreach_copy_stack), (void *) &switch_entry.cond, sizeof(znode));
 	}
-	function_token->throw_list = CG(throw_list);
-	CG(throw_list) = NULL;	
 
 	if (CG(doc_comment)) {
 		CG(active_op_array)->doc_comment = estrndup(CG(doc_comment), CG(doc_comment_len));
@@ -1095,11 +1092,22 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 }
 
+void zend_do_handle_exception(TSRMLS_D)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_HANDLE_EXCEPTION;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+}
+
 
 void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 {
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
+	zend_do_handle_exception(TSRMLS_C);
+
 	pass_two(CG(active_op_array) TSRMLS_CC);
 
 	if (CG(active_class_entry)
@@ -1115,8 +1123,6 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	/* Pop the switch and foreach seperators */
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
-
-	CG(throw_list) = function_token->throw_list;
 }
 
 
@@ -1358,16 +1364,6 @@ void zend_do_end_function_call(znode *function_name, znode *result, znode *argum
 	*result = opline->result;
 	SET_UNUSED(opline->op2);
 
-	/* Check how much this is really needed
-	  opline->op2.u.constant.value.lval = is_method;
-	*/
-	if (CG(throw_list) != NULL) {
-		long op_number = get_next_op_number(CG(active_op_array))-1;
-		zend_llist_add_element(CG(throw_list), &op_number);
-	} else {
-		opline->op2.u.opline_num = -1;
-	}
-
 	zend_stack_del_top(&CG(function_call_stack));
 	opline->extended_value = argument_list->u.constant.value.lval;
 }
@@ -1536,12 +1532,46 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC)
 }
 
 
+static int zend_add_try_element(zend_uint try_op TSRMLS_DC)
+{
+	int try_catch_offset = CG(active_op_array)->last_try_catch++;
+
+	CG(active_op_array)->try_catch_array = erealloc(CG(active_op_array)->try_catch_array, sizeof(zend_try_catch_element)*CG(active_op_array)->last_try_catch);
+	CG(active_op_array)->try_catch_array[try_catch_offset].try_op = try_op;
+	return try_catch_offset;
+}
+
+static void zend_add_catch_element(int offset, zend_uint catch_op TSRMLS_DC)
+{
+	CG(active_op_array)->try_catch_array[offset].catch_op = catch_op;
+}
+
+
+void zend_do_first_catch(znode *open_parentheses TSRMLS_DC)
+{
+	open_parentheses->u.opline_num = get_next_op_number(CG(active_op_array));
+}
+
+
+void zend_initialize_try_catch_element(znode *try_token TSRMLS_DC)
+{
+	zend_add_catch_element(try_token->u.opline_num, get_next_op_number(CG(active_op_array)) TSRMLS_CC);
+}
+
+
+void zend_do_mark_last_catch(znode *first_catch, znode *last_additional_catch TSRMLS_DC)
+{
+	if (last_additional_catch->u.opline_num == -1) {
+		CG(active_op_array)->opcodes[first_catch->u.opline_num].op1.u.EA.type = 1;
+	} else {
+		CG(active_op_array)->opcodes[last_additional_catch->u.opline_num].op1.u.EA.type = 1;
+	}
+}
+
+
 void zend_do_try(znode *try_token TSRMLS_DC)
 {
-	try_token->throw_list = (void *) CG(throw_list);
-	CG(throw_list) = (zend_llist *) emalloc(sizeof(zend_llist));
-	zend_llist_init(CG(throw_list), sizeof(long), NULL, 0);
-	/* Initialize try backpatch list used to backpatch throw, do_fcall */
+	try_token->u.opline_num = zend_add_try_element(get_next_op_number(CG(active_op_array)) TSRMLS_CC);
 }
 
 static void throw_list_applier(long *opline_num, long *catch_opline)
@@ -1575,13 +1605,8 @@ void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var,
 	opline->op1 = *catch_class;
 /*	SET_UNUSED(opline->op1); *//* FIXME: Define IS_CLASS or something like that */
 	opline->op2 = *catch_var;
+	opline->op1.u.EA.type = 0; /* 1 means it's the last catch in the block */
 
-	if (first_catch) {
-		zend_llist_apply_with_argument(CG(throw_list), (llist_apply_with_arg_func_t) throw_list_applier, &CG(catch_begin) TSRMLS_CC);
-		zend_llist_destroy(CG(throw_list));
-		efree(CG(throw_list));
-		CG(throw_list) = (void *) try_token->throw_list;
-	}
 	try_token->u.opline_num = catch_op_number;
 }
 
@@ -1599,12 +1624,6 @@ void zend_do_throw(znode *expr TSRMLS_DC)
 	opline->opcode = ZEND_THROW;
 	opline->op1 = *expr;
 	SET_UNUSED(opline->op2);
-	
-	if (CG(throw_list) != NULL) {
-		zend_llist_add_element(CG(throw_list), &throw_op_number);
-	} else {
-		opline->op2.u.opline_num = -1;
-	}
 }
 
 ZEND_API void function_add_ref(zend_function *function)

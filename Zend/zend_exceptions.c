@@ -435,7 +435,7 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 
 	efree(message);
 
-	EG(exception) = ex;
+	zend_throw_exception_internal(ex TSRMLS_CC);
 }
 
 /* at the moment we can't use zend_throw_exception_ex because we don't have a protable
@@ -465,7 +465,7 @@ ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message
 		zend_update_property_long(default_exception_ptr, ex, "code", sizeof("code")-1, code TSRMLS_CC);
 	}
 
-	EG(exception) = ex;
+	zend_throw_exception_internal(ex TSRMLS_CC);
 }
 
 static void zend_error_va(int type, const char *file, uint lineno, const char *format, ...)

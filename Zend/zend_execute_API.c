@@ -783,6 +783,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EG(scope) = current_scope;
 	EG(This) = current_this;
 	EG(current_execute_data) = EX(prev_execute_data);
+
+	if (EG(exception)) {
+		zend_throw_exception_internal(NULL TSRMLS_CC);
+	}
 	return SUCCESS;
 }
 
@@ -1187,6 +1191,38 @@ check_fetch_type:
 	EG(in_autoload) = in_autoload;
 	return *pce;
 }
+
+void zend_throw_exception_internal(zval *exception TSRMLS_DC)
+{
+	if (exception != NULL) {
+		if (EG(exception)) {
+			/* FIXME:  bail out? */
+			return;
+		}
+		EG(exception) = exception;
+	}
+	if ((EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {
+		/* no need to rethrow the exception */
+		return;
+	}
+	EG(opline_before_exception) = EG(current_execute_data)->opline;
+	EG(current_execute_data)->opline = &EG(active_op_array)->opcodes[EG(active_op_array)->last-1-1];
+}
+
+
+ZEND_API void zend_clear_exception(TSRMLS_D)
+{
+	if (!EG(exception)) {
+		return;
+	}
+	zval_ptr_dtor(&EG(exception));
+	EG(exception) = NULL;
+	EG(current_execute_data)->opline = EG(opline_before_exception);
+#if ZEND_DEBUG
+	EG(opline_before_exception) = NULL;
+#endif
+}
+
 
 /*
  * Local variables:
