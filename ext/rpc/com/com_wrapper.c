@@ -370,26 +370,21 @@ static PHP_INI_MH(OnTypelibFileChange)
 	FILE *typelib_file;
 	char *typelib_name_buffer;
 	char *strtok_buf = NULL;
-#if SUPPORT_INTERACTIVE
 	int interactive;
-	ELS_FETCH();
 
-	interactive = EG(interactive);
-#endif
-
+	CLS_FETCH();
+	interactive = CG(interactive);
 
 	if(!new_value || (typelib_file = VCWD_FOPEN(new_value, "r"))==NULL)
 	{
 		return FAILURE;
 	}
 
-#if SUPPORT_INTERACTIVE
 	if(interactive)
 	{
 		printf("Loading type libraries...");
 		fflush(stdout);
 	}
-#endif
 
 	typelib_name_buffer = (char *) emalloc(sizeof(char)*1024);
 
@@ -431,13 +426,11 @@ static PHP_INI_MH(OnTypelibFileChange)
 			ptr--;
 		}
 
-
-#if SUPPORT_INTERACTIVE
 		if(interactive)
 		{
 			printf("\rLoading %-60s\r", typelib_name);
 		}
-#endif
+
 		if((pTL = php_COM_find_typelib(typelib_name, mode)) != NULL)
 		{
 			php_COM_load_typelib(pTL, mode);
@@ -448,12 +441,10 @@ static PHP_INI_MH(OnTypelibFileChange)
 	efree(typelib_name_buffer);
 	fclose(typelib_file);
 
-#if SUPPORT_INTERACTIVE
 	if(interactive)
 	{
 		printf("\r%70s\r", "");
 	}
-#endif
 
 	return SUCCESS;
 }
