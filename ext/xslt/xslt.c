@@ -89,7 +89,7 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 		return;
 	}
 
-	*carr = emalloc((zend_hash_num_elements(arr) * 2) + 1);
+	*carr = emalloc(((zend_hash_num_elements(arr) * 2) + 1) * sizeof(char *));
 	
 	for (zend_hash_internal_pointer_reset(arr);
 	     zend_hash_get_current_data(arr, (void **) &current) == SUCCESS;
