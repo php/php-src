@@ -179,6 +179,7 @@ $ini_overwrites = array(
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
 		'xdebug.default_enable=0',
+		'session.auto_start=0'
 	);
 $info_params = array();
 settings2array($ini_overwrites,$info_params);
