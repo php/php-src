@@ -253,7 +253,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals)
 
 	compiler_globals->class_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
-	zend_hash_copy(compiler_globals->class_table, global_class_table, zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
+	zend_hash_copy(compiler_globals->class_table, global_class_table, (copy_ctor_func_t) zend_class_add_ref, &tmp_class, sizeof(zend_class_entry));
 
 	compiler_globals->extended_info = 0;
 }

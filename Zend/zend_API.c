@@ -210,7 +210,7 @@ ZEND_API inline int object_init_ex(zval *arg, zend_class_entry *class_type)
 	
 	ALLOC_HASHTABLE(arg->value.obj.properties);
 	zend_hash_init(arg->value.obj.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(arg->value.obj.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 	arg->type = IS_OBJECT;
 	arg->value.obj.ce = class_type;
 	return SUCCESS;
@@ -695,7 +695,9 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 	if (module) {
 		module->module_number = zend_next_free_module();
 		if (module->module_startup_func) {
-			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number)==FAILURE) {
+			ELS_FETCH();
+
+			if (module->module_startup_func(MODULE_PERSISTENT, module->module_number ELS_CC)==FAILURE) {
 				zend_error(E_CORE_ERROR,"Unable to start %s module",module->name);
 				return FAILURE;
 			}
@@ -842,10 +844,12 @@ void module_destructor(zend_module_entry *module)
 int module_registry_request_startup(zend_module_entry *module)
 {
 	if (module->request_startup_func) {
+		ELS_FETCH();
+
 #if 0
 		zend_printf("%s:  Request startup\n",module->name);
 #endif
-		if (module->request_startup_func(module->type, module->module_number)==FAILURE) {
+		if (module->request_startup_func(module->type, module->module_number ELS_CC)==FAILURE) {
 			zend_error(E_WARNING, "request_startup() for %s module failed", module->name);
 			exit(1);
 		}

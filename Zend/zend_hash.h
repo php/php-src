@@ -38,6 +38,7 @@ typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
 typedef void (*dtor_func_t)(void *pDest);
 typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
+typedef void (*copy_ctor_func_t)(void *pElement);
 
 struct hashtable;
 
@@ -150,10 +151,10 @@ ZEND_API void zend_hash_internal_pointer_reset(HashTable *ht);
 ZEND_API void zend_hash_internal_pointer_end(HashTable *ht);
 
 /* Copying, merging and sorting */
-ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size);
-ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size, int overwrite);
+ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
+ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite);
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber);
-ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar) (const void *, const void *), int flag, void **pData);
+ZEND_API int zend_hash_minmax(HashTable *ht, int (*compar)(const void *, const void *), int flag, void **pData);
 
 ZEND_API int zend_hash_num_elements(HashTable *ht);
 

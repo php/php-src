@@ -45,7 +45,7 @@ void zend_copy_constants(HashTable *target, HashTable *source)
 {
 	zend_constant tmp_constant;
 
-	zend_hash_copy(target, source, (void (*)(void *)) copy_zend_constant, &tmp_constant, sizeof(zend_constant));
+	zend_hash_copy(target, source, (copy_ctor_func_t) copy_zend_constant, &tmp_constant, sizeof(zend_constant));
 }
 
 

@@ -744,7 +744,7 @@ ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, int (*destruct)(void
 
 
 
-ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size)
+ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size)
 {
 	Bucket *p;
 
@@ -768,7 +768,7 @@ ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyC
 }
 
 
-ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size, int overwrite)
+ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite)
 {
 	Bucket *p;
 	void *t;

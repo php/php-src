@@ -415,7 +415,7 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
 		ALLOC_INIT_ZVAL(*retval_ptr_ptr);
-		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, &EG(regular_list), &EG(persistent_list), object, 1);
+		((zend_internal_function *) function_state.function)->handler(param_count, *retval_ptr_ptr, object, 1);
 		INIT_PZVAL(*retval_ptr_ptr);
 	}
 	zend_ptr_stack_clear_multiple(ELS_C);
