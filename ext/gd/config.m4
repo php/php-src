@@ -9,7 +9,7 @@ AC_DEFUN(PHP_GD_JPEG,[
   if test "$PHP_JPEG_DIR" != "no"; then
 
     for i in /usr /usr/local $PHP_JPEG_DIR; do
-      test -f "$i/lib/libjpeg.s?" -o -f "$i/lib/libjpeg.a" && GD_JPEG_DIR=$i
+      test -f $i/lib/libjpeg.$SHLIB_SUFFIX_NAME -o -f $i/lib/libjpeg.a && GD_JPEG_DIR=$i
     done
 
     AC_CHECK_LIB(jpeg,jpeg_read_header,
@@ -32,7 +32,7 @@ AC_DEFUN(PHP_GD_PNG,[
   if test "$PHP_PNG_DIR" != "no"; then
 
     for i in /usr /usr/local $PHP_PNG_DIR; do
-      test -f "$i/lib/libpng.s?" -o -f "$i/lib/libpng.a" && GD_PNG_DIR=$i
+      test -f $i/lib/libpng.$SHLIB_SUFFIX_NAME -o -f $i/lib/libpng.a && GD_PNG_DIR=$i
     done
 
     if test "$PHP_ZLIB_DIR" = "no"; then
@@ -59,7 +59,7 @@ AC_DEFUN(PHP_GD_XPM,[
 
   if test "$PHP_XPM_DIR" != "no"; then
     for i in /usr /usr/local /usr/X11R6 $PHP_XPM_DIR; do
-      test -f "$i/lib/libXpm.s?" -o -f "$i/lib/libXpm.a" && GD_XPM_DIR=$i
+      test -f $i/lib/libXpm.$SHLIB_SUFFIX_NAME -o -f $i/lib/libXpm.a && GD_XPM_DIR=$i
     done
 
     AC_CHECK_LIB(Xpm,XpmFreeXpmImage, 
@@ -181,6 +181,8 @@ AC_DEFUN(PHP_GD_CHECK_VERSION,[
   AC_CHECK_LIB(gd, gdImageCreateTrueColor, [AC_DEFINE(HAVE_LIBGD20, 1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetTile,         [AC_DEFINE(HAVE_GD_IMAGESETTILE,  1, [ ])])
   AC_CHECK_LIB(gd, gdImageSetBrush,        [AC_DEFINE(HAVE_GD_IMAGESETBRUSH, 1, [ ])])
+  AC_CHECK_LIB(gd, gdImageStringTTF,       [AC_DEFINE(HAVE_GD_STRINGTTF,     1, [ ])])
+  AC_CHECK_LIB(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_STRINGFT,      1, [ ])])
   AC_CHECK_LIB(gd, gdImageStringFTEx,      [AC_DEFINE(HAVE_GD_STRINGFTEX,    1, [ ])])
   AC_CHECK_LIB(gd, gdImageColorClosestHWB, [AC_DEFINE(HAVE_COLORCLOSESTHWB,     1, [ ])])
   AC_CHECK_LIB(gd, gdImageColorResolve,    [AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])])
@@ -220,7 +222,7 @@ dnl A whole whack of possible places where these might be
       done
 
       for i in lib/gd1.3 lib/gd lib gd1.3 gd ""; do
-        test -f $PHP_GD/$i/libgd.s? -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
+        test -f $PHP_GD/$i/libgd.$SHLIB_SUFFIX_NAME -o -f $PHP_GD/$i/libgd.a && GD_LIB=$PHP_GD/$i
       done
 
       if test -n "$GD_INCLUDE" && test -n "$GD_LIB" ; then

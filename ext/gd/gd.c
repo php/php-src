@@ -2610,7 +2610,6 @@ PHP_FUNCTION(imagefttext)
 /* }}} */
 
 
-
 /* {{{ proto array imagettfbbox(int size, int angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
@@ -2640,8 +2639,7 @@ PHP_FUNCTION(imagettftext)
 #ifdef ENABLE_GD_TTF
 /* {{{ php_imagettftext_common
  */
-static
-void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extended)
+static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extended)
 {
 	zval **IM, **PTSIZE, **ANGLE, **X, **Y, **C, **FONTNAME, **COL, **EXT = NULL;
 	gdImagePtr im=NULL;
@@ -2739,22 +2737,26 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 	fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
 #endif
 
-#ifdef USE_GD_IMGSTRTTF
-# if HAVE_LIBFREETYPE
 
-#if HAVE_GD_STRINGFTEX
+#ifdef USE_GD_IMGSTRTTF
+# if HAVE_GD_STRINGFTEX
 	if (extended)	{
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
 	}
 	else
-#endif
+# endif
+# if HAVE_GD_STRINGFT
 	error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
-# else
+# endif
+
+# if HAVE_GD_STRINGTTF
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
 # endif
-#else
+
+#else /* !USE_GD_IMGSTRTTF */
 	error = gdttf(im, brect, col, fontname, ptsize, angle, x, y, str);
 #endif
+
 
 	if (error) {
 		php_error(E_WARNING, "%s", error);

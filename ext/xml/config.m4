@@ -42,7 +42,7 @@ else
   AC_DEFINE(HAVE_LIBEXPAT,  1, [ ])
 
   for i in $PHP_XML $PHP_EXPAT_DIR; do
-    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.s? ; then
+    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.$SHLIB_SUFFIX_NAME ; then
       EXPAT_DIR=$i
     fi
   done
