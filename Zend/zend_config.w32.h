@@ -51,7 +51,11 @@ typedef unsigned int uint;
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary
  */
-#define inline __forceinline
+#ifdef ZEND_WIN32_FORCE_INLINE
+# define inline __forceinline
+#else
+# define inline
+#endif
 
 #define DL_LOAD(libname)	LoadLibrary(libname)
 #define DL_FETCH_SYMBOL		GetProcAddress
