@@ -7,7 +7,21 @@
  * (c) Marcus Boerger, 2003 - 2004
  */
 
-/** Interface to override array access of objects.
+/** \defgroup SPL Internal classes
+ *
+ * The classes and interfaces in this group are contained in the c-code of 
+ * ext/SPL.
+ */
+
+/** \defgroup Examples Example classes
+ *
+ * The classes and interfaces in this group are contained as PHP code in the 
+ * examples subdirectory of ext/SPL. Sooner or later they will be moved to
+ * c-code.
+ */
+
+/** \ingroup SPL
+ * \brief Interface to override array access of objects.
  */
 interface ArrayAccess
 {
@@ -31,7 +45,10 @@ interface ArrayAccess
 	function offsetExists($offset);
 }
 
-/** Abstract base interface that cannot be implemented alone. Instead it
+/** \ingroup SPL
+ * \brief Interface to detect a class is traversable using foreach.
+ *
+ * Abstract base interface that cannot be implemented alone. Instead it
  * must be implemented by either IteratorAggregate or Iterator. 
  *
  * \note Internal classes that implement this interface can be used in a 
@@ -46,7 +63,8 @@ interface Traversable
 {
 }
 
-/** Interface to create an external Iterator.
+/** \ingroup SPL
+ * \brief Interface to create an external Iterator.
  *
  * \note This is an engine internal interface.
  */ 
@@ -57,7 +75,10 @@ interface IteratorAggregate extends Traversable
 	function getIterator();
 }
 
-/** Interface for external iterators or objects that can be iterated 
+/** \ingroup SPL
+ * \brief Basic iterator
+ *
+ * Interface for external iterators or objects that can be iterated 
  * themselves internally.
  *
  * \note This is an engine internal interface.
@@ -85,7 +106,10 @@ interface Iterator extends Traversable
 	function valid();
 }
 
-/** Interface for recursive traversal to be used with 
+/** \ingroup SPL
+ * \brief Recursive iterator
+ *
+ * Interface for recursive traversal to be used with 
  * RecursiveIteratorIterator.
  */
 interface RecursiveIterator extends Iterator
@@ -100,7 +124,8 @@ interface RecursiveIterator extends Iterator
 	function getChildren();
 }
 
-/** \brief Class for recursive traversal. 
+/** \ingroup SPL
+ * \brief Class for recursive traversal. 
  *
  * The objects of this class are created by instances of RecursiveIterator. 
  * Elements of those iterators may be traversable themselves. If so these 
@@ -114,7 +139,7 @@ class RecursiveIteratorIterator implements Iterator
 	 * \param $mode one of
 	 *            - RIT_LEAVES_ONLY do not return elements that can be recursed.
 	 *            - RIT_SELF_FIRST  show elements before their sub elements.
-	 *            - RIT_CHILD_FIRST show elements after their sub elements-
+	 *            - RIT_CHILD_FIRST show elements after their sub elements.
 	 *
 	 * \note If you want to see only those elements which have sub elements then
 	 *       use a ParentIterator.
@@ -132,7 +157,8 @@ class RecursiveIteratorIterator implements Iterator
 	function getSubIterator([$level]);
 }
 
-/** \brief An Array wrapper
+/** \ingroup SPL
+ * \brief An Array wrapper
  *
  * This array wrapper allows to recursively iterate over Arrays and public 
  * Object properties.
@@ -190,7 +216,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess
 	function count();
 }
 
-/** \brief An Array iterator
+/** \ingroup SPL
+ * \brief An Array iterator
  *
  * This iterator allows to unset and modify values and keys while iterating
  * over Arrays and Objects.
@@ -250,7 +277,8 @@ class ArrayIterator implements Iterator, SeekableIterator, ArrayAccess
 	function count();
 }
 
-/** \brief An iterator that filters other iterators
+/** \ingroup SPL
+ * \brief An iterator that filters other iterators
  * 
  * Iterator that wrapps around another iterator and only returns selected
  * elements of the inner iterator. The only thing that needs to be done to
@@ -276,7 +304,10 @@ abstract class FilterIterator implements Iterator
 	function getInnerIterator();
 }
 
-/** This interface is used to optimize LimitIterator functionality. but it 
+/** \ingroup SPL
+ * \brief Seekable iterator
+ *
+ * This interface is used to optimize LimitIterator functionality. but it 
  * may also be used for other situations where seeking a specific offset is
  * required and easily possible.
  */
@@ -288,7 +319,10 @@ interface SeekableIterator extends Iterator
 	function seek($position);
 }
 
-/** A class that starts iteration at a certain offset and only iterates over
+/** \ingroup SPL
+ * \brief Limiting iterator
+ *
+ * A class that starts iteration at a certain offset and only iterates over
  * a specified amount of elements.
  *
  * This class uses SeekableIterator::seek() if available and rewind() plus
@@ -325,7 +359,10 @@ class LimitIetrator implements Iterator
 	function getPosition();
 }
 
-/** A recursive iterator that only returns elements that themselves can be 
+/** \ingroup SPL
+ * \brief Iterator that shows only parents
+ *
+ * A recursive iterator that only returns elements that themselves can be 
  * trversed.
  */
 class ParentIterator extends FilterIterator implements RecursiveIterator
@@ -337,7 +374,10 @@ class ParentIterator extends FilterIterator implements RecursiveIterator
 	function __construct(RecursiveIterator $iterator);
 }
 
-/** This Iterator allways reads one ahead. That allows it to know whether
+/** \ingroup SPL
+ * \brief Caching iterator
+ *
+ * This Iterator allways reads one ahead. That allows it to know whether
  * more elements are available.
  */
 class CachingIterator implements Iterator
@@ -367,7 +407,8 @@ class CachingIterator implements Iterator
 	function getInnerIterator();
 }
 
-/** The recursive version of the CachingIterator.
+/** \ingroup SPL
+ * \brief The recursive version of the CachingIterator.
  */
 class CachingRecursiveIterator extends CachingIterator implements RecursiveIterator
 {
@@ -381,7 +422,8 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	function __construct(RecursiveIterator $iterator, $getStrVal);
 }
 
-/** \brief Directory iterator
+/** \ingroup SPL
+ * \brief Directory iterator
  */
 class DirectoryIterator implements Iterator
 {
@@ -472,7 +514,8 @@ class DirectoryIterator implements Iterator
 	function __toString();
 }
 
-/** \brief recursive directory iterator
+/** \ingroup SPL
+ * \brief recursive directory iterator
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
@@ -485,7 +528,8 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	function getChildren();	
 }
 
-/** \brief recursive SimpleXML_Element iterator
+/** \ingroup SPL
+ * \brief recursive SimpleXML_Element iterator
  */
 class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 {
