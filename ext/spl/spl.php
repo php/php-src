@@ -696,9 +696,9 @@ interface Subject
 	 */
     function detach(Observer $observer);
 
-	/** @param $ignore optional observer that should not be notified
+	/** Notify all observers
 	 */
-    function notify([Observer $ignore = NULL]);
+    function notify();
 }
 
 ?>
