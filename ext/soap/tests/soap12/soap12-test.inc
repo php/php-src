@@ -107,6 +107,10 @@ class Soap12test {
 	function echoHeader() {
 	  return $this->header;
 	}
+
+	function echoResolvedRef($ref) {
+	  return $ref->RelativeReference->base.$ref->RelativeReference->href;
+	}
 }
 
 $server = new soapserver("http://http://example.org/ts-tests","http://example.org/ts-tests/C");

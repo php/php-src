@@ -2009,6 +2009,13 @@ static void schema_attribute_fixup(sdlPtr sdl, sdlAttributePtr attr)
 				}
 				attr->encode = (*tmp)->encode;
 			}
+		} 
+		if (attr->name == NULL && attr->ref != NULL) {
+			char *name, *ns;
+			parse_namespace(attr->ref, &name, &ns);
+			attr->name = strdup(name);
+			if (name) {efree(name);}
+			if (ns) {efree(ns);}
 		}
 		efree(attr->ref);
 		attr->ref = NULL;

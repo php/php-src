@@ -331,6 +331,13 @@
 		<part name="responseHeader" element="test:echoHeaderResponse"/>
 	</message>
 
+	<message name="echoResolvedRefRequest">
+		<part name="responseHeader" element="test:echoResolvedRef"/>
+	</message>
+	<message name="echoResolvedRefResponse">
+		<part name="responseHeader" element="test:responseResolvedRef"/>
+	</message>
+
 	<!-- "unknown" header block -->
 	<message name="UnknownHdrBlockLit">
 		<part name="Unknown" element="test:Unknown" />
@@ -354,6 +361,10 @@
     		<operation name="echoHeader">
       			<input message="tns:echoHeaderRequest" />
       			<output message="tns:echoHeaderResponse" />
+    		</operation>
+    		<operation name="echoResolvedRef">
+      			<input message="tns:echoResolvedRefRequest" />
+      			<output message="tns:echoResolvedRefResponse" />
     		</operation>
 	</portType>
 
@@ -501,8 +512,6 @@
       			<soap12:operation/>
       			<input>
         			<soap12:body use="literal" />
-        			<soap12:header message="tns:echoOkRequest" part="echoOk" use="literal" />
-				<soap12:header message="tns:UnknownHdrBlockLit" part="Unknown" use="literal" />
       			</input>
     		</operation>
     		<operation name="echoHeader">
@@ -515,6 +524,15 @@
       			<output>
         			<soap12:body use="literal" />
         			<soap12:header message="tns:echoOkResponse" part="responseOk" use="literal" />
+      			</output>
+    		</operation>
+    		<operation name="echoResolvedRef">
+      			<soap12:operation/>
+      			<input>
+        			<soap12:body use="literal" />
+      			</input>
+      			<output>
+        			<soap12:body use="literal" />
       			</output>
     		</operation>
 	</binding>
