@@ -28,9 +28,6 @@ require_once "PEAR/Config.php";
  */
 class PEAR_Command_Login extends PEAR_Command_Common
 {
-    // {{{ properties
-    // }}}
-
     // {{{ constructor
 
     /**
@@ -60,6 +57,19 @@ class PEAR_Command_Login extends PEAR_Command_Common
     // }}}
     // {{{ run()
 
+    /**
+     * Execute the command.
+     *
+     * @param string command name
+     *
+     * @param array option_name => value
+     *
+     * @param array list of additional parameters
+     *
+     * @return bool TRUE on success, PEAR error on failure
+     *
+     * @access public
+     */
     function run($command, $options, $params)
     {
         $cf = $this->config;
@@ -69,18 +79,24 @@ class PEAR_Command_Login extends PEAR_Command_Common
             case 'login': {
                 $username = $cf->get('username');
                 if (empty($username)) {
-                    $this->ui->displayLine("Logging in to $server.");
-                    $username = trim($this->ui->userDialog('Username'));
-                    $cf->set('username', $username);
-                } else {
-                    $this->ui->displayLine("Logging in as `$username' to $server.");
+                    $username = @$_ENV['USER'];
                 }
+                $this->ui->displayLine("Logging in to $server.");
+                $username = trim($this->ui->userDialog('Username', 'text', $username));
+                
+                $cf->set('username', $username);
                 $password = trim($this->ui->userDialog('Password', 'password'));
                 $cf->set('password', $password);
-                $cf->store();
-                $remote = new PEAR_Remote;
+                $remote = new PEAR_Remote($cf);
+                $remote->expectError(401);
                 $ok = $remote->call('logintest');
-                print "logintest=";var_dump($ok);
+                $remote->popExpect();
+                if ($ok === true) {
+                    $this->ui->displayLine("Logged in.");
+                    $cf->store();
+                } else {
+                    $this->ui->displayLine("Login failed!");
+                }
                 break;
             }
             case 'logout': {
