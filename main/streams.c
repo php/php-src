@@ -1691,12 +1691,12 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	filename_length = strlen(filename);
 
 	/* Relative path open */
-	if (*filename == '.' && (*(filename+1) == '/' || *(filename+1) == '.')) {
+	if (*filename == '.' && (IS_SLASH(filename[1]) || filename[1] == '.')) {
 		/* further checks, we could have ....... filenames */
 		ptr = filename + 1;
 		if (*ptr == '.') {
 			while (*(++ptr) == '.');
-			if (*ptr != '/') { /* not a relative path after all */
+			if (!IS_SLASH(*ptr)) { /* not a relative path after all */
 				goto not_relative_path;
 			}
 		}
