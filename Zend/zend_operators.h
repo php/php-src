@@ -65,6 +65,8 @@ ZEND_API void convert_to_object(zval *op);
 ZEND_API int add_char_to_string(zval *result, zval *op1, zval *op2);
 ZEND_API int add_string_to_string(zval *result, zval *op1, zval *op2);
 #define convert_to_string(op)			_convert_to_string((op) ZEND_FILE_LINE_CC)
+
+ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 END_EXTERN_C()
 
 ZEND_API int zval_is_true(zval *op);
