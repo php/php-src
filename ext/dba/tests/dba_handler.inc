@@ -1,7 +1,7 @@
 <?php
 	echo "database handler: $handler\n";
 	@unlink($db_filename);
-	if (($db_file = @dba_open($db_filename, "nl", $handler))!==FALSE) {
+	if (($db_file = dba_open($db_filename, 'n'.$lock_flag, $handler))!==FALSE) {
 		dba_insert("key1", "Content String 1", $db_file);
 		dba_insert("key2", "Content String 2", $db_file);
 		dba_insert("key3", "Third Content String", $db_file);
@@ -27,8 +27,8 @@
 	} else {
 		echo "Error creating database\n";
 	}
-	$db_writer = @dba_open($db_filename, "wl", $handler);
-	if (($dba_reader = @dba_open($db_filename, "rlt", $handler))===false) {
+	$db_writer = dba_open($db_filename, 'w'.$lock_flag, $handler);
+	if (($dba_reader = dba_open($db_filename, 'r'.$lock_flag.($lock_flag ? 't' : ''), $handler))===false) {
 		echo "Cannot read during write operation\n";
 	} else {
 		echo "Read during write permitted\n";
@@ -44,7 +44,7 @@
 	} else {
 		die("Error reopening database\n");
 	}
-	if (($db_file = @dba_open($db_filename, "rd", $handler))!==FALSE) {
+	if (($db_file = dba_open($db_filename, 'r'.$lock_flag, $handler))!==FALSE) {
 		$key = dba_firstkey($db_file);
 		$res = array();
 		while($key) {

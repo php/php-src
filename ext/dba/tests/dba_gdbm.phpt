@@ -9,6 +9,7 @@ DBA GDBM handler test
 <?php
 	require_once('test.inc');
 	$handler = 'gdbm';
+	$lock_flag = ''; // lock in library
 	require_once('dba_handler.inc');
 ?>
 --EXPECT--
