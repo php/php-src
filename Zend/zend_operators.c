@@ -45,9 +45,6 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_DOUBLE:
 			case IS_LONG:
 				break;
-			case IS_BOOL:
-				op->type = IS_LONG;
-				break;
 #if WITH_BCMATH
 			case IS_BC:
 				op->type = IS_DOUBLE; /* may have lost significant digits */
@@ -61,6 +58,9 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		STR_FREE(strval);
 	} else if (op->type==IS_BOOL || op->type==IS_RESOURCE) {
 		op->type = IS_LONG;
+	} else if (op->type==IS_UNSET) {
+		op->type = IS_LONG;
+		op->value.lval = 0;
 	}
 }
 
@@ -85,6 +85,9 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		(holder).value.lval = (op)->value.lval;						\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
+	} else if ((op)->type==IS_UNSET) {								\
+		(holder).type = IS_UNSET;									\
+		(op) = &(holder);											\
 	}
 
 
@@ -98,6 +101,9 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		(op) = &(holder);											\
 	} else if ((op)->type != IS_LONG) {								\
 		switch ((op)->type) {										\
+			case IS_UNSET:											\
+				(holder).value.lval = 0;							\
+				break;												\
 			case IS_DOUBLE:											\
 				(holder).value.lval = (long) (op)->value.dval;		\
 				break;												\
@@ -125,6 +131,9 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		convert_to_boolean(op);										\
 	} else if ((op)->type != IS_BOOL) {								\
 		switch ((op)->type) {										\
+			case IS_UNSET:											\
+				(holder).value.lval = 0;							\
+				break;												\
 			case IS_RESOURCE:										\
 			case IS_LONG:											\
 				(holder).value.lval = ((op)->value.lval ? 1 : 0);	\
@@ -167,6 +176,9 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 	long tmp;
 
 	switch (op->type) {
+		case IS_UNSET:
+			op->value.lval = 0;
+			break;
 		case IS_RESOURCE:
 		case IS_BOOL:
 		case IS_LONG:
@@ -206,11 +218,13 @@ ZEND_API void convert_to_double(zval *op)
 	double tmp;
 
 	switch (op->type) {
+		case IS_UNSET:
+			op->value.dval = 0.0;
+			break;
 		case IS_RESOURCE:
 		case IS_BOOL:
 		case IS_LONG:
 			op->value.dval = (double) op->value.lval;
-			op->type = IS_DOUBLE;
 			break;
 		case IS_DOUBLE:
 			break;
@@ -218,28 +232,32 @@ ZEND_API void convert_to_double(zval *op)
 			strval = op->value.str.val;
 
 			op->value.dval = strtod(strval, NULL);
-			op->type = IS_DOUBLE;
 			STR_FREE(strval);
 			break;
 		case IS_ARRAY:
 			tmp = (zend_hash_num_elements(op->value.ht)?1:0);
 			zval_dtor(op);
 			op->value.dval = tmp;
-			op->type = IS_DOUBLE;
 			break;
 		case IS_OBJECT:
 			tmp = (zend_hash_num_elements(op->value.obj.properties)?1:0);
 			zval_dtor(op);
 			op->value.dval = tmp;
-			op->type = IS_DOUBLE;
 			break;			
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
 			zval_dtor(op);
 			op->value.dval = 0;
-			op->type = IS_DOUBLE;
 			break;
 	}
+	op->type = IS_DOUBLE;
+}
+
+
+ZEND_API void convert_to_unset(zval *op)
+{
+	zval_dtor(op);
+	op->type = IS_UNSET;
 }
 
 
@@ -250,6 +268,9 @@ ZEND_API void convert_to_boolean(zval *op)
 
 	switch (op->type) {
 		case IS_BOOL:
+			break;
+		case IS_UNSET:
+			op->value.lval = 0;
 			break;
 		case IS_RESOURCE:
 		case IS_LONG:
@@ -295,6 +316,10 @@ ZEND_API void convert_to_string(zval *op)
 	ELS_FETCH();
 
 	switch (op->type) {
+		case IS_UNSET:
+			op->value.str.val = empty_string;
+			op->value.str.len = 0;
+			break;
 		case IS_STRING:
 			break;
 		case IS_BOOL:
@@ -893,6 +918,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 		result->value.lval = op1->value.lval - op2->value.lval;
 		return SUCCESS;
 	}
+
 	zendi_convert_scalar_to_number(op1, op1_copy, result);
 	zendi_convert_scalar_to_number(op2, op2_copy, result);
 
@@ -924,6 +950,10 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	switch (op1->type) {
+		case IS_UNSET:
+			result->value.lval = (op2->type==IS_UNSET);
+			return SUCCESS;
+			break;
 		case IS_BOOL:
 		case IS_LONG:
 		case IS_RESOURCE:
@@ -1120,14 +1150,12 @@ ZEND_API int increment_function(zval *op1)
 		case IS_DOUBLE:
 			op1->value.dval = op1->value.dval + 1;
 			break;
+		case IS_UNSET:
+			op1->value.lval = 1;
+			op1->type = IS_LONG;
+			break;
 		case IS_STRING: /* Perl style string increment */
-			if (op1->value.str.len==0) { /* consider as 0 */
-				STR_FREE(op1->value.str.val);
-				op1->value.lval = 1;
-				op1->type = IS_LONG;
-			} else {
-				increment_string(op1);
-			}
+			increment_string(op1);
 			break;
 		default:
 			return FAILURE;

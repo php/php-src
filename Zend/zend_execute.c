@@ -656,7 +656,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 		return;
 	}
 
-	if (container->type == IS_STRING && container->value.str.len==0) {
+	if (container->type == IS_UNSET) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
@@ -695,36 +695,35 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			SEPARATE_ON_READ_OBJECT(*retval, type);
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
+		case IS_UNSET:
+			/* for read-mode only */
+			*retval = &EG(uninitialized_zval_ptr);
+			SELECTIVE_PZVAL_LOCK(**retval, result);
+			FREE_OP(op2, free_op2);
+			break;
 		case IS_STRING: {
 				zval *offset;
+				zval tmp;
+
 				offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 
-				if (container->value.str.val == undefined_variable_string) {
-					/* for read-mode only */
-					*retval = &EG(uninitialized_zval_ptr);
-					SELECTIVE_PZVAL_LOCK(**retval, result);
-					FREE_OP(op2, free_op2);
-				} else {
-					zval tmp;
-
-					if (offset->type != IS_LONG) {
-						tmp = *offset;
-						zval_copy_ctor(&tmp);
-						convert_to_long(&tmp);
-						offset = &tmp;
-					}
-					if (!container->is_ref && type!=BP_VAR_R && type!=BP_VAR_IS) {
-						SEPARATE_ZVAL(container_ptr);
-					}
-					container = *container_ptr;
-					Ts[result->u.var].EA.str = container;
-					PZVAL_LOCK(container);
-					Ts[result->u.var].EA.offset = offset->value.lval;
-					Ts[result->u.var].EA.type = IS_STRING_OFFSET;
-					FREE_OP(op2, free_op2);
-					*retval = NULL;
-					return;
+				if (offset->type != IS_LONG) {
+					tmp = *offset;
+					zval_copy_ctor(&tmp);
+					convert_to_long(&tmp);
+					offset = &tmp;
 				}
+				if (!container->is_ref && type!=BP_VAR_R && type!=BP_VAR_IS) {
+					SEPARATE_ZVAL(container_ptr);
+				}
+				container = *container_ptr;
+				Ts[result->u.var].EA.str = container;
+				PZVAL_LOCK(container);
+				Ts[result->u.var].EA.offset = offset->value.lval;
+				Ts[result->u.var].EA.type = IS_STRING_OFFSET;
+				FREE_OP(op2, free_op2);
+				*retval = NULL;
+				return;
 			}
 			break;
 		default: {
@@ -1720,12 +1719,6 @@ send_by_ref:
 					zval **param, *assignment_value;
 
 					if (zend_ptr_stack_get_arg(opline->op1.u.constant.value.lval, (void **) &param ELS_CC)==FAILURE) {
-						if (opline->op2.op_type == IS_UNUSED) {
-							if (opline->result.op_type == IS_VAR) {
-								PZVAL_UNLOCK(*Ts[opline->result.u.var].var.ptr_ptr);
-							}
-							break;
-						}
 						if (opline->op2.u.constant.type == IS_CONSTANT) {
 							zval *default_value;
 							zval tmp;
@@ -1949,6 +1942,9 @@ send_by_ref:
 						zendi_zval_copy_ctor(*result);
 					}					
 					switch (opline->op2.u.constant.type) {
+						case IS_UNSET:
+							convert_to_unset(result);
+							break;
 						case IS_BOOL:
 							convert_to_boolean(result);
 							break;
@@ -2161,7 +2157,7 @@ send_by_ref:
 							isset = 1;
 						}
 					} else if (*var==EG(uninitialized_zval_ptr)
-						|| ((*var)->type == IS_STRING && (*var)->value.str.val == undefined_variable_string)) {
+						|| ((*var)->type == IS_UNSET)) {
 						isset = 0;
 					} else {
 						isset = 1;

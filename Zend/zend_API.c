@@ -242,6 +242,16 @@ ZEND_API inline int add_assoc_long(zval *arg, char *key, long n)
 }
 
 
+ZEND_API inline int add_assoc_unset(zval *arg, char *key)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->type = IS_UNSET;
+	INIT_PZVAL(tmp);
+	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
+}
+
 ZEND_API inline int add_assoc_bool(zval *arg, char *key, int b)
 {
 	zval *tmp;
@@ -324,6 +334,17 @@ ZEND_API inline int add_index_long(zval *arg, uint index, long n)
 }
 
 
+ZEND_API inline int add_index_unset(zval *arg, uint index)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->type = IS_UNSET;
+	INIT_PZVAL(tmp);
+	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *), NULL);
+}
+
+
 ZEND_API inline int add_index_bool(zval *arg, uint index, int b)
 {
 	zval *tmp;
@@ -401,6 +422,17 @@ ZEND_API inline int add_next_index_long(zval *arg, long n)
 	ALLOC_ZVAL(tmp);
 	tmp->type = IS_LONG;
 	tmp->value.lval = n;
+	INIT_PZVAL(tmp);
+	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
+}
+
+
+ZEND_API inline int add_next_index_unset(zval *arg)
+{
+	zval *tmp;
+
+	ALLOC_ZVAL(tmp);
+	tmp->type = IS_UNSET;
 	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
 }

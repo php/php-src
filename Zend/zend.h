@@ -199,8 +199,12 @@ typedef struct _zend_utility_values {
 #undef MAX
 #define MAX(a,b)  (((a)>(b))?(a):(b))
 #define MIN(a,b)  (((a)<(b))?(a):(b))
+#define ZEND_STRL(str)		(str), (sizeof(str)-1)
+#define ZEND_STRS(str)		(str), (sizeof(str)
+
 
 /* data types */
+#define IS_UNSET	0
 #define IS_LONG		1
 #define IS_DOUBLE	2
 #define IS_STRING	3
@@ -226,13 +230,12 @@ ZEND_API int zend_print_zval(zval *expr, int indent);
 ZEND_API void zend_print_zval_r(zval *expr, int indent);
 
 ZEND_API extern char *empty_string;
-ZEND_API extern char *undefined_variable_string;
 
-#define STR_FREE(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr && ptr!=empty_string) { efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string) { efree_rel(ptr); }
 
 #define STR_REALLOC(ptr, size)										\
-	if (ptr!=empty_string && ptr!=undefined_variable_string) {		\
+	if (ptr!=empty_string) {										\
 		ptr = (char *) erealloc(ptr, size);							\
 	} else {														\
 		ptr = (char *) emalloc(size);								\

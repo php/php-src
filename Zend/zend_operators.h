@@ -56,6 +56,7 @@ ZEND_API void convert_scalar_to_number(zval *op);
 ZEND_API void convert_to_string(zval *op);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_long_base(zval *op, int base);
+ZEND_API void convert_to_unset(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);

@@ -879,6 +879,10 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_BOOL_CAST;
 }
 
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("unset"){TABS_AND_SPACES}")" {
+	return T_UNSET_CAST;
+}
+
 <ST_IN_SCRIPTING>"eval" {
 	return T_EVAL;
 }

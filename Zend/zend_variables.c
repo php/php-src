@@ -32,8 +32,6 @@ ZEND_API char *empty_string = "";	/* in order to save emalloc() and efree() time
 									 * The macro STR_FREE() will not efree() it.
 									 */
 
-ZEND_API char *undefined_variable_string = "\0";
-
 /* this function MUST set the value for the variable to an empty string */
 /* and empty strings must be evaluated as FALSE */
 ZEND_API inline void var_reset(zval *var)
@@ -50,9 +48,7 @@ ZEND_API inline void var_reset(zval *var)
 
 ZEND_API inline void var_uninit(zval *var)
 {
-	var->type = IS_STRING;
-	var->value.str.val = undefined_variable_string;
-	var->value.str.len = 0;
+	var->type = IS_UNSET;
 }
 		
 
@@ -86,6 +82,7 @@ ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_BOOL:
+		case IS_UNSET:
 		default:
 			return 1;
 			break;
@@ -118,15 +115,12 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_BOOL:
 		case IS_LONG:
+		case IS_UNSET:
 			break;
 		case IS_STRING:
 			if (zvalue->value.str.val) {
 				if (zvalue->value.str.len==0) {
-					if (zvalue->value.str.val==undefined_variable_string) {
-						zvalue->value.str.val = undefined_variable_string;
-					} else {
-						zvalue->value.str.val = empty_string;
-					}
+					zvalue->value.str.val = empty_string;
 					return SUCCESS;
 				}
 			}

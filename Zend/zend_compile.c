@@ -741,10 +741,8 @@ void do_receive_arg(int op, znode *var, znode *offset, znode *initialization, un
 	opline->opcode = op;
 	opline->result = *var;
 	opline->op1 = *offset;
-	if ((op == ZEND_RECV_INIT) && initialization) {
+	if ((op == ZEND_RECV_INIT)) {
 		opline->op2 = *initialization;
-	} else {
-		SET_UNUSED(opline->op2);
 	}
 	if (pass_type==BYREF_FORCE && !CG(active_op_array)->arg_types) {
 		int i;

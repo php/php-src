@@ -117,6 +117,9 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 		return;
 	}
 	switch (expr->type) {
+		case IS_UNSET:
+			expr_copy->value.str.len = 0;
+			expr_copy->value.str.val = empty_string;
 		case IS_BOOL:
 #if 1
 			if (expr->value.lval) {
@@ -336,9 +339,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
 	zval_used_for_init.is_ref = 0;
 	zval_used_for_init.refcount = 1;
-	zval_used_for_init.type = IS_STRING;
-	zval_used_for_init.value.str.val = undefined_variable_string;
-	zval_used_for_init.value.str.len = 0;
+	zval_used_for_init.type = IS_UNSET;
 
 #ifdef ZTS
 	global_constants_table = NULL;
