@@ -49,6 +49,7 @@ static ZEND_FUNCTION(crash);
 #endif
 static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
+static ZEND_FUNCTION(is_a);
 static ZEND_FUNCTION(get_class_vars);
 static ZEND_FUNCTION(get_object_vars);
 static ZEND_FUNCTION(get_class_methods);
@@ -98,6 +99,7 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(get_included_files,	NULL)
 	ZEND_FALIAS(get_required_files,	get_included_files,		NULL)
 	ZEND_FE(is_subclass_of,		NULL)
+	ZEND_FE(is_a,				NULL)
 	ZEND_FE(get_class_vars,		NULL)
 	ZEND_FE(get_object_vars,	NULL)
 	ZEND_FE(get_class_methods,	NULL)
@@ -531,35 +533,52 @@ ZEND_FUNCTION(get_parent_class)
 }
 /* }}} */
 
-
-/* {{{ proto bool is_subclass_of(object object, string class_name)
-   Returns true if the object has this class as one of its parents */
-ZEND_FUNCTION(is_subclass_of)
+static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 {
 	zval **obj, **class_name;
 	char *lcname;
-	zend_class_entry *parent_ce = NULL;
+	zend_class_entry *ce = NULL;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &obj, &class_name)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
-	if ((*obj)->type != IS_OBJECT) {
+	if (Z_TYPE_PP(obj) != IS_OBJECT) {
 		RETURN_FALSE;
 	}
 
 	convert_to_string_ex(class_name);
-	lcname = estrndup((*class_name)->value.str.val, (*class_name)->value.str.len);
-	zend_str_tolower(lcname, (*class_name)->value.str.len);
+	lcname = estrndup(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name));
+	zend_str_tolower(lcname, Z_STRLEN_PP(class_name));
 
-	for (parent_ce = Z_OBJCE_PP(obj)->parent; parent_ce != NULL; parent_ce = parent_ce->parent) {
-		if (!strcmp(parent_ce->name, lcname)) {
+	if (only_subclass)
+		ce = Z_OBJCE_PP(obj)->parent;
+	else
+		ce = Z_OBJCE_PP(obj);
+	for (; ce != NULL; ce = ce->parent) {
+		if (!strncmp(ce->name, lcname, MIN(ce->name_length, Z_STRLEN_PP(class_name)))) {
 			efree(lcname);
 			RETURN_TRUE;
 		}
 	}
 	efree(lcname);
 	RETURN_FALSE;
+}
+
+/* {{{ proto bool is_subclass_of(object object, string class_name)
+   Returns true if the object has this class as one of its parents */
+ZEND_FUNCTION(is_subclass_of)
+{
+	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+
+/* {{{ proto bool is_a(object object, string class_name)
+   Returns true if the object is of this class or has this class as one of its parents */
+ZEND_FUNCTION(is_a)
+{
+	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
