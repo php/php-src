@@ -35,7 +35,7 @@
 
 #include "php_apache.h"
 
-static request_rec *php_apache_lookup_uri(char *filename)
+static request_rec *php_apache_lookup_uri(char *filename TSRMLS_DC)
 {
 	php_struct *ctx;
 	
@@ -60,7 +60,7 @@ PHP_FUNCTION(virtual)
 
 	convert_to_string_ex(filename);
 	
-	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename)))) {
+	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename) TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
@@ -98,7 +98,7 @@ PHP_FUNCTION(apache_lookup_uri)
 
 	convert_to_string_ex(filename);
 	
-	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename)))) {
+	if (!(rr = php_apache_lookup_uri(Z_STRVAL_PP(filename) TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to include '%s' - URI lookup failed", Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
