@@ -1,3 +1,32 @@
+2001-07-24  Andrei Zmievski  <andrei@ispi.net>
+
+    * main/internal_functions.c.in:
+    Remove references to global startup functions.
+
+2001-07-24  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/servlet/servlet.c
+      main/php.h
+      main/php_main.h
+      main/SAPI.c
+      main/internal_functions_win32.c
+      main/main.c: Get rid of the redundant global startup code
+
+2001-07-24  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Add extra check on Delete statements
+
+2001-07-24  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/conversion.c: removed duplicate code and changed
+    code slightly to be compatible with broken
+    com implementations
+
+2001-07-24  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/assert.c: - MSHUTDOWN needs to return SUCCESS/FAILURE
+
 2001-07-23  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/mysql.php:
