@@ -307,8 +307,11 @@ default_mimetype = "text/html"
 ; Paths and Directories ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; UNIX: "/path1:/path2"  Windows: "\path1;\path2"
-;include_path =
+; UNIX: "/path1:/path2"  
+;include_path = ".:/php/includes"
+;
+; Windows: "\path1;\path2"
+;include_path = ".;c:\php\includes"
 
 ; The root of the PHP pages, used only if nonempty.
 doc_root =
