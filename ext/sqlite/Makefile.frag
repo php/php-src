@@ -4,11 +4,6 @@ LEMON="@LEMON@"
 # sqlite has some generated source files; this specifies how to
 # build them
 
-$(srcdir)/libsqlite/src/sqlite.h:	$(srcdir)/libsqlite/src/sqlite.h.in $(srcdir)/libsqlite/VERSION
-	$(SED) -e s/--VERS--/`cat $(srcdir)/libsqlite/VERSION`/ \
-            -e s/--ENCODING--/$(SQLITE_ENCODING)/ \
-                 $(srcdir)/libsqlite/src/sqlite.h.in >$(srcdir)/libsqlite/src/sqlite.h
-
 # We avoid building these last three by bundling the generated versions
 # in our release packages
 
