@@ -581,6 +581,8 @@ class PEAR_Installer extends PEAR_Downloader
     {
         // trickiness: initialize here
         parent::PEAR_Downloader($this->ui, $options, $config);
+        $errors = $this->getErrorMsgs();
+        $installpackages = $this->getDownloadedPackages();
         return parent::download($packages);
     }
 
