@@ -3203,7 +3203,7 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 		return PG_DATE;
 	if (!strcmp(type_name, "time"))
 		return PG_TIME;
-	if (!strcmp(type_name, "timestamp") || !strcmp(type_name, "time with time zone"))
+	if (!strcmp(type_name, "time with time zone") || !strcmp(type_name, "timetz"))
 		return PG_TIME_WITH_TIMEZONE;
 	if (!strcmp(type_name, "timestamp with time zone") || !strcmp(type_name, "timestamptz"))
 		return PG_TIMESTAMP_WITH_TIMEZONE;
