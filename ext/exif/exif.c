@@ -532,7 +532,7 @@ typedef tag_info_type  *tag_table_type;
   {TAG_COMPUTED_VALUE, "Computed value"},\
   {TAG_END_OF_LIST,    ""}  /* Important for exif_get_tagname() IF value != "" functionresult is != false */
 
-static const tag_info_array tag_table_IFD = {
+static tag_info_array tag_table_IFD = {
   { 0x000B, "ACDComment"},
   { 0x00FE, "NewSubFile"}, /* better name it 'ImageType' ? */
   { 0x00FF, "SubFile"},
@@ -781,7 +781,7 @@ static const tag_info_array tag_table_IFD = {
   TAG_TABLE_END
 } ;
 
-static const tag_info_array tag_table_GPS = {
+static tag_info_array tag_table_GPS = {
   { 0x0000, "GPSVersion"},
   { 0x0001, "GPSLatitudeRef"},
   { 0x0002, "GPSLatitude"},
@@ -816,7 +816,7 @@ static const tag_info_array tag_table_GPS = {
   TAG_TABLE_END
 };
 
-static const tag_info_array tag_table_IOP = {
+static tag_info_array tag_table_IOP = {
   { 0x0001, "InterOperabilityIndex"}, /* should be 'R98' or 'THM' */
   { 0x0002, "InterOperabilityVersion"},
   { 0x1000, "RelatedFileFormat"},
@@ -825,7 +825,7 @@ static const tag_info_array tag_table_IOP = {
   TAG_TABLE_END
 };
 
-static const tag_info_array tag_table_VND_CANON = {
+static tag_info_array tag_table_VND_CANON = {
   { 0x0001, "ModeArray"}, /* guess */
   { 0x0004, "ImageInfo"}, /* guess */
   { 0x0006, "ImageType"},
@@ -837,7 +837,7 @@ static const tag_info_array tag_table_VND_CANON = {
   TAG_TABLE_END
 };
 
-static const tag_info_array tag_table_VND_CASIO = {
+static tag_info_array tag_table_VND_CASIO = {
   { 0x0001, "RecordingMode"},
   { 0x0002, "Quality"},
   { 0x0003, "FocusingMode"},
@@ -853,7 +853,7 @@ static const tag_info_array tag_table_VND_CASIO = {
   TAG_TABLE_END
 };
 
-static const tag_info_array tag_table_VND_FUJI = {
+static tag_info_array tag_table_VND_FUJI = {
   { 0x0000, "Version"},
   { 0x1000, "Quality"},
   { 0x1001, "Sharpness"},
@@ -873,7 +873,7 @@ static const tag_info_array tag_table_VND_FUJI = {
   TAG_TABLE_END
 };
 
-static const tag_info_array tag_table_VND_NIKON = {
+static tag_info_array tag_table_VND_NIKON = {
   { 0x0003, "Quality"},
   { 0x0004, "ColorMode"},
   { 0x0005, "ImageAdjustment"},
@@ -885,7 +885,7 @@ static const tag_info_array tag_table_VND_NIKON = {
   TAG_TABLE_END
 };
   
-static const tag_info_array tag_table_VND_NIKON_990 = {
+static tag_info_array tag_table_VND_NIKON_990 = {
   { 0x0001, "Version"},
   { 0x0002, "ISOSetting"},
   { 0x0003, "ColorMode"},
@@ -904,7 +904,7 @@ static const tag_info_array tag_table_VND_NIKON_990 = {
   TAG_TABLE_END
 };
   
-static const tag_info_array tag_table_VND_OLYMPUS = {
+static tag_info_array tag_table_VND_OLYMPUS = {
   { 0x0200, "SpecialMode"},
   { 0x0201, "JPEGQuality"},
   { 0x0202, "Macro"},
@@ -1518,7 +1518,7 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 */
 static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, int motorola_intel TSRMLS_DC)
 {
-	int index;
+	size_t index;
 	image_info_value *info_value;
 	image_info_data  *info_data;
 	image_info_data  *list;
@@ -2259,7 +2259,7 @@ PHP_FUNCTION(exif_tagname)
 static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel TSRMLS_DC) {
 	size_t  byte_count;
 	char    *value_ptr, *data_ptr;
-	int     i;
+	size_t  i;
 
 	image_info_value  *info_value;
 
