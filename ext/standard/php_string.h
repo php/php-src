@@ -86,6 +86,7 @@ PHP_FUNCTION(substr_replace);
 PHP_FUNCTION(strnatcmp);
 PHP_FUNCTION(strnatcasecmp);
 PHP_FUNCTION(substr_count);
+PHP_FUNCTION(str_pad);
 PHP_FUNCTION(sscanf);
 
 #define strnatcmp(a, b) \

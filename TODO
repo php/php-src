@@ -88,7 +88,6 @@ ext/standard
     * possibly modify parsing of GPC data to automatically create arrays if
       variable name is seen more than once.
     * implement regex-cache for url-functions.
-    * strpad(). (Andrei)
     * strcase_replace(). (Andrei)
     * move socket related functions to fsock.c.
     * get_defined_funcs(), get_defined_vars().

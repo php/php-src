@@ -2562,6 +2562,75 @@ PHP_FUNCTION(substr_count)
 
 	RETURN_LONG(count);
 }
+/* }}} */	
+
+
+/* {{{ proto string str_pad(string input, int pad_length [, string pad_string])
+   Returns input string padded on the left or right to specified length with pad_string */
+PHP_FUNCTION(str_pad)
+{
+	zval **input,				/* Input string */
+		 **pad_length,			/* Length to pad to (positive/negative) */
+		 **pad_string;			/* Padding string */
+	int	   pad_length_abs;		/* Absolute padding length */
+	char  *result = NULL;		/* Resulting string */
+	int	   result_len = 0;		/* Length of the resulting string */
+	char  *pad_str_val = " ";	/* Pointer to padding string */
+	int    pad_str_len = 1;		/* Length of the padding string */
+	int	   i;
+
+	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 3 ||
+		zend_get_parameters_ex(ZEND_NUM_ARGS(), &input, &pad_length, &pad_string) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	/* Perform initial conversion to expected data types. */
+	convert_to_string_ex(input);
+	convert_to_long_ex(pad_length);
+
+	pad_length_abs = abs(Z_LVAL_PP(pad_length));
+
+	/* If resulting string turns out to be shorter than input string,
+	   we simply copy the input and return. */
+	if (pad_length_abs <= Z_STRLEN_PP(input)) {
+		*return_value = **input;
+		zval_copy_ctor(return_value);
+		return;
+	}
+
+	/* Setup the padding string values if specified. */
+	if (ZEND_NUM_ARGS() > 2) {
+		convert_to_string_ex(pad_string);
+		if (Z_STRLEN_PP(pad_string) == 0) {
+			php_error(E_WARNING, "Padding string cannot be empty in %s()",
+					  get_active_function_name());
+			return;
+		}
+		pad_str_val = Z_STRVAL_PP(pad_string);
+		pad_str_len = Z_STRLEN_PP(pad_string);
+	}
+
+	result = (char *)emalloc(pad_length_abs);
+
+	/* If positive, we pad on the right and copy the input now. */
+	if (Z_LVAL_PP(pad_length) > 0) {
+		memcpy(result, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
+		result_len = Z_STRLEN_PP(input);
+	}
+
+	/* Loop through pad string, copying it into result. */
+	for (i = 0; i < pad_length_abs - Z_STRLEN_PP(input); i++) {
+		result[result_len++] = pad_str_val[i % pad_str_len];
+	}
+
+	/* If negative, we've padded on the left, and copy the input now. */
+	if (Z_LVAL_PP(pad_length) < 0) {
+		memcpy(result + result_len, Z_STRVAL_PP(input), Z_STRLEN_PP(input));
+		result_len += Z_STRLEN_PP(input);
+	}
+
+	RETURN_STRINGL(result, result_len, 0);
+}
 /* }}} */
 
    

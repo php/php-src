@@ -169,6 +169,7 @@ function_entry basic_functions[] = {
 	PHP_FE(chr,										NULL)
 	PHP_FE(ord,										NULL)
 	PHP_FE(parse_str,								NULL)
+	PHP_FE(str_pad,									NULL)
 	PHP_FALIAS(rtrim,			chop,				NULL)
 	PHP_FALIAS(strchr,			strstr,				NULL)
 	PHP_NAMED_FE(sprintf,		PHP_FN(user_sprintf),	NULL)
