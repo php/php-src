@@ -531,8 +531,9 @@ PHP_FUNCTION(enchant_dict_quick_check)
 			for (i = 0; i < n_sugg; i++) {
 				add_next_index_string(sugg, suggs[i], 1);
 			}
+			enchant_dict_free_suggestions(pdict->pdict, suggs);
 		}
-		enchant_dict_free_suggestions(pdict->pdict, suggs);
+
 
 		RETURN_FALSE;
 	}
