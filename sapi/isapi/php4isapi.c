@@ -334,7 +334,11 @@ static void sapi_isapi_register_server_variables(zval *track_vars_array ELS_DC S
 	}
 
 	/* PHP_SELF support */
+#ifdef WITH_ZEUS
+	if (lpECB->GetServerVariable(lpECB->ConnID, "PATH_INFO", static_variable_buf, &variable_len)
+#else
 	if (lpECB->GetServerVariable(lpECB->ConnID, "SCRIPT_NAME", static_variable_buf, &variable_len)
+#endif
 		&& static_variable_buf[0]) {
 		php_register_variable("PHP_SELF", static_variable_buf, track_vars_array ELS_CC PLS_CC);
 	}
