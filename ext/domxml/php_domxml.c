@@ -269,6 +269,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
+	PHP_FALIAS(replace_node,				domxml_node_replace_node,			NULL)
 	PHP_FALIAS(set_content,				domxml_node_set_content,		NULL)
 	PHP_FALIAS(text_concat,				domxml_node_text_concat,		NULL)
 	PHP_FALIAS(set_name,				domxml_node_set_name,			NULL)
@@ -1678,6 +1679,33 @@ PHP_FUNCTION(domxml_node_add_child)
 	}
 
 	DOMXML_RET_OBJ(rv, child, &ret);
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_replace_node(object domnode)
+   Replaces one node with another node */
+PHP_FUNCTION(domxml_node_replace_node)
+{
+	zval *id, *rv, *node;
+	xmlNodePtr repnode, nodep, new_repnode;
+	int ret;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &node) == FAILURE) {
+		return;
+	}
+
+	DOMXML_GET_OBJ(repnode, node, le_domxmlnodep);
+
+	if (NULL == (new_repnode = xmlCopyNode(repnode, 1))) {
+		php_error(E_WARNING, "%s(): unable to clone node", get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
+
+	repnode = xmlReplaceNode(nodep, new_repnode);
+
+	DOMXML_RET_OBJ(rv, repnode, &ret);
 }
 /* }}} */
 
