@@ -272,7 +272,7 @@ static zval * sxe_dimension_read(zval *object, zval *offset, int type TSRMLS_DC)
 /* {{{ change_node_zval()
  */
 static void
-change_node_zval(xmlNodePtr node, zval *value)
+change_node_zval(xmlNodePtr node, zval *value TSRMLS_DC)
 {
 	zval value_copy;
 
@@ -418,7 +418,7 @@ next_iter:
 				xmlUnlinkNode(tempnode);
 				php_libxml_node_free_resource((xmlNodePtr) tempnode TSRMLS_CC);
 			}
-			change_node_zval(newnode, value);
+			change_node_zval(newnode, value TSRMLS_CC);
 		} else if (counter > 1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)\n");
 		} else {
