@@ -27,14 +27,14 @@
 # $Id$
 #
 
-old_IFS="$IFS"
-IFS=.
-eval set `bison -V|sed "s/GNU Bison version //"`
-if test "$1" = "1" && test "28" -gt "$2"; then
-  echo "Please use Bison 1.28 or higher"
-  exit 10
-fi
-IFS="$old_IFS"
+#old_IFS="$IFS"
+#IFS=.
+#eval set `bison -V|sed "s/GNU Bison version //"`
+#if test "$1" = "1" && test "28" -gt "$2"; then
+#  echo "Please use Bison 1.28 or higher"
+#  exit 10
+#fi
+#IFS="$old_IFS"
 
 PHPROOT=:pserver:cvsread@cvs.php.net:/repository
 ZENDROOT=:pserver:cvsread@cvs.zend.com:/repository
