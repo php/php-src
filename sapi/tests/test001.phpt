@@ -8,7 +8,6 @@ PATH_TRANSLATED=$filename
 PATH_INFO=$scriptname
 SCRIPT_NAME=$scriptname
 END;
---CGI--
 --FILE--
 <?php
     echo "HELLO";

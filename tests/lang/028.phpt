@@ -1,7 +1,5 @@
 --TEST--
 Testing calling user-level functions from C
---POST--
---GET--
 --FILE--
 <?php
 

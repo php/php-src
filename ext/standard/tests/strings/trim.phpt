@@ -1,7 +1,5 @@
 --TEST--
 trim(), rtrim() and ltrim() functions
---POST--
---GET--
 --FILE--
 <?php
 

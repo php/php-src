@@ -1,6 +1,5 @@
 --TEST--
 Multipart Form POST Data, incorrect content length
---CGI--
 --HEADERS--
 return <<<END
 Content-Type=multipart/form-data; boundary=---------------------------240723202011929
@@ -40,7 +39,6 @@ phpinfo();
 ?>
 -----------------------------240723202011929--
 
---GET--
 --FILE--
 <?php 
 print @$_POST['choices'];

@@ -227,8 +227,6 @@ function cleanall()
 }
 
 ?>
---GET--
---POST--
 --EXPECT--
 extension 1 ok? yes
 no error

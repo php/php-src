@@ -13,7 +13,6 @@ PATH_TRANSLATED=$filename/path/info
 PATH_INFO=$scriptname/path/info
 SCRIPT_NAME=$scriptname
 END;
---CGI--
 --FILE--
 <?php
     echo $_SERVER['PATH_INFO'];

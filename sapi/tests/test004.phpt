@@ -18,7 +18,6 @@ PATH_INFO=$scriptname/path/info
 SCRIPT_NAME=/scriptalias/php
 SCRIPT_FILENAME=$this->conf['TEST_PHP_EXECUTABLE']
 END;
---CGI--
 --FILE--
 <?php
     echo $_SERVER['PATH_INFO'];

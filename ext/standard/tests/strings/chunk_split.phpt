@@ -1,7 +1,5 @@
 --TEST--
 chunk_split() function
---POST--
---GET--
 --FILE--
 <?php
 echo chunk_split('abc', 1, '-')."\n";

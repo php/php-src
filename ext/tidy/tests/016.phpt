@@ -2,9 +2,6 @@
 Passing configuration file through tidy_parse_file()
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php
         $tidy = tidy_parse_file("ext/tidy/tests/016.html", "ext/tidy/tests/016.tcfg");

@@ -1,7 +1,5 @@
 --TEST--
 crc32() function
---POST--
---GET--
 --FILE--
 <?php
 $input = array("foo", "bar", "baz", "grldsajkopallkjasd");

@@ -1,7 +1,5 @@
 --TEST--
 addslashes() and stripslashes() functions, normal and sybase-style
---POST--
---GET--
 --FILE--
 <?php
 

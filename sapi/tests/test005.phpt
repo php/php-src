@@ -17,7 +17,6 @@ PATH_INFO=/nothing.php
 SCRIPT_NAME=/phpexe/php.exe/nothing.php
 SCRIPT_FILENAME=c:\apache\1.3.27\htdocs\nothing.php
 END;
---CGI--
 --FILE--
 <?php
     echo "HELLO";

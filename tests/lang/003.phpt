@@ -1,7 +1,5 @@
 --TEST--
 Simple Switch Test
---POST--
---GET--
 --FILE--
 <?php
 $a=1; 

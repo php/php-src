@@ -301,8 +301,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Test simple direct url download:
 NULL

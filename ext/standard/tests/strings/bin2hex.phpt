@@ -1,7 +1,5 @@
 --TEST--
 bin2hex() function
---POST--
---GET--
 --FILE--
 <?php
 $s = '';

@@ -1,7 +1,5 @@
 --TEST--
 Various pow() tests
---POST--
---GET--
 --FILE--
 <?php // $Id$
 

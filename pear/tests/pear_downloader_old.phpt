@@ -315,8 +315,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Test simple direct url download:
 Warning: PEAR Warning: PEAR_Installer::download() is deprecated in favor of PEAR_Downloader class

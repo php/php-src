@@ -2,9 +2,6 @@
 Passing configuration options through tidy_parse_file().
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php
         $tidy = tidy_parse_file("ext/tidy/tests/015.html", array('show-body-only'=>true));

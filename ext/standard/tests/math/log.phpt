@@ -1,7 +1,5 @@
 --TEST--
 log() tests
---POST--
---GET--
 --FILE--
 <?php // $Id$
 echo "On failure, please mail result to php-dev@lists.php.net\n";

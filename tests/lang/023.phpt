@@ -1,7 +1,5 @@
 --TEST--
 Regression test
---POST--
---GET--
 --FILE--
 PHP Regression Test
 

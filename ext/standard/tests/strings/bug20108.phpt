@@ -1,6 +1,5 @@
 --TEST--
 Bug #20108 (Segfault on printf statement)
---SKIPIF--
 --FILE--
 <?php
 	$a = "boo";

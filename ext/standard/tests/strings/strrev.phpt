@@ -1,7 +1,5 @@
 --TEST--
 strrev() function
---POST--
---GET--
 --FILE--
 <?php
 	$i = 0;

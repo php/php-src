@@ -1,7 +1,5 @@
 --TEST--
 Testing recursive function
---POST--
---GET--
 --FILE--
 <?php
 

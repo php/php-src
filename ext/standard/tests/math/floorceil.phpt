@@ -1,7 +1,5 @@
 --TEST--
 Tests for floor en ceil
---POST--
---GET--
 --FILE--
 <?php
     $a = ceil (-0);   $b = ceil (-1);	$c = ceil (-1.5); 

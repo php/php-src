@@ -2,9 +2,6 @@
 Passing configuration options through tidy_parse_string().
 --SKIPIF--
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
---POST--
---GET--
---INI--
 --FILE--
 <?php
         $text = "<B>testing</I>";

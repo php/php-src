@@ -1,7 +1,5 @@
 --TEST--
 Testing nested functions
---POST--
---GET--
 --FILE--
 <?php 
 function F()

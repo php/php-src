@@ -1,7 +1,5 @@
 --TEST--
 Testing do-while loop
---POST--
---GET--
 --FILE--
 <?php 
 $i=3;

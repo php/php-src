@@ -207,8 +207,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Test package.xml direct install:
 array(1) {

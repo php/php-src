@@ -103,8 +103,6 @@ function cleanall($dir)
     rmdir($dir);
 }
 ?>
---GET--
---POST--
 --EXPECT--
 Test static:
 Simple: passed

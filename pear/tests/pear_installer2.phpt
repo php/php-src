@@ -326,8 +326,6 @@ rmdir($temp_path . DIRECTORY_SEPARATOR . 'tmp');
 rmdir($temp_path . DIRECTORY_SEPARATOR . 'bin');
 rmdir($temp_path);
 ?>
---GET--
---POST--
 --EXPECT--
 test _installFile():
 install as role="php":

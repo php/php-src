@@ -1,7 +1,5 @@
 --TEST--
 Class method registration
---POST--
---GET--
 --FILE--
 <?php
 class A {

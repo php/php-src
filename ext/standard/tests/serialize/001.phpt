@@ -1,7 +1,5 @@
 --TEST--
 serialize()/unserialize()/var_dump()
---POST--
---GET--
 --FILE--
 <?php 
 class t

@@ -2,8 +2,6 @@
 gzencode()/base64_encode()
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php
 $original = str_repeat("hallo php",4096);

@@ -206,8 +206,6 @@ function cleanall()
 }
 
 ?>
---GET--
---POST--
 --EXPECT--
 has works? yes
 no error

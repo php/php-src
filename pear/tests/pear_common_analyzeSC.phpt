@@ -114,8 +114,6 @@ unlink($testdir . DIRECTORY_SEPARATOR . 'test5.php');
 
 rmdir($testdir);
 ?>
---GET--
---POST--
 --EXPECT--
 first test: returns false with non-existing filename? yes
 second test: returns false with invalid PHP? yes

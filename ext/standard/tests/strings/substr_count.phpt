@@ -1,7 +1,5 @@
 --TEST--
 substr_count() function
---POST--
---GET--
 --FILE--
 <?php
 	var_dump(@substr_count("", ""));

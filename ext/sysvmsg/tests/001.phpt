@@ -3,8 +3,6 @@ send/receive serialized message.
 --SKIPIF--
 <?php // vim600:syn=php
 if (!extension_loaded("sysvmsg")) print "skip"; ?>
---POST--
---GET--
 --FILE--
 <?php 
 $key = ftok("./ext/sysvmsg/tests/001.phpt", "p");

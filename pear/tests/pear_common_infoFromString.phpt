@@ -433,8 +433,6 @@ maintainers and configure options
 var_dump($ret);
 
 ?>
---GET--
---POST--
 --EXPECT--
 Test invalid XML
 Caught error: XML error: not well-formed (invalid token) at line 1

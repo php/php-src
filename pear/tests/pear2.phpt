@@ -272,8 +272,6 @@ $obj->doPopErrorHandling();
 $obj->doPopErrorHandling();
 
 ?>
---GET--
---POST--
 --EXPECT--
 testing static error-handling global code
 echoing PEAR error-handling Variables:

@@ -1,7 +1,5 @@
 --TEST--
 implode() function
---POST--
---GET--
 --INI--
 error_reporting=2047
 log_errors=0

@@ -78,8 +78,6 @@ var_dump($res);
 unlink($temp_path . DIRECTORY_SEPARATOR . 'user.conf');
 rmdir($temp_path);
 ?>
---GET--
---POST--
 --EXPECT--
 test extractDownloadFileName:
 existing file: yes

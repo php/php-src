@@ -1,7 +1,5 @@
 --TEST--
 nl2br() function
---POST--
---GET--
 --FILE--
 <?php
 	var_dump(nl2br("test"));
