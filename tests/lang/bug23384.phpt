@@ -21,7 +21,7 @@ Foo::test();
 echo Foo::HUN."\n";
 ?>
 --EXPECTF--
-Strict Standards: Non-static method Foo::test() cannot be called statically in %sbug23384.php on line %d
+Strict Standards: Non-static method Foo::test() should not be called statically in %sbug23384.php on line %d
 Array
 (
     [100] => ten
