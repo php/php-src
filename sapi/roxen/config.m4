@@ -1,4 +1,6 @@
-dnl ## $Id$ -*- sh -*-
+dnl
+dnl $Id$
+dnl
 
 RESULT=no
 AC_MSG_CHECKING(for Roxen/Pike support)
@@ -52,6 +54,7 @@ if test "$RESULT" != "no" ; then
  ])
  AC_MSG_RESULT($RESULT)
 fi
+
 dnl ## Local Variables:
 dnl ## tab-width: 4
 dnl ## End:

@@ -1,9 +1,11 @@
-dnl ## $Id$ -*- sh -*-
+dnl
+dnl $Id$
+dnl 
 
 RESULT=no
 AC_MSG_CHECKING(for PHTTPD support)
 AC_ARG_WITH(phttpd,
-[  --with-phttpd=DIR],
+[  --with-phttpd=DIR       Build PHP as phttpd module],
 [
 	if test ! -d $withval ; then
 		AC_MSG_ERROR(You did not specify a directory)

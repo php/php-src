@@ -1,3 +1,7 @@
+dnl
+dnl $Id$
+dnl
+
 AC_DEFUN(PHP_TEST_WRITE_STDOUT,[
   AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
     AC_TRY_RUN([

@@ -1,5 +1,6 @@
-# $Id$
-# config.m4 for servlet sapi
+dnl
+dnl $Id$
+dnl
 
 AC_MSG_CHECKING(for Servlet support)
 AC_ARG_WITH(servlet,

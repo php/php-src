@@ -1,4 +1,6 @@
-dnl ## $Id$ -*- sh -*-
+dnl
+dnl $Id$
+dnl
 
 RESULT=no
 AC_MSG_CHECKING(for Zeus ISAPI support)
