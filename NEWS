@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   ze1_compatiblity_mode. (Andi)
 - Added support for PHP 4 style object conversion to long, double, and boolean
   values which is enabled in ze1_compatibility_mode. (Andi, Stas)
-- Allow objector oriented extensions to overload comparison functions and other
+- Allow object oriented extensions to overload comparison functions and other
   operations. Solves problems using SimpleXML values. (Andi, Zeev)
 - Fixed crash when accessing a class constant with a value which in turn is
   also a constant. (Dmitry)
