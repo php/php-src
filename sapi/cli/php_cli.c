@@ -608,6 +608,7 @@ int main(int argc, char *argv[])
 		/*zend_alter_ini_entry("<name>", len, "<value>", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);*/
 
 		zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
+		CG(in_compilation) = 0; /* not initialized but needed for several options */
 
 		if (cli_sapi_module.php_ini_path_override && cli_sapi_module.php_ini_ignore) {
 			SG(headers_sent) = 1;
