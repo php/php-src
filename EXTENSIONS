@@ -220,13 +220,13 @@ COMMENT:             Using the new OCI8 driver is encouraged where possible.
 EXTENSION:           dom
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>, Marcus Boerger <helly@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Experimental
+STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Experimental
+STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           wddx
@@ -247,7 +247,7 @@ STATUS:              Experimental
 EXTENSION:           xsl
 PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>
 MAINTENANCE:         Maintained
-STATUS:              Experimental
+STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 
@@ -426,6 +426,12 @@ PRIMARY MAINTAINER:  Chris Vandomelen <chrisv@b0rked.dhs.org>
 MAINTENANCE:         Maintained
 STATUS:              Experimental
 SINCE:               4.0.2
+-------------------------------------------------------------------------------
+EXTENSION:           spl
+PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               5.0.0
 -------------------------------------------------------------------------------
 EXTENSION:           sysvmsg
 MAINTENANCE:         Unknown
