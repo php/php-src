@@ -21,7 +21,7 @@ if test "$PHP_INTERBASE" != "no"; then
   ], [
     AC_MSG_ERROR([libgds not found! Check config.log for more information.])
   ], [
-    -L$IBASE_LIBDIR -lgds -lcrypt
+    -L$IBASE_LIBDIR -lgds 
   ])
 
   PHP_ADD_INCLUDE($IBASE_INCDIR)
