@@ -1,3 +1,125 @@
+2001-03-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB.php
+      pear/DB/ifx.php
+      pear/DB/mysql.php
+      pear/DB/pgsql.php: pgsql.php
+    * better handling of $rownum param in fetchInto()
+    * changed property numrows[] to num_rows[]
+
+    DB.php
+    * $rowmun in fetch* now defaults to NULL
+
+    mysql.php
+    * added default $fetchmode to ordered
+    * removed extra checks in connect()
+    * fetchrow() now uses fetchInto()
+    * added the "fetch absolute row numbers" feature to fetchInto()
+    (not tested)
+
+    ifx.php
+    * better handling of $rownum param in fetchInto()
+
+2001-03-28  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: Yes, RC4 is here too.  RC3 had a broken ZTS build.
+
+2001-03-28  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      ext/ming/config.m4
+      ext/ming/ming.c: MFH
+
+2001-03-28  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/basic_functions.c: Fix ZTS build
+
+2001-03-28  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Make file() work again.
+
+2001-03-28  André Langhorst  <A.Langhorst@itbnet.de>
+
+    * ext/standard/output.c: fix typo
+
+    * ext/standard/output.c: fix proto
+
+2001-03-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache.php: Added a simple usage example
+
+    * pear/Experimental/Image/gtext.php: - fixed the vertical alignment bug
+
+2001-03-28  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in: RC3
+
+2001-03-28  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/Image/color_helper.php
+      pear/HTML/Menu.php: - added the php licence
+
+    * pear/Experimental/Image/gbutton.php:
+    Very much the same like gtext but this one can be used to render
+    graphical buttons.
+
+    * pear/Experimental/HTML/Menu.php: Moved it to the stable code.
+
+    * pear/HTML/Menu.php:
+    Moved menu.php to the stable code.  I didn't get any bug reports
+    and it works for me...
+
+    * pear/Cache/Container/file.php:
+    - minor change regarding the recognition of relative file paths
+
+    * pear/Cache/Graphics.php:
+    - fixed several bugs with the usage of the parent class
+    - gerror() by Cache_Error()
+
+    * pear/Experimental/Image/gtext.php:
+    Creates graphical text images using Cache/Graphics.
+
+    Although it's unlikely that the API will changed use it with care some
+    features seen to be broken :/.
+
+    * pear/Experimental/Image/color_helper.php:
+    Widget functions to deal with colors when creating images.
+
+    I'm not sure where I should place this, lets wait for the next classes
+    (gtext, gbutton) before we take care on the correct directory structure so
+    we can see if it's worth it's own directory.
+
+2001-03-28  Romolo Manfredini  <romolo@bicnet.it>
+
+    * ext/standard/basic_functions.c:
+    Safe mode check on target introduced in function move_uploaded_file.
+
+    * ext/standard/file.c:
+    Safe mode check for target introduced in function copy. Pls insert in 4_0_5
+
+2001-03-28  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Page.php: bug fix in toHtml
+
+2001-03-28  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ibase.php
+      pear/DB/oci8.php: oci8.php
+    * added not capable for fetchInto when $rownum !== null (feature not
+    supported yet)
+    * fix fetchInto to return null on no more data
+    * Removed extra checks in connect()
+
+    ibase.php
+    * removed extra checks in connect() and return error on no connection
+    * fetchInto now returns NULL on no more data (not tested)
+    * added not capable for fetchInto when $rownum !== null (feature not
+    supported yet)
+    * changed tabs to spaces
+    Please note that this extension seems to be very old.
+
 2001-03-27  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/pi3web/config.m4
