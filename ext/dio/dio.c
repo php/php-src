@@ -43,10 +43,9 @@ function_entry dio_functions[] = {
 	PHP_FE(dio_read,      NULL)
 	PHP_FE(dio_write,     NULL)
 	PHP_FE(dio_close,     NULL)
-        PHP_FE(dio_tcsetattr,     NULL)
+	PHP_FE(dio_tcsetattr,     NULL)
 	{NULL, NULL, NULL}
 };
-
 
 zend_module_entry dio_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -61,11 +60,9 @@ zend_module_entry dio_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-
 #ifdef COMPILE_DL_DIO
 ZEND_GET_MODULE(dio)
 #endif
-
 
 static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -75,7 +72,6 @@ static void _dio_close_fd(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 
 #define RDIOC(c) REGISTER_LONG_CONSTANT(#c, c, CONST_CS | CONST_PERSISTENT)
-
 #define DIO_UNDEF_CONST -1
 
 PHP_MINIT_FUNCTION(dio)
@@ -183,6 +179,7 @@ PHP_FUNCTION(dio_read)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &r_fd, &bytes) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	data = emalloc(bytes + 1);
@@ -213,6 +210,7 @@ PHP_FUNCTION(dio_write)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|l", &r_fd, &data, &data_len, &trunc_len) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	res = write(f->fd, data, trunc_len ? trunc_len : data_len);
@@ -235,6 +233,7 @@ PHP_FUNCTION(dio_truncate)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &r_fd, &offset) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	if (ftruncate(f->fd, offset) == -1) {
@@ -259,6 +258,7 @@ PHP_FUNCTION(dio_stat)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &r_fd) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	if (fstat(f->fd, &s) == -1) {
@@ -295,6 +295,7 @@ PHP_FUNCTION(dio_seek)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &r_fd, &offset, &whence) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	RETURN_LONG(lseek(f->fd, offset, whence));
@@ -313,98 +314,94 @@ PHP_FUNCTION(dio_fcntl)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &r_fd, &cmd, &arg) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	switch (cmd) {
-	case F_SETLK:
-	case F_SETLKW: {
-		zval          **element;
-		struct flock    lk = {0};
-		HashTable      *fh;
+		case F_SETLK:
+		case F_SETLKW: {
+			zval          **element;
+			struct flock    lk = {0};
+			HashTable      *fh;
 
-		if (!arg) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, none given");
-			RETURN_FALSE;
+			if (!arg) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, none given");
+				RETURN_FALSE;
+			}
+			if (Z_TYPE_P(arg) == IS_ARRAY) {
+				fh = HASH_OF(arg);
+				if (zend_hash_find(fh, "start", sizeof("start"), (void **) &element) == FAILURE) {
+					lk.l_start = 0;
+				} else {
+					lk.l_start = Z_LVAL_PP(element);
+				}
+
+				if (zend_hash_find(fh, "length", sizeof("length"), (void **) &element) == FAILURE) {
+					lk.l_len = 0;
+				} else {
+					lk.l_len = Z_LVAL_PP(element);
+				}
+
+				if (zend_hash_find(fh, "whence", sizeof("whence"), (void **) &element) == FAILURE) {
+					lk.l_whence = 0;
+				} else {
+					lk.l_whence = Z_LVAL_PP(element);
+				}
+
+				if (zend_hash_find(fh, "type", sizeof("type"), (void **) &element) == FAILURE) {
+					lk.l_type = 0;
+				} else {
+					lk.l_type = Z_LVAL_PP(element);
+				}
+			} else if (Z_TYPE_P(arg) == IS_LONG) {
+				lk.l_start  = 0;
+				lk.l_len    = 0;
+				lk.l_whence = SEEK_SET;
+				lk.l_type   = Z_LVAL_P(arg);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, %s given", zend_zval_type_name(arg));
+				RETURN_FALSE;
+			}
+
+			RETURN_LONG(fcntl(f->fd, cmd, &lk));
+			break;
 		}
-		if (Z_TYPE_P(arg) == IS_ARRAY) {
-			fh = HASH_OF(arg);
-			if (zend_hash_find(fh, "start", sizeof("start"), (void **) &element) == FAILURE) {
-				lk.l_start = 0;
-			}
-			else {
-				lk.l_start = Z_LVAL_PP(element);
-			}
-
-			if (zend_hash_find(fh, "length", sizeof("length"), (void **) &element) == FAILURE) {
-				lk.l_len = 0;
-			}
-			else {
-				lk.l_len = Z_LVAL_PP(element);
-			}
-
-			if (zend_hash_find(fh, "whence", sizeof("whence"), (void **) &element) == FAILURE) {
-				lk.l_whence = 0;
-			}
-			else {
-				lk.l_whence = Z_LVAL_PP(element);
-			}
-
-			if (zend_hash_find(fh, "type", sizeof("type"), (void **) &element) == FAILURE) {
-				lk.l_type = 0;
-			}
-			else {
-				lk.l_type = Z_LVAL_PP(element);
-			}
-		} else if (Z_TYPE_P(arg) == IS_LONG) {
-			lk.l_start  = 0;
-			lk.l_len    = 0;
-			lk.l_whence = SEEK_SET;
-			lk.l_type   = Z_LVAL_P(arg);
-		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be array or int, %s given", zend_zval_type_name(arg));
-			RETURN_FALSE;
-		}
-
-		RETURN_LONG(fcntl(f->fd, cmd, &lk));
-		break;
-	}
-	case F_GETLK: {
-		struct flock lk = {0};
+		case F_GETLK: {
+			struct flock lk = {0};
 		
-		fcntl(f->fd, cmd, &lk);
+			fcntl(f->fd, cmd, &lk);
 
-		array_init(return_value);
-		add_assoc_long(return_value, "type", lk.l_type);
-		add_assoc_long(return_value, "whence", lk.l_whence);
-		add_assoc_long(return_value, "start", lk.l_start);
-		add_assoc_long(return_value, "length", lk.l_len);
-		add_assoc_long(return_value, "pid", lk.l_pid);
+			array_init(return_value);
+			add_assoc_long(return_value, "type", lk.l_type);
+			add_assoc_long(return_value, "whence", lk.l_whence);
+			add_assoc_long(return_value, "start", lk.l_start);
+			add_assoc_long(return_value, "length", lk.l_len);
+			add_assoc_long(return_value, "pid", lk.l_pid);
 
-		break;
-	}
-	case F_DUPFD: {
-		php_fd_t *new_f;
-
-		if (!arg || Z_TYPE_P(arg) != IS_LONG) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
-			RETURN_FALSE;
+			break;
 		}
+		case F_DUPFD: {
+			php_fd_t *new_f;
 
-		new_php_fd(&new_f, fcntl(f->fd, cmd, Z_LVAL_P(arg)));
-		ZEND_REGISTER_RESOURCE(return_value, new_f, le_fd);
-		break;
-	}
-	default:
-		if (!arg || Z_TYPE_P(arg) != IS_LONG) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
-			RETURN_FALSE;
+			if (!arg || Z_TYPE_P(arg) != IS_LONG) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
+				RETURN_FALSE;
+			}
+
+			new_php_fd(&new_f, fcntl(f->fd, cmd, Z_LVAL_P(arg)));
+			ZEND_REGISTER_RESOURCE(return_value, new_f, le_fd);
+			break;
 		}
+		default:
+			if (!arg || Z_TYPE_P(arg) != IS_LONG) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "expects argument 3 to be int");
+				RETURN_FALSE;
+			}
 
-		RETURN_LONG(fcntl(f->fd, cmd, Z_LVAL_P(arg)));
+			RETURN_LONG(fcntl(f->fd, cmd, Z_LVAL_P(arg)));
 	}
 }
 /* }}} */
-
 
 /* {{{ proto mixed dio_tcsetattr(resource fd,  array args )
    Perform a c library tcsetattr on fd */
@@ -422,8 +419,8 @@ PHP_FUNCTION(dio_tcsetattr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rz", &r_fd, &arg) == FAILURE) {
 		return;
 	}
+	
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
-
  
 	if (Z_TYPE_P(arg) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,"tcsetattr, third argument should be an associative array");
@@ -558,16 +555,14 @@ PHP_FUNCTION(dio_tcsetattr)
 	newtio.c_iflag = IGNPAR;
 	newtio.c_oflag = 0;
 	newtio.c_lflag = 0;       /* ICANON; */
-	newtio.c_cc[VMIN]=1;
-	newtio.c_cc[VTIME]=0;
+	newtio.c_cc[VMIN] = 1;
+	newtio.c_cc[VTIME] = 0;
 	tcflush(f->fd, TCIFLUSH);
 	tcsetattr(f->fd,TCSANOW,&newtio);
 
 	RETURN_TRUE;
 }
 /* }}} */
-
-
 
 /* {{{ proto void dio_close(resource fd)
    Close the file descriptor given by fd */
@@ -579,6 +574,7 @@ PHP_FUNCTION(dio_close)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &r_fd) == FAILURE) {
 		return;
 	}
+
 	ZEND_FETCH_RESOURCE(f, php_fd_t *, &r_fd, -1, le_fd_name, le_fd);
 
 	zend_list_delete(Z_LVAL_P(r_fd));
