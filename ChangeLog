@@ -1,3 +1,56 @@
+2004-04-19  Rob Richards  <rrichards@ctindustries.net>
+
+    * scripts/Makefile.frag:
+      add ext/libxml/ to the headers path
+
+2004-04-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_reflection_api.c:
+      show ini entries and classes for extensions.
+
+2004-04-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS
+      ext/standard/php_fopen_wrapper.c:
+      Fix #27865; don't dup STDIN, STDOUT or STDERR when running under CLI.
+
+2004-04-19  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Is it really this hard?</jani>
+
+2004-04-19  John Coggeshall  <john@coggeshall.org>
+
+    * NEWS:
+      Adding tidy error handling news
+
+2004-04-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS:
+      and the news
+
+    * configure.in
+      ext/standard/proc_open.c:
+      Add pty support to proc_open() for systems with Unix98 ptys.
+
+2004-04-19  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/interbase/ibase_blobs.c
+      ext/interbase/ibase_events.c
+      ext/interbase/php_ibase_includes.h:
+      No need to export anything. Fixes win32 build
+
+2004-04-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      NEWS:
+      news!
+
+    * (PHP_4_3)
+      main/network.c:
+      MFH: timeout duration too long in liveness checks for sockets.
+      Fixes Bug #28055
+
 2004-04-18  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/posix/posix.c:
