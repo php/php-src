@@ -124,7 +124,7 @@ Since:
 PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 {
 	zval *id, *docp = NULL;
-	xmlDoc *doc = NULL;
+	xmlDoc *doc = NULL, *newdoc = NULL;
 	xsltStylesheetPtr sheetp, oldsheetp;
 	xsl_object *intern;
 	node_object *docobj;
@@ -137,7 +137,11 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 	DOC_GET_OBJ(doc, docp, xmlDocPtr, docobj);
 
-	sheetp = xsltParseStylesheetDoc(doc);
+	/* libxslt uses _private, so we must copy the imported 
+	stylesheet document otherwise the node proxies will be a mess */
+	newdoc = xmlCopyDoc(doc, 1);
+
+	sheetp = xsltParseStylesheetDoc(newdoc);
 
 	if (!sheetp) {
 		RETURN_FALSE;
@@ -161,8 +165,9 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 		intern->ptr = NULL;
 	}
 
-	intern->document = docobj->document;
-	intern->document->refcount++;
+	intern->document = emalloc(sizeof(dom_ref_obj));
+	intern->document->ptr = newdoc;
+	intern->document->refcount = 1;
 
 	php_xsl_set_object(id, sheetp TSRMLS_CC);
 }
