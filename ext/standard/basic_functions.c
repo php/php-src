@@ -937,6 +937,8 @@ static void php_putenv_destructor(putenv_entry *pe)
 	} else {
 # if HAVE_UNSETENV
 		unsetenv(pe->key);
+# elif defined(PHP_WIN32)
+		SetEnvironmentVariable(pe->key, NULL);
 # else
 		char **env;
 
