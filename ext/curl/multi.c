@@ -195,7 +195,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
 	if (ch->handlers->write->method == PHP_CURL_RETURN && ch->handlers->write->buf.len > 0) {
-		if (ch->handlers->write->type == PHP_CURL_BINARY) {
+		if (ch->handlers->write->type != PHP_CURL_BINARY) {
 			smart_str_0(&ch->handlers->write->buf);
 		}
 		
