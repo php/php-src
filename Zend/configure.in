@@ -32,6 +32,7 @@ AC_PROG_CC_C_O
 AM_PROG_LEX
 
 AM_PROG_CC_STDC
+AC_C_INLINE
 
 dnl Hack to work around a Mac OS X cpp problem
 dnl Known versions needing this workaround are 5.3 and 5.4
@@ -159,6 +160,25 @@ if test "$enable_thread_safety" = "yes" ; then
 AC_CHECK_LIB(C, cin)
 AC_CHECK_LIB(g++, cin)
 AC_CHECK_LIB(stdc++, cin)
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+AC_MSG_CHECKING(for class istdiostream)
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <unistd.h>
+#include <fstream.h>
+#include <stdiostream.h>
+],[
+istdiostream *foo = new istdiostream((FILE *) 0);
+],[
+  AC_DEFINE(HAVE_CLASS_ISTDIOSTREAM, 1)
+  AC_MSG_RESULT(yes)
+],[
+  AC_MSG_RESULT(no)
+])
+AC_LANG_RESTORE
+
 fi
 
 AC_SUBST(CXXFLAGS)

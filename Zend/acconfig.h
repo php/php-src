@@ -1,3 +1,5 @@
+#undef HAVE_CLASS_ISTDIOSTREAM
+
 #define ZEND_API
 
 @TOP@

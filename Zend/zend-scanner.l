@@ -85,6 +85,16 @@
 #  define MY_INPUT input
 #endif
 
+#if defined(ZTS) && !defined(HAVE_CLASS_ISTDIOSTREAM)
+class istdiostream : public istream
+{
+private:
+  stdiobuf _file;
+public:
+  istdiostream (FILE* __f) : istream(), _file(__f) { init(&_file); }
+};
+#endif
+
 #define YY_FATAL_ERROR zend_fatal_scanner_error
 
 #define HANDLE_NEWLINES(s,l) \
@@ -193,7 +203,7 @@ ZEND_API void zend_close_file_handle(zend_file_handle *file_handle CLS_DC)
 }
 
 
-ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
+ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 {
 #ifndef ZTS
 	switch (file_handle->type) {
