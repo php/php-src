@@ -157,12 +157,12 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 		switch (V_VT(var_arg)) {
 			case VT_UI1:
 				convert_to_long_ex(&pval_arg);
-				V_UI1(var_arg) = (unsigned char)Z_LVAL_P(pval_arg);
+				V_UI1(var_arg) = (unsigned char) Z_LVAL_P(pval_arg);
 				break;
 
 			case VT_I2:
 				convert_to_long_ex(&pval_arg);
-				V_I2(var_arg) = (short)Z_LVAL_P(pval_arg);
+				V_I2(var_arg) = (short) Z_LVAL_P(pval_arg);
 				break;
 
 			case VT_I4:
@@ -172,7 +172,7 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 			case VT_R4:
 				convert_to_double_ex(&pval_arg);
-				V_R4(var_arg) = (float)Z_DVAL_P(pval_arg);
+				V_R4(var_arg) = (float) Z_DVAL_P(pval_arg);
 				break;
 
 			case VT_R8:
@@ -182,7 +182,11 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 			case VT_BOOL:
 				convert_to_boolean_ex(&pval_arg);
-				V_BOOL(var_arg) = (short)Z_LVAL_P(pval_arg);
+				if (Z_LVAL_P(pval_arg)) {
+					V_BOOL(var_arg) = VT_TRUE;
+				} else {
+					V_BOOL(var_arg) = VT_FALSE;
+				}
 				break;
 
 			case VT_ERROR:
@@ -278,7 +282,13 @@ PHPAPI void php_pval_to_variant_ex2(pval *pval_arg, VARIANT *var_arg, int type, 
 
 			case VT_BOOL|VT_BYREF:
 				convert_to_boolean(pval_arg);
-				V_BOOLREF(var_arg) = (short FAR*) &Z_LVAL_P(pval_arg);
+				/* emalloc or malloc ? */
+				V_BOOLREF(var_arg) = (short FAR*) pemalloc(sizeof(short), 1);
+				if (Z_LVAL_P(pval_arg)) {
+					*V_BOOLREF(var_arg) = VT_TRUE;
+				} else {
+					*V_BOOLREF(var_arg) = VT_TRUE;
+				}
 				break;
 
 			case VT_ERROR|VT_BYREF:
@@ -584,9 +594,17 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		case VT_BOOL:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_BOOL(pval_arg, *V_BOOLREF(var_arg));
+				if (*V_BOOLREF(var_arg)) {
+					ZVAL_BOOL(pval_arg, Z_TRUE);
+				} else {
+					ZVAL_BOOL(pval_arg, Z_FALSE);
+				}
 			} else {
-				ZVAL_BOOL(pval_arg, V_BOOL(var_arg));
+				if (V_BOOL(var_arg)) {
+					ZVAL_BOOL(pval_arg, Z_TRUE);
+				} else {
+					ZVAL_BOOL(pval_arg, Z_FALSE);
+				}
 			}
 			break;
 
