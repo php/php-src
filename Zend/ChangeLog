@@ -1,3 +1,25 @@
+2004-05-17  Andrei Zmievski  <andreiz@gmail.com>
+
+    * zend_ini_parser.y
+      zend_ini_scanner.l:
+      Revert the .ini vars patch. Will have to try again next Christmas
+      apparently.
+
+    * zend_ini_parser.y:
+      Fix the apparent bug (; at the end of parse rule block).
+
+2004-05-17  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_objects_API.c
+      zend_objects_API.h:
+      As discussed with Andi, add this helper API for setting the object pointer
+      from
+      within the constructor.
+      
+      Please read the comment for notes about how to use it; in general, you
+      don't
+      need it, so don't use it.
+
 2004-05-14  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_ini_parser.y
