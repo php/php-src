@@ -159,7 +159,7 @@ function_entry dbx_functions[] = {
 };
 
 zend_module_entry dbx_module_entry = {
-    STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER,
 	"dbx",
 	dbx_functions,
 	ZEND_MINIT(dbx),
@@ -167,7 +167,7 @@ zend_module_entry dbx_module_entry = {
 	NULL, /*ZEND_RINIT(dbx),         Replace with NULL if there's nothing to do at request start */
 	NULL, /*ZEND_RSHUTDOWN(dbx),     Replace with NULL if there's nothing to do at request end */
 	ZEND_MINFO(dbx),
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -176,12 +176,12 @@ ZEND_GET_MODULE(dbx)
 #endif
 
 ZEND_INI_BEGIN()
-    ZEND_INI_ENTRY("dbx.colnames_case", "unchanged", ZEND_INI_SYSTEM, NULL)
+	ZEND_INI_ENTRY("dbx.colnames_case", "unchanged", ZEND_INI_SYSTEM, NULL)
 ZEND_INI_END()
 
 ZEND_MINIT_FUNCTION(dbx)
 {
-    REGISTER_INI_ENTRIES();
+	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("DBX_MYSQL", DBX_MYSQL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DBX_ODBC", DBX_ODBC, CONST_CS | CONST_PERSISTENT);
@@ -213,7 +213,7 @@ ZEND_MINIT_FUNCTION(dbx)
 
 ZEND_MSHUTDOWN_FUNCTION(dbx)
 {
-    UNREGISTER_INI_ENTRIES();
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
@@ -234,7 +234,7 @@ ZEND_MINFO_FUNCTION(dbx)
 	php_info_print_table_row(2, "dbx version", "1.0.1");
 	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (oci8)\nSybase-CT\nSQLite");
 	php_info_print_table_end();
-    DISPLAY_INI_ENTRIES();
+	DISPLAY_INI_ENTRIES();
 }
 
 /*
