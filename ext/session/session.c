@@ -19,7 +19,6 @@
 
 /*
  * TODO:
- * - add complete support for objects (partially implemented)
  * - userland callback functions for ps_module
  */
 #if !(WIN32|WINNT)
