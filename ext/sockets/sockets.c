@@ -239,14 +239,14 @@ static php_socket *accept_connect(php_socket *php_sock, struct sockaddr *la)
 }
 
 /* php_read -- wrapper around read() so that it only reads to a \r or \n. */
-int php_read(php_socket *php_sock, void *buf, int maxlen)
+int php_read(int socket, void *buf, int maxlen)
 {
 	int m = 0, n = 0;
 	int no_read = 0;
 	int nonblock = 0;
 	char *t = (char *) buf;
 
-	m = fcntl(php_sock->socket, F_GETFL);
+	m = fcntl(socket, F_GETFL);
 	if (m < 0) {
 		return m;
 	}
@@ -276,7 +276,7 @@ int php_read(php_socket *php_sock, void *buf, int maxlen)
 		}
 		 
 		if (n < maxlen) {
-			m = read(php_sock->socket, (void *) t, 1);
+			m = read(socket, (void *) t, 1);
 		}
 		 
 		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
@@ -641,6 +641,8 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
+typedef int (*read_function)(int, void *, int);
+
 /* {{{ proto mixed socket_read(resource socket, int length [, int type])
    Reads length bytes from socket */
 PHP_FUNCTION(socket_read)
@@ -648,7 +650,7 @@ PHP_FUNCTION(socket_read)
 	zval **arg1, **arg2, **arg3;
 	char *tmpbuf;
 	php_socket *php_sock;
-	int (*read_function)(int, void *, int) = (int (*)(int, void *, int)) php_read;
+	read_function php_read;
 	int retval, argc = ZEND_NUM_ARGS();
 
 	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &arg1, &arg2, &arg3) == FAILURE) {
@@ -663,15 +665,12 @@ PHP_FUNCTION(socket_read)
 		switch (Z_LVAL_PP(arg3)) {
 			case PHP_SYSTEM_READ:
 			case PHP_BINARY_READ:
-				read_function = (int (*)(int, void *, int)) read;
+				read_function = (read_function) read;
 				break;
 		}
 	}
 
-	if ((tmpbuf = (char*)emalloc((Z_LVAL_PP(arg2)+1)*sizeof(char))) == NULL) {
-		php_error(E_WARNING, "couldn't allocate memory");
-		RETURN_FALSE;
-	}
+	tmpbuf = emalloc(Z_LVAL_PP(arg2) + 1);
 
 #ifndef PHP_WIN32
 	retval = (*read_function)(php_sock->socket, tmpbuf, Z_LVAL_PP(arg2));
@@ -686,6 +685,7 @@ PHP_FUNCTION(socket_read)
 
 	tmpbuf[retval] = '\0';
 	RETURN_STRING(tmpbuf, 1);
+	efree(tmpbuf);
 }
 /* }}} */
 
