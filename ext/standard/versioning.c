@@ -34,7 +34,7 @@
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
-    int len = strlen(version), in_number = 0;
+    int len = strlen(version);
     char *buf = emalloc(len * 2 + 1), *q, lp, lq;
     const char *p;
 
@@ -175,22 +175,19 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 
 PHP_FUNCTION(version_compare)
 {
-    zval **v1, **v2, **oper;
+	char *v1, *v2, *op;
+	int v1_len, v2_len, op_len;
 	int compare, argc;
-	char *op;
 
 	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &v1, &v2, &oper) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(argc TSRMLS_CC, "ss|s", &v1, &v1_len, &v2,
+							  &v2_len, &op, &op_len) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(v1);
-	convert_to_string_ex(v2);
-	compare = php_version_compare(Z_STRVAL_PP(v1), Z_STRVAL_PP(v2));
+	compare = php_version_compare(v1, v2);
 	if (argc == 2) {
 		RETURN_LONG(compare);
 	}
-	convert_to_string_ex(oper);
-	op = Z_STRVAL_PP(oper);
 	if (!strcmp(op, "<") || !strcmp(op, "lt")) {
 		RETURN_LONG(compare == -1);
 	}
