@@ -1240,7 +1240,7 @@ PHP_FUNCTION(mcve_void)
 	convert_to_long_ex(arg4);
 	convert_to_long_ex(arg5);
 
-	retval = MCVE_Void(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), Z_LVAL_PP(arg5));
+	retval = MCVE_Void(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), (MCVE_int64)Z_LVAL_PP(arg4), Z_LVAL_PP(arg5));
 
 	RETURN_LONG(retval);
 }
@@ -1439,13 +1439,13 @@ PHP_FUNCTION(mcve_gut)
 	convert_to_string_ex(arg6);
 	convert_to_string_ex(arg7);
 	convert_to_string_ex(arg8);
-	convert_to_long_ex(arg9);
+	convert_to_double_ex(arg9);
 	convert_to_string_ex(arg10);
 	convert_to_string_ex(arg11);
 
 	retval = MCVE_Gut(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4),
 		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_STRVAL_PP(arg7), Z_STRVAL_PP(arg8),
-		Z_LVAL_PP(arg9), Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
+		Z_DVAL_PP(arg9), Z_STRVAL_PP(arg10),Z_STRVAL_PP(arg11));
 
 	RETURN_LONG(retval);
 }
@@ -1473,13 +1473,13 @@ PHP_FUNCTION(mcve_gl)
 	convert_to_string_ex(arg7);
 	convert_to_string_ex(arg8);
 	convert_to_string_ex(arg9);
-	convert_to_long_ex(arg10);
+	convert_to_double_ex(arg10);
 	convert_to_string_ex(arg11);
 	convert_to_string_ex(arg12);
 	
 	retval = MCVE_Gl(conn, Z_STRVAL_PP(arg2), Z_STRVAL_PP(arg3), Z_LVAL_PP(arg4), 
 		Z_STRVAL_PP(arg5), Z_STRVAL_PP(arg6), Z_STRVAL_PP(arg7), Z_STRVAL_PP(arg8),
-		Z_STRVAL_PP(arg9), Z_LVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12));
+		Z_STRVAL_PP(arg9), Z_DVAL_PP(arg10), Z_STRVAL_PP(arg11), Z_STRVAL_PP(arg12));
 
 	RETURN_LONG(retval);
 }
@@ -2036,7 +2036,7 @@ PHP_FUNCTION(mcve_text_code)
 
 	convert_to_long_ex(arg);
 
-	retval = MCVE_TEXT_AVS(Z_LVAL_PP(arg));
+	retval = MCVE_TEXT_Code(Z_LVAL_PP(arg));
 
 	if (retval == NULL) {
 		RETVAL_STRING("",1);
