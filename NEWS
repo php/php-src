@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Changed the Apache handler's return status to 'Declined' when a requested
+  PHP file could not be found.  Returning 'Not Found' caused problems
+  in the ErrorDocument handler stage in that $REDIRECT_REDIRECT_ERROR_NOTES
+  was not getting set at all.  Moving to 'Declined' shoudl fix this and I
+  can't see any other side effects.  (Rasmus)
 - Fixed scanning decimal numbers in internationalized environments. They should
   always be in standard US format e.g. 23.3. (Andi, Zend Engine)
 - Added second argument to preg_quote() which allows quoting of
