@@ -27,7 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php3_browscap.h"
+#include "ext/standard/php_browscap.h"
 #include "zend_extensions.h"
 
 #undef YYPARSE_PARAM
