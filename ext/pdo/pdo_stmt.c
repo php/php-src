@@ -527,10 +527,19 @@ function_entry pdo_dbstmt_functions[] = {
 static zval *dbstmt_prop_read(zval *object, zval *member, int type TSRMLS_DC)
 {
 	zval *return_value;
+	pdo_stmt_t * stmt = (pdo_stmt_t *) zend_object_store_get_object(object);
+	zval tmp_zv;
 
-	MAKE_STD_ZVAL(return_value);
-	ZVAL_NULL(return_value);
+	convert_to_string(member);
 
+	if(strncmp(Z_STRVAL_P(member), "queryString", sizeof("queryString")) == 0) {
+		MAKE_STD_ZVAL(return_value);
+		ZVAL_STRINGL(return_value, stmt->query_string, stmt->query_stringlen, 1);
+	}
+	else {
+		MAKE_STD_ZVAL(return_value);
+		ZVAL_NULL(return_value);
+	}
 	return return_value;
 }
 
