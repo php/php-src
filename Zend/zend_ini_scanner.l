@@ -26,28 +26,10 @@
 #include "zend_ini_parser.h"
 #include "zend_ini_scanner.h"
 
-#ifdef __cplusplus
-# ifdef HAVE_STDIOSTR_H
-#  include <stdiostr.h>
-# endif
-# ifdef HAVE_STDIOSTREAM_H
-#  include <stdiostream.h>
-# endif
-# ifdef ZEND_WIN32
-#  include <strstrea.h>
-# else
-#  include <strstream.h>
-# endif
-#endif
-
 #undef YYSTYPE
 #define YYSTYPE zval
 
-#ifdef __cplusplus
-#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *ini_lval TSRMLS_DC)
-#else
 #define YY_DECL int ini_lex(zval *ini_lval TSRMLS_DC)
-#endif
 
 /* Globals Macros */
 #define SCNG	INI_SCNG
@@ -58,7 +40,6 @@ ZEND_API zend_scanner_globals ini_scanner_globals;
 #endif
 
 
-#ifndef __cplusplus
 static char *ini_filename;
 
 void init_ini_scanner()
@@ -78,40 +59,6 @@ char *zend_ini_scanner_get_filename(TSRMLS_D)
 	return ini_filename;
 }
 
-#else /* ZTS */
-
-int zend_ini_scanner_get_lineno(TSRMLS_D)
-{
-	return CG(ini_scanner)->lineno();
-}
-
-char *zend_ini_scanner_get_filename(TSRMLS_D)
-{
-	return CG(ini_scanner)->filename;
-}
-
-int ini_lex(zval *ini_lval)
-{
-	TSRMLS_FETCH();
-
-	return CG(ini_scanner)->lex_scan(ini_lval);
-}
-
-ZendIniFlexLexer::~ZendIniFlexLexer()
-{
-	if (yy_start_stack) {
-		yy_flex_free(yy_start_stack);
-	}
-}
-
-int yyFlexLexer::yylex()
-{
-	fprintf(stderr, "Error:  yyFlexLexer::yylex() called\n");
-	return -1;
-}
-
-#endif
-
 
 int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 {
@@ -129,22 +76,10 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 			return FAILURE;
 	}
 
-#ifdef __cplusplus
-	if (!fp) {
-		return FAILURE;
-	}
-	fh->handle.is = new istdiostream(fp);
-	fh->type = ZEND_HANDLE_STDIOSTREAM;
-
-	CG(ini_scanner) = new ZendIniFlexLexer;
-	CG(ini_scanner)->switch_streams(fh->handle.is, &cout);
-	CG(ini_scanner)->filename = fh->filename;
-#else
 	init_ini_scanner();
 	yyin = fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	ini_filename = fh->filename;
-#endif
 	return SUCCESS;
 }
 
@@ -155,13 +90,6 @@ void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
-#ifdef __cplusplus
-		case ZEND_HANDLE_STDIOSTREAM: {
-				TSRMLS_FETCH();
-				delete CG(ini_scanner);
-			}
-			break;
-#endif
 	}
 }
 

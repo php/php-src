@@ -53,21 +53,6 @@
 #include "zend_variables.h"
 #include "zend_operators.h"
 
-#ifdef __cplusplus
-# include <fstream.h>
-# ifdef HAVE_STDIOSTR_H
-#  include <stdiostr.h>
-# endif
-# ifdef HAVE_STDIOSTREAM_H
-#  include <stdiostream.h>
-# endif
-# ifdef ZEND_WIN32
-#  include <strstrea.h>
-# else
-#  include <strstream.h>
-# endif
-#endif
-
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
 #endif
@@ -76,11 +61,7 @@
 # include <unistd.h>
 #endif
 
-#ifdef __cplusplus
-#define YY_DECL int ZendFlexLexer::lex_scan(zval *zendlval TSRMLS_DC)
-#else
 #define YY_DECL int lex_scan(zval *zendlval TSRMLS_DC)
-#endif
 
 #define ECHO { ZEND_WRITE( yytext, yyleng ); }
 
@@ -153,13 +134,9 @@ END_EXTERN_C()
 
 static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
-#ifndef __cplusplus
 	memcpy(&lex_state->buffer_state, &YY_CURRENT_BUFFER, sizeof(YY_BUFFER_STATE));
 	lex_state->in = yyin;
 	lex_state->state = YYSTATE;
-#else
-	lex_state->ZFL = CG(ZFL);
-#endif
 	lex_state->filename = zend_get_compiled_filename(TSRMLS_C);
 	lex_state->lineno = CG(zend_lineno);
 }
@@ -167,7 +144,6 @@ static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 
 static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
-#ifndef __cplusplus
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
 
 	if (lex_state->buffer_state) {
@@ -179,10 +155,6 @@ static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	yy_delete_buffer(original_buffer_state TSRMLS_CC);
 	yyin = lex_state->in;
 	BEGIN(lex_state->state);
-#else
-	delete((ZendFlexLexer *) CG(ZFL));
-	CG(ZFL) = lex_state->ZFL;
-#endif
 	CG(zend_lineno) = lex_state->lineno;
 	zend_restore_compiled_filename(lex_state->filename TSRMLS_CC);
 }
@@ -202,17 +174,6 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 			 * which doesn't really contain open files, but references to their names/paths
 			 */
 			break;
-#ifdef __cplusplus
-		case ZEND_HANDLE_FSTREAM:
-			delete ((ifstream *) fh->handle.is);
-			break;
-		case ZEND_HANDLE_STDIOSTREAM:
-			istdiostream *pstdiostream = (istdiostream *) fh->handle.is;
-			
-			fclose(pstdiostream->rdbuf()->stdiofile());
-			delete pstdiostream;
-			break;
-#endif
 	}
 	if (fh->opened_path) {
 		efree(fh->opened_path);
@@ -232,12 +193,6 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp==fh2->handle.fp;
 			break;
-#ifdef __cplusplus
-		case ZEND_HANDLE_FSTREAM:
-		case ZEND_HANDLE_STDIOSTREAM:
-			return fh1->handle.is==fh2->handle.is;
-			break;
-#endif
 	}
 	return 0;
 }
@@ -253,7 +208,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path=NULL;
 
-#ifndef __cplusplus
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
 			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
@@ -277,46 +231,6 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	yyin = file_handle->handle.fp;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	BEGIN(INITIAL);
-#else
-	switch (file_handle->type) {
-		case ZEND_HANDLE_FD:
-			file_handle->handle.is = new ifstream(file_handle->handle.fd);
-			file_handle->type = ZEND_HANDLE_FSTREAM;
-			break;
-		case ZEND_HANDLE_FILENAME:
-			{
-				file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
-				if (!file_handle->handle.fp) {
-					return FAILURE;
-				}
-				file_handle->handle.is = new istdiostream(file_handle->handle.fp);
-				file_handle->type = ZEND_HANDLE_STDIOSTREAM;
-				break;
-			}
-		case ZEND_HANDLE_FP:
-			if (file_handle->handle.fp==stdin) {
-				file_handle->handle.is = &cin;
-			} else {
-				if (!file_handle->handle.fp) {
-					return FAILURE;
-				}
-				file_handle->handle.is = new istdiostream(file_handle->handle.fp);
-				file_handle->type = ZEND_HANDLE_STDIOSTREAM;
-			}	
-			break;
-	}
-
-	if (file_handle->handle.is->fail()) {
-		delete file_handle->handle.is;
-		return FAILURE;
-	}
-	if (file_handle->handle.is != &cin) {
-		zend_llist_add_element(&CG(open_files), file_handle);
-	}
-
-	CG(ZFL) = new ZendFlexLexer;
-	CG(ZFL)->switch_streams(file_handle->handle.is, &cout);
-#endif
 
 	if (file_handle->opened_path) {
 		file_path = file_handle->opened_path; 
@@ -422,13 +336,8 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	return retval;
 }
 
-#ifndef __cplusplus
 static inline int prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
-#else
-static inline int prepare_string_for_scanning(zval *str, istrstream **input_stream, char *filename TSRMLS_DC)
-#endif
 {
-#ifndef __cplusplus
 	/* enforce two trailing NULLs for flex... */
 	STR_REALLOC(str->value.str.val, str->value.str.len+2);
 
@@ -436,12 +345,7 @@ static inline int prepare_string_for_scanning(zval *str, istrstream **input_stre
 
 	yyin=NULL;
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2 TSRMLS_CC);
-#else
-	*input_stream = new istrstream(str->value.str.val, str->value.str.len);
-	CG(ZFL) = new ZendFlexLexer;
 
-	CG(ZFL)->switch_streams(*input_stream, &cout);
-#endif
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
@@ -458,9 +362,6 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	zval tmp;
 	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
-#ifdef __cplusplus
-	istrstream *input_stream;
-#endif
 
 	if (source_string->value.str.len==0) {
 		efree(op_array);
@@ -475,21 +376,13 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	source_string = &tmp;
 
 	save_lexical_state(&original_lex_state TSRMLS_CC);
-#ifndef __cplusplus
 	if (prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
-#else
-	if (prepare_string_for_scanning(source_string, &input_stream, filename TSRMLS_CC)==FAILURE) {
-#endif
 		efree(op_array);
 		retval = NULL;
 	} else {
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(active_op_array) = op_array;
-#ifndef __cplusplus
 		BEGIN(ST_IN_SCRIPTING);
-#else
-		CG(ZFL)->BeginState(ST_IN_SCRIPTING);
-#endif
 		compiler_result = zendparse(TSRMLS_C);
 		
 		if (compiler_result==1) {
@@ -504,9 +397,6 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		}
 		restore_lexical_state(&original_lex_state TSRMLS_CC);
 	}
-#ifdef __cplusplus
-	delete input_stream;
-#endif
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
 	return retval;
@@ -538,72 +428,19 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 {
 	zend_lex_state original_lex_state;
 	zval tmp = *str;
-#ifdef __cplusplus
-	istrstream *input_stream;
-#endif
 
 	str = &tmp;
 	zval_copy_ctor(str);
 	save_lexical_state(&original_lex_state TSRMLS_CC);
-#ifndef __cplusplus
 	if (prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
-#else
-	if (prepare_string_for_scanning(str, &input_stream, str_name TSRMLS_CC)==FAILURE) {
-#endif
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	restore_lexical_state(&original_lex_state TSRMLS_CC);
-#ifdef __cplusplus
-	delete input_stream;
-#endif
 	zval_dtor(str);
 	return SUCCESS;
 }
 END_EXTERN_C()
-
-#ifdef __cplusplus
-BEGIN_EXTERN_C()
-int lex_scan(zval *zendlval TSRMLS_DC)
-{
-	return CG(ZFL)->lex_scan(zendlval TSRMLS_CC);
-}
-
-
-const char *zend_get_zendtext(TSRMLS_D)
-{
-	return CG(ZFL)->YYText();
-}
-
-
-int zend_get_zendleng(TSRMLS_D)
-{
-	return CG(ZFL)->YYLeng();
-}
-END_EXTERN_C()
-
-
-void ZendFlexLexer::BeginState(int state)
-{
-	BEGIN(state);
-}
-
-
-ZendFlexLexer::~ZendFlexLexer()
-{
-	if (yy_start_stack) {
-		yy_flex_free(yy_start_stack);
-	}
-}
-
-
-int yyFlexLexer::yylex()
-{
-	fprintf(stderr, "Error:  yyFlexLexer::yylex() called\n");
-	return -1;
-}
-
-#endif
 
 %}
 
