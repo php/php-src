@@ -106,11 +106,6 @@ three transaction on default link
 */
     ibase_connect($test_base);
     
-	$tr_1 = ibase_trans();  /* this default transaction also */
-	$tr_2 = ibase_trans(IBASE_READ);
-	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_VERSION+IBASE_WAIT);    
-	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_NO_VERSION+IBASE_NOWAIT);	
-    
 	$res = ibase_query("select * from test5");
     
     echo "one row\n";
@@ -118,6 +113,11 @@ three transaction on default link
 
     ibase_free_result($res);
 
+	$tr_1 = ibase_trans();  /* this default transaction also */
+	$tr_2 = ibase_trans(IBASE_READ);
+	$tr_3 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_VERSION+IBASE_WAIT);    
+	$tr_4 = ibase_trans(IBASE_READ+IBASE_COMMITTED+IBASE_REC_NO_VERSION+IBASE_NOWAIT);	
+    
     /* insert in first transaction context...  */
     /* as default */
     ibase_query("insert into test5 (i) values (3)");
@@ -126,18 +126,19 @@ three transaction on default link
     
 	$res = ibase_query("select * from test5");
     
-    echo "three rows\n";
+    echo "two rows\n";
     out_result($res,"test5");
 
     ibase_free_result($res);
     
 	$res = ibase_query($tr_1, "select * from test5");
     
-    echo "three rows again\n";
+    echo "two rows again\n";
     out_result($res,"test5");
 
     ibase_free_result($res);
     
+	ibase_commit();
     ibase_commit($tr_1);
 
 	$tr_1 = ibase_trans();
@@ -240,16 +241,14 @@ one row
 --- test5 ---
 2	
 ---
-three rows
+two rows
 --- test5 ---
 2	
 3	
-4	
 ---
-three rows again
+two rows again
 --- test5 ---
 2	
-3	
 4	
 ---
 one row in second transaction
