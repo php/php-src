@@ -4,8 +4,10 @@ PHP                                                                        NEWS
 - Updated several libraries bundled with the windows release which now 
   includes libxml2-2.6.11, libxslt-1.1.7 and iconv-1.9.1. (Rob, Edin)
 - Improved and moved ActiveScript SAPI to PECL.  (Wez)
+- Fixed bug #29577 (MYSQLI_CLIENT_FOUND_ROWS undefined) (Georg)
 - Fixed bug #29573 (Segmentation fault, when exception thrown within
   PHP function called from XSLT). (Christian)
+- Fixed bug #29522 (accessing properties without connection) (Georg)
 - Fixed bug #29505 (get_class_vars() severely broken when used with arrays).
   (Marcus)
 - Fixed bug #29490 (.Net object instantiation failed). (Michael Sisolak).
