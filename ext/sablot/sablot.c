@@ -175,7 +175,10 @@ ZEND_GET_MODULE(sablot)
 /* MINIT and MINFO Functions */
 PHP_MINIT_FUNCTION(sablot)
 {
+    SABLOTLS_FETCH();
     le_sablot = zend_register_list_destructors_ex(_php_sablot_free_processor, NULL, "Sablotron XSLT", module_number);
+
+    SABLOTG(processor) = NULL;
 
     return SUCCESS;
 }
