@@ -29,6 +29,7 @@ Open:
     socket_select               (4)
     php_imagepolygon		(5)
     imagesetstyle		(6)
+    bundled gd			(7)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -84,6 +85,20 @@ Methodology
     second argument * sizeof(int) result in an overflow.
     gdImageSetStyle function called by this php wrapper can die for the
     same reason.  
+
+(7) multiple integer overflows that can occur when trying to allocate a buffer
+    for a new image. Affected functions:
+    gdImageCreateFromJpegCtx
+    readwbmp
+    gdImageCreateFromXpm
+    gdImageCreateFromPngCtx
+    gdImagePngCtx
+    gdImageCreateFromJpegCtx
+    gdImageJpegCtx
+    gdImageCreateFromGd2Ctx
+    gdImageCreateFromGd2PartCtx
+    _gdImageGd2
+    GetDataBlock (gd_gif_in.c)
 
 Ammendment 1.
 
