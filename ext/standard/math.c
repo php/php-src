@@ -132,7 +132,8 @@ PHP_FUNCTION(round)
 			/* break omitted intentionally */
 
 		case IS_DOUBLE:
-			return_val = (Z_TYPE_PP(value) == IS_LONG) ? Z_LVAL_PP(value) : Z_DVAL_PP(value);
+			return_val = (Z_TYPE_PP(value) == IS_LONG) ?
+							(double)Z_LVAL_PP(value) : Z_DVAL_PP(value);
 
 			f = pow(10.0, places);
 
