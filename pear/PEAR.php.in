@@ -144,12 +144,11 @@ class PEAR_Error
 	var $error_message_prefix = '';
 	var $error_prepend        = '';
 	var $error_append         = '';
-	
 	var $mode                 = PEAR_ERROR_RETURN;
 	var $level                = E_USER_NOTICE;
 	var $code                 = -1;
-	
 	var $message              = '';
+	var $debuginfo            = '';
 
 	// Wait until we have a stack-groping function in PHP.
 	//var $file    = '';
@@ -178,14 +177,16 @@ class PEAR_Error
 	function PEAR_Error($message = 'unknown error',
 						$code = 0,
 						$mode = null,
-						$options = null)
+						$options = null,
+						$debuginfo = null)
 	{
 		if ($mode === null) {
 			$mode = PEAR_ERROR_RETURN;
 		}
-		$this->message = $message;
-		$this->code    = $code;
-		$this->mode    = $mode;
+		$this->message   = $message;
+		$this->code      = $code;
+		$this->mode      = $mode;
+		$this->debuginfo = $debuginfo;
 		if ($mode & PEAR_ERROR_CALLBACK) {
 			$this->level = E_USER_NOTICE;
 			$this->callback = $options;
@@ -276,6 +277,19 @@ class PEAR_Error
 	}
 
     // }}}
+    // {{{ getDebugInfo()
+
+	/**
+	 * Get additional debug information supplied by the application.
+	 *
+	 * @return string debug information
+	 */
+	function getDebugInfo ()
+	{
+		return $this->debuginfo;
+	}
+
+    // }}}
     // {{{ toString()
 
 	/**
@@ -296,10 +310,12 @@ class PEAR_Error
 				$callback = $this->callback;
 			}
 			return sprintf('[%s: message="%s" code=%d mode=callback '.
-						   'callback=%s prefix="%s" prepend="%s" append="%s"]',
+						   'callback=%s prefix="%s" prepend="%s" append="%s" '.
+						   'debug="%s"]',
 						   get_class($this), $this->message, $this->code,
 						   $callback, $this->error_message_prefix,
-						   $this->error_prepend, $this->error_append);
+						   $this->error_prepend, $this->error_append,
+						   $this->debuginfo);
 		}
 		if ($this->mode & PEAR_ERROR_CALLBACK) {
 			$modes[] = "callback";
@@ -316,11 +332,13 @@ class PEAR_Error
 		if ($this->mode & PEAR_ERROR_RETURN) {
 			$modes[] = "return";
 		}
-		return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" prepend="%s" append="%s"]',
+		return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
+					   'prepend="%s" append="%s" debug="%s"]',
 					   get_class($this), $this->message, $this->code,
 					   implode("|", $modes), $levels[$this->level],
 					   $this->error_message_prefix,
-					   $this->error_prepend, $this->error_append);
+					   $this->error_prepend, $this->error_append,
+					   $this->debuginfo);
 	}
 
     // }}}
