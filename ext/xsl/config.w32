@@ -8,7 +8,7 @@ if (PHP_XSL != "no") {
 		var ext_xsl_lib_found = false;
 
 		if (CHECK_LIB("libxslt_a.lib", "xsl", PHP_XSL)) {
-			ADD_FLAG("CFLAGS_XSL", "/D LIBXSL_STATIC ");
+			ADD_FLAG("CFLAGS_XSL", "/D LIBXSLT_STATIC ");
 			ext_xsl_lib_found = true;
 		} else if (CHECK_LIB("libxslt.lib", "xsl", PHP_XSL)) {
 			ext_xsl_lib_found = true;
