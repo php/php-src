@@ -2761,11 +2761,10 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	}
 	else
 # endif
+
 # if HAVE_GD_STRINGFT
 	error = gdImageStringFT(im, brect, col, fontname, ptsize, angle, x, y, str);
-# endif
-
-# if HAVE_GD_STRINGTTF
+# elif HAVE_GD_STRINGTTF
 	error = gdImageStringTTF(im, brect, col, fontname, ptsize, angle, x, y, str);
 # endif
 
