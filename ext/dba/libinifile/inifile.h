@@ -40,7 +40,6 @@ typedef struct {
 	char *lockfn;
 	int lockfd;
 	php_stream *fp;
-	int fd;
 	int readonly;
 	line_type curr;
 	line_type next;
