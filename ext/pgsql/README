@@ -91,7 +91,7 @@ multiple queries at once. Each result may be retrieved separately by
 pg_get_result().
 
 --------------------------------------------------------------------
-bool pg_request_cancel(resource connection) 
+bool pg_cancel_query(resource connection) 
 
 Cancels currently executing async query already sent to PostgreSQL
 server. This function is useful when user request time consuming query
@@ -109,23 +109,34 @@ retrieved one by one using pg_get_result(). If there is no result left
 in connection, it returns false.
 
 --------------------------------------------------------------------
-bool pg_is_busy(resource connection)
+bool pg_connection_busy(resource connection)
 
 Returns connections is executing query or not. 
 
 --------------------------------------------------------------------
-int pg_status(resource connection)
+int pg_connection_status(resource connection)
 
 Gets connection status. It returns PGSQL_CONNECTION_OK or
 PGSQL_CONNECTION_BAD.
 
 --------------------------------------------------------------------
-bool pg_reset(resource connection)
+bool pg_connection_reset(resource connection)
 
 Resets communication port to Postgresql server using the same
 connection parameter. It's useful for error recovery.
 
 --------------------------------------------------------------------
+string pg_result_error(resource result)
+
+Get error message associated with result 
+
+--------------------------------------------------------------------
+int pg_result_status(resource result)
+
+Get status of query result
+
+--------------------------------------------------------------------
+
 
 Copy functions
 
