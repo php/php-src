@@ -31,6 +31,6 @@ PHP_FUNCTION(htmlspecialchars);
 PHP_FUNCTION(htmlentities);
 PHP_FUNCTION(get_html_translation_table);
 
-PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style);
+PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newlen, int all, int quote_style, char * hint_charset);
 
 #endif /* HTML_H */
