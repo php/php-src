@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Read-only GIF support for bundled GD2 library (Rasmus)
 - Make the glue argument to implode() optional, if it is not specified
   default to using "". (Sterling)
 - Fixed fields argument to contain correct info for xslt_set_error_handler.
