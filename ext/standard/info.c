@@ -239,7 +239,7 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</a></h1>\n");
 	}
 
-	zend_ini_sort_entries();
+	zend_ini_sort_entries(ELS_C);
 
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();

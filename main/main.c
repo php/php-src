@@ -680,11 +680,7 @@ void php_request_shutdown(void *dummy)
 	if (PG(modules_activated)) {
 		zend_deactivate_modules();
 	}
-	
-	if (setjmp(EG(bailout))==0) {
-		zend_ini_rshutdown();
-	}
-	
+		
 	zend_deactivate(CLS_C ELS_CC);
 
 	if (setjmp(EG(bailout))==0) {
@@ -724,13 +720,6 @@ static int php_body_write_wrapper(const char *str, uint str_length)
 {
 	return php_body_write(str, str_length);
 }
-
-#ifdef ZTS
-static void php_new_thread_end_handler(THREAD_T thread_id)
-{
-	zend_ini_refresh_caches(PHP_INI_STAGE_STARTUP);
-}
-#endif
 
 
 #ifdef ZTS
@@ -843,7 +832,6 @@ int php_module_startup(sapi_module_struct *sf)
 	zend_startup(&zuf, NULL, 1);
 
 #ifdef ZTS
-	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
 	executor_globals = ts_resource(executor_globals_id);
 	core_globals_id = ts_allocate_id(sizeof(php_core_globals), (ts_allocate_ctor) core_globals_ctor, NULL);
 	core_globals = ts_resource(core_globals_id);
@@ -871,8 +859,6 @@ int php_module_startup(sapi_module_struct *sf)
 	SET_MUTEX(gLock);
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 	FREE_MUTEX(gLock);
-
-	zend_ini_mstartup();
 
 	if (php_config_ini_startup() == FAILURE) {
 		return FAILURE;
@@ -953,7 +939,9 @@ void php_module_shutdown()
 	php_shutdown_fopen_wrappers();
 	php_shutdown_info_logos();
 	UNREGISTER_INI_ENTRIES();
-	zend_ini_mshutdown();
+#ifndef ZTS
+	zend_ini_shutdown(ELS_C);
+#endif
 	shutdown_memory_manager(0, 1);
 	module_initialized = 0;
 }

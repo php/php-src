@@ -333,6 +333,10 @@ SOURCE=..\ext\standard\crc32.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\credits.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\datetime.c
 # End Source File
 # Begin Source File
@@ -442,10 +446,6 @@ SOURCE=..\ext\session\mod_files.c
 # Begin Source File
 
 SOURCE=..\ext\session\mod_user.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\number.c
 # End Source File
 # Begin Source File
 
@@ -606,10 +606,6 @@ SOURCE=..\ext\standard\mime.h
 # Begin Source File
 
 SOURCE=..\ext\session\mod_user.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\bcmath\number.h
 # End Source File
 # Begin Source File
 
@@ -996,6 +992,513 @@ SOURCE=..\ext\calendar\php_calendar.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\sdncal.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "bcmath"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 8"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\add.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\compare.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\debug.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\div.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\divmod.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\doaddsub.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\init.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\int2num.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\nearzero.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\neg.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\num2long.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\num2str.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\outofmem.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\output.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\raise.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\raisemod.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\recmul.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\rmzero.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\rt.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\sqrt.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\str2num.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\sub.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\zero.c
+
+!IF  "$(CFG)" == "php4dll - Win32 Debug"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release"
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
+
+# ADD CPP /I "..\ext\mysql\libmysql" /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "Header Files No. 8"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\bcmath.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\config.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\private.h
 # End Source File
 # End Group
 # End Group
