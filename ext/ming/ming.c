@@ -32,6 +32,13 @@
 
 #if HAVE_MING
 
+#define FLOAT_Z_DVAL_PP(x) ((float)Z_DVAL_PP(x))
+#define BYTE_Z_LVAL_PP(x)  ((byte)Z_LVAL_PP(x))
+
+#ifndef HAVE_DESTROY_SWF_BLOCK
+void destroySWFBlock(SWFBlock block);
+#endif
+
 static zend_function_entry ming_functions[] = {
 	PHP_FALIAS(ming_setcubicthreshold,  ming_setCubicThreshold,  NULL)
 	PHP_FALIAS(ming_setscale,           ming_setScale,           NULL)
@@ -78,7 +85,7 @@ PHP_FUNCTION(ming_setScale)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(num);
-	Ming_setScale(Z_DVAL_PP(num));
+	Ming_setScale(FLOAT_Z_DVAL_PP(num));
 }
 /* }}} */
 
@@ -488,7 +495,7 @@ PHP_FUNCTION(swfbutton_addShape)
 	convert_to_object_ex(zchar);
 	character = getCharacter(*zchar TSRMLS_CC);
 	convert_to_long_ex(flags);
-	SWFButton_addShape(button, character, Z_LVAL_PP(flags));
+	SWFButton_addShape(button, character, BYTE_Z_LVAL_PP(flags));
 }
 /* }}} */
 
@@ -601,7 +608,7 @@ PHP_FUNCTION(swfdisplayitem_moveTo)
 
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFDisplayItem_moveTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFDisplayItem_moveTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -617,7 +624,7 @@ PHP_FUNCTION(swfdisplayitem_move)
 
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFDisplayItem_move(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFDisplayItem_move(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -632,14 +639,14 @@ PHP_FUNCTION(swfdisplayitem_scaleTo)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(x);
-		SWFDisplayItem_scaleTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(x));
+		SWFDisplayItem_scaleTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(x));
 	} else if (ZEND_NUM_ARGS() == 2) {
 		if (zend_get_parameters_ex(2, &x, &y) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(x);
 		convert_to_double_ex(y);
-		SWFDisplayItem_scaleTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+		SWFDisplayItem_scaleTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -658,7 +665,7 @@ PHP_FUNCTION(swfdisplayitem_scale)
 
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFDisplayItem_scale(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFDisplayItem_scale(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -673,7 +680,7 @@ PHP_FUNCTION(swfdisplayitem_rotateTo)
 	}
 
 	convert_to_double_ex(degrees);
-	SWFDisplayItem_rotateTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(degrees));
+	SWFDisplayItem_rotateTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(degrees));
 }
 /* }}} */
 
@@ -688,7 +695,7 @@ PHP_FUNCTION(swfdisplayitem_rotate)
 	}
 	
 	convert_to_double_ex(degrees);
-	SWFDisplayItem_rotate(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(degrees));
+	SWFDisplayItem_rotate(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(degrees));
 }
 /* }}} */
 
@@ -703,7 +710,7 @@ PHP_FUNCTION(swfdisplayitem_skewXTo)
 	}
 	
 	convert_to_double_ex(x);
-	SWFDisplayItem_skewXTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x));
+	SWFDisplayItem_skewXTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x));
 }
 /* }}} */
 
@@ -718,7 +725,7 @@ PHP_FUNCTION(swfdisplayitem_skewX)
 	}
 	
 	convert_to_double_ex(x);
-	SWFDisplayItem_skewX(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(x));
+	SWFDisplayItem_skewX(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x));
 }
 /* }}} */
 
@@ -733,7 +740,7 @@ PHP_FUNCTION(swfdisplayitem_skewYTo)
 	}
 	
 	convert_to_double_ex(y);
-	SWFDisplayItem_skewYTo(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(y));
+	SWFDisplayItem_skewYTo(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -748,7 +755,7 @@ PHP_FUNCTION(swfdisplayitem_skewY)
 	}
 	
 	convert_to_double_ex(y);
-	SWFDisplayItem_skewY(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(y));
+	SWFDisplayItem_skewY(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -770,7 +777,7 @@ PHP_FUNCTION(swfdisplayitem_setMatrix)
 	convert_to_double_ex(y);
 
 	SWFDisplayItem_setMatrix( getDisplayItem(getThis() TSRMLS_CC), 
-		Z_DVAL_PP(a), Z_DVAL_PP(b), Z_DVAL_PP(c), Z_DVAL_PP(d), Z_DVAL_PP(x), Z_DVAL_PP(y)
+		FLOAT_Z_DVAL_PP(a), FLOAT_Z_DVAL_PP(b), FLOAT_Z_DVAL_PP(c), FLOAT_Z_DVAL_PP(d), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y)
 	);
 }
 /* }}} */
@@ -801,7 +808,7 @@ PHP_FUNCTION(swfdisplayitem_setRatio)
 	}
 
 	convert_to_double_ex(ratio);
-	SWFDisplayItem_setRatio(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(ratio));
+	SWFDisplayItem_setRatio(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(ratio));
 }
 /* }}} */
 
@@ -839,14 +846,14 @@ PHP_FUNCTION(swfdisplayitem_addColor)
 PHP_FUNCTION(swfdisplayitem_multColor)
 {
 	zval **r, **g, **b, **za;
-	float a = 1.0;
+	float a = 1.0f;
 
 	if (ZEND_NUM_ARGS() == 4) {
 		if (zend_get_parameters_ex(4, &r, &g, &b, &za) == FAILURE) { 
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(za);
-		a = Z_DVAL_PP(za);
+		a = FLOAT_Z_DVAL_PP(za);
 	} else if(ZEND_NUM_ARGS() == 3) {
 		if (zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -859,7 +866,7 @@ PHP_FUNCTION(swfdisplayitem_multColor)
 	convert_to_double_ex(g);
 	convert_to_double_ex(b);
 
-	SWFDisplayItem_setColorMult(getDisplayItem(getThis() TSRMLS_CC), Z_DVAL_PP(r), Z_DVAL_PP(g), Z_DVAL_PP(b), a);
+	SWFDisplayItem_setColorMult(getDisplayItem(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(r), FLOAT_Z_DVAL_PP(g), FLOAT_Z_DVAL_PP(b), a);
 }
 /* }}} */
 
@@ -952,7 +959,7 @@ PHP_FUNCTION(swffill_moveTo)
 	
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFFill_moveTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFFill_moveTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -967,14 +974,14 @@ PHP_FUNCTION(swffill_scaleTo)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(x);
-		SWFFill_scaleXYTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(x));
+		SWFFill_scaleXYTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(x));
 	} else if (ZEND_NUM_ARGS() == 2) {
 		if (zend_get_parameters_ex(2, &x, &y) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_double_ex(x);
 		convert_to_double_ex(y);
-		SWFFill_scaleXYTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+		SWFFill_scaleXYTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -991,7 +998,7 @@ PHP_FUNCTION(swffill_rotateTo)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(degrees);
-	SWFFill_rotateTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(degrees));
+	SWFFill_rotateTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(degrees));
 }
 /* }}} */
 
@@ -1005,7 +1012,7 @@ PHP_FUNCTION(swffill_skewXTo)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(x);
-	SWFFill_skewXTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(x));
+	SWFFill_skewXTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x));
 }
 /* }}} */
 
@@ -1019,7 +1026,7 @@ PHP_FUNCTION(swffill_skewYTo)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(y);
-	SWFFill_skewYTo(getFill(getThis() TSRMLS_CC), Z_DVAL_PP(y));
+	SWFFill_skewYTo(getFill(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 /* }}} */
@@ -1205,7 +1212,7 @@ PHP_FUNCTION(swfgradient_addEntry)
 	convert_to_long_ex(b);
 
 	SWFGradient_addEntry( getGradient(getThis() TSRMLS_CC), 
-		Z_DVAL_PP(ratio), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), a
+		FLOAT_Z_DVAL_PP(ratio), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), a
 	);
 }
 /* }}} */
@@ -1514,7 +1521,7 @@ PHP_FUNCTION(swfmovie_setRate)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(rate);
-	SWFMovie_setRate(movie, Z_DVAL_PP(rate));
+	SWFMovie_setRate(movie, FLOAT_Z_DVAL_PP(rate));
 }
 /* }}} */
 
@@ -1530,7 +1537,7 @@ PHP_FUNCTION(swfmovie_setDimension)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFMovie_setDimension(movie, Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFMovie_setDimension(movie, FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -1658,11 +1665,11 @@ PHP_FUNCTION(swfshape_setline)
 
 	if (ZEND_NUM_ARGS() == 4) {
 		SWFShape_setLine(getShape(getThis() TSRMLS_CC),
-			Z_LVAL_PP(w), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), 0xff
+			(unsigned short)Z_LVAL_PP(w), BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), 0xff
 		);
 	} else {
 		SWFShape_setLine(getShape(getThis() TSRMLS_CC),
-			Z_LVAL_PP(w), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), Z_LVAL_PP(a)
+			(unsigned short)Z_LVAL_PP(w), BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), BYTE_Z_LVAL_PP(a)
 		);
 	}
 }
@@ -1712,7 +1719,7 @@ PHP_FUNCTION(swfshape_addfill)
 	} else if (ZEND_NUM_ARGS() == 3 || ZEND_NUM_ARGS() == 4) {
 		/* it's a solid fill */
 		zval **r, **g, **b, **za;
-		int a = 0xff;
+		byte a = 0xff;
 
 		if (ZEND_NUM_ARGS() == 3) {
 			if(zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
@@ -1723,7 +1730,7 @@ PHP_FUNCTION(swfshape_addfill)
 				WRONG_PARAM_COUNT;
 			}
 			convert_to_long_ex(za);
-			a = Z_LVAL_PP(za);
+			a = BYTE_Z_LVAL_PP(za);
 		} else {
 			WRONG_PARAM_COUNT;
 		}
@@ -1731,7 +1738,7 @@ PHP_FUNCTION(swfshape_addfill)
 		convert_to_long_ex(g);
 		convert_to_long_ex(b);
 
-		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC), Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), a);
+		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC), BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), a);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -1763,7 +1770,7 @@ PHP_FUNCTION(swfshape_setleftfill)
 		convert_to_long_ex(b);
 		
 		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC), 
-			Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), 0xff
+			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), 0xff
 		);
 
 	} else if (ZEND_NUM_ARGS() == 4) {
@@ -1776,7 +1783,7 @@ PHP_FUNCTION(swfshape_setleftfill)
 		convert_to_long_ex(a);
 
 		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC),
-			Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), Z_LVAL_PP(a)
+			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), BYTE_Z_LVAL_PP(a)
 		);
 
 	} else if (ZEND_NUM_ARGS() == 1) {
@@ -1814,7 +1821,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 		convert_to_long_ex(b);
 
 		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC),
-			Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), 0xff
+			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), 0xff
 		);
 
 	} else if (ZEND_NUM_ARGS() == 4) {
@@ -1827,7 +1834,7 @@ PHP_FUNCTION(swfshape_setrightfill)
 		convert_to_long_ex(a);
 
 		fill = SWFShape_addSolidFill(getShape(getThis() TSRMLS_CC),
-			Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), Z_LVAL_PP(a)
+			BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), BYTE_Z_LVAL_PP(a)
 		);
 	} else if (ZEND_NUM_ARGS() == 1) {
 		if (zend_get_parameters_ex(1, &zfill) == FAILURE){
@@ -1859,7 +1866,7 @@ PHP_FUNCTION(swfshape_movepento)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFShape_movePenTo(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFShape_movePenTo(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -1874,7 +1881,7 @@ PHP_FUNCTION(swfshape_movepen)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFShape_movePen(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFShape_movePen(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -1889,7 +1896,7 @@ PHP_FUNCTION(swfshape_drawlineto)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFShape_drawLineTo(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFShape_drawLineTo(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -1904,7 +1911,7 @@ PHP_FUNCTION(swfshape_drawline)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFShape_drawLine(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFShape_drawLine(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -1924,7 +1931,7 @@ PHP_FUNCTION(swfshape_drawcurveto)
 		convert_to_double_ex(ay);
 
 		SWFShape_drawCurveTo(getShape(getThis() TSRMLS_CC),
-			Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(ax), Z_DVAL_PP(ay)
+			FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(ax), FLOAT_Z_DVAL_PP(ay)
 		);
 	
 	} else if (ZEND_NUM_ARGS() == 6) {
@@ -1941,7 +1948,7 @@ PHP_FUNCTION(swfshape_drawcurveto)
 		convert_to_double_ex(dy);
 
 		RETURN_LONG(SWFShape_drawCubicTo(getShape(getThis() TSRMLS_CC), 
-			Z_DVAL_PP(bx), Z_DVAL_PP(by), Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(dx), Z_DVAL_PP(dy))
+			FLOAT_Z_DVAL_PP(bx), FLOAT_Z_DVAL_PP(by), FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(dx), FLOAT_Z_DVAL_PP(dy))
 		);
 	} else {
 		WRONG_PARAM_COUNT;
@@ -1965,7 +1972,7 @@ PHP_FUNCTION(swfshape_drawcurve)
 		convert_to_double_ex(ay);
 
 		SWFShape_drawCurve(getShape(getThis() TSRMLS_CC), 
-			Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(ax), Z_DVAL_PP(ay)
+			FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(ax), FLOAT_Z_DVAL_PP(ay)
 		);
 
 	} else if(ZEND_NUM_ARGS() == 6) {
@@ -1982,7 +1989,7 @@ PHP_FUNCTION(swfshape_drawcurve)
 		convert_to_double_ex(dy);
 
 		RETURN_LONG( SWFShape_drawCubic(getShape(getThis() TSRMLS_CC),
-			 Z_DVAL_PP(bx), Z_DVAL_PP(by), Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(dx), Z_DVAL_PP(dy))
+			 FLOAT_Z_DVAL_PP(bx), FLOAT_Z_DVAL_PP(by), FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(dx), FLOAT_Z_DVAL_PP(dy))
 		);
 	} else {
 		WRONG_PARAM_COUNT;
@@ -2001,7 +2008,7 @@ PHP_FUNCTION(swfshape_drawglyph)
 		if (zend_get_parameters_ex(2, &font, &c) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		size = 1024/Ming_getScale();
+		size = (int)(1024.0f/Ming_getScale());
 
 	} else if (ZEND_NUM_ARGS() == 3) {
 		if (zend_get_parameters_ex(3, &font, &c, &zsize) == FAILURE) {
@@ -2025,7 +2032,7 @@ PHP_FUNCTION(swfshape_drawcircle)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(r);
-	SWFShape_drawCircle(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(r));
+	SWFShape_drawCircle(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(r));
 }
 /* }}} */
 
@@ -2043,7 +2050,7 @@ PHP_FUNCTION(swfshape_drawarc)
 	convert_to_double_ex(end);
 
 	/* convert angles to radians, since that's what php uses elsewhere */
-	SWFShape_drawArc(getShape(getThis() TSRMLS_CC), Z_DVAL_PP(r), Z_DVAL_PP(start)*M_PI/180, Z_DVAL_PP(end)*M_PI/180);
+	SWFShape_drawArc(getShape(getThis() TSRMLS_CC), FLOAT_Z_DVAL_PP(r), (float)(Z_DVAL_PP(start)*M_PI/180.0), (float)(Z_DVAL_PP(end)*M_PI/180.0));
 }
 /* }}} */
 
@@ -2064,7 +2071,7 @@ PHP_FUNCTION(swfshape_drawcubic)
 	convert_to_double_ex(dy);
 
 	RETURN_LONG( SWFShape_drawCubic(getShape(getThis() TSRMLS_CC), 
-		Z_DVAL_PP(bx), Z_DVAL_PP(by), Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(dx), Z_DVAL_PP(dy))
+		FLOAT_Z_DVAL_PP(bx), FLOAT_Z_DVAL_PP(by), FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(dx), FLOAT_Z_DVAL_PP(dy))
 	);
 }
 /* }}} */
@@ -2086,7 +2093,7 @@ PHP_FUNCTION(swfshape_drawcubicto)
 	convert_to_double_ex(dy);
 
 	RETURN_LONG( SWFShape_drawCubicTo(getShape(getThis() TSRMLS_CC),
-		Z_DVAL_PP(bx), Z_DVAL_PP(by), Z_DVAL_PP(cx), Z_DVAL_PP(cy), Z_DVAL_PP(dx), Z_DVAL_PP(dy))
+		FLOAT_Z_DVAL_PP(bx), FLOAT_Z_DVAL_PP(by), FLOAT_Z_DVAL_PP(cx), FLOAT_Z_DVAL_PP(cy), FLOAT_Z_DVAL_PP(dx), FLOAT_Z_DVAL_PP(dy))
 	);
 }
 /* }}} */
@@ -2299,7 +2306,7 @@ PHP_FUNCTION(swftext_setHeight)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(height);
-	SWFText_setHeight(text, Z_DVAL_PP(height));
+	SWFText_setHeight(text, FLOAT_Z_DVAL_PP(height));
 }
 /* }}} */
 
@@ -2314,7 +2321,7 @@ PHP_FUNCTION(swftext_setSpacing)
  		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(spacing);
-	SWFText_setSpacing(text, Z_DVAL_PP(spacing));
+	SWFText_setSpacing(text, FLOAT_Z_DVAL_PP(spacing));
 }
 /* }}} */
 
@@ -2342,9 +2349,9 @@ PHP_FUNCTION(swftext_setColor)
 	convert_to_long_ex(b);
 
 	if (ZEND_NUM_ARGS() == 4) {
-		SWFText_setColor(text, Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), Z_LVAL_PP(a));
+		SWFText_setColor(text, BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), BYTE_Z_LVAL_PP(a));
 	} else {
-		SWFText_setColor(text, Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), 0xff);
+		SWFText_setColor(text, BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), 0xff);
 	}
 }
 /* }}} */
@@ -2361,7 +2368,7 @@ PHP_FUNCTION(swftext_moveTo)
 	}
 	convert_to_double_ex(x);
 	convert_to_double_ex(y);
-	SWFText_setXY(text, Z_DVAL_PP(x), Z_DVAL_PP(y));
+	SWFText_setXY(text, FLOAT_Z_DVAL_PP(x), FLOAT_Z_DVAL_PP(y));
 }
 /* }}} */
 
@@ -2385,14 +2392,12 @@ PHP_FUNCTION(swftext_addString)
 PHP_FUNCTION(swftext_getWidth)
 {
 	zval **zstring;
-	int width;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstring) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(zstring);
-	width = SWFText_getStringWidth(getText(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring));
-	RETURN_DOUBLE(width);
+	RETURN_DOUBLE(SWFText_getStringWidth(getText(getThis() TSRMLS_CC), Z_STRVAL_PP(zstring)));
 }
 /* }}} */
 
@@ -2507,7 +2512,7 @@ PHP_FUNCTION(swftextfield_setBounds)
 	}
 	convert_to_double_ex(width);
 	convert_to_double_ex(height);
-	SWFTextField_setBounds(field, Z_DVAL_PP(width), Z_DVAL_PP(height));
+	SWFTextField_setBounds(field, FLOAT_Z_DVAL_PP(width), FLOAT_Z_DVAL_PP(height));
 }
 /* }}} */
 
@@ -2537,7 +2542,7 @@ PHP_FUNCTION(swftextfield_setHeight)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(height);
-	SWFTextField_setHeight(field, Z_DVAL_PP(height));
+	SWFTextField_setHeight(field, FLOAT_Z_DVAL_PP(height));
 }
 /* }}} */
 
@@ -2552,7 +2557,7 @@ PHP_FUNCTION(swftextfield_setLeftMargin)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(margin);
-	SWFTextField_setLeftMargin(field, Z_DVAL_PP(margin));
+	SWFTextField_setLeftMargin(field, FLOAT_Z_DVAL_PP(margin));
 }
 /* }}} */
 
@@ -2567,7 +2572,7 @@ PHP_FUNCTION(swftextfield_setRightMargin)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(margin);
-	SWFTextField_setRightMargin(field, Z_DVAL_PP(margin));
+	SWFTextField_setRightMargin(field, FLOAT_Z_DVAL_PP(margin));
 }
 /* }}} */
 
@@ -2583,8 +2588,8 @@ PHP_FUNCTION(swftextfield_setMargins)
 	}
 	convert_to_double_ex(left);
 	convert_to_double_ex(right);
-	SWFTextField_setLeftMargin(field, Z_DVAL_PP(left));
-	SWFTextField_setRightMargin(field, Z_DVAL_PP(right));
+	SWFTextField_setLeftMargin(field, FLOAT_Z_DVAL_PP(left));
+	SWFTextField_setRightMargin(field, FLOAT_Z_DVAL_PP(right));
 }
 /* }}} */
 
@@ -2599,7 +2604,7 @@ PHP_FUNCTION(swftextfield_setIndentation)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(indent);
-	SWFTextField_setIndentation(field, Z_DVAL_PP(indent));
+	SWFTextField_setIndentation(field, FLOAT_Z_DVAL_PP(indent));
 }
 /* }}} */
 
@@ -2614,7 +2619,7 @@ PHP_FUNCTION(swftextfield_setLineSpacing)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_double_ex(spacing);
-	SWFTextField_setLineSpacing(field, Z_DVAL_PP(spacing));
+	SWFTextField_setLineSpacing(field, FLOAT_Z_DVAL_PP(spacing));
 }
 /* }}} */
 
@@ -2624,7 +2629,7 @@ PHP_FUNCTION(swftextfield_setColor)
 {
 	zval **r, **g, **b, **a;
 	SWFTextField field = getTextField(getThis() TSRMLS_CC);
-	int alpha = 0xff;
+	byte alpha = 0xff;
 
 	if (ZEND_NUM_ARGS() == 3) {
 		if (zend_get_parameters_ex(3, &r, &g, &b) == FAILURE) {
@@ -2635,14 +2640,14 @@ PHP_FUNCTION(swftextfield_setColor)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(a);
-		alpha = Z_LVAL_PP(a);
+		alpha = BYTE_Z_LVAL_PP(a);
 	} else {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(r);
 	convert_to_long_ex(g);
 	convert_to_long_ex(b);
-	SWFTextField_setColor(field, Z_LVAL_PP(r), Z_LVAL_PP(g), Z_LVAL_PP(b), alpha);
+	SWFTextField_setColor(field, BYTE_Z_LVAL_PP(r), BYTE_Z_LVAL_PP(g), BYTE_Z_LVAL_PP(b), (byte)alpha);
 }
 /* }}} */
 
