@@ -799,7 +799,9 @@ PHP_FUNCTION(curl_setopt)
 				}
 				else {
 					error = curl_formadd(&first, &last, CURLFORM_COPYNAME, string_key, 
-										 CURLFORM_PTRCONTENTS, postval, CURLFORM_END);
+										 CURLFORM_PTRCONTENTS, postval, 
+										 CURLFORM_CONTENTSLENGTH, Z_STRLEN_PP(current),
+										 CURLFORM_END);
 				}
 			}
 
