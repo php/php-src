@@ -1,3 +1,43 @@
+2003-12-21  Derick Rethans  <php@derickrethans.nl>
+
+    * configure.in
+      main/php_version.h:
+      - Fix version number so that people are not mistaking our development
+        version for RC1.
+
+2003-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ncurses/ncurses_functions.c:
+      Corrected argument parsing.
+
+2003-12-21  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h:
+      B3 here we go (away)
+
+    * (php_5_0_0b3)
+      NEWS:
+      Update date
+
+    * (php_5_0_0b3)
+      configure.in
+      main/php_version.h:
+      B3 here we come
+
+2003-12-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (php_5_0_0b3)
+      ext/dom/document.c
+      ext/dom/namednodemap.c
+      ext/dom/nodelist.c:
+      Compiler warning fixes.
+
+    * (php_5_0_0b3)
+      ext/openssl/openssl.c:
+      Fixed uninitialized usage of mdtype when unknown signature algorithm is
+      found.
+
 2003-12-20  Andi Gutmans  <andi@zend.com>
 
     * configure.in
