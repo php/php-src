@@ -246,7 +246,7 @@ PHP_FUNCTION(odbc_statistics);
 #define ODBC_SQL_ENV_T SQLHANDLE
 #define ODBC_SQL_CONN_T SQLHANDLE
 #define ODBC_SQL_STMT_T SQLHANDLE
-#elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB )
+#elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB ) || defined ( HAVE_EMPRESS )
 #define ODBC_SQL_ENV_T SQLHENV
 #define ODBC_SQL_CONN_T SQLHDBC
 #define ODBC_SQL_STMT_T SQLHSTMT
