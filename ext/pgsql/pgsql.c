@@ -585,7 +585,7 @@ int php_pgsql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ proto int pg_connect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
+/* {{{ proto resource pg_connect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
    Open a PostgreSQL connection */
 PHP_FUNCTION(pg_connect)
 {
@@ -593,7 +593,7 @@ PHP_FUNCTION(pg_connect)
 }
 /* }}} */
 
-/* {{{ proto int pg_pconnect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
+/* {{{ proto resource pg_pconnect([string connection_string] | [string host, string port [, string options [, string tty,]] string database)
    Open a persistent PostgreSQL connection */
 PHP_FUNCTION(pg_pconnect)
 {
@@ -601,7 +601,7 @@ PHP_FUNCTION(pg_pconnect)
 }
 /* }}} */
 
-/* {{{ proto bool pg_close([int connection])
+/* {{{ proto bool pg_close([resource connection])
    Close a PostgreSQL connection */ 
 PHP_FUNCTION(pg_close)
 {
@@ -702,7 +702,7 @@ void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto string pg_dbname([int connection])
+/* {{{ proto string pg_dbname([resource connection])
    Get the database name */ 
 PHP_FUNCTION(pg_dbname)
 {
@@ -710,7 +710,7 @@ PHP_FUNCTION(pg_dbname)
 }
 /* }}} */
 
-/* {{{ proto string pg_errormessage([int connection])
+/* {{{ proto string pg_errormessage([resource connection])
    Get the error message string */
 PHP_FUNCTION(pg_errormessage)
 {
@@ -718,7 +718,7 @@ PHP_FUNCTION(pg_errormessage)
 }
 /* }}} */
 
-/* {{{ proto string pg_options([int connection])
+/* {{{ proto string pg_options([resource connection])
    Get the options associated with the connection */
 PHP_FUNCTION(pg_options)
 {
@@ -726,7 +726,7 @@ PHP_FUNCTION(pg_options)
 }
 /* }}} */
 
-/* {{{ proto int pg_port([int connection])
+/* {{{ proto int pg_port([resource connection])
    Return the port number associated with the connection */
 PHP_FUNCTION(pg_port)
 {
@@ -734,7 +734,7 @@ PHP_FUNCTION(pg_port)
 }
 /* }}} */
 
-/* {{{ proto string pg_tty([int connection])
+/* {{{ proto string pg_tty([resource connection])
    Return the tty name associated with the connection */
 PHP_FUNCTION(pg_tty)
 {
@@ -742,7 +742,7 @@ PHP_FUNCTION(pg_tty)
 }
 /* }}} */
 
-/* {{{ proto string pg_host([int connection])
+/* {{{ proto string pg_host([resource connection])
    Returns the host name associated with the connection */
 PHP_FUNCTION(pg_host)
 {
@@ -750,7 +750,7 @@ PHP_FUNCTION(pg_host)
 }
 /* }}} */
 
-/* {{{ proto int pg_exec([int connection,] string query)
+/* {{{ proto resource pg_exec([resource connection,] string query)
    Execute a query */
 PHP_FUNCTION(pg_exec)
 {
@@ -830,7 +830,7 @@ PHP_FUNCTION(pg_exec)
 }
 /* }}} */
 
-/* {{{ proto int pg_end_copy([int connection])
+/* {{{ proto bool pg_end_copy([resource connection])
    Sync with backend. Completes the Copy command */
 PHP_FUNCTION(pg_end_copy)
 {
@@ -868,7 +868,7 @@ PHP_FUNCTION(pg_end_copy)
 
 #define	COPYBUFSIZ	8192
 
-/* {{{ proto int pg_put_line([int connection,] string query)
+/* {{{ proto bool pg_put_line([resource connection,] string query)
    Send null-terminated string to backend server*/
 PHP_FUNCTION(pg_put_line)
 {
@@ -949,7 +949,7 @@ void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto int pg_numrows(int result)
+/* {{{ proto int pg_numrows(resource result)
    Return the number of rows in the result */
 PHP_FUNCTION(pg_numrows)
 {
@@ -957,7 +957,7 @@ PHP_FUNCTION(pg_numrows)
 }
 /* }}} */
 
-/* {{{ proto int pg_numfields(int result)
+/* {{{ proto int pg_numfields(resource result)
    Return the number of fields in the result */
 PHP_FUNCTION(pg_numfields)
 {
@@ -965,7 +965,7 @@ PHP_FUNCTION(pg_numfields)
 }
 /* }}} */
 
-/* {{{ proto int pg_cmdtuples(int result)
+/* {{{ proto int pg_cmdtuples(resource result)
    Returns the number of affected tuples */
 PHP_FUNCTION(pg_cmdtuples)
 {
@@ -973,7 +973,7 @@ PHP_FUNCTION(pg_cmdtuples)
 }
 /* }}} */
 
-/* {{{ proto int pg_last_notice(int connection)
+/* {{{ proto string pg_last_notice(resource connection)
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) 
 {
@@ -1081,7 +1081,7 @@ void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto string pg_fieldname(int result, int field_number)
+/* {{{ proto string pg_fieldname(resource result, int field_number)
    Returns the name of the field */
 PHP_FUNCTION(pg_fieldname)
 {
@@ -1089,7 +1089,7 @@ PHP_FUNCTION(pg_fieldname)
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldsize(int result, int field_number)
+/* {{{ proto int pg_fieldsize(resource result, int field_number)
    Returns the internal size of the field */ 
 PHP_FUNCTION(pg_fieldsize)
 {
@@ -1097,7 +1097,7 @@ PHP_FUNCTION(pg_fieldsize)
 }
 /* }}} */
 
-/* {{{ proto string pg_fieldtype(int result, int field_number)
+/* {{{ proto string pg_fieldtype(resource result, int field_number)
    Returns the type name for the given field */
 PHP_FUNCTION(pg_fieldtype)
 {
@@ -1105,7 +1105,7 @@ PHP_FUNCTION(pg_fieldtype)
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldnum(int result, string field_name)
+/* {{{ proto int pg_fieldnum(resource result, string field_name)
    Returns the field number of the named field */
 PHP_FUNCTION(pg_fieldnum)
 {
@@ -1127,7 +1127,7 @@ PHP_FUNCTION(pg_fieldnum)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result(int result, [int row_number,] mixed field_name)
+/* {{{ proto mixed pg_result(resource result, [int row_number,] mixed field_name)
    Returns values from a result identifier */
 PHP_FUNCTION(pg_result)
 {
@@ -1283,7 +1283,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 }
 /* }}} */
 
-/* {{{ proto array pg_fetch_row(int result, [int row])
+/* {{{ proto array pg_fetch_row(resource result, [int row])
    Get a row as an enumerated array */ 
 PHP_FUNCTION(pg_fetch_row)
 {
@@ -1292,7 +1292,7 @@ PHP_FUNCTION(pg_fetch_row)
 /* }}} */
 
 /* ??  This is a rather odd function - why not just point pg_fetcharray() directly at fetch_hash ? -RL */
-/* {{{ proto array pg_fetch_array(int result, [int row [, int result_type]])
+/* {{{ proto array pg_fetch_array(resource result, [int row [, int result_type]])
    Fetch a row as an array */
 PHP_FUNCTION(pg_fetch_array)
 {
@@ -1300,7 +1300,7 @@ PHP_FUNCTION(pg_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto object pg_fetch_object(int result, [int row [, int result_type]])
+/* {{{ proto object pg_fetch_object(resource result, [int row [, int result_type]])
    Fetch a row as an object */
 PHP_FUNCTION(pg_fetch_object)
 {
@@ -1374,7 +1374,7 @@ void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldprtlen(int result, [int row,] mixed field_name_or_number)
+/* {{{ proto int pg_fieldprtlen(resource result, [int row,] mixed field_name_or_number)
    Returns the printed length */
 PHP_FUNCTION(pg_fieldprtlen)
 {
@@ -1382,7 +1382,7 @@ PHP_FUNCTION(pg_fieldprtlen)
 }
 /* }}} */
 
-/* {{{ proto int pg_fieldisnull(int result, [int row,] mixed field_name_or_number)
+/* {{{ proto int pg_fieldisnull(resource result, [int row,] mixed field_name_or_number)
    Test if a field is NULL */
 PHP_FUNCTION(pg_fieldisnull)
 {
@@ -1390,7 +1390,7 @@ PHP_FUNCTION(pg_fieldisnull)
 }
 /* }}} */
 
-/* {{{ proto int pg_freeresult(int result)
+/* {{{ proto bool pg_freeresult(resource result)
    Free result memory */
 PHP_FUNCTION(pg_freeresult)
 {
@@ -1410,7 +1410,7 @@ PHP_FUNCTION(pg_freeresult)
 }
 /* }}} */
 
-/* {{{ proto int pg_getlastoid(int result)
+/* {{{ proto int pg_getlastoid(resource result)
    Returns the last object identifier */
 PHP_FUNCTION(pg_getlastoid)
 {
@@ -1500,7 +1500,7 @@ PHP_FUNCTION(pg_trace)
 }
 /* }}} */
 
-/* {{{ proto bool pg_untrace([int connection])
+/* {{{ proto bool pg_untrace([resource connection])
    Disable tracing of a PostgreSQL connection */
 PHP_FUNCTION(pg_untrace)
 {
@@ -1529,7 +1529,7 @@ PHP_FUNCTION(pg_untrace)
 }
 /* }}} */
 
-/* {{{ proto int pg_locreate(int connection)
+/* {{{ proto int pg_locreate(resource connection)
    Create a large object */
 PHP_FUNCTION(pg_locreate)
 {
@@ -1573,7 +1573,7 @@ PHP_FUNCTION(pg_locreate)
 }
 /* }}} */
 
-/* {{{ proto void pg_lounlink([int connection,] int large_obj_id)
+/* {{{ proto bool pg_lounlink([resource connection,] int large_object_oid)
    Delete a large object */
 PHP_FUNCTION(pg_lounlink)
 {
@@ -1614,7 +1614,7 @@ PHP_FUNCTION(pg_lounlink)
 }
 /* }}} */
 
-/* {{{ proto int pg_loopen([int connection,] int objoid, string mode)
+/* {{{ proto resource pg_loopen([resource connection,] int large_object_oid, string mode)
    Open a large object and return fd */
 PHP_FUNCTION(pg_loopen)
 {
@@ -1716,7 +1716,7 @@ PHP_FUNCTION(pg_loopen)
 }
 /* }}} */
 
-/* {{{ proto void pg_loclose(int fd)
+/* {{{ proto bool pg_loclose(resource large_object)
    Close a large object */
 PHP_FUNCTION(pg_loclose)
 {
@@ -1748,7 +1748,7 @@ PHP_FUNCTION(pg_loclose)
 }
 /* }}} */
 
-/* {{{ proto string pg_loread(int fd [, int len])
+/* {{{ proto string pg_loread(resource large_object [, int len])
    Read a large object */
 PHP_FUNCTION(pg_loread)
 {
@@ -1780,7 +1780,7 @@ PHP_FUNCTION(pg_loread)
 }
 /* }}} */
 
-/* {{{ proto int pg_lowrite(int fd, string buf [, int len])
+/* {{{ proto int pg_lowrite(resource large_object, string buf [, int len])
    Write a large object */
 PHP_FUNCTION(pg_lowrite)
 {
@@ -1815,7 +1815,7 @@ PHP_FUNCTION(pg_lowrite)
 }
 /* }}} */
 
-/* {{{ proto void pg_loreadall(int fd)
+/* {{{ proto int pg_loreadall(resource large_object)
    Read a large object and send straight to browser */
 PHP_FUNCTION(pg_loreadall)
 {
@@ -1940,7 +1940,7 @@ PHP_FUNCTION(pg_loexport)
 
 #if HAVE_PQCLIENTENCODING
 
-/* {{{ proto int pg_set_client_encoding([int connection,] string encoding)
+/* {{{ proto int pg_set_client_encoding([resource connection,] string encoding)
    Set client encoding */
 PHP_FUNCTION(pg_set_client_encoding)
 {
@@ -1975,7 +1975,7 @@ PHP_FUNCTION(pg_set_client_encoding)
 }
 /* }}} */
 
-/* {{{ proto string pg_client_encoding([int connection])
+/* {{{ proto string pg_client_encoding([resource connection])
    Get the current client encoding */
 PHP_FUNCTION(pg_client_encoding)
 {
@@ -2016,7 +2016,7 @@ PHP_FUNCTION(pg_client_encoding)
 #endif
 
 
-/* {{{ proto long pg_status(resource conn)
+/* {{{ proto int pg_status(resource connnection)
    Get connection status */
 PHP_FUNCTION(pg_status)
 {
@@ -2046,7 +2046,7 @@ PHP_FUNCTION(pg_status)
 
 /* }}} */
 
-/* {{{ proto bool pg_reset(resource conn)
+/* {{{ proto bool pg_reset(resource connection)
    Reset connection */
 PHP_FUNCTION(pg_reset)
 {
