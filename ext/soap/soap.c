@@ -51,6 +51,7 @@ static zend_function_entry soap_client_functions[] = {
 	PHP_FE(__isfault, NULL)
 	PHP_FE(__getfault, NULL)
 	PHP_FE(__call, NULL)
+
 	PHP_FE(__parse, NULL)
 #ifdef PHP_DEBUG
 	PHP_FE(__getlastrequest, NULL)
@@ -1141,37 +1142,70 @@ PHP_FUNCTION(soapobject)
 	}
 }
 
+
+
 PHP_FUNCTION(__parse)
+
 {
+
 	char *message, *function;
+
 	int message_len, function_len;
+
 	int num_params;
+
 	zval **ret_params;
+
 	sdlPtr sdl;
+
 	sdlFunctionPtr fn;
 
+
+
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &message, &message_len, &function, &function_len) == FAILURE)
+
 		php_error(E_ERROR, "Invalid arguments to SoapObject->__parse");
+
+
 
 	FETCH_THIS_SDL(sdl);
 
+
+
 	if(sdl != NULL)
+
 	{
+
 		fn = get_function(sdl, function);
+
 		if(fn != NULL)
+
 			parse_packet_soap(getThis(), message, message_len, fn, NULL, &ret_params, &num_params);
+
 	}
+
 	else
+
 			parse_packet_soap(getThis(), message, message_len, NULL, function, &ret_params, &num_params);
 
+
+
 	if(num_params > 0)
+
 	{
+
 		*return_value = *ret_params[0];
+
 		zval_add_ref(&return_value);
+
 		efree(ret_params);
+
 	}
+
 	else
+
 		ZVAL_NULL(return_value)
+
 }
 
 PHP_FUNCTION(__call)
@@ -1184,7 +1218,9 @@ PHP_FUNCTION(__call)
 	xmlDocPtr request = NULL;
 	int num_params, arg_count;
 	zval **ret_params;
+
 	char *buffer;
+
 	int len;
 
 	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa|ss",
@@ -1207,12 +1243,16 @@ PHP_FUNCTION(__call)
 	xmlFreeDoc(request);
 
 	get_http_soap_response(getThis(), &buffer, &len);
+
 	parse_packet_soap(getThis(), buffer, len, NULL, function, &ret_params, &num_params);
+
 	efree(buffer);
+
 
 	if(num_params > 0)
 	{
 		*return_value = *ret_params[0];
+
 		zval_add_ref(&return_value);
 		efree(ret_params);
 	}
@@ -1375,7 +1415,9 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			{
 				int num_params;
 				zval **ret_params;
+
 				char *buffer;
+
 				int len;
 
 				request = seralize_function_call(fn, sdl->target_ns, NULL, arguments, arg_count);
@@ -1385,8 +1427,11 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 				xmlFreeDoc(request);
 
 				get_http_soap_response(getThis(), &buffer, &len);
+
 				parse_packet_soap(getThis(), buffer, len, fn, NULL, &ret_params, &num_params);
+
 				efree(buffer);
+
 
 				if(num_params > 0)
 				{
@@ -1409,7 +1454,9 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			zval **uri;
 			smart_str *action;
 			char *buffer;
+
 			int len;
+
 
 			if(zend_hash_find(Z_OBJPROP_P(thisObj), "uri", sizeof("uri"), (void *)&uri) == FAILURE)
 				php_error(E_ERROR, "Error finding uri in soap_call_function_handler");
@@ -1422,8 +1469,11 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			xmlFreeDoc(request);
 
 			get_http_soap_response(getThis(), &buffer, &len);
+
 			parse_packet_soap(getThis(), buffer, len, NULL, function, &ret_params, &num_params);
+
 			efree(buffer);
+
 
 			if(num_params > 0)
 			{
@@ -1476,6 +1526,8 @@ void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 		add_property_zval(obj, "detail", fault_detail);
 	}
 }
+
+
 
 void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name, int *num_params, zval ***parameters)
 {
@@ -1555,6 +1607,8 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 	}
 	ENDFOREACH(trav);
 }
+
+
 
 
 
@@ -1855,6 +1909,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 void delete_sdl(void *handle)
 {
 	sdlPtr tmp = *((sdlPtr*)handle);
+
 
 	xmlFreeDoc(tmp->doc);
 	if(tmp->source)
