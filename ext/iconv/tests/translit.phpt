@@ -1,10 +1,7 @@
 --TEST--
 ICONV: LIBICONV transliteration (bug #16069)
 --SKIPIF--
-<?php
-include( 'skipif.inc' );
-if( empty( iconv( 'CP932', 'EUC-JP//TRANSLIT', '\x87\x6d' ) ) ) ) die("skip\n"); 
-?>
+<?php include('skipif.inc'); if(iconv('CP932', 'EUC-JP//TRANSLIT', '\x87\x6d') === FALSE) die("skip\n"); ?>
 --POST--
 --GET--
 --FILE--
