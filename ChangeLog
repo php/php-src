@@ -1,3 +1,45 @@
+2000-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/file.c: Not needed.
+
+2000-02-01  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/file.c: Compile fix
+
+2000-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/file.c
+      ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      TODO:
+    - Implemented socket_get_status() function. Some more stuff can be added
+      to it in the future.
+    - Renamed set_socket_timeout() to socket_set_timeout()
+    - Renamed set_socket_blocking() to socket_set_blocking() but kept the
+      old name for compatibility. It now outputs a warning that
+      set_socket_timeout() is deprecated but still goes through.
+
+    * TODO: Socket note.
+
+2000-02-01  Sam Ruby  <rubys@us.ibm.com>
+
+    * sapi/servlet/servlet.c:
+    Servlets work again!  OK, so it crashes on shutdown, apparently trying to
+    report a memory leak, but it is worth committing the progress so far.
+
+2000-02-01  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+    make it work without the zend_hash_pointer*() functions. some work on the shutdown issues (more to follow)
+
+2000-02-01  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO
+      ext/standard/file.c
+      ext/standard/file.h: Implemented realpath().
+
 2000-01-31  Zeev Suraski  <zeev@php.net>
 
     * NEWS
