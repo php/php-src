@@ -392,10 +392,8 @@ globtilde(pattern, patbuf, patbuf_len, pglob)
 		/*
 		 * Expand a ~user
 		 */
-		if ((pwd = getpwnam((char*) patbuf)) == NULL) {
-			fprintf (stderr, "here (%s)\n", patbuf);
+		if ((pwd = getpwnam((char*) patbuf)) == NULL)
 			return pattern;
-		}
 		else
 			h = pwd->pw_dir;
 	}
