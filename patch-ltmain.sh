@@ -1,10 +1,12 @@
---- /usr/local/share/libtool/ltmain.sh	Wed Jul 14 14:46:28 1999
-+++ ltmain.sh	Tue Oct  5 19:01:41 1999
-@@ -1955,6 +1955,7 @@
- 		    done
- 	      done
- 	      if test -n "$a_deplib" ; then
-+	      newdeplibs="$newdeplibs $a_deplib"
- 		droppeddeps=yes
- 		echo
- 		echo "*** Warning: This library needs some functionality provided by $a_deplib."
+*** ltmain.sh.orig	Wed Oct  6 15:10:21 1999
+--- ltmain.sh	Wed Oct  6 15:11:33 1999
+***************
+*** 1955,1960 ****
+--- 1955,1961 ----
+  		    done
+  	      done
+  	      if test -n "$a_deplib" ; then
++ 		newdeplibs="$newdeplibs $a_deplib"
+  		droppeddeps=yes
+  		echo
+  		echo "*** Warning: This library needs some functionality provided by $a_deplib."
