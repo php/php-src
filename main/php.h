@@ -246,7 +246,7 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define DONT_FREE 0
 #define DO_FREE 1
 
-#define PHP3_MIME_TYPE "application/x-httpd-php3"
+#define PHP_MIME_TYPE "application/x-httpd-php"
 
 /* macros */
 #undef MIN
