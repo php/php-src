@@ -73,7 +73,7 @@ ZEND_API inline void zend_ptr_stack_n_pop(zend_ptr_stack *stack, int count,...)
 	va_start(ptr, count);
 	while (count>0) {
 		elem = va_arg(ptr, void **);
-		*elem = *(stack->top_element--);
+		*elem = *(--stack->top_element);
 		stack->top--;
 		count--;
 	}
