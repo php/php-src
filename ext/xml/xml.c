@@ -39,6 +39,7 @@
 #include "php.h"
 #include "php3_xml.h"
 #include "zend_variables.h"
+#include "../standard/php3_string.h" /* XXX don't like it! */
 
 #if defined(THREAD_SAFE) && !PHP_31
 #undef THREAD_SAFE
@@ -96,6 +97,38 @@ DLEXPORT php3_module_entry *get_module() { return &xml_module_entry; };
 
 /* }}} */
 /* {{{ function prototypes */
+
+/* XXXXX this is AN UGLY HACK - we'll need to do a cleanup here!!! */
+
+#if PHP_API_VERSION >= 19990421
+#define php3tls_pval_destructor(a) pval_destructor(a)
+#endif                                                                                                                                              
+static pval *php3i_long_pval(long value)
+{
+    pval *ret = emalloc(sizeof(pval));
+ 
+    ret->type = IS_LONG;
+    ret->value.lval = value;
+	ret->is_ref = 0;
+	ret->refcount = 1;
+    return ret;
+}
+
+static pval *php3i_string_pval(const char *str)
+{
+    pval *ret = emalloc(sizeof(pval));
+    int len = strlen(str);
+ 
+    ret->type = IS_STRING;
+    ret->value.str.len = len;
+	ret->is_ref = 0;
+	ret->refcount = 1;
+    ret->value.str.val = estrndup(str, len);
+    return ret;
+} 
+
+/* end of UGLY HACK!!! */
+
 
 int php3_minit_xml(INIT_FUNC_ARGS);
 int php3_rinit_xml(INIT_FUNC_ARGS);
@@ -601,23 +634,23 @@ static int php3i_xmlcharlen(const XML_Char *s)
 /* {{{ php3i_add_to_info */
 static void php3i_add_to_info(xml_parser *parser,char *name)
 {
-	pval *element, values;
+	pval **element, *values;
 
 	if (! parser->info) {
 		return;
 	}
 
 	if (_php3_hash_find(parser->info->value.ht,name,strlen(name) + 1,(void **) &element) == FAILURE) {
-		if (array_init(&values) == FAILURE) {
+		values = emalloc(sizeof(pval));
+		if (array_init(values) == FAILURE) {
 			php3_error(E_ERROR, "Unable to initialize array");
 			return;
 		}
 		
-		_php3_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval), (void **) &element);
+		_php3_hash_update(parser->info->value.ht, name, strlen(name)+1, (void *) &values, sizeof(pval*), (void **) &element);
 	} 
 			
-	add_next_index_long(element,parser->curtag);
-
+	add_next_index_long(*element,parser->curtag);
 	
 	parser->curtag++;
 }
@@ -672,17 +705,19 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 		} 
 
 		if (parser->data) {
-			pval tag, atr;
+			pval *tag, *atr;
 			int atcnt = 0;
 
-			array_init(&tag);
-			array_init(&atr);
+			tag = emalloc(sizeof(pval));
+			atr = emalloc(sizeof(pval));
+			array_init(tag);
+			array_init(atr);
 
 			php3i_add_to_info(parser,((char *) name) + parser->toffset);
 
-			add_assoc_string(&tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
-			add_assoc_string(&tag,"type","open",1);
-			add_assoc_long(&tag,"level",parser->level);
+			add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
+			add_assoc_string(tag,"type","open",1);
+			add_assoc_long(tag,"level",parser->level);
 
 			parser->ltags[parser->level-1] = estrdup(name);
 			parser->lastwasopen = 1;
@@ -700,7 +735,7 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 												&decoded_len,
 												parser->target_encoding);
 				
-				add_assoc_stringl(&atr,key,decoded_value,decoded_len,0);
+				add_assoc_stringl(atr,key,decoded_value,decoded_len,0);
 				atcnt++;
 				if (parser->case_folding) {
 					efree(key);
@@ -709,12 +744,13 @@ void php3i_xml_startElementHandler(void *userData, const char *name,
 			}
 
 			if (atcnt) {
-				_php3_hash_add(tag.value.ht,"attributes",sizeof("attributes"),&atr,sizeof(pval),NULL);
+				_php3_hash_add(tag->value.ht,"attributes",sizeof("attributes"),&atr,sizeof(pval*),NULL);
 			} else {
-				php3tls_pval_destructor(&atr);
+				php3tls_pval_destructor(atr);
+				efree(atr);
 			}
 
-			_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval),(void *) &parser->ctag);
+			_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),(void *) &parser->ctag);
 		}
 
 		if (parser->case_folding) {
@@ -749,20 +785,22 @@ void php3i_xml_endElementHandler(void *userData, const char *name)
 		} 
 
 		if (parser->data) {
-			pval tag;
+			pval *tag;
 
 			if (parser->lastwasopen) {
-				add_assoc_string(parser->ctag,"type","complete",1);
+				add_assoc_string(*(parser->ctag),"type","complete",1);
 			} else {
-				array_init(&tag);
+				tag = emalloc(sizeof(pval));
+
+				array_init(tag);
 				  
 				php3i_add_to_info(parser,((char *) name) + parser->toffset);
 
-				add_assoc_string(&tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
-				add_assoc_string(&tag,"type","close",1);
-				add_assoc_long(&tag,"level",parser->level);
+				add_assoc_string(tag,"tag",((char *) name) + parser->toffset,1); /* cast to avoid gcc-warning */
+				add_assoc_string(tag,"type","close",1);
+				add_assoc_long(tag,"level",parser->level);
 				  
-				_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval),NULL);
+				_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
 			}
 
 			parser->lastwasopen = 0;
@@ -822,20 +860,22 @@ void php3i_xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 			}
 			if (doprint || (! parser->skipwhite)) {
 				if (parser->lastwasopen) {
-					add_assoc_string(parser->ctag,"value",decoded_value,0);
+					add_assoc_string(*(parser->ctag),"value",decoded_value,0);
 				} else {
-					pval tag;
+					pval *tag;
+
+					tag = emalloc(sizeof(pval));
 					
-					array_init(&tag);
+					array_init(tag);
 					
 					php3i_add_to_info(parser,parser->ltags[parser->level-1] + parser->toffset);
 
-					add_assoc_string(&tag,"tag",parser->ltags[parser->level-1] + parser->toffset,1);
-					add_assoc_string(&tag,"value",decoded_value,0);
-					add_assoc_string(&tag,"type","cdata",1);
-					add_assoc_long(&tag,"level",parser->level);
+					add_assoc_string(tag,"tag",parser->ltags[parser->level-1] + parser->toffset,1);
+					add_assoc_string(tag,"value",decoded_value,0);
+					add_assoc_string(tag,"type","cdata",1);
+					add_assoc_long(tag,"level",parser->level);
 					
-					_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval),NULL);
+					_php3_hash_next_index_insert(parser->data->value.ht,&tag,sizeof(pval*),NULL);
 				}
 			} else {
 				efree(decoded_value);
