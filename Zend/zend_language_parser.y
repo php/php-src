@@ -287,7 +287,7 @@ unticked_function_declaration_statement:
 ;
 
 unticked_class_declaration_statement:
-		T_CLASS declaration_class_name extends_from '{' { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+		T_CLASS T_STRING extends_from '{' { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 
 namespace_declaration_statement:
@@ -329,7 +329,7 @@ extends_from:
 
 declaration_class_name:
 		namespace_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { do_fetch_class_name(&$$, &$1, &$3, 0 TSRMLS_CC); }
-	|	T_STRING { $$ = $1; zend_str_tolower($$.u.constant.value.str.val, $$.u.constant.value.str.len); }
+	|	
 ;
 
 foreach_optional_arg:

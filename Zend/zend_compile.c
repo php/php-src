@@ -284,8 +284,6 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 
 	opline_ptr->op2.u.EA.type = ZEND_FETCH_LOCAL;
 	if (varname->op_type == IS_CONST && varname->u.constant.type == IS_STRING) {
-		zend_auto_global *auto_global;
-
 		if (zend_is_auto_global(varname->u.constant.value.str.val, varname->u.constant.value.str.len+1 TSRMLS_CC)) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 		} else {
@@ -2148,6 +2146,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_op *opline;
 	int doing_inheritance = 0;
 	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
+
+	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len); 
 
 	if (!(strcmp(class_name->u.constant.value.str.val, "main") && strcmp(class_name->u.constant.value.str.val, "self") &&
 			strcmp(class_name->u.constant.value.str.val, "parent"))) {
