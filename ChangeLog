@@ -1,3 +1,37 @@
+2004-05-06  Derick Rethans  <php@derickrethans.nl>
+
+    * tests/lang/bug22367.phpt:
+      - Fixed test
+
+2004-05-06  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/string.c:
+      Fixed a segfault. (It's possible for large offsets to make strrpos()
+      read past the end of the haystack string...)
+
+2004-05-06  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c:
+      fix line endings
+
+    * sapi/cgi/cgi_main.c:
+      Fix fastCGI breakage: due to calling flush on unitialized requests,
+      request was aborted unless ignore_user_abort is set
+
+2004-05-06  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/user_filters.c
+      main/streams/userspace.c:
+      Bugfix #28300 Userspace stream/filter names don't need to be lowercased.
+
+2004-05-06  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_pgsql.c:
+      Call functions by their new, proper names instead of what are now aliases.
+      Change OCIFetchInto (deprecated) to oci_fetch_array.
+
 2004-05-05  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * ext/interbase/ibase_query.c:
