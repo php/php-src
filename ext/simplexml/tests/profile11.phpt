@@ -12,9 +12,9 @@ $root = simplexml_load_string('<?xml version="1.0"?>
 </root>
 ');
 
-echo $root->children('reserved')->child;
+echo $root->children('reserved-ns')->child;
 echo "\n";
-echo $root->children('special')->child;
+echo $root->children('special-ns')->child;
 foreach ($root->child as $child) {
 	echo "$child\n";
 }
