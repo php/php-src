@@ -13,3 +13,17 @@ if (PHP_MSSQL == "yes") {
 		WARNING("mssql not enabled; libraries and headers not found");
 	}
 }
+
+ARG_WITH("freetds", "mssql support with freetds", "no");
+
+if (PHP_FREETDS == "yes") {
+	if (CHECK_LIB("sybdb.lib", "freetds", PHP_PHP_BUILD + "\\freetds") &&
+			CHECK_HEADER_ADD_INCLUDE("sybfront.h", "CFLAGS_FREETDS", PHP_PHP_BUILD + "\\freetds;" + PHP_FREETDS)) {
+		EXTENSION("freetds", "php_mssql.c");
+		ADD_FLAG("CFLAGS_FREETDS", "/D DBNTWIN32=1 /D MSSQL70=1");
+		AC_DEFINE('HAVE_FREETDS', 1, 'Have MSSQL support');
+		ADD_FLAG("CFLAGS_FREETDS", "/D HAVE_MSSQL /D MSSQL_EXPORTS /D COMPILE_DL_MSSQL");
+	} else {
+		WARNING("freetds not enabled; libraries and headers not found");
+	}
+}
