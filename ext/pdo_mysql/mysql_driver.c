@@ -30,11 +30,11 @@
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
-int _pdo_mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC) /* {{{ */
+int _pdo_mysql_error(char *what, int mysql_errno, const char *file, int line TSRMLS_DC) /* {{{ */
 {
 	switch (errno) {
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s:%d) %s: %d", file, line, what, errno);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "(%s:%d) %s: %d", file, line, what, mysql_errno);
 			break;
 	}
 	return errno;
@@ -83,8 +83,7 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	*quoted = emalloc(2*unquotedlen + 3);
 	(*quoted)[0] = '"';
-    *quotedlen = mysql_real_escape_string(H->server, *quoted + 1, 
-                                         unquoted, unquotedlen);
+	*quotedlen = mysql_real_escape_string(H->server, *quoted + 1, unquoted, unquotedlen);
 	(*quoted)[*quotedlen + 1] = '"';
 	(*quoted)[*quotedlen + 2] = '\0';
 	*quotedlen += 2;
@@ -111,7 +110,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{ "dbname",   "",	0 },
 		{ "host",   "localhost",	0 },
 		{ "port",   "3306",	0 },
-		{ "unix_socket",   "/var/tmp/mysql.sock",	0 },
+		{ "unix_socket",  PDO_MYSQL_UNIX_ADDR,	0 },
 	};
 
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 4);

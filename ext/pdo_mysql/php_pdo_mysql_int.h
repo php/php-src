@@ -53,7 +53,7 @@ typedef struct {
 
 extern pdo_driver_t pdo_mysql_driver;
 
-extern int _pdo_mysql_error(char *what, int errno, const char *file, int line TSRMLS_DC);
+extern int _pdo_mysql_error(char *what, int mysql_errno, const char *file, int line TSRMLS_DC);
 #define pdo_mysql_error(w,s)	_pdo_mysql_error(w, s, __FILE__, __LINE__ TSRMLS_CC)
 extern int mysql_handle_error(pdo_dbh_t *dbh, pdo_mysql_db_handle *H, int errcode);
 
