@@ -533,6 +533,7 @@ static void php_conv_base64_decode_dtor(php_conv_base64_decode *inst)
 	/* do nothing */
 }
 
+#define bmask(a) (0xffff >> (16 - a))
 static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
 {
 	php_conv_err_t err;
@@ -544,12 +545,6 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 	unsigned int ustat;
 
 	const static unsigned int nbitsof_pack = 8;
-
-	static unsigned int bmask[17] = {
-		0x0000, 0x0001, 0x0003, 0x0007, 0x000f, 0x001f, 0x003f, 0x007f,
-		0x00ff, 0x01ff, 0x03ff, 0x07ff, 0x0fff, 0x1fff, 0x3fff, 0x7fff,
-		0xffff
-	};
 
 	if (in_pp == NULL || in_left_p == NULL) {
 		if (inst->eos || inst->urem_nbits == 0) { 
@@ -580,7 +575,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 		} else {
 			urem_nbits -= pack_bcnt;
 			pack |= (urem >> urem_nbits);
-			urem &= bmask[urem_nbits];
+			urem &= bmask(urem_nbits);
 			pack_bcnt = 0;
 		}
 		if (pack_bcnt > 0) {
@@ -606,7 +601,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 				} else {
 					urem_nbits = 6 - pack_bcnt;
 					pack |= (i >> urem_nbits);
-					urem = i & bmask[urem_nbits];
+					urem = i & bmask(urem_nbits);
 					pack_bcnt = 0;
 				}
 			} else if (ustat) {
@@ -648,6 +643,7 @@ static php_conv_err_t php_conv_base64_decode_convert(php_conv_base64_decode *ins
 
 	return err;
 }
+#undef bmask
 /* }}} */
 
 /* {{{ php_conv_qprint_encode */
