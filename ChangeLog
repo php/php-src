@@ -1,3 +1,18 @@
+2004-12-13  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      Make it really build...
+
+2004-12-13  Joe Orton  <jorton@redhat.com>
+
+    * ext/gd/config.m4:
+      More PHP_LIBDIR fixes for lib64 platforms.
+
+2004-12-13  Derick Rethans  <php@derickrethans.nl>
+
+    * ZendEngine2/zend_operators.c:
+      - Added "G" modifier to ini setting number format.
+
 2004-12-12  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/file.c:
