@@ -1,3 +1,8 @@
+2005-02-21  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * Makefile.am:
+      - Add missing entry.
+
 2005-02-20  Dmitry Stogov  <dmitry@zend.com>
 
     * zend_compile.c:
