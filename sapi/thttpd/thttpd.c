@@ -165,6 +165,7 @@ static char *sapi_thttpd_read_cookies(SLS_D)
 static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
 {
 	char buf[BUF_SIZE + 1];
+	char *p;
 	TLS_FETCH();
 
 	php_register_variable("PHP_SELF", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
@@ -174,9 +175,13 @@ static void sapi_thttpd_register_variables(zval *track_vars_array ELS_DC SLS_DC 
 	php_register_variable("REQUEST_URI", SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
 	php_register_variable("PATH_TRANSLATED", SG(request_info).path_translated, track_vars_array ELS_CC PLS_CC);
 
-	strlcpy(buf, inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr), sizeof(buf));
-	ADD_STRING("REMOTE_ADDR");
-	ADD_STRING("REMOTE_HOST");
+	p = inet_ntoa(TG(hc)->client_addr.sa_in.sin_addr);
+	/* string representation of IPs are never larger than 512 bytes */
+	if (p) {
+		memcpy(buf, p, strlen(p) + 1);
+		ADD_STRING("REMOTE_ADDR");
+		ADD_STRING("REMOTE_HOST");
+	}
 
 	snprintf(buf, BUF_SIZE, "%d", TG(hc)->hs->port);
 	ADD_STRING("SERVER_PORT");
