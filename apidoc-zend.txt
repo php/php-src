@@ -238,7 +238,7 @@ registers two INI entries - "foo" and "bar".  They're given defaults "1"
 and "bah" respectively - note that all defaults are always given as
 strings.  That doesn't reduce your ability to use integer values, simply
 specify them as strings.  "foo" is marked so that it can be changed by
-anyone at any time (PHP_INI_ALL), whereas "foo" is marked so it can be
+anyone at any time (PHP_INI_ALL), whereas "bar" is marked so it can be
 changed only at startup in the php3.ini only, presumably, by the system
 administrator (PHP_INI_SYSTEM).
 When "foo" changes, no function is called.  Access to it is done using the
