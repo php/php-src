@@ -1,3 +1,78 @@
+2002-04-22  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * win32/readdir.c:
+    fixed access problem when japanese Shift_JIS character is used as directory name. Some characters in Shift_JIS are including 0x5c (slash) as second byte.
+
+2002-04-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h: remove unnecessary casts
+
+    * ext/session/mod_files.c:
+    Set the close-on-exec flag for fds.  Child processes should not inherit
+    the fd.
+
+    Also rip out the broken O_EXCL use.  Our file names are not unique and
+    this left a small window open where creating a session file would fail
+    (a, b notice that the file does not exist; a creates the file successfully;
+     b tries to create, but fails due to O_EXCL).
+
+2002-04-22  Jim Jagielski  <jim@jaguNET.com>
+
+    * sapi/apache2filter/apache_config.c: Typo in error string
+
+2002-04-22  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/rpc.c
+      ext/rpc/rpc_proxy.c:
+    set up a proxy object when requesting a reference to a variable
+
+    * ext/standard/php_smart_str.h: fixes a warning when compiling under win32
+
+2002-04-22  Marko Karppinen  <karppinen@pobox.com>
+
+    * sapi/apache2filter/config.m4: Refine the OS X support a bit
+
+    * sapi/apache2filter/config.m4:
+    Merged the Mac OS X compile changes from the Apache 1.3 SAPI.
+    --with-apxs2 should now work on Mac OS X / Darwin.
+
+    * NEWS: Prettify the NEWS entries
+
+    * CREDITS: Let's pretend this is up-to-date now
+
+2002-04-22  Harald Radi  <h.radi@nme.at>
+
+    * ext/rpc/com/com.c
+      ext/rpc/handler.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/rpc_proxy.c
+      ext/rpc/rpc_proxy.h:
+    changes related to the latest commit of the zend engine
+
+2002-04-22  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache2filter/php4apache2.dsp: Reverting my previous patch.
+
+2002-04-22  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Fix date
+
+2002-04-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/WebInstaller.php:
+    * Due to the recent changes in the installer stuff, the webinstaller
+      is not supported at the moment.
+
+2002-04-22  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c:
+    hash keys lengths include the NUL-byte, so we need to copy one byte less.
+
+    also add missing commas in the INSERT clause.
+
+    Noticed by: Yasuo Ohgaki
+
 2002-04-21  Jani Taskinen  <sniper@iki.fi>
 
     * ext/domxml/tests/.cvsignore: missing .cvsignore
