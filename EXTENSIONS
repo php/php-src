@@ -372,7 +372,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sablot
 PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
-MAINTENANCE:         Maintained
+MAINTENANCE:         Obsolete
 STATUS:              Experimental
 SINCE:               4.0.3
 -------------------------------------------------------------------------------
@@ -431,6 +431,11 @@ STATUS:              Working
 EXTENSION:           xml
 PRIMARY MAINTAINER:  Thies C. Arntzen <thies@thieso.net>
 MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
+EXTENSION:           xslt
+PRIMARY MAINTAINER:  Sterling Hughes <sterling@php.net>
+MAINTENANC:          Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           yaz
