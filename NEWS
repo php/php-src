@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- Stopped supporting Windows 95!
+- Fixed include_once()/require_once() on Windows to honor case-insensitivity of
+  files (Andi)
 - Moved extensions to PECL:
   . ext/db (Jani, Derick)
   . ext/qtdom (Jani, Derick)
