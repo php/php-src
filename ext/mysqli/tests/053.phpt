@@ -1,5 +1,7 @@
 --TEST--
 not freed resultset 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

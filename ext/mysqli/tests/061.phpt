@@ -1,5 +1,7 @@
 --TEST--
 local infile handler
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -15,6 +15,8 @@ mysqli_bind_result (SHOW)
 	$stmt->close();
 	mysqli_close($link);
 ?>
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

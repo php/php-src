@@ -1,5 +1,7 @@
 --TEST--
 function test: mysqli_insert_id()
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

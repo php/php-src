@@ -1,5 +1,7 @@
 --TEST--
 mysqli fetch long values
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -1,5 +1,7 @@
 --TEST--
 function test: mysqli_get_proto_info
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -1,5 +1,7 @@
 --TEST--
 mysqli fetch short values
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

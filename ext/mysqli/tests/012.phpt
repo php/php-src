@@ -2,6 +2,8 @@
 mysqli fetch mixed values 2
 --INI--
 precision=12
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

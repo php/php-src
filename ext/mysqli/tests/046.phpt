@@ -1,5 +1,7 @@
 --TEST--
 mysqli_stmt_affected_rows (delete)
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";

@@ -1,5 +1,7 @@
 --TEST--
 mysqli fetch mixed / mysql_query 
+--SKIPIF--
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 	include "connect.inc";
