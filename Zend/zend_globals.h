@@ -139,14 +139,14 @@ struct _zend_compiler_globals {
 
 	zend_llist filenames_list;
 
-	unsigned char short_tags;
-	unsigned char asp_tags;
+	zend_bool short_tags;
+	zend_bool asp_tags;
 
 	/* For extensions support */
-	unsigned char extended_info;	/* generate extension information for debugger/profiler */
-	unsigned char handle_op_arrays;	/* run op_arrays through op_array handlers */
+	zend_bool extended_info;	/* generate extension information for debugger/profiler */
+	zend_bool handle_op_arrays;	/* run op_arrays through op_array handlers */
 
-	unsigned char unclean_shutdown;
+	zend_bool unclean_shutdown;
 
 	zend_llist open_files;
 #ifdef ZTS

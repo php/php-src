@@ -73,6 +73,7 @@ AC_TYPE_SIZE_T
 dnl This is required for QNX and may be some BSD derived systems
 AC_CHECK_TYPE( uint, unsigned int )
 AC_CHECK_TYPE( ulong, unsigned long )
+AC_CHECK_TYPE( zend_bool, unsigned char )
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
