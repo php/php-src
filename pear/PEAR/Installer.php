@@ -483,6 +483,9 @@ class PEAR_Installer extends PEAR_Common
 
     function extractDownloadFileName($pkgfile, &$version)
     {
+        if (@is_file($pkgfile)) {
+            return $pkgfile;
+        }
         // regex defined in Common.php
         if (preg_match(PEAR_COMMON_PACKAGE_DOWNLOAD_PREG, $pkgfile, $m)) {
             $version = (isset($m[3])) ? $m[3] : null;
