@@ -556,7 +556,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"is" {
-	return T_IS_TYPE;
+	return T_IS_CLASS;
 }
 
 <ST_IN_SCRIPTING>"as" {
