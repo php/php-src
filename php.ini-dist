@@ -313,7 +313,7 @@ track_errors = Off
 ; leading '/'. You must also specify the file extension being used including 
 ; the dot.
 ; Note: Never use this feature for production boxes.
-;docref_root = /phpmanual/
+;docref_root = "/phpmanual/"
 ;docref_ext = .html
   
 ; String to output before an error message.
@@ -427,7 +427,7 @@ doc_root =
 user_dir =
 
 ; Directory in which the loadable extensions (modules) reside.
-extension_dir = ./
+extension_dir = "./"
 
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
