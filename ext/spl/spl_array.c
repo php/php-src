@@ -713,10 +713,11 @@ SPL_METHOD(Array, rewind)
  Seek to position. */
 SPL_METHOD(Array, seek)
 {
-	long position;
+	long opos, position;
 	zval *object = getThis();
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 	HashTable *aht = HASH_OF(intern->array);
+	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &position) == FAILURE) {
 		return;
@@ -729,7 +730,17 @@ SPL_METHOD(Array, seek)
 
 	zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
 	
-	while (position-- > 0 && spl_array_next(intern TSRMLS_CC) == SUCCESS);
+	opos = position;
+	while (position-- > 0 && (result = spl_array_next(intern TSRMLS_CC)) == SUCCESS);
+
+	if (intern->pos && intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+		/* fail */
+	} else {
+		if (zend_hash_has_more_elements_ex(aht, &intern->pos) == SUCCESS) {
+			return; /* ok */
+		}
+	}
+	zend_throw_exception_ex(zend_exception_get_default(), 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
 } /* }}} */
 
 int spl_array_object_count_elements(zval *object, long *count TSRMLS_DC) /* {{{ */
