@@ -125,6 +125,9 @@ for($i=0;$i<count($x2); $i++) {
 }
 var_dump($x1, $x2);
 
+echo "test failure:\n";
+$packager->package(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree' . DIRECTORY_SEPARATOR . 'package-fail.xml');
+
 unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pkg1-1.0.tgz');
 unlink(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pkg2-1.0.tgz');
 chdir($curdir);
@@ -421,3 +424,9 @@ array(4) {
     string(0) ""
   }
 }
+test failure:
+Analyzing multiplepackages\pkg2file.php
+Analyzing nestedroot\rootfile.php
+Analyzing nestedroot\emptydir\nesteddir\nestedfile.php
+Analyzing nestedroot\emptydir\nesteddir\doesntexist.php
+Caught error: File does not exist: nestedroot\emptydir\nesteddir\doesntexist.php
