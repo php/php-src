@@ -23,10 +23,10 @@
     
     $tidy->cleanRepair();
     
-    if(!empty($tidy->error_buf)) {
+    if(!empty($tidy->errorBuffer)) {
         
         echo "\n\nThe following errors or warnings occured:\n";
-        echo "{$tidy->error_buf}\n";
+        echo "{$tidy->errorBuffer}\n";
         
     }
     

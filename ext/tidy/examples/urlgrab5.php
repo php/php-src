@@ -12,7 +12,7 @@
      * Usage: php urlgrab5.php <file>
      *
      */
-    function dump_nodes(tidy_node $node, &$urls = NULL) {
+    function dump_nodes(tidyNode $node, &$urls = NULL) {
 
 	$urls = (is_array($urls)) ? $urls : array();
 	
