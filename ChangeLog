@@ -1,3 +1,9 @@
+2004-05-22  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      Use dummy status vector in ibase_connect()
+      Added fbird_ aliases for all ibase_ functions
+
 2004-05-21  Timm Friebe  <thekid@thekid.de>
 
     * ext/sybase_ct/php_sybase_ct.c:
