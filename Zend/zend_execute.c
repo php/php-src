@@ -4010,7 +4010,7 @@ int zend_add_interface_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ce->interfaces[EX(opline)->extended_value] = iface;
 
-	zend_do_implement_interface(ce, iface);
+	zend_do_implement_interface(ce, iface TSRMLS_CC);
 
 	NEXT_OPCODE();
 }
