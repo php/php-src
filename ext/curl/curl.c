@@ -48,12 +48,6 @@
 #include "ext/standard/file.h"
 #include "php_curl.h"
 
-#ifdef ZTS
-int curl_globals_id;
-#else
-php_curl_globals curl_globals;
-#endif
-
 static int le_curl;
 
 static void _php_curl_close(zend_rsrc_list_entry *rsrc);
@@ -315,7 +309,7 @@ PHP_FUNCTION(curl_init)
 
 		urlstr = estrndup(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
 		curl_easy_setopt(curl_handle->cp, CURLOPT_URL, urlstr);
-		zend_llist_add_element(&curl_handle->to_free,&urlstr);
+		zend_llist_add_element(&curl_handle->to_free, &urlstr);
 	}
 
 	curl_easy_setopt(curl_handle->cp, CURLOPT_NOPROGRESS, 1);
@@ -383,7 +377,7 @@ PHP_FUNCTION(curl_setopt)
 				copystr = estrndup(Z_STRVAL_PP(curl_value), Z_STRLEN_PP(curl_value));
 				
 				ret = curl_easy_setopt(curl_handle->cp, option, copystr);
-				zend_llist_add_element(&curl_handle->to_free,&copystr);
+				zend_llist_add_element(&curl_handle->to_free, &copystr);
 			}
 			break;
 			
