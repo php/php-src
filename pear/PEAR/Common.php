@@ -26,10 +26,10 @@ require_once 'PEAR/Config.php';
 
 // {{{ constants and globals
 
-define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^([A-Za-z][a-zA-Z0-9_]+|[a-z][a-z0-9_]+)$/');
+define('PEAR_COMMON_PACKAGE_NAME_PREG', '/^[A-Za-z][a-zA-Z0-9_]+$/');
 
 // XXX far from perfect :-)
-define('PEAR_COMMON_PACKAGE_DOWNLOAD_PREG', '/^([A-Z][a-zA-Z0-9_]+|[a-z][a-z0-9_]+)(-([.0-9a-zA-Z]+))?$/');
+define('PEAR_COMMON_PACKAGE_DOWNLOAD_PREG', '/^([A-Za-z][a-zA-Z0-9_]+)(-([.0-9a-zA-Z]+))?$/');
 
 /**
  * List of temporary files and directories registered by
