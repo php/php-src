@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added PEAR/Cache as a generic Caching System. (Sebastian, PEAR/Cache)
 - IMAP quota support (imap_set_quota, imap_get_quota) enabled/added via
   c-client2000 (kalowsky)
 - Upgraded PCRE to version 3.4. (Andrei)
