@@ -185,14 +185,9 @@ void init_executor(TSRMLS_D)
 	EG(float_separator)[0] = '.';
 }
 
-static void do_nothing(void *v)
-{
-}
-
 void shutdown_executor(TSRMLS_D)
 {
 	zend_try {
-		zend_ptr_stack_clean(&EG(arg_types_stack), do_nothing, 1);
 /* Removed because this can not be safely done, e.g. in this situation:
    Object 1 creates object 2
    Object 3 holds reference to object 2.
