@@ -142,6 +142,10 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return_value->type = IS_RESOURCE;\
 		return_value->value.lval = l;	\
 	}
+#define RETVAL_BOOL(b) {				\
+		return_value->type = IS_BOOL;	\
+		return_value->value.lval = b;	\
+	}
 #define RETVAL_LONG(l) {				\
 		return_value->type = IS_LONG;	\
 		return_value->value.lval = l;	\
@@ -171,6 +175,13 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return_value->value.lval = l;	\
 		return;							\
 	}
+
+#define RETURN_BOOL(b) {				\
+		return_value->type = IS_BOOL;	\
+		return_value->value.lval = b;	\
+		return;							\
+	}
+
 #define RETURN_LONG(l) {				\
 		return_value->type = IS_LONG;	\
 		return_value->value.lval = l;	\
