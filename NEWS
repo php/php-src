@@ -3,6 +3,9 @@ PHP 4.0                                                                    NEWS
 
 
 ?? ??? 2000, Version 4.0.4
+- Fixed a bug in session.c. The php_session_save_current_state did not check
+  if mod_data is NULL and such situation is possible if the user calls 
+  session_module_name with a parameter. (alex@zend.com)
 - IIS Admin mudule added
 - OCIBindByName() now does better parameter-checking. (Thies)
 - Attempted to make compile fixes for Solaris in ext/sockets/sockets.c (Chris Vandomelen)

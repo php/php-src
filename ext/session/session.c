@@ -579,12 +579,15 @@ static void php_session_save_current_state(PSLS_D)
 	  }
 	}
 
-	val = php_session_encode(&vallen PSLS_CC);
-	if (val) {
-		ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
-		efree(val);
-	} else
-		ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
+	if (PS(mod_data)) {
+		val = php_session_encode(&vallen PSLS_CC);
+		if (val) {
+			ret = PS(mod)->write(&PS(mod_data), PS(id), val, vallen);
+			efree(val);
+		} else {
+			ret = PS(mod)->write(&PS(mod_data), PS(id), "", 0);
+		}
+	}
 	
 	if (ret == FAILURE)
 		php_error(E_WARNING, "Failed to write session data (%s). Please "
@@ -594,7 +597,8 @@ static void php_session_save_current_state(PSLS_D)
 				PS(save_path));
 	
 	
-	PS(mod)->close(&PS(mod_data));
+	if (PS(mod_data))
+		PS(mod)->close(&PS(mod_data));
 }
 
 static char *month_names[] = {
