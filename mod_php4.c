@@ -391,7 +391,19 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 #define CONST_PREFIX
 #endif
 
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+}
+
+
+CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+}
+
+
+CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	php_per_dir_entry per_dir_entry;
 
@@ -400,7 +412,7 @@ CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, cha
 		php_module_startup(&sapi_module);
 		apache_php_initialized = 1;
 	}
-	per_dir_entry.type = PHP_INI_PERDIR;
+	per_dir_entry.type = mode;
 
 	per_dir_entry.key_length = strlen(arg1);
 	per_dir_entry.value_length = strlen(arg2);
@@ -418,7 +430,19 @@ CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, cha
 }
 
 
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
+}
+
+
+CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, php_apache_info_struct *conf, char *arg1, char *arg2)
+{
+	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
+}
+
+
+CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	char bool_val[2];
 
@@ -429,7 +453,7 @@ CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char
 	}
 	bool_val[1] = 0;
 	
-	return php_apache_value_handler(cmd, conf, arg1, bool_val);
+	return php_apache_value_handler_ex(cmd, conf, arg1, bool_val, mode);
 }
 
 
@@ -523,7 +547,9 @@ handler_rec php_handlers[] =
 command_rec php_commands[] =
 {
 	{"php_value",		php_apache_value_handler, NULL, OR_OPTIONS, TAKE2, "PHP Value Modifier"},
-	{"php_flag",			php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
+	{"php_flag",		php_apache_flag_handler, NULL, OR_OPTIONS, TAKE2, "PHP Flag Modifier"},
+	{"php_admin_value",	php_apache_admin_value_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Value Modifier (Admin)"},
+	{"php_admin_flag",	php_apache_admin_flag_handler, NULL, ACCESS_CONF|RSRC_CONF, TAKE2, "PHP Flag Modifier (Admin)"},
 	{NULL}
 };
 

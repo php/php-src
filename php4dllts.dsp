@@ -794,6 +794,10 @@ InputPath=".\configuration-scanner.l"
 
 SOURCE=.\LICENSE
 # End Source File
+# Begin Source File
+
+SOURCE=".\php.ini-dist"
+# End Source File
 # End Group
 # End Target
 # End Project
