@@ -47,7 +47,7 @@
 #include "php_globals.h"
 #include "php_ini.h"
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 #include <winsock.h>
 #else
 #include "build-defs.h"
