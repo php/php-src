@@ -104,8 +104,8 @@ int link_insert_id_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 	MYSQL *mysql = (MYSQL*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ALLOC_ZVAL(*retval);
 
-	if (mysql->insert_id < LONG_MAX) {
-		ZVAL_LONG(*retval, (long)mysql->last_used_con->insert_id);
+	if (mysql->last_used_con->insert_id < LONG_MAX) {
+		ZVAL_LONG(*retval, mysql->last_used_con->insert_id);
 	} else {
 		char ret[40];	
 		sprintf(ret, "%llu", mysql->last_used_con->insert_id);
@@ -114,6 +114,7 @@ int link_insert_id_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 	return SUCCESS;
 }
 /* }}} */
+
 /* link properties */
 MYSQLI_MAP_PROPERTY_LONG(link_client_flags_read, MYSQL, client_flag);
 MYSQLI_MAP_PROPERTY_LONG(link_errno_read, MYSQL, net.last_errno);
