@@ -4,7 +4,7 @@ HTML entities
 --GET--
 --FILE--
 <?php 
-setlocale ("LC_CTYPE", "C");
+setlocale (LC_CTYPE, "C");
 echo htmlspecialchars ("<>\"&åÄ\n");
 echo htmlentities ("<>\"&åÄ\n");
 ?>
