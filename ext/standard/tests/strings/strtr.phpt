@@ -1,7 +1,5 @@
 --TEST--
 strtr() function
---POST--
---GET--
 --FILE--
 <?php
 $trans = array("hello" => "hi", "hi" => "hello","a" => "A","world" => "planet");
