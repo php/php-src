@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2004, PHP 5.0.2
 - Added PHP_EOL constant that contains the OS way of representing newlines.
   (Paul Hudson, Derick)
+- Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path does not
+  have trailing slash). (Ilia)
 - Fixed bug #29656 (segfault on result and statement properties) (Georg)
 
 12 Aug 2004, PHP 5.0.1
