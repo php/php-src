@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
 - Added version_compare() function (Stig)
-- Don't throw a file does not exist warning for the is_dir(), is_writeable(),
+- Don't throw a 'file does not exist' warning for the is_dir(), is_writeable(),
   is_readable(), is_executable(), is_link() and is_file() functions. (Sterling)
 - Added array_change_key_case() function that returns array with
   with all string keys lowercased or uppercased (EdinK)
