@@ -36,36 +36,6 @@ ps_module ps_mod_sqlite = {
 	PS_MOD(sqlite)
 };
 
-/* If you change the logic here, please also update the error message in
- * ps_sqlite_open() appropriately (code taken from ps_files_valid_key()) */
-
-static int ps_sqlite_valid_key(const char *key)
-{
-	size_t len;
-	const char *p;
-	char c;
-	int ret = 1;
-
-	for (p = key; (c = *p); p++) {
-		/* valid characters are a..z,A..Z,0..9 */
-		if (!((c >= 'a' && c <= 'z')
-				|| (c >= 'A' && c <= 'Z')
-				|| (c >= '0' && c <= '9')
-				|| c == ','
-				|| c == '-')) {
-			ret = 0;
-			break;
-		}
-	}
-
-	len = p - key;
-	
-	if (len == 0)
-		ret = 0;
-	
-	return ret;
-}
-
 PS_OPEN_FUNC(sqlite) 
 {
 	char *errmsg = NULL;
@@ -119,11 +89,6 @@ PS_READ_FUNC(sqlite)
 	*val = NULL;
 	*vallen = 0;
 	
-	if (!ps_sqlite_valid_key(key)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: The session id contains illegal characters, valid characters are a-z, A-Z, 0-9 and '-,'");
-		return FAILURE;
-	}
-
 	query = sqlite_mprintf("SELECT value FROM session_data WHERE sess_id='%q' LIMIT 1", key);
 	if (query == NULL) {
 		/* no memory */
