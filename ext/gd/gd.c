@@ -50,11 +50,6 @@ static int le_gd, le_gd_font;
 static int le_ps_font, le_ps_enc;
 #endif
 
-#ifdef ZTS
-int gd_globals_id;
-#else
-static php_gd_globals gd_globals;
-#endif
 
 #include <gd.h>
 #include <gdfontt.h>  /* 1 Tiny font */
