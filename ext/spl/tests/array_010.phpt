@@ -1,5 +1,7 @@
 --TEST--
 SPL: ArrayIterator implements ArrayAccess
+--SKIPIF--
+<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 
