@@ -159,17 +159,12 @@ void do_binary_assign_op(int op, znode *result, znode *op1, znode *op2 CLS_DC)
 
 void do_fetch_globals(znode *varname CLS_DC)
 {
-	if (!CG(active_op_array)->initialized_globals
+	if (!CG(active_op_array)->uses_globals
 		&& varname->op_type == IS_CONST
 		&& varname->u.constant.type == IS_STRING
 		&& varname->u.constant.value.str.len == (sizeof("GLOBALS")-1)
 		&& !memcmp(varname->u.constant.value.str.val, "GLOBALS", sizeof("GLOBALS")-1)) {
-		zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
-
-		opline->opcode = ZEND_INIT_GLOBALS;
-		SET_UNUSED(opline->op1);
-		SET_UNUSED(opline->op2);
-		CG(active_op_array)->initialized_globals = 1;
+		CG(active_op_array)->uses_globals = 1;
 	}
 }
 
