@@ -479,6 +479,7 @@ memmove \
 mkstemp \
 mmap \
 nl_langinfo \
+perror \
 poll \
 putenv \
 realpath \
