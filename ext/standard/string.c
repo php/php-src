@@ -2256,6 +2256,9 @@ static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *
 		switch (zend_hash_get_current_key_ex(hash, &string_key, &string_key_len, &num_key, 0, &hpos)) {
 			case HASH_KEY_IS_STRING:
 				len = string_key_len-1;
+				if (len < 1) {
+					RETURN_FALSE;
+				}
 				if (len > maxlen) {
 					maxlen = len;
 				}
