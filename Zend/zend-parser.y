@@ -437,8 +437,8 @@ common_scalar:
 		LNUMBER 					{ $$=$1; }
 	|	DNUMBER 					{ $$=$1; }
 	|	CONSTANT_ENCAPSED_STRING	{ $$ = $1; }
-	|	ZEND_LINE 
-	|	ZEND_FILE 
+	|	ZEND_LINE 					{ $$ = $1; }
+	|	ZEND_FILE 					{ $$ = $1; }
 ;
 
 
