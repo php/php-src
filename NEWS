@@ -1,6 +1,20 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
+?? Jan 2001, Version 4.0.4pl1
+- Fixed a bug that could cause invalid INI entries to be used under certain
+  circumstances (Zeev)
+- Fixed a bug in the Apache module that could cause invalid INI values to
+  propogate to different virtual hosts, if one or more of the virtual
+  hosts was configured with engine=Off (Zeev)
+- Fixed possible crash bugs in the session module (Sascha)
+- Fixed the ODBC module to build properly with Solid 3.0 and OpenLink (Dan
+  Kalowsky)
+- Fixed possible corruption of line number information in PHP scripts (Zeev,
+  Zend Engine)
+- Fixed a few possible crashes in functions that use user-defined callbacks
+  (Zeev, Zend Engine)
+
 19 Dec 2000, Version 4.0.4
 - Allow assigning a newly created object by reference. This is needed only if 
   your constructor makes other data structures reference the $this object (for 
