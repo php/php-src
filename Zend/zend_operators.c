@@ -299,15 +299,30 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			if (op->value.obj.handlers->cast_object) {
+			{
 				TSRMLS_FETCH();
-				if (op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
-					break;
+
+				if (op->value.obj.handlers->cast_object) {
+					if (op->value.obj.handlers->cast_object(op, op, IS_LONG, 1 TSRMLS_CC) == SUCCESS) {
+						break;
+					}
+				} else {
+					int retval = 1;
+					
+					if (EG(ze1_compatibility_mode)) {
+						HashTable *ht = Z_OBJPROP_P(op);
+						if (ht) {
+							retval = (zend_hash_num_elements(ht)?1:0);
+						}
+					} else {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to integer", Z_OBJCE_P(op)->name);
+					}
+
+					zval_dtor(op);
+					ZVAL_LONG(op, retval);
 				}
+				break;
 			}
-			zval_dtor(op);
-			op->value.lval = 1;
-			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
 			zval_dtor(op);
@@ -352,15 +367,31 @@ ZEND_API void convert_to_double(zval *op)
 			op->value.dval = tmp;
 			break;
 		case IS_OBJECT:
-			if (op->value.obj.handlers->cast_object) {
+			{
 				TSRMLS_FETCH();
-				if (op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
-					break;
+
+				if (op->value.obj.handlers->cast_object) {
+					TSRMLS_FETCH();
+					if (op->value.obj.handlers->cast_object(op, op, IS_DOUBLE, 1 TSRMLS_CC) == SUCCESS) {
+						break;
+					}
+				} else {
+					double retval = 1.0;
+					
+					if (EG(ze1_compatibility_mode)) {
+						HashTable *ht = Z_OBJPROP_P(op);
+						if (ht) {
+							retval = (zend_hash_num_elements(ht)?1.0:0.0);
+						}
+					} else {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
+					}
+
+					zval_dtor(op);
+					ZVAL_DOUBLE(op, retval);
 				}
-			}
-			zval_dtor(op);
-			op->value.dval = 1; /* TBI!! */
-			break;			
+				break;
+			}	
 		default:
 			zend_error(E_WARNING, "Cannot convert to real value (type=%d)", op->type);
 			zval_dtor(op);
@@ -427,15 +458,30 @@ ZEND_API void convert_to_boolean(zval *op)
 			op->value.lval = tmp;
 			break;
 		case IS_OBJECT:
-			if (op->value.obj.handlers->cast_object) {
+			{
 				TSRMLS_FETCH();
-				if (op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
-					break;
+
+				if (op->value.obj.handlers->cast_object) {
+					if (op->value.obj.handlers->cast_object(op, op, IS_BOOL, 1 TSRMLS_CC) == SUCCESS) {
+						break;
+					}
+				} else {
+					zend_bool retval = 1;
+					
+					if (EG(ze1_compatibility_mode)) {
+						HashTable *ht = Z_OBJPROP_P(op);
+						if (ht) {
+							retval = (zend_hash_num_elements(ht)?1:0);
+						}
+					} else {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to boolean", Z_OBJCE_P(op)->name);
+					}
+
+					zval_dtor(op);
+					ZVAL_BOOL(op, retval);
 				}
+				break;
 			}
-			zval_dtor(op);
-			op->value.lval = 1; /* TBI!! */
-			break;
 		default:
 			zval_dtor(op);
 			op->value.lval = 0;
