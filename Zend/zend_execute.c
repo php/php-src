@@ -1450,6 +1450,7 @@ do_fcall_common:
 						EG(opline_ptr) = &opline;
 						EG(active_op_array) = op_array;
 						EG(return_value)=original_return_value;
+						EG(destroying_function_symbol_table) = 1;
 						if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
 							zend_hash_destroy(function_state.function_symbol_table);
 							efree(function_state.function_symbol_table);
@@ -1457,6 +1458,7 @@ do_fcall_common:
 							*(++EG(symtable_cache_ptr)) = function_state.function_symbol_table;
 							zend_hash_clean(*EG(symtable_cache_ptr));
 						}
+						EG(destroying_function_symbol_table) = 0;
 						EG(active_symbol_table) = calling_symbol_table;
 					} else { /* ZEND_OVERLOADED_FUNCTION */
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
