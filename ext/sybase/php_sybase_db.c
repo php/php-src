@@ -743,7 +743,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				memset(res_buf,' ',res_length+1);  /* XXX i'm sure there's a better way
 													  but i don't have sybase here to test
 													  991105 thies@thieso.net  */
-				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), res_length,SYBCHAR,res_buf,res_length);
+				dbconvert(NULL,coltype(offset),dbdata(sybase_ptr->link,offset), src_length,SYBCHAR,res_buf,res_length);
 		
 				/* get rid of trailing spaces */
 				p = res_buf + res_length;
