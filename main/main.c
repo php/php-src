@@ -1330,11 +1330,11 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 	}
 
 	op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
+	zend_destroy_file_handle(file CLS_CC);
 
 	if (op_array) {
 		destroy_op_array(op_array);
 		efree(op_array);
-		zend_destroy_file_handle(file CLS_CC);
 		return SUCCESS;
 	} else {
 		return FAILURE;
