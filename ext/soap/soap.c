@@ -165,6 +165,7 @@ PHP_METHOD(soapserver,getfunctions);
 PHP_METHOD(soapserver,handle);
 PHP_METHOD(soapserver,setpersistence);
 PHP_METHOD(soapserver,bind);
+PHP_METHOD(soapserver,fault);
 #ifdef HAVE_PHP_DOMXML
 PHP_METHOD(soapserver,map);
 #endif
@@ -216,6 +217,7 @@ static zend_function_entry soap_server_functions[] = {
 	PHP_ME(soapserver, getfunctions, NULL, 0)
 	PHP_ME(soapserver, handle, NULL, 0)
 	PHP_ME(soapserver, bind, NULL, 0)
+	PHP_ME(soapserver, fault, NULL, 0)
 #ifdef HAVE_PHP_DOMXML
 	PHP_ME(soapserver, map, NULL, 0)
 #endif
@@ -1343,6 +1345,22 @@ PHP_METHOD(soapserver, handle)
 	SOAP_SERVER_END_CODE();
 }
 
+PHP_METHOD(soapserver, fault)
+{
+	char *code, *string, *actor=NULL;
+	int code_len, string_len, actor_len;
+	zval* details = NULL;
+
+	SOAP_SERVER_BEGIN_CODE();
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|sz",
+	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details) == FAILURE) {
+		php_error(E_ERROR, "Invalid parameters passed to soapserver:fault");
+	}
+	soap_server_fault(code, string, actor, details TSRMLS_CC);
+	SOAP_SERVER_END_CODE();
+}
+
 static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC)
 {
 	int soap_version;
@@ -2440,7 +2458,7 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 	if (Z_TYPE_P(ret) == IS_OBJECT &&
 		Z_OBJCE_P(ret) == soap_fault_class_entry) {
 		body = xmlNewChild(envelope, ns, "Body", NULL);
-		use = SOAP_ENCODED;
+		use = SOAP_LITERAL;
 		if (version == SOAP_1_1) {
 			HashTable* prop;
 			zval **tmp;
@@ -2473,6 +2491,7 @@ static xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_
 			}
 			if (zend_hash_find(prop, "detail", sizeof("detail"), (void**)&tmp) == SUCCESS &&
 			    Z_TYPE_PP(tmp) != IS_NULL) {
+	  		/*FIXME: use = SOAP_ENCODED;*/
 				seralize_zval(*tmp, NULL, "detail", use, param TSRMLS_CC);
 			}
 		} else {
