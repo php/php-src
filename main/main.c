@@ -873,6 +873,10 @@ int php_request_startup(TSRMLS_D)
 {
 	int retval = SUCCESS;
 
+#ifdef PHP_WIN32
+	CoInitialize(NULL);
+#endif
+
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
@@ -1072,6 +1076,10 @@ void php_request_shutdown(void *dummy)
 	zend_try { 
 		zend_unset_timeout(TSRMLS_C);
 	} zend_end_try();
+
+#ifdef PHP_WIN32
+	CoUninitialize();
+#endif
 }
 /* }}} */
 

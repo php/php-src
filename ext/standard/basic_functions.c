@@ -1133,10 +1133,6 @@ PHP_MSHUTDOWN_FUNCTION(basic)
 
 PHP_RINIT_FUNCTION(basic)
 {
-#ifdef PHP_WIN32
-	CoInitialize(NULL);
-#endif
-
 	memset(BG(strtok_table), 0, 256);
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
@@ -1227,10 +1223,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 	if (BG(mmap_file)) {
 		munmap(BG(mmap_file), BG(mmap_len));
 	}
-#endif
-
-#ifdef PHP_WIN32
-	CoUninitialize();
 #endif
 
 	return SUCCESS;
