@@ -99,6 +99,8 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	ulong num_key;
 	char *elem_esc = NULL;
 
+	zend_is_auto_global(name, name_length TSRMLS_CC);
+
 	if (zend_hash_find(&EG(symbol_table), name, name_length+1, (void **) &data)!=FAILURE
 		&& (Z_TYPE_PP(data)==IS_ARRAY)) {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
