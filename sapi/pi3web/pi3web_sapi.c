@@ -40,9 +40,7 @@
 #include "PiAPI.h"
 #include "Pi3API.h"
 
-#define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
 #define PI3WEB_SERVER_VAR_BUF_SIZE 1024
-#define PI3WEB_POST_DATA_BUF 1024
 
 int IWasLoaded=0;
 
@@ -233,7 +231,7 @@ static int sapi_pi3web_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	DWORD read_from_input=0;
 	DWORD total_read=0;
 
-	if (SG(read_post_bytes) < lpCB->cbAvailable) {
+	if ((DWORD)SG(read_post_bytes) < lpCB->cbAvailable) {
 		read_from_buf = MIN(lpCB->cbAvailable-SG(read_post_bytes), count_bytes);
 		memcpy(buffer, lpCB->lpbData+SG(read_post_bytes), read_from_buf);
 		total_read += read_from_buf;
@@ -385,7 +383,7 @@ static sapi_module_struct pi3web_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
+MODULE_API DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 {
 	zend_file_handle file_handle;
 	int iRet = PIAPI_COMPLETED;
@@ -454,7 +452,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 	return iRet;
 }
 
-BOOL PHP4_startup() {
+MODULE_API BOOL PHP4_startup() {
 	tsrm_startup(1, 1, 0, NULL);
 	sapi_startup(&pi3web_sapi_module);
 	if (pi3web_sapi_module.startup) {
@@ -464,7 +462,7 @@ BOOL PHP4_startup() {
 	return IWasLoaded;
 };
 
-BOOL PHP4_shutdown() {
+MODULE_API BOOL PHP4_shutdown() {
 	if (pi3web_sapi_module.shutdown) {
 		pi3web_sapi_module.shutdown(&pi3web_sapi_module);
 	};
