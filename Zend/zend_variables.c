@@ -115,6 +115,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_LONG:
 		case IS_NULL:
 			break;
+		case IS_CONSTANT:
 		case IS_STRING:
 			if (zvalue->value.str.val) {
 				if (zvalue->value.str.len==0) {
