@@ -1,7 +1,7 @@
 --TEST--
 iconv test
 --SKIPIF--
-<?php if (!extension_loaded("iconv")) print "skip"; ?>
+<?php include('skipif.inc'); ?>
 --POST--
 --GET--
 --FILE--
