@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added experimental support for Simplified Chinese, Traditional
+  Chinese and Korean encoding in mbstring. (Rui)
 - Win32 mail() supports parsing 'From:' field from header (msisolak@yahoo.com, Markus).
 - Improve IMAP performance when dealing with large mailboxes.
 - Minor fix to rmdir() under safe-mode (Rasmus)
