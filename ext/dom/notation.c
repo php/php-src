@@ -49,7 +49,7 @@ int dom_notation_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNotationPtr nodep;
 
-	nodep = obj->ptr;
+	nodep = (xmlNotationPtr) dom_object_get_node(obj);
 	ALLOC_ZVAL(*retval);
 	if (nodep->PublicID) {
 		ZVAL_STRING(*retval, (char *) (nodep->PublicID), 1);
@@ -73,7 +73,7 @@ int dom_notation_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNotationPtr nodep;
 
-	nodep = obj->ptr;
+	nodep = (xmlNotationPtr) dom_object_get_node(obj);
 	ALLOC_ZVAL(*retval);
 	if (nodep->SystemID) {
 		ZVAL_STRING(*retval, (char *) (nodep->PublicID), 1);

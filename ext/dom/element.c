@@ -107,7 +107,7 @@ int dom_element_tag_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
 	xmlNodePtr nodep;
 
-	nodep = obj->ptr;
+	nodep = dom_object_get_node(obj);
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, (char *) (nodep->name), 1);
 	return SUCCESS;
@@ -296,7 +296,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
-			if (oldobj->ptr == attrp) {
+			if (oldobj->ptr->node == (xmlNodePtr) attrp) {
 				RETURN_NULL();
 			}
 			xmlUnlinkNode((xmlNodePtr) existattrp);
@@ -637,7 +637,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
-			if (oldobj->ptr == attrp) {
+			if (oldobj->ptr->node == (xmlNodePtr) attrp) {
 				RETURN_NULL();
 			}
 			xmlUnlinkNode((xmlNodePtr) existattrp);

@@ -107,8 +107,7 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDtdPtr dtdptr;
 	int ret;
 
-	docp = obj->ptr;
-
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	dtdptr = xmlGetIntSubset(docp);
 	if (!dtdptr) {
@@ -155,7 +154,7 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlNode *root;
 	int ret;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	root = xmlDocGetRootElement(docp);
 	if (!root) {
@@ -204,7 +203,7 @@ int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp;
 	char *encoding;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	encoding = (char *) docp->encoding;
 	ALLOC_ZVAL(*retval);
 
@@ -253,7 +252,7 @@ int dom_document_standalone_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp;
 	int standalone;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	ALLOC_ZVAL(*retval);
 	standalone = docp->standalone;
 	ZVAL_BOOL(*retval, standalone);
@@ -266,7 +265,7 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 	xmlDoc *docp;
 	int standalone;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	standalone = Z_LVAL_P(newval);
     if (standalone > 0) {
         docp->standalone = 1;
@@ -295,7 +294,7 @@ int dom_document_version_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp;
 	char *version;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	version = (char *) docp->version;
 	ALLOC_ZVAL(*retval);
 
@@ -312,7 +311,7 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	xmlDoc *docp;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	if (docp->version != NULL) {
 		xmlFree((xmlChar *) docp->version );
 	}
@@ -357,7 +356,7 @@ int dom_document_document_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp;
 	char *url;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 
 	ALLOC_ZVAL(*retval);
 	url = (char *) docp->URL;
@@ -374,7 +373,7 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 {
 	xmlDoc *docp;
 
-	docp = obj->ptr;
+	docp = (xmlDocPtr) dom_object_get_node(obj);
 	if (docp->URL != NULL) {
 		xmlFree((xmlChar *) docp->URL);
 	}
@@ -975,6 +974,7 @@ PHP_FUNCTION(dom_document_document)
 	if (intern != NULL) {
 		olddoc = (xmlDocPtr)intern->ptr;
 		if (olddoc != NULL) {
+			decrement_node_ptr(intern TSRMLS_CC);
 			refcount = decrement_document_reference(intern TSRMLS_CC);
 			if (refcount != 0) {
 				olddoc->_private = NULL;
@@ -983,7 +983,7 @@ PHP_FUNCTION(dom_document_document)
 		intern->document = NULL;
 		increment_document_reference(intern, docp TSRMLS_CC);
 
-		php_dom_set_object(intern, docp TSRMLS_CC);
+		php_dom_set_object(intern, (xmlNodePtr) docp TSRMLS_CC);
 	}
 
 	add_property_bool(id, "formatOutput", 0);
@@ -1019,6 +1019,7 @@ PHP_FUNCTION(dom_document_load)
 		if (intern != NULL) {
 			docp = (xmlDocPtr)intern->ptr;
 			if (docp != NULL) {
+				decrement_node_ptr(intern TSRMLS_CC);
 				refcount = decrement_document_reference(intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
@@ -1028,7 +1029,7 @@ PHP_FUNCTION(dom_document_load)
 			increment_document_reference(intern, newdoc TSRMLS_CC);
 		}
 
-		php_dom_set_object(intern, newdoc TSRMLS_CC);
+		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
 
 		RETURN_TRUE;
 	} else {
@@ -1064,6 +1065,7 @@ PHP_FUNCTION(dom_document_loadxml)
 		if (intern != NULL) {
 			docp = (xmlDocPtr)intern->ptr;
 			if (docp != NULL) {
+				decrement_node_ptr(intern TSRMLS_CC);
 				refcount = decrement_document_reference(intern TSRMLS_CC);
 				if (refcount != 0) {
 					docp->_private = NULL;
@@ -1074,7 +1076,7 @@ PHP_FUNCTION(dom_document_loadxml)
 			increment_document_reference(intern, newdoc TSRMLS_CC);
 		}
 
-		php_dom_set_object(intern, newdoc TSRMLS_CC);
+		php_dom_set_object(intern, (xmlNodePtr) newdoc TSRMLS_CC);
 
 		RETURN_TRUE;
 	} else {
