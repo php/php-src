@@ -18,7 +18,6 @@ CREDIT_LINE("Caudium / Roxen", "David Hedbor");
 CREDIT_LINE("CGI / FastCGI", "Rasmus Lerdorf, Stig Bakken, Shane Caraveo");
 CREDIT_LINE("CLI", "Edin Kadribasic, Marcus Boerger");
 CREDIT_LINE("Embed", "Edin Kadribasic");
-CREDIT_LINE("fastcgi", "Ben Mansell");
 CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
 CREDIT_LINE("Java Servlet", "Sam Ruby");
 CREDIT_LINE("NSAPI", "Jayakumar Muthukumarasamy");
