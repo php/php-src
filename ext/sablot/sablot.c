@@ -1394,27 +1394,16 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 
 static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_error errors_start, int code, int level)
 {
-    int len = 0,
-        pos = 0;
     char *errstr = NULL;
     SABLOTLS_FETCH();
     
     errors = errors_start.next;
     while (errors) {
-        len = pos + strlen(errors->key) + sizeof(": ") + strlen(errors->value) + sizeof("\n");
-        
-        /** 
-         * Could be a problem, I just hate looping through strings
-         * more than I have to ;-)
-         */
-        if (pos)
-            errstr = erealloc(errstr, len);
-        else
-            errstr = emalloc(len+1);
-        
-        sprintf(errstr + pos, "%s: %s\n", errors->key, errors->value);
-        
-        pos = len;
+    	if (strcmp(errors->key, "msg") == 0) {
+    		errstr = estrdup(errors->value);
+    		break;
+    	}
+
         errors = errors->next;
     }
     
@@ -1427,6 +1416,8 @@ static void _php_sablot_standard_error(php_sablot_error *errors, php_sablot_erro
             php_error(E_WARNING, errstr);
             break;
     }
+    
+    efree(errstr);
 }
 
 /* }}} */
