@@ -694,12 +694,13 @@ PHP_FUNCTION(vpopmail_auth_user)
 	zval **password;
 	zval **apop;
 	struct passwd *retval;
+	int argc=ZEND_NUM_ARGS();
 
-	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4
+	if (argc < 3 || argc > 4
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain, &password, &apop) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if (ZEND_NUM_ARGS() > 3)
+	if (argc > 3)
 		convert_to_string_ex(apop);
 
 	convert_to_string_ex(user);
@@ -713,7 +714,7 @@ PHP_FUNCTION(vpopmail_auth_user)
 	retval = vauth_user(Z_STRVAL_PP(user),
 						Z_STRVAL_PP(domain),
 						Z_STRVAL_PP(password),
-						Z_STRVAL_PP(apop));
+						(argc>3)?Z_STRVAL_PP(apop):"");
 
 	/* 
 	 * we do not set vpopmail_errno here - it is considered auth_user cannot fail; insted it does not auth
