@@ -30,7 +30,6 @@
 #include "zend_constants.h"
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
-#include "zend_vm.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -1074,7 +1073,7 @@ void execute_new_code(TSRMLS_D)
 			opline->op2.u.constant.is_ref = 1;
 			opline->op2.u.constant.refcount = 2;
 		}
-		ZEND_VM_SET_OPCODE_HANDLER(opline);
+		opline->handler = zend_opcode_handlers[opline->opcode];
 		opline++;
 	}
 
