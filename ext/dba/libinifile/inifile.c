@@ -254,40 +254,12 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
 	val_type val;
 	int res, grp_eq = 0;
 
-	if (skip == -1) {
-		if (dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key TSRMLS_CC)) {
-			/* we got it already from last fetch */
-			val.value = estrdup(dba->next.val.value ? dba->next.val.value : "");
-			/* allow faster access by automatically getting next key */
-			php_stream_seek(dba->fp, dba->next.pos, SEEK_SET);
-			ln.key.group = estrdup(dba->next.key.group ? dba->next.key.group : "");
-			inifile_read(dba, &ln TSRMLS_CC);
-			inifile_line_free(&dba->next);
-			dba->next = ln;
-			return val;
-		} else if (dba->curr.key.group && dba->curr.key.name && !inifile_key_cmp(&dba->curr.key, key TSRMLS_CC)) {
-			/* we got it already from firstkey/lastkey */
-			/* 
-			 * this optimisation does not work when firstkey/nextkey found
-			 * any instance other than the one instance wanted.
-			 */
-			val.value = estrdup(dba->curr.val.value ? dba->curr.val.value : "");
-			/* allow faster access by automatically getting next key 
-			 * we must use the line pointer 'next' since we cannot change the 
-			 * line pointer of firstkey/nextkey
-			 */
-			php_stream_seek(dba->fp, dba->curr.pos, SEEK_SET);
-			ln.key.group = estrdup(dba->curr.key.group ? dba->curr.key.group : "");
-			inifile_read(dba, &ln TSRMLS_CC);
-			inifile_line_free(&dba->next);
-			dba->next = ln;
-			return val;
-		}
-	}
-
-	/* the slow way: restart and seacrch */
-	if (skip != -1 || !dba->next.key.group || !dba->next.key.name || inifile_key_cmp(&dba->next.key, key TSRMLS_CC)) {
+	if (skip == -1 && dba->next.key.group && dba->next.key.name && !inifile_key_cmp(&dba->next.key, key TSRMLS_CC)) {
+		/* we got position already from last fetch */
+		php_stream_seek(dba->fp, dba->next.pos, SEEK_SET);
+	} else {
 		/* specific instance or not same key -> restart search */
+		/* the slow way: restart and seacrch */
 		php_stream_rewind(dba->fp);
 	}
 	inifile_line_free(&dba->next);
@@ -298,10 +270,10 @@ val_type inifile_fetch(inifile *dba, const key_type *key, int skip TSRMLS_DC) {
 		if (!(res=inifile_key_cmp(&ln.key, key TSRMLS_CC))) {
 			if (!skip) {
 				val.value = estrdup(ln.val.value ? ln.val.value : "");
-				/* allow faster access by automatically getting next key */
-				inifile_read(dba, &ln TSRMLS_CC);
+				/* allow faster access by updating key read into next */
 				inifile_line_free(&dba->next);
 				dba->next = ln;
+				dba->next.pos = php_stream_tell(dba->fp);;
 				return val;
 			}
 			skip--;
