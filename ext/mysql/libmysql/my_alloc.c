@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Routines to handle mallocing of results which will be freed the same time */
 
@@ -98,7 +98,7 @@ void free_root(MEM_ROOT *root)
 
 char *strdup_root(MEM_ROOT *root,const char *str)
 {
-  uint len=strlen(str)+1;
+  uint len= (uint) strlen(str)+1;
   char *pos;
   if ((pos=alloc_root(root,len)))
     memcpy(pos,str,len);

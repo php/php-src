@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Functions to handle typelib */
 
@@ -20,7 +20,8 @@
 int find_type(my_string x, TYPELIB *typelib, uint full_name)
 {
   int find,pos,findpos;
-  reg1 my_string i,j;
+  reg1 my_string i;
+  reg2 const char *j;
   DBUG_ENTER("find_type");
   DBUG_PRINT("enter",("x: '%s'  lib: %lx",x,typelib));
 
@@ -83,9 +84,9 @@ void make_type(register my_string to, register uint nr, register TYPELIB *typeli
 	/* Get type */
 	/* Warning first type is 0 */
 
-my_string get_type(TYPELIB *typelib, uint nr)
+const char *get_type(TYPELIB *typelib, uint nr)
 {
   if (nr < (uint) typelib->count && typelib->type_names)
     return(typelib->type_names[nr]);
-  return((char*) "?");
+  return "?";
 }

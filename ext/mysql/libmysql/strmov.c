@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
   strmov(dst, src) moves all the  characters  of  src  (including  the
   closing NUL) to dst, and returns a pointer to the new closing NUL in
@@ -14,11 +17,13 @@
 #define strmov strmov_overlapp
 #endif
 
+#ifndef strmov
+
 #if !defined(MC68000) && !defined(DS90)
 
 char *strmov(register char *dst, register const char *src)
 {
-  while (*dst++ = *src++) ;
+  while ((*dst++ = *src++)) ;
   return dst-1;
 }
 
@@ -36,3 +41,5 @@ char *strmov(dst, src)
 }
 
 #endif
+
+#endif /* strmov */

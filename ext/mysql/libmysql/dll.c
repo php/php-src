@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1999 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
 ** Handling initialization of the dll library
@@ -29,7 +29,7 @@ void libmysql_init(void)
   }
 }
 
-#ifdef WIN32
+#ifdef __WIN__
 
 static int inited=0,threads=0;
 HINSTANCE NEAR s_hModule;	/* Saved module handle */

@@ -1,5 +1,5 @@
-/* Copyright Abandoned 2000 Monty Program KB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
  * Vio Lite.
@@ -33,7 +33,7 @@ enum enum_vio_type { VIO_CLOSED, VIO_TYPE_TCPIP, VIO_TYPE_SOCKET,
 Vio*		vio_new(my_socket	sd,
 			enum enum_vio_type type,
 			my_bool		localhost);
-#ifdef __WIN32__
+#ifdef __WIN__
 Vio*		vio_new_win32pipe(HANDLE hPipe);
 #endif
 void		vio_delete(Vio* vio);

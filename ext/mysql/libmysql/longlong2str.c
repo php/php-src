@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
   Defines: longlong2str();
 
@@ -66,16 +69,61 @@ char *longlong2str(longlong val,char *dst,int radix)
     ulonglong quo=(ulonglong) val/(uint) radix;
     uint rem= (uint) (val- quo* (uint) radix);
     *--p = _dig_vec[rem];
-      val= quo;
+    val= quo;
   }
   long_val= (long) val;
   while (long_val != 0)
   {
-    *--p = _dig_vec[long_val%radix];
-    long_val /= radix;
+    long quo= long_val/radix;
+    *--p = _dig_vec[(uchar) (long_val - quo*radix)];
+    long_val= quo;
   }
   while ((*dst++ = *p++) != 0) ;
   return dst-1;
 }
 
+#endif
+
+#ifndef longlong10_to_str
+char *longlong10_to_str(longlong val,char *dst,int radix)
+{
+  char buffer[65];
+  register char *p;
+  long long_val;
+
+  if (radix < 0)
+  {
+    if (val < 0)
+    {
+      *dst++ = '-';
+      val = -val;
+    }
+  }
+
+  if (val == 0)
+  {
+    *dst++='0';
+    *dst='\0';
+    return dst;
+  }
+  p = &buffer[sizeof(buffer)-1];
+  *p = '\0';
+
+  while ((ulonglong) val > (ulonglong) LONG_MAX)
+  {
+    ulonglong quo=(ulonglong) val/(uint) 10;
+    uint rem= (uint) (val- quo* (uint) 10);
+    *--p = _dig_vec[rem];
+    val= quo;
+  }
+  long_val= (long) val;
+  while (long_val != 0)
+  {
+    long quo= long_val/10;
+    *--p = _dig_vec[(uchar) (long_val - quo*10)];
+    long_val= quo;
+  }
+  while ((*dst++ = *p++) != 0) ;
+  return dst-1;
+}
 #endif

@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
     strnmov(dst,src,length) moves length characters, or until end, of src to
     dst and appends a closing NUL to dst if src is shorter than length.

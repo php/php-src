@@ -1,9 +1,9 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 
-int my_message_no_curses(uint my_error __attribute__((unused)),
+int my_message_no_curses(uint error __attribute__((unused)),
 			 const char *str, myf MyFlags)
 {
   DBUG_ENTER("my_message_no_curses");

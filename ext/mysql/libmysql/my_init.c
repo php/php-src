@@ -1,10 +1,12 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 #include "mysys_priv.h"
 #include "my_static.h"
 #include "mysys_err.h"
+#include "m_ctype.h"
 #include <m_string.h>
+#include <m_ctype.h>
 #ifdef THREAD
 #include <my_pthread.h>
 #endif
@@ -17,7 +19,7 @@
 #include <my_static.c>
 #include <m_ctype.h>
 #endif
-#ifdef __WIN32__
+#ifdef __WIN__
 #ifdef _MSC_VER
 #include <locale.h>
 #include <crtdbg.h>
@@ -44,7 +46,7 @@ void my_init(void)
   pthread_init();			/* Must be called before DBUG_ENTER */
 #endif
   my_thread_global_init();
-#ifndef __WIN32__
+#ifndef __WIN__
   sigfillset(&my_signals);		/* signals blocked by mf_brkhant */
 #endif
 #endif
@@ -59,13 +61,15 @@ void my_init(void)
 #ifndef VMS
       if ((str=getenv("UMASK")) != 0)
 	my_umask=atoi(str) | 0600;	/* Default creation of new files */
+      if ((str=getenv("UMASK_DIR")) != 0)
+	my_umask_dir=atoi(str) | 0700;	/* Default creation of new dir's */
 #endif
 #ifdef VMS
       init_ctype();			/* Stupid linker don't link _ctype.c */
 #endif
       DBUG_PRINT("exit",("home: '%s'",home_dir));
     }
-#ifdef __WIN32__
+#ifdef __WIN__
     win32_init_tcp_ip();
 #endif
     DBUG_VOID_RETURN;
@@ -94,7 +98,7 @@ void my_end(int infoflag)
 #ifdef HAVE_GETRUSAGE
     struct rusage rus;
     if (!getrusage(RUSAGE_SELF, &rus))
-      fprintf(info_file,"\nUser time %.2f, System time %.2f\nMaximum resident set size %d, Integral resident set size %d\nNon physical pagefaults %d, Physical pagefaults %d, Swaps %d\nBlocks in %d out %d, Messages in %d out %d, Signals %d\nVouluntary context switches %d, Invouluntary context switches %d\n",
+      fprintf(info_file,"\nUser time %.2f, System time %.2f\nMaximum resident set size %ld, Integral resident set size %ld\nNon physical pagefaults %ld, Physical pagefaults %ld, Swaps %ld\nBlocks in %ld out %ld, Messages in %ld out %ld, Signals %ld\nVouluntary context switches %ld, Invouluntary context switches %ld\n",
 	      (rus.ru_utime.tv_sec * SCALE_SEC +
 	       rus.ru_utime.tv_usec / SCALE_USEC) / 100.0,
 	      (rus.ru_stime.tv_sec * SCALE_SEC +
@@ -105,12 +109,13 @@ void my_end(int infoflag)
 	      rus.ru_msgsnd, rus.ru_msgrcv, rus.ru_nsignals,
 	      rus.ru_nvcsw, rus.ru_nivcsw);
 #endif
-#if defined(MSDOS) && !defined(__WIN32__)
+#if defined(MSDOS) && !defined(__WIN__)
     fprintf(info_file,"\nRun time: %.1f\n",(double) clock()/CLOCKS_PER_SEC);
 #endif
+    free_charsets();
 #if defined(SAFEMALLOC)
     TERMINATE(stderr);		/* Give statistic on screen */
-#elif defined(__WIN32__) && defined(_MSC_VER)
+#elif defined(__WIN__) && defined(_MSC_VER)
    _CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
    _CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDERR );
    _CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
@@ -129,13 +134,13 @@ void my_end(int infoflag)
   my_thread_end();
   my_thread_global_end();
 #endif
-#ifdef __WIN32__
+#ifdef __WIN__
   if (have_tcpip);
     WSACleanup( );
-#endif /* __WIN32__ */
+#endif /* __WIN__ */
 } /* my_end */
 
-#ifdef __WIN32__
+#ifdef __WIN__
 
 /*
   This code is specially for running MySQL, but it should work in

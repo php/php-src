@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
   Code for handling strings with can grow dynamicly.
@@ -19,7 +19,7 @@ my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
   if (!alloc_increment)
     alloc_increment=128;
   length=1;
-  if (init_str && (length=strlen(init_str)+1) < init_alloc)
+  if (init_str && (length= (uint) strlen(init_str)+1) < init_alloc)
     init_alloc=((length+alloc_increment-1)/alloc_increment)*alloc_increment;
   if (!init_alloc)
     init_alloc=alloc_increment;
@@ -39,7 +39,7 @@ my_bool dynstr_set(DYNAMIC_STRING *str, const char *init_str)
   uint length;
   DBUG_ENTER("dynstr_set");
 
-  if (init_str && (length=strlen(init_str)+1) > str->max_length)
+  if (init_str && (length= (uint) strlen(init_str)+1) > str->max_length)
   {
     str->max_length=((length+str->alloc_increment-1)/str->alloc_increment)*
       str->alloc_increment;

@@ -72,7 +72,7 @@
 #include <global.h>
 #include <m_string.h>
 #include <errno.h>
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
 #include <process.h>
 #endif
 
@@ -123,7 +123,7 @@
  *	Typedefs to make things more obvious.
  */
 
-#ifndef __WIN32__
+#ifndef __WIN__
 typedef int BOOLEAN;
 #else
 #define BOOLEAN BOOL
@@ -310,10 +310,12 @@ static char *static_strtok(char *s1,pchar chr);
 #if !defined(HAVE_ACCESS) || defined(MSDOS)
 #define EXISTS(pathname) (FALSE)	/* Assume no existance */
 #define Writable(name) (TRUE)
-#define ChangeOwner(name)
 #else
 #define EXISTS(pathname)	 (access (pathname, F_OK) == 0)
 #define WRITABLE(pathname)	 (access (pathname, W_OK) == 0)
+#endif
+#ifndef MSDOS
+#define ChangeOwner(name)
 #endif
 
 /*
@@ -1055,20 +1057,20 @@ struct link *linkp;
 const char *cp;
 {
   REGISTER struct link *scan;
-  REGISTER BOOLEAN accept;
+  REGISTER BOOLEAN result;
 
   if (linkp == NULL) {
-    accept = TRUE;
+    result = TRUE;
   } else {
-    accept = FALSE;
+    result = FALSE;
     for (scan = linkp; scan != NULL; scan = scan -> next_link) {
       if (STREQ (scan -> str, cp)) {
-	accept = TRUE;
+	result = TRUE;
 	break;
       }
     }
   }
-  return (accept);
+  return (result);
 }
 
 
@@ -1217,20 +1219,20 @@ static BOOLEAN DoProfile ()
 BOOLEAN _db_keyword_ (keyword)
 const char *keyword;
 {
-  REGISTER BOOLEAN accept;
+  REGISTER BOOLEAN result;
   CODE_STATE *state;
 
   if (!init_done)
     _db_push_ ("");
   state=code_state();
-  accept = FALSE;
+  result = FALSE;
   if (DEBUGGING &&
       state->level <= stack -> maxdepth &&
       InList (stack -> functions, state->func) &&
       InList (stack -> keywords, keyword) &&
       InList (stack -> processes, _db_process_))
-    accept = TRUE;
-  return (accept);
+    result = TRUE;
+  return (result);
 }
 
 /*
@@ -1921,7 +1923,7 @@ static void dbug_flush(CODE_STATE *state)
   if (stack->flags & FLUSH_ON_WRITE)
 #endif
   {
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
     if (_db_fp_ != stdout && _db_fp_ != stderr)
     {
       if (!(freopen(stack->name,"a",_db_fp_)))
@@ -1988,7 +1990,7 @@ static unsigned long Clock ()
 }
 
 #else
-#if defined(MSDOS) || defined(__WIN32__)
+#if defined(MSDOS) || defined(__WIN__)
 
 static ulong Clock()
 {
@@ -2038,7 +2040,7 @@ static unsigned long Clock ()
 }
 #endif
 #endif /* amiga */
-#endif /* MSDOS || __WIN32__ */
+#endif /* MSDOS || __WIN__ */
 #endif /* RUSAGE */
 
 

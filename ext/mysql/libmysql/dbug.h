@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 #ifndef _dbug_h
 #define _dbug_h
 #ifdef	__cplusplus

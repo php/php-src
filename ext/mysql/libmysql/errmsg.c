@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1997 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /* Error messages for MySQL clients */
 /* error messages for the demon is in share/language/errmsg.sys */
@@ -29,7 +29,9 @@ const char *client_errors[]=
   "Verbindung ueber Named Pipe; Host: %-.64s",
   "Kann nicht auf Named Pipe warten. Host: %-.64s  pipe: %-.32s (%lu)",
   "Kann Named Pipe nicht oeffnen. Host: %-.64s  pipe: %-.32s (%lu)",
-  "Kann den Status der Named Pipe nicht setzen.  Host: %-.64s  pipe: %-.32s (%lu)"
+  "Kann den Status der Named Pipe nicht setzen.  Host: %-.64s  pipe: %-.32s (%lu)",
+  "Can't initialize character set %-.64s (path: %-.64s)",
+  "Got packet bigger than 'max_allowed_packet'"
 };
 
 #else /* ENGLISH */
@@ -54,6 +56,8 @@ const char *client_errors[]=
   "Can't wait for named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't open named pipe to host: %-.64s  pipe: %-.32s (%lu)",
   "Can't set state of named pipe to host: %-.64s  pipe: %-.32s (%lu)",
+  "Can't initialize character set %-.64s (path: %-.64s)",
+  "Got packet bigger than 'max_allowed_packet'"
 };
 #endif
 

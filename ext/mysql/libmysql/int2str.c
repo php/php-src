@@ -1,3 +1,6 @@
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
+
 /*
   Defines: int2str(), itoa(), ltoa()
 
@@ -33,6 +36,7 @@ char *int2str(register long int val, register char *dst, register int radix)
 {
   char buffer[65];
   register char *p;
+  long int new_val;
 
   if (radix < 0) {
     if (radix < -36 || radix > -2) return NullS;
@@ -57,8 +61,9 @@ char *int2str(register long int val, register char *dst, register int radix)
       */
   p = &buffer[sizeof(buffer)-1];
   *p = '\0';
-  *--p = _dig_vec[(ulong) val % (ulong) radix];
-  val = (ulong) val / (ulong) radix;
+  new_val=(ulong) val / (ulong) radix;
+  *--p = _dig_vec[(uchar) ((ulong) val- (ulong) new_val*(ulong) radix)];
+  val = new_val;
 #ifdef HAVE_LDIV
   while (val != 0)
   {
@@ -70,13 +75,52 @@ char *int2str(register long int val, register char *dst, register int radix)
 #else
   while (val != 0)
   {
-    *--p = _dig_vec[val%radix];
-    val /= radix;
+    new_val=val/radix;
+    *--p = _dig_vec[(uchar) (val-new_val*radix)];
+    val= new_val;
   }
 #endif
   while ((*dst++ = *p++) != 0) ;
   return dst-1;
 }
+
+
+/*
+  This is a faster version of the above optimized for the normal case of
+   radix 10 / -10
+*/
+
+char *int10_to_str(long int val,char *dst,int radix)
+{
+  char buffer[65];
+  register char *p;
+  long int new_val;
+
+  if (radix < 0)				/* -10 */
+  {
+    if (val < 0)
+    {
+      *dst++ = '-';
+      val = -val;
+    }
+  }
+
+  p = &buffer[sizeof(buffer)-1];
+  *p = '\0';
+  new_val= (long) ((unsigned long int) val / 10);
+  *--p = '0'+ (char) ((unsigned long int) val - (unsigned long) new_val * 10);
+  val = new_val;
+
+  while (val != 0)
+  {
+    new_val=val/10;
+    *--p = '0' + (char) (val-new_val*10);
+    val= new_val;
+  }
+  while ((*dst++ = *p++) != 0) ;
+  return dst-1;
+}
+
 
 #ifdef USE_MY_ITOA
 

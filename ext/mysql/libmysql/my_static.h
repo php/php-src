@@ -1,5 +1,5 @@
-/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB
-   This file is public domain and comes with NO WARRANTY of any kind */
+/* Copyright Abandoned 1996 TCX DataKonsult AB & Monty Program KB & Detron HB 
+This file is public domain and comes with NO WARRANTY of any kind */
 
 /*
   Static variables for mysys library. All definied here for easy making of
@@ -63,6 +63,6 @@ extern byte	*sf_min_adress,*sf_max_adress;
 extern uint	cNewCount;
 extern struct remember *pRememberRoot;
 
-#if defined(THREAD) && !defined(__WIN32__)
+#if defined(THREAD) && !defined(__WIN__)
 extern sigset_t my_signals;		/* signals blocked by mf_brkhant */
 #endif
