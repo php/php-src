@@ -87,6 +87,8 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_error,               NULL)
 	PHP_FE(xslt_errno,               NULL)
 	PHP_FE(xslt_free,                NULL)
+	PHP_FE(xslt_backend_version,     NULL)
+	PHP_FE(xslt_backend_name,     	 NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -605,6 +607,26 @@ PHP_FUNCTION(xslt_free)
 	
 	/* Remove the entry from the list */
 	zend_list_delete(Z_LVAL_PP(processor_p));
+}
+/* }}} */
+
+/* {{{ proto void xslt_backend_version()
+   Returns the version number of Sablotron (if available) */
+PHP_FUNCTION(xslt_backend_version)
+{
+#ifdef SAB_VERSION
+	RETURN_STRING(SAB_VERSION,1);
+#else
+	RETURN_FALSE;
+#endif	
+}
+/* }}} */
+
+/* {{{ proto void xslt_backend_name()
+   Returns the name of the Backend (here "Sablotron")*/
+PHP_FUNCTION(xslt_backend_name)
+{
+	RETURN_STRING("Sablotron",1);
 }
 /* }}} */
 

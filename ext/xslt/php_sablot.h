@@ -62,6 +62,8 @@ PHP_FUNCTION(xslt_process);
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
 PHP_FUNCTION(xslt_free);
+PHP_FUNCTION(xslt_backend_version);
+PHP_FUNCTION(xslt_backend_name);
 
 struct scheme_handlers {
 	zval *get_all;
