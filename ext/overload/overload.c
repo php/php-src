@@ -34,6 +34,7 @@
  *   yes
  * + turn off all overloading handlers on a call to a handler
  * - pass array overloading info on to handlers?
+ * - add unoverload() function
  */
 
 #ifdef HAVE_CONFIG_H
