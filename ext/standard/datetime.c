@@ -120,6 +120,17 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		ta->tm_isdst = is_dst = (*arguments[6])->value.lval;
 		/* fall-through */
 	case 6:
+		/* special case: 
+		   a zero in year, month and day is considered illegal
+		   as it would be interpreted as 30.11.1999 otherwise
+		*/
+		if (  (  (*arguments[5])->value.lval==0)
+			  &&((*arguments[4])->value.lval==0)
+			  &&((*arguments[3])->value.lval==0)
+			  ) {
+			RETURN_LONG(-1);
+		}
+
 		/*
 		** Accept parameter in range 0..1000 interpreted as 1900..2900
 		** (if 100 is given, it means year 2000)
