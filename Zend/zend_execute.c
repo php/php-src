@@ -1008,6 +1008,9 @@ ZEND_API void execute(zend_op_array *op_array ELS_DC)
 			zend_timeout(0);
 		}
 #endif
+
+		zend_clean_garbage(ELS_C);
+
 		switch(opline->opcode) {
 			case ZEND_ADD:
 				EG(binary_op) = add_function;
