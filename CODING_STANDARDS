@@ -96,9 +96,10 @@ Exceptions:
     check its man page again, and only then, consider using it, and even then,
     try avoiding it.
 
-[7] Use ZEND_* macros instead of PHP_* macros. Use of PHP_* macros is not
-    recommended. Since most of the PHP_* macros are ZEND_* macro aliases, using
-    the PHP_* macros makes browsing the source code with a tag search harder.
+[7] Use PHP_* macros in the PHP source, and ZEND_* macros in the Zend
+	part of the source. Although the PHP_* macro's are mostly aliased to the
+	ZEND_* macros it gives a better understanding on what kind of macro you're
+	calling.
 
 [8] Use assert(). assert.h is included in php.h if it is available.  Not only
     does good assertion catch bugs, but it also helps with code readability.
@@ -125,7 +126,7 @@ Naming Conventions
 ------------------
 
 [1] Function names for user-level functions should be enclosed with in
-    the ZEND_FUNCTION() macro. They should be in lowercase, with words
+    the PHP_FUNCTION() macro. They should be in lowercase, with words
     underscore delimited, with care taken to minimize the letter count.
     Abbreviations should not be used when they greatly decrease the
     readability of the function name itself.
@@ -226,7 +227,7 @@ function does.  It would look like this:
 
 /* {{{ proto int abs(int number)
    Returns the absolute value of the number */
-ZEND_FUNCTION(abs)
+PHP_FUNCTION(abs)
 {
    ...
 }
