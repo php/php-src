@@ -518,7 +518,7 @@ int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *fun
 		/* TBI!! new object handlers */
 		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
 			if (!IS_ZEND_STD_OBJECT(**object_pp)) {
-				zend_error(E_WARNING, "Cannot use call_user_function on overloaded objects");
+				zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
 				return FAILURE;
 			}
 
