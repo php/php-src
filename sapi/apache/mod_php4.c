@@ -34,17 +34,17 @@
 /* {{{ Prototypes
  */
 int apache_php_module_main(request_rec *r, int display_source_mode TSRMLS_DC);
-void php_save_umask(void);
-void php_restore_umask(void);
-int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC);
-char *sapi_apache_read_cookies(TSRMLS_D);
-int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
-int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC);
+static void php_save_umask(void);
+static void php_restore_umask(void);
+static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC);
+static char *sapi_apache_read_cookies(TSRMLS_D);
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC);
+static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC);
 static int send_php(request_rec *r, int display_source_mode, char *filename);
 static int send_parsed_php(request_rec * r);
 static int send_parsed_php_source(request_rec * r);
-int php_xbithack_handler(request_rec * r);
-void php_init_handler(server_rec *s, pool *p);
+static int php_xbithack_handler(request_rec * r);
+static void php_init_handler(server_rec *s, pool *p);
 /* }}} */
 
 #if MODULE_MAGIC_NUMBER >= 19970728
@@ -56,12 +56,12 @@ static void php_child_exit_handler(server_rec *s, pool *p);
 #else
 #define CONST_PREFIX
 #endif
-CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
-CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
-CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
-CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
+static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
+static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode);
+static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2);
 
 /* ### these should be defined in mod_php4.h or somewhere else */
 #define USE_PATH 1
@@ -84,7 +84,7 @@ typedef struct _php_per_dir_entry {
 
 /* {{{ php_save_umask
  */
-void php_save_umask(void)
+static void php_save_umask(void)
 {
 	saved_umask = umask(077);
 	umask(saved_umask);
@@ -123,7 +123,7 @@ static void sapi_apache_flush(void *server_context)
 
 /* {{{ sapi_apache_read_post
  */
-int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
+static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint total_read_bytes=0, read_bytes;
 	request_rec *r = (request_rec *) SG(server_context);
@@ -156,7 +156,7 @@ int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 /* {{{ sapi_apache_read_cookies
  */
-char *sapi_apache_read_cookies(TSRMLS_D)
+static char *sapi_apache_read_cookies(TSRMLS_D)
 {
 	return (char *) table_get(((request_rec *) SG(server_context))->subprocess_env, "HTTP_COOKIE");
 }
@@ -164,7 +164,7 @@ char *sapi_apache_read_cookies(TSRMLS_D)
 
 /* {{{ sapi_apache_header_handler
  */
-int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char *header_name, *header_content, *p;
 	request_rec *r = (request_rec *) SG(server_context);
@@ -200,7 +200,7 @@ int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 
 /* {{{ sapi_apache_send_headers
  */
-int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
+static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	if(SG(server_context) == NULL) { /* server_context is not here anymore */
 		return SAPI_HEADER_SEND_FAILED;
@@ -387,7 +387,7 @@ static sapi_module_struct apache_sapi_module = {
 
 /* {{{ php_restore_umask
  */
-void php_restore_umask(void)
+static void php_restore_umask(void)
 {
 	umask(saved_umask);
 }
@@ -670,7 +670,7 @@ static void *php_merge_dir(pool *p, void *basev, void *addv)
 
 /* {{{ php_apache_value_handler_ex
  */
-CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
+static CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	php_per_dir_entry per_dir_entry;
 
@@ -706,7 +706,7 @@ CONST_PREFIX char *php_apache_value_handler_ex(cmd_parms *cmd, HashTable *conf, 
 
 /* {{{ php_apache_value_handler
  */
-CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
 	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
 }
@@ -714,7 +714,7 @@ CONST_PREFIX char *php_apache_value_handler(cmd_parms *cmd, HashTable *conf, cha
 
 /* {{{ php_apache_admin_value_handler
  */
-CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
 	return php_apache_value_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
 }
@@ -722,7 +722,7 @@ CONST_PREFIX char *php_apache_admin_value_handler(cmd_parms *cmd, HashTable *con
 
 /* {{{ php_apache_flag_handler_ex
  */
-CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
+static CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2, int mode)
 {
 	char bool_val[2];
 
@@ -739,7 +739,7 @@ CONST_PREFIX char *php_apache_flag_handler_ex(cmd_parms *cmd, HashTable *conf, c
 
 /* {{{ php_apache_flag_handler
  */
-CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
 	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_PERDIR);
 }
@@ -747,7 +747,7 @@ CONST_PREFIX char *php_apache_flag_handler(cmd_parms *cmd, HashTable *conf, char
 
 /* {{{ php_apache_admin_flag_handler
  */
-CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
+static CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf, char *arg1, char *arg2)
 {
 	return php_apache_flag_handler_ex(cmd, conf, arg1, arg2, PHP_INI_SYSTEM);
 }
@@ -755,9 +755,8 @@ CONST_PREFIX char *php_apache_admin_flag_handler(cmd_parms *cmd, HashTable *conf
 
 /* {{{ int php_xbithack_handler(request_rec * r)
  */
-int php_xbithack_handler(request_rec * r)
+static int php_xbithack_handler(request_rec * r)
 {
-	php_apache_info_struct *conf;
 	HashTable *per_dir_conf;
 	TSRMLS_FETCH();
 
@@ -814,7 +813,7 @@ static void php_child_exit_handler(server_rec *s, pool *p)
 
 /* {{{ void php_init_handler(server_rec *s, pool *p)
  */
-void php_init_handler(server_rec *s, pool *p)
+static void php_init_handler(server_rec *s, pool *p)
 {
 	register_cleanup(p, NULL, (void (*)(void *))apache_php_module_shutdown_wrapper, (void (*)(void *))php_module_shutdown_for_exec);
 	if (!apache_php_initialized) {
