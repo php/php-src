@@ -69,7 +69,7 @@ CREATING THE MAKEFILE TEMPLATE
 LTLIBRARY_SHARED_NAME = foobar.la
 LTLIBRARY_SOURCES     = foo.c bar.c
 
-include $(top_srcdir)/build/rules.mk
+include $(top_srcdir)/build/dynlib.mk
 ------------------------------------------------------------------------------
 
   LTLIBRARY_SHARED_NAME specifies the name of the extension.
