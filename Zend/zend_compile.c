@@ -1056,6 +1056,9 @@ void do_early_binding(CLS_D)
 		case ZEND_DECLARE_CLASS:
 			table = CG(class_table);
 			break;
+		default:
+			zend_error(E_COMPILE_ERROR, "Invalid binding type");
+			return;
 	}
 	zend_hash_del(table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len);
 	zval_dtor(&opline->op1.u.constant);
