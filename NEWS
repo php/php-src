@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.2
 - Add interface_exists() and make class_exists() only return true for real
-  classes. (Andrey Hristov)
+  classes. (Andrey)
 - Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
   exhaustion. (Andrei)
 - Added PHP_EOL constant that contains the OS way of representing newlines.
