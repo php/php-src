@@ -99,6 +99,20 @@ PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry, 
 		struct dirent **result)
 {
+#if defined(HAVE_OLD_READDIR_R)
+	int ret;
+	
+	errno = 0;
+
+	ret = readdir_r(dirp, entry);
+	
+	if (ret == 0)
+		*result = entry;
+	else
+		*result = NULL;
+
+	return ret;
+#else
 	struct dirent *ptr;
 	int ret = 0;
 
@@ -120,6 +134,7 @@ PHPAPI int php_readdir_r(DIR *dirp, struct dirent *entry,
 	local_unlock(READDIR_R);
 
 	return ret;
+#endif
 }
 
 #endif
