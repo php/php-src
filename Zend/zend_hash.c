@@ -819,6 +819,35 @@ ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct) (void 
 }
 
 
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht,int (*destruct)(void *, int, va_list, zend_hash_key *), int num_args, ...)
+{
+	Bucket *p, *q;
+	va_list args;
+	zend_hash_key hash_key;
+
+	va_start(args, num_args);
+
+	p = ht->pListHead;
+	while (p != NULL) {
+		q = p;
+		p = p->pListNext;
+		hash_key.arKey = q->arKey;
+		hash_key.nKeyLength = q->nKeyLength;
+		hash_key.h = q->h;
+		if (destruct(q->pData, num_args, args, &hash_key)) {
+			if (q->nKeyLength == 0) {
+				zend_hash_index_del(ht, q->h);
+			} else {
+				zend_hash_del(ht,q->arKey,q->nKeyLength);
+			}
+		}
+	}
+
+	va_end(args);
+}
+
+
+
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, void (*pCopyConstructor) (void *pData), void *tmp, uint size)
 {
 	Bucket *p;

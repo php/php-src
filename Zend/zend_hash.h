@@ -98,13 +98,26 @@ ZEND_API int zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void 
 
 ZEND_API int zend_hash_pointer_update(HashTable *ht, char *arKey, uint nKeyLength, void *pData);
 
+
+typedef struct _zend_hash_key {
+	char *arKey;
+	uint nKeyLength;
+	ulong h;
+} zend_hash_key;
+
+
+#define ZEND_STD_HASH_APPLIER		\
+	int (*)(void *element, int num_args, va_list args, zend_hash_key *hash_key)
+
 ZEND_API int zend_hash_pointer_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, int flag);
 #define zend_hash_pointer_index_update(ht,h,pData) \
 		zend_hash_pointer_index_update_or_next_insert(ht,h,pData,HASH_UPDATE)
 #define zend_hash_next_index_pointer_insert(ht,pData) \
         zend_hash_pointer_index_update_or_next_insert(ht,0,pData,HASH_NEXT_INSERT)
-ZEND_API void zend_hash_apply(HashTable *ht,int (*destruct) (void *));
-ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct) (void *, void *), void *);
+ZEND_API void zend_hash_apply(HashTable *ht,int (*destruct)(void *));
+ZEND_API void zend_hash_apply_with_argument(HashTable *ht,int (*destruct)(void *, void *), void *);
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, ZEND_STD_HASH_APPLIER, int, ...);
+
 
 
 
