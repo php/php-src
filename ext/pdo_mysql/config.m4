@@ -19,19 +19,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
   for i in $PHP_PDO_MYSQL /usr/local /usr; do
-    if test -x $i/bin/mysql_config; then
       MYSQL_DIR=$i
       PDO_MYSQL_CONFIG=$MYSQL_DIR/bin/mysql_config
-      MYSQL_INC_DIR=$i/include/mysql
+      if test -r $i/include/mysql; then
+	MYSQL_INC_DIR=$i/include/mysql
+      else
+	MYSQL_INC_DIR=$i/include
+      fi      
       MYSQL_LIBS=$i/lib
       break
-    elif test -x $i/bin/mysql_config; then
-      MYSQL_DIR=$i
-      PDO_MYSQL_CONFIG=$MYSQL_DIR/bin/mysql_config
-      MYSQL_INC_DIR=$i/include
-      MYSQL_LIBS=$i/lib
-      break
-    fi
   done
 
   if test -z "$MYSQL_DIR"; then
