@@ -27,6 +27,7 @@
 #include "SAPI.h"
 
 #include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_standard.h"
 
 #include "apr_strings.h"
 #include "ap_config.h"
@@ -440,12 +441,23 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 			php_apache_request_ctor(f, ctx TSRMLS_CC);
 
 			apr_file_name_get(&path, ((apr_bucket_file *) b->data)->fd);
-			zfd.type = ZEND_HANDLE_FILENAME;
-			zfd.filename = (char *) path;
-			zfd.free_filename = 0;
-			zfd.opened_path = NULL;
+			
+			/* Determine if we need to parse the file or show the source */
+			if (!strncmp(ctx->r->handler, "application/x-httpd-php", sizeof("application/x-httpd-php"))) { 
+				zfd.type = ZEND_HANDLE_FILENAME;
+				zfd.filename = (char *) path;
+				zfd.free_filename = 0;
+				zfd.opened_path = NULL;
 
-			php_execute_script(&zfd TSRMLS_CC);
+				php_execute_script(&zfd TSRMLS_CC);
+			} else { 
+				zend_syntax_highlighter_ini syntax_highlighter_ini;
+				
+				php_get_highlight_struct(&syntax_highlighter_ini);
+				
+ 				highlight_file((char *)path, &syntax_highlighter_ini TSRMLS_CC);
+			}	
+			
 			php_apache_request_dtor(f TSRMLS_CC);
 			
 			ctx->request_processed = 1;
@@ -560,10 +572,13 @@ static void php_add_filter(request_rec *r, ap_filter_t *f)
 
 static void php_insert_filter(request_rec *r)
 {
-	if (r->content_type &&
-	    strcmp(r->content_type, "application/x-httpd-php") == 0) {
-		php_add_filter(r, r->output_filters);
-		php_add_filter(r, r->input_filters);
+	int content_type_len = strlen("application/x-httpd-php");
+
+	if (r->content_type && !strncmp(r->content_type, "application/x-httpd-php", content_type_len-1)) {
+		if (r->content_type[content_type_len] == '\0' || !strncmp(r->content_type+content_type_len, "-source", strlen("-source"))) { 
+			php_add_filter(r, r->output_filters);
+			php_add_filter(r, r->input_filters);
+		}	
 	}
 }
 
