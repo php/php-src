@@ -27,7 +27,7 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id */
+/* $Id$ */
 
 #if HAVE_LIBEXPAT
 # ifndef _PHP_XML_H
@@ -60,6 +60,17 @@ typedef struct {
 	char *notationDeclHandler;
 	char *externalEntityRefHandler;
 	char *unknownEncodingHandler;
+
+	pval *data;
+	pval *info;
+	int level;
+	int toffset;
+	int curtag;
+	pval *ctag;
+	char **ltags;
+	int lastwasopen;
+	int skipwhite;
+	
 	XML_Char *baseURI;
 } xml_parser;
 
@@ -67,7 +78,7 @@ typedef struct {
 typedef struct {
 	XML_Char *name;
 	char (*decoding_function)(unsigned short);
-	unsigned short (*encoding_function)(char);
+	unsigned short (*encoding_function)(unsigned char);
 } xml_encoding;
 
 
@@ -75,14 +86,20 @@ extern php3_module_entry xml_module_entry;
 # define xml_module_ptr &xml_module_entry
 
 enum php3_xml_option {
-    PHP3_XML_OPTION_CASE_FOLDING,
-    PHP3_XML_OPTION_TARGET_ENCODING
+    PHP3_XML_OPTION_CASE_FOLDING = 1,
+    PHP3_XML_OPTION_TARGET_ENCODING,
+    PHP3_XML_OPTION_SKIP_TAGSTART,
+    PHP3_XML_OPTION_SKIP_WHITE
 };
 
 # define RETURN_OUT_OF_MEMORY \
 	php3_error(E_WARNING, "Out of memory");\
 	RETURN_FALSE
 
+/* for xml_parse_into_struct */
+	
+#define XML_MAXLEVEL 255 /* XXX this should be dynamic */
+	
 PHP_FUNCTION(xml_parser_create);
 PHP_FUNCTION(xml_set_element_handler);
 PHP_FUNCTION(xml_set_character_data_handler);
@@ -102,6 +119,7 @@ PHP_FUNCTION(xml_parser_set_option);
 PHP_FUNCTION(xml_parser_get_option);
 PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
+PHP_FUNCTION(xml_parse_into_struct);
 
 #else /* !HAVE_LIBEXPAT */
 

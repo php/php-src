@@ -85,6 +85,10 @@ PHP_FUNCTION(ldap_add);
 PHP_FUNCTION(ldap_delete);
 PHP_FUNCTION(ldap_modify);
 
+PHP_FUNCTION(ldap_mod_add);
+PHP_FUNCTION(ldap_mod_replace);
+PHP_FUNCTION(ldap_mod_del);
+
 typedef struct {
 	long default_link;
 	long num_links, max_links;

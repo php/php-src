@@ -51,7 +51,6 @@
 # endif
 # include "snprintf.h"
 # include "ext/standard/head.h"
-# include "php3_string.h"
 
 /* Short-term TODO list:
  * - Implement XML_ExternalEntityParserCreate()
