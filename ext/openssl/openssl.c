@@ -280,7 +280,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		/* get passphrase */
 
 		if (zend_hash_index_find(HASH_OF(*val), 1, (void **)&zphrase) == FAILURE)	{
-			zend_error(E_ERROR, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name());
+			zend_error(E_WARNING, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name());
 			return NULL;
 		}
 		convert_to_string_ex(zphrase);
@@ -288,7 +288,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 
 		/* now set val to be the key param and continue */
 		if (zend_hash_index_find(HASH_OF(*val), 0, (void **)&val) == FAILURE)	{
-			zend_error(E_ERROR, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name());
+			zend_error(E_WARNING, "%s(): key array must be of the form array(0 => key, 1 => phrase)", get_active_function_name());
 			return NULL;
 		}
 	}
@@ -688,7 +688,7 @@ PHP_FUNCTION(openssl_get_privatekey)
 	pkey = php_openssl_evp_from_zval(key, 0, argc == 2 ? Z_STRVAL_PP(passphrase) : "", 1, &(return_value->value.lval));
 
 	if (pkey == NULL) {
-		zend_error(E_ERROR, "%s(): unable to coerce arg to a private key", get_active_function_name());
+		zend_error(E_WARNING, "%s(): unable to coerce arg to a private key", get_active_function_name());
 		RETURN_FALSE;
 	}
 }
@@ -904,13 +904,13 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 	}
 
 	if(!(in=BIO_new_file(certfile, "r"))) {
-		zend_error(E_ERROR, "%s(): error opening the file, %s", get_active_function_name(), certfile);
+		zend_error(E_WARNING, "%s(): error opening the file, %s", get_active_function_name(), certfile);
 		goto end;
 	}
 
 	/* This loads from a file, a stack of x509/crl/pkey sets */
 	if(!(sk=PEM_X509_INFO_read_bio(in, NULL, NULL, NULL))) {
-		zend_error(E_ERROR, "%s(): error reading the file, %s", get_active_function_name(), certfile);
+		zend_error(E_WARNING, "%s(): error reading the file, %s", get_active_function_name(), certfile);
 		goto end;
 	}
 
@@ -926,7 +926,7 @@ static STACK_OF(X509) * load_all_certs_from_file(char *certfile)
 		X509_INFO_free(xi);
 	}
 	if(!sk_X509_num(stack)) {
-		zend_error(E_ERROR, "%s(): no certificates in file, %s", get_active_function_name(), certfile);
+		zend_error(E_WARNING, "%s(): no certificates in file, %s", get_active_function_name(), certfile);
 		sk_X509_free(stack);
 		goto end;
 	}
@@ -1064,7 +1064,7 @@ PHP_FUNCTION(openssl_x509_read)
 	x509 = php_openssl_x509_from_zval(cert, 1, &(return_value->value.lval));
 
 	if (x509 == NULL) {
-		zend_error(E_ERROR, "%s() supplied parameter cannot be coerced into an X509 certificate!", get_active_function_name());
+		zend_error(E_WARNING, "%s() supplied parameter cannot be coerced into an X509 certificate!", get_active_function_name());
 		RETURN_FALSE;
 	}
 }
@@ -1207,7 +1207,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 	
 	if (argc >= 4)	{
 		if (Z_TYPE_PP(cainfo) != IS_ARRAY)	{
-			zend_error(E_ERROR, "%s(): 4th parameter must be an array", get_active_function_name());
+			zend_error(E_WARNING, "%s(): 4th parameter must be an array", get_active_function_name());
 			goto clean_exit;
 		}
 	}
@@ -1250,7 +1250,7 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				sk_X509_free(signers);
 			}
 			else	{
-				zend_error(E_ERROR, "%s(): signature OK, but cannot open %s for writing",
+				zend_error(E_WARNING, "%s(): signature OK, but cannot open %s for writing",
 					  	get_active_function_name(), signersfilename);
 				RETVAL_LONG(-1);
 			}
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 		if ((*zheaders)->type == IS_NULL)
 			zheaders = NULL;
 		else if ((*zheaders)->type != IS_ARRAY)	{
-			zend_error(E_ERROR, "%s(): 4th param must be an array/null value!", get_active_function_name());
+			zend_error(E_WARNING, "%s(): 4th param must be an array/null value!", get_active_function_name());
 			goto clean_exit;
 		}
 	}
@@ -1445,7 +1445,7 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 		if ((*zheaders)->type == IS_NULL)
 			zheaders = NULL;
 		else if ((*zheaders)->type != IS_ARRAY)	{
-			zend_error(E_ERROR, "%s(): 5th param must be an array/null value!", get_active_function_name());
+			zend_error(E_WARNING, "%s(): 5th param must be an array/null value!", get_active_function_name());
 			goto clean_exit;
 		}
 	}
@@ -1455,31 +1455,31 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 
 	privkey = php_openssl_evp_from_zval(zprivkey, 0, "", 0, &keyresource);
 	if (privkey == NULL)	{
-		zend_error(E_ERROR, "%s(): error getting private key", get_active_function_name());
+		zend_error(E_WARNING, "%s(): error getting private key", get_active_function_name());
 		goto clean_exit;
 	}
 
 	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
 	if (cert == NULL)	{
-		zend_error(E_ERROR, "%s(): error getting cert", get_active_function_name());
+		zend_error(E_WARNING, "%s(): error getting cert", get_active_function_name());
 		goto clean_exit;
 	}
 
 	infile = BIO_new_file(Z_STRVAL_PP(zinfilename), "r");
 	if (infile == NULL)	{
-		zend_error(E_ERROR, "%s(): error opening input file %s!", get_active_function_name(), Z_STRVAL_PP(zinfilename));
+		zend_error(E_WARNING, "%s(): error opening input file %s!", get_active_function_name(), Z_STRVAL_PP(zinfilename));
 		goto clean_exit;
 	}
 
 	outfile = BIO_new_file(Z_STRVAL_PP(zoutfilename), "w");
 	if (outfile == NULL)	{
-		zend_error(E_ERROR, "%s(): error opening output file %s!", get_active_function_name(), Z_STRVAL_PP(zoutfilename));
+		zend_error(E_WARNING, "%s(): error opening output file %s!", get_active_function_name(), Z_STRVAL_PP(zoutfilename));
 		goto clean_exit;
 	}
 
 	p7 = PKCS7_sign(cert, privkey, others, infile, flags);
 	if (p7 == NULL)	{
-		zend_error(E_ERROR, "%s(): error creating PKCS7 structure!", get_active_function_name());
+		zend_error(E_WARNING, "%s(): error creating PKCS7 structure!", get_active_function_name());
 		goto clean_exit;
 	}
 
@@ -1539,13 +1539,13 @@ PHP_FUNCTION(openssl_pkcs7_decrypt)
 
 	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval);
 	if (cert == NULL)	{
-		zend_error(E_ERROR, "%s(): unable to coerce param 3 to x509 cert", get_active_function_name());
+		zend_error(E_WARNING, "%s(): unable to coerce param 3 to x509 cert", get_active_function_name());
 		goto clean_exit;
 	}
 
 	key = php_openssl_evp_from_zval(argc == 3 ? recipcert : recipkey, 0, "", 0, &keyresval);
 	if (key == NULL)	{
-		zend_error(E_ERROR, "%s(): unable to coerce param %d to a private key", get_active_function_name(), argc);
+		zend_error(E_WARNING, "%s(): unable to coerce param %d to a private key", get_active_function_name(), argc);
 		goto clean_exit;
 	}
 
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(openssl_sign)
 
 	pkey = php_openssl_evp_from_zval(key, 0, "", 0, &keyresource);
 	if (pkey == NULL)	{
-		zend_error(E_ERROR, "%s(): supplied key param cannot be coerced into a private key", get_active_function_name());
+		zend_error(E_WARNING, "%s(): supplied key param cannot be coerced into a private key", get_active_function_name());
 		RETURN_FALSE;
 	}
 
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(openssl_verify)
 
 	pkey = php_openssl_evp_from_zval(key, 1, NULL, 0, &keyresource);
 	if (pkey == NULL)	{
-		zend_error(E_ERROR, "%s(): supplied key param cannot be coerced into a public key", get_active_function_name());
+		zend_error(E_WARNING, "%s(): supplied key param cannot be coerced into a public key", get_active_function_name());
 		RETURN_FALSE;
 	}
 
@@ -1701,7 +1701,7 @@ PHP_FUNCTION(openssl_seal)
 				&pos) == SUCCESS) {
 		pkeys[i] = php_openssl_evp_from_zval(pubkey, 1, NULL, 0, &key_resources[i]);
 		if (pkeys[i] == NULL)	{
-			zend_error(E_ERROR, "%s(): not a public key (%dth member of pubkeys)", get_active_function_name(), i);
+			zend_error(E_WARNING, "%s(): not a public key (%dth member of pubkeys)", get_active_function_name(), i);
 			RETVAL_FALSE;
 			goto clean_exit;
 		}
@@ -1813,7 +1813,7 @@ PHP_FUNCTION(openssl_open)
 
 	pkey = php_openssl_evp_from_zval(privkey, 0, "", 0, &keyresource);
 	if (pkey == NULL)	{
-		zend_error(E_ERROR, "%s(): unable to coerce param 4 into a private key", get_active_function_name());
+		zend_error(E_WARNING, "%s(): unable to coerce param 4 into a private key", get_active_function_name());
 		RETURN_FALSE;
 	}
 	buf = emalloc(Z_STRLEN_PP(data) + 1);
