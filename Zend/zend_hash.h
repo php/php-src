@@ -41,7 +41,7 @@ typedef int (*apply_func_arg_t)(void *pDest, void *argument);
 typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
-struct hashtable;
+struct _hashtable;
 
 typedef struct bucket {
 	ulong h;						/* Used for numeric indexing */
@@ -55,7 +55,7 @@ typedef struct bucket {
 	char arKey[1]; /* Must be last element */
 } Bucket;
 
-typedef struct hashtable {
+typedef struct _hashtable {
 	uint nTableSize;
 	uint nHashSizeIndex;
 	uint nNumOfElements;
