@@ -1,3 +1,84 @@
+2000-10-17  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Makefile.in: update for Date_Calc install
+
+2000-10-17  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/mhash/mhash.c:
+    Added the mhash HMAC functionality. Now the mhash function can use
+    keyed hash by added the key as an extra parameter to the function.
+
+2000-10-17  Zeev Suraski  <zeev@zend.com>
+
+    * main/rfc1867.c: Fix warning
+
+    * main/main.c
+      NEWS: Fix a crash in CGI mode, in case no file is provided
+
+2000-10-17  Jouni Ahto  <jah@mork.net>
+
+    * ext/interbase/interbase.c:
+    (ibase_execute) - Oops, trying to free a little bit too much. Maybe fixes
+    		  #6721, #7117, #7278.
+
+
+2000-10-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/mcal/php_mcal.c: spaces to tabs. do we have a standard on this?
+
+    * ext/imap/php_imap.c:
+    fix imap_fetchstructure(). msgindex is not valid if we're using FT_UID;
+    always use Z_LVAL_PP(msgno) in the actual c-client function call.
+
+2000-10-17  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+    Added ldap_get_option() and ldap_set_option() functions
+
+2000-10-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * ext/mcal/php_mcal.c:
+    replace fixed-size buffers for username and password with dynamically
+    allocated strings in the MCAL extension.
+
+2000-10-17  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Removed some redundant convert_to_*_ex() calls. Edited some whitespace.
+
+2000-10-17  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: cvs commit message disappeared.
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h: *** empty log message ***
+
+2000-10-17  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.h
+      ext/odbc/setup.stub
+      ext/odbc/config.m4: Added support for SAP DB
+
+2000-10-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Initialize tags properly.
+
+    Submitted by: Andreas Karajannis <Andreas.Karajannis@gmd.de>
+
+2000-10-17  Monte Ohrt  <monte@ispi.net>
+
+    * pear/Date/Calc.php: fixed a bug in daysInMonth()
+
+2000-10-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.re: Back out ws changes
+
+    * NEWS: .
+
+    * ext/session/mod_files.c: fix indentation
+
 2000-10-16  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/standard/basic_functions.c: Aha, Sascha made a mistake!  ;)
