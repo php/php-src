@@ -62,7 +62,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...)
 			INIT_PZVAL(new_tmp);
 			param_ptr = new_tmp;
 			((zval *) *(p-arg_count))->refcount--;
-			*(p-param_count) = param_ptr;
+			*(p-arg_count) = param_ptr;
 		}
 		*param = param_ptr;
 		arg_count--;
@@ -86,7 +86,6 @@ ZEND_API int zend_get_parameters_array(int ht, int param_count, zval **argument_
 	if (param_count>arg_count) {
 		return FAILURE;
 	}
-
 
 	while (param_count-->0) {
 		param_ptr = *(p-arg_count);
