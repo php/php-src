@@ -15,6 +15,7 @@ Fixed:
     str_repeat (Ilia)
     imagecopyresized (Ilia)
     mhash_keygen_s2k (Ilia)
+    bundled gd (Ilia)
     mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi)
     xml_parser_create (Moriyoshi)
     ob_start (Sascha)
@@ -31,9 +32,8 @@ Open:
     socket_select               (3)
     php_imagepolygon            (4)
     imagesetstyle               (5)
-    bundled gd                  (6)
-    php_base64_encode		(8)
-    pack			(9)
+    php_base64_encode		(6)
+    pack			(7)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -83,26 +83,9 @@ Methodology
     gdImageSetStyle function called by this php wrapper can die for the
     same reason.  
 
-(6) multiple integer overflows that can occur when trying to allocate a buffer
-    for a new image. Affected functions:
-    gdImageCreateFromJpegCtx
-    readwbmp
-    gdImageCreateFromXpm
-    gdImageCreateFromPngCtx
-    gdImagePngCtx
-    gdImageCreateFromJpegCtx
-    gdImageJpegCtx
-    gdImageCreateFromGd2Ctx
-    gdImageCreateFromGd2PartCtx
-    _gdImageGd2
-    GetDataBlock (gd_gif_in.c)
+(6) integer overflow if the specified string is longer then ~1.1 billion bytes.
 
-(7) few possible integer overflows, once safe_emalloc() or something similar
-    is implemented they can all be addressed.
-
-(8) integer overflow if the specified string is longer then ~1.1 billion bytes.
-
-(9) multiple integer overflows, ex. pack("d4294967297", 2);
+(7) multiple integer overflows, ex. pack("d4294967297", 2);
 
 Ammendment 1.
 
