@@ -46,13 +46,6 @@ static int schema_restriction_var_char(xmlNodePtr val, sdlRestrictionCharPtr *va
 
 static void schema_type_fixup(sdlCtx *ctx, sdlTypePtr type);
 
-static void delete_model(void *handle);
-static void delete_type(void *data);
-static void delete_extra_attribute(void *attribute);
-static void delete_attribute(void *attribute);
-static void delete_restriction_var_int(void *rvi);
-static void delete_schema_restriction_var_char(void *srvc);
-
 static encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
 {
 	smart_str nscat = {0};
@@ -697,7 +690,7 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodeP
 			schema_restriction_var_char(trav, &enumval);
 			if (cur_type->restrictions->enumeration == NULL) {
 				cur_type->restrictions->enumeration = sdl_malloc(sizeof(HashTable));
-				zend_hash_init(cur_type->restrictions->enumeration, 0, NULL, delete_schema_restriction_var_char, SDL_PERSISTENT);
+				zend_hash_init(cur_type->restrictions->enumeration, 0, NULL, delete_restriction_var_char, SDL_PERSISTENT);
 			}
 			zend_hash_add(cur_type->restrictions->enumeration, enumval->value, strlen(enumval->value)+1, &enumval, sizeof(sdlRestrictionCharPtr), NULL);
 		} else {
@@ -2113,7 +2106,7 @@ static void schema_content_model_fixup(sdlCtx *ctx, sdlContentModelPtr model)
 				schema_type_fixup(ctx,*tmp);
 				efree(model->u.group_ref);
 				model->kind = XSD_CONTENT_GROUP;
-				model->u.group = (*tmp)->model;
+				model->u.group = (*tmp);
 			} else {
 				php_error(E_ERROR, "SOAP-ERROR: Parsing Schema: unresolved group 'ref' attribute");
 			}
@@ -2231,7 +2224,7 @@ void schema_pass2(sdlCtx *ctx)
 	}
 }
 
-static void delete_model(void *handle)
+void delete_model(void *handle)
 {
 	sdlContentModelPtr tmp = *((sdlContentModelPtr*)handle);
 	switch (tmp->kind) {
@@ -2251,7 +2244,7 @@ static void delete_model(void *handle)
 	sdl_free(tmp);
 }
 
-static void delete_type(void *data)
+void delete_type(void *data)
 {
 	sdlTypePtr type = *((sdlTypePtr*)data);
 	if (type->name) {
@@ -2287,8 +2280,8 @@ static void delete_type(void *data)
 		delete_restriction_var_int(&type->restrictions->length);
 		delete_restriction_var_int(&type->restrictions->minLength);
 		delete_restriction_var_int(&type->restrictions->maxLength);
-		delete_schema_restriction_var_char(&type->restrictions->whiteSpace);
-		delete_schema_restriction_var_char(&type->restrictions->pattern);
+		delete_restriction_var_char(&type->restrictions->whiteSpace);
+		delete_restriction_var_char(&type->restrictions->pattern);
 		if (type->restrictions->enumeration) {
 			zend_hash_destroy(type->restrictions->enumeration);
 			sdl_free(type->restrictions->enumeration);
@@ -2298,7 +2291,7 @@ static void delete_type(void *data)
 	sdl_free(type);
 }
 
-static void delete_extra_attribute(void *attribute)
+void delete_extra_attribute(void *attribute)
 {
 	sdlExtraAttributePtr attr = *((sdlExtraAttributePtr*)attribute);
 
@@ -2311,7 +2304,7 @@ static void delete_extra_attribute(void *attribute)
 	sdl_free(attr);
 }
 
-static void delete_attribute(void *attribute)
+void delete_attribute(void *attribute)
 {
 	sdlAttributePtr attr = *((sdlAttributePtr*)attribute);
 
@@ -2334,7 +2327,7 @@ static void delete_attribute(void *attribute)
 	sdl_free(attr);
 }
 
-static void delete_restriction_var_int(void *rvi)
+void delete_restriction_var_int(void *rvi)
 {
 	sdlRestrictionIntPtr ptr = *((sdlRestrictionIntPtr*)rvi);
 	if (ptr) {
@@ -2342,7 +2335,7 @@ static void delete_restriction_var_int(void *rvi)
 	}
 }
 
-static void delete_schema_restriction_var_char(void *srvc)
+void delete_restriction_var_char(void *srvc)
 {
 	sdlRestrictionCharPtr ptr = *((sdlRestrictionCharPtr*)srvc);
 	if (ptr) {

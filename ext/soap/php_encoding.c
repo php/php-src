@@ -826,7 +826,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 			}
 		}
 		case XSD_CONTENT_GROUP:
-			model_to_zval_object(ret, model->u.group, data, sdl TSRMLS_CC);
+			model_to_zval_object(ret, model->u.group->model, data, sdl TSRMLS_CC);
 		default:
 		  break;
 	}
@@ -1023,7 +1023,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 			return 0;
 		}
 		case XSD_CONTENT_GROUP: {
-			return model_to_xml_object(node, model->u.group, prop, style, model->min_occurs > 0);
+			return model_to_xml_object(node, model->u.group->model, prop, style, model->min_occurs > 0);
 		}
 		default:
 		  break;
@@ -1555,7 +1555,7 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data)
 	int dimension = 1;
 	int* dims = NULL;
 	int* pos = NULL;
-	xmlAttrPtr attr;	
+	xmlAttrPtr attr;
 	sdlPtr sdl;
 	sdlAttributePtr *arrayType;
 	sdlExtraAttributePtr *ext;
