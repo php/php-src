@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Forced call_user_method() and call_user_method_array() to take the
+  object argument by reference. (Andrei)
+- Fixed binding of ROWIDs in OCI8. (Thies)
 - Added PEAR/Cache as a generic Caching System. (Sebastian, PEAR/Cache)
 - IMAP quota support (imap_set_quota, imap_get_quota) enabled/added via
   c-client2000 (kalowsky)
