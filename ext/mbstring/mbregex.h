@@ -198,7 +198,7 @@ extern void mbre_free_registers (struct mbre_registers*);
 #else /* !__STDC__ */
 
 extern char *mbre_compile_pattern ();
-void mbre_free_regexp ();
+void mbre_free_pattern ();
 /* Is this really advertised? */
 extern int mbre_adjust_startpos ();
 extern void mbre_compile_fastmap ();
