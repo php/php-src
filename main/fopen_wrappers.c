@@ -352,7 +352,6 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		   we're not adding it in this case */
 		STR_FREE(SG(request_info).path_translated);
 		SG(request_info).path_translated = NULL;
-		file_handle->handle.fp = NULL;
 		return FAILURE;
 	}
 	fp = VCWD_FOPEN(filename, "rb");
@@ -365,7 +364,6 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	if (!fp) {
 		php_error(E_ERROR, "Unable to open %s", filename);
 		STR_FREE(SG(request_info).path_translated);	/* for same reason as above */
-		file_handle->handle.fp = NULL;
 		return FAILURE;
 	}
 
