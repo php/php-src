@@ -34,7 +34,6 @@
 #include "php_globals.h"
 
 int php_tag_find(char *tag, int len, char *set);
-static inline char *php_memnstr(char *haystack, char *needle, int needle_len, char *end);
 
 /* this is read-only, so it's ok */
 static char hexconvtab[] = "0123456789abcdef";
@@ -525,42 +524,45 @@ PHP_FUNCTION(dirname)
 
 
 /* case insensitve strstr */
-PHPAPI char *php_stristr(unsigned char *s, unsigned char *t)
+PHPAPI char *php_stristr(unsigned char *s, unsigned char *t,
+                         size_t s_len, size_t t_len)
 {
-	int i, j, k, l;
-	
-	for (i = 0; s[i]; i++) {
-		for (j = 0, l = k = i; s[k] && t[j] &&
-			tolower(s[k]) == tolower(t[j]); j++, k++)
-			;
-		if (t[j] == '\0')
-			return s + l;
-	}
-	return NULL;
+	php_strtolower(s, s_len);
+	php_strtolower(t, t_len);
+	return php_memnstr(s, t, t_len, s + s_len);
 }
 
 /* {{{ proto string stristr(string haystack, string needle)
    Find first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stristr)
 {
-	pval **haystack, **needle;
+	zval **haystack, **needle;
 	char *found = NULL;
+	char needle_char[2];
 	
 	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) ==
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(haystack);
-	convert_to_string_ex(needle);
 
-	if (strlen((*needle)->value.str.val)==0) {
-		php_error(E_WARNING,"Empty delimiter");
-		RETURN_FALSE;
+	if ((*needle)->type == IS_STRING) {
+		if ((*needle)->value.str.len==0) {
+			php_error(E_WARNING,"Empty delimiter");
+			RETURN_FALSE;
+		}
+		found = php_stristr((*haystack)->value.str.val, (*needle)->value.str.val,
+							(*haystack)->value.str.len, (*needle)->value.str.len);
+	} else {
+		convert_to_long_ex(needle);
+		needle_char[0] = tolower((char) (*needle)->value.lval);
+		needle_char[1] = '\0';
+		found = php_stristr((*haystack)->value.str.val, needle_char,
+				            (*haystack)->value.str.len, 1);
 	}
-	found = php_stristr((*haystack)->value.str.val, (*needle)->value.str.val);
 
 	if (found) {
-		RETVAL_STRING(found,1);
+		RETVAL_STRING(found, 1);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -571,29 +573,35 @@ PHP_FUNCTION(stristr)
    Find first occurrence of a string within another */
 PHP_FUNCTION(strstr)
 {
-	pval **haystack, **needle;
+	zval **haystack, **needle;
+	char *haystack_end;
 	char *found = NULL;
+	char needle_char[2];
 	
 	if (ARG_COUNT(ht) != 2 || getParametersEx(2, &haystack, &needle) ==
 		FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(haystack);
+	haystack_end = (*haystack)->value.str.val + (*haystack)->value.str.len;
 
 	if ((*needle)->type == IS_STRING) {
-		if (strlen((*needle)->value.str.val)==0) {
+		if ((*needle)->value.str.len==0) {
 			php_error(E_WARNING,"Empty delimiter");
 			RETURN_FALSE;
 		}
-		found = strstr((*haystack)->value.str.val, (*needle)->value.str.val);
+		found = php_memnstr((*haystack)->value.str.val, (*needle)->value.str.val,
+                            (*needle)->value.str.len, haystack_end);
 	} else {
 		convert_to_long_ex(needle);
-		found = strchr((*haystack)->value.str.val, (char) (*needle)->value.lval);
+		needle_char[0] = (char) (*needle)->value.lval;
+		needle_char[1] = '\0';
+		found = php_memnstr((*haystack)->value.str.val, needle_char, 1, haystack_end);
 	}
 
 
 	if (found) {
-		RETVAL_STRING(found,1);
+		RETVAL_STRING(found, 1);
 	} else {
 		RETVAL_FALSE;
 	}
@@ -1047,24 +1055,26 @@ PHP_FUNCTION(ucfirst)
    Uppercase the first character of every word in a string */
 PHP_FUNCTION(ucwords)
 {
-	pval **arg;
+	zval **str;
 	char *r;
+	char *r_end;
 	
-	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &arg) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(arg);
+	convert_to_string_ex(str);
 
-	if (!*(*arg)->value.str.val) {
+	if (!(*str)->value.str.len) {
 		RETURN_FALSE;
 	}
-	*return_value=**arg;
+	*return_value=**str;
 	zval_copy_ctor(return_value);
 	*return_value->value.str.val = toupper((unsigned char)*return_value->value.str.val);
 
 	r=return_value->value.str.val;
-	while((r=strstr(r," "))){
-		if(*(r+1)){
+	r_end = r + (*str)->value.str.len;
+	while((r=php_memnstr(r, " ", 1, r_end)) != NULL){
+		if(r < r_end){
 			r++;
 			*r=toupper((unsigned char)*r);
 		} else {
@@ -1672,7 +1682,7 @@ PHPAPI void php_char_to_str(char *str,uint len,char from,char *to,int to_len,pva
 }
 
 
-static inline char *
+PHPAPI inline char *
 php_memnstr(char *haystack, char *needle, int needle_len, char *end)
 {
 	char *p = haystack;
