@@ -175,6 +175,30 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 }
 
 
+SAPI_POST_HANDLER_FUNC(php_std_post_handler)
+{
+	char *var, *val;
+	char *strtok_buf = NULL;
+	zval *array_ptr = (zval *) arg;
+	ELS_FETCH();
+	PLS_FETCH();
+
+	var = strtok_r(SG(request_info).post_data, "&", &strtok_buf);
+
+	while (var) {
+		val = strchr(var, '=');
+		if (val) { /* have a value */
+			*val++ = '\0';
+			/* FIXME: XXX: not binary safe, discards returned length */
+			php_url_decode(var, strlen(var));
+			php_url_decode(val, strlen(val));
+			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
+		}
+		var = strtok_r(NULL, "&", &strtok_buf);
+	}
+}
+
+
 void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 {
 	char *res = NULL, *var, *val;
@@ -192,18 +216,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
 					case PARSE_POST:
-						if (zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL)==FAILURE) {
-							zval **p;
-
-							/* This could happen if we're in RFC 1867 file upload */
-							/* The parsing portion of the POST reader should actually move
-							 * to this function  - Zeev
-							 */
-							zval_dtor(array_ptr);
-							FREE_ZVAL(array_ptr);
-							zend_hash_find(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), (void **) &p);
-							array_ptr = *p;
-						}
+						zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL);
 						break;
 					case PARSE_GET:
 						zend_hash_add_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), array_ptr, sizeof(pval *),NULL);
@@ -221,10 +234,12 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 			break;
 	}
 
-	if (arg == PARSE_POST) {			/* POST data */
-		res = SG(request_info).post_data;
-		free_buffer = 0;
-	} else if (arg == PARSE_GET) {		/* GET data */
+	if (arg==PARSE_POST) {
+		sapi_handle_post(array_ptr SLS_CC);
+		return;
+	}
+
+	if (arg == PARSE_GET) {		/* GET data */
 		var = SG(request_info).query_string;
 		if (var && *var) {
 			res = (char *) estrdup(var);
@@ -244,51 +259,34 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 		res = str;
 		free_buffer = 1;
 	}
+
 	if (!res) {
 		return;
 	}
 
-#if HAVE_FDFLIB
-	if((NULL != SG(request_info).content_type) && (0 == strcmp(SG(request_info).content_type, "application/vnd.fdf"))) {
-		pval *tmp;
-
-		ALLOC_ZVAL(tmp);
-		tmp->value.str.len = SG(request_info).post_data_length;
-		tmp->value.str.val = estrndup(SG(request_info).post_data, SG(request_info).post_data_length);
-		tmp->type = IS_STRING;
-		INIT_PZVAL(tmp);
-		zend_hash_add(&EG(symbol_table), "HTTP_FDF_DATA", sizeof("HTTP_FDF_DATA"), &tmp, sizeof(pval *),NULL);
-
+	if (arg == PARSE_COOKIE) {
+		var = strtok_r(res, ";", &strtok_buf);
+	} else if (arg == PARSE_POST) {
+		var = strtok_r(res, "&", &strtok_buf);
 	} else {
-#endif
-		if (arg == PARSE_COOKIE) {
-			var = strtok_r(res, ";", &strtok_buf);
-		} else if (arg == PARSE_POST) {
-			var = strtok_r(res, "&", &strtok_buf);
-		} else {
-			var = strtok_r(res, PG(arg_separator), &strtok_buf);
-		}
-
-		while (var) {
-			val = strchr(var, '=');
-			if (val) { /* have a value */
-				*val++ = '\0';
-				/* FIXME: XXX: not binary safe, discards returned length */
-				php_url_decode(var, strlen(var));
-				php_url_decode(val, strlen(val));
-				php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
-			}
-			if (arg == PARSE_COOKIE) {
-				var = strtok_r(NULL, ";", &strtok_buf);
-			} else if (arg == PARSE_POST) {
-				var = strtok_r(NULL, "&", &strtok_buf);
-			} else {
-				var = strtok_r(NULL, PG(arg_separator), &strtok_buf);
-			}
-		}
-#if HAVE_FDFLIB
+		var = strtok_r(res, PG(arg_separator), &strtok_buf);
 	}
-#endif
+
+	while (var) {
+		val = strchr(var, '=');
+		if (val) { /* have a value */
+			*val++ = '\0';
+			/* FIXME: XXX: not binary safe, discards returned length */
+			php_url_decode(var, strlen(var));
+			php_url_decode(val, strlen(val));
+			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
+		}
+		if (arg == PARSE_COOKIE) {
+			var = strtok_r(NULL, ";", &strtok_buf);
+		} else {
+			var = strtok_r(NULL, PG(arg_separator), &strtok_buf);
+		}
+	}
 	if (free_buffer) {
 		efree(res);
 	}

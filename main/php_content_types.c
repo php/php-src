@@ -4,8 +4,9 @@
 
 #include "php_content_types.h"
 
-static sapi_post_content_type_reader php_post_content_types[] = {
-	{ MULTIPART_CONTENT_TYPE,		sizeof(MULTIPART_CONTENT_TYPE)-1,		rfc1867_post_reader	},
+static sapi_post_entry php_post_entries[] = {
+	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data,	php_std_post_handler },
+	{ MULTIPART_CONTENT_TYPE,		sizeof(MULTIPART_CONTENT_TYPE)-1,		sapi_read_standard_form_data,	rfc1867_post_handler },
 	{ NULL, 0, NULL }
 };
 
@@ -15,15 +16,15 @@ SAPI_POST_READER_FUNC(php_default_post_reader)
 	char *data;
 	ELS_FETCH();
 
-	sapi_read_standard_form_data(content_type_dup SLS_CC);
+	sapi_read_standard_form_data(SLS_C);
 	data = estrndup(SG(request_info).post_data,SG(request_info).post_data_length);
 	SET_VAR_STRINGL("HTTP_RAW_POST_DATA", data, SG(request_info).post_data_length);
 }
 
 
-int php_startup_SAPI_content_types(void)
+int php_startup_sapi_content_types(void)
 {
-	sapi_register_post_readers(php_post_content_types);
+	sapi_register_post_entries(php_post_entries);
 	sapi_register_default_post_reader(php_default_post_reader);
 	return SUCCESS;
 }
