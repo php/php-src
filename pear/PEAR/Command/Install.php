@@ -118,6 +118,34 @@ upgrade anyway).
 
 More than one package may be specified at once.
 '),
+        'upgrade-all' => array(
+            'summary' => 'Upgrade All Packages',
+            'function' => 'doInstall',
+            'shortcut' => 'ua',
+            'options' => array(
+                'nodeps' => array(
+                    'shortopt' => 'n',
+                    'doc' => 'ignore dependencies, upgrade anyway',
+                    ),
+                'register-only' => array(
+                    'shortopt' => 'r',
+                    'doc' => 'do not install files, only register the package as upgraded',
+                    ),
+                'nobuild' => array(
+                    'shortopt' => 'B',
+                    'doc' => 'don\'t build C extensions',
+                    ),
+                'nocompress' => array(
+                    'shortopt' => 'Z',
+                    'doc' => 'request uncompressed files when downloading',
+                    ),
+                ),
+            'doc' => '
+Upgrades all packages that have a newer release available.  Upgrades are
+done only if there is a release available of the state specified in
+"preferred_state" (currently {config preferred_state}), or a state considered
+more stable.
+'),
         'uninstall' => array(
             'summary' => 'Un-install Package',
             'function' => 'doUninstall',
@@ -161,6 +189,36 @@ specified at once.
         }
         if ($command == 'upgrade') {
             $options[$command] = true;
+        }
+        if ($command == 'upgrade-all') {
+            include_once "PEAR/Remote.php";
+            $options['upgrade'] = true;
+            $remote = new PEAR_Remote($this->config);
+            $state = $this->config->get('preferred_state');
+            if (empty($state) || $state == 'any') {
+                $latest = $remote->call("package.listLatestReleases");
+            } else {
+                $latest = $remote->call("package.listLatestReleases", $state);
+            }
+            if (PEAR::isError($latest)) {
+                return $latest;
+            }
+            $reg = new PEAR_Registry($this->config->get('php_dir'));
+            $installed = array_flip($reg->listPackages());
+            $params = array();
+            foreach ($latest as $package => $info) {
+                if (!isset($installed[$package])) {
+                    // skip packages we don't have installed
+                    continue;
+                }
+                $inst_version = $reg->packageInfo($package, 'version');
+                if (version_compare("$info[version]", "$inst_version", "le")) {
+                    // installed version is up-to-date
+                    continue;
+                }
+                $params[] = $package;
+                $this->ui->outputData("will upgrade $package", $command);
+            }
         }
         foreach ($params as $pkg) {
             $bn = basename($pkg);
