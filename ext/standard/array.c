@@ -1988,7 +1988,7 @@ PHP_FUNCTION(array_unshift)
 	   hashtable and replace it with new one */
 	new_hash = php_splice(Z_ARRVAL_P(stack), 0, 0, &args[1], argc-1, NULL);
 	zend_hash_destroy(Z_ARRVAL_P(stack));
-	efree(Z_ARRVAL_P(stack));
+	FREE_HASHTABLE(Z_ARRVAL_P(stack));
 	Z_ARRVAL_P(stack) = new_hash;
 
 	/* Clean up and return the number of elements in the stack */
