@@ -663,26 +663,18 @@ static void php_start_request_hook(void *data)
 
 static void php_execute_pre_request_shutdown(PLS_D)
 {
-	zend_llist_apply(&PG(ll_pre_request_shutdown), php_start_request_hook);
+	if (PG(pre_request_shutdown_ok)) {
+		zend_llist_apply(&PG(ll_pre_request_shutdown), php_start_request_hook);
+		zend_llist_destroy(&PG(ll_pre_request_shutdown));
+	}
 }
 
 static void php_execute_post_request_startup(PLS_D)
 {
-	zend_llist_apply(&PG(ll_post_request_startup), php_start_request_hook);
-}
-
-static void php_destroy_request_hooks(void)
-{
-	PLS_FETCH();
-
-	zend_llist_destroy(&PG(ll_pre_request_shutdown));
-	zend_llist_destroy(&PG(ll_post_request_startup));
-}
-
-static void php_init_request_hooks(PLS_D)
-{
-	zend_llist_init(&PG(ll_post_request_startup), sizeof(php_request_hook), NULL, 0);
-	zend_llist_init(&PG(ll_pre_request_shutdown), sizeof(php_request_hook), NULL, 0);
+	if (PG(post_request_startup_ok)) {
+		zend_llist_apply(&PG(ll_post_request_startup), php_start_request_hook);
+		zend_llist_destroy(&PG(ll_post_request_startup));
+	}
 }
 
 void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
@@ -690,6 +682,11 @@ void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
 	php_request_hook ptr;
 	PLS_FETCH();
 
+	if (!PG(pre_request_shutdown_ok)) {
+		zend_llist_init(&PG(ll_pre_request_shutdown), sizeof(php_request_hook), NULL, 0);
+		PG(pre_request_shutdown_ok) = 1;
+	}
+	
 	ptr.func = func;
 	ptr.userdata = userdata;
 	
@@ -700,6 +697,11 @@ void php_register_post_request_startup(void (*func)(void *), void *userdata)
 {
 	php_request_hook ptr;
 	PLS_FETCH();
+
+	if (!PG(post_request_startup_ok)) {
+		zend_llist_init(&PG(ll_post_request_startup), sizeof(php_request_hook), NULL, 0);
+		PG(post_request_startup_ok) = 1;
+	}
 
 	ptr.func = func;
 	ptr.userdata = userdata;
@@ -712,7 +714,6 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	global_lock();
 	
 	php_output_startup();
-	php_init_request_hooks(PLS_C);
 
 #if APACHE
 	/*
@@ -802,7 +803,6 @@ void php_request_shutdown(void *dummy)
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
-	php_destroy_request_hooks();
 	php_destroy_request_info(NULL);
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
 	php_unset_timeout();

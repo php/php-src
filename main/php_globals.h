@@ -98,6 +98,9 @@ struct _php_core_globals {
 
 	zend_llist ll_post_request_startup;
 	zend_llist ll_pre_request_shutdown;
+
+	zend_bool post_request_startup_ok;
+	zend_bool pre_request_shutdown_ok;
 };
 
 
