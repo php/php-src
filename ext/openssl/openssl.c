@@ -152,7 +152,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 	if (resourceval)
 		*resourceval = -1;
 
-	if ((*val)->type == IS_RESOURCE)	{
+	if (Z_TYPE_PP(val) == IS_RESOURCE)	{
 		/* is it an x509 resource ? */
 		void * what;
 		int type;
@@ -210,7 +210,7 @@ static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * r
 /* Given a zval, coerce it into a EVP_PKEY object.
 	It can be:
 		1. private key resource from openssl_get_privatekey()
-		2. X509 resource -> private key will be extracted from it
+		2. X509 resource -> public key will be extracted from it
 		3. if it starts with file:// interpreted as path to key file
 		4. interpreted as the data from the cert/key file and interpreted in same way as openssl_get_privatekey()
 		5. an array(0 => [items 2..4], 1 => passphrase)
@@ -225,13 +225,13 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 	int free_cert = 0;
 	long cert_res = -1;
 	char * filename = NULL;
-
+	
 	if (resourceval)
 		*resourceval = -1;
 
-	if ((*val)->type == IS_ARRAY)	{
+	if (Z_TYPE_PP(val) == IS_ARRAY)	{
 		zval ** zphrase;
-
+		
 		/* get passphrase */
 
 		if (zend_hash_index_find(HASH_OF(*val), 1, (void **)&zphrase) == FAILURE)	{
@@ -248,7 +248,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		}
 	}
 
-	if ((*val)->type == IS_RESOURCE)	{
+	if (Z_TYPE_PP(val) == IS_RESOURCE)	{
 		void * what;
 		int type;
 
@@ -1144,20 +1144,28 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	convert_to_string_ex(zoutfilename);
 
 	privkey = php_openssl_evp_from_zval(zprivkey, 0, "", 0, &keyresource);
-	if (privkey == NULL)
+	if (privkey == NULL)	{
+		zend_error(E_ERROR, "%s(): error getting private key", get_active_function_name());
 		goto clean_exit;
+	}
 
 	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
-	if (cert == NULL)
+	if (cert == NULL)	{
+		zend_error(E_ERROR, "%s(): error getting cert", get_active_function_name());
 		goto clean_exit;
+	}
 
 	infile = BIO_new_file(Z_STRVAL_PP(zinfilename), "r");
-	if (infile == NULL)
+	if (infile == NULL)	{
+		zend_error(E_ERROR, "%s(): error opening input file %s!", get_active_function_name(), Z_STRVAL_PP(zinfilename));
 		goto clean_exit;
+	}
 
 	outfile = BIO_new_file(Z_STRVAL_PP(zoutfilename), "w");
-	if (outfile == NULL)
+	if (outfile == NULL)	{
+		zend_error(E_ERROR, "%s(): error opening output file %s!", get_active_function_name(), Z_STRVAL_PP(zoutfilename));
 		goto clean_exit;
+	}
 
 	p7 = PKCS7_sign(cert, privkey, others, infile, flags);
 	if (p7 == NULL)	{
