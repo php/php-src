@@ -241,64 +241,66 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, ch
 		}
 	}
 	
-	/* read past HTTP headers */
+	if( reqok ) {
+		/* read past HTTP headers */
 	
-	http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
+		http_header_line = emalloc(HTTP_HEADER_BLOCK_SIZE);
 
-	while (!body && !php_stream_eof(stream))	{
+		while (!body && !php_stream_eof(stream))	{
 		
-		if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
-			char *p;
-			int found_eol = 0;
-			int http_header_line_length;
+			if (php_stream_gets(stream, http_header_line, HTTP_HEADER_BLOCK_SIZE-1) != NULL)	{
+				char *p;
+				int found_eol = 0;
+				int http_header_line_length;
 			
-			http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
-			p = http_header_line;
-			while(*p)	{
-				while(*p == '\n' || *p == '\r')	{
-					*p = '\0';
-					p--;
-					found_eol = 1;
+				http_header_line[HTTP_HEADER_BLOCK_SIZE-1] = '\0';
+				p = http_header_line;
+				while(*p)	{
+					while(*p == '\n' || *p == '\r')	{
+						*p = '\0';
+						p--;
+						found_eol = 1;
+					}
+					if (found_eol)
+						break;
+					p++;
 				}
-				if (found_eol)
-					break;
-				p++;
-			}
-			http_header_line_length = p-http_header_line+1;
+				http_header_line_length = p-http_header_line+1;
 		
-			if (!strncasecmp(http_header_line, "Location: ", 10)) {
-				strlcpy(location, http_header_line + 10, sizeof(location));
-			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
-				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
-			} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
-				file_size = atoi(http_header_line + 16);
-				php_stream_notify_file_size(context, file_size, http_header_line, 0);
-			}
+				if (!strncasecmp(http_header_line, "Location: ", 10)) {
+					strlcpy(location, http_header_line + 10, sizeof(location));
+				} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
+					php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_line + 14, 0);
+				} else if (!strncasecmp(http_header_line, "Content-Length: ", 16)) {
+					file_size = atoi(http_header_line + 16);
+					php_stream_notify_file_size(context, file_size, http_header_line, 0);
+				}
 	
+				if (http_header_line[0] == '\0')
+					body = 1;
+				else	{
+					zval *http_header;
 
-			if (http_header_line[0] == '\0')
-				body = 1;
-			else	{
-				zval *http_header;
+					MAKE_STD_ZVAL(http_header);
 
-				MAKE_STD_ZVAL(http_header);
-
-				ZVAL_STRINGL(http_header, http_header_line, http_header_line_length, 1);
+					ZVAL_STRINGL(http_header, http_header_line, http_header_line_length, 1);
 				
-				zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
+					zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_header, sizeof(zval *), NULL);
+				}
 			}
+			else
+				break;
 		}
-		else
-			break;
-	}
-
-	if (!reqok)	{
-			
+	} 
+	
+	if (!reqok)	{		
 		if (location[0] != '\0')
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_REDIRECTED, location, 0);
 
 		php_stream_close(stream);
 		stream = NULL;
+		zval_dtor(response_header);
+		FREE_ZVAL(response_header);
 
 		if (location[0] != '\0')	{
 
