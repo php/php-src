@@ -32,14 +32,14 @@ struct php_gz_stream_data_t	{
 static size_t php_gziop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self = (struct php_gz_stream_data_t *)stream->abstract;
-
-	if (buf == NULL && count == 0) {
-		if (gzeof(self->gz_file))
-			return EOF;
-		return 0;
-	}
+	size_t ret;
 	
-	return gzread(self->gz_file, buf, count); 
+	ret = gzread(self->gz_file, buf, count);
+
+	if (ret == 0 && gzeof(self->gz_file))
+		stream->eof = 1;
+	
+	return ret;
 }
 
 static size_t php_gziop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)

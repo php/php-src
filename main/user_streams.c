@@ -431,65 +431,61 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 	int call_result;
 	size_t didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+	zval *zcount;
 
 	assert(us != NULL);
 
-	if (buf == NULL && count == 0) {
-		ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1, 0);
+	ZVAL_STRINGL(&func_name, USERSTREAM_READ, sizeof(USERSTREAM_READ)-1, 0);
 
-		call_result = call_user_function_ex(NULL,
+	MAKE_STD_ZVAL(zcount);
+	ZVAL_LONG(zcount, count);
+	args[0] = &zcount;
+
+	call_result = call_user_function_ex(NULL,
+			&us->object,
+			&func_name,
+			&retval,
+			1, args,
+			0, NULL TSRMLS_CC);
+
+	if (call_result == SUCCESS && retval != NULL) {
+		convert_to_string(retval);
+		didread = Z_STRLEN_P(retval);
+		if (didread > count) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
+					us->wrapper->classname, didread - count, didread, count);
+			didread = count;
+		}
+		if (didread > 0)
+			memcpy(buf, Z_STRVAL_P(retval), didread);
+	} else if (call_result == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
+				us->wrapper->classname);
+	}
+	zval_ptr_dtor(&zcount);
+
+	if (retval)
+		zval_ptr_dtor(&retval);
+
+	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
+
+	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1, 0);
+
+	call_result = call_user_function_ex(NULL,
 			&us->object,
 			&func_name,
 			&retval,
 			0, NULL, 0, NULL TSRMLS_CC);
 
-		if (call_result == SUCCESS && retval != NULL && zval_is_true(retval))
-			didread = 0;
-		else {
-			if (call_result == FAILURE) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
-						us->wrapper->classname);
-			}
-
-			didread = EOF;
-		}
-
-	} else {
-		zval *zcount;
-
-		ZVAL_STRINGL(&func_name, USERSTREAM_READ, sizeof(USERSTREAM_READ)-1, 0);
-
-		MAKE_STD_ZVAL(zcount);
-		ZVAL_LONG(zcount, count);
-		args[0] = &zcount;
-
-		call_result = call_user_function_ex(NULL,
-				&us->object,
-				&func_name,
-				&retval,
-				1, args,
-				0, NULL TSRMLS_CC);
-
-		if (call_result == SUCCESS && retval != NULL) {
-			convert_to_string(retval);
-			didread = Z_STRLEN_P(retval);
-			if (didread > count) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %d bytes more data than requested (%d read, %d max) - excess data will be lost",
-						us->wrapper->classname, didread - count, didread, count);
-				didread = count;
-			}
-			if (didread > 0)
-				memcpy(buf, Z_STRVAL_P(retval), didread);
-		} else if (call_result == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
+	if (!(call_result == SUCCESS && retval != NULL && zval_is_true(retval))) {
+		if (call_result == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_EOF " is not implemented! Assuming EOF",
 					us->wrapper->classname);
 		}
-		zval_ptr_dtor(&zcount);
+
+		stream->eof = 1;
 	}
-	
-	if (retval)
-		zval_ptr_dtor(&retval);
-	
+
 	return didread;
 }
 

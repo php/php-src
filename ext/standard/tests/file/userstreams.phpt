@@ -243,11 +243,12 @@ foreach($line_lengths as $line_length) {
 
 		printf("\n--[%d] whence=%s offset=%d line_length=%d position_should_be=%d --\n",
 			$j, $whence_names[$whence], $offset, $line_length, $position);
-		printf("REAL: pos=(%d,%d,%d) ret=%d line=`%s'\n", $rpb, $rpa, ftell($tf), $rr, $rline);
-		printf("USER: pos=(%d,%d,%d) ret=%d line=`%s'\n", $upb, $upa, ftell($fp), $ur, $uline);
+		printf("REAL: pos=(%d,%d,%d) ret=%d line[%d]=`%s'\n", $rpb, $rpa, ftell($tf), $rr, strlen($rline), $rline);
+		printf("USER: pos=(%d,%d,%d) ret=%d line[%d]=`%s'\n", $upb, $upa, ftell($fp), $ur, strlen($uline), $uline);
 
 		if ($rr != $ur || $rline != $uline || $rpa != $position || $upa != $position) {
 			$fail_count++;
+			echo "###################################### FAIL!\n";
 			$dat = stream_get_meta_data($fp);
 			var_dump($dat);
 			break;
@@ -273,7 +274,7 @@ fseek($tf, $DATALEN / 2, SEEK_SET);
 
 while(!feof($fp)) {
 	$uline = fgets($fp, 1024);
-	$rline = fgets($fp, 1024);
+	$rline = fgets($tf, 1024);
 
 	if ($uline != $rline) {
 		echo "FGETS: FAIL\nuser=$uline\nreal=$rline\n";

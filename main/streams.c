@@ -462,8 +462,8 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 	/* allocate/fill the buffer */
 	
 	/* is there enough data in the buffer ? */
-	while (stream->writepos - stream->readpos < (off_t)size) {
-		size_t justread;
+	if (stream->writepos - stream->readpos < (off_t)size) {
+		size_t justread = 0;
 		
 		/* no; so lets fetch more data */
 		
@@ -491,20 +491,20 @@ static void php_stream_fill_read_buffer(php_stream *stream, size_t size TSRMLS_D
 					stream->readbuflen - stream->writepos
 					TSRMLS_CC);
 		}
-		
-		if (justread <= 0)
-			break;
-		
-		stream->writepos += justread;
-		
-		if (stream->flags & PHP_STREAM_FLAG_AVOID_BLOCKING)
-			break;
+
+		if (justread > 0) {
+			stream->writepos += justread;
+		}
 	}
+
 }
 
 PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS_DC)
 {
 	size_t toread, didread = 0;
+	
+	if (size == 0)
+		return 0;
 	
 	/* take from the read buffer first.
 	 * It is possible that a buffered stream was switched to non-buffered, so we
@@ -525,6 +525,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 
 	if (size == 0) {
 		stream->position += didread;
+
+		if (didread == 0)
+			stream->eof = 1;
+		
 		return didread;
 	}
 	
@@ -549,6 +553,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size TSRMLS
 		}
 	}
 	stream->position += size;
+
+	if (didread == 0)
+		stream->eof = 1;
+
 	return didread;
 }
 
@@ -558,6 +566,8 @@ PHPAPI int _php_stream_eof(php_stream *stream TSRMLS_DC)
 	if (stream->writepos - stream->readpos > 0)
 		return 0;
 
+	return stream->eof;
+	
 	/* we define our stream reading function so that it
 	   must return EOF when an EOF condition occurs, when
 	   working in unbuffered mode and called with these args */
@@ -657,7 +667,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 {
 	size_t avail = 0;
 	int did_copy = 0;
-	
+
 	if (maxlen == 0)
 		return NULL;
 
@@ -779,6 +789,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 			if (offset > 0 && offset < stream->writepos - stream->readpos) {
 				stream->readpos += offset;
 				stream->position += offset;
+				stream->eof = 0;
 				return 0;
 			}
 			break;
@@ -787,6 +798,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 					offset < stream->position + stream->writepos - stream->readpos) {
 				stream->readpos += offset - stream->position;
 				stream->position = offset;
+				stream->eof = 0;
 				return 0;
 			}
 			break;
@@ -809,8 +821,11 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		}
 		ret = stream->ops->seek(stream, offset, whence, &stream->position TSRMLS_CC);
 
-		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0)
+		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
+			if (ret == 0)
+				stream->eof = 0;
 			return ret;
+		}
 		/* else the stream has decided that it can't support seeking after all;
 		 * fall through to attempt emulation */
 	}
@@ -827,6 +842,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 			if (php_stream_read(stream, tmp, offset) == 0)
 				return -1;
 		}
+		stream->eof = 0;
 		return 0;
 	}
 
@@ -1100,6 +1116,7 @@ PHPAPI size_t _php_stream_copy_to_stream(php_stream *src, php_stream *dest, size
 
 typedef struct {
 	FILE *file;
+	int fd;					/* underlying file descriptor */
 	int is_process_pipe;	/* use pclose instead of fclose */
 	int is_pipe;			/* don't try and seek */
 #if HAVE_FLUSHIO
@@ -1149,21 +1166,19 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC TSRMLS_DC)
 PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	php_stdio_stream_data *self;
-#ifdef S_ISFIFO
-	int fd;
-#endif
 	
 	self = emalloc_rel_orig(sizeof(*self));
 	self->file = file;
 	self->is_pipe = 0;
 	self->is_process_pipe = 0;
 
+	self->fd = fileno(file);
+
 #ifdef S_ISFIFO
 	/* detect if this is a pipe */
-	fd = fileno(file);
-	if (fd >= 0) {
+	if (self->fd >= 0) {
 		struct stat sb;
-		self->is_pipe = (fstat(fd, &sb) == 0 && S_ISFIFO(sb.st_mode)) ? 1 : 0;
+		self->is_pipe = (fstat(self->fd, &sb) == 0 && S_ISFIFO(sb.st_mode)) ? 1 : 0;
 	}
 #endif
 	
@@ -1178,6 +1193,8 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self->file = file;
 	self->is_pipe = 1;
 	self->is_process_pipe = 1;
+	self->fd = fileno(file);
+
 	return php_stream_alloc_rel(&php_stream_stdio_ops, self, 0, mode);
 }
 
@@ -1187,37 +1204,48 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 	assert(data != NULL);
 
+	if (data->fd >= 0) {
+		
+		return write(data->fd, buf, count);
+
+	} else {
+
 #if HAVE_FLUSHIO
-	if (!data->is_pipe && data->last_op == 'r') {
-		fseek(data->file, 0, SEEK_CUR);
-	}
-	data->last_op = 'w';
+		if (!data->is_pipe && data->last_op == 'r') {
+			fseek(data->file, 0, SEEK_CUR);
+		}
+		data->last_op = 'w';
 #endif
 
-	return fwrite(buf, 1, count, data->file);
+		return fwrite(buf, 1, count, data->file);
+	}
 }
 
 static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
+	size_t ret;
 
 	assert(data != NULL);
 
-	if (buf == NULL && count == 0)	{
-		/* check for EOF condition */
-		if (feof(data->file))	{
-			return EOF;
-		}
-		return 0;
-	}
-
+	if (data->fd >= 0) {
+		ret = read(data->fd, buf, count);
+		
+		if (ret == 0 || (ret < 0 && errno != EWOULDBLOCK))
+			stream->eof = 1;
+				
+	} else {
 #if HAVE_FLUSHIO
-	if (!data->is_pipe && data->last_op == 'w')
-		fseek(data->file, 0, SEEK_CUR);
-	data->last_op = 'r';
+		if (!data->is_pipe && data->last_op == 'w')
+			fseek(data->file, 0, SEEK_CUR);
+		data->last_op = 'r';
 #endif
 
-	return fread(buf, 1, count, data->file);
+		ret = fread(buf, 1, count, data->file);
+
+		if (ret == 0 && feof(data->file))
+			stream->eof = 1;
+	}
 }
 
 static int php_stdiop_close(php_stream *stream, int close_handle TSRMLS_DC)
@@ -1249,7 +1277,11 @@ static int php_stdiop_flush(php_stream *stream TSRMLS_DC)
 
 	assert(data != NULL);
 
-	return fflush(data->file);
+	if (data->fd >= 0) {
+		return fsync(data->fd);
+	} else {
+		return fflush(data->file);
+	}
 }
 
 static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
@@ -1263,10 +1295,22 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot seek on a pipe");
 		return -1;
 	}
-	
-	ret = fseek(data->file, offset, whence);
-	*newoffset = ftell(data->file);
-	return ret;
+
+	if (data->fd >= 0) {
+		off_t result;
+		
+		result = lseek(data->fd, offset, whence);
+		if (result == (off_t)-1)
+			return -1;
+
+		*newoffset = result;
+		return 0;
+		
+	} else {
+		ret = fseek(data->file, offset, whence);
+		*newoffset = ftell(data->file);
+		return ret;
+	}
 }
 
 static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
@@ -1275,15 +1319,22 @@ static int php_stdiop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 	php_stdio_stream_data *data = (php_stdio_stream_data*) stream->abstract;
 
 	assert(data != NULL);
+	
+	/* as soon as someone touches the stdio layer, buffering may ensue,
+	 * so we need to stop using the fd directly in that case */
 
 	switch (castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret) {
 				*ret = data->file;
+				data->fd = -1;
 			}
 			return SUCCESS;
 
 		case PHP_STREAM_AS_FD:
+			/* fetch the fileno rather than using data->fd, since we may
+			 * have zeroed that member if someone requested the FILE*
+			 * first (see above case) */
 			fd = fileno(data->file);
 			if (fd < 0) {
 				return FAILURE;
