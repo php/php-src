@@ -60,6 +60,7 @@ if test "$PHP_SQLITE" != "no"; then
         libsqlite/src/update.c libsqlite/src/util.c libsqlite/src/vdbe.c \
         libsqlite/src/attach.c libsqlite/src/btree_rb.c libsqlite/src/pragma.c \
         libsqlite/src/vacuum.c libsqlite/src/copy.c \
+        libsqlite/src/vdbeaux.c libsqlite/src/date.c \
         libsqlite/src/where.c libsqlite/src/trigger.c"
     
     PHP_NEW_EXTENSION(sqlite, sqlite.c $sources, $ext_shared,,$PHP_SQLITE_CFLAGS)

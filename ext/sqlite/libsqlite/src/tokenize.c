@@ -29,122 +29,122 @@
 typedef struct Keyword Keyword;
 struct Keyword {
   char *zName;             /* The keyword name */
-  int len;                 /* Number of characters in the keyword */
-  int tokenType;           /* The token value for this keyword */
-  Keyword *pNext;          /* Next keyword with the same hash */
+  u8 tokenType;            /* Token value for this keyword */
+  u8 len;                  /* Length of this keyword */
+  u8 iNext;                /* Index in aKeywordTable[] of next with same hash */
 };
 
 /*
 ** These are the keywords
 */
 static Keyword aKeywordTable[] = {
-  { "ABORT",             0, TK_ABORT,            0 },
-  { "AFTER",             0, TK_AFTER,            0 },
-  { "ALL",               0, TK_ALL,              0 },
-  { "AND",               0, TK_AND,              0 },
-  { "AS",                0, TK_AS,               0 },
-  { "ASC",               0, TK_ASC,              0 },
-  { "ATTACH",            0, TK_ATTACH,           0 },
-  { "BEFORE",            0, TK_BEFORE,           0 },
-  { "BEGIN",             0, TK_BEGIN,            0 },
-  { "BETWEEN",           0, TK_BETWEEN,          0 },
-  { "BY",                0, TK_BY,               0 },
-  { "CASCADE",           0, TK_CASCADE,          0 },
-  { "CASE",              0, TK_CASE,             0 },
-  { "CHECK",             0, TK_CHECK,            0 },
-  { "CLUSTER",           0, TK_CLUSTER,          0 },
-  { "COLLATE",           0, TK_COLLATE,          0 },
-  { "COMMIT",            0, TK_COMMIT,           0 },
-  { "CONFLICT",          0, TK_CONFLICT,         0 },
-  { "CONSTRAINT",        0, TK_CONSTRAINT,       0 },
-  { "COPY",              0, TK_COPY,             0 },
-  { "CREATE",            0, TK_CREATE,           0 },
-  { "CROSS",             0, TK_JOIN_KW,          0 },
-  { "DATABASE",          0, TK_DATABASE,         0 },
-  { "DEFAULT",           0, TK_DEFAULT,          0 },
-  { "DEFERRED",          0, TK_DEFERRED,         0 },
-  { "DEFERRABLE",        0, TK_DEFERRABLE,       0 },
-  { "DELETE",            0, TK_DELETE,           0 },
-  { "DELIMITERS",        0, TK_DELIMITERS,       0 },
-  { "DESC",              0, TK_DESC,             0 },
-  { "DETACH",            0, TK_DETACH,           0 },
-  { "DISTINCT",          0, TK_DISTINCT,         0 },
-  { "DROP",              0, TK_DROP,             0 },
-  { "END",               0, TK_END,              0 },
-  { "EACH",              0, TK_EACH,             0 },
-  { "ELSE",              0, TK_ELSE,             0 },
-  { "EXCEPT",            0, TK_EXCEPT,           0 },
-  { "EXPLAIN",           0, TK_EXPLAIN,          0 },
-  { "FAIL",              0, TK_FAIL,             0 },
-  { "FOR",               0, TK_FOR,              0 },
-  { "FOREIGN",           0, TK_FOREIGN,          0 },
-  { "FROM",              0, TK_FROM,             0 },
-  { "FULL",              0, TK_JOIN_KW,          0 },
-  { "GLOB",              0, TK_GLOB,             0 },
-  { "GROUP",             0, TK_GROUP,            0 },
-  { "HAVING",            0, TK_HAVING,           0 },
-  { "IGNORE",            0, TK_IGNORE,           0 },
-  { "IMMEDIATE",         0, TK_IMMEDIATE,        0 },
-  { "IN",                0, TK_IN,               0 },
-  { "INDEX",             0, TK_INDEX,            0 },
-  { "INITIALLY",         0, TK_INITIALLY,        0 },
-  { "INNER",             0, TK_JOIN_KW,          0 },
-  { "INSERT",            0, TK_INSERT,           0 },
-  { "INSTEAD",           0, TK_INSTEAD,          0 },
-  { "INTERSECT",         0, TK_INTERSECT,        0 },
-  { "INTO",              0, TK_INTO,             0 },
-  { "IS",                0, TK_IS,               0 },
-  { "ISNULL",            0, TK_ISNULL,           0 },
-  { "JOIN",              0, TK_JOIN,             0 },
-  { "KEY",               0, TK_KEY,              0 },
-  { "LEFT",              0, TK_JOIN_KW,          0 },
-  { "LIKE",              0, TK_LIKE,             0 },
-  { "LIMIT",             0, TK_LIMIT,            0 },
-  { "MATCH",             0, TK_MATCH,            0 },
-  { "NATURAL",           0, TK_JOIN_KW,          0 },
-  { "NOT",               0, TK_NOT,              0 },
-  { "NOTNULL",           0, TK_NOTNULL,          0 },
-  { "NULL",              0, TK_NULL,             0 },
-  { "OF",                0, TK_OF,               0 },
-  { "OFFSET",            0, TK_OFFSET,           0 },
-  { "ON",                0, TK_ON,               0 },
-  { "OR",                0, TK_OR,               0 },
-  { "ORDER",             0, TK_ORDER,            0 },
-  { "OUTER",             0, TK_JOIN_KW,          0 },
-  { "PRAGMA",            0, TK_PRAGMA,           0 },
-  { "PRIMARY",           0, TK_PRIMARY,          0 },
-  { "RAISE",             0, TK_RAISE,            0 },
-  { "REFERENCES",        0, TK_REFERENCES,       0 },
-  { "REPLACE",           0, TK_REPLACE,          0 },
-  { "RESTRICT",          0, TK_RESTRICT,         0 },
-  { "RIGHT",             0, TK_JOIN_KW,          0 },
-  { "ROLLBACK",          0, TK_ROLLBACK,         0 },
-  { "ROW",               0, TK_ROW,              0 },
-  { "SELECT",            0, TK_SELECT,           0 },
-  { "SET",               0, TK_SET,              0 },
-  { "STATEMENT",         0, TK_STATEMENT,        0 },
-  { "TABLE",             0, TK_TABLE,            0 },
-  { "TEMP",              0, TK_TEMP,             0 },
-  { "TEMPORARY",         0, TK_TEMP,             0 },
-  { "THEN",              0, TK_THEN,             0 },
-  { "TRANSACTION",       0, TK_TRANSACTION,      0 },
-  { "TRIGGER",           0, TK_TRIGGER,          0 },
-  { "UNION",             0, TK_UNION,            0 },
-  { "UNIQUE",            0, TK_UNIQUE,           0 },
-  { "UPDATE",            0, TK_UPDATE,           0 },
-  { "USING",             0, TK_USING,            0 },
-  { "VACUUM",            0, TK_VACUUM,           0 },
-  { "VALUES",            0, TK_VALUES,           0 },
-  { "VIEW",              0, TK_VIEW,             0 },
-  { "WHEN",              0, TK_WHEN,             0 },
-  { "WHERE",             0, TK_WHERE,            0 },
+  { "ABORT",             TK_ABORT,        },
+  { "AFTER",             TK_AFTER,        },
+  { "ALL",               TK_ALL,          },
+  { "AND",               TK_AND,          },
+  { "AS",                TK_AS,           },
+  { "ASC",               TK_ASC,          },
+  { "ATTACH",            TK_ATTACH,       },
+  { "BEFORE",            TK_BEFORE,       },
+  { "BEGIN",             TK_BEGIN,        },
+  { "BETWEEN",           TK_BETWEEN,      },
+  { "BY",                TK_BY,           },
+  { "CASCADE",           TK_CASCADE,      },
+  { "CASE",              TK_CASE,         },
+  { "CHECK",             TK_CHECK,        },
+  { "CLUSTER",           TK_CLUSTER,      },
+  { "COLLATE",           TK_COLLATE,      },
+  { "COMMIT",            TK_COMMIT,       },
+  { "CONFLICT",          TK_CONFLICT,     },
+  { "CONSTRAINT",        TK_CONSTRAINT,   },
+  { "COPY",              TK_COPY,         },
+  { "CREATE",            TK_CREATE,       },
+  { "CROSS",             TK_JOIN_KW,      },
+  { "DATABASE",          TK_DATABASE,     },
+  { "DEFAULT",           TK_DEFAULT,      },
+  { "DEFERRED",          TK_DEFERRED,     },
+  { "DEFERRABLE",        TK_DEFERRABLE,   },
+  { "DELETE",            TK_DELETE,       },
+  { "DELIMITERS",        TK_DELIMITERS,   },
+  { "DESC",              TK_DESC,         },
+  { "DETACH",            TK_DETACH,       },
+  { "DISTINCT",          TK_DISTINCT,     },
+  { "DROP",              TK_DROP,         },
+  { "END",               TK_END,          },
+  { "EACH",              TK_EACH,         },
+  { "ELSE",              TK_ELSE,         },
+  { "EXCEPT",            TK_EXCEPT,       },
+  { "EXPLAIN",           TK_EXPLAIN,      },
+  { "FAIL",              TK_FAIL,         },
+  { "FOR",               TK_FOR,          },
+  { "FOREIGN",           TK_FOREIGN,      },
+  { "FROM",              TK_FROM,         },
+  { "FULL",              TK_JOIN_KW,      },
+  { "GLOB",              TK_GLOB,         },
+  { "GROUP",             TK_GROUP,        },
+  { "HAVING",            TK_HAVING,       },
+  { "IGNORE",            TK_IGNORE,       },
+  { "IMMEDIATE",         TK_IMMEDIATE,    },
+  { "IN",                TK_IN,           },
+  { "INDEX",             TK_INDEX,        },
+  { "INITIALLY",         TK_INITIALLY,    },
+  { "INNER",             TK_JOIN_KW,      },
+  { "INSERT",            TK_INSERT,       },
+  { "INSTEAD",           TK_INSTEAD,      },
+  { "INTERSECT",         TK_INTERSECT,    },
+  { "INTO",              TK_INTO,         },
+  { "IS",                TK_IS,           },
+  { "ISNULL",            TK_ISNULL,       },
+  { "JOIN",              TK_JOIN,         },
+  { "KEY",               TK_KEY,          },
+  { "LEFT",              TK_JOIN_KW,      },
+  { "LIKE",              TK_LIKE,         },
+  { "LIMIT",             TK_LIMIT,        },
+  { "MATCH",             TK_MATCH,        },
+  { "NATURAL",           TK_JOIN_KW,      },
+  { "NOT",               TK_NOT,          },
+  { "NOTNULL",           TK_NOTNULL,      },
+  { "NULL",              TK_NULL,         },
+  { "OF",                TK_OF,           },
+  { "OFFSET",            TK_OFFSET,       },
+  { "ON",                TK_ON,           },
+  { "OR",                TK_OR,           },
+  { "ORDER",             TK_ORDER,        },
+  { "OUTER",             TK_JOIN_KW,      },
+  { "PRAGMA",            TK_PRAGMA,       },
+  { "PRIMARY",           TK_PRIMARY,      },
+  { "RAISE",             TK_RAISE,        },
+  { "REFERENCES",        TK_REFERENCES,   },
+  { "REPLACE",           TK_REPLACE,      },
+  { "RESTRICT",          TK_RESTRICT,     },
+  { "RIGHT",             TK_JOIN_KW,      },
+  { "ROLLBACK",          TK_ROLLBACK,     },
+  { "ROW",               TK_ROW,          },
+  { "SELECT",            TK_SELECT,       },
+  { "SET",               TK_SET,          },
+  { "STATEMENT",         TK_STATEMENT,    },
+  { "TABLE",             TK_TABLE,        },
+  { "TEMP",              TK_TEMP,         },
+  { "TEMPORARY",         TK_TEMP,         },
+  { "THEN",              TK_THEN,         },
+  { "TRANSACTION",       TK_TRANSACTION,  },
+  { "TRIGGER",           TK_TRIGGER,      },
+  { "UNION",             TK_UNION,        },
+  { "UNIQUE",            TK_UNIQUE,       },
+  { "UPDATE",            TK_UPDATE,       },
+  { "USING",             TK_USING,        },
+  { "VACUUM",            TK_VACUUM,       },
+  { "VALUES",            TK_VALUES,       },
+  { "VIEW",              TK_VIEW,         },
+  { "WHEN",              TK_WHEN,         },
+  { "WHERE",             TK_WHERE,        },
 };
 
 /*
 ** This is the hash table
 */
-#define KEY_HASH_SIZE 71
-static Keyword *apHashTable[KEY_HASH_SIZE];
+#define KEY_HASH_SIZE 101
+static u8 aiHashTable[KEY_HASH_SIZE];
 
 
 /*
@@ -153,27 +153,29 @@ static Keyword *apHashTable[KEY_HASH_SIZE];
 ** returned.  If the input is not a keyword, TK_ID is returned.
 */
 int sqliteKeywordCode(const char *z, int n){
-  int h;
+  int h, i;
   Keyword *p;
-  if( aKeywordTable[0].len==0 ){
+  static char needInit = 1;
+  if( needInit ){
     /* Initialize the keyword hash table */
     sqliteOsEnterMutex();
-    if( aKeywordTable[0].len==0 ){
-      int i;
-      int n;
-      n = sizeof(aKeywordTable)/sizeof(aKeywordTable[0]);
-      for(i=0; i<n; i++){
+    if( needInit ){
+      int nk;
+      nk = sizeof(aKeywordTable)/sizeof(aKeywordTable[0]);
+      for(i=0; i<nk; i++){
         aKeywordTable[i].len = strlen(aKeywordTable[i].zName);
         h = sqliteHashNoCase(aKeywordTable[i].zName, aKeywordTable[i].len);
         h %= KEY_HASH_SIZE;
-        aKeywordTable[i].pNext = apHashTable[h];
-        apHashTable[h] = &aKeywordTable[i];
+        aKeywordTable[i].iNext = aiHashTable[h];
+        aiHashTable[h] = i+1;
       }
+      needInit = 0;
     }
     sqliteOsLeaveMutex();
   }
   h = sqliteHashNoCase(z, n) % KEY_HASH_SIZE;
-  for(p=apHashTable[h]; p; p=p->pNext){
+  for(i=aiHashTable[h]; i; i=p->iNext){
+    p = &aKeywordTable[i-1];
     if( p->len==n && sqliteStrNICmp(p->zName, z, n)==0 ){
       return p->tokenType;
     }
@@ -183,8 +185,12 @@ int sqliteKeywordCode(const char *z, int n){
 
 
 /*
-** If X is a character that can be used in an identifier then
-** isIdChar[X] will be 1.  Otherwise isIdChar[X] will be 0.
+** If X is a character that can be used in an identifier and
+** X&0x80==0 then isIdChar[X] will be 1.  If X&0x80==0x80 then
+** X is always an identifier character.  (Hence all UTF-8
+** characters can be part of an identifier).  isIdChar[X] will
+** be 0 for every character in the lower 128 ASCII characters
+** that cannot be used as part of an identifier.
 **
 ** In this implementation, an identifier can be a string of
 ** alphabetic characters, digits, and "_" plus any character
@@ -202,21 +208,12 @@ static const char isIdChar[] = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1,  /* 5x */
     0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* 6x */
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,  /* 7x */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* 8x */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* 9x */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Ax */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Bx */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Cx */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Dx */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Ex */
-    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  /* Fx */
 };
 
 
 /*
-** Return the length of the token that begins at z[0].  Return
-** -1 if the token is (or might be) incomplete.  Store the token
-** type in *tokenType before returning.
+** Return the length of the token that begins at z[0]. 
+** Store the token type in *tokenType before returning.
 */
 static int sqliteGetToken(const unsigned char *z, int *tokenType){
   int i;
@@ -227,7 +224,6 @@ static int sqliteGetToken(const unsigned char *z, int *tokenType){
       return i;
     }
     case '-': {
-      if( z[1]==0 ) return -1;
       if( z[1]=='-' ){
         for(i=2; z[i] && z[i]!='\n'; i++){}
         *tokenType = TK_COMMENT;
@@ -237,13 +233,8 @@ static int sqliteGetToken(const unsigned char *z, int *tokenType){
       return 1;
     }
     case '(': {
-      if( z[1]=='+' && z[2]==')' ){
-        *tokenType = TK_ORACLE_OUTER_JOIN;
-        return 3;
-      }else{
-        *tokenType = TK_LP;
-        return 1;
-      }
+      *tokenType = TK_LP;
+      return 1;
     }
     case ')': {
       *tokenType = TK_RP;
@@ -380,11 +371,15 @@ static int sqliteGetToken(const unsigned char *z, int *tokenType){
       *tokenType = TK_ID;
       return i;
     }
+    case '?': {
+      *tokenType = TK_VARIABLE;
+      return 1;
+    }
     default: {
-      if( !isIdChar[*z] ){
+      if( (*z&0x80)==0 && !isIdChar[*z] ){
         break;
       }
-      for(i=1; isIdChar[z[i]]; i++){}
+      for(i=1; (z[i]&0x80)!=0 || isIdChar[z[i]]; i++){}
       *tokenType = sqliteKeywordCode((char*)z, i);
       return i;
     }
@@ -416,13 +411,12 @@ int sqliteRunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
   i = 0;
   pEngine = sqliteParserAlloc((void*(*)(int))malloc);
   if( pEngine==0 ){
-    sqliteSetString(pzErrMsg, "out of memory", 0);
+    sqliteSetString(pzErrMsg, "out of memory", (char*)0);
     return 1;
   }
   pParse->sLastToken.dyn = 0;
   pParse->zTail = zSql;
   while( sqlite_malloc_failed==0 && zSql[i]!=0 ){
-    
     assert( i>=0 );
     pParse->sLastToken.z = &zSql[i];
     assert( pParse->sLastToken.dyn==0 );
@@ -433,7 +427,7 @@ int sqliteRunParser(Parse *pParse, const char *zSql, char **pzErrMsg){
       case TK_COMMENT: {
         if( (db->flags & SQLITE_Interrupt)!=0 ){
           pParse->rc = SQLITE_INTERRUPT;
-          sqliteSetString(pzErrMsg, "interrupt", 0);
+          sqliteSetString(pzErrMsg, "interrupt", (char*)0);
           goto abort_parse;
         }
         break;
@@ -468,7 +462,8 @@ abort_parse:
   }
   sqliteParserFree(pEngine, free);
   if( pParse->rc!=SQLITE_OK && pParse->rc!=SQLITE_DONE && pParse->zErrMsg==0 ){
-    sqliteSetString(&pParse->zErrMsg, sqlite_error_string(pParse->rc), 0);
+    sqliteSetString(&pParse->zErrMsg, sqlite_error_string(pParse->rc),
+                    (char*)0);
   }
   if( pParse->zErrMsg ){
     if( pzErrMsg && *pzErrMsg==0 ){

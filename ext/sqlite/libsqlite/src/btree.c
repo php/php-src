@@ -471,8 +471,10 @@ static int allocateSpace(Btree *pBt, MemPage *pPage, int nByte){
   FreeBlk *p;
   u16 *pIdx;
   int start;
-  int cnt = 0;
   int iSize;
+#ifndef NDEBUG
+  int cnt = 0;
+#endif
 
   assert( sqlitepager_iswriteable(pPage) );
   assert( nByte==ROUNDUP(nByte) );
@@ -1400,7 +1402,9 @@ static int moveToChild(BtCursor *pCur, int newPgno){
   sqlitepager_unref(pCur->pPage);
   pCur->pPage = pNewPage;
   pCur->idx = 0;
-  if( pNewPage->nCell<1 ) return SQLITE_CORRUPT;
+  if( pNewPage->nCell<1 ){
+    return SQLITE_CORRUPT;
+  }
   return SQLITE_OK;
 }
 
@@ -3155,8 +3159,6 @@ struct IntegrityCk {
   Pager *pPager; /* The associated pager.  Also accessible by pBt->pPager */
   int nPage;     /* Number of pages in the database */
   int *anRef;    /* Number of times each page is referenced */
-  int nTreePage; /* Number of BTree pages */
-  int nByte;     /* Number of bytes of data stored on BTree pages */
   char *zErrMsg; /* An error message.  NULL of no errors seen. */
 };
 
@@ -3167,10 +3169,10 @@ static void checkAppendMsg(IntegrityCk *pCheck, char *zMsg1, char *zMsg2){
   if( pCheck->zErrMsg ){
     char *zOld = pCheck->zErrMsg;
     pCheck->zErrMsg = 0;
-    sqliteSetString(&pCheck->zErrMsg, zOld, "\n", zMsg1, zMsg2, 0);
+    sqliteSetString(&pCheck->zErrMsg, zOld, "\n", zMsg1, zMsg2, (char*)0);
     sqliteFree(zOld);
   }else{
-    sqliteSetString(&pCheck->zErrMsg, zMsg1, zMsg2, 0);
+    sqliteSetString(&pCheck->zErrMsg, zMsg1, zMsg2, (char*)0);
   }
 }
 
@@ -3400,11 +3402,6 @@ static int checkTreePage(
     checkAppendMsg(pCheck, zContext, zMsg);
   }
 #endif
-
-  /* Update freespace totals.
-  */
-  pCheck->nTreePage++;
-  pCheck->nByte += USABLE_SPACE - pPage->nFree;
 
   sqlitepager_unref(pPage);
   return depth;

@@ -34,7 +34,7 @@ typedef struct {
 ** that the database is corrupt.
 */
 static void corruptSchema(InitData *pData){
-  sqliteSetString(pData->pzErrMsg, "malformed database schema", 0);
+  sqliteSetString(pData->pzErrMsg, "malformed database schema", (char*)0);
 }
 
 /*
@@ -58,6 +58,7 @@ int sqliteInitCallback(void *pInit, int argc, char **argv, char **azColName){
   int nErr = 0;
 
   assert( argc==5 );
+  if( argv==0 ) return 0;   /* Might happen if EMPTY_RESULT_CALLBACKS are on */
   if( argv[0]==0 ){
     corruptSchema(pData);
     return 1;
@@ -149,7 +150,7 @@ int upgrade_3_callback(void *pInit, int argc, char **argv, char **NotUsed){
     "DROP TABLE sqlite_x;",
     0, 0, &zErr, argv[0], argv[0], argv[0]);
   if( zErr ){
-    sqliteSetString(pData->pzErrMsg, zErr, 0);
+    sqliteSetString(pData->pzErrMsg, zErr, (char*)0);
     sqlite_freemem(zErr);
   }
 
@@ -271,7 +272,7 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   if( db->aDb[iDb].pBt==0 ) return SQLITE_OK;
   rc = sqliteBtreeCursor(db->aDb[iDb].pBt, 2, 0, &curMain);
   if( rc ){
-    sqliteSetString(pzErrMsg, sqlite_error_string(rc), 0);
+    sqliteSetString(pzErrMsg, sqlite_error_string(rc), (char*)0);
     return rc;
   }
 
@@ -279,7 +280,7 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
   */
   rc = sqliteBtreeGetMeta(db->aDb[iDb].pBt, meta);
   if( rc ){
-    sqliteSetString(pzErrMsg, sqlite_error_string(rc), 0);
+    sqliteSetString(pzErrMsg, sqlite_error_string(rc), (char*)0);
     sqliteBtreeCloseCursor(curMain);
     return rc;
   }
@@ -305,17 +306,17 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
       db->file_format = 4;
     }else if( db->file_format>4 ){
       sqliteBtreeCloseCursor(curMain);
-      sqliteSetString(pzErrMsg, "unsupported file format", 0);
+      sqliteSetString(pzErrMsg, "unsupported file format", (char*)0);
       return SQLITE_ERROR;
     }
   }else if( db->file_format!=meta[2] || db->file_format<4 ){
     assert( db->file_format>=4 );
     if( meta[2]==0 ){
       sqliteSetString(pzErrMsg, "cannot attach empty database: ",
-         db->aDb[iDb].zName, 0);
+         db->aDb[iDb].zName, (char*)0);
     }else{
       sqliteSetString(pzErrMsg, "incompatible file format in auxiliary "
-         "database: ", db->aDb[iDb].zName, 0);
+         "database: ", db->aDb[iDb].zName, (char*)0);
     }
     sqliteBtreeClose(db->aDb[iDb].pBt);
     db->aDb[iDb].pBt = 0;
@@ -340,13 +341,13 @@ static int sqliteInitOne(sqlite *db, int iDb, char **pzErrMsg){
     char *zSql = 0;
     sqliteSetString(&zSql, 
        "SELECT type, name, rootpage, sql, ", zDbNum, " FROM \"",
-       db->aDb[iDb].zName, "\".sqlite_master", 0);
+       db->aDb[iDb].zName, "\".sqlite_master", (char*)0);
     sqliteRunParser(&sParse, zSql, pzErrMsg);
     sqliteFree(zSql);
   }
   sqliteBtreeCloseCursor(curMain);
   if( sqlite_malloc_failed ){
-    sqliteSetString(pzErrMsg, "out of memory", 0);
+    sqliteSetString(pzErrMsg, "out of memory", (char*)0);
     sParse.rc = SQLITE_NOMEM;
     sqliteResetInternalSchema(db, 0);
   }
@@ -447,7 +448,8 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
   if( rc!=SQLITE_OK ){
     switch( rc ){
       default: {
-        sqliteSetString(pzErrMsg, "unable to open database: ", zFilename, 0);
+        sqliteSetString(pzErrMsg, "unable to open database: ",
+           zFilename, (char*)0);
       }
     }
     sqliteFree(db);
@@ -500,7 +502,7 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
     if( rc!=SQLITE_OK ){
       sqliteSetString(pzErrMsg, 
         "unable to upgrade database to the version 2.6 format",
-        zErr ? ": " : 0, zErr, 0);
+        zErr ? ": " : 0, zErr, (char*)0);
       sqlite_freemem(zErr);
       sqliteStrRealloc(pzErrMsg);
       sqlite_close(db);
@@ -513,7 +515,7 @@ sqlite *sqlite_open(const char *zFilename, int mode, char **pzErrMsg){
   return db;
 
 no_mem_on_open:
-  sqliteSetString(pzErrMsg, "out of memory", 0);
+  sqliteSetString(pzErrMsg, "out of memory", (char*)0);
   sqliteStrRealloc(pzErrMsg);
   return 0;
 }
@@ -616,7 +618,7 @@ static int sqliteMain(
   }
   if( db->file_format<3 ){
     sqliteSafetyOff(db);
-    sqliteSetString(pzErrMsg, "obsolete database file format", 0);
+    sqliteSetString(pzErrMsg, "obsolete database file format", (char*)0);
     return SQLITE_ERROR;
   }
   if( db->pVdbe==0 ){ db->nChange = 0; }
@@ -628,7 +630,7 @@ static int sqliteMain(
   if( db->xTrace ) db->xTrace(db->pTraceArg, zSql);
   sqliteRunParser(&sParse, zSql, pzErrMsg);
   if( sqlite_malloc_failed ){
-    sqliteSetString(pzErrMsg, "out of memory", 0);
+    sqliteSetString(pzErrMsg, "out of memory", (char*)0);
     sParse.rc = SQLITE_NOMEM;
     sqliteRollbackAll(db);
     sqliteResetInternalSchema(db, 0);
@@ -636,7 +638,7 @@ static int sqliteMain(
   }
   if( sParse.rc==SQLITE_DONE ) sParse.rc = SQLITE_OK;
   if( sParse.rc!=SQLITE_OK && pzErrMsg && *pzErrMsg==0 ){
-    sqliteSetString(pzErrMsg, sqlite_error_string(sParse.rc), 0);
+    sqliteSetString(pzErrMsg, sqlite_error_string(sParse.rc), (char*)0);
   }
   sqliteStrRealloc(pzErrMsg);
   if( sParse.rc==SQLITE_SCHEMA ){
@@ -645,7 +647,7 @@ static int sqliteMain(
   if( sParse.useCallback==0 ){
     assert( ppVm );
     *ppVm = (sqlite_vm*)sParse.pVdbe;
-    *pzTail = sParse.zTail;
+    if( pzTail ) *pzTail = sParse.zTail;
   }
   if( sqliteSafetyOff(db) ) goto exec_misuse;
   return sParse.rc;
@@ -653,7 +655,7 @@ static int sqliteMain(
 exec_misuse:
   if( pzErrMsg ){
     *pzErrMsg = 0;
-    sqliteSetString(pzErrMsg, sqlite_error_string(SQLITE_MISUSE), 0);
+    sqliteSetString(pzErrMsg, sqlite_error_string(SQLITE_MISUSE), (char*)0);
     sqliteStrRealloc(pzErrMsg);
   }
   return SQLITE_MISUSE;
@@ -694,6 +696,7 @@ int sqlite_compile(
   return sqliteMain(db, zSql, 0, 0, pzTail, ppVm, pzErrMsg);
 }
 
+
 /*
 ** The following routine destroys a virtual machine that is created by
 ** the sqlite_compile() routine.
@@ -710,6 +713,23 @@ int sqlite_finalize(
   char **pzErrMsg            /* OUT: Write error messages here */
 ){
   int rc = sqliteVdbeFinalize((Vdbe*)pVm, pzErrMsg);
+  sqliteStrRealloc(pzErrMsg);
+  return rc;
+}
+
+/*
+** Terminate the current execution of a virtual machine then
+** reset the virtual machine back to its starting state so that it
+** can be reused.  Any error message resulting from the prior execution
+** is written into *pzErrMsg.  A success code from the prior execution
+** is returned.
+*/
+int sqlite_reset(
+  sqlite_vm *pVm,            /* The virtual machine to be destroyed */
+  char **pzErrMsg            /* OUT: Write error messages here */
+){
+  int rc = sqliteVdbeReset((Vdbe*)pVm, pzErrMsg);
+  sqliteVdbeMakeReady((Vdbe*)pVm, -1, 0, 0, 0);
   sqliteStrRealloc(pzErrMsg);
   return rc;
 }
@@ -745,6 +765,8 @@ const char *sqlite_error_string(int rc){
     case SQLITE_MISUSE:     z = "library routine called out of sequence";break;
     case SQLITE_NOLFS:      z = "kernel lacks large file support";       break;
     case SQLITE_AUTH:       z = "authorization denied";                  break;
+    case SQLITE_FORMAT:     z = "auxiliary database format error";       break;
+    case SQLITE_RANGE:      z = "bind index out of range";               break;
     default:                z = "unknown error";                         break;
   }
   return z;
@@ -764,7 +786,7 @@ static int sqliteDefaultBusyCallback(
 #if SQLITE_MIN_SLEEP_MS==1
   int delay = 10;
   int prior_delay = 0;
-  int timeout = (int)Timeout;
+  int timeout = (int)(long)Timeout;
   int i;
 
   for(i=1; i<count; i++){ 
@@ -783,7 +805,7 @@ static int sqliteDefaultBusyCallback(
   sqliteOsSleep(delay);
   return 1;
 #else
-  int timeout = (int)Timeout;
+  int timeout = (int)(long)Timeout;
   if( (count+1)*1000 > timeout ){
     return 0;
   }
@@ -804,6 +826,31 @@ void sqlite_busy_handler(
   db->xBusyCallback = xBusy;
   db->pBusyArg = pArg;
 }
+
+#ifndef SQLITE_OMIT_PROGRESS_CALLBACK
+/*
+** This routine sets the progress callback for an Sqlite database to the
+** given callback function with the given argument. The progress callback will
+** be invoked every nOps opcodes.
+*/
+void sqlite_progress_handler(
+  sqlite *db, 
+  int nOps,
+  int (*xProgress)(void*), 
+  void *pArg
+){
+  if( nOps>0 ){
+    db->xProgress = xProgress;
+    db->nProgressOps = nOps;
+    db->pProgressArg = pArg;
+  }else{
+    db->xProgress = 0;
+    db->nProgressOps = 0;
+    db->pProgressArg = 0;
+  }
+}
+#endif
+
 
 /*
 ** This routine installs a default busy handler that waits for the

@@ -26,7 +26,7 @@
       sqliteSetNString(&pParse->zErrMsg, 
           "near \"", -1, TOKEN.z, TOKEN.n, "\": syntax error", -1, 0);
     }else{
-      sqliteSetString(&pParse->zErrMsg, "incomplete SQL statement", 0);
+      sqliteSetString(&pParse->zErrMsg, "incomplete SQL statement", (char*)0);
     }
   }
   pParse->nErr++;
@@ -125,10 +125,10 @@ id(A) ::= ID(X).         {A = X;}
 // fallback to ID if they will not parse as their original value.
 // This obviates the need for the "id" nonterminal.
 //
-%fallback ID 
+%fallback ID
   ABORT AFTER ASC ATTACH BEFORE BEGIN CASCADE CLUSTER CONFLICT
   COPY DATABASE DEFERRED DELIMITERS DESC DETACH EACH END EXPLAIN FAIL FOR
-  IGNORE IMMEDIATE INITIALLY INSTEAD MATCH KEY
+  GLOB IGNORE IMMEDIATE INITIALLY INSTEAD LIKE MATCH KEY
   OF OFFSET PRAGMA RAISE REPLACE RESTRICT ROW STATEMENT
   TEMP TRIGGER VACUUM VIEW.
 
@@ -153,9 +153,10 @@ type ::= typename(X) LP signed COMMA signed RP(Y).
 %type typename {Token}
 typename(A) ::= ids(X).           {A = X;}
 typename(A) ::= typename(X) ids.  {A = X;}
-signed ::= INTEGER.
-signed ::= PLUS INTEGER.
-signed ::= MINUS INTEGER.
+%type signed {int}
+signed(A) ::= INTEGER(X).         { A = atoi(X.z); }
+signed(A) ::= PLUS INTEGER(X).    { A = atoi(X.z); }
+signed(A) ::= MINUS INTEGER(X).   { A = -atoi(X.z); }
 carglist ::= carglist carg.
 carglist ::= .
 carg ::= CONSTRAINT nm ccons.
@@ -176,7 +177,7 @@ carg ::= DEFAULT NULL.
 ccons ::= NULL onconf.
 ccons ::= NOT NULL onconf(R).               {sqliteAddNotNull(pParse, R);}
 ccons ::= PRIMARY KEY sortorder onconf(R).  {sqliteAddPrimaryKey(pParse,0,R);}
-ccons ::= UNIQUE onconf(R).           {sqliteCreateIndex(pParse,0,0,0,R,0,0,0);}
+ccons ::= UNIQUE onconf(R).           {sqliteCreateIndex(pParse,0,0,0,R,0,0);}
 ccons ::= CHECK LP expr RP onconf.
 ccons ::= REFERENCES nm(T) idxlist_opt(TA) refargs(R).
                                 {sqliteCreateForeignKey(pParse,0,&T,TA,R);}
@@ -223,7 +224,7 @@ tcons ::= CONSTRAINT nm.
 tcons ::= PRIMARY KEY LP idxlist(X) RP onconf(R).
                                              {sqliteAddPrimaryKey(pParse,X,R);}
 tcons ::= UNIQUE LP idxlist(X) RP onconf(R).
-                                     {sqliteCreateIndex(pParse,0,0,X,R,0,0,0);}
+                                       {sqliteCreateIndex(pParse,0,0,X,R,0,0);}
 tcons ::= CHECK expr onconf.
 tcons ::= FOREIGN KEY LP idxlist(FA) RP
           REFERENCES nm(T) idxlist_opt(TA) refargs(R) defer_subclause_opt(D). {
@@ -442,12 +443,12 @@ having_opt(A) ::= .                {A = 0;}
 having_opt(A) ::= HAVING expr(X).  {A = X;}
 
 %type limit_opt {struct LimitVal}
-limit_opt(A) ::= .                  {A.limit = -1; A.offset = 0;}
-limit_opt(A) ::= LIMIT INTEGER(X).  {A.limit = atoi(X.z); A.offset = 0;}
-limit_opt(A) ::= LIMIT INTEGER(X) OFFSET INTEGER(Y). 
-                                    {A.limit = atoi(X.z); A.offset = atoi(Y.z);}
-limit_opt(A) ::= LIMIT INTEGER(X) COMMA INTEGER(Y). 
-                                    {A.limit = atoi(Y.z); A.offset = atoi(X.z);}
+limit_opt(A) ::= .                     {A.limit = -1; A.offset = 0;}
+limit_opt(A) ::= LIMIT signed(X).      {A.limit = X; A.offset = 0;}
+limit_opt(A) ::= LIMIT signed(X) OFFSET signed(Y). 
+                                       {A.limit = X; A.offset = Y;}
+limit_opt(A) ::= LIMIT signed(X) COMMA signed(Y). 
+                                       {A.limit = Y; A.offset = X;}
 
 /////////////////////////// The DELETE statement /////////////////////////////
 //
@@ -514,7 +515,6 @@ inscollist(A) ::= nm(Y).                      {A = sqliteIdListAppend(0,&Y);}
 %left STAR SLASH REM.
 %left CONCAT.
 %right UMINUS UPLUS BITNOT.
-%right ORACLE_OUTER_JOIN.
 
 %type expr {Expr*}
 %destructor expr {sqliteExprDelete($$);}
@@ -535,11 +535,13 @@ expr(A) ::= nm(X) DOT nm(Y) DOT nm(Z). {
   Expr *temp4 = sqliteExpr(TK_DOT, temp2, temp3, 0);
   A = sqliteExpr(TK_DOT, temp1, temp4, 0);
 }
-expr(A) ::= expr(B) ORACLE_OUTER_JOIN. 
-                             {A = B; ExprSetProperty(A,EP_Oracle8Join);}
 expr(A) ::= INTEGER(X).      {A = sqliteExpr(TK_INTEGER, 0, 0, &X);}
 expr(A) ::= FLOAT(X).        {A = sqliteExpr(TK_FLOAT, 0, 0, &X);}
 expr(A) ::= STRING(X).       {A = sqliteExpr(TK_STRING, 0, 0, &X);}
+expr(A) ::= VARIABLE(X).     {
+  A = sqliteExpr(TK_VARIABLE, 0, 0, &X);
+  if( A ) A->iTable = ++pParse->nVar;
+}
 expr(A) ::= ID(X) LP exprlist(Y) RP(E). {
   A = sqliteExprFunction(Y, &X);
   sqliteExprSpan(A,&X,&E);
@@ -699,12 +701,12 @@ expritem(A) ::= .                       {A = 0;}
 
 ///////////////////////////// The CREATE INDEX command ///////////////////////
 //
-cmd ::= CREATE(S) temp(T) uniqueflag(U) INDEX nm(X)
+cmd ::= CREATE(S) uniqueflag(U) INDEX nm(X)
         ON nm(Y) dbnm(D) LP idxlist(Z) RP(E) onconf(R). {
   SrcList *pSrc = sqliteSrcListAppend(0, &Y, &D);
   if( U!=OE_None ) U = R;
   if( U==OE_Default) U = OE_Abort;
-  sqliteCreateIndex(pParse, &X, pSrc, Z, U, T, &S, &E);
+  sqliteCreateIndex(pParse, &X, pSrc, Z, U, &S, &E);
 }
 
 %type uniqueflag {int}

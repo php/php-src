@@ -85,7 +85,8 @@ static int sqlite_get_table_cb(void *pArg, int nCol, char **argv, char **colv){
     }
   }else if( p->nColumn!=nCol ){
     sqliteSetString(&p->zErrMsg,
-       "sqlite_get_table() called with two or more incompatible queries", 0);
+       "sqlite_get_table() called with two or more incompatible queries",
+       (char*)0);
     p->rc = SQLITE_ERROR;
     return 1;
   }
@@ -195,7 +196,7 @@ void sqlite_free_table(
     int i, n;
     azResult--;
     if( azResult==0 ) return;
-    n = (int)azResult[0];
+    n = (int)(long)azResult[0];
     for(i=1; i<n; i++){ if( azResult[i] ) free(azResult[i]); }
     free(azResult);
   }

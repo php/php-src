@@ -43,6 +43,10 @@ int sqlite_iMallocFail;     /* Fail sqliteMalloc() after this many calls */
 static int memcnt = 0;
 #endif
 
+/*
+** Number of 32-bit guard words
+*/
+#define N_GUARD 1
 
 /*
 ** Allocate new memory and set it to zero.  Return NULL if
@@ -51,7 +55,7 @@ static int memcnt = 0;
 void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
   void *p;
   int *pi;
-  int k;
+  int i, k;
   if( sqlite_iMallocFail>=0 ){
     sqlite_iMallocFail--;
     if( sqlite_iMallocFail==0 ){
@@ -66,16 +70,16 @@ void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
   }
   if( n==0 ) return 0;
   k = (n+sizeof(int)-1)/sizeof(int);
-  pi = malloc( (3+k)*sizeof(int));
+  pi = malloc( (N_GUARD*2+1+k)*sizeof(int));
   if( pi==0 ){
     sqlite_malloc_failed++;
     return 0;
   }
   sqlite_nMalloc++;
-  pi[0] = 0xdead1122;
-  pi[1] = n;
-  pi[k+2] = 0xdead3344;
-  p = &pi[2];
+  for(i=0; i<N_GUARD; i++) pi[i] = 0xdead1122;
+  pi[N_GUARD] = n;
+  for(i=0; i<N_GUARD; i++) pi[k+1+N_GUARD+i] = 0xdead3344;
+  p = &pi[N_GUARD+1];
   memset(p, bZero==0, n);
 #if MEMORY_DEBUG>1
   fprintf(stderr,"%06d malloc %d bytes at 0x%x from %s:%d\n",
@@ -93,13 +97,17 @@ void *sqliteMalloc_(int n, int bZero, char *zFile, int line){
 */
 void sqliteCheckMemory(void *p, int N){
   int *pi = p;
-  int n, k;
-  pi -= 2;
-  assert( pi[0]==0xdead1122 );
-  n = pi[1];
+  int n, i, k;
+  pi -= N_GUARD+1;
+  for(i=0; i<N_GUARD; i++){
+    assert( pi[i]==0xdead1122 );
+  }
+  n = pi[N_GUARD];
   assert( N>=0 && N<n );
   k = (n+sizeof(int)-1)/sizeof(int);
-  assert( pi[k+2]==0xdead3344 );
+  for(i=0; i<N_GUARD; i++){
+    assert( pi[k+N_GUARD+1+i]==0xdead3344 );
+  }
 }
 
 /*
@@ -107,21 +115,25 @@ void sqliteCheckMemory(void *p, int N){
 */
 void sqliteFree_(void *p, char *zFile, int line){
   if( p ){
-    int *pi, k, n;
+    int *pi, i, k, n;
     pi = p;
-    pi -= 2;
+    pi -= N_GUARD+1;
     sqlite_nFree++;
-    if( pi[0]!=0xdead1122 ){
-      fprintf(stderr,"Low-end memory corruption at 0x%x\n", (int)p);
-      return;
+    for(i=0; i<N_GUARD; i++){
+      if( pi[i]!=0xdead1122 ){
+        fprintf(stderr,"Low-end memory corruption at 0x%x\n", (int)p);
+        return;
+      }
     }
-    n = pi[1];
+    n = pi[N_GUARD];
     k = (n+sizeof(int)-1)/sizeof(int);
-    if( pi[k+2]!=0xdead3344 ){
-      fprintf(stderr,"High-end memory corruption at 0x%x\n", (int)p);
-      return;
+    for(i=0; i<N_GUARD; i++){
+      if( pi[k+N_GUARD+1+i]!=0xdead3344 ){
+        fprintf(stderr,"High-end memory corruption at 0x%x\n", (int)p);
+        return;
+      }
     }
-    memset(pi, 0xff, (k+3)*sizeof(int));
+    memset(pi, 0xff, (k+N_GUARD*2+1)*sizeof(int));
 #if MEMORY_DEBUG>1
     fprintf(stderr,"%06d free %d bytes at 0x%x from %s:%d\n",
          ++memcnt, n, (int)p, zFile,line);
@@ -136,7 +148,7 @@ void sqliteFree_(void *p, char *zFile, int line){
 ** works just like sqliteFree().
 */
 void *sqliteRealloc_(void *oldP, int n, char *zFile, int line){
-  int *oldPi, *pi, k, oldN, oldK;
+  int *oldPi, *pi, i, k, oldN, oldK;
   void *p;
   if( oldP==0 ){
     return sqliteMalloc_(n,1,zFile,line);
@@ -146,32 +158,35 @@ void *sqliteRealloc_(void *oldP, int n, char *zFile, int line){
     return 0;
   }
   oldPi = oldP;
-  oldPi -= 2;
+  oldPi -= N_GUARD+1;
   if( oldPi[0]!=0xdead1122 ){
-    fprintf(stderr,"Low-end memory corruption in realloc at 0x%x\n", (int)p);
+    fprintf(stderr,"Low-end memory corruption in realloc at 0x%x\n", (int)oldP);
     return 0;
   }
-  oldN = oldPi[1];
+  oldN = oldPi[N_GUARD];
   oldK = (oldN+sizeof(int)-1)/sizeof(int);
-  if( oldPi[oldK+2]!=0xdead3344 ){
-    fprintf(stderr,"High-end memory corruption in realloc at 0x%x\n", (int)p);
-    return 0;
+  for(i=0; i<N_GUARD; i++){
+    if( oldPi[oldK+N_GUARD+1+i]!=0xdead3344 ){
+      fprintf(stderr,"High-end memory corruption in realloc at 0x%x\n",
+              (int)oldP);
+      return 0;
+    }
   }
   k = (n + sizeof(int) - 1)/sizeof(int);
-  pi = malloc( (k+3)*sizeof(int) );
+  pi = malloc( (k+N_GUARD*2+1)*sizeof(int) );
   if( pi==0 ){
     sqlite_malloc_failed++;
     return 0;
   }
-  pi[0] = 0xdead1122;
-  pi[1] = n;
-  pi[k+2] = 0xdead3344;
-  p = &pi[2];
+  for(i=0; i<N_GUARD; i++) pi[i] = 0xdead1122;
+  pi[N_GUARD] = n;
+  for(i=0; i<N_GUARD; i++) pi[k+N_GUARD+1+i] = 0xdead3344;
+  p = &pi[N_GUARD+1];
   memcpy(p, oldP, n>oldN ? oldN : n);
   if( n>oldN ){
     memset(&((char*)p)[oldN], 0, n-oldN);
   }
-  memset(oldPi, 0xab, (oldK+3)*sizeof(int));
+  memset(oldPi, 0xab, (oldK+N_GUARD+2)*sizeof(int));
   free(oldPi);
 #if MEMORY_DEBUG>1
   fprintf(stderr,"%06d realloc %d to %d bytes at 0x%x to 0x%x at %s:%d\n",
@@ -236,13 +251,11 @@ char *sqliteStrNDup_(const char *z, int n, char *zFile, int line){
 */
 void *sqliteMalloc(int n){
   void *p;
-  if( n==0 ) return 0;
-  p = malloc(n);
-  if( p==0 ){
-    sqlite_malloc_failed++;
-    return 0;
+  if( (p = malloc(n))==0 ){
+    if( n>0 ) sqlite_malloc_failed++;
+  }else{
+    memset(p, 0, n);
   }
-  memset(p, 0, n);
   return p;
 }
 
@@ -252,11 +265,8 @@ void *sqliteMalloc(int n){
 */
 void *sqliteMallocRaw(int n){
   void *p;
-  if( n==0 ) return 0;
-  p = malloc(n);
-  if( p==0 ){
-    sqlite_malloc_failed++;
-    return 0;
+  if( (p = malloc(n))==0 ){
+    if( n>0 ) sqlite_malloc_failed++;
   }
   return p;
 }
@@ -640,6 +650,87 @@ int sqliteIsNumber(const char *z){
   return *z==0;
 }
 
+/*
+** The string z[] is an ascii representation of a real number.
+** Convert this string to a double.
+**
+** This routine assumes that z[] really is a valid number.  If it
+** is not, the result is undefined.
+**
+** This routine is used instead of the library atof() function because
+** the library atof() might want to use "," as the decimal point instead
+** of "." depending on how locale is set.  But that would cause problems
+** for SQL.  So this routine always uses "." regardless of locale.
+*/
+double sqliteAtoF(const char *z){
+  int sign = 1;
+  LONGDOUBLE_TYPE v1 = 0.0;
+  if( *z=='-' ){
+    sign = -1;
+    z++;
+  }else if( *z=='+' ){
+    z++;
+  }
+  while( isdigit(*z) ){
+    v1 = v1*10.0 + (*z - '0');
+    z++;
+  }
+  if( *z=='.' ){
+    LONGDOUBLE_TYPE divisor = 1.0;
+    z++;
+    while( isdigit(*z) ){
+      v1 = v1*10.0 + (*z - '0');
+      divisor *= 10.0;
+      z++;
+    }
+    v1 /= divisor;
+  }
+  if( *z=='e' || *z=='E' ){
+    int esign = 1;
+    int eval = 0;
+    LONGDOUBLE_TYPE scale = 1.0;
+    z++;
+    if( *z=='-' ){
+      esign = -1;
+      z++;
+    }else if( *z=='+' ){
+      z++;
+    }
+    while( isdigit(*z) ){
+      eval = eval*10 + *z - '0';
+      z++;
+    }
+    while( eval>=64 ){ scale *= 1.0e+64; eval -= 64; }
+    while( eval>=16 ){ scale *= 1.0e+16; eval -= 16; }
+    while( eval>=4 ){ scale *= 1.0e+4; eval -= 4; }
+    while( eval>=1 ){ scale *= 1.0e+1; eval -= 1; }
+    if( esign<0 ){
+      v1 /= scale;
+    }else{
+      v1 *= scale;
+    }
+  }
+  return sign<0 ? -v1 : v1;
+}
+
+/*
+** The string zNum represents an integer.  There might be some other
+** information following the integer too, but that part is ignored.
+** If the integer that the prefix of zNum represents will fit in a
+** 32-bit signed integer, return TRUE.  Otherwise return FALSE.
+**
+** This routine returns FALSE for the string -2147483648 even that
+** that number will, in theory fit in a 32-bit integer.  But positive
+** 2147483648 will not fit in 32 bits.  So it seems safer to return
+** false.
+*/
+int sqliteFitsIn32Bits(const char *zNum){
+  int i, c;
+  if( *zNum=='-' || *zNum=='+' ) zNum++;
+  for(i=0; (c=zNum[i])>='0' && c<='9'; i++){}
+  return i<10 || (i==10 && memcmp(zNum,"2147483647",10)<=0);
+}
+
 /* This comparison routine is what we use for comparison operations
 ** between numeric values in an SQL expression.  "Numeric" is a little
 ** bit misleading here.  What we mean is that the strings have a
@@ -668,8 +759,8 @@ int sqliteCompare(const char *atext, const char *btext){
       result = -1;
     }else{
       double rA, rB;
-      rA = atof(atext);
-      rB = atof(btext);
+      rA = sqliteAtoF(atext);
+      rB = sqliteAtoF(btext);
       if( rA<rB ){
         result = -1;
       }else if( rA>rB ){
@@ -761,8 +852,8 @@ int sqliteSortCompare(const char *a, const char *b){
           res = -1;
           break;
         }
-        rA = atof(&a[1]);
-        rB = atof(&b[1]);
+        rA = sqliteAtoF(&a[1]);
+        rB = sqliteAtoF(&b[1]);
         if( rA<rB ){
           res = -1;
           break;

@@ -84,7 +84,7 @@ int sqliteVdbeFindOp(Vdbe*, int, int);
 VdbeOp *sqliteVdbeGetOp(Vdbe*, int);
 int sqliteVdbeMakeLabel(Vdbe*);
 void sqliteVdbeDelete(Vdbe*);
-void sqliteVdbeMakeReady(Vdbe*,sqlite_callback,void*,int);
+void sqliteVdbeMakeReady(Vdbe*,int,sqlite_callback,void*,int);
 int sqliteVdbeExec(Vdbe*);
 int sqliteVdbeList(Vdbe*);
 int sqliteVdbeFinalize(Vdbe*,char**);
@@ -92,5 +92,7 @@ void sqliteVdbeResolveLabel(Vdbe*, int);
 int sqliteVdbeCurrentAddr(Vdbe*);
 void sqliteVdbeTrace(Vdbe*,FILE*);
 void sqliteVdbeCompressSpace(Vdbe*,int);
+int sqliteVdbeReset(Vdbe*,char **);
+int sqliteVdbeSetVariables(Vdbe*,int,const char**);
 
 #endif

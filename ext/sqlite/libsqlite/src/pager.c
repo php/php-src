@@ -129,6 +129,7 @@ struct PgHdr {
 struct Pager {
   char *zFilename;            /* Name of the database file */
   char *zJournal;             /* Name of the journal file */
+  char *zDirectory;           /* Directory hold database and journal files */
   OsFile fd, jfd;             /* File descriptors for database and journal */
   OsFile cpfd;                /* File descriptor for the checkpoint journal */
   int dbSize;                 /* Number of pages in the file */
@@ -315,7 +316,7 @@ static int write32bits(OsFile *fd, u32 val){
 */
 static void store32bits(u32 val, PgHdr *p, int offset){
   unsigned char *ac;
-  ac = &((char*)PGHDR_TO_DATA(p))[offset];
+  ac = &((unsigned char*)PGHDR_TO_DATA(p))[offset];
   if( journal_format<=1 ){
     memcpy(ac, &val, 4);
   }else{
@@ -425,6 +426,10 @@ static void pager_reset(Pager *pPager){
 ** a write lock on the database.  This routine releases the database
 ** write lock and acquires a read lock in its place.  The journal file
 ** is deleted and closed.
+**
+** TODO: Consider keeping the journal file open for temporary databases.
+** This might give a performance improvement on windows where opening
+** a file is an expensive operation.
 */
 static int pager_unwritelock(Pager *pPager){
   int rc;
@@ -515,19 +520,13 @@ static int pager_playback_one_page(Pager *pPager, OsFile *jfd, int format){
   sqliteOsSeek(&pPager->fd, (pgRec.pgno-1)*(off_t)SQLITE_PAGE_SIZE);
   rc = sqliteOsWrite(&pPager->fd, pgRec.aData, SQLITE_PAGE_SIZE);
   if( pPg ){
-    if( pPg->nRef==0 ||
-        memcmp(PGHDR_TO_DATA(pPg), pgRec.aData, SQLITE_PAGE_SIZE)==0
-    ){
-      /* Do not update the data on this page if the page is in use
-      ** and the page has never been modified.  This avoids resetting
-      ** the "extra" data.  That in turn avoids invalidating BTree cursors
-      ** in trees that have never been modified.  The end result is that
-      ** you can have a SELECT going on in one table and ROLLBACK changes
-      ** to a different table and the SELECT is unaffected by the ROLLBACK.
-      */
-      memcpy(PGHDR_TO_DATA(pPg), pgRec.aData, SQLITE_PAGE_SIZE);
-      memset(PGHDR_TO_EXTRA(pPg), 0, pPager->nExtra);
-    }
+    /* No page should ever be rolled back that is in use, except for page
+    ** 1 which is held in use in order to keep the lock on the database
+    ** active.
+    */
+    assert( pPg->nRef==0 || pPg->pgno==1 );
+    memcpy(PGHDR_TO_DATA(pPg), pgRec.aData, SQLITE_PAGE_SIZE);
+    memset(PGHDR_TO_EXTRA(pPg), 0, pPager->nExtra);
     pPg->dirty = 0;
     pPg->needSync = 0;
   }
@@ -595,7 +594,7 @@ static int pager_playback(Pager *pPager, int useJournalSize){
     goto end_playback;
   }
   if( format>=JOURNAL_FORMAT_3 ){
-    rc = read32bits(format, &pPager->jfd, &nRec);
+    rc = read32bits(format, &pPager->jfd, (u32*)&nRec);
     if( rc ) goto end_playback;
     rc = read32bits(format, &pPager->jfd, &pPager->cksumInit);
     if( rc ) goto end_playback;
@@ -828,7 +827,7 @@ int sqlitepager_open(
   char *zFullPathname;
   int nameLen;
   OsFile fd;
-  int rc;
+  int rc, i;
   int tempFile;
   int readOnly = 0;
   char zTemp[SQLITE_TEMPNAME_SIZE];
@@ -837,7 +836,7 @@ int sqlitepager_open(
   if( sqlite_malloc_failed ){
     return SQLITE_NOMEM;
   }
-  if( zFilename ){
+  if( zFilename && zFilename[0] ){
     zFullPathname = sqliteOsFullPathname(zFilename);
     rc = sqliteOsOpenReadWrite(zFullPathname, &fd, &readOnly);
     tempFile = 0;
@@ -855,7 +854,7 @@ int sqlitepager_open(
     return SQLITE_CANTOPEN;
   }
   nameLen = strlen(zFullPathname);
-  pPager = sqliteMalloc( sizeof(*pPager) + nameLen*2 + 30 );
+  pPager = sqliteMalloc( sizeof(*pPager) + nameLen*3 + 30 );
   if( pPager==0 ){
     sqliteOsClose(&fd);
     sqliteFree(zFullPathname);
@@ -863,8 +862,12 @@ int sqlitepager_open(
   }
   SET_PAGER(pPager);
   pPager->zFilename = (char*)&pPager[1];
-  pPager->zJournal = &pPager->zFilename[nameLen+1];
+  pPager->zDirectory = &pPager->zFilename[nameLen+1];
+  pPager->zJournal = &pPager->zDirectory[nameLen+1];
   strcpy(pPager->zFilename, zFullPathname);
+  strcpy(pPager->zDirectory, zFullPathname);
+  for(i=nameLen; i>0 && pPager->zDirectory[i-1]!='/'; i--){}
+  if( i>0 ) pPager->zDirectory[i-1] = 0;
   strcpy(pPager->zJournal, zFullPathname);
   sqliteFree(zFullPathname);
   strcpy(&pPager->zJournal[nameLen], "-journal");
@@ -995,8 +998,10 @@ int sqlitepager_close(Pager *pPager){
   */
   CLR_PAGER(pPager);
   if( pPager->zFilename!=(char*)&pPager[1] ){
+    assert( 0 );  /* Cannot happen */
     sqliteFree(pPager->zFilename);
     sqliteFree(pPager->zJournal);
+    sqliteFree(pPager->zDirectory);
   }
   sqliteFree(pPager);
   return SQLITE_OK;
@@ -1221,7 +1226,7 @@ int sqlitepager_get(Pager *pPager, Pgno pgno, void **ppPage){
     /* If a journal file exists, try to play it back.
     */
     if( pPager->useJournal && sqliteOsFileExists(pPager->zJournal) ){
-       int rc, dummy;
+       int rc;
 
        /* Get a write lock on the database
        */
@@ -1235,14 +1240,15 @@ int sqlitepager_get(Pager *pPager, Pgno pgno, void **ppPage){
        }
        pPager->state = SQLITE_WRITELOCK;
 
-       /* Open the journal for exclusive access.  Return SQLITE_BUSY if
-       ** we cannot get exclusive access to the journal file. 
+       /* Open the journal for reading only.  Return SQLITE_BUSY if
+       ** we are unable to open the journal file. 
        **
-       ** Even though we will only be reading from the journal, not writing,
-       ** we have to open the journal for writing in order to obtain an
-       ** exclusive access lock.
+       ** The journal file does not need to be locked itself.  The
+       ** journal file is never open unless the main database file holds
+       ** a write lock, so there is never any chance of two or more
+       ** processes opening the journal at the same time.
        */
-       rc = sqliteOsOpenReadWrite(pPager->zJournal, &pPager->jfd, &dummy);
+       rc = sqliteOsOpenReadOnly(pPager->zJournal, &pPager->jfd);
        if( rc!=SQLITE_OK ){
          rc = sqliteOsUnlock(&pPager->fd);
          assert( rc==SQLITE_OK );
@@ -1519,6 +1525,7 @@ static int pager_open_journal(Pager *pPager){
   assert( pPager->state==SQLITE_WRITELOCK );
   assert( pPager->journalOpen==0 );
   assert( pPager->useJournal );
+  sqlitepager_pagecount(pPager);
   pPager->aInJournal = sqliteMalloc( pPager->dbSize/8 + 1 );
   if( pPager->aInJournal==0 ){
     sqliteOsReadLock(&pPager->fd);
@@ -1533,12 +1540,12 @@ static int pager_open_journal(Pager *pPager){
     pPager->state = SQLITE_READLOCK;
     return SQLITE_CANTOPEN;
   }
+  sqliteOsOpenDirectory(pPager->zDirectory, &pPager->jfd);
   pPager->journalOpen = 1;
   pPager->journalStarted = 0;
   pPager->needSync = 0;
   pPager->alwaysRollback = 0;
   pPager->nRec = 0;
-  sqlitepager_pagecount(pPager);
   if( pPager->errMask!=0 ){
     rc = pager_errcode(pPager);
     return rc;

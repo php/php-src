@@ -75,6 +75,7 @@ static int intCompare(const void *pKey1, int n1, const void *pKey2, int n2){
   return n2 - n1;
 }
 
+#if 0 /* NOT USED */
 /*
 ** Hash and comparison functions when the mode is SQLITE_HASH_POINTER
 */
@@ -87,6 +88,7 @@ static int ptrCompare(const void *pKey1, int n1, const void *pKey2, int n2){
   if( pKey1<pKey2 ) return -1;
   return 1;
 }
+#endif
 
 /*
 ** Hash and comparison functions when the mode is SQLITE_HASH_STRING
@@ -130,7 +132,7 @@ static int binCompare(const void *pKey1, int n1, const void *pKey2, int n2){
 static int (*hashFunction(int keyClass))(const void*,int){
   switch( keyClass ){
     case SQLITE_HASH_INT:     return &intHash;
-    case SQLITE_HASH_POINTER: return &ptrHash;
+    /* case SQLITE_HASH_POINTER: return &ptrHash; // NOT USED */
     case SQLITE_HASH_STRING:  return &strHash;
     case SQLITE_HASH_BINARY:  return &binHash;;
     default: break;
@@ -147,7 +149,7 @@ static int (*hashFunction(int keyClass))(const void*,int){
 static int (*compareFunction(int keyClass))(const void*,int,const void*,int){
   switch( keyClass ){
     case SQLITE_HASH_INT:     return &intCompare;
-    case SQLITE_HASH_POINTER: return &ptrCompare;
+    /* case SQLITE_HASH_POINTER: return &ptrCompare; // NOT USED */
     case SQLITE_HASH_STRING:  return &strCompare;
     case SQLITE_HASH_BINARY:  return &binCompare;
     default: break;
