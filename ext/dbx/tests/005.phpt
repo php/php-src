@@ -23,6 +23,8 @@ else {
         for ($i=0; $i<$dro->rows; ++$i) {
             print($dro->data[$i]['id'].".".$dro->data[$i]['description'].".".$dro->data[$i]['field1'].".".strlen($dro->data[$i]['field2'])."\n");
             }
+        $dro->data[0]['id']='changed_value';
+        print($dro->data[0][0]."\n");
         }
     // insert query
     if (dbx_query($dlo, $sql_insert_statement)) {
@@ -76,6 +78,7 @@ else {
 40.100.field2 contains >64k text.70051
 50.20.empty fields.0
 60.20.empty fields.0
+changed_value
 insert-query: dbx_query works ok
 999999.temporary_record.0
 update-query: dbx_query works ok
