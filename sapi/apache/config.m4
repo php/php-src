@@ -42,7 +42,7 @@ AC_ARG_WITH(apxs,
   PHP_SAPI=apache
 
   # Test whether apxs support -S option
-  $APXS -q -S CFLAGS=$APXS_CFLAGS CFLAGS >/dev/null 2>&1
+  $APXS -q -S CFLAGS="$APXS_CFLAGS" CFLAGS >/dev/null 2>&1
 
   if test "$?" != "0"; then
     APACHE_INSTALL="$APXS -i -a -n php4 $SAPI_SHARED" # Old apxs does not have -S option
