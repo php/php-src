@@ -1,3 +1,97 @@
+2002-10-17  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Added pg_get_pid() that get backend process PID.
+    Does anyone prefer pg_get_backend_pid() or else?
+
+    * ext/pgsql/README
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Added pg_get_pid()
+
+2002-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/php_string.h
+      ext/standard/string.c
+      ext/standard/basic_functions.c:
+    Renamed word_count to str_word_count to comply with naming conventions.
+    Thanks Andi, for catching this oversight.
+
+2002-10-17  Tal Peer  <tal@kaktos.co.il>
+
+    * ext/fribidi/fribidi.c:
+    Improved fribidi_charset_info() slightly
+
+    * ext/fribidi/php_fribidi.h
+      ext/fribidi/fribidi.c:
+    New functions:
+    fribidi_get_charsets()
+    fribidi_charset_info()
+
+2002-10-17  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/com/COM.c:  fixes bugs #19156 and #19544 (memleak)
+
+2002-10-17  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php: - Removing debugging info
+
+2002-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/url.c:
+    Added support for file:/. Thanks to Thies for noticing the problem.
+
+2002-10-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    A child process should not have access to IRCG's file descriptors.
+
+2002-10-17  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * php.ini-recommended
+      php.ini-dist: Add note for short_open_tag
+
+2002-10-17  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    - Added Oracle TIMESTAMP type to oci8 extension. (thies)
+
+2002-10-17  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Added pg_get_notify() for better performace for applications
+    cache query results.
+    Removed unneeded entry.
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Added async message function - pg_get_notify()
+
+    * ext/mysql/php_mysql.c: Remove mysql_result_seek() alias.
+
+2002-10-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/config.m4
+      ext/snmp/snmp.c: Fix this for Wez and his antique ucd-snmp
+
+    * NEWS: Snow..yuck..
+
+    * ext/zip/config.m4: Fix the phpize build
+
+    * pear/pear.m4: Fix some phpize problems.
+
+    * ext/zip/zip.c: Part 1 of fixing the shared build
+
+    * ext/pdf/config.m4: --with-zlib-dir was missing. Needed for phpize builds
+
+2002-10-17  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+    Added word_count() function that allows counting of words inside a string.
+    The function also allows the user to retrieve all the words from a string.
+
+2002-10-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/snmp/snmp.c: ws fixes
+
 2002-10-16  Harald Radi  <harald.radi+coding.php@nme.at>
 
     * ext/com/VARIANT.c
