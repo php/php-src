@@ -2549,11 +2549,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	int return_value_used = RETURN_VALUE_USED(EX(opline));
 
 	zend_ptr_stack_n_push(&EG(argument_stack), 2, (void *) EX(opline)->extended_value, NULL);
-	current_scope = EG(scope);
-	EG(scope) = EX(calling_scope);
-
-	current_this = EG(This);
-	EG(This) = EX(object);
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 
@@ -2576,6 +2571,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		HashTable *calling_symbol_table;
+
+		current_this = EG(This);
+		EG(This) = EX(object);
+		current_scope = EG(scope);
+		EG(scope) = EX(calling_scope);
 
 		EX_T(EX(opline)->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
@@ -2614,6 +2614,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zend_hash_clean(*EG(symtable_cache_ptr));
 		}
 		EG(active_symbol_table) = calling_symbol_table;
+		if (EG(This)) {
+			zval_ptr_dtor(&EG(This));
+		}
+		EG(This) = current_this;
+		EG(scope) = current_scope;
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
@@ -2636,14 +2641,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 	EG(function_state_ptr) = &EX(function_state);
 	zend_ptr_stack_clear_multiple(TSRMLS_C);
 
-	EG(scope) = current_scope;
-
-	if (EG(This)) {
-		zval_ptr_dtor(&EG(This));
-	}
-
-	EG(This) = current_this;
-	
 	if (EG(exception)) {
 		if (EX(opline)->op2.u.opline_num == -1) {
 			RETURN_FROM_EXECUTE_LOOP(execute_data);
