@@ -47,7 +47,7 @@ static void
 _php_mb_regex_strbuf_init(struct strbuf *pd)
 {
 	if (pd) {
-		pd->buffer = (char*)0;
+		pd->buffer = (unsigned char*)0;
 		pd->length = 0;
 		pd->pos = 0;
 		pd->allocsz = 64;
@@ -377,7 +377,7 @@ _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 			beg = regs.beg[i];
 			end = regs.end[i];
 			if (beg >= 0 && beg < end && end <= string_len) {
-				add_index_stringl(array, i, &str[beg], end - beg, 1);
+				add_index_stringl(array, i, (char *)&str[beg], end - beg, 1);
 			} else {
 				add_index_bool(array, i, 0);
 			}
@@ -503,7 +503,7 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			}
 #endif
 			/* copy the part of the string before the match */
-			_php_mb_regex_strbuf_ncat(&outdev, &string[pos], regs.beg[0] - pos);
+			_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], regs.beg[0] - pos);
 			/* copy replacement and backrefs */
 			/* FIXME: this code (\\digit replacement) is not mbyte aware! */ 
 			i = 0;
@@ -515,12 +515,12 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 				}
 				if (n >= 0 && n < regs.num_regs) {
 					if (regs.beg[n] >= 0 && regs.beg[n] < regs.end[n] && regs.end[n] <= string_len) {
-						_php_mb_regex_strbuf_ncat(pdevice, &string[regs.beg[n]], regs.end[n] - regs.beg[n]);
+						_php_mb_regex_strbuf_ncat(pdevice, (const unsigned char *)&string[regs.beg[n]], regs.end[n] - regs.beg[n]);
 					}
 					p += 2;
 					i += 2;
 				} else {
-					_php_mb_regex_strbuf_ncat(pdevice, p, 1);
+					_php_mb_regex_strbuf_ncat(pdevice, (const unsigned char *)p, 1);
 					p++;
 					i++;
 				}
@@ -528,9 +528,9 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			if (eval) {
 				zval v;
 				/* null terminate buffer */
-				_php_mb_regex_strbuf_ncat(&evaldev, "\0", 1);
+				_php_mb_regex_strbuf_ncat(&evaldev, (const unsigned char *)"\0", 1);
 				/* do eval */
-				zend_eval_string(evaldev.buffer, &v, description TSRMLS_CC);
+				zend_eval_string((char *)evaldev.buffer, &v, description TSRMLS_CC);
 				/* result of eval */
 				convert_to_string(&v);
 				_php_mb_regex_strbuf_ncat(&outdev, Z_STRVAL(v), Z_STRLEN(v));
@@ -542,12 +542,12 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 			if (pos < n) {
 				pos = n;
 			} else {
-				_php_mb_regex_strbuf_ncat(&outdev, &string[pos], 1 ); 
+				_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], 1 ); 
 				pos++;
 			}
 		} else { /* nomatch */
 			/* stick that last bit of string on our output */
-			_php_mb_regex_strbuf_ncat(&outdev, &string[pos], string_len - pos);
+			_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)&string[pos], string_len - pos);
 		}
 	}
 
@@ -559,14 +559,14 @@ _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, int option)
 		efree((void*)evaldev.buffer);
 	}
 	n = outdev.pos;
-	_php_mb_regex_strbuf_ncat(&outdev, "\0", 1);
+	_php_mb_regex_strbuf_ncat(&outdev, (const unsigned char *)"\0", 1);
 	if (err <= -2) {
 		if (outdev.buffer) {
 			efree((void*)outdev.buffer);
 		}
 		RETVAL_FALSE;
 	} else {
-		RETVAL_STRINGL(outdev.buffer, n, 0);
+		RETVAL_STRINGL((char *)outdev.buffer, n, 0);
 	}
 }
 /* }}} */
@@ -633,7 +633,7 @@ PHP_FUNCTION(mb_split)
 
 		/* add it to the array */
 		if ( regs.beg[0] < string_len && regs.beg[0] >= pos) {
-			add_next_index_stringl(return_value, &string[pos], regs.beg[0]-pos, 1);
+			add_next_index_stringl(return_value, (char *)&string[pos], regs.beg[0]-pos, 1);
 		} else {
 			err = -2;
 			break;
@@ -660,9 +660,9 @@ PHP_FUNCTION(mb_split)
 	/* otherwise we just have one last element to add to the array */
 	n = string_len - pos;
 	if (n > 0) {
-		add_next_index_stringl(return_value, &string[pos], n, 1);
+		add_next_index_stringl(return_value, (char *)&string[pos], n, 1);
 	} else {
-		add_next_index_stringl(return_value, empty_string, 0, 1);
+		add_next_index_stringl(return_value, (char *)empty_string, 0, 1);
 	}
 }
 /* }}} */
@@ -771,7 +771,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	str = NULL;
 	len = 0;
 	if (Z_TYPE_PP(MBSTRG(search_str)) == IS_STRING){
-		str = Z_STRVAL_PP(MBSTRG(search_str));
+		str = (unsigned char *)Z_STRVAL_PP(MBSTRG(search_str));
 		len = Z_STRLEN_PP(MBSTRG(search_str));
 	}
 
@@ -790,7 +790,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		MBSTRG(search_regs) = (struct mbre_registers*)ecalloc(1, sizeof(struct mbre_registers));
 	}
 
-	err = mbre_search(MBSTRG(search_re), str, len, pos, len - pos, MBSTRG(search_regs));
+	err = mbre_search(MBSTRG(search_re), (const char *)str, len, pos, len - pos, MBSTRG(search_regs));
 	if (err <= -2) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mbregex search failure in mbregex_search()");
 		RETVAL_FALSE;
@@ -819,7 +819,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					beg = MBSTRG(search_regs)->beg[i];
 					end = MBSTRG(search_regs)->end[i];
 					if (beg >= 0 && beg <= end && end <= len) {
-						add_index_stringl(return_value, i, &str[beg], end - beg, 1);
+						add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
 					} else {
 						add_index_bool(return_value, i, 0);
 					}
@@ -972,14 +972,14 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 
 	if (MBSTRG(search_regs) && Z_TYPE_PP(MBSTRG(search_str)) == IS_STRING &&
 	    Z_STRVAL_PP(MBSTRG(search_str)) && array_init(return_value) != FAILURE) {
-		str = Z_STRVAL_PP(MBSTRG(search_str));
+		str = (unsigned char *)Z_STRVAL_PP(MBSTRG(search_str));
 		len = Z_STRLEN_PP(MBSTRG(search_str));
 		n = MBSTRG(search_regs)->num_regs;
 		for (i = 0; i < n; i++) {
 			beg = MBSTRG(search_regs)->beg[i];
 			end = MBSTRG(search_regs)->end[i];
 			if (beg >= 0 && beg <= end && end <= len) {
-				add_index_stringl(return_value, i, &str[beg], end - beg, 1);
+				add_index_stringl(return_value, i, (char *)&str[beg], end - beg, 1);
 			} else {
 				add_index_bool(return_value, i, 0);
 			}

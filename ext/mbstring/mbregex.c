@@ -496,7 +496,7 @@ enum regexpcode
     wordbeg,	 /* Succeeds if at word beginning.  */
     wordend,	 /* Succeeds if at word end.  */
     wordbound,   /* Succeeds if at a word boundary.  */
-    notwordbound,/* Succeeds if not at a word boundary.  */
+    notwordbound /* Succeeds if not at a word boundary.  */
   };
 
 
