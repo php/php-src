@@ -317,12 +317,32 @@ void php_set_session_var(char *name, size_t namelen, zval *state_val, php_unseri
 
 int php_get_session_var(char *name, size_t namelen, zval ***state_var TSRMLS_DC)
 {
+	int ret = FAILURE;
+
 	IF_SESSION_VARS() {
-		return zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
+		ret = zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), name, 
 				namelen+1, (void **) state_var);
+
+		/*
+		 * If register_globals is enabled, and
+		 * if there is an entry for the slot in $_SESSION, and
+		 * if that entry is still set to NULL, and
+		 * if the global var exists, then
+		 * we prefer the same key in the global sym table
+		 */
+		
+		if (PG(register_globals) && ret == SUCCESS 
+				&& Z_TYPE_PP(*state_var) == IS_NULL) {
+			zval **tmp;
+
+			if (zend_hash_find(&EG(symbol_table), name, namelen + 1,
+						(void **) &tmp) == SUCCESS) {
+				*state_var = tmp;
+			}
+		}
 	}
 	
-	return FAILURE;
+	return ret;
 }
 
 #define PS_BIN_NR_OF_BITS 8
