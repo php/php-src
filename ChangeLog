@@ -1,3 +1,26 @@
+2004-12-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      build/build2.mk:
+      Revert part of the previous commit: autoheader 2.13 does not have this
+      option
+
+2004-12-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/crack/crack.c:
+      Don't forget to init a variable.
+
+    * (PHP_4_3)
+      ext/crack/config.m4:
+      Detect libcrack with Kerberos 5 support built-in.
+
+    * (PHP_4_3)
+      ext/zip/config.m4
+      ext/zip/php_zip.h
+      ext/zip/zip.c:
+      Fixed compiler warning when using newer versions of libzip.
+
 2004-12-30  Rasmus Lerdorf  <rasmus@lerdorf.com>
 
     * (PHP_4_3)
