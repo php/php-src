@@ -41,6 +41,13 @@ if test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/lib $PHP_READLINE_LIBS
   ])
 
+  PHP_CHECK_LIBRARY(readline, rl_callback_read_char,
+  [
+    AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
+  ],[],[
+    -L$READLINE_DIR/lib $PHP_READLINE_LIBS
+  ])
+
   PHP_CHECK_LIBRARY(history, add_history,
   [
     PHP_ADD_LIBRARY_WITH_PATH(history, $READLINE_DIR/lib, READLINE_SHARED_LIBADD)

@@ -45,6 +45,15 @@ PHP_FUNCTION(readline_read_history);
 PHP_FUNCTION(readline_write_history);
 PHP_FUNCTION(readline_completion_function);
 
+#if HAVE_RL_CALLBACK_READ_CHAR
+PHP_FUNCTION(readline_callback_handler_install);
+PHP_FUNCTION(readline_callback_read_char);
+PHP_FUNCTION(readline_callback_handler_remove);
+
+static zval *_prepped_callback = NULL;
+
+#endif
+
 static char *_readline_completion = NULL;
 static zval _readline_array;
 
@@ -65,6 +74,11 @@ static zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_read_history, 		NULL)
 	PHP_FE(readline_write_history, 		NULL)
 	PHP_FE(readline_completion_function,NULL)
+#if HAVE_RL_CALLBACK_READ_CHAR
+	PHP_FE(readline_callback_handler_install, NULL)
+	PHP_FE(readline_callback_read_char,			NULL)
+	PHP_FE(readline_callback_handler_remove,	NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 
@@ -95,6 +109,13 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 {
 	if (_readline_completion) 
 		efree(_readline_completion);
+#if HAVE_RL_CALLBACK_READ_CHAR
+	if (_prepped_callback) {
+		rl_callback_handler_remove();
+		FREE_ZVAL(_prepped_callback);
+		_prepped_callback = 0;
+	}
+#endif
 
 	return SUCCESS;
 }
@@ -428,6 +449,83 @@ PHP_FUNCTION(readline_completion_function)
 }
 
 /* }}} */
+
+#if HAVE_RL_CALLBACK_READ_CHAR
+
+static void php_rl_callback_handler(char *the_line)
+{
+	zval *params[1];
+	zval dummy;
+	TSRMLS_FETCH();
+
+	ZVAL_NULL(&dummy);
+
+	params[0] = _readline_string_zval(the_line);
+
+	call_user_function(CG(function_table), NULL, _prepped_callback, &dummy, 1, params TSRMLS_CC);
+
+	zval_ptr_dtor(&params[0]);
+	zval_dtor(&dummy);
+}
+
+/* {{{ proto void readline_callback_handler_install(string prompt, mixed callback)
+   Initializes the readline callback interface and terminal, prints the prompt and returns immediately */
+PHP_FUNCTION(readline_callback_handler_install)
+{
+	zval *callback;
+	char *name = NULL;
+	char *prompt;
+	int prompt_len;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &prompt, &prompt_len, &callback)) {
+		return;
+	}
+
+	if (!zend_is_callable(callback, 0, &name)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s is not callable", name);
+		RETURN_FALSE;
+	}
+
+	if (_prepped_callback) {
+		rl_callback_handler_remove();
+		FREE_ZVAL(_prepped_callback);
+	}
+
+	MAKE_STD_ZVAL(_prepped_callback);
+	*_prepped_callback = *callback;
+	zval_copy_ctor(_prepped_callback);
+
+	rl_callback_handler_install(prompt, php_rl_callback_handler);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void readline_callback_read_char()
+   Informs the readline callback interface that a character is ready for input */
+PHP_FUNCTION(readline_callback_read_char)
+{
+	if (_prepped_callback) {
+		rl_callback_read_char();
+	}
+}
+/* }}} */
+
+/* {{{ proto bool readline_callback_handler_remove()
+   Removes a previously installed callback handler and restores terminal settings */
+PHP_FUNCTION(readline_callback_handler_remove)
+{
+	if (_prepped_callback) {
+		rl_callback_handler_remove();
+		FREE_ZVAL(_prepped_callback);
+		_prepped_callback = 0;
+		RETURN_TRUE;
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+#endif
+
 
 #endif /* HAVE_LIBREADLINE */
 
