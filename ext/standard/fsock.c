@@ -127,6 +127,9 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	struct timeval tv;
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
+#ifdef PHP_WIN32
+	int err;
+#endif
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzzd", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE)	{
 		RETURN_FALSE;
@@ -194,12 +197,8 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, (int)timeout, persistent);
 
 #ifdef PHP_WIN32
-		{
-			int err;
-	
-			/* Preserve error */
-			err = WSAGetLastError();
-		}
+		/* Preserve error */
+		err = WSAGetLastError();
 #endif
 
 		if (stream == NULL) {
