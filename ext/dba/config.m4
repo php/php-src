@@ -2,13 +2,14 @@ dnl
 dnl $Id$
 dnl
 
+dnl Suppose we need FlatFile if no or only CDB is used.
+
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
   old_LDFLAGS=$LDFLAGS
   LDFLAGS="$1 $LDFLAGS"
   $2
   LDFLAGS=$old_LDFLAGS
 ])
-
 
 dnl Assign INCLUDE/LFLAGS from PREFIX
 AC_DEFUN(PHP_DBA_STD_ASSIGN,[
@@ -48,7 +49,7 @@ AC_DEFUN(AC_DBA_STD_RESULT,[
 ])
 
 PHP_ARG_ENABLE(dba,whether to enable DBA,
-[  --enable-dba=shared     Build DBA as a shared module])
+[  --enable-dba            Build DBA with builtin modules])
 
 AC_ARG_WITH(gdbm,
 [  --with-gdbm[=DIR]       Include GDBM support],[
@@ -211,15 +212,19 @@ AC_ARG_WITH(dbm,
 AC_MSG_CHECKING(for DBM support)
 AC_DBA_STD_RESULT
 
+AC_DEFUN(PHP_DBA_BUILTIN_CDB,[
+  PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
+  AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
+  AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
+  AC_DEFINE(DBA_CDB, 1, [ ])
+  cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
+  THIS_RESULT="builtin"
+])
+
 AC_ARG_WITH(cdb,
 [  --with-cdb[=DIR]        Include CDB support],[
-  if test "$withval" = "yes"; then
-    PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
-    AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
-    AC_DEFINE(DBA_CDB_MAKE, 1, [ ])
-    AC_DEFINE(DBA_CDB, 1, [ ])
-    cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
-    THIS_RESULT="builtin"
+  if test "$withval" != "no"; then
+    PHP_DBA_BUILTIN_CDB
   elif test "$withval" != "no"; then
     for i in /usr/local /usr $withval; do
       if test -f "$i/include/cdb.h" ; then
@@ -237,17 +242,32 @@ AC_ARG_WITH(cdb,
     PHP_DBA_STD_CHECK
     PHP_DBA_STD_ATTACH
   fi
+],[
+  if test "$PHP_DBA" != "no"; then
+    PHP_DBA_BUILTIN_CDB
+  fi
 ])
 AC_MSG_CHECKING(for CDB support)
 AC_DBA_STD_RESULT
 
+AC_DEFUN(PHP_DBA_BUILTIN_FLATFILE,[
+  PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
+  AC_DEFINE(DBA_FLATFILE, 1, [ ])
+  flat_sources="dba_flatfile.c libflatfile/flatfile.c"
+  THIS_RESULT="builtin"
+])
+
+dnl
+dnl FlatFile check must be the last one.
+dnl
 AC_ARG_WITH(flatfile,
 [  --with-flatfile         Include FlatFile support],[
   if test "$withval" != "no"; then
-    PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
-    AC_DEFINE(DBA_FLATFILE, 1, [ ])
-    flat_sources="dba_flatfile.c libflatfile/flatfile.c"
-    THIS_RESULT="builtin"
+    PHP_DBA_BUILTIN_FLATFILE
+  fi
+],[
+  if test "$PHP_DBA" != "no"; then
+    PHP_DBA_BUILTIN_FLATFILE
   fi
 ])
 AC_MSG_CHECKING(for FlatFile support)
