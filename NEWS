@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Fixed bug #20155: xmlrpc compile problem with zendengine2 (Derick, Jan
+  Schneider)
 - Implemented string.base64 stream filter. (Moriyoshi)
 - Added domxml_node_get_path() (Lukas Schröder)
 - Added iconv related functions (Moriyoshi)
