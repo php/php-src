@@ -732,7 +732,7 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 			} else {
 				delete_bucket = 1;
 			}
-			if (!q->pDataPtr && q->pData) {
+			if (!q->pDataPtr && q->pData && delete_bucket) {
 				pefree(q->pData,ht->persistent);
 			}
 		} else {
