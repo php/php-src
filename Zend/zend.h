@@ -303,6 +303,8 @@ END_EXTERN_C()
 	if ((pzv)->refcount>1) {				\
 		zval_copy_ctor(&(zv));				\
 		(pzv)->refcount--;					\
+	} else {								\
+		efree(pzv);							\
 	}										\
 	INIT_PZVAL(&(zv));
 

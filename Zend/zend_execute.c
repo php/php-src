@@ -1562,6 +1562,7 @@ do_fcall_common:
 					zval *retval_ptr;
 					zval **retval_ptr_ptr;
 					
+					SUSPEND_GARBAGE();
 					if ((EG(active_op_array)->return_reference == ZEND_RETURN_REF) &&
 						(opline->op1.op_type != IS_CONST) && 
 						(opline->op1.op_type != IS_TMP_VAR)) {
@@ -1595,6 +1596,7 @@ do_fcall_common:
 							(*EG(return_value_ptr_ptr))->is_ref = 0;
 						}
 					}
+					RESUME_GARBAGE();
 #if SUPPORT_INTERACTIVE
 					op_array->last_executed_op_number = opline-op_array->opcodes;
 #endif

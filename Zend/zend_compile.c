@@ -2060,7 +2060,12 @@ void do_begin_silence(znode *strudel_token CLS_DC)
 
 void do_end_silence(znode *strudel_token CLS_DC)
 {
+	zend_op *last_opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+
+	if ((last_opline->opcode == ZEND_DO_FCALL) || (last_opline->opcode == ZEND_DO_FCALL_BY_NAME)) {
+		last_opline->result.u.EA.type |= EXT_TYPE_UNUSED;
+	}
 
 	opline->opcode = ZEND_END_SILENCE;
 	opline->op1 = *strudel_token;
