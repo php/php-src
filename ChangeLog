@@ -1,3 +1,26 @@
+2004-08-21  Timm Friebe  <thekid@thekid.de>
+
+    * ext/sybase_ct/php_sybase_ct.c:
+      - Fixed packet size setting
+
+2004-08-21  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/var.c
+      tests/classes/bug26737.phpt:
+      fix for bug 26737 : private & protected member variables not serialized
+      when user defined __sleep() is declared. Additionally E_NOTICE is
+      being thrown if __sleep() returns a non-existing member variable name
+
+2004-08-21  Frank M. Kromann  <frank@kromann.info>
+
+    * main/SAPI.h:
+      Fix win32 compilation. Missing uid_t and gid_t definitions.
+
+2004-08-21  Sara Golemon  <php@alphaweb.net>
+
+    * ZendEngine2/zend_compile.c:
+      Bugfix#29777 Some compilers don't like // style comments
+
 2004-08-20  Sara Golemon  <php@alphaweb.net>
 
     * ZendEngine2/zend_ini_parser.y:
