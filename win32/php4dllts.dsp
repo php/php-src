@@ -1624,6 +1624,10 @@ SOURCE=..\ext\standard\html.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\standard\http.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\standard\http_fopen_wrapper.c
 # End Source File
 # Begin Source File
@@ -1840,6 +1844,10 @@ SOURCE=..\ext\standard\head.h
 # Begin Source File
 
 SOURCE=..\ext\standard\html.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\http.h
 # End Source File
 # Begin Source File
 
