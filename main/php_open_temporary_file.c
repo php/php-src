@@ -107,11 +107,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, char **
 	char *trailing_slash;
 	char *opened_path;
 	int fd = -1;
+#ifndef HAVE_MKSTEMP
 	int open_flags = O_CREAT | O_TRUNC | O_RDWR
 #ifdef PHP_WIN32
 		| _O_BINARY
 #endif
 		;
+#endif
 #ifdef NETWARE
     char *file_path = NULL;
 #endif
