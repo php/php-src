@@ -247,10 +247,7 @@ PHP_MINIT_FUNCTION(xml)
 #else
 	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", "expat", CONST_CS|CONST_PERSISTENT);
 #endif
-	
-#ifdef LIBXML_EXPAT_COMPAT
-	php_libxml_initialize();
-#endif
+
 	return SUCCESS;
 }
 
@@ -263,9 +260,6 @@ PHP_RINIT_FUNCTION(xml)
 
 PHP_MSHUTDOWN_FUNCTION(xml)
 {
-#ifdef LIBXML_EXPAT_COMPAT
-	php_libxml_shutdown();
-#endif
 	return SUCCESS;
 }
 

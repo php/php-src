@@ -631,8 +631,6 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_LONG_CONSTANT("DOM_INVALID_ACCESS_ERR",	INVALID_ACCESS_ERR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DOM_VALIDATION_ERR",		VALIDATION_ERR,			CONST_CS | CONST_PERSISTENT);
 
-	php_libxml_initialize();
-
 	return SUCCESS;
 }
 /* }}} */
@@ -663,8 +661,6 @@ PHP_MINFO_FUNCTION(dom)
 
 PHP_MSHUTDOWN_FUNCTION(dom)
 {
-	php_libxml_shutdown();
-
 	zend_hash_destroy(&dom_domstringlist_prop_handlers);
 	zend_hash_destroy(&dom_namelist_prop_handlers);
 	zend_hash_destroy(&dom_domimplementationlist_prop_handlers);
