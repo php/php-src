@@ -11,7 +11,7 @@ AC_DEFUN(CPDF_JPEG_TEST,[
     AC_ARG_WITH(jpeg-dir,
     [  --with-jpeg-dir[=DIR]     CPDF: Set the path to libjpeg install prefix.],[
       for i in $withval /usr/local /usr; do
-        if test -f $i/lib/libjpeg.$SHLIB_SUFFIX_NAME -o -f $i/lib/libjpeg.a; then
+        if test -f "$i/lib/libjpeg.$SHLIB_SUFFIX_NAME" -o -f "$i/lib/libjpeg.a"; then
           CPDF_JPEG_DIR=$i
           break;
         fi
@@ -23,7 +23,7 @@ AC_DEFUN(CPDF_JPEG_TEST,[
       LIBS="$LIBS -L$CPDF_JPEG_DIR/lib"
     ],) 
     AC_CHECK_LIB(jpeg,jpeg_read_header, ,[AC_MSG_ERROR(Problem with libjpeg.(a|so). Please check config.log for more information.)],)
-    if test -z $CPDF_JPEG_DIR; then
+    if test -z "$CPDF_JPEG_DIR"; then
       PHP_ADD_LIBRARY(jpeg)
     else
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $CPDF_JPEG_DIR/lib)
@@ -36,7 +36,7 @@ AC_DEFUN(CPDF_TIFF_TEST,[
     AC_ARG_WITH(tiff-dir,
     [  --with-tiff-dir[=DIR]     CPDF: Set the path to libtiff install prefix.],[
       for i in $withval /usr/local /usr; do
-        if test -f $i/lib/libtiff.$SHLIB_SUFFIX_NAME -o -f $i/lib/libtiff.a; then
+        if test -f "$i/lib/libtiff.$SHLIB_SUFFIX_NAME" -o -f "$i/lib/libtiff.a"; then
           CPDF_TIFF_DIR=$i
           break;
         fi
@@ -48,7 +48,7 @@ AC_DEFUN(CPDF_TIFF_TEST,[
       LIBS="$LIBS -L$CPDF_TIFF_DIR/lib"
     ],) 
     AC_CHECK_LIB(tiff,TIFFOpen, ,[AC_MSG_ERROR(Problem with libtiff.(a|so). Please check config.log for more information.)],)
-    if test -z $CPDF_TIFF_DIR; then
+    if test -z "$CPDF_TIFF_DIR"; then
       PHP_ADD_LIBRARY(tiff)
     else
       PHP_ADD_LIBRARY_WITH_PATH(tiff, $CPDF_TIFF_DIR/lib)
@@ -68,7 +68,7 @@ AC_ARG_WITH(cpdflib,
     CPDF_JPEG_TEST
     CPDF_TIFF_TEST
     for i in $withval /usr /usr/local; do
-      if test -f $i/include/cpdflib.h; then
+      if test -f "$i/include/cpdflib.h"; then
         CPDFLIB_INCLUDE=$i/include
         AC_MSG_CHECKING(for cpdflib.h)
         AC_MSG_RESULT([in $i/include])
