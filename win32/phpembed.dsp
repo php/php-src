@@ -85,7 +85,7 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\main\php_embed.c
+SOURCE=..\sapi\embed\php_embed.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -93,7 +93,7 @@ SOURCE=..\main\php_embed.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\main\php_embed.h
+SOURCE=..\sapi\embed\php_embed.h
 # End Source File
 # End Group
 # End Target

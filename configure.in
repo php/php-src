@@ -215,7 +215,6 @@ dnl SAPI configuration.
 dnl -------------------------------------------------------------------------
 
 dnl paths to the targets are relative to the build directory
-SAPI_PROGRAM=php
 SAPI_SHARED=libs/libphp4.$SHLIB_SUFFIX_NAME
 SAPI_STATIC=libs/libphp4.a
 SAPI_LIBTOOL=libphp4.la
@@ -225,7 +224,7 @@ PHP_CONFIGURE_PART(Configuring SAPI modules)
 esyscmd(./scripts/config-stubs sapi)
 
 if test "$PHP_SAPI" = "default"; then
-  PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c)
+  PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c,,'$(SAPI_CGI_PATH)')
 fi
 
 AC_MSG_CHECKING([for chosen SAPI module])
@@ -1077,12 +1076,6 @@ else
 fi
 
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
-
-
-PHP_ADD_SOURCES_X(main, php_embed.c,, PHP_LIB_OBJS)
-PHP_LIB_OBJS="$PHP_GLOBAL_OBJS $PHP_LIB_OBJS main/internal_functions_cli.lo"
-PHP_SUBST(PHP_LIB_OBJS)
-
 
 PHP_ADD_BUILD_DIR(main)
 PHP_ADD_BUILD_DIR(regex)

@@ -814,7 +814,7 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN(PHP_BUILD_PROGRAM,[
-  OVERALL_TARGET=php
+  OVERALL_TARGET=[]ifelse($1,,php,$1)
   php_c_pre='$(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=' && echo > $[@]'
@@ -1179,7 +1179,7 @@ EOF
 ])
 
 dnl
-dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags]])
+dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags [, build-target]]])
 dnl
 dnl Selects the SAPI name and type (static, shared, programm)
 dnl and optionally also the source-files for the SAPI-specific
@@ -1192,7 +1192,7 @@ AC_DEFUN(PHP_SELECT_SAPI,[
   static) PHP_BUILD_STATIC;;
   shared) PHP_BUILD_SHARED;;
   bundle) PHP_BUILD_BUNDLE;;
-  program) PHP_BUILD_PROGRAM;;
+  program) PHP_BUILD_PROGRAM($5);;
   esac
     
   ifelse($3,,,[PHP_ADD_SOURCES([sapi/$1],[$3],[$4],[sapi])])

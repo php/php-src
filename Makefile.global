@@ -16,25 +16,7 @@ libphp4.la: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 libs/libphp4.bundle: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
 	$(CC) $(MH_BUNDLE_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(PHP_GLOBAL_OBJS:.lo=.o) $(PHP_SAPI_OBJS:.lo=.o) $(PHP_FRAMEWORKS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ libs/libphp4.so
 
-php: $(PHP_GLOBAL_OBJS) $(PHP_SAPI_OBJS)
-	$(BUILD_CGI)
-	
-sapi/cli/php: $(PHP_GLOBAL_OBJS) $(PHP_CLI_OBJS)
-	$(BUILD_CLI)
-
-libphp.la: $(PHP_LIB_OBJS)
-	$(LIBTOOL) --mode=link $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_LIB_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@
-
-libphp.so: $(PHP_LIB_OBJS)
-	$(LIBTOOL) --mode=link $(CC) -shared -export-dynamic $(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) $(EXTRA_LDFLAGS) $(LDFLAGS) $(PHP_RPATHS) $(PHP_LIB_OBJS) $(EXTRA_LIBS) $(ZEND_EXTRA_LIBS) -o $@ && cp $@ .libs
-
-libs: libphp.la libphp.so
-
-install: $(install_targets) 
-
-install-cli: sapi/cli/php
-	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
-	@$(INSTALL_CLI)
+install: $(install_targets)
 
 install-sapi: libphp4.la
 	@echo "Installing PHP SAPI module"
@@ -64,14 +46,14 @@ install-tester:
 
 install-su: install-pear install-tester
 
-test: sapi/cli/php
-	@TEST_PHP_EXECUTABLE=$(top_builddir)/sapi/cli/php \
-			$(top_builddir)/sapi/cli/php -c php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
+test: $(SAPI_CLI_PHP)
+	@TEST_PHP_EXECUTABLE=$(top_builddir)/$(SAPI_CLI_PHP) \
+			$(top_builddir)/$(SAPI_CLI_PHP) -c php.ini-dist $(top_srcdir)/run-tests.php $(TESTS)
 
 clean:
 	find . -name \*.lo -o -name \*.o -o -name \*.la -o -name \*.a -o -name \*.so| xargs rm -f
 	find . -name .libs -a -type d|xargs rm -rf
-	rm -f libphp4.la php sapi/cli/php modules/* libs/*
+	rm -f libphp4.la $(SAPI_CLI_PHP) $(SAPI_CGI_PHP) modules/* libs/*
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile.objects Makefile.fragments libtool main/php_config.h stamp-h php4.spec sapi/apache/libphp4.module buildmk.stamp
