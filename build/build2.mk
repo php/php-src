@@ -47,7 +47,7 @@ $(config_h_in): configure acconfig.h
 	@echo rebuilding $@
 	@rm -f $@
 	@autoheader=`./build/shtool path autoheader-2.13 autoheader`; \
-	$$autoheader -W none 2>&1 | $(SUPPRESS_WARNINGS)
+	$$autoheader 2>&1 | $(SUPPRESS_WARNINGS)
 
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
