@@ -288,11 +288,8 @@ ZEND_API int zend_hash_quick_add_or_update(HashTable *ht, char *arKey, uint nKey
 
 	IS_CONSISTENT(ht);
 
-	if (nKeyLength <= 0) {
-#if ZEND_DEBUG
-		ZEND_PUTS("zend_hash_update: Can't put in empty key\n");
-#endif
-		return FAILURE;
+	if (nKeyLength == 0) {
+		return zend_hash_index_update(ht, h, pData, nDataSize, pDest);
 	}
 
 	nIndex = h & ht->nTableMask;
@@ -819,30 +816,30 @@ ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_fu
 }
 
 
-ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *p_new))
+static int zend_hash_replace_checker_wrapper(HashTable *target, void *source_data, Bucket *p, void *pParam, merge_checker_func_t merge_checker_func)
+{
+	zend_hash_key hash_key;
+
+	hash_key.arKey = p->arKey;
+	hash_key.nKeyLength = p->nKeyLength;
+	hash_key.h = p->h;
+	return merge_checker_func(target, source_data, &hash_key, pParam);
+}
+
+
+ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam)
 {
 	Bucket *p;
 	void *t;
-	void *pOrig;
 
 	IS_CONSISTENT(source);
 	IS_CONSISTENT(target);
 
     p = source->pListHead;
 	while (p) {
-		if (p->nKeyLength>0) {
-			if (zend_hash_find(target, p->arKey, p->nKeyLength, &pOrig)==FAILURE
-				|| pReplaceOrig(pOrig, p->pData)) {
-				if (zend_hash_update(target, p->arKey, p->nKeyLength, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
-					pCopyConstructor(t);
-				}
-			}
-		} else {
-			if (zend_hash_index_find(target, p->h, &pOrig)==FAILURE
-				|| pReplaceOrig(pOrig, p->pData)) {
-				if (zend_hash_index_update(target, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
-					pCopyConstructor(t);
-				}
+		if (zend_hash_replace_checker_wrapper(target, p->pData, p, pParam, pMergeSource)) {
+			if (zend_hash_quick_update(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t)==SUCCESS && pCopyConstructor) {
+				pCopyConstructor(t);
 			}
 		}
 		p = p->pListNext;
@@ -851,10 +848,8 @@ ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor
 }
 
 
-ZEND_API ulong zend_get_hash_value(HashTable *ht, char *arKey, uint nKeyLength)
+ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength)
 {
-	IS_CONSISTENT(ht);
-
 	return zend_inline_hash_func(arKey, nKeyLength);
 }
 
@@ -894,6 +889,10 @@ ZEND_API int zend_hash_quick_find(HashTable *ht, char *arKey, uint nKeyLength, u
 {
 	uint nIndex;
 	Bucket *p;
+
+	if (nKeyLength==0) {
+		return zend_hash_index_find(ht, h, pData);
+	}
 
 	IS_CONSISTENT(ht);
 

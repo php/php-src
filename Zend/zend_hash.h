@@ -75,6 +75,16 @@ typedef struct _hashtable {
 #endif
 } HashTable;
 
+
+typedef struct _zend_hash_key {
+	char *arKey;
+	uint nKeyLength;
+	ulong h;
+} zend_hash_key;
+
+
+typedef int (*merge_checker_func_t)(HashTable *target_ht, void *source_data, zend_hash_key *hash_key, void *pParam);
+
 typedef Bucket* HashPosition;
 
 BEGIN_EXTERN_C()
@@ -113,12 +123,6 @@ ZEND_API int zend_hash_add_empty_element(HashTable *ht, char *arKey, uint nKeyLe
 #define ZEND_HASH_APPLY_REMOVE				1<<0
 #define ZEND_HASH_APPLY_STOP				1<<1
 
-typedef struct _zend_hash_key {
-	char *arKey;
-	uint nKeyLength;
-	ulong h;
-} zend_hash_key;
-
 
 typedef int (*apply_func_t)(void *pDest TSRMLS_DC);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument TSRMLS_DC);
@@ -146,7 +150,7 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
-ZEND_API ulong zend_get_hash_value(HashTable *ht, char *arKey, uint nKeyLength);
+ZEND_API ulong zend_get_hash_value(char *arKey, uint nKeyLength);
 
 /* Data retreival */
 ZEND_API int zend_hash_find(HashTable *ht, char *arKey, uint nKeyLength, void **pData);
@@ -185,7 +189,7 @@ ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos
 /* Copying, merging and sorting */
 ZEND_API void zend_hash_copy(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size);
 ZEND_API void zend_hash_merge(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, void *tmp, uint size, int overwrite);
-ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, zend_bool (*pReplaceOrig)(void *orig, void *p_new));
+ZEND_API void zend_hash_merge_ex(HashTable *target, HashTable *source, copy_ctor_func_t pCopyConstructor, uint size, merge_checker_func_t pMergeSource, void *pParam);
 ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber TSRMLS_DC);
 ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t compar, zend_bool ordered TSRMLS_DC);
 ZEND_API int zend_hash_minmax(HashTable *ht, compare_func_t compar, int flag, void **pData TSRMLS_DC);
