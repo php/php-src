@@ -555,8 +555,8 @@ ZEND_FUNCTION(get_class)
 /* }}} */
 
 
-/* {{{ proto string get_parent_class(mixed object)
-   Retrieves the parent class name for object or class. */
+/* {{{ proto string get_parent_class([mixed object])
+   Retrieves the parent class name for object or class or current scope. */
 ZEND_FUNCTION(get_parent_class)
 {
 	zval **arg;
@@ -564,6 +564,14 @@ ZEND_FUNCTION(get_parent_class)
 	char *name;
 	zend_uint name_length;
 	
+	if (!ZEND_NUM_ARGS()) {
+		ce = EG(scope);
+		if (ce && ce->parent) {
+			RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
+		} else {
+			RETURN_FALSE;
+		}
+	}
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
