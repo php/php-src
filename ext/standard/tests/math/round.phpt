@@ -33,7 +33,7 @@ $tests = <<<TESTS
  LONG_MAX   ~== floor(LONG_MAX + 0.5)
 TESTS;
 
-include('../../../../tests/quicktester.inc');
+include('tests/quicktester.inc');
 --EXPECT--
 1,1,0,0
 OK

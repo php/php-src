@@ -29,7 +29,7 @@ $tests = <<<TESTS
 
 TESTS;
 
-include('../../../../tests/quicktester.inc');
+include('tests/quicktester.inc');
 
 --EXPECT--
 OK

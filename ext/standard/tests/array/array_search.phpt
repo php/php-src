@@ -3,7 +3,7 @@ search_array and in_array (including bug 13567)
 --POST--
 --GET--
 --FILE--
-<?php // by jeroen@php.net
+<?php
 
 $arr1 = array('a','b','c');
 $arr2 = array();
@@ -19,7 +19,7 @@ TRUE  === in_array('a', \$arr1)
 'key'=== array_search('d', \$arr4)
 TESTS;
 
- include('../../../../tests/quicktester.inc');
+include('tests/quicktester.inc');
 
 --EXPECT--
 OK

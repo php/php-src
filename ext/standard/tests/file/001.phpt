@@ -4,6 +4,7 @@ File type functions
 --GET--
 --FILE--
 <?php
+chdir(dirname(__FILE__));
 @unlink('test.file');
 @unlink('test.link');
 if (file_exists('test.file')) {

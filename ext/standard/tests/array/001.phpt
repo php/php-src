@@ -4,6 +4,7 @@ Test array_walk, arsort, asort, krsort, ksort, rsort and sort
 --GET--
 --FILE--
 <?php
+chdir(dirname(__FILE__));
 /*
 ** Create sample arrays
 ** Test alpha, numeric (decimal, hex, octal) and special data

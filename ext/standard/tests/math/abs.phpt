@@ -20,7 +20,7 @@ $tests = <<<TESTS
 -(LONG_MIN+1) === abs(LONG_MIN+1)
 TESTS;
 
-include('../../../../tests/quicktester.inc');
+include('tests/quicktester.inc');
 --EXPECT--
 1,1,0,0
 OK
