@@ -17,16 +17,16 @@ SUBDIRS = libzend TSRM
 
 STAMP = buildmk.stamp
 
-makefile_am_files = Makefile.am $(shell find ext sapi regex pear -name Makefile.am)
+makefile_am_files = Makefile.am libzend/Makefile.am TSRM/Makefile.am $(shell find ext sapi regex pear -name Makefile.am)
 makefile_in_files = $(makefile_am_files:.am=.in)
 makefile_files    = $(makefile_am_files:e.am=e)
 
 config_h_in = php_config.h.in
 
 config_h_files = \
-	$(shell echo ext/*/config.h.stub sapi/*/config.h.stub)
+	$(shell echo ext/*/config.h.stub sapi/*/config.h.stub libzend/acconfig.h TSRM/acconfig.h)
 
-config_m4_files = \
+config_m4_files = libzend/libzend.m4 TSRM/tsrm.m4 libzend/acinclude.m4 \
 	$(shell echo ext/*/config.m4 sapi/*/config.m4)
 
 acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
@@ -36,13 +36,18 @@ targets = $(makefile_in_files) configure $(config_h_in)
 all: $(targets)
 	@for i in $(SUBDIRS); do \
 		test -d $$i || (test -d ../$$i && ln -s ../$$i $$i); \
-		(cd $$i>/dev/null && $(MAKE) -f build.mk AMFLAGS=$(AMFLAGS)); \
 	done
 
 all: $(STAMP)
 
 $(STAMP): buildcheck.sh
 	@./buildcheck.sh && touch $(STAMP)
+
+libzend/Makefile.am:
+	test -d libzend || (test -d ../libzend && ln -s ../libzend libzend)
+
+TSRM/Makefile.am:
+	test -d TSRM || (test -d ../TSRM && ln -s ../TSRM TSRM)
 
 dist:
 	@rm -f $(SUBDIRS) 2>/dev/null || true
