@@ -17,8 +17,8 @@ InterBase: BLOB test
             v_blob		blob)");
     ibase_commit();
 
-    /* create 10k blob file  */
-    $blob_str = rand_binstr(10*1024);
+    /* create 100k blob file  */
+    $blob_str = rand_binstr(100*1024);
 
     $name = tempnam(dirname(__FILE__),"blob.tmp");
     $ftmp = fopen($name,"w");
@@ -39,7 +39,16 @@ InterBase: BLOB test
     while($piece = ibase_blob_get($bl_h, rand() % 1024))
         $blob .= $piece;
     if($blob != $blob_str)
-		echo " BLOB 1 fail\n";
+		echo " BLOB 1 fail (1)\n";
+    ibase_blob_close($bl_h);
+
+    $bl_h = ibase_blob_open($row->V_BLOB);
+
+	$blob = '';    
+    while($piece = ibase_blob_get($bl_h, 100 * 1024))
+        $blob .= $piece;
+    if($blob != $blob_str)
+		echo " BLOB 1 fail (2)\n";
     ibase_blob_close($bl_h);
     ibase_free_result($q);
     unset($blob);
