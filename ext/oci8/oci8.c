@@ -4604,7 +4604,7 @@ PHP_FUNCTION(ocicollgetelem)
 	ub4  ndx;
 	int inx;
 	dvoid *elem;
-	dvoid *elemind;
+	OCIInd elemind;
 	boolean exists;
 	OCIString *ocistr = (OCIString *)0;
 	text *str;
@@ -4632,17 +4632,23 @@ PHP_FUNCTION(ocicollgetelem)
 					ndx, 
 					&exists, 
 					&elem, 
-					&elemind));
+					(dvoid **)&elemind));
 
 		if (connection->error) {
 			oci_error(connection->pError, "OCICollGetElem", connection->error);
-			RETURN_FALSE;
+			RETURN_NULL();
 		}
 		
 		/* Return false if value does not exist at that location */
 		if(exists == 0) {
+			php_error(E_WARNING, "OCICollGetElem - Invalid index %d", ndx);
 			RETURN_FALSE;
 		}
+
+		/* Return null if the value is null */
+		if(elemind == OCI_IND_NULL) {
+			RETURN_FALSE;
+		} 
 
 		switch (coll->element_typecode) {
 		   case OCI_TYPECODE_DATE:
