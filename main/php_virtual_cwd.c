@@ -327,6 +327,13 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		ptr = php_strtok_r(NULL, TOKENIZER_STRING, &tok);
 	}
 
+	if (state->cwd_length == COPY_WHEN_ABSOLUTE) {
+		state->cwd = (char *) realloc(state->cwd, state->cwd_length+1+1);
+		state->cwd[state->cwd_length] = DEFAULT_SLASH;
+		state->cwd[state->cwd_length+1] = '\0';
+		state->cwd_length++;
+	}
+
 	if (verify_path && verify_path(state)) {
 		CWD_STATE_FREE(state);
 
