@@ -2030,22 +2030,26 @@ PHP_FUNCTION(strtr)
 PHP_FUNCTION(strrev)
 {
 	zval **str;
-	int i, len;
-	char c;
+	char *s, *e, *n, *p;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(str);
 	
-	ZVAL_STRINGL(return_value, Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
-	len = Z_STRLEN_P(return_value);
+	n = emalloc(Z_STRLEN_PP(str)+1);
+	p = n;
 	
-	for (i = 0; i < len - 1 - i; i++) {
-		c = Z_STRVAL_P(return_value)[i];
-		Z_STRVAL_P(return_value)[i] = Z_STRVAL_P(return_value)[len - 1 - i];
-		Z_STRVAL_P(return_value)[len - 1 - i] = c;
+	s = Z_STRVAL_PP(str);
+	e = s + Z_STRLEN_PP(str);
+	
+	while (--e>=s) {
+		*p++ = *e;
 	}
+	
+	*p = '\0';
+	
+	RETVAL_STRINGL(n, Z_STRLEN_PP(str), 0);
 }
 /* }}} */
 
@@ -2427,17 +2431,19 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	char *new_str;
 	char *source, *target;
 	char *end;
-	char c;
  	
 	if (!str) {
 		*new_length = 0;
 		return str;
 	}
 	new_str = (char *) emalloc((length?length:(length=strlen(str)))*2+1);
+	source = str;
+	end = source + length;
+	target = new_str;
+	
 	if (PG(magic_quotes_sybase)) {
-		for (source = str, end = source+length, target = new_str; source < end; source++) {
-			c = *source;
-			switch (c) {
+		while (source<end) {
+			switch (*source) {
 				case '\0':
 					*target++ = '\\';
 					*target++ = '0';
@@ -2447,14 +2453,16 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 					*target++ = '\'';
 					break;
 				default:
-					*target++ = c;
-				break;
+					*target++ = *source;
+					break;
 			}
+			source++;
 		}
-	} else {
-		for (source = str, end = source+length, target = new_str; source < end; source++) {
-			c = *source;
-			switch (c) {
+	}
+	else {
+		while (source<end) {
+			switch (*source)
+			{
 				case '\0':
 					*target++ = '\\';
 					*target++ = '0';
@@ -2465,11 +2473,14 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 					*target++ = '\\';
 					/* break is missing *intentionally* */
 				default:
-					*target++ = c;
-					break;
+					*target++ = *source;
+					break;	
 			}
+		
+			source++;
 		}
 	}
+	
 	*target = 0;
 	if (new_length) {
 		*new_length = target - new_str;
@@ -3023,40 +3034,14 @@ PHP_FUNCTION(hebrevc)
 
 /* {{{ proto string nl2br(string str)
    Converts newlines to HTML line breaks */
-
-/* maybe const, but will it break some archaic compiler? */
-static int jumps[3][3]={
-	{0,2,1,},
-	{0,0,1,},
-	{0,2,0,},
-};
-static int acts[3][3]={
-	{0,0,0,},
-	{1,3,1,},
-	{2,2,4,},
-};
-static char *strs[4]={"\n","\r","\n\r","\r\n",};
-
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> before matched regexp \n\r?|\r\n? */
-	zval **zstr;
-	char  *tmp, *str;
-	int    new_length, length;
-	char  *p, *end, *target;
-	int    repl_cnt = 0;
-	int    state = 0; /* 0 - initial; 1 - \r found; 2 - \n found; */
-	int action;	
-	 /* actions:
-	   0 - do nothing;   1 - replace \n;   2 - replace \r 
-	   3 - replace \n\r; 4 - replace \r\n;
-	 */
-
-	int ichar;
-	/* letters read from input scanner:
-	   0 - any char different from \n or \r, even end of stream;
-	   1 - \r;  2 - \n
-	 */
+	zval	**zstr;
+	char	*tmp, *str;
+	int	new_length;
+	char	*end, *target;
+	int	repl_cnt = 0;
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zstr) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -3064,57 +3049,59 @@ PHP_FUNCTION(nl2br)
 	
 	convert_to_string_ex(zstr);
 
-	str    = Z_STRVAL_PP(zstr);
-	length = Z_STRLEN_PP(zstr);
-	end    = str + length;
-
+	str = Z_STRVAL_PP(zstr);
+	end = str + Z_STRLEN_PP(zstr);
+	
 	/* it is really faster to scan twice and allocate mem once insted scanning once
 	   and constantly reallocing */
-	for (p = str; p <= end; p++) {
-		/* when p == end assume any char and take the last pending action */
-		if (p == end)
-			ichar = 0;
-		else
-			ichar = (*p == '\n') ? 2 : ((*p == '\r') ? 1 : 0); 
-
-		action = acts[state][ichar];
-		state  = jumps[state][ichar];
-		if (action)
+	while (str<end) {
+		if (*str == '\r') {
+			if (*(str+1) == '\n') {
+				str++;
+			}
 			repl_cnt++;
-	}
-
-	if (repl_cnt == 0) {
-		RETURN_STRINGL(str, length, 1);
-	}
-
-	new_length = length + repl_cnt * 6;
-	tmp        = target = emalloc(new_length + 1);
-
-	/* reinit state machine */
-	state = 0;
-	for (p = str; p <= end; p++) {
-		/* when p == end assume any char and take the last pending action */
-		if (p == end)
-			ichar = 0;
-		else
-			ichar = (*p == '\n') ? 2 : ((*p == '\r') ? 1 : 0); 
-		action = acts[state][ichar];
-		state  = jumps[state][ichar];
-		if (action) {
-			*target++ = '<';
-			*target++ = 'b';
-			*target++ = 'r';
-			*target++ = ' ';
-			*target++ = '/';
-			*target++ = '>';
-			*target++ = strs[action - 1][0];
-			if (action > 2)
-				*target++ = strs[action - 1][1];
+		} else if (*str == '\n') {
+			if (*(str+1) == '\r') {
+				str++;
+			}
+			repl_cnt++;
 		}
-		if (!ichar && p < end)
-			*target++ = *p;
+		
+		str++;
+	}
+	
+	if (repl_cnt == 0) {
+		RETURN_STRINGL(str, Z_STRLEN_PP(zstr), 1);
 	}
 
+	new_length = Z_STRLEN_PP(zstr) + repl_cnt * 6;
+	tmp = target = emalloc(new_length + 1);
+
+	str = Z_STRVAL_PP(zstr);
+
+	while (str<end) {
+		switch (*str)
+		{
+			case '\r':
+			case '\n':
+				*target++ = '<';
+				*target++ = 'b';
+				*target++ = 'r';
+				*target++ = ' ';
+				*target++ = '/';
+				*target++ = '>';
+				
+				if ((*str == '\r' && *(str+1) == '\n') || (*str == '\n' && *(str+1) == '\r')) {
+					*target++ = *str++;
+				}
+				/* lack of a break; is intentional */
+			default:
+				*target++ = *str;
+		}
+	
+		str++;
+	}
+	
 	*target = 0;
 
 	RETURN_STRINGL(tmp, new_length, 0);
@@ -3805,7 +3792,7 @@ PHP_FUNCTION(strnatcasecmp)
 PHP_FUNCTION(substr_count)
 {
 	zval **haystack, **needle;	
-	int i, length, count = 0;
+	int count = 0;
 	char *p, *endp, cmp;
 
 	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &haystack, &needle) == FAILURE) {
@@ -3818,25 +3805,23 @@ PHP_FUNCTION(substr_count)
 	if (Z_STRLEN_PP(needle) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty substring.");
 		RETURN_FALSE;
-	} else if (Z_STRLEN_PP(needle) == 1) {
-		/* Special optimized case to avoid calls to php_memnstr(). */
-		for (i = 0, p = Z_STRVAL_PP(haystack), 
-		     length = Z_STRLEN_PP(haystack), cmp = Z_STRVAL_PP(needle)[0]; 
-		     i < length; i++) {
-			if (p[i] == cmp) {
-				count++;
+	}
+	
+	p = Z_STRVAL_PP(haystack);
+	endp = p + Z_STRLEN_PP(haystack);
+	
+	if (Z_STRLEN_PP(needle) == 1) {
+		cmp = Z_STRVAL_PP(needle)[0];
+	
+		while (p < endp) {
+			if (*(p++) == cmp) {
+				count++;	
 			}
 		}
 	} else {
- 		p = Z_STRVAL_PP(haystack);
-		endp = p + Z_STRLEN_PP(haystack);
-		while (p <= endp) {
-			if ( (p = php_memnstr(p, Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), endp)) != NULL ) {
-				p += Z_STRLEN_PP(needle);
-				count++;
-			} else {
-				break;
-			}
+		while ((p = php_memnstr(p, Z_STRVAL_PP(needle), Z_STRLEN_PP(needle), endp))) {
+			p += Z_STRLEN_PP(needle);
+			count++;
 		}
 	}
 
