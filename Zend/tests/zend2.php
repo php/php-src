@@ -264,7 +264,7 @@ Example 8: __clone()
 		
 		function __clone()
 		{
-			$this->name = $clone->name;
+			$this->name = $that->name;
 			$this->address = "New York";
 			$this->id = self::$id++;
 		}
