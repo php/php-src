@@ -28,12 +28,29 @@
 #include "zend_globals.h"
 
 
-PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array ELS_DC PLS_DC)
+PHPAPI void php_register_variable(char *var, char *strval, zval *track_vars_array ELS_DC PLS_DC)
+{
+	zval new_entry;
+
+	/* Prepare value */
+	new_entry.value.str.len = strlen(strval);
+	if (PG(magic_quotes_gpc)) {
+		new_entry.value.str.val = php_addslashes(strval, new_entry.value.str.len, &new_entry.value.str.len, 0);
+	} else {
+		strval = estrndup(strval, new_entry.value.str.len);
+	}
+	new_entry.type = IS_STRING;
+
+	php_register_variable_ex(var, &new_entry, track_vars_array ELS_CC PLS_CC);
+}
+
+
+PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_array ELS_DC PLS_DC)
 {
 	char *p = NULL;
 	char *ip;		/* index pointer */
 	char *index;
-	int var_len, val_len, index_len;
+	int var_len, index_len;
 	zval *gpc_element, **gpc_element_p, **top_gpc_p=NULL;
 	zend_bool is_array;
 	zend_bool free_index;
@@ -52,6 +69,7 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 	}
 	if (!symtable1) {
 		/* we don't need track_vars, and we're not setting GPC globals either. */
+		zval_dtor(val);
 		return;
 	}
 
@@ -71,6 +89,7 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 	}
 	var_len = strlen(var);
 	if (var_len==0) { /* empty variable name, or variable name with a space in it */
+		zval_dtor(val);
 		return;
 	}
 	/* ensure that we don't have spaces or dots in the variable name (not binary safe) */
@@ -81,14 +100,6 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 				*p='_';
 				break;
 		}
-	}
-
-	/* Prepare value */
-	val_len = strlen(val);
-	if (PG(magic_quotes_gpc)) {
-		val = php_addslashes(val, val_len, &val_len, 0);
-	} else {
-		val = estrndup(val, val_len);
 	}
 
 	index = var;
@@ -150,9 +161,8 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 			}
 		} else {
 			MAKE_STD_ZVAL(gpc_element);
-			gpc_element->value.str.val = val;
-			gpc_element->value.str.len = val_len;
-			gpc_element->type = IS_STRING;
+			gpc_element->value = val->value;
+			gpc_element->type = val->type;
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
@@ -225,6 +235,7 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 						zend_hash_add_ptr(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), array_ptr, sizeof(pval *),NULL);
 						break;
 				}
+				array_ptr->refcount++;  /* If someone overwrites us, array_ptr must stay valid */
 			} else {
 				array_ptr=NULL;
 			}
@@ -236,6 +247,9 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 
 	if (arg==PARSE_POST) {
 		sapi_handle_post(array_ptr SLS_CC);
+		if (array_ptr) {
+			zval_ptr_dtor(&array_ptr);
+		}
 		return;
 	}
 
@@ -261,6 +275,9 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (!res) {
+		if (array_ptr) {
+			zval_ptr_dtor(&array_ptr);
+		}
 		return;
 	}
 
@@ -289,6 +306,9 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	}
 	if (free_buffer) {
 		efree(res);
+	}
+	if (array_ptr) {
+		zval_ptr_dtor(&array_ptr);
 	}
 }
 

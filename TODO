@@ -33,7 +33,6 @@ global
     * make SAPI conform to CGI/1.1. Currently, all SAPI modules
       define REMOTE_ADDR etc. themselves and reach only various level
       of compliance.
-    * create $HTTP_UPLOAD_FILES[].
 
 documentation
 -------------
