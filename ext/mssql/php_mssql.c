@@ -77,6 +77,7 @@ function_entry mssql_functions[] = {
  	PHP_FE(mssql_init,					NULL)
  	PHP_FE(mssql_bind,					a3_arg_force_ref)
  	PHP_FE(mssql_execute,				NULL)
+	PHP_FE(mssql_free_statement,		NULL)
  	PHP_FE(mssql_guid_string,			NULL)
 	{NULL, NULL, NULL}
 };
@@ -910,7 +911,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 			parameter = (char*)dbretname(mssql_ptr->link, i);
 			type = dbrettype(mssql_ptr->link, i);
 						
-			if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
+			if (statement->binds != NULL) {	/*	Maybe a non-parameter sp	*/
 				if (zend_hash_find(statement->binds, parameter, strlen(parameter), (void**)&bind)==SUCCESS) {
 					switch (type) {
 						case SQLBIT:
@@ -942,7 +943,7 @@ static void _mssql_get_sp_result(mssql_link *mssql_ptr, mssql_statement *stateme
 			}
 		}
 	}
-	if (statement->binds!=NULL ) {	/*	Maybe a non-parameter sp	*/
+	if (statement->binds != NULL) {	/*	Maybe a non-parameter sp	*/
 		if (zend_hash_find(statement->binds, "RETVAL", 6, (void**)&bind)==SUCCESS) {
 			if (dbhasretstat(mssql_ptr->link)) {
 				convert_to_long_ex(&bind->zval);
@@ -1032,7 +1033,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 	return i;
 }
 
-/* {{{ proto int mssql_fetch_batch(string result_index)
+/* {{{ proto int mssql_fetch_batch(resource result_index)
    Returns the next batch of records */
 PHP_FUNCTION(mssql_fetch_batch)
 {
@@ -1166,12 +1167,13 @@ PHP_FUNCTION(mssql_rows_affected)
 /* }}} */
 
 
-/* {{{ proto int mssql_free_result(string result_index)
+/* {{{ proto int mssql_free_result(resource result_index)
    Free a MS-SQL result index */
 PHP_FUNCTION(mssql_free_result)
 {
 	zval **mssql_result_index;
 	mssql_result *result;
+	int retvalue;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_result_index)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1182,14 +1184,14 @@ PHP_FUNCTION(mssql_free_result)
 	}
 
 	ZEND_FETCH_RESOURCE(result, mssql_result *, mssql_result_index, -1, "MS SQL-result", le_result);	
-#ifndef HAVE_FREETDS
-	if (dbdataready(result->mssql_ptr->link))
-		dbresults(result->mssql_ptr->link);
-#endif
+	/* Release remaining results */
+	do {
+		retvalue = dbresults(result->mssql_ptr->link);
+	} while (retvalue != NO_MORE_RESULTS && retvalue != FAIL);
+
 	zend_list_delete(Z_RESVAL_PP(mssql_result_index));
 	RETURN_TRUE;
 }
-
 /* }}} */
 
 /* {{{ proto string mssql_get_last_message(void)
@@ -2053,12 +2055,10 @@ PHP_FUNCTION(mssql_execute)
 		RETURN_FALSE;
 	}
 
-	/* The following is just like mssql_query, fetch all rows from the server into 
-	 *	the row buffer. We add here the RETVAL and OUTPUT parameters stuff
-	 */
+	/* The following is just like mssql_query, fetch all rows from the first result 
+	 *	set into the row buffer. 
+ 	 */
 	result=NULL;
-	/* if multiple recordsets in a stored procedure were supported, we would 
-	   use a "while (retval_results!=NO_MORE_RESULTS)" instead an "if" */
 	if (retval_results==SUCCEED) {
 		if ( (retvalue=(dbnextrow(mssql_ptr->link)))!=NO_MORE_ROWS ) {
 			num_fields = dbnumcols(mssql_ptr->link);
@@ -2079,9 +2079,10 @@ PHP_FUNCTION(mssql_execute)
 			result->statement = statement;
 		}
 	}
-	else if (retval_results==NO_MORE_RESULTS) {
-		_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
-	}
+	/* Try to get output parameters.  Won't work if there are more record sets
+	 *  in the batch until they are all retrieved with mssql_next_result().
+	 */
+	_mssql_get_sp_result(mssql_ptr, statement TSRMLS_CC);
 	
 	if (result==NULL) {
 		RETURN_TRUE;	/* no recordset returned ...*/
@@ -2089,6 +2090,33 @@ PHP_FUNCTION(mssql_execute)
 	else {
 		ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 	}
+}
+/* }}} */
+
+/* {{{ proto int mssql_free_statement(resource result_index)
+   Free a MS-SQL statement index */
+PHP_FUNCTION(mssql_free_statement)
+{
+	zval **mssql_statement_index;
+	mssql_statement *statement;
+	int retvalue;
+	
+	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &mssql_statement_index)==FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (Z_TYPE_PP(mssql_statement_index)==IS_RESOURCE && Z_LVAL_PP(mssql_statement_index)==0) {
+		RETURN_FALSE;
+	}
+
+	ZEND_FETCH_RESOURCE(statement, mssql_statement *, mssql_statement_index, -1, "MS SQL-statement", le_statement);	
+	/* Release remaining results */
+	do {
+		retvalue = dbresults(statement->link);
+	} while (retvalue != NO_MORE_RESULTS && retvalue != FAIL);
+
+	zend_list_delete(Z_RESVAL_PP(mssql_statement_index));
+	RETURN_TRUE;
 }
 /* }}} */
 
