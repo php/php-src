@@ -644,7 +644,7 @@ assignment_list:
 
 
 assignment_list_element:
-		w_cvar								{ do_add_list_element(&$1 CLS_CC); }
+		cvar								{ do_add_list_element(&$1 CLS_CC); }
 	|	T_LIST '(' { do_new_list_begin(CLS_C); } assignment_list ')'	{ do_new_list_end(CLS_C); }
 	|	/* empty */							{ do_add_list_element(NULL CLS_CC); }
 ;
