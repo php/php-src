@@ -115,7 +115,7 @@ function_entry oracle_functions[] = {
 	PHP_FE(ora_errorcode,							NULL)
 	PHP_FE(ora_exec,								NULL)
 	PHP_FE(ora_fetch,								NULL)
-   	PHP_FE(ora_fetch_into,							NULL)
+   	PHP_FE(ora_fetch_into,							second_arg_force_ref)
 	PHP_FE(ora_columntype,							NULL)
 	PHP_FE(ora_columnname,							NULL)
 	PHP_FE(ora_columnsize,							NULL)
@@ -1075,11 +1075,6 @@ PHP_FUNCTION(ora_fetch_into)
 	default:
 		WRONG_PARAM_COUNT;
 		break;
-	}
-	
-	if (! ParameterPassedByReference(ht, 2)){
-		php_error(E_WARNING, "Array not passed by reference in call to ora_fetch_into()");
-		RETURN_FALSE;
 	}
 	
 	/* Find the cursor */
