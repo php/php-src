@@ -486,10 +486,16 @@ static void sapi_cgi_log_message(char *message)
 
 static int sapi_cgi_deactivate(TSRMLS_D)
 {
-	sapi_cgibin_flush(SG(server_context));
+	/* flush only when SAPI was started. The reasons are:
+		1. SAPI Deactivate is called from two places: module init and request shutdown
+		2. When the first call occurs and the request is not set up, flush fails on 
+			FastCGI.
+	*/
+	if(SG(sapi_started)) {
+		sapi_cgibin_flush(SG(server_context));
+	}
 	return SUCCESS;
 }
-
 
 static int php_cgi_startup(sapi_module_struct *sapi_module)
 {
