@@ -245,11 +245,9 @@ static enum XML_Error
 processXmlDecl(XML_Parser parser, int isGeneralTextEntity, const char *, const char *);
 static enum XML_Error
 initializeEncoding(XML_Parser parser);
-#if 0
 static enum XML_Error
 doProlog(XML_Parser parser, const ENCODING *enc, const char *s,
 	 const char *end, int tok, const char *next, const char **nextPtr);
-#endif
 static enum XML_Error
 processInternalParamEntity(XML_Parser parser, ENTITY *entity);
 static enum XML_Error
