@@ -3971,7 +3971,7 @@ PHP_FUNCTION(exif_read_data)
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_ANY_TAG    TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_IFD0       TSRMLS_CC);
 	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_THUMBNAIL  TSRMLS_CC);
-	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_COMMENT    TSRMLS_CC);
+	add_assoc_image_info(return_value, 1,          &ImageInfo, SECTION_COMMENT    TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_EXIF       TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_GPS        TSRMLS_CC);
 	add_assoc_image_info(return_value, sub_arrays, &ImageInfo, SECTION_INTEROP    TSRMLS_CC);
