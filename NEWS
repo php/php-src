@@ -1,15 +1,16 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added large OID value (2^31 to 2^32) support for pg_lo_import()/pg_lo_unlink()/pg_lo_open()/pg_lo_export(). (Yasuo)
-- Made mbstring extension enabled by default. (Yasuo)
+- Added large OID value (2^31 to 2^32) support for pg_lo_import(),
+  pg_lo_unlink(), pg_lo_open() and pg_lo_export(). (Yasuo)
+- Made the mbstring extension enabled by default. (Yasuo)
 - Fixed mixing OCIPlogon() and OCINLogon() to not leak Oracle-Sessions. (thies)
-- Changed old $node->append_child() to $node->append_sibling() since
+- Changed the old $node->append_child() to $node->append_sibling() since
   the new append_child() behaves correctly (= W3C standard). (chregu, uwe)
 - Added php.ini options for EXIF extension to encode and decode Unicode/JIS
   user comments. (Marcus)
-- Changed "-c" CLI/CGI option to allow both 'filename' and 'path to php.ini'.
-  (Yasuo)
+- Changed the "-c" CLI/CGI option to allow both 'filename' and
+  'path to php.ini'. (Yasuo)
 - Added version info to the dll and exe files created under Windows. (jtate)
 - Added "log_errors_max_len" php.ini option which controls maximum length for 
   error messages. (Marcus)
@@ -25,9 +26,7 @@ PHP 4                                                                      NEWS
 - Added "zlib.output_compression_level" php.ini option. (Stig)
 - Added support for --with-apxs build on Mac OS X / Darwin. (markonen)
 - Added support for dynamically loaded extensions on OS X / Darwin. 
-  NOTE: Due to the Mach object handling in current version of OS X, the
-  dynamically loaded extensions do not work on the apxs build. To get
-  reliable extensions support, build --with-apache. (kalowsky, markonen)
+  NOTE: This requires Apache 1.3.25 or later. (kalowsky, markonen)
 - Fixed CR/LF processing in quoted_printable_decode() on Win32. (kir)
 - Made crack extension available on Win32. Cracklib libraries for Win32 are
   available at http://www.jtatesoftware.com/cracklib/. (jtate)
