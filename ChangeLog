@@ -1,3 +1,35 @@
+2002-01-11  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h: Added domxml_node_replace_node() function.
+
+2002-01-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/Makefile.in
+      ext/mbstring/config.m4
+      ext/mbstring/mbregex.c
+      ext/mbstring/mbregex.h
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.c:
+    Added multi-byte enabled regex functions. 
+
+2002-01-11  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/file.c:
+    - mkdir(): made second (mode) parameter optional, default to 0777
+               switched to zend_parse_parameters().
+
+2002-01-11  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/HTTP.php:
+    - Added HTTP::head($url) which sends a "HEAD" HTTP command to a server
+      and returns the headers as an associative array
+    - Call-time pass-by-reference fixes
+
+    * pear/tests/pear1.phpt:
+    submit a test that will fail due to php bug #14744
+
 2002-01-10  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c
