@@ -118,7 +118,8 @@ PHP_RINIT_FUNCTION(filestat)
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(filestat) {
+PHP_RSHUTDOWN_FUNCTION(filestat) 
+{
 	if (BG(CurrentStatFile)) {
 		efree (BG(CurrentStatFile));
 	}
@@ -549,6 +550,7 @@ PHP_FUNCTION(clearstatcache)
 /* }}} */
 
 #define IS_LINK_OPERATION() (type == 8 /* filetype */ || type == 14 /* is_link */ || type == 16 /* lstat */)
+#define IS_EXISTS_CHECK(__t) ((__t) == FS_EXISTS  || (__t) == FS_IS_W || (__t) == FS_IS_R || (__t) == FS_IS_X || (__t) == FS_IS_FILE || (__t) == FS_IS_DIR || (__t) == FS_IS_LINK)
 
 /* {{{ php_stat
  */
@@ -578,7 +580,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
 		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
-			if (!IS_LINK_OPERATION() && (type != FS_EXISTS || errno != ENOENT)) { /* fileexists() test must print no error */
+			if (!(IS_LINK_OPERATION() && IS_EXISTS_CHECK(type)) || errno != ENOENT) { /* fileexists() test must print no error */
 				php_error(E_WARNING, "stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
 			efree(BG(CurrentStatFile));
