@@ -1,3 +1,49 @@
+2000-10-31  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/mod_php4.c: Fix Apache build
+
+    * ext/standard/file.c
+      ext/standard/filestat.c
+      main/win95nt.h: mode_t fixes
+
+2000-10-31  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/info.c
+      ext/standard/info.h
+      main/main.c: generalization of image handling in phpinfo
+
+2000-10-31  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cgi/cgi_main.c: Fix -d functionality
+
+2000-10-31  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_ini.c: - Fix phpinfo()
+    - Fix non-thread-safe build
+
+    * main/main.c: Fix memory_limit build problem
+
+2000-10-31  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * main/fopen-wrappers.c: removed some bogus code
+
+    * ext/skeleton/create_stubs
+      README.EXT_SKEL:
+    support for short comments was added to ext_skel proto files
+    theese will be used in proto comments in the source
+    and as <refpurpose> information in the XML docs
+
+2000-10-31  Jesus M. Castagnetto  <jesusmc@scripps.edu>
+
+    * ext/sablot/sablot.c:
+    cosmetic changes (added some "proto"s missing in the function documentations)
+
+2000-10-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c: Both RETR and STOR have also 250 as possible return value
+
+    * ext/ftp/ftp.c: Fix the fix.
+
 2000-10-30  Zeev Suraski  <zeev@zend.com>
 
     * ext/standard/basic_functions.c
