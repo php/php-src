@@ -110,6 +110,7 @@ typedef struct _php_userstream_data php_userstream_data_t;
 #define USERSTREAM_DIR_READ		"dir_readdir"
 #define USERSTREAM_DIR_REWIND	"dir_rewinddir"
 #define USERSTREAM_DIR_CLOSE	"dir_closedir"
+#define USERSTREAM_LOCK     "stream_lock"
 
 /* {{{ class should have methods like these:
  
@@ -759,6 +760,55 @@ static int php_userstreamop_stat(php_stream *stream, php_stream_statbuf *ssb TSR
 	return ret;
 }
 
+
+static int php_userstreamop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC) {
+	zval func_name;
+	zval *retval = NULL;
+	int call_result;
+	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
+	int ret = -1;
+	zval *zvalue;
+	zval **args[1];
+
+	MAKE_STD_ZVAL(zvalue);
+	ZVAL_LONG(zvalue, value);
+	args[0] = &zvalue;
+
+	switch (option) {
+	case PHP_STREAM_OPTION_LOCKING:
+		// TODO wouldblock
+		ZVAL_STRINGL(&func_name, USERSTREAM_LOCK, sizeof(USERSTREAM_LOCK)-1, 0);
+		
+		call_result = call_user_function_ex(NULL,
+											&us->object,
+											&func_name,
+											&retval,
+											1, args, 0, NULL TSRMLS_CC);
+		
+		if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) == IS_BOOL) {
+			ret = !Z_LVAL_P(retval);
+		} else if (call_result == FAILURE) {
+			if (value == 0) { 
+				ret = 0; // lock support test (TODO: more check)
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_LOCK " is not implemented!", 
+								 us->wrapper->classname);
+			}
+		}
+
+		if (retval)
+			zval_ptr_dtor(&retval);
+  
+		break;
+	}
+
+	/* clean up */
+	zval_ptr_dtor(&zvalue);
+
+	return ret;
+}
+
+
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
@@ -1152,6 +1202,7 @@ static int php_userstreamop_rewinddir(php_stream *stream, off_t offset, int when
 {
 	zval func_name;
 	zval *retval = NULL;
+	zval **args[1];
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_DIR_REWIND, sizeof(USERSTREAM_DIR_REWIND)-1, 0);
@@ -1175,8 +1226,8 @@ php_stream_ops php_stream_userspace_ops = {
 	"user-space",
 	php_userstreamop_seek,
 	NULL, /* cast */
-	php_userstreamop_stat, /* stat */
-	NULL  /* set_option */
+	php_userstreamop_stat, 
+	php_userstreamop_set_option,
 };
 
 php_stream_ops php_stream_userspace_dir_ops = {
