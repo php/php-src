@@ -30,6 +30,7 @@
 /* PHP Includes */
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_fopen_wrappers.h"
 
 /* OpenSSL includes */
 #include <openssl/evp.h>
@@ -614,6 +615,9 @@ PHP_MINIT_FUNCTION(openssl)
 
 	/* override the default tcp socket provider */
 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory TSRMLS_CC);
+
+	php_register_url_stream_wrapper("https", &php_stream_http_wrapper TSRMLS_CC);
+	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper TSRMLS_CC);
 	
 	return SUCCESS;
 }
@@ -635,6 +639,9 @@ PHP_MINFO_FUNCTION(openssl)
 PHP_MSHUTDOWN_FUNCTION(openssl)
 {
 	EVP_cleanup();
+
+	php_unregister_url_stream_wrapper("https" TSRMLS_CC);
+	php_unregister_url_stream_wrapper("ftps" TSRMLS_CC);
 
 	php_stream_xport_unregister("ssl" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
