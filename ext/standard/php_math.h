@@ -74,9 +74,16 @@ PHP_FUNCTION(log1p);
 PHP_FUNCTION(sinh);
 PHP_FUNCTION(cosh);
 PHP_FUNCTION(tanh);
+
+#ifdef HAVE_ASINH
 PHP_FUNCTION(asinh);
+#endif
+#ifdef HAVE_ACOSH
 PHP_FUNCTION(acosh);
+#endif
+#ifdef HAVE_ATANH
 PHP_FUNCTION(atanh);
+#endif
 
 #include <math.h>
 
