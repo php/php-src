@@ -675,6 +675,7 @@ static void php_execute_post_request_startup(PLS_D)
 	if (PG(post_request_startup_ok)) {
 		zend_llist_apply(&PG(ll_post_request_startup), php_start_request_hook);
 		zend_llist_destroy(&PG(ll_post_request_startup));
+		PG(post_request_startup_ok) = 0;
 	}
 }
 
