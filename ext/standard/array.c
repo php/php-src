@@ -1945,6 +1945,7 @@ static void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMETERS, int recursive)
 	array_init(return_value);
 	
 	for (i=0; i<argc; i++) {
+		SEPARATE_ZVAL(args[i]);
 		convert_to_array_ex(args[i]);
 		php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive);
 	}
@@ -2925,7 +2926,8 @@ PHP_FUNCTION(array_rand)
 PHP_FUNCTION(array_sum)
 {
 	zval **input,
-		 **entry;
+		 **entry,
+		 entry_n;
 	int argc = ZEND_NUM_ARGS();
 	HashPosition pos;
 	double dval;
@@ -2949,19 +2951,20 @@ PHP_FUNCTION(array_sum)
 		if (Z_TYPE_PP(entry) == IS_ARRAY || Z_TYPE_PP(entry) == IS_OBJECT)
 			continue;
 
-		SEPARATE_ZVAL(entry);
-		convert_scalar_to_number(*entry TSRMLS_CC);
+		entry_n = **entry;
+		zval_copy_ctor(&entry_n);
+		convert_scalar_to_number(&entry_n TSRMLS_CC);
 
-		if (Z_TYPE_PP(entry) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
-			dval = (double)Z_LVAL_P(return_value) + (double)Z_LVAL_PP(entry);
+		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
+			dval = (double)Z_LVAL_P(return_value) + (double)Z_LVAL(entry_n);
 			if ( (double)LONG_MIN <= dval && dval <= (double)LONG_MAX ) {
-				Z_LVAL_P(return_value) += Z_LVAL_PP(entry);
+				Z_LVAL_P(return_value) += Z_LVAL(entry_n);
 				continue;
 			}
 		}
 		convert_to_double(return_value);
-		convert_to_double_ex(entry);
-		Z_DVAL_P(return_value) += Z_DVAL_PP(entry);
+		convert_to_double(&entry_n);
+		Z_DVAL_P(return_value) += Z_DVAL(entry_n);
 	}
 }
 
