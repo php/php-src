@@ -366,7 +366,9 @@ AC_DEFUN(PHP_MKDIR_P_CHECK,[
   AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
     test -d conftestdir && rm -rf conftestdir
     mkdir -p conftestdir/somedir >/dev/null 2>&1
-    if test -d conftestdir/somedir; then
+dnl `mkdir -p' must be quiet about creating existing directories
+    mkdir -p conftestdir/somedir >/dev/null 2>&1
+    if test "$?" = "0" && test -d conftestdir/somedir; then
       ac_cv_mkdir_p=yes
     else
       ac_cv_mkdir_p=no
