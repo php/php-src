@@ -79,8 +79,7 @@ static int		ftp_putcmd(	ftpbuf_t *ftp,
 /* wrapper around send/recv to handle timeouts */
 static int		my_send(ftpbuf_t *ftp, int s, void *buf, size_t len);
 static int		my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len);
-static int		my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr,
-				int *addrlen);
+static int		my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, socklen_t *addrlen);
 
 /* reads a line the socket , returns true on success, false on error */
 static int		ftp_readline(ftpbuf_t *ftp);
@@ -116,7 +115,7 @@ ftpbuf_t*
 ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 {
 	ftpbuf_t		*ftp;
-	int			size;
+	socklen_t		 size;
 	struct timeval tv;
 
 
@@ -137,7 +136,7 @@ ftp_open(const char *host, short port, long timeout_sec TSRMLS_DC)
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
-	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, (unsigned int*)&size) == -1) {
+	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "getsockname failed: %s (%d)\n", strerror(errno), errno);
 		goto bail;
 	}
@@ -560,7 +559,7 @@ ftp_pasv(ftpbuf_t *ftp, int pasv)
 	char			*ptr;
 	union ipbox		ipbox;
 	unsigned long		b[6];
-	int			n;
+	socklen_t			n;
 	struct sockaddr *sa;
 	struct sockaddr_in *sin;
 
@@ -1203,7 +1202,7 @@ data_writeable(ftpbuf_t *ftp, int s)
 /* {{{ my_accept
  */
 int
-my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
+my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, socklen_t *addrlen)
 {
 	fd_set		accept_set;
 	struct timeval	tv;
@@ -1223,7 +1222,7 @@ my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 		return -1;
 	}
 
-	return accept(s, addr, (unsigned int*)addrlen);
+	return accept(s, addr, addrlen);
 }
 /* }}} */
 
@@ -1236,7 +1235,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 	databuf_t		*data;
 	php_sockaddr_storage addr;
 	struct sockaddr *sa;
-	int			size;
+	socklen_t		size;
 	union ipbox		ipbox;
 	char			arg[sizeof("255, 255, 255, 255, 255, 255")];
 	struct timeval	tv;
@@ -1292,7 +1291,7 @@ ftp_getdata(ftpbuf_t *ftp TSRMLS_DC)
 		goto bail;
 	}
 
-	if (getsockname(fd, (struct sockaddr*) &addr, (unsigned int*)&size) == -1) {
+	if (getsockname(fd, (struct sockaddr*) &addr, &size) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "getsockname() failed: %s (%d)\n", strerror(errno), errno);
 		goto bail;
 	}
@@ -1352,7 +1351,7 @@ databuf_t*
 data_accept(databuf_t *data, ftpbuf_t *ftp)
 {
 	php_sockaddr_storage addr;
-	int			size;
+	socklen_t			size;
 
 #if HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
