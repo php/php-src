@@ -920,6 +920,9 @@ ftp_getresp(ftpbuf_t *ftp)
 
 	memmove(ftp->inbuf, ftp->inbuf + 4, FTP_BUFSIZE - 4);
 
+	if (ftp->extra)
+		ftp->extra -= 4;
+
 	return 1;
 }
 /* }}} */
