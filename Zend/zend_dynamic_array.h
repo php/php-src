@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_DYNAMIC_ARRAY_H
 #define ZEND_DYNAMIC_ARRAY_H
@@ -36,3 +37,11 @@ ZEND_API void *zend_dynamic_array_get_element(dynamic_array *da, unsigned int in
 END_EXTERN_C()
 
 #endif /* ZEND_DYNAMIC_ARRAY_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_EXECUTE_H
 #define ZEND_EXECUTE_H
@@ -172,3 +173,11 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 END_EXTERN_C()
 
 #endif /* ZEND_EXECUTE_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

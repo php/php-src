@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_CONFIG_NW_H
 #define ZEND_CONFIG_NW_H
@@ -77,3 +78,11 @@ typedef unsigned int uint;
 */
 
 #endif /* ZEND_CONFIG_NW_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

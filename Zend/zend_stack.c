@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend.h"
 #include "zend_stack.h"
@@ -162,3 +163,11 @@ ZEND_API void zend_stack_apply_with_argument(zend_stack *stack, int type, int (*
 			break;
 	}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

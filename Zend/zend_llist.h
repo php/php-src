@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_LLIST_H
 #define ZEND_LLIST_H
@@ -75,3 +76,11 @@ ZEND_API void *zend_llist_get_prev_ex(zend_llist *l, zend_llist_position *pos);
 END_EXTERN_C()
 
 #endif /* ZEND_LLIST_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

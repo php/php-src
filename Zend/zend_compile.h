@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
@@ -334,7 +335,7 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC);
 
 void zend_do_boolean_or_begin(znode *expr1, znode *op_token TSRMLS_DC);
 void zend_do_boolean_or_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC);
-void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC);               
+void zend_do_boolean_and_begin(znode *expr1, znode *op_token TSRMLS_DC);
 void zend_do_boolean_and_end(znode *result, znode *expr1, znode *expr2, znode *op_token TSRMLS_DC);
 
 void zend_do_brk_cont(zend_uchar op, znode *expr TSRMLS_DC);
@@ -744,3 +745,11 @@ END_EXTERN_C()
 #define ZEND_CALL_FUNC_NAME         "__call"
 
 #endif /* ZEND_COMPILE_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

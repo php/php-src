@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include "zend.h"
 #include "zend_qsort.h"
 #include "zend_API.h"
@@ -509,10 +511,10 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty)
 	return SUCCESS;
 }
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

@@ -18,6 +18,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 /* 
  * LALR shift/reduce conflicts and how they are resolved:
  *
@@ -861,3 +863,10 @@ isset_variables:
 
 %%
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -18,6 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_API_H
 #define ZEND_API_H
@@ -427,5 +428,6 @@ END_EXTERN_C()
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

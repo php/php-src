@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #ifndef ZEND_STATIC_ALLOCATOR_H
 #define ZEND_STATIC_ALLOCATOR_H
 
@@ -43,3 +45,11 @@ char *static_allocator_allocate(StaticAllocator *sa, zend_uint size);
 void static_allocator_destroy(StaticAllocator *sa);
 
 #endif /* ZEND_STATIC_ALLOCATOR_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

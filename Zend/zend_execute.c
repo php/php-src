@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #define ZEND_INTENSIVE_DEBUGGING 0
 
 #include <stdio.h>
@@ -4052,3 +4054,11 @@ void zend_init_opcodes_handlers()
 
 	zend_opcode_handlers[ZEND_RAISE_ABSTRACT_ERROR] = zend_raise_abstract_error_handler;
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

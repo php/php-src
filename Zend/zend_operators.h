@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #ifndef ZEND_OPERATORS_H
 #define ZEND_OPERATORS_H
@@ -275,3 +276,11 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 #define Z_TYPE_PP(zval_pp)	Z_TYPE(**zval_pp)
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

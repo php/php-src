@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 #include "zend_extensions.h"
 
@@ -277,3 +278,11 @@ const char *zend_mh_bundle_error(void)
 }
 
 #endif /* HAVE_MACH_O_DYLD_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

@@ -591,5 +591,6 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

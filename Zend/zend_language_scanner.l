@@ -19,6 +19,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #define yyleng SCNG(yy_leng)
 #define yytext SCNG(yy_text)
 #define yytext_ptr SCNG(yy_text)
@@ -1542,3 +1544,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>{ANY_CHAR} {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

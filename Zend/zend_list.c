@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
 
 /* resource lists */
 
@@ -358,10 +359,10 @@ char *zend_rsrc_list_get_rsrc_type(int resource TSRMLS_DC)
 	}
 }
 
-
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
+ * indent-tabs-mode: t
  * End:
  */

@@ -16,6 +16,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #ifndef ZEND_QSORT_H
 #define ZEND_QSORT_H
 
@@ -24,3 +26,11 @@ ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t co
 END_EXTERN_C()
 
 #endif       /* ZEND_QSORT_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */

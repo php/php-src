@@ -17,6 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
+/* $Id$ */
+
 #include <ctype.h>
 
 #include "zend.h"
@@ -1784,3 +1786,11 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC)
 		}	
 	}
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ */
