@@ -491,7 +491,7 @@ static void php_ibase_free_query_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	if (rsrc->ptr != NULL) {
 		IBDEBUG("Preparing to free query by dtor...");
-		_php_ibase_free_query((ibase_query *)rsrc->ptr);
+		_php_ibase_free_query((ibase_query *)rsrc->ptr TSRMLS_CC);
 		efree(rsrc->ptr);
 	}
 }
