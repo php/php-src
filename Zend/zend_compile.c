@@ -303,7 +303,15 @@ void zend_do_echo(znode *arg CLS_DC)
 
 void zend_do_assign(znode *result, znode *variable, znode *value CLS_DC)
 {
-	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
+	zend_op *opline;
+
+	if (value->op_type == IS_VAR && value->u.EA.type & EXT_TYPE_NEW_OP) {
+		value->u.EA.type &= ~EXT_TYPE_NEW_OP;
+		zend_do_assign_ref(result, variable, value CLS_CC);
+		return;
+	}
+
+	opline = get_next_op(CG(active_op_array) CLS_CC);
 
 	opline->opcode = ZEND_ASSIGN;
 	opline->result.op_type = IS_VAR;
@@ -1649,6 +1657,7 @@ void zend_do_begin_new_object(znode *new_token, znode *class_name CLS_DC)
 	opline->opcode = ZEND_NEW;
 	opline->result.op_type = IS_VAR;
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->result.u.EA.type |= EXT_TYPE_NEW_OP;
 	opline->op1 = *class_name;
 	SET_UNUSED(opline->op2);
 
