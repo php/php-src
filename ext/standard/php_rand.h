@@ -115,6 +115,14 @@ void php_srand_mt(long seed TSRMLS_DC);
 /* Define random generator constants */
 #define RAND_SYS 1
 #define RAND_MT  2
+#define RAND_LCG 3
+#define RAND_SYS_STR "system"
+#define RAND_MT_STR  "mt"
+#define RAND_LCG_STR "lcg"
+
+#define RAND_DEFAULT     RAND_MT
+#define RAND_DEFAULT_STR RAND_MT_STR
+
 
 /* BC */
 #define PHP_RAND_MAX php_randmax()

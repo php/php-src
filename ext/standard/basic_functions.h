@@ -171,6 +171,10 @@ typedef struct {
 	struct stat lsb;
 
 	/* rand.c */
+	int rand_generator; /* current ini-setting */
+	int rand_generator_current; /* current (by overriding by [mt_]srand) */
+
+	/* rand_mt.c */
 	php_uint32   state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */
 	php_uint32   *next;       /* next random value is computed from here */
 	int      left;        /* can *next++ this many times before reloading */

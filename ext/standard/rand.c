@@ -24,12 +24,73 @@
 #include "php.h"
 #include "php_math.h"
 #include "php_rand.h"
+#include "php_ini.h"
 
 #include "zend_execute.h"
 
 #include "basic_functions.h"
 
 /* See php_rand.h for information about layout */
+
+#define SRAND_A_RANDOM_SEED (time(0) * getpid() * (php_combined_lcg(TSRMLS_C) * 10000.0)) /* something with microtime? */
+
+/* TODO: check that this function is called on the start of each script
+ * execution: not more often, not less often.
+ *
+ * Note that system rand is inherently thread-unsafe: A different thread can
+ * always eat up some rand()'s, and thus nuking your expected sequence.
+ * Another reason to use MT...
+ */
+PHP_RINIT_FUNCTION(rand)
+{
+	/* seed all number-generators */
+	/* FIXME: or seed relevant numgen on init/update ini-entry? */
+	php_srand_sys(SRAND_A_RANDOM_SEED);
+	php_srand_mt(SRAND_A_RANDOM_SEED);
+}
+
+/* INI */
+static int randgen_str_to_int(char *str, int strlen)
+{
+	/* manually check all cases, or some loop to automate this
+	 * kind of stuff, so that a new random number generator
+	 * can be added more easily?
+	 *
+	 * --jeroen
+	 */
+	if (!strcasecmp(str,RAND_SYS_STR)) {
+		return RAND_SYS;
+	} else if (!strcasecmp(str,RAND_MT_STR)) {
+		return RAND_MT;
+	} else if (!strcasecmp(str,RAND_LCG_STR)) {
+		return RAND_LCG;
+	}
+	return 0; /* FIXME: include that f*** .h that has FALSE */
+}
+	
+/* FIXME: check that this is called on initial ini-parsing too */
+/* FIXME: what if no ini-entry was present? */
+static PHP_INI_MH(OnUpdateRandGen)
+{
+	/* Set BG(rand_generator) to the correct integer value indicating
+	 * ini-setting */
+	BG(rand_generator) = randgen_str_to_int(new_value, new_value_length);
+	if (!BG(rand_generator)) {
+		/* FIXME: is this possible? What happens if this occurs during
+		 * ini-parsing at startup? */
+		php_error(E_WARNING,"Invalid value for random_number_generator: \"%s\"", new_value);
+		/* Fallback: */
+		BG(rand_generator) = RAND_DEFAULT;
+	}
+#ifdef DEBUG_RAND
+	printf("\nRAND-INI updated: %d\n",BG(rand_generator));
+#endif
+	return SUCCESS;
+}
+
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("random_number_generator",	RAND_DEFAULT_STR,	PHP_INI_ALL,		OnUpdateRandGen)
+PHP_INI_END()
 
 /* srand */
 
