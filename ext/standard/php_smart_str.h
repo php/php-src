@@ -80,6 +80,7 @@ static inline char *smart_str_print_long(char *buf, long num)
 {
 	char *p = buf;
 	long tmp = 0;
+	int n = 0;
 	
 	if (num < 0) {
 		num = -num;
@@ -89,12 +90,13 @@ static inline char *smart_str_print_long(char *buf, long num)
 	while (num > 0) {
 		tmp = tmp * 10 + (num % 10);
 		num /= 10;
+		n++;
 	}
 
 	do {
 		*p++ = (tmp % 10) + '0';
 		tmp /= 10;
-	} while (tmp > 0);
+	} while (--n > 0);
 
 	return p;
 }
