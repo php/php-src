@@ -250,6 +250,8 @@ void zenderror(char *error);
 
 extern ZEND_API zend_class_entry zend_standard_class_def;
 extern zend_utility_values zend_uv;
+extern zval zval_used_for_init;
+
 END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)
@@ -271,6 +273,8 @@ END_EXTERN_C()
 #define INIT_PZVAL(z)		\
 	(z)->refcount = 1;		\
 	(z)->is_ref = 0;	
+
+#define INIT_ZVAL(z) z = zval_used_for_init;
 
 #define MAKE_STD_ZVAL(zv)				 \
 	zv = (zval *) emalloc(sizeof(zval)); \

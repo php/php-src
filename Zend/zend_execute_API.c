@@ -81,13 +81,9 @@ static void zend_extension_deactivator(zend_extension *extension)
 
 void init_executor(CLS_D ELS_DC)
 {
-	var_uninit(&EG(uninitialized_zval));
-	var_uninit(&EG(error_zval));
-	EG(uninitialized_zval).refcount = 1;
-	EG(uninitialized_zval).is_ref=0;
+	INIT_ZVAL(EG(uninitialized_zval));
+	INIT_ZVAL(EG(error_zval));
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
-	EG(error_zval).refcount = 1;
-	EG(error_zval).is_ref=0;
 	EG(error_zval_ptr)=&EG(error_zval);
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
@@ -97,8 +93,15 @@ void init_executor(CLS_D ELS_DC)
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
 #endif
 #endif
+	/*
 	EG(return_value) = &EG(global_return_value);
 	var_reset(EG(return_value));
+	*/
+	EG(return_value_ptr_ptr) = &EG(global_return_value);
+	EG(global_return_value) = emalloc(sizeof(zval));
+	INIT_PZVAL(EG(global_return_value));
+	var_reset(EG(global_return_value));
+
 	EG(symtable_cache_ptr) = EG(symtable_cache)-1;
 	EG(symtable_cache_limit)=EG(symtable_cache)+SYMTABLE_CACHE_SIZE-1;
 	EG(no_extensions)=0;
@@ -123,7 +126,8 @@ void init_executor(CLS_D ELS_DC)
 
 void shutdown_executor(ELS_D)
 {
-	zval_dtor(&EG(global_return_value));
+	zval_ptr_dtor(&EG(global_return_value));
+	/*zval_dtor(&EG(global_return_value));*/
 	zend_ptr_stack_destroy(&EG(arg_types_stack));
 	zend_stack_destroy(&EG(overloaded_objects_stack));
 			
@@ -373,8 +377,8 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		if (object) {
 			zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
 
-			var_uninit(dummy);
-			INIT_PZVAL(dummy);
+			INIT_ZVAL(*dummy);
+			
 			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
 			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
 		}

@@ -60,6 +60,8 @@ HashTable *global_constants_table;
 
 zend_utility_values zend_uv;
 
+zval zval_used_for_init; /* True global variable */
+
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
@@ -328,6 +330,13 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	register_standard_class();
 	zend_hash_init(&module_registry, 50, NULL, ZEND_MODULE_DTOR, 1);
 	zend_hash_init(&list_destructors, 50, NULL, NULL, 1);
+
+	/* This zval can be used to initialize allocate zval's to an uninit'ed value */
+	zval_used_for_init.is_ref = 0;
+	zval_used_for_init.refcount = 1;
+	zval_used_for_init.type = IS_STRING;
+	zval_used_for_init.value.str.val = undefined_variable_string;
+	zval_used_for_init.value.str.len = 0;
 
 #ifdef ZTS
 	global_constants_table = NULL;

@@ -991,9 +991,8 @@ void do_return(znode *expr, int do_end_vparse CLS_DC)
 	if (expr) {
 		opline->op1 = *expr;
 	} else {
-		var_uninit(&opline->op1.u.constant);
 		opline->op1.op_type = IS_CONST;
-		INIT_PZVAL(&opline->op1.u.constant);
+		INIT_ZVAL(opline->op1.u.constant);
 	}
 	SET_UNUSED(opline->op2);
 }
