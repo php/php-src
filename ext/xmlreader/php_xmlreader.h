@@ -44,6 +44,7 @@ typedef struct _xmlreader_object {
 	must manually allocate and de-allocate these - can be refactored when
 	libxml 2.6.x becomes minimum version */
 	xmlParserInputBufferPtr input;
+	void *schema;
 	HashTable *prop_handler;
 	zend_object_handle handle;
 } xmlreader_object;

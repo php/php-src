@@ -47,6 +47,9 @@ typedef struct _xmlreader_prop_handler {
 	int type;
 } xmlreader_prop_handler;
 
+#define XMLREADER_LOAD_STRING 0
+#define XMLREADER_LOAD_FILE 1
+
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_char_t read_char_func, int rettype TSRMLS_DC)
 {
 	xmlreader_prop_handler hnd;
@@ -178,6 +181,97 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
+/* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a 
+	common function in libxml extension as code is common to a few xml extensions */
+char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
+	xmlURI *uri;
+	xmlChar *escsource;
+	char *file_dest;
+	int isFileUri = 0;
+
+	uri = xmlCreateURI();
+	escsource = xmlURIEscapeStr(source, ":");
+	xmlParseURIReference(uri, escsource);
+	xmlFree(escsource);
+
+	if (uri->scheme != NULL) {
+		/* absolute file uris - libxml only supports localhost or empty host */
+		if (strncasecmp(source, "file:///",8) == 0) {
+			isFileUri = 1;
+#ifdef PHP_WIN32
+			source += 8;
+#else
+			source += 7;
+#endif
+		} else if (strncasecmp(source, "file://localhost/",17) == 0) {
+			isFileUri = 1;
+#ifdef PHP_WIN32
+			source += 17;
+#else
+			source += 16;
+#endif
+		}
+	}
+
+	file_dest = source;
+
+	if ((uri->scheme == NULL || isFileUri)) {
+		/* XXX possible buffer overflow if VCWD_REALPATH does not know size of resolved_path */
+		if (! VCWD_REALPATH(source, resolved_path)) {
+			expand_filepath(source, resolved_path TSRMLS_CC);
+		}
+		file_dest = resolved_path;
+	}
+
+	xmlFreeURI(uri);
+
+	return file_dest;
+}
+
+#ifdef LIBXML_SCHEMAS_ENABLED
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type, 
+											xmlRelaxNGValidityErrorFunc error_func, 
+											xmlRelaxNGValidityWarningFunc warn_func TSRMLS_DC)
+{
+	char *valid_file = NULL;
+	xmlRelaxNGParserCtxtPtr parser = NULL;
+	xmlRelaxNGPtr           sptr;
+	char resolved_path[MAXPATHLEN + 1];
+
+	switch (type) {
+	case XMLREADER_LOAD_FILE:
+		valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+		if (!valid_file) {
+			return NULL;
+		}
+		parser = xmlRelaxNGNewParserCtxt(valid_file);
+		break;
+	case XMLREADER_LOAD_STRING:
+		parser = xmlRelaxNGNewMemParserCtxt(source, source_len);
+		/* If loading from memory, we need to set the base directory for the document 
+		   but it is not apparent how to do that for schema's */
+		break;
+	default:
+		return NULL;
+	}
+
+	if (parser == NULL) {
+		return NULL;
+	}
+
+	if (error_func || warn_func) {
+		xmlRelaxNGSetParserErrors(parser,
+			(xmlRelaxNGValidityErrorFunc) error_func,
+			(xmlRelaxNGValidityWarningFunc) warn_func,
+			parser);
+	}
+	sptr = xmlRelaxNGParse(parser);
+	xmlRelaxNGFreeParserCtxt(parser);
+
+	return sptr;
+}
+#endif
+
 /* {{{ xmlreader_module_entry
  */
 zend_module_entry xmlreader_module_entry = {
@@ -216,6 +310,12 @@ static void xmlreader_free_resources(xmlreader_object *intern) {
 			xmlFreeTextReader(intern->ptr);
 			intern->ptr = NULL;
 		}
+#ifdef LIBXML_SCHEMAS_ENABLED
+		if (intern->schema) {
+			xmlRelaxNGFree((xmlRelaxNGPtr) intern->schema);
+			intern->schema = NULL;
+		}
+#endif
 	}
 }
 
@@ -246,6 +346,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->std.in_set = 0;
 	intern->ptr = NULL;
 	intern->input = NULL;
+	intern->schema = NULL;
 	intern->prop_handler = &xmlreader_prop_handlers;
 
 	ALLOC_HASHTABLE(intern->std.properties);
@@ -328,6 +429,58 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	}
 }
 */
+
+static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int type) {
+#ifdef LIBXML_SCHEMAS_ENABLED
+	zval *id;
+	int source_len = 0, retval = -1;
+	xmlreader_object *intern;
+	xmlRelaxNGPtr schema = NULL;
+	char *source;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+		return;
+	}
+
+	if (source != NULL && !source_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Schema data source is requried");
+		RETURN_FALSE;
+	}
+
+	id = getThis();
+
+	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+	if (intern && intern->ptr) {
+		if (source) {
+			schema =  _xmlreader_get_relaxNG(source, source_len, type, NULL, NULL TSRMLS_CC);
+			if (schema) {
+				retval = xmlTextReaderRelaxNGSetSchema(intern->ptr, schema);
+			}
+		} else {
+			/* unset the associated relaxNG context and schema if one exists */
+			retval = xmlTextReaderRelaxNGSetSchema(intern->ptr, NULL);
+		}
+
+		if (retval == 0) {
+			if (intern->schema) {
+				xmlRelaxNGFree((xmlRelaxNGPtr) intern->schema);
+			}
+
+			intern->schema = schema;
+
+			RETURN_TRUE;
+		}
+	}
+	
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
+
+	RETURN_FALSE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "No Schema support built into libxml.");
+
+	RETURN_FALSE;
+#endif
+}
 
 /* {{{ proto boolean close()
 Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
@@ -610,7 +763,8 @@ PHP_METHOD(xmlreader, open)
 	zval *id;
 	int source_len = 0;
 	xmlreader_object *intern;
-	char *source;
+	char *source, *valid_file = NULL;
+	char resolved_path[MAXPATHLEN + 1];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
@@ -627,7 +781,11 @@ PHP_METHOD(xmlreader, open)
 
 	xmlreader_free_resources(intern);
 
-	intern->ptr = xmlNewTextReaderFilename(source);
+	valid_file = _xmlreader_get_valid_file_path(source, resolved_path, MAXPATHLEN  TSRMLS_CC);
+
+	if (valid_file) {
+		intern->ptr = xmlNewTextReaderFilename(valid_file);
+	}
 
 	if (intern->ptr == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open source data");
@@ -686,6 +844,22 @@ PHP_METHOD(xmlreader, setParserProperty)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto boolean setRelaxNGSchemaSource(string filename)
+Sets the string that the the XMLReader will parse. */
+PHP_METHOD(xmlreader, setRelaxNGSchema)
+{
+	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_FILE);
+}
+/* }}} */
+
+/* {{{ proto boolean setRelaxNGSchemaSource(string source)
+Sets the string that the the XMLReader will parse. */
+PHP_METHOD(xmlreader, setRelaxNGSchemaSource)
+{
+	php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAM_PASSTHRU, XMLREADER_LOAD_STRING);
 }
 /* }}} */
 
@@ -770,6 +944,8 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, resetState, NULL, ZEND_ACC_PUBLIC)
 */
 	PHP_ME(xmlreader, setParserProperty, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, setRelaxNGSchema, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(xmlreader, setRelaxNGSchemaSource, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, XML, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
