@@ -1215,7 +1215,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 
 				if ((newpos + tlen + 1) > newlen) {
 					newlen = newpos + tlen + 1 + 8192;
-					newstr = realloc(newstr,newlen);
+					newstr = erealloc(newstr,newlen);
 				}
 				
 				memcpy(newstr+newpos,tval,tlen);
@@ -1233,7 +1233,7 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 		if (! found) {
 			if ((newpos + 1) > newlen) {
 				newlen = newpos + 1 + 8192;
-				newstr = realloc(newstr,newlen);
+				newstr = erealloc(newstr,newlen);
 			}
 			
 			newstr[ newpos++ ] = str[ pos++ ];
