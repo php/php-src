@@ -119,7 +119,7 @@ any = [\000-\277];
 
 
 
-static inline int parse_iv2(const char *p, const char **q)
+static inline int parse_iv2(const unsigned char *p, const unsigned char **q)
 {
 	char cursor;
 	int result = 0;
@@ -134,7 +134,7 @@ static inline int parse_iv2(const char *p, const char **q)
 	}
 	
 	while (1) {
-		cursor = *p;
+		cursor = (char)*p;
 		if (cursor >= '0' && cursor <= '9') {
 			result = result * 10 + cursor - '0';
 		} else {
@@ -147,12 +147,34 @@ static inline int parse_iv2(const char *p, const char **q)
 	return result;
 }
 
-static inline int parse_iv(const char *p)
+static inline int parse_iv(const unsigned char *p)
 {
 	return parse_iv2(p, NULL);
 }
 
-#define UNSERIALIZE_PARAMETER zval **rval, const char **p, const char *max, php_unserialize_data_t *var_hash TSRMLS_DC
+/* no need to check for length - re2c already did */
+static inline size_t parse_uiv(const unsigned char *p)
+{
+	unsigned char cursor;
+	size_t result = 0;
+
+	if (*p == '+') {
+		p++;
+	}
+	
+	while (1) {
+		cursor = *p;
+		if (cursor >= '0' && cursor <= '9') {
+			result = result * 10 + (size_t)(cursor - (unsigned char)'0');
+		} else {
+			break;
+		}
+		p++;
+	}
+	return result;
+}
+
+#define UNSERIALIZE_PARAMETER zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
 
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int elements)
@@ -190,6 +212,14 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, int 
 		
 		zval_dtor(key);
 		FREE_ZVAL(key);
+		
+		if (elements && *(*p-1) != ';') {
+#if SOMETHING_NEW_MIGHT_LEAD_TO_CRASH_ENABLE_IF_YOU_ARE_BRAVE
+			zval_ptr_dtor(rval);
+#endif
+			(*p)--;
+			return 0;
+		}
 	}
 
 	return 1;
@@ -306,7 +336,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"b:" iv ";"	{
+"b:" [01] ";"	{
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 	ZVAL_BOOL(*rval, parse_iv(start + 2));
@@ -345,18 +375,30 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "s:" uiv ":" ["] 	{
-	int len;
+	size_t len, maxlen;
 	char *str;
 
-	len = parse_iv(start + 2);
+	len = parse_uiv(start + 2);
+	maxlen = max - YYCURSOR;
+	if (maxlen < len) {
+		*p = start + 2;
+		return 0;
+	}
 
-	str = estrndup(YYCURSOR, len);
+	str = (char*)YYCURSOR;
 
-	YYCURSOR += len + 2;
+	YYCURSOR += len;
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+
+	YYCURSOR += 2;
 	*p = YYCURSOR;
 
 	INIT_PZVAL(*rval);
-	ZVAL_STRINGL(*rval, str, len, 0);
+	ZVAL_STRINGL(*rval, str, len, 1);
 	return 1;
 }
 
@@ -387,9 +429,8 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 }
 
 "O:" uiv ":" ["]	{
-	int len;
+	size_t len, len2, maxlen;
 	int elements;
-	int len2;
 	char *class_name;
 	zend_class_entry *ce;
 	zend_class_entry **pce;
@@ -401,12 +442,27 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zval *arg_func_name;
 	
 	INIT_PZVAL(*rval);
-	len2 = len = parse_iv(start + 2);
-	if (len == 0)
+	len2 = len = parse_uiv(start + 2);
+	maxlen = max - YYCURSOR;
+	if (maxlen < len || len == 0) {
+		*p = start + 2;
 		return 0;
+	}
 
-	class_name = estrndup(YYCURSOR, len);
+	class_name = (char*)YYCURSOR;
+
 	YYCURSOR += len;
+
+	if (*(YYCURSOR) != '"') {
+		*p = YYCURSOR;
+		return 0;
+	}
+	if (*(YYCURSOR+1) != ':') {
+		*p = YYCURSOR+1;
+		return 0;
+	}
+
+	class_name = estrndup(class_name, len);
 
 	do {
 		/* Try to find class directly */
