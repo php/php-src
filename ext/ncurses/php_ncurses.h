@@ -59,7 +59,7 @@ ZEND_END_MODULE_GLOBALS(ncurses)
 */
 
 #ifdef ZTS
-#define NCURSES_G(v) (ncurses_globals->v)
+#define NCURSES_G(v) TSRMG(ncurses_globals_id, zend_ncurses_globals *, v)
 #define NCURSES_LS_FETCH() zend_ncurses_globals *ncurses_globals = ts_resource(ncurses_globals_id)
 #else
 #define NCURSES_G(v) (ncurses_globals.v)
