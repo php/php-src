@@ -1979,7 +1979,7 @@ PHP_FUNCTION(pdf_open_memory_image)
 			} else {
 #endif
 				if (im->pixels && gdImageBoundsSafe(im, j, i)) {
-					color = im->pixels[im->sy][im->sx];
+					color = im->pixels[i][j];
 					*ptr++ = im->red[color];
 					*ptr++ = im->green[color];
 					*ptr++ = im->blue[color];
