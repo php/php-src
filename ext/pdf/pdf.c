@@ -84,11 +84,11 @@ static int le_pdf;
 
 function_entry pdf_functions[] = {
 	PHP_FE(pdf_set_info, NULL)
-	PHP_FE(pdf_set_info_creator, NULL)
-	PHP_FE(pdf_set_info_title, NULL)
-	PHP_FE(pdf_set_info_subject, NULL)
-	PHP_FE(pdf_set_info_author, NULL)
-	PHP_FE(pdf_set_info_keywords, NULL)
+	PHP_FE(pdf_set_info_creator, NULL)   // deprecated
+	PHP_FE(pdf_set_info_title, NULL)   // deprecated
+	PHP_FE(pdf_set_info_subject, NULL)   // deprecated
+	PHP_FE(pdf_set_info_author, NULL)   // deprecated
+	PHP_FE(pdf_set_info_keywords, NULL)   // deprecated
 	PHP_FE(pdf_open, NULL)
 	PHP_FE(pdf_close, NULL)
 	PHP_FE(pdf_begin_page, NULL)
@@ -98,13 +98,13 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_show_boxed, NULL)
 	PHP_FE(pdf_skew, NULL)
 	PHP_FE(pdf_set_font, NULL)
-	PHP_FE(pdf_set_leading, NULL)
-	PHP_FE(pdf_set_text_rendering, NULL)
-	PHP_FE(pdf_set_horiz_scaling, NULL)
-	PHP_FE(pdf_set_text_rise, NULL)
+	PHP_FE(pdf_set_leading, NULL)   // deprecated
+	PHP_FE(pdf_set_text_rendering, NULL)   // deprecated
+	PHP_FE(pdf_set_horiz_scaling, NULL)   // deprecated
+	PHP_FE(pdf_set_text_rise, NULL)   // deprecated
 	PHP_FE(pdf_set_text_pos, NULL)
-	PHP_FE(pdf_set_char_spacing, NULL)
-	PHP_FE(pdf_set_word_spacing, NULL)
+	PHP_FE(pdf_set_char_spacing, NULL)   // deprecated
+	PHP_FE(pdf_set_word_spacing, NULL)   // deprecated
 	PHP_FE(pdf_get_font, NULL)
 	PHP_FE(pdf_get_fontname, NULL)
 	PHP_FE(pdf_get_fontsize, NULL)
@@ -147,15 +147,15 @@ function_entry pdf_functions[] = {
 	PHP_FE(pdf_setrgbcolor, NULL)
 	PHP_FE(pdf_add_outline, NULL)
 	PHP_FALIAS(pdf_add_bookmark, pdf_add_outline, NULL)
-	PHP_FE(pdf_set_transition, NULL)
-	PHP_FE(pdf_set_duration, NULL)
-	PHP_FE(pdf_open_jpeg, NULL)
-	PHP_FE(pdf_open_tiff, NULL)
-	PHP_FE(pdf_open_png, NULL)
+	PHP_FE(pdf_set_transition, NULL)   // deprecated
+	PHP_FE(pdf_set_duration, NULL)   // deprecated
+	PHP_FE(pdf_open_jpeg, NULL)   // deprecated
+	PHP_FE(pdf_open_tiff, NULL)   // deprecated
+	PHP_FE(pdf_open_png, NULL)   // deprecated
 #if HAVE_LIBGD13
 	PHP_FE(pdf_open_memory_image, NULL)
 #endif
-	PHP_FE(pdf_open_gif, NULL)
+	PHP_FE(pdf_open_gif, NULL)   // deprecated
 	PHP_FE(pdf_open_image_file, NULL)
 	PHP_FE(pdf_close_image, NULL)
 	PHP_FE(pdf_place_image, NULL)
@@ -224,7 +224,7 @@ static void *pdf_realloc(PDF *p, void *mem, size_t size, const char *caller) {
 }
 
 static void pdf_efree(PDF *p, void *mem) {
-	return(efree(mem));
+	efree(mem);
 }
 
 static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
@@ -1855,30 +1855,37 @@ PHP_FUNCTION(pdf_set_parameter) {
 }
 /* }}} */
 
-/* {{{ proto string pdf_get_parameter(int pdfdoc, string key, double modifier)
+/* {{{ proto string pdf_get_parameter(int pdfdoc, string key, mixed modifier)
    Gets arbitrary parameters */
 PHP_FUNCTION(pdf_get_parameter) {
-	pval **arg1, **arg2, **arg3;
+	pval **argv[3];
+	int argc;
 	int id, type;
 	PDF *pdf;
 	char *value;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	if((argc < 2) || (argc > 3))
 		WRONG_PARAM_COUNT;
-	}
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_double_ex(arg3);
-	id=(*arg1)->value.lval;
+	convert_to_long_ex(argv[0]);
+	convert_to_string_ex(argv[1]);
+	id=(*argv[0])->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	value = PDF_get_parameter(pdf, (*arg2)->value.str.val, (float) ((*arg3)->value.dval));
+	if(argc == 3) {
+		convert_to_double_ex(argv[2]);
+		value = (char *) PDF_get_parameter(pdf, (*argv[1])->value.str.val, (float) ((*argv[2])->value.dval));
+	} else {
+		value = (char *) PDF_get_parameter(pdf, (*argv[1])->value.str.val, 0.0);
+	}
 
 	RETURN_STRING(value, 1);
 }
@@ -1915,27 +1922,48 @@ PHP_FUNCTION(pdf_set_value) {
 /* {{{ proto double pdf_get_value(int pdfdoc, string key, double modifier)
    Gets arbitrary value */
 PHP_FUNCTION(pdf_get_value) {
-	pval **arg1, **arg2, **arg3;
+	pval **argv[3];
+	int argc;
 	int id, type;
 	PDF *pdf;
 	double value;
 	PDF_TLS_VARS;
 
-	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	if((argc < 2) || (argc > 3))
 		WRONG_PARAM_COUNT;
-	}
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
 
-	convert_to_long_ex(arg1);
-	convert_to_string_ex(arg2);
-	convert_to_double_ex(arg3);
-	id=(*arg1)->value.lval;
+	convert_to_long_ex(argv[0]);
+	convert_to_string_ex(argv[1]);
+	id=(*argv[0])->value.lval;
 	pdf = zend_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	value = PDF_get_value(pdf, (*arg2)->value.str.val, (*arg3)->value.dval);
+	if(0 == (strncmp((*argv[1])->value.str.val, "image", 5))) {
+		int pdf_image;
+		if(argc < 3)
+			WRONG_PARAM_COUNT;
+		convert_to_long_ex(argv[2]);
+		id=(*argv[2])->value.lval;
+		pdf_image = (int) zend_list_find(id,&type);
+		if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+			php_error(E_WARNING,"Unable to find image identifier %d",id);
+			RETURN_FALSE;
+		}
+		value = PDF_get_value(pdf, (*argv[1])->value.str.val, pdf_image);
+  } else {
+		if(argc < 3) {
+			value = PDF_get_value(pdf, (*argv[1])->value.str.val, 0.0);
+		} else {
+			convert_to_double_ex(argv[2]);
+			value = PDF_get_value(pdf, (*argv[1])->value.str.val, (*argv[2])->value.dval);
+		}
+	}
 
 	RETURN_DOUBLE(value);
 }
