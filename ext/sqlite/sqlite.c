@@ -22,6 +22,8 @@
 #include "config.h"
 #endif
 
+#define PHP_SQLITE_MODULE_VERSION	"0.7"
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -73,7 +75,7 @@ zend_module_entry sqlite_module_entry = {
 	NULL,
 	PHP_MINFO(sqlite),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1",
+	PHP_SQLITE_MODULE_VERSION,
 #endif
 	STANDARD_MODULE_PROPERTIES
 };
@@ -221,7 +223,7 @@ PHP_MINFO_FUNCTION(sqlite)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "SQLite support", "enabled");
-	php_info_print_table_row(2, "PECL Module version", "$Id$");
+	php_info_print_table_row(2, "PECL Module version", PHP_SQLITE_MODULE_VERSION " $Id$");
 	php_info_print_table_row(2, "SQLite Library", sqlite_libversion());
 	php_info_print_table_row(2, "SQLite Encoding", sqlite_libencoding());
 	php_info_print_table_end();
