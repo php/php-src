@@ -1,3 +1,52 @@
+2005-02-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/exif/exif.c
+      ext/exif/exif.c:
+      MFH: Fixed bug #31797 (exif_read_data() uses too low nesting limit).
+
+    * ext/exif/exif.c:
+      Fixed bug #31797 (exif_read_data() uses too low nesting limit).
+
+2005-02-01  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      Fix debug_trace with eval (patch from Antony Dovgal)
+
+    * ZendEngine2/tests/bug_debug_backtrace.phpt:
+      test for eval debug_backtrace bug
+
+    * ZendEngine2/tests/bug_debug_backtrace.phpt
+      ZendEngine2/tests/bug_debug_backtrace.phpt:
+      
+      file bug_debug_backtrace.phpt was initially added on branch PHP_5_0.
+
+    * (PHP_4_3)
+      Zend/zend_execute.c:
+      Better fix for #28086
+
+2005-02-01  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * TSRM/TSRM.h:
+      NetWare has a compliant pthread implementation
+
+    * (PHP_5_0)
+      TSRM/TSRM.h:
+      NetWare is now having compliant pthreads implementation
+
+2005-02-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      main/rfc1867.c
+      main/rfc1867.c:
+      MFH: Final version of filename upload handling.
+
+    * main/rfc1867.c:
+      Final version of filename upload handling.
+
 2005-01-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_reflection_api.c:
