@@ -392,9 +392,30 @@ PHP_FUNCTION(simplexml_load_file)
 }
 /* }}} */
 
+/* {{{ proto bool simplexml_save_file(string filename, simplexml_element node)
+   Save a document from a SimpleXML node */
+PHP_FUNCTION(simplexml_save_document_file)
+{
+	php_sxe_object *sxe;
+	zval           *element;
+	char           *filename;
+	int             filename_len;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &filename, &filename_len, &element) == FAILURE) {
+		return;
+	}
+
+	sxe = php_sxe_fetch_object(element TSRMLS_CC);
+
+	xmlSaveFile(filename, sxe->document);
+
+	RETURN_TRUE;
+}
+/* }}} */
 
 function_entry simplexml_functions[] = {
 	PHP_FE(simplexml_load_file, NULL)
+	PHP_FE(simplexml_save_document_file, NULL)
 	{NULL, NULL, NULL}
 };
 
