@@ -6,7 +6,8 @@ PHP 4                                                                      NEWS
   for doing performance stats without warnings in server-log. (Uwe Schindler)
 - Fixed bug #29116 (Zend constant warning uses memory after free). (Marcus,
   jdolecek at NetBSD dot org)
-- Fixed Bug #29075 (strnatcmp() incorrectly handles whitespace). (Curt, Ilia)
+- Fixed bug #29114 (Potential double free in php_stat). (Sara)
+- Fixed bug #29075 (strnatcmp() incorrectly handles whitespace). (Curt, Ilia)
 - Fixed bug #29049 (array sorting via user function/method does not validate 
   it). (Ilia)
 - Fixed bug #29038 (extract() with EXTR_PREFIX_SAME prefixes empty strings).

@@ -613,8 +613,11 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 			if (!IS_LINK_OPERATION(type) && (!IS_EXISTS_CHECK(type) || (errno != ENOENT && errno != ENOTDIR))) { /* fileexists() test must print no error */
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
-			efree(BG(CurrentStatFile));
-			BG(CurrentStatFile) = NULL;
+			/* This could be null if a failed stat leads to a user error handler which calls a failed stat */
+			if (BG(CurrentStatFile)) {
+				efree(BG(CurrentStatFile));
+				BG(CurrentStatFile) = NULL;
+			}
 #if HAVE_SYMLINK
 			if (!IS_LINK_OPERATION(type))  /* Don't require success for link operation */
 #endif
