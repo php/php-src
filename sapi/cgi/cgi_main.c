@@ -521,7 +521,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] \n"
+	php_printf("Usage: %s [-q] [-h] [-s] [-v] [-i] [-f <file>] \n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
 #if PHP_FASTCGI
