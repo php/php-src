@@ -171,7 +171,7 @@ static int call_get_handler(zval *object, zval *prop_name, zval **prop_value TSR
 	Z_OBJCE_P(object) = orig_ce;
 
 	if (call_result == FAILURE || !retval) {
-		php_error(E_WARNING, "unable to call %s::__get() handler", orig_ce->name);
+		php_error(E_WARNING, "unable to call %s::" GET_HANDLER "() handler", orig_ce->name);
 		return 0;
 	}
 
@@ -234,7 +234,7 @@ int call_set_handler(zval *object, zval *prop_name, zval *value TSRMLS_DC)
 	Z_OBJCE_P(object) = orig_ce;
 
 	if (call_result == FAILURE || !retval) {
-		php_error(E_WARNING, "unable to call %s::__set() handler", orig_ce->name);
+		php_error(E_WARNING, "unable to call %s::" SET_HANDLER "() handler", orig_ce->name);
 		return 0;
 	}
 
@@ -486,7 +486,7 @@ static void overload_call_method(INTERNAL_FUNCTION_PARAMETERS, zend_property_ref
 
 		if (call_result == FAILURE || !retval) {
 			efree(args);
-			php_error(E_WARNING, "unable to call %s::__call() handler", Z_OBJCE_P(object)->name);
+			php_error(E_WARNING, "unable to call %s::" CALL_HANDLER "() handler", Z_OBJCE_P(object)->name);
 			return;
 		}
 	} else {
