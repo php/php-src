@@ -1,6 +1,9 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
+- Make ImageTruecolorToPalette() in bundled GD2 library actually work (Rasmus)
+- Fix ImageCopy() in bundled GD2 library to handle copying from truecolor to
+  palette-based.  (Wez, Rasmus)
 - Read-only GIF support for bundled GD2 library (Rasmus)
 - Make the glue argument to implode() optional, if it is not specified
   default to using "". (Sterling)
