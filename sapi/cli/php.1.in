@@ -309,7 +309,7 @@ configuration information. If you then combine those two
 \fIphp \-E 'echo "Lines: $argi\\n";'\fP
 Using this PHP command you can count the lines being input.
 .TP
-\fIphp \-R '$l+=count(file($argn));' \-E'echo "Lines:$l\\n";'\fP
+\fIphp \-R '@$l+=count(file($argn));' \-E 'echo "Lines:$l\\n";'\fP
 In this example PHP expects each input line beeing a file. It counts all lines 
 of the files specified by each input line and shows the summarized result. 
 You may combine this with tools like find and change the php scriptlet.
