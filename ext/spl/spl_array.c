@@ -218,9 +218,18 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_ASSIGN_DIM)
 
 		FREE_OP(Ts, op2, EG(free_op2));
 		if (&EX(opline)->result) {
-			EX_T(EX(opline)->result.u.var).var.ptr = retval;
-			EX_T(EX(opline)->result.u.var).var.ptr_ptr = NULL;/*&EX_T(EX(opline)->result.u.var).var.ptr;*/
-			SELECTIVE_PZVAL_LOCK(retval, &EX(opline)->result);
+			if (retval->refcount < 2) {
+				zend_error(E_WARNING, "Method %s::set() did not return a value, using input value", obj_ce->name);
+				EX_T(EX(opline)->result.u.var).var.ptr = value;
+				SELECTIVE_PZVAL_LOCK(value, &EX(opline)->result);
+				DELETE_RET_ZVAL(retval);			
+			} else {
+				EX_T(EX(opline)->result.u.var).var.ptr = retval;
+				retval->refcount--;
+			}
+			EX_T(EX(opline)->result.u.var).var.ptr_ptr = NULL;
+		} else {
+			DELETE_RET_ZVAL(retval);			
 		}
 
 		EX(opline)++;

@@ -82,32 +82,28 @@ c::get(4th)
 int(4)
 c::exists(5th)
 
-Notice: Undefined index:  5th in %s on line %d
+Notice: Undefined index:  5th in %sarray_access_001.php on line %d
 NULL
 c::exists(6)
 
-Notice: Undefined index:  6 in %s on line %d
+Notice: Undefined index:  6 in %sarray_access_001.php on line %d
 NULL
 WRITE 1
-c::exists(1)
 c::set(1,Changed 1)
 c::exists(1)
 c::get(1)
 string(9) "Changed 1"
 WRITE 2
-c::exists(4th)
 c::set(4th,Changed 4th)
 c::exists(4th)
 c::get(4th)
 string(11) "Changed 4th"
 WRITE 3
-c::exists(5th)
 c::set(5th,Added 5th)
 c::exists(5th)
 c::get(5th)
 string(9) "Added 5th"
 WRITE 4
-c::exists(6)
 c::set(6,Added 6)
 c::exists(6)
 c::get(6)
@@ -118,7 +114,6 @@ string(3) "1st"
 c::exists(2)
 c::get(2)
 string(3) "3rd"
-c::exists(6)
 c::set(6,changed 6)
 c::exists(6)
 c::get(6)
