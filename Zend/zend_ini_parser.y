@@ -123,9 +123,10 @@ static void ini_error(char *str)
 {
 	char *error_buf;
 	int error_buf_len;
-	char *currently_parsed_filename = zend_ini_scanner_get_filename();
+	char *currently_parsed_filename;
 	TSRMLS_FETCH();
 
+	currently_parsed_filename = zend_ini_scanner_get_filename(TSRMLS_C);
 	error_buf_len = 128+strlen(currently_parsed_filename); /* should be more than enough */
 	error_buf = (char *) emalloc(error_buf_len);
 
@@ -153,14 +154,14 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_
 	ini_parser_param.ini_parser_cb = ini_parser_cb;
 	ini_parser_param.arg = arg;
 
-	if (zend_ini_open_file_for_scanning(fh)==FAILURE) {
+	if (zend_ini_open_file_for_scanning(fh TSRMLS_CC)==FAILURE) {
 		return FAILURE;
 	}
 
 	CG(ini_parser_unbuffered_errors) = unbuffered_errors;
 	retval = ini_parse(&ini_parser_param);
 
-	zend_ini_close_file(fh);
+	zend_ini_close_file(fh TSRMLS_CC);
 
 	if (retval==0) {
 		return SUCCESS;

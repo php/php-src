@@ -91,7 +91,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D);
 ZEND_API void zend_ini_sort_entries(TSRMLS_D);
 
 ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_number TSRMLS_DC);
-ZEND_API void zend_unregister_ini_entries(int module_number);
+ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC);
 ZEND_API void zend_ini_refresh_caches(int stage TSRMLS_DC);
 ZEND_API int zend_alter_ini_entry(char *name, uint name_length, char *new_value, uint new_value_length, int modify_type, int stage);
 ZEND_API int zend_restore_ini_entry(char *name, uint name_length, int stage);
@@ -162,7 +162,7 @@ ZEND_API ZEND_INI_DISP(display_link_numbers);
 
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number TSRMLS_CC)
-#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
+#define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number TSRMLS_CC)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
 #define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), sizeof(name), displayer)

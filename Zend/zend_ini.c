@@ -135,7 +135,7 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 	while (p->name) {
 		p->module_number = module_number;
 		if (zend_hash_add(registered_zend_ini_directives, p->name, p->name_length, p, sizeof(zend_ini_entry), (void **) &hashed_ini_entry)==FAILURE) {
-			zend_unregister_ini_entries(module_number);
+			zend_unregister_ini_entries(module_number TSRMLS_CC);
 			return FAILURE;
 		}
 		if ((zend_get_configuration_directive(p->name, p->name_length, &default_value))==SUCCESS) {
@@ -155,10 +155,8 @@ ZEND_API int zend_register_ini_entries(zend_ini_entry *ini_entry, int module_num
 }
 
 
-ZEND_API void zend_unregister_ini_entries(int module_number)
+ZEND_API void zend_unregister_ini_entries(int module_number TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	zend_hash_apply_with_argument(registered_zend_ini_directives, (apply_func_arg_t) zend_remove_ini_entries, (void *) &module_number TSRMLS_CC);
 }
 
