@@ -939,9 +939,9 @@ fi
 
 	function write_ms_devstudio_dsp() {
     // TODO files should come from external list
+    ob_start();
 
-		$fp = fopen("{$this->name}/{$this->name}.dsp","w");
-		fwrite($fp,
+		echo
 '# Microsoft Developer Studio Project File - Name="'.$this->name.'" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
@@ -1031,14 +1031,14 @@ LINK32=link.exe
 
 # Name "'.$this->name.' - Win32 Release_TS"
 # Name "'.$this->name.' - Win32 Debug_TS"
-');
+';
 
 
-		fputs($fp,'
+		echo '
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-');
+';
 
 		foreach($this->files['c'] as $filename) {
 			if($filename{0}!='/' && $filename{0}!='.') {
@@ -1046,49 +1046,53 @@ LINK32=link.exe
 			}
 			$filename = str_replace("/","\\",$filename);
 
-			fputs($fp,"
+		 echo "
 # Begin Source File
 
 SOURCE=$filename
 # End Source File
-");
+";
 		}
 
-fputs($fp,'
+echo '
 # End Group
-');
+';
 
 
 
 
-fputs($fp,'
+echo '
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-');
+';
+
 		foreach($this->files['h'] as $filename) {
 			if($filename{0}!='/' && $filename{0}!='.') {
 				$filename = "./$filename";
 			}
 			$filename = str_replace("/","\\",$filename);
 
-			fputs($fp,"
+			echo "
 # Begin Source File
 
 SOURCE=$filename
 # End Source File
-");
+";
 		}
 
-fputs($fp,
+echo
 '# End Group
 # End Target
 # End Project
-');
+';
 
 
 
-fclose($fp);
+		$fp = fopen("{$this->name}/{$this->name}.dsp","wb");
+    fputs($fp, str_replace("\n","\r\n",ob_get_contents()));
+    fclose($fp);
+    ob_end_clean();
 	}
 
 // }}} 
