@@ -2164,6 +2164,9 @@ send_by_ref:
 								case IS_LONG:
 									zend_hash_index_del(ht, offset->value.lval);
 									break;
+								case IS_NULL:
+									zend_hash_del(ht,"",1);
+									break;
 								case IS_STRING:
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
 									break;
