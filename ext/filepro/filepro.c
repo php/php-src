@@ -159,23 +159,23 @@ BOOL WINAPI DllMain(HANDLE hModule,
                       DWORD  ul_reason_for_call, 
                       LPVOID lpReserved)
 {
-    switch( ul_reason_for_call ) {
-    case DLL_PROCESS_ATTACH:
-		if ((FPTls=TlsAlloc())==0xFFFFFFFF){
-			return 0;
-		}
-		break;    
-    case DLL_THREAD_ATTACH:
-		break;
-    case DLL_THREAD_DETACH:
-		break;
-	case DLL_PROCESS_DETACH:
-		if (!TlsFree(FPTls)){
-			return 0;
-		}
-		break;
-    }
-    return 1;
+	switch( ul_reason_for_call ) {
+		case DLL_PROCESS_ATTACH:
+			if ((FPTls=TlsAlloc())==0xFFFFFFFF) {
+				return 0;
+			}
+			break;    
+		case DLL_THREAD_ATTACH:
+			break;
+		case DLL_THREAD_DETACH:
+			break;
+		case DLL_PROCESS_DETACH:
+			if (!TlsFree(FPTls)) {
+				return 0;
+			}
+			break;
+	}
+	return 1;
 }
 #endif
 #endif
@@ -194,11 +194,11 @@ PHP_FUNCTION(filepro)
 {
 	pval *dir;
 	FILE *fp;
-	char workbuf[256]; /* FIX - should really be the max filename length */
+	char workbuf[MAXPATHLEN];
 	char readbuf[256];
 	char *strtok_buf = NULL;
 	int i;
-	FP_FIELD *new_field, *tmp;
+	FP_FIELD *new_field, *tmp, *next;
 	FP_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 1 || getParameters(ht, 1, &dir) == FAILURE) {
@@ -207,28 +207,43 @@ PHP_FUNCTION(filepro)
 
 	convert_to_string(dir);
 
-	/* FIX - we should really check and free these if they are used! */
-	FP_GLOBAL(fp_database) = NULL;
-    FP_GLOBAL(fp_fieldlist) = NULL;
-	FP_GLOBAL(fp_fcount) = -1;
-    FP_GLOBAL(fp_keysize) = -1;
+	/* free memory */
+	if (FP_GLOBAL(fp_database) != NULL) {
+		efree (FP_GLOBAL(fp_database));
+	}
 	
-	sprintf(workbuf, "%s/map", Z_STRVAL_P(dir));
-
+	/* free linked list of fields */
+	tmp = FP_GLOBAL(fp_fieldlist);
+	while (tmp != NULL) {
+		next = tmp->next;
+		efree(tmp);
+		tmp = next;
+	} 
+	
+	/* init the global vars */
+	FP_GLOBAL(fp_database) = NULL;
+	FP_GLOBAL(fp_fieldlist) = NULL;
+	FP_GLOBAL(fp_fcount) = -1;
+	FP_GLOBAL(fp_keysize) = -1;
+	
+	snprintf(workbuf, sizeof(workbuf), "%s/map", Z_STRVAL_P(dir));
+fp=fopen("/tmp/filepro","a+");if(fp){fprintf(fp,"workbuf:%s\n",workbuf);fclose(fp);}
 	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
 	}
+fp=fopen("/tmp/filepro","a+");if(fp){fprintf(fp,"2workbuf:%s\n",workbuf);fclose(fp);}
 	
 	if (php_check_open_basedir(workbuf TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
+fp=fopen("/tmp/filepro","a+");if(fp){fprintf(fp,"3workbuf:%s\n",workbuf);fclose(fp);}
 
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
 		php_error(E_WARNING, "filePro: cannot open map: [%d] %s",
 					errno, strerror(errno));
 		RETURN_FALSE;
 	}
-	if (!fgets(readbuf, 250, fp)) {
+	if (!fgets(readbuf, sizeof(readbuf), fp)) {
 		fclose(fp);
 		php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
 					errno, strerror(errno));
@@ -243,10 +258,10 @@ PHP_FUNCTION(filepro)
 	FP_GLOBAL(fp_keysize) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
 	php_strtok_r(NULL, ":", &strtok_buf);
 	FP_GLOBAL(fp_fcount) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
-    
-    /* Read in the fields themselves */
+
+	/* Read in the fields themselves */
 	for (i = 0; i < FP_GLOBAL(fp_fcount); i++) {
-		if (!fgets(readbuf, 250, fp)) {
+		if (!fgets(readbuf, sizeof(readbuf), fp)) {
 			fclose(fp);
 			php_error(E_WARNING, "filePro: cannot read map: [%d] %s",
 						errno, strerror(errno));
@@ -311,7 +326,7 @@ PHP_FUNCTION(filepro_rowcount)
 	recsize = FP_GLOBAL(fp_keysize) + 19; /* 20 bytes system info -1 to save time later */
 	
 	/* Now read the records in, moving forward recsize-1 bytes each time */
-	sprintf(workbuf, "%s/key", FP_GLOBAL(fp_database));
+	snprintf(workbuf, sizeof(workbuf), "%s/key", FP_GLOBAL(fp_database));
 
 	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
@@ -333,7 +348,7 @@ PHP_FUNCTION(filepro_rowcount)
 			fseek(fp, recsize, SEEK_CUR);
 		}
 	}
-    fclose(fp);
+	fclose(fp);
 	
 	RETVAL_LONG(records);
 }
@@ -496,12 +511,12 @@ PHP_FUNCTION(filepro_fieldcount)
 PHP_FUNCTION(filepro_retrieve)
 {
 	pval *rno, *fno;
-    FP_FIELD *lp;
-    FILE *fp;
-    char workbuf[MAXPATHLEN];
-	char readbuf[1024]; /* FIX - Work out better buffering! */
-    int i, fnum, rnum;
-    long offset;
+	FP_FIELD *lp;
+	FILE *fp;
+	char workbuf[MAXPATHLEN];
+	char *readbuf;
+	int i, fnum, rnum;
+	long offset;
 	FP_TLS_VARS;
 
 	if (ZEND_NUM_ARGS() != 2 || getParameters(ht, 2, &rno, &fno) == FAILURE) {
@@ -520,22 +535,22 @@ PHP_FUNCTION(filepro_retrieve)
 	fnum = Z_LVAL_P(fno);
 	rnum = Z_LVAL_P(rno);
     
-    if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
-        php_error(E_WARNING, "filepro: parameters out of range");
+	if (rnum < 0 || fnum < 0 || fnum >= FP_GLOBAL(fp_fcount)) {
+		php_error(E_WARNING, "filepro: parameters out of range");
 		RETURN_FALSE;
-    }
+	}
     
-    offset = (rnum + 1) * (FP_GLOBAL(fp_keysize) + 20) + 20; /* Record location */
-    for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp && i < fnum; lp = lp->next, i++) {
-        offset += lp->width;
-    }
-    if (!lp) {
-        php_error(E_WARNING, "filePro: cannot locate field");
+	offset = (rnum + 1) * (FP_GLOBAL(fp_keysize) + 20) + 20; /* Record location */
+	for (i = 0, lp = FP_GLOBAL(fp_fieldlist); lp && i < fnum; lp = lp->next, i++) {
+		offset += lp->width;
+	}
+	if (!lp) {
+		php_error(E_WARNING, "filePro: cannot locate field");
 		RETURN_FALSE;
-    }
+	}
     
 	/* Now read the record in */
-	sprintf(workbuf, "%s/key", FP_GLOBAL(fp_database));
+	snprintf(workbuf, sizeof(workbuf), "%s/key", FP_GLOBAL(fp_database));
 
 	if (PG(safe_mode) && (!php_checkuid(workbuf, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
 		RETURN_FALSE;
@@ -548,19 +563,22 @@ PHP_FUNCTION(filepro_retrieve)
 	if (!(fp = VCWD_FOPEN(workbuf, "r"))) {
 		php_error(E_WARNING, "filePro: cannot open key: [%d] %s",
 					errno, strerror(errno));
-	    fclose(fp);
+		fclose(fp);
 		RETURN_FALSE;
 	}
-    fseek(fp, offset, SEEK_SET);
+	fseek(fp, offset, SEEK_SET);
+	
+	readbuf = emalloc (lp->width+1);
 	if (fread(readbuf, lp->width, 1, fp) != 1) {
-        php_error(E_WARNING, "filePro: cannot read data: [%d] %s",
+        	php_error(E_WARNING, "filePro: cannot read data: [%d] %s",
 					errno, strerror(errno));
-	    fclose(fp);
+		efree(readbuf);
+		fclose(fp);
 		RETURN_FALSE;
-    }
-    readbuf[lp->width] = '\0';
-    fclose(fp);
-	RETURN_STRING(readbuf, 1);
+	}
+	readbuf[lp->width] = '\0';
+	fclose(fp);
+	RETURN_STRING(readbuf, 0);
 }
 /* }}} */
 
