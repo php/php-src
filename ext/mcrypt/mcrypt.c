@@ -251,6 +251,7 @@ static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 #if HAVE_LIBMCRYPT24
 	MCRYPT td = (MCRYPT) rsrc->ptr;
+	mcrypt_generic_deinit(td);
 	mcrypt_module_close (td);
 #endif
 }
@@ -499,6 +500,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	}
 	memcpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
+	mcrypt_generic_deinit(td);
 	result = mcrypt_generic_init (td, key_s, key_size, iv_s);
 
 	/* If this function fails, close the mcrypt module to prevent crashes
