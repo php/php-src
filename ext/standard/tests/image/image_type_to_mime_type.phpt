@@ -25,7 +25,9 @@ image_type_to_mime_type()
 	var_dump($result);
 ?>
 --EXPECT--
-array(9) {
+array(11) {
+  ["test13pix.swf"]=>
+  string(29) "application/x-shockwave-flash"
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
   ["test1pix.jpc"]=>
@@ -42,6 +44,8 @@ array(9) {
   string(9) "image/png"
   ["test4pix.psd"]=>
   string(9) "image/psd"
+  ["test4pix.swf"]=>
+  string(29) "application/x-shockwave-flash"
   ["test4pix.tif"]=>
   string(10) "image/tiff"
 }
