@@ -568,6 +568,9 @@ static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, 
 		len = snprintf(hdr_line, sizeof(hdr_line),
 					   "Host: %s\r\n", resource->host);
 	}
+	if(len > sizeof(hdr_line) - 1) {
+		len = sizeof(hdr_line) - 1;
+	}
 	if (len > 0) {
 		SOCK_WRITE(hdr_line, *socketd);
 	}
