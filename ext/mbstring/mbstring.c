@@ -84,10 +84,19 @@ SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
 
 static sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE,	sizeof(DEFAULT_POST_CONTENT_TYPE)-1,	sapi_read_standard_form_data,	php_mbstr_post_handler },
-	{ MULTIPART_CONTENT_TYPE,		sizeof(MULTIPART_CONTENT_TYPE)-1,		sapi_read_standard_form_data,	rfc1867_post_handler },
-	{ NULL, 0, NULL }
+	{ MULTIPART_CONTENT_TYPE,	sizeof(MULTIPART_CONTENT_TYPE)-1,	NULL,	rfc1867_post_handler },
+	{ NULL, 0, NULL, NULL }
 };
 #endif
+
+static struct mb_overload_def mb_ovld[] = {
+	{MB_OVERLOAD_MAIL, "mail", "mb_send_mail", NULL},
+	{MB_OVERLOAD_STRING, "strlen", "mb_strlen", NULL},
+	{MB_OVERLOAD_STRING, "strpos", "mb_strpos", NULL},
+	{MB_OVERLOAD_STRING, "strrpos", "mb_strrpos", NULL},
+	{MB_OVERLOAD_STRING, "substr", "mb_substr", NULL},
+	{0, NULL, NULL, NULL}
+}; 
 
 function_entry mbstring_functions[] = {
 	PHP_FE(mb_language,					NULL)
@@ -408,7 +417,6 @@ php_mbstring_init_globals(zend_mbstring_globals *pglobals)
 	pglobals->current_filter_illegal_mode = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
 	pglobals->current_filter_illegal_substchar = 0x3f;	/* '?' */
 	pglobals->func_overload = 0;
-	pglobals->orig_mail = (zend_function *)NULL;
 	pglobals->outconv = NULL;
 }
 
@@ -445,6 +453,8 @@ PHP_RINIT_FUNCTION(mbstring)
 {
 	int n, *list, *entry;
 	zend_function *func;
+	struct mb_overload_def *p;
+	TSRMLS_FETCH();
 
 	MBSTRG(current_language) = MBSTRG(language);
 	MBSTRG(current_internal_encoding) = MBSTRG(internal_encoding);
@@ -471,17 +481,30 @@ PHP_RINIT_FUNCTION(mbstring)
 		}
 	}
 
- 	/* override original mail() function with mb_send_mail(). */
- 	if ((MBSTRG(func_overload) & MB_OVERLOAD_MAIL) == MB_OVERLOAD_MAIL &&
-		!MBSTRG(orig_mail)){ 
-		zend_hash_find(EG(function_table), "mb_send_mail", sizeof("mb_send_mail"), (void **)&func);
-		zend_hash_find(EG(function_table), "mail", sizeof("mail"), (void **)&MBSTRG(orig_mail));
-		if (zend_hash_del(EG(function_table), "mail",sizeof("mail")) != FAILURE) {
-			zend_hash_add(EG(function_table), "mail",sizeof("mail"),func, sizeof(zend_function), NULL);
-		} else {
- 			zend_error(E_ERROR, "mbtring couldn't replace mail().");
+ 	/* override original function. */
+	if (MBSTRG(func_overload)){
+		p = &(mb_ovld[0]);
+		
+		while (p->type > 0) {
+			if ((MBSTRG(func_overload) & p->type) == p->type && !(p->orig)){
+				if(zend_hash_find(EG(function_table), p->ovld_func, strlen(p->ovld_func)+1 , 
+								  (void **)&func) != SUCCESS) {
+					php_error(E_ERROR, "mbstring couldn't found function %s.", p->ovld_func);
+				}
+
+				if (zend_hash_find(EG(function_table), p->orig_func, 
+								   strlen(p->orig_func)+1, (void **)&(p->orig)) != SUCCESS) {
+					php_error(E_ERROR, "mbstring couldn't found function %s.", p->orig_func);
+				}
+				
+				if (zend_hash_update(EG(function_table), p->orig_func, strlen(p->orig_func)+1,
+									 func, sizeof(zend_function), NULL) == FAILURE){
+					php_error(E_ERROR, "mbstring couldn't replace function %s.", p->orig_func);
+				}
+			}
+			p++;
 		}
- 	}
+	}
 
 	return SUCCESS;
 }
