@@ -120,7 +120,7 @@ static int  _##name##_PutProperty(zend_property_reference * pPropertyReference, 
 	}\
 	else\
 	{\
-		zend_error(E_ERROR, "(Satellite) Can't set members in class");\
+		zend_error(E_WARNING, "(Satellite) Can't set members in class");\
 	}\
 	return result;\
 }
@@ -146,7 +146,7 @@ static zval _##name##_GetProperty(zend_property_reference * pPropertyReference)\
 	}\
 	else\
 	{\
-		zend_error(E_ERROR, "(Satellite) Can't get members in class");\
+		zend_error(E_WARNING, "(Satellite) Can't get members in class");\
 	}\
 	return value;\
 }

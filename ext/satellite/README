@@ -36,10 +36,12 @@ Before linking Apache you must do either of these things:
 
 What version of ORBit is required?
 ----------------------------------
-You need the CVS version of ORBit to use Satellite!
+You need a CVS version of ORBit to use Satellite!
 
 This does NOT work with ORBit 0.5.3 or earlier.
 
+The latest version of ORBit in CVS requires glib-2.0 and has not been tested.
+Because of this we checkout a CVS version from a know safe date.
 
 How to install ORBit from CVS
 -----------------------------
@@ -48,12 +50,37 @@ How to install ORBit from CVS
 
     CVS root:   :pserver:anonymous@anoncvs.gnome.org:/cvs/gnome
     Password:   Empty string
-    Directory:	ORBit
+    Directory:  ORBit
+    Safe date:  2000-09-02 (yyyy-mm-dd)
 
     More about GNOME:s CVS on http://www.gnome.org/start/source.html
+
+    Sample session at command line to checkout:
+
+    $ export CVSROOT=":pserver:anonymous@anoncvs.gnome.org:/cvs/gnome"
+    
+    $ cvs login
+    (Logging in to anonymous@anoncvs.gnome.org)
+    CVS password:
+    
+    $ cvs checkout -D "2000-09-02" ORBit
+    cvs server: Updating ORBit
+    .
+    .
+    .
 
 (2) Set the environment variable CERTIFIED_GNOMIE to whatever you like.
 
 (3) Run ./autogen.sh, gmake och gmake install
 
+
+How to install ORBit from snapshot
+----------------------------------
+
+(1) Download snapshot from one of these addresses:
+
+    http://download.2good.nu/satellite/ORBit-20000902.tgz
+    http://www.2good.com/satellite/ORBit-20000902.tgz
+
+(2) Run ./configure, gmake and gmake install
 
