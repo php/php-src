@@ -2718,9 +2718,6 @@ void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC)
 		SET_UNUSED(opline->op2);
 		opline->op2.u.constant.value.lval = type;
 		*result = opline->result;
-		if (type==ZEND_REQUIRE) {
-			opline->result.u.EA.type |= EXT_TYPE_UNUSED;
-		}
 	}
 	zend_do_extended_fcall_end(TSRMLS_C);
 }
