@@ -953,9 +953,8 @@ PHP_FUNCTION(notes_unread)
 STATUS near pascal GetUniqueFileName(char *Drive, char *Ext, char *FileName);
 
 /* {{{ proto object notes_header_info(string server, string mailbox, int msg_number)
-   Open the message msg_number in the specified mailbox on the specified server (leave server
-	blank for local).
-	
+   Opens the message msg_number in the specified mailbox on the specified server (leave server blank for local) */
+/*	
 	Elements:
 
 		originator (Contains orignal message sender. Relevant only when forwarded messages)
@@ -967,7 +966,8 @@ STATUS near pascal GetUniqueFileName(char *Drive, char *Ext, char *FileName);
 		status (blank if delivered, otherwise contains failure reason)
 		priority H: High N: Normal L: Low
 		receipt 1: Yes 0: No
-		subject*/
+		subject
+*/
 PHP_FUNCTION(notes_header_info)
 {
 
@@ -2216,7 +2216,7 @@ char    ItemName[MAX_ITEM_NAME_LEN];/* Zero terminated item name */
 
 
 /* {{{ proto bool notes_list_msgs(string db)
- */
+   ??? */
 PHP_FUNCTION(notes_list_msgs)
 {
 
