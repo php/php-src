@@ -460,6 +460,7 @@ allow_url_fopen = On
 ;extension=php_oci8.dll
 ;extension=php_openssl.dll
 ;extension=php_oracle.dll
+;extension=php_overload.dll
 ;extension=php_pdf.dll
 ;extension=php_pgsql.dll
 ;extension=php_printer.dll
