@@ -59,6 +59,7 @@ typedef int ts_rsrc_id;
 # define MUTEX_T PISync *
 #endif
 
+typedef void (*ts_allocate_ctor)(void *);
 
 #define THREAD_HASH_OF(thr,ts)  thr%ts
 
@@ -71,7 +72,7 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 TSRM_API void tsrm_shutdown();
 
 /* allocates a new thread-safe-resource id */
-TSRM_API ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), void (*dtor)(void *resource));
+TSRM_API ts_rsrc_id ts_allocate_id(size_t size, ts_allocate_ctor ctor, void (*dtor)(void *resource));
 
 /* fetches the requested resource for the current thread */
 TSRM_API void *ts_resource(ts_rsrc_id id);
