@@ -43,6 +43,7 @@
 #include "ext/standard/php3_standard.h"
 #include "ext/gd/php3_gd.h"
 #include "ext/dbase/dbase.h"
+#include "ext/odbc/php3_odbc.h"
 
 #include "functions/php3_ifx.h"
 #include "functions/php3_ldap.h"
@@ -52,19 +53,15 @@
 #include "functions/php3_oci8.h"
 #include "functions/oracle.h"
 #include "functions/php3_pgsql.h"
-#include "functions/php3_velocis.h"
 #include "functions/php3_sybase.h"
 #include "functions/php3_sybase-ct.h"
 #include "functions/imap.h"
 #include "functions/dl.h"
 #include "functions/head.h"
 #include "functions/post.h"
-#include "functions/php3_solid.h"
-#include "functions/adabasd.h"
 #include "functions/hw.h"
 #include "functions/filepro.h"
 #include "functions/db.h"
-#include "functions/php3_unified_odbc.h"
 #include "dl/snmp/php3_snmp.h"
 #include "functions/php3_zlib.h"
 #include "functions/php3_COM.h"
@@ -96,7 +93,6 @@ zend_module_entry *php3_builtin_modules[] =
 	pgsql_module_ptr,
 	ifx_module_ptr,
 	ldap_module_ptr,
-	velocis_module_ptr,
 	filepro_module_ptr,
 	sybase_module_ptr,
 	sybct_module_ptr,
@@ -104,8 +100,6 @@ zend_module_entry *php3_builtin_modules[] =
 	dbase_module_ptr,
 	hw_module_ptr,
 	regexp_module_ptr,
-	solid_module_ptr,
-	adabas_module_ptr,
 	gd_module_ptr,
 	oci8_module_ptr,
 	oracle_module_ptr,

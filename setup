@@ -246,24 +246,6 @@ define_option with-oracle 'Oracle support?' yesnodir \
     Oracle environment, enter what $ORACLE_HOME is usually set to here.\n
     More info about Oracle can be found at http://www.oracle.com/.'
 
-define_option with-iodbc 'iODBC support?' yesnodir \
-    'no /usr/local iODBC install' \
-'    Whether to build PHP with iODBC support.  This feature was first\n
-    developed for iODBC Driver Manager, a freely redistributable ODBC\n
-    driver manager which runs under many flavors of UNIX.\n
-    More info about iODBC can be found on the FreeODBC Pages at \n
-    http://users.ids.net/~bjepson/freeODBC/.'
-
-define_option with-openlink 'OpenLink ODBC support?' yesnodir \
-    'no /usr/local/openlink OpenLink install' \
-'    Whether to build PHP with OpenLink ODBC support.  See
-     http://www.openlinksw.com/ for more information.'
-
-define_option with-adabas 'Adabas D support?' yesnodir \
-    'no /usr/local Adabas D install root' \
-'    Whether to build with Adabas D support.\n
-    More info about Adabas D can be found at http://www.adabas.com/.'
-
 define_option with-sybase 'Sybase support?' yesnodir \
     'no /home/sybase Sybase install' \
 '     Whether to build PHP with Sybase support (DBLib only).\n
@@ -290,18 +272,6 @@ define_option with-pgsql 'PostgreSQL support?' yesnodir \
 '    Whether to build PHP with PostgreSQL support.\n
     More info about PostgreSQL can be found at\n
     http://www.postgreSQL.org/.'
-
-define_option with-solid 'Solid support?' yesnodir \
-    'no /usr/local/solid Solid install' \
-'     Whether to build PHP with Solid support.\n
-     More information about Solid can be found at http://www.solidtech.com/.'
-
-define_option with-empress 'Empress support?' yesnodir \
-    "no $EMPRESSPATH Empress home" \
-'    Whether to build PHP with Empress support.  Has been confirmed to
-    work with Empress Version 8.10.  If you have not set up your
-    Empress environment, enter what $EMPRESSPATH is usually set to here.
-    More info about Empress can be found at http://www.empress.com/.'
 
 define_option with-informix 'Informix support?' yesnodir \
     "no $INFORMIXDIR Informix home" \
@@ -330,32 +300,6 @@ define_option with-imap 'IMAP support?' yesnodir \
 '     Whether to build with IMAP (Internet Message Access Protocol)\n
      support.\n
      More information about LDAP can be found in RFC1777 and RFC1778.'
-
-define_option with-velocis 'Velocis support?' yesnodir \
-    'no /usr/local/velocis Velocis install' \
-'     Whether to build PHP with Velocis support.\n
-     More information about Velocis can be found at http://www.raima.com/.'
-
-define_option with-custom-odbc 'custom ODBC support?' yesnodir \
-    'no /usr/local CODBC install' \
-'    Whether to build PHP with CODBC support.  This feature was first
-    developed for Sybase SQL Anywhere 5.5 on QNX, but may be used for
-    any unknown ODBC driver on all flavors of UNIX.'
-
-if test "$option_value_with_iodbc" != "no" -o \
-        "$option_value_with_solid" != "no" -o \
-        "$option_value_with_adabas" != "no" -o \
-        "$option_value_with_velocis" != "no" -o \
-        "$option_value_with_custom_odbc" != "no"
-then
-define_option enable-unified-odbc 'Enable unified ODBC support?' yesno yes \
-'    Whether to enabled the unified ODBC support.  This is a database\n
-    module that compiles with the C API of several DBMSes that happen to\n
-    use ODBC as their C-API.  Has been tested with iODBC, Solid, Adabas D,\n
-    Empress, and Sybase SQL Anywhere. Requires that some one (and only one)\n
-    specific ODBC module is enabled, or some custom ODBC library specified\n
-    instead.'
-fi
 
 define_option with-filepro 'filePro support? ' yesno no \
 '    Whether to use the bundled filePro library.  Read-access only.'

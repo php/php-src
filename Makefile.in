@@ -68,22 +68,21 @@ OBJS = main.o internal_functions.o snprintf.o php3_sprintf.o \
        safe_mode.o fopen-wrappers.o php3_realpath.o alloca.o output.o \
        php_ini.o
 
-FUNCTIONS_SOURCE = functions/adabasd.c functions/apache.c functions/fhttpd.c \
+FUNCTIONS_SOURCE = functions/apache.c functions/fhttpd.c \
        functions/crypt.c functions/db.c functions/dl.c functions/filepro.c \
        functions/head.c functions/imap.c functions/mime.c \
        functions/msql.c functions/mysql.c \
        functions/oracle.c functions/oci8.c functions/pgsql.c \
-       functions/post.c functions/solid.c functions/sybase.c \
+       functions/post.c functions/sybase.c \
        functions/sybase-ct.c @BCMATH_SRC@ functions/xml.c \
-       functions/unified_odbc.c functions/ldap.c functions/velocis.c \
-       functions/zlib.c functions/COM.c functions/ifx.c \
+       functions/ldap.c functions/zlib.c functions/COM.c functions/ifx.c \
        functions/pdf.c functions/hw.c functions/hg_comm.c functions/dlist.c \
        functions/fdf.c functions/snmp.c functions/interbase.c \
        functions/sysvsem.c functions/sysvshm.c functions/dav.c
 
 FUNCTIONS = $(FUNCTIONS_SOURCE:.c=.o)
 PHPLIBS = -L@top_srcdir@/libzend -lzend -Lext -lphpext
-LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @REGEX_LIB@ @DBM_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @IODBC_LFLAGS@ @IODBC_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @ADA_LFLAGS@ @ADA_LIBS@ @SOLID_LIBS@ @EMPRESS_LIBS@ @OPENLINK_LFLAGS@ @OPENLINK_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @VELOCIS_LIBS@ @CODBC_LFLAGS@ @CODBC_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
+LIBS = $(PHPLIBS) $(EXTRA_LIBS) @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @FHTTPD_LIB@ @REGEX_LIB@ @DBM_LIB@ @ORACLE_LFLAGS@ @ORACLE_LIBS@ @SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@ @MYSQL_LFLAGS@ @MYSQL_LIBS@ @MSQL_LFLAGS@ @MSQL_LIBS@ @PGSQL_LFLAGS@ @PGSQL_LIBS@ @LDAP_LFLAGS@ @LDAP_LIBS@ @IMAP_LIBS@ @ZLIB_LIBS@ @PDFLIB_LIBS@ @FDFLIB_LIBS@ @IFX_LFLAGS@ @IFX_LIBS@ @SNMP_LFLAGS@ @SNMP_LIBS@ @IBASE_LFLAGS@ @IBASE_LIBS@ @XML_LIBS@ @LIBS@
 
 all: $(BINNAME)
 

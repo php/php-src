@@ -1023,99 +1023,6 @@ AC_SUBST(ORACLE_HOME)
 AC_SUBST(ORACLE_VERSION)
 
 
-AC_MSG_CHECKING(for iODBC support)
-AC_ARG_WITH(iodbc,
-[  --with-iodbc[=DIR]      Include iODBC support.  DIR is the iODBC base
-                          install directory, defaults to /usr/local.],
-[
-	if test "$withval" = "yes"; then
-	  withval=/usr/local
-	fi
-	if test "$withval" != "no"; then
-
-	  IODBC_INCDIR=$withval/include
-	  IODBC_LIBDIR=$withval/lib
-	  IODBC_LFLAGS=-L$IODBC_LIBDIR
-	  IODBC_INCLUDE=-I$IODBC_INCDIR
-	  IODBC_LIBS=-liodbc
-      UODBC_DEFAULT=yes
-
-	  AC_DEFINE(HAVE_IODBC)
-
-	  AC_MSG_RESULT(yes)
-
-	fi
-],[
-	AC_MSG_RESULT(no)
-])
-AC_SUBST(IODBC_LIBS)
-AC_SUBST(IODBC_LFLAGS)
-dnl## AC_SUBST(IODBC_INCLUDE)
-INCLUDES="$INCLUDES $IODBC_INCLUDE"
-
-
-AC_MSG_CHECKING(for OpenLink ODBC support)
-AC_ARG_WITH(openlink,
-[  --with-openlink[=DIR]   Include OpenLink ODBC support.  DIR is the
-                          OpenLink base install directory, defaults to
-                          /usr/local/openlink.],
-[
-	if test "$withval" = "yes"; then
-	  withval=/usr/local/openlink
-	fi
-	if test "$withval" != "no"; then
-
-	  OPENLINK_INCDIR=$withval/odbcsdk/include
-	  OPENLINK_LIBDIR=$withval/odbcsdk/lib
-	  OPENLINK_LFLAGS=-L$OPENLINK_LIBDIR
-	  OPENLINK_INCLUDE=-I$OPENLINK_INCDIR
-	  OPENLINK_LIBS=-liodbc
-      UODBC_DEFAULT=yes
-
-	  AC_DEFINE(HAVE_OPENLINK)
-
-	  AC_MSG_RESULT(yes)
-
-	fi
-],[
-	AC_MSG_RESULT(no)
-])
-AC_SUBST(OPENLINK_LIBS)
-AC_SUBST(OPENLINK_LFLAGS)
-dnl## AC_SUBST(OPENLINK_INCLUDE)
-INCLUDES="$INCLUDES $OPENLINK_INCLUDE"
-
-
-AC_MSG_CHECKING(for Adabas support)
-AC_ARG_WITH(adabas,
-[  --with-adabas[=DIR]     Include Adabas D support.  DIR is the Adabas base
-                          install directory, defaults to /usr/local.],
-[
-  if test "$withval" = "yes"; then
-    withval=/usr/local
-  fi
-  if test "$withval" != "no"; then
-    ADA_INCDIR=$withval/incl
-    ADA_LIBDIR=$withval/lib
-    ADA_LFLAGS=-L$ADA_LIBDIR
-    ADA_INCLUDE=-I$ADA_INCDIR
-    ADA_LIBS="${ADA_LIBDIR}/odbclib.a -lsqlrte -lsqlptc"
-    UODBC_DEFAULT=yes
-
-    AC_DEFINE(HAVE_ADABAS)
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
-AC_SUBST(ADA_LIBS)
-AC_SUBST(ADA_LFLAGS)
-dnl## AC_SUBST(ADA_INCLUDE)
-INCLUDES="$INCLUDES $ADA_INCLUDE"
-
-
 AC_MSG_CHECKING(for Sybase support)
 AC_ARG_WITH(sybase,
 [  --with-sybase[=DIR]     Include Sybase-DB support.  DIR is the Sybase home
@@ -1309,72 +1216,6 @@ dnl## AC_SUBST(PGSQL_INCLUDE)
 INCLUDES="$INCLUDES $PGSQL_INCLUDE"
 
 
-AC_MSG_CHECKING(for Solid support)
-AC_ARG_WITH(solid,
-[  --with-solid[=DIR]      Include Solid support.  DIR is the Solid base
-                          install directory, defaults to /usr/local/solid],
-[
-  if test "$withval" != "no"; then
-  	if test "$withval" = "yes"; then
-	    SOLID_INCDIR=/usr/local/solid/include
-   		SOLID_LIBDIR=/usr/local/solid/lib
-   	else
-   		SOLID_INCDIR=$withval/include
-   		SOLID_LIBDIR=$withval/lib
-   	fi
-    SOLID_INCLUDE=-I$SOLID_INCDIR
-    UODBC_DEFAULT=yes
-
-    AC_DEFINE(HAVE_SOLID)
-
-    AC_MSG_RESULT(yes)
-  else
-  	AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
-if test "$SOLID_LIBDIR" != ""; then
-  AC_FIND_SOLID_LIBS($SOLID_LIBDIR)
-fi
-dnl## AC_SUBST(SOLID_INCLUDE)
-AC_SUBST(SOLID_LIBS)
-INCLUDES="$INCLUDES $SOLID_INCLUDE"
-
-
-AC_MSG_CHECKING(for Empress support)
-AC_ARG_WITH(empress,
-[  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
-                          install directory, defaults to \$EMPRESSPATH],
-[
-  if test "$withval" != "no"; then
-        if test "$withval" = "yes"; then
-                EMPRESS_INCDIR=$EMPRESSPATH/odbccl/include
-                EMPRESS_LIBDIR=$EMPRESSPATH/odbccl/lib
-        else
-                EMPRESS_INCDIR=$withval/include
-                EMPRESS_LIBDIR=$withval/lib
-        fi
-    EMPRESS_INCLUDE=-I$EMPRESS_INCDIR
-    UODBC_DEFAULT=yes
-
-    AC_DEFINE(HAVE_EMPRESS)
-
-    AC_MSG_RESULT(yes)
-  else
-        AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
-if test "$EMPRESS_LIBDIR" != ""; then
-  AC_FIND_EMPRESS_LIBS($EMPRESS_LIBDIR)
-fi
-AC_SUBST(EMPRESS_LIBS)
-dnl## AC_SUBST(EMPRESS_INCLUDE)
-INCLUDES="$INCLUDES $EMPRESS_INCLUDE"
-
-
 AC_MSG_CHECKING(for LDAP support)
 AC_ARG_WITH(ldap,
 [  --with-ldap[=DIR]       Include LDAP support.  DIR is the LDAP base
@@ -1439,48 +1280,6 @@ AC_SUBST(SNMP_LIBS)
 AC_SUBST(SNMP_LFLAGS)
 dnl## AC_SUBST(SNMP_INCLUDE)
 INCLUDES="$INCLUDES $SNMP_INCLUDE"
-
-
-AC_MSG_CHECKING(for Velocis support)
-AC_ARG_WITH(velocis,
-[  --with-velocis[=DIR]    Include Velocis support.  DIR is the Velocis
-			  base install directory, defaults to /usr/local/velocis.],
-[
-  if test "$withval" != "no"; then
-    VELOCIS_OS=`uname`
-  	if test "$withval" = "yes"; then
-	    VELOCIS_INCDIR=/usr/local/velocis/include
-		VELOCIS_LIBDIR=/usr/local/velocis
-   	else
-		VELOCIS_INCDIR=$withval/include
-		VELOCIS_LIBDIR=$withval
-   	fi
-    VELOCIS_INCLUDE=-I$VELOCIS_INCDIR
-    VELOCIS_LIBDIR="$VELOCIS_LIBDIR/bin"
-    VELOCIS_LIBS="-l_rdbc -l_sql"
-    if test $VELOCIS_OS = "FreeBSD"; then
-	VELOCIS_LIBS="$VELOCIS_LIBDIR/../lib/rdscli.a -lcompat"
-    fi
-    if test $VELOCIS_OS = "BSD/OS"; then
-	VELOCIS_LIBS="$VELOCIS_LIBDIR/../lib/rdscli.a -lcompat"
-    fi
-    old_CFLAGS=$CFLAGS; old_LDFLAGS=$LDFLAGS
-	CFLAGS="$CFLAGS $VELOCIS_INCLUDE"
-	LDFLAGS="$LDFLAGS $VELOCIS_LIBS"
-    UODBC_DEFAULT=yes
-
-    AC_DEFINE(HAVE_VELOCIS)
-    AC_MSG_RESULT(yes)
-  else
-  	AC_MSG_RESULT(no)
-  fi
-],[
-  AC_MSG_RESULT(no)
-])
-AC_SUBST(VELOCIS_LIBS)
-AC_SUBST(VELOCIS_LFLAGS)
-dnl## AC_SUBST(VELOCIS_INCLUDE)
-INCLUDES="$INCLUDES $VELOCIS_INCLUDE"
 
 
 AC_MSG_CHECKING(for Informix support)
@@ -1585,46 +1384,6 @@ AC_SUBST(IBASE_LIBS)
 AC_SUBST(IBASE_LFLAGS)
 dnl## AC_SUBST(IBASE_INCLUDE)
 INCLUDES="$INCLUDES $IBASE_INCLUDE"
-
-
-AC_MSG_CHECKING(for a custom ODBC support)
-AC_ARG_WITH(custom-odbc,
-[  --with-custom-odbc[=DIR]      Include a user defined ODBC support.
-                          The DIR is ODBC install base directory, 
-                          which defaults to /usr/local.
-                          Make sure to define CUSTOM_ODBC_LIBS and
-                          have some odbc.h in your include dirs.
-                          E.g., you should define following for 
-                          Sybase SQL Anywhere 5.5.00 on QNX, prior to
-                          run configure script:
-                              CFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
-                              LDFLAGS=-lunix
-                              CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\".],
-[
-	if test "$withval" = "yes"; then
-	  withval=/usr/local
-	fi
-	if test "$withval" != "no"; then
-
-	  CODBC_INCDIR=$withval/include
-	  CODBC_LIBDIR=$withval/lib
-	  CODBC_LFLAGS=-L$CODBC_LIBDIR
-	  CODBC_INCLUDE=-I$CODBC_INCDIR
-	  CODBC_LIBS=$CUSTOM_ODBC_LIBS
-      UODBC_DEFAULT=yes
-
-	  AC_DEFINE(HAVE_CODBC)
-
-	  AC_MSG_RESULT(yes)
-
-	fi
-],[
-	AC_MSG_RESULT(no)
-])
-AC_SUBST(CODBC_LIBS)
-AC_SUBST(CODBC_LFLAGS)
-dnl## AC_SUBST(CODBC_INCLUDE)
-INCLUDES="$INCLUDES $CODBC_INCLUDE"
 
 
 AC_MSG_CHECKING(for Hyperwave support)
@@ -1803,43 +1562,6 @@ AC_ARG_WITH(mod-dav,
   AC_DEFINE(HAVE_MOD_DAV, 0)
 ])
 AC_SUBST(MOD_DAV_CFLAGS)
-
-
-AC_MSG_CHECKING(whether to enable unified ODBC support)
-AC_ARG_ENABLE(unified-odbc,
-[  --disable-unified-odbc  Disable unified ODBC support. Only applicable if
-                          iODBC, Adabas, Solid, Velocis or a custom ODBC
-                          interface is enabled.],
-[
-  if test "$enableval" = "no"; then
-    AC_DEFINE(HAVE_UODBC, 0)
-    AC_MSG_RESULT(no)
-  else
-    if test "$with_solid" != ""; then
-      UODBC_TYPE=solid
-    elif test "$with_iodbc" != ""; then
-      UODBC_TYPE=iodbc
-    elif test "$with_adabas" != ""; then
-      UODBC_TYPE=adabas
-    elif test "$with_velocis" != ""; then
-      UODBC_TYPE=velocis
-    elif test "$with_custom_odbc" != ""; then
-      UODBC_TYPE=custom
-    else
-      AC_MSG_ERROR([no ODBC library!  Include Solid, iODBC, Velocis, Adabas D or a custom ODBC support.])
-    fi
-    AC_DEFINE(HAVE_UODBC, 1)
-    AC_MSG_RESULT([yes, using $UODBC_TYPE])
-  fi
-],[
-  if test "$UODBC_DEFAULT" = "yes"; then
-  	AC_DEFINE(HAVE_UODBC, 1)
-  	AC_MSG_RESULT(yes)
-  else
-  	AC_DEFINE(HAVE_UODBC, 0)
-  	AC_MSG_RESULT(no)
-  fi
-])
 
 
 AC_MSG_CHECKING(whether to enable System V semaphore support)
