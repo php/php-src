@@ -779,12 +779,13 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
 		}
-#ifdef ZTS
-		tsrm_shutdown();
-#endif
 	} zend_catch {
 		exit_status = -1;
 	} zend_end_try();
+
+#ifdef ZTS
+	tsrm_shutdown();
+#endif
 
 	return exit_status;
 }
