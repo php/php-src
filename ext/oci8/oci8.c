@@ -3118,11 +3118,11 @@ PHP_FUNCTION(ocisavelob)
 
 			if (offparam == -1) {
 				offset = curloblen;
-			} else if (offparam >= curloblen) {
+			} else if ((ub4)offparam >= curloblen) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset is bigger than current LOB-Size - appending");
 				offset = curloblen;
 			} else {
-				offset = offparam;
+				offset = (ub4)offparam;
 			}
 		} else if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 			WRONG_PARAM_COUNT;
@@ -3136,6 +3136,10 @@ PHP_FUNCTION(ocisavelob)
 			RETURN_FALSE;
 		}
 
+		if (offset <= 0) {
+			offset = 1;
+		}
+		
 		CALL_OCI_RETURN(connection->error, OCILobWrite(
 					connection->pServiceContext, 
 					connection->pError,
