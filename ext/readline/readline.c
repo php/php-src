@@ -377,7 +377,7 @@ static char *_readline_command_generator(char *text,int state)
 		}
 	}
 
-	return NULL;
+	return strdup("");
 }
 
 static zval *_readline_string_zval(const char *str)
