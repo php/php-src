@@ -1,3 +1,81 @@
+2001-09-05  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/rand.c: Fix ts build
+
+
+    * ext/standard/rand.c:
+    Straight out da bronx, I be using zend_parse_parameters()
+
+
+    * ext/standard/rand.c: stray tabs and spaces
+
+    * ext/standard/rand.c: change range macro semantics
+
+
+    * ext/standard/rand.c: remove inline
+
+    * ext/standard/rand.c:
+    a bit of api cleanup...  move range stuff into a macro (properly :)
+
+2001-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-recommended: revert bad commit
+
+    * ext/standard/basic_functions.h
+      ext/standard/crypt.c
+      ext/standard/lcg.c
+      ext/standard/php_crypt.h
+      ext/standard/php_math.h
+      ext/standard/php_rand.h
+      ext/standard/php_standard.h
+      ext/standard/rand.c
+      ext/standard/rand_mt.c
+      ext/standard/rand_sys.c
+      ext/standard/Makefile.in
+      ext/standard/array.c
+      ext/standard/basic_functions.c: revert bad commit.
+
+2001-09-05  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.c:
+    Patch to stop the crashing behavior exhibited by PHP/ODBC in SOLID/DB2
+    submitted by Walter Franzini (walter@sys-net.it)
+
+2001-09-05  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS
+      ext/interbase/interbase.c
+      ext/interbase/interbase.dsp
+      ext/interbase/php_interbase.h: Interbase fixes
+
+    * NEWS: Interbase changes should get a NEWS entry
+
+2001-09-05  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    Prevent incorrect warning message from occuring on an EOF of socket_read.
+
+2001-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/vpopmail/config.m4
+      ext/sybase_ct/config.m4
+      ext/mcrypt/config.m4
+      ext/pdf/config.m4
+      ext/satellite/config.m4
+      ext/curl/config.m4
+      ext/fdf/config.m4
+      ext/gd/config.m4
+      acinclude.m4: Fixes commit / link problems with certain compilers.
+
+2001-09-05  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/link.c: API Update
+
+2001-09-05  Jani Taskinen  <sniper@iki.fi>
+
+    * main/rfc1867.h: Removed unused lines.
+
 2001-09-04  Richard Heyes  <richard.heyes@heyes-computing.net>
 
     * pear/Mail/mimeDecode.php:
