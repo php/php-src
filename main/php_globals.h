@@ -97,13 +97,14 @@ struct _php_core_globals {
 	unsigned char header_is_being_sent;
 
 	zend_llist ll_post_request_startup;
+	zend_llist ll_pre_request_shutdown;
 };
 
 
 typedef struct {
 	void (*func)(void *);
 	void *userdata;
-} php_post_request_startup;
+} php_request_hook;
 
 #endif /* _PHP_GLOBALS_H */
 

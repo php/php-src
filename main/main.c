@@ -439,6 +439,19 @@ PHPAPI void php_error(int type, const char *format,...)
 			}
 		}
 	}
+
+	switch (type) {
+		case E_ERROR:
+		case E_CORE_ERROR:
+		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
+		case E_COMPILE_ERROR:
+			if (module_initialized) {
+				zend_bailout();
+				return;
+			}
+			break;
+	}
+
 	if (PG(track_errors)) {
 		pval *tmp;
 
@@ -454,17 +467,6 @@ PHPAPI void php_error(int type, const char *format,...)
 		tmp->type = IS_STRING;
 
 		zend_hash_update(EG(active_symbol_table), "php_errormsg", sizeof("php_errormsg"), (void **) & tmp, sizeof(pval *), NULL);
-	}
-
-	switch (type) {
-		case E_ERROR:
-		case E_CORE_ERROR:
-		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
-		case E_COMPILE_ERROR:
-			if (module_initialized) {
-				zend_bailout();
-			}
-			break;
 	}
 }
 
@@ -652,33 +654,51 @@ static void php_message_handler_for_zend(long message, void *data)
 	}
 }
 
-static void php_start_post_request_startup(void *data)
+static void php_start_request_hook(void *data)
 {
-	php_post_request_startup *ptr = (php_post_request_startup *) data;
+	php_request_hook *ptr = (php_request_hook *) data;
 
 	ptr->func(ptr->userdata);
 }
 
-static void php_execute_post_request_startup(PLS_D)
+static void php_execute_pre_request_shutdown(PLS_D)
 {
-	zend_llist_apply(&PG(ll_post_request_startup), php_start_post_request_startup);
+	zend_llist_apply(&PG(ll_pre_request_shutdown), php_start_request_hook);
 }
 
-static void php_destroy_post_request_startup(void)
+static void php_execute_post_request_startup(PLS_D)
+{
+	zend_llist_apply(&PG(ll_post_request_startup), php_start_request_hook);
+}
+
+static void php_destroy_request_hooks(void)
 {
 	PLS_FETCH();
 
+	zend_llist_destroy(&PG(ll_pre_request_shutdown));
 	zend_llist_destroy(&PG(ll_post_request_startup));
 }
 
-static void php_init_post_request_startup(PLS_D)
+static void php_init_request_hooks(PLS_D)
 {
-	zend_llist_init(&PG(ll_post_request_startup), sizeof(php_post_request_startup), NULL, 0);
+	zend_llist_init(&PG(ll_post_request_startup), sizeof(php_request_hook), NULL, 0);
+	zend_llist_init(&PG(ll_pre_request_shutdown), sizeof(php_request_hook), NULL, 0);
+}
+
+void php_register_pre_request_shutdown(void (*func)(void *), void *userdata)
+{
+	php_request_hook ptr;
+	PLS_FETCH();
+
+	ptr.func = func;
+	ptr.userdata = userdata;
+	
+	zend_llist_add_element(&PG(ll_pre_request_shutdown), &ptr);
 }
 
 void php_register_post_request_startup(void (*func)(void *), void *userdata)
 {
-	php_post_request_startup ptr;
+	php_request_hook ptr;
 	PLS_FETCH();
 
 	ptr.func = func;
@@ -692,7 +712,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	global_lock();
 	
 	php_output_startup();
-	php_init_post_request_startup(PLS_C);
+	php_init_request_hooks(PLS_C);
 
 #if APACHE
 	/*
@@ -772,7 +792,6 @@ void php_request_shutdown(void *dummy)
 	ELS_FETCH();
 	SLS_FETCH();
 
-	php_destroy_post_request_startup();
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
 
@@ -783,10 +802,10 @@ void php_request_shutdown(void *dummy)
 	zend_deactivate(CLS_C ELS_CC);
 	sapi_deactivate(SLS_C);
 
+	php_destroy_request_hooks();
 	php_destroy_request_info(NULL);
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
 	php_unset_timeout();
-
 
 #if CGI_BINARY
 	fflush(stdout);
@@ -1275,6 +1294,7 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		EG(active_op_array) = EG(main_op_array);
 		php_execute_post_request_startup(PLS_C);
 		zend_execute(EG(main_op_array) ELS_CC);
+		php_execute_pre_request_shutdown(PLS_C);
 	}
 }
 
