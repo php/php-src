@@ -1,3 +1,26 @@
+2002-05-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c: reverted my patch.
+
+    * ext/mbstring/config.m4
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_ru.c
+      ext/mbstring/mbfilter_ru.h
+      ext/mbstring/mbstring.c: reverted patch to support iso2022kr.
+
+2002-05-24  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/standard/info.c:
+    Fix <head> and <body> tags in phpinfo() output (#17411)
+
+2002-05-24  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/php_cli.c:
+    Register STDIN, STDOUT, and STDERR "constants" in cli in cases where
+    script itself is not being loaded from STDIN.
+
+    This enables constructs like fwrite(STDERR, "Error 42");
+
 2002-05-23  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/image.c
