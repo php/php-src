@@ -35,21 +35,27 @@ static zend_class_entry *domxmlattr_class_entry_ptr;
 
 static zend_function_entry php_domxml_functions[] = {
 	PHP_FE(getdom,	NULL)
+	PHP_FALIAS(dom,		getdom,	NULL)
 	PHP_FE(domxml_root,	NULL)
+	PHP_FE(domxml_addroot,	NULL)
+	PHP_FE(domxml_dumpmem,	NULL)
 	PHP_FE(domxml_attributes,	NULL)
 	PHP_FE(domxml_getattr,	NULL)
 	PHP_FE(domxml_setattr,	NULL)
 	PHP_FE(domxml_children,	NULL)
 	PHP_FE(domxml_newchild,	NULL)
 	PHP_FE(domxml_node,	NULL)
-	PHP_FALIAS(dom,		getdom,	NULL)
+	PHP_FE(domxml_newxmldoc,	NULL)
+	PHP_FALIAS(newxmldoc, domxml_newxmldoc,	NULL)
 	{NULL, NULL, NULL}
 };
 
 
 static zend_function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(root,	domxml_root,	NULL)
-	PHP_FALIAS(intdtd,	domxml_intdtd,	NULL)
+	PHP_FALIAS(addroot,	domxml_addroot,	NULL)
+	PHP_FALIAS(dtd,	domxml_intdtd,	NULL)
+	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -62,14 +68,14 @@ static zend_function_entry php_domxmldtd_class_functions[] = {
    It appears the hash table is somewhat corrupted.
 */
 static zend_function_entry php_domxmlnode_class_functions[] = {
-//	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
+	PHP_FALIAS(lastchild,	domxml_lastchild,	NULL)
 	PHP_FALIAS(children,	domxml_children,	NULL)
 	PHP_FALIAS(parent,	domxml_parent,		NULL)
 	PHP_FALIAS(newchild,	domxml_newchild,		NULL)
 	PHP_FALIAS(getattr,	domxml_getattr,		NULL)
-//	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
+	PHP_FALIAS(setattr,	domxml_setattr,		NULL)
 	PHP_FALIAS(attributes,	domxml_attributes,	NULL)
-//	PHP_FALIAS(node,	domxml_node,	NULL)
+	PHP_FALIAS(node,	domxml_node,	NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -258,57 +264,6 @@ PHP_FUNCTION(domxml_lastchild)
 	add_property_stringl(return_value, "name", (char *) last->name, strlen(last->name), 1);
 	if(last->content)
 		add_property_stringl(return_value, "content", (char *) last->content, strlen(last->content), 1);
-}
-/* }}} */
-
-/* {{{ proto string domxml_newchild([int node], int parent, string name, string content)
-   Create new child of parent */
-PHP_FUNCTION(domxml_newchild)
-{
-	pval *id, *name, *content, **tmp;
-	int id_to_find;
-	xmlNode *nodep, *newnode;
-	int type;
-	int ret;
-	
-	if (ARG_COUNT(ht) == 3) {
-		id = getThis();
-		if (id) {
-			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my handle property");
-				RETURN_FALSE;
-			}
-			id_to_find = (*tmp)->value.lval;
-		} else {
-			RETURN_FALSE;
-		}
-	} else if ((ARG_COUNT(ht) != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
-	newnode = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
-	if (!newnode) {
-		RETURN_FALSE;
-	}
-
-	ret = zend_list_insert(newnode, le_domxmlnodep);
-
-	/* construct an object with some methods */
-	object_init_ex(return_value, domxmlnode_class_entry_ptr);
-	add_property_long(return_value, "node", ret);
-	add_property_long(return_value, "type", newnode->type);
-	add_property_stringl(return_value, "name", (char *) newnode->name, strlen(newnode->name), 1);
-	if(newnode->content)
-		add_property_stringl(return_value, "content", (char *) newnode->content, strlen(newnode->content), 1);
 }
 /* }}} */
 
@@ -619,7 +574,7 @@ PHP_FUNCTION(domxml_root)
 }
 /* }}} */
 
-/* {{{ proto string domxml_dtd([int dir_handle])
+/* {{{ proto string domxml_dtd([int doc_handle])
    Returns DTD of document */
 PHP_FUNCTION(domxml_intdtd)
 {
@@ -671,6 +626,49 @@ PHP_FUNCTION(domxml_intdtd)
 }
 /* }}} */
 
+/* {{{ proto string domxml_dumpmem([int doc_handle])
+   Dumps document into string */
+PHP_FUNCTION(domxml_dumpmem)
+{
+	pval *id, **tmp;
+	int id_to_find;
+	xmlDoc *docp;
+	xmlChar *mem;
+	int size;
+	int type;
+	
+	if (ARG_COUNT(ht) == 0) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			id_to_find = (*tmp)->value.lval;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ARG_COUNT(ht) != 1) || getParameters(ht, 1, &id) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_long(id);
+		id_to_find = id->value.lval;
+	}
+		
+	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
+	if (!docp || type != le_domxmldocp) {
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		RETURN_FALSE;
+	}
+
+	xmlDocDumpMemory(docp, &mem, &size);
+	if (!size) {
+		RETURN_FALSE;
+	}
+	RETURN_STRINGL(mem, size, 0);
+}
+/* }}} */
+
 /* {{{ proto class dom(string xmldoc)
    Creates dom object of xml document */
 PHP_FUNCTION(getdom)
@@ -685,6 +683,139 @@ PHP_FUNCTION(getdom)
 	convert_to_string(arg);
 
 	docp = xmlParseMemory(arg->value.str.val, arg->value.str.len);
+	if (!docp) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(docp, le_domxmldocp);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmldoc_class_entry_ptr);
+	add_property_long(return_value, "doc", ret);
+	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
+	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto string domxml_newchild([int node_handle], string name, string content)
+   Adds child node to parent node */
+PHP_FUNCTION(domxml_newchild)
+{
+	pval *id, *name, *content, **tmp;
+	int id_to_find;
+	xmlNode *child, *nodep;
+	int type;
+	int ret;
+	
+	if (ARG_COUNT(ht) == 2) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			id_to_find = (*tmp)->value.lval;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ARG_COUNT(ht) != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_long(id);
+		id_to_find = id->value.lval;
+		convert_to_string(name);
+		convert_to_string(content);
+	}
+		
+	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
+	if (!nodep || type != le_domxmlnodep) {
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		RETURN_FALSE;
+	}
+
+	child = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
+	if (!child) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(child, le_domxmlnodep);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmlnode_class_entry_ptr);
+	add_property_long(return_value, "child", ret);
+	add_property_long(return_value, "type", child->type);
+	add_property_stringl(return_value, "name", (char *) child->name, strlen(child->name), 1);
+	if(content->value.str.val)
+		add_property_stringl(return_value, "content", content->value.str.val, content->value.str.len, 1);
+	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto string domxml_addroot([int doc_handle], string name)
+   Adds root node to document */
+PHP_FUNCTION(domxml_addroot)
+{
+	pval *id, *name, **tmp;
+	int id_to_find;
+	xmlDoc *docp;
+	xmlNode *node;
+	int type;
+	int ret;
+	
+	if (ARG_COUNT(ht) == 1) {
+		id = getThis();
+		if (id) {
+			if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+				php_error(E_WARNING, "unable to find my handle property");
+				RETURN_FALSE;
+			}
+			id_to_find = (*tmp)->value.lval;
+		} else {
+			RETURN_FALSE;
+		}
+	} else if ((ARG_COUNT(ht) != 2) || getParameters(ht, 2, &id, &name) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	} else {
+		convert_to_long(id);
+		id_to_find = id->value.lval;
+		convert_to_string(name);
+	}
+		
+	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
+	if (!docp || type != le_domxmldocp) {
+		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
+		RETURN_FALSE;
+	}
+
+	node = xmlNewDocNode(docp, NULL, name->value.str.val, NULL);
+	if (!node) {
+		RETURN_FALSE;
+	}
+	ret = zend_list_insert(node, le_domxmlnodep);
+
+	/* construct an object with some methods */
+	object_init_ex(return_value, domxmlnode_class_entry_ptr);
+	add_property_long(return_value, "node", ret);
+	add_property_long(return_value, "type", node->type);
+	add_property_stringl(return_value, "name", (char *) node->name, strlen(node->name), 1);
+	if(node->content)
+		add_property_stringl(return_value, "content", (char *) node->content, strlen(node->content), 1);
+	zend_list_addref(ret);
+}
+/* }}} */
+
+/* {{{ proto class domxml_newxmldoc(string version)
+   Creates new xmldoc */
+PHP_FUNCTION(domxml_newxmldoc)
+{
+	pval *arg;
+	xmlDoc *docp;
+	int ret;
+	
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &arg) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string(arg);
+
+	docp = xmlNewDoc(arg->value.str.val);
 	if (!docp) {
 		RETURN_FALSE;
 	}
