@@ -37,6 +37,7 @@
 #define PSPELL_BAD_SPELLERS 3L
 #define PSPELL_SPEED_MASK_INTERNAL 3L
 #define PSPELL_RUN_TOGETHER 8L
+#define USE_ORIGINAL_MANAGER_FUNCS 1L
 
 function_entry pspell_functions[] = {
 	PHP_FE(pspell_new,		NULL)
