@@ -39,19 +39,31 @@ PHP_RINIT_FUNCTION(vpopmail);
 PHP_RSHUTDOWN_FUNCTION(vpopmail);
 PHP_MINFO_FUNCTION(vpopmail);
 
-/* domain management */
-PHP_FUNCTION(vpopmail_adddomain);
-PHP_FUNCTION(vpopmail_deldomain);
-PHP_FUNCTION(vpopmail_addaliasdomain);
+/* domain management - lib call */
+PHP_FUNCTION(vpopmail_add_domain);
+PHP_FUNCTION(vpopmail_del_domain);
+PHP_FUNCTION(vpopmail_add_alias_domain);
+/* domain management - exec */
+PHP_FUNCTION(vpopmail_add_domain_ex);
+PHP_FUNCTION(vpopmail_del_domain_ex);
+PHP_FUNCTION(vpopmail_add_alias_domain_ex);
 /* user management */
-PHP_FUNCTION(vpopmail_adduser);
-PHP_FUNCTION(vpopmail_deluser);
+PHP_FUNCTION(vpopmail_add_user);
+PHP_FUNCTION(vpopmail_del_user);
 PHP_FUNCTION(vpopmail_passwd);
-PHP_FUNCTION(vpopmail_setuserquota);
+PHP_FUNCTION(vpopmail_set_user_quota);
 PHP_FUNCTION(vpopmail_auth_user);
+/* error handling */
+PHP_FUNCTION(vpopmail_error);
+
+/* defines for vpopmail command line tool names */
+#define VPOPMAIL_ADDD "/vadddomain "
+#define VPOPMAIL_DELD "/vdeldomain "
+#define VPOPMAIL_ADAD "/vaddaliasdomain "
 
 ZEND_BEGIN_MODULE_GLOBALS(vpopmail)
 	int vpopmail_open;
+	int vpopmail_errno;
 ZEND_END_MODULE_GLOBALS(vpopmail)
 
 #ifdef ZTS

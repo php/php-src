@@ -32,8 +32,11 @@
 #include "php_ini.h"
 #include "php_vpopmail.h"
 
+#if HAVE_VPOPMAIL
+
 #include "vpopmail.h"
 
+#include "ext/standard/exec.h"
 #include "ext/standard/php_string.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(vpopmail)
@@ -46,18 +49,28 @@ ZEND_DECLARE_MODULE_GLOBALS(vpopmail)
 #undef PACKAGE
 #include "vpopmail.h"
 
+/* vpopmail does not export this, argh! */
+#define MAX_BUFF 500
+
 /* Function table */
 
 function_entry vpopmail_functions[] = {
-	/* domain management */
-	PHP_FE(vpopmail_adddomain, NULL)
-	PHP_FE(vpopmail_deldomain, NULL)
+	/* domain management - lib call */
+	PHP_FE(vpopmail_add_domain, NULL)
+	PHP_FE(vpopmail_del_domain, NULL)
+	PHP_FE(vpopmail_add_alias_domain, NULL)
+	/* domain management - exec */
+	PHP_FE(vpopmail_add_domain_ex, NULL)
+	PHP_FE(vpopmail_del_domain_ex, NULL)
+	PHP_FE(vpopmail_add_alias_domain_ex, NULL)
 	/* user management */
-	PHP_FE(vpopmail_adduser, NULL)
-	PHP_FE(vpopmail_deluser, NULL)
+	PHP_FE(vpopmail_add_user, NULL)
+	PHP_FE(vpopmail_del_user, NULL)
 	PHP_FE(vpopmail_passwd, NULL)
-	PHP_FE(vpopmail_setuserquota, NULL)
+	PHP_FE(vpopmail_set_user_quota, NULL)
 	PHP_FE(vpopmail_auth_user, NULL)
+	/* error handling */
+	PHP_FE(vpopmail_error, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -78,7 +91,7 @@ ZEND_GET_MODULE(vpopmail)
 
 
 PHP_INI_BEGIN()
-	/*	STD_PHP_INI_ENTRY("vpopmail.directory",		"",				PHP_INI_ALL, OnUpdateString,	directory,			php_vpopmail_globals,	vpopmail_globals) */
+	/*STD_PHP_INI_ENTRY("vpopmail.directory",		"",				PHP_INI_ALL, OnUpdateString,	directory,			php_vpopmail_globals,	vpopmail_globals)*/
 PHP_INI_END()
 
 
@@ -99,6 +112,7 @@ PHP_RINIT_FUNCTION(vpopmail)
 	VPOPMAILLS_FETCH();
 
 	VPOPMAILG(vpopmail_open) = 0;
+	VPOPMAILG(vpopmail_errno) = 0;
 
 	return SUCCESS;
 }
@@ -118,23 +132,28 @@ PHP_MINFO_FUNCTION(vpopmail)
 {
 	char ids[64];
 
-	sprintf(ids, "%d/%d", VPOPMAILUID, VPOPMAILGID);
+	sprintf(ids, "%d/%d %d/%d/%d/%d", VPOPMAILUID, VPOPMAILGID, getuid(), getgid(), geteuid(), getegid());
 
 	php_info_print_table_start();
 	php_info_print_table_header(2, "vpopmail support", "enabled");
 	php_info_print_table_row(2, "vpopmail version", VERSION);
-	php_info_print_table_row(2, "vpopmail uid/gid", ids);
+	php_info_print_table_row(2, "vpopmail uid/gid php uid/gid/euid/egid", ids);
 	php_info_print_table_row(2, "vpopmail dir", VPOPMAILDIR);
+	php_info_print_table_row(2, "vpopmail vadddomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADDD);
+	php_info_print_table_row(2, "vpopmail vdeldomain", VPOPMAIL_BIN_DIR VPOPMAIL_DELD);
+	php_info_print_table_row(2, "vpopmail vaddaliasdomain", VPOPMAIL_BIN_DIR VPOPMAIL_ADAD);
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
 }
 
+/*
+ * Domain management functions - library call
+ */
 
-
-/* {{{ proto void vpopmail_adddomain(string domain, string dir, int uid, int gid)
+/* {{{ proto bool vpopmail_add_domain(string domain, string dir, int uid, int gid)
    Add a new virtual domain */
-PHP_FUNCTION(vpopmail_adddomain)
+PHP_FUNCTION(vpopmail_add_domain)
 {
 	zval **domain;
 	zval **dir;
@@ -163,20 +182,21 @@ PHP_FUNCTION(vpopmail_adddomain)
 						Z_LVAL_PP(gid)
 #endif
 						);
+	VPOPMAILG(vpopmail_errno)=retval;
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_deldomain(string domain)
+/* {{{ proto bool vpopmail_del_domain(string domain)
    Delete a virtual domain */
-PHP_FUNCTION(vpopmail_deldomain)
+PHP_FUNCTION(vpopmail_del_domain)
 {
 	zval **domain;
 	int retval;
@@ -190,20 +210,22 @@ PHP_FUNCTION(vpopmail_deldomain)
 	VPOPMAILG(vpopmail_open) = 1;
 
 	retval = vdeldomain(Z_STRVAL_PP(domain));
+	
+	VPOPMAILG(vpopmail_errno)=retval;
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_addaliasdomain(string domain, string aliasdomain)
+/* {{{ proto bool vpopmail_add_alias_domain(string domain, string aliasdomain)
    Add an alias for a virtual domain */
-PHP_FUNCTION(vpopmail_addaliasdomain)
+PHP_FUNCTION(vpopmail_add_alias_domain)
 {
 	zval **domain;
 	zval **aliasdomain;
@@ -229,7 +251,8 @@ PHP_FUNCTION(vpopmail_addaliasdomain)
 	tmpstr = vget_assign(Z_STRVAL_PP(domain), Dir, 156, &uid, &gid);
 
 	if (tmpstr == NULL) {
-        php_error(E_WARNING, "existing domain %s was not found", Z_STRVAL_PP(domain));
+		php_error(E_WARNING, "vpopmail_add_alias_domain error: existing domain %s was not found", Z_STRVAL_PP(domain));
+		VPOPMAILG(vpopmail_errno) = 1;
 		RETURN_FALSE;
 	}
 
@@ -240,24 +263,259 @@ PHP_FUNCTION(vpopmail_addaliasdomain)
 	sprintf(TmpBuf2, "%s/domains/%s", Dir, Z_STRVAL_PP(domain));
 
 	if (symlink(TmpBuf2, TmpBuf1) != 0) {
-        php_error(E_WARNING, "vpopmail_addaliasdomain could not symlink domains: %s", strerror(errno));
+	        php_error(E_WARNING, "vpopmail_add_alias_domain error: could not symlink domains: %s", strerror(errno));
+		VPOPMAILG(vpopmail_errno) = 1;
 		RETURN_FALSE;
 	}
 
 	if (add_domain_assign(Z_STRVAL_PP(aliasdomain), Dir, uid, gid) != 0) {
 		php_error(E_WARNING, "vpopmail_addaliasdomain could not add domain to control files");
+		VPOPMAILG(vpopmail_errno) = 1;
 		RETURN_FALSE;
 	}
 
 	signal_process("qmail-send", SIGHUP);
 
+	VPOPMAILG(vpopmail_errno) = 0;
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_adduser(string user, string domain, string password[, string gecos[, bool apop]])
+/*
+ * Domain management functions - exec
+ */
+
+/* {{{ proto int vpopmail_add_domain_ex(string domain, string passwd [, string quota [, string bounce [, bool apop]]])
+   Add a new virtual domain */
+PHP_FUNCTION(vpopmail_add_domain_ex) {
+	zval **domain, **passwd, **quota, **bounce, **apop;
+	int retval,len=0,argc=ZEND_NUM_ARGS(),Uid=VPOPMAILUID,Gid=VPOPMAILGID,is_bounce_email;
+	int fr_bounce=0,fr_quota=0;
+	char *q,*bo,*cmd,*escdomain="",*escpasswd="",*escquota="",*escbounce="",*escapop="";
+
+	if (argc < 2 || argc > 5 || zend_get_parameters_ex(argc, &domain, &passwd, &quota, &bounce, &apop) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+	
+	VPOPMAILLS_FETCH();
+
+	switch (argc) {
+		case 5:
+			convert_to_long_ex(apop);
+			escapop=Z_BVAL_PP(apop)?"1":"0";
+			/* Fall-through. */
+		case 4:
+			fr_bounce=1;
+			convert_to_string_ex(bounce);
+			escbounce=php_escape_shell_cmd(Z_STRVAL_PP(bounce));
+			if (!escbounce) {
+				php_error(E_WARNING,"vpopmail_adddomain error: cannot alloc");
+				VPOPMAILG(vpopmail_errno)=1;
+				RETURN_FALSE;
+			}
+			/* Fall-through. */
+		case 3:
+			fr_quota=1;
+			convert_to_string_ex(quota);
+			escquota=php_escape_shell_cmd(Z_STRVAL_PP(quota));
+			if (!escquota) {
+				php_error(E_WARNING,"vpopmail_adddomain error: cannot alloc");
+				VPOPMAILG(vpopmail_errno)=1;
+				RETURN_FALSE;
+			}
+			/* Fall-through. */
+		case 2:
+			convert_to_string_ex(passwd);
+			convert_to_string_ex(domain);
+			break;
+	}
+
+	escdomain=php_escape_shell_cmd(Z_STRVAL_PP(domain));
+	escpasswd=php_escape_shell_cmd(Z_STRVAL_PP(passwd));
+	if (!escdomain||!escpasswd) {
+		if (fr_quota)
+			efree(escquota);
+		if (fr_bounce)
+			efree(escbounce);
+		php_error(E_WARNING,"vpopmail_adddomain error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	len+=strlen(VPOPMAIL_BIN_DIR);
+	len+=strlen(VPOPMAIL_ADDD);
+	if (*escquota)
+		len+=strlen("-q ")+strlen(escquota)+strlen(" ");
+	if (*escbounce) {
+		if (strchr(Z_STRVAL_PP(bounce),'@')) {
+			is_bounce_email=1;
+			len+=strlen("-e ")+strlen(escbounce)+strlen(" ");
+		} else {
+			is_bounce_email=0;
+			len+=strlen("-b ");
+		}
+	}
+	if (*escapop)
+		len+=strlen("-a ");
+	len+=strlen(escdomain)+strlen(" ");
+	len+=strlen(escpasswd)+strlen(" ");
+	len++;
+	cmd=emalloc(len);
+	if (!cmd) {
+		if (fr_quota)
+			efree(escquota);
+		if (fr_bounce)
+			efree(escbounce);
+		efree(escdomain);
+		efree(escpasswd);
+		php_error(E_WARNING,"vpopmail_adddomain error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	strcpy(cmd,VPOPMAIL_BIN_DIR VPOPMAIL_ADDD);
+	if (*escquota) {
+		strcat(cmd,"-q ");
+		strcat(cmd,escquota);
+		strcat(cmd," ");
+	}
+	if (*escbounce) {
+		if (is_bounce_email) {
+			strcat(cmd,"-e ");
+			strcat(cmd,escbounce);
+			strcat(cmd," ");
+		} else {
+			strcat(cmd,"-b ");
+		}
+	}
+	if (*escapop)
+		strcat(cmd,"-a ");
+	strcat(cmd,escdomain);
+	strcat(cmd," ");
+	strcat(cmd,escpasswd);
+	retval=php_Exec(0,cmd,NULL,return_value);
+	efree(cmd);
+	efree(escdomain);
+	efree(escpasswd);
+	if (fr_quota)
+		efree(escquota);
+	if (fr_bounce)
+		efree(escbounce);
+
+	if (retval!=VA_SUCCESS) {
+		php_error(E_WARNING,"vpopmail_add_domain_ex error: %d", retval);
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	} else {
+		VPOPMAILG(vpopmail_errno)=0;
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int vpopmail_del_domain_ex(string domain)
+   Delete a virtual domain */
+PHP_FUNCTION(vpopmail_del_domain_ex) {
+	zval **domain;
+	int retval=-1;
+	char *cmd,*escdomain;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &domain) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	VPOPMAILLS_FETCH();
+
+	convert_to_string_ex(domain);
+
+	escdomain=php_escape_shell_cmd(Z_STRVAL_PP(domain));
+	if (!escdomain) {
+		php_error(E_WARNING,"vpopmail_del_domain_ex error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	cmd=emalloc(strlen(VPOPMAIL_BIN_DIR)+strlen(VPOPMAIL_DELD)+strlen(escdomain)+1);
+	if (!cmd) {
+		efree(escdomain);
+		php_error(E_WARNING,"vpopmail_del_domain_ex error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	sprintf(cmd,VPOPMAIL_BIN_DIR VPOPMAIL_DELD"%s",escdomain);
+	retval=php_Exec(0,cmd,NULL,return_value);
+	efree(escdomain);
+	efree(cmd);
+
+	if (retval!=VA_SUCCESS) {
+		php_error(E_WARNING,"vpopmail_del_domain_ex error: %d", retval);
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	} else {
+		VPOPMAILG(vpopmail_errno)=0;
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+/* {{{ proto int vpopmail_add_alias_domain_ex(string olddomain, string newdomain)
+   Add alias to an existing virtual domain */
+PHP_FUNCTION(vpopmail_add_alias_domain_ex) {
+	zval **olddomain, **newdomain;
+	int retval;
+	char *cmd,*escolddomain,*escnewdomain;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &olddomain, &newdomain) == FAILURE){
+		WRONG_PARAM_COUNT;
+	}
+
+	VPOPMAILLS_FETCH();
+
+	convert_to_string_ex(olddomain);
+	convert_to_string_ex(newdomain);
+	escnewdomain=php_escape_shell_cmd(Z_STRVAL_PP(newdomain));
+	if (!escnewdomain) {
+		php_error(E_WARNING,"vpopmail_addaliasdomain error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	escolddomain=php_escape_shell_cmd(Z_STRVAL_PP(olddomain));
+	if (!escolddomain) {
+		efree(escnewdomain);
+		php_error(E_WARNING,"vpopmail_addaliasdomain error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+
+	cmd=emalloc(strlen(VPOPMAIL_BIN_DIR VPOPMAIL_ADAD)+strlen(escolddomain)+strlen(" ")+strlen(escnewdomain)+1);
+	if (!cmd) {
+		efree(escnewdomain);
+		efree(escolddomain);
+		php_error(E_WARNING,"vpopmail_addaliasdomain error: cannot alloc");
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	}
+	sprintf(cmd,"%s%s %s",VPOPMAIL_BIN_DIR VPOPMAIL_ADAD,escolddomain,escnewdomain);
+	retval=php_Exec(0,cmd,NULL,return_value);
+	efree(cmd);
+	efree(escnewdomain);
+	efree(escolddomain);
+
+	if (retval!=VA_SUCCESS) {
+		php_error(E_WARNING,"vpopmail_addaliasdomain error: %d", retval);
+		VPOPMAILG(vpopmail_errno)=1;
+		RETURN_FALSE;
+	} else {
+		VPOPMAILG(vpopmail_errno)=0;
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+/*
+ * User management functions
+ */
+
+/* {{{ proto bool vpopmail_add_user(string user, string domain, string password[, string gecos[, bool apop]])
    Add a new user to the specified virtual domain */
-PHP_FUNCTION(vpopmail_adduser)
+PHP_FUNCTION(vpopmail_add_user)
 {
 	zval **user;
 	zval **domain;
@@ -297,20 +555,22 @@ PHP_FUNCTION(vpopmail_adduser)
 					  Z_STRVAL_PP(password),
 					  the_gecos,
 					  is_apop);
+	
+	VPOPMAILG(vpopmail_errno)=retval;
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+        	php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_deluser(string user, string domain)
+/* {{{ proto bool vpopmail_del_user(string user, string domain)
    Delete a user from a virtual domain */
-PHP_FUNCTION(vpopmail_deluser)
+PHP_FUNCTION(vpopmail_del_user)
 {
 	zval **user;
 	zval **domain;
@@ -329,17 +589,19 @@ PHP_FUNCTION(vpopmail_deluser)
 	retval = vdeluser(Z_STRVAL_PP(user),
 					  Z_STRVAL_PP(domain));
 
+	VPOPMAILG(vpopmail_errno)=retval;
+
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_passwd(string user, string domain, string password)
+/* {{{ proto bool vpopmail_passwd(string user, string domain, string password)
    Change a virtual user's password */
 PHP_FUNCTION(vpopmail_passwd)
 {
@@ -370,20 +632,22 @@ PHP_FUNCTION(vpopmail_passwd)
 					 Z_STRVAL_PP(domain),
 					 Z_STRVAL_PP(password),
 					 is_apop);
+	
+	VPOPMAILG(vpopmail_errno)=retval;
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_setuserquota(string user, string domain, string quota)
+/* {{{ proto bool vpopmail_set_user_quota(string user, string domain, string quota)
    Sets a virtual user's quota */
-PHP_FUNCTION(vpopmail_setuserquota)
+PHP_FUNCTION(vpopmail_set_user_quota)
 {
 	zval **user;
 	zval **domain;
@@ -404,18 +668,20 @@ PHP_FUNCTION(vpopmail_setuserquota)
 	retval = vsetuserquota(Z_STRVAL_PP(user),
 						   Z_STRVAL_PP(domain),
 						   Z_STRVAL_PP(quota));
+	
+	VPOPMAILG(vpopmail_errno)=retval;
 
 	if (retval == VA_SUCCESS) {
 		RETURN_TRUE;
 	}
 	else {
-        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
+	        php_error(E_WARNING, "vpopmail error: %s", verror(retval));
 		RETURN_FALSE;
 	}
 }
 /* }}} */
 
-/* {{{ proto void vpopmail_auth_user(string user, string domain, string password[, bool apop])
+/* {{{ proto bool vpopmail_auth_user(string user, string domain, string password[, string apop])
    Attempt to validate a username/domain/password. Returns true/false */
 PHP_FUNCTION(vpopmail_auth_user)
 {
@@ -423,17 +689,14 @@ PHP_FUNCTION(vpopmail_auth_user)
 	zval **domain;
 	zval **password;
 	zval **apop;
-	int is_apop = 0;
 	struct passwd *retval;
 
 	if (ZEND_NUM_ARGS() < 3 || ZEND_NUM_ARGS() > 4
 			|| zend_get_parameters_ex(ZEND_NUM_ARGS(), &user, &domain, &password, &apop) == FAILURE)
 		WRONG_PARAM_COUNT;
 
-	if (ZEND_NUM_ARGS() > 3) {
-		convert_to_boolean_ex(apop);
-		is_apop = (Z_BVAL_PP(apop) ? 1 : 0);
-	}
+	if (ZEND_NUM_ARGS() > 3)
+		convert_to_string_ex(apop);
 
 	convert_to_string_ex(user);
 	convert_to_string_ex(domain);
@@ -441,11 +704,17 @@ PHP_FUNCTION(vpopmail_auth_user)
 
 	VPOPMAILLS_FETCH();
 	VPOPMAILG(vpopmail_open) = 1;
+	VPOPMAILG(vpopmail_errno) = 0;
 
 	retval = vauth_user(Z_STRVAL_PP(user),
 						Z_STRVAL_PP(domain),
 						Z_STRVAL_PP(password),
-						is_apop);
+						Z_STRVAL_PP(apop));
+
+	/* 
+	 * we do not set vpopmail_errno here - it is considered auth_user cannot fail; insted it does not auth
+	 * this is a vpopmail's api limitation - there is no error return form vauth_user
+	 */
 
 	if (retval == NULL) {
 		RETURN_FALSE;
@@ -456,6 +725,20 @@ PHP_FUNCTION(vpopmail_auth_user)
 }
 /* }}} */
 
+/* {{{ proto string vpopmail_error(void)
+   Attempt to validate a username/domain/password. Returns true/false */
+PHP_FUNCTION(vpopmail_error)
+{
+	if (ZEND_NUM_ARGS() != 0)
+		WRONG_PARAM_COUNT;
+	
+	VPOPMAILLS_FETCH();
+
+	RETURN_STRING(verror(VPOPMAILG(vpopmail_errno)),1);
+}
+/* }}} */
+
+#endif HAVE_VPOPMAIL
 
 /*
  * Local variables:
