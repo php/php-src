@@ -78,7 +78,7 @@ if test "$PHP_SQLITE" != "no"; then
     dnl in funcs.c uses assert(), which is a bit silly and something 
     dnl we want to avoid. This assert() was removed in SQLite 2.8.9.
     if test "$PHP_SQLITE_UTF8" = "yes"; then
-        SQLITE_ENCODING="UTF-8"
+        SQLITE_ENCODING="UTF8"
         AC_DEFINE(SQLITE_UTF8, 1, [ ])
     else
         SQLITE_ENCODING="ISO8859"
