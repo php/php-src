@@ -58,7 +58,6 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_deleteln,    NULL)
   PHP_FE(ncurses_doupdate,    NULL)
   PHP_FE(ncurses_echo,    NULL)
-  PHP_FE(ncurses_echochar,    NULL)
   PHP_FE(ncurses_erase,    NULL)
   PHP_FE(ncurses_erasechar,    NULL)
   PHP_FE(ncurses_flash,    NULL)
