@@ -889,9 +889,16 @@ PHP_FUNCTION(implode)
 	}
 
 	php_implode(delim, arr, return_value);
-	if (arg1 != NULL && arg1_separated) zval_ptr_dtor(arg1);
-	if (arg2 != NULL && arg2_separated) zval_ptr_dtor(arg2);
-	if (delim_needs_dtor) FREE_ZVAL(delim);
+
+	if (arg1 != NULL && arg1_separated) {
+		zval_ptr_dtor(arg1);
+	}
+	if (arg2 != NULL && arg2_separated) {
+		zval_ptr_dtor(arg2);
+	}
+	if (delim_needs_dtor) {
+		FREE_ZVAL(delim);
+	}
 }
 /* }}} */
 
