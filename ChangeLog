@@ -1,3 +1,112 @@
+2002-05-04  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c:
+    We shouldn't force Content-length:, but much worse, it's wrong in many
+    cases (basically, unless you use output buffering to buffer all of your content,
+    it won't work;  output buffering is used for lots of different things as a
+    functional interface, and such buffers have no relation to Content-type at
+    all).
+
+2002-05-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/output.c: Free string before overwriting it
+
+    * ext/standard/url_scanner_ex.c: update
+
+    * ext/standard/basic_functions.c
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      main/output.c
+      main/php_output.h
+      ext/session/session.c:
+    simplify handling of variables by maintaining two strings which
+    are simply appended instead of traversing the hash table on each
+    URL/form.
+
+    also fix an unconditional segfault in rshutdown due to efree'ing
+    a static char *.
+
+    remove remove_var, add reset_vars.  move the function declarations
+    into the right header file.
+
+    * ext/standard/basic_functions.c: ret set but unused
+
+    * main/user_streams.c: these are case sensitive
+
+    * ext/standard/iptc.c: c set but unused
+
+    * ext/standard/iptc.c: inheader set but unused
+
+2002-05-04  James Cox  <james@wherewithal.com>
+
+    * main/user_streams.c: touch.
+
+    * main/user_streams.c: add $id:$ line
+
+2002-05-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/string.c:
+    block_ended/opposite_target were set but never used
+
+    * ext/standard/strnatcmp.c: don't emit code for version
+
+    * main/php_variables.c: free_index is set but never used
+
+    * main/user_streams.c: call_result is set but never used
+
+    * sapi/cli/getopt.c: ap_php_optopt is set but never used
+
+    * ext/standard/php_fopen_wrappers.h: Fix linkage of symbols
+
+    * ext/standard/image.c: entry_length was set but never used
+
+    * ext/standard/var_unserializer.c: update
+
+    * ext/standard/var_unserializer.re: rval_temp was declared but never used
+
+    * ext/standard/http_fopen_wrapper.c: redirected is set but never used
+
+    * ext/standard/url_scanner_ex.c: include url.h
+
+    * ext/standard/url_scanner_ex.re:
+    include url.h to pull in declaration of php_url_encode
+
+    * ext/standard/file.c:
+    Make this code work on compilers which don't consider the address
+    of a variable on the stack available at compile time.
+
+    * ext/standard/basic_functions.c: unused var
+
+    * ext/posix/posix.c: p is set, but never used.
+
+    * ext/mbstring/config.m4: Turn misplaced PHP_ARG_WITH into _ENABLE
+    and fix --enable-mbstring=shared
+
+    * ext/session/config.m4: Fix --enable-session=shared
+
+    * ext/xml/config.m4: Fix --enable-xml=shared
+
+2002-05-04  Stig Venaas  <venaas@uninett.no>
+
+    * ext/ldap/ldap.c:
+    Reworked result resource handling so that result is not freed until all
+    its result entry resources are freed
+
+2002-05-04  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/standard/reg.c:
+    fixed a problem that ereg_replace() couldn't match with line stand/end marker.
+
+2002-05-04  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: Forgot to dup strings.
+
+    * main/output.c: Fixed reference to freed zval string value.
+
+    * main/output.c:
+    Fixed crash when buffer is over written in ob callback. (Bug $ 12227)
+    Added check current output function check for Centent-Length header.
+
 2002-05-03  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: MFH
