@@ -1,6 +1,11 @@
 Things to do or at least think about doing in the future. Name in
 parenthesis means that person has taken on this project.
 
+Zend
+----
+    * allow foreach ($array as $k => &$val) syntax. right now we can not 
+	  traverse an array without copying each element.
+
 global
 ------
     * let every module (source-file) have it's own module & function_entry 
