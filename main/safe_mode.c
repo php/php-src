@@ -49,8 +49,11 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	int ret, nofile=0;
 	long uid=0L, gid=0L, duid=0L, dgid=0L;
 	char path[MAXPATHLEN];
-	char *s;
+	char *s, filenamecopy[MAXPATHLEN];
 	TSRMLS_FETCH();
+
+	strlcpy(filenamecopy, filename, MAXPATHLEN);
+	filename=(char *)&filenamecopy;
 
 	if (!filename) {
 		return 0; /* path must be provided */
@@ -67,7 +70,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	/* 
 	 * If given filepath is a URL, allow - safe mode stuff
 	 * related to URL's is checked in individual functions
-     */	
+	 */
 	if (!strncasecmp(filename,"http://", 7) || !strncasecmp(filename,"ftp://", 6)) {
 		return 1;
 	}
@@ -116,7 +119,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 			VCWD_REALPATH(filename, path);
 			*s = DEFAULT_SLASH;
 		} else {
-			VCWD_GETCWD(path, MAXPATHLEN);
+			VCWD_GETCWD(path, sizeof(path));
  		}
 	} /* end CHECKUID_ALLOW_ONLY_DIR */
 	
