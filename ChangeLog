@@ -1,3 +1,227 @@
+2003-06-16  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      scripts/phpize.in:
+      MFH: Fixed bug #24207: phpize wrong exit code
+
+    * scripts/phpize.in:
+      Fixed bug #24207: phpize wrong exit code
+
+    * (PHP_4_3)
+      NEWS:
+      broken caps-lock/shift key
+
+2003-06-16  Sara Golemon  <php@alphaweb.net>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN 24210
+
+    * (PHP_4_3)
+      ext/ncurses/config.m4:
+      MFH (r-1.14) Bug #24210 : assume misspelled (and thereby not found during
+      configure)
+
+    * ext/ncurses/config.m4:
+      Bug #24210 : assume misspelled (and thereby not found during configure)
+
+2003-06-16  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/tests/math/bug24142.phpt:
+      Fixed the expected result
+
+    * NEWS:
+      Nothing to see here, move along.
+
+2003-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_variables.c:
+      Fixed bug #24208
+
+2003-06-16  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      main/streams/userspace.c:
+      Add context property to userspace streams object.
+
+2003-06-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd_patch:
+      Simplify/fix logging
+
+2003-06-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/standard/tests/strings/bug24208.phpt:
+      MFH(r-1.1): added test case for bug #24208
+
+    * ext/standard/tests/strings/bug24208.phpt:
+      
+      Added test case for bug #24208
+
+2003-06-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/hyperwave/hg_comm.c:
+      Remove cast which hides a bug in the code.
+
+2003-06-16  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/streamsfuncs.c
+      main/streams/streams.c:
+      optionvalue is being copied via zval_copy_ctor, there's no need to addref
+      the original
+
+2003-06-16  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/math/bug24142.phpt:
+      
+      - Added test for bug #24142
+
+2003-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      MFH: Fixed bug #24150 (crash in imap_fetch_overview() &
+      imap_rfc822_write_address())
+
+    * ext/imap/php_imap.c:
+      Fixed bug #24150 (crash in imap_fetch_overview() &
+      imap_rfc822_write_address())
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/tests/array/bug24198.phpt:
+      MFH: Fixed bug #24198 (Invalid recursion detection in
+      array_merge_recurcive())
+
+    * ext/standard/array.c
+      ext/standard/tests/array/bug24198.phpt:
+      Fixed bug #24198 (Invalid recursion detection in array_merge_recurcive())
+
+2003-06-16  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Build.php:
+      s/verbose/debug/
+
+    * pear/PEAR/Installer.php:
+      Fix registry obj creation when no installroot is set
+
+    * pear/PEAR/Builder.php:
+      Expose phpize output
+      Increase verbosity for building process by default
+      (no need for -v)
+
+2003-06-16  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/msql/php_msql.c
+      ext/ncurses/ncurses_functions.c
+      ext/notes/php_notes.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c:
+      proto fixes
+
+2003-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * sapi/cli/php_cli.c:
+      flush after banner print
+
+2003-06-16  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/mnogosearch/php_mnogo.c:
+      1. proto fixes.
+      2, comments on possible leak : buffer calloc()-ed but not free()-d on
+      error (author will be contacted)
+
+    * ext/ming/ming.c
+      ext/ming/php_ming.h:
+      updating license to 3.0
+
+    * ext/ming/php_ming.h:
+      $Id tag added
+
+    * ext/ming/ming.c:
+      load of proto fixes
+
+    * ext/mhash/mhash.c
+      ext/mhash/php_mhash.h:
+      $Id tag added. License added tp php_mhash.h
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h:
+      added $Id tag
+
+    * ext/mcal/php_mcal.c:
+      proto fixes
+
+    * ext/iconv/iconv.c
+      ext/imap/php_imap.c:
+      proto fix
+
+2003-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/hyperwave/hw.c:
+      Hopefully fix win32 build
+
+2003-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/lang/bug21669.phpt:
+      Add test for the bug - will fail for now!
+
+2003-06-16  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c
+      ext/interbase/interbase.c:
+      proto fixes ibase_rollback and ibase_commit
+
+2003-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * tests/classes/bug23951.phpt:
+      fix test so it does not depend on variable order
+
+    * tests/lang/bug18872.phpt
+      tests/lang/bug23279.phpt
+      tests/lang/bug23384.phpt:
+      add tests for fixed bugs
+
+2003-06-16  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/dba/dba.c:
+      Fixed win32 build
+
+2003-06-16  Stanislav Malyshev  <stas@zend.com>
+
+    * configure.in:
+      default_classes belongs to ZE2 part
+
+2003-06-16  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/template.spec:
+      Better file relocation and invert post/postun logic
+
+    * pear/PEAR/Installer.php:
+      Do not create the registry obj at Installer object creation
+      (it's problematic when pear install -R <DIR> is used)
+
+2003-06-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hw.c:
+      Fixed a few remaining compiler warnings.
+
+2003-06-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dom/php_dom.c:
+      Fit the error handler into the naming scheme and get rid of trailing new
+      lines
+
 2003-06-15  Edin Kadribasic  <edink@proventum.net>
 
     * ext/xmlrpc/xmlrpc.dsp:
