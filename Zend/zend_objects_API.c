@@ -242,6 +242,11 @@ ZEND_API zval* zend_object_proxy_get(zval *property TSRMLS_DC)
 	return NULL;
 }
 
+ZEND_API zend_object_handlers *zend_get_std_object_handlers()
+{
+	return &std_object_handlers;
+}
+
 static zend_object_handlers zend_object_proxy_handlers = {
 	ZEND_OBJECTS_STORE_HANDLERS,
 	
