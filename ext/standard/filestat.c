@@ -611,9 +611,10 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 			}
 			efree(BG(CurrentStatFile));
 			BG(CurrentStatFile) = NULL;
-			if (!IS_LINK_OPERATION(type)) { /* Don't require success for link operation */
+#if HAVE_SYMLINK
+			if (!IS_LINK_OPERATION(type))  /* Don't require success for link operation */
+#endif
 				RETURN_FALSE;
-			}
 		}
 	}
 
