@@ -42,7 +42,6 @@ ZEND_API int getParameters(int ht, int param_count,...)
 	va_list ptr;
 	zval **param, *param_ptr;
 	ELS_FETCH();
-	ALS_FETCH();
 
 	p = EG(argument_stack).top_element-1;
 	arg_count = (ulong) *p;

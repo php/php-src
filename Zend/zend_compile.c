@@ -830,7 +830,6 @@ void do_begin_class_member_function_call(znode *class_name, znode *function_name
 void do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall CLS_DC)
 {
 	zend_op *opline = get_next_op(CG(active_op_array) CLS_CC);
-	ELS_FETCH();
 	
 	if (function_name->op_type==IS_CONST && !is_method && !is_dynamic_fcall) {
 		opline->opcode = ZEND_DO_FCALL;
