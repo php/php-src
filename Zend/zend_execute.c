@@ -1609,11 +1609,27 @@ send_by_ref:
 								 get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R),
 								 get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R));
 
-					FREE_OP(&opline->op1, free_op1);
 					FREE_OP(&opline->op2, free_op2);
 					if (switch_expr_is_overloaded) {
+						/* We only free op1 if this is a string offset,
+						 * Since if it is a TMP_VAR, it'll be reused by
+						 * other CASE opcodes (whereas string offsets
+						 * are allocated at each get_zval_ptr())
+						 */
+						FREE_OP(&opline->op1, free_op1);
 						Ts[opline->op1.u.var].var = NULL;
 					}
+				}
+				break;
+			case ZEND_SWITCH_FREE:
+				switch (opline->op1.op_type) {
+					case IS_VAR:
+						get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+						FREE_OP(&opline->op1, free_op1);
+						break;
+					case IS_TMP_VAR:
+						zendi_zval_dtor(Ts[opline->op1.u.var].tmp_var);
+						break;
 				}
 				break;
 			case ZEND_NEW: {
