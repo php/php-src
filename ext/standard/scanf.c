@@ -78,6 +78,7 @@
 #endif
 #include "zend_execute.h"
 #include "zend_operators.h"
+#include "zend_strtod.h"
 #include "php_globals.h"
 #include "basic_functions.h"
 #include "scanf.h"
@@ -1204,7 +1205,7 @@ PHPAPI int php_sscanf_internal(	char *string, char *format,
 				if (!(flags & SCAN_SUPPRESS)) {
 					double dvalue;
 					*end = '\0';
-					dvalue = strtod(buf, NULL);
+					dvalue = zend_strtod(buf, NULL);
 					if (numVars) {
 						current = args[objIndex++];
 						convert_to_double( *current );

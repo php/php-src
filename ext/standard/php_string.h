@@ -112,7 +112,7 @@ PHP_MINIT_FUNCTION(nl_langinfo);
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, int fold_case);
 
 #ifdef HAVE_LOCALECONV
-struct lconv *localeconv_r(struct lconv *out);
+PHPAPI struct lconv *localeconv_r(struct lconv *out);
 #endif
 
 PHPAPI char *php_strtoupper(char *s, size_t len);
