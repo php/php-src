@@ -3250,7 +3250,7 @@ PHP_FUNCTION(array_filter)
 	}
 
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument shouldbe an array");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be an array");
 		return;
 	}
 
