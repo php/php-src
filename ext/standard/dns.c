@@ -82,7 +82,11 @@ PHP_FUNCTION(gethostbyaddr)
 	addr = php_gethostbyaddr(Z_STRVAL_PP(arg));
 
 	if(addr == NULL) {
+#if HAVE_IPV6
+		php_error(E_WARNING, "Address is not a valid IPv4 or IPv6 address");
+#else
 		php_error(E_WARNING, "Address is not in a.b.c.d form");
+#endif
 		RETVAL_FALSE;
 	} else {
 		RETVAL_STRING(addr, 0);
@@ -94,9 +98,21 @@ PHP_FUNCTION(gethostbyaddr)
  */
 static char *php_gethostbyaddr(char *ip)
 {
+#if HAVE_IPV6
+	struct in6_addr addr6;
+#endif
 	struct in_addr addr;
 	struct hostent *hp;
 
+#if HAVE_IPV6
+	if (inet_pton(AF_INET6, ip, &addr6)) {
+		hp = gethostbyaddr((char *) &addr6, sizeof(addr6), AF_INET6);
+	} else if (inet_pton(AF_INET, ip, &addr)) {
+		hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+	} else {
+		return NULL;
+	}
+#else
 	addr.s_addr = inet_addr(ip);
 
 	if (addr.s_addr == -1) {
@@ -104,6 +120,7 @@ static char *php_gethostbyaddr(char *ip)
 	}
 
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+#endif
 
 	if (!hp) {
 		return estrdup(ip);
