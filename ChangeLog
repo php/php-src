@@ -1,3 +1,85 @@
+2004-04-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Missing news entries.
+
+2004-04-07  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/gd/gd.c:
+      Merged wrongly s/#ifdef/#if/
+
+    * ext/gd/gd.c:
+      Allow compilation with gdlib 1.8
+
+2004-04-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/gd/tests/bug27582_2.phpt:
+      Removed test for a problem inside the GD library.
+
+2004-04-07  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * (PHP_4_3)
+      ext/yaz/config.m4:
+      Fixed bug #27803 (YAZ lib path)
+
+2004-04-07  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/zlib/php_zlib.def:
+      Export symbols required by zlib_filter extension
+
+2004-04-07  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/xsl/php_xsl.c:
+      Fix class name
+
+    * NEWS:
+      BFN
+
+    * ext/xml/compat.c
+      ext/xml/xml.c:
+      Fix bug #27821 xml_parse segfaults when xml_set_object called from class
+      method
+      fix memleaks in compat.c
+
+2004-04-07  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Hopefully fix the debug_backtrace() code.
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Fix crash bug in zend_debug_backtrace(). No idea how come this survived
+      - for so long....
+
+2004-04-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in:
+      MFH: Revert the patch to "fix" #27664 and added more informal error msg.
+
+    * configure.in:
+      Revert the patch to "fix" #27664 and added more informal error msg.
+
+2004-04-07  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_service.c
+      ext/interbase/php_ibase_includes.h:
+      Don't define ibase_service struct type unless its member types are defined
+
+2004-04-07  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/incomplete_class.c:
+      Fix incomplete class for the new object model
+
+2004-04-07  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      developer -> lead for cellog
+
 2004-04-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/ldap/ldap.c:
