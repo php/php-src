@@ -1,3 +1,84 @@
+2001-02-22  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c: Registering Midgard constants.
+
+2001-02-22  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * tests/strings/003.phpt: removed LC_* warnin
+
+2001-02-22  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/article.c
+      ext/midgard/calendar.c
+      ext/midgard/event.c
+      ext/midgard/group.c
+      ext/midgard/mgd_group.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/midgard.c
+      ext/midgard/page.c
+      ext/midgard/person.c
+      ext/midgard/topic.c: Added mgd_walk_group_tree() function
+
+2001-02-22  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/Mail/SMTP.php
+      pear/Mail/Sendmail.php
+      pear/Mail/sendmail.php
+      pear/Mail/smtp.php
+      pear/Mail.php
+      pear/Makefile.in:
+    factory-generated classes have lowercase subclass names by our (newly
+    revised) standards.
+
+2001-02-22  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/event.c
+      ext/midgard/mgd_event.h
+      ext/midgard/mgd_internal.h
+      ext/midgard/midgard.c:
+    Added custom sort on mgd_walk_xxx_tree() function.
+
+2001-02-22  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/README: README for mnoGoSearch module updated.
+
+2001-02-22  Andi Gutmans  <andi@zend.com>
+
+    * main/main.c: - Fix indentation and remove comment.
+
+2001-02-22  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/php_mnogo.c
+      ext/mnogosearch/test.php:
+    Added Ispell routines to work with Ispell data loaded into sql tables.
+    Example updated.
+
+2001-02-22  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/string.c: Safer bin2hex
+
+    * ext/standard/exec.c: Fix #8992, patch by yasushi_takahashi@tsuken.co.jp
+
+2001-02-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hw.c:
+    - took out the HwSLS_FETCH to make it compile again on Unix
+      Is this really neccesary at this point?
+
+2001-02-22  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/crypt.c:
+    The php_rand() and php_srand() functions added in the previous commit
+    require the inclusion of php_rand.h.
+
+2001-02-22  James Moore  <James@phpuk.org>
+
+    * ext/standard/array.c
+      ext/standard/crypt.c
+      ext/standard/php_rand.h
+      ext/standard/rand.c:
+    Adding php_rand() and php_srand(seed) as a wrapper around random, lrand48 and rand.
+
 2001-02-21  Shane Caraveo  <shane@php.net>
 
     * ext/mysql/php_mysql.c:
