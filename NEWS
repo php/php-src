@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Set default include_path so PEAR files can be reached (Stig)
 - Added "pear" executable, requires CGI version installed (Stig)
 - Added extension ii for Ingres II native support. See README in ext/ii
   directory. (David H)
