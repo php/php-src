@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Thies C. Arntzen <thies@digicol.de>						  |
+   | Based on aolserver SAPI by Sascha Schumann <sascha@schumann.cx>      |
    +----------------------------------------------------------------------+
 */
 
@@ -21,6 +22,8 @@
 #include "main.h"
 
 #ifdef HAVE_PHTTPD
+
+#include "ext/standard/info.h"
  
 #ifndef ZTS
 #error PHTTPD module is only useable in thread-safe mode
@@ -30,6 +33,7 @@
 
 typedef struct {
     struct connectioninfo *cip;
+	struct stat sb;
 } phttpd_globals_struct; 
 
 static int ph_globals_id;
@@ -65,19 +69,20 @@ php_phttpd_sapi_ub_write(const char *str, uint str_length)
 
 	sent_bytes = fd_write(PHG(cip)->fd,str,str_length);
 
-	fprintf(stderr,"***php_phttpd_sapi_ub_write returned %d\n",sent_bytes);
- 
+	if (sent_bytes == -1) perror("fd_write\n");
+
     return sent_bytes;
 }
 
 static int
 php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC)
 {
-#if 0
     char *header_name, *header_content;
     char *p;
-    NSLS_FETCH();
+    PHLS_FETCH();
  
+	http_sendheaders(PHG(cip)->fd,PHG(cip), SG(sapi_headers).http_response_code, NULL);
+
     header_name = sapi_header->header;
     header_content = p = strchr(header_name, ':');
  
@@ -86,19 +91,13 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
         do {
             header_content++;
         } while (*header_content == ' ');
- 
-        if (!strcasecmp(header_name, "Content-type")) {
-            Ns_ConnSetTypeHeader(NSG(conn), header_content);
-        } else {
-            Ns_ConnSetHeaders(NSG(conn), header_name, header_content);
-        }
+
+		fd_printf(PHG(cip)->fd,"%s: %s\n",header_name,header_content);
  
         *p = ':';
     }
- 
+
     sapi_free_header(sapi_header);
-#endif
-	fprintf(stderr,"***php_phttpd_sapi_header_handler\n");
 
     return 0;
 }
@@ -106,18 +105,14 @@ php_phttpd_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_str
 static int
 php_phttpd_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
-/*
-    NSLS_FETCH();
+    PHLS_FETCH();
  
-    if(SG(sapi_headers).send_default_content_type) {
-        Ns_ConnSetRequiredHeaders(NSG(conn), "text/html", 0);
+    if (SG(sapi_headers).send_default_content_type) {
+		fd_printf(PHG(cip)->fd,"Content-Type: text/html\n");
     }
  
-    Ns_ConnFlushHeaders(NSG(conn), SG(sapi_headers).http_response_code);
-*/
+	fd_putc('\n', PHG(cip)->fd);
  
-	fprintf(stderr,"***php_phttpd_sapi_send_headers\n");
-
     return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -186,19 +181,96 @@ static sapi_module_struct sapi_module = {
     STANDARD_SAPI_MODULE_PROPERTIES
 };
 
+static void
+php_phttpd_request_ctor(PHLS_D SLS_DC)
+{
+	memset(&SG(request_info),0,sizeof(sapi_globals_struct)); /* pfusch! */
+
+    SG(request_info).query_string = PHG(cip)->hip->request;
+    SG(request_info).request_method = PHG(cip)->hip->method;
+	SG(request_info).path_translated = malloc(MAXPATHLEN+1);
+	if (url_expand(PHG(cip)->hip->url, SG(request_info).path_translated, MAXPATHLEN, &PHG(sb), NULL, NULL) == NULL) {
+		/* handle error */
+	}
+
+#if 0
+    char *server;
+    Ns_DString ds;
+    char *root;
+    int index;
+    char *tmp;
+ 
+    server = Ns_ConnServer(NSG(conn));
+ 
+    Ns_DStringInit(&ds);
+    Ns_UrlToFile(&ds, server, NSG(conn->request->url));
+ 
+    /* path_translated is the absolute path to the file */
+    SG(request_info).path_translated = strdup(Ns_DStringValue(&ds));
+    Ns_DStringFree(&ds);
+    root = Ns_PageRoot(server);
+    SG(request_info).request_uri = SG(request_info).path_translated + strlen(root);
+    SG(request_info).content_length = Ns_ConnContentLength(NSG(conn));
+    index = Ns_SetIFind(NSG(conn)->headers, "content-type");
+    SG(request_info).content_type = index == -1 ? NULL :
+        Ns_SetValue(NSG(conn)->headers, index);
+ 
+    tmp = Ns_ConnAuthUser(NSG(conn));
+    if(tmp) {
+        tmp = estrdup(tmp);
+    }
+    SG(request_info).auth_user = tmp;
+ 
+    tmp = Ns_ConnAuthPasswd(NSG(conn));
+    if(tmp) {
+        tmp = estrdup(tmp);
+    }
+    SG(request_info).auth_password = tmp;
+ 
+    NSG(data_avail) = SG(request_info).content_length;
+#endif
+}
+
+static void
+php_phttpd_request_dtor(PHLS_D SLS_DC)
+{
+    free(SG(request_info).path_translated);
+}
+
+
+int php_doit(PHLS_D SLS_DC)
+{
+	struct stat sb;
+	zend_file_handle file_handle;
+	struct httpinfo *hip = PHG(cip)->hip;
+
+	CLS_FETCH();
+	ELS_FETCH();
+	PLS_FETCH();
+
+	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
+        return -1;
+    }
+
+    file_handle.type = ZEND_HANDLE_FILENAME;
+    file_handle.filename = SG(request_info).path_translated;
+    file_handle.free_filename = 0;
+
+/*
+	php_phttpd_hash_environment(PHLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
+*/
+	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
+	php_request_shutdown(NULL);
+
+	return SG(sapi_headers).http_response_code;
+}
 
 int pm_init(const char **argv)
 {
-
-	fprintf(stderr,"***pm_init\n");
 	tsrm_startup(1, 1, 0);
-	fprintf(stderr,"***tsrm_startup\n");
 	reentrancy_startup();
-	fprintf(stderr,"***reentrancy_startup\n");
 	sapi_startup(&sapi_module);
-	fprintf(stderr,"***sapi_startup\n");
     sapi_module.startup(&sapi_module);
-	fprintf(stderr,"***sapi_module.startup\n");
 
 	ph_globals_id = ts_allocate_id(sizeof(phttpd_globals_struct), NULL, NULL);
 
@@ -210,62 +282,23 @@ void pm_exit(void)
 	fprintf(stderr,"***pm_exit\n");
 }
 
-int php_doit(struct connectioninfo *cip)
-{
-	char path[MAXPATHLEN];
-	struct stat sb;
-	zend_file_handle file_handle;
-	struct httpinfo *hip = cip->hip;
-
-	CLS_FETCH();
-	ELS_FETCH();
-	PLS_FETCH();
-	SLS_FETCH();
-	PHLS_FETCH();
-
-	if (debug > 1) {
-		fprintf(stderr, "*** php/php_doit() called ***\n");
-	}
-
-	if (url_expand(hip->url, path, sizeof(path), &sb, NULL, NULL) == NULL) {
-		return -1;
-	}
-
-	PHG(cip) = cip;
-
-	if (debug > 1) {
-		fprintf(stderr, "*** php/php_request_startup for  %s ***\n",path);
-	}
-
-	memset(&SG(request_info),0,sizeof(sapi_globals_struct)); /* pfusch! */
-
-	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
-        return -1;
-    }
-
-	if (debug > 1) {
-		fprintf(stderr, "*** php/php_doit/script %s ***\n",path);
-	}
-
-    file_handle.type = ZEND_HANDLE_FILENAME;
-    file_handle.filename = path;
-    file_handle.free_filename = 0;
-
-	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
-
-	php_request_shutdown(NULL);
-
-	return -1;
-}
-
 int pm_request(struct connectioninfo *cip)
 {
 	struct httpinfo *hip = cip->hip;
+	int status;
+	PHLS_FETCH();
+	SLS_FETCH();
 
 	if (strcasecmp(hip->method, "GET") == 0 || 
 	    strcasecmp(hip->method, "HEAD") == 0 ||
 	    strcasecmp(hip->method, "POST") == 0) {
-		return php_doit(cip);
+		PHG(cip) = cip;
+		
+		php_phttpd_request_ctor(PHLS_C SLS_CC);
+		status = php_doit(PHLS_C SLS_CC);
+		php_phttpd_request_dtor(PHLS_C SLS_CC);
+
+		return status;	
 	} else {
 		return -2;
 	}
