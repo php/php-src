@@ -5,7 +5,7 @@ dnl
 dnl Suppose we need FlatFile if no support or only CDB is used.
 
 AC_DEFUN(PHP_DBA_STD_BEGIN,[
-  unset THIS_INCLUDE THIS_INC_DIR THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
+  unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT
 ])
 
 AC_DEFUN(PHP_TEMP_LDFLAGS,[
@@ -35,11 +35,8 @@ AC_DEFUN(PHP_DBA_STD_CHECK,[
 
 dnl Attach THIS_x to DBA_x
 AC_DEFUN(PHP_DBA_STD_ATTACH,[
-  if test -n "$THIS_INC_DIR" -a "$THIS_PREFIX" != "/usr"; then
-    PHP_ADD_INCLUDE($THIS_INC_DIR)
-  fi
   PHP_ADD_LIBRARY_WITH_PATH($THIS_LIBS, $THIS_LFLAGS, DBA_SHARED_LIBADD)
-  unset THIS_INCLUDE THIS_INC_DIR THIS_LIBS THIS_LFLAGS THIS_PREFIX
+  unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX
 ])
 
 dnl Print the result message
@@ -76,7 +73,6 @@ AC_ARG_WITH(gdbm,
       if test -f "$i/include/gdbm.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/include/gdbm.h
-        THIS_INC_DIR=$i/include
         break
       fi
     done
@@ -85,6 +81,7 @@ AC_ARG_WITH(gdbm,
       unset ac_cv_lib_gdbm_gdbm_open
       PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
         AC_CHECK_LIB(gdbm, gdbm_open, [
+          AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
           AC_DEFINE(DBA_GDBM, 1, [ ]) 
           THIS_LIBS=gdbm
           break
@@ -116,10 +113,10 @@ AC_ARG_WITH(ndbm,
     done
     
     if test -n "$THIS_INCLUDE"; then
-      AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
       for LIB in ndbm db1 c; do
         PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
           AC_CHECK_LIB($LIB, dbm_open, [
+            AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
             AC_DEFINE(DBA_NDBM,1, [ ]) 
             THIS_LIBS=$LIB
             break
@@ -301,15 +298,26 @@ AC_ARG_WITH(dbm,
       if test -f "$i/include/dbm.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/include/dbm.h
-        THIS_INC_DIR=$i/include
         break
+      elif test -f "$i/include/gdbm/dbm.h"; then
+        THIS_PREFIX=$i
+        THIS_INCLUDE=$i/include/gdbm/dbm.h
       fi
     done
 
     if test -n "$THIS_INCLUDE"; then
-      for LIB in db1 dbm c; do
+      for LIB in gdbm dbm c; do
         PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
           AC_CHECK_LIB($LIB, dbminit, [
+            AC_MSG_CHECKING(for DBM using GDBM)
+            AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+            if test "$LIB" = "gdbm"; then
+              AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
+              AC_MSG_RESULT(yes)
+            else
+              AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
+              AC_MSG_RESULT(no)
+            fi
             AC_DEFINE(DBA_DBM,1,[ ]) 
             THIS_LIBS=$LIB
             break
@@ -344,7 +352,6 @@ AC_ARG_WITH(cdb,
       if test -f "$i/include/cdb.h"; then
         THIS_PREFIX=$i
         THIS_INCLUDE=$i/include/cdb.h
-        THIS_INC_DIR=$i/include
         break
       fi
     done
@@ -353,6 +360,7 @@ AC_ARG_WITH(cdb,
       for LIB in cdb c; do
         PHP_TEMP_LDFLAGS(-L$THIS_PREFIX/lib,[
           AC_CHECK_LIB($LIB, cdb_read, [
+            AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
             AC_DEFINE(DBA_CDB,1,[ ]) 
             THIS_LIBS=$LIB
             break

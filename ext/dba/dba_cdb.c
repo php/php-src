@@ -35,12 +35,13 @@
 #include <fcntl.h>
 
 #if DBA_CDB_BUILTIN
-#include "libcdb/cdb.h"
-#include "libcdb/cdb_make.h"
-#include "libcdb/uint32.h"
+# include "libcdb/cdb.h"
+# include "libcdb/cdb_make.h"
+# include "libcdb/uint32.h"
 #else
-#include <cdb.h>
-#include <uint32.h>
+# ifdef CDB_INCLUDE_FILE
+#  include CDB_INCLUDE_FILE
+# endif
 #endif
 
 #define CDB_INFO \
