@@ -33,7 +33,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler);
 MBSTRING_API SAPI_TREAT_DATA_FUNC(mbstr_treat_data);
 
 int _php_mb_enable_encoding_translation(int flag);
-int _php_mb_encoding_handler_ex(zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC);
+int _php_mb_encoding_handler_ex(int data_type, zval *arg, char *res, char *separator, int force_register_globals, int report_errors TSRMLS_DC);
 /* }}} */
 #endif /* HAVE_MBSTRING */
 
