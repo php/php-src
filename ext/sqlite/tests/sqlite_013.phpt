@@ -39,6 +39,9 @@ while (sqlite_has_more($r)) {
 	var_dump(sqlite_column($r, 'a'));
 	sqlite_next($r);
 }
+
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECT--

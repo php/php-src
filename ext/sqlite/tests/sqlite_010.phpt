@@ -36,6 +36,9 @@ while (sqlite_has_more($r)) {
 	var_dump(sqlite_current($r, SQLITE_NUM));
 	sqlite_next($r);
 }
+
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECT--

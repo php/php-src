@@ -49,6 +49,8 @@ do {
   var_dump(sqlite_current($r));
 } while(sqlite_has_prev($r));
 
+sqlite_close($db);
+
 echo "====DONE!====\n";
 ?>
 --EXPECTF--

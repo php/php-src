@@ -21,6 +21,7 @@ var_dump(sqlite_single_query($db, "SELECT * FROM test db WHERE id < 4"));
 var_dump(sqlite_single_query($db, "SELECT * FROM test_db WHERE id=999999"));
 var_dump(sqlite_single_query($db, "SELECT id FROM test_db WHERE id=5", FALSE));
 
+sqlite_close($db);
 ?>
 --EXPECTF--
 string(1) "5"
