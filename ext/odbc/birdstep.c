@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Nikolay P. Romanyuk <mag@redcom.ru>                          |
+   | Authors: Nikolay P. Romanyuk <mag@redcom.ru>                         |
    +----------------------------------------------------------------------+
  */
 
@@ -20,7 +20,7 @@
 
 /*
  * TODO:
- * velocis_fetch_into(),
+ * birdstep_fetch_into(),
  * Check all on real life apps.
  */
 
@@ -44,42 +44,54 @@
 # define THREAD_LS
 #endif
 
-#ifdef HAVE_VELOCIS
-#include "php_velocis.h"
+#ifdef HAVE_BIRDSTEP
+#include "php_birdstep.h"
 #include "ext/standard/info.h"
 
-function_entry velocis_functions[] = {
-	PHP_FE(velocis_connect,								NULL)
-	PHP_FE(velocis_close,								NULL)
-	PHP_FE(velocis_exec,								NULL)
-	PHP_FE(velocis_fetch,								NULL)
-	PHP_FE(velocis_result,								NULL)
-	PHP_FE(velocis_freeresult,							NULL)
-	PHP_FE(velocis_autocommit,							NULL)
-	PHP_FE(velocis_off_autocommit,						NULL)
-	PHP_FE(velocis_commit,								NULL)
-	PHP_FE(velocis_rollback,							NULL)
-	PHP_FE(velocis_fieldnum,							NULL)
-	PHP_FE(velocis_fieldname,							NULL)
+function_entry birdstep_functions[] = {
+	PHP_FE(birdstep_connect,								NULL)
+	PHP_FE(birdstep_close,								NULL)
+	PHP_FE(birdstep_exec,								NULL)
+	PHP_FE(birdstep_fetch,								NULL)
+	PHP_FE(birdstep_result,								NULL)
+	PHP_FE(birdstep_freeresult,							NULL)
+	PHP_FE(birdstep_autocommit,							NULL)
+	PHP_FE(birdstep_off_autocommit,						NULL)
+	PHP_FE(birdstep_commit,								NULL)
+	PHP_FE(birdstep_rollback,							NULL)
+	PHP_FE(birdstep_fieldnum,							NULL)
+	PHP_FE(birdstep_fieldname,							NULL)
+	PHP_FALIAS(velocis_connect,	 birdstep_connect,	NULL)
+	PHP_FALIAS(velocis_close,	birdstep_close,	NULL)
+	PHP_FALIAS(velocis_exec,	birdstep_exec,	NULL)
+	PHP_FALIAS(velocis_fetch,	birdstep_fetch,	NULL)
+	PHP_FALIAS(velocis_result,	birdstep_result,	NULL)
+	PHP_FALIAS(velocis_freeresult,	birdstep_freeresult,	NULL)
+	PHP_FALIAS(velocis_autocommit,	birdstep_autocommit,	NULL)
+	PHP_FALIAS(velocis_off_autocommit,	birdstep_off_autocommit,	NULL)
+	PHP_FALIAS(velocis_commit,	birdstep_commit,	NULL)
+	PHP_FALIAS(velocis_rollback,	birdstep_rollback,	NULL)
+	PHP_FALIAS(velocis_fieldnum,	birdstep_fieldnum,	NULL)
+	PHP_FALIAS(velocis_fieldname,	birdstep_fieldname,	NULL)
 	{NULL, NULL, NULL}
 };
 
-zend_module_entry velocis_module_entry = {
+zend_module_entry birdstep_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"velocis", velocis_functions, PHP_MINIT(velocis), PHP_MSHUTDOWN(velocis),
-		PHP_RINIT(velocis), NULL, PHP_MINFO(velocis), NO_VERSION_YET,
+	"birdstep", birdstep_functions, PHP_MINIT(birdstep), PHP_MSHUTDOWN(birdstep),
+		PHP_RINIT(birdstep), NULL, PHP_MINFO(birdstep), NO_VERSION_YET,
         STANDARD_MODULE_PROPERTIES
 };
 
 
 #ifdef COMPILE_DL_ODBC
-ZEND_GET_MODULE(velocis)
+ZEND_GET_MODULE(birdstep)
 #endif
 
-THREAD_LS velocis_module php_velocis_module;
+THREAD_LS birdstep_module php_birdstep_module;
 THREAD_LS static HENV henv;
 
-static void _close_velocis_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void _close_birdstep_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	VConn *conn = (VConn *)rsrc->ptr;
 
@@ -88,7 +100,7 @@ static void _close_velocis_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 }
 
-static void _free_velocis_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+static void _free_birdstep_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	Vresult *res = (Vresult *)rsrc->ptr;
 
@@ -105,34 +117,34 @@ static void _free_velocis_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 }
 
-PHP_MINIT_FUNCTION(velocis)
+PHP_MINIT_FUNCTION(birdstep)
 {
 	SQLAllocEnv(&henv);
 
-	if ( cfg_get_long("velocis.max_links",&php_velocis_module.max_links) == FAILURE ) {
-		php_velocis_module.max_links = -1;
+	if ( cfg_get_long("birdstep.max_links",&php_birdstep_module.max_links) == FAILURE ) {
+		php_birdstep_module.max_links = -1;
 	}
-	php_velocis_module.num_links = 0;
-	php_velocis_module.le_link   = zend_register_list_destructors_ex(_close_velocis_link, NULL, "velocis link", module_number);
-	php_velocis_module.le_result = zend_register_list_destructors_ex(_free_velocis_result, NULL, "velocis result", module_number);
+	php_birdstep_module.num_links = 0;
+	php_birdstep_module.le_link   = zend_register_list_destructors_ex(_close_birdstep_link, NULL, "birdstep link", module_number);
+	php_birdstep_module.le_result = zend_register_list_destructors_ex(_free_birdstep_result, NULL, "birdstep result", module_number);
 
 	return SUCCESS;
 }
 
-PHP_RINIT_FUNCTION(velocis)
+PHP_RINIT_FUNCTION(birdstep)
 {
 	return SUCCESS;
 }
 
 
-PHP_MINFO_FUNCTION(velocis)
+PHP_MINFO_FUNCTION(birdstep)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "RAIMA Velocis Support", "enabled" );
+	php_info_print_table_row(2, "RAIMA Birdstep Support", "enabled" );
 	php_info_print_table_end();
 }
 
-PHP_MSHUTDOWN_FUNCTION(velocis)
+PHP_MSHUTDOWN_FUNCTION(birdstep)
 {
 	SQLFreeEnv(henv);
 	return SUCCESS;
@@ -141,11 +153,11 @@ PHP_MSHUTDOWN_FUNCTION(velocis)
 /* Some internal functions. Connections and result manupulate */
 
 static int
-velocis_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
+birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 {
 	int ind;
 
-	ind = zend_list_insert(conn,php_velocis_module.le_link);
+	ind = zend_list_insert(conn,php_birdstep_module.le_link);
 	conn->hdbc = hdbc;
 	conn->index = ind;
 
@@ -153,30 +165,30 @@ velocis_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
 }
 
 static VConn *
-velocis_find_conn(HashTable *list,int ind)
+birdstep_find_conn(HashTable *list,int ind)
 {
 	VConn *conn;
 	int type;
 
 	conn = zend_list_find(ind,&type);
-	if ( !conn || type != php_velocis_module.le_link ) {
+	if ( !conn || type != php_birdstep_module.le_link ) {
 		return(NULL);
 	}
 	return(conn);
 }
 
 static void
-velocis_del_conn(HashTable *list,int ind)
+birdstep_del_conn(HashTable *list,int ind)
 {
 	zend_list_delete(ind);
 }
 
 static int
-velocis_add_result(HashTable *list,Vresult *res,VConn *conn)
+birdstep_add_result(HashTable *list,Vresult *res,VConn *conn)
 {
 	int ind;
 
-	ind = zend_list_insert(res,php_velocis_module.le_result);
+	ind = zend_list_insert(res,php_birdstep_module.le_result);
 	res->conn = conn;
 	res->index = ind;
 
@@ -184,29 +196,29 @@ velocis_add_result(HashTable *list,Vresult *res,VConn *conn)
 }
 
 static Vresult *
-velocis_find_result(HashTable *list,int ind)
+birdstep_find_result(HashTable *list,int ind)
 {
 	Vresult *res;
 	int type;
 
 	res = zend_list_find(ind,&type);
-	if ( !res || type != php_velocis_module.le_result ) {
+	if ( !res || type != php_birdstep_module.le_result ) {
 		return(NULL);
 	}
 	return(res);
 }
 
 static void
-velocis_del_result(HashTable *list,int ind)
+birdstep_del_result(HashTable *list,int ind)
 {
 	zend_list_delete(ind);
 }
 
 /* Users functions */
 
-/* {{{ proto int velocis_connect(string server, string user, sting pass)
+/* {{{ proto int birdstep_connect(string server, string user, sting pass)
  */
-PHP_FUNCTION(velocis_connect)
+PHP_FUNCTION(birdstep_connect)
 {
 	pval *serv,*user,*pass;
 	char *Serv = NULL;
@@ -217,8 +229,8 @@ PHP_FUNCTION(velocis_connect)
 	VConn *new;
 	long ind;
 
-	if ( php_velocis_module.max_links != -1 && php_velocis_module.num_links == php_velocis_module.max_links ) {
-		php_error(E_WARNING,"Velocis: Too many open connections (%d)",php_velocis_module.num_links);
+	if ( php_birdstep_module.max_links != -1 && php_birdstep_module.num_links == php_birdstep_module.max_links ) {
+		php_error(E_WARNING,"Birdstep: Too many open connections (%d)",php_birdstep_module.num_links);
 		RETURN_FALSE;
 	}
 	if ( ZEND_NUM_ARGS() != 3 ||
@@ -233,30 +245,30 @@ PHP_FUNCTION(velocis_connect)
 	Pass = Z_STRVAL_P(pass);
 	stat = SQLAllocConnect(henv,&hdbc);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Velocis: Could not allocate connection handle");
+		php_error(E_WARNING,"Birdstep: Could not allocate connection handle");
 		RETURN_FALSE;
 	}
 	stat = SQLConnect(hdbc,Serv,SQL_NTS,User,SQL_NTS,Pass,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: Could not connect to server \"%s\" for %s",Serv,User);
+		php_error(E_WARNING,"Birdstep: Could not connect to server \"%s\" for %s",Serv,User);
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
 	new = (VConn *)emalloc(sizeof(VConn));
 	if ( new == NULL ) {
-		php_error(E_WARNING,"Velocis: Out of memory for store connection");
+		php_error(E_WARNING,"Birdstep: Out of memory for store connection");
 		SQLFreeConnect(hdbc);
 		RETURN_FALSE;
 	}
-	ind = velocis_add_conn(list,new,hdbc);
-	php_velocis_module.num_links++;
+	ind = birdstep_add_conn(list,new,hdbc);
+	php_birdstep_module.num_links++;
 	RETURN_LONG(ind);
 }
 /* }}} */
 
-/* {{{ proto bool velocis_close(int id)
+/* {{{ proto bool birdstep_close(int id)
  */
-PHP_FUNCTION(velocis_close)
+PHP_FUNCTION(birdstep_close)
 {
 	pval *id;
 	VConn *conn;
@@ -265,22 +277,22 @@ PHP_FUNCTION(velocis_close)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,Z_LVAL_P(id));
+	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	SQLDisconnect(conn->hdbc);
 	SQLFreeConnect(conn->hdbc);
-	velocis_del_conn(list,Z_LVAL_P(id));
-	php_velocis_module.num_links--;
+	birdstep_del_conn(list,Z_LVAL_P(id));
+	php_birdstep_module.num_links--;
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto int velocis_exec(int index, string exec_str)
+/* {{{ proto int birdstep_exec(int index, string exec_str)
  */
-PHP_FUNCTION(velocis_exec)
+PHP_FUNCTION(birdstep_exec)
 {
 	pval *ind,*exec_str;
 	char *query = NULL;
@@ -295,9 +307,9 @@ PHP_FUNCTION(velocis_exec)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	conn = velocis_find_conn(list,Z_LVAL_P(ind));
+	conn = birdstep_find_conn(list,Z_LVAL_P(ind));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(ind));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	convert_to_string(exec_str);
@@ -305,18 +317,18 @@ PHP_FUNCTION(velocis_exec)
 
 	res = (Vresult *)emalloc(sizeof(Vresult));
 	if ( res == NULL ) {
-		php_error(E_WARNING,"Velocis: Out of memory for result");
+		php_error(E_WARNING,"Birdstep: Out of memory for result");
 		RETURN_FALSE;
 	}
 	stat = SQLAllocStmt(conn->hdbc,&res->hstmt);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: SQLAllocStmt return %d",stat);
+		php_error(E_WARNING,"Birdstep: SQLAllocStmt return %d",stat);
 		efree(res);
 		RETURN_FALSE;
 	}
 	stat = SQLExecDirect(res->hstmt,query,SQL_NTS);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: Can not execute \"%s\" query",query);
+		php_error(E_WARNING,"Birdstep: Can not execute \"%s\" query",query);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -324,7 +336,7 @@ PHP_FUNCTION(velocis_exec)
 	/* Success query */
 	stat = SQLNumResultCols(res->hstmt,&cols);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
+		php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
 		SQLFreeStmt(res->hstmt,SQL_DROP);
 		efree(res);
 		RETURN_FALSE;
@@ -332,7 +344,7 @@ PHP_FUNCTION(velocis_exec)
 	if ( !cols ) { /* Was INSERT, UPDATE, DELETE, etc. query */
 		stat = SQLRowCount(res->hstmt,&rows);
 		if ( stat != SQL_SUCCESS ) {
-			php_error(E_WARNING,"Velocis: SQLNumResultCols return %d",stat);
+			php_error(E_WARNING,"Birdstep: SQLNumResultCols return %d",stat);
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -343,7 +355,7 @@ PHP_FUNCTION(velocis_exec)
 	} else {  /* Was SELECT query */
 		res->values = (VResVal *)emalloc(sizeof(VResVal)*cols);
 		if ( res->values == NULL ) {
-			php_error(E_WARNING,"Velocis: Out of memory for result columns");
+			php_error(E_WARNING,"Birdstep: Out of memory for result columns");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
 			efree(res);
 			RETURN_FALSE;
@@ -374,14 +386,14 @@ PHP_FUNCTION(velocis_exec)
 		}
 	}
 	res->fetched = 0;
-	indx = velocis_add_result(list,res,conn);
+	indx = birdstep_add_result(list,res,conn);
 	RETURN_LONG(indx);
 }
 /* }}} */
 
-/* {{{ proto bool velocis_fetch(int index)
+/* {{{ proto bool birdstep_fetch(int index)
  */
-PHP_FUNCTION(velocis_fetch)
+PHP_FUNCTION(birdstep_fetch)
 {
 	pval *ind;
 	Vresult *res;
@@ -393,21 +405,21 @@ PHP_FUNCTION(velocis_fetch)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,Z_LVAL_P(ind));
+	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d)",Z_LVAL_P(ind));
+		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 	if ( stat == SQL_NO_DATA_FOUND ) {
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		velocis_del_result(list,Z_LVAL_P(ind));
+		birdstep_del_result(list,Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: SQLFetch return error");
+		php_error(E_WARNING,"Birdstep: SQLFetch return error");
 		SQLFreeStmt(res->hstmt,SQL_DROP);
-		velocis_del_result(list,Z_LVAL_P(ind));
+		birdstep_del_result(list,Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	res->fetched = 1;
@@ -415,9 +427,9 @@ PHP_FUNCTION(velocis_fetch)
 }
 /* }}} */
 
-/* {{{ proto mixed velocis_result(int index, int col)
+/* {{{ proto mixed birdstep_result(int index, int col)
  */
-PHP_FUNCTION(velocis_result)
+PHP_FUNCTION(birdstep_result)
 {
 	pval *ind,*col;
 	Vresult *res;
@@ -432,9 +444,9 @@ PHP_FUNCTION(velocis_result)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,Z_LVAL_P(ind));
+	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
+		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	if ( Z_TYPE_P(col) == IS_STRING ) {
@@ -456,7 +468,7 @@ PHP_FUNCTION(velocis_result)
 		}
 	} else {
 		if ( indx < 0 || indx >= res->numcols ) {
-			php_error(E_WARNING,"Velocis: Field index not in range");
+			php_error(E_WARNING,"Birdstep: Field index not in range");
 			RETURN_FALSE;
 		}
 	}
@@ -464,13 +476,13 @@ PHP_FUNCTION(velocis_result)
 		stat = SQLExtendedFetch(res->hstmt,SQL_FETCH_NEXT,1,&row,RowStat);
 		if ( stat == SQL_NO_DATA_FOUND ) {
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			velocis_del_result(list,Z_LVAL_P(ind));
+			birdstep_del_result(list,Z_LVAL_P(ind));
 			RETURN_FALSE;
 		}
 		if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-			php_error(E_WARNING,"Velocis: SQLFetch return error");
+			php_error(E_WARNING,"Birdstep: SQLFetch return error");
 			SQLFreeStmt(res->hstmt,SQL_DROP);
-			velocis_del_result(list,Z_LVAL_P(ind));
+			birdstep_del_result(list,Z_LVAL_P(ind));
 			RETURN_FALSE;
 		}
 		res->fetched = 1;
@@ -493,13 +505,13 @@ l1:
 				res->values[indx].value,4095,&res->values[indx].vallen);
 			if ( stat == SQL_NO_DATA_FOUND ) {
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				velocis_del_result(list,Z_LVAL_P(ind));
+				birdstep_del_result(list,Z_LVAL_P(ind));
 				RETURN_FALSE;
 			}
 			if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-				php_error(E_WARNING,"Velocis: SQLGetData return error");
+				php_error(E_WARNING,"Birdstep: SQLGetData return error");
 				SQLFreeStmt(res->hstmt,SQL_DROP);
-				velocis_del_result(list,Z_LVAL_P(ind));
+				birdstep_del_result(list,Z_LVAL_P(ind));
 				RETURN_FALSE;
 			}
 			if ( res->values[indx].valtype == SQL_LONGVARCHAR ) {
@@ -515,9 +527,9 @@ l1:
 }
 /* }}} */
 
-/* {{{ proto bool velocis_freeresult(int index)
+/* {{{ proto bool birdstep_freeresult(int index)
  */
-PHP_FUNCTION(velocis_freeresult)
+PHP_FUNCTION(birdstep_freeresult)
 {
 	pval *ind;
 	Vresult *res;
@@ -526,20 +538,20 @@ PHP_FUNCTION(velocis_freeresult)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,Z_LVAL_P(ind));
+	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d)",Z_LVAL_P(ind));
+		php_error(E_WARNING,"Birdstep: Not result index (%d)",Z_LVAL_P(ind));
 		RETURN_FALSE;
 	}
 	SQLFreeStmt(res->hstmt,SQL_DROP);
-	velocis_del_result(list,Z_LVAL_P(ind));
+	birdstep_del_result(list,Z_LVAL_P(ind));
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool velocis_autocommit(int index)
+/* {{{ proto bool birdstep_autocommit(int index)
  */
-PHP_FUNCTION(velocis_autocommit)
+PHP_FUNCTION(birdstep_autocommit)
 {
 	pval *id;
 	RETCODE stat;
@@ -549,23 +561,23 @@ PHP_FUNCTION(velocis_autocommit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,Z_LVAL_P(id));
+	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_ON);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: Set autocommit_on option failure");
+		php_error(E_WARNING,"Birdstep: Set autocommit_on option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool velocis_off_autocommit(int index)
+/* {{{ proto bool birdstep_off_autocommit(int index)
  */
-PHP_FUNCTION(velocis_off_autocommit)
+PHP_FUNCTION(birdstep_off_autocommit)
 {
 	pval *id;
 	RETCODE stat;
@@ -575,23 +587,23 @@ PHP_FUNCTION(velocis_off_autocommit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,Z_LVAL_P(id));
+	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLSetConnectOption(conn->hdbc,SQL_AUTOCOMMIT,SQL_AUTOCOMMIT_OFF);
 	if ( stat != SQL_SUCCESS && stat != SQL_SUCCESS_WITH_INFO ) {
-		php_error(E_WARNING,"Velocis: Set autocommit_off option failure");
+		php_error(E_WARNING,"Birdstep: Set autocommit_off option failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool velocis_commit(int index)
+/* {{{ proto bool birdstep_commit(int index)
  */
-PHP_FUNCTION(velocis_commit)
+PHP_FUNCTION(birdstep_commit)
 {
 	pval *id;
 	RETCODE stat;
@@ -601,23 +613,23 @@ PHP_FUNCTION(velocis_commit)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,Z_LVAL_P(id));
+	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_COMMIT);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Velocis: Commit failure");
+		php_error(E_WARNING,"Birdstep: Commit failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool velocis_rollback(int index)
+/* {{{ proto bool birdstep_rollback(int index)
  */
-PHP_FUNCTION(velocis_rollback)
+PHP_FUNCTION(birdstep_rollback)
 {
 	pval *id;
 	RETCODE stat;
@@ -627,23 +639,23 @@ PHP_FUNCTION(velocis_rollback)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(id);
-	conn = velocis_find_conn(list,Z_LVAL_P(id));
+	conn = birdstep_find_conn(list,Z_LVAL_P(id));
 	if ( !conn ) {
-		php_error(E_WARNING,"Velocis: Not connection index (%d)",Z_LVAL_P(id));
+		php_error(E_WARNING,"Birdstep: Not connection index (%d)",Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	stat = SQLTransact(NULL,conn->hdbc,SQL_ROLLBACK);
 	if ( stat != SQL_SUCCESS ) {
-		php_error(E_WARNING,"Velocis: Rollback failure");
+		php_error(E_WARNING,"Birdstep: Rollback failure");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto string velocis_fieldname(int index, int col)
+/* {{{ proto string birdstep_fieldname(int index, int col)
  */
-PHP_FUNCTION(velocis_fieldname)
+PHP_FUNCTION(birdstep_fieldname)
 {
 	pval *ind,*col;
 	Vresult *res;
@@ -653,24 +665,24 @@ PHP_FUNCTION(velocis_fieldname)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,Z_LVAL_P(ind));
+	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
+		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	convert_to_long(col);
 	indx = Z_LVAL_P(col);
 	if ( indx < 0 || indx >= res->numcols ) {
-		php_error(E_WARNING,"Velocis: Field index not in range");
+		php_error(E_WARNING,"Birdstep: Field index not in range");
 		RETURN_FALSE;
 	}
 	RETURN_STRING(res->values[indx].name,TRUE);
 }
 /* }}} */
 
-/* {{{ proto int velocis_fieldnum(int index)
+/* {{{ proto int birdstep_fieldnum(int index)
  */
-PHP_FUNCTION(velocis_fieldnum)
+PHP_FUNCTION(birdstep_fieldnum)
 {
 	pval *ind;
 	Vresult *res;
@@ -679,16 +691,16 @@ PHP_FUNCTION(velocis_fieldnum)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long(ind);
-	res = velocis_find_result(list,Z_LVAL_P(ind));
+	res = birdstep_find_result(list,Z_LVAL_P(ind));
 	if ( !res ) {
-		php_error(E_WARNING,"Velocis: Not result index (%d),Z_LVAL_P(ind)");
+		php_error(E_WARNING,"Birdstep: Not result index (%d),Z_LVAL_P(ind)");
 		RETURN_FALSE;
 	}
 	RETURN_LONG(res->numcols);
 }
 /* }}} */
 
-#endif /* HAVE_VELOCIS */
+#endif /* HAVE_BIRDSTEP */
 
 /*
  * Local variables:

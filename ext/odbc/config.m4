@@ -290,26 +290,26 @@ AC_ARG_WITH(empress-bcs,
 fi
 
 if test -z "$ODBC_TYPE"; then
-AC_MSG_CHECKING(for Velocis support)
-AC_ARG_WITH(velocis,
-[  --with-velocis[=DIR]    Include Velocis support.  DIR is the Velocis base
-                          install directory, defaults to /usr/local/velocis.],
+AC_MSG_CHECKING(for Birdstep support)
+AC_ARG_WITH(birdstep,
+[  --with-birdstep[=DIR]    Include Birdstep support.  DIR is the Birdstep base
+                          install directory, defaults to /usr/local/birdstep.],
 [
   PHP_WITH_SHARED
 
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
-        ODBC_INCDIR=/usr/local/velocis/include
-        ODBC_LIBDIR=/usr/local/velocis/lib
+        ODBC_INCDIR=/usr/local/birdstep/include
+        ODBC_LIBDIR=/usr/local/birdstep/lib
     else
         ODBC_INCDIR=$withval/include
         ODBC_LIBDIR=$withval/lib
     fi
     ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_TYPE=velocis
+    ODBC_TYPE=birdstep
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
-    AC_DEFINE(HAVE_VELOCIS,1,[ ])
+    AC_DEFINE(HAVE_BIRDSTEP,1,[ ])
 
     AC_MSG_RESULT(yes)
   else

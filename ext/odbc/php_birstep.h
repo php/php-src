@@ -12,16 +12,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Nikolay P. Romanyuk <mag@redcom.ru>                          |
+   | Authors: Nikolay P. Romanyuk <mag@redcom.ru>                         |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef PHP_VELOCIS_H
-#define PHP_VELOCIS_H
+#ifndef PHP_BIRDSTEP_H
+#define PHP_BIRDSTEP_H
 
-#if defined(HAVE_VELOCIS) && !HAVE_UODBC
+#if defined(HAVE_BIRDSTEP) && !HAVE_UODBC
 #define UNIX
 #include <sql.h>
 #include <sqlext.h>
@@ -51,38 +51,38 @@ typedef struct {
 	long num_links;
 	long max_links;
 	int le_link,le_result;
-} velocis_module;
+} birdstep_module;
 
-extern zend_module_entry velocis_module_entry;
-#define velocis_module_ptr &velocis_module_entry
+extern zend_module_entry birdstep_module_entry;
+#define birdstep_module_ptr &birdstep_module_entry
 
-/* velocis.c functions */
-PHP_MINIT_FUNCTION(velocis);
-PHP_RINIT_FUNCTION(velocis);
-PHP_MINFO_FUNCTION(velocis);
-PHP_MSHUTDOWN_FUNCTION(velocis);
+/* birdstep.c functions */
+PHP_MINIT_FUNCTION(birdstep);
+PHP_RINIT_FUNCTION(birdstep);
+PHP_MINFO_FUNCTION(birdstep);
+PHP_MSHUTDOWN_FUNCTION(birdstep);
 
-PHP_FUNCTION(velocis_connect);
-PHP_FUNCTION(velocis_close);
-PHP_FUNCTION(velocis_exec);
-PHP_FUNCTION(velocis_fetch);
-PHP_FUNCTION(velocis_result);
-PHP_FUNCTION(velocis_freeresult);
-PHP_FUNCTION(velocis_autocommit);
-PHP_FUNCTION(velocis_off_autocommit);
-PHP_FUNCTION(velocis_commit);
-PHP_FUNCTION(velocis_rollback);
-PHP_FUNCTION(velocis_fieldnum);
-PHP_FUNCTION(velocis_fieldname);
+PHP_FUNCTION(birdstep_connect);
+PHP_FUNCTION(birdstep_close);
+PHP_FUNCTION(birdstep_exec);
+PHP_FUNCTION(birdstep_fetch);
+PHP_FUNCTION(birdstep_result);
+PHP_FUNCTION(birdstep_freeresult);
+PHP_FUNCTION(birdstep_autocommit);
+PHP_FUNCTION(birdstep_off_autocommit);
+PHP_FUNCTION(birdstep_commit);
+PHP_FUNCTION(birdstep_rollback);
+PHP_FUNCTION(birdstep_fieldnum);
+PHP_FUNCTION(birdstep_fieldname);
 
-extern velocis_module php_velocis_module;
+extern birdstep_module php_birdstep_module;
 
 #else
 
-#define velocis_module_ptr NULL
+#define birdstep_module_ptr NULL
 
-#endif /* HAVE_VELOCIS */
-#endif /* PHP_VELOCIS_H */
+#endif /* HAVE_BIRDSTEP */
+#endif /* PHP_BIRDSTEP_H */
 
 /*
  * Local variables:

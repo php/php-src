@@ -15,7 +15,7 @@
    | Authors: Stig Sæther Bakken <ssb@fast.no>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@frontbase.com> Support for DB/2 CLI |
-   |          Kevin N. Shallow <kshallow@tampabay.rr.com> Velocis Support |
+   |          Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support |
    |          Daniel R. Kalowsky <kalowsky@php.net>                       |
    +----------------------------------------------------------------------+
  */
@@ -113,14 +113,14 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_columns, NULL)
 	PHP_FE(odbc_gettypeinfo, NULL)
 	PHP_FE(odbc_primarykeys, NULL)
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_VELOCIS)    /* not supported now */
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)    /* not supported now */
 	PHP_FE(odbc_columnprivileges, NULL)
 	PHP_FE(odbc_tableprivileges, NULL)
 #endif
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) /* not supported */
 	PHP_FE(odbc_foreignkeys, NULL)
 	PHP_FE(odbc_procedures, NULL)
-#if !defined(HAVE_VELOCIS)
+#if !defined(HAVE_BIRDSTEP)
 	PHP_FE(odbc_procedurecolumns, NULL)
 #endif
 #endif
@@ -2800,7 +2800,7 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_VELOCIS)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column)
    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
@@ -3127,7 +3127,7 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_VELOCIS)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
 /* {{{ proto int odbc_procedurecolumns(int connection_id [, string qualifier, string owner, string proc, string column])
    Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
@@ -3464,7 +3464,7 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_VELOCIS)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
 /* {{{ proto int odbc_tableprivileges(int connection_id, string qualifier, string owner, string name)
    Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)

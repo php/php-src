@@ -89,7 +89,7 @@ define_option with-adabas 'Adabas D support?' yesnodir \
     More info about Adabas D can be found at http://www.adabas.com/.'
 fi
 
-# Velocis
+# Birdstep
 if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_empress" = "no" -a \
         "$option_value_with_iodbc" = "no" -a \
@@ -97,10 +97,10 @@ if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no"; then
-define_option with-velocis 'Velocis support?' yesnodir \
-    'no /usr/local/velocis Velocis install' \
-'     Whether to build PHP with Velocis support.\n
-     More information about Velocis can be found at http://www.raima.com/.'
+define_option with-birdstep 'Birdstep support?' yesnodir \
+    'no /usr/local/birdstep Birdstep install' \
+'     Whether to build PHP with Birdstep support.\n
+     More information about Birdstep can be found at http://www.birdstep.com/.'
 fi
 
 # DBMaker
@@ -111,7 +111,7 @@ if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
-        "$option_value_with_velocis" = "no"; then
+        "$option_value_with_birdstep" = "no"; then
 define_option with-dbmaker 'DBMaker support?' yesnodir \
     'no /home/dbmaker DBMaker install' \
 '    Whether to build PHP with DBMaker support. \n
@@ -126,7 +126,7 @@ if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
-        "$option_value_with_velocis" = "no" -a \
+        "$option_value_with_birdstep" = "no" -a \
         "$option_value_with_dbmaker" = "no"; then
 define_option with-sapdb 'SAP DB support?' yesnodir \
     'no /usr/local SAP DB install' \
@@ -142,7 +142,7 @@ if test "$option_value_with_solid" = "no" -a \
         "$option_value_with_esoob" = "no" -a \
         "$option_value_with_openlink" = "no" -a \
         "$option_value_with_adabas" = "no" -a \
-        "$option_value_with_velocis" = "no" -a \
+        "$option_value_with_birdstep" = "no" -a \
         "$option_value_with_dbmaker" = "no" -a \
         "$option_value_with_sapdb" = "no"; then
 define_option with-custom-odbc 'custom ODBC support?' yesnodir \
