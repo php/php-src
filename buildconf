@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if test "$1" = "--copy"; then
+  automake_flags=--copy
+fi
+
 test -d libzend || ln -s ../libzend .
 test -d TSRM || ln -s ../TSRM .
 
@@ -16,7 +20,7 @@ fi
 
 autoheader
 
-automake --add-missing --include-deps --copy
+automake --add-missing --include-deps $automake_flags
 
 mv configure configure.old 2>/dev/null
 autoconf
