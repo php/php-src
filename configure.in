@@ -623,8 +623,11 @@ AC_MSG_RESULT($DMALLOC_RESULT)
 
 dnl ## This is the default server API.
 PHP_SAPI=cgi
-SAPI_TARGET=php
 PHP_BUILD_PROGRAM
+dnl paths to the targets relative to the build directory
+SAPI_PROGRAM=php
+SAPI_SHARED=libs/libphp4.so
+SAPI_STATIC=libs/libphp4.a
 
 esyscmd(./scripts/config-stubs sapi)
 
@@ -761,7 +764,7 @@ if true; then
   fi
 
   # Warn about CGI version with no extra security options.
-  if test "$SAPI_TARGET" = "php"; then
+  if test "$PHP_SAPI" = "cgi"; then
     if test "$REDIRECT" = "0"; then
       if test "$DISCARD_PATH" = "0"; then
         echo "+--------------------------------------------------------------------+"

@@ -1,5 +1,5 @@
 
-if test "$SAPI_TARGET" = "php"; then
+if test "$PHP_SAPI" = "cgi"; then
 AC_MSG_CHECKING(whether to force Apache CGI redirect)
 AC_ARG_ENABLE(force-cgi-redirect,
 [  --enable-force-cgi-redirect
@@ -45,8 +45,8 @@ AC_ARG_ENABLE(discard_path,
 ]) 
 fi
 
-if test "$SAPI_TARGET" = "php" ; then
-  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_TARGET \$(bindir)/$SAPI_TARGET"
+if test "$PHP_SAPI" = "cgi" ; then
+  INSTALL_IT="\$(SHELL) \$(srcdir)/install-sh -m 0755 $SAPI_PROGRAM \$(bindir)/$SAPI_CGI"
 fi
 
 AC_MSG_CHECKING(for fhttpd module support)
@@ -54,28 +54,29 @@ AC_ARG_WITH(fhttpd,
 [  --with-fhttpd[=DIR]     Build fhttpd module.  DIR is the fhttpd sources
                           directory, defaults to /usr/local/src/fhttpd.],
 [
-	if test "$withval" = "yes"; then
-	  # fhttpd source directory
-	  withval=/usr/local/src/fhttpd
-	fi
-	if test "$withval" != "no"; then
+    if test "$withval" = "yes"; then
+      # fhttpd source directory
+      withval=/usr/local/src/fhttpd
+    fi
+    if test "$withval" != "no"; then
 # For fhttpd 0.3.x
-	  if test -f $withval/servproc.h; then 
-	    FHTTPD_INCLUDE=-I$withval/
-            FHTTPD_LIB=$withval/servproc.o
-	    FHTTPD_TARGET=$withval/
-	    SAPI_TARGET=php
-	    AC_DEFINE(FHTTPD)
-	    AC_MSG_RESULT(yes - fhttpd 0.3.x)
-	  else
-	    AC_MSG_RESULT(no)
-	    AC_MSG_ERROR(Invalid fhttpd directory - unable to find servproc.h under $withval)
-	  fi
-	else
-	  AC_MSG_RESULT(no)
-	fi
+      if test -f $withval/servproc.h; then 
+        FHTTPD_INCLUDE=-I$withval/
+        FHTTPD_LIB=$withval/servproc.o
+        FHTTPD_TARGET=$withval/
+        PHP_BUILD_STATIC
+		PHP_SAPI=cgi
+        AC_DEFINE(FHTTPD)
+        AC_MSG_RESULT(yes - fhttpd 0.3.x)
+      else
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR(Invalid fhttpd directory - unable to find servproc.h under $withval)
+      fi
+    else
+      AC_MSG_RESULT(no)
+    fi
 ],[
-	AC_MSG_RESULT(no)
+    AC_MSG_RESULT(no)
 ])
 INCLUDES="$INCLUDES $FHTTPD_INCLUDE"
 dnl## AC_SUBST(FHTTPD_INCLUDE)
