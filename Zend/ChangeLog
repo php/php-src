@@ -1,3 +1,30 @@
+2004-09-08  Andi Gutmans  <andi@zend.com>
+
+    * zend_builtin_functions.c:
+      - Fix bug #28054 by preventing printing out bogus information in backtrace
+        when in error handler (still doesn't know all information but at least
+        it's not bogus)
+
+    * zend_compile.h
+      zend_exceptions.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_opcode.c
+      zend_vm.h
+      zend_vm_handlers.h
+      zend_vm_spec.h:
+      - Some architectural changes:
+       a) We specialize opcodes according to op_type fields. Each opcode has to
+          be marked with which op_type's it uses.
+       b) We support different execution methods. Function handlers, switch()
+          and goto dispatching. goto seems to be the fastest but it really
+          depends on the compiler and how well it optimizes. I suggest playing
+          around with optimization flags.
+      
+      - Warning: Things might break so keep us posted on how things are going.
+        (Dmitry, Andi)
+
 2004-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_objects.c:
