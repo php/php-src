@@ -143,12 +143,14 @@ typedef struct dba_handler {
 
 /* a DBA handler must have specific routines */
 
-#define DBA_HND(x) \
+#define DBA_NAMED_HND(name, x) \
 {\
-	#x, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
+	#name, dba_open_##x, dba_close_##x, dba_fetch_##x, dba_update_##x, \
 	dba_exists_##x, dba_delete_##x, dba_firstkey_##x, dba_nextkey_##x, \
 	dba_optimize_##x, dba_sync_##x \
 },
+
+#define DBA_HND(x) DBA_NAMED_HND(x, x)
 
 /* check whether the user has write access */
 #define DBA_WRITE_CHECK \
@@ -173,6 +175,9 @@ static dba_handler handler[] = {
 #endif
 #if DBA_CDB
 	DBA_HND(cdb)
+#endif
+#if DBA_CDB_BUILTIN
+    DBA_NAMED_HND(cdb_make, cdb)
 #endif
 #if DBA_DB2
 	DBA_HND(db2)

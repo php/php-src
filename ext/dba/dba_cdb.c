@@ -32,48 +32,95 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#if DBA_CDB_BUILTIN
+#include "libcdb/cdb.h"
+#include "libcdb/cdb_make.h"
+#include "libcdb/uint32.h"
+#else
 #include <cdb.h>
 #include <uint32.h>
+#endif
 
 #define CDB_INFO \
 	dba_cdb *cdb = (dba_cdb *) info->dbf
 
 typedef struct {
 	struct cdb c;
-	int fd;
+#if DBA_CDB_BUILTIN
+	struct cdb_make m;
+	php_stream *file;
+	int make;
+#else
+	int file;
+#endif
 	uint32 eod; /* size of constant database */
 	uint32 pos; /* current position for traversing */
 } dba_cdb;
 
 DBA_OPEN_FUNC(cdb)
 {
-	int gmode = 0;
-	int fd;
+#if DBA_CDB_BUILTIN
+	php_stream* file = 0;
+	int make;
+#else
+	int file = 0;
+#endif
 	dba_cdb *cdb;
 	dba_info *pinfo = (dba_info *) info;
 
 	switch (info->mode) {
 		case DBA_READER: 
-			gmode = O_RDONLY; break;
- 		/* currently not supported: */
-#if 0
-	case DBA_WRITER: 
-		gmode = O_RDWR; break;
+#if DBA_CDB_BUILTIN
+			make = 0;
+			file = php_stream_open_wrapper(info->path, "rb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			if (!file) {
+				return FAILURE;
+			}
+#else
+			file = VCWD_OPEN(info->path, O_RDONLY);
+			if (file < 0) {
+				return FAILURE;
+			}
+#endif
+			break;
+#if DBA_CDB_BUILTIN
+		case DBA_TRUNC:
+		case DBA_CREAT:
+			make = 1;
+			file = php_stream_open_wrapper(info->path, "wb", STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			if (!file) {
+				return FAILURE;
+			}
+			break;
+		case DBA_WRITER:
+			return FAILURE; /* not supported */
 #endif
 		default: 
+ 		/* currently not supported: */
 			return FAILURE;
 	}
 
-	fd = VCWD_OPEN(info->path, gmode);
-	if (fd < 0) {
+	cdb = ecalloc(sizeof(dba_cdb), 1);
+	if (!cdb) {
+#if DBA_CDB_BUILTIN
+		php_stream_close(cdb->file);
+#else
+		close(cdb->file);
+#endif
 		return FAILURE;
 	}
-	
-	cdb = emalloc(sizeof(dba_cdb));
-	memset(cdb, 0, sizeof(dba_cdb));
 
-	cdb_init(&cdb->c, fd);
-	cdb->fd = fd;
+#if DBA_CDB_BUILTIN
+	if (make) {
+		cdb_make_start(&cdb->m, file TSRMLS_CC);
+	} else {
+		cdb_init(&cdb->c, file TSRMLS_CC);
+	}
+	cdb->make = make;
+#else
+	cdb_init(&cdb->c, file);
+#endif
+	cdb->file = file;
 	
 	pinfo->dbf = cdb;
 	return SUCCESS;
@@ -83,11 +130,30 @@ DBA_CLOSE_FUNC(cdb)
 {
 	CDB_INFO;
 
-	/* cdb_free does not close associated fd */
+	/* cdb_free does not close associated file */
+#if DBA_CDB_BUILTIN
+	if (cdb->make) {
+		cdb_make_finish(&cdb->m TSRMLS_CC);
+	} else {
+		cdb_free(&cdb->c TSRMLS_CC);
+	}
+	php_stream_close(cdb->file);
+#else
 	cdb_free(&cdb->c);
-	close(cdb->fd);
+	close(cdb->file);
+#endif
 	efree(cdb);
 }
+
+#if DBA_CDB_BUILTIN
+# define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos TSRMLS_CC)
+# define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len TSRMLS_CC)
+# define php_cdb_find(cdb, key, len) cdb_find(cdb, key, len TSRMLS_CC)
+#else
+# define php_cdb_read(cdb, buf, len, pos) cdb_read(cdb, buf, len, pos)
+# define php_cdb_findnext(cdb, key, len) cdb_findnext(cdb, key, len)
+# define php_cdb_find(cdb, key, len) cdb_find(cdb, key, len)
+#endif
 
 DBA_FETCH_FUNC(cdb)
 {
@@ -95,17 +161,20 @@ DBA_FETCH_FUNC(cdb)
 	unsigned int len;
 	char *new_entry = NULL;
 	
-/*	cdb_findstart(&cdb->c); */
-	if (cdb_find(&cdb->c, key, keylen) == 1) {
+#if DBA_CDB_BUILTIN
+	if (cdb->make)
+		return NULL; /* database was opened writeonly */
+#endif
+	if (php_cdb_find(&cdb->c, key, keylen) == 1) {
 		while(skip--) {
-			if (cdb_findnext(&cdb->c, key, keylen) != 1) {
+			if (php_cdb_findnext(&cdb->c, key, keylen) != 1) {
 				return NULL;
 			}
 		}
 		len = cdb_datalen(&cdb->c);
 		new_entry = emalloc(len+1);
 		
-		if (cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
+		if (php_cdb_read(&cdb->c, new_entry, len, cdb_datapos(&cdb->c)) == -1) {
 			efree(new_entry);
 			return NULL;
 		}
@@ -119,7 +188,16 @@ DBA_FETCH_FUNC(cdb)
 
 DBA_UPDATE_FUNC(cdb)
 {
-	/* if anyone figures out cdbmake.c, let me know */
+#if DBA_CDB_BUILTIN
+	CDB_INFO;
+
+	if (!cdb->make)
+		return FAILURE; /* database was opened readonly */
+	if (!mode)
+		return FAILURE; /* cdb_make dosn't know replace */
+	if (cdb_make_add(&cdb->m, key, keylen, val, vallen TSRMLS_CC) != -1)
+		return SUCCESS;
+#endif
 	return FAILURE;
 }
 
@@ -127,24 +205,49 @@ DBA_EXISTS_FUNC(cdb)
 {
 	CDB_INFO;
 
-	if (cdb_find(&cdb->c, key, keylen) == 1)
+#if DBA_CDB_BUILTIN
+	if (cdb->make)
+		return FAILURE; /* database was opened writeonly */
+#endif
+	if (php_cdb_find(&cdb->c, key, keylen) == 1)
 		return SUCCESS;
 	return FAILURE;
 }
 
 DBA_DELETE_FUNC(cdb)
 {
-	return FAILURE;
+	return FAILURE; /* cdb doesn't support delete */
 }
 
+/* {{{ cdb_file_read */
+#if DBA_CDB_BUILTIN
+# define cdb_file_read(fildes, buf, size) php_stream_read(fildes, buf, size)
+#else
+# define cdb_file_read(fildes, buf, size) read(fildes, buf, size)
+#endif
+/* }}} */
 
 #define CREAD(n) do { \
-	if (read(cdb->fd, buf, n) < n) return NULL; \
+	if (cdb_file_read(cdb->file, buf, n) < n) return NULL; \
 } while (0)
+
+/* {{{ cdb_file_lseek 
+ php_stream_seek does not return actual position */
+#if DBA_CDB_BUILTIN
+int cdb_file_lseek(php_stream *fp, off_t offset, int whence TSRMLS_DC) {
+	php_stream_seek(fp, offset, whence);
+	return php_stream_tell(fp);
+}
+#else
+int cdb_file_lseek(int fd, off_t offset, int whence TSRMLS_DC) {
+	return lseek(fd, offset, whence);
+}
+#endif
+/* }}} */
 
 #define CSEEK(n) do { \
 	if (n >= cdb->eod) return NULL; \
-	if (lseek(cdb->fd, (off_t)n, SEEK_SET) != (off_t) n) return NULL; \
+	if (cdb_file_lseek(cdb->file, (off_t)n, SEEK_SET TSRMLS_CC) != (off_t) n) return NULL; \
 } while (0)
 
 
@@ -154,6 +257,11 @@ DBA_FIRSTKEY_FUNC(cdb)
 	uint32 klen, dlen;
 	char buf[8];
 	char *key;
+
+#if DBA_CDB_BUILTIN
+	if (cdb->make)
+		return NULL; /* database was opened writeonly */
+#endif
 
 	cdb->eod = -1;
 	CSEEK(0);
@@ -170,7 +278,7 @@ DBA_FIRSTKEY_FUNC(cdb)
 	uint32_unpack(buf + 4, &dlen);
 
 	key = emalloc(klen + 1);
-	if (read(cdb->fd, key, klen) < klen) {
+	if (cdb_file_read(cdb->file, key, klen) < klen) {
 		efree(key);
 		key = NULL;
 	} else {
@@ -191,13 +299,18 @@ DBA_NEXTKEY_FUNC(cdb)
 	char buf[8];
 	char *key;
 
+#if DBA_CDB_BUILTIN
+	if (cdb->make)
+		return NULL; /* database was opened writeonly */
+#endif
+
 	CSEEK(cdb->pos);
 	CREAD(8);
 	uint32_unpack(buf, &klen);
 	uint32_unpack(buf + 4, &dlen);
 	
 	key = emalloc(klen + 1);
-	if (read(cdb->fd, key, klen) < klen) {
+	if (cdb_file_read(cdb->file, key, klen) < klen) {
 		efree(key);
 		key = NULL;
 	} else {
