@@ -1245,8 +1245,9 @@ PHP_FUNCTION(preg_split)
 			add_offset_pair(return_value, &Z_STRVAL_PP(subject)[start_offset], Z_STRLEN_PP(subject) - start_offset, start_offset);
 		} else {
 			/* Add the last piece to the return value */
-			add_next_index_string(return_value,
-									&Z_STRVAL_PP(subject)[start_offset], 1);
+			add_next_index_stringl(return_value,
+								   &Z_STRVAL_PP(subject)[start_offset],
+								   Z_STRLEN_PP(subject) - start_offset, 1);
 		}
 	}
 
