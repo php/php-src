@@ -283,7 +283,7 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 	long enc;
 
 	soap_globals->sdls = malloc(sizeof(HashTable));
-	zend_hash_init(soap_globals->sdls, 0, NULL, delete_sdl, 1);
+	zend_hash_init(soap_globals->sdls, 0, NULL, delete_sdl_ptr, 1);
 
 	zend_hash_init(&soap_globals->defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&soap_globals->defEncIndex, 0, NULL, NULL, 1);
@@ -395,8 +395,11 @@ PHP_MINIT_FUNCTION(soap)
 
 	INIT_CLASS_ENTRY(ce, PHP_SOAP_HEADER_CLASSNAME, soap_header_functions);
 	soap_header_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
-
+#ifdef SDL_CACHE
 	le_sdl = register_list_destructors(NULL, NULL);
+#else
+	le_sdl = register_list_destructors(delete_sdl, NULL);
+#endif
 	le_url = register_list_destructors(delete_url, NULL);
 	le_service = register_list_destructors(delete_service, NULL);
 
@@ -739,7 +742,7 @@ PHP_FUNCTION(SoapServer,map)
 
 		FETCH_THIS_SERVICE(service);
 
-		new_enc = malloc(sizeof(encode));
+		new_enc = emalloc(sizeof(encode));
 		memset(new_enc, 0, sizeof(encode));
 
 		ctype = strrchr(type, ':');
@@ -769,8 +772,8 @@ PHP_FUNCTION(SoapServer,map)
 		}
 
 		new_enc->details.type = enc->details.type;
-		new_enc->details.ns = strdup(enc->details.ns);
-		new_enc->details.type_str = strdup(enc->details.type_str);
+		new_enc->details.ns = estrdup(enc->details.ns);
+		new_enc->details.type_str = estrdup(enc->details.type_str);
 		new_enc->details.sdl_type = enc->details.sdl_type;
 		new_enc->to_xml = enc->to_xml;
 		new_enc->to_zval = enc->to_zval;
@@ -818,7 +821,7 @@ PHP_FUNCTION(SoapServer,map)
 
 		if (!service->mapping) {
 			service->mapping = emalloc(sizeof(HashTable));
-			zend_hash_init(service->mapping, 0, NULL, delete_encoder, 0);
+			zend_hash_init(service->mapping, 0, NULL, delete_tmp_encoder, 0);
 		}
 		zend_hash_update(service->mapping, type, type_len + 1, &new_enc, sizeof(encodePtr), NULL);
 		smart_str_free(&resloved_ns);
@@ -3092,5 +3095,10 @@ static void delete_service(void *data)
 	if (service->uri) {
 		efree(service->uri);
 	}
+#ifndef SDL_CACHE
+	if (service->sdl) {
+		delete_sdl(service->sdl);
+	}
+#endif
 	efree(service);
 }
