@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1
+- Make trim strip \0 to match php 3 (Rasmus)
+- Added function imagecreatefromxbm(). (Jouni)
+- Added function imagewbmp(). (Jouni, based on patch from Rune Nordbøe Skillingstad)
 - Added str_pad() for padding a string with an arbitrary string on left or
   right. (Andrei)
 - Made the short_tags, asp_tags and allow_call_time_pass_reference INI
