@@ -87,6 +87,8 @@ typedef struct {
 	int dberr;
 	char *oserrstr;
 	char *dberrstr;
+	char *sqlstate;
+	char *lastmsg;
 } pdo_dblib_err;
 
 typedef struct {
@@ -118,7 +120,22 @@ typedef struct {
 	int nrows;
 
 	int current;
+	
+	pdo_dblib_err err;
 } pdo_dblib_stmt;
+
+ZEND_BEGIN_MODULE_GLOBALS(dblib)
+	pdo_dblib_err err;
+	char sqlstate[6];
+ZEND_END_MODULE_GLOBALS(dblib)
+
+#ifdef ZTS
+# define DBLIB_G(v) TSRMG(dblib_globals_id, zend_dblib_globals *, v)
+#else
+# define DBLIB_G(v) (dblib_globals.v)
+#endif
+
+ZEND_EXTERN_MODULE_GLOBALS(dblib);
 
 #endif
 

@@ -32,6 +32,38 @@
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
 
+static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
+{
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	pdo_dblib_err *einfo = &H->err;
+	pdo_dblib_stmt *S = NULL;
+	char *message;
+	char *msg;
+
+	if (stmt) {
+		S = (pdo_dblib_stmt*)stmt->driver_data;
+		einfo = &S->err;
+	}
+	
+	if (einfo->dberr == SYBESMSG && einfo->lastmsg) {
+		msg = einfo->lastmsg;
+	} else {
+		msg = einfo->dberr;
+	}
+
+	spprintf(&message, 0, "%s [%d] (severity %d)",
+		msg, einfo->dberr, einfo->severity);
+
+	add_next_index_long(info, einfo->dberr);
+	add_next_index_string(info, message, 0);
+	add_next_index_long(info, einfo->oserr);
+	add_next_index_long(info, einfo->severity);
+	add_next_index_string(info, einfo->oserrstr, 1);
+
+	return 1;
+}
+
+
 static int dblib_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -59,6 +91,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, 
 	S->H = H;
 	stmt->driver_data = S;
 	stmt->methods = &dblib_stmt_methods;
+	S->err.sqlstate = stmt->error_code;
 
 	return 1;
 }
@@ -67,6 +100,8 @@ static long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, long sql_len TSRM
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	RETCODE ret, resret;
+
+	dbsetuserdata(H->link, (BYTE*)&H->err);
 
 	if (FAIL == dbcmd(H->link, sql)) {
 		return -1;
@@ -135,7 +170,7 @@ static struct pdo_dbh_methods dblib_methods = {
 	NULL,
 	NULL,
 	NULL, /* last insert */
-	NULL, /* fetch error */
+	dblib_fetch_error, /* fetch error */
 	NULL, /* get attr */
 	NULL, /* check liveness */
 };
@@ -157,6 +192,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
+	H->err.sqlstate = dbh->error_code;
 
 	if (!H->login) {
 		goto cleanup;
@@ -197,6 +233,14 @@ cleanup:
 
 	dbh->methods = &dblib_methods;
 	dbh->driver_data = H;
+
+	if (!ret) {
+		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
+			"SQLSTATE[%s] %s (severity %d)",
+			DBLIB_G(err).sqlstate,
+			DBLIB_G(err).dberrstr,
+			DBLIB_G(err).severity);
+	}
 
 	return ret;
 }
