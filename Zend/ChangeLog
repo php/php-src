@@ -1,3 +1,35 @@
+2003-04-01  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_execute.c:
+      Stas's patch on zend_execute.c (1.448 -> 1.449) resulted in a bug where
+      the namespaced member accesses didn't work. This should hopefully
+      correct it.
+
+    * zend_builtin_functions.c
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_object_handlers.c
+      zend_opcode.c:
+      Split ZEND_NAMESPACE into user and internal namespaces. Hope this is
+      okay with engine folks.
+
+2003-04-01  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_builtin_functions.c:
+      improve namespace name hanfling
+
+    * zend_builtin_functions.c:
+      fix get_declared_classes()
+
+    * zend_language_parser.y
+      zend_language_scanner.l:
+      Add __NAMESPACE__ auto-constant.
+
+    * zend_builtin_functions.c:
+      make get_declared_classes() work with namespaces (based on Tal Peer's
+      patch)
+
 2003-03-31  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend.h
