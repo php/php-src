@@ -208,6 +208,7 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	if (TG(seen_cl) && !TG(seen_cn) && TG(hc)->do_keep_alive) {
 		ADD_VEC(KA_DO, sizeof(KA_DO)-1);
 	} else {
+		TG(hc)->do_keep_alive = 0;
 		ADD_VEC(KA_NO, sizeof(KA_NO)-1);
 	}
 		
@@ -656,6 +657,7 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 		
 		TG(hc)->response = TG(sbuf).c;
 		TG(hc)->responselen = TG(sbuf).len;
+		TG(hc)->maxresponse = TG(sbuf).a;
 
 		TG(sbuf).c = 0;
 		TG(sbuf).len = 0;
