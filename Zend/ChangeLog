@@ -1,3 +1,39 @@
+2005-01-25  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend.h:
+      New versions of glibc support a RTLD_DEEPBIND flag to dlopen.  The
+      effect of this flag when loading a "foo.so" with undefined symbols is
+      that the search that symbol starts at foo.so and its dependencies
+      *before* the loading process' global symbol table.
+      
+      This is an effective workaround for symbol namespace collisions between
+      various modules and the libraries on which they depend (where fixing the
+      respective modules or libraries is not possible e.g. due to API
+      constraints).
+      
+      (By: Joe Orton)
+
+2005-01-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_interfaces.c
+      tests/bug26229.phpt:
+      - MFH #26229 (getIterator() segfaults when it returns arrays or scalars)
+
+    * zend_interfaces.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug26229.phpt:
+      - Bugfix #26229 (getIterator() segfaults when it returns arrays or scalars)
+
+    * Makefile.frag:
+      - Fix dependency
+
+    * zend_vm_def.h
+      zend_vm_execute.h:
+      - Use correct freeing (thx Dmitry)
+
 2005-01-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_vm_def.h
