@@ -84,9 +84,12 @@ For string.c:
 
 The lines above marked with @ will go into NEWS file automagically, and the
 # lines will be omitted from the ChangeLog. Alternatively, you might want
-to modify NEWS file directly and not use the @ lines. Since ChangeLog and
-NEWS are updated once a day, the lines you prefixed with @ may not show up
-until somewhat later.
+to modify NEWS file directly and not use the @ lines.
+
+If you don't see your messages in ChangeLog and NEWS right away, don't worry!
+These files are updated once a day, so your stuff will not show up until
+somewhat later. Don't go adding stuff to NEWS by hand if you already put @
+lines in the commit message.
 
 Happy hacking,
 
