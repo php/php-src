@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Changed mail() to Use escape_shell_cmd() to allow multiple extra parameters 
+- Changed mail() to use escape_shell_cmd() to allow multiple extra parameters 
   to the invocation of the mailer as used in the fifth parameter. (Derick)
 - Changed cURL extension to require cURL version 7.9.8 (Derick)
 - Added zend_execute_internal which is called like zend_execute but for
