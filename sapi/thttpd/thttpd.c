@@ -212,18 +212,22 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
+/* to understand this, read cgi_interpose_input() in libhttpd.c */
+#define SIZEOF_UNCONSUMED_BYTES() (TG(hc)->read_idx - TG(hc)->checked_idx)
+#define CONSUME_BYTES(n) do { TG(hc)->checked_idx += (n); } while (0)
+
+
 static int sapi_thttpd_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	size_t read_bytes = 0, tmp;
 	int c;
 	int n;
 
-	/* to understand this, read cgi_interpose_input() in libhttpd.c */
-	c = TG(hc)->read_idx - TG(hc)->checked_idx;
+	c = SIZEOF_UNCONSUMED_BYTES();
 	if (c > 0) {
 		read_bytes = MIN(c, count_bytes);
 		memcpy(buffer, TG(hc)->read_buf + TG(hc)->checked_idx, read_bytes);
-		TG(hc)->checked_idx += read_bytes;
+		CONSUME_BYTES(read_bytes);
 		count_bytes -= read_bytes;
 	}
 	
@@ -644,6 +648,8 @@ static void remove_dead_conn(int fd)
 
 #endif
 
+#define CT_LEN_MAX_RAM 8192
+
 static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 {
 	TG(hc) = hc;
@@ -652,6 +658,18 @@ static off_t thttpd_real_php_request(httpd_conn *hc, int show_source TSRMLS_DC)
 	TG(read_post_data) = 0;
 	if (hc->method == METHOD_POST)
 		hc->should_linger = 1;
+	
+	if (hc->contentlength > 0 
+			&& SIZEOF_UNCONSUMED_BYTES() < hc->contentlength) {
+		int missing = hc->contentlength - SIZEOF_UNCONSUMED_BYTES();
+		
+		if (hc->contentlength < CT_LEN_MAX_RAM) {
+			hc->read_body_into_mem = 1;
+			return 0;
+		} else {
+			return -1;
+		}
+	}
 	
 	thttpd_request_ctor(TSRMLS_C);
 
