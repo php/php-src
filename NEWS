@@ -3,6 +3,8 @@ PHP 4                                                                      NEWS
 ?? ??? 2003, Version 4.3.5
 - Fixed header handler in NSAPI SAPI module (header->replace was ignored,
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
+- Fixed bug #26467 (flock() does not force the "wouldblock" parameter to be 
+  passed by reference). (Wez)
 - Fixed bug #26463 (Incorrect handling of semicolons after heredoc). (Ilia)
 - Fixed bug #26462 (phpize + ext/bcmath -> compile error). (Jani)
 - Fixed bug #26458 (var_dump(), var_export(), debug_zval_dump() not binary
