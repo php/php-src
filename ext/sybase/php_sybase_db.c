@@ -747,7 +747,7 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 		
 				/* get rid of trailing spaces */
 				p = res_buf + res_length;
-				while (p >= res_buf && *p == ' ') {
+				while (p >= res_buf && (*p == ' ' || *p == '\0')) {
 					p--;
 				}
 				*(++p) = 0; /* put a trailing NULL */
