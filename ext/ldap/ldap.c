@@ -161,7 +161,6 @@ static void _free_ldap_result(zend_rsrc_list_entry *rsrc TSRMLS_DC)
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("ldap.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_ldap_globals,		ldap_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY("ldap.base_dn",			NULL,	PHP_INI_ALL,			OnUpdateString,		base_dn,			zend_ldap_globals,		ldap_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -303,16 +302,12 @@ PHP_FUNCTION(ldap_connect)
 	int authmode;
 	int ssl=0;
 #endif
-	/*	char *hashed_details;
-	int hashed_details_length;*/
 	LDAP *ldap;
 
 	switch(ZEND_NUM_ARGS()) {
 		case 0: 
 			host = NULL;
 			port = 0;
-			/* hashed_details = estrndup("ldap_", 5);
-			hashed_details_length = 4+1; */
 			break;
 
 		case 1: {
@@ -325,10 +320,6 @@ PHP_FUNCTION(ldap_connect)
 				convert_to_string_ex(yyhost);
 				host = Z_STRVAL_PP(yyhost);
 				port = 389; /* Default port */
-
-				/* hashed_details_length = Z_STRLEN_P(yyhost)+4+1;
-				hashed_details = emalloc(hashed_details_length+1); 
-				sprintf(hashed_details, "ldap_%s", Z_STRVAL_P(yyhost));*/ 
 			}
 			break;
 
@@ -343,11 +334,6 @@ PHP_FUNCTION(ldap_connect)
 				host = Z_STRVAL_PP(yyhost);
 				convert_to_long_ex(yyport);
 				port = Z_LVAL_PP(yyport);
-
-			/* Do we need to take care of hosts running multiple LDAP servers ? */
-				/*	hashed_details_length = Z_STRLEN_P(yyhost)+4+1;
-				hashed_details = emalloc(hashed_details_length+1);
-				sprintf(hashed_details, "ldap_%s", Z_STRVAL_P(yyhost));*/ 
 			}
 			break;
 #ifdef HAVE_ORALDAP
@@ -503,7 +489,7 @@ PHP_FUNCTION(ldap_unbind)
 }
 /* }}} */
 
-/* {{{ hp_set_opts
+/* {{{ php_set_opts
  */
 static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 {
@@ -541,7 +527,8 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref)
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
 	pval **link, **base_dn, **filter, **attrs, **attr, **attrsonly, **sizelimit, **timelimit, **deref;
-	char *ldap_base_dn, *ldap_filter;
+	char *ldap_base_dn = NULL;
+	char *ldap_filter = NULL;
 	char **ldap_attrs = NULL; 
 	LDAP *ldap;
 	LDAPMessage *ldap_res;
@@ -1335,7 +1322,6 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		ldap_mods[i]->mod_bvalues = emalloc((num_values + 1) * sizeof(struct berval *));
 
 /* allow for arrays with one element, no allowance for arrays with none but probably not required, gerrit thomson. */
-/*              if (num_values == 1) {*/
 		if ((num_values == 1) && (Z_TYPE_PP(value) != IS_ARRAY)) {
 			convert_to_string_ex(value);
 			ldap_mods[i]->mod_bvalues[0] = (struct berval *) emalloc (sizeof(struct berval));
@@ -1362,8 +1348,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ldap_mods[num_attribs] = NULL;
 
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
-/* 	if (oper == LDAP_MOD_ADD) { */
-        if (is_full_add == 1) {
+	if (is_full_add == 1) {
 		if (ldap_add_s(ldap, ldap_dn, ldap_mods) != LDAP_SUCCESS) {
 			ldap_perror(ldap, "LDAP");
 			php_error(E_WARNING, "LDAP: add operation could not be completed.");
@@ -1397,7 +1382,6 @@ errexit:
 PHP_FUNCTION(ldap_add)
 {
 	/* use a newly define parameter into the do_modify so ldap_mod_add can be used the way it is supposed to be used , Gerrit THomson */
-	/* php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD);*/
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_LD_FULL_ADD);
 }
 /* }}} */
@@ -1436,9 +1420,6 @@ PHP_FUNCTION(ldap_mod_del)
         php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE);
 }
 /* }}} */
-
-/* end of attribute based functions , gerrit thomson */
-
 
 /* {{{ proto int ldap_delete(int link, string dn)
    Delete an entry from a directory */
