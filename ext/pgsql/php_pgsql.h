@@ -141,6 +141,11 @@ typedef struct _php_pgsql_result_handle {
 	int row;
 } pgsql_result_handle;
 
+typedef struct _php_pgsql_notice {
+	char *message;
+	size_t len;
+} php_pgsql_notice;
+
 typedef struct {
 	long default_link;
 	long num_links,num_persistent;
@@ -148,9 +153,8 @@ typedef struct {
 	long allow_persistent;
 	long auto_reset_persistent;
 	int le_lofp,le_string;
-	int ignore_notices;
-	char *last_notice;
-	uint last_notice_len;
+	int ignore_notices,log_notices;
+	HashTable notices;
 } php_pgsql_globals;
 
 
