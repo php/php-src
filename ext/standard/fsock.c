@@ -83,7 +83,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		efree(hostname);
 	}
 	if (stream == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%d (%s)", host, port, errstr == NULL ? "Unknown error" : errstr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to %s:%ld (%s)", host, port, errstr == NULL ? "Unknown error" : errstr);
 	}
 
 	if (hashkey) {
