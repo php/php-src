@@ -58,15 +58,15 @@ typedef struct {
 	int case_folding;
 	XML_Parser parser;
 	XML_Char *target_encoding;
-	char *startElementHandler;
-	char *endElementHandler;
-	char *characterDataHandler;
-	char *processingInstructionHandler;
-	char *defaultHandler;
-	char *unparsedEntityDeclHandler;
-	char *notationDeclHandler;
-	char *externalEntityRefHandler;
-	char *unknownEncodingHandler;
+	zval *startElementHandler;
+	zval *endElementHandler;
+	zval *characterDataHandler;
+	zval *processingInstructionHandler;
+	zval *defaultHandler;
+	zval *unparsedEntityDeclHandler;
+	zval *notationDeclHandler;
+	zval *externalEntityRefHandler;
+	zval *unknownEncodingHandler;
 
 	zval *object;
 
