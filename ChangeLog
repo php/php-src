@@ -1,3 +1,58 @@
+2001-07-17  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/CODING_STANDARDS: Woops, missed a closing paren.
+
+    * pear/CODING_STANDARDS:
+    Describe the standards for function naming and private methods.
+
+2001-07-17  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in:
+    Oops, said include but do require (thanks Jon and Rasmus)
+
+    * pear/PEAR/Packager.php:
+    - Removed the xml parser code (use now PEAR_Common::infoFromDescriptionFile())
+    - Added the ability to build packages without the need of being in the same
+      dir as the package.xml file (f.ex: pear package ./mypack/package.xml)
+    - Removed methods log() and mkdirHier() as they are now in Common.php
+    - More debug code and error checks
+
+    * pear/PEAR/Common.php:
+    moved methods log() and mkdirHier() from Packager/Installer to here
+
+    * pear/scripts/pear.in:
+    include only the needed files
+
+2001-07-17  Jason Greene  <jason@inetgurus.net>
+
+    * ext/ftp/ftp.c: Forgotten Include.
+    This should fix the windows build (though I currently don't have a way to test it)
+
+2001-07-17  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/php_globals.h
+      main/SAPI.c
+      main/main.c
+      main/php_content_types.c:
+    Add always_populate_raw_post_data ini directive and default it to 0 to
+    maintain current behaviour.  If this is turned on then $HTTP_RAW_POST_DATA
+    is always populated with a copy of the raw post data.
+
+2001-07-17  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB.php: fix problem with static usage...
+
+2001-07-17  Joey Smith  <joey@joeysmith.com>
+
+    * ext/sybase/php_sybase_db.c: Be consistent with hashed_details behavior.
+
+2001-07-17  Jason Greene  <jason@inetgurus.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+    Added support for socket and popen file types to ftp_fput 
+
 2001-07-16  Zeev Suraski  <zeev@zend.com>
 
     * main/rfc1867.c: Another layout fix
