@@ -3,7 +3,7 @@ dnl config.m4 for extension sqlite
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_ENABLE(sqlite-utf8, whether to enable UTF-8 support in sqlite (default: ISO-8859-1),
-[  --enable-sqlite-utf8    Enable UTF-8 support], no, no)
+[  --enable-sqlite-utf8    Enable UTF-8 support (DANGEROUS!)], no, no)
 
 PHP_ARG_WITH(sqlite, for sqlite support,
 [  --with-sqlite           Include sqlite support], yes)
