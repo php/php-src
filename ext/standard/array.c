@@ -256,6 +256,9 @@ PHP_FUNCTION(count)
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
  * This keeps it consistant and simple.
+ *
+ * This is not correct any more, if you want this behavior, use
+ * array_type_data_compare().
  */
 static int array_data_compare(const void *a, const void *b)
 {
@@ -346,7 +349,8 @@ static int array_natural_case_compare(const void *a, const void *b)
 	return array_natural_general_compare(a, b, 1);
 }
 
-/* Compare types first, and compare data only if same type */
+/* Compare types first, if exactly one argument is a string, return the
+ * type difference, thus numbers are always smaller than strings */
 static int array_type_data_compare(const void *a, const void *b)
 {
 	Bucket *f;
@@ -364,9 +368,8 @@ static int array_type_data_compare(const void *a, const void *b)
 	second = *((pval **) s->pData);
 
 	diff = first->type - second->type;
-	if (diff)
+	if (diff && ((first->type == IS_STRING) || (second->type == IS_STRING)))
 		return diff;
-
 
     if (ARRAYG(compare_func)(&result, first, second) == FAILURE) {
         return 0;
