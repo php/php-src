@@ -212,7 +212,7 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Empress support)
 AC_ARG_WITH(empress,
-[  --with-empress[=DIR]    Include Empress support.  DIR is the Empress base
+[  --with-empress[=DIR]  Include Empress support.  DIR is the Empress base
                           install directory, defaults to \$EMPRESSPATH.
                           From PHP4, this option only supports Empress Version
                           8.60 and above],
