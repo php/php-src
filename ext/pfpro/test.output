@@ -1,0 +1,29 @@
+X-Powered-By: PHP/4.0.2-dev
+Content-type: text/html
+
+<pre>
+
+Payflow Pro library is version L211
+Payflow Pro init returned 1
+Signio response code was 0, which means: Approved
+
+Dump of the transaction request Array
+(
+    [USER] => mylogin
+    [PWD] => mypassword
+    [TRXTYPE] => S
+    [TENDER] => C
+    [AMT] => 1.5
+    [ACCT] => 4111111111111111
+    [EXPDATE] => 0900
+)
+
+Dump of the response Array
+(
+    [RESULT] => 0
+    [PNREF] => P40111660030
+    [RESPMSG] => Approved
+    [AUTHCODE] => 251PNI
+    [AVSADDR] => X
+    [AVSZIP] => X
+)
