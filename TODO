@@ -36,6 +36,8 @@ global
       available in ZTS mode.
     * add aliases to functions to conform to new naming conventions, e.g.
       str_to_upper().
+    * see what functions might need to be changed to use HashPosition, so
+      that the internal array pointer is not affected.
 
 documentation
 -------------
