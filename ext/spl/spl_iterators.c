@@ -47,6 +47,7 @@ zend_class_entry *spl_ce_CachingRecursiveIterator;
 zend_class_entry *spl_ce_OuterIterator;
 zend_class_entry *spl_ce_IteratorIterator;
 zend_class_entry *spl_ce_NoRewindIterator;
+zend_class_entry *spl_ce_InfiniteIterator;
 
 function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  NULL)
@@ -1440,7 +1441,37 @@ static zend_function_entry spl_funcs_NoRewindIterator[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_object_iterator_funcs spl_norewind_it_iterator_funcs;
+/* {{{ proto InfiniteIterator::__construct(Iterator it)
+   Create an iterator from another iterator */
+SPL_METHOD(InfiniteIterator, __construct)
+{
+	spl_dual_it_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, zend_ce_iterator, DIT_InfiniteIterator);
+} /* }}} */
+
+/* {{{ proto InfiniteIterator::next()
+   Prevent a call to inner iterators rewind() (internally the current data will be fetched if valid()) */
+SPL_METHOD(InfiniteIterator, next)
+{
+	spl_dual_it_object   *intern;
+
+	intern = (spl_dual_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	spl_dual_it_next(intern, 1 TSRMLS_CC);
+	if (spl_dual_it_valid(intern TSRMLS_CC) == SUCCESS) {
+		spl_dual_it_fetch(intern, 0 TSRMLS_CC);
+	} else {
+		spl_dual_it_rewind(intern TSRMLS_CC);
+		if (spl_dual_it_valid(intern TSRMLS_CC) == SUCCESS) {
+			spl_dual_it_fetch(intern, 0 TSRMLS_CC);
+		}
+	}
+
+} /* }}} */
+
+static zend_function_entry spl_funcs_InfiniteIterator[] = {
+	SPL_ME(InfiniteIterator, __construct,      arginfo_norewind_it___construct, ZEND_ACC_PUBLIC)
+	SPL_ME(InfiniteIterator, next,             NULL, ZEND_ACC_PUBLIC)
+};
 
 /* {{{ array iterator_to_array(IteratorAggregate it) 
    Copy the iterator into an array */
@@ -1574,6 +1605,8 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_IMPLEMENTS(LimitIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(IteratorIterator, OuterIterator);
 	REGISTER_SPL_IMPLEMENTS(NoRewindIterator, OuterIterator);
+
+	REGISTER_SPL_SUB_CLASS_EX(InfiniteIterator, IteratorIterator, spl_dual_it_new, spl_funcs_InfiniteIterator);
 
 	return SUCCESS;
 }
