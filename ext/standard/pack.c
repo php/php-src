@@ -830,7 +830,9 @@ PHP_FUNCTION(unpack)
 
 				inputpos += size;
 				if (inputpos < 0) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+					if (size != -1) { /* only print warning if not working with * */
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: outside of string", type);
+					}
 					inputpos = 0;
 				}
 			} else if (arg < 0) {
