@@ -9,7 +9,6 @@ error_reporting(0);
 $fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
 $x = fprintf($fp, "fprintf test 1:%.5s\n", "abcdefghij");
 var_dump($x);
-fclose($fp);
 
 printf("printf test 1:%s\n", "simple string");
 printf("printf test 2:%d\n", 42);
