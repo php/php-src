@@ -43,12 +43,12 @@ ZEND_API zend_class_entry zend_standard_class_def;
 ZEND_API int (*zend_printf)(const char *format, ...);
 ZEND_API int (*zend_write)(const char *str, uint str_length);
 ZEND_API void (*zend_error)(int type, const char *format, ...);
-ZEND_API void (*zend_message_dispatcher)(long message, void *data);
 ZEND_API FILE *(*zend_fopen)(const char *filename, char **opened_path);
 ZEND_API void (*zend_block_interruptions)(void);
 ZEND_API void (*zend_unblock_interruptions)(void);
-ZEND_API int (*zend_get_ini_entry)(char *name, uint name_length, zval *contents);
 ZEND_API void (*zend_ticks_function)(int ticks);
+static void (*zend_message_dispatcher_p)(long message, void *data);
+static int (*zend_get_ini_entry_p)(char *name, uint name_length, zval *contents);
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -316,10 +316,10 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions)
 	if (!zend_fopen) {
 		zend_fopen = zend_fopen_wrapper;
 	}
-	zend_message_dispatcher = utility_functions->message_handler;
+	zend_message_dispatcher_p = utility_functions->message_handler;
 	zend_block_interruptions = utility_functions->block_interruptions;
 	zend_unblock_interruptions = utility_functions->unblock_interruptions;
-	zend_get_ini_entry = utility_functions->get_ini_entry;
+	zend_get_ini_entry_p = utility_functions->get_ini_entry;
 	zend_ticks_function = utility_functions->ticks_function;
 
 	zend_compile_files = compile_files;
@@ -463,4 +463,22 @@ void zend_deactivate(CLS_D ELS_DC)
 	shutdown_scanner(CLS_C);
 	shutdown_executor(ELS_C);
 	shutdown_compiler(CLS_C);
+}
+
+
+ZEND_API void zend_message_dispatcher(long message, void *data)
+{
+	if (zend_message_dispatcher_p) {
+		zend_message_dispatcher_p(message, data);
+	}
+}
+
+
+ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents)
+{
+	if (zend_get_ini_entry_p) {
+		return zend_get_ini_entry_p(name, name_length, contents);
+	} else {
+		return FAILURE;
+	}
 }
