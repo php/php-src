@@ -13,7 +13,8 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Stig Sæther Bakken <ssb@php.net>                            |
-   |          Thies C. Arntzen <thies@thieso.net>                         | 
+   |          Thies C. Arntzen <thies@thieso.net>                         |
+   |          Sterling Hughes <sterling@php.net>                          |
    +----------------------------------------------------------------------+
  */
 
@@ -79,7 +80,7 @@ inline static char xml_decode_iso_8859_1(unsigned short);
 inline static unsigned short xml_encode_us_ascii(unsigned char);
 inline static char xml_decode_us_ascii(unsigned short);
 static XML_Char *xml_utf8_encode(const char *, int, int *, const XML_Char *);
-static zval *xml_call_handler(xml_parser *, zval *, int, zval **);
+static zval *xml_call_handler(xml_parser *, zval *, zend_function *, int, zval **);
 static zval *_xml_xmlchar_zval(const XML_Char *, int, const XML_Char *);
 static int _xml_xmlcharlen(const XML_Char *);
 static void _xml_add_to_info(xml_parser *parser,char *name);
@@ -385,20 +386,22 @@ static void xml_set_handler(zval **handler, zval **data)
 /* }}} */
 
 /* {{{ xml_call_handler() */
-static zval *xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
+static zval *xml_call_handler(xml_parser *parser, zval *handler, zend_function *function_ptr, int argc, zval **argv)
 {
 	TSRMLS_FETCH();
 
 	if (parser && handler) {
+		zval ***args;
 		zval *retval;
 		int i;	
 		int result;
 
-		MAKE_STD_ZVAL(retval);
-		ZVAL_FALSE(retval);
-
-		result = call_user_function(EG(function_table), &parser->object, handler, retval, argc, argv TSRMLS_CC);
-
+		args = emalloc(sizeof(zval **) * argc);
+		for (i = 0; i < argc; i++) {
+			args[i] = &argv[i];
+		}
+		
+		result = fast_call_user_function(EG(function_table), &parser->object, handler, &retval, argc, args, 0, NULL, &function_ptr TSRMLS_CC);
 		if (result == FAILURE) {
 			zval **method;
 			zval **obj;
@@ -412,14 +415,14 @@ static zval *xml_call_handler(xml_parser *parser, zval *handler, int argc, zval 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 			} else 
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler");
-
-			zval_dtor(retval);
-			efree(retval);
+			
+			zval_ptr_dtor(&retval);
 		}
 
 		for (i = 0; i < argc; i++) {
-			zval_ptr_dtor(&(argv[i]));
+			zval_ptr_dtor(args[i]);
 		}
+		efree(args);
 
 		if (result == FAILURE) {
 			return NULL;
@@ -676,7 +679,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 				efree(att);
 			}
 			
-			if ((retval = xml_call_handler(parser, parser->startElementHandler, 3, args))) {
+			if ((retval = xml_call_handler(parser, parser->startElementHandler, parser->startElementPtr, 3, args))) {
 				zval_dtor(retval);
 				efree(retval);
 			}
@@ -745,7 +748,7 @@ void _xml_endElementHandler(void *userData, const XML_Char *name)
 			args[0] = _xml_resource_zval(parser->index);
 			args[1] = _xml_string_zval(tag_name);
 
-			if ((retval = xml_call_handler(parser, parser->endElementHandler, 2, args))) {
+			if ((retval = xml_call_handler(parser, parser->endElementHandler, parser->endElementPtr, 2, args))) {
 				zval_dtor(retval);
 				efree(retval);
 			}
@@ -795,7 +798,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 		if (parser->characterDataHandler) {
 			args[0] = _xml_resource_zval(parser->index);
 			args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
-			if ((retval = xml_call_handler(parser, parser->characterDataHandler, 2, args))) {
+			if ((retval = xml_call_handler(parser, parser->characterDataHandler, parser->characterDataPtr, 2, args))) {
 				zval_dtor(retval);
 				efree(retval);
 			}
@@ -873,7 +876,7 @@ void _xml_processingInstructionHandler(void *userData, const XML_Char *target, c
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(target, 0, parser->target_encoding);
 		args[2] = _xml_xmlchar_zval(data, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->processingInstructionHandler, 3, args))) {
+		if ((retval = xml_call_handler(parser, parser->processingInstructionHandler, parser->processingInstructionPtr, 3, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
@@ -891,7 +894,7 @@ void _xml_defaultHandler(void *userData, const XML_Char *s, int len)
 
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(s, len, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->defaultHandler, 2, args))) {
+		if ((retval = xml_call_handler(parser, parser->defaultHandler, parser->defaultPtr, 2, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
@@ -918,7 +921,7 @@ void _xml_unparsedEntityDeclHandler(void *userData,
 		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
 		args[5] = _xml_xmlchar_zval(notationName, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->unparsedEntityDeclHandler, 6, args))) {
+		if ((retval = xml_call_handler(parser, parser->unparsedEntityDeclHandler, parser->unparsedEntityDeclPtr, 6, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
@@ -943,7 +946,7 @@ void _xml_notationDeclHandler(void *userData,
 		args[2] = _xml_xmlchar_zval(base, 0, parser->target_encoding);
 		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->notationDeclHandler, 5, args))) {
+		if ((retval = xml_call_handler(parser, parser->notationDeclHandler, parser->notationDeclPtr, 5, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
@@ -969,7 +972,7 @@ int _xml_externalEntityRefHandler(XML_Parser parserPtr,
 		args[2] = _xml_xmlchar_zval(base, 0, parser->target_encoding);
 		args[3] = _xml_xmlchar_zval(systemId, 0, parser->target_encoding);
 		args[4] = _xml_xmlchar_zval(publicId, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->externalEntityRefHandler, 5, args))) {
+		if ((retval = xml_call_handler(parser, parser->externalEntityRefHandler, parser->externalEntityRefPtr, 5, args))) {
 			convert_to_long(retval);
 			ret = Z_LVAL_P(retval);
 			efree(retval);
@@ -992,7 +995,7 @@ void _xml_startNamespaceDeclHandler(void *userData,const XML_Char *prefix, const
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(prefix, 0, parser->target_encoding);
 		args[2] = _xml_xmlchar_zval(uri, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->startNamespaceDeclHandler, 3, args))) {
+		if ((retval = xml_call_handler(parser, parser->startNamespaceDeclHandler, parser->startNamespaceDeclPtr, 3, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
@@ -1010,7 +1013,7 @@ void _xml_endNamespaceDeclHandler(void *userData, const XML_Char *prefix)
 
 		args[0] = _xml_resource_zval(parser->index);
 		args[1] = _xml_xmlchar_zval(prefix, 0, parser->target_encoding);
-		if ((retval = xml_call_handler(parser, parser->endNamespaceDeclHandler, 2, args))) {
+		if ((retval = xml_call_handler(parser, parser->endNamespaceDeclHandler, parser->endNamespaceDeclPtr, 2, args))) {
 			zval_dtor(retval);
 			efree(retval);
 		}
