@@ -1830,8 +1830,10 @@ PHP_FUNCTION(call_user_func)
 		RETURN_NULL();
 	}
 
-	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
-		COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+	if (call_user_function_ex(EG(function_table), NULL, *params[0], &retval_ptr, argc-1, params+1, 0, NULL TSRMLS_CC) == SUCCESS) {
+		if (retval_ptr) {
+			COPY_PZVAL_TO_ZVAL(*return_value, retval_ptr);
+		}
 	} else {
 		if (argc > 1) {
 			SEPARATE_ZVAL(params[1]);
