@@ -53,7 +53,7 @@ install-modules:
 	$(mkinstalldirs) $(moduledir) && \
 	echo "installing shared modules into $(moduledir)" && \
 	rm -f modules/*.la && \
-	cp modules/* $(moduledir) || true
+	cp modules/* $(moduledir) >/dev/null 2>&1 || true
 
 install-su: install-modules
 	(cd pear && $(MAKE) install)
