@@ -6,6 +6,7 @@ Translit UTF-8 quotes
 ( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
 ?>
 --INI--
+magic_quotes_runtime=0
 error_reporting=2047
 --FILE--
 <?php // vim600: syn=php
