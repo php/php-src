@@ -43,9 +43,10 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
+#define ZEND_MM_ALIGNMENT_MASK ~(ZEND_MM_ALIGNMENT-1)
 
 /* Aligned header size */
-#define ZEND_MM_ALIGNED_SIZE(size)	(size+(((ZEND_MM_ALIGNMENT-size)%ZEND_MM_ALIGNMENT+ZEND_MM_ALIGNMENT)%ZEND_MM_ALIGNMENT))
+#define ZEND_MM_ALIGNED_SIZE(size) ((size + ZEND_MM_ALIGNMENT - 1) & ZEND_MM_ALIGNMENT_MASK)
 #define ZEND_MM_ALIGNED_HEADER_SIZE	ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_block))
 #define ZEND_MM_ALIGNED_FREE_HEADER_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_free_block))
 #define ZEND_MM_ALIGNED_SEGMENT_SIZE ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_segment))
@@ -94,7 +95,7 @@ zend_bool zend_mm_add_memory_block(zend_mm_heap *heap, size_t block_size)
 	zend_mm_segment *segment;
 
 	/* align block size downwards */
-	block_size -= block_size % ZEND_MM_ALIGNMENT;
+	block_size = block_size & ZEND_MM_ALIGNMENT_MASK;
 
 	segment = (zend_mm_segment *) malloc(block_size);
 	if (!segment) {
