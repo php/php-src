@@ -1,23 +1,16 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Dec 2004, Version 4.3.10
-- Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
-- Fixed bug #31024 (Crash in fgetcsv() with negative length). (Ilia)
-- Fixed bug #31019 (Logic error mssql library checking). (Frank)
-- Fixed bug #28598 (Lost support for MS Symbol fonts). (Pierre)
-- Fixed bug #28228 (NULL decimal separator is not being handled correctly).
-  (Ilia)
-
-07 Dec 2004, Version 4.3.10RC2
-- Fixed bug #30995 (snmp extension does not build with net-snmp 5.2). (Ilia)
-- Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag). (Ilia)
-
-23 Nov 2004, Version 4.3.10RC1
+15 Dec 2004, Version 4.3.10
 - Added the %F modifier to *printf to render a non-locale-aware representation
-  of a float with the . as decimal seperator. (Derick)
+  of a float with the . as decimal separator. (Derick)
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #31034 (Problem with non-existing iconv header file). (Derick)
+- Fixed bug #31024 (Crash in fgetcsv() with negative length). (Ilia)
+- Fixed bug #31019 (Logic error mssql library checking). (Frank)
+- Fixed bug #30995 (snmp extension does not build with net-snmp 5.2). (Ilia)
+- Fixed bug #30990 (allow popen() on *NIX to accept 'b' flag). (Ilia)
 - Fixed bug #30826 (Certain reference relations cannot be unserialized
   properly). (Ilia)
 - Fixed bug #30750 (Meaningful error message when upload directory is not 
@@ -52,7 +45,10 @@ PHP 4                                                                      NEWS
 - Fixed bug #29805 (HTTP Authentication Issues). (Uwe Schindler)
 - Fixed bug #29418 (double free when openssl_csr_new fails).
   (Kamesh Jayachandran).
-- Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
+- Fixed bug #28598 (Lost support for MS Symbol fonts). (Pierre)
+- Fixed bug #28325 (Circular references not properly serialized). (Moriyoshi)
+- Fixed bug #28228 (NULL decimal separator is not being handled correctly).
+  (Ilia)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
 
 22 Sep 2004, Version 4.3.9
