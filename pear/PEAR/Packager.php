@@ -86,17 +86,9 @@ class PEAR_Packager extends PEAR_Common
     // }}}
     // {{{ destructor
 
-    function _PEAR_Packager() {
-        $this->_PEAR();
-        while (is_array($this->_tempfiles) &&
-               $file = array_shift($this->_tempfiles))
-        {
-            if (is_dir($file)) {
-                System::rm("-rf $file");
-            } else {
-                unlink($file);
-            }
-        }
+    function _PEAR_Packager()
+    {
+        $this->_PEAR_Common();
     }
 
     // }}}
@@ -121,9 +113,11 @@ class PEAR_Packager extends PEAR_Common
         }
         $pwd = getcwd();
         $pkgfile = basename($pkgfile);
-        $pkgver = $pkginfo['package'] . '-' . $pkginfo['version'];
         // don't want strange characters
-        $pkgver = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkgver);
+        $pkgname    = ereg_replace ('[^a-zA-Z0-9._]', '_', $pkginfo['package']);
+        $pkgversion = ereg_replace ('[^a-zA-Z0-9._\-]', '_', $pkginfo['version']);
+        $pkgver = $pkgname . '-' . $pkgversion;
+
         $this->tmpdir = $pwd . DIRECTORY_SEPARATOR . $pkgver;
         if (file_exists($this->tmpdir)) {
             return $this->raiseError('Tmpdir: ' . $this->tmpdir .' already exists',
@@ -135,7 +129,7 @@ class PEAR_Packager extends PEAR_Common
         } else {
             $this->log(2, "+ tmp dir created at: " . $this->tmpdir);
         }
-        $this->_tempfiles[] = $this->tmpdir;
+        $this->addTempFile($this->tmpdir);
 
         // Copy files -----------------------------------------------
         foreach ($pkginfo['filelist'] as $fname => $atts) {
