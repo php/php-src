@@ -269,8 +269,8 @@ PHP_FUNCTION(finfo_open)
 
 	if (magic_load(finfo->magic, file) == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to load magic database at '%s'.", file);
-		efree(finfo);
 		magic_close(finfo->magic);
+		efree(finfo);
 		RETURN_FALSE;
 	}	
 
