@@ -40,7 +40,7 @@ WARNING: You specified Informix base install directory that is different
       IFX_INCLUDE=-I$IFX_INCDIR
       IFX_LFLAGS=$IFX_LIBDIR
       if test -z "$IFX_LIBS"; then
-        IFX_LIBS=`esql -libs | sed -e 's/-lm$//'`
+        IFX_LIBS=`$INFORMIXDIR/bin/esql -libs | sed -e 's/-lm$//'`
         dnl  -lm twice otherwise?
         IFX_LIBS=`echo $IFX_LIBS | sed -e 's/Libraries to be used://g' -e 's/esql: error -55923: No source or object file\.//g'`
         dnl Seems to get rid of newlines.
@@ -59,7 +59,8 @@ WARNING: You specified Informix base install directory that is different
 
       AC_DEFINE(HAVE_IFX,1,[ ])
       AC_MSG_CHECKING([Informix version])
-      IFX_VERSION=[`esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
+      IFX_VERSION=[`$INFORMIXDIR/bin/esql -V | sed -ne '1 s/^[^0-9]*\([0-9]\)\.\([0-9]*\).*/\1\2/p'`]
+      AC_MSG_RESULT($IFX_VERSION)
       if test $IFX_VERSION -ge "900"; then
         AC_DEFINE(HAVE_IFX_IUS,1,[ ])
         IFX_ESQL_FLAGS=-EDHAVE_IFX_IUS
@@ -71,20 +72,23 @@ WARNING: You specified Informix base install directory that is different
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION, [ ])
       PHP_EXTENSION(informix, $ext_shared)
       for i in $IFX_LIBS; do
-        case $i in
-        *.o)
+        case "$i" in
+          *.o)
             PHP_ADD_LIBPATH($abs_builddir/ext/informix, INFORMIX_SHARED_LIBADD)
             PHP_ADD_LIBRARY(php_ifx, 1, INFORMIX_SHARED_LIBADD)
             $srcdir/build/shtool mkdir -p ext/informix
             cd ext/informix
             ar r libphp_ifx.a $i
             ranlib libphp_ifx.a
-            cd ../..;;
-        -l*)
+            cd ../..
+            ;;
+          -l*)
             lib=`echo $i|sed 's/^-l//'`
-            PHP_ADD_LIBRARY($lib, 1, INFORMIX_SHARED_LIBADD);;
-        *)
-            IFX_LIBADD="$IFX_LIBADD $i";;
+            PHP_ADD_LIBRARY($lib, 1, INFORMIX_SHARED_LIBADD)
+            ;;
+          *)
+            IFX_LIBADD="$IFX_LIBADD $i"
+            ;;
         esac
       done
       IFX_LIBS="$IFX_LFLAGS $IFX_LIBADD"

@@ -10,7 +10,7 @@ include $(top_srcdir)/build/dynlib.mk
 
 ifx.c: $(srcdir)/ifx.ec
 	(if test -d $(INFORMIXDIR); then \
-	   esql -e $(IFX_ESQL_FLAGS) $(srcdir)/ifx.ec; \
+	   $(INFORMIXDIR)/bin/esql -e $(IFX_ESQL_FLAGS) $(srcdir)/ifx.ec; \
 	 else \
 	   touch ifx.c; \
 	 fi)
