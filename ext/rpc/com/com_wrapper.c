@@ -162,6 +162,13 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 			}
 		}
 
+		if(!pVarResult)
+		{
+			VariantInit(pVarResult);
+			V_VT(pVarResult) = VT_I4;
+			V_I4(pVarResult) = hr;
+		}
+
 		return hr;
 	}
 	else
