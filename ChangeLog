@@ -1,3 +1,858 @@
+2002-08-29  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/sapi_apache.c:
+    added the ability to set handlers as class methods (classes will need to be
+    declared in a phpRequire statemenet, of course, or be otherwise available
+    at the hook run-time (builtins)).  This is currently only implemented
+    for the uri trans handler  it is usable as:
+
+    phpUriHandlerCodeRef MyClass::MyMethod
+
+    This can be greatly robustified from whre it stands now, but is a good proof
+    of concept (hopefully!)
+
+2002-08-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c:  - seperate registered streams.
+
+2002-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/dns.c: Fixed the \0 check in previous patch.
+
+    * ext/standard/dns.c: MFH fix for bug: #18966
+
+    * ext/standard/dns.c: Fixed bug #18966
+
+2002-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mcrypt/tests/001.phpt: Remove unnecessary whitespace
+
+2002-08-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/bz2/bz2.c:
+    Added a check for a negative return value of php_stream_read, which if
+    left uncheck can result in segv.
+
+2002-08-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * main/php_ini.c:
+     - reenable "no value" output. thanks to sebastian for pointing that out.
+
+2002-08-29  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/System.php:
+    Hope to finnally got it, fixes notice (Thx to Sebastian)
+
+2002-08-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/basic/011.phpt: MFH (not with cli)
+
+2002-08-29  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c:  - fix ZTS build. thanks to edin.
+
+2002-08-29  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: MFH (One zero to much)
+
+    * ext/exif/exif.c: One zero to much
+
+2002-08-29  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/exif/config.m4:
+    - EXIF is about meta data from images, not for digital cameras
+
+2002-08-29  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mysql/php_mysql.c: MFH fix for bug: #19159
+
+    * ext/mysql/php_mysql.c:
+    Fix bug: #19159, mysql_field_count was available since 3.22.24
+
+    * NEWS: I would have thought this was clear to everyone already..
+
+    * ext/exif/config.m4:
+    revert that undiscussed change until it is really agreed upon.
+
+2002-08-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/info.c: Fixed compile warning (unused variable)
+    Added a \n separator between Addition Modules
+
+2002-08-28  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/standard/info.c
+      main/php_ini.c:  - add phpinfo() support for CLI.
+
+2002-08-28  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/html.c: Description didn't match the function here
+
+2002-08-28  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/php_apache.c:
+    added all the sub_request methods and logging methods
+
+2002-08-28  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/config.m4: Enable EXIF by default as discussed with Rasmus
+
+2002-08-28  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      main/SAPI.c
+      main/SAPI.h
+      main/main.c:
+    Added wrapper functions for the majority of the apache API_EXPORT functions
+    as class methods for the ApacheRequest objects.  broke sapi_activate
+    into two functions to allow for reading of headers/cookies separately
+    from request bodies (POST stuff).  Altered some of the send_headers code
+    in mod_php4.c to prevent sending headers twice (since a phpResponseHandler
+    needs to be able to have full freedom for setting headers using the
+    ap_*_header* functions.
+
+2002-08-28  Christian Stocker  <chregu@phant.ch>
+
+    * NEWS: correct entry about XsltObject->result_dump_*()
+
+2002-08-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/ming/ming.c: - Let's make this a little bit more professional :)
+
+    * ext/domxml/php_domxml.c: - Whitespace
+
+2002-08-28  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:    Zero the structure so that when the tcp layer of the OS decides to ignore it,
+    we do not think we are getting a value
+
+2002-08-28  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/standard/url_scanner.c: silence build warning, added default case
+
+2002-08-28  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/sapi_apache.c
+      sapi/apache/mod_php4.c
+      sapi/apache/php_apache.c:
+    added wrapper for ap_send_http_header so that phpResponseHandler is now
+    working.  Added protections to mod_php4's internal call to the same so
+    that headers cannot be accidentally sent twice.
+
+    * sapi/apache/mod_php4.c:
+    This handler works much better when not commented out.  :)
+
+2002-08-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mcve/mcve.c: This extension is not forced to be compiled as shared.
+
+    * ext/mcve/php_mcve.h:
+    Added the header and removed some commented out stuff (wrong place anyway)
+
+    * ext/mcve/mcve.c: ws fixes
+
+    * ext/mbstring/mbregex.c: Fix ZTS build
+
+2002-08-27  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/php_apache_http.h:
+    All handlers are now 'stacked' allowing for multiple handlers to be called in the
+    order they are listed in the httpd.conf for a section.  phpRequire is now supported (called out of the post-read request handler), and a first attempt at phpResponseHandler, a response-time type handler which is set by a
+
+    <Location blah>
+    SetHandler php-script
+    phpResponseHandler /tmp/foo.php
+    </Location>
+
+    To allow for the stacked handlers, the entirety of zend_stack.c was imported into mod_php4.c.  There is a patch pending to zend_stack.c to add the functionality so that all the redundant code can be removed.
+
+2002-08-27  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c
+      ext/mcve/php_mcve.h: Adding a left-out command
+
+2002-08-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c:
+    Some requirements engineering: today necessary defines exists where
+    needed.
+
+    * ext/gd/gd.c: php_error_docref
+
+    BUT didn't we decide to disable those functions when not supported
+    instead of displaying an error?
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/mbfilter.c: php_error_docref
+
+    * ext/mbstring/mbstring.c:
+    Remove this nonsense - this makes the module unpredicable since we do
+    not have default values in ini and more encodings will follow.
+
+2002-08-27  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c:
+    Replaced handler loading commands such that what was
+
+    php_value uri_handler /tmp/foo.php
+
+    is now
+
+    phpUriHandler	/tmp/foo.php
+
+    This fixes some bugs that caused handlers to be skipped or mysteriously 'unloaded',
+    reduces the number of calls to zend_alter_ini_entries that are necessary, as well
+    as allows for easier implementation of stacked handlers (which comes next).
+
+    Added 2 new hooks, phpPostReadHandler and phpHeaderHandler (going to the obvious places).
+
+2002-08-27  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: MFH (fix some to long property strings)
+
+    * ext/domxml/php_domxml.c: fix some to long property strings
+
+    * ext/domxml/php_domxml.c:
+    argh, domxml_doc_free is not yet ready for CVS :)
+
+    * ext/domxml/php_domxml.c: stupid typo
+
+    * ext/domxml/php_domxml.c:
+    MFH (fix memleak in php_domxslt_string_to_xpathexpr)
+
+    * ext/domxml/php_domxml.c: fix memleak in php_domxslt_string_to_xpathexpr
+
+2002-08-27  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - "Use" is not a name :)
+
+2002-08-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/db/db.c
+      ext/db/php_db.h: MFH
+
+    * ext/db/db.c: -php_error_docref
+    -nuke unused variable
+
+    * ext/db/php_db.h: header for last commit
+
+2002-08-27  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: cleanup
+
+2002-08-27  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/file/002.phpt
+      ext/standard/file.c: MFH
+
+    * ext/db/db.c: -fix memory leak on failure
+    -only use one function for nearly identical things
+    -fix stripslashes not working on input directly
+
+2002-08-26  lukas schroeder  <lukas@kodics.de>
+
+    * sapi/apache/php_apache.c:
+    - add interface functions for headers_in, headers_out and err_headers_out
+
+2002-08-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * run-tests.php: -reimplemented old style output (.exp, .out)
+    -implemented diff format output
+    -delete error logs on success
+
+    * ext/standard/file.c:
+    fix fwrite to no longer apply stripslashes on input string when
+    magic_quotes_runtime is set On.
+
+    * ext/standard/basic_functions.c: fix proto and tweak error message
+
+2002-08-26  lukas schroeder  <lukas@kodics.de>
+
+    * main/main.c: - put common sapi startup code into a function
+
+2002-08-26  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c
+      sapi/apache/mod_php4.h
+      sapi/apache/php_apache.c
+      sapi/apache/php_apache_http.h
+      sapi/apache/sapi_apache.c:
+    Import of Lukas Schroeder's work to give php a full interface to apache 1.3.x's hook interface, and full class wrappers around the apache request object and it's interfaces.
+
+    * main/SAPI.c
+      main/SAPI.h
+      main/main.c:
+    new full apache-1.3.x hooks interface support initial import
+
+2002-08-26  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com/COM.c
+      ext/com/php_COM.h:
+    Implement com_invoke_ex, which allows the user to specify the invoke kind
+    flags, so that custom invocations can be made.
+    Tidy up code for com_propget and com_propset, so that it can work with
+    objects as well as resources.
+
+2002-08-26  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/mail.c: - Whitespace
+
+    * ext/standard/mail.c:
+    - Use escape_shell_cmd() to allow multiple extra parameters to the
+      invocation of the mailer as used in the fifth parameter to mail(). 
+    - Use escape_shell_cmd() to allow multiple extra parameters to the invocation
+      of the mailer as used in the fifth parameter to mail().
+
+2002-08-26  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS: that propably wasn't a good idea and thus already removed
+
+2002-08-26  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.h
+      ext/imap/php_imap.c:
+    MFH: bug fixes; #14410, #17503, #17999, #15595. Also some performance improvements.
+
+2002-08-26  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/scripts/pearize.in: Set 'defaultuser' if 'USER' env not found
+
+    * pear/PEAR/Builder.php: Replace horrendous code :)
+
+    * pear/System.php: Rule 1: Never quickly fix a thing in cvs
+    Rule 2: follow rule 1
+    Thx rasmus :)
+
+2002-08-25  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c
+      ext/sockets/unix_socket_constants.h:
+    Implement socket errno values for UNIX based platforms.
+    They are all prefixed with SOCKET_ to preserve name space
+    Win32 will follow...
+
+2002-08-25  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/network.c
+      main/php_network.h
+      ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c: Fix ZTS build.
+
+2002-08-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/html.c: WS
+
+2002-08-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+    Slight optimization of php_strtoupper & php_strtoupper functions.
+
+2002-08-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/002.phpt: MFB
+
+    * main/fopen_wrappers.c
+      main/network.c
+      main/php_variables.c
+      main/safe_mode.c
+      main/user_streams.c: use php_error_docref()
+
+2002-08-25  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/PEAR/Builder.php: Remove $_ENV usages, getenv() is used instead
+    'MAKE' and 'USER' are used, if 'USER' not found I set user to 'defaultuser'
+
+2002-08-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c: improoved error messages
+
+2002-08-25  Pierre-Alain Joye  <pajoye@phpindex.com>
+
+    * pear/scripts/pearize.in: Remove $_ENV usages
+    Remove $env arg in all functions and uses getenv instead
+    Note only 'USER' env var is used
+
+    * pear/System.php:
+    Remove $_ENV usages, this causes problems with recommanded php.ini files
+    Replace by getenv()
+
+2002-08-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/output.c:
+    Removed __output_handler as everybody seems against such implicit
+    behaviour. Instead supply error message.
+
+2002-08-25  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Fix long line..and typo
+
+2002-08-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/curl/config.m4:
+    - PHP's cURL extention now requires cURL version 7.9.8 
+    - Bump up required version number of cURL to 7.9.8
+
+2002-08-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/output.c:
+    Use zend_is_callable() instead of php_check_object_method_array() and
+    drop the latter. THX to Markus Fischer - i did not recognize this function.
+
+
+2002-08-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Fix open_basedir.
+
+    * ext/standard/file.c: Prevent possible problems with include_path.
+
+2002-08-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/output.c: Reenable array(object,method) in ob_start()
+
+2002-08-25  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Hopefully really fix #18022 this time.
+
+    * main/streams.c: Potential fix for Bug#18022:
+    Streams that are pipes on systems that HAVE_FLUSHIO should not be seeked
+    as is required for plain files on those systems.
+
+    * main/streams.c: Unify error messages.
+
+    * ext/standard/string.c
+      main/php_streams.h
+      main/streams.c:
+    Add a "closing" parameter for filters to determine if a flush is the last
+    flush before the stream is closed.  This allows filters to finish a chunk
+    and write footers etc.
+
+    * ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      main/php_streams.h: Remove php_stream_error as discussed with Rasmus.
+    Unify error messages for ext/ftp. (which was using php_stream_error).
+
+2002-08-24  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c:
+    Changed pg_connection_info()/pg_connection_reset()/pg_connection_busy()/pg_result_status()/pg_result_error() silently return FALSE when resource is not passed to them.
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h:
+    Rename mysql_character_set_name() to mysql_client_encoding(). pg_client_encoding() is available from PHP4.0.3 and this function is available from PHP 4.3.0
+
+2002-08-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/mbstring/html_entities.c: Convert to unix, related to bug 18588
+
+2002-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c: Fixlet
+
+    * NEWS
+      ext/mysql/php_mysql.c: Undeprecate mysql_db_query()
+
+    * ext/mysql/php_mysql.c: mysql_db_query() should not have been deprecated
+
+2002-08-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/basic/002.phpt
+      tests/basic/003.phpt
+      tests/basic/004.phpt
+      tests/basic/005.phpt: MFH (skip if cli)
+
+2002-08-24  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Make this entry a little bit easier for eyes to catch.
+
+2002-08-24  Stefan Esser  <s.esser@e-matters.de>
+
+    * NEWS: Added news entry
+
+    * ext/standard/mail.c: MFH
+
+    * ext/standard/mail.c:
+    Overwrite control chars in parameters with whitespace instead of truncating.
+
+2002-08-24  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c: changed zend_error -> php_error_docref()
+
+2002-08-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * makedist: - Also make bz2 archives
+
+2002-08-24  Den V. Tsopa  <tdv@edisoft.ru>
+
+    * ext/mbstring/mbfilter.c:
+    convert encoding to cp1251,cp866 was not working, fixed
+
+2002-08-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/tests/array/003.phpt: - MFH
+
+2002-08-24  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+    changed error messages according to CODING_STANDARDS
+
+    * NEWS: MySQL changes
+
+2002-08-24  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c: Fixed typo
+
+    * ext/pgsql/pgsql.c:
+    Make pg_result_status() a little more useufl by ignoring invalid
+    parameter and return FALSE.
+    (i.e. pg_query() may return FALSE instead of result resource)
+
+2002-08-24  Jani Taskinen  <sniper@iki.fi>
+
+    * main/php_version.h
+      configure.in: switch the version back to 4.2.3-dev here.
+
+2002-08-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/ftok.c
+      ext/standard/head.c
+      ext/standard/image.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/levenshtein.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/scanf.c
+      ext/standard/sha1.c
+      ext/standard/string.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/aggregation.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/exec.c: php_error_docref
+
+2002-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * makedist: Zend and TSRM already get checked out in php4
+
+2002-08-24  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-dist
+      php.ini-recommended: MFH
+
+    * php.ini-dist
+      php.ini-recommended:
+    Remove relic from PHP3 days which is not useful anymore.
+
+2002-08-24  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      configure.in
+      main/php_version.h: Update version number, prepare for release
+
+    * ext/standard/basic_functions.c: Fix import_request_variables()
+
+    * ext/standard/basic_functions.c: Fix bug #15106
+
+2002-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/mail.c: MFH security fix
+
+2002-08-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h: Made this extension to use the resource stuff
+
+    * ext/pgsql/pgsql.c: ws fix
+
+2002-08-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/array/data.inc: MFH
+
+    * ext/exif/exif.c
+      ext/exif/tests/002.phpt:
+    fixes magically mentioned in NEWS before being commited
+
+    * NEWS: differentiate: Makus, Marcus
+
+2002-08-23  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/gd/gd.c: stream closing bug here too
+
+2002-08-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/gd/gd.c: Fix segfault reported by Rasmus.
+
+    * main/main.c:
+    Respect safe mode setting when opening scripts and things for the ZE.
+
+2002-08-23  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: I like periods..:)
+
+2002-08-23  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/libmysql/my_tempnam.c: fixed bug #18643
+
+2002-08-23  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    renamed xslt_dump_* to xslt_result_dump_* to avoid confusion
+
+    * ext/domxml/php_domxml.c: fix memleak in xslt->dump_mem()
+
+2002-08-23  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c: fixed bug #19016
+    SSL is only available for MYSQL_VERSION_ID >= 40000
+
+2002-08-23  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: One more
+
+2002-08-23  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * NEWS: Should probably mention this fix too.
+
+2002-08-23  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c: fixed bug #16965
+
+2002-08-23  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: Due credit to Steph.
+
+2002-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS:
+    Update NEWS (got as far as ext/standard (not inclusive) in the ext/ dir)
+
+    Please take a look at it and update it if you find 'bugs'.
+
+    * ext/session/session.c: Avoid changing behavior in a bug-fix release
+
+    * NEWS:
+    Update, remove somewhat useless entry (we'd have to figure out a way
+    to update it)
+
+    * main/output.c
+      ext/zlib/zlib.c:
+    Fix ob_gzhandler()'s handling of requests w/o compression but that do have
+    the Accept-Encoding header
+
+    * main/output.c
+      ext/zlib/zlib.c:
+    Fix ob_gzhandler()'s handling of requests without compression, but that do
+    have an Accept-Encoding header
+
+2002-08-23  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/File/Passwd.php:
+    * Suppress warning when having empty lines in password file.
+
+
+2002-08-23  Zeev Suraski  <zeev@zend.com>
+
+    * main/fopen_wrappers.c
+      main/fopen_wrappers.h
+      ext/standard/reg.c: Fix a few warnings (MFH)
+
+2002-08-23  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Sync with HEAD
+
+    * NEWS: Update/cleanup.
+
+2002-08-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * acinclude.m4
+      main/streams.c:
+    Add a configure check to see if the seeker function in an fopencookie
+    uses off_t or the newer, more portable "fpos_t *".
+    The check could perhaps be more refined, as the test program will segfault
+    on older systems (like mine) that use off_t.
+
+2002-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mime_magic/config.m4: Fixed a typo
+
+2002-08-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c: more php_error_docref
+
+    * ext/gd/gd.c
+      ext/gd/gd_ctx.c: php_error_docref...
+
+2002-08-22  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/streams.c: Fix compile warnings under win32
+
+    * ext/zlib/zlib_fopen_wrapper.c: *cough*
+
+    * ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c: Fix error messages.
+
+2002-08-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gdft.c: fiw warnings
+
+2002-08-22  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: - moved xslt_dump_ to better place
+    - removed unused variables
+
+    * ext/domxml/php_domxml.h
+      ext/domxml/php_domxml.c:
+    - Added XsltObject->dump_file($result,$filename[,$compression]) for dumping
+      xslt-result directly into a file. (chregu)
+
+2002-08-22  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/install.txt:
+    Sync install.txt file with the one provided in other 4.2.x distro's.
+
+2002-08-22  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/config.m4
+      ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - XsltObject->dump_file() will follow
+    - bumped up needed libxslt version to 1.0.18
+
+2002-08-22  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache/mod_php4.c: MFH the xbithack fix
+
+2002-08-22  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    return version number of linked libxml2, not of the one, which it was
+    compiled against
+
+2002-08-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * CODING_STANDARDS: fix examples
+
+    * ext/gd/gd.c: fix zts build
+
+2002-08-22  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c
+      ext/msession/reqclient.h: Removed C++ comments
+
+2002-08-22  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mime_magic/mime_magic.c:
+    magic.mime seems to be more common name for the file.
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/mime_magic.dsp:    Mime_magic extensions builds on windows now.
+
+2002-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mime_magic/config.m4
+      ext/mime_magic/mime_magic.c:
+    Instead of hardcoding the path of magic.mime file, try to find the file
+    inside common paths for the file.
+
+    * ext/ncurses/ncurses_functions.c: Fixed a number of compile warnings.
+
+2002-08-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/output.c: fix warning
+
+    * main/streams.c: fix php_error_docref parameters
+
+2002-08-22  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c:
+     - Added xslt_backend_version() and xslt_backend_name() for getting
+       information about the processor backend. (chregu)
+
+2002-08-22  Stefan Roehrich  <stefan@roehri.ch>
+
+    * ext/zlib/zlib.c: Fixed prototype.
+    Fixed double printing of function name in docref error messages.
+
+2002-08-22  Christian Stocker  <chregu@phant.ch>
+
+    * php.ini-recommended
+      php.ini-dist: add allow_webdav_methods as option
+
+    * main/SAPI.c: do not check for POST twice
+
+    * sapi/apache/mod_php4.c
+      main/SAPI.c
+      main/main.c
+      main/php_globals.h:
+     - Added php.ini option "allow_webdav_methods" to allow handling of
+       WebDAV http requests within PHP scripts. (chregu)
+
+2002-08-22  Tim Toohey  <php@toowards.com>
+
+    * ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gd.c
+      ext/gd/php_gd.h
+      ext/gd/gd.c:
+    (PHP imagecolormatch) makes a palette image match the colours in the
+                          true-color version.
+    (PHP imagelayereffect) extended alpha-channel mixing effects for the
+                           bundled GD library
+
+2002-08-22  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/php_signal.c
+      ext/pcntl/php_signal.h
+      ext/pcntl/test-pcntl.php:    Changed callback hash table to be initialized and destroyed per reqeust
+    (allows the ability to use request life zvals as handles)
+    Nuked warnings
+    Modified test script to adjust to new ticks backend
+    Some slight WS fixes
+
+2002-08-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xmlrpc/libxmlrpc/simplestring.c: kill some compile warnings
+
+    * ext/standard/base64.c: style fix
+
+    * ext/tokenizer/tokenizer.c: comment out unused variable
+
+    * ext/domxml/php_domxml.c: kill compiler warning (unused variable)
+
+    * ext/readline/config.m4: MFH
+
+    * ext/readline/config.m4: Fix typo.
+
+    * sapi/apache/mod_php4.c: These functions are not used elsewhere.
+
 2002-08-21  sniper  <sniper@pb1.pair.com>
 
     * sapi/apache/mod_php4.c: Fix ZTS build
