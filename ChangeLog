@@ -1,3 +1,38 @@
+2004-07-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/string.c:
+      MFH: Fixed bug #29034 (wordwrap() returns a boolean when passed empty
+      string).
+
+    * ext/standard/string.c:
+      Fixed bug #29034 (wordwrap() returns a boolean when passed empty string).
+
+2004-07-06  Sergey Kartashoff  <gluke@mail.ru>
+
+    * ext/mnogosearch/php_mnogo.c:
+      - Some fixes in mnogosearch extension
+
+2004-07-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/dl.c:
+      - Revert storing handle, got lost in 1.92, noticed by Kamesh Jayachandran
+        <kameshj at fastmail dot fm>
+
+2004-07-06  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/ibase_query.c
+      ext/interbase/interbase.c
+      ext/interbase/php_ibase_includes.h:
+      Don't copy ini items to module globals
+      (fixed unregistered bug with mangled default_db setting)
+
+2004-07-06  Dmitry Stogov  <dmitry@zend.com>
+
+    * NEWS:
+      Fixed bug #28751 (SoapServer does not call _autoload())
+
 2004-07-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * NEWS
