@@ -703,6 +703,8 @@ PHP_MINIT_FUNCTION(url_scanner)
 
 PHP_MSHUTDOWN_FUNCTION(url_scanner)
 {
+	BLS_FETCH();
+
 	UNREGISTER_INI_ENTRIES();
 	zend_hash_destroy(BG(url_adapt_state_ex).tags);
 	free(BG(url_adapt_state_ex).tags);
