@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "c:\projects\php4\include" /I "..\libzend" /I "." /I "regex\\" /I "d:\src\bind\include" /I "..\tsrm" /D "NDEBUG" /D "MSVC5" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "COMPILE_LIBZEND" /D "ZTS" /Fr /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "c:\projects\php4\include" /I "..\libzend" /I "." /I "regex\\" /I "d:\src\bind\include" /I "..\tsrm" /D "NDEBUG" /D "MSVC5" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "COMPILE_LIBZEND" /D "ZTS" /D "TSRM_EXPORTS" /Fr /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 lib44bsd95.lib resolv.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libzendts.lib tsrm.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release_TS\php.exe" /libpath:"c:\Projects\php4\lib" /libpath:"\src\lib" /libpath:"d:\src\bind\lib" /libpath:"..\tsrm\release" /libpath:"..\libzend\Release_TS"
+# ADD LINK32 lib44bsd95.lib resolv.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib libzendts.lib tsrm.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release_TS\php.exe" /libpath:"c:\Projects\php4\lib" /libpath:"\src\lib" /libpath:"d:\src\bind\lib" /libpath:"..\tsrm\release_TS" /libpath:"..\libzend\Release_TS"
 
 !ELSEIF  "$(CFG)" == "php4ts - Win32 Debug_TS"
 
@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\projects\php4\include" /I "..\libzend" /I "." /I "regex\\" /I "d:\src\bind\include" /I "..\tsrm" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "COMPILE_LIBZEND" /D "ZTS" /FR /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "c:\projects\php4\include" /I "..\libzend" /I "." /I "regex\\" /I "d:\src\bind\include" /I "..\tsrm" /D "DEBUG" /D "_DEBUG" /D "MSVC5" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "COMPILE_LIBZEND" /D "ZTS" /D "TSRM_EXPORTS" /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /i "c:\include" /d "_DEBUG"
@@ -76,7 +76,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 lib44bsd95.lib resolv.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib TSRM.lib libzendts.lib /nologo /version:3.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"Debug_TS\php.exe" /pdbtype:sept /libpath:"c:\Projects\php4\lib" /libpath:"\src\lib" /libpath:"d:\src\bind\lib" /libpath:"..\TSRM\debug" /libpath:"..\libzend\Debug_TS"
+# ADD LINK32 lib44bsd95.lib resolv.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib TSRM.lib libzendts.lib /nologo /version:3.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd" /nodefaultlib:"libcmt" /out:"Debug_TS\php.exe" /pdbtype:sept /libpath:"c:\Projects\php4\lib" /libpath:"\src\lib" /libpath:"d:\src\bind\lib" /libpath:"..\TSRM\debug_ts" /libpath:"..\libzend\Debug_TS"
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 

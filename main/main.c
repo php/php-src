@@ -361,11 +361,7 @@ PHPAPI void php3_error(int type, const char *format,...)
 	ELS_FETCH();
 	PLS_FETCH();
 
-	if (!(type & E_CORE)) {
-		if (!PG(initialized)) {	/* don't display further errors after php3_request_shutdown() */
-			return;
-		}
-	}
+
 	switch (type) {
 		case E_CORE_ERROR:
 		case E_CORE_WARNING:
@@ -680,7 +676,6 @@ void php3_request_shutdown(void *dummy)
 
 	php3_destroy_request_info(NULL);
 	shutdown_memory_manager(0, 0);
-	php3_error(E_WARNING, "Unknown resources in request shutdown function");
 	php3_unset_timeout();
 
 
