@@ -44,10 +44,10 @@ are met:
      distribution to you under this license agreement, only as a
      part of PHP.  In the event that you separate the Zend Engine
      (or any portion thereof) from the rest of the software, or
-     modify the Zend Engine, or any portion thereof, your use of
-     the separated or modified Zend Engine software shall not be
-     governed by this license, and instead shall be governed by
-     the license set forth at www.zend.com/license/ZendLicense.txt. 
+     modify the Zend Engine, or any portion thereof, your use of the
+     separated or modified Zend Engine software shall not be governed
+     by this license, and instead shall be governed by the license
+     set forth at http://www.zend.com/license/ZendLicense.txt. 
 
 
 
