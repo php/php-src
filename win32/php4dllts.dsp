@@ -178,6 +178,10 @@ SOURCE=..\main\network.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\output.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\php_content_types.c
 # End Source File
 # Begin Source File
@@ -295,6 +299,10 @@ SOURCE=..\main\php_main.h
 # Begin Source File
 
 SOURCE=..\main\php_open_temporary_file.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\php_output.h
 # End Source File
 # Begin Source File
 
@@ -479,10 +487,6 @@ SOURCE=..\ext\session\mod_files.c
 # Begin Source File
 
 SOURCE=..\ext\session\mod_user.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\output.c
 # End Source File
 # Begin Source File
 
@@ -692,10 +696,6 @@ SOURCE=..\ext\mysql\php_mysql.h
 # Begin Source File
 
 SOURCE=..\ext\odbc\php_odbc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\standard\php_output.h
 # End Source File
 # Begin Source File
 

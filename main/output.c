@@ -22,7 +22,7 @@
 #include "php.h"
 #include "ext/standard/head.h"
 #include "ext/session/php_session.h"
-#include "basic_functions.h"
+#include "ext/standard/basic_functions.h"
 #include "SAPI.h"
 
 /* output functions */

@@ -47,7 +47,6 @@
 #include "ext/standard/php_ext_syslog.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/php_lcg.h"
-#include "ext/standard/php_output.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
 #include "ext/calendar/php_calendar.h"
