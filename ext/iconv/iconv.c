@@ -31,16 +31,15 @@
 #include "php_ini.h"
 
 #include <errno.h>
-
 #include "php_iconv.h"
 
 #ifdef HAVE_ICONV
 
-#ifndef PHP_ICONV_H_PATH
-#define PHP_ICONV_H_PATH <iconv.h>
+#ifdef HAVE_GICONV_H
+#include <giconv.h>
+#else
+#include <iconv.h>
 #endif
-
-#include PHP_ICONV_H_PATH
 
 #ifdef HAVE_GLIBC_ICONV
 #include <gnu/libc-version.h>
