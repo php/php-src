@@ -1,3 +1,9 @@
+2002-07-21  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_compile.c:
+    - Fix bug reported by Sebastian where old constructors didn't work in
+    - nested classes.
+
 2002-07-18  derick  <derick@pb1.pair.com>
 
     * zend.h
