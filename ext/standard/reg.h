@@ -42,7 +42,7 @@ PHP_MINFO_FUNCTION(regex);
 
 
 #ifdef ZTS
-#define REG(v) TSRMG(reg_globals_id, php_reg_globals *, v)
+#define REG(v) TSRMG(reg_globals_id, zend_reg_globals *, v)
 #else
 #define REG(v) (reg_globals.v)
 #endif
