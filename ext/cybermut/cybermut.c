@@ -86,9 +86,7 @@ PHP_MINFO_FUNCTION(cybermut)
 /* }}} */
 
 /* {{{ proto string cybermut_creerformulairecm(string url_CM, string version, string TPE, string montant, string ref_commande, string texte_libre, string url_retour, string url_retour_ok, string url_retour_err, string langue, string code_societe, string texte_bouton)
-   Return a string containing source HTML of the form of request for payment.
-   This result corresponds to the last parameter "formulaire" of the original function 
-   which was removed */
+   Returns a string containing source HTML of the form of request for payment. This result corresponds to the last parameter "formulaire" of the original function which was removed */
 PHP_FUNCTION(cybermut_creerformulairecm)
 {
 	zval **url_CM, **version, **TPE, **montant, **ref_commande, **texte_libre, **url_retour, **url_retour_ok, **url_retour_err, **langue, **code_societe, **texte_bouton;
@@ -121,9 +119,7 @@ PHP_FUNCTION(cybermut_creerformulairecm)
 /* }}} */
 
 /* {{{ proto bool cybermut_testmac(string code_MAC, string version, string TPE, string cdate, string montant, string ref_commande, string texte_libre, string code_retour)
-   Return a boolean attesting that the authentification proceeded well 
-   true : the received message is authenticated 
-   false: if not */
+   Returns a boolean attesting that the authentification proceeded well. TRUE if the received message is authenticated and FALSE if not */ 
 PHP_FUNCTION(cybermut_testmac)
 {
 	zval **code_MAC, **version, **TPE, **cdate, **montant, **ref_commande, **texte_libre, **code_retour;
@@ -154,10 +150,7 @@ PHP_FUNCTION(cybermut_testmac)
 /* }}} */
 
 /* {{{ proto string cybermut_creerreponsecm(string phrase)
-   Return a string containing the message of acknowledgement of delivery 
-	(headers and body of the message).
-   This result corresponds to the last parameter "reponse" of the original function
-   which was removed. */
+   Returns a string containing the message of acknowledgement of delivery (headers and body of the message). This result corresponds to the last parameter "reponse" of the original function which was removed */
 PHP_FUNCTION(cybermut_creerreponsecm)
 {
 	zval **phrase;
