@@ -231,7 +231,7 @@ int php_init_config()
 		free_ini_search_path = 0;
 	} else {
 		char *default_location;
-		char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
+		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 
 		php_ini_search_path = (char *) emalloc(MAXPATHLEN*3+strlen(env_location)+3+1);
 		free_ini_search_path = 1;
@@ -244,8 +244,10 @@ int php_init_config()
 		/* Add cwd */
 #ifdef INI_CHECK_CWD
 		if (strcmp(sapi_module.name, "cli")!=0) {	
+			if (*php_ini_search_path) {
+				strcat(php_ini_search_path, paths_separator);
+			}
 			strcat(php_ini_search_path, ".");
-			strcat(php_ini_search_path, paths_separator);
 		}
 #endif
 
@@ -269,28 +271,37 @@ int php_init_config()
 			if (separator_location) {
 				*(separator_location+1) = 0;
 			}
+			if (*php_ini_search_path) {
+				strcat(php_ini_search_path, paths_separator);
+			}
 			strcat(php_ini_search_path, binary_location);
-			strcat(php_ini_search_path, paths_separator);
 			efree(binary_location);
 		}
 
 		/* Add environment location */
 		if (env_location[0]) {
+			if (*php_ini_search_path) {
+				strcat(php_ini_search_path, paths_separator);
+			}
 			strcat(php_ini_search_path, env_location);
-			strcat(php_ini_search_path, paths_separator);
 		}
 
 		/* Add default location */
 #ifdef PHP_WIN32
 		default_location = (char *) emalloc(MAXPATHLEN+1);
 	
-		if (!GetWindowsDirectory(default_location, MAXPATHLEN)) {
-			default_location[0]=0;
+		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
+			if (*php_ini_search_path) {
+				strcat(php_ini_search_path, paths_separator);
+			}
+			strcat(php_ini_search_path, default_location);
 		}
-		strcat(php_ini_search_path, default_location);
 		efree(default_location);
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
+		if (*php_ini_search_path) {
+			strcat(php_ini_search_path, paths_separator);
+		}
 		strcat(php_ini_search_path, default_location);
 #endif
 	}
@@ -310,15 +321,23 @@ int php_init_config()
 			}
 		}
 	}
+	/* Search php-%sapi-module-name%.ini file in search path */
+	if (!fh.handle.fp) {
+		const char *fmt = "php-%s.ini";
+		char *ini_fname=emalloc(strlen(fmt)+strlen(sapi_module.name));
+		sprintf(ini_fname, fmt, sapi_module.name);
+		fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+		efree(ini_fname);
+		if (fh.handle.fp) {
+			fh.filename = php_ini_opened_path;
+		}
+	}
 	/* Search php.ini file in search path */
 	if (!fh.handle.fp) {
-		char *ini_fname=emalloc(10+strlen(sapi_module.name));
-		sprintf(ini_fname, "php-%s.ini", sapi_module.name);
-		if (!(fh.handle.fp = php_fopen_with_path(ini_fname, "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC))) {
-			fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+		fh.handle.fp = php_fopen_with_path("php.ini", "r", php_ini_search_path, &php_ini_opened_path TSRMLS_CC);
+		if (fh.handle.fp) {
+			fh.filename = php_ini_opened_path;
 		}
-		efree(ini_fname);
-		fh.filename = php_ini_opened_path;
 	}
 	if (free_ini_search_path) {
 		efree(php_ini_search_path);
