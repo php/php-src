@@ -393,7 +393,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 			{
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
-				if (!instanceof_function(*arg, ce TSRMLS_CC)) {
+				if (!instanceof_function(Z_OBJCE_PP(arg), ce TSRMLS_CC)) {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
@@ -602,7 +602,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 
 			return FAILURE;
 		} else {
-			if (!instanceof_function(*parameter, ce TSRMLS_CC)) {
+			if (!instanceof_function(Z_OBJCE_PP(parameter), ce TSRMLS_CC)) {
 				if (!quiet) {
 					zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
 						get_active_function_name(TSRMLS_C), ce->name,
