@@ -931,6 +931,9 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_XPM
 	ret |= 16;
 #endif
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	RETURN_LONG(ret);
 }
 /* }}} */

@@ -1229,6 +1229,9 @@ PHP_FUNCTION(session_encode)
 	int len;
 	char *enc;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	enc = php_session_encode(&len TSRMLS_CC);
 	RETVAL_STRINGL(enc, len, 0);
 }
@@ -1253,6 +1256,7 @@ PHP_FUNCTION(session_decode)
    Begin session - reinitializes freezed variables, registers browsers etc */
 PHP_FUNCTION(session_start)
 {
+	/* skipping check for non-zero args for performance reasons here ?*/
 	php_session_start(TSRMLS_C);
 	RETURN_TRUE;
 }
@@ -1262,6 +1266,9 @@ PHP_FUNCTION(session_start)
    Destroy the current session and all data associated with it */
 PHP_FUNCTION(session_destroy)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	if (php_session_destroy(TSRMLS_C) == SUCCESS) {
 		RETURN_TRUE;
 	} else {

@@ -2432,6 +2432,9 @@ PHP_FUNCTION(xmltree)
    Initializing XPath environment */
 PHP_FUNCTION(xpath_init)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "") == FAILURE)
+		return;
+
 	xmlXPathInit();
 	RETURN_TRUE;
 }
