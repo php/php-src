@@ -23,10 +23,11 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_MCVE
+#include "php.h"
+
+#if HAVE_MCVE
 
 /* standard php include(s) */
-#include "php.h"
 #include "ext/standard/head.h"
 #include "ext/standard/php_standard.h"
 #include "ext/standard/info.h"
