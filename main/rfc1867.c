@@ -35,7 +35,7 @@
 
 static void add_protected_variable(char *varname PLS_DC)
 {
-	int dummy=0;
+	int dummy=1;
 
 	zend_hash_add(&PG(rfc1867_protected_variables), varname, strlen(varname)+1, &dummy, sizeof(int), NULL);
 }
@@ -211,7 +211,6 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					} else {
 						safe_php_register_variable(lbuf, filenamebuf, NULL ELS_CC PLS_CC);
 					}
-					add_protected_variable(lbuf PLS_CC);
 
 					/* Add $foo[name] */
                     if (is_arr_upload) {
@@ -350,6 +349,7 @@ static void php_mime_split(char *buf, int cnt, char *boundary, zval *array_ptr)
 					}
 				}
 				safe_php_register_variable(namebuf, fn, NULL ELS_CC PLS_CC);
+				add_protected_variable(namebuf PLS_CC);
 
 				/* Add $foo[tmp_name] */
 				if(is_arr_upload) {
