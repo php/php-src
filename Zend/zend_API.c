@@ -247,7 +247,7 @@ ZEND_API inline int add_assoc_unset(zval *arg, char *key)
 	zval *tmp;
 
 	ALLOC_ZVAL(tmp);
-	tmp->type = IS_UNSET;
+	tmp->type = IS_NULL;
 	INIT_PZVAL(tmp);
 	return zend_hash_update(arg->value.ht, key, strlen(key)+1, (void *) &tmp, sizeof(zval *), NULL);
 }
@@ -339,7 +339,7 @@ ZEND_API inline int add_index_unset(zval *arg, uint index)
 	zval *tmp;
 
 	ALLOC_ZVAL(tmp);
-	tmp->type = IS_UNSET;
+	tmp->type = IS_NULL;
 	INIT_PZVAL(tmp);
 	return zend_hash_index_update(arg->value.ht, index, (void *) &tmp, sizeof(zval *), NULL);
 }
@@ -432,7 +432,7 @@ ZEND_API inline int add_next_index_unset(zval *arg)
 	zval *tmp;
 
 	ALLOC_ZVAL(tmp);
-	tmp->type = IS_UNSET;
+	tmp->type = IS_NULL;
 	INIT_PZVAL(tmp);
 	return zend_hash_next_index_insert(arg->value.ht, &tmp, sizeof(zval *), NULL);
 }

@@ -60,7 +60,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		STR_FREE(strval);
 	} else if (op->type==IS_BOOL || op->type==IS_RESOURCE) {
 		op->type = IS_LONG;
-	} else if (op->type==IS_UNSET) {
+	} else if (op->type==IS_NULL) {
 		op->type = IS_LONG;
 		op->value.lval = 0;
 	}
@@ -87,7 +87,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		(holder).value.lval = (op)->value.lval;						\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
-	} else if ((op)->type==IS_UNSET) {								\
+	} else if ((op)->type==IS_NULL) {								\
 		(holder).value.lval = 0;									\
 		(holder).type = IS_LONG;									\
 		(op) = &(holder);											\
@@ -104,7 +104,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		(op) = &(holder);											\
 	} else if ((op)->type != IS_LONG) {								\
 		switch ((op)->type) {										\
-			case IS_UNSET:											\
+			case IS_NULL:											\
 				(holder).value.lval = 0;							\
 				break;												\
 			case IS_DOUBLE:											\
@@ -134,7 +134,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 		convert_to_boolean(op);										\
 	} else if ((op)->type != IS_BOOL) {								\
 		switch ((op)->type) {										\
-			case IS_UNSET:											\
+			case IS_NULL:											\
 				(holder).value.lval = 0;							\
 				break;												\
 			case IS_RESOURCE:										\
@@ -179,7 +179,7 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 	long tmp;
 
 	switch (op->type) {
-		case IS_UNSET:
+		case IS_NULL:
 			op->value.lval = 0;
 			break;
 		case IS_RESOURCE:
@@ -221,7 +221,7 @@ ZEND_API void convert_to_double(zval *op)
 	double tmp;
 
 	switch (op->type) {
-		case IS_UNSET:
+		case IS_NULL:
 			op->value.dval = 0.0;
 			break;
 		case IS_RESOURCE:
@@ -260,7 +260,7 @@ ZEND_API void convert_to_double(zval *op)
 ZEND_API void convert_to_unset(zval *op)
 {
 	zval_dtor(op);
-	op->type = IS_UNSET;
+	op->type = IS_NULL;
 }
 
 
@@ -272,7 +272,7 @@ ZEND_API void convert_to_boolean(zval *op)
 	switch (op->type) {
 		case IS_BOOL:
 			break;
-		case IS_UNSET:
+		case IS_NULL:
 			op->value.lval = 0;
 			break;
 		case IS_RESOURCE:
@@ -319,7 +319,7 @@ ZEND_API void convert_to_string(zval *op)
 	ELS_FETCH();
 
 	switch (op->type) {
-		case IS_UNSET:
+		case IS_NULL:
 			op->value.str.val = empty_string;
 			op->value.str.len = 0;
 			break;
@@ -915,7 +915,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 	}
 	
 	if (op1->type == IS_BOOL || op2->type == IS_BOOL
-		|| op1->type == IS_UNSET || op2->type == IS_UNSET) {
+		|| op1->type == IS_NULL || op2->type == IS_NULL) {
 		zendi_convert_to_boolean(op1, op1_copy, result);
 		zendi_convert_to_boolean(op2, op2_copy, result);
 		result->type = IS_LONG;
@@ -954,8 +954,8 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 		return SUCCESS;
 	}
 	switch (op1->type) {
-		case IS_UNSET:
-			result->value.lval = (op2->type==IS_UNSET);
+		case IS_NULL:
+			result->value.lval = (op2->type==IS_NULL);
 			return SUCCESS;
 			break;
 		case IS_BOOL:
@@ -1154,7 +1154,7 @@ ZEND_API int increment_function(zval *op1)
 		case IS_DOUBLE:
 			op1->value.dval = op1->value.dval + 1;
 			break;
-		case IS_UNSET:
+		case IS_NULL:
 			op1->value.lval = 1;
 			op1->type = IS_LONG;
 			break;

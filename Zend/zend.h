@@ -204,7 +204,7 @@ typedef struct _zend_utility_values {
 
 
 /* data types */
-#define IS_UNSET	0
+#define IS_NULL	0
 #define IS_LONG		1
 #define IS_DOUBLE	2
 #define IS_STRING	3

@@ -48,7 +48,7 @@ ZEND_API inline void var_reset(zval *var)
 
 ZEND_API inline void var_uninit(zval *var)
 {
-	var->type = IS_UNSET;
+	var->type = IS_NULL;
 }
 		
 
@@ -82,7 +82,7 @@ ZEND_API int _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_LONG:
 		case IS_DOUBLE:
 		case IS_BOOL:
-		case IS_UNSET:
+		case IS_NULL:
 		default:
 			return 1;
 			break;
@@ -115,7 +115,7 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			break;
 		case IS_BOOL:
 		case IS_LONG:
-		case IS_UNSET:
+		case IS_NULL:
 			break;
 		case IS_STRING:
 			if (zvalue->value.str.val) {

@@ -538,7 +538,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, znode *op
 	int offset_key_length;
 
 	switch (dim->type) {
-		case IS_UNSET:
+		case IS_NULL:
 			offset_key = "";
 			offset_key_length = 0;
 			goto fetch_string_dim;
@@ -665,7 +665,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 		return;
 	}
 
-	if (container->type == IS_UNSET) {
+	if (container->type == IS_NULL) {
 		switch (type) {
 			case BP_VAR_RW:
 			case BP_VAR_W:
@@ -704,7 +704,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			SEPARATE_ON_READ_OBJECT(*retval, type);
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
-		case IS_UNSET:
+		case IS_NULL:
 			/* for read-mode only */
 			get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 			*retval = &EG(uninitialized_zval_ptr);
@@ -1956,7 +1956,7 @@ send_by_ref:
 						zendi_zval_copy_ctor(*result);
 					}					
 					switch (opline->op2.u.constant.type) {
-						case IS_UNSET:
+						case IS_NULL:
 							convert_to_unset(result);
 							break;
 						case IS_BOOL:
@@ -2171,7 +2171,7 @@ send_by_ref:
 							isset = 1;
 						}
 					} else if (*var==EG(uninitialized_zval_ptr)
-						|| ((*var)->type == IS_UNSET)) {
+						|| ((*var)->type == IS_NULL)) {
 						isset = 0;
 					} else {
 						isset = 1;

@@ -442,7 +442,7 @@ expr_without_variable:
 	|	T_ARRAY_CAST expr 	{ do_cast(&$$, &$2, IS_ARRAY CLS_CC); }
 	|	T_OBJECT_CAST expr 	{ do_cast(&$$, &$2, IS_OBJECT CLS_CC); }
 	|	T_BOOL_CAST expr	{ do_cast(&$$, &$2, IS_BOOL CLS_CC); }
-	|	T_UNSET_CAST expr	{ do_cast(&$$, &$2, IS_UNSET CLS_CC); }
+	|	T_UNSET_CAST expr	{ do_cast(&$$, &$2, IS_NULL CLS_CC); }
 	|	T_EXIT exit_expr	{ do_exit(&$$, &$2 CLS_CC); }
 	|	'@' { do_begin_silence(&$1 CLS_CC); } expr { do_end_silence(&$1 CLS_CC); $$ = $3; }
 	|	scalar				{ $$ = $1; }

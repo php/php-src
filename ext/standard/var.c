@@ -48,7 +48,7 @@ void php_var_dump(pval **struc, int level)
 			PHPWRITE(&buf[1], i - 1);
 			break;
 
-		case IS_UNSET:
+		case IS_NULL:
 			i = sprintf(buf, "%*cNULL\n", level, ' ');
 			PHPWRITE(&buf[1], i - 1);
 			break;
@@ -203,7 +203,7 @@ void php_var_serialize(pval *buf, pval **struc)
 			STR_CAT(buf, s, slen);
 			return;
 
-		case IS_UNSET:
+		case IS_NULL:
 			STR_CAT(buf, "N;", 2);
 			return;
 
@@ -311,7 +311,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 			}
 			(*p)++;
 			INIT_PZVAL(*rval);
-			(*rval)->type = IS_UNSET;
+			(*rval)->type = IS_NULL;
 			(*p)++;
 			return 1;
 
