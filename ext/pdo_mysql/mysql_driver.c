@@ -116,6 +116,11 @@ int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int lin
 			break;
 	}
 
+	if (!dbh->methods) {
+		zend_throw_exception_ex(php_pdo_get_exception(), *pdo_err TSRMLS_CC, "[%d] %s",
+				einfo->errcode, einfo->errmsg);
+	}
+	
 	return einfo->errcode;
 }
 /* }}} */
