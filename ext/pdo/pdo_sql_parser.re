@@ -122,7 +122,6 @@ int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char **ou
 			/* stupid keys need to be null-terminated, even though we know their length */
 			crutch  = s.tok[s.cur-s.tok];
 			s.tok[s.cur-s.tok] = '\0';
-			fprintf(stderr, "%d %s\n", s.cur-s.tok + 1, s.tok);
 			if((SUCCESS == zend_hash_find(params, s.tok, s.cur-s.tok + 1,(void **)&param))  
 			    ||
 			   (SUCCESS == zend_hash_index_find(params, bindno, (void **)&param))) 
