@@ -5,8 +5,6 @@ Zend
 ----
     * allow foreach ($array as $k => &$val) syntax. right now we can not 
 	  traverse an array without copying each element.
-    * create typedefs for all kinds of callback functions - this would make
-      casting easier. eg: zend_hash_apply(someht,(zend_apply_f) bla);
 
 global
 ------
