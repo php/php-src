@@ -38,11 +38,6 @@
 #include "bcmath.h"
 #include "private.h"
 
-/* Storage used for special numbers. */
-bc_num _zero_;
-bc_num _one_;
-bc_num _two_;
-
  bc_num _bc_Free_list = NULL;
 
 /* new_num allocates a number and sets fields to known values. */
@@ -103,21 +98,20 @@ bc_free_num (num)
 /* Intitialize the number package! */
 
 void
-bc_init_numbers ()
+bc_init_numbers (TSRMLS_D)
 {
-  _zero_ = bc_new_num (1,0);
-  _one_  = bc_new_num (1,0);
-  _one_->n_value[0] = 1;
-  _two_  = bc_new_num (1,0);
-  _two_->n_value[0] = 2;
+  BCG(_zero_) = bc_new_num (1,0);
+  BCG(_one_)  = bc_new_num (1,0);
+  BCG(_one_)->n_value[0] = 1;
+  BCG(_two_)  = bc_new_num (1,0);
+  BCG(_two_)->n_value[0] = 2;
 }
 
 
 /* Make a copy of a number!  Just increments the reference count! */
 
 bc_num
-bc_copy_num (num)
-     bc_num num;
+bc_copy_num (bc_num num)
 {
   num->n_refs++;
   return num;
@@ -127,9 +121,8 @@ bc_copy_num (num)
 /* Initialize a number NUM by making it a copy of zero. */
 
 void
-bc_init_num (num)
-     bc_num *num;
+bc_init_num (bc_num *num TSRMLS_DC)
 {
-  *num = bc_copy_num (_zero_);
+  *num = bc_copy_num (BCG(_zero_));
 }
 

@@ -176,7 +176,7 @@ _bc_shift_addsub (bc_num accum, bc_num val, int shift, int sub)
 */
 static void
 _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
-	     int full_scale)
+	     int full_scale TSRMLS_DC)
 { 
   bc_num u0, u1, v0, v1;
   int u0len, v0len;
@@ -197,14 +197,14 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
 
   /* Split u and v. */
   if (ulen < n) {
-    u1 = bc_copy_num (_zero_);
+    u1 = bc_copy_num (BCG(_zero_));
     u0 = new_sub_num (ulen,0, u->n_value);
   } else {
     u1 = new_sub_num (ulen-n, 0, u->n_value);
     u0 = new_sub_num (n, 0, u->n_value+ulen-n);
   }
   if (vlen < n) {
-    v1 = bc_copy_num (_zero_);
+    v1 = bc_copy_num (BCG(_zero_));
     v0 = new_sub_num (vlen,0, v->n_value);
   } else {
     v1 = new_sub_num (vlen-n, 0, v->n_value);
@@ -217,12 +217,12 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
   _bc_rm_leading_zeros (v0);
   v0len = v0->n_len;
 
-  m1zero = bc_is_zero(u1) || bc_is_zero(v1);
+  m1zero = bc_is_zero(u1 TSRMLS_CC) || bc_is_zero(v1 TSRMLS_CC);
 
   /* Calculate sub results ... */
 
-  bc_init_num(&d1);
-  bc_init_num(&d2);
+  bc_init_num(&d1 TSRMLS_CC);
+  bc_init_num(&d2 TSRMLS_CC);
   bc_sub (u1, u0, &d1, 0);
   d1len = d1->n_len;
   bc_sub (v0, v1, &d2, 0);
@@ -231,19 +231,19 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
 
   /* Do recursive multiplies and shifted adds. */
   if (m1zero)
-    m1 = bc_copy_num (_zero_);
+    m1 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0);
+    _bc_rec_mul (u1, u1->n_len, v1, v1->n_len, &m1, 0 TSRMLS_CC);
 
-  if (bc_is_zero(d1) || bc_is_zero(d2))
-    m2 = bc_copy_num (_zero_);
+  if (bc_is_zero(d1 TSRMLS_CC) || bc_is_zero(d2 TSRMLS_CC))
+    m2 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0);
+    _bc_rec_mul (d1, d1len, d2, d2len, &m2, 0 TSRMLS_CC);
 
-  if (bc_is_zero(u0) || bc_is_zero(v0))
-    m3 = bc_copy_num (_zero_);
+  if (bc_is_zero(u0 TSRMLS_CC) || bc_is_zero(v0 TSRMLS_CC))
+    m3 = bc_copy_num (BCG(_zero_));
   else
-    _bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0);
+    _bc_rec_mul (u0, u0->n_len, v0, v0->n_len, &m3, 0 TSRMLS_CC);
 
   /* Initialize product */
   prodlen = ulen+vlen+1;
@@ -274,9 +274,7 @@ _bc_rec_mul (bc_num u, int ulen, bc_num v, int vlen, bc_num *prod,
    */
 
 void
-bc_multiply (n1, n2, prod, scale)
-     bc_num n1, n2, *prod;
-     int scale;
+bc_multiply (bc_num n1, bc_num n2, bc_num *prod, int scale TSRMLS_DC)
 {
   bc_num pval; 
   int len1, len2;
@@ -289,7 +287,7 @@ bc_multiply (n1, n2, prod, scale)
   prod_scale = MIN(full_scale,MAX(scale,MAX(n1->n_scale,n2->n_scale)));
 
   /* Do the multiply */
-  _bc_rec_mul (n1, len1, n2, len2, &pval, full_scale);
+  _bc_rec_mul (n1, len1, n2, len2, &pval, full_scale TSRMLS_CC);
 
   /* Assign to prod and clean up the number. */
   pval->n_sign = ( n1->n_sign == n2->n_sign ? PLUS : MINUS );
@@ -297,7 +295,7 @@ bc_multiply (n1, n2, prod, scale)
   pval->n_len = len2 + len1 + 1 - full_scale;
   pval->n_scale = prod_scale;
   _bc_rm_leading_zeros (pval);
-  if (bc_is_zero (pval))
+  if (bc_is_zero (pval TSRMLS_CC))
     pval->n_sign = PLUS;
   bc_free_num (prod);
   *prod = pval;

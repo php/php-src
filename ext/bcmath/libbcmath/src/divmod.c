@@ -45,26 +45,24 @@
  */
 
 int
-bc_divmod (num1, num2, quot, rem, scale)
-     bc_num num1, num2, *quot, *rem;
-     int scale;
+bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale TSRMLS_DC)
 {
   bc_num quotient = NULL;
   bc_num temp;
   int rscale;
 
   /* Check for correct numbers. */
-  if (bc_is_zero (num2)) return -1;
+  if (bc_is_zero (num2 TSRMLS_CC)) return -1;
 
   /* Calculate final scale. */
   rscale = MAX (num1->n_scale, num2->n_scale+scale);
-  bc_init_num(&temp);
+  bc_init_num(&temp TSRMLS_CC);
 
   /* Calculate it. */
-  bc_divide (num1, num2, &temp, scale);
+  bc_divide (num1, num2, &temp, scale TSRMLS_CC);
   if (quot)
     quotient = bc_copy_num (temp);
-  bc_multiply (temp, num2, &temp, rscale);
+  bc_multiply (temp, num2, &temp, rscale TSRMLS_CC);
   bc_sub (num1, temp, rem, rscale);
   bc_free_num (&temp);
 
@@ -82,10 +80,8 @@ bc_divmod (num1, num2, quot, rem, scale)
    result in RESULT.   */
 
 int
-bc_modulo (num1, num2, result, scale)
-     bc_num num1, num2, *result;
-     int scale;
+bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale TSRMLS_DC)
 {
-  return bc_divmod (num1, num2, NULL, result, scale);
+  return bc_divmod (num1, num2, NULL, result, scale TSRMLS_CC);
 }
 
