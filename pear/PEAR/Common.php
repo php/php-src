@@ -1076,7 +1076,7 @@ class PEAR_Common extends PEAR
         if (!isset($info['version'])) {
             $errors[] = 'missing version';
         } elseif (!$this->validPackageVersion($info['version'])) {
-            $errors[] = 'invalid package version';
+            $errors[] = 'invalid package release version';
         }
         if (empty($info['release_state'])) {
             $errors[] = 'missing release state';
