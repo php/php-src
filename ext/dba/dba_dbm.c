@@ -78,13 +78,13 @@ DBA_OPEN_FUNC(dbm)
 		return FAILURE;
 	}
 
-	info->dbf = calloc(sizeof(dba_dbm_data), 1);
+	info->dbf = ecalloc(sizeof(dba_dbm_data), 1);
 	return SUCCESS;
 }
 
 DBA_CLOSE_FUNC(dbm)
 {
-	free(info->dbf);
+	efree(info->dbf);
 	dbmclose();
 }
 
