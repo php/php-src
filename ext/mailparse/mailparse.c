@@ -171,8 +171,7 @@ static void mailparse_do_uudecode(FILE * infp, FILE * outfp)
 
 
 /* {{{ proto array mailparse_uudecode_all(resource fp)
-	Scan the data from fp and extract each embedded uuencoded file. Returns an array listing filename information
-*/
+   Scans the data from fp and extract each embedded uuencoded file. Returns an array listing filename information */
 PHP_FUNCTION(mailparse_uudecode_all)
 {
 	zval * file, * item;
@@ -260,8 +259,7 @@ PHP_FUNCTION(mailparse_uudecode_all)
 
 
 /* {{{ proto array mailparse_rfc822_parse_addresses(string addresses)
-	parse addresses and return a hash containing that data
-*/
+   Parse addresses and returns a hash containing that data */
 PHP_FUNCTION(mailparse_rfc822_parse_addresses)
 {
 	zval ** addresses;
@@ -309,8 +307,7 @@ PHP_FUNCTION(mailparse_rfc822_parse_addresses)
 /* }}} */
 
 /* {{{ proto int mailparse_determine_best_xfer_encoding(resource fp)
-	figure out the best way of encoding the content read from the file pointer fp, which must be seek-able.
-*/
+   Figures out the best way of encoding the content read from the file pointer fp, which must be seek-able */
 PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 {
 	zval ** file;
@@ -396,8 +393,7 @@ PHP_FUNCTION(mailparse_determine_best_xfer_encoding)
 /* }}} */
 
 /* {{{ proto boolean mailparse_stream_encode(resource sourcefp, resource destfp, string encoding)
-	stream data from source file pointer, apply encoding and write to destfp
-*/
+   Streams data from source file pointer, apply encoding and write to destfp */
 
 static int mailparse_fp_output(int c, void * fp)
 {
@@ -468,8 +464,7 @@ PHP_FUNCTION(mailparse_stream_encode)
 /* }}} */
 
 /* {{{ proto void mailparse_msg_parse(resource rfc2045buf, string data)
-	Incrementally parse data into buffer
-*/
+   Incrementally parse data into buffer */
 PHP_FUNCTION(mailparse_msg_parse)
 {
 	zval ** arg, ** data;
@@ -492,8 +487,7 @@ PHP_FUNCTION(mailparse_msg_parse)
 /* }}} */
 
 /* {{{ proto resource mailparse_msg_parse_file(string filename)
-	Parse file and return a resource representing the structure
-*/
+   Parse file and return a resource representing the structure */
 PHP_FUNCTION(mailparse_msg_parse_file)
 {
 	zval ** filename;
@@ -533,7 +527,7 @@ PHP_FUNCTION(mailparse_msg_parse_file)
 /* }}} */
 
 /* {{{ proto void mailparse_msg_free(resource rfc2045buf)
-	Frees a handle allocated by mailparse_msg_create
+   Frees a handle allocated by mailparse_msg_create
 */
 PHP_FUNCTION(mailparse_msg_free)
 {
@@ -556,9 +550,8 @@ PHP_FUNCTION(mailparse_msg_free)
 /* }}} */
 
 
-/* {{{ proto int mailparse_msg_create()
-	Return a handle that can be used to parse a message
-*/
+/* {{{ proto int mailparse_msg_create(void)
+   Returns a handle that can be used to parse a message */
 PHP_FUNCTION(mailparse_msg_create)
 {
 	struct rfc2045 * rfcbuf;
@@ -593,8 +586,7 @@ static void get_structure_callback(struct rfc2045 *p, struct rfc2045id *id, void
 }
 
 /* {{{ proto array mailparse_msg_get_structure(resource rfc2045)
-	Returns an array of mime section names in the supplied message
-*/
+   Returns an array of mime section names in the supplied message */
 PHP_FUNCTION(mailparse_msg_get_structure)
 {
 	zval **arg;
@@ -653,8 +645,7 @@ static int extract_callback_stdout(const char *p, size_t n, void *ptr)
 }
 
 /* {{{ proto void mailparse_msg_extract_part(resource rfc2045, string msgbody[, string callbackfunc])
-	Extracts/decodes a message section.  If callbackfunc is not specified, the contents will be sent to "stdout".
-*/
+   Extracts/decodes a message section.  If callbackfunc is not specified, the contents will be sent to "stdout" */
 PHP_FUNCTION(mailparse_msg_extract_part)
 {
 	zval **arg, **bodystr, **cbfunc;
@@ -706,9 +697,8 @@ PHP_FUNCTION(mailparse_msg_extract_part)
 }
 /* }}} */
 
-/* {{{ proto string mailparse_msg_extract_part_file(resource rfc2045, string filename[, string callbackfunc])
-	Extracts/decodes a message section, decoding the transfer encoding
-*/
+/* {{{ proto string mailparse_msg_extract_part_file(resource rfc2045, string filename [, string callbackfunc])
+   Extracts/decodes a message section, decoding the transfer encoding */
 PHP_FUNCTION(mailparse_msg_extract_part_file)
 {
 	zval **arg, **filename, **cbfunc;
@@ -792,8 +782,7 @@ cleanup:
 /* }}} */
 
 /* {{{ proto array mailparse_msg_get_part_data(resource rfc2045)
-	Return an assoc. array of info about the message
-*/
+   Returns an associative array of info about the message */
 /* NOTE: you may add keys to the array, but PLEASE do not remove the key/value pairs
 	that are emitted here - it will break my PHP scripts if you do! */
 PHP_FUNCTION(mailparse_msg_get_part_data)
@@ -886,8 +875,7 @@ PHP_FUNCTION(mailparse_msg_get_part_data)
 /* }}} */
 
 /* {{{ proto int mailparse_msg_get_part(resource rfc2045, string mimesection)
-	Return a handle on a given section in a mimemessage
-*/
+   Returns a handle on a given section in a mimemessage */
 PHP_FUNCTION(mailparse_msg_get_part)
 {
 	zval ** arg, ** mimesection;
