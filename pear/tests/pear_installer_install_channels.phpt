@@ -14,6 +14,7 @@ if (!is_dir($temp_path)) {
 }
 if (!is_dir($temp_path . DIRECTORY_SEPARATOR . 'php')) {
     mkdir($temp_path . DIRECTORY_SEPARATOR . 'php');
+    mkdir($temp_path . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'frob');
 }
 if (!is_dir($temp_path . DIRECTORY_SEPARATOR . 'data')) {
     mkdir($temp_path . DIRECTORY_SEPARATOR . 'data');

@@ -23,7 +23,7 @@ if (PEAR_Registry::apiVersion() != '1.1') {
 --FILE--
 <?php
 error_reporting(E_ALL);
-include_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pear_registry_inc.php';
+include_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pear_registry_inc.php.inc';
 include_once "PEAR/Registry.php";
 PEAR::setErrorHandling(PEAR_ERROR_DIE, "%s\n");
 $statedir = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'registry_tester';

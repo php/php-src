@@ -13,7 +13,7 @@ if (!getenv('PHP_PEAR_RUNTESTS')) {
 // Parts tested: - PEAR_Error class
 //               - PEAR::isError static method
 
-include dirname(__FILE__)."/../PEAR.php";
+include_once "PEAR.php";
 
 function test_error_handler($errno, $errmsg, $file, $line, $vars) {
 	$errortype = array (
