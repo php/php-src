@@ -145,6 +145,7 @@ PHP_MINIT_FUNCTION(browscap)
 			return FAILURE;
 		}
 		fh.filename = browscap;
+		fh.type = ZEND_HANDLE_FP;
 		zend_parse_ini_file(&fh, 1, (zend_ini_parser_cb_t) php_browscap_parser_cb, &browser_hash);
 	}
 
