@@ -147,9 +147,11 @@ int main ()
     ])
 
     dnl SablotSetOptions implemented in Sablotron CVS > 2002/10/31
-    AC_CHECK_LIB(sablot, SablotGetOptions,
+    PHP_CHECK_LIBRARY(sablot, SablotGetOptions,
     [
       AC_DEFINE(HAVE_SABLOT_GET_OPTIONS, 1, [Whether Sablotron supports SablotGetOptions])
+    ], [], [
+      -L$XSLT_DIR/lib
     ])
 
     AC_DEFINE(HAVE_SABLOT_BACKEND, 1, [ ])
