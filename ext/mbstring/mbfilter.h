@@ -247,6 +247,8 @@ typedef struct _mbfl_string {
 } mbfl_string;
 
 void mbfl_string_init(mbfl_string *string);
+void mbfl_string_init_set(mbfl_string *string, enum mbfl_no_language no_language, enum mbfl_no_encoding no_encoding);
+void mbfl_string_clear(mbfl_string *string);
 
 
 /*
@@ -399,8 +401,9 @@ int mbfl_buffer_converter_illegal_mode(mbfl_buffer_converter *convd, int mode);
 int mbfl_buffer_converter_illegal_substchar(mbfl_buffer_converter *convd, int substchar);
 int mbfl_buffer_converter_strncat(mbfl_buffer_converter *convd, const unsigned char *p, int n);
 int mbfl_buffer_converter_feed(mbfl_buffer_converter *convd, mbfl_string *string);
+int mbfl_buffer_converter_flush(mbfl_buffer_converter *convd);
+mbfl_string * mbfl_buffer_converter_getbuffer(mbfl_buffer_converter *convd, mbfl_string *result);
 mbfl_string * mbfl_buffer_converter_result(mbfl_buffer_converter *convd, mbfl_string *result);
-mbfl_string * mbfl_buffer_converter_feed_getbuffer(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 mbfl_string * mbfl_buffer_converter_feed_result(mbfl_buffer_converter *convd, mbfl_string *string, mbfl_string *result);
 
 
