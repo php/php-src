@@ -44,6 +44,7 @@
 #include "php_globals.h"
 #include "SAPI.h"
 #include "php_main.h"
+#include "php_variables.h"
 
 #include "ns.h"
 
@@ -287,6 +288,81 @@ php_ns_startup(sapi_module_struct *sapi_module)
 }
 
 
+/*
+ * php_ns_sapi_register_variables() populates the php script environment
+ * with a number of variables. HTTP_* variables are created for
+ * the HTTP header data, so that a script can access these.
+ */
+
+#define ADD_STRINGX(name,buf)										\
+	php_register_variable(name, buf, track_vars_array ELS_CC PLS_CC)
+
+#define ADD_STRING(name)										\
+	ADD_STRINGX(name, buf)
+
+static void
+php_ns_sapi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS_DC)
+{
+	int i;
+	char buf[NS_BUF_SIZE + 1];
+	char *tmp;
+	NSLS_FETCH();
+
+	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
+		char *key = Ns_SetKey(NSG(conn->headers), i);
+		char *value = Ns_SetValue(NSG(conn->headers), i);
+		char *p;
+		char c;
+		int buf_len;
+
+		buf_len = snprintf(buf, NS_BUF_SIZE, "HTTP_%s", key);
+		for(p = buf + 5; (c = *p); p++) {
+			c = toupper(c);
+			if(c < 'A' || c > 'Z') {
+				c = '_';
+			}
+			*p = c;
+		}
+
+		ADD_STRINGX(buf, value);
+	}
+	
+	snprintf(buf, NS_BUF_SIZE, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
+	ADD_STRING("SERVER_SOFTWARE");
+	snprintf(buf, NS_BUF_SIZE, "HTTP/%1.1f", NSG(conn)->request->version);
+	ADD_STRING("SERVER_PROTOCOL");
+
+	ADD_STRINGX("REQUEST_METHOD", NSG(conn)->request->method);
+
+	if(NSG(conn)->request->query)
+		ADD_STRINGX("QUERY_STRING", NSG(conn)->request->query);
+	
+	ADD_STRINGX("SERVER_BUILDDATE", Ns_InfoBuildDate());
+
+	ADD_STRINGX("REMOTE_ADDR", Ns_ConnPeer(NSG(conn)));
+
+	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPeerPort(NSG(conn)));
+	ADD_STRING("REMOTE_PORT");
+
+	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPort(NSG(conn)));
+	ADD_STRING("SERVER_PORT");
+
+	tmp = Ns_ConnHost(NSG(conn));
+	if (tmp)
+		ADD_STRINGX("SERVER_NAME", tmp);
+
+	ADD_STRINGX("PATH_TRANSLATED", SG(request_info).path_translated);
+	ADD_STRINGX("REQUEST_URI", SG(request_info).request_uri);
+	ADD_STRINGX("PHP_SELF", SG(request_info).request_uri);
+
+	ADD_STRINGX("GATEWAY_INTERFACE", "CGI/1.1");
+
+	snprintf(buf, NS_BUF_SIZE, "%d", Ns_InfoBootTime());
+	ADD_STRING("SERVER_BOOTTIME");
+}
+
+
+
 /* this structure is static (as in "it does not change") */
 
 static sapi_module_struct sapi_module = {
@@ -313,7 +389,7 @@ static sapi_module_struct sapi_module = {
 	php_ns_sapi_read_post,					/* read POST data */
 	php_ns_sapi_read_cookies,				/* read Cookies */
 
-	NULL,									/* register server variables */
+	php_ns_sapi_register_variables,
 	NULL,									/* Log message */
 
 	NULL,									/* Block interruptions */
@@ -321,97 +397,6 @@ static sapi_module_struct sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-
-/*
- * php_ns_hash_environment() populates the php script environment
- * with a number of variables. HTTP_* variables are created for
- * the HTTP header data, so that a script can access these.
- */
-
-#define ADD_STRING(name)										\
-	MAKE_STD_ZVAL(pval);										\
-	pval->type = IS_STRING;										\
-	pval->value.str.len = strlen(buf);							\
-	pval->value.str.val = estrndup(buf, pval->value.str.len);	\
-	zend_hash_update(&EG(symbol_table), name, sizeof(name), 	\
-			&pval, sizeof(zval *), NULL)
-
-static void
-php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
-{
-	int i;
-	char buf[NS_BUF_SIZE + 1];
-	zval *pval;
-	char *tmp;
-
-	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
-		char *key = Ns_SetKey(NSG(conn->headers), i);
-		char *value = Ns_SetValue(NSG(conn->headers), i);
-		char *p;
-		char c;
-		int buf_len;
-
-		buf_len = snprintf(buf, NS_BUF_SIZE, "HTTP_%s", key);
-		for(p = buf; (c = *p); p++) {
-			c = toupper(c);
-			if(c < 'A' || c > 'Z') {
-				c = '_';
-			}
-			*p = c;
-		}
-		
-		MAKE_STD_ZVAL(pval);
-		pval->type = IS_STRING;
-		pval->value.str.len = strlen(value);
-		pval->value.str.val = estrndup(value, pval->value.str.len);
-
-		zend_hash_update(&EG(symbol_table), buf, buf_len + 1, &pval, sizeof(zval *), NULL);
-	}
-	
-	snprintf(buf, NS_BUF_SIZE, "%s/%s", Ns_InfoServerName(), Ns_InfoServerVersion());
-	ADD_STRING("SERVER_SOFTWARE");
-	snprintf(buf, NS_BUF_SIZE, "HTTP/%1.1f", NSG(conn)->request->version);
-	ADD_STRING("SERVER_PROTOCOL");
-
-	strncpy(buf, NSG(conn)->request->method, NS_BUF_SIZE);
-	ADD_STRING("REQUEST_METHOD");
-
-	if(NSG(conn)->request->query) {
-		strncpy(buf, NSG(conn)->request->query, NS_BUF_SIZE);
-	} else {
-		buf[0] = '\0';
-	}
-	ADD_STRING("QUERY_STRING");
-	
-	strncpy(buf, Ns_InfoBuildDate(), NS_BUF_SIZE);
-	ADD_STRING("SERVER_BUILDDATE");
-
-	strncpy(buf, Ns_ConnPeer(NSG(conn)), NS_BUF_SIZE);
-	ADD_STRING("REMOTE_ADDR");
-
-	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPeerPort(NSG(conn)));
-	ADD_STRING("REMOTE_PORT");
-
-	snprintf(buf, NS_BUF_SIZE, "%d", Ns_ConnPort(NSG(conn)));
-	ADD_STRING("SERVER_PORT");
-
-	tmp = Ns_ConnHost(NSG(conn));
-	if (tmp) {
-		strncpy(buf, tmp, NS_BUF_SIZE);
-		ADD_STRING("SERVER_NAME");
-	}	
-
-	strncpy(buf, SG(request_info).path_translated, NS_BUF_SIZE);
-	ADD_STRING("PATH_TRANSLATED");
-
-	strncpy(buf, "CGI/1.1", NS_BUF_SIZE);
-	ADD_STRING("GATEWAY_INTERFACE");
-
-	MAKE_STD_ZVAL(pval);
-	pval->type = IS_LONG;
-	pval->value.lval = Ns_InfoBootTime();
-	zend_hash_update(&EG(symbol_table), "SERVER_BOOTTIME", sizeof("SERVER_BOOTTIME"), &pval, sizeof(zval *), NULL);
-}
 
 /*
  * php_ns_module_main() is called by the per-request handler and
@@ -436,7 +421,6 @@ php_ns_module_main(NSLS_D SLS_DC)
 		return NS_ERROR;
 	}
 	
-	php_ns_hash_environment(NSLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	php_request_shutdown(NULL);
 
@@ -564,8 +548,9 @@ php_ns_config(php_ns_context *ctx, char global)
 	 * known_directives) 
 	 */
 
-#if 0
 		} else if (!global && !strcasecmp(key, "php_value")) {
+			Ns_Log(Notice, "php_value has been deactivated temporarily. Please use a php.ini file to pass directives to PHP. Thanks.");
+#if 0
 			char *val;
 
 			val = strchr(value, ' ');
@@ -583,8 +568,8 @@ php_ns_config(php_ns_context *ctx, char global)
 						strlen(val) + 1, PHP_INI_SYSTEM, PHP_INI_STAGE_RUNTIME);
 				
 				efree(new_key);
-#endif
 			}
+#endif
 		}
 		
 	}
