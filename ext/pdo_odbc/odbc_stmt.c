@@ -227,7 +227,7 @@ static int odbc_stmt_set_param(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC)
 			if (rc == SQL_SUCCESS || rc == SQL_SUCCESS_WITH_INFO) {
 				return 1;
 			}
-			pdo_odbc_stmt_error("SQLFetch");
+			pdo_odbc_stmt_error("SQLSetCursorName");
 			return 0;
 
 		default:
