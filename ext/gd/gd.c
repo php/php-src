@@ -2952,7 +2952,7 @@ PHP_FUNCTION(imagesy)
 #ifdef ENABLE_GD_TTF
 
 #if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
-/* {{{ proto array imageftbbox(int size, int angle, string font_file, string text[, array extrainfo])
+/* {{{ proto array imageftbbox(float size, float angle, string font_file, string text [, array extrainfo])
    Give the bounding box of a text using fonts via freetype2 */
 PHP_FUNCTION(imageftbbox)
 {
@@ -2960,7 +2960,7 @@ PHP_FUNCTION(imageftbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagefttext(int im, int size, int angle, int x, int y, int col, string font_file, string text, [array extrainfo])
+/* {{{ proto array imagefttext(resource im, float size, float angle, int x, int y, int col, string font_file, string text [, array extrainfo])
    Write text to the image using fonts via freetype2 */
 PHP_FUNCTION(imagefttext)
 {
@@ -2969,8 +2969,7 @@ PHP_FUNCTION(imagefttext)
 /* }}} */
 #endif
 
-
-/* {{{ proto array imagettfbbox(int size, int angle, string font_file, string text)
+/* {{{ proto array imagettfbbox(float size, float angle, string font_file, string text)
    Give the bounding box of a text using TrueType fonts */
 PHP_FUNCTION(imagettfbbox)
 {
@@ -2978,7 +2977,7 @@ PHP_FUNCTION(imagettfbbox)
 }
 /* }}} */
 
-/* {{{ proto array imagettftext(int im, int size, int angle, int x, int y, int col, string font_file, string text)
+/* {{{ proto array imagettftext(resource im, float size, float angle, int x, int y, int col, string font_file, string text)
    Write text to the image using a TrueType font */
 PHP_FUNCTION(imagettftext)
 {
@@ -3036,38 +3035,40 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	}
 
 #if HAVE_GD_STRINGFTEX
-		if (extended && EXT) {
-			/* parse extended info */
+	if (extended && EXT) {
+		/* parse extended info */
 
-			HashPosition pos;
+		HashPosition pos;
 
-			convert_to_array_ex(EXT);
+		convert_to_array_ex(EXT);
 
-			/* walk the assoc array */
-			zend_hash_internal_pointer_reset_ex(HASH_OF(*EXT), &pos);
-			do {
-			  zval ** item;
-			  char * key;
-			  ulong num_key;
+		/* walk the assoc array */
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*EXT), &pos);
+		do {
+			zval ** item;
+			char * key;
+			ulong num_key;
 
-			  if (zend_hash_get_current_key_ex(HASH_OF(*EXT), &key, NULL, &num_key, 0, &pos) != HASH_KEY_IS_STRING)
-				  continue;
+			if (zend_hash_get_current_key_ex(HASH_OF(*EXT), &key, NULL, &num_key, 0, &pos) != HASH_KEY_IS_STRING) {
+				continue;
+			}
+		
+			if (zend_hash_get_current_data_ex(HASH_OF(*EXT), (void**)&item, &pos) == FAILURE) {
+				continue;
+			}
+		
+			if (strcmp("linespacing", key) == 0)	{
+				convert_to_double_ex(item);
+				strex.flags |= gdFTEX_LINESPACE;
+				strex.linespacing = Z_DVAL_PP(item);
+			}
 
-			  if (zend_hash_get_current_data_ex(HASH_OF(*EXT), (void**)&item, &pos) == FAILURE)
-				  continue;
-
-			  if (strcmp("linespacing", key) == 0)	{
-					convert_to_double_ex(item);
-					strex.flags |= gdFTEX_LINESPACE;
-					strex.linespacing = Z_DVAL_PP(item);
-			  }
-
-			} while(zend_hash_move_forward_ex(HASH_OF(*EXT), &pos) == SUCCESS);
-		}
+		} while(zend_hash_move_forward_ex(HASH_OF(*EXT), &pos) == SUCCESS);
+	}
 #endif
 
 	ptsize = Z_DVAL_PP(PTSIZE);
-	angle = Z_DVAL_PP(ANGLE) * (M_PI/180); /* convert to radians */
+	angle = Z_DVAL_PP(ANGLE) * (M_PI / 180); /* convert to radians */
 
 	str = (unsigned char *) Z_STRVAL_PP(C);
 	l = strlen(str);
@@ -3082,7 +3083,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
  		}
 	}
 #else
-	fontname = (unsigned char*)Z_STRVAL_PP(FONTNAME);
+	fontname = (unsigned char *) Z_STRVAL_PP(FONTNAME);
 #endif
 
 #ifdef USE_GD_IMGSTRTTF
