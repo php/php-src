@@ -2017,7 +2017,7 @@ PHP_FUNCTION(array_reverse)
 
 	if (ZEND_NUM_ARGS() > 1) {
 		convert_to_boolean_ex(z_preserve_keys);
-		preserve_keys = Z_LVAL_PP(z_preserve_keys);
+		preserve_keys = (zend_bool) Z_LVAL_PP(z_preserve_keys);
 	}
 	
 	/* Initialize return array */

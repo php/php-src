@@ -35,22 +35,26 @@
 #define BUFSIZE 256
 #endif
 
-PHP_RINIT_FUNCTION(url_scanner) {
+PHP_RINIT_FUNCTION(url_scanner)
+{
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;
 }
 
-PHP_RSHUTDOWN_FUNCTION(url_scanner) {
+
+PHP_RSHUTDOWN_FUNCTION(url_scanner)
+{
 	url_adapt(NULL,0,NULL,NULL);
 	return SUCCESS;
 }
 
 
-static char *url_attr_addon(const char *tag,const char *attr,const char *val,const char *buf) {
+static char *url_attr_addon(const char *tag,const char *attr,const char *val,const char *buf)
+{
 	int flag = 0;
 	PLS_FETCH();
 
-	if(!strcasecmp(tag,"a")&&!strcasecmp(attr,"href")) {
+	if(!strcasecmp(tag,"a") && !strcasecmp(attr,"href")) {
 		flag = 1;
 	} else if(!strcasecmp(tag,"area" ) && !strcasecmp(attr,"href"   )) {
 		flag = 1;
@@ -100,9 +104,9 @@ char *url_adapt(const char *src, size_t srclen, const char *data, size_t *newlen
 
 	if(src==NULL) {
 		US.state=STATE_NORMAL;
-		if(US.tag)  {efree(US.tag);  US.tag =NULL; }
-		if(US.attr) {efree(US.attr); US.attr=NULL; }
-		if(US.val)  {efree(US.val);  US.val =NULL; }
+		if(US.tag)  { efree(US.tag);  US.tag =NULL; }
+		if(US.attr) { efree(US.attr); US.attr=NULL; }
+		if(US.val)  { efree(US.val);  US.val =NULL; }
 		return NULL;
 	}
 

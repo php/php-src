@@ -26,6 +26,7 @@
 #include "php_standard.h"
 #include "php_math.h"
 #include "ext/standard/info.h"
+#include "ext/standard/url_scanner.h"
 #include "zend_operators.h"
 #include <stdarg.h>
 #include <stdlib.h>
@@ -645,6 +646,11 @@ static void basic_globals_ctor(BLS_D)
 	BG(user_tick_functions) = NULL;
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
+
+#ifdef TRANS_SID
+	memset(&BG(url_adapt_state), 0, sizeof(BG(url_adapt_state)));
+#endif
+
 #ifdef PHP_WIN32
 	CoInitialize(NULL);
 #endif
