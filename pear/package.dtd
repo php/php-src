@@ -1,5 +1,5 @@
 <!--
-     $Id: package.dtd,v 1.4 2001-03-29 22:01:52 uw Exp $
+     $Id: package.dtd,v 1.5 2001-04-15 23:52:42 ssb Exp $
 
      This is the PEAR package description, version 1.0.
      It should be used with the informal public identifier:
@@ -24,14 +24,14 @@
 <!ENTITY % global.atts "id		ID	#IMPLIED">
 <!--============== attributes common to several elements ===================-->
 <!ENTITY % role.atts "Role		(php|ext|test|doc) 'php'">
-<!ENTITY % extension.atts "Debug		(on|off) 'off'
-				 ThreadSafe	(on|off) 'off'">
+<!ENTITY % extension.atts "Debug	(on|off) 'off'
+			   ThreadSafe	(on|off) 'off'">
 <!ENTITY % format.atts "Format		CDATA	#IMPLIED">
 <!--=============== ELEMENT: Package =======================================-->
 <!ELEMENT Package (Name, Summary, Maintainer, Release, FileList)>
 <!ATTLIST Package
 	%global.atts; 
-	Type (Source | Binary) "Binary"
+	Type (Source | Binary | Empty) "Empty"
 >
 <!--=============== ELEMENT: Name ==========================================-->
 <!ELEMENT Name (#PCDATA)>
