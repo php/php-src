@@ -67,6 +67,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
 	char *string_key;
+	uint string_len;
 	ulong num_key;
 
 	if (zend_hash_find(&EG(symbol_table), name, name_length+1, (void **) &data)!=FAILURE
@@ -77,9 +78,9 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			PUTS("<td bgcolor=\"" PHP_ENTRY_NAME_COLOR "\"><b>");
 			PUTS(name);
 			PUTS("[\"");
-			switch (zend_hash_get_current_key(Z_ARRVAL_PP(data), &string_key, &num_key, 0)) {
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
-					zend_html_puts(string_key, strlen(string_key));
+					php_html_puts(string_key, strlen(string_key) TSRMLS_CC);
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld", num_key);
@@ -94,10 +95,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				zend_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+				php_html_puts(Z_STRVAL(tmp2), Z_STRLEN(tmp2) TSRMLS_CC);
 				zval_dtor(&tmp2);
 			} else {
-				zend_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				php_html_puts(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp) TSRMLS_CC);
 			}
 			PUTS("&nbsp;</td></tr>\n");
 			zend_hash_move_forward(Z_ARRVAL_PP(data));
@@ -290,7 +291,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS("?="ZEND_LOGO_GUID"\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
 		}
 		php_printf("This program makes use of the Zend Scripting Language Engine:<br />");
-		zend_html_puts(zend_version, strlen(zend_version));
+		php_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
 		php_info_print_box_end();
 		efree(php_uname);
 	}
@@ -482,7 +483,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 		if (!row_element || !*row_element) {
 			php_printf("&nbsp;");
 		} else {
-			zend_html_puts(row_element, strlen(row_element));
+			php_html_puts(row_element, strlen(row_element) TSRMLS_CC);
 		}
 
 		php_printf("%s</td>", (i==0?"</b>":""));
