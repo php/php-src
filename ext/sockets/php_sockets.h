@@ -31,8 +31,12 @@ extern zend_module_entry sockets_module_entry;
 
 #ifdef PHP_WIN32
 #define PHP_SOCKETS_API __declspec(dllexport)
+#include <winsock.h>
 #else
 #define PHP_SOCKETS_API
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #endif
 
 PHP_MINIT_FUNCTION(sockets);
@@ -76,6 +80,7 @@ PHP_FUNCTION(socket_writev);
 PHP_FUNCTION(socket_getopt);
 PHP_FUNCTION(socket_setopt);
 PHP_FUNCTION(socket_shutdown);
+PHP_FUNCTION(socket_last_error);
 
 typedef struct php_iovec {
 	struct iovec	*iov_array;
@@ -87,8 +92,9 @@ typedef int SOCKET;
 #endif
 
 typedef struct {
-	SOCKET	  bsd_socket;
+	SOCKET	bsd_socket;
 	int		type;
+	int		error;
 } php_socket;
 
 typedef struct {
@@ -97,13 +103,18 @@ typedef struct {
 } php_fd_set;
 
 typedef struct {
-	unsigned char	info[256];
+	long family;
+	char info[256];
 } php_sockaddr_storage;
 
 typedef struct {
 	zend_bool	use_system_read;
 } php_sockets_globals;
 
+/* Prototypes */
+int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
+int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
+int php_read(int bsd_socket, void *buf, int maxlen);
 
 #ifdef ZTS
 #define SOCKETSG(v) (sockets_globals->v)

@@ -42,7 +42,7 @@
 #define close(a) closesocket(a)
 #define CMSG_DATA(cmsg) ((cmsg)->cmsg_data)
 
-typedef long ssize_t;
+typedef int ssize_t;
 
 struct	sockaddr_un {
 	short	sun_family;
@@ -77,6 +77,6 @@ ssize_t recvmsg(SOCKET sock, struct msghdr *msg, int flags);
 ssize_t sendmsg(SOCKET sock, struct msghdr *msg, int flags);
 int socketpair(int domain, int type, int protocol, SOCKET sock[2]);
 int inet_aton(const char *cp, struct in_addr *inp);
-int fcntl(int fd, int cmd, ...);
+int	fcntl(int fd, int cmd, ...);
 
 #endif
