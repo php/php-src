@@ -116,7 +116,6 @@ static struct gfxinfo *php_handle_bmp (int socketd, FILE *fp, int issock)
 {
 	struct gfxinfo *result = NULL;
 	char temp[15];
-	unsigned long in_width, in_height;
 
 	struct {
 		unsigned long in_width, in_height;
