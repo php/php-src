@@ -1,3 +1,7 @@
+2001-11-17  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/IDEAS: ideas scratch file
+
 2001-11-16  David Reid  <dreid@jetnet.co.uk>
 
     * configure.in: s/\t/    /
