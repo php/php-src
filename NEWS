@@ -3,8 +3,8 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? ????, Version 4.0 Beta 4
 - Added socket_get_status() function. Renamed:
-  set_socket_timeout() -> socket_set_timeout()
-- set_socket_blocking() -> socket_set_blocking(). (Andrei)
+    set_socket_timeout() -> socket_set_timeout()
+    set_socket_blocking() -> socket_set_blocking(). (Andrei)
 - Added realpath() function. (Andrei)
 - mktime interprets years in the range 0-70 now as 2000-2070. You can
   continue to specify the complete year (i.e. 1920) (Sascha)
