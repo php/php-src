@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Added get_declared_classes(). (Andrei, Zend library)
 - Add initial NSAPI module from Jayakumar Muthukumarasamy. (Rasmus)
 - Added the SWF module which allows you to create Macromedia Flash files via 
   libswf. (Sterling)
