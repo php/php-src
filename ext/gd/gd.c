@@ -305,8 +305,11 @@ PHP_MINFO_FUNCTION(gd)
 
 /* this next part is stupid ... if I knew better, I'd put them all on one row (cmv) */
 
-#ifdef HAVE_GD_GIF
-	php_info_print_table_row(2, "GIF Support", "enabled");
+#ifdef HAVE_GD_GIF_READ
+	php_info_print_table_row(2, "GIF Read Support", "enabled");
+#endif
+#ifdef(HAVE_GD_GID_CREATE)
+	php_info_print_table_row(2, "GIF Create Support", "enabled");
 #endif
 #ifdef HAVE_GD_JPG
 	php_info_print_table_row(2, "JPG Support", "enabled");
@@ -1045,7 +1048,7 @@ PHP_FUNCTION(imagecreatefromstring)
 			break;
 			
 		case PHP_GDIMG_TYPE_GIF:
-#ifdef HAVE_GD_GIF
+#ifdef HAVE_GD_GIF_READ
 			im = _php_image_create_from_string (data, "GIF", gdImageCreateFromGifCtx TSRMLS_CC);
 #else
 			php_error(E_WARNING, "No GIF support in this PHP build");
@@ -1187,10 +1190,10 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
    Create a new image from GIF file or URL */
 PHP_FUNCTION(imagecreatefromgif)
 {
-#ifdef HAVE_GD_GIF
+#ifdef HAVE_GD_GIF_READ
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageCreateFromGif, gdImageCreateFromGifCtx);
-#else /* HAVE_GD_GIF */
-	php_error(E_WARNING, "ImageCreateFromGif: No GIF support in this PHP build");
+#else /* HAVE_GD_GIF_READ */
+	php_error(E_WARNING, "ImageCreateFromGif: No GIF read support in this PHP build");
 	RETURN_FALSE;
 #endif /* HAVE_GD_GIF */
 }
@@ -1413,14 +1416,14 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
-#ifdef HAVE_GD_GIF
+#ifdef HAVE_GD_GIF_CREATE
 #ifdef HAVE_GD_GIF_CTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
 #else
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGif);
 #endif
 #else /* HAVE_GD_GIF */
-	php_error(E_WARNING, "ImageGif: No GIF support in this PHP build");
+	php_error(E_WARNING, "ImageGif: No GIF create support in this PHP build");
 	RETURN_FALSE;
 #endif /* HAVE_GD_GIF */
 }
@@ -3447,7 +3450,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 		}
 
 		switch (image_type) {
-#ifdef HAVE_GD_GIF
+#ifdef HAVE_GD_GIF_READ
 			case PHP_GDIMG_TYPE_GIF:
 				im_org = gdImageCreateFromGif (org);
 				if (im_org == NULL) {
@@ -3455,7 +3458,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 					RETURN_FALSE;
 				}
 				break;
-#endif /* HAVE_GD_GIF */
+#endif /* HAVE_GD_GIF_READ */
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
