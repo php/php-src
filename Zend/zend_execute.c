@@ -2176,7 +2176,7 @@ int zend_assign_ref_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 
 int zend_jmp_handler(ZEND_OPCODE_HANDLER_ARGS)
-{				
+{
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", opline->op1.u.opline_num);
 #endif
