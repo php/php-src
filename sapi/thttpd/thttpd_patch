@@ -71,7 +71,7 @@ diff -ur thttpd-2.19/libhttpd.c thttpd-2.19-t/libhttpd.c
  	}
  
      hs->port = port;
-+    hs->php_pattern = strdup("*.php");
++    hs->php_pattern = strdup("**.php");
      if ( cgi_pattern == (char*) 0 )
  	hs->cgi_pattern = (char*) 0;
      else
