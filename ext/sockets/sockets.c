@@ -35,6 +35,10 @@
 #define _XPG4_2
 #define __EXTENSIONS__
 
+#ifndef __PRAGMA_REDEFINE_EXTNAME
+#define __PRAGMA_REDEFINE_EXTNAME
+#endif
+
 #include "ext/standard/info.h"
 #include "php_sockets.h"
 #include "php_ini.h"
