@@ -1,3 +1,40 @@
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Whitespace fixes.
+
+2002-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_object_handlers.c: remove dead code
+
+    * ZEND_CHANGES
+      zend_object_handlers.c: Fix __call and add some docs
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_object_handlers.c: Fix ZTS build.
+
+    * ZEND_CHANGES: TBD: __call(), __get(), __set().
+
+2002-09-04  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h
+      zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_extensions.h
+      zend_object_handlers.c
+      zend_objects.c: Support for __get, __set and __call in classes.
+    This should work as follows: if class hasn't member with given name,
+    __get/__set is called. If class has no method with given name, __call is called.
+    __get/__set are not recursive, __call can be.
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Workaround for superfluous comma in var_export() result.
+
+    * ZEND_CHANGES:
+    Let debug_backtrace() example print out the class name, if applicable, and the function/method arguments.
+
 2002-09-03  Thies C. Arntzen  <thies@thieso.net>
 
     * zend_builtin_functions.c: nuke warning

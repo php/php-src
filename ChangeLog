@@ -1,3 +1,110 @@
+2002-09-04  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c: php_error -> php_error_docref
+
+2002-09-04  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/SAPI.c:
+    This 2 lines should have been removed when the header() code was rewritten.
+
+2002-09-04  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/cgi/config.m4
+      sapi/pi3web/config.m4
+      ext/xmlrpc/config.m4
+      ext/xslt/config.m4
+      ext/zlib/config0.m4
+      ext/session/config.m4
+      ext/xml/config.m4
+      ext/mbstring/config.m4
+      ext/mysql/config.m4
+      ext/pdf/config.m4
+      ext/curl/config.m4
+      ext/domxml/config.m4
+      ext/gd/config.m4
+      configure.in
+      acinclude.m4: - Added --disable-all configure option. 
+
+    * configure.in: MFH: Fix the missing libgcc problems.
+
+    * ext/cyrus/config.m4: ws fix
+
+    * ext/cyrus/config.m4:
+    Fix the shared build (nobody ever build this as shared?)
+
+2002-09-04  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * sapi/cgi/cgi_main.c: Fix headers when default content type is used.
+
+2002-09-04  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/cyrus/config.m4:
+    The sasl.h file is in .../include/sasl/ (at least in cyrus-sasl-2.1.6)
+
+2002-09-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sockets/config.m4: Fix bug: #19212
+
+2002-09-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/overload/overload.c
+      main/internal_functions_win32.c:
+    Don't build ext/overload with Zend Engine 2.
+
+2002-09-04  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/session/config.m4: sniper claims its safe to take these out as well.
+
+    * ext/session/mod_files.c: taking out the PWRITE calls too
+
+    * ext/session/mod_files.c: Taking out the PWRITE functions too...
+
+    * ext/session/mod_files.c: MFH, removing PREAD for Bug #15983
+
+    * ext/session/mod_files.c: This fixes Bug #19022 and #15983
+
+2002-09-04  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * ext/fbsql/config.m4: Fix bogus test
+
+2002-09-04  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * netware/phplib.mak:
+    Makefile to build for NetWare: extensions, main, netware & regex files
+
+    * netware/buildlib.bat:
+    Batch file to build extensions and files under main, netware and regex folders
+
+    * ext/bcmath/libbcmath/src/config.h: To include the NetWare config file
+
+2002-09-04  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * php.ini-dist
+      php.ini-recommended: Fixed mbstring.func_overload description.
+
+    * ext/iconv/config.m4
+      ext/iconv/iconv.c
+      ext/iconv/iconv.dsp
+      ext/iconv/php_iconv.h
+      ext/iconv/tests/translit.phpt: Fixed undefiend referece at build time.
+    Fixed transilit test script.
+    Make fixes available on Windows.
+    Patch by Yoshimori Koizumi<readjust@deneb.freemail.ne.jp>
+
+2002-09-04  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/fbsql/php_fbsql.c:
+    Fix for bug #19155 UNTESTED.  Unfortunately I don't have a way to test it
+    hopefully the user will.
+
+    * ext/fbsql/php_fbsql.h: No more C++ comments again
+
+    * ext/fbsql/php_fbsql.h: No C++ comments, again!
+
+    * ext/fbsql/php_fbsql.c: No C++ Comments
+
+    * ext/fbsql/php_fbsql.c: No C++ comments
+
 2002-09-03  Jani Taskinen  <sniper@iki.fi>
 
     * ext/standard/basic_functions.c
