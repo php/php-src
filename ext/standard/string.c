@@ -3121,6 +3121,7 @@ PHP_FUNCTION(setlocale)
 	}
 	while (1) {
 		if (Z_TYPE_PP(args[1]) == IS_ARRAY) {
+			if(!zend_hash_num_elements(Z_ARRVAL_PP(args[1]))) break;
 			zend_hash_get_current_data(Z_ARRVAL_PP(args[1]),(void **)&plocale);
 		} else {
 			plocale = args[i];

@@ -9,6 +9,8 @@ Fixed:
 	exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
 	array_pad (Rasmus)
+	str_repeat (Ilia)
+    setlocale (Rasmus)
 
 Open:
 
@@ -18,7 +20,6 @@ Open:
     mb_eregi (2)
     mb_split
     ob_start (3)
-    setlocale
     unregister_tick_function
     xml_parser_create
 
