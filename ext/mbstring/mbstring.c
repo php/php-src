@@ -656,6 +656,14 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 	   return FAILURE;
 	}
 
+	if(!strncasecmp(new_value, "off", sizeof("off"))) {
+		new_value = "0";
+		new_value_length = sizeof("0");
+	} else if(!strncasecmp(new_value, "on", sizeof("on"))) {
+		new_value = "1";
+		new_value_length = sizeof("1");
+	}
+
 	MBSTRG(encoding_translation) =  (zend_bool) atoi(new_value);
 
 	if (MBSTRG(encoding_translation)){
