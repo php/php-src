@@ -2257,7 +2257,7 @@ PHP_FUNCTION(imagefontheight)
 
 /* {{{ php_gdimagecharup
  * workaround for a bug in gd 1.2 */
-void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
+static void php_gdimagecharup(gdImagePtr im, gdFontPtr f, int x, int y, int c, int color)
 {
 	int cx, cy, px, py, fline;
 	cx = 0;
