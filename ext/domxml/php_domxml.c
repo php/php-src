@@ -120,6 +120,9 @@ static int le_domxmlnotationp;
 /*static int le_domxmlentityp;*/
 static int le_domxmlentityrefp;
 /*static int le_domxmlnsp;*/
+#if HAVE_DOMXSLT
+static int le_domxsltstylesheetp;
+#endif
 
 #if defined(LIBXML_XPATH_ENABLED)
 static int le_xpathctxp;
@@ -143,6 +146,9 @@ zend_class_entry *domxmlns_class_entry;
 #if defined(LIBXML_XPATH_ENABLED)
 zend_class_entry *xpathctx_class_entry;
 zend_class_entry *xpathobject_class_entry;
+#endif
+#if HAVE_DOMXSLT
+zend_class_entry *domxsltstylesheet_class_entry;
 #endif
 
 
@@ -185,6 +191,9 @@ static zend_function_entry domxml_functions[] = {
 #endif
 #if HAVE_DOMXSLT
 	PHP_FE(domxml_xslt_version,											NULL)
+	PHP_FE(domxml_xslt_stylesheet,											NULL)
+	PHP_FE(domxml_xslt_stylesheet_doc,											NULL)
+	PHP_FE(domxml_xslt_stylesheet_file,											NULL)
 	PHP_FE(domxml_xslt_process,													NULL)
 #endif
 
@@ -360,6 +369,14 @@ static zend_function_entry php_domxmlns_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+#if HAVE_DOMXSLT
+static zend_function_entry php_domxsltstylesheet_class_functions[] = {
+/* TODO */
+	PHP_FALIAS(process, 				domxml_xslt_process, 			NULL)
+	{NULL, NULL, NULL}
+};
+#endif
+
 zend_module_entry domxml_module_entry = {
     STANDARD_MODULE_HEADER,
 	"domxml",
@@ -498,6 +515,92 @@ static void php_free_xpath_object(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 }
 #endif
+
+
+#if HAVE_DOMXSLT
+static void php_free_xslt_stylesheet(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	xsltStylesheetPtr sheet = (xsltStylesheetPtr) rsrc->ptr;
+
+	if (sheet) {
+		node_wrapper_dtor((xmlNodePtr) sheet);
+		xsltFreeStylesheet(sheet);
+	}
+}
+
+static void xsltstylesheet_set_data(void *obj, zval *wrapper)
+{
+/*
+	char tmp[20];
+	sprintf(tmp, "%08X", obj);
+	fprintf(stderr, "Adding %s to hash\n", tmp);
+*/
+	((xsltStylesheetPtr) obj)->_private = wrapper;
+}
+
+
+static zval *xsltstylesheet_get_data(void *obj)
+{
+/*  
+	char tmp[20];
+	sprintf(tmp, "%08X", obj);
+	fprintf(stderr, "Trying getting %s from object ...", tmp);
+	if(((xmlNodePtr) obj)->_private)
+		fprintf(stderr, " found\n");
+	else
+		fprintf(stderr, " not found\n"); 
+*/
+	return ((zval *) (((xsltStylesheetPtr) obj)->_private));
+}
+
+void *php_xsltstylesheet_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
+{
+	void *obj;
+	zval **handle;
+	int type;
+
+	if (NULL == wrapper) {
+		php_error(E_WARNING, "xsltstylesheet_get_object() invalid wrapper object passed");
+		return NULL;
+	}
+
+	if (Z_TYPE_P(wrapper) != IS_OBJECT) {
+		php_error(E_WARNING, "%s(): wrapper is not an object", get_active_function_name(TSRMLS_C));
+		return NULL;
+	}
+
+	if (zend_hash_index_find(Z_OBJPROP_P(wrapper), 0, (void **) &handle) ==	FAILURE) {
+		php_error(E_WARNING, "%s(): underlying object missing", get_active_function_name(TSRMLS_C));
+		return NULL;
+	}
+
+	obj = zend_list_find(Z_LVAL_PP(handle), &type);
+	if (!obj || ((type != rsrc_type1) && (type != rsrc_type2))) {
+		php_error(E_WARNING, "%s(): underlying object missing or of invalid type", get_active_function_name(TSRMLS_C));
+		return NULL;
+	}
+
+	return obj;
+}
+
+static void php_xsltstylesheet_set_object(zval *wrapper, void *obj, int rsrc_type)
+{
+	zval *handle, *addr;
+
+	MAKE_STD_ZVAL(handle);
+	Z_TYPE_P(handle) = IS_LONG;
+	Z_LVAL_P(handle) = zend_list_insert(obj, rsrc_type);
+
+	MAKE_STD_ZVAL(addr);
+	Z_TYPE_P(addr) = IS_LONG;
+	Z_LVAL_P(addr) = (int) obj;
+
+	zend_hash_index_update(Z_OBJPROP_P(wrapper), 0, &handle, sizeof(zval *), NULL);
+	zend_hash_index_update(Z_OBJPROP_P(wrapper), 1, &addr, sizeof(zval *), NULL);
+	zval_add_ref(&wrapper);
+	xsltstylesheet_set_data(obj, wrapper);
+}
+#endif  /* HAVE_DOMXSLT */
 
 
 void *php_xpath_get_object(zval *wrapper, int rsrc_type1, int rsrc_type2 TSRMLS_DC)
@@ -987,6 +1090,10 @@ PHP_MINIT_FUNCTION(domxml)
 
 /*	le_domxmlnsp = register_list_destructors(NULL, NULL); */
 
+#if HAVE_DOMXSLT
+	le_domxsltstylesheetp =	zend_register_list_destructors_ex(php_free_xslt_stylesheet, NULL, "xsltstylesheet", module_number);
+#endif
+
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "DomNode", php_domxmlnode_class_functions, NULL, NULL, NULL);
 	domxmlnode_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 
@@ -1035,6 +1142,11 @@ PHP_MINIT_FUNCTION(domxml)
 
 	INIT_OVERLOADED_CLASS_ENTRY(ce, "XPathObject", php_xpathobject_class_functions, NULL, NULL, NULL);
 	xpathobject_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+#endif
+
+#if HAVE_DOMXSLT
+	INIT_OVERLOADED_CLASS_ENTRY(ce, "XsltStylesheet", php_domxsltstylesheet_class_functions, NULL, NULL, NULL);
+	domxsltstylesheet_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
 #endif
 
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE",			XML_ELEMENT_NODE,			CONST_CS | CONST_PERSISTENT);
@@ -2528,7 +2640,7 @@ PHP_FUNCTION(domxml_html_dump_mem)
 }
 /* }}} */
 
-/* {{{ proto object html_doc(string html_doc)
+/* {{{ proto object html_doc(string html_doc [, bool from_file])
    Creates DOM object of HTML document */
 PHP_FUNCTION(html_doc)
 {
@@ -3081,10 +3193,44 @@ PHP_FUNCTION(domxml_version)
 /* }}} */
 
 #if HAVE_DOMXSLT
+static zval *php_xsltstylesheet_new(xsltStylesheetPtr obj, int *found TSRMLS_DC)
+{
+	zval *wrapper;
+	int rsrc_type;
+
+	if (! found) {
+	    *found = 0;
+	}
+
+	if (!obj) {
+		MAKE_STD_ZVAL(wrapper);
+		ZVAL_NULL(wrapper);
+		return wrapper;
+	}
+
+	if ((wrapper = (zval *) dom_object_get_data((void *) obj))) {
+		zval_add_ref(&wrapper);
+		*found = 1;
+		return wrapper;
+	}
+
+	MAKE_STD_ZVAL(wrapper);
+
+	object_init_ex(wrapper, domxsltstylesheet_class_entry);
+	rsrc_type = le_domxsltstylesheetp;
+	php_xsltstylesheet_set_object(wrapper, (void *) obj, rsrc_type);
+
+	return (wrapper);
+}
+
 /* {{{ _php_libxslt_ht_char()
    Translates a PHP array to a libxslt character array */
 static void _php_libxslt_ht_char(HashTable *php, char **arr)
 {
+/* TODO: 
+    - make parameters array('key'=>'string',...) instead of array('key'=>'XPathExpression')
+    - change error reporting
+*/
     zval **value;
     char *string_key = NULL;
     ulong num_key;
@@ -3109,67 +3255,148 @@ static void _php_libxslt_ht_char(HashTable *php, char **arr)
     arr[i++] = NULL;
 }
 
+/* {{{ proto object domxml_xslt_stylesheet(string xsltstylesheet)
+   Creates XSLT Stylesheet object from string */
+PHP_FUNCTION(domxml_xslt_stylesheet)
+{
+	zval *rv;
+	xmlDocPtr docp;
+	xsltStylesheetPtr sheetp;
+	int ret;
+	char *buffer;
+	int buffer_len;
 
-/* {{{ proto object domxml_xslt_process(int xsldoc_handle, int xmldoc_handle, [array xslt_parameters])
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buffer, &buffer_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	docp = xmlParseDoc(buffer);
+
+	if (!docp)
+		RETURN_FALSE;
+
+	sheetp = xsltParseStylesheetDoc(docp);
+
+	if (!sheetp)
+		RETURN_FALSE;
+
+	rv = php_xsltstylesheet_new(sheetp, &ret TSRMLS_CC);
+	DOMXML_RET_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto object domxml_xslt_stylesheet_doc(object xmldoc)
+   Creates XSLT Stylesheet object from DOM Document object */
+PHP_FUNCTION(domxml_xslt_stylesheet_doc)
+{
+	zval *rv, *idxml;
+	xmlDocPtr docp;
+	xmlDocPtr newdocp;
+	xsltStylesheetPtr sheetp;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &idxml) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	DOMXML_GET_OBJ(docp, idxml, le_domxmldocp);
+
+	newdocp = xmlCopyDoc(docp, 1);
+
+	if (!newdocp)
+		RETURN_FALSE;
+
+	sheetp = xsltParseStylesheetDoc(newdocp);
+
+	if (!sheetp)
+		RETURN_FALSE;
+
+	rv = php_xsltstylesheet_new(sheetp, &ret TSRMLS_CC);
+	DOMXML_RET_ZVAL(rv);
+}
+/* }}} */
+
+/* {{{ proto object domxml_xslt_stylesheet_file(string filename)
+   Creates XSLT Stylesheet object from file */
+PHP_FUNCTION(domxml_xslt_stylesheet_file)
+{
+	zval *rv;
+	xsltStylesheetPtr sheetp;
+	int ret, file_len;
+	char *file;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &file, &file_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	sheetp = xsltParseStylesheetFile(file);
+
+	if (!sheetp)
+		RETURN_FALSE;
+
+	rv = php_xsltstylesheet_new(sheetp, &ret TSRMLS_CC);
+	DOMXML_RET_ZVAL(rv);
+}
+/* }}} */
+
+
+/* {{{ proto object domxml_xslt_process(object xslstylesheet, object xmldoc, [array xslt_parameters])
    Perform an XSLT transformation */
 PHP_FUNCTION(domxml_xslt_process)
 {
 /* TODO:
-    - add functions for dealing with xsltStylesheet objects
-    - split this function: domxml_xslt_process will receive:
-	- a handle to the xsltStylesheet object
-        - a handle to the xmlDoc object
-	- an optional array of parameters
-    - memory deallocation
+    - make & test memory deallocation
+    - test other stuff
+    - move HashTable operations outside the function
+    - check xsltsp->errors ???
 */
 	zval *rv, *idxsl, *idxml, *idvars = NULL;
-	xmlDocPtr xsldocp, xmldocp, docp;
-	char **params = NULL;
 	xsltStylesheetPtr xsltstp;
+	xmlDocPtr xmldocp;
+	xmlDocPtr docp;
+	char **params = NULL;
 	int ret, parsize;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo|a", &idxsl, &idxml, &idvars) == FAILURE) {
-		return;
+
+	DOMXML_GET_THIS(idxsl);
+
+	xsltstp = php_xsltstylesheet_get_object(idxsl, le_domxsltstylesheetp, 0 TSRMLS_CC);
+	if (!xsltstp) {
+		php_error(E_WARNING, "%s(): cannot fetch XSLT Stylesheet", get_active_function_name(TSRMLS_C));
+    		RETURN_FALSE;
 	}
 
-	DOMXML_GET_OBJ(xsldocp, idxsl, le_domxmldocp);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|a", &idxml, &idvars) == FAILURE) {
+		RETURN_FALSE;
+	}
+
 	DOMXML_GET_OBJ(xmldocp, idxml, le_domxmldocp);
 
-	xsltstp = xsltParseStylesheetDoc(xsldocp);
-	if (!xsltstp) {
-		RETURN_FALSE;
-	}
-	if (xsltstp->errors) {
-/*	    	xsltFreeStylesheet(xsltstp);*/
-		RETURN_FALSE;
-	}
-
-	if (idvars)
-	{
-	    HashTable *parht = HASH_OF(idvars);
-	    parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
-            params = (char **)emalloc(parsize);
-            memset((char *)params, 0, parsize);
-            _php_libxslt_ht_char(parht, params);
+	if (idvars) {
+		HashTable *parht = HASH_OF(idvars);
+		parsize = (2 * zend_hash_num_elements(parht) + 1) * sizeof(char *);
+        	params = (char **)emalloc(parsize);
+        	memset((char *)params, 0, parsize);
+        	_php_libxslt_ht_char(parht, params);
 	}
 
 	docp = xsltApplyStylesheet(xsltstp, xmldocp, (const char**)params);
 
-/*	xsltFreeStylesheet(xsltstp);
-	efree(params);*/
+/* ???: */
+	efree(params);
 	
 	if (!docp) {
 		RETURN_FALSE;
 	}
 
 	DOMXML_RET_OBJ(rv, (xmlNodePtr) docp, &ret);
-
+/* ???: */
+/*
 	add_property_resource(return_value, "doc", ret);
 	if(docp->name)
 		add_property_stringl(return_value, "name", (char *) docp->name, strlen(docp->name), 1);
 	if(docp->URL)
 		add_property_stringl(return_value, "url", (char *) docp->name, strlen(docp->name), 1);
-/*	add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);*/
 	if(docp->version)
 	    add_property_stringl(return_value, "version", (char *) docp->version, strlen(docp->version), 1);
 	if(docp->encoding)
@@ -3179,6 +3406,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	add_property_long(return_value, "compression", docp->compression);
 	add_property_long(return_value, "charset", docp->charset);
 	zend_list_addref(ret);
+*/
 }
 /* }}} */
 

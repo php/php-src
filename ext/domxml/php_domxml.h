@@ -166,8 +166,11 @@ PHP_FUNCTION(domxml_test);
 
 /* DOMXSLT functions */
 #if HAVE_DOMXSLT
-PHP_FUNCTION(domxml_xslt_version);
+PHP_FUNCTION(domxml_xslt_stylesheet);
+PHP_FUNCTION(domxml_xslt_stylesheet_doc);
+PHP_FUNCTION(domxml_xslt_stylesheet_file);
 PHP_FUNCTION(domxml_xslt_process);
+PHP_FUNCTION(domxml_xslt_version);
 #endif
 
 #else
