@@ -92,11 +92,9 @@
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-#define MT_RAND_MAX ((long)(0x7FFFFFFF)) /* (1<<31) - 1 */
-
-/* {{{ seedMT
+/* {{{ php_mt_srand
  */
-static void seedMT(php_uint32 seed TSRMLS_DC)
+PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 {
 	/*
 	   We initialize state[0..(N-1)] via the generator
@@ -158,7 +156,7 @@ static php_uint32 reloadMT(TSRMLS_D)
 	register int    j;
 
 	if (BG(left) < -1)
-		seedMT(4357U TSRMLS_CC);
+		php_mt_srand(4357U TSRMLS_CC);
 
 	BG(left) = N - 1, BG(next) = BG(state) + 1;
 
@@ -177,7 +175,7 @@ static php_uint32 reloadMT(TSRMLS_D)
 }
 
 
-static php_uint32 randomMT(TSRMLS_D)
+PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 {
 	php_uint32 y;
 
@@ -214,7 +212,7 @@ PHP_FUNCTION(mt_srand)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &seed) == FAILURE) 
 		return;
 
-	seedMT(seed TSRMLS_CC);
+	php_mt_srand(seed TSRMLS_CC);
 }
 /* }}} */
 
@@ -244,8 +242,8 @@ PHP_FUNCTION(mt_srand)
  *
  * -RL
  */    
-#define RAND_RANGE(__n, __min, __max) \
-	(__n) = (__min) + (long) ((double) ((__max) - (__min) + 1.0) * ((__n) / (PHP_RAND_MAX + 1.0)))
+#define RAND_RANGE(__n, __min, __max, __tmax) \
+	(__n) = (__min) + (long) ((double) ((__max) - (__min) + 1.0) * ((__n) / ((__tmax) + 1.0)))
 
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
@@ -261,7 +259,7 @@ PHP_FUNCTION(rand)
 
 	number = php_rand();
 	if (argc == 2) {
-		RAND_RANGE(number, min, max);
+		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
 
 	RETURN_LONG(number);
@@ -288,9 +286,9 @@ PHP_FUNCTION(mt_rand)
 	 * Update: 
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
-	number = (long) (randomMT(TSRMLS_C) >> 1);
+	number = (long) (php_mt_rand(TSRMLS_C) >> 1);
 	if (argc == 2) {
-		RAND_RANGE(number, min, max);
+		RAND_RANGE(number, min, max, PHP_MT_RAND_MAX);
 	}
 
 	RETURN_LONG(number);
@@ -321,7 +319,7 @@ PHP_FUNCTION(mt_getrandmax)
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	RETURN_LONG(MT_RAND_MAX);	/* 2^^31 */
+  	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
 }
 /* }}} */
 
