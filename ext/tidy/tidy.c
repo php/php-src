@@ -887,9 +887,10 @@ PHP_MINIT_FUNCTION(tidy)
 
 	REGISTER_INI_ENTRIES();
 	REGISTER_TIDY_CLASS(tidy, doc,	NULL);
-	REGISTER_TIDY_CLASS(tidy_node, node,	NULL);
-	REGISTER_TIDY_CLASS(tidy_exception, exception,	zend_exception_get_default());
-
+	REGISTER_TIDY_CLASS(tidyNode, node,	NULL);
+	/* no exceptions for now..
+	REGISTER_TIDY_CLASS(tidyException, exception,	zend_exception_get_default());
+	*/
 	tidy_object_handlers_doc.get_class_entry = tidy_get_ce_doc;
 	tidy_object_handlers_node.get_class_entry = tidy_get_ce_node;
 	
