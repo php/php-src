@@ -47,7 +47,7 @@ PHP_RSHUTDOWN_FUNCTION(extname);
 PHP_MINFO_FUNCTION(extname);
 
 PHP_FUNCTION(confirm_extname_compiled);	/* For testing, remove later. */
-__function_declarations_here__
+/* __function_declarations_here__ */
 
 /* Fill in this structure and use entries in it
    for thread safety instead of using true globals.
