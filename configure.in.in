@@ -208,6 +208,7 @@ if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
 fi
 
 INCLUDES="-I\$(top_builddir)/libzend -I\$(top_builddir)/TSRM"
+EXTRA_LIBS="$EXTRA_LIBS \`\$(SHELL) ./libzend/zend_config --libs\`"
 AC_SUBST(INCLUDES)
 
 AC_CHECK_LIB(nsl, gethostname, [
@@ -864,15 +865,14 @@ AC_MSG_CHECKING(whether to build PHP thread-safe)
 AC_ARG_ENABLE(thread-safety,
 [  --enable-thread-safety  Whether to build PHP thread-safe.],[
   TSRM_LIB='TSRM/libtsrm.a'
-  TSRM_LIBS='TSRM/libtsrm.a `TSRM/tsrm_config --libs`'
   TSRM_DIR=TSRM
+  EXTRA_LIBS="$EXTRA_LIBS \$(TSRM_DIR)/libtsrm.a \`\$(SHELL) \$(TSRM_DIR)/tsrm_config --libs\`"
   AC_DEFINE(ZTS)
 ],[
   TSRM_DIR=""
 ])
 AC_SUBST(TSRM_DIR)
 AC_SUBST(TSRM_LIB)
-AC_SUBST(TSRM_LIBS)
 
 AC_MSG_CHECKING(whether to enable runpaths)
 AC_ARG_ENABLE(rpath,
