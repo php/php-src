@@ -12,8 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Chris Vandomelen <chrisv@b0rked.dhs.org>                    |
    +----------------------------------------------------------------------+
  */
 
@@ -22,9 +21,6 @@
 
 /* $Id$ */
 
-/* You should tweak config.m4 so this symbol (or some else suitable)
-   gets defined.
-*/
 #if HAVE_SOCKETS
 
 extern zend_module_entry sockets_module_entry;
@@ -37,12 +33,8 @@ extern zend_module_entry sockets_module_entry;
 #endif
 
 PHP_MINIT_FUNCTION(sockets);
-PHP_MSHUTDOWN_FUNCTION(sockets);
-PHP_RINIT_FUNCTION(sockets);
-PHP_RSHUTDOWN_FUNCTION(sockets);
 PHP_MINFO_FUNCTION(sockets);
 
-PHP_FUNCTION(confirm_sockets_compiled);
 PHP_FUNCTION(fd_alloc);
 PHP_FUNCTION(fd_dealloc);
 PHP_FUNCTION(fd_set);
@@ -50,7 +42,7 @@ PHP_FUNCTION(fd_isset);
 PHP_FUNCTION(fd_clear);
 PHP_FUNCTION(fd_zero);
 PHP_FUNCTION(select);
-PHP_FUNCTION(open_listen_sok);
+PHP_FUNCTION(open_listen_sock);
 PHP_FUNCTION(accept_connect);
 PHP_FUNCTION(set_nonblock);
 PHP_FUNCTION(listen);
@@ -79,29 +71,23 @@ PHP_FUNCTION(readv);
 PHP_FUNCTION(writev);
 PHP_FUNCTION(getsockopt);
 PHP_FUNCTION(setsockopt);
+PHP_FUNCTION(socketpair);
+PHP_FUNCTION(shutdown);
 
-/* Fill in this structure and use entries in it
-   for thread safety instead of using true globals.
-*/
+typedef struct php_iovec {
+	struct iovec *iov_array;
+	unsigned int count;
+} php_iovec_t;
+
 typedef struct {
-	/* You can use the next one as type if your module registers any
-	   resources. Oh, you can of course rename it to something more
-	   suitable, add list entry types or remove it if it not needed.
-	   It's just an example.
-	*/
-	int le_sockets;
+	int le_destroy;
+	int le_iov;
 } php_sockets_globals;
 
-/* In every function that needs to use variables in php_sockets_globals,
-   do call SOCKETSLS_FETCH(); after declaring other variables used by
-   that function, and always refer to them as SOCKETSG(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
 
 #ifdef ZTS
 #define SOCKETSG(v) (sockets_globals->v)
-#define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(gd_sockets_id)
+#define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(sockets_global_id)
 #else
 #define SOCKETSG(v) (sockets_globals.v)
 #define SOCKETSLS_FETCH()
