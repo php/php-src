@@ -142,6 +142,47 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 
 #define add_method(arg,key,method)	add_assoc_function((arg),(key),(method))
 
+#define ZVAL_RESOURCE(z,l) {			\
+		(z)->type = IS_RESOURCE;        \
+		(z)->value.lval = l;	        \
+	}
+#define ZVAL_BOOL(z,b) {				\
+		(z)->type = IS_BOOL;	        \
+		(z)->value.lval = b;	        \
+	}
+#define ZVAL_NULL(z) {					\
+		(z)->type = IS_NULL;	        \
+	}
+#define ZVAL_LONG(z,l) {				\
+		(z)->type = IS_LONG;	        \
+		(z)->value.lval = l;	        \
+	}
+#define ZVAL_DOUBLE(z,d) {				\
+		(z)->type = IS_DOUBLE;	        \
+		(z)->value.dval = d;	        \
+	}
+#define ZVAL_STRING(z,s,duplicate) {	\
+		char *__s=(s);					\
+		(z)->value.str.len = strlen(__s);	\
+		(z)->value.str.val = (duplicate?estrndup(__s,(z)->value.str.len):__s);	\
+		(z)->type = IS_STRING;	        \
+	}
+#define ZVAL_STRINGL(z,s,l,duplicate) {	\
+		char *__s=(s); int __l=l;		\
+		(z)->value.str.len = __l;	    \
+		(z)->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
+		(z)->type = IS_STRING;		    \
+	}
+
+#define ZVAL_EMPTY_STRING(z) {	        \
+		(z)->value.str.len = 0;  	    \
+		(z)->value.str.val = empty_string \
+		(z)->type = IS_STRING;		    \
+	}
+
+#define ZVAL_FALSE  { (z)->value.lval = 0;  (z)->type = IS_BOOL; }
+#define ZVAL_TRUE   { (z)->value.lval = 1;  (z)->type = IS_BOOL; }
+
 #define RETVAL_RESOURCE(l) {			\
 		return_value->type = IS_RESOURCE;\
 		return_value->value.lval = l;	\
@@ -171,6 +212,12 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		char *__s=(s); int __l=l;			\
 		return_value->value.str.len = __l;	\
 		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
+		return_value->type = IS_STRING;		\
+	}
+
+#define RETVAL_EMPTY_STRING() {	            \
+		return_value->value.str.len = 0;  	\
+		return_value->value.str.val = empty_string \
 		return_value->type = IS_STRING;		\
 	}
 
@@ -217,6 +264,13 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 		return_value->value.str.val = (duplicate?estrndup(__s,__l):__s);	\
       	return_value->type = IS_STRING;		\
 		return;								\
+	}
+
+#define RETURN_EMPTY_STRING() {	            \
+		return_value->value.str.len = 0;  	\
+		return_value->value.str.val = empty_string \
+		return_value->type = IS_STRING;		\
+        return;                             \
 	}
 
 #define RETURN_FALSE  { RETVAL_FALSE; return; }
@@ -309,6 +363,7 @@ ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
 	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount, _is_ref)
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
+#define ZVAL_IS_NULL(z) ((z)->type==IS_NULL)
 
 #endif /* _ZEND_API_H */
 
