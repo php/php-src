@@ -70,6 +70,9 @@
 
 /* needed for ssize_t definition */
 #include <sys/types.h>
+#if defined(PHP_WIN32) && !defined(ssize_t)
+typedef SSIZE_T ssize_t;
+#endif
 
 typedef unsigned char uchar;
 
