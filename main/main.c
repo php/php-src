@@ -210,6 +210,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("enable_dl",		"1",	PHP_INI_SYSTEM,			OnUpdateBool,	enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",		"1",	PHP_INI_SYSTEM,			OnUpdateBool,	expose_php,				php_core_globals,	core_globals)
 
+
 	PHP_INI_ENTRY("SMTP",			"localhost",			PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)
 	PHP_INI_ENTRY("sendmail_from",	NULL,					PHP_INI_ALL,		NULL)
