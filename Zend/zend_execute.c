@@ -1467,8 +1467,8 @@ do_fcall_common:
 					int return_value_not_used = (opline->result.u.EA.type & EXT_TYPE_UNUSED);
 
 					zend_ptr_stack_push(&EG(argument_stack), (void *) opline->extended_value);
+					var_uninit(&Ts[opline->result.u.var].tmp_var);
 					if (function_state.function->type==ZEND_INTERNAL_FUNCTION) {
-						var_uninit(&Ts[opline->result.u.var].tmp_var);
 						((zend_internal_function *) function_state.function)->handler(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list), object.ptr, !return_value_not_used);
 						if (object.ptr) {
 							object.ptr->refcount--;
@@ -1500,7 +1500,6 @@ do_fcall_common:
 						}
 						original_return_value = EG(return_value);
 						EG(return_value) = &Ts[opline->result.u.var].tmp_var;
-						var_uninit(EG(return_value));
 						EG(active_op_array) = (zend_op_array *) function_state.function;
 						zend_execute(EG(active_op_array) ELS_CC);
 						EG(opline_ptr) = &opline;
