@@ -212,6 +212,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("error_append_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_append_string,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("error_prepend_string",	NULL,		PHP_INI_ALL,		OnUpdateString,			error_prepend_string,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
@@ -334,7 +335,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 	ELS_FETCH();
 	PLS_FETCH();
 
-		
 	if (EG(error_reporting) & type || (type & E_CORE)) {
 		char *error_type_str;
 
@@ -386,11 +386,17 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			if (module_initialized && PG(display_errors)) {
 				char *prepend_string = INI_STR("error_prepend_string");
 				char *append_string = INI_STR("error_append_string");
+				char *error_format;
+
+				error_format = PG(html_errors) ?
+					"<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n"
+					: "\n%s: %s in %s on line %d\n";
 
 				if (prepend_string) {
 					PUTS(prepend_string);
 				}
-				php_printf("<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n", error_type_str, buffer, error_filename, error_lineno);
+				php_printf(error_format, error_type_str, buffer,
+						   error_filename, error_lineno);
 				if (append_string) {
 					PUTS(append_string);
 				}

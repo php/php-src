@@ -111,6 +111,8 @@ struct _php_core_globals {
 
 	zend_bool y2k_compliance;
 
+	zend_bool html_errors;
+
 	zend_bool modules_activated;
 };
 
