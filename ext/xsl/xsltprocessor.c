@@ -95,8 +95,10 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params TSRMLS
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid argument or parameter array");
 			return NULL;
 		} else {
-			SEPARATE_ZVAL(value);
-			convert_to_string_ex(value);
+			if (Z_TYPE_PP(value) != IS_STRING) {
+				SEPARATE_ZVAL(value);
+				convert_to_string(*value);
+			}
 
 			if (!xpath_params) {
 				xpath_expr = php_xsl_xslt_string_to_xpathexpr(Z_STRVAL_PP(value) TSRMLS_CC);
