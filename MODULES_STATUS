@@ -23,3 +23,5 @@ snmp                Working
 gettext             Working
 mcal                Working
 interbase           Working
+posix               Working
+recode              Working
