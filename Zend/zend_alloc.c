@@ -403,6 +403,7 @@ ZEND_API void start_memory_manager(ALS_D)
 	memset(AG(fast_cache_list_head), 0, sizeof(AG(fast_cache_list_head)));
 	memset(AG(cache_count), 0, sizeof(AG(cache_count)));
 
+#if 0
 #ifndef ZTS
 	/* Initialize cache, to prevent fragmentation */
 	/* We can't do this in ZTS mode, because calling emalloc() from within start_memory_manager()
@@ -418,6 +419,7 @@ ZEND_API void start_memory_manager(ALS_D)
 			efree(cached_entries[i][j]);
 		}
 	}
+#endif
 #endif
 
 #if ZEND_DEBUG
@@ -445,6 +447,19 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 			fast_cache_list_entry = next_fast_cache_list_entry;
 		}
 		AG(fast_cache_list_head)[fci] = NULL;
+	}
+
+	if (1 || clean_cache) {
+		zend_mem_header *ptr;
+
+		for (i=1; i<MAX_CACHED_MEMORY; i++) {
+			for (j=0; j<AG(cache_count)[i]; j++) {
+				ptr = (zend_mem_header *) AG(cache)[i][j];
+				REMOVE_POINTER_FROM_LIST(ptr);
+				free(ptr);
+			}
+			AG(cache_count)[i] = 0;
+		}
 	}
 
 	p = AG(head);
@@ -487,13 +502,6 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 		}
 	}
 
-	if (clean_cache) {
-		for (i=1; i<MAX_CACHED_MEMORY; i++) {
-			for (j=0; j<AG(cache_count)[i]; j++) {
-				free(AG(cache)[i][j]);
-			}
-		}
-	}
 #if MEMORY_LIMIT
 	AG(memory_exhausted)=0;
 	AG(allocated_memory_peak) = 0;
