@@ -100,6 +100,10 @@ SOURCE=.\zlib.c
 
 SOURCE=.\zlib_fopen_wrapper.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\zlib_filter.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
