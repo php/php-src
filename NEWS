@@ -3,10 +3,9 @@ PHP                                                                        NEWS
 ? ? ??? 200?, Version 5.0.0
 
 ## Note the changed grouping. Try add your entries to appropriate places
-## to enchance the readability of this file. Using @ is discouraged.
+## to enhance the readability of this file. Using @ is discouraged.
 ## (This file will be cleaned up before release.)
 
-- Mnogosearch extension updated. Now can compile with mnogosearch-3.2.11+
 - Moved extensions to PECL (http://pear.php.net/): (James, Tal)
   . ext/fribidi
 
@@ -14,8 +13,9 @@ PHP                                                                        NEWS
   . "session.hash_function" and "session.hash_bits_per_character". (Sascha)
   . "mail.force_extra_paramaters". (Derick)
 
-- Improved streams support: (Wez)
-  . Added context property to userspace streams object. (sara)
+- Improved the streams support: (Wez)
+  . Improved performance of readfile(), fpassthru() and some internal streams
+    operations under Win32.
   . stream_socket_client() - similar to fsockopen(), but more powerful. 
   . stream_socket_server() - Creates a server socket. 
   . stream_socket_accept() - Accept a client connection.
@@ -23,17 +23,16 @@ PHP                                                                        NEWS
   . stream_copy_to_stream()
   . stream_get_line() - Reads either the specified number of bytes or until 
     the ending string is found. (Ilia)
+  . Added context property to userspace streams object. (Sara)
   . Added generic crypto interface for streams.
     (supports dynamic loading of OpenSSL)
-  . Improved performance of readfile(), fpassthru() and some internal streams
-    operations under Win32.
   . Added lightweight streaming input abstraction to the Zend Engine scanners
     to provide uniform support for include()'ing data from PHP streams across
     all platforms.
   . Added 'string.base64' stream filter. (Moriyoshi)
   . Renamed stream_register_wrapper() to stream_wrapper_register(). (Derick)
 
-- Improved GD extension: (Pierre-Alain Joye, Ilia)
+- Improved the GD extension: (Pierre-Alain Joye, Ilia)
    . imagefilter() - Apply different filters to image.
     (Only available with bundled GD library)
    . Antialiased drawing support:
@@ -113,4 +112,3 @@ PHP                                                                        NEWS
 ### Add everything that MIGHT get merged to some PHP 4 branch 
 ### (before PHP 5.0.0 is released), below.
 
-- Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia) <-- move to 4.3.3 NEWS
