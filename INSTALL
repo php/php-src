@@ -11,6 +11,8 @@ install both.
 If you want both PHP 3 and 4 modules in the same Apache server, check the
 bottom of this file for instructions.
 
+INSTALLATION WITH THE ZEUS WEB SERVER:
+--Please see the 'README.Zeus' file included in this distribution
 
 QUICK INSTALL (DSO)
 

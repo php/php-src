@@ -20,9 +20,12 @@
 #ifdef PHP_WIN32
 # include <windows.h>
 # include <process.h>
+# define SEPARATOR '\\'
 #else
 # define __try
 # define __except(val)
+# define __declspec(foo)
+# define SEPARATOR '/'
 #endif
 
 #include <httpext.h>
@@ -37,7 +40,9 @@
 #include "php_ini.h"
 
 #ifdef WITH_ZEUS
-#include "zeus.h"
+# include "httpext.h"
+# include <errno.h>
+# define GetLastError() errno
 #endif
 
 #define MAX_STATUS_LENGTH sizeof("xxxx LONGEST STATUS DESCRIPTION")
@@ -219,9 +224,7 @@ static int sapi_isapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 			header_info.pszStatus = status_buf;
 			break;
 	}
-#ifndef WITH_ZEUS
 	header_info.cchStatus = strlen(header_info.pszStatus);
-#endif
 	header_info.pszHeader = combined_headers;
 	header_info.cchHeader = total_length;
 	lpECB->dwHttpStatusCode = SG(sapi_headers).http_response_code;
@@ -450,12 +453,12 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPEXTENSION_CON
 	SG(request_info).content_type = lpECB->lpszContentType;
 	SG(request_info).content_length = lpECB->cbTotalBytes;
 	{
-		char *path_end = strrchr(SG(request_info).path_translated, '\\');
+		char *path_end = strrchr(SG(request_info).path_translated, SEPARATOR);
 
 		if (path_end) {
 			*path_end = 0;
 			PHP_CHDIR(SG(request_info).path_translated);
-			*path_end = '\\';
+			*path_end = SEPARATOR;
 		}
 	}
 	if (!bFilterLoaded) { /* we don't have valid ISAPI Filter information */
@@ -471,9 +474,7 @@ static void php_isapi_report_exception(char *message, int message_len SLS_DC)
 		LPEXTENSION_CONTROL_BLOCK lpECB = (LPEXTENSION_CONTROL_BLOCK) SG(server_context);
 
 		header_info.pszStatus = "500 Internal Server Error";
-#ifndef WITH_ZEUS
 		header_info.cchStatus = strlen(header_info.pszStatus);
-#endif
 		header_info.pszHeader = "Content-Type: text/html\r\n\r\n";
 		header_info.cchHeader = strlen(header_info.pszHeader);
 
@@ -488,7 +489,11 @@ static void php_isapi_report_exception(char *message, int message_len SLS_DC)
 BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO *pVer)
 {
 	pVer->dwExtensionVersion = HSE_VERSION;
+#ifdef WITH_ZEUS
+        strncpy( pVer->lpszExtensionDesc, sapi_module.name, HSE_MAX_EXT_DLL_NAME_LEN);
+#else
 	lstrcpyn(pVer->lpszExtensionDesc, sapi_module.name, HSE_MAX_EXT_DLL_NAME_LEN);
+#endif
 	return TRUE;
 }
 

@@ -1,0 +1,91 @@
+Using PHP4 with the Zeus Web Server
+-----------------------------------
+
+Zeus fully supports running PHP in combination with our webserver. A
+significant improvement in PHP 4 is that you can now run PHP as an
+ISAPI module, giving great performance benefits over traditional CGI
+code.
+
+Note that you will need to be running at least version 3.3.6 of the
+webserver. If you are running an earlier version, please see our
+website (http://www.zeus.com) for upgrade instructions.
+
+
+To build the ISAPI version of PHP, start the configuration with:
+
+./configure --with-zeus=/usr/local/zeus
+
+Obviously, replace /usr/local/zeus with the location of where you have
+installed Zeus on your machine. For PHP to build successfully, you
+need to have 3.3.6 already installed, because the code relies on the
+presence of header files provided with the latest version.
+
+You may have to adjust the environment variable LDFLAGS and EXTRA_LIBS
+in order to link in extra libraries. This depends on the platform on
+which you are building and also on the compiler used (see below). A
+standard GNU/Linux install with GCC should build fine with no changes.
+
+
+Configuring the webserver
+-------------------------
+
+After running 'make' and 'make install', you will have a 'libphp4.so'
+file. Copy this file into a directory reserved for ISAPI
+binaries. Now, perform the following steps for each virtual server
+that you wish to run PHP on:
+
+1) On the Admin server, go to 'edit server->path mapping'
+2) Add an alias to the directory with libphp4.so in it, mapped to
+   /isapi/ (or a location of your choice). Make sure you set the alias
+   type to ISAPI.
+3) Click 'update'
+4) Add a handler for file extension 'php' to be run by /isapi/libphp4.so
+5) Click 'update', then go back to the previous page.
+6) Click on the 'module configuration' button, ensure that ISAPI
+   support is ticked.
+7) Click on the ISAPI link. At the bottom of the page, click the
+   checkbox for running ISAPI extensions 'out of process'.
+8) Click 'update'. Then restart the virtual server. Done!
+
+
+Troubleshooting
+---------------
+
+*) Why does my PHP library fail to load?
+
+After configuring Zeus, if you get a '502 Bad Gatway' error when
+accessing a PHP page, there are problems loading the PHP
+library. Check the error log ($ZEUSHOME/web/log/errors) for errors.
+
+Failing to load the PHP ISAPI module is likely to be due to unresolved
+symbols in the module. A way to check for this is to visit our support
+page at http://support.zeus.com/faq/entries/isapi_error.html and run
+the program there on your libphp4.so. It will list any unresolved
+symbols.
+
+*) My libphp4.so has unresolved symbols. How do I fix this?
+
+You must ensure that the PHP build process links in the appropriate
+libraries that contain these symbols! The libraries required will
+depend on the platform you are running PHP on.
+
+You may need to set one or two environment variables before running
+the 'configure' program to set up PHP; LDFLAGS and EXTRA_LIBS. Make
+sure that you also export these variables to the build process.
+(Type 'export LDFLAGS EXTRA_LIBS' in the shell to do this.)
+
+Specific examples:
+
+Solaris + gcc: Set LDFLAGS to
+'-L/usr/local/egcs/lib/gcc-lib/sparc-sun-solaris2.7/egcs-2.91.66
+ -L/usr/local/egcs/lib' (your paths may vary)
+EXTRA_LIBS should be '-lgcc'
+
+FreeBSD 4.0 + gcc: Set EXTRA_LIBS to '-lc_r_p -lgcc'
+
+Linux/Alpha: Set EXTRA_LIBS to '-lstdc++-3-libc6.1-2-2.10.0'
+             (change as appropriate to the stdc++ in /usr/lib)
+
+
+For more information and help with Zeus, please visit our website:
+http://www.zeus.com
