@@ -45,6 +45,13 @@ ext/pcre
 
 ext/wddx
 --------
+    * See if we can support the remaining datatypes:
+        dateTime
+        binary
+        recordset
+
+        http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
+
     * implement wddx_packet_as_javascript(). (Andrei)
 
 ext/oci8
@@ -54,7 +61,7 @@ ext/oci8
 ext/snmp
 --------
     * port to latest UCD-SNMP 4.1 (even doesn't compile)
-	
+    
 ext/standard
 ------------
     * array_add(), array_rand() (Andrei)
