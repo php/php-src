@@ -36,7 +36,7 @@
 #define PHP_CONF_LONG(directive,value1,value2) \
 	php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\"><TD BGCOLOR=\"" PHP_ENTRY_NAME_COLOR "\">%s<BR></TD><TD>%ld<BR></TD><TD>%ld<BR></TD></TR>\n",directive,value1,value2);
 
-#define SECTION(name)  PUTS("<H2>" name "</H2>\n")
+#define SECTION(name)  PUTS("<H2 align=\"center\">" name "</H2>\n")
 
 #define CREDIT_LINE(module, authors) php_info_print_table_row(2, module, authors)
 PHPAPI extern char *php_ini_path;
@@ -46,7 +46,7 @@ static int _display_module_info(zend_module_entry *module, void *arg)
 	int show_info_func = *((int *) arg);
 
 	if (show_info_func && module->info_func) {
-		php_printf("<A NAME=\"module_%s\"><H2>%s</H2>\n", module->name, module->name);
+		php_printf("<H2 align=\"center\"><A NAME=\"module_%s\">%s</A></H2>\n", module->name, module->name);
 		module->info_func(module);
 	} else if (!show_info_func && !module->info_func) {
 		php_printf("<TR VALIGN=\"baseline\" BGCOLOR=\"" PHP_CONTENTS_COLOR "\">");
@@ -157,15 +157,16 @@ PHPAPI void php_print_info(int flag)
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
-	
-	PUTS("<CENTER>");
+
+	PUTS("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 3.2//EN\">\n<html>\n");
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 
 		php_uname = php_get_uname();
-
+		PUTS("<head>");
 		php_info_print_style();
+		PUTS("<title>phpinfo()</title></head><body>");
 
 		php_info_print_box_start(1);
 		if (expose_php) {
@@ -174,9 +175,9 @@ PHPAPI void php_print_info(int flag)
 				PUTS(SG(request_info).request_uri);
 			}
 			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
-				PUTS("?=PHPE9568F36-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
+				PUTS("?=PHPE9568F36-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\" alt=\"Thies!\"></a>");
 			} else {
-				PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
+				PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\" alt=\"PHP Logo\"></a>");
 			}
 		}
 		php_printf("<H1>PHP Version %s</H1>\n", PHP_VERSION);
@@ -219,7 +220,7 @@ PHPAPI void php_print_info(int flag)
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\"></a>\n");
+			PUTS("?=PHPE9568F35-D428-11d2-A769-00AA001ACF42\" border=\"0\" align=\"right\" alt=\"Zend logo\"></a>\n");
 		}
 		php_printf("This program makes use of the Zend scripting language engine:<BR>");
 		zend_html_puts(zend_version, strlen(zend_version));
@@ -230,20 +231,20 @@ PHPAPI void php_print_info(int flag)
 
 	if ((flag & PHP_INFO_CREDITS) && expose_php) {	
 		php_info_print_hr();
-		PUTS("<a href=\"");
+		PUTS("<h1 align=\"center\"><a href=\"");
 		if (SG(request_info).request_uri) {
 			PUTS(SG(request_info).request_uri);
 		}
 		PUTS("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
-		PUTS("<h1>PHP 4.0 Credits</h1>");
-		PUTS("</a>\n");
+		PUTS("PHP 4.0 Credits");
+		PUTS("</a></h1>\n");
 	}
 
 	php_ini_sort_entries();
 
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();
-		PUTS("<h1>Configuration</h1>\n");
+		PUTS("<h1 align=\"center\">Configuration</h1>\n");
 		SECTION("PHP Core\n");
 		display_ini_entries(NULL);
 	}
@@ -326,8 +327,6 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</P>\n");
 		php_info_print_box_end();
 	}
-
-	PUTS("</center>");
 }
 
 
@@ -339,8 +338,7 @@ void php_print_credits(int flag)
 
 	php_info_print_style();
 
-	PUTS("<center>");
-	PUTS("<h1>PHP 4.0 Credits</h1>\n");
+	PUTS("<h1 align=\"center\">PHP 4.0 Credits</h1>\n");
 
 	if (flag & PHP_CREDITS_GROUP) {
 		/* Group */
@@ -404,6 +402,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("DBM", "Rasmus Lerdorf, Jim Winstead");
 		CREDIT_LINE("dBase", "Jim Winstead");
 		CREDIT_LINE("dotnet", "Sam Ruby");
+		CREDIT_LINE("EXIF", "Rasmus Lerdorf");
 		CREDIT_LINE("FDF", "Uwe Steinmann");
 		CREDIT_LINE("FilePro", "Chad Robinson");
 		CREDIT_LINE("FTP", "Andrew Skalski");
@@ -451,8 +450,6 @@ void php_print_credits(int flag)
 		php_info_print_table_end();
 	}
 
-	PUTS("</center>");
-
 	if (flag & PHP_CREDITS_FULLPAGE) {
 		PUTS("</body></html>\n");
 	}
@@ -460,7 +457,7 @@ void php_print_credits(int flag)
 
 PHPAPI void php_info_print_table_start()
 {
-	php_printf("<TABLE BORDER=0 CELLPADDING=3 CELLSPACING=1 WIDTH=600 BGCOLOR=\"#000000\">\n");
+	php_printf("<TABLE BORDER=0 CELLPADDING=3 CELLSPACING=1 WIDTH=600 BGCOLOR=\"#000000\" ALIGN=\"CENTER\">\n");
 }
 
 PHPAPI void php_info_print_table_end()
