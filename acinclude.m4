@@ -875,7 +875,7 @@ AC_DEFUN(PHP_ADD_LIBPATH,[
       PHP_ADD_LIBPATH_GLOBAL([$ai_p])
     ],[
       if test "$ext_shared" = "yes"; then
-        $2="-R$ai_p -L$ai_p [$]$2"
+        $2="$ld_runpath_switch$ai_p -L$ai_p [$]$2"
       else
         PHP_ADD_LIBPATH_GLOBAL([$ai_p])
       fi
