@@ -64,6 +64,10 @@ struct _php_core_globals {
 	long y2k_compliance;
 
 	unsigned char header_is_being_sent;
+
+	/* for fsock */
+	HashTable ht_fsock_keys;
+	HashTable ht_fsock_socks;
 };
 
 
