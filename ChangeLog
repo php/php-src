@@ -1,3 +1,53 @@
+2001-04-28  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/string.c: Fix for bug #10362
+
+2001-04-28  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h:
+
+    * ext/curl/curl.c: fix bug #10541
+
+2001-04-28  James Moore  <James@phpuk.org>
+
+    * TODO-4.1.txt: Zend shallow copy needs to be fixed
+
+2001-04-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    also free the message, if the socket has already been marked as dead.
+
+2001-04-28  Daniel Beulshausen  <daniel@php4win.de>
+
+    * sapi/pi3web/php4pi3web.dsp
+      win32/php4ts.dsw: add/fix pi3web dsp
+
+2001-04-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    free the message in msg_accum_send, if we recognize the connection
+    as stale.
+
+    * ext/ircg/ircg.c:
+    ircg_mirc_color() does not use emalloc anymore to allocate strings,
+    so ircg_html_encode() needs to copy the return value.
+
+    * ext/ircg/ircg.c:
+    Add some logic that deconnects a client, when it has been connected to
+    the IRC server for longer than 20 seconds and if more than 50 messages
+    have been queued up.
+
+2001-04-28  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/exec.c:
+    - Fix for bugs #9042, #8212, and #8962. Patch from <tunacat@yahoo.com>
+    - Fixed proto for exec()
+
+2001-04-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: add some diagnostic output to phpinfo.
+
 2001-04-27  Daniel Beulshausen  <daniel@php4win.de>
 
     * win32/install.txt: add notes about support directories
