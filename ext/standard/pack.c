@@ -551,8 +551,14 @@ PHP_FUNCTION(unpack)
 				break;
 			}
 
-			case 'a': case 'A': case 'h': case 'H': {
+			case 'a': case 'A': {
 				size = arg;
+				arg = 1;
+				break;
+			}
+
+			case 'h': case 'H': {
+				size = arg/2;
 				arg = 1;
 				break;
 			}
@@ -638,11 +644,10 @@ PHP_FUNCTION(unpack)
 						int ipos, opos;
 
 						/* If size was given take minimum of len and size */
-						if ((size >= 0) && (len > size)) {
-							len = size;
-						}
-
-						size = (len + 1) / 2;
+						if ((size >= 0) && (len > size*2)) {
+							len = size*2;
+						} 
+							
 						buf = emalloc(len + 1);
 
 						for (ipos = opos = 0; opos < len; opos++) {
