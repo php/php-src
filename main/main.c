@@ -666,6 +666,7 @@ static void php_execute_pre_request_shutdown(PLS_D)
 	if (PG(pre_request_shutdown_ok)) {
 		zend_llist_apply(&PG(ll_pre_request_shutdown), php_start_request_hook);
 		zend_llist_destroy(&PG(ll_pre_request_shutdown));
+		PG(pre_request_shutdown_ok) = 0;
 	}
 }
 
