@@ -388,6 +388,15 @@ static void php_libxml_ctx_error_level(int level, void *ctx, const char *msg TSR
 	}
 }
 
+void php_libxml_issue_error(int level, const char *msg TSRMLS_DC)
+{
+	if (LIBXML(error_list)) {
+		_php_list_set_error_structure(NULL, msg);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, level, "%s", msg);
+	}
+}
+
 static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
 {
 	char *buf;

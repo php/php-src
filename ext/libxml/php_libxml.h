@@ -88,6 +88,7 @@ void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 void php_libxml_ctx_error(void *ctx, const char *msg, ...);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API zval *php_libxml_switch_context(zval *context TSRMLS_DC);
+PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg TSRMLS_DC);
 
 #endif /* HAVE_LIBXML */
 
