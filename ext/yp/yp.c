@@ -262,7 +262,7 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 }
 /* }}} */
 
-/* {{{ proto void yp_all(string domain, string map, string callback)
+/* {{{ proto bool yp_all(string domain, string map, string callback)
    Traverse the map and call a function on each entry */
 PHP_FUNCTION(yp_all)
 {

@@ -960,7 +960,7 @@ struct limitlist {
 /* }}} */
 
 
-/* {{{ proto int posix_getrlimit(void)
+/* {{{ proto array posix_getrlimit(void)
    Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
 PHP_FUNCTION(posix_getrlimit)
 {

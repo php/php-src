@@ -316,7 +316,7 @@ PHP_FUNCTION(pspell_new_config)
 }
 /* }}} */
 
-/* {{{ proto int pspell_check(int pspell, string word)
+/* {{{ proto bool pspell_check(int pspell, string word)
    Returns true if word is valid */
 PHP_FUNCTION(pspell_check)
 {
@@ -386,7 +386,7 @@ PHP_FUNCTION(pspell_suggest)
 }
 /* }}} */
 
-/* {{{ proto int pspell_store_replacement(int pspell, string misspell, string correct)
+/* {{{ proto bool pspell_store_replacement(int pspell, string misspell, string correct)
    Notify the dictionary of a user-selected replacement */
 PHP_FUNCTION(pspell_store_replacement)
 {
@@ -419,7 +419,7 @@ PHP_FUNCTION(pspell_store_replacement)
 }
 /* }}} */
 
-/* {{{ proto int pspell_add_to_personal(int pspell, string word)
+/* {{{ proto bool pspell_add_to_personal(int pspell, string word)
    Adds a word to a personal list */
 PHP_FUNCTION(pspell_add_to_personal)
 {
@@ -456,7 +456,7 @@ PHP_FUNCTION(pspell_add_to_personal)
 }
 /* }}} */
 
-/* {{{ proto int pspell_add_to_session(int pspell, string word)
+/* {{{ proto bool pspell_add_to_session(int pspell, string word)
    Adds a word to the current session */
 PHP_FUNCTION(pspell_add_to_session)
 {
@@ -493,7 +493,7 @@ PHP_FUNCTION(pspell_add_to_session)
 }
 /* }}} */
 
-/* {{{ proto int pspell_clear_session(int pspell)
+/* {{{ proto bool pspell_clear_session(int pspell)
    Clears the current session */
 PHP_FUNCTION(pspell_clear_session)
 {
@@ -524,7 +524,7 @@ PHP_FUNCTION(pspell_clear_session)
 }
 /* }}} */
 
-/* {{{ proto int pspell_save_wordlist(int pspell)
+/* {{{ proto bool pspell_save_wordlist(int pspell)
    Saves the current (personal) wordlist */
 PHP_FUNCTION(pspell_save_wordlist)
 {
@@ -606,7 +606,7 @@ PHP_FUNCTION(pspell_config_create)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_runtogether(int conf, bool runtogether)
+/* {{{ proto bool pspell_config_runtogether(int conf, bool runtogether)
    Consider run-together words as valid components */
 PHP_FUNCTION(pspell_config_runtogether)
 {
@@ -635,7 +635,7 @@ PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_mode(int conf, long mode)
+/* {{{ proto bool pspell_config_mode(int conf, long mode)
    Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 PHP_FUNCTION(pspell_config_mode)
 {
@@ -672,7 +672,7 @@ PHP_FUNCTION(pspell_config_mode)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_ignore(int conf, int ignore)
+/* {{{ proto bool pspell_config_ignore(int conf, int ignore)
    Ignore words <= n chars */
 PHP_FUNCTION(pspell_config_ignore)
 {
@@ -723,7 +723,7 @@ PHP_FUNCTION(pspell_config_ignore)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_personal(int conf, string personal)
+/* {{{ proto bool pspell_config_personal(int conf, string personal)
    Use a personal dictionary for this config */
 PHP_FUNCTION(pspell_config_personal)
 {
@@ -761,7 +761,7 @@ PHP_FUNCTION(pspell_config_personal)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_repl(int conf, string repl)
+/* {{{ proto bool pspell_config_repl(int conf, string repl)
    Use a personal dictionary with replacement pairs for this config */
 PHP_FUNCTION(pspell_config_repl)
 {
@@ -801,7 +801,7 @@ PHP_FUNCTION(pspell_config_repl)
 }
 /* }}} */
 
-/* {{{ proto int pspell_config_save_repl(int conf, bool save)
+/* {{{ proto bool pspell_config_save_repl(int conf, bool save)
    Save replacement pairs when personal list is saved for this config */
 PHP_FUNCTION(pspell_config_save_repl)
 {

@@ -255,7 +255,7 @@ static int strcmp_null(const char *s1, const char *s2)
 	return strcmp(s1, s2);
 }
 
-/* {{{ proto int yaz_connect(string zurl [, array options])
+/* {{{ proto resource yaz_connect(string zurl [, array options])
    Create target with given zurl. Returns positive id if successful. */
 PHP_FUNCTION(yaz_connect)
 {
@@ -387,7 +387,7 @@ PHP_FUNCTION(yaz_connect)
 }
 /* }}} */
 
-/* {{{ proto int yaz_close(resource id)
+/* {{{ proto bool yaz_close(resource id)
    Destory and close target */
 PHP_FUNCTION(yaz_close)
 {
@@ -411,7 +411,7 @@ PHP_FUNCTION(yaz_close)
 }
 /* }}} */
 
-/* {{{ proto int yaz_search(resource id, string type, string query)
+/* {{{ proto bool yaz_search(resource id, string type, string query)
    Specify query of type for search - returns true if successful */
 PHP_FUNCTION(yaz_search)
 {
@@ -470,7 +470,7 @@ PHP_FUNCTION(yaz_search)
 }
 /* }}} */
 
-/* {{{ proto int yaz_present(resource id)
+/* {{{ proto bool yaz_present(resource id)
    Retrieve records */
 PHP_FUNCTION(yaz_present)
 {
@@ -501,7 +501,7 @@ PHP_FUNCTION(yaz_present)
 }
 /* }}} */
 
-/* {{{ proto int yaz_wait([array options])
+/* {{{ proto bool yaz_wait([array options])
    Process events. */
 PHP_FUNCTION(yaz_wait)
 {
@@ -984,7 +984,7 @@ PHP_FUNCTION(yaz_record)
 }
 /* }}} */
 
-/* {{{ proto int yaz_syntax(resource id, string syntax)
+/* {{{ proto void yaz_syntax(resource id, string syntax)
    Set record syntax for retrieval */
 PHP_FUNCTION(yaz_syntax)
 {
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(yaz_syntax)
 }
 /* }}} */
 
-/* {{{ proto int yaz_element(resource id, string elementsetname)
+/* {{{ proto void yaz_element(resource id, string elementsetname)
    Set Element-Set-Name for retrieval */
 PHP_FUNCTION(yaz_element)
 {
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(yaz_element)
 }
 /* }}} */
 
-/* {{{ proto int yaz_schema(resource id, string schema)
+/* {{{ proto void yaz_schema(resource id, string schema)
    Set Schema for retrieval */
 PHP_FUNCTION(yaz_schema)
 {
@@ -1039,7 +1039,7 @@ PHP_FUNCTION(yaz_schema)
 }
 /* }}} */
 
-/* {{{ proto int yaz_set_option(resource id, mixed options)
+/* {{{ proto void yaz_set_option(resource id, mixed options)
    Set Option(s) for connection */
 PHP_FUNCTION(yaz_set_option)
 {
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(yaz_get_option)
 }
 /* }}} */
 
-/* {{{ proto int yaz_range(resource id, int start, int number)
+/* {{{ proto void yaz_range(resource id, int start, int number)
    Set result set start point and number of records to request */
 PHP_FUNCTION(yaz_range)
 {
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(yaz_range)
 }
 /* }}} */
 
-/* {{{ proto int yaz_sort(resource id, string sortspec)
+/* {{{ proto void yaz_sort(resource id, string sortspec)
    Set result set sorting criteria */
 PHP_FUNCTION(yaz_sort)
 {
@@ -1174,7 +1174,7 @@ const char *ill_array_lookup (void *handle, const char *name)
 	return array_lookup_string((HashTable *) handle, name);
 }
 
-/* {{{ proto int yaz_itemorder(resource id, array package)
+/* {{{ proto void yaz_itemorder(resource id, array package)
    Sends Item Order request */
 PHP_FUNCTION(yaz_itemorder)
 {
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(yaz_itemorder)
 }
 /* }}} */
 
-/* {{{ proto int yaz_scan(resource id, type, query [, flags])
+/* {{{ proto void yaz_scan(resource id, type, query [, flags])
    Sends Scan Request */
 PHP_FUNCTION(yaz_scan)
 {
@@ -1244,7 +1244,7 @@ PHP_FUNCTION(yaz_scan)
 }
 /* }}} */
 
-/* {{{ proto int yaz_es_result(resource id)
+/* {{{ proto array yaz_es_result(resource id)
    Inspects Extended Services Result */
 PHP_FUNCTION(yaz_es_result)
 {
@@ -1269,7 +1269,7 @@ PHP_FUNCTION(yaz_es_result)
 }
 /* }}} */
 
-/* {{{ proto int yaz_scan_result(resource id [, array options])
+/* {{{ proto array yaz_scan_result(resource id [, array options])
    Inspects Scan Result */
 PHP_FUNCTION(yaz_scan_result)
 {
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(yaz_scan_result)
 }
 /* }}} */
 
-/* {{{ proto int yaz_ccl_conf(resource id, array package)
+/* {{{ proto void yaz_ccl_conf(resource id, array package)
    Configure CCL package */
 PHP_FUNCTION(yaz_ccl_conf)
 {
@@ -1388,7 +1388,7 @@ PHP_FUNCTION(yaz_ccl_conf)
 }
 /* }}} */
 
-/* {{{ proto int yaz_ccl_parse(resource id, string query, array res)
+/* {{{ proto bool yaz_ccl_parse(resource id, string query, array res)
    Parse a CCL query */
 PHP_FUNCTION(yaz_ccl_parse)
 {
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(yaz_ccl_parse)
 }
 /* }}} */
 
-/* {{{ proto int yaz_database (resource id, string databases)
+/* {{{ proto bool yaz_database (resource id, string databases)
    Specify the databases within a session */
 PHP_FUNCTION(yaz_database)
 {

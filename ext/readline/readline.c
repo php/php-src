@@ -222,7 +222,7 @@ PHP_FUNCTION(readline_info)
 }
 
 /* }}} */
-/* {{{ proto void readline_add_history([string prompt]) 
+/* {{{ proto bool readline_add_history([string prompt]) 
    Adds a line to the history */
 PHP_FUNCTION(readline_add_history)
 {
@@ -240,7 +240,7 @@ PHP_FUNCTION(readline_add_history)
 }
 
 /* }}} */
-/* {{{ proto void readline_clear_history(void) 
+/* {{{ proto bool readline_clear_history(void) 
    Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
@@ -281,7 +281,7 @@ PHP_FUNCTION(readline_list_history)
 }
 #endif
 /* }}} */
-/* {{{ proto int readline_read_history([string filename] [, int from] [,int to]) 
+/* {{{ proto bool readline_read_history([string filename] [, int from] [,int to]) 
    Reads the history */
 PHP_FUNCTION(readline_read_history)
 {
@@ -308,7 +308,7 @@ PHP_FUNCTION(readline_read_history)
 }
 
 /* }}} */
-/* {{{ proto int readline_write_history([string filename]) 
+/* {{{ proto bool readline_write_history([string filename]) 
    Writes the history */
 PHP_FUNCTION(readline_write_history)
 {
@@ -333,7 +333,7 @@ PHP_FUNCTION(readline_write_history)
 }
 
 /* }}} */
-/* {{{ proto void readline_completion_function(string funcname) 
+/* {{{ proto bool readline_completion_function(string funcname) 
    Readline completion function? */
 
 static char *_readline_command_generator(char *text,int state)
