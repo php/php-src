@@ -646,11 +646,6 @@ static inline HashTable *zend_get_target_symbol_table(zend_op *opline, temp_vari
 			return EG(active_symbol_table);
 			break;
 		case ZEND_FETCH_GLOBAL:
-			/* Don't think this is actually needed.
-			   if (opline->op1.op_type == IS_VAR) {
-				PZVAL_LOCK(varname);
-			}
-+ */
 			return &EG(symbol_table);
 			break;
 		case ZEND_FETCH_STATIC:
@@ -687,6 +682,9 @@ static void zend_fetch_var_address(zend_op *opline, temp_variable *Ts, int type 
 		target_symbol_table = NULL;
 		retval = zend_std_get_static_property(T(opline->op2.u.var).EA.class_entry, Z_STRVAL_P(varname), Z_STRLEN_P(varname), 0 TSRMLS_CC);
 	} else {
+		if (opline->op2.u.EA.type == ZEND_FETCH_GLOBAL && opline->op1.op_type == IS_VAR) {
+			PZVAL_LOCK(varname);
+		}
 		target_symbol_table = zend_get_target_symbol_table(opline, Ts, type, varname TSRMLS_CC);
 		if (!target_symbol_table) {
 			return;
