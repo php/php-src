@@ -99,19 +99,19 @@ function_entry odbc_functions[] = {
 	PHP_FE(odbc_define, NULL)*/
 	PHP_FE(odbc_tables, NULL)
 	PHP_FE(odbc_columns, NULL)
-#ifndef HAVE_DBMAKER   /* not supported now */
-	PHP_FE(odbc_columnprivileges, NULL)
-#endif
-	PHP_FE(odbc_foreignkeys, NULL)
 	PHP_FE(odbc_gettypeinfo, NULL)
 	PHP_FE(odbc_primarykeys, NULL)
-	PHP_FE(odbc_procedurecolumns, NULL)
-	PHP_FE(odbc_procedures, NULL)
-	PHP_FE(odbc_specialcolumns, NULL)
-	PHP_FE(odbc_statistics, NULL)
-#ifndef HAVE_DBMAKER   /* not supported now */
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)    /* not supported now */
+	PHP_FE(odbc_columnprivileges, NULL)
 	PHP_FE(odbc_tableprivileges, NULL)
 #endif
+#if !defined(HAVE_SOLID)    /* not supported */
+	PHP_FE(odbc_foreignkeys, NULL)
+	PHP_FE(odbc_procedures, NULL)
+	PHP_FE(odbc_procedurecolumns, NULL)
+#endif
+	PHP_FE(odbc_specialcolumns, NULL)
+	PHP_FE(odbc_statistics, NULL)
 	PHP_FALIAS(odbc_do, odbc_exec, NULL)
 	{ NULL, NULL, NULL }
 };
@@ -2323,7 +2323,7 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#ifndef HAVE_DBMAKER
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
 /* {{{ proto int odbc_columnprivileges(int connection_id, string catalog, string schema, string table, string column )
    call the SQLColumnPrivileges function */
 PHP_FUNCTION(odbc_columnprivileges)
@@ -2401,8 +2401,9 @@ PHP_FUNCTION(odbc_columnprivileges)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
-#endif /* HAVE_DBMAKER */
+#endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
+#if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_foreignkeys(int connection_id, string pk_catalog, string pk_schema, string pk_table, string fk_catalog, string fk_schema, string fk_table )
    call the SQLForeignKeys function */
 PHP_FUNCTION(odbc_foreignkeys)
@@ -2500,6 +2501,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
+#endif /* HAVE_SOLID */
 
 /* {{{ proto int odbc_gettypeinfo(int connection_id [, int data_type ] )
    call the SQLGetTypeInfo function */
@@ -2648,6 +2650,7 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
+#if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_procedurecolumns(int connection_id [, string database, string schema, string proc, string column ] )
    call the SQLProcedureColumns function */
 PHP_FUNCTION(odbc_procedurecolumns)
@@ -2729,7 +2732,9 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
+#endif /* HAVE_SOLID */
 
+#if !defined(HAVE_SOLID)
 /* {{{ proto int odbc_procedures(int connection_id [, string database, string schema, string proc ] )
    call the SQLProcedures function */
 PHP_FUNCTION(odbc_procedures)
@@ -2808,6 +2813,7 @@ PHP_FUNCTION(odbc_procedures)
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
 /* }}} */
+#endif /* HAVE_SOLID */
 
 /* {{{ proto int odbc_specialcolumns(int connection_id, int type, string catalog, string schema, string name, int scope, int nullable )
    call the SQLSpecialColumns function */
@@ -2981,7 +2987,7 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#ifndef HAVE_DBMAKER
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID)
 /* {{{ proto int odbc_tableprivilegess(int connection_id, string catalog, string schema, string table )
    call the SQLTablePrivilegess function */
 PHP_FUNCTION(odbc_tableprivileges)
