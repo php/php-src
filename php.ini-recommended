@@ -616,12 +616,6 @@ SMTP = localhost
 ; the 5th parameter to mail(), even in safe mode.
 ;mail.force_extra_paramaters = 
 
-[Java]
-;java.class.path = .\php_java.jar
-;java.home = c:\jdk
-;java.library = c:\jdk\jre\bin\hotspot\jvm.dll 
-;java.library.path = .\
-
 [SQL]
 sql.safe_mode = Off
 
@@ -1068,9 +1062,6 @@ sockets.use_system_read = On
 ;com.autoregister_casesensitive = false
 ; show warnings on duplicate constat registrations
 ;com.autoregister_verbose = true
-
-[Printer]
-;printer.default_printer = ""
 
 [mbstring]
 ; language for internal character representation.
