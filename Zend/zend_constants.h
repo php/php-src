@@ -42,8 +42,9 @@ typedef struct _zend_constant {
 
 void clean_module_constants(int module_number);
 int free_zend_constant(zend_constant *c);
-int zend_startup_constants(ELS_D);
+int zend_startup_constants(HashTable *constants ELS_DC);
 int zend_shutdown_constants(ELS_D);
+void zend_register_standard_constants(ELS_D);
 void clean_non_persistent_constants(void);
 ZEND_API int zend_get_constant(char *name, uint name_len, zval *result);
 ZEND_API void zend_register_long_constant(char *name, uint name_len, long lval, int flags, int module_number ELS_DC);
@@ -51,6 +52,7 @@ ZEND_API void zend_register_double_constant(char *name, uint name_len, double dv
 ZEND_API void zend_register_string_constant(char *name, uint name_len, char *strval, int flags, int module_number ELS_DC);
 ZEND_API void zend_register_stringl_constant(char *name, uint name_len, char *strval, uint strlen, int flags, int module_number ELS_DC);
 ZEND_API void zend_register_constant(zend_constant *c ELS_DC);
+void zend_copy_constants(HashTable *target, HashTable *sourc);
 
 #define ZEND_CONSTANT_DTOR (int (*)(void *)) free_zend_constant
 

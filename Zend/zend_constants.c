@@ -32,6 +32,21 @@ int free_zend_constant(zend_constant *c)
 }
 
 
+void copy_zend_constant(zend_constant *c)
+{
+	c->name = zend_strndup(c->name, c->name_len);
+	zval_copy_ctor(&c->value);
+}
+
+
+void zend_copy_constants(HashTable *target, HashTable *source)
+{
+	zend_constant tmp_constant;
+
+	zend_hash_copy(target, source, (void (*)(void *)) copy_zend_constant, &tmp_constant, sizeof(zend_constant));
+}
+
+
 static int clean_non_persistent_constant(zend_constant *c)
 {
 	if (c->flags & CONST_PERSISTENT) {
@@ -60,7 +75,7 @@ void clean_module_constants(int module_number)
 }
 
 
-int zend_startup_constants(ELS_D)
+int zend_startup_constants(HashTable *constants ELS_DC)
 {
 #if WIN32|WINNT
 	DWORD dwBuild=0;
@@ -69,8 +84,19 @@ int zend_startup_constants(ELS_D)
 	DWORD dwWindowsMinorVersion =  (DWORD)(HIBYTE(LOWORD(dwVersion)));
 #endif
 
+	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
 
-/* ZEND_FIX:  Move to PHP */
+	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+
+
+void zend_register_standard_constants(ELS_D)
+{
+	/* ZEND_FIX:  Move to PHP */
 #if 0
 #if WIN32|WINNT
 	// Get build numbers for Windows NT or Win95
@@ -84,12 +110,6 @@ int zend_startup_constants(ELS_D)
 #endif
 #endif
 
-
-	EG(zend_constants) = (HashTable *) malloc(sizeof(HashTable));
-
-	if (zend_hash_init(EG(zend_constants), 20, NULL, ZEND_CONSTANT_DTOR, 1)==FAILURE) {
-		return FAILURE;
-	}
 
 #if 0
 	/* This should go back to PHP */
@@ -122,8 +142,6 @@ int zend_startup_constants(ELS_D)
 		c.value.type = IS_BOOL;
 		zend_register_constant(&c ELS_CC);
 	}
-
-	return SUCCESS;
 }
 
 

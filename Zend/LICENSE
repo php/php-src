@@ -1,37 +1,46 @@
-Zend Temporary License
-======================
+------------------------------------------------------------------------
+                    The Zend License, version 0.90
+Copyright (c) 1999 Andi Gutmans, Zeev Suraski.  All Rights Reserved.
+------------------------------------------------------------------------
 
-This is a temporary license, that is in effect until the final Zend license
-is available.
+1. The Zend engine (``SOFTWARE'') can be distributed or redistributed
+   free of charge as an integral part of PHP;  It may not be embedded in
+   other products nor reused separately from PHP, without prior written
+   permission from both Andi Gutmans and Zeev Suraski (``AUTHORS'').
 
-* The final license will include the ability to distribute Zend freely,
-  as a part of PHP (in both compiled and source code formats).  It may
-  (and probably will) allow to redistribute Zend under other circumstances
-  as well, but at the very least, it'll be freely distributed as a part
-  of PHP.
+2. Distribution or redistribution of larger works derived from or works
+   which bundle the SOFTWARE require prior written permission from the
+   AUTHORS.
 
-* The source code in the Zend engine is the property of Andi Gutmans and
-  Zeev Suraski.  Parts of this code are based on source code taken from
-  PHP 3.0, which may include several patches and enhancements that weren't
-  made by us (Andi&Zeev).  If you're the author of such a patch and you're
-  not willing to give up ownership over your patch to us, please contact
-  us as soon as possible, so we can remove it.  We're doing this so that
-  we'd be eligible to sell the Zend engine for uses other than PHP, most
-  notably - as an embedded part of possible commercial products that we'd
-  have.
+3. Any modifications made to the SOFTWARE will not grant the modifier
+   any rights whatsoever to the SOFTWARE.  Moreover, by publishing any
+   modifications made to the SOFTWARE, the publisher explicitly signs
+   over to the AUTHORS all and any rights to the published modified
+   code.
 
-* Patches submitted to the Zend CVS automatically fall under this license,
-  and by submitting them you're implicitly giving up your ownership over
-  this patch to us.
+4. Redistribution of the SOFTWARE in both source and binary forms must
+   retain the above copyright notice, a copy of these license terms and
+   the following disclaimer.
 
-* Until further notice, Zend is in a status of a closed beta test.  That means
-  that only people that were explicitly given the right to access the Zend
-  CVS repository are allowed to use it.  If you're reading this file and you
-  weren't explicitly given the right to access the Zend CVS repository from
-  either Andi Gutmans or Zeev Suraski - you're not supposed to have it - please
-  erase the Zend files from your system.  When the closed beta period finishes,
-  the Zend CVS tree will be open for the public (in read-only mode, of course).
+5. The name Zend must not be used to endorse or promote products
+   derived from this software without prior written permission from
+   the AUTHORS.
 
 
-Any questions regarding Zend or this license should be addressed via Email to
-zend@zend.com.
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESSED
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS OR ITS CONTRIBUTORS
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+-----------------------------------------------------------------------
+
+- For more information about Zend, please visit http://www.zend.com/
+- For more information about PHP, please visit http://www.php.net/
