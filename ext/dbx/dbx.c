@@ -1,26 +1,32 @@
 /*
    +----------------------------------------------------------------------+
-   | stentor module version 1.0                                           |
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2001 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | dbx module version 1.0                                               |
    +----------------------------------------------------------------------+
    | Copyright (c) 2001 Guidance Rotterdam BV                             |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0  of the STENTOR license,  |
+   | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at                              |
-   | http://www.guidance.nl/php/dbx/license/1_00.txt.                     |
-   | If you did not receive a copy of the STENTOR license and are unable  |
-   | to obtain it through the world-wide-web, please send a note to       |
-   | license@guidance.nl so we can mail you a copy immediately.           |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author : Marc Boeren         <marc@guidance.nl>                      |
    +----------------------------------------------------------------------+
- */
+*/
 
 #include "php.h"
 #include "php_ini.h"
-#include "php_config.h"
 #include "php_dbx.h"
 #include "ext/standard/info.h"
+#if !(WIN32|WINNT)
+#include "php_config.h"
+#endif
 
 /*/ defines for supported databases /*/
 #define DBX_UNKNOWN 0
@@ -61,7 +67,7 @@ void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, z
     if (call_user_function_ex(EG(function_table), NULL, zval_function_name, returnvalue, number_of_arguments, params, 0, NULL) == FAILURE) {
         zend_error(E_ERROR, "function '%s' not found", zval_function_name->value.str.val);
         }
-    zval_dtor(zval_function_name); // to free stringvalue memory
+    zval_dtor(zval_function_name); /*/ to free stringvalue memory /*/
     FREE_ZVAL(zval_function_name);
     }
 
@@ -180,12 +186,12 @@ ZEND_MINFO_FUNCTION(dbx)
 /*/    DISPLAY_INI_ENTRIES(); /*/
 }
 /*/
-//
-// actual implementation of the dbx functions
-//
-//
-//
-//
+/ /
+/ / actual implementation of the dbx functions
+/ /
+/ /
+/ /
+/ /
 /*/
 /* {{{ proto dbx_handle_object dbx_connect(string module_name, string host, string db, string username, string password [, bool persistent])
    returns a dbx_handle_object on success
@@ -330,14 +336,14 @@ ZEND_FUNCTION(dbx_query)
             }
         }
  /*/
-//    if (ZEND_NUM_ARGS()>3) {
-//        convert_to_long_ex(arguments[3]);
-//        result_row_offset = (*arguments[3])->value.lval;
-//        }
-//    if (ZEND_NUM_ARGS()>4) {
-//        convert_to_long_ex(arguments[4]);
-//        result_row_count = (*arguments[4])->value.lval;
-//        }
+/ /    if (ZEND_NUM_ARGS()>3) {
+/ /        convert_to_long_ex(arguments[3]);
+/ /        result_row_offset = (*arguments[3])->value.lval;
+/ /        }
+/ /    if (ZEND_NUM_ARGS()>4) {
+/ /        convert_to_long_ex(arguments[4]);
+/ /        result_row_count = (*arguments[4])->value.lval;
+/ /        }
  /*/
     MAKE_STD_ZVAL(rv_result_handle); 
     convert_to_string_ex(arguments[1]);
@@ -349,7 +355,7 @@ ZEND_FUNCTION(dbx_query)
         RETURN_LONG(result?1:0);
         }
     /*/ if you get here, the query succeeded and returned results, so we'll return them
-    // rv_result_handle holds a resource
+    / / rv_result_handle holds a resource
     /*/
     /*/ init return_value as object (of rows) /*/
     if (object_init(return_value) != SUCCESS) {
@@ -456,10 +462,10 @@ ZEND_FUNCTION(dbx_query)
                         }
                     }
  /*/
-//                }
-//            else {
-//                FREE_ZVAL(rv_row);
-//                }
+/ /                }
+/ /            else {
+/ /                FREE_ZVAL(rv_row);
+/ /                }
  /*/
             ++row_count;
             }
@@ -503,7 +509,7 @@ ZEND_FUNCTION(dbx_error)
 }
 /* }}} */
 /*/
-/////////// dbx functions that are database independent... like sorting result_objects!
+/ /       dbx functions that are database independent... like sorting result_objects!
 /*/
 /* {{{ proto long dbx_cmp_asc(array row_x, array row_y, string columnname)
    returns row_x[columnname] - row_y[columnname], converted to -1, 0 or 1
@@ -649,7 +655,7 @@ ZEND_FUNCTION(dbx_sort)
     RETURN_LONG(1);
 }
 
-/*///////////////*/
+/***********************************/
 
 /* {{{ proto long dbx_test(???)
    */
@@ -664,7 +670,7 @@ ZEND_FUNCTION(dbx_test)
 
 
 /*/
-// switch_dbx functions
+/ / switch_dbx functions
 /*/
 int switch_dbx_connect(zval ** rv, zval ** host, zval ** db, zval ** username, zval ** password, INTERNAL_FUNCTION_PARAMETERS, zval ** dbx_module) {
     /*/ returns connection handle as resource on success or 0 as long on failure /*/

@@ -1,20 +1,24 @@
 /*
    +----------------------------------------------------------------------+
-   | stentor module version 1.0                                           |
+   | PHP version 4.0                                                      |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1997-2001 The PHP Group                                |
+   +----------------------------------------------------------------------+
+   | dbx module version 1.0                                               |
    +----------------------------------------------------------------------+
    | Copyright (c) 2001 Guidance Rotterdam BV                             |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 1.0  of the STENTOR license,  |
+   | This source file is subject to version 2.02 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available through the world-wide-web at                              |
-   | http://www.guidance.nl/php/dbx/license/1_00.txt.                     |
-   | If you did not receive a copy of the STENTOR license and are unable  |
-   | to obtain it through the world-wide-web, please send a note to       |
-   | license@guidance.nl so we can mail you a copy immediately.           |
+   | available at through the world-wide-web at                           |
+   | http://www.php.net/license/2_02.txt.                                 |
+   | If you did not receive a copy of the PHP license and are unable to   |
+   | obtain it through the world-wide-web, please send a note to          |
+   | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author : Marc Boeren         <marc@guidance.nl>                      |
    +----------------------------------------------------------------------+
- */
+*/
 
 #ifndef ZEND_PHP_DBX_H
 #define ZEND_PHP_DBX_H
