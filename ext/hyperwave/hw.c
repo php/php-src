@@ -108,6 +108,7 @@ function_entry hw_functions[] = {
 	PHP_FE(hw_insertobject,							NULL)
 	PHP_FE(hw_insdoc,								NULL)
 	PHP_FE(hw_getsrcbydestobj,						NULL)
+	PHP_FE(hw_insertanchors,							NULL)
 	PHP_FE(hw_getrellink,							NULL)
 	PHP_FE(hw_who,									NULL)
 	PHP_FE(hw_stat,									NULL)
@@ -631,6 +632,28 @@ static int * make_ints_from_array(HashTable *lht) {
 		zend_hash_move_forward(lht);
 	}
 	return objids;
+}
+
+static char **make_strs_from_array(HashTable *arrht) {
+	char **carr = NULL;
+	zval *data, **dataptr;
+
+	zend_hash_internal_pointer_reset(arrht);
+	if(NULL == (carr = emalloc(zend_hash_num_elements(arrht) * sizeof(char *))))
+		return(NULL);
+
+	/* Iterate through hash */
+	while(zend_hash_get_current_data(arrht, (void **) &dataptr) == SUCCESS) {
+		data = *dataptr;
+		switch(data->type) {
+			case IS_STRING:
+				*carr++ = estrdup(data->value.str.val);
+				break;
+		}
+
+		zend_hash_move_forward(arrht);
+	}
+	return(carr);
 }
 
 #define BUFFERLEN 30
@@ -3827,6 +3850,50 @@ PHP_FUNCTION(hw_getrellink) {
 		RETURN_FALSE;
 	}
 
+	RETURN_STRING(anchorstr, 0);
+}
+/* }}} */
+	
+/* {{{ proto string hw_insertanchors(int hwdoc, array anchorecs, array dest)
+   Inserts only anchors into text */
+PHP_FUNCTION(hw_insertanchors) {
+	pval **arg1, **arg2, **arg3, **arg4;
+	hw_document *hwdoc;
+	int type, docid, error;
+	char *anchorstr;
+	char **anchorrecs;
+	char **dest;
+	HashTable *arrht;
+
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_long_ex(arg1);
+	convert_to_array_ex(arg2);
+	convert_to_array_ex(arg3);
+	docid=(*arg1)->value.lval;
+	hwdoc = zend_list_find(docid, &type);
+	if(!hwdoc || (type!=HwSG(le_document))) {
+		php_error(E_WARNING,"Unable to find file identifier %d",link);
+		RETURN_FALSE;
+	}
+
+	if(zend_hash_num_elements((*arg2)->value.ht) != zend_hash_num_elements((*arg3)->value.ht)) {
+		php_error(E_WARNING,"Unequal number of elments in arrays");
+		RETURN_FALSE;
+	}
+
+	/* Turn PHP-Array of strings into C-Array of strings */
+	arrht = (*arg2)->value.ht;
+	anchorrecs = make_strs_from_array(arrht);
+	arrht = (*arg3)->value.ht;
+	dest = make_strs_from_array(arrht);
+/*
+	if (0 != (error = insertanchors(hwdoc->data, anchorrecs, dest, zend_hash_num_elements(arrht)))) {
+		php_error(E_WARNING, "command (insertanchors) returned %d\n", error);
+		RETURN_FALSE;
+	}
+*/
 	RETURN_STRING(anchorstr, 0);
 }
 /* }}} */
