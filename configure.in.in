@@ -333,7 +333,7 @@ AC_ARG_WITH(apxs,
     if test "$withval" = "yes"; then
         withval=apxs
     fi
-    APXS="$withval"
+    AC_EXPAND_PATH($withval, APXS)
     APXS_LDFLAGS="@SYBASE_LFLAGS@ @SYBASE_LIBS@ @SYBASE_CT_LFLAGS@ @SYBASE_CT_LIBS@"
     APACHE_INCLUDE="-I`$APXS -q INCLUDEDIR`"
     BINNAME=libphp4.so
@@ -372,6 +372,7 @@ AC_ARG_WITH(shared-apache,
 	fi
 	if test "$withval" != "no"; then
 	  if test -f $withval/src/include/httpd.h; then
+        AC_EXPAND_PATH($withval, withval)
 	    APACHE_INCLUDE="-I$withval/src/include -I$withval/src/os/unix"
 	    APACHE_TARGET=$withval/src/modules/php4
 		if test ! -d $APACHE_TARGET; then
@@ -429,6 +430,7 @@ AC_ARG_WITH(apache,
 	fi
 	if test "$withval" != "no"; then
 # For Apache 1.2.x
+      AC_EXPAND_PATH($withval, withval)
 	  if test -f $withval/src/httpd.h; then 
 	    APACHE_INCLUDE=-I$withval/src
 	    APACHE_TARGET=$withval/src
@@ -866,6 +868,7 @@ AC_SUBST(PROG_SENDMAIL)
 AC_SUBST(CFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB)
 AC_SUBST(LDFLAGS_SHLIB_EXPORT)
+AC_SUBST(RPATHS)
 
 PHP_BUILD_DATE=`date '+%Y-%m-%d'`
 AC_SUBST(PHP_BUILD_DATE)

@@ -16,8 +16,8 @@ AC_ARG_WITH(mcrypt,
     if test "$MCRYPT_DIR" = ""; then
       AC_MSG_ERROR(Please reinstall libmcrypt - I cannot find mcrypt.h)
     fi
-    INCLUDES="$INCLUDES -I$MCRYPT_DIR/include"
-    EXTRA_LIBS="$EXTRA_LIBS -L$MCRYPT_DIR/lib -lmcrypt"
+    AC_ADD_INCLUDE($MCRYPT_DIR/include)
+    AC_ADD_LIBRARY_WITH_PATH(mcrypt, $MCRYPT_DIR/lib)
 
     AC_DEFINE(HAVE_LIBMCRYPT)
 

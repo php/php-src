@@ -50,8 +50,8 @@ AC_ARG_WITH(mysql,
 		AC_DEFINE(HAVE_MYSQL)
 		AC_MSG_RESULT(yes)
 
-		EXTRA_LIBS="$EXTRA_LIBS $MYSQL_LFLAGS $MYSQL_LIBS"
-		INCLUDES="$INCLUDES $MYSQL_INCLUDE"
+		AC_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIBDIR)
+        AC_ADD_INCLUDE($MYSQL_INCDIR)
 		PHP_EXTENSION(mysql)
 
 		dnl check for errmsg.h, which isn't installed by some versions of 3.21

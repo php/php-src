@@ -16,8 +16,8 @@ AC_ARG_WITH(mhash,
     if test "$MHASH_DIR" = ""; then
       AC_MSG_ERROR(Please reinstall libmhash - I cannot find mhash.h)
     fi
-    INCLUDES="$INCLUDES -I$MHASH_DIR/include"
-    EXTRA_LIBS="$EXTRA_LIBS -L$MHASH_DIR/lib -lmhash"
+    AC_ADD_INCLUDE($MHASH_DIR/include)
+    AC_ADD_LIBRARY_WITH_PATH(mhash, $MHASH_DIR/lib)
 
     AC_DEFINE(HAVE_LIBMHASH)
 

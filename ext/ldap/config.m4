@@ -35,36 +35,33 @@ dnl I have tested Solaris, and it doesn't, but others may.  Add
 dnl these here if necessary.   -RL
 
 	if test `uname` = "Linux"; then
-		LDAP_PTHREAD="-lpthread"
+		LDAP_PTHREAD="pthread"
 	else
 		LDAP_PTHREAD=
 	fi
 
 	if test -f $LDAP_LIBDIR/liblber.a; then
 		LDAP_LIBS="-lldap -llber"
+        AC_ADD_LIBRARY(ldap)
+        AC_ADD_LIBRARY(lber)
 	elif test -f $LDAP_LIBDIR/libldapssl30.so; then
-		LDAP_LIBS="-lldapssl30 $LDAP_PTHREAD"
+        AC_ADD_LIBRARY(ldapssl30)
+        AC_ADD_LIBRARY($LDAP_PTHREAD)
 		AC_DEFINE(HAVE_NSLDAP)
 	elif test -f $LDAP_LIBDIR/libldapssl30.sl; then
-		LDAP_LIBS="-lldapssl30"
+        AC_ADD_LIBRARY(ldapssl30)
 		AC_DEFINE(HAVE_NSLDAP)
 	elif test -f $LDAP_LIBDIR/libldap30.so; then
-		LDAP_LIBS="-lldap30 $LDAP_PTHREAD"
+        AC_ADD_LIBRARY(ldap30)
+        AC_ADD_LIBRARY($LDAP_PTHREAD)
 		AC_DEFINE(HAVE_NSLDAP)
 	elif test -f $LDAP_LIBDIR/libldap30.sl; then
-		LDAP_LIBS="-lldap30"
+        AC_ADD_LIBRARY(ldap30)
 		AC_DEFINE(HAVE_NSLDAP)
 	fi  
 
-	LDAP_INCLUDE=-I$LDAP_INCDIR
-	if test -n "$APXS"; then
-	    LDAP_LFLAGS="-L$LDAP_LIBDIR ${apxs_runpath_switch}$LDAP_LIBDIR'"
-	else
-	    LDAP_LFLAGS="-L$LDAP_LIBDIR ${ld_runpath_switch}$LDAP_LIBDIR"
-	fi
-
-	INCLUDES="$INCLUDES $LDAP_INCLUDE"
-	EXTRA_LIBS="$EXTRA_LIBS $LDAP_LFLAGS $LDAP_LIBS"
+    AC_ADD_INCLUDE($LDAP_INCDIR)
+    AC_ADD_LIBPATH($LDAP_LIBDIR)
 
     AC_DEFINE(HAVE_LDAP)
 
