@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added URL-wrapper support to exif. (Marcus)
 - PHP now has a new stream system that allows it to do some clever stuff with
   fopen() and fsockopen().  As a result:
   . URL wrappers natively supports https:// URLs
