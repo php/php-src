@@ -106,6 +106,7 @@ BEGIN_EXTERN_C()
 
 #define INIT_NAMESPACE(ns_container, ns_name) INIT_CLASS_ENTRY(ns_container, ns_name, NULL)
 
+#define INIT_NAMESPACE_WITH_FUNCS(ns_container, ns_name, functions) INIT_CLASS_ENTRY(ns_container, ns_name, functions)
 
 
 int zend_next_free_module(void);

@@ -1146,7 +1146,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL;
 	char *lowercase_name;
-	int fname_len;
+	int fname_len, is_namespace = 0;
 	zend_namespace *scope_namespace;
 
 	if (type==MODULE_PERSISTENT) {
@@ -1162,6 +1162,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 
 	if(scope) {
 		scope_namespace = scope->ns;
+		is_namespace = (scope->type == ZEND_INTERNAL_NAMESPACE || scope->type == ZEND_USER_NAMESPACE) ? 1 : 0;
 	} else {
 		scope_namespace = EG(active_namespace);
 	}
@@ -1189,18 +1190,23 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 			break;
 		}
 		if (scope) {
-			/*
-			 * If it's an old-style constructor, store it only if we don't have
-			 * a constructor already.
-			 */
-			if (!strcmp(ptr->fname, scope->name) && !ctor) {
-				ctor = reg_function;
-			} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
-				ctor = reg_function;
-			} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
-				dtor = reg_function;
-			} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
-				clone = reg_function;
+			if (is_namespace) {
+				/* if namespace all methods must be "static final" */
+				reg_function->common.fn_flags = ZEND_ACC_FINAL | ZEND_ACC_STATIC;
+			} else {
+				/* if class not namespace then look for ctor, dtor, clone
+				 * If it's an old-style constructor, store it only if we don't have
+				 * a constructor already.
+				 */
+				if (!strcmp(ptr->fname, scope->name) && !ctor) {
+					ctor = reg_function;
+				} else if (!strcmp(ptr->fname, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+					ctor = reg_function;
+				} else if (!strcmp(ptr->fname, ZEND_DESTRUCTOR_FUNC_NAME)) {
+					dtor = reg_function;
+				} else if (!strcmp(ptr->fname, ZEND_CLONE_FUNC_NAME)) {
+					clone = reg_function;
+				}
 			}
 		}
 		ptr++;
@@ -1437,6 +1443,10 @@ ZEND_API zend_namespace *zend_register_internal_namespace(zend_namespace *orig_n
 	zend_str_tolower(lowercase_name, ns->name_length);
 	zend_hash_update(&CG(global_namespace).class_table, lowercase_name, ns->name_length+1, &ns, sizeof(zend_namespace *), NULL);
 	free(lowercase_name);
+
+	if (ns->builtin_functions) {
+		zend_register_functions(ns, ns->builtin_functions, &ns->function_table, MODULE_PERSISTENT TSRMLS_CC);
+	}
 
 	return ns;
 }
