@@ -26,6 +26,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/flock_compat.h"
+#include "ext/standard/exec.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -712,7 +713,7 @@ PHP_FUNCTION(popen)
 {
 	pval **arg1, **arg2;
 	FILE *fp;
-	char *p;
+	char *p,*tmp = NULL;
 	char *b, buf[1024];
 	PLS_FETCH();
 	
@@ -741,7 +742,11 @@ PHP_FUNCTION(popen)
 		} else {
 			snprintf(buf,sizeof(buf),"%s/%s",PG(safe_mode_exec_dir),(*arg1)->value.str.val);
 		}
-		fp = popen(buf,p);
+
+		tmp = php_escape_shell_cmd(buf);
+		fp = popen(tmp,p);
+		efree(tmp);
+
 		if (!fp) {
 			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",buf,p,strerror(errno));
 			RETURN_FALSE;
