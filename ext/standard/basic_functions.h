@@ -119,6 +119,7 @@ PHP_FUNCTION(define);
 PHP_FUNCTION(defined);
 
 PHP_FUNCTION(function_exists);
+PHP_FUNCTION(in_array);
 PHP_FUNCTION(extract);
 
 #if HAVE_PUTENV
