@@ -13,7 +13,8 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   |          Z
+   eev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
 */
 
@@ -47,6 +48,7 @@ typedef unsigned int uint;
 #define HAVE_VSNPRINTF	1
 
 #define vsnprintf _vsnprintf
+#define zend_isinf(a)	0
 
 #ifdef inline
 #undef inline
