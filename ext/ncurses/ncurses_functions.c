@@ -1404,7 +1404,7 @@ PHP_FUNCTION(ncurses_mvdelch)
 {
 	long y,x;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls", &y, &x) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &y, &x) == FAILURE) {
 	        return;
 	}
 	IS_NCURSES_INITIALIZED();	
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(ncurses_mvgetch)
 {
 	long y,x;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls", &y, &x) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &y, &x) == FAILURE) {
 	        return;
 	}
 	IS_NCURSES_INITIALIZED();	
@@ -1433,7 +1433,7 @@ PHP_FUNCTION(ncurses_mvinch)
 {
 	long y,x;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lls", &y, &x) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &y, &x) == FAILURE) {
 	        return;
 	}
 	IS_NCURSES_INITIALIZED();
