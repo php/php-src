@@ -1,3 +1,5 @@
+# $Source$
+# $Id$
 
 LTLIBRARY_NAME    = libmnogosearch.la
 LTLIBRARY_SOURCES = php_mnogo.c

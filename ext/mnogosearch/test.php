@@ -32,8 +32,9 @@
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PAGE_SIZE,$page_size);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_PAGE_NUM,$page_number);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_SEARCH_MODE,UDM_MODE_BOOL);
-	Udm_Set_Agent_Param($udm,UDM_PARAM_CACHE_MODE,UDM_PARAM_CACHE_DISABLED);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_CACHE_MODE,UDM_CACHE_DISABLED);
 	Udm_Set_Agent_Param($udm,UDM_PARAM_TRACK_MODE,UDM_TRACK_DISABLED);
+	Udm_Set_Agent_Param($udm,UDM_PARAM_CHARSET,"koi8-r");
 	
 // Stage 3: perform search 
 
