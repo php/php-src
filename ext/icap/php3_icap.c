@@ -396,30 +396,36 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
        if(_php3_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          begincal.year=pvalue->value.lval;
+	 SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          begincal.year=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(begindate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          begincal.month=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          begincal.month=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(begindate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          begincal.mday=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          begincal.mday=(*pvalue)->value.lval;
        }
 if(myargc == 3)
   {
     if(_php3_hash_find(enddate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-      convert_to_long(pvalue);
-      endcal.year=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+      convert_to_long(*pvalue);
+      endcal.year=(*pvalue)->value.lval;
     }
     if(_php3_hash_find(enddate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-      convert_to_long(pvalue);
-      endcal.month=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+      convert_to_long(*pvalue);
+      endcal.month=(*pvalue)->value.lval;
     }
     if(_php3_hash_find(enddate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
-      convert_to_long(pvalue);
-      endcal.mday=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+      convert_to_long(*pvalue);
+      endcal.mday=(*pvalue)->value.lval;
     }
   }
  
@@ -534,25 +540,30 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
        if(_php3_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          mydate.year=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          mydate.year=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(date->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          mydate.month=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          mydate.month=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(date->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          mydate.mday=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          mydate.mday=(*pvalue)->value.lval;
        }
 
        if(_php3_hash_find(time->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          mytime.hour=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          mytime.hour=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(time->value.ht,"minute",sizeof("minute"),(void **) &pvalue)== SUCCESS){
-          convert_to_long(pvalue);
-          mytime.minute=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+          convert_to_long(*pvalue);
+          mytime.minute=(*pvalue)->value.lval;
        }
 
        cal_search_alarming(icap_le_struct->icap_stream,&mydate,&mytime);
@@ -685,69 +696,85 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	event_init(&myevent);
 	if(_php3_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.uid=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.uid=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.date.year=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.date.year=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.date.month=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.date.month=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.date.mday=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.date.mday=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"starthour",sizeof("starthour"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.start.hour=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.start.hour=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"startminute",sizeof("startminute"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.start.minute=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.start.minute=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"endhour",sizeof("endhour"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.end.hour=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.end.hour=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"endminute",sizeof("endminute"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.end.minute=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.end.minute=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
+          SEPARATE_ZVAL(pvalue);
 	  convert_to_string(pvalue);
-	  myevent.category=strdup(pvalue->value.str.val);
+	  myevent.category=strdup((*pvalue)->value.str.val);
 	}
 	if(_php3_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
-	  convert_to_string(pvalue);
-	  myevent.title=strdup(pvalue->value.str.val);
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_string(*pvalue);
+	  myevent.title=strdup((*pvalue)->value.str.val);
 	}
 	if(_php3_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
-	  convert_to_string(pvalue);
-	  myevent.description=strdup(pvalue->value.str.val);
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_string(*pvalue);
+	  myevent.description=strdup((*pvalue)->value.str.val);
 	}
 
 	if(_php3_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.alarm=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.alarm=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"alarm_year",sizeof("alarm_year"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.alarm_last.year=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.alarm_last.year=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"alarm_month",sizeof("alarm_month"),(void **) &pvalue)== SUCCESS){
-	  convert_to_string(pvalue);
-	  myevent.alarm_last.month=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_string(*pvalue);
+	  myevent.alarm_last.month=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"alarm_mday",sizeof("alarm_day"),(void **) &pvalue)== SUCCESS){
-	  convert_to_string(pvalue);
-	  myevent.alarm_last.mday=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_string(*pvalue);
+	  myevent.alarm_last.mday=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"class",sizeof("class"),(void **) &pvalue)== SUCCESS){
-	  convert_to_long(pvalue);
-	  myevent.ical_class=pvalue->value.lval;
+          SEPARATE_ZVAL(pvalue);
+	  convert_to_long(*pvalue);
+	  myevent.ical_class=(*pvalue)->value.lval;
 	}
 
 
