@@ -1,3 +1,23 @@
+2000-06-22  Andi Gutmans  <andi@php.net>
+
+    * win32/php4dllts.dsp: - Make Windows compile. Was missing crc32.c
+
+2000-06-22  Zeev Suraski  <zeev@php.net>
+
+    * main/php_version.h
+      configure.in: Update to 4.0.1
+
+2000-06-22  Andi Gutmans  <andi@php.net>
+
+    * NEWS:
+    - Improve memory cache performance and increase cache size. (Stas, Zend Engine)
+
+2000-06-22  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * pear/DB/odbc.php
+      pear/DB/pgsql.php:
+    added a variable to save the current row in pgsql. added a function to odbc module.
+
 2000-06-21  Rasmus Lerdorf  <rasmus@php.net>
 
     * ext/standard/Makefile.in
