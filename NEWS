@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Oct 2003, PHP 5 Beta 3
+- The engine now preserves the case of the class passed to __autoload() (Andi)
 - Added new functions:
   . dba_key_split() to split inifile keys in an array. (Marcus)
   . time_nanosleep() signal safe sleep (Magnus, Ilia)
