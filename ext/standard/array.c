@@ -1373,7 +1373,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 		if (p->nKeyLength)
 			zend_hash_update(out_hash, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
 		else
-			zend_hash_index_update(out_hash, p->h, &entry, sizeof(zval *), NULL);
+			zend_hash_next_index_insert(out_hash, &entry, sizeof(zval *), NULL);
 	}
 	
 	/* If hash for removed entries exists, go until offset+length
@@ -1385,7 +1385,7 @@ HashTable* php_splice(HashTable *in_hash, int offset, int length,
 			if (p->nKeyLength)
 				zend_hash_update(*removed, p->arKey, p->nKeyLength, &entry, sizeof(zval *), NULL);
 			else
-				zend_hash_index_update(*removed, p->h, &entry, sizeof(zval *), NULL);
+				zend_hash_next_index_insert(*removed, &entry, sizeof(zval *), NULL);
 		}
 	} else /* otherwise just skip those entries */
 		for( ; pos<offset+length && p; pos++, p=p->pListNext);
