@@ -137,7 +137,7 @@ const char *zend_mh_bundle_error(void);
 #ifndef __GNUC__
 # ifndef HAVE_ALLOCA_H
 #  ifdef _AIX
- #pragma alloca
+#pragma alloca
 #  else
 #   ifndef alloca /* predefined by HP cc +Olibcalls */
 char *alloca ();
