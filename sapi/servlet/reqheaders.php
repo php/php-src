@@ -4,10 +4,6 @@
 <title>Request Header Example</title>
 </head>
 <body>
-<a href="/examples/servlets/reqheaders.html">
-<img src="/examples/images/code.gif" height=24 width=24 align=right border=0 alt="view code"></a>
-<a href="/examples/servlets/index.html">
-<img src="/examples/images/return.gif" height=24 width=24 align=right border=0 alt="return"></a>
 <h3>Request Header Example</h3>
 <table border=0>
 
