@@ -23,13 +23,10 @@ if test "$PHP_FDFTK" != "no"; then
 
   PHP_ADD_INCLUDE($FDFTK_DIR/include)
   
-  old_LIBS=$LIBS
-  LIBS="$LIBS -L$FDFTK_DIR/lib -lm"
   FDFLIBRARY=""
   for i in fdftk FdfTk; do
-    AC_CHECK_LIB($i, FDFOpen, [FDFLIBRARY=$i])
+    AC_CHECK_LIB($i, FDFOpen, [FDFLIBRARY=$i], [], [-L$FDFTK_DIR/lib -lm])
   done
-  LIBS=$old_LIBS
   
   if test $FDFLIBRARY = ""; then
     AC_MSG_ERROR(fdftk module requires fdftk 2.0)
