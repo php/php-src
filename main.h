@@ -55,7 +55,6 @@ extern void php3_module_shutdown();
 extern void php3_module_shutdown_for_exec(void);
 
 #ifndef THREAD_SAFE
-extern unsigned char header_is_being_sent;
 extern int initialized;
 #endif
 
