@@ -1517,6 +1517,7 @@ PHP_FUNCTION(array_push)
 	stack = *args[0];
 	if (Z_TYPE_P(stack) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_push() needs to be an array");
+		efree(args);
 		RETURN_FALSE;
 	}
 
@@ -1621,6 +1622,7 @@ PHP_FUNCTION(array_unshift)
 	stack = *args[0];
 	if (Z_TYPE_P(stack) != IS_ARRAY) {
 		php_error(E_WARNING, "First argument to array_unshift() needs to be an array");
+		efree(args);
 		RETURN_FALSE;
 	}
 
