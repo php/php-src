@@ -569,16 +569,25 @@ static void php_message_handler_for_zend(long message, void *data)
 		case ZMSG_FAILED_HIGHLIGHT_FOPEN:
 			php3_error(E_WARNING, "Failed opening '%s' for highlighting", php3_strip_url_passwd((char *) data));
 			break;
-		case ZMSG_MEMORY_LEAK_DETECTED: {
+		case ZMSG_MEMORY_LEAK_DETECTED:
+		case ZMSG_MEMORY_LEAK_REPEATED: {
 				ELS_FETCH();
 				SLS_FETCH();
 
 				if (EG(error_reporting)&E_WARNING) {
 #if ZEND_DEBUG
-					mem_header *t = (mem_header *) data;
 					char memory_leak_buf[512];
+					SLS_FETCH();
 
-					snprintf(memory_leak_buf, 512, "Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n",(void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING),t->size,t->filename,t->lineno);
+					if (message==ZMSG_MEMORY_LEAK_DETECTED) {
+						mem_header *t = (mem_header *) data;
+
+						snprintf(memory_leak_buf, 512, "%s:  Freeing 0x%0.8X (%d bytes), allocated in %s on line %d<br>\n", SG(request_info).path_translated, (void *)((char *)t+sizeof(mem_header)+PLATFORM_PADDING),t->size,t->filename,t->lineno);
+					} else {
+						uint leak_count = (uint) data;
+
+						snprintf(memory_leak_buf, 512, "%s:  Last leak repeated %d time%s\n", SG(request_info).path_translated, leak_count, (leak_count>1?"s":""));
+					}
 #	if WIN32||WINNT
 					OutputDebugString(memory_leak_buf);
 #	else
@@ -1213,7 +1222,6 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 #endif
 	SLS_FETCH();
 
-	fprintf(stderr, "%d request startup\n", getpid());
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
 		return FAILURE;
 	}
@@ -1221,10 +1229,8 @@ PHPAPI int apache_php3_module_main(request_rec *r, int fd, int display_source_mo
 	file_handle.type = ZEND_HANDLE_FD;
 	file_handle.handle.fd = fd;
 	file_handle.filename = SG(request_info).path_translated;
-	fprintf(stderr, "%d executing script\n", getpid());
 	(void) php_execute_script(&file_handle CLS_CC ELS_CC);
 	
-	fprintf(stderr, "%d Terminated successfully, sending headers\n", getpid());
 	php3_header();			/* Make sure headers have been sent */
 	zend_end_ob_buffering(1);
 	fprintf(stderr, "%d all done\n", getpid());
