@@ -104,7 +104,7 @@ in.  The default layer is "user".
             } elseif ($value === true) {
                 $value = 'true';
             }
-            $data['data'][] = array($key, $value);
+            $data['data'][$this->config->getGroup($key)][] = array($this->config->getPrompt($key) , $key, $value);
         }
         $this->ui->outputData($data, $command);
         return true;

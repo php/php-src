@@ -96,10 +96,20 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
     // }}}
 
-    // {{{ info-remote
+    // {{{ remote-info
 
-    function doInfoRemote($command, $options, $params)
+    function doRemoteInfo($command, $options, $params)
     {
+        return false; // coming soon
+        var_dump($params[0]);
+        $r = new PEAR_Remote($this->config);
+        $info = $r->call('package.info', $params[0]);
+        if (PEAR::isError($info)) {
+            return $this->raiseError($info);
+        }
+        
+        var_dump($info);
+        
         return false; // coming soon
     }
 
@@ -140,7 +150,6 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
         if (PEAR::isError($available)) {
             return $this->raiseError($available);
         }
-        $i = $j = 0;
         $data = array(
             'caption' => 'All packages:',
             'border' => true,

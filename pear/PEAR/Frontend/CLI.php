@@ -378,6 +378,18 @@ class PEAR_Frontend_CLI extends PEAR
                 };
                 $this->_endTable();
                 break;
+            case 'config-show':
+                $this->_startTable($data);
+                if (isset($data['headline']) && is_array($data['headline']))
+                    $this->_tableRow($data['headline'], array('bold' => true), array(1 => array('wrap' => 55)));
+                
+                foreach($data['data'] as $group) {
+                    foreach($group as $value) {
+                        $this->_tableRow($value, null, array(1 => array('wrap' => 55)));
+                    }
+                };
+                $this->_endTable();
+                break;
             default:
                 if (is_array($data))
                 {
@@ -397,7 +409,7 @@ class PEAR_Frontend_CLI extends PEAR
     
     function log($text)
     {
-        return $this->displayLine($text);
+        return $this->_displayLine($text);
     }
     
     // {{{ bold($text)
