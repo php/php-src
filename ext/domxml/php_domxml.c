@@ -2034,7 +2034,7 @@ PHP_FUNCTION(domxml_node_append_child)
 	 * Uwe: must have been a temporary problem. It works for me with both
 	 * xmlAddChildList and xmlAddChild
 	 */
-//	child = xmlAddSibling(nodep, new_child);
+	/*child = xmlAddSibling(nodep, new_child);*/
 	child = xmlAddChild(nodep, new_child);
 
 	if (NULL == child) {
@@ -2072,7 +2072,7 @@ PHP_FUNCTION(domxml_node_append_sibling)
 		RETURN_FALSE;
 	}
 
-	// FIXME reverted xmlAddChildList; crashes
+	/* FIXME reverted xmlAddChildList; crashes */
 	child = xmlAddSibling(nodep, new_child);
 
 	if (NULL == child) {
@@ -2670,7 +2670,7 @@ PHP_FUNCTION(domxml_doc_get_element_by_id)
 
 	ids = (xmlHashTable *) docp->ids;
 	if(ids) {
-		iter.elementId = (xmlChar *) 
+		iter.elementId = (xmlChar *) idname;
 		iter.element = NULL;
 		xmlHashScan(ids, idsHashScanner, &iter);
 		rv = php_domobject_new(iter.element, &retnode TSRMLS_CC);
