@@ -173,8 +173,9 @@ static int pgsql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 	cols[colno].namelen = strlen(cols[colno].name);
 	cols[colno].maxlen = PQfsize(S->result, colno);
 	cols[colno].precision = PQfmod(S->result, colno);
-
-	switch(PQftype(S->result, colno)) {
+	S->cols[colno].pgsql_type = PQftype(S->result, colno);
+	
+	switch(S->cols[colno].pgsql_type) {
 
 		case BOOLOID:
 			cols[colno].param_type = PDO_PARAM_BOOL;
@@ -202,8 +203,6 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	struct pdo_column_data *cols = stmt->columns;
-	long intval;
-	zend_bool boolval;
 
 	if (!S->result) {
 		return 0;
@@ -220,14 +219,14 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 		switch(cols[colno].param_type) {
 
 			case PDO_PARAM_INT:
-				intval = atol(*ptr);
-				*ptr = &intval;
+				S->cols[colno].intval = atol(*ptr);
+				*ptr = (char *) &(S->cols[colno].intval);
 				*len = sizeof(long);
 				break;
 
 			case PDO_PARAM_BOOL:
-				boolval = **ptr == 't' ? 1: 0;
-				*ptr = &boolval;
+				S->cols[colno].boolval = **ptr == 't' ? 1: 0;
+				*ptr = (char *) &(S->cols[colno].boolval);
 				*len = sizeof(zend_bool);
 				break;
 		}
