@@ -63,100 +63,124 @@
 ; Language Options ;
 ;;;;;;;;;;;;;;;;;;;;
 
-engine			=	On	; Enable the PHP scripting language engine under Apache
-short_open_tag	=	On	; allow the <? tag.  otherwise, only <?php and <script> tags are recognized.
-asp_tags		=	Off ; allow ASP-style <% %> tags
-precision		=	14	; number of significant digits displayed in floating point numbers
-y2k_compliance	=	Off	; whether to be year 2000 compliant (will cause problems with non y2k compliant browsers)
-output_buffering	= Off	; Output buffering allows you to send header lines (including cookies)
-							; even after you send body content, in the price of slowing PHP's
-							; output layer a bit.
-							; You can enable output buffering by in runtime by calling the output
-							; buffering functions, or enable output buffering for all files
-							; by setting this directive to On.
-output_handler		=		; You can redirect all of the output of your scripts to a function,
-							; that can be responsible to process or log it.  For example,
-							; if you set the output_handler to "ob_gzhandler", than output
-							; will be transparently compressed for browsers that support gzip or
-							; deflate encoding.  Setting an output handler automatically turns on
-							; output buffering.
-zlib.output_compression = Off	; Transparent output compression using the zlib library
-								; Valid values for this option are 'off', 'on', or a specific buffer size
-								; to be used for compression (default is 4KB)
+; Enable the PHP scripting language engine under Apache.
+engine = On
 
-implicit_flush		= Off	; Implicit flush tells PHP to tell the output layer to flush itself
-							; automatically after every output block.  This is equivalent to
-							; calling the PHP function flush() after each and every call to print()
-							; or echo() and each and every HTML block.
-							; Turning this option on has serious performance implications, and
-							; is generally recommended for debugging purposes only.
-allow_call_time_pass_reference	= Off	; whether to enable the ability to force arguments to be 
-										; passed by reference at function-call time.  This method
-										; is deprecated, and is likely to be unsupported in future
-										; versions of PHP/Zend.  The encouraged method of specifying
-										; which arguments should be passed by reference is in the
-										; function declaration.  You're encouraged to try and
-										; turn this option Off, and make sure your scripts work
-										; properly with it, to ensure they will work with future
-										; versions of the language (you will receive a warning
-										; each time you use this feature, and the argument will
-										; be passed by value instead of by reference).
+; Allow the <? tag.  Otherwise, only <?php and <script> tags are recognized.
+short_open_tag = On
 
+; Allow ASP-style <% %> tags.
+asp_tags = Off
+
+; The number of significant digits displayed in floating point numbers.
+precision    =  14
+
+; Enforce year 2000 compliance (will cause problems with non-compliant browsers)
+y2k_compliance = Off
+
+; Output buffering allows you to send header lines (including cookies) even
+; after you send body content, at the price of slowing PHP's output layer a
+; bit.  You can enable output buffering during runtime by calling the output
+; buffering functions.  You can also enable output buffering for all files by
+; setting this directive to On.  If you wish to limit the size of the buffer
+; to a certain size - you can use a maximum number of bytes instead of 'On', as
+; a value for this directive (e.g., output_buffering=4096).
+output_buffering = Off
+
+; You can redirect all of the output of your scripts to a function.  For
+; example, if you set output_handler to "ob_gzhandler", output will be
+; transparently compressed for browsers that support gzip or deflate encoding.
+; Setting an output handler automatically turns on output buffering.
+output_handler =
+
+; Transparent output compression using the zlib library
+; Valid values for this option are 'off', 'on', or a specific buffer size
+; to be used for compression (default is 4KB)
+zlib.output_compression = Off
+
+; Implicit flush tells PHP to tell the output layer to flush itself
+; automatically after every output block.  This is equivalent to calling the
+; PHP function flush() after each and every call to print() or echo() and each
+; and every HTML block.  Turning this option on has serious performance
+; implications and is generally recommended for debugging purposes only.
+implicit_flush = Off
+
+; Whether to enable the ability to force arguments to be passed by reference
+; at function call time.  This method is deprecated and is likely to be
+; unsupported in future versions of PHP/Zend.  The encouraged method of
+; specifying which arguments should be passed by reference is in the function
+; declaration.  You're encouraged to try and turn this option Off and make
+; sure your scripts work properly with it in order to ensure they will work
+; with future versions of the language (you will receive a warning each time
+; you use this feature, and the argument will be passed by value instead of by
+; reference).
+allow_call_time_pass_reference = Off
+
+
+;
 ; Safe Mode
-safe_mode		=	Off
-safe_mode_gid	=	Off								; By default, Safe Mode does a UID compare
-													; check when opening files. If you want to
-													; relax this to a GID compare, then turn on
-													; safe_mode_gid. (safe_mode must be On)
-safe_mode_include_dir =								; When safe_mode is on, UID/GID checks are
-													; bypassed when including files from this
-													; directory and its subdirectories. (directory
-													; must also be in include_path or full path
-													; must be used when including)
-safe_mode_exec_dir	=
-safe_mode_allowed_env_vars = PHP_					; Setting certain environment variables
-													; may be a potential security breach.
-													; This directive contains a comma-delimited
-													; list of prefixes.  In Safe Mode, the
-													; user may only alter environment
-													; variables whose names begin with the
-													; prefixes supplied here.
-													; By default, users will only be able
-													; to set environment variables that begin
-													; with PHP_ (e.g. PHP_FOO=BAR).
-													; Note:  If this directive is empty, PHP
-													; will let the user modify ANY environment
-													; variable!
-safe_mode_protected_env_vars = LD_LIBRARY_PATH		; This directive contains a comma-
-													; delimited list of environment variables,
-													; that the end user won't be able to
-													; change using putenv().
-													; These variables will be protected
-													; even if safe_mode_allowed_env_vars is
-													; set to allow to change them.
+;
+safe_mode = Off
+
+; By default, Safe Mode does a UID compare check when
+; opening files. If you want to relax this to a GID compare,
+; then turn on safe_mode_gid.
+safe_mode_gid = Off
+
+; When safe_mode is on, UID/GID checks are bypassed when
+; including files from this directory and its subdirectories.
+; (directory must also be in include_path or full path must
+; be used when including)
+safe_mode_include_dir =								
+
+; When safe_mode is on, only executables located in the safe_mode_exec_dir
+; will be allowed to be executed via the exec family of functions.
+safe_mode_exec_dir =
+
+; open_basedir, if set, limits all file operations to the defined directory
+; and below.  This directive makes most sense if used in a per-directory
+; or per-virtualhost web server configuration file.
+;
+;open_basedir =
+
+; Setting certain environment variables may be a potential security breach.
+; This directive contains a comma-delimited list of prefixes.  In Safe Mode,
+; the user may only alter environment variables whose names begin with the
+; prefixes supplied here.  By default, users will only be able to set
+; environment variables that begin with PHP_ (e.g. PHP_FOO=BAR).
+;
+; Note:  If this directive is empty, PHP will let the user modify ANY
+; environment variable!
+safe_mode_allowed_env_vars = PHP_
+
+; This directive contains a comma-delimited list of environment variables that
+; the end user won't be able to change using putenv().  These variables will be
+; protected even if safe_mode_allowed_env_vars is set to allow to change them.
+safe_mode_protected_env_vars = LD_LIBRARY_PATH
+
+; This directive allows you to disable certain functions for security reasons.
+; It receives a comma-delimited list of function names.  This directive is
+; *NOT* affected by whether Safe Mode is turned On or Off.
+disable_functions =
+
+; Colors for Syntax Highlighting mode.  Anything that's acceptable in
+; <font color="??????"> would work.
+highlight.string  = #CC0000
+highlight.comment = #FF9900
+highlight.keyword = #006600
+highlight.bg      = #FFFFFF
+highlight.default = #0000CC
+highlight.html    = #000000
 
 
-disable_functions	=								; This directive allows you to disable certain
-													; functions for security reasons.  It receives
-													; a comma separated list of function names.
-													; This directive is *NOT* affected by whether
-													; Safe Mode is turned on or off.
-
-
-; Colors for Syntax Highlighting mode.  Anything that's acceptable in <font color=???> would work.
-highlight.string	=	#DD0000
-highlight.comment	=	#FF8000
-highlight.keyword	=	#007700
-highlight.bg		=	#FFFFFF
-highlight.default	=	#0000BB
-highlight.html		=	#000000
-
+;
 ; Misc
-expose_php	=	On		; Decides whether PHP may expose the fact that it is installed on the
-						; server (e.g., by adding its signature to the Web server header).
-						; It is no security threat in any way, but it makes it possible
-						; to determine whether you use PHP on your server or not.
-
+;
+; Decides whether PHP may expose the fact that it is installed on the server
+; (e.g. by adding its signature to the Web server header).  It is no security
+; threat in any way, but it makes it possible to determine whether you use PHP
+; on your server or not.
+expose_php = On
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -164,139 +188,226 @@ expose_php	=	On		; Decides whether PHP may expose the fact that it is installed 
 ;;;;;;;;;;;;;;;;;;;
 
 max_execution_time = 30     ; Maximum execution time of each script, in seconds
-memory_limit = 8M			; Maximum amount of memory a script may consume (8MB)
+memory_limit = 8M      ; Maximum amount of memory a script may consume (8MB)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; error_reporting is a bit-field.  Or each number up to get desired error reporting level
-; E_ALL				- All errors and warnings
-; E_ERROR			- fatal run-time errors
-; E_WARNING			- run-time warnings (non fatal errors)
-; E_PARSE			- compile-time parse errors
-; E_NOTICE			- run-time notices (these are warnings which often result from a bug in
-;					  your code, but it's possible that it was intentional (e.g., using an
-;					  uninitialized variable and relying on the fact it's automatically
-;					  initialized to an empty string)
-; E_CORE_ERROR		- fatal errors that occur during PHP's initial startup
-; E_CORE_WARNING	- warnings (non fatal errors) that occur during PHP's initial startup
-; E_COMPILE_ERROR	- fatal compile-time errors
-; E_COMPILE_WARNING	- compile-time warnings (non fatal errors)
-; E_USER_ERROR		- user-generated error message
-; E_USER_WARNING	- user-generated warning message
-; E_USER_NOTICE		- user-generated notice message
+
+; error_reporting is a bit-field.  Or each number up to get desired error
+; reporting level
+; E_ALL             - All errors and warnings
+; E_ERROR           - fatal run-time errors
+; E_WARNING         - run-time warnings (non-fatal errors)
+; E_PARSE           - compile-time parse errors
+; E_NOTICE          - run-time notices (these are warnings which often result
+;                     from a bug in your code, but it's possible that it was
+;                     intentional (e.g., using an uninitialized variable and
+;                     relying on the fact it's automatically initialized to an
+;                     empty string)
+; E_CORE_ERROR      - fatal errors that occur during PHP's initial startup
+; E_CORE_WARNING    - warnings (non-fatal errors) that occur during PHP's
+;                     initial startup
+; E_COMPILE_ERROR   - fatal compile-time errors
+; E_COMPILE_WARNING - compile-time warnings (non-fatal errors)
+; E_USER_ERROR      - user-generated error message
+; E_USER_WARNING    - user-generated warning message
+; E_USER_NOTICE     - user-generated notice message
+;
 ; Examples:
-; error_reporting = E_ALL & ~E_NOTICE						; show all errors, except for notices
-; error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR	; show only errors
-error_reporting	=	E_ALL & ~E_NOTICE		; Show all errors except for notices
-display_errors	=	Off	; Print out errors (as a part of the output)
-						; For production web sites, you're strongly encouraged
-						; to turn this feature off, and use error logging instead (see below).
-						; Keeping display_errors enabled on a production web site may reveal
-						; security information to end users, such as file paths on your Web server,
-						; your database schema or other information.
-display_startup_errors = Off		; Even when display_errors is on, errors that occur during
-									; PHP's startup sequence are not displayed.  It's strongly
-									; recommended to keep display_startup_errors off, except for
-									; when debugging.
-log_errors		=	On	; Log errors into a log file (server-specific log, stderr, or error_log (below))
-						; As stated above, you're strongly advised to use error logging in place of
-						; error displaying on production web sites.
-track_errors	=	Off	; Store the last error/warning message in $php_errormsg (boolean)
-;error_prepend_string = "<font color=ff0000>"   ; string to output before an error message
-;error_append_string = "</font>"                ; string to output after an error message
-;error_log	=	filename	; log errors to specified file
-;error_log	=	syslog		; log errors to syslog (Event Log on NT, not valid in Windows 95)
-warn_plus_overloading	=	Off		; warn if the + operator is used with strings
+;
+;   - Show all errors, except for notices
+;
+;error_reporting = E_ALL & ~E_NOTICE
+;
+;   - Show only errors
+;
+;error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
+;
+;   - Show all errors except for notices
+;
+error_reporting  =  E_ALL & ~E_NOTICE
+
+; Print out errors (as a part of the output).  For production web sites,
+; you're strongly encouraged to turn this feature off, and use error logging
+; instead (see below).  Keeping display_errors enabled on a production web site
+; may reveal security information to end users, such as file paths on your Web
+; server, your database schema or other information.
+display_errors = Off
+
+; Even when display_errors is on, errors that occur during PHP's startup
+; sequence are not displayed.  It's strongly recommended to keep
+; display_startup_errors off, except for when debugging.
+display_startup_errors = Off
+
+; Log errors into a log file (server-specific log, stderr, or error_log (below))
+; As stated above, you're strongly advised to use error logging in place of
+; error displaying on production web sites.
+log_errors = On
+
+; Store the last error/warning message in $php_errormsg (boolean).
+track_errors = Off
+
+; Disable the inclusion of HTML tags in error messages.
+;html_errors = Off
+  
+; String to output before an error message.
+;error_prepend_string = "<font color=ff0000>"
+
+; String to output after an error message.
+;error_append_string = "</font>"
+
+; Log errors to specified file.
+;error_log = filename
+
+; Log errors to syslog (Event Log on NT, not valid in Windows 95).
+;error_log = syslog
+
+; Warn if the + operator is used with strings.
+warn_plus_overloading = Off
 
 
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
+;
+; Note - track_vars is ALWAYS enabled as of PHP 4.0.3
 
-;arg_separator.output = "&amp;"	; The separator used in PHP generated URLs to separate arguments.
-								; Default is "&".
+; The separator used in PHP generated URLs to separate arguments.
+; Default is "&". 
+;arg_separator.output = "&amp;"
 
-;arg_separator.input = ";&"		; List of separator(s) used by PHP to parse input URLs into variables.
-								; Default is "&". 
-								; NOTE: Every character in this directive is considered as separator!                 
+; List of separator(s) used by PHP to parse input URLs into variables.
+; Default is "&". 
+; NOTE: Every character in this directive is considered as separator!
+;arg_separator.input = ";&"
 
-variables_order		=	"GPCS"	; This directive describes the order in which PHP registers
-								; GET, POST, Cookie, Environment and Built-in variables (G, P,
-								; C, E & S respectively, often referred to as EGPCS or GPC).
-								; Registration is done from left to right, newer values override
-								; older values.
-register_globals	=	Off		; Whether or not to register the EGPCS variables as global
-								; variables.  You may want to turn this off if you don't want
-								; to clutter your scripts' global scope with user data.  This makes
-								; most sense when coupled with track_vars - in which case you can
-								; access all of the GPC variables through the $HTTP_*_VARS[],
-								; variables.
-register_argc_argv	=	Off		; This directive tells PHP whether to declare the argv&argc
-								; variables (that would contain the GET information).  If you
-								; don't use these variables, you should turn it off for
-								; increased performance (you should try not to use it anyway,
-								; for less likelihood of security bugs in your code).
-post_max_size		=	8M		; Maximum size of POST data that PHP will accept.
-gpc_order			=	"GPC"	; This directive is deprecated.  Use variables_order instead.
+; This directive describes the order in which PHP registers GET, POST, Cookie,
+; Environment and Built-in variables (G, P, C, E & S respectively, often
+; referred to as EGPCS or GPC).  Registration is done from left to right, newer
+; values override older values.
+variables_order = "GPCS"
+
+; Whether or not to register the EGPCS variables as global variables.  You may
+; want to turn this off if you don't want to clutter your scripts' global scope
+; with user data.  This makes most sense when coupled with track_vars - in which
+; case you can access all of the GPC variables through the $HTTP_*_VARS[],
+; variables.
+;
+; You should do your best to write your scripts so that they do not require
+; register_globals to be on;  Using form variables as globals can easily lead
+; to possible security problems, if the code is not very well thought of.
+register_globals = Off
+
+; This directive tells PHP whether to declare the argv&argc variables (that
+; would contain the GET information).  If you don't use these variables, you
+; should turn it off for increased performance.
+register_argc_argv = Off
+
+; Maximum size of POST data that PHP will accept.
+post_max_size = 8M
+
+; This directive is deprecated.  Use variables_order instead.
+gpc_order = "GPC"
 
 ; Magic quotes
-magic_quotes_gpc	=	Off		; magic quotes for incoming GET/POST/Cookie data
-magic_quotes_runtime=	Off		; magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
-magic_quotes_sybase	=	Off		; Use Sybase-style magic quotes (escape ' with '' instead of \')
+;
 
-; automatically add files before or after any PHP document
-auto_prepend_file	=
-auto_append_file	=
+; Magic quotes for incoming GET/POST/Cookie data.
+magic_quotes_gpc = Off
+
+; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
+magic_quotes_runtime = Off    
+
+; Use Sybase-style magic quotes (escape ' with '' instead of \').
+magic_quotes_sybase = Off
+
+; Automatically add files before or after any PHP document.
+auto_prepend_file =
+auto_append_file =
 
 ; As of 4.0b4, PHP always outputs a character encoding by default in
 ; the Content-type: header.  To disable sending of the charset, simply
 ; set it to be empty.
+;
 ; PHP's built-in default is text/html
 default_mimetype = "text/html"
 ;default_charset = "iso-8859-1"
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Paths and Directories ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
-include_path	=                   ; UNIX: "/path1:/path2"  Windows: "\path1;\path2"
-doc_root		=					; the root of the php pages, used only if nonempty
-user_dir		=					; the directory under which php opens the script using /~username, used only if nonempty
-extension_dir	=	./				; directory in which the loadable extensions (modules) reside
-enable_dl		= On				; Whether or not to enable the dl() function.
-									; The dl() function does NOT properly work in multithreaded
-									; servers, such as IIS or Zeus, and is automatically disabled
-									; on them.
+
+; UNIX: "/path1:/path2"  
+;include_path = ".:/php/includes"
+;
+; Windows: "\path1;\path2"
+;include_path = ".;c:\php\includes"
+
+; The root of the PHP pages, used only if nonempty.
+doc_root =
+
+; The directory under which PHP opens the script using /~usernamem used only
+; if nonempty.
+user_dir =
+
+; Directory in which the loadable extensions (modules) reside.
+extension_dir = ./
+
+; Whether or not to enable the dl() function.  The dl() function does NOT work
+; properly in multithreaded servers, such as IIS or Zeus, and is automatically
+; disabled on them.
+enable_dl = On
 
 
 ;;;;;;;;;;;;;;;;
 ; File Uploads ;
 ;;;;;;;;;;;;;;;;
-file_uploads	= On				; Whether to allow HTTP file uploads
-;upload_tmp_dir	=	                ; temporary directory for HTTP uploaded files (will use system default if not specified)
-upload_max_filesize = 2M		    ; Maximum allowed size for uploaded files
+
+; Whether to allow HTTP file uploads.
+file_uploads = On
+
+; Temporary directory for HTTP uploaded files (will use system default if not
+; specified).
+;upload_tmp_dir =
+
+; Maximum allowed size for uploaded files.
+upload_max_filesize = 2M
 
 
 ;;;;;;;;;;;;;;;;;;
 ; Fopen wrappers ;
 ;;;;;;;;;;;;;;;;;;
-allow_url_fopen = On                ; Whether to allow the treatment of URLs (like http:// or ftp://) as files
-;from="john@doe.com"                ; Define the anonymous ftp password (your email address)
+
+; Whether to allow the treatment of URLs (like http:// or ftp://) as files.
+allow_url_fopen = On
+
+; Define the anonymous ftp password (your email address)
+;from="john@doe.com"
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ; Dynamic Extensions ;
 ;;;;;;;;;;;;;;;;;;;;;;
-; if you wish to have an extension loaded automatically, use the
-; following syntax:  extension=modulename.extension
-; for example, on windows,
-; extension=msql.dll
-; or under UNIX,
-; extension=msql.so
-; Note that it should be the name of the module only, no directory information 
-; needs to go here.  Specify the location of the extension with the extension_dir directive above.
-
+;
+; If you wish to have an extension loaded automatically, use the following
+; syntax:
+;
+;   extension=modulename.extension
+;
+; For example, on Windows:
+;
+;   extension=msql.dll
+;
+; ... or under UNIX:
+;
+;   extension=msql.so
+;
+; Note that it should be the name of the module only; no directory information 
+; needs to go here.  Specify the location of the extension with the
+; extension_dir directive above.
 
 
 ;Windows Extensions
@@ -348,31 +459,31 @@ allow_url_fopen = On                ; Whether to allow the treatment of URLs (li
 ;extension=php_yaz.dll
 ;extension=php_zlib.dll
 
+
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
 
 [Syslog]
-define_syslog_variables	= Off	; Whether or not to define the various syslog variables,
-								; e.g. $LOG_PID, $LOG_CRON, etc.  Turning it off is a
-								; good idea performance-wise.  In runtime, you can define
-								; these variables by calling define_syslog_variables()
-
+; Whether or not to define the various syslog variables (e.g. $LOG_PID,
+; $LOG_CRON, etc.).  Turning it off is a good idea performance-wise.  In
+; runtime, you can define these variables by calling define_syslog_variables().
+define_syslog_variables  = Off
 
 [mail function]
-SMTP			=	localhost			;for win32 only
-sendmail_from	=	me@localhost.com	;for win32 only
-;sendmail_path	=						;for unix only, may supply arguments as well (default is 'sendmail -t -i')
+; For Win32 only.
+SMTP = localhost
 
-[Debugger]
-debugger.host	=	localhost
-debugger.port	=	7869
-debugger.enabled	=	False
+; For Win32 only.
+sendmail_from = me@localhost.com
+
+; For Unix only.  You may supply arguments as well (default: 'sendmail -t -i').
+;sendmail_path =
 
 [Logging]
 ; These configuration directives are used by the example logging mechanism.
 ; See examples/README.logging for more explanation.
-;logging.method    = db
+;logging.method = db
 ;logging.directory = /path/to/log/directory
 
 [Java]
@@ -382,174 +493,336 @@ debugger.enabled	=	False
 ;java.library.path = .\
 
 [SQL]
-sql.safe_mode	=	Off
+sql.safe_mode = Off
 
 [ODBC]
-;odbc.default_db		=	Not yet implemented
-;odbc.default_user		=	Not yet implemented
-;odbc.default_pw		=	Not yet implemented
-odbc.allow_persistent	=	On	; allow or prevent persistent links
-odbc.check_persistent  = 	On	; check that a connection is still validbefore reuse
-odbc.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
-odbc.max_links			=	-1	; maximum number of links (persistent+non persistent). -1 means no limit
-odbc.defaultlrl	=	4096	; Handling of LONG fields. Returns number of bytes to variables, 0 means passthru
-odbc.defaultbinmode	= 	1	; Handling of binary data. 0 means passthru, 1 return as is, 2 convert to char
-; See the documentation on odbc_binmode and odbc_longreadlen for an explanation of uodbc.defaultlrl
-; and uodbc.defaultbinmode
+;odbc.default_db    =  Not yet implemented
+;odbc.default_user  =  Not yet implemented
+;odbc.default_pw    =  Not yet implemented
+
+; Allow or prevent persistent links.
+odbc.allow_persistent = On
+
+; Check that a connection is still valid before reuse.
+odbc.check_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+odbc.max_persistent = -1
+
+; Maximum number of links (persistent + non-persistent).  -1 means no limit.
+odbc.max_links = -1  
+
+; Handling of LONG fields.  Returns number of bytes to variables.  0 means
+; passthru.
+odbc.defaultlrl = 4096  
+
+; Handling of binary data.  0 means passthru, 1 return as is, 2 convert to char.
+; See the documentation on odbc_binmode and odbc_longreadlen for an explanation
+; of uodbc.defaultlrl and uodbc.defaultbinmode
+odbc.defaultbinmode = 1  
 
 [MySQL]
-mysql.allow_persistent	=	On	; allow or prevent persistent link
-mysql.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
-mysql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
-mysql.default_port		=		; default port number for mysql_connect().  If unset,
-								; mysql_connect() will use the $MYSQL_TCP_PORT, or the mysql-tcp
-								; entry in /etc/services, or the compile-time defined MYSQL_PORT
-								; (in that order).  Win32 will only look at MYSQL_PORT.
-mysql.default_socket	=		; default socket name for local MySQL connects.  If empty, uses the built-in
-								; MySQL defaults
-mysql.default_host		=		; default host for mysql_connect() (doesn't apply in safe mode)
-mysql.default_user		=		; default user for mysql_connect() (doesn't apply in safe mode)
-mysql.default_password	=		; default password for mysql_connect() (doesn't apply in safe mode)
-								; Note that this is generally a *bad* idea to store passwords
-								; in this file.  *Any* user with PHP access can run
-								; 'echo cfg_get_var("mysql.default_password")' and reveal that
-								; password!  And of course, any users with read access to this
-								; file will be able to reveal the password as well.
+; Allow or prevent persistent links.
+mysql.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+mysql.max_persistent = -1
+
+; Maximum number of links (persistent + non-persistent).  -1 means no limit.
+mysql.max_links = -1
+
+; Default port number for mysql_connect().  If unset, mysql_connect() will use
+; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
+; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
+' at MYSQL_PORT.
+mysql.default_port =
+
+; Default socket name for local MySQL connects.  If empty, uses the built-in
+; MySQL defaults.
+mysql.default_socket =
+
+; Default host for mysql_connect() (doesn't apply in safe mode).
+mysql.default_host =
+
+; Default user for mysql_connect() (doesn't apply in safe mode).
+mysql.default_user =
+
+; Default password for mysql_connect() (doesn't apply in safe mode).
+; Note that this is generally a *bad* idea to store passwords in this file.
+; *Any* user with PHP access can run 'echo cfg_get_var("mysql.default_password")
+; and reveal this password!  And of course, any users with read access to this
+; file will be able to reveal the password as well.
+mysql.default_password =
 
 [mSQL]
-msql.allow_persistent	=	On	; allow or prevent persistent link
-msql.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
-msql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+; Allow or prevent persistent links.
+msql.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+msql.max_persistent = -1
+
+; Maximum number of links (persistent+non persistent).  -1 means no limit.
+msql.max_links = -1
 
 [PostgresSQL]
-pgsql.allow_persistent	=	On	; allow or prevent persistent link
-pgsql.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
-pgsql.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
+; Allow or prevent persistent links.
+pgsql.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+pgsql.max_persistent = -1
+
+; Maximum number of links (persistent+non persistent).  -1 means no limit.
+pgsql.max_links = -1
 
 [Sybase]
-sybase.allow_persistent	=	On	; allow or prevent persistent link
-sybase.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
-sybase.max_links		=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
-;sybase.interface_file	=	"/usr/sybase/interfaces"
-sybase.min_error_severity	=	10	; minimum error severity to display
-sybase.min_message_severity	=	10	; minimum message severity to display
-sybase.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0.
-									; If on, this will cause PHP to automatically assign types to results
-									; according to their Sybase type, instead of treating them all as
-									; strings.  This compatability mode will probably not stay around
-									; forever, so try applying whatever necessary changes to your code,
-									; and turn it off.
+; Allow or prevent persistent links.
+sybase.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+sybase.max_persistent = -1
+
+; Maximum number of links (persistent + non-persistent).  -1 means no limit.
+sybase.max_links = -1
+
+;sybase.interface_file = "/usr/sybase/interfaces"
+
+; Minimum error severity to display.
+sybase.min_error_severity = 10
+
+; Minimum message severity to display.
+sybase.min_message_severity = 10
+
+; Compatability mode with old versions of PHP 3.0.
+; If on, this will cause PHP to automatically assign types to results according
+; to their Sybase type, instead of treating them all as strings.  This
+; compatability mode will probably not stay around forever, so try applying
+; whatever necessary changes to your code, and turn it off.
+sybase.compatability_mode = Off
 
 [Sybase-CT]
-sybct.allow_persistent	=	On		; allow or prevent persistent link
-sybct.max_persistent	=	-1		; maximum number of persistent links. -1 means no limit
-sybct.max_links			=	-1		; maximum number of links (persistent+non persistent).  -1 means no limit
-sybct.min_server_severity	=	10	; minimum server message severity to display
-sybct.min_client_severity	=	10	; minimum client message severity to display
+; Allow or prevent persistent links.
+sybct.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+sybct.max_persistent = -1
+
+; Maximum number of links (persistent + non-persistent).  -1 means no limit.
+sybct.max_links = -1
+
+; Minimum server message severity to display.
+sybct.min_server_severity = 10
+
+; Minimum client message severity to display.
+sybct.min_client_severity = 10
 
 [bcmath]
-bcmath.scale	=	0	; number of decimal digits for all bcmath functions
+; Number of decimal digits for all bcmath functions.
+bcmath.scale = 0
 
 [browscap]
-;browscap	=	extra/browscap.ini
+;browscap = extra/browscap.ini
 
 [Informix]
-ifx.default_host		=		; default host for ifx_connect() (doesn't apply in safe mode)
-ifx.default_user		=		; default user for ifx_connect() (doesn't apply in safe mode)
-ifx.default_password		=		; default password for ifx_connect() (doesn't apply in safe mode)
-ifx.allow_persistent		=	On	; allow or prevent persistent link
-ifx.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
-ifx.max_links			=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
-ifx.textasvarchar		=	0	; if set on, select statements return the contents of a text blob instead of it's id
-ifx.byteasvarchar		=	0	; if set on, select statements return the contents of a byte blob instead of it's id
-ifx.charasvarchar		=	0	; trailing blanks are stripped from fixed-length char columns. May help the life
-						; of Informix SE users. 
-ifx.blobinfile			=	0	; if set on, the contents of text&byte blobs are dumped to a file instead of
-						; keeping them in memory
-ifx.nullformat			=	0	; NULL's are returned as empty strings, unless this is set to 1. In that case,
-						; NULL's are returned as string 'NULL'.
+; Default host for ifx_connect() (doesn't apply in safe mode).
+ifx.default_host =
+
+; Default user for ifx_connect() (doesn't apply in safe mode).
+ifx.default_user =
+
+; Default password for ifx_connect() (doesn't apply in safe mode).
+ifx.default_password =
+
+; Allow or prevent persistent links.
+ifx.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+ifx.max_persistent = -1
+
+; Maximum number of links (persistent + non-persistent).  -1 means no limit.
+ifx.max_links = -1
+
+; If on, select statements return the contents of a text blob instead of its id.
+ifx.textasvarchar = 0
+
+; If on, select statements return the contents of a byte blob instead of its id.
+ifx.byteasvarchar = 0
+
+; Trailing blanks are stripped from fixed-length char columns.  May help the
+; life of Informix SE users.
+ifx.charasvarchar = 0
+
+; If on, the contents of text and byte blobs are dumped to a file instead of
+; keeping them in memory.
+ifx.blobinfile = 0
+
+; NULL's are returned as empty strings, unless this is set to 1.  In that case,
+; NULL's are returned as string 'NULL'.
+ifx.nullformat = 0
 
 [Session]
-session.save_handler      = files   ; handler used to store/retrieve data
-session.save_path         = /tmp    ; argument passed to save_handler
-                                    ; in the case of files, this is the
-                                    ; path where data files are stored
-session.use_cookies       = 1       ; whether to use cookies
-session.name              = PHPSESSID  
-                                    ; name of the session
-                                    ; is used as cookie name
-session.auto_start        = 0       ; initialize session on request startup
-session.cookie_lifetime   = 0       ; lifetime in seconds of cookie
-                                    ; or if 0, until browser is restarted
-session.cookie_path       = /       ; the path the cookie is valid for
-session.cookie_domain     =         ; the domain the cookie is valid for
-session.serialize_handler = php     ; handler used to serialize data
-                                    ; php is the standard serializer of PHP
-session.gc_probability    = 1       ; percentual probability that the 
-                                    ; 'garbage collection' process is started
-                                    ; on every session initialization
-session.gc_maxlifetime    = 1440    ; after this number of seconds, stored
-                                    ; data will be seen as 'garbage' and
-                                    ; cleaned up by the gc process
-session.referer_check     =         ; check HTTP Referer to invalidate 
-                                    ; externally stored URLs containing ids
-session.entropy_length    = 0       ; how many bytes to read from the file
-session.entropy_file      =         ; specified here to create the session id
-; session.entropy_length    = 16
-; session.entropy_file      = /dev/urandom
-session.cache_limiter     = nocache ; set to {nocache,private,public} to
-                                    ; determine HTTP caching aspects
-session.cache_expire      = 180     ; document expires after n minutes
-session.use_trans_sid     = 1       ; use transient sid support if enabled
-                                    ; by compiling with --enable-trans-sid
+; Handler used to store/retrieve data.
+session.save_handler = files
 
-url_rewriter.tags         = "a=href,area=href,frame=src,input=src,form=fakeentry"
+; Argument passed to save_handler.  In the case of files, this is the path
+; where data files are stored. Note: Windows users have to change this 
+; variable in order to use PHP's session functions.
+session.save_path = /tmp
+
+; Whether to use cookies.
+session.use_cookies = 1
+
+
+; Name of the session (used as cookie name).
+session.name = PHPSESSID
+
+; Initialize session on request startup.
+session.auto_start = 0
+
+; Lifetime in seconds of cookie or, if 0, until browser is restarted.
+session.cookie_lifetime = 0
+
+; The path for which the cookie is valid.
+session.cookie_path = /
+
+; The domain for which the cookie is valid.
+session.cookie_domain =
+
+; Handler used to serialize data.  php is the standard serializer of PHP.
+session.serialize_handler = php
+
+; Percentual probability that the 'garbage collection' process is started
+; on every session initialization.
+session.gc_probability = 1
+
+; After this number of seconds, stored data will be seen as 'garbage' and
+; cleaned up by the garbage collection process.
+session.gc_maxlifetime = 1440
+
+; Check HTTP Referer to invalidate externally stored URLs containing ids.
+session.referer_check =
+
+; How many bytes to read from the file.
+session.entropy_length = 0
+
+; Specified here to create the session id.
+session.entropy_file =
+
+;session.entropy_length = 16
+
+;session.entropy_file = /dev/urandom
+
+; Set to {nocache,private,public} to determine HTTP caching aspects.
+session.cache_limiter = nocache
+
+; Document expires after n minutes.
+session.cache_expire = 180
+
+; use transient sid support if enabled by compiling with --enable-trans-sid.
+session.use_trans_sid = 1
+
+url_rewriter.tags = "a=href,area=href,frame=src,input=src,form=fakeentry"
 
 [MSSQL]
-mssql.allow_persistent		=	On	; allow or prevent persistent link
-mssql.max_persistent		=	-1	; maximum number of persistent links. -1 means no limit
-mssql.max_links				=	-1	; maximum number of links (persistent+non persistent).  -1 means no limit
-mssql.min_error_severity	=	10	; minimum error severity to display
-mssql.min_message_severity	=	10	; minimum message severity to display
-mssql.compatability_mode	=  Off	; compatability mode with old versions of PHP 3.0.
-;mssql.textlimit			= 4096	; valid range 0 - 2147483647 default = 4096
-;mssql.textsize				= 4096	; valid range 0 - 2147483647 default = 4096
-;mssql.batchsize			=	 0  ; limits the number of records in each batch. 0 = all records in one batch.
+; Allow or prevent persistent links.
+mssql.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+mssql.max_persistent = -1
+
+; Maximum number of links (persistent+non persistent).  -1 means no limit.
+mssql.max_links = -1
+
+; Minimum error severity to display.
+mssql.min_error_severity = 10
+
+; Minimum message severity to display.
+mssql.min_message_severity = 10
+
+; Compatability mode with old versions of PHP 3.0.
+mssql.compatability_mode = Off
+
+; Valid range 0 - 2147483647.  Default = 4096.
+;mssql.textlimit = 4096
+
+; Valid range 0 - 2147483647.  Default = 4096.
+;mssql.textsize = 4096
+
+; Limits the number of records in each batch.  0 = all records in one batch.
+;mssql.batchsize = 0
 
 [Assertion]
-;assert.active				=	Off	; assert(expr); does nothing by default
-;assert.warning				=	On	; issue a PHP warning for each failed assertion.
-;assert.bail				=	Off	; don't bail out by default.
-;assert.callback			=	0	; user-function to be called if an assertion fails.
-;assert.quiet_eval			=	0	; eval the expression with current error_reporting(). set to true if you want error_reporting(0) around the eval().
+; Assert(expr); active by default.
+;assert.active = On
+
+; Issue a PHP warning for each failed assertion.
+;assert.warning = On
+
+; Don't bail out by default.
+;assert.bail = Off
+
+; User-function to be called if an assertion fails.
+;assert.callback = 0
+
+; Eval the expression with current error_reporting().  Set to true if you want
+; error_reporting(0) around the eval().
+;assert.quiet_eval = 0
 
 [Ingres II]
-ingres.allow_persistent		=	On	; allow or prevent persistent link
-ingres.max_persistent		=	-1	; maximum number of persistent links. (-1 means no limit)
-ingres.max_links			=	-1	; maximum number of links, including persistents (-1 means no limit)
-ingres.default_database		=		; default database (format : [node_id::]dbname[/srv_class]
-ingres.default_user			=		; default user
-ingres.default_password		=		; default password
+; Allow or prevent persistent links.
+ingres.allow_persistent = On
+
+; Maximum number of persistent links.  -1 means no limit.
+ingres.max_persistent = -1
+
+; Maximum number of links, including persistents.  -1 means no limit.
+ingres.max_links = -1
+
+; Default database (format: [node_id::]dbname[/srv_class]).
+ingres.default_database =
+
+; Default user.
+ingres.default_user =
+
+; Default password.
+ingres.default_password =
 
 [Verisign Payflow Pro]
-pfpro.defaulthost 			=	"test.signio.com"	; default Signio server
-pfpro.defaultport 			=	443	; default port to connect to
-pfpro.defaulttimeout		=	30	; default timeout in seconds
+; Default Signio server.
+pfpro.defaulthost = "test.signio.com"
 
-; pfpro.proxyaddress 		=		; default proxy IP address (if required)
-; pfpro.proxyport 			=		; default proxy port
-; pfpro.proxylogon 			=		; default proxy logon
-; pfpro.proxypassword 		=		; default proxy password
+; Default port to connect to.
+pfpro.defaultport = 443
+
+; Default timeout in seconds.
+pfpro.defaulttimeout = 30
+
+; Default proxy IP address (if required).
+;pfpro.proxyaddress =
+
+; Default proxy port.
+;pfpro.proxyport =
+
+; Default proxy logon.
+;pfpro.proxylogon =
+
+; Default proxy password.
+;pfpro.proxypassword =
 
 [Sockets]
-sockets.use_system_read		=	Off	; Use the system read() function instead of
-						; the php_read() wrapper.
+; Use the system read() function instead of the php_read() wrapper.
+sockets.use_system_read = On
+
 [com]
-;com.allow_dcom					= true	; allow Distributed-COM calls
-;com.typelib_file 		= 				; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
-;com.autoregister_typelib		= true	
-;com.autoregister_casesensitive	= false
-;com.autoregister_verbose		= true
+; path to a file containing GUIDs, IIDs or filenames of files with TypeLibs
+;com.typelib_file = 
+; allow Distributed-COM calls
+;com.allow_dcom = true
+; autoregister constants of a components typlib on com_load()
+;com.autoregister_typelib = true
+; register constants casesensitive
+;com.autoregister_casesensitive = false
+; show warnings on duplicate constat registrations
+;com.autoregister_verbose = true
 
 [Printer]
 ;printer.default_printer = ""
