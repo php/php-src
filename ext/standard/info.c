@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 4                                                        |
    +----------------------------------------------------------------------+
@@ -83,7 +83,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 		} else {
 			php_printf(module->name);
 			php_printf("\n");
-		}	
+		}
 	}
 	return 0;
 }
@@ -111,7 +111,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 
 			PUTS(name);
 			PUTS("[\"");
-			
+
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
 					if (!sapi_module.phpinfo_as_text) {
@@ -120,7 +120,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 						efree(elem_esc);
 					} else {
 						PUTS(string_key);
-					}	
+					}
 					break;
 				case HASH_KEY_IS_LONG:
 					php_printf("%ld", num_key);
@@ -151,10 +151,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 						elem_esc = php_info_html_esc(Z_STRVAL(tmp2) TSRMLS_CC);
 						PUTS(elem_esc);
 						efree(elem_esc);
-					} 
+					}
 				} else {
 					PUTS(Z_STRVAL(tmp2));
-				}	
+				}
 				zval_dtor(&tmp2);
 			} else {
 				if (!sapi_module.phpinfo_as_text) {
@@ -167,13 +167,13 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					}
 				} else {
 					PUTS(Z_STRVAL_PP(tmp));
-				}	
+				}
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				PUTS("</td></tr>\n");
 			} else {
 				PUTS("\n");
-			}	
+			}
 			zend_hash_move_forward(Z_ARRVAL_PP(data));
 		}
 	}
@@ -337,7 +337,7 @@ PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 			charset = mbfl_no2preferred_mime_name(MBSTRG(current_http_output_encoding));
 		}
 	}
-#endif   
+#endif
 
 #if HAVE_ICONV
 	if (php_ob_handler_used("ob_iconv_handler" TSRMLS_CC)) {
@@ -393,14 +393,14 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_print_info_htmlhead(TSRMLS_C);
 	} else {
 		PUTS("phpinfo()\n");
-	}	
+	}
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 		char temp_api[9];
 
 		php_uname = php_get_uname('a');
-		
+
 		if (!sapi_module.phpinfo_as_text) {
 			php_info_print_box_start(1);
 		}
@@ -421,7 +421,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			php_printf("<h1 class=\"p\">PHP Version %s</h1>\n", PHP_VERSION);
 		} else {
 			php_info_print_table_row(2, "PHP Version", PHP_VERSION);
-		}	
+		}
 		php_info_print_box_end();
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", php_uname );
@@ -447,7 +447,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				php_info_print_table_row(2, "additional .ini files parsed", php_ini_scanned_files);
 			}
 		}
-		
+
 		snprintf(temp_api, sizeof(temp_api), "%d", PHP_API_VERSION);
 		php_info_print_table_row(2, "PHP API", temp_api);
 
@@ -501,7 +501,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				php_info_print_table_row(2, "PHP Streams", "disabled"); /* ?? */
 			}
 		}
-		
+
 		php_info_print_table_end();
 
 		/* Zend Engine */
@@ -515,16 +515,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 		PUTS("This program makes use of the Zend Scripting Language Engine:");
 		PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
-		if (PG(html_errors)) {
-			zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
-		} else {
-			PUTS(zend_version);
-		}
+		PUTS(zend_version);
 		php_info_print_box_end();
 		efree(php_uname);
 	}
 
-	if ((flag & PHP_INFO_CREDITS) && expose_php && !sapi_module.phpinfo_as_text) {	
+	if ((flag & PHP_INFO_CREDITS) && expose_php && !sapi_module.phpinfo_as_text) {
 		php_info_print_hr();
 		PUTS("<h1><a href=\"");
 		if (SG(request_info).request_uri) {
@@ -543,7 +539,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS("<h1>Configuration</h1>\n");
 		} else {
 			SECTION("Configuration");
-		}	
+		}
 		SECTION("PHP Core");
 		display_ini_entries(NULL);
 	}
@@ -652,7 +648,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("</div></body></html>");
-	}	
+	}
 }
 /* }}} */
 
@@ -663,7 +659,7 @@ PHPAPI void php_info_print_table_start()
 		php_printf("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
 	} else {
 		php_printf("\n");
-	}	
+	}
 }
 
 PHPAPI void php_info_print_table_end()
@@ -686,7 +682,7 @@ PHPAPI void php_info_print_box_start(int flag)
 			php_printf("<tr class=\"v\"><td>\n");
 		} else {
 			php_printf("\n");
-		}	
+		}
 	}
 }
 
@@ -716,7 +712,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 	} else {
 		spaces = (74 - strlen(header));
 		php_printf("%*s%s%*s\n", (int)(spaces/2), " ", header, (int)(spaces/2), " ");
-	}	
+	}
 }
 
 /* {{{ php_info_print_table_header
@@ -732,7 +728,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 	va_start(row_elements, num_cols);
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr class=\"h\">");
-	}	
+	}
 	for (i=0; i<num_cols; i++) {
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
@@ -748,12 +744,12 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 				PUTS(" => ");
 			} else {
 				PUTS("\n");
-			}	
-		}	
+			}
+		}
 	}
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</tr>\n");
-	}	
+	}
 
 	va_end(row_elements);
 }
@@ -776,13 +772,13 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	va_start(row_elements, num_cols);
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr>");
-	}	
+	}
 	for (i=0; i<num_cols; i++) {
 		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<td class=\"%s\">",
 			   (i==0 ? "e" : "v" )
 			);
-		}	
+		}
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
 			if (!sapi_module.phpinfo_as_text) {
@@ -799,7 +795,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 				PUTS(row_element);
 				if (i < num_cols-1) {
 					PUTS(" => ");
-				}	
+				}
 			}
 		}
 		if (!sapi_module.phpinfo_as_text) {
@@ -811,7 +807,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</tr>\n");
 	}
-	
+
 	va_end(row_elements);
 }
 /* }}} */
@@ -900,7 +896,7 @@ PHP_FUNCTION(phpcredits)
 
 	if(!argc) {
 		flag = PHP_CREDITS_ALL;
-	} 
+	}
 
 	php_print_credits(flag);
 	RETURN_TRUE;
