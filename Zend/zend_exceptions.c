@@ -385,7 +385,7 @@ static void zend_register_default_exception(TSRMLS_D)
 	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
-	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "Unknown exception", ZEND_ACC_PROTECTED TSRMLS_CC);
+	zend_declare_property_string(default_exception_ptr, "message", sizeof("message")-1, "none", ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_string(default_exception_ptr, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE TSRMLS_CC);
 	zend_declare_property_long(default_exception_ptr, "code", sizeof("code")-1, 0, ZEND_ACC_PROTECTED TSRMLS_CC);
 	zend_declare_property_null(default_exception_ptr, "file", sizeof("file")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
