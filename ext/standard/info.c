@@ -27,6 +27,7 @@
 #include "credits.h"
 #include "SAPI.h"
 #include <time.h>
+#include "php_main.h"
 #if !defined(PHP_WIN32)
 #include "build-defs.h"
 #endif
