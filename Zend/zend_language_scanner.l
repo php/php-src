@@ -138,7 +138,7 @@ void shutdown_scanner(TSRMLS_D)
 END_EXTERN_C()
 
 
-static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
+ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
 	memcpy(&lex_state->buffer_state, &YY_CURRENT_BUFFER, sizeof(YY_BUFFER_STATE));
 	lex_state->in = SCNG(yy_in);
@@ -148,7 +148,7 @@ static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 }
 
 
-static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
+ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
 
@@ -269,7 +269,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 	retval_znode.u.constant.is_ref = 0;
 	retval_znode.u.constant.refcount = 1;
 
-	save_lexical_state(&original_lex_state TSRMLS_CC);
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
 	retval = op_array; /* success oriented */
 
@@ -305,7 +305,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		}
 	}
 	if (compilation_successful) {
-		restore_lexical_state(&original_lex_state TSRMLS_CC);
+		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	}
 	return retval;
 }
@@ -342,7 +342,7 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	return retval;
 }
 
-static inline int prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
+ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 {
 	/* enforce two trailing NULLs for flex... */
 	STR_REALLOC(str->value.str.val, str->value.str.len+2);
@@ -381,8 +381,8 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	convert_to_string(&tmp);
 	source_string = &tmp;
 
-	save_lexical_state(&original_lex_state TSRMLS_CC);
-	if (prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
+	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
 		efree(op_array);
 		retval = NULL;
 	} else {
@@ -401,7 +401,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			pass_two(op_array TSRMLS_CC);
 			retval = op_array;
 		}
-		restore_lexical_state(&original_lex_state TSRMLS_CC);
+		zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	}
 	zval_dtor(&tmp);
 	CG(in_compilation) = original_in_compilation;
@@ -419,14 +419,14 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 	file_handle.filename = filename;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
-	save_lexical_state(&original_lex_state TSRMLS_CC);
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (open_file_for_scanning(&file_handle TSRMLS_CC)==FAILURE) {
 		zend_message_dispatcher(ZMSG_FAILED_HIGHLIGHT_FOPEN, filename);
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	zend_destroy_file_handle(&file_handle TSRMLS_CC);
-	restore_lexical_state(&original_lex_state TSRMLS_CC);
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	return SUCCESS;
 }
 
@@ -437,12 +437,12 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 
 	str = &tmp;
 	zval_copy_ctor(str);
-	save_lexical_state(&original_lex_state TSRMLS_CC);
-	if (prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
+	if (zend_prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
-	restore_lexical_state(&original_lex_state TSRMLS_CC);
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(str);
 	return SUCCESS;
 }
