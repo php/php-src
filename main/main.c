@@ -168,15 +168,36 @@ static PHP_INI_MH(OnChangeMemoryLimit)
  */
 static void php_disable_functions(TSRMLS_D)
 {
-	char *func;
-	char *new_value_dup = strdup(INI_STR("disable_functions"));	/* This is an intentional leak,
-																 * it's not a big deal as it's process-wide
-																 */
+	char *s = NULL;
+	char *e = INI_STR("disable_functions");
+	char p;
 
-	func = strtok(new_value_dup, ", ");
-	while (func) {
-		zend_disable_function(func, strlen(func) TSRMLS_CC);
-		func = strtok(NULL, ", ");
+	if (!*e) {
+		return;
+	}
+
+	while (*e) {
+		switch (*e) {
+			case ' ':
+			case ',':
+				if (s) {
+					p = *e;
+					*e = '\0';
+					zend_disable_function(s, e-s TSRMLS_CC);
+					*e = p;
+					s = NULL;
+				}
+				break;
+			default:
+				if (!s) {
+					s = e;
+				}
+				break;
+		}
+		e++;
+	}
+	if (s) {
+		zend_disable_function(s, e-s TSRMLS_CC);
 	}
 }
 /* }}} */
