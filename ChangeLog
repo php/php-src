@@ -1,3 +1,70 @@
+2002-06-23  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/time.c
+      win32/time.h:
+    Allow dynamically compiled extensions to use gettimeofday() on win32.
+
+2002-06-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/imap/php_imap.c: standardize a bit (we know its enabled :)
+
+2002-06-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/apache2filter/php_functions.c: - MFH
+
+2002-06-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/snprintf.h:
+    explain difference between sprintf, snprintf and spprintf
+
+    * main/spprintf.h:
+    * main/spprintf.c: -freeing memory for pbuf=NULL
+
+    * main/spprintf.c: -allow pbuf = NULL in case of NO MEMORY, too
+
+    * main/spprintf.c: -allways terminate buffer
+    -allow pbuf parameter to be NULL for buffer size calculation
+
+2002-06-23  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c: MFH: several fixes to fileupload code
+
+    * ext/standard/mail.c: merged in the filtering control chars patch
+
+    * ext/standard/link.c: MFH: link/symlink safe_mode/open_base_dir fix
+
+    * main/SAPI.c: MFH: replace header fix, content-type header handling fix
+
+2002-06-23  James Cox  <james@blog.at>
+
+    * buildconf:
+    some people would prefer to be able to specify. So, we specify --ZendEngine2 for ZE2 builds, Zend for the rest.
+
+    * build/build.mk
+      buildconf:
+    changing this to mv ZendEngine2 Zend instead of shell logic that isn't portable.
+
+2002-06-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/main.c: -unlimited php_printf
+
+    * ext/exif/exif.c
+      ext/standard/basic_functions.c
+      ext/standard/image.c
+      ext/standard/php_image.h:
+    -imagetype2mimetype renamed to image_type_to_mime_type
+
+    * ext/exif/tests/004.phpt
+      ext/exif/tests/test4.jpg: -new test for WinXP tags
+
+    * ext/exif/tests/003.phpt: -fix test results
+
+    * run-tests.php: -make it run again
+
+    * main/snprintf.c: -compiler warning (missing data type)
+
+    * ext/exif/tests/001.phpt: -corrected test result
+
 2002-06-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/exif/exif.c
