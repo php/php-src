@@ -82,7 +82,7 @@ struct _zend_ini_entry {
 	void (*displayer)(zend_ini_entry *ini_entry, int type);
 };
 
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 ZEND_API int zend_ini_startup(TSRMLS_D);
 ZEND_API int zend_ini_shutdown(TSRMLS_D);
 ZEND_API int zend_ini_global_shutdown(TSRMLS_D);
@@ -108,7 +108,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
 ZEND_API ZEND_INI_DISP(display_link_numbers);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define ZEND_INI_BEGIN()		static zend_ini_entry ini_entries[] = {
 #define ZEND_INI_END()		{ 0, 0, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, NULL, 0, 0, NULL } };
@@ -172,13 +172,13 @@ END_EXTERN_C();
 #define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, zend_ini_boolean_displayer_cb)
 
 /* Standard message handlers */
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 ZEND_API ZEND_INI_MH(OnUpdateBool);
 ZEND_API ZEND_INI_MH(OnUpdateLong);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
 ZEND_API ZEND_INI_MH(OnUpdateString);
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define ZEND_INI_DISPLAY_ORIG	1
 #define ZEND_INI_DISPLAY_ACTIVE	2
@@ -191,9 +191,9 @@ END_EXTERN_C();
 
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, int callback_type, void *arg);
-BEGIN_EXTERN_C();
+BEGIN_EXTERN_C()
 int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_ini_parser_cb_t ini_parser_cb, void *arg);
-END_EXTERN_C();
+END_EXTERN_C()
 
 #define ZEND_INI_PARSER_ENTRY	1
 #define ZEND_INI_PARSER_SECTION	2

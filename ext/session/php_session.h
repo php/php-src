@@ -228,7 +228,7 @@ PHPAPI void php_session_start(TSRMLS_D);
 		}															\
 	}
 
-PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps);
+PHPAPI ZEND_EXTERN_MODULE_GLOBALS(ps)
 
 void php_session_auto_start(void *data);
 void php_session_shutdown(void *data);
