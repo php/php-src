@@ -722,7 +722,7 @@ static PHP_METHOD(PDO, query)
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
 	stmt->default_fetch_type = PDO_FETCH_BOTH;
-	stmt->active_query_string = stmt->query_stirng;
+	stmt->active_query_string = stmt->query_string;
 	stmt->active_query_stringlen = statement_len;
 
 	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, driver_options TSRMLS_CC)) {
