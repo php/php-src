@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, PHP 5.0.1
-
-11 Aug 2004, PHP 5.0.1RC2
+12 Aug 2004, PHP 5.0.1
 - Changed destructor mechanism so that destructors are called prior to request
   shutdown. (Marcus)
 - Rewritten UNIX and Windows install help files. (Documentation Team)
