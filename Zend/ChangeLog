@@ -1,3 +1,23 @@
+2004-10-22  Andi Gutmans  <andi@zend.com>
+
+    * zend_vm_handlers.h
+      zend_vm_spec.h:
+      - Nuke another two files
+
+    * Makefile.frag
+      zend_execute.c
+      zend_vm.h
+      zend_vm_def.h
+      zend_vm_execute.skl
+      zend_vm_gen.php:
+      - Commit new VM
+      - Old one is tagged as PRE_NEW_VM_GEN_PATCH
+      - Still doing work so more commits to come. Don't complain (yet) :)
+
+    * (PRE_NEW_VM_GEN_PATCH)
+      zend_execute.c:
+      - Fix crash (MFB PHP5_0)
+
 2004-10-21  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
