@@ -43,8 +43,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Debug_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D ZEND_DEBUG=1 /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /FR /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D ZEND_DEBUG=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "_DEBUG" /D ZEND_DEBUG=1 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "_DEBUG"
@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ib_util_ms.lib gds32_ms.lib php4ts_debug.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Debug_TS"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ib_util_ms.lib gds32_ms.lib php4ts_debug.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_interbase.dll" /pdbtype:sept /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib gds32_ms.lib php4ts_debug.lib /nologo /dll /debug /machine:I386 /out:"..\..\Debug_TS/php_interbase.dll" /pdbtype:sept /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Debug_TS"
 
 !ELSEIF  "$(CFG)" == "interbase - Win32 Release_TS"
 
@@ -70,8 +70,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Release_TS"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D ZEND_DEBUG=0 /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\..\bindlib_w32" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D "COMPILE_DL_INTERBASE" /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D ZEND_DEBUG=0 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\main" /I "..\.." /I "..\..\Zend" /I "..\..\TSRM" /I "..\..\..\php_build\Interbase SDK\include" /D "NDEBUG" /D ZEND_DEBUG=0 /D "ZTS" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "INTERBASE_EXPORTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_IBASE=1 /D "COMPILE_DL_INTERBASE" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x40d /d "NDEBUG"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ib_util_ms.lib gds32_ms.lib /nologo /dll /machine:I386 /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Release_TS"
-# ADD LINK32 php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ib_util_ms.lib gds32_ms.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_interbase.dll" /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Release_TS"
+# ADD LINK32 php4ts.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib gds32_ms.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_interbase.dll" /libpath:"..\..\..\php_build\Interbase SDK\lib_ms" /libpath:"..\..\Release_TS"
 
 !ENDIF 
 
