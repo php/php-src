@@ -554,6 +554,7 @@ int zendlex(znode *zendlval TSRMLS_DC);
 /* class fetches */
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
+#define ZEND_FETCH_CLASS_MAIN		2
 
 /* unset types */
 #define ZEND_UNSET_REG 0

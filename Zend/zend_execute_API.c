@@ -136,7 +136,7 @@ void init_executor(TSRMLS_D)
 
 	zend_hash_init(&EG(symbol_table), 50, NULL, ZVAL_PTR_DTOR, 0);
 	EG(active_symbol_table) = &EG(symbol_table);
-
+	
 	zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_activator TSRMLS_CC);
 	EG(opline_ptr) = NULL;
 	EG(garbage_ptr) = 0;
@@ -160,6 +160,10 @@ void init_executor(TSRMLS_D)
 	EG(exception) = NULL;
 
 	EG(namespace) = NULL;
+
+	EG(main_class_ptr) = &CG(main_class);
+	CG(main_class).static_members = &EG(symbol_table);
+
 }
 
 

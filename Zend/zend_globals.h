@@ -157,6 +157,7 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	zend_class_entry *namespace;
+	zend_class_entry *main_class_ptr;
 
 	long precision;
 

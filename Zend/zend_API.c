@@ -572,7 +572,7 @@ ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type
 
 	if (!class_type->constants_updated) {
 		zend_hash_apply_with_argument(&class_type->default_properties, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
-		zend_hash_apply_with_argument(&class_type->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
+		zend_hash_apply_with_argument(class_type->static_members, (apply_func_arg_t) zval_update_constant, (void *) 1 TSRMLS_CC);
 		class_type->constants_updated = 1;
 	}
 	
@@ -1216,7 +1216,8 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 	*class_entry->refcount = 1;
 	class_entry->constants_updated = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
-	zend_hash_init(&class_entry->static_members, 0, NULL, ZVAL_PTR_DTOR, 1);
+	class_entry->static_members = (HashTable *) malloc(sizeof(HashTable));
+	zend_hash_init(class_entry->static_members, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->constants_table, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->function_table, 0, NULL, ZEND_FUNCTION_DTOR, 1);
 	zend_hash_init(&class_entry->class_table, 10, NULL, ZEND_CLASS_DTOR, 1);
