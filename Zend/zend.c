@@ -568,6 +568,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions, i
  	GLOBAL_FUNCTION_TABLE = (HashTable *) malloc(sizeof(HashTable));
  	GLOBAL_CLASS_TABLE = (HashTable *) malloc(sizeof(HashTable));
  	GLOBAL_AUTO_GLOBALS_TABLE = (HashTable *) malloc(sizeof(HashTable));
+ 	GLOBAL_CONSTANTS_TABLE = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init_ex(GLOBAL_FUNCTION_TABLE, 100, NULL, ZEND_FUNCTION_DTOR, 1, 0);
 	zend_hash_init_ex(GLOBAL_CLASS_TABLE, 10, NULL, ZEND_CLASS_DTOR, 1, 0);
 
