@@ -1,3 +1,197 @@
+2002-05-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/scripts/pear.in: * fix option parsing
+
+2002-05-12  Zeev Suraski  <zeev@zend.com>
+
+    * main/output.c:
+    Remove redundant code (thanks to Jani for pointing that out)
+
+2002-05-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in
+      main/php_version.h: - Fix version
+
+2002-05-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Install.php
+      pear/scripts/pear.in
+      pear/PEAR/Command.php
+      pear/PEAR/Installer.php: * refactored the command/options code:
+      - now each command class should define a "commands" property with
+        documentation, option specs etc.
+      - both long and short options are now supported
+      - after recent changes to Console_Getopt, you may now have options
+        to commands even though the same option is also valid for the pear
+        command itself
+      - less CLI-centric, better suited to Gtk and Web frontends
+
+2002-05-12  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: sync with branch
+
+    * NEWS: short is good
+
+    * NEWS: Made several entries comprehensible.
+
+2002-05-12  Edin Kadribasic  <edink@proventum.net>
+
+    * NEWS: Merged safe_mode fixes into one entry.
+
+2002-05-12  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    Submitted by: Rob Siemborski <rjs3@andrew.cmu.edu>
+
+2002-05-12  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/install.txt: Fixed typo.
+
+    * NEWS: MFH
+
+2002-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/sockets/config.m4:
+    As far as I can tell, the AC_CHECK_MEMBER could not succeed,
+    because it does not include <sys/socket.h> which is necessary
+    for the definition of struct msghdr.  This include file is not
+    part of ac_includes_default.
+
+    Regardless, AC_CHECK_MEMBER is a autoconf-2.5x macro and thus we
+    expand it here for 2.13 compatibility.
+
+2002-05-12  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in:
+    The command name is now the first arg not the second
+
+    * pear/PEAR/Command/Install.php: Add "r" in cmd help
+
+    * pear/scripts/pear.in:
+    The first entry in argv is the command name, so Getopt will stop
+    parsing more args
+
+2002-05-12  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * ext/standard/file.c: MFH
+
+    * ext/standard/file.c:
+    Change safe-mode rule for rmdir() to match unlink() - allow is target
+    is opened by caller or in a directory owned by caller
+
+2002-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/main.c: Simplify even more
+
+    * main/main.c: Simplify white space handling in php_html_puts.
+
+    If we encounter a ' ', we will look for the next non-' ' and set p
+    accordingly.
+
+2002-05-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/calendar/easter.c: Nuke unused local variables.
+
+2002-05-12  Marko Karppinen  <karppinen@pobox.com>
+
+    * ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/calendar/php_calendar.h:
+    Add an option to calculate easter dates based on the Gregorian calendar
+    during the years 1582-1752. Earlier this was only possible from
+    1753 onwards. Use the optional parameter CAL_EASTER_ROMAN with
+    easter_days() to enable this. This is a fix for bug #12766.
+
+2002-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/mbstring/config.m4: Fix this again.
+
+    If you are unsure whether enable or with shall be used, please
+    inquire on the mailing list.
+
+    WITH is solely for the purpose of pointing to paths and other external
+    entities.
+
+    Note that the comment has always mentioned "--disable-mbstring" which
+    clearly refers to enable and not with.
+
+2002-05-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Dependency.php: * fix up package dependency check
+
+2002-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/info.c: Use string_len information
+
+    * ext/standard/info.c
+      main/main.c
+      main/php_ini.c
+      main/php_main.h: reenable php_html_puts
+
+2002-05-12  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Dependency.php: Make <dep type="pkg" rel="has"> avaible
+
+2002-05-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-Console_Getopt.xml: * fix description
+
+2002-05-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter.h
+      ext/mbstring/mbfilter_cn.c
+      ext/mbstring/mbfilter_cn.h
+      ext/mbstring/mbfilter_kr.c:
+    added chinese HZ encoding support.  fixed ascii area character conversion was not work in euc-cn and euc-kr.
+
+2002-05-12  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c: fix bug #17040
+    User can't close a connection if there are blobs opened.
+    He must close them before to not lose data....
+
+2002-05-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: - Fix the way code was outcommented
+    - Remove unused STR_CAT macro
+    - Remove limits/tests based on unused macro
+    - Implement cache_limiter(private) using private_no_expire
+
+2002-05-12  Daniela Mariaschi  <mariaschi@libero.it>
+
+    * ext/interbase/interbase.c: fix bug #17040 ibase_close again.....
+    User can't close a connection if there are blobs opened.
+    He must close them before to not loose data....
+
+2002-05-12  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-Console_Getopt.xml:
+    Vincent is not involved in this class :-)
+
+2002-05-12  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/config.m4
+      ext/sockets/sockets.c: Fix build on IRIX for both mips and gcc
+
+2002-05-12  Stig Bakken  <ssb@fast.no>
+
+    * pear/Console/tests/001-getopt.phpt
+      pear/Console/Getopt.php:
+    * Try again: fixed Console_Getopt::getopt so it does not steal options
+      after the first non-option argument.  Added test.
+
+    * pear/tests/pear_config.phpt: * updated config key names
+
+    * pear/tests/pear_registry.phpt:
+    * exclude _lastmodified registry attrib from tests
+
+2002-05-12  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/config.m4: fixed to support --with-mbsting=LANG.
+
 2002-05-10  Edin Kadribasic  <edink@proventum.net>
 
     * configure.in:

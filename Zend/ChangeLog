@@ -1,3 +1,17 @@
+2002-05-12  Zeev Suraski  <zeev@zend.com>
+
+    * zend_highlight.c: MFZE1
+
+2002-05-12  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES: Rephrase.
+
+    * ZEND_CHANGES: Beautify.
+
+    * ZEND_CHANGES: Start documenting the debug backtracing.
+
+    * ZEND_CHANGES: Whitespace fixes.
+
 2002-05-11  Zeev Suraski  <zeev@zend.com>
 
     * zend_highlight.c
