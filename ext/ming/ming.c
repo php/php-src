@@ -238,14 +238,16 @@ static SWFCharacter getCharacter(zval *id TSRMLS_DC)
 		return (SWFCharacter)getBitmap(id TSRMLS_CC);
 	else if(Z_OBJCE_P(id) == sound_class_entry_ptr)
 		return (SWFCharacter)getSound(id TSRMLS_CC);
-	else if(Z_OBJCE_P(id) == videostream_class_entry_ptr)
-		return (SWFCharacter)getVideoStream(id TSRMLS_CC);
-	else if(Z_OBJCE_P(id) == prebuiltclip_class_entry_ptr)
-		return (SWFCharacter)getPrebuiltClip(id TSRMLS_CC);
+#ifdef HAVE_NEW_MING
 /*
 	else if(Z_OBJCE_P(id) == soundinstance_class_entry_ptr)
 		return (SWFCharacter)getSoundInstance(id TSRMLS_CC);
 */
+	else if(Z_OBJCE_P(id) == videostream_class_entry_ptr)
+		return (SWFCharacter)getVideoStream(id TSRMLS_CC);
+	else if(Z_OBJCE_P(id) == prebuiltclip_class_entry_ptr)
+		return (SWFCharacter)getPrebuiltClip(id TSRMLS_CC);
+#endif
 	else
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Called object is not an SWFCharacter");
 		return NULL;
