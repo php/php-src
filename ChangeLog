@@ -1,3 +1,112 @@
+2001-03-22  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Adding warning when query fails
+
+2001-03-22  Ben Mansell  <ben@zeus.com>
+
+    * sapi/cgi/cgi_main.c
+      sapi/fastcgi/fastcgi.c:
+    Fix a bug with POST requests. If the Content-Type header wasn't present,
+    we were setting SG(request_info).content_type to NULL, instead of
+    an empty string. This was stopping PHP from processing the data.
+
+2001-03-22  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Experimental/HTML/Menu_Browser.php: Finished it, works for me.
+
+2001-03-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Common.php: - removed wrong copyright notice.
+
+2001-03-22  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/php_dbx.h: Changed C++ style comments to C-style comments (Marc)
+
+2001-03-22  Emiliano Heyns  <emile@iris-advies.com>
+
+    * ext/midgard/article.c
+      ext/midgard/element.c
+      ext/midgard/page.c
+      ext/midgard/pageelement.c
+      ext/midgard/topic.c: Added update duplicate checks
+
+2001-03-22  Ulf Wendel  <ulf.wendel@phpdoc.de>
+
+    * pear/Cache/Container/dbx.php: - added support for persistent connections
+
+    * pear/Cache/Container/dbx.php: - connection data typo
+    - whitespaces
+
+2001-03-22  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/basic_functions.c: Fixed prototype.
+
+2001-03-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Table.php: - Fixed bug reported by Bertrand Mansion.
+
+2001-03-22  Christian Stocker  <chregu@nomad.ch>
+
+    * pear/Cache/Container/dbx.php:
+    a new container, which uses the new dbx extension of php as db-abstraction
+
+2001-03-22  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sockets/sockets.c: MFH
+
+    * ext/sockets/sockets.c: Fix bugs: #9920, #9190
+
+2001-03-22  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/EXPERIMENTAL: no comment :)
+
+    * ext/dbx/CREDITS
+      ext/dbx/INSTALL
+      ext/dbx/LICENSE
+      ext/dbx/Makefile.in
+      ext/dbx/config.m4
+      ext/dbx/dbx.c
+      ext/dbx/dbx.dsp
+      ext/dbx/dbx.h
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_odbc.h
+      ext/dbx/php_dbx.h:
+    Added dbx module (database abstraction) to the repositorty (/ext/dbx).
+    Compiles under Linux (--enable-dbx) and Windows.
+    Supports MySQL and ODBC modules (more to be added later).
+
+2001-03-22  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/domxml/php_domxml.c: - fixed some bugs with xpath
+
+2001-03-22  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/HTML/Common.php
+      pear/HTML/Table.php:
+    - some cosmetic changes in pear/html/HTML_Common and pear/html/HTML_Table for better
+      readability.
+
+2001-03-22  Chuck Hagenbuch  <chuck@horde.org>
+
+    * pear/DB/odbc.php:
+    we have a default for dbsyntax; don't cause an error if it's not specified.
+
+    * pear/DB/mssql.php: space
+
+2001-03-22  Adam Daniel  <adaniel2@cinci.rr.com>
+
+    * pear/HTML/Table.php: original commit. class to create html tables
+
+    * pear/HTML/Common.php:
+    orginal commit.  class containing common html tools
+
 2001-03-21  Frank M. Kromann  <frank@frontbase.com>
 
     * ext/fbsql/php_fbsql.c: setting right params to zend_get_parameters_ex
