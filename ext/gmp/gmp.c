@@ -440,6 +440,11 @@ ZEND_FUNCTION(gmp_strval)
 			break;
 	}
 
+	if(base < 2 || base > 36) {
+		zend_error(E_WARNING, "Bad base for conversion: %d", base);
+		RETURN_FALSE;
+	}
+
 	num_len = mpz_sizeinbase(*gmpnum, base);
 	out_string = emalloc(num_len+2);
 	if(mpz_sgn(*gmpnum) < 0) {
