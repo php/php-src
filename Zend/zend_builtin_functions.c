@@ -1888,10 +1888,10 @@ ZEND_FUNCTION(get_extension_funcs)
 		char *lcname = zend_str_tolower_dup(Z_STRVAL_PP(extension_name), Z_STRLEN_PP(extension_name));
 		if (zend_hash_find(&module_registry, lcname,
 			Z_STRLEN_PP(extension_name)+1, (void**)&module) == FAILURE) {
-		    efree(lcname);
+			efree(lcname);
 			RETURN_FALSE;
 		}
-	    efree(lcname);
+		efree(lcname);
 		
 		if (!(func = module->functions)) {
 			RETURN_FALSE;
