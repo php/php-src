@@ -1743,7 +1743,7 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 			is_priv = php_openssl_is_private_key((EVP_PKEY*)what TSRMLS_CC);
 
 			/* check whether it is actually a private key if requested */
-			if (!public_key && !ispriv) {
+			if (!public_key && !is_priv) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied key param is a public key");
 				return NULL;
 			}
