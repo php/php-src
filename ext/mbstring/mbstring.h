@@ -124,7 +124,7 @@ PHP_FUNCTION(mb_ereg_search_setpos);
 int php_mbregex_name2mbctype(const char *pname);
 #endif
 
-char *mbstr_strrchr(const char *s, char c);
+char *mbstr_strrchr(const char *s, char c TSRMLS_DC);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	int language;
