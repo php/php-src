@@ -56,6 +56,9 @@ static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
 static ZEND_FUNCTION(get_declared_classes);
 static ZEND_FUNCTION(create_function);
+#if ZEND_DEBUG
+static ZEND_FUNCTION(zend_test_func);
+#endif
 
 unsigned char first_arg_force_ref[] = { 1, BYREF_FORCE };
 unsigned char first_arg_allow_ref[] = { 1, BYREF_ALLOW };
@@ -95,6 +98,9 @@ static zend_function_entry builtin_functions[] = {
 	ZEND_FE(set_error_handler,		NULL)
 	ZEND_FE(get_declared_classes, NULL)
 	ZEND_FE(create_function,	NULL)
+#if ZEND_DEBUG
+	ZEND_FE(zend_test_func,		NULL)
+#endif
 	{ NULL, NULL, NULL }
 };
 
@@ -780,9 +786,13 @@ ZEND_FUNCTION(set_error_handler)
 /* }}} */
 
 
-static int copy_class_name(zend_class_entry *ce, zval *array)
+static int copy_class_name(zend_class_entry *ce, int num_args, va_list args, zend_hash_key *hash_key)
 {
-	add_next_index_stringl(array, ce->name, ce->name_length, 1);
+	zval *array = va_arg(args, zval *);
+
+	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
+		add_next_index_stringl(array, ce->name, ce->name_length, 1);
+	}
 	return 0;
 }
 
@@ -797,7 +807,7 @@ ZEND_FUNCTION(get_declared_classes)
 	}
 
 	array_init(return_value);
-	zend_hash_apply_with_argument(CG(class_table), (apply_func_arg_t)copy_class_name, return_value);
+	zend_hash_apply_with_arguments(CG(class_table), copy_class_name, 1, return_value);
 }
 /* }}} */
 
@@ -854,3 +864,12 @@ ZEND_FUNCTION(create_function)
 	}
 }
 /* }}} */
+
+
+
+ZEND_FUNCTION(zend_test_func)
+{
+	zval **arg1, **arg2;
+
+	zend_get_parameters_ex(2, &arg1, &arg2);
+}
