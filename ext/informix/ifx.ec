@@ -278,11 +278,12 @@ EXEC SQL END DECLARE SECTION;
 	return(ifx_err_msg);
 }
 
-static void ifx_do_close(link TSRMLS_DC)
+static void ifx_do_close(link)
 EXEC SQL BEGIN DECLARE SECTION;
 	PARAMETER char *link;
 EXEC SQL END DECLARE SECTION;
 {
+	TSRMLS_FETCH();
 
 	EXEC SQL SET CONNECTION :link;
                 
@@ -328,7 +329,7 @@ static void _close_ifx_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	link=(char *)rsrc->ptr;
 
-	ifx_do_close(link TSRMLS_CC);
+	ifx_do_close(link);
 
 	efree(link);
 	IFXG(num_links)--;
@@ -340,7 +341,7 @@ static void _close_ifx_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	link = (char *)rsrc->ptr;
 
-	ifx_do_close(link TSRMLS_CC);
+	ifx_do_close(link);
 
 	free(link);
 	IFXG(num_persistent)--;
