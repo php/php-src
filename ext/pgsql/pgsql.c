@@ -117,14 +117,14 @@ static void php_pgsql_set_default_link(int id)
 {   
 	PGLS_FETCH();
 
+	zend_list_addref(id); /* increase refcount for the new default link */
+
     if (PGG(default_link) != -1) {
+		/* decrease refcount for the old default link */
         zend_list_delete(PGG(default_link));
     }
 
-    if (PGG(default_link) != id) {
-        PGG(default_link) = id;
-        zend_list_addref(id);
-    }
+	PGG(default_link) = id;
 }
 
 
