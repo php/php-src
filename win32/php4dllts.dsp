@@ -1918,6 +1918,22 @@ SOURCE=..\ext\rpc\com\variant.h
 
 SOURCE=..\ext\rpc\tests\test1.php
 # End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\tests\test2.php
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\tests\test3.php
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\tests\test4.php
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\tests\tests.php
+# End Source File
 # End Group
 # End Group
 # End Group
