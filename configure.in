@@ -278,6 +278,7 @@ PHP_CHECK_FUNC(gethostname, nsl)
 PHP_CHECK_FUNC(gethostbyaddr, nsl)
 PHP_CHECK_FUNC(yp_get_default_domain, nsl)
 
+AC_CHECK_LIB(dl, dlopen, [PHP_ADD_LIBRARY(dl)])
 AC_CHECK_LIB(m, sin)
 
 dnl Check for resolver routines.
