@@ -95,7 +95,8 @@ AC_DEFUN(AC_BUILD_RPATH,[
     OLD_RPATHS="$PHP_RPATHS"
 	PHP_RPATHS=""
 	for i in $OLD_RPATHS; do
-	    PHP_RPATHS="$PHP_RPATHS -R $i"
+        PHP_LDFLAGS="$PHP_LDFLAGS -L$i"
+        PHP_RPATHS="$PHP_RPATHS -R $i"
         NATIVE_RPATHS="$NATIVE_RPATHS ${ld_runpath_switch}$i"
 	  done
   fi
