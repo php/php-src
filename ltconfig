@@ -1936,8 +1936,7 @@ hpux9* | hpux10* | hpux11*)
   # HP-UX runs *really* slowly unless shared libraries are mode 555.
   postinstall_cmds='chmod 555 $lib'
   case "$host_os" in
-  hpux10.20*)
-    # TODO:  Does this work for hpux-11 too?
+  hpux10.20*|hpux11*)
     deplibs_check_method='file_magic (s[0-9][0-9][0-9]|PA-RISC[0-9].[0-9]) shared library'
     file_magic_cmd=/usr/bin/file
     file_magic_test_file=/usr/lib/libc.sl
