@@ -1470,7 +1470,7 @@ PHP_FUNCTION(is_numeric)
 			break;
 
 		case IS_STRING:
-			result = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL);
+			result = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0);
 			if (result == IS_LONG || result == IS_DOUBLE) {
 				RETURN_TRUE;
 			} else {

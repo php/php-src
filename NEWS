@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Floating point numbers are better detected when converting from strings
+  (Zeev, Zend Engine)
 - Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
   it's warmly recommended to use this file as the basis for your PHP
   configuration, rather than php.ini-dist.  (Zeev)
