@@ -297,18 +297,36 @@ PHP_CHECK_FUNC(res_nsend, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 dnl already done PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
 
-AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen])
-AC_CHECK_FUNCS([mbrlen mbsinit],,,[
+dnl
+dnl Check for i18n capabilities
+dnl
+AC_DEFUN([PHP_CHECK_I18N_FUNCS],[
+  AC_CHECK_HEADERS([wchar.h])
+  AC_CHECK_FUNCS([mblen])
+  AC_CHECK_FUNCS([mbrlen mbsinit],,,[
 #ifdef HAVE_WCHAR_H
 # include <wchar.h>
 #endif
-])
-AC_CHECK_TYPES([mbstate_t],,,[
+  ])
+  AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
+    AC_TRY_COMPILE([
 #ifdef HAVE_WCHAR_H
 # include <wchar.h>
 #endif
+    ],[
+int __tmp__() { mbstate_t a; }
+    ],[
+      ac_cv_type_mbstate_t=yes
+    ],[
+      ac_cv_type_mbstate_t=no
+    ])
+  ])
+  if test "$ac_cv_type_mbstate_t" = "yes"; then
+    AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
+  fi
 ])
+
+PHP_CHECK_I18N_FUNCS
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
