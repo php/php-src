@@ -250,6 +250,13 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ setFrontendObject()
 
+    /**
+     * Set object that represents the frontend to be used.
+     *
+     * @param  object Reference of the frontend object
+     * @return void
+     * @access public
+     */
     function setFrontendObject(&$ui)
     {
         $this->ui = &$ui;
@@ -259,6 +266,13 @@ class PEAR_Common extends PEAR
 
     // {{{ _unIndent()
 
+    /**
+     * Unindent given string (?)
+     *
+     * @param string $str The string that has to be unindented.
+     * @return string
+     * @access private
+     */
     function _unIndent($str)
     {
         // remove leading newlines
@@ -943,6 +957,16 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ infoFromAny()
 
+    /**
+     * Returns package information from different sources
+     *
+     * This method is able to extract information about a package
+     * from a .tgz archive or from a XML package definition file.
+     *
+     * @access public
+     * @param  string Filename of the source ('package.xml', '<package>.tgz')
+     * @return string
+     */
     function infoFromAny($info)
     {
         if (is_string($info) && file_exists($info)) {
@@ -971,6 +995,15 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ validatePackageInfo()
 
+    /**
+     * Validate XML package definition file.
+     *
+     * @param  string Filename of the package archive or of the package definition file
+     * @param  array  Array that will contain the errors
+     * @param  array  Array that will contain the warnings
+     * @access public
+     * @return boolean
+     */
     function validatePackageInfo($info, &$errors, &$warnings)
     {
         global $_PEAR_Common_maintainer_roles,
@@ -1098,6 +1131,13 @@ class PEAR_Common extends PEAR
     // }}}
     // {{{ analyzeSourceCode()
 
+    /**
+     * Analyze the source code of the given PHP file
+     *
+     * @param  string Filename of the PHP file
+     * @return mixed
+     * @access public
+     */
     function analyzeSourceCode($file)
     {
         if (!function_exists("token_get_all")) {
@@ -1462,11 +1502,11 @@ class PEAR_Common extends PEAR
                                                                   $errno, $errstr));
                 }
                 return PEAR::raiseError("Connection to `$host:$port' failed: $errstr", $errno);
-            }
+            }            
             $request = "GET $path HTTP/1.0\r\n";
         }
         $request .= "Host: $host:$port\r\n".
-            "User-Agent: ".PHP_VERSION."\r\n".
+            "User-Agent: PHP/".PHP_VERSION."\r\n".
             "\r\n";
         fwrite($fp, $request);
         $headers = array();
