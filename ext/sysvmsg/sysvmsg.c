@@ -88,7 +88,7 @@ PHP_INI_END()
 */
 /* }}} */
 
-static void sysvmsg_release(zend_rsrc_list_entry *rsrc)
+static void sysvmsg_release(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	sysvmsg_queue_t * mq = (sysvmsg_queue_t*)rsrc->ptr;
 	efree(mq);
