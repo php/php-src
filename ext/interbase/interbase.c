@@ -2606,8 +2606,8 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 	var = ib_result->out_sqlda->sqlvar;
 	for (i = 0; i < ib_result->out_sqlda->sqld; i++, var++) {
 		if (((var->sqltype & 1) == 0) || *var->sqlind != -1) {
-			zval *tmp;
-			tmp = emalloc(sizeof(zval));
+			zval tmp;
+
 			switch (var->sqltype & ~1) {
 				case SQL_VARYING:
 				case SQL_TEXT:
@@ -2625,7 +2625,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 				case SQL_TYPE_DATE:
 				case SQL_TYPE_TIME:
 #endif
-					_php_ibase_var_zval(tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag TSRMLS_CC);
+					_php_ibase_var_zval(&tmp, var->sqldata, var->sqltype, var->sqllen, var->sqlscale, flag TSRMLS_CC);
 					break;
 				case SQL_BLOB:
 					if (flag & PHP_IBASE_FETCH_BLOBS) { /* fetch blob contents into hash */
@@ -2665,25 +2665,25 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 							RETURN_FALSE;
 						}
 						
-						if (_php_ibase_blob_get(tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
+						if (_php_ibase_blob_get(&tmp, &blob_handle, max_len TSRMLS_CC) != SUCCESS) {
 							RETURN_FALSE;
 						}
 						
 						if (isc_close_blob(IB_STATUS, &blob_handle.bl_handle)) {
+							zval_dtor(&tmp);
 							_php_ibase_error(TSRMLS_C);
+							RETURN_FALSE;
 						}
 
 					} else { /* blob id only */
-						ISC_QUAD *bl_qd = (ISC_QUAD ISC_FAR *) var->sqldata;
-						ibase_blob_handle *ib_blob_id;
-						
-						ib_blob_id = (ibase_blob_handle *) ecalloc(1, sizeof(ibase_blob_handle) + 1);
+
+						ibase_blob_handle *ib_blob_id = (ibase_blob_handle *) ecalloc(1, sizeof(ibase_blob_handle) + 1);
 						
 						ib_blob_id->link = ib_result->link;
 						ib_blob_id->trans_handle = ib_result->trans;
-						ib_blob_id->bl_qd = *bl_qd;
+						ib_blob_id->bl_qd = *(ISC_QUAD ISC_FAR *) var->sqldata;
 						
-						ZVAL_STRINGL(tmp, (char *) ib_blob_id, sizeof(ibase_blob_handle),0);
+						ZVAL_STRINGL(&tmp, (char *) ib_blob_id, sizeof(ibase_blob_handle),0);
 					}
 					break;
 				case SQL_ARRAY: {
@@ -2703,7 +2703,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 						}
 						
 						tmp_ptr = ar_data; /* avoid changes in _arr_zval */
-						if (_php_ibase_arr_zval(tmp, &tmp_ptr, ib_array, 0, flag TSRMLS_CC) == FAILURE) {
+						if (_php_ibase_arr_zval(&tmp, &tmp_ptr, ib_array, 0, flag TSRMLS_CC) == FAILURE) {
 							efree(ar_data);
 							RETURN_FALSE;
 						}
@@ -2719,31 +2719,30 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 			} /* switch */
 
 			if (fetch_type & FETCH_ROW) {
-				switch (Z_TYPE_P(tmp)) {
+				switch (Z_TYPE(tmp)) {
 					case IS_STRING:
-						add_index_stringl(return_value, i, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
+						add_index_stringl(return_value, i, Z_STRVAL(tmp), Z_STRLEN(tmp), 0);
 						break;
 					case IS_LONG:
-						add_index_long(return_value, i, Z_LVAL_P(tmp));
+						add_index_long(return_value, i, Z_LVAL(tmp));
 						break;
 					case IS_DOUBLE:
-						add_index_double(return_value, i, Z_DVAL_P(tmp));
+						add_index_double(return_value, i, Z_DVAL(tmp));
 						break;
 				}
 			} else {
-				switch (Z_TYPE_P(tmp)) {
+				switch (Z_TYPE(tmp)) {
 					case IS_STRING:
-						add_assoc_stringl(return_value, var->aliasname, Z_STRVAL_P(tmp), Z_STRLEN_P(tmp), 0);
+						add_assoc_stringl(return_value, var->aliasname, Z_STRVAL(tmp), Z_STRLEN(tmp), 0);
 						break;
 					case IS_LONG:
-						add_assoc_long(return_value, var->aliasname, Z_LVAL_P(tmp));
+						add_assoc_long(return_value, var->aliasname, Z_LVAL(tmp));
 						break;
 					case IS_DOUBLE:
-						add_assoc_double(return_value, var->aliasname, Z_DVAL_P(tmp));
+						add_assoc_double(return_value, var->aliasname, Z_DVAL(tmp));
 						break;
 				}
 			}
-			efree(tmp);
 		} else {
 			if (fetch_type & FETCH_ROW) {
 				add_index_null(return_value, i);
