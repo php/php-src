@@ -2317,6 +2317,11 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_class_entry *new_class_entry = emalloc(sizeof(zend_class_entry));
 	char *lcname = zend_str_tolower_dup(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 
+	if (CG(active_class_entry)) {
+		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+		return;
+	}
+
 	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent"))) {
 		efree(lcname);
 		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", class_name->u.constant.value.str.val);
