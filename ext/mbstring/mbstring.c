@@ -2256,7 +2256,7 @@ PHP_FUNCTION(mb_convert_variables)
 								if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 									if (stack_level >= stack_max) {
 										stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-										ptmp = erealloc(stack, stack_max);
+										ptmp = erealloc(stack, sizeof(pval **)*stack_max);
 										if (ptmp == NULL) {
 											php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
 											continue;
@@ -2347,7 +2347,7 @@ detect_end:
 							if (Z_TYPE_PP(hash_entry) == IS_ARRAY || Z_TYPE_PP(hash_entry) == IS_OBJECT) {
 								if (stack_level >= stack_max) {
 									stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
-									ptmp = erealloc(stack, stack_max);
+									ptmp = erealloc(stack, sizeof(pval **)*stack_max);
 									if (ptmp == NULL) {
 										php_error(E_WARNING, "stack err at %s:(%d)", __FILE__, __LINE__);
 										continue;
@@ -2497,13 +2497,13 @@ PHP_FUNCTION(mb_decode_numericentity)
 
 
 #if HAVE_SENDMAIL
-/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers])
+/* {{{ proto int mb_send_mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
    Sends an email message with MIME scheme */
 PHP_FUNCTION(mb_send_mail)
 {
 	int argc, n;
 	pval **argv[4];
-	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL;
+	char *to=NULL, *message=NULL, *headers=NULL, *subject=NULL, *extra_cmd=NULL;
 	char *message_buf=NULL, *subject_buf=NULL, *p;
 	mbfl_string orig_str, conv_str;
 	mbfl_string *pstr;	/* pointer to mbfl string for return value */
@@ -2537,7 +2537,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	argc = ZEND_NUM_ARGS();
-	if (argc < 3 || argc > 4 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
+	if (argc < 3 || argc > 5 || zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -2621,7 +2621,12 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device_output('\0', &device);
 	headers = device.buffer;
 
-	if (!err && php_mail(to, subject, message, headers, NULL)){
+	if (argc == 5) {	/* extra options that get passed to the mailer */
+		convert_to_string_ex(argv[4]);
+		extra_cmd = (*argv[4])->value.str.val;
+	}
+
+	if (!err && php_mail(to, subject, message, headers, extra_cmd)){
 		RETVAL_TRUE;
 	} else {
 		RETVAL_FALSE;
