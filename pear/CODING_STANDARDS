@@ -123,6 +123,18 @@ function connect(&$dsn, $persistent = false)
     return true;
 }
 
+Functions should be named using the "studly caps" style (also referred to as
+"bumpy case" or "camel caps".  The initial letter of the name is lowercase,
+and each letter that starts a new "word" is capitalized.  Some examples:
+
+    connect()       getData()       buildSomeWidget()
+
+Private methods (meaning methods that an intented to be called only from
+within the same class; PHP does not yet support truly-enforceable private
+namespaces) are preceeded by a single underscore.  For example:
+
+    _sort()         _initTree()     _validateInput()
+
 
 ------------
 [5] Comments
