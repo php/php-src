@@ -39,6 +39,7 @@
 #include "ext/xml/php_xml.h"
 #include "ext/standard/php_incomplete_class.h"
 #include "ext/standard/base64.h"
+#include "ext/standard/info.h"
 
 #define WDDX_BUF_LEN			256
 #define PHP_CLASS_NAME_VAR		"php_class_name"
@@ -241,6 +242,7 @@ PHP_MINIT_FUNCTION(wddx)
 	return SUCCESS;
 }
 /* }}} */
+
 
 PHP_MINFO_FUNCTION(wddx)
 {
