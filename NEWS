@@ -15,6 +15,8 @@ PHP 4                                                                      NEWS
 - Added memory_get_usage(). Defined only when PHP is compiled with
   --enable-memory-limit. Returns the number of bytes allocated by the Zend's
   memory routines. (Andrey)
+- Fixed bug #22103 (Added gdImageEllipse and replaced old gdImageFilledEllipse
+  with a better implementation) (Pierre).
 - Fixed bug #22088 (array_shift() left next index to be +1 too much). (Jani)
 - Fixed bug #22042 (pg_result_seek() would never seek to the 1st row in the
   result due to always seeking to row next to the one requested). (Ilia)
