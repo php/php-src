@@ -1,7 +1,7 @@
 <?php # vim:ft=php
 
 require_once('pdo.inc');
-	
+
 set_sql('create1', 'CREATE TABLE classtypes(id int PRIMARY KEY, name VARCHAR(10) UNIQUE)');
 set_sql('insert1', 'INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
 set_sql('insert2', 'INSERT INTO classtypes VALUES(1, \'Test1\')'); 
