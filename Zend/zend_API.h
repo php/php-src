@@ -243,25 +243,28 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 	{																			\
 		char *_name = (name);													\
 																				\
-		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var);		\
+		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 0);	\
 	}
 
 
-#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var)									\
+#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount)									\
 	{																									\
 		zval **orig_var;																				\
 																										\
 		if (zend_hash_find(symtable, (name), (name_length), (void **) &orig_var)==SUCCESS				\
 			&& PZVAL_IS_REF(*orig_var)) {																\
-			(var)->refcount = (*orig_var)->refcount;														\
+			(var)->refcount = (*orig_var)->refcount;													\
 			(var)->is_ref = 1;																			\
 																										\
 			zval_dtor(*orig_var);																		\
-			**orig_var = *(var);																			\
+			**orig_var = *(var);																		\
 			efree(var);																					\
 		} else {																						\
 			INIT_PZVAL((var));																			\
-			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);				\
+			if (_refcount) {																			\
+				(var)->refcount = _refcount;															\
+			}																							\
+			zend_hash_update(symtable, (name), (name_length), &(var), sizeof(zval *), NULL);			\
 		}																								\
 	}
 
@@ -269,8 +272,8 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 #define ZEND_SET_GLOBAL_VAR(name, var)				\
 	ZEND_SET_SYMBOL(&EG(symbol_table), name, var)
 
-#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var)		\
-	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var)
+#define ZEND_SET_GLOBAL_VAR_WITH_LENGTH(name, name_length, var, _refcount)		\
+	ZEND_SET_SYMBOL_WITH_LENGTH(&EG(symbol_table), name, name_length, var, _refcount)
 
 #define HASH_OF(p) ((p)->type==IS_ARRAY ? (p)->value.ht : (((p)->type==IS_OBJECT ? (p)->value.obj.properties : NULL)))
 
