@@ -286,6 +286,10 @@ PHP_MINIT_FUNCTION(file)
 	FIL(pclose_ret) = 0;
 #endif
 
+	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
+
 	return SUCCESS;
 }
 
@@ -1183,13 +1187,13 @@ PHP_FUNCTION(ftell)
 }
 
 /* }}} */
-/* {{{ proto int fseek(int fp, int offset [, int seekfrom])
+/* {{{ proto int fseek(int fp, int offset [, int whence])
    Seek on a file pointer */
 
 PHP_FUNCTION(fseek)
 {
-	pval **arg1, **arg2, **arg3;
-	int argcount = ARG_COUNT(ht), seekfrom = 0;
+	zval **arg1, **arg2, **arg3;
+	int argcount = ARG_COUNT(ht), whence = SEEK_SET;
 	void *what;
 	
 	if (argcount < 2 || argcount > 3 ||
@@ -1203,10 +1207,10 @@ PHP_FUNCTION(fseek)
 	convert_to_long_ex(arg2);
 	if (argcount > 2) {
 		convert_to_long_ex(arg3);
-		seekfrom = (*arg3)->value.lval;
+		whence = (*arg3)->value.lval;
 	}
 	
-	RETURN_LONG(fseek((FILE*)what,(*arg2)->value.lval+seekfrom,SEEK_SET));
+	RETURN_LONG(fseek((FILE*)what, (*arg2)->value.lval, whence));
 }
 
 /* }}} */
