@@ -39,7 +39,7 @@ static void browscap_entry_dtor(zval **pvalue)
 		zend_hash_destroy(Z_ARRVAL_PP(pvalue));
 		free(Z_ARRVAL_PP(pvalue));
 	} else if (Z_TYPE_PP(pvalue) == IS_STRING) {
-		if (Z_STRVAL_PP(pvalue) && Z_STRVAL_PP(pvalue) != empty_string) {
+		if (Z_STRVAL_PP(pvalue)) {
 			free(Z_STRVAL_PP(pvalue));
 		}
 	}
@@ -102,7 +102,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 
 				new_property = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(new_property);
-				Z_STRVAL_P(new_property) = Z_STRLEN_P(arg2)?zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)):empty_string;
+				Z_STRVAL_P(new_property) = zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2));
 				Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
 				Z_TYPE_P(new_property) = IS_STRING;
 
