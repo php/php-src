@@ -69,7 +69,6 @@ if (!empty($home)) {
 }
 require_once "PEAR/Downloader.php";
 require_once 'PEAR/Installer.php';
-require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'php_dump.php';
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'download_test_classes.php.inc';
 
 // no UI is needed for these tests
