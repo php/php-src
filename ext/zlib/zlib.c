@@ -76,6 +76,8 @@
 #define OS_CODE			0x03 /* FIXME */
 #define CODING_GZIP		1
 #define CODING_DEFLATE	2
+#define GZIP_HEADER_LENGTH		10
+#define GZIP_FOOTER_LENGTH		8
 
 /* True globals, no need for thread safety */
 static int le_zp;
@@ -761,7 +763,7 @@ PHP_FUNCTION(gzcompress)
 		convert_to_long_ex(zlimit);
 		limit = Z_LVAL_PP(zlimit);
 		if((limit<0)||(limit>9)) {
-			php_error(E_WARNING,"gzcompress: compression level must be whithin 0..9");
+			php_error(E_WARNING,"gzcompress: compression level must be within 0..9");
 			RETURN_FALSE;
 		}
 		break;
@@ -870,7 +872,7 @@ PHP_FUNCTION(gzdeflate)
 		convert_to_long_ex(zlimit);
 		level = Z_LVAL_PP(zlimit);
 		if((level<0)||(level>9)) {
-			php_error(E_WARNING,"gzdeflate: compression level must be whithin 0..9");
+			php_error(E_WARNING,"gzdeflate: compression level must be within 0..9");
 			RETURN_FALSE;
 		}
 		break;
@@ -1124,36 +1126,104 @@ int php_deflate_string(const char *str, uint str_length, char **newstr, uint *ne
 }
 /* }}} */
 
-/* {{{ proto string gzencode(string data [, int encoding_mode])
+/* {{{ proto string gzencode(string data [, int level [, int encoding_mode]])
    GZ encode a string */
 PHP_FUNCTION(gzencode)
 {
-	zval **zv_coding, **zv_string;
-	int coding;
+	char *data, *s2;
+	int data_len;
+	int level = Z_DEFAULT_COMPRESSION, coding = CODING_GZIP;
+	int status;
+	z_stream stream;
 
-	switch(ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &zv_string)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(zv_string);
-			coding = 1;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &zv_string, &zv_coding)==FAILURE) {
-				RETURN_FALSE;
-			}
-			convert_to_string_ex(zv_string);
-			convert_to_long_ex(zv_coding);
-			coding = Z_LVAL_PP(zv_coding);
-			break;
-		default:
-			ZEND_WRONG_PARAM_COUNT();
-			break;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ll", &data, &data_len, &level, &coding) == FAILURE) {
+		return;
 	}
-	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, 1, 1 TSRMLS_CC)==SUCCESS) {
-		Z_TYPE_P(return_value) = IS_STRING;
+
+	if((level<-1)||(level>9)) {
+		php_error(E_WARNING,"gzencode: compression level must be within -1..9");
+		RETURN_FALSE;
+	}
+
+	if((coding!=CODING_GZIP)&&(coding!=CODING_DEFLATE)) {
+		php_error(E_WARNING,"gzencode: encoding mode must be FORCE_GZIP or FORCE_DEFLATE");
+		RETURN_FALSE;
+	}
+
+	stream.zalloc = Z_NULL;
+	stream.zfree = Z_NULL;
+	stream.opaque = Z_NULL;
+
+	stream.next_in = (Bytef*) data;
+	stream.avail_in = data_len;
+
+	stream.avail_out = stream.avail_in + (stream.avail_in/1000) + 15 + 1; /* room for \0 */
+	s2 = (char *) emalloc(stream.avail_out+GZIP_HEADER_LENGTH+(coding==CODING_GZIP?GZIP_FOOTER_LENGTH:0));
+	if(!s2)
+		RETURN_FALSE;
+
+	/* add gzip file header */
+	s2[0] = gz_magic[0];
+	s2[1] = gz_magic[1];
+	s2[2] = Z_DEFLATED;
+	s2[3] = s2[4] = s2[5] = s2[6] = s2[7] = s2[8] = 0; /* time set to 0 */
+	s2[9] = OS_CODE;
+
+	stream.next_out = &(s2[GZIP_HEADER_LENGTH]);
+
+	switch (coding) {
+		case CODING_GZIP:
+			/* windowBits is passed < 0 to suppress zlib header & trailer */
+			if ((status = deflateInit2(&stream, level, Z_DEFLATED,
+									  -MAX_WBITS, MAX_MEM_LEVEL,
+									   Z_DEFAULT_STRATEGY))
+							!= Z_OK) {
+				php_error(E_WARNING,"gzencode: %s", zError(status));
+				RETURN_FALSE;
+			}
+		
+			break;
+		case CODING_DEFLATE:
+			if ((status = deflateInit(&stream, level)) != Z_OK) {
+				php_error(E_WARNING,"gzencode: %s", zError(status));
+				RETURN_FALSE;
+			}
+			break;		
+	}
+
+	status = deflate(&stream, Z_FINISH);
+	if (status != Z_STREAM_END) {
+		deflateEnd(&stream);
+		if (status == Z_OK) {
+			status = Z_BUF_ERROR;
+		}
 	} else {
+		status = deflateEnd(&stream);
+	}
+
+	if (status==Z_OK) {
+		s2 = erealloc(s2,stream.total_out+GZIP_HEADER_LENGTH+(coding==CODING_GZIP?GZIP_FOOTER_LENGTH:0)+1); /* resize to buffer to the "right" size */
+		if (coding == CODING_GZIP) {
+			char *trailer = s2+(stream.total_out+GZIP_HEADER_LENGTH);
+			uLong crc = crc32(0L, Z_NULL, 0);
+
+			crc = crc32(crc, (const Bytef *) data, data_len);
+
+			/* write crc & stream.total_in in LSB order */
+			trailer[0] = (char) crc & 0xFF;
+			trailer[1] = (char) (crc >> 8) & 0xFF;
+			trailer[2] = (char) (crc >> 16) & 0xFF;
+			trailer[3] = (char) (crc >> 24) & 0xFF;
+			trailer[4] = (char) stream.total_in & 0xFF;
+			trailer[5] = (char) (stream.total_in >> 8) & 0xFF;
+			trailer[6] = (char) (stream.total_in >> 16) & 0xFF;
+			trailer[7] = (char) (stream.total_in >> 24) & 0xFF;
+			trailer[8] = '\0';
+	}
+		RETURN_STRINGL(s2, stream.total_out+GZIP_HEADER_LENGTH+(coding==CODING_GZIP?GZIP_FOOTER_LENGTH:0), 0);
+	} else {
+		efree(s2);
+		php_error(E_WARNING,"gzencode: %s",zError(status));
 		RETURN_FALSE;
 	}
 }
