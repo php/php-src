@@ -44,11 +44,10 @@ LTLIBRARY_SOURCES     = \
 	typecode.c \
 	typemanager.c \
 	zval_to_namedvalue.c
+
 LTLIBRARY_SHARED_NAME = satellite.la
+LTLIBRARY_SHARED_LIBADD = $(SATELLITE_SHARED_LIBADD)
 
-#LTLIBRARY_SHARED_LIBADD = `orbit-config --libs client` `libIDL-config --libs`
-LTLIBRARY_LDFLAGS=`orbit-config --libs client` `libIDL-config --libs`
-
-EXTRA_CFLAGS = -Wall -Wunused -Wmissing-prototypes -Wmissing-declarations `orbit-config --cflags client` `libIDL-config --cflags` 
+EXTRA_CFLAGS = -Wall -Wunused -Wmissing-prototypes -Wmissing-declarations
 
 include $(top_srcdir)/build/dynlib.mk
