@@ -244,8 +244,8 @@ PHP_MINFO_FUNCTION(apache)
 		
 		r = ((request_rec *) SG(server_context));
 		SECTION("HTTP Headers Information");
-		php_info_print_table_start();	
-		PUTS("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=2>HTTP Request Headers</TH></TR>\n");
+		php_info_print_table_start();
+		php_info_print_table_colspan_header(2, "HTTP Request Headers");
 		php_info_print_table_row(2, "HTTP Request", r->the_request);
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
@@ -254,7 +254,7 @@ PHP_MINFO_FUNCTION(apache)
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
-		PUTS("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=2>HTTP Response Headers</TH></TR>\n");
+		php_info_print_table_colspan_header(2, "HTTP Response Headers");
 		env_arr = table_elts(r->headers_out);
 		env = (table_entry *)env_arr->elts;
 		for(i = 0; i < env_arr->nelts; ++i) {
