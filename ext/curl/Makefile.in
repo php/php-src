@@ -1,0 +1,7 @@
+
+LTLIBRARY_NAME    = libcurl.la
+LTLIBRARY_SOURCES = curl.c
+LTLIBRARY_SHARED_NAME   = curl.la
+LTLIBRARY_SHARED_LIBADD = $(CURL_SHARED_LIBADD)
+
+include $(top_srcdir)/build/dynlib.mk
