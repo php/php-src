@@ -52,6 +52,7 @@ struct php_shmop
 	int shmid;
 	key_t key;
 	int shmflg;
+	int shmatflg;
 	char *addr;
 	int size;
 };
