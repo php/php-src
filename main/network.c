@@ -778,7 +778,9 @@ static char *php_sockop_gets(php_stream *stream, char *buf, size_t maxlen)
 	}
 
 	if(p) {
-		amount = (ptrdiff_t) p - (ptrdiff_t) READPTR(sock) + 1;
+/*              FIXME: ptrdiff_t is better, but just not all system support this type */
+/* 		amount = (ptrdiff_t) p - (ptrdiff_t) READPTR(sock) + 1; */
+		amount = (long) p - (long) READPTR(sock) + 1;
 	} else {
 		amount = TOREAD(sock);
 	}
