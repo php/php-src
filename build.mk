@@ -57,7 +57,7 @@ cvsclean:
 	@for i in $(shell find . -follow -name .cvsignore); do \
 		(cd `dirname $$i` && rm -rf `cat .cvsignore`); \
 	done
-	@rm -f $(SUBDIRS) 
+	@rm -f $(SUBDIRS) 2>/dev/null || true
 
 acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
