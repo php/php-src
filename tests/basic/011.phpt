@@ -1,8 +1,9 @@
 --TEST--
-Testing $argc and $argv handling
+Testing $argc and $argv handling (GET)
 --SKIPIF--
-<?php if(ini_get('register_argc_argv') == '') echo 'skip'; ?>
---POST--
+<?php if (php_sapi_name()=='cli') echo 'skip'; ?>
+--INI--
+register_argc_argv=1
 --GET--
 ab+cd+ef+123+test
 --FILE--
