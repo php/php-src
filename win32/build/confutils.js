@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.34 2004-01-08 21:53:48 wez Exp $
+// $Id: confutils.js,v 1.35 2004-01-09 11:19:40 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -792,15 +792,22 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 {
 	var EXT = extname.toUpperCase();
 	var DEP = dependson.toUpperCase();
+	var dep_present = false;
+	var dep_shared = false;
 
+	try {
+		dep_present = eval("PHP_" + DEP);
+		dep_shared = eval("PHP_" + DEP + "_SHARED");
+	} catch (e) {
+		dep_present = "no";
+		dep_shared = false;
+	}
+	
 	if (optional) {
-		var dep_present = eval("PHP_" + DEP);
-
 		if (dep_present == "no")
 			return;
 	}
 
-	var dep_shared = eval("PHP_" + DEP + "_SHARED");
 	var ext_shared = eval("PHP_" + EXT + "_SHARED");
 
 	if (dep_shared) {
