@@ -106,7 +106,7 @@ void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	tn = localtime(&t);
  	memcpy(&ta, tn, sizeof(struct tm));
 	if (gm) {
-	  ta.tm_isdst = 0 /* force winter time if UTC flag is true */
+	  ta.tm_isdst = 0; /* force winter time if UTC flag is true */
 	  /* unless the UTC flag is specified after GMT date parameters. */
 	}
 	else {
