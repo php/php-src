@@ -1776,7 +1776,11 @@ PHP_FUNCTION(imap_fetchbody)
 		convert_to_long_ex(flags);
 	}
  
- 	PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
+    if (myargc < 4 || !Z_LVAL_PP(flags) & FT_UID) {
+        /* If we're fetching via UID, checking the range of msgno is
+           DUMB. */
+        PHP_IMAP_CHECK_MSGNO(Z_LVAL_PP(msgno));
+    }
  
 	body = mail_fetchbody_full(imap_le_struct->imap_stream, Z_LVAL_PP(msgno), Z_STRVAL_PP(sec), &len, myargc==4 ? Z_LVAL_PP(flags) : NIL);
 
