@@ -164,6 +164,12 @@ typedef struct {
 #define IS_CONSTANT	9
 #define IS_METHOD	10 /* for overloaded function calls */
 
+#define MAKE_STD_ZVAL(zv) \
+	zv = (zval *) emalloc(sizeof(zval)); \
+	zv->refcount = 1; \
+	zv->is_ref = 0;
+
+
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown();
 void zend_set_utility_values(zend_utility_values *utility_values);
