@@ -26,8 +26,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_simplexml.h"
-//#include "zend.h"
-//#include "zend_fast_cache.h"
 
 zend_class_entry *sxe_class_entry;
 
