@@ -2462,7 +2462,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		/* BC with older php scripts and zlib wrapper */
 		protocol = "compress.zlib";
 		n = 13;
-		if(options & REPORT_ERRRORS) {
+		if(options & REPORT_ERRORS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Use of \"zlib:\" wrapper is deprecated; please use \"compress.zlib://\" instead.");
 		}
 	}
@@ -2471,7 +2471,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, char 
 		if (FAILURE == zend_hash_find(&url_stream_wrappers_hash, (char*)protocol, n, (void**)&wrapper))	{
 			char wrapper_name[32];
 
-			if(options & REPORT_ERRRORS) {
+			if(options & REPORT_ERRORS) {
 				if (n >= sizeof(wrapper_name))
 					n = sizeof(wrapper_name) - 1;
 				PHP_STRLCPY(wrapper_name, protocol, sizeof(wrapper_name), n);
