@@ -85,6 +85,8 @@ PHP_MINIT_FUNCTION(ftp)
 	return SUCCESS;
 }
 
+/* {{{ proto int ftp_connect(string host)
+   Open a FTP stream */
 PHP_FUNCTION(ftp_connect)
 {
 	pval		*arg1;
@@ -108,7 +110,10 @@ PHP_FUNCTION(ftp_connect)
 	id = php3_list_insert(net, le_netbuf);
 	RETURN_LONG(id);
 }
+/* }}} */
 
+/* {{{ proto int ftp_login(int stream, string username, string password)
+   Logs into the FTP server. */
 PHP_FUNCTION(ftp_login)
 {
 	pval		*arg1, *arg2, *arg3;
@@ -144,7 +149,10 @@ PHP_FUNCTION(ftp_login)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto string ftp_pwd(int stream)
+   Returns the present working directory. */
 PHP_FUNCTION(ftp_pwd)
 {
 	pval		*arg1;
@@ -174,7 +182,10 @@ PHP_FUNCTION(ftp_pwd)
 
 	RETURN_STRING(buf, 1);
 }
+/* }}} */
 
+/* {{{ proto int ftp_cdup(int stream)
+   Changes to the parent directory */
 PHP_FUNCTION(ftp_cdup)
 {
 	pval		*arg1;
@@ -203,7 +214,10 @@ PHP_FUNCTION(ftp_cdup)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ftp_chdir(int stream, string directory)
+   Changes directories */
 PHP_FUNCTION(ftp_chdir)
 {
 	pval		*arg1, *arg2;
@@ -237,7 +251,10 @@ PHP_FUNCTION(ftp_chdir)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ftp_mkdir(int stream, string directory)
+   Creates a directory */
 PHP_FUNCTION(ftp_mkdir)
 {
 	pval		*arg1, *arg2;
@@ -271,7 +288,10 @@ PHP_FUNCTION(ftp_mkdir)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ftp_rmdir(int stream, string directory)
+   Removes a directory */
 PHP_FUNCTION(ftp_rmdir)
 {
 	pval		*arg1, *arg2;
@@ -305,7 +325,10 @@ PHP_FUNCTION(ftp_rmdir)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto array ftp_nlist(int stream, string directory)
+   Returns an array of filenames in the given directory */
 PHP_FUNCTION(ftp_nlist)
 {
 	pval		*arg1, *arg2;
@@ -383,7 +406,10 @@ PHP_FUNCTION(ftp_nlist)
 	} while (size != -1);
 	fclose(outfp);
 }
+/* }}} */
 
+/* {{{ proto array ftp_listraw(int stream, string directory)
+   Returns a detailed listing of a directory as an array of output lines */
 PHP_FUNCTION(ftp_listraw)
 {
 	pval		*arg1, *arg2;
@@ -461,7 +487,10 @@ PHP_FUNCTION(ftp_listraw)
 	} while (size != -1);
 	fclose(outfp);
 }
+/* }}} */
 
+/* {{{ proto string ftp_systype(int stream)
+   Returns the system type identifier */
 PHP_FUNCTION(ftp_systype)
 {
 	pval		*arg1;
@@ -493,7 +522,10 @@ PHP_FUNCTION(ftp_systype)
 
 	RETURN_STRING(buf, 1);
 }
+/* }}} */
 
+/* {{{ proto int ftp_get(int stream, string local_file, string remote_file, int mode)
+   Retrieves a file from the FTP server. */
 PHP_FUNCTION(ftp_get)
 {
 	pval		*arg1, *arg2, *arg3, *arg4;
@@ -576,7 +608,10 @@ PHP_FUNCTION(ftp_get)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ftp_put(int stream, string remote_file, string local_file, int mode)
+   Stores a file on the FTP server */
 PHP_FUNCTION(ftp_put)
 {
 	pval		*arg1, *arg2, *arg3, *arg4;
@@ -634,7 +669,10 @@ PHP_FUNCTION(ftp_put)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
+/* {{{ proto int ftp_quit(int stream)
+   Closes the FTP stream */
 PHP_FUNCTION(ftp_quit)
 {
 	pval		*arg1;
@@ -659,5 +697,6 @@ PHP_FUNCTION(ftp_quit)
 
 	RETURN_TRUE;
 }
+/* }}} */
 
 #endif /* HAVE_FTP */
