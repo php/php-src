@@ -1,0 +1,4 @@
+/* define if you want to use the oci8 extension */
+/* #undef HAVE_LIBOCI8 */
+#define HAVE_OCI8 0   
+
