@@ -545,12 +545,6 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 			php_sprintf_appendchar(&result, &outpos, &size, '%' TSRMLS_CC);
 			inpos += 2;
 		} else {
-			if (currarg >= argc && format[inpos + 1] != '%') {
-				efree(result);
-				efree(args);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
-				return NULL;
-			}
 			/* starting a new format specifier, reset variables */
 			alignment = ALIGN_RIGHT;
 			adjusting = 0;
@@ -581,13 +575,6 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 				}
 
 				argnum += format_offset;
-				
-				if (argnum >= argc) {
-					efree(result);
-					efree(args);
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
-					return NULL;
-				}
 
 				/* after argnum comes modifiers */
 				PRINTF_DEBUG(("sprintf: looking for modifiers\n"
@@ -641,6 +628,13 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 			} else {
 				width = precision = 0;
 				argnum = currarg++ + format_offset;
+			}
+
+			if (argnum >= argc) {
+				efree(result);
+				efree(args);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Too few arguments");
+				return NULL;
 			}
 
 			if (format[inpos] == 'l') {

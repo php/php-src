@@ -59,6 +59,8 @@ PHP                                                                        NEWS
   in segfault). (pdan-php at esync dot org, Tony)
 - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
   parameters). (Jani)
+- Fixed bug #29733 (printf() handles repeated placeholders wrong).
+  (bugs dot php dot net at bluetwanger dot de, Ilia)
 - Fixed bug #29136 (make test - libtool failure on MacOSX). (Jani)
 - Fixed bug #28976 (mail(): use "From:" from headers if sendmail_from is empty).
   (Jani)
