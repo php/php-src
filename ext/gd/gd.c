@@ -1767,8 +1767,9 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		int   b;
 		FILE *tmp;
 		char  buf[4096];
+		char *path;
 
-		tmp = php_open_temporary_file("", "", NULL TSRMLS_CC);
+		tmp = php_open_temporary_file("", "", &path TSRMLS_CC);
 		if (tmp == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to open temporary file");
 			RETURN_FALSE;
@@ -1823,7 +1824,8 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 		}
 
 		fclose(tmp);
-		/* the temporary file is automatically deleted */
+		VCWD_UNLINK((const char *)path); /* make sure that the temporary file is removed */
+		efree(path);
 	}
 	RETURN_TRUE;
 }
