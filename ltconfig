@@ -1188,8 +1188,8 @@ EOF
 
   netbsd*)
     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
-      archive_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
-      archive_expsym_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+      archive_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
+      archive_expsym_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
     else
       archive_cmds='$LD -Bshareable $libobjs $deplibs $linkopts -o $lib'
       # can we support soname and/or expsyms with a.out? -oliva
@@ -1210,8 +1210,8 @@ EOF
 
 EOF
     elif $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
-      archive_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
-      archive_expsym_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+      archive_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
+      archive_expsym_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
     else
       ld_shlibs=no
     fi
@@ -1226,8 +1226,8 @@ EOF
 
   *)
     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
-      archive_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
-      archive_expsym_cmds='$CC -shared $compile_rpath $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
+      archive_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname -o $lib'
+      archive_expsym_cmds='$CC -shared $libobjs $deplibs $linkopts ${wl}-soname $wl$soname ${wl}-retain-symbols-file $wl$export_symbols -o $lib'
     else
       ld_shlibs=no
     fi
@@ -1428,9 +1428,9 @@ else
     no_undefined_flag=' -z text'
     # $CC -shared without GNU ld will not create a library from C++
     # object files and a static libstdc++, better avoid it by now
-    archive_cmds='$LD $compile_rpath -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linkopts'
+    archive_cmds='$LD -G${allow_undefined_flag} -h $soname -o $lib $libobjs $deplibs $linkopts'
     archive_expsym_cmds='$echo "{ global:" > $lib.exp~cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $lib.exp~$echo "local: *; };" >> $lib.exp~
-		$LD $compile_rpath -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linkopts~$rm $lib.exp'
+		$LD -G${allow_undefined_flag} -M $lib.exp -h $soname -o $lib $libobjs $deplibs $linkopts~$rm $lib.exp'
     hardcode_libdir_flag_spec='-R$libdir'
     hardcode_shlibpath_var=no
     case "$host_os" in

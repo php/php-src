@@ -191,6 +191,7 @@ sql.safe_mode	=	Off
 ;uodbc.default_user		=	Not yet implemented
 ;uodbc.default_pw		=	Not yet implemented
 uodbc.allow_persistent	=	On	; allow or prevent persistent links
+uodbc.check_persistent  = 	On	; check that a connection is still validbefore reuse
 uodbc.max_persistent	=	-1	; maximum number of persistent links. -1 means no limit
 uodbc.max_links			=	-1	; maximum number of links (persistent+non persistent). -1 means no limit
 uodbc.defaultlrl	=	4096	; Handling of LONG fields. Returns number of bytes to variables, 0 means passthru

@@ -241,6 +241,7 @@ typedef struct {
 	char *defUser;
 	char *defPW;
 	long allow_persistent;
+	long check_persistent;
 	long max_persistent;
 	long max_links;
 	long num_persistent;
