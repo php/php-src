@@ -174,15 +174,15 @@ PHPAPI void php_print_info(int flag)
 		php_info_print_table_row(2, "php.ini Path", CONFIGURATION_FILE_PATH );
 
 #if ZEND_DEBUG
-		php_info_print_table_row(2, "ZEND_DEBUG", "Enabled" );
+		php_info_print_table_row(2, "ZEND_DEBUG", "enabled" );
 #else
-		php_info_print_table_row(2, "ZEND_DEBUG", "Disabled" );
+		php_info_print_table_row(2, "ZEND_DEBUG", "disabled" );
 #endif
 
 #ifdef ZTS
-		php_info_print_table_row(2, "Thread Safety", "Enabled" );
+		php_info_print_table_row(2, "Thread Safety", "enabled" );
 #else
-		php_info_print_table_row(2, "Thread Safety", "Disabled" );
+		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
 		php_info_print_table_end();
 
@@ -326,8 +326,7 @@ void php_print_credits(int flag)
 		/* Language */
 
 		php_info_print_table_start();
-		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
-		PUTS("<TH COLSPAN=2>PHP 4.0 Authors<BR></TH></TR>\n");
+		php_info_print_table_colspan_header(2, "PHP 4.0 Authors");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Zend Scripting Language Engine", "Andi Gutmans, Zeev Suraski");
 		CREDIT_LINE("Extension Module API", "Andi Gutmans, Zeev Suraski");
@@ -341,8 +340,7 @@ void php_print_credits(int flag)
 		/* SAPI Modules */
 
 		php_info_print_table_start();
-		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
-		PUTS("<TH COLSPAN=2>SAPI Module<BR></TH></TR>\n");
+		php_info_print_table_colspan_header(2, "SAPI Module");
 		php_info_print_table_header(2, "Contribution", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Zeev Suraski");
 		CREDIT_LINE("ISAPI", "Andi Gutmans, Zeev Suraski");
@@ -358,8 +356,7 @@ void php_print_credits(int flag)
 		/* Modules */
 
 		php_info_print_table_start();
-		PUTS("<TR VALIGN=\"bottom\" bgcolor=\"" PHP_HEADER_COLOR "\">");
-		PUTS("<TH COLSPAN=2>Module Authors<BR></TH></TR>\n");
+		php_info_print_table_colspan_header(2, "Module Authors");
 		php_info_print_table_header(2, "Module", "Authors");
 		CREDIT_LINE("Apache", "Rasmus Lerdorf, Stig Bakken, David Sklar");
 		CREDIT_LINE("Assert", "Thies C. Arntzen");
@@ -449,6 +446,10 @@ PHPAPI void php_info_print_hr()
 	php_printf("<HR NOSHADE SIZE=1 WIDTH=600>\n");
 }
 
+PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
+{
+	php_printf("<TR BGCOLOR=\"" PHP_HEADER_COLOR "\"><TH COLSPAN=%d>%s</TH></TR>\n", num_cols, header );
+}
 
 
 PHPAPI void php_info_print_table_header(int num_cols, ...)
