@@ -7,6 +7,10 @@ AC_DEFUN(PHP_GD_JPEG,[
   [  --with-jpeg-dir=DIR       GD: Set the path to libjpeg install prefix.])
 
   if test "$PHP_JPEG_DIR" != "no" -a "$PHP_JPEG_DIR"; then
+    if test "$PHP_JPEG_DIR" = "yes"; then
+      $PHP_JPEG_DIR=/usr/local
+    fi
+
     AC_CHECK_LIB(jpeg,jpeg_read_header,[
       PHP_ADD_LIBRARY_WITH_PATH(jpeg, $PHP_JPEG_DIR/lib, GD_SHARED_LIBADD)
     ],[
@@ -24,6 +28,10 @@ AC_DEFUN(PHP_GD_PNG,[
   [  --with-png-dir=DIR        GD: Set the path to libpng install prefix.])
 
   if test "$PHP_PNG_DIR" != "no" -a "$PHP_PNG_DIR"; then
+    if test "$PHP_PNG_DIR" = "yes"; then
+      $PHP_PNG_DIR=/usr/local
+    fi
+
     AC_CHECK_LIB(png,png_info_init,[
       PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(png, $PHP_PNG_DIR/lib, GD_SHARED_LIBADD)
@@ -42,6 +50,10 @@ AC_DEFUN(PHP_GD_XPM,[
   [  --with-xpm-dir=DIR        GD: Set the path to libXpm install prefix.])
 
   if test "$PHP_XPM_DIR" != "no" -a "$PHP_XPM_DIR"; then
+    if test "$PHP_XPM_DIR" = "yes"; then
+      $PHP_XPM_DIR=/usr/local
+    fi
+
     AC_CHECK_LIB(Xpm,XpmFreeXpmImage, [
       PHP_ADD_LIBRARY_WITH_PATH(Xpm, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
       PHP_ADD_LIBRARY_WITH_PATH(X11, $PHP_XPM_DIR/lib, GD_SHARED_LIBADD)
