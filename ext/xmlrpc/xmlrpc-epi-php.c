@@ -1030,7 +1030,12 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 		WRONG_PARAM_COUNT;
 	}
 	/* user output options */
-	set_output_options(&out, *output_opts);
+	if (argc == 3) {
+		set_output_options(&out, NULL);
+	}
+	else {
+		set_output_options(&out, *output_opts);
+	}
 
 	server = zend_list_find(Z_LVAL_PP(handle), &type);
 
