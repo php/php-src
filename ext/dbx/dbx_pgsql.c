@@ -148,7 +148,7 @@ int dbx_pgsql_query(zval **rv, zval **dbx_handle, zval **db_name, zval **sql_sta
 	/* db_name is not used in this function */
 	args[0]=dbx_handle;
 	args[1]=sql_statement;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_exec", &returned_zval, nargs, args);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_query", &returned_zval, nargs, args);
 	/* pg_query returns a bool for success or failure, 
 	   or a result_identifier for select statements */
 	if (!returned_zval || (Z_TYPE_P(returned_zval)!=IS_BOOL && Z_TYPE_P(returned_zval)!=IS_RESOURCE)) {
@@ -167,7 +167,7 @@ int dbx_pgsql_getcolumncount(zval **rv, zval **result_handle, INTERNAL_FUNCTION_
 	zval *returned_zval=NULL;
 
 	arguments[0]=result_handle;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_numfields", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_num_fields", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_LONG) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
@@ -188,7 +188,7 @@ int dbx_pgsql_getcolumnname(zval **rv, zval **result_handle, long column_index, 
 	ZVAL_LONG(zval_column_index, column_index);
 	arguments[0]=result_handle;
 	arguments[1]=&zval_column_index;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldname", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_field_name", &returned_zval, number_of_arguments, arguments);
 	/* pg_fieldname returns a string */
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
@@ -212,7 +212,7 @@ int dbx_pgsql_getcolumntype(zval **rv, zval **result_handle, long column_index, 
 	ZVAL_LONG(zval_column_index, column_index);
 	arguments[0]=result_handle;
 	arguments[1]=&zval_column_index;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_fieldtype", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_field_type", &returned_zval, number_of_arguments, arguments);
 	/* pg_fieldtype returns a string */
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
@@ -252,7 +252,7 @@ int dbx_pgsql_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS)
 
 	arguments[0]=dbx_handle;
 	if (!dbx_handle) number_of_arguments=0;
-	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_errormessage", &returned_zval, number_of_arguments, arguments);
+	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "pg_last_error", &returned_zval, number_of_arguments, arguments);
 	if (!returned_zval || Z_TYPE_P(returned_zval)!=IS_STRING) {
 		if (returned_zval) zval_ptr_dtor(&returned_zval);
 		return 0;
