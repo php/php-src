@@ -53,8 +53,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib cpdfi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_cpdf.dll" /libpath:"..\..\Release_TS"
-# ADD LINK32 php4ts.lib zendts.lib user32.lib winspool.lib cpdf.lib php_gd.lib kernel32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_cpdf.dll" /libpath:"..\..\Release_TS"
+# ADD BASE LINK32 kernel32.lib user32.lib cpdfi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
+# ADD LINK32 php4ts.lib zendts.lib user32.lib winspool.lib cpdf.lib php_gd.lib kernel32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_cpdf.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\Release_TS_Inline"
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "cpdf - Win32 Debug_TS"
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib cpdfi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Debug_TS/php_cpdf.dll" /libpath:"..\..\Debug_TS"
+# ADD BASE LINK32 kernel32.lib user32.lib cpdfi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib php4ts.lib /nologo /dll /machine:I386
 # ADD LINK32 cpdf.lib php4ts_debug.lib user32.lib winspool.lib mckcrypto.lib kernel32.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /incremental:yes /debug /machine:I386 /nodefaultlib:"msvcrtd.lib" /out:"..\..\Debug_TS/php_cpdf.dll" /libpath:"..\..\Debug_TS"
 # SUBTRACT LINK32 /pdb:none
 

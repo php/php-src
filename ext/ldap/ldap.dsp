@@ -87,8 +87,8 @@ LINK32=link.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "ldap___Win32_Debug_TS"
-# PROP BASE Intermediate_Dir "ldap___Win32_Debug_TS"
+# PROP BASE Output_Dir "Debug_TS"
+# PROP BASE Intermediate_Dir "Debug_TS"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
@@ -114,8 +114,8 @@ LINK32=link.exe
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "ldap___Win32_Release_TS"
-# PROP BASE Intermediate_Dir "ldap___Win32_Release_TS"
+# PROP BASE Output_Dir "Release_TS"
+# PROP BASE Intermediate_Dir "Release_TS"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
@@ -133,8 +133,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4nts.lib /nologo /dll /machine:I386 /libpath:"..\..\..\openldap\libraries\Release" /libpath:"..\..\Release"
-# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_ldap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\openldap\libraries\Release"
+# ADD BASE LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4ts.lib /nologo /dll /machine:I386
+# ADD LINK32 oldap32.lib olber32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib php4ts.lib /nologo /dll /machine:I386 /out:"..\..\Release_TS/php_ldap.dll" /libpath:"..\..\Release_TS" /libpath:"..\..\..\php_build\openldap\libraries\Release" /libpath:"..\..\Release_TS_Inline"
 
 !ENDIF 
 
