@@ -891,11 +891,14 @@ PHP_FUNCTION(socket_set_blocking)
 
 /* }}} */
 
+/* {{{ proto bool set_socket_blocking(resource socket, int mode)
+   Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(set_socket_blocking)
 {
 	php_error(E_NOTICE, "set_socket_blocking() is deprecated, use socket_set_blocking() instead");
 	PHP_FN(socket_set_blocking)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
+/* }}} */
 
 /* {{{ proto bool socket_set_timeout(int socket_descriptor, int seconds, int microseconds)
    Set timeout on socket read to seconds + microseonds */

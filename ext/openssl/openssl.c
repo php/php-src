@@ -1368,7 +1368,7 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
-/* {{{ proto openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days)
+/* {{{ proto resource openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days)
    Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
