@@ -1,3 +1,8 @@
+2004-08-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      Eliminate unneeded variable.
+
 2004-08-04  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_reflection_api.c
