@@ -799,20 +799,30 @@ ZEND_FUNCTION(method_exists)
 }
 /* }}} */
 
-/* {{{ proto bool class_exists(string classname)
+/* {{{ proto bool class_exists(string classname [, bool autoload])
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	zval **class_name;
+	char *class_name, *lc_name;
 	zend_class_entry **ce;
+	long class_name_len;
+	zend_bool autoload = 1;
+	int found;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &class_name)==FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &class_name, &class_name_len, &autoload) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(class_name);
+	if (!autoload) {
+		lc_name = do_alloca(class_name_len + 1);
+		zend_str_tolower_copy(lc_name, class_name, class_name_len);
+	
+		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
+		free_alloca(lc_name);
+		RETURN_BOOL(found == SUCCESS);
+	}
 
-	if (zend_lookup_class(Z_STRVAL_PP(class_name), Z_STRLEN_PP(class_name), &ce TSRMLS_CC) == SUCCESS) {
+ 	if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
