@@ -98,8 +98,13 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else
 typedef struct {
+#ifdef HAVE_SOCKADDR_LEN
+		unsigned char ss_len;
+		unsigned char ss_family;
+#else
         unsigned short ss_family;
-        char info[256];
+#endif
+        char info[126];
 } php_sockaddr_storage;
 #endif
 
