@@ -94,7 +94,7 @@ void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC)
 	}
 
 	if (dbh->error_mode == PDO_ERRMODE_WARNING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, message);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", message);
 
 		if (info) {
 			FREE_ZVAL(info);
