@@ -241,62 +241,61 @@ static php_socket *accept_connect(php_socket *php_sock, struct sockaddr *la)
 /* php_read -- wrapper around read() so that it only reads to a \r or \n. */
 int php_read(php_socket *php_sock, void *buf, int maxlen)
 {
-     int m = 0, n = 0;
-     int no_read = 0;
-     int nonblock = 0;
-	 char *t = (char*)buf;
+	int m = 0, n = 0;
+	int no_read = 0;
+	int nonblock = 0;
+	char *t = (char *) buf;
 
-     m = fcntl(php_sock->socket, F_GETFL);
-	 
-	 if (m < 0) {
-		 return m;
-	 }
+	m = fcntl(php_sock->socket, F_GETFL);
+	if (m < 0) {
+		return m;
+	}
 
-     nonblock = (m & O_NONBLOCK);
-     m = 0;
+	nonblock = (m & O_NONBLOCK);
+	m = 0;
 
-	 set_errno(0);
+	set_errno(0);
 
-     while (*t != '\n' && *t != '\r' && n < maxlen) {
-		 if (m > 0) {
-			 t++;
-			 n++;
-		 } else if (m == 0) {
-			 no_read++;
-			 if (nonblock && no_read >= 2) {
-			 return n;
-			 /* The first pass, m always is 0, so no_read becomes 1
-			  * in the first pass. no_read becomes 2 in the second pass,
-			  * and if this is nonblocking, we should return.. */
-			 }
+	while (*t != '\n' && *t != '\r' && n < maxlen) {
+		if (m > 0) {
+			t++;
+			n++;
+		} else if (m == 0) {
+			no_read++;
+			if (nonblock && no_read >= 2) {
+				return n;
+				/* The first pass, m always is 0, so no_read becomes 1
+				 * in the first pass. no_read becomes 2 in the second pass,
+				 * and if this is nonblocking, we should return.. */
+			}
 			 
-			 if (no_read > 200) {
-				 set_errno(ECONNRESET);
-				 return -1;
-			 }
-		 }
+			if (no_read > 200) {
+				set_errno(ECONNRESET);
+				return -1;
+			}
+		}
 		 
-		 if (n < maxlen) {
-			 m = read(php_sock->socket, (void *) t, 1);
-		 }
+		if (n < maxlen) {
+			m = read(php_sock->socket, (void *) t, 1);
+		}
 		 
-		 if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
-			 return -1;
-		 }
-		 
-		 set_errno(0);
-	 }
+		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
+			return -1;
+		}
+		
+		set_errno(0);
+	}
 	 
-	 if (n < maxlen) {
+	if (n < maxlen) {
 		n++;
 		/* The only reasons it makes it to here is
 		 * if '\n' or '\r' are encountered. So, increase
 		 * the return by 1 to make up for the lack of the
 		 * '\n' or '\r' in the count (since read() takes
 		 * place at the end of the loop..) */
-	 }
+	}
 	 
-	 return n;
+	return n;
 }
 
 
@@ -907,7 +906,7 @@ PHP_FUNCTION(socket_connect)
 			}
 
 			sin->sin_port = htons((unsigned short int)Z_LVAL_PP(arg3));
-			if (inet_aton(Z_STRVAL_PP(arg2), &addr_buf) == 0) {
+			if (inet_aton(Z_STRVAL_PP(arg2), &addr_buf)) {
 				sin->sin_addr.s_addr = addr_buf.s_addr;
 			} else {
 				char *q = (char *) &(sin->sin_addr.s_addr);
