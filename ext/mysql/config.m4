@@ -60,6 +60,9 @@ if test "$PHP_MYSQL" = "yes"; then
   PHP_ADD_INCLUDE($ext_srcdir/libmysql)
   MYSQL_MODULE_TYPE=builtin
 elif test "$PHP_MYSQL" != "no"; then
+
+  MYSQL_TYPE_CHECKS
+
   for i in $PHP_MYSQL; do
     if test -r $i/include/mysql/mysql.h; then
       MYSQL_DIR=$i
