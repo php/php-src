@@ -86,6 +86,15 @@ typedef struct {
 	char Software[32];
 	char *Thumbnail;
 	int ThumbnailSize;
+	/* Olympus vars */
+	int SpecialMode;
+	int JpegQual;
+	int Macro;
+	int DigiZoom;
+	char SoftwareRelease[16];
+	char PictInfo[64];
+	char CameraId[64];
+	/* End Olympus vars */
 } ImageInfoType;
 
 /* This structure is used to store a section of a Jpeg file. */
@@ -270,8 +279,15 @@ static int ExifBytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
 
 #define TAG_SOFTWARE          0x0131
 
-#define TAG_THUMBOFFSET       0x0201
-#define TAG_THUMBSIZE         0x0202
+/* Olympus specific tags */
+#define TAG_SPECIALMODE       0x0200
+#define TAG_JPEGQUAL          0x0201
+#define TAG_MACRO             0x0202
+#define TAG_DIGIZOOM          0x0204
+#define TAG_SOFTWARERELEASE   0x0207
+#define TAG_PICTINFO          0x0208
+#define TAG_CAMERAID          0x0209
+/* end Olympus specific tags */
 
 #define TAG_COPYRIGHT         0x8298
 
@@ -335,6 +351,7 @@ static const struct {
   {	0x212,	"YCbCrSubSampling"},
   {	0x213,	"YCbCrPositioning"},
   {	0x214,	"ReferenceBlackWhite"},
+  { 0x1000, "RelatedImageFileFormat"},
   {	0x828D,	"CFARepeatPatternDim"},
   {	0x828E,	"CFAPattern"},
   {	0x828F,	"BatteryLevel"},
@@ -659,6 +676,34 @@ static void ProcessExifDir(ImageInfoType *ImageInfo, char *DirStart, char *Offse
             case TAG_LIGHT_SOURCE:
                 /* Rarely set or useful. */
                 break;
+
+			case TAG_SPECIALMODE:
+                ImageInfo->SpecialMode = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->SpecialMode);
+				break;
+
+			case TAG_JPEGQUAL:
+                ImageInfo->JpegQual = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->JpegQual);
+				break;
+
+			case TAG_MACRO:
+                ImageInfo->Macro = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->Macro);
+				break;
+
+			case TAG_DIGIZOOM:
+                ImageInfo->DigiZoom = (int)ConvertAnyFormat(ValuePtr, Format,ImageInfo->DigiZoom);
+				break;
+
+			case TAG_SOFTWARERELEASE:
+                strncpy(ImageInfo->SoftwareRelease, ValuePtr, 15);
+				break;
+
+			case TAG_PICTINFO:
+                strncpy(ImageInfo->PictInfo, ValuePtr, 63);
+				break;
+
+			case TAG_CAMERAID:
+                strncpy(ImageInfo->CameraId, ValuePtr, 63);
+				break;
         }
 
         if (Tag == TAG_EXIF_OFFSET || Tag == TAG_INTEROP_OFFSET) {
@@ -896,6 +941,10 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     ImageInfo->Distance = 0;
     ImageInfo->CCDWidth = 0;
     ImageInfo->FlashUsed = -1;
+	ImageInfo->SpecialMode = -1;
+	ImageInfo->JpegQual = -1;
+	ImageInfo->Macro = -1;
+	ImageInfo->DigiZoom = -1;
 
     {
         /* Store file date/time. */
@@ -932,7 +981,7 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
 
     ret = ReadJpegFile(ImageInfo, Sections, &SectionsRead, FileName, ReadAll, LastExifRefd); 
 	/*
-	 * Thought this might pick out the embedded thumbnail, but it doesn't work.
+	 * Thought this might pick out the embedded thumbnail, but it doesn't work.   -RL
     for (i=0;i<SectionsRead-1;i++) {
         if (Sections[i].Type == M_EXIF) {
 			thumbsize = Sections[i].Size;
@@ -1050,6 +1099,27 @@ PHP_FUNCTION(read_exif_data) {
 		add_assoc_stringl(return_value,"Thumbnail",ImageInfo.Thumbnail,ImageInfo.ThumbnailSize,1);
 		add_assoc_long(return_value,"ThumbnailSize",ImageInfo.ThumbnailSize);
 		efree(ImageInfo.Thumbnail);
+	}
+	if(ImageInfo.SpecialMode >= 0) {
+		add_assoc_long(return_value,"SpecialMode",ImageInfo.SpecialMode);
+	}
+	if(ImageInfo.JpegQual >= 0) {
+		add_assoc_long(return_value,"JpegQual",ImageInfo.JpegQual);
+	}
+	if(ImageInfo.Macro >= 0) {
+		add_assoc_long(return_value,"Macro",ImageInfo.Macro);
+	}
+	if(ImageInfo.DigiZoom >= 0) {
+		add_assoc_long(return_value,"DigiZoom",ImageInfo.DigiZoom);
+	}
+	if (ImageInfo.SoftwareRelease[0]) {
+		add_assoc_string(return_value,"SoftwareRelease",ImageInfo.SoftwareRelease,1);
+	}
+	if (ImageInfo.PictInfo[0]) {
+		add_assoc_string(return_value,"PictInfo",ImageInfo.PictInfo,1);
+	}
+	if (ImageInfo.CameraId[0]) {
+		add_assoc_string(return_value,"CameraId",ImageInfo.CameraId,1);
 	}
 }
 
