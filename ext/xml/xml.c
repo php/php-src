@@ -294,9 +294,11 @@ xml_parser_dtor(zend_rsrc_list_entry *rsrc)
 {
 	xml_parser *parser = (xml_parser *)rsrc->ptr;
 
-	if (parser->object) {
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+    if (parser->object) {
 		zval_del_ref(&parser->object);
 	}
+	*/
 	
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
@@ -1175,19 +1177,19 @@ PHP_FUNCTION(xml_set_object)
 		RETURN_FALSE;
 	}
 
-	if (! ParameterPassedByReference(ht,2)) {
-		php_error(E_WARNING,"arg 2 not passed by reference");
-		RETURN_FALSE;
-	}
-
 	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
 
-	if (parser->object) {
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+    if (parser->object) {
 		zval_del_ref(&parser->object);
 	}
+	*/
 	
 	parser->object = *mythis;
-	zval_add_ref(&parser->object);
+
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+	zval_add_ref(&parser->object); 
+	*/
 
 	RETVAL_TRUE;
 }
@@ -1405,19 +1407,10 @@ PHP_FUNCTION(xml_parse_into_struct)
 
 	argc = ZEND_NUM_ARGS();
 	if (zend_get_parameters_ex(4, &pind, &data, &xdata,&info) == SUCCESS) {
-		if (!ParameterPassedByReference(ht, 4)) {
-			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-            RETURN_FALSE;
-		}
 		zval_dtor(*info);
 		array_init(*info);
 	} else if (zend_get_parameters_ex(3, &pind, &data, &xdata) == FAILURE) {
 		WRONG_PARAM_COUNT;
-	}
-
-	if (!ParameterPassedByReference(ht, 3)) {
-		php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
