@@ -158,7 +158,7 @@ typedef struct _xml_element {
 
 void xml_elem_free(xml_element* root);
 void xml_elem_free_non_recurse(xml_element* root);
-xml_element* xml_elem_new();
+xml_element* xml_elem_new(void);
 char* xml_elem_serialize_to_string(xml_element *el, XML_ELEM_OUTPUT_OPTIONS options, int *buf_len);
 void xml_elem_serialize_to_stream(xml_element *el, FILE *output, XML_ELEM_OUTPUT_OPTIONS options);
 xml_element* xml_elem_parse_buf(const char* in_buf, int len, XML_ELEM_INPUT_OPTIONS options, XML_ELEM_ERROR error);

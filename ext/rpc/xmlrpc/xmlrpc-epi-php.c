@@ -53,6 +53,7 @@
  */
 
 #include "php.h"
+#include "ext/standard/info.h"
 #include "php_ini.h"
 #include "php_xmlrpc.h"
 #include "xmlrpc.h"
@@ -178,6 +179,12 @@ typedef struct _xmlrpc_callback_data {
 ***********************/
 XMLRPC_VALUE_TYPE get_pval_xmlrpc_type(pval* value, pval** newvalue);
 static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data);
+int sset_pval_xmlrpc_type(pval* value, XMLRPC_VALUE_TYPE type);
+pval* decode_request_worker(pval* xml_in, pval* encoding_in, pval* method_name_out);
+const char* xmlrpc_type_as_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype);
+XMLRPC_VALUE_TYPE xmlrpc_str_as_type(const char* str);
+XMLRPC_VECTOR_TYPE xmlrpc_str_as_vector_type(const char* str);
+int set_pval_xmlrpc_type(pval* value, XMLRPC_VALUE_TYPE type);
 
 /*********************
 * startup / shutdown *
@@ -206,7 +213,7 @@ static void xmlrpc_server_destructor(zend_rsrc_list_entry *rsrc) {
    }
 }
 
-static void xmlrpc_init_globals(TSRMLS_D)
+static void xmlrpc_init_globals(php_xmlrpc_globals *xmlrpc_globals)
 {
     return;
 }
@@ -267,6 +274,7 @@ PHP_MINFO_FUNCTION(xmlrpc)
 /* Utility functions for adding data types to arrays, with or without key (assoc, non-assoc).
  * Could easily be further generalized to work with objects.
  */
+#if 0
 static int add_long(pval* list, char* id, int num) {
    if(id) return add_assoc_long(list, id, num);
    else   return add_next_index_long(list, num);
@@ -286,6 +294,8 @@ static int add_stringl(pval* list, char* id, char* string, uint length, int dupl
    if(id) return add_assoc_stringl(list, id, string, length, duplicate);
    else   return add_next_index_stringl(list, string, length, duplicate);
 }
+
+#endif
 
 static int add_pval(pval* list, const char* id, pval** val) {
    if(list && val) {
@@ -552,7 +562,6 @@ static XMLRPC_VALUE PHP_to_XMLRPC(pval* root_val) {
 /* recursively convert xmlrpc values into php values */
 static pval* XMLRPC_to_PHP(XMLRPC_VALUE el) {
    pval* elem = NULL;
-   char* pBuf;
    const char* pStr;
 
    if(el) {
@@ -664,8 +673,7 @@ PHP_FUNCTION(xmlrpc_encode_request) {
 PHP_FUNCTION(xmlrpc_encode)
 {
    XMLRPC_VALUE xOut = NULL;
-   pval* arg1, *out_opts;
-   php_output_options out;
+   pval* arg1;
    char* outBuf;
 
    if( !(ARG_COUNT(ht) == 1)  || 
@@ -697,7 +705,7 @@ PHP_FUNCTION(xmlrpc_encode)
 pval* decode_request_worker(pval* xml_in, pval* encoding_in, pval* method_name_out) {
    pval* retval = NULL;
    XMLRPC_REQUEST response;
-   STRUCT_XMLRPC_REQUEST_INPUT_OPTIONS opts = {0};
+   STRUCT_XMLRPC_REQUEST_INPUT_OPTIONS opts = {{0}};
    opts.xml_elem_opts.encoding = encoding_in ? utf8_get_encoding_id_from_string(Z_STRVAL_P(encoding_in)) : ENCODING_DEFAULT;
 
    /* generate XMLRPC_REQUEST from raw xml */
@@ -844,7 +852,6 @@ PHP_FUNCTION(xmlrpc_server_destroy) {
  * it then calls the corresponding PHP function to handle the method.
  */
 static XMLRPC_VALUE php_xmlrpc_callback(XMLRPC_SERVER server, XMLRPC_REQUEST xRequest, void* data) {
-   pval *retval_ptr;
    xmlrpc_callback_data* pData = (xmlrpc_callback_data*)data;
    pval* xmlrpc_params;
    pval* callback_params[3];
@@ -971,7 +978,7 @@ PHP_FUNCTION(xmlrpc_server_register_method) {
    Register a PHP function to generate documentation */
 PHP_FUNCTION(xmlrpc_server_register_introspection_callback) {
 
-   pval* method_key, *method_name, *handle, *method_name_save;
+   pval* method_name, *handle, *method_name_save;
    int type;
    xmlrpc_server_data* server;
 
@@ -1045,7 +1052,7 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
 
          /* check if we have a method name -- indicating success and all manner of good things */
          if(XMLRPC_RequestGetMethodName(xRequest)) {
-            pval** php_function, *returned = NULL;
+			pval** php_function;
             XMLRPC_VALUE xAnswer = NULL;
             MAKE_STD_ZVAL(data.xmlrpc_method); /* init. very important.  spent a frustrating day finding this out. */
             MAKE_STD_ZVAL(data.return_data);
@@ -1136,7 +1143,7 @@ PHP_FUNCTION(xmlrpc_server_call_method) {
    Adds introspection documentation  */
 PHP_FUNCTION(xmlrpc_server_add_introspection_data) {
 
-   pval *method, *handle, *desc;
+   pval *handle, *desc;
    int type;
    xmlrpc_server_data* server;
 
@@ -1163,7 +1170,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data) {
    Decodes XML into a list of method descriptions */
 PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 {
-   pval* arg1, *arg2, *retval;
+   pval* arg1, *retval;
 
    if( !(ARG_COUNT(ht) == 1) || getParameters(ht, ARG_COUNT(ht), &arg1) == FAILURE) {
       WRONG_PARAM_COUNT; /* prints/logs a warning and returns */
@@ -1209,7 +1216,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 #define TYPE_STR_MAP_SIZE (XMLRPC_TYPE_COUNT + XMLRPC_VECTOR_TYPE_COUNT)
 
 /* return a string matching a given xmlrpc type */
-static const char** get_type_str_mapping() {
+static const char** get_type_str_mapping(void) {
    static const char* str_mapping[TYPE_STR_MAP_SIZE];
    static int first = 1;
    if(first) {

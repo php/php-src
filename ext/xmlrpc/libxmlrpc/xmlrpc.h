@@ -274,9 +274,9 @@ typedef XMLRPC_VALUE (*XMLRPC_Callback)(XMLRPC_SERVER server, XMLRPC_REQUEST inp
 /******/
 
 /* ID Case Defaults */
-XMLRPC_CASE XMLRPC_GetDefaultIdCase();
+XMLRPC_CASE XMLRPC_GetDefaultIdCase(void);
 XMLRPC_CASE XMLRPC_SetDefaultIdCase(XMLRPC_CASE id_case);
-XMLRPC_CASE_COMPARISON XMLRPC_GetDefaultIdCaseComparison();
+XMLRPC_CASE_COMPARISON XMLRPC_GetDefaultIdCaseComparison(void);
 XMLRPC_CASE_COMPARISON XMLRPC_SetDefaultIdCaseComparison(XMLRPC_CASE_COMPARISON id_case);
 
 /* Vector manipulation */
@@ -298,7 +298,7 @@ XMLRPC_VALUE XMLRPC_CreateValueDateTime_ISO8601(const char* id, const char *s);
 XMLRPC_VALUE XMLRPC_CreateValueDouble(const char* id, double f);
 XMLRPC_VALUE XMLRPC_CreateValueInt(const char* id, int i);
 XMLRPC_VALUE XMLRPC_CreateValueString(const char* id, const char* s, int len);
-XMLRPC_VALUE XMLRPC_CreateValueEmpty();
+XMLRPC_VALUE XMLRPC_CreateValueEmpty(void);
 XMLRPC_VALUE XMLRPC_CreateVector(const char* id, XMLRPC_VECTOR_TYPE type);
 
 /* Cleanup values */
@@ -340,7 +340,7 @@ char* XMLRPC_VALUE_ToXML(XMLRPC_VALUE val, int* buf_len);
 /* Request manipulation funcs */
 const char* XMLRPC_RequestSetMethodName(XMLRPC_REQUEST request, const char* methodName);
 const char* XMLRPC_RequestGetMethodName(XMLRPC_REQUEST request);
-XMLRPC_REQUEST XMLRPC_RequestNew();
+XMLRPC_REQUEST XMLRPC_RequestNew(void);
 void XMLRPC_RequestFree(XMLRPC_REQUEST request, int bFreeIO);
 XMLRPC_REQUEST_OUTPUT_OPTIONS XMLRPC_RequestSetOutputOptions(XMLRPC_REQUEST request, XMLRPC_REQUEST_OUTPUT_OPTIONS output);
 XMLRPC_REQUEST_OUTPUT_OPTIONS XMLRPC_RequestGetOutputOptions(XMLRPC_REQUEST request);
@@ -350,8 +350,8 @@ XMLRPC_REQUEST_TYPE XMLRPC_RequestSetRequestType(XMLRPC_REQUEST request, XMLRPC_
 XMLRPC_REQUEST_TYPE XMLRPC_RequestGetRequestType(XMLRPC_REQUEST request);
 
 /* Server Creation/Destruction; Method Registration and Invocation */
-XMLRPC_SERVER XMLRPC_ServerCreate();
-XMLRPC_SERVER XMLRPC_GetGlobalServer();   /* better to use XMLRPC_ServerCreate if you can */
+XMLRPC_SERVER XMLRPC_ServerCreate(void);
+XMLRPC_SERVER XMLRPC_GetGlobalServer(void);   /* better to use XMLRPC_ServerCreate if you can */
 void XMLRPC_ServerDestroy(XMLRPC_SERVER server);
 int XMLRPC_ServerRegisterMethod(XMLRPC_SERVER server, const char *name, XMLRPC_Callback cb);
 XMLRPC_Callback XMLRPC_ServerFindMethod(XMLRPC_SERVER server, const char* callName);
@@ -362,7 +362,7 @@ XMLRPC_VALUE XMLRPC_ServerCallMethod(XMLRPC_SERVER server, XMLRPC_REQUEST reques
 /* Public Utility funcs */
 XMLRPC_VALUE XMLRPC_UtilityCreateFault(int fault_code, const char* fault_string);
 void XMLRPC_Free(void* mem);
-const char*  XMLRPC_GetVersionString();
+const char*  XMLRPC_GetVersionString(void);
 
 /****d* VALUE/XMLRPC_MACROS
  * NAME
