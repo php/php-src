@@ -430,6 +430,8 @@ PHP_FUNCTION(socket_fd_alloc)
 	php_fd_set	*php_fd = (php_fd_set*)emalloc(sizeof(php_fd_set));
 
 	FD_ZERO(&(php_fd->set));
+
+	php_fd->max_fd = 0;
 	
 	ZEND_REGISTER_RESOURCE(return_value, php_fd, le_destroy);
 }
@@ -557,6 +559,8 @@ PHP_FUNCTION(socket_fd_zero)
 
 	FD_ZERO(&(php_fd->set));
 
+	php_fd->max_fd = 0;
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -568,7 +572,7 @@ PHP_FUNCTION(socket_select)
 	zval			*arg1, *arg2, *arg3, *arg4;
 	struct timeval	tv;
 	php_fd_set		*rfds = NULL, *wfds = NULL, *xfds = NULL;
-	SOCKET			max_fd;
+	SOCKET			max_fd = 0;
 	int				sets = 0, usec = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r!r!r!z|l", &arg1, &arg2, &arg3, &arg4, &usec) == FAILURE)
@@ -729,7 +733,8 @@ PHP_FUNCTION(socket_write)
 	retval = send(php_sock->bsd_socket, str, min(length, str_len), 0);
 #endif
 
-	if (retval <= 0) {
+	if (retval < 0) {
+		php_sock->error = errno;
 		php_error(E_WARNING, "%s() unable to write to socket %d [%d]: %s", get_active_function_name(TSRMLS_C), php_sock->bsd_socket, errno, php_strerror(errno));
 		RETURN_FALSE;
 	}
@@ -767,16 +772,14 @@ PHP_FUNCTION(socket_read)
 	retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
 #endif
 
-	if (retval <= 0) {
-		if (retval != 0) { 
-			/* Not EOF */
-			PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
-		}
+	if (retval == -1) {
+		PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		efree(tmpbuf);
 		RETURN_FALSE;
 	}
-
-	tmpbuf[retval] = 0;
+	
+	tmpbuf = erealloc(tmpbuf, retval + 1);
+	tmpbuf[ retval ] = '\0` ;
 	RETURN_STRINGL(tmpbuf, retval, 0);
 }
 /* }}} */
@@ -958,7 +961,7 @@ PHP_FUNCTION(socket_connect)
 			} else {
 				char *q = (char *) &(sin.sin_addr.s_addr);
 				host_struct = gethostbyname(addr);
-				if (host_struct->h_addrtype != AF_INET) {
+				if ((! host_struct) || (host_struct->h_addrtype != AF_INET)) {
 					RETURN_FALSE;
 				}
 			
