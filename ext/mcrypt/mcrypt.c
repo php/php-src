@@ -206,26 +206,14 @@ ZEND_GET_MODULE(mcrypt)
 	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 
 #define MCRYPT_GET_MODE_DIR_ARGS(DIRECTORY)								\
-	switch (argc) {														\
-		case 2:															\
-			lib_dir_s = Z_STRVAL_PP(lib_dir);						\
-			if (zend_get_parameters_ex(2, &arg1, &lib_dir) == FAILURE)	\
-			{															\
-				WRONG_PARAM_COUNT;										\
-			}															\
-			convert_to_string_ex (lib_dir);								\
-			break;														\
-		case 1:															\
-			lib_dir_s = MCG(DIRECTORY);									\
-			if (zend_get_parameters_ex(1, &arg1) == FAILURE)			\
-			{															\
-				WRONG_PARAM_COUNT;										\
-			}															\
-			break;														\
-		default:														\
-			WRONG_PARAM_COUNT;											\
-	}																	\
-	convert_to_string_ex(arg1);
+	char *dir = NULL;                                                   \
+	int   dir_len;                                                      \
+	char *module;                                                       \
+	int   module_len;                                                   \
+	if (zend_parse_parameters (ZEND_NUM_ARGS() TSRMLS_CC,               \
+		"s|s", &module, &module_len, &dir, &dir_len) == FAILURE) {      \
+		return;                                                         \
+	}
 	
 #endif
 
@@ -842,18 +830,11 @@ PHP_FUNCTION(mcrypt_enc_get_modes_name)
    Does a self test of the module "module" */
 PHP_FUNCTION(mcrypt_module_self_test)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
-	if (mcrypt_module_self_test ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_self_test (module, dir) == 0) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -864,18 +845,11 @@ PHP_FUNCTION(mcrypt_module_self_test)
    Returns TRUE if the mode is for use with block algorithms */
 PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
-	if (mcrypt_module_is_block_algorithm_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_algorithm_mode (module, dir) == 1) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -886,18 +860,11 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
    Returns TRUE if the algorithm is a block algorithm */
 PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
-	if (mcrypt_module_is_block_algorithm ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_algorithm (module, dir) == 1) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -908,18 +875,11 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
    Returns TRUE if the mode outputs blocks of bytes */
 PHP_FUNCTION(mcrypt_module_is_block_mode)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
-	if (mcrypt_module_is_block_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_mode (module, dir) == 1) {
 		RETURN_TRUE;
-	}
-	else {
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -930,15 +890,9 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
    Returns the block size of the algorithm */
 PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
-	RETURN_LONG(mcrypt_module_get_algo_block_size ((*arg1)->value.str.val, lib_dir_s))
+	RETURN_LONG(mcrypt_module_get_algo_block_size (module, dir));
 }
 /* }}} */
 
@@ -947,15 +901,9 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
    Returns the maximum supported key size of the algorithm */
 PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc;
-	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
-	RETURN_LONG(mcrypt_module_get_algo_key_size ((*arg1)->value.str.val, lib_dir_s))
+	RETURN_LONG(mcrypt_module_get_algo_key_size (module, dir));
 }
 /* }}} */
 
@@ -964,16 +912,12 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
    This function decrypts the crypttext */
 PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 {
-	zval **arg1, **lib_dir;
-	char *lib_dir_s;
-	int argc, i, count;
+	int i, count;
 	int *key_sizes;
 	
-	argc = ZEND_NUM_ARGS();
-
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 
-	key_sizes = mcrypt_module_get_algo_supported_key_sizes ((*arg1)->value.str.val, lib_dir_s, &count);
+	key_sizes = mcrypt_module_get_algo_supported_key_sizes (module, dir, &count);
 
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_ERROR, "Unable to initialize array");
