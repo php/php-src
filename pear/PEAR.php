@@ -45,7 +45,6 @@ $GLOBALS['_PEAR_destructor_object_list'] = array();
 
 //
 // Tests needed: - PEAR inheritance
-//               - destructors
 //
 
 /**
