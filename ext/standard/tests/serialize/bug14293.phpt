@@ -23,10 +23,10 @@ $t = unserialize($data);
 var_dump($t);
 
 ?>
---EXPECT--
+--EXPECTF--
 __sleep called
 O:1:"t":2:{s:1:"a";s:5:"hello";s:1:"b";N;}
-object(t)(2) {
+object(t)#%d (2) {
   ["a"]=>
   string(5) "hello"
   ["b"]=>
