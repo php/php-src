@@ -229,9 +229,9 @@ dnl SAPI configuration.
 dnl -------------------------------------------------------------------------
 
 dnl paths to the targets are relative to the build directory
-SAPI_SHARED=libs/libphp4.$SHLIB_SUFFIX_NAME
-SAPI_STATIC=libs/libphp4.a
-SAPI_LIBTOOL=libphp4.la
+SAPI_SHARED=libs/libphp5.$SHLIB_SUFFIX_NAME
+SAPI_STATIC=libs/libphp5.a
+SAPI_LIBTOOL=libphp5.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 

@@ -449,7 +449,7 @@ static int php_handler(request_rec *r)
 	request_rec *parent_req = NULL;
 	TSRMLS_FETCH();
 
-	conf = ap_get_module_config(r->per_dir_config, &php4_module);
+	conf = ap_get_module_config(r->per_dir_config, &php5_module);
 	apply_config(conf);
 
 	if (strcmp(r->handler, PHP_MAGIC_TYPE) && strcmp(r->handler, PHP_SOURCE_MAGIC_TYPE) && strcmp(r->handler, PHP_SCRIPT)) {
@@ -556,7 +556,7 @@ static void php_register_hook(apr_pool_t *p)
 	ap_hook_handler(php_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
-AP_MODULE_DECLARE_DATA module php4_module = {
+AP_MODULE_DECLARE_DATA module php5_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
 	merge_php_config,		/* merge per-directory config structures */

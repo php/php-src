@@ -1,4 +1,4 @@
-Name: php4_module
+Name: php5_module
 ConfigStart
 	RULE_WANTHSREGEX=no
 	RULE_HIDE=yes
