@@ -1,9 +1,9 @@
 <?
-  $id = 187852;       // A plain/text document
+  $id = 188178;       // A plain/text document
   $collid = 169828;   // A collection
   $query = "Name=m*";      // Search query for test_9
   $host = "gehtnix";
-  $username = "steinm";
+  $username = "annonymous";
   $password = "";
 
   $connect = hw_connect($host, 418, $username, $password);
@@ -22,11 +22,13 @@
   $test_7 = "no";   // Insert a new text document
   $test_8 = "no";   // Remove the just inserted text document
   $test_9 = "no";   // Searching for objects with Name $query
+  $test_10= "yes";   // Listing all anchors of a document
 
   /* Lists an object array
   */
   function list_attr($attributes) {
-    global $imagepath;
+    var_dump($attributes);
+		return;
     for($i=0; $i<count($attributes); $i++) {
       $key = key($attributes);
       switch($key) {
@@ -195,6 +197,16 @@
     }
     list_attr($objrecs[$c_objrecs]);
   }
+
+  if($test_10 == "yes") {
+    $anchors = hw_getanchorsobj($connect, $id);
+    $countanchors = count($anchors) - 1;
+    echo "$countanchors Anchors of Object $id\n";
+    for($i=0; $i<$countanchors; $i++) {
+      $arr = hw_objrec2array($anchors[$i]);
+      list_attr($arr);
+    }
+	}
 
   hw_close($connect);
 ?>

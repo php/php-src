@@ -299,6 +299,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 		add_assoc_long(spec_arr, "Description", HW_ATTR_LANG);
 		add_assoc_long(spec_arr, "Keyword", HW_ATTR_LANG);
 		add_assoc_long(spec_arr, "Group", HW_ATTR_NONE);
+		add_assoc_long(spec_arr, "HtmlAttr", HW_ATTR_NONE);
 	}
 
 	if (array_init(*return_value) == FAILURE) {
