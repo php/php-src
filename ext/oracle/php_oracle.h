@@ -130,7 +130,7 @@ typedef struct {
 
 #else
 
-#define oracle_module_ptr NULL
+#define phpext_oracle_ptr NULL
 
 #endif /* HAVE_ORACLE */
 
