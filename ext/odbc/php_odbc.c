@@ -59,7 +59,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 static int le_result, le_conn, le_pconn;
 
-#define SAFE_SQL_NTS(n) ((SQLSMALLINT) ((n)?(SQL_NTS):0))
+#define SAFE_SQL_NTS(n) ((SWORD) ((n)?(SQL_NTS):0))
 
 /*
  * #if defined( HAVE_IBMDB2 ) || defined( HAVE_UNIXODBC )
@@ -461,7 +461,7 @@ void ODBC_SQL_ERROR(HENV henv, HDBC conn, HSTMT stmt, char *func)
 	SDWORD	error;        /* Not used */
 	char	errormsg[255];
 	SWORD	errormsgsize; /* Not used */
-    SQLRETURN ret;
+    RETCODE ret;
 	ODBCLS_FETCH();
 
     do {
@@ -698,7 +698,7 @@ PHP_FUNCTION(odbc_execute)
 	params_t *params = NULL;
 	char *filename;
    	SWORD sqltype, ctype, scale;
-	SQLSMALLINT nullable;
+	SWORD nullable;
 	UDWORD precision;
    	odbc_result   *result;
 	int numArgs, i, ne;
@@ -1770,19 +1770,19 @@ try_and_get_another_connection:
 			/*
 			 * check to see if the connection is still in place (lurcher)
 			 */
-			if (ODBCG(check_persistent)) {
-				SQLRETURN ret;
-				SQLCHAR d_name[ 32 ];
-				SQLSMALLINT len;
+			if(ODBCG(check_persistent)){
+				RETCODE ret;
+				UCHAR d_name[32];
+				SWORD len;
 
-				ret = SQLGetInfo( db_conn -> hdbc, 
+				ret = SQLGetInfo(db_conn->hdbc, 
 					SQL_DATA_SOURCE_READ_ONLY, 
-					d_name, sizeof( d_name ), &len );
+					d_name, sizeof(d_name), &len);
 
-				if ( ret != SQL_SUCCESS )
-				{
-					zend_hash_del(plist, hashed_details, hashed_len + 1);					     SQLDisconnect( db_conn -> hdbc );
-					SQLFreeConnect( db_conn -> hdbc );
+				if(ret != SQL_SUCCESS){
+					zend_hash_del(plist, hashed_details, hashed_len + 1);
+					SQLDisconnect(db_conn->hdbc);
+					SQLFreeConnect(db_conn->hdbc);
 					goto try_and_get_another_connection;
 				}
 			}
@@ -2295,10 +2295,10 @@ PHP_FUNCTION(odbc_columns)
 	}
 
 	rc = SQLColumns(result->stmt, 
-            cat, (SQLSMALLINT) (cat ? SQL_NTS : 0), 
-            schema, (SQLSMALLINT) (schema ? SQL_NTS : 0), 
-            table, (SQLSMALLINT) (table ? SQL_NTS : 0), 
-            column, (SQLSMALLINT) (column ? SQL_NTS : 0) );
+            cat, SAFE_SQL_NTS(cat), 
+            schema, SAFE_SQL_NTS(schema), 
+            table, SAFE_SQL_NTS(table), 
+            column, SAFE_SQL_NTS(column));
 
 	if (rc == SQL_ERROR) {
 		ODBC_SQL_ERROR(conn->henv, conn->hdbc, SQL_NULL_HSTMT, "SQLColumns");
@@ -2512,7 +2512,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	odbc_connection *conn;
 	RETCODE rc;
 	int argc;
-	SQLSMALLINT data_type = SQL_ALL_TYPES;
+	SWORD data_type = SQL_ALL_TYPES;
 
 	argc = ARG_COUNT(ht);
 	if (argc == 1) {
@@ -2524,7 +2524,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 			WRONG_PARAM_COUNT;
 		}
 	    convert_to_long_ex(pv_data_type);
-        data_type = (SQLSMALLINT) (*pv_data_type)->value.lval;
+        data_type = (SWORD) (*pv_data_type)->value.lval;
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -2824,8 +2824,8 @@ PHP_FUNCTION(odbc_specialcolumns)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
 	char *cat = NULL, *schema = NULL, *name = NULL;
-	SQLUSMALLINT type;
-	SQLSMALLINT scope, nullable;
+	UWORD type;
+	UWORD scope, nullable;
 	RETCODE rc;
 	int argc;
 
@@ -2836,7 +2836,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 			WRONG_PARAM_COUNT;
 		}
 		convert_to_long_ex(pv_type);
-		type = (SQLUSMALLINT) (*pv_type)->value.lval;
+		type = (UWORD) (*pv_type)->value.lval;
 		convert_to_string_ex(pv_cat);
 		cat = (*pv_cat)->value.str.val;
 		convert_to_string_ex(pv_schema);
@@ -2844,9 +2844,9 @@ PHP_FUNCTION(odbc_specialcolumns)
 		convert_to_string_ex(pv_name);
 		name = (*pv_name)->value.str.val;
 		convert_to_long_ex(pv_scope);
-		scope = (SQLSMALLINT) (*pv_scope)->value.lval;
+		scope = (UWORD) (*pv_scope)->value.lval;
 		convert_to_long_ex(pv_nullable);
-		nullable = (SQLSMALLINT) (*pv_nullable)->value.lval;
+		nullable = (UWORD) (*pv_nullable)->value.lval;
 	} else {
 		WRONG_PARAM_COUNT;
 	}
@@ -2912,7 +2912,7 @@ PHP_FUNCTION(odbc_statistics)
 	odbc_result   *result = NULL;
 	odbc_connection *conn;
     char *cat = NULL, *schema = NULL, *name = NULL;
-    SQLUSMALLINT unique, reserved;
+    UWORD unique, reserved;
 	RETCODE rc;
 	int argc;
 
@@ -2929,9 +2929,9 @@ PHP_FUNCTION(odbc_statistics)
 	    convert_to_string_ex(pv_name);
 	    name = (*pv_name)->value.str.val;
         convert_to_long_ex(pv_unique);
-        unique = (SQLUSMALLINT) (*pv_unique)->value.lval;
+        unique = (UWORD) (*pv_unique)->value.lval;
         convert_to_long_ex(pv_reserved);
-        reserved = (SQLUSMALLINT) (*pv_reserved)->value.lval;
+        reserved = (UWORD) (*pv_reserved)->value.lval;
 	} else {
 		WRONG_PARAM_COUNT;
 	}
