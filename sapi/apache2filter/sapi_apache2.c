@@ -42,6 +42,9 @@
 #include "http_core.h"                         
 
 #include "php_apache.h"
+ 
+/* A way to specify the location of the php.ini dir in an apache directive */
+char *apache2_php_ini_path_override = NULL;
 
 static int
 php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
@@ -63,13 +66,15 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 	b = apr_bucket_transient_create(str, str_length, ba);
 	APR_BRIGADE_INSERT_TAIL(bb, b);
 
+#if 0
 	/* Add a Flush bucket to the end of this brigade, so that
 	 * the transient buckets above are more likely to make it out
 	 * the end of the filter instead of having to be copied into
 	 * someone's setaside. */
 	b = apr_bucket_flush_create(ba);
 	APR_BRIGADE_INSERT_TAIL(bb, b);
-
+#endif
+	
 	if (ap_pass_brigade(f->next, bb) != APR_SUCCESS) {
 		php_handle_aborted_connection();
 	}
@@ -225,37 +230,36 @@ static sapi_module_struct apache2_sapi_module = {
 	"apache2filter",
 	"Apache 2.0 Filter",
 
-	php_module_startup,							/* startup */
+	php_module_startup,						/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
 
 	NULL,									/* activate */
 	NULL,									/* deactivate */
 
-	php_apache_sapi_ub_write,					/* unbuffered write */
+	php_apache_sapi_ub_write,				/* unbuffered write */
 	php_apache_sapi_flush,					/* flush */
 	NULL,									/* get uid */
 	NULL,									/* getenv */
 
 	php_error,								/* error handler */
 
-	php_apache_sapi_header_handler,				/* header handler */
-	php_apache_sapi_send_headers,				/* send headers handler */
+	php_apache_sapi_header_handler,			/* header handler */
+	php_apache_sapi_send_headers,			/* send headers handler */
 	NULL,									/* send header handler */
 
-	php_apache_sapi_read_post,					/* read POST data */
-	php_apache_sapi_read_cookies,				/* read Cookies */
+	php_apache_sapi_read_post,				/* read POST data */
+	php_apache_sapi_read_cookies,			/* read Cookies */
 
 	php_apache_sapi_register_variables,
 	php_apache_sapi_log_message,			/* Log message */
+
+    NULL,									/* php_ini_path_override */
 
 	NULL,									/* Block interruptions */
 	NULL,									/* Unblock interruptions */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-
-
-AP_MODULE_DECLARE_DATA module php4_module;
 
 static int php_input_filter(ap_filter_t *f, apr_bucket_brigade *bb, 
 		ap_input_mode_t mode, apr_read_type_e block, apr_off_t readbytes)
@@ -433,6 +437,14 @@ static void php_apache_add_version(apr_pool_t *p)
 	}
 }
 
+static int php_pre_config(apr_pool_t *pconf, apr_pool_t *plog, apr_pool_t *ptemp)
+{
+    /* When this is NULL, apache won't override the hard-coded default
+     * php.ini path setting. */
+    apache2_php_ini_path_override = NULL;
+    return OK;
+}
+
 static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
@@ -452,6 +464,11 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 		apr_pool_userdata_set((const void *)1, userdata_key,
 							  apr_pool_cleanup_null, s->process->pool);
 		return OK;
+	}
+
+	/* Set up our overridden path. */
+	if (apache2_php_ini_path_override) {
+		apache2_sapi_module.php_ini_path_override = apache2_php_ini_path_override;
 	}
 
 	tsrm_startup(1, 1, 0, NULL);
@@ -482,8 +499,7 @@ static void php_add_filter(request_rec *r, ap_filter_t *f)
 
 	if (output) {
 		ap_add_output_filter("PHP", NULL, r, r->connection);
-	}
-	else {
+	} else {
 		ap_add_input_filter("PHP", NULL, r, r->connection);
 	}
 }
@@ -528,21 +544,22 @@ static int php_post_read_request(request_rec *r)
 
 static void php_register_hook(apr_pool_t *p)
 {
+	ap_hook_pre_config(php_pre_config, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_post_config(php_apache_server_startup, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_hook_insert_filter(php_insert_filter, NULL, NULL, APR_HOOK_MIDDLE);
-    ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
+	ap_hook_post_read_request(php_post_read_request, NULL, NULL, APR_HOOK_MIDDLE);
 	ap_register_output_filter("PHP", php_output_filter, AP_FTYPE_RESOURCE);
 	ap_register_input_filter("PHP", php_input_filter, AP_FTYPE_RESOURCE);
 }
 
 AP_MODULE_DECLARE_DATA module php4_module = {
-    STANDARD20_MODULE_STUFF,
-    create_php_config,		/* create per-directory config structure */
-    merge_php_config,      		/* merge per-directory config structures */
-    NULL,			/* create per-server config structure */
-    NULL,			/* merge per-server config structures */
-    php_dir_cmds,			/* command apr_table_t */
-    php_register_hook		/* register hooks */
+	STANDARD20_MODULE_STUFF,
+	create_php_config,		/* create per-directory config structure */
+	merge_php_config,		/* merge per-directory config structures */
+	NULL,					/* create per-server config structure */
+	NULL,					/* merge per-server config structures */
+	php_dir_cmds,			/* command apr_table_t */
+	php_register_hook		/* register hooks */
 };
 
 /*
@@ -553,5 +570,3 @@ AP_MODULE_DECLARE_DATA module php4_module = {
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
-

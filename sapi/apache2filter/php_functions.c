@@ -20,6 +20,7 @@
 #include "SAPI.h"
 
 #include "apr_strings.h"
+#include "apr_time.h"
 #include "ap_config.h"
 #include "util_filter.h"
 #include "httpd.h"
@@ -69,9 +70,11 @@ PHP_FUNCTION(virtual)
 }
 
 #define ADD_LONG(name) \
-		add_assoc_long(return_value, #name, rr->name)
+		add_property_long(return_value, #name, rr->name)
+#define ADD_TIME(name) \
+		add_property_long(return_value, #name, rr->name / APR_USEC_PER_SEC);
 #define ADD_STRING(name) \
-		if (rr->name) add_assoc_string(return_value, #name, (char *) rr->name, 1)
+		if (rr->name) add_property_string(return_value, #name, (char *) rr->name, 1)
 
 PHP_FUNCTION(apache_lookup_uri)
 {
@@ -82,13 +85,13 @@ PHP_FUNCTION(apache_lookup_uri)
 		WRONG_PARAM_COUNT;
 	
 	if (rr->status == HTTP_OK) {
-		array_init(return_value);
+		object_init(return_value);
 
 		ADD_LONG(status);
 		ADD_STRING(the_request);
 		ADD_STRING(status_line);
 		ADD_STRING(method);
-		ADD_LONG(mtime);
+		ADD_TIME(mtime);
 		ADD_LONG(clength);
 #if MODULE_MAGIC_NUMBER < 20020506
 		ADD_STRING(boundary);
@@ -104,6 +107,12 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(filename);
 		ADD_STRING(path_info);
 		ADD_STRING(args);
+		ADD_LONG(allowed);
+		ADD_LONG(sent_bodyct);
+		ADD_LONG(bytes_sent);
+		ADD_LONG(request_time);
+		ADD_LONG(mtime);
+		ADD_TIME(request_time);
 
 		ap_destroy_sub_req(rr);
 		return;
