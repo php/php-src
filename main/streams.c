@@ -831,17 +831,13 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-		{
-			TSRMLS_FETCH();
-
-			/* must be either:
-		  		a) programmer error
-		  		b) no memory
-		  		-> lets bail
-			 */
-			zend_error(E_ERROR, "%s(): fopencookie failed", get_active_function_name(TSRMLS_C));
-			return FAILURE;
-		}
+		/* must be either:
+			a) programmer error
+			b) no memory
+			-> lets bail
+		*/
+		zend_error(E_ERROR, "%s(): fopencookie failed", get_active_function_name(TSRMLS_C));
+		return FAILURE;
 #endif
 
 		goto exit_fail;
@@ -990,7 +986,7 @@ out:
 	if (stream != NULL && (options & STREAM_MUST_SEEK)) {
 		php_stream *newstream;
 
-		switch(php_stream_make_seekable_rel(stream, &newstream)) {
+		switch(php_stream_make_seekable_rel(stream, &newstream, PHP_STREAM_NO_PREFERENCE)) {
 			case PHP_STREAM_UNCHANGED:
 				return stream;
 			case PHP_STREAM_RELEASED:
@@ -1018,7 +1014,9 @@ out:
 	return stream;
 }
 
-PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream STREAMS_DC TSRMLS_DC)
+#define PHP_STREAM_MAX_MEM	2 * 1024 * 1024
+
+PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC)
 {
 	assert(newstream != NULL);
 
@@ -1031,7 +1029,10 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	
 	/* Use a tmpfile and copy the old streams contents into it */
 
-	*newstream = php_stream_fopen_tmpfile();
+	if (flags & PHP_STREAM_PREFER_STDIO)
+		*newstream = php_stream_fopen_tmpfile();
+	else
+		*newstream = php_stream_temp_create(TEMP_STREAM_DEFAULT, PHP_STREAM_MAX_MEM);
 
 	if (*newstream == NULL)
 		return PHP_STREAM_FAILED;

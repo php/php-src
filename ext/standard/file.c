@@ -126,6 +126,7 @@ static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 	zend_hash_init(&FG(ht_persistent_socks), 0, NULL, NULL, 1);
 	FG(fgetss_state) = 0;
 	FG(pclose_ret) = 0;
+	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
 }
 
 

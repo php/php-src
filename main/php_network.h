@@ -73,6 +73,8 @@
 # define SOCK_RECV_ERR -1
 #endif
 
+#define PHP_SOCK_CHUNK_SIZE	8192
+
 #ifdef HAVE_SOCKADDR_STORAGE
 typedef struct sockaddr_storage php_sockaddr_storage;
 #else

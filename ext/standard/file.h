@@ -108,6 +108,7 @@ typedef struct {
   int fgetss_state;
   int pclose_ret;
   HashTable ht_persistent_socks;
+  size_t def_chunk_size;
 } php_file_globals;
 
 #ifdef ZTS

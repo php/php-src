@@ -17,7 +17,6 @@
  */
 /* $Id$ */
 
-#define PHP_SOCK_CHUNK_SIZE	8192
 #define MAX_CHUNKS_PER_READ 10
 
 #include "php.h"
@@ -70,6 +69,8 @@ int		 inet_aton(const char *, struct in_addr *);
 #if defined(AF_UNIX)
 #include <sys/un.h>
 #endif
+
+#include "ext/standard/file.h"
 
 #ifdef PHP_WIN32
 # define SOCK_ERR INVALID_SOCKET
@@ -425,7 +426,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent 
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
 	sock->is_blocked = 1;
-	sock->chunk_size = PHP_SOCK_CHUNK_SIZE;
+	sock->chunk_size = FG(def_chunk_size);
 	sock->timeout.tv_sec = -1;
 	sock->socket = socket;
 
@@ -780,7 +781,7 @@ static int php_sockop_cast(php_stream *stream, int castas, void **ret TSRMLS_DC)
 			if (ret)	{
 				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
 				if (TOREAD(sock) > 0)
-					zend_error(E_WARNING, "%s(): buffered data lost during conversion to FILE*!", get_active_function_name(TSRMLS_C));
+					zend_error(E_WARNING, "%s(): %d bytes of buffered data lost during conversion to FILE*!", get_active_function_name(TSRMLS_C), TOREAD(sock));
 				*ret = fdopen(sock->socket, stream->mode);
 				if (*ret)
 					return SUCCESS;
