@@ -5,6 +5,9 @@ if (!extension_loaded("session") && ini_get("enable_dl")) {
   @dl("session$dlext");
 }
 if (!extension_loaded("session")) {
-    die("skip\n");
+    die("skip Session module not loaded");
+}
+if (!file_exists(ini_get("session.save_path"))) {
+	die("skip Session save_path doesn't exist");
 }
 ?>
