@@ -232,7 +232,13 @@ class PEAR
     {
         if (is_object($data) && (get_class($data) == 'pear_error' ||
                                  is_subclass_of($data, 'pear_error'))) {
-            return $code === null ? true : $data->getCode() == $code;
+            if (is_null($code)) {
+                return true;
+            } elseif (is_string($code)) {
+                return $data->getMessage() == $code;
+            } else {
+                return $data->getCode() == $code;
+            }
         }
         return false;
     }
