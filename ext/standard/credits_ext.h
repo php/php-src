@@ -26,6 +26,7 @@ CREDIT_LINE("IMAP","Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni
 CREDIT_LINE("Informix","Danny Heijl, Christian Cartus");
 CREDIT_LINE("Ingres II","David Hénot");
 CREDIT_LINE("InterBase","Jouni Ahto, Andrew Avdeev");
+CREDIT_LINE("IRCG", "Sascha Schumann");
 CREDIT_LINE("Java","Sam Ruby");
 CREDIT_LINE("LDAP","Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson");
 CREDIT_LINE("MCAL","Mark Musone, Chuck Hagenbuch");
