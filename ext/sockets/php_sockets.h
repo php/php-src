@@ -87,7 +87,7 @@ typedef struct {
 
 #ifdef ZTS
 #define SOCKETSG(v) (sockets_globals->v)
-#define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(sockets_global_id)
+#define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(sockets_globals_id)
 #else
 #define SOCKETSG(v) (sockets_globals.v)
 #define SOCKETSLS_FETCH()
