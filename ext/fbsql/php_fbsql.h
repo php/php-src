@@ -110,6 +110,7 @@ ZEND_BEGIN_MODULE_GLOBALS(fbsql)
    long persistantCount;
    long linkCount;
    long linkIndex;
+
 ZEND_END_MODULE_GLOBALS(fbsql)
 
 #ifdef ZTS
@@ -127,5 +128,7 @@ ZEND_END_MODULE_GLOBALS(fbsql)
 #define fbsql_module_ptr NULL
 #error not ok
 #endif //  HAVE_FBSQL
+
+#define phpext_fbsql_ptr fbsql_module_ptr
 
 #endif /* _PHP_FBSQL_H */
