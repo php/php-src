@@ -124,6 +124,10 @@ done
 set -x
 ./buildconf --copy
 
+# remove buildmk.stamp. Otherwise, buildcheck.sh might not be run,
+# when a user runs buildconf in the distribution.
+rm -f buildmk.stamp
+
 ./genfiles
 
 echo "/* Dummy File */" > ext/bcmath/number.c
