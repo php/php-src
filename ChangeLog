@@ -1,3 +1,116 @@
+2000-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * genfiles: oops.
+
+    * genfiles:
+    This makes flex and bison not to add those #line directives which
+    cause trouble with some compilers.
+
+2000-09-03  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/php_sablot.h
+      ext/sablot/sablot.c:
+    If the user wants to use more than one handle reuse the old handle.
+
+2000-09-03  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/output.c:
+    - Increase buffers of output buffering to 40KB and 10KB increments which
+      makes more sense when web pages are typically like 10KB-20KB.
+      I think it would be best to change the reallocation algorithm at least to
+      redoubling when it's full instead of incrementing and possibly use
+      a data structure similar to Zend/zend_static_allocator which uses memory
+      blocks and not realloc().
+
+    * main/php_virtual_cwd.c
+      main/php_virtual_cwd.h:
+    - Before removing php_virtual_cwd.[ch] #if 0 them to make sure nothing
+      is broken by this.
+
+    * win32/php4dllts.dsp: - Remove php_virtual_cwd.[ch] from Windows project
+
+2000-09-03  Stig Venaas  <venaas@uninett.no>
+
+    * main/network.c
+      main/php_network.h: Added timeout argument, but not used yet
+
+2000-09-03  Andi Gutmans  <andi@zend.com>
+
+    * main/Makefile.in
+      main/php.h: - Move to virtual cwd in TSRM
+
+2000-09-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/sybase/php_sybase_db.c:
+    - Changed appname from "PHP 3.0" to "PHP 4.0"
+      Fix for #6517
+
+2000-09-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/output.c: Make gcc happy
+
+    * ext/standard/output.c: Fix init bug
+
+2000-09-03  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/sablot/sablot.c:
+    Just when you got something working they decide to change the API
+    on you :-).
+
+    * ext/sablot/config.m4: ucd -> sablot.
+
+    * ext/sablot/Makefile.in
+      ext/sablot/config.m4
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c
+      ext/sablot/.cvsignore:
+    Folks, features include:
+
+    - Output Buffering Tie-ins
+    - Optional Descriptive error reporting (compile option)
+    - String Transformations
+    - File Transformations
+    - Logging
+    - SAX XML Processing support (slightly different from expat, even though
+    Sablotron uses expat to do the parsing.)
+
+2000-09-03  Stanislav Malyshev  <stas@zend.com>
+
+    * run-tests.php: Remove deprecated call-time reference
+
+2000-09-03  Stig Venaas  <venaas@uninett.no>
+
+    * main/Makefile.in: Added network.c
+
+    * main/php_network.h: To be included by code using functions in network.c
+
+2000-09-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/quot_print.c:
+    Fix quoted_printable_decode (also should fix #6511)
+
+2000-09-03  Stig Venaas  <venaas@uninett.no>
+
+    * main/network.c:
+    Network related functions, only for internal use by other PHP code. Tries
+    to hide the details of address families/protocols, and to reduce duplication
+    of code.
+
+2000-09-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/xml/tests/003.phpt: Remove deprecated call-time reference
+
+    * ext/xml/tests/skipif.inc: tests look for skipif.inc, so add it
+
+    * tests/lang/028.phpt: Remove deprecated call-time reference
+
+2000-09-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/datetime.c:
+    - Fixed a bug in checkdate() which caused < 1 years to be valid 
+
+    * ext/standard/datetime.c: Fixed bug #6409.
+
 2000-09-02  Andi Gutmans  <andi@zend.com>
 
     * main/php_virtual_cwd.c
