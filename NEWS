@@ -4,12 +4,13 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.6
 - Improved memory manager to use less memory and provide better memory overflow
   detection abilities in debug mode (Andi, Zend Engine)
-- Fix resource leaks when resources where being cast to numbers (Zeev, Zend
+- Fixed resource leaks when resources were being cast to numbers (Zeev, Zend
   Engine)
-- Fix foreach() to not crash when being sent an invalid argument (Andi, Zend
+- Fixed foreach() to not crash when being sent an invalid argument (Andi, Zend
   Engine)
-- Fix opendir() on Windows when trying to open a non-exisiting directory (Andi)
-- Fix popen() and the exec family under Win32 (Unable to fork issue) (Daniel)
+- Fixed a bug in opendir() under Windows when trying to open a non-exisiting
+  directory (Andi)
+- Fixed popen() and the exec family under Win32 (Unable to fork issue) (Daniel)
 - Make the printf family of functions binary clean (Rasmus)
 - Fixed WDDX serialization to HTML-escape key/variable names so as not to
   break the XML packet. (Andrei)
