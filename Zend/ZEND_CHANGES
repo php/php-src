@@ -139,12 +139,12 @@ Changes in the Zend Engine 2.0
       Example:
 
         <?php
-        interface Throwable {
-          public function getMessage();
+        interface Printable {
+          public function dump();
         }
 
-        class Exception implements Throwable {
-          public function getMessage() {
+        class PrintableExample implements Printable {
+          public function dump() {
             // ...
           }
         }
