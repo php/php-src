@@ -19,6 +19,7 @@
 #ifndef PHP_OVERLOAD_H
 #define PHP_OVERLOAD_H
 
+#ifndef ZEND_ENGINE_2
 #if HAVE_OVERLOAD
 
 extern zend_module_entry overload_module_entry;
@@ -52,6 +53,7 @@ ZEND_END_MODULE_GLOBALS(overload)
 #endif
 
 #endif /* HAVE_OVERLOAD */
+#endif /* ZEND_ENGINE_2 */
 
 #endif /* PHP_OVERLOAD_H */
 
