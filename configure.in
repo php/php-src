@@ -510,7 +510,7 @@ if test "$PHP_PEAR" != "no"; then
   PEAR_DIR=pear
 fi
 
-if test "$PHP_PEAR" = "DEFAULT"; then
+if test "$PHP_PEAR" = "DEFAULT" -o "x$PHP_PEAR" = "xyes"; then
   case $PHP_LAYOUT in
     GNU) PEAR_INSTALLDIR=$datadir/pear;;
     *)   PEAR_INSTALLDIR=$libdir/php;;
