@@ -25,6 +25,7 @@
 #include "ext/standard/info.h"
 #if !defined(PHP_WIN32)
 #include "build-defs.h"
+#include <sysexits.h>
 #endif
 #include "php_mail.h"
 #include "php_ini.h"
@@ -151,7 +152,7 @@ int php_mail(char *to, char *subject, char *message, char *headers)
 		}
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
-		if (ret == -1) {
+		if ((ret != EX_OK)&&(ret != EX_TEMPFAIL)) {
 			return 0;
 		} else {
 			return 1;
