@@ -102,7 +102,6 @@
 %token T_DEFAULT
 %token T_BREAK
 %token T_CONTINUE
-%token T_OLD_FUNCTION
 %token T_FUNCTION
 %token T_CONST
 %token T_RETURN
@@ -276,8 +275,6 @@ class_declaration_statement:
 unticked_function_declaration_statement:
 		T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING  { zend_do_begin_function_declaration(&$1, &$4, 0, $3.op_type TSRMLS_CC); }
-			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
 unticked_class_declaration_statement:
@@ -443,8 +440,6 @@ class_statement:
 	|	class_constant_declaration ';'
 	|	T_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); } '(' 
 			parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
-	|	T_OLD_FUNCTION { $1.u.opline_num = CG(zend_lineno); } is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 1, $3.op_type TSRMLS_CC); }
-			parameter_list '(' inner_statement_list ')' ';' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 	|	T_CLASS T_STRING extends_from '{' { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } class_statement_list '}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
 ;
 

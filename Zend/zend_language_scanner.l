@@ -488,11 +488,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_EXIT;
 }
 
-<ST_IN_SCRIPTING>"old_function" {
-	return T_OLD_FUNCTION;
-}
-
-<ST_IN_SCRIPTING>"function"|"cfunction" {
+<ST_IN_SCRIPTING>"function" {
 	return T_FUNCTION;
 }
 
