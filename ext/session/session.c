@@ -483,8 +483,8 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 	}
 
 	zval_dtor(retval);
-	efree(retval);
-
+	FREE_ZVAL(retval);
+	
 	return ret;
 }
 
