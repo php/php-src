@@ -188,7 +188,7 @@ static int _Exec(int type, char *cmd, pval *array, pval *return_value)
 
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
 			for (i = 0; i < b; i++)
-				if (output) PUTC(buf[i]);
+				if (output) (void)PUTC(buf[i]);
 		}
 	}
 
