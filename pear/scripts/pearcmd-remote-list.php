@@ -9,6 +9,7 @@ if (PEAR::isError($result)) {
 }
 
 heading("Available packages");
+
 foreach ($result as $package => $info) {
     if ($i++ % 20 == 0) {
         if ($j++ > 0) {
@@ -22,7 +23,7 @@ foreach ($result as $package => $info) {
         $info['stable'] = '(none)';
     }
     $stable = (string)$info['stable'];
-    printf("%-20s %-10s %-15s %s\n", $info['name'],
+    printf("%-20s %-10s %-15s %s\n", $package,
            $info['stable'], $info['lead'], $info['category']);
 }
 
