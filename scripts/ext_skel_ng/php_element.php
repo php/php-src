@@ -1,6 +1,7 @@
 <?php
 
 class php_element {
+
 	function is_type($name) {
 		$types = array("void"     => "void", 
 									 "bool"     => "bool", 
@@ -18,7 +19,7 @@ class php_element {
 									 "callback" => "callback",
 									 );
 		
-		if(isset($types[$name])) {
+		if (isset($types[$name])) {
 			return $types[$name];
 		} else {
 			return false;
@@ -26,7 +27,7 @@ class php_element {
 	}
 
 	function is_name($name) {
-		if(ereg("[a-zA-Z0-9_]",$name)) {
+		if (ereg("^[[:alpha:]_][[:alnum:]_]*$",$name)) {
 			// TODO reserved words
 			return true;
 		} 
@@ -49,7 +50,7 @@ class php_element {
 	function docbook_editor_footer($level=3) {
 		return '
 <!-- Keep this comment at the end of the file
-Local variables:
+Local'.' variables:
 mode: sgml
 sgml-omittag:t
 sgml-shorttag:t
