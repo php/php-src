@@ -606,8 +606,11 @@ static void php_message_handler_for_zend(long message, void *data)
 				}
 			}
 			break;
-		case ZMSG_LOG_SCRIPT_NAME:
-			fprintf(stderr, "Script:  '%s'\n", SG(request_info).path_translated);
+		case ZMSG_LOG_SCRIPT_NAME: {
+				SLS_FETCH();
+
+				fprintf(stderr, "Script:  '%s'\n", SG(request_info).path_translated);
+			}
 			break;
 	}
 }
