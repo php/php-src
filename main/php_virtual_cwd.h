@@ -25,6 +25,7 @@ void virtual_cwd_startup();
 char *virtual_getcwd_ex(int *length);
 char *virtual_getcwd(char *buf, size_t size);
 int virtual_chdir(char *path);
+int virtual_chdir_file(char *path);
 int virtual_filepath(char *path, char **filepath);
 FILE *virtual_fopen(char *path, const char *mode);
 
