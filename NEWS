@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.2.2
+- Couple of bug fixes. (Various Artists)
 - Fixed accidental pg_lo_import() API change. (Yasuo)
 - Fixed ereg_replace() crash when the backreference number was greater than the 
   number of captured subpatterns. (oliver@billix.franken.de)
