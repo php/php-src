@@ -1,3 +1,252 @@
+2003-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/tests/skipif.inc:
+      Fix test (ssen by Dan Torop)
+
+2003-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/network.c:
+      Implement socket liveness checking for SSL streams when recycling via
+      pfsockopen.
+
+2003-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      Make error messages less ambiguous
+
+2003-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      main/streams.c:
+      Make fread() non-greedy for socket based streams
+
+2003-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/mod_files.c:
+      Defensive programming
+
+2003-05-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.c:
+      initialize these to NULL
+
+2003-05-20  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ext/pcre/php_pcre.c:
+      Put some guards in place.
+
+2003-05-20  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/browscap.c:
+      Make get_browser() try harder to find better matches.
+
+2003-05-20  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+      Adding imap_getacl, patch provided by Holger Burbach
+      (holger.burbach@gonicus.de)
+
+2003-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      Touch and remove WS added by last touch....
+
+    * (PHP_4_3)
+      ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      Touch files
+
+2003-05-20  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/standard/array.c
+      ext/standard/basic_functions.h:
+      convert array functions to use fast_call_user_function(), gives a nice
+      performance win.
+
+2003-05-20  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/php_imap.c:
+      NIL, NULL, same thing, but changing for consistency sake
+
+2003-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      Better reinitialize session_status unconditionally
+
+2003-05-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * scripts/ext_skel_ng/php_function.php:
+      doing the trick like in extension_parser.php
+
+2003-05-20  Brad House  <brad@mainstreetsoftworks.com>
+
+    * ext/mcve/mcve.c:
+      Properly map mcve_text_code to MCVE_TEXT_Code instead of MCVE_TEXT_AVS.
+      Properly cast MCVE_TTID.
+      Correct DVAL arguments to MCVE_Gut and MCVE_Gl.
+
+2003-05-20  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * scripts/ext_skel_ng/extension_parser.php:
+      - experimental streams support
+      - more file types: conf and doc
+      - requirements/install/configure documentation in configure.xml
+      - auto-generated PEAR/PECL package.xml files
+      - auto-generated CREDITS file
+      - auto-generated EXPERIMENTAL file if release state != stable
+      - beginning support for test file generation
+
+    * scripts/ext_skel_ng/extension.xml:
+      example for "stream" as parameter and return type
+
+    * scripts/ext_skel_ng/php_function.php:
+      no RCS keyword expansion in template, 2nd try
+
+    * scripts/ext_skel_ng/php_function.php:
+      protect revision entry in template from CVS keyword expansion
+
+    * scripts/ext_skel_ng/php_function.php:
+      - new method to generate test cases for functions
+      - beginning support for "pass by reference" parameters
+
+    * scripts/ext_skel_ng/php_element.php:
+      just a method name change
+
+    * scripts/ext_skel_ng/extension.dtd:
+      additional tags for experimental streams support
+
+    * scripts/ext_skel_ng/ext_skel_ng.php:
+      create CREDITS, package.xml and maybe EXPERIMENTAL files
+      create tests
+
+    * scripts/ext_skel_ng/TODO:
+      updated TODOs
+
+    * ext/fdf/fdf.c:
+      zend_is_callable() already checks this ...
+
+    * ext/pcntl/pcntl.c:
+      proto and typo fixes
+
+    * ext/standard/info.h:
+      C++ extensions build fix
+
+    * main/streams/userspace.c:
+      always return timestamps as 'atime', 'mtime' and 'ctime'
+      no matter what names the underlying platform uses for them
+
+2003-05-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4_3)
+      main/network.c:
+      initialize err
+
+    * (PHP_4_3)
+      ext/ncurses/php_ncurses.h
+      ext/session/mod_files.c
+      ext/session/php_session.h:
+      Fix use of ZEND_EXTERN_MODULE_GLOBALS which mysteriously includes a
+      trailing semicolon.
+      
+      Also add a do {} while (0) construct in php_session.h
+
+2003-05-20  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      Set exspected threads to tsrm_startup() to number of threads NSAPI returns
+      for server
+
+2003-05-20  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c:
+      Revisit the braindead patch only for this branch
+
+2003-05-20  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdf/pdf.c:
+      Added missing safe_mode & open_basedir checks.
+
+2003-05-20  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/standard/file.c
+      ext/standard/fsock.c
+      main/streams.c:
+      Much better fix for refcount issues with contexts, and fix a leak in
+      context
+      value storage.
+
+2003-05-20  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xml/config.m4:
+      - Go back to using --disable-xml and --enable-xml
+        . Require use of --with-libxml-dir and --with-libexpat-dir for ext/xml.
+          Allows other extensions to use --with-expat-dir for now.
+
+2003-05-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/tests/01createdb.phpt
+      ext/pgsql/tests/02connection.phpt
+      ext/pgsql/tests/03sync_query.phpt
+      ext/pgsql/tests/04async_query.phpt
+      ext/pgsql/tests/05large_object.phpt
+      ext/pgsql/tests/06copy.phpt
+      ext/pgsql/tests/07optional.phpt
+      ext/pgsql/tests/08escape.phpt
+      ext/pgsql/tests/09notice.phpt
+      ext/pgsql/tests/10pg_convert.phpt
+      ext/pgsql/tests/11pg_meta_data.phpt
+      ext/pgsql/tests/12pg_insert.phpt
+      ext/pgsql/tests/13pg_select.phpt
+      ext/pgsql/tests/14pg_update.phpt
+      ext/pgsql/tests/15pg_delete.phpt
+      ext/pgsql/tests/16pg_result_status.phpt
+      ext/pgsql/tests/17result.phpt
+      ext/pgsql/tests/18pg_escape_bytea.phpt
+      ext/pgsql/tests/19pg_ping.phpt
+      ext/pgsql/tests/20pg_get_pid.phpt
+      ext/pgsql/tests/21pg_get_notify.phpt
+      ext/pgsql/tests/98old_api.phpt
+      ext/pgsql/tests/9999dropdb.phpt
+      ext/pgsql/tests/async_query.inc
+      ext/pgsql/tests/connection.inc
+      ext/pgsql/tests/copy.inc
+      ext/pgsql/tests/createdb.inc
+      ext/pgsql/tests/dropdb.inc
+      ext/pgsql/tests/escape.inc
+      ext/pgsql/tests/informational.inc
+      ext/pgsql/tests/large_object.inc
+      ext/pgsql/tests/notice.inc
+      ext/pgsql/tests/old_api.inc
+      ext/pgsql/tests/optional.inc
+      ext/pgsql/tests/pg_convert.inc
+      ext/pgsql/tests/pg_delete.inc
+      ext/pgsql/tests/pg_escape_bytea.inc
+      ext/pgsql/tests/pg_get_notify.inc
+      ext/pgsql/tests/pg_get_pid.inc
+      ext/pgsql/tests/pg_insert.inc
+      ext/pgsql/tests/pg_meta_data.inc
+      ext/pgsql/tests/pg_ping.inc
+      ext/pgsql/tests/pg_result_status.inc
+      ext/pgsql/tests/pg_select.inc
+      ext/pgsql/tests/pg_update.inc
+      ext/pgsql/tests/result.inc
+      ext/pgsql/tests/sync_query.inc:
+      Reorganized tests
+
+    * ext/standard/tests/serialize/003.phpt:
+      Fix Test (2nd time)
+
 2003-04-07  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS:
