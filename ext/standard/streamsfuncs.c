@@ -802,7 +802,7 @@ PHP_FUNCTION(stream_context_create)
 		parse_context_options(context, params);
 	}
 	
-	ZEND_REGISTER_RESOURCE(return_value, context, php_le_stream_context());
+	php_stream_context_to_zval(context, return_value);
 }
 /* }}} */
 

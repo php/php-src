@@ -1247,11 +1247,6 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		BG(user_filter_map) = NULL;
 	}
 
-	/* cleanup any default context that was created */
-	if (FG(default_context)) {
-		php_stream_context_free(FG(default_context));
-	}
-	
 	return SUCCESS;
 }
 
