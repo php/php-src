@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.0.2
+- SoapClient->__call() is renamed to SoapClinet->__soap_call(). (Dmitry)
 - Add interface_exists() and make class_exists() only return true for real
   classes. (Andrey)
 - Implemented periodic PCRE compiled regexp cache cleanup, to avoid memory
