@@ -20,6 +20,7 @@ PHP 4                                                                      NEWS
   . ext/vpopmail
   . ext/cybermut
 - Added "neutral" language entry to mbstring spec. (Moriyoshi) 
+- Changed bundled gd library to consider php.ini option memory_limit. (Marcus)
 - Modified log() to accept multiple bases. (Jason)
 - Fixed bugs #16190/18746 (ext/db: flatfile support with windows). (Marcus)
 - Added gd_info() which returns an array of gd support information. (Marcus)
