@@ -20,6 +20,7 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bugs #20270, #15702, #18600 (segfaults in ext/java). (Tony J. White)
 - Fixed bug #19566 (get_declared_classes() segfaults). (Moriyoshi, Marcus, Andi)
 - Fixed bug #20381 (array_merge_recursive mangles input arrays). (Moriyoshi) 
 - Added -n command switch to cli and cgi version which allows to skip php.ini
