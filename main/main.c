@@ -575,8 +575,6 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 
 /* {{{ php_error_cb
  extended error handling function */
-#define NO_NULL_STR(x) (x?x:"")
-
 static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
 {
 	char *buffer;
@@ -653,7 +651,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				char *error_format = PG(html_errors) ?
 					"%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s"
 					: "%s\n%s: %s in %s on line %d\n%s";    
-				php_printf(error_format, NO_NULL_STR(prepend_string), error_type_str, buffer, error_filename, error_lineno, NO_NULL_STR(append_string));
+				php_printf(error_format, STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 			}
 		}
 #if ZEND_DEBUG
