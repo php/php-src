@@ -2641,6 +2641,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
+				zend_str_tolower(constant_container->u.constant.value.str.val, constant_container->u.constant.value.str.len);
 				zend_do_fetch_class_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
 			} else {
