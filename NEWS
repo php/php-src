@@ -1,12 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Update the XSLT extension to support Sablotron 0.8 (Sterling)
 - Fixed a bug in preg_match()/preg_match_all() when matching strings containing
   null bytes. (Andrei)
-- Added xpath_register_ns() function.
-  It makes possible to issue XPath queries with namespaces
-  like for example: "//namespace:sampletag" (Chris Jarecki)
-- Added multi-byte enabled regex functions. (Rui)
+- Added xpath_register_ns() function. This makes it possible to issue XPath 
+  queries with namespaces like for example: "//namespace:sampletag" 
+  (Chris Jarecki)
+- Added multi-byte enabled regular expression functions. (Rui)
 - Added second parameter to count() that can be used to specify either normal
   or recursive counting. (patch by Vlad Bosinceanu <glipy@fx.ro>)
 - Added mb_get_info() to get internal settings of mbstring.
@@ -15,10 +16,11 @@ PHP 4                                                                      NEWS
 - Added IPv6 support in FTP extension. (Stig Venaas)
 - Added CLI (command line intrerface) sapi based on a cut-down version
   of the CGI sapi which is more suited for writing shell scripts. Some of
-  the differences are: it prints no HTTP headers, displays plain text
-  error messages, etc. (Edin)
-- Made wordwrap() significantly faster. (Jim)
-- Fixed pow(), and added is_finite(), is_infinite(), and is_nan(). (Jim)
+  the differences are: it prints no HTTP headers and it displays plain text
+  error messages. (Edin)
+- Improve the speed of wordwrap() significantly. (Jim)
+- Fixed pow()'s incorrect behaviour when dealing with powers of 0. (Jim)
+- Added is_finite(), is_infinite(), and is_nan(). (Jim)
 - Fixed segfault in wordwrap() when wrapping to zero width and using
   multi-character break or trying to force cut (bug #12768). (Jim)
 - Fixed several bugs in dbase extension (dbase_pack() truncate file to right
@@ -59,7 +61,6 @@ PHP 4                                                                      NEWS
   images. (Rasmus)
 - Added support for bind_textdomain_codeset(). (rudib@email.si)
 - Added generic Win 32 API extension. (jmoore)
-- Fixed Bug #9878. Patch by bfoddy@mediaone.net. (jmoore)
 - Removed warning message about NONEXISTENT character set from mysql_connect() 
   when the server's default character set != latin1. (Mysql Team)
 - Added Direct I/O extension for lowlevel access to the POSIX layer. (sterling)
@@ -68,7 +69,6 @@ PHP 4                                                                      NEWS
   arrays. Previously segfaulted or added wrong value. (Stig Venaas)
 - Added Udm_Check_Charset() function into mnoGoSearch extension. (gluke)
 - Fixed mnoGoSearch extension to support mnogosearch-3.2.x. (gluke)
-- Fixed bug #13885 (gmdate() timezone handling on windows). (jmoore)
 - Made fbsql_num_rows() to return the correct value on all select statements.
   (Frank)
 - Fixed HTTP file upload support to handle big files better. (Jani)
