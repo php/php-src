@@ -298,76 +298,29 @@ test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 dnl First, library checks.
 dnl -------------------------------------------------------------------------
 
-AC_CHECK_LIB(socket, socket, [
- PHP_ADD_LIBRARY(socket)
- AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
-  AC_CHECK_LIB(socket, htonl, [
-   PHP_ADD_LIBRARY(socket)
-   ])])
-
 dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
 dnl to avoid -lnsl checks, if we already have the functions which
 dnl are usually in libnsl
 dnl Also, uClibc will bark at linking with glibc's libnsl.
-unset ac_cv_func_gethostname
-unset ac_cv_func_yp_get_default_domain
-case $host_alias in
-  *unixware* | *sco*)
-    AC_CHECK_FUNC(gethostname, [
-      php_no_nsl_checks=yes
-    ])
-    ;;
-esac
 
-AC_CHECK_FUNC(yp_get_default_domain, [
-  php_no_nsl_checks=yes
-])
-unset ac_cv_func_gethostname
-unset ac_cv_func_yp_get_default_domain
+PHP_CHECK_FUNC(socket, socket)
+PHP_CHECK_FUNC(htonl, socket)
+PHP_CHECK_FUNC(gethostname, nsl)
+PHP_CHECK_FUNC(gethostbyaddr, nsl)
+PHP_CHECK_FUNC(yp_get_default_domain, nsl)
 
-if test "$php_no_nsl_checks" != "yes"; then
-
-AC_CHECK_LIB(nsl, gethostname, [
- PHP_ADD_LIBRARY(nsl)
- AC_DEFINE(HAVE_LIBNSL,1,[ ]) ],[
- AC_CHECK_LIB(nsl, gethostbyaddr, [
-  PHP_ADD_LIBRARY(nsl)
-  AC_DEFINE(HAVE_LIBNSL,1,[ ]) ], [])
-])
-
-fi
-
-AC_CHECK_LIB(dl, dlopen,[PHP_ADD_LIBRARY(dl)])
-
-dnl The sin may be in a library which need not be specifed
-dnl as well as res_search resides in libsocket
+AC_CHECK_LIB(dl, dlopen, [PHP_ADD_LIBRARY(dl)])
 AC_CHECK_LIB(m, sin)
 
-dnl Only include libbind if inet_aton is not found in 
-dnl libresolv.
-AC_CHECK_LIB(resolv, inet_aton, [], [
-  AC_CHECK_LIB(bind, inet_aton, [], [
-    AC_CHECK_LIB(bind, __inet_aton)
-  ])
-])
+dnl Check for resolver routines.
+dnl Need to check for both res_search and __res_search
+dnl in -lc, -lbind, -lresolv and -lsocket
+PHP_CHECK_FUNC(res_search, resolv, bind, socket)
 
-dnl The res_search may be in libsocket as well, and if it is
-dnl make sure to check for dn_skipname in libresolv, or if res_search
-dnl is in neither of these libs, still check for dn_skipname in libresolv
-AC_CHECK_LIB(socket, res_search, [
- AC_CHECK_LIB(resolv, dn_skipname)
- AC_CHECK_LIB(resolv, __dn_skipname)
- LIBS="$LIBS -lsocket"
- AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
- AC_CHECK_LIB(resolv, res_search, [
-  LIBS="$LIBS -lresolv"
-  AC_DEFINE(HAVE_LIBRESOLV,1,[ ]) 
- ], [
-  AC_CHECK_LIB(resolv, dn_skipname)
-  AC_CHECK_LIB(resolv, __dn_skipname)
- ]) 
-])
-
+dnl Check for inet_aton and dn_skipname
+dnl in -lc, -lbind and -lresolv
+PHP_CHECK_FUNC(inet_aton, resolv, bind)
+PHP_CHECK_FUNC(dn_skipname, resolv, bind)
 
 
 dnl Then headers.
@@ -384,8 +337,11 @@ else
 fi
 PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
-AC_CHECK_HEADERS(
+AC_CHECK_HEADERS([ \
 ApplicationServices/ApplicationServices.h \
+sys/types.h \
+sys/time.h \
+netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
@@ -398,7 +354,6 @@ langinfo.h \
 limits.h \
 locale.h \
 mach-o/dyld.h \
-netinet/in.h \
 pwd.h \
 resolv.h \
 signal.h \
@@ -418,15 +373,26 @@ sys/statfs.h \
 sys/statvfs.h \
 sys/vfs.h \
 sys/sysexits.h \
-sys/time.h \
-sys/types.h \
 sys/varargs.h \
 sys/wait.h \
 unistd.h \
 unix.h \
 utime.h \
 sys/utsname.h \
-)
+],[],[],[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
+])
 
 
 
@@ -494,7 +460,6 @@ flock \
 gai_strerror \
 gcvt \
 getlogin \
-gethostbyaddr \
 getprotobyname \
 getprotobynumber \
 getservbyname \
@@ -502,7 +467,6 @@ getservbyport \
 getrusage \
 gettimeofday \
 gmtime_r \
-inet_aton \
 isascii \
 link \
 localtime_r \
