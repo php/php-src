@@ -83,7 +83,10 @@
 
 #define HTTP_HEADER_BLOCK_SIZE		1024
 #define PHP_URL_REDIRECT_MAX		20
-
+#define HTTP_HEADER_USER_AGENT		1
+#define HTTP_HEADER_HOST		2
+#define HTTP_HEADER_AUTH		4
+#define HTTP_HEADER_FROM		8
 
 php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int header_init STREAMS_DC TSRMLS_DC)
 {
@@ -93,7 +96,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *scratch = NULL;
 	char *tmp = NULL;
 	char *ua_str = NULL;
-	zval **ua_zval = NULL;
+	zval **ua_zval = NULL, **tmpzval = NULL;
 	int scratch_len = 0;
 	int body = 0;
 	char location[HTTP_HEADER_BLOCK_SIZE];
@@ -102,7 +105,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	char *http_header_line = NULL;
 	char tmp_line[128];
 	size_t chunk_size = 0, file_size = 0;
-	int eol_detect;
+	int eol_detect, have_header = 0;
 
  	if (redirect_max < 1) {
  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
@@ -133,8 +136,10 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		resource->port = 80;
 
 	stream = php_stream_sock_open_host(resource->host, resource->port, SOCK_STREAM, NULL, 0);
-	if (stream == NULL)	
+	if (stream == NULL) {
+		eol_detect = 0;
 		goto out;
+	}
 
 	/* avoid problems with auto-detecting when reading the headers -> the headers
 	 * are always in canonical \r\n format */
@@ -168,10 +173,20 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 #endif
 
-	scratch_len = strlen(path) + 32;
-	scratch = emalloc(scratch_len);
+	if (context && php_stream_context_get_option(context, "http", "method", &tmpzval) == SUCCESS) {
+		if (Z_TYPE_PP(tmpzval) == IS_STRING && Z_STRLEN_PP(tmpzval) > 0) {
+	        	scratch_len = strlen(path) + 29 + Z_STRLEN_PP(tmpzval);
+	                scratch = emalloc(scratch_len);
+	                strlcpy(scratch, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) + 1);
+	                strcat(scratch, " ");
+		}
+	}
 
-	strcpy(scratch, "GET ");
+	if (!scratch) {
+		scratch_len = strlen(path) + 32;
+	        scratch = emalloc(scratch_len);
+	        strcpy(scratch, "GET ");
+	}
 
 	/* file */
 	if (resource->path && *resource->path)
@@ -190,9 +205,35 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 
 	/* send it */
 	php_stream_write(stream, scratch, strlen(scratch));
+	
+	if (context && php_stream_context_get_option(context, "http", "header", &tmpzval) == SUCCESS && Z_STRLEN_PP(tmpzval)) {
+		/* Remove newlines and spaces from start and end, php_trim will estrndup() */
+		tmp = php_trim(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), NULL, 0, NULL, 3 TSRMLS_CC);
+		if (strlen(tmp) > 0) {
+			/* Output trimmed headers with \r\n at the end */
+			php_stream_write(stream, tmp, strlen(tmp));
+			php_stream_write(stream, "\r\n", sizeof("\r\n") - 1);
+
+			/* Make lowercase for easy comparison against 'standard' headers */
+			php_strtolower(tmp, strlen(tmp));
+			if (strstr(tmp, "user-agent:")) {
+				 have_header |= HTTP_HEADER_USER_AGENT;
+			}
+			if (strstr(tmp, "host:")) {
+				 have_header |= HTTP_HEADER_HOST;
+			}
+			if (strstr(tmp, "from:")) {
+				 have_header |= HTTP_HEADER_FROM;
+				}
+			if (strstr(tmp, "authorization:")) {
+				 have_header |= HTTP_HEADER_AUTH;
+			}
+		}
+		efree(tmp);
+	}
 
 	/* auth header if it was specified */
-	if (resource->user && resource->pass)	{
+	if (((have_header & HTTP_HEADER_AUTH) == 0) && resource->user && resource->pass) {
 		/* decode the strings first */
 		php_url_decode(resource->user, strlen(resource->user));
 		php_url_decode(resource->pass, strlen(resource->pass));
@@ -203,7 +244,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strcat(scratch, resource->pass);
 
 		tmp = php_base64_encode((unsigned char*)scratch, strlen(scratch), NULL);
-		
+
 		if (snprintf(scratch, scratch_len, "Authorization: Basic %s\r\n", tmp) > 0) {
 			php_stream_write(stream, scratch, strlen(scratch));
 			php_stream_notify_info(context, PHP_STREAM_NOTIFY_AUTH_REQUIRED, NULL, 0);
@@ -214,18 +255,24 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	/* if the user has configured who they are, send a From: line */
-	if (cfg_get_string("from", &tmp) == SUCCESS)	{
-		if (snprintf(scratch, scratch_len, "From: %s\r\n", tmp) > 0)
+	if (((have_header & HTTP_HEADER_FROM) == 0) && cfg_get_string("from", &tmp) == SUCCESS)	{
+		if (snprintf(scratch, scratch_len, "From: %s\r\n", tmp) > 0) {
 			php_stream_write(stream, scratch, strlen(scratch));
+		}
 	}
 
 	/* Send Host: header so name-based virtual hosts work */
-	if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80))	{
-		if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0)
-			php_stream_write(stream, scratch, strlen(scratch));
+	if ((have_header & HTTP_HEADER_HOST) == 0) {
+		if ((use_ssl && resource->port != 443) || (!use_ssl && resource->port != 80))	{
+			if (snprintf(scratch, scratch_len, "Host: %s:%i\r\n", resource->host, resource->port) > 0) {
+				php_stream_write(stream, scratch, strlen(scratch));
+			}
+		} else {
+			if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0) {
+				php_stream_write(stream, scratch, strlen(scratch));
+			}
+		}
 	}
-	else if (snprintf(scratch, scratch_len, "Host: %s\r\n", resource->host) > 0)
-		php_stream_write(stream, scratch, strlen(scratch));
 
 	if (context && 
 	    php_stream_context_get_option(context, "http", "user_agent", &ua_zval) == SUCCESS) {
@@ -258,6 +305,12 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	}
 
 	php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
+
+	/* Request content, such as for POST requests */
+	if (context && php_stream_context_get_option(context, "http", "content", &tmpzval) == SUCCESS && Z_STRLEN_PP(tmpzval) > 0) {
+		php_stream_write(stream, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval));
+		php_stream_write(stream, "\r\n\r\n", sizeof("\r\n\r\n")-1);
+	}
 
 	location[0] = '\0';
 

@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   send_default_content_type now sends value from php.ini). (Uwe Schindler)
 - Fixed bug #26446 (domxml_open_file() returns an empty error-Array). (Rob)
 - Fixed bug #26438 (error in thttpd SAPI installation). (Jani)
+- Fixed bug #26440 (MFH missing context options). (Ilia)
 - Fixed bug #25963 (PostgreSQL error message include \n characters).
   (Marcus, Ilia)
 - Fixed bug #26376 (typo in ext/odbc/config.m4: DBMaker test fails). (Jani)
