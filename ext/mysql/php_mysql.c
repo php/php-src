@@ -33,6 +33,7 @@
 
 #ifdef PHP_WIN32
 #include <winsock.h>
+#define signal(a,b) NULL
 #else
 #include "build-defs.h"
 
