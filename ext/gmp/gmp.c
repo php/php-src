@@ -1107,12 +1107,12 @@ ZEND_FUNCTION(gmp_xor)
    Sets or clear bit in a */
 ZEND_FUNCTION(gmp_setbit)
 {
-	zval **a_arg, **ind_arg, **sc_arg;
+	zval **a_arg, **ind_arg, **set_c_arg;
 	int argc, index, set=1;
 	mpz_t *gmpnum_a;
 
 	argc = ZEND_NUM_ARGS();
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &a_arg, &ind_arg, &sc_arg) == FAILURE){
+	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &a_arg, &ind_arg, &set_c_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 
@@ -1123,8 +1123,8 @@ ZEND_FUNCTION(gmp_setbit)
 
 	switch (argc) {
 		case 3:
-			convert_to_long_ex(sc_arg);
-			set = Z_LVAL_PP(sc_arg);
+			convert_to_long_ex(set_c_arg);
+			set = Z_LVAL_PP(set_c_arg);
 			break;
 		case 2:
 			set = 1;
