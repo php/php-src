@@ -32,10 +32,14 @@
 #ifndef _PHP_LINK_H
 #define _PHP_LINK_H
 
+#ifdef HAVE_SYMLINK
+
 PHP_FUNCTION(link);
 PHP_FUNCTION(unlink);
 PHP_FUNCTION(readlink);
 PHP_FUNCTION(linkinfo);
 PHP_FUNCTION(symlink);
+
+#endif
 
 #endif /* _PHP_LINK_H */
