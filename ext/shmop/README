@@ -1,31 +1,35 @@
-last update sept 3, 2000 (slavapl@mailandnews.com/iliaa@home.com)
+last update Jan 2, 2002 (hackie@prohost.org/ilia@prohost.org)
 
 Shared Memory Operations Extension to PHP4
 
-	While developing a search deamon we needed the php based front end
-	to communicate the deamon via SHM. Now, PHP already had a shared memory
+	While developing a search deamon we needed a php based front end
+	to communicate the deamon via SHM. PHP already had a shared memory
 	extention (sysvshm) written by Christian Cartus <cartus@atrior.de>,
-	unfortunatly this extention was designed with PHP only in mind, and
+	unfortunatly this extention was designed with PHP only in mind and
 	offers high level features which are extremly bothersome for basic SHM
-	we had in mind.  After spending a day trying to reverse engeener figure
+	we had in mind.  After spending a day trying to reverse engineer and figure
 	out the format of sysvshm we decided that it would be much easier to
 	add our own extention to php for simple SHM operations, we were right :)). 
 
 the functions are:
 	
-int shm_open(int key, string flags, int mode, int size)
+int shmop_open(int key, string flags, int mode, int size)
 	
 	key 		- the key of/for the shared memory block
-	flags 		- 2 flags are avalible 
-				a for access  (sets IPC_EXCL)
-				c for create  (sets IPC_CREATE)
+	flags 		- 4 flags are avalible 
+				a for read only access (sets SHM_RDONLY)
+				w for read & write access
+				c create or open an existing segment (sets IPC_CREATE)
+				n create a new segment and fail if one already exists under same name (sets IPC_CREATE|IPC_EXCL)
+				(the n flag is mostly useful for security perpouses, so that you don't end up opening a faked segment 
+				if someone guesses your key)
 	mode		- acsess mode same as for a file (0644) for example
 	size		- size of the block in bytes
 	
 	returns an indentifier
 	
 
-char shm_read(int shmid, int start, int count)
+char shmop_read(int shmid, int start, int count)
 
 	shmid		- shmid from which to read
 	start		- offset from which to start reading
@@ -33,7 +37,7 @@ char shm_read(int shmid, int start, int count)
 	
 	returns the data read
 
-int shm_write(int shmid, string data, int offset)
+int shmop_write(int shmid, string data, int offset)
 
 	shmid		- shmid from which to read
 	data		- string to put into shared memory
@@ -41,14 +45,14 @@ int shm_write(int shmid, string data, int offset)
 	
 	returns bytes written
 	
-int shm_size(int shmid)
+int shmop_size(int shmid)
 
 	shmid 		- shmid for which to return the size
 	
 	returns the size in bytes of the shm segment
 	
 	
-int shm_delete(int shmid)
+int shmop_delete(int shmid)
 
 	marks the segment for deletion, the segment will be deleted when all processes mapping it will detach
 
@@ -56,7 +60,7 @@ int shm_delete(int shmid)
 	
 	returns 1 if all ok, zero on failure
 	
-int shm_close(int shmid)
+int shmop_close(int shmid)
 
 	shmid 		- shmid which to close
 	

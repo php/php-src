@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 4                                                        |
+   | PHP version 4                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2002 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -12,8 +12,8 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Slava Poliakov (slavapl@mailandnews.com)                    |
-   |          Ilia Alshanetsky (iliaa@home.com)                           |
+   | Authors: Slava Poliakov (hackie@prohost.org)                    	  |
+   |          Ilia Alshanetsky (ilia@prohost.org)                         |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -125,7 +125,6 @@ PHP_FUNCTION(shmop_open)
 	struct php_shmop *shmop;	
 	struct shmid_ds shm;
 	int rsid;
-	int shmflg=0;
 
 	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &key, &flags, &mode, &size) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -139,40 +138,56 @@ PHP_FUNCTION(shmop_open)
 	shmop = emalloc(sizeof(struct php_shmop));
 	memset(shmop, 0, sizeof(struct php_shmop));
 
-	shmop->key = Z_LVAL_PP(key);
-	shmop->shmflg |= Z_LVAL_PP(mode);
+	shmop->key = (*key)->value.lval;
+	shmop->shmflg |= (*mode)->value.lval;
 
-	if (memchr(Z_STRVAL_PP(flags), 'a', Z_STRLEN_PP(flags))) {
-		shmflg = SHM_RDONLY;
-		shmop->shmflg |= IPC_EXCL;
-	} 
-	else if (memchr(Z_STRVAL_PP(flags), 'c', Z_STRLEN_PP(flags))) {
-		shmop->shmflg |= IPC_CREAT;
-		shmop->size = Z_LVAL_PP(size);
-	}
-	else {
-		php_error(E_WARNING, "shmopen: access mode invalid");
-		efree(shmop);
+	if( (*flags)->value.str.len != 1 ) {
+		php_error(E_WARNING, "shmop_open: invalid flag");
 		RETURN_FALSE;
+	}
+
+	switch( (*flags)->value.str.val[0] ) 
+	{
+		case 'a':
+			shmop->shmatflg |= SHM_RDONLY;
+			break;
+		case 'c':
+			shmop->shmflg |= IPC_CREAT;
+			shmop->size = (*size)->value.lval;
+			break;
+		case 'n':
+			shmop->shmflg |= (IPC_CREAT|IPC_EXCL);
+			shmop->size = (*size)->value.lval;
+			break;	
+		case 'w':
+			/* noop 
+				shm segment is being opened for read & write
+				will fail if segment does not exist
+			*/
+			break;
+		default:
+			php_error(E_WARNING, "shmop_open: invalid access mode");
+			efree(shmop);
+			RETURN_FALSE;
 	}
 
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
 	if (shmop->shmid == -1) {
-		php_error(E_WARNING, "shmopen: can't get the block");
+		php_error(E_WARNING, "shmop_open: unable to attach or create shm segment");
 		efree(shmop);
 		RETURN_FALSE;
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
 		efree(shmop);
-		php_error(E_WARNING, "shmopen: can't get information on the block");
+		php_error(E_WARNING, "shmop_open: unable to get shm segment information");
 		RETURN_FALSE;
 	}	
 
-	shmop->addr = shmat(shmop->shmid, 0, shmflg);
+	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {
 		efree(shmop);
-		php_error(E_WARNING, "shmopen: can't attach the memory block");
+		php_error(E_WARNING, "shmop_open: unable to attach to shm segment");
 		RETURN_FALSE;
 	}
 
@@ -202,30 +217,30 @@ PHP_FUNCTION(shmop_read)
 	convert_to_long_ex(start);
 	convert_to_long_ex(count);
 
-	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);	
+	shmop = zend_list_find((*shmid)->value.lval, &type);	
 
 	if (!shmop) {
-		php_error(E_WARNING, "shmread: can't find this segment");
+		php_error(E_WARNING, "shmop_read: can't find this segment");
 		RETURN_FALSE;
 	}
 
-	if (Z_LVAL_PP(start) < 0 || Z_LVAL_PP(start) > shmop->size) {
-		php_error(E_WARNING, "shmread: start is out of range");
+	if ((*start)->value.lval < 0 || (*start)->value.lval > shmop->size) {
+		php_error(E_WARNING, "shmop_read: start is out of range");
 		RETURN_FALSE;
 	}
 
-	if ((Z_LVAL_PP(start)+Z_LVAL_PP(count)) > shmop->size) {
-		php_error(E_WARNING, "shmread: count is out of range");
+	if (((*start)->value.lval+(*count)->value.lval) > shmop->size) {
+		php_error(E_WARNING, "shmop_read: count is out of range");
 		RETURN_FALSE;
 	}
 
-	if (Z_LVAL_PP(count) < 0 ){
-		php_error(E_WARNING, "shmread: count is out of range");
+	if ((*count)->value.lval < 0 ){
+		php_error(E_WARNING, "shmop_read: count is out of range");
 		RETURN_FALSE;
 	}
 
-	startaddr = shmop->addr + Z_LVAL_PP(start);
-	bytes = Z_LVAL_PP(count) ? Z_LVAL_PP(count) : shmop->size-Z_LVAL_PP(start);
+	startaddr = shmop->addr + (*start)->value.lval;
+	bytes = (*count)->value.lval ? (*count)->value.lval : shmop->size-(*start)->value.lval;
 
 	return_string = emalloc(bytes);
 	memcpy(return_string, startaddr, bytes);
@@ -246,13 +261,13 @@ PHP_FUNCTION(shmop_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
+	shmop = zend_list_find((*shmid)->value.lval, &type);
 
 	if (!shmop) {
-		php_error(E_WARNING, "shmclose: no such shmid");
+		php_error(E_WARNING, "shmop_close: no such shmid");
 		RETURN_FALSE;
 	}
-	zend_list_delete(Z_LVAL_PP(shmid));
+	zend_list_delete((*shmid)->value.lval);
 }
 /* }}} */
 
@@ -270,10 +285,10 @@ PHP_FUNCTION(shmop_size)
 
 	convert_to_long_ex(shmid);
 
-	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
+	shmop = zend_list_find((*shmid)->value.lval, &type);
 
 	if (!shmop) {
-		php_error(E_WARNING, "shmsize: no such segment");
+		php_error(E_WARNING, "shmop_size: no such segment");
 		RETURN_FALSE;
 	}
 
@@ -298,20 +313,25 @@ PHP_FUNCTION(shmop_write)
 	convert_to_string_ex(data);
 	convert_to_long_ex(offset);
 
-	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
+	shmop = zend_list_find((*shmid)->value.lval, &type);
 
 	if (!shmop) {
-		php_error(E_WARNING, "shmwrite: error no such segment");
+		php_error(E_WARNING, "shmop_write: error no such segment");
 		RETURN_FALSE;
 	}
 
-	if ( Z_LVAL_PP(offset) > shmop->size ) {
-		php_error(E_WARNING, "shmwrite: offset out of range");
+	if( (shmop->shmatflg&SHM_RDONLY) == SHM_RDONLY ) {
+		php_error(E_WARNING, "shmop_write: trying to write to a read only segment");
 		RETURN_FALSE;
 	}
 
-	writesize = (Z_STRLEN_PP(data)<shmop->size-Z_LVAL_PP(offset)) ? Z_STRLEN_PP(data) : shmop->size-Z_LVAL_PP(offset);	
-	memcpy(shmop->addr+Z_LVAL_PP(offset), Z_STRVAL_PP(data), writesize);
+	if ( (*offset)->value.lval > shmop->size ) {
+		php_error(E_WARNING, "shmop_write: offset out of range");
+		RETURN_FALSE;
+	}
+
+	writesize = ((*data)->value.str.len<shmop->size-(*offset)->value.lval) ? (*data)->value.str.len : shmop->size-(*offset)->value.lval;	
+	memcpy(shmop->addr+(*offset)->value.lval, (*data)->value.str.val, writesize);
 
 	RETURN_LONG(writesize);
 }
@@ -331,15 +351,15 @@ PHP_FUNCTION(shmop_delete)
 
 	convert_to_long_ex(shmid);
 
-	shmop = zend_list_find(Z_LVAL_PP(shmid), &type);
+	shmop = zend_list_find((*shmid)->value.lval, &type);
 
 	if (!shmop) {
-		php_error(E_WARNING, "shmdelete: error no such segment");
+		php_error(E_WARNING, "shmop_delete: error no such segment");
 		RETURN_FALSE;
 	}
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
-		php_error(E_WARNING, "shmdelete: can't mark segment for deletion (are you the owner?)");
+		php_error(E_WARNING, "shmop_delete: can't mark segment for deletion (are you the owner?)");
 		RETURN_FALSE;
 	}
 

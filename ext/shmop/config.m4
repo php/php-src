@@ -1,7 +1,4 @@
-dnl
 dnl $Id$
-dnl
-
 PHP_ARG_ENABLE(shmop, whether to enable shmop support, 
 [  --enable-shmop          Enable shmop support])
 
