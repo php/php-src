@@ -507,7 +507,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "yaz"=..\ext\xslt\xslt.dsp - Package Owner=<4>
+Project: "xslt"=..\ext\xslt\xslt.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
