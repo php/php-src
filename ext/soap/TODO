@@ -98,6 +98,7 @@ WSDL
 
 Schema
 ------
+- <include>, <import>, <redefine>
 - support for user defined simple types
   - restiction
 	  + base

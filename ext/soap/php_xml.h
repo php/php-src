@@ -6,6 +6,7 @@
 #define get_node_recursive(node, name) get_node_recursive_ex(node, name, NULL)
 #define get_node_with_attribute(node, name, attr, val) get_node_with_attribute_ex(node, name, NULL, attr, val, NULL)
 #define get_node_with_attribute_recursive(node, name, attr, val) get_node_with_attribute_recursive_ex(node, name, NULL, attr, val, NULL)
+#define node_is_equal(node, name) node_is_equal_ex(node, name, NULL)
 #define attr_is_equal(node, name) attr_is_equal_ex(node, name, NULL)
 
 xmlNsPtr attr_find_ns(xmlAttrPtr node);
