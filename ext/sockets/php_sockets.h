@@ -107,10 +107,6 @@ typedef struct {
 	zend_bool	use_system_read;
 } php_sockets_globals;
 
-int php_read(int bsd_socket, void *buf, int maxlen);
-char *php_strerror(int error);
-
-
 #ifdef ZTS
 #define SOCKETSG(v) (sockets_globals->v)
 #define SOCKETSLS_FETCH() php_sockets_globals *sockets_globals = ts_resource(sockets_globals_id)
