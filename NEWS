@@ -1,7 +1,6 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
-- Fix disk_free_space() and disk_total_space() under FreeBSD. (jon)
 - Added get_defined_constants() function to return an associative array of
   constants mapped to their values. (Sean)
 - New mailparse extension for parsing and manipulating MIME mail. (Wez)
@@ -20,7 +19,7 @@ PHP 4.0                                                                    NEWS
 - Added disk_total_space() to return the total size of a filesystem.
   (Patch from Steven Bower)
 - Renamed diskfreespace() to disk_free_space() to conform to established
-  naming conventions. (jon)
+  naming conventions. (Jon)
 - Fixed #2181. Now zero is returned instead of an unset value for
   7-bit encoding and plain text body type. (Vlad)
 - Fixed a bug in call_user_*() functions that would not allow calling
@@ -40,6 +39,7 @@ PHP 4.0                                                                    NEWS
 ?? ??? 200?, Version 4.0.6
 - Made $HTTP_SESSION_VARS['foo'] and $foo be references to the same value
   when register_globals is on. (Andrei)
+- Fix disk_free_space() and disk_total_space() under FreeBSD. (Jon)
 - Fixed readfile/passthru losing resources during connection abort (Sascha)
 - Fixed bug in the mcrypt extension that caused segfaults when using a key
   that is too large for the used algorithm, and a bug that caused
