@@ -127,6 +127,7 @@
 %token T_LIST
 %token T_ARRAY
 %token T_CLASS_C
+%token T_METHOD_C
 %token T_FUNC_C
 %token T_LINE
 %token T_FILE
@@ -667,6 +668,7 @@ common_scalar:
 	|	T_LINE 						{ $$ = $1; }
 	|	T_FILE 						{ $$ = $1; }
 	|	T_CLASS_C					{ $$ = $1; }
+	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 ;
 

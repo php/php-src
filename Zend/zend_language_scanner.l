@@ -1285,7 +1285,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		);
 	zendlval->value.str.len = strlen(zendlval->value.str.val);
 	zendlval->type = IS_STRING;
-	return T_CLASS_C;
+	return T_METHOD_C;
 }
 
 <ST_IN_SCRIPTING>"__LINE__" {
