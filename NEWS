@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
   . Added support for virtual()
   . Added "nsapi.read_timeout" php.ini option. 
   . Synced $_SERVER variables to be similar to Apache variables
+- Changed mysql.connect_timeout directive to be user-settable (Rasmus)
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
