@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- BeOS patch from svanegmond@bang.dhs.org modified somewhat by Rasmus
 - Fixed the Apache module to overwrite PATH_TRANSLATED with SCRIPT_FILENAME,
   only if PATH_TRANSLATED is not previously set (Zeev)
 - Fixed crash bug in highlight_string() (Rasmus)
