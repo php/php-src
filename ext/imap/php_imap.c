@@ -3164,7 +3164,9 @@ PHP_FUNCTION(imap_mail_compose)
 
 	RETVAL_STRING(tempstring, 0);
 done:
+#if ilia_0 /* this should be done, otherwise we leak memory. Unfortunately this seems to cause a crash in some cases */
 	mail_free_body(&topbod);
+#endif
 	mail_free_envelope(&env);
 }
 /* }}} */
