@@ -317,6 +317,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 	}
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
+		int was_persistent = stream->is_persistent;
 		
 		while (stream->readfilters.head) {
 			php_stream_filter_remove(stream->readfilters.head, 1 TSRMLS_CC);
@@ -369,7 +370,7 @@ fprintf(stderr, "stream_free: %s:%p[%s] preserve_handle=%d release_cast=%d remov
 #else
 		pefree(stream, stream->is_persistent);
 #endif
-		if (stream->is_persistent) {
+		if (was_persistent) {
 			/* we don't work with *stream but need its value for comparison */
 			zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) _php_stream_free_persistent, stream TSRMLS_CC);
 		}
