@@ -135,7 +135,7 @@ if test "$YACC" != "bison -y"; then
     AC_MSG_WARN([You will need bison if you want to regenerate the PHP parsers.])
 else
     AC_MSG_CHECKING([bison version])
-    set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'`
+    set `bison --version| grep 'GNU Bison' | cut -d ' ' -f 4 | sed -e 's/\./ /'|tr -d a-z`
     if test "${1}" = "1" -a "(" "${2}" -lt "75" -a "${2}" -ne "28" -a "${2}" -ne "35" -o "${2}" -ge "875" ")"; then
       AC_MSG_WARN(You will need bison 1.28, 1.35 or 1.75 if you want to regenerate the Zend parser (found ${1}.${2}).)
     fi
