@@ -603,7 +603,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char 
 	DIR *dir = NULL;
 	php_stream *stream = NULL;
 
-	if (php_check_open_basedir(path TSRMLS_CC)) {
+	if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 		return NULL;
 	}
 	
@@ -637,7 +637,7 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 		return php_stream_fopen_with_path_rel(path, mode, PG(include_path), opened_path, options);
 	}
 
-	if (php_check_open_basedir(path TSRMLS_CC)) {
+	if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 		return NULL;
 	}
 
@@ -702,7 +702,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		}
 
 
-		if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(filename TSRMLS_CC)) {
 			return NULL;
 		}
 
@@ -722,7 +722,7 @@ not_relative_path:
 	/* Absolute path open */
 	if (IS_ABSOLUTE_PATH(filename, filename_length)) {
 
-		if (php_check_open_basedir(filename TSRMLS_CC)) {
+		if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(filename TSRMLS_CC)) {
 			return NULL;
 		}
 
@@ -748,7 +748,7 @@ not_relative_path:
 		
 		free(cwd);
 		
-		if (php_check_open_basedir(trypath TSRMLS_CC)) {
+		if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;
 		}
 		if ((php_check_safe_mode_include_dir(trypath TSRMLS_CC)) == 0) {
@@ -764,7 +764,7 @@ not_relative_path:
 
 	if (!path || (path && !*path)) {
 
-		if (php_check_open_basedir(path TSRMLS_CC)) {
+		if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(path TSRMLS_CC)) {
 			return NULL;
 		}
 
@@ -809,7 +809,7 @@ not_relative_path:
 		}
 		snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename);
 		
-		if (php_check_open_basedir(trypath TSRMLS_CC)) {
+		if ((options & STREAM_DISABLE_OPEN_BASEDIR == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			stream = NULL;
 			goto stream_done;
 		}

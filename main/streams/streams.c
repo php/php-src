@@ -801,6 +801,16 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 {
 	size_t didwrite = 0, towrite, justwrote;
 
+ 	/* if we have a seekable stream we need to ensure that data is written at the
+ 	 * current stream->position. This means invalidating the read buffer and then
+	 * performing a low-level seek */
+	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
+		stream->readpos = stream->writepos = 0;
+
+		stream->ops->seek(stream, stream->position, SEEK_SET, &stream->position TSRMLS_CC);
+	}
+
+ 
 	while (count > 0) {
 		towrite = count;
 		if (towrite > stream->chunk_size)
@@ -817,8 +827,6 @@ static size_t _php_stream_write_buffer(php_stream *stream, const char *buf, size
 			 * buffered from fifos and sockets */
 			if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0 && !php_stream_is_filtered(stream)) {
 				stream->position += justwrote;
-				stream->writepos = 0;
-				stream->readpos = 0;
 			}
 		} else {
 			break;
@@ -947,10 +955,6 @@ PHPAPI off_t _php_stream_tell(php_stream *stream TSRMLS_DC)
 
 PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_DC)
 {
-	/* not moving anywhere */
-	if ((offset == 0 && whence == SEEK_CUR) || (offset == stream->position && whence == SEEK_SET))
-		return 0;
-
 	/* handle the case where we are in the buffer */
 	if ((stream->flags & PHP_STREAM_FLAG_NO_BUFFER) == 0) {
 		switch(whence) {
@@ -974,8 +978,6 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		}
 	}
 	
-	/* invalidate the buffer contents */
-	stream->readpos = stream->writepos = 0;
 
 	if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
 		int ret;
@@ -995,6 +997,10 @@ PHPAPI int _php_stream_seek(php_stream *stream, off_t offset, int whence TSRMLS_
 		if (((stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) || ret == 0) {
 			if (ret == 0)
 				stream->eof = 0;
+
+			/* invalidate the buffer contents */
+			stream->readpos = stream->writepos = 0;
+
 			return ret;
 		}
 		/* else the stream has decided that it can't support seeking after all;
