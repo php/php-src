@@ -1,3 +1,25 @@
+AC_DEFUN(PHP_GD_JPEG,[
+        AC_MSG_CHECKING([for libjpeg (needed by gd-1.8+)])
+        AC_ARG_WITH(jpeg-dir,
+        [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
+          AC_MSG_RESULT(yes)
+          if test -z $withval; then
+            withval="/usr/local"
+          fi
+          old_LIBS=$LIBS
+          LIBS="$LIBS -L$withval/lib"
+          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
+          LIBS=$old_LIBS
+          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
+          LIBS="$LIBS -L$withval/lib -ljpeg"
+        ],[
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
+        ]) 
+        AC_CHECK_LIB(gd, gdImageCreateFromJpeg, [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
+])
+
+
 shared=no
 AC_MSG_CHECKING(whether to include GD support)
 AC_ARG_WITH(gd,
@@ -37,25 +59,7 @@ dnl Some versions of GD support both PNG and GIF. Check for both.
           AC_ADD_LIBRARY(z)
         fi
 
-        AC_MSG_CHECKING([for libjpeg (needed by gd-1.8+)])
-        AC_ARG_WITH(jpeg-dir,
-        [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
-          AC_MSG_RESULT(yes)
-          if test -z $withval; then
-            withval="/usr/local"
-          fi
-          old_LIBS=$LIBS
-          LIBS="$LIBS -L$withval/lib"
-          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
-          LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
-          LIBS="$LIBS -L$withval/lib -ljpeg"
-        ],[
-          AC_MSG_RESULT(no)
-          AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
-        ]) 
-        AC_CHECK_LIB(gd, gdImageCreateFromJpeg, [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
-
+        PHP_GD_JPEG
         ac_cv_lib_gd_gdImageLine=yes
       ;;
     *)
@@ -103,28 +107,10 @@ dnl A whole whack of possible places where this might be
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
         if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-          AC_ADD_LIBRARY(png)
           AC_ADD_LIBRARY(z)
+          AC_ADD_LIBRARY(png)
         fi
-
-        AC_MSG_CHECKING([for libjpeg (needed by gd-1.8+)])
-        AC_ARG_WITH(jpeg-dir,
-        [  --with-jpeg-dir[=DIR]   jpeg dir for gd-1.8+],[
-          AC_MSG_RESULT(yes)
-          if test -z $withval; then
-            withval="/usr/local"
-          fi
-          old_LIBS=$LIBS
-          LIBS="$LIBS -L$withval/lib"
-          AC_CHECK_LIB(jpeg,jpeg_read_header, [LIBS="$LIBS -L$withval/lib -ljpeg"],[AC_MSG_RESULT(no)],)
-          LIBS=$old_LIBS
-          AC_ADD_LIBRARY_WITH_PATH(jpeg, $withval/lib)
-          LIBS="$LIBS -L$withval/lib -ljpeg"
-        ],[
-          AC_MSG_RESULT(no)
-          AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
-        ]) 
-        AC_CHECK_LIB(gd, gdImageCreateFromJpeg, [AC_DEFINE(HAVE_GD_JPG, 1, [ ])])
+        PHP_GD_JPEG
 
         ac_cv_lib_gd_gdImageLine=yes
       else
@@ -146,8 +132,8 @@ dnl A whole whack of possible places where this might be
         LIBS=$old_LIBS
         LDFLAGS=$old_LDFLAGS
         if test "$ac_cv_lib_gd_gdImageCreateFromPng" = "yes"; then
-          AC_ADD_LIBRARY(png)
           AC_ADD_LIBRARY(z)
+          AC_ADD_LIBRARY(png)
         fi
         ac_cv_lib_gd_gdImageLine=yes
   fi
