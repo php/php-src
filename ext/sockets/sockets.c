@@ -1093,6 +1093,10 @@ PHP_FUNCTION(strerror)
 	} else {
 		buf = strerror(-(Z_LVAL_PP(error)));
 	}
+
+	if (!buf) {
+		RETURN_FALSE;
+	}
 	
 	RETURN_STRING((char *)buf, 1);
 }
