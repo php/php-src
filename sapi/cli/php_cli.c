@@ -81,11 +81,12 @@
 #define PHP_MODE_INDENT		3
 #define PHP_MODE_LINT		4
 #define PHP_MODE_STRIP		5
+#define PHP_MODE_CLI_DIRECT 6
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aCc:d:ef:g:hilmnqsw?vz:"
+#define OPTSTRING "aCc:d:ef:g:hilmnqr:sw?vz:"
 
 static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
@@ -252,6 +253,7 @@ static void php_cli_usage(char *argv0)
 				"  -l             Syntax check only (lint)\n"
 				"  -m             Show compiled in modules\n"
 				"  -i             PHP information\n"
+				"  -r <code>      Run PHP <code>\n"
 				"  -h             This help\n", prog); 
 }
 /* }}} */
@@ -302,6 +304,8 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
+    char *exec_direct=NULL;
+    char *compiled_string_description;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -475,6 +479,11 @@ int main(int argc, char *argv[])
 			case 's': /* generate highlighted HTML from source */
 				behavior=PHP_MODE_HIGHLIGHT;
 				break;
+
+			case 'r': /* generate highlighted HTML from source */
+				behavior=PHP_MODE_CLI_DIRECT;
+				exec_direct=ap_php_optarg;
+				break;
 				
 			case 'v': /* show php version & quit */
 				no_headers = 1;
@@ -595,6 +604,12 @@ int main(int argc, char *argv[])
 			return SUCCESS;
 			break;
 #endif
+		case PHP_MODE_CLI_DIRECT:
+			compiled_string_description = zend_make_compiled_string_description("Command line code" TSRMLS_CC);
+        if (zend_eval_string(exec_direct, NULL, compiled_string_description TSRMLS_CC) == FAILURE) {
+            exit_status=254;
+        }
+        efree(compiled_string_description);
 		}
 		
 		php_request_shutdown((void *) 0);
