@@ -3753,6 +3753,16 @@ static int exif_discard_imageinfo(image_info_type *ImageInfo)
 }
 /* }}} */
 
+/* {{{ estrdupx */
+static inline char * estrdupx(const char* str)
+{
+	if (str) {
+		return estrdup(str);
+	}
+	return estrdup("");
+}
+/* }}} */
+
 /* {{{ exif_read_file
  */
 static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnail, int read_all TSRMLS_DC)
@@ -3776,12 +3786,12 @@ static int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_t
 	ImageInfo->read_all = read_all;
 	ImageInfo->Thumbnail.filetype = IMAGE_FILETYPE_UNKNOWN;
 
-	ImageInfo->encode_unicode    = estrdup(EXIF_G(encode_unicode));
-	ImageInfo->decode_unicode_be = estrdup(EXIF_G(decode_unicode_be));
-	ImageInfo->decode_unicode_le = estrdup(EXIF_G(decode_unicode_le));
-	ImageInfo->encode_jis        = estrdup(EXIF_G(encode_jis));
-	ImageInfo->decode_jis_be     = estrdup(EXIF_G(decode_jis_be));
-	ImageInfo->decode_jis_le     = estrdup(EXIF_G(decode_jis_le));
+	ImageInfo->encode_unicode    = estrdupx(EXIF_G(encode_unicode));
+	ImageInfo->decode_unicode_be = estrdupx(EXIF_G(decode_unicode_be));
+	ImageInfo->decode_unicode_le = estrdupx(EXIF_G(decode_unicode_le));
+	ImageInfo->encode_jis        = estrdupx(EXIF_G(encode_jis));
+	ImageInfo->decode_jis_be     = estrdupx(EXIF_G(decode_jis_be));
+	ImageInfo->decode_jis_le     = estrdupx(EXIF_G(decode_jis_le));
 
 	if (php_stream_is(ImageInfo->infile, PHP_STREAM_IS_STDIO)) {
 		if (VCWD_STAT(FileName, &st) >= 0) {
