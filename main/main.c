@@ -870,10 +870,7 @@ int php_module_startup(sapi_module_struct *sf)
 	   which is always an internal extension and to be initialized
        ahead of all other internals
 	 */
-	if (php_startup_loaded_extensions() == FAILURE) {
-		php_printf("Unable to start loaded modules\n");
-		return FAILURE;
-	}
+	php_ini_delayed_modules_startup();
 
 	/* disable certain functions as requested by php.ini */
 	php_disable_functions();
