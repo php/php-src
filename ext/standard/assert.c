@@ -106,9 +106,17 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 
 PHP_RINIT_FUNCTION(assert)
 {
+	char *cbstr;
+
 	ASSERTLS_FETCH();
 
-	ASSERT(callback) = estrdup(INI_STR("assert.callback"));
+	cbstr = INI_STR("assert.callback");
+
+	if (cbstr) {
+		ASSERT(callback) = estrdup(cbstr);
+	} else {
+		ASSERT(callback) = NULL;
+	}
 
 	return SUCCESS;
 }
