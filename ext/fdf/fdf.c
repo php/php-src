@@ -196,7 +196,7 @@ PHP_FUNCTION(fdf_open)
 	err = FDFOpen(Z_STRVAL_PP(file), 0, &fdf);
 
 	if(err != FDFErcOK || !fdf) {
-		php_error(E_WARNING, "Could not open fdf document: %s", Z_STRVAL_PP(file));
+		php_error(E_WARNING, "%s(): Could not open fdf document: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(file));
 		RETURN_FALSE;
 	}
 
@@ -218,7 +218,7 @@ PHP_FUNCTION(fdf_create)
 	err = FDFCreate(&fdf);
 
 	if(err != FDFErcOK || !fdf) {
-		php_error(E_WARNING, "Error creating new fdf document!");
+		php_error(E_WARNING, "%s(): Error creating new fdf document!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(fdf_get_value)
 	} 
 
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "Error getting value of %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error getting value of %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		efree(buffer);
 		RETURN_FALSE;
 	}
@@ -298,7 +298,7 @@ PHP_FUNCTION(fdf_set_value)
 
 	err = FDFSetValue(fdf, Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value), (ASBool) Z_LVAL_PP(isname));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING, "Error setting field: %s to value: %s", Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value));
+		php_error(E_WARNING, "%s(): Error setting field: %s to value: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname), Z_STRVAL_PP(value));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -337,7 +337,7 @@ PHP_FUNCTION(fdf_next_field_name)
 
 	if(err != FDFErcOK) {
 		efree(buffer);
-		php_error(E_WARNING,"Error getting next fieldname!");
+		php_error(E_WARNING, "%s(): Error getting next fieldname!", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	} 
 
@@ -386,7 +386,7 @@ PHP_FUNCTION(fdf_set_ap)
 	   possible errors this function can return. Or create global error handler function.
 	 */
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting appearence of field: %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error setting appearence of field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 
@@ -413,7 +413,7 @@ PHP_FUNCTION(fdf_set_status)
 
 	err = FDFSetStatus(fdf, Z_STRVAL_PP(status));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting fdf document status key to: %s", Z_STRVAL_PP(status));
+		php_error(E_WARNING, "%s(): Error setting fdf document status key to: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(status));
 		RETURN_FALSE;
 	}
 
@@ -446,7 +446,7 @@ PHP_FUNCTION(fdf_get_status)
 	}
 	
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error getting fdf document status key!");
+		php_error(E_WARNING, "%s(): Error getting fdf document status key!", get_active_function_name(TSRMLS_C));
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -474,7 +474,7 @@ PHP_FUNCTION(fdf_set_file)
 
 	err = FDFSetFile(fdf, Z_STRVAL_PP(filename));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting filename key to: %s", Z_STRVAL_PP(filename));
+		php_error(E_WARNING, "%s(): Error setting filename key to: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
 
@@ -507,7 +507,7 @@ PHP_FUNCTION(fdf_get_file)
 	}
 	
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error getting fdf document filename key!");
+		php_error(E_WARNING, "%s(): Error getting fdf document filename key!", get_active_function_name(TSRMLS_C));
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -534,7 +534,7 @@ PHP_FUNCTION(fdf_save)
 	convert_to_string_ex(filename);
 	err = FDFSave(fdf, Z_STRVAL_PP(filename));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error saving fdf document into filename: %s", Z_STRVAL_PP(filename));
+		php_error(E_WARNING, "%s(): Error saving fdf document into filename: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(filename));
 		RETURN_FALSE;
 	}
 
@@ -574,7 +574,7 @@ PHP_FUNCTION(fdf_add_template)
 
 	err = FDFAddTemplate(fdf, Z_LVAL_PP(newpage), &filespec, Z_STRVAL_PP(template), Z_LVAL_PP(rename));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error adding template: %s into fdf document", Z_STRVAL_PP(template));
+		php_error(E_WARNING, "%s(): Error adding template: %s into fdf document", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(template));
 		RETURN_FALSE;
 	}
 
@@ -602,7 +602,7 @@ PHP_FUNCTION(fdf_set_flags)
 
 	err=FDFSetFlags(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(flags), Z_LVAL_PP(newflags));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting flags for field: %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error setting flags for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 
@@ -631,7 +631,7 @@ PHP_FUNCTION(fdf_set_opt)
 
 	err = FDFSetOpt(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(element), Z_STRVAL_PP(value), Z_STRVAL_PP(name));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting FDF option for field: %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error setting FDF option for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -659,7 +659,7 @@ PHP_FUNCTION(fdf_set_submit_form_action)
 
 	err = FDFSetSubmitFormAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(url), Z_LVAL_PP(flags));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting FDF submit action for field: %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error setting FDF submit action for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -686,7 +686,7 @@ PHP_FUNCTION(fdf_set_javascript_action)
 	
 	err = FDFSetJavaScriptAction(fdf, Z_STRVAL_PP(fieldname), Z_LVAL_PP(trigger), Z_STRVAL_PP(script));
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting FDF javascript action for field: %s", Z_STRVAL_PP(fieldname));
+		php_error(E_WARNING, "%s(): Error setting FDF javascript action for field: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(fieldname));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -712,7 +712,7 @@ PHP_FUNCTION(fdf_set_encoding)
 	err = FDFSetEncoding(fdf, Z_STRVAL_PP(enc));
     
 	if(err != FDFErcOK) {
-		php_error(E_WARNING,"Error setting FDF encoding: %s", Z_STRVAL_PP(enc));
+		php_error(E_WARNING, "%s(): Error setting FDF encoding: %s", get_active_function_name(TSRMLS_C), Z_STRVAL_PP(enc));
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
