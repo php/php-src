@@ -523,6 +523,19 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 						if(strncmp(str, "background", 10) == 0)
 							cur_ptr->linktype=HW_BACKGROUND_LINK;
 						else
+						if(strncmp(str, "intagnodel", 10) == 0) { /* New type introduced by Uwe Steinmann 16.03.2001 */
+							cur_ptr->linktype=HW_INTAGNODEL_LINK;
+							cur_ptr->tagattr = NULL;
+							if(NULL != (str = strstr(object, "TagAttr="))) {
+								str += 8;
+								str1 = str;
+								while((*str1 != '\n') && (*str1 != '\0'))
+									str1++;
+								cur_ptr->tagattr = emalloc(str1 - str + 1);
+								memcpy(cur_ptr->tagattr, str, str1 - str);
+								cur_ptr->tagattr[str1 - str] = '\0';
+							}
+						} else
 						if(strncmp(str, "intag", 5) == 0) {
 							cur_ptr->linktype=HW_INTAG_LINK;
 							cur_ptr->tagattr = NULL;
@@ -695,6 +708,11 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						offset -= 4; /* because there is no closing tag </A> */
 /*						laststart = cur_ptr->start; */
 						break;
+					case HW_INTAGNODEL_LINK:
+						snprintf(istr, BUFFERLEN, "%s", cur_ptr->link);
+						offset -= 4; /* because there is no closing tag </A> */
+/*						laststart = cur_ptr->start; */
+						break;
 					case HW_APPLET_LINK:
 						if(cur_ptr->codebase)
 						  snprintf(istr, BUFFERLEN, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
@@ -727,7 +745,10 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						else
 							snprintf(istr, BUFFERLEN, " %s='%s/%s'", cur_ptr->tagattr, scriptname[HW_INTAG_LINK], cur_ptr->destdocname); 
 						offset -= 4; /* because there is no closing tag </A> */
-/*						laststart = cur_ptr->start; */
+						break;
+					case HW_INTAGNODEL_LINK:
+						snprintf(istr, BUFFERLEN, "%s", cur_ptr->destdocname);
+						offset -= 4; /* because there is no closing tag </A> */
 						break;
 					case HW_APPLET_LINK:
 						if(cur_ptr->codebase)

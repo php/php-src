@@ -85,6 +85,7 @@
 #define HW_BACKGROUND_LINK            2
 #define HW_INTAG_LINK                 3
 #define HW_APPLET_LINK                4
+#define HW_INTAGNODEL_LINK            5
 
 #define COPY                          0
 #define MOVE                          1
