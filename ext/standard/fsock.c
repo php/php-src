@@ -47,6 +47,19 @@
 #endif
 #ifdef PHP_WIN32
 #include <winsock.h>
+#elif defined(NETWARE)
+#ifdef NEW_LIBC
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#else
+#include <netinet/in.h>
+#include <netdb.h>
+/*#include <sys/socket.h>*/
+#include <sys/select.h>
+/*#else
+#include <sys/socket.h>*/
+#endif
+#endif
 #else
 #include <netinet/in.h>
 #include <netdb.h>
@@ -54,7 +67,7 @@
 #include <arpa/inet.h>
 #endif
 #endif
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
 #undef AF_UNIX
 #endif
 #if defined(AF_UNIX)
@@ -88,6 +101,10 @@ static int fsock_globals_id;
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#elif defined(NETWARE)
+#ifdef USE_WINSOCK
+#define EWOULDBLOCK WSAEWOULDBLOCK
+#endif
 #else
 #include "build-defs.h"
 #endif
