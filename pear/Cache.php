@@ -173,7 +173,7 @@ class Cache extends PEAR {
         if ($this->no_cache)
             return true;
 
-        return $this->container->save($id, $data, $expires, $group, "");
+        return $this->extSave($id, $data, "",$expires, $group);
     } // end func save
 
     /**
