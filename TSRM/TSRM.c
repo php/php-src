@@ -283,9 +283,16 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 		tsrm_new_thread_begin_handler(thread_id, &((*thread_resources_ptr)->storage));
 	}
 	for (i=0; i<id_count; i++) {
-		(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
-		if (resource_types_table[i].ctor) {
-			resource_types_table[i].ctor((*thread_resources_ptr)->storage[i], &(*thread_resources_ptr)->storage);
+#if MBO_0
+		if (resource_types_table[i].done) {
+			thread_resources_ptr)->storage[i] = NULL;
+		} else
+#endif
+		{
+			(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
+			if (resource_types_table[i].ctor) {
+				resource_types_table[i].ctor((*thread_resources_ptr)->storage[i], &(*thread_resources_ptr)->storage);
+			}
 		}
 	}
 
