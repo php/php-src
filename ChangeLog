@@ -1,3 +1,110 @@
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/rpc/xmlrpc/xmlrpc-epi-php.c:
+      Porting of patch applied to ext/xmlrpc.
+
+    * ext/xmlrpc/xmlrpc-epi-php.c:
+      Made the code use php_error_docref().
+      Removed pointless checks around array_init() and emalloc().
+      Switched to zend_get_parameters_ex() argument parsing API.
+
+    * ext/domxml/php_domxml.c:
+      Changed getParameters() to zend_get_parameters_ex().
+
+    * ext/hyperwave/hw.c:
+      Fixed compile warnings.
+
+    * ext/cpdf/cpdf.c:
+      One more typo.
+
+    * ext/cpdf/cpdf.c:
+      Fixed typos.
+
+2003-01-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Appended my name to the list of authors
+
+    * ext/iconv/tests/iconv_mime_decode.phpt:
+      Test update for new feature
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/cpdf/cpdf.c:
+      Switched from old getParse* argument parsing API to a more recent
+      zend_get_parameters*.
+
+2003-01-14  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_var.h
+      ext/standard/var.c:
+      added function get_memory_usage(). available only when PHP is compiled
+      with --enable-memory-limit
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/hyperwave/hg_comm.c:
+      Fixed compile warning & removed useless variable.
+
+    * ext/hyperwave/hw.c:
+      Changed php_error to php_error_docref.
+      Got rid off the ancient getParameters* parameter parsing API.
+
+2003-01-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Added a new option "force-encode-first" to the quoted-printable encoder
+      as per Wez's request. If enabled, the encoder forcefully does qp
+      tranformation on every first character of lines in incoming stream.
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/cpdf/cpdf.c:
+      Changed php_error() to php_error_docref().
+      Made pdfdoc retrieval a macro.
+
+2003-01-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/quot_print.c:
+      Made php_quot_print_decode() RFC2045-compliant
+
+2003-01-14  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_4_3)
+      NEWS:
+      Bugfixing news
+
+    * ext/gettext/gettext.dsp:
+      MFB: bind_textdomain_codeset() availability on windows
+
+    * (PHP_4_3)
+      ext/gettext/gettext.dsp:
+      Made bind_textdomain_codeset() available on windows (fixes #21525).
+
+2003-01-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * win32/install.txt:
+      s/gd/gd2
+
+2003-01-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sockets/sockets.c:
+      Changed php_error to php_error_docref().
+      Removed pointless checks around array_init().
+
+2003-01-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Fixed small memory leak that occurs when the invalid line length is passed
+      to the qprint ctor.
+
+    * ext/standard/filters.c:
+      Fixed quoted-printable encoder so that it produces RFC2045 complicant
+      output. As per this specification requirement, the constructor now accepts
+      three options: binary (boolean), line-len (uint), line-break-chars
+      (string).
+
 2003-01-13  Jani Taskinen  <sniper@iki.fi>
 
     * ext/informix/config.m4
