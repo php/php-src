@@ -2303,6 +2303,7 @@ int zend_import_const_handler(ZEND_OPCODE_HANDLER_ARGS)
 int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_class_entry **pce;
+	zend_class_entry *ce = NULL;
 	zend_bool is_const;
 	char *class_name_strval;
 	zend_uint class_name_strlen;						
@@ -2335,48 +2336,59 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 	is_const = (EX(opline)->op2.op_type == IS_CONST);
 
 	if (is_const) {
-		class_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+{
+			class_name_strval = EX(opline)->op2.u.constant.value.str.val;
+			class_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+		}
 	} else {
 		class_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
 
-		tmp = *class_name;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
-		zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
+		if (class_name->type == IS_OBJECT) {
+			ce = Z_OBJCE_P(class_name);
+		} else {
+			tmp = *class_name;
+			zval_copy_ctor(&tmp);
+			convert_to_string(&tmp);
+			zend_str_tolower(tmp.value.str.val, tmp.value.str.len);
 
-		class_name_strval = tmp.value.str.val;
-		class_name_strlen = tmp.value.str.len;
+			class_name_strval = tmp.value.str.val;
+			class_name_strlen = tmp.value.str.len;
+		}
 	}
 	
-	if (EX(opline)->op1.op_type == IS_UNUSED && EX(opline)->extended_value != ZEND_FETCH_CLASS_GLOBAL) {
-		retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
+	if (!ce) {
+		if (EX(opline)->op1.op_type == IS_UNUSED && EX(opline)->extended_value != ZEND_FETCH_CLASS_GLOBAL) {
+			retval = zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC);
 
-		if(retval == FAILURE) {
-			/* try namespace */
-			if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && (*pce)->type == ZEND_NAMESPACE) {
-				retval = SUCCESS;
+			if(retval == FAILURE) {
+				/* try namespace */
+				if(zend_hash_find(&EG(global_namespace_ptr)->class_table, class_name_strval, class_name_strlen+1, (void **)&pce) == SUCCESS && (*pce)->type == ZEND_NAMESPACE) {
+					retval = SUCCESS;
+				}
 			}
-		}
-
-	} else {
-		zend_namespace *ns;
-		/* Looking for namespace */
-		if(EX(opline)->extended_value == ZEND_FETCH_CLASS_GLOBAL) {
-			ns = EG(global_namespace_ptr);
 		} else {
-			if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || (*pce)->type != ZEND_NAMESPACE) {
-				zend_error(E_ERROR, "Namespace '%s' not found", EX(opline)->op1.u.constant.value.str.val);
+			zend_namespace *ns;
+
+			/* Looking for namespace */
+			if(EX(opline)->extended_value == ZEND_FETCH_CLASS_GLOBAL) {
+				ns = EG(global_namespace_ptr);
+			} else {
+				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, EX(opline)->op1.u.constant.value.str.val, EX(opline)->op1.u.constant.value.str.len+1, (void **)&pce) == FAILURE || (*pce)->type != ZEND_NAMESPACE) {
+					zend_error(E_ERROR, "Namespace '%s' not found", EX(opline)->op1.u.constant.value.str.val);
+				}
+				ns = *pce;
 			}
-			ns = *pce;
+			retval = zend_hash_find(&ns->class_table, class_name_strval, class_name_strlen+1, (void **)&pce);
 		}
-		retval = zend_hash_find(&ns->class_table, class_name_strval, class_name_strlen+1, (void **)&pce);
+		if (retval==SUCCESS) {
+			ce = *pce;
+		}
 	}
 
 	if (retval == FAILURE) {
 		zend_error(E_ERROR, "Class '%s' not found", class_name_strval);
 	} else {
-		EX_T(EX(opline)->result.u.var).EA.class_entry = *pce;
+		EX_T(EX(opline)->result.u.var).EA.class_entry = ce;
 	}
 	if (!is_const) {
 		zval_dtor(&tmp);
@@ -3120,7 +3132,7 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 		} else {
 			class_type = "abstract_class";
 		}
-		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type, EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
+		zend_error(E_ERROR, "Cannot instantiate %s %s", class_type,  EX_T(EX(opline)->op1.u.var).EA.class_entry->name);
 	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
