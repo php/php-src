@@ -527,8 +527,6 @@ class PEAR_Error
     // {{{ properties
 
     var $error_message_prefix = '';
-    var $error_prepend        = '';
-    var $error_append         = '';
     var $mode                 = PEAR_ERROR_RETURN;
     var $level                = E_USER_NOTICE;
     var $code                 = -1;
@@ -656,8 +654,7 @@ class PEAR_Error
      */
     function getMessage ()
     {
-        return ($this->error_prepend . $this->error_message_prefix .
-                $this->message       . $this->error_append);
+        return ($this->error_message_prefix . $this->message);
     }
 
 
@@ -751,11 +748,9 @@ class PEAR_Error
                 $callback = $this->callback;
             }
             return sprintf('[%s: message="%s" code=%d mode=callback '.
-                           'callback=%s prefix="%s" prepend="%s" append="%s" '.
-                           'info="%s"]',
+                           'callback=%s prefix="%s" info="%s"]',
                            get_class($this), $this->message, $this->code,
                            $callback, $this->error_message_prefix,
-                           $this->error_prepend, $this->error_append,
                            $this->userinfo);
         }
         if ($this->mode & PEAR_ERROR_CALLBACK) {
@@ -773,12 +768,11 @@ class PEAR_Error
         if ($this->mode & PEAR_ERROR_RETURN) {
             $modes[] = 'return';
         }
-        return sprintf('[%s: message="%s" code=%d mode=%s level=%s prefix="%s" '.
-                       'prepend="%s" append="%s" info="%s"]',
+        return sprintf('[%s: message="%s" code=%d mode=%s level=%s '.
+                       'prefix="%s" info="%s"]',
                        get_class($this), $this->message, $this->code,
                        implode("|", $modes), $levels[$this->level],
                        $this->error_message_prefix,
-                       $this->error_prepend, $this->error_append,
                        $this->userinfo);
     }
 
