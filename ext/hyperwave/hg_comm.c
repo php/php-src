@@ -4425,13 +4425,13 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )  {
 		efree(msg.buf);
-		return(-1);
+		return(-2);
 	}
 
 	efree(msg.buf);
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL )  {
-		return(-1);
+		return(-3);
 	}
 
 	ptr = (int *) retmsg->buf;
@@ -4454,11 +4454,11 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 		if((hostptr = gethostbyname(host)) == NULL) {
 			php3_error(E_WARNING, "gethostbyname failed for %s", host);
 			/* close(fd); fd is not set yet */
-			return(-1);
+			return(-4);
 		}
 	} else {
 		/* close(fd); fd is not set yet */
-		return(-1);
+		return(-5);
 	}
 	 
 	switch(hostptr->h_addrtype) {
@@ -4476,7 +4476,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	 
 	if(-1 == (fd = fnCOpenDataCon(sockfd, &port))) {
 		   efree(msg.buf);
-		   return(-1);
+		   return(-6);
 	}
 
 	/* Start building the PUTDOCUMENT message. I works even if
@@ -4487,7 +4487,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 
 	if ( (msg.buf = (char *)emalloc(length-HEADER_LENGTH)) == NULL )	{
 		lowerror = LE_MALLOC;
-		return(-1);
+		return(-7);
 	}
 
 	tmp = build_msg_int(msg.buf, *objectID);
@@ -4499,7 +4499,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	if ( send_hg_msg(sockfd, &msg, length) == -1 )	{
 		efree(msg.buf);
 		HWSOCK_FCLOSE(fd);
-		return(-1);
+		return(-8);
 	}
 	efree(msg.buf);
 
@@ -4509,7 +4509,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	len = sizeof(serv_addr);
 	if((newfd = accept(fd, (struct sockaddr *) &serv_addr, &len)) < 0) {
 		HWSOCK_FCLOSE(fd);
-		return(-1);
+		return(-9);
 	} else {
 		HWSOCK_FCLOSE(fd);
 	}
@@ -4524,13 +4524,13 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	len = strlen(header) + 1;
 	if(len != write_to(newfd, header, len, wtimeout)) {
 		HWSOCK_FCLOSE(newfd);
-		return(-1);
+		return(-10);
 	}
 
 	/* And now the document */
 	if(count != write_to(newfd, text, count, wtimeout)) {
 		HWSOCK_FCLOSE(newfd);
-		return(-1);
+		return(-11);
 	}
 	
  	/* The data connection has to be close before the return
@@ -4541,7 +4541,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) {
 		HWSOCK_FCLOSE(fd);
-		return(-1);
+		return(-12);
 	}
 
 	ptr = (int *) retmsg->buf;
@@ -4549,7 +4549,7 @@ int send_putdocument(int sockfd, char *host, hw_objectID parentID, char *objectR
 		if(retmsg->buf) efree(retmsg->buf);
 		efree(retmsg);
 		HWSOCK_FCLOSE(fd);
-		return(-1);
+		return(-13);
 	}
 
 	efree(retmsg->buf);
