@@ -1,3 +1,37 @@
+2004-12-01  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_strtod.c:
+      MFB: Removed extra space that causes problems for some compilers.
+
+    * (PHP_5_0)
+      zend_strtod.c:
+      Removed extra space that causes problems for some compilers.
+
+2004-12-01  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      zend_strtod.c:
+      - revert unwanted change
+
+    * zend_strtod.c
+      zend_strtod.c:
+      - Fixed MacOSX compilation  (Patch by Christian)
+
+    * (PHP_5_0)
+      zend.h:
+      - And in Zend/ too.
+
+2004-12-01  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c
+      zend_vm_def.h
+      zend_vm_execute.h
+      tests/bug29883.phpt
+      tests/bug29883.phpt
+      tests/bug29883.phpt:
+      Fixed bug #29883 (isset gives invalid values on strings).
+
 2004-11-30  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
