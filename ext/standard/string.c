@@ -3162,8 +3162,12 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
-			MAKE_STD_ZVAL(result);
-			php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
+			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
+				MAKE_STD_ZVAL(result);
+				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
+			} else {
+				result = *subject_entry;
+			}
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
