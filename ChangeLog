@@ -1,3 +1,34 @@
+2000-11-18  dickmeiss  <dickmeiss@toye.p.sourceforge.net>
+
+    * ext/yaz/.cvsignore: Added .cvsignore file.
+
+2000-11-18  James Moore  <James@phpuk.org>
+
+    * ext/gd/gd.c: Stopping Compile Warnings when using old GD
+
+2000-11-18  Zeev Suraski  <zeev@zend.com>
+
+    * ext/bcmath/bcmath.c:
+    Persist these numbers so that they stay for the duration of the entire process
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/php_bcmath.h: Fix thread-safety bug in bcmath
+
+    * sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/servlet/servlet.c
+      sapi/isapi/php4isapi.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/apache/mod_php4.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      ext/standard/basic_functions.c
+      sapi/aolserver/aolserver.c:
+    Update SAPI modules to interface with the new TSRM.
+    Enable thread-safety memory debugging in ISAPI when in debug mode
+
 2000-11-17  Stig Venaas  <venaas@uninett.no>
 
     * EXTENSIONS: Added openssl extension info
