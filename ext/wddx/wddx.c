@@ -95,7 +95,7 @@ typedef struct {
 } wddx_stack;
 
 
-static void php_wddx_process_data(void *user_data, const char *s, int len);
+static void php_wddx_process_data(void *user_data, const XML_Char *s, int len);
 
 /* {{{ wddx_functions[]
  */
@@ -394,7 +394,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 					break;
 
 				default:
-					if (iscntrl((int)*p)) {
+					if (iscntrl((int)*(unsigned char *)p)) {
 						FLUSH_BUF();
 						sprintf(control_buf, WDDX_CHAR, *p);
 						php_wddx_add_chunk(packet, control_buf);
@@ -690,7 +690,7 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 
 /* {{{ php_wddx_push_element
  */
-static void php_wddx_push_element(void *user_data, const char *name, const char **atts)
+static void php_wddx_push_element(void *user_data, const XML_Char *name, const XML_Char **atts)
 {
 	st_entry ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
@@ -878,7 +878,7 @@ static void php_wddx_push_element(void *user_data, const char *name, const char 
 
 /* {{{ php_wddx_pop_element
  */
-static void php_wddx_pop_element(void *user_data, const char *name)
+static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 {
 	st_entry 			*ent1, *ent2;
 	wddx_stack 			*stack = (wddx_stack *)user_data;
@@ -1000,7 +1000,7 @@ static void php_wddx_pop_element(void *user_data, const char *name)
 
 /* {{{ php_wddx_process_data
  */
-static void php_wddx_process_data(void *user_data, const char *s, int len)
+static void php_wddx_process_data(void *user_data, const XML_Char *s, int len)
 {
 	st_entry *ent;
 	wddx_stack *stack = (wddx_stack *)user_data;
