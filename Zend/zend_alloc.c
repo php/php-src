@@ -248,23 +248,6 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 }
 
 
-ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
-{
-	void *p;
-	int final_size = size*nmemb;
-	
-	HANDLE_BLOCK_INTERRUPTIONS();
-	p = _emalloc(final_size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	if (!p) {
-		HANDLE_UNBLOCK_INTERRUPTIONS();
-		return (void *) p;
-	}
-	memset(p, 0, final_size);
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-	return p;
-}
-
-
 ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	zend_mem_header *p;
