@@ -1134,7 +1134,7 @@ ZEND_API int zend_hash_sort(HashTable *ht, sort_func_t sort_func,
 		i=0;
 		while (p != NULL) {
 			p->nKeyLength = 0;
-			;
+			p->h = i++;
 			p = p->pListNext;
 		}
 		ht->nNextFreeElement = i;
