@@ -40,6 +40,8 @@ PEAR_FILES = \
 	Cache/Function.php \
 	Cache/Graphics.php \
 	Cache/Output.php \
+	Cache/Error.php \
+	Cache/OutputCompression.php \
 	Cache/Container/db.php \
 	Cache/Container/dbx.php \
 	Cache/Container/file.php \
