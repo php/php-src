@@ -60,6 +60,8 @@ php_array_globals array_globals;
 #define	EXTR_PREFIX_IF_EXISTS	5
 #define	EXTR_IF_EXISTS			6
 
+#define EXTR_REFS				0x100
+
 #define SORT_REGULAR			0
 #define SORT_NUMERIC			1
 #define	SORT_STRING				2
@@ -86,6 +88,7 @@ PHP_MINIT_FUNCTION(array)
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_INVALID", EXTR_PREFIX_INVALID, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_IF_EXISTS", EXTR_PREFIX_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_IF_EXISTS", EXTR_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_REFS", EXTR_REFS, CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("SORT_ASC", SORT_ASC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_DESC", SORT_DESC, CONST_CS | CONST_PERSISTENT);
@@ -1139,6 +1142,7 @@ PHP_FUNCTION(extract)
 	ulong num_key;
 	uint var_name_len;
 	int var_exists, extract_type, key_type, count = 0;
+	zend_bool extract_refs = 0;
 	HashPosition pos;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -1155,6 +1159,8 @@ PHP_FUNCTION(extract)
 			}
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
+			extract_refs = (extract_type & EXTR_REFS)>>8;
+			extract_type &= 0xff;
 			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Prefix expected to be specified");
 				return;
@@ -1167,6 +1173,8 @@ PHP_FUNCTION(extract)
 			}
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
+			extract_refs = (extract_type & EXTR_REFS)>>8;
+			extract_type &= 0xff;
 			convert_to_string_ex(prefix);
 			break;
 
@@ -1252,11 +1260,28 @@ PHP_FUNCTION(extract)
 		if (final_name.len) {
 			smart_str_0(&final_name);
 			if (php_valid_var_name(final_name.c)) {
-				MAKE_STD_ZVAL(data);
-				*data = **entry;
-				zval_copy_ctor(data);
+				if (extract_refs) {
+					zval **orig_var;
 
-				ZEND_SET_SYMBOL(EG(active_symbol_table), final_name.c, data);
+					(*entry)->is_ref = 1;
+					(*entry)->refcount++;
+					if (zend_hash_find(EG(active_symbol_table), final_name.c, final_name.len+1, (void **) &orig_var)==SUCCESS
+						&& PZVAL_IS_REF(*orig_var)) {
+
+						(*entry)->refcount += (*orig_var)->refcount-2;
+						zval_dtor(*orig_var);
+						FREE_ZVAL(*orig_var);
+						*orig_var = *entry;
+					} else {
+						zend_hash_update(EG(active_symbol_table), final_name.c, final_name.len+1, entry, sizeof(zval *), NULL);
+					}
+				} else {
+					MAKE_STD_ZVAL(data);
+					*data = **entry;
+					zval_copy_ctor(data);
+
+					ZEND_SET_SYMBOL(EG(active_symbol_table), final_name.c, data);
+				}
 
 				count++;
 			}
