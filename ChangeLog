@@ -1,3 +1,36 @@
+2001-11-25  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in
+      NEWS: Prepare 4.1.0
+
+2001-11-25  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/xslt/config.m4: fixed a link error in configure script.
+
+2001-11-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/ircg/ircg.c: Sascha please explain your protos.
+
+    * ext/domxml/php_domxml.c:
+    Fixed some protos. If pi means processing instruction, it should be written IMHO in uppercase characters.
+
+2001-11-25  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php: Tabs --> spaces
+
+2001-11-25  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/crack/crack.c: Fixed some protos.
+
+2001-11-25  Richard Heyes  <richard.heyes@heyes-computing.net>
+
+    * pear/Mail/mimeDecode.php: Added support for multipart/signed
+
+2001-11-25  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/isapi/php4isapi.c: Fix build if PHP_ENABLE_SEH is not defined
+
 2001-11-24  Jani Taskinen  <sniper@iki.fi>
 
     * php.ini-dist
