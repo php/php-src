@@ -68,6 +68,18 @@ $GLOBALS['_PEAR_Common_file_roles'] = array('php','ext','test','doc','data','ext
  */
 $GLOBALS['_PEAR_Common_replacement_types'] = array('php-const', 'pear-config');
 
+/**
+ * Valid "provide" types
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_provide_types'] = array('ext', 'prog', 'class', 'function', 'feature', 'api');
+
+/**
+ * Valid "provide" types
+ * @var array
+ */
+$GLOBALS['_PEAR_Common_script_phases'] = array('pre-install', 'post-install', 'pre-uninstall', 'post-uninstall', 'pre-build', 'post-build', 'pre-configure', 'post-configure', 'pre-setup', 'post-setup');
+
 // }}}
 
 /**
@@ -1224,6 +1236,34 @@ class PEAR_Common extends PEAR
     function getReplacementTypes()
     {
         return $GLOBALS['_PEAR_Common_replacement_types'];
+    }
+
+    // }}}
+    // {{{ getReplacementTypes()
+
+    /**
+     * Get the implemented file replacement types in
+     *
+     * @return array
+     * @static
+     */
+    function getProvideTypes()
+    {
+        return $GLOBALS['_PEAR_Common_provide_types'];
+    }
+
+    // }}}
+    // {{{ getReplacementTypes()
+
+    /**
+     * Get the implemented file replacement types in
+     *
+     * @return array
+     * @static
+     */
+    function getScriptPhases()
+    {
+        return $GLOBALS['_PEAR_Common_script_phases'];
     }
 
     // }}}
