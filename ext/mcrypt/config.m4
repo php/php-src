@@ -33,7 +33,7 @@ if test "$PHP_MCRYPT" != "no"; then
     [
       AC_DEFINE(HAVE_LIBMCRYPT22,1,[ ])
     ],[
-      AC_MSG_ERROR(Sorry, I was not able to diagnose which libmcrypt version you have installed.)
+      AC_MSG_ERROR([Sorry, I was not able to diagnose which libmcrypt version you have installed.])
     ],[
       -L$MCRYPT_DIR/lib
     ])
