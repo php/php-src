@@ -1,0 +1,18 @@
+// $Id$
+// vim: ft=javascript
+
+ARG_WITH("xsl", "xsl support", "no");
+
+if (PHP_XSL == "yes") {
+	if (CHECK_LIB("libxslt.lib", "xsl", PHP_XSL) && 
+			CHECK_LIB("libxml2.lib", "xsl") &&
+			CHECK_HEADER_ADD_INCLUDE("libxslt\\xslt.h", "CFLAGS_XSL")) {
+		EXTENSION("xsl", "php_xsl.c xsltprocessor.c", PHP_XSL_SHARED);
+		AC_DEFINE("HAVE_XSL", 1, "Define if xsl extension is enabled");
+		if (! PHP_XSL_SHARED) {
+			ADD_FLAG("CFLAGS_XSL", "/D DOM_EXPORTS ");
+		}
+	} else {
+		WARNING("xsl not enabled; libraries and headers not found");
+	}
+}
