@@ -507,7 +507,7 @@ php_stream_ops php_openssl_socket_ops = {
 };
 
 
-PHPAPI php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
+php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
 		char *resourcename, long resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
