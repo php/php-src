@@ -47,7 +47,7 @@ if test "$PHP_SQLITE" != "no"; then
 	# use bundled library
 
 	PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src"
-	if test "$PHP_DEBUG" = "1"; then
+	if test "$PHP_DEBUG" = "0"; then
 		PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
 	fi
 	if test "$enable_experimental_zts" = "yes"; then
