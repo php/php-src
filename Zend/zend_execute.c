@@ -715,6 +715,10 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 				zval *offset;
 				zval tmp;
 
+				if (op2->op_type==IS_UNUSED) {
+					zend_error(E_ERROR, "[] operator not supported for strings");
+				}
+
 				offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 
 				if (offset->type != IS_LONG) {
