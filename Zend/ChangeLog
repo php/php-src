@@ -1,3 +1,19 @@
+2002-06-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_execute.c: Remove unused local variable.
+
+2002-06-05  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_execute.c
+      zend_object_handlers.c:
+    - Allow overloaded objects to receive the method name in its original
+    - case.
+
+2002-06-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_llist.c: - Fix memleak (patch by Stefan Sesser)
+
 2002-06-04  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * zend_ini_scanner.l: - Fix for bug #17462 (Patch by Edin Kadribasic)
