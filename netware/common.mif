@@ -1,26 +1,26 @@
 #
-# common include file for PHP build
-# include this in every make file
+# Common include file for PHP build.
+# Include this in every make file.
 #
+
 
 # Set following directories based on your setting
 
 # Path to CodeWarrior installation
 CW_PATH = P:/APPS/SCRIPT/SW/CW71-4
 
-# NWSDK directories
+# LibC directory
 ifndef SDK_DIR
-SDK_DIR = R:/script/common/libc
+SDK_DIR = P:/APPS/script/sw/libc
 endif
 
 # MPK related directory
 ifndef MPK_DIR
 MPK_DIR = p:/apps/script/mpk
+XDCTOOL = mpkxdc
+MPKTOOL = $(MPK_DIR)/$(XDCTOOL)
+XDCFLAGS = -n
 endif
-
-#ifndef CLIB_DIR
-#CLIB_DIR = p:/apps/ndk0601/nwsdk
-#endif
 
 # Winsock stuff
 WINSOCK_DIR = P:/APPS/script/sw/Winsock2
@@ -28,9 +28,20 @@ WINSOCK_DIR = P:/APPS/script/sw/Winsock2
 # LDAP stuff
 LDAP_DIR = P:/APPS/script/sw/cldapsdk
 
+# XML-EXPAT stuff
+EXPAT_DIR = P:/APPS/script/sw/expat
+
+
+# Web Server defaults to Apache 1.3.x
+ifndef APACHE_VER
+APACHE_VER = 1.3
+endif
+
 # Apache directory
-ifndef APACHE_DIR
+ifeq '$(APACHE_VER)' '1.3'
 APACHE_DIR = P:/APPS/script/sw/Apache1.3.xSource
+else
+APACHE_DIR = P:/APPS/script/sw/Apache2Source
 endif
 
 
@@ -46,7 +57,6 @@ LINK = mwldnlm
 ifndef BUILD
 BUILD = release
 endif
-#BUILD = debug
 
 OBJ_DIR = $(BUILD)
 FINAL_DIR = $(BUILD)
@@ -57,8 +67,16 @@ STACK_SIZE=65536
 endif
 
 ifndef COPYRIGHT
-#COPYRIGHT = "Copyright (c) 1997-2002 The PHP Group. All Rights Reserved."
-COPYRIGHT = "Copyright (c) 1999\, 2000 The PHP Group. All rights reserved."
+COPYRIGHT = "Copyright (C) 2002-2003  Novell\, Inc. All Rights Reserved."
+endif
+
+
+# Compile flags
+ifeq '$(APACHE_VER)' '1.3'
+C_FLAGS  = -align 1
+C_FLAGS += -DCLIB_STAT_PATCH
+else
+C_FLAGS  = -align 4
 endif
 
 # Link flags
@@ -70,4 +88,3 @@ LD_FLAGS += -desc $(MODULE_DESC)
 LD_FLAGS += -copy $(COPYRIGHT)
 LD_FLAGS += -screenname Default
 LD_FLAGS += -threadname $(MODULE_NAME)__p
-
