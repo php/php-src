@@ -39,6 +39,8 @@ PHP_RSHUTDOWN_FUNCTION(fribidi);
 PHP_MINFO_FUNCTION(fribidi);
 
 PHP_FUNCTION(fribidi_log2vis);
+PHP_FUNCTION(fribidi_charset_info);
+PHP_FUNCTION(fribidi_get_charsets);
 
 #ifdef ZTS
 #define FRIBIDIG(v) TSRMG(fribidi_globals_id, php_fribidi_globals *, v)

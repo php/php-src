@@ -43,7 +43,9 @@
 #endif
 
 function_entry fribidi_functions[] = {
-	PHP_FE(fribidi_log2vis,	NULL)		
+	PHP_FE(fribidi_log2vis,	     NULL)
+	PHP_FE(fribidi_charset_info, NULL)
+	PHP_FE(fribidi_get_charsets, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -244,6 +246,68 @@ PHP_FUNCTION(fribidi_log2vis)
 
 	RETVAL_STRING(out_string, 1);
 	efree(out_string);
+}
+/* }}} */
+
+/* {{{ proto array fribidi_charset_info(int charset)
+   Returns an array containing information about the specified charset */
+PHP_FUNCTION(fribidi_charset_info)
+{
+	long charset;
+	char *name, *title, *desc;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &charset) == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	switch (charset) {
+		case FRIBIDI_CHARSET_UTF8:
+		case FRIBIDI_CHARSET_ISO8859_6:
+		case FRIBIDI_CHARSET_ISO8859_8:
+		case FRIBIDI_CHARSET_CP1255:
+		case FRIBIDI_CHARSET_CP1256:
+		case FRIBIDI_CHARSET_ISIRI_3342:
+		case FRIBIDI_CHARSET_CAP_RTL:
+			name  = fribidi_char_set_name(charset);
+			title = fribidi_char_set_title(charset);
+			desc  = fribidi_char_set_desc(charset);
+		   	
+			if (name == NULL) {
+				name = "";
+			}
+			if (title == NULL) {
+				title = "";
+			}
+			if (desc == NULL) {
+				desc = "";
+			}
+
+			add_assoc_string(return_value, "name", name , 1);
+			add_assoc_string(return_value, "title", title, 1);
+			add_assoc_string(return_value, "desc", desc, 1);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown charset");
+			RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto array fribidi_get_charsets()
+   Returns an array containing available charsets */
+PHP_FUNCTION(fribidi_get_charsets)
+{
+	array_init(return_value);
+
+	add_index_string(return_value, 0, "FRIBIDI_CHARSET_UTF8", 1);
+	add_index_string(return_value, 1, "FRIBIDI_CHARSET_8859_6", 1);
+	add_index_string(return_value, 2, "FRIBIDI_CHARSET_8859_8", 1);
+	add_index_string(return_value, 3, "FRIBIDI_CHARSET_CP1255", 1);
+	add_index_string(return_value, 4, "FRIBIDI_CHARSET_CP1256", 1);
+	add_index_string(return_value, 5, "FRIBIDI_CHARSET_ISIRI_3342", 1);
+	add_index_string(return_value, 6, "FRIBIDI_CHARSET_CAP_RTL", 1);
 }
 /* }}} */
 
