@@ -916,21 +916,38 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2)
 
 ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2)
 {
+	result->type = IS_BOOL;
 	if (op1->type != op2->type) {
-		convert_to_boolean(result);
 		result->value.lval = 0;
 		return SUCCESS;
 	}
-	if (compare_function(result, op1, op2) == FAILURE) {
-		return FAILURE;
+	switch (op1->type) {
+		case IS_BOOL:
+		case IS_LONG:
+		case IS_RESOURCE:
+			result->type = (op1->value.lval == op2->value.lval);
+			return SUCCESS;
+			break;
+		case IS_DOUBLE:
+			result->type = (op1->value.dval == op2->value.dval);
+			return SUCCESS;
+			break;
+		case IS_STRING:
+			if ((op1->value.str.len == op2->value.str.len)
+				&& (!memcmp(op1->value.str.val, op2->value.str.val, op1->value.str.len))) {
+				result->value.lval = 1;
+			} else {
+				result->value.lval = 0;
+			}
+			return SUCCESS;
+			break;
+		case IS_ARRAY:
+		case IS_OBJECT:
+			zend_error(E_WARNING,"Cannot compare arrays or objects");
+			break;
 	}
-	convert_to_boolean(result);
-	if (result->value.lval == 0) {
-		result->value.lval = 1;
-	} else {
-		result->value.lval = 0;
-	}
-	return SUCCESS;
+	var_reset(result);
+	return FAILURE;
 }
 
 ZEND_API int is_equal_function(zval *result, zval *op1, zval *op2)
