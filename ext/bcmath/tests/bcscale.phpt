@@ -1,6 +1,6 @@
 --TEST--
 bcscale() function
---SKIP--
+--SKIPIF--
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
 --INI--
 bcmath.scale=0

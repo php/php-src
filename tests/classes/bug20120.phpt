@@ -1,6 +1,6 @@
 --TEST--
 Methods via variable name, bug #20120
---SKIP--
+--SKIPIF--
 --FILE--
 <?php
 class bugtest {
