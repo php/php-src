@@ -77,9 +77,70 @@
 #include <sys/un.h>
 #endif
 
-static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
+
+typedef FILE * (*php_fopen_url_wrapper_t) (const char *, char *, int, int *, int *, char **) ;
+
+static FILE *php_fopen_url_wrapper(const char *, char *, int, int *, int *, char **);
+static FILE *php_fopen_url_wrap_http(const char *, char *, int, int *, int *, char **);
+static FILE *php_fopen_url_wrap_ftp(const char *, char *, int, int *, int *, char **);
+static FILE *php_fopen_url_wrap_php(const char *, char *, int, int *, int *, char **);
 
 int php_get_ftp_result(int socketd);
+
+
+
+HashTable fopen_url_wrappers_hash;
+
+PHPAPI int php_register_url_wrapper(char *protocol, FILE * (*wrapper)(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)) {
+#if PHP_URL_FOPEN
+	return zend_hash_add(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1, &wrapper, sizeof(wrapper), NULL);
+#else
+	return FAILURE;
+#endif
+}
+
+PHPAPI int php_unregister_url_wrapper(char *protocol) {
+#if PHP_URL_FOPEN
+	return zend_hash_del(&fopen_url_wrappers_hash, protocol, strlen(protocol)+1);
+#else
+	return SUCCESS;
+#endif
+}
+
+int php_init_fopen_wrappers(void) 
+{
+	int status = SUCCESS;
+#if PHP_URL_FOPEN
+	if (zend_hash_init(&fopen_url_wrappers_hash, 0, NULL, NULL, 1)==FAILURE) {
+		return FAILURE;
+	}
+
+ 	if(FAILURE==php_register_url_wrapper("http",php_fopen_url_wrap_http)) {
+		status = FAILURE;
+	} else
+	if(FAILURE==php_register_url_wrapper("ftp",php_fopen_url_wrap_ftp)) {
+		status = FAILURE;
+	} else
+	if(FAILURE==php_register_url_wrapper("php",php_fopen_url_wrap_php)) {
+		status = FAILURE;
+	}
+
+	if(FAILURE==status) {
+		zend_hash_destroy(&fopen_url_wrappers_hash);
+	}
+#endif
+	return status;
+}
+
+int php_shutdown_fopen_wrappers(void) 
+{
+#if PHP_URL_FOPEN
+		zend_hash_destroy(&fopen_url_wrappers_hash);
+#endif
+
+	return SUCCESS;
+}
+
 
 /*
 	When open_basedir is not NULL, check if the given filename is located in
@@ -446,464 +507,522 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
  * Otherwise, fopen is called as usual and the file pointer is returned.
  */
 
-static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
-{
-	url *resource;
-	int result;
-	char *scratch;
-	unsigned char *tmp;
 
+static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+{
+	FILE *fp=NULL;
+	url *resource=NULL;
+	struct sockaddr_in server;
 	char tmp_line[512];
 	char location[512];
 	char hdr_line[8192];
-	char *tpath, *ttpath;
 	int body = 0;
+	char *scratch;
+	unsigned char *tmp;
+	int len;
 	int reqok = 0;
-	int i, len;
 
-	FILE *fp = NULL;
-	struct sockaddr_in server;
-	unsigned short portno;
-
-	if (!strncasecmp(path, "http://", 7)) {
-		resource = url_parse((char *) path);
-		if (resource == NULL) {
-			php_error(E_WARNING, "Invalid URL specified, %s", path);
-			*issock = BAD_URL;
-			return NULL;
-		}
-		/* use port 80 if one wasn't specified */
-		if (resource->port == 0)
-			resource->port = 80;
-
-		*socketd = socket(AF_INET, SOCK_STREAM, 0);
-		if (*socketd == SOCK_ERR) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-		server.sin_family = AF_INET;
-
-		if (lookup_hostname(resource->host, &server.sin_addr)) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-		server.sin_port = htons(resource->port);
-
-		if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
+	resource = url_parse((char *) path);
+	if (resource == NULL) {
+		php_error(E_WARNING, "Invalid URL specified, %s", path);
+		*issock = BAD_URL;
+		return NULL;
+	}
+	/* use port 80 if one wasn't specified */
+	if (resource->port == 0)
+		resource->port = 80;
+	
+	*socketd = socket(AF_INET, SOCK_STREAM, 0);
+	if (*socketd == SOCK_ERR) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+	server.sin_family = AF_INET;
+	
+	if (lookup_hostname(resource->host, &server.sin_addr)) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+	server.sin_port = htons(resource->port);
+	
+	if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
 #if 0
+	if ((fp = fdopen(*socketd, "r+")) == NULL) {
+		free_url(resource);
+		return NULL;
+	}
+#ifdef HAVE_SETVBUF
+	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
+		free_url(resource);
+		return NULL;
+	}
+#endif
+#endif							/*win32 */
+	
+	strcpy(hdr_line, "GET ");
+	
+	/* tell remote http which file to get */
+	if (resource->path != NULL) {
+		strlcat(hdr_line, resource->path, sizeof(hdr_line));
+	} else {
+		strlcat(hdr_line, "/", sizeof(hdr_line));
+	}
+	/* append the query string, if any */
+	if (resource->query != NULL) {
+		strlcat(hdr_line, "?", sizeof(hdr_line));
+		strlcat(hdr_line, resource->query, sizeof(hdr_line));
+	}
+	strlcat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line));
+	SOCK_WRITE(hdr_line, *socketd);
+	
+	/* send authorization header if we have user/pass */
+	if (resource->user != NULL && resource->pass != NULL) {
+		scratch = (char *) emalloc(strlen(resource->user) + strlen(resource->pass) + 2);
+		if (!scratch) {
+			free_url(resource);
+			return NULL;
+		}
+		strcpy(scratch, resource->user);
+		strcat(scratch, ":");
+		strcat(scratch, resource->pass);
+		tmp = php_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
+		
+		if (snprintf(hdr_line, sizeof(hdr_line),
+					 "Authorization: Basic %s\r\n", tmp) > 0) {
+			SOCK_WRITE(hdr_line, *socketd);
+		}
+		
+		efree(scratch);
+		efree(tmp);
+	}
+	/* if the user has configured who they are, send a From: line */
+	if (cfg_get_string("from", &scratch) == SUCCESS) {
+		if (snprintf(hdr_line, sizeof(hdr_line),
+					 "From: %s\r\n", scratch) > 0) {
+			SOCK_WRITE(hdr_line, *socketd);
+		}
+		
+	}
+	/* send a Host: header so name-based virtual hosts work */
+	if (resource->port != 80) {
+		len = snprintf(hdr_line, sizeof(hdr_line),
+					   "Host: %s:%i\r\n", resource->host, resource->port);
+	} else {
+		len = snprintf(hdr_line, sizeof(hdr_line),
+					   "Host: %s\r\n", resource->host);
+	}
+	if (len > 0) {
+		SOCK_WRITE(hdr_line, *socketd);
+	}
+	
+	/* identify ourselves and end the headers */
+	SOCK_WRITE("User-Agent: PHP/" PHP_VERSION "\r\n\r\n", *socketd);
+	
+	body = 0;
+	location[0] = '\0';
+	if (!SOCK_FEOF(*socketd)) {
+		/* get response header */
+		if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
+			if (strncmp(tmp_line + 8, " 200 ", 5) == 0) {
+				reqok = 1;
+			}
+		}
+	}
+	/* Read past HTTP headers */
+	while (!body && !SOCK_FEOF(*socketd)) {
+		if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
+			char *p = tmp_line;
+			
+			tmp_line[sizeof(tmp_line)-1] = '\0';
+			
+			while (*p) {
+				if (*p == '\n' || *p == '\r') {
+					*p = '\0';
+				}
+				p++;
+			}
+			
+			if (!strncasecmp(tmp_line, "Location: ", 10)) {
+				strlcpy(location, tmp_line + 10, sizeof(location));
+			}
+			
+			if (tmp_line[0] == '\0') {
+					body = 1;
+			}
+		}
+	}
+	if (!reqok) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		if (location[0] != '\0') {
+			return php_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
+		} else {
+			return NULL;
+		}
+	}
+	free_url(resource);
+	*issock = 1;
+	return (fp);
+}
+ 
+ static FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+{
+	FILE *fp=NULL;
+	url *resource=NULL;
+	struct sockaddr_in server;
+	char tmp_line[512];
+	unsigned short portno;
+	char *scratch;
+	int result;
+	int i;
+	char *tpath, *ttpath;
+	
+	resource = url_parse((char *) path);
+	if (resource == NULL) {
+		php_error(E_WARNING, "Invalid URL specified, %s", path);
+		*issock = BAD_URL;
+		return NULL;
+	} else if (resource->path == NULL) {
+		php_error(E_WARNING, "No file-path specified");
+		free_url(resource);
+		*issock = BAD_URL;
+		return NULL;
+	}
+	/* use port 21 if one wasn't specified */
+	if (resource->port == 0)
+		resource->port = 21;
+	
+	*socketd = socket(AF_INET, SOCK_STREAM, 0);
+	if (*socketd == SOCK_ERR) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+	server.sin_family = AF_INET;
+	
+	if (lookup_hostname(resource->host, &server.sin_addr)) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+	server.sin_port = htons(resource->port);
+	
+	if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+#if 0
+	if ((fpc = fdopen(*socketd, "r+")) == NULL) {
+		free_url(resource);
+		return NULL;
+	}
+#ifdef HAVE_SETVBUF
+	if ((setvbuf(fpc, NULL, _IONBF, 0)) != 0) {
+		free_url(resource);
+		fclose(fpc);
+		return NULL;
+	}
+#endif
+#endif
+	
+	/* Start talking to ftp server */
+	result = php_get_ftp_result(*socketd);
+	if (result > 299 || result < 200) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	/* send the user name */
+	SOCK_WRITE("USER ", *socketd);
+	if (resource->user != NULL) {
+		php_raw_url_decode(resource->user, strlen(resource->user));
+		SOCK_WRITE(resource->user, *socketd);
+	} else {
+		SOCK_WRITE("anonymous", *socketd);
+	}
+	SOCK_WRITE("\r\n", *socketd);
+	
+	/* get the response */
+	result = php_get_ftp_result(*socketd);
+	
+	/* if a password is required, send it */
+	if (result >= 300 && result <= 399) {
+		SOCK_WRITE("PASS ", *socketd);
+		if (resource->pass != NULL) {
+			php_raw_url_decode(resource->pass, strlen(resource->pass));
+			SOCK_WRITE(resource->pass, *socketd);
+		} else {
+			/* if the user has configured who they are,
+			   send that as the password */
+			if (cfg_get_string("from", &scratch) == SUCCESS) {
+				SOCK_WRITE(scratch, *socketd);
+			} else {
+				SOCK_WRITE("anonymous", *socketd);
+			}
+		}
+		SOCK_WRITE("\r\n", *socketd);
+		
+		/* read the response */
+		result = php_get_ftp_result(*socketd);
+		if (result > 299 || result < 200) {
+			free_url(resource);
+			SOCK_FCLOSE(*socketd);
+			*socketd = 0;
+			return NULL;
+		}
+	} else if (result > 299 || result < 200) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	
+	/* set the connection to be binary */
+	SOCK_WRITE("TYPE I\r\n", *socketd);
+	result = php_get_ftp_result(*socketd);
+	if (result > 299 || result < 200) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	
+	/* find out the size of the file (verifying it exists) */
+	SOCK_WRITE("SIZE ", *socketd);
+	SOCK_WRITE(resource->path, *socketd);
+	SOCK_WRITE("\r\n", *socketd);
+	
+	/* read the response */
+	result = php_get_ftp_result(*socketd);
+	if (mode[0] == 'r') {
+		/* when reading file, it must exist */
+		if (result > 299 || result < 200) {
+			php_error(E_WARNING, "File not found");
+			free_url(resource);
+			SOCK_FCLOSE(*socketd);
+			*socketd = 0;
+			errno = ENOENT;
+			return NULL;
+		}
+	} else {
+		/* when writing file, it must NOT exist */
+		if (result <= 299 && result >= 200) {
+			php_error(E_WARNING, "File already exists");
+			free_url(resource);
+			SOCK_FCLOSE(*socketd);
+			*socketd = 0;
+			errno = EEXIST;
+			return NULL;
+		}
+	}
+	
+	/* set up the passive connection */
+	SOCK_WRITE("PASV\r\n", *socketd);
+	while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) &&
+		   !(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
+			 isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
+	
+	/* make sure we got a 227 response */
+	if (strncmp(tmp_line, "227", 3)) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	/* parse pasv command (129,80,95,25,13,221) */
+	tpath = tmp_line;
+	
+	/* skip over the "227 Some message " part */
+	for (tpath += 4; *tpath && !isdigit((int) *tpath); tpath++);
+	if (!*tpath) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	/* skip over the host ip, we just assume it's the same */
+	for (i = 0; i < 4; i++) {
+		for (; isdigit((int) *tpath); tpath++);
+		if (*tpath == ',') {
+			tpath++;
+		} else {
+			SOCK_FCLOSE(*socketd);
+			*socketd = 0;
+			return NULL;
+		}
+	}
+	
+	/* pull out the MSB of the port */
+	portno = (unsigned short) strtol(tpath, &ttpath, 10) * 256;
+	if (ttpath == NULL) {
+		/* didn't get correct response from PASV */
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	tpath = ttpath;
+	if (*tpath == ',') {
+		tpath++;
+	} else {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	
+	/* pull out the LSB of the port */
+	portno += (unsigned short) strtol(tpath, &ttpath, 10);
+	
+	if (ttpath == NULL) {
+		/* didn't get correct response from PASV */
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	
+	if (mode[0] == 'r') {
+		/* retrieve file */
+		SOCK_WRITE("RETR ", *socketd);
+	} else {
+		/* store file */
+		SOCK_WRITE("STOR ", *socketd);
+	} 
+	if (resource->path != NULL) {
+		SOCK_WRITE(resource->path, *socketd);
+	} else {
+		SOCK_WRITE("/", *socketd);
+	}
+	
+	/* close control connection */
+	SOCK_WRITE("\r\nQUIT\r\n", *socketd);
+	SOCK_FCLOSE(*socketd);
+
+	/* open the data channel */
+	*socketd = socket(AF_INET, SOCK_STREAM, 0);
+	if (*socketd == SOCK_ERR) {
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		free_url(resource);
+		return NULL;
+	}
+	server.sin_family = AF_INET;
+	
+	if (lookup_hostname(resource->host, &server.sin_addr)) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+	server.sin_port = htons(portno);
+	
+	if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
+		free_url(resource);
+		SOCK_FCLOSE(*socketd);
+		*socketd = 0;
+		return NULL;
+	}
+#if 0
+	if (mode[0] == 'r') {
 		if ((fp = fdopen(*socketd, "r+")) == NULL) {
 			free_url(resource);
 			return NULL;
 		}
-#ifdef HAVE_SETVBUF
-		if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
-			free_url(resource);
-			return NULL;
-		}
-#endif
-#endif							/*win32 */
-
-		strcpy(hdr_line, "GET ");
-		
-		/* tell remote http which file to get */
-		if (resource->path != NULL) {
-			strlcat(hdr_line, resource->path, sizeof(hdr_line));
-		} else {
-			strlcat(hdr_line, "/", sizeof(hdr_line));
-		}
-		/* append the query string, if any */
-		if (resource->query != NULL) {
-			strlcat(hdr_line, "?", sizeof(hdr_line));
-			strlcat(hdr_line, resource->query, sizeof(hdr_line));
-		}
-		strlcat(hdr_line, " HTTP/1.0\r\n", sizeof(hdr_line));
-		SOCK_WRITE(hdr_line, *socketd);
-		
-		/* send authorization header if we have user/pass */
-		if (resource->user != NULL && resource->pass != NULL) {
-			scratch = (char *) emalloc(strlen(resource->user) + strlen(resource->pass) + 2);
-			if (!scratch) {
-				free_url(resource);
-				return NULL;
-			}
-			strcpy(scratch, resource->user);
-			strcat(scratch, ":");
-			strcat(scratch, resource->pass);
-			tmp = php_base64_encode((unsigned char *)scratch, strlen(scratch), NULL);
-
-			if (snprintf(hdr_line, sizeof(hdr_line),
-						 "Authorization: Basic %s\r\n", tmp) > 0) {
-				SOCK_WRITE(hdr_line, *socketd);
-			}
-
-			efree(scratch);
-			efree(tmp);
-		}
-		/* if the user has configured who they are, send a From: line */
-		if (cfg_get_string("from", &scratch) == SUCCESS) {
-			if (snprintf(hdr_line, sizeof(hdr_line),
-						 "From: %s\r\n", scratch) > 0) {
-				SOCK_WRITE(hdr_line, *socketd);
-			}
-
-		}
-		/* send a Host: header so name-based virtual hosts work */
-		if (resource->port != 80) {
-			len = snprintf(hdr_line, sizeof(hdr_line),
-						   "Host: %s:%i\r\n", resource->host, resource->port);
-		} else {
-			len = snprintf(hdr_line, sizeof(hdr_line),
-						   "Host: %s\r\n", resource->host);
-		}
-		if (len > 0) {
-			SOCK_WRITE(hdr_line, *socketd);
-		}
-
-		/* identify ourselves and end the headers */
-		SOCK_WRITE("User-Agent: PHP/" PHP_VERSION "\r\n\r\n", *socketd);
-
-		body = 0;
-		location[0] = '\0';
-		if (!SOCK_FEOF(*socketd)) {
-			/* get response header */
-			if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
-				if (strncmp(tmp_line + 8, " 200 ", 5) == 0) {
-					reqok = 1;
-				}
-			}
-		}
-		/* Read past HTTP headers */
-		while (!body && !SOCK_FEOF(*socketd)) {
-			if (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) != NULL) {
-				char *p = tmp_line;
-
-				tmp_line[sizeof(tmp_line)-1] = '\0';
-
-				while (*p) {
-					if (*p == '\n' || *p == '\r') {
-						*p = '\0';
-					}
-					p++;
-				}
-
-				if (!strncasecmp(tmp_line, "Location: ", 10)) {
-					strlcpy(location, tmp_line + 10, sizeof(location));
-				}
-
-				if (tmp_line[0] == '\0') {
-					body = 1;
-				}
-			}
-		}
-		if (!reqok) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			if (location[0] != '\0') {
-				return php_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
-			} else {
-				return NULL;
-			}
-		}
-		free_url(resource);
-		*issock = 1;
-		return (fp);
-	} else if (!strncasecmp(path, "php://", 6)) {
-		const char *res = path + 6;
-
-		if (!strcasecmp(res, "stdin")) {
-			return fdopen(STDIN_FILENO, mode);
-		} else if (!strcasecmp(res, "stdout")) {
-			return fdopen(STDOUT_FILENO, mode);
-		} else if (!strcasecmp(res, "stderr")) {
-			return fdopen(STDERR_FILENO, mode);
-		}
-	} else if (!strncasecmp(path, "ftp://", 6)) {
-		resource = url_parse((char *) path);
-		if (resource == NULL) {
-			php_error(E_WARNING, "Invalid URL specified, %s", path);
-			*issock = BAD_URL;
-			return NULL;
-		} else if (resource->path == NULL) {
-			php_error(E_WARNING, "No file-path specified");
-			free_url(resource);
-			*issock = BAD_URL;
-			return NULL;
-		}
-		/* use port 21 if one wasn't specified */
-		if (resource->port == 0)
-			resource->port = 21;
-
-		*socketd = socket(AF_INET, SOCK_STREAM, 0);
-		if (*socketd == SOCK_ERR) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-		server.sin_family = AF_INET;
-
-		if (lookup_hostname(resource->host, &server.sin_addr)) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-		server.sin_port = htons(resource->port);
-
-		if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-#if 0
-		if ((fpc = fdopen(*socketd, "r+")) == NULL) {
-			free_url(resource);
-			return NULL;
-		}
-#ifdef HAVE_SETVBUF
-		if ((setvbuf(fpc, NULL, _IONBF, 0)) != 0) {
-			free_url(resource);
-			fclose(fpc);
-			return NULL;
-		}
-#endif
-#endif
-
-		/* Start talking to ftp server */
-		result = php_get_ftp_result(*socketd);
-		if (result > 299 || result < 200) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-		/* send the user name */
-		SOCK_WRITE("USER ", *socketd);
-		if (resource->user != NULL) {
-			php_raw_url_decode(resource->user, strlen(resource->user));
-			SOCK_WRITE(resource->user, *socketd);
-		} else {
-			SOCK_WRITE("anonymous", *socketd);
-		}
-		SOCK_WRITE("\r\n", *socketd);
-
-		/* get the response */
-		result = php_get_ftp_result(*socketd);
-
-		/* if a password is required, send it */
-		if (result >= 300 && result <= 399) {
-			SOCK_WRITE("PASS ", *socketd);
-			if (resource->pass != NULL) {
-				php_raw_url_decode(resource->pass, strlen(resource->pass));
-				SOCK_WRITE(resource->pass, *socketd);
-			} else {
-				/* if the user has configured who they are,
-				   send that as the password */
-				if (cfg_get_string("from", &scratch) == SUCCESS) {
-					SOCK_WRITE(scratch, *socketd);
-				} else {
-					SOCK_WRITE("anonymous", *socketd);
-				}
-			}
-			SOCK_WRITE("\r\n", *socketd);
-
-			/* read the response */
-			result = php_get_ftp_result(*socketd);
-			if (result > 299 || result < 200) {
-				free_url(resource);
-				SOCK_FCLOSE(*socketd);
-				*socketd = 0;
-				return NULL;
-			}
-		} else if (result > 299 || result < 200) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-
-		/* set the connection to be binary */
-		SOCK_WRITE("TYPE I\r\n", *socketd);
-		result = php_get_ftp_result(*socketd);
-		if (result > 299 || result < 200) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-
-		/* find out the size of the file (verifying it exists) */
-		SOCK_WRITE("SIZE ", *socketd);
-		SOCK_WRITE(resource->path, *socketd);
-		SOCK_WRITE("\r\n", *socketd);
-
-		/* read the response */
-		result = php_get_ftp_result(*socketd);
-		if (mode[0] == 'r') {
-			/* when reading file, it must exist */
-			if (result > 299 || result < 200) {
-				php_error(E_WARNING, "File not found");
-				free_url(resource);
-				SOCK_FCLOSE(*socketd);
-				*socketd = 0;
-				errno = ENOENT;
-				return NULL;
-			}
-		} else {
-			/* when writing file, it must NOT exist */
-			if (result <= 299 && result >= 200) {
-				php_error(E_WARNING, "File already exists");
-				free_url(resource);
-				SOCK_FCLOSE(*socketd);
-				*socketd = 0;
-				errno = EEXIST;
-				return NULL;
-			}
-		}
-
-		/* set up the passive connection */
-		SOCK_WRITE("PASV\r\n", *socketd);
-		while (SOCK_FGETS(tmp_line, sizeof(tmp_line)-1, *socketd) &&
-			!(isdigit((int) tmp_line[0]) && isdigit((int) tmp_line[1]) &&
-			  isdigit((int) tmp_line[2]) && tmp_line[3] == ' '));
-
-		/* make sure we got a 227 response */
-		if (strncmp(tmp_line, "227", 3)) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-		/* parse pasv command (129,80,95,25,13,221) */
-		tpath = tmp_line;
-
-		/* skip over the "227 Some message " part */
-		for (tpath += 4; *tpath && !isdigit((int) *tpath); tpath++);
-		if (!*tpath) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-		/* skip over the host ip, we just assume it's the same */
-		for (i = 0; i < 4; i++) {
-			for (; isdigit((int) *tpath); tpath++);
-			if (*tpath == ',') {
-				tpath++;
-			} else {
-				SOCK_FCLOSE(*socketd);
-				*socketd = 0;
-				return NULL;
-			}
-		}
-
-		/* pull out the MSB of the port */
-		portno = (unsigned short) strtol(tpath, &ttpath, 10) * 256;
-		if (ttpath == NULL) {
-			/* didn't get correct response from PASV */
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-		tpath = ttpath;
-		if (*tpath == ',') {
-			tpath++;
-		} else {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-
-		/* pull out the LSB of the port */
-		portno += (unsigned short) strtol(tpath, &ttpath, 10);
-
-		if (ttpath == NULL) {
-			/* didn't get correct response from PASV */
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-
-		if (mode[0] == 'r') {
-			/* retrieve file */
-			SOCK_WRITE("RETR ", *socketd);
-		} else {
-			/* store file */
-			SOCK_WRITE("STOR ", *socketd);
-		} 
-		if (resource->path != NULL) {
-			SOCK_WRITE(resource->path, *socketd);
-		} else {
-			SOCK_WRITE("/", *socketd);
-		}
-
-		/* close control connection */
-		SOCK_WRITE("\r\nQUIT\r\n", *socketd);
-		SOCK_FCLOSE(*socketd);
-
-		/* open the data channel */
-		*socketd = socket(AF_INET, SOCK_STREAM, 0);
-		if (*socketd == SOCK_ERR) {
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			free_url(resource);
-			return NULL;
-		}
-		server.sin_family = AF_INET;
-
-		if (lookup_hostname(resource->host, &server.sin_addr)) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-		server.sin_port = htons(portno);
-
-		if (connect(*socketd, (struct sockaddr *) &server, sizeof(server)) == SOCK_CONN_ERR) {
-			free_url(resource);
-			SOCK_FCLOSE(*socketd);
-			*socketd = 0;
-			return NULL;
-		}
-#if 0
-		if (mode[0] == 'r') {
-			if ((fp = fdopen(*socketd, "r+")) == NULL) {
-				free_url(resource);
-				return NULL;
-			}
-		} else {
-			if ((fp = fdopen(*socketd, "w+")) == NULL) {
-				free_url(resource);
-				return NULL;
-			}
-		}
-#ifdef HAVE_SETVBUF
-		if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
-			free_url(resource);
-			fclose(fp);
-			return NULL;
-		}
-#endif
-#endif
-		free_url(resource);
-		*issock = 1;
-		return (fp);
 	} else {
+		if ((fp = fdopen(*socketd, "w+")) == NULL) {
+			free_url(resource);
+			return NULL;
+		}
+	}
+#ifdef HAVE_SETVBUF
+	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
+		free_url(resource);
+		fclose(fp);
+		return NULL;
+	}
+#endif
+#endif
+	free_url(resource);
+	*issock = 1;
+	return (fp);
+}
+
+static FILE *php_fopen_url_wrap_php(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+{
+	const char *res = path + 6;
+
+	*issock = 0;
+	
+	if (!strcasecmp(res, "stdin")) {
+		return fdopen(STDIN_FILENO, mode);
+	} else if (!strcasecmp(res, "stdout")) {
+		return fdopen(STDOUT_FILENO, mode);
+	} else if (!strcasecmp(res, "stderr")) {
+		return fdopen(STDERR_FILENO, mode);
+	}
+	
+	return NULL;
+}
+
+static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
+{
+	FILE *fp = NULL;
+	const char *p;
+	const char *protocol=NULL;
+	int n=0;
+
+	for(p=path;isalnum(*p);p++) 
+		n++;
+	if((*p==':')&&(n>1)) {
+		protocol=path;
+	} 
+		
+	if(protocol) {
+		php_fopen_url_wrapper_t *wrapper=NULL;
+		char *protocopy = emalloc(n+1);
+
+		if(protocopy) {
+			strncpy(protocopy,protocol,n);
+			protocopy[n]='\0';
+			if(FAILURE==zend_hash_find(&fopen_url_wrappers_hash, protocopy, n+1,(void **)&wrapper)) {
+				wrapper=NULL;
+			}		
+			efree(protocopy);
+		}
+		if(wrapper)
+			return (*wrapper)(path, mode, options, issock, socketd, opened_path);	
+	} 
+
+	if( !protocol || !strncasecmp(protocol, "file",n)){
 		PLS_FETCH();
+		
+		*issock = 0;
+		
+		if(protocol) {
+			if(path[n+1]=='/') {
+				if(path[n+2]=='/') { 
+					php_error(E_WARNING, "remote host file access not supported, %s", path);
+					return NULL;
+				}
+			}
+			path+= n+1; 			
+		}		
 
 		if (options & USE_PATH) {
 			fp = php_fopen_with_path((char *) path, mode, PG(include_path), opened_path);
@@ -921,14 +1040,11 @@ static FILE *php_fopen_url_wrapper(const char *path, char *mode, int options, in
 			}
 		}
 
-		*issock = 0;
 
 		return (fp);
 	}
-
-	/* NOTREACHED */
-	SOCK_FCLOSE(*socketd);
-	*socketd = 0;
+			
+	php_error(E_WARNING, "Invalid URL specified, %s", path);
 	return NULL;
 }
 
