@@ -41,6 +41,20 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 		PQclear(S->result);
 		S->result = NULL;
 	}
+
+	if (S->cursor_name) {
+		pdo_pgsql_db_handle *H = S->H;
+		char *q = NULL;
+		spprintf(&q, 0, "CLOSE %s", S->cursor_name);
+		PGresult *res = PQexec(H->server, q);
+		efree(q);
+		if (res) PQclear(res);
+		res = PQexec(H->server, "COMMIT");
+		if (res) PQclear(res);
+		efree(S->cursor_name);
+		S->cursor_name = NULL;
+	}
+	
 	if(S->cols) {
 		efree(S->cols);
 		S->cols = NULL;
@@ -64,7 +78,14 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		}
 	}
 
-	S->result = PQexec(H->server, stmt->active_query_string);
+	if (S->cursor_name) {
+		char *q = NULL;
+		spprintf(&q, 0, "DECLARE %s FOR %s", S->cursor_name, stmt->active_query_string);
+		S->result = PQexec(H->server, q);
+		efree(q);
+	} else {
+		S->result = PQexec(H->server, stmt->active_query_string);
+	}
 	status = PQresultStatus(S->result);
 
 	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
@@ -76,7 +97,6 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 		stmt->column_count = (int) PQnfields(S->result);
 		S->cols = ecalloc(stmt->column_count, sizeof(pdo_pgsql_column));
 	}
-
 
 	if (status == PGRES_COMMAND_OK) {
 		stmt->row_count = (long)atoi(PQcmdTuples(S->result));
@@ -98,11 +118,39 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 
-	if (S->current_row < stmt->row_count) {
-		S->current_row++;
-		return 1;
+	if (S->cursor_name) {
+		char *ori_str = NULL;
+		char *q = NULL;
+		ExecStatusType status;
+
+		switch (ori) {
+			case PDO_FETCH_ORI_NEXT: 	ori_str = "NEXT"; break;
+			case PDO_FETCH_ORI_PRIOR:	ori_str = "PRIOR"; break;
+			case PDO_FETCH_ORI_REL:		ori_str = "RELATIVE"; break;
+		}
+		if (!ori_str) {
+			return 0;
+		}
+		
+		spprintf(&q, 0, "FETCH %s %d FROM %s", ori_str, offset, S->cursor_name);
+		S->result = PQexec(S->H->server, q);
+		status = PQresultStatus(S->result);
+
+		if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
+			pdo_pgsql_error_stmt(stmt, status);
+			return 0;
+		}
+
+		S->current_row = 1;
+		return 1;	
+		
 	} else {
-		return 0;
+		if (S->current_row < stmt->row_count) {
+			S->current_row++;
+			return 1;
+		} else {
+			return 0;
+		}
 	}
 }
 
