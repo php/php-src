@@ -997,7 +997,7 @@ PHP_FUNCTION(mb_internal_encoding)
 }
 /* }}} */
 
-/* {{{ proto false|string mb_http_input([string type])
+/* {{{ proto mixed mb_http_input([string type])
    Returns the input encoding */
 PHP_FUNCTION(mb_http_input)
 {
