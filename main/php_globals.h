@@ -72,6 +72,7 @@ struct _php_core_globals {
 
 	long memory_limit;
 
+	int error_reporting;
 	zend_bool track_errors;
 	zend_bool display_errors;
 	zend_bool log_errors;
