@@ -343,7 +343,11 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_ZONE
 				size += strlen(ta->tm_zone);
 #elif HAVE_TZNAME
-				size += strlen(tname[0]);
+				if (ta->tm_isdst > 0 ) {
+					size += strlen(tname[1]);
+				} else {
+					size += strlen(tname[0]);
+				}
 #endif
 				break;
 			case 'Z':		/* timezone offset in seconds */
