@@ -1101,7 +1101,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_row)
 /* }}} */
 
 
-/* {{{ proto object msql_fetch_object(int query)
+/* {{{ proto object msql_fetch_object(int query [, int result_type])
    Fetch a result row as an object */
 DLEXPORT PHP_FUNCTION(msql_fetch_object)
 {
@@ -1114,7 +1114,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto array msql_fetch_array(int query)
+/* {{{ proto array msql_fetch_array(int query [, int result_type])
    Fetch a result row as an associative array */
 DLEXPORT PHP_FUNCTION(msql_fetch_array)
 {
