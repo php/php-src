@@ -1,3 +1,8 @@
+2004-06-14  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_language_scanner.l:
+      Need {} here
+
 2004-06-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * ext/standard/syslog.c:
