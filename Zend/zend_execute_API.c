@@ -501,67 +501,63 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	EX(opline) = NULL;
 	*retval_ptr_ptr = NULL;
 
-	/**
-	 * Function name lookup code
-	 *
-	 */
-	if (*function_pointer == NULL) {
-		if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
-			zval **tmp_object_ptr, **tmp_real_function_name;
+	if (function_name->type==IS_ARRAY) { /* assume array($obj, $name) couple */
+		zval **tmp_object_ptr, **tmp_real_function_name;
 
-			if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
-				return FAILURE;
-			}
-			if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
-				return FAILURE;
-			}
-			function_name = *tmp_real_function_name;
-			SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
-			object_pp = tmp_object_ptr;
-			(*object_pp)->is_ref = 1;
+		if (zend_hash_index_find(function_name->value.ht, 0, (void **) &tmp_object_ptr)==FAILURE) {
+			return FAILURE;
 		}
+		if (zend_hash_index_find(function_name->value.ht, 1, (void **) &tmp_real_function_name)==FAILURE) {
+			return FAILURE;
+		}
+		function_name = *tmp_real_function_name;
+		SEPARATE_ZVAL_IF_NOT_REF(tmp_object_ptr);
+		object_pp = tmp_object_ptr;
+		(*object_pp)->is_ref = 1;
+	}
 
-		if (object_pp && !*object_pp) {
+	if (object_pp && !*object_pp) {
+		object_pp = NULL;
+	}
+
+	if (object_pp) {
+		/* TBI!! new object handlers */
+		if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
+			if (!IS_ZEND_STD_OBJECT(**object_pp)) {
+				zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
+				return FAILURE;
+			}
+
+			calling_scope = Z_OBJCE_PP(object_pp);
+			function_table = &calling_scope->function_table;
+			EX(object) =  *object_pp;
+		} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
+			zend_class_entry **ce;
+			char *lc_class;
+			int found = FAILURE;
+
+			lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
+			if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
+				ce = &(EG(active_op_array)->scope);
+				found = (*ce != NULL?SUCCESS:FAILURE);
+			} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
+				ce = &(EG(active_op_array)->scope->parent);
+				found = (*ce != NULL?SUCCESS:FAILURE);
+			} else {
+				found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
+			}
+			efree(lc_class);
+			if (found == FAILURE)
+				return FAILURE;
+
+			function_table = &(*ce)->function_table;
+			calling_scope = *ce;
 			object_pp = NULL;
-		}
+		} else
+			return FAILURE;
+	}
 
-		if (object_pp) {
-			/* TBI!! new object handlers */
-			if (Z_TYPE_PP(object_pp) == IS_OBJECT) {
-				if (!IS_ZEND_STD_OBJECT(**object_pp)) {
-					zend_error(E_WARNING, "Cannot use call_user_function on objects without a class entry");
-					return FAILURE;
-				}
-
-				calling_scope = Z_OBJCE_PP(object_pp);
-				function_table = &calling_scope->function_table;
-				EX(object) =  *object_pp;
-			} else if (Z_TYPE_PP(object_pp) == IS_STRING) {
-				zend_class_entry **ce;
-				char *lc_class;
-				int found = FAILURE;
-
-				lc_class = zend_str_tolower_dup(Z_STRVAL_PP(object_pp), Z_STRLEN_PP(object_pp));
-				if (EG(active_op_array) && strcmp(lc_class, "self") == 0) {
-					ce = &(EG(active_op_array)->scope);
-					found = (*ce != NULL?SUCCESS:FAILURE);
-				} else if (strcmp(lc_class, "parent") == 0 && EG(active_op_array) && EG(active_op_array)->scope) {
-					ce = &(EG(active_op_array)->scope->parent);
-					found = (*ce != NULL?SUCCESS:FAILURE);
-				} else {
-					found = zend_lookup_class(lc_class, Z_STRLEN_PP(object_pp), &ce TSRMLS_CC);
-				}
-				efree(lc_class);
-				if (found == FAILURE)
-					return FAILURE;
-
-				function_table = &(*ce)->function_table;
-				calling_scope = *ce;
-				object_pp = NULL;
-			} else
-				return FAILURE;
-		}
-
+	if (*function_pointer == NULL) {
 		if (function_name->type!=IS_STRING) {
 			return FAILURE;
 		}
@@ -690,7 +686,7 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 	EG(This) = current_this;
 	EG(current_execute_data) = EX(prev_execute_data);                       \
 
-	return SUCCESS;
+																				return SUCCESS;
 }
 
 ZEND_API int zend_lookup_class(char *name, int name_length, zend_class_entry ***ce TSRMLS_DC)
