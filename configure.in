@@ -507,7 +507,7 @@ AC_ARG_WITH(exec-dir,
 ])
 
 PHP_ARG_WITH(openssl,for OpenSSL support,
-[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.6) ])
+[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.5) ])
 if test "$PHP_OPENSSL" = "yes"; then
   PHP_OPENSSL="/usr/local/ssl /usr/local /usr /usr/local/openssl"
 fi
