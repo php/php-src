@@ -1,3 +1,225 @@
+2003-01-28  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c:
+      moved to php4/main
+
+    * (PHP_4_3)
+      main/main.c:
+      somehow the module shutdown order got reversed since 4.3.0,
+      thus the CoInitialize / CoUninitialize calles are more sane here
+      than in the basic functions module.
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      fugbix news
+
+2003-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/hyperwave/hw.c:
+      Fixed compile warning.
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * sapi/apache2filter/sapi_apache2.c:
+      Fixed bug #17868 (more then the <!--include--> directive used to include
+      a PHP file would result in a crash).
+
+2003-01-28  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/php_scandir.c
+      main/php_scandir.c:
+      - Fix includes
+
+2003-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * main/php_scandir.c
+      main/php_scandir.c:
+      Fixed compiler warning.
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      Makefile.frag
+      configure.in
+      build/config-stubs
+      pear/Makefile.frag
+      pear/pear.m4
+      pear/scripts/.cvsignore
+      pear/scripts/php-config.in
+      pear/scripts/phpextdist
+      pear/scripts/phpize.in
+      scripts/.cvsignore
+      scripts/Makefile.frag
+      scripts/config-stubs
+      scripts/conv_proto
+      scripts/conv_z_macros
+      scripts/credits
+      scripts/php-config.in
+      scripts/phpextdist
+      scripts/phpize.in
+      scripts/phpize.m4
+      scripts/dev/conv_proto
+      scripts/dev/conv_z_macros
+      scripts/dev/credits:
+      - MFH: Fixed bug #13561 (--without-pear prevents install of php-config,
+      phpize)
+      - MFH: Added --ldflags option to php-config
+      - MFH: Added --clean option to phpize
+
+2003-01-28  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/php_embed.c:
+      Call correct module startup function (not a hard coded one) allowing
+      startup override.
+
+2003-01-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg_scanner.c:
+      sync with .re
+
+    * ext/ircg/ircg_scanner.re:
+      update year
+
+    * ext/ircg/Makefile.frag:
+      Looks like we are hitting a bug due to '\xxx' for xxx >= 200 not being
+      handled
+      correctly.
+
+2003-01-28  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4ts.dsw:
+      Get rid of php4ts.dsw - replaced by php5ts.dsw
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * build/config-stubs
+      pear/Makefile.frag
+      pear/pear.m4
+      pear/scripts/.cvsignore
+      scripts/.cvsignore
+      scripts/Makefile.frag
+      scripts/php-config.in
+      scripts/phpextdist
+      scripts/phpize.in
+      scripts/phpize.m4
+      scripts/dev/conv_proto
+      scripts/dev/conv_z_macros
+      scripts/dev/credits:
+      
+      - Fixed bug: #13561 (--without-pear prevents install of phpize,
+      php-config)
+
+    * Makefile.frag
+      configure.in
+      pear/scripts/php-config.in
+      pear/scripts/phpextdist
+      pear/scripts/phpize.in
+      scripts/config-stubs
+      scripts/conv_proto
+      scripts/conv_z_macros
+      scripts/credits:
+      - Fixed bug: #13561 (--without-pear prevents install of phpize, php-config)
+
+    * ext/dba/config.m4:
+      Fix configure. (typo?)
+
+2003-01-28  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/embed/php_embed.c
+      sapi/embed/php_embed.h:
+      Expose php_embed_module struct (and make Wez happy).
+
+2003-01-28  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      tests/lang/bug20175.phpt:
+      Fix parse error and edink's fear of bison errors
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      ext/imap/config.m4:
+      fix some typos
+
+    * (PHP_5_0_dev_before_13561_fix)
+      ext/mime_magic/config.m4:
+      fix typo
+
+2003-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      ext/dba/config.m4:
+      - fix this: els is optional but may not be empty
+
+2003-01-28  Frank M. Kromann  <frank@kromann.info>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      ext/standard/info.c
+      ext/standard/info.c:
+      Fix the setting of computer name and processor type for php_uname() on
+      Win32
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      makedist
+      makedist.ZendEngine2:
+      - Removed unnecessary makedist.ZendEngine2
+      - Modified makedist to use php5 CVS module (alias)
+
+2003-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      ext/standard/basic_functions.c
+      ext/standard/dir.c
+      ext/standard/php_dir.h:
+      Added scandir() function, which allows quick retrieval of all files &
+      directories within the specified path and sort the output in alphabetical
+      or reverse alphabetical order.
+
+    * (PHP_5_0_dev_before_13561_fix)
+      sapi/apache2filter/php_functions.c:
+      Fixed win32 build (bug #21506).
+      Fixed a bug that would cause garbage data to appear at the end of the
+      loaded apache modules list in phpinfo().
+
+2003-01-28  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/mime_magic/config.m4:
+      - Cleaned up and made less error-prone
+      - Changed --enable-mime-magic -> --with-mime-magic[=FILE] to allow
+        specifying of the file during configure.
+
+2003-01-28  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      main/php_scandir.c
+      main/php_scandir.h:
+      
+      2nd part of Sebastian's patch.
+
+2003-01-28  Edin Kadribasic  <edink@proventum.net>
+
+    * (PHP_5_0_dev_before_13561_fix)
+      win32/php4dllts.dsp:
+      Adding new files to the project.
+
+2003-01-28  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/config.m4:
+      MFH: --without-flatfile, Berkeley DB version check
+
+    * ext/dba/config.m4:
+      - fix "--without-flatfile"
+      - simplify Berkley DB verison check
+
 2003-01-27  Ilia Alshanetsky  <ilia@prohost.org>
 
     * configure.in
