@@ -1,3 +1,21 @@
+2004-12-15  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - 5.0.4-dev
+
+    * (PHP_5_0)
+      zend.h:
+      - Redo 5.0.3
+
+    * (PHP_5_0)
+      zend.h:
+      - Back to -dev
+
+    * (PHP_5_0)
+      zend.h:
+      - Roll PHP 5.0.3
+
 2004-12-14  Derick Rethans  <php@derickrethans.nl>
 
     * zend_strtod.c
