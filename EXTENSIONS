@@ -258,6 +258,11 @@ PRIMARY MAINTAINER:  Uwe Steinmann <steinm@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Unknown
 -------------------------------------------------------------------------------
+EXTENSION:           fribidi
+PRIMARY MAINTAINER:  Tal Peer <tal@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+-------------------------------------------------------------------------------
 EXTENSION:           ftp
 MAINTENANCE:         Unknown
 STATUS:              Unknown
