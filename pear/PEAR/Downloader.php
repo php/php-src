@@ -425,7 +425,7 @@ class PEAR_Downloader extends PEAR_Common
         if (in_array($pkgfile, $this->_toDownload)) {
             return false;
         }
-        $releases = $this->_remote->call('package.info', $pkgfile, 'releases');
+        $releases = $this->_remote->call('package.info', $pkgfile, 'releases', true);
         if (!count($releases)) {
             return $this->raiseError("No releases found for package '$pkgfile'");
         }
@@ -508,7 +508,7 @@ class PEAR_Downloader extends PEAR_Common
             return false;
         }
         // {{{ get releases
-        $releases = $this->_remote->call('package.info', $info['name'], 'releases');
+        $releases = $this->_remote->call('package.info', $info['name'], 'releases', true);
         if (PEAR::isError($releases)) {
             return $releases;
         }
