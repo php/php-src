@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 - Added Oracle Instant Client support. (cjbj at hotmail dot com, Tony)
 - Added length and charsetnr for field array and object in mysqli. (Georg)
 - Fixed a bug in mysqli_stmt_execute() (type conversion with NULL values). (Georg)
+- Fixed bug #31454 (session_set_save_handler crashes PHP when supplied 
+  non-existent object ref). (Tony)
 - Fixed bug #31413 (curl POSTFIELDS crashes on 64-bit platforms). (Joe)
 - Fixed bug #31396 (compile fails with gd 2.0.33 without freetype). (Jani)
 - Fixed bug #31371 (highlight_file() trims new line after heredoc). (Ilia)
