@@ -38,15 +38,17 @@
  */
 #if !(WIN32|WINNT)
 #include <sys/time.h>
+#else
+#include "win32/time.h"
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "SAPI.h"
 
-
 #include "php_session.h"
-#include "../standard/md5.h"
+#include "ext/standard/md5.h"
+#include "ext/standard/php3_var.h"
 
 
 #ifdef ZTS
@@ -77,17 +79,19 @@ PHP_INI_BEGIN()
 	PHP_INI_ENTRY("session_auto_start", "0", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
+
 static int php_minit_session(INIT_FUNC_ARGS);
 static int php_rinit_session(INIT_FUNC_ARGS);
 static int php_mshutdown_session(SHUTDOWN_FUNC_ARGS);
 static int php_rshutdown_session(SHUTDOWN_FUNC_ARGS);
+static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS);
 
 zend_module_entry session_module_entry = {
 	"session",
 	session_functions,
 	php_minit_session, php_mshutdown_session,
 	php_rinit_session, php_rshutdown_session,
-	NULL,
+	php_info_isapi,
 	STANDARD_MODULE_PROPERTIES,
 };
 
@@ -279,8 +283,6 @@ static void _php_session_start(PSLS_D)
 {
 	pval **ppid;
 	int send_cookie = 1;
-	char *session_data;
-	int datalen;
 	ELS_FETCH();
 
 	if(!PS(id) &&
@@ -347,7 +349,7 @@ PHP_FUNCTION(session_module_name)
 		ps_module *tempmod;
 
 		convert_to_string(p_name);
-		tempmod = _php_find_ps_module(p_name->value.str.val);
+		tempmod = _php_find_ps_module(p_name->value.str.val PSLS_CC);
 		if(tempmod) {
 			if(PS(mod_data))
 				PS(mod)->close(&PS(mod_data));
@@ -458,6 +460,7 @@ PHP_FUNCTION(session_encode)
 {
 	int len;
 	char *enc;
+	PSLS_FETCH();
 
 	enc = _php_session_encode(&len PSLS_CC);
 	RETVAL_STRINGL(enc, len, 0);
@@ -469,6 +472,7 @@ PHP_FUNCTION(session_encode)
 PHP_FUNCTION(session_decode)
 {
 	pval *str;
+	PSLS_FETCH();
 
 	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -490,7 +494,7 @@ PHP_FUNCTION(session_start)
 
 void php_rinit_globals(PSLS_D)
 {
-	PS(mod) = _php_find_ps_module(INI_STR("session_module_name"));
+	PS(mod) = _php_find_ps_module(INI_STR("session_module_name") PSLS_CC);
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(save_path) = estrdup(INI_STR("session_save_path"));
@@ -517,7 +521,7 @@ int php_rinit_session(INIT_FUNC_ARGS)
 	php_rinit_globals(PSLS_C);
 
 	if(INI_INT("session_auto_start")) {
-		_php_session_start();
+		_php_session_start(PSLS_C);
 	}
 	if(PS(mod) == NULL)
 		return FAILURE;
@@ -530,7 +534,7 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 	PSLS_FETCH();
 
 	if(PS(nr_open_sessions) > 0) {
-		_php_session_save_current_state();
+		_php_session_save_current_state(PSLS_C);
 	}
 	php_rshutdown_globals(PSLS_C);
 	return SUCCESS;
@@ -549,4 +553,10 @@ int php_mshutdown_session(SHUTDOWN_FUNC_ARGS)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
+}
+
+
+static void php_info_isapi(ZEND_MODULE_INFO_FUNC_ARGS)
+{
+	DISPLAY_INI_ENTRIES();
 }

@@ -42,9 +42,11 @@ typedef struct {
 	char *basedir;
 } ps_files;
 
+
 ps_module ps_mod_files = {
 	PS_MOD(files)
 };
+
 
 #define PS_FILES_DATA ps_files *data = *mod_data
 
@@ -76,7 +78,7 @@ PS_CLOSE_FUNC(files)
 
 static void _ps_files_open(ps_files *data, const char *key)
 {
-	char buf[PATH_MAX];
+	char buf[MAXPATHLEN];
 	
 	if(data->fd < 0 || !data->lastkey || strcmp(key, data->lastkey)) {
 		if(data->lastkey) efree(data->lastkey);
@@ -84,7 +86,7 @@ static void _ps_files_open(ps_files *data, const char *key)
 		
 		data->lastkey = estrdup(key);
 		
-		snprintf(buf, PATH_MAX, "%s/%s", data->basedir, key);
+		snprintf(buf, MAXPATHLEN, "%s/%s", data->basedir, key);
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
 		if(data->fd > -1) {
 			flock(data->fd, LOCK_EX);
@@ -137,10 +139,10 @@ PS_WRITE_FUNC(files)
 
 PS_DELETE_FUNC(files)
 {
-	char buf[PATH_MAX];
+	char buf[MAXPATHLEN];
 	PS_FILES_DATA;
 
-	snprintf(buf, PATH_MAX, "%s/%s", data->basedir, key);
+	snprintf(buf, MAXPATHLEN, "%s/%s", data->basedir, key);
 	unlink(buf);
 
 	return SUCCESS;

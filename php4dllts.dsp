@@ -355,6 +355,10 @@ SOURCE=.\ext\standard\mime.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\session\mod_files.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\bcmath\number.c
 # End Source File
 # Begin Source File
