@@ -232,7 +232,7 @@ fail:
 	if (I) {
 		VariantClear(&I->safe_array);
 		VariantClear(&I->v);
-		free(I);
+		efree(I);
 	}
 	return NULL;
 }
