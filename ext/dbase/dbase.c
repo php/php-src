@@ -303,7 +303,8 @@ PHP_FUNCTION(dbase_add_record) {
 
 /* {{{ proto bool dbase_replace_record(int identifier, array data, int recnum)
    Replaces a record to the database */
-void php3_dbase_replace_record(INTERNAL_FUNCTION_PARAMETERS) {
+PHP_FUNCTION(dbase_replace_record)
+{
 	pval *dbh_id, *fields, *field, *recnum;
 	dbhead_t *dbh;
 	int dbh_type;

@@ -70,7 +70,7 @@ static zend_function_entry php_domxmlattr_class_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_module_entry php3_domxml_module_entry = {
+zend_module_entry php_domxml_module_entry = {
 	"DOM", php_domxml_functions, PHP_MINIT(domxml), NULL, NULL, NULL, PHP_MINFO(domxml), STANDARD_MODULE_PROPERTIES
 };
 

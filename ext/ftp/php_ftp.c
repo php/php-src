@@ -34,12 +34,6 @@
 
 #if HAVE_FTP
 
-#ifndef ZEND_VERSION
-#include "internal_functions.h"
-#include "php3_list.h"
-#define php_error php_error
-#endif
-
 #include "ext/standard/file.h"
 
 #include "php_ftp.h"
@@ -48,7 +42,7 @@
 static int	le_ftpbuf;
 
 
-function_entry php3_ftp_functions[] = {
+function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			NULL)
 	PHP_FE(ftp_login,			NULL)
 	PHP_FE(ftp_pwd,				NULL)
@@ -72,14 +66,10 @@ function_entry php3_ftp_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-zend_module_entry php3_ftp_module_entry = {
+zend_module_entry php_ftp_module_entry = {
 	"FTP Functions",
-	php3_ftp_functions,
-#ifdef ZEND_VERSION
+	php_ftp_functions,
 	PHP_MINIT(ftp),
-#else
-	php3_minit_ftp,
-#endif
 	NULL,
 	NULL,
 	NULL,
@@ -92,11 +82,7 @@ static void ftp_destructor_ftpbuf(ftpbuf_t *ftp)
 	ftp_close(ftp);
 }
 
-#ifndef ZEND_VERSION
-int php3_minit_ftp(INIT_FUNC_ARGS)
-#else
 PHP_MINIT_FUNCTION(ftp)
-#endif
 {
 
 	ELS_FETCH();
