@@ -1245,8 +1245,6 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 	opline->opcode = ZEND_INIT_FCALL_BY_NAME;
 	opline->op2 = *function_name;
 	opline->extended_value = 0;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->result.op_type = IS_TMP_VAR;
 
 	SET_UNUSED(opline->op1);
 
