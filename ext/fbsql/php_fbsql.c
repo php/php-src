@@ -2275,7 +2275,7 @@ void phpfbColumnAsString (PHPFBResult* result, int column, void* data , int* len
 			FBLongInteger v = *((FBLongInteger*)data);
 			char  b[128];
 #ifdef PHP_WIN32
-			sprintf(b, "%i64", v);
+			sprintf(b, "%I64i", v);
 #else
 			sprintf(b, "%ll", v);
 #endif
