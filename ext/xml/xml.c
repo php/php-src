@@ -248,7 +248,7 @@ PHP_RSHUTDOWN_FUNCTION(xml)
 #ifdef LIBXML_EXPAT_COMPAT
 	xmlCleanupParser();
 #endif	
-   	return SUCCESS;
+	return SUCCESS;
 }
 
 
