@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Added mmapfile(), read a file into a variabele with mmap (Ilia A, Derick)
+- Have rand() and mt_rand() seed automatically if srand() or mt_srand() has
+  not been called. (Sterling)
 - Added version_compare() function (Stig)
 - Don't throw a 'file does not exist' warning for the is_dir(), is_writeable(),
   is_readable(), is_executable(), is_link() and is_file() functions. (Sterling)
