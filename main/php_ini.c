@@ -222,7 +222,7 @@ char *php_ini_string(char *name, uint name_length, int orig)
 	if (_php3_hash_find(&known_directives, name, name_length, (void **) &ini_entry)==SUCCESS) {
 		if (orig && ini_entry->orig_value) {
 			return ini_entry->orig_value;
-		} else if (ini_entry->value) {
+		} else {
 			return ini_entry->value;
 		}
 	}
