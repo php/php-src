@@ -40,6 +40,7 @@ PHP_FUNCTION(eregi);
 PHP_FUNCTION(eregi_replace);
 PHP_FUNCTION(ereg_replace);
 PHP_FUNCTION(split);
+PHP_FUNCTION(spliti);
 PHPAPI PHP_FUNCTION(sql_regcase);
 
 typedef struct {
