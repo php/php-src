@@ -1333,8 +1333,11 @@ PHP_FUNCTION(curl_close)
 	}
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, zid, -1, le_curl_name, le_curl);
-	
-	zend_list_delete(Z_LVAL_PP(zid));
+	if (ch->uses) {	
+		ch->uses--;
+	} else {
+		zend_list_delete(Z_LVAL_PP(zid));
+	}
 }
 /* }}} */
 
