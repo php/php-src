@@ -215,7 +215,7 @@ SOURCE=.\FlexLexer.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\modules.h
+SOURCE=.\zend_modules.h
 # End Source File
 # Begin Source File
 
