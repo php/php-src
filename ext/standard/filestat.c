@@ -706,7 +706,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_IS_W:
 #ifdef NETWARE
 		RETURN_LONG(0);
-#else
+#endif
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
@@ -714,7 +714,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_IS_R:
 #ifdef NETWARE
 		RETURN_LONG(0);
-#else
+#endif
 		if (getuid()==0) {
 			RETURN_TRUE; /* root */
 		}
@@ -722,7 +722,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	case FS_IS_X:
 #ifdef NETWARE
 		RETURN_LONG(0);
-#else
+#endif
 		if (getuid()==0) {
 			xmask = S_IXROOT; /* root */
 		}
