@@ -318,7 +318,8 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		                           t->func,
 		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_WRITEFUNCTION", get_active_function_name(TSRMLS_C));
+			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_WRITEFUNCTION", 
+					  get_active_function_name(TSRMLS_C));
 			length = -1;
 		}
 		else {
@@ -372,7 +373,8 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		                           t->func,
 		                           retval, 3, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "%s(): Cannot call the CURLOPT_READFUNCTION", get_active_function_name(TSRMLS_C));
+			php_error(E_WARNING, "%s(): Cannot call the CURLOPT_READFUNCTION", 
+					  get_active_function_name(TSRMLS_C));
 			length = -1;
 		}
 		else {
@@ -402,49 +404,50 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 	TSRMLS_FETCH();
 	
 	switch (t->method) {
-	case PHP_CURL_STDOUT:
-		/* Handle special case write when we're returning the entire transfer
-		 */
-		if (ch->handlers->write->method == PHP_CURL_RETURN)
-			smart_str_appendl(&ch->handlers->write->buf, data, (int) length);
-		else
-			PUTS(data);
-		break;
-	case PHP_CURL_FILE:
-		return fwrite(data, size, nmemb, t->fp);
-	case PHP_CURL_USER: {
-		zval *argv[2];
-		zval *retval;
-		int   error;
-		TSRMLS_FETCH();
+		case PHP_CURL_STDOUT:
+			/* Handle special case write when we're returning the entire transfer
+			 */
+			if (ch->handlers->write->method == PHP_CURL_RETURN)
+				smart_str_appendl(&ch->handlers->write->buf, data, (int) length);
+			else
+				PUTS(data);
+			break;
+		case PHP_CURL_FILE:
+			return fwrite(data, size, nmemb, t->fp);
+		case PHP_CURL_USER: {
+			zval *argv[2];
+			zval *retval;
+			int   error;
+			TSRMLS_FETCH();
 
-		MAKE_STD_ZVAL(argv[0]);
-		MAKE_STD_ZVAL(argv[1]);
-		MAKE_STD_ZVAL(retval);
+			MAKE_STD_ZVAL(argv[0]);
+			MAKE_STD_ZVAL(argv[1]);
+			MAKE_STD_ZVAL(retval);
 
-		ZVAL_RESOURCE(argv[0], ch->id);
-		zend_list_addref(ch->id);
-		ZVAL_STRINGL(argv[1], data, length, 1);
+			ZVAL_RESOURCE(argv[0], ch->id);
+			zend_list_addref(ch->id);
+			ZVAL_STRINGL(argv[1], data, length, 1);
 
-		error = call_user_function(EG(function_table),
-		                           NULL,
-		                           t->func,
-		                           retval, 2, argv TSRMLS_CC);
-		if (error == FAILURE) {
-			php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_HEADERFUNCTION", get_active_function_name(TSRMLS_C));
-			length = -1;
+			error = call_user_function(EG(function_table),
+									   NULL,
+									   t->func,
+									   retval, 2, argv TSRMLS_CC);
+			if (error == FAILURE) {
+				php_error(E_WARNING, "%s(): Couldn't call the CURLOPT_HEADERFUNCTION", 
+						  get_active_function_name(TSRMLS_C));
+				length = -1;
+			}
+			else {
+				length = Z_LVAL_P(retval);
+			}
+			zval_ptr_dtor(&argv[0]);
+			zval_ptr_dtor(&argv[1]);
+			zval_ptr_dtor(&retval);
+			break;
 		}
-		else {
-			length = Z_LVAL_P(retval);
-		}
-		zval_ptr_dtor(&argv[0]);
-		zval_ptr_dtor(&argv[1]);
-		zval_ptr_dtor(&retval);
-		break;
+		case PHP_CURL_IGNORE:
+			return length;
 	}
-	case PHP_CURL_IGNORE:
-		return length;
-    	}
 	return length;
 }
 /* }}} */
@@ -480,7 +483,8 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	}
 	else {
 		if (Z_STRLEN_P(retval) > buflen) {
-			php_error(E_WARNING, "%s(): Returned password is too long for libcurl to handle", get_active_function_name(TSRMLS_C));
+			php_error(E_WARNING, "%s(): Returned password is too long for libcurl to handle", 
+					  get_active_function_name(TSRMLS_C));
 			ret = -1;
 		}
 		else {
@@ -698,8 +702,13 @@ PHP_FUNCTION(curl_setopt)
 		what = zend_fetch_resource(zvalue TSRMLS_CC, -1, "File-Handle", &type, 1, php_file_le_stream());
 		ZEND_VERIFY_RESOURCE(what);
 
-		if (FAILURE == php_stream_cast((php_stream*)what, PHP_STREAM_AS_STDIO, (void*)&fp, REPORT_ERRORS))
+		if (FAILURE == php_stream_cast((php_stream *) what, 
+									   PHP_STREAM_AS_STDIO, 
+									   (void *) &fp, 
+									   REPORT_ERRORS)) {
 			RETURN_FALSE;
+		}
+
 		if (!fp) {
 			RETURN_FALSE;
 		}
@@ -771,7 +780,9 @@ PHP_FUNCTION(curl_setopt)
 
 			postfields = HASH_OF(*zvalue);
 			if (! postfields) {
-				php_error(E_WARNING, "%s(): Couldn't get HashTable in CURLOPT_POSTFIELDS", get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, 
+						  "%s(): Couldn't get HashTable in CURLOPT_POSTFIELDS", 
+						  get_active_function_name(TSRMLS_C));
 				RETURN_FALSE;
 			}
 
@@ -831,9 +842,9 @@ PHP_FUNCTION(curl_setopt)
 		struct curl_slist  *slist = NULL;
 
 		ph = HASH_OF(*zvalue);
-		if (! ph) {
+		if (!ph) {
 			php_error(E_WARNING, 
-			          "%s(): You must pass either an object or an array with the CURLOPT_HTTPHEADER,"
+			          "%s(): You must pass either an object or an array with the CURLOPT_HTTPHEADER, "
 					  "CURLOPT_QUOTE and CURLOPT_POSTQUOTE arguments", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
@@ -980,10 +991,10 @@ PHP_FUNCTION(curl_getinfo)
 		case CURLINFO_FILETIME: 
 		case CURLINFO_SSL_VERIFYRESULT: {
 			long code;
-					
+
 			curl_easy_getinfo(ch->cp, option, &code);
 			RETURN_LONG(code);
-				
+   
 			break;
 		}
 		case CURLINFO_TOTAL_TIME: 
