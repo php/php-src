@@ -429,7 +429,8 @@ if(myargc == 3)
     }
   }
  
- 
+
+g_cal_list=NULL;
  cal_search(icap_le_struct->icap_stream,&begincal,(myargc == 3) ? NULL : &endcal);
  my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
@@ -437,7 +438,7 @@ if(myargc == 3)
      add_next_index_long(return_value,my_cal_list->uid);
      my_cal_list=my_cal_list->next;
      free(g_cal_list);
-	    g_cal_list=my_cal_list;
+     g_cal_list=my_cal_list;
    }
 }
 /* }}} */
@@ -542,6 +543,10 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
+        if (array_init(return_value) == FAILURE) {
+                RETURN_FALSE;
+        }
+
        if(_php3_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
@@ -569,14 +574,15 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
           mytime.minute=(*pvalue)->value.lval;
        }
 
+       g_cal_list=NULL;
        cal_search_alarming(icap_le_struct->icap_stream,&mydate,&mytime);
- my_cal_list=g_cal_list;
+       my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
      add_next_index_long(return_value,my_cal_list->uid);
      my_cal_list=my_cal_list->next;
      free(g_cal_list);
-            g_cal_list=my_cal_list;
+     g_cal_list=my_cal_list;
    }
 
 
