@@ -1330,7 +1330,7 @@ binary_assign_op_addr: {
 								object_ptr = *object_ptr_ptr;
 							}
 						} else { /* used for member function calls */
-							object_ptr = _get_object_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R);
+							object_ptr = _get_object_zval_ptr(&opline->op1, Ts, &free_op1 ELS_CC);
 
 
 							if (!object_ptr
