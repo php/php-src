@@ -1,16 +1,27 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP version 4.0                                                      |
+   | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997, 1998, 1999 The PHP Group                         |
+   | Copyright (c) 1997-1999 PHP Development Team (See Credits file)      |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.0 of the PHP license,       |
-   | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_0.txt.                                  |
-   | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to          |
-   | license@php.net so we can mail you a copy immediately.               |
+   | This program is free software; you can redistribute it and/or modify |
+   | it under the terms of one of the following licenses:                 |
+   |                                                                      |
+   |  A) the GNU General Public License as published by the Free Software |
+   |     Foundation; either version 2 of the License, or (at your option) |
+   |     any later version.                                               |
+   |                                                                      |
+   |  B) the PHP License as published by the PHP Development Team and     |
+   |     included in the distribution in the file: LICENSE                |
+   |                                                                      |
+   | This program is distributed in the hope that it will be useful,      |
+   | but WITHOUT ANY WARRANTY; without even the implied warranty of       |
+   | MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        |
+   | GNU General Public License for more details.                         |
+   |                                                                      |
+   | You should have received a copy of both licenses referred to here.   |
+   | If you did not, or have any questions about PHP licensing, please    |
+   | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
    | Authors: Uwe Steinmann <Uwe.Steinmann@fernuni-hagen.de>              |
    +----------------------------------------------------------------------+
@@ -28,14 +39,15 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/head.h"
-#include <math.h>
-#include "php3_pdf.h"
+#include "php_globals.h"
 
-#if HAVE_SYS_WAIT_H
-# include <sys/wait.h>
+#include <math.h>
+
+#if HAVE_LIBGD13
+#include "gd.h"
 #endif
-#if HAVE_UNISTD_H
+
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 #if WIN32|WINNT
@@ -45,12 +57,15 @@
 
 #if HAVE_PDFLIB
 
+#include "php3_pdf.h"
+
 #ifdef THREAD_SAFE
 DWORD PDFlibTls;
 static int numthreads=0;
 
 typedef struct pdflib_global_struct{
-	int le_pdf_info;
+	int le_pdf_image;
+	int le_outline;
 	int le_pdf;
 } pdflib_global_struct;
 
@@ -60,73 +75,89 @@ typedef struct pdflib_global_struct{
 #else
 #  define PDF_GLOBAL(a) a
 #  define PDF_TLS_VARS
-int le_pdf_info;
-int le_pdf;
+static int le_pdf_image;
+static int le_outline;
+static int le_pdf;
 #endif
 
 function_entry pdf_functions[] = {
-	{"pdf_get_info",			php3_pdf_get_info,			NULL},
-	{"pdf_set_info_creator",	php3_pdf_set_info_creator,	NULL},
-	{"pdf_set_info_title",		php3_pdf_set_info_title,	NULL},
-	{"pdf_set_info_subject",	php3_pdf_set_info_subject,	NULL},
-	{"pdf_set_info_author",		php3_pdf_set_info_author,	NULL},
-	{"pdf_set_info_keywords",	php3_pdf_set_info_keywords,	NULL},
-	{"pdf_open",				php3_pdf_open,				NULL},
-	{"pdf_close",				php3_pdf_close,				NULL},
-	{"pdf_begin_page",			php3_pdf_begin_page,		NULL},
-	{"pdf_end_page",			php3_pdf_end_page,			NULL},
-	{"pdf_show",				php3_pdf_show,				NULL},
-	{"pdf_show_xy",				php3_pdf_show_xy,			NULL},
-	{"pdf_set_font",			php3_pdf_set_font,			NULL},
-	{"pdf_set_leading",			php3_pdf_set_leading,		NULL},
-	{"pdf_set_text_rendering",	php3_pdf_set_text_rendering,NULL},
-	{"pdf_set_horiz_scaling",	php3_pdf_set_horiz_scaling,	NULL},
-	{"pdf_set_text_rise",		php3_pdf_set_text_rise,		NULL},
-	{"pdf_set_text_matrix",		php3_pdf_set_text_matrix,	NULL},
-	{"pdf_set_text_pos",		php3_pdf_set_text_pos,		NULL},
-	{"pdf_set_char_spacing",		php3_pdf_set_char_spacing,		NULL},
-	{"pdf_set_word_spacing",		php3_pdf_set_word_spacing,		NULL},
-	{"pdf_continue_text",		php3_pdf_continue_text,		NULL},
-	{"pdf_stringwidth",		php3_pdf_stringwidth,		NULL},
-	{"pdf_save",				php3_pdf_save,				NULL},
-	{"pdf_restore",				php3_pdf_restore,			NULL},
-	{"pdf_translate",			php3_pdf_translate,			NULL},
-	{"pdf_scale",				php3_pdf_scale,				NULL},
-	{"pdf_rotate",				php3_pdf_rotate,			NULL},
-	{"pdf_setflat",				php3_pdf_setflat,			NULL},
-	{"pdf_setlinejoin",			php3_pdf_setlinejoin,		NULL},
-	{"pdf_setlinecap",			php3_pdf_setlinecap,		NULL},
-	{"pdf_setmiterlimit",		php3_pdf_setmiterlimit,		NULL},
-	{"pdf_setlinewidth",		php3_pdf_setlinewidth,		NULL},
-	{"pdf_setdash",				php3_pdf_setdash,			NULL},
-	{"pdf_moveto",				php3_pdf_moveto,			NULL},
-	{"pdf_lineto",				php3_pdf_lineto,			NULL},
-	{"pdf_curveto",				php3_pdf_curveto,			NULL},
-	{"pdf_circle",				php3_pdf_circle,			NULL},
-	{"pdf_arc",					php3_pdf_arc,				NULL},
-	{"pdf_rect",				php3_pdf_rect,				NULL},
-	{"pdf_closepath",			php3_pdf_closepath,			NULL},
-	{"pdf_stroke",				php3_pdf_stroke,			NULL},
-	{"pdf_closepath_stroke",	php3_pdf_closepath_stroke,	NULL},
-	{"pdf_fill",				php3_pdf_fill,  			NULL},
-	{"pdf_fill_stroke",			php3_pdf_fill_stroke,  		NULL},
-	{"pdf_closepath_fill_stroke",	php3_pdf_closepath_fill_stroke, NULL},
-	{"pdf_endpath",				php3_pdf_endpath,			NULL},
-	{"pdf_clip",				php3_pdf_clip,				NULL},
-	{"pdf_setgray_fill",		php3_pdf_setgray_fill,		NULL},
-	{"pdf_setgray_stroke",		php3_pdf_setgray_stroke,	NULL},
-	{"pdf_setgray",				php3_pdf_setgray,			NULL},
-	{"pdf_setrgbcolor_fill",	php3_pdf_setrgbcolor_fill,	NULL},
-	{"pdf_setrgbcolor_stroke",	php3_pdf_setrgbcolor_stroke,NULL},
-	{"pdf_setrgbcolor",			php3_pdf_setrgbcolor,		NULL},
-	{"pdf_add_outline",			php3_pdf_add_outline,		NULL},
-	{"pdf_set_transition",			php3_pdf_set_transition,		NULL},
-	{"pdf_set_duration",			php3_pdf_set_duration,		NULL},
+	PHP_FE(pdf_set_info_creator, NULL)
+	PHP_FE(pdf_set_info_title, NULL)
+	PHP_FE(pdf_set_info_subject, NULL)
+	PHP_FE(pdf_set_info_author, NULL)
+	PHP_FE(pdf_set_info_keywords, NULL)
+	PHP_FE(pdf_open, NULL)
+	PHP_FE(pdf_close, NULL)
+	PHP_FE(pdf_begin_page, NULL)
+	PHP_FE(pdf_end_page, NULL)
+	PHP_FE(pdf_show, NULL)
+	PHP_FE(pdf_show_xy, NULL)
+	PHP_FE(pdf_set_font, NULL)
+	PHP_FE(pdf_set_leading, NULL)
+	PHP_FE(pdf_set_text_rendering, NULL)
+	PHP_FE(pdf_set_horiz_scaling, NULL)
+	PHP_FE(pdf_set_text_rise, NULL)
+	PHP_FE(pdf_set_text_matrix, NULL)
+	PHP_FE(pdf_set_text_pos, NULL)
+	PHP_FE(pdf_set_char_spacing, NULL)
+	PHP_FE(pdf_set_word_spacing, NULL)
+	PHP_FE(pdf_continue_text, NULL)
+	PHP_FE(pdf_stringwidth, NULL)
+	PHP_FE(pdf_save, NULL)
+	PHP_FE(pdf_restore, NULL)
+	PHP_FE(pdf_translate, NULL)
+	PHP_FE(pdf_scale, NULL)
+	PHP_FE(pdf_rotate, NULL)
+	PHP_FE(pdf_setflat, NULL)
+	PHP_FE(pdf_setlinejoin, NULL)
+	PHP_FE(pdf_setlinecap, NULL)
+	PHP_FE(pdf_setmiterlimit, NULL)
+	PHP_FE(pdf_setlinewidth, NULL)
+	PHP_FE(pdf_setdash, NULL)
+	PHP_FE(pdf_moveto, NULL)
+	PHP_FE(pdf_lineto, NULL)
+	PHP_FE(pdf_curveto, NULL)
+	PHP_FE(pdf_circle, NULL)
+	PHP_FE(pdf_arc, NULL)
+	PHP_FE(pdf_rect, NULL)
+	PHP_FE(pdf_closepath, NULL)
+	PHP_FE(pdf_stroke, NULL)
+	PHP_FE(pdf_closepath_stroke, NULL)
+	PHP_FE(pdf_fill, NULL)
+	PHP_FE(pdf_fill_stroke, NULL)
+	PHP_FE(pdf_closepath_fill_stroke, NULL)
+	PHP_FE(pdf_endpath, NULL)
+	PHP_FE(pdf_clip, NULL)
+	PHP_FE(pdf_setgray_fill, NULL)
+	PHP_FE(pdf_setgray_stroke, NULL)
+	PHP_FE(pdf_setgray, NULL)
+	PHP_FE(pdf_setrgbcolor_fill, NULL)
+	PHP_FE(pdf_setrgbcolor_stroke, NULL)
+	PHP_FE(pdf_setrgbcolor, NULL)
+	PHP_FE(pdf_add_outline, NULL)
+	PHP_FE(pdf_set_transition, NULL)
+	PHP_FE(pdf_set_duration, NULL)
+	PHP_FE(pdf_open_jpeg, NULL)
+#if HAVE_LIBGD13
+	PHP_FE(pdf_open_memory_image, NULL)
+#endif
+	PHP_FE(pdf_open_gif, NULL)
+	PHP_FE(pdf_close_image, NULL)
+	PHP_FE(pdf_place_image, NULL)
+	PHP_FE(pdf_put_image, NULL)
+	PHP_FE(pdf_execute_image, NULL)
+	PHP_FE(pdf_add_weblink, NULL)
+	PHP_FE(pdf_add_pdflink, NULL)
+	PHP_FE(pdf_add_annotation, NULL)
+	PHP_FE(pdf_set_border_style, NULL)
+	PHP_FE(pdf_set_border_color, NULL)
+	PHP_FE(pdf_get_image_height, NULL)
+	PHP_FE(pdf_get_image_width, NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry pdf_module_entry = {
-	"pdf", pdf_functions, php3_minit_pdf, php3_mend_pdf, NULL, NULL, php3_info_pdf, STANDARD_MODULE_PROPERTIES
+	"pdf", pdf_functions, PHP_MINIT(pdf), php3_mend_pdf, NULL, NULL, PHP_MINFO(pdf), 0, 0, 0, NULL
 };
 
 #if COMPILE_DL
@@ -134,56 +165,43 @@ php3_module_entry pdf_module_entry = {
 DLEXPORT php3_module_entry *get_module(void) { return &pdf_module_entry; }
 #endif
 
-static void _free_pdf_info(PDF_info *info)
+static void _free_pdf_image(int image)
 {
-	if(info->Title) efree(info->Title);
-	if(info->Subject) efree(info->Subject);
-	if(info->Author) efree(info->Author);
-	if(info->Keywords) efree(info->Keywords);
-	if(info->Creator) efree(info->Creator);
 }
 
-int php3_minit_pdf(INIT_FUNC_ARGS)
+static void _free_pdf_doc(PDF *pdf)
 {
-	PDF_GLOBAL(le_pdf_info) = register_list_destructors(_free_pdf_info, NULL);
-	PDF_GLOBAL(le_pdf) = register_list_destructors(php3_pdf_close, NULL);
+	PDF_close(pdf);
+	PDF_delete(pdf);
+}
+
+static void _free_outline(int *outline)
+{
+}
+
+PHP_MINIT_FUNCTION(pdf)
+{
+	PDF_GLOBAL(le_pdf_image) = register_list_destructors(_free_pdf_image, NULL);
+	PDF_GLOBAL(le_outline) = register_list_destructors(_free_outline, NULL);
+	PDF_GLOBAL(le_pdf) = register_list_destructors(_free_pdf_doc, NULL);
 	return SUCCESS;
 }
 
-void php3_info_pdf(ZEND_MODULE_INFO_FUNC_ARGS) {
+PHP_MINFO_FUNCTION(pdf) {
 	/* need to use a PHPAPI function here because it is external module in windows */
-	php_printf("%s. AFM files in %s", PDFLIB_VERSION, PDF_DEFAULT_FONT_PATH);
+	php3_printf("pdflib %d.%d",  PDF_get_majorversion(), PDF_get_minorversion());
 }
 
 int php3_mend_pdf(void){
 	return SUCCESS;
 }
 
-/* {{{ proto int pdf_get_info(void)
-   Returns a default info structure for a pdf document */
-PHP_FUNCTION(pdf_get_info) {
-	PDF_info *pdf_info;
-	int id;
-	PDF_TLS_VARS;
-
-	pdf_info = PDF_get_info();
-
-	if(!pdf_info) {
-		php_error(E_WARNING, "Could not get PDF info");
-		RETURN_FALSE;
-	}
-
-	id = php3_list_insert(pdf_info,PDF_GLOBAL(le_pdf_info));
-	RETURN_LONG(id);
-}
-/* }}} */
-
 /* {{{ proto pdf_set_info_creator(int info, string creator)
    Fills the creator field of the info structure */
 PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
 	int id, type;
-	PDF_info *pdf_info;
+	PDF *pdf;
 	PDF_TLS_VARS;
 
 
@@ -194,13 +212,13 @@ PHP_FUNCTION(pdf_set_info_creator) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	id=arg1->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+	pdf = php3_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	pdf_info->Creator = estrdup(arg2->value.str.val);
+	PDF_set_info(pdf, "Creator", arg2->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -211,7 +229,7 @@ PHP_FUNCTION(pdf_set_info_creator) {
 PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
 	int id, type;
-	PDF_info *pdf_info;
+	PDF *pdf;
 	PDF_TLS_VARS;
 
 
@@ -222,13 +240,13 @@ PHP_FUNCTION(pdf_set_info_title) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	id=arg1->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+	pdf = php3_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	pdf_info->Title = estrdup(arg2->value.str.val);
+	PDF_set_info(pdf, "Title", arg2->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -239,7 +257,7 @@ PHP_FUNCTION(pdf_set_info_title) {
 PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
 	int id, type;
-	PDF_info *pdf_info;
+	PDF *pdf;
 	PDF_TLS_VARS;
 
 
@@ -250,13 +268,13 @@ PHP_FUNCTION(pdf_set_info_subject) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	id=arg1->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+	pdf = php3_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	pdf_info->Subject = estrdup(arg2->value.str.val);
+	PDF_set_info(pdf, "Subject", arg2->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -267,7 +285,7 @@ PHP_FUNCTION(pdf_set_info_subject) {
 PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
 	int id, type;
-	PDF_info *pdf_info;
+	PDF *pdf;
 	PDF_TLS_VARS;
 
 
@@ -278,13 +296,13 @@ PHP_FUNCTION(pdf_set_info_author) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	id=arg1->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+	pdf = php3_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	pdf_info->Author = estrdup(arg2->value.str.val);
+	PDF_set_info(pdf, "Author", arg2->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -295,7 +313,7 @@ PHP_FUNCTION(pdf_set_info_author) {
 PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
 	int id, type;
-	PDF_info *pdf_info;
+	PDF *pdf;
 	PDF_TLS_VARS;
 
 
@@ -306,13 +324,13 @@ PHP_FUNCTION(pdf_set_info_keywords) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	id=arg1->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+	pdf = php3_list_find(id,&type);
+	if (!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	pdf_info->Keywords = estrdup(arg2->value.str.val);
+	PDF_set_info(pdf, "Keywords", arg2->value.str.val);
 
 	RETURN_TRUE;
 }
@@ -325,35 +343,26 @@ PHP_FUNCTION(pdf_open) {
 	pval *info;
 	int id, type;
 	FILE *fp;
-	PDF_info *pdf_info;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &file, &info) == FAILURE) {
+	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &file) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long(file);
-	convert_to_long(info);
 	id=file->value.lval;
 	fp = php3_list_find(id,&type);
 	if (!fp || type!=php3i_get_le_fp()) {
-		php_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
+		php3_error(E_WARNING,"Unable to find file identifier %d (type=%d)",id, type);
 		RETURN_FALSE;
 	}
 
-	id=info->value.lval;
-	pdf_info = php3_list_find(id,&type);
-	if (!pdf_info || type!=PDF_GLOBAL(le_pdf_info)) {
-		php_error(E_WARNING,"Unable to find pdf info identifier %d (%d!=%d)",id, type, PDF_GLOBAL(le_pdf_info));
+	pdf = PDF_new();
+	if (0 > PDF_open_fp(pdf, fp)) {
 		RETURN_FALSE;
 	}
-
-	pdf = PDF_open(fp, pdf_info);
-	if(!pdf)
-		RETURN_FALSE;
-
 	id = php3_list_insert(pdf,PDF_GLOBAL(le_pdf));
 	RETURN_LONG(id);
 }
@@ -375,11 +384,11 @@ PHP_FUNCTION(pdf_close) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_close(pdf);
+	php3_list_delete(id);
 
 	RETURN_TRUE;
 }
@@ -406,7 +415,7 @@ PHP_FUNCTION(pdf_begin_page) {
 	width = arg3->value.dval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -432,7 +441,7 @@ PHP_FUNCTION(pdf_end_page) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -459,7 +468,7 @@ PHP_FUNCTION(pdf_show) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -469,7 +478,7 @@ PHP_FUNCTION(pdf_show) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_show_xy(int pdfdoc, string text)
+/* {{{ proto void pdf_show_xy(int pdfdoc, string text, double x-koor, double y-koor)
    Output text at position */
 PHP_FUNCTION(pdf_show_xy) {
 	pval *arg1, *arg2, *arg3, *arg4;
@@ -488,7 +497,7 @@ PHP_FUNCTION(pdf_show_xy) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -498,11 +507,11 @@ PHP_FUNCTION(pdf_show_xy) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, string encoding)
-   Select the current font face and size */
+/* {{{ proto void pdf_set_font(int pdfdoc, string font, double size, int encoding)
+   Select the current font face, size and encoding */
 PHP_FUNCTION(pdf_set_font) {
 	pval *arg1, *arg2, *arg3, *arg4;
-	int id, type;
+	int id, type, font;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
@@ -513,15 +522,46 @@ PHP_FUNCTION(pdf_set_font) {
 	convert_to_long(arg1);
 	convert_to_string(arg2);
 	convert_to_double(arg3);
-	convert_to_string(arg4);
+	convert_to_long(arg4);
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_font(pdf, arg2->value.str.val, (float) arg3->value.dval, builtin);
+	if((arg4->value.lval > 5) || (arg4->value.lval < 0)) {
+		php3_error(E_WARNING,"Font encoding set to 4");
+		arg4->value.lval = 4;
+	}
+
+	switch(arg4->value.lval) {
+		case 0:
+			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", 1);
+			break;
+		case 1:
+			font = PDF_findfont(pdf, arg2->value.str.val, "pdfdoc", 1);
+			break;
+		case 2:
+			font = PDF_findfont(pdf, arg2->value.str.val, "macroman", 1);
+			break;
+		case 3:
+			font = PDF_findfont(pdf, arg2->value.str.val, "macexpert", 1);
+			break;
+		case 4:
+			font = PDF_findfont(pdf, arg2->value.str.val, "winansi", 1);
+			break;
+		default:
+			php3_error(E_WARNING,"Encoding out of range, using 0");
+			font = PDF_findfont(pdf, arg2->value.str.val, "builtin", 1);
+	}
+
+	if (font < 0) {
+		php3_error(E_WARNING,"Font %s not found", arg2->value.str.val);
+		RETURN_FALSE;
+	}
+
+	PDF_setfont(pdf, font, (float) arg3->value.dval);
 
 	RETURN_TRUE;
 }
@@ -544,7 +584,7 @@ PHP_FUNCTION(pdf_set_leading) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -571,11 +611,11 @@ PHP_FUNCTION(pdf_set_text_rendering) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	PDF_set_text_rendering(pdf, (byte) arg2->value.lval);
+	PDF_set_text_rendering(pdf, arg2->value.lval);
 
 	RETURN_TRUE;
 }
@@ -598,7 +638,7 @@ PHP_FUNCTION(pdf_set_horiz_scaling) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -625,7 +665,7 @@ PHP_FUNCTION(pdf_set_text_rise) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
@@ -642,7 +682,7 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 	int id, type, i;
 	HashTable *matrix;
 	PDF *pdf;
-	PDF_matrix pdfmatrix;
+	float pdfmatrix[6];
 	float *pdfmatrixptr;
 	PDF_TLS_VARS;
 
@@ -656,36 +696,39 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 	matrix=arg2->value.ht;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 	
-	if(zend_hash_num_elements(matrix) != 6) {
-		 php_error(E_WARNING,"Text matrix must have 6 elements");
+	if(_php3_hash_num_elements(matrix) != 6) {
+		 php3_error(E_WARNING,"Text matrix must have 6 elements");
 		RETURN_FALSE;
 	}
 
 	pdfmatrixptr = (float *) &pdfmatrix;
-	zend_hash_internal_pointer_reset(matrix);
-	for(i=0; i<zend_hash_num_elements(matrix); i++) {
-		zend_hash_get_current_data(matrix, (void *) &data);
+	_php3_hash_internal_pointer_reset(matrix);
+	for(i=0; i<_php3_hash_num_elements(matrix); i++) {
+		_php3_hash_get_current_data(matrix, (void *) &data);
 		switch(data->type) {
 			case IS_DOUBLE:
 				*pdfmatrixptr++ = (float) data->value.dval;
+				break;
 			default:
 				*pdfmatrixptr++ = 0.0;
+				break;
 		}
-		zend_hash_move_forward(matrix);
+		_php3_hash_move_forward(matrix);
 	}
 
-	PDF_set_text_matrix(pdf, pdfmatrix);
+	PDF_set_text_matrix(pdf, pdfmatrix[0], pdfmatrix[1], pdfmatrix[2],
+	                         pdfmatrix[3], pdfmatrix[4], pdfmatrix[5]);
 
 	RETURN_TRUE;
 }
 /* }}} */
 
 /* {{{ proto void pdf_set_text_pos(int pdfdoc, double x, double y)
-   */
+   ??? */
 PHP_FUNCTION(pdf_set_text_pos) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
@@ -702,7 +745,7 @@ PHP_FUNCTION(pdf_set_text_pos) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -729,7 +772,7 @@ PHP_FUNCTION(pdf_set_char_spacing) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -756,7 +799,7 @@ PHP_FUNCTION(pdf_set_word_spacing) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -783,7 +826,7 @@ PHP_FUNCTION(pdf_continue_text) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -811,11 +854,11 @@ PHP_FUNCTION(pdf_stringwidth) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	width = (double) PDF_stringwidth(pdf, arg2->value.str.val);
+	width = (double) PDF_stringwidth(pdf, arg2->value.str.val, PDF_get_font(pdf), PDF_get_fontsize(pdf));
 
 	RETURN_DOUBLE((double)width);
 }
@@ -837,7 +880,7 @@ PHP_FUNCTION(pdf_save) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -863,7 +906,7 @@ PHP_FUNCTION(pdf_restore) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -891,7 +934,7 @@ PHP_FUNCTION(pdf_translate) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -919,7 +962,7 @@ PHP_FUNCTION(pdf_scale) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -946,7 +989,7 @@ PHP_FUNCTION(pdf_rotate) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -973,12 +1016,12 @@ PHP_FUNCTION(pdf_setflat) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 100) && (arg2->value.lval < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
+		php3_error(E_WARNING,"Parameter of pdf_setflat() has to between 0 and 100");
 		RETURN_FALSE;
 	}
 
@@ -1005,16 +1048,16 @@ PHP_FUNCTION(pdf_setlinejoin) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
+		php3_error(E_WARNING,"Parameter of pdf_setlinejoin() has to between 0 and 2");
 		RETURN_FALSE;
 	}
 
-	PDF_setlinejoin(pdf, (byte) arg2->value.lval);
+	PDF_setlinejoin(pdf, arg2->value.lval);
 
 	RETURN_TRUE;
 }
@@ -1037,16 +1080,16 @@ PHP_FUNCTION(pdf_setlinecap) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if((arg2->value.lval > 2) && (arg2->value.lval < 0)) {
-		php_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
+		php3_error(E_WARNING,"Parameter of pdf_setlinecap() has to be > 0 and =< 2");
 		RETURN_FALSE;
 	}
 
-	PDF_setlinecap(pdf, (byte) arg2->value.lval);
+	PDF_setlinecap(pdf, arg2->value.lval);
 
 	RETURN_TRUE;
 }
@@ -1069,12 +1112,12 @@ PHP_FUNCTION(pdf_setmiterlimit) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	if(arg2->value.dval < 1) {
-		php_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
+		php3_error(E_WARNING,"Parameter of pdf_setmiterlimit() has to be >= 1");
 		RETURN_FALSE;
 	}
 
@@ -1101,7 +1144,7 @@ PHP_FUNCTION(pdf_setlinewidth) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1129,7 +1172,7 @@ PHP_FUNCTION(pdf_setdash) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1157,7 +1200,7 @@ PHP_FUNCTION(pdf_moveto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1189,7 +1232,7 @@ PHP_FUNCTION(pdf_curveto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1222,7 +1265,7 @@ PHP_FUNCTION(pdf_lineto) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1251,7 +1294,7 @@ PHP_FUNCTION(pdf_circle) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1282,7 +1325,7 @@ PHP_FUNCTION(pdf_arc) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1312,7 +1355,7 @@ PHP_FUNCTION(pdf_rect) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1341,7 +1384,7 @@ PHP_FUNCTION(pdf_closepath) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1367,7 +1410,7 @@ PHP_FUNCTION(pdf_closepath_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1377,7 +1420,7 @@ PHP_FUNCTION(pdf_closepath_stroke) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_closepath_stroke(int pdfdoc)
+/* {{{ proto void pdf_stroke(int pdfdoc)
    Draw line along path path */
 PHP_FUNCTION(pdf_stroke) {
 	pval *arg1;
@@ -1393,7 +1436,7 @@ PHP_FUNCTION(pdf_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1419,7 +1462,7 @@ PHP_FUNCTION(pdf_fill) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1445,7 +1488,7 @@ PHP_FUNCTION(pdf_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1471,7 +1514,7 @@ PHP_FUNCTION(pdf_closepath_fill_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1497,7 +1540,7 @@ PHP_FUNCTION(pdf_endpath) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1523,7 +1566,7 @@ PHP_FUNCTION(pdf_clip) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1550,7 +1593,7 @@ PHP_FUNCTION(pdf_setgray_fill) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1577,7 +1620,7 @@ PHP_FUNCTION(pdf_setgray_stroke) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1604,7 +1647,7 @@ PHP_FUNCTION(pdf_setgray) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1628,10 +1671,12 @@ PHP_FUNCTION(pdf_setrgbcolor_fill) {
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1655,10 +1700,12 @@ PHP_FUNCTION(pdf_setrgbcolor_stroke) {
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1682,10 +1729,12 @@ PHP_FUNCTION(pdf_setrgbcolor) {
 
 	convert_to_long(arg1);
 	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
@@ -1695,30 +1744,75 @@ PHP_FUNCTION(pdf_setrgbcolor) {
 }
 /* }}} */
 
-/* {{{ proto void pdf_add_outline(int pdfdoc, string text);
+/* {{{ proto int pdf_add_outline(int pdfdoc, string text [, int parent, int open]);
    Add bookmark for current page */
 PHP_FUNCTION(pdf_add_outline) {
-	pval *arg1, *arg2;
+	pval *arg1, *arg2, *arg3, *arg4;
 	int id, type;
+	int *outline, *parent, parentid, open;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+	switch (ARG_COUNT(ht)) {
+	case 2:
+		if (getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 3:
+		if (getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+		break;
+	case 4:
+		if (getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+			WRONG_PARAM_COUNT;
+		}
+	break;
+	default:
 		WRONG_PARAM_COUNT;
 	}
-
 	convert_to_long(arg1);
 	convert_to_string(arg2);
+
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find document identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_add_outline(pdf, arg2->value.str.val);
+	if (ARG_COUNT(ht) > 2) {
+		convert_to_long(arg3);
+		id = arg3->value.lval;
 
-	RETURN_TRUE;
+		if (id > 0) {
+			parent = php3_list_find(id, &type);
+			if (!parent || (type != PDF_GLOBAL(le_outline))) {
+				php3_error(E_WARNING,"Unable to find identifier %d",id);
+				RETURN_FALSE;
+			} else {
+				parentid = *parent;
+			}
+		} else {
+			parentid = 0;
+		}
+
+		if (ARG_COUNT(ht) > 3) {
+			convert_to_long(arg4);
+			open = arg4->value.lval;
+		} else {
+			open = 0;
+		}
+	} else {
+		parentid = 0;
+		open = 0;
+	}
+
+	outline=emalloc(sizeof(int));
+	*outline = PDF_add_bookmark(pdf, estrdup(arg2->value.str.val), parentid, open);
+	id = php3_list_insert(outline,PDF_GLOBAL(le_outline));
+	RETURN_LONG(id);
 }
 /* }}} */
 
@@ -1739,11 +1833,39 @@ PHP_FUNCTION(pdf_set_transition) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
-	PDF_set_transition(pdf, arg2->value.lval);
+	switch(arg2->value.lval) {
+		case 0:
+			PDF_set_transition(pdf, "none");
+			break;
+		case 1:
+			PDF_set_transition(pdf, "split");
+			break;
+		case 2:
+			PDF_set_transition(pdf, "blinds");
+			break;
+		case 3:
+			PDF_set_transition(pdf, "box");
+			break;
+		case 4:
+			PDF_set_transition(pdf, "wipe");
+			break;
+		case 5:
+			PDF_set_transition(pdf, "dissolve");
+			break;
+		case 6:
+			PDF_set_transition(pdf, "glitter");
+			break;
+		case 7:
+			PDF_set_transition(pdf, "replace");
+			break;
+		default:
+			PDF_set_transition(pdf, "none");
+			
+	}
 
 	RETURN_TRUE;
 }
@@ -1766,11 +1888,522 @@ PHP_FUNCTION(pdf_set_duration) {
 	id=arg1->value.lval;
 	pdf = php3_list_find(id,&type);
 	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
-		php_error(E_WARNING,"Unable to find file identifier %d",id);
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
 		RETURN_FALSE;
 	}
 
 	PDF_set_duration(pdf, (float) arg2->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_gif(int pdf, string giffile)
+   Opens a gif file and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_gif) {
+	pval *arg1, *arg2;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	pdf_image = PDF_open_GIF(pdf, arg2->value.str.val);
+
+	if(pdf_image < 0) {
+		php3_error(E_WARNING, "Could not open image");
+		RETURN_FALSE;
+	}
+
+	id = php3_list_insert((void *) pdf_image,PDF_GLOBAL(le_pdf_image));
+	RETURN_LONG(id);
+}
+/* }}} */
+
+/* {{{ proto int pdf_open_jpeg(int pdf, string jpegfile)
+   Opens a jpeg file and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_jpeg) {
+	pval *arg1, *arg2;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	pdf_image = PDF_open_JPEG(pdf, arg2->value.str.val);
+
+	if(pdf_image < 0) {
+		php3_error(E_WARNING, "Could not open image");
+		RETURN_FALSE;
+	}
+
+	id = php3_list_insert((void *) pdf_image,PDF_GLOBAL(le_pdf_image));
+	RETURN_LONG(id);
+}
+/* }}} */
+
+#if HAVE_LIBGD13
+/* {{{ proto int pdf_open_memory_image(int pdf, int image)
+   Takes an gd image and returns an image for placement in a pdf document */
+PHP_FUNCTION(pdf_open_memory_image) {
+	pval *argv[2];
+	int argc;
+	int i, j, id, gid, type, color, count;
+	int pdf_image;
+	gdImagePtr im;
+	unsigned char *buffer, *ptr;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	argc = ARG_COUNT(ht);
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(argv[0]);
+	id=argv[0]->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(argv[1]);
+	gid=argv[1]->value.lval;
+	im = php3_list_find(gid, &type);
+	if (!im || type != phpi_get_le_gd()) {
+		php3_error(E_WARNING, "pdf: Unable to find image pointer");
+		RETURN_FALSE;
+	}
+
+	count = 3 * im->sx * im->sy;
+	if(NULL == (buffer = (unsigned char *) emalloc(count)))
+		RETURN_FALSE;
+
+	ptr = buffer;
+	for(i=0; i<im->sy; i++) {
+		for(j=0; j<im->sx; j++) {
+			color = im->pixels[i][j];
+			*ptr++ = im->red[color];
+			*ptr++ = im->green[color];
+			*ptr++ = im->blue[color];
+		}
+	}
+
+
+	pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
+
+	if(0 > pdf_image) {
+		php3_error(E_WARNING, "Could not open image");
+		RETURN_FALSE;
+	}
+
+	id = php3_list_insert((void *) pdf_image,PDF_GLOBAL(le_pdf_image));
+	RETURN_LONG(id);
+}
+/* }}} */
+#endif /* HAVE_LIBGD13 */
+
+/* {{{ proto void pdf_close_image(int pdfimage)
+   Closes the pdf image */
+PHP_FUNCTION(pdf_close_image) {
+	pval *arg1, *arg2;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_close_image(pdf, pdf_image);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_place_image(int pdf, int pdfimage, int x, int y, int scale)
+   Places image in the pdf document */
+PHP_FUNCTION(pdf_place_image) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	convert_to_double(arg5);
+
+	PDF_place_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_put_image(int pdf, int pdfimage)
+   Stores image in the pdf document for later use */
+PHP_FUNCTION(pdf_put_image) {
+	pval *arg1, *arg2;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+	
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+	
+	PDF_put_image(pdf, pdf_image);
+	
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_execute_image(int pdf, int pdfimage, int x, int y, int scale)
+   Places stored image in the pdf document */
+PHP_FUNCTION(pdf_execute_image) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5;
+	int id, type;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 5 || getParameters(ht, 5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	convert_to_double(arg5);
+
+	PDF_execute_image(pdf, pdf_image, (float) arg3->value.dval, (float) arg4->value.dval, arg5->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_get_image_width(int pdf, int pdfimage)
+   Returns the width of an image */
+PHP_FUNCTION(pdf_get_image_width) {
+	pval *arg1, *arg2;
+	int id, type;
+	int width;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	width = PDF_get_image_width(pdf, pdf_image);
+
+	RETURN_LONG(width);
+}
+/* }}} */
+
+/* {{{ proto void pdf_get_image_height(int pdf, int pdfimage)
+   Returns the height of an image */
+PHP_FUNCTION(pdf_get_image_height) {
+	pval *arg1, *arg2;
+	int id, type;
+	int height;
+	int pdf_image;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	convert_to_long(arg2);
+	id=arg2->value.lval;
+	pdf_image = (int) php3_list_find(id,&type);
+	if(pdf_image < 0 || type!=PDF_GLOBAL(le_pdf_image)) {
+		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	height = PDF_get_image_height(pdf, pdf_image);
+
+	RETURN_LONG(height);
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_weblink(int pdfdoc, double llx, double lly, double urx, double ury, string url)
+   Adds link to web resource */
+PHP_FUNCTION(pdf_add_weblink) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 6 || getParameters(ht, 6, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	convert_to_double(arg5);
+	convert_to_string(arg6);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_add_weblink(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, arg6->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_pdflink(int pdfdoc, double llx, double lly, double urx, double ury, string filename, int page, string dest)
+   Adds link to pdf document */
+PHP_FUNCTION(pdf_add_pdflink) {
+	pval *arg1, *arg2, *arg3, *arg4, *arg5, *arg6, *arg7, *arg8;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 8 || getParameters(ht, 8, &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7, &arg8) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	convert_to_double(arg5);
+	convert_to_string(arg6);
+	convert_to_long(arg7);
+	convert_to_string(arg8);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_add_pdflink(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval, (float) arg5->value.dval, arg6->value.str.val, arg7->value.lval, arg8->value.str.val);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_set_border_style(int pdfdoc, string style, double width)
+   Set style of box surounded weblinks */
+PHP_FUNCTION(pdf_set_border_style) {
+	pval *arg1, *arg2, *arg3;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_string(arg2);
+	convert_to_double(arg3);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_set_border_style(pdf, arg2->value.str.val, (float) arg3->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_set_border_color(int pdfdoc, double red, double green, double blue)
+   Set color of box surounded weblinks */
+PHP_FUNCTION(pdf_set_border_color) {
+	pval *arg1, *arg2, *arg3, *arg4;
+	int id, type;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	if (ARG_COUNT(ht) != 4 || getParameters(ht, 4, &arg1, &arg2, &arg3, &arg4) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long(arg1);
+	convert_to_double(arg2);
+	convert_to_double(arg3);
+	convert_to_double(arg4);
+	id=arg1->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find file identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_set_border_color(pdf, (float) arg2->value.dval, (float) arg3->value.dval, (float) arg4->value.dval);
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void pdf_add_annotation(int pdfdoc, double xll, double yll, double xur, double xur, string title, string text)
+   Sets annotation */
+PHP_FUNCTION(pdf_add_annotation) {
+	pval *argv[11];
+	int id, type, argc;
+	PDF *pdf;
+	PDF_TLS_VARS;
+
+	argc = ARG_COUNT(ht);
+	if(argc != 7)
+		WRONG_PARAM_COUNT;
+	if (getParametersArray(ht, argc, argv) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	convert_to_long(argv[0]);
+	convert_to_double(argv[1]);
+	convert_to_double(argv[2]);
+	convert_to_double(argv[3]);
+	convert_to_double(argv[4]);
+	convert_to_string(argv[5]);
+	convert_to_string(argv[6]);
+	id=argv[0]->value.lval;
+	pdf = php3_list_find(id,&type);
+	if(!pdf || type!=PDF_GLOBAL(le_pdf)) {
+		php3_error(E_WARNING,"Unable to find identifier %d",id);
+		RETURN_FALSE;
+	}
+
+	PDF_add_note(pdf,
+	             (float) argv[1]->value.dval,
+	             (float) argv[2]->value.dval,
+	             (float) argv[3]->value.dval,
+	             (float) argv[4]->value.dval,
+	             argv[6]->value.str.val,
+	             argv[5]->value.str.val,
+	             "note", 1);
 
 	RETURN_TRUE;
 }
