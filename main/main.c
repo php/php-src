@@ -696,10 +696,8 @@ int php_request_startup(TSRMLS_D)
 
 /* {{{ php_request_shutdown_for_exec
  */
-void php_request_shutdown_for_exec(void *dummy)
+void php_request_shutdown_for_exec(void *dummy TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	/* used to close fd's in the 3..255 range here, but it's problematic
 	 */
 	shutdown_memory_manager(1, 1 TSRMLS_CC);
@@ -744,7 +742,7 @@ void php_request_shutdown(void *dummy)
 	} zend_end_try();
 
 	zend_try { 
-		shutdown_memory_manager(CG(unclean_shutdown), 0);
+		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
 	} zend_end_try();
 
 	zend_try { 
@@ -1009,7 +1007,7 @@ void php_module_shutdown(TSRMLS_D)
 
 #ifndef ZTS
 	zend_ini_shutdown(TSRMLS_C);
-	shutdown_memory_manager(CG(unclean_shutdown), 1);
+	shutdown_memory_manager(CG(unclean_shutdown), 1 TSRMLS_CC);
 #endif
 
 	module_initialized = 0;
