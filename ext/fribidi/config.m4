@@ -16,7 +16,7 @@ if test "$PHP_FRIBIDI" != "no"; then
 dnl if module was requested with default path of fribidi installation then 
 dnl $PHP_FRIBIDI will be "yes"
 
-  if test "$PHP_FRIBIDI" == "yes"; then
+  if test "$PHP_FRIBIDI" = "yes"; then
     PHP_FRIBIDI="/usr/local"
   fi
   
