@@ -662,21 +662,6 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 		}
 		php_error(E_WARNING, "Unknown file type (%d)", BG(sb).st_mode&S_IFMT);
 		RETURN_STRING("unknown", 1);
-	case FS_IS_W:
-		if (getuid()==0) {
-			RETURN_TRUE; /* root */
-		}
-		RETURN_BOOL((BG(sb).st_mode & wmask) != 0);
-	case FS_IS_R:
-		if (getuid()==0) {
-			RETURN_TRUE; /* root */
-		}
-		RETURN_BOOL((BG(sb).st_mode&rmask)!=0);
-	case FS_IS_X:
-		if (getuid()==0) {
-			xmask = S_IXROOT; /* root */
-		}
-		RETURN_BOOL((BG(sb).st_mode&xmask)!=0 && !S_ISDIR(BG(sb).st_mode));
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(BG(sb).st_mode));
 	case FS_IS_DIR:
@@ -687,8 +672,6 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #else
 		RETURN_FALSE;
 #endif
-	case FS_EXISTS:
-		RETURN_TRUE; /* the false case was done earlier */
 	case FS_LSTAT:
 #if HAVE_SYMLINK
 		stat_sb = &BG(lsb);
@@ -820,17 +803,44 @@ FileFunction(PHP_FN(filetype), FS_TYPE)
 
 /* {{{ proto bool is_writable(string filename)
    Returns true if file can be written */
-FileFunction(PHP_FN(is_writable), FS_IS_W)
+PHP_FUNCTION(is_writable)
+{
+	char *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(!access (filename, W_OK));
+}
 /* }}} */
 
 /* {{{ proto bool is_readable(string filename)
    Returns true if file can be read */
-FileFunction(PHP_FN(is_readable), FS_IS_R)
+PHP_FUNCTION(is_readable)
+{
+	char *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(!access (filename, R_OK));
+}
 /* }}} */
 
 /* {{{ proto bool is_executable(string filename)
    Returns true if file is executable */
-FileFunction(PHP_FN(is_executable), FS_IS_X)
+PHP_FUNCTION(is_executable) 
+{
+	char *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(!access (filename, X_OK));
+}
 /* }}} */
 
 /* {{{ proto bool is_file(string filename)
@@ -850,7 +860,16 @@ FileFunction(PHP_FN(is_link), FS_IS_LINK)
 
 /* {{{ proto bool file_exists(string filename)
    Returns true if filename exists */
-FileFunction(PHP_FN(file_exists), FS_EXISTS)
+PHP_FUNCTION(file_exists)
+{
+	char *filename;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename) == FAILURE) {
+		return;
+	}
+	
+	RETURN_BOOL(!access (filename, F_OK));
+}
 /* }}} */
 
 /* {{{ proto array lstat(string filename)
