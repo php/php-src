@@ -50,7 +50,6 @@ for suExec and stand alone php scripts too.
 %prep
 %setup -q -n TARDIR
 #mkdir manual; cd manual && tar xzf $RPM_SOURCE_DIR/php3-manual.tar.gz
-chown -R root.root .
 ./buildconf
 
 %build
@@ -58,49 +57,61 @@ chown -R root.root .
 # need to run this under sh or it breaks
 
 sh ./configure --prefix=/usr \
-	--with-config-file-path=/usr/lib \
+	--with-config-file-path=/etc \
 	--enable-force-cgi-redirect \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
-	--with-mysql=/usr \
-	--with-pdflib=/usr \
-	--with-zlib=/usr \
+	--with-mysql \
+	--with-zlib \
 	--enable-xml \
 	--enable-wddx 
 
 make
-mv php php.keepme
+mv sapi/cgi/php php.keepme
 
 # then the apache module 
-rm config.cache
+test -f config.cache && rm -f config.cache
 sh ./configure --prefix=/usr \
 	--with-apxs=/usr/sbin/apxs \
 	--enable-versioning \
-	--with-config-file-path=/usr/lib \
+	--enable-cli \
+	--with-config-file-path=/etc \
 	--enable-safe-mode \
 	--with-exec-dir=/usr/bin \
-	--with-mysql=/usr \
-	--with-pdflib=/usr \
-	--with-zlib=/usr \
+	--with-mysql \
+	--with-zlib \
 	--enable-xml \
 	--enable-wddx 
 
 make clean
 make
 # restore cgi version
-mv php.keepme php
+mv php.keepme sapi/cgi/php
 
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/usr/lib/apache
 install -m 755 .libs/libphp4.so $RPM_BUILD_ROOT/usr/lib/apache
 mkdir -p $RPM_BUILD_ROOT/usr/bin
-install -m 755 php $RPM_BUILD_ROOT/usr/bin
+install -m 0755 sapi/cli/php $RPM_BUILD_ROOT/usr/bin
+install -m 0755 sapi/cgi/php $RPM_BUILD_ROOT/usr/bin/php_cgi
+mkdir -p $RPM_BUILD_ROOT/man/man1
+install -m 0755 sapi/cli/php.1 $RPM_BUILD_ROOT/man/man1
+mkdir -p $RPM_BUILD_ROOT/etc
+install -m 0755 php.ini-recommended $RPM_BUILD_ROOT/etc/php.ini
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
+* Tue Jan 20 2004 Marcus Boerger <helly@php.net>
+- Fix script
+- Drop pdf
+- Drop hardcoded path to libs
+- Change ini path to /etc
+- Added man page
+- Added cli binary
+
 * Mon Mar 04 2002 Arjen Lentz <agl@bitbike.com>
 - Fix path and remove --with-imap due to conflicts with kerberos.
 
@@ -132,10 +143,11 @@ rm -rf $RPM_BUILD_ROOT
 - Made initial cut for PHP3.
 
 %files
+%defattr(-,root,root)
 /usr/lib/apache/libphp4.so
 /usr/bin/php
-%doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE BUGS examples
-%doc manual/*
+
+%doc TODO CODING_STANDARDS CREDITS ChangeLog LICENSE NEWS
 EOF
 
 RPMDIR=/usr/src/redhat/RPMS
@@ -144,13 +156,12 @@ SRCDIR=/usr/src/redhat/SOURCES
 
 (
 make clean
-find . -name config.cache -exec rm -f '{}'
+find . -name config.cache -exec rm -f '{}' \;
 cd .. 
 tar czvf ${SRCDIR}/${TAR} $TARDIR )
 
 cp -a $SPEC $SPECDIR/${SPEC}
 #cp -a *.patch $SRCDIR
 cd $SRCDIR
-chown -R root.root ${TAR}
 cd $SPECDIR
 rpm -ba -v ${SPEC}
