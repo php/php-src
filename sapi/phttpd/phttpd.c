@@ -16,11 +16,30 @@
    +----------------------------------------------------------------------+
 */
 
-
 #include "php.h"
 #include "SAPI.h"
 #include "main.h"
+
+#ifdef HAVE_PHTTPD
+ 
+#ifndef ZTS
+#error PHTTPD module is only useable in thread-safe mode
+#endif
+
 #include "php_phttpd.h"
+
+typedef struct {
+    struct connectioninfo *cip;
+} phttpd_globals_struct; 
+
+static int ph_globals_id;
+
+#define PHLS_D phttpd_globals_struct *ph_context
+#define PHLS_DC , PHLS_D
+#define PHLS_C ph_context
+#define PHLS_CC , PHLS_C
+#define PHG(v) (ph_context->v)
+#define PHLS_FETCH() phttpd_globals_struct *ph_context = ts_resource(ph_globals_id) 
 
 static int
 php_phttpd_startup(sapi_module_struct *sapi_module)
@@ -42,16 +61,13 @@ static int
 php_phttpd_sapi_ub_write(const char *str, uint str_length)
 {
     int sent_bytes;
-	fprintf(stderr,"***php_phttpd_sapi_ub_write\n");
-	fwrite(str,1,str_length,stderr);
-	return 0;
-/*
-    NSLS_FETCH();
- 
-    sent_bytes = Ns_ConnWrite(NSG(conn), (void *) str, str_length);
+	PHLS_FETCH();
+
+	sent_bytes = fd_write(PHG(cip)->fd,str,str_length);
+
+	fprintf(stderr,"***php_phttpd_sapi_ub_write returned %d\n",sent_bytes);
  
     return sent_bytes;
-*/
 }
 
 static int
@@ -173,6 +189,7 @@ static sapi_module_struct sapi_module = {
 
 int pm_init(const char **argv)
 {
+
 	fprintf(stderr,"***pm_init\n");
 	tsrm_startup(1, 1, 0);
 	fprintf(stderr,"***tsrm_startup\n");
@@ -182,6 +199,8 @@ int pm_init(const char **argv)
 	fprintf(stderr,"***sapi_startup\n");
     sapi_module.startup(&sapi_module);
 	fprintf(stderr,"***sapi_module.startup\n");
+
+	ph_globals_id = ts_allocate_id(sizeof(phttpd_globals_struct), NULL, NULL);
 
 	return 0;
 }
@@ -202,6 +221,7 @@ int php_doit(struct connectioninfo *cip)
 	ELS_FETCH();
 	PLS_FETCH();
 	SLS_FETCH();
+	PHLS_FETCH();
 
 	if (debug > 1) {
 		fprintf(stderr, "*** php/php_doit() called ***\n");
@@ -211,11 +231,13 @@ int php_doit(struct connectioninfo *cip)
 		return -1;
 	}
 
+	PHG(cip) = cip;
+
 	if (debug > 1) {
 		fprintf(stderr, "*** php/php_request_startup for  %s ***\n",path);
 	}
 
-	memset(&SG(request_info),0,sizeof(sapi_globals_struct));
+	memset(&SG(request_info),0,sizeof(sapi_globals_struct)); /* pfusch! */
 
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC) == FAILURE) {
         return -1;
@@ -249,3 +271,4 @@ int pm_request(struct connectioninfo *cip)
 	}
 }
 
+#endif
