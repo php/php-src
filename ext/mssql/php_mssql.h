@@ -137,6 +137,7 @@ typedef struct mssql_result {
 	pval **data;
 	mssql_field *fields;
 	mssql_link *mssql_ptr;
+	mssql_statement * statement;
 	int batchsize;
 	int lastresult;
 	int blocks_initialized;
