@@ -364,6 +364,8 @@ AC_HEADER_DIRENT
 PHP_MISSING_FCLOSE_DECL
 dnl QNX requires unix.h to allow functions in libunix to work properly
 AC_CHECK_HEADERS([ \
+inttypes.h \
+stdint.h \
 dirent.h \
 ApplicationServices/ApplicationServices.h \
 sys/param.h \
