@@ -5,6 +5,12 @@
 #define XSD_1999_TIMEINSTANT 401
 #define XSD_1999_TIMEINSTANT_STRING "timeInstant"
 
+#define SOAP_1_1_ENC "http://schemas.xmlsoap.org/soap/encoding/"
+#define SOAP_1_1_ENV "http://schemas.xmlsoap.org/soap/envelope/"
+
+#define SOAP_1_2_ENC "http://www.w3.org/2003/05/soap-encoding"
+#define SOAP_1_2_ENV "http://www.w3.org/2003/05/soap-envelope"
+
 #define SCHEMA_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NAMESPACE "http://www.w3.org/2001/XMLSchema"
 #define XSD_NS_PREFIX "xsd"
@@ -97,6 +103,8 @@
 #define XSD_UNSIGNEDBYTE_STRING "unsignedByte"
 #define XSD_POSITIVEINTEGER 142
 #define XSD_POSITIVEINTEGER_STRING "positiveInteger"
+#define XSD_ANYTYPE 143
+#define XSD_ANYTYPE_STRING "anyType"
 
 #define APACHE_NAMESPACE "http://xml.apache.org/xml-soap"
 #define APACHE_NS_PREFIX "apache"

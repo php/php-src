@@ -47,6 +47,8 @@ encode defaultEncoding[] = {
 	{{XSD_UNSIGNEDINT, XSD_UNSIGNEDINT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
   {{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_ulong, to_xml_ulong}, 
 
+	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
+
 	{{APACHE_MAP, APACHE_MAP_STRING, APACHE_NAMESPACE, NULL}, to_zval_map, to_xml_map},
 
 	{{SOAP_ENC_OBJECT, SOAP_ENC_OBJECT_STRING, SOAP_ENC_NAMESPACE, NULL}, to_zval_object, to_xml_object},
@@ -1281,7 +1283,7 @@ void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 /*	TSRMLS_FETCH();*/
 
 	if(!array || Z_TYPE_P(array) != IS_ARRAY)
-		smart_str_appendl(type, "xsd:ur-type", 11);
+		smart_str_appendl(type, "xsd:anyType", 11);
 
 	different = FALSE;
 	cur_type = prev_type = 0;
@@ -1319,7 +1321,7 @@ void get_array_type(zval *array, smart_str *type TSRMLS_DC)
 	}
 
 	if(different)
-		smart_str_appendl(type, "xsd:ur-type", 11);
+		smart_str_appendl(type, "xsd:anyType", 11);
 	else
 	{
 		encodePtr enc;
