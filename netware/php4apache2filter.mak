@@ -4,7 +4,7 @@ PROJECT_ROOT = ../..
 
 # Module details
 MODULE_NAME = mod_php
-MODULE_DESC = "PHP 4.3 - Apache 1.3 Module"
+MODULE_DESC = "PHP 4.3 - Apache 2.0 Module"
 VMAJ = 3
 VMIN = 0
 VREV = 0
@@ -17,10 +17,9 @@ include $(PROJECT_ROOT)/netware/common.mif
 .SUFFIXES: .nlm .lib .obj .cpp .c .msg .mlc .mdb .xdc .d
 
 # Source files
-C_SRC = mod_php4.c \
-        php_apache.c \
-        sapi_apache.c \
-        libpre.c
+C_SRC = apache_config.c \
+        php_functions.c \
+        sapi_apache2.c
 
 # Destination directories and files
 OBJ_DIR = $(BUILD)
@@ -36,7 +35,7 @@ endif
 
 
 # Compile flags
-C_FLAGS  = -c -maxerrors 25 -msgstyle gcc
+C_FLAGS += -c -maxerrors 25 -msgstyle gcc
 C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium
 C_FLAGS += -w nounusedarg -msext on
@@ -50,8 +49,9 @@ C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED -DAPACHE_OS_H -DNO_USE_SIGACTION -DMULT
 C_FLAGS += -DCLIB_STAT_PATCH
 C_FLAGS += -DNEW_LIBC
 C_FLAGS += -I. -I- -I. -I../../netware -I$(SDK_DIR)/include		# ../../netware added for special SYS/STAT.H
+C_FLAGS += -I$(SDK_DIR)/include/winsock	# For Apache 2.0 headers
 C_FLAGS += -I$(MWCIncludes)
-C_FLAGS += -I$(APACHE_DIR)/include -I$(APACHE_DIR)/os/netware
+C_FLAGS += -I$(APACHE_DIR)/include
 C_FLAGS += -I- -I../../main -I../../Zend -I../../TSRM -I../../ext/standard
 C_FLAGS += -I../../ -I../../netware -I$(PROJECT_ROOT)/regex
 C_FLAGS += -I$(WINSOCK_DIR)/include/nlm -I$(WINSOCK_DIR)/include
@@ -77,8 +77,9 @@ endif
 # Dependencies
 MODULE = LibC \
          phplib
-IMPORT = @$(SDK_DIR)/imports/libc.imp            \
-         @$(PROJECT_ROOT)/netware/apachecore.imp \
+IMPORT = @$(SDK_DIR)/imports/libc.imp          \
+         @$(APACHE_DIR)/lib/httpd.imp   \
+         @$(APACHE_DIR)/lib/aprlib.imp  \
          @$(PROJECT_ROOT)/netware/phplib.imp
 EXPORT = php4_module
 
@@ -134,7 +135,7 @@ endif
 ifdef LIBRARY
 	@echo $(LIBRARY) >> $(basename $@).link
 endif
-	@echo $(OBJECTS) >> $(basename $@).link
+	@echo $(OBJECTS) $(APACHE_DIR)/lib/libpre.obj >> $(basename $@).link
 
 	@$(LINK) @$(basename $@).link
 

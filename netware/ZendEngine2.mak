@@ -3,7 +3,7 @@
 PROJECT_ROOT = ..
 
 # Module details
-MODULE_NAME = Zend
+MODULE_NAME = ZEND
 
 #include the common settings
 include $(PROJECT_ROOT)/netware/common.mif
@@ -63,10 +63,10 @@ C_FLAGS  = -c -maxerrors 25 -msgstyle std
 C_FLAGS += -wchar_t on -bool on
 C_FLAGS += -processor Pentium
 C_FLAGS += -nostdinc
-C_FLAGS += -relax_pointers	# To remove the type-casting errors
+C_FLAGS += -relax_pointers		# To remove type-casting errors
 C_FLAGS += -D__C9X_CMATH_INLINES_DEFINED
-C_FLAGS += -DNETWARE
-C_FLAGS += -DZTS
+C_FLAGS += -DNETWARE -DZTS
+C_FLAGS  += -DNEW_LIBC
 C_FLAGS += -DCLIB_STAT_PATCH
 C_FLAGS += -DTHREAD_SWITCH
 
