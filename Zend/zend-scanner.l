@@ -288,7 +288,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 		case ZEND_HANDLE_FP:
 			file_handle->opened_path = NULL;
 			if (file_handle->handle.fp==stdin) {
-				file_handle->handle.is = (ifstream *) &cin;
+				file_handle->handle.is = &cin;
 			} else {
 				if (!file_handle->handle.fp) {
 					return FAILURE;
