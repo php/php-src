@@ -968,7 +968,7 @@ PHPAPI int php_mb_regex_set_options( int options TSRMLS_DC)
 /* {{{ php_mb_regex_set_options_by_string */
 PHPAPI int php_mb_regex_set_options_by_string( const char *opt_str, int len TSRMLS_DC)
 {
-	int new_opt;
+	int new_opt = 0;
 	_php_mb_regex_init_options( opt_str, len, &new_opt, NULL);
 	return php_mb_regex_set_options( new_opt TSRMLS_CC);
 }
