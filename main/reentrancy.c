@@ -46,7 +46,42 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 
 #endif
 
+#if defined(PHP_HPUX_TIME_R)
 
+PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
+{
+#undef localtime_r
+	if (localtime_r(timep, p_tm) == 0)
+		return (p_tm);
+	return (NULL);
+}
+
+PHPAPI char *ctime_r(const time_t *clock, char *buf)
+{
+#undef ctime_r
+	if (ctime_r(clock, buf, 26) != -1)
+		return (buf);
+	return (NULL);
+}
+
+PHPAPI char *asctime_r(const struct tm *tm, char *buf)
+{
+#undef asctime_r
+	if (asctime_r(tm, buf, 26) != -1)
+		return (buf);
+	return (NULL);
+}
+
+PHPAPI struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
+{
+#undef gmtime_r
+	if (gmtime_r(timep, p_tm) == 0)
+		return (p_tm);
+	return (NULL);
+}
+
+#endif
+	
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 
 PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
