@@ -1,7 +1,5 @@
 TODO:
 
-- Rewriting header handling so that more than one header with the same
-  name can be set (most importantly, cookies).
 - per-virtual-server configuration
 - configurable limit of number of concurrent PHP executions
 - fix setting of auth info.
@@ -11,6 +9,8 @@ FIXED:
 -  =>  not fixed and no fix planned
 ?  =>  Maybe fixed, maybe not.
 
++ Allow multiple headers
+     This is now fixed.
 + fix backtraces
      Uses th_farm, thus problem is fixed
 + exit in PHP exits Caudium
