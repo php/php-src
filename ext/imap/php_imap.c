@@ -4078,6 +4078,9 @@ void mm_log(char *str, long errflg)
 	TSRMLS_FETCH();
   
 	/* Author: CJH */
+	if (!(EG(error_reporting) & E_NOTICE)) {
+		return;
+	}
 	if (errflg != NIL) { /* CJH: maybe put these into a more comprehensive log for debugging purposes? */
 		if (IMAPG(imap_errorstack) == NIL) {
 			IMAPG(imap_errorstack) = mail_newerrorlist();
