@@ -261,7 +261,7 @@ class PEAR_Installer extends PEAR_Common
             if (sizeof($subst_from)) {
                 $contents = str_replace($subst_from, $subst_to, $contents);
             }
-            $wp = @fopen($dest_file, "w");
+            $wp = @fopen($dest_file, "wb");
             if (!is_resource($wp)) {
                 return $this->raiseError("failed to create $dest_file: $php_errormsg",
                                          PEAR_INSTALLER_FAILED);
