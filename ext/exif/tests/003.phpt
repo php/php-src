@@ -2,8 +2,11 @@
 Check for exif_read_data, Unicode user comment
 --SKIPIF--
 <?php if (!extension_loaded("exif")) print "skip";?>
---POST--
---GET--
+--INI--
+output_handler = 
+zlib.output_compression = Off
+exif.decode_unicode_motorola=UCS-2BE
+exif.encode_unicode=ISO-8859-15
 --FILE--
 <?php
 /*
@@ -12,9 +15,6 @@ Check for exif_read_data, Unicode user comment
             copy of test1.jpg as a thumbnail.
   test3.jpg is the same as test2.jpg but with a UNICODE UserComment: &Auml;&Ouml;&&Uuml;&szlig;&auml;&ouml;&uuml;
 */
-chdir($_ENV['PHP_DIR']);
-ini_alter('exif.decode_unicode_motorola', 'UCS-2BE'); 
-ini_alter('exif.encode_unicode', 'ISO-8859-15'); 
 $image  = exif_read_data('./ext/exif/tests/test3.jpg','',true,false);
 $accept = '';
 foreach($image as $idx=>$section) {

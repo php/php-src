@@ -2,31 +2,33 @@
 Check for exif_read_data, Unicode WinXP tags	
 --SKIPIF--
 <?php if (!extension_loaded("exif")) print "skip";?>
---POST--
---GET--
+--INI--
+output_handler = 
+zlib.output_compression = Off
+exif.decode_unicode_intel=UCS-2LE
+exif.decode_unicode_motorola=UCS-2BE
+exif.encode_unicode=ISO-8859-1
 --FILE--
 <?php
 /*
   test4.jpg is a 1*1 image that contains Exif tags written by WindowsXP
 */
-chdir($_ENV['PHP_DIR']);
-ini_alter('exif.decode_unicode_motorola', 'UCS-2BE');
-ini_alter('exif.encode_unicode', 'ISO-8859-15');
 $image  = exif_read_data('./ext/exif/tests/test4.jpg','',true,false);
-$accept = '';
-foreach($image as $idx=>$section) {
-	$accept .= $section;
-	foreach($section as $name=>$value) {
-		if  ( $idx!='FILE' || $name!='FileDateTime') {
-			$accept .= substr($name,0,2);
-			$accept .= $value;
-		}
-	}
-}
-echo $accept;
+echo var_dump($image['WINXP']);
 ?>
 --EXPECT--
-ArrayFitest4.jpgFi713Fi2Miimage/jpegSeANY_TAG, IFD0, WINXPArrayhtwidth="1" height="1"He1Wi1Is1By0ArraySuArrayKeArrayAuArrayCoArrayTiArrayArraySuSubject...KeKeywords...AuRui CarmoCoComments
+array(5) {
+  ["Subject"]=>
+  string(10) "Subject..."
+  ["Keywords"]=>
+  string(11) "Keywords..."
+  ["Author"]=>
+  string(9) "Rui Carmo"
+  ["Comments"]=>
+  string(29) "Comments
 Line2
 Line3
-Line4TiTitle...
+Line4"
+  ["Title"]=>
+  string(8) "Title..."
+}
