@@ -1,12 +1,14 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jan 2004, Version 4.3.5
-- Improved the sybase_ct module (Timm)
+- Improved the sybase_ct module: (Timm)
   . Added ability to define a message handler not only globally, but also per 
     connection.
-  . Made sybct.login_timeout changeable at runtime.
-  . Added ini option sybct.packet_size which lets you control the packet size.
+  . Added "sybct.packet_size" php.ini option.
+  . Changed "sybct.login_timeout" php.ini option changeable at runtime.
   . Fixed memory leak in sybase_set_message_handler().
+- Fixed bug #27040 (passing an array of form-fields to CURLOPT_POSTFIELDS
+  does not work). (Ilia, Jani)
 - Fixed bug #26974 (rename() doesn't check the destination file against 
   safe_mode/open_basedir). (Ilia)
 - Fixed bug #26973 (*printf() '+' modifier broken). (Jani)
