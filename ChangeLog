@@ -1,3 +1,25 @@
+1999-11-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/config.m4:
+    * ext/gd/gd.c: This arg is optional
+
+1999-11-10  Stig Bakken  <ssb@fast.no>
+
+    * makedist: "import" libtool file preservation code from build.mk
+
+    * build.mk: Shut up warning from automake.
+
+1999-11-10  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/oci8/oci8.c:
+1999-11-10  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: Remove duplicates.
+
+1999-11-10  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
 1999-11-09  Frank M. Kromann  <fmk@swwwing.com>
 
     * php.ini-dist: Adding default mssql ini-setings
