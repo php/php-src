@@ -539,15 +539,14 @@ static inline void vt_type_to_zpp_string(ELEMDESC *elem, smart_str *argtypes_str
 		}
 	}
 
-	smart_str_appendl(argtypes_str, &zppflag, 1);
 	if (ref) {
-		smart_str_appendl(argtypes_str, "/", 1);
+		smart_str_appendl(argtypes_str, "z/", 2);
 		*argflags = BYREF_FORCE;
 	} else {
 		*argflags = BYREF_NONE;
-	}
-	if (nullable) {
-		smart_str_appendl(argtypes_str, "!", 1);
+		if (nullable) {
+			smart_str_appendl(argtypes_str, "!", 1);
+		}
 	}
 }
 
