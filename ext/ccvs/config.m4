@@ -9,12 +9,13 @@ AC_ARG_WITH(ccvs,
 [
   if test "$withval" != "no"; then
      CCVS_DIR="$withval"
-     CCVS_LIB_DIR="$CCVS_DIR/lib"
-     CCVS_INCLUDE_DIR="$CCVS_DIR/include"
+	test -f $withval/include/cv_api.h && CCVS_INCLUDE_DIR="$withval/include"
+    test -f $withval/lib/libccvs.a && CCVS_LIB_DIR="$withval/lib"
+
      	if test -n "$CCVS_DIR"; then
 		AC_MSG_RESULT(yes)
 		PHP_EXTENSION(ccvs)
-		LIBS="$LIBS -LCCVS_DIR/lib"
+		LIBS="$LIBS -L$CCVS_LIB_DIR"
 		AC_ADD_LIBRARY_WITH_PATH(ccvs, $CCVS_LIB_DIR)
 		AC_ADD_INCLUDE($CCVS_INCLUDE_DIR)
     	  else
