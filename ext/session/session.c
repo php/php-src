@@ -65,6 +65,7 @@ function_entry session_functions[] = {
 	PHP_FE(session_cache_limiter, NULL)
 	PHP_FE(session_set_cookie_params, NULL)
 	PHP_FE(session_get_cookie_params, NULL)
+	PHP_FE(session_write_close, NULL)
 	{0}
 };
 
@@ -1082,10 +1083,10 @@ PHP_FUNCTION(session_set_save_handler)
 	mdata = emalloc(sizeof(*mdata));
 	
 	for (i = 0; i < 6; i++) {
-		convert_to_string_ex(args[i]);
-		mdata->names[i] = estrdup(Z_STRVAL_PP(args[i]));
+		ZVAL_ADDREF(*args[i]);
+		mdata->names[i] = *args[i];
 	}
-	
+
 	PS(mod_data) = (void *) mdata;
 	
 	RETURN_TRUE;
@@ -1390,15 +1391,25 @@ PHP_RINIT_FUNCTION(session)
 	return SUCCESS;
 }
 
+static void php_session_flush(PSLS_D)
+{
+	if (PS(nr_open_sessions) > 0) {
+		php_session_save_current_state(PSLS_C);
+		PS(nr_open_sessions)--;
+	}
+}
+
+PHP_FUNCTION(session_write_close)
+{
+	PSLS_FETCH();
+	php_session_flush(PSLS_C);
+}
 
 PHP_RSHUTDOWN_FUNCTION(session)
 {
 	PSLS_FETCH();
 
-	if (PS(nr_open_sessions) > 0) {
-		php_session_save_current_state(PSLS_C);
-		PS(nr_open_sessions)--;
-	}
+	php_session_flush(PSLS_C);
 	php_rshutdown_session_globals(PSLS_C);
 	return SUCCESS;
 }

@@ -49,26 +49,18 @@ ps_module ps_mod_user = {
 }
 
 
-static zval *ps_call_handler(char *name, int argc, zval **argv)
+static zval *ps_call_handler(zval *func, int argc, zval **argv)
 {
 	int i;
 	zval *retval = NULL;
 	ELS_FETCH();
 	
-	if (name && name[0] != '\0') {
-		zval *func;
-
-		SESS_ZVAL_STRING(name, func);
-		MAKE_STD_ZVAL(retval);
-
-		if (call_user_function(EG(function_table), NULL, func, retval, 
-					argc, argv) == FAILURE) {
-			zval_dtor(retval);
-			efree(retval);
-			retval = NULL;
-		}
-		zval_dtor(func);
-		efree(func);
+	MAKE_STD_ZVAL(retval);
+	if (call_user_function(EG(function_table), NULL, func, retval, 
+				argc, argv) == FAILURE) {
+		zval_dtor(retval);
+		efree(retval);
+		retval = NULL;
 	}
 
 	for (i = 0; i < argc; i++) {
@@ -118,7 +110,7 @@ PS_CLOSE_FUNC(user)
 	retval = ps_call_handler(PSF(close), 0, NULL);
 
 	for (i = 0; i < 6; i++)
-		efree(mdata->names[i]);
+		zval_del_ref(&mdata->names[i]);
 	efree(mdata);
 
 	PS_SET_MOD_DATA(NULL);
