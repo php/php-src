@@ -5,6 +5,7 @@ PHP 4                                                                      NEWS
   POSIX compatible mode. (K.Kosako <kosako at sofnec.co.jp>, Moriyoshi)
 - Fixed bug #25745 (ctype functions fail with non-ascii characters). (Moriyoshi)
 - Fixed bug #25744 (make ZTS build of ext/sybase compile). (Ilia)
+- Fixed bug #25738 (alloca() related issues on the Darwin platform). (Moriyoshi)
 - Fixed bug #25708 (extract($GLOBALS, EXTR_REFS) mangles $GLOBALS). (Moriyoshi)
 - Fixed bug #25707 (html_entity_decode() over-decodes &amp;lt;). (Moriyoshi)
 - Fixed bug #25703 (openssl configure check failed). (Jani)
