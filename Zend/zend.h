@@ -107,6 +107,8 @@
 #include "zend_alloc.h"
 
 typedef unsigned char zend_bool;
+typedef unsigned char zend_uchar;
+typedef unsigned int zend_uint;
 
 #undef SUCCESS
 #undef FAILURE

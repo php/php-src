@@ -58,20 +58,20 @@ typedef struct _znode {
 	union {
 		zval constant;
 
-		int var;
-		int opline_num;
-		int fetch_type;
+		zend_uint var;
+		int opline_num; /*  Needs to be signed */
+		zend_uchar fetch_type;
 		zend_op_array *op_array;
 		struct {
-			int var;	/* dummy */
-			int type;
+			zend_uint var;	/* dummy */
+			zend_uint type;
 		} EA;
 	} u;
 } znode;
 
 
 typedef struct _zend_op {
-	int opcode;
+	zend_uchar opcode;
 	znode result;
 	znode op1;
 	znode op2;
@@ -89,23 +89,22 @@ typedef struct _zend_brk_cont_element {
 
 
 struct _zend_op_array {
-	unsigned char type;	/* MUST be the first element of this struct! */
+	zend_uchar type;	/* MUST be the first element of this struct! */
 
-	unsigned char *arg_types;		/* MUST be the second element of this struct! */
+	zend_uchar *arg_types;		/* MUST be the second element of this struct! */
 	char *function_name;			/* MUST be the third element of this struct! */
 
-	int *refcount;
+	zend_uint *refcount;
 
 	zend_op *opcodes;
-	int last, size;
+	zend_uint last, size;
 
-	int T;
-
+	zend_uint T;
 
 	zend_brk_cont_element *brk_cont_array;
-	int last_brk_cont;
-	int current_brk_cont;
-	unsigned char uses_globals;
+	zend_uint last_brk_cont;
+	zend_uint current_brk_cont;
+	zend_bool uses_globals;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -122,9 +121,9 @@ struct _zend_op_array {
 
 
 typedef struct _zend_internal_function {
-	unsigned char type;	/* MUST be the first element of this struct! */
+	zend_uchar type;	/* MUST be the first element of this struct! */
 
-	unsigned char *arg_types;		/* MUST be the second element of this struct */
+	zend_uchar *arg_types;		/* MUST be the second element of this struct */
 	char *function_name;			/* MUST be the third element of this struct */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -132,10 +131,10 @@ typedef struct _zend_internal_function {
 
 
 typedef union _zend_function {
-	unsigned char type;	/* MUST be the first element of this struct! */
+	zend_uchar type;	/* MUST be the first element of this struct! */
 	struct {
-		unsigned char type;  /* never used */
-		unsigned char *arg_types;
+		zend_uchar type;  /* never used */
+		zend_uchar *arg_types;
 		char *function_name;
 	} common;
 	
