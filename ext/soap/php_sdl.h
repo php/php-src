@@ -109,7 +109,6 @@ typedef struct _sdlSoapBindingFunctionFault {
 struct _sdlSoapBindingFunctionBody {
 	char                *ns;
 	sdlEncodingUse       use;
-	char                *parts;          /* not implemented yet */
 	sdlRpcEncodingStyle  encodingStyle;  /* not implemented yet */
 	HashTable           *headers;        /* array of sdlSoapBindingFunctionHeaderPtr */
 };

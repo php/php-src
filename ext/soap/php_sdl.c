@@ -480,8 +480,43 @@ static void wsdl_soap_binding_body(sdlCtx* ctx, xmlNodePtr node, char* wsdl_soap
 
 			tmp = get_attribute(body->properties, "parts");
 			if (tmp) {
-				whiteSpace_collapse(tmp->children->content);
-				binding->parts = estrdup(tmp->children->content);
+				HashTable    ht;
+				char *parts = tmp->children->content;
+
+				/* Delete all parts those are not in the "parts" attribute */
+				zend_hash_init(&ht, 0, NULL, delete_parameter, 0);
+				while (*parts) {
+					HashPosition pos;
+					sdlParamPtr *param;
+					int found = 0;
+					char *end;
+
+					while (*parts == ' ') ++parts;
+					if (*parts == '\0') break;
+					end = strchr(parts, ' ');
+					if (end) *end = '\0';
+					zend_hash_internal_pointer_reset_ex(params, &pos);
+					while (zend_hash_get_current_data_ex(params, (void **)&param, &pos) != FAILURE) {
+						if ((*param)->paramName &&
+						    strcmp(parts, (*param)->paramName) == 0) {
+					  	sdlParamPtr x_param;
+					  	x_param = emalloc(sizeof(sdlParam));
+					  	*x_param = **param;
+					  	(*param)->paramName = NULL;
+					  	zend_hash_next_index_insert(&ht, &x_param, sizeof(sdlParamPtr), NULL);
+					  	found = 1;
+					  	break;
+						}
+						zend_hash_move_forward_ex(params, &pos);
+					}
+					if (!found) {
+						soap_error1(E_ERROR, "Parsing WSDL: Missing part '%s' in <message>", parts);
+					}
+					parts += strlen(parts);
+					if (end) *end = ' ';
+				}
+				zend_hash_destroy(params);
+				*params = ht;
 			}
 
 			if (binding->use == SOAP_ENCODED) {
@@ -1026,7 +1061,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri TSRMLS_DC)
 	return ctx.sdl;
 }
 
-#define WSDL_CACHE_VERSION 0x0a
+#define WSDL_CACHE_VERSION 0x0b
 
 #define WSDL_CACHE_GET(ret,type,buf)   memcpy(&ret,*buf,sizeof(type)); *buf += sizeof(type);
 #define WSDL_CACHE_GET_INT(ret,buf)    ret = ((unsigned char)(*buf)[0])|((unsigned char)(*buf)[1]<<8)|((unsigned char)(*buf)[2]<<16)|((int)(*buf)[3]<<24); *buf += 4;
@@ -1274,7 +1309,6 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 		body->encodingStyle = SOAP_ENCODING_DEFAULT;
 	}
 	body->ns = sdl_deserialize_string(in);
-	body->parts = sdl_deserialize_string(in);
 	WSDL_CACHE_GET_INT(i, in);
 	if (i > 0) {
 		body->headers = emalloc(sizeof(HashTable));
@@ -1875,7 +1909,6 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 		WSDL_CACHE_PUT_1(body->encodingStyle, out);
 	}
 	sdl_serialize_string(body->ns, out);
-	sdl_serialize_string(body->parts, out);
 	if (body->headers) {
 		i = zend_hash_num_elements(body->headers);
 	} else {
@@ -2309,9 +2342,6 @@ static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody bod
 {
 	if (body.ns) {
 		efree(body.ns);
-	}
-	if (body.parts) {
-		efree(body.parts);
 	}
 	if (body.headers) {
 		zend_hash_destroy(body.headers);
