@@ -223,6 +223,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("magic_quotes_runtime",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_runtime,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("magic_quotes_sybase",	"0",		PHP_INI_ALL,		OnUpdateBool,			magic_quotes_sybase,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("output_buffering",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	output_buffering,		php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("output_handler",			NULL,		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateString,	output_handler,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_argc_argv",	"1",		PHP_INI_ALL,		OnUpdateBool,			register_argc_argv,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("register_globals",		"1",		PHP_INI_ALL,		OnUpdateBool,			register_globals,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("safe_mode",			"0",		PHP_INI_SYSTEM,		OnUpdateBool,			safe_mode,				php_core_globals,	core_globals)
@@ -623,7 +624,15 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 	}
 
-	if (PG(output_buffering)) {
+	if (PG(output_handler)) {
+		zval *output_handler;
+
+		ALLOC_INIT_ZVAL(output_handler);
+		Z_STRLEN_P(output_handler) = strlen(PG(output_handler));	/* this can be optimized */
+		Z_STRVAL_P(output_handler) = estrndup(PG(output_handler), Z_STRLEN_P(output_handler));
+		Z_TYPE_P(output_handler) = IS_STRING;
+		php_start_ob_buffer(output_handler);
+	} else if (PG(output_buffering)) {
 		php_start_ob_buffer(NULL);
 	} else if (PG(implicit_flush)) {
 		php_start_implicit_flush();
@@ -656,11 +665,11 @@ void php_request_shutdown(void *dummy)
 	PLS_FETCH();
 
 	if (setjmp(EG(bailout))==0) {
-		sapi_send_headers();
+		php_end_ob_buffers(SG(request_info).headers_only?0:1);
 	}
 
 	if (setjmp(EG(bailout))==0) {
-		php_end_ob_buffers(SG(request_info).headers_only?0:1);
+		sapi_send_headers();
 	}
 
 	if (PG(modules_activated) && setjmp(EG(bailout))==0) {

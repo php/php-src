@@ -64,6 +64,12 @@ output_buffering	= Off	; Output buffering allows you to send header lines (inclu
 							; You can enable output buffering by in runtime by calling the output
 							; buffering functions, or enable output buffering for all files
 							; by setting this directive to On.
+output_handler		=		; You can redirect all of the output of your scripts to a function,
+							; that can be responsible to process or log it.  For example,
+							; if you set the output_handler to "ob_gzhandler", than output
+							; will be transparently compressed for browsers that support gzip or
+							; deflate encoding.  Setting an output handler automatically turns on
+							; output buffering.
 implicit_flush		= Off	; Implicit flush tells PHP to tell the output layer to flush itself
 							; automatically after every output block.  This is equivalent to
 							; calling the PHP function flush() after each and every call to print()

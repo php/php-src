@@ -548,6 +548,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 						}
 					}
 					if (no_headers) {
+						SG(request_info).no_headers = 1;
 						SG(headers_sent) = 1;
 					}
 					cgi_started=1;
@@ -582,6 +583,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					if (no_headers) {
 						SG(headers_sent) = 1;
+						SG(request_info).no_headers = 1;
 					}
 					cgi_started=1;
 					php_print_info(0xFFFFFFFF);
@@ -630,6 +632,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					}
 					if (no_headers) {
 						SG(headers_sent) = 1;
+						SG(request_info).no_headers = 1;
 					}
 					php_printf("%s\n", PHP_VERSION);
 					php_end_ob_buffers(1);
@@ -677,6 +680,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 	if (no_headers) {
 		SG(headers_sent) = 1;
+		SG(request_info).no_headers = 1;
 	}
 	file_handle.filename = "-";
 	file_handle.type = ZEND_HANDLE_FP;
@@ -766,9 +770,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 #endif
 	}
 
-	php_header();			/* Make sure headers have been sent */
-
-	
 
 	if (SG(request_info).path_translated) {
 		persist_alloc(SG(request_info).path_translated);
