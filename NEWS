@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- added function overload in mbstring to add multibyte support for string and mail functions.
 - Added flags parameter to preg_grep(). The only flag currently is
   PREG_GREP_INVERT that will make the function return entries that
   did not match. (Andrei)
