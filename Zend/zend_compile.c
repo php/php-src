@@ -1630,6 +1630,53 @@ static void do_inherit_method(zend_function *function)
 }
 
 
+static zend_bool zend_do_perform_implementation_check(zend_function *fe)
+{
+	zend_op *op, *proto_op;
+
+	if (!fe->common.prototype) {
+		return 1;
+	}
+
+	if ((fe->common.arg_types && !fe->common.prototype->common.arg_types)
+		|| (!fe->common.arg_types && fe->common.prototype->common.arg_types)) {
+		return 0;
+	}
+
+	if (fe->common.arg_types) {
+		if (fe->common.arg_types[0] != fe->common.prototype->common.arg_types[0]) {
+			return 0;
+		}
+		if (memcmp(fe->common.arg_types+1, fe->common.prototype->common.arg_types+1, fe->common.arg_types[0]*sizeof(zend_uchar)) != 0) {
+			return 0;
+		}
+	}
+
+	if (fe->common.prototype->type == ZEND_INTERNAL_FUNCTION) {
+		return 1; /* nothing further we can do here */
+	}
+	
+	op = fe->op_array.opcodes;
+	proto_op = fe->common.prototype->op_array.opcodes;
+
+	while (proto_op->opcode != ZEND_RAISE_ABSTRACT_ERROR) {
+		if (proto_op->opcode != op->opcode) {
+			return 0;
+		}
+		switch (proto_op->opcode) {
+			case ZEND_FETCH_CLASS:
+				if (zend_binary_zval_strcasecmp(&op->op2.u.constant, &proto_op->op2.u.constant)!=0) {
+					return 0;
+				}
+				break;
+		}
+		proto_op++;
+		op++;
+	}
+	return 1;
+}
+
+
 static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_function *parent, zend_hash_key *hash_key, zend_class_entry *child_ce)
 {
 	zend_uint child_flags;
@@ -1674,6 +1721,16 @@ static zend_bool do_inherit_method_check(HashTable *child_function_table, zend_f
 			&& ((parent_flags & ZEND_ACC_PPP_MASK) & ZEND_ACC_PRIVATE)) {
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
+	}
+
+	if (parent_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_ABSTRACT)) {
+		child->common.prototype = parent;
+	} else if (parent->common.prototype) {
+		child->common.prototype = parent->common.prototype;
+	}
+
+	if (!zend_do_perform_implementation_check(child)) {
+		zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be the same as %s::%s()", ZEND_FN_SCOPE_NAME(child), child->common.function_name, ZEND_FN_SCOPE_NAME(child->common.prototype), child->common.prototype->common.function_name);
 	}
 
 	return 0;

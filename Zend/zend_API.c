@@ -1166,6 +1166,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 		internal_function->scope = scope;
 		internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		internal_function->ns = EG(active_namespace);
+		internal_function->prototype = NULL;
 		if (!internal_function->handler) {
 			zend_error(error_type, "Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table TSRMLS_CC);
