@@ -675,8 +675,7 @@ static PHP_METHOD(PDOStatement, rowCount)
 {
 	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This statement is not a scrollable cursor and does not know the row count");
-	RETURN_FALSE;
+	RETURN_LONG(stmt->row_count);
 }
 /* }}} */
 
