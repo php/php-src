@@ -29,6 +29,20 @@
 
 #define sign(n) ((n)<0?-1:((n)>0?1:0))
 
+#define PHP_VC_COMPARE	0
+#define PHP_VC_LT		1
+#define PHP_VC_LE		2
+#define PHP_VC_GT		3
+#define PHP_VC_GE		4
+#define PHP_VC_EQ		5
+
+#define PHP_VCFUNC(name,mode) \
+	void name(INTERNAL_FUNCTION_PARAMETERS) { \
+		do_version_compare(INTERNAL_FUNCTION_PARAM_PASSTHRU, mode); \
+	}
+
+/* {{{ php_canonicalize_version() */
+
 PHPAPI char *
 php_canonicalize_version(const char *version)
 {
@@ -65,6 +79,9 @@ php_canonicalize_version(const char *version)
     return buf;
 }
 
+/* }}} */
+/* {{{ compare_special_version_forms() */
+
 static int
 compare_special_version_forms(const char *form1, const char *form2)
 {
@@ -94,6 +111,9 @@ compare_special_version_forms(const char *form1, const char *form2)
 	}
 	return sign(found1 - found2);
 }
+
+/* }}} */
+/* {{{ php_version_compare() */
 
 PHPAPI int
 php_version_compare(const char *orig_ver1, const char *orig_ver2)
@@ -159,19 +179,68 @@ php_version_compare(const char *orig_ver1, const char *orig_ver2)
 	return compare;
 }
 
-/* {{{ proto int version_compare(string ver1, string ver2) */
+/* }}} */
+/* {{{ do_version_compare() */
 
-PHP_FUNCTION(version_compare)
+void do_version_compare(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
     zval **v1, **v2;
+	int compare, argc;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &v1, &v2) == FAILURE) {
+	argc = ZEND_NUM_ARGS();
+	if (argc != 2 || zend_get_parameters_ex(argc, &v1, &v2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(v1);
 	convert_to_string_ex(v2);
-	RETURN_LONG(php_version_compare(Z_STRVAL_PP(v1), Z_STRVAL_PP(v2)));
+	compare = php_version_compare(Z_STRVAL_PP(v1), Z_STRVAL_PP(v2));
+	switch (mode) {
+		case PHP_VC_LT:
+			RETURN_LONG(compare == -1);
+		case PHP_VC_LE:
+			RETURN_LONG(compare != 1);
+		case PHP_VC_GT:
+			RETURN_LONG(compare == 1);
+		case PHP_VC_GE:
+			RETURN_LONG(compare != -1);
+		case PHP_VC_EQ:
+			RETURN_LONG(compare == 0);
+		case PHP_VC_COMPARE:
+		default:
+			RETURN_LONG(compare);
+	}
 }
+
+/* }}} */
+
+/* {{{ proto int version_compare(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_compare), PHP_VC_COMPARE);
+
+/* }}} */
+/* {{{ proto int version_lt(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_lt), PHP_VC_LT);
+
+/* }}} */
+/* {{{ proto int version_lt(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_le), PHP_VC_LE);
+
+/* }}} */
+/* {{{ proto int version_gt(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_gt), PHP_VC_GT);
+
+/* }}} */
+/* {{{ proto int version_ge(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_ge), PHP_VC_GE);
+
+/* }}} */
+/* {{{ proto int version_eq(string ver1, string ver2) */
+
+PHP_VCFUNC(PHP_FN(version_eq), PHP_VC_EQ);
 
 /* }}} */
 
