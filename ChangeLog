@@ -1,3 +1,84 @@
+2005-04-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * NEWS:
+      MBFN2B
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_execute_API.c:
+      MFH: - Fixed bug #28839 (SIGSEGV in interactive mode (php -a)).
+      MFH:   (kameshj at fastmail dot fm)
+
+2005-04-03  Uwe Schindler  <uwe@thetaphi.de>
+
+    * sapi/nsapi/nsapi.c:
+      Add sapi.get_request_time() to NSAPI
+
+2005-04-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/standard/string.c
+      ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt
+      ext/standard/tests/strings/chunk_split.phpt:
+      MFH: Fixed bug #32530 (chunk_split() does not append endstr if chunklen is
+      longer then the original string).
+
+    * ext/standard/string.c
+      ext/standard/tests/strings/chunk_split.phpt:
+      Fixed bug #32530 (chunk_split() does not append endstr if chunklen is
+      longer then the original string).
+
+2005-04-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/pgsql/config.m4:
+      fix typo
+
+    * (PHP_4_3)
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re
+      ext/standard/url_scanner_ex.re:
+      MFH: fix output_reset_rewrite_vars() returning false
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re:
+      fix output_reset_rewrite_vars() returning false everytime
+
+    * (PHP_5_0)
+      main/php_variables.c:
+      MFH patch previously commited by Ilia
+      (memory leak when "S" is not listed in variable_order)
+
+2005-04-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * (PHP_4_3)
+      ext/dbase/dbase.c
+      ext/dbase/dbf_rec.c:
+      - Sync with HEAD:
+        . php_error -> php_error_docref (fixes test)
+        . pval -> zval
+        . use modern parameter parsing
+
+    * ext/gd/tests/bug19366.phpt:
+      Fix another title
+
+    * ext/gd/tests/bug27582_1.phpt:
+      fix description
+
+2005-04-03  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_5_0)
+      NEWS:
+      - Reorder.
+
+2005-04-03  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/xml/tests/bug32001.phpt:
+      Partial fix test: It is still possible to use expat libs with ext/xml..
+
 2005-04-02  Greg Beaver  <greg@chiaraquartet.net>
 
     * (PHP_4_3)
