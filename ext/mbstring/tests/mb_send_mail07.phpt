@@ -10,7 +10,7 @@ if (!@mb_internal_encoding('ISO-2022-KR')) {
 }
 ?>
 --INI--
-sendmail_path=cat
+sendmail_path=/bin/cat
 --FILE--
 <?php
 $to = 'example@example.com';
