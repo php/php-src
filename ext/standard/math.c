@@ -101,7 +101,6 @@ PHP_FUNCTION(floor) {
 
 /* }}} */
 /* {{{ proto int round(double number)
-
    Returns the rounded value of the number */
 
 #ifndef HAVE_RINT
