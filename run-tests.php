@@ -109,19 +109,28 @@ PHP_OS      : " . PHP_OS . "
 INI actual  : " . realpath(get_cfg_var("cfg_file_path")) . "
 More .INIs  : " . (function_exists(\'php_ini_scanned_files\') ? str_replace("\n","", php_ini_scanned_files()) : "** not determined **"); ?>';
 save_text($info_file, $php_info);
-$settings = array(
+$ini_overwrites = array(
+		'output_handler=',
+		'zlib.output_compression=Off',
 		'open_basedir=',
 		'safe_mode=0',
+		'disable_functions=',
 		'output_buffering=Off',
-		'output_handler=',
+		'error_reporting=2047',
+		'display_errors=1',
+		'log_errors=0',
+		'html_errors=0',
 		'track_errors=1',
-		'zlib.output_compression=Off',
+		'report_memleaks=1',
+		"docref_root=/phpmanual/",
+		"docref_ext=.html",
+		"error_prepend_string=",
+		"error_append_string=",
 		'auto_prepend_file=',
 		'auto_append_file=',
-		'disable_functions='
 	);
 $info_params = array();
-settings2array($settings,$info_params);
+settings2array($ini_overwrites,$info_params);
 settings2params($info_params);
 $php_info = `$php $info_params $info_file`;
 @unlink($info_file);
@@ -456,7 +465,7 @@ function error_report($testname,$logname,$tested)
 
 function run_test($php,$file)
 {
-	global $log_format, $info_params;
+	global $log_format, $info_params, $ini_overwrites;
 
 	if (DETAILED) echo "
 =================
@@ -536,27 +545,10 @@ TEST $file
 	}
 
 	// Default ini settings
-	$settings = array (
-		"output_handler=",
-		"zlib.output_compression=Off",
-		"open_basedir=",
-		"safe_mode=0",
-		"disable_functions=",
-		"error_reporting=2047",
-		"display_errors=1",
-		"log_errors=0",
-		"html_errors=0",
-		"track_errors=1",
-		"report_memleaks=1",
-		"docref_root=/phpmanual/",
-		"docref_ext=.html",
-		"error_prepend_string=",
-		"error_append_string=",
-		"auto_append_file=",
-		"auto_prepend_file=",
-	);
 	$ini_settings = array();
-	settings2array($settings, $ini_settings);
+	// additional ini overwrites
+	//$ini_overwrites[] = 'setting=value';
+	settings2array($ini_overwrites, $ini_settings);
 
 	// Any special ini settings 
 	// these may overwrite the test defaults...
