@@ -264,7 +264,7 @@ static void _class_string(string *str, zend_class_entry *ce, char *indent TSRMLS
 			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
 
 			while (zend_hash_get_current_data_ex(&ce->constants_table, (void **) &value, &pos) == SUCCESS) {
-				zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_len, &num_index, 0, NULL);
+				zend_hash_get_current_key_ex(&ce->constants_table, &key, &key_len, &num_index, 0, &pos);
 				
 				string_printf(str, "%s    Constant [ %s %s ] { }\n",
 						   indent,
