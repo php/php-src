@@ -52,8 +52,8 @@ from the source root and any subdirectories below. If there are files,
 which have a "phpt" extension, "run-tests.php" looks at the sections
 in these files, determines whether it should run it, by evaluating
 the 'SKIP' section. If the test is eligible for execution, the 'FILE'
-section is extracted into a ".php" file, with a unique name and
-executed.
+section is extracted into a ".php" file (with the same name besides 
+the extension) and gets executed.
 When an argument is given or TESTS environment variable is set, the
 GLOB is expanded by the shell and any file with extension "*.phpt" is
 regarded as a test file.
@@ -208,7 +208,8 @@ abcd
 Test script and SKIPIF code should be directly written into *.phpt.
 However, it is recommended to use include files when more test scripts
 depend on the same SKIPIF code or when certain test files need the same
-values for some input.
+values for some input. But no file used by any test should have one of
+the following extensions: ".php", ".log", ".exp", ".out" or ".diff".
 
 
 /ext/standard/tests/strings 003.phpt is a good example for using EXPECTF 
