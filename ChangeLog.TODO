@@ -23,7 +23,6 @@ over to PHP4.
 - PUT method support (mlemos@acm.org)
 - Add ldap_mod_add(), ldap_mod_del() and ldap_mod_replace() (Gerritt Thomson)
 - Fix parameter count problem in odbc_setoption()
-- Replace broken str_replace(). The fix in 3.0.7 was bogus (Sascha Schumann)
 - Really fix implode() this time.  The fix in 3.0.7 was bogus
 - Added more option to the date() function: (Colin Viebrock)
   'g' - hour, 12-hour format, no leading zeros
