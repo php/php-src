@@ -681,34 +681,30 @@ void _php_wddx_deserialize_ex(char *value, int vallen, zval *return_value)
 PHP_FUNCTION(wddx_serialize_value)
 {
 	int argc;
-	zval *var,
-		 *comment;
+	zval **var,
+		 **comment;
 	wddx_packet *packet;
 	char *buf;
 	
 	argc = ARG_COUNT(ht);
-	if(argc < 1 || argc > 2 || getParameters(ht, argc, &var, &comment) == FAILURE) {
+	if(argc < 1 || argc > 2 || getParametersEx(argc, &var, &comment) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	packet = emalloc(sizeof(wddx_packet));
+	packet = _php_wddx_constructor();
 	if (!packet) {
-		zend_error(E_WARNING, "Unable to allocate memory in php_wddx_packet_start");
 		RETURN_FALSE;
 	}
-	
-	packet->packet_head = dlst_init();
-	packet->packet_length = 0;
 
 	if (argc == 2)
 	{
-		convert_to_string(comment);
-		_php_wddx_packet_start(packet, comment->value.str.val);
+		convert_to_string_ex(comment);
+		_php_wddx_packet_start(packet, (*comment)->value.str.val);
 	}
 	else
 		_php_wddx_packet_start(packet, NULL);
 
-	_php_wddx_serialize_var(packet, var, NULL);		
+	_php_wddx_serialize_var(packet, (*var), NULL);
 	_php_wddx_packet_end(packet);
 	buf = _php_wddx_gather(packet);
 	_php_wddx_destructor(packet);
@@ -724,32 +720,29 @@ PHP_FUNCTION(wddx_serialize_vars)
 {
 	int argc, i;
 	wddx_packet *packet;
-	zval **args;
+	zval ***args;
 	char *buf;
 		
 	argc = ARG_COUNT(ht);
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 		
-	packet = emalloc(sizeof(wddx_packet));
+	packet = _php_wddx_constructor();
 	if (!packet) {
-		zend_error(E_WARNING, "Unable to allocate memory in php_wddx_packet_start");
 		RETURN_FALSE;
 	}
-	
-	packet->packet_head = dlst_init();
-	packet->packet_length = 0;
 
 	_php_wddx_packet_start(packet, NULL);
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_S);
 	
 	for (i=0; i<argc; i++) {
-		convert_to_string(args[i]);
-		_php_wddx_add_var(packet, args[i]);
+		if ((*args[i])->type != IS_ARRAY && (*args[i])->type != IS_OBJECT)
+			convert_to_string_ex(args[i]);
+		_php_wddx_add_var(packet, *args[i]);
 	}	
 	
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);
@@ -781,25 +774,24 @@ wddx_packet *_php_wddx_constructor(void)
 PHP_FUNCTION(wddx_packet_start)
 {
 	int argc;
-	zval *comment;
+	zval **comment;
 	wddx_packet *packet;
 
 	comment = NULL;
 	argc = ARG_COUNT(ht);
 
-	if (argc>1 || (argc==1 && getParameters(ht, 1, &comment)==FAILURE)) {
+	if (argc > 1 || (argc == 1 && getParametersEx(1, &comment)==FAILURE)) {
 		WRONG_PARAM_COUNT;
 	}
 
 	packet = _php_wddx_constructor();
 	if (!packet) {
-		zend_error(E_WARNING, "Unable to allocate memory in wddx_packet_start");
 		RETURN_FALSE;
 	}
 	
 	if (argc == 1) {
-		convert_to_string(comment);
-		_php_wddx_packet_start(packet, comment->value.str.val);		
+		convert_to_string_ex(comment);
+		_php_wddx_packet_start(packet, (*comment)->value.str.val);
 	}
 	else
 		_php_wddx_packet_start(packet, NULL);
@@ -815,15 +807,15 @@ PHP_FUNCTION(wddx_packet_start)
    Ends specified WDDX packet and returns the string containing the packet */
 PHP_FUNCTION(wddx_packet_end)
 {
-	zval *packet_id;
+	zval **packet_id;
 	char *buf;
 	wddx_packet *packet = NULL;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &packet_id)==FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &packet_id)==FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(packet, wddx_packet *, &packet_id, -1, "WDDX packet ID", le_wddx);
+	ZEND_FETCH_RESOURCE(packet, wddx_packet *, packet_id, -1, "WDDX packet ID", le_wddx);
 			
 	_php_wddx_add_chunk(packet, WDDX_STRUCT_E);	
 	
@@ -831,7 +823,7 @@ PHP_FUNCTION(wddx_packet_end)
 
 	buf = _php_wddx_gather(packet);
 	
-	zend_list_delete(packet_id->value.lval);
+	zend_list_delete((*packet_id)->value.lval);
 	
 	RETURN_STRING(buf, 0);
 }
@@ -843,8 +835,8 @@ PHP_FUNCTION(wddx_packet_end)
 PHP_FUNCTION(wddx_add_vars)
 {
 	int argc, i;
-	zval **args;
-	zval *packet_id;
+	zval ***args;
+	zval **packet_id;
 	wddx_packet *packet = NULL;
 	
 	argc = ARG_COUNT(ht);
@@ -853,15 +845,15 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 	
 	/* Allocate arguments array and get the arguments, checking for errors. */
-	args = (zval **)emalloc(argc * sizeof(zval *));
-	if (getParametersArray(ht, argc, args) == FAILURE) {
+	args = (zval ***)emalloc(argc * sizeof(zval **));
+	if (getParametersArrayEx(argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
 	}
 	
 	packet_id = args[0];
 
-	packet = (wddx_packet *)zend_fetch_resource(&packet_id, -1, "WDDX packet ID", le_wddx);
+	packet = (wddx_packet *)zend_fetch_resource(packet_id, -1, "WDDX packet ID", le_wddx);
 	if (!packet)
 	{
 		efree(args);
@@ -869,8 +861,9 @@ PHP_FUNCTION(wddx_add_vars)
 	}
 		
 	for (i=1; i<argc; i++) {
-		convert_to_string(args[i]);
-		_php_wddx_add_var(packet, args[i]);
+		if ((*args[i])->type != IS_ARRAY && (*args[i])->type != IS_OBJECT)
+			convert_to_string_ex(args[i]);
+		_php_wddx_add_var(packet, (*args[i]));
 	}
 
 	efree(args);	
@@ -879,21 +872,21 @@ PHP_FUNCTION(wddx_add_vars)
 /* }}} */
 
 
-/* {{{  proto mixed wddx_deserialized(string packet) 
+/* {{{  proto mixed wddx_deserialize(string packet) 
    Deserializes given packet and returns a PHP value */
 PHP_FUNCTION(wddx_deserialize)
 {
-	zval *packet;
+	zval **packet;
 	
-	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &packet) == FAILURE) {
+	if (ARG_COUNT(ht)!=1 || getParametersEx(1, &packet) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_string(packet);
-	if (packet->value.str.len == 0)
+	convert_to_string_ex(packet);
+	if ((*packet)->value.str.len == 0)
 		return;
 		
-	_php_wddx_deserialize(packet, return_value);
+	_php_wddx_deserialize(*packet, return_value);
 }
 /* }}} */
 
