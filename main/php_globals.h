@@ -147,6 +147,9 @@ struct _php_core_globals {
 	int  last_error_lineno;
 	error_handling_t  error_handling;
 	zend_class_entry *exception_class;
+
+	char *disable_functions;
+	char *disable_classes;
 };
 
 

@@ -131,23 +131,21 @@ static PHP_INI_MH(OnChangeMemoryLimit)
  */
 static void php_disable_functions(TSRMLS_D)
 {
-	char *s = NULL;
-	char *e = INI_STR("disable_functions");
-	char p;
+	char *s = NULL, *e;
 
-	if (!*e) {
+	if (!*(INI_STR("disable_functions"))) {
 		return;
 	}
+
+	e = PG(disable_functions) = strdup(INI_STR("disable_functions"));
 
 	while (*e) {
 		switch (*e) {
 			case ' ':
 			case ',':
 				if (s) {
-					p = *e;
 					*e = '\0';
 					zend_disable_function(s, e-s TSRMLS_CC);
-					*e = p;
 					s = NULL;
 				}
 				break;
@@ -169,23 +167,21 @@ static void php_disable_functions(TSRMLS_D)
  */
 static void php_disable_classes(TSRMLS_D)
 {
-	char *s = NULL;
-	char *e = INI_STR("disable_classes");
-	char p;
+	char *s = NULL, *e;
 
-	if (!*e) {
+	if (!*(INI_STR("disable_classes"))) {
 		return;
 	}
+
+	e = PG(disable_classes) = strdup(INI_STR("disable_classes"));
 
 	while (*e) {
 		switch (*e) {
 			case ' ':
 			case ',':
 				if (s) {
-					p = *e;
 					*e = '\0';
 					zend_disable_class(s, e-s TSRMLS_CC);
-					*e = p;
 					s = NULL;
 				}
 				break;
@@ -1384,6 +1380,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	PG(last_error_file) = NULL;
 	PG(last_error_lineno) = 0;
 	PG(error_handling) = EH_NORMAL;
+	PG(disable_functions) = NULL;
+	PG(disable_classes) = NULL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
@@ -1551,6 +1549,12 @@ void php_module_shutdown(TSRMLS_D)
 	}
 	if (PG(last_error_file)) {
 		free(PG(last_error_file));
+	}
+	if (PG(disable_functions)) {
+		free(PG(disable_functions));
+	}
+	if (PG(disable_classes)) {
+		free(PG(disable_classes));
 	}
 }
 /* }}} */
