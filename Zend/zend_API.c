@@ -617,14 +617,14 @@ void module_destructor(zend_module_entry *module)
 #if 0
 		zend_printf("%s:  Request shutdown\n",module->name);
 #endif
-		module->request_shutdown_func();
+		module->request_shutdown_func(module->type, module->module_number);
 	}
 	module->request_started=0;
 	if (module->module_started && module->module_shutdown_func) {
 #if 0
 		zend_printf("%s:  Module shutdown\n",module->name);
 #endif
-		module->module_shutdown_func();
+		module->module_shutdown_func(module->type, module->module_number);
 	}
 	module->module_started=0;
 	unregister_functions(module->functions,-1);
@@ -662,7 +662,7 @@ int module_registry_cleanup(zend_module_entry *module)
 #if 0
 				zend_printf("%s:  Request shutdown\n",module->name);
 #endif
-				module->request_shutdown_func();
+				module->request_shutdown_func(module->type, module->module_number);
 			}
 			module->request_started=0;
 			return 0;
