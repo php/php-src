@@ -49,7 +49,7 @@
 #include <sys/socket.h>
 /* #include <sys/uio.h> */
 #endif
-#include "head.h"
+#include "functions/head.h"
 #include "safe_mode.h"
 #include "php3_string.h"
 #include "file.h"

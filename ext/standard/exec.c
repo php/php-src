@@ -36,7 +36,7 @@
 #include <ctype.h>
 #include "php3_string.h"
 #include "safe_mode.h"
-#include "head.h"
+#include "functions/head.h"
 #include "exec.h"
 #include "php_globals.h"
 

@@ -60,7 +60,7 @@
 
 #include "base64.h"
 #include "file.h"
-#include "post.h"
+#include "functions/post.h"
 #include "url.h"
 #include "fsock.h"
 
@@ -96,8 +96,8 @@ struct php3i_sockbuf {
 static struct php3i_sockbuf *phpsockbuf;
 
 static int php3_minit_fsock(INIT_FUNC_ARGS);
-static int php3_mshutdown_fsock(void);
-static int php3_rshutdown_fsock(void);
+static int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS);
+static int php3_rshutdown_fsock(SHUTDOWN_FUNC_ARGS);
 
 php3_module_entry fsock_module_entry = {
 	"Socket functions", fsock_functions, php3_minit_fsock, php3_mshutdown_fsock, NULL, php3_rshutdown_fsock, NULL, STANDARD_MODULE_PROPERTIES
@@ -363,7 +363,8 @@ int _php3_sock_fgets(char *buf, int maxlen, int socket)
 			sockbuf->next = phpsockbuf;
 			phpsockbuf = sockbuf;
 		} else {
-			int needlen = sockbuf->writepos + buflen;
+			uint needlen = sockbuf->writepos + buflen;
+
 			if (needlen > sockbuf->readbuflen) {
 				sockbuf->readbuflen += maxlen;
 				sockbuf->readbuf = erealloc(sockbuf->readbuf, sockbuf->readbuflen);
@@ -440,7 +441,7 @@ static int php3_minit_fsock(INIT_FUNC_ARGS)
 /* }}} */
 	/* {{{ php3_mshutdown_fsock */
 
-static int php3_mshutdown_fsock(void)
+static int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS)
 {
 #ifndef THREAD_SAFE
 	_php3_hash_destroy(&ht_socks);
@@ -451,7 +452,7 @@ static int php3_mshutdown_fsock(void)
 /* }}} */
     /* {{{ php3_rshutdown_fsock() */
 
-static int php3_rshutdown_fsock(void)
+static int php3_rshutdown_fsock(SHUTDOWN_FUNC_ARGS)
 {
 	struct php3i_sockbuf *sockbuf = phpsockbuf, *this;
 
