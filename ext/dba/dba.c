@@ -43,6 +43,7 @@
 #include "php_ndbm.h"
 #include "php_dbm.h"
 #include "php_cdb.h"
+#include "php_db1.h"
 #include "php_db2.h"
 #include "php_db3.h"
 #include "php_db4.h"
@@ -239,6 +240,9 @@ static dba_handler handler[] = {
 #if DBA_CDB_BUILTIN
     DBA_NAMED_HND(cdb_make, cdb, DBA_STREAM_OPEN|DBA_LOCK_ALL) /* No lock in lib */
 #endif
+#if DBA_DB1
+	DBA_HND(db1, DBA_LOCK_ALL) /* No lock in lib */
+#endif
 #if DBA_DB2
 	DBA_HND(db2, DBA_LOCK_ALL) /* No lock in lib */
 #endif
@@ -268,6 +272,8 @@ static dba_handler handler[] = {
 #define DBA_DEFAULT "db3"
 #elif DBA_DB2
 #define DBA_DEFAULT "db2"
+#elif DBA_DB1
+#define DBA_DEFAULT "db1"
 #elif DBA_GDBM
 #define DBA_DEFAULT "gdbm"
 #elif DBA_NBBM
