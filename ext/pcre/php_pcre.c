@@ -77,6 +77,9 @@ static int _php_free_pcre_cache(void *data)
 {
 	pcre_cache_entry *pce = (pcre_cache_entry *) data;
 	pefree(pce->re, 1);
+#if HAVE_SETLOCALE
+	pefree((void*)pce->tables, 1);
+#endif
 	return 1;
 }
 
@@ -163,6 +166,10 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 	int				 	 regex_len;
 	int				 	 do_study = 0;
 	int					 poptions = 0;
+	unsigned const char *tables = NULL;
+#if HAVE_SETLOCALE
+	char				*locale = setlocale(LC_CTYPE, NULL);
+#endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
 	PCRE_LS_FETCH();
@@ -171,9 +178,15 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 	   back the compiled pattern, otherwise go on and compile it. */
 	regex_len = strlen(regex);
 	if (zend_hash_find(&PCRE_G(pcre_cache), regex, regex_len+1, (void **)&pce) == SUCCESS) {
-		extra = pce->extra;
-		*preg_options = pce->preg_options;
-		return pce->re;
+#if HAVE_SETLOCALE
+		if (!strcmp(pce->locale, locale)) {
+#endif
+			extra = pce->extra;
+			*preg_options = pce->preg_options;
+			return pce->re;
+#if HAVE_SETLOCALE
+		}
+#endif
 	}
 	
 	p = regex;
@@ -247,13 +260,18 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 				return NULL;
 		}
 	}
+	
+#if HAVE_SETLOCALE
+	if (strcmp(locale, "C"))
+		tables = pcre_maketables();
+#endif
 
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre_compile(pattern,
 					  coptions,
 					  &error,
 					  &erroffset,
-					  NULL);
+					  tables);
 
 	if (re == NULL) {
 		zend_error(E_WARNING, "Compilation failed: %s at offset %d\n", error, erroffset);
@@ -278,6 +296,10 @@ static pcre* _pcre_get_compiled_regex(char *regex, pcre_extra *extra, int *preg_
 	new_entry.re = re;
 	new_entry.extra = extra;
 	new_entry.preg_options = poptions;
+#if HAVE_SETLOCALE
+	new_entry.locale = locale;
+	new_entry.tables = tables;
+#endif
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
 						sizeof(pcre_cache_entry), NULL);
 

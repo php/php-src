@@ -35,6 +35,9 @@
 #if HAVE_PCRE
 
 #include "pcrelib/pcre.h"
+#if HAVE_LOCALE_H
+#include <locale.h>
+#endif
 
 extern void php_info_pcre(ZEND_MODULE_INFO_FUNC_ARGS);
 extern int php_minit_pcre(INIT_FUNC_ARGS);
@@ -55,6 +58,10 @@ typedef struct {
         pcre *re;
         pcre_extra *extra;
 	int preg_options;
+#if HAVE_SETLOCALE
+	char *locale;
+	unsigned const char *tables;
+#endif
 } pcre_cache_entry;
 
 typedef struct {
