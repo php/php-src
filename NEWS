@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Impelemented timeout functionality, and fixed error handling of fsockopen() on win32
+- Add --with-mysql-sock option (James Cox)
 - Fixed shuffle() to provide equal distribution of values. (Andrei)
 - Added --with-mysql-sock configure option which can be used to override
   the unix socket location. (e.g. NFS compiles, etc.) (James Cox)
