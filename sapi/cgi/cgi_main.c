@@ -129,7 +129,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array ELS_DC SLS_DC PLS
 
 	/* Build the special-case PHP_SELF variable for the CGI version */
 #if FORCE_CGI_REDIRECT
-	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri, track_vars_array ELS_CC PLS_CC);
+	php_register_variable("PHP_SELF", (SG(request_info).request_uri ? SG(request_info).request_uri:""), track_vars_array ELS_CC PLS_CC);
 #else
 	{
 		char *sn;
