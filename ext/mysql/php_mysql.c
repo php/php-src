@@ -1633,10 +1633,13 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 			}
 		} else {
 			/* NULL value. */
-			if (result_type & MYSQL_NUM)
+			if (result_type & MYSQL_NUM) {
 				add_index_null(return_value, i);
-			else
+            }
+
+            if (result_type & MYSQL_ASSOC) {
 				add_assoc_null(return_value, mysql_field->name);
+            }
 		}
 	}
 }
