@@ -1,3 +1,32 @@
+2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      Added a check to ensure that string.h is avaliable before trying to use it.
+      
+      Thanks Andi.
+
+    * zend_builtin_functions.c:
+      Added missing header.
+
+2003-02-07  Zeev Suraski  <zeev@zend.com>
+
+    * zend_globals.h
+      zend_object_handlers.c:
+      Improve PPP handling of properties
+
+    * zend_config.w32.h:
+      Better fix
+
+    * zend_config.w32.h:
+      Fix Windows build
+
+2003-02-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c:
+      Fixed bug #15734 (Added an optional parameter to get_defined_constants(),
+      which if passed, will include information regarding who created the
+      constant).
+
 2003-02-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_builtin_functions.c:
