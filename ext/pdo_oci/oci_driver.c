@@ -198,8 +198,9 @@ static int oci_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, pd
 	ub4 prefetch;
 
 #if HAVE_OCISTMTFETCH2
-	S->exec_type = pdo_attr_lval(driver_options, PDO_ATTR_SCROLL,
-		0 TSRMLS_CC) ? OCI_STMT_SCROLLABLE_READONLY : OCI_DEFAULT;
+	S->exec_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR,
+		PDO_CURSOR_FWDONLY TSRMLS_CC) == PDO_CURSOR_SCROLL ?
+		OCI_STMT_SCROLLABLE_READONLY : OCI_DEFAULT;
 #else
 	S->exec_type = OCI_DEFAULT;
 #endif
