@@ -192,6 +192,7 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_factory, third_arg_force_ref)
 	PHP_FE(sqlite_udf_encode_binary, NULL)
 	PHP_FE(sqlite_udf_decode_binary, NULL)
+	PHP_FE(sqlite_fetch_column_types, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -211,6 +212,7 @@ function_entry sqlite_funcs_db[] = {
 	PHP_ME_MAPPING(create_function, sqlite_create_function, NULL)
 	PHP_ME_MAPPING(busy_timeout, sqlite_busy_timeout, NULL)
 	PHP_ME_MAPPING(last_error, sqlite_last_error, NULL)
+	PHP_ME_MAPPING(fetch_column_types, sqlite_fetch_column_types, NULL)
 /*	PHP_ME_MAPPING(error_string, sqlite_error_string, NULL) static */
 /*	PHP_ME_MAPPING(escape_string, sqlite_escape_string, NULL) static */
 	{NULL, NULL, NULL}
@@ -1549,6 +1551,72 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 	}
 
 	sqlite_query(object, db, sql, sql_len, mode, 0, return_value, NULL TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto resource sqlite_fetch_column_types(string table_name, resource db)
+   Return an array of column types from a particular table. */
+PHP_FUNCTION(sqlite_fetch_column_types)
+{
+	zval *zdb;
+	struct php_sqlite_db *db;
+	char *tbl, *sql;
+	long tbl_len;
+	char *errtext = NULL;
+	zval *object = getThis();
+	struct php_sqlite_result res;
+	const char **rowdata, **colnames, *tail;
+	int i, ncols;
+
+	if (object) {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &tbl, &tbl_len)) {
+			return;
+		}
+		DB_FROM_OBJECT(db, object);
+	} else {
+		if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+				ZEND_NUM_ARGS() TSRMLS_CC, "sr", &tbl, &tbl_len, &zdb) && 
+			FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &zdb, &tbl, &tbl_len)) {
+			return;
+		}
+		DB_FROM_ZVAL(db, &zdb);
+	}
+
+	if (!(sql = sqlite_mprintf("SELECT * FROM %q LIMIT 1", tbl))) {
+		RETURN_FALSE;
+	}
+
+	sqlite_exec(db->db, "PRAGMA show_datatypes = ON", NULL, NULL, &errtext);
+
+	db->last_err_code = sqlite_compile(db->db, sql, &tail, &res.vm, &errtext);
+
+	sqlite_freemem(sql);
+
+	if (db->last_err_code != SQLITE_OK) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", errtext);
+		sqlite_freemem(errtext);
+		RETVAL_FALSE;
+		goto done;
+	}
+
+	sqlite_step(res.vm, &ncols, &rowdata, &colnames);
+
+	array_init(return_value);
+
+	for (i = 0; i < ncols; i++) {
+		char *colname = (char *)colnames[i];
+
+		if (SQLITE_G(assoc_case) == 1) {
+			php_sqlite_strtoupper(colname);
+		} else if (SQLITE_G(assoc_case) == 2) {
+			php_sqlite_strtolower(colname);
+		}
+
+		add_assoc_string(return_value, colname, colnames[ncols + i] ? (char *)colnames[ncols + i] : "", 1);
+	}
+
+done:
+	sqlite_exec(db->db, "PRAGMA show_datatypes = OFF", NULL, NULL, &errtext);
 }
 /* }}} */
 

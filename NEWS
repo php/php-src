@@ -29,6 +29,7 @@ PHP                                                                        NEWS
   . stream_socket_sendto() and stream_socket_recvfrom(). (Wez)
   . iconv_mime_decode_headers(). (Moriyoshi)
   . get_declared_interfaces(). (Andrey, Marcus)
+  . sqlite_fetch_column_types(). (Ilia)
 - Added proxy support to http:// wrapper. (Sara)
 - Added rename(), rmdir() and mkdir() support to userstreams. (Sara)
 - Added rename(), rmdir() and mkdir() support to ftp:// wrapper. (Sara)

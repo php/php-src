@@ -88,6 +88,8 @@ PHP_FUNCTION(sqlite_udf_encode_binary);
 
 PHP_FUNCTION(sqlite_factory);
 
+PHP_FUNCTION(sqlite_fetch_column_types);
+
 ZEND_BEGIN_MODULE_GLOBALS(sqlite)
 	 int assoc_case;
 ZEND_END_MODULE_GLOBALS(sqlite)
