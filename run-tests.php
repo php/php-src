@@ -75,6 +75,7 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 	$php = getenv('TEST_PHP_EXECUTABLE');
 	if ($php=='auto') {
 		$php = $cwd.'/sapi/cli/php';
+		putenv("TEST_PHP_EXECUTABLE=$php");
 	}
 }
 if (!file_exists($php)) {
