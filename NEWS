@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Made foreach() only support variables and array(...) as the array argument
+  (Andi, Zend Engine)
 - Fixed FTP module to accept multiline server replies (Jani)
 - Fix switch which only has a single default rule. (Andi, Zend Engine)
 - Fix problem with nested foreach()'s. (Andi, Zend Engine)
