@@ -52,8 +52,8 @@ static php_tux_globals tux_globals;
 static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 {
 	int n;
-	uint sent = 0;
 	int m;
+	const char *estr;
 	
 	/* combine headers and body */
 	if (TG(number_vec)) {
@@ -73,9 +73,11 @@ static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 		TG(number_vec) = 0;
 		return str_length;
 	}
+
+	estr = str + str_length;
 	
-	while (str_length > 0) {
-		n = send(TG(req)->sock, str, str_length, 0);
+	while (str < estr) {
+		n = send(TG(req)->sock, str, estr - str, 0);
 
 		if (n == -1 && errno == EPIPE)
 			php_handle_aborted_connection();
@@ -84,13 +86,14 @@ static int sapi_tux_ub_write(const char *str, uint str_length TSRMLS_DC)
 		if (n <= 0) 
 			return n;
 
-		TG(req)->bytes_sent += n;
 		str += n;
-		sent += n;
-		str_length -= n;
 	}
 
-	return sent;
+	n = str_length - (estr - str);
+	
+	TG(req)->bytes_sent += n;
+
+	return n;
 }
 
 static int sapi_tux_send_headers(sapi_headers_struct *sapi_headers)
