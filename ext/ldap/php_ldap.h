@@ -69,6 +69,7 @@ PHP_FUNCTION(ldap_next_attribute);
 PHP_FUNCTION(ldap_get_attributes);
 
 PHP_FUNCTION(ldap_get_values);
+PHP_FUNCTION(ldap_get_values_len);
 
 PHP_FUNCTION(ber_free);
 PHP_FUNCTION(ldap_get_dn);
