@@ -512,7 +512,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 			eol = memchr(readptr, '\n', avail);
 		}
 
-		if (eol && (eol + 1 - readptr) <= maxlen - 1) {
+		if (eol && ((ptrdiff_t)eol + 1 - (ptrdiff_t)readptr) <= maxlen - 1) {
 			justread = eol + 1 - readptr;
 		} else {
 			eol = NULL;

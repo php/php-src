@@ -255,8 +255,8 @@ struct _php_stream  {
 	off_t position; /* of underlying stream */
 	unsigned char *readbuf;
 	size_t readbuflen;
-	size_t readpos;
-	size_t writepos;
+	off_t readpos;
+	off_t writepos;
 	
 	/* how much data to read when filling buffer */
 	size_t chunk_size;

@@ -571,7 +571,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	databuf_t		*data = NULL;
 	char			*ptr;
 	int			lastch;
-	int			rcvd;
+	size_t			rcvd;
 	char			arg[11];
 	TSRMLS_FETCH();
 
@@ -1443,7 +1443,7 @@ ftp_async_continue_read(ftpbuf_t *ftp)
 	databuf_t	*data = NULL;
 	char		*ptr;
 	int			lastch;
-	int			rcvd;
+	size_t		rcvd;
 	ftptype_t	type;
 	TSRMLS_FETCH();
 
