@@ -1,3 +1,47 @@
+2002-07-19  jason  <jason@pb1.pair.com>
+
+    * main/network.c
+      main/php_network.h: Fix feof() on win32
+    Bug #18436
+
+2002-07-19  sniper  <sniper@pb1.pair.com>
+
+    * main/network.c: ws fix
+
+2002-07-19  phanto  <phanto@pb1.pair.com>
+
+    * ext/rpc/com/com_wrapper.c
+      ext/rpc/skeleton/skeleton.c
+      ext/rpc/skeleton/skeleton.h
+      ext/rpc/com/com.c
+      ext/rpc/handler.h
+      ext/rpc/rpc.c: - added a skeleton for new layers
+    - a bit cleanup
+
+2002-07-19  yohgaki  <yohgaki@pb1.pair.com>
+
+    * php.ini-recommended
+      php.ini-dist: MFH
+
+    * php.ini-dist
+      php.ini-recommended:
+    This option should be left enabled by default by mistake.
+    --enable-trans-sid option is removed and this option should
+    be disabled by default in php.ini.
+
+    1) It's insecure by nature
+    2) It may not work well always
+    3) It wasn't enabled by default used be
+    4) It risks security and user should enable it after realizing
+       it's security risks.
+
+2002-07-19  derick  <derick@pb1.pair.com>
+
+    * ext/ircg/ircg.c
+      ext/interbase/interbase.c
+      ext/informix/ifx.ec
+      ext/iconv/iconv.c: Unify error messages
+
 2002-07-18  phanto  <phanto@pb1.pair.com>
 
     * ext/rpc/com/conversion.h
