@@ -676,6 +676,7 @@ static int com_call(rpc_string method_name, void *data, zval *return_value, int 
 	VARIANT result;
 	int current_arg, current_variant;
 	char *ErrString = NULL;
+	TSRMLS_FETCH();
 
 	/* if the length of the name is 0, we are dealing with a pointer to a dispid */
 	assert(method_name.len == 0);
@@ -684,7 +685,7 @@ static int com_call(rpc_string method_name, void *data, zval *return_value, int 
 
 	for (current_arg = 0; current_arg < num_args; current_arg++) {
 		current_variant = num_args - current_arg - 1;
-		php_zval_to_variant(*args[current_arg], &variant_args[current_variant], C_CODEPAGE((comval *) data));
+		php_zval_to_variant(*args[current_arg], &variant_args[current_variant], C_CODEPAGE((comval *) data) TSRMLS_CC);
 	}
 
 	dispparams.rgvarg = variant_args;
@@ -777,11 +778,12 @@ static int com_set(rpc_string property_name, zval *value, void *data)
 	DISPPARAMS dispparams;
 	VARIANT *var;
 	char *error_message, *ErrString = NULL;
+	TSRMLS_FETCH();
 
 	var = (VARIANT *) emalloc(sizeof(VARIANT));
 	VariantInit(var);
 
-	php_zval_to_variant(value, var, C_CODEPAGE((comval *) data));
+	php_zval_to_variant(value, var, C_CODEPAGE((comval *) data) TSRMLS_CC);
 	dispparams.rgvarg = var;
 	dispparams.rgdispidNamedArgs = &mydispid;
 	dispparams.cArgs = 1;
@@ -897,7 +899,7 @@ static ZEND_FUNCTION(com_indexed_prop_set)
 	for (current_arg = 2; current_arg < arg_count; current_arg++) {
 		current_variant = arg_count - current_arg - 1;
 		php_zval_to_variant(arguments[current_arg], &variant_args[current_variant],
-			C_CODEPAGE((comval *)intern->data));
+			C_CODEPAGE((comval *)intern->data) TSRMLS_CC);
 	}
 
 	dispparams.rgvarg = variant_args;

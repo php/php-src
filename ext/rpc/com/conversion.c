@@ -48,7 +48,7 @@
 static int comval_to_variant(zval *zval_arg, VARIANT *var_arg);
 
 /* implementations */
-PHPAPI void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage)
+PHPAPI void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage TSRMLS_DC)
 {
 	int type = VT_EMPTY;	/* default variant type */
 
@@ -92,11 +92,11 @@ PHPAPI void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage)
 			break;
 	}
 
-	php_zval_to_variant_ex(zval_arg, var_arg, type, codepage);
+	php_zval_to_variant_ex(zval_arg, var_arg, type, codepage TSRMLS_CC);
 }
 
 
-PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage)
+PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC)
 {
 	OLECHAR *unicode_str = NULL;
 
@@ -140,9 +140,9 @@ PHPAPI void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, i
 						/* Add another value to the safe array */
 						if (SUCCEEDED(SafeArrayPtrOfIndex( safeArray, &i, &v))) {		/* Pointer to output element entry retrieved successfully */
 							if (type) {	/* explicit type */
-							   php_zval_to_variant_ex(*entry, v, type, codepage);		/* Do the required conversion */
+							   php_zval_to_variant_ex(*entry, v, type, codepage TSRMLS_CC);		/* Do the required conversion */
 							} else {
-								php_zval_to_variant(*entry, v, codepage);                    /* Do the required conversion */
+								php_zval_to_variant(*entry, v, codepage TSRMLS_CC);                    /* Do the required conversion */
 							}
 						} else {
 							rpc_error(E_WARNING, "phpArrayToSafeArray() - Unable to retrieve pointer to output element number (%d)", i);

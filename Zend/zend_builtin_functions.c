@@ -530,7 +530,7 @@ ZEND_FUNCTION(get_class)
 		Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_len, 0 TSRMLS_CC) != SUCCESS) {
 		zend_class_entry *ce;
 
-		ce = zend_get_class_entry(*arg);
+		ce = zend_get_class_entry(*arg TSRMLS_CC);
 		if (!ce) {
 			RETURN_FALSE;
 		}
@@ -562,7 +562,7 @@ ZEND_FUNCTION(get_parent_class)
 		if (Z_OBJ_HT_PP(arg)->get_class_name
 			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
 			RETURN_STRINGL(name, name_length, 1);
-		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg))) {
+		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg TSRMLS_CC))) {
 			RETURN_STRINGL(ce->name, ce->name_length, 1);
 		} else {
 			RETURN_FALSE;

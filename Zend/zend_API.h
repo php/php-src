@@ -142,7 +142,7 @@ ZEND_API void zend_wrong_param_count(TSRMLS_D);
 ZEND_API zend_bool zend_is_callable(zval *callable, zend_bool syntax_only, char **callable_name);
 ZEND_API char *zend_get_module_version(char *module_name);
 
-ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject);
+ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC);
 
 #define getThis() (this_ptr)
 

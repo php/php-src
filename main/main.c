@@ -1697,7 +1697,7 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC)
 		zend_destroy_file_handle(file TSRMLS_CC);
 
 		if (op_array) {
-			destroy_op_array(op_array);
+			destroy_op_array(op_array TSRMLS_CC);
 			efree(op_array);
 			return SUCCESS;
 		} else {

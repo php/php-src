@@ -30,8 +30,8 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage);
-ZEND_API void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage);
+ZEND_API void php_zval_to_variant(zval *zval_arg, VARIANT *var_arg, int codepage TSRMLS_DC);
+ZEND_API void php_zval_to_variant_ex(zval *zval_arg, VARIANT *var_arg, int type, int codepage TSRMLS_DC);
 ZEND_API int php_variant_to_zval(VARIANT *var_arg, zval *zval_arg, int codepage);
 
 ZEND_API OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage, int persist);

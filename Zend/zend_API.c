@@ -199,10 +199,9 @@ ZEND_API char *zend_zval_type_name(zval *arg)
 	}
 }
 
-ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject)
+ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject TSRMLS_DC)
 {
 	if (Z_OBJ_HT_P(zobject)->get_class_entry) {
-		TSRMLS_FETCH();
 		return Z_OBJ_HT_P(zobject)->get_class_entry(zobject TSRMLS_CC);
 	} else {
 		zend_error(E_ERROR, "Class entry requested for an object without PHP class");
@@ -210,7 +209,7 @@ ZEND_API zend_class_entry *zend_get_class_entry(zval *zobject)
 	}
 }
 
-static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
+static int zend_check_class(zval *obj, zend_class_entry *expected_ce TSRMLS_DC)
 {
 	zend_class_entry *ce;
 
@@ -227,7 +226,7 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 	return 0;
 }
 
-static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
+static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec TSRMLS_DC)
 {
 	char *spec_walk = *spec;
 	char c = *spec_walk++;
@@ -410,7 +409,7 @@ static char *zend_parse_arg_impl(zval **arg, va_list *va, char **spec)
 			{
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
-				if (!zend_check_class(*arg, ce)) {
+				if (!zend_check_class(*arg, ce TSRMLS_CC)) {
 					if (Z_TYPE_PP(arg) == IS_NULL && return_null) {
 						*p = NULL;
 					} else {
@@ -445,7 +444,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, char **spec, int
 {
 	char *expected_type = NULL;
 
-	expected_type = zend_parse_arg_impl(arg, va, spec);
+	expected_type = zend_parse_arg_impl(arg, va, spec TSRMLS_CC);
 	if (expected_type) {
 		if (!quiet) {
 			zend_error(E_WARNING, "%s() expects parameter %d to be %s, %s given",
@@ -610,7 +609,7 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args TSRMLS_DC, 
 
 			return FAILURE;
 		} else {
-			if (!zend_check_class(*parameter, ce)) {
+			if (!zend_check_class(*parameter, ce TSRMLS_CC)) {
 				if (!quiet) {
 					zend_error(E_WARNING, "%s() expects parameter 1 to be %s, %s given",
 						get_active_function_name(TSRMLS_C), ce->name,
