@@ -1214,40 +1214,45 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 #endif
 
 		case UDM_ISPELL_TYPE_AFFIX: 
-#if UDM_VERSION_ID < 30200		
+#if UDM_VERSION_ID < 30200
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
-
 #if UDM_VERSION_ID > 30111
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
 #endif
-			
 			if (UdmImportAffixes(Agent->Conf,val1,val2,NULL,0)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load affix file %s",val2);
 				RETURN_FALSE;
 			}
-#else
+#elif UDM_VERSION_ID < 30225
 			if (UdmImportAffixes(Agent->Conf,val1,charset,val2)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load affix file %s",val2);
 				RETURN_FALSE;
 			}
-    
+#else
+			if(UdmAffixListListAdd(&Agent->Conf->Affixes,val1,charset,val2)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load affix file %s",val2);
+				RETURN_FALSE;
+			}
 #endif
 			break;
 			
 		case UDM_ISPELL_TYPE_SPELL: 
 #if UDM_VERSION_ID < 30200				
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_DB;
-			
 #if UDM_VERSION_ID > 30111
 			Agent->Conf->ispell_mode &= ~UDM_ISPELL_MODE_SERVER;
 #endif
-			
 			if (UdmImportDictionary(Agent->Conf,val1,val2,1,"")) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load spell file %s",val2);
 				RETURN_FALSE;
 			}
-#else
+#elif UDM_VERSION_ID < 30225
 			if (UdmImportDictionary(Agent->Conf,val1,charset,val2,0,"")) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load spell file %s",val2);
+				RETURN_FALSE;
+			}
+#else
+			if(UdmSpellListListAdd(&Agent->Conf->Spells,val1,charset,val2)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot load spell file %s",val2);
 				RETURN_FALSE;
 			}
@@ -1262,6 +1267,7 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 	}
 	
 	if (flag) {
+#if UDM_VERSION_ID < 30225
 #if UDM_VERSION_ID >= 30204
 		if(Agent->Conf->Spells.nspell) {
 			UdmSortDictionary(&Agent->Conf->Spells);
@@ -1272,6 +1278,7 @@ DLEXPORT PHP_FUNCTION(udm_load_ispell_data)
 			UdmSortDictionary(Agent->Conf);
 		  	UdmSortAffixes(Agent->Conf);
 		}
+#endif
 #endif
 	}
 	
@@ -1297,8 +1304,11 @@ DLEXPORT PHP_FUNCTION(udm_free_ispell_data)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, -1, "mnoGoSearch-Agent", le_link);
-
-#if UDM_VERSION_ID >= 30204
+	
+#if UDM_VERSION_ID >= 30225
+	UdmSpellListListFree(&Agent->Conf->Spells); 
+	UdmAffixListListFree(&Agent->Conf->Affixes);
+#elif UDM_VERSION_ID >= 30204
 	UdmSpellListFree(&Agent->Conf->Spells);
 	UdmAffixListFree(&Agent->Conf->Affixes);
 #elif UDM_VERSION_ID > 30111
