@@ -3150,9 +3150,10 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 		col = Z_LVAL_PP(COL);
 		y = Z_LVAL_PP(Y);
 		x = Z_LVAL_PP(X);
+	}
 
 #if HAVE_GD_STRINGFTEX
-		if (EXT) {
+		if (extended && EXT) {
 			/* parse extended info */
 
 			HashPosition pos;
@@ -3183,8 +3184,6 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 			} while (zend_hash_move_forward_ex(HASH_OF(*EXT), &pos) == SUCCESS);
 		}
 #endif
-
-	}
 
 	ptsize = Z_DVAL_PP(PTSIZE);
 	angle = Z_DVAL_PP(ANGLE) * (M_PI / 180); /* convert to radians */
