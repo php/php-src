@@ -10,8 +10,9 @@ Bug #22414: passthru() does not read data correctly
 output_handler=
 --FILE--
 <?php
-$php = getenv('TEST_PHP_EXECUTABLE');
-$tmpfile = tempnam('/tmp', 'phpt');
+
+	$php = getenv('TEST_PHP_EXECUTABLE');
+	$tmpfile = tempnam('/tmp', 'phpt');
 	
 	/* Regular Data Test */
 	passthru($php . ' -r " echo \"HELLO\"; "');
