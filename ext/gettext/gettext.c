@@ -40,15 +40,22 @@ function_entry php_gettext_functions[] = {
 	PHP_FE(dgettext,			NULL)
 	PHP_FE(dcgettext,			NULL)
 	PHP_FE(bindtextdomain,		NULL)
-    PHP_FE(ngettext,            NULL)
-    PHP_FE(dngettext,           NULL)
-    PHP_FE(dcngettext,          NULL)
+	PHP_FE(ngettext,			NULL)
+	PHP_FE(dngettext,			NULL)
+	PHP_FE(dcngettext,			NULL)
     {NULL, NULL, NULL}
 };
 /* }}} */
 
 zend_module_entry php_gettext_module_entry = {
-	"gettext", php_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
+	"gettext",
+	php_gettext_functions,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(gettext),
+	STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_GETTEXT
@@ -139,9 +146,7 @@ PHP_FUNCTION(dcgettext)
 	convert_to_string_ex(msgid);
 	convert_to_long_ex(category);
 
-	msgstr = dcgettext(Z_STRVAL_PP(domain_name),
-			   Z_STRVAL_PP(msgid),
-			   Z_LVAL_PP(category));
+	msgstr = dcgettext(Z_STRVAL_PP(domain_name), Z_STRVAL_PP(msgid), Z_LVAL_PP(category));
 
 	RETURN_STRING(msgstr, 1);
 }
@@ -173,8 +178,7 @@ PHP_FUNCTION(bindtextdomain)
 /* }}} */
 
 /* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
-   Plural version of gettext().
-*/
+   Plural version of gettext() */
 PHP_FUNCTION(ngettext)
 {
 	zval **msgid1, **msgid2, **count;
@@ -182,16 +186,14 @@ PHP_FUNCTION(ngettext)
 
 	RETVAL_FALSE;
 
-	if (3 != ZEND_NUM_ARGS()
-		|| FAILURE == zend_get_parameters_ex(3, &msgid1, &msgid2, &count)) {
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &msgid1, &msgid2, &count) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		convert_to_string_ex(msgid1);
 		convert_to_string_ex(msgid2);
 		convert_to_long_ex(count);
 
-		msgstr = ngettext(Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2),
-				  Z_LVAL_PP(count));
+		msgstr = ngettext(Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count));
 		if (msgstr) {
 			RETVAL_STRING (msgstr, 1);
 		}
@@ -200,17 +202,14 @@ PHP_FUNCTION(ngettext)
 /* }}} */
 
 /* {{{ proto string dngettext (string domain, string msgid1, string msgid2, long count)
-   Plural version of dgettext().
- */
+   Plural version of dgettext() */
 PHP_FUNCTION(dngettext)
 {
 	zval **domain, **msgid1, **msgid2, **count;
 
 	RETVAL_FALSE;
 
-	if (4 != ZEND_NUM_ARGS()
-		|| FAILURE == zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, 
-											 &count)) {
+	if (ZEND_NUM_ARGS() != 4 || zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, &count) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
 		char *msgstr;
@@ -220,8 +219,7 @@ PHP_FUNCTION(dngettext)
 		convert_to_string_ex(msgid2);
 		convert_to_long_ex(count);
 
-		msgstr = dngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1),
-				   Z_STRVAL_PP(msgid2), Z_LVAL_PP(count));
+		msgstr = dngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count));
 		if (msgstr) {
 			RETVAL_STRING(msgstr, 1);
 		}
@@ -230,18 +228,15 @@ PHP_FUNCTION(dngettext)
 /* }}} */
 
 /* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, long n, int category)
-   Plural version of dcgettext().
-*/								
+   Plural version of dcgettext() */								
 PHP_FUNCTION(dcngettext)
 {
 	zval **domain, **msgid1, **msgid2, **count, **category;
 
 	RETVAL_FALSE;
 
-	if (5 != ZEND_NUM_ARGS()
-		|| FAILURE == zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, 
-						     &count, &category)) {
-
+	if (ZEND_NUM_ARGS() != 5 || zend_get_parameters_ex(4, &domain, &msgid1, &msgid2, &count, &category) == FAILURE) {
+		WRONG_PARAM_COUNT;
 	} else {
 		char* msgstr = NULL;
 
@@ -251,9 +246,7 @@ PHP_FUNCTION(dcngettext)
 		convert_to_long_ex(count);
 		convert_to_long_ex(category);
 
-		msgstr = dcngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1),
-				    Z_STRVAL_PP(msgid2), Z_LVAL_PP(count),
-				    Z_LVAL_PP(category));
+		msgstr = dcngettext(Z_STRVAL_PP(domain), Z_STRVAL_PP(msgid1), Z_STRVAL_PP(msgid2), Z_LVAL_PP(count), Z_LVAL_PP(category));
 
 		if (msgstr) {
 			RETVAL_STRING(msgstr, 1);
