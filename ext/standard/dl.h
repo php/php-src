@@ -1,4 +1,4 @@
-/*
+/* 
    +----------------------------------------------------------------------+
    | PHP HTML Embedded Scripting Language Version 3.0                     |
    +----------------------------------------------------------------------+
@@ -23,51 +23,38 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Brian Schaffner <brian@tool.net>                            |
+   |          Shane Caraveo <shane@caraveo.com>                           |
+   |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
 
+
 /* $Id$ */
 
-#include "basic_functions.h"
-#include "phpmath.h"
-#include "php3_string.h"
-#include "base64.h"
-#include "php3_dir.h"
-#include "dns.h"
-#include "reg.h"
-#include "php3_mail.h"
-#include "md5.h"
-#include "html.h"
-#include "exec.h"
-#include "file.h"
-#include "php3_syslog.h"
-#include "php3_filestat.h"
-#include "php3_browscap.h"
-#include "pack.h"
-#include "datetime.h"
-#include "microtime.h"
-#include "url.h"
-#include "pageinfo.h"
-#include "cyr_convert.h"
-#include "php3_link.h"
-#include "fsock.h"
-#include "image.h"
-#include "php3_iptc.h"
-#include "info.h"
-#include "uniqid.h"
-#include "php3_var.h"
-#include "quot_print.h"
-#include "type.h"
-#include "dl.h"
-#include "php3_crypt.h"
+#ifndef _DL_H
+#define _DL_H
 
-#define standard_module_ptr basic_functions_module_ptr
+extern void php3_dl(pval *file,int type,pval *return_value);
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+
+#if HAVE_LIBDL
+
+extern php3_module_entry dl_module_entry;
+#define dl_module_ptr &dl_module_entry
+
+/* dynamic loading functions */
+extern void dl(INTERNAL_FUNCTION_PARAMETERS);
+extern int php3_minit_dl(INIT_FUNC_ARGS);
+extern int php3_mshutdown_dl(SHUTDOWN_FUNC_ARGS);
+extern int php3_rshutdown_dl(SHUTDOWN_FUNC_ARGS);
+extern void php3_info_dl(void);
+
+#else
+
+#define dl_module_ptr NULL
+
+#endif
+
+
+#endif /* _DL_H */

@@ -54,7 +54,7 @@
 
 #include "safe_mode.h"
 #include "php3_realpath.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include "ext/standard/php3_standard.h"
 #include "zend_compile.h"
 

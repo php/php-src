@@ -33,7 +33,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_globals.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include "info.h"
 #ifndef MSVC5
 #include "build-defs.h"

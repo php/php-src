@@ -1,0 +1,2 @@
+/* Define if you have the fdftk library */
+#define HAVE_FDFLIB 0

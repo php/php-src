@@ -36,7 +36,7 @@
 #endif
 
 #include "alloc.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include "ext/bcmath/number.h"
 #include "constants.h"
 #include <sys/stat.h>

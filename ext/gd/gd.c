@@ -39,7 +39,7 @@
 # include "tls.h"
 #endif
 #include "php.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 #include <math.h>
 #include "php3_gd.h"
 

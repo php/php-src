@@ -15,7 +15,7 @@
 
 
 #include "php.h"
-#include "functions/head.h"
+#include "ext/standard/head.h"
 
 /* output functions */
 int (*zend_body_write)(const char *str, uint str_length);		/* string output */

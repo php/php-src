@@ -23,51 +23,44 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors:                                                             |
-   |                                                                      |
+   | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    +----------------------------------------------------------------------+
  */
+#ifndef _HEAD_H
+#define _HEAD_H
 
-/* $Id$ */
 
-#include "basic_functions.h"
-#include "phpmath.h"
-#include "php3_string.h"
-#include "base64.h"
-#include "php3_dir.h"
-#include "dns.h"
-#include "reg.h"
-#include "php3_mail.h"
-#include "md5.h"
-#include "html.h"
-#include "exec.h"
-#include "file.h"
-#include "php3_syslog.h"
-#include "php3_filestat.h"
-#include "php3_browscap.h"
-#include "pack.h"
-#include "datetime.h"
-#include "microtime.h"
-#include "url.h"
-#include "pageinfo.h"
-#include "cyr_convert.h"
-#include "php3_link.h"
-#include "fsock.h"
-#include "image.h"
-#include "php3_iptc.h"
-#include "info.h"
-#include "uniqid.h"
-#include "php3_var.h"
-#include "quot_print.h"
-#include "type.h"
-#include "dl.h"
-#include "php3_crypt.h"
+/* 
+   We are still using a PHP2-style Push/Pop list here as opposed
+   to the PHP3 built-in list functionality because of the nature
+   of this particular list.  It is just used as a structured
+   buffer.  Doing this with the built-in list code would require
+   some changes to allow a search for the first item with a
+   certain type.  This type of search would not be optimal.
+   Private list management makes more sense here
+*/
+typedef struct CookieList {
+	char *name;
+	char *value;
+	time_t expires;
+	char *path;
+	char *domain;
+	int secure;
+	struct CookieList *next;
+} CookieList;
 
-#define standard_module_ptr basic_functions_module_ptr
+extern php3_module_entry php3_header_module_entry;
+#define php3_header_module_ptr &php3_header_module_entry
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+extern int php3_init_head(INIT_FUNC_ARGS);
+extern void php3_Header(INTERNAL_FUNCTION_PARAMETERS);
+extern void php3_SetCookie(INTERNAL_FUNCTION_PARAMETERS);
+
+void php4i_add_header_information(char *header_information);
+
+extern void php3_noheader(void);
+extern PHPAPI int php3_header(void);
+extern void php3_noheader(void);
+extern int php3_headers_unsent(void);
+
+#endif

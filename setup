@@ -283,11 +283,6 @@ define_option with-pdflib 'pdflib 0.6 support? ' yesnodir \
 '    Whether to use the pdflib support to write .pdf-files.\n
     Tested for version 0.6!'
 
-define_option with-fdftk 'Acrobat Forms (Ftf Toolkit 2.0) support? ' yesnodir \
-    'no /usr/local ftktk install' \
-'    Whether to use the Ftf Toolkit support to write/read .fdf-files.\n
-    Tested for version 2.0!'
-
 define_option with-zlib 'zlib (>= 1.0.9) support? ' yesnodir \
     'no /usr zlib install' \
 '    Whether to use the zlib support to read/write .gz-files.\n
