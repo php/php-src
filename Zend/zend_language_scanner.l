@@ -76,6 +76,7 @@
 #else
 #define YY_DECL int lex_scan(zval *zendlval CLS_DC)
 #endif
+
 #define ECHO { ZEND_WRITE( yytext, yyleng ); }
 
 #ifdef ZTS
@@ -88,10 +89,10 @@
 class istdiostream : public istream
 {
 private:
-  stdiobuf _file;
+	stdiobuf _file;
 public:
-  istdiostream (FILE* __f) : istream(), _file(__f) { init(&_file); }
-  stdiobuf* rdbuf()/* const */ { return &_file; }
+	istdiostream (FILE* __f) : istream(), _file(__f) { init(&_file); }
+	stdiobuf* rdbuf()/* const */ { return &_file; }
 };
 #endif
 

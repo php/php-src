@@ -107,14 +107,6 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=".\zend_language_parser.c"
-# End Source File
-# Begin Source File
-
-SOURCE=".\zend_language_scanner.cpp"
-# End Source File
-# Begin Source File
-
 SOURCE=.\zend.c
 # End Source File
 # Begin Source File
@@ -171,6 +163,14 @@ SOURCE=.\zend_ini.c
 # End Source File
 # Begin Source File
 
+SOURCE=".\zend_language_parser.c"
+# End Source File
+# Begin Source File
+
+SOURCE=".\zend_language_scanner.cpp"
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_list.c
 # End Source File
 # Begin Source File
@@ -212,14 +212,6 @@ SOURCE=.\FlexLexer.h
 # Begin Source File
 
 SOURCE=.\modules.h
-# End Source File
-# Begin Source File
-
-SOURCE=".\zend_language_parser.h"
-# End Source File
-# Begin Source File
-
-SOURCE=".\zend_language_scanner.h"
 # End Source File
 # Begin Source File
 
@@ -299,6 +291,14 @@ SOURCE=.\zend_ini.h
 # End Source File
 # Begin Source File
 
+SOURCE=".\zend_language_parser.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\zend_language_scanner.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_list.h
 # End Source File
 # Begin Source File
@@ -325,6 +325,67 @@ SOURCE=.\zend_variables.h
 # Begin Group "Parsers"
 
 # PROP Default_Filter "y"
+# Begin Source File
+
+SOURCE=.\zend_ini_parser.y
+
+!IF  "$(CFG)" == "ZendTS - Win32 Release_TS"
+
+# Begin Custom Build
+InputDir=.
+InputPath=.\zend_ini_parser.y
+
+BuildCmds= \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	
+
+"$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)\zend_ini_parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Debug_TS"
+
+# Begin Custom Build
+InputDir=.
+InputPath=.\zend_ini_parser.y
+
+BuildCmds= \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	
+
+"$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)\zend_ini_parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputDir=.
+InputPath=.\zend_ini_parser.y
+
+BuildCmds= \
+	if not "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "%CYGWIN%\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	if "X%CYGWIN%"=="X" bison --output=zend_ini_parser.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" -p zend_ini zend_ini_parser.y \
+	
+
+"$(InputDir)\zend_ini_parser.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)\zend_ini_parser.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # Begin Source File
 
 SOURCE=".\zend_language_parser.y"
@@ -390,6 +451,43 @@ BuildCmds= \
 # Begin Group "Scanners"
 
 # PROP Default_Filter "l"
+# Begin Source File
+
+SOURCE=.\zend_ini_scanner.l
+
+!IF  "$(CFG)" == "ZendTS - Win32 Release_TS"
+
+# Begin Custom Build
+InputPath=.\zend_ini_scanner.l
+
+"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Debug_TS"
+
+# Begin Custom Build
+InputPath=.\zend_ini_scanner.l
+
+"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "ZendTS - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputPath=.\zend_ini_scanner.l
+
+"zend_ini_scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -+ -B -i -Sflex.skl -Pzend_ini -ozend_ini_scanner.cpp zend_ini_scanner.l
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # Begin Source File
 
 SOURCE=".\zend_language_scanner.l"

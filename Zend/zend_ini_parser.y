@@ -37,7 +37,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winbase.h>
-#include "win32/wfile.h"
+//#include "win32/wfile.h"
 #endif
 
 #define YYSTYPE zval
