@@ -6505,7 +6505,7 @@ PHP_FUNCTION(oci_collection_element_get)
 
 		/* Return null if the value is null */
 		if (*elemind == OCI_IND_NULL) {
-			RETURN_NULL;
+			RETURN_NULL();
 		} 
 
 		switch (coll->element_typecode) {
