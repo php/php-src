@@ -11,9 +11,6 @@
 /* define ulong by configure if it is missed (most probably is) */
 #undef ulong
 
-/* define zend_bool by configure */
-#undef zend_bool
-
 /* type check for in_addr_t */
 #undef in_addr_t
 
