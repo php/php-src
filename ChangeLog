@@ -1,3 +1,68 @@
+1999-11-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dba/config.h.stub
+      ext/dba/config.m4
+      ext/dba/dba.c
+      ext/dba/dba_db3.c
+      ext/dba/php3_db3.h
+      ext/dba/Makefile.am: add Berkeley DB3 support
+
+1999-11-20  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/string.c:
+    (PHP substr_replace) Changed the order of the arguments.
+
+1999-11-20  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/php.sym
+      sapi/apache/php.sym
+      acinclude.m4
+      configure.in
+      php.sym:
+    --enable-versioning can now be used with CGI/AOLserver as well. Note that
+    we do not use versioning per se anymore, but export only the required
+    symbols.
+
+1999-11-20  Andi Gutmans  <andi@php.net>
+
+    * ext/pgsql/pgsql.dsp
+      ext/mysql/mysql.dsp: - Changed path to MySQL library in Win32 project
+
+1999-11-20  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:    (PHP strtr) new 2-Arg version.
+
+    * NEWS: *** empty log message ***
+
+1999-11-20  Andi Gutmans  <andi@php.net>
+
+    * ext/pgsql/pgsql.dsp
+      ext/pgsql/pqsql.dsp:
+    - Fixed a typo in the name of the project file. It links now
+
+1999-11-20  changelog  <changelog@www>
+
+    * NEWS: NEWS update
+
+1999-11-20  Andi Gutmans  <andi@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pqsql.dsp:
+    - More PGSQL thread-safe updates. It still doesn't work though. Crashes for
+      some reason at .dll load time
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php3_pgsql.h
+      ext/pgsql/pqsql.dsp: - Should pretty much work now
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/pqsql.dsp: - Add project file
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php3_pgsql.h:
+    - Start PostgreSQL support for Win32. Just added preliminary ZTS support.
+      Still need to make minit ZTS.
+
 1999-11-19  Andrei Zmievski  <zmievski@ispi.net>
 
     * ext/pcre/php_pcre.c:
