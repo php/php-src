@@ -1568,87 +1568,82 @@ PHP_FUNCTION(stripos)
 /* }}} */
 
 /* {{{ proto int strrpos(string haystack, string needle [, int offset])
-   Finds position of last occurrence of a character in a string within another */
+   Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strrpos)
 {
-	zval **haystack, **needle, **offset;
-	char *found = NULL;
-	int argc = ZEND_NUM_ARGS();
-	int off = 0;
-	
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &haystack, &needle, &offset) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(haystack);
+	char *needle, *haystack;
+	int needle_len, haystack_len, offset = 0;
+	char *p, *e;
 
-	if (argc == 3) {
-		convert_to_long_ex(offset);
-		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
-			RETURN_FALSE;
-		}
-		off = Z_LVAL_PP(offset); 
-	}
-
-	if (Z_TYPE_PP(needle) == IS_STRING) {
-		found = strrchr(Z_STRVAL_PP(haystack) + off, *Z_STRVAL_PP(needle));
-	} else {
-		convert_to_long_ex(needle);
-		found = strrchr(Z_STRVAL_PP(haystack) + off, (char) Z_LVAL_PP(needle));
-	}
-
-	if (found) {
-		RETURN_LONG(Z_STRLEN_PP(haystack) - strlen(found));
-	} else {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &haystack, &haystack_len, &needle, &needle_len, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	if (offset >= 0) {
+		p = haystack + offset;
+		e = haystack + haystack_len - needle_len;
+	} else {
+		p = haystack;
+		if (needle_len > -offset) {
+			e = haystack + haystack_len - needle_len;
+		} else {
+			e = haystack + haystack_len + offset;
+		}
+	}
+
+	while (e >= p) {
+		if (memcmp(e, needle, needle_len) == 0) {
+			RETURN_LONG(e - p);
+		}
+		e--;
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
 /* {{{ proto int strripos(string haystack, string needle [, int offset])
-   Finds position of last occurrence of a character in a string within another, case insensitive */
+   Finds position of last occurrence of a string within another string */
 PHP_FUNCTION(strripos)
 {
-	zval **haystack, **needle, **offset;
-	char *found = NULL;
-	int argc = ZEND_NUM_ARGS();
-	int off = 0;
-	char *haystack_dup;
-	char needle_dup;
-	
-	if (argc < 2 || argc > 3 || zend_get_parameters_ex(argc, &haystack, &needle, &offset) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_string_ex(haystack);
+	char *needle, *haystack;
+	int needle_len, haystack_len, offset = 0;
+	char *p, *e;
+	char *needle_dup, *haystack_dup;
 
-	if (argc == 3) {
-		convert_to_long_ex(offset);
-		if (Z_LVAL_PP(offset) < 0 || Z_LVAL_PP(offset) > Z_STRLEN_PP(haystack)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
-			RETURN_FALSE;
-		}
-		off = Z_LVAL_PP(offset); 
-	}
-
-	haystack_dup = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
-	php_strtolower(haystack_dup, Z_STRLEN_PP(haystack));
-
-	if (Z_TYPE_PP(needle) == IS_STRING) {
-		needle_dup = *Z_STRVAL_PP(needle);
-	} else {
-		convert_to_long_ex(needle);
-		needle_dup = (char) Z_LVAL_PP(needle);
-	}
-
-	found = strrchr(haystack_dup + off, tolower(needle_dup));
-
-	efree(haystack_dup);
-
-	if (found) {
-		RETURN_LONG(Z_STRLEN_PP(haystack) - strlen(found));
-	} else {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &haystack, &haystack_len, &needle, &needle_len, &offset) == FAILURE) {
 		RETURN_FALSE;
 	}
+
+	needle_dup = estrndup(needle, needle_len);
+	php_strtolower(needle_dup, needle_len);
+	haystack_dup = estrndup(haystack, haystack_len);
+	php_strtolower(haystack_dup, haystack_len);
+
+	if (offset >= 0) {
+		p = haystack_dup + offset;
+		e = haystack_dup + haystack_len - needle_len;
+	} else {
+		p = haystack_dup;
+		if (needle_len > -offset) {
+			e = haystack_dup + haystack_len - needle_len;
+		} else {
+			e = haystack_dup + haystack_len + offset;
+		}
+	}
+
+	while (e >= p) {
+		if (memcmp(e, needle_dup, needle_len) == 0) {
+			efree(haystack_dup);
+			efree(needle_dup);
+			RETURN_LONG(e - p);
+		}
+		e--;
+	}
+
+	efree(haystack_dup);
+	efree(needle_dup);
+	RETURN_FALSE;
 }
 /* }}} */
 
