@@ -38,7 +38,7 @@
 #include "win32/wfile.h"
 #endif
 
-#define YYSTYPE pval
+#define YYSTYPE zval
 
 #define PARSING_MODE_CFG 0
 #define PARSING_MODE_BROWSCAP 1
@@ -49,21 +49,21 @@ extern HashTable browser_hash;
 PHPAPI extern char *php_ini_path;
 #endif
 static HashTable *active_hash_table;
-static pval *current_section;
+static zval *current_section;
 static char *currently_parsed_filename;
 
 static int parsing_mode;
 
-pval yylval;
+zval yylval;
 
-extern int cfglex(pval *cfglval);
+extern int cfglex(zval *cfglval);
 extern FILE *cfgin;
 extern int cfglineno;
 extern void init_cfg_scanner(void);
 
-pval *cfg_get_entry(char *name, uint name_length)
+zval *cfg_get_entry(char *name, uint name_length)
 {
-	pval *tmp;
+	zval *tmp;
 
 	if (zend_hash_find(&configuration_hash, name, name_length, (void **) &tmp)==SUCCESS) {
 		return tmp;
@@ -75,14 +75,14 @@ pval *cfg_get_entry(char *name, uint name_length)
 
 PHPAPI int cfg_get_long(char *varname,long *result)
 {
-	pval *tmp,var;
+	zval *tmp,var;
 	
 	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
 		*result=(long)NULL;
 		return FAILURE;
 	}
 	var = *tmp;
-	pval_copy_constructor(&var);
+	zval_copy_ctor(&var);
 	convert_to_long(&var);
 	*result = var.value.lval;
 	return SUCCESS;
@@ -91,14 +91,14 @@ PHPAPI int cfg_get_long(char *varname,long *result)
 
 PHPAPI int cfg_get_double(char *varname,double *result)
 {
-	pval *tmp,var;
+	zval *tmp,var;
 	
 	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
 		*result=(double)0;
 		return FAILURE;
 	}
 	var = *tmp;
-	pval_copy_constructor(&var);
+	zval_copy_ctor(&var);
 	convert_to_double(&var);
 	*result = var.value.dval;
 	return SUCCESS;
@@ -107,7 +107,7 @@ PHPAPI int cfg_get_double(char *varname,double *result)
 
 PHPAPI int cfg_get_string(char *varname, char **result)
 {
-	pval *tmp;
+	zval *tmp;
 
 	if (zend_hash_find(&configuration_hash,varname,strlen(varname)+1,(void **) &tmp)==FAILURE) {
 		*result=NULL;
@@ -124,19 +124,20 @@ static void yyerror(char *str)
 }
 
 
-static void pvalue_config_destructor(pval *pvalue)
+static void pvalue_config_destructor(zval **pvalue)
 {
-	if (pvalue->type == IS_STRING && pvalue->value.str.val != empty_string) {
-		free(pvalue->value.str.val);
+	if ((*pvalue)->type == IS_STRING && (*pvalue)->value.str.val != empty_string) {
+		free((*pvalue)->value.str.val);
 	}
+	free(*pvalue);
 }
 
 
-static void pvalue_browscap_destructor(pval *pvalue)
+static void pvalue_browscap_destructor(zval *pvalue)
 {
 	if (pvalue->type == IS_OBJECT || pvalue->type == IS_ARRAY) {
-		zend_hash_destroy(pvalue->value.ht);
-		free(pvalue->value.ht);
+		zend_hash_destroy(pvalue->value.obj.properties);
+		free(pvalue->value.obj.properties);
 	}
 }
 
@@ -145,7 +146,7 @@ int php_init_config(void)
 {
 	PLS_FETCH();
 
-	if (zend_hash_init(&configuration_hash, 0, NULL, (void (*)(void *))pvalue_config_destructor, 1)==FAILURE) {
+	if (zend_hash_init(&configuration_hash, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1)==FAILURE) {
 		return FAILURE;
 	}
 
@@ -214,12 +215,12 @@ int php_init_config(void)
 		}
 
 		if (opened_path) {
-			pval tmp;
+			zval tmp;
 			
 			tmp.value.str.val = opened_path;
 			tmp.value.str.len = strlen(opened_path);
 			tmp.type = IS_STRING;
-			zend_hash_update(&configuration_hash,"cfg_file_path",sizeof("cfg_file_path"),(void *) &tmp,sizeof(pval),NULL);
+			zend_hash_update(&configuration_hash,"cfg_file_path",sizeof("cfg_file_path"),(void *) &tmp,sizeof(zval),NULL);
 #if DEBUG_CFG_PARSER
 			php_printf("INI file opened at '%s'\n",opened_path);
 #endif
@@ -244,7 +245,7 @@ PHP_MINIT_FUNCTION(browscap)
 	char *browscap = INI_STR("browscap");
 
 	if (browscap) {
-		if (zend_hash_init(&browser_hash, 0, NULL, (void (*)(void *))pvalue_browscap_destructor, 1)==FAILURE) {
+		if (zend_hash_init(&browser_hash, 0, NULL, (dtor_func_t) pvalue_browscap_destructor, 1)==FAILURE) {
 			return FAILURE;
 		}
 
@@ -281,7 +282,7 @@ PHP_MSHUTDOWN_FUNCTION(browscap)
 }
 
 
-static void convert_browscap_pattern(pval *pattern)
+static void convert_browscap_pattern(zval *pattern)
 {
 	register int i,j;
 	char *t;
@@ -293,7 +294,7 @@ static void convert_browscap_pattern(pval *pattern)
 	}
 
 	if (i==pattern->value.str.len) { /* no wildcards */
-		return;
+		pattern->value.str.val = zend_strndup(pattern->value.str.val, pattern->value.str.len);
 	}
 
 	t = (char *) malloc(pattern->value.str.len*2);
@@ -317,10 +318,8 @@ static void convert_browscap_pattern(pval *pattern)
 		}
 	}
 	t[j]=0;
-	free(pattern->value.str.val);
 	pattern->value.str.val = t;
 	pattern->value.str.len = j;
-	return;
 }
 
 
@@ -410,19 +409,28 @@ statement:
 #endif
 			$3.type = IS_STRING;
 			if (parsing_mode==PARSING_MODE_CFG) {
-				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
+				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(zval), NULL);
 				if (active_hash_table == &configuration_hash) {
 			        php_alter_ini_entry($1.value.str.val, $1.value.str.len+1, $3.value.str.val, $3.value.str.len+1, PHP_INI_SYSTEM);
 				}
 			} else if (parsing_mode==PARSING_MODE_BROWSCAP) {
-				zend_str_tolower($1.value.str.val,$1.value.str.len);
-				zend_hash_update(current_section->value.ht, $1.value.str.val, $1.value.str.len+1, &$3, sizeof(pval), NULL);
+				if (current_section) {
+					zval *new_property;
+
+					new_property = (zval *) malloc(sizeof(zval));
+					INIT_PZVAL(new_property);
+					new_property->value.str.val = $3.value.str.val;
+					new_property->value.str.len = $3.value.str.len;
+					new_property->type = IS_STRING;
+					zend_str_tolower(new_property->value.str.val, new_property->value.str.len);
+					zend_hash_update(current_section->value.obj.properties, $1.value.str.val, $1.value.str.len+1, &new_property, sizeof(zval *), NULL);
+				}
 			}
 			free($1.value.str.val);
 		}
 	|	TC_STRING { free($1.value.str.val); }
 	|	EXTENSION '=' string_foo {
-			pval dummy;
+			zval dummy;
 #if DEBUG_CFG_PARSER
 			printf("Loading '%s'\n",$3.value.str.val);
 #endif
@@ -455,18 +463,25 @@ statement:
 		}
 	|	SECTION { 
 			if (parsing_mode==PARSING_MODE_BROWSCAP) {
-				pval tmp;
+				zval *processed;
 
 				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
-				tmp.value.ht = (HashTable *) malloc(sizeof(HashTable));
-				zend_hash_init(tmp.value.ht, 0, NULL, (void (*)(void *))pvalue_config_destructor, 1);
-				tmp.type = IS_OBJECT;
-				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &tmp, sizeof(pval), (void **) &current_section);
-				tmp.value.str.val = zend_strndup($1.value.str.val,$1.value.str.len);
-				tmp.value.str.len = $1.value.str.len;
-				tmp.type = IS_STRING;
-				convert_browscap_pattern(&tmp);
-				zend_hash_update(current_section->value.ht,"browser_name_pattern",sizeof("browser_name_pattern"),(void *) &tmp, sizeof(pval), NULL);
+				current_section = (zval *) malloc(sizeof(zval));
+				INIT_PZVAL(current_section);
+				processed = (zval *) malloc(sizeof(zval));
+				INIT_PZVAL(processed);
+
+				current_section->value.obj.ce = &zend_standard_class_def;
+				current_section->value.obj.properties = (HashTable *) malloc(sizeof(HashTable));
+				current_section->type = IS_OBJECT;
+				zend_hash_init(current_section->value.obj.properties, 0, NULL, (dtor_func_t) pvalue_config_destructor, 1);
+				zend_hash_update(active_hash_table, $1.value.str.val, $1.value.str.len+1, (void *) &current_section, sizeof(zval *), NULL);
+
+				processed->value.str.val = $1.value.str.val;
+				processed->value.str.len = $1.value.str.len;
+				processed->type = IS_STRING;
+				convert_browscap_pattern(processed);
+				zend_hash_update(current_section->value.obj.properties, "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
 			}
 			free($1.value.str.val);
 		}

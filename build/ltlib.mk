@@ -29,3 +29,5 @@ targets = $(LTLIBRARY_NAME)
 include $(topsrcdir)/build/rules.mk
 include $(topsrcdir)/build/library.mk
 
+# CC = insure
+CC = gcc
