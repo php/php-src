@@ -156,7 +156,7 @@ top_statement_list:
 top_statement:
 		statement
 	|	function_declaration_statement	{ zend_do_early_binding(TSRMLS_C); }
-	|	class_declaration_statement
+	|	class_declaration_statement		{ zend_do_early_binding(TSRMLS_C); }
 ;
 
 

@@ -1980,7 +1980,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 }
 
 
-ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTable *class_table, int compile_time)
+ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, zend_bool compile_time)
 {
 	zend_function *function;
 
@@ -2012,7 +2012,7 @@ ZEND_API int do_bind_function(zend_op *opline, HashTable *function_table, HashTa
 }
 			
 
-ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_table, HashTable *class_table TSRMLS_DC)
+ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *class_table, zend_bool compile_time TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 
@@ -2025,14 +2025,23 @@ ZEND_API zend_class_entry *do_bind_class(zend_op *opline, HashTable *function_ta
 	ce->refcount++;
 	if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		if (!compile_time) {
+			/* If we're in compile time, in practice, it's quite possible
+			 * that we'll never reach this class declaration at runtime,
+			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
+			 * approach to work.
+			 */
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		}
 		return NULL;
 	} else {
+		zend_verify_abstract_class(ce TSRMLS_CC);
 		return ce;
 	}
 }
 
-ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *function_table, HashTable *class_table, zend_class_entry *parent_ce TSRMLS_DC)
+
+ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time TSRMLS_DC)
 {
 	zend_class_entry *ce, **pce;
 	int found_ce;
@@ -2040,7 +2049,14 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *f
 	found_ce = zend_hash_find(class_table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len, (void **) &pce);
 
 	if (found_ce == FAILURE) {
-		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		if (!compile_time) {
+			/* If we're in compile time, in practice, it's quite possible
+			 * that we'll never reach this class declaration at runtime,
+			 * so we shut up about it.  This allows the if (!defined('FOO')) { return; }
+			 * approach to work.
+			 */
+			zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
+		}
 		return NULL;
 	} else {
 		ce = *pce;
@@ -2068,16 +2084,56 @@ ZEND_API zend_class_entry *do_bind_inherited_class(zend_op *opline, HashTable *f
 void zend_do_early_binding(TSRMLS_D)
 {
 	zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
+	HashTable *table;
 
 	while (opline->opcode == ZEND_TICKS && opline > CG(active_op_array)->opcodes) {
 		opline--;
 	}
 
-	if (do_bind_function(opline, CG(function_table), CG(class_table), 1) == FAILURE) {
-		return;
+	switch (opline->opcode) {
+		case ZEND_DECLARE_FUNCTION:
+			if (do_bind_function(opline, CG(function_table), 1) == FAILURE) {
+				return;
+			}
+			table = CG(function_table);
+			break;
+		case ZEND_VERIFY_ABSTRACT_CLASS: {
+				zend_op *verify_abstract_class_op = opline;
+
+				opline--;
+				if (opline->opcode == ZEND_DECLARE_CLASS) {
+					if (do_bind_class(opline, CG(class_table), 1 TSRMLS_CC) == NULL) {
+						return;
+					}
+				} else if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS) {
+					zval *parent_name = &(opline-1)->op2.u.constant;
+					zend_class_entry **pce;
+
+					if (zend_lookup_class(Z_STRVAL_P(parent_name), Z_STRLEN_P(parent_name), &pce TSRMLS_CC) == FAILURE) {
+						return;
+					}
+					if (do_bind_inherited_class(opline, CG(class_table), *pce, 1 TSRMLS_CC) == NULL) {
+						return;
+					}
+				} else {
+					/* We currently don't early-bind classes that implement interfaces */
+					return;
+				}
+				table = CG(class_table);
+				/* clear the verify_abstract_class op */
+				init_op(verify_abstract_class_op TSRMLS_CC);
+				SET_UNUSED(verify_abstract_class_op->op1);
+				SET_UNUSED(verify_abstract_class_op->op2);
+				verify_abstract_class_op->opcode = ZEND_NOP;
+			}
+
+			break;
+		default:
+			zend_error(E_COMPILE_ERROR, "Invalid binding type");
+			return;
 	}
 
-	zend_hash_del(CG(function_table), opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len);
+	zend_hash_del(table, opline->op1.u.constant.value.str.val, opline->op1.u.constant.value.str.len);
 	zval_dtor(&opline->op1.u.constant);
 	zval_dtor(&opline->op2.u.constant);
 	opline->opcode = ZEND_NOP;
