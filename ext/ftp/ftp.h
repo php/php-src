@@ -31,6 +31,9 @@
 
 #define	FTP_DEFAULT_TIMEOUT	90
 #define FTP_DEFAULT_AUTOSEEK 1
+#define PHP_FTP_FAILED			0
+#define PHP_FTP_FINISHED		1
+#define PHP_FTP_MOREDATA		2
 
 /* XXX this should be configurable at runtime XXX */
 #define	FTP_BUFSIZE	4096
@@ -39,6 +42,14 @@ typedef enum ftptype {
 	FTPTYPE_ASCII,
 	FTPTYPE_IMAGE
 } ftptype_t;
+
+typedef struct databuf
+{
+	int		listener;		/* listener socket */
+	int		fd;			/* data connection */
+	ftptype_t	type;			/* transfer type */
+	char		buf[FTP_BUFSIZE];	/* data buffer */
+} databuf_t;
 
 typedef struct ftpbuf
 {
@@ -56,15 +67,15 @@ typedef struct ftpbuf
 	php_sockaddr_storage	pasvaddr;	/* passive mode address */
 	long	timeout_sec;	/* User configureable timeout (seconds) */
 	int			autoseek;	/* User configureable autoseek flag */
+
+	int				async;	/* asyncronous transfer in progress */
+	databuf_t		*data;	/* Data connection for asyncrounous transfers */
+	php_stream		*stream; /* output stream for asyncrounous transfers */
+	int				lastch;		/* last char of previous call */
+	int				direction;	/* recv = 0 / send = 1 */
+	int				closestream;/* close or not close stream */
 } ftpbuf_t;
 
-typedef struct databuf
-{
-	int		listener;		/* listener socket */
-	int		fd;			/* data connection */
-	ftptype_t	type;			/* transfer type */
-	char		buf[FTP_BUFSIZE];	/* data buffer */
-} databuf_t;
 
 
 /* open a FTP connection, returns ftpbuf (NULL on error)
@@ -155,5 +166,25 @@ int		ftp_delete(ftpbuf_t *ftp, const char *path);
 
 /* sends a SITE command to the server */
 int		ftp_site(ftpbuf_t *ftp, const char *cmd);
+
+/* retrieves part of a file and saves its contents to outfp
+ * returns true on success, false on error
+ */
+int		ftp_async_get(ftpbuf_t *ftp, php_stream *outstream, const char *path,
+			ftptype_t type, int resumepos);
+
+/* stores the data from a file, socket, or process as a file on the remote server
+ * returns true on success, false on error
+ */
+int		ftp_async_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos);
+
+/* continues a previous async_(f)get command
+ */
+int		ftp_async_continue_read(ftpbuf_t *ftp);
+
+/* continues a previous async_(f)put command
+ */
+int		ftp_async_continue_write(ftpbuf_t *ftp);
+
 
 #endif

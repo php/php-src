@@ -126,6 +126,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 
 	/* Default Settings */
 	ftp->timeout_sec = timeout_sec;
+	ftp->async = 0;
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
@@ -231,6 +232,8 @@ ftp_reinit(ftpbuf_t *ftp)
 		return 0;
 
 	ftp_gc(ftp);
+
+	ftp->async = 0;
 
 	if (!ftp_putcmd(ftp, "REIN", NULL))
 		return 0;
@@ -1018,6 +1021,59 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 }
 /* }}} */
 
+/* {{{ data_available
+ */
+int
+data_available(ftpbuf_t *ftp, int s)
+{
+	fd_set		read_set;
+	struct timeval	tv;
+	int		n;
+
+	tv.tv_sec = 0;
+	tv.tv_usec = 1;
+
+	FD_ZERO(&read_set);
+	FD_SET(s, &read_set);
+	n = select(s + 1, &read_set, NULL, NULL, &tv);
+	if (n < 1) {
+#ifndef PHP_WIN32
+		if (n == 0)
+			errno = ETIMEDOUT;
+#endif
+		return 0;
+	}
+
+	return 1;
+}
+/* }}} */
+/* {{{ data_writeable
+ */
+int
+data_writeable(ftpbuf_t *ftp, int s)
+{
+	fd_set		write_set;
+	struct timeval	tv;
+	int		n;
+
+	tv.tv_sec = 0;
+	tv.tv_usec = 1;
+
+	FD_ZERO(&write_set);
+	FD_SET(s, &write_set);
+	n = select(s + 1, NULL, &write_set, NULL, &tv);
+	if (n < 1) {
+#ifndef PHP_WIN32
+		if (n == 0)
+			errno = ETIMEDOUT;
+#endif
+		return 0;
+	}
+
+	return 1;
+}
+/* }}} */
+
 /* {{{ my_accept
  */
 int
@@ -1308,6 +1364,239 @@ bail:
 	return NULL;
 }
 /* }}} */
+
+/* {{{ ftp_async_get
+ */
+int
+ftp_async_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, int resumepos)
+{
+	databuf_t		*data = NULL;
+	char			*ptr;
+	int			lastch;
+	int			rcvd;
+	char			arg[11];
+	TSRMLS_FETCH();
+
+	if (ftp == NULL)
+		goto bail;
+
+	if (!ftp_type(ftp, type)) {
+		goto bail;
+	}
+
+	if ((data = ftp_getdata(ftp)) == NULL) {
+		goto bail;
+	}
+
+	if (resumepos>0) {
+		sprintf(arg, "%u", resumepos);
+		if (!ftp_putcmd(ftp, "REST", arg)) {
+			goto bail;
+		}
+		if (!ftp_getresp(ftp) || (ftp->resp != 350)) {
+			goto bail;
+		}
+	}
+
+	if (!ftp_putcmd(ftp, "RETR", path)) {
+		goto bail;
+	}
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
+		goto bail;
+	}
+
+	if ((data = data_accept(data, ftp)) == NULL) {
+		goto bail;
+	}
+
+	ftp->data = data;
+	ftp->stream = outstream;
+	ftp->lastch = 0;
+	ftp->async = 1;
+
+	return (ftp_async_continue_read(ftp));
+
+bail:
+	data_close(data);
+	return PHP_FTP_FAILED;
+}
+/* }}} */
+
+/* {{{ ftp_aget
+ */
+int
+ftp_async_continue_read(ftpbuf_t *ftp)
+{
+	databuf_t	*data = NULL;
+	char		*ptr;
+	int			lastch;
+	int			rcvd;
+	ftptype_t	type;
+	TSRMLS_FETCH();
+
+	data = ftp->data;
+
+	/* check if there is already more data */
+	if (!data_available(ftp, data->fd)) {
+		return PHP_FTP_MOREDATA;
+	}
+
+	type = ftp->type;
+
+	lastch = ftp->lastch;
+	if (rcvd = my_recv(ftp, data->fd, data->buf, FTP_BUFSIZE)) {
+		if (rcvd == -1) {
+			goto bail;
+		}
+
+		if (type == FTPTYPE_ASCII) {
+			for (ptr = data->buf; rcvd; rcvd--, ptr++) {
+				if (lastch == '\r' && *ptr != '\n')
+					php_stream_putc(ftp->stream, '\r');
+				if (*ptr != '\r')
+					php_stream_putc(ftp->stream, *ptr);
+				lastch = *ptr;
+			}
+		}
+		else {
+			php_stream_write(ftp->stream, data->buf, rcvd);
+		}
+
+		ftp->lastch = lastch;
+		return PHP_FTP_MOREDATA;
+	}
+
+	if (type == FTPTYPE_ASCII && lastch == '\r')
+		php_stream_putc(ftp->stream, '\r');
+
+	data = data_close(data);
+
+	if (php_stream_error(ftp->stream)) {
+		goto bail;
+	}
+
+	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250)) {
+		goto bail;
+	}
+
+	ftp->async = 0;
+	return PHP_FTP_FINISHED;
+bail:
+	ftp->async = 0;
+	data_close(data);
+	return PHP_FTP_FAILED;
+}
+/* }}} */
+
+/* {{{ ftp_async_put
+ */
+int
+ftp_async_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, int startpos)
+{
+	databuf_t		*data = NULL;
+	int			size;
+	char			*ptr;
+	int			ch;
+	char			arg[11];
+	TSRMLS_FETCH();
+
+	if (ftp == NULL)
+		return 0;
+
+	if (!ftp_type(ftp, type))
+		goto bail;
+
+	if ((data = ftp_getdata(ftp)) == NULL)
+		goto bail;
+
+	if (startpos>0) {
+		sprintf(arg, "%u", startpos);
+		if (!ftp_putcmd(ftp, "REST", arg)) {
+			goto bail;
+		}
+		if (!ftp_getresp(ftp) || (ftp->resp != 350)) {
+			goto bail;
+		}
+	}
+
+	if (!ftp_putcmd(ftp, "STOR", path))
+		goto bail;
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125))
+		goto bail;
+
+	if ((data = data_accept(data, ftp)) == NULL)
+		goto bail;
+
+	ftp->data = data;
+	ftp->stream = instream;
+	ftp->lastch = 0;
+	ftp->async = 1;
+
+	return (ftp_async_continue_write(ftp));
+
+bail:
+	data_close(data);
+	return PHP_FTP_FAILED;
+
+}
+/* }}} */
+
+
+/* {{{ ftp_async_continue_write
+ */
+int
+ftp_async_continue_write(ftpbuf_t *ftp)
+{
+	int			size;
+	char			*ptr;
+	int 			ch;
+
+	/* check if we can write more data */
+	if (!data_writeable(ftp, ftp->data->fd)) {
+		return PHP_FTP_MOREDATA;
+	}
+
+	size = 0;
+	ptr = ftp->data->buf;
+	while ((ch = php_stream_getc(ftp->stream))!=EOF && !php_stream_eof(ftp->stream)) {
+
+		if (ch == '\n' && ftp->type == FTPTYPE_ASCII) {
+			*ptr++ = '\r';
+			size++;
+		}
+
+		*ptr++ = ch;
+		size++;
+
+		/* flush if necessary */
+		if (FTP_BUFSIZE - size < 2) {
+			if (my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size)
+				goto bail;
+			return PHP_FTP_MOREDATA;
+		}
+
+	}
+
+	if (size && my_send(ftp, ftp->data->fd, ftp->data->buf, size) != size)
+		goto bail;
+
+	if (php_stream_error(ftp->stream))
+		goto bail;
+
+	ftp->data = data_close(ftp->data);
+
+	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250))
+		goto bail;
+
+	ftp->async = 0;
+	return PHP_FTP_FINISHED;
+bail:
+	data_close(ftp->data);
+	ftp->async = 0;
+	return PHP_FTP_FAILED;
+}
+/* }}} */
+
 
 #endif /* HAVE_FTP */
 
