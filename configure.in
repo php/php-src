@@ -351,6 +351,7 @@ stdlib.h \
 string.h \
 syslog.h \
 sysexits.h \
+sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
 sys/mount.h \
@@ -364,6 +365,7 @@ sys/vfs.h \
 sys/sysexits.h \
 sys/varargs.h \
 sys/wait.h \
+termios.h \
 unistd.h \
 unix.h \
 utime.h \
@@ -479,6 +481,7 @@ getservbyport \
 getrusage \
 gettimeofday \
 gmtime_r \
+grantpt \
 inet_ntoa \
 inet_ntop \
 inet_pton \
@@ -494,6 +497,7 @@ mmap \
 nl_langinfo \
 perror \
 poll \
+ptsname \
 putenv \
 realpath \
 random \
@@ -504,6 +508,7 @@ scandir \
 setitimer \
 setlocale \
 localeconv \
+setpgid \
 setsockopt \
 setvbuf \
 shutdown \
@@ -524,6 +529,7 @@ strtok_r \
 symlink \
 tempnam \
 tzset \
+unlockpt \
 unsetenv \
 usleep \
 nanosleep \
