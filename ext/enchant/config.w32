@@ -1,9 +1,0 @@
-// $Id$
-// vim:ft=javascript
-
-ARG_ENABLE("enchant", "Enchant Support", "no");
-
-if (PHP_ENCHANT == "yes") {
-	EXTENSION("enchant", "enchant.c");
-	AC_DEFINE('HAVE_ENCHANT', 1, 'Have Enchant support', false);
-}
