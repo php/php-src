@@ -10,7 +10,7 @@
    lib33bsd95.lib to the project settings, and add the path to the
    bind include directory to the preprocessor settings.  These libs
    are availabe in the ntbind distribution */
-#define HAVE_BINDLIB 1
+#define HAVE_LIBBIND 1
 
 /* set to enable bcmath */
 #define WITH_BCMATH 1
@@ -231,7 +231,7 @@
 #define HAVE_LOCALE_H 1
 
 /* Define if you have the setvbuf function.  */
-#ifndef HAVE_BINDLIB
+#ifndef HAVE_LIBBIND
 #define HAVE_SETVBUF 1
 #endif
 
