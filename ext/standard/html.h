@@ -32,7 +32,10 @@
 #ifndef _HTML_H
 #define _HTML_H
 
+void register_html_constants(INIT_FUNC_ARGS);
+
 PHP_FUNCTION(htmlspecialchars);
 PHP_FUNCTION(htmlentities);
+PHP_FUNCTION(get_html_translation_table);
 
 #endif /* _HTML_H */

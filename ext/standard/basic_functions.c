@@ -105,6 +105,7 @@ function_entry basic_functions[] = {
 	
 	PHP_FE(htmlspecialchars,						NULL)
 	PHP_FE(htmlentities,							NULL)
+	PHP_FE(get_html_translation_table,				NULL)
 	
 	PHP_FE(md5,										NULL)
 
@@ -366,6 +367,7 @@ PHP_MINIT_FUNCTION(basic)
 	REGISTER_INI_ENTRIES();
 
 	register_phpinfo_constants(INIT_FUNC_ARGS_PASSTHRU);
+	register_html_constants(INIT_FUNC_ARGS_PASSTHRU);
 	return SUCCESS;
 }
 
