@@ -3746,7 +3746,9 @@ reg_char:
 		c = *(++p);
 		i++;
 	}	
-	*rp = '\0';
+	if (rp < rbuf + len) {
+		*rp = '\0';
+	}
 	efree(buf);
 	if (allow)
 		efree(tbuf);
