@@ -717,6 +717,7 @@ PHP_SUBST(libdir)
 PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
+PHP_SUBST(localstatedir)
 
 PHP_SUBST(AWK)
 PHP_SUBST(CC)
@@ -820,7 +821,8 @@ PHP_CONFIGURE_PART(Generating files)
 PHP_GEN_CONFIG_VARS
 
 ALL_OUTPUT_FILES="php4.spec Zend/Makefile main/build-defs.h \
-pear/pear pear/phpize pear/php-config pear/PEAR.php TSRM/Makefile $PHP_OUTPUT_FILES"
+pear/scripts/pear pear/scripts/phpize pear/scripts/php-config pear/PEAR.php \
+TSRM/Makefile $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [
 
