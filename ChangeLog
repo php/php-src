@@ -1,3 +1,175 @@
+2002-05-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Config.php: * add umask config value
+
+2002-05-02  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/mbstring/mbfilter_tw.c: Changed & to &&.
+
+    * ext/mbstring/mbstring.dsp: Adding missing files to the project
+
+    * ext/standard/info.c: Fixing wrong pointer
+
+2002-05-02  Sander Roobol  <phy@wanadoo.nl>
+
+    * sapi/cgi/cgi_main.c: MFH
+
+    * sapi/cgi/cgi_main.c: Fixed some minor typos
+
+2002-05-02  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/sockets.c:
+    socket_write() should just use the standard socket error macro so that errors will be consistent if the macro ever changes
+
+2002-05-02  James Cox  <james@wherewithal.com>
+
+    * sapi/cgi/cgi_main.c: fix.
+
+    * sapi/cgi/cgi_main.c: MFH.
+
+2002-05-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cgi/cgi_main.c: Fix build.
+
+2002-05-02  James Cox  <james@wherewithal.com>
+
+    * sapi/cgi/cgi_main.c: updated cgi warning notice.
+
+2002-05-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * configure.in: - MFH
+
+2002-05-02  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in: Update comment
+
+2002-05-02  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c:
+    Change nest level to send Content-Length again. It seems this is the
+    best setting for now.
+
+    PHP will not send Content-Length always. It only sends when it is
+    possible to send. output_buffer=0 is supposed to disable chunked
+    output, but it seems it does not disable. It also behaves a litte
+    strange way. This should be addressed someday.
+
+    It is possible Content-Length header is not set. If it happens, try to
+    increase chunk size for now. (i.e. output_buffer=40960)
+
+    I included a little debug code for me and other develpers to play with,
+    when (NestLevel==1 && ObStatus==5), PHP sends Content-Length.
+
+2002-05-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/com/COM.c: MFH
+
+    * ext/com/COM.c: remove temporary resources immediately
+    return value fix
+
+
+2002-05-02  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in: Readd warning
+
+    * configure.in: Readd warning
+
+    If Mr. Taskinen feels like removing it again, he can commence a
+    discussion.  Otherwise, I'll personally disable his CVS account
+    immediately.
+
+    * configure.in:
+    in6addr_any is defined as extern in IRIX header files, but is not actually
+    contained in any library (sigh).
+
+    Make this check fail, if the link stage does not succeed.  Also avoid
+    GCC optimization which drops the reference to ip6addr_any.
+
+    Tested on IRIX 6.5.15.
+
+2002-05-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/info.c: - Add Zend API No. to phpinofo() output
+
+2002-05-02  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/xslt/config.m4: MFH: Do not use the old expat libs.
+
+    * ext/xslt/config.m4: Stop the search when the libs are found.
+
+    * ext/xslt/config.m4:
+    Added the usual search paths where to look for expat.
+
+2002-05-02  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-pear.xml: Install pear.bat
+
+2002-05-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp:
+    I could swear it worked the other way before I committed.
+
+2002-05-02  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-pear.xml: untabify
+
+2002-05-02  James Cox  <james@wherewithal.com>
+
+    * NEWS: englishify.
+
+2002-05-02  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/.cvsignore: Add config.w32.h.
+
+    * win32/php4dllts.dsp: Oops.
+
+    * NEWS: Fugbix typos.
+
+    * main/config.w32.h
+      main/config.w32.h.in
+      win32/php4dll.dsp
+      win32/php4dllts.dsp
+      NEWS:
+    The Windows build can now be configures more comfortably, for instance in regard to built-in extensions.
+
+2002-05-02  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: MFH
+
+    * configure.in: Remove bogus warning.
+
+    * NEWS: Sync with PHP_4_2_0 branch.
+
+2002-05-02  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c:
+    Fixed header output. Only need to output header when it is actually sent to client.
+
+2002-05-02  Jon Parise  <jon@csh.rit.edu>
+
+    * pear/scripts/pear.in: Revert the previous commit (revision 1.40).
+
+    (FreeBSD 4.5), thus producing a broken shebang line.
+
+    substitution problem noted above needs to be resolved before the change
+    is reapplied.
+
+2002-05-02  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/output.c: Check buffer status
+
+    * main/main.c
+      main/output.c: Make Content-Type output always correct.
+
+    * NEWS: Modify NEWS entry for Content-Length header change
+
+    * main/output.c
+      ext/zlib/zlib.c:
+    Move Content-Length: header handling from zlib.c to output.c
+    When output buffer is enabled and header can be sent, Content-Length:
+    header is added always from now on.
+
 2002-05-01  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/base64.c: - MFH
