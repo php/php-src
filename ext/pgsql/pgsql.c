@@ -339,11 +339,20 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
-	orig = PGG(ignore_notices);
-	PGG(ignore_notices) = 1;
-	res = PQexec(link,"BEGIN;ROLLBACK;");
-	PQclear(res);
-	PGG(ignore_notices) = orig;
+#if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
+	if (PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE)
+#endif
+	{
+		orig = PGG(ignore_notices);
+		PGG(ignore_notices) = 1;
+#if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
+		res = PQexec(link,"ROLLBACK;");
+#else
+		res = PQexec(link,"BEGIN;ROLLBACK;");
+#endif
+		PQclear(res);
+		PGG(ignore_notices) = orig;
+	}
 
 	return 0;
 }
@@ -517,6 +526,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zval **args[5];
 	int i, connect_type = 0;
 	char *msgbuf;
+	PGresult *pg_result;
 
 	if (ZEND_NUM_ARGS() < 1 || ZEND_NUM_ARGS() > 5
 			|| zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
@@ -625,12 +635,15 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					goto err;
 				}
 			}
+			pgsql = (PGconn *) le->ptr;
+#if HAVE_PQPROTOCOLVERSION && HAVE_PQPARAMETERSTATUS
+			if (PQprotocolVersion(pgsql) >= 3 && atof(PQparameterStatus(pgsql, "server_version")) >= 7.2) {
+#else
 			if (atof(PG_VERSION) >= 7.2) {
-				PGresult *pg_result;
-				pg_result = PQexec(le->ptr, "BEGIN;COMMIT;RESET ALL;");
+#endif
+				pg_result = PQexec(pgsql, "RESET ALL;");
 				PQclear(pg_result);
 			}
-			pgsql = (PGconn *) le->ptr;
 		}
 		ZEND_REGISTER_RESOURCE(return_value, pgsql, le_plink);
 	} else { /* Non persistent connection */
@@ -840,7 +853,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			add_assoc_long(return_value, "protocol", PQprotocolVersion(pgsql));
 #if HAVE_PQPARAMETERSTATUS
 			if (PQprotocolVersion(pgsql) >= 3) {
-				add_assoc_string(return_value, "server", PQparameterStatus(pgsql, "server_version"), 1);
+				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"), 1);
 			}
 #endif
 #endif
@@ -915,19 +928,24 @@ PHP_FUNCTION(pg_version)
 }
 /* }}} */
 
-/* {{{ proto bool pg_ping(resource connection)
+/* {{{ proto bool pg_ping([resource connection])
    Ping database. If connection is bad, try to reconnect. */
 PHP_FUNCTION(pg_ping)
 {
-	zval *pgsql_link = NULL;
-	int id = -1;
+	zval *pgsql_link;
+	int id;
 	PGconn *pgsql;
 	PGresult *res;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r",
-								 &pgsql_link) == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r", &pgsql_link) == SUCCESS) {
+		id = -1;
+	} else {
+		pgsql_link = NULL;
+		id = PGG(default_link);
 	}
+	if (pgsql_link == NULL && id == -1) {
+		RETURN_FALSE;
+	}	
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
