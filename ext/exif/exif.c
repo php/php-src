@@ -1630,7 +1630,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			} else {
 				info_value = &info_data->value;
 			}
-			for (idex=0,vptr=value; idex<length; idex++,(char *)vptr+=php_tiff_bytes_per_format[format]) {
+			for (idex=0,vptr=value; idex<length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
 				if (length>1) {
 					info_value = &info_data->value.list[idex];
 				}
