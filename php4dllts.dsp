@@ -490,6 +490,10 @@ SOURCE=.\ext\standard\string.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\standard\strnatcmp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\syslog.c
 # End Source File
 # Begin Source File
