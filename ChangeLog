@@ -1,3 +1,19 @@
+2004-09-07  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+      Chunk Length may optionally be followed by whitespace
+
+2004-09-07  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/ming/ming.c:
+      Make it possible to return VideoStream and PrebuiltClip
+
+2004-09-07  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Protocol version context option and chunked transfer encoding
+
 2004-09-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_objects.c:
