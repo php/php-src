@@ -23,6 +23,7 @@
 
 #include "fribidi.h"
 #include "../standard/info.h"
+#include <glib.h>
 
 extern zend_module_entry fribidi_module_entry;
 #define phpext_fribidi_ptr &fribidi_module_entry
