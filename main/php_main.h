@@ -30,7 +30,7 @@
 
 PHPAPI int php_request_startup(TSRMLS_D);
 PHPAPI void php_request_shutdown(void *dummy);
-PHPAPI void php_request_shutdown_for_exec(void *dummy TSRMLS_DC);
+PHPAPI void php_request_shutdown_for_exec(void *dummy);
 PHPAPI int php_module_startup(sapi_module_struct *sf);
 PHPAPI void php_module_shutdown(TSRMLS_D);
 PHPAPI void php_module_shutdown_for_exec(void);
