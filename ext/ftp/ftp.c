@@ -616,7 +616,7 @@ ftp_alloc(ftpbuf_t *ftp, const int size, char **response)
 		return 0;
 	}
 
-	snprintf(buffer, 64, "%d", size);
+	snprintf(buffer, sizeof(buffer) - 1, "%d", size);
 
 	if (!ftp_putcmd(ftp, "ALLO", buffer)) {
 		return 0;
