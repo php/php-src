@@ -81,6 +81,13 @@ static inline void smart_str_appendl(smart_str *dest, const char *src, size_t le
 	smart_str_append(dest, &s);
 }
 
+static inline void smart_str_setl(smart_str *dest, const char *src, size_t len)
+{
+	dest->len = len;
+	dest->a = len + 1;
+	dest->c = src;
+}
+
 static inline void smart_str_appends(smart_str *dest, const char *src)
 {
 	smart_str_appendl(dest, src, strlen(src));
@@ -89,6 +96,11 @@ static inline void smart_str_appends(smart_str *dest, const char *src)
 static inline void smart_str_copys(smart_str *dest, const char *src)
 {
 	smart_str_copyl(dest, src, strlen(src));
+}
+
+static inline void smart_str_sets(smart_str *dest, const char *src)
+{
+	smart_str_setl(dest, src, strlen(src));
 }
 
 static inline void attach_url(smart_str *url, smart_str *name, smart_str *val, const char *separator)
@@ -241,7 +253,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   						char *p;
 
 						for (p = start; isalpha(*p); p++);
-						smart_str_copyl(&ctx->arg, start, p - start);
+						smart_str_setl(&ctx->arg, start, p - start);
 #ifdef SCANNER_DEBUG
 						printf("ARG(%s)\n", ctx->arg.c);
 #endif
@@ -262,7 +274,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   ["] (all\[^>"])* ["] [ >]		{
   						YYCURSOR--;
 						para_start = NULL;
-						smart_str_copyl(&ctx->para, start + 1, YYCURSOR - start - 2);
+						smart_str_setl(&ctx->para, start + 1, YYCURSOR - start - 2);
 #ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
@@ -274,7 +286,7 @@ static void mainloop(url_adapt_state_t *ctx, smart_str *newstuff)
   (all\[^> ])+ [ >]		{
   						YYCURSOR--;
 						para_start = NULL;
-						smart_str_copyl(&ctx->para, start, YYCURSOR - start);
+						smart_str_setl(&ctx->para, start, YYCURSOR - start);
 #ifdef SCANNER_DEBUG
 						printf("PARA(%s)\n", ctx->para.c);
 #endif
@@ -329,19 +341,25 @@ char *url_adapt_ext(const char *src, size_t srclen, const char *name, const char
 	char *ret;
 	BLS_FETCH();
 
-	smart_str_copys(&BG(url_adapt_state).name, name);
-	smart_str_copys(&BG(url_adapt_state).value, value);
+	smart_str_sets(&BG(url_adapt_state).name, name);
+	smart_str_sets(&BG(url_adapt_state).value, value);
 	str.c = (char *) src;
 	str.len = srclen;
 	mainloop(&BG(url_adapt_state), &str);
 
 	*newlen = BG(url_adapt_state).result.len;
 
-	//printf("(%d)NEW(%d): %s'\n", srclen, BG(url_adapt_state).result.len, BG(url_adapt_state).result.c);
+#ifdef SCANNER_DEBUG
+	printf("(%d)NEW(%d): %s'\n", srclen, BG(url_adapt_state).result.len, BG(url_adapt_state).result.c);
+#endif
 
+#if 1
 	ret = BG(url_adapt_state).result.c;
 	BG(url_adapt_state).result.c = NULL;
 	return ret;
+#else
+	return strdup(BG(url_adapt_state).result.c);
+#endif
 }
 
 PHP_RINIT_FUNCTION(url_scanner)
@@ -357,40 +375,10 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	BLS_FETCH();
 
-	smart_str_free(&BG(url_adapt_state).name);
-	smart_str_free(&BG(url_adapt_state).value);
 	smart_str_free(&BG(url_adapt_state).result);
 	smart_str_free(&BG(url_adapt_state).work);
-	smart_str_free(&BG(url_adapt_state).arg);
-	smart_str_free(&BG(url_adapt_state).tag);
-	smart_str_free(&BG(url_adapt_state).para);
 
 	return SUCCESS;
 }
-
-#if 0
-void main()
-{
-	url_adapt_state_t ctx;
-	smart_str str = {0};
-	
-	memset(&ctx, 0, sizeof(ctx));
-	
-	smart_str_copys(&ctx.name, "PHPSESSID");
-	smart_str_copys(&ctx.value, "FOOBAR");
-	smart_str_copys(&str, "blabla<HTML>asdasd<a c=d target=_b foobar=x");
-	mainloop(&ctx, &str);
-	smart_str_copys(&str, "lank dontblink href=someurl onclick=\"xxx\">bla</a>\n<");
-	mainloop(&ctx, &str);
-	smart_str_copys(&str, "area href=foobar>");
-	mainloop(&ctx, &str);
-	smart_str_copys(&str, "<form action=blabla ");
-	mainloop(&ctx, &str);
-	smart_str_copys(&str, "method=post>");
-	mainloop(&ctx, &str);
-
-	printf("\n%s\n", ctx.result.c);
-}
-#endif
 
 #endif
