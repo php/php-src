@@ -464,26 +464,30 @@ PHPAPI FILE *php_fopen_with_path(char *filename, char *mode, char *path, char **
 	/* append the calling scripts' current working directory
 	 * as a fall back case
 	 */
-	exec_fname = zend_get_executed_filename(ELS_C);
-	exec_fname_length = strlen(exec_fname);
-	path_length = strlen(path);
+	if (zend_is_executing()) {
+		exec_fname = zend_get_executed_filename(ELS_C);
+		exec_fname_length = strlen(exec_fname);
+		path_length = strlen(path);
 
-	while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length])) {
-	}
-	if (exec_fname && exec_fname[0] == '[') {
-		/* [no active file] */
-		exec_fname_length = 0;
-	}
-	
-	pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
-	memcpy(pathbuf, path, path_length);
+		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length])) {
+		}
+		if (exec_fname && exec_fname[0] == '[') {
+			/* [no active file] */
+			exec_fname_length = 0;
+		}
+		
+		pathbuf = (char *) emalloc(exec_fname_length + path_length +1 +1);
+		memcpy(pathbuf, path, path_length);
 #ifdef PHP_WIN32
-	pathbuf[path_length] = ';';
+		pathbuf[path_length] = ';';
 #else
-	pathbuf[path_length] = ':';
+		pathbuf[path_length] = ':';
 #endif
-	memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
-	pathbuf[path_length + exec_fname_length +1] = '\0';
+		memcpy(pathbuf+path_length+1, exec_fname, exec_fname_length);
+		pathbuf[path_length + exec_fname_length +1] = '\0';
+	} else {
+		pathbuf = estrdup(path);
+	}
 
 	ptr = pathbuf;
 
