@@ -25,7 +25,9 @@
 #include <unistd.h>
 #endif
 
-#if HAVE_SYS_TIME_H
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#else
 #include <sys/time.h>
 #endif
 
