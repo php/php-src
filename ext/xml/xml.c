@@ -289,11 +289,12 @@ static void xml_parser_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xml_parser *parser = (xml_parser *)rsrc->ptr;
 
-	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
+#ifdef ZEND_ENGINE_2
 	if (parser->object) {
 		zval_ptr_dtor(&parser->object);
 	}
-	*/
+#endif
 	
 	if (parser->parser) {
 		XML_ParserFree(parser->parser);
@@ -1126,17 +1127,19 @@ PHP_FUNCTION(xml_set_object)
 
 	ZEND_FETCH_RESOURCE(parser,xml_parser *,pind, -1, "XML Parser", le_xml_parser);
 
-	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
+#ifdef ZEND_ENGINE_2
 	if (parser->object) {
 		zval_ptr_dtor(&parser->object);
 	}
-	*/
+#endif
 	
 	parser->object = *mythis;
 
-	/* please leave this commented - or ask thies@thieso.net before doing it (again) 
+	/* please leave this commented - or ask thies@thieso.net before doing it (again) */
+#ifdef ZEND_ENGINE_2
 	zval_add_ref(&parser->object); 
-	*/
+#endif
 
 	RETVAL_TRUE;
 }
