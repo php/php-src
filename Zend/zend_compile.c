@@ -1173,8 +1173,8 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 		opline->op1 = *namespace_name;
 	} else {
 		SET_UNUSED(opline->op1);
-		CG(catch_begin) = fetch_class_op_number;
 	}
+	CG(catch_begin) = fetch_class_op_number;
 	if(class_name) {
 		zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	}
