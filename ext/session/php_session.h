@@ -93,6 +93,8 @@ typedef struct _php_ps_globals {
 	char *save_path;
 	char *session_name;
 	char *id;
+	char *udata_name;
+	char *udata_value;
 	char *extern_referer_chk;
 	char *entropy_file;
 	char *cache_limiter;
@@ -141,6 +143,7 @@ PHP_FUNCTION(session_cache_limiter);
 PHP_FUNCTION(session_set_cookie_params);
 PHP_FUNCTION(session_get_cookie_params);
 PHP_FUNCTION(session_write_close);
+PHP_FUNCTION(session_set_userdata);
 
 #ifdef ZTS
 #define PS(v) TSRMG(ps_globals_id, php_ps_globals *, v)
