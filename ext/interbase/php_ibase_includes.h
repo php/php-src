@@ -46,8 +46,15 @@ typedef unsigned long long ISC_UINT64;
 
 #define IB_STATUS (IBG(status))
 
-extern int le_blob, le_link, le_plink, le_result, le_query, le_trans, 
-	le_event, le_service;
+#ifdef ZEND_DEBUG_
+#define IBDEBUG(a) php_printf("::: %s (%d)\n", a, __LINE__);
+#endif
+
+#ifndef IBDEBUG
+#define IBDEBUG(a)
+#endif
+
+extern int le_link, le_plink, le_trans;
 
 #define IBASE_MSGSIZE 256
 #define MAX_ERRMSG (IBASE_MSGSIZE*2)
@@ -154,7 +161,7 @@ enum php_interbase_option {
 	PHP_IBASE_TIMESTAMP 		= 1,
 	PHP_IBASE_DATE 				= 2,
 	PHP_IBASE_TIME 				= 4,
-	/* transaction access mode */	
+	/* transaction access mode */
 	PHP_IBASE_WRITE 			= 1,
 	PHP_IBASE_READ 				= 2,
 	/* transaction isolation level */
@@ -190,14 +197,9 @@ typedef void (__stdcall *info_func_t)(char*);
 typedef void (*info_func_t)(char*);
 #endif
 
-int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
-char *_php_ibase_quad_to_string(ISC_QUAD const qd);
-int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
-int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
-
-void _php_ibase_error(TSRMLS_D);
-void _php_ibase_module_error(char * TSRMLS_DC, ...) 
-	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);	
+PHPAPI void _php_ibase_error(TSRMLS_D);
+PHPAPI void _php_ibase_module_error(char * TSRMLS_DC, ...)
+	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
 
 /* determine if a resource is a link or transaction handle */
 #define PHP_IBASE_LINK_TRANS(pzval, lh, th)													\
@@ -208,12 +210,27 @@ void _php_ibase_module_error(char * TSRMLS_DC, ...)
 			_php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAM_PASSTHRU, &pzval, &lh, &th);	\
 		if (SUCCESS != _php_ibase_def_trans(lh, &th TSRMLS_CC)) { RETURN_FALSE; }			\
 	} while (0)
-	
-int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
-void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, 
+
+PHPAPI int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
+PHPAPI void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id,
 	ibase_db_link **ib_link, ibase_trans **trans);
 
-void _php_ibase_event_free(char *event_buf, char *result_buf);
+/* provided by ibase_query.c */
+void php_ibase_query_minit(INIT_FUNC_ARGS);
+
+/* provided by ibase_blobs.c */
+void php_ibase_blobs_minit(INIT_FUNC_ARGS);
+PHPAPI int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
+PHPAPI char *_php_ibase_quad_to_string(ISC_QUAD const qd);
+PHPAPI int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
+PHPAPI int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
+
+/* provided by ibase_events.c */
+void php_ibase_events_minit(INIT_FUNC_ARGS);
+PHPAPI void _php_ibase_free_event(ibase_event *event TSRMLS_DC);
+
+/* provided by ibase_service.c */
+void php_ibase_service_minit(INIT_FUNC_ARGS);
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
