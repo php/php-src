@@ -120,7 +120,7 @@ PHP_FUNCTION(yp_match) {
 	convert_to_string_ex(map);
 	convert_to_string_ex(key);
 
-	if(yp_match((*domain)->value.str.val,(*map)->value.str.val,(*key)->value.str.val,key->value.str.len,&outval,&outvallen)) {
+	if(yp_match((*domain)->value.str.val,(*map)->value.str.val,(*key)->value.str.val,(*key)->value.str.len,&outval,&outvallen)) {
 		RETURN_FALSE;
 	}
 
