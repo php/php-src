@@ -96,6 +96,10 @@ LINK32=link.exe
 
 SOURCE=.\zlib.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\zlib_fopen_wrapper.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
