@@ -288,6 +288,8 @@ mysql.default_port		=		; default port number for mysql_connect().  If unset,
 								; mysql_connect() will use the $MYSQL_TCP_PORT, or the mysql-tcp
 								; entry in /etc/services, or the compile-time defined MYSQL_PORT
 								; (in that order).  Win32 will only look at MYSQL_PORT.
+mysql.default_socket	=		; default socket name for local MySQL connects.  If empty, uses the built-in
+								; MySQL defaults
 mysql.default_host		=		; default host for mysql_connect() (doesn't apply in safe mode)
 mysql.default_user		=		; default user for mysql_connect() (doesn't apply in safe mode)
 mysql.default_password	=		; default password for mysql_connect() (doesn't apply in safe mode)

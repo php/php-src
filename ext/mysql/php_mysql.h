@@ -82,6 +82,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysql)
 	long allow_persistent;
 	long default_port;
 	char *default_host, *default_user, *default_password;
+	char *default_socket;
 ZEND_END_MODULE_GLOBALS(mysql);
 
 #ifdef ZTS

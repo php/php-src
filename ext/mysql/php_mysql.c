@@ -210,7 +210,7 @@ static void _close_mysql_plink(MYSQL *link)
 static PHP_INI_MH(OnMySQLPort)
 {
 	MySLS_FETCH();
-	
+
 	if (new_value==NULL) { /* default port */
 #ifndef PHP_WIN32
 		struct servent *serv_ptr;
@@ -236,11 +236,12 @@ static PHP_INI_MH(OnMySQLPort)
 PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("mysql.allow_persistent",	"1",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	zend_mysql_globals,		mysql_globals)
 	STD_PHP_INI_ENTRY_EX("mysql.max_persistent",	"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_persistent,		zend_mysql_globals,		mysql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY_EX("mysql.max_links",		"-1",	PHP_INI_SYSTEM,			OnUpdateInt,		max_links,			zend_mysql_globals,		mysql_globals,	display_link_numbers)
-	STD_PHP_INI_ENTRY("mysql.default_host",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_host,		zend_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_user",		NULL,	PHP_INI_ALL,			OnUpdateString,		default_user,		zend_mysql_globals,		mysql_globals)
-	STD_PHP_INI_ENTRY("mysql.default_password",	NULL,	PHP_INI_ALL,			OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
-	PHP_INI_ENTRY("mysql.default_port",		NULL,	PHP_INI_ALL,			OnMySQLPort)
+	STD_PHP_INI_ENTRY_EX("mysql.max_links",			"-1",	PHP_INI_SYSTEM,		OnUpdateInt,		max_links,			zend_mysql_globals,		mysql_globals,	display_link_numbers)
+	STD_PHP_INI_ENTRY("mysql.default_host",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_host,		zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_user",			NULL,	PHP_INI_ALL,		OnUpdateString,		default_user,		zend_mysql_globals,		mysql_globals)
+	STD_PHP_INI_ENTRY("mysql.default_password",		NULL,	PHP_INI_ALL,		OnUpdateString,		default_password,	zend_mysql_globals,		mysql_globals)
+	PHP_INI_ENTRY("mysql.default_port",				NULL,	PHP_INI_ALL,		OnMySQLPort)
+	STD_PHP_INI_ENTRY("mysql.default_socket",		NULL,	PHP_INI_ALL,		OnUpdateStringUnempty,	default_socket,	zend_mysql_globals,		mysql_globals)
 PHP_INI_END()
 
 
@@ -311,13 +312,15 @@ PHP_MINFO_FUNCTION(mysql)
 
 static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 {
-	char *user,*passwd,*host,*socket=NULL,*tmp;
+	char *user,*passwd,*host,*socket,*tmp;
 	char *hashed_details;
 	int hashed_details_length,port = MYSQL_PORT;
 	MYSQL *mysql;
 	void (*handler) (int);
 	MySLS_FETCH();
 	PLS_FETCH();
+
+	socket = MySG(default_socket);
 
 	if (PG(sql_safe_mode)) {
 		if (ZEND_NUM_ARGS()>0) {
