@@ -272,7 +272,7 @@ int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *
 }
 
 /* {{{ php_read -- wrapper around read() so that it only reads to a \r or \n. */
-int php_read(int bsd_socket, void *buf, int maxlen)
+int php_read(int bsd_socket, void *buf, size_t maxlen, int flags)
 {
 	int m = 0, n = 0;
 	int no_read = 0;
@@ -309,7 +309,7 @@ int php_read(int bsd_socket, void *buf, int maxlen)
 		}
 		 
 		if (n < maxlen) {
-			m = read(bsd_socket, (void *) t, 1);
+			m = recv(bsd_socket, (void *) t, 1, flags);
 		}
 		 
 		if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
@@ -766,7 +766,7 @@ PHP_FUNCTION(socket_write)
 }
 /* }}} */
 
-typedef int (*read_func)(int, void *, int);
+typedef int (*read_func)(int, void *, size_t, int);
 
 /* {{{ proto string socket_read(resource socket, int length [, int type])
    Reads a maximum of length bytes from socket */
@@ -774,7 +774,7 @@ PHP_FUNCTION(socket_read)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	read_func	read_function = (read_func) read;
+	read_func	read_function = (read_func) recv;
 	char		*tmpbuf;
 	int			retval, length, type = PHP_BINARY_READ;
 
@@ -789,12 +789,7 @@ PHP_FUNCTION(socket_read)
 
 	tmpbuf = emalloc(length + 1);
 
-#ifndef PHP_WIN32
-	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, length);
-#else
-	retval = recv(php_sock->bsd_socket, tmpbuf, length, 0);
-#endif
-
+	retval = (*read_function)(php_sock->bsd_socket, tmpbuf, length, 0);
 	if (retval == -1) {
 		PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		efree(tmpbuf);
