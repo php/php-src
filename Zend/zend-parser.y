@@ -201,7 +201,7 @@ unticked_statement:
 	|	T_REQUIRE expr ';'			{ do_require(&$2 CLS_CC); }
 	|	T_USE use_filename ';'		{ use_filename($2.u.constant.value.str.val, $2.u.constant.value.str.len CLS_CC); zval_dtor(&$2.u.constant); }
 	|	T_UNSET '(' r_cvar ')' ';' { do_unset(&$3 CLS_CC); }
-	|	T_FOREACH '(' expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
+	|	T_FOREACH '(' w_expr T_AS { do_foreach_begin(&$1, &$3, &$2, &$4 CLS_CC); } w_cvar foreach_optional_arg ')' { do_foreach_cont(&$6, &$7, &$4 CLS_CC); } foreach_statement { do_foreach_end(&$1, &$2 CLS_CC); }
 	|	T_DECLARE { do_declare_begin(CLS_C); } '(' declare_list ')' declare_statement { do_declare_end(CLS_C); }
 	|	';'		/* empty statement */
 ;
@@ -560,6 +560,10 @@ expr:
 	|	expr_without_variable	{ $$ = $1; }
 ;
 
+w_expr:
+		w_cvar					{ $$ = $1; }
+	|	expr_without_variable	{ $$ = $1; }
+;
 
 
 r_cvar:
@@ -612,14 +616,14 @@ ref_list:
 ;
 
 object_property:
-		object_dim_list { $$ = $1; }
-	|	cvar_without_objects { do_end_variable_parse(BP_VAR_R, 0 CLS_CC); $$ = $1; }
+		object_dim_list { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
+	|	cvar_without_objects { do_end_variable_parse(BP_VAR_R, 0 CLS_CC); } { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
 ;
 
 object_dim_list:
 		object_dim_list '[' dim_offset ']'	{ fetch_array_dim(&$$, &$1, &$3 CLS_CC); }
 	|	object_dim_list '{' expr '}'		{ fetch_string_offset(&$$, &$1, &$3 CLS_CC); }
-	|	variable_name { znode tmp_znode;  do_pop_object(&tmp_znode CLS_CC);  do_fetch_property(&$$, &tmp_znode, &$1 CLS_CC);}
+	|	variable_name
 ;
 
 variable_name:

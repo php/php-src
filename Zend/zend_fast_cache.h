@@ -21,7 +21,13 @@
 #ifndef _ZEND_FAST_CACHE_H
 #define _ZEND_FAST_CACHE_H
 
-#define ZEND_ENABLE_FAST_CACHE	1
+#ifndef ZEND_ENABLE_FAST_CACHE
+# if ZEND_DEBUG
+# define ZEND_ENABLE_FAST_CACHE 0
+# else
+# define ZEND_ENABLE_FAST_CACHE 1
+# endif
+#endif
 
 typedef struct _zend_fast_cache_list_entry {
 	struct _zend_fast_cache_list_entry *next;
@@ -30,13 +36,11 @@ typedef struct _zend_fast_cache_list_entry {
 #define MAX_FAST_CACHE_TYPES	4
 
 
-
-
+#define ZVAL_CACHE_LIST			0
+#define HASHTABLE_CACHE_LIST	1
 
 #if ZEND_ENABLE_FAST_CACHE
 
-#define ZVAL_CACHE_LIST			0
-#define HASHTABLE_CACHE_LIST	1
 
 #include "zend_globals.h"
 #include "zend_globals_macros.h"
