@@ -1516,8 +1516,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = estrndup(name, name_length);
 	new_class_entry->name_length = name_length;
-	new_class_entry->refcount = (int *) emalloc(sizeof(int));
-	*new_class_entry->refcount = 1;
+	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
 
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);
@@ -1578,9 +1577,9 @@ static int create_nested_class(HashTable *class_table, char *path, zend_class_en
 		}
 		last = cur;
 	}
-	(*new_ce->refcount)++;
+	new_ce->refcount++;
 	if (zend_hash_add(&ce->class_table, last, strlen(last)+1, &new_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
-		(*new_ce->refcount)--;
+		new_ce->refcount--;
 		zend_error(E_ERROR, "Cannot redeclare class %s", last);
 		return FAILURE;
 	}
@@ -1628,9 +1627,9 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				if (strchr(opline->op2.u.constant.value.str.val, ':')) {
 					return create_nested_class(class_table, opline->op2.u.constant.value.str.val, ce);
 				}
-				(*ce->refcount)++;
+				ce->refcount++;
 				if (zend_hash_add(class_table, opline->op2.u.constant.value.str.val, opline->op2.u.constant.value.str.len+1, &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
-					(*ce->refcount)--;
+					ce->refcount--;
 					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 					}
@@ -1662,7 +1661,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				} else {
 					ce = *pce;
 				}
-				(*ce->refcount)++;
+				ce->refcount++;
 
 				/* Obtain parent class */
 				parent_name_length = class_name - opline->op2.u.constant.value.str.val - 1;
@@ -1671,7 +1670,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					if (!compile_time) {
 						zend_error(E_ERROR, "Class %s:  Cannot inherit from undefined class %s", class_name, parent_name);
 					}
-					(*ce->refcount)--;
+					ce->refcount--;
 					efree(parent_name);
 					return FAILURE;
 				}
@@ -1684,7 +1683,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 					}
-					(*ce->refcount)--;
+					ce->refcount--;
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
 					zend_hash_destroy(&ce->private_properties);
@@ -2015,8 +2014,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = class_name->u.constant.value.str.val;
 	new_class_entry->name_length = class_name->u.constant.value.str.len;
-	new_class_entry->refcount = (int *) emalloc(sizeof(int));
-	*new_class_entry->refcount = 1;
+	new_class_entry->refcount = 1;
 	new_class_entry->constants_updated = 0;
 	
 	zend_str_tolower(new_class_entry->name, new_class_entry->name_length);

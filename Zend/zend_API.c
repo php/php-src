@@ -212,10 +212,7 @@ static int zend_check_class(zval *obj, zend_class_entry *expected_ce)
 	}
 	
 	for (ce = Z_OBJCE_P(obj); ce != NULL; ce = ce->parent) {
-		/*
-		 * C'est une UGLY HACK.
-		 */
-		if (ce->refcount == expected_ce->refcount) {
+		if (ce == expected_ce) {
 			return 1;
 		}
 	}
@@ -1228,8 +1225,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *orig_c
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
 	class_entry->parent = NULL;
-	class_entry->refcount = (int *) malloc(sizeof(int));
-	*class_entry->refcount = 1;
+	class_entry->refcount = 1;
 	class_entry->constants_updated = 0;
 	zend_hash_init(&class_entry->default_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
 	zend_hash_init(&class_entry->private_properties, 0, NULL, ZVAL_PTR_DTOR, 1);
