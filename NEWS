@@ -1,9 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2004, PHP 5.0.1
+?? ??? 2004, PHP 5.1.0
 - Implement true/false/NULL as keywords. (Marcus)
 - Fixed ZTS destruction. (Marcus)
-- Fixed bug #28829 (Thread-unsafety in bcmath elementary values). (Sara)
 
 13 Jul 2004, PHP 5.0.0
 - Updated PCRE to provide better error handling in certain cases. (Andrei)
