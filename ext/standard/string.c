@@ -2443,7 +2443,13 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int should_f
 	p = str;
 	if (!type) {
 		while (p < e) {
-			if (php_esc_list[(int)(unsigned char)*p]) {
+			int c = php_esc_list[(int)(unsigned char)*p];
+			if (c == 2) {
+				*ps++ = '\\';
+				*ps++ = '0';
+				p++;
+				continue;
+			} else if (c) {
 				*ps++ = '\\';
 			}
 			*ps++ = *p++;
