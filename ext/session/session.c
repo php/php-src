@@ -669,8 +669,12 @@ int php_rshutdown_session(SHUTDOWN_FUNC_ARGS)
 int php_minit_session(INIT_FUNC_ARGS)
 {
 #ifdef ZTS
+	php_ps_globals *ps_globals;
+
 	ps_globals_id = ts_allocate_id(sizeof(php_ps_globals), NULL, NULL);
+	ps_globals = ts_resource(ps_globals_id);
 #endif
+
 	PS(module_number) = module_number;
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
