@@ -1,0 +1,79 @@
+mailparse library for PHP 4
+===========================
+
+This library is build upon the librfc822 and librfc2045 libraries that
+originated from the maildrop component of the courier mail server.
+The copyright for most of the work belongs to Double Precision Inc.,
+although distribution of the library is carried out under the terms of the
+GPL.
+
+Example for PHP:
+=============
+
+$file = "/path/to/rfc822/compliant/message";
+
+$mime = mailparse_rfc2045_parse_file($file);
+$ostruct = mailparse_rfc2045_getstructure($mime);
+foreach($ostruct as $st)	{
+	$section = mailparse_rfc2045_find($mime, $st); 
+	$struct[$st] = mailparse_rfc2045_getinfo($section);
+}
+var_dump($struct);
+
+array mailparse_rfc822_parse_addresses(string addresses)
+	parses an rfc822 compliant recipient list, such as that found in To: From:
+	headers.  Returns a indexed array of assoc. arrays for each recipient:
+	array(0 => array("display" => "Wez Furlong", "address" => "wez@php.net"))
+
+resource mailparse_rfc2045_create()
+	Create a mime mail resource
+
+boolean mailparse_rfc2045_parse(resource mimemail, string data)
+	incrementally parse data into the supplied mime mail resource.
+	Concept: you can stream portions of a file at a time, rather than read
+	and parse the whole thing.
+
+
+resource mailparse_rfc2045_parse_file(string $filename)
+	Parse a file and return a $mime resource.
+	The file is opened and streamed through the parser.
+	This is the optimal way of parsing a mail file that
+	you have on disk.
+
+		
+array mailparse_rfc2045_getstructure(resource mimemail)
+	returns an array containing a list of message parts in the form:
+	array("1", "1.1", "1.2")
+
+resource mailparse_rfc2045_find(resource mimemail, string partname)
+	returns an mime mail resource representing the named section
+	
+array mailparse_rfc2045_getinfo(resource mimemail)
+	returns an array containing the bounds, content type and headers of the
+  	section.
+
+mailparse_rfc2045_extract_file(resource mimemail, string filename[, string
+		callbackfunc])
+	Extracts/decodes a message section from the supplied filename.
+	If no callback func is supplied, it outputs the results into the current
+	output buffer, otherwise it calls the callback with a string parameter
+	containing the text.	
+	The contents of the section will be decoded according to their transfer
+	encoding - base64, quoted-printable and uuencoded text are supported.
+
+All operations are done incrementally; streaming the input and output so that
+memory usage is on the whole lower than something like procmail or doing this
+stuff in PHP space.  The aim is that it stays this way to handle large
+quantities of email.
+
+TODO:
+=====
+
+. Add support for binhex encoding?
+. Extracting a message part without decoding the transfer encoding so that
+	eg: pgp-signatures can be verified.
+
+. Work the other way around - build up a rfc2045 compliant message file from
+	simple structure information and filenames/variables.
+	
+vim:tw=78
