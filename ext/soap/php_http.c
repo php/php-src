@@ -279,8 +279,8 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 		}
 		*/
 
-		/* Try and get headers again
-		if (http_status == 100") {
+		/* Try and get headers again */
+		if (http_status == 100) {
 			efree(http_headers);
 			if (!get_http_headers(stream, &http_headers, &http_header_size TSRMLS_CC)) {
 				php_stream_close(stream);
@@ -289,7 +289,6 @@ int get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRMLS
 				return FALSE;
 			}
 		}
-		*/
 
 		if (strncmp(http_version,"1.1", 3)) {
 			http_1_1 = 1;
