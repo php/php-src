@@ -10,8 +10,8 @@ libphpext_standard_a_SOURCES=\
 	cyr_convert.c flock_compat.c crypt.c dl.c head.c post.c \
 	parsedate.y lcg.c url_scanner.c
 
-url_scanner.c: url_scanner.re
-	re2c -s $< > $@
+$(srcdir)/url_scanner.c: $(srcdir)/url_scanner.re
+	re2c -b $< > $@
 
 #number.o: number.c
 #	$(CC) $(CFLAGS) -w@WARNING_LEVEL@ -c $< -o $@

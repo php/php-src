@@ -22,6 +22,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#undef MIN
+#define MIN(a,b) (a)<(b)?(a):(b)
+
 #define YYCTYPE char
 #define YYCURSOR state->crs
 #define YYLIMIT state->end
@@ -71,9 +74,9 @@ typedef struct {
 	
 static void screw_url(lexdata *state)
 {
-	char *url;
 	int len;
 	char buf[URLLEN];
+	char url[URLLEN];
 	const char *p, *q;
 	char c;
 
@@ -95,8 +98,7 @@ static void screw_url(lexdata *state)
 	ATTACH(state->start, p-state->start);
 	
 	/* copy old URI */
-	len = q - p;
-	url = malloc(len + 1);
+	len = MIN(q - p, sizeof(buf) - 1);
 	memcpy(url, p, len);
 	url[len] = '\0';
 	
@@ -104,7 +106,6 @@ static void screw_url(lexdata *state)
 	len = snprintf(buf, sizeof(buf), "%s%c%s", url,
 			memchr(state->start, '?', len) ? '&' : '?',
 			state->data);
-	free(url);
 
 	/* attach new URI */
 	ATTACH(buf, len);
