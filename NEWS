@@ -1,6 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added vprintf() and vsprintf() functions that allow passing all arguments
+  after format as an array. (Andrei)
+- Added support for GD2 image type for ImageCreateFromString() (Jani)
 - addcslashes now warns when charlist is invalid. The returned string
   remained the same (Jeroen)
 - Added optional extra argument to gmp_init(). The extra argument
