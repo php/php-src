@@ -13,16 +13,16 @@ fi
 
 # then look for the right pear include dir
 if test "x$PHP_PEAR_INSTALL_DIR" != "x"; then
-  INC="-d include_path=$PHP_PEAR_INSTALL_DIR"
+  INCDIR=$PHP_PEAR_INSTALL_DIR
+  INCARG="-d include_path=$PHP_PEAR_INSTALL_DIR"
 else
   if test "@php_dir@" = '@'php_dir'@'; then
-    INC=""  
+    INCDIR=`dirname $0`/..
+    INCARG=""  
   else
-    INC="-d include_path=@php_dir@"
+    INCDIR="@php_dir@"
+    INCARG="-d include_path=@php_dir@"
   fi
 fi
 
-exec $PHP -C -q $INC -d output_buffering=1 $0 $@
-<?php
-include "@include_path@/pearcmd.php";
-?>
+exec $PHP -C -q $INCARG -d output_buffering=1 $INCDIR/pearcmd.php $@
