@@ -1309,10 +1309,28 @@ void php3_min(INTERNAL_FUNCTION_PARAMETERS)
 			var_uninit(return_value);
 		}
 	} else {
-		if (_php3_hash_minmax(ht, array_data_compare, 0, (void **) &result)==SUCCESS) {
-			*return_value = **result;
-			pval_copy_constructor(return_value);
+		pval **args = (pval **) emalloc(sizeof(pval *)*ARG_COUNT(ht));
+		pval *min, result;
+		int i;
+
+		if (getParametersArray(ht, ARG_COUNT(ht), args)==FAILURE) {
+			efree(args);
+			WRONG_PARAM_COUNT;
 		}
+
+		min = args[0];
+
+		for (i=1; i<ARG_COUNT(ht); i++) {
+			compare_function(&result, min, args[i]);
+			if (result.value.lval > 0) {
+				min = args[i];
+			}
+		}
+
+		*return_value = *min;
+		pval_copy_constructor(return_value);
+
+		efree(args);
 	}
 }
 
@@ -1342,10 +1360,28 @@ void php3_max(INTERNAL_FUNCTION_PARAMETERS)
 			var_uninit(return_value);
 		}
 	} else {
-		if (_php3_hash_minmax(ht, array_data_compare, 1, (void **) &result)==SUCCESS) {
-			*return_value = **result;
-			pval_copy_constructor(return_value);
+		pval **args = (pval **) emalloc(sizeof(pval *)*ARG_COUNT(ht));
+		pval *max, result;
+		int i;
+
+		if (getParametersArray(ht, ARG_COUNT(ht), args)==FAILURE) {
+			efree(args);
+			WRONG_PARAM_COUNT;
 		}
+
+		max = args[0];
+
+		for (i=1; i<ARG_COUNT(ht); i++) {
+			compare_function(&result, max, args[i]);
+			if (result.value.lval < 0) {
+				max = args[i];
+			}
+		}
+
+		*return_value = *max;
+		pval_copy_constructor(return_value);
+
+		efree(args);
 	}
 }
 
@@ -1916,7 +1952,7 @@ void test_class_call_function(INTERNAL_FUNCTION_PARAMETERS, zend_property_refere
 		pval_destructor(&overloaded_property->element);
 	}
 		
-	printf("%d arguments\n", zend_hash_num_elements(ht));
+	printf("%d arguments\n", ARG_COUNT(ht));
 	return_value->value.str.val = estrndup("testing", 7);
 	return_value->value.str.len = 7;
 	return_value->type = IS_STRING;
