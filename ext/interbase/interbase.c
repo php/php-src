@@ -252,7 +252,7 @@ typedef struct {
 		float fval;
 		ISC_LONG lval;
 		ISC_QUAD qval;
-#ifdef ISC_TIMESTAMP
+#ifdef SQL_TIMESTAMP
 		ISC_TIMESTAMP tsval;
 		ISC_DATE dtval;
 		ISC_TIME tmval;
@@ -796,7 +796,7 @@ PHP_MINFO_FUNCTION(ibase)
 			break;
 		}
 		info_func = (void (__stdcall *)(char*))GetProcAddress(l, "isc_get_client_version");
-#endif		
+#endif
 		if (info_func) {
 			info_func(s = tmp);
 		} else {
@@ -1026,7 +1026,7 @@ PHP_FUNCTION(ibase_close)
 	zval **link_arg = NULL;
 	ibase_db_link *ib_link;
 	int link_id;
-	
+
 	RESET_ERRMSG;
 	
 	switch (ZEND_NUM_ARGS()) {
@@ -1200,7 +1200,7 @@ static int _php_ibase_alloc_array(ibase_array **ib_arrayp, XSQLDA *sqlda, /* {{{
 			
 			/* calculate elements count */
 			for (dim = 0; dim < ar_desc->array_desc_dimensions; dim++) {
-				ar_size *= 1 + ar_desc->array_desc_bounds[dim].array_bound_upper 
+				ar_size *= 1 + ar_desc->array_desc_bounds[dim].array_bound_upper
 					-ar_desc->array_desc_bounds[dim].array_bound_lower;
 			}
 			IB_ARRAY[i].ar_size = IB_ARRAY[i].el_size * ar_size;
@@ -1347,8 +1347,8 @@ static int _php_ibase_bind_array(zval *val, char *buf, unsigned long buf_size, /
 			{
 				subval = &pnull_val;
 			}
-				
-			if (_php_ibase_bind_array(*subval, buf, slice_size, array, dim+1 TSRMLS_CC) == FAILURE) 
+
+			if (_php_ibase_bind_array(*subval, buf, slice_size, array, dim+1 TSRMLS_CC) == FAILURE)
 			{
 				return FAILURE;
 			}
@@ -1549,11 +1549,11 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 	XSQLVAR *var = sqlda->sqlvar;
 
 	for (i = 0; i < sqlda->sqld; ++var, ++i) { /* bound vars */
-		
+
 		zval *b_var = b_vars[i];
 
 		var->sqlind = &buf[i].sqlind;
-		
+
 		if (Z_TYPE_P(b_var) == IS_NULL) {
 			if ((var->sqltype & 1) != 1) {
 				_php_ibase_module_error("Parameter %d must have a value" TSRMLS_CC, i+1);
@@ -1570,8 +1570,10 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 				*/
 				var->sqltype = SQL_TEXT;
 			}
-		
+
 			switch (var->sqltype & ~1) {
+				struct tm t;
+
 				case SQL_SHORT:
 					convert_to_long(b_var);
 					if (Z_LVAL_P(b_var) > SHRT_MAX || Z_LVAL_P(b_var) < SHRT_MIN) {
@@ -1608,80 +1610,91 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 					convert_to_double(b_var);
 					var->sqldata = (void *) &Z_DVAL_P(b_var);
 					break;
+
+				case SQL_DATE: /* == SQL_TIMESTAMP: */
+#ifdef SQL_TIMESTAMP
+				case SQL_TYPE_DATE:
+				case SQL_TYPE_TIME:
+#endif
+					if (Z_TYPE_P(b_var) == IS_LONG) {
+						/* insert timestamp directly */
+						gmtime_r(&Z_LVAL_P(b_var),&t);
+					} else {
+#ifndef HAVE_STRPTIME
 #ifndef SQL_TIMESTAMP
-				case SQL_DATE:
-					convert_to_string(b_var);
-					{
-						struct tm t;
-#ifdef HAVE_STRPTIME
-						strptime(Z_STRVAL_P(b_var), IBG(timestampformat), &t);
-#else
-						/* Parsing doesn't seem to happen with older versions... */
 						int n;
-						
+
 						t.tm_year = t.tm_mon = t.tm_mday = t.tm_hour = t.tm_min = t.tm_sec = 0;
-						
+
 						n = sscanf(Z_STRVAL_P(b_var), "%d%*[/]%d%*[/]%d %d%*[:]%d%*[:]%d",
 							&t.tm_mon, &t.tm_mday, &t.tm_year, &t.tm_hour, &t.tm_min, &t.tm_sec);
-		
+
 						if (n != 3 && n != 6) {
 							_php_ibase_module_error("Parameter %d: invalid date/time format "
 								"(expected 3 or 6 fields, got %d. Use format m/d/Y H:i:s. You gave '%s')"
 								TSRMLS_CC, i+1, n, Z_STRVAL_P(b_var));
 							rv = FAILURE;
+							break;
 						}
 						t.tm_year -= 1900;
 						t.tm_mon--;
-#endif
-						isc_encode_date(&t, &buf[i].val.qval);
-						var->sqldata = (void *) (&buf[i].val.qval);
-					}
 #else
-#ifdef HAVE_STRPTIME
-				case SQL_TIMESTAMP:
-				case SQL_TYPE_DATE:
-				case SQL_TYPE_TIME:
-					{
-						struct tm t;
-	
+						goto php_ibase_bind_default; /* let IB string handling take over */
+#endif
+#else
 						convert_to_string(b_var);
-	
+
 						switch (var->sqltype & ~1) {
-							case SQL_TIMESTAMP:
+							default: /* == case SQL_TIMESTAMP/SQL_DATE: */
 								strptime(Z_STRVAL_P(b_var), IBG(timestampformat), &t);
-								isc_encode_timestamp(&t, &buf[i].val.tsval);
-								var->sqldata = (void *) (&buf[i].val.tsval);
 								break;
 							case SQL_TYPE_DATE:
 								strptime(Z_STRVAL_P(b_var), IBG(dateformat), &t);
-								isc_encode_sql_date(&t, &buf[i].val.dtval);
-								var->sqldata = (void *) (&buf[i].val.dtval);
 								break;
 							case SQL_TYPE_TIME:
 								strptime(Z_STRVAL_P(b_var), IBG(timeformat), &t);
-								isc_encode_sql_time(&t, &buf[i].val.tmval);
-								var->sqldata = (void *) (&buf[i].val.tmval);
 								break;
 						}
+#endif
 					}
+
+#ifndef SQL_TIMESTAMP
+					isc_encode_date(&t, &buf[i].val.qval);
+					var->sqldata = (void *) (&buf[i].val.qval);
+#else
+					switch (var->sqltype & ~1) {
+						default: /* == case SQL_TIMESTAMP */
+							isc_encode_timestamp(&t, &buf[i].val.tsval);
+							var->sqldata = (void *) (&buf[i].val.tsval);
+							break;
+						case SQL_TYPE_DATE:
+							strptime(Z_STRVAL_P(b_var), IBG(dateformat), &t);
+							isc_encode_sql_date(&t, &buf[i].val.dtval);
+							var->sqldata = (void *) (&buf[i].val.dtval);
+							break;
+						case SQL_TYPE_TIME:
+							strptime(Z_STRVAL_P(b_var), IBG(timeformat), &t);
+							isc_encode_sql_time(&t, &buf[i].val.tmval);
+							var->sqldata = (void *) (&buf[i].val.tmval);
+							break;
 #endif
-#endif
+					}
 					break;
 				case SQL_BLOB:
-						
+
 					convert_to_string(b_var);
-	
+
 					if (Z_STRLEN_P(b_var) != BLOB_ID_LEN ||
 						!_php_ibase_string_to_quad(Z_STRVAL_P(b_var), &buf[i].val.qval)) {
-	
+
 						ibase_blob ib_blob = { NULL, BLOB_INPUT };
-	
+
 						if (isc_create_blob(IB_STATUS, &ib_query->link->handle,
 								&ib_query->trans->handle, &ib_blob.bl_handle, &ib_blob.bl_qd)) {
 							_php_ibase_error(TSRMLS_C);
 							return FAILURE;
 						}
-	
+
 						if (_php_ibase_blob_add(&b_var, &ib_blob TSRMLS_CC) != SUCCESS) {
 							return FAILURE;
 						}
@@ -1737,6 +1750,7 @@ static int _php_ibase_bind(XSQLDA *sqlda, zval **b_vars, BIND_BUF *buf, /* {{{ *
 					var->sqldata = (void *) &buf[i].val.qval;
 					break;
 				default:
+php_ibase_bind_default:
 					convert_to_string(b_var);
 					var->sqldata = Z_STRVAL_P(b_var);
 					var->sqllen	 = Z_STRLEN_P(b_var);
