@@ -1928,7 +1928,7 @@ send_by_ref:
 					zend_str_tolower(class_name.value.str.val, class_name.value.str.len);
 
 					if (zend_hash_find(EG(class_table), class_name.value.str.val, class_name.value.str.len+1, (void **) &ce)==FAILURE) {
-						zend_error(E_ERROR, "Cannot instanciate non-existant class:  %s", class_name.value.str.val);
+						zend_error(E_ERROR, "Cannot instantiate non-existant class:  %s", class_name.value.str.val);
 					}
 					object_init_ex(&Ts[opline->result.u.var].tmp_var, ce);
 					Ts[opline->result.u.var].tmp_var.refcount=1;
