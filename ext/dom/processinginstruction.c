@@ -86,6 +86,11 @@ int dom_processinginstruction_target_read(dom_object *obj, zval **retval TSRMLS_
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	ZVAL_STRING(*retval, (char *) (nodep->name), 1);
 
@@ -108,6 +113,11 @@ int dom_processinginstruction_data_read(dom_object *obj, zval **retval TSRMLS_DC
 
 	nodep = dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 
 	
@@ -127,6 +137,11 @@ int dom_processinginstruction_data_write(dom_object *obj, zval *newval TSRMLS_DC
 	xmlNode *nodep;
 
 	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	if (newval->type != IS_STRING) {
 		if(newval->refcount > 1) {

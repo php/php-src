@@ -101,6 +101,11 @@ int dom_document_doctype_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	dtdptr = xmlGetIntSubset(docp);
 	if (!dtdptr) {
 		return FAILURE;
@@ -147,6 +152,11 @@ int dom_document_document_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int ret;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	root = xmlDocGetRootElement(docp);
 	if (!root) {
@@ -195,6 +205,12 @@ int dom_document_encoding_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *encoding;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	encoding = (char *) docp->encoding;
 	ALLOC_ZVAL(*retval);
 
@@ -214,6 +230,11 @@ int dom_document_encoding_write(dom_object *obj, zval *newval TSRMLS_DC)
 	xmlCharEncodingHandlerPtr handler;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	if (newval->type != IS_STRING) {
 		if(newval->refcount > 1) {
@@ -258,6 +279,12 @@ int dom_document_standalone_read(dom_object *obj, zval **retval TSRMLS_DC)
 	int standalone;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	standalone = docp->standalone;
 	ZVAL_BOOL(*retval, standalone);
@@ -272,6 +299,11 @@ int dom_document_standalone_write(dom_object *obj, zval *newval TSRMLS_DC)
 	int standalone;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	if(newval->refcount > 1) {
 		value_copy = *newval;
@@ -313,6 +345,12 @@ int dom_document_version_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *version;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	version = (char *) docp->version;
 	ALLOC_ZVAL(*retval);
 
@@ -331,6 +369,12 @@ int dom_document_version_write(dom_object *obj, zval *newval TSRMLS_DC)
 	xmlDoc *docp;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	if (docp->version != NULL) {
 		xmlFree((xmlChar *) docp->version );
 	}
@@ -626,6 +670,11 @@ int dom_document_document_uri_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
 
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	url = (char *) docp->URL;
 	if (url != NULL) {
@@ -643,6 +692,12 @@ int dom_document_document_uri_write(dom_object *obj, zval *newval TSRMLS_DC)
 	xmlDoc *docp;
 
 	docp = (xmlDocPtr) dom_object_get_node(obj);
+
+	if (docp == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	if (docp->URL != NULL) {
 		xmlFree((xmlChar *) docp->URL);
 	}
@@ -1024,8 +1079,6 @@ PHP_FUNCTION(dom_document_create_element_ns)
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
-
-	DOM_GET_THIS_OBJ(docp, id, xmlDocPtr, intern);
 
 	errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 

@@ -52,6 +52,11 @@ int dom_entity_public_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	nodep = (xmlEntity *) dom_object_get_node(obj);
 
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
+
 	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(*retval);
@@ -76,6 +81,11 @@ int dom_entity_system_id_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlEntity *nodep;
 
 	nodep = (xmlEntity *) dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
@@ -102,6 +112,11 @@ int dom_entity_notation_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *content;
 
 	nodep = (xmlEntity *) dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0 TSRMLS_CC);
+		return FAILURE;
+	}
 
 	ALLOC_ZVAL(*retval);
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
