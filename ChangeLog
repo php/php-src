@@ -1,3 +1,107 @@
+2000-09-11  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - Renamed functions so that this extension finally starts to follow the
+      recommended naming scheme of PHP.
+
+2000-09-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - Fix for bug #6673
+    - Added a "cut" option to wordwrap (as per feature request #6429)
+     Added an optional parameter to wordwrap that cuts a string if the length
+      of a word is longer than the maximum allowed with (Derick)
+
+2000-09-11  Andi Gutmans  <andi@zend.com>
+
+    * win32/php4dllts.dsp
+      main/php_open_temporary_file.c: - Windows and UNIX compile fixes
+
+    * main/php_open_temporary_file.c:
+    - Get rid of stuff which is already done in php.h
+    - More can probably be removed as the code doesn't use lots of sys calls.
+
+    * ext/standard/file.h: - Remove #if 0 code
+
+    * ext/standard/file.h
+      ext/swf/swf.c
+      main/Makefile.in
+      main/php_open_temporary_file.c
+      main/php_open_temporary_file.h
+      main/rfc1867.c
+      ext/standard/file.c: - Move php_open_temporary_file() out of file.c
+
+2000-09-11  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Use the same check for existence of a valid link as the other functions.
+    - Return TRUE if everything went OK.
+    - Fixed the number of arguments to pg_endcopy.
+    - Removed unused variables.
+    - Indentation, changed spaces to tabs.
+
+2000-09-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/file.c: Kill a warning
+
+    * ext/sockets/sockets.c:
+    Add proper struct sockaddr * casts and make use of memcpy/memset ('coz we
+    don't provide any fallbacks for bcopy/bzero).
+
+2000-09-11  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - Added functions pg_putline and pg_endcopy (thanks to Dirk Elmendorf
+      <delmendo@rackspace.com>)
+     Added functions pg_putline and pg_endcopy (Dirk Elmendorf)
+
+2000-09-11  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Solaris-readdir_r-wants-large-buffer fix
+    Libc5-readdir_r workaround
+
+    * ext/session/mod_files.c: Libc5-readdir_r workaround
+
+2000-09-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c:
+    (PHP parse_str) ParameterPassedByReference() check is not necessary.
+
+2000-09-11  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/basic_functions.c
+      ext/standard/string.c
+      main/main.c
+      main/php_variables.c
+      main/php_variables.h:
+    Add additional parameter to parse_str for saving result (thanks to
+    John Bafford <dshadow@zort.net>)
+
+2000-09-11  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: (PHP pathinfo) Fixed more typos.
+
+    * TODO
+      ext/standard/string.c:
+    (PHP pathinfo) Fixed leaks, saved some memory allocations, added
+    more error checking.
+
+    * NEWS: Fix attribution.
+
+2000-09-11  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4: Fixed bug #6356.
+
+2000-09-11  Andi Gutmans  <andi@zend.com>
+
+    * ext/swf/swf.c: - Should fix compile warning
+
+2000-09-11  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/curl/curl.c:
+    - Fix bug with curl places extra data in the output. (medvitz@medvitz.net)
+
 2000-09-10  Sterling Hughes  <stirling@bestweb.net>
 
     * ext/sockets/sockets.c: Fix compile warning.
