@@ -23,8 +23,6 @@
 
 #if HAVE_WDDX
 
-#include <expat.h>
-
 extern zend_module_entry wddx_module_entry;
 #define wddx_module_ptr &wddx_module_entry
 

@@ -22,6 +22,7 @@
 
 #if HAVE_WDDX
 
+#include "ext/xml/expat_compat.h"
 #include "php_wddx.h"
 #include "php_wddx_api.h"
 
