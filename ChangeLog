@@ -1,3 +1,109 @@
+2000-06-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * configure.in: fix for BUG #5066
+
+2000-06-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/var.c
+      ext/wddx/wddx.c: Just to make extra sure.
+
+    * ext/standard/var.c: Plug a memory leak: retval_ptr should be destroyed.
+
+    * ext/wddx/wddx.c:
+    - Enhanced WDDX functions to call __sleep() and __wakeup() when working on
+      objects. 
+
+2000-06-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c: typo fix
+
+    * ext/dav/dav.c
+      ext/imap/php_imap.c:
+    retro-patch from // comments, theese where private experimental changes
+
+2000-06-16  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/var.c: Typo.
+
+2000-06-16  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/icap/php_icap.c
+      ext/imap/php_imap.c
+      ext/msql/php_msql.c
+      ext/mysql/libmysql/config-win32.h
+      ext/mysql/libmysql/my_pthread.h
+      ext/standard/info.c
+      ext/standard/levenshtein.c
+      ext/yaz/php_yaz.c
+      ext/zlib/zlib.c
+      sapi/isapi/php4isapi.c
+      win32/sendmail.c
+      win32/sendmail.h
+      win32/syslog.h
+      win32/winutil.c
+      dl/snmp/winsnmp.c
+      ext/com/COM.c
+      ext/cpdf/cpdf.c
+      ext/dav/dav.c
+      ext/domxml/php_domxml.c
+      ext/hyperwave/hw.c
+      ext/hyperwave/php_hyperwave.h
+      dl/crypt/sflcryp.c: C++ // comments are evil ...
+
+2000-06-16  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/wddx/wddx.c: Protos looks now equal in both versions.
+
+2000-06-16  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/wddx/wddx.c:
+    - Changed WDDX to serialize arrays as structs only if needed. 
+
+2000-06-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache/libphp4.module.in: More main work
+
+    * genfiles: Some stuff has moved to main
+
+2000-06-16  Jouni Ahto  <jah@mork.net>
+
+    * ext/gd/gd.c:
+    - Forgot to test check for errors in two places.
+
+2000-06-16  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c: - Make Windows compile
+
+2000-06-16  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c
+      main/php_globals.h:
+    Improve timeout support - ini_get("max_execution_time", ...) works now
+
+    * ext/mysql/php_mysql.c
+      ext/mysql/php_mysql.h
+      main/main.c
+      php.ini-dist
+      php.ini-optimized: Move timeout code to Zend, allow Win32 timeouts
+
+2000-06-16  Andi Gutmans  <andi@php.net>
+
+    * main/fopen-wrappers.c: - Don't need to check doc_root's length twice
+
+    * main/fopen-wrappers.c:
+    - Last one for tonight. Make sure that we don't check uninitialized
+    - memory
+
+    * main/fopen-wrappers.c:
+    - Last patch for tonight. A more optimized way to check for absolute path
+    - in Windows. This should be fixed to use the virtual cwd macro for
+    - ABSOLUTE_DIR() but I need to have time to understand the logic first
+
+    * main/fopen-wrappers.c: - Missed a bracket
+
+    * main/fopen-wrappers.c: - Beautify fopen-wrappers a bit.
+    - Still needs quite a lot of improvement in order to treat Windows well
+
 2000-06-15  Andi Gutmans  <andi@php.net>
 
     * ext/gd/gd.c
