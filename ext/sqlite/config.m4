@@ -73,7 +73,12 @@ if test "$PHP_SQLITE" != "no"; then
 
 	AC_PATH_PROG(LEMON,lemon,no)
 	AC_SUBST(LEMON)
-	
+
+	SQLITE_VERSION=`cat $ext_builddir/libsqlite/VERSION`
+	AC_SUBST(SQLITE_VERSION)
+
+	sed -e s/--VERS--/`cat libsqlite/VERSION`/ -e s/--ENCODING--/$SQLITE_ENCODING/ libsqlite/src/sqlite.h.in >libsqlite/src/sqlite.h
+
 	PHP_ADD_MAKEFILE_FRAGMENT
   fi
 
