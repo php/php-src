@@ -348,6 +348,7 @@ PHP_FUNCTION(curl_exec)
 	FILE *fp;
 	char buf[4096];
 	int b;
+	unsigned long pos = 0;
 
 	CURLLS_FETCH();
 	
@@ -408,8 +409,10 @@ PHP_FUNCTION(curl_exec)
 		ret_data = emalloc((stat_sb.st_size+1)*sizeof(char));
 		
 		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
-			strcat(ret_data, buf);
+			memcpy(&(ret_data[pos]), buf, b);
+			pos += b;
 		}
+		ret_data[stat_sb.st_size - 1] = '\0';
 		
 		RETURN_STRINGL(ret_data, stat_sb.st_size, 0);
 	
