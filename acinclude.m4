@@ -151,7 +151,7 @@ no)
   ;;
 esac
 
-if test "$php_always_shared"; then
+if test "$php_always_shared" = "yes"; then
   ext_output="yes, shared"
   ext_shared=yes
   test "[$]$1" = "no" && $1=yes
