@@ -12,6 +12,7 @@ case "$EXTRA_VERSION" in
 esac
 
 devok=0
+debug=no
 
 while test $# -gt 0; do
   if test "$1" = "--copy"; then
@@ -21,6 +22,10 @@ while test $# -gt 0; do
   if test "$1" = "--force"; then
     devok=1
     echo "Forcing buildconf"
+  fi
+
+  if test "$1" = "--debug"; then
+    debug=yes
   fi
 
   shift
@@ -48,17 +53,17 @@ if test -z "$ZENDDIR"; then
     fi
   else
     if test -r "Zend/zend_execute_globals.h"; then
-	  :
+      :
     else
       mv Zend ZendEngine2 2>/dev/null
       mv ZendEngine1 Zend
     fi
   fi
-	
+
   ZENDDIR=Zend
   echo "using default Zend directory"
 fi
  
 rm -f generated_lists
 
-${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
+${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR" SHOW_WARNINGS="$debug"
