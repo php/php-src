@@ -30,7 +30,7 @@
 #endif
 
 /* Additional headers for NetWare */
-#if defined(NETWARE) && (NEW_LIBC)
+#if defined(NETWARE)
 #include <sys/select.h>
 #include <sys/timeval.h>
 #endif
