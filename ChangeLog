@@ -1,3 +1,232 @@
+2001-09-09  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/credits.c: Do some justice to the doc team
+
+2001-09-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: MFH
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Better fix for mark problem
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: Fix mark-handling
+
+    * ext/ircg/ircg.c: Remove unneccessary preprocessor checks
+
+2001-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cgi/cgi_main.c
+      sapi/tux/php_tux.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      main/fopen_wrappers.c
+      main/internal_functions_win32.c
+      main/main.c
+      main/mergesort.c
+      main/network.c
+      main/output.c
+      main/php.h
+      main/php_content_types.c
+      main/php_ini.c
+      main/php_logos.c
+      main/php_open_temporary_file.c
+      main/php_sprintf.c
+      main/php_streams.h
+      main/php_ticks.c
+      main/php_variables.c
+      main/reentrancy.c
+      main/rfc1867.c
+      main/safe_mode.c
+      main/snprintf.c
+      main/streams.c
+      main/strlcat.c
+      main/strlcpy.c
+      sapi/apache/mod_php4.c
+      main/SAPI.c
+      main/alloca.c
+      ext/zip/zip.c
+      ext/zlib/zlib.c
+      ext/xslt/xslt.c
+      ext/yaz/php_yaz.c
+      ext/yp/yp.c
+      ext/xml/xml.c
+      ext/xslt/sablot.c
+      ext/vpopmail/php_vpopmail.c
+      ext/wddx/wddx.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/soundex.c
+      ext/standard/strnatcmp.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/url_scanner.c
+      ext/standard/var.c
+      ext/swf/swf.c
+      ext/standard/flock_compat.c
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/fsock.h
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/incomplete_class.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/lcg.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/quot_print.c
+      ext/standard/rand.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/browscap.c
+      ext/standard/crc32.c
+      ext/standard/credits.c
+      ext/standard/crypt.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/array.c
+      ext/snmp/winsnmp.c
+      ext/sockets/sockets.c
+      ext/skeleton/skeleton.c
+      ext/snmp/snmp.c
+      ext/session/mod_user.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/session/mod_mm.c
+      ext/pspell/pspell.c
+      ext/qtdom/qtdom.c
+      ext/session/mod_files.c
+      ext/printer/printer.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pfpro/pfpro.c
+      ext/pcre/php_pcre.c
+      ext/pdf/pdf.c
+      ext/ovrimos/ovrimos.c
+      ext/oracle/oracle.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/ncurses/ncurses.c
+      ext/oci8/oci8.c
+      ext/msql/php_msql.c
+      ext/mysql/php_mysql.c
+      ext/mhash/mhash.c
+      ext/ming/ming.c
+      ext/mnogosearch/php_mnogo.c
+      ext/mailparse/mailparse.c
+      ext/mailparse/php_mailparse.h
+      ext/mailparse/rfc2045.c
+      ext/mailparse/rfc2045appendurl.c
+      ext/mcrypt/mcrypt.c
+      ext/ircg/ircg.c
+      ext/ldap/ldap.c
+      ext/interbase/interbase.c
+      ext/imap/php_imap.c
+      ext/ingres_ii/ii.c
+      ext/icap/php_icap.c
+      ext/iconv/iconv.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/hyperwave/hw.c
+      ext/ftp/ftp.c
+      ext/gd/gd.c
+      ext/filepro/filepro.c
+      ext/fribidi/fribidi.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/dbase/dbase.c
+      ext/dbase/dbf_head.c
+      ext/dbase/dbf_misc.c
+      ext/dbase/dbf_ndx.c
+      ext/dbase/dbf_rec.c
+      ext/domxml/php_domxml.c
+      ext/exif/exif.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_ndbm.c
+      ext/dba/dba.c
+      ext/cybermut/cybermut.c
+      ext/db/db.c
+      ext/cybercash/cybercash.c
+      ext/ctype/ctype.c
+      ext/curl/curl.c
+      ext/cpdf/cpdf.c
+      ext/crack/crack.c
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/dow.c
+      ext/calendar/french.c
+      ext/calendar/jewish.c
+      ext/calendar/julian.c
+      ext/ccvs/ccvs.c
+      ext/bz2/bz2.c
+      ext/aspell/aspell.c
+      ext/bcmath/bcmath.c:
+    - Don't wrap lines... this is annoying while coding.
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    - Really fix nl2br now... it's actaulyl faster now
+
+    * ext/standard/string.c: - Fix for bug 11904
+
+2001-09-09  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/standard/array.c: remove ARG_COUNT(ht)
+
+
+    * ext/standard/php_rand.h
+      ext/standard/rand.c: export the mt rand functions...
+
+2001-09-09  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/phttpd/phttpd.c: - Removed duplicate FETCH()
+
+2001-09-09  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * NEWS: add DOMXML news
+
+    * ext/domxml/php_domxml.c: have this go through php's error warning system
+
+    * ext/domxml/php_domxml.c: ws fix, MFB
+
+    * ext/domxml/php_domxml.c: ws fix
+
+    * ext/domxml/php_domxml.c: MFH
+
+    * ext/domxml/php_domxml.c:
+    Change DOM-XML's error reporting to E_WARNING which is more appropriate
+
 2001-09-08  Harald Radi  <h.radi@nme.at>
 
     * ext/com/COM.c
