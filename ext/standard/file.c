@@ -1553,7 +1553,7 @@ PHP_FUNCTION(fgetcsv) {
 
 	bptr = buf;
 	tptr = buf + strlen(buf) -1;
-	while ( isspace(*tptr) && (tptr > bptr) ) *tptr--=0;
+	while ( isspace((int)*tptr) && (tptr > bptr) ) *tptr--=0;
 
 	/* add single space - makes it easier to parse trailing null field */
 	*++tptr = ' ';
@@ -1576,7 +1576,7 @@ PHP_FUNCTION(fgetcsv) {
 
 	do	{
 		/* 1. Strip any leading space */		
-		while(isspace(*bptr)) bptr++;	
+		while(isspace((int)*bptr)) bptr++;	
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (*bptr == '"') {
 			/* 2A. handle quote delimited field */
@@ -1605,7 +1605,7 @@ PHP_FUNCTION(fgetcsv) {
 			*tptr=0;	/* terminate temporary string */
 			if (strlen(temp)) {
 				tptr--;
-				while (isspace(*tptr)) *tptr-- = 0;	/* strip any trailing spaces */
+				while (isspace((int)*tptr)) *tptr-- = 0;	/* strip any trailing spaces */
 			}
 			if (*bptr == delimiter) bptr++;
 		}
