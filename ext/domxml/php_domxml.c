@@ -326,9 +326,9 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(parent,					domxml_node_parent,				NULL)
 	PHP_FALIAS(parent_node,				domxml_node_parent,				NULL)
 	PHP_FALIAS(insert_before,			domxml_node_insert_before,		NULL)
-	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(append_child,			domxml_node_append_child,		NULL)
 	PHP_FALIAS(remove_child,			domxml_node_remove_child,		NULL)
+	PHP_FALIAS(replace_child,			domxml_node_replace_child,		NULL)
 	PHP_FALIAS(owner_document,			domxml_node_owner_document,		NULL)
 	PHP_FALIAS(new_child,				domxml_node_new_child,			NULL)
 	PHP_FALIAS(attributes,				domxml_node_attributes,			NULL)
@@ -337,6 +337,7 @@ static zend_function_entry php_domxmlnode_class_functions[] = {
 	PHP_FALIAS(clone_node,				domxml_clone_node,				NULL)
 /* Non DOM functions start here */
 	PHP_FALIAS(add_child,				domxml_node_add_child,			NULL)
+	PHP_FALIAS(append_sibling,			domxml_node_append_sibling,		NULL)
 	PHP_FALIAS(node,					domxml_node,					NULL)
 	PHP_FALIAS(unlink,					domxml_node_unlink_node,		NULL)
 	PHP_FALIAS(unlink_node,				domxml_node_unlink_node,		NULL)
@@ -2156,6 +2157,42 @@ PHP_FUNCTION(domxml_node_remove_child)
 			zval *rv;
 			xmlUnlinkNode(child);
 			DOMXML_RET_OBJ(rv, child, &ret);
+			return;
+		}
+		children = children->next;
+	}
+	RETURN_FALSE
+}
+/* }}} */
+
+/* {{{ proto object domxml_node_replace_child(object newnode, object oldnode)
+   Replaces node in list of children */
+PHP_FUNCTION(domxml_node_replace_child)
+{
+	zval *id, *newnode, *oldnode;
+	xmlNodePtr children, newchild, oldchild, nodep;
+	int ret;
+
+	DOMXML_GET_THIS_OBJ(nodep, id, le_domxmlnodep);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oo", &newnode, &oldnode) == FAILURE) {
+		return;
+	}
+
+	DOMXML_GET_OBJ(newchild, newnode, le_domxmlnodep);
+	DOMXML_GET_OBJ(oldchild, oldnode, le_domxmlnodep);
+
+	children = nodep->children;
+	if (!children) {
+		RETURN_FALSE;
+	}
+
+	while (children) {
+		if (children == oldchild) {
+			zval *rv;
+			xmlNodePtr node;
+			node = xmlReplaceNode(oldchild, newchild);
+			DOMXML_RET_OBJ(rv, oldchild, &ret);
 			return;
 		}
 		children = children->next;
