@@ -945,7 +945,7 @@ PHP_FUNCTION(ibase_connect)
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
-	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	_php_ibase_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU, IBG(allow_persistent));
 }
 /* }}} */
 
