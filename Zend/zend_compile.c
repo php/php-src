@@ -290,10 +290,10 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 		if (zend_hash_exists(CG(auto_globals), varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 			opline_ptr->op2.u.EA.type = ZEND_FETCH_GLOBAL;
 		} else {
-			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
+/*			if (CG(active_op_array)->static_variables && zend_hash_exists(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1)) {
 				opline_ptr->op2.u.EA.type = ZEND_FETCH_STATIC;
 			} 
-		}
+*/		}
 	}
 
 	if (bp) {
@@ -2682,6 +2682,9 @@ void zend_do_list_end(znode *result, znode *expr TSRMLS_DC)
 void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
 {
 	zval *tmp;
+	zend_op *opline;
+	znode lval;
+	znode result;
 
 	ALLOC_ZVAL(tmp);
 	convert_to_string(&varname->u.constant);
@@ -2695,7 +2698,26 @@ void zend_do_fetch_static_variable(znode *varname, znode *static_assignment, int
 		zend_hash_init(CG(active_op_array)->static_variables, 2, NULL, ZVAL_PTR_DTOR, 0);
 	}
 	zend_hash_update(CG(active_op_array)->static_variables, varname->u.constant.value.str.val, varname->u.constant.value.str.len+1, &tmp, sizeof(zval *), NULL);
-	zval_dtor(&varname->u.constant);
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_FETCH_W;		/* the default mode must be Write, since fetch_simple_variable() is used to define function arguments */
+	opline->result.op_type = IS_VAR;
+	opline->result.u.EA.type = 0;
+	opline->result.u.var = get_temporary_variable(CG(active_op_array));
+	opline->op1 = *varname;
+	SET_UNUSED(opline->op2);
+	opline->op2.u.EA.type = fetch_type;
+	result = opline->result;
+
+	if (varname->op_type == IS_CONST) {
+		zval_copy_ctor(&varname->u.constant);
+	}
+	fetch_simple_variable(&lval, varname, 0 TSRMLS_CC); /* Relies on the fact that the default fetch is BP_VAR_W */
+
+	zend_do_assign_ref(NULL, &lval, &result TSRMLS_CC);
+	CG(active_op_array)->opcodes[CG(active_op_array)->last-1].result.u.EA.type |= EXT_TYPE_UNUSED;
+
+/*	zval_dtor(&varname->u.constant); */
 }
 
 void zend_do_fetch_global_variable(znode *varname, znode *static_assignment, int fetch_type TSRMLS_DC)
