@@ -570,7 +570,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
 						}
-						php_print_info(0xFFFFFFFF);
+						php_print_info(0xFFFFFFFF TSRMLS_CC);
 						exit(1);
 						break;
 
