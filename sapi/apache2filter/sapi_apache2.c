@@ -72,7 +72,7 @@ php_apache_sapi_ub_write(const char *str, uint str_length TSRMLS_DC)
 		php_handle_aborted_connection();
 	}
 	
-	return 0; /* we wrote everything, we promise! */
+	return str_length; /* we always consume all the data passed to us. */
 }
 
 static int
