@@ -84,7 +84,7 @@ PHP_MSHUTDOWN_FUNCTION(shmop)
 PHP_MINFO_FUNCTION(shmop)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "shmop support", "enabled");
+	php_info_print_table_row(2, "shmop support", "enabled");
 	php_info_print_table_end();
 }
 
