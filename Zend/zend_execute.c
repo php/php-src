@@ -856,8 +856,9 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 		return;
 	}
 
-	if (container->type == IS_OBJECT
-		&& Z_OBJCE_P(container)->handle_property_get) {
+	if (container->type == IS_OBJECT &&
+		(type == BP_VAR_W && Z_OBJCE_P(container)->handle_property_set ||
+		 type != BP_VAR_W && Z_OBJCE_P(container)->handle_property_get)) {
 		zend_overloaded_element overloaded_element;
 
 		Ts[result->u.var].EA.data.overloaded_element.object = container;
