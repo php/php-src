@@ -1661,16 +1661,17 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	char *dot;
 	int conv_mode;
 
+	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);
+		return NULL;
+	}
+
 	if ((dot = strchr(filtername, '.')) == NULL) {
 		return NULL;
 	}
 	++dot;
 
 	inst = pemalloc(sizeof(php_convert_filter), persistent);
-
-	if (Z_TYPE_P(filterparams) != IS_ARRAY) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);
-	}
 
 	if (strcasecmp(dot, "base64-encode") == 0) {
 		conv_mode = PHP_CONV_BASE64_ENCODE;
