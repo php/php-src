@@ -24,6 +24,8 @@
 
 #define ZEND_VERSION "2.0.0-dev"
 
+#define ZEND_ENGINE_2
+
 #ifdef __cplusplus
 #define BEGIN_EXTERN_C() extern "C" {
 #define END_EXTERN_C() }
