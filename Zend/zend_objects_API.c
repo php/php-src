@@ -136,7 +136,9 @@ ZEND_API void zend_objects_store_del_ref(zval *zobject TSRMLS_DC)
 				obj->dtor(obj->object, handle TSRMLS_CC);
 			}
 			if (obj->refcount == 0) {
-				obj->free_storage(obj->object TSRMLS_CC);
+				if (obj->free_storage) {
+					obj->free_storage(obj->object TSRMLS_CC);
+				}
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST();
 			}
 		}
