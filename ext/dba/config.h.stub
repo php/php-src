@@ -1,0 +1,17 @@
+/* define if you want to use the dba extension */
+
+#define NDBM_DB1_NDBM_H 0
+#define NDBM_NDBM_H 0
+#define DB2_DB2_DB_H 0
+#define DB2_DB_DB2_H 0
+#define DB2_DB_H 0
+#define DB2_DB2_H 0
+#define HAVE_DBA 0
+#define DBA_GDBM 0
+#define DBA_NDBM 0
+#define DBA_DBOPEN 0
+#define DBA_DB2 0
+#define DBA_DBM 0
+#define DBA_CDB 0
+
+

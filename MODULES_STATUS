@@ -4,7 +4,7 @@ MySQL				Working
 COM					Working
 WDDX				Working
 PCRE				Working
-DBA					Not yet ported
+DBA					Not yet tested
 mcrypt				Working
 mhash				Working
 dbase				Working
