@@ -39,15 +39,10 @@ PHP_RSHUTDOWN_FUNCTION(basic);
 PHP_MINFO_FUNCTION(basic);
 
 PHP_FUNCTION(constant);
-PHP_FUNCTION(intval);
-PHP_FUNCTION(floatval);
-PHP_FUNCTION(strval);
 PHP_FUNCTION(toggle_short_open_tag);
 PHP_FUNCTION(sleep);
 PHP_FUNCTION(usleep);
 PHP_FUNCTION(flush);
-PHP_FUNCTION(gettype);
-PHP_FUNCTION(settype);
 PHP_FUNCTION(ip2long);
 PHP_FUNCTION(long2ip);
 
@@ -63,18 +58,6 @@ PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
 
-void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type);
-PHP_FUNCTION(is_null);
-PHP_FUNCTION(is_resource);
-PHP_FUNCTION(is_bool);
-PHP_FUNCTION(is_long);
-PHP_FUNCTION(is_float);
-PHP_FUNCTION(is_numeric);
-PHP_FUNCTION(is_string);
-PHP_FUNCTION(is_array);
-PHP_FUNCTION(is_object);
-PHP_FUNCTION(is_scalar);
-PHP_FUNCTION(is_callable);
 PHP_FUNCTION(import_request_variables);
 
 PHP_FUNCTION(error_log);

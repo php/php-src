@@ -18,16 +18,24 @@
 
 /* $Id$ */
 
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef PHP_TYPE_H
+#define PHP_TYPE_H
 
-extern int php_check_type(char *str);
-extern int php_check_ident_type(char *str);
-extern char *php_get_ident_index(char *str);
-
-#define GPC_REGULAR 0x1
-#define GPC_INDEXED_ARRAY 0x2
-#define GPC_NON_INDEXED_ARRAY 0x4
-#define GPC_ARRAY (GPC_INDEXED_ARRAY | GPC_NON_INDEXED_ARRAY)
+PHP_FUNCTION(intval);
+PHP_FUNCTION(floatval);
+PHP_FUNCTION(strval);
+PHP_FUNCTION(gettype);
+PHP_FUNCTION(settype);
+PHP_FUNCTION(is_null);
+PHP_FUNCTION(is_resource);
+PHP_FUNCTION(is_bool);
+PHP_FUNCTION(is_long);
+PHP_FUNCTION(is_float);
+PHP_FUNCTION(is_numeric);
+PHP_FUNCTION(is_string);
+PHP_FUNCTION(is_array);
+PHP_FUNCTION(is_object);
+PHP_FUNCTION(is_scalar);
+PHP_FUNCTION(is_callable);
 
 #endif

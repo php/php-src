@@ -31,7 +31,6 @@
 #include "php_globals.h"
 #include "php_variables.h"
 #include "rfc1867.h"
-#include "ext/standard/type.h"
 
 
 #define SAFE_RETURN { \
