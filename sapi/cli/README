@@ -1,0 +1,15 @@
+The CLI (command line interface) SAPI has been introduced
+with a goal of making PHP better at supporting the creation of 
+stand alone applications.
+
+It is based on CGI SAPI with all CGI specific things removed.
+
+The main differences between the two:
+
+* CLI is started up in quiet mode by default.
+  (-q switch kept for compatibility)
+* It does not change the working directory to that of the script.
+  (-C switch kept for compatibility)
+* Plain text error message
+* $argc and $argv registered irrespective of register_globals
+* implicit_flush always on
