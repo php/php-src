@@ -150,7 +150,7 @@ static void _close_msql_plink(zend_rsrc_list_entry *rsrc)
 	msql_globals.num_links--;
 }
 
-DLEXPORT PHP_MINIT_FUNCTION(msql)
+PHP_MINIT_FUNCTION(msql)
 {
 	if (cfg_get_long("msql.allow_persistent",&msql_globals.allow_persistent)==FAILURE) {
 		msql_globals.allow_persistent=1;
@@ -175,7 +175,7 @@ DLEXPORT PHP_MINIT_FUNCTION(msql)
 	return SUCCESS;
 }
 
-DLEXPORT PHP_RINIT_FUNCTION(msql)
+PHP_RINIT_FUNCTION(msql)
 {
 	msql_globals.default_link=-1;
 	msql_globals.num_links = msql_globals.num_persistent;
@@ -183,7 +183,7 @@ DLEXPORT PHP_RINIT_FUNCTION(msql)
 	return SUCCESS;
 }
 
-DLEXPORT PHP_MINFO_FUNCTION(msql)
+PHP_MINFO_FUNCTION(msql)
 {
 	char maxp[32],maxl[32];
 
@@ -363,7 +363,7 @@ static int php_msql_get_default_link(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int msql_connect([string hostname[:port]] [, string username] [, string password])
    Open a connection to an mSQL Server */
-DLEXPORT PHP_FUNCTION(msql_connect)
+PHP_FUNCTION(msql_connect)
 {
 	php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,0);
 }
@@ -372,7 +372,7 @@ DLEXPORT PHP_FUNCTION(msql_connect)
 
 /* {{{ proto int msql_pconnect([string hostname[:port]] [, string username] [, string password])
    Open a persistent connection to an mSQL Server */
-DLEXPORT PHP_FUNCTION(msql_pconnect)
+PHP_FUNCTION(msql_pconnect)
 {
 	php_msql_do_connect(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
@@ -381,7 +381,7 @@ DLEXPORT PHP_FUNCTION(msql_pconnect)
 
 /* {{{ proto int msql_close([int link_identifier])
    Close an mSQL connection */
-DLEXPORT PHP_FUNCTION(msql_close)
+PHP_FUNCTION(msql_close)
 {
 	pval *msql_link;
 	int id;
@@ -421,7 +421,7 @@ DLEXPORT PHP_FUNCTION(msql_close)
 
 /* {{{ proto int msql_select_db(string database_name [, int link_identifier])
    Select an mSQL database */
-DLEXPORT PHP_FUNCTION(msql_select_db)
+PHP_FUNCTION(msql_select_db)
 {
 	pval *db,*msql_link;
 	int id;
@@ -461,7 +461,7 @@ DLEXPORT PHP_FUNCTION(msql_select_db)
 
 /* {{{ proto int msql_create_db(string database_name [, int link_identifier])
    Create an mSQL database */
-DLEXPORT PHP_FUNCTION(msql_create_db)
+PHP_FUNCTION(msql_create_db)
 {
 	pval *db,*msql_link;
 	int id;
@@ -499,7 +499,7 @@ DLEXPORT PHP_FUNCTION(msql_create_db)
 
 /* {{{ proto int msql_drop_db(string database_name [, int link_identifier])
    Drop (delete) an mSQL database */
-DLEXPORT PHP_FUNCTION(msql_drop_db)
+PHP_FUNCTION(msql_drop_db)
 {
 	pval *db,*msql_link;
 	int id;
@@ -537,7 +537,7 @@ DLEXPORT PHP_FUNCTION(msql_drop_db)
 
 /* {{{ proto int msql_query(string query [, int link_identifier])
    Send an SQL query to mSQL */
-DLEXPORT PHP_FUNCTION(msql_query)
+PHP_FUNCTION(msql_query)
 {
 	pval *query,*msql_link;
 	int id;
@@ -575,7 +575,7 @@ DLEXPORT PHP_FUNCTION(msql_query)
 
 /* {{{ proto int msql_db_query(string database_name, string query [, int link_identifier])
    Send an SQL query to mSQL */
-DLEXPORT PHP_FUNCTION(msql_db_query)
+PHP_FUNCTION(msql_db_query)
 {
 	pval *db,*query,*msql_link;
 	int id;
@@ -618,7 +618,7 @@ DLEXPORT PHP_FUNCTION(msql_db_query)
 
 /* {{{ proto int msql_list_dbs([int link_identifier])
    List databases available on an mSQL server */
-DLEXPORT PHP_FUNCTION(msql_list_dbs)
+PHP_FUNCTION(msql_list_dbs)
 {
 	pval *msql_link;
 	int id;
@@ -653,7 +653,7 @@ DLEXPORT PHP_FUNCTION(msql_list_dbs)
 
 /* {{{ proto int msql_list_tables(string database_name [, int link_identifier])
    List tables in an mSQL database */
-DLEXPORT PHP_FUNCTION(msql_list_tables)
+PHP_FUNCTION(msql_list_tables)
 {
 	pval *db,*msql_link;
 	int id;
@@ -695,7 +695,7 @@ DLEXPORT PHP_FUNCTION(msql_list_tables)
 
 /* {{{ proto int msql_list_fields(string database_name, string table_name [, int link_identifier])
    List mSQL result fields */
-DLEXPORT PHP_FUNCTION(msql_list_fields)
+PHP_FUNCTION(msql_list_fields)
 {
 	pval *db,*table,*msql_link;
 	int id;
@@ -749,7 +749,7 @@ PHP_FUNCTION(msql_error)
 
 /* {{{ proto int msql_result(int query, int row [, mixed field])
    Get result data */
-DLEXPORT PHP_FUNCTION(msql_result)
+PHP_FUNCTION(msql_result)
 {
 	pval *result, *row, *field=NULL;
 	m_result *msql_result;
@@ -853,7 +853,7 @@ DLEXPORT PHP_FUNCTION(msql_result)
 
 /* {{{ proto int msql_num_rows(int query)
    Get number of rows in a result */
-DLEXPORT PHP_FUNCTION(msql_num_rows)
+PHP_FUNCTION(msql_num_rows)
 {
 	pval *result;
 	m_result *msql_result;
@@ -871,7 +871,7 @@ DLEXPORT PHP_FUNCTION(msql_num_rows)
 
 /* {{{ proto int msql_num_fields(int query)
    Get number of fields in a result */
-DLEXPORT PHP_FUNCTION(msql_num_fields)
+PHP_FUNCTION(msql_num_fields)
 {
 	pval *result;
 	m_result *msql_result;
@@ -965,7 +965,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 
 /* {{{ proto array msql_fetch_row(int query)
    Get a result row as an enumerated array */
-DLEXPORT PHP_FUNCTION(msql_fetch_row)
+PHP_FUNCTION(msql_fetch_row)
 {
 	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MSQL_NUM);
 }
@@ -974,7 +974,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_row)
 
 /* {{{ proto object msql_fetch_object(int query [, int result_type])
    Fetch a result row as an object */
-DLEXPORT PHP_FUNCTION(msql_fetch_object)
+PHP_FUNCTION(msql_fetch_object)
 {
 	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 	if (return_value->type==IS_ARRAY) {
@@ -987,7 +987,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_object)
 
 /* {{{ proto array msql_fetch_array(int query [, int result_type])
    Fetch a result row as an associative array */
-DLEXPORT PHP_FUNCTION(msql_fetch_array)
+PHP_FUNCTION(msql_fetch_array)
 {
 	php_msql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -995,7 +995,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_array)
 
 /* {{{ proto int msql_data_seek(int query, int row_number)
    Move internal result pointer */
-DLEXPORT PHP_FUNCTION(msql_data_seek)
+PHP_FUNCTION(msql_data_seek)
 {
 	pval *result,*offset;
 	m_result *msql_result;
@@ -1058,7 +1058,7 @@ static char *php_msql_get_field_name(int field_type)
 
 /* {{{ proto object msql_fetch_field(int query [, int field_offset])
    Get column information from a result and return as an object */
-DLEXPORT PHP_FUNCTION(msql_fetch_field)
+PHP_FUNCTION(msql_fetch_field)
 {
 	pval *result, *field=NULL;
 	m_result *msql_result;
@@ -1111,7 +1111,7 @@ DLEXPORT PHP_FUNCTION(msql_fetch_field)
 
 /* {{{ proto int msql_field_seek(int query, int field_offset)
    Set result pointer to a specific field offset */
-DLEXPORT PHP_FUNCTION(msql_field_seek)
+PHP_FUNCTION(msql_field_seek)
 {
 	pval *result, *offset;
 	m_result *msql_result;
@@ -1229,7 +1229,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 /* {{{ proto string msql_field_name(int query, int field_index)
    Get the name of the specified field in a result */
-DLEXPORT PHP_FUNCTION(msql_field_name)
+PHP_FUNCTION(msql_field_name)
 {
 	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_NAME);
 }
@@ -1237,7 +1237,7 @@ DLEXPORT PHP_FUNCTION(msql_field_name)
 
 /* {{{ proto string msql_field_table(int query, int field_offset)
    Get name of the table the specified field is in */
-DLEXPORT PHP_FUNCTION(msql_field_table)
+PHP_FUNCTION(msql_field_table)
 {
 	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_TABLE);
 }
@@ -1245,7 +1245,7 @@ DLEXPORT PHP_FUNCTION(msql_field_table)
 
 /* {{{ proto int msql_field_len(int query, int field_offet)
    Returns the length of the specified field */
-DLEXPORT PHP_FUNCTION(msql_field_len)
+PHP_FUNCTION(msql_field_len)
 {
 	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_LEN);
 }
@@ -1253,7 +1253,7 @@ DLEXPORT PHP_FUNCTION(msql_field_len)
 
 /* {{{ proto string msql_field_type(int query, int field_offset)
    Get the type of the specified field in a result */
-DLEXPORT PHP_FUNCTION(msql_field_type)
+PHP_FUNCTION(msql_field_type)
 {
 	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_TYPE);
 }
@@ -1261,7 +1261,7 @@ DLEXPORT PHP_FUNCTION(msql_field_type)
 
 /* {{{ proto string msql_field_flags(int query, int field_offset)
    Get the flags associated with the specified field in a result */
-DLEXPORT PHP_FUNCTION(msql_field_flags)
+PHP_FUNCTION(msql_field_flags)
 {
 	php_msql_field_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_MSQL_FIELD_FLAGS);
 }
@@ -1270,7 +1270,7 @@ DLEXPORT PHP_FUNCTION(msql_field_flags)
 
 /* {{{ proto int msql_free_result(int query)
    Free result memory */
-DLEXPORT PHP_FUNCTION(msql_free_result)
+PHP_FUNCTION(msql_free_result)
 {
 	pval *result;
 	m_result *msql_result;
@@ -1288,7 +1288,7 @@ DLEXPORT PHP_FUNCTION(msql_free_result)
 
 /* {{{ proto int msql_affected_rows(int query)
    Return number of affected rows */
-DLEXPORT PHP_FUNCTION(msql_affected_rows) 
+PHP_FUNCTION(msql_affected_rows) 
 {
 	pval *result;
 	m_result *msql_result;
