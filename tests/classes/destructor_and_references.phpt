@@ -1,5 +1,5 @@
 --TEST--
-Destucting and references
+Destructing and references
 --FILE--
 <?php
 
