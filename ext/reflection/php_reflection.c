@@ -1819,6 +1819,50 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 }
 /* }}} */
 
+/* {{{ proto public array Reflection_Class::getDefaultProperties()
+   Returns an associative array containing copies of all default property values of the class */
+ZEND_METHOD(reflection_class, getDefaultProperties)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	int count;
+	
+	METHOD_NOTSTATIC_NUMPARAMS(0);	
+	GET_REFLECTION_OBJECT_PTR(ce);
+	array_init(return_value);
+
+	count = zend_hash_num_elements(&ce->default_properties);
+	if (count > 0) {
+		HashPosition pos;
+		zval **prop;
+
+		zend_hash_internal_pointer_reset_ex(&ce->default_properties, &pos);
+		while (zend_hash_get_current_data_ex(&ce->default_properties, (void **) &prop, &pos) == SUCCESS) {
+			char *key, *class_name, *prop_name;
+			uint key_len;
+			ulong num_index;
+			zval *prop_copy;
+
+			zend_hash_get_current_key_ex(&ce->default_properties, &key, &key_len, &num_index, 0, &pos);
+			zend_hash_move_forward_ex(&ce->default_properties, &pos);
+			unmangle_property_name(key, &class_name, &prop_name);
+			if (class_name && class_name[0] != '*' && strcmp(class_name, ce->name)) {
+				/* filter privates from base classes */
+				continue;
+			}
+
+			/* copy: enforce read only access */
+			ALLOC_ZVAL(prop_copy);
+			*prop_copy = **prop;
+			zval_copy_ctor(prop_copy);
+			INIT_PZVAL(prop_copy);
+
+			add_assoc_zval(return_value, prop_name, prop_copy);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public string Reflection_Class::__toString()
    Returns a string representation */
 ZEND_METHOD(reflection_class, __toString)
@@ -2904,6 +2948,7 @@ static zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getParentClass, NULL, 0)
 	ZEND_ME(reflection_class, isSubclassOf, NULL, 0)
 	ZEND_ME(reflection_class, getStaticProperties, NULL, 0)
+	ZEND_ME(reflection_class, getDefaultProperties, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
