@@ -520,6 +520,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char *file_mode;
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
+	char *opened_path, *lock_name;
 	
 	if(ac < 2) {
 		WRONG_PARAM_COUNT;
@@ -640,13 +641,16 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 'c': 
 			modenr = DBA_CREAT; 
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
-			file_mode = "a+b";
 			if (!lock_mode || !lock_dbf) {
-				break;
+				file_mode = "a+b";
+			} else {
+				/* the create/append check will be done on the lock
+				 * when the lib opens the file it is already created
+				 */
+				file_mode = "w+b";
+				lock_file_mode = "a+b";
 			}
-			/* When we lock the db file it will be created before the handler
-			 * even tries to open it, hence we must change to truncate mode.
-			 */
+			break;
 		case 'n':
 			modenr = DBA_TRUNC;
 			lock_mode = (lock_flag & DBA_LOCK_TRUNC) ? LOCK_EX : 0;
@@ -656,6 +660,9 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			modenr = 0;
 			lock_mode = 0;
 			file_mode = "";
+	}
+	if (!lock_file_mode) {
+		lock_file_mode = file_mode;
 	}
 	if (*pmode=='d' || *pmode=='l' || *pmode=='-') {
 		pmode++; /* done already - skip here */
@@ -712,24 +719,45 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (!error && lock_mode) {
 		if (lock_dbf) {
-			info->lock.name = pestrdup(info->path, persistent);
-			lock_file_mode = file_mode;
+			lock_name = estrdup(info->path);
 		} else {
-			spprintf(&info->lock.name, 0, "%s.lck", info->path);
+			spprintf(&lock_name, 0, "%s.lck", info->path);
 			if (!strcmp(file_mode, "r")) {
 				/* when in read only mode try to use existing .lck file first */
 				/* do not log errors for .lck file while in read ony mode on .lck file */
 				lock_file_mode = "rb";
-				info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
+				info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, &opened_path);
 			}
 			if (!info->lock.fp) {
 				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
 				lock_file_mode = "a+b";
+			} else {
+				if (!persistent) {
+					info->lock.name = opened_path;
+				} else {
+					info->lock.name = pestrdup(opened_path, persistent);
+					efree(opened_path);
+				}
 			}
 		}
 		if (!info->lock.fp) {
-			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, NULL);
+			info->lock.fp = php_stream_open_wrapper(lock_name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE|persistent_flag, &opened_path);
+			if (info->lock.fp) {
+				if (lock_dbf) {
+					/* replace the path info with the real path of the opened file */
+					pefree(info->path, persistent);
+					info->path = pestrdup(opened_path, persistent);
+				}
+				/* now store the name of the lock */
+				if (!persistent) {
+					info->lock.name = opened_path;
+				} else {
+					info->lock.name = pestrdup(opened_path, persistent);
+					efree(opened_path);
+				}
+			}
 		}
+		efree(lock_name);
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
