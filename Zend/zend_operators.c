@@ -48,7 +48,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_LONG:
 				break;
 #if WITH_BCMATH
-			case IS_BC:
+			case FLAG_IS_BC:
 				op->type = IS_DOUBLE; /* may have lost significant digits */
 				break;
 #endif
@@ -74,7 +74,7 @@ ZEND_API void convert_scalar_to_number(zval *op)
 			case IS_DOUBLE:											\
 			case IS_LONG:											\
 				break;												\
-			case IS_BC:												\
+			case FLAG_IS_BC:												\
 				(holder).type = IS_DOUBLE; /* may have lost significant digits */	\
 				break;												\
 			default:												\
@@ -1264,7 +1264,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 	if ((ret1=is_numeric_string(s1->value.str.val, s1->value.str.len, &lval1, &dval1)) &&
 		(ret2=is_numeric_string(s2->value.str.val, s2->value.str.len, &lval2, &dval2))) {
 #if WITH_BCMATH
-		if ((ret1==IS_BC) || (ret2==IS_BC)) {
+		if ((ret1==FLAG_IS_BC) || (ret2==FLAG_IS_BC)) {
 			bc_num first, second;
 			
 			/* use the BC math library to compare the numbers */
@@ -1301,7 +1301,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2)
 /* returns 0 for non-numeric string
  * returns IS_DOUBLE for floating point string, and assigns the value to *dval (if it's not NULL)
  * returns IS_LONG for integer strings, and assigns the value to *lval (if it's not NULL)
- * returns IS_BC if the number might lose accuracy when converted to a double
+ * returns FLAG_IS_BC if the number might lose accuracy when converted to a double
  */
  
 #if 1
@@ -1345,7 +1345,7 @@ ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double 
 						break;
 				}
 			}
-			return IS_BC;
+			return FLAG_IS_BC;
 		} else {
 			return IS_DOUBLE;
 		}
