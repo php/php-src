@@ -4,20 +4,17 @@
 #include "php_COM.h"
 #include "unknwn.h"
 
-// #define PHP_UNICODE_CODEPAGE CP_THREAD_ACP   // for win2k
-#define PHP_UNICODE_CODEPAGE CP_ACP
-
 // prototypes
 
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg);
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type);
-PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent);
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen);
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent);
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage);
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage);
+PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage);
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage);
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage);
 
 // implementations
 
-PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
+PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 {
    OLECHAR *unicode_str;
 
@@ -83,68 +80,17 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg)
 
       case IS_STRING:
          var_arg->vt = VT_BSTR;
-         unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+         unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len, codepage);
          var_arg->bstrVal = SysAllocString(unicode_str);
          efree(unicode_str);
    }
 }
 
-PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type)
+PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_type, int codepage)
 {
-   if(pval_type->type != IS_STRING)
-   {
-      php_error(E_WARNING, "Assuming string as parameter type for parameter 3.");
-      php_pval_to_variant(pval_arg, var_arg);
-   }
-   else
-   {
       OLECHAR *unicode_str;
 
-      // set type
-      if(!strcmp(pval_type->value.str.val, "VT_UI1"))
-         var_arg->vt = VT_UI1;
-      else if(!strcmp(pval_type->value.str.val, "VT_I2"))
-         var_arg->vt = VT_I4;
-      else if(!strcmp(pval_type->value.str.val, "VT_R4"))
-         var_arg->vt = VT_R4;
-      else if(!strcmp(pval_type->value.str.val, "VT_R8"))
-         var_arg->vt = VT_R8;
-      else if(!strcmp(pval_type->value.str.val, "VT_BOOL"))
-         var_arg->vt = VT_BOOL;
-      else if(!strcmp(pval_type->value.str.val, "VT_ERROR"))
-         var_arg->vt = VT_ERROR;
-      else if(!strcmp(pval_type->value.str.val, "VT_CY"))
-         var_arg->vt = VT_CY;
-      else if(!strcmp(pval_type->value.str.val, "VT_DATE"))
-         var_arg->vt = VT_DATE;
-      else if(!strcmp(pval_type->value.str.val, "VT_BSTR"))
-         var_arg->vt = VT_BSTR;
-      else if(!strcmp(pval_type->value.str.val, "VT_DECIMAL"))
-         var_arg->vt = VT_DECIMAL;
-      else if(!strcmp(pval_type->value.str.val, "VT_UNKNOWN"))
-         var_arg->vt = VT_UNKNOWN;
-      else if(!strcmp(pval_type->value.str.val, "VT_DISPATCH"))
-         var_arg->vt = VT_DISPATCH;
-      else if(!strcmp(pval_type->value.str.val, "VT_VARIANT"))
-         var_arg->vt = VT_VARIANT;
-      else if(!strcmp(pval_type->value.str.val, "VT_I1"))
-         var_arg->vt = VT_I1;
-      else if(!strcmp(pval_type->value.str.val, "VT_UI2"))
-         var_arg->vt = VT_UI2;
-      else if(!strcmp(pval_type->value.str.val, "VT_UI4"))
-         var_arg->vt = VT_UI4;
-      else if(!strcmp(pval_type->value.str.val, "VT_INT"))
-         var_arg->vt = VT_INT;
-      else if(!strcmp(pval_type->value.str.val, "VT_UINT"))
-         var_arg->vt = VT_UINT;
-
-      // is safearray
-      if(!strcmp(pval_type->value.str.val, "VT_ARRAY"))
-         var_arg->vt |= VT_ARRAY;   // have to read msdn first
-
-      // by reference
-      if(!strcmp(pval_type->value.str.val, "VT_BYREF"))
-         var_arg->vt |= VT_BYREF;
+      var_arg->vt = (short) pval_type->value.lval;
 
       switch(var_arg->vt)
       {
@@ -207,25 +153,25 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 
          case VT_BSTR:
             convert_to_string_ex(&pval_arg);
-            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len, codepage);
             var_arg->bstrVal = SysAllocString(unicode_str);
             efree(unicode_str);
             break;
 
          case VT_DECIMAL:
             convert_to_string_ex(&pval_arg);
-            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len, codepage);
             VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, &(var_arg->decVal));
             break;
 
          case VT_DECIMAL|VT_BYREF:
             convert_to_string_ex(&pval_arg);
-            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len, codepage);
             VarDecFromStr(unicode_str, LOCALE_SYSTEM_DEFAULT, 0, var_arg->pdecVal);
             break;
 
          case VT_UNKNOWN:
-            php_pval_to_variant(pval_arg, var_arg);
+            php_pval_to_variant(pval_arg, var_arg, codepage);
             if(var_arg->vt != VT_DISPATCH)
                var_arg->vt = VT_EMPTY;
             else
@@ -245,7 +191,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
             break;
 
          case VT_DISPATCH:
-            php_pval_to_variant(pval_arg, var_arg);
+            php_pval_to_variant(pval_arg, var_arg, codepage);
             if(var_arg->vt != VT_DISPATCH)
                var_arg->vt = VT_EMPTY;
             break;
@@ -310,13 +256,13 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
          case VT_BSTR|VT_BYREF:
             convert_to_string(pval_arg);
             var_arg->pbstrVal = (BSTR FAR*) emalloc(sizeof(BSTR FAR*));
-            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
+            unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len, codepage);
             *(var_arg->pbstrVal) = SysAllocString(unicode_str);
             efree(unicode_str);
             break;
 
          case VT_UNKNOWN|VT_BYREF:
-            php_pval_to_variant(pval_arg, var_arg);
+            php_pval_to_variant(pval_arg, var_arg, codepage);
             if(var_arg->vt != VT_DISPATCH)
                var_arg->vt = VT_EMPTY;
             else
@@ -336,7 +282,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
             break;
 
          case VT_DISPATCH|VT_BYREF:
-            php_pval_to_variant(pval_arg, var_arg);
+            php_pval_to_variant(pval_arg, var_arg, codepage);
             if(var_arg->vt != VT_DISPATCH)
                var_arg->vt = VT_EMPTY;
             else
@@ -344,7 +290,7 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
             break;
 
          case VT_VARIANT|VT_BYREF:
-            php_pval_to_variant(pval_arg, var_arg);
+            php_pval_to_variant(pval_arg, var_arg, codepage);
             if(var_arg->vt != (VT_VARIANT | VT_BYREF))
                var_arg->vt = VT_EMPTY;
             break;
@@ -402,10 +348,9 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
          default:
             php_error(E_WARNING, "Type not supportet or not yet implemented.");
       }
-   }
 }
 
-PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent)
+PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent, int codepage)
 {
 
    switch(var_arg->vt & ~VT_BYREF)
@@ -465,7 +410,7 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
             switch(VarBstrFromDec(&var_arg->decVal, LOCALE_SYSTEM_DEFAULT, 0, &unicode_str))
             {
                case S_OK:
-                  pval_arg->value.str.val = php_OLECHAR_to_char(unicode_str, &pval_arg->value.str.len, persistent);
+                  pval_arg->value.str.val = php_OLECHAR_to_char(unicode_str, &pval_arg->value.str.len, persistent, codepage);
                   pval_arg->type = IS_STRING;
                   break;
 
@@ -497,15 +442,15 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
          break;
 
       case VT_VARIANT:
-         php_variant_to_pval(var_arg->pvarVal, pval_arg, persistent);
+         php_variant_to_pval(var_arg->pvarVal, pval_arg, persistent, codepage);
          break;
 
       case VT_BSTR:
          if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF) {
-            pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent);
+            pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent, codepage);
             SysFreeString(var_arg->bstrVal);
          } else {
-            pval_arg->value.str.val = php_OLECHAR_to_char(*(var_arg->pbstrVal), &pval_arg->value.str.len, persistent);
+            pval_arg->value.str.val = php_OLECHAR_to_char(*(var_arg->pbstrVal), &pval_arg->value.str.len, persistent, codepage);
             SysFreeString(*(var_arg->pbstrVal));
             efree(var_arg->pbstrVal);
          }
@@ -560,19 +505,19 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
    }
 }
 
-PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
+PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen, int codepage)
 {
    OLECHAR *unicode_str;
 
    //request needed buffersize
-   uint reqSize = MultiByteToWideChar(PHP_UNICODE_CODEPAGE, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
+   uint reqSize = MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, NULL, 0);
 
    if(reqSize)
    {
       unicode_str = (OLECHAR *) emalloc(sizeof(OLECHAR) * reqSize);
 
       //convert string
-      MultiByteToWideChar(PHP_UNICODE_CODEPAGE, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, unicode_str, reqSize);
+      MultiByteToWideChar(codepage, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS, C_str, -1, unicode_str, reqSize);
    }
    else
    {
@@ -592,20 +537,20 @@ PHPAPI OLECHAR *php_char_to_OLECHAR(char *C_str, uint strlen)
    return unicode_str;
 }
 
-PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent)
+PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent, int codepage)
 {
    char *C_str;
    uint length = 0;
 
    //request needed buffersize
-   uint reqSize = WideCharToMultiByte(PHP_UNICODE_CODEPAGE, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
+   uint reqSize = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, NULL, 0, NULL, NULL);
 
    if(reqSize)
    {
       C_str = (char *) pemalloc(sizeof(char) * reqSize, persistent);
 
       //convert string
-      length = WideCharToMultiByte(PHP_UNICODE_CODEPAGE, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
+      length = WideCharToMultiByte(codepage, WC_COMPOSITECHECK, unicode_str, -1, C_str, reqSize, NULL, NULL) - 1;
    }
    else
    {

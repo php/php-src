@@ -52,6 +52,7 @@ static ICorRuntimeHost *pHost;
 static mscorlib::_AppDomain *pDomain;
 
 static zend_class_entry dotnet_class_entry;
+static int codepage;
 
 HRESULT dotnet_init() {
   HRESULT hr;
@@ -112,12 +113,15 @@ PHP_FUNCTION(DOTNET_load)
 
 	if (ZEND_NUM_ARGS() != 2) WRONG_PARAM_COUNT;
 
+	/* should be made configurable like in ext/com */
+	codepage = CP_ACP;
+
 	getParameters(ht, 2, &assembly_name, &datatype_name);
 	convert_to_string(assembly_name);
-	assembly = php_char_to_OLECHAR(assembly_name->value.str.val, assembly_name->value.str.len);
+	assembly = php_char_to_OLECHAR(assembly_name->value.str.val, assembly_name->value.str.len, codepage);
 
 	convert_to_string(datatype_name);
-	datatype = php_char_to_OLECHAR(datatype_name->value.str.val, datatype_name->value.str.len);
+	datatype = php_char_to_OLECHAR(datatype_name->value.str.val, datatype_name->value.str.len, codepage);
 
 	/* obtain IDispatch */
 	hr=dotnet_create(assembly, datatype, &i_dispatch);
