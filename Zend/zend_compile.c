@@ -1847,6 +1847,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 }
 
 
+
 static inline void do_implement_interface(zend_class_entry *ce, zend_class_entry *iface TSRMLS_DC)
 {
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE) && iface->interface_gets_implemented && iface->interface_gets_implemented(iface, ce TSRMLS_CC) == FAILURE) {
@@ -1861,31 +1862,33 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, zend_class_entry 
 	int i, ce_num, if_num = iface->num_interfaces;
 	zend_class_entry *entry;
 
-	if (if_num) {
-		ce_num = ce->num_interfaces;
-		if (ce->type == ZEND_INTERNAL_CLASS) {
-			ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
-		} else {
-			ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
-		}
+	if (if_num==0) {
+		return;
+	}
+	ce_num = ce->num_interfaces;
 
-		/* only have every interface ones - this holds for the list we append too, what makes the test a bit faster */
-		while (if_num--) {
-			entry = iface->interfaces[if_num];
-			for (i = 0; i < ce_num; ++i) {
-				if (ce->interfaces[i] == entry) {
-					break;
-				}
-			}
-			if (i == ce_num) {
-				ce->interfaces[ce->num_interfaces++] = entry;
-			}
-		}
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		ce->interfaces = (zend_class_entry **) realloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
+	} else {
+		ce->interfaces = (zend_class_entry **) erealloc(ce->interfaces, sizeof(zend_class_entry *) * (ce_num + if_num));
+	}
 
-		/* and now call the implementing handlers */
-		while (ce_num < ce->num_interfaces) {
-			do_implement_interface(ce, ce->interfaces[ce_num++] TSRMLS_CC);
+	/* Inherit the interfaces, only if they're not already inherited by the class */
+	while (if_num--) {
+		entry = iface->interfaces[if_num];
+		for (i = 0; i < ce_num; i++) {
+			if (ce->interfaces[i] == entry) {
+				break;
+			}
 		}
+		if (i == ce_num) {
+			ce->interfaces[ce->num_interfaces++] = entry;
+		}
+	}
+
+	/* and now call the implementing handlers */
+	while (ce_num < ce->num_interfaces) {
+		do_implement_interface(ce, ce->interfaces[ce_num++] TSRMLS_CC);
 	}
 }
 
