@@ -935,8 +935,8 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				}
 
 				/* Perform inheritence */
-				zend_hash_copy(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function));
-				zend_hash_copy(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				zend_hash_merge(&ce->default_properties, &parent_ce->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
+				zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
 
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
