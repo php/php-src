@@ -57,7 +57,7 @@ function_entry pack_functions[] = {
 };
 
 php3_module_entry pack_module_entry = {
-	"PHP_pack", pack_functions, php3_minit_pack, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"PHP_pack", pack_functions, PHP_MINIT(pack), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 /* Whether machine is little endian */
@@ -794,7 +794,7 @@ PHP_FUNCTION(unpack)
 /* }}} */
 
 
-int php3_minit_pack(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(pack)
 {
 	int machine_endian_check = 1;
 	int i;

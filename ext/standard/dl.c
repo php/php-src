@@ -47,7 +47,7 @@ function_entry dl_functions[] = {
 
 
 php3_module_entry dl_module_entry = {
-	"PHP_DL", dl_functions, NULL, NULL, NULL, NULL, php3_info_dl, STANDARD_MODULE_PROPERTIES
+	"PHP_DL", dl_functions, NULL, NULL, NULL, NULL, PHP_MINFO(dl), STANDARD_MODULE_PROPERTIES
 };
 
 #endif
@@ -150,7 +150,7 @@ void php3_dl(pval *file,int type,pval *return_value)
 }
 
 
-void php3_info_dl(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(dl)
 {
 	PUTS("Dynamic Library support enabled.\n");
 }

@@ -37,7 +37,7 @@ extern php3_module_entry mail_module_entry;
 #define mail_module_ptr &mail_module_entry
 
 PHP_FUNCTION(mail);
-void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINFO_FUNCTION(mail);
 extern int _php3_mail(char *to, char *subject, char *message, char *headers);
 
 #else

@@ -50,28 +50,28 @@
 static int le_idispatch;
 
 function_entry COM_functions[] = {
-	{"com_load",		php3_COM_load,		NULL},
-	{"com_invoke",		php3_COM_invoke,	NULL},
+	PHP_FE(COM_load,								NULL)
+	PHP_FE(COM_invoke,								NULL)
 
-	PHP_FE(com_propget,		NULL)
-	PHP_FE(com_propput,		NULL)
+	PHP_FE(com_propget,								NULL)
+	PHP_FE(com_propput,								NULL)
 
-	PHP_NAMED_FE(com_get,		php3_com_propget,	NULL)
-	PHP_NAMED_FE(com_propset,	php3_com_propput,	NULL)
-	PHP_NAMED_FE(com_set,		php3_com_propput,	NULL)
+	PHP_FALIAS(com_get,			com_propget,		NULL)
+	PHP_FALIAS(com_propset,		com_propput,		NULL)
+	PHP_FALIAS(com_set,			com_propput,		NULL)
 
 	{NULL, NULL, NULL}
 };
 
 
-static void php_info_COM(ZEND_MODULE_INFO_FUNC_ARGS)
+static PHP_MINFO_FUNCTION(COM)
 {
 	DISPLAY_INI_ENTRIES();
 }
 
 
 php3_module_entry COM_module_entry = {
-	"Win32 COM", COM_functions, php3_minit_COM, php3_mshutdown_COM, NULL, NULL, php_info_COM, STANDARD_MODULE_PROPERTIES
+	"Win32 COM", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
 };
 
 void php_register_COM_class();
@@ -214,7 +214,7 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
-int php3_minit_COM(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
 	le_idispatch = register_list_destructors(_php3_idispatch_destructor,NULL);
@@ -224,7 +224,7 @@ int php3_minit_COM(INIT_FUNC_ARGS)
 }
 
 
-int php3_mshutdown_COM(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(COM)
 {
 	CoUninitialize();
 	UNREGISTER_INI_ENTRIES();
@@ -817,7 +817,7 @@ void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_r
 		&& !strcmp(function_name->element.value.str.val, "com")) { /* constructor */
 		pval *object_handle;
 
-		php3_COM_load(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		PHP_FN(COM_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		if (!zend_is_true(return_value)) {
 			var_reset(object);
 			return;

@@ -35,9 +35,10 @@
 extern php3_module_entry syslog_module_entry;
 #define syslog_module_ptr &syslog_module_entry
 
-extern int php3_minit_syslog(INIT_FUNC_ARGS);
-extern int php3_rinit_syslog(INIT_FUNC_ARGS);
-extern int php3_rshutdown_syslog(SHUTDOWN_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(syslog);
+extern PHP_RINIT_FUNCTION(syslog);
+extern PHP_RSHUTDOWN_FUNCTION(syslog);
+
 PHP_FUNCTION(openlog);
 PHP_FUNCTION(syslog);
 PHP_FUNCTION(closelog);

@@ -3,8 +3,8 @@
 
 #if WIN32|WINNT
 
-extern int php3_minit_COM(INIT_FUNC_ARGS);
-extern int php3_mshutdown_COM(SHUTDOWN_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(COM);
+extern PHP_MSHUTDOWN_FUNCTION(COM);
 PHP_FUNCTION(COM_load);
 PHP_FUNCTION(COM_invoke);
 

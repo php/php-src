@@ -54,7 +54,7 @@ function_entry crypt_functions[] = {
 };
 
 php3_module_entry crypt_module_entry = {
-	"Crypt", crypt_functions, php_minit_crypt, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"Crypt", crypt_functions, PHP_MINIT(crypt), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -90,7 +90,7 @@ php3_module_entry crypt_module_entry = {
 #endif
 #endif
 
-int php_minit_crypt(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(crypt)
 {
 	ELS_FETCH();
 

@@ -37,7 +37,8 @@
 extern php3_module_entry php3_file_module_entry;
 #define php3_file_module_ptr &php3_file_module_entry
 
-extern int php3_minit_file(INIT_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(file);
+
 PHP_FUNCTION(tempnam);
 PHP_FUNCTION(fopen);
 PHP_FUNCTION(fclose);

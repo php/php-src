@@ -326,10 +326,10 @@ PHP_INI_END()
 php3_module_entry basic_functions_module = {
 	"Basic Functions",			/* extension name */
 	basic_functions,			/* function list */
-	php3_minit_basic,			/* process startup */
-	php3_mshutdown_basic,		/* process shutdown */
-	php3_rinit_basic,			/* request startup */
-	php3_rshutdown_basic,		/* request shutdown */
+	PHP_MINIT(basic),			/* process startup */
+	PHP_MSHUTDOWN(basic),		/* process shutdown */
+	PHP_RINIT(basic),			/* request startup */
+	PHP_RSHUTDOWN(basic),		/* request shutdown */
 	NULL,						/* extension info */
 	STANDARD_MODULE_PROPERTIES
 };
@@ -372,7 +372,7 @@ static int _php3_putenv_destructor(putenv_entry *pe)
 
 void test_class_startup();
 
-int php3_minit_basic(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(basic)
 {
 	ELS_FETCH();
 
@@ -391,14 +391,14 @@ int php3_minit_basic(INIT_FUNC_ARGS)
 }
 
 
-int php3_mshutdown_basic(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(basic)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;	
 }
 
 
-int php3_rinit_basic(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(basic)
 {
 	strtok_string = NULL;
 #ifdef HAVE_PUTENV
@@ -412,7 +412,7 @@ int php3_rinit_basic(INIT_FUNC_ARGS)
 }
 
 
-int php3_rshutdown_basic(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(basic)
 {
 	STR_FREE(strtok_string);
 #ifdef HAVE_PUTENV

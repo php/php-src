@@ -42,7 +42,7 @@ static int syslog_started;
 static char *syslog_device;
 static void start_syslog(void);
 
-int php3_minit_syslog(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(syslog)
 {
 	ELS_FETCH();
 	
@@ -104,7 +104,7 @@ int php3_minit_syslog(INIT_FUNC_ARGS)
 }
 
 
-int php3_rinit_syslog(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(syslog)
 {
 	if (INI_INT("define_syslog_variables")) {
 		start_syslog();
@@ -116,7 +116,7 @@ int php3_rinit_syslog(INIT_FUNC_ARGS)
 }
 
 
-int php3_rshutdown_syslog(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(syslog)
 {
 	if (syslog_device) {
 		efree(syslog_device);
@@ -266,7 +266,7 @@ function_entry syslog_functions[] = {
 
 
 php3_module_entry syslog_module_entry = {
-	"Syslog", syslog_functions, php3_minit_syslog, NULL, php3_rinit_syslog, php3_rshutdown_syslog, NULL, STANDARD_MODULE_PROPERTIES
+	"Syslog", syslog_functions, PHP_MINIT(syslog), NULL, PHP_RINIT(syslog), PHP_RSHUTDOWN(syslog), NULL, STANDARD_MODULE_PROPERTIES
 };
 
 

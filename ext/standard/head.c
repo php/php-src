@@ -47,7 +47,7 @@ static int header_called = 0;
 void php3_PushCookieList(char *, char *, time_t, char *, char *, int);
 CookieList *php3_PopCookieList(void);
 
-int php3_init_head(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(head)
 {
 	php3_HeaderPrinted = 0;
 	if (header_called == 0)
@@ -574,7 +574,7 @@ function_entry php3_header_functions[] = {
 
 
 php3_module_entry php3_header_module_entry = {
-	"PHP_head", php3_header_functions, NULL, NULL, php3_init_head, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"PHP_head", php3_header_functions, NULL, NULL, PHP_RINIT(head), NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 /*

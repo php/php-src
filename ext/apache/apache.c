@@ -46,15 +46,16 @@ extern module *top_module;
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(getallheaders);
 PHP_FUNCTION(apachelog);
-void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS);
 PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
 
+PHP_MINFO_FUNCTION(apache);
+
 function_entry apache_functions[] = {
-	{"virtual",			php3_virtual,		NULL},
-	{"getallheaders",		php3_getallheaders,	NULL},
-	{"apache_note", php3_apache_note,NULL},
-	{"apache_lookup_uri", php3_apache_lookup_uri,NULL},
+	PHP_FE(virtual,									NULL)
+	PHP_FE(getallheaders,							NULL)
+	PHP_FE(apache_note,								NULL)
+	PHP_FE(apache_lookup_uri,						NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -98,14 +99,14 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 
 
-static int php_apache_minit(INIT_FUNC_ARGS)
+static PHP_MINIT_FUNCTION(apache)
 {
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 
 
-static int php_apache_mshutdown(SHUTDOWN_FUNC_ARGS)
+static PHP_MSHUTDOWN_FUNCTION(apache)
 {
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -113,7 +114,7 @@ static int php_apache_mshutdown(SHUTDOWN_FUNC_ARGS)
 
 
 php3_module_entry apache_module_entry = {
-	"Apache", apache_functions, php_apache_minit, php_apache_mshutdown, NULL, NULL, php3_info_apache, STANDARD_MODULE_PROPERTIES
+	"Apache", apache_functions, PHP_MINIT(apache), PHP_MSHUTDOWN(apache), NULL, NULL, PHP_MINFO(apache), STANDARD_MODULE_PROPERTIES
 };
 
 /* {{{ proto string apache_note(string note_name [, string note_value])
@@ -146,7 +147,7 @@ PHP_FUNCTION(apache_note)
 }
 /* }}} */
 
-void php3_info_apache(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(apache)
 {
 	module *modp = NULL;
 	char output_buf[128];

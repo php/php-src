@@ -246,12 +246,25 @@ extern int ap_vsnprintf(char *, size_t, const char *, va_list);
 #define MAXPATHLEN 256    /* Should be safe for any weird systems that do not define it */
 #endif
 
+#define PHP_FN(name) php3_##name
 #define PHP_NAMED_FUNCTION(name) void name(INTERNAL_FUNCTION_PARAMETERS)
 #define PHP_FUNCTION(name) PHP_NAMED_FUNCTION(php3_##name)
 
 #define PHP_NAMED_FE(php_name, name, arg_types) { #php_name, name, arg_types },
 #define PHP_FE(name, arg_types) PHP_NAMED_FE(name, php3_##name, arg_types)
 #define PHP_FALIAS(name, alias, arg_types) PHP_NAMED_FE(name, php3_##alias, arg_types)
+
+#define PHP_MINIT(module)	php3_minit_##module
+#define PHP_MSHUTDOWN(module)	php3_mshutdown_##module
+#define PHP_RINIT(module)	php3_rinit_##module
+#define PHP_RSHUTDOWN(module)	php3_rshutdown_##module
+#define PHP_MINFO(module)	php3_info_##module
+
+#define PHP_MINIT_FUNCTION(module)	int php3_minit_##module(INIT_FUNC_ARGS)
+#define PHP_MSHUTDOWN_FUNCTION(module)	int php3_mshutdown_##module(SHUTDOWN_FUNC_ARGS)
+#define PHP_RINIT_FUNCTION(module)	int php3_rinit_##module(INIT_FUNC_ARGS)
+#define PHP_RSHUTDOWN_FUNCTION(module)	int php3_rshutdown_##module(SHUTDOWN_FUNC_ARGS)
+#define PHP_MINFO_FUNCTION(module)	void php3_info_##module(ZEND_MODULE_INFO_FUNC_ARGS)
 
 
 /* global variables */

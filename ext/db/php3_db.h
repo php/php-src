@@ -74,9 +74,10 @@ char *_php3_dbmfirstkey(dbm_info *info);
 char *_php3_dbmnextkey(dbm_info *info, char *key);
 
 /* db file functions */
-int php3_minit_db(INIT_FUNC_ARGS);
-int php3_rinit_db(INIT_FUNC_ARGS);
-void php3_info_db(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINIT_FUNCTION(db);
+PHP_RINIT_FUNCTION(db);
+PHP_MINFO_FUNCTION(db);
+
 PHP_FUNCTION(dblist);
 PHP_FUNCTION(dbmopen);
 PHP_FUNCTION(dbmclose);

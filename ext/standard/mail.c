@@ -45,7 +45,7 @@ function_entry mail_functions[] = {
 };
 
 php3_module_entry mail_module_entry = {
-	"Sendmail", mail_functions, NULL, NULL, NULL, NULL, php3_info_mail, STANDARD_MODULE_PROPERTIES
+	"Sendmail", mail_functions, NULL, NULL, NULL, NULL, PHP_MINFO(mail), STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -148,7 +148,7 @@ int _php3_mail(char *to, char *subject, char *message, char *headers)
 	return 1;
 }
 
-void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(mail)
 {
 #if MSVC5
 	PUTS("Internal Sendmail support for Windows 4");
@@ -160,7 +160,7 @@ void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS)
 #else
 
 PHP_FUNCTION(mail) {}
-void php3_info_mail(ZEND_MODULE_INFO_FUNC_ARGS) {}
+PHP_MINFO_FUNCTION(mail) {}
 
 #endif
 
