@@ -105,6 +105,8 @@ PHP_FUNCTION(move_uploaded_file);
 PHP_FUNCTION(parse_ini_file);
 
 PHP_FUNCTION(str_rot13);
+PHP_FUNCTION(stream_register_filter);
+PHP_MINIT_FUNCTION(user_filters);
 
 #ifdef PHP_WIN32
 typedef unsigned int php_stat_len;
@@ -187,6 +189,7 @@ typedef struct {
 #endif
 
 	HashTable *aggregation_table;
+	HashTable *user_filter_map;
 } php_basic_globals;
 
 #ifdef ZTS

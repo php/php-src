@@ -862,6 +862,7 @@ function_entry basic_functions[] = {
 #endif
 
 	PHP_FE(str_rot13, NULL)
+	PHP_FE(stream_register_filter, NULL)
 
 	/* functions from aggregate.c */
 	PHP_FE(aggregate,						first_arg_force_ref)
@@ -964,6 +965,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC)
 	BG(left) = -1;
 	BG(user_tick_functions) = NULL;
 	BG(aggregation_table) = NULL;
+	BG(user_filter_map) = NULL;
 	zend_hash_init(&BG(sm_protected_env_vars), 5, NULL, NULL, 1);
 	BG(sm_allowed_env_vars) = NULL;
 
@@ -1030,6 +1032,7 @@ PHP_MINIT_FUNCTION(basic)
 	PHP_MINIT(pack) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(browscap) (INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(string_filters) (INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(user_filters) (INIT_FUNC_ARGS_PASSTHRU);
 
 #if defined(HAVE_LOCALECONV) && defined(ZTS)
 	PHP_MINIT(localeconv) (INIT_FUNC_ARGS_PASSTHRU);
@@ -1190,6 +1193,12 @@ PHP_RSHUTDOWN_FUNCTION(basic)
 		zend_hash_destroy(BG(aggregation_table));
 		efree(BG(aggregation_table));
 		BG(aggregation_table) = NULL;
+	}
+
+	if (BG(user_filter_map)) {
+		zend_hash_destroy(BG(user_filter_map));
+		efree(BG(user_filter_map));
+		BG(user_filter_map) = NULL;
 	}
 	
 #ifdef HAVE_MMAP
