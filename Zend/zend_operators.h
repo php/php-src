@@ -232,7 +232,7 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 #define Z_STRVAL(zval)		(zval).value.str.val
 #define Z_STRLEN(zval)		(zval).value.str.len
 #define Z_ARRVAL(zval)		(zval).value.ht
-#define Z_OBJ(zval)			(zval).value.obj.handlers.get_address((zval).value.obj.handle)
+#define Z_OBJ(zval)			(zval).value.obj.handlers->get_address((zval).value.obj.handle)
 #define Z_OBJPROP(zval)		Z_OBJ(zval)->properties
 #define Z_OBJCE(zval)		Z_OBJ(zval)->ce
 #define Z_RESVAL(zval)		(zval).value.lval

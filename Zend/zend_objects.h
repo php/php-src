@@ -30,5 +30,6 @@ zend_object *zend_objects_get_address(zend_object_handle handle);
 void zend_objects_add_ref(zend_object_handle handle);
 void zend_objects_del_ref(zend_object_handle handle);
 void zend_objects_delete_obj(zend_object_handle handle);
+zend_object_value zend_objects_clone_obj(zend_object_handle handle);
 
 #endif /* ZEND_OBJECTS_H */

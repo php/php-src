@@ -54,7 +54,7 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_OBJECT:
-			zvalue->value.obj.handlers.del_ref(zvalue->value.obj.handle);
+			zvalue->value.obj.handlers->del_ref(zvalue->value.obj.handle);
 			break;
 		case IS_RESOURCE:	{
 				TSRMLS_FETCH();
@@ -119,7 +119,11 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_OBJECT:
-			zvalue->value.obj.handlers.add_ref(zvalue->value.obj.handle);
+#if 0
+			zvalue->value.obj = zvalue->value.obj.handlers->clone_obj(zvalue->value.obj.handle);
+#else
+			zvalue->value.obj.handlers->add_ref(zvalue->value.obj.handle);
+#endif
 			break;
 	}
 	return SUCCESS;
@@ -152,8 +156,7 @@ ZEND_API int zval_persist(zval *zvalue TSRMLS_DC)
 			zend_hash_apply(zvalue->value.ht, (apply_func_t) zval_persist TSRMLS_CC);
 			break;
 		case IS_OBJECT:
-			persist_alloc(zvalue->value.obj.properties);
-			zend_hash_apply(zvalue->value.obj.properties, (apply_func_t) zval_persist TSRMLS_CC);
+			return FAILURE; /* objects cannot be persisted */ 
 			break;
 	}
 	return SUCCESS;

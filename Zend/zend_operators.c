@@ -514,10 +514,19 @@ ZEND_API void convert_to_array(zval *op)
 		case IS_ARRAY:
 			return;
 			break;
-/* OBJECTS_FIXME */
+/* OBJECTS_OPTIMIZE */
 		case IS_OBJECT:
-			op->type = IS_ARRAY;
-			op->value.ht = Z_OBJPROP_P(op);
+			{
+				zval *tmp;
+				HashTable *ht;
+
+				ALLOC_HASHTABLE(ht);
+				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+				zend_hash_copy(ht, Z_OBJPROP_P(op), (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+				zval_dtor(op);
+				op->type = IS_ARRAY;
+				op->value.ht = ht;
+			}
 			return;
 		case IS_NULL:
 			ALLOC_HASHTABLE(op->value.ht);
@@ -1240,7 +1249,6 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 			}
 			break;
 		case IS_OBJECT:
-/* OBJECTS_FIXME */
 			if (Z_OBJCE_P(op1) != Z_OBJCE_P(op2)) {
 				result->value.lval = 0;
 			} else {
@@ -1695,7 +1703,6 @@ ZEND_API void zend_compare_arrays(zval *result, zval *a1, zval *a2 TSRMLS_DC)
 
 ZEND_API void zend_compare_objects(zval *result, zval *o1, zval *o2 TSRMLS_DC)
 {
-/* OBJECTS_FIXME */
 	if (Z_OBJCE_P(o1) != Z_OBJCE_P(o2)) {
 		result->value.lval = 1;	/* Comparing objects of different types is pretty much meaningless */
 		result->type = IS_LONG;
