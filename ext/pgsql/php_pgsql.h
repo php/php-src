@@ -85,6 +85,8 @@ PHP_FUNCTION(pg_lowrite);
 PHP_FUNCTION(pg_loreadall);
 PHP_FUNCTION(pg_loimport);
 PHP_FUNCTION(pg_loexport);
+PHP_FUNCTION(pg_lolseek);
+PHP_FUNCTION(pg_lotell);
 PHP_FUNCTION(pg_put_line);
 PHP_FUNCTION(pg_end_copy);
 #if HAVE_PQCLIENTENCODING
