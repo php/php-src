@@ -191,4 +191,9 @@ int zend_parse_ini_file(zend_file_handle *fh, zend_bool unbuffered_errors, zend_
 #define ZEND_INI_PARSER_ENTRY	1
 #define ZEND_INI_PARSER_SECTION	2
 
+typedef struct _zend_ini_parser_param {
+	zend_ini_parser_cb_t ini_parser_cb;
+	void *arg;
+} zend_ini_parser_param;
+
 #endif /* ZEND_INI_H */

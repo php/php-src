@@ -405,6 +405,10 @@ BuildCmds= \
 # PROP Default_Filter "l"
 # Begin Source File
 
+SOURCE=.\flex.skl
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_ini_scanner.l
 
 !IF  "$(CFG)" == "Zend - Win32 Release"

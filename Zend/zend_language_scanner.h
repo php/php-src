@@ -21,7 +21,7 @@
 #ifndef ZEND_SCANNER_H
 #define ZEND_SCANNER_H
 
-#ifdef ZTS
+#ifdef __cplusplus
 class ZendFlexLexer : public yyFlexLexer
 {
 public:
@@ -34,7 +34,7 @@ public:
 
 
 typedef struct _zend_lex_state {
-#ifndef ZTS
+#ifndef __cplusplus
 	YY_BUFFER_STATE buffer_state;
 	int state;
 	FILE *in;
