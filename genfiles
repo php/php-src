@@ -17,6 +17,7 @@ EOF
 
 rm config_vars.mk .deps ext/standard/libs.mk $files
 
-f=ext/standard/url_scanner_ex.c
-cp $f $f.orig
-grep -v '#line ' $f.orig > $f
+for f in ext/standard/url_scanner_ex.c ext/standard/var_unserializer.c
+  cp $f $f.orig
+  grep -v '#line ' $f.orig > $f
+fi
