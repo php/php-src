@@ -19,7 +19,7 @@
 
 /* $Id$ */
 
-#define DEBUG_CFG_PARSER 0
+#define DEBUG_CFG_PARSER 1
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_ini.h"
