@@ -242,6 +242,11 @@ if test "$enable_experimental_zts" = "yes"; then
   PTHREADS_FLAGS
 fi
 
+if test "$PHP_ENABLE_FASTCGI" = "yes"; then
+  PHP_CONFIGURE_PART(Running FastCGI checks)
+  sinclude(sapi/cgi/libfcgi/acinclude.m4)
+  sinclude(sapi/cgi/libfcgi/libfcgi.m4)
+fi
 
 divert(3)
 

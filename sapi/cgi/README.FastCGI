@@ -1,6 +1,13 @@
 Credits:
 Ben Mansell, Stephen Landamore, Daniel Silverstone, Shane Caraveo
 
+Building PHP
+------------
+
+You must add '--enable-fastcgi' to the configure command on Linux or
+OSX based systems to get fastcgi support in the php-cgi binary.  You
+also must not use '--enable-discard-path'.
+
 Running the FastCGI PHP module
 ------------------------------
 
@@ -58,7 +65,8 @@ Don't load mod_php, by the way. Make sure it is commented out!
 Now, we'll create a fcgi-bin directory, just like you would do with normal
 CGI scripts. You'll need to create a directory somewhere to store your
 FastCGI binaries. We'll use /space/fcgi-bin/ for this example. Remember to
-copy the FastCGI-PHP binary in there. (named just 'php')
+copy the FastCGI-PHP binary in there. (named 'php-cgi')  This sets up
+php to run under mod_fastcgi as a dynamic server.
 
     ScriptAlias /fcgi-bin/ /space/fcgi-bin/
     <Location /fcgi-bin/>
@@ -66,14 +74,17 @@ copy the FastCGI-PHP binary in there. (named just 'php')
         SetHandler fastcgi-script
     </Location>
 
-To have mod_fastcgi manage your php fastcgi processes for you, use the 
-configuration directive FCGIServer (see mod_fastcgi docs for more
-configuration information):
+To setup a specific static configuration for php, you have to use
+the FastCgiServer configuration for mod_fastcgi.  For this, do not
+use the above configuration, but rather the following.
+(see mod_fastcgi docs for more configuration information):
 
-    FastCgiServer /fcgi-bin/php-cgi -processes 5
+    Alias /fcgi-bin/ /space/fcgi-bin/
+    FastCgiServer /path/to/php-cgi -processes 5
 
-Next, we need to tell Apache to use the FastCGI binary /fcgi-bin/php to
-deliver PHP pages. All that is needed is:
+For either of the above configurations,  we need to tell Apache to 
+use the FastCGI binary /fcgi-bin/php to deliver PHP pages. 
+All that is needed is:
 
     AddType application/x-httpd-fastphp .php
     Action application/x-httpd-fastphp /fcgi-bin/php-cgi
