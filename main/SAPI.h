@@ -186,6 +186,7 @@ struct _sapi_module_struct {
 	void (*unblock_interruptions)(void);
 
 	void (*default_post_reader)(TSRMLS_D);
+	char *executable_location;
 };
 
 
@@ -216,7 +217,7 @@ struct _sapi_post_entry {
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
 SAPI_API SAPI_POST_READER_FUNC(php_default_post_reader);
 
-#define STANDARD_SAPI_MODULE_PROPERTIES NULL
+#define STANDARD_SAPI_MODULE_PROPERTIES NULL, NULL
 
 #endif /* SAPI_H */
 

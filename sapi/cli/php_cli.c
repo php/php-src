@@ -361,6 +361,8 @@ int main(int argc, char *argv[])
 	ap_php_optind = orig_optind;
 	ap_php_optarg = orig_optarg;
 
+	cli_sapi_module.executable_location = argv[0];
+
 	/* startup after we get the above ini override se we get things right */
 	if (php_module_startup(&cli_sapi_module)==FAILURE) {
 		return FAILURE;
