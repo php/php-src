@@ -112,7 +112,10 @@ scan:
   (any\[:?#])+		{ goto scan; }
 */
 done:
-  
+ 
+	if (bash)
+		bash--;
+	
 	/* Don't modify URLs of the format "#mark" */
 	if (bash && bash - url->c == 0) {
 		smart_str_append(dest, url);
@@ -132,6 +135,7 @@ done:
 	if (bash)
 		smart_str_appendl(dest, bash, q - bash);
 }
+
 
 #undef YYFILL
 #undef YYCTYPE
