@@ -53,6 +53,7 @@ PHP_MINFO_FUNCTION(simplexml);
 typedef struct {
 	zend_object zo;
 	xmlDocPtr document;
+	xmlXPathContextPtr xpath;
 	xmlNodePtr node;
 } php_sxe_object;
 
