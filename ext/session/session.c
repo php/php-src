@@ -1350,7 +1350,7 @@ static void php_register_var(zval** entry TSRMLS_DC)
 	} else {
 		convert_to_string_ex(entry);
 
-		if ((strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0) ||
+		if ((strcmp(Z_STRVAL_PP(entry), "HTTP_SESSION_VARS") != 0) &&
 		   (strcmp(Z_STRVAL_PP(entry), "_SESSION") != 0)) {
 			PS_ADD_VARL(Z_STRVAL_PP(entry), Z_STRLEN_PP(entry));
 		}
