@@ -1,3 +1,56 @@
+2001-05-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/gd/config.m4: default to /usr/local
+
+2001-05-10  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Fixing some proto types
+
+2001-05-10  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    Always free the callback_name when using zend_is_callable().
+
+2001-05-10  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/credits.c: Fix buggy line split
+
+    * sapi/cgi/cgi_main.c:    Fixed bug 7822
+
+2001-05-10  Rui Hirokawa  <louis@cityfujisawa.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbstring.c:
+    fixed bug of mb_substitute_character() and mb_substr() in mbstring.
+
+2001-05-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/.cvsignore: Missing .slo ignore.
+
+    * ext/oracle/config.m4: Fixed bug: #10779
+
+    * ext/imap/config.m4:
+    Cleaning this a bit too. Now I'm also able to configure and compile
+    with the test for imap-ssl.
+
+2001-05-10  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/com/COM.c: Fix naming issue
+
+
+2001-05-10  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/config.m4: Cleaning up here too.
+
+    * configure.in
+      ext/zlib/config.m4
+      ext/zlib/zlib.m4: Moved the zlib configure before other extensions.
+
+    * ext/fdf/config.m4
+      ext/mcrypt/config.m4
+      ext/pdf/config.m4
+      ext/gd/config.m4: Cleaned up this a bit..
+
 2001-05-09  Wez Furlong  <wez.php@thebrainroom.com>
 
     * ext/mysql/php_mysql.c:
