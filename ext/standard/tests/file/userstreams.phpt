@@ -82,12 +82,12 @@ class uselessstream
 
 class mystream 
 {
-	var $path;
-	var $mode;
-	var $options;
+	public $path;
+	public $mode;
+	public $options;
 
-	var $position;
-	var $varname;
+	public $position;
+	public $varname;
 
 	function stream_open($path, $mode, $options, &$opened_path)
 	{

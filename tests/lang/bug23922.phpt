@@ -4,7 +4,7 @@ Bug #23922 (scope doesn't properly propagate into internal functions)
 <?php
   class foo
   {
-    var $foo = 1;
+    public $foo = 1;
 
     function as_string()
     { assert('$this->foo == 1'); }

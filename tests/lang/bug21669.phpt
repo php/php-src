@@ -9,7 +9,7 @@ class Test {
 }
 
 class Factory {
-	var $name = "Test";
+	public $name = "Test";
 	function create() {
 		$obj = new $this->name; /* Parse error */
 		return $obj;

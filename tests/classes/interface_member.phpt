@@ -6,7 +6,7 @@ ZE2 An interface cannot have properties
 <?php
 
 interface if_a {
-	var $member;
+	public $member;
 }
 ?>
 --EXPECTF--

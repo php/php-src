@@ -3,7 +3,7 @@ Bug #22231 (segfault when returning a global variable by reference)
 --FILE--
 <?php
 class foo {
-    var $fubar = 'fubar';
+    public $fubar = 'fubar';
 }
 
 function &foo(){

@@ -1,7 +1,7 @@
 --TEST--
 Bug #26182 (Object properties created redundantly)
 --INI--
-error_reporting=2039
+error_reporting=4095
 --FILE--
 <?php
 

@@ -7,7 +7,7 @@ Classes general test
 /* pretty nifty object oriented code! */
 
 class user {
-  var $first_name,$family_name,$address,$phone_num;
+  public $first_name,$family_name,$address,$phone_num;
   function display()
   {
     echo "User information\n";
