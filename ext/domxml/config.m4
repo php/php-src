@@ -22,8 +22,7 @@ AC_ARG_WITH(dom,
       AC_ADD_INCLUDE(/usr/local/include)
       ;;
     *)
-      test -f $withval/include/gnome-xml/tree.h && DOMXML_INCLUDE="$withval/include/gnome-xml"
-      test -f $withval/include/tree.h && DOMXML_INCLUDE="$withval/include"
+      test -f $withval/include/gnome-xml/tree.h && DOMXML_INCLUDE="$withval/include"
       if test -n "$DOMXML_INCLUDE" ; then
         AC_MSG_RESULT(yes)
         PHP_EXTENSION(domxml)

@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- domxml now supports libxml 2.0 Beta and drops support for older versions,
+  due to massive changes in libxml
 - fixed possible crash in unserialize() if serialized data was
   corrupted. (Thies)
 - Changed $HTTP_STATE_VARS to $HTTP_SESSION_VARS. Use only the latter
