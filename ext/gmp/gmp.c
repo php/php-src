@@ -1231,7 +1231,7 @@ ZEND_FUNCTION(gmp_hamdist)
 	zval **a_arg, **b_arg;
 	mpz_t *gmpnum_a, *gmpnum_b;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(1, &a_arg, &b_arg) == FAILURE){
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &a_arg, &b_arg) == FAILURE){
 		WRONG_PARAM_COUNT;
 	}
 	
