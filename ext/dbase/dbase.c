@@ -137,7 +137,7 @@ PHP_FUNCTION(dbase_open)
 		RETURN_FALSE;
 	}
 
-	dbh = dbf_open(Z_STRVAL_P(dbf_name), Z_LVAL_PP(options) TSRMLS_CC);
+	dbh = dbf_open(Z_STRVAL_PP(dbf_name), Z_LVAL_PP(options) TSRMLS_CC);
 	if (dbh == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to open database %s", Z_STRVAL_PP(dbf_name));
 		RETURN_FALSE;
@@ -317,7 +317,7 @@ PHP_FUNCTION(dbase_add_record)
    Replaces a record to the database */
 PHP_FUNCTION(dbase_replace_record)
 {
-	zval **dbh_id, *fields, **field, **recnum;
+	zval **dbh_id, **fields, **field, **recnum;
 	dbhead_t *dbh;
 	int dbh_type;
 
@@ -395,7 +395,7 @@ PHP_FUNCTION(dbase_delete_record)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_P(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -417,7 +417,7 @@ PHP_FUNCTION(dbase_delete_record)
  */  
 static void php_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS, int assoc)
 {
-	pval *dbh_id, *record;
+	zval **dbh_id, **record;
 	dbhead_t *dbh;
 	int dbh_type;
 	dbfield_t *dbf, *cur_f;
