@@ -41,35 +41,23 @@ documentation
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
 
-ext/pcre
---------
-    * have a non-greedy option for preg_replace().
-    * have an option for preg_grep() to return keys as well.
-
-ext/wddx
---------
-    * implement __sleep() and __wakeup() the way serialize()/unserialize() do.
-    * See if we can support the remaining datatypes:
-        dateTime
-        binary
-        recordset
-
-        http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
-        (Andrei)
-
-    * implement wddx_packet_as_javascript(). (Andrei)
-
 ext/dav
 --------
     * rewrite.
+
+ext/mcrypt
+----------
+    * port to mcrypt-2.6 or later
 
 ext/oci8
 --------
     * all OCIFetch*() functions should return 0 for no more data and false on error.
 
-ext/mcrypt
-----------
-    * port to mcrypt-2.6 or later
+ext/pcre
+--------
+    * have a non-greedy option for preg_replace().
+    * have an option for preg_grep() to return keys as well.
+    * update the online docs from version 3.1 man page
 
 ext/standard
 ------------
@@ -91,6 +79,19 @@ ext/standard
         strrpos()
         strrchr()
         strip_tags()
+
+ext/wddx
+--------
+    * implement __sleep() and __wakeup() the way serialize()/unserialize() do.
+    * See if we can support the remaining datatypes:
+        dateTime
+        binary
+        recordset
+
+        http://www.wddx.org/WDDX_SDK_10a/7__References/WDDX_DTD.htm
+        (Andrei)
+
+    * implement wddx_packet_as_javascript(). (Andrei)
 
 other cool stuff
 ----------------
