@@ -319,7 +319,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 
 	string_len = strlen(string);
 	if (!string_len)
-		return (char *)string;
+		return estrndup("", 0);
 
 	if (icase)
 		copts = REG_ICASE;
