@@ -16,6 +16,18 @@
    <email>helly@php.net</email>
    <role>lead</role>
   </maintainer>
+  <maintainer>
+   <user>iliaa</user>
+   <name>Ilia Alshanetsky</name>
+   <email>iliaa@php.net</email>
+   <role>lead</role>
+  </maintainer>
+  <maintainer>
+   <user>gschlossnagle</user>
+   <name>George Schlossnagle</name>
+   <email>george@omniti.com</email>
+   <role>lead</role>
+  </maintainer>
  </maintainers>
  <description>
   PDO provides a uniform data access interface, sporting advanced features such
@@ -26,7 +38,7 @@
  <license>PHP</license>
  <release>
   <state>alpha</state>
-  <version>0.1dev</version>
+  <version>0.1</version>
   <date>2004-05-21</date>
 
   <notes>
