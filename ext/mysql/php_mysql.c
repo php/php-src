@@ -1297,7 +1297,7 @@ static void php_mysql_do_query(INTERNAL_FUNCTION_PARAMETERS, int use_store)
 }
 /* }}} */
 
-/* {{{ proto resource mysql_query(string query [, int link_identifier] [, int result_mode])
+/* {{{ proto resource mysql_query(string query [, int link_identifier])
    Sends an SQL query to MySQL */
 PHP_FUNCTION(mysql_query)
 {
@@ -1306,7 +1306,7 @@ PHP_FUNCTION(mysql_query)
 /* }}} */
 
 
-/* {{{ proto resource mysql_unbuffered_query(string query [, int link_identifier] [, int result_mode])
+/* {{{ proto resource mysql_unbuffered_query(string query [, int link_identifier])
    Sends an SQL query to MySQL, without fetching and buffering the result rows */
 PHP_FUNCTION(mysql_unbuffered_query)
 {
