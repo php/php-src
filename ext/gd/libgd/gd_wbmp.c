@@ -188,7 +188,7 @@ gdImageCreateFromWBMP (FILE * inFile)
   gdImagePtr im;
   gdIOCtx *in = gdNewFileCtx (inFile);
   im = gdImageCreateFromWBMPCtx (in);
-  in->free (in);
+  in->gd_free (in);
   return (im);
 }
 
@@ -200,7 +200,7 @@ gdImageWBMP (gdImagePtr im, int fg, FILE * outFile)
 {
   gdIOCtx *out = gdNewFileCtx (outFile);
   gdImageWBMPCtx (im, fg, out);
-  out->free (out);
+  out->gd_free (out);
 }
 
 /* gdImageWBMPPtr
@@ -213,6 +213,6 @@ gdImageWBMPPtr (gdImagePtr im, int *size, int fg)
   gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
   gdImageWBMPCtx (im, fg, out);
   rv = gdDPExtractData (out, size);
-  out->free (out);
+  out->gd_free (out);
   return rv;
 }

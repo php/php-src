@@ -13,7 +13,7 @@ typedef struct gdIOCtx {
 	int	(*seek)(struct gdIOCtx*, const int);
 	long	(*tell)(struct gdIOCtx*);
 
-	void    (*free)(struct gdIOCtx*);
+	void    (*gd_free)(struct gdIOCtx*);
 
 } gdIOCtx;
 

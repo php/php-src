@@ -1,4 +1,3 @@
-
 /*
    * io_dp.c
    *
@@ -95,7 +94,7 @@ gdNewDynamicCtx (int initialSize, void *data)
   ctx->ctx.seek = dynamicSeek;
   ctx->ctx.tell = dynamicTell;
 
-  ctx->ctx.free = gdFreeDynamicCtx;
+  ctx->ctx.gd_free = gdFreeDynamicCtx;
 
   return (gdIOCtx *) ctx;
 }

@@ -1,5 +1,3 @@
-
-
 /*
  * gd_jpeg.c: Read and write JPEG (JFIF) format image files using the
  * gd graphics library (http://www.boutell.com/gd/).
@@ -20,20 +18,21 @@
  * major CGI brain damage
  */
 
-/* TBB: move this up so include files are not brought in */
-#ifdef HAVE_LIBJPEG
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <setjmp.h>
 #include <limits.h>
 #include <string.h>
 
+#include "gd.h"
+/* TBB: move this up so include files are not brought in */
+/* JCE: arrange HAVE_LIBJPEG so that it can be set in gd.h */
+#ifdef HAVE_LIBJPEG
+#include "gdhelpers.h"
+
 /* 1.8.1: remove dependency on jinclude.h */
 #include "jpeglib.h"
 #include "jerror.h"
-#include "gd.h"
-#include "gdhelpers.h"
 
 static const char *const GD_JPEG_VERSION = "1.0";
 
@@ -85,7 +84,7 @@ gdImageJpeg (gdImagePtr im, FILE * outFile, int quality)
 {
   gdIOCtx *out = gdNewFileCtx (outFile);
   gdImageJpegCtx (im, out, quality);
-  out->free (out);
+  out->gd_free (out);
 }
 
 void *
@@ -95,7 +94,7 @@ gdImageJpegPtr (gdImagePtr im, int *size, int quality)
   gdIOCtx *out = gdNewDynamicCtx (2048, NULL);
   gdImageJpegCtx (im, out, quality);
   rv = gdDPExtractData (out, size);
-  out->free (out);
+  out->gd_free (out);
   return rv;
 }
 
@@ -249,7 +248,6 @@ gdImageJpegCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
     }
   jpeg_finish_compress (&cinfo);
-/*error:*/
   jpeg_destroy_compress (&cinfo);
   gdFree (row);
 }
@@ -260,7 +258,7 @@ gdImageCreateFromJpeg (FILE * inFile)
   gdImagePtr im;
   gdIOCtx *in = gdNewFileCtx (inFile);
   im = gdImageCreateFromJpegCtx (in);
-  in->free (in);
+  in->gd_free (in);
   return im;
 }
 
