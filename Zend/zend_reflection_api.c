@@ -976,8 +976,18 @@ ZEND_METHOD(reflection_method, invoke)
 
 	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC) ||
 		(mptr->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-		_DO_THROW("Trying to invoke a non-public or abstract method");
-		/* Returns from this function */
+		if (mptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			zend_throw_exception_ex(zend_exception_get_abstract(), 0 TSRMLS_CC, 
+				"Trying to invoke abstract method %s::%s", 
+				mptr->common.scope->name, mptr->common.function_name);
+		} else {
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+				"Trying to invoke %s method %s::%s from scope %s", 
+				mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
+				mptr->common.scope->name, mptr->common.function_name,
+				Z_OBJCE_P(getThis())->name);
+		}
+		return;
 	}
 
 	params = safe_emalloc(sizeof(zval **), argc, 0);
