@@ -18,6 +18,7 @@
  */
 
 #include "php.h"
+#include "ext/standard/info.h"
 #include "php_ini.h"
 #include "php_dbplus.h"
 

@@ -25,7 +25,11 @@
 #include <relation.h>
 #include <dblight.h>
 
-
+/* missing prototypes in dbplus header files */
+void string_to_scalop(char *op, enum scalop *sop);
+field * string_to_field(char *val, attribute *ap, int flags);
+void cdb_tcl(int,char *,char **, int *);
+relf * aql_exec(char *, char *);
 
 #define _STRING(x) ((*x)->value.str.val)
 #define _INT(x)    ((*x)->value.lval)
@@ -112,7 +116,6 @@ tuple2var(relf * r, tuple * t, zval **zv)
 {
     register attribute *ap ;
     unsigned deg ;
-    char buf[20];
     zval *element;
     
     zval_dtor(*zv);
@@ -179,12 +182,8 @@ ary2constr(relf * r, zval** constr)
 {
   attribute *ap;
   static constraint c;
-  int len;
-  int alen;
   field *f;
   enum scalop sop;
-  int n_elems;
-  int n;
   char * dom;
   char * val;
   char * op;
@@ -298,7 +297,7 @@ ary2constr(relf * r, zval** constr)
    Add a tuple to a relation */
 PHP_FUNCTION(dbplus_add)
 {
-  zval **relation, **data, **element;
+  zval **relation, **data;
   enum errorcond stat = ERR_UNKNOWN;
   relf *r;
   tuple t;
@@ -561,7 +560,7 @@ PHP_FUNCTION(dbplus_freealllocks)
    Release write lock on tuple */
 PHP_FUNCTION(dbplus_freelock)
 {
-  zval **relation, **data, **element;
+  zval **relation, **data;
   enum errorcond stat = ERR_UNKNOWN;
   relf *r;
   tuple t;
@@ -603,7 +602,7 @@ PHP_FUNCTION(dbplus_freerlocks)
    Request locking of tuple */
 PHP_FUNCTION(dbplus_getlock)
 {
-  zval **relation, **data, **element;
+  zval **relation, **data;
   enum errorcond stat = ERR_UNKNOWN;
   relf *r;
   tuple t;
@@ -738,7 +737,7 @@ PHP_FUNCTION(dbplus_lockrel)
    Get next tuple from relation */
 PHP_FUNCTION(dbplus_next)
 {
-  zval **relation, **tname, *element;
+  zval **relation, **tname;
   relf *r;
   tuple t;
   int stat;
@@ -1044,8 +1043,9 @@ PHP_FUNCTION(dbplus_rkeys)
   } else {
     convert_to_string_ex(domlist);
     name = estrdup(_STRING(domlist));
-    while (p = strtok(nkeys ? 0 : name, " \t"))
+    while ( ( p = strtok ( nkeys ? 0 : name, " \t") ) ) {
       keys[nkeys++] = p;
+		}
   }
   
   rnew = cdbRkeys(r, nkeys, keys);
@@ -1158,8 +1158,9 @@ PHP_FUNCTION(dbplus_rsecindex)
   } else {
     convert_to_string_ex(domlist);
     name = estrdup(_STRING(domlist));
-    while (p = strtok(nkeys ? 0 : name, "   "))
+    while ( ( p = strtok ( nkeys ? 0 : name, "   ") ) ) {
       keys[nkeys++] = p;
+		}
   }
 
   convert_to_long_ex(compact);
@@ -1204,7 +1205,7 @@ PHP_FUNCTION(dbplus_rzap)
 
   /* todo: optional argument */
   relf *r;
-  zval **relation, **truncate;
+  zval **relation;
   if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &relation) == FAILURE){
     WRONG_PARAM_COUNT;
   }
