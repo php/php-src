@@ -2292,6 +2292,7 @@ void php_call_shutdown_functions(void)
 			memcpy(&EG(bailout), &orig_bailout, sizeof(jmp_buf));
 			zend_hash_destroy(BG(user_shutdown_function_names));
 			FREE_HASHTABLE(BG(user_shutdown_function_names));
+			BG(user_shutdown_function_names) = NULL;
 		}
 		zend_end_try();
 }
