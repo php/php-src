@@ -975,12 +975,20 @@ PHPAPI char *expand_filepath(char *filepath)
 
 			if (filepath[1] == '.') {	/* parent directory - .. */
 				/* erase the last directory name from the path */
+#if PHP_WIN32
+				while (*cwd_end != '/' || *cwd_end != '\\') {
+#else
 				while (*cwd_end != '/') {
+#endif
 					*cwd_end-- = 0;
 				}
 				filepath++;		/* make filepath appear as a current directory path */
 			}
+#if PHP_WIN32
+			if (cwd_end > cwd && (*cwd_end == '/' || *cwd_end == '\\')) { /* remove trailing slashes */
+#else
 			if (cwd_end > cwd && *cwd_end == '/') {		/* remove trailing slashes */
+#endif
 				*cwd_end-- = 0;
 			}
 			retval = (char *) malloc(strlen(cwd) + strlen(filepath) - 1 + 1);
