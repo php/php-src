@@ -116,7 +116,7 @@ if ($store_user_config) {
     $config->store('user');
 }
 
-$command = (isset($options[1][1])) ? $options[1][1] : null;
+$command = (isset($options[1][0])) ? $options[1][0] : null;
 
 if (empty($command) && ($store_user_config || $store_system_config)) {
     exit;
@@ -128,13 +128,13 @@ if ($fetype == 'Gtk') {
     if (empty($all_commands[$command]) || $command == 'help') {
         usage(null, @$options[1][2]);
     }
-    
+
     $cmd = PEAR_Command::factory($command, $config);
     if (PEAR::isError($cmd)) {
         die($cmd->getMessage());
     }
-    
-    $cmdargs = array_slice($options[1], 2);
+
+    $cmdargs = array_slice($options[1], 1);
     $ok = $cmd->run($command, $cmdopts, $cmdargs);
     if ($ok === false) {
         PEAR::raiseError("unknown command `$command'");
