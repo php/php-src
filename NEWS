@@ -441,6 +441,7 @@ PHP 4                                                                      NEWS
   GMT +0100 and GMT -0100. (Derick)
 
 10 Dec 2001, Version 4.1.0
+- Fixed return values for strtok (Bug #13866) (jmoore)
 - Worked around a bug in the MySQL client library that could cause PHP to hang
   when using unbuffered queries. (Zeev)
 - Fixed a bug which caused set_time_limit() to affect all subsequent requests
