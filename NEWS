@@ -2,8 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
-- The CCVS module is now stable and compiling. It compiles as a CGI and into apache cleanly without warnings. (Brendan W. McAdams)
-- Fix mSQL_close(). (nick@loman.net)
+- The CCVS module is now stable and compiling. It compiles as a CGI and into
+  Apache cleanly without warnings. (Brendan W. McAdams)
+- Fixed mSQL_close(). (nick@loman.net)
 - Made return() in a require()'d file work like return() in an include()'d
   file (Andi & Zeev, Zend Engine)
 - Changed require_once() to work using the same table as include_once()
@@ -40,7 +41,8 @@ PHP 4.0                                                                    NEWS
 - Bug-report and fix submitted by Michel Alexeline <alexel@dr15.cnrs.fr>
 - Make ext_skel create a Makefile.in set up to handle shared extension
   support automatically (Rasmus)
-- Fix php_realpath not to die on non-existing files (needed for touch()) (Stas and china@thewrittenword.com)
+- Fix php_realpath not to die on non-existing files (needed for touch()) (Stas
+  and china@thewrittenword.com)
 - Fix get_browser() function (Stas)
 - Fix symbol clash which caused a DSO problem on OpenBSD (Rob Black and
   anil@recoil.org)
