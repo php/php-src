@@ -87,6 +87,10 @@
 #include "mbfilter_ja.h"
 #include "zend.h"
 
+#ifdef PHP_WIN32
+#include "win95nt.h"
+#endif
+
 #define	mbfl_malloc		emalloc
 #define	mbfl_realloc	erealloc
 #define	mbfl_calloc		ecalloc

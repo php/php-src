@@ -49,7 +49,6 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "php_config.h"
 #include "php_variables.h"
 #include "mbstring.h"
 #include "ext/standard/php_string.h"
