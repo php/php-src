@@ -238,7 +238,7 @@ int php_libxml_streams_IO_match_wrapper(const char *filename)
 	return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
 }
 
-void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode)
+void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
 	char resolved_path[MAXPATHLEN + 1];
 	php_stream_statbuf ssbuf;
@@ -257,7 +257,7 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode)
 	   may try to open files that don't exist, but it is not a failure
 	   in xml processing (eg. DTD files)  */
 	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
-	if (wrapper && wrapper->wops->url_stat) {
+	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, 0, &ssbuf, NULL TSRMLS_CC) == -1) {
 			return NULL;
 		}
@@ -272,12 +272,12 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode)
 
 void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
 {
-	return php_libxml_streams_IO_open_wrapper(filename, "rb");
+	return php_libxml_streams_IO_open_wrapper(filename, "rb", 1);
 }
 
 void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
 {
-	return php_libxml_streams_IO_open_wrapper(filename, "wb");
+	return php_libxml_streams_IO_open_wrapper(filename, "wb", 0);
 }
 
 int php_libxml_streams_IO_read(void *context, char *buffer, int len)
