@@ -1,3 +1,101 @@
+2003-06-13  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/user_filters.c:
+      User Filters don't need to register a resource list for streams.
+      That functionality is already exported by the streams API.
+
+    * ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/streamsfuncs.c
+      main/streams/php_stream_context.h
+      main/streams/streams.c:
+      Plug leak (context options not freed)
+      Make contexts auto-registered, ensures userland contexts
+      and C API contexts are both dealt with on request shutdown.
+      Also brings contexts in keeping with streams which are already
+      auto-registered.
+
+    * ext/standard/http_fopen_wrapper.c:
+      Loosen restrictions on method used with http_fopen_wrapper, still default
+      to GET though.
+
+2003-06-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      Busted by the CS police.
+
+2003-06-13  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/dba/dba.c
+      ext/dba/dba.c:
+      proto fixes
+
+2003-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      it rains here..
+
+2003-06-13  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      proto
+
+    * ext/imap/php_imap.c:
+      Added missing function proto
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+      MFH:
+      	Fixed bug #24161 (No timeout value for imap functions)
+      	Fixed bug #22505 (Allow imap_sort() and imap_search() to specify a
+      charset)
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+      Fixed bug #24161 (No timeout value for imap functions)
+      
+      Added imap_timeout() that allows the user to specify as well as retrieve
+      timeout values and set default timeout values based on the
+      default_socket_timeout ini setting.
+
+2003-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Missing entry
+
+    * NEWS:
+      Added missing NEWS entry
+
+    * ext/ldap/config.m4
+      ext/ldap/ldap.c
+      ext/ldap/php_ldap.h:
+      Fixed the SASL config check.
+
+2003-06-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/tests/019.phpt:
+      MFB
+
+    * (PHP_4_3)
+      ext/session/tests/019.phpt:
+      Fix test
+
+2003-06-13  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      ext/session/tests/019.phpt:
+      MFH, fixed the test (second session init produces a notices)
+
+    * ext/session/tests/019.phpt:
+      Fix the test. (second session init call produces a notice)
+
 2003-06-12  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/dom/document.c
