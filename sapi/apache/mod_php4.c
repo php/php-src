@@ -69,9 +69,9 @@ int sapi_apache_read_post(char *buffer, uint count_bytes SLS_DC);
 char *sapi_apache_read_cookies(SLS_D);
 int sapi_apache_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct *sapi_headers SLS_DC);
 int sapi_apache_send_headers(sapi_headers_struct *sapi_headers SLS_DC);
-int send_php(request_rec *r, int display_source_mode, char *filename);
-int send_parsed_php(request_rec * r);
-int send_parsed_php_source(request_rec * r);
+static int send_php(request_rec *r, int display_source_mode, char *filename);
+static int send_parsed_php(request_rec * r);
+static int send_parsed_php_source(request_rec * r);
 int php_xbithack_handler(request_rec * r);
 void php_init_handler(server_rec *s, pool *p);
 
@@ -436,7 +436,7 @@ static char *php_apache_get_default_mimetype(request_rec *r SLS_DC)
 	return mimetype;
 }
 
-int send_php(request_rec *r, int display_source_mode, char *filename)
+static int send_php(request_rec *r, int display_source_mode, char *filename)
 {
 	int retval;
 	HashTable *per_dir_conf;
@@ -445,6 +445,17 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 	CLS_FETCH();
 	PLS_FETCH();
 	APLS_FETCH();
+
+	if (r->assbackwards && r->protocol && !strcmp(r->protocol, "INCLUDED")) {
+		zend_file_handle fh;
+
+		fh.filename = r->filename;
+		fh.opened_path = NULL;
+		fh.free_filename = 0;
+		fh.type = ZEND_HANDLE_FILENAME;
+		zend_execute_scripts(ZEND_INCLUDE CLS_CC ELS_CC, 1, &fh);
+		return OK;
+	}
 
 	if (setjmp(EG(bailout))!=0) {
 		return OK;
@@ -527,13 +538,13 @@ int send_php(request_rec *r, int display_source_mode, char *filename)
 }
 
 
-int send_parsed_php(request_rec * r)
+static int send_parsed_php(request_rec * r)
 {
 	return send_php(r, 0, NULL);
 }
 
 
-int send_parsed_php_source(request_rec * r)
+static int send_parsed_php_source(request_rec * r)
 {
 	return send_php(r, 1, NULL);
 }
