@@ -1,7 +1,14 @@
 --TEST--
 Gettext basic test
 --SKIPIF--
-<?php if (!extension_loaded("gettext")) print "skip"; ?>
+<?php 
+	if (!extension_loaded("gettext")) {
+		die("skip\n");
+	}
+	if (!setlocale(LC_ALL, 'fi_FI')) {
+		die("skip fi_FI locale not supported.");
+	}
+?>
 --FILE--
 <?php // $Id$
 
