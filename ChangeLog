@@ -1,3 +1,83 @@
+2000-06-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/session.c: Cosmetic name change
+
+2000-06-27  Jouni Ahto  <jah@mork.net>
+
+    * NEWS
+      ext/dba/dba.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/php_dba.h:
+
+2000-06-27  Zeev Suraski  <zeev@php.net>
+
+    * win32/README.txt: - Limit lines to 80 chars
+    - Let people know they don't have to use the ISAPI filter if they don't need
+      HTTP authenatication
+
+2000-06-27  Jouni Ahto  <jah@mork.net>
+
+    * ext/dba/dba_db3.c
+      ext/dba/php_dba.h
+      NEWS
+      ext/dba/dba.c
+      ext/dba/dba_db2.c:
+    - dba_[p]open accepts now a new parameter, which kind of database to create
+      (DBA_BTREE or DBA_HASH), if the handler is either 'db2' or 'db3' and
+      mode 'c' or 'n'. It is ignored if mode is 'c' and the db already exists.
+
+2000-06-27  Zeev Suraski  <zeev@php.net>
+
+    * NEWS
+      ext/standard/dir.c:
+    Fixed a bug in opendir(), which prevented readdir() from working properly if
+    the $dir argument wasn't explicitly specified
+
+    * win32/sendmail.c:
+    Revert the sendmail.c patch - it uses 4 different variables that aren't defined, and breaks
+    the Win32 build
+
+2000-06-27  Andi Gutmans  <andi@php.net>
+
+    * main/php_virtual_cwd.c: - Fix bug with VIRTUAL_DIR, .., and symlinks.
+
+2000-06-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * genif.sh:
+    Use [\]n to refer to the two characters '\' and 'n'. This is the correct way
+    according to SUS II.
+
+    PR: #5212
+
+2000-06-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * win32/sendmail.c: should now get multiple To: and Cc: recievers right
+    (code taken from php3 version)
+
+2000-06-27  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    (pg_loreadall) Was using zval ** but forgot to convert to use
+    	       zend_get_parameters_ex(). Fixes #5244.
+
+2000-06-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * win32/php4ts.dsw: add Java as a valid package
+
+    * sapi/servlet/servlet.java: defer loading of the native code
+
+2000-06-27  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.c: (fgetcsv) fixed leak
+
+    * ext/ldap/ldap.c:
+    - Fixed a possible crash in the LDAP modify code. (Eric Kilfoil)
+
+2000-06-27  Andi Gutmans  <andi@php.net>
+
+    * NEWS: - Made discard-path work again
+
 2000-06-26  Zeev Suraski  <zeev@php.net>
 
     * NEWS
