@@ -1187,7 +1187,7 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 	UpdateIniFromRegistry(file->filename);
 #endif
 
-	op_array = zend_compile_file(file CLS_CC);
+	op_array = zend_compile_file(file, ZEND_INCLUDE CLS_CC);
 	retval = (op_array?SUCCESS:FAILURE);
 	destroy_op_array(op_array);
 
