@@ -61,7 +61,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF 2.10 standard.
  */
-#undef EXIF_DEBUG /**/
+#undef EXIF_DEBUG
 
 #include "php_exif.h"
 #include <math.h>
@@ -878,7 +878,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 		{
 			info_value = &image_info->info_list[section_index].list[i];
 			#ifdef EXIF_DEBUG
-			/* php_error(E_NOTICE,"adding info #%d: '%s:%s'", i, exif_get_sectionname(section_index), info_value->name);/**/
+			php_error(E_NOTICE,"adding info #%d: '%s:%s'", i, exif_get_sectionname(section_index), info_value->name);
 			#endif
 			switch(info_value->format)
 			{
@@ -1266,7 +1266,7 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 {
 	int l;
 	int tag, format, components;
-	char *value_ptr, *buffer, tagname[64];
+	char *value_ptr, tagname[64];
 	size_t byte_count;
 	unsigned offset_val;
 
@@ -1429,8 +1429,9 @@ static void exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, ch
 							#endif
 							ImageInfo->sections_found |= FOUND_INTEROP;
 							sub_section_index = SECTION_INTEROP;
-/*							return;/* we do not know how to handle that yet */
-							break;/**/
+						/* we do not know how to handle that yet */
+						/*	return; */
+							break;
 					}
 					SubdirStart = offset_base + php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
 					if (SubdirStart < offset_base || SubdirStart > offset_base+IFDlength) {
@@ -1577,7 +1578,6 @@ static void exif_process_APP12(image_info_type *ImageInfo, char *buffer, unsigne
 static int exif_scan_JPEG_header(image_info_type *ImageInfo, FILE *infile)
 {
 	int a;
-	int HaveCom = FALSE;
 
 	for(ImageInfo->sections_count=0;ImageInfo->sections_count < 19;) {
 		int itemlen;
@@ -1859,8 +1859,9 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, FILE *infile, si
 							case TAG_INTEROP_IFD_POINTER:
 								ImageInfo->sections_found |= FOUND_INTEROP;
 								sub_section_index = SECTION_INTEROP;
-/*								return; /* we do not know how to handle that yet */
-								break;/**/
+							/* we do not know how to handle that yet */
+							/*	return; */
+								break;
 						}
 						entry_offset = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 						#ifdef EXIF_DEBUG
@@ -2007,7 +2008,7 @@ int php_exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thum
 		php_error(E_WARNING, "Unable to open '%s'", FileName);
 		return FALSE;
 	}
-    /* php_error(E_WARNING,"EXIF: Process %s%s: %s", read_thumbnail?"thumbs ":"", read_all?"All ":"", FileName); /**/
+    /* php_error(E_WARNING,"EXIF: Process %s%s: %s", read_thumbnail?"thumbs ":"", read_all?"All ":"", FileName); */
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
@@ -2045,7 +2046,6 @@ PHP_FUNCTION(exif_read_data)
 {
 	pval **p_name, **p_sections_needed, **p_sub_arrays, **p_read_thumbnail, **p_read_all;
 	int i, len, ac = ZEND_NUM_ARGS(), ret, sections_needed=0, sub_arrays=0, read_thumbnail=0, read_all=0;
-	int self_motorola_intel;
 	image_info_type ImageInfo;
 	char tmp[64], *sections_str, *s;
 
