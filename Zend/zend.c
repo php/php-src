@@ -218,7 +218,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 				TSRMLS_FETCH();
 #if 0
 				/* Standard PHP objects */
-				if (expr->value.obj.handlers == &std_object_handlers) {
+				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HT_P(expr)->cast_object) {
 					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING, 0 TSRMLS_CC) == SUCCESS) {
 						break;
 					}
