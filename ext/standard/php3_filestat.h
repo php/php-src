@@ -32,8 +32,9 @@
 #ifndef _FILESTAT_H
 #define _FILESTAT_H
 
-extern int php3_init_filestat(INIT_FUNC_ARGS);
-extern int php3_shutdown_filestat(SHUTDOWN_FUNC_ARGS);
+PHP_RINIT_FUNCTION(filestat);
+PHP_RSHUTDOWN_FUNCTION(filestat);
+
 PHP_FUNCTION(clearstatcache);
 PHP_FUNCTION(fileatime);
 PHP_FUNCTION(filectime);

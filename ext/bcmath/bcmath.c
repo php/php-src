@@ -24,20 +24,20 @@
 #include "php3_bcmath.h"
 
 function_entry bcmath_functions[] = {
-	{"bcadd",		php3_bcmath_add,			NULL},
-	{"bcsub",		php3_bcmath_sub,			NULL},
-	{"bcmul",		php3_bcmath_mul,			NULL},
-	{"bcdiv",		php3_bcmath_div,			NULL},
-	{"bcmod",		php3_bcmath_mod,			NULL},
-	{"bcpow",		php3_bcmath_pow,			NULL},
-	{"bcsqrt",		php3_bcmath_sqrt,			NULL},
-	{"bcscale",		php3_bcmath_set_scale,		NULL},
-	{"bccomp",		php3_bcmath_comp,			NULL},
+	PHP_FE(bcadd,									NULL)
+	PHP_FE(bcsub,									NULL)
+	PHP_FE(bcmul,									NULL)
+	PHP_FE(bcdiv,									NULL)
+	PHP_FE(bcmod,									NULL)
+	PHP_FE(bcpow,									NULL)
+	PHP_FE(bcsqrt,									NULL)
+	PHP_FE(bcscale,									NULL)
+	PHP_FE(bccomp,									NULL)
 	{NULL, NULL, NULL}
 };
 
 php3_module_entry bcmath_module_entry = {
-	"bcmath", bcmath_functions, NULL, NULL, php3_rinit_bcmath, php3_rend_bcmath, NULL, STANDARD_MODULE_PROPERTIES
+	"bcmath", bcmath_functions, NULL, NULL, PHP_RINIT(bcmath), PHP_RSHUTDOWN(bcmath), NULL, STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
@@ -48,7 +48,7 @@ php3_module_entry *get_module() { return &bcmath_module_entry; };
 static long bc_precision;
 #endif
 
-int php3_rinit_bcmath(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(bcmath)
 {
 	init_numbers();
 	if (cfg_get_long("bcmath.scale",&bc_precision)==FAILURE) {
@@ -57,7 +57,7 @@ int php3_rinit_bcmath(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_rend_bcmath(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(bcmath)
 {
 	destruct_numbers();
 	return SUCCESS;
@@ -65,7 +65,7 @@ int php3_rend_bcmath(SHUTDOWN_FUNC_ARGS)
 
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
-PHP_FUNCTION(bcmath_add)
+PHP_FUNCTION(bcadd)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -108,7 +108,7 @@ PHP_FUNCTION(bcmath_add)
 
 /* {{{ proto string bcsub(string left_operand, string right_operand [, int scale])
    Returns the difference between two arbitrary precision numbers (subtration) */
-PHP_FUNCTION(bcmath_sub)
+PHP_FUNCTION(bcsub)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -151,7 +151,7 @@ PHP_FUNCTION(bcmath_sub)
 
 /* {{{ proto string bcmul(string left_operand, string right_operand [, int scale])
    Returns the multiplication of two arbitrary precision numbers */
-PHP_FUNCTION(bcmath_mul)
+PHP_FUNCTION(bcmul)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -194,7 +194,7 @@ PHP_FUNCTION(bcmath_mul)
 
 /* {{{ proto string bcdiv(string left_operand, string right_operand [, int scale])
    Returns the quotient of two arbitrary precision numbers (division) */
-PHP_FUNCTION(bcmath_div)
+PHP_FUNCTION(bcdiv)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -243,7 +243,7 @@ PHP_FUNCTION(bcmath_div)
 
 /* {{{ proto string bcmod(string left_operand, string right_operand)
    Returns the modulus of the two arbitrary precision operands */
-PHP_FUNCTION(bcmath_mod)
+PHP_FUNCTION(bcmod)
 {
 	pval *left, *right;
 	bc_num first, second, result;
@@ -284,7 +284,7 @@ PHP_FUNCTION(bcmath_mod)
 
 /* {{{ proto string bcpow(string x, string y [, int scale])
    Returns the value of an arbitrary precision number raised to the power of another */
-PHP_FUNCTION(bcmath_pow)
+PHP_FUNCTION(bcpow)
 {
 	pval *left, *right,*scale_param;
 	bc_num first, second, result;
@@ -327,7 +327,7 @@ PHP_FUNCTION(bcmath_pow)
 
 /* {{{ proto string bcsqrt(string operand [, int scale])
    Returns the square root of an arbitray precision number */
-PHP_FUNCTION(bcmath_sqrt)
+PHP_FUNCTION(bcsqrt)
 {
 	pval *left,*scale_param;
 	bc_num result;
@@ -367,7 +367,7 @@ PHP_FUNCTION(bcmath_sqrt)
 
 /* {{{ proto string bccomp(string left_operand, string right_operand [, int scale])
    Compares two arbitrary precision numbers */
-PHP_FUNCTION(bcmath_comp)
+PHP_FUNCTION(bccomp)
 {
 	pval *left, *right, *scale_param;
 	bc_num first, second;
@@ -409,7 +409,7 @@ PHP_FUNCTION(bcmath_comp)
 
 /* {{{ proto string bcscale(int scale)
    Sets default scale parameter for all bc math functions */
-PHP_FUNCTION(bcmath_set_scale)
+PHP_FUNCTION(bcscale)
 {
 	pval *new_scale;
 	

@@ -36,13 +36,14 @@
 extern php3_module_entry aspell_module_entry;
 #define aspell_module_ptr &aspell_module_entry
 
-extern int php3_minit_aspell(INIT_FUNC_ARGS);
-extern void php3_info_aspell(ZEND_MODULE_INFO_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(aspell);
+extern PHP_MINFO_FUNCTION(aspell);
 extern void php3_aspell_close();
-void php3_aspell_new(INTERNAL_FUNCTION_PARAMETERS);
-void php3_aspell_check(INTERNAL_FUNCTION_PARAMETERS);
-void php3_aspell_check_raw(INTERNAL_FUNCTION_PARAMETERS);
-void php3_aspell_suggest(INTERNAL_FUNCTION_PARAMETERS);
+
+PHP_FUNCTION(aspell_new);
+PHP_FUNCTION(aspell_check);
+PHP_FUNCTION(aspell_check_raw);
+PHP_FUNCTION(aspell_suggest);
 
 #else
 #define aspell_module_ptr NULL

@@ -52,7 +52,7 @@ typedef struct CookieList {
 extern php3_module_entry php3_header_module_entry;
 #define php3_header_module_ptr &php3_header_module_entry
 
-extern int php3_init_head(INIT_FUNC_ARGS);
+extern PHP_RINIT_FUNCTION(head);
 PHP_FUNCTION(Header);
 PHP_FUNCTION(setcookie);
 PHP_FUNCTION(headers_sent);

@@ -37,7 +37,7 @@ extern php3_module_entry php3_dir_module_entry;
 #define php3_dir_module_ptr &php3_dir_module_entry
 
 /* directory functions */
-extern int php3_minit_dir(INIT_FUNC_ARGS);
+extern PHP_MINIT_FUNCTION(dir);
 PHP_FUNCTION(opendir);
 PHP_FUNCTION(closedir);
 PHP_FUNCTION(chdir);

@@ -35,7 +35,8 @@ function_entry browscap_functions[] = {
 };
 
 php3_module_entry browscap_module_entry = {
-	"browscap", browscap_functions, php3_minit_browscap, php3_mshutdown_browscap, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	"browscap", browscap_functions, PHP_MINIT(browscap), PHP_MSHUTDOWN(browscap),
+	NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 
 

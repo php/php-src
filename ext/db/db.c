@@ -240,7 +240,7 @@ static char *php3_get_info_db(void)
 }
 
 
-void php3_info_db(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(db)
 {
 	php3_printf(php3_get_info_db());
 }
@@ -1079,7 +1079,7 @@ datum flatfile_nextkey(FILE *dbf) {
 #endif
 
 
-int php3_minit_db(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(db)
 {
 #if defined(THREAD_SAFE)
 	dbm_global_struct *dbm_globals;
@@ -1104,7 +1104,8 @@ int php3_minit_db(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-static int php3_mend_db(void){
+static PHP_MSHUTDOWN_FUNCTION(db)
+{
 	DBM_TLS_VARS;
 #ifdef THREAD_SAFE
 	PHP3_TLS_THREAD_FREE(dbm_globals);
@@ -1121,7 +1122,8 @@ static int php3_mend_db(void){
 	return SUCCESS;
 }
 
-int php3_rinit_db(INIT_FUNC_ARGS) {
+PHP_RINIT_FUNCTION(db)
+{
 #if !GDBM && !NDBM
 	CurrentFlatFilePos = 0L;
 #endif
@@ -1130,21 +1132,21 @@ int php3_rinit_db(INIT_FUNC_ARGS) {
 
 
 function_entry dbm_functions[] = {
-	{"dblist",		php3_dblist,		NULL},
-	{"dbmopen",		php3_dbmopen,		NULL},
-	{"dbmclose",	php3_dbmclose,		NULL},
-	{"dbminsert",	php3_dbminsert,		NULL},
-	{"dbmfetch",	php3_dbmfetch,		NULL},
-	{"dbmreplace",	php3_dbmreplace,	NULL},
-	{"dbmexists",	php3_dbmexists,		NULL},
-	{"dbmdelete",	php3_dbmdelete,		NULL},
-	{"dbmfirstkey",	php3_dbmfirstkey,	NULL},
-	{"dbmnextkey",	php3_dbmnextkey,	NULL},
+	PHP_FE(dblist,									NULL)
+	PHP_FE(dbmopen,									NULL)
+	PHP_FE(dbmclose,								NULL)
+	PHP_FE(dbminsert,								NULL)
+	PHP_FE(dbmfetch,								NULL)
+	PHP_FE(dbmreplace,								NULL)
+	PHP_FE(dbmexists,								NULL)
+	PHP_FE(dbmdelete,								NULL)
+	PHP_FE(dbmfirstkey,								NULL)
+	PHP_FE(dbmnextkey,								NULL)
 	{NULL,NULL,NULL}
 };
 
 php3_module_entry dbm_module_entry = {
-	"DBM", dbm_functions, php3_minit_db, php3_mend_db, php3_rinit_db, NULL, php3_info_db, STANDARD_MODULE_PROPERTIES
+	"DBM", dbm_functions, PHP_MINIT(db), PHP_MSHUTDOWN(db), PHP_RINIT(db), NULL, PHP_MINFO(db), STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL

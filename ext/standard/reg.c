@@ -39,15 +39,15 @@ function_entry reg_functions[] = {
 };
 
 
-static int php_minit_regex(INIT_FUNC_ARGS);
-static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS);
-static void php_info_regex(ZEND_MODULE_INFO_FUNC_ARGS);
+static PHP_MINIT_FUNCTION(regex);
+static PHP_MSHUTDOWN_FUNCTION(regex);
+static PHP_MINFO_FUNCTION(regex);
 
 zend_module_entry regexp_module_entry = {
 	"Regular Expressions", 
 	reg_functions, 
-	php_minit_regex, php_mshutdown_regex,
-	NULL, NULL, php_info_regex, 
+	PHP_MINIT(regex), PHP_MSHUTDOWN(regex),
+	NULL, NULL, PHP_MINFO(regex), 
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -101,7 +101,7 @@ static void php_reg_init_globals(php_reg_globals *reg_globals)
 	_php3_hash_init(&reg_globals->ht_rc, 0, NULL, (int (*)(void *)) _free_reg_cache, 1);
 }
 
-static int php_minit_regex(INIT_FUNC_ARGS)
+static PHP_MINIT_FUNCTION(regex)
 {
 #ifdef ZTS
 	reg_globals_id = ts_allocate_id(sizeof(php_reg_globals), php_reg_init_globals, NULL);
@@ -112,7 +112,7 @@ static int php_minit_regex(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS)
+static PHP_MSHUTDOWN_FUNCTION(regex)
 {
 	REGLS_FETCH();
 
@@ -120,7 +120,7 @@ static int php_mshutdown_regex(SHUTDOWN_FUNC_ARGS)
 	return SUCCESS;
 }
 
-static void php_info_regex(ZEND_MODULE_INFO_FUNC_ARGS)
+static PHP_MINFO_FUNCTION(regex)
 {
 #if HSREGEX
 	PUTS("Bundled regex library enabled\n");

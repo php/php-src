@@ -109,10 +109,10 @@ typedef struct php3i_sockbuf php3i_sockbuf;
 php3_module_entry fsock_module_entry = {
 	"Socket functions",
 	fsock_functions,
-	php3_minit_fsock,
-	php3_mshutdown_fsock,
+	PHP_MINIT(fsock),
+	PHP_MSHUTDOWN(fsock),
 	NULL,
-	php3_rshutdown_fsock,
+	PHP_RSHUTDOWN(fsock),
 	NULL,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -701,7 +701,7 @@ static int _php3_msock_destroy(int *data)
 /* }}} */
 	/* {{{ php3_minit_fsock */
 
-int php3_minit_fsock(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(fsock)
 {
 #ifndef ZTS
 	_php3_hash_init(&PG(ht_fsock_keys), 0, NULL, NULL, 1);
@@ -712,7 +712,7 @@ int php3_minit_fsock(INIT_FUNC_ARGS)
 /* }}} */
 	/* {{{ php3_mshutdown_fsock */
 
-int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(fsock)
 {
 #ifndef ZTS
 	_php3_hash_destroy(&PG(ht_fsock_socks));
@@ -724,7 +724,7 @@ int php3_mshutdown_fsock(SHUTDOWN_FUNC_ARGS)
 /* }}} */
     /* {{{ php3_rshutdown_fsock() */
 
-int php3_rshutdown_fsock(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(fsock)
 {
 	php_cleanup_sockbuf(0);
 	return SUCCESS;

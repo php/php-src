@@ -37,17 +37,17 @@
 #include <aspell-c.h>
 
 function_entry aspell_functions[] = {
-	{"aspell_new",		php3_aspell_new,		NULL},
-	{"aspell_check",		php3_aspell_check,		NULL},
-	{"aspell_check_raw",		php3_aspell_check_raw,		NULL},
-	{"aspell_suggest",		php3_aspell_suggest,		NULL},
+	PHP_FE(aspell_new,								NULL)
+	PHP_FE(aspell_check,							NULL)
+	PHP_FE(aspell_check_raw,						NULL)
+	PHP_FE(aspell_suggest,							NULL)
 	{NULL, NULL, NULL}
 };
 
 static int le_aspell;
 
 php3_module_entry aspell_module_entry = {
-	"Aspell", aspell_functions, php3_minit_aspell, NULL, NULL, NULL, php3_info_aspell, STANDARD_MODULE_PROPERTIES
+	"Aspell", aspell_functions, PHP_MINIT(aspell), NULL, NULL, NULL, PHP_MINFO(aspell), STANDARD_MODULE_PROPERTIES
 };
 
 
@@ -55,7 +55,7 @@ php3_module_entry aspell_module_entry = {
 DLEXPORT php3_module_entry *get_module(void) { return &aspell_module_entry; }
 #endif
 
-int php3_minit_aspell(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(aspell)
 {
     le_aspell = register_list_destructors(php3_aspell_close,NULL);
 	return SUCCESS;
@@ -68,7 +68,7 @@ void php3_aspell_close(aspell *sc)
 
 /* {{{ proto int aspell_new(string master[, string personal])
    Load a dictionary */
-void php3_aspell_new(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(aspell_new)
 {
 	pval *master, *personal;
 	int argc;
@@ -93,9 +93,10 @@ void php3_aspell_new(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
+
 /* {{{ proto array aspell_suggest(aspell int,string word)
    Return array of Suggestions */
-void php3_aspell_suggest(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(aspell_suggest)
 {
 	pval *scin, *word;
 	int argc;
@@ -132,7 +133,7 @@ void php3_aspell_suggest(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int aspell_check(aspell int,string word)
    Return if word is valid */
-void php3_aspell_check(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(aspell_check)
 {
    int type;
    pval *scin,*word;
@@ -164,7 +165,7 @@ void php3_aspell_check(INTERNAL_FUNCTION_PARAMETERS)
 
 /* {{{ proto int aspell_check_raw(aspell int,string word)
    Return if word is valid, ignoring case or trying to trim it in any way*/
-void php3_aspell_check_raw(INTERNAL_FUNCTION_PARAMETERS)
+PHP_FUNCTION(aspell_check_raw)
 {
   pval *scin,*word;
   int type;
@@ -194,7 +195,7 @@ void php3_aspell_check_raw(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-void php3_info_aspell(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(aspell)
 {
 	php3_printf("ASpell support enabled");
 

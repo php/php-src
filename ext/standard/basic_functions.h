@@ -39,10 +39,11 @@
 extern php3_module_entry basic_functions_module;
 #define basic_functions_module_ptr &basic_functions_module
 
-extern int php3_minit_basic(INIT_FUNC_ARGS);
-extern int php3_mshutdown_basic(SHUTDOWN_FUNC_ARGS);
-extern int php3_rinit_basic(INIT_FUNC_ARGS);
-extern int php3_rshutdown_basic(SHUTDOWN_FUNC_ARGS);
+PHP_MINIT_FUNCTION(basic);
+PHP_MSHUTDOWN_FUNCTION(basic);
+PHP_RINIT_FUNCTION(basic);
+PHP_RSHUTDOWN_FUNCTION(basic);
+
 PHP_FUNCTION(intval);
 PHP_FUNCTION(doubleval);
 PHP_FUNCTION(strval);

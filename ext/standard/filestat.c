@@ -84,7 +84,7 @@ static struct stat lsb;
 #endif
 
 
-int php3_init_filestat(INIT_FUNC_ARGS)
+PHP_RINIT_FUNCTION(filestat)
 {
 	CurrentStatFile=NULL;
 	CurrentStatLength=0;
@@ -92,7 +92,7 @@ int php3_init_filestat(INIT_FUNC_ARGS)
 }
 
 
-int php3_shutdown_filestat(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(filestat)
 {
 	if (CurrentStatFile) {
 		efree (CurrentStatFile);
@@ -433,24 +433,24 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	_php3_stat(filename->value.str.val, funcnum, return_value); \
 }
 
-FileFunction(php3_fileperms,0)
-FileFunction(php3_fileinode,1)
-FileFunction(php3_filesize, 2)
-FileFunction(php3_fileowner,3)
-FileFunction(php3_filegroup,4)
-FileFunction(php3_fileatime,5)
-FileFunction(php3_filemtime,6)
-FileFunction(php3_filectime,7)
-FileFunction(php3_filetype, 8)
-FileFunction(php3_is_writable, 9)
-FileFunction(php3_is_readable,10)
-FileFunction(php3_is_executable,11)
-FileFunction(php3_is_file,12)
-FileFunction(php3_is_dir,13)
-FileFunction(php3_is_link,14)
-FileFunction(php3_file_exists,15)
-FileFunction(php3_lstat,16)
-FileFunction(php3_stat,17)
+FileFunction(PHP_FN(fileperms),0)
+FileFunction(PHP_FN(fileinode),1)
+FileFunction(PHP_FN(filesize), 2)
+FileFunction(PHP_FN(fileowner),3)
+FileFunction(PHP_FN(filegroup),4)
+FileFunction(PHP_FN(fileatime),5)
+FileFunction(PHP_FN(filemtime),6)
+FileFunction(PHP_FN(filectime),7)
+FileFunction(PHP_FN(filetype), 8)
+FileFunction(PHP_FN(is_writable), 9)
+FileFunction(PHP_FN(is_readable),10)
+FileFunction(PHP_FN(is_executable),11)
+FileFunction(PHP_FN(is_file),12)
+FileFunction(PHP_FN(is_dir),13)
+FileFunction(PHP_FN(is_link),14)
+FileFunction(PHP_FN(file_exists),15)
+FileFunction(PHP_FN(lstat),16)
+FileFunction(PHP_FN(stat),17)
 
 function_entry php3_filestat_functions[] = {
 	PHP_FE(fileatime,								NULL)
@@ -481,7 +481,8 @@ function_entry php3_filestat_functions[] = {
 
 
 php3_module_entry php3_filestat_module_entry = {
-	"PHP_filestat", php3_filestat_functions, NULL, NULL, php3_init_filestat, php3_shutdown_filestat, NULL, STANDARD_MODULE_PROPERTIES
+	"PHP_filestat", php3_filestat_functions, NULL, NULL, PHP_RINIT(filestat),
+					PHP_RSHUTDOWN(filestat), NULL, STANDARD_MODULE_PROPERTIES
 };
 
 /*
