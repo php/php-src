@@ -259,8 +259,10 @@ PHP_MINIT_FUNCTION(ps_mm)
 
 	memcpy(ps_mm_path, PS(save_path), len + 1);
 
-	if (len > 0 && ps_mm_path[len - 1] != DEFAULT_DIR_SEPARATOR)
-		strcat(ps_mm_path, DEFAULT_DIR_SEPARATOR);
+	if (len > 0 && ps_mm_path[len - 1] != DEFAULT_SLASH) {
+		ps_mm_path[len] = DEFAULT_SLASH;
+		ps_mm_path[len+1] = '\0';
+	}
 
 	strcat(ps_mm_path, PS_MM_FILE);
 
