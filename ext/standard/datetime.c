@@ -540,7 +540,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_ZONE
 				strcat(Z_STRVAL_P(return_value), ta->tm_zone);
 #elif HAVE_TZNAME
-				strcat(Z_STRVAL_P(return_value), tname[0]);
+				strcat(Z_STRVAL_P(return_value), ta->tm_isdst ? tname[1] : tname[0]);
 #endif
 				break;
 			case 'B':	/* Swatch Beat a.k.a. Internet Time */
