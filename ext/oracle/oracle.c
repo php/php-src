@@ -601,9 +601,8 @@ PHP_FUNCTION(ora_close)
 	if (zend_get_parameters_ex(1, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
+	ZEND_FETCH_RESOURCE(cursor, oraCursor *, arg, -1, "Oracle-Cursor", le_cursor);
 
-	if (ZEND_FETCH_RESOURCE(cursor, oraCursor *, arg, -1, "Oracle-Cursor", le_cursor) == NULL)
-		RETURN_FALSE;
 	zend_list_delete((*arg)->value.lval);
 
 	RETURN_TRUE;
