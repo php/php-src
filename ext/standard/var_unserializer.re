@@ -91,7 +91,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 
 /*!re2c
 iv = [+-]? [0-9]+;
-nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]+);
+nv = [+-]? ([0-9]* "." [0-9]+|[0-9]+ "." [0-9]*);
 nvexp = (iv | nv) [eE] [+-]? iv;
 any = [\000-\277];
 */
@@ -394,7 +394,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	elements = object_common1(UNSERIALIZE_PASSTHRU, ce);
 
 	if (incomplete_class) {
-		php_store_class_name(*rval, class_name, len2);
+		php_store_class_name(*rval, class_name, len2 TSRMLS_CC);
 		efree(class_name);
 	}
 
