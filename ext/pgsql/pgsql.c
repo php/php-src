@@ -1116,7 +1116,7 @@ PHP_FUNCTION(pg_field_num)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result(resource result, [int row_number,] mixed field_name)
+/* {{{ proto mixed pg_fetch_result(resource result, [int row_number,] mixed field_name)
    Returns values from a result identifier */
 PHP_FUNCTION(pg_fetch_result)
 {
@@ -1923,7 +1923,7 @@ PHP_FUNCTION(pg_lo_export)
 }
 /* }}} */
 
-/* {{{ proto bool pg_lo_lseek(resource large_object, int offset[, int whence])
+/* {{{ proto bool pg_lo_lseek(resource large_object, int offset [, int whence])
    Seeks position of large object */
 PHP_FUNCTION(pg_lo_seek)
 {
@@ -2490,7 +2490,7 @@ void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 }
 /* }}} */
 
-/* {{{ proto bool pg_cancel_request(resource connection)
+/* {{{ proto bool pg_cancel_query(resource connection)
    Cancel request */
 PHP_FUNCTION(pg_cancel_query)
 {
@@ -2498,7 +2498,7 @@ PHP_FUNCTION(pg_cancel_query)
 }
 /* }}} */
 
-/* {{{ proto query bool pg_connection_busy(resource connection)
+/* {{{ proto bool pg_connection_busy(resource connection)
    Get connection is busy or not */
 PHP_FUNCTION(pg_connection_busy)
 {
@@ -2592,7 +2592,7 @@ PHP_FUNCTION(pg_get_result)
 }
 /* }}} */
 
-/* {{{ proto query int pg_result_status(resource result)
+/* {{{ proto int pg_result_status(resource result)
    Get status of query result */
 PHP_FUNCTION(pg_result_status)
 {
