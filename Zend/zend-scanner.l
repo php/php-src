@@ -1441,7 +1441,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	return T_CHARACTER;
 }
 
-<ST_DOUBLE_QUOTES,ST_BACKQUOTE>"\\". {
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"\\". {
 	switch (yytext[1]) {
 		case 'n':
 			zendlval->value.chval='\n';
@@ -1468,12 +1468,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 			return T_BAD_CHARACTER;
 			break;
 	}
-	return T_CHARACTER;
-}
-
-
-<ST_HEREDOC>"\\$"|"\\{" {
-	zendlval->value.chval = yytext[1];
 	return T_CHARACTER;
 }
 
@@ -1515,6 +1509,6 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	
 
 
-<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE>. {
+<ST_IN_SCRIPTING,INITIAL,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_SINGLE_QUOTE,ST_HEREDOC>. {
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d",yytext[0],yytext[0],YYSTATE);
 }
