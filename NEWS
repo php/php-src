@@ -1,15 +1,15 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 5.0.0
+- Moved extensions to PECL (http://pear.php.net/): (James, Tal)
+  . ext/fribidi
 - Fixed bug #22386 (Using browscap causes segfault). This fix
   also adds an optional bool argument to get_browser() that
   makes the return value an array instead of an object. (jay)
-- Moved extensions to PECL (http://pear.php.net/): (James, Tal)
-  . ext/fribidi
-- Fixed bug #21600 (Assign by reference function call changes variable contents).
-  (Zeev)
 - Fixed bug #22059 (ftp_chdir causes segfault). (Sara)
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
+- Fixed bug #21600 (Assign by reference function call changes variable contents).
+  (Zeev)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
 - Changed the length parameter in fgetss() to be optional. (Moriyoshi)
