@@ -1,3 +1,53 @@
+2002-02-12  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Fix entry
+
+2002-02-12  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/DB/mysql.php:
+     - added default case for mysql_select_db error handling. It throws a
+     - DB_ERROR (unknown error) in the default case.
+
+    * pear/DB.php
+      pear/DB/mysql.php:
+     - added support for different error messages for the following cases:
+     -
+     - if a user with unsufficient permissions trys to select a database
+     - PEAR::DB previously threw a "no database selected" error  instead
+     - of a more proper "insufficient permissions". This is fixed now.
+     -
+     - if a user selects a nonexistant database PEAR::DB threw a
+     - "no database selected" error instead of "no such database".
+     - This is fixed as well.
+     -
+     - I added two new constants to DB.php and a simple case construct to
+     - DB/mysql.php which can be easily extended to achive the above. I
+     - hope this is ok.
+     - Thanks to Till Gerken for mentioning this.
+
+2002-02-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Fix-up.
+
+2002-02-12  Sascha Schumann  <sascha@schumann.cx>
+
+    * main/network.c: Irix defines AF_INET6, but lacks IPv6 support, including
+    struct sockaddr_in6.
+
+2002-02-12  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c: Initialize automatic persistent connection reset flag
+
+2002-02-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.h
+      ext/pcre/php_pcre.c:
+    Fix a long-standing infelicity that resulted in extra regex information
+    not being passed to PCRE functions.
+
+    * ext/pcre/php_pcre.h
+      ext/pcre/php_pcre.c: Expose pcre_get_compiled_regex as an API function.
+
 2002-02-11  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
 
     * ext/msession/msession.c: Added one more tweak for 4.0.x compatibility.
