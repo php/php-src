@@ -2216,7 +2216,7 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 	}
 
 	if (i < dst->sx) {
-		gdImageSetPixel (dst, i, uRow, pxlLeft);
+		gdImageSetPixel (dst, i, uRow, clrBack);
 	}
 
 	pxlOldLeft  = clrBack;
