@@ -227,9 +227,9 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC)
 {
-	zval * subitem;
-	int i;
-	char * sn, * ln;
+	zval *subitem, *subentries;
+	int i, j = -1, last = -1, obj_cnt = 0;
+	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
 	ASN1_STRING * str;
@@ -241,14 +241,39 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
-		str = X509_NAME_ENTRY_get_data(ne);
 		nid = OBJ_obj2nid(obj);
+		obj_cnt = 0;
+
 		if (shortname) {
-			sn = (char*)OBJ_nid2sn(nid);
-			add_assoc_stringl(subitem, sn, str->data, str->length, 1);
+			sname = (char *) OBJ_nid2sn(nid);
 		} else {
-			ln = (char*)OBJ_nid2ln(nid);
-			add_assoc_stringl(subitem, ln, str->data, str->length, 1);
+			sname = (char *) OBJ_nid2ln(nid);
+		}
+
+		MAKE_STD_ZVAL(subentries);
+		array_init(subentries);
+
+		last = -1;
+		for (;;) {
+			j = X509_NAME_get_index_by_OBJ(name, obj, last);
+			if (j < 0) {
+				if (last != -1) break;
+			} else {
+				obj_cnt++;
+				ne  = X509_NAME_get_entry(name, j);
+				str = X509_NAME_ENTRY_get_data(ne);
+				add_next_index_stringl(subentries, str->data, str->length, 1);
+			}
+			last = j;
+		}
+		i = last;
+		
+		if (obj_cnt > 1) {
+			add_assoc_zval_ex(subitem, sname, strlen(sname) + 1, subentries);
+		} else {
+			zval_dtor(subentries);
+			FREE_ZVAL(subentries);
+			add_assoc_stringl(subitem, sname, str->data, str->length, 1);
 		}
 	}
 	zend_hash_update(HASH_OF(val), key, strlen(key) + 1, (void *)&subitem, sizeof(subitem), NULL);
