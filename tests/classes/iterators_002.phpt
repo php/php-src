@@ -78,42 +78,39 @@ c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:0:0
 c_iter::__destruct
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:1:0
 c_iter::__destruct
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:2:0
 c_iter::__destruct
+c_iter::next
 c_iter::hasMore = false
 c_iter::__destruct
 c::__destruct

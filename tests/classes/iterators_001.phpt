@@ -111,18 +111,18 @@ c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:1
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:2
+c_iter::next
 c_iter::hasMore = false
 ===foreach/rec===
 c::getIterator
@@ -130,69 +130,69 @@ c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:0:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:0:1
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:0:2
+c_iter::next
 c_iter::hasMore = false
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:1:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:1:1
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:1:2
+c_iter::next
 c_iter::hasMore = false
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:2:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:2:1
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 double:2:2
+c_iter::next
 c_iter::hasMore = false
+c_iter::next
 c_iter::hasMore = false
 ===foreach/key===
 c::getIterator
@@ -200,17 +200,17 @@ c_iter::__construct
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:1st=>0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:2nd=>1
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
 c_iter::key
-c_iter::next
 object:3rd=>2
+c_iter::next
 c_iter::hasMore = false
 Done

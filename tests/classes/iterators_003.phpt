@@ -77,43 +77,40 @@ c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 continue outer
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 double:1:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 continue inner
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 break inner
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 c::getIterator
 c_iter::__construct
 c_iter::rewind
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 double:2:0
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 continue inner
+c_iter::next
 c_iter::hasMore = true
 c_iter::current
-c_iter::next
 break inner
 break outer
 Done
