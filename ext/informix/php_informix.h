@@ -119,7 +119,6 @@ typedef struct {
 	long num_links,num_persistent;
 	long max_links,max_persistent;
 	long allow_persistent;
-	int le_result,le_link,le_plink,le_idresult;
 	char *default_host, *default_user, *default_password;
 	int connectionid;
 	int cursorid;
@@ -132,6 +131,15 @@ typedef struct {
         char *nullvalue;     /* "" */
         char *nullstring;    /* "NULL" */
 } php_ifx_globals;           /* formerly "ifx_module" in the php3 version */
+
+typedef struct {
+	int le_result;
+        int le_link;
+        int le_plink;
+        int le_idresult;
+} php_ifx_listids;
+
+#define IFXL(v) (ifx_listids.v)
 
 #ifndef ZTS
 extern php_ifx_globals ifx_globals;
