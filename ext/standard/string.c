@@ -2602,7 +2602,7 @@ PHP_FUNCTION(str_pad)
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	int    pad_str_len = 1;		/* Length of the padding string */
 	int	   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
-	int	   i, left_pad, right_pad;
+	int	   i, left_pad=0, right_pad=0;
 
 
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 4 ||
