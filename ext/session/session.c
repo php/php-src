@@ -108,7 +108,7 @@ static PHP_INI_MH(OnUpdateStringCopy)
 
 	p = (char **) (base+(size_t) mh_arg1);
 
-	if (*p && entry->modified) {
+	if (*p && stage != PHP_INI_STAGE_STARTUP) {
 		STR_FREE(*p);
 	}
 
