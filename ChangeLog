@@ -1,3 +1,36 @@
+2002-05-18  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    - delete attributes as well in php_free_xml_node
+    - more consistent naming in phpinfo()
+
+    * ext/domxml/php_domxml.c: added "domxml API version" in phpinfo() output.
+
+    * ext/domxml/php_domxml.c:
+    MFH for memleak fixes in domxml_dump_mem and domxml_html_dump_mem
+
+    * ext/domxml/php_domxml.c: mem leak fix for domxml_dump_node
+
+    * ext/domxml/php_domxml.c: fixes memleak in html_dump_mem
+
+    * ext/domxml/php_domxml.c:
+    rename the object name for comment nodes to domcoment
+
+2002-05-18  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/standard/dir.c:
+    - Fix portability issues with empty results on Linux and FreeBSD, add safe_mode
+      check and simplify code.
+
+2002-05-18  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: MFH for memleak patch
+
+    * ext/domxml/php_domxml.c: WS fixes
+
+    * ext/domxml/php_domxml.c:
+    This should fix a big bad memory leak in freeing the nodes at script end.
+
 2002-05-17  Sascha Schumann  <sascha@schumann.cx>
 
     * sapi/thttpd/thttpd.c: Improve readability of the header send function
