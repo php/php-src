@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Fixed a problem under some versions of Windows that could cause PHP to hang
+  on startup if errors occured, e.g. in the php.ini file (Zeev)
 - Fixed opendir() again.  It should actually work well continuously now (Zeev)
 - Added three additional arguments to be sent to a user-defined error handler -
   the filename and line number in which the error occured, and the context

@@ -377,7 +377,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 #ifdef PHP_WIN32
 				if (type==E_CORE_ERROR || type==E_CORE_WARNING) {
-					MessageBox(NULL, buffer, error_type_str, MB_OK|MB_SERVICE_NOTIFICATION|MB_TOPMOST);
+					MessageBox(NULL, buffer, error_type_str, MB_OK|ZEND_SERVICE_MB_STYLE);
 				}
 #endif
 				snprintf(log_buffer, 1024, "PHP %s:  %s in %s on line %d", error_type_str, buffer, error_filename, error_lineno);
