@@ -79,6 +79,7 @@ static zend_function_entry php_domxmldoc_class_functions[] = {
 	PHP_FALIAS(dumpmem,	domxml_dumpmem,	NULL)
 	PHP_FALIAS(xpath_init, xpath_init, NULL)
 	PHP_FALIAS(xpath_new_context, xpath_new_context, NULL)
+	PHP_FALIAS(xptr_new_context, xpath_new_context, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -399,7 +400,7 @@ PHP_MINFO_FUNCTION(domxml)
 {
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
-	php_info_print_table_row(2, "DOM/XML Support", "enabled");
+	php_info_print_table_row(2, "DOM/XML, XPath, XPointer Support", "enabled");
 	php_info_print_table_row(2, "libmxl Version", LIBXML_DOTTED_VERSION );
 	php_info_print_table_end();
 }
@@ -410,7 +411,7 @@ PHP_FUNCTION(domxml_attrname)
 {
 	zval *id, **tmp;
 	int id_to_find;
-	xmlNode *nodep;
+	xmlNodePtr nodep;
 	xmlAttr *attr;
 	int type;
 	int ret;
@@ -422,23 +423,20 @@ PHP_FUNCTION(domxml_attrname)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
 	attr = nodep->properties;
 	if (!attr) {
 		RETURN_FALSE;
@@ -510,21 +508,18 @@ PHP_FUNCTION(domxml_lastchild)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 
 	last = nodep->last;
@@ -561,21 +556,18 @@ PHP_FUNCTION(domxml_parent)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 
 	last = nodep->parent;
@@ -608,28 +600,28 @@ PHP_FUNCTION(domxml_children)
 	if (ZEND_NUM_ARGS() == 0) {
 		id = getThis();
 		if (id) {
-			if ((zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) &&
-			    (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE)) {
-				php_error(E_WARNING, "unable to find my handle property");
-				RETURN_FALSE;
-			}
-			id_to_find = (*tmp)->value.lval;
+			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+				if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+					php_error(E_WARNING, "unable to find my handle property");
+					RETURN_FALSE;
+				} else 
+					ZEND_FETCH_RESOURCE(nodep,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
+			 } else 
+				ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if ((zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) &&
+		    (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE)) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || (type != le_domxmlnodep && type != le_domxmldocp)) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
 	/* Even if the nodep is a XML_DOCUMENT_NODE the type is at the
 	   same position.
 	*/
@@ -681,24 +673,21 @@ PHP_FUNCTION(domxml_getattr)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
-		convert_to_string(arg1);
 	} else if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &id, &arg1) == SUCCESS) {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-		convert_to_string(arg1);
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	} else {
 		WRONG_PARAM_COUNT;
 	}
 		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
+	convert_to_string(arg1);
 
 	value = xmlGetProp(nodep, arg1->value.str.val);
 	if (!value) {
@@ -718,7 +707,7 @@ PHP_FUNCTION(domxml_setattr)
 	xmlNode *nodep;
 	xmlAttr *attr;
 	int type;
-	
+
 	if ((ZEND_NUM_ARGS() == 2) && getParameters(ht, 2, &arg1, &arg2) == SUCCESS) {
 		id = getThis();
 		if (id) {
@@ -726,26 +715,22 @@ PHP_FUNCTION(domxml_setattr)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
-		convert_to_string(arg1);
-		convert_to_string(arg2);
 	} else if ((ZEND_NUM_ARGS() == 3) && getParameters(ht, 3, &id, &arg1, &arg2) == SUCCESS) {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-		convert_to_string(arg1);
-		convert_to_string(arg2);
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	} else {
 		WRONG_PARAM_COUNT;
 	}
 		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
+	convert_to_string(arg1);
+	convert_to_string(arg2);
 
 	attr = xmlSetProp(nodep, arg1->value.str.val, arg2->value.str.val);
 	if (!attr) {
@@ -770,24 +755,21 @@ PHP_FUNCTION(domxml_attributes)
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my node (%d)", id);
+				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find node identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 
 	if(0 > node_attributes(&return_value, nodep))
@@ -818,12 +800,12 @@ fprintf(stderr, "ATTRNAME = %s\n", attr->name);
 /* }}} */
 
 /* {{{ proto string domxml_rootnew([int doc])
-   Returns list of children nodes */
+   Returns root nodes */
 PHP_FUNCTION(domxml_rootnew)
 {
 	zval *id, **tmp;
 	int id_to_find;
-	xmlDoc *nodep;
+	xmlDoc *docp;
 	xmlNode *last;
 	int type;
 	int ret;
@@ -835,24 +817,21 @@ PHP_FUNCTION(domxml_rootnew)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	nodep = (xmlDoc *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 
-	last = nodep->children;
+	last = docp->children;
 	if (!last) {
 		RETURN_FALSE;
 	}
@@ -898,21 +877,18 @@ PHP_FUNCTION(domxml_root)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
-	if (!docp || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 
 	node = docp->children;
@@ -957,21 +933,18 @@ PHP_FUNCTION(domxml_intdtd)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
-	if (!docp || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 
 	dtd = docp->intSubset;
@@ -1010,21 +983,18 @@ PHP_FUNCTION(domxml_dumpmem)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
-	}
-		
-	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
-	if (!docp || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 
 	xmlDocDumpMemory(docp, &mem, &size);
@@ -1111,7 +1081,7 @@ PHP_FUNCTION(domxml_new_child)
 	xmlNode *child, *nodep;
 	int type;
 	int ret;
-	
+
 	if (ZEND_NUM_ARGS() == 2) {
 		id = getThis();
 		if (id) {
@@ -1119,7 +1089,7 @@ PHP_FUNCTION(domxml_new_child)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 			if(getParameters(ht, 2, &name, &content) == FAILURE)
 				WRONG_PARAM_COUNT;
 		} else {
@@ -1128,18 +1098,15 @@ PHP_FUNCTION(domxml_new_child)
 	} else if ((ZEND_NUM_ARGS() != 3) || getParameters(ht, 3, &id, &name, &content) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if (zend_hash_find(id->value.obj.properties, "node", sizeof("node"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(nodep,xmlNodePtr,tmp,-1, "DomNode", le_domxmlnodep)
 	}
 	convert_to_string(name);
 	convert_to_string(content);
 		
-	nodep = (xmlNode *)zend_list_find(id_to_find, &type);
-	if (!nodep || type != le_domxmlnodep) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
 	if(content->value.str.len)
 		child = xmlNewChild(nodep, NULL, name->value.str.val, content->value.str.val);
 	else
@@ -1178,7 +1145,7 @@ PHP_FUNCTION(domxml_add_root)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 			if (getParameters(ht, 1, &name) == FAILURE)
 				WRONG_PARAM_COUNT;
 		} else {
@@ -1187,17 +1154,14 @@ PHP_FUNCTION(domxml_add_root)
 	} else if ((ZEND_NUM_ARGS() != 2) || getParameters(ht, 2, &id, &name) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 	convert_to_string(name);
 		
-	docp = (xmlDoc *)zend_list_find(id_to_find, &type);
-	if (!docp || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
 	node = xmlNewDocNode(docp, NULL, name->value.str.val, NULL);
 	if (!node) {
 		RETURN_FALSE;
@@ -1345,10 +1309,11 @@ static int node_children(zval **children, xmlNode *nodep)
 
 	while(last) {
 		zval *child;
+		int ret;
 
 		/* Each child is a node object */
 		MAKE_STD_ZVAL(child);
-/*		ret = zend_list_insert(last, le_domxmlnodep); */
+		ret = zend_list_insert(last, le_domxmlnodep);
 
 		/* construct a node object for each child */
 		object_init_ex(child, domxmlnode_class_entry_ptr);
@@ -1361,7 +1326,7 @@ static int node_children(zval **children, xmlNode *nodep)
 		add_property_long(child, "type", last->type);
 		if(last->content)
 			add_property_stringl(child, "content", (char *) last->content, strlen(last->content), 1);
-/*		add_property_resource(child, "node", ret); */
+		add_property_resource(child, "node", ret);
 
 		/* Get the namespace of the current node and add it as a property */
 /*		if(!node_namespace(&namespace, last))
@@ -1485,23 +1450,20 @@ static void php_xpathptr_new_context(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				php_error(E_WARNING, "unable to find my handle property");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 		} else {
 			RETURN_FALSE;
 		}
 	} else if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if (zend_hash_find(id->value.obj.properties, "doc", sizeof("doc"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my handle property");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(docp,xmlDocPtr,tmp,-1, "DomDocument", le_domxmldocp)
 	}
 		
-	docp = (xmlDocPtr) zend_list_find(id_to_find, &type);
-	if (!docp || type != le_domxmldocp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
-
 #if defined(LIBXML_XPTR_ENABLED)
 	if(mode == PHP_XPTR)
 		ctx = xmlXPtrNewContext(docp, NULL, NULL);
@@ -1547,10 +1509,11 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 		id = getThis();
 		if (id) {
 			if (zend_hash_find(id->value.obj.properties, "xpathctx", sizeof("xpathctx"), (void **)&tmp) == FAILURE) {
-				php_error(E_WARNING, "unable to find my handle property");
+				php_error(E_WARNING, "unable to find my xpath context");
 				RETURN_FALSE;
 			}
-			id_to_find = (*tmp)->value.lval;
+			ZEND_FETCH_RESOURCE(ctxp,xmlXPathContextPtr,tmp,-1, "XPathContext", le_xpathctxp)
+//			id_to_find = (*tmp)->value.lval;
 			if (getParameters(ht, 1, &str) == FAILURE)
 				WRONG_PARAM_COUNT;
 		} else {
@@ -1559,16 +1522,13 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 	} else if ((ZEND_NUM_ARGS() != 2) || getParameters(ht, 2, &id, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	} else {
-		convert_to_long(id);
-		id_to_find = id->value.lval;
+		if (zend_hash_find(id->value.obj.properties, "xpathctx", sizeof("xpathctx"), (void **)&tmp) == FAILURE) {
+			php_error(E_WARNING, "unable to find my own xpath context");
+			RETURN_FALSE;
+		}
+		ZEND_FETCH_RESOURCE(ctxp,xmlXPathContextPtr,tmp,-1, "XPathContext", le_xpathctxp)
 	}
 	convert_to_string(str);
-
-	ctxp = (xmlXPathContextPtr) zend_list_find(id_to_find, &type);
-	if (!ctxp || type != le_xpathctxp) {
-		php_error(E_WARNING, "unable to find identifier (%d)", id_to_find);
-		RETURN_FALSE;
-	}
 
 #if defined(LIBXML_XPTR_ENABLED)
 	if(mode == PHP_XPTR) {
@@ -1602,6 +1562,7 @@ static void php_xpathptr_eval(INTERNAL_FUNCTION_PARAMETERS, int mode, int expr)
 			zval *arr;
 			xmlNodeSetPtr nodesetp;
 
+			MAKE_STD_ZVAL(arr);
 			if (array_init(arr) == FAILURE) {
 				xmlXPathFreeObject(xpathobjp);
 				RETURN_FALSE;
