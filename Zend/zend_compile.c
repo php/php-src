@@ -88,13 +88,14 @@ void shutdown_compiler(CLS_D)
 }
 
 
-ZEND_API void zend_set_compiled_filename(char *new_compiled_filename)
+ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename)
 {
 	char *p = estrdup(new_compiled_filename);
 	CLS_FETCH();
 
 	zend_llist_add_element(&CG(filenames_list), &p);
 	CG(compiled_filename) = p;
+	return p;
 }
 
 

@@ -200,7 +200,7 @@ int lex_scan(zval *zendlval CLS_DC);
 void startup_scanner(CLS_D);
 void shutdown_scanner(CLS_D);
 
-ZEND_API void zend_set_compiled_filename(char *new_compiled_filename);
+ZEND_API char *zend_set_compiled_filename(char *new_compiled_filename);
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename);
 ZEND_API char *zend_get_compiled_filename();
 
