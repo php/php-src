@@ -21,6 +21,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "php_config.h"
 #include "reg.h"
 #include "html.h"
 #include "php_string.h"
