@@ -18,7 +18,6 @@ PHPAPI HRESULT php_COM_invoke(i_dispatch *obj, DISPID dispIdMember, WORD wFlags,
 PHPAPI HRESULT php_COM_get_ids_of_names(i_dispatch *obj, OLECHAR FAR* FAR* rgszNames, DISPID FAR* rgDispId);
 PHPAPI HRESULT php_COM_release(i_dispatch *obj);
 PHPAPI HRESULT php_COM_addref(i_dispatch *obj);
-PHPAPI int php_COM_check_ref(i_dispatch *obj);
 PHPAPI HRESULT php_COM_set(i_dispatch *obj, IDispatch FAR* pDisp, int cleanup);
 PHPAPI HRESULT php_COM_clone(i_dispatch *obj, i_dispatch *clone, int cleanup);
 

@@ -67,11 +67,12 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 				/* fetch the IDispatch interface */
 				zend_hash_index_find(pval_arg->value.obj.properties, 0, (void **) &idispatch_handle);
 				obj = (i_dispatch *)zend_list_find((*idispatch_handle)->value.lval, &type);
-				if(!obj || (type != php_COM_get_le_idispatch()))
+				if(!obj || (type != php_COM_get_le_idispatch()) || !obj->referenced)
+				{
 					var_arg->vt = VT_EMPTY;
+				}
 				else
 				{
-					php_COM_check_ref(obj);
 					var_arg->vt = VT_DISPATCH;
 					var_arg->pdispVal = obj->i.dispatch;
 				}
@@ -83,7 +84,12 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage)
 		case IS_RESOURCE:
 		case IS_CONSTANT:
 		case IS_CONSTANT_ARRAY:
+			var_arg->vt = VT_EMPTY;
+			break;
+
 		case IS_ARRAY:
+			//check if assoc or not 
+
 			var_arg->vt = VT_EMPTY;
 			break;
 
@@ -192,7 +198,9 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 		case VT_UNKNOWN:
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
+			{
 				var_arg->vt = VT_EMPTY;
+			}
 			else
 			{
 				HRESULT hr;
@@ -205,14 +213,18 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 					var_arg->vt = VT_EMPTY;
 				}
 				else
+				{
 					var_arg->vt	= VT_UNKNOWN;
+				}
 			}
 			break;
 
 		case VT_DISPATCH:
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
+			{
 				var_arg->vt = VT_EMPTY;
+			}
 			break;
 
 		case VT_UI1|VT_BYREF:
@@ -283,7 +295,9 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 		case VT_UNKNOWN|VT_BYREF:
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
+			{
 				var_arg->vt = VT_EMPTY;
+			}
 			else
 			{
 				HRESULT hr;
@@ -296,22 +310,30 @@ PHPAPI void php_pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, pval *pval_
 					var_arg->vt = VT_EMPTY;
 				}
 				else
+				{
 					var_arg->vt	= VT_UNKNOWN|VT_BYREF;
+				}
 			}
 			break;
 
 		case VT_DISPATCH|VT_BYREF:
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != VT_DISPATCH)
+			{
 				var_arg->vt = VT_EMPTY;
+			}
 			else
+			{
 				var_arg->vt	|= VT_BYREF;
+			}
 			break;
 
 		case VT_VARIANT|VT_BYREF:
 			php_pval_to_variant(pval_arg, var_arg, codepage);
 			if(var_arg->vt != (VT_VARIANT | VT_BYREF))
+			{
 				var_arg->vt = VT_EMPTY;
+			}
 			break;
 
 		case VT_I1:
@@ -380,45 +402,65 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 
 		case VT_UI1:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->pbVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->bVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_I2:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long )*(var_arg->piVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->iVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_I4:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = *(var_arg->plVal);
+			}
 			else
+			{
 				pval_arg->value.lval = var_arg->lVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_R4:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.dval = (double)*(var_arg->pfltVal);
+			}
 			else
+			{
 				pval_arg->value.dval = (double) var_arg->fltVal;
+			}
 
 			pval_arg->type = IS_DOUBLE;
 			break;
 
 		case VT_R8:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.dval = *(var_arg->pdblVal);
+			}
 			else
+			{
 				pval_arg->value.dval = var_arg->dblVal;
+			}
 
 			pval_arg->type = IS_DOUBLE;
 			break;
@@ -442,24 +484,40 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 
 		case VT_CY:
 			if(var_arg->vt & VT_BYREF)
+			{
 				VarR8FromCy(var_arg->cyVal, &(pval_arg->value.dval));
+			}
 			else
+			{
 				VarR8FromCy(*(var_arg->pcyVal), &(pval_arg->value.dval));
+			}
 
 			pval_arg->type = IS_DOUBLE;
 			break;
 
 		case VT_BOOL:
 			if(var_arg->vt & VT_BYREF)
+			{
 				if(*(var_arg->pboolVal) & 0xFFFF)
+				{
 					pval_arg->value.lval = 1;
+				}
 				else
+				{
 					pval_arg->value.lval = 0;
+				}
+			}
 			else
+			{
 				if(var_arg->boolVal & 0xFFFF)
-				pval_arg->value.lval = 1;
-			else
-				pval_arg->value.lval = 0;
+				{
+					pval_arg->value.lval = 1;
+				}
+				else
+				{
+					pval_arg->value.lval = 0;
+				}
+			}
 
 			pval_arg->type = IS_BOOL;
 			break;
@@ -508,13 +566,25 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 				pval_arg->type = IS_LONG;
 			}
 			break;
+
 		case VT_UNKNOWN:
+			if(var_arg->punkVal == NULL)
+			{
+				pval_arg->type = IS_NULL;
+			}
+			else
+			{
+				HRESULT hr;
 
-			//IDispatch holen und dann weiterfiechen
-			//wtf ??
-			var_arg->pdispVal->lpVtbl->Release(var_arg->pdispVal);
-			/* break missing intentionally */
+				hr = var_arg->punkVal->lpVtbl->QueryInterface(var_arg->punkVal, &IID_IDispatch, &(var_arg->pdispVal));
 
+				if(FAILED(hr))
+				{
+					php_error(E_WARNING,"can't query IUnknown");
+					var_arg->pdispVal = NULL;
+				}
+			}
+			/* break missing intentionaly */
 		case VT_DISPATCH: {
 				pval *handle;
 				i_dispatch *obj;
@@ -546,45 +616,65 @@ PHPAPI void php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int persistent
 			break;
 		case VT_I1:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->pcVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->cVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UI2:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->puiVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->uiVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UI4:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->pulVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->ulVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_INT:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->pintVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->intVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
 
 		case VT_UINT:
 			if(var_arg->vt & VT_BYREF)
+			{
 				pval_arg->value.lval = (long)*(var_arg->puintVal);
+			}
 			else
+			{
 				pval_arg->value.lval = (long) var_arg->uintVal;
+			}
 
 			pval_arg->type = IS_LONG;
 			break;
@@ -652,7 +742,9 @@ PHPAPI char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int per
 	}
 
 	if(out_length)
+	{
 		*out_length = length;
+	}
 
 	return C_str;
 }
