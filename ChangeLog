@@ -1,3 +1,21 @@
+2003-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Removed entry that is in the PHP_4_3 branch..
+
+    * NEWS:
+      reorder
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2003-04-07  Sara Golemon  <php@alphaweb.net>
+
+    * NEWS
+      ext/standard/http_fopen_wrapper.c:
+      Introduce support for context options 'method', 'header', 'content'
+
 2003-04-06  Jani Taskinen  <sniper@iki.fi>
 
     * (PHP_4_3)
