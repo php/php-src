@@ -232,6 +232,7 @@ static const mbfl_language *mbfl_language_ptr_table[] = {
 	&mbfl_language_english,
 	&mbfl_language_german,
 	&mbfl_language_russian,
+	&mbfl_language_neutral,
 	NULL
 };
 
