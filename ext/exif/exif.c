@@ -521,7 +521,7 @@ static void ExtractThumbnail(ImageInfoType *ImageInfo, char *OffsetBase, unsigne
 		return;
 	} else {
 		/* Check to make sure we are not going to go past the ExifLength */
-		if (ImageInfo->ThumbnailOffset + ImageInfo->ThumbnailSize > ExifLength) {
+		if ((unsigned)(ImageInfo->ThumbnailOffset + ImageInfo->ThumbnailSize) > ExifLength) {
 			php_error(E_WARNING,"Thumbnail goes beyond exif header boundary");
 			return;
 		} else {
@@ -1038,7 +1038,7 @@ void DiscardData(Section_t *Sections, int *SectionsRead)
 */
 int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections, 
 				  int *SectionsRead, char *FileName, 
-				  int ReadAll, char *LastExifRefd)
+				  int ReadAll, char *LastExifRefd TSRMLS_DC)
 {
     FILE *infile;
     int ret;
@@ -1097,7 +1097,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
 
 /* {{{ php_read_jpeg_exif
  */
-int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
+int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll TSRMLS_DC)
 {
 	Section_t Sections[20];
 	int SectionsRead;
@@ -1107,7 +1107,7 @@ int php_read_jpeg_exif(ImageInfoType *ImageInfo, char *FileName, int ReadAll)
 
 	ImageInfo->MotorolaOrder = 0;
 
-    ret = ReadJpegFile(ImageInfo, Sections, &SectionsRead, FileName, ReadAll, LastExifRefd); 
+    ret = ReadJpegFile(ImageInfo, Sections, &SectionsRead, FileName, ReadAll, LastExifRefd TSRMLS_CC); 
 	/*
 	 * Thought this might pick out the embedded thumbnail, but it doesn't work.   -RL
     for (i=0;i<SectionsRead-1;i++) {
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(read_exif_data)
 		readall = Z_LVAL_PP(p_readall);
 	}
 
-	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name), readall);
+	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name), readall TSRMLS_CC);
 
 	if (ret==FALSE || array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
