@@ -157,16 +157,17 @@ void zend_shutdown_timeout_thread();
 
 static inline void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, zval **value_ptr_ptr, temp_variable *Ts ELS_DC)
 {
-	zval *variable_ptr = *variable_ptr_ptr;
+	zval *variable_ptr;
 	zval *value_ptr;
-	
 
-	if (!value_ptr_ptr) {
-		zend_error(E_ERROR, "Cannot create references to string offsets nor overloaded objects");
+	if (!value_ptr_ptr || !variable_ptr_ptr) {
+		zend_error(E_ERROR, "Cannot create references to/from string offsets nor overloaded objects");
 		return;
 	}
 
+	variable_ptr = *variable_ptr_ptr;
 	value_ptr = *value_ptr_ptr;
+
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
 /*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
