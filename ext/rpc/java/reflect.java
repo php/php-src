@@ -45,6 +45,7 @@ public class reflect {
   private static native void setResultFromObject(long result, Object value);
   private static native void setResultFromArray(long result);
   private static native long nextElement(long array);
+  private static native long hashUpdate(long array, byte key[]);
   private static native void setException(long result, byte value[]);
   public  static native void setEnv();
 
@@ -79,6 +80,15 @@ public class reflect {
       setResultFromArray(result);
       for (int i=0; i<length; i++) {
         setResult(nextElement(result), Array.get(value, i));
+      }
+
+    } else if (value instanceof java.util.Hashtable) {
+
+      Hashtable ht = (Hashtable) value; 
+      setResultFromArray(result);
+      for (Enumeration e = ht.keys(); e.hasMoreElements(); ) {
+        Object key = e.nextElement();
+        setResult(hashUpdate(result, key.toString().getBytes()), ht.get(key));
       }
 
     } else {
