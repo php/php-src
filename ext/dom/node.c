@@ -154,8 +154,7 @@ int dom_node_node_value_read(dom_object *obj, zval **retval TSRMLS_DC)
 	char *str = NULL;
 
 	nodep = dom_object_get_node(obj);
-/* TODO: Element node is invalid for this property -
-currently here as a convience method while developing */
+	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
 		case XML_TEXT_NODE:
@@ -193,7 +192,9 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 	nodep = dom_object_get_node(obj);
 
+	/* Access to Element node is implemented as a convience method */
 	switch (nodep->type) {
+		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
 			if (nodep->children) {
 				node_list_unlink(nodep->children TSRMLS_CC);
@@ -202,7 +203,6 @@ int dom_node_node_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-		case XML_ELEMENT_NODE:
 			convert_to_string(newval);
 			xmlNodeSetContentLen(nodep, Z_STRVAL_P(newval), Z_STRLEN_P(newval) + 1);
 			break;
