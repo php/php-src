@@ -15,6 +15,7 @@
 /* Include stuff ************************************************************ */
 #include <winsock.h>
 #include <time.h>
+#include <php.h>
 
 /* Struct stuff ************************************************************* */
 struct timezone {
@@ -34,10 +35,10 @@ struct itimerval {
 #define ITIMER_PROF    2		/*generates sigprof */
 
 /* Prototype stuff ********************************************************** */
-extern int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info);
+PHPAPI extern int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info);
 
 /* setitimer operates at 100 millisecond resolution */
-extern int setitimer(int which, const struct itimerval *value,
+PHPAPI extern int setitimer(int which, const struct itimerval *value,
 					 struct itimerval *ovalue);
 
 #endif
