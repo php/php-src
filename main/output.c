@@ -119,7 +119,7 @@ PHPAPI int php_ob_default_buffer_size(TSRMLS_D)
 {
 	uint buffer_size = (uint)(PG(output_buffering) > 1 ? PG(output_buffering) : 4096);
 	if (OG(ob_nesting_level)==0 && PG(double_buffering)!=0) {
-		buffer_size = (uint)(PG(double_buffering) >= buffer_size ? PG(double_buffering) : 4*buffer_size);
+		buffer_size = (uint)(PG(double_buffering)) >= buffer_size ? (uint)(PG(double_buffering)) : 4*buffer_size;
 	}
 	return buffer_size;
 }
