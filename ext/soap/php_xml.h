@@ -30,6 +30,9 @@
 #define node_is_equal(node, name) node_is_equal_ex(node, name, NULL)
 #define attr_is_equal(node, name) attr_is_equal_ex(node, name, NULL)
 
+xmlDocPtr soap_xmlParseFile(const char *filename);
+xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size);
+
 xmlNsPtr attr_find_ns(xmlAttrPtr node);
 xmlNsPtr node_find_ns(xmlNodePtr node);
 int attr_is_equal_ex(xmlAttrPtr node, char *name, char *ns);
@@ -40,8 +43,6 @@ xmlNodePtr get_node_recursive_ex(xmlNodePtr node,char *name, char *ns);
 xmlNodePtr get_node_with_attribute_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 xmlNodePtr get_node_with_attribute_recursive_ex(xmlNodePtr node, char *name, char *name_ns, char *attribute, char *value, char *attr_ns);
 int parse_namespace(const char *inval,char **value,char **namespace);
-
-void cleanup_xml(xmlDocPtr doc);
 
 int php_stream_xmlIO_match_wrapper(const char *filename);
 void *php_stream_xmlIO_open_wrapper(const char *filename);

@@ -164,7 +164,7 @@ extern zend_module_entry soap_module_entry;
 #define soap_module_ptr &soap_module_entry
 #define phpext_soap_ptr soap_module_ptr
 
-ZEND_EXTERN_MODULE_GLOBALS(soap);
+ZEND_EXTERN_MODULE_GLOBALS(soap)
 
 #ifdef ZTS
 # define SOAP_GLOBAL(v) TSRMG(soap_globals_id, zend_soap_globals *, v)
