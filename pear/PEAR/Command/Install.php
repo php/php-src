@@ -335,7 +335,7 @@ package if needed.
             return $this->raiseError("Please supply the package you want to bundle");
         }
         $pkgfile = $params[0];
-
+        $need_download = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
             $need_download = true;
         } elseif (!@is_file($pkgfile)) {
