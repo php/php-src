@@ -1,3 +1,18 @@
+2003-11-07  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute_API.c:
+      Make __autoload() faster
+
+    * zend_execute.c
+      zend_iterators.h:
+      Update Iterators: Call next at the correct point in time.
+
+    * zend_compile.c:
+      Add missing initialization.
+
+    * zend_interfaces.h:
+      Make these class entries available for inheriting classes
+
 2003-11-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_operators.c:
