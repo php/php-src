@@ -187,7 +187,9 @@ function_entry sqlite_functions[] = {
 	PHP_FE(sqlite_seek, NULL)
 	PHP_FE(sqlite_rewind, NULL)
 	PHP_FE(sqlite_next, NULL)
+	PHP_FE(sqlite_prev, NULL)
 	PHP_FE(sqlite_has_more, NULL)
+	PHP_FE(sqlite_has_prev, NULL)
 	PHP_FE(sqlite_escape_string, NULL)
 	PHP_FE(sqlite_busy_timeout, NULL)
 	PHP_FE(sqlite_last_error, NULL)
@@ -232,7 +234,9 @@ function_entry sqlite_funcs_query[] = {
 	/* spl_forward */
 	PHP_ME_MAPPING(current, sqlite_current, NULL)
 	PHP_ME_MAPPING(next, sqlite_next, NULL)
+	PHP_ME_MAPPING(prev, sqlite_prev, NULL)
 	PHP_ME_MAPPING(has_more, sqlite_has_more, NULL)
+	PHP_ME_MAPPING(has_prev, sqlite_has_prev, NULL)
 	/* spl_sequence */
 	PHP_ME_MAPPING(rewind, sqlite_rewind, NULL)
 	/* additional */
@@ -2056,6 +2060,35 @@ PHP_FUNCTION(sqlite_has_more)
 }
 /* }}} */
 
+/* {{{ proto bool sqlite_has_prev(resource result)
+ * Returns whether a previous row is available. */
+PHP_FUNCTION(sqlite_has_prev)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+	zval *object = getThis();
+
+	if (object) {
+		if (ZEND_NUM_ARGS() != 0) {
+			WRONG_PARAM_COUNT
+		}
+		RES_FROM_OBJECT(res, object);
+	} else {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+			return;
+		}
+		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	}
+
+	if(!res->buffered) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "you cannot use sqlite_has_prev on unbuffered querys");
+		RETURN_FALSE;
+	}
+
+	RETURN_BOOL(res->curr_row); 
+}
+/* }}} */
+
 /* {{{ proto int sqlite_num_fields(resource result)
    Returns the number of fields in a result set. */
 PHP_FUNCTION(sqlite_num_fields)
@@ -2167,7 +2200,7 @@ PHP_FUNCTION(sqlite_rewind)
 	}
 
 	if (!res->buffered) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot seek an unbuffered result set");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot rewind an unbuffered result set");
 		RETURN_FALSE;
 	}
 	
@@ -2211,6 +2244,42 @@ PHP_FUNCTION(sqlite_next)
 	}
 
 	res->curr_row++;
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool sqlite_prev(resource result)
+ * Seek to the previous row number of a result set. */
+PHP_FUNCTION(sqlite_prev)
+{
+	zval *zres;
+	struct php_sqlite_result *res;
+	zval *object = getThis();
+
+	if (object) {
+		if (ZEND_NUM_ARGS() != 0) {
+			WRONG_PARAM_COUNT
+		}
+		RES_FROM_OBJECT(res, object);
+	} else {
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zres)) {
+			return;
+		}
+		ZEND_FETCH_RESOURCE(res, struct php_sqlite_result *, &zres, -1, "sqlite result", le_sqlite_result);
+	}
+
+	if (!res->buffered) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "you cannot use sqlite_prev on unbuffered querys");
+		RETURN_FALSE;
+	}
+
+	if (res->curr_row <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "no previous row available");
+		RETURN_FALSE;
+	}
+
+	res->curr_row--;
 
 	RETURN_TRUE;
 }
