@@ -40,7 +40,7 @@ $all_commands = PEAR_Command::getCommands();
 
 $argv = Console_Getopt::readPHPArgv();
 $progname = basename($argv[0]);
-$options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:v");
+$options = Console_Getopt::getopt($argv, "c:C:d:D:Gh?sSqu:vV");
 if (PEAR::isError($options)) {
     usage($options);
 }
@@ -108,6 +108,8 @@ foreach ($opts as $opt) {
         case 'q':
             $config->set('verbose', $config->get('verbose') - 1);
             break;
+        case 'V':
+            usage(null, 'version');
         default:
             // all non pear params goes to the command
             $cmdopts[$opt[0]] = $param;
@@ -220,7 +222,9 @@ function cmdHelp($command)
         "     -s         store user configuration\n".
         "     -S         store system configuration\n".
         "     -u foo     unset `foo' in the user configuration\n".
-        "     -h, -?     display help/usage (this message)\n";
+        "     -h, -?     display help/usage (this message)\n".
+        "     -V         version information\n";
+
     } elseif ($command == "shortcuts") {
         $sc = PEAR_Command::getShortcuts();
         $ret = "Shortcuts:\n";
@@ -228,6 +232,11 @@ function cmdHelp($command)
             $ret .= sprintf("     %-8s %s\n", $s, $c);
         }
         return $ret;
+
+    } elseif ($command == "version") {
+        $reg = &new PEAR_Registry($config->get('php_dir'));
+        return "PEAR " . $reg->packageInfo('PEAR', 'version');
+
     } elseif ($help = PEAR_Command::getHelp($command)) {
         if (is_string($help)) {
             return "pear $command [options] $help\n";
