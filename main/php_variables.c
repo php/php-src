@@ -152,11 +152,11 @@ PHPAPI void php_register_variable_ex(char *var, zval *val, pval *track_vars_arra
 				} else {
 					escaped_index = index;
 				}
-				if (zend_hash_find(symtable1, escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
+				if (zend_symtable_find(symtable1, escaped_index, index_len+1, (void **) &gpc_element_p)==FAILURE
 					|| Z_TYPE_PP(gpc_element_p) != IS_ARRAY) {
 					MAKE_STD_ZVAL(gpc_element);
 					array_init(gpc_element);
-					zend_hash_update(symtable1, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+					zend_symtable_update(symtable1, escaped_index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 				}
 				if (index!=escaped_index) {
 					efree(escaped_index);
@@ -182,7 +182,7 @@ plain_var:
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				zend_hash_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				zend_symtable_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
 			break;
 		}
@@ -498,20 +498,20 @@ static inline void php_register_server_variables(TSRMLS_D)
  */
 static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 {
-	zval		**src_entry, **dest_entry;
-	char		 *string_key;
-	uint		  string_key_len;
-	ulong		  num_key;
-	HashPosition 	  pos;
-	int		  key_type;
+	zval **src_entry, **dest_entry;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
+	HashPosition pos;
+	int key_type;
 
 	zend_hash_internal_pointer_reset_ex(src, &pos);
 	while (zend_hash_get_current_data_ex(src, (void **)&src_entry, &pos) == SUCCESS) {
 		key_type = zend_hash_get_current_key_ex(src, &string_key, &string_key_len, &num_key, 0, &pos);
-		if (Z_TYPE_PP(src_entry) != IS_ARRAY || 
-				(string_key_len && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) != SUCCESS) ||
-				(!string_key_len && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
-				|| Z_TYPE_PP(dest_entry) != IS_ARRAY) {
+		if (Z_TYPE_PP(src_entry) != IS_ARRAY
+			|| (key_type==HASH_KEY_IS_STRING && zend_hash_find(dest, string_key, string_key_len, (void **) &dest_entry) != SUCCESS)
+			|| (key_type==HASH_KEY_IS_LONG && zend_hash_index_find(dest, num_key, (void **)&dest_entry) != SUCCESS)
+			|| Z_TYPE_PP(dest_entry) != IS_ARRAY) {
 			(*src_entry)->refcount++;
 			if (key_type == HASH_KEY_IS_STRING) {
 				zend_hash_update(dest, string_key, strlen(string_key)+1, src_entry, sizeof(zval *), NULL);
