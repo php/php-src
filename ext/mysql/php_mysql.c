@@ -229,7 +229,6 @@ void timeout(int sig);
 static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_mysql_conn *link;
-	char	query[17];		/* Increase size if query length increases */
 	char	user[128];
 	char 	passwd[128];
 
@@ -252,14 +251,10 @@ static int _restore_connection_defaults(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 	/* rollback possible transactions */
-	memcpy(query, "ROLLBACK", sizeof("ROLLBACK"));
-	/* Binary safe query not required here */
-	mysql_query(&link->conn, query);
+	mysql_query(&link->conn, "ROLLBACK");
 
-	/* restore session variable "autocommit" to default (=1) */
-	memcpy(query, "SET AUTOCOMMIT=1", sizeof("SET AUTOCOMMIT=1"));
-	/* Binary safe query not required here */
-	mysql_query(&link->conn, query);
+	/* restore session variable "autocommit" to default (1) */
+	mysql_query(&link->conn, "SET AUTOCOMMIT=1");
 
 	/* unset the current selected db */
 #if MYSQL_VERSION_ID > 32329
