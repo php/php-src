@@ -2,11 +2,6 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
-- UDM_FIELD_ORDER and UDM_FIELD_CRC mnoGoSearch result fields
-  has been added. (gluke)
-- UDM_PARAM_WORDINFO mnoGoSearch result parameter has been added.
-  UDM_PARAM_RATING result field has neen added as alias for
-  UDM_PARAM_SCORE. (gluke)
 - Prefer random() over *rand48() (JimJag)
 - Sped up WDDX serialization 2x. (Andrei)
 - Added a new parameter to mail() which appends aditional command line
@@ -21,25 +16,17 @@ PHP 4.0                                                                    NEWS
 - Added PREG_SPLIT_DELIM_CAPTURE flag to preg_split() that allows for Perl-like
   functionality of capturing parenthesized delimiter expression. (Andrei)
 - Fixed strip_tags() to not strip a lone > character. (Rasmus)
-- Added new UDM_PARAM_STOPTABLE and UDM_PARAM_STOPFILE parameters
-  for Udm_Set_Agent_Params mnoGoSearch module. Now it can use stopwords
-  stored either in database or in the plain text files. Added php warnings.
-  Test example updated. (gluke)
 - When using the ob_gzhandler() PHP now automagically also sets the
   Content-Lengh correctly which enables browsers to use the HTTP
   Keep-Alive feature. (Thies)
-- UDM_PARAM_CHARSET parameter in Udm_Set_Agent_Param() has been added to
-  set local charset you are using. Example updated also. (gluke)
 - Improved handling of preg_replace() /F modifier so that it's possible to
   specify array($obj, 'method') construct as a replacement function. (Andrei)
 - Added mysql_get_client_info(), mysql_get_server_info(),
   mysql_get_proto_info(), and mysql_get_host_info() functions. (Sean)
-- Added search cache and track query features to mnogosearch extension.
-  (Sergey K)
 - Major change of the php pdf api. It could break some functions though
   backwards compatibility was tried to maintain. Adding some still
   missing functions as well. (Uwe)
-- mnoGoSearch extension module initial version has been added. (Sergey K)
+- Added mnoGoSearch extension. (Sergey K)
   This module currently at the alpha state, but it can be used already.
 - Allow url encoding in DB usernames and passwords (Stig, PEAR)
 - Added raiseError and setErrorHandling methods to PEAR class (Stig, PEAR)
