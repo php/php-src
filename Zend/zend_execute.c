@@ -3167,6 +3167,7 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 	zval *obj = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 	zend_class_entry *ce;
 	zend_function *clone;
+	zend_object_clone_obj_t clone_call;
 
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		zend_error(E_WARNING, "__clone method called on non-object");
@@ -3177,6 +3178,12 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	ce = Z_OBJCE_P(obj);
 	clone = ce ? ce->clone : NULL;
+	clone_call =  Z_OBJ_HT_P(obj)->clone_obj;
+	if (!clone_call) {
+		zend_error(E_ERROR, "Trying to clone an uncloneable object of class %s", ce->name);
+		EX_T(EX(opline)->result.u.var).var.ptr = EG(error_zval_ptr);
+		EX_T(EX(opline)->result.u.var).var.ptr->refcount++;
+	}
 
 	if (ce && clone) {
 		if (clone->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -3196,7 +3203,7 @@ int zend_clone_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
-	EX_T(EX(opline)->result.u.var).var.ptr->value.obj = Z_OBJ_HT_P(obj)->clone_obj(obj TSRMLS_CC);
+	EX_T(EX(opline)->result.u.var).var.ptr->value.obj = clone_call(obj TSRMLS_CC);
 	EX_T(EX(opline)->result.u.var).var.ptr->type = IS_OBJECT;
 	EX_T(EX(opline)->result.u.var).var.ptr->refcount=1;
 	EX_T(EX(opline)->result.u.var).var.ptr->is_ref=1;
