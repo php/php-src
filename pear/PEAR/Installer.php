@@ -1314,11 +1314,6 @@ class PEAR_Installer extends PEAR_Common
                 $code = $depchecker->callCheckMethod($error, $dep);
                 if ($code) {
                     if (isset($dep['optional']) && $dep['optional'] == 'yes') {
-/* die ugly hack die
-                        // Ugly hack to adjust the error messages
-                        $error = str_replace('requires ', '', $error);
-                        $error = ucfirst($error);
-                        $error = $error . ' is recommended to utilize some features.';*/
                         $optional_deps[] = array($dep, $code, $error);
                     } else {
                         $failed_deps[] = array($dep, $code, $error);
