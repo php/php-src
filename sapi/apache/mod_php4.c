@@ -21,6 +21,10 @@
 
 #include "php_apache_http.h"
 
+#ifdef NETWARE
+#define SIGPIPE SIGINT
+#endif
+
 #if defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING)
 #include "ext/mbstring/mbstring.h"
 #endif /* defined(ZEND_MULTIBYTE) && defined(HAVE_MBSTRING) */
