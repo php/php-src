@@ -17,13 +17,16 @@
 */
 
 /* $Id$ */
+#include <assert.h>
 
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_default_classes.h"
+#include "zend_operators.h"
 
 extern zend_class_entry *default_exception_ptr;
 zend_class_entry *reflection_function_ptr;
+zend_class_entry *reflection_class_ptr;
 
 static zend_object_handlers reflection_object_handlers;
 
@@ -83,6 +86,7 @@ ZEND_FUNCTION(reflection_function)
 {
 	zval **name;
 	zval  *object;
+	char *lcname;
 	reflection_object *intern;
 	zend_function *fptr;
 
@@ -99,7 +103,8 @@ ZEND_FUNCTION(reflection_function)
 	convert_to_string_ex(name);
 	zval_add_ref(name);
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) name, sizeof(zval *), NULL);
-	if (zend_hash_find(EG(function_table), (char *)Z_STRVAL_PP(name), (int)(Z_STRLEN_PP(name) + 1), (void **)&fptr) == FAILURE) {
+	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(name), (int) Z_STRLEN_PP(name));
+	if (zend_hash_find(EG(function_table), lcname, (int)(Z_STRLEN_PP(name) + 1), (void **)&fptr) == FAILURE) {
 		zval *ex;
 		zval *tmp;
 		MAKE_STD_ZVAL(ex);
@@ -122,6 +127,7 @@ ZEND_FUNCTION(reflection_function)
 
 		EG(exception) = ex;
 	}
+	efree(lcname);
 	intern->ptr = fptr;
 }
 
@@ -313,8 +319,237 @@ ZEND_FUNCTION(reflection_function_invoke)
 	}
 	efree(params);
 }
-#define PHP_ME_MAPPING(name, func_name, arg_types) \
-    ZEND_NAMED_FE(name, ZEND_FN(func_name), arg_types)
+
+ZEND_FUNCTION(reflection_class)
+{
+	zval **name;
+	zval  *object;
+	reflection_object *intern;
+	char *lcname;
+	zend_class_entry **ce;
+
+	int	argc = ZEND_NUM_ARGS();
+	if (zend_get_parameters_ex(argc, &name) == FAILURE) {
+			ZEND_WRONG_PARAM_COUNT();
+	}
+
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL) {
+			return;
+	}
+	convert_to_string_ex(name);
+	zval_add_ref(name);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) name, sizeof(zval *), NULL);
+	lcname = zend_str_tolower_dup((const char *)Z_STRVAL_PP(name), (int) Z_STRLEN_PP(name));
+	if (zend_hash_find(EG(class_table), lcname, (int)(Z_STRLEN_PP(name) + 1), (void **)&ce) == FAILURE) {
+		zval *ex;
+		zval *tmp;
+		MAKE_STD_ZVAL(ex);
+		object_init_ex(ex, default_exception_ptr);
+
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_STRING(tmp, "Function does not exist", 1);
+		zend_hash_update(Z_OBJPROP_P(ex), "message", sizeof("message"), (void **) &tmp, sizeof(zval *), NULL);
+		tmp = NULL;
+
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_STRING(tmp, zend_get_executed_filename(TSRMLS_C), 1);
+		zend_hash_update(Z_OBJPROP_P(ex), "file", sizeof("file"), (void **) &tmp, sizeof(zval *), NULL);
+		tmp = NULL;
+
+		MAKE_STD_ZVAL(tmp);
+		ZVAL_LONG(tmp, zend_get_executed_lineno(TSRMLS_C));
+		zend_hash_update(Z_OBJPROP_P(ex), "line", sizeof("line"), (void **) &tmp, sizeof(zval *), NULL);
+		tmp = NULL;
+
+		EG(exception) = ex;
+	}
+	efree(lcname);
+	intern->ptr = *ce;
+}
+
+ZEND_FUNCTION(reflection_class_getname)
+{
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
+}
+
+ZEND_FUNCTION(reflection_class_isinternal)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL || (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	RETURN_BOOL(ce->type == ZEND_INTERNAL_CLASS);
+}
+
+ZEND_FUNCTION(reflection_class_isuserdefined)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL || (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	RETURN_BOOL(ce->type == ZEND_USER_CLASS);
+}
+
+ZEND_FUNCTION(reflection_class_getfilename)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL || (ce = intern->ptr) == NULL) {
+		RETURN_FALSE;
+	}
+	if (ce->type == ZEND_USER_CLASS) {
+		RETURN_STRING(ce->filename, 1);
+	}
+	RETURN_FALSE;
+}
+
+ZEND_FUNCTION(reflection_class_getstartline)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL  || ((ce = intern->ptr) == NULL)) {
+			RETURN_FALSE;
+	}
+	if (ce->type == ZEND_USER_FUNCTION) {
+		RETURN_LONG(ce->line_start);
+	}
+	RETURN_FALSE;
+}
+
+ZEND_FUNCTION(reflection_class_getendline)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL  || (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	if (ce->type == ZEND_USER_CLASS) {
+		RETURN_LONG(ce->line_end);
+	}
+	RETURN_FALSE;
+}
+
+ZEND_FUNCTION(reflection_class_getdoccomment)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL  && (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	if (ce->type == ZEND_USER_CLASS && ce->doc_comment) {
+		RETURN_STRINGL(ce->doc_comment, ce->doc_comment_len, 1);
+	}
+	RETURN_FALSE;
+}
+
+ZEND_FUNCTION(reflection_class_getconstants)
+{
+	zval *object, *tmp_copy;
+	reflection_object *intern;
+	zend_class_entry *ce;
+	
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL  || (ce = intern->ptr) == NULL) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+	zend_hash_copy(Z_ARRVAL_P(return_value), &ce->constants_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
+}
+
+ZEND_FUNCTION(reflection_class_getconstant)
+{
+	zval *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zval **value;
+	zval **name; 
+	int argc = ZEND_NUM_ARGS();
+
+	if (zend_get_parameters_ex(argc, &name) == FAILURE) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
+
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL  || (ce = intern->ptr) == NULL) {
+		RETURN_FALSE;
+	}
+	if(zend_hash_find(&ce->constants_table, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void **) &value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	*return_value = **value;
+	zval_copy_ctor(return_value);
+}
+
+ZEND_FUNCTION(reflection_class_isinterface)
+{
+	zval  *object;
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (ZEND_NUM_ARGS() > 0) { 
+		ZEND_WRONG_PARAM_COUNT();
+	}
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL || (ce = intern->ptr) == NULL) {
+			RETURN_FALSE;
+	}
+	RETURN_BOOL(ce->type & ZEND_ACC_INTERFACE);
+}
 
 static zend_function_entry reflection_function_functions[] = {
 	ZEND_FE(reflection_function, NULL)
@@ -330,12 +565,30 @@ static zend_function_entry reflection_function_functions[] = {
 	{NULL, NULL, NULL}
 };
 
+static zend_function_entry reflection_class_functions[] = {
+	ZEND_FE(reflection_class, NULL)
+	ZEND_NAMED_FE(getname, ZEND_FN(reflection_class_getname), NULL)
+	ZEND_NAMED_FE(isinternal, ZEND_FN(reflection_class_isinternal), NULL)
+	ZEND_NAMED_FE(isuserdefined, ZEND_FN(reflection_class_isuserdefined), NULL)
+	ZEND_NAMED_FE(getfilename, ZEND_FN(reflection_class_getfilename), NULL)
+	ZEND_NAMED_FE(getstartline, ZEND_FN(reflection_class_getstartline), NULL)
+	ZEND_NAMED_FE(getendline, ZEND_FN(reflection_class_getendline), NULL)
+	ZEND_NAMED_FE(getdoccomment, ZEND_FN(reflection_class_getdoccomment), NULL)
+	ZEND_NAMED_FE(getconstants, ZEND_FN(reflection_class_getconstants), NULL)
+	ZEND_NAMED_FE(getconstant, ZEND_FN(reflection_class_getconstant), NULL)
+	ZEND_NAMED_FE(isinterface, ZEND_FN(reflection_class_isinterface), NULL)
+	{NULL, NULL, NULL}
+};
+
 ZEND_API void zend_register_reflection_api(TSRMLS_D) {
-	zend_class_entry _reflection_function;
+	zend_class_entry _reflection_entry;
 	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	INIT_CLASS_ENTRY(_reflection_function, "reflection_function", reflection_function_functions);
-	_reflection_function.create_object = reflection_objects_new;
-	reflection_function_ptr = zend_register_internal_class(&_reflection_function TSRMLS_CC);
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_function", reflection_function_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_function_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	INIT_CLASS_ENTRY(_reflection_entry, "reflection_class", reflection_class_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_class_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 }
 
 /*
