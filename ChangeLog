@@ -1,3 +1,58 @@
+2004-09-24  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/incomplete_class.c
+      ext/standard/php_incomplete_class.h
+      ext/standard/php_var.h
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/tests/file/bug22414.phpt
+      ext/standard/tests/serialize/001.phpt
+      ext/standard/tests/serialize/002.phpt
+      ext/standard/tests/serialize/bug14293.phpt
+      ext/standard/tests/serialize/bug25378.phpt
+      ext/standard/tests/serialize/bug27469.phpt
+      ext/standard/tests/serialize/bug28325.phpt:
+      - MFH Several serialize/unserialize fixes
+
+    * (PHP_4_3)
+      ext/standard/var_unserializer.re:
+      - MFH Several serialize/unserialize fixes
+
+2004-09-24  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * sapi/apache2filter/sapi_apache2.c:
+      removed redundant CLIB_STAT_PATCH checks for NETWARE
+
+    * ZendEngine2/zend_API.c:
+      selectively avoiding module cleanup code for apache 1 build and removing a
+      duplicate code
+
+2004-09-24  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      Zend/zend_compile.c
+      Zend/zend_compile.h
+      Zend/zend_execute.c
+      Zend/zend_language_parser.y:
+      - Backported Marcus' foreach() speedup patch from PHP 5.x.
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/file.c:
+      [0.25]
+      - Fixed some signed issues.
+
+2004-09-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * ZendEngine2/zend_vm_spec.h:
+      Fixed specializer bug.
+
 2004-09-23  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)

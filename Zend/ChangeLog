@@ -1,3 +1,14 @@
+2004-09-24  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_API.c:
+      selectively avoiding module cleanup code for apache 1 build and removing a
+      duplicate code
+
+2004-09-24  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_spec.h:
+      Fixed specializer bug.
+
 2004-09-23  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
