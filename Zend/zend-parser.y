@@ -343,17 +343,17 @@ expr_without_variable:
 	|	w_cvar '=' expr		{ do_assign(&$$, &$1, &$3 CLS_CC); }
 	|	w_cvar '=' '&' w_cvar	{ do_assign_ref(&$$, &$1, &$4 CLS_CC); }
 	|	w_cvar '=' T_NEW class_name { do_extended_fcall_begin(CLS_C); do_begin_new_object(&$2, &$1, &$3, &$4 CLS_CC); } ctor_arguments { do_end_new_object(&$4, &$3, &$6 CLS_CC); do_extended_fcall_end(CLS_C);  $$ = $2;}
-	|	rw_cvar T_PLUS_EQUAL expr 	{ do_binary_assign_op(T_ASSIGN_ADD, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_MINUS_EQUAL expr	{ do_binary_assign_op(T_ASSIGN_SUB, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_MUL_EQUAL expr		{ do_binary_assign_op(T_ASSIGN_MUL, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_DIV_EQUAL expr		{ do_binary_assign_op(T_ASSIGN_DIV, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_CONCAT_EQUAL expr	{ do_binary_assign_op(T_ASSIGN_CONCAT, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_MOD_EQUAL expr		{ do_binary_assign_op(T_ASSIGN_MOD, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_AND_EQUAL expr		{ do_binary_assign_op(T_ASSIGN_BW_AND, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_OR_EQUAL expr 		{ do_binary_assign_op(T_ASSIGN_BW_OR, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar XT_OR_EQUAL expr 		{ do_binary_assign_op(T_ASSIGN_BW_XOR, &$$, &$1, &$3 CLS_CC); }
-	|	rw_cvar T_SL_EQUAL expr	{ do_binary_assign_op(T_ASSIGN_SL, &$$, &$1, &$3 CLS_CC); } 
-	|	rw_cvar T_SR_EQUAL expr	{ do_binary_assign_op(T_ASSIGN_SR, &$$, &$1, &$3 CLS_CC); } 
+	|	rw_cvar T_PLUS_EQUAL expr 	{ do_binary_assign_op(ZEND_ASSIGN_ADD, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_MINUS_EQUAL expr	{ do_binary_assign_op(ZEND_ASSIGN_SUB, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_MUL_EQUAL expr		{ do_binary_assign_op(ZEND_ASSIGN_MUL, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_DIV_EQUAL expr		{ do_binary_assign_op(ZEND_ASSIGN_DIV, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_CONCAT_EQUAL expr	{ do_binary_assign_op(ZEND_ASSIGN_CONCAT, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_MOD_EQUAL expr		{ do_binary_assign_op(ZEND_ASSIGN_MOD, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_AND_EQUAL expr		{ do_binary_assign_op(ZEND_ASSIGN_BW_AND, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_OR_EQUAL expr 		{ do_binary_assign_op(ZEND_ASSIGN_BW_OR, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar XT_OR_EQUAL expr 		{ do_binary_assign_op(ZEND_ASSIGN_BW_XOR, &$$, &$1, &$3 CLS_CC); }
+	|	rw_cvar T_SL_EQUAL expr	{ do_binary_assign_op(ZEND_ASSIGN_SL, &$$, &$1, &$3 CLS_CC); } 
+	|	rw_cvar T_SR_EQUAL expr	{ do_binary_assign_op(ZEND_ASSIGN_SR, &$$, &$1, &$3 CLS_CC); } 
 	|	rw_cvar T_INC { do_post_incdec(&$$, &$1, ZEND_POST_INC CLS_CC); }
 	|	T_INC rw_cvar { do_pre_incdec(&$$, &$2, ZEND_PRE_INC CLS_CC); }
 	|	rw_cvar T_DEC { do_post_incdec(&$$, &$1, ZEND_POST_DEC CLS_CC); }
@@ -378,12 +378,12 @@ expr_without_variable:
 	|	'-' expr { $1.u.constant.value.lval=0; $1.u.constant.type=IS_LONG; $1.op_type = IS_CONST; $1.u.constant.refcount=1; do_binary_op(ZEND_SUB, &$$, &$1, &$2 CLS_CC); }
 	|	'!' expr { do_unary_op(ZEND_BOOL_NOT, &$$, &$2 CLS_CC); }
 	|	'~' expr { do_unary_op(ZEND_BW_NOT, &$$, &$2 CLS_CC); }
-	|	expr T_IS_EQUAL expr				{ do_binary_op(ZEND_T_IS_EQUAL, &$$, &$1, &$3 CLS_CC); }
-	|	expr T_IS_NOT_EQUAL expr 			{ do_binary_op(ZEND_T_IS_NOT_EQUAL, &$$, &$1, &$3 CLS_CC); }
+	|	expr T_IS_EQUAL expr				{ do_binary_op(ZEND_IS_EQUAL, &$$, &$1, &$3 CLS_CC); }
+	|	expr T_IS_NOT_EQUAL expr 			{ do_binary_op(ZEND_IS_NOT_EQUAL, &$$, &$1, &$3 CLS_CC); }
 	|	expr '<' expr 					{ do_binary_op(ZEND_IS_SMALLER, &$$, &$1, &$3 CLS_CC); }
-	|	expr T_IS_SMALLER_OR_EQUAL expr 	{ do_binary_op(ZEND_T_IS_SMALLER_OR_EQUAL, &$$, &$1, &$3 CLS_CC); }
+	|	expr T_IS_SMALLER_OR_EQUAL expr 	{ do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$1, &$3 CLS_CC); }
 	|	expr '>' expr 					{ do_binary_op(ZEND_IS_SMALLER, &$$, &$3, &$1 CLS_CC); }
-	|	expr T_IS_GREATER_OR_EQUAL expr 	{ do_binary_op(ZEND_T_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 CLS_CC); }
+	|	expr T_IS_GREATER_OR_EQUAL expr 	{ do_binary_op(ZEND_IS_SMALLER_OR_EQUAL, &$$, &$3, &$1 CLS_CC); }
 	|	'(' expr ')' 	{ $$ = $2; }
 	|	expr '?' { do_begin_qm_op(&$1, &$2 CLS_CC); }
 		expr ':' { do_qm_true(&$4, &$2, &$5 CLS_CC); }

@@ -66,16 +66,6 @@
 #endif
 
 
-#ifndef YY_TLS_VARS
-/* NOTE, YY_TLS_VARS CANNOT have a semicolon after in
-   in the code or it will break compilation in msvc5 */
-#define YY_TLS_VARS
-#endif
-
-#ifndef TLS_VARS /* just to make sure ;) */
-#define TLS_VARS
-#endif
-
 #define HANDLE_NEWLINES(s,l) \
 do { \
 	char *p = (s),*boundary = p+(l); \

@@ -373,35 +373,35 @@ int zendlex(znode *zendlval CLS_DC);
 #define ZEND_BW_NOT					12
 #define ZEND_BOOL_NOT				13
 #define ZEND_BOOL_XOR				14
-#define ZEND_T_IS_EQUAL				15
-#define ZEND_T_IS_NOT_EQUAL			16
+#define ZEND_IS_EQUAL				15
+#define ZEND_IS_NOT_EQUAL			16
 #define ZEND_IS_SMALLER				17
-#define ZEND_T_IS_SMALLER_OR_EQUAL	18
+#define ZEND_IS_SMALLER_OR_EQUAL	18
 #define ZEND_CAST					19
 #define ZEND_QM_ASSIGN				20
 
-#define T_ASSIGN_ADD				21
-#define T_ASSIGN_SUB				22
-#define T_ASSIGN_MUL				23
-#define T_ASSIGN_DIV				24
-#define T_ASSIGN_MOD				25
-#define T_ASSIGN_SL				26
-#define T_ASSIGN_SR				27
-#define T_ASSIGN_CONCAT			28
-#define T_ASSIGN_BW_OR			29
-#define T_ASSIGN_BW_AND			30
-#define T_ASSIGN_BW_XOR			31
+#define ZEND_ASSIGN_ADD				21
+#define ZEND_ASSIGN_SUB				22
+#define ZEND_ASSIGN_MUL				23
+#define ZEND_ASSIGN_DIV				24
+#define ZEND_ASSIGN_MOD				25
+#define ZEND_ASSIGN_SL				26
+#define ZEND_ASSIGN_SR				27
+#define ZEND_ASSIGN_CONCAT			28
+#define ZEND_ASSIGN_BW_OR			29
+#define ZEND_ASSIGN_BW_AND			30
+#define ZEND_ASSIGN_BW_XOR			31
 									
 #define ZEND_PRE_INC				32
 #define ZEND_PRE_DEC				33
 #define ZEND_POST_INC				34
 #define ZEND_POST_DEC				35
 									
-#define T_ASSIGN					36
-#define T_ASSIGN_REF				37
+#define ZEND_ASSIGN					36
+#define ZEND_ASSIGN_REF				37
 
-#define T_ECHO_OP				38
-#define T_PRINT_OP				39
+#define ZEND_ECHO				38
+#define ZEND_PRINT				39
 
 #define ZEND_JMP					40
 #define ZEND_JMPZ					41
@@ -443,8 +443,8 @@ int zendlex(znode *zendlval CLS_DC);
 									
 #define ZEND_INCLUDE_OR_EVAL		70
 									
-#define T_UNSET_VAR				71
-#define T_UNSET_DIM_OBJ			72
+#define ZEND_UNSET_VAR				71
+#define ZEND_UNSET_DIM_OBJ			72
 #define ZEND_ISSET_ISEMPTY			73
 									
 #define ZEND_FE_RESET				74
