@@ -174,12 +174,12 @@ PHP_FUNCTION(gethostbynamel)
 	}
 	convert_to_string_ex(arg);
 
-	array_init(return_value);
-
 	hp = gethostbyname(Z_STRVAL_PP(arg));
 	if (hp == NULL || hp->h_addr_list == NULL) {
 		RETURN_FALSE;
 	}
+
+	array_init(return_value);
 
 	for (i = 0 ; hp->h_addr_list[i] != 0 ; i++) {
 		in = *(struct in_addr *) hp->h_addr_list[i];
