@@ -98,7 +98,8 @@ void zend_ini_get_constant(zval *result, zval *name)
 	zval z_constant;
 	TSRMLS_FETCH();
 
-	if (zend_get_constant(name->value.str.val, name->value.str.len, &z_constant TSRMLS_CC)) {
+	if (!memchr(name->value.str.val, ':', name->value.str.len)
+		   	&& zend_get_constant(name->value.str.val, name->value.str.len, &z_constant TSRMLS_CC)) {
 		/* z_constant is emalloc()'d */
 		convert_to_string(&z_constant);
 		result->value.str.val = zend_strndup(z_constant.value.str.val, z_constant.value.str.len);
