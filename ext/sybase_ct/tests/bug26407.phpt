@@ -14,7 +14,7 @@ Sybase-CT bug #26407 (Result set fetching broken around transactions)
   $db= sybase_connect_ex();
 
   // Create temporary table
-  $table= basename(__FILE__, '.php');
+  $table= 'phpt_bug26407';
   var_dump(sybase_query('create table #'.$table.' ( the_big_answer int )', $db));
 
   // I
@@ -67,7 +67,7 @@ array(1) {
 >>> Query: 
     begin transaction
       -- no result returned...
-      update #bug26407 set the_big_answer=42
+      update #phpt_bug26407 set the_big_answer=42
     commit
   
 <<< Return: boolean

@@ -16,7 +16,7 @@ Sybase-CT bug #22403 (crash when executing a stored procedure without parameters
   error_reporting(error_reporting() & !E_NOTICE);       // Suppress notices
 
   // Check if stored procedure already exists
-  $sp_name= basename(__FILE__, '.php');
+  $sp_name= 'phpt_bug22403';
   var_dump(sybase_select_db('tempdb', $db));
   if (!sybase_select_single($db, 'select object_id("'.$sp_name.'")')) {
     echo "Stored procedure {$sp_name} not found, creating\n";
