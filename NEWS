@@ -1,6 +1,10 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added ircg_get_username, a roomkey argument to ircg_join, error fetching
+  infrastructure, a tokenizer to speed up message processing, and fixed
+  a lot of bugs in the IRCG extension (Sascha)
+- Improved speed of the serializer/deserializer (Thies, Sascha)
 - Floating point numbers are better detected when converting from strings
   (Zeev, Zend Engine)
 - Replaced php.ini-optimized with php.ini-recommended.  As the name implies,
