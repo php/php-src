@@ -1247,27 +1247,22 @@ ZEND_FUNCTION(get_defined_constants)
 /* }}} */
 
 
-static zval *debug_backtrace_get_args(void ***curpos, int andjustonly TSRMLS_DC) {
+static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
 	void **p = *curpos - 2;
 	zval *arg_array, **arg;
 	int arg_count = (ulong) *p;
 
 	*curpos -= (arg_count+2); 
 
-	if (!andjustonly) {
-		MAKE_STD_ZVAL(arg_array);
-		array_init(arg_array);
-		p -= arg_count;
-		while (--arg_count >= 0) {
-			arg = (zval **) p++;
-			(*arg)->is_ref = 1;
-			(*arg)->refcount++;
-			add_next_index_zval(arg_array, *arg);
-		}
-		return arg_array;
+	MAKE_STD_ZVAL(arg_array);
+	array_init(arg_array);
+	p -= arg_count;
+	while (--arg_count >= 0) {
+		arg = (zval **) p++;
+		SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+		add_next_index_zval(arg_array, *arg);
 	}
-
-	return NULL;
+	return arg_array;
 }
 
 /* {{{ proto void debug_backtrace(void)
@@ -1281,14 +1276,21 @@ ZEND_FUNCTION(debug_backtrace)
 	char *class_name;
 	char *include_filename = NULL;
 	zval *stack_frame;
-	void **cur_arg_pos = EG(argument_stack).top_element;
+	void **cur_arg_pos = EG(argument_stack).top_element - 2;
+
+	if (ZEND_NUM_ARGS()) {
+		WRONG_PARAM_COUNT;
+	}
 
 	ptr = EG(current_execute_data);
 
-	/* Skip debug_backtrace() itself */
+	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
-	debug_backtrace_get_args(&cur_arg_pos, 1 TSRMLS_CC);
-	
+
+    if (ptr && cur_arg_pos[-1]) { 
+		zend_error(E_ERROR, "debug_backtrace(): Can't be used as a function parameter");
+	}
+
 	array_init(return_value);
 
 	while (ptr) {
@@ -1306,10 +1308,12 @@ ZEND_FUNCTION(debug_backtrace)
 		}
 		
 		if (ptr->op_array) {
-			include_filename = filename = ptr->op_array->filename;
+			filename = ptr->op_array->filename;
 			lineno = ptr->opline->lineno;
 			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+		} else {
+			filename = NULL;
 		}
 
 		function_name = ptr->function_state.function->common.function_name;
@@ -1321,15 +1325,15 @@ ZEND_FUNCTION(debug_backtrace)
 				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
 			}
 
-			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos, 0 TSRMLS_CC));
+			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
-			zend_bool have_function_name = 1;
+			zend_bool build_filename_arg = 1;
 
 			switch (ptr->opline->op2.u.constant.value.lval) {
 				case ZEND_EVAL:
 					function_name = "eval";
-					have_function_name = 0;
+					build_filename_arg = 0;
 					break;
 				case ZEND_INCLUDE:
 					function_name = "include";
@@ -1344,22 +1348,32 @@ ZEND_FUNCTION(debug_backtrace)
 					function_name = "require_once";
 					break;
 				default:
-					function_name = "unknown - please report a bug";
-					have_function_name = 0;
+					function_name = "unknown";
+					build_filename_arg = 0;
+					zend_error(E_ERROR, "debug_backtrece(): unable to find function-name. Please report a bug.");
 					break;
 			}
 
-			if (have_function_name && include_filename) {
-				/* include_filename always points to the last known filename.
-				   if we have called include in the frame above - this is the file we have included
+			if (build_filename_arg && include_filename) {
+				zval *arg_array;
+
+				MAKE_STD_ZVAL(arg_array);
+				array_init(arg_array);
+				
+				/* include_filename always points to the last filename of the last last called-fuction.
+				   if we have called include in the frame above - this is the file we have included.
 				 */
-				printf("%s\n", include_filename);
+
+				add_next_index_string(arg_array, include_filename, 1);
+				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), arg_array);
 			}
 
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 		}
 
 		add_next_index_zval(return_value, stack_frame);
+
+		include_filename = filename; 
 
 		ptr = ptr->prev_execute_data;
 	}
