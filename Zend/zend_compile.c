@@ -761,8 +761,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zend_hash_update(&CG(active_class_entry)->function_table, name, name_len+1, &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		if ((CG(active_class_entry)->name_length == (uint) name_len) && (!memcmp(CG(active_class_entry)->name, name, name_len))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
-		} else if ((function_name->u.constant.value.str.len == sizeof("_construct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_construct", sizeof("_clone")))) {
+		} else if ((function_name->u.constant.value.str.len == sizeof("_construct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_construct", sizeof("_construct")))) {
 			CG(active_class_entry)->constructor = (zend_function *) CG(active_op_array);
+		} else if ((function_name->u.constant.value.str.len == sizeof("_destruct")-1) && (!memcmp(function_name->u.constant.value.str.val, "_destruct", sizeof("_destruct")))) {
+			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof("_clone")-1) && (!memcmp(function_name->u.constant.value.str.val, "_clone", sizeof("_clone")))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
 		}
@@ -1361,6 +1363,7 @@ static void create_class(HashTable *class_table, char *name, int name_length, ze
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	new_class_entry.constructor = NULL;
+	new_class_entry.destructor = NULL;
 	new_class_entry.clone = NULL;
 
 	new_class_entry.handle_function_call = NULL;
@@ -1849,6 +1852,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	zend_hash_init(&new_class_entry.constants_table, 10, NULL, ZVAL_PTR_DTOR, 0);
 
 	new_class_entry.constructor = NULL;
+	new_class_entry.destructor = NULL;
 	new_class_entry.clone = NULL;
 
 	new_class_entry.handle_function_call = NULL;
@@ -1879,6 +1883,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 			zend_hash_copy(&new_class_entry.constants_table, &parent_class->constants_table, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
 			new_class_entry.constructor = parent_class->constructor;
+			new_class_entry.destructor = parent_class->destructor;
 
 			/* FIXME: What do we do with clone? */
 
