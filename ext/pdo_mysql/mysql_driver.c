@@ -275,7 +275,6 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H = pecalloc(1, sizeof(pdo_mysql_db_handle), dbh->is_persistent);
 	
-	dbh->methods = &mysql_methods;
 	H->einfo.errcode = 0;
 	H->einfo.errmsg = NULL;
 
@@ -313,6 +312,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	dbh->alloc_own_columns = 1;
 	dbh->supports_placeholders = 0;
 	dbh->max_escaped_char_length = 2;
+	dbh->methods = &mysql_methods;
 
 	ret = 1;
 	
@@ -322,6 +322,8 @@ cleanup:
 			efree(vars[i].optval);
 		}
 	}
+	
+	dbh->methods = &mysql_methods;
 
 	return ret;
 }
