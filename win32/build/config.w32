@@ -16,7 +16,7 @@ PATH_PROG('flex');
 PATH_PROG('re2c');
 PATH_PROG('zip');
 PATH_PROG('lemon');
-PATH_PROG('mc');
+PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
 
 ARG_ENABLE('debug', 'Compile with debugging symbols', "no");
 ARG_ENABLE('zts', 'Thread safety', 'yes');
