@@ -245,7 +245,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 				break;
 		}
 		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
-		/* Had INC_AI_COUNT:  No need to lock anything */
+		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
 		return;
 	}
 
@@ -254,7 +254,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 	if (variable_ptr == EG(error_zval_ptr)) {
 		if (result) {
 			Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
-			/* Had INC_AI_COUNT:  No need to lock anything */
+			SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
 		}
 		return;
 	}
@@ -554,8 +554,8 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 	container = *container_ptr;
 
 	if (container == EG(error_zval_ptr)) {
-		/* Had INC_AI_COUNT:  No need to lock anything */
 		*retval = &EG(error_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(**retval, result);
 		return;
 	}
 
@@ -634,10 +634,10 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 					*retval = &EG(error_zval_ptr);
 				}
 				FREE_OP(op2, free_op2);
+				SELECTIVE_PZVAL_LOCK(**retval, result);
 			}
 			break;
 	}
-	/* Had INC_AI_COUNT - Relevant cases handled above */
 }
 
 
@@ -647,8 +647,8 @@ static inline void zend_fetch_dimension_address_from_tmp_var(znode *result, znod
 	zval *container = get_zval_ptr(op1, Ts, &free_op1, BP_VAR_R);
 
 	if (container->type != IS_ARRAY) {
-		/* Had INC_AI_COUNT:  No need to lock anything */
 		Ts[result->u.var].var = &EG(uninitialized_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(*Ts[result->u.var].var, result);
 		return;
 	}
 
@@ -700,8 +700,8 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 
 	container = *container_ptr;
 	if (container == EG(error_zval_ptr)) {
-		/* Had INC_AI_COUNT:  No need to lock anything */
 		*retval = &EG(error_zval_ptr);
+		SELECTIVE_PZVAL_LOCK(**retval, result);
 		return;
 	}
 
@@ -750,12 +750,13 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 
 		offset = get_zval_ptr(op2, Ts, &free_op2, BP_VAR_R);
 		FREE_OP(op2, free_op2);
-		/* Had INC_AI_COUNT:  No need to lock anything */
 		if (type==BP_VAR_R || type==BP_VAR_IS) {
 			*retval = &EG(uninitialized_zval_ptr);
+			SELECTIVE_PZVAL_LOCK(**retval, result);
 			return;
 		} else {
 			*retval = &EG(error_zval_ptr);
+			SELECTIVE_PZVAL_LOCK(**retval, result);
 			return;
 		}
 	}
@@ -978,7 +979,7 @@ binary_assign_op_addr: {
 					}
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
-						/* Had INC_AI_COUNT:  No need to lock anything */
+						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var, &opline->result);
 						opline++;
 						continue;
 					}
@@ -1015,7 +1016,7 @@ binary_assign_op_addr: {
 					}
 					if (*var_ptr == EG(error_zval_ptr)) {
 						Ts[opline->result.u.var].var = &EG(uninitialized_zval_ptr);
-						/* Had INC_AI_COUNT:  No need to lock anything */
+						SELECTIVE_PZVAL_LOCK(*Ts[opline->result.u.var].var, &opline->result);
 						opline++;
 						continue;
 					}
@@ -1114,7 +1115,6 @@ binary_assign_op_addr: {
 				break;
 			case ZEND_ASSIGN_REF:
 				zend_assign_to_variable_reference(&opline->result, get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_W), get_zval_ptr_ptr(&opline->op2, Ts, BP_VAR_W), Ts ELS_CC);
-				/* Had INC_AI_COUNT:  Handled inside zend_assign_to_variable_reference() now */
 				break;
 			case ZEND_JMP:
 #if DEBUG_ZEND>=2

@@ -740,6 +740,9 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		}
 		if (delete_bucket) {
 			pefree(q,ht->persistent);
+		} else {
+			int i;
+			i=2;
 		}
 	}
 	pefree(ht->arBuckets,ht->persistent);
