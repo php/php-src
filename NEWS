@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- Added a parameter to mysql_connect to force a new database link to be
+  created. (Markus, Derick)
 - Added ldap_sort() function. (Stig Venaas)
 - Added md5_file(), which calculaties the MD5 sum of a file.
   (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
