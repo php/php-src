@@ -33,6 +33,18 @@
 #include <time.h>
 #ifdef PHP_WIN32
 #include <winsock.h>
+#elif defined(NETWARE)
+#ifdef USE_WINSOCK    /* Modified to use Winsock (NOVSOCK2.H), atleast for now */
+#include <novsock2.h>
+#else
+#ifdef NEW_LIBC
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#else
+#include <sys/socket.h>
+#endif
+#endif
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -56,9 +68,14 @@
 #include "ext/standard/fsock.h"
 
 /* define closesocket macro for portability */
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 #undef closesocket
 #define closesocket close
+#endif
+
+/* Additional headers for NetWare */
+#if defined(NETWARE) && defined(NEW_LIBC) && !defined(USE_WINSOCK)
+#include <sys/select.h>
 #endif
 
 /* sends an ftp command, returns true on success, false on error.
@@ -130,7 +147,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 
 	size = sizeof(ftp->localaddr);
 	memset(&ftp->localaddr, 0, size);
-	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, &size) == -1) {
+	if (getsockname(ftp->fd, (struct sockaddr*) &ftp->localaddr, (unsigned int*)&size) == -1) {
 		perror("getsockname");
 		goto bail;
 	}
@@ -946,7 +963,7 @@ my_send(ftpbuf_t *ftp, int s, void *buf, size_t len)
 		FD_SET(s, &write_set);
 		n = select(s + 1, NULL, &write_set, NULL, &tv);
 		if (n < 1) {
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 			if (n == 0)
 				errno = ETIMEDOUT;
 #endif
@@ -981,7 +998,7 @@ my_recv(ftpbuf_t *ftp, int s, void *buf, size_t len)
 	FD_SET(s, &read_set);
 	n = select(s + 1, &read_set, NULL, NULL, &tv);
 	if (n < 1) {
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0)
 			errno = ETIMEDOUT;
 #endif
@@ -1008,14 +1025,14 @@ my_accept(ftpbuf_t *ftp, int s, struct sockaddr *addr, int *addrlen)
 
 	n = select(s + 1, &accept_set, NULL, NULL, &tv);
 	if (n < 1) {
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !(defined(NETWARE) && defined(USE_WINSOCK))
 		if (n == 0)
 			errno = ETIMEDOUT;
 #endif
 		return -1;
 	}
 
-	return accept(s, addr, addrlen);
+	return accept(s, addr, (unsigned int*)addrlen);
 }
 /* }}} */
 
@@ -1087,7 +1104,7 @@ ftp_getdata(ftpbuf_t *ftp)
 		goto bail;
 	}
 
-	if (getsockname(fd, (struct sockaddr*) &addr, &size) == -1) {
+	if (getsockname(fd, (struct sockaddr*) &addr, (unsigned int*)&size) == -1) {
 		perror("getsockname");
 		goto bail;
 	}

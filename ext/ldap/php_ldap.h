@@ -89,9 +89,11 @@ PHP_FUNCTION(ldap_parse_reference);
 PHP_FUNCTION(ldap_rename);
 #endif
 
+#ifndef NETWARE		/* The below function not supported on NetWare */
 #if LDAP_API_VERSION > 2000
 PHP_FUNCTION(ldap_start_tls);
 #endif
+#endif	/* NETWARE */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 PHP_FUNCTION(ldap_set_rebind_proc);

@@ -32,6 +32,20 @@
 #include <errno.h>
 #include <process.h>
 #include "win32/time.h"
+#elif defined(NETWARE)
+#ifdef USE_WINSOCK
+/*#include <ws2nlm.h>*/
+#include <novsock2.h>
+#else
+#include <sys/socket.h>
+#endif
+#include <errno.h>
+/*#include <process.h>*/
+#ifdef NEW_LIBC
+#include <sys/timeval.h>
+#else
+#include "netware/time_nw.h"
+#endif
 #else
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -34,6 +34,8 @@ extern zend_module_entry pgsql_module_entry;
 #ifdef PHP_WIN32
 #define INV_WRITE            0x00020000
 #define INV_READ             0x00040000
+#elif defined NETWARE
+#include <libpq-fs.h>
 #else
 #include <libpq/libpq-fs.h>
 #endif

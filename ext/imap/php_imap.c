@@ -421,7 +421,7 @@ PHP_MINIT_FUNCTION(imap)
 
 	ZEND_INIT_MODULE_GLOBALS(imap, php_imap_init_globals, NULL)
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 	mail_link(&unixdriver);		/* link in the unix driver */
 	mail_link(&mhdriver);		/* link in the mh driver */
 	/* mail_link(&mxdriver); */	/* According to c-client docs (internal.txt) this shouldn't be used. */
@@ -437,7 +437,7 @@ PHP_MINIT_FUNCTION(imap)
 	mail_link(&mtxdriver);		/* link in the mtx driver */
 	mail_link(&dummydriver);	/* link in the dummy driver */
 
-#ifndef PHP_WIN32
+#if !defined(PHP_WIN32) && !defined(NETWARE)
 	auth_link(&auth_log);		/* link in the log authenticator */
 	auth_link(&auth_md5);       /* link in the cram-md5 authenticator */ 
 #ifdef  HAVE_IMAP_SSL

@@ -29,6 +29,12 @@
 #include "config.h"
 #endif
 
+/* Additional headers for NetWare */
+#if defined(NETWARE) && (NEW_LIBC)
+#include <sys/select.h>
+#include <sys/timeval.h>
+#endif
+
 #include "php.h"
 #include "php_ini.h"
 
@@ -118,9 +124,11 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_rename,									NULL)
 #endif
 
+#ifndef NETWARE		/* The below function not supported on NetWare */
 #if LDAP_API_VERSION > 2000
 	PHP_FE(ldap_start_tls,								NULL)
 #endif
+#endif	/* NETWARE */
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	PHP_FE(ldap_set_rebind_proc,						NULL)
@@ -492,7 +500,16 @@ PHP_FUNCTION(ldap_bind)
 
 	ZEND_FETCH_RESOURCE(ld, ldap_linkdata *, link, -1, "ldap link", le_link);
 
+#ifndef NETWARE
 	if (ldap_bind_s(ld->link, ldap_bind_rdn, ldap_bind_pw, LDAP_AUTH_SIMPLE) != LDAP_SUCCESS) {
+#else
+	/*	The function ldap_bind_s has been deprecated on NetWare. If it is used on NetWare,
+		it gives the result, but will also result in the display of warning message
+		that gets displayed on the web browser.
+		ldap_simple_bind_s removes that warning.
+	*/
+	if (ldap_simple_bind_s(ld->link, (const char *)ldap_bind_rdn, (const char *)ldap_bind_pw) != LDAP_SUCCESS) {
+#endif
 		php_error(E_WARNING, "LDAP:  Unable to bind to server: %s", ldap_err2string(_get_lderrno(ld->link)));
 		RETURN_FALSE;
 	} else {
@@ -1992,6 +2009,7 @@ PHP_FUNCTION(ldap_rename)
 /* }}} */
 #endif
 
+#ifndef NETWARE		/* The below function not supported on NetWare */
 #if LDAP_API_VERSION > 2000
 /* {{{ proto bool ldap_start_tls(resource link)
    Start TLS */
@@ -2016,6 +2034,7 @@ PHP_FUNCTION(ldap_start_tls)
 }
 /* }}} */
 #endif
+#endif	/* NETWARE */
 
 
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)

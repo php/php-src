@@ -509,7 +509,8 @@ static char *_php_create_id(int *newlen TSRMLS_DC)
 	PHP_MD5Init(&context);
 	
 	sprintf(buf, "%ld%ld%0.8f", tv.tv_sec, tv.tv_usec, php_combined_lcg(TSRMLS_C) * 10);
-	PHP_MD5Update(&context, buf, strlen(buf));
+	/*PHP_MD5Update(&context, buf, strlen(buf));*/
+	PHP_MD5Update(&context, (const unsigned char*)buf, strlen(buf));
 
 	if (PS(entropy_length) > 0) {
 		int fd;
@@ -523,7 +524,8 @@ static char *_php_create_id(int *newlen TSRMLS_DC)
 			while (to_read > 0) {
 				n = read(fd, buf, MIN(to_read, sizeof(buf)));
 				if (n <= 0) break;
-				PHP_MD5Update(&context, buf, n);
+				/*PHP_MD5Update(&context, buf, n);*/
+				PHP_MD5Update(&context, (const unsigned char*)buf, n);
 				to_read -= n;
 			}
 			close(fd);
@@ -635,7 +637,11 @@ static void strcpy_gmt(char *ubuf, time_t *when)
 static void last_modified(TSRMLS_D)
 {
 	const char *path;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc sb;
+#else
 	struct stat sb;
+#endif
 	char buf[MAX_STR + 1];
 	
 	path = SG(request_info).path_translated;
@@ -646,7 +652,11 @@ static void last_modified(TSRMLS_D)
 
 #define LAST_MODIFIED "Last-Modified: "
 		memcpy(buf, LAST_MODIFIED, sizeof(LAST_MODIFIED) - 1);
-		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
+#if (defined(NETWARE) && defined(NEW_LIBC))
+		strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &(sb.st_mtime.tv_nsec));
+#else
+        strcpy_gmt(buf + sizeof(LAST_MODIFIED) - 1, &sb.st_mtime);
+#endif
 		ADD_COOKIE(buf);
 	}
 }

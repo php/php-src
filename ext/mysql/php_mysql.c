@@ -37,6 +37,10 @@
 #ifdef PHP_WIN32
 #include <winsock.h>
 #define signal(a, b) NULL
+#elif defined(NETWARE)
+/*#include <ws2nlm.h>*/
+#include <sys/socket.h>
+#define signal(a, b) NULL
 #else
 #include "build-defs.h"
 #if HAVE_SIGNAL_H
@@ -124,10 +128,12 @@ function_entry mysql_functions[] = {
 	PHP_FE(mysql_pconnect,								NULL)
 	PHP_FE(mysql_close,									NULL)
 	PHP_FE(mysql_select_db,								NULL)
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_FE(mysql_create_db,								NULL)
 	PHP_FE(mysql_drop_db,								NULL)
 #endif
+#endif	/* NETWARE */
 	PHP_FE(mysql_query,									NULL)
 	PHP_FE(mysql_unbuffered_query,						NULL)
 	PHP_FE(mysql_db_query,								NULL)
@@ -173,10 +179,12 @@ function_entry mysql_functions[] = {
 	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	NULL)
 	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	NULL)
 	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	NULL)
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_FALIAS(mysql_createdb,		mysql_create_db,	NULL)
 	PHP_FALIAS(mysql_dropdb,		mysql_drop_db,		NULL)
 #endif
+#endif	/* NETWARE */
 	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	NULL)
 	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	NULL)
 	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		NULL)
@@ -297,7 +305,7 @@ static void _close_mysql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static PHP_INI_MH(OnMySQLPort)
 {
 	if (new_value==NULL) { /* default port */
-#ifndef PHP_WIN32
+#if !defined (PHP_WIN32) && ! defined (NETWARE)
 		struct servent *serv_ptr;
 		char *env;
 		
@@ -427,7 +435,7 @@ PHP_MINFO_FUNCTION(mysql)
 	sprintf(buf, "%ld", MySG(num_links));
 	php_info_print_table_row(2, "Active Links", buf);
 	php_info_print_table_row(2, "Client API version", mysql_get_client_info());
-#ifndef PHP_WIN32
+#if !defined (PHP_WIN32) && !defined (NETWARE)
 	php_info_print_table_row(2, "MYSQL_MODULE_TYPE", PHP_MYSQL_TYPE);
 	php_info_print_table_row(2, "MYSQL_SOCKET", MYSQL_UNIX_ADDR);
 	php_info_print_table_row(2, "MYSQL_INCLUDE", PHP_MYSQL_INCLUDE);
@@ -834,7 +842,7 @@ PHP_FUNCTION(mysql_get_client_info)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETURN_STRING(mysql_get_client_info(),1);	
+	RETURN_STRING((char *)mysql_get_client_info(),1);	/* Type-casting done due to NetWare */
 }
 /* }}} */
 
@@ -864,7 +872,7 @@ PHP_FUNCTION(mysql_get_host_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_host_info(&mysql->conn),1);
+	RETURN_STRING((char *)mysql_get_host_info(&mysql->conn),1);	/* Type-casting done due to NetWare */
 }
 /* }}} */
 
@@ -924,11 +932,13 @@ PHP_FUNCTION(mysql_get_server_info)
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
-	RETURN_STRING(mysql_get_server_info(&mysql->conn),1);
+	RETURN_STRING((char *)mysql_get_server_info(&mysql->conn),1);	/* Type-casting done due to NetWare */
 }
 /* }}} */
 
 #endif
+
+#ifndef NETWARE		/* The below two functions not supported on NetWare */
 
 #if MYSQL_VERSION_ID < 40000
 /* {{{ proto bool mysql_create_db(string database_name [, int link_identifier])
@@ -1008,6 +1018,8 @@ PHP_FUNCTION(mysql_drop_db)
 }
 /* }}} */
 #endif
+
+#endif	/* NETWARE */
 
 /* {{{ php_mysql_do_query_general
  */
@@ -1310,7 +1322,7 @@ PHP_FUNCTION(mysql_error)
 	
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
-	RETURN_STRING(mysql_error(&mysql->conn), 1);
+	RETURN_STRING((char *)mysql_error(&mysql->conn), 1);	/* Type-casting done due to NetWare */
 }
 /* }}} */
 

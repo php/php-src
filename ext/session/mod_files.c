@@ -156,7 +156,11 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 	DIR *dir;
 	char dentry[sizeof(struct dirent) + MAXPATHLEN];
 	struct dirent *entry = (struct dirent *) &dentry;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc sbuf;
+#else
 	struct stat sbuf;
+#endif
 	char buf[MAXPATHLEN];
 	time_t now;
 	int nrdels = 0;
@@ -190,7 +194,11 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime TSRMLS_DC)
 				buf[dirname_len + entry_len + 1] = '\0';
 				/* check whether its last access was more than maxlifet ago */
 				if (VCWD_STAT(buf, &sbuf) == 0 && 
-						(now - sbuf.st_atime) > maxlifetime) {
+#if (defined(NETWARE) && defined(NEW_LIBC))
+						(now - sbuf.st_atime.tv_nsec) > maxlifetime) {
+#else
+                        (now - sbuf.st_atime) > maxlifetime) {
+#endif
 					VCWD_UNLINK(buf);
 					nrdels++;
 				}
@@ -242,14 +250,22 @@ PS_CLOSE_FUNC(files)
 PS_READ_FUNC(files)
 {
 	long n;
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+    struct stat_libc sbuf;
+#else
 	struct stat sbuf;
+#endif
 	PS_FILES_DATA;
 
 	ps_files_open(data, key TSRMLS_CC);
 	if (data->fd < 0)
 		return FAILURE;
 	
+#if (defined(NETWARE) && defined(CLIB_STAT_PATCH))
+	if (fstat(data->fd, ((struct stat*)&sbuf)))
+#else
 	if (fstat(data->fd, &sbuf))
+#endif
 		return FAILURE;
 	
 	data->st_size = *vallen = sbuf.st_size;

@@ -24,6 +24,16 @@
 
 #include "php.h"
 
+#ifdef NETWARE
+#ifdef USE_WINSOCK
+#include <novsock2.h>
+#else
+#ifndef NEW_LIBC
+#include <sys/socket.h>
+#endif
+#endif
+#endif
+
 #if HAVE_FTP
 
 #include "ext/standard/info.h"
@@ -482,7 +492,7 @@ PHP_FUNCTION(ftp_get)
 		RETURN_FALSE;
 	}
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)  /* On Windows and NetWare, the file should always be opened in binary mode */
 	if ((outfp = VCWD_FOPEN(local, "wb")) == NULL) {
 #else
 	if ((outfp = VCWD_FOPEN(local, "w")) == NULL) {
@@ -557,7 +567,7 @@ PHP_FUNCTION(ftp_put)
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(NETWARE)  /* On Windows and NetWare, the file should always be opened in binary mode */
 	if ((infp = VCWD_FOPEN(local, "rb")) == NULL) {
 #else
 	if ((infp = VCWD_FOPEN(local, "r")) == NULL) {
