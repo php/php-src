@@ -1,3 +1,832 @@
+2004-01-08  Sterling Hughes  <winnie@edwardbear.org>
+
+    * ext/simplexml/simplexml.c:
+      Fix dumping, when dumping a text element, for example:
+      
+      <?php
+      $doc = simplexml_load_string('<?xml version="1.0"?>
+      <namelist>
+       <name>
+        <first>helly</first>
+       </name>
+       <name>
+        <first>sterling</first>
+       </name>
+      </namelist>');
+      var_dump($doc->name[0]->first);
+      
+      Used to not display the node's content, now it does.
+
+2004-01-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/simplexml/config.w32:
+      add optional dep on spl for simplexml.
+      Fix dep handling in buildconf
+
+2004-01-08  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/README:
+      Add some minimalistic documentation
+
+    * ext/simplexml/simplexml.c:
+      Fix windows build issue
+
+    * ext/simplexml/simplexml.c:
+      Cannot use shared SPL
+
+    * ext/sqlite/sqlite.c:
+      There's no more interaction with SPL
+
+2004-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/var_unserializer.c:
+      touch generated files
+
+    * ext/sqlite/libsqlite/src/parse.c:
+      touch to make build work without lemon..
+
+    * run-tests.php
+      run-tests2.php
+      TSRM/tsrm_nw.h
+      TSRM/tsrm_virtual_cwd.h
+      TSRM/tsrm_win32.h
+      ZendEngine2/acconfig.h
+      ZendEngine2/zend.c
+      ZendEngine2/zend.h
+      ZendEngine2/zend_API.c
+      ZendEngine2/zend_API.h
+      ZendEngine2/zend_alloc.c
+      ZendEngine2/zend_alloc.h
+      ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.h
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_config.nw.h
+      ZendEngine2/zend_config.w32.h
+      ZendEngine2/zend_constants.c
+      ZendEngine2/zend_constants.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_default_classes.h
+      ZendEngine2/zend_dynamic_array.c
+      ZendEngine2/zend_dynamic_array.h
+      ZendEngine2/zend_errors.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_extensions.c
+      ZendEngine2/zend_extensions.h
+      ZendEngine2/zend_fast_cache.h
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_globals_macros.h
+      ZendEngine2/zend_hash.c
+      ZendEngine2/zend_hash.h
+      ZendEngine2/zend_highlight.c
+      ZendEngine2/zend_highlight.h
+      ZendEngine2/zend_indent.c
+      ZendEngine2/zend_indent.h
+      ZendEngine2/zend_ini.c
+      ZendEngine2/zend_ini.h
+      ZendEngine2/zend_ini_scanner.h
+      ZendEngine2/zend_interfaces.c
+      ZendEngine2/zend_interfaces.h
+      ZendEngine2/zend_istdiostream.h
+      ZendEngine2/zend_iterators.c
+      ZendEngine2/zend_iterators.h
+      ZendEngine2/zend_language_scanner.h
+      ZendEngine2/zend_list.c
+      ZendEngine2/zend_list.h
+      ZendEngine2/zend_llist.c
+      ZendEngine2/zend_llist.h
+      ZendEngine2/zend_mm.c
+      ZendEngine2/zend_mm.h
+      ZendEngine2/zend_modules.h
+      ZendEngine2/zend_multibyte.c
+      ZendEngine2/zend_multibyte.h
+      ZendEngine2/zend_multiply.h
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects.c
+      ZendEngine2/zend_objects.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_operators.c
+      ZendEngine2/zend_operators.h
+      ZendEngine2/zend_ptr_stack.c
+      ZendEngine2/zend_ptr_stack.h
+      ZendEngine2/zend_qsort.c
+      ZendEngine2/zend_qsort.h
+      ZendEngine2/zend_reflection_api.c
+      ZendEngine2/zend_reflection_api.h
+      ZendEngine2/zend_sprintf.c
+      ZendEngine2/zend_stack.c
+      ZendEngine2/zend_stack.h
+      ZendEngine2/zend_static_allocator.c
+      ZendEngine2/zend_static_allocator.h
+      ZendEngine2/zend_stream.c
+      ZendEngine2/zend_stream.h
+      ZendEngine2/zend_ts_hash.c
+      ZendEngine2/zend_ts_hash.h
+      ZendEngine2/zend_types.h
+      ZendEngine2/zend_variables.c
+      ZendEngine2/zend_variables.h
+      build/build.mk
+      build/build2.mk
+      build/buildcheck.sh
+      build/mkdep.awk
+      ext/bcmath/php_bcmath.h
+      ext/bz2/php_bz2.h
+      ext/com_dotnet/php_com_dotnet.h
+      ext/com_dotnet/php_com_dotnet_internal.h
+      ext/cpdf/php_cpdf.h
+      ext/ctype/php_ctype.h
+      ext/curl/php_curl.h
+      ext/dba/php_dba.h
+      ext/dba/libcdb/cdb.h
+      ext/dba/libcdb/cdb_make.h
+      ext/dba/libcdb/uint32.h
+      ext/dba/libflatfile/flatfile.h
+      ext/dba/libinifile/inifile.h
+      ext/dbase/php_dbase.h
+      ext/dbx/dbx.h
+      ext/dbx/dbx_fbsql.h
+      ext/dbx/dbx_mssql.h
+      ext/dbx/dbx_mysql.h
+      ext/dbx/dbx_oci8.h
+      ext/dbx/dbx_odbc.h
+      ext/dbx/dbx_pgsql.h
+      ext/dbx/dbx_sqlite.h
+      ext/dbx/dbx_sybasect.h
+      ext/dbx/php_dbx.h
+      ext/dio/php_dio.h
+      ext/dom/dom_ce.h
+      ext/dom/dom_fe.h
+      ext/dom/dom_properties.h
+      ext/dom/php_dom.h
+      ext/dom/xml_common.h
+      ext/exif/php_exif.h
+      ext/fam/php_fam.h
+      ext/fbsql/php_fbsql.h
+      ext/fdf/php_fdf.h
+      ext/filepro/php_filepro.h
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.h
+      ext/gd/php_gd.h
+      ext/gettext/php_gettext.h
+      ext/gmp/php_gmp.h
+      ext/iconv/php_iconv.h
+      ext/imap/php_imap.h
+      ext/informix/ifx.ec
+      ext/informix/php_informix.h
+      ext/informix/php_informix_includes.h
+      ext/ingres_ii/ii.h
+      ext/ingres_ii/php_ii.h
+      ext/interbase/interbase.rc
+      ext/interbase/php_interbase.h
+      ext/ircg/ircg_scanner.re
+      ext/ircg/php_ircg.h
+      ext/ldap/php_ldap.h
+      ext/mbstring/mb_gpc.h
+      ext/mbstring/mbstring.h
+      ext/mbstring/php_mbregex.h
+      ext/mbstring/php_unicode.h
+      ext/mcrypt/php_mcrypt.h
+      ext/mcve/php_mcve.h
+      ext/mhash/php_mhash.h
+      ext/mime_magic/php_mime_magic.h
+      ext/mime_magic/phpmimemagic.h
+      ext/ming/php_ming.h
+      ext/mnogosearch/php_mnogo.h
+      ext/mono/php_mono.h
+      ext/msession/msession.c
+      ext/msession/php_msession.h
+      ext/msql/php_msql.h
+      ext/mssql/php_mssql.h
+      ext/mysql/php_mysql.h
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_prop.c
+      ext/mysqli/mysqli_report.h
+      ext/mysqli/php_mysqli.h
+      ext/ncurses/php_ncurses.h
+      ext/ncurses/php_ncurses_fe.h
+      ext/oci8/php_oci8.h
+      ext/odbc/php_birdstep.h
+      ext/odbc/php_odbc.h
+      ext/odbc/php_odbc_includes.h
+      ext/openssl/php_openssl.h
+      ext/pcntl/php_pcntl.h
+      ext/pcntl/php_signal.h
+      ext/pcre/php_pcre.h
+      ext/pdf/php_pdf.h
+      ext/pfpro/php_pfpro.h
+      ext/pgsql/php_pgsql.h
+      ext/posix/php_posix.h
+      ext/pspell/php_pspell.h
+      ext/readline/php_readline.h
+      ext/recode/php_recode.h
+      ext/session/mod_files.h
+      ext/session/mod_mm.h
+      ext/session/mod_user.h
+      ext/session/php_session.h
+      ext/shmop/php_shmop.h
+      ext/simplexml/php_simplexml.h
+      ext/snmp/php_snmp.h
+      ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.h
+      ext/sockets/unix_socket_constants.h
+      ext/sockets/win32_socket_constants.h
+      ext/sqlite/php_sqlite.h
+      ext/standard/base64.h
+      ext/standard/basic_functions.h
+      ext/standard/crc32.h
+      ext/standard/credits.h
+      ext/standard/css.h
+      ext/standard/cyr_convert.h
+      ext/standard/datetime.h
+      ext/standard/dl.h
+      ext/standard/dns.h
+      ext/standard/exec.h
+      ext/standard/file.h
+      ext/standard/flock_compat.h
+      ext/standard/fsock.h
+      ext/standard/head.h
+      ext/standard/html.h
+      ext/standard/info.h
+      ext/standard/md5.h
+      ext/standard/microtime.h
+      ext/standard/pack.h
+      ext/standard/pageinfo.h
+      ext/standard/php_array.h
+      ext/standard/php_assert.h
+      ext/standard/php_browscap.h
+      ext/standard/php_crypt.h
+      ext/standard/php_dir.h
+      ext/standard/php_ext_syslog.h
+      ext/standard/php_filestat.h
+      ext/standard/php_fopen_wrappers.h
+      ext/standard/php_ftok.h
+      ext/standard/php_http.h
+      ext/standard/php_image.h
+      ext/standard/php_incomplete_class.h
+      ext/standard/php_iptc.h
+      ext/standard/php_lcg.h
+      ext/standard/php_link.h
+      ext/standard/php_mail.h
+      ext/standard/php_math.h
+      ext/standard/php_metaphone.h
+      ext/standard/php_parsedate.h
+      ext/standard/php_rand.h
+      ext/standard/php_smart_str.h
+      ext/standard/php_smart_str_public.h
+      ext/standard/php_standard.h
+      ext/standard/php_string.h
+      ext/standard/php_sunfuncs.h
+      ext/standard/php_type.h
+      ext/standard/php_uuencode.h
+      ext/standard/php_var.h
+      ext/standard/php_versioning.h
+      ext/standard/proc_open.h
+      ext/standard/quot_print.h
+      ext/standard/reg.h
+      ext/standard/scanf.h
+      ext/standard/sha1.h
+      ext/standard/streamsfuncs.h
+      ext/standard/uniqid.h
+      ext/standard/url.h
+      ext/standard/url_scanner.h
+      ext/standard/url_scanner_ex.h
+      ext/standard/url_scanner_ex.re
+      ext/standard/var_unserializer.re
+      ext/sybase/php_sybase_db.h
+      ext/sybase_ct/php_sybase_ct.h
+      ext/sysvmsg/php_sysvmsg.h
+      ext/sysvsem/php_sysvsem.h
+      ext/sysvshm/php_sysvshm.h
+      ext/tokenizer/php_tokenizer.h
+      ext/wddx/php_wddx.h
+      ext/wddx/php_wddx_api.h
+      ext/xml/expat_compat.h
+      ext/xml/php_xml.h
+      ext/xmlrpc/php_xmlrpc.h
+      ext/xsl/php_xsl.h
+      ext/xsl/xsl_fe.h
+      ext/yaz/php_yaz.h
+      ext/yp/php_yp.h
+      ext/zlib/php_zlib.h
+      main/SAPI.h
+      main/build-defs.h.in
+      main/config.nw.h
+      main/fopen_wrappers.h
+      main/internal_functions.c.in
+      main/internal_functions_registry.h
+      main/logos.h
+      main/php.h
+      main/php3_compat.h
+      main/php_compat.h
+      main/php_content_types.h
+      main/php_globals.h
+      main/php_ini.h
+      main/php_logos.h
+      main/php_main.h
+      main/php_memory_streams.h
+      main/php_network.h
+      main/php_open_temporary_file.h
+      main/php_output.h
+      main/php_realpath.c
+      main/php_reentrancy.h
+      main/php_regex.h
+      main/php_scandir.h
+      main/php_streams.h
+      main/php_syslog.h
+      main/php_ticks.h
+      main/php_variables.h
+      main/rfc1867.h
+      main/safe_mode.h
+      main/snprintf.h
+      main/spprintf.h
+      main/win95nt.h
+      main/streams/php_stream_context.h
+      main/streams/php_stream_filter_api.h
+      main/streams/php_stream_mmap.h
+      main/streams/php_stream_plain_wrapper.h
+      main/streams/php_stream_transport.h
+      main/streams/php_stream_userspace.h
+      main/streams/php_streams_int.h
+      netware/sys/stat.h
+      pear/CMD.php
+      pear/PEAR.php
+      pear/System.php
+      pear/package.dtd
+      pear/Archive/Tar.php
+      pear/Console/Getopt.php
+      pear/OS/Guess.php
+      pear/PEAR/Autoloader.php
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Dependency.php
+      pear/PEAR/DependencyDB.php
+      pear/PEAR/Downloader.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Registry.php
+      pear/PEAR/Remote.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Mirror.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.bat
+      pear/scripts/pearcmd.php
+      pear/scripts/pearwin.php
+      sapi/activescript/classfactory.cpp
+      sapi/activescript/php4activescript.h
+      sapi/activescript/php4as_classfactory.h
+      sapi/activescript/php4as_scriptengine.h
+      sapi/activescript/scriptengine.cpp
+      sapi/apache/mod_php5.h
+      sapi/apache/php_apache_http.h
+      sapi/apache2filter/php_apache.h
+      sapi/apache2handler/php_apache.h
+      sapi/apache_hooks/mod_php4.h
+      sapi/cgi/php_getopt.h
+      sapi/cli/php.1.in
+      sapi/cli/php_getopt.h
+      sapi/embed/php_embed.h
+      sapi/phttpd/php_phttpd.h
+      sapi/thttpd/php_thttpd.h
+      sapi/webjames/php_webjames.h
+      scripts/dev/conv_z_macros
+      win32/crypt_win32.h
+      win32/grp.h
+      win32/md5crypt.h
+      win32/php4dllts.rc2
+      win32/php4ts.rc2
+      win32/php4ts_cli.rc2
+      win32/pwd.h
+      win32/select.h
+      win32/syslog.h
+      win32/winutil.h:
+      - Happy new year and PHP 5 for rest of the files too..
+
+2004-01-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/tests/blankdb.inc
+      ext/sqlite/tests/sqlite_oo_029.phpt:
+      fix tests for win32
+
+2004-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/dba/dba_qdbm.c:
+      correct header
+
+    * header:
+      Happy new year!
+
+2004-01-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/sqlite/sqlite.dsp:
+      add new files to .dsp
+
+    * ext/sqlite/config.w32
+      ext/sqlite/libsqlite/src/sqlite.w32.h:
+      Update win32 build for new version of libsqlite
+
+2004-01-08  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/config.m4
+      ext/sqlite/config.w32
+      ext/sqlite/libsqlite/VERSION
+      ext/sqlite/libsqlite/src/attach.c
+      ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/btree.c
+      ext/sqlite/libsqlite/src/btree.h
+      ext/sqlite/libsqlite/src/btree_rb.c
+      ext/sqlite/libsqlite/src/build.c
+      ext/sqlite/libsqlite/src/copy.c
+      ext/sqlite/libsqlite/src/date.c
+      ext/sqlite/libsqlite/src/delete.c
+      ext/sqlite/libsqlite/src/encode.c
+      ext/sqlite/libsqlite/src/expr.c
+      ext/sqlite/libsqlite/src/func.c
+      ext/sqlite/libsqlite/src/hash.c
+      ext/sqlite/libsqlite/src/hash.h
+      ext/sqlite/libsqlite/src/insert.c
+      ext/sqlite/libsqlite/src/main.c
+      ext/sqlite/libsqlite/src/opcodes.c
+      ext/sqlite/libsqlite/src/opcodes.h
+      ext/sqlite/libsqlite/src/os.c
+      ext/sqlite/libsqlite/src/os.h
+      ext/sqlite/libsqlite/src/pager.c
+      ext/sqlite/libsqlite/src/pager.h
+      ext/sqlite/libsqlite/src/parse.c
+      ext/sqlite/libsqlite/src/parse.h
+      ext/sqlite/libsqlite/src/parse.y
+      ext/sqlite/libsqlite/src/pragma.c
+      ext/sqlite/libsqlite/src/printf.c
+      ext/sqlite/libsqlite/src/random.c
+      ext/sqlite/libsqlite/src/select.c
+      ext/sqlite/libsqlite/src/sqlite.h.in
+      ext/sqlite/libsqlite/src/sqliteInt.h
+      ext/sqlite/libsqlite/src/table.c
+      ext/sqlite/libsqlite/src/tokenize.c
+      ext/sqlite/libsqlite/src/trigger.c
+      ext/sqlite/libsqlite/src/update.c
+      ext/sqlite/libsqlite/src/util.c
+      ext/sqlite/libsqlite/src/vacuum.c
+      ext/sqlite/libsqlite/src/vdbe.c
+      ext/sqlite/libsqlite/src/vdbe.h
+      ext/sqlite/libsqlite/src/vdbeInt.h
+      ext/sqlite/libsqlite/src/vdbeaux.c
+      ext/sqlite/libsqlite/src/where.c:
+      Upgrade bundled libsqlite to 2.8.9
+
+2004-01-08  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * sapi/cgi/config.w32:
+      fix fastcgi build
+
+2004-01-08  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l:
+      -   - A belated happy holidays (by two years)
+
+    * TSRM/tsrm_nw.c
+      TSRM/tsrm_virtual_cwd.c
+      TSRM/tsrm_win32.c
+      ext/bcmath/bcmath.c
+      ext/bz2/bz2.c
+      ext/calendar/cal_unix.c
+      ext/calendar/calendar.c
+      ext/calendar/easter.c
+      ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_dotnet.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_handlers.c
+      ext/com_dotnet/com_iterator.c
+      ext/com_dotnet/com_misc.c
+      ext/com_dotnet/com_olechar.c
+      ext/com_dotnet/com_saproxy.c
+      ext/com_dotnet/com_typeinfo.c
+      ext/com_dotnet/com_variant.c
+      ext/com_dotnet/com_wrapper.c
+      ext/cpdf/cpdf.c
+      ext/ctype/ctype.c
+      ext/curl/interface.c
+      ext/curl/multi.c
+      ext/curl/streams.c
+      ext/dba/dba.c
+      ext/dba/dba_cdb.c
+      ext/dba/dba_db2.c
+      ext/dba/dba_db3.c
+      ext/dba/dba_db4.c
+      ext/dba/dba_dbm.c
+      ext/dba/dba_flatfile.c
+      ext/dba/dba_gdbm.c
+      ext/dba/dba_inifile.c
+      ext/dba/dba_ndbm.c
+      ext/dba/dba_qdbm.c
+      ext/dba/libcdb/cdb.c
+      ext/dba/libcdb/cdb_make.c
+      ext/dba/libcdb/uint32.c
+      ext/dba/libflatfile/flatfile.c
+      ext/dba/libinifile/inifile.c
+      ext/dbase/dbase.c
+      ext/dbx/dbx.c
+      ext/dbx/dbx_fbsql.c
+      ext/dbx/dbx_mssql.c
+      ext/dbx/dbx_mysql.c
+      ext/dbx/dbx_oci8.c
+      ext/dbx/dbx_odbc.c
+      ext/dbx/dbx_pgsql.c
+      ext/dbx/dbx_sqlite.c
+      ext/dbx/dbx_sybasect.c
+      ext/dio/dio.c
+      ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/characterdata.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/documenttype.c
+      ext/dom/dom_iterators.c
+      ext/dom/domconfiguration.c
+      ext/dom/domerror.c
+      ext/dom/domerrorhandler.c
+      ext/dom/domexception.c
+      ext/dom/domimplementation.c
+      ext/dom/domimplementationlist.c
+      ext/dom/domimplementationsource.c
+      ext/dom/domlocator.c
+      ext/dom/domstringlist.c
+      ext/dom/element.c
+      ext/dom/entity.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/namelist.c
+      ext/dom/node.c
+      ext/dom/nodelist.c
+      ext/dom/notation.c
+      ext/dom/php_dom.c
+      ext/dom/processinginstruction.c
+      ext/dom/string_extend.c
+      ext/dom/text.c
+      ext/dom/typeinfo.c
+      ext/dom/userdatahandler.c
+      ext/dom/xpath.c
+      ext/exif/exif.c
+      ext/fam/fam.c
+      ext/fbsql/php_fbsql.c
+      ext/fdf/fdf.c
+      ext/filepro/filepro.c
+      ext/ftp/ftp.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/gd/gd_ctx.c
+      ext/gd/libgd/xbm.c
+      ext/gettext/gettext.c
+      ext/gmp/gmp.c
+      ext/iconv/iconv.c
+      ext/imap/php_imap.c
+      ext/ingres_ii/ii.c
+      ext/interbase/interbase.c
+      ext/ircg/ircg.c
+      ext/ircg/ircg_common.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_thttpd.c
+      ext/ldap/ldap.c
+      ext/mbstring/mb_gpc.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/php_mbregex.c
+      ext/mbstring/php_unicode.c
+      ext/mcrypt/mcrypt.c
+      ext/mcve/mcve.c
+      ext/mhash/mhash.c
+      ext/mime_magic/mime_magic.c
+      ext/ming/ming.c
+      ext/mnogosearch/php_mnogo.c
+      ext/mono/php_mono.c
+      ext/msql/php_msql.c
+      ext/mssql/php_mssql.c
+      ext/mysql/php_mysql.c
+      ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_fe.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/mysqli_report.c
+      ext/ncurses/ncurses.c
+      ext/ncurses/ncurses_fe.c
+      ext/ncurses/ncurses_functions.c
+      ext/oci8/oci8.c
+      ext/odbc/birdstep.c
+      ext/odbc/php_odbc.c
+      ext/openssl/openssl.c
+      ext/openssl/xp_ssl.c
+      ext/oracle/oracle.c
+      ext/ovrimos/ovrimos.c
+      ext/pcntl/pcntl.c
+      ext/pcntl/php_signal.c
+      ext/pcre/php_pcre.c
+      ext/pcre/pcrelib/dftables.c
+      ext/pcre/pcrelib/get.c
+      ext/pcre/pcrelib/maketables.c
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcreposix.c
+      ext/pcre/pcrelib/study.c
+      ext/pdf/pdf.c
+      ext/pfpro/pfpro.c
+      ext/pgsql/pgsql.c
+      ext/posix/posix.c
+      ext/pspell/pspell.c
+      ext/readline/readline.c
+      ext/recode/recode.c
+      ext/session/mod_files.c
+      ext/session/mod_mm.c
+      ext/session/mod_user.c
+      ext/session/session.c
+      ext/shmop/shmop.c
+      ext/simplexml/simplexml.c
+      ext/snmp/snmp.c
+      ext/sockets/php_sockets_win.c
+      ext/sockets/sockets.c
+      ext/sqlite/sess_sqlite.c
+      ext/sqlite/sqlite.c
+      ext/standard/array.c
+      ext/standard/assert.c
+      ext/standard/base64.c
+      ext/standard/basic_functions.c
+      ext/standard/browscap.c
+      ext/standard/crc32.c
+      ext/standard/credits.c
+      ext/standard/crypt.c
+      ext/standard/css.c
+      ext/standard/cyr_convert.c
+      ext/standard/datetime.c
+      ext/standard/dir.c
+      ext/standard/dl.c
+      ext/standard/dns.c
+      ext/standard/exec.c
+      ext/standard/file.c
+      ext/standard/filestat.c
+      ext/standard/filters.c
+      ext/standard/flock_compat.c
+      ext/standard/formatted_print.c
+      ext/standard/fsock.c
+      ext/standard/ftok.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/head.c
+      ext/standard/html.c
+      ext/standard/http.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/incomplete_class.c
+      ext/standard/info.c
+      ext/standard/iptc.c
+      ext/standard/lcg.c
+      ext/standard/levenshtein.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/math.c
+      ext/standard/md5.c
+      ext/standard/metaphone.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/proc_open.c
+      ext/standard/quot_print.c
+      ext/standard/rand.c
+      ext/standard/reg.c
+      ext/standard/scanf.c
+      ext/standard/sha1.c
+      ext/standard/soundex.c
+      ext/standard/streamsfuncs.c
+      ext/standard/string.c
+      ext/standard/sunfuncs.c
+      ext/standard/syslog.c
+      ext/standard/type.c
+      ext/standard/uniqid.c
+      ext/standard/url.c
+      ext/standard/url_scanner.c
+      ext/standard/url_scanner_ex.c
+      ext/standard/user_filters.c
+      ext/standard/uuencode.c
+      ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/versioning.c
+      ext/sybase/php_sybase_db.c
+      ext/sybase_ct/php_sybase_ct.c
+      ext/sysvmsg/sysvmsg.c
+      ext/sysvsem/sysvsem.c
+      ext/sysvshm/sysvshm.c
+      ext/tokenizer/tokenizer.c
+      ext/wddx/wddx.c
+      ext/xml/compat.c
+      ext/xml/xml.c
+      ext/xmlrpc/xmlrpc-epi-php.c
+      ext/xsl/php_xsl.c
+      ext/xsl/xsltprocessor.c
+      ext/yaz/php_yaz.c
+      ext/yp/yp.c
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/SAPI.c
+      main/fopen_wrappers.c
+      main/internal_functions_nw.c
+      main/internal_functions_win32.c
+      main/main.c
+      main/network.c
+      main/output.c
+      main/php_content_types.c
+      main/php_ini.c
+      main/php_logos.c
+      main/php_open_temporary_file.c
+      main/php_scandir.c
+      main/php_sprintf.c
+      main/php_ticks.c
+      main/php_variables.c
+      main/reentrancy.c
+      main/rfc1867.c
+      main/safe_mode.c
+      main/snprintf.c
+      main/spprintf.c
+      main/strlcat.c
+      main/strlcpy.c
+      main/streams/cast.c
+      main/streams/filter.c
+      main/streams/memory.c
+      main/streams/mmap.c
+      main/streams/plain_wrapper.c
+      main/streams/streams.c
+      main/streams/transports.c
+      main/streams/userspace.c
+      main/streams/xp_socket.c
+      netware/start.c
+      sapi/activescript/php4activescript.c
+      sapi/aolserver/aolserver.c
+      sapi/apache/libpre.c
+      sapi/apache/mod_php5.c
+      sapi/apache/php_apache.c
+      sapi/apache/sapi_apache.c
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/apache_config.c
+      sapi/apache2handler/mod_php5.c
+      sapi/apache2handler/php_functions.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php4.c
+      sapi/apache_hooks/php_apache.c
+      sapi/apache_hooks/sapi_apache.c
+      sapi/caudium/caudium.c
+      sapi/cgi/cgi_main.c
+      sapi/cgi/getopt.c
+      sapi/cli/getopt.c
+      sapi/cli/php_cli.c
+      sapi/embed/php_embed.c
+      sapi/isapi/php4isapi.c
+      sapi/milter/php_milter.c
+      sapi/nsapi/nsapi.c
+      sapi/phttpd/phttpd.c
+      sapi/pi3web/pi3web_sapi.c
+      sapi/roxen/roxen.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c
+      sapi/webjames/webjames.c
+      win32/crypt_win32.c
+      win32/md5crypt.c
+      win32/pwd.c
+      win32/select.c
+      win32/winutil.c:
+      - A belated happy holidays and PHP 5
+
+2004-01-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * win32/php_modules.dsw:
+      - remove non-existing project
+
+    * (PHP_4_3)
+      ext/imap/php_imap.c:
+      MFH: Added missing constants (bug #26831)
+
+    * ext/imap/php_imap.c:
+      Added missing constants (bug #26831)
+
+2004-01-08  Frank M. Kromann  <frank@kromann.info>
+
+    * win32/php4dllts.dsp:
+      Adding new com_dotnet source files to project
+
 2004-01-07  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * NEWS
