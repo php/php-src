@@ -163,7 +163,11 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 	if (failed) {
 		/* failure means that they don't get a stream to play with */
-		php_stream_close(stream);
+		if (persistent_id) {
+			php_stream_pclose(stream);
+		} else {
+			php_stream_close(stream);
+		}
 		stream = NULL;
 	}
 
