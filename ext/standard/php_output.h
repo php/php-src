@@ -28,10 +28,10 @@ PHPAPI int  php_header_write(const char *str, uint str_length);
 PHPAPI void php_start_ob_buffering(void);
 PHPAPI void php_end_ob_buffering(int send_buffer);
 PHPAPI int php_ob_get_buffer(pval *p);
-PHPAPI void php_start_implicit_flush();
-PHPAPI void php_end_implicit_flush();
-PHPAPI char *php_get_output_start_filename();
-PHPAPI int php_get_output_start_lineno();
+PHPAPI void php_start_implicit_flush(void);
+PHPAPI void php_end_implicit_flush(void);
+PHPAPI char *php_get_output_start_filename(void);
+PHPAPI int php_get_output_start_lineno(void);
 
 PHP_FUNCTION(ob_start);
 PHP_FUNCTION(ob_end_flush);
