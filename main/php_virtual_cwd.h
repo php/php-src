@@ -69,6 +69,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API int virtual_chdir(char *path);
 CWD_API int virtual_chdir_file(char *path);
 CWD_API int virtual_filepath(char *path, char **filepath);
+CWD_API char *virtual_realpath(char *path, char *real_path);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode);
 CWD_API int virtual_open(const char *path, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode);
@@ -81,6 +82,13 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode);
 CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
+#if HAVE_UTIME
+CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);
+#endif
+CWD_API int virtual_chmod(const char *filename, mode_t mode);
+#ifndef PHP_WIN32
+CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group);
+#endif
 
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path);
 

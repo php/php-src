@@ -1979,15 +1979,16 @@ PHP_FUNCTION(fgetcsv) {
 PHP_FUNCTION(realpath)
 {
 	zval **path;
-	char resolved_path[MAXPATHLEN];
+	char resolved_path_buff[MAXPATHLEN];
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(ZEND_NUM_ARGS(), &path) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_string_ex(path);
-	if (php_realpath((*path)->value.str.val, resolved_path)) {
-		RETURN_STRING(resolved_path, 1);
+	
+	if (V_REALPATH((*path)->value.str.val, resolved_path_buff)) {
+		RETURN_STRING(resolved_path_buff, 1);
 	} else {
 		RETURN_FALSE;
 	}

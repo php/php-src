@@ -260,7 +260,7 @@ PHP_FUNCTION(chgrp)
 	if (php_check_open_basedir((*filename)->value.str.val))
 		RETURN_FALSE;
 
-	ret = chown((*filename)->value.str.val, -1, gid);
+	ret = V_CHOWN((*filename)->value.str.val, -1, gid);
 	if (ret == -1) {
 		php_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -308,7 +308,7 @@ PHP_FUNCTION(chown)
 	if (php_check_open_basedir((*filename)->value.str.val))
 		RETURN_FALSE;
 
-	ret = chown((*filename)->value.str.val, uid, -1);
+	ret = V_CHOWN((*filename)->value.str.val, uid, -1);
 	if (ret == -1) {
 		php_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -349,7 +349,7 @@ PHP_FUNCTION(chmod)
 	if(PG(safe_mode)) 
 	  imode &= 0777;
 
-	ret = chmod((*filename)->value.str.val, imode);
+	ret = V_CHMOD((*filename)->value.str.val, imode);
 	if (ret == -1) {
 		php_error(E_WARNING, "chmod failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -419,7 +419,7 @@ PHP_FUNCTION(touch)
 		fclose(file);
 	}
 
-	ret = utime((*filename)->value.str.val, newtime);
+	ret = V_UTIME((*filename)->value.str.val, newtime);
 	if (newtime) efree(newtime);
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));
