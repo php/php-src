@@ -1,0 +1,65 @@
+#!/bin/sh
+
+EXTNAME="$1"
+
+function givup() {
+	echo $*
+	exit 1
+}
+
+if test "$EXTNAME" = ""; then
+	givup "usage: $0 extension-name"
+fi
+
+if test -d "$EXTNAME" ; then
+	givup "Directory $EXTNAME already exists."
+fi
+
+echo "Creating directory"
+
+mkdir $EXTNAME || givup "Cannot create directory $EXTNAME"
+
+cd $EXTNAME
+chmod 755 .
+
+echo -n "Creating basic files:"
+
+echo -n " config.m4"
+cat >config.m4 <<eof
+dnl \$Id\$
+dnl config.m4 for extension $EXTNAME
+dnl don't forget to call PHP_EXTENSION($EXTNAME)
+
+eof
+
+echo -n " setup.stub"
+cat >setup.stub <<eof
+# \$Id\$
+
+define_option with-$EXTNAME '$EXTNAME support?' yesnodir \\
+    "defs" \\
+'    Whether to include $EXTNAME support.'
+	
+eof
+
+echo -n " Makefile.am"
+cat >Makefile.am <<eof
+# \$Id\$
+
+INCLUDES=@INCLUDES@ -I@top_srcdir@ -I@top_srcdir@/libzend
+noinst_LIBRARIES=libphpext_$EXTNAME.a
+libphpext_${EXTNAME}_a_SOURCES=$EXTNAME.c
+
+eof
+
+
+echo -n " .cvsignore"
+cat >.cvsignore <<eof
+.deps
+Makefile.in
+Makefile
+eof
+
+chmod 644 *
+
+echo " [done]."
