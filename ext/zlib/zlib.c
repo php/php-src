@@ -74,8 +74,6 @@
 #endif
 
 #define OS_CODE			0x03 /* FIXME */
-#define CODING_GZIP		1
-#define CODING_DEFLATE	2
 #define GZIP_HEADER_LENGTH		10
 #define GZIP_FOOTER_LENGTH		8
 
@@ -144,6 +142,26 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		return FAILURE;
 	}
 
+	if(new_value == NULL)
+		return FAILURE;
+
+	if(!strncasecmp(new_value, "off", sizeof("off"))) {
+		new_value = "0";
+		new_value_length = sizeof("0");
+	} else if(!strncasecmp(new_value, "on", sizeof("on"))) {
+		new_value = "4096";
+		new_value_length = sizeof("4096");
+	} else if(stage == PHP_INI_STAGE_RUNTIME &&
+			  strncmp(new_value, "0", sizeof("0")) && strncmp(new_value, "1", sizeof("1"))) {
+		php_error(E_WARNING, "Cannot change zlib.output_compression buffer size during script execution");
+		return FAILURE;
+	}
+
+	if (stage == PHP_INI_STAGE_RUNTIME && SG(headers_sent) && !SG(request_info).no_headers) {
+		php_error(E_WARNING, "Cannot change zlib.output_compression - headers already sent");
+		return FAILURE;
+	}
+
 	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	return SUCCESS;
@@ -161,7 +179,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression_level)
 
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_SYSTEM|PHP_INI_PERDIR, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
+    STD_PHP_INI_BOOLEAN("zlib.output_compression", "0", PHP_INI_ALL, OnUpdate_zlib_output_compression, output_compression, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdate_zlib_output_compression_level, output_compression_level, zend_zlib_globals, zlib_globals)
 PHP_INI_END()
 
@@ -197,6 +215,7 @@ PHP_MINIT_FUNCTION(zlib)
 PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(ob_gzhandler_status) = 0;
+	ZLIBG(ob_gzip_coding) = 0;
 	switch (ZLIBG(output_compression)) {
 		case 0:
 			break;
@@ -947,11 +966,15 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 {
 	zend_bool do_start, do_end;
 
-	do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
-	do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
-	if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)!=SUCCESS) {
-		zend_error(E_ERROR, "Compression failed");
-	} 
+	if (!ZLIBG(output_compression)) {
+		*handled_output = NULL;
+	} else {
+		do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
+		do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
+		if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC)!=SUCCESS) {
+			zend_error(E_ERROR, "Compression failed");
+		}
+	}
 }
 /* }}} */
 
@@ -968,20 +991,8 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 	}
 	convert_to_string_ex(a_encoding);
 	if (php_memnstr(Z_STRVAL_PP(a_encoding), "gzip", 4, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
-			return FAILURE;
-		}
-		if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
-			return FAILURE;			
-		}
 		ZLIBG(ob_gzip_coding) = CODING_GZIP;
 	} else if(php_memnstr(Z_STRVAL_PP(a_encoding), "deflate", 7, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
-			return FAILURE;
-		}
-		if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
-			return FAILURE;			
-		}
 		ZLIBG(ob_gzip_coding) = CODING_DEFLATE;
 	} else {
 		return FAILURE;

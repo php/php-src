@@ -30,6 +30,10 @@
 #if (HAVE_PCRE || HAVE_BUNDLED_PCRE) && !defined(COMPILE_DL_PCRE)
 #include "ext/pcre/php_pcre.h"
 #endif
+#if HAVE_ZLIB
+#include "ext/zlib/php_zlib.h"
+ZEND_EXTERN_MODULE_GLOBALS(zlib)
+#endif
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -485,6 +489,11 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 			if (!STRCASECMP(header_line, "Content-Type")) {
 				char *ptr = colon_offset+1, *mimetype = NULL, *newheader;
 				size_t len = header_line_len - (ptr - header_line), newlen;
+#if HAVE_ZLIB
+				if(strncmp(ptr, "image/", sizeof("image/"))) {
+					ZLIBG(output_compression) = 0;
+				}
+#endif
 				while (*ptr == ' ' && *ptr != '\0') {
 					ptr++;
 				}
@@ -632,6 +641,31 @@ SAPI_API int sapi_send_headers(TSRMLS_D)
 	if (SG(headers_sent) || SG(request_info).no_headers) {
 		return SUCCESS;
 	}
+
+#if HAVE_ZLIB
+	/* Add output compression headers at this late stage in order to make
+	   it possible to switch it off inside the script. */
+	if (ZLIBG(output_compression)) {
+		switch (ZLIBG(ob_gzip_coding)) {
+			case CODING_GZIP:
+				if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
+					return FAILURE;
+				}
+				if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+					return FAILURE;			
+				}
+				break;
+			case CODING_DEFLATE:
+				if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
+					return FAILURE;
+				}
+				if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+					return FAILURE;			
+				}
+				break;
+		}
+	}
+#endif
 
 	/* Success-oriented.  We set headers_sent to 1 here to avoid an infinite loop
 	 * in case of an error situation.
