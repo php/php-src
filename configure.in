@@ -127,6 +127,9 @@ dnl AC_PROG_CXXCPP
 dnl check for -R, etc. switch
 PHP_RUNPATH_SWITCH
 
+dnl check for working sed (disabled for now, waiting for comments)
+dnl PHP_PROG_SED
+
 AC_PROG_RANLIB
 AC_PROG_LN_S
 AC_PROG_AWK
@@ -223,10 +226,7 @@ PHP_CONFIGURE_PART(Configuring SAPI modules)
 
 esyscmd(./scripts/config-stubs sapi)
 
-if test "$PHP_SAPI" = "default"; then
-  PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c,,'$(SAPI_CGI_PATH)')
-fi
-
+dnl Show which main SAPI was selected
 AC_MSG_CHECKING([for chosen SAPI module])
 AC_MSG_RESULT([$PHP_SAPI])
 
