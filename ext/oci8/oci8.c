@@ -3009,6 +3009,15 @@ static void _oci_close_session(oci_session *session)
 		}
 	mutex_unlock(mx_lock);
 
+#ifdef HAVE_OCI_9_2
+	/* free environment handle (and fix bug #29652 with growing .msb FD number under weirdie Solarises) */
+	CALL_OCI(
+		OCIHandleFree(
+				(dvoid *) session->pEnv, 
+				OCI_HTYPE_ENV
+		)
+	);
+#endif
 	if (session->exclusive) {
 		efree(session);
 	}
