@@ -1,3 +1,83 @@
+2000-04-15  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/calendar/Makefile.in
+      ext/calendar/calendar.c
+      ext/calendar/config.m4
+      ext/calendar/dow.c
+      ext/calendar/easter.c
+      ext/calendar/french.c
+      ext/calendar/gregor.c
+      ext/calendar/jewish.c
+      ext/calendar/julian.c
+      ext/calendar/php_calendar.h
+      ext/calendar/sdncal.h:
+    made calendar a real extension instead of a dl one only
+
+2000-04-15  Frank M. Kromann  <fmk@swwwing.com>
+
+    * php_modules.dsw: Adding mssql to modules
+
+    * ext/mssql/mssql.dsp
+      ext/mssql/php_mssql.c: Fixing compilation errors in MSSQL module
+
+    * sapi/isapi/php4isapi.c:
+    Adding $PHP_SELF variable for compatibility with other platforms
+
+2000-04-15  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/aolserver/aolserver.c: SECTION is not defined in info.h anymore
+
+    * sapi/aolserver/config.m4:
+    Support install directories other than srcdir/root
+
+    * sapi/aolserver/README:
+    Add documentation on how to install PHP in AOLserver
+
+2000-04-15  Andi Gutmans  <andi@php.net>
+
+    * configuration-parser.y: - PHP_FOPEN -> V_FOPEN
+
+2000-04-15  Zeev Suraski  <zeev@php.net>
+
+    * main.c: Remove unnecessary argument
+
+2000-04-15  Andi Gutmans  <andi@php.net>
+
+    * win32/registry.c
+      ext/posix/posix.c
+      ext/standard/dir.c
+      ext/standard/filestat.c
+      ext/standard/image.c
+      ext/standard/iptc.c
+      sapi/apache/mod_php4.c
+      sapi/isapi/php4isapi.c
+      sapi/roxen/roxen.c:  - Change PHP_ to V_ (directory & file functions)
+
+    * ext/gd/gd.c
+      ext/db/db.c
+      ext/filepro/filepro.c
+      ext/ftp/php_ftp.c
+      ext/com/COM.c
+      fopen-wrappers.c
+      main.c
+      php.h
+      php_realpath.c
+      rfc1867.c
+      safe_mode.c: - Change PHP_ to V_ (directory & file functions)
+
+    * ext/standard/math.c:  Fix bug in number_format (Jon Forsberg)
+
+2000-04-15  Zeev Suraski  <zeev@php.net>
+
+    * php3_compat.h
+      main.c: Forgot to commit the php4 fixes
+
+2000-04-15  Danny Heijl  <Danny.Heijl@cevi.be>
+
+    * ext/informix/ifx.dsp
+      ext/informix/ifx.dsw:
+    - fix Win32 Release_TS build of Informix driver (danny).
+
 2000-04-14  Egon Schmid  <eschmid@s.netic.de>
 
     * ext/standard/info.c: Small corrections.
