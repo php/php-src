@@ -66,7 +66,7 @@ PHP 4                                                                      NEWS
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
 
-?? ??? 2002, Version 4.2.0
+22 Apr 2002, Version 4.2.0
 - ATTENTION!! register_globals defaults to 'off' now !!!
 - Moved ext/mailparse to PECL. (Wez/Jim)
 - Modified the mysql extension to disable 'LOAD LOCAL' when safe mode is 
