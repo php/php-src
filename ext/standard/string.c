@@ -2668,83 +2668,105 @@ PHPAPI int php_char_to_str(char *str, uint len, char from, char *to, int to_len,
 }
 /* }}} */
 
-/* {{{ boyer_str_to_str */
-static char *boyer_str_to_str(char *haystack, int length,
-		char *needle, int needle_len, char *str, 
-		int str_len, int *new_length)
+/* {{{ php_str_to_str_ex
+ */
+PHPAPI char *php_str_to_str_ex(char *haystack, int length, 
+	char *needle, int needle_len, char *str, int str_len, int *_new_length, int case_sensitivity)
 {
-	char *p, *pe, *cursor, *end, *r;
-	int off;
-	char jump_table[256];
-	smart_str result = {0};
+	char *new_str;
 
-	/*
-	 * We implement only the first half of the Boyer-Moore algorithm,
-	 * because the second half is too expensive to compute during run-time.
-	 * TODO: Split matching into compile-/match-stage.
-	 */
-	
-	/* Prepare the jump_table which contains the skip offsets */
-	memset(jump_table, needle_len, 256);
-	
-	off = needle_len - 1;
-	
-	/* Calculate the default start where each comparison starts */
-	pe = needle + off;
+	if (needle_len < length) {
+		char *end, *haystack_dup, *needle_dup;
+		char *e, *s, *p, *r;
 
-	/* Assign skip offsets based on the pattern */
-	for (p = needle; p <= pe; p++)
-		jump_table[(unsigned char) *p] = off--;
-	
-	/* Start to look at the first possible position for the pattern */
-	cursor = haystack + needle_len - 1;
-	
-	/* The cursor must not cross this limit */
-	end = haystack + length;
+		if (needle_len == str_len) {
+			new_str = estrndup(haystack, length);
+			*_new_length = length;
 
-	/* Start to copy at haystack */
-	r = haystack;
-	
-nextiter:
-	while (cursor < end) {
-		p = pe;						/* Compare from right to left */
-		while (*p == *cursor) {
-			if (--p < needle) {		/* Found the pattern */
-									
-				/* Append whatever was not matched */
-				smart_str_appendl(&result, r, cursor - r);
-									
-				/* Append replacement string */
-				smart_str_appendl(&result, str, str_len);
-				
-				/* Update copy pointer */
-				r = cursor + needle_len;
-				
-				/* needle_len was substracted from cursor for 
-				 * this comparison, add it back.  Also add 
-				 * needle_len - 1 which is the default search 
-				 * offset.
-				 */
-				cursor += (needle_len << 1) - 1;
-				
-				/* Next iteration */
-				goto nextiter;
+			if (case_sensitivity) {
+				end = new_str + length;
+				for (p = new_str; (r = php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+					memcpy(r, str, str_len);
+				}
+			} else {
+				haystack_dup = estrndup(haystack, length);
+				needle_dup = estrndup(needle, needle_len);
+				php_strtolower(haystack_dup, length);
+				php_strtolower(needle_dup, needle_len);
+				end = haystack_dup + length;
+				for (p = haystack_dup; (r = php_memnstr(p, needle_dup, needle_len, end)); p = r + needle_len) {
+					memcpy(new_str + (r - haystack_dup), str, str_len);
+				}
+				efree(haystack_dup);
+				efree(needle_dup);
 			}
-			cursor--;
-		}
+			return new_str;
+		} else {
+			if (str_len < needle_len) {
+				new_str = emalloc(length + 1);
+			} else {
+				new_str = emalloc((length / needle_len + 1) * str_len);
+			}
 
-		cursor += jump_table[(unsigned char) *cursor];
+			e = s = new_str;
+
+			if (case_sensitivity) {
+				end = haystack + length;
+				for (p = haystack; (r = php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
+					memcpy(e, p, r - p);
+					e += r - p;
+					memcpy(e, str, str_len);
+					e += str_len;
+				}
+
+				if (p < end) {
+					memcpy(e, p, end - p);
+					e += end - p;
+				}
+			} else {
+				haystack_dup = estrndup(haystack, length);
+				needle_dup = estrndup(needle, needle_len);
+				php_strtolower(haystack_dup, length);
+				php_strtolower(needle_dup, needle_len);
+
+				end = haystack_dup + length;
+
+				for (p = haystack_dup; (r = php_memnstr(p, needle_dup, needle_len, end)); p = r + needle_len) {
+					memcpy(e, haystack + (p - haystack_dup), r - p);
+					e += r - p;
+					memcpy(e, str, str_len);
+					e += str_len;
+				}
+
+				if (p < end) {
+					memcpy(e, haystack + (p - haystack_dup), end - p);
+					e += end - p;
+				}
+				efree(haystack_dup);
+				efree(needle_dup);
+			}
+
+			*e = '\0';
+			*_new_length = e - s;
+
+			new_str = erealloc(new_str, *_new_length + 1);
+			return new_str;
+		}
+	} else if (needle_len > length) {
+nothing_todo:
+		*_new_length = length;
+		new_str = estrndup(haystack, length);
+		return new_str;
+	} else {
+		if (case_sensitivity ? strncmp(haystack, needle, length) : strncasecmp(haystack, needle, length)) {
+			goto nothing_todo;
+		} else {
+			*_new_length = str_len;
+			new_str = estrndup(str, str_len);
+			return new_str;
+		}
 	}
 
-	if (r < end)		/* Copy the remaining data */
-		smart_str_appendl(&result, r, end - r);
-
-	smart_str_0(&result); /* NUL-ify result */
-
-	if (new_length)
-		*new_length = result.len;
-
-	return result.c;
 }
 /* }}} */
 
@@ -2753,43 +2775,21 @@ nextiter:
 PHPAPI char *php_str_to_str(char *haystack, int length, 
 	char *needle, int needle_len, char *str, int str_len, int *_new_length)
 {
-	char *p;
-	char *r;
-	char *end = haystack + length;
-	smart_str result = {0};
-
-	for (p = haystack;
-			(r = php_memnstr(p, needle, needle_len, end));
-			p = r + needle_len) {
-		smart_str_appendl(&result, p, r - p);
-		smart_str_appendl(&result, str, str_len);
-	}
-
-	if (p < end) 
-		smart_str_appendl(&result, p, end - p);
-
-	smart_str_0(&result);
-
-	if (_new_length) 
-		*_new_length = result.len;
-
-	return result.c;
-}
-/* }}} */
+	return php_str_to_str_ex(haystack, length, needle, needle_len, str, str_len, _new_length, 1);
+} 
+/* }}}
+ */
 
 /* {{{ php_str_replace_in_subject
  */
-static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int boyer)
+static void php_str_replace_in_subject(zval *search, zval *replace, zval **subject, zval *result, int case_sensitivity)
 {
 	zval		**search_entry,
 				**replace_entry = NULL,
 				  temp_result;
 	char		*replace_value = NULL;
 	int			 replace_len = 0;
-	char *(*str_to_str)(char *, int, char *, int, char *, int, int *);
 
-	str_to_str = boyer ? boyer_str_to_str : php_str_to_str;
-	
 	/* Make sure we're dealing with strings. */	
 	convert_to_string_ex(subject);
 	Z_TYPE_P(result) = IS_STRING;
@@ -2851,9 +2851,9 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 								replace_len,
 								&temp_result);
 			} else if (Z_STRLEN_PP(search_entry) > 1) {
-				Z_STRVAL(temp_result) = str_to_str(Z_STRVAL_P(result), Z_STRLEN_P(result),
-												   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
-												   replace_value, replace_len, &Z_STRLEN(temp_result));
+				Z_STRVAL(temp_result) = php_str_to_str_ex(Z_STRVAL_P(result), Z_STRLEN_P(result),
+														   Z_STRVAL_PP(search_entry), Z_STRLEN_PP(search_entry),
+														   replace_value, replace_len, &Z_STRLEN(temp_result), case_sensitivity);
 			}
 
 			efree(Z_STRVAL_P(result));
@@ -2875,9 +2875,9 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 							Z_STRLEN_P(replace),
 							result);
 		} else if (Z_STRLEN_P(search) > 1) {
-			Z_STRVAL_P(result) = str_to_str(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
-											Z_STRVAL_P(search), Z_STRLEN_P(search),
-											Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result));
+			Z_STRVAL_P(result) = php_str_to_str_ex(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject),
+													Z_STRVAL_P(search), Z_STRLEN_P(search),
+													Z_STRVAL_P(replace), Z_STRLEN_P(replace), &Z_STRLEN_P(result), case_sensitivity);
 		} else {
 			*result = **subject;
 			zval_copy_ctor(result);
@@ -2887,32 +2887,21 @@ static void php_str_replace_in_subject(zval *search, zval *replace, zval **subje
 }
 /* }}} */
 
-/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject [, bool boyer])
+/* {{{ proto mixed str_replace(mixed search, mixed replace, mixed subject)
    Replaces all occurrences of search in haystack with replace */
 PHP_FUNCTION(str_replace)
 {
-	zval **subject, **search, **replace, **subject_entry, **pboyer;
+	zval **subject, **search, **replace, **subject_entry;
 	zval *result;
 	char *string_key;
 	uint string_key_len;
 	ulong num_key;
-	int boyer = 0;
 
-	if (ZEND_NUM_ARGS() < 3 ||
-	   ZEND_NUM_ARGS() > 4 ||
-	   zend_get_parameters_ex(ZEND_NUM_ARGS(), &search, 
-							  &replace, &subject, &pboyer) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 3 ||
+	   zend_get_parameters_ex(3, &search, &replace, &subject) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	switch (ZEND_NUM_ARGS()) {
-		case 4:
-			convert_to_boolean_ex(pboyer);
-			if (Z_BVAL_PP(pboyer))
-				boyer = 1;
-			break;
-	}
-	
 	SEPARATE_ZVAL(search);
 	SEPARATE_ZVAL(replace);
 	SEPARATE_ZVAL(subject);
@@ -2934,7 +2923,7 @@ PHP_FUNCTION(str_replace)
 		   and add the result to the return_value array. */
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
 			MAKE_STD_ZVAL(result);
-			php_str_replace_in_subject(*search, *replace, subject_entry, result, boyer);
+			php_str_replace_in_subject(*search, *replace, subject_entry, result, 1);
 			/* Add to return array */
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
 												&string_key_len, &num_key, 0, NULL)) {
@@ -2950,7 +2939,64 @@ PHP_FUNCTION(str_replace)
 			zend_hash_move_forward(Z_ARRVAL_PP(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(*search, *replace, subject, return_value, boyer);
+		php_str_replace_in_subject(*search, *replace, subject, return_value, 1);
+	}	
+}
+/* }}} */
+
+/* {{{ proto mixed str_ireplace(mixed search, mixed replace, mixed subject)
+   Replaces all occurrences of search in haystack with replace / case-insensitive */
+PHP_FUNCTION(str_ireplace)
+{
+	zval **subject, **search, **replace, **subject_entry;
+	zval *result;
+	char *string_key;
+	uint string_key_len;
+	ulong num_key;
+
+	if (ZEND_NUM_ARGS() != 3 ||
+	   zend_get_parameters_ex(3, &search, &replace, &subject) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+
+	SEPARATE_ZVAL(search);
+	SEPARATE_ZVAL(replace);
+	SEPARATE_ZVAL(subject);
+
+	/* Make sure we're dealing with strings and do the replacement. */
+	if (Z_TYPE_PP(search) != IS_ARRAY) {
+		convert_to_string_ex(search);
+		convert_to_string_ex(replace);
+	} else if (Z_TYPE_PP(replace) != IS_ARRAY) {
+		convert_to_string_ex(replace);
+	}
+
+	/* if subject is an array */
+	if (Z_TYPE_PP(subject) == IS_ARRAY) {
+		array_init(return_value);
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(subject));
+
+		/* For each subject entry, convert it to string, then perform replacement
+		   and add the result to the return_value array. */
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(subject), (void **)&subject_entry) == SUCCESS) {
+			MAKE_STD_ZVAL(result);
+			php_str_replace_in_subject(*search, *replace, subject_entry, result, 0);
+			/* Add to return array */
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(subject), &string_key,
+												&string_key_len, &num_key, 0, NULL)) {
+				case HASH_KEY_IS_STRING:
+					add_assoc_zval_ex(return_value, string_key, string_key_len, result);
+					break;
+
+				case HASH_KEY_IS_LONG:
+					add_index_zval(return_value, num_key, result);
+					break;
+			}
+		
+			zend_hash_move_forward(Z_ARRVAL_PP(subject));
+		}
+	} else {	/* if subject is not an array */
+		php_str_replace_in_subject(*search, *replace, subject, return_value, 0);
 	}	
 }
 /* }}} */
