@@ -1865,7 +1865,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			zval *outbuf = NULL;
 			zval outbuflen;
 
-			ALLOC_INIT_ZVAL(outbuf);
 			INIT_ZVAL(outbuflen);
 
 			buffer_len = vsnprintf(buffer, sizeof(buffer)-1, format, args);
