@@ -1,4 +1,4 @@
-#!@prefix@/bin/php -f
+#!@prefix@/bin/php -q
 <?php // -*- C++ -*-
 
 require_once "PEAR.php";
