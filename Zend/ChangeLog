@@ -1,3 +1,14 @@
+2005-03-21  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend_execute.c:
+      - Fix memset() bug (Joe Orton)
+
+2005-03-21  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      internal_function->fn_flags is not initialized at this point
+
 2005-03-20  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * tests/bug31102.phpt:
