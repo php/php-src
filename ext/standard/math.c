@@ -636,9 +636,12 @@ char *_php_math_number_format(double d,int dec,char dec_point,char thousand_sep)
 		return tmpbuf;
 	}
 
-	for (t=tmpbuf; *t; t++) {
-		if (*t=='.') {
-			*t = dec_point;
+	if (dec_point!='.') {
+		for (t=tmpbuf; *t; t++) {
+			if (*t=='.') {
+				*t = dec_point;
+				break;
+			}
 		}
 	}
 	if (dec) {
