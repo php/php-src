@@ -280,6 +280,7 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 	int dimension = 1;
 	int* dims;
 	xmlNodePtr xmlParam;
+	sdlTypePtr elementType;
 	encodePtr enc = NULL;
 	TSRMLS_FETCH();
 
@@ -368,8 +369,47 @@ xmlNodePtr sdl_to_xml_array(sdlTypePtr type, zval *data, int style)
 
 				efree(value);
 				if (ns) efree(ns);
+			} else if (type->elements &&
+			           zend_hash_num_elements(type->elements) == 1 &&
+				         (elementType = *(sdlTypePtr*)type->elements->pListHead->pData) != NULL &&
+				         elementType->encode && elementType->encode->details.type_str) {
+				char* ns = elementType->encode->details.ns;
+				if (ns) {
+					if (strcmp(ns,XSD_NAMESPACE) == 0) {
+						smart_str_appendl(&array_type_and_size, XSD_NS_PREFIX, sizeof(XSD_NS_PREFIX) - 1);
+						smart_str_appendc(&array_type_and_size, ':');
+					} else {
+						smart_str *prefix = encode_new_ns();
+						smart_str smart_ns = {0};
+
+						smart_str_appendl(&smart_ns, "xmlns:", sizeof("xmlns:") - 1);
+						smart_str_appendl(&smart_ns, prefix->c, prefix->len);
+						smart_str_0(&smart_ns);
+						xmlSetProp(xmlParam, smart_ns.c, ns);
+						smart_str_free(&smart_ns);
+
+						smart_str_appends(&array_type_and_size, prefix->c);
+						smart_str_appendc(&array_type_and_size, ':');
+						smart_str_free(prefix);
+						efree(prefix);
+					}
+				}
+				enc = elementType->encode;
+				smart_str_appends(&array_type_and_size, elementType->encode->details.type_str);
+				smart_str_free(&array_type);
+				smart_str_appendc(&array_type_and_size, '[');
+				smart_str_append_long(&array_type_and_size, i);
+				smart_str_appendc(&array_type_and_size, ']');
+				smart_str_0(&array_type_and_size);
+
+				dims = emalloc(sizeof(int)*dimension);
+				dims[0] = i;
 			} else {
-				smart_str_appends(&array_type_and_size, type->name);
+				smart_str array_type = {0};
+				get_array_type(data, &array_type TSRMLS_CC);
+				enc = get_encoder_ex(SOAP_GLOBAL(sdl), array_type.c);
+				smart_str_append(&array_type_and_size, &array_type);
+				smart_str_free(&array_type);
 				smart_str_appendc(&array_type_and_size, '[');
 				smart_str_append_long(&array_type_and_size, i);
 				smart_str_appendc(&array_type_and_size, ']');
@@ -439,6 +479,7 @@ sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns)
 	smart_str_appends(&key, ns);
 	smart_str_appendc(&key, ':');
 	smart_str_appends(&key, name);
+	smart_str_0(&key);
 
 	zend_hash_find(sdl->bindings, key.c, key.len, (void **)&binding);
 

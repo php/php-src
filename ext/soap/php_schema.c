@@ -121,6 +121,7 @@ static int schema_simpleType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr simpleType,
 			}
 			ht = cur_type->elements;
 			smart_str_appends(&key, cur_type->name);
+			smart_str_0(&key);
 		}
 
 		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
@@ -316,17 +317,25 @@ static int schema_restriction_complexContent(sdlPtr *sdl, xmlAttrPtr tsn, xmlNod
 		if(trav->type == XML_ELEMENT_NODE) {
 			if(!strcmp(trav->name, "group")) {
 				schema_group(sdl, tsn, trav, cur_type);
-				return TRUE;
+				break;
 			} else if(!strcmp(trav->name, "all")) {
 				schema_all(sdl, tsn, trav, cur_type);
-				return TRUE;
+				break;
 			} else if(!strcmp(trav->name, "choice")) {
 				schema_choice(sdl, tsn, trav, cur_type);
-				return TRUE;
+				break;
 			} else if(!strcmp(trav->name, "sequence")) {
 				schema_sequence(sdl, tsn, trav, cur_type);
-				return TRUE;
+				break;
 			} else if(!strcmp(trav->name, "attribute")) {
+				schema_attribute(sdl, tsn, trav, cur_type);
+			}
+		}
+	  trav = trav->next;
+	}
+	while (trav != NULL) {
+		if(trav->type == XML_ELEMENT_NODE) {
+			if(!strcmp(trav->name, "attribute")) {
 				schema_attribute(sdl, tsn, trav, cur_type);
 			}
 		}
@@ -773,6 +782,7 @@ static int schema_complexType(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr compType, 
 			}
 			ht = cur_type->elements;
 			smart_str_appends(&key, newType->name);
+			smart_str_0(&key);
 		}
 
 		zend_hash_add(ht, key.c, key.len + 1, &newType, sizeof(sdlTypePtr), (void **)&ptr);
@@ -1055,6 +1065,7 @@ static int schema_attribute(sdlPtr *sdl, xmlAttrPtr tsn, xmlNodePtr attrType, sd
 			smart_str_free(&key);
 			return TRUE;
 		}
+		smart_str_free(&key);
 	}
 
 	zend_hash_next_index_insert(cur_type->attributes, &newAttr, sizeof(sdlAttributePtr), NULL);
