@@ -1754,9 +1754,7 @@ static void apache_table_to_zval(table *t, int safe_mode, zval *return_value)
     table_entry *tenv;
     int i;
 	
-    if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-    }
+    array_init(return_value);
     env_arr = table_elts(t);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {

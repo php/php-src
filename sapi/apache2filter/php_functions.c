@@ -158,9 +158,7 @@ PHP_FUNCTION(apache_request_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->f->r->headers_in);
@@ -180,9 +178,7 @@ PHP_FUNCTION(apache_response_headers)
 	const apr_array_header_t *arr;
 	char *key, *val;
 
-	if (array_init(return_value) == FAILURE) {
-		RETURN_FALSE;
-	}
+	array_init(return_value);
 	
 	ctx = SG(server_context);
 	arr = apr_table_elts(ctx->f->r->headers_out);
