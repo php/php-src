@@ -75,8 +75,8 @@ static void zend_extension_fcall_end_handler(zend_extension *extension, zend_op_
 		&& offset<=function_being_called->common.arg_types[0]				\
 		&& function_being_called->common.arg_types[offset]==BYREF_FORCE)
 
-#define SEPARATE_ON_READ_OBJECT(obj)	\
-if ((obj) && (type == BP_VAR_R) && ((*(obj))->type == IS_OBJECT) && (!(*(obj))->is_ref)) { \
+#define SEPARATE_ON_READ_OBJECT(obj, _type)	\
+if ((obj) && ((_type) == BP_VAR_R) && ((*(obj))->type == IS_OBJECT) && (!(*(obj))->is_ref)) { \
 		SEPARATE_ZVAL((obj));			\
 		(*(obj))->is_ref = 1;			\
 	}
@@ -500,7 +500,7 @@ static inline void zend_fetch_var_address(znode *result, znode *op1, znode *op2,
 		zval_dtor(varname);
 	}
 	Ts[result->u.var].var.ptr_ptr = retval;
-	SEPARATE_ON_READ_OBJECT(retval);
+	SEPARATE_ON_READ_OBJECT(retval, type);
 	SELECTIVE_PZVAL_LOCK(*retval, result);
 }
 
@@ -667,7 +667,7 @@ static inline void zend_fetch_dimension_address(znode *result, znode *op1, znode
 			} else {
 				*retval = zend_fetch_dimension_address_inner(container->value.ht, op2, Ts, type ELS_CC);
 			}
-			SEPARATE_ON_READ_OBJECT(*retval);
+			SEPARATE_ON_READ_OBJECT(*retval, type);
 			SELECTIVE_PZVAL_LOCK(**retval, result);
 			break;
 		case IS_STRING: {
@@ -844,7 +844,7 @@ static inline void zend_fetch_property_address(znode *result, znode *op1, znode 
 		zendi_zval_copy_ctor(*container);
 	}
 	*retval = zend_fetch_property_address_inner(container->value.obj.properties, op2, Ts, type ELS_CC);
-	SEPARATE_ON_READ_OBJECT(*retval);
+	SEPARATE_ON_READ_OBJECT(*retval, type);
 	SELECTIVE_PZVAL_LOCK(**retval, result);
 }
 
@@ -1514,10 +1514,9 @@ do_fcall_common:
 						call_overloaded_function(opline->extended_value, &Ts[opline->result.u.var].tmp_var, &EG(regular_list), &EG(persistent_list) ELS_CC);
 						efree(function_being_called);
 					}
+					object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
 					if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-						zend_ptr_stack_n_pop(&EG(arg_types_stack), 2, &object.ptr, &function_being_called);
-					} else if (opline->opcode == ZEND_DO_FCALL) {
-						object.ptr = zend_ptr_stack_pop(&EG(arg_types_stack));
+						function_being_called = zend_ptr_stack_pop(&EG(arg_types_stack));
 					}
 					function_state.function = (zend_function *) op_array;
 					EG(function_state_ptr) = &function_state;
