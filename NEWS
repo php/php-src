@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.1-dev
+- Fixed basename() bug where "file.ext///" would not return the same
+  as "/path/file.ext///" (Rasmus)
+- Add the swf_ortho function. (Sterling)
 - Moved to virtual current working directory support. This highly improves the
   functionality and stability of multi-threaded versions of PHP (Andi, Sascha)
 
