@@ -539,6 +539,9 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 	zend_llist_element *le;
 	zend_op *opline, *opline_ptr;
 
+	if (zend_variable_buffer_empty(TSRMLS_C) && (type == BP_VAR_W || type == BP_VAR_RW)) {
+		zend_error(E_ERROR, "Method can't be used as l-value");
+	}
 	zend_stack_top(&CG(bp_stack), (void **) &fetch_list_ptr);
 
 	le = fetch_list_ptr->head;
@@ -838,7 +841,7 @@ void zend_do_begin_method_call(znode *object, znode *function_name TSRMLS_DC)
 	zend_op *opline;
 	unsigned char *ptr = NULL;
 
-	zend_do_end_variable_parse(BP_VAR_W, 0 TSRMLS_CC);
+	zend_do_end_variable_parse(BP_VAR_R, 0 TSRMLS_CC);
 	zend_do_begin_variable_parse(TSRMLS_C);
  
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
