@@ -596,7 +596,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         list_entry *le;
         
         /* try to find if we already have this link in our persistent list */
-        if (zend_hash_find(plist, hashed_details, hashed_details_length+1, 
+        if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, 
                             (void **) &le)==FAILURE) {  /* we don't */
             list_entry new_le;
 
@@ -640,7 +640,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             /* hash it up */
             new_le.type = IFXL(le_plink);
             new_le.ptr = ifx;
-            if (zend_hash_update(plist, hashed_details, 
+            if (zend_hash_update(&EG(persistent_list), hashed_details, 
                    hashed_details_length+1, 
                    (void *) &new_le, sizeof(list_entry), NULL)==FAILURE) {
                 free(ifx);
@@ -668,7 +668,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                     php_error(E_WARNING,
                                "Informix:  Link to server lost, unable to reconnect (%s)",
                                ifx_error(ifx));
-                    zend_hash_del(plist, hashed_details, 
+                    zend_hash_del(&EG(persistent_list), hashed_details, 
                                    hashed_details_length+1);
                     efree(hashed_details);
                     RETURN_FALSE;
@@ -685,7 +685,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
          * if it doesn't, open a new ifx link, add it to the resource list,
          * and add a pointer to it with hashed_details as the key.
          */
-        if (zend_hash_find(list,hashed_details,hashed_details_length+1,
+        if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,
                            (void **) &index_ptr) == SUCCESS) {
             int type,link;
             void *ptr;
@@ -703,7 +703,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
                 efree(hashed_details);
                 return;
             } else {
-                zend_hash_del(list,hashed_details,hashed_details_length+1);
+                zend_hash_del(&EG(regular_list),hashed_details,hashed_details_length+1);
             }
         }
         if (IFXG(max_links) != -1 && 
@@ -737,7 +737,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
         /* add it to the hash */
         new_index_ptr.ptr = (void *) return_value->value.lval;
         new_index_ptr.type = le_index_ptr;
-        if (zend_hash_update(list,
+        if (zend_hash_update(&EG(regular_list),
                               hashed_details,
                               hashed_details_length+1,
                               (void *) &new_index_ptr, 
@@ -1040,8 +1040,8 @@ EXEC SQL END DECLARE SECTION;
                    EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
                }
               /* TEXT/BYTE */
- 	      if(php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_BLTEXT || php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_BLBYTE) {
-               locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),list);
+ 	      if(php3_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list))==TYPE_BLTEXT || php3_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list))==TYPE_BLBYTE) {
+               locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list));
                if(locator==NULL) {
                    php_error(E_WARNING,"%d is not a Informix blob-result index",
                               (int)((*tmp)->value.lval));
@@ -1059,8 +1059,8 @@ EXEC SQL END DECLARE SECTION;
               }
               
               /* CHAR */
-              if(php3_intifx_getType((int)(*tmp)->value.lval,list)==TYPE_CHAR) {
-               len=php3_intifx_get_char((int)((*tmp)->value.lval),list,&char_tmp);
+              if(php3_intifx_getType((int)(*tmp)->value.lval,&EG(regular_list))==TYPE_CHAR) {
+               len=php3_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp);
                indicator=0;
                if(char_tmp==NULL || len<0)
                 indicator=-1;
@@ -1191,28 +1191,28 @@ $endif;
             
                int bid = 0;
                if(fieldtype==SQLTEXT) {
-                   bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,list);
-                   locator=php3_intifx_get_blobloc(bid,list);
+                   bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list));
+                   locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                } 
                if(fieldtype==SQLBYTES) {
                    if(IFXG(blobinfile)==0) {
-                       bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,list);
-                       locator=php3_intifx_get_blobloc(bid,list);
+                       bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
+                       locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                    } else {
                        blobfilename=php3_intifx_create_tmpfile(i);
                        bid=php3_intifx_create_blob(
                                       TYPE_BLBYTE,BLMODE_INFILE,
-                                      blobfilename,strlen(blobfilename),list);
-                       locator=php3_intifx_get_blobloc(bid,list);
+                                      blobfilename,strlen(blobfilename),&EG(regular_list));
+                       locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                        locator->loc_oflags=LOC_WONLY;
                    }
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                 } 
 $ifdef HAVE_IFX_IUS;
                if(fieldtype==SQLUDTFIXED) {
-                   bid=php3_intifxus_new_slob(list);
-                   slocator=php3_intifxus_get_slobloc(bid,list);
+                   bid=php3_intifxus_new_slob(&EG(regular_list));
+                   slocator=php3_intifxus_get_slobloc(bid,&EG(regular_list));
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
                 } 
 $endif;
@@ -1428,8 +1428,8 @@ EXEC SQL END DECLARE SECTION;
                   EXEC SQL SET DESCRIPTOR :descrpid COUNT = :i;
               }
               /* TEXT/BYTE */
- 	      if(php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_BLTEXT || php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_BLBYTE) {
-                locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),list);
+ 	      if(php3_intifx_getType((int)((*tmp)->value.lval),&EG(regular_list))==TYPE_BLTEXT || php3_intifx_getType((int)((*tmp)->value.lval),&EG(regular_list))==TYPE_BLBYTE) {
+                locator=php3_intifx_get_blobloc((int)((*tmp)->value.lval),&EG(regular_list));
                 if(locator==NULL) {
                     php_error(E_WARNING,"%d is not a Informix blob-result index",
                                (int)((*tmp)->value.lval));
@@ -1446,8 +1446,8 @@ EXEC SQL END DECLARE SECTION;
                                         TYPE=:loc_t_type; 
               }
               /* CHAR */
-              if(php3_intifx_getType((int)((*tmp)->value.lval),list)==TYPE_CHAR) {
-               len=php3_intifx_get_char((int)((*tmp)->value.lval),list,&char_tmp);
+              if(php3_intifx_getType((int)((*tmp)->value.lval),&EG(regular_list))==TYPE_CHAR) {
+               len=php3_intifx_get_char((int)((*tmp)->value.lval),&EG(regular_list),&char_tmp);
                indicator=0;
                if(char_tmp==NULL || len<0)
                 indicator=-1;
@@ -1652,28 +1652,28 @@ $endif;
             
                int bid = 0;
                if(fieldtype==SQLTEXT) {
-                   bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,list);
-                   locator=php3_intifx_get_blobloc(bid,list);
+                   bid=php3_intifx_create_blob(TYPE_BLTEXT,BLMODE_INMEM,"",-1,&EG(regular_list));
+                   locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                } 
                if(fieldtype==SQLBYTES) {
                    if(IFXG(blobinfile)==0) {
-                       bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,list);
-                       locator=php3_intifx_get_blobloc(bid,list);
+                       bid=php3_intifx_create_blob(TYPE_BLBYTE,BLMODE_INMEM,"",-1,&EG(regular_list));
+                       locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                    } else {
                        blobfilename=php3_intifx_create_tmpfile(i);
                        bid=php3_intifx_create_blob(
                                 TYPE_BLBYTE,BLMODE_INFILE,
-                                blobfilename,strlen(blobfilename),list);
-                       locator=php3_intifx_get_blobloc(bid,list);
+                                blobfilename,strlen(blobfilename),&EG(regular_list));
+                       locator=php3_intifx_get_blobloc(bid,&EG(regular_list));
                        locator->loc_oflags=LOC_WONLY;
                    }
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*locator;
                 } 
 $ifdef HAVE_IFX_IUS;
                if(fieldtype==SQLUDTFIXED) {
-                   bid=php3_intifxus_new_slob(list);
-                   slocator=php3_intifxus_get_slobloc(bid,list);
+                   bid=php3_intifxus_new_slob(&EG(regular_list));
+                   slocator=php3_intifxus_get_slobloc(bid,&EG(regular_list));
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
                 } 
 $endif;
@@ -2041,8 +2041,8 @@ EXEC SQL END DECLARE SECTION;
                                                   && fieldtype==SQLBYTES)) {
   
               bid_b=Ifx_Result->res_id[locind];
-              bid=php3_intifx_copy_blob(bid_b, list);
-              php3_intifx_update_blob(bid,nullstr,strlen(nullstr),list);
+              bid=php3_intifx_copy_blob(bid_b, &EG(regular_list));
+              php3_intifx_update_blob(bid,nullstr,strlen(nullstr),&EG(regular_list));
               add_assoc_long(return_value,fieldname,bid);
               ++locind;
               continue; 
@@ -2153,8 +2153,8 @@ $ifdef HAVE_IFX_IUS;
                 bid_b=Ifx_Result->res_id[locind];
                 add_assoc_long(return_value,fieldname,bid_b);
 
-                bid=php3_intifxus_new_slob(list);
-                slocator=php3_intifxus_get_slobloc(bid,list);
+                bid=php3_intifxus_new_slob(&EG(regular_list));
+                slocator=php3_intifxus_get_slobloc(bid,&EG(regular_list));
                 EXEC SQL SET DESCRIPTOR :descrpid VALUE :i DATA = :*slocator;  
                 Ifx_Result->res_id[locind]=bid;
                 ++locind;
@@ -2164,7 +2164,7 @@ $endif;
             case SQLBYTES   :   
             case SQLTEXT    :        /* NULL has already been dealt with */   
                 bid_b=Ifx_Result->res_id[locind];
-                locator_b=php3_intifx_get_blobloc(bid_b,list); 
+                locator_b=php3_intifx_get_blobloc(bid_b,&EG(regular_list)); 
                 ++locind;
 
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
@@ -2174,11 +2174,11 @@ $endif;
                        RETURN_FALSE;
                 }
                                  /* copy blob */
-                bid=php3_intifx_copy_blob(bid_b, list);
+                bid=php3_intifx_copy_blob(bid_b, &EG(regular_list));
                                  /* and generate new tempfile for next row */
                 if(locator_b->loc_loctype==LOCFNAME) {
                    blobfilename=php3_intifx_create_tmpfile(bid_b);
-                   php3_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),list);
+                   php3_intifx_update_blob(bid_b,blobfilename,strlen(blobfilename),&EG(regular_list));
                    efree(blobfilename);
                    EXEC SQL SET DESCRIPTOR :descrpid VALUE :i  
                                            DATA= :*locator_b;
@@ -2194,13 +2194,13 @@ $endif;
                                             && fieldtype==SQLBYTES)) {
                    char *content;
                    long lg;
-                   lg=php3_intifx_get_blob(bid, list, &content);
+                   lg=php3_intifx_get_blob(bid, &EG(regular_list), &content);
                    if(content==NULL || lg<0) {
                        add_assoc_string(return_value,fieldname,nullstr,DUP);
                    } else {
                        add_assoc_stringl(return_value,fieldname,content,lg,DUP);
                    }
-                   php3_intifx_free_blob(bid, list);
+                   php3_intifx_free_blob(bid, &EG(regular_list));
                    break;
                 } 
                                   /* no, return as blob id */
@@ -2502,7 +2502,7 @@ $endif;
                     bid_b=Ifx_Result->res_id[locind];
                     ++locind;
 
-                    locator_b=php3_intifx_get_blobloc(bid_b,list); 
+                    locator_b=php3_intifx_get_blobloc(bid_b,&EG(regular_list)); 
                   
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i 
                                             :*locator_b = DATA;
@@ -2513,7 +2513,7 @@ $endif;
                     }
                     
                                        /* get blob contents */    
-                    lg=php3_intifx_get_blob(bid_b, list, &content);
+                    lg=php3_intifx_get_blob(bid_b, &EG(regular_list), &content);
                  
                     if(content==NULL || lg<0) {
                         php_printf("<td>%s</td>", nullstr);
@@ -3083,7 +3083,7 @@ EXEC SQL END DECLARE SECTION;
 
     for (i = 0; i < MAX_RESID; ++i) {
         if (Ifx_Result->res_id[i]>0) {
-         php3_intifx2_free_blob(Ifx_Result->res_id[i],list);
+         php3_intifx2_free_blob(Ifx_Result->res_id[i],&EG(regular_list));
          Ifx_Result->res_id[i]=-1;
         }
     }
@@ -3185,7 +3185,7 @@ PHP_FUNCTION(ifx_create_blob) {
  if(mode!=0) 
   mode=BLMODE_INFILE;
   
- id=php3_intifx_create_blob(type,mode,pparam->value.str.val,pparam->value.str.len,list); 
+ id=php3_intifx_create_blob(type,mode,pparam->value.str.val,pparam->value.str.len,&EG(regular_list)); 
  if(id<0) {
     RETURN_FALSE;
  } 
@@ -3289,7 +3289,7 @@ PHP_FUNCTION(ifx_copy_blob) {
  }
  convert_to_long(pbid);
 
- newid=php3_intifx_copy_blob(pbid->value.lval,list); 
+ newid=php3_intifx_copy_blob(pbid->value.lval,&EG(regular_list)); 
  if(newid<0) {
   RETURN_FALSE;
  } 
@@ -3396,7 +3396,7 @@ PHP_FUNCTION(ifx_free_blob) {
  }
  convert_to_long(pid);
 
- ret=php3_intifx_free_blob(pid->value.lval,list); 
+ ret=php3_intifx_free_blob(pid->value.lval,&EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -3516,7 +3516,7 @@ PHP_FUNCTION(ifx_get_blob) {
  }
  convert_to_long(pbid);
 
- len=php3_intifx_get_blob(pbid->value.lval,list,&content); 
+ len=php3_intifx_get_blob(pbid->value.lval,&EG(regular_list),&content); 
  if(content==NULL || len<0) {
    RETURN_STRING(php3_intifx_null(),1);
  }
@@ -3613,7 +3613,7 @@ PHP_FUNCTION(ifx_update_blob) {
  ret=php3_intifx_update_blob(pbid->value.lval,
                              pparam->value.str.val,
                              pparam->value.str.len,
-                             list); 
+                             &EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -3891,7 +3891,7 @@ PHP_FUNCTION(ifx_create_char) {
  }
  convert_to_string(pparam);
 
- id=php3_intifx_create_char(pparam->value.str.val,pparam->value.str.len,list); 
+ id=php3_intifx_create_char(pparam->value.str.val,pparam->value.str.len,&EG(regular_list)); 
  if(id<0) {
     RETURN_FALSE;
  } 
@@ -3963,7 +3963,7 @@ PHP_FUNCTION(ifx_get_char) {
  }
  convert_to_long(pbid);
 
- len=php3_intifx_get_char(pbid->value.lval,list,&content); 
+ len=php3_intifx_get_char(pbid->value.lval,&EG(regular_list),&content); 
  if(content==NULL || len<0) {
    RETURN_STRING("",1);
  }
@@ -4021,7 +4021,7 @@ PHP_FUNCTION(ifx_free_char) {
  }
  convert_to_long(pid);
 
- ret=php3_intifx_free_char(pid->value.lval,list); 
+ ret=php3_intifx_free_char(pid->value.lval,&EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -4089,7 +4089,7 @@ PHP_FUNCTION(ifx_update_char) {
  ret=php3_intifx_update_char(pbid->value.lval,
                              pparam->value.str.val,
                              pparam->value.str.len,
-                             list); 
+                             &EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -4220,7 +4220,7 @@ PHP_FUNCTION(ifxus_create_slob) {
   create_mode|=LO_NOBUFFER;
 
   
- id=php3_intifxus_create_slob(create_mode,list); 
+ id=php3_intifxus_create_slob(create_mode,&EG(regular_list)); 
  if(id<0) {
   RETURN_FALSE;
  } 
@@ -4287,7 +4287,7 @@ PHP_FUNCTION(ifxus_free_slob) {
  }
  convert_to_long(pid);
 
- ret=php3_intifxus_close_slob(pid->value.lval,list); 
+ ret=php3_intifxus_close_slob(pid->value.lval,&EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -4320,7 +4320,7 @@ static long php3_intifxus_free_slob(long bid, HashTable *list) {
  }
 
 
- if(php3_intifxus_close_slob(bid, list)<0) {
+ if(php3_intifxus_close_slob(bid, &EG(regular_list))<0) {
   return -1;
  }
  if(Ifx_slob->SLOB.createspec!=NULL) {
@@ -4355,7 +4355,7 @@ PHP_FUNCTION(ifxus_close_slob) {
  }
  convert_to_long(pid);
 
- ret=php3_intifxus_close_slob(pid->value.lval,list); 
+ ret=php3_intifxus_close_slob(pid->value.lval,&EG(regular_list)); 
  if(ret<0) {
   RETURN_FALSE;
  } 
@@ -4443,7 +4443,7 @@ PHP_FUNCTION(ifxus_open_slob) {
  if((mode&32) !=0)   
   create_mode|=LO_NOBUFFER;
 
- RETURN_LONG(php3_intifxus_open_slob(pbid->value.lval,create_mode,list));
+ RETURN_LONG(php3_intifxus_open_slob(pbid->value.lval,create_mode,&EG(regular_list)));
 }
 /* }}} */
 
