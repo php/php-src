@@ -65,7 +65,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 
-#ifdef ZEND_MULTIBYTE
+#if ZEND_MULTIBYTE
 #include "zend_multibyte.h"
 #endif /* ZEND_MULTIBYTE */
 
