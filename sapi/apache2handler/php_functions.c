@@ -110,7 +110,7 @@ PHP_FUNCTION(virtual)
 #define ADD_LONG(name) \
 		add_property_long(return_value, #name, rr->name)
 #define ADD_TIME(name) \
-		add_property_long(return_value, #name, rr->name / APR_USEC_PER_SEC);
+		add_property_long(return_value, #name, apr_time_sec(rr->name));
 #define ADD_STRING(name) \
 		if (rr->name) add_property_string(return_value, #name, (char *) rr->name, 1)
 
@@ -156,7 +156,6 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_LONG(allowed);
 		ADD_LONG(sent_bodyct);
 		ADD_LONG(bytes_sent);
-		ADD_LONG(request_time);
 		ADD_LONG(mtime);
 		ADD_TIME(request_time);
 
@@ -402,7 +401,9 @@ PHP_MINFO_FUNCTION(apache)
 	sprintf(tmp, "Per Child: %d - Keep Alive: %s - Max Per Connection: %d", max_requests, (serv->keep_alive ? "on":"off"), serv->keep_alive_max);
 	php_info_print_table_row(2, "Max Requests", tmp);
 
-	sprintf(tmp, "Connection: %lld - Keep-Alive: %lld", (serv->timeout / 1000000), (serv->keep_alive_timeout / 1000000));
+	apr_snprintf(tmp, sizeof tmp,
+				 "Connection: %" APR_TIME_T_FMT " - Keep-Alive: %" APR_TIME_T_FMT, 
+				 apr_time_sec(serv->timeout), apr_time_sec(serv->keep_alive_timeout));
 	php_info_print_table_row(2, "Timeouts", tmp);
 	
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
