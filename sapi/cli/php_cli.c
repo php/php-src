@@ -89,8 +89,8 @@
 #define PHP_MODE_CLI_DIRECT    6
 #define PHP_MODE_PROCESS_STDIN 7
 
-static char *optarg = NULL;
-static int optind = 1;
+static char *php_optarg = NULL;
+static int php_optind = 1;
 
 static const opt_struct OPTIONS[] = {
 	{'a', 0, "interactive"},
@@ -527,8 +527,8 @@ int main(int argc, char *argv[])
 	zend_file_handle file_handle;
 /* temporary locals */
 	int behavior=PHP_MODE_STANDARD;
-	int orig_optind=optind;
-	char *orig_optarg=optarg;
+	int orig_optind=php_optind;
+	char *orig_optarg=php_optarg;
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL;
 	zend_llist global_vars;
@@ -594,18 +594,18 @@ int main(int argc, char *argv[])
 #endif
 
 
-	while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0))!=-1) {
+	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0))!=-1) {
 		switch (c) {
 		case 'c':
-			cli_sapi_module.php_ini_path_override = strdup(optarg);
+			cli_sapi_module.php_ini_path_override = strdup(php_optarg);
 			break;
 		case 'n':
 			cli_sapi_module.php_ini_ignore = 1;
 			break;
 		}
 	}
-	optind = orig_optind;
-	optarg = orig_optarg;
+	php_optind = orig_optind;
+	php_optarg = orig_optarg;
 
 	cli_sapi_module.executable_location = argv[0];
 
@@ -649,11 +649,11 @@ int main(int argc, char *argv[])
 		INI_HARDCODED("output_buffering", "0");
 		INI_HARDCODED("max_execution_time", "0");
 
-		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
+		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 			switch (c) {
 
 			case 'd': /* define ini entries on command line */
-				define_command_line_ini_entry(optarg);
+				define_command_line_ini_entry(php_optarg);
 				break;
 
 			case 'h': /* help & quit */
@@ -708,9 +708,9 @@ int main(int argc, char *argv[])
 		/* Set some CLI defaults */
 		SG(options) |= SAPI_OPTION_NO_CHDIR;
 
-		optind = orig_optind;
-		optarg = orig_optarg;
-		while ((c = php_getopt(argc, argv, OPTIONS, &optarg, &optind, 0)) != -1) {
+		php_optind = orig_optind;
+		php_optarg = orig_optarg;
+		while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0)) != -1) {
 			switch (c) {
 
 			case 'a':	/* interactive mode */
@@ -738,7 +738,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				behavior=PHP_MODE_PROCESS_STDIN;
-				script_file = optarg;
+				script_file = php_optarg;
 				break;
 
 			case 'f': /* parse file */
@@ -749,12 +749,12 @@ int main(int argc, char *argv[])
 					param_error = "You can use -f only once.\n";
 					break;
 				}
-				script_file = optarg;
+				script_file = php_optarg;
 				break;
 
 			case 'g': /* define global variables on command line */
 				{
-					char *arg = estrdup(optarg);
+					char *arg = estrdup(php_optarg);
 
 					zend_llist_add_element(&global_vars, &arg);
 				}
@@ -792,7 +792,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				behavior=PHP_MODE_CLI_DIRECT;
-				exec_direct=optarg;
+				exec_direct=php_optarg;
 				break;
 			
 			case 'R':
@@ -806,7 +806,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				behavior=PHP_MODE_PROCESS_STDIN;
-				exec_run=optarg;
+				exec_run=php_optarg;
 				break;
 
 			case 'B':
@@ -820,7 +820,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				behavior=PHP_MODE_PROCESS_STDIN;
-				exec_begin=optarg;
+				exec_begin=php_optarg;
 				break;
 
 			case 'E':
@@ -834,7 +834,7 @@ int main(int argc, char *argv[])
 					break;
 				}
 				behavior=PHP_MODE_PROCESS_STDIN;
-				exec_end=optarg;
+				exec_end=php_optarg;
 				break;
 
 			case 's': /* generate highlighted HTML from source */
@@ -854,7 +854,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'z': /* load extension file */
-				zend_load_extension(optarg);
+				zend_load_extension(php_optarg);
 				break;
 			case 'H':
 				hide_argv = 1;
@@ -874,14 +874,14 @@ int main(int argc, char *argv[])
 		CG(interactive) = interactive;
 
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
-		if (argc > optind 
+		if (argc > php_optind 
 		  && !script_file 
 		  && behavior!=PHP_MODE_CLI_DIRECT 
 		  && behavior!=PHP_MODE_PROCESS_STDIN 
-		  && strcmp(argv[optind-1],"--")) 
+		  && strcmp(argv[php_optind-1],"--")) 
 		{
-			script_file=argv[optind];
-			optind++;
+			script_file=argv[php_optind];
+			php_optind++;
 		}
 		if (script_file) {
 			if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
@@ -903,12 +903,12 @@ int main(int argc, char *argv[])
 
 		/* before registering argv to module exchange the *new* argv[0] */
 		/* we can achieve this without allocating more memory */
-		SG(request_info).argc=argc-optind+1;
-		arg_excp = argv+optind-1;
-		arg_free = argv[optind-1];
+		SG(request_info).argc=argc-php_optind+1;
+		arg_excp = argv+php_optind-1;
+		arg_free = argv[php_optind-1];
 		SG(request_info).path_translated = file_handle.filename;
-		argv[optind-1] = file_handle.filename;
-		SG(request_info).argv=argv+optind-1;
+		argv[php_optind-1] = file_handle.filename;
+		SG(request_info).argv=argv+php_optind-1;
 
 		if (php_request_startup(TSRMLS_C)==FAILURE) {
 			*arg_excp = arg_free;
