@@ -1753,8 +1753,6 @@ else
 fi
 echo "$ac_t$hardcode_action" 1>&6
 
-echo "XXXXX $hardcode_action"
-
 reload_flag=
 reload_cmds='$LD$reload_flag -o $output$reload_objs'
 echo $ac_n "checking for $LD option to reload object files... $ac_c" 1>&6
