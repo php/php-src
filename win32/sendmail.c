@@ -191,7 +191,8 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 //  See SendText() for additional args!
 //********************************************************************/
 int TSendMail(char *host, int *error, char **error_message,
-			  char *headers, char *Subject, char *mailTo, char *data)
+			  char *headers, char *Subject, char *mailTo, char *data,
+			  char *mailCc, char *mailBcc, char *mailRPath)
 {
 	int ret;
 	char *RPath = NULL;
@@ -233,7 +234,10 @@ int TSendMail(char *host, int *error, char **error_message,
 	}
  
 	/* Fall back to sendmail_from php.ini setting */
-	if (INI_STR("sendmail_from")) {
+	if (mailRPath && *mailRPath) {
+		RPath = estrdup(mailRPath);
+	}
+	else if (INI_STR("sendmail_from")) {
 		RPath = estrdup(INI_STR("sendmail_from"));
 	} else {
 		if (headers) {
@@ -264,7 +268,7 @@ int TSendMail(char *host, int *error, char **error_message,
 			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
 	} else {
-		ret = SendText(RPath, Subject, mailTo, data, headers, headers_lc, error_message);
+		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message);
 		TSMClose();
 		if (RPath) {
 			efree(RPath);
@@ -341,7 +345,8 @@ char *GetSMErrorText(int index)
 // Author/Date:  jcar 20/9/96
 // History:
 //*******************************************************************/
-int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers, char *headers_lc, char **error_message)
+int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char *mailBcc, char *data, 
+			 char *headers, char *headers_lc, char **error_message)
 {
 	int res, i;
 	char *p;
@@ -426,11 +431,35 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		token = strtok(tempMailTo, ",");
 		while(token != NULL)
 		{
-			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
-			if ((res = Post(Buffer)) != SUCCESS)
+			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(tempMailTo);
 				return (res);
+			}
 			if ((res = Ack(&server_response)) != SUCCESS) {
 				SMTP_ERROR_RESPONSE(server_response);
+				efree(tempMailTo);
+				return (res);
+			}
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
+	}
+
+	if (mailCc && *mailCc) {
+		tempMailTo = estrdup(mailCc);
+		/* Send mail to all rcpt's */
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(tempMailTo);
+				return (res);
+			}
+			if ((res = Ack(&server_response)) != SUCCESS) {
+				SMTP_ERROR_RESPONSE(server_response);
+				efree(tempMailTo);
 				return (res);
 			}
 			token = strtok(NULL, ",");
@@ -497,6 +526,26 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 				return OUT_OF_MEMORY;
 			}
 		}
+	}
+	if (mailBcc && *mailBcc) {
+		tempMailTo = estrdup(mailBcc);
+		/* Send mail to all rcpt's */
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			snprintf(Buffer, MAIL_BUFFER_SIZE, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				efree(tempMailTo);
+				return (res);
+			}
+			if ((res = Ack(&server_response)) != SUCCESS) {
+				SMTP_ERROR_RESPONSE(server_response);
+				efree(tempMailTo);
+				return (res);
+			}
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
 	}
 
 	if ((res = Post("DATA\r\n")) != SUCCESS) {
@@ -646,7 +695,7 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *m
 		}
 	}
 	if(xheaders){
-		if (!addToHeader(&header_buffer, "%s\r\n", xheaders)) {
+		if (!addToHeader(&header_buffer, "%s", xheaders)) {
 			goto PostHeader_outofmem;
 		}
 	}
