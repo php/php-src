@@ -548,6 +548,7 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 	function getArrayCopy();
 
 	/** @param $position offset to seek to
+	 * @throw OutOfBoundsException if $position is invalid
 	 */
 	function seek($position);
 
