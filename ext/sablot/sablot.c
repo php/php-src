@@ -348,7 +348,7 @@ PHP_FUNCTION(xslt_output_endtransform)
      * current output buffer (so we don't send data twice) 
      */
     if (tRes)
-        php_end_ob_buffer(0);
+        php_end_ob_buffer(0, 0);
     
     PUTS(tRes);
     
@@ -363,7 +363,7 @@ PHP_FUNCTION(xslt_output_endtransform)
     if (tRes)
         SablotFree(tRes);
     else
-        php_end_ob_buffer(1);
+        php_end_ob_buffer(1, 0);
 }
 /* }}} */
 
