@@ -274,7 +274,7 @@ PHP_FUNCTION(get_meta_tags)
 	fp = php_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			char *tmp = estrdup((*filename)->value.str.val);
+			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING,"get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
@@ -408,7 +408,7 @@ PHP_FUNCTION(file)
 	fp = php_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			char *tmp = estrdup((*filename)->value.str.val);
+			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING,"file(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
@@ -484,9 +484,8 @@ PHP_FUNCTION(tempnam)
 	}
 	convert_to_string_ex(arg1);
 	convert_to_string_ex(arg2);
-	d = estrndup((*arg1)->value.str.val,(*arg1)->value.str.len);
-	strlcpy(p,(*arg2)->value.str.val,sizeof(p));
-
+	d = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
+	strlcpy(p, Z_STRVAL_PP(arg2), sizeof(p));
 
 	if ((fp = php_open_temporary_file(d, p, &opened_path))) {
 		fclose(fp);
@@ -555,7 +554,7 @@ PHP_FUNCTION(fopen)
 	fp = php_fopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			char *tmp = estrdup((*arg1)->value.str.val);
+			char *tmp = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING,"fopen(\"%s\",\"%s\") - %s", tmp, p, strerror(errno));
 			efree(tmp);
@@ -644,7 +643,7 @@ PHP_FUNCTION(popen)
 			RETURN_FALSE;
 		}
 	} else {
-		fp = V_POPEN((*arg1)->value.str.val,p);
+		fp = V_POPEN((*arg1)->value.str.val, p);
 		if (!fp) {
 			php_error(E_WARNING,"popen(\"%s\",\"%s\") - %s",(*arg1)->value.str.val,p,strerror(errno));
 			efree(p);
@@ -1408,7 +1407,7 @@ PHP_FUNCTION(readfile)
 	fp = php_fopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
-			char *tmp = estrdup((*arg1)->value.str.val);
+			char *tmp = estrndup(Z_STRVAL_PP(arg1), Z_STRLEN_PP(arg1));
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING,"readfile(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
