@@ -65,8 +65,8 @@ static CURLcode win32_init()
     
 	if (err != 0) return CURLE_FAILED_INIT;
 
-	if ( LOBYTE( wsaData.wVersion ) != 1 || 
-	     HIBYTE( wsaData.wVersion ) != 1 ) { 
+	if ( LOBYTE(wsaData.wVersion) != 1 || 
+	     HIBYTE(wsaData.wVersion) != 1 ) { 
 		WSACleanup(); 
 		return CURLE_FAILED_INIT; 
 	}
@@ -102,13 +102,13 @@ zend_module_entry curl_module_entry = {
 ZEND_GET_MODULE (curl)
 #endif
 
-static void php_curl_close(CURL *cp);
+static void php_curl_close(php_curl *curl_handle);
 static int php_curl_error_translator(CURLcode err);
 
 PHP_MINFO_FUNCTION(curl)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "CURL support",     "enabled");
+	php_info_print_table_row(2, "CURL support", "enabled");
 	php_info_print_table_row(2, "CURL Information", curl_version());
 	php_info_print_table_end();
 }
@@ -214,8 +214,6 @@ PHP_MINIT_FUNCTION(curl)
 	
 	win32_init();
 
-	CURLG(output_start).next = NULL;
-
 	return SUCCESS;
 }
 
@@ -229,7 +227,7 @@ PHP_MSHUTDOWN_FUNCTION(curl)
    Return the CURL version string. */
 PHP_FUNCTION (curl_version)
 {
-	RETURN_STRING(curl_version(),1);
+	RETURN_STRING(curl_version(), 1);
 }
 /* }}} */
 
@@ -238,7 +236,7 @@ PHP_FUNCTION (curl_version)
 PHP_FUNCTION(curl_init)
 {
 	zval **u_url;
-	CURL *cp;
+	php_curl *curl_handle;
 	int argcount = ZEND_NUM_ARGS();
 	CURLLS_FETCH();
 	
@@ -247,22 +245,25 @@ PHP_FUNCTION(curl_init)
 		WRONG_PARAM_COUNT;
 	}
 	
-	cp = curl_easy_init();
+	curl_handle->cp = curl_easy_init();
 	
-	if (!cp) {
+	if (!curl_handle->cp) {
 		php_error(E_ERROR, "Cannot initialize CURL Handle");
 		RETURN_FALSE;
 	}
 	
 	if (argcount > 0) {
 		convert_to_string_ex(u_url);
-		curl_easy_setopt(cp, CURLOPT_URL, Z_STRVAL_PP(u_url));
+		curl_easy_setopt(curl_handle->cp, CURLOPT_URL, Z_STRVAL_PP(u_url));
 	}
 	
-	curl_easy_setopt(cp, CURLOPT_NOPROGRESS, 1);
-	curl_easy_setopt(cp, CURLOPT_VERBOSE,    0);
+	curl_easy_setopt(curl_handle->cp, CURLOPT_NOPROGRESS, 1);
+	curl_easy_setopt(curl_handle->cp, CURLOPT_VERBOSE,    0);
 	
-	ZEND_REGISTER_RESOURCE(return_value, cp, CURLG(le_curl));
+	curl_handle->output_file = 0;
+	curl_handle->php_stdout  = 1;
+	
+	ZEND_REGISTER_RESOURCE(return_value, curl_handle, CURLG(le_curl));
 }
 /* }}} */
 
@@ -271,7 +272,7 @@ PHP_FUNCTION(curl_init)
 PHP_FUNCTION(curl_setopt)
 {
 	zval **u_curl_id, **u_curl_option, **u_curl_value;
-	CURL *cp;
+	php_curl *curl_handle;
 	CURLcode ret;
 	int option;
 	CURLLS_FETCH();
@@ -281,7 +282,7 @@ PHP_FUNCTION(curl_setopt)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(cp, CURL *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
+	ZEND_FETCH_RESOURCE(curl_handle, php_curl *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
 	
 	convert_to_long_ex(u_curl_option);
 	option = Z_LVAL_PP(u_curl_option);
@@ -299,7 +300,7 @@ PHP_FUNCTION(curl_setopt)
 	    option == CURLOPT_TIMEVALUE       || option == CURLOPT_TRANSFERTEXT) {
 
 		convert_to_long_ex(u_curl_value);
-		ret = curl_easy_setopt(cp, option, Z_LVAL_PP(u_curl_value));
+		ret = curl_easy_setopt(curl_handle->cp, option, Z_LVAL_PP(u_curl_value));
 
 	} else if (option == CURLOPT_URL           || option == CURLOPT_PROXY        ||
 	           option == CURLOPT_USERPWD       || option == CURLOPT_PROXYUSERPWD ||
@@ -310,43 +311,27 @@ PHP_FUNCTION(curl_setopt)
 	           option == CURLOPT_CUSTOMREQUEST) {
 
 		convert_to_string_ex(u_curl_value);
-		ret = curl_easy_setopt(cp, option, Z_STRVAL_PP(u_curl_value));
+		ret = curl_easy_setopt(curl_handle->cp, option, Z_STRVAL_PP(u_curl_value));
 
 	} else if (option == CURLOPT_FILE        || option == CURLOPT_INFILE ||
 	           option == CURLOPT_WRITEHEADER || option == CURLOPT_STDERR) {
 
 		FILE *fp;
 		ZEND_FETCH_RESOURCE(fp, FILE *, u_curl_value, -1, "File-handle", php_file_le_fopen());
-		ret = curl_easy_setopt(cp, option, fp);
+		ret = curl_easy_setopt(curl_handle->cp, option, fp);
 		
 		if (option == CURLOPT_FILE) {
-			CURLG(output_node) = &CURLG(output_start);			
-			
-			while (CURLG(output_node)->next)
-				CURLG(output_node) = CURLG(output_node)->next;
-			
-			CURLG(output_node)->next = (struct curl_file_id_table *)emalloc(sizeof(struct curl_file_id_table));
-			CURLG(output_node) = CURLG(output_node)->next;
-			CURLG(output_node)->id = Z_LVAL_PP(u_curl_id);
-			CURLG(output_node)->output_to_file = 1;
-			CURLG(output_node)->return_transfer = 0;
-			CURLG(output_node)->next = NULL;
+			curl_handle->output_file = Z_LVAL_PP(u_curl_value);
+			curl_handle->php_stdout  = 0;
 		}
 		
 	} else if (option == CURLOPT_RETURNTRANSFER) {
-		CURLG(output_node) = &CURLG(output_start);
-		
-		while (CURLG(output_node)->next)
-			CURLG(output_node) = CURLG(output_node)->next;
-		
-		CURLG(output_node)->next = (struct curl_file_id_table *)emalloc(sizeof(struct curl_file_id_table));
-		CURLG(output_node) = CURLG(output_node)->next;
-		CURLG(output_node)->id = Z_LVAL_PP(u_curl_id);
-		CURLG(output_node)->return_transfer = 1;
-		CURLG(output_node)->output_to_file = 0;
-		CURLG(output_node)->next = NULL;
+	
+		convert_to_long_ex(u_curl_value);
+
+		curl_handle->return_transfer = Z_LVAL_PP(u_curl_value);
+		curl_handle->php_stdout      = 0;
 	}
-			
 
 	RETURN_LONG(php_curl_error_translator(ret));
 }
@@ -354,71 +339,82 @@ PHP_FUNCTION(curl_setopt)
 
 /* {{{ proto bool curl_exec (int ch)
    Perform a CURL session */
-PHP_FUNCTION (curl_exec)
+PHP_FUNCTION(curl_exec)
 {
 	zval **u_curl_id;
-	CURL *cp;
+	php_curl *curl_handle;
 	CURLcode ret;
+
+	FILE *fp;
+	char buf[4096];
+	int b;
+
 	CURLLS_FETCH();
 	
+
 	if (ZEND_NUM_ARGS() != 1 ||
 	    zend_get_parameters_ex(1, &u_curl_id) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(cp, CURL *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
+	ZEND_FETCH_RESOURCE(curl_handle, php_curl *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
 	
-	CURLG(output_node) = CURLG(output_start).next;
-	while (CURLG(output_node))
-	{
-		if (CURLG(output_node)->id == Z_LVAL_PP(u_curl_id)) {
-			break;
-		}
-		CURLG(output_node) = CURLG(output_node)->next;
-	}
-	
-	if (CURLG(output_node)->output_to_file) {
-		ret = curl_easy_perform (cp);
-	} else {
-		FILE *tmp;
-		char buf[4096];
-		int b;
+	if ((curl_handle->return_transfer &&
+	    !curl_handle->output_file) || curl_handle->php_stdout) {
 		
-		if ((tmp = tmpfile()) == NULL) {
-			php_error(E_WARNING, "Cannot create temporary file to stream output of cURL from");
-			RETURN_LONG(-1);
+		if ((fp = tmpfile()) == NULL) {
+			php_error(E_WARNING, "Cannot initialize temporary file to save output from curl_exec()");
+			RETURN_FALSE;
 		}
 		
-		curl_easy_setopt(cp, CURLOPT_FILE, tmp);
-		ret = curl_easy_perform (cp);
+		curl_easy_setopt(curl_handle->cp, CURLOPT_FILE, fp);
+	
+	} else if (curl_handle->return_transfer &&
+	           curl_handle->output_file) {
 		
-		if (ret != CURLE_OK)
-			RETURN_LONG(php_curl_error_translator(ret));
+		zval **id;
+	
+		Z_LVAL_PP(id) = curl_handle->output_file;
+		Z_TYPE_PP(id) = IS_RESOURCE;
 		
-		fseek(tmp, 0, SEEK_SET);
-		
-		if (CURLG(output_node)->return_transfer) {
-			char *ret_data;
-			struct stat stat_sb;
-			
-			if (fstat(fileno(tmp), &stat_sb)) {
-				RETURN_FALSE;
-			}
-			
-			ret_data = emalloc((stat_sb.st_size+1)*sizeof(char));
+		ZEND_FETCH_RESOURCE(fp, FILE *, id, -1, "File-Handle", php_file_le_fopen());
 
-			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0)
-				strcat(ret_data, buf);
-			
-			RETURN_STRINGL(ret_data, stat_sb.st_size, 0);
-		} else {
-			while ((b = fread(buf, 1, sizeof(buf), tmp)) > 0)
-				php_write(buf, b);
+	}
+	
+	ret = curl_easy_perform(curl_handle->cp);
+	
+	if ((!curl_handle->return_transfer && !curl_handle->php_stdout) ||
+	    (ret != CURLE_OK)) {
+		RETURN_LONG(php_curl_error_translator(ret));
+	}
+	
+	fseek(fp, 0, SEEK_SET);
+		
+	if (curl_handle->php_stdout) {
+		
+		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
+			php_write(buf, b);
 		}
 		
-		fclose(tmp);
+	} else {
+		
+		char *ret_data;
+		struct stat stat_sb;
+		
+		if (fstat(fileno(fp), &stat_sb)) {
+			RETURN_FALSE;
+		}
+				
+		ret_data = emalloc((stat_sb.st_size+1)*sizeof(char));
+		
+		while ((b = fread(buf, 1, sizeof(buf), fp)) > 0) {
+			strcat(ret_data, buf);
+		}
+		
+		RETURN_STRINGL(ret_data, stat_sb.st_size, 0);
+	
 	}
-	RETURN_LONG(php_curl_error_translator(ret));
+
 }
 /* }}} */
 
@@ -427,7 +423,7 @@ PHP_FUNCTION (curl_exec)
 PHP_FUNCTION (curl_close)
 {
 	zval **u_curl_id;
-	CURL *cp;
+	php_curl *curl_handle;
 	CURLLS_FETCH();
 	
 	if (ZEND_NUM_ARGS() != 1 ||
@@ -435,22 +431,7 @@ PHP_FUNCTION (curl_close)
 		WRONG_PARAM_COUNT;
 	}
 	
-	ZEND_FETCH_RESOURCE(cp, CURL *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
-	
-	CURLG(output_node)     = CURLG(output_start).next;
-	CURLG(output_previous) = &CURLG(output_start);
-	
-	while (CURLG(output_node))
-	{
-		if (CURLG(output_node)->id == Z_LVAL_PP(u_curl_id)) {
-			CURLG(output_previous) = CURLG(output_node)->next;
-			efree(CURLG(output_node));
-			break;
-		} else {
-			CURLG(output_node)     = CURLG(output_node)->next;
-			CURLG(output_previous) = CURLG(output_previous)->next;
-		}
-	}
+	ZEND_FETCH_RESOURCE(curl_handle, php_curl *, u_curl_id, -1, "CURL Handle", CURLG(le_curl));
 	
 	zend_list_delete(Z_LVAL_PP(u_curl_id));
 }
@@ -556,9 +537,9 @@ static int php_curl_error_translator(CURLcode err)
 	}
 }
 
-static void php_curl_close(CURL *cp)
+static void php_curl_close(php_curl *curl_handle)
 {
-	curl_easy_cleanup(cp);
+	curl_easy_cleanup(curl_handle->cp);
 }
 
 #endif
