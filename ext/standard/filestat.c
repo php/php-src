@@ -570,7 +570,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 #ifndef PHP_WIN32
-#if VIRTUAL_DIR
+#ifdef VIRTUAL_DIR
 	do {
 		char *tmpname;
 
