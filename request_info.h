@@ -31,7 +31,6 @@
 #define _REQUEST_INFO_H_
 
 typedef struct {
-	char *filename;
 	char *script_name;
 	char *current_user;
 	int current_user_length;
