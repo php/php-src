@@ -241,5 +241,5 @@ PHP_FUNCTION(base64_decode)
  * c-basic-offset: 4
  * End:
  * vim600: sw=4 ts=4 fdm=marker
- * vimo<600: sw=4 ts=4
+ * vim<600: sw=4 ts=4
  */
