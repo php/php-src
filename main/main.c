@@ -804,9 +804,8 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
 	zend_startup(&zuf, NULL);
 
-	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
-
 #ifdef ZTS
+	tsrm_set_new_thread_end_handler(php_new_thread_end_handler);
 	core_globals_id = ts_allocate_id(sizeof(php_core_globals), NULL, NULL);
 	core_globals = ts_resource(core_globals_id);
 #endif
