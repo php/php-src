@@ -82,6 +82,32 @@ int php_ini_rshutdown()
 	return SUCCESS;
 }
 
+
+static int ini_key_compare(const void *a, const void *b)
+{
+	Bucket *f;
+	Bucket *s;
+ 
+	f = *((Bucket **) a);
+	s = *((Bucket **) b);
+
+	if (f->nKeyLength==0 && s->nKeyLength==0) { /* both numeric */
+		return ZEND_NORMALIZE_BOOL(f->nKeyLength - s->nKeyLength);
+	} else if (f->nKeyLength==0) { /* f is numeric, s is not */
+		return -1;
+	} else if (s->nKeyLength==0) { /* s is numeric, f is not */
+		return 1;
+	} else { /* both strings */
+		return zend_binary_strcasecmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
+	}
+}
+
+
+void php_ini_sort_entries()
+{
+	zend_hash_sort(&known_directives, qsort, ini_key_compare, 0);
+}
+
 /*
  * Registration / unregistration
  */

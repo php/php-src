@@ -228,6 +228,7 @@ PHPAPI void php_print_info(int flag)
 		PUTS("</a>\n");
 	}
 
+	php_ini_sort_entries();
 
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();

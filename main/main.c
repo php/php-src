@@ -384,6 +384,24 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					PUTS(append_string);
 				}		
 			}
+#if ZEND_DEBUG
+			{
+				zend_bool trigger_break;
+
+				switch (type) {
+					case E_ERROR:
+					case E_CORE_ERROR:
+					case E_COMPILE_ERROR:
+					case E_USER_ERROR:
+						trigger_break=1;
+						break;
+					default:
+						trigger_break=0;
+						break;
+				}
+				zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+			}
+#endif
 		}
 	}
 
@@ -667,6 +685,10 @@ void php_request_shutdown(void *dummy)
 	ELS_FETCH();
 	SLS_FETCH();
 	PLS_FETCH();
+
+	if (setjmp(EG(bailout))!=0) {
+		return;
+	}
 
 	sapi_send_headers();
 	php_end_ob_buffering(SG(request_info).headers_only?0:1);
