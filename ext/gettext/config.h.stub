@@ -1,0 +1,3 @@
+/* define if you want to use the gettext extension */
+
+#define HAVE_LIBINTL 0
