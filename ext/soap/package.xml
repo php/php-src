@@ -2,7 +2,7 @@
 <!-- do not use the "Type" attribute here, that one is only for
      generated package.xml files -->
 <package>
-  <name>soap</name>
+  <name>ext_soap</name>
   <summary>Provides SOAP Services</summary>
   <description>
     Description of package....
@@ -54,7 +54,7 @@
       <file role="src">php_xml.c</file>
       <file role="src">php_xml.h</file>
       <file role="src">soap.c</file>
-      <file role="src">soap.dsp</file>
+      <file role="src">php_soap.dsp</file>
     </dir>
   </filelist>
 </package>
