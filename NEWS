@@ -1,21 +1,14 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- Added php.ini option "mysql.connect_timeout" to set the time out limit for 
-  mysql_connect and mysql_pconnect (Georg).
-- Added optional parameter client flags to mysql_connect and mysql_pconnect 
-  functions, which supports now idle timeout and diffrent protocols like SSL
-  and compressed protocol (Georg)
-- Added automatically rollback in ext/mysql for non committed transactions
-  (Georg)
-- Added 'type juggling' for boolean values. The following conversions are
-  done (Derick):
-- $a = FALSE; $a++; /* $a is now bool(true); */
-  $a = TRUE;  $a++; /* $a is now int(2); */
-  $a = FALSE; $a--; /* $a is now int(-1); */
-  $a = TRUE;  $a--; /* $a is now bool(false); */
-- Fixed cases where preg_split() incorrectly terminated final element if
-  it contained null byte. (Andrei)
+- Added php.ini option "mysql.connect_timeout" to set the timeout limit for 
+  mysql_connect() and mysql_pconnect(). (Georg)
+- Added optional parameter "flags" to mysql_connect() and mysql_pconnect() 
+  which can be used to set usage of idle timeout and different protocols,
+  SSL and compressed. (Georg)
+- Added automatic rollback to ext/mysql for non committed transactions. (Georg)
+- Fixed cases where preg_split() incorrectly terminated final element if it 
+  contained null bytes. (Andrei)
 - Added persistent connections/pipelining to thttpd. (Sascha)
 - Fixed two potential blocking issues in thttpd. (Sascha)
 - Fixed broken header file detection on Solaris. (Sascha)
