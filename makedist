@@ -127,13 +127,13 @@ done
 
 cd $MY_OLDPWD
 $ECHO_N "makedist: making gzipped tar archive...$ECHO_C"
-rm -f $ARCHIVEt.tar.gz
+rm -f $ARCHIVE.tar.gz
 tar cf $ARCHIVE $PKG-$VER || exit 8
 gzip -9 $ARCHIVE || exit 9
 echo ""
 
 $ECHO_N "makedist: making bz2zipped tar archive...$ECHO_C"
-rm -f $ARCHIVEt.tar.bz2
+rm -f $ARCHIVE.tar.bz2
 tar cf $ARCHIVE $PKG-$VER || exit 10
 bzip2 -9 $ARCHIVE || exit 11
 echo ""
