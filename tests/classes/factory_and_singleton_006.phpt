@@ -16,5 +16,5 @@ $obj = NULL;
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: Call to private destructor from context '' in %sfactory_and_singleton_006.php on line %d
-Done
+Fatal error: Call to private test::__destruct from context '' in %sfactory_and_singleton_006.php on line %d
+
