@@ -90,7 +90,6 @@ static int le_x509;
 
 static X509 * php_openssl_x509_from_zval(zval ** val, int makeresource, long * resourceval);
 static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * passphrase, int makeresource, long * resourceval);
-static unsigned long php_openssl_parse_pkcs7_flags(zval ** val, unsigned long def);
 static X509_STORE 	  * setup_verify(zval * calist);
 static STACK_OF(X509) * load_all_certs_from_file(char *certfile);
 
@@ -117,6 +116,17 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SMIME_ENCRYPT", X509_PURPOSE_SMIME_ENCRYPT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_CRL_SIGN", X509_PURPOSE_CRL_SIGN, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
+
+	/* flags for S/MIME */
+	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_TEXT", PKCS7_TEXT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOINTERN", PKCS7_NOINTERN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOVERIFY", PKCS7_NOVERIFY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOCHAIN", PKCS7_NOCHAIN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOCERTS", PKCS7_NOCERTS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOATTR", PKCS7_NOATTR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -615,7 +625,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 }
 
 
-/* {{{ proto bool openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo[, string untrustedfile])
+/* {{{ proto int openssl_x509_checkpurpose(mixed x509cert, int purpose, array cainfo[, string untrustedfile])
 	check the cert to see if it can be used for the purpose in purpose. cainfo holds information about trusted CAs */
 PHP_FUNCTION(openssl_x509_checkpurpose)
 {
@@ -632,7 +642,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 		WRONG_PARAM_COUNT;
 	}
 
-	RETVAL_FALSE;
+	RETVAL_LONG(-1);
 
 	if (argc == 4)	{
 		convert_to_string_ex(zuntrusted);
@@ -703,7 +713,7 @@ PHP_FUNCTION(openssl_free_key)
 }
 /* }}} */
 
-/* {{{ proto resource openssl_read_x509(mixed cert)
+/* {{{ proto resource openssl_x509_read(mixed cert)
    Read X.509 certificate */
 PHP_FUNCTION(openssl_x509_read)
 {
@@ -740,65 +750,6 @@ PHP_FUNCTION(openssl_x509_free)
 	zend_list_delete(Z_LVAL_PP(x509));
 }
 /* }}} */
-
-static struct {
-	const char * name;
-	unsigned long value;
-	int or;
-} php_pkcs7_option_values[] = {
-	{"detached", 	PKCS7_DETACHED, 1},
-	{"nodetached", ~PKCS7_DETACHED, 0},
-	{"text",			PKCS7_TEXT, 1},
-	{"nointern",	PKCS7_NOINTERN, 1},
-	{"noverify",	PKCS7_NOVERIFY, 1},
-	{"nochain",		PKCS7_NOCHAIN, 1},
-	{"nocerts",		PKCS7_NOCERTS, 1},
-	{"noattr",		PKCS7_NOATTR, 1},
-	{"binary",		PKCS7_BINARY, 1},
-	{"nosigs",		PKCS7_NOSIGS, 1},
-	{NULL,			0, 0}
-
-};
-
-/* given an array of named flags, parse it into a form we can pass to the pkcs7 routines */
-static unsigned long php_openssl_parse_pkcs7_flags(zval ** val, unsigned long def)
-{
-	HashPosition pos;
-
-	if ((*val)->type == IS_NULL)
-		return def;
-
-	if ((*val)->type != IS_ARRAY)
-	{
-		zend_error(E_WARNING, "%s(): expected an array of flag names", get_active_function_name());
-		return def;
-	}
-
-	zend_hash_internal_pointer_reset_ex(HASH_OF(*val), &pos);
-	for (;; zend_hash_move_forward_ex(HASH_OF(*val), &pos))	{
-		zval ** item;
-		int i;
-
-		if (zend_hash_get_current_data_ex(HASH_OF(*val), (void**)&item, &pos) == FAILURE)
-			break;
-
-		convert_to_string_ex(item);
-
-		i = 0;
-		while (php_pkcs7_option_values[i].name)	{
-			if (strcmp(php_pkcs7_option_values[i].name, Z_STRVAL_PP(item)) == 0)	{
-				if (php_pkcs7_option_values[i].or)
-					def |= php_pkcs7_option_values[i].value;
-				else
-					def &= php_pkcs7_option_values[i].value;
-				break;
-			}
-			i++;
-		}
-	}
-
-	return def;
-}
 
 /* calist is an array containing file and directory names.
 	create a certificate store and add those certs to it for
@@ -886,32 +837,42 @@ PHP_FUNCTION(openssl_error_string)
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_verify(string filename, array flags[, string signerscerts][, array cainfo])
+/* {{{ proto bool openssl_pkcs7_verify(string filename, long flags[, string signerscerts][, array cainfo][, string extracerts])
 	verify that the data block is intact, the signer is who they say they are, and return the certs of the signers
 */
 PHP_FUNCTION(openssl_pkcs7_verify)
 {
 	X509_STORE * store;
 	int argc = ZEND_NUM_ARGS();
-	zval ** data, ** zflags, ** signerscerts, ** cainfo = NULL;
+	zval ** data, ** zflags, ** signerscerts, ** cainfo = NULL, ** zextracerts;
 	char * signersfilename = NULL;
-	STACK_OF(X509) *signers;
+	STACK_OF(X509) *signers= NULL;
+	STACK_OF(X509) *others = NULL;
 	PKCS7 * p7 = NULL;
 	BIO * in = NULL, * datain = NULL;
 	int flags = 0;
 
-	if (argc > 4 || argc < 1)	{
+	RETVAL_LONG(-1);
+	
+	if (argc > 5 || argc < 1)	{
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_get_parameters_ex(argc, &data, &zflags, &signerscerts, &cainfo) == FAILURE)	{
+	if (zend_get_parameters_ex(argc, &data, &zflags, &signerscerts, &cainfo, &zextracerts) == FAILURE)	{
 		WRONG_PARAM_COUNT;
 	}
 
+	if (argc >= 5)	{
+		convert_to_string_ex(zextracerts);
+		others = load_all_certs_from_file(Z_STRVAL_PP(zextracerts));
+		if (others == NULL)
+			goto clean_exit;
+	}
+	
 	if (argc >= 4)	{
-		if ((*cainfo)->type != IS_ARRAY)	{
+		if (Z_TYPE_PP(cainfo) != IS_ARRAY)	{
 			zend_error(E_ERROR, "%s(): 4th parameter must be an array", get_active_function_name());
-			RETURN_FALSE;
+			goto clean_exit;
 		}
 	}
 	if (argc >= 3)	{
@@ -921,21 +882,22 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 
 	convert_to_string_ex(data);
 
-	flags = php_openssl_parse_pkcs7_flags(zflags, 0);
+	convert_to_long_ex(zflags);
+	flags = Z_LVAL_PP(zflags);
 
 	store = setup_verify(cainfo ? *cainfo : NULL);
 
 	if (!store)
-		RETURN_FALSE;
+		goto clean_exit;
 
 	in = BIO_new_file(Z_STRVAL_PP(data), "r");
 	if (in == NULL)
-		goto exit_fail;
+		goto clean_exit;
 	p7 = SMIME_read_PKCS7(in, &datain);
 	if (p7 == NULL)
-		goto exit_fail;
+		goto clean_exit;
 
-	if (PKCS7_verify(p7, NULL, store, datain, NULL, flags))	{
+	if (PKCS7_verify(p7, others, store, datain, NULL, flags))	{
 
 		RETVAL_TRUE;
 
@@ -951,22 +913,26 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 				BIO_free(certout);
 				sk_X509_free(signers);
 			}
+			else	{
+				zend_error(E_ERROR, "%s(): signature OK, but cannot open %s for writing",
+					  	get_active_function_name(), signersfilename);
+				RETVAL_LONG(-1);
+			}
 		}
-
-		goto exit_cleanup;
+		goto clean_exit;
 	}
-
-exit_fail:
-	RETVAL_FALSE;
-exit_cleanup:
+	else
+		RETVAL_FALSE;
+clean_exit:
 	X509_STORE_free(store);
 	BIO_free(datain);
 	BIO_free(in);
 	PKCS7_free(p7);
+	sk_X509_free(others);
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, array recipcerts, array headers[, array flags])
+/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers[, long flags])
 	encrypt the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
 PHP_FUNCTION(openssl_pkcs7_encrypt)
 {
@@ -1004,16 +970,8 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 
 
 	if (argc >= 5)	{
-		if ((*zflags)->type != IS_ARRAY)	{
-			zend_error(E_ERROR, "%s(): 5th param must be an array!", get_active_function_name());
-			goto clean_exit;
-		}
-		flags = php_openssl_parse_pkcs7_flags(zflags, 0);
-	}
-
-	if ((*zrecipcerts)->type != IS_ARRAY)	{
-		zend_error(E_ERROR, "%s(): 3rd parameter must be an array", get_active_function_name());
-		goto clean_exit;
+		convert_to_long_ex(zflags);
+		flags = Z_LVAL_PP(zflags);
 	}
 
 	infile = BIO_new_file(Z_STRVAL_PP(zinfilename), "r");
@@ -1027,24 +985,43 @@ PHP_FUNCTION(openssl_pkcs7_encrypt)
 	recipcerts = sk_X509_new_null();
 
 	/* get certs */
-	zend_hash_internal_pointer_reset_ex(HASH_OF(*zrecipcerts), &hpos);
-	while(zend_hash_get_current_data_ex(HASH_OF(*zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS)	{
+	if (Z_TYPE_PP(zrecipcerts) == IS_ARRAY)	{
+		zend_hash_internal_pointer_reset_ex(HASH_OF(*zrecipcerts), &hpos);
+		while(zend_hash_get_current_data_ex(HASH_OF(*zrecipcerts), (void**)&zcertval, &hpos) == SUCCESS)	{
+			long certresource;
+
+			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
+			if (cert == NULL)
+				goto clean_exit;
+
+			if (certresource != -1)	{
+				/* we shouldn't free this particular cert, as it is a resource.
+					make a copy and push that on the stack instead */
+				cert = X509_dup(cert);
+				if (cert == NULL)
+					goto clean_exit;
+			}
+			sk_X509_push(recipcerts, cert);
+
+			zend_hash_move_forward_ex(HASH_OF(*zrecipcerts), &hpos);
+		}
+	}
+	else	{
+		/* a single certificate */
 		long certresource;
 
-		cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
+		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource);
 		if (cert == NULL)
 			goto clean_exit;
 
 		if (certresource != -1)	{
 			/* we shouldn't free this particular cert, as it is a resource.
-			   make a copy and push that on the stack instead */
+				make a copy and push that on the stack instead */
 			cert = X509_dup(cert);
 			if (cert == NULL)
 				goto clean_exit;
 		}
 		sk_X509_push(recipcerts, cert);
-
-		zend_hash_move_forward_ex(HASH_OF(*zrecipcerts), &hpos);
 	}
 
 	/* TODO: allow user to choose a different cipher */
@@ -1090,7 +1067,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers[, array flags][, string extracertsfilename])
+/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers[, long flags][, string extracertsfilename])
 	sign the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
 
 PHP_FUNCTION(openssl_pkcs7_sign)
@@ -1125,11 +1102,8 @@ PHP_FUNCTION(openssl_pkcs7_sign)
 	}
 
 	if (argc >= 6)	{
-		if ((*zflags)->type != IS_ARRAY)	{
-			zend_error(E_ERROR, "%s(): 6th param must be an array!", get_active_function_name());
-			goto clean_exit;
-		}
-		flags = php_openssl_parse_pkcs7_flags(zflags, PKCS7_DETACHED);
+		convert_to_long_ex(zflags);
+		flags = Z_LVAL_PP(zflags);
 	}
 	if (argc >= 5)	{
 		if ((*zheaders)->type == IS_NULL)
