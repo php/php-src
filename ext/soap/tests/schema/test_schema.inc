@@ -1,0 +1,81 @@
+<?php
+$val = null;
+
+function test($input) {
+	global $val;
+	$val = $input;
+}
+
+function test_schema($schema,$type,$param,$style="rpc",$use="encoded") {
+  global $HTTP_RAW_POST_DATA, $val;
+$wsdl  = <<<EOF
+<definitions name="InteropTest"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:tns="http://test-uri/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    targetNamespace="http://test-uri/">
+  <types>
+  <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://test-uri/">
+   <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+   <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+  	$schema
+  </schema>
+  </types>
+  <message name="testMessage">
+  	<part name="testParam" $type/>
+  </message>
+	<portType name="testPortType">
+		<operation name="test">
+			<input message="testMessage"/>
+		</operation>
+	</portType>
+	<binding name="testBinding" type="testPortType">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="test">
+			<soap:operation soapAction="#test" style="$style"/>
+			<input>
+				<soap:body parts="body" use="$use" namespace="http://test-uri/"/>
+			</input>
+		</operation>
+	</binding>
+	<service name="testService">
+   <port name="testPort" binding="tns:testBinding">
+     <soap:address location="test://" /> 
+   </port>
+ </service>
+</definitions>
+EOF;
+
+  $fname = tempnam ("./", "wsdl");
+  $f = fopen($fname,"w");
+  fwrite($f,$wsdl);
+  fclose($f);
+  $x = new SoapObject($fname);
+  $y = new SoapServer("http://test-uri/");
+  $y->bind($fname);
+	$y->addfunction("test");
+  unlink($fname);
+
+  $x->__trace(1);
+  $x->test($param);
+  $xml = xml_parser_create();
+  $req = $x->__getlastrequest();
+  echo $req;
+  if ($style == "rpc") {
+    $HTTP_RAW_POST_DATA = $req;
+    ob_start();
+    $y->handle();
+    ob_end_clean();
+    var_dump($val);
+  }
+
+/*
+  xml_parse_into_struct($xml,$x->__getlastrequest(),&$x,&$y);
+  var_dump($x);
+  var_dump($y);
+*/
+}
+?>
