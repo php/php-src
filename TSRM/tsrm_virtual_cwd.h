@@ -41,6 +41,10 @@
 #include <unistd.h>
 #endif
 
+#if defined(__osf__) || defined(_AIX)
+#include <errno.h>
+#endif
+
 #ifdef TSRM_WIN32
 #include "readdir.h"
 #include <sys/utime.h>
@@ -155,6 +159,25 @@ CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
 CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
 #endif
 
+/* On AIX & Tru64 when a file does not exist realpath() returns
+ * NULL, and sets errno to ENOENT. Unlike in other libc implementations
+ * the destination is not filled and remains undefined. Therefor, we
+ * must populate it manually using strcpy as done on systems with no
+ * realpath() function.
+ */
+#if defined(__osf__) || defined(_AIX)
+static char *php_realpath_hack(char *src, char *dest)
+{
+	char *ret;
+
+	if ((ret = realpath(src, dest)) == NULL && errno == ENOENT) {
+		return strcpy(dest, src);
+	} else {
+		return ret;
+	}
+}
+#endif
+
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC);
 #endif
@@ -232,7 +255,11 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 
 #ifdef HAVE_REALPATH
+#if defined(__osf__) || defined(_AIX)
+#define VCWD_REALPATH(path, real_path) php_realpath_hack(path, real_path)
+#else
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)
+#endif
 #else
 #define VCWD_REALPATH(path, real_path) strcpy(real_path, path)
 #endif
