@@ -57,7 +57,7 @@ class PEAR_Registry extends PEAR
 
     // }}}
 
-    // {{{ PEAR_Registry
+    // {{{ constructor
 
     /**
      * PEAR_Registry constructor.
@@ -79,7 +79,7 @@ class PEAR_Registry extends PEAR
     }
 
     // }}}
-    // {{{ _PEAR_Registry
+    // {{{ destructor
 
     /**
      * PEAR_Registry destructor.  Makes sure no locks are forgotten.
