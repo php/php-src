@@ -71,10 +71,11 @@ PHP_FUNCTION(gethostbyaddr)
 
 char *php_gethostbyaddr(char *ip)
 {
-	unsigned long addr;
+	struct in_addr addr;
 	struct hostent *hp;
 
-	if ((int) (addr = inet_addr(ip)) == -1) {
+	addr.s_addr = inet_addr(ip);
+	if (addr.s_addr == -1) {
 #if PHP_DEBUG
 		php_error(E_WARNING, "address not in a.b.c.d form");
 #endif
