@@ -115,9 +115,9 @@ AC_CHECK_LIB(bind, inet_aton, [
   AC_DEFINE(HAVE_LIBBIND) ], []) 
 
 
-AC_CRYPT_CAP
-
 divert(3)
+
+AC_CRYPT_CAP
 
 PHP_EXTENSION(standard)
 
