@@ -1581,7 +1581,8 @@ PHP_FUNCTION(sqlite_fetch_column_types)
 	zval *object = getThis();
 	struct php_sqlite_result res;
 	const char **rowdata, **colnames, *tail;
-	int i, ncols, result_type = PHPSQLITE_ASSOC;
+	int i, ncols;
+	long result_type = PHPSQLITE_ASSOC;
 
 	if (object) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &tbl, &tbl_len, &result_type)) {
