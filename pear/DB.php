@@ -153,13 +153,6 @@ if (!defined('DB_GETMODE_DEFAULT')) {
  */
 class DB {
 
-	function DB ($dsn = false, $persistent = false)
-	{
-		if ($dsn) {
-			return DB::connect ($dsn, $persistent);
-		}
-	}
-
     // {{{ factory()
 
 	/**
