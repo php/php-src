@@ -239,7 +239,7 @@ void fnListAnchor(DLIST *pAnchorList)
 	while(cur_ptr) {
 #endif
 
-		fprintf(stderr, "0x%X->0x%X ", ptr, cur_ptr);
+		fprintf(stderr, "0x%X->0x%X ", (int) ptr, (int) cur_ptr);
 		fprintf(stderr, "%d, %d, %s, %s, %s, %s %s\n", cur_ptr->start,
 		                                           cur_ptr->end,
 		                                           cur_ptr->tanchor == 1 ? "src" : "dest",
@@ -270,8 +270,8 @@ int fnCmpAnchors(const void *e1, const void *e2)
 {
 	ANCHOR *a1, **aa1, *a2, **aa2;
 	zend_llist_element **ee1, **ee2;
-	ee1 = e1;
-	ee2 = e2;
+	ee1 = (zend_llist_element **) e1;
+	ee2 = (zend_llist_element **) e2;
 	aa1 = (ANCHOR **) (*ee1)->data;
 	aa2 = (ANCHOR **) (*ee2)->data;
 	a1 = *aa1;
@@ -3290,6 +3290,7 @@ int send_getreldestforanchorsobj(int sockfd, char **anchorrec, char ***reldestre
 				efree(reldestptr);
 				return -1;
 			}
+
 			reldestptr[i] = docofanchorptr;
 			/* if we can't get the object rec of the dest, than this document
 			   is probably not accessible for us. For later functions simply
@@ -3377,6 +3378,7 @@ fprintf(stderr,"\n");
 /* fprintf(stderr, "%s\n", anchorstr); */
 				efree(retthisIDs);
 				efree(retdestIDs);
+				efree(reldestptr[i]);
 				reldestptr[i] = estrdup(anchorstr);
 			}
 		} else {
