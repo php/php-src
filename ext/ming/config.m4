@@ -11,6 +11,7 @@ if test "$PHP_MING" != "no"; then
   for i in $PHP_MING /usr/local /usr; do
     if test -f $i/lib/libming.$SHLIB_SUFFIX_NAME -o -f $i/lib/libming.a; then
       MING_DIR=$i
+      break
     fi
   done
 
