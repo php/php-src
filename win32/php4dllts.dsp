@@ -169,10 +169,6 @@ SOURCE=..\main\php_variables.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_virtual_cwd.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\standard\quot_print.c
 # End Source File
 # Begin Source File
@@ -265,19 +261,11 @@ SOURCE=..\main\php_ini.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_realpath.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\php_regex.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\main\php_variables.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\php_virtual_cwd.h
 # End Source File
 # Begin Source File
 
