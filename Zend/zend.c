@@ -817,7 +817,9 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		if (EG(active_op_array)) {
 			EG(return_value_ptr_ptr) = retval ? retval : &local_retval;
 			zend_execute(EG(active_op_array) TSRMLS_CC);
-			if (!retval) {
+			if (EG(exception)) {
+				zval_ptr_dtor(&EG(exception));
+			} else if (!retval) {
 				zval_ptr_dtor(EG(return_value_ptr_ptr));
 				local_retval = NULL;
 			}
