@@ -54,7 +54,7 @@ PHP_FUNCTION(odbc_data_source);
 PHP_FUNCTION(odbc_do);
 PHP_FUNCTION(odbc_exec);
 PHP_FUNCTION(odbc_execute);
-#ifdef HAVE_DBMAKER
+#if defined(HAVE_DBMAKER) || deifned(PHP_WIN32)
 PHP_FUNCTION(odbc_fetch_array);
 PHP_FUNCTION(odbc_fetch_object);
 #endif
