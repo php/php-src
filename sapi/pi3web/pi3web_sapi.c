@@ -319,11 +319,6 @@ static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK
 	SG(request_info).auth_user       = lpCB->lpszUser;
 	SG(request_info).auth_password   = lpCB->lpszPassword;
 	SG(sapi_headers).http_response_code = 200;
-	if (!strcmp(lpCB->lpszMethod, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
-	}
 }
 
 static void hash_pi3web_variables(ELS_D SLS_DC)

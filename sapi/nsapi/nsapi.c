@@ -479,12 +479,6 @@ nsapi_request_ctor(NSLS_D SLS_DC)
 	SG(request_info).content_type = nsapi_strdup(content_type);
 	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
 	SG(sapi_headers).http_response_code = 200;
-	if (!strcmp(request_method, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
-	}
-
 }
 
 static void

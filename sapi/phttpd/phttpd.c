@@ -203,11 +203,6 @@ php_phttpd_request_ctor(PHLS_D SLS_DC)
     SG(request_info).request_method = PHG(cip)->hip->method;
 	SG(request_info).path_translated = malloc(MAXPATHLEN+1);
     SG(sapi_headers).http_response_code = 200;
-	if (!strcmp(PHG(cip)->hip->method, "HEAD")) {
-		SG(request_info).headers_only = 1;
-	} else {
-		SG(request_info).headers_only = 0;
-	}
 	if (url_expand(PHG(cip)->hip->url, SG(request_info).path_translated, MAXPATHLEN, &PHG(sb), NULL, NULL) == NULL) {
 		/* handle error */
 	}
