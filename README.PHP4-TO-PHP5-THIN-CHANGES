@@ -39,3 +39,7 @@
    by Apache.  This change was made to comply with the CGI specification.
    Please refer to bug #23610 for further information.
 
+6. Starting PHP 5.0.0 the T_ML_CONSTANT constant is no longer defined by the
+   ext/tokenizer extension. If error_reporting is set to E_ALL notices will
+   be produced. Instead of T_ML_CONSTANT for /* */ the T_COMMENT constant 
+   is used, thus both // and /* */ are resolved as the T_COMMENT constant.
