@@ -136,12 +136,6 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	if (stream == NULL)	
 		goto out;
 
-	/* Ordinarily we'd always reduce chunk_size to 1 to avoid filter problems.
-	   However, since 4.3 filter support is extremely limited and will be completely rewritten in 5.0
-	   we'll accept the unexpected behavior of filtered http streams in favor of improved performance. */
-	if (options & STREAM_WILL_CAST)
-		chunk_size = php_stream_set_chunk_size(stream, 1);
-
 	/* avoid problems with auto-detecting when reading the headers -> the headers
 	 * are always in canonical \r\n format */
    	eol_detect = stream->flags & (PHP_STREAM_FLAG_DETECT_EOL | PHP_STREAM_FLAG_EOL_MAC);
@@ -266,6 +260,15 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	php_stream_write(stream, "\r\n", sizeof("\r\n")-1);
 
 	location[0] = '\0';
+
+	/* 
+	 * We need to read the HTTP response header one-by-one, because
+	 * the original author did not know about MSG_PEEK.
+	 * The chunk_size will be reset later, once we have read the
+	 * header completely.
+	 */
+	if (options & STREAM_WILL_CAST)
+		chunk_size = php_stream_set_chunk_size(stream, 1);
 
 	if (!header_init && FAILURE == zend_hash_find(EG(active_symbol_table),
 				"http_response_header", sizeof("http_response_header"), (void **) &response_header)) {
