@@ -1,7 +1,10 @@
 --TEST--
 Output buffering tests
---POST--
---GET--
+--INI--
+output_buffering=0
+output_handler=
+zlib.output_compression=0
+zlib.output_handler=
 --FILE--
 <?php
 ob_start();
