@@ -1020,7 +1020,12 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 		is_negative = 1;
 		d = -d;
 	}
-	dec = MAX(0, dec);
+	if (!dec_point && dec > 0) {
+		d *= pow(10, dec);
+		dec = 0;
+	} else {
+		dec = MAX(0, dec);
+	}
 
 	PHP_ROUND_WITH_FUZZ(d, dec);
 
@@ -1140,6 +1145,8 @@ PHP_FUNCTION(number_format)
 		convert_to_string_ex(t_s);
 		if (Z_STRLEN_PP(d_p)==1) {
 			dec_point=Z_STRVAL_PP(d_p)[0];
+		} else if (Z_STRLEN_PP(d_p)==0) {
+			dec_point=0;
 		}
 		if (Z_STRLEN_PP(t_s)==1) {
 			thousand_sep=Z_STRVAL_PP(t_s)[0];
