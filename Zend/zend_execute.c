@@ -434,7 +434,6 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
-	zval_ptr_dtor(&value);
 	
 	FREE_OP(Ts, op2, EG(free_op2));
 	if (result) {
@@ -442,6 +441,7 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		T(result->u.var).var.ptr_ptr = NULL; /* see if we can remove this */
 		SELECTIVE_PZVAL_LOCK(value, result);
 	}
+	zval_ptr_dtor(&value);
 }
 
 
