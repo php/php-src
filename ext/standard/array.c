@@ -326,6 +326,7 @@ PHP_FUNCTION(count)
 			break;
 		case IS_OBJECT: {
 #if HAVE_SPL
+			/* it the object implements Countable we call its count() method */
 			zval *retval;
 
 			if (instanceof_function(Z_OBJCE_P(array), spl_ce_Countable TSRMLS_CC)) {
@@ -335,6 +336,7 @@ PHP_FUNCTION(count)
 				return;
 			}
 #endif
+			/* if not we return the number of properties (not taking visibility into account) */
 			if (Z_OBJ_HT(*array)->count_elements) {
 				RETVAL_LONG(1);
 				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(array, &Z_LVAL_P(return_value) TSRMLS_CC)) {
