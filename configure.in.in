@@ -48,7 +48,7 @@ AM_INIT_AUTOMAKE(php, 4.0pa1)
 
 PHP_VERSION=$VERSION
 echo "#define PHP_VERSION \"$PHP_VERSION\"" > php_version.h.new
-cmp php_version.h.new php_version.h >/dev/null
+cmp php_version.h.new php_version.h >/dev/null 2>&1
 if test $? -ne 0 ; then
     rm -f php_version.h && mv php_version.h.new php_version.h && \
     echo 'Updated php_version.h'
