@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("exif", "exif", "no");
+ARG_ENABLE("exif", "exif", "no");
 
 if (PHP_EXIF == "yes") {
 	EXTENSION("exif", "exif.c");
