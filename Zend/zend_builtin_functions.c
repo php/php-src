@@ -1484,6 +1484,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	array_init(return_value);
 
 	while (ptr) {
+   		class_name = call_type = NULL;   
 		if (ptr->op_array) {
 			filename = ptr->op_array->filename;
 			lineno = ptr->opline->lineno;
