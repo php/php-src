@@ -17,6 +17,8 @@ PHP 4                                                                      NEWS
 - Added OCIPasswordChange() which allows renewing expired Oracle users. (Maxim)
 - Added memory_get_usage(). Only available when PHP is configured with 
   --enable-memory-limit. (Andrey)
+- Added improved JPEG 2000 support for getimagesize(). (Marcus, Adam Wright)
+- Added XBM and WBMP support for getimagesize(). (Marcus)
 - Fixed bug #22191 (frontbase build broken with old version of frontbase). (Ilia)
 - Fixed bug #22187 (spprintf function did not handle floats correctly). (Ilia)
 - Fixed bug #22149 (incorrect insertion of session id when tabs are used to
