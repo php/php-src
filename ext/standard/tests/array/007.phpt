@@ -111,7 +111,7 @@ var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_diff_assoc($a, $b));'."\n";
-var_dump(array_diff_assoc($a, $b));
+var_dump(@array_diff_assoc($a, $b));
 
 
 echo '$a='.var_export($a,TRUE).";\n";
