@@ -29,20 +29,20 @@ var_dump(DB::parseDSN(""));
 
 
 print "testing different error codes...\n";
-$e = new DB_Error(); print $e->__string_value()."\n";
-$e = new DB_Error("test error"); print $e->__string_value()."\n";
-$e = new DB_Error(DB_OK); print $e->__string_value()."\n";
-$e = new DB_Error(DB_ERROR); print $e->__string_value()."\n";
-$e = new DB_Error(DB_ERROR_SYNTAX); print $e->__string_value()."\n";
-$e = new DB_Error(DB_ERROR_DIVZERO); print $e->__string_value()."\n";
-$e = new DB_Warning(); print $e->__string_value()."\n";
-$e = new DB_Warning("test warning"); print $e->__string_value()."\n";
-$e = new DB_Warning(DB_WARNING_READ_ONLY); print $e->__string_value()."\n";
+$e = new DB_Error(); print $e->toString()."\n";
+$e = new DB_Error("test error"); print $e->toString()."\n";
+$e = new DB_Error(DB_OK); print $e->toString()."\n";
+$e = new DB_Error(DB_ERROR); print $e->toString()."\n";
+$e = new DB_Error(DB_ERROR_SYNTAX); print $e->toString()."\n";
+$e = new DB_Error(DB_ERROR_DIVZERO); print $e->toString()."\n";
+$e = new DB_Warning(); print $e->toString()."\n";
+$e = new DB_Warning("test warning"); print $e->toString()."\n";
+$e = new DB_Warning(DB_WARNING_READ_ONLY); print $e->toString()."\n";
 
 ini_alter("html_errors", false);
 
 print "testing different error modes...\n";
-$e = new DB_Error(DB_ERROR, PEAR_ERROR_PRINT); print $e->__string_value()."\n";
+$e = new DB_Error(DB_ERROR, PEAR_ERROR_PRINT); print $e->toString()."\n";
 $e = new DB_Error(DB_ERROR_SYNTAX, PEAR_ERROR_TRIGGER);
 
 print "testing different error serverities...\n";
