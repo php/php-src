@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 
 	sapi_startup(&sapi_module);
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
 	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
 	setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
