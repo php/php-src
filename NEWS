@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - Fixed posix_getsid() & posix_getpgid() to return sid & pgid instead 
   of true. (Tony)
 - Fixed bug #31797 (exif_read_data() uses too low nesting limit). (Ilia)
+- Fixed bug #31755 (Cannot create SOAP header in no namespace). (Dmitry)
 - Fixed bug #31732 (mb_get_info() causes segfault when no parameters 
   specified). (Tony)
 - Fixed bug #31710 (Wrong return values for mysqli_autocommit/commit/rollback).
