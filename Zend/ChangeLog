@@ -1,3 +1,56 @@
+2003-04-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c
+      zend_API.h:
+      - Add zend_register_internal_namespace() API function.
+      - Add zend_register_internal_class_in_ns() API function.
+
+    * zend_compile.h:
+      Simplify.
+
+2003-04-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * zend_list.c:
+      - Fix whitespace
+
+2003-04-02  Sterling Hughes  <sterling@bumblebury.com>
+
+    * zend_list.c
+      zend_list.h:
+      add the ability for curl_multi_info to introspect the handles.
+      
+
+2003-04-02  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l:
+      Implement a different way to catch documentation comments.
+
+    * zend_compile.c
+      zend_compile.h
+      zend_highlight.c
+      zend_language_parser.y
+      zend_language_scanner.l:
+      Revert portions of the doc comment patch. There should be no parser
+      errors now.
+
+2003-04-02  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_builtin_functions.c
+      zend_compile.h
+      zend_execute.c:
+      allow class_exists() to work with namespaces too.
+      add CLASS_IS_NAMESPACE macro
+
+    * zend_builtin_functions.c:
+      fix typo
+
+    * zend_builtin_functions.c:
+      fix parameterless get_declared_classes call
+
 2003-04-01  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_execute.c:
