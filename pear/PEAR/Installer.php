@@ -803,7 +803,7 @@ class PEAR_Installer extends PEAR_Common
                     if ($version == 0 && !isset($options['force'])) {
                         return $this->raiseError('No release with state equal to: \'' . implode(', ', $states) .
                                                  "' found for '$pkgfile'");
-                    } else {
+                    } elseif ($version == 0) {
                         $this->log(0, "Warning: $pkgfile is state '$inf[state]' which is less stable " .
                                       "than state '$state'");
                     }
