@@ -6,7 +6,7 @@
    +----------------------------------------------------------------------+
    | dbx module version 1.0                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 2001 Guidance Rotterdam BV                             |
+   | Copyright (c) 2001-2003 Guidance Rotterdam BV                        |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
