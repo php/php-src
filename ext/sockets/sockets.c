@@ -899,8 +899,10 @@ PHP_FUNCTION(socket_create)
 	int			arg1, arg2, arg3;
 	php_socket	*php_sock = (php_socket*)emalloc(sizeof(php_socket));
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &arg1, &arg2, &arg3) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll", &arg1, &arg2, &arg3) == FAILURE) {
+        efree(php_sock);
 		return;
+    }
 
 	if (arg1 != AF_UNIX && arg1 != AF_INET) {
 		php_error(E_WARNING, "Invalid socket domain [%d] specified, assuming AF_INET", arg1);
@@ -1026,6 +1028,7 @@ PHP_FUNCTION(socket_bind)
 				sa->sun_family = AF_UNIX;
 				snprintf(sa->sun_path, 108, "%s", addr);
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa, SUN_LEN(sa));
+				break;
 			}
 		
 		case AF_INET:
@@ -1044,6 +1047,7 @@ PHP_FUNCTION(socket_bind)
 				sa.sin_family	= hp->h_addrtype;
 				sa.sin_port		= htons((unsigned short)port);
 				retval = bind(php_sock->bsd_socket, (struct sockaddr *)&sa, sizeof(sa));
+				break;
 			}
 		
 		default:
@@ -1818,6 +1822,8 @@ PHP_FUNCTION(socket_create_pair)
 	zval_dtor(fds_array_zval);
 	if (array_init(fds_array_zval) == FAILURE) {
 		php_error(E_WARNING, "Can't initialize fds array");
+		efree(php_sock[0]);
+		efree(php_sock[1]);
 		RETURN_FALSE;
 	}
 
