@@ -55,7 +55,7 @@ ZEND_GET_MODULE(php_gettext)
 PHP_MINFO_FUNCTION(gettext)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "GNU GetText Support", "enabled");
+	php_info_print_table_row(2, "GetText Support", "enabled");
 	php_info_print_table_end();
 }
 
