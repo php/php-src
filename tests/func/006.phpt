@@ -18,4 +18,4 @@ echo $b;
 echo $a;
 ?>
 --EXPECT--
-3B2A
+2B1A
