@@ -301,7 +301,7 @@ PHP_FUNCTION(jdtogregorian)
 {
 	long julday;
 	int year, month, day;
-	char date[10];
+	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &julday) == FAILURE) {
 		RETURN_FALSE;
@@ -337,7 +337,7 @@ PHP_FUNCTION(jdtojulian)
 {
 	long julday;
 	int year, month, day;
-	char date[10];
+	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &julday) == FAILURE) {
 		RETURN_FALSE;
@@ -469,7 +469,7 @@ PHP_FUNCTION(jdtojewish)
 	long julday, fl = 0;
 	zend_bool heb   = 0;
 	int year, month, day;
-	char date[10], hebdate[25];
+	char date[16], hebdate[25];
 	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|bl", &julday, &heb, &fl) == FAILURE) {
@@ -524,7 +524,7 @@ PHP_FUNCTION(jdtofrench)
 {
 	long julday;
 	int year, month, day;
-	char date[10];
+	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &julday) == FAILURE) {
 		RETURN_FALSE;
