@@ -87,7 +87,7 @@ if (getenv('TEST_PHP_DETAILED')) {
 if (getenv('TEST_PHP_USER')) {
 	$user_tests = explode (',', getenv('TEST_PHP_USER'));
 } else {
-	$user_tests = NULL;
+	$user_tests = array();
 }
 
 // Write test context information.
