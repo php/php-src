@@ -306,9 +306,6 @@ PHP_MINIT_FUNCTION(mssql)
 	REGISTER_LONG_CONSTANT("SQLFLT8",SQLFLT8, CONST_CS | CONST_PERSISTENT);
 	/* END MSSQL data types for mssql_sp_bind */
 
-	dberrhandle((DBERRHANDLE_PROC) php_mssql_error_handler);
-	dbmsghandle((DBMSGHANDLE_PROC) php_mssql_message_handler);
-
 	return SUCCESS;
 }
 
@@ -441,6 +438,9 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		RETURN_FALSE;
 	}
 	
+	dbprocerrhandle(mssql.login, (DBERRHANDLE_PROC) php_mssql_error_handler);
+	dbprocmsghandle(mssql.login, (DBMSGHANDLE_PROC) php_mssql_message_handler);
+
 	if (user) {
 		DBSETLUSER(mssql.login,user);
 	}
