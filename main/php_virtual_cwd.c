@@ -393,7 +393,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode)
 	return f;
 }
 
-CWD_API int virtual_open(const char *path, int flags)
+CWD_API int virtual_open(const char *path, int flags, ...)
 {
 	cwd_state new_state;
 	int f;
