@@ -1,3 +1,150 @@
+2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/tests/file/bug26938.phpt:
+      
+      test case for bug #26938
+
+2004-01-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/classes/interface_doubled.phpt:
+      Change to correct syntax.
+
+    * CODING_STANDARDS:
+      All technical reasons that prevented us from studlyCaps are solved
+      and all current extensions as well as the whole PEAR framework follow
+      this rule. So for consistency i readd it.
+
+2004-01-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/exec.c:
+      Fixed bug #26938 (exec() has problems reading long lines).
+
+2004-01-21  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      -change constant name, coz it doesn't comply with others
+      *add constant's alias, coz others do have aliases
+      *change protos (oops =))
+      *add notices to collection functions
+      *change coll_element_get & coll_assign to inform user, that this type of
+      element is not supported yet.
+
+2004-01-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/profile10.phpt:
+      Fix namespace regression bug
+      Read attributes correctly
+      Update sxe_prop_dim_exists logic
+      Update profile
+
+2004-01-21  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c:
+      fix potential segfault in oci_lob_write()
+      change oci_lob_trim() - truncate length should be 0 by default.
+
+2004-01-21  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/simplexml.c
+      ext/simplexml/tests/015.phpt:
+      Fix Bug #26976 (Can not access array elements using array indices)
+      return index 0 as non iterable object
+      update test
+
+2004-01-21  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * ext/interbase/interbase.c:
+      MFB
+
+2004-01-21  Hartmut Holzgraefe  <hartmut@php-groupies.de>
+
+    * NEWS:
+      News update on new streams method
+
+    * main/streams/userspace.c:
+      stream_lock() method added to userspace streams wrapper
+
+2004-01-21  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
+
+    * (PHP_4_3)
+      NEWS
+      ext/interbase/interbase.c:
+      Fixed bug #26968 (Segfault with Interbase module built as shared)
+
+2004-01-21  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sqlite/Makefile.frag:
+      Adding dependencies on sqlite.h for the rest of the source files in the
+      libsqlite distribution.
+
+2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * .cvsignore
+      build/build.mk:
+      Last php4 occurances..
+
+2004-01-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      makerpm:
+      Add these files to the actual package
+
+    * (PHP_4_3)
+      makerpm:
+      Make this thing actually work again
+
+2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/bz2/config.m4:
+      Break out the test with first hit.
+
+2004-01-21  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/tests/file/userwrapper.phpt:
+      Typo
+
+2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/formatted_print.c:
+      MFH: - Fixed bug #26973 (*printf() + modifier broken)
+
+    * ext/standard/formatted_print.c:
+      - Fixed bug #26973 (*printf() + modifier broken)
+
+    * ext/standard/tests/strings/bug26973.phpt:
+      extend a bit
+
+    * ext/standard/tests/strings/bug26973.phpt:
+      
+      test case for bug #26973
+
+    * ext/simplexml/tests/bug26976.phpt:
+      typo fix
+
+    * ext/simplexml/tests/bug26976.phpt:
+      test for bug #26976
+
+2004-01-21  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/file.c:
+      MFH: Fixed bug #26974 (rename() doesn't check the destination file against
+      safe_mode/open_basedir).
+
+    * main/streams/plain_wrapper.c:
+      Fixed bug #26974 (rename() doesn't check the destination file
+      against safe_mode/open_basedir).
+
+2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/simplexml/simplexml.c:
+      Goto targets should not be indented (some compilers choke on this, iirc)
+
 2004-01-20  Antony Dovgal  <tony2001@phpclub.net>
 
     * (PHP_4_3)
