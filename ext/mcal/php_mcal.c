@@ -280,8 +280,6 @@ void php_mcal_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 
 
-
-
 /* {{{ proto int mcal_close(int stream_id [, int options])
    Close an MCAL stream */
 PHP_FUNCTION(mcal_close)
@@ -311,12 +309,6 @@ PHP_FUNCTION(mcal_close)
         RETURN_TRUE;
 }
 /* }}} */
-
-
-
-
-
-
 
 
 /* {{{ proto int mcal_open(string calendar, string user, string password [, int options])
@@ -398,8 +390,8 @@ PHP_FUNCTION(mcal_expunge)
 }
 /* }}} */
 
-/* {{{ proto int mcal_fetch_event(int stream_id,int eventid, [int options])
-   Fetch an event*/
+/* {{{ proto int mcal_fetch_event(int stream_id,int eventid [, int options])
+   Fetch an event */
 PHP_FUNCTION(mcal_fetch_event)
 {
 	pval *streamind,*eventid,*options=NULL;
@@ -435,7 +427,7 @@ PHP_FUNCTION(mcal_fetch_event)
 /* }}} */
 
 /* {{{ proto object mcal_fetch_current_stream_event(int stream_id)
-   Fetch the current event stored in the stream's event structure*/
+   Fetch the current event stored in the stream's event structure */
 PHP_FUNCTION(mcal_fetch_current_stream_event)
 {
 	pval *streamind;
@@ -528,7 +520,7 @@ void make_event_object(pval *mypvalue,CALEVENT *event)
 
 
 
-/* {{{ proto array mcal_list_events(int stream_id,object begindate, [object enddate])
+/* {{{ proto array mcal_list_events(int stream_id,object begindate [, object enddate])
    Returns list of UIDs for that day or range of days */
 PHP_FUNCTION(mcal_list_events)
 {
@@ -593,7 +585,7 @@ PHP_FUNCTION(mcal_list_events)
 
 
 /* {{{ proto string mcal_create_calendar(int stream_id, string calendar)
-   Create a new calendar*/
+   Create a new calendar */
 
 PHP_FUNCTION(mcal_create_calendar)
 {
@@ -629,7 +621,7 @@ PHP_FUNCTION(mcal_create_calendar)
 
 
 /* {{{ proto string mcal_rename(int stream_id, string src_calendar, string dest_calendar)
-   Rename a calendar*/
+   Rename a calendar */
 PHP_FUNCTION(mcal_rename_calendar)
 {
 	pval *streamind, *src_calendar,*dest_calendar;
@@ -661,7 +653,7 @@ PHP_FUNCTION(mcal_rename_calendar)
 
 
 /* {{{ proto int mcal_reopen(int stream_id, array date, array time)
-   list alarms for a given time */
+   List alarms for a given time */
 PHP_FUNCTION(mcal_list_alarms)
 {
   pval *streamind, *year,*month,*day,*hour,*min,*sec;
@@ -717,7 +709,7 @@ PHP_FUNCTION(mcal_list_alarms)
 
 
 /* {{{ proto string mcal_delete_calendar(int stream_id, string calendar)
-   Delete calendar*/
+   Delete calendar */
 PHP_FUNCTION(mcal_delete_calendar)
 {
 	pval *streamind, *calendar;
@@ -752,7 +744,7 @@ PHP_FUNCTION(mcal_delete_calendar)
 
 
 /* {{{ proto string mcal_delete_event(int stream_id, int uid)
-   Delete event*/
+   Delete event */
 PHP_FUNCTION(mcal_delete_event)
 {
 	pval *streamind, *uid;
@@ -789,7 +781,7 @@ PHP_FUNCTION(mcal_popen){
 
 
 /* {{{ proto string mcal_store_event(int stream_id, object event)
-   Store an  event*/
+   Store an event */
 PHP_FUNCTION(mcal_store_event)
 {
   pval *streamind;
@@ -828,7 +820,7 @@ PHP_FUNCTION(mcal_store_event)
 
 
 /* {{{ proto string mcal_snooze(int stream_id, int uid)
-   Snooze an alarm*/
+   Snooze an alarm */
 PHP_FUNCTION(mcal_snooze)
 {
 	pval *streamind,*uid;
@@ -867,7 +859,7 @@ PHP_FUNCTION(mcal_snooze)
 
 
 /* {{{ proto string mcal_event_set_category(int stream_id, string category)
-   attach a category to an event*/
+   Attach a category to an event */
 PHP_FUNCTION(mcal_event_set_category)
 {
 	pval *streamind,*category;
@@ -895,7 +887,7 @@ PHP_FUNCTION(mcal_event_set_category)
 	/* }}} */
 
 /* {{{ proto string mcal_event_set_title(int stream_id, string title)
-   attach a title to an event*/
+   Attach a title to an event */
 PHP_FUNCTION(mcal_event_set_title)
 {
 	pval *streamind,*title;
@@ -923,7 +915,7 @@ PHP_FUNCTION(mcal_event_set_title)
 	/* }}} */
 
 /* {{{ proto string mcal_event_set_description(int stream_id, string description)
-   attach a description to an event*/
+   Attach a description to an event */
 PHP_FUNCTION(mcal_event_set_description)
 {
 	pval *streamind,*description;
@@ -950,8 +942,8 @@ PHP_FUNCTION(mcal_event_set_description)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_start(int stream_id, int year,int month, int day, [[[int hour],int min],int sec])
-   attach a start datetime to an event*/
+/* {{{ proto string mcal_event_set_start(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
+   Attach a start datetime to an event */
 PHP_FUNCTION(mcal_event_set_start)
 {
 	pval *streamind,*year,*month,*date,*hour,*min,*sec;
@@ -992,8 +984,8 @@ PHP_FUNCTION(mcal_event_set_start)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_end(int stream_id, int year,int month, int day, [[[int hour],int min],int sec])
-   attach an end datetime to an event*/
+/* {{{ proto string mcal_event_set_end(int stream_id, int year,int month, int day [[[, int hour], int min], int sec])
+   Attach an end datetime to an event */
 PHP_FUNCTION(mcal_event_set_end)
 {
 	pval *streamind,*year,*month,*date,*hour,*min,*sec;
@@ -1036,7 +1028,7 @@ PHP_FUNCTION(mcal_event_set_end)
 	/* }}} */
 
 /* {{{ proto int mcal_event_set_alarm(int stream_id, int alarm)
-   add an alarm to the streams global event */
+   Add an alarm to the streams global event */
 PHP_FUNCTION(mcal_event_set_alarm)
 {
 	pval *streamind,*alarm;
@@ -1064,7 +1056,7 @@ PHP_FUNCTION(mcal_event_set_alarm)
 	/* }}} */
 
 /* {{{ proto int mcal_event_init(int stream_id)
-   initialize a streams global event */
+   Initialize a streams global event */
 PHP_FUNCTION(mcal_event_init)
 {
 	pval *streamind;
@@ -1098,7 +1090,7 @@ void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 
 
 /* {{{ proto int mcal_event_set_class(int stream_id, int class)
-   add an class to the streams global event */
+   Add an class to the streams global event */
 PHP_FUNCTION(mcal_event_set_class)
 {
 	pval *streamind,*class;
@@ -1128,7 +1120,7 @@ PHP_FUNCTION(mcal_event_set_class)
 
 
 /* {{{ proto bool mcal_is_leap_year(int year)
-   returns true if year is a leap year, false if not */
+   Returns true if year is a leap year, false if not */
 PHP_FUNCTION(mcal_is_leap_year)
 {
 	pval *year;
@@ -1149,8 +1141,8 @@ PHP_FUNCTION(mcal_is_leap_year)
 }
 /* }}} */
 
-/* {{{ proto int mcal_days_in_month(int month,bool leap_year)
-   returns the number of days in the given month, needs to know if the year is a leap year or not */
+/* {{{ proto int mcal_days_in_month(int month, bool leap_year)
+   Returns the number of days in the given month, needs to know if the year is a leap year or not */
 PHP_FUNCTION(mcal_days_in_month)
 {
 	pval *month,*leap;
@@ -1167,8 +1159,8 @@ PHP_FUNCTION(mcal_days_in_month)
 /* }}} */
 
 
-/* {{{ proto bool mcal_date_valid(int year,int month,int day)
-   returns true if the date is a valid date */
+/* {{{ proto bool mcal_date_valid(int year, int month, int day)
+   Returns true if the date is a valid date */
 PHP_FUNCTION(mcal_date_valid)
 {
 	pval *year,*month,*day;
@@ -1193,8 +1185,8 @@ PHP_FUNCTION(mcal_date_valid)
 /* }}} */
 
 
-/* {{{ proto bool mcal_time_valid(int hour,int min,int sec)
-   returns true if the time is a valid time */
+/* {{{ proto bool mcal_time_valid(int hour, int min, int sec)
+   Returns true if the time is a valid time */
 PHP_FUNCTION(mcal_time_valid)
 {
 	pval *hour,*min,*sec;
@@ -1217,8 +1209,8 @@ PHP_FUNCTION(mcal_time_valid)
 }
 /* }}} */
 
-/* {{{ proto int mcal_day_of_week(int year,int month,int day)
-   returns the day of the week of the given date */
+/* {{{ proto int mcal_day_of_week(int year, int month, int day)
+   Returns the day of the week of the given date */
 PHP_FUNCTION(mcal_day_of_week)
 {
 	pval *year,*month,*day;
@@ -1238,8 +1230,8 @@ PHP_FUNCTION(mcal_day_of_week)
 }
 /* }}} */
 
-/* {{{ proto int mcal_day_of_year(int year,int month,int day)
-   returns the day of the year of the given date */
+/* {{{ proto int mcal_day_of_year(int year, int month, int day)
+   Returns the day of the year of the given date */
 PHP_FUNCTION(mcal_day_of_year)
 {
 	pval *year,*month,*day;
@@ -1259,10 +1251,8 @@ PHP_FUNCTION(mcal_day_of_year)
 }
 
 
-
-
-/* {{{ proto int mcal_day_of_week(int ayear,int amonth,int aday,int byear,int bmonth,int bday)
- returns <0, 0, >0 if a<b, a==b, a>b respectively  */
+/* {{{ proto int mcal_day_of_week(int ayear, int amonth, int aday, int byear, int bmonth, int bday)
+   Returns <0, 0, >0 if a<b, a==b, a>b respectively */
 PHP_FUNCTION(mcal_date_compare)
 {
 	pval *ayear,*amonth,*aday;
@@ -1291,11 +1281,8 @@ PHP_FUNCTION(mcal_date_compare)
 /* }}} */
 
 
-/* {{{ proto object mcal_next_recurrence(int stream_id, int weekstart,array next)
-   returns an object filled with the next date the event occurs, on or
-   after the supplied date.  Returns empty date field if event does not
-  occur or something is invalid.
- */
+/* {{{ proto object mcal_next_recurrence(int stream_id, int weekstart, array next)
+   Returns an object filled with the next date the event occurs, on or after the supplied date.  Returns empty date field if event does not occur or something is invalid. */
 PHP_FUNCTION(mcal_next_recurrence)
 {
 	pval *streamind,*weekstart,*next,*pvalue;
@@ -1372,8 +1359,8 @@ PHP_FUNCTION(mcal_next_recurrence)
 
 
 
-/* {{{ proto string mcal_event_set_recur_daily(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval
-   create a daily recurrence */
+/* {{{ proto string mcal_event_set_recur_daily(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval
+   Create a daily recurrence */
 PHP_FUNCTION(mcal_event_set_recur_daily)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
@@ -1411,8 +1398,8 @@ PHP_FUNCTION(mcal_event_set_recur_daily)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_recur_weekly(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval, int weekdays)
-create a weekly recurrence */
+/* {{{ proto string mcal_event_set_recur_weekly(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval, int weekdays)
+   Create a weekly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_weekly)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval,*weekdays;
@@ -1450,8 +1437,8 @@ PHP_FUNCTION(mcal_event_set_recur_weekly)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
- create a monthly by day recurrence */
+/* {{{ proto string mcal_event_set_recur_monthly_mday(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+   Create a monthly by day recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
@@ -1489,8 +1476,8 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_mday)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
-   create a monthy by week recurrence */
+/* {{{ proto string mcal_event_set_recur_monthly_wday(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+   Create a monthy by week recurrence */
 PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
@@ -1528,8 +1515,8 @@ PHP_FUNCTION(mcal_event_set_recur_monthly_wday)
 }
 	/* }}} */
 
-/* {{{ proto string mcal_event_set_recur_yearly(int stream_id,int year,int month,int day,int hour,int min,int sec,int interval)
-   create a yearly recurrence */
+/* {{{ proto string mcal_event_set_recur_yearly(int stream_id, int year, int month, int day, int hour, int min, int sec, int interval)
+   Create a yearly recurrence */
 PHP_FUNCTION(mcal_event_set_recur_yearly)
 {
 	pval *streamind,*year,*month,*day,*hour,*min,*sec,*interval;
