@@ -1,3 +1,13 @@
+2004-04-18  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/posix/posix.c:
+      Simplify code via the use of macros.
+
+2004-04-18  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/mcrypt/mcrypt.c:
+      - Whitespace
+
 2004-04-17  Derick Rethans  <php@derickrethans.nl>
 
     * ext/standard/html.c:
