@@ -220,6 +220,10 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	struct tm *ta, tmbuf;
 	int i, size = 0, length, h, beat, fd, wd, yd, wk;
 	char tmp_buff[32];
+#if !HAVE_TM_GMTOFF
+	long tzone;
+	char *tname[2]= {"GMT Standard Time", "BST"};
+#endif
 
 	switch(ZEND_NUM_ARGS()) {
 	case 1:
@@ -242,8 +246,15 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 
 	if (gm) {
 		ta = php_gmtime_r(&the_time, &tmbuf);
+#if !HAVE_TM_GMTOFF
+		tzone = 0;
+#endif
 	} else {
 		ta = php_localtime_r(&the_time, &tmbuf);
+#if !HAVE_TM_GMTOFF
+		tzone = timezone;
+		tname[0] = tzname[0];
+#endif
 	}
 
 	if (!ta) {			/* that really shouldn't happen... */
@@ -266,7 +277,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_ZONE
 				size += strlen(ta->tm_zone);
 #elif HAVE_TZNAME
-				size += strlen(tzname[0]);
+				size += strlen(tname[0]);
 #endif
 				break;
 			case 'Z':		/* timezone offset in seconds */
@@ -439,7 +450,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF				
 				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( ta->tm_gmtoff % 3600));
 #else
-				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+', abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
+				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? tzone - 3600:tzone)>0)?'-':'+', abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600), abs((ta->tm_isdst ? tzone - 3600 : tzone) % 3600));
 #endif
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
@@ -447,7 +458,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF
 				sprintf(tmp_buff, "%ld", ta->tm_gmtoff);
 #else
-				sprintf(tmp_buff, "%ld", ta->tm_isdst ? -(timezone - 3600) : -timezone);
+				sprintf(tmp_buff, "%ld", ta->tm_isdst ? -(tzone- 3600) : -tzone);
 #endif
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
 				break;
@@ -459,7 +470,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_ZONE
 				strcat(Z_STRVAL_P(return_value), ta->tm_zone);
 #elif HAVE_TZNAME
-				strcat(Z_STRVAL_P(return_value), tzname[0]);
+				strcat(Z_STRVAL_P(return_value), tname[0]);
 #endif
 				break;
 			case 'B':	/* Swatch Beat a.k.a. Internet Time */
@@ -499,9 +510,9 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
-					((ta->tm_isdst ? timezone - 3600 : timezone) > 0) ? '-' : '+',
-					abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600),
-					abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600)
+					((ta->tm_isdst ? tzone - 3600 : tzone) > 0) ? '-' : '+',
+					abs((ta->tm_isdst ? tzone - 3600 : tzone) / 3600),
+					abs((ta->tm_isdst ? tzone - 3600 : tzone) % 3600)
 				);
 #endif
 				strcat(Z_STRVAL_P(return_value), tmp_buff);
