@@ -411,7 +411,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 				PUTS(SG(request_info).request_uri);
 			}
 			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
-				PUTS("?="PHP_EGG_LOGO_GUID"\" alt=\"Thies!\" /></a>");
+				PUTS("?="PHP_EGG_LOGO_GUID"\" alt=\"Nadia!\" /></a>");
 			} else {
 				PUTS("?="PHP_LOGO_GUID"\" alt=\"PHP Logo\" /></a>");
 			}
