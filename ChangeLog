@@ -1,3 +1,136 @@
+2002-04-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/domxml/tests/.cvsignore: missing .cvsignore
+
+2002-04-21  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c:
+    small performance improvement when pass is selected as input encoding.
+
+2002-04-21  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache2filter/php4apache2.dsp:
+    Added ..\..\..\php_build\lib\apache2 to libpath and
+    ..\..\..\php_build\include\apache2 to includepath
+
+2002-04-21  Richard Heyes  <richard@phpguru.org>
+
+    * pear/File/SearchReplace.php: * Moving to it's own package
+
+2002-04-21  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/webpng.c:
+    Apply that patch I wrote ages ago that fixes some problems with true-color
+    vs palette based handling.
+    Also implements the gdImageStringFTEx function.
+
+2002-04-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS
+      pear/DB/oci8.php:
+    Added oci8 tableInfo (thanks Bertrand Mansion <bmansion@mamasam.com>!)
+
+    * pear/DB/tests/oci8/mktable.inc: Include the correct file
+
+    * pear/DB/tests/oci8/connect.inc: Use the right include_path
+
+    * pear/DB/tests/oci8/02fetch.phpt
+      pear/DB/tests/oci8/03simplequery.phpt
+      pear/DB/tests/oci8/04numcols.phpt
+      pear/DB/tests/oci8/05sequences.phpt
+      pear/DB/tests/oci8/06prepexec.phpt
+      pear/DB/tests/oci8/07errornative.phpt
+      pear/DB/tests/oci8/08affectedrows.phpt
+      pear/DB/tests/oci8/09numrows.phpt
+      pear/DB/tests/oci8/10errormap.phpt
+      pear/DB/tests/oci8/12tableinfo.phpt
+      pear/DB/tests/oci8/13limit.phpt:
+    - Added test for the new tableInfo()
+    - Fixed include_path's for tests
+
+2002-04-21  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/DB/TESTERS: * Fix CVS username
+
+2002-04-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php: * more uniform "level 2 debug messages"
+    * don't add dirname(file) to install path if install-as attribute is set
+
+2002-04-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c:
+    refactoring in pgsql_do_connect and some "leaner" code in pgsql_add_quotes
+
+    * ext/pgsql/pgsql.c:
+    Avoid allocating resources, if we know that the input array is empty.
+
+    Also pass tsrmls to do_exec.
+
+    * ext/pgsql/pgsql.c: speling fix and s/FAILURE/HASH_KEY_NON_EXISTANT/
+
+    * ext/pgsql/pgsql.c:
+    The default has been changed to assume failure, because there were 5-10
+    cases of failure and one success.
+
+    * ext/pgsql/pgsql.c:
+    Add PGSQL_RETURN_OID which encapsulates the LONG_MAX check etc.
+
+    Add a few missing smart_str_0's.
+
+    Remove a "(" in a probably less-tested #ifdef.. branch
+
+    * ext/pgsql/config.m4:
+    Also support --disable-shared installations of pgsql
+
+2002-04-21  Stig Bakken  <ssb@fast.no>
+
+    * pear/package-pear.xml: * set version to 0.9.1-dev
+
+    * pear/package-pear.xml
+      pear/scripts/pear.in:
+    * PHP_PREFIX constant is not defined, use bin_dir pear config instead
+
+2002-04-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/pgsql/pgsql.c:
+    My patch as posted to php-dev + warnings/errors fixed as seen in
+    Yasuo's reply.
+
+2002-04-21  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Installer.php:
+    * Remove package directory if empty during uninstall process
+    * Don't baseinstalldir for documentation.
+
+2002-04-21  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/config.m4: Tiny typo..
+
+2002-04-21  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Remote.php: Bail on no HTTP.php present in the system
+    Let "pear download" act ala wget
+
+    * pear/PEAR/Common.php: typo
+
+2002-04-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/php_smart_str.h
+      ext/standard/var.c: simplify and improve speed of smart_str_print_long.
+
+    also add a variant for unsigned numbers.
+
+2002-04-21  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/xslt/sablot.c: expletives deleted.
+
+    * ext/xslt/sablot.c: some more fixes towards making it work again
+
 2002-04-20  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/dio/dio.c: allocate space for NUL
