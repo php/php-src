@@ -1,3 +1,39 @@
+2005-01-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/sqlite/libsqlite/src/auth.c
+      ext/sqlite/libsqlite/src/auth.c:
+      merge patch from http://www.sqlite.org/cvstrac/chngview?cn=1953
+      bug led to PHP exiting on queries with unknown columns
+
+    * (PHP_5_0)
+      ZendEngine2/zend_language_scanner.l:
+      MFH:
+      Fix the following nasty bug:
+      - if compile bails out from the middle of compiling, current_buffer is not
+      restored
+      - if current_buffer is not null, yy_switch_to_buffer will do: *yy_c_buf_p
+      = yy_hold_char; on
+      the next request
+      - which would lead to memory corruption on next request
+
+    * ZendEngine2/zend_language_scanner.l:
+      Fix the following nasty bug:
+      - if compile bails out from the middle of compiling, current_buffer is not
+      restored
+      - if current_buffer is not null, yy_switch_to_buffer will do: *yy_c_buf_p
+      = yy_hold_char; on
+      the next request
+      - which would lead to memory corruption on next request
+
+    * (PHP_4_3)
+      Zend/zend_language_scanner.l:
+      Fix the following nasty bug:
+      - if compile bails out from the middle of compiling, current_buffer is not
+      restored
+      - if current_buffer is not null, yy_switch_to_buffer will do: *yy_c_buf_p
+      = yy_hold_char; on the next request
+      - which would lead to memory corruption on next request
+
 2005-01-02  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
