@@ -148,12 +148,12 @@ static inline void save_lexical_state(zend_lex_state *lex_state CLS_DC)
 #ifndef ZTS
 	memcpy(&lex_state->buffer_state,&YY_CURRENT_BUFFER,sizeof(YY_BUFFER_STATE));
 	lex_state->in = yyin;
-	lex_state->lineno = CG(zend_lineno);
 	lex_state->state = YYSTATE;
-	lex_state->filename = zend_get_compiled_filename(CLS_C);
 #else
 	lex_state->ZFL = CG(ZFL);
 #endif
+	lex_state->filename = zend_get_compiled_filename(CLS_C);
+	lex_state->lineno = CG(zend_lineno);
 }
 
 
@@ -170,13 +170,13 @@ inline void restore_lexical_state(zend_lex_state *lex_state CLS_DC)
 		
 	yy_delete_buffer(original_buffer_state);
 	yyin = lex_state->in;
-	CG(zend_lineno) = lex_state->lineno;
 	BEGIN(lex_state->state);
-	zend_restore_compiled_filename(lex_state->filename);
 #else
 	delete((ZendFlexLexer *) CG(ZFL));
 	CG(ZFL) = lex_state->ZFL;
 #endif
+	CG(zend_lineno) = lex_state->lineno;
+	zend_restore_compiled_filename(lex_state->filename);
 }
 
 

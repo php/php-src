@@ -33,21 +33,19 @@ public:
 #endif	/* ZTS */
 
 
-#ifndef ZTS
 typedef struct _zend_lex_state {
+#ifndef ZTS
 	YY_BUFFER_STATE buffer_state;
 	int state;
-	uint return_offset;
-	uint lineno;
 	FILE *in;
-	char *filename;
-} zend_lex_state;
 #else
-typedef struct _zend_lex_state {
 	ZendFlexLexer *ZFL;
 	istream *input_file;
-} zend_lex_state;
 #endif
+	uint lineno;
+	char *filename;
+} zend_lex_state;
+
 
 void zend_fatal_scanner_error(char *);
 inline void restore_lexical_state(zend_lex_state * CLS_DC);
