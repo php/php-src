@@ -26,8 +26,15 @@ if test "$PHP_SABLOT" != "no"; then
 
   PHP_SUBST(SABLOT_SHARED_LIBADD)
   AC_ADD_LIBRARY_WITH_PATH(sablot, $SABLOT_DIR/lib, SABLOT_SHARED_LIBADD)
-  AC_ADD_LIBRARY(xmlparse)
-  AC_ADD_LIBRARY(xmltok)
+
+  if test -f $SABLOT_DIR/lib/libexpat.a -o -f $SABLOT_DIR/lib/libexpat.so ; then
+	AC_ADD_LIBRARY(expat)
+  	AC_CHECK_LIB(sablot, SablotSetEncoding,
+		AC_DEFINE(HAVE_SABLOT_SET_ENCODING,1,[ ]))
+  else
+	AC_ADD_LIBRARY(xmlparse)
+	AC_ADD_LIBRARY(xmltok)
+  fi
   
   AC_DEFINE(HAVE_SABLOT,1,[ ])
 
