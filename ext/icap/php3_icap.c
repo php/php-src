@@ -511,6 +511,12 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 	caltime_t mytime;
 	int ind, ind_type;
 	pils *icap_le_struct; 
+        int icap_folders=0;
+        unsigned int msgno;
+        pils *icap_le_struct;
+        cal_list_t *my_cal_list;
+        caldate_t begincal,endcal;
+
 	int myargc=ARG_COUNT(ht);
 	if (myargc != 3 || getParameters(ht,myargc,&streamind,&date,&time) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -549,15 +555,17 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
           mytime.minute=pvalue->value.lval;
        }
 
-       if(cal_search_alarming(icap_le_struct->icap_stream,&mydate,&mytime))
-	 {
+       cal_search_alarming(icap_le_struct->icap_stream,&mydate,&mytime);
+ my_cal_list=g_cal_list;
+ while(my_cal_list != NULL)
+   {
+     add_next_index_long(return_value,my_cal_list->uid);
+     my_cal_list=my_cal_list->next;
+     free(g_cal_list);
+            g_cal_list=my_cal_list;
+   }
 
-	   RETURN_TRUE;
-	 }
-       else
-	 {
-	   RETURN_FALSE;
-	 }
+
 }
 /* Interfaces to C-client */
 
@@ -772,6 +780,11 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	  convert_to_string(pvalue);
 	  myevent.alarm_last.mday=pvalue->value.lval;
 	}
+	if(_php3_hash_find(storeobject->value.ht,"class",sizeof("class"),(void **) &pvalue)== SUCCESS){
+	  convert_to_long(pvalue);
+	  myevent.ical_class=pvalue->value.lval;
+	}
+
 
 
 	cal_append(icap_le_struct->icap_stream,"INBOX",&myevent);
