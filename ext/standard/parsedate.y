@@ -18,6 +18,7 @@
 /* SUPPRESS 593 on yynewstate *//* Label was not used */
 /* SUPPRESS 595 on yypvt *//* Automatic variable may be used before set */
 
+
 #ifdef WIN32
 # include "config.w32.h"
 #else
@@ -60,6 +61,9 @@ extern time_t timezone;
 #	endif
 #endif
 
+
+
+
 #define yylhs		date_yylhs
 #define yylen		date_yylen
 #define yydefred	date_yydefred
@@ -74,7 +78,6 @@ extern time_t timezone;
 #define yylex		date_lex
 #define yyerror		date_error
 
-static int date_lex(void);
 
     /* See the LeapYears table in Convert. */
 #define EPOCH		1970
@@ -156,13 +159,18 @@ static time_t	yyRelSeconds;
 
 extern struct tm	*localtime(const time_t *timep);
 
+/* YYSTYPE is not yet defined at this point */
+static int date_lex(void *yylval);
+
 static void		date_error(char *s);
+
 %}
 
+%pure_parser
 %expect 6
 
 %union {
-    time_t		Number;
+    time_t			Number;
     enum _MERIDIAN	Meridian;
 }
 
@@ -703,7 +711,7 @@ RelativeMonth(time_t Start, time_t RelMonth)
 }
 
 
-static int LookupWord(char *buff, int length)
+static int LookupWord(char *buff, int length, YYSTYPE *yylval)
 {
     char	        *p;
     STRING	        q;
@@ -718,14 +726,14 @@ static int LookupWord(char *buff, int length)
 	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++) {
 	    q = tp->name;
 	    if (c == q[0] && p[1] == q[1] && p[2] == q[2]) {
-		yylval.Number = tp->value;
+		yylval->Number = tp->value;
 		return tp->type;
 	    }
 	}
     else
 	for (tp = MonthDayTable; tp < ENDOF(MonthDayTable); tp++)
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
-		yylval.Number = tp->value;
+		yylval->Number = tp->value;
 		return tp->type;
 	    }
 
@@ -733,14 +741,14 @@ static int LookupWord(char *buff, int length)
     for (tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
 	if (c == tp->name[0] && p[1] == tp->name[1]
 	 && strcmp(p, tp->name) == 0) {
-	    yylval.Number = tp->value;
+	    yylval->Number = tp->value;
 	    return tp->type;
 	}
 
     /* Try the units table. */
     for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
 	if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
-	    yylval.Number = tp->value;
+	    yylval->Number = tp->value;
 	    return tp->type;
 	}
 
@@ -750,7 +758,7 @@ static int LookupWord(char *buff, int length)
 	for (tp = UnitsTable; tp < ENDOF(UnitsTable); tp++)
 	    if (c == tp->name[0] && strcmp(p, tp->name) == 0) {
 		p[length] = 's';
-		yylval.Number = tp->value;
+		yylval->Number = tp->value;
 		return tp->type;
 	    }
 	p[length] = 's';
@@ -766,11 +774,11 @@ static int LookupWord(char *buff, int length)
     /* Try the meridians. */
     if (buff[1] == 'm' && buff[2] == '\0') {
 	if (buff[0] == 'a') {
-	    yylval.Meridian = MERam;
+	    yylval->Meridian = MERam;
 	    return tMERIDIAN;
 	}
 	if (buff[0] == 'p') {
-	    yylval.Meridian = MERpm;
+	    yylval->Meridian = MERpm;
 	    return tMERIDIAN;
 	}
     }
@@ -781,18 +789,18 @@ static int LookupWord(char *buff, int length)
 	for (p = buff, tp = TimezoneTable; tp < ENDOF(TimezoneTable); tp++)
 	    if (c == tp->name[0] && p[1] == tp->name[1]
 	    && strcmp(p, tp->name) == 0) {
-		yylval.Number = tp->value;
+		yylval->Number = tp->value;
 		return tp->type;
 	    }
     }
 
     /* Unknown word -- assume GMT timezone. */
-    yylval.Number = 0;
+    yylval->Number = 0;
     return tZONE;
 }
 
 
-static int date_lex(void)
+static int date_lex(YYSTYPE *yylval)
 {
     char	        c;
     char	        *p;
@@ -835,7 +843,7 @@ static int date_lex(void)
 	    for (i = 0; (c = *yyInput++) != '\0' && CTYPE(isdigit, (int)c); )
 		i = 10 * i + c - '0';
 	    yyInput--;
-	    yylval.Number = sign < 0 ? -i : i;
+	    yylval->Number = sign < 0 ? -i : i;
 	    return sign ? tSNUMBER : tUNUMBER;
 	}
 
@@ -846,7 +854,7 @@ static int date_lex(void)
 		    *p++ = CTYPE(isupper, (int)c) ? tolower(c) : c;
 	    *p = '\0';
 	    yyInput--;
-	    return LookupWord(buff, p - buff);
+	    return LookupWord(buff, p - buff, yylval);
 	}
 
 	return *yyInput++;
