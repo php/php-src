@@ -121,9 +121,9 @@ class PEAR_Command_Install extends PEAR_Command_Common
                 // fall through
             case 'install': {
                 if ($installer->install(@$params[0], $opts, $this->config)) {
-                    $this->ui->displayLine("install ok");
+                    $this->ui->displayLine("$command ok");
                 } else {
-                    $failmsg = "install failed";
+                    $failmsg = "$command failed";
                 }
                 break;
             }
