@@ -3229,7 +3229,7 @@ PHP_FUNCTION(mb_get_info)
 		RETURN_FALSE;
 	}
 
-	if (!strcasecmp("all", typ)) {
+	if (!typ || !strcasecmp("all", typ)) {
 		array_init(return_value);
 		if ((name = (char *)mbfl_no_encoding2name(MBSTRG(current_internal_encoding))) != NULL) {
 			add_assoc_string(return_value, "internal_encoding", name, 1);
