@@ -3,6 +3,7 @@ PHP 4.0                                                                    NEWS
 
 ?? ?? 1999, Version 4.0 Beta 3
 
+- Added new str_repeat() function. (Andrei)
 - Output-Buffering system is now Thread-Safe. (Thies)
 - implemented OCI8 $lob->WriteToFile() function - very useful for streaming
   large amounts of LOB-Data without to need of a huge buffer. (Thies)
