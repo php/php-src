@@ -67,7 +67,7 @@
  * while extending the module as it shows if you are at the right position.
  * You are always considered to have a copy of TIFF6.0 and EXIF2.10 standard.
  */
-#undef EXIF_DEBUG
+#define EXIF_DEBUG
 
 #include "php_exif.h"
 #include <math.h>
@@ -85,6 +85,20 @@ typedef unsigned char uchar;
 
 #ifndef max
 	#define max(a,b) ((a)>(b) ? (a) : (b))
+#endif
+
+#ifdef HAVE_PHP_STREAM
+#define auto_ftell(f)        php_stream_tell(f)
+#define auto_fseek(f,o,w)    php_stream_seek(f,o,w)
+#define auto_fread(b,s,n,f)  php_stream_read(f,b,(s)*(n))
+#define auto_fgetc(f)        php_stream_getc(f)
+#define auto_fclose(f)       php_stream_close(f)
+#else
+#define auto_ftell(f)        ftell(f)
+#define auto_fseek(f,o,w)    fseek(f,o,w)
+#define auto_fread(b,s,n,f)  fread(b,s,n,f)
+#define auto_fgetc(f)        fgetc(f)
+#define auto_fclose(f)       fclose(f)
 #endif
 
 /* {{{ exif_functions[]
@@ -886,7 +900,11 @@ typedef struct {
 /* EXIF standard defines Copyright as "<Photographer> [ '\0' <Editor> ] ['\0']" */
 /* This structure is used to store a section of a Jpeg file. */
 typedef struct {
-	FILE            *infile;
+	#ifdef HAVE_PHP_STREAM
+	php_stream      *infile;
+	#else
+	FILE			*infile;
+	#endif
 	char            *FileName;
 	time_t          FileDateTime;
 	size_t          FileSize;
@@ -1545,7 +1563,7 @@ void add_assoc_image_info( pval *value, int sub_array, image_info_type *image_in
 */
 static void exif_process_COM (image_info_type *image_info, uchar *value, int length)
 {
-    exif_iif_add_tag( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length, value);
+    exif_iif_add_tag( image_info, SECTION_COMMENT, "Comment", TAG_COMPUTED_VALUE, TAG_FMT_STRING, length-2, value+2);
 }
 /* }}} */
 
@@ -2054,16 +2072,17 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				// explicitley before returning.
 				value_ptr = cbuf;
 			}
-			fpos = ftell(ImageInfo->infile);
-			fseek(ImageInfo->infile, offset_val, SEEK_SET);
-			fgot = ftell(ImageInfo->infile);
+
+			fpos = auto_ftell(ImageInfo->infile);
+			auto_fseek(ImageInfo->infile, offset_val, SEEK_SET);
+			fgot = auto_ftell(ImageInfo->infile);
 			if ( fgot!=offset_val) {
 				if ( outside) efree( outside);
 				php_error(E_WARNING,"Wrong file pointer: 0x%08X != 0x08X", fgot, offset_val);
 				return FALSE;
 			}
-			fgot = fread(value_ptr, 1, byte_count, ImageInfo->infile);
-			fseek(ImageInfo->infile, fpos, SEEK_SET);
+			fgot = auto_fread(value_ptr, 1, byte_count, ImageInfo->infile);
+			auto_fseek(ImageInfo->infile, fpos, SEEK_SET);
 			if ( fgot<byte_count) {
 				if ( outside) efree( outside);
 				EXIF_ERRLOG_FILEEOF
@@ -2407,7 +2426,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 	for(section=0;;section++)
 	{
 		#ifdef EXIF_DEBUG
-		fpos = ftell(ImageInfo->infile);
+		fpos = auto_ftell(ImageInfo->infile);
 		php_error(E_NOTICE,"needing section %d @ 0x%08X", ImageInfo->file.count, fpos);
 		#endif
 
@@ -2416,7 +2435,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		/* one company doing so is very much envolved in JPEG... so we accept too */
 		if ( last_marker==M_COM && comment_correction) comment_correction = 2;
 		do {
-			if ((marker = fgetc(ImageInfo->infile)) == EOF)
+			if ((marker = auto_fgetc(ImageInfo->infile)) == EOF)
 			{
 				EXIF_ERRLOG_CORRUPT
 				return FALSE;
@@ -2436,7 +2455,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 			return M_EOI; /* ah illegal: char after COM section not 0xFF */
 
 		#ifdef EXIF_DEBUG
-		fpos = ftell(ImageInfo->infile);
+		fpos = auto_ftell(ImageInfo->infile);
 		#endif
 		if (marker == 0xff) {
 			/* 0xff is legal padding, but if we get that many, something's wrong. */
@@ -2445,8 +2464,8 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		}
 
 		/* Read the length of the section. */
-		lh = fgetc(ImageInfo->infile);
-		ll = fgetc(ImageInfo->infile);
+		lh = auto_fgetc(ImageInfo->infile);
+		ll = auto_fgetc(ImageInfo->infile);
 
 		itemlen = (lh << 8) | ll;
 
@@ -2465,7 +2484,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 		Data[0] = (uchar)lh;
 		Data[1] = (uchar)ll;
 
-		got = fread(Data+2, 1, itemlen-2, ImageInfo->infile); /* Read the whole section. */
+		got = auto_fread(Data+2, 1, itemlen-2, ImageInfo->infile); /* Read the whole section. */
 		if (got != itemlen-2) {
 			php_error(E_WARNING, "error reading from file: got=x%04X(=%d) != itemlen-2=x%04X(=%d)",got, got, itemlen-2, itemlen-2);
 			return FALSE;
@@ -2479,7 +2498,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 				/* If reading entire image is requested, read the rest of the data. */
 				if (ImageInfo->read_all) {
 					/* Determine how much file is left. */
-					fpos = ftell(ImageInfo->infile);
+					fpos = auto_ftell(ImageInfo->infile);
 					size = ImageInfo->FileSize - fpos;
 					if ( (sn=exif_file_sections_add(ImageInfo, M_PSEUDO, size, NULL))==-1)
 					{
@@ -2487,7 +2506,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 						return FALSE;
 					}
 					Data = ImageInfo->file.list[sn].data;
-					got = fread(Data, 1, size, ImageInfo->infile);
+					got = auto_fread(Data, 1, size, ImageInfo->infile);
 					if (got != size) {
 						EXIF_ERRLOG_FILEEOF
 						return FALSE;
@@ -2500,7 +2519,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 				return (ImageInfo->sections_found&(~FOUND_COMPUTED)) ? TRUE : FALSE;
 
 			case M_COM: /* Comment section */
-				exif_process_COM(ImageInfo, (char *)Data+2, itemlen);
+				exif_process_COM(ImageInfo, (char *)Data, itemlen);
 				break;
 
 			case M_EXIF:
@@ -2651,8 +2670,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 		#ifdef EXIF_DEBUG
 		php_error(E_NOTICE,"Read from TIFF: filesize(x%04X), IFD dir(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, 2);
 		#endif
-		fseek(ImageInfo->infile,dir_offset,SEEK_SET); /* we do not know the order of sections */
-		fread(ImageInfo->file.list[sn].data, 1, 2, ImageInfo->infile);
+		auto_fseek(ImageInfo->infile,dir_offset,SEEK_SET); /* we do not know the order of sections */
+		auto_fread(ImageInfo->file.list[sn].data, 1, 2, ImageInfo->infile);
 	    num_entries = php_ifd_get16u(ImageInfo->file.list[sn].data, ImageInfo->motorola_intel);
 		dir_size = 2/*num dir entries*/ +12/*length of entry*/*num_entries +4/* offset to next ifd (points to thumbnail or NULL)*/;
 		if ( ImageInfo->FileSize >= dir_offset+dir_size) {
@@ -2666,7 +2685,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				return FALSE;
 			}
 			ImageInfo->file.list[sn].data = tmp;
-			fread(ImageInfo->file.list[sn].data+2, 1, dir_size-2, ImageInfo->infile);
+			auto_fread(ImageInfo->file.list[sn].data+2, 1, dir_size-2, ImageInfo->infile);
 			/*php_error(E_NOTICE,"Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 1));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 			#ifdef EXIF_DEBUG
@@ -2755,7 +2774,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 					#ifdef EXIF_DEBUG
 					php_error(E_NOTICE,"Read from TIFF: filesize(x%04X), IFD(x%04X + x%04X)", ImageInfo->FileSize, dir_offset, ifd_size);
 					#endif
-					fread(ImageInfo->file.list[sn].data+dir_size, 1, ifd_size-dir_size, ImageInfo->infile);
+					auto_fread(ImageInfo->file.list[sn].data+dir_size, 1, ifd_size-dir_size, ImageInfo->infile);
 					#ifdef EXIF_DEBUG
 					php_error(E_NOTICE,"Read from TIFF, done");
 					#endif
@@ -2814,8 +2833,8 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						if (!ImageInfo->Thumbnail.data) {
 							EXIF_ERRLOG_EALLOC
 						} else {
-							fseek(ImageInfo->infile,ImageInfo->Thumbnail.offset,SEEK_SET);
-							fgot = fread(ImageInfo->Thumbnail.data, 1, ImageInfo->Thumbnail.size, ImageInfo->infile);
+							auto_fseek(ImageInfo->infile,ImageInfo->Thumbnail.offset,SEEK_SET);
+							fgot = auto_fread(ImageInfo->Thumbnail.data, 1, ImageInfo->Thumbnail.size, ImageInfo->infile);
 							if ( fgot < ImageInfo->Thumbnail.size)
 							{
 								EXIF_ERRLOG_THUMBEOF
@@ -2853,8 +2872,8 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
     ImageInfo->FileType = IMAGE_FILETYPE_UNKNOWN;
 
     if ( ImageInfo->FileSize >= 2) {
-		fseek(ImageInfo->infile, 0, SEEK_SET);
-		fread(file_header, 1, 2, ImageInfo->infile);
+		auto_fseek(ImageInfo->infile, 0, SEEK_SET);
+		auto_fread(file_header, 1, 2, ImageInfo->infile);
 		if ( (file_header[0]==0xff) && (file_header[1]==M_SOI)) {
 	    	ImageInfo->FileType = IMAGE_FILETYPE_JPEG;
 	    	if (exif_scan_JPEG_header(ImageInfo)) {
@@ -2863,7 +2882,7 @@ static int exif_scan_FILE_header (image_info_type *ImageInfo)
 				php_error(E_WARNING, "Invalid JPEG file: '%s'", ImageInfo->FileName);
 	    	}
 		} else if ( ImageInfo->FileSize >= 8) {
-			fread(file_header+2, 1, 6, ImageInfo->infile);
+			auto_fread(file_header+2, 1, 6, ImageInfo->infile);
 		    if ( !memcmp(file_header,"II\x2A\x00", 4))
 		    {
 		    	ImageInfo->FileType = IMAGE_FILETYPE_TIFF_II;
@@ -2933,15 +2952,19 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 {
 	int ret;
 	struct stat st;
+	php_stream *mem_stream;
 
 	/* Start with an empty image information structure. */
 	memset(ImageInfo, 0, sizeof(*ImageInfo));
 
 	ImageInfo->motorola_intel = 0;
 
+	#ifdef HAVE_PHP_STREAM
+	ImageInfo->infile = php_stream_open_wrapper(FileName, "rb", REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL TSRMLS_CC);
+	#else
 	ImageInfo->infile = VCWD_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
-
-	if (ImageInfo->infile == NULL) {
+	#endif
+	if (!ImageInfo->infile) {
 		php_error(E_WARNING, "Unable to open '%s'", FileName);
 		return FALSE;
 	}
@@ -2956,13 +2979,30 @@ int exif_read_file(image_info_type *ImageInfo, char *FileName, int read_thumbnai
 		ImageInfo->FileDateTime = st.st_mtime;
 		ImageInfo->FileSize = st.st_size;
 	} else {
-		php_error(E_WARNING, "Can't get file statitics");
-		return FALSE;
+		ImageInfo->FileDateTime = 0;
+		#ifdef HAVE_PHP_STREAM
+		if ( !ImageInfo->infile->ops->seek) {
+			php_error(E_NOTICE,"Using a memory stream");
+			mem_stream = php_memory_stream_create();
+			php_error(E_NOTICE,"Using a memory stream: created");
+			ImageInfo->FileSize = php_stream_copy_to_stream(ImageInfo->infile, mem_stream, PHP_STREAM_COPY_ALL);
+			php_error(E_NOTICE,"Using a memory stream: copy done %d", ImageInfo->FileSize);
+			php_error(E_NOTICE,"Using a memory stream: closed");
+//			auto_fclose(ImageInfo->infile);
+			php_error(E_NOTICE,"Using a memory stream: closed");
+			ImageInfo->infile = mem_stream;
+		}
+		#else
+		ImageInfo->FileSize = 0;
+		#endif
 	}
 
 	/* Scan the JPEG headers. */
+	php_error(E_NOTICE,"Using a memory stream: exif_scan_FILE_header");
 	ret = exif_scan_FILE_header(ImageInfo);
-	fclose(ImageInfo->infile);
+	php_error(E_NOTICE,"Using a memory stream: exif_scan_FILE_header done");
+
+	auto_fclose(ImageInfo->infile);
 	return ret;
 }
 /* }}} */
@@ -3260,4 +3300,4 @@ PHP_FUNCTION(exif_imagetype)
  * vim600: sw=4 ts=4 tw=78 fdm=marker
  * vim<600: sw=4 ts=4 tw=78
  */
- 
+
