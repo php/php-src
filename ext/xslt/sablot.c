@@ -81,8 +81,6 @@ function_entry xslt_functions[] = {
 	PHP_FE(xslt_set_base,		 NULL)
 #ifdef HAVE_SABLOT_SET_ENCODING
 	PHP_FE(xslt_set_encoding,        NULL)
-#else
-	PHP_FALIAS(xslt_set_encoding, warn_not_available, NULL)
 #endif
 	PHP_FE(xslt_set_log,             NULL)
 	PHP_FE(xslt_process,             NULL)
