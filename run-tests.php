@@ -123,10 +123,10 @@ $ini_overwrites = array(
 		'html_errors=0',
 		'track_errors=1',
 		'report_memleaks=1',
-		"docref_root=/phpmanual/",
-		"docref_ext=.html",
-		"error_prepend_string=",
-		"error_append_string=",
+		'docref_root=/phpmanual/',
+		'docref_ext=.html',
+		'error_prepend_string=',
+		'error_append_string=',
 		'auto_prepend_file=',
 		'auto_append_file=',
 		'magic_quotes_runtime=0',
@@ -235,12 +235,12 @@ function find_files($dir,$is_ext_dir=FALSE,$ignore=FALSE)
 function test_sort($a, $b) {
 	global $cwd;
 
-	$ta = strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0;
-	$tb = strpos($b, "{$cwd}/tests/run-test")===0 ? 1 : 0;
+	$ta = strpos($a, "{$cwd}/tests")===0 ? 1 + (strpos($a, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
+	$tb = strpos($b, "{$cwd}/tests")===0 ? 1 + (strpos($b, "{$cwd}/tests/run-test")===0 ? 1 : 0) : 0;
 	if ($ta == $tb) {
 		return strcmp($a, $b);
 	} else {
-		return $ta ? -1 : +1;
+		return $tb - $ta;
 	}
 }
 
