@@ -280,7 +280,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
 					(void *) &tmp, sizeof(zval *));
 
-	retval.handle = zend_objects_store_put(intern, NULL, mysqli_objects_free_storage, mysqli_objects_clone TSRMLS_CC);
+	retval.handle = zend_objects_store_put(intern, NULL, mysqli_objects_free_storage, NULL /*mysqli_objects_clone*/ TSRMLS_CC);
 	retval.handlers = &mysqli_object_handlers;
 
 	return retval;
@@ -353,7 +353,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_INI_ENTRIES();
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	mysqli_object_handlers.clone_obj = zend_objects_store_clone_obj;
+	mysqli_object_handlers.clone_obj = NULL /*zend_objects_store_clone_obj*/;
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
 	mysqli_object_handlers.get_property_ptr_ptr = NULL;
