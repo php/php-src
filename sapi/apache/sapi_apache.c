@@ -69,10 +69,15 @@ int apache_php_module_hook(request_rec *r, char *filename, zval **ret TSRMLS_DC)
 #if PHP_SIGCHILD
 	signal(SIGCHLD, sigchld_handler);
 #endif
-
-    if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+    if(AP(current_hook) == AP_RESPONSE) {
+        fprintf(stderr, "in Response\n");
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
             return FAILURE;
-
+    }
+    else {
+        if (php_request_startup_for_hook(TSRMLS_C) == FAILURE)
+            return FAILURE;
+    }
 
 	/* Add PHP_SELF_HOOK - Absolute path */
 	php_register_variable("PHP_SELF_HOOK", filename, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);

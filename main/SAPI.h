@@ -83,6 +83,7 @@ typedef struct {
 
 	zend_bool headers_only;
 	zend_bool no_headers;
+        zend_bool headers_read;
 
 	sapi_post_entry *post_entry;
 

@@ -349,10 +349,14 @@ static int sapi_apache_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	}
 
 	((request_rec *) SG(server_context))->status = SG(sapi_headers).http_response_code;
-    /* check that we haven't sent headers already */
-    if(!((request_rec *) SG(server_context))->sent_bodyct)
-	    send_http_header((request_rec *) SG(server_context));
-	return SAPI_HEADER_SENT_SUCCESSFULLY;
+    /* check that we haven't sent headers already, we use our own
+     * headers_sent since we may send headers at anytime 
+     */
+    if(!AP(headers_sent)) {
+        send_http_header((request_rec *) SG(server_context));
+        AP(headers_sent) = 1;
+    }
+    return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 /* }}} */
 
@@ -433,6 +437,7 @@ static void php_apache_log_message(char *message)
 static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
+    AP(current_hook) = AP_CLEANUP;
 	php_output_set_status(0 TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
     if(SG(sapi_started)) {
@@ -443,6 +448,8 @@ static void php_apache_request_shutdown(void *dummy)
     if(AP(setup_env)) {
         AP(setup_env) = 0;
     }
+    AP(current_hook) = AP_WAITING_FOR_REQUEST;
+    AP(headers_sent) = 0;
 }
 /* }}} */
 
@@ -1137,7 +1144,7 @@ static void php_init_handler(server_rec *s, pool *p)
 }
 /* }}} */
 
-static int php_run_hook(request_rec *r, char *handler)
+static int php_run_hook(char *handler, request_rec *r)
 {
 	zval *ret = NULL;
     php_per_dir_config *conf;
@@ -1171,27 +1178,26 @@ static int php_run_hook(request_rec *r, char *handler)
 	return HTTP_INTERNAL_SERVER_ERROR;
 }
  
-int php_run_stacked_handler(char *hookname, request_rec *r) {
-    return php_run_hook(r, hookname);
-}
 
 
 static int php_uri_translation(request_rec *r)
 {    
     php_per_server_config *conf;
     fprintf(stderr,"HOOK: uri_translation\n");
+    AP(current_hook) = AP_URI_TRANS;
     conf = (php_per_server_config *) get_module_config(r->server->module_config, &php4_module);
-    return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_stacked_handler, r, OK);
+    return sapi_stack_apply_with_argument_stop_if_equals(&conf->uri_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r, OK);
 }
 
 static int php_header_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: headers\n");
+    AP(current_hook) = AP_HEADER_PARSE;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->headers_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler,
+            (int (*)(void *element, void *)) php_run_hook,
             r);
 }
 
@@ -1199,10 +1205,11 @@ static int php_auth_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: auth\n");
+    AP(current_hook) = AP_AUTHENTICATION;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_equals(&conf->auth_handlers, 
             ZEND_STACK_APPLY_BOTTOMUP, 
-            (int (*)(void *element, void *)) php_run_stacked_handler, 
+            (int (*)(void *element, void *)) php_run_hook, 
             r, OK);
 }
 
@@ -1210,10 +1217,11 @@ static int php_access_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: access\n");
+    AP(current_hook) = AP_ACCESS_CONTROL;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->access_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler,
+            (int (*)(void *element, void *)) php_run_hook,
             r);
 
 }
@@ -1222,10 +1230,11 @@ static int php_type_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: type-checker\n");
+    AP(current_hook) = AP_TYPE_CHECKING;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_equals(&conf->type_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler,
+            (int (*)(void *element, void *)) php_run_hook,
             r, OK);
 }
 
@@ -1233,10 +1242,11 @@ static int php_fixup_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: fixup\n");
+    AP(current_hook) = AP_FIXUP;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->fixup_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler,
+            (int (*)(void *element, void *)) php_run_hook,
             r);
 }
 
@@ -1244,10 +1254,11 @@ static int php_logger_hook(request_rec *r)
 {
     php_per_dir_config *conf;
     fprintf(stderr,"HOOK: logger\n");
+    AP(current_hook) = AP_LOGGING;
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->logger_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler,
+            (int (*)(void *element, void *)) php_run_hook,
             r);
 }
  
@@ -1256,21 +1267,21 @@ static int php_post_read_hook(request_rec *r)
     php_per_dir_config *conf;
     php_per_server_config *svr;
     fprintf(stderr,"HOOK: post-read\n");
-
+    AP(current_hook) = AP_POST_READ;
     svr = get_module_config(r->server->module_config, &php4_module);
-    sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_stacked_handler, r);
+    sapi_stack_apply_with_argument_all(&svr->requires, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
     conf = (php_per_dir_config *) get_module_config(r->per_dir_config, &php4_module);
     return sapi_stack_apply_with_argument_stop_if_http_error(&conf->post_read_handlers,
             ZEND_STACK_APPLY_BOTTOMUP,
-            (int (*)(void *element, void *)) php_run_stacked_handler, r);
+            (int (*)(void *element, void *)) php_run_hook, r);
 }
 
 static int php_response_handler(request_rec *r)
 {
     php_per_dir_config *conf;
-
+    AP(current_hook) = AP_RESPONSE;
     conf = get_module_config(r->per_dir_config, &php4_module);
-    sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_stacked_handler, r);
+    sapi_stack_apply_with_argument_all(&conf->response_handlers, ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_run_hook, r);
 }
 
 /* {{{ handler_rec php_handlers[]

@@ -45,7 +45,6 @@ static void apache_table_to_zval(table *, int safe_mode, zval *return_value);
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
 PHP_FUNCTION(apache_response_headers);
-PHP_FUNCTION(apache_send_http_header);
 PHP_FUNCTION(apachelog);
 PHP_FUNCTION(apache_note);
 PHP_FUNCTION(apache_lookup_uri);
@@ -58,7 +57,6 @@ PHP_MINFO_FUNCTION(apache);
 function_entry apache_functions[] = {
 	PHP_FE(virtual,									NULL)
 	PHP_FE(apache_request_headers,					NULL)
-	PHP_FE(apache_send_http_header,					NULL)
 	PHP_FE(apache_note,								NULL)
 	PHP_FE(apache_lookup_uri,						NULL)
 	PHP_FE(apache_child_terminate,					NULL)
@@ -75,13 +73,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("engine",				"1",				PHP_INI_ALL,		OnUpdateInt,		engine, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("last_modified",		"0",				PHP_INI_ALL,		OnUpdateInt,		last_modified, php_apache_info_struct, php_apache_info)
 	STD_PHP_INI_ENTRY("child_terminate",	"0",				PHP_INI_ALL,		OnUpdateInt,		terminate_child, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("uri_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		uri_handler, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("auth_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		auth_handler, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("access_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		access_handler, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("type_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		type_handler, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("fixup_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		fixup_handler, php_apache_info_struct, php_apache_info)
-	STD_PHP_INI_ENTRY("logger_handler",		NULL,				PHP_INI_ALL,		OnUpdateString,		logger_handler, php_apache_info_struct, php_apache_info)
-
 PHP_INI_END()
 /* }}} */
 
@@ -106,7 +97,7 @@ static void php_apache_request_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	zval_ptr_dtor(&z);
 }
 
-static request_rec *get_apache_request(zval *z)
+static request_rec *get_apache_request(pval *z)
 {
 	request_rec *r;
 	zval **addr;
@@ -558,6 +549,8 @@ PHP_FUNCTION(apache_request_headers_in)
 /* }}} */
 
 
+/* {{{ add_header_to_table
+*/
 static void add_header_to_table(table *t, INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval *first = NULL;
@@ -959,6 +952,222 @@ PHP_FUNCTION(apache_request_basic_auth_pw)
 /* }}} */
 
 
+/* http_protocol.h */
+
+PHP_FUNCTION(apache_request_send_http_header)
+{
+    zval *id;
+    request_rec *r;
+
+    APREQ_GET_REQUEST(id, r);
+    ap_send_http_header(r);
+    AP(headers_sent) = 1;
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_basic_http_header)
+{
+    zval *id;
+    request_rec *r;
+
+    APREQ_GET_REQUEST(id, r);
+
+    ap_basic_http_header((request_rec *)SG(server_context));
+    AP(headers_sent) = 1;
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_send_http_trace)
+{
+    zval *id;
+    request_rec *r;
+
+    APREQ_GET_REQUEST(id, r);
+
+    ap_send_http_trace((request_rec *)SG(server_context));
+    AP(headers_sent) = 1;
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_send_http_options)
+{
+    zval *id;
+    request_rec *r;
+
+    APREQ_GET_REQUEST(id, r);
+
+    ap_send_http_options((request_rec *)SG(server_context));
+    AP(headers_sent) = 1;
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_send_error_response)
+{
+    zval **recursive;
+    zval *id;
+    request_rec *r;
+    int rec;
+
+    TSRMLS_FETCH();
+
+    switch(ARG_COUNT(ht)) {
+        case 0:
+            rec = 0;
+            break;
+        case 1:
+            if(zend_get_parameters_ex(1, &recursive) == FAILURE) {
+                RETURN_FALSE;
+            }
+            convert_to_long_ex(recursive);
+            rec = Z_LVAL_PP(recursive);
+            break;
+        default:
+            WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    ap_send_error_response(r, rec);
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_set_content_length)
+{
+    zval **length;
+    zval *id;
+    request_rec *r;
+
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &length) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+
+    convert_to_long_ex(length);
+    ap_set_content_length(r, Z_LVAL_PP(length)); 
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_set_keepalive)
+{
+    zval *id;
+    request_rec *r;
+    APREQ_GET_REQUEST(id, r);
+    ap_set_keepalive(r);
+    RETURN_TRUE;
+}
+
+/* This stuff should use streams or however this is implemented now
+
+PHP_FUNCTION(apache_request_send_fd) 
+{
+}
+
+PHP_FUNCTION(apache_request_send_fd_length)
+{
+}
+*/
+
+/* These are for overriding default output behaviour */
+PHP_FUNCTION(apache_request_rputs)
+{
+    zval **buffer;
+    zval *id;
+    request_rec *r;
+    TSRMLS_FETCH();
+
+    if(ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &buffer) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    APREQ_GET_REQUEST(id, r);
+    convert_to_string_ex(buffer);
+    ap_rwrite(Z_STRVAL_PP(buffer), Z_STRLEN_PP(buffer), (request_rec*)SG(server_context));
+}
+
+/* This stuff would be useful for custom POST handlers, 
+   which should be supported.  Probably by not using
+   sapi_activate at all inside a phpResponseHandler
+   and instead using a builtin composed of the below
+   calls as a apache_read_request_body() and allow
+   people to custom craft their own.
+    
+PHP_FUNCTION(apache_request_setup_client_block)
+{
+}
+
+PHP_FUNCTION(apache_request_should_client_block)
+{
+}
+
+PHP_FUNCTION(apache_request_get_client_block)
+{
+}
+
+PHP_FUNCTION(apache_request_discard_request_body)
+{
+}
+*/
+
+/* http_log.h */
+
+PHP_FUNCTION(apache_request_log_error)
+{
+    
+}
+
+PHP_FUNCTION(apache_request_log_rerror)
+{
+}
+
+/* http_main.h */
+
+PHP_FUNCTION(apache_request_sub_req_lookup_uri)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_sub_req_lookup_file)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_sub_req_method_uri)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_run_sub_req)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_destroy_sub_req)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_internal_redirect)
+{
+    RETURN_TRUE;
+}
+
+PHP_FUNCTION(apache_request_send_header_field)
+{
+    zval **fieldname;
+    zval **fieldval;
+    zval *id;
+    request_rec *r;
+
+    TSRMLS_FETCH();
+    if(ARG_COUNT(ht) != 2 || zend_get_parameters_ex(2, &fieldname, &fieldval) == FAILURE) {
+        WRONG_PARAM_COUNT;
+    }
+    convert_to_string_ex(fieldname);
+    convert_to_string_ex(fieldval);
+    APREQ_GET_REQUEST(id, r);
+
+    ap_send_header_field(r, Z_STRVAL_PP(fieldname), Z_STRVAL_PP(fieldval));
+    AP(headers_sent) = 1;
+}
+
 
 
 /* }}} */
@@ -1016,6 +1225,16 @@ static function_entry php_apache_request_class_functions[] = {
 #undef set_last_modified
 #undef some_auth_required
 #undef update_mtime
+#undef send_http_header
+#undef basic_http_header
+#undef send_http_trace
+#undef send_http_options
+#undef send_error_response
+#undef set_content_length
+#undef set_keepalive
+#undef rputs
+#undef log_error
+#undef log_rerror
 	PHP_FALIAS(auth_name,					apache_request_auth_name,				NULL)
 	PHP_FALIAS(auth_type,					apache_request_auth_type,				NULL)
 	PHP_FALIAS(basic_auth_pw,				apache_request_basic_auth_pw,			NULL)
@@ -1029,7 +1248,23 @@ static function_entry php_apache_request_class_functions[] = {
 	PHP_FALIAS(set_last_modified,			apache_request_set_last_modified,		NULL)
 	PHP_FALIAS(some_auth_required,			apache_request_some_auth_required,		NULL)
 	PHP_FALIAS(update_mtime,				apache_request_update_mtime,			NULL)
-
+	PHP_FALIAS(send_http_header,			apache_request_send_http_header,		NULL)
+	PHP_FALIAS(basic_http_header,			apache_request_basic_http_header,		NULL)
+    PHP_FALIAS(send_header_field,           apache_request_send_header_field,       NULL)
+	PHP_FALIAS(send_http_trace,			    apache_request_send_http_trace,		    NULL)
+	PHP_FALIAS(send_http_options,			apache_request_send_http_trace,		    NULL)
+	PHP_FALIAS(send_error_response,			apache_request_send_error_response,	    NULL)
+    PHP_FALIAS(set_content_length,          apache_request_set_content_length,      NULL)
+    PHP_FALIAS(set_keepalive,               apache_request_set_keepalive,           NULL)
+    PHP_FALIAS(rputs,                       apache_request_rputs,                   NULL)
+    PHP_FALIAS(log_error,                   apache_request_log_error,               NULL)
+    PHP_FALIAS(log_rerror,                  apache_request_log_rerror,              NULL)
+    PHP_FALIAS(sub_req_lookup_uri,          apache_request_sub_req_lookup_uri,      NULL)
+    PHP_FALIAS(sub_req_lookup_file,         apache_request_sub_req_lookup_file,     NULL)
+    PHP_FALIAS(sub_req_method_uri,          apache_request_sub_req_method_uri,      NULL)
+    PHP_FALIAS(run_sub_req,                 apache_request_run_sub_req,             NULL)
+    PHP_FALIAS(destroy_sub_req,             apache_request_destroy_sub_req,         NULL)
+    PHP_FALIAS(internal_redirect,           apache_request_internal_redirect,       NULL)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -1141,7 +1376,7 @@ PHP_FUNCTION(apache_child_terminate)
    Get and set Apache request notes */
 PHP_FUNCTION(apache_note)
 {
-	pval **arg_name, **arg_val;
+	zval **arg_name, **arg_val;
 	char *note_val;
 	int arg_count = ARG_COUNT(ht);
 
@@ -1370,8 +1605,10 @@ static void apache_table_to_zval(table *t, int safe_mode, zval *return_value)
 
 
 /* {{{ proto array getallheaders(void)
-   Alias for apache_request_headers() */
+*/
+/*  Alias for apache_request_headers() */
 /* }}} */
+
 /* {{{ proto array apache_request_headers(void)
    Fetch all HTTP request headers */
 PHP_FUNCTION(apache_request_headers)
@@ -1388,10 +1625,6 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
-PHP_FUNCTION(apache_send_http_header)
-{
-    ap_send_http_header((request_rec *)SG(server_context));
-}
 /* {{{ proto bool apache_setenv(string variable, string value [, bool walk_to_top])
    Set an Apache subprocess_env variable */
 PHP_FUNCTION(apache_setenv)

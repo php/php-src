@@ -896,7 +896,7 @@ int php_request_startup_for_hook(TSRMLS_D)
 		return FAILURE;
 
     php_output_activate(TSRMLS_C);
-    sapi_activate(TSRMLS_C);
+    sapi_activate_headers_only(TSRMLS_C);
     php_hash_environment(TSRMLS_C);
 
 	return retval;
@@ -958,7 +958,6 @@ void php_request_shutdown_for_hook(void *dummy)
 void php_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
-
 	zend_try {
 		php_end_ob_buffers((zend_bool)(SG(request_info).headers_only?0:1) TSRMLS_CC);
 	} zend_end_try();

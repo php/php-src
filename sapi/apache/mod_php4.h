@@ -32,14 +32,10 @@ typedef struct {
 	long xbithack;
 	long terminate_child;
 	long setup_env;
+        long current_hook;
 	zend_bool in_request;
 	zend_bool apache_config_loaded;
-	char *uri_handler;
-	char *auth_handler;
-	char *access_handler;
-	char *type_handler;
-	char *fixup_handler;
-	char *logger_handler;
+        zend_bool headers_sent;
 } php_apache_info_struct;
 
 extern zend_module_entry apache_module_entry;
@@ -52,6 +48,19 @@ extern php_apache_info_struct php_apache_info;
 #define AP(v) (php_apache_info.v)
 #endif
 
+/* defines for the various stages of the apache request */
+#define AP_WAITING_FOR_REQUEST 0
+#define AP_POST_READ 1
+#define AP_URI_TRANS 2
+#define AP_HEADER_PARSE 3
+#define AP_ACCESS_CONTROL 4
+#define AP_AUTHENTICATION 5
+#define AP_AUTHORIZATION 6
+#define AP_TYPE_CHECKING 7
+#define AP_FIXUP 8
+#define AP_RESPONSE 9
+#define AP_LOGGING 10
+#define AP_CLEANUP 11
 #endif							/* MOD_PHP4_H */
 
 /*
