@@ -40,14 +40,14 @@ are met:
   6. The software incorporates the Zend Engine, a product of Zend
      Technologies, Ltd. ("Zend"). The Zend Engine is licensed to the
      PHP Association (pursuant to a grant from Zend that can be
-     found at http://www.php.net/license/ZendGrant) for
+     found at http://www.php.net/license/ZendGrant/) for
      distribution to you under this license agreement, only as a
      part of PHP.  In the event that you separate the Zend Engine
      (or any portion thereof) from the rest of the software, or
      modify the Zend Engine, or any portion thereof, your use of the
      separated or modified Zend Engine software shall not be governed
      by this license, and instead shall be governed by the license
-     set forth at http://www.zend.com/license/ZendLicense. 
+     set forth at http://www.zend.com/license/ZendLicense/. 
 
 
 
