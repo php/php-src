@@ -68,12 +68,17 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
     // }}}
     // {{{ doList()
 
+    function _sortinfo($a, $b)
+    {
+        return strcmp($a['package'], $b['package']);
+    }
+
     function doList($command, $options, $params)
     {
         $reg = new PEAR_Registry($this->config->get('php_dir'));
         if (sizeof($params) == 0) {
             $installed = $reg->packageInfo();
-            
+            usort($installed, array(&$this, '_sortinfo'));
             $i = $j = 0;
             $data = array(
                 'caption' => 'Installed packages:',
