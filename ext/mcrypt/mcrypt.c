@@ -147,7 +147,7 @@ ZEND_GET_MODULE(mcrypt)
 
 #define MCRYPT_CHECK_TD_CPY 									\
 	if(td < 0) { 												\
-		php_error(E_WARNING, MCRYPT_FAILED); 					\
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), MCRYPT_FAILED); 					\
 		RETURN_FALSE; 											\
 	} 															\
 	ndata = ecalloc(nr, bsize); 								\
@@ -156,7 +156,7 @@ ZEND_GET_MODULE(mcrypt)
 #define MCRYPT_CHECK_IV 										\
 	convert_to_string_ex(iv);	 								\
 	if(Z_STRLEN_PP(iv) != bsize) { 						\
-		php_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); 			\
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), MCRYPT_IV_WRONG_SIZE); 			\
 		RETURN_FALSE; 											\
 	}
 
@@ -167,7 +167,7 @@ ZEND_GET_MODULE(mcrypt)
 		mdecrypt_##x(td, ndata, nsize); 						\
 	end_mcrypt_##x(td)
 
-#define MCRYPT_IV_WRONG_SIZE "The IV parameter must be as long as the blocksize"
+#define MCRYPT_IV_WRONG_SIZE "%s(): The IV parameter must be as long as the blocksize"
 
 #if HAVE_LIBMCRYPT24
 #define MCRYPT_ENCRYPT 0
@@ -219,9 +219,9 @@ ZEND_GET_MODULE(mcrypt)
 #endif
 
 #if HAVE_LIBMCRYPT22
-#define MCRYPT_FAILED "mcrypt initialization failed"
+#define MCRYPT_FAILED "%s(): Initialization failed"
 #else
-#define MCRYPT_OPEN_MODULE_FAILED "mcrypt module initialization failed"
+#define MCRYPT_OPEN_MODULE_FAILED "%s(): Module initialization failed"
 #endif
 
 #if HAVE_LIBMCRYPT22
@@ -432,7 +432,7 @@ PHP_FUNCTION(mcrypt_module_open)
 		mode_dir_len > 0 ? mode_dir : MCG(modes_dir));
 
 	if (td == MCRYPT_FAILED) {
-		php_error (E_WARNING, "could not open encryption module");
+		php_error (E_WARNING, "%s(): Could not open encryption module", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	} else {
 		ZEND_REGISTER_RESOURCE (return_value, td, le_mcrypt);
@@ -466,7 +466,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	iv_size = mcrypt_enc_get_iv_size (td);
 
 	if (Z_STRLEN_PP(key) == 0) {
-		php_error (E_WARNING, "key size is 0");
+		php_error (E_WARNING, "%s(): Key size is 0", get_active_function_name(TSRMLS_C));
 	}
 
 	key_s = emalloc (Z_STRLEN_PP(key));
@@ -476,9 +476,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memset (iv_s, 0, iv_size + 1);
 
 	if (Z_STRLEN_PP(key) > max_key_size) {
-		sprintf (dummy, "key size too large; supplied length: %d, max: %d", 
+		sprintf (dummy, "Key size too large; supplied length: %d, max: %d", 
 			Z_STRLEN_PP(key), max_key_size);
-		php_error (E_WARNING, dummy);
+		php_error (E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), dummy);
 		key_size = max_key_size;
 	} else {
 		key_size = Z_STRLEN_PP(key);
@@ -486,9 +486,9 @@ PHP_FUNCTION(mcrypt_generic_init)
 	memcpy (key_s, Z_STRVAL_PP(key), Z_STRLEN_PP(key));
 
 	if (Z_STRLEN_PP(iv) != iv_size) {
-		sprintf (dummy, "iv size incorrect; supplied length: %d, needed: %d", 
+		sprintf (dummy, "Iv size incorrect; supplied length: %d, needed: %d", 
 			Z_STRLEN_PP(iv), iv_size);
-		php_error (E_WARNING, dummy);
+		php_error (E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), dummy);
 	}
 	memcpy (iv_s, Z_STRVAL_PP(iv), iv_size);
 
@@ -500,14 +500,14 @@ PHP_FUNCTION(mcrypt_generic_init)
 		zend_list_delete (Z_LVAL_PP(mcryptind));
 		switch (result) {
 			case -3:
-				php_error (E_WARNING, "mcrypt_generic_init: Key length incorrect");
+				php_error (E_WARNING, "%s(): Key length incorrect", get_active_function_name(TSRMLS_C));
 				break;
 			case -4:
-				php_error (E_WARNING, "mcrypt_generic_init: Memory allocation error");
+				php_error (E_WARNING, "%s(): Memory allocation error", get_active_function_name(TSRMLS_C));
 				break;
 			case -1:
 			default:
-				php_error (E_WARNING, "mcrypt_generic_init: Unknown error");
+				php_error (E_WARNING, "%s(): Unknown error", get_active_function_name(TSRMLS_C));
 				break;
 		}
 	}
@@ -615,7 +615,7 @@ PHP_FUNCTION(mcrypt_enc_get_supported_key_sizes)
 	key_sizes = mcrypt_enc_get_supported_key_sizes (td, &count);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "Unable to initialize array");
+		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	if (count != 0) {
@@ -666,12 +666,12 @@ PHP_FUNCTION(mcrypt_generic_end)
 	MCRYPT_GET_TD_ARG
 
 #if HAVE_MCRYPT_GENERIC_DEINIT
-	php_error(E_NOTICE, "mcrypt_generic_end is deprecated, please use mcrypt_generic_deinit");
+	php_error(E_NOTICE, "%s(): This function is deprecated, please use mcrypt_generic_deinit()", get_active_function_name(TSRMLS_C));
 	if (mcrypt_generic_deinit (td) < 0) {
 #else
 	if (mcrypt_generic_end (td) < 0) {
 #endif
-		php_error (E_WARNING, "could not terminate encryption specifier");
+		php_error (E_WARNING, "%s(): Could not terminate encryption specifier", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE
 	}
 	RETURN_TRUE
@@ -691,7 +691,7 @@ PHP_FUNCTION(mcrypt_generic_deinit)
 	MCRYPT_GET_TD_ARG
 
 	if (mcrypt_generic_deinit (td) < 0) {
-		php_error (E_WARNING, "could not terminate encryption specifier");
+		php_error (E_WARNING, "%s(): Could not terminate encryption specifier", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE
 	}
 	RETURN_TRUE
@@ -922,7 +922,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 	key_sizes = mcrypt_module_get_algo_supported_key_sizes (module, dir, &count);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "Unable to initialize array");
+		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	if (count != 0) {
@@ -965,11 +965,11 @@ PHP_FUNCTION(mcrypt_list_algorithms)
 	modules = mcrypt_list_algorithms (lib_dir_s, &count);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "Unable to initialize array");
+		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	if (count == 0) {
-		php_error (E_WARNING, "No algorithms found in module dir");
+		php_error (E_WARNING, "%s(): No algorithms found in module dir", get_active_function_name(TSRMLS_C));
 	}
 	for (i = 0; i < count; i++) {
 		add_index_string(return_value, i, modules[i], 1);
@@ -1009,11 +1009,11 @@ PHP_FUNCTION(mcrypt_list_modes)
 	modules = mcrypt_list_modes (lib_dir_s, &count);
 
 	if (array_init(return_value) == FAILURE) {
-		php_error(E_ERROR, "Unable to initialize array");
+		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	if (count == 0) {
-		php_error (E_WARNING, "No modes found in module dir");
+		php_error (E_WARNING, "%s(): No modes found in module dir", get_active_function_name(TSRMLS_C));
 	}
 	for (i = 0; i < count; i++) {
 		add_index_string(return_value, i, modules[i], 1);
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(mcrypt_get_key_size)
 	}
 	else
 	{
-		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
+		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED, get_active_function_name(TSRMLS_C));
 		RETVAL_LONG(0);
 	}
 }
@@ -1096,7 +1096,7 @@ PHP_FUNCTION(mcrypt_get_block_size)
 	}
 	else
 	{
-		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
+		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED, get_active_function_name(TSRMLS_C));
 		RETVAL_LONG(0);
 	}
 }
@@ -1136,7 +1136,7 @@ PHP_FUNCTION(mcrypt_get_iv_size)
 	}
 	else
 	{
-		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
+		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED, get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 }
@@ -1190,7 +1190,7 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
 		}
 		else
 		{
-			php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
+			php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED, get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	}
@@ -1217,13 +1217,13 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 		mode, 
 		module_dir_string);
 	if (td == MCRYPT_FAILED) {
-		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED);
+		php_error (E_WARNING, MCRYPT_OPEN_MODULE_FAILED, get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	/* Checking for key-length */
 	max_key_length = mcrypt_enc_get_key_size (td);
 	if (Z_STRLEN_PP(key) > max_key_length) {
-		php_error (E_WARNING, "size of key is too large for this algorithm");
+		php_error (E_WARNING, "%s(): Size of key is too large for this algorithm", get_active_function_name(TSRMLS_C));
 	}
 	key_length_sizes = mcrypt_enc_get_supported_key_sizes (td, &count);
 	if (count == 0 && key_length_sizes == NULL) { /* all lengths 1 - k_l_s = OK */
@@ -1258,7 +1258,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	iv_size = mcrypt_enc_get_iv_size (td);
 	if (argc == 5) {
 		if (iv_size != Z_STRLEN_PP(iv)) {
-			php_error (E_WARNING, MCRYPT_IV_WRONG_SIZE);
+			php_error (E_WARNING, MCRYPT_IV_WRONG_SIZE, get_active_function_name(TSRMLS_C));
 			
 		}
 		else {
@@ -1269,7 +1269,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	else if (argc == 4)
 	{
 		if (iv_size != 0) {
-			php_error (E_WARNING, "attempt to use an empty IV, which is NOT recommend");
+			php_error (E_WARNING, "%s(): Attempt to use an empty IV, which is NOT recommend", get_active_function_name(TSRMLS_C));
 			iv_s = emalloc (iv_size + 1);
 			memset (iv_s, 0, iv_size + 1);
 		}
@@ -1291,7 +1291,7 @@ static void php_mcrypt_do_crypt (char* cipher, zval **key, zval **data, char *mo
 	}
 
 	if (mcrypt_generic_init (td, key_s, use_key_length, iv_s) < 0) {
-		php_error (E_ERROR, "generic_init failed");
+		php_error (E_ERROR, "%s(): Mcrypt initialisation failed", get_active_function_name(TSRMLS_C));
 	}
 	if (dencrypt == MCRYPT_ENCRYPT)
 		mcrypt_generic (td, data_s, data_size);
@@ -1437,7 +1437,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	}
 
 	if (size <= 0) {
-		php_error(E_WARNING, "can not create an IV with size 0 or smaller");
+		php_error(E_WARNING, "%s(): Can not create an IV with size 0 or smaller", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 				O_RDONLY);
 		if (fd < 0) {
 			efree(iv);
-			php_error(E_WARNING, "cannot open source device");
+			php_error(E_WARNING, "%s(): Cannot open source device", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 		while (read_bytes < size) {
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 		n = read_bytes;
 		close(fd);
 		if (n < size) {
-			php_error(E_WARNING, "could not gather sufficient random data");
+			php_error(E_WARNING, "%s(): Could not gather sufficient random data", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	} else {
