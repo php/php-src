@@ -11,13 +11,16 @@ Sybase-CT select and types
 
   require('test.inc');
 
+  define('LONG_MAX', is_int(2147483648) ? 9223372036854775807 : 2147483647);
+  define('LONG_MIN', -LONG_MAX - 1);
+
   $db= sybase_connect_ex();
   var_dump(sybase_select_ex($db, 'select 
     1 as "integer", 
-    -2147483647 as "integer_min",
-    -2147483648 as "integer_min_exceed",
-    2147483647 as "integer_max",
-    2147483648 as "integer_max_exceed",
+    '.(LONG_MIN).' as "integer_min",
+    '.(LONG_MIN - 1).' as "integer_min_exceed",
+    '.(LONG_MAX).' as "integer_max",
+    '.(LONG_MAX + 1).' as "integer_max_exceed",
     1.0  as "float", 
     $22.36 as "money",
     "Binford" as "string",
@@ -33,10 +36,10 @@ Sybase-CT select and types
 --EXPECTF--
 >>> Query: select 
     1 as "integer", 
-    -2147483647 as "integer_min",
-    -2147483648 as "integer_min_exceed",
-    2147483647 as "integer_max",
-    2147483648 as "integer_max_exceed",
+    -%s as "integer_min",
+    -%s as "integer_min_exceed",
+    %s as "integer_max",
+    %s as "integer_max_exceed",
     1.0  as "float", 
     $22.36 as "money",
     "Binford" as "string",
@@ -53,13 +56,13 @@ array(1) {
     ["integer"]=>
     int(1)
     ["integer_min"]=>
-    int(-2147483647)
+    int(-%s)
     ["integer_min_exceed"]=>
-    float(-2147483648)
+    float(-%s)
     ["integer_max"]=>
-    int(2147483647)
+    int(%s)
     ["integer_max_exceed"]=>
-    float(2147483648)
+    float(%s)
     ["float"]=>
     float(1)
     ["money"]=>
