@@ -26,7 +26,7 @@ and not output any error messages.
 Both functions return SUCCESS or FAILURE depending on the result.
 
 The auto-conversions are performed as necessary. Arrays, objects, and
-resources cannot be autoconverted.
+resources cannot be auto-converted.
 
 
 Type specifiers
