@@ -1,3 +1,89 @@
+2002-04-25  jim winstead  <jimw@apache.org>
+
+    * ext/standard/url_scanner_ex.c: update generated file
+
+    * ext/standard/url_scanner_ex.re:
+    Do not add redundant id attribute. It doesn't make the output any
+    more standards compliant.
+
+2002-04-25  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/mysql/config.m4: MFH
+
+    * ext/mysql/config.m4: Some systems have mysql socket in /var/run/mysql
+
+    * ext/oracle/oracle.c: MFB
+
+    * ext/oracle/oracle.c: Fix the fix.
+
+    * ext/oracle/oracle.c: Fix win32 build
+
+2002-04-25  Colin Viebrock  <colin@easydns.com>
+
+    * pear/Net/Dig.php
+      pear/Crypt/CBC.php: moved into /pear
+
+2002-04-25  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/standard/string.c:
+    fixed directory access problem when direcory name is encoded in japanese Shift_JIS encoding.
+
+2002-04-25  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/exec.c: MFH: fix for bug #16811
+
+2002-04-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php: * fix warning
+
+2002-04-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c:
+    Touch generated file to increase timestamp
+
+2002-04-25  Harald Radi  <h.radi@nme.at>
+
+    * main/win95nt.h: already defined in zend_config.win32.h
+
+2002-04-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/tests/17result.phpt
+      ext/pgsql/tests/result.inc: Added test for pg_fetch_*() functions
+
+    * ext/pgsql/pgsql.c: Revert last 2 commits.
+
+2002-04-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/exec.c: - Fix for bug #16811
+
+    * ext/com/conversion.c: - MFH: fix for bug #14353
+
+    * ext/com/conversion.c: - Fix for bug #14353
+
+    * ext/standard/url_scanner_ex.c
+      ext/standard/url_scanner_ex.re: - Fix for bug 16810 (XHTML compliance)
+
+2002-04-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/config.m4: Fix version in message
+
+2002-04-25  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: fine-tuning
+
+    * ext/xslt/config.m4: Only support the new libexpat.
+
+2002-04-25  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/php_pgsql.h
+      ext/pgsql/pgsql.c:
+    pg_client_encoding/pg_set_client_encoding should be compiled always.
+    Recent libpq has PQclientEncoding/PQsetClientEncoding regarless of
+    multibyte support enabled or not.
+
+    Reported by c@cornelia-boenigk.de
+
+
 2002-04-24  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
 
     * ext/pgsql/pgsql.c: Remove result_type from pg_fetch_object() proto.
