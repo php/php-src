@@ -276,6 +276,10 @@ END_EXTERN_C()
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 
+#define ALLOC_INIT_ZVAL(zp)						\
+	(zp) = (zval *) emalloc(sizeof(zval));		\
+	INIT_ZVAL(*zp);
+
 #define MAKE_STD_ZVAL(zv)				 \
 	zv = (zval *) emalloc(sizeof(zval)); \
 	INIT_PZVAL(zv);
@@ -290,9 +294,17 @@ END_EXTERN_C()
 			**(ppzv) = *orig_ptr;							\
 			zval_copy_ctor(*(ppzv));						\
 			(*(ppzv))->refcount=1;							\
-			(*(ppzv))->is_ref = 0;						\
+			(*(ppzv))->is_ref = 0;							\
 		}													\
 	}
+
+#define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
+	(zv) = *(pzv);							\
+	if ((pzv)->refcount>1) {				\
+		zval_copy_ctor(&(zv));				\
+		(pzv)->refcount--;					\
+	}										\
+	INIT_PZVAL(&(zv));
 
 #define ZEND_MAX_RESERVED_RESOURCES	1
 

@@ -124,8 +124,8 @@ ZEND_API int add_get_assoc_stringl(zval *arg, char *key, char *str, uint length,
 ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
 
-ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval *params[]);
-ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval *retval, int param_count, zval **params[], int no_separation);
+ZEND_API int call_user_function(HashTable *function_table, zval *object, zval *function_name, zval *retval_ptr, int param_count, zval *params[]);
+ZEND_API int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation);
 
 ZEND_API int add_property_long(zval *arg, char *key, long l);
 ZEND_API int add_property_resource(zval *arg, char *key, long r);
