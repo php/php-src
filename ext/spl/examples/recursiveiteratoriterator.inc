@@ -26,12 +26,12 @@ class RecursiveIteratorIterator implements Iterator
 		$this->ait[0]->recursed = false;
 	}
 	
-	function hasMore()
+	function valid()
 	{
 		$count = $this->count;
 		while ($count) {
 			$it = $this->ait[$count];
-			if ($it->hasMore()) {
+			if ($it->valid()) {
 				return true;
 			}
 			$count--;
@@ -55,13 +55,13 @@ class RecursiveIteratorIterator implements Iterator
 	{
 		while ($this->count) {
 			$it = $this->ait[$this->count];
-			if ($it->hasMore()) {
+			if ($it->valid()) {
 				if (!$it->recursed && $it->hasChildren()) {
 					$it->recursed = true;
 					$sub = $it->getChildren();
 					$sub->recursed = false;
 					$sub->rewind();
-					if ($sub->hasMore()) {
+					if ($sub->valid()) {
 						$this->ait[++$this->count] = $sub;
 						if (!$sub instanceof RecursiveIterator) {
 							throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
@@ -72,7 +72,7 @@ class RecursiveIteratorIterator implements Iterator
 				}
 				$it->next();
 				$it->recursed = false;
-				if ($it->hasMore()) {
+				if ($it->valid()) {
 					return;
 				}
 				$it->recursed = false;

@@ -53,7 +53,7 @@ function_entry spl_funcs_RecursiveIterator[] = {
 
 SPL_METHOD(RecursiveIteratorIterator, __construct);
 SPL_METHOD(RecursiveIteratorIterator, rewind);
-SPL_METHOD(RecursiveIteratorIterator, hasMore);
+SPL_METHOD(RecursiveIteratorIterator, valid);
 SPL_METHOD(RecursiveIteratorIterator, key);
 SPL_METHOD(RecursiveIteratorIterator, current);
 SPL_METHOD(RecursiveIteratorIterator, next);
@@ -74,7 +74,7 @@ ZEND_END_ARG_INFO();
 static zend_function_entry spl_funcs_RecursiveIteratorIterator[] = {
 	SPL_ME(RecursiveIteratorIterator, __construct,   arginfo_recursive_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(RecursiveIteratorIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveIteratorIterator, valid,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveIteratorIterator, next,          NULL, ZEND_ACC_PUBLIC)
@@ -348,7 +348,7 @@ SPL_METHOD(RecursiveIteratorIterator, rewind)
 	spl_recursive_it_rewind_ex(object TSRMLS_CC);
 }
 
-SPL_METHOD(RecursiveIteratorIterator, hasMore)
+SPL_METHOD(RecursiveIteratorIterator, valid)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
@@ -670,7 +670,7 @@ SPL_METHOD(dual_it, rewind)
 	spl_dual_it_fetch(intern, 1 TSRMLS_CC);
 }
 
-SPL_METHOD(dual_it, hasMore)
+SPL_METHOD(dual_it, valid)
 {
 	spl_dual_it_object   *intern;
 
@@ -842,7 +842,7 @@ ZEND_END_ARG_INFO();
 static zend_function_entry spl_funcs_FilterIterator[] = {
 	SPL_ME(dual_it,        __construct,   arginfo_filter_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(FilterIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(dual_it,        hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(dual_it,        valid,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,        key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,        current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(FilterIterator, next,          NULL, ZEND_ACC_PUBLIC)
@@ -926,7 +926,7 @@ SPL_METHOD(LimitIterator, rewind)
 	spl_limit_it_seek(intern, intern->u.limit.offset TSRMLS_CC);
 }
 
-SPL_METHOD(LimitIterator, hasMore)
+SPL_METHOD(LimitIterator, valid)
 {
 	spl_dual_it_object   *intern;
 
@@ -994,7 +994,7 @@ ZEND_END_ARG_INFO();
 static zend_function_entry spl_funcs_LimitIterator[] = {
 	SPL_ME(LimitIterator, __construct,   arginfo_limit_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(LimitIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(LimitIterator, valid,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,       key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,       current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(LimitIterator, next,          NULL, ZEND_ACC_PUBLIC)
@@ -1075,7 +1075,7 @@ SPL_METHOD(CachingIterator, rewind)
 	spl_caching_it_rewind(intern TSRMLS_CC);
 }
 
-SPL_METHOD(CachingIterator, hasMore)
+SPL_METHOD(CachingIterator, valid)
 {
 	spl_dual_it_object   *intern;
 
@@ -1127,7 +1127,7 @@ ZEND_END_ARG_INFO();
 static zend_function_entry spl_funcs_CachingIterator[] = {
 	SPL_ME(CachingIterator, __construct,   arginfo_caching_it___construct, ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, rewind,        NULL, ZEND_ACC_PUBLIC)
-	SPL_ME(CachingIterator, hasMore,       NULL, ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, valid,         NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,         key,           NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(dual_it,         current,       NULL, ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, next,          NULL, ZEND_ACC_PUBLIC)

@@ -64,7 +64,7 @@ class DbaReader implements Iterator
 	/**
 	 * @return Whether more elements are available.
 	 */
-	function hasMore() {
+	function valid() {
 		if ($this->db && $this->key !== false) {
 			return true;
 		} else {

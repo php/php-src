@@ -54,7 +54,7 @@ interface Iterator implements Traversable
 
 	/** Check if there is a current element after calls to rewind() or next().
 	 */
-	function hasMore();
+	function valid();
 }
 
 /** Interface for recursive traversal to be used with 
@@ -156,9 +156,9 @@ class ArrayIterator implements Iterator
 	 */
 	function next();
 
-	/** \copydoc Iterator::hasMore
+	/** \copydoc Iterator::valid
 	 */
-	function hasMore();
+	function valid();
 }
 
 /** Iterator that wrapps around another iterator and only returns selected
@@ -193,9 +193,9 @@ abstract class FilterIterator implements Iterator
 	 */
 	function next();
 
-	/** \copydoc Iterator::hasMore
+	/** \copydoc Iterator::valid
 	 */
-	function hasMore();
+	function valid();
 }
 
 /** A recursive iterator that only returns elements that themselves can be 
@@ -233,9 +233,9 @@ class ParentIterator extends FilterIterator implements RecursiveIterator
 	 */
 	function next();
 
-	/** \copydoc Iterator::hasMore
+	/** \copydoc Iterator::valid
 	 */
-	function hasMore();
+	function valid();
 }
 
 /** \brief Directory iterator
@@ -260,9 +260,9 @@ class DirectoryIterator implements Iterator
 	 */
 	function next();
 
-	/** \copydoc Iterator::hasMore
+	/** \copydoc Iterator::valid
 	 */
-	function hasMore();
+	function valid();
 	
 	/** \return The opened path.
 	 */
@@ -301,9 +301,9 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
 	 */
 	function next();
 
-	/** \copydoc Iterator::hasMore
+	/** \copydoc Iterator::valid
 	 */
-	function hasMore();
+	function valid();
 	
 	/** \return whether the current is a directory (not '.' or '..').
 	 */

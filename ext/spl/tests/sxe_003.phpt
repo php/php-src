@@ -45,7 +45,7 @@ foreach($sxe->getChildren() as $name => $data) {
 
 echo "===RESET===\n";
 
-for ($sxe->rewind(); $sxe->hasMore(); $sxe->next()) {
+for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 	var_dump($sxe->hasChildren());
 	var_dump(trim($sxe->key()));
 	var_dump(trim($sxe->current()));

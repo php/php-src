@@ -19,7 +19,7 @@ interface SeekableIterator implements Iterator
 	function seek($index);
 /*		$this->rewind();
 		$position = 0;
-		while($position < $index && $this->hasMore()) {
+		while($position < $index && $this->valid()) {
 			$this->next();
 			$position++;
 		}

@@ -21,6 +21,10 @@ try {
 } catch(sqlite_exception $err) {
 	echo "Message: ".$err->getMessage()."\n";
 	echo "File: ".$err->getFile()."\n";
+	echo "File: ".$err->getCode()."\n";
+	echo "Line: ".$err->getLine()."\n";
+	print_r($err->getTrace());
+	echo "BackTrace: ".$err->getTraceAsString()."\n";
 }
 
 $db = sqlite_factory($dbname);
@@ -37,7 +41,7 @@ foreach ($data as $str) {
 }
 
 $r = $db->unbuffered_query("SELECT a, b from strings");
-while ($r->hasMore()) {
+while ($r->valid()) {
 	var_dump($r->current(SQLITE_NUM));
 	$r->next();
 }

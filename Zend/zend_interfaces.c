@@ -143,7 +143,7 @@ static int zend_user_it_has_more(zend_object_iterator *_iter TSRMLS_DC)
 		zval *more;
 		int result;
 	
-		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_has_more, "hasmore", &more);
+		zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_has_more, "valid", &more);
 		if (more) {
 			result = i_zend_is_true(more);
 			zval_ptr_dtor(&more);
@@ -377,7 +377,7 @@ zend_function_entry zend_funcs_iterator[] = {
 	ZEND_ABSTRACT_ME(iterator, current,  NULL)
 	ZEND_ABSTRACT_ME(iterator, next,     NULL)
 	ZEND_ABSTRACT_ME(iterator, key,      NULL)
-	ZEND_ABSTRACT_ME(iterator, hasMore,  NULL)
+	ZEND_ABSTRACT_ME(iterator, valid,    NULL)
 	ZEND_ABSTRACT_ME(iterator, rewind,   NULL)
 	{NULL, NULL, NULL}
 };

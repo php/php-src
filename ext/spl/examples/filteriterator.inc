@@ -47,7 +47,7 @@ abstract class FilterIterator implements Iterator
 	 * @return void
 	 */
 	protected function fetch() {
-		while ($this->it->hasMore()) {
+		while ($this->it->valid()) {
 			if ($this->accept()) {
 				return;
 			}
@@ -68,8 +68,8 @@ abstract class FilterIterator implements Iterator
 	/**
 	 * @return Whether more elements are available
 	 */
-	function hasMore() {
-		return $this->it->hasMore();
+	function valid() {
+		return $this->it->valid();
 	}
 	
 	/**

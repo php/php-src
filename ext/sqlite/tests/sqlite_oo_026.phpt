@@ -30,7 +30,7 @@ foreach($r as $idx => $row) {
 }
 echo "====FOR====\n";
 $r = $db->unbuffered_query("SELECT a from strings", SQLITE_NUM);
-for(;$r->hasMore(); $r->next()) {
+for(;$r->valid(); $r->next()) {
 	$v = $r->column(0);
 	var_dump($v);
 	$c = $r->column(0);

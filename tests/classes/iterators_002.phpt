@@ -18,7 +18,7 @@ class c_iter implements Iterator {
 		echo __METHOD__ . "\n";
 		$this->num = 0;
 	}
-	function hasMore() {
+	function valid() {
 		$more = $this->num < $this->obj->max;
 		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
 		return $more;
@@ -75,43 +75,43 @@ print "Done\n";
 c::getIterator
 c_iter::__construct
 c_iter::rewind
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::rewind
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:0:0
 c_iter::__destruct
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::rewind
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:1:0
 c_iter::__destruct
 c_iter::next
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 c::getIterator
 c_iter::__construct
 c_iter::rewind
-c_iter::hasMore = true
+c_iter::valid = true
 c_iter::current
 c_iter::key
 double:2:0
 c_iter::__destruct
 c_iter::next
-c_iter::hasMore = false
+c_iter::valid = false
 c_iter::__destruct
 c::__destruct
 Done

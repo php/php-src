@@ -70,7 +70,7 @@ class SqliteNestedset implements RecursiveIterator
 		$this->fetch();
 	}
 
-	function hasMore()
+	function valid()
 	{
 		return is_object($this->entry);
 	}
