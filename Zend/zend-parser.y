@@ -547,9 +547,13 @@ scalar:
 
 static_array_pair_list:
 		/* empty */ 						{ $$.op_type = IS_CONST; INIT_PZVAL(&$$.u.constant); array_init(&$$.u.constant); }
-	|	non_empty_static_array_pair_list	{ $$ = $1; }
+	|	non_empty_static_array_pair_list possible_comma	{ $$ = $1; }
 ;
 
+possible_comma:
+		/* empty */
+	|	','
+;
 
 non_empty_static_array_pair_list:
 		non_empty_static_array_pair_list ',' static_scalar T_DOUBLE_ARROW static_scalar	{ do_add_static_array_element(&$$, &$3, &$5); }
@@ -657,7 +661,7 @@ assignment_list_element:
 
 array_pair_list:
 		/* empty */ 				{ do_init_array(&$$, NULL, NULL, 0 CLS_CC); }
-	|	non_empty_array_pair_list	{ $$ = $1; }
+	|	non_empty_array_pair_list possible_comma	{ $$ = $1; }
 ;
 
 non_empty_array_pair_list:
