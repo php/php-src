@@ -10,7 +10,7 @@
 #elif defined(NETWARE)
 # include "tsrm_config.nw.h"
 #else
-# include "tsrm_config.h"
+# include <tsrm_config.h>
 # include <sys/param.h>
 #endif
 

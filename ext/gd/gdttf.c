@@ -9,7 +9,7 @@
 #if PHP_WIN32
 #include "config.w32.h"
 #else
-#include "php_config.h"
+#include <php_config.h>
 #endif
 #if HAVE_LIBTTF && !defined(USE_GD_IMGSTRTTF)
 #include <stdio.h>

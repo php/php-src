@@ -9,7 +9,7 @@
 #include <syslog.h>
 #endif
 #else
-#include "php_config.h"
+#include <php_config.h>
 #ifdef HAVE_SYSLOG_H
 #include <syslog.h>
 #endif
