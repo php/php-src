@@ -1,3 +1,18 @@
+2003-12-18  Andi Gutmans  <andi@zend.com>
+
+    * zend_execute.c:
+      - Nuke C++ comment
+
+    * zend_execute.c:
+      - Revert patch 1.566
+
+2003-12-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_object_handlers.c
+      zend_object_handlers.h:
+      Fixed bug #24837 Incorrect behaviour of PPP using foreach.
+
 2003-12-17  Zeev Suraski  <zeev@zend.com>
 
     * (php_5_0_0b3RC1)
