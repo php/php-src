@@ -1145,6 +1145,7 @@ int zend_register_functions(zend_class_entry *scope, zend_function_entry *functi
 	char *lowercase_name;
 	int fname_len;
 
+	memset(internal_function, 0, sizeof(zend_function));
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
 	} else {
