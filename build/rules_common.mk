@@ -23,10 +23,10 @@ COMMON_FLAGS = $(DEFS) $(INCLUDES) $(EXTRA_INCLUDES) $(CPPFLAGS)
 COMPILE      = $(CC)  $(COMMON_FLAGS) $(CFLAGS) $(EXTRA_CFLAGS)
 CXX_COMPILE  = $(CXX) $(COMMON_FLAGS) $(CXXFLAGS) $(EXTRA_CXXFLAGS)
 
-SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) -prefer-pic $(EXTRA_CFLAGS) -c $< && touch $@
-CXX_SHARED_COMPILE = $(SHARED_LIBTOOL) --mode=compile $(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) -prefer-pic $(EXTRA_CXXFLAGS) -c $< && touch $@
+SHARED_COMPILE = $(SHARED_LIBTOOL) --silent --mode=compile $(CC) $(COMMON_FLAGS) $(CFLAGS_CLEAN) -prefer-pic $(EXTRA_CFLAGS) -c $< && touch $@
+CXX_SHARED_COMPILE = $(SHARED_LIBTOOL) --silent --mode=compile $(CXX) $(COMMON_FLAGS) $(CXXFLAGS_CLEAN) -prefer-pic $(EXTRA_CXXFLAGS) -c $< && touch $@
 
-LINK = $(LIBTOOL) --mode=link $(COMPILE) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --silent --mode=link $(COMPILE) $(LDFLAGS) -o $@
 
 mkinstalldirs = $(top_srcdir)/build/shtool mkdir -p
 INSTALL = $(top_srcdir)/build/shtool install -c
@@ -42,28 +42,36 @@ CXX_SUFFIX = .cpp
 .SUFFIXES: .slo .c $(CXX_SUFFIX) .lo .o .s .y .l
 
 .c.o:
-	$(COMPILE) -c $<
+	@echo Compiling $<
+	@$(COMPILE) -c $<
 
 $(CXX_SUFFIX).o:
-	$(CXX_COMPILE) -c $<
+	@echo Compiling $<
+	@$(CXX_COMPILE) -c $<
 
 .s.o:
-	$(COMPILE) -c $<
+	@echo Compiling $<
+	@$(COMPILE) -c $<
 
 .c.lo:
-	$(PHP_COMPILE)
+	@echo Compiling $<
+	@$(PHP_COMPILE)
 
 $(CXX_SUFFIX).lo:
-	$(CXX_PHP_COMPILE)
+	@echo Compiling $<
+	@$(CXX_PHP_COMPILE)
 
 .s.lo:
-	$(PHP_COMPILE)
+	@echo Compiling $<
+	@$(PHP_COMPILE)
 
 .c.slo:
-	$(SHARED_COMPILE)
+	@echo Compiling $<
+	@$(SHARED_COMPILE)
 
 $(CXX_SUFFIX).slo:
-	$(CXX_SHARED_COMPILE)
+	@echo Compiling $<
+	@$(CXX_SHARED_COMPILE)
 
 .y.c:
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
