@@ -10,7 +10,7 @@ if test -z "$PHP_LIBXML_DIR"; then
   [  --with-libxml-dir[=DIR]   DOM: libxml2 install prefix.], no, no)
 fi
 
-if test "$PHP_DOM" != "no"; then
+if test "$PHP_DOM" != "no" && test "$PHP_LIBXML" != "no"; then
 
   PHP_SETUP_LIBXML(DOM_SHARED_LIBADD, [
     AC_DEFINE(HAVE_DOM,1,[ ])
@@ -22,7 +22,7 @@ if test "$PHP_DOM" != "no"; then
                             documenttype.c domimplementationlist.c entity.c \
                             nodelist.c text.c comment.c domconfiguration.c \
                             domimplementationsource.c entityreference.c \
-			    notation.c xpath.c \
+                            notation.c xpath.c \
                             typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c], 
                             $ext_shared)
     PHP_SUBST(DOM_SHARED_LIBADD)
