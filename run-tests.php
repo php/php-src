@@ -108,7 +108,7 @@ $test_files = array();
 $test_results = array();
 
 // If parameters given assume they represent selected tests to run.
-if ($argc>1) {
+if (isset($argc) && $argc>1) {
 	for ($i=1; $i<$argc; $i++) {
 		$testfile = realpath($argv[$i]);
 		$test_to_run[$testfile] = 1;
@@ -116,7 +116,8 @@ if ($argc>1) {
 }
 
 // Compile a list of all test files (*.phpt).
-$module_of_test = $test_files = array();
+$test_files     = array();
+$module_of_test = array();
 find_files(getcwd());
 
 function find_files($dir) {
