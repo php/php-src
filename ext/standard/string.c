@@ -1138,8 +1138,7 @@ PHP_FUNCTION(ucfirst)
 PHP_FUNCTION(ucwords)
 {
 	zval **str;
-	char *r;
-	int i, new_word = 1;
+	register char *r,*r_end;
 	
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &str) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1151,18 +1150,12 @@ PHP_FUNCTION(ucwords)
 	}
 	*return_value=**str;
 	zval_copy_ctor(return_value);
-	r=return_value->value.str.val;
 
-	for (i = 0; i < (*str)->value.str.len; i++, r++) {
-		/* Alpha char preceeded by white space? Uppercase it. */
-		if (new_word && isalpha(*r)) {
-			*r = toupper((unsigned char)*r);
-		}
-		/* Find a word boundary. */
-		if (isspace(*r)) {
-			new_word = 1;
-		} else {
-			new_word = 0;
+	r=return_value->value.str.val;
+	*r=toupper((unsigned char)*r);
+	for(r_end = r + return_value->value.str.len -1 ; r < r_end ; r++ ) {
+		if(isspace(*r)) {
+			*++r=toupper((unsigned char)*r);
 		}
 	}
 }
