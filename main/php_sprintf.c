@@ -18,9 +18,9 @@
 
 /* $Id$ */
 
-#include "php_config.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include "php_config.h"
 
 #if BROKEN_SPRINTF
 
