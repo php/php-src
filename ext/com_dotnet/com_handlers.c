@@ -182,6 +182,7 @@ static void com_write_dimension(zval *object, zval *offset, zval *value TSRMLS_D
 	}
 }
 
+#if 0
 static void com_object_set(zval **property, zval *value TSRMLS_DC)
 {
 	/* Not yet implemented in the engine */
@@ -192,6 +193,7 @@ static zval *com_object_get(zval *property TSRMLS_DC)
 	/* Not yet implemented in the engine */
 	return NULL;
 }
+#endif
 
 static int com_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 {
@@ -518,8 +520,8 @@ zend_object_handlers php_com_object_handlers = {
 	com_read_dimension,
 	com_write_dimension,
 	NULL,
-	com_object_get,
-	com_object_set,
+	NULL, //com_object_get,
+	NULL, //com_object_set,
 	com_property_exists,
 	com_property_delete,
 	com_dimension_exists,
@@ -561,6 +563,7 @@ void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable TSR
 void php_com_object_free_storage(void *object TSRMLS_DC)
 {
 	php_com_dotnet_object *obj = (php_com_dotnet_object*)object;
+
 	if (obj->typeinfo) {
 		ITypeInfo_Release(obj->typeinfo);
 		obj->typeinfo = NULL;
