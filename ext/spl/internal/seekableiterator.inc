@@ -1,7 +1,7 @@
 <?php
 
 /** @file seekableiterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class SeekableIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004

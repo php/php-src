@@ -1,7 +1,7 @@
 <?php
 
 /** @file outeriterator.inc
- * @ingroup Internal
+ * @ingroup SPL
  * @brief class OuterIterator
  * @author  Marcus Boerger
  * @date    2003 - 2004
