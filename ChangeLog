@@ -1,3 +1,200 @@
+2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Dependency.php:
+      MFB
+
+2003-12-06  Edin Kadribasic  <edink@emini.dk>
+
+    * ext/dba/config.w32:
+      Added dba to the new win32 build. Works both as shared
+      and built-in extension on windows.
+
+2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR/Frontend/CLI.php:
+      CS
+
+    * pear/PEAR/DependencyDB.php:
+      (try again)
+      fix 2 bugs
+      
+      - optional dependencies not supported
+      - incorrect index determination
+
+    * pear/PEAR/DependencyDB.php:
+      fix 3 bugs
+      
+      - optional dependencies not supported
+      - PHP 5 references (#362)
+      - incorrect index determination
+
+    * pear/tests/pear_downloader_invalid.phpt:
+      finished unit test for _processDependency failure test
+
+    * pear/package-Console_Getopt.xml:
+      stupid me - this was a circular reference, removing
+
+    * pear/PEAR/Downloader.php:
+      slightly clearer error messages
+
+    * pear/System.php:
+      fix arg parsing to work with Console_Getopt 2.0
+
+2003-12-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      Fixed memory corruption occuring in fgetcsv() on certain files.
+
+2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR-new-Downloader.xml
+      pear/PEAR/Installer-minus-download.php
+      pear/PEAR/Command/Install-using-downloader.php:
+      remove unnecessary experimental code
+
+    * pear/package-Console_Getopt.xml
+      pear/package-Console_Getopt.xml
+      pear/package-PEAR.xml
+      pear/package-PEAR.xml:
+      getting ready for both packages to be released
+
+2003-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/pgsql/pgsql.c:
+      MFB: PHP_PQ_ERROR() change
+
+2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/scripts/pearcmd.php:
+      fix for Console_GetOpt 2.0 (what was 1.1 - re-release being negotiated)
+
+2003-12-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/pgsql/pgsql.c:
+      Update error/warning messages
+
+    * (PHP_4_3)
+      ext/pgsql/tests/skipif.inc:
+      MFH: Do not dynamically load the extension in skipif
+
+    * ext/pgsql/tests/skipif.inc:
+      
+
+    * ext/pgsql/tests/skipif.inc:
+      Do not dynamically load the extension in skipif
+
+    * ZendEngine2/zend_compile.c:
+      This test is against interfaces not abstract classes.
+
+    * ZendEngine2/zend_default_classes.c:
+      Show the exception message again after __toString() magic has been dropped.
+
+2003-12-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/php_com_dotnet.h:
+      com_create_guid() returns...
+
+2003-12-06  Andrey Hristov  <php@hristov.com>
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      ups, i forgot this entry
+
+    * README.PHP4-TO-PHP5-THIN-CHANGES:
+      A small start for so called "not-yet-written faq" about small changes that
+      may make someone's life a nightmare for some time. It will be good when a
+      change is made a line in this file to be written and then it will be
+      easier
+      for the doc team to write comprehensive and pretty FAQ for the end users.
+
+2003-12-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      EXTENSIONS:
+      No maintainer for oci8 / oracle
+
+    * EXTENSIONS:
+      There is no maintainer atm.
+
+2003-12-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c:
+      Fix ftp build when openssl is built as a shared extension.
+
+    * ext/standard/config.w32
+      main/php_ini.c:
+      Fix a problem resolving the php.ini path under win32 terminal services
+      environment.
+      Remove config-file-path option from configure under win32; it is not used
+      except to display what might have been chosen, so lets default to the
+      getenv() thingy.
+
+    * ext/standard/config.w32:
+      use quotes if the user specifies a path, but don't otherwise (since we
+      don't want the getenv calls quoted).
+
+2003-12-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Add missing iconv_close() call
+
+2003-12-06  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/proc_open.c:
+      fix proto
+
+2003-12-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/php_network.h:
+      fix ipv6 stuff under vc6
+
+    * README.WIN32-BUILD-SYSTEM:
+      bah
+
+2003-12-06  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/tests/pear_system.phpt:
+      forgot to have it delete the directory it creates
+
+    * pear/PEAR/Installer.php:
+      update phpdoc comment
+
+    * pear/PEAR/Downloader.php:
+      
+      add todo for known issue that isn't yet critical but will be
+
+    * pear/tests/pear_downloader_invalid.phpt:
+      new test case - test invalid download conditions
+      
+      TODO:
+      - tests for _processDependency
+
+    * pear/PEAR/Downloader.php:
+      improve error message, it was both terrible grammar and unclear.
+
+    * pear/PEAR/Downloader.php:
+      fix error message - was printing an empty preferred state
+
+    * pear/PEAR.php:
+      simple fix for core bug #362 - raiseError() doesn't return a reference, why
+      should throwError()?
+
+2003-12-06  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/ftp/ftp.c
+      ext/sockets/sockets.c
+      ext/standard/info.c
+      main/network.c
+      main/php_network.h:
+      Detect and enable IPv6 support under win32.
+      The ws2tcpip.h header links to IPv6 functions dynamically
+      and the generated binary will run on win98 and later.
+
 2003-12-05  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/openssl/config.w32:
