@@ -33,6 +33,8 @@
 #endif
 #include <stdio.h>
 
+#include "php_parsedate.h"
+
 char *mon_full_names[] =
 {
 	"January", "February", "March", "April",
@@ -64,8 +66,6 @@ static int phpday_tab[2][12] =
 };
 
 #define isleap(year) (((year%4) == 0 && (year%100)!=0) || (year%400)==0)
-
-extern PHPAPI time_t parse_date (const char *p, const time_t *now);
 
 /* {{{ proto int time(void)
    Return current UNIX timestamp */

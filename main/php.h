@@ -156,7 +156,7 @@ typedef unsigned int socklen_t;
 #include "safe_mode.h"
 
 #ifndef HAVE_STRERROR
-extern char *strerror(int);
+char *strerror(int);
 #endif
 
 #include "fopen-wrappers.h"
@@ -240,12 +240,12 @@ extern char **environ;
 #define php_sleep sleep
 #endif
 
-extern void phperror(char *error);
-extern PHPAPI int php_write(void *buf, int size);
-extern PHPAPI int php_printf(const char *format, ...);
-extern void php_log_err(char *log_message);
-extern int Debug(char *format, ...);
-extern int cfgparse(void);
+void phperror(char *error);
+PHPAPI int php_write(void *buf, uint size);
+PHPAPI int php_printf(const char *format, ...);
+void php_log_err(char *log_message);
+int Debug(char *format, ...);
+int cfgparse(void);
 
 #define php_error zend_error
 
@@ -263,9 +263,6 @@ int php_global_startup_internal_extensions(void);
 int php_global_shutdown_internal_extensions(void);
 
 int mergesort(void *base, size_t nmemb, register size_t size, int (*cmp) (const void *, const void *));
-
-/*from basic functions*/
-extern PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
 
 PHPAPI void php_register_pre_request_shutdown(void (*func)(void *), void *userdata);
 

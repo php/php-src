@@ -117,6 +117,8 @@ typedef unsigned int php_stat_len;
 typedef int php_stat_len;
 #endif
 
+PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers);
+
 #if SIZEOF_INT == 4
 /* Most 32-bit and 64-bit systems have 32-bit ints */
 typedef unsigned int php_uint32;

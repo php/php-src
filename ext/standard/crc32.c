@@ -19,6 +19,7 @@
 /* $Id$ */
 
 #include "php.h"
+#include "basic_functions.h"
 
 /*
  * This code implements the AUTODIN II polynomial

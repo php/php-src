@@ -244,7 +244,7 @@ PHPAPI int php_check_open_basedir(char *path)
 	return 0;
 }
 
-FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
+static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
 {
 		FILE *fp;
 
