@@ -398,7 +398,8 @@ a->have_char_map_Roman = 0;
 	for (i = 0; i < n; i++) {
         TT_Get_CharMap_ID(a->face, i, &platform, &encoding);
 		if ((platform == 3 && encoding == 1)           /* Windows Unicode */
-			|| (platform == 0 && encoding == 0)) {        /* ?? Unicode */
+			|| (platform == 2 && encoding == 1)
+			|| (platform == 0)) {        /* ?? Unicode */
 			TT_Get_CharMap(a->face, i, &a->char_map_Unicode);
 			a->have_char_map_Unicode = 1;
 			map_found++;
@@ -417,11 +418,6 @@ a->have_char_map_Roman = 0;
 		*error = "Unable to find a CharMap that I can handle";
         return NULL;
     }
-
-	if (i == n) {
-		*error = "Sorry, but this font doesn't contain any Unicode mapping table";
-		return NULL;
-	}
 
 	a->matrix.xx = (TT_Fixed) (a->cos_a * (1<<16));
 	a->matrix.yx = (TT_Fixed) (a->sin_a * (1<<16));
