@@ -117,6 +117,7 @@ if (getenv('TEST_PHP_EXECUTABLE')) {
 		putenv("TEST_PHP_EXECUTABLE=$php");
 	}
 }
+
 if (empty($php) || !file_exists($php)) {
 	error("environment variable TEST_PHP_EXECUTABLE must be set to specify PHP executable!");
 }
@@ -588,7 +589,7 @@ function system_with_timeout($commandline)
 		0 => array('pipe', 'r'),
 		1 => array('pipe', 'w'),
 		2 => array('pipe', 'w')
-		), $pipes);
+		), $pipes, null, null, array("suppress_errors" => true));
 
 	if (!$proc)
 		return false;
