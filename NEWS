@@ -1,7 +1,9 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? 2000, Version 4.0 Release
+?? ??? 2000, Version 4.0.0 Release
+- Fixed a crash bug with modules loaded through dl() not properly freeing their
+  resources (Zeev)
 - Added the localtime function. (Sterling)
 - Added the 'I' format option for the date function, this option will return
   true or false depending on whether or not daylight savings time is in effect.
