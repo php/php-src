@@ -1,3 +1,65 @@
+2001-10-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/head.c: convert to use new parameter parsing API.
+
+    * ext/standard/levenshtein.c
+      ext/standard/metaphone.c
+      ext/standard/soundex.c: Converting to use new parameter parsing API.
+
+2001-10-19  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/head.c: Fixed other protos.
+
+2001-10-19  Jason Greene  <jason@inetgurus.net>
+
+    * NEWS: Fix news entry
+
+2001-10-19  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/uniqid.c: Fixed another proto.
+
+2001-10-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/uniqid.c
+      ext/standard/syslog.c: Conver to use new parameter parsing API.
+
+2001-10-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Fixed last argument in strlcat() call.
+
+2001-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/com/VARIANT.c: - Fix for bug #13760
+
+2001-10-19  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/url.c
+      ext/standard/versioning.c: Convert to use new parameter parsing API.
+
+2001-10-19  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/http_fopen_wrapper.c:
+    Merged change strncpy=>strlcpy; strncat=>strlcat into the release brach.
+
+    * ext/standard/http_fopen_wrapper.c:
+    Changed strncpy=>strlcpy; strncat=>strlcat
+
+2001-10-19  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * pear/HTML/Form.php: fix call-time pass by reference warnings
+
+2001-10-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/sablot/config.m4:
+    - Fix bug in detecting libexpat with the sablotron extension
+
+    * ext/zip/zip.c: - MFH
+
+2001-10-19  Stig Bakken  <ssb@fast.no>
+
+    * NEWS: * another update
+
 2001-10-18  Stig Bakken  <ssb@fast.no>
 
     * NEWS: * update NEWS file
