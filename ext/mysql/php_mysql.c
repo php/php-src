@@ -663,11 +663,6 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			/* ensure that the link did not die */
 #if MYSQL_VERSION_ID > 32230 /* Use mysql_ping to ensure link is alive (and to reconnect if needed) */
 			if (mysql_ping(le->ptr)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Link to server lost, unable to reconnect");
-					zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_length+1);
-					efree(hashed_details);
-					MYSQL_DO_CONNECT_RETURN_FALSE();
-			}
 #else	/* Use mysql_stat() to check if server is alive */
 			handler=signal(SIGPIPE, SIG_IGN);
 #if defined(HAVE_MYSQL_ERRNO) && defined(CR_SERVER_GONE_ERROR)
@@ -677,6 +672,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (!strcasecmp(mysql_stat(le->ptr), "mysql server has gone away")) { /* the link died */
 #endif
 				signal(SIGPIPE, handler);
+#endif /* end mysql_ping */
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
 				if (mysql_real_connect(le->ptr, host, user, passwd, NULL, port, socket, client_flags)==NULL) {
 #else
@@ -688,8 +684,9 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 					MYSQL_DO_CONNECT_RETURN_FALSE();
 				}
 			}
+#if MYSQL_VERSION_ID < 32231
 			signal(SIGPIPE, handler);
-#endif /* end Use mysql_ping ... */
+#endif
 
 			mysql = (php_mysql_conn *) le->ptr;
 		}
