@@ -699,7 +699,9 @@ void zend_do_free(znode *op1 CLS_DC)
 				opline--;
 			}
 		}
-	}
+	} else if (op1->op_type == IS_CONST) {
+		zval_dtor(&op1->u.constant);
+	}		
 }
 
 
