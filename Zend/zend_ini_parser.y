@@ -60,7 +60,7 @@ static int parsing_mode;
 zval yylval;
 
 #ifndef ZTS
-extern int ini_lex(zval *ini_lval); */
+extern int ini_lex(zval *ini_lval);
 extern FILE *ini_in;
 extern int ini_lineno;
 extern void init_cfg_scanner(void);

@@ -76,7 +76,7 @@ int zend_load_extension(char *path)
 			DL_UNLOAD(handle);
 			return FAILURE;
 		} else if (extension_version_info->zend_extension_api_no < ZEND_EXTENSION_API_NO) {
-			fprintf(stderr, "%s designed to be used with the Zend Engine API %d is outdated\	n"
+			fprintf(stderr, "%s designed to be used with the Zend Engine API %d is outdated\n"
 					"It requires a more recent version of the Zend Engine\n"
 					"The installed Zend Engine API version is %d\n"
 					"Contact %s at %s for a later version of this module.\n\n",
