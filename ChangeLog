@@ -1,3 +1,217 @@
+2002-10-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/001.phpt
+      ext/exif/tests/003.phpt: better use var_dump and EXPECTF
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/rfc1867.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.h:
+    Make php_mb_is_mb_leadbyte() obsolete. It only works with double-byte chars.
+
+2002-10-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/.cvsignore: allow php here for the moment
+
+    * ext/standard/html.c: fix warning
+
+    * ext/mbstring/mbstring.h: fix warning: used in rfc1867.c
+
+    * ext/mbstring/mbstring.c: fix style and warnings
+
+2002-10-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/tests/strings/strtoupper.phpt:
+    Added 'skip logic' to the test on platforms where the locale required by
+    this test is not avaliable.
+
+2002-10-23  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/009.phpt: suddenly, there was a newline
+
+2002-10-23  Jon Parise  <jon@csh.rit.edu>
+
+    * README.UNIX-BUILD-SYSTEM: Correct spelling.
+
+    * README.TESTING: Correct mispellings and some word misuse.
+
+    * README.SUBMITTING_PATCH:
+    Capitalize PHP and spell "web server" using two words.
+
+    * README.STREAMS: - Apply proper capitalization to PHP and MySQL.
+    - Correct some spelling errors.
+
+    * README.SELF-CONTAINED-EXTENSIONS: Improve the wording in this paragraph.
+
+    * README.PARAMETER_PARSING_API:
+    Formatting nit: "autoconverted" to "auto-converted"
+
+2002-10-23  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * README.TESTING:
+    Provide an example cron script, to invite people to test.
+
+2002-10-23  Jon Parise  <jon@csh.rit.edu>
+
+    * README.EXT_SKEL: - Spell out "cd" as "change directory".
+    - Replace "ie" with "e.g.", which is more appropriate in this context.
+
+2002-10-23  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * README.TESTING: no more looking
+
+    * README.TESTING: statis->status
+    clarity on the exit status
+
+    * README.TESTING: Some english fixes
+    Added docs for automated testing.
+    Now telling the current version of the truth about ini settings :)
+    Be more verbose about QA goals intentions and the tester's part in the
+    process.
+
+    * run-tests.php: Implement 'no interaction' for automated tests
+    Implement exit status 1 to make actions for automated testing selectable
+
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/tests/casefold.phpt: Updated the test case
+
+2002-10-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * tests/lang/034.phpt: - Use new setlocal semantics
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/php_unicode.c:
+    Modified mb_convert_case() to handle cased characters properly when MB_CASE_TITLE is specified.
+
+2002-10-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * run-tests.php: [0.05]
+    - Disable html_errors in info sent
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: Fixed comment position.
+
+2002-10-23  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/xslt/tests/003.phpt
+      ext/xslt/tests/xslt_set_error_handler.php:
+    Make it work without .php files
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/rfc1867.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/mbstring.c: Function renaming.
+
+    * ext/mbstring/mbstring.c: Added folding markers for happier hacking
+
+2002-10-23  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/tests/strings/004.phpt:
+    Test case regarding randomization of shuffle() and str_shuffle().
+    The code was provided by Adam Trachtenberg : adam trachtenberg com
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c: Style keisatsu
+
+    * sapi/apache/mod_php4.c: Forgot this one.
+
+    * ext/mbstring/mbstring.h
+      main/main.c
+      ext/mbstring/mbstring.c: Renaming the functions.
+
+2002-10-23  Jan Lehnardt  <jan@dasmoped.net>
+
+    * Makefile.global
+      run-tests.php:
+     - use the cc that was detected by ./configure when determining version
+       information in run-tests.php
+
+2002-10-23  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/rfc1867.c
+      ext/mbstring/mbstring.h
+      ext/mbstring/mbstring.c: Remaned the functions for consistency
+
+    * ext/mbstring/mbstring.c: MFH
+
+2002-10-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/yp/config.m4:
+    don't assume yp-functions are always in libc, try also libnsl
+
+2002-10-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * README.TESTING: update and correct
+
+    * run-tests.php: remove *.php file for EXPECTF tests, too.
+
+    * ext/standard/tests/strings/003.phpt: Shorten
+
+2002-10-23  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_oci8.c
+      ext/dbx/howto_extend_dbx.html
+      ext/dbx/dbx.c: Added Oracle (oci8) support
+
+    * ext/dbx/tests/004.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/006.phpt
+      ext/dbx/tests/007.phpt
+      ext/dbx/tests/008.phpt
+      ext/dbx/tests/dbx_test.p: Updated tests for Oracle (oci8) support (Mc)
+
+2002-10-23  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/apache_config.c: Maintain appropiate line breaks
+
+2002-10-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c: - Trying to clean up this mess :)
+
+    * main/main.c:
+    - No reason why implicit_flush should not be settable from a script
+
+2002-10-23  Jan Lehnardt  <jan@dasmoped.net>
+
+    * run-tests.php:  - be more verbose
+
+2002-10-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * Makefile.global: - Remove this messed up thing AGAIN
+
+2002-10-23  George Schlossnagle  <george@omniti.com>
+
+    * sapi/apache/mod_php4.c: white space changes (s/    /\t/g)
+
+    * sapi/apache/mod_php4.c: fixed directory merging
+
+2002-10-23  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/fdf/config.m4: - No tabs, no echoing, no unnecessary code
+
+2002-10-23  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * sapi/cli/php_cli.c:
+    Make CLI behave like other moder scripting languages.
+
+    * Makefile.global: Fixed buffring issue again.
+
+2002-10-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/fdf/config.m4
+      ext/fdf/fdf.c: make it work with pre-v5 fdftk again
+
+2002-10-23  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Possible fix for cygwin detection.
+
 2002-10-22  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Command/Package.php:
