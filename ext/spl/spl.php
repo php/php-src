@@ -139,26 +139,6 @@ class ArrayIterator implements Iterator
 	 * \param $array the array to use.
 	 */
 	private function __construct($array);
-
-	/** \copydoc Iterator::rewind
-	 */
-	function rewind();
-
-	/** \copydoc Iterator::current
-	 */
-	function current();
-
-	/** \copydoc Iterator::key
-	 */
-	function key();
-
-	/** \copydoc Iterator::next
-	 */
-	function next();
-
-	/** \copydoc Iterator::valid
-	 */
-	function valid();
 }
 
 /** Iterator that wrapps around another iterator and only returns selected
@@ -176,26 +156,51 @@ abstract class FilterIterator implements Iterator
 	 * used as a current element of this iterator or if it should be skipped.
 	 */
 	abstract function accept();
-
-	/** \copydoc Iterator::rewind
+	
+	/** \return the inner Iterator
 	 */
-	function rewind();
+	function getInnerIterator();
+}
 
-	/** \copydoc Iterator::current
+interface SeekableIterator implements Iterator
+{
+	/** Seek to a specific position if available or throw an exception.
 	 */
-	function current();
+	function seek($position);
+}
 
-	/** \copydoc Iterator::key
+/** A class that starts iteration at a certain offset and only iterates over
+ * a specified amount of elements.
+ */
+class LimitIetrator implements Iterator
+{
+	/** Construct an instance form a Iterator.
+	 *
+	 * \param $iterator inner iterator
+	 * \param $offset   starting position (zero based)
+	 * \param $count    amount of elements returned, if available)
 	 */
-	function key();
+	function __construct(Iterator $iterator, $offset = 0, $count = -1);
 
-	/** \copydoc Iterator::next
+	/** \return whether the current element of the inner iterator should be
+	 * used as a current element of this iterator or if it should be skipped.
 	 */
-	function next();
-
-	/** \copydoc Iterator::valid
+	abstract function accept();
+	
+	/** \return the inner Iterator
 	 */
-	function valid();
+	function getInnerIterator();
+	
+	/** Seek to a specific position if available or throw an exception.
+	 * If the inner iterator is an instance of SeekableIterator its seek()
+	 * method will be used. Otherwise the iterator will me manually forwared
+	 * and rewinded first if necessary.
+	 */
+	function seek($position);
+	
+	/** return the current position (zero based)
+	 */
+	function getPosition();
 }
 
 /** A recursive iterator that only returns elements that themselves can be 
@@ -208,34 +213,50 @@ class ParentIterator extends FilterIterator implements RecursiveIterator
 	 * \param $iterator inner iterator
 	 */
 	function __construct(RecursiveIterator $iterator);
+}
 
-	/** \copydoc RecursiveIterator::hasChildren
+/** This Iterator allways reads one ahead. That allows it to know whether
+ * more elements are available.
+ */
+class CachingIterator implements Iterator
+{
+	/** Construct an instance form a RecursiveIterator.
+	 *
+	 * \param $iterator  inner iterator
+	 * \param $getStrVal whether to fetch the value returned by __toString()
+	 *                   or the (string) conversion. This is optional since
+	 *                   it is not always used nad takes an additional fcall.
 	 */
-	function hasChildren();
+	function __construct(Iterator $iterator, $getStrVal = false);
 
-	/** \copydoc RecursiveIterator::getChildren
+	/** \return whether the inner iterator is valid. That is this iterator
+	 * is valid and has one more element.
 	 */
-	function getChildren();
+	function hasNext();
 
-	/** \copydoc Iterator::rewind
+	/** \return The last value from the inner iterators __toString() or
+	 * (string) conversion. The value is only fetched when the __constructor
+	 * was called with $getStrVal = true.
 	 */
-	function rewind();
+	function __tostring();
+	
+	/** \return the inner Iterator
+	 */
+	function getInnerIterator();
+}
 
-	/** \copydoc Iterator::current
+/** The recursive version of the CachingIterator.
+ */
+class CachingRecursiveIterator extends CachingIterator implemnets RecursiveIterator
+{
+	/** Construct an instance form a RecursiveIterator.
+	 *
+	 * \param $iterator inner iterator
+	 * \param $getStrVal whether to fetch the value returned by __toString()
+	 *                   or the (string) conversion. This is optional since
+	 *                   it is not always used nad takes an additional fcall.
 	 */
-	function current();
-
-	/** \copydoc Iterator::key
-	 */
-	function key();
-
-	/** \copydoc Iterator::next
-	 */
-	function next();
-
-	/** \copydoc Iterator::valid
-	 */
-	function valid();
+	function __construct(RecursiveIterator $iterator, $getStrVal);
 }
 
 /** \brief Directory iterator
@@ -248,22 +269,6 @@ class DirectoryIterator implements Iterator
 	 */
 	function __construct($path);
 
-	/** \copydoc Iterator::rewind
-	 */
-	function rewind();
-
-	/** \copydoc Iterator::current
-	 */
-	function current();
-
-	/** \copydoc Iterator::next
-	 */
-	function next();
-
-	/** \copydoc Iterator::valid
-	 */
-	function valid();
-	
 	/** \return The opened path.
 	 */
 	function getPath();	
@@ -289,22 +294,6 @@ class DirectoryIterator implements Iterator
  */
 class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveIterator
 {
-	/** \copydoc Iterator::rewind
-	 */
-	function rewind();
-
-	/** \copydoc Iterator::current
-	 */
-	function current();
-
-	/** \copydoc Iterator::next
-	 */
-	function next();
-
-	/** \copydoc Iterator::valid
-	 */
-	function valid();
-	
 	/** \return whether the current is a directory (not '.' or '..').
 	 */
 	function hasChildren();	
@@ -318,22 +307,6 @@ class RecursiveDirectoryIterator extends DirectoryIterator implements RecursiveI
  */
 class SimpleXMLIterator extends simplexml_element implements RecursiveIterator
 {
-	/** \copydoc Iterator::rewind
-	 */
-	function rewind();
-
-	/** \copydoc Iterator::current
-	 */
-	function current();
-
-	/** \copydoc Iterator::next
-	 */
-	function next();
-
-	/** \copydoc Iterator::valid
-	 */
-	function valid();
-	
 	/** \return whether the current node has sub nodes.
 	 */
 	function hasChildren();	
