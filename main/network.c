@@ -203,7 +203,7 @@ static int php_network_getaddresses(const char *host, struct sockaddr ***sal, ch
 		;
 	}
 		
-	*sal = emalloc((n + 1) * sizeof(*sal));
+	*sal = safe_emalloc((n + 1), sizeof(*sal), 0);
 	sai = res;
 	sap = *sal;
 	do {
