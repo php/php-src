@@ -286,14 +286,14 @@ PS_SERIALIZER_ENCODE_FUNC(wddx)
 	if (!packet)
 		return FAILURE;
 
-	php_wddx_packet_start(packet, NULL);
-	php_wddx_add_chunk(packet, WDDX_STRUCT_S);
+	php_wddx_packet_start(packet, NULL, 0);
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 	
 	ENCODE_LOOP(
 		php_wddx_serialize_var(packet, *struc, key);
 	);
 	
-	php_wddx_add_chunk(packet, WDDX_STRUCT_E);
+	php_wddx_add_chunk_static(packet, WDDX_STRUCT_E);
 	php_wddx_packet_end(packet);
 	*newstr = php_wddx_gather(packet);
 	php_wddx_destructor(packet);
