@@ -4,6 +4,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug in addslashes() handling of the '\0' character. (Ilia)
 - Backported Marcus' foreach() speedup patch from PHP 5.x. (Derick)
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
+- Fixed bug #30475 (curl_getinfo() may crash in some situations). (Ilia)
 - Fixed bug #30442 (segfault when parsing ?getvariable[][ ). (Tony)
 - Fixed bug #30282 (segfault when using unknown/unsupported
   session.save_handler and/or session.serialize_handler). (Tony)
@@ -14,7 +15,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #30057 (did not detect IPV6 on FreeBSD 4.1). (Wez)
 - Fixed bug #30027 (Possible crash inside ftp_get()).
-  (cfield at affinitysolutions dot com
+  (cfield at affinitysolutions dot com)
 - Fixed bug #29805 (HTTP Authentication Issues). (Uwe Schindler)
 - Fixed bug #28325 (Circular references not properly serialised). (Moriyoshi)
 - Fixed bug #27469 (serialize() objects of incomplete class). (Dmitry)
