@@ -295,9 +295,13 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if (!charset || !charset[0]) {
 		charset = "US-ASCII";
 	}
-	php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
-	PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
 
+	if (PG(html_errors)) {
+		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
+		PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
+	} else {
+		PUTS("phpinfo()");
+	}	
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
@@ -537,6 +541,8 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 PHPAPI void php_info_print_table_start()
 {
+	TSRMLS_FETCH();
+
     if (PG(html_errors)) {
 		php_printf("<table border=\"0\" cellpadding=\"3\" cellspacing=\"1\" width=\"600\" bgcolor=\"#000000\" align=\"center\">\n");
 	} else {
@@ -545,7 +551,9 @@ PHPAPI void php_info_print_table_start()
 }
 
 PHPAPI void php_info_print_table_end()
-{ 	
+{
+	TSRMLS_FETCH();
+
 	if (PG(html_errors)) {
 		php_printf("</table><br />\n");
 	}
@@ -554,6 +562,8 @@ PHPAPI void php_info_print_table_end()
 
 PHPAPI void php_info_print_box_start(int flag)
 {
+	TSRMLS_FETCH();
+
 	php_info_print_table_start();
 	if (flag) {
 		if (PG(html_errors)) {
@@ -570,6 +580,8 @@ PHPAPI void php_info_print_box_start(int flag)
 
 PHPAPI void php_info_print_box_end()
 {
+	TSRMLS_FETCH();
+
 	if (PG(html_errors)) {
 		php_printf("</td></tr>\n");
 	}
@@ -578,6 +590,8 @@ PHPAPI void php_info_print_box_end()
 
 PHPAPI void php_info_print_hr()
 {
+	TSRMLS_FETCH();
+
 	if (PG(html_errors)) {
 		php_printf("<hr noshade size=\"1\" width=\"600\">\n");
 	} else {
@@ -588,6 +602,8 @@ PHPAPI void php_info_print_hr()
 PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 {
 	int spaces;
+
+	TSRMLS_FETCH();
 	
 	if (PG(html_errors)) {
 		php_printf("<tr bgcolor=\"" PHP_HEADER_COLOR "\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
@@ -604,6 +620,8 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 	int i;
 	va_list row_elements;
 	char *row_element;
+
+	TSRMLS_FETCH();
 
 	va_start(row_elements, num_cols);
 	if (PG(html_errors)) {
@@ -640,6 +658,7 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	int i;
 	va_list row_elements;
 	char *row_element;
+
 	TSRMLS_FETCH();
 
 	va_start(row_elements, num_cols);
