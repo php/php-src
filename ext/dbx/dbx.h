@@ -33,21 +33,21 @@
 
 #define DBX_PERSISTENT        (1<<0)
 
-#define DBX_RESULT_INFO      (1<<0)
-#define DBX_RESULT_INDEX    (1<<1)
-#define DBX_RESULT_ASSOC   (1<<2)
+#define DBX_RESULT_INFO       (1<<0)
+#define DBX_RESULT_INDEX      (1<<1)
+#define DBX_RESULT_ASSOC      (1<<2)
 
-#define DBX_CMP_NATIVE      (1<<0)
+#define DBX_CMP_NATIVE        (1<<0)
 #define DBX_CMP_TEXT          (1<<1)
-#define DBX_CMP_NUMBER      (1<<2)
+#define DBX_CMP_NUMBER        (1<<2)
 #define DBX_CMP_ASC           (1<<3)
 #define DBX_CMP_DESC          (1<<4)
 
 #define MOVE_RETURNED_TO_RV(rv, returned_zval) { **rv = *returned_zval; zval_copy_ctor(*rv); zval_ptr_dtor(&returned_zval); }
 
-void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char * function_name, zval **returnvalue, int number_of_arguments, zval *** params);
+void dbx_call_any_function(INTERNAL_FUNCTION_PARAMETERS, char *function_name, zval **returnvalue, int number_of_arguments, zval ***params);
 
-#endif	/* ZEND_DBX_H */
+#endif /* ZEND_DBX_H */
 
 
 /*
