@@ -59,7 +59,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv)
 	
 	MAKE_STD_ZVAL(retval);
 	if (call_user_function(EG(function_table), NULL, func, retval, 
-				argc, argv) == FAILURE) {
+				argc, argv TSRMLS_CC) == FAILURE) {
 		zval_ptr_dtor(&retval);
 		retval = NULL;
 	}

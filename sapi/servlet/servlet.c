@@ -381,7 +381,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 			if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 				php_get_highlight_struct(&syntax_highlighter_ini);
 				sapi_send_headers();
-				zend_highlight(&syntax_highlighter_ini);
+				zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 			}
 		} else {
 			php_execute_script(&file_handle TSRMLS_CC);

@@ -215,10 +215,8 @@ static void _free_mssql_result(zend_rsrc_list_entry *rsrc)
 	efree(result);
 }
 
-static void php_mssql_set_default_link(int id)
+static void php_mssql_set_default_link(int id TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (MS_SQL_G(default_link)!=-1) {
 		zend_list_delete(MS_SQL_G(default_link));
 	}
@@ -587,7 +585,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
 				return_value->value.lval = link;
-				php_mssql_set_default_link(link);
+				php_mssql_set_default_link(link TSRMLS_CC);
 				return_value->type = IS_RESOURCE;
 				efree(hashed_details);
 				return;
@@ -644,7 +642,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		MS_SQL_G(num_links)++;
 	}
 	efree(hashed_details);
-	php_mssql_set_default_link(return_value->value.lval);
+	php_mssql_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 
 
@@ -866,12 +864,11 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 	}
 }
 
-int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue) 
+static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int retvalue TSRMLS_DC) 
 {
 	int i, j = 0;
 	int *column_types;
 	char computed_buf[16];
-	TSRMLS_FETCH();
 
 	column_types = (int *) emalloc(sizeof(int) * result->num_fields);
 	for (i=0; i<result->num_fields; i++) {
@@ -964,7 +961,7 @@ PHP_FUNCTION(mssql_fetch_batch)
 	mssql_ptr = result->mssql_ptr;
 	_free_result(result, 0);
 	result->cur_row=result->num_rows=0;
-	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, result->lastresult);
+	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, result->lastresult TSRMLS_CC);
 	RETURN_LONG(result->num_rows);
 }
 /* }}} */
@@ -1047,7 +1044,7 @@ PHP_FUNCTION(mssql_query)
 	result->cur_field=result->cur_row=result->num_rows=0;
 
 	result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
-	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue);
+	result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 	
 	ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 }
@@ -1640,7 +1637,7 @@ PHP_FUNCTION(mssql_next_result)
 
 		result->num_fields = dbnumcols(mssql_ptr->link);
 		result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*result->num_fields);
-		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue);
+		result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 		RETURN_TRUE;
 	}
 
@@ -1958,7 +1955,7 @@ PHP_FUNCTION(mssql_execute)
 			result->num_fields = num_fields;
 
 			result->fields = (mssql_field *) emalloc(sizeof(mssql_field)*num_fields);
-			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue);
+			result->num_rows = _mssql_fetch_batch(mssql_ptr, result, retvalue TSRMLS_CC);
 		}
 		retval_results=dbresults(mssql_ptr->link);
 	}

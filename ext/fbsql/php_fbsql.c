@@ -260,7 +260,7 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc)
 }
 
 
-static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
+static void phpfbReleaseLink(zend_rsrc_list_entry *rsrc)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
 	TSRMLS_FETCH();
@@ -283,7 +283,7 @@ static void phpfbReleaseLink (zend_rsrc_list_entry *rsrc)
 	}
 }
 
-static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
+static void phpfbReleasePLink(zend_rsrc_list_entry *rsrc)
 {
 	PHPFBLink* link = (PHPFBLink *)rsrc->ptr;
 	TSRMLS_FETCH();
@@ -307,10 +307,8 @@ static void phpfbReleasePLink (zend_rsrc_list_entry *rsrc)
 	}
 }
 
-static void php_fbsql_set_default_link(int id)
+static void php_fbsql_set_default_link(int id TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (FB_SQL_G(linkIndex)!=-1) {
 		zend_list_delete(FB_SQL_G(linkIndex));
 	}
@@ -539,7 +537,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 			if (ptr && (type==le_link || type==le_plink)) {
 				zend_list_addref(link);
 				return_value->value.lval = link;
-				php_fbsql_set_default_link(link);
+				php_fbsql_set_default_link(link TSRMLS_CC);
 				return_value->type = IS_RESOURCE;
 				return;
 			} else {
@@ -577,7 +575,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistant)
 		}
 		FB_SQL_G(linkCount)++;
 	}
-	php_fbsql_set_default_link(return_value->value.lval);
+	php_fbsql_set_default_link(return_value->value.lval TSRMLS_CC);
 }
 /* }}} */
 
@@ -660,12 +658,11 @@ PHP_FUNCTION(fbsql_close)
 
 /* {{{ php_fbsql_select_db
  */
-static int php_fbsql_select_db(char *databaseName, PHPFBLink *link)
+static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 {
 	unsigned port;
 	FBCDatabaseConnection* c;
 	FBCMetaData*           md;
-	TSRMLS_FETCH();
 
 	if (!link->databaseName || strcmp(link->databaseName, databaseName)) 
 	{
@@ -1072,8 +1069,9 @@ PHP_FUNCTION(fbsql_select_db)
 		}
 	}
 
-	if (!php_fbsql_select_db(name, phpLink)) RETURN_FALSE;
-
+	if (!php_fbsql_select_db(name, phpLink TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1386,7 +1384,9 @@ PHP_FUNCTION(fbsql_stop_db)
 	convert_to_string_ex(database_name);
 	databaseName = (*database_name)->value.str.val;
 
-	if (!php_fbsql_select_db(databaseName, phpLink)) RETURN_FALSE;
+	if (!php_fbsql_select_db(databaseName, phpLink TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 
 /*	printf("Stop db %x\n",phpDatabase->connection); */
 	if (!fbcdcStopDatabase(phpLink->connection))
@@ -1499,7 +1499,6 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 	char*          tp;
 	char*          fh; 
 	unsigned int   sR = 1, cR = 0;
-	TSRMLS_FETCH();
 
 	meta     = fbcdcExecuteDirectSQL(link->connection, sql);
 
@@ -1639,12 +1638,9 @@ PHP_FUNCTION(fbsql_db_query)
 	convert_to_string_ex(query);
 	convert_to_string_ex(dbname);
 
-	if (php_fbsql_select_db((*dbname)->value.str.val, phpLink))
-	{
+	if (php_fbsql_select_db((*dbname)->value.str.val, phpLink TSRMLS_CC)) {
 		phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, (*query)->value.str.val, phpLink);
-	}
-	else
-	{
+	} else {
 		RETURN_FALSE;
 	}
 }
@@ -1728,13 +1724,10 @@ PHP_FUNCTION(fbsql_list_tables)
 	convert_to_string_ex(database_name);
 	databaseName = (*database_name)->value.str.val;
 
-	if (databaseName == NULL)
-	{
-		php_fbsql_select_db(FB_SQL_G(databaseName), phpLink);
-	}
-	else 
-	{
-		php_fbsql_select_db(databaseName, phpLink);
+	if (databaseName == NULL) {
+		php_fbsql_select_db(FB_SQL_G(databaseName), phpLink TSRMLS_CC);
+	} else {
+		php_fbsql_select_db(databaseName, phpLink TSRMLS_CC);
 	}
 
 	phpfbQuery(INTERNAL_FUNCTION_PARAM_PASSTHRU, sql, phpLink);
@@ -1776,7 +1769,9 @@ PHP_FUNCTION(fbsql_list_fields)
 	convert_to_string_ex(table_name);
 	tableName = (*table_name)->value.str.val;
 
-	if (!php_fbsql_select_db(databaseName, phpLink)) RETURN_FALSE;
+	if (!php_fbsql_select_db(databaseName, phpLink TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
 
 	sprintf(sql,"EXTRACT TABLE %s;",tableName);
 

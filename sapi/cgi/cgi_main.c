@@ -750,7 +750,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 					if (open_file_for_scanning(&file_handle TSRMLS_CC)==SUCCESS) {
 						php_get_highlight_struct(&syntax_highlighter_ini);
-						zend_highlight(&syntax_highlighter_ini);
+						zend_highlight(&syntax_highlighter_ini TSRMLS_CC);
 						fclose(file_handle.handle.fp);
 					}
 					return SUCCESS;

@@ -545,7 +545,7 @@ PHP_FUNCTION(imagecreatetruecolor)
 
 	ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -571,7 +571,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -597,7 +597,7 @@ PHP_FUNCTION(imagesetthickness)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -628,7 +628,7 @@ PHP_FUNCTION(imageellipse)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -658,7 +658,7 @@ PHP_FUNCTION(imagefilledellipse)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -697,7 +697,7 @@ PHP_FUNCTION(imagefilledarc)
 	gdImageFilledArc(im,Z_LVAL_PP(cx),Z_LVAL_PP(cy),Z_LVAL_PP(w),Z_LVAL_PP(h),st,e,Z_LVAL_PP(col), Z_LVAL_PP(style));
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */	
@@ -722,7 +722,7 @@ PHP_FUNCTION(imagealphablending)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -749,7 +749,7 @@ PHP_FUNCTION(imagecolorresolvealpha)
 
 	RETURN_LONG(gdImageColorResolveAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 
 }
@@ -777,7 +777,7 @@ PHP_FUNCTION(imagecolorclosestalpha)
 
 	RETURN_LONG(gdImageColorClosestAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -804,7 +804,7 @@ PHP_FUNCTION(imagecolorexactalpha)
 	
 	RETURN_LONG(gdImageColorExactAlpha(im, Z_LVAL_PP(red), Z_LVAL_PP(green), Z_LVAL_PP(blue), Z_LVAL_PP(alpha)));
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -848,7 +848,7 @@ PHP_FUNCTION(imagecopyresampled)
 	gdImageCopyResampled(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires GD 2.0 or later", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */	
@@ -873,7 +873,7 @@ PHP_FUNCTION(imagesettile)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -898,7 +898,7 @@ PHP_FUNCTION(imagesetbrush)
 
 	RETURN_TRUE;
 #else
-	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name());
+	zend_error(E_ERROR, "%s(): requires a more recent version of GD", get_active_function_name(TSRMLS_C));
 #endif
 }
 /* }}} */
@@ -999,7 +999,7 @@ gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*io
         
 	im = (*ioctx_func_p)(io_ctx);
 	if (!im) {
-		php_error(E_WARNING, "%s: Passed data is not in '%s' format", get_active_function_name(), tn);
+		php_error(E_WARNING, "%s: Passed data is not in '%s' format", get_active_function_name(TSRMLS_C), tn);
 		return NULL;
 	}
 
@@ -1118,7 +1118,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #endif
 	if (!fp && !socketd) {
 		php_strip_url_passwd(fn);
-		php_error(E_WARNING, "%s: Unable to open '%s' for reading", get_active_function_name(), fn);
+		php_error(E_WARNING, "%s: Unable to open '%s' for reading", get_active_function_name(TSRMLS_C), fn);
 		RETURN_FALSE;
 	}
 
@@ -1127,7 +1127,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #endif
 
 	if(issock && !ioctx_func_p) {
-		php_error(E_WARNING, "%s: Sockets are not supported for image type '%s'",get_active_function_name(),tn);
+		php_error(E_WARNING, "%s: Sockets are not supported for image type '%s'",get_active_function_name(TSRMLS_C),tn);
 		RETURN_FALSE;
 	}
 
@@ -1140,7 +1140,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		buff_size = php_fread_all(&buff_em, socketd, fp, issock);
 
 		if(!buff_size) {
-			php_error(E_WARNING,"%s: Cannot read image data",get_active_function_name());
+			php_error(E_WARNING,"%s: Cannot read image data",get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 		
@@ -1150,7 +1150,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 		io_ctx = gdNewDynamicCtx(buff_size,buff);
 		if(!io_ctx) {
-			php_error(E_WARNING,"%s: Cannot allocate GD IO context",get_active_function_name());
+			php_error(E_WARNING,"%s: Cannot allocate GD IO context",get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 		if (image_type == PHP_GDIMG_TYPE_GD2PART) {
@@ -1172,7 +1172,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	}
 
 	if (!im) {
-		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(), fn, tn);
+		php_error(E_WARNING,"%s: '%s' is not a valid %s file", get_active_function_name(TSRMLS_C), fn, tn);
 		RETURN_FALSE;
 	}
 
@@ -1328,20 +1328,20 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 	if ((argc == 2) || (argc == 3 && Z_STRLEN_PP(file))) {
 		if (!fn || fn == empty_string || php_check_open_basedir(fn)) {
-			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(), fn);
+			php_error(E_WARNING, "%s: invalid filename '%s'", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}
 
 		fp = VCWD_FOPEN(fn, "wb");
 		if (!fp) {
-			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn);
+			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(TSRMLS_C), fn);
 			RETURN_FALSE;
 		}
 		
 		switch(image_type) {
 			case PHP_GDIMG_CONVERT_WBM:
 				if(q<0||q>255) {
-					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(TSRMLS_C), q);
 				}
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, fp, q);
@@ -1365,14 +1365,14 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		tmp = tmpfile();
 		if (tmp == NULL) {
-			php_error(E_WARNING, "%s: unable to open temporary file", get_active_function_name());
+			php_error(E_WARNING, "%s: unable to open temporary file", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 
 		switch(image_type) {
 			case PHP_GDIMG_CONVERT_WBM:
 				if(q<0||q>255) {
-					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(), q);
+					php_error(E_WARNING, "%s: invalid threshold value '%d'. It must be between 0 and 255",get_active_function_name(TSRMLS_C), q);
 				}
 			case PHP_GDIMG_TYPE_JPG:
 				(*func_p)(im, tmp, q);
@@ -2518,7 +2518,7 @@ PHP_FUNCTION(imagecopymergegray)
 	gdImageCopyMergeGray(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
 	RETURN_TRUE;
 #else
-	php_error(E_WARNING, "%s(): was introduced in GD version 1.5", get_active_function_name());
+	php_error(E_WARNING, "%s(): was introduced in GD version 1.5", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
 #endif
 }
@@ -2611,7 +2611,7 @@ PHP_FUNCTION(imageftbbox)
 #if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_BBOX, 1);
 #else 
-	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name());
+	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
 #endif 
 }
@@ -2624,7 +2624,7 @@ PHP_FUNCTION(imagefttext)
 #if HAVE_LIBGD20 && HAVE_LIBFREETYPE && HAVE_GD_STRINGFTEX
 	php_imagettftext_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, TTFTEXT_DRAW, 1);
 #else 
-	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name());
+	php_error(E_WARNING, "%s(): No FreeType 2 support in this PHP build", get_active_function_name(TSRMLS_C));
 	RETURN_FALSE;
 #endif 
 }
@@ -2677,7 +2677,7 @@ void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int extende
 
 #if !HAVE_GD_STRINGFTEX
 	if (extended)	{
-		zend_error(E_ERROR, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name());
+		zend_error(E_ERROR, "%s(): gdImageStringFTEx not supported in this PHP build", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 #endif
@@ -3365,18 +3365,18 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 
 	im_dest = gdImageCreate (dest_width, dest_height);
 	if (im_dest == NULL) {
-		php_error (E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name());
+		php_error (E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	white = gdImageColorAllocate (im_dest, 255, 255, 255);
 	if( white == -1) {
-		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
 		return;
 	}
 
 	black = gdImageColorAllocate (im_dest, 0, 0, 0);
 	if (black == -1) {
-		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+		php_error (E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -3440,33 +3440,33 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 		/* Check threshold value */
 		if( int_threshold < 0 || int_threshold > 8 ) {
-			php_error (E_WARNING, "Invalid threshold value '%d' in %s",int_threshold, get_active_function_name());
+			php_error (E_WARNING, "Invalid threshold value '%d' in %s",int_threshold, get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 
 		/* Check origin file */
 		if (!fn_org || fn_org == empty_string || php_check_open_basedir(fn_org)) {
-			php_error (E_WARNING, "%s: invalid origin filename '%s'", get_active_function_name(), fn_org);
+			php_error (E_WARNING, "%s: invalid origin filename '%s'", get_active_function_name(TSRMLS_C), fn_org);
 			RETURN_FALSE;
 		}
 
 		/* Check destination file */
 		if (!fn_dest || fn_dest == empty_string || php_check_open_basedir(fn_dest)) {
-			php_error (E_WARNING, "%s: invalid destination filename '%s'", get_active_function_name(), fn_dest);
+			php_error (E_WARNING, "%s: invalid destination filename '%s'", get_active_function_name(TSRMLS_C), fn_dest);
 			RETURN_FALSE;
 		}
 
 		/* Open origin file */
 		org = VCWD_FOPEN(fn_org, "rb");
 		if (!org) {
-			php_error (E_WARNING, "%s: unable to open '%s' for reading", get_active_function_name(), fn_org);
+			php_error (E_WARNING, "%s: unable to open '%s' for reading", get_active_function_name(TSRMLS_C), fn_org);
 			RETURN_FALSE;
 		}
 
 		/* Open destination file */
 		dest = VCWD_FOPEN(fn_dest, "wb");
 		if (!dest) {
-			php_error (E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn_dest);
+			php_error (E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(TSRMLS_C), fn_dest);
 			RETURN_FALSE;
 		}
 
@@ -3475,7 +3475,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			case PHP_GDIMG_TYPE_GIF:
 				im_org = gdImageCreateFromGif (org);
 				if (im_org == NULL) {
-					php_error (E_WARNING, "%s: unable to open '%s' Not a valid GIF file", get_active_function_name(), fn_dest);
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid GIF file", get_active_function_name(TSRMLS_C), fn_dest);
 					RETURN_FALSE;
 				}
 				break;
@@ -3485,7 +3485,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			case PHP_GDIMG_TYPE_JPG:
 				im_org = gdImageCreateFromJpeg (org);
 				if (im_org == NULL) {
-					php_error (E_WARNING, "%s: unable to open '%s' Not a valid JPEG file", get_active_function_name(), fn_dest);
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid JPEG file", get_active_function_name(TSRMLS_C), fn_dest);
 					RETURN_FALSE;
 				}
 				break;
@@ -3496,14 +3496,14 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 			case PHP_GDIMG_TYPE_PNG:
 				im_org = gdImageCreateFromPng(org);
 				if (im_org == NULL) {
-					php_error (E_WARNING, "%s: unable to open '%s' Not a valid PNG file", get_active_function_name(), fn_dest);
+					php_error (E_WARNING, "%s: unable to open '%s' Not a valid PNG file", get_active_function_name(TSRMLS_C), fn_dest);
 					RETURN_FALSE;
 				}
 				break;
 #endif /* HAVE_GD_PNG */
 
 			default:
-				php_error(E_WARNING, "%s: Format not supported", get_active_function_name());
+				php_error(E_WARNING, "%s: Format not supported", get_active_function_name(TSRMLS_C));
 				break;
 		}
 
@@ -3539,7 +3539,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 		im_tmp = gdImageCreate (dest_width, dest_height);
 		if (im_tmp == NULL ) {
-			php_error(E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name());
+			php_error(E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 
@@ -3551,18 +3551,18 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 		im_dest = gdImageCreate(dest_width, dest_height);
 		if (im_dest == NULL) {
-			php_error(E_WARNING, "%s: unable to allocate destination buffer", get_active_function_name());
+			php_error(E_WARNING, "%s: unable to allocate destination buffer", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 		white = gdImageColorAllocate(im_dest, 255, 255, 255);
 		if (white == -1) {
-			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 
 		black = gdImageColorAllocate(im_dest, 0, 0, 0);
 		if (black == -1) {
-			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name());
+			php_error(E_WARNING, "%s: unable to allocate the colors for the destination buffer", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 

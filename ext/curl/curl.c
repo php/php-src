@@ -286,7 +286,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		error = call_user_function(EG(function_table),
 		                           NULL,
 		                           t->func,
-		                           retval, 2, argv);
+		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Cannot call the CURLOPT_WRITEFUNCTION");
 			length = -1;
@@ -340,7 +340,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 		error = call_user_function(EG(function_table),
 		                           NULL,
 		                           t->func,
-		                           retval, 3, argv);
+		                           retval, 3, argv TSRMLS_CC);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Cannot call the CURLOPT_READFUNCTION");
 			length = -1;
@@ -402,7 +402,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 		error = call_user_function(EG(function_table), 
 	    	                       NULL,
 		                           t->func,
-	        	                   retval, 2, argv);
+	        	                   retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
 			php_error(E_WARNING, "Couldn't call the CURLOPT_HEADERFUNCTION");
 			length = -1;
@@ -450,7 +450,7 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	error = call_user_function(EG(function_table),
 	                           NULL,
 	                           func,
-	                           retval, 2, argv);
+	                           retval, 2, argv TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error(E_WARNING, "Couldn't call the CURLOPT_PASSWDFUNCTION");
 		ret = -1;

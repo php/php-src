@@ -192,7 +192,7 @@ PHP_FUNCTION(pcntl_fork)
 
 	id=fork();
 	if (id == -1) {
-		php_error(E_ERROR, "Error %d in %s", errno, get_active_function_name());
+		php_error(E_ERROR, "Error %d in %s", errno, get_active_function_name(TSRMLS_C));
 	}
 	
 	RETURN_LONG((long) id);
@@ -366,23 +366,23 @@ PHP_FUNCTION(pcntl_signal)
 	/* Special long value case for SIG_DFL and SIG_IGN */
 	if (Z_TYPE_PP(handle)==IS_LONG) {
  		if (Z_LVAL_PP(handle)!= (long) SIG_DFL && Z_LVAL_PP(handle) != (long) SIG_IGN) {
- 			php_error(E_WARNING, "Invalid value for handle argument specifEied in %s", get_active_function_name());
+ 			php_error(E_WARNING, "Invalid value for handle argument specifEied in %s", get_active_function_name(TSRMLS_C));
 		}
 		if (php_signal(Z_LVAL_PP(signo), (Sigfunc *) Z_LVAL_PP(handle))==SIG_ERR) {
-			php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name());
+			php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name(TSRMLS_C));
 		   	RETURN_FALSE;
 		}
 		RETURN_TRUE;
 	} 
 	
         if (Z_TYPE_PP(handle)!=IS_STRING) {
-		php_error(E_WARNING, "Invalid type specified for handle argument in %s", get_active_function_name());
+		php_error(E_WARNING, "Invalid type specified for handle argument in %s", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
 	convert_to_string_ex(handle); /* Just in case */
 	if (!zend_is_callable(*handle, 0, &func_name)) {
-		php_error(E_WARNING, "%s: %s is not a callable function name error", get_active_function_name(), func_name);
+		php_error(E_WARNING, "%s: %s is not a callable function name error", get_active_function_name(TSRMLS_C), func_name);
 	   	efree(func_name);
 		RETURN_FALSE;
 	}
@@ -392,7 +392,7 @@ PHP_FUNCTION(pcntl_signal)
 	zend_hash_index_update(&PCNTL_G(php_signal_table), Z_LVAL_PP(signo), Z_STRVAL_PP(handle),  (Z_STRLEN_PP(handle) + 1) * sizeof(char), NULL);
 	
 	if (php_signal(Z_LVAL_PP(signo), pcntl_signal_handler)==SIG_ERR) {
- 			php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name());
+ 			php_error(E_WARNING, "Error assigning singal in %s", get_active_function_name(TSRMLS_C));
 		   	RETURN_FALSE;
 	}
 	RETURN_TRUE;	
@@ -404,9 +404,10 @@ static void old_pcntl_signal_handler(int signo)
 {
 	char *func_name;
 	zval *param, *call_name, *retval;
-   
-	PCNTL_LS_FETCH();
-        DEBUG_OUT("Caught signal: %d\n", signo); 
+  	PCNTL_LS_FETCH();
+	TSRMLS_FETCH();
+
+    DEBUG_OUT("Caught signal: %d\n", signo); 
 	if (zend_hash_index_find(&PCNTL_G(php_signal_table), (long) signo, (void *) &func_name)==FAILURE) {
 		DEBUG_OUT("Signl handler not fount"); 
 		return;
@@ -419,7 +420,7 @@ static void old_pcntl_signal_handler(int signo)
  	ZVAL_STRING(call_name, func_name, 1);
 
 	/* Call php singal handler - Note that we do not report errors, and we ignore the return value */ 
-	call_user_function(EG(function_table), NULL, call_name, retval, 1, &param);
+	call_user_function(EG(function_table), NULL, call_name, retval, 1, &param TSRMLS_CC);
 	
  	zval_dtor(call_name);
 	efree(call_name);
@@ -477,11 +478,13 @@ void pcntl_zend_extension_deactivate(void)
 }
 
 /* Custom hook to ensure signals only get called at a safe poing in Zend's execute process */
-void pcntl_zend_extension_statement_handler(zend_op_array *op_array) {
+void pcntl_zend_extension_statement_handler(zend_op_array *op_array)
+{
 	zend_llist_element *element;
-        zval *param, *call_name, *retval;
+    zval *param, *call_name, *retval;
 	char *func_name;
 	PCNTL_LS_FETCH();
+	TSRMLS_FETCH();
 
 	/* Bail if the queue is empty or if we are already playing the queue*/
 	if (! PCNTL_G(signal_queue_ready) || PCNTL_G(processing_signal_queue))
@@ -515,7 +518,7 @@ void pcntl_zend_extension_statement_handler(zend_op_array *op_array) {
 		ZVAL_STRING(call_name, func_name, 0);
 	   
 		/* Call php singal handler - Note that we do not report errors, and we ignore the return value */ 
-		call_user_function(EG(function_table), NULL, call_name, retval, 1, &param);
+		call_user_function(EG(function_table), NULL, call_name, retval, 1, &param TSRMLS_CC);
 	}
 	/* Clear */
 	zend_llist_clean(&PCNTL_G(php_signal_queue));

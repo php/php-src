@@ -149,7 +149,9 @@ PHPAPI int php_stream_flush(php_stream * stream)
 PHPAPI size_t php_stream_write(php_stream * stream, const char * buf, size_t count)
 {
 	if (strchr(stream->mode, 'w') == NULL)	{
-		zend_error(E_WARNING, "%s(): stream was not opened for writing", get_active_function_name());
+		TSRMLS_FETCH();
+
+		zend_error(E_WARNING, "%s(): stream was not opened for writing", get_active_function_name(TSRMLS_C));
 		return 0;
 	}
 	
@@ -311,13 +313,17 @@ PHPAPI int php_stream_cast(php_stream * stream, int castas, void ** ret, int sho
 			goto exit_success;
 		}
 
-		/* must be either:
-		  	a) programmer error
-		  	b) no memory
-		  	-> lets bail
-		 */
-		zend_error(E_ERROR, "%s(): fopencookie failed", get_active_function_name());
-		return FAILURE;
+		{
+			TSRMLS_FETCH();
+
+			/* must be either:
+		  		a) programmer error
+		  		b) no memory
+		  		-> lets bail
+			 */
+			zend_error(E_ERROR, "%s(): fopencookie failed", get_active_function_name(TSRMLS_C));
+			return FAILURE;
+		}
 #endif
 
 		goto exit_fail;
@@ -328,12 +334,14 @@ PHPAPI int php_stream_cast(php_stream * stream, int castas, void ** ret, int sho
 
 exit_fail:
 	if (show_err)	{
+		TSRMLS_FETCH();
+
 		/* these names depend on the values of the PHP_STREAM_AS_XXX defines in php_streams.h */
 		static const char * cast_names[3] = {
 			"STDIO FILE*", "File Descriptor", "Socket Descriptor"
 		};
 		zend_error(E_WARNING, "%s(): cannot represent a stream of type %s as a %s",
-			get_active_function_name(),
+			get_active_function_name(TSRMLS_C),
 			stream->ops->label,
 			cast_names[castas]
 			);

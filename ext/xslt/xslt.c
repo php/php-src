@@ -81,11 +81,12 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 	zval      **current;
 	HashTable  *arr;
 	int         idx = 0;
+	TSRMLS_FETCH();
 
 	arr = HASH_OF(*zarr);
 	if (! arr) {
 		php_error(E_WARNING, "Invalid argument or parameter array to %s",
-		          get_active_function_name());
+		          get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -104,7 +105,7 @@ extern void xslt_make_array(zval **zarr, char ***carr)
 		type = zend_hash_get_current_key(arr, &string_key, &num_key, 0);
 		if (type == HASH_KEY_IS_LONG) {
 			php_error(E_WARNING, "Invalid argument or parameter array to %s",
-			          get_active_function_name());
+			          get_active_function_name(TSRMLS_C));
 			return;
 		}
 
@@ -229,7 +230,7 @@ extern void xslt_call_function(char *name,
 	/* Call the function */
 	error = call_user_function_ex(EG(function_table),
 	                              NULL, function,
-							      retval, argc, argv, 0, NULL);
+							      retval, argc, argv, 0, NULL TSRMLS_CC);
 	if (error == FAILURE) {
 		php_error(E_WARNING, "Cannot call the %s handler: %s", 
 		          name, Z_STRVAL_P(function));

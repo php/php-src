@@ -168,13 +168,12 @@ void *dbm_mutex;
 
 /* {{{ php_find_dbm
  */
-dbm_info *php_find_dbm(pval *id)
+dbm_info *php_find_dbm(pval *id TSRMLS_DC)
 {
 	list_entry *le;
 	dbm_info *info;
 	int numitems, i;
 	int info_type;
-	TSRMLS_FETCH();
 
 	if (Z_TYPE_P(id) == IS_STRING) {
 		numitems = zend_hash_num_elements(&EG(regular_list));
@@ -260,7 +259,8 @@ PHP_FUNCTION(dblist)
 
 /* {{{ proto int dbmopen(string filename, string mode)
    Opens a dbm database */
-PHP_FUNCTION(dbmopen) {
+PHP_FUNCTION(dbmopen)
+{
 	pval *filename, *mode;
 	dbm_info *info=NULL;
 	int ret;
@@ -272,7 +272,7 @@ PHP_FUNCTION(dbmopen) {
 	convert_to_string(filename);
 	convert_to_string(mode);
 	
-	info = php_dbm_open(Z_STRVAL_P(filename), Z_STRVAL_P(mode));
+	info = php_dbm_open(Z_STRVAL_P(filename), Z_STRVAL_P(mode) TSRMLS_CC);
 	if (info) {
 		ret = zend_list_insert(info, le_db);
 		RETURN_LONG(ret);
@@ -284,22 +284,19 @@ PHP_FUNCTION(dbmopen) {
 
 /* {{{ php_dbm_open
  */
-dbm_info *php_dbm_open(char *filename, char *mode)
+dbm_info *php_dbm_open(char *filename, char *mode TSRMLS_DC)
 {
 	dbm_info *info;
 	int ret, lock=0;
 	char *lockfn = NULL;
 	int lockfd = 0;
-
 #if NFS_HACK
 	int last_try = 0;
 	struct stat sb;
 	int retries = 0;
 #endif
-
 	DBM_TYPE dbf=NULL;
 	DBM_MODE_TYPE imode;
-	TSRMLS_FETCH();
 
 	if (filename == NULL) {
 		php_error(E_WARNING, "NULL filename passed to php_dbm_open()");
@@ -492,7 +489,7 @@ PHP_FUNCTION(dbminsert)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
@@ -552,25 +549,24 @@ PHP_FUNCTION(dbmreplace)
 	convert_to_string(key);
 	convert_to_string(value);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	
-	ret = php_dbm_replace(info, Z_STRVAL_P(key), Z_STRVAL_P(value));
+	ret = php_dbm_replace(info, Z_STRVAL_P(key), Z_STRVAL_P(value) TSRMLS_CC);
 	RETURN_LONG(ret);
 }
 /* }}} */
 
 /* {{{ php_dbm_replace
  */
-int php_dbm_replace(dbm_info *info, char *key, char *value)
+int php_dbm_replace(dbm_info *info, char *key, char *value TSRMLS_DC)
 {
 	DBM_TYPE dbf;
 	int ret;
 	datum key_datum, value_datum;
-	TSRMLS_FETCH();
 
 	if (PG(magic_quotes_runtime)) {
 		php_stripslashes(key,NULL);
@@ -614,13 +610,13 @@ PHP_FUNCTION(dbmfetch)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
-	ret = php_dbm_fetch(info, Z_STRVAL_P(key));
+	ret = php_dbm_fetch(info, Z_STRVAL_P(key) TSRMLS_CC);
 	if (ret) {
 		RETVAL_STRING(ret, 0);
 	} else {
@@ -631,12 +627,11 @@ PHP_FUNCTION(dbmfetch)
 
 /* {{{ php_dbm_fetch
  */
-char *php_dbm_fetch(dbm_info *info, char *key)
+char *php_dbm_fetch(dbm_info *info, char *key TSRMLS_DC)
 {
 	datum key_datum, value_datum;
 	char *ret;
 	DBM_TYPE dbf;
-	TSRMLS_FETCH();
 
 	key_datum.dptr = key;
 	key_datum.dsize = strlen(key);
@@ -691,7 +686,7 @@ PHP_FUNCTION(dbmexists)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
@@ -740,7 +735,7 @@ PHP_FUNCTION(dbmdelete)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
@@ -787,7 +782,7 @@ PHP_FUNCTION(dbmfirstkey)
 		WRONG_PARAM_COUNT;
 	}
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
@@ -849,13 +844,13 @@ PHP_FUNCTION(dbmnextkey)
 	}
 	convert_to_string(key);
 
-	info = php_find_dbm(id);
+	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
 		php_error(E_WARNING, "not a valid database identifier %d", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
-	ret = php_dbm_nextkey(info, Z_STRVAL_P(key));
+	ret = php_dbm_nextkey(info, Z_STRVAL_P(key) TSRMLS_CC);
 	if (!ret) {
 		RETURN_FALSE;
 	} else {
@@ -866,12 +861,11 @@ PHP_FUNCTION(dbmnextkey)
 
 /* {{{ php_dbm_nextkey
  */
-char *php_dbm_nextkey(dbm_info *info, char *key)
+char *php_dbm_nextkey(dbm_info *info, char *key TSRMLS_DC)
 {
 	datum key_datum, ret_datum;
 	char *ret;
 	DBM_TYPE dbf;
-	TSRMLS_FETCH();
 
 	key_datum.dptr = key;
 	key_datum.dsize = strlen(key);

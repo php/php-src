@@ -796,7 +796,7 @@ PHP_FUNCTION(implode)
 		delim = *arg1;
 	} else {
 		php_error(E_WARNING, "Bad arguments to %s()",
-				   get_active_function_name());
+				   get_active_function_name(TSRMLS_C));
 		return;
 	}
 	php_implode(delim, arr, return_value);
@@ -1088,7 +1088,7 @@ PHP_FUNCTION(pathinfo)
 		opt = Z_LVAL_PP(uopt);
 		if (opt < PHP_PATHINFO_DIRNAME || opt > PHP_PATHINFO_EXTENSION) {
 			php_error(E_WARNING, "Invalid option in call to %s()",
-					  get_active_function_name());
+					  get_active_function_name(TSRMLS_C));
 			return;
 		}
 	}
@@ -3220,7 +3220,7 @@ PHP_FUNCTION(str_repeat)
 	
 	if ((*mult)->value.lval < 0) {
 		php_error(E_WARNING, "Second argument to %s() has to be greater than or equal to 0",
-				  get_active_function_name());
+				  get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -3538,7 +3538,7 @@ PHP_FUNCTION(str_pad)
 		convert_to_string_ex(pad_string);
 		if (Z_STRLEN_PP(pad_string) == 0) {
 			php_error(E_WARNING, "Padding string cannot be empty in %s()",
-					  get_active_function_name());
+					  get_active_function_name(TSRMLS_C));
 			return;
 		}
 		pad_str_val = Z_STRVAL_PP(pad_string);
@@ -3548,7 +3548,7 @@ PHP_FUNCTION(str_pad)
 			convert_to_long_ex(pad_type);
 			pad_type_val = Z_LVAL_PP(pad_type);
 			if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
-				php_error(E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH in %s()", get_active_function_name());
+				php_error(E_WARNING, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH in %s()", get_active_function_name(TSRMLS_C));
 				return;
 			}
 		}
@@ -3602,7 +3602,6 @@ PHP_FUNCTION(sscanf)
 	zval ***args;
 	int	argCount;	
 
-
     argCount = ZEND_NUM_ARGS();
 	if (argCount < 2) {
 		WRONG_PARAM_COUNT;
@@ -3621,8 +3620,8 @@ PHP_FUNCTION(sscanf)
 	
 	result = php_sscanf_internal( (*literal)->value.str.val,
 								  (*format)->value.str.val,
-								  argCount,args,
-								  2,&return_value);
+								  argCount, args,
+								  2, &return_value TSRMLS_CC);
 	efree(args);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {

@@ -1133,10 +1133,11 @@ static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval 
     zval *retval;
     int i;
     TSRMLS_FETCH();
+
     MAKE_STD_ZVAL(retval);
     
-    if (call_user_function(EG(function_table), NULL, handlerName, retval, argc, args) == FAILURE) {
-        php_error(E_WARNING, "Sorry, couldn't call %s handler", function_name);
+    if (call_user_function(EG(function_table), NULL, handlerName, retval, argc, args TSRMLS_CC) == FAILURE) {
+		php_error(E_WARNING, "Sorry, couldn't call %s handler", function_name);
     }
     
     zval_dtor(retval);
@@ -1433,7 +1434,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
             }
         }
 
-        if (call_user_function(EG(function_table), NULL, errorHandler, retval, argc, argv) == FAILURE) {
+        if (call_user_function(EG(function_table), NULL, errorHandler, retval, argc, argv TSRMLS_CC) == FAILURE) {
             php_error(E_WARNING, "Sorry, couldn't call %s error handler", Z_STRVAL_P(errorHandler));
         }
 
@@ -1510,7 +1511,7 @@ static int _php_sablot_sh_getAll(void *userData, SablotHandle p, const char *sch
 		                       handle->getAllHandler,
 		                       retval,
 		                       argc,
-		                       argv) == FAILURE) {
+		                       argv TSRMLS_CC) == FAILURE) {
 			php_error(E_WARNING, "Sorry couldn't call function, %s, with handler of type %s",
 			          handle->getAllHandler->value.str.val, "Scheme GetALL");
 		}

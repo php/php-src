@@ -394,7 +394,7 @@ static char **_readline_completion_cb(char *text, int start, int end)
 	params[2]=_readline_long_zval(start);
 	params[3]=_readline_long_zval(end);
 
-	if (call_user_function(CG(function_table), NULL, params[0], &_readline_array, 3, params+1) == SUCCESS) {
+	if (call_user_function(CG(function_table), NULL, params[0], &_readline_array, 3, params+1 TSRMLS_CC) == SUCCESS) {
 		if (_readline_array.type == IS_ARRAY) {
 			matches = completion_matches(text,_readline_command_generator);
 		}

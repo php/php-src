@@ -183,7 +183,7 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush)
 		params[0] = &orig_buffer;
 		params[1] = &z_status;
 		OG(ob_lock) = 1;
-		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL)==SUCCESS) {
+		if (call_user_function_ex(CG(function_table), NULL, OG(active_ob_buffer).output_handler, &alternate_buffer, 2, params, 1, NULL TSRMLS_CC)==SUCCESS) {
 			convert_to_string_ex(&alternate_buffer);
 			final_buffer = alternate_buffer->value.str.val;
 			final_buffer_length = alternate_buffer->value.str.len;
@@ -489,14 +489,10 @@ static int php_ub_body_write(const char *str, uint str_length)
 		zend_bailout();
 	}
 	if (php_header()) {
-		if (zend_is_compiling()) {
-			TSRMLS_FETCH();
-
+		if (zend_is_compiling(TSRMLS_C)) {
 			OG(output_start_filename) = zend_get_compiled_filename(TSRMLS_C);
 			OG(output_start_lineno) = zend_get_compiled_lineno(TSRMLS_C);
-		} else if (zend_is_executing()) {
-			TSRMLS_FETCH();
-
+		} else if (zend_is_executing(TSRMLS_C)) {
 			OG(output_start_filename) = zend_get_executed_filename(TSRMLS_C);
 			OG(output_start_lineno) = zend_get_executed_lineno(TSRMLS_C);
 		}

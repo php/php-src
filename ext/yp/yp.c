@@ -237,7 +237,7 @@ static int php_foreach_all (int instatus, char *inkey, int inkeylen, char *inval
 	MAKE_STD_ZVAL (value);
 	ZVAL_STRINGL (value, inval, invallen, 1);
 
-	if(call_user_function_ex(CG(function_table), NULL, *((zval **)indata), &retval, 3, args, 0, NULL) != SUCCESS)
+	if(call_user_function_ex(CG(function_table), NULL, *((zval **)indata), &retval, 3, args, 0, NULL TSRMLS_CC) != SUCCESS)
 	{
 		zend_error(E_ERROR, "Function call failed");
 		return 1;

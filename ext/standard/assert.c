@@ -195,7 +195,7 @@ PHP_FUNCTION(assert)
 		ZVAL_FALSE(retval);
 
 		/* XXX do we want to check for error here? */
-		call_user_function(CG(function_table), NULL, ASSERTG(callback), retval, 3, args);
+		call_user_function(CG(function_table), NULL, ASSERTG(callback), retval, 3, args TSRMLS_CC);
 
 		for (i = 0; i <= 2; i++) {
 			zval_ptr_dtor(&(args[i]));

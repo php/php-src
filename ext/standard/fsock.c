@@ -679,13 +679,14 @@ static int php_sockop_flush(php_stream * stream)
 static int php_sockop_cast(php_stream * stream, int castas, void ** ret)
 {
 	php_sockbuf * sock = (php_sockbuf*)stream->abstract;
+	TSRMLS_FETCH();
 
 	switch(castas)	{
 		case PHP_STREAM_AS_STDIO:
 			if (ret)	{
 				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
 				if (TOREAD(sock) > 0)
-					zend_error(E_WARNING, "%s(): buffered data lost during conversion to FILE*!", get_active_function_name());
+					zend_error(E_WARNING, "%s(): buffered data lost during conversion to FILE*!", get_active_function_name(TSRMLS_C));
 				*ret = fdopen(sock->socket, stream->mode);
 				if (*ret)
 					return SUCCESS;
