@@ -76,7 +76,7 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_
 							zval *str = T->EA.data.str_offset.str;
 
 							if (T->EA.data.str_offset.str->type != IS_STRING
-								|| (T->EA.data.str_offset.offset<0)
+								|| ((int)T->EA.data.str_offset.offset<0)
 								|| (T->EA.data.str_offset.str->value.str.len <= T->EA.data.str_offset.offset)) {
 								zend_error(E_NOTICE, "Uninitialized string offset:  %d", T->EA.data.str_offset.offset);
 								T->tmp_var.value.str.val = empty_string;
@@ -799,10 +799,9 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 
 	if (!container_ptr) {
 		if (T(op1->u.var).EA.type == IS_STRING_OFFSET) {
-			zval *offset;
 			zend_error(E_WARNING, "Cannot use string offset as an array");
 
-			offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+			get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 			FREE_OP(Ts, op2, EG(free_op2));
 		}
 		*retval = &EG(error_zval_ptr);
@@ -908,9 +907,7 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			}
 			break;
 		default: {
-				zval *offset;
-
-				offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+				get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 				if (type==BP_VAR_R || type==BP_VAR_IS) {
 					*retval = &EG(uninitialized_zval_ptr);
 				} else {
@@ -971,9 +968,7 @@ static void zend_fetch_property_address(znode *result, znode *op1, znode *op2, t
 	}
 	
 	if (container->type != IS_OBJECT) {
-		zval *offset;
-		
-		offset = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+		get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 		FREE_OP(Ts, op2, EG(free_op2));
 		if (type == BP_VAR_R || type == BP_VAR_IS) {
 			*retval = &EG(uninitialized_zval_ptr);
@@ -1721,8 +1716,9 @@ int zend_post_dec_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	NEXT_OPCODE();
 }
 
+typedef int (*incdec_t)(zval *);
 
-static inline int zend_incdec_op_helper(void *incdec_op_arg, ZEND_OPCODE_HANDLER_ARGS)
+static inline int zend_incdec_op_helper(incdec_t incdec_op_arg, ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **var_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_RW);
 	int (*incdec_op)(zval *op1) = incdec_op_arg;

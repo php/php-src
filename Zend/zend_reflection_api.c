@@ -753,15 +753,12 @@ ZEND_FUNCTION(reflection_function_invoke)
 {
 	zval *retval_ptr;
 	zval ***params;
-	reflection_object *intern;
-	zend_function *fptr;
 	zval *fname;
 	int result;
 	int argc = ZEND_NUM_ARGS();
 	zend_fcall_info fci;
 	
 	METHOD_NOTSTATIC;
-	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	params = safe_emalloc(sizeof(zval **), argc, 0);
 	if (zend_get_parameters_array_ex(argc, params) == FAILURE) {
