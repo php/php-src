@@ -97,6 +97,10 @@ static inline zval *_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_
 				}
 			}
 			break;
+		case IS_UNUSED:
+			*should_free = 0;
+			return NULL;
+			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return NULL;
