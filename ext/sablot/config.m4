@@ -49,6 +49,24 @@ if test "$PHP_SABLOT" != "no"; then
     PHP_ADD_LIBRARY(xmlparse)
     PHP_ADD_LIBRARY(xmltok)
   fi
+
+  found_iconv=no
+  AC_CHECK_LIB(c, iconv_open, found_iconv=yes)
+   if test "$found_iconv" = "no"; then
+    if test "$PHP_ICONV" = "no"; then
+      for i in /usr /usr/local; do
+       if test -f $i/lib/libconv.a -o -f $i/lib/libiconv.so; then
+         PHP_ADD_LIBRARY_WITH_PATH(iconv, $i/lib)
+         found_iconv=yes
+       fi
+      done
+    fi
+   fi
+  
+    if test "$found_iconv" = "no"; then
+      AC_MSG_ERROR(iconv not found, in order to build sablotron you need the iconv library)
+    fi
+
   
   AC_DEFINE(HAVE_SABLOT,1,[ ])
 
