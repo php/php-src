@@ -24,7 +24,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_compile.h"
-#include "zend_execute_locks.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -77,7 +76,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FE_RESET)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Objects created by %s::new_iterator() must implement spl_forward", obj_ce->name);
 			ZEND_EXECUTE_HOOK_ORIGINAL(ZEND_FE_RESET);
 		}
-		PZVAL_LOCK(retval);
+		spl_pzval_lock_func(retval);
 	} else if (is_a & SPL_IS_A_FORWARD) {
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 		retval = *obj;
@@ -252,7 +251,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_SWITCH_FREE)
 		FREE_ZVAL(tmp);
 
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
-		PZVAL_LOCK(*obj);
+		spl_pzval_lock_func(*obj);
 		
 		SET_UNUSED(*op2);
 	}

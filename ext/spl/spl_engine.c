@@ -24,7 +24,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_compile.h"
-#include "zend_execute_locks.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -72,9 +71,9 @@ void spl_unlock_zval_ptr_ptr(znode *node, temp_variable *Ts TSRMLS_DC)
 {
 	if (node->op_type==IS_VAR) {
 		if (T(node->u.var).var.ptr_ptr) {
-			PZVAL_UNLOCK(*T(node->u.var).var.ptr_ptr);
+			spl_pzval_unlock_func(*T(node->u.var).var.ptr_ptr TSRMLS_CC);
 		} else if (T(node->u.var).EA.type==IS_STRING_OFFSET) {
-			PZVAL_UNLOCK(T(node->u.var).EA.data.str_offset.str);
+			spl_pzval_unlock_func(T(node->u.var).EA.data.str_offset.str TSRMLS_CC);
 		}
 	}
 }
@@ -93,7 +92,7 @@ zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRML
 			break;
 		case IS_VAR:
 			if (T(node->u.var).var.ptr) {
-				PZVAL_UNLOCK(T(node->u.var).var.ptr);
+				spl_pzval_unlock_func(T(node->u.var).var.ptr TSRMLS_CC);
 				*should_free = 0;
 				return T(node->u.var).var.ptr;
 			} else {
@@ -116,7 +115,7 @@ zval * spl_get_zval_ptr(znode *node, temp_variable *Ts, zval **should_free TSRML
 								T->tmp_var.value.str.val = estrndup(&c, 1);
 								T->tmp_var.value.str.len = 1;
 							}
-							PZVAL_UNLOCK(str);
+							spl_pzval_unlock_func(str TSRMLS_CC);
 							T->tmp_var.refcount=1;
 							T->tmp_var.is_ref=1;
 							T->tmp_var.type = IS_STRING;

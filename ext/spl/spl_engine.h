@@ -23,7 +23,6 @@
 #include "php_spl.h"
 
 #include "zend_compile.h"
-#include "zend_execute_locks.h"
 
 #undef EX
 #define EX(element) execute_data->element
@@ -75,6 +74,26 @@ typedef enum {
 } spl_is_a;
 
 spl_is_a spl_implements(zend_class_entry *ce);
+
+/* Use this only insode OPCODE-Hooks */
+static inline void spl_pzval_unlock_func(zval *z TSRMLS_DC)
+{
+	z->refcount--;
+	if (!z->refcount) {
+		z->refcount = 1;
+		z->is_ref = 0;
+		EG(garbage)[EG(garbage_ptr)++] = z;
+	}
+}
+
+/* Use this only insode OPCODE-Hooks */
+static inline void spl_pzval_lock_func(zval *z)
+{
+	z->refcount++;
+}
+
+/* Use this only insode OPCODE-Hooks */
+#define SELECTIVE_PZVAL_LOCK(pzv, pzn)		if (!((pzn)->u.EA.type & EXT_TYPE_UNUSED)) { spl_pzval_lock_func(pzv); }
 
 #endif /* SPL_ENGINE_H */
 

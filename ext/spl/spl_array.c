@@ -24,7 +24,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "zend_compile.h"
-#include "zend_execute_locks.h"
 
 #include "php_spl.h"
 #include "spl_functions.h"
@@ -101,7 +100,7 @@ ZEND_EXECUTE_HOOK_FUNCTION(ZEND_FETCH_DIM_R)
 	if (!spl_fetch_dimension_address(&EX(opline)->result, &EX(opline)->op1, &EX(opline)->op2, EX(Ts), BP_VAR_R TSRMLS_CC))
 	{
 		if (EX(opline)->extended_value == ZEND_FETCH_ADD_LOCK) {
-			PZVAL_LOCK(*EX_T(EX(opline)->op1.u.var).var.ptr_ptr);
+			spl_pzval_lock_func(*EX_T(EX(opline)->op1.u.var).var.ptr_ptr);
 		}
 		spl_unlock_zval_ptr_ptr(&EX(opline)->op1, EX(Ts) TSRMLS_CC);
 
