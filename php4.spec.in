@@ -9,7 +9,7 @@ Version: %{version}
 Release: %{release}
 Copyright: The PHP license (see "LICENSE" file included in distribution)
 Source: http://www.php.net/version4/downloads/php-%{version}.tar.gz
-Icon: php4.gif
+Icon: php.gif
 URL: http://www.php.net/
 Packager: PHP Group <group@php.net>
 
