@@ -183,8 +183,9 @@ PS_SERIALIZER_DECODE_FUNC(php)
 		if(p[0] == '!') {
 			p++;
 			has_value = 0;
-		} else
+		} else {
 			has_value = 1;
+		}
 		
 		namelen = q - p;
 		name = estrndup(p, namelen);

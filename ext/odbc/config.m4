@@ -131,8 +131,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for Velocis support)
 AC_ARG_WITH(velocis,
-[  --with-velocis[=DIR]    Include Velocis support.  DIR is the Velocis
-                          base install directory, defaults to /usr/local/velocis.],
+[  --with-velocis[=DIR]    Include Velocis support.  DIR is the Velocis base
+                          install directory, defaults to /usr/local/velocis.],
 [
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
@@ -164,7 +164,8 @@ fi
 if test -z "$ODBC_TYPE"; then
 AC_MSG_CHECKING(for a custom ODBC support)
 AC_ARG_WITH(custom-odbc,
-[  --with-custom-odbc[=DIR]      Include a user defined ODBC support.
+[  --with-custom-odbc[=DIR]      
+                          Include a user defined ODBC support.
                           The DIR is ODBC install base directory, 
                           which defaults to /usr/local.
                           Make sure to define CUSTOM_ODBC_LIBS and
