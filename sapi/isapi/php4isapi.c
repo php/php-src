@@ -800,8 +800,8 @@ DWORD WINAPI HttpExtensionProc(LPEXTENSION_CONTROL_BLOCK lpECB)
 				php_isapi_report_exception(buf, strlen(buf) TSRMLS_CC);
 				my_endthread();
 			}
-#endif
 		}
+#endif
 #ifdef PHP_ENABLE_SEH
 		__try {
 			php_request_shutdown(NULL);
