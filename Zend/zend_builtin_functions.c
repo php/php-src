@@ -1195,16 +1195,27 @@ ZEND_FUNCTION(debug_backtrace)
 	int lineno;
 	char *function_name;
 	char *filename;
+	char *class_name;
+	zend_uint class_name_length;
+	zval *stack_frame;
 
 	ptr = EG(current_execute_data);
 	lineno = ptr->opline->lineno;
 	
+	array_init(return_value);
+
 	while (ptr) {
+		MAKE_STD_ZVAL(stack_frame);
+		array_init(stack_frame);
+
+		class_name = NULL;
+
 		if (ptr->object) {
-			printf("%s::", Z_OBJCE(*ptr->object)->name);
+			class_name = Z_OBJCE(*ptr->object)->name;
+			class_name_length = Z_OBJCE(*ptr->object)->name_length;
 		}
 		if (ptr->function_state.function->common.scope) {
-			printf("%s::", ptr->function_state.function->common.scope->name);
+			class_name = ptr->function_state.function->common.scope->name;
 		}
 		function_name = ptr->function_state.function->common.function_name;
 		if (!function_name) {
@@ -1213,17 +1224,26 @@ ZEND_FUNCTION(debug_backtrace)
 
 		ptr = ptr->prev_execute_data;
 		if (!ptr) {
+			zval_ptr_dtor(&stack_frame);
 			break;
 		}
-		
+
 		filename = ptr->function_state.function->op_array.filename;
+
+		add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
+		if (class_name) {
+			add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+		}
+		add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
+		add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+		//add_assoc_stringl_ex(stack_frame, "class", sizeof("class")-1, class_name, class_name_length, 1);
 		
-		printf("%s() [%s:%d]\n", function_name, filename, lineno);
+		add_next_index_zval(return_value, stack_frame);
+
 		if (ptr->opline) {
 			lineno = ptr->opline->lineno;
 		}
 	}
-	RETURN_TRUE;
 }
 
 
