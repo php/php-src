@@ -16,13 +16,14 @@ REM ----------------------------------------------------------------------
 REM  Authors:     Alexander Merz (alexmerz@php.net)
 REM ----------------------------------------------------------------------
 REM
-REM  $Id: pear.bat,v 1.9 2002/07/26 10:48:20 cox Exp $
+REM  $Id: pear.bat,v 1.11 2002/12/13 02:10:23 ssb Exp $
 
 REM change this lines to match the paths of your system
 REM -------------------
 
-set PHP_BIN=c:\php\php.exe
-set PEAR_PATH=c:\php\pear
+set PHP_BIN=@php_bin@
+set BIN_DIR=@bin_dir@
+set PEAR_PATH=@include_path@
 
-%PHP_BIN% -C -d output_buffer=0 -d include_path=%PEAR_PATH% -f %PEAR_PATH%\scripts\pear.in -- %1 %2 %3 %4 %5 %6 %7 %8 %9
+%PHP_BIN% -C -d output_buffer=1 -d include_path=%PEAR_PATH% -f %BIN_DIR%\pear -- %1 %2 %3 %4 %5 %6 %7 %8 %9
 @ECHO ON

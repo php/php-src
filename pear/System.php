@@ -61,7 +61,7 @@ class System
     function _parseArgs($argv, $short_options, $long_options = null)
     {
         if (!is_array($argv) && $argv !== null) {
-            $argv = preg_split('/\s+/', $argv);
+            $argv = preg_split('/\s+/', ': '.$argv);
         }
         return Console_Getopt::getopt($argv, $short_options);
     }

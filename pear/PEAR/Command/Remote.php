@@ -200,10 +200,10 @@ version of DB is 1.2, the downloaded file will be DB-1.2.tgz.',
 
             $data['data'][$info['category']][] = array(
                 $name,
-                $info['stable'],
-                $installed['version'],
-                $desc,
-                $info['deps'],
+                @$info['stable'],
+                @$installed['version'],
+                @$desc,
+                @$info['deps'],
                 );
         }
         $this->ui->outputData($data, $command);
