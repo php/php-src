@@ -1,3 +1,61 @@
+2002-09-06  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Fix the errors reported by Melvyn
+
+2002-09-06  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c: fixed typo
+
+2002-09-06  James Cox  <james@blog.at>
+
+    * ext/xml/xml.c: remove uneeded def
+
+2002-09-06  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      ext/session/config.m4
+      ext/session/mod_files.c: Reenable pwrite/pread support
+
+    The old checks supposed that pread/pwrite worked, if a declaration was
+    found in <unistd.h>.  We now actually check whether they work successfully
+    before using them.
+
+2002-09-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/xml/xml.c: NetWare related changes/modifications
+
+2002-09-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/math.c
+      ext/standard/pageinfo.c
+      ext/standard/parsedate.y: - argh... this is getting annoying
+
+2002-09-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/math.c
+      ext/standard/microtime.c
+      ext/standard/pack.c
+      ext/standard/pageinfo.c
+      ext/standard/rand.c: NetWare related changes/modifications
+
+    * netware/sendmail.h: Main functions declarations for NetWare
+
+    * netware/sendmail.c: Main functions for NetWare
+
+2002-09-06  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/link.c
+      ext/standard/mail.c: - Please do not use spaces for indentation!
+    - Removed redundend ifdefs
+
+2002-09-06  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/standard/lcg.c
+      ext/standard/link.c
+      ext/standard/mail.c
+      ext/standard/info.c
+      ext/standard/image.c: NetWare related additions/modifications
+
 2002-09-05  Zeev Suraski  <zeev@zend.com>
 
     * main/php_version.h
