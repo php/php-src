@@ -7,27 +7,15 @@ AC_INIT(TSRM.c)
 AM_INIT_AUTOMAKE(TSRM, 1.0)
 AM_CONFIG_HEADER(tsrm_config.h)
 
-AC_PROG_CC
-AM_PROG_CC_STDC
-AC_PROG_CC_C_O
-AC_PROG_RANLIB
-
+sinclude(tsrm.m4)
+	
+TSRM_BASIC_CHECKS
+	
 AM_PROG_LIBTOOL
 if test "$enable_debug" != "yes"; then
   AM_SET_LIBTOOL_VARIABLE([--silent])
 fi
 
-AC_CHECK_LIB(c_r, pthread_kill)
-AC_CHECK_LIB(pthread, pthread_kill)
-
-AC_CHECK_FUNCS(pthread_kill)
-
-if test "$ac_cv_func_pthread_kill" != "yes"; then
-  AC_MSG_ERROR(You need pthreads to build TSRM.)
-fi
-
-AC_DEFINE(PTHREADS)
-
-AC_CHECK_HEADERS(stdarg.h)
+TSRM_PTHREAD
 
 AC_OUTPUT(Makefile)
