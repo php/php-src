@@ -259,7 +259,7 @@ void php_mcal_event_init(struct _php_mcal_le_struct *mystruct)
 	mystruct->event=calevent_new();
 }
 
-void make_event_object(zval *myzvalue, CALEVENT *event)
+void _php_make_event_object(zval *myzvalue, CALEVENT *event)
 {
 	zval *start, *end, *recurend, *attrlist;
 	CALATTR *attr;
@@ -373,7 +373,7 @@ PHP_FUNCTION(mcal_open)
 /* }}} */
 
 /* {{{ proto string mcal_popen(string calendar, string user, string password [, int options])
-   Open a persistant MCAL stream to a calendar */
+   Open a persistent MCAL stream to a calendar */
 PHP_FUNCTION(mcal_popen)
 {
 	php_mcal_do_open(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
@@ -475,7 +475,7 @@ PHP_FUNCTION(mcal_fetch_event)
 	}
 	calevent_free(mcal_le_struct->event);
 	mcal_le_struct->event = myevent;
-	make_event_object(return_value, mcal_le_struct->event);
+	_php_make_event_object(return_value, mcal_le_struct->event);
 }
 /* }}} */
 
@@ -498,7 +498,7 @@ PHP_FUNCTION(mcal_fetch_current_stream_event)
 		php_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
     }
-	make_event_object(return_value, mcal_le_struct->event);
+	_php_make_event_object(return_value, mcal_le_struct->event);
 }
 /* }}} */
 
