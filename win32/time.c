@@ -126,38 +126,18 @@ PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
 	return 0;
 }
 
-
-/* this usleep isnt exactly accurate but should do ok */
 void usleep(unsigned int useconds)
 {
-struct timeval tnow, tthen, t0;
+	HANDLE timer;
+	LARGE_INTEGER due;
 
-	gettimeofday(&tthen, NULL);
-    t0 = tthen;
-    tthen.tv_usec += useconds;
-    while (tthen.tv_usec > 1000000) {
-        tthen.tv_usec -= 1000000;
-        tthen.tv_sec++;
-    }
-    
-	if (useconds > 10000) {
-        useconds -= 10000;
-        Sleep(useconds/1000);
-    }
-    
-	while (1) {
-        gettimeofday(&tnow, NULL);
-        if (tnow.tv_sec > tthen.tv_sec) {
-            break;
-        }
-        if (tnow.tv_sec == tthen.tv_sec) {
-            if (tnow.tv_usec > tthen.tv_usec) {
-                break;
-            }
-        }
-    }
+	due.QuadPart = -useconds * 1000;
+	timer = CreateWaitableTimer(NULL, TRUE, NULL);
+
+	SetWaitableTimer(timer, &due, 0, NULL, NULL, 0);
+	WaitForSingleObject(timer, INFINITE);
+	CloseHandle(timer);
 }
-
 
 #ifdef HAVE_SETITIMER
 
