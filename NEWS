@@ -1,7 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ????? 2004, PHP 5 Release Candidate 2
-- Fix for bug #27810 (Joe Orton)
 - Reimplemented zend.ze1_compatibility_mode to have better PHP 4 compliance.
   (Dmitry, Andi)
 - Moved yaz extension to PECL. (Wez)
@@ -28,6 +27,7 @@ PHP                                                                        NEWS
 - Fixed bug #27865 (STDIN, STDOUT, STDERR are dup()d under CLI). (Wez)
 - Fixed bug #27821 (xml_parse() segfaults when xml_set_object() is called from
   class method). (Andi, Rob)
+- Fixed bug #27810 (Apache-2.0.49 crashes on graceful/restart). (Joe Orton)
 - Fixed bug #27742 (WDSL SOAP Parsing Schema bug). (Dmitry)
 - Fixed bug #27722 (Segfault on schema without targetNamespace). (Dmitry)
 - Fixed bug #27719 (mktime issues on and around DST changeover). (Rasmus)
