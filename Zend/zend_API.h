@@ -239,17 +239,14 @@ ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, 
 							}
 
 
-#define ZEND_SET_SYMBOL(symtable, name, var)									\
-	{																			\
-		char *_name = (name);													\
-																				\
-		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 0);	\
+#define ZEND_SET_SYMBOL(symtable, name, var)										\
+	{																				\
+		char *_name = (name);														\
+																					\
+		ZEND_SET_SYMBOL_WITH_LENGTH(symtable, _name, strlen(_name)+1, var, 0, 0);	\
 	}
 
-#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount) \
-			ZEND_SET_SYMBOL_WITH_LENGTH_EX(symtable, name, name_length, var, _refcount, 0)
-
-#define ZEND_SET_SYMBOL_WITH_LENGTH_EX(symtable, name, name_length, var, _refcount, _is_ref)			\
+#define ZEND_SET_SYMBOL_WITH_LENGTH(symtable, name, name_length, var, _refcount, _is_ref)				\
 	{																									\
 		zval **orig_var;																				\
 																										\
