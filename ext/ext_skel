@@ -42,20 +42,28 @@ dnl \$Id\$
 dnl config.m4 for extension $extname
 dnl don't forget to call PHP_EXTENSION($extname)
 
+dnl Comments in this file start with the string 'dnl'.
+dnl Remove where necessary. This file will not work
+dnl without editing.
+
 dnl If your extension references something external, use with:
 
-PHP_ARG_WITH($extname, for $extname support,
+dnl PHP_ARG_WITH($extname, for $extname support,
 dnl Make sure that the comment is aligned:
-[  --with-$extname             Include $extname support])
+dnl [  --with-$extname             Include $extname support])
 
 dnl Otherwise use enable:
 
-PHP_ARG_ENABLE($extname, whether to enable $extname support,
+dnl PHP_ARG_ENABLE($extname, whether to enable $extname support,
 dnl Make sure that the comment is aligned:
-[  --enable-$extname           Enable $extname support])
+dnl [  --enable-$extname           Enable $extname support])
 
 if test "\$PHP_$EXTNAME" != "no"; then
-  dnl Action..
+  dnl If you will not be testing anything external, like existence of
+  dnl headers, libraries or functions in them, just uncomment the 
+  dnl following line and you are ready to go.
+  dnl AC_DEFINE(HAVE_$EXTNAME, 1, [ ])
+  dnl Write more examples of tests here...
   PHP_EXTENSION($extname, \$ext_shared)
 fi
 eof
@@ -83,6 +91,15 @@ Makefile
 libs.mk
 eof
 
+$ECHO_N " $extname.c$ECHO_C"
+cat ../skeleton/skeleton.c | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > $extname.c
+
+$ECHO_N " php_$extname.h$ECHO_C"
+cat ../skeleton/php_skeleton.h | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > php_$extname.h
+
+$ECHO_N " $extname.php$ECHO_C"
+cat ../skeleton/skeleton.php | sed -e "s/_extname_/$extname/g" | sed -e "s/_EXTNAME_/$EXTNAME/g" > $extname.php
+
 chmod 644 *
 
 echo " [done]."
@@ -92,10 +109,11 @@ cat <<eof
 To use your new extension, you will have to execute the following steps:
 
     $ cd ..
+    $ vi ext/$extname/config.m4
     $ ./buildconf
-    $ ./configure                 (your extension is automatically enabled)
-    $ vi ext/$extname/$extname.c
+    $ ./configure --[with|enable]-$extname
     $ make
+    $ vi ext/$extname/$extname.c
 
 Repeat the last two steps as often as necessary.
 

@@ -25,13 +25,7 @@
 /* You should tweak config.m4 so this symbol (or some else suitable)
    gets defined.
 */
-#if HAVE__EXTNAME_
-
-/* Use this for type if your module registers any resources. You can of course
-   rename it and add more if needed. These can be true globals, they don't need
-   thread safety. Remove if not needed.
-*/
-static int le_extname_;
+#ifdef HAVE__EXTNAME_
 
 #ifdef ZTS
 int _extname__globals_id;
@@ -131,7 +125,8 @@ PHP_FUNCTION(_extname__test)
 /* }}} */
 /* The previous line is meant for emacs, so it can correctly fold and unfold
    functions in source code. See the corresponding marks just before function
-   definition, where the functions purpose is also documented.
+   definition, where the functions purpose is also documented. Please follow
+   this convention for the convenience of others editing your code.
 */
 
 #endif	/* HAVE__EXTNAME_ */
