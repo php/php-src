@@ -7,7 +7,7 @@ dnl Check for crypt() capabilities
 dnl
 AC_DEFUN(AC_CRYPT_CAP,[
 
-  AC_MSG_CHECKING([for standard DES crypt])
+  AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
   AC_TRY_RUN([
 main() {
 #if HAVE_CRYPT
@@ -16,17 +16,20 @@ main() {
 	exit(0);
 #endif
 }],[
-    AC_DEFINE(PHP3_STD_DES_CRYPT,1)
-    AC_MSG_RESULT(yes)
+    ac_cv_crypt_des=yes
   ],[
-    AC_DEFINE(PHP3_STD_DES_CRYPT,0)
-    AC_MSG_RESULT(no)
+    ac_cv_crypt_des=no
   ],[
-    AC_DEFINE(PHP3_STD_DES_CRYPT,1)
-    AC_MSG_RESULT(cannot check, guessing yes)
+    ac_cv_crypt_des=yes
   ])
+  ])
+  if test "$ac_cv_crypt_des" = "yes"; then
+    AC_DEFINE(PHP3_STD_DES_CRYPT, 1)
+  else
+    AC_DEFINE(PHP3_STD_DES_CRYPT, 0)
+  fi
 
-  AC_MSG_CHECKING([for extended DES crypt])
+  AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
   AC_TRY_RUN([
 main() {
 #if HAVE_CRYPT
@@ -35,17 +38,20 @@ main() {
 	exit(0);
 #endif
 }],[
-    AC_DEFINE(PHP3_EXT_DES_CRYPT,1)
-    AC_MSG_RESULT(yes)
+    ac_cv_crypt_ext_des=yes
   ],[
-    AC_DEFINE(PHP3_EXT_DES_CRYPT,0)
-    AC_MSG_RESULT(no)
+    ac_cv_crypt_ext_des=no
   ],[
-    AC_DEFINE(PHP3_EXT_DES_CRYPT,0)
-    AC_MSG_RESULT(cannot check, guessing no)
+    ac_cv_crypt_ext_des=no
   ])
+  ])
+  if test "$ac_cv_crypt_ext_des" = "yes"; then
+    AC_DEFINE(PHP3_EXT_DES_CRYPT,1)
+  else
+    AC_DEFINE(PHP3_EXT_DES_CRYPT,0)
+  fi
 
-  AC_MSG_CHECKING([for MD5 crypt])
+  AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
   AC_TRY_RUN([
 main() {
 #if HAVE_CRYPT
@@ -63,17 +69,20 @@ main() {
 	exit(0);
 #endif
 }],[
-    AC_DEFINE(PHP3_MD5_CRYPT,1)
-    AC_MSG_RESULT(yes)
+    ac_cv_crypt_md5=yes
   ],[
-    AC_DEFINE(PHP3_MD5_CRYPT,0)
-    AC_MSG_RESULT(no)
+    ac_cv_crypt_md5=no
   ],[
-    AC_DEFINE(PHP3_MD5_CRYPT,0)
-    AC_MSG_RESULT(cannot check, guessing no)
+    ac_cv_crypt_md5=no
   ])
+  ])
+  if test "$ac_cv_crypt_md5" = "yes"; then
+    AC_DEFINE(PHP3_MD5_CRYPT,1)
+  else
+    AC_DEFINE(PHP3_MD5_CRYPT,0)
+  fi
 
-  AC_MSG_CHECKING([for Blowfish crypt])
+  AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
   AC_TRY_RUN([
 main() {
 #if HAVE_CRYPT
@@ -88,15 +97,18 @@ main() {
 	exit(0);
 #endif
 }],[
-    AC_DEFINE(PHP3_BLOWFISH_CRYPT,1)
-    AC_MSG_RESULT(yes)
+    ac_cv_crypt_blowfish=yes
   ],[
-    AC_DEFINE(PHP3_BLOWFISH_CRYPT,0)
-    AC_MSG_RESULT(no)
+    ac_cv_crypt_blowfish=no
   ],[
-    AC_DEFINE(PHP3_BLOWFISH_CRYPT,0)
-    AC_MSG_RESULT(cannot check, guessing no)
+    ac_cv_crypt_blowfish=no
   ])
+  ])
+  if test "$ac_cv_crypt_blowfish" = "yes"; then
+    AC_DEFINE(PHP3_BLOWFISH_CRYPT,1)
+  else
+    AC_DEFINE(PHP3_BLOWFISH_CRYPT,0)
+  fi
 ])
 
 AC_CHECK_LIB(c, dlopen, [
