@@ -14,12 +14,11 @@ fi
 
 if test "$no_recursion" != "yes"; then
 	cwd=`pwd`
-	cachefile=$cwd/config.cache
-	(set -x; test -d libzend || mkdir libzend; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cachefile $@) || exit 1
+	(set -x; test -d libzend || mkdir libzend; cd libzend; $cwd/$srcdir/libzend/configure --cache-file=$cache_file $@) || exit 1
 	if test "$enable_thread_safety" = "yes"; then
-		(set -x; test -d TSRM || mkdir TSRM; cd TSRM && $cwd/$srcdir/TSRM/configure --cache-file=$cachefile $@) || exit 1
+		(set -x; test -d TSRM || mkdir TSRM; cd TSRM && $cwd/$srcdir/TSRM/configure --cache-file=$cache_file $@) || exit 1
 	fi
-	(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cachefile ltmain.sh)
+	(set -x; cd $srcdir; sh ltconfig --disable-static --enable-dlopen --cache-file=$cache_file ltmain.sh)
 fi
 
 dnl ## Diversion 1 is the initial checking of OS features, programs,
@@ -614,12 +613,19 @@ AC_ARG_ENABLE(magic-quotes,
 AC_MSG_CHECKING(whether to build PHP thread-safe)
 AC_ARG_ENABLE(thread-safety,
 [  --enable-thread-safety  Whether to build PHP thread-safe.],[
-  TSRM_LIB='TSRM/libtsrm.a'
-  TSRM_DIR=TSRM
-  EXTRA_LIBS="$EXTRA_LIBS \$(TSRM_DIR)/libtsrm.a \`\$(SHELL) \$(TSRM_DIR)/tsrm_config --libs\`"
-  AC_DEFINE(ZTS)
+  if test "$enableval" = "yes"; then
+    TSRM_LIB='TSRM/libtsrm.a'
+    TSRM_DIR=TSRM
+    EXTRA_LIBS="$EXTRA_LIBS \$(TSRM_DIR)/libtsrm.a \`\$(SHELL) \$(TSRM_DIR)/tsrm_config --libs\`"
+    AC_DEFINE(ZTS)
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
 ],[
   TSRM_DIR=""
+  TSRM_LIB=""
+  AC_MSG_RESULT(no)
 ])
 AC_SUBST(TSRM_DIR)
 AC_SUBST(TSRM_LIB)
@@ -735,10 +741,9 @@ AC_SUBST(PHP_LIBS)
 AC_SUBST(PHP_SAPI)
 AC_SUBST(SAPI_TARGET)
 
-AC_OUTPUT(Makefile libphp4.module php4.spec
-          scripts/mkextlib regex/Makefile
-          @@EXT_MAKEFILES@@ build-defs.h, [
-], [
+#libphp4.module 
+AC_OUTPUT([Makefile php4.spec $PHP_OUTPUT_FILES
+           scripts/mkextlib regex/Makefile build-defs.h], [], [
 
 if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "creating number.c"
@@ -747,8 +752,8 @@ if test ! -f $srcdir/ext/bcmath/number.c; then
 	echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
 fi
 
-if test "" = ""; then
-
+# run this only when generating all the files?
+if true; then
   chmod +x scripts/mkextlib
   # Hacking while airborne considered harmful.
   #
@@ -793,6 +798,6 @@ fi
 
 divert
 
-# Local Variables:
-# tab-width: 4
-# End:
+dnl ## Local Variables:
+dnl ## tab-width: 4
+dnl ## End:

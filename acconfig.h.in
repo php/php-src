@@ -122,3 +122,5 @@
 /* Define when compiling with Zeus support */
 #undef WITH_ZEUS
 
+/* Define if struct sockaddr contains the field sa_len */
+#undef HAVE_SOCKADDR_SA_LEN
