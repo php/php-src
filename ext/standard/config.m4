@@ -111,7 +111,7 @@ AC_CHECK_LIB(pam, pam_start, [
   AC_DEFINE(HAVE_LIBPAM) ], []) 
 
 AC_CHECK_LIB(bind, inet_aton, [
-  EXTRA_LIBS="$LIBS -lbind"
+  EXTRA_LIBS="$EXTRA_LIBS -lbind"
   AC_DEFINE(HAVE_LIBBIND) ], []) 
 
 
