@@ -675,7 +675,8 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 				unsigned int nbl = (*ps >= 'A' ? *ps - 0x37 : *ps - 0x30);
 
 				if (nbl > 15) {
-					return 0;
+					err = PHP_CONV_ERR_INVALID_SEQ;
+					goto out;
 				}
 				v = (v << 4) | nbl;
 
