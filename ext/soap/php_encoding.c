@@ -992,6 +992,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 							property = master_to_xml(enc, *val, style, node);
 						}
 						xmlNodeSetName(property, model->u.element->name);
+						if (style == SOAP_LITERAL && model->u.element->namens) {
+							xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
+							xmlSetNs(property, nsp);
+						}
 						zend_hash_move_forward(ht);
 					}
 				} else {
@@ -1008,6 +1012,10 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, HashTa
 						property = master_to_xml(enc, *data, style, node);
 					}
 					xmlNodeSetName(property, model->u.element->name);
+					if (style == SOAP_LITERAL && model->u.element->namens) {
+						xmlNsPtr nsp = encode_add_ns(property, model->u.element->namens);
+						xmlSetNs(property, nsp);
+					}
 				}
 				return 1;
 			} else if (model->min_occurs == 0) {
@@ -1162,8 +1170,8 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 		if (prop != NULL) {
 		  sdlTypePtr array_el;
 
-		  if (Z_TYPE_P(data) == IS_ARRAY && 
-		      !is_map(data) && 
+		  if (Z_TYPE_P(data) == IS_ARRAY &&
+		      !is_map(data) &&
 		      sdlType->attributes == NULL &&
 		      sdlType->model != NULL &&
 		      (array_el = model_array_element(sdlType->model)) != NULL) {
@@ -1185,6 +1193,10 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 						property = master_to_xml(array_el->encode, *val, style, xmlParam);
 					}
 					xmlNodeSetName(property, array_el->name);
+					if (style == SOAP_LITERAL && array_el->namens) {
+						xmlNsPtr nsp = encode_add_ns(property, array_el->namens);
+						xmlSetNs(property, nsp);
+					}
 					zend_hash_move_forward(prop);
 				}
 			} else if (sdlType->model) {
