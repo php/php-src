@@ -11,6 +11,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #25424 (ext/informix: lvarchar not supported in win32). (Jani)
 - Fixed bug #25404 (ext/pgsql: open transactions not closed when script ends). 
   (Marcus)
+- Fixed bug #25385 (ob_gzhandler(): typo in sapi_add_header_ex() call). (Jani)
 - Fixed bug #25378 (unserialize() crashes with invalid data). (Jani)
 - Fixed bug #25372 (sscanf() does not work with %X). (Jani)
 - Fixed bug #25348 ("make install" fails with --enable-short-tags). (Jani)
