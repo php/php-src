@@ -24,6 +24,10 @@
 #include "php_variables.h"
 #include "zend_modules.h"
 
+#ifndef ZTS
+#error SRM sapi module is only useable in thread-safe mode
+#endif
+
 #include "SAPI.h"
 
 #include <stdio.h>
@@ -60,7 +64,7 @@
 #include "libmilter/mfapi.h"
 
 #define OPTSTRING "ac:d:Def:hnp:vVz:?"
-#define MG(v) TSRMG(milter_globals_id, milter_globals *, v)
+#define MG(v)  TSRMG(milter_globals_id, zend_milter_globals *, v)
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
@@ -68,14 +72,15 @@ extern int ap_php_optind;
 /*********************
  * globals
  */
-static int milter_globals_id;
 static int flag_debug=0;
 static zend_file_handle file_handle;
 
 /* per thread */
-typedef struct _milter_globals {
+ZEND_BEGIN_MODULE_GLOBALS(milter)
 	SMFICTX *ctx;
-} milter_globals;
+ZEND_END_MODULE_GLOBALS(milter)
+
+ZEND_DECLARE_MODULE_GLOBALS(milter)
 
 /*********************
  * Milter callbacks
@@ -84,7 +89,7 @@ typedef struct _milter_globals {
 /* connection info filter */
 static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 {
-	zval *function_name, *retval, *host, **params[1];
+	zval *function_name, *retval, *param[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -105,14 +110,12 @@ static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(host);
+	ZVAL_INIT(param[0]);
 
 	ZVAL_STRING(function_name, "milter_connect", 1);
-	ZVAL_STRING(host, hostname, 1);
+	ZVAL_STRING(param[0], hostname, 1);
 
-	params[0] = &host;
-
-	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -124,7 +127,7 @@ static sfsistat	mlfi_connect(SMFICTX *ctx, char *hostname, _SOCK_ADDR *hostaddr)
 /* SMTP HELO command filter */
 static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 {
-	zval *function_name, *retval, *host, **params[1];
+	zval *function_name, *retval, *param[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -132,14 +135,12 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(host);
+	ZVAL_INIT(param[0]);
 
 	ZVAL_STRING(function_name, "milter_helo", 1);
-	ZVAL_STRING(host, helohost, 1);
+	ZVAL_STRING(param[0], helohost, 1);
 
-	params[0] = &host;
-	
-	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -151,7 +152,7 @@ static sfsistat mlfi_helo(SMFICTX *ctx, char *helohost)
 /* envelope sender filter */
 static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 {
-	zval *function_name, *retval, *v, **params[1];
+	zval *function_name, *retval, *param[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -159,19 +160,17 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(v);
+	ZVAL_INIT(param[0]);
 
 	ZVAL_STRING(function_name, "milter_envelope_from", 1);
-	array_init(v);
+	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(v, *argv, 1);
+		add_next_index_string(param[0], *argv, 1);
 		argv++;
 	}
 
-	params[0] = v;
-
-	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -183,7 +182,7 @@ static sfsistat mlfi_envfrom(SMFICTX *ctx, char **argv)
 /* envelope recipient filter */
 static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 {
-	zval *function_name, *retval, *v, **params[1];
+	zval *function_name, *retval, *param[1];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -191,19 +190,17 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(v);
+	ZVAL_INIT(param[0]);
 
 	ZVAL_STRING(function_name, "milter_envelope_recipient", 1);
-	array_init(v);
+	array_init(param[0]);
 
 	while (*argv) {
-		add_next_index_string(v, *argv, 1);
+		add_next_index_string(param[0], *argv, 1);
 		argv++;
 	}
 
-	params[0] = v;
-	
-	call_user_function(CG(function_table), NULL, function_name, retval, 1, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -215,7 +212,7 @@ static sfsistat mlfi_envrcpt(SMFICTX *ctx, char **argv)
 /* header filter */
 static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 {
-	zval *function_name, *retval, *f, *v, **params[2];
+	zval *function_name, *retval, *param[2];
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -223,17 +220,14 @@ static sfsistat mlfi_header(SMFICTX *ctx, char *headerf, char *headerv)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(f);
-	ZVAL_INIT(v);
+	ZVAL_INIT(param[0]);
+	ZVAL_INIT(param[1]);
 	
 	ZVAL_STRING(function_name, "milter_header", 1);
-	ZVAL_STRING(f, headerf, 1);
-	ZVAL_STRING(v, headerv, 1);
+	ZVAL_STRING(param[0], headerf, 1);
+	ZVAL_STRING(param[1], headerv, 1);
 
-	params[0] = f;
-	params[1] = v;
-	
-	call_user_function(CG(function_table), NULL, function_name, retval, 2, params TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 2, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -266,7 +260,7 @@ static sfsistat mlfi_eoh(SMFICTX *ctx)
 /* body block */
 static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 {
-	zval *function_name, *retval, *p, **params[1];;
+	zval *function_name, *retval, *param[1];;
 	TSRMLS_FETCH();
 
 	/* set the milter context for possible use in API functions */
@@ -274,14 +268,12 @@ static sfsistat mlfi_body(SMFICTX *ctx, u_char *bodyp, size_t len)
 	
 	/* call userland */
 	ZVAL_INIT(function_name);
-	ZVAL_INIT(p);
+	ZVAL_INIT(param[0]);
 
 	ZVAL_STRING(function_name, "milter_body", 1);
-	ZVAL_STRINGL(p, bodyp, len, 1);
+	ZVAL_STRINGL(param[0], bodyp, len, 1);
 	
-	params[0] = p;
-	
-	call_user_function(CG(function_table), NULL, function_name, retval, 0, NULL TSRMLS_CC);
+	call_user_function(CG(function_table), NULL, function_name, retval, 1, param TSRMLS_CC);
 
 	if (Z_TYPE_P(retval) == IS_LONG) {
 		return Z_LONG_P(retval);
@@ -384,7 +376,7 @@ PHP_FUNCTION(smfi_getsymval)
 
     if (zend_parse_parameters(1 TSRMLS_CC, "s", &symname, &len) == SUCCESS) {
 		if ((ret = smfi_getsymval(MG(ctx), symname)) != NULL) {
-			RETVAL_STRING(ret);
+			RETVAL_STRING(ret, 1);
 		}
 	}
 
@@ -398,11 +390,11 @@ PHP_FUNCTION(smfi_setreply)
 	
 	if (zend_parse_parameters(3 TSRMLS_CC, "sss", &rcode, &len, &xcode, &len, &message, &len) == SUCCESS) {
 		if (smfi_setreply(MG(ctx), rcode, xcode, message) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_FUNCTION(smfi_addheader)
@@ -412,11 +404,11 @@ PHP_FUNCTION(smfi_addheader)
 	
 	if (zend_parse_parameters(2 TSRMLS_CC, "ss", &f, &len, &v, &len) == SUCCESS) {
 		if (smfi_addheader(MG(ctx), f, v) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_FUNCTION(smfi_chgheader)
@@ -427,11 +419,11 @@ PHP_FUNCTION(smfi_chgheader)
 	
 	if (zend_parse_parameters(3 TSRMLS_CC, "sls", &f, &len, &idx, &v, &len) == SUCCESS) {
 		if (smfi_chgheader(MG(ctx), f, idx, v) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_FUNCTION(smfi_addrcpt)
@@ -441,11 +433,11 @@ PHP_FUNCTION(smfi_addrcpt)
 	
 	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
 		if (smfi_addrcpt(MG(ctx), rcpt) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_FUNCTION(smfi_delrcpt)
@@ -455,11 +447,11 @@ PHP_FUNCTION(smfi_delrcpt)
 	
 	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
 		if (smfi_delrcpt(MG(ctx), rcpt) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_FUNCTION(smfi_replacebody)
@@ -467,13 +459,13 @@ PHP_FUNCTION(smfi_replacebody)
 	char *body;
 	int len;
 	
-	if (zend_parse_parameters(1 TSRMLS_CC, "s", &rcpt, &len) == SUCCESS) {
+	if (zend_parse_parameters(1 TSRMLS_CC, "s", &body, &len) == SUCCESS) {
 		if (smfi_replacebody(MG(ctx), body, len) == MI_SUCCESS) {
-			RETVAL_TRUE();
+			RETVAL_TRUE;
 		}
 	}
 	
-	RETVAL_FALSE();
+	RETVAL_FALSE;
 }
 
 PHP_MINIT_FUNCTION(milter)
@@ -483,11 +475,17 @@ PHP_MINIT_FUNCTION(milter)
 	REGISTER_LONG_CONSTANT("SMFIS_DISCARD",		SMFIS_DISCARD,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SMFIS_ACCEPT",		SMFIS_ACCEPT,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SMFIS_TEMPFAIL",	SMFIS_TEMPFAIL,	CONST_CS | CONST_PERSISTENT);
+
+	ZEND_INIT_MODULE_GLOBALS(milter, NULL, NULL);
 }
 
 PHP_MINFO_FUNCTION(milter)
 {
-	DISPLAY_INI_ENTRIES();
+	php_info_print_table_start();
+	php_info_print_table_header(2, "Milter support", "enabled");
+	php_info_print_table_end();
+	
+//	DISPLAY_INI_ENTRIES();
 }
 
 
@@ -673,7 +671,7 @@ int main(int argc, char *argv[])
 	char *param_error=NULL;
 /* end of temporary locals */
 
-	void ***tsrm_ls;
+	TSRMLS_FETCH();
 
 
 #ifdef HAVE_SIGNAL_H
@@ -707,8 +705,6 @@ int main(int argc, char *argv[])
 	milter_sapi_module.executable_location = argv[0];
 
 	sapi_module.startup(&milter_sapi_module);
-
-	tsrm_ls = ts_resource(0);
 
 	zend_first_try {
 		while ((c=ap_php_getopt(argc, argv, OPTSTRING))!=-1) {
@@ -864,9 +860,6 @@ int main(int argc, char *argv[])
 		SG(request_info).path_translated = file_handle.filename;
 		argv[ap_php_optind-1] = file_handle.filename;
 		SG(request_info).argv=argv+ap_php_optind-1;
-
-		/* TSRM is used to allocate a per-thread structure */
-		ts_allocate_id (&milter_globals_id, sizeof(milter_globals), NULL, NULL);
 
 		if (dofork) {
 			switch(fork()) {
