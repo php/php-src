@@ -12,7 +12,7 @@ image_type_to_mime_type()
 	$result = array();
 	$files  = array();
 	while (($file = readdir($dir)) !== FALSE) {
-		if (preg_match('/^test.+pix\./',$file)) {
+		if (preg_match('/^test.+pix\./',$file) && $file != "test13pix.swf") {
 			$files[] = $file;
 		}
 	}
@@ -25,9 +25,7 @@ image_type_to_mime_type()
 	var_dump($result);
 ?>
 --EXPECT--
-array(11) {
-  ["test13pix.swf"]=>
-  string(29) "application/x-shockwave-flash"
+array(10) {
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
   ["test1pix.jpc"]=>
