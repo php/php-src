@@ -138,6 +138,8 @@ ZEND_MINIT_FUNCTION(dbx)
     REGISTER_LONG_CONSTANT("DBX_RESULT_INFO", DBX_RESULT_INFO, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_RESULT_INDEX", DBX_RESULT_INDEX, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("DBX_RESULT_ASSOC", DBX_RESULT_ASSOC, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DBX_CMP_TEXT", DBX_CMP_TEXT, CONST_CS | CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("DBX_CMP_NUMBER", DBX_CMP_NUMBER, CONST_CS | CONST_PERSISTENT);
 
     return SUCCESS;
     }
@@ -498,7 +500,7 @@ ZEND_FUNCTION(dbx_cmp_asc)
     int min_number_of_arguments=3;
     int max_number_of_arguments=4;
     int number_of_arguments=-1;
-    int comparison_type=0;
+    long comparison_type;
     double dtemp;
     long ltemp;
     zval ** arguments[4];
@@ -516,10 +518,10 @@ ZEND_FUNCTION(dbx_cmp_asc)
         RETURN_LONG(0);
         }
     convert_to_string_ex(arguments[2]); /*/ field name /*/
-    comparison_type = 0; // default, text
+    comparison_type = DBX_CMP_TEXT;
     if (number_of_arguments>3) {
-        convert_to_string_ex(arguments[3]); /*/ comparison type /*/
-        if (!strcmp((*arguments[3])->value.str.val, "number")) comparison_type=1;
+        convert_to_long_ex(arguments[3]); /*/ comparison type /*/
+        comparison_type=(*arguments[3])->value.lval;
         }
 
     if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
@@ -529,13 +531,13 @@ ZEND_FUNCTION(dbx_cmp_asc)
         }
 
     switch (comparison_type) {
-        case 0:
+        case DBX_CMP_TEXT:
             convert_to_string_ex(zv_a);
             convert_to_string_ex(zv_b);
             ltemp = strcmp((*zv_a)->value.str.val, (*zv_b)->value.str.val);
             result = (ltemp==0?0: (ltemp>0?1:-1));
             break;
-        case 1:
+        case DBX_CMP_NUMBER:
             convert_to_double_ex(zv_a);
             convert_to_double_ex(zv_b);
             dtemp = ((*zv_a)->value.dval - (*zv_b)->value.dval);
@@ -557,7 +559,7 @@ ZEND_FUNCTION(dbx_cmp_desc)
     int min_number_of_arguments=3;
     int max_number_of_arguments=4;
     int number_of_arguments=-1;
-    int comparison_type=0;
+    long comparison_type;
     double dtemp;
     long ltemp;
     zval ** arguments[4];
@@ -575,10 +577,10 @@ ZEND_FUNCTION(dbx_cmp_desc)
         RETURN_LONG(0);
         }
     convert_to_string_ex(arguments[2]); /*/ field name /*/
-    comparison_type = 0; // default, text
+    comparison_type = DBX_CMP_TEXT;
     if (number_of_arguments>3) {
-        convert_to_string_ex(arguments[3]); /*/ comparison type /*/
-        if (!strcmp((*arguments[3])->value.str.val, "number")) comparison_type=1;
+        convert_to_long_ex(arguments[3]); /*/ comparison type /*/
+        comparison_type=(*arguments[3])->value.lval;
         }
 
     if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
@@ -588,13 +590,13 @@ ZEND_FUNCTION(dbx_cmp_desc)
         }
 
     switch (comparison_type) {
-        case 0:
+        case DBX_CMP_TEXT:
             convert_to_string_ex(zv_a);
             convert_to_string_ex(zv_b);
             ltemp = strcmp((*zv_b)->value.str.val, (*zv_a)->value.str.val);
             result = (ltemp==0?0: (ltemp>0?1:-1));
             break;
-        case 1:
+        case DBX_CMP_NUMBER:
             convert_to_double_ex(zv_a);
             convert_to_double_ex(zv_b);
             dtemp = ((*zv_b)->value.dval - (*zv_a)->value.dval);
