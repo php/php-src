@@ -495,8 +495,8 @@ class_variable_declaration:
 ;
 
 class_constant_declaration:
-		class_constant_declaration ',' T_STRING '=' const_scalar_expr	{ zend_do_declare_class_constant(&$3, &$5 TSRMLS_CC); }
-	|	T_CONST T_STRING '=' const_scalar_expr	{ zend_do_declare_class_constant(&$2, &$4 TSRMLS_CC); }
+		class_constant_declaration ',' T_STRING '=' static_scalar	{ zend_do_declare_class_constant(&$3, &$5 TSRMLS_CC); }
+	|	T_CONST T_STRING '=' static_scalar	{ zend_do_declare_class_constant(&$2, &$4 TSRMLS_CC); }
 ;
 
 echo_expr_list:	
