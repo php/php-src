@@ -912,7 +912,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 }
 /* }}} */
 
-/* {{{ proto int ibase_connect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_connect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
 {
@@ -920,7 +920,7 @@ PHP_FUNCTION(ibase_connect)
 }
 /* }}} */
 
-/* {{{ proto int ibase_pconnect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_pconnect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {
@@ -928,7 +928,7 @@ PHP_FUNCTION(ibase_pconnect)
 }
 /* }}} */
 
-/* {{{ proto int ibase_close([int link_identifier])
+/* {{{ proto bool ibase_close([resource link_identifier])
    Close an InterBase connection */
 PHP_FUNCTION(ibase_close)
 {
@@ -1494,7 +1494,7 @@ _php_ibase_exec_error:		 /* I'm a bad boy... */
 }
 /* }}} */
 
-/* {{{ proto int ibase_trans([int trans_args [, int link_identifier]])
+/* {{{ proto resource ibase_trans([int trans_args [, resource link_identifier]])
    Start transaction */
 PHP_FUNCTION(ibase_trans)
 {
@@ -1663,7 +1663,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit)
 }
 /* }}} */
 
-/* {{{ proto int ibase_commit([int link_identifier [, int trans_number]])
+/* {{{ proto bool ibase_commit([resource link_identifier [, int trans_number]])
    Commit transaction */
 PHP_FUNCTION(ibase_commit)
 {
@@ -1671,7 +1671,7 @@ PHP_FUNCTION(ibase_commit)
 }
 /* }}} */
 
-/* {{{ proto int ibase_rollback([int link_identifier [, int trans_number]])
+/* {{{ proto bool ibase_rollback([resource link_identifier [, int trans_number]])
    Roolback transaction */
 PHP_FUNCTION(ibase_rollback)
 {
@@ -1679,7 +1679,7 @@ PHP_FUNCTION(ibase_rollback)
 }
 /* }}} */
 
-/* {{{ proto int ibase_query([int link_identifier [, string query [, int bind_args]]])
+/* {{{ proto resource ibase_query([resource link_identifier [, string query [, int bind_args]]])
    Execute a query */
 PHP_FUNCTION(ibase_query)
 {
@@ -2184,7 +2184,7 @@ static void _php_ibase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int fetch_type)
 }
 /* }}} */
 
-/* {{{ proto array ibase_fetch_row(int result [, int blob_flag])
+/* {{{ proto array ibase_fetch_row(resource result [, int blob_flag])
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_row)
 {
@@ -2192,7 +2192,7 @@ PHP_FUNCTION(ibase_fetch_row)
 }
 /* }}} */
 
-/* {{{ proto array ibase_fetch_assoc(int result [, int blob_flag])
+/* {{{ proto array ibase_fetch_assoc(resource result [, int blob_flag])
    Fetch a row  from the results of a query */
 PHP_FUNCTION(ibase_fetch_assoc)
 {
@@ -2200,7 +2200,7 @@ PHP_FUNCTION(ibase_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto object ibase_fetch_object(int result [, int blob_flag])
+/* {{{ proto object ibase_fetch_object(resource result [, int blob_flag])
    Fetch a object from the results of a query */
 PHP_FUNCTION(ibase_fetch_object)
 {
@@ -2212,7 +2212,7 @@ PHP_FUNCTION(ibase_fetch_object)
 }
 /* }}} */
 
-/* {{{ proto int ibase_free_result(int result)
+/* {{{ proto bool ibase_free_result(resource result)
    Free the memory used by a result */
 PHP_FUNCTION(ibase_free_result)
 {
@@ -2231,7 +2231,7 @@ PHP_FUNCTION(ibase_free_result)
 }
 /* }}} */
 
-/* {{{ proto int ibase_prepare([int link_identifier, ] string query)
+/* {{{ proto resource ibase_prepare([resource link_identifier, ] string query)
    Prepare a query for later execution */
 PHP_FUNCTION(ibase_prepare)
 {
@@ -2281,7 +2281,7 @@ PHP_FUNCTION(ibase_prepare)
 }
 /* }}} */
 
-/* {{{ proto int ibase_execute(int query [, int bind_args [, int ...]])
+/* {{{ proto resource ibase_execute(resource query [, int bind_args [, int ...]])
    Execute a previously prepared query */
 PHP_FUNCTION(ibase_execute)
 {
@@ -2333,7 +2333,7 @@ PHP_FUNCTION(ibase_execute)
 }
 /* }}} */
 
-/* {{{ proto int ibase_free_query(int query)
+/* {{{ proto bool ibase_free_query(resource query)
    Free memory used by a query */
 PHP_FUNCTION(ibase_free_query)
 {
@@ -2409,7 +2409,7 @@ PHP_FUNCTION(ibase_timefmt)
 /* }}} */
 #endif
 
-/* {{{ proto int ibase_num_fields(int result)
+/* {{{ proto int ibase_num_fields(resource result)
    Get the number of fields in result */
 PHP_FUNCTION(ibase_num_fields)
 {
@@ -2433,7 +2433,7 @@ PHP_FUNCTION(ibase_num_fields)
 }
 /* }}} */
 
-/* {{{ proto array ibase_field_info(int result, int field_number)
+/* {{{ proto array ibase_field_info(resource result, int field_number)
    Get information about a field */
 PHP_FUNCTION(ibase_field_info)
 {
@@ -2567,7 +2567,7 @@ static int _php_ibase_blob_info(isc_blob_handle bl_handle, IBASE_BLOBINFO *bl_in
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_create([int link_identifier])
+/* {{{ proto int ibase_blob_create([resource link_identifier])
    Create blob for adding data */
 PHP_FUNCTION(ibase_blob_create)
 {
@@ -2650,7 +2650,7 @@ PHP_FUNCTION(ibase_blob_open)
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_add(int blob_id, string data)
+/* {{{ proto bool ibase_blob_add(int blob_id, string data)
    Add data into created blob */
 PHP_FUNCTION(ibase_blob_add)
 {
@@ -2763,7 +2763,7 @@ static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end)
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_close(int blob_id)
+/* {{{ proto bool ibase_blob_close(int blob_id)
    Close blob */
 PHP_FUNCTION(ibase_blob_close)
 {
@@ -2771,7 +2771,7 @@ PHP_FUNCTION(ibase_blob_close)
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_cancel(int blob_id)
+/* {{{ proto bool ibase_blob_cancel(int blob_id)
    Cancel creating blob */
 PHP_FUNCTION(ibase_blob_cancel)
 {
@@ -2846,7 +2846,7 @@ PHP_FUNCTION(ibase_blob_info)
 }
 /* }}} */
 
-/* {{{ proto int ibase_blob_echo(string blob_id_str)
+/* {{{ proto bool ibase_blob_echo(string blob_id_str)
    Output blob contents to browser */
 PHP_FUNCTION(ibase_blob_echo)
 {
@@ -2890,7 +2890,7 @@ PHP_FUNCTION(ibase_blob_echo)
 }
 /* }}} */
 
-/* {{{ proto string ibase_blob_import([link_identifier, ] int file_id)
+/* {{{ proto string ibase_blob_import([resource link_identifier, ] int file_id)
    Create blob, copy file in it, and close it */
 PHP_FUNCTION(ibase_blob_import)
 {
@@ -3111,7 +3111,7 @@ static void _php_ibase_user(INTERNAL_FUNCTION_PARAMETERS, int operation)
 }
 /* }}} */
 
-/* {{{ proto int ibase_add_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
+/* {{{ proto bool ibase_add_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
    Add an user to security database (only for IB6 or later) */
 PHP_FUNCTION(ibase_add_user)
 {
@@ -3119,7 +3119,7 @@ PHP_FUNCTION(ibase_add_user)
 }
 /* }}} */
 
-/* {{{ proto int ibase_modify_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
+/* {{{ proto bool ibase_modify_user(string server, string dba_user_name, string dba_password, string user_name, string password [, string first_name [, string middle_name [, string last_name]]])
    Modify an user in security database (only for IB6 or later) */
 PHP_FUNCTION(ibase_modify_user)
 {
@@ -3127,7 +3127,7 @@ PHP_FUNCTION(ibase_modify_user)
 }
 /* }}} */
 
-/* {{{ proto int ibase_delete_user(string server, string dba_user_name, string dba_password, string username)
+/* {{{ proto bool ibase_delete_user(string server, string dba_user_name, string dba_password, string username)
    Delete an user from security database (only for IB6 or later) */
 PHP_FUNCTION(ibase_delete_user)
 {
