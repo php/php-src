@@ -236,7 +236,8 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 	}
 	module_entry->type = type;
 	module_entry->module_number = zend_next_free_module();
-	
+	module_entry->handle = handle;
+
 	if (zend_register_module_ex(module_entry TSRMLS_CC) == FAILURE) {
 		DL_UNLOAD(handle);
 		RETURN_FALSE;
@@ -250,8 +251,6 @@ void php_dl(pval *file, int type, pval *return_value TSRMLS_DC)
 		}
 	}
 	
-	module_entry->handle = handle;
-
 	RETURN_TRUE;
 }
 /* }}} */
