@@ -35,9 +35,7 @@
  * sas: Works for me on Linux 2.0.36 and FreeBSD 3.0-current
  */
 
-#ifndef MSVC5
-#include "php_config.h"
-#endif
+#include "php.h"
 
 #if HAVE_SYSVSEM
 
@@ -46,7 +44,6 @@
 #include <sys/sem.h>
 #include <errno.h>
 
-#include "php.h"
 #include "php3_sysvsem.h"
 
 #if !HAVE_SEMUN && defined(__GNU_LIBRARY__) && __GNU_LIBRARY__ == 6
@@ -70,7 +67,7 @@ function_entry sysvsem_functions[] = {
 	{NULL, NULL, NULL}
 };
 
-php3_module_entry sysvsem_module_entry = {
+zend_module_entry sysvsem_module_entry = {
 	"System V semaphores", sysvsem_functions, php3_minit_sysvsem, NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 

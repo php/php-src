@@ -38,7 +38,7 @@
 #endif
 
 extern php3_module_entry php3_gettext_module_entry;
-#define php3_gettext_module_ptr &php3_gettext_module_entry
+#define gettext_module_ptr &php3_gettext_module_entry
 
 extern void php3_info_gettext(ZEND_MODULE_INFO_FUNC_ARGS);
 extern void php3_textdomain(INTERNAL_FUNCTION_PARAMETERS);
@@ -48,7 +48,9 @@ extern void php3_dcgettext(INTERNAL_FUNCTION_PARAMETERS);
 extern void php3_bindtextdomain(INTERNAL_FUNCTION_PARAMETERS);
 
 #else
-#define php3_gettext_module_ptr NULL
+#define gettext_module_ptr NULL
 #endif /* HAVE_LIBINTL */
+
+#define phpext_gettext_ptr gettext_module_ptr
 
 #endif /* _GETTEXT_H */

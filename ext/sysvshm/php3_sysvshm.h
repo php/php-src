@@ -98,4 +98,6 @@ extern sysvshm_module php3_sysvshm_module;
 
 #endif
 
+#define phpext_sysvshm_ptr sysvshm_module_ptr
+
 #endif /* _PHP3_SYSVSHM_H */
