@@ -1,0 +1,11 @@
+1) Multi-dimenstional array support
+2) IErrorInfo
+3) WithEvents
+4) Documentation (internal and user) and howtos
+5) IEnumVariant::All() which would be like IEnumVariant::Next(IDispatch::Count)
+6) Look for memory leaks and AdRef/Release problems - I KNOW there are some...
+7) Test component (goes with the docs)
+8) Test suite (Needs test component)
+9) reduce the need for VARIANT()
+10) lets try if we are able to call non IDispatch - only Typelib components
+11) IEnumVariant::Next() without parameter should only return an object, not an array with one element
