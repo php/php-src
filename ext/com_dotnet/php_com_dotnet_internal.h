@@ -99,6 +99,7 @@ PHP_FUNCTION(com_create_guid);
 PHP_FUNCTION(com_print_typeinfo);
 PHP_FUNCTION(com_message_pump);
 PHP_FUNCTION(com_load_typelib);
+PHP_FUNCTION(com_get_active_object);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 		WORD flags, DISPPARAMS *disp_params, VARIANT *v TSRMLS_DC);
@@ -115,6 +116,9 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 int php_com_wrapper_minit(INIT_FUNC_ARGS);
 PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name TSRMLS_DC);
 PHPAPI IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC);
+
+/* com_persist.c */
+int php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
 PHP_FUNCTION(com_variant_create_instance);

@@ -70,6 +70,7 @@ function_entry com_dotnet_functions[] = {
 	PHP_FE(com_print_typeinfo, NULL)
 	PHP_FE(com_message_pump, NULL)
 	PHP_FE(com_load_typelib, NULL)
+	PHP_FE(com_get_active_object, NULL)
 	{ NULL, NULL, NULL }
 };
 
@@ -187,7 +188,8 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	ZEND_INIT_MODULE_GLOBALS(com_dotnet, php_com_dotnet_init_globals, NULL);
 	REGISTER_INI_ENTRIES();
 
-	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);	
+	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
+	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	INIT_CLASS_ENTRY(ce, "com_exception", NULL);
 	php_com_exception_class_entry = zend_register_internal_class_ex(&ce, zend_exception_get_default(), NULL TSRMLS_CC);
@@ -282,6 +284,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	COM_CONST(DISP_E_DIVBYZERO);
 	COM_CONST(DISP_E_OVERFLOW);
 	COM_CONST(DISP_E_BADINDEX);
+	COM_CONST(MK_E_UNAVAILABLE);
 
 	return SUCCESS;
 }
