@@ -89,7 +89,6 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(start_lineno) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
-	CG(in_clone_method) = 0;
 	zend_hash_apply(CG(auto_globals), (apply_func_t) zend_auto_global_arm TSRMLS_CC);
 }
 
@@ -1048,7 +1047,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			CG(active_class_entry)->destructor = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CLONE_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CLONE_FUNC_NAME, sizeof(ZEND_CLONE_FUNC_NAME)))) {
 			CG(active_class_entry)->clone = (zend_function *) CG(active_op_array);
-			CG(in_clone_method) = 1;
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_CALL_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_CALL_FUNC_NAME, sizeof(ZEND_CALL_FUNC_NAME)))) {
 			CG(active_class_entry)->__call = (zend_function *) CG(active_op_array);
 		} else if ((function_name->u.constant.value.str.len == sizeof(ZEND_GET_FUNC_NAME)-1) && (!memcmp(function_name->u.constant.value.str.val, ZEND_GET_FUNC_NAME, sizeof(ZEND_GET_FUNC_NAME)))) {
@@ -1116,8 +1114,6 @@ void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 	zend_stack_del_top(&CG(foreach_copy_stack));
 
 	CG(throw_list) = function_token->throw_list;
-
-	CG(in_clone_method) = 0;
 }
 
 
