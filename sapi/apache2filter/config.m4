@@ -42,7 +42,7 @@ AC_ARG_WITH(apxs2,
   done
 
   # Test that we're trying to configure with apache 2.x
-  APACHE_VERSION=`$APXS_HTTPD -v | head -1 | cut -f3 -d' ' | cut -f2 -d'/' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+  APACHE_VERSION=`$APXS_HTTPD -v | head -1 | cut -f3 -d' ' | cut -f2 -d'/' | cut -f1 -d'-' | awk 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
   if test "$APACHE_VERSION" -le 2000000; then
     AC_MSG_ERROR([You have enabled Apache 2 support while your server is Apache 1.3.  Please use the appropiate switch --with-apxs (without the 2)])
   elif test "$APACHE_VERSION" -lt 2000035; then
