@@ -41,7 +41,8 @@
 #define tinyintcol(i) ((int) *(DBTINYINT *) dbdata(mssql_ptr->link,i))
 #define anyintcol(j) (coltype(j)==SQLINT4?intcol(j):(coltype(j)==SQLINT2?smallintcol(j):tinyintcol(j)))
 #define charcol(i) ((DBCHAR *) dbdata(mssql_ptr->link,i))
-#define floatcol(i) ((float) *(DBFLT8 *) dbdata(mssql_ptr->link,i))
+#define floatcol4(i) ((float) *(DBFLT4 *) dbdata(mssql_ptr->link,i))
+#define floatcol8(i) ((float) *(DBFLT8 *) dbdata(mssql_ptr->link,i))
 
 #ifdef ZTS
 #include "TSRM.h"
