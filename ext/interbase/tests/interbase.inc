@@ -14,7 +14,7 @@ function init_db()
 {
 	global $test_base, $user, $password;
 
-	$test_db = ibase_query(sprintf("CREATE DATABASE '%s' USER '%s' PASSWORD '%s' DEFAULT CHARACTER SET %s",
+	$test_db = ibase_query(0, sprintf("  create    Schema '%s' USER '%s' PASSWORD '%s' DEFAULT CHARACTER SET %s",
 		$test_base, $user, $password, ($charset = ini_get('ibase.default_charset')) ? $charset : 'NONE'));
 	$tr = ibase_trans($test_db);
 	ibase_query($tr,"create table test1 (i integer, c varchar(100))");
@@ -69,8 +69,8 @@ function out_result_trap_error($result, $table_name = "")
 function rand_datetime()
 {
     return sprintf("%02d/%02d/%4d %02d:%02d:%02d",
-        rand()%12+1, rand()%28+1, rand()%100+1910,
-	    rand()%24,   rand()%60,  rand()%60);
+		rand()%12+1, rand()%28+1, rand()%100+1910,
+		rand()%24,   rand()%60,  rand()%60);
 }
 
 /* random binary string  */
