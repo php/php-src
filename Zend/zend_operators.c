@@ -314,8 +314,6 @@ ZEND_API void convert_to_long_base(zval *op, int base)
 						if (ht) {
 							retval = (zend_hash_num_elements(ht)?1:0);
 						}
-					} else {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to integer", Z_OBJCE_P(op)->name);
 					}
 
 					zval_dtor(op);
@@ -383,8 +381,6 @@ ZEND_API void convert_to_double(zval *op)
 						if (ht) {
 							retval = (zend_hash_num_elements(ht)?1.0:0.0);
 						}
-					} else {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to double", Z_OBJCE_P(op)->name);
 					}
 
 					zval_dtor(op);
@@ -473,8 +469,6 @@ ZEND_API void convert_to_boolean(zval *op)
 						if (ht) {
 							retval = (zend_hash_num_elements(ht)?1:0);
 						}
-					} else {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to boolean", Z_OBJCE_P(op)->name);
 					}
 
 					zval_dtor(op);
