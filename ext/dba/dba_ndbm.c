@@ -156,7 +156,7 @@ DBA_SYNC_FUNC(ndbm)
 
 DBA_INFO_FUNC(ndbm)
 {
-	return estrdup("NDBM" );
+	return estrdup("NDBM");
 }
 
 #endif
