@@ -15,38 +15,44 @@ fi
 PHP_ARG_ENABLE(xml,for XML support,
 [  --disable-xml           Disable XML support using bundled expat lib], yes)
 
-if test "$PHP_XML" != "no"; then
+PHP_ARG_WITH(expat-dir, external libexpat install dir,
+[  --with-expat-dir=DIR    XML: external libexpat install dir])
 
+if test "$PHP_XML" = "yes" -a "$PHP_EXPAT_DIR" = "no"; then
+
+  PHP_EXTENSION(xml, $ext_shared)
+  PHP_SUBST(EXPAT_SHARED_LIBADD)
   AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
 
-  if test "$PHP_XML" = "yes"; then
-    CPPFLAGS="$CPPFLAGS -DXML_BYTE_ORDER=$order"
-    EXPAT_INTERNAL_LIBADD="expat/libexpat.la"	    
-    PHP_SUBST(EXPAT_INTERNAL_LIBADD)
-    EXPAT_SUBDIRS="expat"	    
-    PHP_SUBST(EXPAT_SUBDIRS)
-    PHP_SUBST(EXPAT_SHARED_LIBADD)
-    PHP_EXTENSION(xml, $ext_shared)
-    LIB_BUILD($ext_builddir/expat,$ext_shared,yes)
-    LIB_BUILD($ext_builddir/expat/xmlparse,$ext_shared,yes)
-    LIB_BUILD($ext_builddir/expat/xmltok,$ext_shared,yes)
-    PHP_ADD_INCLUDE($ext_srcdir/expat/xmltok)
-    PHP_ADD_INCLUDE($ext_srcdir/expat/xmlparse)
-    PHP_FAST_OUTPUT($ext_builddir/expat/Makefile $ext_builddir/expat/xmlparse/Makefile $ext_builddir/expat/xmltok/Makefile)
+  CPPFLAGS="$CPPFLAGS -DXML_BYTE_ORDER=$order"
+  EXPAT_INTERNAL_LIBADD="expat/libexpat.la"	    
+  PHP_SUBST(EXPAT_INTERNAL_LIBADD)
+  EXPAT_SUBDIRS="expat"	    
+  PHP_SUBST(EXPAT_SUBDIRS)
+  LIB_BUILD($ext_builddir/expat,$ext_shared,yes)
+  LIB_BUILD($ext_builddir/expat/xmlparse,$ext_shared,yes)
+  LIB_BUILD($ext_builddir/expat/xmltok,$ext_shared,yes)
+  PHP_ADD_INCLUDE($ext_srcdir/expat/xmltok)
+  PHP_ADD_INCLUDE($ext_srcdir/expat/xmlparse)
+  PHP_FAST_OUTPUT($ext_builddir/expat/Makefile $ext_builddir/expat/xmlparse/Makefile $ext_builddir/expat/xmltok/Makefile)
 
-  else
+else
+  
+  PHP_EXTENSION(xml, $ext_shared)
+  PHP_SUBST(EXPAT_SHARED_LIBADD)
+  AC_DEFINE(HAVE_LIBEXPAT,  1, [ ])
+  AC_DEFINE(HAVE_LIBEXPAT2, 1, [Whether external expat libs are used])
 
-    EXPAT_DIR="$withval"
-    if test -f $EXPAT_DIR/lib/libexpat.a -o -f $EXPAT_DIR/lib/libexpat.so ; then
-        AC_DEFINE(HAVE_LIBEXPAT2, 1, [ ])
-        PHP_ADD_INCLUDE($EXPAT_DIR/include)
-    else
-        AC_MSG_RESULT(not found)
-        AC_MSG_ERROR(Please reinstall the expat distribution)
+  for i in $PHP_XML $PHP_EXPAT_DIR; do
+    if test -f $i/lib/libexpat.a -o -f $i/lib/libexpat.s? ; then
+      EXPAT_DIR=$i
     fi
+  done
 
-    PHP_SUBST(EXPAT_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, EXPAT_SHARED_LIBADD)
-    PHP_EXTENSION(xml, $ext_shared)
+  if test -z "$EXPAT_DIR"; then
+    AC_MSG_ERROR(not found. Please reinstall the expat distribution.)
   fi
+
+  PHP_ADD_INCLUDE($EXPAT_DIR/include)
+  PHP_ADD_LIBRARY_WITH_PATH(expat, $EXPAT_DIR/lib, EXPAT_SHARED_LIBADD)
 fi

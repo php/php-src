@@ -26,7 +26,7 @@
 #include "php_sablot.h"
 #include "ext/standard/info.h"
 
-#if HAVE_SABLOT
+#if HAVE_SABLOT_BACKEND
 
 #include <sablot.h>
 
