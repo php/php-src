@@ -1141,17 +1141,22 @@ PHP_FUNCTION(number_format)
 		}
 		convert_to_double_ex(num);
 		convert_to_long_ex(dec);
-		convert_to_string_ex(d_p);
-		convert_to_string_ex(t_s);
-		if (Z_STRLEN_PP(d_p)==1) {
-			dec_point=Z_STRVAL_PP(d_p)[0];
-		} else if (Z_STRLEN_PP(d_p)==0) {
-			dec_point=0;
+
+		if (Z_TYPE_PP(d_p) != IS_NULL) { 
+			convert_to_string_ex(d_p);
+			if (Z_STRLEN_PP(d_p)==1) {
+				dec_point=Z_STRVAL_PP(d_p)[0];
+			} else if (Z_STRLEN_PP(d_p)==0) {
+				dec_point=0;
+			}
 		}
-		if (Z_STRLEN_PP(t_s)==1) {
-			thousand_sep=Z_STRVAL_PP(t_s)[0];
-		} else if(Z_STRLEN_PP(t_s)==0) {
-			thousand_sep=0;	
+		if (Z_TYPE_PP(t_s) != IS_NULL) {
+			convert_to_string_ex(t_s);
+			if (Z_STRLEN_PP(t_s)==1) {
+				thousand_sep=Z_STRVAL_PP(t_s)[0];
+			} else if(Z_STRLEN_PP(t_s)==0) {
+				thousand_sep=0;	
+			}
 		}
 		RETURN_STRING(_php_math_number_format(Z_DVAL_PP(num), Z_LVAL_PP(dec), dec_point, thousand_sep), 0);
 		break;
