@@ -1,5 +1,7 @@
 --TEST--
 mysql connect
+--SKIPIF--
+<?php include 'skipif.inc'; ?>
 --FILE--
 <?php
 
