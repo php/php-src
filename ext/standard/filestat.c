@@ -359,7 +359,7 @@ PHP_FUNCTION(chmod)
 /* }}} */
 
 
-/* {{{ proto bool touch(string filename[, int time])
+/* {{{ proto bool touch(string filename [, int time])
    Set modification time of file */
 PHP_FUNCTION(touch) 
 {
