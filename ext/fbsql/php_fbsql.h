@@ -97,6 +97,7 @@ PHP_FUNCTION(fbsql_database_password);
 PHP_FUNCTION(fbsql_username);
 PHP_FUNCTION(fbsql_password);
 PHP_FUNCTION(fbsql_warnings);
+PHP_FUNCTION(fbsql_set_password);
 
 PHP_FUNCTION(fbsql_get_autostart_info);
 /* PHP_FUNCTION(fbsql_set_autostart_info); */
