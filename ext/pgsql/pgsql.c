@@ -916,29 +916,24 @@ static void php3_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	for (i=0,num_fields=PQnfields(pgsql_result); i<num_fields; i++) {
 		element = PQgetvalue(pgsql_result,row->value.lval,i);
 		element_len = (element ? strlen(element) : 0);
-		element = safe_estrndup(element,element_len);
 		if (element) {
 			char *data;
 			int data_len;
-			int should_copy;
 
 			if (PG(magic_quotes_runtime)) {
 				data = php_addslashes(element,element_len,&data_len,0);
-				should_copy = 0;
 			} else {
-				data = element;
+				data = safe_estrndup(element,element_len);
 				data_len = element_len;
-				should_copy = 1;
 			}
 			
 			if (result_type & PGSQL_NUM) {
-				add_index_stringl(return_value, i, data, data_len, should_copy);
-				should_copy = 1;
+				add_index_stringl(return_value, i, data, data_len, 0);
 			}
 			
 			if (result_type & PGSQL_ASSOC) {
 				field_name = PQfname(pgsql_result,i);
-				add_assoc_stringl(return_value, field_name, data, data_len, should_copy);
+				add_assoc_stringl(return_value, field_name, data, data_len, 1);
 			}
         } else {
             /* NULL field, don't set it */
