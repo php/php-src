@@ -1,3 +1,164 @@
+2002-04-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c: MFH: ocibind: avoid warning in debug mode
+
+    * ext/oci8/oci8.c:
+    ocibind: avoid warning in debug mode if an outbound variable is NULL
+
+2002-04-13  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/php_ini.c: Fix cli/cgi -c option
+
+2002-04-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    MFH: Mixing OCIPlogon and OCINLogon no longer leak Oracle-Sessions. (thies)
+    to RM: this is a real fix that _should_ be in 4.2!
+
+    * ext/oci8/oci8.c:
+    - Mixing OCIPlogon and OCINLogon no longer leak Oracle-Sessions. (thies)
+
+2002-04-13  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c
+      ext/domxml/php_domxml.h:
+    - old $node->append_child() is now $node->append_sibling(), since
+      new append_child() now behaves like excepted (= W3C standard) (chregu, uwe)
+
+2002-04-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gd/config.m4: s/==/=/
+
+2002-04-13  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/PEAR/Installer.php:
+    - Also raise a different error message if we don't specify any package at all.
+
+
+2002-04-13  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4:
+    - Prevent users from trying to make a static build with Apache2 using
+      --with-apache
+
+
+2002-04-13  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/PEAR/Installer.php:
+    - Return a different error message if no package file was given at all.
+
+2002-04-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/config.m4: oops
+
+2002-04-13  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * pear/Archive/Tar.php: - Properly format error message.
+
+
+    * ext/xml/xml.c: - Fix a possible memory leak in xml_set_handler().
+
+      I stumbled over this while trying out 'pear package' which, while doing
+      xml parsing, re-assigns the variaous callback handlers depending
+      on the version during xml processing.
+
+      If this check causes problems, let me know.
+
+2002-04-13  Jani Taskinen  <sniper@iki.fi>
+
+    * pear/Makefile.in
+      pear/Makefile.frag: - Makefile.frag is not supposed to be here..
+    - Net/Socket.php doesn't exist anymore
+
+2002-04-13  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/gd/libgd/gdfonts.c
+      ext/gd/libgd/gdfonts.h
+      ext/gd/libgd/gdfontt.c
+      ext/gd/libgd/gdfontt.h
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.c
+      ext/gd/libgd/gdhelpers.h
+      ext/gd/libgd/gdkanji.c
+      ext/gd/libgd/gdparttopng.c
+      ext/gd/libgd/gdtables.c
+      ext/gd/libgd/gdtest.c
+      ext/gd/libgd/gdtestft.c
+      ext/gd/libgd/gdtopng.c
+      ext/gd/libgd/gdxpm.c
+      ext/gd/libgd/jisx0208.h
+      ext/gd/libgd/mathmake.c
+      ext/gd/libgd/pngtogd.c
+      ext/gd/libgd/pngtogd2.c
+      ext/gd/libgd/testac.c
+      ext/gd/libgd/wbmp.c
+      ext/gd/libgd/wbmp.h
+      ext/gd/libgd/webpng.c
+      ext/gd/libgd/README
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd2copypal.c
+      ext/gd/libgd/gd2time.c
+      ext/gd/libgd/gd2topng.c
+      ext/gd/libgd/gd_arc_f_buggy.c
+      ext/gd/libgd/gd_gd.c
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io.c
+      ext/gd/libgd/gd_io.h
+      ext/gd/libgd/gd_io_dp.c
+      ext/gd/libgd/gd_io_file.c
+      ext/gd/libgd/gd_io_ss.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_ss.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gd_wbmp.c
+      ext/gd/libgd/gdcache.c
+      ext/gd/libgd/gdcache.h
+      ext/gd/libgd/gddemo.c
+      ext/gd/libgd/gdfontg.c
+      ext/gd/libgd/gdfontg.h
+      ext/gd/libgd/gdfontl.c
+      ext/gd/libgd/gdfontl.h
+      ext/gd/libgd/gdfontmb.c
+      ext/gd/libgd/gdfontmb.h
+      ext/gd/config.m4: Initial commit of the built-in libgd based on GD-2.0.1
+    This initial checkin has no changes to any of the libgd code so it can
+    be used as a basis for diffs.  It also will not build currently because
+    of this.  The PHP gd checks need to be incorporated along with a bit of
+    other config magic.  It also shouldn't break the build and will only
+    take effect if you use --with-gd=php right now.
+
+2002-04-13  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/posix/posix.c:
+    MFH: For example the compile in AIX does not like these at all..
+
+    * ext/posix/posix.c: Do NOT use c++ comments in c code!!!!!
+
+2002-04-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php:
+    * cvstag command: tag slide option is -f, not -F
+
+    * pear/PEAR/Common.php:
+    * missing file role message could be mistaken for missing maintainer role
+
+2002-04-13  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/apache/config.m4
+      sapi/apache2filter/config.m4: MFH.
+
+    (Prevent users from trying to build Apache 1.x module with Apache 2.x and
+    vice-versa)
+
+    * ext/standard/config.m4: MFH (forgot to commit this..sorry Derick..)
+
+2002-04-13  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Remote.php:
+    * add cookie authentication to PEAR_Remote (temporarily in addition to http auth)
+
 2002-04-12  Jani Taskinen  <sniper@iki.fi>
 
     * sapi/apache2filter/config.m4
