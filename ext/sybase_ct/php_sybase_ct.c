@@ -1514,16 +1514,16 @@ PHP_MINFO_FUNCTION(sybase)
 	char maxp[32],maxl[32];
 	
 	if (sybase_globals.max_persistent==-1) {
-		snprintf(maxp, 31, "%d/unlimited", sybase_globals.num_persistent);
+		snprintf(maxp, 31, "%ld/unlimited", sybase_globals.num_persistent);
 	} else {
-		snprintf(maxp, 31, "%d/%ld", sybase_globals.num_persistent, sybase_globals.max_persistent);
+		snprintf(maxp, 31, "%ld/%ld", sybase_globals.num_persistent, sybase_globals.max_persistent);
 	}
 	maxp[31]=0;
 
 	if (sybase_globals.max_links==-1) {
-		snprintf(maxl, 31, "%d/unlimited", sybase_globals.num_links);
+		snprintf(maxl, 31, "%ld/unlimited", sybase_globals.num_links);
 	} else {
-		snprintf(maxl, 31, "%d/%ld", sybase_globals.num_links, sybase_globals.max_links);
+		snprintf(maxl, 31, "%ld/%ld", sybase_globals.num_links, sybase_globals.max_links);
 	}
 	maxl[31]=0;
 
