@@ -28,6 +28,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_simplexml.h"
+#include "ext/libxml/php_libxml.h"
 
 zend_class_entry *sxe_class_entry;
 
@@ -1037,7 +1038,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe TSRMLS_CC);
 
-	xmlInitParser();
+	php_libxml_initialize();
 
 	return SUCCESS;
 }
@@ -1047,7 +1048,7 @@ PHP_MINIT_FUNCTION(simplexml)
  */
 PHP_MSHUTDOWN_FUNCTION(simplexml)
 {
-	xmlCleanupParser();
+	php_libxml_shutdown();
 
 	return SUCCESS;
 }

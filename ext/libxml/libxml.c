@@ -42,6 +42,9 @@
 
 #include "php_libxml.h"
 
+/* a true global for initialization */
+int _php_libxml_initialized = 0;
+
 #ifdef ZTS
 int libxml_globals_id;
 #else
@@ -101,8 +104,7 @@ static void php_libxml_init_globals(php_libxml_globals *libxml_globals_p TSRMLS_
 int php_libxml_streams_IO_match_wrapper(const char *filename)
 {
 	TSRMLS_FETCH();
-	return php_stream_locate_url_wrapper(filename, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ? 1 : 0;
-
+	return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
 }
 
 void *php_libxml_streams_IO_open_wrapper(const char *filename)
@@ -134,31 +136,48 @@ int php_libxml_streams_IO_close(void *context)
 	return php_stream_close((php_stream*)context);
 }
 
+PHP_LIBXML_API void php_libxml_initialize() {
+	if (!_php_libxml_initialized) {
+		/* we should be the only one's to ever init!! */
+		xmlInitParser();
+
+		/* Enable php stream/wrapper support for libxml 
+		   we only use php streams, so we do not enable
+		   the default io handlers in libxml.
+		*/
+		xmlRegisterInputCallbacks(
+			php_libxml_streams_IO_match_wrapper, 
+			php_libxml_streams_IO_open_wrapper,
+			php_libxml_streams_IO_read, 
+			php_libxml_streams_IO_close);
+
+		xmlRegisterOutputCallbacks(
+			php_libxml_streams_IO_match_wrapper, 
+			php_libxml_streams_IO_open_wrapper,
+			php_libxml_streams_IO_write, 
+			php_libxml_streams_IO_close);
+
+		_php_libxml_initialized = 1;
+	}
+}
+
+PHP_LIBXML_API void php_libxml_shutdown() {
+	if (_php_libxml_initialized) {
+		xmlCleanupParser();
+		_php_libxml_initialized = 0;
+	}
+}
+
 PHP_MINIT_FUNCTION(libxml)
 {
-	/* Enable php stream/wrapper support for libxml 
-	   we only use php streams, so we disable the libxml builtin
-	   io support.
-	*/
-	xmlCleanupInputCallbacks();
-	xmlRegisterInputCallbacks(
-		php_libxml_streams_IO_match_wrapper, 
-		php_libxml_streams_IO_open_wrapper,
-		php_libxml_streams_IO_read, 
-		php_libxml_streams_IO_close);
+	php_libxml_initialize();
 
-	xmlCleanupOutputCallbacks();
-	xmlRegisterOutputCallbacks(
-		php_libxml_streams_IO_match_wrapper, 
-		php_libxml_streams_IO_open_wrapper,
-		php_libxml_streams_IO_write, 
-		php_libxml_streams_IO_close);
-	
 #ifdef ZTS
 	ts_allocate_id(&libxml_globals_id, sizeof(php_libxml_globals), (ts_allocate_ctor) php_libxml_init_globals, NULL);
 #else
 	LIBXML(stream_context) = NULL;
 #endif
+
 	return SUCCESS;
 }
 
@@ -171,6 +190,7 @@ PHP_RINIT_FUNCTION(libxml)
 
 PHP_MSHUTDOWN_FUNCTION(libxml)
 {
+	php_libxml_shutdown();
 	return SUCCESS;
 }
 
