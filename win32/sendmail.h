@@ -36,7 +36,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 char *GetSMErrorText(int index);
 
 int MailConnect();
-int PostHeader(char *, char *, char *, char *);
+int PostHeader(char *, char *, char *, char *, char *);
 int Post(LPCSTR);
 int Ack();
 unsigned long GetAddr(LPSTR szHost);

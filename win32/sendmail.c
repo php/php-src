@@ -277,9 +277,9 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 	/* send message header */
 	if (Subject == NULL)
-		res = PostHeader(RPath, "No Subject", mailTo, headers);
+		res = PostHeader(RPath, "No Subject", mailTo, headers, NULL);
 	else
-		res = PostHeader(RPath, Subject, mailTo, headers);
+		res = PostHeader(RPath, Subject, mailTo, headers, NULL);
 	if (res != SUCCESS)
 		return (res);
 
@@ -331,7 +331,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 // Author/Date:  jcar 20/9/96
 // History:
 //********************************************************************/
-int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
+int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders, char *mailCc)
 {
 
 	/* Print message header according to RFC 822 */
@@ -368,6 +368,8 @@ int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	if(!xheaders || !strstr(xheaders, "To:")){
 		p += sprintf(p, "To: %s\r\n", mailTo);
 	}
+	if (mailCc && *mailCc) 
+		p += sprintf(p, "Cc: %s\r\n", mailCc);
 	if(xheaders){
 		p += sprintf(p, "%s\r\n", xheaders);
 	}
