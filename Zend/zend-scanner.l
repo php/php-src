@@ -1132,7 +1132,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	errno = 0;
 	zendlval->value.lval = strtol(yytext, NULL, 0);
 	if (errno == ERANGE) { /* overflow */
-		zendlval->value.dval = zend_string_to_double(yytext, yyleng);
+		zendlval->value.dval = strtod(yytext,NULL);
 		zendlval->type = IS_DOUBLE;
 		return T_DNUMBER;
 	} else {
@@ -1149,7 +1149,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
-	zendlval->value.dval = zend_string_to_double(yytext, yyleng);
+	zendlval->value.dval = strtod(yytext,NULL);
 	zendlval->type = IS_DOUBLE;
 	return T_DNUMBER;
 }
