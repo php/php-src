@@ -1,7 +1,7 @@
 --TEST--
 date_sunrise() and date_sunset() functions
 --INI--
-precision = 14
+precision=14
 --FILE--
 <?php
 
