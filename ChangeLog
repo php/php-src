@@ -1,3 +1,57 @@
+2005-03-30  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      configure.in
+      main/php_version.h:
+      - Back to dev so that we have working snapshots again.
+
+2005-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      back to dev.
+
+2005-03-30  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Roll 5.0.4
+
+2005-03-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      configure.in
+      main/php_version.h:
+      Tag 4.3.11
+
+2005-03-30  Joe Orton  <jorton@redhat.com>
+
+    * ext/mysqli/mysqli_driver.c
+      ext/mysqli/mysqli_prop.c:
+      Mark more private functions as static.
+
+2005-03-30  Edin Kadribasic  <edink@emini.dk>
+
+    * INSTALL
+      INSTALL
+      win32/install.txt
+      win32/install.txt:
+      Updated install instructions from the documentation project (Philip Olson)
+
+    * (PHP_5_0)
+      INSTALL
+      win32/install.txt:
+      Update instruction from the documentation project (Philip Olson)
+
+2005-03-30  Joe Orton  <jorton@redhat.com>
+
+    * ext/mysqli/mysqli_prop.c:
+      Mark private functions as static.
+
 2005-03-29  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_5_0)
