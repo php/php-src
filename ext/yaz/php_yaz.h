@@ -45,6 +45,7 @@ PHP_FUNCTION(yaz_range);
 PHP_FUNCTION(yaz_itemorder);
 PHP_FUNCTION(yaz_scan);
 PHP_FUNCTION(yaz_scan_result);
+PHP_FUNCTION(yaz_es_result);
 PHP_FUNCTION(yaz_present);
 PHP_FUNCTION(yaz_ccl_conf);
 PHP_FUNCTION(yaz_ccl_parse);
