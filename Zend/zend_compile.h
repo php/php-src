@@ -50,7 +50,6 @@ typedef struct _znode {
 
 		zend_uint var;
 		zend_uint opline_num; /*  Needs to be signed */
-		zend_uint fetch_type;
 		zend_op_array *op_array;
 		zend_class_entry *previously_active_class_entry; /* Used at compile-time */
 		struct {
