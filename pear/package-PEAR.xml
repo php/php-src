@@ -38,7 +38,7 @@
   </maintainers>
   <release>
     <version>1.2.2</version>
-    <date>2003-08-??</date>
+    <date>2003-08-25</date>
     <state>stable</state>
     <notes>
 * Fixed #25131 - OS_Guess warnings on empty lines from
