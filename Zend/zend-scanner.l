@@ -214,16 +214,20 @@ ZEND_API inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 			file_handle->handle.is = new ifstream(file_handle->handle.fd);
 			break;
 		case ZEND_HANDLE_FILENAME:
-			file_handle->handle.is = new ifstream(file_handle->filename);
+			file_handle->handle.is = new ifstream(file_handle->filename, ios::nocreate|ios::in|ios::binary);
 			break;
 		case ZEND_HANDLE_FP:
 			if (file_handle->handle.fp==stdin) {
 				file_handle->handle.is = (ifstream *) &cin;
 			} else {
 				fclose(file_handle->handle.fp);
-				file_handle->handle.is = new ifstream(file_handle->filename);
+				file_handle->handle.is = new ifstream(file_handle->filename, ios::nocreate|ios::in|ios::binary);
 			}	
 			break;
+	}
+	if (file_handle->handle.is->fail()) {
+		delete file_handle->handle.is;
+		return FAILURE;
 	}
 	file_handle->type = ZEND_HANDLE_ISTREAM;
 
@@ -398,7 +402,11 @@ int require_filename(char *filename CLS_DC)
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = filename;
-	return require_file(&file_handle CLS_CC);
+	if (require_file(&file_handle CLS_CC)==FAILURE) {
+		zend_bailout();
+		return FAILURE; /* will never get here */
+	}
+	return SUCCESS;
 }
 
 
@@ -1050,6 +1058,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	zendlval->value.str.val = yytext; /* no copying - intentional */
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
+	printf("Matched whitespace:  '%s'\n", yytext);
 	HANDLE_NEWLINES(yytext,yyleng);
 	return T_WHITESPACE;
 }
@@ -1067,6 +1076,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 
 <ST_COMMENT>[^*]+ {
+	HANDLE_NEWLINES(yytext, yyleng);
 	yymore();
 }
 
