@@ -153,13 +153,6 @@ safe_mode_include_dir =
 ; will be allowed to be executed via the exec family of functions.
 safe_mode_exec_dir =
 
-; open_basedir, if set, limits all file operations to the defined directory
-; and below.  This directive makes most sense if used in a per-directory
-; or per-virtualhost web server configuration file.
-; Note: open_basedir is in effect regardless of safe_mode setting
-;
-;open_basedir =
-
 ; Setting certain environment variables may be a potential security breach.
 ; This directive contains a comma-delimited list of prefixes.  In Safe Mode,
 ; the user may only alter environment variables whose names begin with the
@@ -175,8 +168,14 @@ safe_mode_allowed_env_vars = PHP_
 ; protected even if safe_mode_allowed_env_vars is set to allow to change them.
 safe_mode_protected_env_vars = LD_LIBRARY_PATH
 
+; open_basedir, if set, limits all file operations to the defined directory
+; and below.  This directive makes most sense if used in a per-directory
+; or per-virtualhost web server configuration file. This directive is
+; *NOT* affected by whether Safe Mode is turned On or Off.
+;open_basedir =
+
 ; This directive allows you to disable certain functions for security reasons.
-; It receives a comma-delimited list of function names.  This directive is
+; It receives a comma-delimited list of function names. This directive is
 ; *NOT* affected by whether Safe Mode is turned On or Off.
 disable_functions =
 
