@@ -33,7 +33,7 @@
 static int le_conn;	/* connection resource */
 static int le_user;  /* store add/edit/get user information */
 
-static int mcve_init;  /* For Safe Memory Dealocation */
+static int mcve_init;  /* For Safe Memory Deallocation */
 /* }}} */
 
 /* {{{ extension definition structures */
@@ -48,7 +48,17 @@ function_entry php_mcve_functions[] = {
 	PHP_FE(mcve_setip,			NULL)
 	PHP_FE(mcve_setssl,			NULL)
 	PHP_FE(mcve_settimeout,			NULL)
+	PHP_FE(mcve_verifyconnection,		NULL)
+	PHP_FE(mcve_verifysslcert,		NULL)
+	PHP_FE(mcve_maxconntimeout,		NULL)
+	PHP_FE(mcve_connectionerror,		NULL)
+	PHP_FE(mcve_deletetrans,		NULL)
 	PHP_FE(mcve_connect,			NULL)
+	PHP_FE(mcve_transnew,			NULL)
+	PHP_FE(mcve_transparam,			NULL)
+	PHP_FE(mcve_transsend,			NULL)
+	PHP_FE(mcve_ping,			NULL)
+	PHP_FE(mcve_responseparam,		NULL)
 	PHP_FE(mcve_returnstatus,		NULL)
 	PHP_FE(mcve_returncode,			NULL)
 	PHP_FE(mcve_transactionssent,		NULL)
@@ -144,8 +154,95 @@ PHP_MINIT_FUNCTION(mcve)
 	le_conn = zend_register_list_destructors_ex(_free_mcve_conn, NULL,
 	    "mcve connection", module_number);
 
+	/* Key definitions for Transaction Parameters */
+	REGISTER_LONG_CONSTANT("MC_TRANTYPE", MC_TRANTYPE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USERNAME", MC_USERNAME, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_PASSWORD", MC_PASSWORD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ACCOUNT", MC_ACCOUNT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRACKDATA", MC_TRACKDATA, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_EXPDATE", MC_EXPDATE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_STREET", MC_STREET, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ZIP", MC_ZIP, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_CV", MC_CV, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_COMMENTS", MC_COMMENTS, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_CLERKID", MC_CLERKID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_STATIONID", MC_STATIONID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_APPRCODE", MC_APPRCODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_AMOUNT", MC_AMOUNT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_PTRANNUM", MC_PTRANNUM, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TTID", MC_TTID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER", MC_USER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_PWD", MC_PWD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ACCT", MC_ACCT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_BDATE", MC_BDATE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_EDATE", MC_EDATE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_BATCH", MC_BATCH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_FILE", MC_FILE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN", MC_ADMIN, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_AUDITTYPE", MC_AUDITTYPE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_CUSTOM", MC_CUSTOM, MCVE_CONST);
+
+	/* Args for adding a user */
+	REGISTER_LONG_CONSTANT("MC_USER_PROC", MC_USER_PROC, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_USER", MC_USER_USER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_PWD", MC_USER_PWD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_INDCODE", MC_USER_INDCODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_MERCHID", MC_USER_MERCHID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_BANKID", MC_USER_BANKID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_TERMID", MC_USER_TERMID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_CLIENTNUM", MC_USER_CLIENTNUM, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_STOREID", MC_USER_STOREID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_AGENTID", MC_USER_AGENTID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_CHAINID", MC_USER_CHAINID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_ZIPCODE", MC_USER_ZIPCODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_TIMEZONE", MC_USER_TIMEZONE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_MERCHCAT", MC_USER_MERCHCAT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_MERNAME", MC_USER_MERNAME, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_MERCHLOC", MC_USER_MERCHLOC, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_STATECODE", MC_USER_STATECODE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_USER_PHONE", MC_USER_PHONE, MCVE_CONST);
+
+	/* Value definitions for Transaction Types */
+	REGISTER_LONG_CONSTANT("MC_TRAN_SALE", MC_TRAN_SALE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_PREAUTH", MC_TRAN_PREAUTH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_VOID", MC_TRAN_VOID, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_PREAUTHCOMPLETE", MC_TRAN_PREAUTHCOMPLETE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_FORCE", MC_TRAN_FORCE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_OVERRIDE", MC_TRAN_OVERRIDE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_RETURN", MC_TRAN_RETURN, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_SETTLE", MC_TRAN_SETTLE, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_ADMIN", MC_TRAN_ADMIN, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_PING", MC_TRAN_PING, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_CHKPWD", MC_TRAN_CHKPWD, MCVE_CONST);
+
+	/* Engine Admin Transaction Types */
+	REGISTER_LONG_CONSTANT("MC_TRAN_CHNGPWD", MC_TRAN_CHKPWD, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_LISTSTATS", MC_TRAN_LISTSTATS, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_LISTUSERS", MC_TRAN_LISTUSERS, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_GETUSERINFO", MC_TRAN_GETUSERINFO, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_ADDUSER", MC_TRAN_ADDUSER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_EDITUSER", MC_TRAN_EDITUSER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_DELUSER", MC_TRAN_DELUSER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_ENABLEUSER", MC_TRAN_ENABLEUSER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_DISABLEUSER", MC_TRAN_DISABLEUSER, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_IMPORT", MC_TRAN_IMPORT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_TRAN_EXPORT", MC_TRAN_EXPORT, MCVE_CONST);
+
+	/* Value definitions for Admin Types */
+	REGISTER_LONG_CONSTANT("MC_ADMIN_GUT", MC_ADMIN_GUT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_GL", MC_ADMIN_GL, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_GFT", MC_ADMIN_GFT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_BT", MC_ADMIN_BT, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_UB", MC_ADMIN_UB, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_QC", MC_ADMIN_QC, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_RS", MC_ADMIN_RS, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_CTH", MC_ADMIN_CTH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_CFH", MC_ADMIN_CFH, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MC_ADMIN_FORCESETTLE", MC_ADMIN_FORCESETTLE, MCVE_CONST);
+
 	/* set up the mcve defines */
 	REGISTER_LONG_CONSTANT("MCVE_UNUSED", MCVE_UNUSED, MCVE_CONST);
+	REGISTER_LONG_CONSTANT("MCVE_NEW", MCVE_NEW, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_PENDING", MCVE_PENDING, MCVE_CONST);
 	REGISTER_LONG_CONSTANT("MCVE_DONE", MCVE_DONE, MCVE_CONST);
 
@@ -202,12 +299,6 @@ PHP_MINFO_FUNCTION(mcve)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "mcve support", "enabled");
-	php_info_print_table_row(2, "mcve ssl support",
-#ifdef ENABLE_SSL
-	"enabled");
-#else
-	"disabled");
-#endif
 	php_info_print_table_row(2, "version", PHP_MCVE_VERSION);
 	php_info_print_table_end();
 }
@@ -261,13 +352,35 @@ PHP_FUNCTION(mcve_deleteresponse)
 	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
 		WRONG_PARAM_COUNT;
-	
+
 	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
 						le_conn);
 
 	convert_to_long_ex(arg2);
 
 	MCVE_DeleteResponse(conn, Z_LVAL_PP(arg2));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool mcve_deletetrans(resource conn, int identifier)
+   Delete specified transaction from MCVE_CONN structure */
+PHP_FUNCTION(mcve_deletetrans)
+{
+	MCVE_CONN *conn;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+						le_conn);
+
+	convert_to_long_ex(arg2);
+
+	MCVE_DeleteTrans(conn, Z_LVAL_PP(arg2));
 
 	RETURN_TRUE;
 }
@@ -343,7 +456,6 @@ PHP_FUNCTION(mcve_setip)
    Set the connection method to SSL */
 PHP_FUNCTION(mcve_setssl)
 {
-#ifdef ENABLE_SSL
 	MCVE_CONN *conn;
 	int retval;
 	zval **arg1, **arg2, **arg3;
@@ -361,9 +473,6 @@ PHP_FUNCTION(mcve_setssl)
 	retval = MCVE_SetSSL(conn, Z_STRVAL_PP(arg2), Z_LVAL_PP(arg3));
 
 	RETURN_LONG(retval);
-#else
-	RETURN_LONG(MCVE_FAIL);
-#endif
 }
 /* }}} */
 
@@ -391,6 +500,99 @@ PHP_FUNCTION(mcve_settimeout)
 }
 /* }}} */
 
+/* {{{ proto int mcve_setblocking(resource conn, int tf)
+    Set blocking/non-blocking mode for connection
+*/
+PHP_FUNCTION(mcve_setblocking)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	retval = MCVE_SetBlocking(conn, Z_LVAL_PP(arg2));
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto bool mcve_verifyconnection(resource conn, int tf)
+    Set whether or not to PING upon connect to verify connection
+*/
+PHP_FUNCTION(mcve_verifyconnection)
+{
+	MCVE_CONN *conn;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	MCVE_VerifyConnection(conn, Z_LVAL_PP(arg2));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool mcve_verifysslcert(resource conn, int tf)
+    Set whether or not to verify the server ssl certificate
+*/
+PHP_FUNCTION(mcve_verifysslcert)
+{
+	MCVE_CONN *conn;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	MCVE_VerifySSLCert(conn, Z_LVAL_PP(arg2));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool mcve_maxconntimeout(resource conn, int secs)
+    The maximum amount of time the API will attempt a connection to MCVE
+*/
+PHP_FUNCTION(mcve_maxconntimeout)
+{
+	MCVE_CONN *conn;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 ||
+	    zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	MCVE_MaxConnTimeout(conn, Z_LVAL_PP(arg2));
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto int mcve_connect(resource conn)
    Establish the connection to MCVE */
 PHP_FUNCTION(mcve_connect)
@@ -411,6 +613,30 @@ PHP_FUNCTION(mcve_connect)
 }
 /* }}} */
 
+/* {{{ proto string mcve_connectionerror(resource conn)
+   Get a textual representation of why a connection failed */
+PHP_FUNCTION(mcve_connectionerror)
+{
+	MCVE_CONN *conn;
+	char *retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
+	    le_conn);
+
+	retval = MCVE_ConnectionError(conn);
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
+}
+/* }}} */
+
 /* {{{ proto int mcve_transactionssent(resource conn)
    Check to see if outgoing buffer is clear */
 PHP_FUNCTION(mcve_transactionssent)
@@ -428,6 +654,158 @@ PHP_FUNCTION(mcve_transactionssent)
 	retval = MCVE_TransactionsSent(conn);
 
 	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int mcve_ping(resource conn)
+   Send a ping request to MCVE */
+PHP_FUNCTION(mcve_ping)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
+	    le_conn);
+
+	retval = MCVE_Ping(conn);
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto long mcve_transnew(resource conn)
+   Start a new transaction */
+PHP_FUNCTION(mcve_transnew)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &arg) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg, -1, "mcve connection",
+	    le_conn);
+
+	retval = MCVE_TransNew(conn);
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int mcve_transparam(resource conn, long identifier, int key, ...)
+   Add a parameter to a transaction */
+PHP_FUNCTION(mcve_transparam)
+{
+	MCVE_CONN *conn;
+	int retval;
+	int key;
+	zval **arg1, **arg2, **arg3, **arg4, **arg5;
+
+	if (ZEND_NUM_ARGS() == 4) {
+		if (zend_get_parameters_ex(4, &arg1, &arg2, &arg3, &arg4) == FAILURE)
+			WRONG_PARAM_COUNT;
+	} else if (ZEND_NUM_ARGS() == 5) {
+		if (zend_get_parameters_ex(5, &arg1, &arg2, &arg3, &arg4, &arg5) == FAILURE)
+			WRONG_PARAM_COUNT;
+	} else {
+		WRONG_PARAM_COUNT;
+	}
+
+	convert_to_long_ex(arg3);
+
+	key = Z_LVAL_PP(arg3);
+
+	if (key == MC_CUSTOM && ZEND_NUM_ARGS() != 5)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	switch (key) {
+		case MC_TRANTYPE:
+		case MC_PTRANNUM:
+		case MC_TTID:
+		case MC_ADMIN:
+		case MC_AUDITTYPE:
+			convert_to_long_ex(arg4);
+			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_LVAL_PP(arg4));
+		break;
+
+		case MC_AMOUNT:
+			convert_to_double_ex(arg4);
+			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_DVAL_PP(arg4));
+		break;
+
+		case MC_CUSTOM:
+			convert_to_string_ex(arg4);
+			convert_to_string_ex(arg5);
+			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5));
+		break;
+
+		default:
+			convert_to_string_ex(arg4);
+			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4));
+		break;
+	}
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto int mcve_transsend(resource conn, long identifier)
+   Finalize and send the transaction */
+PHP_FUNCTION(mcve_transsend)
+{
+	MCVE_CONN *conn;
+	int retval;
+	zval **arg1, **arg2;
+
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+
+	retval = MCVE_TransSend(conn, Z_LVAL_PP(arg2));
+
+	RETURN_LONG(retval);
+}
+/* }}} */
+
+/* {{{ proto string mcve_responseparam(resource conn, long identifier, string key)
+   Get a custom response parameter */
+PHP_FUNCTION(mcve_responseparam)
+{
+	MCVE_CONN *conn;
+	char *retval;
+	zval **arg1, **arg2, **arg3;
+
+	if (ZEND_NUM_ARGS() != 3 ||
+		zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE)
+		WRONG_PARAM_COUNT;
+
+	ZEND_FETCH_RESOURCE(conn, MCVE_CONN *, arg1, -1, "mcve connection",
+	    le_conn);
+
+	convert_to_long_ex(arg2);
+	convert_to_string_ex(arg3);
+
+	retval = MCVE_ResponseParam(conn, Z_LVAL_PP(arg2), Z_STRVAL_PP(arg3));
+
+	if (retval == NULL) {
+	  RETVAL_STRING("",1);
+	} else {
+	  RETVAL_STRING(retval, 1);
+	}
 }
 /* }}} */
 
