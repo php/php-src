@@ -20,7 +20,7 @@
 #include "zend.h"
 
 typedef struct _dynamic_array {
-        char *array;
+        void *array;
         unsigned int element_size;
         unsigned int current;
         unsigned int allocated;
@@ -31,7 +31,7 @@ ZEND_API int zend_dynamic_array_init(dynamic_array *da, unsigned int element_siz
 	da->element_size = element_size;
 	da->allocated = size;
 	da->current = 0;
-	da->array = (char *) emalloc(size*element_size);
+	da->array = (void *) emalloc(size*element_size);
 	if (da->array == NULL) {
 		return 1;
 	}
@@ -42,7 +42,7 @@ ZEND_API void *zend_dynamic_array_push(dynamic_array *da)
 {
 	if (da->current == da->allocated) {
 		da->allocated *= 2;
-		da->array = (char *) erealloc(da->array, da->allocated*da->element_size);
+		da->array = (void *) erealloc(da->array, da->allocated*da->element_size);
 	}
 	return (da->array+(da->current++)*da->element_size);
 }
