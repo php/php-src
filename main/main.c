@@ -756,7 +756,7 @@ static void php3_config_ini_shutdown()
 
 
 #ifdef ZTS
-static core_globals_ctor(php_core_globals *core_globals)
+static void core_globals_ctor(php_core_globals *core_globals)
 {
 	if (main_core_globals) {
 		*core_globals = *main_core_globals;
