@@ -104,7 +104,7 @@ static void spl_init_globals(zend_spl_globals *spl_globals)
 	ZEND_EXECUTE_HOOK(ZEND_FE_FETCH);
 #endif
 
-#if defined(SPL_ARRAY_READ) | defined(SPl_ARRAY_WRITE)
+#if defined(SPL_ARRAY_READ) | defined(SPL_ARRAY_WRITE)
 	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_R);
 	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_W);
 	ZEND_EXECUTE_HOOK(ZEND_FETCH_DIM_RW);
