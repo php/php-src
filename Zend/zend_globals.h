@@ -199,9 +199,10 @@ struct _zend_executor_globals {
 	HashTable *zend_constants;	/* constants table */
 
 	long precision;
+	zend_bool destroying_function_symbol_table;
 
 	/* for extended information support */
-	unsigned char no_extensions;
+	zend_bool no_extensions;
 
 	HashTable regular_list;
 	HashTable persistent_list;

@@ -1299,6 +1299,8 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 			/* copy default properties */
 			zend_hash_copy(&CG(class_entry).default_properties, &parent_class->default_properties, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
+			CG(class_entry).parent = parent_class;
+
 			zval_dtor(&parent_class_name->u.constant);
 		} else {
 			runtime_inheritence = 1;

@@ -91,6 +91,7 @@ void init_executor(CLS_D ELS_DC)
 	EG(error_zval).EA.is_ref=0;
 	EG(error_zval).EA.locks = 0;
 	EG(error_zval_ptr)=&EG(error_zval);
+	EG(destroying_function_symbol_table) = 0;
 	zend_ptr_stack_init(&EG(arg_types_stack));
 	zend_stack_init(&EG(overloaded_objects_stack));
 /* destroys stack frame, therefore makes core dumps worthless */
@@ -215,7 +216,13 @@ ZEND_API int zval_ptr_dtor(zval **zval_ptr)
 		safe_free_zval_ptr(*zval_ptr);
 	}
 	if (locked) {
-		return 0; /* don't kill the container bucket */
+		ELS_FETCH();
+
+		if (EG(destroying_function_symbol_table)) {
+			return 1;
+		} else {
+			return 0; /* don't kill the container bucket */
+		}
 	} else {
 		return 1;
 	}
