@@ -206,7 +206,7 @@ PHP_ARG_ENABLE([mbregex], [whether to enable multibyte regex support],
 
 PHP_ARG_WITH(libmbfl, [for external libmbfl],
 [  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl. DIR is the libmbfl install prefix.
-                            If DIR is not set, the bundled libmbfl will be used.], yes, no)
+                            If DIR is not set, the bundled libmbfl will be used.], no, no)
 
 if test "$PHP_MBSTRING" != "no"; then  
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
