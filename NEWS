@@ -12,23 +12,24 @@ PHP 4                                                                      NEWS
   is used for background color. (Pierre-Alain Joye)
 - Fixed a bug that under certain circumstances could invalidate safe_mode.
   (Ilia)
-- Fixed bug #24752 (Unhandled "uniqueidentifier" field type). (Ilia, 
-  s.sonnenberg[at]coolspot.de)
+- Fixed bug #24752 (Unhandled "uniqueidentifier" field type). 
+  (Ilia, s.sonnenberg[at]coolspot.de)
 - Fixed bug #24710 (Crash when $obj->{0} is used). (Zeev)
 - Fixed bug #24663 (\n. sequences were not being escaped). (Ilia)
-- Fixed bug #24640 (var_export and var_dump can't output large float). (Marcus)
-- Fixed bug #24609 (segfault when using replace node across different docs).
-  (Rob Richards)
-- Fixed bug #24594 (Rewrite the imagefill function). (Pierre-Alain Joye)
+- Fixed bug #24640 (var_export() and var_dump() can not output large floats).
+  (Marcus)
+- Fixed bug #24609 (ext/domxml: segfault when using replace node across 
+  different docs). (Rob Richards)
+- Fixed bug #24594 (Rewrite of the imagefill() function). (Pierre-Alain Joye)
 - Fixed bug #24592 (NULL related crash in session extension). (Sascha)
 - Fixed bug #24573 (debug_backtrace() crashes if $this set to null). (Jani)
 - Fixed bug #24560 (parse_url() incorrectly handling certain file:// based 
   schemas). (Ilia)
 - Fixed bug #24537 (apache2 compile misses some include directories). (Jani)
-- Fixed bug #24535 (Crash when retrieving data from unbuffered result after
-  the original connection has been changed). (Ilia)
+- Fixed bug #24535 (ext/mysql: crash when retrieving data from unbuffered
+  result after the original connection has been changed). (Ilia)
 - Fixed bug #24519 (aggregate_methods_by_list() does not increment refcount).
-- Fixed bug #24313 (file_exist() warning on non-existent files when
+- Fixed bug #24313 (file_exists() warning on non-existent files when
   open_basedir is used). (Ilia)
 - Fixed bug #24312 (base64_decode() does not skip 0xF0-0xFF characters).
   (gereon.steffens[at]onvista.de, Ilia)
