@@ -60,6 +60,9 @@ PHP_FUNCTION(snmp3_set);
 PHP_FUNCTION(snmp_set_valueretrieval);
 PHP_FUNCTION(snmp_get_valueretrieval);
 
+PHP_FUNCTION(snmp_read_mib);
+
+
 ZEND_BEGIN_MODULE_GLOBALS(snmp)
       int valueretrieval;
 ZEND_END_MODULE_GLOBALS(snmp)
