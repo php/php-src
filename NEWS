@@ -19,6 +19,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #31174 (compile warning in url.c). (Ilia, lukem at NetBSD dot org)
 - Fixed bug #31159 (COM object access is not working). (Wez)
 - Fixed bug #31142 (imap_mail_compose() fails to generate correct output). (Ilia)
+- Fixed bug #31398 (When magic_guotes_gpc are enabled filenames with ' get cutoff).
+  (Ilia)
 - Fixed bug #31120 (mssql_query returns false on successfull inserts and 
   stored procedures). (Frank)
 - Fixed bugs #31107, #31110, #31111 (Compile failure of zend_strtod.c). (Jani)
