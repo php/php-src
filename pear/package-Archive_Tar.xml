@@ -25,7 +25,7 @@ loaded.
   </maintainers>
   <release>
     <version>0.4</version>
-    <date>2002-04-13</date>
+    <date>2002-05-20</date>
     <notes>Windows bugfix: use forward slashes inside archives</notes>
     <state>stable</state>
     <filelist>
