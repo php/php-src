@@ -61,6 +61,7 @@ PHPAPI void php_print_credits(int flag)
 		CREDIT_LINE("UNIX Build and Modularization", "Stig Bakken, Sascha Schumann");
 		CREDIT_LINE("Win32 Port", "Shane Caraveo, Zeev Suraski");
 		CREDIT_LINE("Server API (SAPI) Abstraction Layer", "Andi Gutmans, Shane Caraveo, Zeev Suraski");
+		CREDIT_LINE("Streams Support and Development", "Wez Furlong");
 		php_info_print_table_end();
 	}
 
