@@ -53,7 +53,7 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element);
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2));
 ZEND_API void zend_llist_destroy(zend_llist *l);
 ZEND_API void zend_llist_clean(zend_llist *l);
-ZEND_API void zend_llist_remove_tail(zend_llist *l);
+ZEND_API void *zend_llist_remove_tail(zend_llist *l);
 ZEND_API void zend_llist_copy(zend_llist *dst, zend_llist *src);
 ZEND_API void zend_llist_apply(zend_llist *l, llist_apply_func_t func TSRMLS_DC);
 ZEND_API void zend_llist_apply_with_del(zend_llist *l, int (*func)(void *data));

@@ -64,32 +64,34 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 
 
 #define DEL_LLIST_ELEMENT(current, l) \
-			if (current->prev) {\
-				current->prev->next = current->next;\
+			if ((current)->prev) {\
+				(current)->prev->next = (current)->next;\
 			} else {\
-				l->head = current->next;\
+				(l)->head = (current)->next;\
 			}\
-			if (current->next) {\
-				current->next->prev = current->prev;\
+			if ((current)->next) {\
+				(current)->next->prev = (current)->prev;\
 			} else {\
-				l->tail = current->prev;\
+				(l)->tail = (current)->prev;\
 			}\
-			if (l->dtor) {\
-				l->dtor(current->data);\
-				pefree(current, l->persistent);\
+			if ((l)->dtor) {\
+				(l)->dtor((current)->data);\
+				pefree((current), (l)->persistent);\
 			}
 
 
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2))
 {
 	zend_llist_element *current=l->head;
+	zend_llist_element *next;
 
 	while (current) {
+		next = current->next;
 		if (compare(current->data, element)) {
 			DEL_LLIST_ELEMENT(current, l);
 			break;
 		}
-		current = current->next;
+		current = next;
 	}
 }
 
@@ -116,17 +118,28 @@ ZEND_API void zend_llist_clean(zend_llist *l)
 }
 
 
-ZEND_API void zend_llist_remove_tail(zend_llist *l)
+ZEND_API void *zend_llist_remove_tail(zend_llist *l)
 {
 	zend_llist_element *old_tail;
+	void *data;
 
 	if ((old_tail = l->tail)) {
 		if (l->tail->prev) {
 			l->tail->prev->next = NULL;
 		}
+        
+		/* Save the data, this doesn't get free'd, 
+		 * the pointer is just removed from the list
+		 */
+		data = old_tail->data;
+
 		l->tail = l->tail->prev;
 		pefree(old_tail, l->persistent);
+
+		return data;
 	}
+
+	return NULL;
 }
 
 
