@@ -178,10 +178,6 @@ SOURCE=..\main\main.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\memory_streams.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\mergesort.c
 # End Source File
 # Begin Source File
@@ -250,15 +246,27 @@ SOURCE=..\main\streams.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\main\memory_streams.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\main\user_streams.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\filters.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\standard\user_filters.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\strlcat.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\main\strlcpy.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\user_streams.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
