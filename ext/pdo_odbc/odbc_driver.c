@@ -42,9 +42,10 @@ static int pdo_odbc_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *inf
 		einfo = &S->einfo;
 	}
 
-	spprintf(&message, 0, "SQLSTATE[%s] %s: %d %s (%s:%d)",
-				einfo->last_state, einfo->what, einfo->last_error,
-				einfo->last_err_msg, einfo->file, einfo->line);
+	spprintf(&message, 0, "%s (%s[%d] at %s:%d)",
+				einfo->last_err_msg,
+				einfo->what, einfo->last_error,
+				einfo->file, einfo->line);
 
 	add_next_index_long(info, einfo->last_error);
 	add_next_index_string(info, message, 0);
@@ -82,7 +83,7 @@ void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, 
 	einfo->line = line;
 	einfo->what = what;
 
-	strcpy(*pdo_err, einfo->last_err_msg);
+	strcpy(*pdo_err, einfo->last_state);
 
 	if (!dbh->methods) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC, "SQLSTATE[%s] %s: %d %s",
@@ -125,8 +126,22 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 
 	cursor_type = pdo_attr_lval(driver_options, PDO_ATTR_CURSOR, PDO_CURSOR_FWDONLY TSRMLS_CC);
 	if (cursor_type != PDO_CURSOR_FWDONLY) {
+#if 0
 		SQLUINTEGER cursor;
+		cursor = SQL_SCROLLABLE;
+#endif
 
+		printf("setting up scrollable cursor\n");
+
+		rc = SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_SCROLLABLE, (void*)SQL_SCROLLABLE, 0);
+		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			pdo_odbc_stmt_error("SQLSetStmtAttr: SQL_ATTR_CURSOR_SCROLLABLE");
+			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
+			return 0;
+		}
+
+#if 0
+		SQLSetStmtAttr(S->stmt, SQL_ATTR_CURSOR_TYPE, (void*)SQL_CURSOR_STATIC, 0);
 		switch (cursor_type) {
 			case PDO_CURSOR_SCROLL:
 				cursor = SQL_CURSOR_STATIC;
@@ -134,12 +149,13 @@ static int odbc_handle_preparer(pdo_dbh_t *dbh, const char *sql, long sql_len, p
 				;
 		}
 
-		rc = SQLSetStmtAttr(S->stmt, SQL_CURSOR_TYPE, (void*)cursor, SQL_IS_UINTEGER);
+		rc = SQLSetStmtOptions(S->stmt, SQL_CURSOR_TYPE, (void*)cursor, SQL_IS_UINTEGER);
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 			pdo_odbc_stmt_error("SQLSetStmtOption: SQL_CURSOR_TYPE");
 			SQLFreeHandle(SQL_HANDLE_STMT, S->stmt);
 			return 0;
 		}
+#endif
 	}
 	
 	rc = SQLPrepare(S->stmt, (char*)sql, SQL_NTS);
@@ -302,8 +318,8 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_D
 
 	/* set up the cursor library, if needed, or if configured explicitly */
 	cursor_lib = pdo_attr_lval(driver_options, PDO_ODBC_ATTR_USE_CURSOR_LIBRARY, SQL_CUR_USE_IF_NEEDED TSRMLS_CC);
-	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, SQL_IS_UINTEGER);
-	if (rc != SQL_SUCCESS) {
+	rc = SQLSetConnectAttr(H->dbc, SQL_ODBC_CURSORS, (void*)cursor_lib, 0);
+	if (rc != SQL_SUCCESS && cursor_lib != SQL_CUR_USE_IF_NEEDED) {
 		pdo_odbc_drv_error("SQLSetConnectAttr SQL_ODBC_CURSORS");
 		odbc_handle_closer(dbh TSRMLS_CC);
 		return 0;
