@@ -49,8 +49,8 @@ features:
   explanation - you can now call functions before they're declared!
 * Added here-docs support.
 * Added foreach.  Two syntaxes supported:
-   foreach($val in array_expr) statement
-   foreach($key, $val in array_expr) statement
+   foreach(array_expr as $val) statement
+   foreach(array_expr as $key => $val) statement
 * A true unset() implementation.  A variable or element that is unset(), is now
   sent to oblivion in its entirely, no trace remains from it.
 * Output buffering support!  Use ob_start() to begin output buffering, ob_end_flush()
