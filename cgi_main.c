@@ -162,17 +162,18 @@ static void php_cgi_usage(char *argv0)
 				" [-s]"
 				" [-v] [-i] [-f <file>] | "
 				"{<file> [args...]}\n"
-				"  -q       Quiet-mode.  Suppress HTTP Header output.\n"
-				"  -s       Display colour syntax highlighted source.\n"
-				"  -f<file> Parse <file>.  Implies `-q'\n"
-				"  -v       Version number\n"
-				"  -c<path> Look for php.ini file in this directory\n"
+				"  -q             Quiet-mode.  Suppress HTTP Header output.\n"
+				"  -s             Display colour syntax highlighted source.\n"
+				"  -f<file>       Parse <file>.  Implies `-q'\n"
+				"  -v             Version number\n"
+				"  -c<path>       Look for php.ini file in this directory\n"
 #if SUPPORT_INTERACTIVE
-				"  -a		Run interactively\n"
+				"  -a             Run interactively\n"
 #endif
-				"  -e		Generate extended information for debugger/profiler\n"
-				"  -i       PHP information\n"
-				"  -h       This help\n", prog);
+				"  -d foo[=bar]   Define INI entry foo with value 'bar'\n"
+				"  -e             Generate extended information for debugger/profiler\n"
+				"  -i             PHP information\n"
+				"  -h             This help\n", prog);
 }
 
 
@@ -190,6 +191,22 @@ static void init_request_info(SLS_D)
 	/* CGI does not support HTTP authentication */
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
+}
+
+
+void define_command_line_ini_entry(char *arg)
+{
+	char *name, *value;
+
+	name = arg;
+	value = strchr(arg, '=');
+	if (value) {
+		*value = 0;
+		value++;
+	} else {
+		value = "1";
+	}
+	php_alter_ini_entry(name, strlen(name), value, strlen(value), PHP_INI_SYSTEM);
 }
 
 
@@ -288,7 +305,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 
 	if (!cgi) {					/* never execute the arguments if you are a CGI */
 		request_info.php_argv0 = NULL;
-		while ((c = getopt(argc, argv, "c:qvisnaeh?vf:")) != -1) {
+		while ((c = getopt(argc, argv, "cd:qvisnaeh?vf:")) != -1) {
 			switch (c) {
 				case 'f':
 					if (!cgi_started){ 
@@ -360,6 +377,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 					SG(headers_sent) = 1;
 					php_cgi_usage(argv[0]);
 					exit(1);
+					break;
+				case 'd':
+					define_command_line_ini_entry(optarg);
 					break;
 				default:
 					break;

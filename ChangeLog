@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added -d switch to the CGI binary that allows overriding php.ini values
+  from the command line (Zeev)
 - Fixed a crash that would occur if wddx_deserialize did not receive
   a valid packet (Andrey)
 - Fixed a bugglet when redefining a class at run-time (Andi, Zend library)
@@ -11,7 +13,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 - Fixed bug in ISAPI header sending function (Charles)
 - Fixed memory leak when using undefined values (Andi & Zeev, Zend library)
 - Added output_buffering directive to php.ini, to enable output buffering
-  for all PHP scripts (default is off).
+  for all PHP scripts - default is off (Zeev).
 - Fixed some more class inheritance issues (Zeev, Zend library)
 - Fixed Apache build wrt to shared modules on FreeBSD/Linux (Sascha)
 - Added session.extern_referer_chk which checks whether session ids were
