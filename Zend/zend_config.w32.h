@@ -48,6 +48,8 @@ typedef unsigned int uint;
 
 #define vsnprintf _vsnprintf
 #define zend_isinf(a)	0
+#define zend_finite(x)	_finite(x)
+#define zend_isnan(x)	_isnan(x)
 
 #define zend_sprintf sprintf
 
