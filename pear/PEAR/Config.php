@@ -258,6 +258,13 @@ class PEAR_Config extends PEAR
             'prompt' => 'Signature Handling Program',
             'group' => 'Maintainers',
             ),
+        'sig_keyid' => array(
+            'type' => 'string',
+            'default' => '',
+            'doc' => 'which key to use for signing with',
+            'prompt' => 'Signature Key Id',
+            'group' => 'Maintainers',
+            ),
         'sig_keydir' => array(
             'type' => 'string',
             'default' => PEAR_DEFAULT_SIG_KEYDIR,
