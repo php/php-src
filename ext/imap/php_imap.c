@@ -1677,7 +1677,7 @@ PHP_FUNCTION(imap_headerinfo)
 /* }}} */
 
 
-/* {{{ proto object imap_rfc822_parse_headers(string headers, string [default_host])
+/* {{{ proto object imap_rfc822_parse_headers(string headers [, string default_host])
    Parse a set of mail headers contained in a string, and return an object similar to imap_headerinfo() */
 PHP_FUNCTION(imap_rfc822_parse_headers)
 {
