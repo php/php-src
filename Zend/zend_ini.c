@@ -375,42 +375,10 @@ ZEND_INI_DISP(display_link_numbers)
 }
 
 
-#if 0
-static int zend_ini_displayer(zend_ini_entry *ini_entry, int module_number)
+ZEND_API zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg)
 {
-	if (ini_entry->module_number != module_number) {
-		return 0;
-	}
-
-	ZEND_PUTS("<TR VALIGN=\"baseline\" BGCOLOR=\"" ZEND_CONTENTS_COLOR "\">");
-	ZEND_PUTS("<TD BGCOLOR=\"" ZEND_ENTRY_NAME_COLOR "\"><B>");
-	ZEND_WRITE(ini_entry->name, ini_entry->name_length-1);
-	ZEND_PUTS("</B><BR></TD><TD ALIGN=\"center\">");
-	zend_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ACTIVE);
-	ZEND_PUTS("</TD><TD ALIGN=\"center\">");
-	zend_ini_displayer_cb(ini_entry, ZEND_INI_DISPLAY_ORIG);
-	ZEND_PUTS("</TD></TR>\n");
-	return 0;
+	zend_hash_apply_with_argument(&known_directives, apply_func, arg);
 }
-
-
-ZEND_API void display_ini_entries(zend_module_entry *module)
-{
-	int module_number;
-
-	if (module) {
-		module_number = module->module_number;
-	} else {
-		module_number = 0;
-	}
-#if 0 /* FIXME */
-	php_info_print_table_start();
-	php_info_print_table_header(3, "Directive", "Local Value", "Master Value");
-	zend_hash_apply_with_argument(&known_directives, (int (*)(void *, void *)) zend_ini_displayer, (void *) (long) module_number);
-	php_info_print_table_end();
-#endif
-}
-#endif
 
 
 /* Standard message handlers */
@@ -507,6 +475,7 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty)
 	*p = new_value;
 	return SUCCESS;
 }
+
 
 /*
  * Local variables:
