@@ -164,12 +164,10 @@ PHP_FUNCTION(mhash)
 			php_error(E_WARNING, MHASH_FAILED_MSG);
 			RETURN_FALSE;
 		}
-		td =
-		    mhash_hmac_init(Z_LVAL_PP(hash),
+		td = mhash_hmac_init(Z_LVAL_PP(hash),
 				    Z_STRVAL_PP(key),
 				    Z_STRLEN_PP(key),
-				    mhash_get_hash_pblock((*hash)->value.
-							  lval));
+				    mhash_get_hash_pblock(Z_LVAL_PP(hash)));
 	} else {
 		td = mhash_init(Z_LVAL_PP(hash));
 	}
@@ -249,19 +247,18 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	keystruct.salt = salt;
 	keystruct.salt_size = salt_len;
 
-	ret = malloc(size);
+	ret = emalloc(size);
 	if (ret==NULL) {
 		php_error(E_WARNING, MHASH_KEYGEN_FAILED_MSG);
 		RETURN_FALSE;
 	}
 
 	val = mhash_keygen_ext( KEYGEN_S2K_SALTED, keystruct, ret, size, password, password_len);
-	if ( val >= 0) {
-		RETVAL_STRINGL(ret, size, 1);
-		free(ret);
+	if (val >= 0) {
+		RETVAL_STRINGL(ret, size, 0);
 	} else {
 		php_error(E_WARNING, MHASH_KEYGEN_FAILED_MSG);
-		free(ret);
+		efree(ret);
 		RETURN_FALSE;
 	}
 }
