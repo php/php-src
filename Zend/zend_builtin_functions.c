@@ -1257,9 +1257,11 @@ static zval *debug_backtrace_get_args(void ***curpos TSRMLS_DC) {
 	MAKE_STD_ZVAL(arg_array);
 	array_init(arg_array);
 	p -= arg_count;
+
 	while (--arg_count >= 0) {
 		arg = (zval **) p++;
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(arg);
+		(*arg)->refcount++;
 		add_next_index_zval(arg_array, *arg);
 	}
 	return arg_array;
@@ -1274,9 +1276,12 @@ ZEND_FUNCTION(debug_backtrace)
 	char *function_name;
 	char *filename;
 	char *class_name;
+	char *call_type;
 	char *include_filename = NULL;
 	zval *stack_frame;
-	void **cur_arg_pos = EG(argument_stack).top_element - 2;
+	void **cur_arg_pos = EG(argument_stack).top_element;
+	int get_args;
+
 
 	if (ZEND_NUM_ARGS()) {
 		WRONG_PARAM_COUNT;
@@ -1286,6 +1291,7 @@ ZEND_FUNCTION(debug_backtrace)
 
 	/* skip debug_backtrace() */
 	ptr = ptr->prev_execute_data;
+	cur_arg_pos -= 2;
 
     if (ptr && cur_arg_pos[-1]) { 
 		zend_error(E_ERROR, "debug_backtrace(): Can't be used as a function parameter");
@@ -1297,21 +1303,20 @@ ZEND_FUNCTION(debug_backtrace)
 		MAKE_STD_ZVAL(stack_frame);
 		array_init(stack_frame);
 
-		class_name = NULL;
-
-		if (ptr->object) {
-			class_name = Z_OBJCE(*ptr->object)->name;
-			add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
-		} else if (ptr->function_state.function->common.scope) {
-			class_name = ptr->function_state.function->common.scope->name;
-			add_assoc_string_ex(stack_frame, "type", sizeof("type"), "::", 1);
-		}
-		
 		if (ptr->op_array) {
 			filename = ptr->op_array->filename;
 			lineno = ptr->opline->lineno;
 			add_assoc_string_ex(stack_frame, "file", sizeof("file"), filename, 1);
 			add_assoc_long_ex(stack_frame, "line", sizeof("line"), lineno);
+
+			/* try to fetch args only if an FCALL was just made - elsewise we're in the middle of a function
+			 * and debug_baktrace() might have been called by the error_handler. in this case we don't 
+			 * want to pop anything of the argument-stack */
+			if ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL)) {
+				get_args = 1;
+			} else {
+				get_args = 0;
+			}
 		} else {
 			filename = NULL;
 		}
@@ -1321,11 +1326,25 @@ ZEND_FUNCTION(debug_backtrace)
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), function_name, 1);
 
-			if (class_name) {
-				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+			if (ptr->object) {
+				class_name = Z_OBJCE(*ptr->object)->name;
+				call_type = "->";
+				add_assoc_string_ex(stack_frame, "type", sizeof("type"), "->", 1);
+			} else if (ptr->function_state.function->common.scope) {
+				class_name = ptr->function_state.function->common.scope->name;
+				call_type = "::";
+			} else {
+				class_name = NULL;
 			}
 
-			add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+			if (class_name) {
+				add_assoc_string_ex(stack_frame, "class", sizeof("class"), class_name, 1);
+				add_assoc_string_ex(stack_frame, "type", sizeof("type"), call_type, 1);
+			}
+
+			if (get_args) {
+				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+			}	
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
 			zend_bool build_filename_arg = 1;
@@ -1348,9 +1367,10 @@ ZEND_FUNCTION(debug_backtrace)
 					function_name = "require_once";
 					break;
 				default:
-					function_name = "unknown";
+					/* this can actually happen if you use debug_backtrace() in your error_handler and 
+					 * you're in the top-scope */
+					function_name = "unknown"; 
 					build_filename_arg = 0;
-					zend_error(E_ERROR, "debug_backtrece(): unable to find function-name. Please report a bug.");
 					break;
 			}
 
