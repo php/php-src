@@ -36,16 +36,25 @@
 
 int Ns_ModuleVersion = 1;
 
+#define NSLS_D ns_globals_struct *ns_context
+#define NSLS_DC , NSLS_D
+#define NSLS_C ns_context
+#define NSLS_CC , NSLS_C
+#define NSG(v) (ns_context->v)
+#define NSLS_FETCH() ns_globals_struct *ns_context = ts_resource(ns_globals_id)
+
+static int ns_globals_id;
+
 typedef struct {
-	/* per server */
 	sapi_module_struct *sapi_module;
 	char *ns_server;
 	char *ns_module;
-	
-	/* per request */
+} php_ns_context;
+
+typedef struct {
 	Ns_Conn *conn;
 	Ns_DString content_type;
-} php_ns_context;
+} ns_globals_struct;
 
 static void php_ns_config(php_ns_context *ctx);
 
@@ -53,12 +62,9 @@ static int
 php_ns_sapi_ub_write(const char *str, uint str_length)
 {
 	int sent_bytes;
-	php_ns_context *ctx;
-	SLS_FETCH();
+	NSLS_FETCH();
 
-	ctx = (php_ns_context *) SG(server_context);
-
-	sent_bytes = Ns_ConnWrite(ctx->conn, (void *) str, str_length);
+	sent_bytes = Ns_ConnWrite(NSG(conn), (void *) str, str_length);
 
 	return sent_bytes;
 }
@@ -68,7 +74,7 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
 {
 	char *header_name, *header_content;
 	char *p;
-	php_ns_context *ctx = (php_ns_context *) SG(server_context);
+	NSLS_FETCH();
 
 	header_name = sapi_header->header;
 	header_content = p = strchr(header_name, ':');
@@ -81,9 +87,9 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
 	} while(*header_content == ' ');
 
 	if(!strcasecmp(header_name, "Content-type")) {
-		Ns_ConnSetTypeHeader(ctx->conn, header_content);
+		Ns_ConnSetTypeHeader(NSG(conn), header_content);
 	} else {
-		Ns_ConnSetHeaders(ctx->conn, header_name, header_content);
+		Ns_ConnSetHeaders(NSG(conn), header_name, header_content);
 	}
 	
 	*p = ':';
@@ -96,13 +102,12 @@ php_ns_sapi_header_handler(sapi_header_struct *sapi_header, sapi_headers_struct 
 static int
 php_ns_sapi_send_headers(sapi_headers_struct *sapi_headers SLS_DC)
 {
-	php_ns_context *ctx;
-	
-	ctx = (php_ns_context *) SG(server_context);
+	NSLS_FETCH();
+
 	if(SG(sapi_headers).send_default_content_type) {
-		Ns_ConnSetRequiredHeaders(ctx->conn, "text/html", 0);
+		Ns_ConnSetRequiredHeaders(NSG(conn), "text/html", 0);
 	}
-	Ns_ConnFlushHeaders(ctx->conn, SG(sapi_headers).http_response_code);
+	Ns_ConnFlushHeaders(NSG(conn), SG(sapi_headers).http_response_code);
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
 
@@ -110,9 +115,9 @@ static int
 php_ns_sapi_read_post(char *buf, uint count_bytes SLS_DC)
 {
 	uint total_read = 0;
-	php_ns_context *ctx = (php_ns_context *) SG(server_context);
+	NSLS_FETCH();
 
-	total_read = Ns_ConnRead(ctx->conn, buf, count_bytes);
+	total_read = Ns_ConnRead(NSG(conn), buf, count_bytes);
 	
 	if(total_read == NS_ERROR) {
 		total_read = -1;
@@ -126,11 +131,11 @@ php_ns_sapi_read_cookies(SLS_D)
 {
 	int i;
 	char *http_cookie = NULL;
-	php_ns_context *ctx = (php_ns_context *) SG(server_context);
+	NSLS_FETCH();
 	
-	i = Ns_SetFind(ctx->conn->headers, "cookie");
+	i = Ns_SetFind(NSG(conn->headers), "cookie");
 	if(i != -1) {
-		http_cookie = Ns_SetValue(ctx->conn->headers, i);
+		http_cookie = Ns_SetValue(NSG(conn->headers), i);
 	}
 
 	return http_cookie;
@@ -157,13 +162,13 @@ static sapi_module_struct sapi_module = {
 };
 
 static void
-php_ns_hash_environment(php_ns_context *ctx CLS_DC ELS_DC PLS_DC SLS_DC)
+php_ns_hash_environment(NSLS_D CLS_DC ELS_DC PLS_DC SLS_DC)
 {
 	int i;
 
-	for(i = 0; i < Ns_SetSize(ctx->conn->headers); i++) {
-		char *key = Ns_SetKey(ctx->conn->headers, i);
-		char *value = Ns_SetValue(ctx->conn->headers, i);
+	for(i = 0; i < Ns_SetSize(NSG(conn->headers)); i++) {
+		char *key = Ns_SetKey(NSG(conn->headers), i);
+		char *value = Ns_SetValue(NSG(conn->headers), i);
 		char *p;
 		zval *pval;
 		char buf[512];
@@ -187,7 +192,7 @@ php_ns_hash_environment(php_ns_context *ctx CLS_DC ELS_DC PLS_DC SLS_DC)
 }
 
 static int
-php_ns_module_main(php_ns_context *ctx SLS_DC)
+php_ns_module_main(NSLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
 	CLS_FETCH();
@@ -198,7 +203,7 @@ php_ns_module_main(php_ns_context *ctx SLS_DC)
 	file_handle.filename = SG(request_info).path_translated;
 	
 	php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
-	php_ns_hash_environment(ctx CLS_CC ELS_CC PLS_CC SLS_CC);
+	php_ns_hash_environment(NSLS_C CLS_CC ELS_CC PLS_CC SLS_CC);
 	php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
 	php_request_shutdown(NULL);
 
@@ -206,56 +211,53 @@ php_ns_module_main(php_ns_context *ctx SLS_DC)
 }
 
 static void 
-php_ns_request_ctor(php_ns_context *ctx SLS_DC)
+php_ns_request_ctor(NSLS_D SLS_DC)
 {
 	char *server;
 	Ns_DString ds;
 	char *root;
 	
-	server = Ns_ConnServer(ctx->conn);
+	server = Ns_ConnServer(NSG(conn));
 	
-	SG(server_context) = ctx;
-	SG(request_info).query_string = ctx->conn->request->query;
+	SG(request_info).query_string = NSG(conn->request->query);
 
 	Ns_DStringInit(&ds);
-	Ns_UrlToFile(&ds, server, ctx->conn->request->url);
+	Ns_UrlToFile(&ds, server, NSG(conn->request->url));
 	SG(request_info).path_translated = strdup(Ns_DStringValue(&ds));
 	Ns_DStringFree(&ds);
 	root = Ns_PageRoot(server);
 	SG(request_info).request_uri = SG(request_info).path_translated + strlen(root);
-	SG(request_info).request_method = ctx->conn->request->method;
-	SG(request_info).content_length = Ns_ConnContentLength(ctx->conn);
-	Ns_DStringInit(&ctx->content_type);
-	Ns_ConnCopyToDString(ctx->conn, SG(request_info).content_length, &ctx->content_type);
-	SG(request_info).content_type = Ns_DStringValue(&ctx->content_type);
+	SG(request_info).request_method = NSG(conn)->request->method;
+	SG(request_info).content_length = Ns_ConnContentLength(NSG(conn));
+	Ns_DStringInit(&NSG(content_type));
+	Ns_ConnCopyToDString(NSG(conn), SG(request_info).content_length, &NSG(content_type));
+	SG(request_info).content_type = Ns_DStringValue(&NSG(content_type));
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
 }
 
 static void
-php_ns_request_dtor(php_ns_context *ctx SLS_DC)
+php_ns_request_dtor(NSLS_D SLS_DC)
 {
 	free(SG(request_info).path_translated);
-	Ns_DStringFree(&ctx->content_type);
+	Ns_DStringFree(&NSG(content_type));
 }
 
 static int
 php_ns_request_handler(void *context, Ns_Conn *conn)
 {
-	php_ns_context *ctx = (php_ns_context *) context;
 	int status = NS_OK;
 	SLS_FETCH();
+	NSLS_FETCH();
 	
-	ctx->conn = conn;
+	NSG(conn) = conn;
 	
-	php_ns_request_ctor(ctx SLS_CC);
+	php_ns_request_ctor(NSLS_C SLS_CC);
 	
-	status = php_ns_module_main(ctx SLS_CC);
+	status = php_ns_module_main(NSLS_C SLS_CC);
 	
-	php_ns_request_dtor(ctx SLS_CC);
+	php_ns_request_dtor(NSLS_C SLS_CC);
 	
-	ctx->conn = NULL;
-
 	return status;
 }
 
@@ -323,6 +325,8 @@ int Ns_ModuleInit(char *server, char *module)
 	tsrm_startup(1, 1, 0);
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
+	
+	ns_globals_id = ts_allocate_id(sizeof(ns_globals_struct), NULL, NULL);
 	
 	ctx = malloc(sizeof *ctx);
 	ctx->sapi_module = &sapi_module;
