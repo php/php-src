@@ -350,7 +350,7 @@ static char *php_strerror(int error TSRMLS_DC)
 		buf = hstrerror(error);
 #else
 		{
-			spprintf(&(SOCKETS_G(strerror_buf)), "Host lookup error %d", error);
+			spprintf(&(SOCKETS_G(strerror_buf)), 0, "Host lookup error %d", error);
 			buf = SOCKETS_G(strerror_buf);
 		}
 #endif
