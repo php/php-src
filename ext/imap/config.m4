@@ -23,6 +23,17 @@ if test "$PHP_KERBEROS" != "no"; then
   PHP_KERBEROS_LIBDIR=$PHP_KERBEROS/lib
 fi
 
+PHP_ARG_WITH(imap-ssl,for SSL support in IMAP,
+[  --with-imap-ssl[=DIR]   Include SSL support in IMAP.])
+
+if test "$PHP_IMAP_SSL" = "yes"; then
+  PHP_IMAP_SSL=/usr
+fi
+
+if test "$PHP_IMAP_SSL" != "no"; then
+  PHP_SSL_LIBDIR=$PHP_IMAP_SSL/lib
+fi
+
 PHP_ARG_WITH(imap,for IMAP support,
 [  --with-imap[=DIR]       Include IMAP support.  DIR is the IMAP include
                           and c-client.a directory.])
@@ -75,6 +86,12 @@ PHP_ARG_WITH(imap,for IMAP support,
       AC_ADD_LIBRARY(k5crypto,, IMAP_SHARED_LIBADD)
       AC_ADD_LIBRARY(krb5,, IMAP_SHARED_LIBADD)
       AC_ADD_LIBRARY(gssapi_krb5,, IMAP_SHARED_LIBADD)
+    fi
+
+    if test "$PHP_IMAP_SSL" != "no"; then
+      AC_ADD_LIBPATH($PHP_SSL_LIBDIR, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(ssl,, IMAP_SHARED_LIBADD)
+      AC_ADD_LIBRARY(crypto,, IMAP_SHARED_LIBADD)
     fi
 
     PHP_EXTENSION(imap, $ext_shared)
