@@ -3,7 +3,7 @@ install_targets = install-data-local install-headers install-build
 
 include $(top_srcdir)/build/rules.mk
 
-peardir=$(prefix)/lib/php
+peardir=$(PEAR_INSTALLDIR)
 
 PEAR_SUBDIRS = \
 	DB \
@@ -67,6 +67,14 @@ install-build:
 		< $(srcdir)/php-config.in > $(bindir)/php-config.tmp && \
 	chmod +x $(bindir)/php-config.tmp && \
 	mv $(bindir)/php-config.tmp $(bindir)/php-config && \
+	echo "creating pear" && \
+	sed \
+		-e 's#@PREFIX@#$(prefix)#' \
+		-e 's#@EXTENSION_DIR@#$(EXTENSION_DIR)#g' \
+		-e 's#@PEAR_INSTALLDIR@#$(PEAR_INSTALLDIR)#g' \
+		< $(srcdir)/pear.in > $(bindir)/pear.tmp && \
+	chmod +x $(bindir)/pear.tmp && \
+	mv $(bindir)/pear.tmp $(bindir)/pear && \
 	cp $(srcdir)/phpextdist $(bindir)/phpextdist
 
 HEADER_DIRS = \
