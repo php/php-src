@@ -172,6 +172,21 @@ zend_module_entry posix_module_entry = {
 ZEND_GET_MODULE(posix)
 #endif
 
+#define PHP_POSIX_NO_ARGS	if (ZEND_NUM_ARGS()) return;
+
+#define PHP_POSIX_RETURN_LONG_FUNC(func_name)	\
+	PHP_POSIX_NO_ARGS	\
+	RETURN_LONG(func_name());
+
+#define PHP_POSIX_SINGLE_ARG_FUNC(func_name)	\
+	long val;	\
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &val) == FAILURE) return;	\
+	if (func_name(val) < 0) {	\
+		POSIX_G(last_error) = errno;	\
+		RETURN_FALSE;	\
+	}	\
+	RETURN_TRUE;
+
 /* {{{ proto bool posix_kill(int pid, int sig)
    Send a signal to a process (POSIX.1, 3.3.2) */
 
@@ -195,13 +210,7 @@ PHP_FUNCTION(posix_kill)
    Get the current process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getpid)
 {
-	pid_t  pid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	pid = getpid();
-	RETURN_LONG(pid);
+	PHP_POSIX_RETURN_LONG_FUNC(getpid);
 }
 /* }}} */
 
@@ -209,13 +218,7 @@ PHP_FUNCTION(posix_getpid)
    Get the parent process id (POSIX.1, 4.1.1) */
 PHP_FUNCTION(posix_getppid)
 {
-	pid_t  ppid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	ppid = getppid();
-	RETURN_LONG(ppid);
+	PHP_POSIX_RETURN_LONG_FUNC(getppid);
 }
 /* }}} */
 
@@ -223,13 +226,7 @@ PHP_FUNCTION(posix_getppid)
    Get the current user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getuid)
 {
-	uid_t  uid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	uid = getuid();
-	RETURN_LONG(uid);
+	PHP_POSIX_RETURN_LONG_FUNC(getuid);
 }
 /* }}} */
 
@@ -237,13 +234,7 @@ PHP_FUNCTION(posix_getuid)
    Get the current group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getgid)
 {
-	gid_t  gid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	gid = getgid();
-	RETURN_LONG(gid);
+	PHP_POSIX_RETURN_LONG_FUNC(getgid);
 }
 /* }}} */
 
@@ -251,13 +242,7 @@ PHP_FUNCTION(posix_getgid)
    Get the current effective user id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_geteuid)
 {
-	uid_t  uid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	uid = geteuid();
-	RETURN_LONG(uid);
+	PHP_POSIX_RETURN_LONG_FUNC(geteuid);
 }
 /* }}} */
 
@@ -265,31 +250,15 @@ PHP_FUNCTION(posix_geteuid)
    Get the current effective group id (POSIX.1, 4.2.1) */
 PHP_FUNCTION(posix_getegid)
 {
-	gid_t  gid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	gid = getegid();
-	RETURN_LONG(gid);
- }
+	PHP_POSIX_RETURN_LONG_FUNC(getegid);
+}
 /* }}} */
 
 /* {{{ proto bool posix_setuid(long uid)
    Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
-	long uid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &uid) == FAILURE)
-		return;
-  
-	if (setuid(uid) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-	
-	RETURN_TRUE;
+	PHP_POSIX_SINGLE_ARG_FUNC(setuid);
 }
 /* }}} */
 
@@ -297,17 +266,7 @@ PHP_FUNCTION(posix_setuid)
    Set group id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setgid)
 {
-	long gid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &gid) == FAILURE)
-		return;
-
-	if (setgid(gid) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-	
-	RETURN_TRUE;
+	PHP_POSIX_SINGLE_ARG_FUNC(setgid);
 }
 /* }}} */
 
@@ -316,17 +275,7 @@ PHP_FUNCTION(posix_setgid)
 #ifdef HAVE_SETEUID
 PHP_FUNCTION(posix_seteuid)
 {
-	long euid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &euid) == FAILURE)
-		return;
-
-	if (seteuid(euid) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-	
-	RETURN_TRUE;
+	PHP_POSIX_SINGLE_ARG_FUNC(seteuid);
 }
 #endif
 /* }}} */
@@ -336,17 +285,7 @@ PHP_FUNCTION(posix_seteuid)
 #ifdef HAVE_SETEGID
 PHP_FUNCTION(posix_setegid)
 {
-	long egid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &egid) == FAILURE)
-		return;
-
-	if (setegid(egid) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-	
-	RETURN_TRUE;
+	PHP_POSIX_SINGLE_ARG_FUNC(setegid);
 }
 #endif
 /* }}} */
@@ -359,8 +298,7 @@ PHP_FUNCTION(posix_getgroups)
 	int    result;
 	int    i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 	
 	if ((result = getgroups(NGROUPS_MAX, gidlist)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -381,8 +319,7 @@ PHP_FUNCTION(posix_getlogin)
 {
 	char *p;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 	
 	if (NULL == (p = getlogin())) {
 		POSIX_G(last_error) = errno;
@@ -397,13 +334,7 @@ PHP_FUNCTION(posix_getlogin)
    Get current process group id (POSIX.1, 4.3.1) */
 PHP_FUNCTION(posix_getpgrp)
 {
-	pid_t  pgrp;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	pgrp = getpgrp();
-	RETURN_LONG(pgrp);
+	PHP_POSIX_RETURN_LONG_FUNC(getpgrp);
 }
 /* }}} */
 
@@ -412,13 +343,7 @@ PHP_FUNCTION(posix_getpgrp)
 #ifdef HAVE_SETSID
 PHP_FUNCTION(posix_setsid)
 {
-	pid_t  sid;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-
-	sid = setsid();
-	RETURN_LONG(sid);
+	PHP_POSIX_RETURN_LONG_FUNC(setsid);
 }
 #endif
 /* }}} */
@@ -446,18 +371,7 @@ PHP_FUNCTION(posix_setpgid)
 #ifdef HAVE_GETPGID
 PHP_FUNCTION(posix_getpgid)
 {
-	long pid;
-	pid_t pgid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pid) == FAILURE)
-		return;
-
-	if ((pgid = getpgid(pid)) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-
-	RETURN_LONG(pgid);
+	PHP_POSIX_SINGLE_ARG_FUNC(getpgid);
 }
 #endif
 /* }}} */
@@ -467,18 +381,7 @@ PHP_FUNCTION(posix_getpgid)
 #ifdef HAVE_GETSID
 PHP_FUNCTION(posix_getsid)
 {
-	long pid;
-	pid_t sid;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &pid) == FAILURE)
-		return;
-
-	if ((sid = getsid(pid)) < 0) {
-		POSIX_G(last_error) = errno;
-		RETURN_FALSE;
-	}
-
-	RETURN_LONG(sid);
+	PHP_POSIX_SINGLE_ARG_FUNC(getsid);
 }
 #endif
 /* }}} */
@@ -489,8 +392,7 @@ PHP_FUNCTION(posix_uname)
 {
 	struct utsname u;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 
 	if (uname(&u) < 0) {
 		POSIX_G(last_error) = errno;
@@ -521,8 +423,7 @@ PHP_FUNCTION(posix_times)
 	struct tms t;
 	clock_t    ticks;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 
 	if((ticks = times(&t)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -550,8 +451,7 @@ PHP_FUNCTION(posix_ctermid)
 {
 	char  buffer[L_ctermid];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 
 	if (NULL == ctermid(buffer)) {
 		/* Found no documentation how the defined behaviour is when this
@@ -663,8 +563,7 @@ PHP_FUNCTION(posix_getcwd)
 	char  buffer[MAXPATHLEN];
 	char *p;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 
 	p = VCWD_GETCWD(buffer, MAXPATHLEN);
 	if (!p) {
@@ -967,8 +866,7 @@ PHP_FUNCTION(posix_getrlimit)
 {
 	struct limitlist *l = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
+	PHP_POSIX_NO_ARGS;
 
 	array_init(return_value);
 
@@ -985,9 +883,8 @@ PHP_FUNCTION(posix_getrlimit)
    Retrieve the error number set by the last posix function which failed. */
 PHP_FUNCTION(posix_get_last_error)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE)
-		return;
-	
+	PHP_POSIX_NO_ARGS;	
+
 	RETURN_LONG(POSIX_G(last_error));
 }
 /* }}} */
