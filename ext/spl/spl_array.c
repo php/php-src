@@ -813,16 +813,19 @@ SPL_METHOD(Array, seek)
 		return;
 	}
 
-	zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
-	
 	opos = position;
-	while (position-- > 0 && (result = spl_array_next(intern TSRMLS_CC)) == SUCCESS);
 
-	if (intern->pos && intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
-		/* fail */
-	} else {
-		if (zend_hash_has_more_elements_ex(aht, &intern->pos) == SUCCESS) {
-			return; /* ok */
+	if (position >= 0) { /* negative values are not supported */
+		zend_hash_internal_pointer_reset_ex(aht, &intern->pos);
+		
+		while (position-- > 0 && (result = spl_array_next(intern TSRMLS_CC)) == SUCCESS);
+	
+		if (intern->pos && intern->is_ref && spl_hash_verify_pos(intern TSRMLS_CC) == FAILURE) {
+			/* fail */
+		} else {
+			if (zend_hash_has_more_elements_ex(aht, &intern->pos) == SUCCESS) {
+				return; /* ok */
+			}
 		}
 	}
 	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0 TSRMLS_CC, "Seek position %ld is out of range", opos);
