@@ -9,7 +9,7 @@ PHP 4                                                                      NEWS
   . zlib wrappers can be used even on systems without fopencookie()
   . Most extensions now support streams when passing files, which means
     that those extensions will support URL wrappers. (Wez)
-- Added memory stream support. (Marcus)
+  . Added memory stream support. (Marcus)
 - Fixed memory allocation problem on systems that have iconv() support in libc.
   (Yasuo)
 - Made var_dump() handle recursive structures better. (Yasuo)
