@@ -309,9 +309,9 @@ class Interop_Client
     function decodeSoapval($soapval)
     {
         if (gettype($soapval) == "object" &&
-            (strcasecmp(get_class($soapval),"soapparam") == 0 ||
-             strcasecmp(get_class($soapval),"soapvar") == 0)) {
-                if (strcasecmp(get_class($soapval),"soapparam") == 0)
+            (strcasecmp(get_class($soapval),"SoapParam") == 0 ||
+             strcasecmp(get_class($soapval),"SoapVar") == 0)) {
+                if (strcasecmp(get_class($soapval),"SoapParam") == 0)
                     $val = $soapval->param_data->enc_value;
                 else
                     $val = $soapval->enc_value;
@@ -321,8 +321,8 @@ class Interop_Client
         if (is_array($val)) {
             foreach($val as $k => $v) {
                 if (gettype($v) == "object" &&
-                    (strcasecmp(get_class($soapval),"soapparam") == 0 ||
-                    strcasecmp(get_class($soapval),"soapvar") == 0)) {
+                    (strcasecmp(get_class($soapval),"SoapParam") == 0 ||
+                    strcasecmp(get_class($soapval),"SoapVar") == 0)) {
                     $val[$k] = $this->decodeSoapval($v);
                 }
             }
