@@ -1,7 +1,7 @@
 --TEST--
 Bug #27719: mktime returns incorrect timestamp for dst days
 --FILE--
-<?php
+<?php /* $Id$ */
 	putenv("TZ=EST");  // No DST
 	$a = mktime(0, 0, 0, 4, 4, 2004, 0);
 	$b = mktime(0, 0, 0, 4, 4, 2004, 1);
@@ -43,9 +43,9 @@ Bug #27719: mktime returns incorrect timestamp for dst days
 	echo "$c ".date("m/d/y h:i:s\n",$c);
 	echo "\n";
 ?>
---EXPECT--
+--EXPECTF--
 1081054800 04/04/04 12:00:00
-1081054800 04/04/04 12:00:00
+%s
 1081054800 04/04/04 12:00:00
 
 1075870800 02/04/04 12:00:00
