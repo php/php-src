@@ -92,7 +92,13 @@ class PEAR_Builder extends PEAR_Common
         if (!@chdir($dir)) {
             return $this->raiseError("could not chdir to $dir");
         }
+        $vdir = "$info[package]-$info[version]";
+        if (is_dir($vdir)) {
+            chdir($vdir);
+        }
         $dir = getcwd();
+        $this->log(2, "building in $dir");
+        $this->_runCommand("find $dir -print", $callback);
         $this->current_callback = $callback;
         $err = $this->_runCommand("phpize", array(&$this, 'phpizeCallback'));
         if (PEAR::isError($err)) {
