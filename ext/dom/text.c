@@ -81,8 +81,13 @@ Since: DOM Level 3
 */
 int dom_text_whole_text_read(dom_object *obj, zval **retval TSRMLS_DC)
 {
+	xmlNodePtr node;
+	
+	node = obj->ptr;
+
 	ALLOC_ZVAL(*retval);
-	ZVAL_NULL(*retval);
+	ZVAL_STRING(*retval, xmlNodeListGetString(node->doc, node, 1), 1);
+	
 	return SUCCESS;
 }
 
@@ -97,7 +102,6 @@ Since:
 */
 PHP_FUNCTION(dom_text_split_text)
 {
-	zval       *id;
 	xmlChar    *cur;
 	xmlChar    *first;
 	xmlChar    *second;
