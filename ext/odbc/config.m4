@@ -538,7 +538,7 @@ fi
 if test -n "$ODBC_TYPE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   if test "$ODBC_TYPE" != "dbmaker"; then
-    if test $shared != "yes"; then
+    if test "$shared" != "yes"; then
       EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
     fi
   fi
