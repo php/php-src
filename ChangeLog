@@ -1,3 +1,14 @@
+2004-06-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/basic_functions.c:
+      Removed unneeded if().
+
+2004-06-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/038.phpt
+      tests/lang/039.phpt:
+      Add more tests
+
 2004-06-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * NEWS:
