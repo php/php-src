@@ -2640,7 +2640,7 @@ PHP_FUNCTION(sqlite_next)
 }
 /* }}} */
 
-/* {{{ proto bool sqlite_key(resource result)
+/* {{{ proto int sqlite_key(resource result)
    Return the current row index of a buffered result. */
 PHP_FUNCTION(sqlite_key)
 {
