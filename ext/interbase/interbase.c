@@ -860,7 +860,7 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 		dpb += sprintf(dpb, "%c\2%c%c", isc_dpb_num_buffers, 
 			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
 	}
-	if (isc_attach_database(IB_STATUS, len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
+	if (isc_attach_database(IB_STATUS, (short)len[DB], args[DB], db, (short)(dpb-dpb_buffer), dpb_buffer)) {
 		_php_ibase_error(TSRMLS_C);
 		return FAILURE;
 	}
@@ -1757,15 +1757,16 @@ php_ibase_bind_default:
 static void _php_ibase_alloc_xsqlda(XSQLDA *sqlda) /* {{{ */
 {
 	int i;
-	XSQLVAR *var = sqlda->sqlvar;
 
-	for (i = 0; i < sqlda->sqld; i++, var++) {
+	for (i = 0; i < sqlda->sqld; i++) {
+		XSQLVAR *var = &sqlda->sqlvar[i];
+
 		switch (var->sqltype & ~1) {
 			case SQL_TEXT:
-				var->sqldata = safe_emalloc(sizeof(char), (var->sqllen), 0);
+				var->sqldata = safe_emalloc(sizeof(char), var->sqllen, 0);
 				break;
 			case SQL_VARYING:
-				var->sqldata = safe_emalloc(sizeof(char), (var->sqllen + sizeof(short)), 0);
+				var->sqldata = safe_emalloc(sizeof(char), var->sqllen + sizeof(short), 0);
 				break;
 			case SQL_SHORT:
 				var->sqldata = emalloc(sizeof(short));
@@ -2316,17 +2317,20 @@ PHP_FUNCTION(ibase_query)
 
 	/* use stack to avoid leaks */
 	args = (zval ***) do_alloca(sizeof(zval **) * ZEND_NUM_ARGS());
+
+	RETVAL_FALSE;
+
 	if (zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		free_alloca(args);
-		RETURN_FALSE;
+		goto ibase_query_end;
+
 	}
 	
 	i = 0;
 	while (Z_TYPE_PP(args[i++]) != IS_STRING) {
 		if (i >= ZEND_NUM_ARGS()) {
 			_php_ibase_module_error("Query argument missing" TSRMLS_CC);
-			free_alloca(args);
-			RETURN_FALSE;
+			goto ibase_query_end;
+
 		}
 	}
 
@@ -2347,8 +2351,7 @@ PHP_FUNCTION(ibase_query)
 				if (isc_dsql_execute_immediate(IB_STATUS, &db, &trans, 0, query, 
 						SQL_DIALECT_CURRENT, NULL)) {
 					_php_ibase_error(TSRMLS_C);
-					free_alloca(args);
-					RETURN_FALSE;
+					goto ibase_query_end;
 				}
 				
 				/* has a new database been created ? */
@@ -2359,8 +2362,7 @@ PHP_FUNCTION(ibase_query)
 						/* too many links already ? => close it up immediately */
 						if (isc_detach_database(IB_STATUS, &db)) {
 							_php_ibase_error(TSRMLS_C);
-							free_alloca(args);
-							RETURN_FALSE;
+							goto ibase_query_end;
 						}
 					} else {
 							
@@ -2375,9 +2377,7 @@ PHP_FUNCTION(ibase_query)
 						zend_list_addref(Z_LVAL_P(return_value));
 						IBG(default_link) = Z_LVAL_P(return_value);
 						IBG(num_links)++;
-
-						free_alloca(args);
-						return;
+						goto ibase_query_end;
 					}
 				}
 				RETURN_TRUE;
@@ -2409,39 +2409,29 @@ PHP_FUNCTION(ibase_query)
 		default:
 			/* more than two arguments preceed the SQL string */
 			_php_ibase_module_error("Invalid arguments" TSRMLS_CC);
-			free_alloca(args);
-			RETURN_FALSE;
+			goto ibase_query_end;
 	}
 			
 	if (ZEND_NUM_ARGS() > i) { /* have variables to bind */
-		/* Using variables in a query without preparing it can be
-		   useful, because it allows you to use (among other things) 
-		   SQL-queries as consts and the passing of string arguments 
-		   without the horror of [un]slashing them. */
 		bind_n = ZEND_NUM_ARGS() - i;
 		bind_args = args[i];
 	}
 
 	/* open default transaction */
 	if (ib_link == NULL || _php_ibase_def_trans(ib_link, &trans TSRMLS_CC) == FAILURE) {
-		free_alloca(args);
-		RETURN_FALSE;
+		goto ibase_query_end;
 	}
 
 	if (FAILURE == _php_ibase_alloc_query(&ib_query, ib_link, trans, query, ib_link->dialect,
 			trans_res_id TSRMLS_CC)) {
-		free_alloca(args);
-		RETURN_FALSE;
+		goto ibase_query_end;
 	}
 
+	do {
 		if (FAILURE == _php_ibase_exec(INTERNAL_FUNCTION_PARAM_PASSTHRU, &result, &ib_query, 
 				bind_n, bind_args)) {
-		_php_ibase_free_query(&ib_query TSRMLS_CC);
-		free_alloca(args);
-		RETURN_FALSE;
+			break;
 		}
-	
-	free_alloca(args);
 	
 		if (result != NULL) { /* statement returns a result */
 			result->type = QUERY_RESULT;	
@@ -2452,7 +2442,11 @@ PHP_FUNCTION(ibase_query)
 			}
 			ZEND_REGISTER_RESOURCE(return_value, result, le_result);
 		}
+	} while (0);
 	_php_ibase_free_query(&ib_query TSRMLS_CC);
+
+ibase_query_end:
+	free_alloca(args);
 }
 /* }}} */
 
@@ -2734,9 +2728,6 @@ static int _php_ibase_arr_zval(zval *ar_zval, char *data, unsigned long data_siz
 		
 		if (FAILURE == _php_ibase_var_zval(ar_zval, data, ib_array->el_type,
 				ib_array->ar_desc.array_desc_length, ib_array->ar_desc.array_desc_scale, flag TSRMLS_CC)) {
-
-
-
 			return FAILURE;
 		}
 		
@@ -3257,7 +3248,7 @@ static void _php_ibase_field_info(zval *return_value, XSQLVAR *var) /* {{{ */
 	add_assoc_stringl(return_value, "length", buf, len, 1);
 
 	if (var->sqlscale < 0) {
-		unsigned short precision;
+		unsigned short precision = 0;
 
 		switch (var->sqltype & ~1) {
 
