@@ -145,6 +145,11 @@ typedef struct {
 	pdo_odbc_db_handle *H;
 	pdo_odbc_errinfo einfo;
 } pdo_odbc_stmt;
+
+typedef struct {
+	SQLINTEGER len;
+	SQLSMALLINT paramtype;
+} pdo_odbc_param;
 	
 extern pdo_driver_t pdo_odbc_driver;
 extern struct pdo_stmt_methods odbc_stmt_methods;
