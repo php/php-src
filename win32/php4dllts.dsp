@@ -1708,10 +1708,6 @@ SOURCE=..\ext\standard\php_fopen_wrapper.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\ext\mcal\php_mcal.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\ext\odbc\php_odbc.c
 # End Source File
 # Begin Source File
