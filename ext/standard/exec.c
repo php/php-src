@@ -61,10 +61,10 @@ int php_exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 {
 	FILE *fp;
 	char *buf, *tmp=NULL;
-	int buflen, l, pclose_return;
+	int l, pclose_return;
 	char *cmd_p, *b, *c, *d=NULL;
 	php_stream *stream;
-	size_t bufl = 0;
+	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)();
 #endif

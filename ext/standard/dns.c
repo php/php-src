@@ -746,7 +746,7 @@ PHP_FUNCTION(dns_get_mx)
 	if (i < 0) {
 		RETURN_FALSE;
 	}
-	if (i > sizeof(ans)) {
+	if (i > (int)sizeof(ans)) {
 		i = sizeof(ans);
 	}
 	hp = (HEADER *)&ans;
