@@ -1552,6 +1552,9 @@ send_by_ref:
 				}
 				break;
 			case ZEND_CASE:
+				if (opline->op1.op_type == IS_VAR) {
+					EG(AiCount)++;
+				}
 				is_equal_function(&Ts[opline->result.u.var].tmp_var, 
 							 get_zval_ptr(&opline->op1, Ts, &free_op1, BP_VAR_R),
 							 get_zval_ptr(&opline->op2, Ts, &free_op2, BP_VAR_R) );

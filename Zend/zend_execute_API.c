@@ -278,8 +278,6 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		return FAILURE;
 	}
 
-	function_state.function_symbol_table = (HashTable *) emalloc(sizeof(HashTable));
-	zend_hash_init(function_state.function_symbol_table, 0, NULL, PVAL_PTR_DTOR, 0);
 
 	for (i=0; i<param_count; i++) {
 		zval *param;
@@ -293,35 +291,38 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 		zend_ptr_stack_push(&EG(argument_stack), param);
 	}
 
-	if (object) {
-		zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
+	zend_ptr_stack_push(&EG(argument_stack), (void *) param_count);
 
-		var_uninit(dummy);
-		dummy->refcount=1;
-		dummy->is_ref=0;
-		zend_hash_update_ptr(function_state.function_symbol_table, "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
-		zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
-	}
-
-	calling_symbol_table = EG(active_symbol_table);
-	EG(active_symbol_table) = function_state.function_symbol_table;
 	var_uninit(retval);
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
+		calling_symbol_table = EG(active_symbol_table);
+		EG(active_symbol_table) = (HashTable *) emalloc(sizeof(HashTable));
+		zend_hash_init(EG(active_symbol_table), 0, NULL, PVAL_PTR_DTOR, 0);
+		if (object) {
+			zval *dummy = (zval *) emalloc(sizeof(zval)), **this_ptr;
+
+			var_uninit(dummy);
+			dummy->refcount=1;
+			dummy->is_ref=0;
+			zend_hash_update_ptr(EG(active_symbol_table), "this", sizeof("this"), dummy, sizeof(zval *), (void **) &this_ptr);
+			zend_assign_to_variable_reference(NULL, this_ptr, &object, NULL ELS_CC);
+		}
 		original_return_value = EG(return_value);
 		original_op_array = EG(active_op_array);
 		EG(return_value) = retval;
 		EG(active_op_array) = (zend_op_array *) function_state.function;
 		original_opline_ptr = EG(opline_ptr);	
 		zend_execute(EG(active_op_array) ELS_CC);
+		zend_hash_destroy(EG(active_symbol_table));		
+		efree(EG(active_symbol_table));
+		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
 		EG(return_value)=original_return_value;
 		EG(opline_ptr) = original_opline_ptr;
 	} else {
 		((zend_internal_function *) function_state.function)->handler(param_count, retval, &EG(regular_list), &EG(persistent_list));
 	}
-	zend_hash_destroy(EG(active_symbol_table));
-	efree(EG(active_symbol_table));
-	EG(active_symbol_table) = calling_symbol_table;
+	zend_ptr_stack_clear_multiple(ELS_C);
 	EG(function_state_ptr) = original_function_state_ptr;
 
 	return SUCCESS;
