@@ -3453,7 +3453,7 @@ void zend_do_foreach_cont(znode *value, znode *key, znode *foreach_token TSRMLS_
 	}
 
 	if (key->op_type != IS_UNUSED) {
-		++opline;
+		opline = &CG(active_op_array)->opcodes[foreach_token->u.opline_num+1];
 		opline->result.op_type = IS_TMP_VAR;
 		opline->result.u.EA.type = 0;
 		opline->result.u.opline_num = get_temporary_variable(CG(active_op_array));
