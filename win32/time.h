@@ -9,7 +9,8 @@
  * Modified by Shane Caraveo for PHP
  *
  *****************************************************************************/
-
+#ifndef _DH_TIME_H
+#define _DH_TIME_H
 
 /* Include stuff ************************************************************ */
 #include <winsock.h>
@@ -38,3 +39,5 @@ extern int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Inf
 /* setitimer operates at 100 millisecond resolution */
 extern int setitimer(int which, const struct itimerval *value,
 					 struct itimerval *ovalue);
+
+#endif
