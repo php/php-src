@@ -5,7 +5,7 @@ PHP 4.0                                                                    NEWS
 - Made ldap_set_option() support controls (Stig Venaas)
 - Changed ldap_search() and added functions ldap_parse_result(),
   ldap_first_reference(), ldap_next_reference() and ldap_parse_reference()
-- to cope with LDAPv3 stuff like referrals and references. (Stig Venaas)
+  to cope with LDAPv3 stuff like referrals and references. (Stig Venaas)
 - Fix date('r') overflow
 - Made the php.ini path reported in phpinfo() always point to the absolute
   path that was opened (Zeev)
