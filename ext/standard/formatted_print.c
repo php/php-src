@@ -303,7 +303,14 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 	char *cvt;
 	register int i = 0, j = 0;
 	int sign, decpt, cvt_len;
-	char decimal_point = EG(float_separator)[0];
+#ifdef HAVE_LOCALE_H
+	struct lconv lc;
+	char decimal_point;
+	localeconv_r(&lc);
+	decimal_point = (lc.decimal_point)[0];
+#else
+	char decimal_point = '.';
+#endif
 
 	PRINTF_DEBUG(("sprintf: appenddouble(%x, %x, %x, %f, %d, '%c', %d, %c)\n",
 				  *buffer, pos, size, number, width, padding, alignment, fmt));
