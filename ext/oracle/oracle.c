@@ -411,7 +411,7 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				RETURN_FALSE;
 			}
 			if (ORA(max_persistent)!=-1 && ORA(num_persistent)>=ORA(max_persistent)) {
-				php_error(E_WARNING,"MySQL:  Too many open persistent links (%d)",ORA(num_persistent));
+				php_error(E_WARNING,"Oracle:  Too many open persistent links (%d)",ORA(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -479,8 +479,8 @@ void ora_do_logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		list_entry *index_ptr,new_index_ptr;
 		
 		/* first we check the hash for the hashed_details key.  if it exists,
-		 * it should point us to the right offset where the actual mysql link sits.
-		 * if it doesn't, open a new mysql link, add it to the resource list,
+		 * it should point us to the right offset where the actual Oracle link sits.
+		 * if it doesn't, open a new Oracle link, add it to the resource list,
 		 * and add a pointer to it with hashed_details as the key.
 		 */
 		if (zend_hash_find(&EG(regular_list),hashed_details,hashed_details_length+1,(void **) &index_ptr)==SUCCESS) {
