@@ -169,6 +169,73 @@ php_mbregex_compile_pattern(mb_regex_t *pre, const char *pattern, int patlen, in
 	return res;
 }
 
+static size_t 
+_php_mb_regex_get_option_string(char *str, size_t len, int option)
+{
+	size_t len_left = len;
+	size_t len_req = 0;
+	char *p = str;
+
+
+	if ((option & MBRE_OPTION_IGNORECASE) != 0) {
+		if (len_left > 0) {
+			--len_left;
+			*(p++) = 'i';
+		}
+		++len_req;	
+	}
+
+	if ((option & MBRE_OPTION_EXTENDED) != 0) {
+		if (len_left > 0) {
+			--len_left;
+			*(p++) = 'x';
+		}
+		++len_req;	
+	}
+
+	if ((option & MBRE_OPTION_POSIXLINE) == MBRE_OPTION_POSIXLINE) {
+		if (len_left > 0) {
+			--len_left;
+			*(p++) = 'p';
+		}
+		++len_req;	
+	} else {
+		if ((option & MBRE_OPTION_MULTILINE) != 0) {
+			if (len_left > 0) {
+				--len_left;
+				*(p++) = 'm';
+			}
+			++len_req;	
+		}
+
+		if ((option & MBRE_OPTION_SINGLELINE) != 0) {
+			if (len_left > 0) {
+				--len_left;
+				*(p++) = 's';
+			}
+			++len_req;	
+		}
+	}	
+	if ((option & MBRE_OPTION_LONGEST) != 0) {
+		if (len_left > 0) {
+			--len_left;
+			*(p++) = 'l';
+		}
+		++len_req;	
+	}
+	if (len_left > 0) {
+		--len_left;
+		*(p++) = '\0';
+	}
+
+	++len_req;	
+	if (len < len_req) {
+		return len_req;
+	}
+
+	return 0;
+}
+
 static void
 _php_mb_regex_init_options(const char *parg, int narg, int *option, int *eval) 
 {
@@ -974,18 +1041,28 @@ PHPAPI int php_mb_regex_set_options_by_string( const char *opt_str, int len TSRM
 }
 /* }}} */
 
-/* {{{ proto bool mb_regex_set_options([string options])
-   Set the default options for mbregex functions */
+/* {{{ proto string mb_regex_set_options([string options])
+   Set or get the default options for mbregex functions */
 PHP_FUNCTION(mb_regex_set_options)
 {
-	char *string;
+	int opt;
+	char *string = NULL;
 	int string_len;
-	if ( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	char buf[16];
+
+	if ( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "|s",
 	                            &string, &string_len ) == FAILURE ) {
 		RETURN_FALSE;
 	}
-	php_mb_regex_set_options_by_string( (const char*)string, string_len TSRMLS_CC);
-	RETURN_TRUE;
+	if (string != NULL) {
+		opt = php_mb_regex_set_options_by_string( (const char*)string,
+		                                          string_len TSRMLS_CC );
+	} else {
+		opt = MBSTRG(regex_default_options);
+	}
+	_php_mb_regex_get_option_string(buf, sizeof(buf), opt);
+
+	RETVAL_STRING(buf, 1);
 }
 /* }}} */
 
