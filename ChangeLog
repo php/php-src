@@ -1,3 +1,14 @@
+2001-02-03  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/pcre/php_pcre.c: Adding delimiter capturing functionality.
+
+    As far as NEWS, compilation fixed don't belong here.
+
+2001-02-03  Sean Bright  <elixer@erols.com>
+
+    * win32/readdir.c: Comments didn't reflect rewinddir()
+
 2001-02-02  Colin Viebrock  <colin@easydns.com>
 
     * pear/Crypt/CBC.php: typo
