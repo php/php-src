@@ -116,12 +116,12 @@ struct PHPFBResult
 	FBCMetaData*			ResultmetaData;		/* The metadata describing the result */
 	FBCRowHandler*			rowHandler;			/* The row handler, the Frontbase structure used for accessing rows in the result */
 	unsigned int			batchSize;			/* The number of row to fetch when expanding the number of rows in the row handler */
-	int						rowCount;			/* The number of rows in the results set.  The number of row is not in */
+	unsigned int			rowCount;			/* The number of rows in the results set.  The number of row is not in */
 						/* general known when the select is done, one typically needs to fetch all the row
 						   to figure out how many row you got. When the rowCount is unknown the value is
 						   0x7ffffffff */
 	int						columnCount;		/* Number of columns in the row set. */
-	int						rowIndex;			/* The current row index. */
+	unsigned int			rowIndex;			/* The current row index. */
 	int						columnIndex;		/* The current column index */
 	void**					row;				/* The last row accessed */
 	FBArray*				array;				/* The link may return a result set, the database list, we implement that by the  */
@@ -364,7 +364,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_links",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxLinks,         zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_connections",				"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxConnections,   zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY_EX ("fbsql.max_results",					"128",		PHP_INI_SYSTEM, OnUpdateInt,    maxResults,       zend_fbsql_globals, fbsql_globals, display_link_numbers)
-	STD_PHP_INI_ENTRY_EX ("fbsql.mbatchSize",					"1000",		PHP_INI_SYSTEM, OnUpdateInt,    batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
+	STD_PHP_INI_ENTRY_EX ("fbsql.batchSize",					"1000",		PHP_INI_SYSTEM, OnUpdateInt,    batchSize,		  zend_fbsql_globals, fbsql_globals, display_link_numbers)
 	STD_PHP_INI_ENTRY    ("fbsql.default_host",					NULL,		PHP_INI_SYSTEM, OnUpdateString, hostName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_user",					"_SYSTEM",	PHP_INI_SYSTEM, OnUpdateString, userName,         zend_fbsql_globals, fbsql_globals)
 	STD_PHP_INI_ENTRY    ("fbsql.default_password",				"",         PHP_INI_SYSTEM, OnUpdateString, userPassword,     zend_fbsql_globals, fbsql_globals)
@@ -628,7 +628,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	php_fbsql_set_default_link(Z_LVAL_P(return_value) TSRMLS_CC);
 }
 
-int phpfbFetchRow(PHPFBResult* result, int row)
+int phpfbFetchRow(PHPFBResult* result, unsigned int row)
 {
 	if (result->rowHandler == NULL)
 	{
@@ -2922,7 +2922,7 @@ PHP_FUNCTION(fbsql_data_seek)
 {
 	PHPFBResult* result = NULL;
 	zval **fbsql_result_index = NULL, **row_number = NULL;
-	int rowIndex;
+	unsigned int rowIndex;
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
