@@ -390,6 +390,8 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
+        int force_redirect = 1;
+        char *redirect_status_env = NULL;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
@@ -472,19 +474,24 @@ int main(int argc, char *argv[])
 
 #if FORCE_CGI_REDIRECT
 	/* check force_cgi after startup, so we have proper output */
-	if (cgi) {
+        if (cfg_get_long("cgi.force_redirect", &force_redirect) == FAILURE) {
+            force_redirect = 1;
+        }
+	if (cgi && force_redirect) {
+                if (cfg_get_string("cgi.redirect_status_env", &redirect_status_env) == FAILURE) {
+                    redirect_status_env = NULL;
+                }
 		/* Apache will generate REDIRECT_STATUS,
 		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
 		 * redirect.so and installation instructions available from
 		 * http://www.koehntopp.de/php.
 		 *   -- kk@netuse.de
 		 */
-		if (!getenv("REDIRECT_STATUS") && !getenv ("HTTP_REDIRECT_STATUS")
-#ifdef PHP_WIN32
-                    /* IIS doesn't set anything, look to see if php.exe is in the script_name */
-                    && (strstr(getenv("SERVER_SOFTWARE"),"Apache") || 
-                        strstr(getenv("SERVER_SOFTWARE"),"iPlanet"))
-#endif
+		if (!getenv("REDIRECT_STATUS") 
+                    && !getenv ("HTTP_REDIRECT_STATUS")
+                    /* this is to allow a different env var to be configured
+                        in case some server does something different than above */
+                    && (!redirect_status_env || !getenv(redirect_status_env))
                     ) {
 			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
 \n\
