@@ -55,8 +55,6 @@
 
 #include "php.h"
 
-#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
-
 #include <stdio.h>
 #include <ctype.h>
 #include <sys/types.h>
@@ -64,6 +62,196 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+
+#define FALSE			0
+#define TRUE			1
+#define NUL			'\0'
+#define INT_NULL		((int *)0)
+
+#define S_NULL			"(null)"
+#define S_NULL_LEN		6
+
+#define FLOAT_DIGITS		6
+#define EXPONENT_LENGTH		10
+
+
+/*
+ * Convert num to its decimal format.
+ * Return value:
+ *   - a pointer to a string containing the number (no sign)
+ *   - len contains the length of the string
+ *   - is_negative is set to TRUE or FALSE depending on the sign
+ *     of the number (always set to FALSE if is_unsigned is TRUE)
+ *
+ * The caller provides a buffer for the string: that is the buf_end argument
+ * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
+ * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
+ */
+char *
+ ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
+	   register bool_int * is_negative, char *buf_end, register int *len)
+{
+	register char *p = buf_end;
+	register u_wide_int magnitude;
+
+	if (is_unsigned) {
+		magnitude = (u_wide_int) num;
+		*is_negative = FALSE;
+	} else {
+		*is_negative = (num < 0);
+
+		/*
+		 * On a 2's complement machine, negating the most negative integer 
+		 * results in a number that cannot be represented as a signed integer.
+		 * Here is what we do to obtain the number's magnitude:
+		 *      a. add 1 to the number
+		 *      b. negate it (becomes positive)
+		 *      c. convert it to unsigned
+		 *      d. add 1
+		 */
+		if (*is_negative) {
+			wide_int t = num + 1;
+
+			magnitude = ((u_wide_int) - t) + 1;
+		} else
+			magnitude = (u_wide_int) num;
+	}
+
+	/*
+	 * We use a do-while loop so that we write at least 1 digit 
+	 */
+	do {
+		register u_wide_int new_magnitude = magnitude / 10;
+
+		*--p = magnitude - new_magnitude * 10 + '0';
+		magnitude = new_magnitude;
+	}
+	while (magnitude);
+
+	*len = buf_end - p;
+	return (p);
+}
+
+
+
+/*
+ * Convert a floating point number to a string formats 'f', 'e' or 'E'.
+ * The result is placed in buf, and len denotes the length of the string
+ * The sign is returned in the is_negative argument (and is not placed
+ * in buf).
+ */
+char *
+ ap_php_conv_fp(register char format, register double num,
+		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len)
+{
+	register char *s = buf;
+	register char *p;
+	int decimal_point;
+
+	if (format == 'f')
+		p = ap_php_fcvt(num, precision, &decimal_point, is_negative);
+	else						/* either e or E format */
+		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative);
+
+	/*
+	 * Check for Infinity and NaN
+	 */
+	if (isalpha((int)*p)) {
+		*len = strlen(strcpy(buf, p));
+		*is_negative = FALSE;
+		return (buf);
+	}
+	if (format == 'f') {
+		if (decimal_point <= 0) {
+			*s++ = '0';
+			if (precision > 0) {
+				*s++ = '.';
+				while (decimal_point++ < 0)
+					*s++ = '0';
+			} else if (add_dp) {
+				*s++ = '.';
+			}
+		} else {
+			while (decimal_point-- > 0) {
+				*s++ = *p++;
+			}
+			if (precision > 0 || add_dp) {
+				*s++ = '.';
+			}
+		}
+	} else {
+		*s++ = *p++;
+		if (precision > 0 || add_dp)
+			*s++ = '.';
+	}
+
+	/*
+	 * copy the rest of p, the NUL is NOT copied
+	 */
+	while (*p)
+		*s++ = *p++;
+
+	if (format != 'f') {
+		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
+		int t_len;
+		bool_int exponent_is_negative;
+
+		*s++ = format;			/* either e or E */
+		decimal_point--;
+		if (decimal_point != 0) {
+			p = ap_php_conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative,
+						&temp[EXPONENT_LENGTH], &t_len);
+			*s++ = exponent_is_negative ? '-' : '+';
+
+			/*
+			 * Make sure the exponent has at least 2 digits
+			 */
+			if (t_len == 1)
+				*s++ = '0';
+			while (t_len--)
+				*s++ = *p++;
+		} else {
+			*s++ = '+';
+			*s++ = '0';
+			*s++ = '0';
+		}
+	}
+	*len = s - buf;
+	return (buf);
+}
+
+
+/*
+ * Convert num to a base X number where X is a power of 2. nbits determines X.
+ * For example, if nbits is 3, we do base 8 conversion
+ * Return value:
+ *      a pointer to a string containing the number
+ *
+ * The caller provides a buffer for the string: that is the buf_end argument
+ * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
+ * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
+ */
+char *
+ ap_php_conv_p2(register u_wide_int num, register int nbits,
+		 char format, char *buf_end, register int *len)
+{
+	register int mask = (1 << nbits) - 1;
+	register char *p = buf_end;
+	static char low_digits[] = "0123456789abcdef";
+	static char upper_digits[] = "0123456789ABCDEF";
+	register char *digits = (format == 'X') ? upper_digits : low_digits;
+
+	do {
+		*--p = digits[num & mask];
+		num >>= nbits;
+	}
+	while (num);
+
+	*len = buf_end - p;
+	return (p);
+}
+
+#if !defined(HAVE_SNPRINTF) || !defined(HAVE_VSNPRINTF) || defined(BROKEN_SNPRINTF) || defined(BROKEN_VSNPRINTF)
 
 
 #ifdef HAVE_GCVT
@@ -88,7 +276,7 @@
 
 #define	NDIG	80
 
-static char *
+char *
  ap_php_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag)
 {
 	register int r2;
@@ -162,13 +350,13 @@ static char *
 	return (buf);
 }
 
-static char *
+char *
  ap_php_ecvt(double arg, int ndigits, int *decpt, int *sign)
 {
 	return (ap_php_cvt(arg, ndigits, decpt, sign, 1));
 }
 
-static char *
+char *
  ap_php_fcvt(double arg, int ndigits, int *decpt, int *sign)
 {
 	return (ap_php_cvt(arg, ndigits, decpt, sign, 0));
@@ -179,7 +367,7 @@ static char *
  * minimal length string
  */
 
-static char *
+char *
  ap_php_gcvt(double number, int ndigit, char *buf)
 {
 	int sign, decpt;
@@ -237,26 +425,6 @@ static char *
 }
 
 #endif							/* HAVE_CVT */
-
-typedef enum {
-	NO = 0, YES = 1
-} boolean_e;
-
-#define FALSE			0
-#define TRUE			1
-#define NUL			'\0'
-#define INT_NULL		((int *)0)
-#define WIDE_INT		long
-
-typedef WIDE_INT wide_int;
-typedef unsigned WIDE_INT u_wide_int;
-typedef int bool_int;
-
-#define S_NULL			"(null)"
-#define S_NULL_LEN		6
-
-#define FLOAT_DIGITS		6
-#define EXPONENT_LENGTH		10
 
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
@@ -336,183 +504,6 @@ typedef struct buf_area buffy;
  * Set the has_prefix flag
  */
 #define PREFIX( str, length, ch )	 *--str = ch ; length++ ; has_prefix = YES
-
-
-/*
- * Convert num to its decimal format.
- * Return value:
- *   - a pointer to a string containing the number (no sign)
- *   - len contains the length of the string
- *   - is_negative is set to TRUE or FALSE depending on the sign
- *     of the number (always set to FALSE if is_unsigned is TRUE)
- *
- * The caller provides a buffer for the string: that is the buf_end argument
- * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
- * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
- */
-static char *
- conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len)
-{
-	register char *p = buf_end;
-	register u_wide_int magnitude;
-
-	if (is_unsigned) {
-		magnitude = (u_wide_int) num;
-		*is_negative = FALSE;
-	} else {
-		*is_negative = (num < 0);
-
-		/*
-		 * On a 2's complement machine, negating the most negative integer 
-		 * results in a number that cannot be represented as a signed integer.
-		 * Here is what we do to obtain the number's magnitude:
-		 *      a. add 1 to the number
-		 *      b. negate it (becomes positive)
-		 *      c. convert it to unsigned
-		 *      d. add 1
-		 */
-		if (*is_negative) {
-			wide_int t = num + 1;
-
-			magnitude = ((u_wide_int) - t) + 1;
-		} else
-			magnitude = (u_wide_int) num;
-	}
-
-	/*
-	 * We use a do-while loop so that we write at least 1 digit 
-	 */
-	do {
-		register u_wide_int new_magnitude = magnitude / 10;
-
-		*--p = magnitude - new_magnitude * 10 + '0';
-		magnitude = new_magnitude;
-	}
-	while (magnitude);
-
-	*len = buf_end - p;
-	return (p);
-}
-
-
-
-/*
- * Convert a floating point number to a string formats 'f', 'e' or 'E'.
- * The result is placed in buf, and len denotes the length of the string
- * The sign is returned in the is_negative argument (and is not placed
- * in buf).
- */
-static char *
- conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, bool_int * is_negative, char *buf, int *len)
-{
-	register char *s = buf;
-	register char *p;
-	int decimal_point;
-
-	if (format == 'f')
-		p = ap_php_fcvt(num, precision, &decimal_point, is_negative);
-	else						/* either e or E format */
-		p = ap_php_ecvt(num, precision + 1, &decimal_point, is_negative);
-
-	/*
-	 * Check for Infinity and NaN
-	 */
-	if (isalpha((int)*p)) {
-		*len = strlen(strcpy(buf, p));
-		*is_negative = FALSE;
-		return (buf);
-	}
-	if (format == 'f') {
-		if (decimal_point <= 0) {
-			*s++ = '0';
-			if (precision > 0) {
-				*s++ = '.';
-				while (decimal_point++ < 0)
-					*s++ = '0';
-			} else if (add_dp) {
-				*s++ = '.';
-			}
-		} else {
-			while (decimal_point-- > 0) {
-				*s++ = *p++;
-			}
-			if (precision > 0 || add_dp) {
-				*s++ = '.';
-			}
-		}
-	} else {
-		*s++ = *p++;
-		if (precision > 0 || add_dp)
-			*s++ = '.';
-	}
-
-	/*
-	 * copy the rest of p, the NUL is NOT copied
-	 */
-	while (*p)
-		*s++ = *p++;
-
-	if (format != 'f') {
-		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
-		int t_len;
-		bool_int exponent_is_negative;
-
-		*s++ = format;			/* either e or E */
-		decimal_point--;
-		if (decimal_point != 0) {
-			p = conv_10((wide_int) decimal_point, FALSE, &exponent_is_negative,
-						&temp[EXPONENT_LENGTH], &t_len);
-			*s++ = exponent_is_negative ? '-' : '+';
-
-			/*
-			 * Make sure the exponent has at least 2 digits
-			 */
-			if (t_len == 1)
-				*s++ = '0';
-			while (t_len--)
-				*s++ = *p++;
-		} else {
-			*s++ = '+';
-			*s++ = '0';
-			*s++ = '0';
-		}
-	}
-	*len = s - buf;
-	return (buf);
-}
-
-
-/*
- * Convert num to a base X number where X is a power of 2. nbits determines X.
- * For example, if nbits is 3, we do base 8 conversion
- * Return value:
- *      a pointer to a string containing the number
- *
- * The caller provides a buffer for the string: that is the buf_end argument
- * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
- * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
- */
-static char *
- conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register int *len)
-{
-	register int mask = (1 << nbits) - 1;
-	register char *p = buf_end;
-	static char low_digits[] = "0123456789abcdef";
-	static char upper_digits[] = "0123456789ABCDEF";
-	register char *digits = (format == 'X') ? upper_digits : low_digits;
-
-	do {
-		*--p = digits[num & mask];
-		num >>= nbits;
-	}
-	while (num);
-
-	*len = buf_end - p;
-	return (p);
-}
 
 
 /*
@@ -677,7 +668,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 						else
 							i_num = (wide_int) va_arg(ap, int);
 					};
-					s = conv_10(i_num, (*fmt) == 'u', &is_negative,
+					s = ap_php_conv_10(i_num, (*fmt) == 'u', &is_negative,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 
@@ -697,7 +688,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 						ui_num = va_arg(ap, u_wide_int);
 					else
 						ui_num = (u_wide_int) va_arg(ap, unsigned int);
-					s = conv_p2(ui_num, 3, *fmt,
+					s = ap_php_conv_p2(ui_num, 3, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 					if (alternate_form && *s != '0') {
@@ -713,7 +704,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 						ui_num = (u_wide_int) va_arg(ap, u_wide_int);
 					else
 						ui_num = (u_wide_int) va_arg(ap, unsigned int);
-					s = conv_p2(ui_num, 4, *fmt,
+					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
 					if (alternate_form && i_num != 0) {
@@ -750,7 +741,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 						s = "inf";
 						s_len = 3;
 					} else {
-						s = conv_fp(*fmt, fp_num, alternate_form,
+						s = ap_php_conv_fp(*fmt, fp_num, alternate_form,
 						 (adjust_precision == NO) ? FLOAT_DIGITS : precision,
 									&is_negative, &num_buf[1], &s_len);
 						if (is_negative)
@@ -821,7 +812,7 @@ static int format_converter(register buffy * odp, const char *fmt,
 					ui_num = (u_wide_int) va_arg(ap, char *);
 
 					if (sizeof(char *) <= sizeof(u_wide_int))
-						 s = conv_p2(ui_num, 4, 'x',
+						 s = ap_php_conv_p2(ui_num, 4, 'x',
 									 &num_buf[NUM_BUF_SIZE], &s_len);
 					else {
 						s = "%p";
