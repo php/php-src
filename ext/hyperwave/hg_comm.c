@@ -48,6 +48,28 @@
 #include "hg_comm.h"
 #include "ext/standard/head.h"
 
+/* Defining hw_optimize does optimize the send_objectbyidquery() function.
+   Instead of getting the complete return message including the objectrecords
+   with recv_hg_msg(), only the header of the return message is fetched.
+   The object records itself are fetched as they are needed straight from
+   the socket. This method requires less memory and is twice as fast because
+   reading from the net seems to be a bottleneck which has less impact if
+   the processing of the data is done in parallel.
+*/
+#define hw_optimize
+
+/* Define hw_less_server_stress does reduce the stress on the hw server, by
+   using send_objectbyidquery() instead of send_getobject() multiple times.
+   send_objectbyidquery() gets a bunch of object records with one message.
+   This also reduced the number of lines in the servers log files.
+   Unfortunately this is not faster unless hw_optimize is defined, because
+   getting object records with multiple send_getobject() is already optimized.
+   First all request messages for each object are send and the the answers
+   are read. This gives the server the possibility to answer request already
+   while more request are comming in.
+*/
+#define hw_less_server_stress
+
 static int set_nonblocking(int fd);
 static int set_blocking(int fd);
 
@@ -1281,7 +1303,7 @@ static int hg_read_exact(int sockfd, char *buf, int size)
 	len = read_to(sockfd, (void *) buf, size, rtimeout);
 	if ( len < 0 ) 
 		return -1;
-	return(0);
+	return(len);
 }
 
 
@@ -1331,6 +1353,36 @@ static int hg_write(int sockfd, char *buf, int size)
 		}
 	}
 	return(0);
+}
+
+hg_msg *recv_hg_msg_head(int sockfd)
+{
+	hg_msg *msg;
+
+	if ( (msg = (hg_msg *)emalloc(sizeof(hg_msg))) == NULL )  {
+		lowerror = LE_MALLOC;
+		return(NULL);
+	}
+
+	if ( hg_read_exact(sockfd, (char *)&(msg->length), 4) == -1 )  {
+		efree(msg);
+		return(NULL);
+	}
+
+	if ( hg_read_exact(sockfd, (char *)&(msg->version_msgid), 4) == -1 )  {
+		efree(msg);
+		return(NULL);
+	}
+
+	if ( hg_read_exact(sockfd, (char *)&(msg->msg_type), 4) == -1 )  {
+		efree(msg);
+		return(NULL);
+	}
+
+#ifdef HW_DEBUG
+	php_printf("<B>   Recv msg: </B>type = %d -- id = %d<BR>\n", msg->msg_type, msg->version_msgid);
+#endif
+	return(msg);
 }
 
 
@@ -2706,6 +2758,13 @@ int send_childrenobj(int sockfd, hw_objectID objectID, char ***childrec, int *co
 	}
 
 	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		return -2;
+	}
+	efree(childIDs);
+#else	
 	for(i=0; i<*count; i++) {
 		
 		length = HEADER_LENGTH + sizeof(hw_objectID);
@@ -2759,7 +2818,7 @@ int send_childrenobj(int sockfd, hw_objectID objectID, char ***childrec, int *co
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -2878,6 +2937,13 @@ int send_getchildcollobj(int sockfd, hw_objectID objectID, char ***childrec, int
 	}
 
 	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		return -2;
+	}
+	efree(childIDs);
+#else	
 	for(i=0; i<*count; i++) {
 		
 		length = HEADER_LENGTH + sizeof(hw_objectID);
@@ -2931,7 +2997,7 @@ int send_getchildcollobj(int sockfd, hw_objectID objectID, char ***childrec, int
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -3049,6 +3115,13 @@ int send_getchilddoccollobj(int sockfd, hw_objectID objectID, hw_objrec ***child
 	}
 
 	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		return -2;
+	}
+	efree(childIDs);
+#else	
 	for(i=0; i<*count; i++) {
 		length = HEADER_LENGTH + sizeof(hw_objectID);
 		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
@@ -3099,7 +3172,7 @@ int send_getchilddoccollobj(int sockfd, hw_objectID objectID, hw_objrec ***child
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -3215,6 +3288,13 @@ int send_getanchorsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 	}
 
 	/* Now get for each anchor the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, anchorIDs, count, NULL, childrec)) {
+		efree(anchorIDs);
+		return -2;
+	}
+	efree(anchorIDs);
+#else
 	for(i=0; i<*count; i++) {
 		
 		length = HEADER_LENGTH + sizeof(hw_objectID);
@@ -3267,7 +3347,7 @@ int send_getanchorsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -3648,6 +3728,10 @@ int send_objectbyidquery(int sockfd, hw_objectID *IDs, int *count, char *query, 
 	int *offsets, *childIDs;
 	char **childrec;
 
+	if(*count <= 0) {
+		*objrecs = emalloc(0);
+		return(0);
+	}
 	length = HEADER_LENGTH + sizeof(int) + sizeof(int) + *count * sizeof(hw_objectID);
 	if(query)
 		length = length + strlen(query) + 1;
@@ -3671,6 +3755,86 @@ int send_objectbyidquery(int sockfd, hw_objectID *IDs, int *count, char *query, 
 		return(-1);
 	}
 	efree(msg.buf);
+
+#ifdef hw_optimize
+	{
+	int hg_error;
+	int c, allc;
+
+	allc = 0;
+	retmsg = recv_hg_msg_head(sockfd);
+	if ( retmsg == NULL ) 
+		return(-1);
+	
+	/* read error field */
+	if ( (c = hg_read_exact(sockfd, (char *) &hg_error, 4)) == -1 ) {
+		if(retmsg) efree(retmsg);
+		return(-2);
+	}
+	allc += c;
+
+	if(hg_error) {
+		if(retmsg) efree(retmsg);
+		return(-3);
+	}
+
+	/* read count field */
+	if ( (c = hg_read_exact(sockfd, (char *) count, 4)) == -1 ) {
+		if(retmsg) efree(retmsg);
+		return(-2);
+	}
+	allc += c;
+
+	if(NULL != (childIDs = emalloc(*count * sizeof(hw_objectID)))) {
+		if((c = hg_read_exact(sockfd, (char *) childIDs, *count * sizeof(hw_objectID))) == -1) {
+			efree(childIDs);
+			if(retmsg) efree(retmsg);
+			return(-3);
+		}
+	} else {
+		efree(retmsg);
+		lowerror = LE_MALLOC;
+		return(-4);
+	}
+	allc += c;
+
+	if(NULL != (offsets = emalloc(*count * sizeof(int)))) {
+		if((c = hg_read_exact(sockfd, (char *) offsets, *count * sizeof(int))) == -1) {
+			efree(childIDs);
+			efree(offsets);
+			if(retmsg) efree(retmsg);
+			return(-5);
+		}
+	} else {
+		efree(retmsg);
+		efree(childIDs);
+		lowerror = LE_MALLOC;
+		return(-6);
+	}  
+	allc += c;
+
+	str = (char *)ptr;
+	if(NULL == (childrec = (char **) emalloc(*count * sizeof(hw_objrec *)))) {
+		efree(offsets);
+		efree(childIDs);
+		efree(retmsg);
+		lowerror = LE_MALLOC;
+		return(-1);
+	} else {
+		for(i=0; i<*count; i++) {
+			char *ptr;
+			childrec[i] = emalloc(offsets[i] + 1);
+			ptr = childrec[i];
+			c = hg_read_exact(sockfd, (char *) ptr, offsets[i]);
+			ptr[c] = '\0';
+			allc += c;
+		}
+		/* Reading the trailing '\0' */
+		c = hg_read_exact(sockfd, (char *) &hg_error, 1);
+		*objrecs = childrec;
+	}
+	}
+#else
 	retmsg = recv_hg_msg(sockfd);
 	if ( retmsg == NULL ) 
 		return(-1);
@@ -3720,13 +3884,19 @@ int send_objectbyidquery(int sockfd, hw_objectID *IDs, int *count, char *query, 
 		return(-1);
 	} else {
 		for(i=0; i<*count; i++) {
-			childrec[i] = estrdup(str);
+			char *ptr;
+			childrec[i] = emalloc(offsets[i] + 1);
+			ptr = childrec[i];
+			memcpy(ptr, str, offsets[i]);
+			ptr[offsets[i]] = '\0';
 			str += offsets[i];
 		}
 		*objrecs = childrec;
 	}
 
 	efree(retmsg->buf);
+#endif
+
 	efree(retmsg);
 	efree(childIDs);
 	efree(offsets);
@@ -3849,6 +4019,13 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 	}
 
 	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		return -2;
+	}
+	efree(childIDs);
+#else
 	for(i=0; i<*count; i++) {
 		length = HEADER_LENGTH + sizeof(hw_objectID);
 		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
@@ -3902,7 +4079,7 @@ int send_getobjbyqueryobj(int sockfd, char *query, int maxhits, char ***childrec
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -4027,6 +4204,13 @@ int send_getobjbyquerycollobj(int sockfd, hw_objectID collID, char *query, int m
 	}
 
 	/* Now get for each child collection the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		if(childIDs) efree(childIDs);
+		return -2;
+	}
+	if(childIDs) efree(childIDs);
+#else
 	for(i=0; i<*count; i++) {
 		length = HEADER_LENGTH + sizeof(hw_objectID);
 		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
@@ -4057,7 +4241,7 @@ int send_getobjbyquerycollobj(int sockfd, hw_objectID collID, char *query, int m
 			efree(retmsg->buf);
 			efree(retmsg);
 		}
-  		*childrec = NULL;
+  	*childrec = NULL;
 		lowerror = LE_MALLOC;
 		return(-1);
 	} else {
@@ -4080,7 +4264,7 @@ int send_getobjbyquerycollobj(int sockfd, hw_objectID collID, char *query, int m
 			}
 		}
 	}
-
+#endif
 	return(0);
 }
 
@@ -4201,6 +4385,13 @@ int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 	}
 
 	/* Now get for each parent the object record */
+#ifdef hw_less_server_stress
+  if(0 != send_objectbyidquery(sockfd, childIDs, count, NULL, childrec)) {
+		efree(childIDs);
+		return -2;
+	}
+	efree(childIDs);
+#else
 	for(i=0; i<*count; i++) {
 		length = HEADER_LENGTH + sizeof(hw_objectID);
 		build_msg_header(&msg, length, childIDs[i], GETOBJECT_MESSAGE);
@@ -4252,6 +4443,7 @@ int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 			}
 		}
 	}
+#endif
 	return(0);
 }
 
