@@ -1,6 +1,11 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- addcslashes now warns when charlist is invalid. The returned string
+  remained the same (Jeroen)
+- Added optional extra argument to gmp_init(). The extra argument
+  indicates which number base gmp should use when converting a
+  string to the gmp-number. (Troels)
 - Added the Cyrus-IMAP extension, which allows a direct interface to Cyrus' 
   more advanced capabilities. (Sterling)
 - Enhance read_exif_data() to support multiple comment tags (Rasmus)
