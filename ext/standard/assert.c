@@ -118,6 +118,7 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 	if (ASSERT(callback)) {
 		zval_ptr_dtor(&ASSERT(callback));
 	}
+	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(assert)
