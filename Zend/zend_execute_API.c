@@ -364,72 +364,27 @@ ZEND_API int zval_update_constant(zval **pp, void *arg TSRMLS_DC)
 
 	if (p->type == IS_CONSTANT) {
 		int refcount;
-		char *const_name;
 
 		SEPARATE_ZVAL(pp);
 		p = *pp;
 
 		refcount = p->refcount;
 
-		if ((const_name = strchr(p->value.str.val, ':')) && const_name[1] == ':') {
-			zend_class_entry **ce;
-			zval **value;
-			int class_name_len = const_name-p->value.str.val;
-			char *class_name = estrndup(p->value.str.val, class_name_len);
-			int free_class_name = 1;
-
-			if (class_name_len == sizeof("self")-1 && strcasecmp(class_name, "self")==0) {
-				if (EG(scope)) {
-					class_name = EG(scope)->name;
-					free_class_name = 0;
-				} else {
-					zend_error(E_ERROR, "Cannot access self:: when no class scope is active");
-				}
-			} else if (class_name_len == sizeof("parent")-1 && strcasecmp(class_name, "parent")==0) {
-				if (!EG(scope)) {
-					zend_error(E_ERROR, "Cannot access parent:: when no class scope is active");
-				} else if (!EG(scope)->parent) {
-					zend_error(E_ERROR, "Cannot access parent:: when current class scope has no parent");
-				} else {
-					class_name = EG(scope)->parent->name;
-					free_class_name = 0;
-				}
+		if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
+			zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
+					   p->value.str.val,
+					   p->value.str.val);
+			p->type = IS_STRING;
+			if (!inline_change) {
+				zval_copy_ctor(p);
 			}
-
-			if (zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC) == FAILURE) {
-				zend_error(E_ERROR, "Undefined class '%s'", class_name);
-			}
-
-			if(free_class_name) {
-				efree(class_name);
-			}
-			const_name += 2;
-
-			if (zend_hash_find(&(*ce)->constants_table, const_name, strlen(const_name)+1, (void **) &value) == FAILURE) {
-				zend_error(E_ERROR, "Undefined class constant '%s'", const_name);
-			}
-			const_value = **value;
-			zval_copy_ctor(&const_value);
+		} else {
 			if (inline_change) {
 				STR_FREE(p->value.str.val);
 			}
 			*p = const_value;
-		} else {
-			if (!zend_get_constant(p->value.str.val, p->value.str.len, &const_value TSRMLS_CC)) {
-				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",
-							p->value.str.val,
-							p->value.str.val);
-				p->type = IS_STRING;
-				if (!inline_change) {
-					zval_copy_ctor(p);
-				}
-			} else {
-				if (inline_change) {
-					STR_FREE(p->value.str.val);
-				}
-				*p = const_value;
-			}
 		}
+
 		INIT_PZVAL(p);
 		p->refcount = refcount;
 	} else if (p->type == IS_CONSTANT_ARRAY) {
