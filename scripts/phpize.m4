@@ -54,6 +54,7 @@ PHP_BUILD_SHARED
 
 AC_PREFIX_DEFAULT()
 
+PHP_PROG_RE2C
 AC_PROG_AWK
     
 sinclude(config.m4)
