@@ -22,6 +22,7 @@
 require_once 'PEAR.php';
 require_once 'Archive/Tar.php';
 require_once 'System.php';
+require_once 'PEAR/Config.php';
 
 // {{{ globals
 
@@ -108,6 +109,12 @@ class PEAR_Common extends PEAR
      */
     var $ui = null;
 
+    /**
+     * Configuration object (PEAR_Config).
+     * @var object
+     */
+    var $config = null;
+
     var $current_path = null;
 
     // }}}
@@ -122,6 +129,7 @@ class PEAR_Common extends PEAR
     function PEAR_Common()
     {
         $this->PEAR();
+        $this->config = &PEAR_Config::singleton();
     }
 
     // }}}
@@ -237,9 +245,9 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
-    // {{{ setFrontend()
+    // {{{ setFrontendObject()
 
-    function setFrontend(&$ui)
+    function setFrontendObject(&$ui)
     {
         $this->ui = &$ui;
     }
@@ -1267,6 +1275,24 @@ class PEAR_Common extends PEAR
     }
 
     // }}}
+    // {{{ validPackageName()
+
+    /**
+     * Test whether a string contains a valid package name.
+     *
+     * @param string $name the package name to test
+     *
+     * @return bool
+     *
+     * @access public
+     */
+    function validPackageName($name)
+    {
+        return (bool)preg_match('/^[A-Z][A-Za-z0-9_]+$/', $name);
+    }
+
+
+    // }}}
 
     // {{{ downloadHttp()
 
@@ -1277,20 +1303,24 @@ class PEAR_Common extends PEAR
      * parameters: the callback type, and parameters.  The implemented
      * callback types are:
      *
-     *  'message'   the parameter is a string with an informational message
-     *  'saveas'    may be used to save with a different file name, the
-     *              parameter is array($ui, $filaneme) where $ui is the
-     *              user interface object used (instance of PEAR_Frontend_*)
-     *              and $filename is the filename that is about to be used.
-     *              If a 'saveas' callback returns a non-empty string,
-     *              that file name will be used instead.  Note that
-     *              $save_dir will not be affected by this, only the
-     *              basename of the file. 
-     *  'start'     download is starting, parameter is number of bytes
-     *              that are expected, or -1 if unknown
-     *  'bytesread' parameter is the number of bytes read so far
-     *  'done'      download is complete, parameter is the total number
-     *              of bytes read
+     *  'setup'       called at the very beginning, parameter is a UI object
+     *                that should be used for all output
+     *  'message'     the parameter is a string with an informational message
+     *  'saveas'      may be used to save with a different file name, the
+     *                parameter is the filename that is about to be used.
+     *                If a 'saveas' callback returns a non-empty string,
+     *                that file name will be used as the filename instead.
+     *                Note that $save_dir will not be affected by this, only
+     *                the basename of the file.
+     *  'start'       download is starting, parameter is number of bytes
+     *                that are expected, or -1 if unknown
+     *  'bytesread'   parameter is the number of bytes read so far
+     *  'done'        download is complete, parameter is the total number
+     *                of bytes read
+     *  'connfailed'  if the TCP connection fails, this callback is called
+     *                with array(host,port,errno,errmsg)
+     *  'writefailed' if writing to disk fails, this callback is called
+     *                with array(destfile,errmsg)
      *
      * If an HTTP proxy has been configured (http_proxy PEAR_Config
      * setting), the proxy will be used.
@@ -1310,11 +1340,18 @@ class PEAR_Common extends PEAR
      *
      * @access public
      */
-    function downloadHttp($url, &$ui, &$config, $save_dir = '.',
-                          $callback = null)
+    function downloadHttp($url, &$ui, $save_dir = '.', $callback = null)
     {
+        if ($callback) {
+            call_user_func($callback, 'setup', array(&$ui));
+        }
         if (preg_match('!^http://([^/:?#]*)(:(\d+))?(/.*)!', $url, $matches)) {
             list(,$host,,$port,$path) = $matches;
+        }
+        if (isset($this)) {
+            $config = &$this->config;
+        } else {
+            $config = &PEAR_Config::singleton();
         }
         $proxy_host = $proxy_port = null;
         if ($proxy = $config->get('http_proxy')) {
@@ -1329,18 +1366,23 @@ class PEAR_Common extends PEAR
         if (empty($port)) {
             $port = 80;
         }
-        if (!extension_loaded("zlib")) {
-            $pkgfile .= '?uncompress=yes';
-        }
         if ($proxy_host) {
             $fp = @fsockopen($proxy_host, $proxy_port, $errno, $errstr);
             if (!$fp) {
+                if ($callback) {
+                    call_user_func($callback, 'connfailed', array($proxy_host, $proxy_port,
+                                                                  $errno, $errstr));
+                }
                 return PEAR::raiseError("Connection to `$proxy_host:$proxy_port' failed: $errstr", $errno);
             }
             $request = "GET $url HTTP/1.0\r\n";
         } else {
             $fp = @fsockopen($host, $port, $errno, $errstr);
             if (!$fp) {
+                if ($callback) {
+                    call_user_func($callback, 'connfailed', array($host, $port,
+                                                                  $errno, $errstr));
+                }
                 return PEAR::raiseError("Connection to `$host:$port' failed: $errstr", $errno);
             }
             $request = "GET $path HTTP/1.0\r\n";
@@ -1362,7 +1404,7 @@ class PEAR_Common extends PEAR
             $save_as = basename($url);
         }
         if ($callback) {
-            $tmp = call_user_func($callback, 'saveas', array(&$ui, $save_as));
+            $tmp = call_user_func($callback, 'saveas', $save_as);
             if ($tmp) {
                 $save_as = $tmp;
             }
@@ -1370,6 +1412,9 @@ class PEAR_Common extends PEAR
         $dest_file = $save_dir . DIRECTORY_SEPARATOR . $save_as;
         if (!$wp = @fopen($dest_file, 'wb')) {
             fclose($fp);
+            if ($callback) {
+                call_user_func($callback, 'writefailed', array($dest_file, $php_errormsg));
+            }
             return PEAR::raiseError("could not open $dest_file for writing");
         }
         if (isset($headers['content-length'])) {
@@ -1388,7 +1433,10 @@ class PEAR_Common extends PEAR
             }
             if (!@fwrite($wp, $data)) {
                 fclose($fp);
-                return PEAR::raiseError("$pkgfile: write failed ($php_errormsg)");
+                if ($callback) {
+                    call_user_func($callback, 'writefailed', array($dest_file, $php_errormsg));
+                }
+                return PEAR::raiseError("$dest_file: write failed ($php_errormsg)");
             }
         }
         fclose($fp);
