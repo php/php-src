@@ -54,7 +54,7 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 #define MODULE_PERSISTENT 1
 #define MODULE_TEMPORARY 2
 
-struct zend_ini_entry;
+struct _zend_ini_entry;
 typedef struct _zend_module_entry zend_module_entry;
 
 struct _zend_module_entry {
@@ -62,7 +62,7 @@ struct _zend_module_entry {
 	unsigned int zend_api;
 	unsigned char zend_debug;
 	unsigned char zts;
-	struct zend_ini_entry *ini_entry;
+	struct _zend_ini_entry *ini_entry;
 	char *name;
 	zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
