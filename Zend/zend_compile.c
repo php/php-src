@@ -909,7 +909,7 @@ void zend_do_free(znode *op1 TSRMLS_DC)
 	}		
 }
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, int is_static  TSRMLS_DC)
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, int fn_flags  TSRMLS_DC)
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -924,7 +924,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.function_name = name;
 	op_array.arg_types = NULL;
 	op_array.return_reference = return_reference;
-	op_array.is_static = is_static;
+	op_array.fn_flags = fn_flags;
 
 	op_array.scope = CG(active_class_entry);
 
@@ -1529,9 +1529,29 @@ static void do_inherit_parent_constructor(zend_class_entry *ce)
 	ce->__call = ce->parent->__call;
 }
 
+static zend_bool do_inherit_method_check(zend_function *child, zend_function *parent) {
+	register zend_uint child_flags  = child->common.fn_flags;
+	register zend_uint parent_flags = parent->common.fn_flags;
+
+	/* You cannot change from static to non static and vice versa.
+	 */
+	if ((child_flags&FN_IS_STATIC) != (parent_flags&FN_IS_STATIC)) {
+		if (child->common.fn_flags & FN_IS_STATIC) {
+			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+		}
+	}
+	/* Disallow makeing an inherited method abstract.
+	 */
+	if (child_flags & FN_ABSTRACT) {
+		zend_error(E_COMPILE_ERROR, "Cannot redeclare %s::%s() abstract in class %s", FN_SCOPE_NAME(parent), child->common.function_name, FN_SCOPE_NAME(child));
+	}
+	return SUCCESS;
+}
+
 void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 {
-	zend_function tmp_zend_function;
 	zval *tmp;
 
 	/* Perform inheritance */
@@ -1540,7 +1560,7 @@ void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce)
 	/* STATIC_MEMBERS_FIXME */
 /*	zend_hash_merge(ce->static_members, parent_ce->static_members, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0); */
 	zend_hash_merge(&ce->constants_table, &parent_ce->constants_table, (void (*)(void *)) zval_add_ref, (void *) &tmp, sizeof(zval *), 0);
-	zend_hash_merge(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, &tmp_zend_function, sizeof(zend_function), 0);
+	zend_hash_merge_ex(&ce->function_table, &parent_ce->function_table, (void (*)(void *)) function_add_ref, sizeof(zend_function), (zend_bool (*)(void *, void *))do_inherit_method_check);
 	ce->parent = parent_ce;
 	if (!ce->handle_property_get)
 	   ce->handle_property_get	= parent_ce->handle_property_get;
