@@ -2385,13 +2385,12 @@ int zend_fetch_class_handler(ZEND_OPCODE_HANDLER_ARGS)
 			class_name_strlen = class_name->value.str.len;
 			free_class_name = 1;
 		} else {
-			class_name_strval = "";
 			class_name_strlen = 0;
 		}
 	}
 	
 	if (!ce) {
-		if (EX(opline)->op1.op_type == IS_UNUSED && class_name->value.str.val && class_name->value.str.len) {
+		if (EX(opline)->op1.op_type == IS_UNUSED && class_name_strlen) {
 			if (zend_lookup_class(class_name_strval, class_name_strlen, &pce TSRMLS_CC) == SUCCESS) {
 				ce = *pce;
 			}
