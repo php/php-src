@@ -636,7 +636,7 @@ ZEND_FUNCTION(gmp_fact)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_powm(resource base, int exp)
+/* {{{ proto resource gmp_pow(resource base, int exp)
    Raise base to power exp */
 ZEND_FUNCTION(gmp_pow)
 {
@@ -963,7 +963,7 @@ ZEND_FUNCTION(gmp_or)
 }
 /* }}} */
 
-/* {{{ proto resource gmp_or(resource a)
+/* {{{ proto resource gmp_com(resource a)
    Calculates one's complement of a */
 ZEND_FUNCTION(gmp_com)
 {
