@@ -893,8 +893,7 @@ SPL_METHOD(Array, current)
 	if (zend_hash_get_current_data_ex(aht, (void **) &entry, &intern->pos) == FAILURE) {
 		return;
 	}
-	*return_value = **entry;
-	zval_copy_ctor(return_value);
+	RETVAL_ZVAL(*entry, 1, 0);
 }
 /* }}} */
 
