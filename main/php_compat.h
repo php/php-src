@@ -24,6 +24,8 @@
 #define hashTableDestroy	php_hashTableDestroy
 #define hashTableIterInit	php_hashTableIterInit
 #define hashTableIterNext	php_hashTableIterNext
+
+#ifndef HAVE_LIBEXPAT2
 #define XML_DefaultCurrent php_XML_DefaultCurrent
 #define XML_ErrorString php_XML_ErrorString
 #define XML_ExternalEntityParserCreate php_XML_ExternalEntityParserCreate
@@ -67,5 +69,6 @@
 #define XmlUtf16Encode php_XmlUtf16Encode
 #define XmlUtf8Encode php_XmlUtf8Encode
 #define XmlPrologStateInit php_XmlPrologStateInit
+#endif
 
 #endif
