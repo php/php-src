@@ -866,6 +866,10 @@ SOURCE=.\LICENSE
 # End Source File
 # Begin Source File
 
+SOURCE=.\NEWS
+# End Source File
+# Begin Source File
+
 SOURCE=".\php.ini-dist"
 # End Source File
 # End Group

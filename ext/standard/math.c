@@ -43,15 +43,11 @@ PHP_FUNCTION(abs)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*value)->type == IS_STRING) {
-		zval_copy_ctor(*value);
-		convert_scalar_to_number(*value);
-	}
-
+	convert_scalar_to_number_ex(value);
+	
 	if ((*value)->type == IS_DOUBLE) {
 		RETURN_DOUBLE(fabs((*value)->value.dval));
-	}
-	else if ((*value)->type == IS_LONG) {
+	} else if ((*value)->type == IS_LONG) {
 		RETURN_LONG(labs((*value)->value.lval));
 	}
 
@@ -70,15 +66,11 @@ PHP_FUNCTION(ceil)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*value)->type == IS_STRING) {
-		zval_copy_ctor(*value);
-		convert_scalar_to_number(*value);
-	}
+	convert_scalar_to_number_ex(value);
 
 	if ((*value)->type == IS_DOUBLE) {
 		RETURN_LONG((long)ceil((*value)->value.dval));
-	}
-	else if ((*value)->type == IS_LONG) {
+	} else if ((*value)->type == IS_LONG) {
 		RETURN_LONG((*value)->value.lval);
 	}
 
@@ -96,15 +88,11 @@ PHP_FUNCTION(floor) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*value)->type == IS_STRING) {
-		zval_copy_ctor(*value);
-		convert_scalar_to_number(*value);
-	}
+	convert_scalar_to_number_ex(value);
 
 	if ((*value)->type == IS_DOUBLE) {
 		RETURN_LONG((long)floor((*value)->value.dval));
-	}
-	else if ((*value)->type == IS_LONG) {
+	} else if ((*value)->type == IS_LONG) {
 		RETURN_LONG((*value)->value.lval);
 	}
 
@@ -136,14 +124,12 @@ PHP_FUNCTION(round)
 	if (ARG_COUNT(ht) != 1 || getParametersEx(1, &value) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	if ((*value)->type == IS_STRING) {
-		zval_copy_ctor(*value);
-		convert_scalar_to_number(*value);
-	}
+
+	convert_scalar_to_number_ex(value);
+
 	if ((*value)->type == IS_DOUBLE) {
 		RETURN_DOUBLE(rint((*value)->value.dval));
-	}
-	if ((*value)->type == IS_LONG) {
+	} else if ((*value)->type == IS_LONG) {
 		RETURN_DOUBLE((double)(*value)->value.lval);
 	}
 	RETURN_FALSE;

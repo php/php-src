@@ -5,4 +5,6 @@ function foobar()
 	print "foobar\n";
 }
 
+$foobar = "foobar";
+
 $a = ${"foo"."bar"}();
