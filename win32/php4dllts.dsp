@@ -270,7 +270,7 @@ SOURCE=..\main\config.w32.h.in
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
-# Begin Custom Build
+# Begin Custom Build - Generating main/config.w32.h
 InputPath=..\main\config.w32.h.in
 
 "config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -282,7 +282,7 @@ InputPath=..\main\config.w32.h.in
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
-# Begin Custom Build
+# Begin Custom Build - Generating main/config.w32.h
 InputPath=..\main\config.w32.h.in
 
 "config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -294,7 +294,7 @@ InputPath=..\main\config.w32.h.in
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
-# Begin Custom Build
+# Begin Custom Build - Generating main/config.w32.h
 InputPath=..\main\config.w32.h.in
 
 "config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -306,7 +306,7 @@ InputPath=..\main\config.w32.h.in
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
 
-# Begin Custom Build
+# Begin Custom Build - Generating main/config.w32.h
 InputPath=..\main\config.w32.h.in
 
 "config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -2061,7 +2061,7 @@ SOURCE=..\ext\standard\parsedate.y
 
 !IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
 
-# Begin Custom Build
+# Begin Custom Build - Generating ext/standard/parsedate.c
 InputPath=..\ext\standard\parsedate.y
 
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -2072,7 +2072,7 @@ InputPath=..\ext\standard\parsedate.y
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
-# Begin Custom Build
+# Begin Custom Build - Generating ext/standard/parsedate.c
 InputPath=..\ext\standard\parsedate.y
 
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -2083,7 +2083,7 @@ InputPath=..\ext\standard\parsedate.y
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
-# Begin Custom Build
+# Begin Custom Build - Generating ext/standard/parsedate.c
 InputPath=..\ext\standard\parsedate.y
 
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -2094,7 +2094,7 @@ InputPath=..\ext\standard\parsedate.y
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
 
-# Begin Custom Build
+# Begin Custom Build - Generating ext/standard/parsedate.c
 InputPath=..\ext\standard\parsedate.y
 
 "..\ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
