@@ -220,6 +220,13 @@ case $host_alias in
     LIBS="$LIBS -lbe -lroot";;
 *mips*)
     CPPFLAGS="$CPPFLAGS -D_XPG_IV";;
+*linux*)
+    AC_MSG_CHECKING([for Linux LFS_CFLAGS])
+    LFS_LINUX_CFLAGS=`getconf LFS_CFLAGS`
+    if test "x$LFS_LINUX_CFLAGS" != "x"; then
+        CFLAGS="$CFLAGS $LFS_LINUX_CFLAGS"
+    fi
+    AC_MSG_RESULT([$LFS_LINUX_CFLAGS])
 esac
 
 
