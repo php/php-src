@@ -639,6 +639,9 @@ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 			p++;
 		}
 #endif
+#ifdef ZEND_MULTIBYTE
+		zend_multibyte_set_internal_encoding(new_value, new_value_length TSRMLS_CC);
+#endif /* ZEND_MULTIBYTE */
 	} else {
 		if (new_value != NULL && new_value_length > 0) {
 			return FAILURE;
