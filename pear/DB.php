@@ -36,6 +36,7 @@ define("DB_ERROR_TRUNCATED",      -10);
 define("DB_ERROR_INVALID_NUMBER", -11);
 define("DB_ERROR_INVALID_DATE",   -12);
 define("DB_ERROR_DIVZERO",        -13);
+define("DB_ERROR_NODBSELECTED",   -14);
 
 // }}}
 // {{{ Prepare/execute parameter types
@@ -84,6 +85,27 @@ class DB {
 		return $obj;
     }
 
+	function connect($dsn, $persistent = false) {
+		global $USED_PACKAGES;
+
+		$dsninfo = DB::parseDSN($dsn);
+		$type = $dsninfo['phptype'];
+		// "include" should be replaced with "use" once PHP gets it
+		$pkgname = 'DB/' . $type;
+		if (!is_array($USED_PACKAGES) || !$USED_PACKAGES[$pkgname]) {
+			print "${pkgname}.php\n";
+			if (!@include($pkgname . '.php')) {
+				return DB_ERROR_NOT_FOUND;
+			} else {
+				$USED_PACKAGES[$pkgname] = true;
+			}
+		}
+		$classname = 'DB_' . $type;
+		$obj = new $classname;
+		$obj->connect(&$dsninfo, $persistent);
+		return $obj; // XXX ADDREF
+	}
+
 	/**
 	 * Return the DB API version.
 	 * @return  int     the DB API version number
@@ -121,10 +143,96 @@ class DB {
 				DB_ERROR_NOT_CAPABLE    => "DB implementation not capable",
 				DB_ERROR_INVALID_NUMBER => "invalid number",
 				DB_ERROR_INVALID_DATE   => "invalid date or time",
-				DB_ERROR_DIVZERO        => "division by zero"
+				DB_ERROR_DIVZERO        => "division by zero",
+				DB_ERROR_NODBSELECTED   => "no database selected"
 			);
 		}
 		return $errorMessages[$code];
+	}
+
+	/**
+	 * Parse a data source name and return an associative array with
+	 * the following keys:
+	 *  phptype       Database backend used in PHP (mysql, odbc etc.)
+	 *  dbsyntax      Database used with regards to SQL syntax etc.
+	 *  protocol      Communication protocol to use (tcp, unix etc.)
+	 *  hostspec      Host specification (hostname[:port])
+	 *  database      Database to use on the DBMS server
+	 *  username      User name for login
+     *  password      Password for login
+	 *
+	 * The format of the supplied DSN is in its fullest form:
+	 *  phptype(dbsyntax)://username:password@protocol+hostspec/database
+	 * Most variations are allowed:
+	 *  phptype://username:password@protocol+hostspec/database
+	 *  phptype://username:password@hostspec/database
+	 *  phptype://username:password@hostspec
+	 *  phptype://hostspec/database
+	 *  phptype://hostspec
+	 *  phptype(dbsyntax)
+	 *  phptype
+	 *
+	 * FALSE is returned on error.
+	 *
+	 * @param $dsn Data Source Name to be parsed
+	 */
+	function parseDSN($dsn) {
+		$parsed = array(
+			'phptype'  => false,
+			'dbsyntax' => false,
+			'protocol' => false,
+			'hostspec' => false,
+			'database' => false,
+			'username' => false,
+			'password' => false
+		);
+		if (ereg('^([^:]+)://', $dsn, &$arr)) {
+			$dbtype = $arr[1];
+			$dsn = ereg_replace('^[^:]+://', '', $dsn);
+			// match "phptype(dbsyntax)"
+			if (ereg('^([^\(]+)\((.+)\)$', $dbtype, &$arr)) {
+				$parsed['phptype'] = $arr[1];
+				$parsed['dbsyntax'] = $arr[2];
+			} else {
+				$parsed['phptype'] = $dbtype;
+			}
+		} else {
+			// match "phptype(dbsyntax)"
+			if (ereg('^([^\(]+)\((.+)\)$', $dsn, &$arr)) {
+				$parsed['phptype'] = $arr[1];
+				$parsed['dbsyntax'] = $arr[2];
+			} else {
+				$parsed['phptype'] = $dsn;
+			}
+			return $parsed; // XXX ADDREF
+		}
+
+		if (ereg('^(.*)/([^/]+)$', $dsn, &$arr)) {
+			$parsed['database'] = $arr[2];
+			$dsn = $arr[1];
+		}
+
+		if (ereg('^([^:]+):([^@]+)@?(.*)$', $dsn, &$arr)) {
+			$parsed['username'] = $arr[1];
+			$parsed['password'] = $arr[2];
+			$dsn = $arr[3];
+		} elseif (ereg('^([^:]+)@(.*)$', $dsn, &$arr)) {
+			$parsed['username'] = $arr[1];
+			$dsn = $arr[3];
+		}
+
+		if (ereg('^([^\+]+)\+(.*)$', $dsn, &$arr)) {
+			$parsed['protocol'] = $arr[1];
+			$dsn = $arr[2];
+		}
+
+		$parsed['hostspec'] = $dsn;
+
+		if (!$parsed['dbsyntax']) {
+			$parsed['dbsyntax'] = $parsed['phptype'];
+		}
+
+		return $parsed; // XXX ADDREF
 	}
 }
 
@@ -145,8 +253,8 @@ class DB_result {
 	 * @param   $dbh    DB object reference
 	 * @param   $result result resource id
 	 */
-    function DB_result($dbh, $result) {
-		$this->dbh = $dbh;
+    function DB_result(&$dbh, $result) {
+		$this->dbh = &$dbh;
 		$this->result = $result;
     }
 
@@ -163,7 +271,7 @@ class DB_result {
 	 * @param   $arr    reference to data array
 	 * @return  int     error code
 	 */
-    function fetchInto(const $arr) {
+    function fetchInto(&$arr) {
 		return $this->dbh->fetchInto($this->result, &$arr);
     }
 
