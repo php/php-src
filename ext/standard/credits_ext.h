@@ -39,7 +39,7 @@ CREDIT_LINE("HyperWave", "Uwe Steinmann");
 CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski, Chuck Hagenbuch, Daniel R Kalowsky");
 CREDIT_LINE("Informix", "Danny Heijl, Christian Cartus, Corne' Cornelius");
 CREDIT_LINE("Ingres II", "David Hénot");
-CREDIT_LINE("InterBase", "Jouni Ahto, Andrew Avdeev");
+CREDIT_LINE("InterBase", "Jouni Ahto, Andrew Avdeev, Ard Biesheuvel");
 CREDIT_LINE("IRCG", "Sascha Schumann");
 CREDIT_LINE("Java", "Sam Ruby");
 CREDIT_LINE("LDAP", "Amitay Isaacs, Eric Warnke, Rasmus Lerdorf, Gerrit Thomson, Stig Venaas");
