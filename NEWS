@@ -72,7 +72,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #21809 (select would not always timeout during socket shutdown). (Wez)
 - Fixed bug #21725 (return behaviour differs between include and require). (Zeev)
 - Fixed bug #21713 (include remote files leaks descriptors on Solaris). (Wez)
-- Fixed bug #21708 (ucfirst() trouble again). (Moriyoshi)
+- Fixed bug #21708 (ucwords() trouble again). (Moriyoshi)
 - Fixed bug #21689 (fgetcsv() suppresses some characters before a separator).
   (Masahiro, Moriyoshi)
 - Fixed bug #21912, #21676 (GetImageSize() failed for remote files). (Wez)
