@@ -74,6 +74,7 @@ void zend_init_compiler_data_structures(CLS_D)
 	zend_stack_init(&CG(object_stack));
 	zend_stack_init(&CG(declare_stack));
 	CG(active_class_entry) = NULL;
+	CG(active_ce_parent_class_name).value.str.val = NULL;
 	zend_llist_init(&CG(list_llist), sizeof(list_llist_element), NULL, 0);
 	zend_llist_init(&CG(dimension_llist), sizeof(int), NULL, 0);
 	CG(handle_op_arrays) = 1;
@@ -883,11 +884,10 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
 	if ((class_name->u.constant.value.str.len == sizeof("parent")-1)
 		&& !memcmp(class_name->u.constant.value.str.val, "parent", sizeof("parent")-1)
-		&& CG(active_class_entry)
-		&& CG(active_class_entry)->parent) {
+		&& CG(active_ce_parent_class_name).value.str.val) {
 		efree(class_name->u.constant.value.str.val);
-		class_name->u.constant.value.str.len = CG(active_class_entry)->parent->name_length;
-		class_name->u.constant.value.str.val = estrndup(CG(active_class_entry)->parent->name, class_name->u.constant.value.str.len);
+		class_name->u.constant.value.str.len = CG(active_ce_parent_class_name).value.str.len;
+		class_name->u.constant.value.str.val = estrndup(CG(active_ce_parent_class_name).value.str.val, class_name->u.constant.value.str.len);
 	}
 	opline->op1 = *class_name;
 	opline->op2 = *function_name;
@@ -1547,6 +1547,8 @@ void zend_do_begin_class_declaration(znode *class_name, znode *parent_class_name
 		zval *tmp;
 
 		zend_str_tolower(parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
+		CG(active_ce_parent_class_name).value.str.val = estrndup(parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len);
+		CG(active_ce_parent_class_name).value.str.len = parent_class_name->u.constant.value.str.len;
 
 		if (zend_hash_find(CG(class_table), parent_class_name->u.constant.value.str.val, parent_class_name->u.constant.value.str.len+1, (void **) &parent_class)==SUCCESS) {
 			/* copy functions */
@@ -1605,6 +1607,10 @@ void zend_do_end_class_declaration(CLS_D)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
 	CG(active_class_entry) = NULL;
+	if (CG(active_ce_parent_class_name).value.str.val) {
+		efree(CG(active_ce_parent_class_name).value.str.val);
+		CG(active_ce_parent_class_name).value.str.val = NULL;
+	}
 }
 
 
