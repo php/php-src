@@ -38,9 +38,10 @@ static zend_object_handlers iterator_object_handlers = {
 	NULL,
 	NULL, /* get */
 	NULL, /* set */
-	NULL, /* isset */
-	NULL, /* unset */
-	NULL, /* dim unset */
+	NULL, /* has prop */
+	NULL, /* unset prop */
+	NULL, /* has dim */
+	NULL, /* unset dim */
 	NULL, /* props get */
 	NULL, /* method get */
 	NULL, /* call */
