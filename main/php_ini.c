@@ -50,7 +50,7 @@ static void php_ini_displayer_cb(zend_ini_entry *ini_entry, int type)
 		uint display_string_length, esc_html=0;
 
 		if (type==ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
-			if (ini_entry->orig_value) {
+			if (ini_entry->orig_value && ini_entry->orig_value[0]) {
 				display_string = ini_entry->orig_value;
 				display_string_length = ini_entry->orig_value_length;
 				esc_html=1;
