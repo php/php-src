@@ -499,6 +499,7 @@ PHP_FUNCTION(imagesetstyle)
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
+	convert_to_array_ex(styles);
 
 	/* copy the style values in the stylearr */
 	stylearr = emalloc(sizeof(int) * zend_hash_num_elements(HASH_OF(*styles)));
