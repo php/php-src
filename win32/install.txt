@@ -320,7 +320,7 @@ Web server configuration
 
   You even can mix the slash-style:
 
-    LoadModule php4_module C:\php/php4apache.dll
+    LoadModule php4_module C:\php/sapi\php4apache.dll
 
 ----------------------------------------------------------
 
