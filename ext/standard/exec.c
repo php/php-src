@@ -283,7 +283,7 @@ int php_Exec(int type, char *cmd, pval *array, pval *return_value TSRMLS_DC)
 		}
 	}
 
-	php_stream_close(stream); 
+	FG(pclose_ret) = php_stream_close(stream); 
 
 #if HAVE_SYS_WAIT_H
 	if (WIFEXITED(FG(pclose_ret))) {
