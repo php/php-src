@@ -77,6 +77,8 @@ PHPAPI void php_output_activate(TSRMLS_D)
 	OG(ob_nesting_level) = 0;
 	OG(ob_lock) = 0;
 	OG(disable_output) = 0;
+	OG(output_start_filename) = NULL;
+	OG(output_start_lineno) = 0;
 }
 
 
