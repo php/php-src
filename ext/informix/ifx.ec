@@ -523,7 +523,7 @@ static void php3_ifx_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
             "SQL safe mode in effect - ignoring host/user/password information");
         }
         host = passwd = NULL;
-        user = _php3_get_current_user();
+        user = php_get_current_user();
         hashed_details_length = strlen(user)+3+3;
         hashed_details = (char *) emalloc(hashed_details_length+1);
         sprintf(hashed_details,"ifx__%s_",user);
@@ -3140,7 +3140,7 @@ static long php3_intifx_getType(long id, HashTable *list) {
 
  IFXLS_FETCH();
 
- Ifx_res = (IFX_IDRES *) php3_list_find(id,&type);
+ Ifx_res = (IFX_IDRES *) zend_list_find(id,&type);
  if (type!=IFXL(le_idresult)) {
   php_error(E_WARNING,"%d is not a Informix id-result index",
             id);
@@ -3262,7 +3262,7 @@ static long php3_intifx_create_blob(long type, long mode, char* param, long len,
   Ifx_blob->BLOB.blob_data.loc_oflags=LOC_WONLY;
   Ifx_blob->BLOB.blob_data.loc_size=-1;
  }
- return php3_list_insert(Ifx_blob,IFXL(le_idresult));
+ return zend_list_insert(Ifx_blob,IFXL(le_idresult));
 }
 
 
@@ -3318,7 +3318,7 @@ static long php3_intifx_copy_blob(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_blob_orig = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob_orig = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || !(Ifx_blob_orig->type==TYPE_BLBYTE || Ifx_blob_orig->type==TYPE_BLTEXT)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3371,7 +3371,7 @@ static long php3_intifx_copy_blob(long bid, HashTable *list) {
   locator->loc_oflags=locator_orig->loc_oflags;
  }
  
- return php3_list_insert(Ifx_blob,IFXL(le_idresult));
+ return zend_list_insert(Ifx_blob,IFXL(le_idresult));
 }
 
 
@@ -3422,7 +3422,7 @@ static long php3_intifx_free_blob(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3440,7 +3440,7 @@ static long php3_intifx_free_blob(long bid, HashTable *list) {
  }
 
  
- php3_list_delete(bid);
+ zend_list_delete(bid);
  efree(Ifx_blob); 
  return 0;
 }
@@ -3466,7 +3466,7 @@ static long php3_intifx2_free_blob(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3489,7 +3489,7 @@ static long php3_intifx2_free_blob(long bid, HashTable *list) {
 
 #endif
   
- php3_list_delete(bid);
+ zend_list_delete(bid);
  efree(Ifx_blob); 
  return 0;
 }
@@ -3543,7 +3543,7 @@ static long php3_intifx_get_blob(long bid, HashTable *list, char** content) {
  
  IFXLS_FETCH();
 
- Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3575,7 +3575,7 @@ static loc_t *php3_intifx_get_blobloc(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3640,7 +3640,7 @@ static long php3_intifx_update_blob(long bid, char* param, long len, HashTable *
  
  IFXLS_FETCH();
 
- Ifx_blob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_blob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_blob->type==TYPE_BLTEXT || Ifx_blob->type==TYPE_BLBYTE)) {
   php_error(E_WARNING,"%d is not a Informix blob-result index",
             bid);
@@ -3938,7 +3938,7 @@ static long php3_intifx_create_char(char* param, long len, HashTable *list) {
   Ifx_char->CHAR.char_data[len]=0;
   Ifx_char->CHAR.len=len;
  }
- return php3_list_insert(Ifx_char,IFXL(le_idresult));
+ return zend_list_insert(Ifx_char,IFXL(le_idresult));
 }
 
 /* ----------------------------------------------------------------------
@@ -3990,7 +3990,7 @@ static long php3_intifx_get_char(long bid, HashTable *list, char** content) {
   
  IFXLS_FETCH();
 
- Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
@@ -4047,7 +4047,7 @@ static long php3_intifx_free_char(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
@@ -4058,7 +4058,7 @@ static long php3_intifx_free_char(long bid, HashTable *list) {
   efree(Ifx_char->CHAR.char_data);
  }
  
- php3_list_delete(bid);
+ zend_list_delete(bid);
  efree(Ifx_char); 
  return 0;
 }
@@ -4116,7 +4116,7 @@ static long php3_intifx_update_char(long bid, char* param, long len, HashTable *
  
  IFXLS_FETCH();
 
- Ifx_char = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_char = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) && !(Ifx_char->type==TYPE_CHAR)) {
   php_error(E_WARNING,"%d is not a Informix char-result index",
             bid);
@@ -4262,7 +4262,7 @@ static long php3_intifxus_create_slob(long create_mode, HashTable *list) {
   return -1;
  }
 
- return php3_list_insert(Ifx_slob,IFXL(le_idresult));
+ return zend_list_insert(Ifx_slob,IFXL(le_idresult));
 }
 
 
@@ -4312,7 +4312,7 @@ static long php3_intifxus_free_slob(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4328,7 +4328,7 @@ static long php3_intifxus_free_slob(long bid, HashTable *list) {
   Ifx_slob->SLOB.createspec=NULL;
  }
  efree(Ifx_slob);
- php3_list_delete(bid);
+ zend_list_delete(bid);
  return 0;
 }
 
@@ -4380,7 +4380,7 @@ static long php3_intifxus_close_slob(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4465,7 +4465,7 @@ static long php3_intifxus_open_slob(long bid, long create_mode, HashTable *list)
  
  IFXLS_FETCH();
 
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult)  || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4515,7 +4515,7 @@ static long php3_intifxus_new_slob(HashTable *list) {
  Ifx_slob->type=TYPE_SLOB;
  Ifx_slob->SLOB.lofd=-1;
  Ifx_slob->SLOB.createspec=NULL;
- return php3_list_insert(Ifx_slob,IFXL(le_idresult));
+ return zend_list_insert(Ifx_slob,IFXL(le_idresult));
 }
 
 
@@ -4535,7 +4535,7 @@ static ifx_lo_t *php3_intifxus_get_slobloc(long bid, HashTable *list) {
  
  IFXLS_FETCH();
 
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult)  || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4578,7 +4578,7 @@ PHP_FUNCTION(ifxus_tell_slob) {
  }
  convert_to_long(pbid);
  bid=pbid->value.lval;
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4631,7 +4631,7 @@ PHP_FUNCTION(ifxus_seek_slob) {
  convert_to_long(poffset);
  
  bid=pbid->value.lval;
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4693,7 +4693,7 @@ PHP_FUNCTION(ifxus_read_slob) {
  convert_to_long(pnbytes); 
  
  bid=pbid->value.lval;
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
@@ -4747,7 +4747,7 @@ PHP_FUNCTION(ifxus_write_slob) {
  convert_to_string(pcontent); 
  
  bid=pbid->value.lval;
- Ifx_slob = (IFX_IDRES *) php3_list_find(bid,&type);
+ Ifx_slob = (IFX_IDRES *) zend_list_find(bid,&type);
  if (type!=IFXL(le_idresult) || Ifx_slob->type!=TYPE_SLOB) {
   php_error(E_WARNING,"%d is not a Informix slob-result index",
             bid);
