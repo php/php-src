@@ -25,8 +25,32 @@
 
 #include <ibase.h>
 
+#ifndef SQLDA_CURRENT_VERSION
+#define SQLDA_CURRENT_VERSION SQLDA_VERSION1
+#endif
+
+/* IB < 6 doesn't define these */
+#ifndef SQL_DIALECT_CURRENT
+#define SQL_DIALECT_CURRENT 1 /* == SQL_DIALECT_V5 */
+
+#ifdef PHP_WIN32
+typedef __int64 ISC_INT64;
+typedef unsigned __int64 ISC_UINT64;
+#else
+typedef long long ISC_INT64;
+typedef unsigned long long ISC_UINT64;
+#endif /* PHP_WIN32 */
+#endif /* SQL_DIALECT_CURRENT */
+
 extern zend_module_entry ibase_module_entry;
 #define phpext_interbase_ptr &ibase_module_entry
+
+#define RESET_ERRMSG { IBG(errmsg)[0] = '\0'; IBG(sql_code) = 0; }
+
+#define IB_STATUS (IBG(status))
+
+extern int le_blob, le_link, le_plink, le_result, le_query, le_trans, 
+	le_event, le_service;
 
 PHP_MINIT_FUNCTION(ibase);
 PHP_RINIT_FUNCTION(ibase);
@@ -80,6 +104,11 @@ PHP_FUNCTION(ibase_modify_user);
 PHP_FUNCTION(ibase_delete_user);
 
 PHP_FUNCTION(ibase_rollback_ret);
+
+PHP_FUNCTION(ibase_service_attach);
+PHP_FUNCTION(ibase_service_detach);
+PHP_FUNCTION(ibase_backup);
+PHP_FUNCTION(ibase_restore);
 #endif
 PHP_FUNCTION(ibase_errmsg);
 PHP_FUNCTION(ibase_errcode);
@@ -110,6 +139,8 @@ ZEND_BEGIN_MODULE_GLOBALS(ibase)
 	char errmsg[MAX_ERRMSG];
 	long sql_code;
 ZEND_END_MODULE_GLOBALS(ibase)
+
+ZEND_EXTERN_MODULE_GLOBALS(ibase)
 
 typedef struct {
 	isc_db_handle handle;
@@ -175,6 +206,12 @@ typedef struct {
 	void **thread_ctx;
 } ibase_event;
 
+typedef struct {
+	isc_svc_handle handle;
+	char *hostname;
+	char *username;
+} ibase_service;
+
 enum php_interbase_option {
 	PHP_IBASE_DEFAULT 			= 0,
 	/* fetch flags */
@@ -204,6 +241,35 @@ enum php_interbase_option {
 #else
 #define IBG(v) (ibase_globals.v)
 #endif
+
+#define BLOB_ID_LEN		18
+#define BLOB_ID_MASK	"0x%" LL_MASK "x"
+
+#define BLOB_INPUT		1
+#define BLOB_OUTPUT		2
+
+#ifdef PHP_WIN32
+#define LL_MASK "I64"
+#define LL_LIT(lit) lit ## I64
+#else
+#define LL_MASK "ll"
+#define LL_LIT(lit) lit ## ll
+#endif
+
+int _php_ibase_string_to_quad(char const *id, ISC_QUAD *qd);
+char *_php_ibase_quad_to_string(ISC_QUAD const qd);
+int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long max_len TSRMLS_DC);
+int _php_ibase_blob_add(zval **string_arg, ibase_blob *ib_blob TSRMLS_DC);
+
+void _php_ibase_error(TSRMLS_D);
+void _php_ibase_module_error(char * TSRMLS_DC, ...) 
+	PHP_ATTRIBUTE_FORMAT(printf,1,PHP_ATTR_FMT_OFFSET +2);
+
+int _php_ibase_def_trans(ibase_db_link *ib_link, ibase_trans **trans TSRMLS_DC);
+void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, zval **link_id, 
+	ibase_db_link **ib_link, ibase_trans **trans);
+
+void _php_ibase_event_free(char *event_buf, char *result_buf);
 
 #else
 
