@@ -1,3 +1,89 @@
+2005-03-22  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/config.m4
+      ext/mbstring/config.w32
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.dsp:
+      - Add Armenian encoding / NLS (patch by Hayk Chamyan)
+
+2005-03-22  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      ext/exif/exif.c
+      ext/exif/exif.dsp
+      ext/mbstring/mbstring.dsp:
+      Fix exif win32 build
+
+2005-03-22  Jani Taskinen  <jani.taskinen@sci.fi>
+
+    * ext/standard/tests/array/locale_sort.phpt:
+      Added SKIPIF
+
+    * ext/standard/tests/array/locale_sort.phpt
+      ext/standard/tests/array/locale_sort.phpt:
+      
+      Addded test for locale aware sort
+
+2005-03-22  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      sapi/cli/php_cli.c
+      sapi/cli/php_cli.c:
+      MFH: fix #28803 (enabled debug causes bailout errors with CLI on AIX
+      because of fflush() called on already closed filedescriptor)
+
+    * sapi/cli/php_cli.c:
+      fix #28803 (enabled debug causes bailout errors with CLI on AIX
+      because of fflush() called on already closed filedescriptor)
+
+2005-03-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/microtime.c:
+      Fixed compiler warning.
+
+2005-03-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30106 (SOAP cannot not parse 'ref' element. Causes Uncaught
+      SoapFault exception)
+
+2005-03-22  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      README.CVS-RULES
+      README.CVS-RULES:
+      - MFH: Changed to reflect "current practise"
+
+    * README.CVS-RULES:
+      - Changed to reflect "current practise"
+
+2005-03-22  Christopher Kings-Lynne  <chriskl@users.sourceforge.net>
+
+    * NEWS
+      ext/pgsql/CREDITS
+      ext/pgsql/config.m4
+      ext/pgsql/config.w32
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h
+      ext/pgsql/tests/06copy.phpt
+      ext/pgsql/tests/07optional.phpt:
+      Tweak some #if's to be more orthogonal.
+      
+      (PHP pg_set_error_verbosity) New function to set PostgreSQL error
+      verbosity
+      
+      (PHP pg_copy_from) Use non-deprecated API if it is available
+      
+      (PHP pg_copy_to) Use non-deprecated API if it is available
+
+2005-03-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/array.c:
+      Simplify argument checking code for array_combine().
+
 2005-03-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * (PHP_5_0)
