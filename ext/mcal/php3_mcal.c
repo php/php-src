@@ -803,22 +803,16 @@ void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	pval *streamind,*storeobject;
 	int ind, ind_type;
 	pils *mcal_le_struct; 
-#ifdef ZEND_VERSION
-	pval **pvalue,**temppvalue;
-#else
-	pval *pvalue,*temppvalue;
-#endif
 	int myargc;
 	unsigned long uid;
 	CALEVENT *myevent;
 	myargc=ARG_COUNT(ht);
-	if (myargc <1 || getParameters(ht,myargc,&streamind,&storeobject) == FAILURE) {
+	if (myargc !=1 || getParameters(ht,myargc,&streamind) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
 	convert_to_long(streamind);
 
-	if(myargc >= 2 )convert_to_array(storeobject);
 
 	ind = streamind->value.lval;
 
@@ -833,120 +827,7 @@ void php3_mcal_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	myevent=calevent_new();
-	if(myargc >=2)
-	  {
-	if(_php3_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_long(pvalue);
-	  myevent->id=(pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"public",sizeof("public"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_long(pvalue);
-	  myevent->public=(pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_string(pvalue);
-	  myevent->category=strdup((pvalue)->value.str.val);
-	}
-	if(_php3_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_string(pvalue);
-	  myevent->title=strdup((pvalue)->value.str.val);
-	}
-	if(_php3_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_string(pvalue);
-	  myevent->description=strdup((pvalue)->value.str.val);
-	}
-
-	if(_php3_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
-
-	  convert_to_long(pvalue);
-	  myevent->alarm=(pvalue)->value.lval;
-	}
-
-
-       	if(_php3_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
-
-	  convert_to_array(temppvalue);
-	  
-	  if(_php3_hash_find((temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.year=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.mon=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.mday=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.hour=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.min=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->start.sec=(pvalue)->value.lval;
-	  }
-	  myevent->start.has_date=true;
-	}
-
-       	if(_php3_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
-
-	  convert_to_array(temppvalue);
-	  
-	  if(_php3_hash_find((temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.year=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.mon=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.mday=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.hour=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.min=(pvalue)->value.lval;
-	  }
-	  if(_php3_hash_find((temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
-
-	    convert_to_long(pvalue);
-	    myevent->end.sec=(pvalue)->value.lval;
-	  }
-	  myevent->end.has_date=true;
-	}
-	  }
-	else
-	  {
-	    myevent=mcal_le_struct->event;
-	  }
+	myevent=mcal_le_struct->event;
 	cal_append(mcal_le_struct->mcal_stream,"INBOX",&uid,myevent);
 	calevent_free(myevent);
 	RETURN_LONG(uid);
