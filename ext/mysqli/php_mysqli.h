@@ -102,11 +102,10 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 #define MYSQLI_FETCH_RESOURCE(__ptr, __type, __id, __name) \
 { \
 	mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*(__id) TSRMLS_CC);\
-	if (!((__ptr) != (__type)intern->ptr)) {\
-		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
-		RETURN_NULL();\
-	}\
-	__ptr = (__type)intern->ptr; \
+	if (!(__ptr = (__type)intern->ptr)) {\
+  		php_error(E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		RETURN_NULL();\
+  	}\
 }
 
 #define MYSQLI_CLEAR_RESOURCE(__id) \
@@ -136,6 +135,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry * TSRML
 PHP_MYSQLI_API void mysqli_register_link(zval *return_value, void *link TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_stmt(zval *return_value, void *stmt TSRMLS_DC);
 PHP_MYSQLI_API void mysqli_register_result(zval *return_value, void *result TSRMLS_DC);
+PHP_MYSQLI_API void php_mysqli_set_error(long mysql_errno, char *mysql_err TSRMLS_DC);
 
 PHP_MINIT_FUNCTION(mysqli);
 PHP_MSHUTDOWN_FUNCTION(mysqli);
