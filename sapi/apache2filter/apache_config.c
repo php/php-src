@@ -150,7 +150,7 @@ void *create_php_config(apr_pool_t *p, char *dummy)
 
 	phpapdebug((stderr, "Creating new config (%p) for %s\n", newx, dummy));
 	zend_hash_init(&newx->config, 0, NULL, NULL, 1);
-	apr_pool_cleanup_register(p, newx, destroy_php_config, NULL);
+	apr_pool_cleanup_register(p, newx, destroy_php_config, apr_pool_cleanup_null);
 	return (void *) newx;
 }
 
