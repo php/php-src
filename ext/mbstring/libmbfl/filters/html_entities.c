@@ -18,7 +18,7 @@
  * if not, write to the Free Software Foundation, Inc., 59 Temple Place,
  * Suite 330, Boston, MA  02111-1307  USA
  *
- * The author of this part: Marcus Boerger <marcus.boerger@t-online.de>
+ * The author of this part: Marcus Boerger <helly@php.net>
  *
  */
 /*
@@ -32,6 +32,7 @@
 #endif
 
 #include "mbfilter.h"
+#include <string.h>
 
 const mbfl_html_entity mbfl_html_entity_list[] = { /*
   {"quot",       34},  DO NOT CONVERT THESE AUTOMATICALLY
