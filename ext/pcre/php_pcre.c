@@ -1031,8 +1031,8 @@ PHP_FUNCTION(preg_split)
 /* }}} */
 
 
-/* {{{ proto string preg_quote(string str)
-   Quote regular expression characters */
+/* {{{ proto string preg_quote(string str, string delim_char)
+   Quote regular expression characters plus an optional character */
 PHP_FUNCTION(preg_quote)
 {
 	zval    **in_str_arg;	/* Input string argument */
