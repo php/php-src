@@ -101,7 +101,7 @@ PHP_FUNCTION(fbsql_warnings);
 PHP_FUNCTION(fbsql_get_autostart_info);
 /* PHP_FUNCTION(fbsql_set_autostart_info); */
 
-static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type);
+static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int expected_args);
 static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 
 ZEND_BEGIN_MODULE_GLOBALS(fbsql)
