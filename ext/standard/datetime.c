@@ -433,7 +433,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF				
 				sprintf(tmp_buff, "%c%02d%02d", (ta->tm_gmtoff < 0) ? '-' : '+', abs(ta->tm_gmtoff / 3600), abs( ta->tm_gmtoff % 3600));
 #else
-				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)<0)?'-':'+',abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
+				sprintf(tmp_buff, "%c%02d%02d", ((ta->tm_isdst ? timezone - 3600:timezone)>0)?'-':'+',abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600), abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600));
 #endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
@@ -493,7 +493,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 					ta->tm_hour,
 					ta->tm_min,
 					ta->tm_sec,
-					((ta->tm_isdst ? timezone - 3600 : timezone) < 0) ? '-' : '+',
+					((ta->tm_isdst ? timezone - 3600 : timezone) > 0) ? '-' : '+',
 					abs((ta->tm_isdst ? timezone - 3600 : timezone) / 3600),
 					abs((ta->tm_isdst ? timezone - 3600 : timezone) % 3600)
 				);
