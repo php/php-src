@@ -18,10 +18,6 @@
 #include "gd.h"
 #include "gdhelpers.h"
 
-/* 2.03: gd2 is no longer mandatory */
-/* JCE - test after including gd.h so that HAVE_LIBZ can be set in
- * a config.h file included by gd.h */
-#ifdef HAVE_ZLIB
 #include <zlib.h>
 
 #define TRUE 1
@@ -926,18 +922,3 @@ gdImageGd2Ptr (gdImagePtr im, int cs, int fmt, int *size)
   out->gd_free (out);
   return rv;
 }
-
-#else /* no HAVE_ZLIB */
-gdImagePtr
-gdImageCreateFromGd2 (FILE * inFile)
-{
-  fprintf(stderr,"GD2 support is not available - no libz\n");
-  return NULL;
-}
-gdImagePtr
-gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
-{
-  fprintf(stderr,"GD2 support is not available - no libz\n");
-  return NULL;
-}
-#endif /* HAVE_ZLIB */
