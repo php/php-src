@@ -16,7 +16,7 @@
 #  |          Sascha Schumann <sascha@schumann.cx>                        |
 #  +----------------------------------------------------------------------+
 #
-# $Id: buildcheck.sh,v 1.21.2.7 2004-12-20 20:24:23 sniper Exp $ 
+# $Id: buildcheck.sh,v 1.21.2.8 2004-12-30 15:43:52 rasmus Exp $ 
 #
 
 echo "buildconf: checking installation..."
@@ -54,7 +54,7 @@ fi
 # libtoolize 1.4.3 or newer
 # Prefer glibtoolize over libtoolize for Mac OS X compatibility
 libtoolize=`./build/shtool path glibtoolize libtoolize 2> /dev/null`
-lt_pversion=`$libtoolize --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//'`
+lt_pversion=`$libtoolize --version 2>/dev/null|head -n 1|awk -F' ' '{print $NF}'`
 if test "$lt_pversion" = ""; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.4.3 or newer installed"
