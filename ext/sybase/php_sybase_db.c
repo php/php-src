@@ -726,12 +726,12 @@ static void php_sybase_get_column_content(sybase_link *sybase_ptr,int offset,pva
 				switch (coltype(offset)) {
 					case SYBBINARY:
 					case SYBVARBINARY:
+					case SYBIMAGE:
 						res_length *= 2;
 						break;
 					case SYBCHAR:
 					case SYBVARCHAR:
 					case SYBTEXT:
-					case SYBIMAGE:
 						break;
 					default:
 						/* take no chances, no telling how big the result would really be */
