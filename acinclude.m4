@@ -1539,3 +1539,19 @@ AC_DEFUN(PHP_CHECK_FUNC,[
   ])
   esac
 ])
+
+dnl
+dnl PHP_AP_EXTRACT_VERSION(/path/httpd)
+dnl This macro is used to get a comparable
+dnl version for apache1/2.
+dnl
+AC_DEFUN(PHP_AP_EXTRACT_VERSION,[
+  ac_output=`$1 -v 2>&1`
+  ac_IFS=$IFS
+IFS="- /.
+"
+  set $ac_output
+  IFS=$ac_IFS
+
+  APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+])
