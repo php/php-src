@@ -1118,7 +1118,7 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
 
   echo "creating main/internal_functions_cli.c"
-  cli_extensions="$EXT_STATIC $EXT_CLI_STATIC"
+  cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
 dnl  if cmp main/internal_functions.c.old main/internal_functions.c > /dev/null 2>&1; then
