@@ -17,6 +17,7 @@ class php_element {
 									 "resource" => "resource",
 									 "mixed"    => "mixed",
 									 "callback" => "callback",
+									 "stream"   => "stream"
 									 );
 		
 		if (isset($types[$name])) {
