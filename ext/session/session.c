@@ -338,6 +338,8 @@ static void _php_session_start(PSLS_D)
 	int nrand;
 	ELS_FETCH();
 
+	if (PS(nr_open_sessions) > 0) return;
+
 	if(!PS(id) &&
 		zend_hash_find(&EG(symbol_table), PS(session_name), 
 				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
