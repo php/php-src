@@ -1646,9 +1646,11 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	return ret;
 bail:
-	data_close(ftp, data);
+	if (data)
+		data_close(ftp, data);
 	fclose(tmpfp);
-	efree(ret);
+	if (ret)
+		efree(ret);
 	return NULL;
 }
 /* }}} */
