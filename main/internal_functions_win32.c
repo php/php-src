@@ -72,7 +72,6 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 	phpext_calendar_ptr,
 	COM_module_ptr,
-	VARIANT_module_ptr,
 	phpext_ftp_ptr,
 #if defined(MBSTR_ENC_TRANS)
 	phpext_mbstring_ptr,
