@@ -163,6 +163,10 @@ static entity_table_t ent_uni_punct[] = {
 	"frasl"
 };
 
+static entity_table_t ent_uni_euro[] = {
+	"euro"
+};
+
 static entity_table_t ent_uni_8465_8501[] = {
 	/* 8465 */
 	"image", NULL, NULL, NULL, NULL, NULL, NULL,
@@ -352,6 +356,7 @@ static const struct html_entity_map entity_map[] = {
 	{ cs_utf_8, 		710,  732,  ent_uni_spacing },
 	{ cs_utf_8, 		913,  982,  ent_uni_greek },
 	{ cs_utf_8, 		8194, 8260, ent_uni_punct },
+	{ cs_utf_8, 		8364, 8364, ent_uni_euro }, 
 	{ cs_utf_8, 		8465, 8501, ent_uni_8465_8501 },
 	{ cs_utf_8, 		8592, 9002, ent_uni_8592_9002 },
 	{ cs_utf_8, 		9674, 9674, ent_uni_9674 },
