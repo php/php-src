@@ -30,8 +30,8 @@ void php_var_dump(pval **struc, int level);
 /* typdef HashTable php_serialize_data_t; */
 #define php_serialize_data_t HashTable
 
-void php_var_serialize(pval *buf, pval **struc, php_serialize_data_t *var_hash);
-int php_var_unserialize(pval **rval, const char **p, const char *max, php_serialize_data_t *var_hash);
+PHPAPI void php_var_serialize(pval *buf, pval **struc, php_serialize_data_t *var_hash);
+PHPAPI int php_var_unserialize(pval **rval, const char **p, const char *max, php_serialize_data_t *var_hash);
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash) \
    zend_hash_init(&(var_hash),10,NULL,NULL,0)
