@@ -6,7 +6,7 @@ ctype on strings
 --GET--
 --FILE--
 <?php 
-  setlocale("LC_ALL","C"); 
+  setlocale(LC_ALL,"C"); 
 
   function ctype_test_002($function) {
     $n=0; $m=0;
