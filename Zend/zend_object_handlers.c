@@ -141,7 +141,7 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 
 	zval_ptr_dtor(&value);
 
-	if (retval && zval_is_true(retval)) {
+	if (retval && zend_is_true(retval)) {
 		ret = SUCCESS;
 	} else {
 		ret = FAILURE;
