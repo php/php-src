@@ -1,3 +1,76 @@
+2003-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      GD news
+
+    * (PHP_4_3)
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io.c
+      ext/gd/libgd/gd_io_file.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.h:
+      MFH: Synchronized bundled GD library with GD 2.0.17
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/libgd/gd.c
+      ext/gd/libgd/gd.h
+      ext/gd/libgd/gd_gd2.c
+      ext/gd/libgd/gd_io.c
+      ext/gd/libgd/gd_io_file.c
+      ext/gd/libgd/gd_jpeg.c
+      ext/gd/libgd/gd_png.c
+      ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/gdft.c
+      ext/gd/libgd/gdhelpers.h:
+      Synchronized bundled GD library with GD 2.0.17
+       . GD is now thread-safe thanks to wrappers around freetype library
+       . Significant optimization to png writing code.
+       . Miscellaneous fixes.
+      Fixed memory leak inside php_imagettftext_common()
+      Make ext/gd compile with GD 2.0.17+ (gdFreeFontCache() is not avaliable)
+
+2003-12-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.c:
+      Fix warning
+
+2003-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS:
+      Bug fixing news.
+
+    * (PHP_4_3)
+      Zend/zend_highlight.c
+      tests/strings/bug26703.phpt:
+      MFH: Fixed Bug #26703 (Certain characters inside strings incorrectly
+      treated as keywords).
+
+    * ZendEngine2/zend_highlight.c:
+      Fixed Bug #26703 (Certain characters inside strings incorrectly treated as
+      keywords). Original patch by vrana@php.net.
+
+    * tests/strings/bug26703.phpt:
+      
+      Fixed Bug #26703 (Certain characters inside strings incorrectly treated as
+      keywords). Original patch by vrana@php.net.
+
+2003-12-25  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:
+      workaround for possible ORA-22280 warning if buffers were not flushed
+
 2003-12-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/file.c:

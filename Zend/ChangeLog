@@ -1,3 +1,15 @@
+2003-12-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_execute.c
+      zend_execute.c:
+      Fix warning
+
+2003-12-25  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c:
+      Fixed Bug #26703 (Certain characters inside strings incorrectly treated as
+      keywords). Original patch by vrana@php.net.
+
 2003-12-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend.c
