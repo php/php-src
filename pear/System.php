@@ -22,6 +22,8 @@
 require_once 'PEAR.php';
 require_once 'Console/Getopt.php';
 
+$GLOBALS['_System_temp_files'] = array();
+
 /**
 * System offers cross plattform compatible system functions
 *
@@ -45,7 +47,7 @@ require_once 'Console/Getopt.php';
 * @access   public
 * @see      http://pear.php.net/manual/
 */
-class System extends PEAR
+class System
 {
     /**
     * returns the commandline arguments of a function
@@ -306,7 +308,8 @@ class System extends PEAR
     }
 
     /**
-    * Creates temporal files or directories
+    * Creates temporary files or directories. This function will remove
+    * the created files when the scripts finish its execution.
     *
     * Usage:
     *   1) $tempfile = System::mktemp("prefix");
@@ -316,8 +319,8 @@ class System extends PEAR
     *
     * prefix -> The string that will be prepended to the temp name
     *           (defaults to "tmp").
-    * -d     -> A temporal dir will be created instead of a file.
-    * -t     -> The target dir where the temporal (file|dir) will be created. If
+    * -d     -> A temporary dir will be created instead of a file.
+    * -t     -> The target dir where the temporary (file|dir) will be created. If
     *           this param is missing by default the env vars TMP on Windows or
     *           TMPDIR in Unix will be used. If these vars are also missing
     *           c:\windows\temp or /tmp will be used.
@@ -329,6 +332,7 @@ class System extends PEAR
     */
     function mktemp($args = null)
     {
+        static $first_time = true;
         $opts = System::_parseArgs($args, 't:d');
         if (PEAR::isError($opts)) {
             return System::raiseError($opts);
@@ -354,7 +358,27 @@ class System extends PEAR
                 return System::raiseError("Unable to create temporary directory $tmpdir");
             }
         }
+        $GLOBALS['_System_temp_files'][] = $tmp;
+        if ($first_time) {
+            PEAR::registerShutdownFunc(array('System', '_removeTmpFiles'));
+            $first_time = false;
+        }
         return $tmp;
+    }
+
+    /**
+    * Remove temporary files created my mkTemp. This function is executed
+    * at script shutdown time
+    *
+    * @access private
+    */
+    function _removeTmpFiles()
+    {
+        if (count($GLOBALS['_System_temp_files'])) {
+            $delete = $GLOBALS['_System_temp_files'];
+            array_unshift($delete, '-r');
+            System::rm($delete);
+        }
     }
 
     /**
