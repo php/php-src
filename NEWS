@@ -6,7 +6,6 @@ PHP 4.0                                                                    NEWS
   (Andi, Zend Engine)
 - Fixed corruption problem when changing deeply nested values in objects.
   (Andi & Zeev, Zend Engine)
-- Fixed closing
 - Improved array_multisort() to be able to specify sort type as well sort
   order. Incidentally, it can be used to sort multi-dimensional arrays
   as well. (Andrei)
