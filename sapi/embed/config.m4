@@ -22,7 +22,7 @@ AC_ARG_ENABLE(embed,
       ;;
   esac
 ],[
-  PHP_EMBED=no
+  PHP_EMBED_TYPE=no
 ])
 
 AC_MSG_RESULT($PHP_EMBED_TYPE)
