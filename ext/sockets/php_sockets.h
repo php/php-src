@@ -44,12 +44,6 @@ PHP_MINFO_FUNCTION(sockets);
 PHP_RINIT_FUNCTION(sockets);
 PHP_RSHUTDOWN_FUNCTION(sockets);
 
-PHP_FUNCTION(socket_iovec_alloc);
-PHP_FUNCTION(socket_iovec_free);
-PHP_FUNCTION(socket_iovec_set);
-PHP_FUNCTION(socket_iovec_fetch);
-PHP_FUNCTION(socket_iovec_add);
-PHP_FUNCTION(socket_iovec_delete);
 PHP_FUNCTION(socket_select);
 PHP_FUNCTION(socket_create_listen);
 PHP_FUNCTION(socket_create_pair);
@@ -70,22 +64,11 @@ PHP_FUNCTION(socket_recv);
 PHP_FUNCTION(socket_send);
 PHP_FUNCTION(socket_recvfrom);
 PHP_FUNCTION(socket_sendto);
-#ifdef HAVE_CMSGHDR
-PHP_FUNCTION(socket_recvmsg);
-#endif
-PHP_FUNCTION(socket_sendmsg);
-PHP_FUNCTION(socket_readv);
-PHP_FUNCTION(socket_writev);
 PHP_FUNCTION(socket_get_option);
 PHP_FUNCTION(socket_set_option);
 PHP_FUNCTION(socket_shutdown);
 PHP_FUNCTION(socket_last_error);
 PHP_FUNCTION(socket_clear_error);
-
-typedef struct php_iovec {
-	struct iovec	*iov_array;
-	unsigned int	count;
-} php_iovec_t;
 
 #ifndef PHP_WIN32
 typedef int PHP_SOCKET;
