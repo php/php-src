@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.8-dev
+- Simplified use of rand() functions. Now you do not need to use srand()
+  anymore, nor mt_rand(). See the manual for more details (Jeroen)
 - Made in_array() and search_array() allow the needle to be an array in
   itself. (Andrei)
 - Added ini_get_all() function which returns all registered ini entries
