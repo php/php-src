@@ -38,7 +38,6 @@ class PEAR_Builder extends PEAR_Common
     var $current_callback = null;
 
     // }}}
-
     // {{{ constructor
 
     /**
@@ -54,8 +53,37 @@ class PEAR_Builder extends PEAR_Common
         $this->setFrontendObject($ui);
     }
 
+    // }}}
+    // {{{ build()
+
+    /**
+     * Build an extension from source.  Runs "phpize" in the source
+     * directory, but compiles in a temporary directory
+     * (/var/tmp/pear-build-USER/PACKAGE-VERSION).
+     *
+     * @param string $descfile path to XML package description file
+     *
+     * @param mixed $callback callback function used to report output,
+     * see PEAR_Builder::_runCommand for details
+     *
+     * @return array an array of associative arrays with built files,
+     * format:
+     * array( array( 'name' => '/path/to/ext.so',
+     *               'php_api' => YYYYMMDD,
+     *               'zend_mod_api' => YYYYMMDD,
+     *               'zend_ext_api' => YYYYMMDD ),
+     *        ... )
+     *
+     * @access public
+     *
+     * @see PEAR_Builder::_runCommand
+     * @see PEAR_Common::infoFromDescriptionFile
+     */
     function build($descfile, $callback = null)
     {
+        if (PEAR_OS != 'Unix') {
+            return $this->raiseError("building extensions not supported on this platform");
+        }
         if (PEAR::isError($info = $this->infoFromDescriptionFile($descfile))) {
             return $info;
         }
@@ -126,12 +154,20 @@ class PEAR_Builder extends PEAR_Common
             chdir($old_cwd);
             return $this->raiseError("no `modules' directory found");
         }
+        $built_files = array();
         while ($ent = readdir($dp)) {
             if ($ent{0} == '.' || substr($ent, -3) == '.la') {
                 continue;
             }
             // harvest!
             if (@copy("modules/$ent", "$dir/$ent")) {
+                $built_files[] = array(
+                    'file' => "$dir/$ent",
+                    'php_api' => $this->php_api_version,
+                    'zend_mod_api' => $this->zend_module_api_no,
+                    'zend_ext_api' => $this->zend_extension_api_no,
+                    );
+
                 $this->log(1, "$ent copied to $dir/$ent");
             } else {
                 chdir($old_cwd);
@@ -140,11 +176,24 @@ class PEAR_Builder extends PEAR_Common
         }
         closedir($dp);
         chdir($old_cwd);
-        return true;
+        return $built_files;
     }
 
     // }}}
+    // {{{ phpizeCallback()
 
+    /**
+     * Message callback function used when running the "phpize"
+     * program.  Extracts the API numbers used.  Ignores other message
+     * types than "cmdoutput".
+     *
+     * @param string $what the type of message
+     * @param mixed $data the message
+     *
+     * @return void
+     *
+     * @access public
+     */
     function phpizeCallback($what, $data)
     {
         if ($what != 'cmdoutput') {
@@ -165,6 +214,25 @@ class PEAR_Builder extends PEAR_Common
         }
     }
 
+    // }}}
+    // {{{ _runCommand()
+
+    /**
+     * Run an external command, using a message callback to report
+     * output.  The command will be run through popen and output is
+     * reported for every line with a "cmdoutput" message with the
+     * line string, including newlines, as payload.
+     *
+     * @param string $command the command to run
+     *
+     * @param mixed $callback (optional) function to use as message
+     * callback
+     *
+     * @return bool whether the command was successful (exit code 0
+     * means success, any other means failure)
+     *
+     * @access private
+     */
     function _runCommand($command, $callback = null)
     {
         $this->log(1, "running: $command");
@@ -183,6 +251,9 @@ class PEAR_Builder extends PEAR_Common
         return ($exitcode == 0);
     }
 
+    // }}}
+    // {{{ log()
+
     function log($level, $msg)
     {
         if ($this->current_callback) {
@@ -193,6 +264,8 @@ class PEAR_Builder extends PEAR_Common
         }
         return PEAR_Common::log($level, $msg);
     }
+
+    // }}}
 }
 
 ?>
