@@ -295,7 +295,7 @@ ZEND_METHOD(exception, getTraceAsString)
 }
 /* }}} */
 
-ZEND_METHOD(exception, toString)
+ZEND_METHOD(exception, __toString)
 {
 	zval *message, *file, *line, *trace;
 	char *str;
@@ -342,7 +342,7 @@ ZEND_METHOD(exception, toString)
  * such exceptions in that handler. 
  * Also all getXY() methods are final because thy serve as read only access to
  * their corresponding properties, no more, no less. If after all you need to 
- * override somthing then it is method toString().
+ * override somthing then it is method __toString().
  * And never try to change the state of exceptions and never implement anything
  * that gives the user anything to accomplish this.
  */
@@ -354,7 +354,7 @@ static zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, getLine, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getTrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getTraceAsString, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, toString, NULL, 0)
+	ZEND_ME(exception, __toString, NULL, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -363,7 +363,7 @@ int zend_cast_exception(zval *readobj, zval *writeobj, int type, int should_free
 	if (type == IS_STRING) {
 		zval fname, *retval;
 
-		ZVAL_STRING(&fname, "tostring", 0);
+		ZVAL_STRING(&fname, "__tostring", 0);
 		if (call_user_function_ex(NULL, &readobj, &fname, &retval, 0, NULL, 0, NULL TSRMLS_CC) == SUCCESS) {
 			ZVAL_STRING(writeobj, Z_STRVAL_P(retval), 1);
 			zval_ptr_dtor(&retval);
@@ -479,7 +479,7 @@ ZEND_API void zend_exception_error(zval *exception TSRMLS_DC)
 		file = zend_read_property(default_exception_ptr, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(default_exception_ptr, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 		
-		ZVAL_STRINGL(&fname, "tostring", sizeof("tostring")-1, 0);
+		ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring")-1, 0);
 	
 		fci.size = sizeof(fci);
 		fci.function_table = &default_exception_ptr->function_table;
