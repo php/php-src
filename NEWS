@@ -84,7 +84,7 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #22017 (date() does not support negative timestamps on win32). (Ilia)
 - Fixed bug #21998 (array_pop() did not reset the current array position). (Jani)
-- Fixed bug #21978, #21036 (bcc: gets interpreted as cc: as well - win32 smtp mail only). (Sara)
+- Fixed bug #21978, #21036 (win32 mail(), bcc: gets interpreted as cc:). (Sara)
 - Fixed bug #21885 (move_uploaded_file() does not ignore open_basedir). (Wez)
 - Fixed bug #21815 (fpassthru() ignored buffered data but complained anyway). 
   (Wez)
