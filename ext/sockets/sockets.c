@@ -86,7 +86,7 @@ ZEND_DECLARE_MODULE_GLOBALS(sockets)
 #define PHP_SOCKET_ERROR(socket,msg,errn)	socket->error = errn;	\
 											SOCKETS_G(last_error) = errn; \
 											php_error(E_WARNING, "%s() %s [%d]: %s", \
-													  get_active_function_name(TSRMLS_C), msg, errn, php_strerror(errn))
+													  get_active_function_name(TSRMLS_C), msg, errn, php_strerror(errn TSRMLS_CC))
 
 static int le_iov;
 #define le_iov_name "Socket I/O vector"
@@ -110,11 +110,6 @@ static unsigned char second_fifth_and_sixth_args_force_ref[] =
 
 static unsigned char third_through_seventh_args_force_ref[] =
 {7, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE, BYREF_FORCE};
-
-/* Global buffer for php_strerror() */
-#if defined(PHP_WIN32) || (! defined(HAVE_HSTRERROR))
-static char php_strerror_buf[10000];
-#endif
 
 /* {{{ sockets_functions[]
  */
@@ -169,8 +164,8 @@ zend_module_entry sockets_module_entry = {
 	sockets_functions,
 	PHP_MINIT(sockets),
 	NULL,
-	NULL,
-	NULL,
+	PHP_RINIT(sockets),
+	PHP_RSHUTDOWN(sockets),
 	PHP_MINFO(sockets),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
@@ -207,7 +202,7 @@ static void destroy_socket(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	efree(php_sock);
 }
 
-static char *php_strerror(int error);
+static char *php_strerror(int error TSRMLS_DC);
 
 int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC)
 {
@@ -337,7 +332,7 @@ int php_read(int bsd_socket, void *buf, int maxlen)
 }
 /* }}} */
 
-static char *php_strerror(int error) {
+static char *php_strerror(int error TSRMLS_DC) {
 	const char *buf;
 
 #ifndef PHP_WIN32
@@ -348,8 +343,8 @@ static char *php_strerror(int error) {
 		buf = hstrerror(error);
 #else
 		{
-			sprintf(php_strerror_buf, "Host lookup error %d", error);
-			buf = php_strerror_buf;
+			sprintf(SOCKETS_G(strerror_buf), "Host lookup error %d", error);
+			buf = SOCKETS_G(strerror_buf);
 		}
 #endif
 	} else {
@@ -362,10 +357,10 @@ static char *php_strerror(int error) {
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |	FORMAT_MESSAGE_IGNORE_INSERTS,
 				  NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &tmp, 0, NULL);
 
-		strlcpy(php_strerror_buf, (char *) tmp, 10000);
+		strlcpy(SOCKETS_G(strerror_buf), (char *) tmp, 10000);
 		LocalFree(tmp);
 		
-		buf = php_strerror_buf;
+		buf = SOCKETS_G(strerror_buf);
 	}
 #endif
 	
@@ -403,6 +398,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 static void php_sockets_init_globals(zend_sockets_globals *sockets_globals TSRMLS_DC)
 {
 	sockets_globals->last_error = 0;
+	sockets_globals->strerror_buf = NULL;
 }
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -475,6 +471,25 @@ PHP_MINFO_FUNCTION(sockets)
 }
 /* }}} */
 
+/* {{{ PHP_RINIT_FUNCTION */
+PHP_RINIT_FUNCTION(sockets)
+{
+	if (SOCKETS_G(strerror_buf) = emalloc(16384)) 
+		return SUCCESS;
+	
+	return FAILURE;
+}
+/* }}} */
+
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
+PHP_RSHUTDOWN_FUNCTION(sockets)
+{
+	efree(SOCKETS_G(strerror_buf));
+	
+	return SUCCESS;
+}
+/* }}} */
+		
 int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, SOCKET *max_fd TSRMLS_DC) {
 	zval		**element;
 	php_socket	*php_sock;
@@ -570,7 +585,7 @@ PHP_FUNCTION(socket_select)
 
 	if (retval == -1) {
 		SOCKETS_G(last_error) = errno;
-		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno));
+		php_error(E_WARNING, "%s() %s [%d]: %s", get_active_function_name(TSRMLS_C), "unable to select", errno, php_strerror(errno TSRMLS_CC));
 		RETURN_FALSE;
 	}
 
@@ -615,7 +630,7 @@ PHP_FUNCTION(socket_accept)
 	
 	if (!accept_connect(php_sock, &new_sock, (struct sockaddr *) &sa TSRMLS_CC)) {
 		php_error(E_WARNING, "%s() unable to accept socket connection [%d]: %s",
-				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
+				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
 		RETURN_FALSE;
 	}
 	
@@ -936,7 +951,7 @@ PHP_FUNCTION(socket_create)
 	if (IS_INVALID_SOCKET(php_sock)) {
 		SOCKETS_G(last_error) = errno;
 		php_error(E_WARNING, "%s() Unable to create socket [%d]: %s",
-				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
+				  get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
 		efree(php_sock);
 		RETURN_FALSE;
 	}
@@ -1009,7 +1024,7 @@ PHP_FUNCTION(socket_strerror)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg1) == FAILURE)
 		return;
 
-	RETURN_STRING(php_strerror(arg1), 1);
+	RETURN_STRING(php_strerror(arg1 TSRMLS_CC), 1);
 }
 /* }}} */
 
@@ -1914,7 +1929,7 @@ PHP_FUNCTION(socket_create_pair)
 	
 	if (socketpair(domain, type, protocol, fds_array) != 0) {
 		SOCKETS_G(last_error) = errno;
-		php_error(E_WARNING, "%s() unable to create socket pair [%d]: %s", get_active_function_name(TSRMLS_C), errno, php_strerror(errno));
+		php_error(E_WARNING, "%s() unable to create socket pair [%d]: %s", get_active_function_name(TSRMLS_C), errno, php_strerror(errno TSRMLS_CC));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
