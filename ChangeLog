@@ -1,3 +1,24 @@
+2002-02-24  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * pear/DB/pgsql.php:
+    fixed error message handling with PostgreSQL 7.2 
+
+2002-02-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c: - Fix the fix.. no need to escape " in single quotes
+
+    * ext/standard/var.c: - Add slashes around string output
+
+    * win32/install.txt: - Update with XP (Thanx to Jan for the patch)
+
+2002-02-24  Stig Bakken  <ssb@fast.no>
+
+    * pear/package.dtd: * fix broken dtd
+
+2002-02-24  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/wddx/wddx.c: Make phpinfo() look nicer.
+
 2002-02-23  Markus Fischer  <mfischer@guru.josefine.at>
 
     * ext/xslt/sablot.c:
