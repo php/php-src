@@ -18,6 +18,7 @@ PHP 4                                                                      NEWS
   (Marcus, Ilia)
 - Fixed bug #22947 (Ack() inside win32/sendmail.c may stall in certain
   situations). (Ilia)
+- Fixed bug #22245 (References inside $_SESSION not being handled). (Ilia)
 - Fixed bug #21957 (serialize() mangles objects with __sleep). (Ilia)
 
 07 Aug 2003, Version 4.3.3RC3
