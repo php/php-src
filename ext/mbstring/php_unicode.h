@@ -101,9 +101,9 @@
 #define UC_PI 0x00008000 /* Punctuation, Initial       */
 #define UC_PF 0x00010000 /* Punctuation, Final         */
 
-PHPAPI int php_unicode_is_prop(unsigned long code, unsigned long mask1,
+MBSTRING_API int php_unicode_is_prop(unsigned long code, unsigned long mask1,
 		unsigned long mask2);
-PHPAPI char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *retlen,
+MBSTRING_API char *php_unicode_convert_case(int case_mode, char *srcstr, size_t srclen, size_t *retlen,
 		char *src_encoding TSRMLS_DC);
 
 #define PHP_UNICODE_CASE_UPPER	0

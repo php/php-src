@@ -26,7 +26,7 @@
 #include "php.h"
 #include "zend.h"
 #include "mbregex.h"
- 
+
 /* {{{ PHP_MBREGEX_GLOBALS */
 #define PHP_MBREGEX_GLOBALS \
 	int default_mbctype; \
@@ -42,9 +42,9 @@
 
 #define PHP_MBREGEX_MAXCACHE 50
 
-PHPAPI int php_mb_regex_name2mbctype(const char *pname);
-PHPAPI int php_mb_regex_set_options(int options TSRMLS_DC);
-PHPAPI int php_mb_regex_set_options_by_string(const char *optstr, int len TSRMLS_DC);
+int php_mb_regex_name2mbctype(const char *pname);
+int php_mb_regex_set_options(int options TSRMLS_DC);
+int php_mb_regex_set_options_by_string(const char *optstr, int len TSRMLS_DC);
 
 PHP_FUNCTION(mb_regex_encoding);
 PHP_FUNCTION(mb_ereg);
