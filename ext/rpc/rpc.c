@@ -396,6 +396,7 @@ static union _zend_function* rpc_get_method(zval *object, char *method, int meth
 		zif->handler = ZEND_FN(rpc_call);
 		zif->scope = intern->ce;
 		zif->type = ZEND_INTERNAL_FUNCTION;
+		zif->fn_flags = ZEND_ACC_PUBLIC;
 
 		/* add new method to the method table */
 		zend_ts_hash_add(&intern->function_table, method, method_len + 1, zif, sizeof(zend_function), &function);
