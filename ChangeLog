@@ -1,3 +1,24 @@
+2004-05-14  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * NEWS:
+      .ini variables patch notice
+
+    * ZendEngine2/zend_ini_parser.y
+      ZendEngine2/zend_ini_scanner.l:
+      Adding ability to refer to existing .ini variables from within .ini
+      files. Example:
+      
+      open_basedir = ${open_basedir} ":/new/dir"
+
+2004-05-14  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/standard/file.c:
+      MFH: Fixed possible memory leak inside popen().
+
+    * ext/standard/file.c:
+      Fixed possible memory leak inside popen().
+
 2004-05-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
