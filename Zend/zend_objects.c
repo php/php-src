@@ -101,27 +101,18 @@ ZEND_API zend_object *zend_objects_get_address(zval *zobject TSRMLS_DC)
 
 ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_value new_obj_val, zend_object *old_object, zend_object_handle handle TSRMLS_DC)
 {
+	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	if (old_object->ce->clone) {
-		zval *old_obj;
 		zval *new_obj;
 		zval *clone_func_name;
 		zval *retval_ptr;
 		HashTable symbol_table;
 		zend_class_entry *ce = old_object->ce;
-		zval **args[1];
-
-		zend_hash_copy(new_object->properties, &ce->default_properties, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
 
 		MAKE_STD_ZVAL(new_obj);
 		new_obj->type = IS_OBJECT;
 		new_obj->value.obj = new_obj_val;
 		zval_copy_ctor(new_obj);
-
-		MAKE_STD_ZVAL(old_obj);
-		old_obj->type = IS_OBJECT;
-		old_obj->value.obj.handle = handle;
-		old_obj->value.obj.handlers = &std_object_handlers; /* If we reached here than the handlers are standrd */
-		zval_copy_ctor(old_obj);
 
 		/* FIXME: Optimize this so that we use the old_object->ce->clone function pointer instead of the name */
 		MAKE_STD_ZVAL(clone_func_name);
@@ -130,11 +121,8 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		clone_func_name->value.str.len = sizeof("__clone")-1;
 
 		ZEND_INIT_SYMTABLE(&symbol_table);
-		args[0] = &old_obj;
 		
-		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 1, args, 1, &symbol_table TSRMLS_CC);
-
-		zval_ptr_dtor(args[0]);
+		call_user_function_ex(NULL, &new_obj, clone_func_name, &retval_ptr, 0, NULL, 0, &symbol_table TSRMLS_CC);
 
 		zend_hash_destroy(&symbol_table);
 		zval_ptr_dtor(&new_obj);
@@ -142,8 +130,6 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object_va
 		if(retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}
-	} else {
-		zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 	}
 }
 
