@@ -314,11 +314,15 @@ class PEAR_Dependency
      */
     function checkPHP(&$errmsg, $req, $relation = 'ge')
     {
+        // this would be a bit stupid, but oh well :)
+        if ($relation == 'has') {
+            return false;
+        }
         if (substr($req, 0, 2) == 'v.') {
             $req = substr($req,2, strlen($req) - 2);
         }
         $php_ver = phpversion();
-        $operator = substr($relation,0,2);
+        $operator = $relation;
         if (!version_compare("$php_ver", "$req", $operator)) {
             $errmsg = "PHP version " . $this->signOperator($operator) .
                 " $req is required";
