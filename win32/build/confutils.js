@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.28 2003-12-23 01:55:33 wez Exp $
+// $Id: confutils.js,v 1.29 2003-12-23 13:10:54 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -34,6 +34,12 @@ if (PROGRAM_FILES == null) {
 if (!FSO.FileExists("README.CVS-RULES")) {
 	STDERR.WriteLine("Must be run from the root of the php source");
 	WScript.Quit(10);
+}
+	
+var CWD = WshShell.CurrentDirectory;
+
+if (typeof(CWD) == "undefined") {
+	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.CVS-RULES"));
 }
 
 /* defaults; we pick up the precise versions from configure.in */
@@ -80,17 +86,15 @@ get_version_numbers();
 
 function condense_path(path)
 {
-	var cd = WshShell.CurrentDirectory;
-
 	path = FSO.GetAbsolutePathName(path);
 
-	if (path.substr(0, cd.length).toLowerCase()
-			== cd.toLowerCase() &&
-			(path.charCodeAt(cd.length) == 92 || path.charCodeAt(cd.length) == 47)) {
-		return path.substr(cd.length + 1);
+	if (path.substr(0, CWD.length).toLowerCase()
+			== CWD.toLowerCase() &&
+			(path.charCodeAt(CWD.length) == 92 || path.charCodeAt(CWD.length) == 47)) {
+		return path.substr(CWD.length + 1);
 	}
 
-	var a = cd.split("\\");
+	var a = CWD.split("\\");
 	var b = path.split("\\");
 	var i, j;
 
@@ -836,7 +840,7 @@ function generate_internal_functions()
 
 	STDOUT.WriteLine("Generating main/internal_functions.c");
 	
-	infile = FSO.OpenTextFile(WshShell.CurrentDirectory + "/main/internal_functions.c.in", 1);
+	infile = FSO.OpenTextFile("main/internal_functions.c.in", 1);
 	indata = infile.ReadAll();
 	infile.Close();
 	
@@ -852,7 +856,7 @@ function generate_internal_functions()
 		}
 	}
 
-	outfile = FSO.CreateTextFile(WshShell.CurrentDirectory + "/main/internal_functions.c", true);
+	outfile = FSO.CreateTextFile("main/internal_functions.c", true);
 	outfile.Write(indata);
 	outfile.Close();
 }
@@ -908,11 +912,11 @@ function generate_config_h()
 
 	STDOUT.WriteLine("Generating main/config.w32.h");
 	
-	infile = FSO.OpenTextFile(WshShell.CurrentDirectory + "/win32/build/config.w32.h.in", 1);
+	infile = FSO.OpenTextFile("win32/build/config.w32.h.in", 1);
 	indata = infile.ReadAll();
 	infile.Close();
 	
-	outfile = FSO.CreateTextFile(WshShell.CurrentDirectory + "/main/config.w32.h", true);
+	outfile = FSO.CreateTextFile("main/config.w32.h", true);
 
 	indata = indata.replace(new RegExp("@PREFIX@", "g"), prefix);
 	outfile.Write(indata);
