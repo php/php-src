@@ -28,12 +28,12 @@
 #include "ext/standard/info.h"
 
 function_entry php_gettext_functions[] = {
-    PHP_FE(textdomain,								NULL)
-    PHP_FE(gettext,									NULL)
-    PHP_FALIAS(_,				gettext,			NULL)
-	PHP_FE(dgettext,								NULL)
-	PHP_FE(dcgettext,								NULL)
-	PHP_FE(bindtextdomain,							NULL)
+	PHP_FE(textdomain,			NULL)
+	PHP_FE(gettext,				NULL)
+	PHP_FALIAS(_,	gettext,	NULL)
+	PHP_FE(dgettext,			NULL)
+	PHP_FE(dcgettext,			NULL)
+	PHP_FE(bindtextdomain,		NULL)
     {NULL, NULL, NULL}
 };
 
@@ -56,12 +56,12 @@ PHP_MINFO_FUNCTION(gettext)
 PHP_MINIT_FUNCTION(gettext)
 {
 	REGISTER_LONG_CONSTANT("LC_CTYPE", LC_CTYPE, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_NUMERIC", LC_NUMERIC, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_TIME", LC_TIME, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_COLLATE", LC_COLLATE, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_MONETARY", LC_MONETARY, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
-    REGISTER_LONG_CONSTANT("LC_ALL", LC_ALL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_NUMERIC", LC_NUMERIC, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_TIME", LC_TIME, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_COLLATE", LC_COLLATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_MONETARY", LC_MONETARY, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_MESSAGES", LC_MESSAGES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LC_ALL", LC_ALL, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 
@@ -69,14 +69,14 @@ PHP_MINIT_FUNCTION(gettext)
    Set the textdomain to "domain". Returns the current domain */
 PHP_FUNCTION(textdomain)
 {
-    pval **domain;
-    char *domain_name, *retval;
+	pval **domain;
+	char *domain_name, *retval;
 	char *val;
 
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &domain) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &domain) == FAILURE) {
 		WRONG_PARAM_COUNT;
-    }
-    convert_to_string_ex(domain);
+	}
+	convert_to_string_ex(domain);
 
 	val = (*domain)->value.str.val;
 	if (strcmp(val, "") && strcmp(val, "0")) {
@@ -87,7 +87,7 @@ PHP_FUNCTION(textdomain)
 
 	retval = textdomain(domain_name);
 
-    RETURN_STRING(retval, 1);
+	RETURN_STRING(retval, 1);
 }
 /* }}} */
 
@@ -95,17 +95,17 @@ PHP_FUNCTION(textdomain)
    Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
 PHP_FUNCTION(gettext)
 {
-    pval **msgid;
-    char *msgstr;
+	pval **msgid;
+	char *msgstr;
 
-    if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &msgid) == FAILURE) {
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &msgid) == FAILURE) {
 		WRONG_PARAM_COUNT;
-    }
-    convert_to_string_ex(msgid);
+	}
+	convert_to_string_ex(msgid);
 
-    msgstr = gettext((*msgid)->value.str.val);
+	msgstr = gettext((*msgid)->value.str.val);
 
-    RETURN_STRING(msgstr, 1);
+	RETURN_STRING(msgstr, 1);
 }
 /* }}} */
 
@@ -116,9 +116,7 @@ PHP_FUNCTION(dgettext)
 	pval **domain_name, **msgid;
 	char *msgstr;
 
-	if (ZEND_NUM_ARGS() != 2
-		|| zend_get_parameters_ex(2, &domain_name, &msgid) == FAILURE)
-	{
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain_name, &msgid) == FAILURE)	{
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(domain_name);
@@ -137,18 +135,16 @@ PHP_FUNCTION(dcgettext)
 	pval **domain_name, **msgid, **category;
 	char *msgstr;
 
-	if (ZEND_NUM_ARGS() != 3
-		|| zend_get_parameters_ex(3, &domain_name, &msgid, &category) == FAILURE)
-	{
+	if (ZEND_NUM_ARGS() != 3 || zend_get_parameters_ex(3, &domain_name, &msgid, &category) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(domain_name);
 	convert_to_string_ex(msgid);
 	convert_to_long_ex(category);
 
-	msgstr = dcgettext((*domain_name)->value.str.val,
-					   (*msgid)->value.str.val,
-					   (*category)->value.lval);
+	msgstr = dcgettext(	(*domain_name)->value.str.val,
+						(*msgid)->value.str.val,
+						(*category)->value.lval);
 
 	RETURN_STRING(msgstr, 1);
 }
@@ -161,9 +157,7 @@ PHP_FUNCTION(bindtextdomain)
 	pval **domain_name, **dir;
 	char *retval, dir_name[MAXPATHLEN];
 
-	if (ZEND_NUM_ARGS() != 2
-		|| zend_get_parameters_ex(2, &domain_name, &dir) == FAILURE)
-	{
+	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &domain_name, &dir) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(domain_name);
