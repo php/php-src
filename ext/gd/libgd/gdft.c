@@ -889,11 +889,16 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	}
 
 #ifndef JISX0208
-	if (!font->have_char_map_sjis) {
-		next = string;
-	} else
+	if (font->have_char_map_sjis) {
 #endif
 		tmpstr = (char *) gdMalloc(BUFSIZ);
+		any2eucjp(tmpstr, string, BUFSIZ);
+		next = tmpstr;
+#ifndef JISX0208
+	} else {
+		next = string;
+	}
+#endif
 
 	while (*next) {
 		ch = *next;
