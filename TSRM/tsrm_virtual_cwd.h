@@ -4,10 +4,10 @@
    +----------------------------------------------------------------------+
    | Copyright (c) 1997-2003 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is subject to version 2.02 of the PHP license,      |
+   | This source file is subject to version 3.0 of the PHP license,       |
    | that is bundled with this package in the file LICENSE, and is        |
-   | available at through the world-wide-web at                           |
-   | http://www.php.net/license/2_02.txt.                                 |
+   | available through the world-wide-web at the following url:           |
+   | http://www.php.net/license/3_0.txt.                                  |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -53,14 +53,13 @@ typedef unsigned short mode_t;
 #define IS_SLASH_P(c)	(*(c) == '/' || \
         (*(c) == '\\' && !IsDBCSLeadByte(*(c-1))))
 
-/* COPY_WHEN_ABSOLUTE also takes path as argument because netware needs it
- * to account for volume name that is unique to NetWare absolute paths
- */
+/* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
+   in the file system and UNC paths need copying of two characters */
 #define COPY_WHEN_ABSOLUTE(path) 2
-#define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && ((isalpha(path[0]) && path[1] == ':') || (IS_SLASH(path[0]) && IS_SLASH(path[1]))))
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
+#define IS_ABSOLUTE_PATH(path, len) \
+	(len >= 2 && ((isalpha(path[0]) && path[1] == ':') || IS_UNC_PATH(path, len)))
 
 #elif defined(NETWARE)
 #ifdef HAVE_DIRENT_H
@@ -70,6 +69,7 @@ typedef unsigned short mode_t;
 #define DEFAULT_SLASH '/'
 #define DEFAULT_DIR_SEPARATOR	';'
 #define IS_SLASH(c)	((c) == '/' || (c) == '\\')
+#define IS_SLASH_P(c)	IS_SLASH(*(c))
 #define COPY_WHEN_ABSOLUTE(path) \
     (strchr(path, ':') - path + 1)  /* Take the volume name which ends with a colon */
 #define IS_ABSOLUTE_PATH(path, len) \
@@ -150,9 +150,21 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);
 CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC);
 CWD_API FILE *virtual_popen(const char *command, const char *type TSRMLS_DC);
-
-#if !defined(TSRM_WIN32)
 CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC);
+#if defined(TSRM_WIN32)
+/* these are not defined in win32 headers */
+#ifndef W_OK
+#define W_OK 0x02
+#endif
+#ifndef R_OK
+#define R_OK 0x04
+#endif
+#ifndef X_OK
+#define X_OK 0x01
+#endif
+#ifndef F_OK
+#define F_OK 0x00
+#endif
 #endif
 
 #if HAVE_UTIME
@@ -229,7 +241,11 @@ typedef struct _virtual_cwd_globals {
 #define VCWD_RMDIR(pathname) rmdir(pathname)
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
+#if defined(TSRM_WIN32)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
+#endif
 
 #ifdef HAVE_REALPATH
 #define VCWD_REALPATH(path, real_path) realpath(path, real_path)
