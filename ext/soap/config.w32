@@ -1,7 +1,7 @@
 // $Id$
 // vim:ft=javascript
 
-ARG_WITH("soap", "SOAP support", "no");
+ARG_ENABLE("soap", "SOAP support", "no");
 
 if (PHP_SOAP != "no" && PHP_LIBXML == "yes") {
 	EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c');

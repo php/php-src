@@ -28,7 +28,7 @@ TD:{
 This extension makes use of the <A HREF="http://www.xmlsoft.org" TARGET="_top">GNOME XML library</A>. Download and install this library. You will need at least libxml-2.5.4.
 <HR>
 <H2>Installation</H2>
-This extension is only available if PHP was configured with --with-soap.
+This extension is only available if PHP was configured with --enable-soap.
 <HR>
 <H2>Predefined Constants</H2>
 The constants below are defined by this extension, and will only be available when the extension has either been compiled into PHP or dynamically loaded at runtime.
@@ -107,6 +107,7 @@ The constants below are defined by this extension, and will only be available wh
 <tr><td><a href="#ref.soap.soapparam">SoapParam</a></td></tr>
 <tr><td><a href="#ref.soap.soapvar">SoapVar</a></td></tr>
 <tr><td><a href="#ref.soap.soapheader">SoapHeader</a></td></tr>
+<tr><td><a href="#ref.soap.soapfault">SoapFault</a></td></tr>
 </table>
 <a name="ref.soap.soapclient">
 <h4>SoapClient class</h4>
@@ -163,6 +164,16 @@ It is just a data holder and it has not any special method except constructor.
 <table border="0">
 <tr><td><a href="#ref.soap.soapheader.soapheader">SoapHeader</a> -- SoapHeader constructor</td></tr>
 </table>
+<a name="ref.soap.soapfault">
+<h4>SoapFault class</h4>
+<p>
+SoapFault is a special class that can be used for error reporting during
+handling of SOAP request (on server). It has not any special methods except
+constructor.
+</p>
+<table border="0">
+<tr><td><a href="#ref.soap.soapfault.soapfault">SoapFault</a> -- SoapFault constructor</td></tr>
+</table>
 <HR>
 <!--
 <H2>Examples</H2>
@@ -186,6 +197,7 @@ It is just a data holder and it has not any special method except constructor.
 <tr><td><a href="#ref.soap.soapparam.soapparam">SoapParam::SoapParam</a> -- SoapParam constructor</td></tr>
 <tr><td><a href="#ref.soap.soapvar.soapvar">SoapVar::SoapVar</a> -- SoapVar constructor</td></tr>
 <tr><td><a href="#ref.soap.soapheader.soapheader">SoapHeader::SoapHeader</a> -- SoapHeader constructor</td></tr>
+<tr><td><a href="#ref.soap.soapfault.soapfault">SoapFault::SoapFault</a> -- SoapFault constructor</td></tr>
 </table>
 
 <a name="ref.soap.is_soap_fault"></a>
@@ -216,7 +228,6 @@ is_soap_fault() functions checks if the given parameter is a SoapFault object.
 <p>SoapClient constructor</p>
 <h3>Description</h3>
 <p><b>SoapClient</b>(mixed wsdl [, array options])</p>
-<h4>Examples</h4>
 <p>
 The constructor allows creating SoapClient objects in WSDL or nonWSDL mode.
 The first case requires URI of WSDL file as first parameter and optional
@@ -230,6 +241,7 @@ Some additional optional options allow using HTTP authentication (<b>login</b>
 and <b>password</b>) and HTTP connection through proxy server (<b>proxy_host</b>,
 <b>proxy_port</b>, <b>proxy_login</b> and <b>proxy_password</b>).
 </p>
+<h4>Examples</h4>
 <TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
     $client = new SoapClient("some.wsdl");
 
@@ -494,6 +506,7 @@ It never returns.
     $server->handle();
 ?&gt;
 </PRE></TD></TR></TABLE>
+<p>See also: <a href="#ref.soap.soapfault.soapfault">SoapFault::SoapFault</a></p>
 
 <a name="ref.soap.soapparam.soapparam"></a>
 <h2>SoapParam::SoapParam</h2>
@@ -580,5 +593,27 @@ Header element.
                                    'hello world'));
 ?&gt;
 </PRE></TD></TR></TABLE>
+
+<a name="ref.soap.soapfault.soapfault"></a>
+<h2>SoapFault::SoapFault</h2>
+<p>(PHP 5)</p>
+<p>SoapFault constructor</p>
+<h3>Description</h3>
+<p><b>SoapFault</b>(string faultcode, string faultstring [, string faultactor [, mixed details]])</p>
+This class is useful when you like to send SOAP fault response from PHP handler.
+<h4>Example</h4>
+<h4>Example</h4>
+<TABLE BORDER="0" BGCOLOR="#E0E0E0"><TR><TD><PRE CLASS="php">
+&lt;?php
+    function test($x) {
+        return new SoapFault("Server","Some error message");
+    }
+
+    $server = new SoapServer(null,array('uri'=>"http://test-uri/"));
+    $server->addFunction("test");
+    $server->handle();
+?&gt;
+</PRE></TD></TR></TABLE>
+<p>See also: <a href="#ref.soap.soapserver.fault">SoapServer::fault</a></p>
 </BODY>
 </HTML>

@@ -47,6 +47,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 static void clear_soap_fault(zval *obj TSRMLS_DC);
 static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
 static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC);
+static void soap_server_fault_ex(zval* fault TSRMLS_DC);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
@@ -1274,6 +1275,11 @@ PHP_METHOD(soapserver, handle)
 	if (call_status == SUCCESS) {
 		char *response_name;
 
+		if (Z_TYPE(retval) == IS_OBJECT &&
+		    Z_OBJCE(retval) == soap_fault_class_entry) {
+			soap_server_fault_ex(&retval TSRMLS_CC);
+		}
+
 		if (function && function->responseName) {
 			response_name = estrdup(function->responseName);
 		} else {
@@ -1361,21 +1367,16 @@ PHP_METHOD(soapserver, fault)
 	SOAP_SERVER_END_CODE();
 }
 
-static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC)
+static void soap_server_fault_ex(zval* fault TSRMLS_DC)
 {
 	int soap_version;
 	xmlChar *buf, cont_len[30];
 	int size;
-	zval ret;
 	xmlDocPtr doc_return;
 
 	soap_version = SOAP_GLOBAL(soap_version);
 
-	INIT_ZVAL(ret);
-
-	set_soap_fault(&ret, code, string, actor, details TSRMLS_CC);
-
-	doc_return = seralize_response_call(NULL, NULL, NULL, &ret, NULL, soap_version TSRMLS_CC);
+	doc_return = seralize_response_call(NULL, NULL, NULL, fault, NULL, soap_version TSRMLS_CC);
 
 	xmlDocDumpMemory(doc_return, &buf, &size);
 
@@ -1396,6 +1397,16 @@ static void soap_server_fault(char* code, char* string, char *actor, zval* detai
 	xmlFreeDoc(doc_return);
 	xmlFree(buf);
 	zend_bailout();
+}
+
+static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC)
+{
+	zval ret;
+
+	INIT_ZVAL(ret);
+
+	set_soap_fault(&ret, code, string, actor, details TSRMLS_CC);
+	soap_server_fault_ex(&ret TSRMLS_CC);
 }
 
 static void soap_error_handler(int error_num, const char *error_filename, const uint error_lineno, const char *format, va_list args)
