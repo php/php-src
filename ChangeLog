@@ -1,3 +1,107 @@
+2002-07-26  sniper  <sniper@pb1.pair.com>
+
+    * ext/curl/curl.c:
+    - Fix bug: #18509, e.g. setting CURLOPT_BINARYTRANSFER succeeds always.
+    - Also set the binary mode ONLY if the passed value is true..
+
+2002-07-26  fmk  <fmk@pb1.pair.com>
+
+    * ext/ftp/ftp.c: Fizing ZTS build
+
+2002-07-26  sesser  <sesser@pb1.pair.com>
+
+    * ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:
+    [EXPERIMENTAL] Added functions for asynchronous FTP transfers
+
+2002-07-26  helly  <helly@pb1.pair.com>
+
+    * ext/exif/exif.c: Missing Photoshop tags
+
+2002-07-26  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c: forgot to make the same change to imap_get_quota...
+
+    * ext/imap/php_imap.c: Minor memory fix suggested by Zeev
+
+2002-07-26  georg  <georg@pb1.pair.com>
+
+    * ext/standard/datetime.c: Bugfix: #18532
+    Fixed week number calculation in accordance with ISO 8601
+
+2002-07-26  sesser  <sesser@pb1.pair.com>
+
+    * ext/ftp/php_ftp.c: fixed cut & paste typo
+
+2002-07-26  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h: Adding initial support for PHP imap_get_quotaroot
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    (PHP imap_get_quota) updated to properly reflect the RFC 2087 as per
+     bug #14673
+       per RFC 2087, closes bug #14673 (kalowsky, Sander Steffann)
+
+2002-07-26  Sascha Schumann  <sas@pb1.pair.com>
+
+    * sapi/thttpd/thttpd_patch: Fix segfault due to unchecked null pointer
+
+2002-07-26  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/Archive/Tar.php:
+    In theory this will fix a problem in Window trying to delete a not closed
+    file
+
+
+2002-07-26  helly  <helly@pb1.pair.com>
+
+    * ext/gd/gd.c:
+    reapply patch for imageellipse beeing wrappet to imagearc if missing
+
+2002-07-26  sesser  <sesser@pb1.pair.com>
+
+    * ext/ftp/CREDITS
+      ext/ftp/ftp.c
+      ext/ftp/ftp.h
+      ext/ftp/php_ftp.c
+      ext/ftp/php_ftp.h:    Added (Auto)Resuming functionality to ftp_(f)get/(f)put via optional 5th parameter.
+
+2002-07-26  Tomas V.V.Cox  <cox@pb1.pair.com>
+
+    * pear/scripts/pear.bat:
+    use -d output_buffer=0 to workarround the PHP flush() problem
+
+    * pear/PEAR/Installer.php: download package if force is set
+
+    * pear/package-PEAR.xml: revert my change from PHP_BINDIR to bin_dir
+
+    * pear/package-PEAR.xml:
+    Use install-as attrib for pear.bat too, so it gets installed in @bin_dir@
+
+    * pear/scripts/pear.bat: Use script arg separator '--'
+    Clean up unused stuff
+
+    * pear/PEAR/Config.php: Use DIRECTORY_SEPARATOR instead of hardcoded '/'
+
+    * pear/System.php: Workarround to the empty $_ENV
+
+    * pear/Console/Getopt.php: use $GLOBALS['HTTP_SERVER_VARS'] instead
+
+    * pear/Console/Getopt.php: Silence NOTICE
+
+2002-07-26  sesser  <sesser@pb1.pair.com>
+
+    * ext/standard/filestat.c:
+    all functions based on php_stat are now safe mode aware...
+
+2002-07-26  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: When Britney learns to sing, I will quit this..
+
 2002-07-25  sniper  <sniper@pb1.pair.com>
 
     * acinclude.m4

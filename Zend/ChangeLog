@@ -1,3 +1,15 @@
+2002-07-26  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_execute.c
+      zend.c
+      zend_builtin_functions.c
+      zend_compile.h:
+    - Fix problem with debug_backtrace() reported by Stig. We weren't reporting
+    - global function information because it wasn't available. We have to do
+    - an additional assignment per-function call so that it'll be available.
+    - Also don't define the global scope as function name _main_ but leave it
+    - empty so that frameworks like Pear can decide what they want to do.
+
 2002-07-25  sniper  <sniper@pb1.pair.com>
 
     * Zend.m4: Fixed 3 major failures in this test:
