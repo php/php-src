@@ -1,0 +1,28 @@
+# Test file used by testscanf.php. Feel free to add additional cases
+# sscanf test cases. formatted to be slurped and split by explode
+%d|48| valid decimal (positive) 
+%d|-98| valid signed decimal (negative) 
+%d|56a| integer scan : decimal digit followed by alpha	
+%4d|558071|decimal integer with width specification
+%i|-5489|valid signed integer (negative)
+%s| the rain in spain | plain ole string matched with %s
+%10s|jabberwocky| string with width specifier
+%f|289.071| valid float (%f)
+%f|-0.403| valid negative (%f)
+%3f|76.4|Float with width specifier ending at decimal point
+%3f"|789.4|Float with width specifier 
+%o|0321|octal with leading 0  
+%o|327| valid octal digits
+%o|380| octal scan with octal digit followed by non-octal  
+%x|fe| valid hex|
+%x|0xfe| "c" style hex with leading 0x|
+%x|455| hex with all single digits < f
+%x|-98| hex (negative signed int)
+%c|y| single char
+%4c|tulips|Character with width specification (4)
+%e|10e-9| signed floating point with negative exponent
+%e|10e+9| signed floating point with explicit positive exponent
+%e|10e9| signed floating point with positive exponent (no + sign)
+# next we test multiple cases
+ %d %i %o %u %x %s %c %e %f %g | 19 84 0666 2000 0xface your x 31e+9 0.912 2.4 |multiple specifiers
+
