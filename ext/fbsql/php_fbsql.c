@@ -788,7 +788,6 @@ PHPFBDatabase* phpfbSelectDB
 			fbcdcClose(c);
 			fbcdcRelease(c);
 			free(result);
-/*			printf("Returning Null\n"); */
 			return NULL;
 		}
 		result->retainCount      = 2;
@@ -813,7 +812,6 @@ PHPFBDatabase* phpfbSelectDB
 		link->databases[i] = result;
 
 		FB_SQL_G(databaseCount)++;
-/*		printf("Return database %x %x\n",result,c); */
 	}
 	link->currentDatabase     = result;
 	return_value->value.lval  = result->index;
@@ -1514,6 +1512,26 @@ PHPFBResult* phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBDatabase* 
 	FBSQLLS_FETCH();
 
 	meta     = fbcdcExecuteDirectSQL(database->connection,sql);
+
+	if (fbcmdErrorCount(meta) > 0) {
+		FBCErrorMetaData *errorMeta;
+		char		 *errorMessage;
+		unsigned	 error_type = 0;
+
+		errorMeta = fbcdcErrorMetaData(database->connection, meta);
+		error_type = fbcemdErrorCodeAtIndex(errorMeta, 0);
+		errorMessage = fbcemdAllErrorMessages(errorMeta);
+		if (error_type != 250) {
+			php_error(E_WARNING, "Error executing SQL-statement (%s)", sql);
+		}
+//		free(errorMessage);
+		fbcemdRelease(errorMeta);
+
+		if (error_type != 250) {
+			fbcmdRelease(meta);
+			return NULL;
+		}
+	}
 
 	if (fbcmdHasMetaDataArray(meta)) {
 		sR = fbcmdMetaDataArrayCount(meta);
