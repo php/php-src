@@ -591,6 +591,7 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here 
 	and for all children as well. */
 	if (node->parent == NULL) {
+		attr_list_wrapper_dtor(node->properties);
 		node_list_wrapper_dtor(node->children);
 		node_wrapper_dtor(node);        
 		xmlFreeNode(node);
@@ -1432,8 +1433,8 @@ PHP_MINFO_FUNCTION(domxml)
 	/* don't know why that line was commented out in the previous version, so i left it (cmv) */
 	php_info_print_table_start();
 	php_info_print_table_row(2, "DOM/XML", "enabled");
+	php_info_print_table_row(2, "DOM/XML API Version", DOMXML_API_VERSION);	
 	php_info_print_table_row(2, "libxml Version", LIBXML_DOTTED_VERSION);
-	php_info_print_table_row(2, "domxml API Version", DOMXML_API_VERSION);	
 #if defined(LIBXML_HTML_ENABLED)
 	php_info_print_table_row(2, "HTML Support", "enabled");
 #endif
@@ -1972,7 +1973,7 @@ PHP_FUNCTION(domxml_node_children)
 /* }}} */
 
 /* {{{ proto void domxml_node_unlink_node([object node])
-   Deletes the node */
+   Deletes the node from tree, but not from memory*/
 PHP_FUNCTION(domxml_node_unlink_node)
 {
 	zval *id;
@@ -1989,6 +1990,7 @@ PHP_FUNCTION(domxml_node_unlink_node)
 	zval_dtor(id);*/			/* This is not enough because the children won't be deleted */
 }
 /* }}} */
+
 
 /* {{{ proto object domxml_node_replace_node(object domnode)
    Replaces one node with another node */
