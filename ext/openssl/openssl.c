@@ -45,6 +45,10 @@
 #define DEFAULT_KEY_LENGTH	512
 #define MIN_KEY_LENGTH		384
 
+#define OPENSSL_ALGO_SHA1 	1
+#define OPENSSL_ALGO_MD5	2
+#define OPENSSL_ALGO_MD4	3
+#define OPENSSL_ALGO_MD2	4
 
 #define DEBUG_SMIME	0
 
@@ -565,6 +569,12 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_CS|CONST_PERSISTENT);
 #endif
 
+	/* signature algotithm constants */
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD4", OPENSSL_ALGO_MD4, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
+	
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_TEXT", PKCS7_TEXT, CONST_CS|CONST_PERSISTENT);
@@ -2795,8 +2805,10 @@ PHP_FUNCTION(openssl_sign)
 	long keyresource = -1;
 	char * data;	int data_len;
 	EVP_MD_CTX md_ctx;
+	long signature_algo = OPENSSL_ALGO_SHA1;
+	EVP_MD *mdtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz", &data, &data_len, &signature, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "szz|l", &data, &data_len, &signature, &key, &signature_algo) == FAILURE) {
 		return;
 	}
 	pkey = php_openssl_evp_from_zval(&key, 0, "", 0, &keyresource TSRMLS_CC);
@@ -2808,7 +2820,22 @@ PHP_FUNCTION(openssl_sign)
 	siglen = EVP_PKEY_size(pkey);
 	sigbuf = emalloc(siglen + 1);
 
-	EVP_SignInit(&md_ctx, EVP_sha1());
+	switch (signature_algo) {
+		case OPENSSL_ALGO_SHA1:
+			mdtype = EVP_sha1();
+			break;
+		case OPENSSL_ALGO_MD5:
+			mdtype = EVP_md5();
+			break;
+		case OPENSSL_ALGO_MD4:
+			mdtype = EVP_md4();
+			break;
+		case OPENSSL_ALGO_MD2:
+			mdtype = EVP_md2();
+			break;
+	}
+	
+	EVP_SignInit(&md_ctx, mdtype);
 	EVP_SignUpdate(&md_ctx, data, data_len);
 	if (EVP_SignFinal (&md_ctx, sigbuf, &siglen, pkey)) {
 		zval_dtor(signature);
