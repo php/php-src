@@ -480,6 +480,7 @@ PHP_FUNCTION(imagetypes)
 
 static int _php_image_type (char data[8])
 {
+#ifdef HAVE_LIBGD15
 	/* Based on ext/standard/images.c */
 
 	if (data == NULL)
@@ -507,10 +508,12 @@ static int _php_image_type (char data[8])
 	}
 #endif
 	return -1;
+#endif
 }
 
 gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*ioctx_func_p)())
 {
+#ifdef HAVE_LIBGD15 
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
         
@@ -528,12 +531,14 @@ gdImagePtr _php_image_create_from_string (zval **data, char *tn, gdImagePtr (*io
 	}
 
 	return im;
+#endif
 }
 
 /* {{{ proto int imagecreatefromstring(string image)
    Create a new image from the image stream in the string */
 PHP_FUNCTION (imagecreatefromstring)
 {
+#ifdef HAVE_LIBGD15
 	zval **data;
 	gdImagePtr im;
 	int imtype;
@@ -596,6 +601,7 @@ PHP_FUNCTION (imagecreatefromstring)
 	}
 
 	ZEND_REGISTER_RESOURCE(return_value, im, GDG (le_gd));
+#endif
 }
 /* }}} */
 
