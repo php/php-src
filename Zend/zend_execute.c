@@ -2512,6 +2512,8 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		should_change_scope = 0;
 	}
 
+	EX_T(EX(opline)->result.u.var).var.fcall_returned_reference = 0;
+
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
@@ -2561,6 +2563,7 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 
 		zend_execute(EG(active_op_array) TSRMLS_CC);
+		EX_T(EX(opline)->result.u.var).var.fcall_returned_reference = EG(active_op_array)->return_reference;
 
 		if (return_value_used && !EX_T(EX(opline)->result.u.var).var.ptr) {
 			if (!EG(exception)) {
@@ -2685,20 +2688,28 @@ int zend_return_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *retval_ptr;
 	zval **retval_ptr_ptr;
-	
-	if ((EG(active_op_array)->return_reference == ZEND_RETURN_REF) &&
-		(EX(opline)->op1.op_type != IS_CONST) && 
-		(EX(opline)->op1.op_type != IS_TMP_VAR)) {
-		
+			
+	if (EG(active_op_array)->return_reference == ZEND_RETURN_REF) {
+		if (EX(opline)->op1.op_type == IS_CONST || EX(opline)->op1.op_type == IS_TMP_VAR) {
+			/* Not supposed to happen, but we'll allow it */
+			zend_error(E_STRICT, "Only variable references should be returned by reference");
+			goto return_by_value;
+		}
+
 		retval_ptr_ptr = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W);
 
 		if (!retval_ptr_ptr) {
-			zend_error(E_ERROR, "Cannot return overloaded elements or string offsets by reference");
+			zend_error(E_ERROR, "Cannot return string offsets by reference");
 		}
 
 		if (!(*retval_ptr_ptr)->is_ref
-			&& EX_T(EX(opline)->op1.u.var).var.ptr_ptr == &EX_T(EX(opline)->op1.u.var).var.ptr) {
-			zend_error(E_ERROR, "Only variables or references can be returned by reference");
+			/*&& EX_T(EX(opline)->op1.u.var).var.ptr_ptr == &EX_T(EX(opline)->op1.u.var).var.ptr*/) {
+			if (EX(opline)->extended_value == ZEND_RETURNS_FUNCTION
+				&& !EX_T(EX(opline)->op1.u.var).var.fcall_returned_reference) {
+				zend_error(E_STRICT, "Only variable references should be returned by reference");
+				PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+				goto return_by_value;
+			}
 		}
 		
 		SEPARATE_ZVAL_TO_MAKE_IS_REF(retval_ptr_ptr);
@@ -2706,6 +2717,7 @@ int zend_return_handler(ZEND_OPCODE_HANDLER_ARGS)
 		
 		(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 	} else {
+return_by_value:
 		retval_ptr = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
 	
 		if (!EG(free_op1)) { /* Not a temp var */
