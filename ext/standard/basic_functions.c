@@ -819,10 +819,12 @@ function_entry basic_functions[] = {
 	PHP_FE(aggregate,						first_arg_force_ref)
 	PHP_FE(aggregate_methods,				first_arg_force_ref)
 	PHP_FE(aggregate_methods_by_list,		first_arg_force_ref)
-	PHP_FE(aggregate_methods_by_regexp,		first_arg_force_ref)
 	PHP_FE(aggregate_properties,			first_arg_force_ref)
 	PHP_FE(aggregate_properties_by_list,	first_arg_force_ref)
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	PHP_FE(aggregate_methods_by_regexp,		first_arg_force_ref)
 	PHP_FE(aggregate_properties_by_regexp,	first_arg_force_ref)
+#endif
 	PHP_FE(deaggregate,						first_arg_force_ref)
 	PHP_FE(aggregation_info,				first_arg_force_ref)
 	{NULL, NULL, NULL}
