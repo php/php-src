@@ -20,12 +20,20 @@ install-pdo-headers:
 			echo "hmmm"; \
 		fi \
 	done;
+	@echo ""
+	@echo ""
+	@echo "You're now ready to install PDO drivers for your database"
+	@echo "If you'd like to have PDO show up in the list of installed"
+	@echo "packages when you run \"pear list\", you may now run"
+	@echo "\"sudo pear install package.xml\""
+	@echo "this time, when prompted to press enter, you shold type"
+	@echo "\"no\" and press enter instead."
 
 # mini hack
 install: $(all_targets) $(install_targets) install-pdo-headers
 
 $(top_srcdir)/ext/pdo/pdo_sql_parser.c: $(top_srcdir)/ext/pdo/pdo_sql_parser.re
-	re2c -b $(top_srcdir)/ext/pdo/pdo_sql_parser.re > $@
+	exit 0; re2c -b $(top_srcdir)/ext/pdo/pdo_sql_parser.re > $@
 
 $(srcdir)/pdo_sql_parser.c: $(srcdir)/pdo_sql_parser.re
-	re2c -b $(srcdir)/pdo_sql_parser.re > $@
+	exit 0; re2c -b $(srcdir)/pdo_sql_parser.re > $@

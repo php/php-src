@@ -25,7 +25,7 @@ for ($i = 0; $i < 4; $i++) {
 $stmt = null;
 
 echo "DEFAULT:\n";
-foreach ($x->queryAndIterate("select NAME, VALUE from test") as $row) {
+foreach ($x->query("select NAME, VALUE from test") as $row) {
 	print_r($row);
 }
 
@@ -37,7 +37,7 @@ class Foo {
 
 $foo = new foo;
 
-foreach ($x->queryAndIterate("select NAME, VALUE from test", PDO_FETCH_COLUMN, 1) as $row) {
+foreach ($x->query("select NAME, VALUE from test", PDO_FETCH_COLUMN, 1) as $row) {
 	debug_zval_dump($row);
 }
 
