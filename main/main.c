@@ -96,8 +96,6 @@ static MUTEX_T global_lock;
  
 
 static void php_build_argv(char *s, zval *track_vars_array ELS_DC PLS_DC);
-static void php_timeout(int dummy);
-static void php_set_timeout(long seconds);
 
 void *gLock;					/*mutex variable */
 
@@ -441,55 +439,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 }
 
 
-static long php_timeout_seconds;
-
-#ifdef HAVE_SETITIMER
-static void php_timeout(int dummy)
-{
-	PLS_FETCH();
-
-	PG(connection_status) |= PHP_CONNECTION_TIMEOUT;
-	php_error(E_ERROR, "Maximum execution time of %d second%s exceeded",
-			  php_timeout_seconds, php_timeout_seconds == 1 ? "" : "s");
-}
-#endif
-
-/* This one doesn't exists on QNX */
-#ifndef SIGPROF
-#define SIGPROF 27
-#endif
-
-static void php_set_timeout(long seconds)
-{
-#ifdef PHP_WIN32
-#else
-#	ifdef HAVE_SETITIMER
-	struct itimerval t_r;		/* timeout requested */
-
-	t_r.it_value.tv_sec = seconds;
-	t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
-
-	php_timeout_seconds = seconds;
-	setitimer(ITIMER_PROF, &t_r, NULL);
-	signal(SIGPROF, php_timeout);
-#	endif
-#endif
-}
-
-
-static void php_unset_timeout(void)
-{
-#ifdef PHP_WIN32
-#else
-#	ifdef HAVE_SETITIMER
-	struct itimerval no_timeout;
-
-	no_timeout.it_value.tv_sec = no_timeout.it_value.tv_usec = no_timeout.it_interval.tv_sec = no_timeout.it_interval.tv_usec = 0;
-
-	setitimer(ITIMER_PROF, &no_timeout, NULL);
-#	endif
-#endif
-}
 
 /* {{{ proto void set_time_limit(int seconds)
    Sets the maximum time a script can run */
@@ -518,8 +467,8 @@ PHP_FUNCTION(set_time_limit)
 	   should work fine.  Is this FIXME a WIN32 problem?  Is
 	   there no way to do per-thread timers on WIN32?
 	 */
-	php_unset_timeout();
-	php_set_timeout(Z_LVAL_PP(new_timeout));
+	zend_unset_timeout();
+	zend_set_timeout(Z_LVAL_PP(new_timeout));
 }
 /* }}} */
 
@@ -654,7 +603,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	virtual_cwd_activate(SG(request_info).path_translated);
 #endif
 
-	php_set_timeout(PG(max_execution_time));
+	zend_set_timeout(PG(max_execution_time));
 	
 	if (PG(expose_php)) {
 		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
@@ -703,7 +652,7 @@ void php_request_shutdown(void *dummy)
 	sapi_deactivate(SLS_C);
 
 	shutdown_memory_manager(CG(unclean_shutdown), 0);
-	php_unset_timeout();
+	zend_unset_timeout();
 
 	global_unlock();
 }
