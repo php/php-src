@@ -49,28 +49,32 @@ class PEAR_Remote extends PEAR
     {
         $args = func_get_args();
         array_shift($args);
-        return $this->__call($method, $args);
+        $this->__call($method, $args, $retval);
+        return $retval;
     }
 
     // }}}
 
     // {{{ __call(method, args)
 
-    function __call($method, $params)
+    function __call($method, $params, &$retval)
     {
         if (!extension_loaded("xmlrpc")) {
-            return $this->raiseError("xmlrpc support not loaded");
+            $retval = $this->raiseError("xmlrpc support not loaded");
+            return false;
         }
         $method = str_replace("_", ".", $method);
         $request = xmlrpc_encode_request($method, $params);
         $server_host = $this->config_object->get("master_server");
         if (empty($server_host)) {
-            return $this->raiseError("PEAR_Remote::call: no master_server configured");
+            $retval = $this->raiseError("PEAR_Remote::call: no master_server configured");
+            return false;
         }
         $server_port = 80;
         $fp = @fsockopen($server_host, $server_port);
         if (!$fp) {
-            return $this->raiseError("PEAR_Remote::call: fsockopen(`$server_host', $server_port) failed");
+            $retval = $this->raiseError("PEAR_Remote::call: fsockopen(`$server_host', $server_port) failed");
+            return false;
         }
         $len = strlen($request);
         fwrite($fp, ("POST /xmlrpc.php HTTP/1.0\r\n".
@@ -96,15 +100,18 @@ class PEAR_Remote extends PEAR
                 if ($ret['message']  === '') $ret['message']  = null;
                 if ($ret['userinfo'] === '') $ret['userinfo'] = null;
                 if (strtolower($class) == 'db_error') {
-                    return $this->raiseError(DB::errorMessage($ret['code']),
-                                             $ret['code'], null, null,
-                                             $ret['userinfo']);
+                    $retval = $this->raiseError(DB::errorMessage($ret['code']),
+                                                $ret['code'], null, null,
+                                                $ret['userinfo']);
                 } else {
-                    return $this->raiseError($ret['message'], $ret['code'],
-                                             null, null, $ret['userinfo']);
+                    $retval = $this->raiseError($ret['message'], $ret['code'],
+                                                null, null, $ret['userinfo']);
                 }
+                return true;
             }
         }
+        $retval = $ret;
+        return true;
     }
 
     // }}}
