@@ -1,3 +1,71 @@
+2004-05-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/dir.c:
+      MFH: Fixed bug #28289 (incorrect resolving of relative paths by glob() in
+      windows).
+
+    * ext/standard/dir.c:
+      Fixed bug #28289 (incorrect resolving of relative paths by glob() in
+      windows).
+
+    * NEWS:
+      GD bug fixing news.
+
+    * ext/gd/libgd/gd.c:
+      Fixed bug #28304 (Missing bounds check inside imagefilter()).
+
+    * ext/gd/libgd/gd_topal.c:
+      Fixed bug #28311 (Transparency detection code is off by 1).
+
+    * ext/gd/gd.c:
+      Fixed bug #28267 (php_image_filter_contrast calls gdImageBrightness).
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/gd.c
+      ext/gd/libgd/gdft.c:
+      MFH:
+      Upgrade bundled GD library to 2.0.23.
+      Fixed bug #28175 (build problem for people using FreeType 2.1.0-2.1.2).
+
+    * ext/gd/gd.c
+      ext/gd/libgd/gdft.c:
+      Upgrade bundled GD library to 2.0.23.
+      Fixed bug #28175 (build problem for people using FreeType 2.1.0-2.1.2).
+
+2004-05-09  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/com_dotnet/com_com.c
+      ext/com_dotnet/com_extension.c
+      ext/com_dotnet/com_persist.c
+      ext/com_dotnet/config.w32
+      ext/com_dotnet/php_com_dotnet_internal.h:
+      Implement com_get_active_object() and a helper object for working with
+      persistent COM objects.
+      (That's the last of the stuff I want to sneak in before 5.0 is released).
+
+    * ext/com_dotnet/com_misc.c:
+      Urgh!
+      Use the correct function to free messages from php_win_err(), otherwise
+      we say hello to Mr. S. Fault.
+
+2004-05-09  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS:
+      - Fixed news
+
+2004-05-09  John Coggeshall  <john@coggeshall.org>
+
+    * NEWS:
+      Tell ppl about it.
+
+2004-05-09  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/proc_open.c:
+      Add __EXTENSIONS__ define - otherwise it won't compile on Solaris
+
 2004-05-08  Sergey Kartashoff  <gluke@mail.ru>
 
     * ext/mnogosearch/php_mnogo.c
