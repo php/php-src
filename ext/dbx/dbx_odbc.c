@@ -281,6 +281,10 @@ int dbx_odbc_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTION_
 	char * tmpstr;
 	int tmplen;
 
+	if (Z_STRLEN_PP(string) == 0) {
+		ZVAL_EMPTY_STRING(*rv);
+		return 1;
+		}
 	tmpstr = estrdup(Z_STRVAL_PP(string));
 	tmplen = Z_STRLEN_PP(string);
 	/* php_str_to_str uses a smart_str that allocates memory */

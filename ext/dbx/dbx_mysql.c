@@ -266,6 +266,10 @@ int dbx_mysql_esc(zval **rv, zval **dbx_handle, zval **string, INTERNAL_FUNCTION
 	char * tmpstr;
 	int tmplen;
 
+	if (Z_STRLEN_PP(string) == 0) {
+		ZVAL_EMPTY_STRING(*rv);
+		return 1;
+		}
 	arguments[0]=string;
 	arguments[1]=dbx_handle;
 	dbx_call_any_function(INTERNAL_FUNCTION_PARAM_PASSTHRU, "mysql_real_escape_string", &returned_zval, number_of_arguments, arguments);
