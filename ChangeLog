@@ -1,3 +1,62 @@
+2000-03-19  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/gettext/gettext.c: initial function prototypes
+
+2000-03-19  Rasmus Lerdorf  <rasmus@php.net>
+
+    * php.ini-dist:
+    Leave sendmail_path commented out to pick up compiled-in default
+
+2000-03-19  tedp  <tedp@www>
+
+    * ext/imap/imap.c
+      ext/imap/imap.h: Added new function: imap_mime_header_decode
+    Decodes mime header elements in accordance with RFC 2047.
+
+2000-03-19  Andi Gutmans  <andi@php.net>
+
+    * php_virtual_cwd.c:
+    - Quick fopen() support. The code needs some cleaning up and we might
+      need to think of performance issues with the strdup()'s (definitely
+      use strndup() and maybe try to do with less string copies).
+
+2000-03-19  Shane Caraveo  <shane@php.net>
+
+    * sapi/isapi/php4isapi.c:
+    I suppose errors should be printed prior to endthread
+
+    * sapi/isapi/php4isapi.c: do this only on win32
+
+    * sapi/isapi/php4isapi.c: just a little more detail in exception report
+
+    * ext/mysql/libmysql/libmysql.dsp:
+    libmysql must use USE_TLS for multithreaded compilation on windows.
+
+2000-03-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/snmp/config.m4
+      ext/snmp/snmp.c: Fix build problems with UCD-SNMP 4.1.x.
+
+    First, we need to include default_store.h.
+
+    Second, UCD-SNMP supports OpenSSL now, so we additionally need to
+    link against that.
+
+    The changes should be completely backwards-compatible.
+
+    Partly suggested by: thor2001@gmx.net
+    PR: #3451, #3668, #3868
+
+    * ltconfig: Cleanup
+
+2000-03-19  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c:
+    (var_dump) removed "refcount-hack" - comiles without warning again (&works).
+
+    * SAPI.h
+      ext/standard/php_output.h: fix some protos
+
 2000-03-18  Sander Steffann  <steffann@nederland.net>
 
     * ext/gd/config.m4: A small fix when checking for libjpeg
