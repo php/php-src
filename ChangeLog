@@ -1,3 +1,71 @@
+2004-01-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/tests/dom003.phpt:
+      update test
+
+2004-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/bug27010.phpt:
+      Add new test
+
+    * ext/simplexml/tests/007.phpt
+      ext/simplexml/tests/015.phpt
+      ext/simplexml/tests/016.phpt
+      ext/simplexml/tests/bug24392.phpt:
+      Update tests
+
+2004-01-22  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/simplexml/php_simplexml.h
+      ext/simplexml/simplexml.c:
+      Fix bug #27010: segfault after returning nodes with children()
+      Fix segfault in match_ns when matching prefix and node without ns
+      some general cleanup and code consilidation
+      better write handling - engine support dependent
+      better isset handling - engine support dependent
+      namespace fixes for reading/writing
+
+    * ext/dom/attr.c
+      ext/dom/cdatasection.c
+      ext/dom/comment.c
+      ext/dom/document.c
+      ext/dom/documentfragment.c
+      ext/dom/element.c
+      ext/dom/entityreference.c
+      ext/dom/namednodemap.c
+      ext/dom/nodelist.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h
+      ext/dom/processinginstruction.c
+      ext/dom/text.c
+      ext/dom/xpath.c:
+      update constructors so they cant be called statically
+
+2004-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_default_classes.c:
+      Fix internal access to exception properties
+
+2004-01-22  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/oci8/config.w32:
+      add collections support to win32 build
+
+    * ext/oci8/oci8.c:
+      add missing protos
+      and some minor changes
+
+    * ext/oci8/oci8.c:
+      MFB
+      oci_lob_save() should be removed indeed, but we're already in feature
+      freeze =(
+
+2004-01-22  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      ext/standard/fsock.c:
+      Nuke unused variable
+
 2004-01-21  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ext/standard/tests/file/bug26938.phpt:

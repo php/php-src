@@ -1,3 +1,8 @@
+2004-01-22  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_default_classes.c:
+      Fix internal access to exception properties
+
 2004-01-19  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
