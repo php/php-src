@@ -498,7 +498,7 @@ PHP_FUNCTION(file_put_contents)
 }
 /* }}} */
 
-/* {{{ proto array file(string filename [, int flags])
+/* {{{ proto array file(string filename [, int flags[, resource context]])
    Read entire file into an array */
 
 #define PHP_FILE_BUF_SIZE	80
@@ -516,9 +516,11 @@ PHP_FUNCTION(file)
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
 	php_stream *stream;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES)) {
@@ -530,7 +532,11 @@ PHP_FUNCTION(file)
 	include_new_line = !(flags & PHP_FILE_IGNORE_NEW_LINES);
 	skip_blank_lines = flags & PHP_FILE_SKIP_EMPTY_LINES;
 
-	stream = php_stream_open_wrapper(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+	if (zcontext) {
+		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, "rb", (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
 	}
