@@ -1,3 +1,45 @@
+2001-02-25  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/midgard.c:
+    force user to pass $xparam by reference (from mgd_walk_xxx_tree() functions)
+
+2001-02-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Provide improved means for mass joins
+
+2001-02-25  David Guerizec  <david@guerizec.net>
+
+    * ext/midgard/article.c
+      ext/midgard/midgard.c
+      ext/midgard/page.c
+      ext/midgard/topic.c: optimized the mgd_is_in_xxx_tree() functions
+
+2001-02-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c
+      ext/ircg/php_ircg.h: Add function for kick and topic
+
+2001-02-25  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/imap/config.m4
+      ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    Updating the IMAP client to include quota support via the imap c-client2000 libraries.
+    Removes the SA_QUOTA and SA_QUOTA_ALL defines
+    Cleans up the imap_status() function to remove notion of quotas in a status message.
+
+    Changes the config.m4 to support the client.h include
+    Changed the directory search order for the include files as well.
+
+    (PHP imap_get_quota) Added
+    (PHP imap_set_quota) Added
+
+
+    PR:
+    Submitted by:
+    Reviewed by:
+    Obtained from:
+
 2001-02-24  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/datetime.c:
