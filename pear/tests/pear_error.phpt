@@ -30,7 +30,7 @@ function test_error_handler($errno, $errmsg, $file, $line, $vars) {
 	}
 	$prefix = $errortype[$errno];
 	$file = basename($file);
-	print "\n$prefix: $errmsg in $file on line $line\n";
+	print "\n$prefix: $errmsg in $file on line XXX\n";
 }
 
 error_reporting(E_ALL);
@@ -137,17 +137,17 @@ mode=print: test error[pear_error: message="test error" code=-42 mode=print leve
 mode=callback(function): errorhandler function called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorhandler prefix="" info=""]
 mode=callback(method): errorhandler method called, obj=[pear_error: message="test error" code=-42 mode=callback callback=errorclass::errorhandler prefix="" info=""]
 mode=print&trigger: test error
-User Notice: test error in PEAR.php on line 591
+User Notice: test error in PEAR.php on line XXX
 [pear_error: message="test error" code=-42 mode=print|trigger level=notice prefix="" info=""]
 mode=trigger:
-User Notice: test error in PEAR.php on line 591
+User Notice: test error in PEAR.php on line XXX
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" info=""]
 mode=trigger,level=notice:
-User Notice: test error in PEAR.php on line 591
+User Notice: test error in PEAR.php on line XXX
 [pear_error: message="test error" code=-42 mode=trigger level=notice prefix="" info=""]
 mode=trigger,level=warning:
-User Warning: test error in PEAR.php on line 591
+User Warning: test error in PEAR.php on line XXX
 [pear_error: message="test error" code=-42 mode=trigger level=warning prefix="" info=""]
 mode=trigger,level=error:
-User Error: test error in PEAR.php on line 591
+User Error: test error in PEAR.php on line XXX
 [pear_error: message="test error" code=-42 mode=trigger level=error prefix="" info=""]
