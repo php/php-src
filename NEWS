@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
-- Add optional socket path to the mysql_?connect() functions
+- Add optional socket path to the mysql_?connect() functions (Rasmus)
 - Fix some warnings when compiling in maintainer-mode (Stig)
 - Made mysql and gd work as shared extensions again (Stig)
 - Make the global GET/POST/Cookie variables and their $HTTP_*_VARS[] counterparts
