@@ -32,8 +32,6 @@ ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC);
 #define zval_dtor(zvalue) _zval_dtor((zvalue) ZEND_FILE_LINE_CC)
 #define zval_ptr_dtor(zval_ptr) _zval_ptr_dtor((zval_ptr) ZEND_FILE_LINE_CC)
 
-ZEND_API int zval_persist(zval *zvalue TSRMLS_DC);
-
 #if ZEND_DEBUG
 ZEND_API int _zval_copy_ctor_wrapper(zval *zvalue);
 ZEND_API void _zval_dtor_wrapper(zval *zvalue);

@@ -138,37 +138,6 @@ ZEND_API int _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API int zval_persist(zval *zvalue TSRMLS_DC)
-{
-	switch (zvalue->type) {
-		case IS_OBJECT:
-		case IS_RESOURCE:
-			return FAILURE; /* resources and objects cannot be persisted */
-			break;
-		case IS_BOOL:
-		case IS_LONG:
-		case IS_NULL:
-			break;
-		case IS_CONSTANT:
-		case IS_STRING:
-			if (zvalue->value.str.val) {
-				if (zvalue->value.str.len==0) {
-					zvalue->value.str.val = empty_string;
-					return SUCCESS;
-				}
-			}
-			persist_alloc(zvalue->value.str.val);
-			break;
-		case IS_ARRAY:
-		case IS_CONSTANT_ARRAY:
-			persist_alloc(zvalue->value.ht);
-			zend_hash_apply(zvalue->value.ht, (apply_func_t) zval_persist TSRMLS_CC);
-			break;
-	}
-	return SUCCESS;
-}
-
-
 ZEND_API int zend_print_variable(zval *var) 
 {
 	return zend_print_zval(var, 0);

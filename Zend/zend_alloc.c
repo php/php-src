@@ -747,29 +747,6 @@ ZEND_API void _full_mem_check(int silent ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_D
 #endif
 
 
-ZEND_API int _persist_alloc(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
-{
-	zend_mem_header *p = (zend_mem_header *) ((char *)ptr-sizeof(zend_mem_header)-MEM_HEADER_PADDING);
-	TSRMLS_FETCH();
-
-#if ZEND_DEBUG
-	_mem_block_check(ptr, 1 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-#endif
-
-	HANDLE_BLOCK_INTERRUPTIONS();
-
-	/* remove the block from the non persistent list */
-	REMOVE_POINTER_FROM_LIST(p);
-
-	p->persistent = 1;
-
-	/* add the block to the persistent list */
-	ADD_POINTER_TO_LIST(p);
-	HANDLE_UNBLOCK_INTERRUPTIONS();
-	return REAL_SIZE(p->size)+sizeof(zend_mem_header)+MEM_HEADER_PADDING;
-}
-
-
 /*
  * Local variables:
  * tab-width: 4
