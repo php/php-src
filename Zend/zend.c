@@ -681,6 +681,7 @@ void zend_post_startup(TSRMLS_D)
 	compiler_globals_ctor(compiler_globals, tsrm_ls);
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
+	zend_new_thread_end_handler(tsrm_thread_id() TSRMLS_CC);
 }
 #endif
 
