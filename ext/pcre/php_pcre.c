@@ -22,6 +22,7 @@
 #include "php_globals.h"
 #include "php_pcre.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 
@@ -584,37 +585,36 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 						int *offsets, int count, char **result)
 {
 	zval		 retval;			/* Return value from evaluation */
-	char		 backref_buf[4],	/* Buffer for string version of backref */
-				*code,				/* PHP code string */
-				*new_code,			/* Code as result of substitution */
+	char		*eval_str_end,		/* End of eval string */
 				*match,				/* Current match for a backref */
 				*esc_match,			/* Quote-escaped match */
 				*walk,				/* Used to walk the code string */
+				*segment,			/* Start of segment to append while walking */
 				 walk_last;			/* Last walked character */
-	int			 code_len;			/* Length of the code string */
-	int			 new_code_len;		/* Length of the substituted code string */
 	int			 match_len;			/* Length of the match */
 	int			 esc_match_len;		/* Length of the quote-escaped match */
 	int			 result_len;		/* Length of the result of the evaluation */
 	int			 backref;			/* Current backref */
 	char        *compiled_string_description;
+	smart_str    code = {0};
 	CLS_FETCH();
 	ELS_FETCH();
 	
-	/* Save string to be evaluated, since we will be modifying it */
-	code = estrndup(eval_str, eval_str_len);
-	walk = code;
-	new_code_len = code_len = eval_str_len;
+	eval_str_end = eval_str + eval_str_len;
+	walk = segment = eval_str;
 	walk_last = 0;
 	
-	while (*walk) {
+	while (walk < eval_str_end) {
 		/* If found a backreference.. */
 		if ('\\' == *walk || '$' == *walk) {
+			smart_str_appendl(&code, segment, walk - segment);
 		  	if (walk_last == '\\') {
-				memmove(walk-1, walk, code_len - (walk - code) + 1);
+				code.c[code.len-1] = *walk++;
+				segment = walk;
 				walk_last = 0;
 				continue;
 			}
+			segment = walk;
 			if (preg_get_backref(walk+1, &backref)) {
 				if (backref < count) {
 					/* Find the corresponding string match and substitute it
@@ -632,30 +632,27 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 					esc_match_len = 0;
 					match_len = 0;
 				}
-				sprintf(backref_buf, "%c%d", *walk, backref);
-				new_code = php_str_to_str(code, code_len,
-										  backref_buf, (backref > 9) ? 3 : 2,
-										  esc_match, esc_match_len, &new_code_len);
+				smart_str_appendl(&code, esc_match, esc_match_len);
 
 				/* Adjust the walk pointer */
-				walk = new_code + (walk - code) + match_len;
+				walk += (backref > 9 ? 3 : 2);
+				segment = walk;
 
 				/* Clean up and reassign */
 				if (esc_match_len)
 					efree(esc_match);
-				efree(code);
-				code = new_code;
-				code_len = new_code_len;
 				continue;
 			}
 		}
 		walk++;
 		walk_last = walk[-1];
 	}
+	smart_str_appendl(&code, segment, walk - segment);
+	smart_str_0(&code);
 
 	compiled_string_description = zend_make_compiled_string_description("regexp code");
 	/* Run the code */
-	if (zend_eval_string(code, &retval, compiled_string_description CLS_CC ELS_CC) == FAILURE) {
+	if (zend_eval_string(code.c, &retval, compiled_string_description CLS_CC ELS_CC) == FAILURE) {
 		efree(compiled_string_description);
 		zend_error(E_ERROR, "Failed evaluating code:\n%s\n", code);
 		/* zend_error() does not return in this case */
@@ -669,7 +666,7 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	
 	/* Clean up */
 	zval_dtor(&retval);
-	efree(code);
+	smart_str_free(&code);
 	
 	return result_len;
 }
