@@ -1,3 +1,123 @@
+2000-11-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/ldap.c:
+    Fixed incorrect logic. And NSLDAP does not have LDAP_OPT_MATCHED_DN.
+
+    * ext/ftp/ftp.c:
+    Fixed ftp_mkdir(). It return the dirname passed to it in case of
+    braindead ftp server which doesn't put the real path into reply.
+    PR: 7216
+
+2000-11-03  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/gd.c: - Fixed gd by adding a define
+
+    * ext/gd/gd.c: - Fixing Mathieu's indentation problems
+
+2000-11-03  Joey Smith  <joey@joeysmith.com>
+
+    * ext/pdf/pdf.c: Include header file for phpi_get_le_gd()
+
+    * ext/pdf/pdf.c: Include header file for php_file_le_fopen()
+
+2000-11-03  Mathieu Kooiman  <mathieu@gginter.net>
+
+    * ext/gd/gd.c
+      ext/gd/php_gd.h: - Introduced ImageCreateFromString() function,
+      works for GIF/JPEG/PNG and WBMP ..
+      (Note: This built with the latest snapshot I grabbed
+       tonight; Derick seemed to have trouble though..)
+    -Introduced ImageCreateFromString(), creates an image
+     stream out of eg a MySQL blob. 
+
+2000-11-03  Jani Taskinen  <sniper@iki.fi>
+
+    * sapi/caudium/config.m4: Fix build.
+
+2000-11-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/session/mod_mm.c: Add some additional checks
+
+    Submitted by: mookid@sigent.ru (Mikhail Zabaluev)
+
+    * ext/session/mod_mm.c: Fix implementation of hash algorithm
+
+2000-11-03  Daniel Beulshausen  <daniel@php4win.de>
+
+    * win32/install.txt: install instructions for more webservers
+
+    * sapi/cgi/cgi_main.c:
+    use argv[1] if it's given, thanks to Bob Denny <rdenny@dc3.com>
+
+2000-11-03  Ben Mansell  <ben@zeus.com>
+
+    * README.Zeus:
+    Added extra help with library issues, and some performance tuning tips
+
+2000-11-03  Stig Venaas  <venaas@uninett.no>
+
+    * ext/standard/array.c:
+    Fixed memory leak in array_diff and array_intersect, was introduced with
+    last change.
+
+2000-11-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/msql/php_msql.c
+      ext/mysql/libmysql/mysql_version.h
+      ext/pgsql/pgsql.c
+      ext/sybase_ct/php_sybase_ct.c
+      NEWS: Fix msql_close(), pg_close() and sybase_close() (Sybase CT)
+
+2000-11-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/sablot/config.m4: fix configure..
+
+2000-11-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/mysql/php_mysql.c:
+    Fixed mysql_close()  - A bit more complicated than I originally thought
+
+2000-11-03  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/sablot/config.m4: Changed as per discussion with Sablotron folks.
+
+
+2000-11-03  Andi Gutmans  <andi@zend.com>
+
+    * NEWS: *** empty log message ***
+
+2000-11-03  Zeev Suraski  <zeev@zend.com>
+
+    * ext/msql/php_msql.c: Fix msql_close()
+
+    * ext/pgsql/pgsql.c: Fix pg_close()
+
+2000-11-03  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/crypt.c:
+    - Make the random generator work again. This patch seems to work.
+
+2000-11-03  Zeev Suraski  <zeev@zend.com>
+
+    * NEWS
+      ext/mysql/php_mysql.c: Fix mysql_close()
+
+2000-11-03  David Hedbor  <david@hedbor.org>
+
+    * sapi/caudium/caudium.c:
+    Use V_CHDIR_FILE instead of doing the job of that function myself and
+    added a define to disable the use of threads for debugging purposes.
+
+2000-11-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Setting no_cache causes Expires: to be send, which is not what we want.
+
+    Also disable ETag. It does not serve any purpose for dynamic pages.
+
+    Finally, disable keep-alive connections again, since we don't know
+    the content-length for sure.
+
 2000-11-02  Andi Gutmans  <andi@zend.com>
 
     * main/fopen-wrappers.c
