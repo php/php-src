@@ -3507,6 +3507,11 @@ PHP_FUNCTION(array_key_exists)
 				RETURN_TRUE;
 			}
 			RETURN_FALSE;
+		case IS_NULL:
+			if (zend_hash_exists(HASH_OF(*array), "", 1)) {
+				RETURN_TRUE;
+			}
+			RETURN_FALSE;
 
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The first argument should be either a string or an integer");
