@@ -1821,6 +1821,13 @@ PHP_FUNCTION(domxml_doc_document_element)
 	int ret;
 	
 	id = getThis();
+	
+	if (!id) {
+		if ((ZEND_NUM_ARGS() != 1) || getParameters(ht, 1, &id) == FAILURE) {
+			RETURN_FALSE;
+		}
+	}
+
 	docp = php_dom_get_object(id, le_domxmldocp, 0);
 
 	node = docp->children;
