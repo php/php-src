@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2 
+- Fixed a bug that did not respect limit parameter in preg_replace() when
+  using /e modifier. (Andrei)
 - Added ability for each xml_set_*_handler() function to take the
   array($obj, 'method') syntax for the handler argument as well
   as the normal function name. (Andrei)
