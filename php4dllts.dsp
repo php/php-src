@@ -1002,7 +1002,27 @@ InputPath=.\ext\standard\parsedate.y
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
+# Begin Custom Build
+InputPath=.\ext\standard\parsedate.y
+
+"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ext\standard 
+	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
+	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
+	
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# Begin Custom Build
+InputPath=.\ext\standard\parsedate.y
+
+"ext\standard\parsedate.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd ext\standard 
+	if not "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "%CYGWIN%\share\bison.simple" parsedate.y 
+	if "X%CYGWIN%"=="X" bison --output=parsedate.c -v -d -S "C:\Program Files\Cygnus\share\bison.simple" parsedate.y 
+	
+# End Custom Build
 
 !ENDIF 
 
