@@ -1,5 +1,5 @@
 <?php
-class reflectionException extends reflection_exception {
+class ReflectionExceptionEx extends ReflectionException {
         function MyException($_errno, $_errmsg) {
                 $this->errno = $_errno;
                 $this->errmsg = $_errmsg;
