@@ -35,6 +35,8 @@ PHP_ARG_WITH(imap,for IMAP support,
 
     if test -r "$IMAP_DIR/c-client/c-client.a"; then
       ln -s "$IMAP_DIR/c-client/c-client.a" "$IMAP_DIR/c-client/libc-client.a" >/dev/null 2>&1
+    elif test -r "$IMAP_DIR/lib/c-client.a"; then
+      ln -s "$IMAP_DIR/lib/c-client.a" "$IMAP_DIR/lib/libc-client.a" >/dev/null 2>&1
     fi
 
     for lib in imap c-client4 c-client; do
