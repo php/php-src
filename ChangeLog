@@ -1,3 +1,44 @@
+2005-03-09  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/var_unserializer.c:
+      - Fix #31442 unserialize broken on 64-bit systems
+      - Fix one warning
+
+2005-03-09  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/ftp/ftp.c:
+      Fixes to ascii downloads on win32.
+
+2005-03-09  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * (PHP_4_3)
+      Zend/zend_language_scanner.l:
+      fixed #31987: possible zend-multibyte crash in ZTS.
+
+2005-03-09  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/html.c
+      ext/standard/html.c:
+      - MF43: Fixed bug #28067 (partially incorrect utf8 to htmlentities
+      mapping).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/html.c:
+      - Fixed bug #28067 (partially incorrect utf8 to htmlentities mapping).
+      (Derick,
+        Benjamin Greiner)
+
+2005-03-09  Magnus M‰‰tt‰  <novell@kiruna.se>
+
+    * run-tests.php:
+      Since in_array is case sensitive we need to convert the names to lowercase
+      otherwise it won't run tests for extensions where the case of the name
+      differ from the
+      extension name.
+
 2005-03-08  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * main/main.c
