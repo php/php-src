@@ -47,11 +47,23 @@ if test "$PHP_SQLITE" != "no"; then
 	# use bundled library
 
 	PHP_SQLITE_CFLAGS="-I@ext_srcdir@/libsqlite/src"
-	if test "$PHP_DEBUG" = "0"; then
-		PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
-	fi
-	if test "$enable_experimental_zts" = "yes"; then
-		PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
+      
+	if test "ek$EXTENSION_DIR" = "ek"; then
+		if test "$PHP_DEBUG" = "0"; then
+			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
+		fi
+		if test "$enable_experimental_zts" = "yes"; then
+			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
+		fi
+	else
+		php_sqlite_no_debug=`echo $EXTENSION_DIR | grep -c "no-debug"`
+		php_sqlite_non_zts=`echo $EXTENSION_DIR | grep -c "non-zts"`
+		if test "$php_sqlite_no_debug" != "0"; then
+			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DNDEBUG"
+		fi
+		if test "$php_sqlite_non_zts" = "0"; then
+			PHP_SQLITE_CFLAGS="$PHP_SQLITE_CFLAGS -DTHREADSAFE"
+		fi
 	fi
 
 	sources="libsqlite/src/opcodes.c
