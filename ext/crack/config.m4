@@ -5,11 +5,11 @@ PHP_ARG_WITH(crack, whether to include crack support,
 
 if test "$PHP_CRACK" != "no"; then
 
-	for i in /usr/local/lib /usr/lib $PHP_CRACK $PHP_CRACK/cracklib; do
-		test -f $i/lib/libcrack.$SHLIB_SUFFIX_NAME -o -f $i/lib/libcrack.a && CRACK_LIBDIR=$i
+	for i in /usr/local/lib /usr/lib $PHP_CRACK/lib $PHP_CRACK/cracklib; do
+		test -f $i/lib/libcrack.$SHLIB_SUFFIX_NAME -o -f $i/libcrack.a && CRACK_LIBDIR=$i
 	done
 
-	for i in /usr/local/include /usr/include $PHP_CRACK $PHP_CRACK/cracklib; do
+	for i in /usr/local/include /usr/include $PHP_CRACK/include $PHP_CRACK/cracklib; do
 		test -f $i/packer.h && CRACK_INCLUDEDIR=$i
 	done
   
