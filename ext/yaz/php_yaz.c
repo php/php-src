@@ -798,7 +798,8 @@ static int send_search (Yaz_Association t)
 static int send_sort_present (Yaz_Association t)
 {
 	if (!send_sort(t))
-		send_present (t);
+		return send_present (t);
+    return 1;
 }
 
 static int send_present (Yaz_Association t)
