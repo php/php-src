@@ -30,6 +30,7 @@
 zend_class_entry *default_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void zend_throw_exception(zend_class_entry *exception_ce, char *message, long code TSRMLS_DC);
+ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC)
@@ -43,6 +44,10 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC)
 	}
 	if (!EG(current_execute_data)) {
 		zend_error(E_ERROR, "Exception thrown without a stack frame");
+	}
+
+	if (zend_throw_exception_hook) {
+		zend_throw_exception_hook(exception TSRMLS_CC);
 	}
 
 	if ((EG(current_execute_data)->opline+1)->opcode == ZEND_HANDLE_EXCEPTION) {

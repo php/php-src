@@ -40,6 +40,8 @@ ZEND_API void zend_throw_exception_ex(zend_class_entry *exception_ce, long code 
 ZEND_API void zend_throw_exception_object(zval *exception TSRMLS_DC);
 ZEND_API void zend_clear_exception(TSRMLS_D);
 
+ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
+
 /* show an exception using zend_error(E_ERROR,...) */
 ZEND_API void zend_exception_error(zval *exception TSRMLS_DC);
 
