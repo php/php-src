@@ -458,7 +458,19 @@ SOURCE=..\ext\mbstring\mbfilter.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\mbstring\mbfilter_cn.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\mbstring\mbfilter_ja.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_kr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\mbstring\mbfilter_tw.c
 # End Source File
 # Begin Source File
 
