@@ -58,6 +58,8 @@
 # include "mod_dav.h"
 #endif
 
+extern zend_module_entry apache_module_entry;
+
 PHPAPI int apache_php_module_main(request_rec *r, int fd, int display_source_mode SLS_DC);
 void php_save_umask(void);
 void php_restore_umask(void);
@@ -255,11 +257,22 @@ static void sapi_apache_register_server_variables(zval *track_vars_array ELS_DC 
 	php_register_variable("PHP_SELF", ((request_rec *) SG(server_context))->uri, NULL ELS_CC PLS_CC);
 }
 
+static int
+php_apache_startup(sapi_module_struct *sapi_module)
+{
+    if(php_module_startup(sapi_module) == FAILURE
+            || zend_register_module(&apache_module_entry) == FAILURE) {
+        return FAILURE;
+    } else {
+        return SUCCESS;
+    }
+}
+
 
 static sapi_module_struct sapi_module = {
 	"Apache",						/* name */
 									
-	php_module_startup,				/* startup */
+	php_apache_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
 
 	sapi_apache_ub_write,			/* unbuffered write */
