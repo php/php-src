@@ -237,6 +237,9 @@ struct _sapi_module_struct {
 
 	int (*get_target_uid)(uid_t * TSRMLS_DC);
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
+
+	void (*ini_defaults)(HashTable *configuration_hash);
+	int phpinfo_as_text;
 };
 
 

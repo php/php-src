@@ -1,6 +1,1 @@
 TODO:
-
-- plain text "php -i" and phpinfo()
-- fix the so called CLI defaults set by zend_alter_ini_entry() in php_ini.c.
-  They currently cannot be set within the PHP.INI file but can be with the -d
-  command line switch and during runtime.

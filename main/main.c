@@ -663,27 +663,10 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			&& (!PG(during_request_startup) || PG(display_startup_errors))) {
 			char *prepend_string = INI_STR("error_prepend_string");
 			char *append_string = INI_STR("error_append_string");
-			char *error_format;
-
-			error_format = PG(html_errors) ?
-				"<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n"
-				: "\n%s: %s in %s on line %d\n";
-			if (PG(xmlrpc_errors)) {
-				error_format = do_alloca(ERROR_BUF_LEN);
-				snprintf(error_format, ERROR_BUF_LEN-1, "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%ld</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
-			}
-
-			if (prepend_string) {
-				PUTS(prepend_string);
-			}
-			php_printf(error_format, error_type_str, buffer, error_filename, error_lineno);
-			if (PG(xmlrpc_errors)) {
-				free_alloca(error_format);
-			}
-
-			if (append_string) {
-				PUTS(append_string);
-			}
+			char *error_format = PG(html_errors) ?
+				"%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s"
+				: "%s\n%s: %s in %s on line %d\n%s";    
+			php_printf(error_format, STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
 		}
 #if ZEND_DEBUG
 		{
@@ -700,7 +683,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					trigger_break=0;
 					break;
 			}
-			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
+//			zend_output_debug_string(trigger_break, "%s(%d) : %s - %s", error_filename, error_lineno, error_type_str, buffer);
 		}
 #endif
 	}

@@ -48,7 +48,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 ZEND_EXTERN_MODULE_GLOBALS(iconv)
 #endif
 
-#define SECTION(name)	if (PG(html_errors)) { \
+#define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
 							PUTS("<h2>" name "</h2>\n"); \
 						} else { \
 							php_info_print_table_start(); \
@@ -66,7 +66,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 	int show_info_func = *((int *) arg);
 
 	if (show_info_func && module->info_func) {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", module->name, module->name);
 		} else {
 			php_info_print_table_start();
@@ -75,7 +75,7 @@ static int _display_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 		}
 		module->info_func(module TSRMLS_CC);
 	} else if (!show_info_func && !module->info_func) {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<tr>");
 			php_printf("<td>");
 			php_printf("%s", module->name);
@@ -103,7 +103,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 		&& (Z_TYPE_PP(data)==IS_ARRAY)) {
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
 		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				PUTS("<tr>");
 				PUTS("<td class=\"e\">");
 
@@ -114,7 +114,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 			
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_STRING:
-					if (PG(html_errors)) {
+					if (!sapi_module.phpinfo_as_text) {
 						elem_esc = php_info_html_esc(string_key TSRMLS_CC);
 						PUTS(elem_esc);
 						efree(elem_esc);
@@ -127,24 +127,24 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					break;
 			}
 			PUTS("\"]");
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				PUTS("</td><td class=\"v\">");
 			} else {
 				PUTS(" => ");
 			}
 			if (Z_TYPE_PP(tmp) == IS_ARRAY) {
-				if (PG(html_errors)) {
+				if (!sapi_module.phpinfo_as_text) {
 					PUTS("<pre>");
 				}
 				zend_print_zval_r(*tmp, 0);
-				if (PG(html_errors)) {
+				if (!sapi_module.phpinfo_as_text) {
 					PUTS("</pre>");
 				}
 			} else if (Z_TYPE_PP(tmp) != IS_STRING) {
 				tmp2 = **tmp;
 				zval_copy_ctor(&tmp2);
 				convert_to_string(&tmp2);
-				if (PG(html_errors)) {
+				if (!sapi_module.phpinfo_as_text) {
 					if (Z_STRLEN(tmp2) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
@@ -157,7 +157,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				}	
 				zval_dtor(&tmp2);
 			} else {
-				if (PG(html_errors)) {
+				if (!sapi_module.phpinfo_as_text) {
 					if (Z_STRLEN_PP(tmp) == 0) {
 						PUTS("<i>no value</i>");
 					} else {
@@ -169,7 +169,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 					PUTS(Z_STRVAL_PP(tmp));
 				}	
 			}
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				PUTS("</td></tr>\n");
 			} else {
 				PUTS("\n");
@@ -182,7 +182,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 
 /* {{{ php_info_print_style
  */
-void php_info_print_style(void)
+void php_info_print_style()
 {
 	php_printf("<style type=\"text/css\"><!--\n");
 	php_info_print_css();
@@ -389,7 +389,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
 
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_print_info_htmlhead(TSRMLS_C);
 	} else {
 		PUTS("phpinfo()\n");
@@ -401,11 +401,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		php_uname = php_get_uname('a');
 		
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_info_print_box_start(1);
 		}
 
-		if (expose_php && PG(html_errors)) {
+		if (expose_php && !sapi_module.phpinfo_as_text) {
 			PUTS("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
@@ -417,7 +417,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			}
 		}
 
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<h1 class=\"p\">PHP Version %s</h1>\n", PHP_VERSION);
 		} else {
 			php_info_print_table_row(2, "PHP Version", PHP_VERSION);
@@ -506,7 +506,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		/* Zend Engine */
 		php_info_print_box_start(0);
-		if (expose_php && PG(html_errors)) {
+		if (expose_php && !sapi_module.phpinfo_as_text) {
 			PUTS("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
@@ -514,7 +514,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS("?="ZEND_LOGO_GUID"\" alt=\"Zend logo\" /></a>\n");
 		}
 		PUTS("This program makes use of the Zend Scripting Language Engine:");
-		PUTS(PG(html_errors)?"<br />":"\n");
+		PUTS(!sapi_module.phpinfo_as_text?"<br />":"\n");
 		if (PG(html_errors)) {
 			zend_html_puts(zend_version, strlen(zend_version) TSRMLS_CC);
 		} else {
@@ -524,7 +524,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		efree(php_uname);
 	}
 
-	if ((flag & PHP_INFO_CREDITS) && expose_php && PG(html_errors)) {	
+	if ((flag & PHP_INFO_CREDITS) && expose_php && !sapi_module.phpinfo_as_text) {	
 		php_info_print_hr();
 		PUTS("<h1><a href=\"");
 		if (SG(request_info).request_uri) {
@@ -539,7 +539,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (flag & PHP_INFO_CONFIGURATION) {
 		php_info_print_hr();
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			PUTS("<h1>Configuration</h1>\n");
 		} else {
 			SECTION("Configuration");
@@ -618,7 +618,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (flag & PHP_INFO_LICENSE) {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			SECTION("PHP License");
 			php_info_print_box_start(0);
 			PUTS("<p>\n");
@@ -650,7 +650,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			PUTS("questions about PHP licensing, please contact license@php.net.\n");
 		}
 	}
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		PUTS("</div></body></html>");
 	}	
 }
@@ -659,9 +659,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 PHPAPI void php_info_print_table_start()
 {
-	TSRMLS_FETCH();
-
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
 	} else {
 		php_printf("\n");
@@ -670,9 +668,7 @@ PHPAPI void php_info_print_table_start()
 
 PHPAPI void php_info_print_table_end()
 {
-	TSRMLS_FETCH();
-
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</table><br />\n");
 	}
 
@@ -680,15 +676,13 @@ PHPAPI void php_info_print_table_end()
 
 PHPAPI void php_info_print_box_start(int flag)
 {
-	TSRMLS_FETCH();
-
 	php_info_print_table_start();
 	if (flag) {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<tr class=\"h\"><td>\n");
 		}
 	} else {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<tr class=\"v\"><td>\n");
 		} else {
 			php_printf("\n");
@@ -698,9 +692,7 @@ PHPAPI void php_info_print_box_start(int flag)
 
 PHPAPI void php_info_print_box_end()
 {
-	TSRMLS_FETCH();
-
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</td></tr>\n");
 	}
 	php_info_print_table_end();
@@ -708,9 +700,7 @@ PHPAPI void php_info_print_box_end()
 
 PHPAPI void php_info_print_hr()
 {
-	TSRMLS_FETCH();
-
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<hr />\n");
 	} else {
 		php_printf("\n\n _______________________________________________________________________\n\n");
@@ -721,9 +711,7 @@ PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header)
 {
 	int spaces;
 
-	TSRMLS_FETCH();
-	
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );
 	} else {
 		spaces = (74 - strlen(header));
@@ -742,7 +730,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 	TSRMLS_FETCH();
 
 	va_start(row_elements, num_cols);
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr class=\"h\">");
 	}	
 	for (i=0; i<num_cols; i++) {
@@ -750,7 +738,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 		if (!row_element || !*row_element) {
 			row_element = " ";
 		}
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			PUTS("<th>");
 			PUTS(row_element);
 			PUTS("</th>");
@@ -763,7 +751,7 @@ PHPAPI void php_info_print_table_header(int num_cols, ...)
 			}	
 		}	
 	}
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</tr>\n");
 	}	
 
@@ -786,24 +774,24 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 	TSRMLS_FETCH();
 
 	va_start(row_elements, num_cols);
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("<tr>");
 	}	
 	for (i=0; i<num_cols; i++) {
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf("<td class=\"%s\">",
 			   (i==0 ? "e" : "v" )
 			);
 		}	
 		row_element = va_arg(row_elements, char *);
 		if (!row_element || !*row_element) {
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				PUTS( "<i>no value</i>" );
 			} else {
 				PUTS( " " );
 			}
 		} else {
-			if (PG(html_errors)) {
+			if (!sapi_module.phpinfo_as_text) {
 				elem_esc = php_info_html_esc(row_element TSRMLS_CC);
 				PUTS(elem_esc);
 				efree(elem_esc);
@@ -814,13 +802,13 @@ PHPAPI void php_info_print_table_row(int num_cols, ...)
 				}	
 			}
 		}
-		if (PG(html_errors)) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_printf(" </td>");
 		} else if (i == (num_cols - 1)) {
 			PUTS("\n");
 		}
 	}
-	if (PG(html_errors)) {
+	if (!sapi_module.phpinfo_as_text) {
 		php_printf("</tr>\n");
 	}
 	
@@ -1003,3 +991,4 @@ PHP_FUNCTION(php_ini_scanned_files) {
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
+
