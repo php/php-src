@@ -1604,7 +1604,7 @@ PHP_FUNCTION(ldap_get_option)
 				RETURN_FALSE;
 			}
 			zval_dtor(*retval);
-                        ZVAL_LONG(*retval, val);
+			ZVAL_LONG(*retval, val);
 		} break;
 		/* options with string value */
 	case LDAP_OPT_HOST_NAME:
@@ -1612,7 +1612,7 @@ PHP_FUNCTION(ldap_get_option)
 #ifdef LDAP_OPT_MATCHED_DN
 	case LDAP_OPT_MATCHED_DN:
 #endif
-	        {
+		{
 			char *val;
 			if (ldap_get_option(ld->link, opt, &val)) {
 				RETURN_FALSE;
