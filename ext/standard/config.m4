@@ -326,6 +326,71 @@ int __tmp__() { mbstate_t a; }
   fi
 ])
 
+AC_CHECK_FUNCS(fpclass isinf isnan)
+
+AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
+  AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISNAN
+#define zend_isnan(a) isnan(a)
+#elif defined(NAN)
+#define zend_isnan(a) (((a)==NAN)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
+#else
+#define zend_isnan(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+	return zend_isnan(atof("NAN")) ? 0 : 1;
+}
+  ],[
+      ac_cv_atof_accept_nan=yes
+  ],[
+      ac_cv_atof_accept_nan=no
+  ],[
+      ac_cv_atof_accept_nan=no
+  ])
+  if test "$ac_cv_atof_accept_nan" = "yes"; then
+    AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
+  fi
+])
+
+AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
+  AC_TRY_RUN([
+#include <math.h>
+#include <stdlib.h>
+
+#ifdef HAVE_ISINF
+#define zend_isinf(a) isinf(a)
+#elif defined(INFINITY)
+/* Might not work, but is required by ISO C99 */
+#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
+#else
+#define zend_isinf(a) 0
+#endif
+
+int main(int argc, char** argv)
+{
+	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
+}
+  ],[
+      ac_cv_atof_accept_inf=yes
+  ],[
+      ac_cv_atof_accept_inf=no
+  ],[
+      ac_cv_atof_accept_inf=no
+  ])
+  if test "$ac_cv_atof_accept_inf" = "yes"; then
+    AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
+  fi
+])
+
 PHP_CHECK_I18N_FUNCS
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
