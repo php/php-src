@@ -52,6 +52,7 @@ function_entry dba_functions[] = {
 	PHP_FE(dba_optimize, NULL)
 	PHP_FE(dba_sync, NULL)
 	PHP_FE(dba_handlers, NULL)
+	PHP_FE(dba_list, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -513,7 +514,7 @@ PHP_FUNCTION(dba_sync)
 }
 /* }}} */
 
-/* {{{ proto array dba_list()
+/* {{{ proto array dba_handlers()
    List configured databases */
 PHP_FUNCTION(dba_handlers)
 {
@@ -531,6 +532,36 @@ PHP_FUNCTION(dba_handlers)
 	for(hptr = handler; hptr->name; hptr++) {
 		add_next_index_string(return_value, hptr->name, 1);
  	}
+}
+/* }}} */
+
+/* {{{ proto array dba_list()
+   List configured databases */
+PHP_FUNCTION(dba_list)
+{
+	ulong numitems, i;
+	zend_rsrc_list_entry *le;
+	dba_info *info;
+
+	if (ZEND_NUM_ARGS()!=0) {
+		ZEND_WRONG_PARAM_COUNT();
+		RETURN_FALSE;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to initialize array");
+		RETURN_FALSE;
+	}
+	numitems = zend_hash_next_free_element(&EG(regular_list));
+	for (i=1; i<numitems; i++) {
+		if (zend_hash_index_find(&EG(regular_list), i, (void **) &le)==FAILURE) {
+			continue;
+		}
+		if (Z_TYPE_P(le) == le_db || Z_TYPE_P(le) == le_pdb) {
+			info = (dba_info *)(le->ptr);
+			add_index_string(return_value, i, info->path, 1);
+		}
+	}
 }
 /* }}} */
 
