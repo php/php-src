@@ -36,7 +36,7 @@ AC_DEFUN(PHP_DOM_EXSLT_CHECK_VERSION,[
   CPPFLAGS=$old_CPPFLAGS
 ])
 
-PHP_ARG_WITH(dom, for DOM support,
+PHP_ARG_WITH(dom, for old deprecated DOM support,
 [  --with-dom[=DIR]        Old deprecated DOM support (requires libxml >= 2.4.14).
                           DIR is the libxml install directory.])
 
