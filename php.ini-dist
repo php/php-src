@@ -1,14 +1,14 @@
-[PHP_3]
+[PHP]
 
 ;;;;;;;;;;;;;;;;;;;
 ; About this file ;
 ;;;;;;;;;;;;;;;;;;;
 ; This file controls many aspects of PHP's behavior.  In order for PHP to
-; read it, it must be named 'php3.ini'.  PHP looks for it in the current
+; read it, it must be named 'php.ini'.  PHP looks for it in the current
 ; working directory, in the path designated by the environment variable
 ; PHPRC, and in the path that was defined in compile time (in that order).
 ; Under Windows, the compile-time path is the Windows directory.  The
-; path in which the php3.ini file is looked for can be overriden using
+; path in which the php.ini file is looked for can be overriden using
 ; the -c argument in command line mode.
 ;
 ; The syntax of the file is extremely simple.  Whitespace and Lines
@@ -24,8 +24,8 @@
 ; Boolean flags can be turned on using the values 1, On, True or Yes.
 ; They can be turned off using the values 0, Off, False or No.
 ;
-; All the values in the php3.ini-dist file correspond to the builtin
-; defaults (that is, if no php3.ini is used, or if you delete these lines,
+; All the values in the php.ini-dist file correspond to the builtin
+; defaults (that is, if no php.ini is used, or if you delete these lines,
 ; the builtin defaults will be identical).
 
 
@@ -33,7 +33,7 @@
 ; Language Options ;
 ;;;;;;;;;;;;;;;;;;;;
 
-engine			=	On	; enable PHP 3.0 parser
+engine			=	On	; Enable the PHP scripting language engine under Apache
 short_open_tag	=	On	; allow the <? tag.  otherwise, only <?php and <script> tags are recognized.
 asp_tags		=	Off ; allow ASP-style <% %> tags
 precision		=	14	; number of significant digits displayed in floating point numbers
@@ -54,7 +54,7 @@ highlight.html		=	#000000
 ; Resource Limits ;
 ;;;;;;;;;;;;;;;;;;;
 
-max_execution_time = 30     ; Maximum execution time of each script, in seconds
+max_execution_time = 30     ; Maximum execution time of each script, in seconds (UNIX only)
 memory_limit = 8388608		; Maximum amount of memory a script may consume (8MB)
 
 
@@ -114,21 +114,21 @@ extension_dir	=	./				; directory in which the loadable extensions (modules) res
 
 
 ;Windows Extensions
-;extension=php3_mysql.dll
-;extension=php3_nsmail.dll
-;extension=php3_calendar.dll
-;extension=php3_dbase.dll
-;extension=php3_filepro.dll
-;extension=php3_gd.dll
-;extension=php3_dbm.dll
-;extension=php3_mssql.dll
-;extension=php3_zlib.dll
-;extension=php3_filepro.dll
-;extension=php3_imap4r2.dll
-;extension=php3_ldap.dll
-;extension=php3_crypt.dll
-;extension=php3_msql2.dll
-;extension=php3_odbc.dll
+;extension=php_mysql.dll
+;extension=php_nsmail.dll
+;extension=php_calendar.dll
+;extension=php_dbase.dll
+;extension=php_filepro.dll
+;extension=php_gd.dll
+;extension=php_dbm.dll
+;extension=php_mssql.dll
+;extension=php_zlib.dll
+;extension=php_filepro.dll
+;extension=php_imap4r2.dll
+;extension=php_ldap.dll
+;extension=php_crypt.dll
+;extension=php_msql2.dll
+;extension=php_odbc.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
