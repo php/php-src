@@ -139,7 +139,7 @@ typedef union {
 } zend_function;
 
 
-typedef struct {
+typedef struct _zend_function_state {
 	HashTable *function_symbol_table;
 	zend_function *function;
 	void *reserved[4];
