@@ -1042,7 +1042,11 @@ PHP_FUNCTION(tidy_get_error_buffer)
 {
 	TIDY_FETCH_OBJECT;
 
-	RETURN_STRING(obj->ptdoc->errbuf->bp, 1);
+	if (obj->ptdoc->errbuf && obj->ptdoc->errbuf->bp) {
+		RETURN_STRING(obj->ptdoc->errbuf->bp, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
