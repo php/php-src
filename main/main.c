@@ -794,7 +794,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			}
 		/* no break - intentionally */
 		case E_ERROR:
-		/*case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
+		/* case E_PARSE: the parser would return 1 (failure), we can bail out nicely */
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
@@ -1384,6 +1384,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
+#endif
+
+#if HAVE_TZSET
+	tzset();
 #endif
 
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
