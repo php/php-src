@@ -58,8 +58,7 @@ DEBUGGING APACHE AND PHP
 
         1. Use the Prefork MPM (Apache 1.3-like process model) by
            configuring Apache with '--with-mpm=prefork'.
-        2. Set the variable "ONE_PROCESS" to 1 and export it before
-           starting Apache/a debugger.
+        2. Start httpd using -DONE_PROCESS (e.g. (gdb) r -DONE_PROCESS).
 
     If you want to debug a part of the PHP startup procedure, set a 
     breakpoint on 'load_module'. Step through it until apr_dso_load() is 
