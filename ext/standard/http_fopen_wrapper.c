@@ -153,6 +153,18 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	
 #if HAVE_OPENSSL_EXT
 	if (use_ssl)	{
+
+		if (context) {
+			/* set the CN we expect to be on the remote cert.
+			 * You still need to have enabled verification (verify_peer) in the context for
+			 * this to have an effect */
+			zval *cn;
+
+			ALLOC_INIT_ZVAL(cn);
+			ZVAL_STRING(cn, resource->host, 1);
+			php_stream_context_set_option(context, "ssl", "CN_match", cn);
+		}
+		
 		if (php_stream_sock_ssl_activate(stream, 1) == FAILURE)	{
 			php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "Unable to activate SSL mode");
 			php_stream_close(stream);

@@ -65,6 +65,10 @@ PHP_FUNCTION(openssl_csr_export);
 PHP_FUNCTION(openssl_csr_export_to_file);
 PHP_FUNCTION(openssl_csr_sign);
 
+#include <openssl/ssl.h>
+PHPAPI int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC);
+PHPAPI SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC);
+
 #else
 
 #define phpext_openssl_ptr NULL

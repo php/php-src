@@ -124,6 +124,11 @@ php_file_globals file_globals;
 /* sharing globals is *evil* */
 static int le_stream_context = FAILURE;
 
+PHPAPI int php_le_stream_context(void)
+{
+	return le_stream_context;
+}
+
 /* }}} */
 /* {{{ Module-Stuff */
 
@@ -493,7 +498,7 @@ PHP_FUNCTION(file)
  	
  		do {
  			p++;
- 			parse_eol:
+parse_eol:
  			if (PG(magic_quotes_runtime)) {
  				/* s is in target_buf which is freed at the end of the function */
  				slashed = php_addslashes(s, (p-s), &len, 0 TSRMLS_CC);

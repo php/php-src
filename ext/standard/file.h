@@ -126,6 +126,7 @@ extern int file_globals_id;
 extern php_file_globals file_globals;
 #endif
 
+PHPAPI int php_le_stream_context(void);
 
 #endif /* FILE_H */
 

@@ -51,6 +51,7 @@
 
 #ifdef HAVE_OPENSSL_EXT
 #include <openssl/err.h>
+#include "ext/openssl/php_openssl.h"
 #endif
 
 #ifdef HAVE_SYS_SELECT_H
@@ -705,22 +706,26 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 			return FAILURE;
 		}
 
-		sock->ssl_handle = SSL_new(ctx);
+		sock->ssl_handle = php_SSL_new_from_context(ctx, stream TSRMLS_CC);
+
 		if (sock->ssl_handle == NULL)	{
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: failed to create an SSL handle");
 			SSL_CTX_free(ctx);
 			return FAILURE;
 		}
 		
+		SSL_set_connect_state(sock->ssl_handle);
 		SSL_set_fd(sock->ssl_handle, sock->socket);
 		
 		if (psock) {
 			SSL_copy_session_id(sock->ssl_handle, psock->ssl_handle);
 		}
+		
 	}
 
 	if (activate) {
 		int err;
+		X509 *peer_cert;
 
 		do {
 			err = SSL_connect(sock->ssl_handle);
@@ -731,6 +736,17 @@ PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int acti
 			SSL_shutdown(sock->ssl_handle);
 			return FAILURE;
 		}
+
+		/* handshake was ok; did the verification go ok too ? */
+		peer_cert = SSL_get_peer_certificate(sock->ssl_handle);
+		
+		if (FAILURE == php_openssl_apply_verification_policy(sock->ssl_handle, peer_cert, stream TSRMLS_CC)) {
+			SSL_shutdown(sock->ssl_handle);
+			return FAILURE;
+		}
+
+		X509_free(peer_cert);
+		
 		sock->ssl_active = activate;
 	} else {
 		SSL_shutdown(sock->ssl_handle);
@@ -773,6 +789,22 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 }
 
 #if HAVE_OPENSSL_EXT
+
+static void php_ERR_error_string_n(int code, char *buf, size_t size)
+{
+	switch (code) {
+		case 0x1407E086: /* SSL2 */
+		case 0x14090086: /* SSL3 */
+			/* There does not appear to be a symbolic constant for these two codes;
+			 * they occur when certificate verification fails. The OpenSSL provided
+			 * error message is not particularly useful, so we special case it here */
+			strncpy(buf, "Failed to verify peer certificate. Check your `cafile' and/or `capath' context options", size);
+			break;
+		default:
+			ERR_error_string_n(code, buf, size);
+	}
+}
+
 static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
@@ -793,6 +825,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			/* re-negotiation, or perhaps the SSL layer needs more
 			 * packets: retry in next iteration */
 			break;
+			
 		case SSL_ERROR_SYSCALL:
 			if (ERR_peek_error() == 0) {
 				if (nr_bytes == 0) {
@@ -819,10 +852,10 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 				if (ebuf) {
 					esbuf[0] = '\n';
 					esbuf[1] = '\0';
-					ERR_error_string_n(code, esbuf + 1, sizeof(esbuf) - 2);
+					php_ERR_error_string_n(code, esbuf + 1, sizeof(esbuf) - 2);
 				} else {
 					esbuf[0] = '\0';
-					ERR_error_string_n(code, esbuf, sizeof(esbuf) - 1);
+					php_ERR_error_string_n(code, esbuf, sizeof(esbuf) - 1);
 				}
 				code = strlen(esbuf);
 				esbuf[code] = '\0';
@@ -840,7 +873,7 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes TSRMLS_DC)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
 					"SSL operation failed with code %d.%s%s",
 					err, 
-					ebuf ? "OpenSSL Error messages:\n" : "",
+					ebuf ? " OpenSSL Error messages:\n" : "",
 					ebuf ? ebuf : "");
 				
 			retry = 0;

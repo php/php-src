@@ -135,6 +135,8 @@ static int le_key;
 static int le_x509;
 static int le_csr;
 
+static int ssl_stream_data_index;
+
 /* {{{ resource destructors */
 static void php_pkey_free(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
@@ -539,9 +541,14 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_algorithms();
 
 	ERR_load_ERR_strings();
+	ERR_load_SSL_strings();
 	ERR_load_crypto_strings();
 	ERR_load_EVP_strings();
 
+	/* register a resource id number with openSSL so that we can map SSL -> stream structures in
+	 * openSSL callbacks */
+	ssl_stream_data_index = SSL_get_ex_new_index(0, "PHP stream index", NULL, NULL, NULL);
+	
 	/* purposes for cert purpose checking */
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_CLIENT", X509_PURPOSE_SSL_CLIENT, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SSL_SERVER", X509_PURPOSE_SSL_SERVER, CONST_CS|CONST_PERSISTENT);
@@ -2959,6 +2966,226 @@ PHP_FUNCTION(openssl_open)
 	RETURN_TRUE;
 }
 /* }}} */
+
+/* SSL verification functions */
+
+#define GET_VER_OPT(name)				SUCCESS == php_stream_context_get_option(stream->context, "ssl", name, &val)
+#define GET_VER_OPT_STRING(name, str)	if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_PP(val); }
+
+static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx)
+{
+	php_stream *stream;
+	SSL *ssl;
+	X509 *err_cert;
+	int err, depth, ret;
+	zval **val;
+	TSRMLS_FETCH();
+
+	ret = preverify_ok;
+	
+	/* determine the status for the current cert */
+	err_cert = X509_STORE_CTX_get_current_cert(ctx);
+	err = X509_STORE_CTX_get_error(ctx);
+	depth = X509_STORE_CTX_get_error_depth(ctx);
+
+	/* conjure the stream & context to use */
+	ssl = X509_STORE_CTX_get_ex_data(ctx, SSL_get_ex_data_X509_STORE_CTX_idx());
+	stream = (php_stream*)SSL_get_ex_data(ssl, ssl_stream_data_index);
+
+	/* if allow_self_signed is set, make sure that verification succeeds */
+	if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT && GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
+		ret = 1;
+	}
+	
+	/* check the depth */
+	if (GET_VER_OPT("verify_depth")) {
+		convert_to_long_ex(val);
+
+		if (depth > Z_LVAL_PP(val)) {
+			ret = 0;
+			X509_STORE_CTX_set_error(ctx, X509_V_ERR_CERT_CHAIN_TOO_LONG);
+		}
+	}
+	
+	return ret;
+	
+}
+
+PHPAPI int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC)
+{
+	zval **val = NULL;
+	char *cnmatch = NULL;
+	X509_NAME *name;
+	char buf[1024];
+	int err;
+	
+	/* verification is turned off */
+	if (!(GET_VER_OPT("verify_peer") && zval_is_true(*val))) {
+		return SUCCESS;
+	}
+
+	if (peer == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not get peer certificate");
+		return FAILURE;
+	}
+
+	err = SSL_get_verify_result(ssl);
+	switch (err) {
+		case X509_V_OK:
+			/* fine */
+			break;
+		case X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT:
+			if (GET_VER_OPT("allow_self_signed") && zval_is_true(*val)) {
+				/* allowed */
+				break;
+			}
+			/* not allowed, so fall through */
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not verify peer: code:%d %s", err, X509_verify_cert_error_string(err));
+			return FAILURE;
+	}
+
+	/* if the cert passed the usual checks, apply our own local policies now */
+	
+	name = X509_get_subject_name(peer);
+
+	/* Does the common name match ? (used primarily for https://) */
+	GET_VER_OPT_STRING("CN_match", cnmatch);
+	if (cnmatch) {
+		int match = 0;
+		
+		X509_NAME_get_text_by_NID(name, NID_commonName, buf, sizeof(buf));
+
+		match = strcmp(cnmatch, buf) == 0;
+
+		if (!match && strlen(buf) > 3 && buf[0] == '*' && buf[1] == '.') {
+			/* Try wildcard */
+
+			if (strchr(buf+2, '.')) {
+				char *tmp = strstr(cnmatch, buf+1);
+
+				match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
+			}
+		}
+
+		if (!match) {
+			/* didn't match */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,
+					"Peer certificate CN=`%s' did not match expected CN=`%s'",
+					buf, cnmatch);
+
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
+}
+
+static int passwd_callback(char *buf, int num, int verify, void *data)
+{
+	php_stream *stream = (php_stream *)data;
+	zval **val = NULL;
+	char *passphrase = NULL;
+	/* TODO: could expand this to make a callback into PHP user-space */
+
+	GET_VER_OPT_STRING("passphrase", passphrase);
+
+	if (passphrase) {
+		if (Z_STRLEN_PP(val) < num - 1) {
+			memcpy(buf, Z_STRVAL_PP(val), Z_STRLEN_PP(val)+1);
+			return Z_STRLEN_PP(val);
+		}
+	}
+	return 0;
+}
+
+PHPAPI SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC)
+{
+	zval **val = NULL;
+	char *cafile = NULL;
+	char *capath = NULL;
+	char *certfile = NULL;
+	int ok = 1;
+	
+	
+	/* look at context options in the stream and set appropriate verification flags */
+	if (GET_VER_OPT("verify_peer") && zval_is_true(*val)) {
+		
+		/* turn on verification callback */
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_callback);
+
+		/* CA stuff */
+		GET_VER_OPT_STRING("cafile", cafile);
+		GET_VER_OPT_STRING("capath", capath);
+
+		if (cafile || capath) {
+			if (!SSL_CTX_load_verify_locations(ctx, cafile, capath)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set verify locations `%s' `%s'\n", cafile, capath);
+				return NULL;
+			}
+		}
+
+		if (GET_VER_OPT("verify_depth")) {
+			convert_to_long_ex(val);
+			SSL_CTX_set_verify_depth(ctx, Z_LVAL_PP(val));
+		}
+
+	} else {
+		SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+	}
+
+	/* callback for the passphrase (for localcert) */
+	if (GET_VER_OPT("passphrase")) {
+		SSL_CTX_set_default_passwd_cb_userdata(ctx, stream);
+		SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
+	}
+	
+	GET_VER_OPT_STRING("local_cert", certfile);
+	if (certfile) {
+		X509 *cert = NULL;
+		EVP_PKEY *key = NULL;
+		SSL *tmpssl;
+
+		/* a certificate to use for authentication */
+		if (SSL_CTX_use_certificate_chain_file(ctx, certfile) != 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set local cert chain file `%s'; Check that your cafile/capath settings include details of your certificate and its issuer", certfile);
+			return NULL;
+		}
+
+		if (SSL_CTX_use_PrivateKey_file(ctx, certfile, SSL_FILETYPE_PEM) != 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set private key file `%s'", certfile);
+			return NULL;
+		}
+
+		tmpssl = SSL_new(ctx);
+		cert = SSL_get_certificate(tmpssl);
+
+		if (cert) {
+			key = X509_get_pubkey(cert);
+			EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
+			EVP_PKEY_free(key);
+		}
+		SSL_free(tmpssl);
+
+		if (!SSL_CTX_check_private_key(ctx)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
+		}
+	} 
+
+	if (ok) {
+		SSL *ssl = SSL_new(ctx);
+
+		if (ssl) {
+			/* map SSL => stream */
+			SSL_set_ex_data(ssl, ssl_stream_data_index, stream);
+		}
+		return ssl;
+	}
+	
+	return NULL;
+}
+
+
 
 /*
  * Local variables:
