@@ -450,9 +450,9 @@ DWORD CALLBACK IsapiThread(void *p)
 						IsapiPostData.GetAt(i),
 						IsapiMatchData.GetAt(i),
 						TestNames.GetAt(i)))
-				InterlockedIncrement(&Results[i].ok);
+				if (test) InterlockedIncrement(&Results[i].ok);
 			else
-				InterlockedIncrement(&Results[i].bad);
+				if (test) InterlockedIncrement(&Results[i].bad);
 			Sleep(10);
 		}
 	}
