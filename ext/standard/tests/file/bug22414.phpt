@@ -7,7 +7,7 @@ Bug #22414: passthru() does not read data correctly
 	}
 ?>
 --INI--
-output_handler=a
+output_handler=
 --FILE--
 <?php
 $php = getenv('TEST_PHP_EXECUTABLE');
