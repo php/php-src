@@ -33,12 +33,12 @@
 #define HASH_DEL_KEY 0
 #define HASH_DEL_INDEX 1
 
+typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void *);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t);
 typedef void (*dtor_func_t)(void *pDest);
 typedef int (*apply_func_t)(void *pDest);
 typedef int (*apply_func_arg_t)(void *pDest, void *argument);
-typedef ulong (*hash_func_t)(char *arKey, uint nKeyLength);
 typedef void (*copy_ctor_func_t)(void *pElement);
 
 struct _hashtable;
@@ -57,10 +57,9 @@ typedef struct bucket {
 
 typedef struct _hashtable {
 	uint nTableSize;
-	uint nHashSizeIndex;
+	uint nTableMask;
 	uint nNumOfElements;
 	ulong nNextFreeElement;
-	hash_func_t pHashFunction;
 	Bucket *pInternalPointer;	/* Used for element traversal */
 	Bucket *pListHead;
 	Bucket *pListTail;
