@@ -274,14 +274,19 @@ static int _build_trace_string(zval **frame, int num_args, va_list args, zend_ha
 ZEND_METHOD(exception, gettraceasstring)
 {
 	zval *trace;
-	char *str = estrdup("");
-	int len = 0, num = 0;
+	char *res = estrdup(""), **str = &res, *s_tmp;
+	int res_len = 0, *len = &res_len, num = 0;
 	
 	trace = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "trace", sizeof("trace")-1, 1 TSRMLS_CC);
-	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 3, &str, &len, &num);
+	zend_hash_apply_with_arguments(Z_ARRVAL_P(trace), (apply_func_args_t)_build_trace_string, 3, str, len, &num);
 
-	str[len] = '\0';	
-	RETURN_STRINGL(str, len, 0); 
+	s_tmp = emalloc(1 + MAX_LENGTH_OF_LONG + 7 + 1);
+	sprintf(s_tmp, "#%d {main}", num);
+	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+	efree(s_tmp);
+
+	res[res_len] = '\0';	
+	RETURN_STRINGL(res, res_len, 0); 
 }
 /* }}} */
 
@@ -315,7 +320,7 @@ ZEND_METHOD(exception, tostring)
 	str = emalloc(len);
 	sprintf(str, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s", 
 		Z_OBJCE_P(getThis())->name, Z_STRVAL_P(message), Z_STRVAL_P(file), Z_LVAL_P(line), 
-		Z_STRVAL_P(trace));
+		Z_STRLEN_P(trace) ? Z_STRVAL_P(trace) : "#0 {main}\n");
 	len = strlen(str);
 
 	/* We store the result in the private property string so we can access
