@@ -1933,14 +1933,13 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 
 		if (strstr((char*)db, ";")) {
 			direct = 1;
-			if (uid && !strstr ((char*)db, "uid") &&
-						!strstr((char*)db, "UID")) {
-				ldb = (char*)emalloc(strlen(db) + strlen(uid) + strlen(pwd) + 12);
+			if (uid && !strstr ((char*)db, "uid") && !strstr((char*)db, "UID")) {
+				ldb = (char*) emalloc(strlen(db) + strlen(uid) + strlen(pwd) + 12);
 				sprintf(ldb, "%s;UID=%s;PWD=%s", db, uid, pwd);
 			} else {
-				ldb_len = (strlen(db)+1);
-				ldb = (char*)emalloc(ldb_len);
-				strlcpy(ldb, db, ldb_len);
+				ldb_len = strlen(db)+1;
+				ldb = (char*) emalloc(ldb_len);
+				memcpy(ldb, db, ldb_len);
 			}
 		}
 
