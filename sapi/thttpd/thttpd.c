@@ -123,8 +123,11 @@ static sapi_module_struct sapi_module = {
 	sapi_thttpd_read_post,
 	sapi_thttpd_read_cookies,
 
-	NULL,							/* register server variables */
-	NULL,							/* Log message */
+	NULL,									/* register server variables */
+	NULL,									/* Log message */
+
+	NULL,									/* Block interruptions */
+	NULL,									/* Unblock interruptions */
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };

@@ -815,8 +815,8 @@ int php_module_startup(sapi_module_struct *sf)
 	zuf.write_function = php_body_write_wrapper;
 	zuf.fopen_function = php_fopen_wrapper_for_zend;
 	zuf.message_handler = php_message_handler_for_zend;
-	zuf.block_interruptions = BLOCK_INTERRUPTIONS;
-	zuf.unblock_interruptions = UNBLOCK_INTERRUPTIONS;
+	zuf.block_interruptions = sapi_module.block_interruptions;
+	zuf.unblock_interruptions = sapi_module.unblock_interruptions;
 	zuf.get_ini_entry = php_get_ini_entry_for_zend;
 	zuf.ticks_function = NULL;
 	zend_startup(&zuf, NULL);
