@@ -116,7 +116,6 @@ AC_ARG_WITH(gdbm,
     done
 
     if test -n "$THIS_INCLUDE"; then
-      unset ac_cv_lib_gdbm_gdbm_open
       PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
         AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
         AC_DEFINE(DBA_GDBM, 1, [ ]) 

@@ -39,8 +39,6 @@ if test "$PHP_MCRYPT" != "no"; then
     PHP_ADD_LIBRARY(ltdl,, MCRYPT_SHARED_LIBADD)
     AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
   ],[
-    unset found
-    unset ac_cv_lib_mcrypt_mcrypt_module_open
     PHP_CHECK_LIBRARY(mcrypt, mcrypt_module_open,
     [
       AC_DEFINE(HAVE_LIBMCRYPT,1,[ ])
