@@ -110,9 +110,6 @@ PHPAPI int php_checkuid(const char *fn, int mode) {
 
 PHPAPI char *php_get_current_user()
 {
-#if CGI_BINARY || USE_SAPI || FHTTPD
-	struct stat statbuf;
-#endif
 	struct passwd *pwd;
 	int uid;
 	SLS_FETCH();
@@ -124,15 +121,12 @@ PHPAPI char *php_get_current_user()
 	/* FIXME: I need to have this somehow handled if
 	USE_SAPI is defined, because cgi will also be
 	interfaced in USE_SAPI */
-#if CGI_BINARY || USE_SAPI || FHTTPD
-	if (!SG(request_info).path_translated || (stat(SG(request_info).path_translated,&statbuf)==-1)) {
+
+	uid = sapi_get_uid();
+
+	if (uid==-1) {
 		return empty_string;
 	}
-	uid = statbuf.st_uid;
-#endif
-#if APACHE
-	uid = ((request_rec *) SG(server_context))->finfo.st_uid;
-#endif
 
 	if ((pwd=getpwuid(uid))==NULL) {
 		return empty_string;

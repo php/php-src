@@ -127,7 +127,7 @@ SAPI_API void sapi_unregister_post_reader(sapi_post_content_type_reader *post_co
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(char *content_type_dup SLS_DC));
 
 SAPI_API int sapi_flush();
-
+SAPI_API int sapi_get_uid();
 
 struct _sapi_module_struct {
 	char *name;
@@ -140,6 +140,7 @@ struct _sapi_module_struct {
 
 	int (*ub_write)(const char *str, unsigned int str_length);
 	void (*flush)(void *server_context);
+	int (*get_uid)(SLS_D);
 
 	void (*sapi_error)(int type, const char *error_msg, ...);
 

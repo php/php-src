@@ -300,6 +300,12 @@ static int php_apache_sapi_activate(SLS_D)
 }
 
 
+static int php_apache_get_uid(SLS_D)
+{
+	return ((request_rec *) SG(server_context))->finfo.st_uid;
+}
+
+
 static sapi_module_struct sapi_module = {
 	"Apache",						/* name */
 									
@@ -311,6 +317,7 @@ static sapi_module_struct sapi_module = {
 
 	sapi_apache_ub_write,			/* unbuffered write */
 	sapi_apache_flush,				/* flush */
+	php_apache_get_uid,				/* get uid */
 
 
 	php_error,						/* error handler */

@@ -302,6 +302,7 @@ static sapi_module_struct sapi_module = {
 
 	php_ns_sapi_ub_write,					/* unbuffered write */
 	NULL,									/* flush */
+	NULL,									/* get uid */
 
 	php_error,								/* error handler */
 

@@ -176,6 +176,7 @@ static int sapi_cgi_deactivate(SLS_D)
 }
 
 
+
 static sapi_module_struct sapi_module = {
 	"CGI",							/* name */
 									
@@ -187,6 +188,7 @@ static sapi_module_struct sapi_module = {
 
 	sapi_cgibin_ub_write,			/* unbuffered write */
 	sapi_cgibin_flush,				/* flush */
+	NULL,							/* get uid */
 
 	php_error,						/* error handler */
 

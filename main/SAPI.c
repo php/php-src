@@ -19,6 +19,7 @@
 */
 
 #include <ctype.h>
+#include <sys/stat.h>
 
 #include "php.h"
 #include "SAPI.h"
@@ -381,5 +382,23 @@ SAPI_API int sapi_flush()
 		return SUCCESS;
 	} else {
 		return FAILURE;
+	}
+}
+
+SAPI_API int sapi_get_uid()
+{
+	SLS_FETCH();
+
+	if (sapi_module.get_uid) {
+		return sapi_module.get_uid(SLS_C);
+	} else {
+		struct stat statbuf;
+
+		if (!SG(request_info).path_translated || (stat(SG(request_info).path_translated, &statbuf)==-1)) {
+			return -1;
+		}
+
+		stat(SG(request_info).path_translated, &statbuf);
+		return statbuf.st_uid;
 	}
 }
