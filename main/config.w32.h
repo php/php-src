@@ -10,9 +10,13 @@
 #define HAVE_BINDLIB 1
 
 /* set to enable bcmath */
-#define WITH_BCMATH 1
+#define WITH_BCMATH 0
 /* should be added to runtime config*/
 #define PHP3_URL_FOPEN 1
+
+#define STDIN_FILENO 0
+#define STDOUT_FILENO 1
+#define STDERR_FILENO 2
 
 /* ----------------------------------------------------------------
    The following are defaults for run-time configuration

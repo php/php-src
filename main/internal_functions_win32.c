@@ -68,7 +68,9 @@ zend_module_entry *php3_builtin_modules[] = {
     phpext_filestat_ptr,
     phpext_mail_ptr,
     phpext_syslog_ptr,
+#if WITH_BCMATH
 	phpext_bcmath_ptr,
+#endif
 	phpext_standard_ptr,
 	COM_module_ptr,
 	phpext_regex_ptr,
