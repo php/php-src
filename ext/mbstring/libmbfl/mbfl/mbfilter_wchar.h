@@ -31,8 +31,9 @@
 #ifndef MBFL_MBFILTER_WCHAR_H
 #define MBFL_MBFILTER_WCHAR_H
 
+#include "mbfl_defs.h"
 #include "mbfilter.h"
 
-extern const mbfl_encoding mbfl_encoding_wchar;
+MBFLAPI extern const mbfl_encoding mbfl_encoding_wchar;
 
 #endif /* MBFL_MBFILTER_WCHAR_H */
