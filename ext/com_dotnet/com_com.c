@@ -355,7 +355,17 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 {
 	OLECHAR *olename;
 	HRESULT hr;
+	DISPID *dispid_ptr;
 
+	if (namelen == -1) {
+		namelen = strlen(name);
+	}
+
+	if (obj->id_of_name_cache && SUCCESS == zend_hash_find(obj->id_of_name_cache, name, namelen, (void**)&dispid_ptr)) {
+		*dispid = *dispid_ptr;
+		return S_OK;
+	}
+	
 	olename = php_com_string_to_olestring(name, namelen, obj->code_page TSRMLS_CC);
 
 	if (obj->typeinfo) {
@@ -373,6 +383,15 @@ HRESULT php_com_get_id_of_name(php_com_dotnet_object *obj, char *name,
 	}
 	efree(olename);
 
+	if (SUCCEEDED(hr)) {
+		/* cache the mapping */
+		if (!obj->id_of_name_cache) {
+			ALLOC_HASHTABLE(obj->id_of_name_cache);
+			zend_hash_init(obj->id_of_name_cache, 2, NULL, NULL, 0);
+		}
+		zend_hash_update(obj->id_of_name_cache, name, namelen, dispid, sizeof(*dispid), NULL);
+	}
+	
 	return hr;
 }
 
@@ -388,7 +407,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 	zend_internal_function *f = (zend_internal_function*)EG(function_state_ptr)->function;
 
 	/* assumption: that the active function (f) is the function we generated for the engine */
-	if (!f || f->type != ZEND_OVERLOADED_FUNCTION_TEMPORARY || f->arg_info == NULL) {
+	if (!f || f->arg_info == NULL) {
 	   f = NULL;
 	}
 	
