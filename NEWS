@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.0 Release
+- Added the swf module which allows you to create Macromedia Flash files via 
+  libswf.(Sterling)
 - Improved UNIX build system to support more vendor make tools (Sascha)
 - Updated natural comparison/sorting algorithm by Martin Pool
   <mbp@humbug.org.au>. (Andrei)
