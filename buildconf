@@ -1,18 +1,6 @@
 #!/bin/sh
 # $Id$
 
-amv=`automake --version | grep GNU |cut -d ' ' -f 4`
-
-if expr $amv '>=' 2.5; then
-    echo "cleaning checkout to force rebuild, due to bad AutoMake"
-    ./cvsclean
-fi
-
-
-if test -d "Zend"; then
-    ZENDVER=`cat Zend/zend.h | grep ZEND_VERSION | cut -d ' ' -f 3 | sed -e 's/"//' | cut -d . -f 1`
-fi
-
 while test $# -gt 0; do
     if test "$1" = "--copy"; then
         automake_flags=--copy
@@ -20,27 +8,8 @@ while test $# -gt 0; do
 
     if test "$1" = "--ZendEngine2"; then
         ZENDDIR=ZendEngine2
-
-	if test $ZENDVER != 2; then
-	    mv Zend Zend_old
-
-	    if test -d "ZendEngine2"; then
-		mv ZendEngine2 Zend
-	    fi	
-	fi    
         echo "Using Zend Engine 2 code"
     fi
-
-    if test "$1" = "--Zend"; then
-	ZENDDIR=Zend
-	
-	if test $ZENDVER != 1; then
-	    echo "The default Zend directory exists, but it doesn't seem to be Zend Engine 1"
-	    exit
-	else
-	    echo "Using default Zend directory"
-	fi	
-    fi	
 
     shift
 done
@@ -65,4 +34,4 @@ fi
 
 rm -f generated_lists
 
-${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags"
+${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags" ZENDDIR="$ZENDDIR"
