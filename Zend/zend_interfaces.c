@@ -108,7 +108,7 @@ static zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS
 /* }}} */
 
 /* {{{ zend_user_it_dtor */
-ZEND_API void zend_user_it_free_current(zend_object_iterator *_iter TSRMLS_DC)
+static void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 
@@ -125,10 +125,7 @@ static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	if (iter->value) {
-		zval_ptr_dtor(&iter->value);
-		iter->value = NULL;
-	}
+	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zval_ptr_dtor(&object);
 	efree(iter);
 }
@@ -187,8 +184,6 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
 
 	if (!retval) {
-		*str_key = "";
-		*str_key_len = 0;
 		*int_key = 0;
 		zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
 		return HASH_KEY_IS_LONG;
@@ -197,8 +192,6 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 		default: 
 			zend_error(E_WARNING, "Illegal type returned from %s::key()", iter->ce->name);
 		case IS_NULL:
-			*str_key = "";
-			*str_key_len = 0;
 			*int_key = 0;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_LONG;
@@ -206,7 +199,6 @@ static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_
 		case IS_STRING:
 			*str_key = estrndup(retval->value.str.val, retval->value.str.len);
 			*str_key_len = retval->value.str.len+1;
-			*int_key = 0;
 			zval_ptr_dtor(&retval);
 			return HASH_KEY_IS_STRING;
 
@@ -232,10 +224,7 @@ static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
-	if (iter->value) {
-		zval_ptr_dtor(&iter->value);
-		iter->value = NULL;
-	}
+	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_next, "next", NULL);
 }
 /* }}} */
@@ -246,6 +235,7 @@ static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
 
+	zend_user_it_invalidate_current(iter TSRMLS_CC);
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_rewind, "rewind", NULL);
 }
 /* }}} */
@@ -256,7 +246,8 @@ zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,
-	zend_user_it_rewind
+	zend_user_it_rewind,
+	zend_user_it_invalidate_current
 };
 
 /* {{{ zend_user_it_get_iterator */

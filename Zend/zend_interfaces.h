@@ -37,8 +37,6 @@ typedef struct _zend_user_iterator {
 	zval                     *value;
 } zend_user_iterator;
 
-ZEND_API void zend_user_it_free_current(zend_object_iterator *_iter TSRMLS_DC);
-
 ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC);
 
 #define zend_call_method_with_0_params(obj, obj_ce, fn_proxy, function_name, retval) \
