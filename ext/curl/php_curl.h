@@ -60,16 +60,6 @@ typedef struct {
 } php_curl;
 
 
-
-#ifdef ZTS
-#define CURLG(v) (curl_globals->v)
-#define CURLLS_FETCH() php_curl_globals *curl_globals = ts_resource(curl_globals_id)
-#else
-#define CURLG(v) (curl_globals.v)
-#define CURLLS_FETCH()
-#endif
-
-
 #else
 #define curl_module_ptr NULL
 #endif /* HAVE_CURL */
