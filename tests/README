@@ -2,17 +2,17 @@ PHP Regression Tests
 ====================
 
 To run the tests, go to the top-level directory and
-run "./php -f run-tests.php".
+run "./php -q run-tests.php".
 
 Without parameters, "run-tests.php" will recursively scan through the
 file tree looking for directories called "tests", and run all the
 tests (.phpt files) within (recursively).
 
 To run tests in a single directory, pass the directory as a parameter:
-"./php -f run-tests.php tests/lang".
+"./php -q run-tests.php tests/lang".
 
 To run one or more single tests, pass them as parameters:
-"./php -f run-tests.php tests/lang/015.phpt".
+"./php -q run-tests.php tests/lang/015.phpt".
 
 The format of the .phpt files is quite simple.  There are 6 possible
 sections.  Test, Skipif, Post, Get, File and Expect.  The Test section
