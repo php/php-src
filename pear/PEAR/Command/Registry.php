@@ -87,6 +87,9 @@ class PEAR_Command_Registry extends PEAR_Command_Common
                                               $package['version'],
                                               @$package['release_state']));
                 }
+                if ($i == 0) {
+                    $this->ui->tableRow(array('(no packages installed yet)'));
+                }
                 $this->ui->endTable();
                 break;
             }
