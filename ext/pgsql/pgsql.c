@@ -110,6 +110,18 @@ int pgsql_globals_id;
 PHP_PGSQL_API php_pgsql_globals pgsql_globals;
 #endif
 
+static void php_pgsql_set_default_link(int id)
+{   
+	PGLS_FETCH();
+
+    if (PGG(default_link)!=-1) {
+        zend_list_delete(PGG(default_link));
+    }
+    PGG(default_link) = id;
+    zend_list_addref(id);
+}
+
+
 static void _close_pgsql_link(PGconn *link)
 {
 	PGLS_FETCH();
@@ -374,7 +386,8 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 			link = (int) (long) index_ptr->ptr;
 			ptr = zend_list_find(link,&type);   /* check if the link is still there */
 			if (ptr && (type==le_link || type==le_plink)) {
-				return_value->value.lval = PGG(default_link) = link;
+				return_value->value.lval = link;
+				php_pgsql_set_default_link(link);
 				return_value->type = IS_RESOURCE;
 				zend_list_addref(link);
 				efree(hashed_details);
@@ -412,8 +425,12 @@ void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent)
 		PGG(num_links)++;
 	}
 	efree(hashed_details);
+<<<<<<< pgsql.c
+	php_pgsql_set_default_link(return_value->value.lval);
+=======
 	PGG(default_link)=return_value->value.lval;
 	zend_list_addref(return_value->value.lval);
+>>>>>>> 1.63
 }
 
 
