@@ -157,6 +157,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				case T_CLOSE_TAG:
 				case T_WHITESPACE:
 				case T_COMMENT:
+				case T_DOC_COMMENT:
 					break;
 				default:
 					efree(token.value.str.val);
@@ -198,6 +199,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				}
 						/* lack of break; is intentional */
 			case T_COMMENT:
+			case T_DOC_COMMENT:
 				token.type = 0;
 				continue;
 			
@@ -226,6 +228,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				case T_CLOSE_TAG:
 				case T_WHITESPACE:
 				case T_COMMENT:
+				case T_DOC_COMMENT:
 					break;
 
 				default:

@@ -1201,9 +1201,6 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 }
 
 <ST_DOC_COMMENT>"*/" {
-	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
-	zendlval->value.str.len = yyleng;
-	zendlval->type = IS_STRING;
 	HANDLE_NEWLINES(yytext, yyleng);
 	BEGIN(ST_IN_SCRIPTING);
 	return T_DOC_COMMENT;

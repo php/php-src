@@ -1071,16 +1071,18 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 }
 
 
-void zend_do_end_function_declaration(znode *function_token, znode *doc_comment TSRMLS_DC)
+void zend_do_end_function_declaration(znode *function_token TSRMLS_DC)
 {
 	zend_do_extended_info(TSRMLS_C);
 	zend_do_return(NULL, 0 TSRMLS_CC);
 	pass_two(CG(active_op_array) TSRMLS_CC);
 	CG(active_op_array)->line_end = zend_get_compiled_lineno(TSRMLS_C);
+#if 0
 	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
 		CG(active_op_array)->doc_comment = doc_comment->u.constant.value.str.val;
 		CG(active_op_array)->doc_comment_len = doc_comment->u.constant.value.str.len;
 	}
+#endif
 	CG(active_op_array) = function_token->u.op_array;
 
 	/* Pop the switch and foreach seperators */
@@ -2251,16 +2253,18 @@ static void do_verify_abstract_class(TSRMLS_D)
 }
 
 
-void zend_do_end_class_declaration(znode *class_token, znode *parent_token, znode *doc_comment TSRMLS_DC)
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
 
 	CG(active_class_entry)->line_end = zend_get_compiled_lineno(TSRMLS_C);
 
+#if 0
 	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
 		CG(active_class_entry)->doc_comment = doc_comment->u.constant.value.str.val;
 		CG(active_class_entry)->doc_comment_len = doc_comment->u.constant.value.str.len;
 	}
+#endif
 
 	if (CG(active_class_entry)->num_interfaces > 0) {
 		CG(active_class_entry)->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*CG(active_class_entry)->num_interfaces);
@@ -3292,6 +3296,7 @@ int zendlex(znode *zendlval TSRMLS_DC)
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch (retval) {
 		case T_COMMENT:
+		case T_DOC_COMMENT:
 		case T_OPEN_TAG:
 		case T_WHITESPACE:
 			retval = zendlex(zendlval TSRMLS_CC);
@@ -3403,7 +3408,7 @@ void zend_do_begin_namespace(znode *ns_token, znode *ns_name TSRMLS_DC)
 	CG(function_table) = &ns->function_table;
 }
 
-void zend_do_end_namespace(znode *ns_token, znode *doc_comment TSRMLS_DC)
+void zend_do_end_namespace(znode *ns_token TSRMLS_DC)
 {
 	zend_namespace *ns = ns_token->u.previously_active_namespace;
 	zend_op *opline;
@@ -3418,6 +3423,7 @@ void zend_do_end_namespace(znode *ns_token, znode *doc_comment TSRMLS_DC)
 		CG(active_namespace)->line_end = zend_get_compiled_lineno(TSRMLS_C);
 	}
 
+#if 0
 	if (doc_comment && doc_comment->op_type != IS_UNUSED) {
 		/*
 		 * Do not overwrite previously declared doc comment in case the namespace is
@@ -3430,6 +3436,7 @@ void zend_do_end_namespace(znode *ns_token, znode *doc_comment TSRMLS_DC)
 			zval_dtor(&doc_comment->u.constant);
 		}
 	}
+#endif
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
