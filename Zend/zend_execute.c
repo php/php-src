@@ -285,7 +285,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 						Ts[result->u.var].var = &T->EA.str;
 						*/
 					}
-					zval_ptr_dtor(&T->EA.str);
+					/* zval_ptr_dtor(&T->EA.str); Nuke this line if it doesn't cause a leak */
 					T->tmp_var.type = IS_STRING;
 				}
 				break;
