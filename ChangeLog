@@ -1,3 +1,40 @@
+2002-01-22  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
+
+    * ext/domxml/php_domxml.c:
+    Simplified domxml_substitute_entities_default() function
+
+2002-01-22  Sterling Hughes  <sterling@designmultimedia.com>
+
+    * ext/curl/curl.c: just init CURL_GLOBAL_SSL
+
+2002-01-22  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ibase.php:
+    - Fix a problem with the cast to array from ibase_fetch_object
+      (reported by Ludovico Magnocavallo <ludo@sumatrasolutions.com>)
+    - Removed old, unsupported, unused DB_ibase->fetchRow()
+      (remember that fetchRow is a method from DB_result not DB_driver)
+
+2002-01-22  Jan Lehnardt  <jan@lehnardt.de>
+
+    * pear/File/Find.php:  - whitespace fix
+
+    * pear/File/Find.php:
+     - initialize $matches to avoid error message on unset variable
+       if no matches are found.
+
+2002-01-22  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c:
+    Getting rid of some compile warnings (thanks to markus for pointing me in the right direction :) )
+
+2002-01-22  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/string.c:
+    Fix for bug #15130.  Way too much effort for this bug, but cleaned up code
+    a bit, use zend_parse_parameters(), etc, etc.  We only look for extensions
+    in the basename, not the full path.
+
 2002-01-21  Jaroslaw Kolakowski  <J.Kolakowski@students.mimuw.edu.pl>
 
     * ext/domxml/php_domxml.h
