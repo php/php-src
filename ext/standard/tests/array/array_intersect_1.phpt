@@ -35,7 +35,7 @@ echo "begin ------------ array_intersect() ----------------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect($a, $b);'."\n";
-var_dump(array_intersect($a, $b));
+var_dump(@array_intersect($a, $b));
 echo "end   ------------ array_intersect() ----------------------------\n";
 
 /* array_uintersect() */
@@ -51,7 +51,7 @@ echo "begin ------------ array_intersect_assoc() ----------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect_assoc($a, $b));'."\n";
-var_dump(array_intersect_assoc($a, $b));
+var_dump(@array_intersect_assoc($a, $b));
 echo "end   ------------ array_intersect_assoc() ----------------------\n";
 
 /* array_uintersect_assoc() */
@@ -67,7 +67,7 @@ echo "begin ------------ array_intersect_uassoc() ---------------------\n";
 echo '$a='.var_export($a,TRUE).";\n";
 echo '$b='.var_export($b,TRUE).";\n";
 echo 'var_dump(array_intersect_uassoc($a, $b, "comp_func"));'."\n";
-var_dump(array_intersect_uassoc($a, $b, "comp_func"));
+var_dump(@array_intersect_uassoc($a, $b, "comp_func"));
 echo "end   ------------ array_intersect_uassoc() ---------------------\n";
 
 /* array_uintersect_uassoc() - with ordinary function */
