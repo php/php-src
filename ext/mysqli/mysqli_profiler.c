@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_mysqli.h"
+#include "mysqli_profiler_com.h"
 
 /* {{{ PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, unsigned int settime) */
 PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, unsigned int settime)
@@ -78,8 +79,9 @@ PR_COMMON *php_mysqli_profiler_new_object(PR_COMMON *parent, unsigned int type, 
 int php_mysqli_profiler_explain(PR_EXPLAIN *explain, PR_HEADER *header, MYSQL *mysql, char *query)
 {
 	MYSQL_RES 		*res;
-	MYSQL_ROW 		row;
-	unsigned int	i;
+	unsigned int	i,j;
+	MYSQL_FIELD		*fields;
+	MYSQL_ROW		row;
 	char *newquery = (char *)emalloc(strlen(query) + 10);
 
 	sprintf (newquery, "EXPLAIN %s", query);
@@ -99,17 +101,23 @@ int php_mysqli_profiler_explain(PR_EXPLAIN *explain, PR_HEADER *header, MYSQL *m
 		return 0;
 	}
 
-	explain->exp_table = (char **)emalloc(sizeof(char *) * explain->exp_cnt);	
-	explain->exp_type = (char **)emalloc(sizeof(char *) * explain->exp_cnt);	
-	explain->exp_key = (char **)emalloc(sizeof(char *) * explain->exp_cnt);	
-	explain->exp_rows = (ulong *)emalloc(sizeof(ulong) * explain->exp_cnt);	
+	explain->columns = mysql_num_fields(res);
+
+	explain->row = (PR_ROW *)emalloc(sizeof(PR_ROW) * explain->exp_cnt);
+	explain->fields = (char **)emalloc(sizeof(char *) * explain->columns);
+
+	fields = mysql_fetch_fields(res);
+
+	for (j=0; j < explain->columns; j++) {
+		explain->fields[j] = estrdup(fields[j].name);
+	}
 
 	for (i=0; i < explain->exp_cnt; i++) {
+		explain->row[i].value = (char **)emalloc(sizeof(char *) * explain->columns);
 		row = mysql_fetch_row(res);
-		explain->exp_table[i] = my_estrdup(row[2]);
-		explain->exp_type[i]  = my_estrdup(row[3]);
-		explain->exp_key[i]   = my_estrdup(row[4]);
-		explain->exp_rows[i]  = atol(row[8]);
+		for (j=0; j < explain->columns; j++) {
+			explain->row[i].value[j] = my_estrdup(row[j]); 
+		}
 	}
 	
 	mysql_free_result(res);
@@ -143,38 +151,38 @@ char *php_mysqli_profiler_indent(int i)
 }
 /* }}} */
 
-/* {{{ void php_mysqli_profiler_report_header(PR_HEADER, char *) */
+/* {{{ void php_mysqli_profiler_report_header(PR_HEADER, char *, char *) */
 void php_mysqli_profiler_report_header(PR_HEADER header, char *ident)
 {
+	char	buffer[8192];
 	switch (header.type) {
 		case MYSQLI_PR_MYSQL:
-			printf("%s[Connection]\n", ident);
 			php_mysqli_profiler_timediff(header.starttime, &header.lifetime);
 			break;
-		case MYSQLI_PR_QUERY:
-			printf("%s[Query]\n", ident);
-			break;
 		case MYSQLI_PR_STMT:
-			printf("%s[Statement]\n", ident);
 			php_mysqli_profiler_timediff(header.starttime, &header.lifetime);
 			break;
 		case MYSQLI_PR_RESULT:
-			printf("%s[Resultset]\n", ident);
 			php_mysqli_profiler_timediff(header.starttime, &header.lifetime);
 			break;
-		case MYSQLI_PR_COMMAND:
-			printf("%s[Command]\n", ident);
-			break;
 	}
-	printf ("%sFunction: %s\n", ident, header.functionname);
-	printf ("%sFile: %s\n", ident, header.filename);
-	printf ("%sLine: %d\n", ident, header.lineno);
-	printf ("%sExecution time: %ld.%06ld\n", ident, header.elapsedtime.tv_sec, header.elapsedtime.tv_usec);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "name", header.functionname);
+	
+	MYSQLI_PROFILER_ADD_STARTTAG(buffer, "fileinfo",0);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "name", header.filename);
+	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "line", header.lineno);
+	MYSQLI_PROFILER_ADD_ENDTAG(buffer, "fileinfo");
+	MYSQLI_PROFILER_ADD_STARTTAG(buffer, "times",0);
+	MYSQLI_PROFILER_ADD_ATTR_TIME(buffer, "execution_time", header.elapsedtime.tv_sec, header.elapsedtime.tv_usec);
 	if (header.lifetime.tv_sec + header.lifetime.tv_usec) {
-		printf ("%sLife time: %ld.%06ld\n", ident, header.lifetime.tv_sec, header.lifetime.tv_usec);
+		MYSQLI_PROFILER_ADD_ATTR_TIME(buffer, "life_time", header.lifetime.tv_sec, header.lifetime.tv_usec);
 	}
+	MYSQLI_PROFILER_ADD_ENDTAG(buffer, "times");
 	if (header.error) {
-		printf("%sError: %s (%ld)\n", ident, header.errormsg, header.error);
+		MYSQLI_PROFILER_ADD_STARTTAG(buffer,  "errors",0);
+		MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "errno", header.error);
+		MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "errmsg", header.errormsg);
+		MYSQLI_PROFILER_ADD_ENDTAG(buffer, "errors");
 	}
 
 	/* free header */
@@ -184,40 +192,33 @@ void php_mysqli_profiler_report_header(PR_HEADER header, char *ident)
 }
 /* }}} */
 
-/* {{{ void php_mysqli_profiler_report_explain(PR_EXPLAIN, char *) */
+/* {{{ void php_mysqli_profiler_report_explain(PR_EXPLAIN, char *, char *) */
 void php_mysqli_profiler_report_explain(PR_EXPLAIN explain, char *ident)
 {
-	int	i;
+	int		i, j;
+	char	buffer[8192];
 
 	if (explain.query) {
-		printf("%sQuery: %s\n", ident, explain.query);
+		MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "query_string", explain.query);
 	}
 
 	if (explain.exp_cnt) {
-		printf("%sTable(s):", ident);
+		MYSQLI_PROFILER_ADD_STARTTAG(buffer, "explain", 1);
 		for (i=0; i < explain.exp_cnt; i++) {
-			printf(" %s%c", explain.exp_table[i], (i == explain.exp_cnt - 1) ? '\n' : ',');
-			my_efree(explain.exp_table[i]);
+			for (j=0; j < explain.columns; j++) {
+				MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, explain.fields[j], explain.row[i].value[j]);
+				my_efree(explain.row[i].value[j]);
+			}
+			efree(explain.row[i].value);
 		}
-		printf("%sJoin-Types(s):", ident);
-		for (i=0; i < explain.exp_cnt; i++) {
-			printf(" %s%c", explain.exp_type[i], (i == explain.exp_cnt - 1) ? '\n' : ',');
-			my_efree(explain.exp_type[i]);
-		}
-		printf("%sKey(s):", ident);
-		for (i=0; i < explain.exp_cnt; i++) {
-			printf(" %s%c", explain.exp_key[i], (i == explain.exp_cnt - 1) ? '\n' : ',');
-			my_efree(explain.exp_key[i]);
-		}
-		printf("%sRow(s):", ident);
-		for (i=0; i < explain.exp_cnt; i++) {
-			printf(" %ld%c", explain.exp_rows[i], (i == explain.exp_cnt - 1) ? '\n' : ',');
-		}
-		my_efree(explain.exp_table);
-		my_efree(explain.exp_type);
-		my_efree(explain.exp_key);
-		my_efree(explain.exp_rows);
+		MYSQLI_PROFILER_ADD_ENDTAG(buffer, "explain");
 	}
+	efree(explain.row);
+	for (j=0; j < explain.columns; j++) {
+		my_efree(explain.fields[j]);
+	}
+	efree(explain.fields);
+
 	/* free explain */
 	my_efree(explain.query);
 }
@@ -226,17 +227,20 @@ void php_mysqli_profiler_report_explain(PR_EXPLAIN explain, char *ident)
 /* {{{ php_mysqli_profiler_report_mysql(PR_MYSQL *, int) */
 void php_mysqli_profiler_report_mysql(PR_MYSQL *prmysql, int depth)
 {
-	char 			*ident = php_mysqli_profiler_indent(depth);
+	char	*ident = php_mysqli_profiler_indent(depth);
+	char	buffer[8192];
 
 	php_mysqli_profiler_report_header(prmysql->header, ident);
 
-	printf ("%sHost: %s\n", ident, prmysql->hostname);
-	printf ("%sUser: %s\n", ident, prmysql->username);
-	printf ("%sThread-id: %d\n", ident, prmysql->thread_id);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "hostname", prmysql->hostname);
+	MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "user", prmysql->username);
+	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "thread_id", prmysql->thread_id);
+
 	if (!prmysql->closed) {
-		printf ("%sWarning: connection wasn't closed by mysqli_close()\n", ident);
+		MYSQLI_PROFILER_ADD_STARTTAG(buffer, "warnings",0);
+		MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "warning", "connection wasn't closed by mysqli_close()");
+		MYSQLI_PROFILER_ADD_ENDTAG(buffer, "warnings");
 	}
-	printf("\n");
 
 	my_efree(prmysql->hostname);
 	my_efree(prmysql->username);
@@ -248,20 +252,19 @@ void php_mysqli_profiler_report_mysql(PR_MYSQL *prmysql, int depth)
 /* {{{ void php_mysqli_profiler_report_query(PR_QUERY *, int) */
 void php_mysqli_profiler_report_query(PR_QUERY *prquery, int depth)
 {
-	char 			*ident = php_mysqli_profiler_indent(depth);
+	char	buffer[8192]; 
+	char	*ident = php_mysqli_profiler_indent(depth);
 
 	php_mysqli_profiler_report_header(prquery->header, ident);
 	php_mysqli_profiler_report_explain(prquery->explain, ident);
 
 	if (prquery->affectedrows > 0) {
-		printf ("%saffected rows: %ld\n", ident, prquery->affectedrows);
+		MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "affected_rows", prquery->affectedrows);
 	}
 	if (prquery->insertid) {
-		printf ("%sinsert id: %ld\n", ident, prquery->insertid);
+		MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "insert_id", prquery->insertid);
 	}
 	
-
-	printf("\n");
 	efree(ident);
 }
 /* }}} */
@@ -269,12 +272,15 @@ void php_mysqli_profiler_report_query(PR_QUERY *prquery, int depth)
 /* {{{ void php_mysqli_profiler_report_stmt(PR_STMT *, int) */
 void php_mysqli_profiler_report_stmt(PR_STMT *prstmt, int depth)
 {
-	char 			*ident = php_mysqli_profiler_indent(depth);
+	char	*ident = php_mysqli_profiler_indent(depth);
+	char	buffer[8192];
 
+	buffer[0] = '\0';
 	php_mysqli_profiler_report_header(prstmt->header, ident);
 	php_mysqli_profiler_report_explain(prstmt->explain, ident);
 
 	printf("\n");
+	MYSQLI_PROFILER_OUT(buffer);
 	efree(ident);
 }
 /* }}} */
@@ -282,17 +288,25 @@ void php_mysqli_profiler_report_stmt(PR_STMT *prstmt, int depth)
 /* {{{ void php_mysqli_profiler_report_result(PR_RESULT *, int) */
 void php_mysqli_profiler_report_result(PR_RESULT *prresult, int depth)
 {
-	char 			*ident = php_mysqli_profiler_indent(depth);
+	char 	*ident = php_mysqli_profiler_indent(depth);
+	char	buffer[8192];
 
+	buffer[0] = '\0';
 	php_mysqli_profiler_report_header(prresult->header, ident);
 
-	printf ("%sColumns: %d\n", ident, prresult->columns);
-	printf ("%sRows: %ld\n", ident, prresult->rows);
-	printf ("%sFetched rows: %ld\n", ident, prresult->fetched_rows);
-	if (!prresult->closed) {
-		printf ("%sWarning: resultset wasn't closed by mysqli_free_result()\n", ident);
+	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "columns", prresult->columns);
+	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "rows", prresult->rows);
+	MYSQLI_PROFILER_ADD_ATTR_LONG(buffer, "fetched_rows", prresult->fetched_rows);
+	if (!prresult->closed || prresult->fetched_rows != prresult->rows) {
+		MYSQLI_PROFILER_ADD_STARTTAG(buffer, "warnings",0);
+		if (!prresult->closed) {
+			MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "warning", "resultset wasn't closed by mysqli_free_result()");
+		}
+		if (prresult->fetched_rows != prresult->rows) {
+			MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "warning", "Not all rows from resultset were fetched.");
+		}
+		MYSQLI_PROFILER_ADD_ENDTAG(buffer, "warnings");
 	}
-	printf("\n");
 	efree(ident);
 }
 /* }}} */
@@ -300,14 +314,16 @@ void php_mysqli_profiler_report_result(PR_RESULT *prresult, int depth)
 /* {{{ void php_mysqli_profiler_report_command(PR_COMMAND *, int) */
 void php_mysqli_profiler_report_command(PR_COMMAND *prcommand, int depth)
 {
-	char 			*ident = php_mysqli_profiler_indent(depth);
+	char	*ident = php_mysqli_profiler_indent(depth);
+	char	buffer[8192];
 
+	buffer[0] = '\0';
 	php_mysqli_profiler_report_header(prcommand->header, ident);
+
 	if (prcommand->returnvalue) {
-		printf("%sReturnvalue: %s\n", ident, prcommand->returnvalue);
+		MYSQLI_PROFILER_ADD_ATTR_STRING(buffer, "return_value", prcommand->returnvalue);
 		efree(prcommand->returnvalue);
 	}
-	printf("\n");
 	efree(ident);
 }
 /* }}} */
@@ -317,23 +333,42 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 {
 	PR_COMMON	*child;
 	PR_COMMON	*next;
+	char		buffer[8192];
+	char		tag[50];
+	char		*ident = php_mysqli_profiler_indent(depth);
+
+	buffer[0] = '\0';
+
 	switch (current->header.type) {
+		case MYSQLI_PR_MAIN:
+		{
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer,"?xml version=\"1.0\" ?", 0); 
+			sprintf((char *)&tag, "profilerinfo source='PHP5' version='%2.1f'", MYSQLI_PROFILER_VERSION);
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 0);
+			strcpy (tag, "profilerinfo");
+		}
+		break;
 		case MYSQLI_PR_MYSQL:
 		{
 			PR_MYSQL *prmysql = (PR_MYSQL *)current;
+			strcpy(tag, "connection");
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 1);
 			php_mysqli_profiler_report_mysql(prmysql, depth);
 		}
 		break;
 		case MYSQLI_PR_COMMAND:
 		{
 			PR_COMMAND *prcommand = (PR_COMMAND *)current;
-			child = NULL;
+			strcpy(tag, "command");
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 1);
 			php_mysqli_profiler_report_command(prcommand, depth);
 		}
 		break;
 		case MYSQLI_PR_RESULT:
 		{
 			PR_RESULT *prresult = (PR_RESULT *)current;
+			strcpy(tag, "resultset");
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 1);
 			php_mysqli_profiler_report_result(prresult, depth);
 		}
 		break;
@@ -341,6 +376,8 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 		case MYSQLI_PR_STMT_RESULT:
 		{
 			PR_STMT *prstmt = (PR_STMT *)current;
+			strcpy(tag, "statement");
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 1);
 			php_mysqli_profiler_report_stmt(prstmt, depth);
 		}
 		break;
@@ -348,6 +385,8 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 		case MYSQLI_PR_QUERY_RESULT:
 		{
 			PR_QUERY *prquery = (PR_QUERY *)current;
+			strcpy(tag, "query");
+			MYSQLI_PROFILER_ADD_STARTTAG(buffer, tag, 1);
 			php_mysqli_profiler_report_query(prquery, depth);
 		}
 		break;
@@ -357,28 +396,91 @@ void php_mysqli_profiler_report(PR_COMMON *current, int depth)
 		php_mysqli_profiler_report(child, depth+1);
 	}
 
+	MYSQLI_PROFILER_ADD_ENDTAG(buffer, tag);
 	next = (current->header.next) ? current->header.next : NULL;
 	
 	if (next) {
 		php_mysqli_profiler_report(next, depth);
 	}
+
+	if (current->header.type == MYSQLI_PR_MAIN) {
+		PR_MAIN *prmain = (PR_MAIN *)current;
+		my_efree(prmain->name);
+	}
 	efree(current);
+	efree(ident);
 	return;
 }
 /* }}} */
 
-/* {{{ proto void mysqli_profiler (bool profiler)
+/* {{{ proto bool mysqli_profiler (int flags, char *info, int port)
 */
 PHP_FUNCTION(mysqli_profiler)
 { 
-	int flags;
+	int 	flag;
+	char	*name;
+	int		name_len = 0, port = 0;
+	int		connection;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &flags) == FAILURE) {
+	if (MyG(profiler)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Profiler was already started.");
+		RETURN_FALSE;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|sl", &flag, &name, &name_len, &port) == FAILURE) {
 		return;
 	}
-	MyG(profiler) = flags;
-	
-	return;
+
+	switch (flag) {
+		case MYSQLI_PR_REPORT_STDERR:
+			prmain = ecalloc(1, sizeof(PR_MAIN));
+			prmain->mode = flag;
+			break;
+		case MYSQLI_PR_REPORT_PORT:
+			if (!name_len) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hostname not specified.");
+				RETURN_FALSE;
+			}
+			if (!port) {	
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Portnumber not specified.");
+				RETURN_FALSE;
+			}
+			if (!(connection = php_mysqli_create_socket(name, port))) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to connect to host %s on port %d, name, port");
+				RETURN_FALSE;
+			}	
+			prmain = ecalloc(1, sizeof(PR_MAIN));
+			prmain->mode = flag;
+			prmain->port = port;
+			prmain->name = my_estrdup(name);
+			prmain->connection = connection;
+			break;
+		case MYSQLI_PR_REPORT_FILE:
+			if (!name_len) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Filename not specified.");
+				RETURN_FALSE;
+			}
+			prmain = ecalloc(1, sizeof(PR_MAIN));
+			if (!(prmain->fp = fopen(name, "w"))){
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can't write to file %s.", name);
+				efree(prmain);
+				RETURN_FALSE;
+			}
+			prmain->mode = flag;
+			prmain->name = my_estrdup(name);
+			
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unsupported flag: %d", flag);
+			RETURN_FALSE;
+	}
+
+
+/*    PR_SSEND(port,"<application>");
+	php_mysqli_close_socket(prmain.connection);
+*/
+	MyG(profiler) = flag;
+	RETURN_TRUE;
 }
 /* }}} */
 /*
