@@ -117,10 +117,10 @@ $settings = array(
 		'auto_append_file=',
 		'disable_functions='
 	);
-$params = array();
-settings2array($settings,$params);
-settings2params($params);
-$php_info = `$php $params $info_file`;
+$info_params = array();
+settings2array($settings,$info_params);
+settings2params($info_params);
+$php_info = `$php $info_params $info_file`;
 @unlink($info_file);
 
 // Write test context information.
@@ -427,7 +427,7 @@ function error_report($testname,$logname,$tested)
 
 function run_test($php,$file)
 {
-	global $log_format;
+	global $log_format, $info_params;
 
 	if (DETAILED) echo "
 =================
@@ -491,7 +491,7 @@ TEST $file
 	if (array_key_exists('SKIPIF', $section_text)) {
 		if (trim($section_text['SKIPIF'])) {
 			save_text($tmp_skipif, $section_text['SKIPIF']);
-			$output = `$php $tmp_skipif`;
+			$output = `$php $info_params $tmp_skipif`;
 			@unlink($tmp_skipif);
 			if (ereg("^skip", trim($output))){
 				echo "SKIP $tested";
