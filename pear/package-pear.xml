@@ -73,8 +73,8 @@ First package release.  Commands implemented:
 	<file role="php" name="Remote.php"/>
       </dir>
       <dir name="scripts">
-	<file baseinstalldir="/" role="script" install-as="pear" name="pear.in" replace="yes">
-          <replace from="@prefix@" to="PHP_PREFIX" type="php-const"/>
+	<file baseinstalldir="/" role="script" install-as="pear" name="pear.in">
+          <replace from="@prefix@" to="PHP_PREFIX" type="pear-config"/>
         </file>
       </dir>
     </filelist>
