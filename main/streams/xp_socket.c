@@ -32,7 +32,7 @@
 #endif
 
 php_stream_ops php_stream_generic_socket_ops;
-php_stream_ops php_stream_socket_ops;
+PHPAPI php_stream_ops php_stream_socket_ops;
 php_stream_ops php_stream_udp_socket_ops;
 #ifdef AF_UNIX
 php_stream_ops php_stream_unix_socket_ops;
