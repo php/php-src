@@ -61,7 +61,7 @@ latest stable release of each package.',
             'shortcut' => 'sp',
             'options' => array(),
             'doc' => '
-Lists all packages which match the search paramteres (first param
+Lists all packages which match the search parameters (first param
 is package name, second package info)',
             ),
         'list-all' => array(
