@@ -1364,7 +1364,8 @@ PHP_FUNCTION(pg_fetch_result)
 		convert_to_long_ex(row);
 		pgsql_row = Z_LVAL_PP(row);
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+							Z_LVAL_PP(row), Z_LVAL_PP(result));
 			RETURN_FALSE;
 		}
 	}
@@ -1447,7 +1448,8 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 			pgsql_row = Z_LVAL_PP(row);
 			pg_result->row = pgsql_row;
 			if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+								Z_LVAL_PP(row), Z_LVAL_PP(result));
 				RETURN_FALSE;
 			}
 		} else {
@@ -1623,7 +1625,8 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		convert_to_long_ex(row);
 		pgsql_row = Z_LVAL_PP(row);
 		if (pgsql_row < 0 || pgsql_row >= PQntuples(pgsql_result)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on PostgreSQL result index %d", Z_LVAL_PP(row), Z_LVAL_PP(result));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on PostgreSQL result index %ld",
+							Z_LVAL_PP(row), Z_LVAL_PP(result));
 			RETURN_FALSE;
 		}
 	}
@@ -2139,11 +2142,12 @@ PHP_FUNCTION(pg_lo_write)
 	if (argc > 2) {
 		convert_to_long_ex(z_len);
 		if (Z_LVAL_PP(z_len) > Z_STRLEN_PP(str)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %d", Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write more than buffer size %d. Tried to write %ld", 
+							Z_STRLEN_PP(str), Z_LVAL_PP(z_len));
 			RETURN_FALSE;
 		}
 		if (Z_LVAL_PP(z_len) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %d was specified", Z_LVAL_PP(str), Z_LVAL_PP(z_len));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Buffer size must be larger than 0, but %d was specified", Z_STRLEN_PP(str));
 			RETURN_FALSE;
 		}
 		len = Z_LVAL_PP(z_len);

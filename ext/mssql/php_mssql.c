@@ -1726,7 +1726,7 @@ PHP_FUNCTION(mssql_result)
 	
 	convert_to_long_ex(row);
 	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%d)", Z_LVAL_PP(row));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Bad row offset (%ld)", Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 

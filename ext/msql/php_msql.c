@@ -786,7 +786,7 @@ PHP_FUNCTION(msql_result)
 	
 	convert_to_long(row);
 	if (Z_LVAL_P(row)<0 || Z_LVAL_P(row)>=msqlNumRows(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %d on mSQL query index %d",Z_LVAL_P(row),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to jump to row %ld on mSQL query index %ld", Z_LVAL_P(row), Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,Z_LVAL_P(row));
@@ -818,7 +818,7 @@ PHP_FUNCTION(msql_result)
 						i++;
 					}
 					if (!tmp_field) { /* no match found */
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in mSQL query index %d",
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s%s%s not found in mSQL query index %ld",
 									(table_name?table_name:""), (table_name?".":""), field_name, Z_LVAL_P(result));
 						efree(field_name);
 						if (table_name) {
@@ -1010,7 +1010,7 @@ PHP_FUNCTION(msql_data_seek)
 	if (!msql_result ||
 			Z_LVAL_P(offset)<0 || 
 			Z_LVAL_P(offset)>=msqlNumRows(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%d is invalid for mSQL query index %d",Z_LVAL_P(offset),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%ld is invalid for mSQL query index %ld", Z_LVAL_P(offset), Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlDataSeek(msql_result,Z_LVAL_P(offset));
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(msql_field_seek)
 		RETURN_FALSE;
 	}
 	if (Z_LVAL_P(offset)<0 || Z_LVAL_P(offset)>=msqlNumFields(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %d is invalid for mSQL query index %d",
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %ld is invalid for mSQL query index %ld",
 				Z_LVAL_P(offset),Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
@@ -1162,7 +1162,7 @@ static void php_msql_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 	convert_to_long(field);
 	if (Z_LVAL_P(field)<0 || Z_LVAL_P(field)>=msqlNumFields(msql_result)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %d is invalid for mSQL query index %d",Z_LVAL_P(field),Z_LVAL_P(result));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Field %ld is invalid for mSQL query index %ld", Z_LVAL_P(field), Z_LVAL_P(result));
 		RETURN_FALSE;
 	}
 	msqlFieldSeek(msql_result,Z_LVAL_P(field));

@@ -163,7 +163,7 @@ PHP_FUNCTION(dbase_close)
 	convert_to_long_ex(dbh_id);
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -187,7 +187,7 @@ PHP_FUNCTION(dbase_numrecords)
 	convert_to_long_ex(dbh_id);
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -210,7 +210,7 @@ PHP_FUNCTION(dbase_numfields)
 	convert_to_long_ex(dbh_id);
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -233,7 +233,7 @@ PHP_FUNCTION(dbase_pack)
 	convert_to_long_ex(dbh_id);
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -268,7 +268,7 @@ PHP_FUNCTION(dbase_add_record)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -339,7 +339,7 @@ PHP_FUNCTION(dbase_replace_record)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
@@ -395,15 +395,15 @@ PHP_FUNCTION(dbase_delete_record)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
 	if (del_dbf_record(dbh, Z_LVAL_PP(record)) < 0) {
 		if (Z_LVAL_PP(record) > dbh->db_records) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "record %d out of bounds", Z_LVAL_PP(record));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "record %ld out of bounds", Z_LVAL_PP(record));
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to delete record %d", Z_LVAL_PP(record));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to delete record %ld", Z_LVAL_PP(record));
 		}
 		RETURN_FALSE;
 	}
@@ -435,12 +435,12 @@ static void php_dbase_get_record(INTERNAL_FUNCTION_PARAMETERS, int assoc)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
 	if ((data = get_dbf_record(dbh, Z_LVAL_PP(record))) == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to read bad record %d", Z_LVAL_PP(record));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to read bad record %ld", Z_LVAL_PP(record));
 		RETURN_FALSE;
 	}
 
@@ -760,7 +760,7 @@ PHP_FUNCTION(dbase_get_header_info)
 
 	dbh = zend_list_find(Z_LVAL_PP(dbh_id), &dbh_type);
 	if (!dbh || dbh_type != DBase_GLOBAL(le_dbhead)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %d", Z_LVAL_PP(dbh_id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find database for identifier %ld", Z_LVAL_PP(dbh_id));
 		RETURN_FALSE;
 	}
 
