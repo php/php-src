@@ -1,3 +1,141 @@
+2001-08-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/math.c
+      ext/standard/string.c:
+    * ext/standard/php_string.h
+      ext/standard/string.c: Un-revert patch
+
+    * ext/standard/php_string.h
+      ext/standard/string.c: Reverting last patch, segfaults.
+
+2001-08-03  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c: Change from E_ERROR to E_WARNING in the exif extension
+
+2001-08-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/math.c:
+    - New pow() function. It now gives warnings on wrong input, and
+      returns integer result when possible
+    - New pow() implementation, which returns an integer when possible,
+      and warnings on wrong input (jeroen)
+
+    * ext/standard/php_string.h
+      ext/standard/string.c:
+    - Added new parameter to [l|r]trim, to specify _what_ to trim
+    - Added optional second parameter to trim, chop and ltrim. You can
+      now specify which characters to trim (jeroen)
+
+2001-08-03  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/imap/config.m4:
+    Don't blindly assume -lc-client when linking 'conftest'.
+
+2001-08-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/array.c:
+    - Fix array_sum to switch to float on overflow. Fixes bug#12505
+
+2001-08-03  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/sysvshm/sysvshm.c: Full include paths are preferrable.
+
+    * ext/sysvshm/sysvshm.c: smart_str use requires php_smart_str.h.
+
+2001-08-03  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/pgsql.php:
+    added tableInfo() (thanks to Francis Romera <francis@vulcanonet.com>)
+
+    * pear/DB/common.php: Added DB_FETCHMODE_OBJECT support for getAll()
+
+    * pear/DB/common.php:
+    setFetchmode now accepts a second optional param with the class type
+    of the row object returned by the DB_FETCHMODE_OBJECT fetchmode. With that
+    people can easily extend the functionality of a row object.
+
+    * pear/DB.php:
+    * Added the new fetch row mode: DB_FETCHMODE_OBJECT that returns the columns
+      of a fetched row as object properties
+    * Added a new class DB_row (the default type of a fetched row object)
+    * Updated some phpdocs
+
+2001-08-03  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Destruct resources appropiately, when associating the connection with
+    a new fd.
+
+    * ext/standard/php_smart_str.h: Treat trailing zeroes correctly
+
+    * ext/session/session.c
+      ext/standard/var.c:
+    Do the nul'ifiying of php_var_serialize's result at the right place
+
+    * ext/session/session.c: Pass on nul'ified data
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/string.c: Don't copy the strtok parameter
+
+    * ext/standard/fsock.c:
+    Fix a possible segfault (Thanks to Sebastian for catching it)
+
+    * ext/standard/var.c: NUL-terminate string
+
+    * ext/session/session.c: Add some casts
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/string.c:
+    Replace our strtok implementation with a binary-safe one which code
+    does not cause headaches when reading it.  Also happens to be a bit quicker.
+
+    * ext/standard/php_smart_str.h
+      ext/standard/php_var.h
+      ext/standard/var.c
+      ext/sysvshm/sysvshm.c
+      ext/session/session.c:
+    Convert serializer to smart_str.. avoids lots of sprintf's and
+    copying of data.
+
+2001-08-03  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_ini.c
+      sapi/cgi/cgi_main.c
+      main/main.c
+      ext/standard/browscap.c:
+    Get rid of a couple of bogus persist_alloc()'s, and some cleanup
+
+    * ext/com/VARIANT.c: More TSRM stuff
+
+2001-08-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/informix/config.m4
+      ext/imap/config.m4
+      acinclude.m4: Changed the PHP_ADD_LIBRARY_DEFER() to work when building
+    standalone extensions. Also improved the checks for SSL and Kerberos in
+    IMAP extension configure.
+
+    * ext/odbc/php_odbc.h:
+    These are redefined in the sqltypes.h that comes with unixODBC. PR: #12519
+
+2001-08-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/sapi_apache2.c: Revert whitespace patch.
+
+2001-08-03  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/imap/php_imap.h: Add missing header.
+
+2001-08-03  Alexander Merz  <alexander.merz@t-online.de>
+
+    * pear/File/Find.php: fix PHPDoc
+
+2001-08-03  Zeev Suraski  <zeev@zend.com>
+
+    * win32/php4dll.dsp: Fix non-TS build
+
 2001-08-02  Thomas V.V.Cox  <cox@idecnet.com>
 
     * pear/DB/pgsql.php:
