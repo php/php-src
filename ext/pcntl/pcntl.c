@@ -520,7 +520,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for handle argument specifEied");
 		}
 		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == SIG_ERR) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning singal");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
 		}
 		RETURN_TRUE;
@@ -538,7 +538,7 @@ PHP_FUNCTION(pcntl_signal)
 	if (dest_handle) zval_add_ref(dest_handle);
 	
 	if (php_signal(signo, pcntl_signal_handler, (int) restart_syscalls) == SIG_ERR) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning singal");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -671,7 +671,7 @@ void pcntl_tick_handler()
 
 		ZVAL_LONG(param, *signal_num);
 		
-		/* Call php singal handler - Note that we do not report errors, and we ignore the return value */
+		/* Call php signal handler - Note that we do not report errors, and we ignore the return value */
 		call_user_function(EG(function_table), NULL, *handle, retval, 1, &param TSRMLS_CC);
 	}
 	/* Clear */
