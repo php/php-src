@@ -3864,6 +3864,14 @@ int zend_get_class_fetch_type(char *class_name, uint class_name_len)
 	}
 }
 
+ZEND_API char* zend_get_compiled_variable_name(zend_op_array *op_array, zend_uint var, int* name_len)
+{
+	if (name_len) {
+		*name_len = op_array->vars[var].name_len;
+	}
+	return op_array->vars[var].name;
+}
+
 /*
  * Local variables:
  * tab-width: 4
