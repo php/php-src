@@ -237,21 +237,32 @@ void zend_do_binary_assign_op(zend_uchar op, znode *result, znode *op1, znode *o
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 	
-	if (last_op->opcode == ZEND_FETCH_OBJ_RW) {
-		last_op->opcode = op;
-		last_op->extended_value = ZEND_ASSIGN_OBJ;
+	switch (last_op->opcode) {
+		case ZEND_FETCH_OBJ_RW:
+			last_op->opcode = op;
+			last_op->extended_value = ZEND_ASSIGN_OBJ;
 
-		zend_do_op_data(opline, op2 TSRMLS_CC);
-		SET_UNUSED(opline->result);
-		*result = last_op->result;
-	} else {
-		opline->opcode = op;
-		opline->op1 = *op1;
-		opline->op2 = *op2;
-		opline->result.op_type = IS_VAR;
-		opline->result.u.EA.type = 0;
-		opline->result.u.var = get_temporary_variable(CG(active_op_array));
-		*result = opline->result;
+			zend_do_op_data(opline, op2 TSRMLS_CC);
+			SET_UNUSED(opline->result);
+			*result = last_op->result;
+			break;
+		case ZEND_FETCH_DIM_RW:
+			last_op->opcode = op;
+			last_op->extended_value = ZEND_ASSIGN_DIM;
+
+			zend_do_op_data(opline, op2 TSRMLS_CC);
+			SET_UNUSED(opline->result);
+			*result = last_op->result;
+			break;
+		default:
+			opline->opcode = op;
+			opline->op1 = *op1;
+			opline->op2 = *op2;
+			opline->result.op_type = IS_VAR;
+			opline->result.u.EA.type = 0;
+			opline->result.u.var = get_temporary_variable(CG(active_op_array));
+			*result = opline->result;
+			break;
 	}
 }
 
