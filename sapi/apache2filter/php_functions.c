@@ -115,7 +115,7 @@ PHP_FUNCTION(apache_lookup_uri)
 PHP_FUNCTION(getallheaders)
 {
 	php_struct *ctx;
-	apr_array_header_t *arr;
+	const apr_array_header_t *arr;
 	char *key, *val;
 
 	if (array_init(return_value) == FAILURE) {
