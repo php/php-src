@@ -371,7 +371,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 		/* static properties */		
 		string_printf(str, "\n%s  - Static methods [%d] {", indent, count_static_funcs);
-		if (count > 0) {
+		if (count_static_funcs > 0) {
 			HashPosition pos;
 			zend_function *mptr;
 
