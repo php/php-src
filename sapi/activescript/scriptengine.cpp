@@ -50,6 +50,9 @@ extern "C" {
 #include "php5as_scriptengine.h"
 #include "php5as_classfactory.h"
 #include <objbase.h>
+#undef php_win_err
+
+#define ACTIVEPHP_THREADING_MODE	COINIT_MULTITHREADED
 
 /* {{{ trace */
 static inline void trace(char *fmt, ...)
@@ -651,7 +654,6 @@ TPHPScriptingEngine::TPHPScriptingEngine()
 	TPHPClassFactory::AddToObjectCount();
 	
 	m_engine_thread_handle = CreateThread(NULL, 0, begin_engine_thread, this, 0, &m_enginethread);
-	CloseHandle(m_engine_thread_handle);
 }
 
 void activescript_run_ticks(int count)
@@ -733,10 +735,14 @@ HRESULT TPHPScriptingEngine::SendThreadMessage(LONG msg, WPARAM wparam, LPARAM l
 TPHPScriptingEngine::~TPHPScriptingEngine()
 {
 	trace("\n\n *** Engine Destructor Called\n\n");
-	if (m_scriptstate != SCRIPTSTATE_UNINITIALIZED && m_scriptstate != SCRIPTSTATE_CLOSED && m_enginethread)
-		Close();
 
+	if (m_scriptstate != SCRIPTSTATE_UNINITIALIZED && m_scriptstate != SCRIPTSTATE_CLOSED && m_enginethread) {
+		Close();
+	}
+		
 	PostThreadMessage(m_enginethread, WM_QUIT, 0, 0);
+	WaitForSingleObject(m_engine_thread_handle, INFINITE);
+	CloseHandle(m_engine_thread_handle);
 
 	TPHPClassFactory::RemoveFromObjectCount();
 	tsrm_mutex_free(m_mutex);
@@ -851,6 +857,8 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 				/* Prepare PHP/ZE for use */
 
 				trace("%08x: m_frags : INIT NEW\n", this);
+
+#if 0
 				zend_hash_init(&m_frags, 0, NULL, frag_dtor, TRUE);
 
 				SG(options) |= SAPI_OPTION_NO_CHDIR;
@@ -865,8 +873,9 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 
 				php_request_startup(TSRMLS_C);
 				PG(during_request_startup) = 0;
-				trace("\n\n     *** ticks func at %08x %08x ***\n\n\n", activescript_run_ticks, &activescript_run_ticks);
+//				trace("\n\n     *** ticks func at %08x %08x ***\n\n\n", activescript_run_ticks, &activescript_run_ticks);
 //				php_add_tick_function(activescript_run_ticks);
+#endif
 
 			}
 			break;
@@ -881,8 +890,10 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 					m_pass_eng->Release();
 					m_pass_eng = NULL;
 				}
+#if 0
 				zend_hash_destroy(&m_frags);
 				php_request_shutdown(NULL);
+#endif
 
 				break;
 			}
@@ -998,7 +1009,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 			{
 				struct php_active_script_get_dispatch_info *info = (struct php_active_script_get_dispatch_info *)lParam;
 				IDispatch *disp = NULL;
-
+				
 				if (info->pstrItemName != NULL) {
 					zval **tmp;
 					/* use this rather than php_OLECHAR_to_char because we want to avoid emalloc here */
@@ -1025,8 +1036,10 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 				if (disp) {
 					ret = GIT_put(disp, IID_IDispatch, &info->dispatch);
 					disp->Release();
+					trace("GET_DISPATCH: we put it in the GIT\n");
 				} else {
 					ret = S_FALSE;
+					trace("GET_DISPATCH: FAILED to put it in the GIT\n");
 				}
 			}
 			break;
@@ -1039,10 +1052,22 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 				struct php_active_script_add_named_item_info *info = (struct php_active_script_add_named_item_info *)lParam;
 
 				TWideString name(info->pstrName);
-				IDispatch *disp;
-				
-				if (SUCCEEDED(GIT_get(info->marshal, IID_IDispatch, (void**)&disp))) 
+				IDispatch *disp = NULL;
+				HRESULT res;
+			
+				trace("ADD_NAMED_ITEM\n");
+
+#if ACTIVEPHP_THREADING_MODE == COINIT_MULTITHREADED
+				res = info->punk->QueryInterface(IID_IDispatch, (void**)&disp);
+#else
+				res = GIT_get(info->marshal, IID_IDispatch, (void**)&disp);
+#endif
+				if (SUCCEEDED(res) && disp) {
 					add_to_global_namespace(disp, info->dwFlags, name.ansi_string() TSRMLS_CC);
+					disp->Release();
+				} else {
+					trace("Ouch: failed to get IDispatch for %s from GIT '%s'\n", name.ansi_string(), php_win_err(res));
+				}
 
 			}
 			break;
@@ -1178,7 +1203,7 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 			}
 			break;
 		default:
-			trace("unhandled message type %08x\n", msg);
+			trace("XXXXX: unhandled message type %08x\n", msg);
 			if (handled)
 				*handled = 0;
 	}
@@ -1195,55 +1220,86 @@ void TPHPScriptingEngine::engine_thread_func(void)
 
 	trace("%08x: engine thread started up!\n", this);
 
-	CoInitializeEx(0, COINIT_MULTITHREADED);
+	CoInitializeEx(0, ACTIVEPHP_THREADING_MODE);
 	
-	m_tsrm_hack = tsrm_ls;
+	zend_first_try {
+		m_tsrm_hack = tsrm_ls;
 
-	while(!terminated) {
-		DWORD result = MsgWaitForMultipleObjects(0, NULL, FALSE, 4000, QS_ALLINPUT);
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		SG(headers_sent) = 1;
+		SG(request_info).no_headers = 1;
 
-		switch(result) {
-			case WAIT_OBJECT_0:
-				while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		SG(server_context) = this;
+		/* override the default PHP error callback */
+		zend_error_cb = activescript_error_handler;
 
-					if (msg.message == WM_QUIT) {
-						terminated = 1;
-					} else if (msg.hwnd) {
-						TranslateMessage(&msg);
-						DispatchMessage(&msg);
+		zend_alter_ini_entry("register_argc_argv", 19, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry("html_errors", 12, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry("implicit_flush", 15, "1", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
+		zend_alter_ini_entry("max_execution_time", 19, "0", 1, PHP_INI_SYSTEM, PHP_INI_STAGE_ACTIVATE);
 
-					} else {
-						handled = 1;
-						m_sync_thread_ret = engine_thread_handler(msg.message, msg.wParam, msg.lParam, &handled TSRMLS_CC);
-						if (handled)
-							SetEvent(m_sync_thread_msg);
-					}
+		if (SUCCESS == php_request_startup(TSRMLS_C)) {
+			PG(during_request_startup) = 0;
+			if (FAILURE == zend_hash_init(&m_frags, 0, NULL, frag_dtor, 1)) {
+				trace("failed to init frags hash\n");
+			}
 
+			while(!terminated) {
+				DWORD result = MsgWaitForMultipleObjects(0, NULL, FALSE, 4000, QS_ALLINPUT);
+
+				switch(result) {
+					case WAIT_OBJECT_0:
+						while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+
+							if (msg.message == WM_QUIT) {
+								terminated = 1;
+							} else if (msg.hwnd) {
+								TranslateMessage(&msg);
+								DispatchMessage(&msg);
+
+							} else {
+								handled = 1;
+								m_sync_thread_ret = engine_thread_handler(msg.message, msg.wParam, msg.lParam, &handled TSRMLS_CC);
+								if (handled)
+									SetEvent(m_sync_thread_msg);
+							}
+
+						}
+						break;
+					case WAIT_TIMEOUT:
+						trace("thread wait timed out\n");
+						break;
+					default:
+						trace("some strange value\n");
 				}
-				break;
-			case WAIT_TIMEOUT:
-				trace("thread wait timed out\n");
-				break;
-			default:
-				trace("some strange value\n");
-		}
-	}
-	
+			}
+
 #if 0
-	while(GetMessage(&msg, NULL, 0, 0)) {
+			while(GetMessage(&msg, NULL, 0, 0)) {
 
-		if (msg.message == WM_QUIT)
-			break;
-		
-		handled = 1;
-		m_sync_thread_ret = engine_thread_handler(msg.message, msg.wParam, msg.lParam, &handled TSRMLS_CC);
-		if (handled)
-			SetEvent(m_sync_thread_msg);
-	}
-	trace("%08x: engine thread exiting!!!!!\n", this);
+				if (msg.message == WM_QUIT)
+					break;
+
+				handled = 1;
+				m_sync_thread_ret = engine_thread_handler(msg.message, msg.wParam, msg.lParam, &handled TSRMLS_CC);
+				if (handled)
+					SetEvent(m_sync_thread_msg);
+			}
 #endif
-	m_enginethread = 0;
 
+			trace("%08x: engine thread exiting!!!!!\n", this);
+			zend_hash_destroy(&m_frags);
+			trace("calling request shutdown\n");
+			php_request_shutdown(NULL);
+		} else {
+			trace("request startup failed\n");
+		}
+
+	} zend_catch {
+		trace("ouch: bailed out\n");
+	} zend_end_try();
+	
+	m_enginethread = 0;
 	CoUninitialize();
 }
 
@@ -1255,6 +1311,16 @@ void TPHPScriptingEngine::engine_thread_func(void)
  *
  * TODO: evaluate if it is appropriate to register as an auto_global
  * */
+
+static inline void make_auto_global(char *name, zval *val TSRMLS_DC)
+{
+	int namelen = strlen(name);
+
+	zend_register_auto_global(name, namelen, NULL TSRMLS_CC);
+	zend_auto_global_disable_jit(name, namelen TSRMLS_CC);
+	ZEND_SET_SYMBOL(&EG(symbol_table), name, val);
+}
+
 void TPHPScriptingEngine::add_to_global_namespace(IDispatch *disp, DWORD flags, char *name TSRMLS_DC)
 {
 	zval *val;
@@ -1271,6 +1337,7 @@ void TPHPScriptingEngine::add_to_global_namespace(IDispatch *disp, DWORD flags, 
 
 trace("Add %s to global namespace\n", name);
 	
+	MAKE_STD_ZVAL(val);
 	php_com_wrap_dispatch(val, disp, CP_ACP TSRMLS_CC);
 	
 	if (val == NULL) {
@@ -1278,7 +1345,7 @@ trace("Add %s to global namespace\n", name);
 		return;
 	}
 
-	ZEND_SET_SYMBOL(&EG(symbol_table), name, val);
+	make_auto_global(name, val TSRMLS_CC);
 
 	if ((flags & SCRIPTITEM_GLOBALMEMBERS) == 0) {
 		disp->Release();
@@ -1329,10 +1396,12 @@ trace("Add %s to global namespace\n", name);
 
 								/* add to namespace */
 								zval *subval;
+
+								MAKE_STD_ZVAL(subval);
 								
 								php_com_wrap_dispatch(subval, sub, CP_ACP TSRMLS_CC);
 								if (subval) {
-									ZEND_SET_SYMBOL(&EG(symbol_table), name, subval);	
+									make_auto_global(name, subval TSRMLS_CC);
 								}
 
 								efree(name);
@@ -1377,6 +1446,10 @@ STDMETHODIMP TPHPScriptingEngine::QueryInterface(REFIID iid, void **ppvObject)
 		*ppvObject = (IActiveScriptParse*)this;
 	} else if (IsEqualGUID(IID_IActiveScriptParseProcedure, iid)) {
 		*ppvObject = (IActiveScriptParseProcedure*)this;
+#if ACTIVEPHP_OBJECT_SAFETY
+	} else if (IsEqualGUID(IID_IObjectSafety, iid)) {
+		*ppvObject = (IObjectSafety*)this;
+#endif
 	} else if (IsEqualGUID(IID_IUnknown, iid)) {
 		*ppvObject = this;	
 	} else {
@@ -1486,16 +1559,38 @@ STDMETHODIMP TPHPScriptingEngine::Close(void)
 STDMETHODIMP TPHPScriptingEngine::AddNamedItem(LPCOLESTR pstrName, DWORD dwFlags)
 {
 	struct php_active_script_add_named_item_info info;
+	HRESULT res;
 	TSRMLS_FETCH();
 
 	info.pstrName = pstrName;
 	info.dwFlags = dwFlags;
 
-	m_pass->GetItemInfo(pstrName, SCRIPTINFO_IUNKNOWN, &info.punk, NULL);
-	if (SUCCEEDED(GIT_put(info.punk, IID_IDispatch, &info.marshal))) {
+	res = m_pass->GetItemInfo(pstrName, SCRIPTINFO_IUNKNOWN, &info.punk, NULL);
+
+	if (SUCCEEDED(res)) {
+#if ACTIVEPHP_THREADING_MODE == COINIT_MULTITHREADED
+		/* strangely, the GIT doesn't want to give the engine thread the interface
+		 * in this threading mode */
 		SEND_THREAD_MESSAGE(this, PHPSE_ADD_NAMED_ITEM, 0, (LPARAM)&info TSRMLS_CC);
+#else
+		IDispatch *disp;
+		res = info.punk->QueryInterface(IID_IDispatch, (void**)&disp);
+		
+		if (SUCCEEDED(res) && disp) {
+			if (SUCCEEDED(GIT_put(disp, IID_IDispatch, &info.marshal))) {
+				trace("put disp=%p into git with marshal ID of %x\n", disp, info.marshal);
+				SEND_THREAD_MESSAGE(this, PHPSE_ADD_NAMED_ITEM, 0, (LPARAM)&info TSRMLS_CC);
+				GIT_revoke(info.marshal, disp);
+			}
+			disp->Release();
+		} else {
+			trace("failed to get IDispatch from punk %s", php_win_err(res));
+		}
+		info.punk->Release();
+#endif
+	} else {
+		trace("failed to get named item, %s", php_win_err(res));
 	}
-	info.punk->Release();
 	
 	return S_OK;
 }
@@ -1545,7 +1640,9 @@ STDMETHODIMP TPHPScriptingEngine::GetScriptDispatch(
 	 * This is "safe" only in this instance, since we are not modifying
 	 * the engine state by looking up the dispatch (I hope).
 	 * The scripting engine rules pretty much guarantee that this
-	 * method is only called in the base thread. */
+	 * method is only called in the base thread.
+	 * This appears to only happen when we set the threading to
+	 * apartment. */
 
 	if (tsrm_thread_id() != m_enginethread) {
 		tsrm_ls = m_tsrm_hack;
@@ -1748,6 +1845,31 @@ STDMETHODIMP TPHPScriptingEngine::ParseProcedureText(
 	return ret;
 }
 
+#if ACTIVEPHP_OBJECT_SAFETY
+STDMETHODIMP TPHPScriptingEngine::GetInterfaceSafetyOptions(
+		/* [in]  */ REFIID	riid,						// Interface that we want options for
+		/* [out] */ DWORD	*pdwSupportedOptions,		// Options meaningful on this interface
+		/* [out] */ DWORD	*pdwEnabledOptions)			// current option values on this interface
+{
+	/* PHP isn't really safe for untrusted anything */
+	*pdwSupportedOptions = 0;
+	*pdwEnabledOptions = 0;
+	return S_OK;
+}
+
+STDMETHODIMP TPHPScriptingEngine::SetInterfaceSafetyOptions(
+		/* [in]  */ REFIID		riid,					// Interface to set options for
+		/* [in]  */ DWORD		dwOptionSetMask,		// Options to change
+		/* [in]  */ DWORD		dwEnabledOptions)		// New option values
+{
+	/* PHP isn't really safe for untrusted anything */
+	if (dwEnabledOptions == 0) {
+		return S_OK;
+	}
+	return E_FAIL;
+}
+#endif
+	
 extern "C" 
 void activescript_error_func(int type, const char *error_msg, ...)
 {

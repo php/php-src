@@ -21,9 +21,16 @@
 
 #include <unknwn.h>
 
+// {CF108A38-59A9-468a-AF45-1368D7855DAE}
+DEFINE_GUID(CLSID_PHPActiveScriptEngine,
+0xcf108a38, 0x59a9, 0x468a, 0xaf, 0x45, 0x13, 0x68, 0xd7, 0x85, 0x5d, 0xae);
+
+#if 0
+/* this was for PHP 4 */
 // {A0AD8E7A-95EC-4819-986F-78D93895F2AE}
 DEFINE_GUID(CLSID_PHPActiveScriptEngine, 
 0xa0ad8e7a, 0x95ec, 0x4819, 0x98, 0x6f, 0x78, 0xd9, 0x38, 0x95, 0xf2, 0xae);
+#endif
 
 class TPHPClassFactory:
 	public IClassFactory

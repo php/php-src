@@ -26,7 +26,7 @@ Usage.
 
 o. Client-side script in Internet Explorer
 
-  <script language="ActivePHP">
+  <script language="ActivePHP5">
   	$window->alert("Hello");
   </script>
 
@@ -35,22 +35,22 @@ o. Windows Script Host
   Create a .wsf file like this:
 
   <job id="test">
-    <script language="ActivePHP">
+    <script language="ActivePHP5">
 	  $WScript->Echo("Hello");
 	</script>
   </script>
 
 o. ASP and ASP.NET
 
-  <%@language=ActivePHP %>
+  <%@language=ActivePHP5 %>
   <% $Response->Write("Hello"); %>
 
 o. Windows Script Components / Behaviours
 
-  Use language="ActivePHP" on your <script> tags
+  Use language="ActivePHP5" on your <script> tags
 
 o. MS Scriptlet control
 
-  Set the language property to "ActivePHP"
+  Set the language property to "ActivePHP5"
 
 
