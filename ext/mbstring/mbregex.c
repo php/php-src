@@ -23,6 +23,10 @@
 
 #include "php.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #if HAVE_MBREGEX
 
 #define re_compile_pattern mbre_compile_pattern
