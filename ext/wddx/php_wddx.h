@@ -30,7 +30,6 @@ extern zend_module_entry wddx_module_entry;
 
 PHP_FUNCTION(wddx_serialize_value);
 PHP_FUNCTION(wddx_serialize_vars);
-PHP_FUNCTION(wddx_serialize_type);
 PHP_FUNCTION(wddx_packet_start);
 PHP_FUNCTION(wddx_packet_end);
 PHP_FUNCTION(wddx_add_vars);
