@@ -51,6 +51,8 @@ typedef union {
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length);
 
+BEGIN_EXTERN_C()
+
 #if ZEND_DEBUG
 ZEND_API void *_emalloc(size_t size,char *filename,uint lineno);
 ZEND_API void _efree(void *ptr,char *filename,uint lineno);
@@ -108,6 +110,8 @@ ZEND_API void _full_mem_check(int silent, char *filename, uint lineno);
 #define full_mem_check(silent)
 #endif
 
+
+END_EXTERN_C()
 
 #endif
 

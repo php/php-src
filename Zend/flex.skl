@@ -135,7 +135,6 @@ extern FILE *yyin, *yyout;
 		{ \
 		/* Undo effects of setting up yytext. */ \
 		*yy_cp = yy_hold_char; \
-		YY_RESTORE_YY_MORE_OFFSET \
 		yy_c_buf_p = yy_cp = yy_bp + n - YY_MORE_ADJ; \
 		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
@@ -525,7 +524,6 @@ do_action:	/* This label is used only to access EOF actions. */
 
 		/* Undo the effects of YY_DO_BEFORE_ACTION. */
 		*yy_cp = yy_hold_char;
-		YY_RESTORE_YY_MORE_OFFSET
 
 		if ( yy_current_buffer->yy_buffer_status == YY_BUFFER_NEW )
 			{

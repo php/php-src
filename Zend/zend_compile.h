@@ -181,10 +181,10 @@ typedef struct _zend_file_handle {
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
 
+BEGIN_EXTERN_C()
 extern ZEND_API zend_op_array *(*zend_compile_files)(int mark_as_ref CLS_DC, int file_count, ...);
 
 int lex_scan(zval *zendlval CLS_DC);
-void reset_scanner(CLS_D);
 void startup_scanner(CLS_D);
 void shutdown_scanner(CLS_D);
 
@@ -192,6 +192,12 @@ ZEND_API void zend_set_compiled_filename(char *new_compiled_filename);
 ZEND_API void zend_restore_compiled_filename(char *original_compiled_filename);
 ZEND_API char *zend_get_compiled_filename();
 
+#ifdef ZTS
+const char *zend_get_zendtext(CLS_D);
+int zend_get_zendleng(CLS_D);
+#endif
+
+END_EXTERN_C()
 
 /* parser-driven code generators */
 void do_binary_op(int op, znode *result, znode *op1, znode *op2 CLS_DC);
@@ -317,6 +323,7 @@ void do_extended_fcall_end(CLS_D);
 
 
 /* helper functions in zend-scanner.l */
+BEGIN_EXTERN_C()
 ZEND_API int require_file(zend_file_handle *file_handle CLS_DC);	
 ZEND_API int require_filename(char *filename CLS_DC);				
 ZEND_API zend_op_array *compile_files(int mark_as_ref CLS_DC, int file_count, ...);
@@ -324,12 +331,15 @@ ZEND_API zend_op_array *v_compile_files(int mark_as_ref CLS_DC, int file_count, 
 ZEND_API zend_op_array *compile_string(zval *source_string CLS_DC);	
 ZEND_API zend_op_array *compile_filename(zval *filename CLS_DC);
 inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC);
+END_EXTERN_C()
 
 #define INITIAL_OP_ARRAY_SIZE 64
 
 
+BEGIN_EXTERN_C()
 ZEND_API void init_op_array(zend_op_array *op_array, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
+END_EXTERN_C()
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry *ce);
@@ -337,8 +347,10 @@ zend_op *get_next_op(zend_op_array *op_array CLS_DC);
 int get_next_op_number(zend_op_array *op_array);
 int print_class(zend_class_entry *class_entry);
 void print_op_array(zend_op_array *op_array, int optimizations);
+BEGIN_EXTERN_C()
 int pass_two(zend_op_array *op_array);
 void pass_include_eval(zend_op_array *op_array);
+END_EXTERN_C()
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 
 
