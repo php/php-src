@@ -1891,7 +1891,6 @@ int OS_IsFcgi(int sock)
 void OS_SetFlags(int fd, int flags)
 {
     unsigned long pLong = 1L;
-    int err;
 
     if (fdTable[fd].type == FD_SOCKET_SYNC && flags == O_NONBLOCK) {
         if (ioctlsocket(fdTable[fd].fid.sock, FIONBIO, &pLong) ==
