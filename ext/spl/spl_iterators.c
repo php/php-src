@@ -166,6 +166,7 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zend_class_entry          *ce;
 	zval                      *retval, *child;
 	zend_object_iterator      *sub_iter;
+	int                       has_children;
 
 	while (1) {
 next_step:
@@ -183,9 +184,11 @@ next_step:
 				ce = object->iterators[object->level].ce;
 				zobject = object->iterators[object->level].zobject;
 				zend_call_method_with_0_params(&zobject, ce, NULL, "haschildren", &retval);
-				if (zend_is_true(retval)) {
+				if (retval) {
+					has_children = zend_is_true(retval);
 					zval_ptr_dtor(&retval);
-					switch (object->mode) {
+					if (has_children) {
+						switch (object->mode) {
 						case RIT_LEAVES_ONLY:
 						case RIT_CHILD_FIRST:
 							object->iterators[object->level].state = RS_CHILD;
@@ -193,9 +196,9 @@ next_step:
 						case RIT_SELF_FIRST:
 							object->iterators[object->level].state = RS_SELF;
 							goto next_step;
+						}
 					}
 				}
-				zval_ptr_dtor(&retval);
 				object->iterators[object->level].state = RS_NEXT;
 				return /* self */;
 			case RS_SELF:
