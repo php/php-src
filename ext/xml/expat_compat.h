@@ -56,7 +56,8 @@ typedef struct _XML_Parser {
 
 	xmlHashTablePtr _ns_map;
 	xmlHashTablePtr _reverse_ns_map;
-	
+	xmlChar *_ns_seperator;
+
 	void *user;
 	xmlParserCtxtPtr parser;
 

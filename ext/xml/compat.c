@@ -20,6 +20,13 @@
 #if HAVE_LIBXML && HAVE_XML
 #include "expat_compat.h"
 
+typedef struct _php_xml_ns {
+	xmlNsPtr nsptr;
+	int ref_count;
+	void *next;
+	void *prev;
+} php_xml_ns;
+
 #ifdef LIBXML_EXPAT_COMPAT
 
 #define IS_NS_DECL(__ns) \
@@ -34,23 +41,83 @@ _find_namespace_decl(XML_Parser parser, const xmlChar *tagname, const xmlChar **
 	xmlChar  *value;
 	xmlChar  *partial;
 	xmlChar  *namespace;
+	php_xml_ns *cur_ns_scope = NULL;
+	php_xml_ns *exist_ns_scope;
+	xmlNsPtr nsptr, curnsptr;
+
+	exist_ns_scope = xmlHashLookup(parser->_reverse_ns_map, tagname);
+
+	if (exist_ns_scope) {
+		while (exist_ns_scope->next != NULL)
+			exist_ns_scope = exist_ns_scope->next;
+	}
 
 	while (attr_p && *attr_p) {
 		name = attr_p[0];
 		value = xmlStrdup(attr_p[1]);
 
 		partial = xmlSplitQName(parser->parser, name, &namespace);
+
 		if (IS_NS_DECL(namespace)) {
+
 			if (parser->h_start_ns) {
 				parser->h_start_ns(parser->user, partial, (const XML_Char *) value);
 			}
-			xmlHashAddEntry(parser->_ns_map, partial, value);
-			xmlHashAddEntry(parser->_reverse_ns_map, tagname, xmlStrdup(partial));
-			break;
+			if (xmlHashLookup(parser->_ns_map, partial) == NULL) {
+				xmlHashAddEntry(parser->_ns_map, partial, value);
+			} else {
+				xmlFree(value);
+			}
+
+			nsptr = (xmlNsPtr) xmlMalloc(sizeof(xmlNs));
+
+			if (nsptr) {
+				memset(nsptr, 0, sizeof(xmlNs));
+				nsptr->type = XML_LOCAL_NAMESPACE;
+
+				if (value != NULL)
+					nsptr->href = xmlStrdup(value); 
+				if (partial != NULL)
+					nsptr->prefix = xmlStrdup(partial);
+
+				if (cur_ns_scope == NULL) {
+					cur_ns_scope = emalloc(sizeof(php_xml_ns));
+					cur_ns_scope->next = NULL;
+					cur_ns_scope->prev = NULL;
+					cur_ns_scope->nsptr = nsptr;
+					cur_ns_scope->ref_count = 0;
+
+					if (exist_ns_scope) {
+						exist_ns_scope->next = cur_ns_scope;
+						cur_ns_scope->prev = exist_ns_scope;
+					} else {
+						xmlHashAddEntry(parser->_reverse_ns_map, tagname, cur_ns_scope);
+					}
+
+					exist_ns_scope = cur_ns_scope;
+				} else {
+					curnsptr = cur_ns_scope->nsptr;
+					while (curnsptr->next != NULL) {
+						curnsptr = curnsptr->next;
+					}
+					curnsptr->next = nsptr;
+				}
+			}
+
+		} else {
+			xmlFree(value);
 		}
 
-		xmlFree(value);
+		xmlFree(partial);
+		if (namespace != NULL) {
+			xmlFree(namespace);
+		}
+
 		attr_p += 2;
+	}
+
+	if (exist_ns_scope) {
+		exist_ns_scope->ref_count++;
 	}
 }
 
@@ -59,7 +126,6 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, xmlChar **qualified)
 {
 	xmlChar *partial;
 	xmlChar *namespace;
-	int      len;
 		
 	partial = xmlSplitQName(parser->parser, name, &namespace);
 	if (namespace) {
@@ -67,18 +133,19 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, xmlChar **qualified)
 
 		nsvalue = xmlHashLookup(parser->_ns_map, namespace);
 		if (nsvalue) {
-			len = strlen(nsvalue) + strlen(partial) + 1; /* colon */
-			*qualified = malloc(len+1);
-			memcpy(*qualified, nsvalue, strlen(nsvalue));
-			memcpy(*qualified + strlen(nsvalue), ":", 1);
-			memcpy(*qualified + strlen(nsvalue) + 1, partial, strlen(partial));
-			(*qualified)[len] = '\0';
+			/* Use libxml functions otherwise its memory deallocation is screwed up */
+			*qualified = xmlStrdup(nsvalue);
+			*qualified = xmlStrncat(*qualified, parser->_ns_seperator, 1);
+			*qualified = xmlStrncat(*qualified, partial, strlen(partial));
 		} else {
 			*qualified = xmlStrdup(name);
 		}
+		xmlFree(namespace);
 	} else {
 		*qualified = xmlStrdup(name);
 	}
+	
+	xmlFree(partial);
 }
 
 static void
@@ -104,6 +171,15 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 }
 
 static void
+_namespace_handler(XML_Parser parser, xmlNsPtr nsptr)
+{
+	if (nsptr != NULL) {
+		_namespace_handler(parser, nsptr->next);
+		parser->h_end_ns(parser->user, nsptr->prefix);
+	}
+}
+
+static void
 _end_element_handler(void *user, const xmlChar *name)
 {
 	xmlChar    *qualified_name;
@@ -114,19 +190,39 @@ _end_element_handler(void *user, const xmlChar *name)
 	}
 	
 	if (parser->use_namespace) {
-		xmlChar *nsname;
-
-		nsname = xmlHashLookup(parser->_reverse_ns_map, name);
-		if (nsname && parser->h_end_ns) {
-			parser->h_end_ns(parser->user, nsname);
-		}
-        
 		_qualify_namespace(parser, name, &qualified_name);
 	} else {
 		qualified_name = xmlStrdup(name);
 	}
 
 	parser->h_end_element(parser->user, (const XML_Char *) qualified_name);
+
+	if (parser->use_namespace) {
+		int			tag_counter;
+		php_xml_ns *cur_ns_scope, *prev_ns_scope;
+		xmlNsPtr nsptr;
+
+		cur_ns_scope = xmlHashLookup(parser->_reverse_ns_map, name);
+		if (cur_ns_scope) {
+			while (cur_ns_scope->next != NULL) {
+				cur_ns_scope = cur_ns_scope->next;
+			}
+			tag_counter = --cur_ns_scope->ref_count;
+			if (tag_counter == 0) {
+				nsptr = cur_ns_scope->nsptr;
+				if (nsptr && parser->h_end_ns) {
+					_namespace_handler(parser, nsptr);
+				}
+				xmlFreeNsList(nsptr);
+				cur_ns_scope->nsptr = NULL;
+				prev_ns_scope = cur_ns_scope->prev;
+				if (prev_ns_scope != NULL) {
+					efree(cur_ns_scope);
+					prev_ns_scope->next = NULL;
+				}
+			}
+		}
+	}
 
 	xmlFree(qualified_name);
 }
@@ -304,6 +400,8 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser = (XML_Parser) emalloc(sizeof(struct _XML_Parser));
 	memset(parser, 0, sizeof(struct _XML_Parser));
 	parser->use_namespace = 0;
+	parser->_ns_seperator = NULL;
+
 	parser->parser = xmlCreatePushParserCtxt((xmlSAXHandlerPtr) &php_xml_compat_handlers, (void *) parser, NULL, 0, NULL);
 	if (parser->parser == NULL) {
 		efree(parser);
@@ -318,6 +416,7 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 		parser->use_namespace = 1;
 		parser->_ns_map = xmlHashCreate(10);
 		parser->_reverse_ns_map = xmlHashCreate(10);
+		parser->_ns_seperator = xmlStrdup(sep);
 	}
 	return parser;
 }
@@ -544,12 +643,32 @@ _free_ns_name(void *ptr, xmlChar *name)
 	xmlFree(ptr);
 }
 
+static void
+_free_ns_pointer(void *ptr, xmlChar *name)
+{
+	php_xml_ns *cur_ns_scope;
+
+	/* Child scopes should already be removed, but in the event 
+	of malformed xml, they may still be resident and need to be cleaned */
+	cur_ns_scope = ((php_xml_ns *) ptr)->next;
+	if (cur_ns_scope != NULL) {
+		_free_ns_pointer(cur_ns_scope, NULL);
+	}
+
+	xmlFreeNsList(((php_xml_ns *) ptr)->nsptr);
+
+	efree(ptr);
+}
+
 void
 XML_ParserFree(XML_Parser parser)
 {
 	if (parser->use_namespace) {
 		xmlHashFree(parser->_ns_map,         _free_ns_name);
-		xmlHashFree(parser->_reverse_ns_map, _free_ns_name);
+		xmlHashFree(parser->_reverse_ns_map, _free_ns_pointer);
+		if (parser->_ns_seperator) {
+			xmlFree(parser->_ns_seperator);
+		}
 	}
 	xmlFreeParserCtxt(parser->parser);
 	efree(parser);
