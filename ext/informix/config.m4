@@ -60,7 +60,16 @@ WARNING: You specified Informix base install directory that is different
       AC_DEFINE_UNQUOTED(IFX_VERSION, $IFX_VERSION)
       AC_MSG_RESULT(yes)
       PHP_EXTENSION(informix)
-      IFX_LIBS="$IFX_LFLAGS $IFX_LIBS"
+      for i in $IFX_LIBS; do
+        case "$i" in
+        *.o)
+            IFX_OBJS="$IFX_OBJS $i"
+            IFX_LIBADD="$IFX_LIBADD -Lext/informix -lifx";;
+        *)
+            IFX_LIBADD="$IFX_LIBADD $i";;
+        esac
+      done
+      IFX_LIBS="$IFX_LFLAGS $IFX_LIBADD"
       INCLUDES="$INCLUDES $IFX_INCLUDE"
     fi
   else
@@ -72,6 +81,7 @@ WARNING: You specified Informix base install directory that is different
 ])
 AC_SUBST(INFORMIXDIR)
 AC_SUBST(IFX_LIBS)
+AC_SUBST(IFX_OBJS)
 	
 divert(5)
 
