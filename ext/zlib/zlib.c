@@ -226,7 +226,7 @@ PHP_RINIT_FUNCTION(zlib)
 	uint chunk_size = ZLIBG(output_compression);
 
 	ZLIBG(ob_gzhandler_status) = 0;
-	ZLIBG(ob_gzip_coding) = 0;
+	ZLIBG(compression_coding) = 0;
 	if (chunk_size) {
 		if (chunk_size == 1) {
 			chunk_size = 4096; /* use the default size */
@@ -268,33 +268,22 @@ PHP_MINFO_FUNCTION(zlib)
    Read und uncompress entire .gz-file into an array */
 PHP_FUNCTION(gzfile)
 {
-	zval **filename, **arg2;
+	char *filename;
+	int filename_len;
+	long flags = 0;
 	char *slashed, buf[8192];
 	register int i = 0;
 	int use_include_path = 0;
 	php_stream *stream;
 
-	/* check args */
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1,&filename) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2,&filename,&arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(arg2);
-			use_include_path = Z_LVAL_PP(arg2) ? USE_PATH : 0;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
+
+	use_include_path = flags ? USE_PATH : 0;
 
 	/* using a stream here is a bit more efficient (resource wise) than php_gzopen_wrapper */
-	stream = php_stream_gzopen(NULL, Z_STRVAL_PP(filename), "rb", use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (stream == NULL) {
 		/* Error reporting is already done by stream code */
 		RETURN_FALSE;
@@ -324,31 +313,19 @@ PHP_FUNCTION(gzfile)
    Open a .gz-file and return a .gz-file pointer */
 PHP_FUNCTION(gzopen)
 {
-	zval **arg1, **arg2, **arg3;
+	char *filename, *mode;
+	int filename_len, mode_len;
+	long flags = 0;
 	php_stream *stream;
 	int use_include_path = 0;
 	
-	switch (ZEND_NUM_ARGS()) {
-		case 2:
-			if (zend_get_parameters_ex(2, &arg1, &arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 3:
-			if (zend_get_parameters_ex(3, &arg1, &arg2, &arg3) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(arg3);
-			use_include_path = Z_LVAL_PP(arg3) ? USE_PATH : 0;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &filename, &filename_len, &mode, &mode_len, &flags) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg1);
-	convert_to_string_ex(arg2);
+	use_include_path = flags ? USE_PATH : 0;
 
-	stream = php_stream_gzopen(NULL, Z_STRVAL_PP(arg1), Z_STRVAL_PP(arg2), use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, mode, use_include_path | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, NULL STREAMS_CC TSRMLS_CC);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -364,32 +341,20 @@ PHP_FUNCTION(gzopen)
    Output a .gz-file */
 PHP_FUNCTION(readgzfile)
 {
-	zval **arg1, **arg2;
+	char *filename;
+	int filename_len;
+	long flags = 0;
 	php_stream *stream;
 	int size;
 	int use_include_path = 0;
 	
-	/* check args */
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1,&arg1) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2,&arg1,&arg2) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(arg2);
-			use_include_path = Z_LVAL_PP(arg2) ? USE_PATH : 0;
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &flags) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(arg1);
+	use_include_path = flags ? USE_PATH : 0;
 
-	stream = php_stream_gzopen(NULL, Z_STRVAL_PP(arg1), "rb", use_include_path | ENFORCE_SAFE_MODE, NULL, NULL STREAMS_CC TSRMLS_CC);
+	stream = php_stream_gzopen(NULL, filename, "rb", use_include_path | ENFORCE_SAFE_MODE, NULL, NULL STREAMS_CC TSRMLS_CC);
 	if (!stream) {
 		RETURN_FALSE;
 	}
@@ -403,45 +368,30 @@ PHP_FUNCTION(readgzfile)
    Gzip-compress a string */
 PHP_FUNCTION(gzcompress)
 {
-	zval **data, **zlimit = NULL;
-	int limit, status;
+	int data_len, status;
+	long level = Z_DEFAULT_COMPRESSION;
 	unsigned long l2;
-	char *s2;
+	char *data, *s2;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &data) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			limit = -1;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(zlimit);
-			limit = Z_LVAL_PP(zlimit);
-			if ((limit < 0) || (limit > 9)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level(%d) must be within 0..9", limit);
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &level) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(data);
-	
-	l2 = Z_STRLEN_PP(data) + (Z_STRLEN_PP(data) / 1000) + 15 + 1; /* room for \0 */
+	if ((level < -1) || (level > 9)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level (%ld) must be within -1..9", level);
+		RETURN_FALSE;
+	}
+
+	l2 = data_len + (data_len / 1000) + 15 + 1; /* room for \0 */
 	s2 = (char *) emalloc(l2);
 	if (!s2) {
 		RETURN_FALSE;
 	}
 		
-	if (limit >= 0) {
-		status = compress2(s2, &l2, Z_STRVAL_PP(data), Z_STRLEN_PP(data), limit);
+	if (level >= 0) {
+		status = compress2(s2, &l2, data, data_len, level);
 	} else {
-		status = compress(s2, &l2, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+		status = compress(s2, &l2, data, data_len);
 	}
 	
 	if (status == Z_OK) {
@@ -460,34 +410,20 @@ PHP_FUNCTION(gzcompress)
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzuncompress)
 {
-	zval **data, **zlimit = NULL;
-	int status, factor=1, maxfactor=16;
+	int data_len, status, factor=1, maxfactor=16;
+	long limit = 0;
 	unsigned long plength=0, length;
-	char *s1=NULL, *s2=NULL;
+	char *data, *s1=NULL, *s2=NULL;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &data) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			length = 0;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(zlimit);
-			if (Z_LVAL_PP(zlimit) <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater zero");
-				RETURN_FALSE;
-			}
-			plength = Z_LVAL_PP(zlimit);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &limit) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(data);
+	if (limit < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length (%ld) must be greater or equal zero", limit);
+		RETURN_FALSE;
+	}
+	plength = limit;
 
 	/*
 	 zlib::uncompress() wants to know the output data length
@@ -497,9 +433,9 @@ PHP_FUNCTION(gzuncompress)
 	 that should be eneugh for all real life cases	
 	*/
 	do {
-		length = plength ? plength : Z_STRLEN_PP(data) * (1 << factor++);
+		length = plength ? plength : data_len * (1 << factor++);
 		s2 = (char *) erealloc(s1, length);
-		status = uncompress(s2, &length, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+		status = uncompress(s2, &length, data, data_len);
 		s1 = s2;
 	} while ((status == Z_BUF_ERROR) && (!plength) && (factor < maxfactor));
 
@@ -519,42 +455,27 @@ PHP_FUNCTION(gzuncompress)
    Gzip-compress a string */
 PHP_FUNCTION(gzdeflate)
 {
-	zval **data, **zlimit = NULL;
-	int level,status;
+	int data_len,status;
+	long level = Z_DEFAULT_COMPRESSION;
 	z_stream stream;
-	char *s2;
+	char *data, *s2;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &data) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			level = Z_DEFAULT_COMPRESSION;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(zlimit);
-			level = Z_LVAL_PP(zlimit);
-			if ((level < 0) || (level > 9)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level(%d) must be within 0..9", level);
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &level) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(data);
+	if ((level < -1) || (level > 9)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "compression level (%ld) must be within -1..9", level);
+		RETURN_FALSE;
+	}
 
 	stream.data_type = Z_ASCII;
 	stream.zalloc = (alloc_func) Z_NULL;
 	stream.zfree  = (free_func) Z_NULL;
 	stream.opaque = (voidpf) Z_NULL;
 
-	stream.next_in = (Bytef *) Z_STRVAL_PP(data);
-	stream.avail_in = Z_STRLEN_PP(data);
+	stream.next_in = (Bytef *) data;
+	stream.avail_in = data_len;
 
 	stream.avail_out = stream.avail_in + (stream.avail_in / 1000) + 15 + 1; /* room for \0 */
 
@@ -595,35 +516,21 @@ PHP_FUNCTION(gzdeflate)
    Unzip a gzip-compressed string */
 PHP_FUNCTION(gzinflate)
 {
-	zval **data, **zlimit = NULL;
-	int status, factor=1, maxfactor=16;
+	int data_len, status, factor=1, maxfactor=16;
+	long limit = 0;
 	unsigned long plength=0, length;
-	char *s1=NULL, *s2=NULL;
+	char *data, *s1=NULL, *s2=NULL;
 	z_stream stream;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_get_parameters_ex(1, &data) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			length = 0;
-			break;
-		case 2:
-			if (zend_get_parameters_ex(2, &data, &zlimit) == FAILURE) {
-				WRONG_PARAM_COUNT;
-			}
-			convert_to_long_ex(zlimit);
-			if (Z_LVAL_PP(zlimit) <= 0) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "length must be greater zero");
-				RETURN_FALSE;
-			}
-			plength = Z_LVAL_PP(zlimit);
-			break;
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &data, &data_len, &limit) == FAILURE) {
+		return;
 	}
 
-	convert_to_string_ex(data);
+	if (limit < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "length (%ld) must be greater or equal zero", limit);
+		RETURN_FALSE;
+	}
+	plength = limit;
 
 	/*
 	  stream.avail_out wants to know the output data length
@@ -637,7 +544,7 @@ PHP_FUNCTION(gzinflate)
 	stream.zfree = (free_func) Z_NULL;
 
 	do {
-		length = plength ? plength : Z_STRLEN_PP(data) * (1 << factor++);
+		length = plength ? plength : data_len * (1 << factor++);
 		s2 = (char *) erealloc(s1, length);
 
 		if (!s2 && s1) {
@@ -645,8 +552,8 @@ PHP_FUNCTION(gzinflate)
 			RETURN_FALSE;
 		}
 
-		stream.next_in = (Bytef *) Z_STRVAL_PP(data);
-		stream.avail_in = (uInt) Z_STRLEN_PP(data) + 1; /* there is room for \0 */
+		stream.next_in = (Bytef *) data;
+		stream.avail_in = (uInt) data_len + 1; /* there is room for \0 */
 
 		stream.next_out = s2;
 		stream.avail_out = (uInt) length;
@@ -684,7 +591,7 @@ PHP_FUNCTION(gzinflate)
    Returns the coding type used for output compression */
 PHP_FUNCTION(zlib_get_coding_type)
 {
-	switch (ZLIBG(ob_gzip_coding)) {
+	switch (ZLIBG(compression_coding)) {
 		case CODING_GZIP:
 			RETURN_STRINGL("gzip", sizeof("gzip") - 1, 1);
 
@@ -742,21 +649,19 @@ static int php_do_deflate(uint str_length, Bytef **p_buffer, uint *p_buffer_len,
 
 /* {{{ php_deflate_string
  */
-static int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, int coding, zend_bool do_start, zend_bool do_end, int compression_level TSRMLS_DC)
+static int php_deflate_string(const char *str, uint str_length, char **newstr, uint *new_length, zend_bool do_start, zend_bool do_end TSRMLS_DC)
 {
 	int err;
-
-	ZLIBG(compression_coding) = coding;
 
 	if (do_start) {
 		ZLIBG(stream).zalloc = Z_NULL;
 		ZLIBG(stream).zfree = Z_NULL;
 		ZLIBG(stream).opaque = Z_NULL;
 
-		switch (coding) {
+		switch (ZLIBG(compression_coding)) {
 			case CODING_GZIP:
 				/* windowBits is passed < 0 to suppress zlib header & trailer */
-				if (deflateInit2(&ZLIBG(stream), compression_level, Z_DEFLATED,	-MAX_WBITS, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY) != Z_OK) {
+				if (deflateInit2(&ZLIBG(stream), ZLIBG(output_compression_level), Z_DEFLATED,	-MAX_WBITS, MAX_MEM_LEVEL, Z_DEFAULT_STRATEGY) != Z_OK) {
 					/* TODO: print out error */
 					return FAILURE;
 				}
@@ -765,7 +670,7 @@ static int php_deflate_string(const char *str, uint str_length, char **newstr, u
 				break;
 
 			case CODING_DEFLATE:
-				if (deflateInit(&ZLIBG(stream), compression_level) != Z_OK) {
+				if (deflateInit(&ZLIBG(stream), ZLIBG(output_compression_level)) != Z_OK) {
 					/* TODO: print out error */
 					return FAILURE;
 				}
@@ -947,20 +852,24 @@ int php_ob_gzhandler_check(TSRMLS_D)
    Encode str based on accept-encoding setting - designed to be called from ob_start() */
 PHP_FUNCTION(ob_gzhandler)
 {
-	int coding;
-	zval **zv_string, **zv_mode;
-	zval **data, **a_encoding;
+	char *string;
+	int string_len;
+	long mode;
+	zval **a_encoding;
 	zend_bool return_original = 0;
 	zend_bool do_start, do_end;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &zv_string, &zv_mode) == FAILURE) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &string, &string_len, &mode) == FAILURE) {
+		return;
 	}
 
-	if (ZLIBG(ob_gzhandler_status) == -1
-		|| zend_hash_find(&EG(symbol_table), "HTTP_SERVER_VARS", sizeof("HTTP_SERVER_VARS"), (void **) &data) == FAILURE
-		|| Z_TYPE_PP(data) != IS_ARRAY
-		|| zend_hash_find(Z_ARRVAL_PP(data), "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding) == FAILURE
+	if(ZLIBG(ob_gzhandler_status) == -1)
+		RETURN_FALSE;
+
+	zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
+
+	if (!PG(http_globals)[TRACK_VARS_SERVER]
+		|| zend_hash_find(PG(http_globals)[TRACK_VARS_SERVER]->value.ht, "HTTP_ACCEPT_ENCODING", sizeof("HTTP_ACCEPT_ENCODING"), (void **) &a_encoding) == FAILURE
 	) {
 		ZLIBG(ob_gzhandler_status) = -1;
 		RETURN_FALSE;
@@ -968,24 +877,23 @@ PHP_FUNCTION(ob_gzhandler)
 
 	convert_to_string_ex(a_encoding);
 	if (php_memnstr(Z_STRVAL_PP(a_encoding), "gzip", 4, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		coding = CODING_GZIP;
+		ZLIBG(compression_coding) = CODING_GZIP;
 	} else if (php_memnstr(Z_STRVAL_PP(a_encoding), "deflate", 7, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		coding = CODING_DEFLATE;
+		ZLIBG(compression_coding) = CODING_DEFLATE;
 	} else {
 		ZLIBG(ob_gzhandler_status) = -1;
 		RETURN_FALSE;
 	}
 	
-	convert_to_long_ex(zv_mode);
-	do_start = ((Z_LVAL_PP(zv_mode) & PHP_OUTPUT_HANDLER_START) ? 1 : 0);
-	do_end = ((Z_LVAL_PP(zv_mode) & PHP_OUTPUT_HANDLER_END) ? 1 : 0);
+	do_start = ((mode & PHP_OUTPUT_HANDLER_START) ? 1 : 0);
+	do_end = ((mode & PHP_OUTPUT_HANDLER_END) ? 1 : 0);
 	Z_STRVAL_P(return_value) = NULL;
 	Z_STRLEN_P(return_value) = 0;
 
-	if (php_deflate_string(Z_STRVAL_PP(zv_string), Z_STRLEN_PP(zv_string), &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), coding, do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC) == SUCCESS) {
+	if (php_deflate_string(string, string_len, &Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value), do_start, do_end TSRMLS_CC) == SUCCESS) {
 		Z_TYPE_P(return_value) = IS_STRING;
 		if (do_start) {
-			switch (coding) {
+			switch (ZLIBG(compression_coding)) {
 				case CODING_GZIP:
 					if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1) == FAILURE) {
 						return_original = 1;
@@ -1018,8 +926,7 @@ PHP_FUNCTION(ob_gzhandler)
 
 	if (return_original) {
 		/* return the original string */
-		*return_value = **zv_string;
-		zval_copy_ctor(return_value);
+		RETURN_STRINGL(string, string_len, 1);
 	}
 }
 /* }}} */
@@ -1035,7 +942,7 @@ static void php_gzip_output_handler(char *output, uint output_len, char **handle
 	} else {
 		do_start = (mode & PHP_OUTPUT_HANDLER_START ? 1 : 0);
 		do_end = (mode & PHP_OUTPUT_HANDLER_END ? 1 : 0);
-		if (php_deflate_string(output, output_len, handled_output, handled_output_len, ZLIBG(ob_gzip_coding), do_start, do_end, ZLIBG(output_compression_level) TSRMLS_CC) != SUCCESS) {
+		if (php_deflate_string(output, output_len, handled_output, handled_output_len, do_start, do_end TSRMLS_CC) != SUCCESS) {
 			zend_error(E_ERROR, "Compression failed");
 		}
 	}
@@ -1059,9 +966,9 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 	convert_to_string_ex(a_encoding);
 
 	if (php_memnstr(Z_STRVAL_PP(a_encoding), "gzip", 4, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		ZLIBG(ob_gzip_coding) = CODING_GZIP;
+		ZLIBG(compression_coding) = CODING_GZIP;
 	} else if (php_memnstr(Z_STRVAL_PP(a_encoding), "deflate", 7, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
-		ZLIBG(ob_gzip_coding) = CODING_DEFLATE;
+		ZLIBG(compression_coding) = CODING_DEFLATE;
 	} else {
 		return FAILURE;
 	}
