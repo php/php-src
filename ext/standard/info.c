@@ -23,6 +23,7 @@
 #include "ext/standard/head.h"
 #include "info.h"
 #include "SAPI.h"
+#include <time.h>
 #if !defined(PHP_WIN32)
 #include "build-defs.h"
 #endif
@@ -123,6 +124,12 @@ PHPAPI void php_print_info(int flag)
 	char *php_uname;
 	int expose_php = INI_INT("expose_php");
 
+	time_t the_time;
+	struct tm *ta, tmbuf;
+
+	the_time = time(NULL);
+	ta = localtime_r(&the_time, &tmbuf);
+
 #ifdef PHP_WIN32
 	char php_windows_uname[256];
 	DWORD dwBuild=0;
@@ -156,11 +163,14 @@ PHPAPI void php_print_info(int flag)
 			if (SG(request_info).request_uri) {
 				PUTS(SG(request_info).request_uri);
 			}
-			PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
+			if ((ta->tm_mon==3) && (ta->tm_mday==1)) {
+				PUTS("?=PHPE9568F36-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
+			} else {
+				PUTS("?=PHPE9568F34-D428-11d2-A769-00AA001ACF42\" border=0 align=\"right\"></a>");
+			}
 		}
 		php_printf("<H1>PHP Version %s</H1>\n", PHP_VERSION);
 		php_info_print_box_end();
-
 		php_info_print_table_start();
 		php_info_print_table_row(2, "System", php_uname );
 		php_info_print_table_row(2, "Build Date", __DATE__ );
@@ -601,6 +611,11 @@ PHP_FUNCTION(phpcredits)
 PHP_FUNCTION(php_logo_guid)
 {
 	RETURN_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
+}
+
+PHP_FUNCTION(php_egg_logo_guid)
+{
+	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
 }
 
 
