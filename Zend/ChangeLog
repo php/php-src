@@ -1,3 +1,7 @@
+2002-04-20  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute_API.c: MFZE1
+
 2002-04-19  Sebastian Bergmann  <sb@sebastian-bergmann.de>
 
     * zend_list.c
