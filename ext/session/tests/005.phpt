@@ -3,6 +3,8 @@ Custom save handler, multiple session_start()s, complex data structure test.
 --FILE--
 <?php
 
+ini_set("register_globals", 1);
+
 error_reporting(E_ALL & ~E_NOTICE);
 
 class handler {

@@ -3,6 +3,8 @@ Session Object Serialization
 --FILE--
 <?php
 
+ini_set("register_globals", 1);
+
 class foo {
 	var $bar = "ok";
 

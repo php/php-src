@@ -3,6 +3,9 @@ References between variables in sessions
 --FILE--
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
+
+ini_set("register_globals", 1);
+
 ob_start();
 session_id("abtest");
 session_start();
