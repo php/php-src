@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . php_check_syntax(). check php script for parse errors. (Ilia)
   . image_type_to_extension(). return extension based on image type. (Ilia)
   . stream_socket_sendto() and stream_socket_recvfrom(). (Wez)
+  . iconv_mime_decode_headers(). (Moriyoshi)
 - Route stat() and family via streams API. (Sara)
 - Fixed __autoload() to preserve case of the passed class name. (Andi)
 - Fixed bug #26072 (--disable-libxml does not work). (Jani)
