@@ -35,7 +35,7 @@ DEFINE("CFLAGS", "/nologo /YX /FD $(BASE_INCLUDES) /D _WINDOWS \
 DEFINE("LDFLAGS", "/nologo /libpath:$(PHP_BUILD)\\lib");
 
 // General DLL link flags
-DEFINE("DLL_LDFLAGS", "/dll");
+DEFINE("DLL_LDFLAGS", "/dll /version:" + PHP_VERSION);
 
 // PHP DLL link flags
 DEFINE("PHP_LDFLAGS", "$(DLL_LDFLAGS)");

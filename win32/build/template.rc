@@ -5,7 +5,6 @@
 # error dont edit with MSVC
 #endif
 
-#include "resource.h"
 #include "winres.h"
 #include "main/php_version.h"
 

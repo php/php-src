@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.11 2003-12-04 01:37:52 wez Exp $
+// $Id: confutils.js,v 1.12 2003-12-04 02:12:36 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -530,7 +530,7 @@ function EXTENSION(extname, file_list, shared, cflags)
 
 	if (shared) {
 		dllname = "php_" + extname + ".dll";
-		var resname = generate_version_info_resource(makefiletarget, "ext/" + extname);
+		var resname = generate_version_info_resource(dllname, "ext/" + extname);
 	
 		MFO.WriteLine("$(BUILD_DIR)\\" + dllname + ": $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(BUILD_DIR)\\" + resname);
 		MFO.WriteLine("\t$(LD) /out:$(BUILD_DIR)\\" + dllname + " $(DLL_LDFLAGS) $(LDFLAGS) $(LDFLAGS_" + EXT + ") $(" + EXT + "_GLOBAL_OBJS) $(BUILD_DIR)\\$(PHPLIB) $(LIBS_" + EXT + ") $(LIBS) $(BUILD_DIR)\\" + resname);
