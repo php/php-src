@@ -433,7 +433,13 @@ int main(int argc, char *argv[])
 			argv0 = NULL;
 		}
 #if FORCE_CGI_REDIRECT
-		if (!getenv("REDIRECT_STATUS")) {
+		/* Apache will generate REDIRECT_STATUS,
+		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
+		 * redirect.so and installation instructions available from
+		 * http://www.koehntopp.de/php.
+		 *   -- kk@netuse.de
+		 */
+		if (!getenv("REDIRECT_STATUS") && !getenv ("HTTP_REDIRECT_STATUS")) {
 			PUTS("<b>Security Alert!</b>  PHP CGI cannot be accessed directly.\n\
 \n\
 <P>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
