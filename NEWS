@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Jul 2003, Version 4.3.3
--
+- Added DBA handler 'inifile' to support ini files. (Marcus)
 
 29 May 2003, Version 4.3.2
 - Syncronized bundled GD library with GD 2.0.12. (Ilia)
