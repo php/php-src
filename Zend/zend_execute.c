@@ -952,7 +952,9 @@ typedef struct _object_info {
 void execute(zend_op_array *op_array ELS_DC)
 {
 	zend_op *opline = op_array->opcodes;
+#if SUPPORT_INTERACTIVE
 	zend_op *end = op_array->opcodes + op_array->last;
+#endif
 	zend_function_state function_state;
 	zend_function *fbc=NULL;  /* Function Being Called */
 	object_info object = {NULL};
@@ -993,7 +995,11 @@ void execute(zend_op_array *op_array ELS_DC)
 		}
 	}
 
+#if SUPPORT_INTERACTIVE
 	while (opline<end) {
+#else
+	while (1) {
+#endif
 		switch(opline->opcode) {
 			case ZEND_ADD:
 				EG(binary_op) = add_function;
@@ -2276,6 +2282,8 @@ send_by_ref:
 	}
 #if SUPPORT_INTERACTIVE
 	op_array->last_executed_op_number = opline-op_array->opcodes;
-#endif
 	free_alloca(Ts);
+#else
+	php_error(E_ERROR,"Arrived at end of main loop which shouldn't happen");
+#endif
 }
