@@ -31,6 +31,7 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "php_scandir.h"
+#include "win32/php_registry.h"
 
 #if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
 #include <dirent.h>
@@ -227,11 +228,20 @@ static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+#define NUM_INI_SEARCH_LOCATIONS	4
+#else
+#define NUM_INI_SEARCH_LOCATIONS	3
+#endif
+
 /* {{{ php_init_config
  */
 int php_init_config()
 {
 	char *env_location, *php_ini_search_path;
+#ifdef PHP_WIN32
+	char *registry_location;
+#endif
 	char *binary_location;
 	int safe_mode_state;
 	char *open_basedir;
@@ -271,7 +281,7 @@ int php_init_config()
 		char *default_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 
-		php_ini_search_path = (char *) emalloc(MAXPATHLEN * 3 + strlen(env_location) + 3 + 1);
+		php_ini_search_path = (char *) emalloc(MAXPATHLEN * NUM_INI_SEARCH_LOCATIONS + strlen(env_location) + NUM_INI_SEARCH_LOCATIONS + 1);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
 
@@ -286,6 +296,17 @@ int php_init_config()
 			}
 			strcat(php_ini_search_path, env_location);
 		}
+
+#ifdef PHP_WIN32
+		registry_location = GetIniPathFromRegistry();
+		if (registry_location) {
+			if (*php_ini_search_path) {
+				strcat(php_ini_search_path, paths_separator);
+			}
+			strcat(php_ini_search_path, registry_location);
+			efree(registry_location);
+		}
+#endif
 
 		/* Add cwd */
 #ifdef INI_CHECK_CWD
