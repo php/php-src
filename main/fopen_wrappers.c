@@ -217,7 +217,7 @@ PHPAPI int php_check_open_basedir(char *path)
 
 			ptr = end;
 		}
-		php_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory.");
+		php_error(E_WARNING, "open_basedir restriction in effect. File is in wrong directory");
 		efree(pathbuf);
 		errno = EPERM; /* we deny permission to open it */
 		return -1;
