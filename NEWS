@@ -20,6 +20,8 @@ PHP 4                                                                      NEWS
 - Moved ext/vpopmail to PECL. (James)
 - Added ICONV_IMPL and ICONV_VERSION constants to iconv extension to
   indicate which iconv implementation is used. (Moriyoshi)
+- Fixed bug #17580 (Allow ini parser to parse files >16K). (Ilia)
+- Fixed bug #19649 (Sanity checks for browscap.ini parser). (Ilia)
 - Added experimental patch to address problem with floats on various locales.
   (Bug #17079). (Ilia)
 - Fixed bug #19280 (imap_header fails with many To: addresses). (Ilia)
