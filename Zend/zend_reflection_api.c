@@ -2152,7 +2152,7 @@ ZEND_METHOD(reflection_class, getConstructor)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionMethod Reflection_Class::getMethod(string name)
+/* {{{ proto public ReflectionMethod Reflection_Class::getMethod(string name) throws ReflectionException
    Returns the class' method specified by it's name */
 ZEND_METHOD(reflection_class, getMethod)
 {
@@ -2172,7 +2172,9 @@ ZEND_METHOD(reflection_class, getMethod)
 	if (zend_hash_find(&ce->function_table, name, name_len + 1, (void**) &mptr) == SUCCESS) {
 		reflection_method_factory(ce, mptr, return_value TSRMLS_CC);
 	} else {
-		RETURN_NULL();
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Method %s does not exist", name);
+		return;
 	}
 }
 /* }}} */
@@ -2221,7 +2223,7 @@ ZEND_METHOD(reflection_class, getMethods)
 }
 /* }}} */
 
-/* {{{ proto public ReflectionProperty Reflection_Class::getProperty(string name)
+/* {{{ proto public ReflectionProperty Reflection_Class::getProperty(string name) throws ReflectionException
    Returns the class' property specified by it's name */
 ZEND_METHOD(reflection_class, getProperty)
 {
@@ -2240,7 +2242,9 @@ ZEND_METHOD(reflection_class, getProperty)
 	if (zend_hash_find(&ce->properties_info, name, name_len + 1, (void**) &property_info) == SUCCESS) {
 		reflection_property_factory(ce, property_info, return_value TSRMLS_CC);
 	} else {
-		RETURN_NULL();
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
+				"Property %s does not exist", name);
+		return;
 	}
 }
 /* }}} */
