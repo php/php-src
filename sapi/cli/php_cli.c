@@ -77,17 +77,18 @@
 
 #include "php_getopt.h"
 
-#define PHP_MODE_STANDARD	1
-#define PHP_MODE_HIGHLIGHT	2
-#define PHP_MODE_INDENT		3
-#define PHP_MODE_LINT		4
-#define PHP_MODE_STRIP		5
-#define PHP_MODE_CLI_DIRECT 6
+#define PHP_MODE_STANDARD    1
+#define PHP_MODE_HIGHLIGHT   2
+#define PHP_MODE_INDENT      3
+#define PHP_MODE_LINT        4
+#define PHP_MODE_STRIP       5
+#define PHP_MODE_CLI_DIRECT  6
+#define PHP_MODE_CLI_NO_TAGS 7
 
 extern char *ap_php_optarg;
 extern int ap_php_optind;
 
-#define OPTSTRING "aCc:d:ef:g:hilmnqr:sw?vz:"
+#define OPTSTRING "aCc:d:ef:g:hilmnqr:sw?vx:z:"
 
 static int _print_module_info(zend_module_entry *module, void *arg TSRMLS_DC)
 {
@@ -241,12 +242,13 @@ static void php_cli_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf( "Usage: %s [options] [-f] <file> [args...]\n"
+	php_printf( "Usage: %s [options] [-f | -x] <file> [args...]\n"
 	            "       %s [options] -r <code> [args...]\n"
 	            "       %s [options] [-- args...]\n"
 				"  -s             Display colour syntax highlighted source.\n"
 				"  -w             Display source with stripped comments and whitespace.\n"
 				"  -f <file>      Parse <file>.\n"
+				"  -x <file>      Parse <file> without script tags <?..?>\n"
 				"  -v             Version number\n"
 				"  -c <path>      Look for php.ini file in this directory\n"
 				"  -a             Run interactively\n"
@@ -416,7 +418,16 @@ int main(int argc, char *argv[])
 				CG(extended_info) = 1;
 				break;
 
+			case 'x': /* parse file */
+				if (behavior != PHP_MODE_STANDARD)
+					break;
+				behavior=PHP_MODE_CLI_NO_TAGS;
+				script_file = ap_php_optarg;
+				no_headers = 1;
+
 			case 'f': /* parse file */
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				script_file = ap_php_optarg;
 				no_headers = 1;
 				break;
@@ -455,6 +466,8 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'l': /* syntax check mode */
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				no_headers = 1;
 				behavior=PHP_MODE_LINT;
 				break;
@@ -475,6 +488,8 @@ int main(int argc, char *argv[])
 
 #if 0 /* not yet operational, see also below ... */
 			case 'n': /* generate indented source mode*/
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				behavior=PHP_MODE_INDENT;
 				break;
 #endif
@@ -484,10 +499,14 @@ int main(int argc, char *argv[])
 				break;
 
 			case 's': /* generate highlighted HTML from source */
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				behavior=PHP_MODE_HIGHLIGHT;
 				break;
 
 			case 'r': /* run code from command line */
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				behavior=PHP_MODE_CLI_DIRECT;
 				exec_direct=ap_php_optarg;
 				break;
@@ -508,6 +527,8 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'w':
+				if (behavior != PHP_MODE_STANDARD)
+					break;
 				behavior=PHP_MODE_STRIP;
 				break;
 
@@ -551,10 +572,30 @@ int main(int argc, char *argv[])
 		}
 		if (script_file) {
 			if (!(file_handle.handle.fp = VCWD_FOPEN(script_file, "rb"))) {
-				PUTS("No input file specified.\n");
+				PUTS("Could not open input file.\n");
 				php_request_shutdown((void *) 0);
 				php_module_shutdown(TSRMLS_C);
 				return FAILURE;
+			}
+			if (behavior == PHP_MODE_CLI_NO_TAGS) {
+				size_t len_r, len_w;
+				char buf[4096];
+				FILE *fp;
+
+				if (!(fp=tmpfile())) {
+					PUTS("Could not create temp file.\n");
+					php_request_shutdown((void *) 0);
+					php_module_shutdown(TSRMLS_C);
+					return FAILURE;
+				}
+				fwrite("<?\n", 3, 1, fp);
+				while((c=fgetc(file_handle.handle.fp))!=EOF) {
+					fputc(c, fp);
+				}
+				fwrite("\n?>", 3, 1, fp);
+				fclose(file_handle.handle.fp);
+				file_handle.handle.fp = fp;
+				behavior = PHP_MODE_STANDARD;
 			}
 			php_register_variable("PHP_SELF", script_file, NULL TSRMLS_CC);
 			file_handle.filename = script_file;
