@@ -150,7 +150,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl fi
 
   dnl # --with-$extname -> add include path
-  dnl AC_ADD_INCLUDE(\$${EXTNAME}_DIR/include)
+  dnl PHP_ADD_INCLUDE(\$${EXTNAME}_DIR/include)
 
   dnl # --with-$extname -> chech for lib and symbol presence
   dnl LIBNAME=$extname # you may wnat to change this
@@ -162,7 +162,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl LIBS=\$old_LIBS
   dnl
   dnl PHP_SUBST(${EXTNAME}_SHARED_LIBADD)
-  dnl AC_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, SAPRFC_SHARED_LIBADD)
+  dnl PHP_ADD_LIBRARY_WITH_PATH(\$LIBNAME, \$${EXTNAME}_DIR/lib, SAPRFC_SHARED_LIBADD)
 
   PHP_EXTENSION($extname, \$ext_shared)
 fi
