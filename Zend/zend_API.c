@@ -188,7 +188,7 @@ ZEND_API inline int _array_init(zval *arg ZEND_FILE_LINE_DC)
 	ALLOC_HASHTABLE_REL(arg->value.ht);
 
 	if (!arg->value.ht || zend_hash_init(arg->value.ht, 0, NULL, ZVAL_PTR_DTOR, 0)) {
-		zend_error(E_CORE_ERROR, "Cannot allocate memory for array");
+		zend_error(E_ERROR, "Cannot allocate memory for array");
 		return FAILURE;
 	}
 	arg->type = IS_ARRAY;
@@ -707,14 +707,21 @@ ZEND_API int zend_startup_module(zend_module_entry *module)
 
 
 /* registers all functions in *library_functions in the function hash */
-int zend_register_functions(zend_function_entry *functions, HashTable *function_table)
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type)
 {
 	zend_function_entry *ptr = functions;
 	zend_function function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
 	int count=0,unload=0;
 	HashTable *target_function_table = function_table;
+	int error_type;
 	CLS_FETCH();
+
+	if (type==MODULE_PERSISTENT) {
+		error_type = E_CORE_WARNING;
+	} else {
+		error_type = E_WARNING;
+	}
 
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
@@ -726,7 +733,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 		internal_function->arg_types = ptr->func_arg_types;
 		internal_function->function_name = ptr->fname;
 		if (!internal_function->handler) {
-			zend_error(E_CORE_WARNING,"Null function defined as active function");
+			zend_error(error_type, "Null function defined as active function");
 			zend_unregister_functions(functions, count, target_function_table);
 			return FAILURE;
 		}
@@ -740,7 +747,7 @@ int zend_register_functions(zend_function_entry *functions, HashTable *function_
 	if (unload) { /* before unloading, display all remaining bad function in the module */
 		while (ptr->fname) {
 			if (zend_hash_exists(target_function_table, ptr->fname, strlen(ptr->fname)+1)) {
-				zend_error(E_CORE_WARNING, "Function registration failed - duplicate name - %s",ptr->fname);
+				zend_error(error_type, "Function registration failed - duplicate name - %s",ptr->fname);
 			}
 			ptr++;
 		}
@@ -782,7 +789,7 @@ ZEND_API int zend_register_module(zend_module_entry *module)
 #if 0
 	zend_printf("%s:  Registering module %d\n",module->name, module->module_number);
 #endif
-	if (module->functions && zend_register_functions(module->functions, NULL)==FAILURE) {
+	if (module->functions && zend_register_functions(module->functions, NULL, module->type)==FAILURE) {
 		zend_error(E_CORE_WARNING,"%s:  Unable to register functions, unable to load",module->name);
 		return FAILURE;
 	}
@@ -908,7 +915,7 @@ ZEND_API zend_class_entry *zend_register_internal_class(zend_class_entry *class_
 
 
 	if (class_entry->builtin_functions) {
-		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table);
+		zend_register_functions(class_entry->builtin_functions, &class_entry->function_table, MODULE_PERSISTENT);
 	}
 
 	zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, class_entry, sizeof(zend_class_entry), (void **) &register_class);
@@ -973,5 +980,5 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 		return FAILURE;
 	}
 	disabled_function[0].fname = function_name;
-	return zend_register_functions(disabled_function, CG(function_table));
+	return zend_register_functions(disabled_function, CG(function_table), MODULE_PERSISTENT);
 }

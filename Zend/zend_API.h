@@ -108,7 +108,7 @@ ZEND_API int zend_get_parameters_array_ex(int param_count, zval ***argument_arra
 
 ZEND_API int ParameterPassedByReference(int ht, uint n);
 
-int zend_register_functions(zend_function_entry *functions, HashTable *function_table);
+int zend_register_functions(zend_function_entry *functions, HashTable *function_table, int type);
 void zend_unregister_functions(zend_function_entry *functions, int count, HashTable *function_table);
 ZEND_API int zend_register_module(zend_module_entry *module_entry);
 
