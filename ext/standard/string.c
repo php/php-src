@@ -3630,8 +3630,16 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 					state = 3;
 					lc = c;
 				} else {
-					*(rp++) = c;
-				}	
+					if (state == 0) {
+						*(rp++) = c;
+					} else if (allow && state == 1) {
+						*(tp++) = c;
+						if ( (tp-tbuf) >= PHP_TAG_BUF_SIZE ) {
+							/* prevent buffer overflows */
+							tp = tbuf;
+						}
+					}
+				}
 				break;
 
 			case '?':
