@@ -1,3 +1,112 @@
+2001-12-02  Harald Radi  <h.radi@nme.at>
+
+    * ext/mssql/php_mssql.c: MFH
+
+    * ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.h:
+    added mssql_fetch_assoc() to be more mysql conform
+    changed mssql_fetch_array() back to its default behaviour (MSSQL_BOTH)
+
+2001-12-02  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/mail.c: - switch to new paramter parser
+    - make sure To: and Subject: do not end with a newline character
+
+2001-12-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c: Please Egon.
+
+2001-12-02  Bernd Roemer  <berndr@bonn.edu>
+
+    * ext/standard/var_unserializer.re
+      ext/standard/var_unserializer.c
+      main/main.c: Allow unserializer_callback_func to be turned off.
+
+2001-12-02  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Dependencie.php
+      pear/PEAR/Dependency.php: Rename Dependencie.php to Dependency.php
+
+2001-12-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c:
+    - Standardize function to accept either $obj->foo or domxml_foo($obj)
+      where they should.
+    - Use xml*Len functions where available.
+    - Workaround in set_content() to prevent crash.
+    - Cleaned up php_xpathptr_eval().
+    - Added NO_ARGS check where missing; moved check for $this always
+      before arg parsing.
+
+2001-12-02  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/overload/overload.dsp:
+    fix CFLAGS, how could this have worked before?
+
+    * win32/README.txt
+      win32/Win32_Package.txt: remove outdated txts
+
+    * win32/php4dllts.dsp: cleanup workspace
+
+    * win32/winutil.c
+      win32/winutil.h: fix php_win_err (wasn't threadsafe)
+
+2001-12-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.h:
+    - Reverted macro moving stupidity (thx to Sterling).
+
+2001-12-02  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/session/session.c: MFH
+    fix for $_SESSION
+    !!! please TEST, TEST, TEST !!!
+
+2001-12-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/domxml/php_domxml.c:
+    - Reverted macro moving stupidity (thx to Sterling).
+
+2001-12-02  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/parsedate.y: - Fix a bug in timezones +0100 and -0100
+
+2001-12-02  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c:
+    - Added synonym stuff support to mnogosearch module. Slightly changed
+      stored API. Example updated.
+
+2001-12-02  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/domxml/php_domxml.c:
+    I hope that this is a better explanation as unknown.
+
+    * ext/cpdf/cpdf.c: Fixed some protos.
+
+    * ext/com/COM.c: Fixed two protos.
+
+2001-12-02  Sergey Kartashoff  <gluke@biosys.net>
+
+    * ext/mnogosearch/index.php
+      ext/mnogosearch/php_mnogo.c:
+    - Mnogosearch module stored API slightly changed. Example updated.
+
+2001-12-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/skeleton.c: Oops, FOO_VERSION doesn't exist
+
+2001-12-02  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Dependencie.php: Class for checking dependencies
+
+2001-12-02  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/skeleton/skeleton.c:
+    Make ext_skel generate backward compatible module sources
+    (flight from London to Paris is too short for any real work)
+
 2001-12-01  Sergey Kartashoff  <gluke@biosys.net>
 
     * ext/mnogosearch/index.php
