@@ -21,6 +21,6 @@
 
 #include <time.h>
 
-time_t parse_date(char *p, time_t *now);
+time_t php_parse_date(char *p, time_t *now);
 
 #endif
