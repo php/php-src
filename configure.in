@@ -27,6 +27,7 @@ dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
+AC_PREREQ(2.13)
 AC_INIT(README.CVS-RULES)
 
 PHP_CONFIG_NICE(config.nice)
