@@ -90,8 +90,8 @@ AC_DEFUN(AC_CHECK_CC_OPTION,[
   opt="$1"
   var=`echo $ac_n "$opt$ac_c"|tr -c a-zA-Z0-9 _`
   AC_MSG_CHECKING([if compiler supports -$1 really])
-  ac_compile="${CC-cc} -$opt -c $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
-  if eval $ac_compile | egrep "$opt" > /dev/null 2>&1 ; then
+  ac_php_compile="${CC-cc} -$opt -c $CFLAGS $CPPFLAGS conftest.$ac_ext 2>&1"
+  if eval $ac_php_compile | egrep "$opt" > /dev/null 2>&1 ; then
     eval php_cc_$var=no
 	AC_MSG_RESULT(no)
   else
