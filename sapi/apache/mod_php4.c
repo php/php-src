@@ -611,7 +611,7 @@ static int send_parsed_php_source(request_rec * r)
 }
 /* }}} */
 
-/* {{{ estroy_per_dir_entry
+/* {{{ destroy_per_dir_entry
  */
 static void destroy_per_dir_entry(php_per_dir_entry *per_dir_entry)
 {
