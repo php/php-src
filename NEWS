@@ -2,6 +2,7 @@ PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Aug 2003, Version 4.3.3RC4
 - Fixed bug #25084 (Make refer check not dependant on register_globals). (Ilia)
+- Fixed bug #25081 (odbc_fetch_array() may mangle numeric fields). (Ilia)
 - Fixed bug #25044 (header("Location:") changing HTTP status). (Marcus)
 - Fixed bug #25037 (Possible infinite loop inside SendText()). (Ilia)
 - Fixed bug #25007 (rand() & mt_rand() seed RNG every call). (Jani)
