@@ -1,3 +1,37 @@
+2001-04-13  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * TODO-4.1.txt: - Added the note about function names
+
+2001-04-13  Stig Bakken  <ssb@fast.no>
+
+    * ChangeLog.1999.gz
+      ChangeLog.2000.gz:
+    * separated and compressed changelogs from 1999 and 2000
+
+    * pear/tests/pear1.phpt
+      pear/PEAR.php.in:
+    * PEAR: look for destructor methods in parent classes if
+      the current class does not have one
+
+    * pear/DB/mysql.php:
+    * better error message on failed connect, suggested by Thomas V.V.Cox
+
+    * TODO-4.1.txt: here's a preliminary list of stuff for 4.1
+
+2001-04-13  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/string.c: - Fixed crash in pathinfo()
+
+    * ext/oci8/oci8.c
+      ext/oci8/php_oci8.h:  - OCI8 now supports binding of collections
+       (Patch by Andy Sautins <asautins@veripost.net>)
+
+2001-04-13  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/php_gd.h: Added GD 2.0.1 support.
+
 2001-04-12  Chuck Hagenbuch  <chuck@horde.org>
 
     * pear/HTML/Select.php:
