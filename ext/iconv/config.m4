@@ -43,24 +43,26 @@ int main() {
 	icv_close( cd );
 	return 2;
 }
-],[
-	AC_MSG_RESULT(yes)
-    PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1)
-    AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
-],[
-    PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0)
-    AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
-	AC_MSG_RESULT(no)
-])
+    ],[
+      AC_MSG_RESULT(yes)
+      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1)
+      AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
+    ],[
+      AC_MSG_RESULT(no)
+      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0)
+      AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
+    ])
+
     if test -z "$iconv_lib_name"; then
       AC_MSG_CHECKING([if iconv is glibc's])
-      AC_TRY_COMPILE([#include <iconv.h>],[void __gconv(); int main() { __gconv(); } ],[
-      AC_MSG_RESULT(yes)
-      PHP_DEFINE([ICONV_IMPL],["glibc"])
-      AC_DEFINE([ICONV_IMPL],["glibc"],[Which iconv implementation to use])
-],[
-      AC_MSG_RESULT(no)
-])
+      AC_TRY_COMPILE([#include <iconv.h>],[void __gconv(); int main() { __gconv(); }],
+      [
+        AC_MSG_RESULT(yes)
+        PHP_DEFINE([ICONV_IMPL],["glibc"])
+        AC_DEFINE([ICONV_IMPL],["glibc"],[Which iconv implementation to use])
+      ],[
+        AC_MSG_RESULT(no)
+      ])
     else
       case "$iconv_lib_name" in
         iconv [)]
