@@ -19,6 +19,7 @@ extern char *gd_strtok_r(char *s, char *sep, char **state);
 #define gdFree(ptr)		efree(ptr)
 #define gdPMalloc(ptr)		pemalloc(ptr, 1)
 #define gdPFree(ptr)		pefree(ptr, 1)
+#define gdPEstrdup(ptr)		pestrdup(ptr, 1)
 
 #endif /* GDHELPERS_H */
 
