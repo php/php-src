@@ -1414,7 +1414,7 @@ static int _php3_array_walk(const void *a)
 	pval retval;
 	CLS_FETCH();
 
-	args[0] = (pval *)a;
+	args[0] = *((pval **)a);
 	
 	call_user_function(CG(function_table), NULL, php3_array_walk_func_name, &retval, 1, args);
 	return 0;
