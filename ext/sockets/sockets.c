@@ -580,6 +580,37 @@ PHP_FUNCTION(write)
 
 /* {{{ proto int read(int fd, string &buf, int length)
    Reads length bytes from fd into buf */
+
+/* php_read -- wrapper around read() so that it only reads to a \r, \n, or \0. */
+
+int php_read(int fd, void *buf, int maxlen)
+{
+     char *t;
+     int m = 0, n = 0;
+     int no_read = 0;
+
+     errno = 0;
+     t = (char *) buf;
+     while (*t != '\n' && *t != '\r' && *t != '\0' && n < maxlen) {
+          if (m > 0) {
+               t++;
+               n++;
+          } else if (m == 0) {
+               no_read++;
+               if (no_read > 200) {
+                    errno = ECONNRESET;
+                    return -1;
+               }
+          }
+          m = read(fd, (void *) t, 1);
+          if (errno != 0 && errno != ESPIPE && errno != EAGAIN) {
+               return -1;
+          }
+          errno = 0;
+     }
+     return n;
+}
+
 PHP_FUNCTION(read)
 {
 	zval **fd, **buf, **length;
@@ -599,10 +630,10 @@ PHP_FUNCTION(read)
 		RETURN_FALSE;
 	}
 	
-	ret = read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
+	ret = php_read(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
 	
 	if (ret >= 0) {
-		Z_STRVAL_PP(buf) = estrndup(tmpbuf,strlen(tmpbuf));
+		Z_STRVAL_PP(buf) = estrndup(tmpbuf,ret);
 		Z_STRLEN_PP(buf) = ret;
 		
 		efree(tmpbuf);
