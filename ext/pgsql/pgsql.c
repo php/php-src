@@ -160,25 +160,22 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	PQfinish(link);
 	PGG(num_persistent)--;
 	PGG(num_links)--;
-	if(PGG(last_notice) != NULL) {
-		efree(PGG(last_notice));
-	}
 }
 /* }}} */
 
 /* {{{ _notice_handler
  */
-static void
-_notice_handler(void *arg, const char *message)
+static void _notice_handler(void *arg, const char *message)
 {
 	TSRMLS_FETCH();
 
 	if (! PGG(ignore_notices)) {
 		php_log_err((char *) message TSRMLS_CC);
-		if (PGG(last_notice) != NULL) {
+		if (PGG(last_notice)) {
 			efree(PGG(last_notice));
 		}
-		PGG(last_notice) = estrdup(message);
+		PGG(last_notice_len) = strlen(message);
+		PGG(last_notice) = estrndup(message, PGG(last_notice_len));
 	}
 }
 /* }}} */
@@ -237,7 +234,6 @@ static void php_pgsql_init_globals(php_pgsql_globals *pgsql_globals_p TSRMLS_DC)
 {
 	PGG(num_persistent) = 0;
 	PGG(ignore_notices) = 0;
-	PGG(last_notice) = NULL;
 }
 /* }}} */
 
@@ -283,6 +279,7 @@ PHP_RINIT_FUNCTION(pgsql)
 {
 	PGG(default_link)=-1;
 	PGG(num_links) = PGG(num_persistent);
+	PGG(last_notice) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -291,6 +288,9 @@ PHP_RINIT_FUNCTION(pgsql)
  */
 PHP_RSHUTDOWN_FUNCTION(pgsql)
 {
+	if (PGG(last_notice)) {
+		efree(PGG(last_notice));
+	}
 	zend_hash_apply(&EG(persistent_list), (apply_func_t) _rollback_transactions TSRMLS_CC);
 	return SUCCESS;
 }
@@ -923,10 +923,10 @@ PHP_FUNCTION(pg_cmdtuples)
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice) 
 {
-	if (PGG(last_notice) == NULL) {
-		RETURN_FALSE;
+	if (PGG(last_notice)) {
+		RETURN_STRINGL(PGG(last_notice), PGG(last_notice_len), 0);
 	} else {       
-		RETURN_STRING(PGG(last_notice),0);
+		RETURN_FALSE;
 	}
 }
 /* }}} */
