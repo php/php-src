@@ -158,7 +158,7 @@ class PEAR_Installer extends PEAR_Common
             }
             // return if this file is meant for another platform
             if (!$os->matchSignature($atts['platform'])) {
-                $this->log(2, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
+                $this->log(3, "skipped $file (meant for $atts[platform], we are ".$os->getSignature().")");
                 return PEAR_INSTALLER_SKIPPED;
             }
         }
@@ -215,15 +215,21 @@ class PEAR_Installer extends PEAR_Common
             $this->log(3, "+ mkdir $dest_dir");
         }
         if (empty($atts['replacements'])) {
-            if (!@copy($orig_file, $dest_file)) {
+            if (!copy($orig_file, $dest_file)) {
                 return $this->raiseError("failed to copy $orig_file to $dest_file",
                                          PEAR_INSTALLER_FAILED);
             }
             $this->log(3, "+ cp $orig_file $dest_file");
+            if (isset($atts['md5sum'])) {
+                $md5sum = md5_file($dest_file);
+            }
         } else {
             $fp = fopen($orig_file, "r");
             $contents = fread($fp, filesize($orig_file));
             fclose($fp);
+            if (isset($atts['md5sum'])) {
+                $md5sum = md5($contents);
+            }
             $subst_from = $subst_to = array();
             foreach ($atts['replacements'] as $a) {
                 $to = '';
@@ -244,7 +250,7 @@ class PEAR_Installer extends PEAR_Common
                     $subst_to[] = $to;
                 }
             }
-            $this->log(2, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
+            $this->log(3, "doing ".sizeof($subst_from)." substitution(s) for $dest_file");
             if (sizeof($subst_from)) {
                 $contents = str_replace($subst_from, $subst_to, $contents);
             }
@@ -255,6 +261,13 @@ class PEAR_Installer extends PEAR_Common
             }
             fwrite($wp, $contents);
             fclose($wp);
+        }
+        if (isset($md5sum)) {
+            if ($md5sum == $atts['md5sum']) {
+                $this->log(3, "md5sum ok: $dest_file");
+            } else {
+                $this->log(0, "warning : bad md5sum for file $dest_file");
+            }
         }
         if (!OS_WINDOWS) {
             if ($atts['role'] == 'script') {
@@ -271,7 +284,7 @@ class PEAR_Installer extends PEAR_Common
         // Store the full path where the file was installed for easy unistall
         $this->pkginfo['filelist'][$file]['installed_as'] = $installed_as;
 
-        $this->log(2, "installed file $dest_file");
+        $this->log(2, "installed: $dest_file");
         return PEAR_INSTALLER_OK;
     }
 
@@ -662,6 +675,16 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+}
+
+if (!function_exists("md5_file")) {
+    function md5_file($filename) {
+        $fp = fopen($filename, "r");
+        if (!$fp) return null;
+        $contents = fread($fp, filesize($filename));
+        fclose($fp);
+        return md5($contents);
+    }
 }
 
 ?>
