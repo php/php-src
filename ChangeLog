@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Updated Oracle to use the new high-performance Zend function API. (Thies)
 - Improved the performance of the MySQL module significantly by using the new
   high-performance Zend function API.
 - Add support for the Easysoft ODBC-ODCB Bridge (martin@easysoft.com)
