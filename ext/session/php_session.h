@@ -77,7 +77,9 @@ typedef struct {
 	char *extern_referer_chk;
 	char *entropy_file;
 	int entropy_length;
-	int lifetime;
+	int cookie_lifetime;
+	char *cookie_path;
+	char *cookie_domain;
 	zend_bool define_sid;
 	zend_bool use_cookies;
 	ps_module *mod;
