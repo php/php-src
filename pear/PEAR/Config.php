@@ -52,7 +52,7 @@ define('PEAR_CONFIG_DEFAULT_TESTDIR',
        PEAR_INSTALL_DIR.DIRECTORY_SEPARATOR.'tests');
 
 define('PEAR_CONFIG_DEFAULT_CACHEDIR',
-         System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'cache');
+       System::tmpdir() . DIRECTORY_SEPARATOR . 'pear' . DIRECTORY_SEPARATOR . 'cache');
 
 if (@is_dir(PHP_SYSCONFDIR)) {
     define('PEAR_CONFIG_SYSCONFDIR', PHP_SYSCONFDIR);
@@ -72,6 +72,15 @@ if (@is_dir(PHP_SYSCONFDIR)) {
     }
 }
 define('PEAR_DEFAULT_UMASK', umask());
+
+if (OS_WINDOWS) {
+    define('PEAR_DEFAULT_GPG_BIN', System::which('gpg', 'c:\gnupg\gpg.exe'));
+} else {
+    define('PEAR_DEFAULT_GPG_BIN', System::which('gpg', '/usr/local/bin/gpg'));
+}
+
+define('PEAR_DEFAULT_SIG_KEYDIR',
+       PEAR_CONFIG_SYSCONFDIR . DIRECTORY_SEPARATOR . 'pearkeys');
 
 /**
  * This is a class for storing configuration data, keeping track of
@@ -233,6 +242,28 @@ class PEAR_Config extends PEAR
             'doc' => 'amount of secs where the local cache is used and not updated',
             'prompt' => 'Cache TimeToLive',
             'group' => 'Advanced',
+            ),
+        'sig_type' => array(
+            'type' => 'set',
+            'default' => 'gpg',
+            'doc' => 'which package signature mechanism to use',
+            'valid_set' => array('gpg'),
+            'prompt' => 'Package Signature Type',
+            'group' => 'Maintainers',
+            ),
+        'sig_bin' => array(
+            'type' => 'string',
+            'default' => PEAR_DEFAULT_GPG_BIN,
+            'doc' => 'which package signature mechanism to use',
+            'prompt' => 'Signature Handling Program',
+            'group' => 'Maintainers',
+            ),
+        'sig_keydir' => array(
+            'type' => 'string',
+            'default' => PEAR_DEFAULT_SIG_KEYDIR,
+            'doc' => 'which package signature mechanism to use',
+            'prompt' => 'Signature Key Directory',
+            'group' => 'Maintainers',
             ),
 /*
         'testset1' => array(
