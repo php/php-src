@@ -45,6 +45,9 @@ static const char rcsid[] = "#(@) $Id$";
  *   06/2000
  * HISTORY
  *   $Log$
+ *   Revision 1.2  2002/07/05 04:43:53  danda
+ *   merged in updates from SF project.  bring php repository up to date with xmlrpc-epi version 0.51
+ *
  *   Revision 1.4  2002/02/13 20:58:50  danda
  *   patch to make source more windows friendly, contributed by Jeff Lawson
  *
@@ -72,7 +75,7 @@ static const char rcsid[] = "#(@) $Id$";
  *   there must be some.
  ******/
 
-
+#include <stdlib.h>
 #include "simplestring.h"
 
 #define my_free(thing)  if(thing) {free(thing); thing = 0;}
