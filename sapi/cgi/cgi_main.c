@@ -759,7 +759,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				if (php_execute_script(&file_handle TSRMLS_CC)) {
 					exit_status = EG(exit_status);
 				} else {
-					exit_status = -1;
+					exit_status = 255;
 				}
 				break;
 			case PHP_MODE_LINT:
@@ -814,7 +814,7 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 
 	} zend_catch {
-		exit_status = -1;
+		exit_status = 255;
 	} zend_end_try();
 
 	php_module_shutdown(TSRMLS_C);
