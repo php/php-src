@@ -40,22 +40,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ext/standard/reg.h"
-#include "ext/standard/dl.h"
-#include "ext/standard/file.h"
-#include "ext/standard/fsock.h"
-#include "ext/standard/head.h"
-#include "ext/standard/pack.h"
-#include "ext/standard/php3_browscap.h"
-#include "ext/standard/php3_crypt.h"
-#include "ext/standard/php3_dir.h"
-#include "ext/standard/php3_filestat.h"
-#include "ext/standard/php3_mail.h"
-#include "ext/standard/php3_syslog.h"
-#include "ext/standard/php_array.h"
-#include "ext/standard/php_lcg.h"
-#include "ext/standard/php_metaphone.h"
-#include "ext/standard/php_output.h"
 @EXT_INCLUDE_CODE@
 
 /* SNMP has to be moved to ext */
