@@ -1544,7 +1544,7 @@ PHP_MSHUTDOWN_FUNCTION(domxml)
 /*	If you want do find memleaks in this module, compile libxml2 with --with-mem-debug and
 	uncomment the following line, this will tell you the amount of not freed memory
 	and the total used memory into apaches error_log  */
-	xmlMemoryDump(); 
+/*	xmlMemoryDump(); */
 
 	return SUCCESS;
 }
