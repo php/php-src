@@ -1571,7 +1571,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 }
 /* }}} */
 
-/* {{{ proto resource sqlite_fetch_column_types(string table_name, [, int result_type] resource db)
+/* {{{ proto resource sqlite_fetch_column_types(string table_name, resource db [, int result_type])
    Return an array of column types from a particular table. */
 PHP_FUNCTION(sqlite_fetch_column_types)
 {
