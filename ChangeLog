@@ -1,3 +1,21 @@
+1999-12-27  Ryan Bloom  <rbb@apache.org>
+
+    * sapi/apache/config.m4:
+    Beginning work to get PHP 4 to work with Apache 2.0.  This change detects
+    Apache 2.0 properly.
+
+1999-12-27  Zeev Suraski  <zeev@php.net>
+
+    * sapi/cgi/cgi_main.c:    Fixed -c support in the standalone CGI binary (Zeev)
+
+1999-12-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS: Format fix.
+
+1999-12-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/dbase/dbf_misc.c: Build correctly on systems which lack localtime_r
+
 1999-12-26  Sascha Schumann  <sascha@schumann.cx>
 
     * ext/standard/config.m4: Cache results of crypt capability checks
