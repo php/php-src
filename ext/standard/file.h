@@ -73,6 +73,22 @@ PHPAPI int php_file_le_popen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_copy_file(char *src, char *dest);
 
+#define META_DEF_BUFSIZE 8192
+
+typedef enum _php_meta_tags_token {
+	TOK_EOF = 0,
+	TOK_OPENTAG,
+	TOK_CLOSETAG,
+	TOK_SLASH,
+	TOK_EQUAL,
+	TOK_SPACE,
+	TOK_ID,
+	TOK_STRING,
+	TOK_OTHER
+} php_meta_tags_token;
+
+php_meta_tags_token php_next_meta_token(FILE *, int, int, int *, int *, char **, int *);
+
 typedef struct {
 	int fgetss_state;
 	int pclose_ret;
