@@ -605,6 +605,7 @@ static int php_roxen_module_main(SLS_D)
 #endif
   file_handle.type = ZEND_HANDLE_FILENAME;
   file_handle.filename = THIS->filename;
+  file_handle.free_filename = 0;
   THREADS_ALLOW();
   fprintf(stderr, "Request Startup.\n");
   res = php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC);
