@@ -32,6 +32,14 @@ AC_ARG_ENABLE(discard-path,
   PHP_DISCARD_PATH=no
 ])
 
+AC_ARG_ENABLE(fastcgi,
+[  --enable-fastcgi        If this is enabled, the cgi module will
+                          be built with support for fastcgi also.],
+[
+  PHP_ENABLE_FASTCGI=$enableval
+],[
+  PHP_ENABLE_FASTCGI=no
+])
 
 AC_DEFUN(PHP_TEST_WRITE_STDOUT,[
   AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
@@ -93,9 +101,29 @@ if test "$PHP_SAPI" = "default"; then
     AC_DEFINE_UNQUOTED(DISCARD_PATH, $DISCARD_PATH, [ ])
     AC_MSG_RESULT($PHP_DISCARD_PATH)
 
+    AC_MSG_CHECKING(whether to enable fastcgi support)
+    PHP_LIBFCGI_DIR="$abs_srcdir/sapi/cgi/libfcgi"
+    if test -z $PHP_LIBFCGI_DIR; then
+      echo "$PHP_LIBFCGI_DIR does not exist"
+      exit 1
+    fi
+    if test "$PHP_ENABLE_FASTCGI" = "yes"; then
+      PHP_FASTCGI=1
+      PHP_FCGI_FILES="libfcgi/fcgi_stdio.c libfcgi/fcgiapp.c libfcgi/os_unix.c"
+      PHP_FCGI_INCLUDE="$PHP_LIBFCGI_DIR/include"
+      PHP_FCGI_STATIC=1
+    else
+      PHP_FASTCGI=0
+      PHP_FCGI_FILES=""
+      PHP_FCGI_INCLUDE=""
+      PHP_FCGI_STATIC=0
+    fi
+    AC_DEFINE_UNQUOTED(PHP_FASTCGI, $PHP_FASTCGI, [ ])
+    AC_DEFINE_UNQUOTED(PHP_FCGI_STATIC, $PHP_FCGI_STATIC, [ ])
+    AC_MSG_RESULT($PHP_ENABLE_FASTCGI)
 
     INSTALL_IT="\$(INSTALL) -m 0755 \$(SAPI_CGI_PATH) \$(INSTALL_ROOT)\$(bindir)/php-cgi"
-    PHP_SELECT_SAPI(cgi, program, cgi_main.c getopt.c,,'$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI(cgi, program, $PHP_FCGI_FILES cgi_main.c getopt.c, -I$PHP_FCGI_INCLUDE,'$(SAPI_CGI_PATH)')
 
     case $host_alias in
       *darwin*)

@@ -76,12 +76,16 @@
 
 #include "php_getopt.h"
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 #include "fcgi_config.h"
 #include "fcgiapp.h"
 /* don't want to include fcgios.h, causes conflicts */
 #ifdef PHP_WIN32
 extern int OS_SetImpersonate(void);
+#else
+/* XXX this will need to change later when threaded fastcgi is 
+   implemented.  shane */
+struct sigaction act, old_term, old_quit, old_int;
 #endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
@@ -179,7 +183,7 @@ static inline size_t sapi_cgibin_single_write(const char *str, uint str_length T
 	size_t ret;
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
 		long ret = FCGX_PutStr( str, str_length, request->out );
@@ -221,7 +225,7 @@ static int sapi_cgibin_ub_write(const char *str, uint str_length TSRMLS_DC)
 
 static void sapi_cgibin_flush(void *server_context)
 {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!FCGX_IsCGI()) {
 		FCGX_Request *request = (FCGX_Request *)server_context;
 		if(!request || FCGX_FFlush( request->out ) == -1 ) {
@@ -295,13 +299,13 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
 	uint read_bytes=0, tmp_read_bytes;
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	char *pos = buffer;
 #endif
 
 	count_bytes = MIN(count_bytes, (uint)SG(request_info).content_length-SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		if (!FCGX_IsCGI()) {
 			FCGX_Request *request = (FCGX_Request *)SG(server_context);
 			tmp_read_bytes = FCGX_GetStr( pos, count_bytes-read_bytes, request->in );
@@ -320,7 +324,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	/* when php is started by mod_fastcgi, no regular environment
 	   is provided to PHP.  It is always sent to PHP at the start
 	   of a request.  So we have to do our own lookup to get env
@@ -329,7 +333,7 @@ static char *sapi_cgibin_getenv(char *name, size_t name_len TSRMLS_DC)
 		int cgi_env_size = 0;
 		FCGX_Request *request = (FCGX_Request *)SG(server_context);
 		while( request->envp[ cgi_env_size ] ) { 
-			if (strnicmp(name,request->envp[cgi_env_size],name_len) == 0) {
+			if (strncasecmp(name,request->envp[cgi_env_size],name_len) == 0) {
 				return (request->envp[cgi_env_size])+name_len+1;
 			}
 			cgi_env_size++; 
@@ -346,7 +350,7 @@ static char *sapi_cgi_read_cookies(TSRMLS_D)
 	return sapi_cgibin_getenv((char *)"HTTP_COOKIE",strlen("HTTP_COOKIE") TSRMLS_CC);
 }
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	if (!FCGX_IsCGI()) {
@@ -410,7 +414,7 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 /* {{{ sapi_module_struct cgi_sapi_module
  */
 static sapi_module_struct cgi_sapi_module = {
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	"cgi-fcgi",						/* name */
 	"CGI/FastCGI",					/* pretty name */
 #else
@@ -464,7 +468,7 @@ static void php_cgi_usage(char *argv0)
 	php_printf("Usage: %s [-q] [-h] [-s [-v] [-i] [-f <file>] \n"
 			   "       %s <file> [args...]\n"
 			   "  -a               Run interactively\n"
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			   "  -b <address:port>|<port> Bind Path for external FASTCGI Server mode\n"
 #endif
 			   "  -C               Do not chdir to the script's directory\n"
@@ -581,6 +585,29 @@ static void php_register_command_line_global_vars(char **arg TSRMLS_DC)
 	efree(*arg);
 }
 
+#if PHP_FASTCGI
+/**
+ * Clean up child processes upon exit
+ */
+void fastcgi_cleanup(int signal)
+{
+
+#ifdef DEBUG_FASTCGI
+	fprintf( stderr, "FastCGI shutdown, pid %d\n", getpid() );
+#endif
+
+#ifndef PHP_WIN32
+	sigaction( SIGTERM, &old_term, 0 );
+
+	/* Kill all the processes in our process group */
+	kill( -pgroup, SIGTERM );
+#endif
+
+	/* We should exit at this point, but MacOSX doesn't seem to */
+	exit( 0 );
+}
+#endif
+
 /* {{{ main
  */
 int main(int argc, char *argv[])
@@ -614,7 +641,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	int max_requests = 500;
 	int requests = 0;
 	int fastcgi = !FCGX_IsCGI();
@@ -623,6 +650,8 @@ int main(int argc, char *argv[])
 	FCGX_Request request;
 #ifdef PHP_WIN32
 	int impersonate = 0;
+#else
+    int status = 0;
 #endif
 #endif /* PHP_FASTCGI */
 
@@ -651,7 +680,7 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!fastcgi) {
 #endif
 	/* Make sure we detect we are a cgi - a bit redundancy here,
@@ -667,12 +696,12 @@ int main(int argc, char *argv[])
 			argv0 = NULL;
 		}
 	}
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	}
 #endif
 
 	if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		/* allow ini override for fastcgi */
 #endif
 		) {
@@ -691,7 +720,7 @@ int main(int argc, char *argv[])
 		ap_php_optarg = orig_optarg;
 	}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (!cgi && !fastcgi) {
 		/* if we're started on command line, check to see if
 		   we are being started as an 'external' fastcgi
@@ -768,7 +797,7 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 #endif							/* FORCE_CGI_REDIRECT */
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 	if (bindpath) {
 		/* Pass on the arg to the FastCGI library, with one exception.
 		 * If just a port is specified, then we prepend a ':' onto the
@@ -891,7 +920,7 @@ consult the installation file that came with this distribution, or visit \n\
 
 	zend_first_try {
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) {
@@ -912,7 +941,7 @@ consult the installation file that came with this distribution, or visit \n\
 			ap_php_optarg = orig_optarg;
 		}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		/* start of FAST CGI loop */
 		/* Initialise FastCGI request structure */
 
@@ -931,7 +960,7 @@ consult the installation file that came with this distribution, or visit \n\
 			|| FCGX_Accept_r( &request ) >= 0) {
 #endif
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		SG(server_context) = (void *) &request;
 #else
 		SG(server_context) = (void *) 1; /* avoid server_context==NULL checks */
@@ -943,7 +972,7 @@ consult the installation file that came with this distribution, or visit \n\
 		zend_llist_init(&global_vars, sizeof(char *), NULL, 0);
 
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) { /* never execute the arguments if you are a CGI */	
@@ -1083,7 +1112,7 @@ consult the installation file that came with this distribution, or visit \n\
 		CG(interactive) = interactive;
 
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) {
@@ -1122,11 +1151,12 @@ consult the installation file that came with this distribution, or visit \n\
 			php_module_shutdown(TSRMLS_C);
 			return FAILURE;
 		}
+
 		if (no_headers) {
 			SG(headers_sent) = 1;
 			SG(request_info).no_headers = 1;
 		}
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		if (fastcgi) {
 			file_handle.type = ZEND_HANDLE_FILENAME;
 			file_handle.filename = SG(request_info).path_translated;
@@ -1135,7 +1165,7 @@ consult the installation file that came with this distribution, or visit \n\
 			file_handle.filename = "-";
 			file_handle.type = ZEND_HANDLE_FP;
 			file_handle.handle.fp = stdin;
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 		}
 #endif
 		file_handle.opened_path = NULL;
@@ -1146,7 +1176,7 @@ consult the installation file that came with this distribution, or visit \n\
 		zend_llist_destroy(&global_vars);
 
 		if (!cgi
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			&& !fastcgi
 #endif
 			) {
@@ -1166,6 +1196,7 @@ consult the installation file that came with this distribution, or visit \n\
 #else
 			env_path_translated = sapi_cgibin_getenv("PATH_TRANSLATED",strlen("PATH_TRANSLATED") TSRMLS_CC);
 #endif
+
 			if(env_path_translated) {
 #ifdef __riscos__
 				/* Convert path to unix format*/
@@ -1266,7 +1297,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		}
 
-#ifdef PHP_FASTCGI
+#if PHP_FASTCGI
 			if (!fastcgi) break;
 			/* only fastcgi will get here */
 			requests++;

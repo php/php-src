@@ -70,7 +70,7 @@ static int libInitialized = 0;
 static int isFastCGI = -1;
 static char *webServerAddressList = NULL;
 static FCGX_Request the_request;
-void _FCGX_FreeStream(FCGX_Stream **streamPtr, BOOL freeData);
+void _FCGX_FreeStream(FCGX_Stream **streamPtr, int freeData);
 
 void FCGX_ShutdownPending(void)
 {
@@ -1814,7 +1814,7 @@ void FCGX_FreeStream(FCGX_Stream **streamPtr)
 	_FCGX_FreeStream(streamPtr, TRUE);
 }
 
-void _FCGX_FreeStream(FCGX_Stream **streamPtr, BOOL freeData)
+void _FCGX_FreeStream(FCGX_Stream **streamPtr, int freeData)
 {
     FCGX_Stream *stream = *streamPtr;
     FCGX_Stream_Data *data;
