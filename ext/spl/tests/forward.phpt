@@ -10,19 +10,19 @@ class c implements spl::forward_assoc {
 	public $num = 0;
 
 	function current() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		return $this->num;
 	}
 	function next() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		$this->num++;
 	}
 	function has_more() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		return $this->num < $this->max;
 	}
 	function key() {
-		echo __CLASS__ . '::' . __FUNCTION__ . "\n";
+		echo __METHOD__ . "\n";
 		switch($this->num) {
 			case 0: return "1st";
 			case 1: return "2nd";
