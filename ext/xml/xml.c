@@ -389,7 +389,7 @@ xml_call_handler(xml_parser *parser, zval *handler, int argc, zval **argv)
 					   zend_hash_index_find(handler->value.ht, 1, (void **) &method) == SUCCESS &&
 					   Z_TYPE_PP(obj) == IS_OBJECT &&
 					   Z_TYPE_PP(method) == IS_STRING) {
-				php_error(E_WARNING, "Unable to call handler %s::%s()", (*obj)->value.obj.ce->name, Z_STRVAL_PP(method));
+				php_error(E_WARNING, "Unable to call handler %s::%s()", Z_OBJCE_PP(obj)->name, Z_STRVAL_PP(method));
 			} else
 				php_error(E_WARNING, "Unable to call handler");
 
