@@ -744,7 +744,7 @@ extern int any2eucjp (char *, char *, unsigned int);
 
 /* Persistent font cache until explicitly cleared */
 /*     Fonts can be used across multiple images */
-static gdCache_head_t *fontCache;
+static gdCache_head_t *fontCache = NULL;
 static FT_Library library;
 
 void
@@ -753,6 +753,7 @@ gdFreeFontCache()
   if (fontCache)
     {
       gdCacheDelete(fontCache);
+	  fontCache=NULL;
       FT_Done_FreeType(library);
     }
 }
