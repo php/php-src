@@ -31,6 +31,7 @@
 #include "zend_extensions.h"
 #include "zend_fast_cache.h"
 #include "zend_execute_locks.h"
+#include "zend_ini.h"
 
 #define get_zval_ptr(node, Ts, should_free, type) _get_zval_ptr(node, Ts, should_free TSRMLS_CC)
 #define get_zval_ptr_ptr(node, Ts, type) _get_zval_ptr_ptr(node, Ts TSRMLS_CC)
@@ -3566,16 +3567,21 @@ int zend_exit_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 int zend_begin_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	EX_T(EX(opline)->result.u.var).tmp_var.value.lval = EG(error_reporting);
-	EX_T(EX(opline)->result.u.var).tmp_var.type = IS_LONG;  /* shouldn't be necessary */
-	EG(error_reporting) = 0;
+	EX(Ts)[EX(opline)->result.u.var].tmp_var.value.lval = EG(error_reporting);
+	EX(Ts)[EX(opline)->result.u.var].tmp_var.type = IS_LONG;  /* shouldn't be necessary */
+	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), "0", 1, ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	NEXT_OPCODE();
 }
 
 int zend_end_silence_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
-	EG(error_reporting) = EX_T(EX(opline)->op1.u.var).tmp_var.value.lval;
-	NEXT_OPCODE();
+	zval restored_error_reporting;
+	
+	restored_error_reporting.type = IS_LONG;
+	restored_error_reporting.value.lval = EX(Ts)[EX(opline)->op1.u.var].tmp_var.value.lval;
+	convert_to_string(&restored_error_reporting);
+	zend_alter_ini_entry("error_reporting", sizeof("error_reporting"), Z_STRVAL(restored_error_reporting), Z_STRLEN(restored_error_reporting), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
+	zendi_zval_dtor(restored_error_reporting);
 }
 
 int zend_qm_assign_handler(ZEND_OPCODE_HANDLER_ARGS)
