@@ -1,3 +1,35 @@
+2002-06-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c: map imageellipse to imagearc if missing
+    fix warnings
+
+    * ext/standard/image.c: bits/channels for gif
+
+2002-06-25  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/scripts/pear.in:
+    change the include_path setting to be in the php space instead
+    of doing in the interpreter line (seems to break FreeBSD)
+
+2002-06-25  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/php_domxml.c: should compile on windows again
+
+    * ext/domxml/php_domxml.h: include libxml/parserInternals.h
+
+2002-06-25  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/gd/gd.c
+      ext/gd/config.m4: imageellipse is removed in 2.01
+
+2002-06-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Update NEWS
+
+2002-06-25  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/sockets/sockets.c: - Fix proto.
+
 2002-06-24  Jani Taskinen  <sniper@iki.fi>
 
     * NEWS: Minor cleanup.
