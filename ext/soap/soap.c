@@ -2215,6 +2215,7 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf)
 		}
 	}
 	smart_str_appendc(buf, ')');
+	smart_str_0(buf);
 }
 
 static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
@@ -2257,6 +2258,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level)
 		smart_str_appendl(buf, ";\n", 2);
 	}
 	smart_str_free(&spaces);
+	smart_str_0(buf);
 }
 
 /* Deletes */
