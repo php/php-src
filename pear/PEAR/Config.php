@@ -577,7 +577,8 @@ class PEAR_Config extends PEAR
         }
         $data = ($data === null) ? $this->configuration[$layer] : $data;
         $this->_encodeOutput($data);
-        if (!@System::mkDir("-p " . dirname($file))) {
+        $opt = array('-p', dirname($file));
+        if (!@System::mkDir($opt)) {
             return $this->raiseError("could not create directory: " . dirname($file));
         }
         if (@is_file($file) && !@is_writeable($file)) {

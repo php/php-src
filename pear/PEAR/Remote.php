@@ -50,21 +50,18 @@ class PEAR_Remote extends PEAR
 
     // {{{ getCache()
 
-    
+
     function getCache($args)
     {
         $id       = md5(serialize($args));
         $cachedir = $this->config->get('cache_dir');
-        if (!file_exists($cachedir)) {
-            System::mkdir('-p '.$cachedir);
-        }
         $filename = $cachedir . DIRECTORY_SEPARATOR . 'xmlrpc_cache_' . $id;
         if (!file_exists($filename)) {
             return null;
         };
-		
-        $fp = fopen($filename, "rb");
-        if ($fp === null) {
+
+        $fp = fopen($filename, 'rb');
+        if (!$fp) {
             return null;
         }
         $content  = fread($fp, filesize($filename));
@@ -78,7 +75,7 @@ class PEAR_Remote extends PEAR
     }
 
     // }}}
-    
+
     // {{{ saveCache()
 
     function saveCache($args, $data)
@@ -86,32 +83,32 @@ class PEAR_Remote extends PEAR
         $id       = md5(serialize($args));
         $cachedir = $this->config->get('cache_dir');
         if (!file_exists($cachedir)) {
-            System::mkdir('-p '.$cachedir);
+            System::mkdir(array('-p', $cachedir));
         }
         $filename = $cachedir.'/xmlrpc_cache_'.$id;
-        
+
         $fp = @fopen($filename, "wb");
-        if ($fp !== null) {
+        if ($fp) {
             fwrite($fp, serialize($data));
             fclose($fp);
         };
     }
 
     // }}}
-    
+
     // {{{ call(method, [args...])
 
     function call($method)
     {
         $_args = $args = func_get_args();
-        
+
         $this->cache = $this->getCache($args);
         $cachettl = $this->config->get('cache_ttl');
         // If cache is newer than $cachettl seconds, we use the cache!
         if ($this->cache !== null && $this->cache['age'] < $cachettl) {
             return $this->cache['content'];
         };
-        
+
         if (extension_loaded("xmlrpc")) {
             $result = call_user_func_array(array(&$this, 'call_epi'), $args);
             if (!PEAR::isError($result)) {
@@ -140,7 +137,7 @@ class PEAR_Remote extends PEAR
             $proxy_port = @$proxy['port'];
             $proxy_user = @$proxy['user'];
             $proxy_pass = @$proxy['pass'];
-        }        
+        }
         $c = new XML_RPC_Client('/xmlrpc.php'.$maxAge, $server_host, 80, $proxy_host, $proxy_port, $proxy_user, $proxy_pass);
         if ($username && $password) {
             $c->setCredentials($username, $password);
@@ -204,8 +201,20 @@ class PEAR_Remote extends PEAR
             return $this->raiseError("PEAR_Remote::call: no master_server configured");
         }
         $server_port = 80;
-        $fp = @fsockopen($server_host, $server_port);
-        if (!$fp) {
+        if ($http_proxy = $this->config->get('http_proxy')) {
+            $proxy = parse_url($http_proxy);
+            $proxy_host = $proxy_port = $proxy_user = $proxy_pass = '';
+            $proxy_host = @$proxy['host'];
+            $proxy_port = @$proxy['port'];
+            $proxy_user = @$proxy['user'];
+            $proxy_pass = @$proxy['pass'];
+            $fp = @fsockopen($proxy_host, $proxy_port);
+        } else {
+            $fp = @fsockopen($server_host, $server_port);
+        }
+        if (!$fp && $http_proxy) {
+            return $this->raiseError("PEAR_Remote::call: fsockopen(`$proxy_host', $proxy_port) failed");
+        } elseif (!$fp) {
             return $this->raiseError("PEAR_Remote::call: fsockopen(`$server_host', $server_port) failed");
         }
         $len = strlen($request);
@@ -224,15 +233,30 @@ class PEAR_Remote extends PEAR
         } else {
             $maxAge = '';
         };
-        
+
+        if ($proxy_host != '' && $proxy_user != '') {
+            $req_headers .= 'Proxy-Authorization: Basic '
+                .base64_encode($proxy_user.':'.$proxy_pass)
+                ."\r\n";
+        }
+
         if ($this->config->get('verbose') > 3) {
             print "XMLRPC REQUEST HEADERS:\n";
             var_dump($req_headers);
             print "XMLRPC REQUEST BODY:\n";
             var_dump($request);
         }
-        
-        fwrite($fp, ("POST /xmlrpc.php$maxAge HTTP/1.0\r\n$req_headers\r\n$request"));
+
+        if ($proxy_host != '') {
+            $post_string = "POST http://".$server_host;
+            if ($proxy_port > '') {
+                $post_string .= ':'.$server_port;
+            }
+        } else {
+            $post_string = "POST ";
+        }
+
+        fwrite($fp, ($post_string."/xmlrpc.php$maxAge HTTP/1.0\r\n$req_headers\r\n$request"));
         $response = '';
         $line1 = fgets($fp, 2048);
         if (!preg_match('!^HTTP/[0-9\.]+ (\d+) (.*)!', $line1, $matches)) {

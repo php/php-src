@@ -769,7 +769,7 @@ class PEAR_Error
                       is_object($this->callback[0]) &&
                       is_string($this->callback[1]) &&
                       strlen($this->callback[1])) {
-                      @call_user_func($this->callback, $this);
+                      call_user_func($this->callback, $this);
             }
         }
         if (PEAR_ZE2 && $this->mode & PEAR_ERROR_EXCEPTION) {

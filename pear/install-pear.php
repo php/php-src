@@ -23,6 +23,9 @@ for ($i = 0; $i < sizeof($argv); $i++) {
     } elseif ($arg == '-d') {
         $with_dir = $argv[$i+1];
         $i++;
+    } elseif ($arg == '-b') {
+        $bin_dir = $argv[$i+1];
+        $i++;
     }
 }
 
@@ -36,11 +39,14 @@ foreach ($config_layers as $layer) {
 }
 $keys = $config->getKeys();
 $config->set('verbose', 0, 'default');
+// PEAR executables
+if (!empty($bin_dir)) {
+    $config->set('bin_dir', $bin_dir, 'default');
+}
 // User supplied a dir prefix
 if (!empty($with_dir)) {
     $ds = DIRECTORY_SEPARATOR;
     $config->set('php_dir', $with_dir . $ds . 'lib', 'default');
-    $config->set('bin_dir', $with_dir . $ds . 'bin', 'default');
     $config->set('doc_dir', $with_dir . $ds . 'doc', 'default');
     $config->set('data_dir', $with_dir . $ds . 'data', 'default');
     $config->set('test_dir', $with_dir . $ds . 'test', 'default');
@@ -115,13 +121,17 @@ foreach ($install_files as $package => $instfile) {
                             'a previous PEAR installation at ' .
                             "'$ufile'. You may probably want to remove it.");
         }
-        $ui->outputData('Writing PEAR system config file at: ' . $config->files['system']);
-        $ui->outputData('You may want to add: ' . $config->get('php_dir') . ' to your php.ini include_path');
         $config->set('verbose', 1, 'default');
         foreach ($config->getKeys() as $key) {
             $data[$key] = $config->get($key);
         }
-        $config->store('system', $data);
+        $cnf_file = $config->getConfFile('system');
+        if (!empty($install_root)) {
+            $cnf_file = $install_root . DIRECTORY_SEPARATOR . $cnf_file;
+        }
+        $config->writeConfigFile($cnf_file, 'system', $data);
+        $ui->outputData('Wrote PEAR system config file at: ' . $cnf_file);
+        $ui->outputData('You may want to add: ' . $config->get('php_dir') . ' to your php.ini include_path');
     }
 }
 ?>

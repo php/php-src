@@ -156,7 +156,7 @@ class PEAR_Common extends PEAR
         $tempfiles =& $GLOBALS['_PEAR_Common_tempfiles'];
         while ($file = array_shift($tempfiles)) {
             if (@is_dir($file)) {
-                System::rm("-rf $file");
+                System::rm(array('-rf', $file));
             } elseif (file_exists($file)) {
                 unlink($file);
             }
@@ -198,7 +198,7 @@ class PEAR_Common extends PEAR
     function mkDirHier($dir)
     {
         $this->log(2, "+ create dir $dir");
-        return System::mkDir("-p $dir");
+        return System::mkDir(array('-p', $dir));
     }
 
     // }}}
@@ -242,11 +242,12 @@ class PEAR_Common extends PEAR
     function mkTempDir($tmpdir = '')
     {
         if ($tmpdir) {
-            $topt = "-t $tmpdir ";
+            $topt = array('-t', $tmpdir);
         } else {
-            $topt = '';
+            $topt = array();
         }
-        if (!$tmpdir = System::mktemp($topt . '-d pear')) {
+        $topt = array_merge($topt, array('-d', 'pear'));
+        if (!$tmpdir = System::mktemp($topt)) {
             return false;
         }
         $this->addTempFile($tmpdir);
@@ -567,7 +568,11 @@ class PEAR_Common extends PEAR
                 }
                 break;
             case 'license':
-                $this->pkginfo['release_license'] = $data;
+                if ($this->in_changelog) {
+                    $this->current_release['release_license'] = $data;
+                } else {
+                    $this->pkginfo['release_license'] = $data;
+                }
                 break;
             case 'dep':
                 if ($data && !$this->in_changelog) {
@@ -671,9 +676,17 @@ class PEAR_Common extends PEAR
             return $this->raiseError("could not open file \"$file\"");
         }
         $tar = new Archive_Tar($file);
+        if ($this->debug <= 1) {
+            $tar->pushErrorHandling(PEAR_ERROR_RETURN);
+        }
         $content = $tar->listContent();
+        if ($this->debug <= 1) {
+            $tar->popErrorHandling();
+        }
         if (!is_array($content)) {
-            return $this->raiseError("could not get contents of package \"$file\"");
+            $file = realpath($file);
+            return $this->raiseError("Could not get contents of package \"$file\"".
+                                     '. Invalid tgz file.');
         }
         $xml = null;
         foreach ($content as $file) {
@@ -688,7 +701,7 @@ class PEAR_Common extends PEAR
         }
         $tmpdir = System::mkTemp('-d pear');
         $this->addTempFile($tmpdir);
-        if (!$xml || !$tar->extractList($xml, $tmpdir)) {
+        if (!$xml || !$tar->extractList(array($xml), $tmpdir)) {
             return $this->raiseError('could not extract the package.xml file');
         }
         return $this->infoFromDescriptionFile("$tmpdir/$xml");
@@ -1099,6 +1112,7 @@ class PEAR_Common extends PEAR
                 if (empty($c['prompt'])) {
                     $errors[] = "configure option $i: missing prompt";
                 }
+                $i++;
             }
         }
         if (empty($info['filelist'])) {
@@ -1155,7 +1169,7 @@ class PEAR_Common extends PEAR
      * Build a "provides" array from data returned by
      * analyzeSourceCode().  The format of the built array is like
      * this:
-     * 
+     *
      *  array(
      *    'class;MyClass' => 'array('type' => 'class', 'name' => 'MyClass'),
      *    ...
@@ -1168,7 +1182,7 @@ class PEAR_Common extends PEAR
      * @return void
      *
      * @access public
-     * 
+     *
      */
     function buildProvidesArray($srcinfo)
     {
@@ -1597,7 +1611,7 @@ class PEAR_Common extends PEAR
                                                                   $errno, $errstr));
                 }
                 return PEAR::raiseError("Connection to `$host:$port' failed: $errstr", $errno);
-            }            
+            }
             $request = "GET $path HTTP/1.0\r\n";
         }
         $request .= "Host: $host:$port\r\n".

@@ -25,4 +25,4 @@ else
   fi
 fi
 
-exec $PHP -C -q $INCARG -d output_buffering=1 $INCDIR/pearcmd.php $@
+exec $PHP -C -q $INCARG -d output_buffering=1 $INCDIR/pearcmd.php "$@"

@@ -37,17 +37,22 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.2b3</version>
+    <version>1.2b5</version>
     <state>beta</state>
-    <date>2003-07-08</date>
+    <date>2003-08-05</date>
     <notes>
 * Changed license from PHP 2.02 to 3.0
 * Added support for optional dependencies
 * Made upgrade and uninstall package case insensitive
 * pear makerpm, now works and generates a better system independant spec file
-* pear install|build &lt;pecl-package&gt;, now exposes the compilation progress
+* pear install|build pecl-package, now exposes the compilation progress
 * Installer now checks dependencies on package uninstall
-* Added new pear bundle command, which downloads and uncompress a &lt;pecl-package&gt;.
+* Added proxy support for remote commands using the xmlrcp C ext (Adam Ashley)
+* Added the command "download-all" (Alex Merz)
+* Made package dependency checking back to work
+* Added support for spaces in path names (Greg)
+* Various bugfixes
+* Added new pear "bundle" command, which downloads and uncompress a PECL package.
 The main purpouse of this command is for easily adding extensions to the PHP sources
 before compiling it.
     </notes>
@@ -71,6 +76,7 @@ before compiling it.
           <file role="php" name="Package.php"/>
           <file role="php" name="Registry.php"/>
           <file role="php" name="Remote.php"/>
+          <file role="php" name="Mirror.php"/>
         </dir>
         <file role="php" name="Common.php"/>
         <file role="php" name="Config.php"/>
