@@ -914,7 +914,7 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		}
 
 /* EAM DEBUG */
-#if (defined(FREETYPE_MAJOR) && (FREETYPE_MAJOR >=2 ) && (FREETYPE_MINOR >= 1))
+#if (defined(FREETYPE_MAJOR) && ((FREETYPE_MAJOR == 2 && ((FREETYPE_MINOR == 1 && FREETYPE_PATCH >= 3) || FREETYPE_MINOR > 1) || FREETYPE_MAJOR > 2)))
 		if (font->face->charmap->encoding == FT_ENCODING_MS_SYMBOL) {
 			/* I do not know the significance of the constant 0xf000.
 			 * It was determined by inspection of the character codes
