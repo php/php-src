@@ -1,3 +1,39 @@
+2000-01-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/wddx.c
+      ext/mysql/php_mysql.c: Fix IS_UNSET -> IS_NULL rename.
+
+2000-01-04  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/basic_functions.c
+      ext/com/COM.c:
+    - Separate the overloaded objects' types from Zend's data types.
+      There is no reason for them to be the same, and IS_METHOD just cluttered
+      the data types.
+    - Overloaded elements should now use OE_IS_OBJECT, OE_IS_ARRAY, and
+      OE_IS_METHOD
+
+    * ext/standard/array.c
+      ext/standard/var.c: - Change IS_UNSET -> IS_NULL
+
+2000-01-04  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:
+2000-01-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/servlet/Makefile.in: Fix typo
+
+    * sapi/apache/Makefile.in
+      sapi/servlet/Makefile.in
+      ext/snmp/Makefile.in: Replace all += constructs with equivalent ones
+
+2000-01-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ltconfig
+      ltmain.sh:
+    * ext/gd/config.m4
+      ltconfig
+      ltmain.sh:
 2000-01-03  Andrei Zmievski  <andrei@ispi.net>
 
     * ext/session/session.c
