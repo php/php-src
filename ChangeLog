@@ -1,3 +1,55 @@
+2000-05-31  Jouni Ahto  <jah@mork.net>
+
+    * ext/standard/formatted_print.c:
+    Correct fix this time... (?)
+
+    * ext/standard/formatted_print.c:
+    Fix a nasty off-by-one with negative numbers.
+
+2000-05-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in: Make use of already existing macro PHP_PROG_SENDMAIL
+
+2000-05-31  Zeev Suraski  <zeev@php.net>
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    - Added pg_trace() and pg_untrace (Dominic J. Eidson & Zeev)
+
+2000-05-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Use sed instead of tr. The tr regexp syntax does not seem to be portable
+    enough to make wide use of it. This should fix problems on Solaris 8
+    and possibly on older SysV-derivatives.
+
+2000-05-31  Charles Hagenbuch  <chagenbu@wso.williams.edu>
+
+    * ext/mcal/config.m4:
+    monkeying Sascha's suggested change to allow relative pathnames.
+
+2000-05-31  Anthony Whitehead  <anthony.whitehead@rfv.sfa.se>
+
+    * sapi/nsapi/nsapi.c:
+    Added changes suggested by Stanislav Borutsky with respect to NSAPI_PUBLIC.
+
+2000-05-31  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c: - ignore_user_abort=Off is now default. 
+
+2000-05-31  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/nsapi/config.m4:
+    The last line added '-I' to INCLUDES, causing all SAPI modules but NSAPI
+    failing to build.
+
+2000-05-31  Thies C. Arntzen  <thies@digicol.de>
+
+    * TODO:
+    just do phpinfo() and "collect" all error_reporting related ini-entries -
+    you'll get my point;-)
+
 2000-05-30  Frank M. Kromann  <fmk@swwwing.com>
 
     * ext/imap/imap.dsp
