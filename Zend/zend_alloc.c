@@ -163,7 +163,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		AG(cache_stats)[CACHE_INDEX][1]++;
 		memcpy((((char *) p) + sizeof(zend_mem_header) + MEM_HEADER_PADDING + size), &mem_block_end_magic, sizeof(long));
 #endif
-		p->cached = 0;
 		p->size = size;
 		return (void *)((char *)p + sizeof(zend_mem_header) + MEM_HEADER_PADDING);
 	} else {
@@ -196,7 +195,6 @@ ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 		return (void *)p;
 	}
-	p->cached = 0;
 	ADD_POINTER_TO_LIST(p);
 	p->size = size; /* Save real size for correct cache output */
 #if ZEND_DEBUG
@@ -270,7 +268,6 @@ ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 #if !ZEND_DISABLE_MEMORY_CACHE
 	if ((CACHE_INDEX < MAX_CACHED_MEMORY) && (AG(cache_count)[CACHE_INDEX] < MAX_CACHED_ENTRIES)) {
 		AG(cache)[CACHE_INDEX][AG(cache_count)[CACHE_INDEX]++] = p;
-		p->cached = 1;
 #if ZEND_DEBUG
 		p->magic = MEM_BLOCK_CACHED_MAGIC;
 #endif
@@ -530,42 +527,36 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 	p = AG(head);
 	t = AG(head);
 	while (t) {
-		if (!t->cached) {
 #if ZEND_DEBUG
-			if (!t->reported) {
-				zend_mem_header *iterator;
-				int total_leak=0, total_leak_count=0;
+		if (!t->reported) {
+			zend_mem_header *iterator;
+			int total_leak=0, total_leak_count=0;
 
-				grand_total_leaks++;
-				if (!silent) {
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
-				}
-				t->reported = 1;
-				for (iterator=t->pNext; iterator; iterator=iterator->pNext) {
-					if (!iterator->cached
-						&& iterator->filename==t->filename
-						&& iterator->lineno==t->lineno) {
-						total_leak += iterator->size;
-						total_leak_count++;
-						iterator->reported = 1;
-					}
-				}
-				if (!silent && total_leak_count>0) {
-					zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (total_leak_count));
-				}
-				grand_total_leaks += total_leak_count;
+			grand_total_leaks++;
+			if (!silent) {
+				zend_message_dispatcher(ZMSG_MEMORY_LEAK_DETECTED, t);
 			}
+			t->reported = 1;
+			for (iterator=t->pNext; iterator; iterator=iterator->pNext) {
+				if (iterator->filename==t->filename && iterator->lineno==t->lineno) {
+					total_leak += iterator->size;
+					total_leak_count++;
+					iterator->reported = 1;
+				}
+			}
+			if (!silent && total_leak_count>0) {
+				zend_message_dispatcher(ZMSG_MEMORY_LEAK_REPEATED, (void *) (long) (total_leak_count));
+			}
+			grand_total_leaks += total_leak_count;
+		}
 #endif
 #if MEMORY_LIMIT
-			AG(allocated_memory) -= REAL_SIZE(t->size);
+		AG(allocated_memory) -= REAL_SIZE(t->size);
 #endif
-			p = t->pNext;
-			REMOVE_POINTER_FROM_LIST(t);
-			ZEND_DO_FREE(t);
-			t = p;
-		} else {
-			t = t->pNext;
-		}
+		p = t->pNext;
+		REMOVE_POINTER_FROM_LIST(t);
+		ZEND_DO_FREE(t);
+		t = p;
 	}
 
 #if ZEND_DEBUG
