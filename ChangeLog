@@ -1,3 +1,100 @@
+2003-06-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/document.c
+      ext/dom/domimplementation.c
+      ext/dom/node.c
+      ext/dom/php_dom.c
+      ext/dom/php_dom.h:
+      add node->isSupported()
+      add domimplementation->hasFeature()
+      add formatOutput property (extends DOM)
+      call xmlFreeDoc when doc is no longer referenced rather than custom code
+      save and savexml now format based on formatOutput property
+
+2003-06-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      ext/dba/dba.c:
+      MFH: Bugfix #2397: dba_open locking error with db3
+
+    * ext/dba/dba.c:
+      Bugfix #2397: dba_open locking error with db3
+
+2003-06-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/imap/php_imap.c:
+      Fixed bug #22505 (Allow imap_sort() and imap_search() to specify a charset)
+
+    * (PHP_4_3)
+      NEWS
+      ext/gd/libgd/gd.c
+      ext/gd/tests/bug24155.phpt:
+      MFH: Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y
+      axis)
+
+    * ext/gd/libgd/gd.c
+      ext/gd/tests/bug24155.phpt:
+      Fixed bug #24155 (gdImageRotate270 incorrectly use x parameter for y axis)
+
+2003-06-12  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/characterdata.c
+      ext/dom/text.c:
+      fix some calls to libxml
+
+2003-06-12  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/standard/array.c:
+      silly bug
+
+    * ext/cpdf/cpdf.c:
+      proto fixes
+
+2003-06-12  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * (PHP_4_3)
+      README.SUBMITTING_PATCH:
+      test
+
+2003-06-12  Andrey Hristov  <andrey@webgate.bg>
+
+    * ext/curl/interface.c:
+      proto fix
+
+    * ext/bcmath/bcmath.c
+      ext/bcmath/bcmath.c
+      ext/cpdf/cpdf.c
+      ext/crack/crack.c
+      ext/crack/crack.c
+      ext/curl/curl.c
+      ext/informix/ifx.ec
+      ext/informix/ifx.ec
+      ext/interbase/interbase.c
+      ext/interbase/interbase.c
+      ext/mcrypt/mcrypt.c
+      ext/mcrypt/mcrypt.c
+      ext/mssql/php_mssql.c
+      ext/mssql/php_mssql.c:
+      proto fixes
+
+2003-06-12  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c:
+      - MFB: HTTP Request Methods are case sensitive
+
+    * (PHP_4_3)
+      main/main.c:
+      - HTTP Request Types are case-sensitive
+
+2003-06-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      ext/pspell/pspell.c:
+      MFH: Added missing safe_mode/open_basedir checks.
+
+    * ext/pspell/pspell.c:
+      Added missing safe_mode/open_basedir checks.
+
 2003-06-11  Rob Richards  <rrichards@ctindustries.net>
 
     * ext/dom/text.c:
