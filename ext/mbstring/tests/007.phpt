@@ -5,7 +5,7 @@ mb_output_handler() (EUC-JP)
 --POST--
 --GET--
 --FILE--
-<?php include('skipif.inc'); ?>
+<?php include('007.inc'); ?>
 --EXPECT--
 テスト用日本語文字列。このモジュールはPHPにマルチバイト関数を提供します。
 
