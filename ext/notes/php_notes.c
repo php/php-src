@@ -242,7 +242,7 @@ PHP_FUNCTION(notes_drop_db)
 }
 /* }}} */
 
-/* {{{ proto string notes_version(string database_name)
+/* {{{ proto float notes_version(string database_name)
    Gets the Lotus Notes version */
 PHP_FUNCTION(notes_version)
 {
@@ -315,7 +315,7 @@ PHP_FUNCTION(notes_version)
 }
 /* }}} */
 
-/* {{{ proto string notes_create_note(string database_name, string form_name)
+/* {{{ proto bool notes_create_note(string database_name, string form_name)
    Creates a note using form form_name */
 PHP_FUNCTION(notes_create_note)
 {
@@ -439,7 +439,7 @@ STATUS UndoUnreadStatus (
    NOTEID         UndoID);
 
 
-/* {{{ proto string notes_mark_read(string database_name, string user_name, string note_id)
+/* {{{ proto bool notes_mark_read(string database_name, string user_name, string note_id)
    Marks a note_id as read for the User user_name.  Note: user_name must be fully distinguished user name */
 PHP_FUNCTION(notes_mark_read)
 {
@@ -853,7 +853,7 @@ STATUS UndoUnreadStatus (
 	return (error);
 }
 
-/* {{{ proto string notes_unread(string database_name, string user_name)
+/* {{{ proto array notes_unread(string database_name, string user_name)
    Returns the unread note id's for the current User user_name.  Note: user_name must be fully distinguished user name */
 PHP_FUNCTION(notes_unread)
 {
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(notes_body)
 }
 /* }}} */
 
-/* {{{ proto bool notes_find_note(string database_name, string name [, string type])
+/* {{{ proto int notes_find_note(string database_name, string name [, string type])
    Returns a note id found in database_name */
 /*
 Specify the name of the note. Leaving type blank
@@ -1696,7 +1696,7 @@ PHP_FUNCTION(notes_nav_create)
 }
 /* }}} */
 
-/* {{{ proto string notes_search(string database_name, string keywords)
+/* {{{ proto array notes_search(string database_name, string keywords)
    Finds notes that match keywords in database_name.  The note(s) that are returned must be converted to base 16. Example base_convert($note_id, "10", "16") */
 
 STATUS LNPUBLIC file_action (void *, SEARCH_MATCH *, ITEM_TABLE *);
@@ -1938,7 +1938,7 @@ PHP_FUNCTION(notes_search)
 }
 /* }}} */
 
-/* {{{ proto string notes_copy_db(string from_database_name, string to_database_name [, string title])
+/* {{{ proto bool notes_copy_db(string from_database_name, string to_database_name [, string title])
    Creates a note using form form_name */
 PHP_FUNCTION(notes_copy_db)
 {

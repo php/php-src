@@ -431,7 +431,7 @@ PHP_FUNCTION(ncurses_reset_shell_mode)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_def_prog_mode(void)
+/* {{{ proto int ncurses_def_prog_mode(void)
    Saves terminals (program) mode */
 PHP_FUNCTION(ncurses_def_prog_mode)
 {
@@ -440,7 +440,7 @@ PHP_FUNCTION(ncurses_def_prog_mode)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_def_shell_mode(void)
+/* {{{ proto int ncurses_def_shell_mode(void)
    Saves terminal (shell) mode*/
 PHP_FUNCTION(ncurses_def_shell_mode)
 {
@@ -449,7 +449,7 @@ PHP_FUNCTION(ncurses_def_shell_mode)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_delch(void)
+/* {{{ proto int ncurses_delch(void)
    Deletes character at current position, move rest of line left */
 PHP_FUNCTION(ncurses_delch)
 {
@@ -458,7 +458,7 @@ PHP_FUNCTION(ncurses_delch)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_deleteln(void)
+/* {{{ proto int ncurses_deleteln(void)
    Deletes line at current position, move rest of screen up */
 PHP_FUNCTION(ncurses_deleteln)
 {
@@ -467,7 +467,7 @@ PHP_FUNCTION(ncurses_deleteln)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_doupdate(void)
+/* {{{ proto int ncurses_doupdate(void)
    Writes all prepared refreshes to terminal */
 PHP_FUNCTION(ncurses_doupdate)
 {
@@ -476,7 +476,7 @@ PHP_FUNCTION(ncurses_doupdate)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_echo(void)
+/* {{{ proto int ncurses_echo(void)
    Activates keyboard input echo */
 PHP_FUNCTION(ncurses_echo)
 {
@@ -485,7 +485,7 @@ PHP_FUNCTION(ncurses_echo)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_erase(void)
+/* {{{ proto int ncurses_erase(void)
    Erases terminal screen */
 PHP_FUNCTION(ncurses_erase)
 {
@@ -508,7 +508,7 @@ PHP_FUNCTION(ncurses_erasechar)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_flash(void)
+/* {{{ proto int ncurses_flash(void)
    Flashes terminal screen (visual bell) */
 PHP_FUNCTION(ncurses_flash)
 {
@@ -517,7 +517,7 @@ PHP_FUNCTION(ncurses_flash)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_flushinp(void)
+/* {{{ proto int ncurses_flushinp(void)
    Flushes keyboard input buffer */
 PHP_FUNCTION(ncurses_flushinp)
 {
@@ -526,7 +526,7 @@ PHP_FUNCTION(ncurses_flushinp)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_has_ic(void)
+/* {{{ proto int ncurses_has_ic(void)
    Checks for insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_ic)
 {
@@ -536,7 +536,7 @@ PHP_FUNCTION(ncurses_has_ic)
 /* }}} */
 
 
-/* {{{ proto bool ncurses_has_il(void)
+/* {{{ proto int ncurses_has_il(void)
    Checks for line insert- and delete-capabilities */
 PHP_FUNCTION(ncurses_has_il)
 {
@@ -559,7 +559,7 @@ PHP_FUNCTION(ncurses_inch)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_insertln(void)
+/* {{{ proto int ncurses_insertln(void)
    Inserts a line, move rest of screen down */
 PHP_FUNCTION(ncurses_insertln)
 {
@@ -568,7 +568,7 @@ PHP_FUNCTION(ncurses_insertln)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_isendwin(void)
+/* {{{ proto int ncurses_isendwin(void)
    Ncurses is in endwin mode, normal screen output may be performed */
 PHP_FUNCTION(ncurses_isendwin)
 {
@@ -591,7 +591,7 @@ PHP_FUNCTION(ncurses_killchar)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nl(void)
+/* {{{ proto int ncurses_nl(void)
    Translates newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nl)
 {
@@ -600,7 +600,7 @@ PHP_FUNCTION(ncurses_nl)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nocbreak(void)
+/* {{{ proto int ncurses_nocbreak(void)
    Switches terminal to cooked mode */
 PHP_FUNCTION(ncurses_nocbreak)
 {
@@ -609,7 +609,7 @@ PHP_FUNCTION(ncurses_nocbreak)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_noecho(void)
+/* {{{ proto int ncurses_noecho(void)
    Switches off keyboard input echo */
 PHP_FUNCTION(ncurses_noecho)
 {
@@ -618,7 +618,7 @@ PHP_FUNCTION(ncurses_noecho)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_nonl(void)
+/* {{{ proto int ncurses_nonl(void)
    Do not ranslate newline and carriage return / line feed */
 PHP_FUNCTION(ncurses_nonl)
 {
@@ -635,7 +635,7 @@ PHP_FUNCTION(ncurses_noraw)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_raw(void)
+/* {{{ proto int ncurses_raw(void)
    Switches terminal into raw mode */
 PHP_FUNCTION(ncurses_raw)
 {
@@ -644,7 +644,7 @@ PHP_FUNCTION(ncurses_raw)
 }
 /* }}} */
 
-/* {{{ proto long ncurses_meta(resource window, bool 8bit)
+/* {{{ proto int ncurses_meta(resource window, bool 8bit)
    Enables/Disable 8-bit meta key information */
 PHP_FUNCTION(ncurses_meta)
 {
@@ -662,7 +662,7 @@ PHP_FUNCTION(ncurses_meta)
 }
 /* }}} */
 
-/* {{{ proto long ncurses_werase(resource window)
+/* {{{ proto int ncurses_werase(resource window)
    Erase window contents */
 PHP_FUNCTION(ncurses_werase)
 {
@@ -680,7 +680,7 @@ PHP_FUNCTION(ncurses_werase)
 /* }}} */
 
 
-/* {{{ proto bool ncurses_resetty(void)
+/* {{{ proto int ncurses_resetty(void)
    Restores saved terminal state */
 PHP_FUNCTION(ncurses_resetty)
 {
@@ -689,7 +689,7 @@ PHP_FUNCTION(ncurses_resetty)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_savetty(void)
+/* {{{ proto int ncurses_savetty(void)
    Saves terminal state */
 PHP_FUNCTION(ncurses_savetty)
 {
@@ -698,7 +698,7 @@ PHP_FUNCTION(ncurses_savetty)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_termattrs(void)
+/* {{{ proto int ncurses_termattrs(void)
    Returns a logical OR of all attribute flags supported by terminal */
 PHP_FUNCTION(ncurses_termattrs)
 {
@@ -707,7 +707,7 @@ PHP_FUNCTION(ncurses_termattrs)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_use_default_colors(void)
+/* {{{ proto int ncurses_use_default_colors(void)
    Assigns terminal default colors to color id -1 */
 PHP_FUNCTION(ncurses_use_default_colors)
 {
@@ -716,7 +716,7 @@ PHP_FUNCTION(ncurses_use_default_colors)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_attr(void)
+/* {{{ proto int ncurses_slk_attr(void)
    Returns current soft label keys attribute */
 PHP_FUNCTION(ncurses_slk_attr)
 {
@@ -725,7 +725,7 @@ PHP_FUNCTION(ncurses_slk_attr)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_clear(void)
+/* {{{ proto int ncurses_slk_clear(void)
    Clears soft label keys from screen */
 PHP_FUNCTION(ncurses_slk_clear)
 {
@@ -734,7 +734,7 @@ PHP_FUNCTION(ncurses_slk_clear)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_noutrefresh(void)
+/* {{{ proto int ncurses_slk_noutrefresh(void)
    Copies soft label keys to virtual screen */
 PHP_FUNCTION(ncurses_slk_noutrefresh)
 {
@@ -743,7 +743,7 @@ PHP_FUNCTION(ncurses_slk_noutrefresh)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_refresh(void)
+/* {{{ proto int ncurses_slk_refresh(void)
    Copies soft label keys to screen */
 PHP_FUNCTION(ncurses_slk_refresh)
 {
@@ -752,7 +752,7 @@ PHP_FUNCTION(ncurses_slk_refresh)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_restore(void)
+/* {{{ proto int ncurses_slk_restore(void)
    Restores soft label keys */
 PHP_FUNCTION(ncurses_slk_restore)
 {
@@ -761,7 +761,7 @@ PHP_FUNCTION(ncurses_slk_restore)
 }
 /* }}} */
 
-/* {{{ proto bool ncurses_slk_touch(void)
+/* {{{ proto int ncurses_slk_touch(void)
    Forces output when ncurses_slk_noutrefresh is performed */
 PHP_FUNCTION(ncurses_slk_touch)
 {
@@ -1128,7 +1128,7 @@ PHP_FUNCTION(ncurses_bkgdset)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_filter(void)
+/* {{{ proto void ncurses_filter(void)
  */
 PHP_FUNCTION(ncurses_filter)
 {
@@ -1146,7 +1146,7 @@ PHP_FUNCTION(ncurses_noqiflush)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_qiflush(void)
+/* {{{ proto void ncurses_qiflush(void)
    Flushes on signal characters */
 PHP_FUNCTION(ncurses_qiflush)
 {
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(ncurses_timeout)
 }
 /* }}} */
 
-/* {{{ proto void ncurses_use_env(bool flag)
+/* {{{ proto void ncurses_use_env(int flag)
    Controls use of environment information about terminal size */
 PHP_FUNCTION(ncurses_use_env)
 {
@@ -1709,7 +1709,7 @@ PHP_FUNCTION(ncurses_wvline)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_keyok(int keycode, bool enable)
+/* {{{ proto int ncurses_keyok(int keycode, int enable)
    Enables or disable a keycode */
 PHP_FUNCTION(ncurses_keyok)
 {
@@ -1811,7 +1811,7 @@ PHP_FUNCTION(ncurses_mousemask)
 /* }}} */
 
 /* {{{ proto bool ncurses_getmouse(array &mevent)
-   Reads mouse event from queue */
+   Reads mouse event from queue. The content of mevent is cleared before new data is added. */
 PHP_FUNCTION(ncurses_getmouse)
 {
 	zval *arg;
@@ -2230,7 +2230,7 @@ PHP_FUNCTION(ncurses_new_panel)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_del_panel(resource panel)
+/* {{{ proto bool ncurses_del_panel(resource panel)
    Remove panel from the stack and delete it (but not the associated window) */
 PHP_FUNCTION(ncurses_del_panel)
 {
@@ -2356,7 +2356,7 @@ PHP_FUNCTION(ncurses_replace_panel)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_panel_above(resource panel)
+/* {{{ proto resource ncurses_panel_above(resource panel)
    Returns the panel above panel. If panel is null, returns the bottom panel in the stack */
 PHP_FUNCTION(ncurses_panel_above)
 {
@@ -2385,7 +2385,7 @@ PHP_FUNCTION(ncurses_panel_above)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_panel_below(resource panel)
+/* {{{ proto resource ncurses_panel_below(resource panel)
    Returns the panel below panel. If panel is null, returns the top panel in the stack */
 PHP_FUNCTION(ncurses_panel_below)
 {
@@ -2413,7 +2413,7 @@ PHP_FUNCTION(ncurses_panel_below)
 }
 /* }}} */
 
-/* {{{ proto int ncurses_panel_window(resource panel)
+/* {{{ proto resource ncurses_panel_window(resource panel)
    Returns the window associated with panel */
 PHP_FUNCTION(ncurses_panel_window)
 {

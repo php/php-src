@@ -226,7 +226,7 @@ static void birdstep_del_result(HashTable *list,int ind)
 
 /* Users functions */
 
-/* {{{ proto int birdstep_connect(string server, string user, sting pass)
+/* {{{ proto int birdstep_connect(string server, string user, string pass)
  */
 PHP_FUNCTION(birdstep_connect)
 {
