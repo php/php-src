@@ -4405,7 +4405,7 @@ PHP_FUNCTION(ocipasswordchange)
 	text *user, *pass_old, *pass_new;
 	oci_connection *connection;
 
-	/*  Disalllow in Safe Mode  */
+	/*  Disable in Safe Mode  */
 	if (PG(safe_mode)) {
 		RETURN_FALSE;
 	}
