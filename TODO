@@ -81,3 +81,7 @@ ext/standard
         strrpos()
         strrchr()
         strip_tags()
+
+other cool stuff
+----------------
+    * PVM extension
