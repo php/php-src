@@ -94,16 +94,16 @@ $archive1c = &new Archive_Tar(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree
 $x1 = $archive1->listContent();
 $x2 = $archive1c->listContent();
 for($i=0;$i<count($x1); $i++) {
-    if ($x1[$i]['filename'] == 'package.xml') {
+//    if ($x1[$i]['filename'] == 'package.xml') {
         unset($x1[$i]['mtime']);
         unset($x1[$i]['checksum']);
-    }
+//    }
 }
 for($i=0;$i<count($x2); $i++) {
-    if ($x2[$i]['filename'] == 'package.xml') {
+//    if ($x2[$i]['filename'] == 'package.xml') {
         unset($x2[$i]['mtime']);
         unset($x2[$i]['checksum']);
-    }
+//    }
 }
 var_dump($x1, $x2);
 $archive1 = &new Archive_Tar(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'pkg2-1.0.tgz');
@@ -112,16 +112,16 @@ $archive1c = &new Archive_Tar(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'dirtree
 $x1 = $archive1->listContent();
 $x2 = $archive1c->listContent();
 for($i=0;$i<count($x1); $i++) {
-    if ($x1[$i]['filename'] == 'package.xml') {
+//    if ($x1[$i]['filename'] == 'package.xml') {
         unset($x1[$i]['mtime']);
         unset($x1[$i]['checksum']);
-    }
+//    }
 }
 for($i=0;$i<count($x2); $i++) {
-    if ($x2[$i]['filename'] == 'package.xml') {
+//    if ($x2[$i]['filename'] == 'package.xml') {
         unset($x2[$i]['mtime']);
         unset($x2[$i]['checksum']);
-    }
+//    }
 }
 var_dump($x1, $x2);
 
@@ -183,9 +183,7 @@ array(3) {
     string(0) ""
   }
   [1]=>
-  array(8) {
-    ["checksum"]=>
-    int(5592)
+  array(6) {
     ["filename"]=>
     string(38) "pkg1-1.0/multiplepackages/pkg1file.php"
     ["mode"]=>
@@ -196,15 +194,11 @@ array(3) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119017)
     ["typeflag"]=>
     string(0) ""
   }
   [2]=>
-  array(8) {
-    ["checksum"]=>
-    int(4534)
+  array(6) {
     ["filename"]=>
     string(28) "pkg1-1.0/pkg1/randomfile.php"
     ["mode"]=>
@@ -215,8 +209,6 @@ array(3) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071120110)
     ["typeflag"]=>
     string(0) ""
   }
@@ -238,9 +230,7 @@ array(3) {
     string(0) ""
   }
   [1]=>
-  array(8) {
-    ["checksum"]=>
-    int(5592)
+  array(6) {
     ["filename"]=>
     string(38) "pkg1-1.0/multiplepackages/pkg1file.php"
     ["mode"]=>
@@ -251,15 +241,11 @@ array(3) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119017)
     ["typeflag"]=>
     string(0) ""
   }
   [2]=>
-  array(8) {
-    ["checksum"]=>
-    int(4534)
+  array(6) {
     ["filename"]=>
     string(28) "pkg1-1.0/pkg1/randomfile.php"
     ["mode"]=>
@@ -270,8 +256,6 @@ array(3) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071120110)
     ["typeflag"]=>
     string(0) ""
   }
@@ -293,9 +277,7 @@ array(4) {
     string(0) ""
   }
   [1]=>
-  array(8) {
-    ["checksum"]=>
-    int(5600)
+  array(6) {
     ["filename"]=>
     string(38) "pkg2-1.0/multiplepackages/pkg2file.php"
     ["mode"]=>
@@ -306,15 +288,11 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119030)
     ["typeflag"]=>
     string(0) ""
   }
   [2]=>
-  array(8) {
-    ["checksum"]=>
-    int(5066)
+  array(6) {
     ["filename"]=>
     string(32) "pkg2-1.0/nestedroot/rootfile.php"
     ["mode"]=>
@@ -325,15 +303,11 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119266)
     ["typeflag"]=>
     string(0) ""
   }
   [3]=>
-  array(8) {
-    ["checksum"]=>
-    int(7193)
+  array(6) {
     ["filename"]=>
     string(53) "pkg2-1.0/nestedroot/emptydir/nesteddir/nestedfile.php"
     ["mode"]=>
@@ -344,8 +318,6 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119310)
     ["typeflag"]=>
     string(0) ""
   }
@@ -367,9 +339,7 @@ array(4) {
     string(0) ""
   }
   [1]=>
-  array(8) {
-    ["checksum"]=>
-    int(5600)
+  array(6) {
     ["filename"]=>
     string(38) "pkg2-1.0/multiplepackages/pkg2file.php"
     ["mode"]=>
@@ -380,15 +350,11 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119030)
     ["typeflag"]=>
     string(0) ""
   }
   [2]=>
-  array(8) {
-    ["checksum"]=>
-    int(5066)
+  array(6) {
     ["filename"]=>
     string(32) "pkg2-1.0/nestedroot/rootfile.php"
     ["mode"]=>
@@ -399,15 +365,11 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119266)
     ["typeflag"]=>
     string(0) ""
   }
   [3]=>
-  array(8) {
-    ["checksum"]=>
-    int(7193)
+  array(6) {
     ["filename"]=>
     string(53) "pkg2-1.0/nestedroot/emptydir/nesteddir/nestedfile.php"
     ["mode"]=>
@@ -418,8 +380,6 @@ array(4) {
     int(0)
     ["size"]=>
     int(0)
-    ["mtime"]=>
-    int(1071119310)
     ["typeflag"]=>
     string(0) ""
   }
