@@ -46,7 +46,6 @@
 /* this disables "<?expression?>" and "<?=expression?>" */
 #define DEFAULT_SHORT_OPEN_TAG 1
 
-#define PHP_TRACK_VARS 1
 
 /* ----------------------------------------------------------------
    The following defines are for those modules which require
