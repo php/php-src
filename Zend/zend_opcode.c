@@ -142,9 +142,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 }
 
 
-void zend_class_add_ref(zend_class_entry *ce)
+void zend_class_add_ref(zend_class_entry **ce)
 {
-	(*ce->refcount)++;
+	(*(*ce)->refcount)++;
 }
 
 

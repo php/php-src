@@ -1754,7 +1754,7 @@ binary_assign_op_addr_obj:
 						if (zend_hash_add(EG(class_table), class_name_strval, class_name_strlen + 1, import_ce, sizeof(zend_class_entry *), NULL) == FAILURE) {
 							zend_error(E_ERROR, "Import: class %s already exists in current scope", class_name_strval);
 						}
-						zend_class_add_ref(*import_ce);
+						zend_class_add_ref(import_ce);
 					} else {
 						zend_class_entry *tmp_zend_class_entry;
 
