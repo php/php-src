@@ -1,10 +1,10 @@
 --TEST--
-ICONV: LIBICONV transliteration (bug #16069)
+Bug #16069
 --SKIPIF--
 <?php include( 'skipif.inc' ); if( @iconv('CP932', 'EUC-JP//TRANSLIT', "\x87\x6d") == '' ) die("skip\n"); ?>
 --POST--
 --GET--
 --FILE--
-<?php include('translit.inc'); ?>
+<?php include('003.inc'); ?>
 --EXPECT--
 ミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバールミリバール(°Д°)
