@@ -2073,7 +2073,7 @@ PHP_FUNCTION(domxml_node_first_child)
 
 	first = nodep->children;
 	if (!first) {
-		RETURN_FALSE;
+		return;
 	}
 
 	DOMXML_RET_OBJ(rv, first, &ret);
@@ -2094,7 +2094,7 @@ PHP_FUNCTION(domxml_node_last_child)
 
 	last = nodep->last;
 	if (!last) {
-		RETURN_FALSE;
+		return;
 	}
 
 	DOMXML_RET_OBJ(rv, last, &ret);
@@ -2247,7 +2247,8 @@ PHP_FUNCTION(domxml_node_namespace_uri)
 
 	ns = nodep->ns;
 	if (!ns) {
-		RETURN_EMPTY_STRING();
+		/* return NULL if no ns is given...*/
+		return;
 	}
 
 	if (ns->href) {
@@ -2565,17 +2566,22 @@ PHP_FUNCTION(domxml_node_attributes)
 {
 	zval *id, *attrs;
 	xmlNode *nodep;
+	int ret;
 #ifdef oldstyle_for_libxml_1_8_7
 	xmlAttr *attr;
 #endif
 
 	DOMXML_PARAM_NONE(nodep, id, le_domxmlnodep);
-
-	if (node_attributes(&attrs, nodep TSRMLS_CC) < 0)
+	ret = node_attributes(&attrs, nodep TSRMLS_CC);
+	if ( ret == -1) {
 		RETURN_FALSE;
+	}
 
-	*return_value = *attrs;
-	FREE_ZVAL(attrs);
+	if ( ret > -1) {
+		*return_value = *attrs;
+		FREE_ZVAL(attrs);
+	} 
+		
 
 #ifdef oldstyle_for_libxml_1_8_7
 	attr = nodep->properties;
@@ -4532,7 +4538,7 @@ static int node_attributes(zval **attributes, xmlNode *nodep TSRMLS_DC)
 		return -1;
 	attr = nodep->properties;
 	if (!attr)
-		return -1;
+		return -2;
 
 	/* create an php array for the children */
 	MAKE_STD_ZVAL(*attributes);
