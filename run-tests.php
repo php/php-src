@@ -36,6 +36,12 @@
  * - do not test PEAR components if base class and/or component class cannot be instanciated
  */
 
+// change into the PHP source directory.
+
+if (getenv('TEST_PHP_SRCDIR')) {
+	@chdir(getenv('TEST_PHP_SRCDIR'));
+}
+
 $cwd = getcwd();
 set_time_limit(0);
 ob_implicit_flush();
