@@ -885,7 +885,10 @@ PHP_FUNCTION(pg_cmdtuples)
 
 /* {{{ proto int pg_last_notice(int connection)
    Returns the last notice set by the backend */
-PHP_FUNCTION(pg_last_notice) {
+PHP_FUNCTION(pg_last_notice) 
+{
+	PGLS_FETCH();
+
 	if (PGG(last_notice) == NULL) {
 		RETURN_FALSE;
 	} else {       
