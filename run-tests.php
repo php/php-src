@@ -102,6 +102,28 @@ function create_modules_2_test_list() {
 
 
 
+function in_path($program)
+{
+    global $HTTP_ENV_VARS;
+    if (substr(PHP_OS, 0, 3) == "WIN") {
+        $delim = ";";
+        $ext = ".exe";
+    } else {
+        $delim = ":";
+        $ext = "";
+    }
+    $slash = DIRECTORY_SEPARATOR;
+    $path_components = explode($delim, $HTTP_ENV_VARS['PATH']);
+    foreach ($path_components as $path) {
+        $test = "{$path}{$slash}php{$ext}";
+        if (@is_executable($test)) {
+            return $test;
+        }
+    }
+    return false;
+}
+
+
 function initialize()
 {
     global $term, $windows_p, $php, $skip, $testdirs, $tmpfile,
@@ -109,38 +131,41 @@ function initialize()
         $tests_in_dir;
 
     // XXX Should support HTML output as well.
-    $term = getenv("TERM");
-    if (ereg('^(xterm|vt220)', $term)) {
-        $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
-        $term_norm = sprintf("%c%c%c", 27, 91, 109);
-    } elseif (ereg('^vt100', $term)) {
-        $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
-        $term_norm = sprintf("%c%c%c", 27, 91, 109);
+    $php = "";
+    if((substr(PHP_OS, 0, 3) == "WIN")) {
+        $ext = ".exe";
+        $windows_p = true;
+        $term = getenv("COMSPEC");
     } else {
-        $term_bold = $term_norm = "";
-    }
-
-   if((substr(PHP_OS, 0, 3) == "WIN")) {
-       $windows_p = true;
-       $term = getenv("COMSPEC");
-       $null = getenv("TOP_BUILDDIR");
-       $php =  ($null ? $null : getcwd()) . "/php.exe";
-       unset($null);
-   } else {
-        if (isset($GLOBALS["TOP_BUILDDIR"])) {
-            $php = $GLOBALS["TOP_BUILDDIR"]."/php";
+        $ext = "";
+        $term = getenv("TERM");
+        if (ereg('^(xterm|vt220)', $term)) {
+            $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
+            $term_norm = sprintf("%c%c%c", 27, 91, 109);
+        } elseif (ereg('^vt100', $term)) {
+            $term_bold = sprintf("%c%c%c%c", 27, 91, 49, 109);
+            $term_norm = sprintf("%c%c%c", 27, 91, 109);
         } else {
-            $php = getcwd() . '/php';
+            $term_bold = $term_norm = "";
         }
     }
 
-    create_compiled_in_modules_list();
-
-    if (!is_executable($php) && !$windows_p) {
-        dowriteln("PHP CGI binary ($php) is not executable.");
-        dowriteln("Please compile PHP as a CGI executable and try again.");
+    if (isset($GLOBALS["TOP_BUILDDIR"]) && @is_executable($GLOBALS["TOP_BUILDDIR"]."/php{$ext}")) {
+        $php = $GLOBALS["TOP_BUILDDIR"]."/php{$ext}";
+    } elseif (@is_executable("./php{$ext}")) {
+        $php = getcwd() . "/php{$ext}";
+    }
+    if (empty($php)) {
+        $php = in_path("php");
+    }
+    if (empty($php)) {
+        dowriteln("Unable to find PHP executable (php{$ext}).");
+        dowriteln("Please build PHP as a CGI executable or make sure it is");
+        dowriteln("available in the PATH environment variable.");
         exit;
     }
+
+    create_compiled_in_modules_list();
 
     $skip = array(
         "CVS" => 1
