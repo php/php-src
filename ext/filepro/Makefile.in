@@ -2,4 +2,4 @@
 LTLIBRARY_NAME    = libfilepro.la
 LTLIBRARY_SOURCES = filepro.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

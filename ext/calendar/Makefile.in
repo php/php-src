@@ -2,4 +2,4 @@
 LTLIBRARY_NAME    = libcalendar.la
 LTLIBRARY_SOURCES = calendar.c dow.c french.c gregor.c jewish.c julian.c easter.c cal_unix.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

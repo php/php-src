@@ -21,7 +21,7 @@
 #ifndef _PHP_SWF_H
 #define _PHP_SWF_H
 
-#if COMPILE_DL
+#ifdef COMPILE_DL_SWF
 #undef HAVE_SWF
 #define HAVE_SWF 1
 #endif

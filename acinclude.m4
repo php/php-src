@@ -2,6 +2,8 @@ dnl $Id$
 dnl
 dnl This file contains local autoconf functions.
 
+sinclude(dynlib.m4)
+
 dnl
 dnl PHP_LIBGCC_LIBPATH(gcc)
 dnl Stores the location of libgcc in libgcc_libpath
@@ -11,15 +13,44 @@ AC_DEFUN(PHP_LIBGCC_LIBPATH,[
   libgcc_libpath="`dirname $ac_data`"
 ])
 
+AC_DEFUN(PHP_ARG_ANALYZE,[
+case "[$]$1" in
+shared,*)
+  ext_output="yes, shared"
+  ext_shared=yes
+  $1=`echo $ac_n "[$]$1$ac_c"|sed s/^shared,//`
+  ;;
+shared)
+  ext_output="yes, shared"
+  ext_shared=yes
+  $1=yes
+  ;;
+no)
+  ext_output="no"
+  ext_shared=no
+  ;;
+*)
+  ext_output="yes"
+  ext_shared=no
+  ;;
+esac
+
+AC_MSG_RESULT($ext_output)
+])
+
 dnl
 dnl PHP_ARG_WITH(arg-name, check message, help text[, default-val])
 dnl Sets PHP_ARG_NAME either to the user value or to the default value.
 dnl default-val defaults to no. 
 dnl
 AC_DEFUN(PHP_ARG_WITH,[
+PHP_REAL_ARG_WITH([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
+])
+
+AC_DEFUN(PHP_REAL_ARG_WITH,[
 AC_MSG_CHECKING($2)
-AC_ARG_WITH($1,[$3],PHP_[]translit($1,a-z-,A-Z_)=[$]withval,PHP_[]translit($1,a-z-,A-Z_)=ifelse($4,,no,$4))
-AC_MSG_RESULT([$]PHP_[]translit($1,a-z-,A-Z_))
+AC_ARG_WITH($1,[$3],$5=[$]withval,$5=ifelse($4,,no,$4))
+PHP_ARG_ANALYZE($5)
 ])
 
 dnl
@@ -28,9 +59,13 @@ dnl Sets PHP_ARG_NAME either to the user value or to the default value.
 dnl default-val defaults to no. 
 dnl
 AC_DEFUN(PHP_ARG_ENABLE,[
+PHP_REAL_ARG_ENABLE([$1],[$2],[$3],[$4],PHP_[]translit($1,a-z-,A-Z_))
+])
+
+AC_DEFUN(PHP_REAL_ARG_ENABLE,[
 AC_MSG_CHECKING($2)
-AC_ARG_ENABLE($1,[$3],PHP_[]translit($1,a-z-,A-Z_)=[$]enableval,PHP_[]translit($1,a-z-,A-Z_)=ifelse($4,,no,$4))
-AC_MSG_RESULT([$]PHP_[]translit($1,a-z-,A-Z_))
+AC_ARG_ENABLE($1,[$3],$5=[$]enableval,$5=ifelse($4,,no,$4))
+PHP_ARG_ANALYZE($5)
 ])
 
 AC_DEFUN(PHP_MODULE_PTR,[
@@ -450,21 +485,30 @@ dnl "shared" can be set to "shared" or "yes" to build the extension as
 dnl a dynamically loadable library.
 dnl
 AC_DEFUN(PHP_EXTENSION,[
-  if test -d "$abs_srcdir/ext/$1" ; then
-    ext_src_base="$abs_srcdir/ext/$1/"
-    ext_base="ext/$1/"
-    EXT_SUBDIRS="$EXT_SUBDIRS $1"
-    if test "$2" != "shared" && test "$2" != "yes" && test -z "$php_always_shared"; then
-      _extlib="lib$1.a"
-      EXT_LTLIBS="$EXT_LTLIBS ext/$1/lib$1.la"
-      EXT_LIBS="$EXT_LIBS $1/$_extlib"
-      EXT_STATIC="$EXT_STATIC $1"
-    else
-      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
-      EXT_SHARED="$EXT_SHARED $1"
-    fi
-    PHP_FAST_OUTPUT(ext/$1/Makefile)
+  EXT_SUBDIRS="$EXT_SUBDIRS $1"
+  
+  if test -d "$abs_srcdir/ext/$1"; then
+dnl ---------------------------------------------- Internal Module
+    ext_builddir="ext/$1"
+    ext_srcdir="$abs_srcdir/ext/$1"
+  else
+dnl ---------------------------------------------- External Module
+    ext_builddir="."
+    ext_srcdir="$abs_srcdir"
   fi
+
+  if test "$2" != "shared" && test "$2" != "yes"; then
+dnl ---------------------------------------------- Static module
+    LIB_BUILD($ext_builddir)
+    EXT_LTLIBS="$EXT_LTLIBS $ext_builddir/lib$1.la"
+    EXT_STATIC="$EXT_STATIC $1"
+  else 
+dnl ---------------------------------------------- Shared module
+    LIB_BUILD($ext_builddir,yes)
+    AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z-,A-Z_), 1, Whether to build $1 as dynamic module)
+  fi
+
+  PHP_FAST_OUTPUT($ext_builddir/Makefile)
 ])
 
 PHP_SUBST(EXT_SUBDIRS)

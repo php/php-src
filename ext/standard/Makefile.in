@@ -9,7 +9,7 @@ LTLIBRARY_SOURCES=\
 	syslog.c type.c uniqid.c url.c url_scanner.c var.c output.c assert.c \
 	strnatcmp.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
 
 parsedate.c: $(srcdir)/parsedate.y
 

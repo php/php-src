@@ -2,4 +2,4 @@
 LTLIBRARY_NAME    = libodbc.la
 LTLIBRARY_SOURCES = php_odbc.c velocis.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

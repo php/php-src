@@ -7,4 +7,4 @@ LTLIBRARY_SHARED_LIBADD = $(XML_LIBS)
 
 SUBDIRS = expat
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk

@@ -1,16 +1,4 @@
 
-SUBDIRS = $(EXT_STATIC) $(EXT_SHARED)
+SUBDIRS = $(EXT_SUBDIRS)
 
-all:
-	@list='$(EXT_STATIC)'; for i in $$list; do \
-		echo "Making all in $$i"; \
-		(cd $$i && $(MAKE) all) || exit 1; \
-	done
-	@list='$(EXT_SHARED)'; for i in $$list; do \
-		echo "Making shared in $$i"; \
-		(cd $$i && $(MAKE) shared) || exit 1; \
-	done
-
-NO_RECURSION = all
-	
 include $(top_srcdir)/build/rules.mk

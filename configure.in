@@ -644,6 +644,7 @@ fi
 
 
 phplibdir="`pwd`/modules"
+test -d $phplibdir || mkdir $phplibdir
 phptempdir="`pwd`/libs"
 
 AC_BUILD_RPATH
@@ -697,7 +698,7 @@ PHP_SUBST(PHP_SAPI)
 PHP_SUBST(PHP_VERSION)
 PHP_SUBST(PROG_SENDMAIL)
 PHP_SUBST(SHELL)
-PHP_SUBST(SHLIBTOOL)
+PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(TSRM_DIR)
 PHP_SUBST(TSRM_LIB)
 PHP_SUBST(WARNING_LEVEL)
@@ -732,12 +733,12 @@ fi
 PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
 
 if test "$enable_shared" = "yes"; then
-  SHLIBTOOL='$(LIBTOOL)'
+  SHARED_LIBTOOL='$(LIBTOOL)'
 else
-  if test -n "$EXT_SHARED"; then
+  if test "$lib_build_shared" = "yes"; then
     PHP_CONFIGURE_PART(Configuring shared libtool)
     $SHELL $srcdir/ltconfig --output=shlibtool --disable-static --srcdir=$srcdir --cache-file=./config.cache $srcdir/ltmain.sh
-    SHLIBTOOL='$(SHELL) $(top_builddir)/shlibtool'
+    SHARED_LIBTOOL='$(SHELL) $(top_builddir)/shlibtool'
   else
     PHP_COMPILE='$(COMPILE) -c $< && touch $@'
   fi
@@ -763,6 +764,7 @@ test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
 PHP_CONFIGURE_PART(Generating files)
 
 PHP_FAST_GENERATE
+touch .deps
 
 #libphp4.module 
 AC_OUTPUT([php4.spec Zend/Makefile 

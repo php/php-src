@@ -39,14 +39,7 @@ acconfig_h_SOURCES = acconfig.h.in $(config_h_files)
 targets = $(TOUCH_FILES) $(makefile_in_files) configure $(config_h_in)
 
 
-all: .deps Zend/Makefile.am TSRM/Makefile.am $(targets)
-
-.deps:
-	@echo creating empty dependencies
-	for i in `find ext sapi regex -type d \! -name \*CVS`; do \
-		list="$$list $$i/.deps"; \
-	done; \
-	touch $$list pear/.deps ext/mysql/libmysql/.deps $@
+all: Zend/Makefile.am TSRM/Makefile.am $(targets)
 
 Zend/Makefile.am:
 	test -d Zend || (test -d ../Zend && ln -s ../Zend Zend)
@@ -71,7 +64,7 @@ $(makefile_in_files): $(makefile_am_files) aclocal.m4 configure.in $(config_m4_f
 		|| true >&2
 	@for i in $(LT_TARGETS); do mv $$i.bak $$i; done
 
-aclocal.m4: configure.in acinclude.m4
+aclocal.m4: configure.in acinclude.m4 dynlib.m4
 	aclocal
 
 $(config_h_in): configure acconfig.h

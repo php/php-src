@@ -2,5 +2,5 @@
 LTLIBRARY_NAME    = libbcmath.la
 LTLIBRARY_SOURCES = bcmath.c number.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
 

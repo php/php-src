@@ -2,4 +2,4 @@
 LTLIBRARY_NAME          = libexpat_tok.la
 LTLIBRARY_SOURCES       = xmltok.c xmlrole.c
 
-include $(top_srcdir)/build/ltlib.mk
+include $(top_srcdir)/build/dynlib.mk
