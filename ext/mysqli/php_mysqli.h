@@ -231,6 +231,7 @@ PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_errno);
 PHP_FUNCTION(mysqli_stmt_error);
+PHP_FUNCTION(mysqli_stmt_store_result);
 PHP_FUNCTION(mysqli_store_result);
 PHP_FUNCTION(mysqli_thread_id);
 PHP_FUNCTION(mysqli_thread_safe);
