@@ -22,7 +22,7 @@
 #include "zend_ini_parser.h"
 #include "zend_ini_scanner.h"
 
-#ifdef ZTS
+#ifdef __cplusplus
 # ifdef HAVE_STDIOSTR_H
 #  include <stdiostr.h>
 # endif
@@ -39,16 +39,22 @@
 #undef YYSTYPE
 #define YYSTYPE zval
 
-#ifdef ZTS
-#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *ini_lval)
+#ifdef __cplusplus
+#define YY_DECL int ZendIniFlexLexer::lex_scan(zval *ini_lval TSRMLS_DC)
 #else
-#define YY_DECL int ini_lex(zval *ini_lval)
+#define YY_DECL int ini_lex(zval *ini_lval TSRMLS_DC)
 #endif
 
-#include "zend_istdiostream.h"
+/* Globals Macros */
+#define SCNG	INI_SCNG
+#ifdef ZTS
+ZEND_API ts_rsrc_id ini_scanner_globals_id;
+#else
+ZEND_API zend_scanner_globals ini_scanner_globals;
+#endif
 
 
-#ifndef ZTS
+#ifndef __cplusplus
 static char *ini_filename;
 
 void init_ini_scanner()
@@ -57,7 +63,7 @@ void init_ini_scanner()
 }
 
 
-int zend_ini_scanner_get_lineno()
+int zend_ini_scanner_get_lineno(TSRMLS_D)
 {
 	return ini_lineno;
 }
@@ -119,7 +125,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 			return FAILURE;
 	}
 
-#ifdef ZTS
+#ifdef __cplusplus
 	if (!fp) {
 		return FAILURE;
 	}
@@ -132,7 +138,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 #else
 	init_ini_scanner();
 	yyin = fp;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	ini_filename = fh->filename;
 #endif
 	return SUCCESS;
@@ -145,7 +151,7 @@ void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 		case ZEND_HANDLE_FP:
 			fclose(fh->handle.fp);
 			break;
-#ifdef ZTS
+#ifdef __cplusplus
 		case ZEND_HANDLE_STDIOSTREAM: {
 				TSRMLS_FETCH();
 				delete CG(ini_scanner);
@@ -278,6 +284,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <<EOF>> {
-	yy_delete_buffer(YY_CURRENT_BUFFER);
+	yy_delete_buffer(YY_CURRENT_BUFFER TSRMLS_CC);
 	yyterminate();
 }

@@ -3,15 +3,11 @@
 #CLEANFILES = zend_language_parser.c zend_language_parser.h zend_language_scanner.c zend_language_parser.output zend_ini_parser.c zend_ini_parser.h zend_ini_scanner.c zend_ini_parser.output
 
 AUTOMAKE_OPTIONS=foreign
-EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
-noinst_LTLIBRARIES=$(ZEND_SCANNER) libZend.la
-
-libZend_cc_la_SOURCES=zend_language_scanner_cc.cc zend_ini_scanner_cc.cc
-libZend_c_la_SOURCES=zend_language_scanner.c zend_ini_scanner.c
+noinst_LTLIBRARIES=libZend.la
 
 libZend_la_SOURCES=\
-	zend_language_parser.y \
-	zend_ini_parser.y \
+	zend_language_parser.y zend_language_scanner.l \
+	zend_ini_parser.y zend_ini_scanner.l \
 	zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
 	zend_execute.c zend_execute_API.c zend_highlight.c zend_llist.c \
 	zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
@@ -19,23 +15,18 @@ libZend_la_SOURCES=\
 	zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
 	zend_ini.c
 
-libZend_la_LIBADD = $(ZEND_SCANNER)
 libZend_la_LDFLAGS = @EXTRA_LIBS@
-libZend_la_DEPENDENCIES = $(ZEND_SCANNER)
 
 # automake isn't too clever about "non-standard" use of lex and yacc
 
-$(libZend_la_OBJECTS) zend_language_scanner.lo zend_language_scanner_cc.lo: zend_language_parser.h
+$(libZend_la_OBJECTS): zend_language_parser.h
 
-zend_ini_scanner.lo zend_ini_scanner_cc.lo: zend_ini_parser.h
+zend_ini_scanner.lo: zend_ini_parser.h
 
 # Language parser/scanner rules
 
 zend_language_scanner.c: $(srcdir)/zend_language_scanner.l
-	$(LEX) -Pzend -o$@ -i $(srcdir)/zend_language_scanner.l
-
-zend_language_scanner_cc.cc: $(srcdir)/zend_language_scanner.l
-	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pzend -o$@ $(srcdir)/zend_language_scanner.l
+	$(LEX) -Pzend -S$(srcdir)/flex.skl -o$@ -i $(srcdir)/zend_language_scanner.l
 
 zend_language_parser.h: zend_language_parser.c
 zend_language_parser.c: $(srcdir)/zend_language_parser.y
@@ -47,10 +38,8 @@ zend_ini_parser.c: $(srcdir)/zend_ini_parser.y
 	$(YACC) -p ini_ -v -d $(srcdir)/zend_ini_parser.y -o zend_ini_parser.c
 
 zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
-	$(LEX) -Pini_ -o$@ -i $(srcdir)/zend_ini_scanner.l
+	$(LEX) -Pini_ -S$(srcdir)/flex.skl -o$@ -i $(srcdir)/zend_ini_scanner.l
 
-zend_ini_scanner_cc.cc: $(srcdir)/zend_ini_scanner.l
-	$(LEX) -+ -B -i -S$(srcdir)/flex.skl -Pini_ -o$@ $(srcdir)/zend_ini_scanner.l
 zend_ini_parser.h: zend_ini_parser.c
 
 depend:

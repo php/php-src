@@ -62,6 +62,8 @@ class istream;
 #define yyconst
 #endif
 
+#undef YY_USE_PROTOS
+#define YY_USE_PROTOS
 
 #ifdef YY_USE_PROTOS
 #define YY_PROTO(proto) proto
@@ -96,7 +98,7 @@ class istream;
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE yyrestart( yyin )
+#define YY_NEW_FILE yyrestart( yyin TSRMLS_CC )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
@@ -107,8 +109,8 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 extern int yyleng;
 %-
-extern FILE *yyin, *yyout;
 %*
+
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
@@ -140,7 +142,7 @@ extern FILE *yyin, *yyout;
 		} \
 	while ( 0 )
 
-#define unput(c) yyunput( c, yytext_ptr )
+#define unput(c) yyunput( c, yytext_ptr TSRMLS_CC )
 
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
@@ -211,7 +213,7 @@ struct yy_buffer_state
 	};
 
 %- Standard (non-C++) definition
-static YY_BUFFER_STATE yy_current_buffer = 0;
+#define yy_current_buffer SCNG(current_buffer)
 %*
 
 /* We provide macros for accessing buffer states in case in the
@@ -227,32 +229,44 @@ static char yy_hold_char;
 
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 
-
 int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
-static int yy_init = 1;		/* whether we need to initialize */
-static int yy_start = 0;	/* start state number */
+#define yy_c_buf_p SCNG(c_buf_p)
+#define yy_init SCNG(init)
+#define yy_start SCNG(start)
+
+#ifdef ZTS
+#define TSRMLS_D	void ***tsrm_ls
+#define TSRMLS_DC	, TSRMLS_D
+#define TSRMLS_C	tsrm_ls
+#define TSRMLS_CC	, TSRMLS_C
+#else
+#define TSRMLS_D
+#define TSRMLS_DC
+#define TSRMLS_C
+#define TSRMLS_CC
+#endif
 
 /* Flag which is used to allow yywrap()'s to do buffer switches
  * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void yyrestart YY_PROTO(( FILE *input_file ));
+void yyrestart YY_PROTO(( FILE *input_file TSRMLS_DC ));
 
-void yy_switch_to_buffer YY_PROTO(( YY_BUFFER_STATE new_buffer ));
-void yy_load_buffer_state YY_PROTO(( void ));
-YY_BUFFER_STATE yy_create_buffer YY_PROTO(( FILE *file, int size ));
-void yy_delete_buffer YY_PROTO(( YY_BUFFER_STATE b ));
-void yy_init_buffer YY_PROTO(( YY_BUFFER_STATE b, FILE *file ));
-void yy_flush_buffer YY_PROTO(( YY_BUFFER_STATE b ));
-#define YY_FLUSH_BUFFER yy_flush_buffer( yy_current_buffer )
+void yy_switch_to_buffer YY_PROTO(( YY_BUFFER_STATE new_buffer TSRMLS_DC ));
+void yy_load_buffer_state YY_PROTO(( TSRMLS_D ));
+YY_BUFFER_STATE yy_create_buffer YY_PROTO(( FILE *file, int size TSRMLS_DC ));
+void yy_delete_buffer YY_PROTO(( YY_BUFFER_STATE b TSRMLS_DC ));
+void yy_init_buffer YY_PROTO(( YY_BUFFER_STATE b, FILE *file TSRMLS_DC ));
+void yy_flush_buffer YY_PROTO(( YY_BUFFER_STATE b TSRMLS_DC ));
+#define YY_FLUSH_BUFFER yy_flush_buffer( yy_current_buffer TSRMLS_CC )
 
-YY_BUFFER_STATE yy_scan_buffer YY_PROTO(( char *base, yy_size_t size ));
-YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str ));
-YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len ));
+YY_BUFFER_STATE yy_scan_buffer YY_PROTO(( char *base, yy_size_t size TSRMLS_DC ));
+YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str TSRMLS_DC ));
+YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len TSRMLS_DC ));
+
 %*
 
 static void *yy_flex_alloc YY_PROTO(( yy_size_t ));
@@ -264,27 +278,41 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define yy_set_interactive(is_interactive) \
 	{ \
 	if ( ! yy_current_buffer ) \
-		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE ); \
+		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC ); \
 	yy_current_buffer->yy_is_interactive = is_interactive; \
 	}
 
 #define yy_set_bol(at_bol) \
 	{ \
 	if ( ! yy_current_buffer ) \
-		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE ); \
+		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC ); \
 	yy_current_buffer->yy_at_bol = at_bol; \
 	}
 
 #define YY_AT_BOL() (yy_current_buffer->yy_at_bol)
 
 %% yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here
+#ifdef ZTS
+#undef yyleng
+#define yyleng SCNG(yy_leng)
+#undef yytext
+#define yytext SCNG(yy_text)
+#undef yytext_ptr
+#define yytext_ptr SCNG(yy_text)
+#endif
+
 
 %- Standard (non-C++) definition
-static yy_state_type yy_get_previous_state YY_PROTO(( void ));
-static yy_state_type yy_try_NUL_trans YY_PROTO(( yy_state_type current_state ));
-static int yy_get_next_buffer YY_PROTO(( void ));
+static yy_state_type yy_get_previous_state YY_PROTO(( TSRMLS_D ));
+static yy_state_type yy_try_NUL_trans YY_PROTO(( yy_state_type current_state TSRMLS_DC ));
+static int yy_get_next_buffer YY_PROTO(( TSRMLS_D ));
 static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 %*
+
+#undef TSRMLS_D
+#undef TSRMLS_DC
+#undef TSRMLS_C
+#undef TSRMLS_CC
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up yytext.
@@ -313,7 +341,7 @@ extern int yywrap YY_PROTO(( void ));
 
 %-
 #ifndef YY_NO_UNPUT
-static void yyunput YY_PROTO(( int c, char *buf_ptr ));
+static void yyunput YY_PROTO(( int c, char *buf_ptr TSRMLS_DC ));
 #endif
 %*
 
@@ -328,9 +356,9 @@ static int yy_flex_strlen YY_PROTO(( yyconst char * ));
 #ifndef YY_NO_INPUT
 %- Standard (non-C++) definition
 #ifdef __cplusplus
-static int yyinput YY_PROTO(( void ));
+static int 3 YY_PROTO(( TSRMLS_D ));
 #else
-static int input YY_PROTO(( void ));
+static int input YY_PROTO(( TSRMLS_D ));
 #endif
 %*
 #endif
@@ -340,10 +368,10 @@ static int yy_start_stack_ptr = 0;
 static int yy_start_stack_depth = 0;
 static int *yy_start_stack = 0;
 #ifndef YY_NO_PUSH_STATE
-static void yy_push_state YY_PROTO(( int new_state ));
+static void yy_push_state YY_PROTO(( int new_state TSRMLS_DC ));
 #endif
 #ifndef YY_NO_POP_STATE
-static void yy_pop_state YY_PROTO(( void ));
+static void yy_pop_state YY_PROTO(( TSRMLS_D ));
 #endif
 #ifndef YY_NO_TOP_STATE
 static int yy_top_state YY_PROTO(( void ));
@@ -382,7 +410,7 @@ YY_MALLOC_DECL
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( yytext, yyleng, 1, yyout )
+#define ECHO (void) fwrite( yytext, yyleng, 1, SCNG(yyout) )
 %+ C++ definition
 #define ECHO LexerOutput( yytext, yyleng )
 %*
@@ -421,6 +449,7 @@ YY_MALLOC_DECL
 #define YY_FATAL_ERROR(msg) LexerError( msg )
 %*
 #endif
+
 
 /* Default declaration of generated scanner - a define so the user can
  * easily add parameters.
@@ -466,25 +495,25 @@ YY_DECL
 		if ( ! yy_start )
 			yy_start = 1;	/* first start state */
 
-		if ( ! yyin )
+		if ( ! SCNG(yyin) )
 %-
-			yyin = stdin;
+			SCNG(yyin) = stdin;
 %+
-			yyin = &cin;
+			SCNG(yyin) = &cin;
 %*
 
-		if ( ! yyout )
+		if ( ! SCNG(yyout) )
 %-
-			yyout = stdout;
+			SCNG(yyout) = stdout;
 %+
-			yyout = &cout;
+			SCNG(yyout) = &cout;
 %*
 
 		if ( ! yy_current_buffer )
 			yy_current_buffer =
-				yy_create_buffer( yyin, YY_BUF_SIZE );
+				yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC );
 
-		yy_load_buffer_state();
+		yy_load_buffer_state(TSRMLS_C);
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
@@ -554,7 +583,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 			yy_c_buf_p = yytext_ptr + yy_amount_of_matched_text;
 
-			yy_current_state = yy_get_previous_state();
+			yy_current_state = yy_get_previous_state(TSRMLS_C);
 
 			/* Okay, we're now positioned to make the NUL
 			 * transition.  We couldn't have
@@ -565,7 +594,7 @@ do_action:	/* This label is used only to access EOF actions. */
 			 * will run more slowly).
 			 */
 
-			yy_next_state = yy_try_NUL_trans( yy_current_state );
+			yy_next_state = yy_try_NUL_trans( yy_current_state TSRMLS_CC );
 
 			yy_bp = yytext_ptr + YY_MORE_ADJ;
 
@@ -584,7 +613,7 @@ do_action:	/* This label is used only to access EOF actions. */
 				}
 			}
 
-		else switch ( yy_get_next_buffer() )
+		else switch ( yy_get_next_buffer(TSRMLS_C) )
 			{
 			case EOB_ACT_END_OF_FILE:
 				{
@@ -619,7 +648,7 @@ do_action:	/* This label is used only to access EOF actions. */
 				yy_c_buf_p =
 					yytext_ptr + yy_amount_of_matched_text;
 
-				yy_current_state = yy_get_previous_state();
+				yy_current_state = yy_get_previous_state(TSRMLS_C);
 
 				yy_cp = yy_c_buf_p;
 				yy_bp = yytext_ptr + YY_MORE_ADJ;
@@ -629,7 +658,7 @@ do_action:	/* This label is used only to access EOF actions. */
 				yy_c_buf_p =
 				&yy_current_buffer->yy_ch_buf[yy_n_chars];
 
-				yy_current_state = yy_get_previous_state();
+				yy_current_state = yy_get_previous_state(TSRMLS_C);
 
 				yy_cp = yy_c_buf_p;
 				yy_bp = yytext_ptr + YY_MORE_ADJ;
@@ -648,8 +677,8 @@ do_action:	/* This label is used only to access EOF actions. */
 %+
 yyFlexLexer::yyFlexLexer( istream* arg_yyin, ostream* arg_yyout )
 	{
-	yyin = arg_yyin;
-	yyout = arg_yyout;
+	SCNG(yyin) = arg_yyin;
+	SCNG(yyout) = arg_yyout;
 	yy_c_buf_p = 0;
 	yy_init = 1;
 	yy_start = 0;
@@ -678,49 +707,49 @@ yyFlexLexer::yyFlexLexer( istream* arg_yyin, ostream* arg_yyout )
 yyFlexLexer::~yyFlexLexer()
 	{
 	delete yy_state_buf;
-	yy_delete_buffer( yy_current_buffer );
+	yy_delete_buffer( yy_current_buffer TSRMLS_CC );
 	}
 
 void yyFlexLexer::switch_streams( istream* new_in, ostream* new_out )
 	{
 	if ( new_in )
 		{
-		yy_delete_buffer( yy_current_buffer );
-		yy_switch_to_buffer( yy_create_buffer( new_in, YY_BUF_SIZE ) );
+		yy_delete_buffer( SCNG(yy_current_buffer TSRMLS_CC ) );
+		yy_switch_to_buffer( yy_create_buffer( new_in, YY_BUF_SIZE TSRMLS_CC ) TSRMLS_CC );
 		}
 
 	if ( new_out )
-		yyout = new_out;
+		SCNG(yyout) = new_out;
 	}
 
 int yyFlexLexer::LexerInput( char* buf, int max_size )
 	{
-		if ( yyin->eof() || yyin->fail() )
+		if ( SCNG(yyin)->eof() || SCNG(yyin)->fail() )
 			return 0;
 
 		if (yy_current_buffer->yy_is_interactive) {
-			yyin->get( buf[0] );
+			SCNG(yyin)->get( buf[0] );
 
-			if ( yyin->eof() )
+			if ( SCNG(yyin)->eof() )
 				return 0;
 
-			if ( yyin->bad() )
+			if ( SCNG(yyin)->bad() )
 				return -1;
 
 			return 1;
 		} else {
-			(void) yyin->read( buf, max_size );
+			(void) SCNG(yyin)->read( buf, max_size );
 
-			if ( yyin->bad() )
+			if ( SCNG(yyin)->bad() )
 				return -1;
 			else
-				return yyin->gcount();
+				return SCNG(yyin)->gcount();
 		}
 	}
 
 void yyFlexLexer::LexerOutput( const char* buf, int size )
 	{
-	(void) yyout->write( buf, size );
+	(void) SCNG(yyout)->write( buf, size );
 	}
 %*
 
@@ -733,9 +762,9 @@ void yyFlexLexer::LexerOutput( const char* buf, int size )
  */
 
 %-
-static int yy_get_next_buffer()
+static int yy_get_next_buffer(TSRMLS_D)
 %+
-int yyFlexLexer::yy_get_next_buffer()
+int yyFlexLexer::yy_get_next_buffer(TSRMLS_D)
 %*
 	{
 	register char *dest = yy_current_buffer->yy_ch_buf;
@@ -842,7 +871,7 @@ int yyFlexLexer::yy_get_next_buffer()
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			yyrestart( yyin );
+			yyrestart( SCNG(yyin) TSRMLS_CC );
 			}
 
 		else
@@ -869,9 +898,9 @@ int yyFlexLexer::yy_get_next_buffer()
 /* yy_get_previous_state - get the state just before the EOB char was reached */
 
 %-
-static yy_state_type yy_get_previous_state()
+static yy_state_type yy_get_previous_state(TSRMLS_D)
 %+
-yy_state_type yyFlexLexer::yy_get_previous_state()
+yy_state_type yyFlexLexer::yy_get_previous_state(TSRMLS_D)
 %*
 	{
 	register yy_state_type yy_current_state;
@@ -896,13 +925,16 @@ yy_state_type yyFlexLexer::yy_get_previous_state()
 
 %-
 #ifdef YY_USE_PROTOS
-static yy_state_type yy_try_NUL_trans( yy_state_type yy_current_state )
+static yy_state_type yy_try_NUL_trans( yy_state_type yy_current_state TSRMLS_DC )
 #else
-static yy_state_type yy_try_NUL_trans( yy_current_state )
+static yy_state_type yy_try_NUL_trans( yy_current_state TSRMLS_CC )
 yy_state_type yy_current_state;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state )
+yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state TSRMLS_DC )
 %*
 	{
 	register int yy_is_jam;
@@ -915,14 +947,17 @@ yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state )
 %-
 #ifndef YY_NO_UNPUT
 #ifdef YY_USE_PROTOS
-static void yyunput( int c, register char *yy_bp )
+static void yyunput( int c, register char *yy_bp TSRMLS_DC )
 #else
-static void yyunput( c, yy_bp )
+static void yyunput( c, yy_bp TSRMLS_CC )
 int c;
 register char *yy_bp;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-void yyFlexLexer::yyunput( int c, register char* yy_bp )
+void yyFlexLexer::yyunput( int c, register char* yy_bp TSRMLS_DC )
 %*
 	{
 	register char *yy_cp = yy_c_buf_p;
@@ -966,12 +1001,15 @@ void yyFlexLexer::yyunput( int c, register char* yy_bp )
 
 %-
 #ifdef __cplusplus
-static int yyinput()
+static int yyinput(TSRMLS_D)
 #else
-static int input()
+static int input(TSRMLS_C)
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-int yyFlexLexer::yyinput()
+int yyFlexLexer::yyinput(TSRMLS_D)
 %*
 	{
 	int c;
@@ -993,7 +1031,7 @@ int yyFlexLexer::yyinput()
 			int offset = yy_c_buf_p - yytext_ptr;
 			++yy_c_buf_p;
 
-			switch ( yy_get_next_buffer() )
+			switch ( yy_get_next_buffer(TSRMLS_C) )
 				{
 				case EOB_ACT_LAST_MATCH:
 					/* This happens because yy_g_n_b()
@@ -1007,7 +1045,7 @@ int yyFlexLexer::yyinput()
 					 */
 
 					/* Reset buffer status. */
-					yyrestart( yyin );
+					yyrestart( SCNG(yyin) TSRMLS_CC );
 
 					/* fall through */
 
@@ -1019,9 +1057,9 @@ int yyFlexLexer::yyinput()
 					if ( ! yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
 #ifdef __cplusplus
-					return yyinput();
+					return yyinput(TSRMLS_C);
 #else
-					return input();
+					return input(TSRMLS_C);
 #endif
 					}
 
@@ -1044,32 +1082,35 @@ int yyFlexLexer::yyinput()
 
 %-
 #ifdef YY_USE_PROTOS
-void yyrestart( FILE *input_file )
+void yyrestart( FILE *input_file TSRMLS_DC )
 #else
-void yyrestart( input_file )
+void yyrestart( input_file TSRMLS_CC )
 FILE *input_file;
 #endif
 %+
-void yyFlexLexer::yyrestart( istream* input_file )
+void yyFlexLexer::yyrestart( istream* input_file TSRMLS_DC )
 %*
 	{
 	if ( ! yy_current_buffer )
-		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE );
+		yy_current_buffer = yy_create_buffer( SCNG(yyin), YY_BUF_SIZE TSRMLS_CC );
 
-	yy_init_buffer( yy_current_buffer, input_file );
-	yy_load_buffer_state();
+	yy_init_buffer( yy_current_buffer, input_file TSRMLS_CC );
+	yy_load_buffer_state(TSRMLS_C);
 	}
 
 
 %-
 #ifdef YY_USE_PROTOS
-void yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
+void yy_switch_to_buffer( YY_BUFFER_STATE new_buffer TSRMLS_DC)
 #else
-void yy_switch_to_buffer( new_buffer )
+void yy_switch_to_buffer( new_buffer TSRMLS_CC)
 YY_BUFFER_STATE new_buffer;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
+void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer TSRMLS_DC )
 %*
 	{
 	if ( yy_current_buffer == new_buffer )
@@ -1084,7 +1125,7 @@ void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
 		}
 
 	yy_current_buffer = new_buffer;
-	yy_load_buffer_state();
+	yy_load_buffer_state(TSRMLS_C);
 
 	/* We don't actually know whether we did this switch during
 	 * EOF (yywrap()) processing, but the only time this flag
@@ -1097,9 +1138,12 @@ void yyFlexLexer::yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
 
 %-
 #ifdef YY_USE_PROTOS
-void yy_load_buffer_state( void )
+void yy_load_buffer_state( TSRMLS_D )
 #else
-void yy_load_buffer_state()
+void yy_load_buffer_state(TSRMLS_C)
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
 void yyFlexLexer::yy_load_buffer_state()
@@ -1107,21 +1151,24 @@ void yyFlexLexer::yy_load_buffer_state()
 	{
 	yy_n_chars = yy_current_buffer->yy_n_chars;
 	yytext_ptr = yy_c_buf_p = yy_current_buffer->yy_buf_pos;
-	yyin = yy_current_buffer->yy_input_file;
+	SCNG(yyin) = yy_current_buffer->yy_input_file;
 	yy_hold_char = *yy_c_buf_p;
 	}
 
 
 %-
 #ifdef YY_USE_PROTOS
-YY_BUFFER_STATE yy_create_buffer( FILE *file, int size )
+YY_BUFFER_STATE yy_create_buffer( FILE *file, int size TSRMLS_DC )
 #else
-YY_BUFFER_STATE yy_create_buffer( file, size )
+YY_BUFFER_STATE yy_create_buffer( file, size TSRMLS_CC )
 FILE *file;
 int size;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-YY_BUFFER_STATE yyFlexLexer::yy_create_buffer( istream* file, int size )
+YY_BUFFER_STATE yyFlexLexer::yy_create_buffer( istream* file, int size TSRMLS_DC )
 %*
 	{
 	YY_BUFFER_STATE b;
@@ -1141,7 +1188,7 @@ YY_BUFFER_STATE yyFlexLexer::yy_create_buffer( istream* file, int size )
 
 	b->yy_is_our_buffer = 1;
 
-	yy_init_buffer( b, file );
+	yy_init_buffer( b, file TSRMLS_CC );
 
 	return b;
 	}
@@ -1149,13 +1196,16 @@ YY_BUFFER_STATE yyFlexLexer::yy_create_buffer( istream* file, int size )
 
 %-
 #ifdef YY_USE_PROTOS
-void yy_delete_buffer( YY_BUFFER_STATE b )
+void yy_delete_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 #else
-void yy_delete_buffer( b )
+void yy_delete_buffer( b TSRMLS_CC )
 YY_BUFFER_STATE b;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-void yyFlexLexer::yy_delete_buffer( YY_BUFFER_STATE b )
+void yyFlexLexer::yy_delete_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 %*
 	{
 	if ( ! b )
@@ -1179,20 +1229,23 @@ extern int isatty YY_PROTO(( int ));
 #endif
 
 #ifdef YY_USE_PROTOS
-void yy_init_buffer( YY_BUFFER_STATE b, FILE *file )
+void yy_init_buffer( YY_BUFFER_STATE b, FILE *file TSRMLS_DC )
 #else
-void yy_init_buffer( b, file )
+void yy_init_buffer( b, file TSRMLS_CC )
 YY_BUFFER_STATE b;
 FILE *file;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 
 %+
 extern "C" int isatty YY_PROTO(( int ));
-void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, istream* file )
+void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, istream* file TSRMLS_DC )
 %*
 
 	{
-	yy_flush_buffer( b );
+	yy_flush_buffer( b TSRMLS_CC );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
@@ -1215,14 +1268,17 @@ void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, istream* file )
 
 %-
 #ifdef YY_USE_PROTOS
-void yy_flush_buffer( YY_BUFFER_STATE b )
+void yy_flush_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 #else
-void yy_flush_buffer( b )
+void yy_flush_buffer( b TSRMLS_CC )
 YY_BUFFER_STATE b;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 
 %+
-void yyFlexLexer::yy_flush_buffer( YY_BUFFER_STATE b )
+void yyFlexLexer::yy_flush_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 %*
 	{
 	if ( ! b )
@@ -1243,7 +1299,7 @@ void yyFlexLexer::yy_flush_buffer( YY_BUFFER_STATE b )
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
 	if ( b == yy_current_buffer )
-		yy_load_buffer_state();
+		yy_load_buffer_state(TSRMLS_C);
 	}
 %*
 
@@ -1251,11 +1307,14 @@ void yyFlexLexer::yy_flush_buffer( YY_BUFFER_STATE b )
 #ifndef YY_NO_SCAN_BUFFER
 %-
 #ifdef YY_USE_PROTOS
-YY_BUFFER_STATE yy_scan_buffer( char *base, yy_size_t size )
+YY_BUFFER_STATE yy_scan_buffer( char *base, yy_size_t size TSRMLS_DC )
 #else
-YY_BUFFER_STATE yy_scan_buffer( base, size )
+YY_BUFFER_STATE yy_scan_buffer( base, size TSRMLS_CC )
 char *base;
 yy_size_t size;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 	{
 	YY_BUFFER_STATE b;
@@ -1280,7 +1339,7 @@ yy_size_t size;
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	yy_switch_to_buffer( b );
+	yy_switch_to_buffer( b TSRMLS_CC );
 
 	return b;
 	}
@@ -1291,17 +1350,20 @@ yy_size_t size;
 #ifndef YY_NO_SCAN_STRING
 %-
 #ifdef YY_USE_PROTOS
-YY_BUFFER_STATE yy_scan_string( yyconst char *yy_str )
+YY_BUFFER_STATE yy_scan_string( yyconst char *yy_str TSRMLS_DC )
 #else
-YY_BUFFER_STATE yy_scan_string( yy_str )
+YY_BUFFER_STATE yy_scan_string( yy_str TSRMLS_CC )
 yyconst char *yy_str;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 	{
 	int len;
 	for ( len = 0; yy_str[len]; ++len )
 		;
 
-	return yy_scan_bytes( yy_str, len );
+	return yy_scan_bytes( yy_str, len TSRMLS_CC );
 	}
 %*
 #endif
@@ -1310,11 +1372,14 @@ yyconst char *yy_str;
 #ifndef YY_NO_SCAN_BYTES
 %-
 #ifdef YY_USE_PROTOS
-YY_BUFFER_STATE yy_scan_bytes( yyconst char *bytes, int len )
+YY_BUFFER_STATE yy_scan_bytes( yyconst char *bytes, int len TSRMLS_DC )
 #else
-YY_BUFFER_STATE yy_scan_bytes( bytes, len )
+YY_BUFFER_STATE yy_scan_bytes( bytes, len TSRMLS_CC )
 yyconst char *bytes;
 int len;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 	{
 	YY_BUFFER_STATE b;
@@ -1333,7 +1398,7 @@ int len;
 
 	buf[len] = buf[len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = yy_scan_buffer( buf, n );
+	b = yy_scan_buffer( buf, n TSRMLS_CC);
 	if ( ! b )
 		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
@@ -1351,13 +1416,16 @@ int len;
 #ifndef YY_NO_PUSH_STATE
 %-
 #ifdef YY_USE_PROTOS
-static void yy_push_state( int new_state )
+static void yy_push_state( int new_state TSRMLS_DC )
 #else
-static void yy_push_state( new_state )
+static void yy_push_state( new_state TSRMLS_CC )
 int new_state;
+#ifdef ZTS
+void ***tsrm_ls;
+#endif
 #endif
 %+
-void yyFlexLexer::yy_push_state( int new_state )
+void yyFlexLexer::yy_push_state( int new_state TSRMLS_DC )
 %*
 	{
 	if ( yy_start_stack_ptr >= yy_start_stack_depth )
@@ -1388,9 +1456,9 @@ void yyFlexLexer::yy_push_state( int new_state )
 
 #ifndef YY_NO_POP_STATE
 %-
-static void yy_pop_state()
+static void yy_pop_state(TSRMLS_D)
 %+
-void yyFlexLexer::yy_pop_state()
+void yyFlexLexer::yy_pop_state(TSRMLS_D)
 %*
 	{
 	if ( --yy_start_stack_ptr < 0 )

@@ -49,7 +49,7 @@
 #include "zend_variables.h"
 #include "zend_operators.h"
 
-#ifdef ZTS
+#ifdef __cplusplus
 # include <fstream.h>
 # ifdef HAVE_STDIOSTR_H
 #  include <stdiostr.h>
@@ -72,7 +72,7 @@
 # include <unistd.h>
 #endif
 
-#ifdef ZTS
+#ifdef __cplusplus
 #define YY_DECL int ZendFlexLexer::lex_scan(zval *zendlval TSRMLS_DC)
 #else
 #define YY_DECL int lex_scan(zval *zendlval TSRMLS_DC)
@@ -86,7 +86,15 @@
 #  define MY_INPUT input
 #endif
 
-#include "zend_istdiostream.h"
+
+/* Globals Macros */
+#define SCNG	LANG_SCNG
+#ifdef ZTS
+ZEND_API ts_rsrc_id language_scanner_globals_id;
+#else
+ZEND_API zend_scanner_globals language_scanner_globals;
+#endif
+
 
 #define YY_FATAL_ERROR zend_fatal_scanner_error
 
@@ -141,7 +149,7 @@ END_EXTERN_C()
 
 static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
-#ifndef ZTS
+#ifndef __cplusplus
 	memcpy(&lex_state->buffer_state,&YY_CURRENT_BUFFER,sizeof(YY_BUFFER_STATE));
 	lex_state->in = yyin;
 	lex_state->state = YYSTATE;
@@ -155,16 +163,16 @@ static inline void save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 
 static inline void restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 {
-#ifndef ZTS
+#ifndef __cplusplus
 	YY_BUFFER_STATE original_buffer_state = YY_CURRENT_BUFFER;
 
 	if (lex_state->buffer_state) {
-		yy_switch_to_buffer(lex_state->buffer_state);
+		yy_switch_to_buffer(lex_state->buffer_state TSRMLS_CC);
 	} else {
 		YY_CURRENT_BUFFER = NULL;
 	}
 		
-	yy_delete_buffer(original_buffer_state);
+	yy_delete_buffer(original_buffer_state TSRMLS_CC);
 	yyin = lex_state->in;
 	BEGIN(lex_state->state);
 #else
@@ -190,7 +198,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh)
 			 * which doesn't really contain open files, but references to their names/paths
 			 */
 			break;
-#ifdef ZTS
+#ifdef __cplusplus
 		case ZEND_HANDLE_FSTREAM:
 			delete ((ifstream *) fh->handle.is);
 			break;
@@ -220,7 +228,7 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2)
 		case ZEND_HANDLE_FP:
 			return fh1->handle.fp==fh2->handle.fp;
 			break;
-#ifdef ZTS
+#ifdef __cplusplus
 		case ZEND_HANDLE_FSTREAM:
 		case ZEND_HANDLE_STDIOSTREAM:
 			return fh1->handle.is==fh2->handle.is;
@@ -241,7 +249,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char *file_path=NULL;
 
-#ifndef ZTS
+#ifndef __cplusplus
 	switch (file_handle->type) {
 		case ZEND_HANDLE_FILENAME:
 			file_handle->handle.fp = zend_fopen(file_handle->filename, &file_handle->opened_path);
@@ -263,7 +271,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 	}
 	/* Reset the scanner for scanning the new file */
 	yyin = file_handle->handle.fp;
-	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
+	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	BEGIN(INITIAL);
 #else
 	switch (file_handle->type) {
@@ -409,20 +417,20 @@ zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC)
 	return retval;
 }
 
-#ifndef ZTS
-static inline int prepare_string_for_scanning(zval *str, char *filename)
+#ifndef __cplusplus
+static inline int prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC)
 #else
 static inline int prepare_string_for_scanning(zval *str, istrstream **input_stream, char *filename TSRMLS_DC)
 #endif
 {
-#ifndef ZTS
+#ifndef __cplusplus
 	/* enforce two trailing NULLs for flex... */
 	STR_REALLOC(str->value.str.val, str->value.str.len+2);
 
 	str->value.str.val[str->value.str.len+1]=0;
 
 	yyin=NULL;
-	yy_scan_buffer(str->value.str.val, str->value.str.len+2);
+	yy_scan_buffer(str->value.str.val, str->value.str.len+2 TSRMLS_CC);
 #else
 	*input_stream = new istrstream(str->value.str.val, str->value.str.len);
 	CG(ZFL) = new ZendFlexLexer;
@@ -444,7 +452,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	zval tmp;
 	int compiler_result;
 	zend_bool original_in_compilation = CG(in_compilation);
-#ifdef ZTS
+#ifdef __cplusplus
 	istrstream *input_stream;
 #endif
 
@@ -461,8 +469,8 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	source_string = &tmp;
 
 	save_lexical_state(&original_lex_state TSRMLS_CC);
-#ifndef ZTS
-	if (prepare_string_for_scanning(source_string, filename)==FAILURE) {
+#ifndef __cplusplus
+	if (prepare_string_for_scanning(source_string, filename TSRMLS_CC)==FAILURE) {
 #else
 	if (prepare_string_for_scanning(source_string, &input_stream, filename TSRMLS_CC)==FAILURE) {
 #endif
@@ -471,7 +479,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 	} else {
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(active_op_array) = op_array;
-#ifndef ZTS
+#ifndef __cplusplus
 		BEGIN(ST_IN_SCRIPTING);
 #else
 		CG(ZFL)->BeginState(ST_IN_SCRIPTING);
@@ -490,7 +498,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		}
 		restore_lexical_state(&original_lex_state TSRMLS_CC);
 	}
-#ifdef ZTS
+#ifdef __cplusplus
 	delete input_stream;
 #endif
 	zval_dtor(&tmp);
@@ -524,15 +532,15 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 {
 	zend_lex_state original_lex_state;
 	zval tmp = *str;
-#ifdef ZTS
+#ifdef __cplusplus
 	istrstream *input_stream;
 #endif
 
 	str = &tmp;
 	zval_copy_ctor(str);
 	save_lexical_state(&original_lex_state TSRMLS_CC);
-#ifndef ZTS
-	if (prepare_string_for_scanning(str, str_name)==FAILURE) {
+#ifndef __cplusplus
+	if (prepare_string_for_scanning(str, str_name TSRMLS_CC)==FAILURE) {
 #else
 	if (prepare_string_for_scanning(str, &input_stream, str_name TSRMLS_CC)==FAILURE) {
 #endif
@@ -540,7 +548,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	}
 	zend_highlight(syntax_highlighter_ini TSRMLS_CC);
 	restore_lexical_state(&original_lex_state TSRMLS_CC);
-#ifdef ZTS
+#ifdef __cplusplus
 	delete input_stream;
 #endif
 	zval_dtor(str);
@@ -548,7 +556,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 }
 END_EXTERN_C()
 
-#ifdef ZTS
+#ifdef __cplusplus
 BEGIN_EXTERN_C()
 int lex_scan(zval *zendlval TSRMLS_DC)
 {
@@ -731,12 +739,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"->" {
-	yy_push_state(ST_LOOKING_FOR_PROPERTY);
+	yy_push_state(ST_LOOKING_FOR_PROPERTY TSRMLS_CC);
 	return T_OBJECT_OPERATOR;
 }
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
-	yy_pop_state();
+	yy_pop_state(TSRMLS_C);
 	zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
@@ -745,7 +753,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
 	yyless(0);
-	yy_pop_state();
+	yy_pop_state(TSRMLS_C);
 }
 
 <ST_IN_SCRIPTING>"::" {
@@ -954,13 +962,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>"{" {
-	yy_push_state(ST_IN_SCRIPTING);
+	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return '{';
 }
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
-	yy_push_state(ST_LOOKING_FOR_VARNAME);
+	yy_push_state(ST_LOOKING_FOR_VARNAME TSRMLS_CC);
 	return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
@@ -968,7 +976,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"}" {
 	/* This is a temporary fix which is dependant on flex and it's implementation */
 	if (yy_start_stack_ptr) {
-		yy_pop_state();
+		yy_pop_state(TSRMLS_C);
 	}
 	return '}';
 }
@@ -978,16 +986,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zendlval->value.str.val = (char *) estrndup(yytext, yyleng);
 	zendlval->value.str.len = yyleng;
 	zendlval->type = IS_STRING;
-	yy_pop_state();
-	yy_push_state(ST_IN_SCRIPTING);
+	yy_pop_state(TSRMLS_C);
+	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	return T_STRING_VARNAME;
 }
 
 
 <ST_LOOKING_FOR_VARNAME>{ANY_CHAR} {
 	yyless(0);
-	yy_pop_state();
-	yy_push_state(ST_IN_SCRIPTING);
+	yy_pop_state(TSRMLS_C);
+	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 }
 
 
@@ -1488,7 +1496,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	zendlval->value.lval = (long) yytext[0];
-	yy_push_state(ST_IN_SCRIPTING);
+	yy_push_state(ST_IN_SCRIPTING TSRMLS_CC);
 	yyless(1);
 	return T_CURLY_OPEN;
 }

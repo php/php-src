@@ -119,6 +119,8 @@ struct _zend_compiler_globals {
 	void *ini_parser;
 #endif
 
+	struct _zend_ini_parser_param *ini_parser_param;
+
 	int interactive;
 };
 
@@ -223,6 +225,18 @@ struct _zend_alloc_globals {
 	unsigned int allocated_memory_peak;
 	unsigned char memory_exhausted;
 #endif
+};
+
+
+struct _zend_scanner_globals {
+	FILE *yyin;
+	FILE *yyout;
+	int yy_leng;
+	char *yy_text;
+	struct yy_buffer_state *current_buffer;
+	char *c_buf_p;
+	int init;
+	int start;
 };
 
 #endif /* ZEND_GLOBALS_H */
