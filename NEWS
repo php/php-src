@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.3-dev
+- Fix some potential OpenBSD and NetBSD crash bugs when opening files. (Andi)
 - Add EscapeShellArg() function (Rasmus)
 - Add a php.ini option session.use_trans_sid to enable/disable trans-sid. (Sterling)
 - Quick-fix for the file upload security alert (Rasmus)
