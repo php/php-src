@@ -694,6 +694,7 @@ static char *_php_replace_in_subject(zval *regex, zval *replace, zval *subject)
 	}
 	else {
 		/* Make sure we're dealing with strings and do the replacement */
+		convert_to_string(regex);
 		convert_to_string(replace);
 		result = _php_pcre_replace(regex->value.str.val,
 									subject->value.str.val,
