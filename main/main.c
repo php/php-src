@@ -662,7 +662,7 @@ void php_request_shutdown(void *dummy)
 	PLS_FETCH();
 	SLS_FETCH();
 
-	php3_header();
+	sapi_send_headers();
 	zend_end_ob_buffering(1);
 
 	php3_call_shutdown_functions();
@@ -1142,14 +1142,12 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 
 			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
 			PHPWRITE(php4_logo, sizeof(php4_logo));
-			efree(header_line);
 			return;
 		} else if (!strcmp(SG(request_info).query_string+1, "PHPE9568F35-D428-11d2-A769-00AA001ACF42")) {
 			char *header_line = estrndup(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF));
 
 			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
 			PHPWRITE(zendtech_logo, sizeof(zendtech_logo));
-			efree(header_line);
 			return;
 		}
 	}

@@ -2164,6 +2164,7 @@ PHP_FUNCTION(function_exists)
 	pval *fname;
 	pval *tmp;
 	char *lcname;
+	CLS_FETCH();
 	
 	if (ARG_COUNT(ht)!=1 || getParameters(ht, 1, &fname)==FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -2220,6 +2221,7 @@ PHP_FUNCTION(extract)
 	char *varname, *finalname;
 	ulong lkey;
 	int res, extype;
+	ELS_FETCH();
 
 	switch(ARG_COUNT(ht)) {
 		case 1:
