@@ -347,6 +347,10 @@ class PEAR_Installer extends PEAR_Common
 
         // Register that the package is installed -----------------------
         if (empty($options['upgrade'])) {
+            // if 'force' is used, replace the info in registry
+            if (!empty($options['force']) && $this->registry->packageExists($pkgname)) {
+                $this->registry->deletePackage($pkgname);
+            }
             $ret = $this->registry->addPackage($pkgname, $this->pkginfo);
         } else {
             $ret = $this->registry->updatePackage($pkgname, $this->pkginfo, false);

@@ -63,7 +63,7 @@ $verbose = $config->get("verbose");
 $cmdopts = array();
 
 foreach ($opts as $opt) {
-    $param = !empty($opt[1]) ? $opt[1] : null;
+    $param = !empty($opt[1]) ? $opt[1] : true;
     switch ($opt[0]) {
         case 'd':
             list($key, $value) = explode('=', $param);
