@@ -22,6 +22,7 @@
 #define MODULES_H
 
 #include "zend.h"
+#include "zend_ini_entry.h"
 
 #define INIT_FUNC_ARGS		int type, int module_number TSRMLS_DC
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number TSRMLS_CC
@@ -41,7 +42,8 @@ ZEND_API extern unsigned char third_arg_force_ref[];
 #define USING_ZTS 0
 #endif
 
-#define STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS
+#define STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, NULL
+#define ZE2_STANDARD_MODULE_HEADER sizeof(zend_module_entry), ZEND_MODULE_API_NO, ZEND_DEBUG, USING_ZTS, &ini_entries
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, 0, NULL, 0
 
@@ -60,6 +62,7 @@ struct _zend_module_entry {
 	unsigned int zend_api;
 	unsigned char zend_debug;
 	unsigned char zts;
+	zend_ini_entry *ini_entry;
 	char *name;
 	zend_function_entry *functions;
 	int (*module_startup_func)(INIT_FUNC_ARGS);
