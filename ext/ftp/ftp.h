@@ -44,7 +44,7 @@
 
 typedef enum ftptype {
 	FTPTYPE_ASCII,
-	FTPTYPE_IMAGE,
+	FTPTYPE_IMAGE
 } ftptype_t;
 
 typedef struct ftpbuf
