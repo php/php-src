@@ -1,3 +1,88 @@
+2002-07-14  Andrei Zmievski  <andrei@pb1.pair.com>
+
+    * ext/pcre/php_pcre.c: Fix Bug #18341.
+
+2002-07-14  Sascha Schumann  <sas@pb1.pair.com>
+
+    * NEWS: it is not really cold though
+
+    * NEWS: the sun was shining a few days ago
+
+    * sapi/thttpd/thttpd_patch
+      sapi/thttpd/thttpd.c: integrate the public keep-alive patch
+
+    the patch did not handle pipeling at all, so that some code had to be added
+    from Premium thttpd
+
+    persistent connections are supported, if a script sets the Content-Length
+    header
+
+2002-07-14  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * ext/ming/ming.c: Fix a couple of protos
+
+2002-07-14  Sascha Schumann  <sas@pb1.pair.com>
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+    thttpd blocks in rare circumstances where it cannot write out a small HTTP
+    response (happened at customer sites).  The response is now written out
+    using the standard state machine.
+
+    the buffer which is handed to thttpd by php is now simply dealt with as if
+    it were a thttpd generated response (avoids code duplication).
+
+    * sapi/thttpd/thttpd.c
+      sapi/thttpd/thttpd_patch:
+    make the sapi module hand off a buffer to thttpd for final data delivery,
+    instead of blocking the whole process
+
+2002-07-14  edink  <edink@pb1.pair.com>
+
+    * main/rfc1867.c:
+    MFH (fixes linking errors when --enable-mbstring is used)
+
+2002-07-14  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/iconv/tests/eucjp2utf8.inc
+      ext/iconv/tests/eucjp2utf8.phpt: Move comment.
+    Remove a skip condition does not required.
+
+2002-07-14  sniper  <sniper@pb1.pair.com>
+
+    * main/rfc1867.c:
+    IF --disable-mbstr-enc-trans is used OR mbstring is compiled as shared
+    extension, these functions are not available.
+
+    * ext/mbstring/tests/002.inc
+      ext/mbstring/tests/003.inc
+      ext/mbstring/tests/004.inc
+      ext/mbstring/tests/005.inc
+      ext/mbstring/tests/006.inc
+      ext/mbstring/tests/008.inc
+      ext/mbstring/tests/009.inc
+      ext/mbstring/tests/010.inc
+      ext/mbstring/tests/011.inc
+      ext/mbstring/tests/012.inc
+      ext/mbstring/tests/013.inc
+      ext/mbstring/tests/014.inc
+      ext/mbstring/tests/015.inc
+      ext/mbstring/tests/016.inc
+      ext/mbstring/tests/017.inc
+      ext/mbstring/tests/018.inc
+      ext/mbstring/tests/019.inc
+      ext/mbstring/tests/common.inc
+      ext/mbstring/tests/common.php: .php files are in .cvsignore here
+
+    * ext/mbstring/config.m4: These options are all enabled by default. (why?)
+
+2002-07-14  yohgaki  <yohgaki@pb1.pair.com>
+
+    * ext/iconv/tests/eucjp2utf8.inc
+      ext/iconv/tests/eucjp2utf8.phpt
+      ext/iconv/tests/translit.phpt:
+    Fix tests. Moriyoshi Koizumi <readjust@deneb.freemail.ne.jp>
+
 2002-07-13  sander  <sander@pb1.pair.com>
 
     * ext/standard/fsock.c: Fixed win32 build
