@@ -435,6 +435,33 @@ interface Countable
 	function count();
 }
 
+/** @ingroup ZendEngine
+ * @brief Interface for customized serializing
+ * @since 5.1
+ * 
+ * Classes that implement this interface no longer support __sleep() and 
+ * __wakeup(). The method serialized is called whenever an instance needs to
+ * be serialized. This does not invoke __destruct() or has any other side
+ * effect unless programmed inside the method. When the data is unserialized
+ * the class is known and the appropriate unserialize() method is called as a
+ * constructor instead of calling __construct(). If you need to execute the
+ * standard constructor you may do so in the method.
+ */
+interface Serializeable
+{
+	/**
+	 * @return string representation of the instance
+	 */
+	function serialize();
+	
+	/**
+	 * @note This is a constructor
+	 * 
+	 * @param $serialized data read from stream to construct the instance
+	 */
+	function unserialize($serialized);
+}
+
 /** @ingroup SPL
  * @brief An Array wrapper
  * @since PHP 5.0
