@@ -38,7 +38,7 @@ InterBase: binding (may take a while)
 
 	echo "insert\n";
 
-	for($iter = 0; $iter < 3; $iter++){
+	for($iter = 0; $iter < 3; $iter++) {
 		/* prepare data  */
 		$v_char = rand_str(1000);
 		$v_date = rand_datetime();
@@ -59,47 +59,47 @@ InterBase: binding (may take a while)
 		$sel = ibase_query("select * from test6 where iter = $iter");
 
 		$row = ibase_fetch_object($sel);
-		if(substr($row->V_CHAR,0,strlen($v_char)) != $v_char){
+		if(substr($row->V_CHAR,0,strlen($v_char)) != $v_char) {
 			echo " CHAR fail:\n";
 			echo " in:  $v_char\n";
 			echo " out: $row->V_CHAR\n";
 		}
-		if($row->V_DATE != $v_date){
+		if($row->V_DATE != $v_date) {
 			echo " DATE fail\n";
 			echo " in:  $v_date\n";
 			echo " out: $row->V_DATE\n";
 		}
-		if($row->V_DECIMAL != $v_decimal){
+		if($row->V_DECIMAL != $v_decimal) {
 			echo " DECIMAL fail\n";
 			echo " in:  $v_decimal\n";
 			echo " out: $row->V_DECIMAL\n";
 		}
-		if(abs($row->V_DOUBLE - $v_double) > abs($v_double / 1E15)){
+		if(abs($row->V_DOUBLE - $v_double) > abs($v_double / 1E15)) {
 			echo " DOUBLE fail\n";
 			echo " in:  $v_double\n";
 			echo " out: $row->V_DOUBLE\n";
 		}
-		if(abs($row->V_FLOAT - $v_float) > abs($v_float / 1E7)){
+		if(abs($row->V_FLOAT - $v_float) > abs($v_float / 1E7)) {
 			echo " FLOAT fail\n";
 			echo " in:  $v_float\n";
 			echo " out: $row->V_FLOAT\n";
 		}
-		if($row->V_INTEGER != $v_integer){
+		if($row->V_INTEGER != $v_integer) {
 			echo " INTEGER fail\n";
 			echo " in:  $v_integer\n";
 			echo " out: $row->V_INTEGER\n";
 		}
-		if ($row->V_NUMERIC != $v_numeric){
+		if ($row->V_NUMERIC != $v_numeric) {
 			echo " NUMERIC fail\n";
 			echo " in:  $v_numeric\n";
 			echo " out: $row->V_NUMERIC\n";
 		}
-		if ($row->V_SMALLINT != $v_smallint){
+		if ($row->V_SMALLINT != $v_smallint) {
 			echo " SMALLINT fail\n";
 			echo " in:  $v_smallint\n";
 			echo " out: $row->V_SMALLINT\n";
 		}
-		if ($row->V_VARCHAR != $v_varchar){
+		if ($row->V_VARCHAR != $v_varchar) {
 			echo " VARCHAR fail:\n";
 			echo " in:  $v_varchar\n";
 			echo " out: $row->V_VARCHAR\n";
@@ -108,7 +108,7 @@ InterBase: binding (may take a while)
 	}/* for($iter)*/
 
 	echo "select\n";
-	for($iter = 0; $iter < 3; $iter++){
+	for($iter = 0; $iter < 3; $iter++) {
 		/* prepare data  */
 		$v_char = rand_str(1000);
 		$v_date = rand_datetime();
@@ -132,35 +132,49 @@ InterBase: binding (may take a while)
 
 		/* test all types */
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_char = ?", $v_char)))
+			"select iter from test6 where v_char = ?", $v_char)) ||
+			!ibase_fetch_row($sel)) {
 			echo "CHAR fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_date = ?", $v_date)))
+			"select iter from test6 where v_date = ?", $v_date)) ||
+			!ibase_fetch_row($sel)) {
 			echo "DATE fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_decimal = ?", $v_decimal)))
+			"select iter from test6 where v_decimal = ?", $v_decimal)) ||
+			!ibase_fetch_row($sel)) {
 			echo "DECIMAL fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_integer = ?", $v_integer)))
+			"select iter from test6 where v_integer = ?", $v_integer)) ||
+			!ibase_fetch_row($sel)) {
 			echo "INTEGER fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_numeric = ?", $v_numeric)))
+			"select iter from test6 where v_numeric = ?", $v_numeric)) ||
+			!ibase_fetch_row($sel)) {
 			echo "NUMERIC fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_smallint = ?", $v_smallint)))
+			"select iter from test6 where v_smallint = ?", $v_smallint)) ||
+			!ibase_fetch_row($sel)) {
 			echo "SMALLINT fail\n";
+		}
 		ibase_free_result($sel);
 		if(!($sel = ibase_query(
-			"select iter from test6 where v_varchar = ?", $v_varchar)))
+			"select iter from test6 where v_varchar = ?", $v_varchar)) ||
+			!ibase_fetch_row($sel)) {
 			echo "VARCHAR fail\n";
+		}
 		ibase_free_result($sel);
         
-	}/*for iter*/
+	} /*for iter*/
 
 	echo "prepare and exec insert\n";
 
@@ -171,13 +185,13 @@ InterBase: binding (may take a while)
 	$query = ibase_prepare(
 		"insert into test6 (v_integer) values (?)");
 
-	for($i = 0; $i < 10; $i++)
+	for($i = 0; $i < 10; $i++) {
 		ibase_execute($query, $i);
+	}
 
 	out_table("test6");
 
 	ibase_free_query($query);
-
 
 	echo "prepare and exec select\n";
 
