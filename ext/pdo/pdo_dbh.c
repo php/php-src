@@ -119,24 +119,29 @@ static PHP_FUNCTION(dbh_constructor)
 }
 /* }}} */
 
-/* {{{ proto object PDO::prepare(string statment)
+/* {{{ proto object PDO::prepare(string statment [, int options [, array driver_options]])
    Prepares a statement for execution and returns a statement object */
+/* TODO: options will be a PDO specific bitmask controlling such things as
+ * cursor type. */
 static PHP_METHOD(PDO, prepare)
 {
 	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
 	pdo_stmt_t *stmt;
 	char *statement;
 	long statement_len;
+	zval *driver_options = NULL;
+	long options = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &statement, &statement_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|la", &statement,
+			&statement_len, &options, &driver_options)) {
 		RETURN_FALSE;
 	}
 	
 	stmt = ecalloc(1, sizeof(*stmt));
-	/* uncoditionally keep this for later reference */
+	/* unconditionally keep this for later reference */
 	stmt->query_string = estrndup(statement, statement_len);
 	stmt->query_stringlen = statement_len;
-	if (dbh->methods->preparer(dbh, statement, statement_len, stmt TSRMLS_CC)) {
+	if (dbh->methods->preparer(dbh, statement, statement_len, stmt, options, driver_options TSRMLS_CC)) {
 		/* prepared; create a statement object for PHP land to access it */
 		Z_TYPE_P(return_value) = IS_OBJECT;
 		Z_OBJ_HANDLE_P(return_value) = zend_objects_store_put(stmt, NULL, pdo_dbstmt_free_storage, NULL TSRMLS_CC);
@@ -164,6 +169,8 @@ static PHP_METHOD(PDO, beginWork)
 	}
 	
 	if (!dbh->methods->begin) {
+		/* TODO: this should be an exception; see the auto-commit mode
+		 * comments below */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support transactions");
 		RETURN_FALSE;
 	}

@@ -57,6 +57,7 @@ enum pdo_fetch_type {
 enum pdo_attribute_type {
 	PDO_ATTR_AUTOCOMMIT,	/* use to turn on or off auto-commit mode */
 	PDO_ATTR_SCROLL,		/* ask for a scrollable cursor (when you prepare()) */
+	PDO_ATTR_PREFETCH,		/* configure the prefetch size for drivers that support it */
 };
 
 /* {{{ utils for reading attributes set as driver_options */
@@ -95,7 +96,7 @@ typedef struct {
 typedef int (*pdo_dbh_close_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 /* prepare a statement and stash driver specific portion into stmt */
-typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt TSRMLS_DC);
+typedef int (*pdo_dbh_prepare_func)(pdo_dbh_t *dbh, const char *sql, long sql_len, pdo_stmt_t *stmt, long options, zval *driver_options TSRMLS_DC);
 
 /* execute a statement (that does not return a result set) */
 typedef int (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql TSRMLS_DC);
