@@ -25,18 +25,25 @@ class PEAR_CommandUI_CLI extends PEAR
         print "$text\n";
     }
 
-    function userDialog($prompt, $type = 'text')
+    function userDialog($prompt, $type = 'text', $default = '')
     {
         if ($type == 'password') {
             system('stty -echo');
         }
-        print "$prompt : ";
+        print "$prompt ";
+        if ($default) {
+            print "[$default] ";
+        }
+        print ": ";
         $fp = fopen("php://stdin", "r");
         $line = fgets($fp, 2048);
         fclose($fp);
         if ($type == 'password') {
             system('stty echo');
             print "\n";
+        }
+        if ($default && trim($line) == "") {
+            return $default;
         }
         return $line;
     }
