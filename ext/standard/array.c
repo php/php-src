@@ -3062,7 +3062,8 @@ PHP_FUNCTION(array_map)
 
 	/* We iterate through all the arrays at once. */
 	for (k = 0; k < maxlen; k++) {
-		uint num_key, str_key_len;
+		uint str_key_len;
+		ulong num_key;
 		char *str_key;
 		int key_type;
 
