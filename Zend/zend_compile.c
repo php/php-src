@@ -1204,7 +1204,7 @@ void do_begin_class_declaration(znode *class_name, znode *parent_class_name CLS_
 	opline->opcode = ZEND_DECLARE_FUNCTION_OR_CLASS;
 	opline->op1.op_type = IS_CONST;
 	opline->op1.u.constant.type = IS_LONG;
-	opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(function_table));
+	opline->op1.u.constant.value.lval = zend_hash_next_free_element(CG(class_table));
 	opline->op2.op_type = IS_CONST;
 	opline->op2.u.constant.type = IS_STRING;
 	opline->op2.u.constant.value.str.val = estrndup(CG(class_entry).name, CG(class_entry).name_length);
