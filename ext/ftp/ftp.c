@@ -34,9 +34,12 @@
 #ifdef PHP_WIN32
 #include <winsock.h>
 #else
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #include <sys/socket.h>
-#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #endif
 #include <errno.h>
