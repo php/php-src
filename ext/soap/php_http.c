@@ -388,14 +388,15 @@ try_again:
 */
 			"User-Agent: PHP SOAP 0.1\r\n");
 		if (soap_version == SOAP_1_2) {
-			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=\"utf-8");
+			smart_str_append_const(&soap_headers,"Content-Type: application/soap+xml; charset=utf-8");
 			if (soapaction) {
-				smart_str_append_const(&soap_headers,"\"; action=\"");
+				smart_str_append_const(&soap_headers,"; action=\"");
 				smart_str_appends(&soap_headers, soapaction);
+				smart_str_append_const(&soap_headers,"\"");
 			}
-			smart_str_append_const(&soap_headers,"\"\r\n");
+			smart_str_append_const(&soap_headers,"\r\n");
 		} else {
-			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=\"utf-8\"\r\n");
+			smart_str_append_const(&soap_headers,"Content-Type: text/xml; charset=utf-8\r\n");
 			if (soapaction) {
 				smart_str_append_const(&soap_headers, "SOAPAction: \"");
 				smart_str_appends(&soap_headers, soapaction);
