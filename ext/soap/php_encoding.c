@@ -177,6 +177,7 @@ void whiteSpace_collapse(char* str)
 xmlNodePtr master_to_xml(encodePtr encode, zval *data, int style)
 {
 	xmlNodePtr node = NULL;
+	TSRMLS_FETCH();
 
 	if (encode == NULL) {
 		encode = get_conversion(UNKNOWN_TYPE);		
