@@ -1484,9 +1484,7 @@ PHP_FUNCTION(getopt)
 		 * Attempt to allocate enough memory to hold all of the arguments
 		 * and a trailing NULL 
 		 */
-		if ((argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0)) == NULL) {
-			RETURN_FALSE;
-		}
+		argv = (char **) safe_emalloc(sizeof(char *), (argc + 1), 0);
 
 		/* Reset the array indexes. */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(args));
