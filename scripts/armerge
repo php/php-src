@@ -37,6 +37,11 @@
 # $Id$
 #
 
+die() {
+	echo $@
+	exit 1
+}
+
 if test "$#" -lt "2"; then
     echo "Usage: "`basename $0`" <out-archive> <in-archives...>"
     exit 1
@@ -44,12 +49,18 @@ fi
 
 out_archive=$1; shift
 in_archives=$@
+cwd=`pwd`
+tmpdir=/tmp/armerge$$
 
 rm -f $out_archive
 
+mkdir $tmpdir || die "can not create temporary directory $tmpdir"
+
+( cd $tmpdir;
+
 for archive in $in_archives; do
-    files=`ar t $archive`
-    ar x $archive
+    files=`ar t $cwd/$archive`
+    ar x $cwd/$archive
     dir=`dirname $archive`
     if test "$dir" = "."; then
 	ext_files=$files
@@ -58,10 +69,15 @@ for archive in $in_archives; do
 	prefix=`echo $prefix | sed -e 's#^\.\._##g'`
 	ext_files=""
 	for file in $files; do
-	    mv "$file" "$prefix$file"
+	    if test "$file" != "$prefix$file"; then
+		mv "$file" "$prefix$file"
+	    fi
 	    ext_files="$ext_files $prefix$file"
 	done
     fi
-    ar r $out_archive $ext_files
-    rm -f $ext_files
-done
+    ar r out.a $ext_files
+done )
+
+mv $tmpdir/out.a $out_archive || die "can not create $out_archive"
+rm -rf $tmpdir
+
