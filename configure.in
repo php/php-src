@@ -817,6 +817,8 @@ fi
 
 PHP_REGEX
 
+EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
+unset LIBS LDFLAGS
 
 dnl Configuring Zend and TSRM.
 dnl -------------------------------------------------------------------------
@@ -841,7 +843,7 @@ if test "$abs_srcdir" != "$abs_builddir"; then
   INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
 fi
 
-EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
+ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS LDFLAGS
 
 PHP_CONFIGURE_PART(Configuring TSRM)
@@ -993,6 +995,7 @@ PHP_SUBST(DEFS)
 PHP_SUBST_OLD(EXTENSION_DIR)
 PHP_SUBST(EXTRA_LDFLAGS)
 PHP_SUBST_OLD(EXTRA_LIBS)
+PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
 PHP_SUBST(INCLUDES)
 PHP_SUBST_OLD(INCLUDE_PATH)
 PHP_SUBST_OLD(INSTALL_IT)
