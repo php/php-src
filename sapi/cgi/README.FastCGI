@@ -25,13 +25,22 @@ or may not be as efficient.
 In this setup, PHP is started as a separate process entirely from the web
 server. It will listen on a socket for new FastCGI requests, and deliver
 PHP pages as appropriate. This is the recommended way of running PHP-FastCGI.
-To run this way, you must start the PHP binary running by giving it a port
-number to listen to on the command line, e.g.:
+To run this way, you must start the PHP binary running by giving it an IP
+and a port number to listen to on the command line, e.g.:
 
-./php -b 8002
+    ./php -b 127.0.0.1:8002
 
-(you can also specify a bind address, e.g. ./php -b localhost:8002. However, this
- relies on the FastCGI devkit and does not seem to work properly)
+The above line is the recommended way of running FastCGI.  You usually
+want the FastCGI server to provide services to the localhost, not
+everyone on the Internet.
+
+If your web server sits on a remote host, you can make FastCGI listen
+on all interfaces:
+
+    ./php -b :8002
+    ./php -b "*:8002"
+
+Note that hostnames are not supported.
 
 You must also configure your web server to connect to the appropriate port
 in order to talk to the PHP FastCGI process.
