@@ -1002,7 +1002,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     {
         /* Store file date/time. */
         struct stat st;
-        if (stat(FileName, &st) >= 0) {
+        if (V_STAT(FileName, &st) >= 0) {
             ImageInfo->FileDateTime = st.st_mtime;
             ImageInfo->FileSize = st.st_size;
         } else {
@@ -1060,7 +1060,7 @@ PHP_FUNCTION(read_exif_data) {
     pval **p_name;
     int ac = ZEND_NUM_ARGS(), ret;
 	ImageInfoType ImageInfo;
-	char tmp[64], *file;
+	char tmp[64];
 
 	/*ImageInfo.Thumbnail = NULL;
 	ImageInfo.ThumbnailSize = 0;
@@ -1071,12 +1071,7 @@ PHP_FUNCTION(read_exif_data) {
 
 	convert_to_string_ex(p_name);
 
-#ifdef VIRTUAL_DIR
-	virtual_filepath(Z_STRVAL_PP(p_name), &file);
-	ret = php_read_jpeg_exif(&ImageInfo, file,1);
-#else
 	ret = php_read_jpeg_exif(&ImageInfo, Z_STRVAL_PP(p_name),1);
-#endif
 
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
