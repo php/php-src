@@ -732,6 +732,10 @@ NAMESPACE_NAME ({LABEL}":")+{LABEL}
 	return T_ABSTRACT;
 }
 
+<ST_IN_SCRIPTING>"final" {
+	return T_FINAL;
+}
+
 <ST_IN_SCRIPTING>"private" {
 	return T_PRIVATE;
 }

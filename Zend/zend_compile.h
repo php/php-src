@@ -91,6 +91,7 @@ typedef struct _zend_brk_cont_element {
 
 #define ZEND_ACC_STATIC		0x01
 #define ZEND_ACC_ABSTRACT	0x02
+#define ZEND_ACC_FINAL		0x04
 
 /* The order of those must be kept - public < protected < private */
 #define ZEND_ACC_PUBLIC		0x10
