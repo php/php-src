@@ -32,7 +32,6 @@
 #include "php_pdo_driver.h"
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
-#include "zend_interfaces.h"
 
 #if defined(HAVE_SPL) && ((PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1))
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
@@ -342,19 +341,8 @@ PHP_MINIT_FUNCTION(pdo)
 #endif
 	zend_declare_property_null(pdo_exception_ce, "errorInfo", sizeof("errorInfo")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 
-	INIT_CLASS_ENTRY(ce, "PDO", pdo_dbh_functions);
-	pdo_dbh_ce = zend_register_internal_class(&ce TSRMLS_CC);
-	pdo_dbh_ce->create_object = pdo_dbh_new;
-
-	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
-	pdo_dbstmt_ce = zend_register_internal_class(&ce TSRMLS_CC);
-	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
-	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
-	zend_class_implements(pdo_dbstmt_ce TSRMLS_CC, 1, zend_ce_traversable); 
-
-	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
-	pdo_row_ce = zend_register_internal_class(&ce TSRMLS_CC);
-	pdo_row_ce->create_object = pdo_row_new;
+	pdo_dbh_init(TSRMLS_C);
+	pdo_stmt_init(TSRMLS_C);
 
 	return SUCCESS;
 }
