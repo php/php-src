@@ -64,7 +64,7 @@ class PEAR_Remote extends PEAR
         if ($username && $password) {
             $c->setCredentials($username, $password);
         }
-        $c->setDebug(1);
+//        $c->setDebug(1);
         $r = $c->send($f);
         if (!$r) {
             return $this->raiseError("XML_RPC send failed");
