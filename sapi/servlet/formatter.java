@@ -24,13 +24,8 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class formatter extends servlet {
-
-    public void service(HttpServletRequest request,
-                        HttpServletResponse response) 
-       throws ServletException
-    {
-       display_source_mode = true;
-       super.service(request, response);
-    }
-
+  public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException {
+    display_source_mode = true;
+    super.service(request, response);
+  }
 }
