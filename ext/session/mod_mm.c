@@ -22,6 +22,7 @@
 
 #ifdef HAVE_LIBMM
 
+#include <unistd.h>
 #include <mm.h>
 #include <time.h>
 #include <sys/stat.h>
@@ -250,24 +251,27 @@ PHP_MINIT_FUNCTION(ps_mm)
 {
 	int save_path_len = strlen(PS(save_path));
 	int mod_name_len = strlen(sapi_module.name);
-	char *ps_mm_path;
+	char *ps_mm_path, euid[30];
 	int ret;
 
 	ps_mm_instance = calloc(sizeof(*ps_mm_instance), 1);
    	if (!ps_mm_instance)
 		return FAILURE;
+
+	if (!sprintf(euid,"%d", geteuid())) 
+		return FAILURE;
+		
+    /* Directory + '/' + File + Module Name + Effective UID + \0 */	
+	ps_mm_path = do_alloca(save_path_len+1+sizeof(PS_MM_FILE)+mod_name_len+strlen(euid)+1);
 	
-	ps_mm_path = do_alloca(save_path_len + 1 + sizeof(PS_MM_FILE) + mod_name_len + 1); /* Directory + '/' + File + Module Name + \0 */
-
 	memcpy(ps_mm_path, PS(save_path), save_path_len + 1);
-
 	if (save_path_len > 0 && ps_mm_path[save_path_len - 1] != DEFAULT_SLASH) {
 		ps_mm_path[save_path_len] = DEFAULT_SLASH;
 		ps_mm_path[save_path_len+1] = '\0';
 	}
-
 	strcat(ps_mm_path, PS_MM_FILE);
 	strcat(ps_mm_path, sapi_module.name);
+	strcat(ps_mm_path, euid);
 	
 	ret = ps_mm_initialize(ps_mm_instance, ps_mm_path);
 		
