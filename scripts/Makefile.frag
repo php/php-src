@@ -26,9 +26,11 @@ HEADER_DIRS = \
 	/ \
 	Zend/ \
 	TSRM/ \
+	include/ \
 	main/ \
 	main/streams/ \
 	regex/ \
+	ext/iconv/ \
 	ext/libxml/ \
 	ext/standard/ \
 	ext/session/ \
