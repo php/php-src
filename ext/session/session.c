@@ -50,6 +50,10 @@
 #include "mod_files.h"
 #include "mod_user.h"
 
+#ifdef HAVE_LIBMM
+#include "mod_mm.h"
+#endif
+
 /* {{{ session_functions[]
  */
 function_entry session_functions[] = {
@@ -1459,21 +1463,50 @@ PHP_MINIT_FUNCTION(session)
 	zend_register_auto_global("_SESSION", sizeof("_SESSION")-1 TSRMLS_CC);
 
 	PS(module_number) = module_number; /* if we really need this var we need to init it in zts mode as well! */
+
 	REGISTER_INI_ENTRIES();
+
+#ifdef HAVE_LIBMM
+	PHP_MINIT(ps_mm) (INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(session)
 {
 	UNREGISTER_INI_ENTRIES();
+
+#ifdef HAVE_LIBMM
+	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
+#endif
+
 	return SUCCESS;
 }
 
 
 PHP_MINFO_FUNCTION(session)
 {
+	ps_module **mod;
+	smart_str handlers = {0};
+	int i;
+	
+	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++) {
+		if (*mod && (*mod)->name) {
+			smart_str_appends(&handlers, (*mod)->name);
+			smart_str_appendc(&handlers, ' ');
+		}
+	}
+	
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Session Support", "enabled" );
+
+	if (handlers.c) {
+		smart_str_0(&handlers);
+		php_info_print_table_row(2, "Registered save handlers", handlers.c);
+		smart_str_free(&handlers);
+	} else {
+		php_info_print_table_row(2, "Registered save handlers", "none");
+	}
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

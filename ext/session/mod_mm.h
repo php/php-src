@@ -23,19 +23,13 @@
 
 #include "php_session.h"
 
+PHP_MINIT_FUNCTION(ps_mm);
+PHP_MSHUTDOWN_FUNCTION(ps_mm);
+
 extern ps_module ps_mod_mm;
 #define ps_mm_ptr &ps_mod_mm
 
-extern zend_module_entry php_session_mm_module;
-#define phpext_ps_mm_ptr &php_session_mm_module
-
 PS_FUNCS(mm);
 
-#else
-
-#define ps_mm_ptr NULL
-#define phpext_ps_mm_ptr NULL
-
 #endif
-
 #endif
