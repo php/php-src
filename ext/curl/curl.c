@@ -291,7 +291,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 		                           t->func,
 		                           retval, 2, argv TSRMLS_CC);
 		if (error == FAILURE) {
-			php_error(E_WARNING, "Cannot call the CURLOPT_WRITEFUNCTION");
+			php_error(E_WARNING, "Couldn't call the CURLOPT_WRITEFUNCTION");
 			length = -1;
 		}
 		else {
