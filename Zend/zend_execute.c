@@ -2426,6 +2426,7 @@ int zend_init_ctor_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	EX(fbc) = EX(fbc_constructor);
+
 	if (EX(fbc)->type == ZEND_USER_FUNCTION) { /* HACK!! */
 		EX(calling_scope) = EX(fbc)->common.scope;
 	} else {
@@ -2498,27 +2499,34 @@ int zend_init_static_method_call_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *function_name;
 	zend_class_entry *ce;
-	zend_bool is_const;
+	zend_bool is_const = 1;
 	char *function_name_strval;
 	int function_name_strlen;
 
 	zend_ptr_stack_n_push(&EG(arg_types_stack), 3, EX(fbc), EX(object), EX(calling_scope));
 
-	is_const = (EX(opline)->op2.op_type == IS_CONST);
+	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
+	if(EX(opline)->op2.op_type != IS_UNUSED) {
+		is_const = (EX(opline)->op2.op_type == IS_CONST);
 
-	if (is_const) {
-		function_name_strval = EX(opline)->op2.u.constant.value.str.val;
-		function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+		if (is_const) {
+			function_name_strval = EX(opline)->op2.u.constant.value.str.val;
+			function_name_strlen = EX(opline)->op2.u.constant.value.str.len;
+		} else {
+			function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
+			
+			function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
+			function_name_strlen = function_name->value.str.len;
+		}
+
+		EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 	} else {
-		function_name = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-
-		function_name_strval = zend_str_tolower_dup(function_name->value.str.val, function_name->value.str.len);
-		function_name_strlen = function_name->value.str.len;
+		if(!ce->constructor) {
+			zend_error(E_ERROR, "Can not call constructor");
+		}
+		EX(fbc) = ce->constructor;
 	}
 
-	ce = EX_T(EX(opline)->op1.u.var).EA.class_entry;
-
-	EX(fbc) = zend_std_get_static_method(ce, function_name_strval, function_name_strlen TSRMLS_CC);
 	EX(calling_scope) = EX(fbc)->common.scope;
 
 	if (!is_const) {
