@@ -50,6 +50,8 @@ PHP_FUNCTION(long2ip);
 PHP_FUNCTION(getenv);
 PHP_FUNCTION(putenv);
 
+PHP_FUNCTION(getopt);
+
 PHP_FUNCTION(get_current_user);
 PHP_FUNCTION(set_time_limit);
 
