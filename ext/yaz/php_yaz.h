@@ -48,6 +48,7 @@ PHP_FUNCTION(yaz_scan_result);
 PHP_FUNCTION(yaz_present);
 PHP_FUNCTION(yaz_ccl_conf);
 PHP_FUNCTION(yaz_ccl_parse);
+PHP_FUNCTION(yaz_database);
 
 #else
 

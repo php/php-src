@@ -72,6 +72,7 @@ struct Yaz_AssociationInfo {
 	char *host_port;
 	int num_databaseNames;
 	char **databaseNames;
+	char *local_databases;
 	COMSTACK cs;
 	char *cookie;
 	char *auth_open;
@@ -110,6 +111,7 @@ static Yaz_Association yaz_association_mk ()
 	p->host_port = 0;
 	p->num_databaseNames = 0;
 	p->databaseNames = 0;
+	p->local_databases = 0;
 	p->cs = 0;
 	p->cookie = 0;
 	p->auth_open = 0;
@@ -149,6 +151,7 @@ static void yaz_association_destroy (Yaz_Association p)
 	if (!p)
 		return ;
 	xfree (p->host_port);
+	xfree (p->local_databases);
 	for (i = 0; i<p->num_databaseNames; i++)
 		xfree (p->databaseNames[i]);
 	xfree (p->databaseNames);
@@ -221,6 +224,7 @@ function_entry yaz_functions [] = {
 	PHP_FE(yaz_present, NULL)
 	PHP_FE(yaz_ccl_conf, NULL)
 	PHP_FE(yaz_ccl_parse, NULL)
+	PHP_FE(yaz_database, NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -656,12 +660,21 @@ static int send_APDU (Yaz_Association t, Z_APDU *a)
 	return 0;	
 }
 
+/* set database names. Take local databases (if set); otherwise
+   take databases given in ZURL (if set); otherwise use Default */
 static char **set_DatabaseNames (Yaz_Association t, int *num)
 {
 	char **databaseNames;
-	char *c, *cp = strchr (t->host_port, '/');
+	char *c;
 	int no = 2;
+	char *cp = t->local_databases;
 
+	if (!cp || !*cp)
+	{
+		cp = strchr (t->host_port, '/');
+		if (cp)
+			cp++;
+	}
 	if (cp)
 	{
 		c = cp;
@@ -672,23 +685,26 @@ static char **set_DatabaseNames (Yaz_Association t, int *num)
 		}
 	}
 	else
-		cp = "/Default";
+		cp = "Default";
 	databaseNames = odr_malloc (t->odr_out, no * sizeof(*databaseNames));
 	no = 0;
 	while (*cp)
 	{
-		c = ++cp;
-		c = strchr (c, '+');
+		c = strchr (cp, '+');
 		if (!c)
 			c = cp + strlen(cp);
 		else if (c == cp)
+		{
+			cp++;
 			continue;
+		}
 		/* cp ptr to first char of db name, c is char following db name */
 		databaseNames[no] = odr_malloc (t->odr_out, 1+c-cp);
 		memcpy (databaseNames[no], cp, c-cp);
-		databaseNames[no][c-cp] = '\0';
-		no++;
+		databaseNames[no++][c-cp] = '\0';
 		cp = c;
+		if (*cp)
+			cp++;
 	}
 	databaseNames[no] = NULL;
 	*num = no;
@@ -822,6 +838,7 @@ static void send_init(Yaz_Association t)
 	ODR_MASK_SET(ireq->options, Z_Options_present);
 	ODR_MASK_SET(ireq->options, Z_Options_namedResultSets);
 	ODR_MASK_SET(ireq->options, Z_Options_scan);
+	ODR_MASK_SET(ireq->options, Z_Options_extendedServices);
 	
 	ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_1);
 	ODR_MASK_SET(ireq->protocolVersion, Z_ProtocolVersion_2);
@@ -1062,6 +1079,8 @@ PHP_FUNCTION(yaz_connect)
 		shared_associations[i]->group = xstrdup (group_str);
 		shared_associations[i]->pass = xstrdup (pass_str);
 	}
+	xfree (shared_associations[i]->local_databases);
+	shared_associations[i]->local_databases = 0;
 #ifdef ZTS
 	tsrm_mutex_unlock (yaz_mutex);
 #endif
@@ -2245,6 +2264,33 @@ PHP_FUNCTION(yaz_ccl_parse)
 			RETVAL_TRUE;
 		}
 		ccl_rpn_delete(rpn);
+	}
+	else
+		RETVAL_FALSE;
+	release_assoc (p);
+}
+/* }}} */
+
+/* {{{ proto int yaz_ccl_parse(int id, string query, array res)
+   Parse a CCL query */
+
+PHP_FUNCTION(yaz_database)
+{
+	pval **pval_id, **pval_database;
+	Yaz_Association p;
+	if (ZEND_NUM_ARGS() != 2 || 
+		zend_get_parameters_ex(2, &pval_id, &pval_database) ==
+		FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex (pval_database);
+	p = get_assoc (pval_id);
+	if (p)
+	{
+		xfree (p->local_databases);
+		p->local_databases = xstrdup ((*pval_database)->value.str.val);
+		RETVAL_TRUE;
 	}
 	else
 		RETVAL_FALSE;
