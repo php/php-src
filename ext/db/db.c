@@ -373,13 +373,13 @@ dbm_info *php_dbm_open(char *filename, char *mode) {
 			ret = -1;
 #else 
 #if NDBM 
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "dbmopen_ndbm(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
 #endif
 		if (errno) ret=errno;
 		else ret = -1;
 #else
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "dbmopen_flatfile(%s): errno = %d [%s]\n",filename,errno,strerror(errno));
 #endif
 		if (errno) ret=errno;

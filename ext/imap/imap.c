@@ -46,7 +46,7 @@
 #include "imap.h"
 #include "mail.h"
 #include "rfc822.h"
-#include "modules.h"
+#include "zend_modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 MAILSTREAM DEFAULTPROTO;
@@ -459,7 +459,7 @@ PHP_MINIT_FUNCTION(imap)
 
 	/* Open Options */
 
-	REGISTER_MAIN_LONG_CONSTANT("OP_DEBUG", OP_DEBUG, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("OP_PHP_DEBUG", OP_PHP_DEBUG, CONST_PERSISTENT | CONST_CS);
 	/* debug protocol negotiations */
 
 	REGISTER_MAIN_LONG_CONSTANT("OP_READONLY", OP_READONLY, CONST_PERSISTENT | CONST_CS);
@@ -2349,7 +2349,7 @@ PHP_FUNCTION(imap_utf7_decode)
 
 	*outp = 0;
 
-#if DEBUG
+#if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
 		php_error(E_WARNING,
@@ -2476,7 +2476,7 @@ PHP_FUNCTION(imap_utf7_encode)
 
 	*outp = 0;
 
-#if DEBUG
+#if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
 		php_error(E_WARNING,

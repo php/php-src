@@ -243,7 +243,7 @@ static PHP_INI_DISP(display_defPW)
 	}
 
 	if (value) {
-#if DEBUG
+#if PHP_DEBUG
 		php_printf("%s", value);
 #else
 		PUTS("********");

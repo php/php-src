@@ -75,14 +75,14 @@ char *php_gethostbyaddr(char *ip)
 	struct hostent *hp;
 
 	if ((int) (addr = inet_addr(ip)) == -1) {
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "address not in a.b.c.d form");
 #endif
 		return estrdup(ip);
 	}
 	hp = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
 	if (!hp) {
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "Unable to resolve %s\n", ip);
 #endif
 		return estrdup(ip);
@@ -127,7 +127,7 @@ PHP_FUNCTION(gethostbynamel)
 
 	hp = gethostbyname((*arg)->value.str.val);
 	if (hp == NULL || hp->h_addr_list == NULL) {
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "Unable to resolve %s\n", (*arg)->value.str.val);
 #endif
 		return;
@@ -149,7 +149,7 @@ char *php_gethostbyname(char *name)
 
 	hp = gethostbyname(name);
 	if (!hp || !hp->h_addr_list) {
-#if DEBUG
+#if PHP_DEBUG
 		php_error(E_WARNING, "Unable to resolve %s\n", name);
 #endif
 		return estrdup(name);
