@@ -145,7 +145,7 @@ install-programs:
 	done; \
 	for lib in $(PEAR_COMMAND_LIBS); do \
 		echo "Installing program library: $$lib"; \
-		$(INSTALL) -m 755 $(srcdir)/scripts/$$lib $(INSTALL_ROOT)$(bindir)/$$lib; \
+		$(INSTALL) -m 644 $(srcdir)/scripts/$$lib $(INSTALL_ROOT)$(bindir)/$$lib; \
 	done
 
 HEADER_DIRS = \
