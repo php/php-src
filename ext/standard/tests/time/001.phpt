@@ -27,6 +27,6 @@ echo "Passed: $passed\n";
 echo "Failed: $failed\n";
 echo $result;
 ?>
---EXPECTREGEX--
-Passed: 10+
+--EXPECT--
+Passed: 100000
 Failed: 0
