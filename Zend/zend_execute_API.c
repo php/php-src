@@ -1007,7 +1007,15 @@ static LRESULT CALLBACK zend_timeout_WndProc(HWND hWnd, UINT message, WPARAM wPa
 			if (lParam==0) {
 				KillTimer(timeout_window, wParam);
 			} else {
+				void ***tsrm_ls;
+
 				SetTimer(timeout_window, wParam, lParam*1000, NULL);
+				tsrm_ls = ts_resource_ex(0, &wParam);
+				if (!tsrm_ls) {
+					/* shouldn't normally happen */
+					break;
+				}
+				EG(timed_out) = 0;
 			}
 			break;
 		case WM_UNREGISTER_ZEND_TIMEOUT:
