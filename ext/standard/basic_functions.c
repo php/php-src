@@ -777,7 +777,7 @@ PHP_MINFO_FUNCTION(basic)
 }
 
 /* {{{ proto int ip2long(string ip_address)
-   Converts a string containing an (Ipv4) Internet Protocol dotted address into a proper address.  */
+   Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
 	zval **str;
@@ -793,7 +793,7 @@ PHP_FUNCTION(ip2long)
 /* }}} */
 
 /* {{{ proto string long2ip(int proper_address)
-   Converts an (Ipv4) Internet network address into a string in Internet standard dotted format. */
+   Converts an (IPv4) Internet network address into a string in Internet standard dotted format */
 PHP_FUNCTION(long2ip)
 {
 	zval **num;
