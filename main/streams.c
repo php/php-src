@@ -643,7 +643,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 		if (PG(safe_mode) && (!php_checkuid(filename, mode, CHECKUID_CHECK_MODE_PARAM))) {
 			return NULL;
 		}
-		return php_stream_fopen_rel(filename, mode, opened_path TSRMLS_CC);
+		return php_stream_fopen_rel(filename, mode, opened_path);
 	}
 
 	/*
