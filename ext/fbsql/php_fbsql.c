@@ -83,29 +83,27 @@ typedef struct PHPFBLink PHPFBLink;
 	required buffereing from of results.
 
 	In the PHP code the 3 above a data structures are referenced by means of integers in the
-	range from 1 to som configurable maximum.  You can put a limit to the number of links, databases
-	and results.  The integer identifications is implemented by insertion in the list, which is passed
+	range from 1 to som configurable maximum. You can put a limit to the number of links, databases
+	and results. The integer identifications is implemented by insertion in the list, which is passed
 	as an argument to all the functions, please note the list is polymorph.
 
 	Database objects and link objects are all reused, base on the host name user name, host name database name 
-	user name.  So connecting twice to the same database as the same user will return the same database id.
+	user name. So connecting twice to the same database as the same user will return the same database id.
 	We use the same coding for that as fbsql does, explioiting the underlying implementation of the lists.
 
 	Persistent objects are put in the persistent list as well, but only by name, if you connect to a persistent object
-	and it is not in the list it is simply added and get a new index, and refcounted.  Tricky, tricky ...
+	and it is not in the list it is simply added and get a new index, and refcounted. Tricky, tricky ...
 */
 
 /* Some functions which should be exported from FBCAccess */
 
-void*        fbaObjectAtIndex();
-void         fbaRelease();
-unsigned int fbaCount();
+void*			fbaObjectAtIndex();
+void			fbaRelease();
+unsigned int	fbaCount();
 
 struct FBCAutoStartInfo {
-   FBArray* infoLines;
+	FBArray* infoLines;
 };
-
-
 
 struct PHPFBResult
 {
@@ -115,7 +113,7 @@ struct PHPFBResult
 	FBCMetaData*			ResultmetaData;		/* The metadata describing the result */
 	FBCRowHandler*			rowHandler;			/* The row handler, the Frontbase structure used for accessing rows in the result */
 	unsigned int			batchSize;			/* The number of row to fetch when expanding the number of rows in the row handler */
-	unsigned int			rowCount;			/* The number of rows in the results set.  The number of row is not in */
+	unsigned int			rowCount;			/* The number of rows in the results set. The number of row is not in */
 						/* general known when the select is done, one typically needs to fetch all the row
 						   to figure out how many row you got. When the rowCount is unknown the value is
 						   0x7ffffffff */
@@ -280,10 +278,10 @@ static void phpfbReleaseResult(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 			FBCMetaData *md = fbcdcCancelFetch(result->link->connection, result->fetchHandle);
 			fbcmdRelease(md);
 		}
-		if (result->rowHandler)  fbcrhRelease(result->rowHandler);
-		if (result->ResultmetaData)    fbcmdRelease(result->ResultmetaData);
-		if (result->list)        fbcplRelease(result->list);
-		if (result->array)       fbaRelease(result->array);
+		if (result->rowHandler)		fbcrhRelease(result->rowHandler);
+		if (result->ResultmetaData)	fbcmdRelease(result->ResultmetaData);
+		if (result->list)			fbcplRelease(result->list);
+		if (result->array)			fbaRelease(result->array);
 		efree(result);
 	}
 }
@@ -389,7 +387,7 @@ static void php_fbsql_init_globals(zend_fbsql_globals *fbsql_globals)
 	fbsql_globals->persistentCount	= 0;
 	fbsql_globals->linkCount		= 0;
 }
-                                        
+
 PHP_MINIT_FUNCTION(fbsql)
 {
 	ZEND_INIT_MODULE_GLOBALS(fbsql, php_fbsql_init_globals, NULL);
@@ -397,7 +395,7 @@ PHP_MINIT_FUNCTION(fbsql)
 	REGISTER_INI_ENTRIES();
 
 	fbcInitialize();
-
+	fbcehSetMultiThreaded(True);
 	le_result	= zend_register_list_destructors_ex(phpfbReleaseResult, NULL, "fbsql result", module_number);
 	le_link		= zend_register_list_destructors_ex(phpfbReleaseLink, NULL, "fbsql link", module_number);
 	le_plink	= zend_register_list_destructors_ex(NULL, phpfbReleasePLink, "fbsql plink", module_number);
@@ -497,12 +495,12 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	if (argc >= 2)
 	{
 		convert_to_string_ex(argv[1]);
-		userName =  Z_STRVAL_PP(argv[1]);
-	}   
+		userName = Z_STRVAL_PP(argv[1]);
+	}
 	if (argc == 3)
 	{
 		convert_to_string_ex(argv[2]);
-		userPassword =  Z_STRVAL_PP(argv[2]);
+		userPassword = Z_STRVAL_PP(argv[2]);
 	}
 
 	if (hostName     == NULL) hostName     = FB_SQL_G(hostName);
@@ -543,7 +541,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			phpLink->userPassword     = strdup(userPassword);
 			phpLink->databasePassword = strdup(FB_SQL_G(databasePassword));
 			phpLink->databaseName	  = NULL;
-			phpLink->execHandler      = fbcehHandlerForHost(hostName, 128);
+			phpLink->execHandler      = NULL;
 			phpLink->affectedRows     = 0;
 			phpLink->autoCommit	 	  = FB_SQL_G(autoCommit);
 			phpLink->errorNo          = 0;
@@ -604,7 +602,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		phpLink->userPassword     = strdup(userPassword);
 		phpLink->databasePassword = strdup(FB_SQL_G(databasePassword));
 		phpLink->databaseName	  = NULL;
-		phpLink->execHandler      = fbcehHandlerForHost(hostName, 128);
+		phpLink->execHandler      = NULL;
 		phpLink->affectedRows     = 0;
 		phpLink->autoCommit	 	  = FB_SQL_G(autoCommit);
 		phpLink->errorNo          = 0;
@@ -613,7 +611,7 @@ static void php_fbsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		ZEND_REGISTER_RESOURCE(return_value, phpLink, le_link);
 
-		le.ptr  = (void *)Z_LVAL_P(return_value);
+		le.ptr = (void *)Z_LVAL_P(return_value);
 		Z_TYPE(le) = le_index_ptr;
 		if (zend_hash_update(&EG(regular_list), name, strlen(name) + 1, &le, sizeof(le), NULL)==FAILURE)
 		{
@@ -751,7 +749,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 			}
 			link->errorText = strdup(emg);
-			link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
+			link->errorNo = fbcemdErrorCodeAtIndex(emd, 0);;
 			free(emg);
 			fbcemdRelease(emd);
 			fbcmdRelease(md);
@@ -786,7 +784,7 @@ static int php_fbsql_select_db(char *databaseName, PHPFBLink *link TSRMLS_DC)
 
 void phpfbestrdup(const char * s, int* length, char** value)
 {
-	int   l = s?strlen(s):0;
+	int l = s?strlen(s):0;
 	if (value)
 	{
 		char* r = emalloc(l+1);
@@ -794,7 +792,7 @@ void phpfbestrdup(const char * s, int* length, char** value)
 			strcpy(r, s);
 		else
 			r[0] = 0;
-		*value  = r;
+		*value = r;
 	}
 	*length = l;
 }
@@ -1290,7 +1288,7 @@ PHP_FUNCTION(fbsql_username)
 /* {{{ proto string fbsql_password(resource link_identifier [, string password])
    Get or set the user password used with a connection */
 PHP_FUNCTION(fbsql_password)
-{   
+{
 	PHPFBLink* phpLink = NULL;
 	zval **fbsql_link_index = NULL, **password = NULL;
 
@@ -1358,17 +1356,6 @@ PHP_FUNCTION(fbsql_select_db)
 			break;
 	}
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
-
-	if (phpLink->execHandler == NULL)
-	{
-		int port = atoi(name);
-		if (port == 0 || port > 64535) {
-			if (FB_SQL_G(generateWarnings)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to FBExec for database '%s'. (%s)", name, fbcehClassErrorMessage());
-			}
-			RETURN_FALSE;
-		}
-	}
 
 	if (!php_fbsql_select_db(name, phpLink TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -1469,6 +1456,7 @@ PHP_FUNCTION(fbsql_create_db)
 	convert_to_string_ex(database_name);
 	databaseName = Z_STRVAL_PP(database_name);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if (status != FBUnknownStatus)
 	{
@@ -1542,6 +1530,7 @@ PHP_FUNCTION(fbsql_drop_db)
 	convert_to_string_ex(database_name);
 	databaseName = Z_STRVAL_PP(database_name);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if (status != FBStopped)
 	{
@@ -1616,6 +1605,7 @@ PHP_FUNCTION(fbsql_start_db)
 	convert_to_string_ex(database_name);
 	databaseName = Z_STRVAL_PP(database_name);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	status = fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName);
 	if ((status != FBStopped) && (status != FBRunning) && (status != FBStarting))
 	{
@@ -1752,6 +1742,7 @@ PHP_FUNCTION(fbsql_db_status)
 	convert_to_string_ex(database_name);
 	databaseName = Z_STRVAL_PP(database_name);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	if (phpLink->execHandler) {
 		RETURN_LONG(fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName));
 	}
@@ -1795,7 +1786,7 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "No message");
 		}
 		link->errorText = strdup(emg);
-		link->errorNo  = fbcemdErrorCodeAtIndex(emd, 0);;
+		link->errorNo = fbcemdErrorCodeAtIndex(emd, 0);;
 		free(emg);
 		fbcemdRelease(emd);
 		result = 0;
@@ -1806,7 +1797,7 @@ int mdOk(PHPFBLink* link, FBCMetaData* md, char* sql)
 
 static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 {
-	PHPFBResult*  result = NULL;
+	PHPFBResult* result = NULL;
 	FBCMetaData*   md, *meta;
 	char*          tp;
 	char*          fh; 
@@ -1827,7 +1818,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 		else
 			md = meta;
 
-		tp     = fbcmdStatementType(md);
+		tp = fbcmdStatementType(md);
 
 		if ((tp[0] == 'C') || (tp[0] == 'R'))
 		{
@@ -1866,7 +1857,7 @@ static void phpfbQuery(INTERNAL_FUNCTION_PARAMETERS, char* sql, PHPFBLink* link)
 				fbcrhConvertToOutputCharSet(fbcdcOutputCharacterSet(link->connection), (unsigned char *)r);
 				if ((result->list = fbcplParse(r)))
 				{
-					result->rowCount    = fbcplCount(result->list);
+					result->rowCount = fbcplCount(result->list);
 					result->columnCount = 7;
 				}
 			}
@@ -1964,7 +1955,7 @@ PHP_FUNCTION(fbsql_db_query)
    Retreive a list of all databases on the server */
 PHP_FUNCTION(fbsql_list_dbs)
 {
-	PHPFBResult*    phpResult;
+	PHPFBResult* phpResult;
 	PHPFBLink* phpLink = NULL;
 	zval	**fbsql_link_index = NULL;
 	int id;
@@ -1986,6 +1977,7 @@ PHP_FUNCTION(fbsql_list_dbs)
 	}
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	phpResult = emalloc(sizeof(PHPFBResult));
 	phpResult->link        = phpLink;
 	phpResult->fetchHandle = NULL;
@@ -2053,10 +2045,10 @@ PHP_FUNCTION(fbsql_list_tables)
 PHP_FUNCTION(fbsql_list_fields)
 {
 	PHPFBLink* phpLink = NULL;
-	zval	**fbsql_link_index = NULL, **database_name, **table_name;
+	zval **fbsql_link_index = NULL, **database_name, **table_name;
 	int id;
 	char *databaseName, *tableName;
-	char             sql[1024];
+	char sql[1024];
 
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
@@ -2160,8 +2152,8 @@ PHP_FUNCTION(fbsql_errno)
    Enable or disable FrontBase warnings */
 PHP_FUNCTION(fbsql_warnings)
 {
-	int   argc     = ARG_COUNT(ht);
-	zval	**argv[1];
+	int argc = ARG_COUNT(ht);
+	zval **argv[1];
 
 	if ((argc < 0) || (argc > 1)) WRONG_PARAM_COUNT;
 	if (zend_get_parameters_ex(argc, &argv[0])==FAILURE) RETURN_FALSE;
@@ -2265,12 +2257,12 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				phpfbestrdup("True", length, value);
 		}
 		break;
-        
+
 		case FB_PrimaryKey:
 		case FB_Integer:
 		{ 
-			int   v = *((int*)data);
-			char  b[128];
+			int v = *((int*)data);
+			char b[128];
 			sprintf(b, "%d", v);
 			phpfbestrdup(b, length, value);
 		}
@@ -2278,8 +2270,8 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 #ifdef FB_TinyInteger
 		case FB_TinyInteger:
 		{ 
-			short int   v = *((FBTinyInteger*)data);
-			char  b[128];
+			short int v = *((FBTinyInteger*)data);
+			char b[128];
 			sprintf(b, "%d", v);
 			phpfbestrdup(b, length, value);
 		}
@@ -2289,7 +2281,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_LongInteger:
 		{ 
 			FBLongInteger v = *((FBLongInteger*)data);
-			char  b[128];
+			char b[128];
 #ifdef PHP_WIN32
 			sprintf(b, "%I64i", v);
 #else
@@ -2302,7 +2294,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_SmallInteger:
 		{
 			short v = *((short*)data);
-			char  b[128];
+			char b[128];
 			sprintf(b, "%d", v);
 			phpfbestrdup(b, length, value);
 		}
@@ -2315,7 +2307,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_Decimal:
 		{
 			double v = *((double*)data);
-			char  b[128];
+			char b[128];
 			sprintf(b, "%f", v);
 			phpfbestrdup(b, length, value);
 		}
@@ -2332,13 +2324,13 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_Bit:
 		case FB_VBit:
 		{
-			const FBCColumnMetaData* clmd  =  fbcmdColumnMetaDataAtIndex(md, column);
+			const FBCColumnMetaData* clmd = fbcmdColumnMetaDataAtIndex(md, column);
 			struct bitValue
 			{
-				unsigned int   nBytes;
+				unsigned int nBytes;
 				unsigned char* bytes;
 			};
-			struct bitValue*  ptr = data;
+			struct bitValue* ptr = data;
 			unsigned nBits = ptr->nBytes * 8;
 
 			if (dtc == FB_Bit) nBits = fbcdmdLength(fbccmdDatatype(clmd));
@@ -2349,7 +2341,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				*length = l*2+3+1;
 				if (value)
 				{
-					char*        r = emalloc(l*2+3+1);
+					char* r = emalloc(l*2+3+1);
 					r[0] = 'X';
 					r[1] = '\'';
 					for (i = 0; i < nBits / 8; i++)
@@ -2361,7 +2353,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 					}
 					r[i*2+2] = '\'';
 					r[i*2+3] = 0;
-					*value  = r;
+					*value = r;
 				}
 			}
 			else
@@ -2371,7 +2363,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 				*length = l*2+3+1;
 				if (value)
 				{
-					char*        r = emalloc(l*2+3+1);
+					char* r = emalloc(l*2+3+1);
 					r[0] = 'B';
 					r[1] = '\'';
 					for (i = 0; i < nBits; i++)
@@ -2382,7 +2374,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 					}
 					r[i*2+2] = '\'';
 					r[i*2+3] = 0;
-					*value  = r;
+					*value = r;
 				}
 			}
 		}
@@ -2402,7 +2394,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 		case FB_YearMonth:
 		{
 			char b[128];
-			int  v = *((unsigned int*)data);
+			int v = *((unsigned int*)data);
 			sprintf(b, "%d", v);
 			phpfbestrdup(b, length, value);
 		}
@@ -2455,14 +2447,14 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 
 /* {{{ phpfbSqlResult 
  */
-void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int  columnIndex)
+void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIndex, int columnIndex)
 {
 	void** row;
 	if (result->list)
 	{
 		FBCPList* columns = (FBCPList*)fbcplValueForKey(result->list, "COLUMNS");
 		FBCPList* column  = (FBCPList*)fbcplValueAtIndex(columns, result->rowIndex);
-		if (columnIndex == 0)  
+		if (columnIndex == 0)
 		{ /* Name */
 			FBCPList* name = (FBCPList*)fbcplValueForKey(column, "NAME");
 			RETURN_STRING((char *)fbcplString((FBCPList*)name), 1);
@@ -2521,7 +2513,7 @@ void phpfbSqlResult(INTERNAL_FUNCTION_PARAMETERS, PHPFBResult* result, int rowIn
 	}
 }
 /* }}} */
-                       
+
 /* {{{ proto mixed fbsql_result(int result [, int row [, mixed field]])
    ??? */
 PHP_FUNCTION(fbsql_result)
@@ -2560,7 +2552,7 @@ PHP_FUNCTION(fbsql_result)
 		rowIndex = Z_LVAL_PP(row);
 	}
 
-	columnIndex  = result->columnIndex;
+	columnIndex = result->columnIndex;
 	if (field)
 	{
 		if ((Z_TYPE_PP(field) == IS_STRING) && (result->metaData))
@@ -2584,8 +2576,8 @@ PHP_FUNCTION(fbsql_result)
 				RETURN_FALSE;
 			}
 		}
-    }
-   
+	}
+
 	phpfbSqlResult(INTERNAL_FUNCTION_PARAM_PASSTHRU, result, rowIndex, columnIndex);
 
 	result->columnIndex++;
@@ -2616,9 +2608,9 @@ PHP_FUNCTION(fbsql_next_result)
 	}
 	ZEND_FETCH_RESOURCE(result, PHPFBResult *, fbsql_result_index, -1, "FrontBase-Result", le_result);
 
-    result->currentResult++;
+	result->currentResult++;
 	if (result->currentResult < result->selectResults) {
-        if (result->fetchHandle) {
+		if (result->fetchHandle) {
 			FBCMetaData *md = fbcdcCancelFetch(result->link->connection, result->fetchHandle);
 			fbcmdRelease(md);
 		}
@@ -2927,7 +2919,7 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, 
 		{
 			if (row[i])
 			{
-				char*        value;
+				char* value;
 				unsigned int length;
 				unsigned int c = 0;
 				phpfbColumnAsString(result, i, row[i], &length, &value TSRMLS_CC);
@@ -3023,7 +3015,7 @@ PHP_FUNCTION(fbsql_fetch_lengths)
 	if (array_init(return_value)==FAILURE) RETURN_FALSE;
 	for (i=0; i < result->columnCount; i++)
 	{
-		unsigned  length = 0;
+		unsigned length = 0;
 		if (result->row[i]) phpfbColumnAsString(result, i, result->row[i], &length, NULL TSRMLS_CC);
 		add_index_long(return_value, i, length);
 	}
@@ -3414,9 +3406,9 @@ PHP_FUNCTION(fbsql_field_flags)
 PHP_FUNCTION(fbsql_table_name)
 {
 	PHPFBResult* result = NULL;
-	zval	**fbsql_result_index = NULL, **table_index;
+	zval **fbsql_result_index = NULL, **table_index;
 	unsigned index;
-	char*        value;	
+	char* value;	
 	unsigned int length;
 	void** row;
 
@@ -3502,6 +3494,7 @@ PHP_FUNCTION(fbsql_get_autostart_info)
 	}
 	ZEND_FETCH_RESOURCE2(phpLink, PHPFBLink *, fbsql_link_index, id, "FrontBase-Link", le_link, le_plink);
 
+	if (phpLink->execHandler == NULL) phpLink->execHandler = fbcehHandlerForHost(phpLink->hostName, 128);
 	if (phpLink->execHandler == NULL) {
 		if (FB_SQL_G(generateWarnings)) 
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No valid Exec handler available for this connection");
