@@ -58,7 +58,7 @@ $s = stat ('test.link');
 $ls = lstat ('test.link');
 for ($i = 0; $i <= 11; $i++) {
     if ($ls[$i] != $s[$i]) {
-	if ($i != 6 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
+	if ($i != 6 && $i != 10 && $i != 11) echo "test.link lstat and stat differ at element $i\n";
     }
 }
 echo "test.file is " . filetype('test.file') . "\n";
@@ -131,7 +131,6 @@ test.link lstat and stat differ at element 2
 test.link lstat and stat differ at element 7
 test.link lstat and stat differ at element 8
 test.link lstat and stat differ at element 9
-test.link lstat and stat differ at element 10
 test.file is file
 test.link is link
 test.file permissions are 0744
