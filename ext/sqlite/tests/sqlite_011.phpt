@@ -15,6 +15,7 @@ sqlite_query("INSERT INTO foo VALUES ('1', '2', '3')", $db);
 sqlite_query("INSERT INTO bar VALUES ('4', '5', '6')", $db);
 $r = sqlite_query("SELECT * from foo, bar", $db, SQLITE_ASSOC);
 var_dump(sqlite_fetch_array($r));
+sqlite_close($db);
 ?>
 --EXPECT--
 array(3) {

@@ -33,6 +33,9 @@ for ($idx = -1; $idx < 4; $idx++) {
 	sqlite_seek($res, $idx);
 	var_dump(sqlite_current($res));
 }
+
+sqlite_close($db);
+
 echo "====DONE!====\n";
 ?>
 --EXPECTF--

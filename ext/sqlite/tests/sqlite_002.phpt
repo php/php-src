@@ -13,6 +13,7 @@ sqlite_query("CREATE TABLE foo(c1 date, c2 time, c3 varchar(64))", $db);
 sqlite_query("INSERT INTO foo VALUES ('2002-01-02', '12:49:00', NULL)", $db);
 $r = sqlite_query("SELECT * from foo", $db);
 var_dump(sqlite_fetch_array($r));
+sqlite_close($db);
 ?>
 --EXPECT--
 array(6) {

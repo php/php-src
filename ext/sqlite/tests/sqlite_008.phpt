@@ -25,6 +25,9 @@ $r = sqlite_query("SELECT a from strings", $db);
 while ($row = sqlite_fetch_array($r, SQLITE_NUM)) {
 	var_dump($row);
 }
+
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECT--

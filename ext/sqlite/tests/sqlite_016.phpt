@@ -30,6 +30,9 @@ $r = sqlite_unbuffered_query("SELECT a, b from strings", $db);
 while (sqlite_has_more($r)) {
 	var_dump(sqlite_fetch_single($r));
 }
+
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECT--

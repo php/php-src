@@ -39,6 +39,8 @@ while (sqlite_has_more($res)) {
 	var_dump(sqlite_fetch_object($res));
 }
 
+sqlite_close($db);
+
 echo "====DONE!====\n";
 ?>
 --EXPECTF--

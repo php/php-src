@@ -21,6 +21,9 @@ $r = sqlite_unbuffered_query("SELECT * from strings", $db);
 for($i=0; $i<sqlite_num_fields($r); $i++) {
 	var_dump(sqlite_field_name($r, $i));
 }
+
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECT--

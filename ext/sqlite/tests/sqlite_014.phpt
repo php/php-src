@@ -37,6 +37,8 @@ var_dump(sqlite_fetch_all($r));
 var_dump(sqlite_fetch_array($r));
 var_dump(sqlite_fetch_all($r));
 
+sqlite_close($db);
+
 echo "DONE!\n";
 ?>
 --EXPECTF--

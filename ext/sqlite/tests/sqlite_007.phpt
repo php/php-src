@@ -17,6 +17,7 @@ $r = sqlite_unbuffered_query("SELECT * from foo", $db);
 var_dump(sqlite_fetch_array($r, SQLITE_NUM));
 $r = sqlite_unbuffered_query("SELECT * from foo", $db);
 var_dump(sqlite_fetch_array($r, SQLITE_ASSOC));
+sqlite_close($db);
 ?>
 --EXPECT--
 array(6) {
