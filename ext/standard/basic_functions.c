@@ -173,7 +173,9 @@ function_entry basic_functions[] = {
 	PHP_FALIAS(strchr,			strstr,				NULL)
 	PHP_NAMED_FE(sprintf,		PHP_FN(user_sprintf),	NULL)
 	PHP_NAMED_FE(printf,		PHP_FN(user_printf),	NULL)
-	
+    PHP_FE(sscanf,                                  NULL)
+    PHP_FE(fscanf,                                  NULL)
+
 	PHP_FE(parse_url,								NULL)
 	PHP_FE(urlencode,								NULL)
 	PHP_FE(urldecode,								NULL)

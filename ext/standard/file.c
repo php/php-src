@@ -86,6 +86,9 @@ extern int fclose();
 #endif
 
 #include "php_realpath.h"
+#include "scanf.h"
+#include "zend_API.h"
+
 
 /* }}} */
 /* {{{ ZTS-stuff / Globals / Prototypes */
@@ -999,6 +1002,7 @@ PHP_FUNCTION(fgetc) {
 }
 
 /* }}} */
+
 /* {{{ proto string fgetss(int fp, int length [, string allowable_tags])
    Get a line from file pointer and strip HTML tags */
 
@@ -1060,6 +1064,74 @@ PHP_FUNCTION(fgetss)
 }
 
 /* }}} */
+/* {{{ proto  mixed fscanf(string str,string format, ...)
+     implements a mostly ANSI compatible  fscanf() . */
+PHP_FUNCTION(fscanf)
+{
+    int  result;
+    pval **file_handle, **format_string;
+    int len, type;
+    char *buf;
+    int issock=0;
+    int socketd=0;
+    void *what;
+    
+    zval ***args;
+    int argCount;   
+    PLS_FETCH();
+    
+    argCount = ZEND_NUM_ARGS();
+    if (argCount < 2) {
+        WRONG_PARAM_COUNT;
+    }
+    args = (zval ***)emalloc(argCount * sizeof(zval **));
+    if (!args || (zend_get_parameters_array_ex(argCount,args) == FAILURE)) {
+        efree( args );
+        WRONG_PARAM_COUNT;
+    }
+    
+    file_handle    = args[0];
+    format_string  = args[1];
+
+    what = zend_fetch_resource(file_handle,-1,"File-Handle",&type,3,le_fopen,le_popen,le_socket);
+
+    /*
+     * we can't do a ZEND_VERIFY_RESOURCE(what), otherwise we end up
+     * with a leak if we have an invalid filehandle. This needs changing
+     * if the code behind ZEND_VERIFY_RESOURCE changed. - cc
+     */
+    if (!what) {
+        efree(args);
+        RETURN_FALSE;
+    }
+
+    len = SCAN_MAX_FSCANF_BUFSIZE;
+
+    if (type == le_socket) {
+        issock=1;
+        socketd=*(int*)what;
+    }
+    buf = emalloc(sizeof(char) * (len + 1));
+    /* needed because recv doesnt put a null at the end*/
+    memset(buf,0,len+1);
+    if (FP_FGETS(buf, len, socketd, (FILE*)what, issock) == NULL) {
+        efree(buf);
+        RETVAL_FALSE;
+    } else {
+        convert_to_string_ex( format_string );  
+        result = php_sscanf_internal( buf,(*format_string)->value.str.val,
+                        argCount,args, 2,&return_value);
+        efree(args);
+        efree(buf);
+        if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
+            WRONG_PARAM_COUNT
+        }
+    }
+
+
+}
+/* }}} */
+
 /* {{{ proto int fwrite(int fp, string str [, int length])
    Binary-safe file write */
 
@@ -1857,6 +1929,8 @@ PHP_FUNCTION(realpath)
 	}
 }
 /* }}} */
+
+
 
 #if 0
 

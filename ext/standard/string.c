@@ -30,6 +30,8 @@
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif
+#include "scanf.h"
+#include "zend_API.h"
 #include "zend_execute.h"
 #include "php_globals.h"
 #include "basic_functions.h"
@@ -2560,7 +2562,49 @@ PHP_FUNCTION(substr_count)
 
 	RETURN_LONG(count);
 }
-/* }}} */	
+/* }}} */
+
+   
+/* {{{ proto  mixed sscanf(string str,string format, ...)
+    implements an ANSI compatible sscanf. */
+PHP_FUNCTION(sscanf)
+{
+    zval **format;
+    zval **literal;
+    int  result;
+	zval ***args;
+	int	argCount;	
+
+
+    argCount = ZEND_NUM_ARGS();
+	if (argCount < 2) {
+		WRONG_PARAM_COUNT;
+	}
+	args = (zval ***)emalloc(argCount * sizeof(zval **));
+	if (!args || (zend_get_parameters_array_ex(argCount,args) == FAILURE)) {
+		efree( args );
+		WRONG_PARAM_COUNT;
+	}
+	
+	literal = args[0];
+	format  = args[1];
+
+	convert_to_string_ex( format );
+	convert_to_string_ex( literal );
+	
+	result = php_sscanf_internal( (*literal)->value.str.val,
+								  (*format)->value.str.val,
+								  argCount,args,
+								  2,&return_value);
+	efree(args);
+
+	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
+		WRONG_PARAM_COUNT
+	}
+
+}
+/* }}} */
+
 
 /*
  * Local variables:
