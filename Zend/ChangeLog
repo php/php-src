@@ -1,3 +1,20 @@
+2003-12-14  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_execute.c
+      zend_execute.h:
+      Fix behavior of return-by-reference functions.  Remove erroneous warnings,
+      add E_STRICT warnings in case you return something by reference that
+      you're
+      not supposed to (anything that's not a variable, or a return-value of a
+      function that returned by reference).
+
+    * zend.h
+      zend_execute.c
+      zend_execute.h:
+      Some cleanup
+
 2003-12-13  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * zend_operators.c:
