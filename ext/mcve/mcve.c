@@ -588,7 +588,6 @@ PHP_FUNCTION(mcve_setssl)
 */
 PHP_FUNCTION(mcve_setssl_files)
 {
-	MCVE_CONN *conn;
 	int retval;
 	zval **arg1, **arg2;
 
@@ -841,29 +840,53 @@ PHP_FUNCTION(mcve_transparam)
 	convert_to_long_ex(arg2);
 
 	switch (key) {
-		case MC_TRANTYPE:
-		case MC_PTRANNUM:
+		/* Typecast to MCVE_int64 */
 		case MC_TTID:
-		case MC_ADMIN:
-		case MC_AUDITTYPE:
 			convert_to_long_ex(arg4);
-			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_LVAL_PP(arg4));
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, (MCVE_int64)Z_LVAL_PP(arg4));
 		break;
 
+		/* Typecast to long */
+
+		case MC_PTRANNUM:
+		case MC_TIMESTAMP:
+		case MC_MARKER:
+			convert_to_long_ex(arg4);
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, (long)Z_LVAL_PP(arg4));
+		break;
+
+		/* Typecast to int */
+		case MC_ADMIN:
+		case MC_SUB:
+		case MC_TRANTYPE:
+		case MC_AUDITTYPE:
+		case MC_EXCHARGES:
+		case MC_INQUIRY:
+		case MC_PRIORITY:
+		case MC_CARDTYPES:
+		case MC_ORIGTYPE:
+		case MC_VOIDORIGTYPE:
+			convert_to_long_ex(arg4);
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, (int)Z_LVAL_PP(arg4));
+		break;
+
+		/* Typecast to double */
 		case MC_AMOUNT:
+		case MC_EXAMOUNT:
+		case MC_RATE:
 			convert_to_double_ex(arg4);
-			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_DVAL_PP(arg4));
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, (double)Z_DVAL_PP(arg4));
 		break;
 
 		case MC_CUSTOM:
 			convert_to_string_ex(arg4);
 			convert_to_string_ex(arg5);
-			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5));
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4), Z_STRVAL_PP(arg5));
 		break;
 
 		default:
 			convert_to_string_ex(arg4);
-			retval = MCVE_TransParam(conn, Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4));
+			retval = MCVE_TransParam(conn, (long)Z_LVAL_PP(arg2), key, Z_STRVAL_PP(arg4));
 		break;
 	}
 
