@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
+- Added pctnl_alarm() function. (Edin)
 - Fixed array_rand() on thread-safe platforms such as Windows. (Edin)
 - If zlib.output_compression is enabled and a page is compressed 
   a "Vary: Accept-Encoding" header is added. (Stefan)
