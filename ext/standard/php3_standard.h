@@ -53,7 +53,7 @@
 #include "cyr_convert.h"
 #include "php3_link.h"
 #include "fsock.h"
-#include "image.h"
+#include "php_image.h"
 #include "php3_iptc.h"
 #include "info.h"
 #include "uniqid.h"
