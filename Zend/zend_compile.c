@@ -960,7 +960,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
-					if (compile_time) {
+					if (!compile_time) {
 						zend_error(E_ERROR, "Cannot redeclare class %s", opline->op2.u.constant.value.str.val);
 					}
 					(*ce->refcount)--;
