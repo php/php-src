@@ -305,6 +305,7 @@ PHP_MINIT_FUNCTION(mssql)
 	REGISTER_LONG_CONSTANT("SQLINT4",SQLINT4, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLBIT",SQLBIT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SQLFLT8",SQLFLT8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SQLFLTN",SQLFLTN, CONST_CS | CONST_PERSISTENT);
 	/* END MSSQL data types for mssql_sp_bind */
 
 	return SUCCESS;
@@ -373,7 +374,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		case 0: /* defaults */
 			host=user=passwd=NULL;
 			hashed_details_length=5+3;
-			hashed_details = (char *) emalloc(hashed_details_length+1);
+			hashed_details = (char *) emalloc(hashed_details_length);
 			strcpy(hashed_details,"mssql___");
 			break;
 		case 1: {
@@ -386,7 +387,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				host = Z_STRVAL_PP(yyhost);
 				user=passwd=NULL;
 				hashed_details_length = Z_STRLEN_PP(yyhost)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
+				hashed_details = (char *) emalloc(hashed_details_length);
 				sprintf(hashed_details,"mssql_%s__",Z_STRVAL_PP(yyhost));
 			}
 			break;
@@ -402,7 +403,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd=NULL;
 				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
+				hashed_details = (char *) emalloc(hashed_details_length);
 				sprintf(hashed_details,"mssql_%s_%s_",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser));
 			}
 			break;
@@ -419,7 +420,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				user = Z_STRVAL_PP(yyuser);
 				passwd = Z_STRVAL_PP(yypasswd);
 				hashed_details_length = Z_STRLEN_PP(yyhost)+Z_STRLEN_PP(yyuser)+Z_STRLEN_PP(yypasswd)+5+3;
-				hashed_details = (char *) emalloc(hashed_details_length+1);
+				hashed_details = (char *) emalloc(hashed_details_length);
 				sprintf(hashed_details,"mssql_%s_%s_%s",Z_STRVAL_PP(yyhost),Z_STRVAL_PP(yyuser),Z_STRVAL_PP(yypasswd)); /* SAFE */
 			}
 			break;
@@ -442,7 +443,7 @@ static void php_mssql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	dbprocerrhandle(mssql.login, (DBERRHANDLE_PROC) php_mssql_error_handler);
 	dbprocmsghandle(mssql.login, (DBMSGHANDLE_PROC) php_mssql_message_handler);
 
-	if (MS_SQL_G(secure_connection)){
+	if (MS_SQL_G(secure_connection) == 1){
 		DBSETLSECURE(mssql.login);
 	}
 	else {
@@ -778,11 +779,14 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			Z_TYPE_P(result) = IS_STRING;
 			break;
 		}
-		case SQLFLT8: {
-			Z_DVAL_P(result) = (double) floatcol(offset);
+		case SQLFLT4:
+			Z_DVAL_P(result) = (double) floatcol4(offset);
 			Z_TYPE_P(result) = IS_DOUBLE;
 			break;
-		}
+		case SQLFLT8:
+			Z_DVAL_P(result) = (double) floatcol8(offset);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			break;
 		case SQLVARBINARY:
 		case SQLBINARY:
 		case SQLIMAGE: {
@@ -790,7 +794,7 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 			unsigned char *res_buf;
 			int res_length = dbdatlen(mssql_ptr->link, offset);
 
-			res_buf = (unsigned char *) emalloc(res_length + 1);
+			res_buf = (unsigned char *) emalloc(res_length);
 			bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 			memcpy(res_buf,bin,res_length);
 			res_buf[res_length] = '\0';
@@ -811,13 +815,13 @@ static void php_mssql_get_column_content_with_type(mssql_link *mssql_ptr,int off
 					if (column_type == SQLDATETIM4) res_length += 14;
 					if (column_type == SQLDATETIME) res_length += 10;
 			
-					res_buf = (unsigned char *) emalloc(res_length + 1);
+					res_buf = (unsigned char *) emalloc(res_length);
 					res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
 				} else {
 					dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
 					res_length = 19;
-					res_buf = (unsigned char *) emalloc(res_length + 1);
+					res_buf = (unsigned char *) emalloc(res_length);
 					sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 				}
 		
@@ -846,7 +850,7 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 		unsigned char *res_buf;
 		int res_length = dbdatlen(mssql_ptr->link, offset);
 
-		res_buf = (unsigned char *) emalloc(res_length + 1);
+		res_buf = (unsigned char *) emalloc(res_length);
 		bin = ((DBBINARY *)dbdata(mssql_ptr->link, offset));
 		memcpy(res_buf, bin, res_length);
 		res_buf[res_length] = '\0';
@@ -864,14 +868,14 @@ static void php_mssql_get_column_content_without_type(mssql_link *mssql_ptr,int 
 			if (column_type == SQLDATETIM4) res_length += 14;
 			if (column_type == SQLDATETIME) res_length += 10;
 			
-			res_buf = (unsigned char *) emalloc(res_length + 1);
-			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR,res_buf,-1);
+			res_buf = (unsigned char *) emalloc(res_length);
+			res_length = dbconvert(NULL,coltype(offset),dbdata(mssql_ptr->link,offset), res_length, SQLCHAR, res_buf, -1);
 
 		} else {
 			dbdatecrack(mssql_ptr->link, &dateinfo, (DBDATETIME *) dbdata(mssql_ptr->link,offset));
 			
 			res_length = 19;
-			res_buf = (unsigned char *) emalloc(res_length + 1);
+			res_buf = (unsigned char *) emalloc(res_length);
 			sprintf(res_buf, "%d-%02d-%02d %02d:%02d:%02d" , dateinfo.year, dateinfo.month, dateinfo.day, dateinfo.hour, dateinfo.minute, dateinfo.second);
 		}
 
@@ -1881,6 +1885,7 @@ PHP_FUNCTION(mssql_bind)
 		switch (type)	{
 
 			case SQLFLT8:
+			case SQLFLTN:
 				convert_to_double_ex(var);
 				value=(LPBYTE)(&Z_DVAL_PP(var));
 				break;
@@ -2024,6 +2029,7 @@ PHP_FUNCTION(mssql_execute)
 								break;
 				
 							case SQLFLT8:
+							case SQLFLTN:
 								convert_to_double_ex(&bind->zval);
 								Z_DVAL_P(bind->zval)=*((double *)(dbretdata(mssql_ptr->link,i)));
 								break;
