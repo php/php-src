@@ -168,6 +168,8 @@ typedef struct {
 	int user_num;
 	HashTable *user;
 
+	HashTable *conns;
+
     OCIEnv *pEnv;
 } php_oci_globals;
 

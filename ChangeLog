@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Fixed LOB/Persistent-Connection related OCI8-Crash (Thies)
 - Generalized server-API build procedure on UNIX (Stig)
 - Added '--disable-rpath' option (Sascha)
 - Added AOLserver SAPI module (Sascha)
