@@ -54,6 +54,8 @@
 extern zend_module_entry ifx_module_entry;
 #define ifx_module_ptr &ifx_module_entry
 
+#undef TYPEMAX
+#undef CHAR
 
 #include "locator.h"
 #include "sqltypes.h"
