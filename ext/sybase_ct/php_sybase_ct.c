@@ -1127,14 +1127,13 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 						convert_to_long(&result->data[i][j]);
 						break;
 					case 2:
-						/* We also get numbers that are actually integers here due to the check on 
-						 * precision against > 9 (ranges are -1E10 to -1E9 and 1E9 to 1E10). As we
-						 * cannot be sure that they "fit" into MIN_LONG <= x <= MAX_LONG, we call
-						 * convert_to_double() on them. This is a small performance penalty, but 
-						 * ensures that "select 2147483648" will be a float and "select 2147483647"
-						 * will be become an int.
-						 */
 						convert_to_double(&result->data[i][j]);
+						break;
+					case 3:
+						/* This signals we have an integer datatype, but we need to convert to double if we 
+						 * overflow. 
+						 */
+						convert_scalar_to_number(&result->data[i][j]);
 						break;
 				}
 			}
@@ -1243,7 +1242,7 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 			case CS_DECIMAL_TYPE:
 				result->datafmt[i].maxlength = result->datafmt[i].precision + 3;
 				/* numeric(10) vs numeric(10, 1) */
-				result->numerics[i] = (result->datafmt[i].scale == 0 && result->datafmt[i].precision <= 9) ? 1 : 2;
+				result->numerics[i] = (result->datafmt[i].scale == 0) ? 3 : 2;
 				break;
 			default:
 				result->datafmt[i].maxlength++;
