@@ -16,9 +16,25 @@
    +----------------------------------------------------------------------+
  */
 
+#include "php.h"
+#include "SAPI.h"
+
+#include "apr_strings.h"
+#include "ap_config.h"
+#include "util_filter.h"
+#include "httpd.h"
+#include "http_config.h"
+#include "http_request.h"
+#include "http_core.h"
+#include "http_protocol.h"
+#include "http_log.h"
+#include "http_main.h"
+#include "util_script.h"
+#include "http_core.h"
+
 #include "php_apache.h"
 
-static request_rec *php_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
+static request_rec *php_apache_lookup_uri(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval **p1;
 	php_struct *ctx;
@@ -37,10 +53,10 @@ PHP_FUNCTION(apache_sub_req)
 {
 	request_rec *rr;
 
-	rr = php_lookup_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	rr = php_apache_lookup_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (!rr)
-		WRONG_NUM_ARGS;
+		WRONG_PARAM_COUNT;
 	
 	if (rr->status == HTTP_OK) {
 		ap_run_sub_req(rr);
@@ -52,7 +68,7 @@ PHP_FUNCTION(apache_sub_req)
 #define ADD_LONG(name) \
 		add_assoc_long(return_value, #name, rr->name)
 #define ADD_STRING(name) \
-		add_assoc_string(return_value, #name, rr->name, 1)
+		if (rr->name) add_assoc_string(return_value, #name, (char *) rr->name, 1)
 
 PHP_FUNCTION(apache_lookup_uri)
 {
@@ -60,7 +76,7 @@ PHP_FUNCTION(apache_lookup_uri)
 
 	rr = php_apache_lookup_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	if (!rr)
-		WRONG_NUM_ARGS;
+		WRONG_PARAM_COUNT;
 	
 	if (rr->status == HTTP_OK) {
 		array_init(return_value);
@@ -73,7 +89,6 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_LONG(clength);
 		ADD_STRING(boundary);
 		ADD_STRING(range);
-		ADD_LONG(byterange);
 		ADD_LONG(chunked);
 		ADD_STRING(content_type);
 		ADD_STRING(handler);
@@ -88,4 +103,51 @@ PHP_FUNCTION(apache_lookup_uri)
 		return;
 	}
 	RETURN_FALSE;
+}
+
+PHP_FUNCTION(get_all_headers)
+{
+	php_struct *ctx;
+	apr_array_header_t *arr;
+	char *key, *val;
+	SLS_FETCH();
+
+	if (array_init(return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+	
+	ctx = SG(server_context);
+	arr = apr_table_elts(ctx->f->r->headers_in);
+
+	APR_ARRAY_FOREACH_OPEN(arr, key, val)
+		if (!val) val = empty_string;
+		add_assoc_string(return_value, key, val, 1);
+	APR_ARRAY_FOREACH_CLOSE()
+}
+
+PHP_MINFO_FUNCTION(apache)
+{
+}
+
+static function_entry apache_functions[] = {
+	PHP_FE(apache_lookup_uri, NULL)
+	PHP_FE(apache_sub_req, NULL)
+	PHP_FE(get_all_headers, NULL)
+	{0}
+};
+
+static zend_module_entry php_apache_module = {
+	"Apache 2.0",
+	apache_functions,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	PHP_MINFO(apache),
+	STANDARD_MODULE_PROPERTIES
+};
+
+int php_apache_register_module(void)
+{
+	return zend_startup_module(&php_apache_module);
 }

@@ -31,9 +31,21 @@ typedef struct php_struct {
 	char *post_data;
 } php_struct;
 
+int php_apache_register_module(void);
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf);
 void *create_php_config(apr_pool_t *p, char *dummy);
 void apply_config(void *);
 extern const command_rec php_dir_cmds[];
+
+#define APR_ARRAY_FOREACH_OPEN(arr, key, val) 		\
+{													\
+	apr_table_entry_t *elts;						\
+	int i;											\
+	elts = (apr_table_entry_t *) arr->elts;			\
+	for (i = 0; i < arr->nelts; i++) {				\
+		key = elts[i].key;							\
+		val = elts[i].val;
+
+#define APR_ARRAY_FOREACH_CLOSE() }}
 
 #endif /* PHP_APACHE_H */
