@@ -293,7 +293,7 @@ static PHP_FUNCTION(dbh_constructor)
 
 	dbh->auto_commit = pdo_attr_lval(driver_options, PDO_ATTR_AUTOCOMMIT, 1 TSRMLS_CC);
 
-	if (!dbh->data_source || !dbh->username || !dbh->password) {
+	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 	}
 	
@@ -569,6 +569,12 @@ static PHP_METHOD(PDO, query)
 		RETURN_LONG(ret);
 	}
 }
+
+static PHP_METHOD(PDO, exec) /* FIXME: nuke on release */
+{
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "This is name deprecated, use PDO::query instead");
+	PHP_FN(PDO_exec)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
 
@@ -632,6 +638,7 @@ function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, commit,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, rollBack,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, exec,			NULL,					ZEND_ACC_PUBLIC) /* FIXME: nuke on stable release */
 	PHP_ME(PDO, query,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, lastInsertId,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, errorCode,		NULL,					ZEND_ACC_PUBLIC)

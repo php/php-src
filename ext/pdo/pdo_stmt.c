@@ -552,7 +552,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 }
 /* }}} */
 
-static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param)
+static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int is_param) /* {{{ */
 {
 	struct pdo_bound_param_data param = {0};
 
@@ -577,7 +577,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 	}
 
 	return really_register_bound_param(&param, stmt, is_param TSRMLS_CC);
-}
+} /* }}} */
 
 /* {{{ proto bool PDOStatement::bindParam(mixed $paramno, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
    bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
@@ -706,18 +706,64 @@ static PHP_METHOD(PDOStatement, getAttribute)
 }
 /* }}} */
 
+/* {{{ proto int PDOStatement::columnCount()
+   Returns the number of columns in the result set */
+static PHP_METHOD(PDOStatement, columnCount)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	if (ZEND_NUM_ARGS()) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(stmt->column_count);
+}
+/* }}} */
+
+/* {{{ proto array PDOStatement::getColumnMeta(int $column)
+   Returns meta data for a numbered column */
+static PHP_METHOD(PDOStatement, getColumnMeta)
+{
+	pdo_stmt_t *stmt = (pdo_stmt_t*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	long colno;
+	struct pdo_column_data *col;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &colno)) {
+		RETURN_FALSE;
+	}
+
+	if (!stmt->methods->get_column_meta) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "This driver does not support meta data");
+		RETURN_FALSE;
+	}
+
+	PDO_STMT_CLEAR_ERR();
+	if (FAILURE == stmt->methods->get_column_meta(stmt, colno, return_value TSRMLS_CC)) {
+		PDO_HANDLE_STMT_ERR();
+		RETURN_FALSE;
+	}
+
+	/* add stock items */
+	col = &stmt->columns[colno];
+	add_assoc_string(return_value, "name", col->name, 1);
+	add_assoc_long(return_value, "len", col->maxlen); /* FIXME: unsigned ? */
+	add_assoc_long(return_value, "precision", col->precision);
+	add_assoc_long(return_value, "pdo_type", col->param_type);
+}
+/* }}} */
+
 function_entry pdo_dbstmt_functions[] = {
 	PHP_ME(PDOStatement, execute,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetch,			NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindParam,		second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, bindColumn,	second_arg_force_ref,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, rowCount,		NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchSingle,		NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, fetchSingle,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, fetchAll,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorCode,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, errorInfo,		NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, setAttribute,	NULL,					ZEND_ACC_PUBLIC)
 	PHP_ME(PDOStatement, getAttribute,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, columnCount,	NULL,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDOStatement, getColumnMeta,	NULL,					ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

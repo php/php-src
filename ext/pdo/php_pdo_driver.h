@@ -35,7 +35,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20040923
+#define PDO_DRIVER_API	20040925
 
 enum pdo_param_type {
 	PDO_PARAM_NULL,
@@ -137,7 +137,11 @@ typedef struct {
 	
 	/* create driver specific portion of the database handle and stash it into
 	 * the dbh.  dbh contains the data source string and flags for this
-	 * instance */
+	 * instance.  You MUST respect dbh->is_persistent and pass that flag to
+	 * pemalloc() for all allocations that are stored in the dbh or your instance
+	 * data in the db, otherwise you will crash PHP when persistent connections
+	 * are used.
+	 */
 	int (*db_handle_factory)(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC);
 
 } pdo_driver_t;
@@ -176,7 +180,9 @@ typedef	int (*pdo_dbh_fetch_error_func)(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *
 /* fetching of attributes */
 typedef int (*pdo_dbh_get_attr_func)(pdo_dbh_t *dbh, long attr, zval *val TSRMLS_DC);
 
-/* checking/pinging persistent connections */
+/* checking/pinging persistent connections; return SUCCESS if the connection
+ * is still alive and ready to be used, FAILURE otherwise.
+ * You may set this handler to NULL, which is equivalent to returning SUCCESS. */
 typedef int (*pdo_dbh_check_liveness_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
 struct pdo_dbh_methods {
@@ -233,6 +239,35 @@ typedef int (*pdo_stmt_set_attr_func)(pdo_stmt_t *stmt, long attr, zval *val TSR
 /* fetching of attributes */
 typedef int (*pdo_stmt_get_attr_func)(pdo_stmt_t *stmt, long attr, zval *val TSRMLS_DC);
 
+/* retrieves meta data for a numbered column.
+ * Returns SUCCESS/FAILURE.
+ * On SUCCESS, fill in return_value with an array with the following fields.
+ * If a particular field is not supported, then the driver simply does not add it to
+ * the array, so that scripts can use isset() to check for it.
+ *
+ * ### this is just a rough first cut, and subject to change ###
+ *
+ * these are added by PDO itself, based on data from the describe handler:
+ *   name => the column name
+ *   len => the length/size of the column
+ *   precision => precision of the column
+ *   pdo_type => an integer, one of the PDO_PARAM_XXX values
+ *
+ *   scale => the floating point scale
+ *   table => the table for that column
+ *   type => a string representation of the type, mapped to the PHP equivalent type name
+ *   native_type => a string representation of the type, native style, if different from
+ *                  the mapped name.
+ *   flags => an array of flags including zero or more of the following:
+ *            primary_key, not_null, unique_key, multiple_key, unsigned, auto_increment, blob
+ *
+ * Any driver specific data should be returned using a prefixed key or value.
+ * Eg: custom data for the mysql driver would use either
+ *   'mysql:foobar' => 'some data' // to add a new key to the array
+ * or
+ *   'flags' => array('not_null', 'mysql:some_flag'); // to add data to an existing key
+ */
+typedef int (*pdo_stmt_get_column_meta_func)(pdo_stmt_t *stmt, long colno, zval *return_value TSRMLS_DC);
 
 struct pdo_stmt_methods {
 	pdo_stmt_dtor_func			dtor;
@@ -243,6 +278,7 @@ struct pdo_stmt_methods {
 	pdo_stmt_param_hook_func	param_hook;
 	pdo_stmt_set_attr_func		set_attribute;
 	pdo_stmt_get_attr_func		get_attribute;
+	pdo_stmt_get_column_meta_func get_column_meta;
 };
 
 /* }}} */
