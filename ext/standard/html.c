@@ -37,7 +37,7 @@
 enum entity_charset { cs_terminator, cs_8859_1, cs_cp1252,
 					  cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, 
  					  cs_big5hkscs, cs_sjis, cs_eucjp};
-typedef const char * entity_table_t;
+typedef const char *entity_table_t;
 
 /* codepage 1252 is a Windows extension to iso-8859-1. */
 static entity_table_t ent_cp_1252[] = {
@@ -88,7 +88,7 @@ struct html_entity_map {
 	enum entity_charset charset;	/* charset identifier */
 	unsigned short basechar;			/* char code at start of table */
 	unsigned short endchar;			/* last char code in the table */
-	entity_table_t * table;			/* the table of mappings */
+	entity_table_t *table;			/* the table of mappings */
 };
 
 static const struct html_entity_map entity_map[] = {
@@ -106,7 +106,7 @@ static const struct html_entity_map entity_map[] = {
 };
 
 static const struct {
-	const char * codeset;
+	const char *codeset;
 	enum entity_charset charset;
 } charset_map[] = {
 	{ "ISO-8859-1", 	cs_8859_1 },
@@ -125,7 +125,7 @@ static const struct {
 
 static const struct {
 	unsigned short charcode;
-	char * entity;
+	char *entity;
 	int entitylen;
 	int flags;
 } basic_entities[] = {
@@ -141,10 +141,10 @@ static const struct {
 /* {{{ get_next_char
  */
 inline static unsigned short get_next_char(enum entity_charset charset,
-		unsigned char * str,
-		int * newpos,
-		unsigned char * mbseq,
-		int * mbseqlen
+		unsigned char *str,
+		int *newpos,
+		unsigned char *mbseq,
+		int *mbseqlen
 )
 {
 	int pos = *newpos;
@@ -341,7 +341,7 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 /* {{{ entity_charset determine_charset
  * returns the charset identifier based on current locale or a hint.
  * defaults to iso-8859-1 */
-static enum entity_charset determine_charset(char * charset_hint)
+static enum entity_charset determine_charset(char *charset_hint)
 {
 	int i;
 	enum entity_charset charset = cs_8859_1;
@@ -360,8 +360,8 @@ static enum entity_charset determine_charset(char * charset_hint)
 		if (charset_hint == NULL)
 		{
 			/* try to figure out the charset from the locale */
-			char * localename;
-			char * dot, * at;
+			char *localename;
+			char *dot, *at;
 
 			/* lang[_territory][.codeset][@modifier] */
 			localename = setlocale(LC_CTYPE, NULL);
@@ -501,7 +501,7 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 
 		if (all)	{
 			/* look for a match in the maps for this charset */
-			unsigned char * rep;
+			unsigned char *rep;
 
 
 			for (j=0; entity_map[j].charset != cs_terminator; j++)	{

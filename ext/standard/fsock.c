@@ -120,15 +120,15 @@ PHPAPI int php_lookup_hostname(const char *addr, struct in_addr *in)
 
 static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char * host;
+	char *host;
 	int host_len;
 	int port = -1;
-	zval * zerrno = NULL, * zerrstr = NULL;
+	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = 60;
 	unsigned long conv;
 	struct timeval tv;
-	char * hashkey = NULL;
-	php_stream * stream = NULL;
+	char *hashkey = NULL;
+	php_stream *stream = NULL;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lzzd", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE)	{
 		RETURN_FALSE;
@@ -163,7 +163,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		enum php_sslflags_t { php_ssl_none, php_ssl_v23, php_ssl_tls };
 		enum php_sslflags_t ssl_flags;
 		struct {
-			char * proto;
+			char *proto;
 			int protolen;
 			int socktype;
 			enum php_sslflags_t ssl_flags;
