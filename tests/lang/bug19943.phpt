@@ -1,0 +1,25 @@
+--TEST--
+Bug #19566 (memleaks)
+--FILE--
+<?php
+	$ar = array();
+	for ($count = 0; $count < 10; $count++) {
+		$ar[$count]        = "$count";
+		$ar[$count]['idx'] = "$count";
+	}
+
+	for ($count = 0; $count < 10; $count++) {
+		echo $ar[$count]." -- ".$ar[$count]['idx']."\n";
+	}
+?>
+--EXPECT--
+0 -- 0
+1 -- 1
+2 -- 2
+3 -- 3
+4 -- 4
+5 -- 5
+6 -- 6
+7 -- 7
+8 -- 8
+9 -- 9
