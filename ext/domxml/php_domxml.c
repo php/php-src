@@ -2328,8 +2328,8 @@ PHP_FUNCTION(domxml_doc_doctype)
    Returns DomeDOMImplementation */
 PHP_FUNCTION(domxml_doc_implementation)
 {
-	zval *id;
-	xmlDocPtr docp;
+/*	zval *id;
+	xmlDocPtr docp;*/
 
 	DOMXML_NOT_IMPLEMENTED();
 
@@ -2678,7 +2678,7 @@ PHP_FUNCTION(domxml_dump_node)
 	
 	xmlNodeDump(buf, docp, elementp,level,format);
 
-	mem = xmlBufferContent(buf);
+	mem = (xmlChar*) xmlBufferContent(buf);
 
 	if (!mem) {
 		xmlBufferFree(buf);
@@ -3519,7 +3519,7 @@ static char **php_domxslt_make_params(zval *idvars, int xpath_params)
 		if (zend_hash_get_current_key(parht, &string_key, &num_key, 1) != HASH_KEY_IS_STRING) {
 			php_error(E_WARNING, "Invalid argument or parameter array to %s",
 			          get_active_function_name(TSRMLS_C));
-			return;
+			return NULL;
 		}
 		else {
 			SEPARATE_ZVAL(value);
@@ -3559,7 +3559,7 @@ PHP_FUNCTION(domxml_xslt_process)
 	xmlDocPtr xmldocp;
 	xmlDocPtr docp;
 	char **params = NULL;
-	int ret, parsize;
+	int ret;
 
 	DOMXML_GET_THIS(idxsl);
 
