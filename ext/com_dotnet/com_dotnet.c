@@ -100,12 +100,12 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	char *assembly_name, *datatype_name;
 	int assembly_name_len, datatype_name_len;
 	struct dotnet_runtime_stuff *stuff;
-	IObjectHandle *handle;
 	DISPPARAMS params;
 	VARIANT vargs[2];
 	VARIANT retval;
 	HRESULT hr;
 	int ret = FAILURE;
+	char *where = "";
 
 	if (COMG(dotnet_runtime_stuff) == NULL) {
 		if (FAILURE == dotnet_init(TSRMLS_C)) {
@@ -143,27 +143,33 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	V_VT(&vargs[1]) = VT_BSTR;
 	V_BSTR(&vargs[1]) = php_com_string_to_olestring(assembly_name, assembly_name_len, obj->code_page TSRMLS_CC);
 
+	where = "IDispatch_Invoke";
 	hr = IDispatch_Invoke(stuff->dotnet_domain, stuff->create_instance, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
 		DISPATCH_METHOD, &params, &retval, NULL, NULL);
 
 	if (SUCCEEDED(hr)) {
 		/* retval should now be an IUnknown/IDispatch representation of an IObjectHandle interface */
-		if ((V_VT(&retval) == VT_UNKNOWN || V_VT(&retval) == VT_DISPATCH) &&
-				SUCCEEDED(IUnknown_QueryInterface(V_UNKNOWN(&retval), &IID_IObjectHandle, &handle))) {
+		if (V_VT(&retval) == VT_UNKNOWN || V_VT(&retval) == VT_DISPATCH) {
 			VARIANT unwrapped;
+			IObjectHandle *handle;
 
-			hr = IObjectHandle_Unwrap(handle, &unwrapped);
+			where = "QI: IID_IObjectHandle";
+			hr = IUnknown_QueryInterface(V_UNKNOWN(&retval), &IID_IObjectHandle, &handle);
 			if (SUCCEEDED(hr)) {
-				/* unwrapped is now the dispatch pointer we want */
-				V_DISPATCH(&obj->v) = V_DISPATCH(&unwrapped);
-				V_VT(&obj->v) = VT_DISPATCH;
+				where = "IObjectHandle_Unwrap";
+				hr = IObjectHandle_Unwrap(handle, &unwrapped);
+				if (SUCCEEDED(hr)) {
+					/* unwrapped is now the dispatch pointer we want */
+					V_DISPATCH(&obj->v) = V_DISPATCH(&unwrapped);
+					V_VT(&obj->v) = VT_DISPATCH;
 
-				/* get its type-info */
-				IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
+					/* get its type-info */
+					IDispatch_GetTypeInfo(V_DISPATCH(&obj->v), 0, LANG_NEUTRAL, &obj->typeinfo);
 
-				ret = SUCCESS;
+					ret = SUCCESS;
+				}
+				IObjectHandle_Release(handle);
 			}
-			IObjectHandle_Release(handle);
 		}
 		VariantClear(&retval);
 	}
@@ -172,7 +178,9 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	VariantClear(&vargs[1]);
 
 	if (ret == FAILURE) {
-		php_com_throw_exception(hr, "Failed to instantiate .Net object" TSRMLS_CC);
+		char buf[1024];
+		sprintf(buf, "Failed to instantiate .Net object [%s]", where);
+		php_com_throw_exception(hr, buf TSRMLS_CC);
 		ZVAL_NULL(object);
 		return;
 	}
