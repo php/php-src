@@ -33,6 +33,10 @@ dbhead_t *get_dbf_head(int fd)
 
 	/* build in core info */
 	dbh->db_fd = fd;
+	if (dbhead.dbh_dbt < 3) {
+		php_error(E_WARNING, "This file appears to be dbase ver. %d. Only version 3 and above is supported.", dbhead.dbh_dbt);
+		return NULL;
+	}
 	dbh->db_dbt = dbhead.dbh_dbt;
 	dbh->db_records = get_long(dbhead.dbh_records);
 	dbh->db_hlen = get_short(dbhead.dbh_hlen);
