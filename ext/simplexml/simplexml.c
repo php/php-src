@@ -211,7 +211,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 							break;
 						}
 					}
-			next_iter:
+next_iter:
 					node = node->next;
 				}
 				if (node) {
