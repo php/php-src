@@ -1,6 +1,13 @@
 #ifndef _PHP_REGEX_H
 #define _PHP_REGEX_H
 
+/*
+ * REGEX means:
+ * 0.. system regex
+ * 1.. bundled regex
+ * 2.. Apache's regex
+ */
+
 #if REGEX == 1
 /* get aliases */
 #include "regex/regex_extra.h"
@@ -28,6 +35,9 @@
 #endif
 #elif REGEX == 0
 #include <regex.h>
+#ifndef _REGEX_H_
+#define _REGEX_H_ 1
+#endif
 #endif
 
 #endif /* _PHP_REGEX_H */
