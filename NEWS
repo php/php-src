@@ -1,8 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2002, Version 4.3.0
-- The Windows build can now be configured more comfortable, for instance in
-  regard to built-in extensions. (Sebastian)
+- The Windows build can now be configured more comfortably, for example 
+  when dealing with built-in extensions. (Sebastian)
 - Added optional 3rd parameter to mysql_select_db() which makes it return
   the previously selected database name. (Jani)
 - Set Content-Length header whenever possible. (thies, Yasuo)
