@@ -133,7 +133,7 @@ PHP_MINIT_FUNCTION(domxml)
   domxmltestnode_class_startup();
 #endif
 
-	le_domxmldocp = zend_register_list_destructors_ex(xmlFreeDoc, NULL, "domxml document", module_number);
+	le_domxmldocp = zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domxml document", module_number);
 	/* Freeing the document contains freeing the complete tree.
 	   Therefore nodes, attributes etc. may not be freed seperately.
 	*/
