@@ -1,4 +1,4 @@
-/*
+3/*
    +----------------------------------------------------------------------+
    | PHP version 4.0                                                      |
    +----------------------------------------------------------------------+
@@ -714,8 +714,7 @@ PHP_FUNCTION(mysql_get_client_info)
 /* }}} */
 
 /* {{{ proto string mysql_get_host_info([int link_identifier])
-   Returns a string describing the type of connection in use, including the
-   server host name */
+   Returns a string describing the type of connection in use, including the server host name */
 PHP_FUNCTION(mysql_get_host_info)
 {
 	zval **mysql_link;
