@@ -113,6 +113,8 @@
 #define HAVE_LIMITS_H 1
 
 #define HAVE_TZSET 1
+#define HAVE_TZNAME 1
+
 /* Define if you have the flock function.  */
 #undef HAVE_FLOCK
 
