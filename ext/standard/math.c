@@ -438,8 +438,6 @@ PHP_FUNCTION(is_nan)
 PHP_FUNCTION(pow)
 {
 	zval *zbase, *zexp;
-	double dval;
-	zend_bool wantlong;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z/z/", &zbase, &zexp) == FAILURE) {
 		return;
