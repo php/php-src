@@ -585,6 +585,7 @@ simplexml_ce_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	if (vptr == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create XML Schema validation context");
+		xmlSchemaFree(sptr);
 		xmlSchemaFreeParserCtxt(parser);
 		RETURN_FALSE;
 	}
