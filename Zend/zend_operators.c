@@ -1299,21 +1299,19 @@ ZEND_API int zend_binary_strncmp(char *s1, uint len1, char *s2, uint len2, uint 
 
 ZEND_API int zend_binary_strcasecmp(char *s1, uint len1, char *s2, uint len2)
 {
-	unsigned char c1 = 0, c2 = 0;
+	int len;
 
-	if (len1 != len2 || !len1) {
-		return len1 - len2;
-	}
+	len = MIN(len1, len2);
 
-	while (len1--) {
+	while (len--) {
 		c1 = tolower(*s1++);
 		c2 = tolower(*s2++);
 		if (c1 != c2) {
-			break;
+			return c1 - c2;
 		}
 	}
 
-	return c1 - c2;
+	return len1 - len2;
 }
 
 
