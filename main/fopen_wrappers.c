@@ -247,16 +247,16 @@ PHPAPI int php_check_open_basedir(char *path)
  */
 static FILE *php_fopen_and_set_opened_path(const char *path, char *mode, char **opened_path)
 {
-		FILE *fp;
+	FILE *fp;
 
-		if (php_check_open_basedir((char *)path)) {
-			return NULL;
-		}
-		fp = VCWD_FOPEN(path, mode);
-		if (fp && opened_path) {
-			*opened_path = expand_filepath(path,NULL);
-		}
-		return fp;
+	if (php_check_open_basedir((char *)path)) {
+		return NULL;
+	}
+	fp = VCWD_FOPEN(path, mode);
+	if (fp && opened_path) {
+		*opened_path = expand_filepath(path,NULL);
+	}
+	return fp;
 }
 /* }}} */
 
