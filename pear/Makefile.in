@@ -106,6 +106,7 @@ PEAR_FILES = \
 	PEAR/Packager.php \
 	PEAR/Remote.php \
 	PEAR/Uploader.php \
+	PEAR/Registry.php \
 	Payment/Verisign.php \
 	Schedule/At.php \
 	System.php \
