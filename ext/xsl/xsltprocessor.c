@@ -156,9 +156,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 
 	fci.param_count = nargs - 1;
-	fci.params = safe_emalloc(fci.param_count, sizeof(zval**), 0);
-
-	args = safe_emalloc(nargs - 1, sizeof(zval *), 0);
+	if (fci.param_count > 0) {
+		fci.params = safe_emalloc(fci.param_count, sizeof(zval**), 0);
+		args = safe_emalloc(nargs - 1, sizeof(zval *), 0);
+	}
 	/* Reverse order to pop values off ctxt stack */
 	for (i = nargs - 2; i >= 0; i--) {
 		obj = valuePop(ctxt);
@@ -229,11 +230,13 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	if (obj->stringval == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Handler name must be a string");
 		xmlXPathFreeObject(obj);
-		for (i = 0; i < nargs - 1; i++) {
-			zval_ptr_dtor(&args[i]);
+		if (fci.param_count > 0) {
+			for (i = 0; i < nargs - 1; i++) {
+				zval_ptr_dtor(&args[i]);
+			}
+			efree(args);
+			efree(fci.params);
 		}
-		efree(args);
-		efree(fci.params);
 		return; 
 	}
 	INIT_PZVAL(&handler);
@@ -254,7 +257,9 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 		if (result == FAILURE) {
 			if (Z_TYPE(handler) == IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
-			} 
+			}
+		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
+		} else if (retval == NULL) {
 		} else {
 			if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
 				xmlNode *nodep;
@@ -283,11 +288,13 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 	efree(callable);
 	zval_dtor(&handler);
-	for (i = 0; i < nargs - 1; i++) {
-		zval_ptr_dtor(&args[i]);
+	if (fci.param_count > 0) {
+		for (i = 0; i < nargs - 1; i++) {
+			zval_ptr_dtor(&args[i]);
+		}
+		efree(args);
+		efree(fci.params);
 	}
-	efree(args);
-	efree(fci.params);
 }
 
 static void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs)
