@@ -95,7 +95,7 @@ peardir=$(PEAR_INSTALLDIR)
 #	Net/Socket.php \
 #	Schedule/At.php \
 
-PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
+#PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
 
 install-pear-installer: $(top_builddir)/sapi/cli/php
 	$(top_builddir)/sapi/cli/php $(srcdir)/install-pear.php $(srcdir)/package-*.xml
@@ -123,7 +123,8 @@ BUILD_FILES = \
 	scan_makefile_in.awk \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config pear phptar
+bin_SCRIPTS = phpize php-config
+# pear phptar
 
 install-build:
 	@echo "Installing build environment"
@@ -135,9 +136,9 @@ install-programs:
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(builddir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done; \
-	for file in $(INSTALL_ROOT)$(bindir)/pearcmd-*.php; do \
-		rm -f $$file; \
-	done; \
+	#for file in $(INSTALL_ROOT)$(bindir)/pearcmd-*.php; do \
+	#	rm -f $$file; \
+	#done; \
 	for prog in phpextdist; do \
 		echo "Installing program: $$prog"; \
 		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
@@ -167,14 +168,14 @@ install-headers:
 		cd $(top_builddir)/$$i && cp -p *.h $(INSTALL_ROOT)$(phpincludedir)/$$i) 2>/dev/null || true; \
 	done
 
-$(builddir)/scripts/pear: $(srcdir)/scripts/pear.in $(top_builddir)/config.status
-	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
+#$(builddir)/scripts/pear: $(srcdir)/scripts/pear.in $(top_builddir)/config.status
+#	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
 $(builddir)/scripts/phpize: $(srcdir)/scripts/phpize.in $(top_builddir)/config.status
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
-$(builddir)/scripts/phptar: $(srcdir)/scripts/phptar.in $(top_builddir)/config.status
-	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
+#$(builddir)/scripts/phptar: $(srcdir)/scripts/phptar.in $(top_builddir)/config.status
+#	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
 $(builddir)/scripts/php-config: $(srcdir)/scripts/php-config.in $(top_builddir)/config.status
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
