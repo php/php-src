@@ -187,29 +187,29 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	
 		if(myargc > 5) {
 			convert_to_long_ex(a6);
-			timeout = (*a6)->value.lval;
+			timeout = Z_LVAL_PP(a6);
 		}
 
 		if(myargc > 6) {
 			convert_to_long_ex(a7);
-			retries = (*a7)->value.lval;
+			retries = Z_LVAL_PP(a7);
 		}
 
-		type = (*a4)->value.str.val[0];
-		value = (*a5)->value.str.val;
+		type = Z_STRVAL_PP(a4)[0];
+		value = Z_STRVAL_PP(a5);
 	} else {
 		if(myargc > 3) {
 			convert_to_long_ex(a4);
-			timeout = (*a4)->value.lval;
+			timeout = Z_LVAL_PP(a4);
 		}
 
 		if(myargc > 4) {
 			convert_to_long_ex(a5);
-			retries = (*a5)->value.lval;
+			retries = Z_LVAL_PP(a5);
 		}
 	}
 
-	objid = (*a3)->value.str.val;
+	objid = Z_STRVAL_PP(a3);
 	
 	if (st >= 2) { /* walk */
 		rootlen = MAX_NAME_LEN;
@@ -229,7 +229,7 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	
 	memset(&session, 0, sizeof(struct snmp_session));
 
-	strcpy (hostname, (*a1)->value.str.val);
+	strcpy (hostname, Z_STRVAL_PP(a1));
 	if ((pptr = strchr (hostname, ':'))) {
 		remote_port = strtol (pptr + 1, NULL, 0);
 		*pptr = 0;
@@ -245,11 +245,11 @@ void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	* memory it did not allocate
 	*/
 #ifdef UCD_SNMP_HACK
-	session.community = (u_char *)strdup((*a2)->value.str.val); /* memory freed by SNMP library, strdup NOT estrdup */
+	session.community = (u_char *)strdup(Z_STRVAL_PP(a2)); /* memory freed by SNMP library, strdup NOT estrdup */
 #else
-	session.community = (u_char *)(*a2)->value.str.val;
+	session.community = (u_char *)Z_STRVAL_PP(a2);
 #endif
-	session.community_len = (*a2)->value.str.len;
+	session.community_len = Z_STRLEN_PP(a2);
 	session.retries = retries;
 	session.timeout = timeout;
 	
@@ -360,7 +360,7 @@ retry:
 				}
 			}
 		} else if (status == STAT_TIMEOUT) {
-			php_error(E_WARNING,"No Response from %s\n", (*a1)->value.str.val);
+			php_error(E_WARNING,"No Response from %s\n", Z_STRVAL_PP(a1));
 			RETURN_FALSE;
 		} else {    /* status == STAT_ERROR */
 			php_error(E_WARNING,"An error occurred, Quitting...\n");

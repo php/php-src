@@ -709,38 +709,38 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	switch(ZEND_NUM_ARGS()) {
 		case 7:
 			convert_to_string_ex(args[6]);
-			ib_role = (*args[6])->value.str.val;
-			hashed_details_length += (*args[6])->value.str.len;
+			ib_role = Z_STRVAL_PP(args[6]);
+			hashed_details_length += Z_STRLEN_PP(args[6]);
 			/* fallout */
 		case 6:
 			convert_to_string_ex(args[5]);
-			ib_dialect = (*args[5])->value.str.val;
-			hashed_details_length += (*args[5])->value.str.len;
+			ib_dialect = Z_STRVAL_PP(args[5]);
+			hashed_details_length += Z_STRLEN_PP(args[5]);
 			/* fallout */
 		case 5:
 			convert_to_string_ex(args[4]);
-			ib_buffers = (*args[4])->value.str.val;
-			hashed_details_length += (*args[4])->value.str.len;
+			ib_buffers = Z_STRVAL_PP(args[4]);
+			hashed_details_length += Z_STRLEN_PP(args[4]);
 			/* fallout */
 		case 4:
 			convert_to_string_ex(args[3]);
-			ib_charset = (*args[3])->value.str.val;
-			hashed_details_length += (*args[3])->value.str.len;
+			ib_charset = Z_STRVAL_PP(args[3]);
+			hashed_details_length += Z_STRLEN_PP(args[3]);
 			/* fallout */
 		case 3:
 			convert_to_string_ex(args[2]);
-			ib_passwd = (*args[2])->value.str.val;
-			hashed_details_length += (*args[2])->value.str.len;
+			ib_passwd = Z_STRVAL_PP(args[2]);
+			hashed_details_length += Z_STRLEN_PP(args[2]);
 			/* fallout */
 		case 2:
 			convert_to_string_ex(args[1]);
-			ib_uname = (*args[1])->value.str.val;
-			hashed_details_length += (*args[1])->value.str.len;
+			ib_uname = Z_STRVAL_PP(args[1]);
+			hashed_details_length += Z_STRLEN_PP(args[1]);
 			/* fallout */
 		case 1:
 			convert_to_string_ex(args[0]);
-			ib_server = (*args[0])->value.str.val;
-			hashed_details_length += (*args[0])->value.str.len;
+			ib_server = Z_STRVAL_PP(args[0]);
+			hashed_details_length += Z_STRLEN_PP(args[0]);
 	} /* case */
 	
 	efree(args);
@@ -1497,7 +1497,7 @@ PHP_FUNCTION(ibase_trans)
 
 		/* First argument is transaction parameters */
 		convert_to_long_ex(args[0]);
-		trans_argl = (*args[0])->value.lval;
+		trans_argl = Z_LVAL_PP(args[0]);
 
 		efree(args);
 	}
@@ -2299,10 +2299,10 @@ PHP_FUNCTION(ibase_timefmt)
 	switch (ZEND_NUM_ARGS()) {
 		case 2:
 			convert_to_long_ex(args[1]);
-			type = (*args[1])->value.lval;
+			type = Z_LVAL_PP(args[1]);
 		case 1:
 			convert_to_string_ex(args[0]);
-			fmt = (*args[0])->value.str.val;
+			fmt = Z_STRVAL_PP(args[0]);
 	}
 
 	switch (type) {

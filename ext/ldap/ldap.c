@@ -934,7 +934,7 @@ PHP_FUNCTION(ldap_get_entries)
 			ldap_value_free(ldap_value);
 
 			attr_len = strlen(attribute);
-			zend_hash_update(tmp1->value.ht, php_strtolower(attribute, attr_len), attr_len+1, (void *) &tmp2, sizeof(pval *), NULL);
+			zend_hash_update(Z_ARRVAL_P(tmp1), php_strtolower(attribute, attr_len), attr_len+1, (void *) &tmp2, sizeof(pval *), NULL);
 			add_index_string(tmp1, num_attrib, attribute, 1);
 
 			num_attrib++;

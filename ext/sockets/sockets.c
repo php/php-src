@@ -1976,8 +1976,8 @@ PHP_FUNCTION(socket_create_pair)
 
 	php_sock[0]->bsd_socket = fds_array[0];
 	php_sock[1]->bsd_socket = fds_array[1];
-	php_sock[0]->type = Z_LVAL_PP(arg1);
-	php_sock[1]->type = Z_LVAL_PP(arg1);	
+	Z_TYPE_P(php_sock[0]) = Z_LVAL_PP(arg1);
+	Z_TYPE_P(php_sock[1]) = Z_LVAL_PP(arg1);	
 
 	ZEND_REGISTER_RESOURCE(retval[0], php_sock[0], le_socket);
 	ZEND_REGISTER_RESOURCE(retval[1], php_sock[1], le_socket);

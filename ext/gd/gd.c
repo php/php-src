@@ -2124,12 +2124,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	npoints = Z_LVAL_PP(NPOINTS);
 	col = Z_LVAL_PP(COL);
 
-	if ((*POINTS)->type != IS_ARRAY) {
+	if (Z_TYPE_PP(POINTS) != IS_ARRAY) {
 		php_error(E_WARNING, "2nd argument to imagepolygon not an array");
 		RETURN_FALSE;
 	}
 
-	nelem = zend_hash_num_elements((*POINTS)->value.ht);
+	nelem = zend_hash_num_elements(Z_ARRVAL_PP(POINTS));
 	if (nelem < 6) {
 		php_error(E_WARNING, "you must have at least 3 points in your array");
 		RETURN_FALSE;
@@ -2143,12 +2143,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	points = (gdPointPtr) emalloc(npoints * sizeof(gdPoint));
 
 	for (i = 0; i < npoints; i++) {
-		if (zend_hash_index_find((*POINTS)->value.ht, (i * 2), (void **) &var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(POINTS), (i * 2), (void **) &var) == SUCCESS) {
 			SEPARATE_ZVAL((var));
 			convert_to_long(*var);
 			points[i].x = Z_LVAL_PP(var);
 		}
-		if (zend_hash_index_find((*POINTS)->value.ht, (i * 2) + 1, (void **) &var) == SUCCESS) {
+		if (zend_hash_index_find(Z_ARRVAL_PP(POINTS), (i * 2) + 1, (void **) &var) == SUCCESS) {
 			SEPARATE_ZVAL(var);
 			convert_to_long(*var);
 			points[i].y = Z_LVAL_PP(var);

@@ -216,41 +216,41 @@ PHP_FUNCTION(pfpro_process_raw)
 	switch (ZEND_NUM_ARGS()) {
 		case 8:
 			convert_to_string_ex(args[7]);
-			proxyPassword = (*args[7])->value.str.val;
+			proxyPassword = Z_STRVAL_PP(args[7]);
 			/* fall through */
 
 		case 7:
 			convert_to_string_ex(args[6]);
-			proxyLogon = (*args[6])->value.str.val;
+			proxyLogon = Z_STRVAL_PP(args[6]);
 			/* fall through */
 
 		case 6:
 			convert_to_long_ex(args[5]);
-			proxyPort = (*args[5])->value.lval;
+			proxyPort = Z_LVAL_PP(args[5]);
 			/* fall through */
 
 		case 5:
 			convert_to_string_ex(args[4]);
-			proxyAddress = (*args[4])->value.str.val;
+			proxyAddress = Z_STRVAL_PP(args[4]);
 			/* fall through */
 
 		case 4:
 			convert_to_long_ex(args[3]);
-			timeout = (*args[3])->value.lval;
+			timeout = Z_LVAL_PP(args[3]);
 			/* fall through */
 
 		case 3:
 			convert_to_long_ex(args[2]);
-			port = (*args[2])->value.lval;
+			port = Z_LVAL_PP(args[2]);
 			/* fall through */
 
 		case 2:
 			convert_to_string_ex(args[1]);
-			address = (*args[1])->value.str.val;
+			address = Z_STRVAL_PP(args[1]);
 	}
 
 	convert_to_string_ex(args[0]);
-	parmlist = (*args[0])->value.str.val;
+	parmlist = Z_STRVAL_PP(args[0]);
 
 	efree(args);
 
@@ -341,7 +341,7 @@ PHP_FUNCTION(pfpro_process)
 		RETURN_FALSE;
 	}
 
-	if ((*args[0])->type != IS_ARRAY) {
+	if (Z_TYPE_PP(args[0]) != IS_ARRAY) {
 		php_error(E_ERROR, "First parameter to pfpro_process() must be an array");
  		efree(args);
 		RETURN_FALSE;
@@ -350,37 +350,37 @@ PHP_FUNCTION(pfpro_process)
 	switch (ZEND_NUM_ARGS()) {
 		case 8:
 			convert_to_string_ex(args[7]);
-			proxyPassword = (*args[7])->value.str.val;
+			proxyPassword = Z_STRVAL_PP(args[7]);
 			/* fall through */
 
 		case 7:
 			convert_to_string_ex(args[6]);
-			proxyLogon = (*args[6])->value.str.val;
+			proxyLogon = Z_STRVAL_PP(args[6]);
 			/* fall through */
 
 		case 6:
 			convert_to_long_ex(args[5]);
-			proxyPort = (*args[5])->value.lval;
+			proxyPort = Z_LVAL_PP(args[5]);
 			/* fall through */
 
 		case 5:
 			convert_to_string_ex(args[4]);
-			proxyAddress = (*args[4])->value.str.val;
+			proxyAddress = Z_STRVAL_PP(args[4]);
 			/* fall through */
 
 		case 4:
 			convert_to_long_ex(args[3]);
-			timeout = (*args[3])->value.lval;
+			timeout = Z_LVAL_PP(args[3]);
 			/* fall through */
 
 		case 3:
 			convert_to_long_ex(args[2]);
-			port = (*args[2])->value.lval;
+			port = Z_LVAL_PP(args[2]);
 			/* fall through */
 
 		case 2:
 			convert_to_string_ex(args[1]);
-			address = (*args[1])->value.str.val;
+			address = Z_STRVAL_PP(args[1]);
 	}
 
 	/* Concatenate the passed array as specified by Verisign.

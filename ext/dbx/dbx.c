@@ -237,24 +237,24 @@ ZEND_FUNCTION(dbx_connect)
 	}
 	if (ZEND_NUM_ARGS()==number_of_arguments+1) {
 		convert_to_long_ex(arguments[5]);
-		if ((*arguments[5])->value.lval!=0) persistent=1;
+		if (Z_LVAL_PP(arguments[5])!=0) persistent=1;
 	}
 
-	if ((*arguments[0])->type == IS_LONG) {
-		if (!module_identifier_exists((*arguments[0])->value.lval)) {
-			zend_error(E_WARNING, "dbx: module '%ld' not loaded or not supported.\n", (*arguments[0])->value.lval);
+	if (Z_TYPE_PP(arguments[0]) == IS_LONG) {
+		if (!module_identifier_exists(Z_LVAL_PP(arguments[0]))) {
+			zend_error(E_WARNING, "dbx: module '%ld' not loaded or not supported.\n", Z_LVAL_PP(arguments[0]));
 			return;
 		}
-		module_identifier = (*arguments[0])->value.lval;
+		module_identifier = Z_LVAL_PP(arguments[0]);
 	} else {
 		convert_to_string_ex(arguments[0]);
-		if (!module_exists((*arguments[0])->value.str.val)) {
-			zend_error(E_WARNING, "dbx: module '%s' not loaded.\n", (*arguments[0])->value.str.val);
+		if (!module_exists(Z_STRVAL_PP(arguments[0]))) {
+			zend_error(E_WARNING, "dbx: module '%s' not loaded.\n", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
-		module_identifier=get_module_identifier((*arguments[0])->value.str.val);
+		module_identifier=get_module_identifier(Z_STRVAL_PP(arguments[0]));
 		if (!module_identifier) {
-			zend_error(E_WARNING, "dbx: unsupported module '%s'.\n", (*arguments[0])->value.str.val);
+			zend_error(E_WARNING, "dbx: unsupported module '%s'.\n", Z_STRVAL_PP(arguments[0]));
 			return;
 		}
 	}
@@ -268,7 +268,7 @@ ZEND_FUNCTION(dbx_connect)
 	convert_to_string_ex(arguments[3]);
 	convert_to_string_ex(arguments[4]);
 	MAKE_STD_ZVAL(db_name); 
-	ZVAL_STRING(db_name, (*arguments[2])->value.str.val, 1);
+	ZVAL_STRING(db_name, Z_STRVAL_PP(arguments[2]), 1);
 	if (persistent) {
 		result = switch_dbx_pconnect(&rv_dbx_handle, arguments[1], arguments[2], arguments[3], arguments[4], INTERNAL_FUNCTION_PARAM_PASSTHRU, &dbx_module);
 	} else {
@@ -367,7 +367,7 @@ ZEND_FUNCTION(dbx_query)
 	/* parameter overrides */
 	if (ZEND_NUM_ARGS()>2) {
 		convert_to_long_ex(arguments[2]);
-		info_flags = (*arguments[2])->value.lval;
+		info_flags = Z_LVAL_PP(arguments[2]);
 		/* fieldnames are needed for association! */
 		if (info_flags & DBX_RESULT_ASSOC) {
 			info_flags |= DBX_RESULT_INFO;
@@ -554,8 +554,8 @@ ZEND_FUNCTION(dbx_compare)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arguments[0])->type != IS_ARRAY
-	|| (*arguments[1])->type != IS_ARRAY) {
+	if (Z_TYPE_PP(arguments[0]) != IS_ARRAY
+	|| Z_TYPE_PP(arguments[1]) != IS_ARRAY) {
 		zend_error(E_WARNING, "Wrong argument type for compare");
 		RETURN_LONG(0);
 	}
@@ -565,27 +565,27 @@ ZEND_FUNCTION(dbx_compare)
 	if (number_of_arguments>3) {
 		convert_to_long_ex(arguments[3]); /* comparison type and direction*/
 		/* direction */
-		if ((*arguments[3])->value.lval & DBX_CMP_DESC) {
+		if (Z_LVAL_PP(arguments[3]) & DBX_CMP_DESC) {
 			comparison_direction=DBX_CMP_DESC;
 		}
-		if ((*arguments[3])->value.lval & DBX_CMP_ASC) {
+		if (Z_LVAL_PP(arguments[3]) & DBX_CMP_ASC) {
 			comparison_direction=DBX_CMP_ASC;
 		}
 		/* type */
-		if ((*arguments[3])->value.lval & DBX_CMP_NUMBER) {
+		if (Z_LVAL_PP(arguments[3]) & DBX_CMP_NUMBER) {
 			comparison_type=DBX_CMP_NUMBER;
 		}
-		if ((*arguments[3])->value.lval & DBX_CMP_TEXT) {
+		if (Z_LVAL_PP(arguments[3]) & DBX_CMP_TEXT) {
 			comparison_type=DBX_CMP_TEXT;
 		}
-		if ((*arguments[3])->value.lval & DBX_CMP_NATIVE) {
+		if (Z_LVAL_PP(arguments[3]) & DBX_CMP_NATIVE) {
 			comparison_type=DBX_CMP_NATIVE;
 		}
 	}
 
-	if (zend_hash_find((*arguments[0])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_a)==FAILURE
-	|| zend_hash_find((*arguments[1])->value.ht, (*arguments[2])->value.str.val, (*arguments[2])->value.str.len+1, (void **) &zv_b)==FAILURE)  {
-		zend_error(E_WARNING, "Field '%s' not available in result-object", (*arguments[2])->value.str.val);
+	if (zend_hash_find(Z_ARRVAL_PP(arguments[0]), Z_STRVAL_PP(arguments[2]), Z_STRLEN_PP(arguments[2])+1, (void **) &zv_a)==FAILURE
+	|| zend_hash_find(Z_ARRVAL_PP(arguments[1]), Z_STRVAL_PP(arguments[2]), Z_STRLEN_PP(arguments[2])+1, (void **) &zv_b)==FAILURE)  {
+		zend_error(E_WARNING, "Field '%s' not available in result-object", Z_STRVAL_PP(arguments[2]));
 		RETURN_LONG(0);
 	}
 
@@ -639,8 +639,8 @@ ZEND_FUNCTION(dbx_sort)
 		WRONG_PARAM_COUNT;
 	}
 
-	if ((*arguments[0])->type != IS_OBJECT
-	|| (*arguments[1])->type != IS_STRING) {
+	if (Z_TYPE_PP(arguments[0]) != IS_OBJECT
+	|| Z_TYPE_PP(arguments[1]) != IS_STRING) {
 		zend_error(E_WARNING, "Wrong argument type for sort");
 		RETURN_LONG(0);
 	}

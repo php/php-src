@@ -916,7 +916,7 @@ static void php_msql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				RETURN_FALSE;
 			}
 			convert_to_long(arg2);
-			result_type = arg2->value.lval;
+			result_type = Z_LVAL_P(arg2);
 			break;
 		default:
 			WRONG_PARAM_COUNT;

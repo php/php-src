@@ -444,12 +444,12 @@ php_formatted_print(int ht, int *len, int use_array TSRMLS_DC)
 		}
 	}
 	convert_to_string_ex(args[0]);
-	format = (*args[0])->value.str.val;
+	format = Z_STRVAL_PP(args[0]);
 	result = emalloc(size);
 
 	currarg = 1;
 
-	while (inpos<(*args[0])->value.str.len) {
+	while (inpos<Z_STRLEN_PP(args[0])) {
 		int expprec = 0;
 
 		PRINTF_DEBUG(("sprintf: format[%d]='%c'\n", inpos, format[inpos]));

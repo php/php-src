@@ -2518,15 +2518,15 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 		convert_to_string_ex(passParam);
 		convert_to_string_ex(dbParam);
 
-		username = (*userParam)->value.str.val;
-		password = (*passParam)->value.str.val;
-		dbname = (*dbParam)->value.str.val;
+		username = Z_STRVAL_PP(userParam);
+		password = Z_STRVAL_PP(passParam);
+		dbname = Z_STRVAL_PP(dbParam);
     } else if (zend_get_parameters_ex(2, &userParam, &passParam) == SUCCESS) {
 		convert_to_string_ex(userParam);
 		convert_to_string_ex(passParam);
 
-		username = (*userParam)->value.str.val;
-		password = (*passParam)->value.str.val;
+		username = Z_STRVAL_PP(userParam);
+		password = Z_STRVAL_PP(passParam);
 		dbname = "";
     } else {
 		WRONG_PARAM_COUNT;

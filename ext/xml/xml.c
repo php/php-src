@@ -800,7 +800,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len)
 					zval **myval;
 					
 					/* check if the current tag already has a value - if yes append to that! */
-					if (zend_hash_find((*parser->ctag)->value.ht,"value",sizeof("value"),(void **) &myval) == SUCCESS) {
+					if (zend_hash_find(Z_ARRVAL_PP(parser->ctag),"value",sizeof("value"),(void **) &myval) == SUCCESS) {
 						int newlen = Z_STRLEN_PP(myval) + decoded_len;
 						Z_STRVAL_PP(myval) = erealloc(Z_STRVAL_PP(myval),newlen+1);
 						strcpy(Z_STRVAL_PP(myval) + Z_STRLEN_PP(myval),decoded_value);
@@ -1014,18 +1014,18 @@ PHP_FUNCTION(xml_parser_create)
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (strncasecmp((*encodingArg)->value.str.val, "ISO-8859-1",
-						(*encodingArg)->value.str.len) == 0) {
+		if (strncasecmp(Z_STRVAL_PP(encodingArg), "ISO-8859-1",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "ISO-8859-1";
-		} else if (strncasecmp((*encodingArg)->value.str.val, "UTF-8",
-						(*encodingArg)->value.str.len) == 0) {
+		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "UTF-8",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "UTF-8";
-		} else if (strncasecmp((*encodingArg)->value.str.val, "US-ASCII",
-						(*encodingArg)->value.str.len) == 0) {
+		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "US-ASCII",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "US-ASCII";
 		} else { /* UTF-16 not supported */
 			php_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
-					   thisfunc, (*encodingArg)->value.str.val);
+					   thisfunc, Z_STRVAL_PP(encodingArg));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1065,18 +1065,18 @@ PHP_FUNCTION(xml_parser_create_ns)
 		/* The supported encoding types are hardcoded here because
 		 * we are limited to the encodings supported by expat/xmltok.
 		 */
-		if (strncasecmp((*encodingArg)->value.str.val, "ISO-8859-1",
-						(*encodingArg)->value.str.len) == 0) {
+		if (strncasecmp(Z_STRVAL_PP(encodingArg), "ISO-8859-1",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "ISO-8859-1";
-		} else if (strncasecmp((*encodingArg)->value.str.val, "UTF-8",
-						(*encodingArg)->value.str.len) == 0) {
+		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "UTF-8",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "UTF-8";
-		} else if (strncasecmp((*encodingArg)->value.str.val, "US-ASCII",
-						(*encodingArg)->value.str.len) == 0) {
+		} else if (strncasecmp(Z_STRVAL_PP(encodingArg), "US-ASCII",
+						Z_STRLEN_PP(encodingArg)) == 0) {
 			encoding = "US-ASCII";
 		} else { /* UTF-16 not supported */
 			php_error(E_WARNING, "%s: unsupported source encoding \"%s\"",
-					   thisfunc, (*encodingArg)->value.str.val);
+					   thisfunc, Z_STRVAL_PP(encodingArg));
 			RETURN_FALSE;
 		}
 	} else {
@@ -1085,7 +1085,7 @@ PHP_FUNCTION(xml_parser_create_ns)
 
 	if (argc == 2){
 		convert_to_string_ex(sepArg);
-		sep = (*sepArg)->value.str.val;
+		sep = Z_STRVAL_PP(sepArg);
 	} else {
 		sep = ":";
 	}

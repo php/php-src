@@ -69,13 +69,13 @@ PHP_FUNCTION(quoted_printable_decode)
     }
     convert_to_string_ex(arg1);
     
-	if((*arg1)->value.str.len == 0) {
+	if(Z_STRLEN_PP(arg1) == 0) {
 		/* shortcut */
 		RETURN_EMPTY_STRING();
 	}
 
-    str_in = (*arg1)->value.str.val;
-	str_out = emalloc((*arg1)->value.str.len+1);
+    str_in = Z_STRVAL_PP(arg1);
+	str_out = emalloc(Z_STRLEN_PP(arg1)+1);
     while ( str_in[i] )
     {
         switch (str_in[i])

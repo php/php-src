@@ -1870,7 +1870,7 @@ PHP_FUNCTION(swfshape_addfill)
 
     convert_to_object_ex(arg1);
 
-    if((*arg1)->value.obj.ce == &gradient_class_entry)
+    if(Z_OBJCE_PP(arg1) == &gradient_class_entry)
     {
       if(flags == 0)
 	flags = SWFFILL_LINEAR_GRADIENT;
@@ -1878,7 +1878,7 @@ PHP_FUNCTION(swfshape_addfill)
       fill = SWFShape_addGradientFill(getShape(getThis() TSRMLS_CC), getGradient(*arg1 TSRMLS_CC),
 				      flags);
     }
-    else if((*arg1)->value.obj.ce == &bitmap_class_entry)
+    else if(Z_OBJCE_PP(arg1) == &bitmap_class_entry)
     {
       if(flags == 0)
 	flags = SWFFILL_TILED_BITMAP;

@@ -824,7 +824,7 @@ PHP_FUNCTION(mcrypt_module_self_test)
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
-	if (mcrypt_module_self_test ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_self_test (Z_STRVAL_PP(arg1), lib_dir_s) == 0) {
 		RETURN_TRUE;
 	}
 	else {
@@ -846,7 +846,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm_mode)
 
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
-	if (mcrypt_module_is_block_algorithm_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_algorithm_mode (Z_STRVAL_PP(arg1), lib_dir_s) == 0) {
 		RETURN_TRUE;
 	}
 	else {
@@ -868,7 +868,7 @@ PHP_FUNCTION(mcrypt_module_is_block_algorithm)
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
-	if (mcrypt_module_is_block_algorithm ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_algorithm (Z_STRVAL_PP(arg1), lib_dir_s) == 0) {
 		RETURN_TRUE;
 	}
 	else {
@@ -890,7 +890,7 @@ PHP_FUNCTION(mcrypt_module_is_block_mode)
 
 	MCRYPT_GET_MODE_DIR_ARGS(modes_dir)
 	
-	if (mcrypt_module_is_block_mode ((*arg1)->value.str.val, lib_dir_s) == 0) {
+	if (mcrypt_module_is_block_mode (Z_STRVAL_PP(arg1), lib_dir_s) == 0) {
 		RETURN_TRUE;
 	}
 	else {
@@ -912,7 +912,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_block_size)
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 	
-	RETURN_LONG(mcrypt_module_get_algo_block_size ((*arg1)->value.str.val, lib_dir_s))
+	RETURN_LONG(mcrypt_module_get_algo_block_size (Z_STRVAL_PP(arg1), lib_dir_s))
 }
 /* }}} */
 
@@ -929,7 +929,7 @@ PHP_FUNCTION(mcrypt_module_get_algo_key_size)
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir);
 	
-	RETURN_LONG(mcrypt_module_get_algo_key_size ((*arg1)->value.str.val, lib_dir_s))
+	RETURN_LONG(mcrypt_module_get_algo_key_size (Z_STRVAL_PP(arg1), lib_dir_s))
 }
 /* }}} */
 
@@ -947,7 +947,7 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes)
 
 	MCRYPT_GET_MODE_DIR_ARGS(algorithms_dir)
 
-	key_sizes = mcrypt_module_get_algo_supported_key_sizes ((*arg1)->value.str.val, lib_dir_s, &count);
+	key_sizes = mcrypt_module_get_algo_supported_key_sizes (Z_STRVAL_PP(arg1), lib_dir_s, &count);
 
 	if (array_init(return_value) == FAILURE) {
 		php_error(E_ERROR, "Unable to initialize array");

@@ -1637,7 +1637,7 @@ PHP_FUNCTION(mb_strcut)
 	 * of the string
 	 */
 	if (from < 0) {
-		from = (*arg1)->value.str.len + from;
+		from = Z_STRLEN_PP(arg1) + from;
 		if (from < 0) {
 			from = 0;
 		}
@@ -1647,7 +1647,7 @@ PHP_FUNCTION(mb_strcut)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (len < 0) {
-		len = ((*arg1)->value.str.len - from) + len;
+		len = (Z_STRLEN_PP(arg1) - from) + len;
 		if (len < 0) {
 			len = 0;
 		}
@@ -2422,7 +2422,7 @@ php_mbstr_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	/* conversion map */
 	convmap = NULL;
 	if (Z_TYPE_PP(arg2) == IS_ARRAY){
-		target_hash = (*arg2)->value.ht;
+		target_hash = Z_ARRVAL_PP(arg2);
 		zend_hash_internal_pointer_reset(target_hash);
 		i = zend_hash_num_elements(target_hash);
 		if (i > 0) {
@@ -2602,7 +2602,7 @@ PHP_FUNCTION(mb_send_mail)
 
 	if (argc == 5) {	/* extra options that get passed to the mailer */
 		convert_to_string_ex(argv[4]);
-		extra_cmd = (*argv[4])->value.str.val;
+		extra_cmd = Z_STRVAL_PP(argv[4]);
 	}
 
 	if (!err && php_mail(to, subject, message, headers, extra_cmd)){
