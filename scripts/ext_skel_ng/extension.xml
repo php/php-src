@@ -55,28 +55,79 @@
   </globals>
 
   <functions>
+		
+    <function role='internal' name='MINIT'>
+      <code>
+<![CDATA[
+  int dummy = 42;
 
-   <function name='dummy_int'>
-    <summary>dummy integer conversion</summary>
-		<proto>int dummy_int(int bar)</proto>
-    <description>
+  dummy = dummy;
+]]>
+      </code>
+    </function>
+
+    <function role='internal' name='MSHUTDOWN'>
+      <code>
+<![CDATA[
+  int dummy = 42;
+
+  dummy = dummy;
+]]>
+      </code>
+    </function>
+
+    <function role='internal' name='RINIT'>
+      <code>
+<![CDATA[
+  int dummy = 42;
+
+  dummy = dummy;
+]]>
+      </code>
+    </function>
+
+    <function role='internal' name='RSHUTDOWN'>
+      <code>
+<![CDATA[
+  int dummy = 42;
+
+  dummy = dummy;
+]]>
+      </code>
+    </function>
+
+    <function role='internal' name='MINFO'>
+      <code>
+<![CDATA[
+  php_info_print_table_start();
+  php_info_print_table_header(2, "test", "table");
+  php_info_print_table_end();
+]]>
+      </code>
+    </function>
+
+
+		<function role='public' name='dummy_int'>
+			<summary>dummy integer conversion</summary>
+			<proto>int dummy_int(int bar)</proto>
+			<description>
 some funcy longer description
 
 foo
 bar
-		</description>
-   </function>
-
-   <function name='dummy_string'>
-    <summary>dummy string conversion</summary>
-		<proto>string dummy_string(string bar) foobar</proto>
-	  <code>
+		  </description>
+		</function>
+		
+		<function name='dummy_string'>
+			<summary>dummy string conversion</summary>
+			<proto>string dummy_string(string bar) foobar</proto>
+			<code>
 <![CDATA[
   RETURN_STRINGL(bar, bar_len, 1);
 ]]>
-    </code>
-   </function>
-
+      </code>
+		</function>
+		
   </functions>
 	
 </extension>
