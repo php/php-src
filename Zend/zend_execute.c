@@ -2567,9 +2567,16 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zend_error(E_ERROR, "Cannot call overloaded function for non-object");
 		}
 			
+		if (EX(function_state).function->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+			efree(EX(function_state).function->common.function_name);
+		}
 		efree(EX(fbc));
+
 		if (!return_value_used) {
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
+		} else {
+			EX_T(EX(opline)->result.u.var).var.ptr->is_ref = 0;
+			EX_T(EX(opline)->result.u.var).var.ptr->refcount = 1;
 		}
 	}
 

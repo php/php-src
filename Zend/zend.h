@@ -510,6 +510,7 @@ ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval
 #define ZMSG_MEMORY_LEAK_DETECTED		4L
 #define ZMSG_MEMORY_LEAK_REPEATED		5L
 #define ZMSG_LOG_SCRIPT_NAME			6L
+#define ZMSG_MEMORY_LEAKS_GRAND_TOTAL	7L
 
 
 #define ZVAL_ADDREF(pz)		(++(pz)->refcount)
