@@ -683,7 +683,7 @@ PHP_FUNCTION(read)
 		read_function = (int (*)(int, void *, int)) php_read;
 	}
 
-	tmpbuf = emalloc(Z_LVAL_PP(length)*sizeof(char));
+	tmpbuf = emalloc((Z_LVAL_PP(length)+1)*sizeof(char));
 	if (tmpbuf == NULL) {
 		php_error(E_WARNING, "Couldn't allocate memory from %s()", get_active_function_name());
 		RETURN_FALSE;
@@ -692,19 +692,9 @@ PHP_FUNCTION(read)
 	ret = (*read_function)(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
 	
 	if (ret >= 0) {
-		if (Z_STRLEN_PP(buf) > 0) {
-			efree(Z_STRVAL_PP(buf));
-		}
-		if (ZEND_NUM_ARGS() == 4 && Z_LVAL_PP(binary) != PHP_NORMAL_READ) {
-			Z_STRVAL_PP(buf) = emalloc(ret);
-			memcpy(Z_STRVAL_PP(buf), tmpbuf, ret);
-			Z_STRLEN_PP(buf) = ret;
-		} else {
-			Z_STRVAL_PP(buf) = estrndup(tmpbuf,strlen(tmpbuf));
-			Z_STRLEN_PP(buf) = strlen(tmpbuf);
-			ret = strlen(tmpbuf);
-		}
-		efree(tmpbuf);
+		tmpbuf[ret] = '\0';
+		Z_STRVAL_PP(buf) = erealloc(tmpbuf, ret+1);
+		Z_STRLEN_PP(buf) = ret;
 
 		RETURN_LONG(ret);
 	} else {
