@@ -79,7 +79,7 @@ void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
 
 typedef struct {
 	zval            *func_name;
-	zend_fcall_info fci_cache;
+	zend_fcall_info_cache fci_cache;
 	FILE            *fp;
 	smart_str       buf;
 	int             method;
@@ -88,7 +88,7 @@ typedef struct {
 
 typedef struct {
 	zval            *func_name;
-	zend_fcall_info fci_cache;
+	zend_fcall_info_cache fci_cache;
 	FILE            *fp;
 	long            fd;
 	int             method;

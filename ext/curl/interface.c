@@ -562,7 +562,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.params = argv;
 			fci.no_separation = 0;
 
-			error = zend_call_user_function(&fci, &t->fci_cache TSRMLS_CC);
+			error = zend_call_function(&fci, &t->fci_cache TSRMLS_CC);
 			if (error == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
 				length = -1;
