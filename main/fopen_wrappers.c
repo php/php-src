@@ -79,7 +79,7 @@
 #include <sys/un.h>
 #endif
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd);
+static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path);
 
 int _php3_getftpresult(int socketd);
 
@@ -181,7 +181,7 @@ PHPAPI int _php3_check_open_basedir(char *path)
 	return 0;
 }
 
-PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd)
+PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	int cm=2;  /* checkuid mode: 2 = if file does not exist, check directory */
 	PLS_FETCH();
@@ -190,12 +190,12 @@ PHPAPI FILE *php3_fopen_wrapper(char *path, char *mode, int options, int *issock
 	   be runtime enabled, NOT compile time. */
 #if PHP3_URL_FOPEN
 	if (!(options & IGNORE_URL)) {
-		return php3_fopen_url_wrapper(path, mode, options, issock, socketd);
+		return php3_fopen_url_wrapper(path, mode, options, issock, socketd, opened_path);
 	}
 #endif
 
 	if (options & USE_PATH && PG(include_path) != NULL) {
-		return php3_fopen_with_path(path, mode, PG(include_path), NULL);
+		return php3_fopen_with_path(path, mode, PG(include_path), opened_path);
 	} else {
 		if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;
 		if (options & ENFORCE_SAFE_MODE && PG(safe_mode) && (!_php3_checkuid(path, cm))) {
@@ -427,7 +427,7 @@ PHPAPI FILE *php3_fopen_with_path(char *filename, char *mode, char *path, char *
  * Otherwise, fopen is called as usual and the file pointer is returned.
  */
 
-static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd)
+static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path)
 {
 	url *resource;
 	int result;
@@ -590,7 +590,7 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 			*socketd = 0;
 			free_url(resource);
 			if (location[0] != '\0') {
-				return php3_fopen_url_wrapper(location, mode, options, issock, socketd);
+				return php3_fopen_url_wrapper(location, mode, options, issock, socketd, opened_path);
 			} else {
 				return NULL;
 			}
@@ -883,12 +883,11 @@ static FILE *php3_fopen_url_wrapper(const char *path, char *mode, int options, i
 		free_url(resource);
 		*issock = 1;
 		return (fp);
-
 	} else {
 		PLS_FETCH();
 
 		if (options & USE_PATH) {
-			fp = php3_fopen_with_path((char *) path, mode, PG(include_path), NULL);
+			fp = php3_fopen_with_path((char *) path, mode, PG(include_path), opened_path);
 		} else {
 			int cm=2;
 			if(!strcmp(mode,"r") || !strcmp(mode,"r+")) cm=0;

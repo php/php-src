@@ -925,7 +925,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	case 1: /*send an email*/
 		{
 #if HAVE_SENDMAIL
-		if (!_php3_mail(opt,"PHP3 error_log message",message,headers)){
+		if (!_php3_mail(opt,"PHP error_log message",message,headers)){
 			return FAILURE;
 		}
 #else
@@ -939,7 +939,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 		return FAILURE;
 		break;
 	case 3: /*save to a file*/
-		logfile=php3_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd);
+		logfile=php3_fopen_wrapper(opt,"a", (IGNORE_URL|ENFORCE_SAFE_MODE), &issock, &socketd, NULL);
 		if(!logfile) {
 			php_error(E_WARNING,"error_log: Unable to write to %s",opt);
 			return FAILURE;

@@ -312,7 +312,7 @@ PHP_FUNCTION(imageloadfont) {
 #if WIN32|WINNT
 	fp = fopen(file->value.str.val, "rb");
 #else
-	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd);
+	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (fp == NULL) {
 		php_error(E_WARNING, "ImageFontLoad: unable to open file");
@@ -416,7 +416,7 @@ void php3_imagecreatefrompng (INTERNAL_FUNCTION_PARAMETERS) {
 #if WIN32|WINNT
       fp = fopen(file->value.str.val, "rb");
 #else
-      fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd);
+      fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
       if (!fp) {
               php3_strip_url_passwd(fn);
@@ -526,7 +526,7 @@ PHP_FUNCTION(imagecreatefromgif )
 #if WIN32|WINNT
 	fp = fopen(file->value.str.val, "rb");
 #else
-	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd);
+	fp = php3_fopen_wrapper(file->value.str.val, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
 	if (!fp) {
 		php3_strip_url_passwd(fn);

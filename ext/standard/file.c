@@ -411,7 +411,7 @@ PHP_FUNCTION(get_meta_tags)
 	}
 	convert_to_string_ex(filename);
 	
-	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			char *tmp = estrdup((*filename)->value.str.val);
@@ -535,7 +535,7 @@ PHP_FUNCTION(file)
 	}
 	convert_to_string_ex(filename);
 	
-	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*filename)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			char *tmp = estrdup((*filename)->value.str.val);
@@ -652,7 +652,7 @@ PHP_FUNCTION(fopen)
 	 * We need a better way of returning error messages from
 	 * php3_fopen__wrapper().
 	 */
-	fp = php3_fopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
 			char *tmp = estrdup((*arg1)->value.str.val);
@@ -1320,7 +1320,7 @@ PHP_FUNCTION(readfile)
 	 * We need a better way of returning error messages from
 	 * php3_fopen_wrapper().
 	 */
-	fp = php3_fopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd);
+	fp = php3_fopen_wrapper((*arg1)->value.str.val,"r", use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd){
 		if (issock != BAD_URL) {
 			char *tmp = estrdup((*arg1)->value.str.val);
