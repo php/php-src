@@ -83,13 +83,15 @@
 			case "public":
 			$code .= "\n/* {{{ proto {$this->returns} {$this->name}(";
 			if(isset($this->params)) {
-				foreach($this->params as $param) {
+				foreach($this->params as $key => $param) {
 					if(!empty($param['optional']))
 						$code.=" [";
 					if($key) 
 						$code.=", ";
 					$code .= $param['type']." ";
-					$code .= $param['name']; 
+					if($param['type'] !== 'void') {
+					  $code .= $param['name']; 
+          }
 				}
 			}
 			for($n=$this->optional; $n>0; $n--) {
@@ -102,13 +104,13 @@
 			$code .= " */\n";
 			$code .= "PHP_FUNCTION({$this->name})\n";
 			$code .= "{\n";
-			$code .= "\tint argc = ZEND_NUM_ARGS();\n\n";
-			if(isset($this->params)) {
+			if(isset($this->params) && count($this->params)) {
 				$arg_string="";
 				$arg_pointers=array();
 				$optional=false;
 				$res_fetch="";
 				foreach($this->params as $param) {
+          if($param["type"] === "void") continue;
 					$name = $param['name']; 
 					$arg_pointers[]="&$name";
 					if(isset($param['optional'])&&!$optional) {
@@ -116,61 +118,65 @@
 						$arg_string.="|";
 					}
 					switch($param['type']) {
-						//case "void":
 					case "bool":
 						$arg_string.="b";
-						$code .= "\tzend_bool $name = 0;\n";
+						$code .= "  zend_bool $name = 0;\n";
 						break;
 					case "int":
 						$arg_string.="l";
-						$code .= "\tlong $name = 0;\n";
+						$code .= "  long $name = 0;\n";
 						break;
 					case "float":
 						$arg_string.="d";
-						$code .= "\tdouble $name = 0.0;\n";
+						$code .= "  double $name = 0.0;\n";
 						break;
 					case "string":
 						$arg_string.="s";
-						$code .= "\tchar * $name = NULL;\n";
-						$code .= "\tint {$name}_len = 0;\n";
+						$code .= "  char * $name = NULL;\n";
+						$code .= "  int {$name}_len = 0;\n";
 						$arg_pointers[]="&{$name}_len";
 						break;
 					case "array":
 						$arg_string.="a";
-						$code .= "\tzval * $name = NULL;\n";
+						$code .= "  zval * $name = NULL;\n";
 						break;
 					case "object": 
 						$arg_string.="o";
-						$code .= "\tzval * $name = NULL;\n";
+						$code .= "  zval * $name = NULL;\n";
 						break;
 					case "resource":
 						$arg_string.="r";
-						$code .= "\tzval * $name = NULL;\n";
-						$code .= "\tint * {$name}_id = -1;\n";
+						$code .= "  zval * $name = NULL;\n";
+						$code .= "  int * {$name}_id = -1;\n";
 						$arg_pointers[]="&{$name}_id";
-						$res_fetch.="\tif ($name) {\n"
-							."\t\tZEND_FETCH_RESOURCE(???, ???, $name, {$name}_id, \"???\", ???_rsrc_id);\n"
-							."\t}\n";
+						$res_fetch.="  if ($name) {\n"
+							."    ZEND_FETCH_RESOURCE(???, ???, $name, {$name}_id, \"???\", ???_rsrc_id);\n"
+							."  }\n";
 						break;
 					case "mixed":
 						$arg_string.="z";
-						$code .= "\tzval * $name = NULL;\n";
+						$code .= "  zval * $name = NULL;\n";
 						break;
 					}
 				}
-				$code .= "\n\tif (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
-				if($res_fetch) $code.="\n$res_fetch\n";
+			} 
+
+			if(isset($arg_string) && strlen($arg_string)) {
+				$code .= "  int argc = ZEND_NUM_ARGS();\n\n";
+				$code .= "\n  if (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
+						if($res_fetch) $code.="\n$res_fetch\n";
 			} else {
-				$code .= "\tif(argc>0) { WRONG_PARAM_COUNT; }\n\n";
+				$code .= "  if (ZEND_NUM_ARGS()>0) { WRONG_PARAM_COUNT; }\n\n";
 			}
-			$code .= "\tphp_error(E_WARNING, \"{$this->name}: not yet implemented\");\n";
+
+			$code .= "  php_error(E_WARNING, \"{$this->name}: not yet implemented\");\n";
 			$code .= "}\n/* }}} */\n\n";
 			  break;
 		  case "internal":
 				if(!empty($this->code)) {
-					$code .= "\t\t{\n";
+					$code .= "    {\n";
 					$code .= $this->code."\n";
-					$code .= "\t\t}\n";
+					$code .= "    }\n";
 				}
 				break;
   		case "private":

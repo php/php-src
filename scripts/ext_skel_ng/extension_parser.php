@@ -4,6 +4,8 @@
 	require_once "php_element.php";
 	require_once "php_constant.php";
 	require_once "php_function.php";
+	require_once "php_resource.php";
+	require_once "php_logo.php";
 
 	require_once "xml_stream_parser.php";
 	require_once "xml_stream_callback_parser.php";
@@ -19,9 +21,15 @@
 		
 		$this->name = "foobar";
 
-		$this->license = "php";
-		
+		$this->release = array("version" => "unknown",
+													 "date"    => date("Y-m-d"),
+													 "state"   => "",
+													 "license" => "unknown",
+													 "notes"   => "",
+													 );
+
 		$this->constants = array();
+		$this->resources = array();
 		$this->functions = array();
 		$this->internal_functions = array();
 		$this->private_functions = array();
@@ -40,9 +48,15 @@
 		// {{{ parsing
 
 	// {{{   general infos
+	  function _check_c_name($name, $msg) {
+			if(!ereg("^[[:alpha:]_][[:alnum:]_]*$", $name)) {
+				$this->error("$name is not a valid $msg");
+			}
+    }
 
 		function handle_extension_name($attr) {
 			$this->name = trim($this->cdata);
+			$this->_check_c_name($this->name, "extension name");
 		}
 
 		function handle_extension_summary($attr) {
@@ -53,8 +67,21 @@
 			$this->description = $this->cdata;
 		}
 
+		function handle_extension_logo($attr) {
+			$this->logo = &new php_logo($this->name, $attr);
+		}
+
+
 		function handle_release_version($attr) {
-			$this->version = trim($this->cdata);
+			$this->release['version'] = trim($this->cdata);
+		}
+
+		function handle_release_state($attr) {
+			$this->release['state'] = trim($this->cdata);
+		}
+
+		function handle_release_license($attr) {
+			$this->release['license'] = trim($this->cdata);
 		}
 
 	function handle_maintainers_maintainer_user($attr) {
@@ -78,12 +105,17 @@
 		unset($this->user);
 	}
 
+
+
 		// }}} 
 
 	// {{{   constants
 
 		function handle_constants_constant($attr) {
+
 			$name = $attr["name"];
+			$this->_check_c_name($name, "constant name");
+
 			$value= $attr["value"];
 			$type = isset($attr["type"]) ? $attr["type"] : "string";
 
@@ -108,7 +140,31 @@
 		}
 
 		// }}} 
-	
+
+	// {{{   resources
+
+	function handle_resources_resource_destruct($attr) {
+		$this->resource_destruct = $this->cdata;
+	}
+
+	function handle_resources_resource_description($attr) {
+		$this->resource_description = $this->cdata;		
+	}
+
+	function handle_resources_resource($attr) {
+		$this->_check_c_name($attr['name'], "resource name");
+
+		$this->resources[] = new php_resource($attr['name'], 
+																					@$attr['payload'], 
+																					@$this->resource_destruct, 
+																					@$this->resource_description);
+
+		unset($this->resource_description);
+		unset($this->resource_destruct);
+	}
+
+	// }}} 
+
 	// {{{   functions
 
 		function handle_functions_function_summary($attr) {
@@ -128,8 +184,10 @@
 		}
 
 		function handle_functions_function($attr) {
+			$this->_check_c_name($attr['name'], "function name");
+
 			$role = isset($attr['role']) ? $attr['role'] : "public";
-			$function = new php_function($attr['name'], $this->func_summary, $this->func_proto, @$this->func_desc, @$this->func_code, $role);
+			$function = new php_function($attr['name'], @$this->func_summary, @$this->func_proto, @$this->func_desc, @$this->func_code, $role);
 			switch($role) {
 			case "internal":
 				$this->internal_functions[$attr['name']] = $function;
@@ -155,14 +213,17 @@
 	// {{{   globals and php.ini
 
 		function handle_globals_global($attr) {
+			$this->_check_c_name($attr['name'], "variable name");
 			if($attr["type"] == "string") $attr["type"] = "char*";
 			$this->globals[$attr["name"]] = $attr;
 		}
 
 		function handle_globals_phpini($attr) {
+			$this->_check_c_name($attr['name'], "php.ini directice name");
 			$ini = array("name" => $attr["name"],
 									 "type" => $attr["type"],
-									 "value"=> $attr["value"]
+									 "value"=> $attr["value"],
+									 "desc" => trim($this->cdata)
 									 );
 			switch($attr["access"]) {
 			case "system":
@@ -244,18 +305,89 @@
 
    <section id='{$this->name}.configuration'>
     &reftitle.runtime;
-    &no.config;
-   </section>
+");
+
+   	if(empty($this->phpini)) {
+			fputs($fp, "    &no.config;\n");
+		} else {
+			fputs($fp, 
+"    <table>
+     <title>{$this->name} runtime configuration</title>
+			<tgroup cols='3'>
+			 <thead>
+        <row>
+         <entry>directive</entry>
+         <entry>default value</entry>
+         <entry>descrpition</entry>
+        </row>
+       </thead>
+      <tbody>
+");
+			foreach($this->phpini as $directive) {
+				fputs($fp, 
+"    <row>
+     <entry>$directive[name]</entry>
+     <entry>$directive[value]</entry>
+     <entry>$directive[desc]</entry>
+    </row>
+");
+			}
+			fputs($fp, 
+"     </tbody>
+    </tgroup>
+   </table>
+");
+		}
+
+		fputs($fp,
+"   </section>
 
    <section id='{$this->name}.resources'>
     &reftitle.resources;
-    &no.resource;
-   </section>
+");
+
+  if (empty($this->resources)) {
+    fputs($fp, "   &no.resource;\n");
+  } else {
+    foreach ($this->resources as $resource) {
+      fputs($fp, $resource->docbook_xml($this->name));
+    }
+  }
+
+
+  fputs($fp,
+"   </section>
 
    <section id='{$this->name}.constants'>
     &reftitle.constants;
-    &no.constants;
-   </section>
+");
+  if(empty($this->constants)) {
+    fputs($fp, "    &no.constants;\n");
+  } else {
+    fputs($fp, 
+"    <table>
+     <title>{$this->name} constants</title>
+      <tgroup cols='3'>
+       <thead>
+        <row>
+         <entry>name</entry>
+         <entry>value</entry>
+         <entry>descrpition</entry>
+        </row>
+       </thead>
+      <tbody>
+");
+    foreach($this->constants as $constant) {
+      fputs($fp, $constant->docbook_xml($this->name));
+    }
+    fputs($fp, 
+"     </tbody>
+    </tgroup>
+   </table>
+");
+  }
+  fputs($fp,
+"   </section>
    
   </partintro>
 
@@ -293,7 +425,7 @@ zend_module_entry '.$this->name.'_module_entry = {
 	PHP_RINIT('.$this->name.'),		  /* Replace with NULL if there is nothing to do at request start */
 	PHP_RSHUTDOWN('.$this->name.'),	/* Replace with NULL if there is nothing to do at request end   */
 	PHP_MINFO('.$this->name.'),
-	"'.$this->version.'", 
+	"'.$this->release['version'].'", 
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
@@ -364,7 +496,7 @@ ZEND_GET_MODULE('.$this->name.')
 
 	  function get_license() {
 			$code = "/*\n";
-			switch($this->license) {
+			switch($this->release['license']) {
 			case "php":
 				$code.=
 '   +----------------------------------------------------------------------+
@@ -385,7 +517,7 @@ ZEND_GET_MODULE('.$this->name.')
 			default:
 				$code.= 
 "   +----------------------------------------------------------------------+
-   | unkown license: '{$this->license}'                                                        |
+   | unkown license: '{$this->release['license']}'                                                        |
    +----------------------------------------------------------------------+
 ";
 				break;
@@ -485,30 +617,47 @@ PHP_MINFO_FUNCTION({$this->name});
 	// {{{ internal functions
 
 	function internal_functions_c() {
+		$need_block = false;
+
 		$code = "
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION({$this->name})
 {
 ";
 
-		if(count($this->globals)) {
+		if (count($this->globals)) {
 			$code .= "\tZEND_INIT_MODULE_GLOBALS({$this->name}, php_{$this->name}_init_globals, NULL)\n";
+			$need_block = true;
 		}
 
-		if(count($this->phpini)) {
+		if (count($this->phpini)) {
 			$code .= "\tREGISTER_INI_ENTRIES();\n";
+			$need_block = true;
 		}
 
-		if(count($this->constants)) {
-			foreach($this->constants as $constant) {
+		if (isset($this->logo)) {
+			$code .= $this->logo->minit_code();
+			$need_block = true;
+		}
+
+		if (count($this->constants)) {
+			foreach ($this->constants as $constant) {
 				$code .= $constant->c_code();
 			}
+			$need_block = true;
 		}
-		
-		if(isset($this->internal_functions['MINIT'])) {
-      if(count($this->globals) || count($this->phpini)) $code .= "\n\t{\n";
+
+		if (count($this->resources)) {
+			foreach ($this->resources as $resource) {
+				$code .= $resource->minit_code();
+      }
+			$need_block = true;			
+    }
+
+		if (isset($this->internal_functions['MINIT'])) {
+      if($need_block) $code .= "\n\t{\n";
 			$code .= $this->internal_functions['MINIT']->code;
-      if(count($this->globals) || count($this->phpini)) $code .= "\n\t}\n";
+      if($need_block) $code .= "\n\t}\n";
 		} else {
 			$code .="\n\t/* add your stuff here */\n";
 		}
@@ -586,10 +735,38 @@ PHP_RSHUTDOWN_FUNCTION({$this->name})
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION({$this->name})
 {
-\tphp_info_print_table_start();
-\tphp_info_print_table_header(2, \"{$this->name} support\", \"enabled\");
-\tphp_info_print_table_end();
+	php_info_print_box_start(0);
+";
 
+   if(isset($this->logo))
+   {
+     $code.= "
+	php_printf(\"<img src='\");
+	if (SG(request_info).request_uri) {
+		php_printf(\"%s\", (SG(request_info).request_uri));
+	}	
+	php_printf(\"?=%s\", ".($this->logo->id).");
+	php_printf(\"' align={'right' alt='image' border='0'>\\n\");
+
+"; 
+    }
+
+   if(isset($this->summary)) {
+     $code .= "  php_printf(\"<p>{$this->summary}</p>\\n\");\n";
+   }
+   if(isset($this->release)) {
+     $code .= "  php_printf(\"<p>Version {$this->release['version']}{$this->release['state']} ({$this->release['date']})</p>\\n\");\n";
+   }
+
+   if(count($this->users)) {
+     $code .= "  php_printf(\"<p><b>Authors:</b></p>\\n\");\n";
+     foreach($this->users as $user) {
+       $code .= "  php_printf(\"<p>$user[name] &lt;$user[email]&gt; ($user[role])</p>\\n\");\n";
+     }
+   }
+
+    $code.=
+"	php_info_print_box_end();
 ";
 
 		if(isset($this->internal_functions['MINFO'])) {
@@ -631,154 +808,9 @@ $code .= "
 	function public_functions_c() {
 		$code = "";
 
-		foreach ($this->functions as $name => $func) {
-
-			$code .= "\n/* {{{ func {$func->returns} {$func->name}(";
-			if (isset($func->params)) {
-				foreach ($func->params as $key => $param) {
-					if (!empty($param['optional'])) $code.=" [";
-					if ($key) $code.=", ";
-					$code .= $param['type'];
-					if($param['type'] != "void") {
-					  $code .= isset($param['name']) ? $param['name'] : "par_$key"; 
-					}
-				}
-			}
-			for ($n=$func->optional; $n>0; $n--) {
-				$code .= "]";
-			}
-			$code .= ")\n  ";
-			if(!empty($func->summary)) $code .= $func->summary;
-			$code .= " */\n";
-
-			$code .= "PHP_FUNCTION({$func->name})\n";
-			$code .= "{\n";
-			
-			if (isset($func->params)) {
-				$arg_string="";
-				$arg_pointers=array();
-				$optional=false;
-				$res_fetch="";
-				
-				foreach ($func->params as $key => $param) {
-					$name = isset($param['name']) ? $param['name'] : "par_$key"; 
-					$arg_pointers[]="&$name";
-					if(isset($param['optional'])&&!$optional) {
-						$optional=true;
-						$arg_string.="|";
-					}
-
-					switch($param['type']) {
-					case "void":
-						break;
-
-					case "bool":
-						$arg_string.="b";
-						$code .= "\tzend_bool $name = 0;\n";
-						break;
-
-					case "int":
-						$arg_string.="l";
-						$code .= "\tlong $name = 0;\n";
-						break;
-
-					case "float":
-						$arg_string.="d";
-						$code .= "\tdouble $name = 0.0;\n";
-						break;
-
-					case "string":
-						$arg_string.="s";
-						$code .= "\tchar * $name = NULL;\n";
-						$code .= "\tint {$name}_len = 0;\n";
-						$arg_pointers[]="&{$name}_len";
-						break;
-
-					case "array":
-						$arg_string.="a";
-						$code .= "\tzval * $name = NULL;\n";
-						break;
-
-					case "object": 
-						$arg_string.="o";
-						$code .= "\tzval * $name = NULL;\n";
-						break;
-
-					case "resource":
-						$arg_string.="r";
-						$code .= "\tzval * $name = NULL;\n";
-						$code .= "\tint * {$name}_id = -1;\n";
-						$arg_pointers[]="&{$name}_id";
-						$res_fetch.="\tif ($name) {\n"
-							."\t\tZEND_FETCH_RESOURCE(???, ???, $name, {$name}_id, \"???\", ???_rsrc_id);\n"
-							."\t}\n";
-						break;
-
-					case "mixed":
-						$arg_string.="z";
-						$code .= "\tzval * $name = NULL;\n";
-						break;
-					}
-				}
-      }
-
-      if(strlen($arg_string)) {
-			  $code .= "\tint argc = ZEND_NUM_ARGS();\n\n";
-				$code .= "\n\tif (zend_parse_parameters(argc TSRMLS_CC, \"$arg_string\", ".join(", ",$arg_pointers).") == FAILURE) return;\n";
-				if($res_fetch) $code.="\n$res_fetch\n";
-			} else {
-				$code .= "\tif(ZEND_NUM_ARGS()>0) { WRONG_PARAM_COUNT; }\n";
-			}
-
-      $code .= "\n";
-
-      if (!empty($func->code)) {
-        $code .= $func->code."\n";
-      } else {
-			  $code .= "\tphp_error(E_WARNING, \"{$func->name}: not yet implemented\");\n\n";
-			
-			  switch($func->returns) {
-			  case "void":
-				  break;
-				
-			  case "bool":
-				  $code .= "\tRETURN_FALSE;\n"; 
-				  break;
-				
-			  case "int":
-			  	$code .= "\tRETURN_LONG(0);\n"; 
-				  break;
-				
-			  case "float":
-				  $code .= "\tRETURN_DOUBLE(0.0);\n";
-				  break;
-				
-			  case "string":
-				  $code .= "\tRETURN_STRINGL(\"\", 0, 1);\n";
-				  break;
-
-			  case "array":
-			  	$code .= "\tarray_init(return_value);\n";
-				  break;
-				
-			  case "object": 
-				  $code .= "\tobject_init(return_value)\n";
-				  break;
-				
-			  case "resource":
-				  $code .= "\t/* RETURN_RESOURCE(...); /*\n";
-				  break;
-
-			  case "mixed":
-				  $code .= "\t/* RETURN_...(...); /*\n";				
-				  break;
-			  }
-      }
-			
-
-			$code .= "}\n/* }}} */\n\n";
-		}
-
+    foreach($this->functions as $function) {
+      $code .= $function->c_code();
+    }
 		
 		return $code;
 	}
@@ -805,13 +837,24 @@ $code .= "
 
 #include <php.h>
 #include <php_ini.h>
+#include <SAPI.h>
 #include <ext/standard/info.h>
 
 ');
 			fputs($fp, "#include \"php_{$this->name}.h\"\n\n");
 						
+      if (isset($this->logo)) {
+			  fputs($fp, $this->logo->c_code());	
+      }
+
 			if (!empty($this->globals)) {
 				fputs($fp, "ZEND_DECLARE_MODULE_GLOBALS({$this->name})\n\n");
+			}
+
+			if (!empty($this->resources)) {
+				foreach ($this->resources as $resource) {
+					fputs($fp, $resource->c_code());
+				}
 			}
 
 			fputs($fp, "/* {{{ {$this->name}_functions[] */\n");

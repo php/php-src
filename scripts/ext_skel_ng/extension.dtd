@@ -1,9 +1,7 @@
 <!--
   -->
 
-<!ELEMENT extension (name|summary|description|license|maintainers|release|changelog|functions|constants|globals|deps)*>
-<!ATTLIST extension type    (source|binary|empty) "empty"
-                  version CDATA                 #REQUIRED>
+<!ELEMENT extension (name|summary|description|license|maintainers|logo|release|changelog|functions|constants|globals|deps|resources)*>
 
 <!ELEMENT name (#PCDATA)>
 
@@ -14,6 +12,11 @@
 <!ELEMENT maintainers (maintainer)+>
 
 <!ELEMENT maintainer (user|role|name|email)*>
+
+<!ELEMENT logo>
+<!ATTLIST logo
+  src CDATA #REQURED
+>
 
 <!ELEMENT user (#PCDATA)>
 
@@ -80,3 +83,11 @@
   function   CDATA #REQUIRED
   searchpath CDATA #IMPLIED
 >
+
+<!ELEMENT resources (resource)*>
+<!ELEMENT resource (destruct)?>
+<!ATTLIST resource
+  name       CDATA #REQUIRED
+  payload    CDATA #IMPLIED
+>
+<!ELEMENT destruct (#PCDATA)>
