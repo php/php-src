@@ -1011,35 +1011,37 @@ PHP_FUNCTION(domxml_node_name)
 	id = getThis();
 	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
 
-  switch (n->type)
-    {
-    case XML_ELEMENT_NODE:
-      str = n->name;
-      break;
-    case XML_TEXT_NODE:
-      str = "#text";
-      break;
+	switch (n->type)
+	{
+	case XML_ELEMENT_NODE:
+		 str = n->name;
+		 break;
+		 
+	case XML_TEXT_NODE:
+		 str = "#text";
+		 break;
+		 
     case XML_CDATA_SECTION_NODE:
-      str = "#cdata-section";
-      break;
+		 str = "#cdata-section";
+		 break;
     case XML_ENTITY_REF_NODE:
-      str = n->name;
-      break;
+		 str = n->name;
+		 break;
     case XML_ENTITY_NODE:
-      str = NULL;
-      break;
+		 str = NULL;
+		 break;
     case XML_PI_NODE:
-      str = n->name;
-      break;
+		 str = n->name;
+		 break;
     case XML_COMMENT_NODE:
-      str = "#comment";
-      break;
+		 str = "#comment";
+		 break;
     case XML_DOCUMENT_FRAG_NODE:
-      str = "#document-fragment";
-      break;
+		 str = "#document-fragment";
+		 break;
     default:
-      str = NULL;
-      break;
+		 str = NULL;
+		 break;
     }
 	RETURN_STRING((char *) str, 1);
 }
@@ -1055,21 +1057,21 @@ PHP_FUNCTION(domxml_node_value)
 	
 	id = getThis();
 	n = php_dom_get_object(id, le_domxmlnodep, 0 TSRMLS_CC);
-
+	
 	if (!n) {
-		RETURN_FALSE;
+		 RETURN_FALSE;
 	}
-  switch (n->type)
+	switch (n->type)
     {
     case XML_TEXT_NODE:
     case XML_COMMENT_NODE:
     case XML_CDATA_SECTION_NODE:
     case XML_PI_NODE:
-      str = n->content;
-      break;
+		 str = n->content;
+		 break;
     default:
-      str = NULL;
-      break;
+		 str = NULL;
+		 break;
     }
 	RETURN_STRING(str, 1);
 }
