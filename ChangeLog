@@ -1,3 +1,71 @@
+2002-08-01  sr  <sr@pb1.pair.com>
+
+    * main/SAPI.c: Fixed wrong usage of strncmp.
+
+2002-08-01  rodif_bl  <rodif_bl@pb1.pair.com>
+
+    * ext/standard/array.c: array_pop wasnt setting next index
+
+2002-08-01  sniper  <sniper@pb1.pair.com>
+
+    * ext/standard/array.c: That was not correct..
+
+    * ext/standard/array.c: Reset index when doing array_pop()
+
+    * ext/standard/tests/array/006.phpt: Add test for the index resetting.
+
+2002-08-01  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * ext/standard/exec.c: Ugh
+
+2002-08-01  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c:
+    Adding in some BC for users to imap_get_quota() function
+
+2002-08-01  sniper  <sniper@pb1.pair.com>
+
+    * ext/standard/tests/array/005.phpt
+      ext/standard/tests/array/006.phpt:
+    Added tests for array_shift/array_pop.
+
+    * ext/standard/array.c: Nuke compile warning.
+
+    * ext/standard/array.c: - Removed the DOS line endings
+    - Changed the '//' comment (this is C, not C++) to /* */
+
+    * tests/func/006.phpt:
+    Fix the levels. (php.ini-dist has output_buffering OFF)
+
+    * tests/lang/034.phpt: Use the constant instead of string for locale type.
+
+2002-08-01  Sascha Schumann  <sas@pb1.pair.com>
+
+    * ext/pgsql/config.m4: MFH *.a check
+
+2002-08-01  helly  <helly@pb1.pair.com>
+
+    * main/SAPI.c:
+    - free mimetype and statusline early if no longer needed or in deactivation
+
+2002-08-01  Rasmus Lerdorf  <rasmus@pb1.pair.com>
+
+    * main/SAPI.c: Need room for the \0 here to avoid an overflow
+
+2002-08-01  Zeev Suraski  <zeev@pb1.pair.com>
+
+    * ext/mbstring/mbstring.c: MFH per Rui's request
+
+2002-08-01  rodif_bl  <rodif_bl@pb1.pair.com>
+
+    * ext/standard/array.c:
+    made array_shift re-index like it did before previous fix
+
+2002-08-01  yohgaki  <yohgaki@pb1.pair.com>
+
+    * main/php_variables.c: MFH
+    Cannot take NULL w/o mbstring.
+
 2002-07-31  jason  <jason@pb1.pair.com>
 
     * NEWS: perhaps this tiem i will get it right

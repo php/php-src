@@ -1,3 +1,8 @@
+2002-08-01  stas  <stas@pb1.pair.com>
+
+    * zend_execute.c
+      zend_hash.c: MFZE1
+
 2002-07-30  jason  <jason@pb1.pair.com>
 
     * zend_compile.c
