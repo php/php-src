@@ -1090,7 +1090,7 @@ static int _mssql_fetch_batch(mssql_link *mssql_ptr, mssql_result *result, int r
 		result->lastresult = retvalue;
 	}
 	efree(column_types);
-	if (result->statement) {
+	if (result->statement && (retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS)) {
 		_mssql_get_sp_result(mssql_ptr, result->statement TSRMLS_CC);
 	}
 	return i;
@@ -1820,6 +1820,9 @@ PHP_FUNCTION(mssql_next_result)
 		RETURN_FALSE;
 	}
 	else if (retvalue == NO_MORE_RESULTS || retvalue == NO_MORE_RPC_RESULTS) {
+		if (result->statement) {
+			_mssql_get_sp_result(mssql_ptr, result->statement TSRMLS_CC);
+		}
 		RETURN_FALSE;
 	}
 	else {
