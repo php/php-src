@@ -1023,7 +1023,6 @@ PHPAPI void php_session_start(TSRMLS_D)
 	zval **ppid;
 	zval **data;
 	char *p;
-	int send_cookie = 1;
 	int define_sid = 1;
 	int module_number = PS(module_number);
 	int nrand;
@@ -1031,6 +1030,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 
 	PS(apply_trans_sid) = PS(use_trans_sid);
 
+	PS(send_cookie) = 1;
 	if (PS(session_status) != php_session_none) 
 		return;
 
@@ -1050,7 +1050,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
 			PS(apply_trans_sid) = 0;
-			send_cookie = 0;
+			PS(send_cookie) = 0;
 			define_sid = 0;
 		}
 
@@ -1061,7 +1061,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
-			send_cookie = 0;
+			PS(send_cookie) = 0;
 		}
 
 		if (!PS(use_only_cookies) && !PS(id) &&
@@ -1071,7 +1071,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 				zend_hash_find(Z_ARRVAL_PP(data), PS(session_name),
 					lensess + 1, (void **) &ppid) == SUCCESS) {
 			PPID2SID;
-			send_cookie = 0;
+			PS(send_cookie) = 0;
 		}
 	}
 
@@ -1104,20 +1104,20 @@ PHPAPI void php_session_start(TSRMLS_D)
 			strstr(Z_STRVAL_PP(data), PS(extern_referer_chk)) == NULL) {
 		efree(PS(id));
 		PS(id) = NULL;
-		send_cookie = 1;
+		PS(send_cookie) = 1;
 		if (PS(use_trans_sid))
 			PS(apply_trans_sid) = 1;
 	}
 	
 	php_session_initialize(TSRMLS_C);
 	
-	if (!PS(use_cookies) && send_cookie) {
+	if (!PS(use_cookies) && PS(send_cookie)) {
 		if (PS(use_trans_sid))
 			PS(apply_trans_sid) = 1;
-		send_cookie = 0;
+		PS(send_cookie) = 0;
 	}
 	
-	if (send_cookie) {
+	if (PS(send_cookie)) {
 		php_session_send_cookie(TSRMLS_C);
 	}
 
@@ -1363,10 +1363,15 @@ PHP_FUNCTION(session_id)
    Update the current session id with a newly generated one. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	if (PS(mod)) {
+	if (PS(session_status) == php_session_active) {
 		if (PS(id)) efree(PS(id));
 	
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+
+		if (PS(send_cookie)) {
+			php_session_send_cookie(TSRMLS_C);
+		}
+
 		RETURN_TRUE;
 	}
 	RETURN_FALSE;
