@@ -206,7 +206,7 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 
 
 /* fetches the requested resource for the current thread */
-void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
+TSRM_API void *ts_resource_ex(ts_rsrc_id id, THREAD_T *th_id)
 {
 	THREAD_T thread_id;
 	int hash_value;
