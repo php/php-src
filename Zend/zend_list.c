@@ -48,7 +48,7 @@ static inline int zend_list_do_delete(HashTable *list,int id)
 	ELS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
-//		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1);
+/*		printf("del(%d): %d->%d\n", id, le->refcount, le->refcount-1); */
 		if (--le->refcount<=0) {
 			return zend_hash_index_del(&EG(regular_list), id);
 		} else {
@@ -96,7 +96,7 @@ ZEND_API int zend_list_addref(int id)
 	ELS_FETCH();
 	
 	if (zend_hash_index_find(&EG(regular_list), id, (void **) &le)==SUCCESS) {
-//		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1);
+/*		printf("add(%d): %d->%d\n", id, le->refcount, le->refcount+1); */
 		le->refcount++;
 		return SUCCESS;
 	} else {

@@ -936,7 +936,6 @@ ZEND_API int is_not_equal_function(zval *result, zval *op1, zval *op2)
 
 ZEND_API int is_smaller_function(zval *result, zval *op1, zval *op2)
 {
-	//printf("Comparing %d and %d\n", op1->value.lval, op2->value.lval);
 	if (compare_function(result, op1, op2) == FAILURE) {
 		return FAILURE;
 	}
