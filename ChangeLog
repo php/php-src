@@ -1,3 +1,69 @@
+2002-08-05  phanto  <phanto@pb1.pair.com>
+
+    * ext/com/COM.c:
+    removed a possible NULL pointer referencing inside an error handler
+
+    * ext/com/VARIANT.c: found a memleak
+
+2002-08-05  kalowsky  <kalowsky@pb1.pair.com>
+
+    * ext/imap/php_imap.c
+      ext/imap/php_imap.h:
+    Removing the imap_popen command... because as Jani puts it "it never worked
+    and it never will work" until IMAP servers support this feature.
+
+2002-08-05  venaas  <venaas@pb1.pair.com>
+
+    * ext/ldap/ldap.c:
+    Made ldap_connect/bind/unbind() use zend_parse_parameters()
+
+2002-08-05  helly  <helly@pb1.pair.com>
+
+    * ext/standard/info.c: Correct carset if iconv is active
+
+    * main/output.c
+      main/php_output.h:
+    Added php_ob_handler_used to check if a specific output handler is used
+    in c.
+
+    * ext/iconv/iconv.c: ws fix
+
+    * main/SAPI.c: -keep mimetype until sapi deactivation
+    -move NULL check for sapi_apply_default_charset to proper position.
+
+    * ext/iconv/iconv.c: -fix one warning
+    -send Content-Type Header with charset
+
+2002-08-05  alan_k  <alan_k@pb1.pair.com>
+
+    * pear/Console/Getopt.php:
+    revert change - this was due to an bug in php HEAD a few days ago
+
+2002-08-05  helly  <helly@pb1.pair.com>
+
+    * win32/php4dll.dsp
+      win32/php4dllts.dsp: Add html_entities.c
+
+2002-08-05  phanto  <phanto@pb1.pair.com>
+
+    * win32/php4dllts.dsp: added testcases to project file
+
+2002-08-05  sniper  <sniper@pb1.pair.com>
+
+    * NEWS: consistency
+
+2002-08-05  alan_k  <alan_k@pb1.pair.com>
+
+    * pear/Console/Getopt.php: Fixed array_shift messing up array_slice..
+
+2002-08-05  helly  <helly@pb1.pair.com>
+
+    * NEWS: :-)
+
+    * ext/standard/basic_functions.c
+      main/output.c
+      main/php_output.h: -New function ob_list_handlers
+
 2002-08-04  Shane Caraveo  <shane@pb1.pair.com>
 
     * ext/standard/var_unserializer.c
