@@ -31,6 +31,8 @@ Open:
     imagesetstyle               (5)
     bundled gd                  (6)
     exif extension		(7)
+    php_base64_encode		(8)
+    pack			(9)
 	
 (1) heap corruption, mostly visible in malloc-related calls.  Whether you see 
     this or not might depend on your libc/compiler.  Hard to track down,
@@ -97,6 +99,9 @@ Methodology
 (7) few possible integer overflows, once safe_emalloc() or something similar
     is implemented they can all be addressed.
 
+(8) integer overflow if the specified string is longer then ~1.1 billion bytes.
+
+(9) multiple integer overflows, ex. pack("d4294967297", 2);
 
 Ammendment 1.
 
