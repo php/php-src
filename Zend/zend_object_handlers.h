@@ -73,7 +73,7 @@ typedef struct _zend_object_handlers {
 
 extern zend_object_handlers std_object_handlers;
 
-#define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && Z_OBJ_HT(z) == &std_object_handlers)
+#define IS_ZEND_STD_OBJECT(z)  ((z).type == IS_OBJECT && Z_OBJ_HT_P(zobject)->get_class_entry)
 #define HAS_CLASS_ENTRY(z) (Z_OBJ_HT(z)->get_class_entry != NULL)
 
 #endif
