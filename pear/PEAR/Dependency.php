@@ -26,61 +26,135 @@
 * (requires php >= 4.1)
 */
 
+require_once "PEAR.php";
+
 class PEAR_Dependency
 {
     /**
-    * Package dependencies check method
-    *
-    * @param string $name    Name of the package to test
-    * @param string $version The package version required
-    * @param string $rule    A valid version_compare compare operator
-    *
-    * @return bool
-    */
-    function package($name, $version = null, $rule = 'has')
+     * Package dependencies check method
+     *
+     * @param string $name      Name of the package to test
+     * @param string $version   The package version required
+     * @param string $relation  How to compare versions with eachother
+     *
+     * @return bool whether the dependency is satisfied
+     */
+    function checkPackage($name, $req_ver = null, $relation = 'has')
     {
         if (empty($this->registry)) {
             $this->registry = new PEAR_Registry;
         }
-        switch ($rule) {
-            case 'has':
-                return $this->registry->packageExists($name);
-                break;
-            default:
-                if ($info = $this->registry->packageInfo($name)) {
-                    return version_compare($version,
-                                           $info['version'],
-                                           $rule);
-                }
-                return false;
-                break;
+        $pkg_ver = $this->registry->packageInfo($name, 'version');
+        if ($relation == 'has') {
+            return $this->registry->packageExists($name);
         }
+        if (substr($relation, 0, 2) == 'v.') {
+            $operator = substr($relation, 2);
+            return version_compare($req_ver, $pkg_ver, $operator);
+        }
+        return false;
     }
 
     /**
-    * Extension dependencies check method
-    *
-    * @param string $name Name of the extension to test
-    * @param string $req_ext_ver Required extension version to compare with
-    * @param string $rule A valid version_compare compare operator
-    *
-    * @return bool
-    */
-    function extension($name, $req_ext_ver = null, $rule = 'has')
+     * Extension dependencies check method
+     *
+     * @param string $name        Name of the extension to test
+     * @param string $req_ext_ver Required extension version to compare with
+     * @param string $relation    How to compare versions with eachother
+     *
+     * @return bool whether the dependency is satisfied
+     */
+    function checkExtension($name, $req_ver = null, $relation = 'has')
     {
+        // XXX (ssb): could we avoid loading the extension here?
         if (!extension_loaded($name)) {
             $dlext = OS_WINDOWS ? '.dll' : '.so';
             if (!@dl($name . $dlext)) {
                 return false;
-            } elseif($rule == 'has') {
+            }
+        }
+        $ext_ver = phpversion($name);
+        if ($relation == 'has') {
+            return true;
+        }
+        if (substr($relation, 0, 2) == 'v.') {
+            $operator = substr($relation, 2);
+            return version_compare($req_ver, $ext_ver, $operator);
+        }
+        return false;
+    }
+
+
+    /**
+     * Operating system  dependencies check method
+     *
+     * @param string $os  Name of the operating system
+     *
+     * @return bool whether we're running on $os
+     */
+    function checkOS($os)
+    {
+        // only 'has' relation is supported
+        return ($os == PHP_OS);
+    }
+
+    /**
+     * PHP version check method
+     *
+     * @param string $req_ver   which version to compare
+     * @param string $relation  how to compare the version
+     *
+     * @return bool whether the dependency is satisfied
+     */
+    function checkPHP($req_ver, $relation = 'ge')
+    {
+        $php_ver = phpversion();
+        if (substr($relation, 0, 2) == 'v.') {
+            $operator = substr($relation, 2);
+            return version_compare($req_ver, $php_ver, $operator);
+        }
+        return true;
+    }
+
+    /**
+     * External program check method.  Looks for executable files in
+     * directories listed in the PATH environment variable.
+     *
+     * @param string $program   which program to look for
+     *
+     * @return bool whether the dependency is satisfied
+     */
+    function checkProgram($program)
+    {
+        // XXX FIXME honor safe mode
+        $path_delim = OS_WINDOWS ? ';' : ':';
+        $exe_suffix = OS_WINDOWS ? '.exe' : '';
+        $path_elements = explode($path_delim, $_ENV['PATH']);
+        foreach ($path_elements as $dir) {
+            $file = "$dir/$program{$exe_suffix}";
+            if (file_exists($file) && is_executable($file)) {
                 return true;
             }
         }
-        // XXX Put here the code to extract the version of a extension. Stig? :)
-        //$ext_ver = ?????($name);
-        return version_compare($req_ext_ver, $ext_ver, $rule);
+        return false;
     }
 
+    /**
+     * SAPI backend check method.  Version comparison is not yet
+     * available here.
+     *
+     * @param string $name      name of SAPI backend
+     * @param string $req_ver   which version to compare
+     * @param string $relation  how to compare versions (currently
+     *                          hardcoded to 'has')
+     */
+    function checkSAPI($name, $req_ver = null, $relation = 'has')
+    {
+        $sapi_backend = php_sapi_name();
+        // Version comparisons not supported, sapi backends don't have
+        // version information yet.
+        return ($sapi_backend == $name);
+    }
 }
 
 ?>
