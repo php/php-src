@@ -93,4 +93,31 @@ ok1
 bar::run1
 foo::method1
 
-Fatal error: Only variables or references can be returned by reference in %s on line %d
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+foo::method1
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+foo::finalize
+done!
+ok2
+bar::run2
+foo::method2
+foo::method2
+foo::finalize
+done!
+ok3
+bar::run3
+foo::method3
+foo::method3
+foo::finalize
+done!
+ouch
+bar::run1
+foo::method1
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+foo::method1
+
+Strict Standards: Only variable references should be returned by reference in %s on line %d
+foo::finalize
+I'm alive!
