@@ -38,6 +38,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #23102 (integer overflow in exif_iif_add_value()). (Ilia)
 - Fixed bug #23093 (highlight_string() crashed with __FUNCTION__). (Jani)
 - Fixed bug #23071 (when DST in effect, date("T") crashed PHP). (Scott MacVicar, Jani)
+- Fixed bug #23069 (tempnam creates readonly file [win32]). (Wez)
 - Fixed bug #23009 (pg_select with timestamp). (Marcus, Jay)
 - Fixed bug #23008 (ldap_start_tls() not available on Windows). (Edin)
 - Fixed bug #23004 (When ftp_close() is called, send QUIT to the ftp server). (Ilia)
