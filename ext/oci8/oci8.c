@@ -4218,16 +4218,35 @@ PHP_FUNCTION(ocierror)
 	zval **arg;
 	oci_statement *statement;
 	oci_connection *connection;
-    text errbuf[512];
-    sb4 errcode = 0;
+	text errbuf[512];
+	sb4 errcode = 0;
 	sword error = 0;
 	dvoid *errh = NULL;
+	ub2 errorofs = 0;
+	text *sqltext = NULL;
 
 	if (zend_get_parameters_ex(1, &arg) == SUCCESS) {
 		statement = (oci_statement *) zend_fetch_resource(arg TSRMLS_CC, -1, NULL, NULL, 1, le_stmt);
 		if (statement) {
 			errh = statement->pError;
 			error = statement->error;
+
+			CALL_OCI_RETURN(statement->error, OCIAttrGet(
+				(dvoid *)statement->pStmt,
+				OCI_HTYPE_STMT,
+				(text *) &sqltext,
+				(ub4 *)0,
+				OCI_ATTR_STATEMENT,
+				statement->pError));
+
+			CALL_OCI_RETURN(statement->error, OCIAttrGet(
+				(dvoid *)statement->pStmt,
+				OCI_HTYPE_STMT,
+				(ub2 *)&errorofs,
+				(ub4 *)0,
+				OCI_ATTR_PARSE_ERROR_OFFSET,
+				statement->pError));
+
 		} else {
 			connection = (oci_connection *) zend_fetch_resource(arg TSRMLS_CC, -1, NULL, NULL, 1, le_conn);
 			if (connection) {
@@ -4262,6 +4281,8 @@ PHP_FUNCTION(ocierror)
 		array_init(return_value);
 		add_assoc_long(return_value, "code", errcode);
 		add_assoc_string(return_value, "message", (char*) errbuf, 1);
+		add_assoc_long(return_value, "offset", errorofs);
+		add_assoc_string(return_value, "sqltext", sqltext ? (char *) sqltext : "", 1);
 	} else {
 		RETURN_FALSE;
 	}
