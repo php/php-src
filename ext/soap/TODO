@@ -22,7 +22,7 @@ Encoding
   ? anyURI, 
   ? QName, 
   ? NOTATION,
-  ? normalizedString, 
+  + normalizedString, 
   ? token, 
   ? language, 
   ? NMTOKEN, 
@@ -33,7 +33,7 @@ Encoding
   ? IDREFS, 
   ? ENTITY, 
   ? ENTITIES, 
-  ? unsignedLong)
+  + unsignedLong)
 - full support for standard date/time types (
   ? dateTime,
   ? time,
@@ -67,30 +67,30 @@ WSDL
 + support for <opperation> without <input>
 + support for style "rpc"/"document" encoding (client part)
 - support for style "rpc"/"document" encoding (server part)
-  How to get function name from request?
+  How to get function name from request? May be SoapAction HTTP header?
 + support for "encoded"/"literal" encoding
 ? arrayType and "literal" encoding
 ? support for "nillable" and "nil"
 - support for user defined simple types
   - restiction
 	  + base
+	  + enumeration
+		+ length (for string, anyURI, hexBinary, base64Binary and derived)
+		+ minLength (for string, hexBinary, base64Binary and derived)
+		+ maxLength (for string, hexBinary, base64Binary and derived)
+		+ whiteSpace (preserve, replace [#x9,#xA,#xD=>#x20], collapse [replace+?])
+		- pattern
 	  - minExclusive (for numeric, date types)
 		- minInclusive (for numeric, date types)
 		- maxExclusive (for numeric, date types)
 		- maxInclusive (for numeric, date types)
 		- totalDigits (for decimal)
 		- fractionDigits (for decimal)
-		- length (for string, anyURI, hexBinary, base64Binary and derived)
-		- minLength (for string, hexBinary, base64Binary and derived)
-		- maxLength (for string, hexBinary, base64Binary and derived)
-		- whiteSpace (preserve, replace [#x9,#xA,#xD=>#x20], collapse [replace+?])
-		- pattern
-	  ? enumeration
 	- list ???
 	- union ???
 - support for user defined complex types
   - simpleContent extension   
-  ? base
+  + base
   - group
   	- name
   	- all
@@ -111,7 +111,7 @@ WSDL
   	- sequence
   	- any ???
   - attribute
-- function/method overloading (test(int); test(string))
+- function/method overloading/redeclaration (test(int); test(string))
 - wsdl caching
 - wsdl auto generation
 ? SOAP binding
@@ -135,7 +135,7 @@ Transport
 + HTTP Cookies support 
 - support for HTTP proxies
 - transport abstraction layer
-? SoapAction HTTP header field
++ SoapAction HTTP header field
 ? HTTP status codes
 ? HTTP chunked Transfer-Encoding
 

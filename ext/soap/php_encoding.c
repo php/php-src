@@ -87,6 +87,7 @@ encode defaultEncoding[] = {
 	{{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_ulong, to_xml_ulong},
 
 	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
+	{{XSD_UR_TYPE, XSD_UR_TYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
 	{{XSD_ANYURI, XSD_ANYURI_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_QNAME, XSD_QNAME_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
 	{{XSD_NOTATION, XSD_NOTATION_STRING, XSD_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
@@ -452,9 +453,19 @@ static zval *to_zval_ulong(encodeType type, xmlNodePtr data)
 	FIND_XML_NULL(data, ret);
 
 	if (data && data->children && data->children->content) {
+		unsigned long val = 0;
+		char *s;
 		whiteSpace_collapse(data->children->content);
-		/* TODO: long overflow */
-		ZVAL_LONG(ret, atol(data->children->content));
+		s = data->children->content;
+		while (*s >= '0' && *s <= '9') {
+			val = (val*10)+(*s-'0');
+			s++;
+		}
+		if ((long)val >= 0) {
+			ZVAL_LONG(ret, val);
+		} else {
+			ZVAL_STRING(ret, data->children->content, 1);
+		}
 	} else {
 		ZVAL_NULL(ret);
 	}
@@ -857,7 +868,6 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 	encodePtr enc = NULL;
 	int dimension = 1;
 	int* dims;
-//	int map;
 
 	TSRMLS_FETCH();
 
@@ -866,12 +876,7 @@ xmlNodePtr to_xml_array(encodeType type, zval *data, int style)
 	FIND_ZVAL_NULL(data, xmlParam, style);
 
 	if (Z_TYPE_P(data) == IS_ARRAY) {
-//		map = is_map(data);
-//		if (map) {
 			i = zend_hash_num_elements(Z_ARRVAL_P(data));
-//		} else {
-//			i = array_num_elements(Z_ARRVAL_P(data));
-//		}
 
 		/*FIXME: arrayType and "literal" encoding? */
 		if (style == SOAP_ENCODED) {
