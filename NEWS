@@ -1,7 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev 
-- Improve range() function to support range('a','z') and range(9,0) types 
+- Added option for returning XMLRPC fault packets (Matt Allen, Sascha Schumann)
+- Improved range() function to support range('a','z') and range(9,0) types 
   of ranges.  (Rasmus)
 - Add getmygid() and safe_mode_gid ini directive to allow safe mode to do
   a gid check instead of a uid check. (James E. Flemer, Rasmus)

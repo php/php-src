@@ -123,6 +123,10 @@ struct _php_core_globals {
 	zend_bool y2k_compliance;
 
 	zend_bool html_errors;
+	zend_bool xmlrpc_errors;
+
+	short xmlrpc_error_number;
+
 
 	zend_bool modules_activated;
 

@@ -202,6 +202,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("enable_dl",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			enable_dl,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("expose_php",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			expose_php,				php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("html_errors",			"1",		PHP_INI_SYSTEM,		OnUpdateBool,			html_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_BOOLEAN("xmlrpc_errors",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			xmlrpc_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("xmlrpc_error_number",	"0",		PHP_INI_ALL,		OnUpdateString,			xmlrpc_error_number,	php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("ignore_user_abort",	"0",		PHP_INI_ALL,		OnUpdateBool,			ignore_user_abort,		php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("implicit_flush",		"0",		PHP_INI_PERDIR|PHP_INI_SYSTEM,OnUpdateBool,	implicit_flush,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("log_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			log_errors,				php_core_globals,	core_globals)
@@ -400,12 +402,20 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 			error_format = PG(html_errors) ?
 				"<br>\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br>\n"
 				: "\n%s: %s in %s on line %d\n";
+			if (PG(xmlrpc_errors)) {
+				error_format = do_alloca(1024);
+				snprintf(error_format, 1023 , "<?xml version=\"1.0\"?><methodResponse><fault><value><struct><member><name>faultCode</name><value><int>%d</int></value></member><member><name>faultString</name><value><string>%%s:%%s in %%s on line %%d</string></value></member></struct></value></fault></methodResponse>", PG(xmlrpc_error_number));
+			}
 
 			if (prepend_string) {
 				PUTS(prepend_string);
 			}
 			php_printf(error_format, error_type_str, buffer,
 					   error_filename, error_lineno);
+			if (PG(xmlrpc_errors)) {
+				free_alloca(error_format);
+			}
+
 			if (append_string) {
 				PUTS(append_string);
 			}
