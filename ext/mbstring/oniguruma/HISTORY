@@ -1,11 +1,361 @@
 History
 
+2004/02/27: Version 2.2.2
+
+2004/02/27: [impl] fix the position of onig_stat_print().
+2004/02/27: [impl] define ONIG_RUBY_DEFINE_GLOBAL_FUNCTION() in regint.h
+                   for ignored by RDoc.
+
+2004/02/26: Version 2.2.1
+
+2004/02/26: [bug]  invalid definition at onig_error_code_to_str()
+                   in the case of NOT HAVE_STDARG_PROTOTYPES.
+
+2004/02/25: Version 2.2.0
+
+2004/02/25: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/02/24: [test] success in ruby 1.9.0 (2004-02-24) [i686-linux].
+2004/02/24: [bug]  undefined IS_BLANK() and IS_GRAPH() was used in
+                   onigenc_is_code_ctype() in the case of Ruby M17N.
+2004/02/24: [new]  support ISO-8859-16. (ONIG_ENCODING_ISO_8859_16)
+2004/02/24: [bug]  should not fold match for 0xdf in iso8859_6.c.
+2004/02/24: [new]  support ISO-8859-14. (ONIG_ENCODING_ISO_8859_14)
+2004/02/23: [new]  support ISO-8859-13. (ONIG_ENCODING_ISO_8859_13)
+2004/02/23: [new]  support ISO-8859-10. (ONIG_ENCODING_ISO_8859_10)
+2004/02/20: [bug]  fix iso_8859_4_mbc_is_case_ambig().
+2004/02/20: [new]  support ISO-8859-9. (ONIG_ENCODING_ISO_8859_9)
+2004/02/19: [bug]  correct ctype tables for ISO-8859-3, ISO-8859-4, 
+                   ISO-8859-6, ISO-8859-7, ISO-8859-8, KOI8_R.
+2004/02/18: [bug]  wrong replaced name OnigSyntaxGnuOnigex.
+2004/02/17: [spec] check capture status for empty infinite loop.
+                   [ruby-dev:20224] etc...
+                   ex. /(?:\1a|())*/.match("a"),
+                       /(?:()|()|()|(x)|()|())*\2b\5/.match("b")
+                   add USE_INFINITE_REPEAT_MONOMANIAC_MEM_STATUS_CHECK.
+                   add OP_NULL_CHECK_END_MEMST, OP_NULL_CHECK_END_MEMST_PUSH.
+                   add stack type STK_NULL_CHECK_END.
+2004/02/13: [impl] add OnigEncodingEUC_CN to enc/euc_kr.c.
+2004/02/13: [bug]  (thanks Simon Strandgaard)
+                   parsing of nested repeat was invalid.
+                   ex. /ab{2,3}*/ was /(?:a(?:b{2,3}))*/,
+                       should be /a(?:b{2,3}*)/
+2004/02/12: [bug]  (thanks Simon Strandgaard)
+                   OP_REPEAT_INC_NG process in match_at() is wrong.
+                   ex. bad match /a.{0,2}?a/ =~ "0aXXXa0"
+2004/02/12: [bug]  (thanks Simon Strandgaard)
+                   wrong fetch after (?x) option.  ex. "(?x)\ta .\n+b"
+2004/02/12: [bug]  (thanks Simon Strandgaard)
+                   [\^] is not a empty char class.
+2004/02/09: [new]  add onig_set_syntax_op(), onig_set_syntax_op2(),
+                   onig_set_syntax_behavior(), onig_set_syntax_options().
+2004/02/06: [dist] add a new target 'site' to Makefile.in.
+2004/02/06: [dist] add index.html.
+2004/02/03: [bug]  oniggnu.h was not installed by 'make install'.
+
+2004/02/02: Version 2.1.0
+
+2004/02/02: [test] success in ruby 1.9.0 (2004-02-02) [i686-linux].
+2004/02/02: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/02/02: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2004/02/02: [new]  support ISO-8859-11. (ONIG_ENCODING_ISO_8859_11)
+2004/02/02: [new]  support ISO-8859-5. (ONIG_ENCODING_ISO_8859_5)
+2004/02/02: [impl] should check single byte encoding or not in and_cclass()
+                   and or_cclass().
+2004/01/30: [dist] add oniggnu.h.
+2004/01/30: [bug]  ISO-8859-7 0xb7 (middle dot) is Punct type.
+2004/01/30: [new]  support ISO-8859-8. (ONIG_ENCODING_ISO_8859_8)
+2004/01/29: [new]  support ISO-8859-7. (ONIG_ENCODING_ISO_8859_7)
+2004/01/29: [new]  support ISO-8859-6. (ONIG_ENCODING_ISO_8859_6)
+2004/01/28: [new]  support KOI8-R. (ONIG_ENCODING_KOI8_R)
+2004/01/28: [new]  support KOI8. (ONIG_ENCODING_KOI8)
+2004/01/27: [dist] rename enc/isotable.c to enc/mktable.c.
+2004/01/27: [new]  support ISO-8859-4. (ONIG_ENCODING_ISO_8859_4)
+2004/01/26: [new]  support ISO-8859-3. (ONIG_ENCODING_ISO_8859_3)
+2004/01/26: [bug]  EncISO_8859_{1,15}_CtypeTable[256] was wrong.
+                   (0x80 - 0xff is not ASCII)
+2004/01/23: [new]  support ISO-8859-2. (ONIG_ENCODING_ISO_8859_2)
+2004/01/23: [dist] add enc/isotable.c.
+2004/01/22; [new]  support EUC-TW. (ONIG_ENCODING_EUC_TW)
+2004/01/22: [bug]  definition of GET_ALIGNMENT_PAD_SIZE() and
+                   ALIGNMENT_RIGHT() was wrong.
+                   type casting should be unsigned int, not int.
+2004/01/22: [impl] add defined(__x86_64) || defined(__x86_64__)
+                   to unaligned word access condition. (AMD64 ?)
+2004/01/21: [dist] rename enc/eucjp.c to enc/euc_jp.c.
+2004/01/21; [new]  support EUC-KR. (ONIG_ENCODING_EUC_KR)
+2004/01/20: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2004/01/20: [dist] change Makefile.in.
+2004/01/20: [spec] add \p{...}, \P{...} in char class.
+2004/01/20: [new]  character property operators \p{...}, \P{...}.
+                   supported in ONIG_SYNTAX_JAVA and ONIG_SYNTAX_PERL.
+2004/01/19: [spec] allow /a{,n}/ as /a{0,n}/. (but don't allow /a{,}/)
+2004/01/19: [dist] rename onigcomp200.h to onigcmpt200.h.
+2004/01/19: [dist] update re.c.168.patch. svn add re.c.181.patch.
+2004/01/16: [dist] update sample/*.c for new API.
+2004/01/16: [dist] add onigcomp200.h. (for old API compatibility)
+2004/01/16: [dist] update documents API, RE and RE.ja.
+2004/01/16: [spec] change prefix REG_ -> ONIG_, regex_ onig_,
+                   ENC_ -> ONIGENC, enc_ -> onigenc_.
+2004/01/15: [impl] rename ENC_IS_MBC_E_WORD() to ENC_IS_MBC_WORD().
+                   rename ENC_CTYPE_SUPPORT_LEVEL_SB_ONLY to
+                   ENC_CTYPE_SUPPORT_LEVEL_SB.
+2004/01/14: [impl] rename UNALIGNED_WORD_ACCESS to
+                   PLATFORM_UNALIGNED_WORD_ACCESS.
+2004/01/14: [impl] change MATCH_STACK_LIMIT_SIZE value from 200000 to 500000.
+2004/01/13: [impl] remove ENC_CODE_TO_MBC_FIRST(enc,code) in regenc.h.
+                   remove code_to_mbc_first member in RegCharEncodingType.
+2004/01/13: [impl] remove head byte bitset information in cclass->mbuf.
+2003/12/26: [impl] change macro name ismb_xxxx() in enc/*.c for
+                   escape conflict.
+
+2003/12/24: Version 2.0.0
+
+2003/12/24: [spec] ignore case option is effective to numbered char.
+                   ex. /\x61/i =~ "A"
+2003/12/24: [test] success in ruby 1.8.1 (2003-12-24) [i686-linux].
+2003/12/24: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2003/12/24: [test] success in ruby 1.8.0 (2003-08-08) [i386-mswin32].
+2003/12/24: [test] success in regex.c compile test on ruby-m17n.
+                   (but can't make miniruby because re.c patch fail.)
+2003/12/24: [bug]  (thanks H.Miyamoto) /[\W]/ was wrong in 1.9.5.
+2003/12/22: [spec] implement fold match on UTF-8 encoding.
+2003/12/19: [impl] add ctype_support_level and ctype_add_codes() member to
+                   RegCharEncoding type.
+2003/12/19: [impl] add add_ctype_to_cc() in regparse.c.
+2003/12/19: [impl] add enc_is_code_ctype() in REG_RUBY_M17N case.
+2003/12/19: [impl] change ENC_CODE_TO_MBC() interface.
+2003/12/18: [new]  implement fold match. (variable number of char
+                   match in ignore case mode.)
+                   ex. German alphabet ess-tsett(U+00DF) match "SS" and "ss".
+2003/12/17: [impl] refactoring of encoding system.
+2003/12/17: [impl] add enc_init() in regenc.c.
+2003/12/17: [new]  support Big5. (REG_ENCODING_BIG5)
+2003/12/16: [impl] change CodePoint from unsigned int to unsigned long.
+2003/12/16: [new]  support ISO 8859-15. (REG_ENCODING_ISO_8859_15)
+2003/12/16: [impl] change P_() macro definition condition for Win32.
+2003/12/16: [dist] add sample/encode.c
+2003/12/16: [new]  support ISO 8859-1. (REG_ENCODING_ISO_8859_1)
+2003/12/15: [impl] rename IS_ENC_XXXX to ENC_IS_XXXX.
+2003/12/15: [impl] rename RegDefaultCharEncoding to EncDefaultCharEncoding.
+2003/12/15: [impl] divide encoding files. (enc/ascii.c, enc/utf8.c etc...)
+2003/12/15: [bug]  unexpected infinite loop in regex_snprintf_with_pattern().
+                   change local var. type char* to UChar*.
+2003/12/15: [impl] remove REG_MBLEN_TABLE[].
+2003/12/15: [spec] rename function prefix regex_get_prev_char_head(),
+                   regex_get_left_adjust_char_head() and
+                   regex_get_right_adjust_char_head() to enc_xxxxxx().
+2003/12/15: [impl] rename function prefixes in regenc.h from regex_ to enc_.
+2003/12/12: [impl] remove USE_SBMB_CLASS.
+2003/12/12: [impl] rename mb -> mbc, mblen() to enc_len().
+2003/12/12: [impl] rename WCINT to CodePoint.
+2003/12/11: [impl] delete IS_XXXX() ctype macros from regint.h.
+2003/12/11: [impl] add enc->wc_is_ctype() and RegAsciiCtypeTable[256].
+2003/12/11: [impl] remove RegAsciiCaseAmbigTable.
+2003/12/10: [impl] use ENC_TO_LOWER() for ignore case comparison.
+2003/12/08: [impl] *** re-defined RegCharEncoding in oniguruma.h. ***
+2003/12/08: [impl] add USE_POSIX_REGION_OPTION to regint.h.
+2003/12/08: [impl] add IS_ENC_WORD() to regenc.h.
+2003/12/05: [impl] rename IS_CODE_XXXX() to IS_ENC_XXXX().
+2003/12/05: [impl] delete IS_CODE_WORD() from regenc.h.
+2003/12/04: [spec] rename REG_SYN_OP_BACK_REF to REG_SYN_OP_DECIMAL_BACKREF.
+2003/12/04: [spec] add (REG_SYN_OP_ESC_W_WORD | REG_SYN_OP_ESC_B_WORD_BOUND |
+                   REG_SYN_OP_ESC_LTGT_WORD_BEGIN_END | REG_SYN_OP_BACK_REF)
+                   to RegSyntaxGrep.
+2003/12/04: [spec] remove REG_ENCODING_DEFAULT and REGCODE_DEFAULT.
+2003/12/04: [spec] move declarations of regex_get_default_encoding() and
+                   regex_set_default_encoding() from oniguruma.h to regenc.h.
+2003/12/03: [new]  add regex_get_default_encoding() and
+                   regex_set_default_encoding().
+2003/12/03: [spec] REG_ENCODING_DEFAULT meaning is changed.
+                   (current default value, not initial default value.)
+2003/12/03: [spec] REGCODE_XXX is obsoleted. use REG_ENCODING_XXX.
+2003/12/02: [memo] alias svnst='svn status | grep -v "^\?"'
+2003/12/02: [spec] move regex_set_default_trans_table() declaration
+                   from oniguruma.h to regenc.h. (obsoleted API)
+2003/12/02: [impl] move variables RegDefaultCharEncoding, DefaultTransTable and
+                   AmbiguityTable to regenc.c.
+2003/12/01: [impl] add regex_continuous_sbmb() to regenc.c.
+2003/12/01: [dist] add regenc.h and regenc.c.
+2003/11/18: [dist] change testconv.rb.
+2003/11/18: [bug]  (thanks Masaru Tsuda)
+                   memory leak in parse_subexp().
+2003/11/18: [bug]  (thanks Masaru Tsuda)
+                   memory leak in names_clear() and parse_char_class().
+2003/11/17: [bug]  memory leak in parse_char_class().
+2003/11/17: [bug]  (thanks Masaru Tsuda)
+                   OptExactInfo length should not over OPT_EXACT_MAXLEN.
+                   (concat_opt_exact_info_str())
+
+2003/11/12: Version 1.9.5
+
+2003/11/12: [test] success in ruby 1.8.0 (2003-08-08) [i386-cygwin].
+2003/11/12: [test] success in ruby 1.8.1 (2003-11-11) [i686-linux].
+2003/11/12: [spec] add definition of REG_INEFFECTIVE_META_CHAR.
+2003/11/11: [dist] add a sample program sample/sql.c.
+2003/11/11: [new]  add variable meta character.
+                   regex_set_meta_char()
+2003/11/11: [spec] add syntax op. REG_SYN_OP_VARIABLE_META_CHARS.
+2003/11/11: [spec] rename REG_SYN_OP_ESC_CAPITAL_Q_QUOTE to
+                   REG_SYN_OP2_ESC_CAPITAL_Q_QUOTE,
+                   REG_SYN_OP_QMARK_GROUP_EFFECT to 
+                   REG_SYN_OP2_QMARK_GROUP_EFFECT.
+2003/11/06: [impl] define THREAD_PASS as rb_thread_schedule() in Ruby mode.
+2003/11/05: [spec] add syntax behavior REG_SYN_WARN_REDUNDANT_NESTED_REPEAT.
+2003/11/05: [spec] rename REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPED to
+                   REG_SYN_WARN_CC_OP_NOT_ESCAPED.
+2003/11/04: [new]  add regex_set_warn_func() and regex_set_verb_warn_func().
+2003/10/30: [new]  add regex_name_to_backref_number().
+                   (for multiplex definition name, see sample/names.c)
+2003/10/30: [spec] add name_end and reg argument to callback function of
+                   regex_foreach_name().  (see sample/names.c)
+2003/10/29: [spec] add syntax behavior REG_SYN_ALLOW_MULTIPLEX_DEFINITION_NAME.
+                   add error code REGERR_MULTIPLEX_DEFINED_NAME.
+2003/10/14: [dist] modify sample/simple.c.
+2003/10/03: [bug]  (thanks nobu)  [ruby-dev:21472]
+                   sub-anchor of optimization map info was wrong
+                   in concat_left_node_opt_info().
+                   ex. /^(x?y)/ = "xy" fail. 
+
+2003/09/17: Version 1.9.4
+
+2003/09/17: [spec] change specification of char-class range in ignore case mode
+                   follows with Ruby 1.8(2003-09-17).
+                   ex. /[H-c]/i ==> (H-Z, 0x5b-0x60, a-c)/i
+                                ==> H-Z, h-z, 0x5b-0x60, a-c, A-C
+2003/09/16: [bug]  (thanks Guy Decoux)
+                   remove env->option == option check in parse_effect().
+                   change env->option for dynamic option in parse_exp().
+                   (ex. bad match /(?i)(?-i)a/ =~ "A")
+2003/09/12: [spec] rename REG_SYN_ALLOW_RANGE_OP_IN_CC to
+                   REG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC,
+                   REG_SYN_ESCAPE_IN_CC to REG_SYN_BACKSLASH_ESCAPE_IN_CC.
+2003/09/11: [bug]  change to IS_SYNTAX_OP2 at REG_SYN_OP2_ESC_GNU_BUF_ANCHOR.
+2003/09/09: [spec] rename REG_SYN_OP2_ESC_M_BAR_META to
+                   REG_SYN_OP2_ESC_CAPITAL_M_BAR_META,
+                   REG_SYN_OP_ESC_Q_QUOTE to REG_SYN_OP_ESC_CAPITAL_Q_QUOTE,
+                   REG_SYN_OP_ESC_SUBEXP to REG_SYN_OP_ESC_LPAREN_SUBEXP,
+                   REG_SYN_OP_ESC_BUF_ANCHOR to REG_SYN_OP_ESC_AZ_BUF_ANCHOR,
+                   REG_SYN_OP_ESC_GNU_BUF_ANCHOR to
+                   REG_SYN_OP2_ESC_GNU_BUF_ANCHOR,
+                   REG_SYN_OP_ESC_CONTROL_CHAR to REG_SYN_OP_ESC_CONTROL_CHARS,
+                   REG_SYN_OP_ESC_WORD to REG_SYN_OP_ESC_W_WORD,
+                   REG_SYN_OP_ESC_WORD_BEGIN_END to
+                   REG_SYN_OP_ESC_LTGT_WORD_BEGIN_END,
+                   REG_SYN_OP_ESC_WORD_BOUND to REG_SYN_OP_ESC_B_WORD_BOUND,
+                   REG_SYN_OP_ESC_WHITE_SPACE to REG_SYN_OP_ESC_S_WHITE_SPACE,
+                   REG_SYN_OP_ESC_DIGIT to REG_SYN_OP_ESC_D_DIGIT,
+                   REG_SYN_OP_CC to REG_SYN_OP_BRACKET_CC,
+                   REG_SYN_OP2_CCLASS_SET to REG_SYN_OP2_CCLASS_SET_OP,
+                   REG_SYN_CONTEXT_INDEP_OPS to
+                   REG_SYN_CONTEXT_INDEP_REPEAT_OPS,
+                   REG_SYN_CONTEXT_INVALID_REPEAT_OPS to
+                   REG_SYN_CONTEXT_INVALID_REPEAT_OPS.
+                   add REG_SYN_OP_ESC_CAPITAL_G_BEGIN_ANCHOR.
+2003/09/08: [spec] rename REG_SYN_OP_ANYCHAR to REG_SYN_OP_DOT_ANYCHAR,
+                   REG_SYN_OP_0INF to REG_SYN_OP_ASTERISK_ZERO_INF,
+                   REG_SYN_OP_ESC_0INF to REG_SYN_OP_ESC_ASTERISK_ZERO_INF,
+                   REG_SYN_OP_1INF to REG_SYN_OP_PLUS_ONE_INF,
+                   REG_SYN_OP_ESC_1INF to REG_SYN_OP_ESC_PLUS_ONE_INF,
+                   REG_SYN_OP_0INF to REG_SYN_OP_QMARK_ZERO_ONE,
+                   REG_SYN_OP_ESC_0INF to REG_SYN_OP_ESC_QMARK_ZERO_ONE,
+                   REG_SYN_OP_INTERVAL to REG_SYN_OP_BRACE_INTERVAL,
+                   REG_SYN_OP_ESC_INTERVAL to REG_SYN_OP_ESC_BRACE_INTERVAL,
+                   REG_SYN_OP_SUBEXP to REG_SYN_OP_LPAREN_SUBEXP,
+                   REG_SYN_OP_ALT to REG_SYN_OP_VBAR_ALT,
+                   REG_SYN_OP_ESC_ALT to REG_SYN_OP_ESC_VBAR_ALT,
+                   REG_SYN_OP_NON_GREEDY to REG_SYN_OP_QMARK_NON_GREEDY,
+                   REG_SYN_OP_SUBEXP_EFFECT to REG_SYN_OP_QMARK_GROUP_EFFECT,
+                   REG_SYN_OP2_POSSESSIVE_{REPEAT,INTERVAL} to
+                   REG_SYN_OP2_PLUS_POSSESSIVE_{REPEAT,INTERVAL},
+                   REG_SYN_OP2_SUBEXP_CALL to REG_SYN_OP2_ESC_G_SUBEXP_CALL,
+                   REG_SYN_OP2_NAMED_GROUP to REG_SYN_OP2_QMARK_LT_NAMED_GROUP
+                   and REG_SYN_OP2_ESC_K_NAMED_BACKREF.
+2003/09/02: [tune] call reduce_nested_qualifier() after disabling capture for
+                   no-name group in noname_disable_map().
+                   ex. /(a+)*(?<name>...)/
+2003/09/02: [impl] include <stdio.h> is forgotten to erase in regcomp.c.
+2003/09/01: [dist] update doc/RE and doc/RE.ja.
+2003/08/26: [bug]  (thanks Guy Decoux)
+                   should not double free node at the case TK_CC_CC_OPEN
+                   in parse_char_class().  
+
+2003/08/19: Version 1.9.3
+
+2003/08/19: [inst] change re.c.180.patch.
+2003/08/19: [impl] rename 'list of captures' to 'capture history'.
+2003/08/19: [dist] add doc/RE.ja. (Japanese)
+2003/08/19: [new]  add regex_copy_syntax().
+2003/08/19: [spec] rename REG_SYN_OP2_ATMARK_LIST_OF_CAPTURES to
+                   REG_SYN_OP2_ATMARK_CAPTURE_HISTORY.
+2003/08/18: [spec] (thanks nobu)
+                   don't use IMPORT in oniguruma.h and onigposix.h.
+2003/08/18: [impl] (thanks nobu) change error output to stdout in testconv.rb. 
+2003/08/18: [inst] (thanks nobu) lacked $(srcdir) in Makefile.in.  
+2003/08/18: [bug]  REG_MBLEN_TABLE[SJIS][0xFD-0xFF] should be 1.
+2003/08/18: [bug]  (thanks nobu) mbctab_sjis[0x80] should be 0.
+2003/08/18: [bug]  (thanks nobu)
+                   single/multi-byte decision was wrong in parse_char_class().
+                   add regex_wc2mblen().
+                   should not set fetched to 1 in TK_RAW_BYTE case.
+2003/08/18: [bug]  should update BitSet in the case inc_n >= 0
+                   in add_wc_range_to_buf().
+2003/08/13: [bug]  change re.c.180.patch for fix rb_reg_to_s() in re.c.
+2003/08/11: [bug]  should clear region->list in regex_region_resize().
+
+2003/08/08: Version 1.9.2
+
+2003/08/08: [test] success in ruby 1.8.0 (2003-08-08) on Windows 2000
+                   VC++ 6.0 and Cygwin.
+2003/08/08: [impl] don't define macro vsnprintf for WIN32 platform,
+                   because definition is added in win32\win32.h.
+2003/08/08: [test] success in ruby 1.8.0 and ruby 1.6.8(2003-08-03) on Linux.
+2003/08/08: [dist] change re.c.180.patch and re.c.168.patch.
+2003/08/08: [new]  (thanks akr)
+                   implemented list of captures. (?@...), (?@<name>...)
+2003/08/07: [dist] add sample/listcap.c.
+2003/08/06: [bug]  OP_MEMORY_END_PUSH_REC case in match_at().
+                   renewal of mem_start_stk[] should be after
+                   STACK_PUSH_MEM_END() call.
+2003/07/29: [new]  add regex_get_encoding(), regex_get_options() and
+                   regex_get_syntax().
+2003/07/25: [spec] (thanks akr)
+                   change group(...) to shy-group(?:...) if named group is 
+                   used in the pattern.
+                   add REG_SYN_CAPTURE_ONLY_NAMED_GROUP.
+2003/07/24: [spec] rename REG_OPTION_CAPTURE_ONLY_NAMED_GROUP to
+                   REG_OPTION_DONT_CAPTURE_GROUP.
+                   add REG_OPTION_CAPTURE_GROUP.
+2003/07/17: [spec] rename REG_SYN_OP2_NAMED_SUBEXP to REG_SYN_OP2_NAMED_GROUP.
+2003/07/17: [spec] add REGERR_EMPTY_GROUP_NAME.
+2003/07/17: [spec] rename REGERR_INVALID_SUBEXP_NAME
+                       to REGERR_INVALID_CHAR_IN_GROUP_NAME.
+2003/07/17: [spec] restrict usable chars of group name to alphabet, digit,
+                   '_' or multibyte-char in fetch_name(). [ruby-dev:20706]
+2003/07/16: [impl] minor change of sample/names.c.
+2003/07/14: [impl] rename USE_NAMED_SUBEXP to USE_NAMED_GROUP.
+2003/07/14: [bug]  add fetch_name() for USE_NAMED_SUBEXP off case.
+2003/07/14: [API]  add regex_number_of_names().
+2003/07/08: [impl] change error message for undefined group number call.
+                       'undefined group reference: /(a)\g<2>/'
+                   --> 'undefined group <2> reference: /(a)\g<2>/'
+2003/07/08: [dist] modify doc/RE.
+2003/07/07: [impl] OP_SET_OPTION is not needed in compiled code.
+                   add IS_DYNAMIC_OPTION() to regint.h.
+2003/07/07: [spec] called group should not ignore outside option (?i:...).
+                   ex. /(?i:(?<n>(a)\2)){0}\g<n>/.match("aA")
+                   add opcode OP_BACKREFN_IC and OP_BACKREF_MULTI_IC.
+                   set option status to effect memory in optimize_node_left().
+2003/07/07: [impl] add opcode OP_ANYCHAR_ML, OP_ANYCHAR_ML_STAR and
+                   OP_ANYCHAR_ML_START_PEEK_NEXT.
+2003/07/07: [bug]  (thanks nobu) REG_MBLEN_TABLE[SJIS][0x80] should be 1. 
+2003/07/07: [spec] rename REG_SYN_OP_QUOTE to REG_SYN_OP_ESC_Q_QUOTE.
+
 2003/07/04: Version 1.9.1
 
 2003/07/04: [new]  add REG_OPTION_CAPTURE_ONLY_NAMED_GROUP. (thanks .NET)
 2003/07/04: [spec] check mbuf member in the case of
                    REG_SYN_NOT_NEWLINE_IN_NEGATIVE_CC in parse_char_class().
-2003/07/04: [impl] typo REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPEED.
+2003/07/04: [spec] typo REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPEED.
                    should be REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPED.
 2003/07/04: [bug]  conflict values on REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPEED and
                    REG_SYN_NOT_NEWLINE_IN_NEGATIVE_CC.  (thanks nobu)
@@ -39,7 +389,7 @@ History
 
 2003/06/20: Version 1.9.0
 
-2003/06/20: [spec] \Q...\E is not effective on REG_SYNTAX_RUBY.
+2003/06/20: [spec] \Q...\E is not effective on REG_SYNTAX_RUBY. (thanks akr)
 2003/06/19: [inst] rename regex.h to oniguruma.h.
 2003/06/18: [impl] change REG_EXTERN setting condition. (__CYGWIN__)
 2003/06/18: [bug]  return wrong result UTF-8 case in regex_mb2wc().
@@ -55,7 +405,7 @@ History
 2003/06/13: [bug]  should use -DIMPORT for link with DLL in win32/Makefile.
 2003/06/13: [dist] add sample/names.c
 2003/06/12: [bug]  range should be from - 1 in not_wc_range_buf().
-2003/06/12: [spec] should warn for '-' befor '&&' operator in char-class.
+2003/06/12: [spec] should warn for '-' before '&&' operator in char-class.
 2003/06/12: [new]  add REG_SYNTAX_PERL.
 2003/06/12: [spec] add syntax behavior REG_SYN_WARN_FOR_CC_OP_NOT_ESCAPEED.
 2003/06/12: [spec] invalid POSIX bracket should be error.   ex. [[:upper :]]
@@ -507,6 +857,7 @@ History
 
 --
 [bug:  bug fix]
+[API:  API change/new/delete]
 [new:  new feature]
 [spec: specification change]
 [impl: implementation change]
@@ -515,3 +866,6 @@ History
 [dist: distribution change]
 [test: test]
 [memo: memo]
+--
+<create tag>
+svn copy http://localhost/repos/trunk/oniguruma http://localhost/repos/tags/oniguruma/X.X.X -m "onigdXXXXXXXX"

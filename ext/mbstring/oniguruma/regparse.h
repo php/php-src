@@ -2,7 +2,7 @@
 
   regparse.h -  Oniguruma (regular expression library)
 
-  Copyright (C) 2003  K.Kosako (kosako@sofnec.co.jp)
+  Copyright (C) 2003-2004  K.Kosako (kosako@sofnec.co.jp)
 
 **********************************************************************/
 #ifndef REGPARSE_H
@@ -64,6 +64,7 @@
 
 #define NSTRING_LEN(node)            ((node)->u.str.end - (node)->u.str.s)
 #define NSTRING_SET_RAW(node)        (node)->u.str.flag |= NSTR_RAW
+#define NSTRING_CLEAR_RAW(node)      (node)->u.str.flag &= ~NSTR_RAW
 #define NSTRING_SET_CASE_AMBIG(node) (node)->u.str.flag |= NSTR_CASE_AMBIG
 #define NSTRING_IS_RAW(node)         (((node)->u.str.flag & NSTR_RAW) != 0)
 #define NSTRING_IS_CASE_AMBIG(node)  \
@@ -71,6 +72,14 @@
 
 #define BACKREFS_P(br) \
   (IS_NOT_NULL((br)->back_dynamic) ? (br)->back_dynamic : (br)->back_static);
+
+#define CCLASS_SET_NOT(cc)      (cc)->not = 1
+
+#define NQ_TARGET_ISNOT_EMPTY     0
+#define NQ_TARGET_IS_EMPTY        1
+#define NQ_TARGET_IS_EMPTY_MEM    2
+#define NQ_TARGET_IS_EMPTY_REC    3
+
 
 typedef struct {
   UChar* s;
@@ -92,23 +101,26 @@ typedef struct {
   int upper;
   int greedy;
   int by_number;         /* {n,m} */
-  int target_may_empty;  /* target can match with empty data */
+  int target_empty_info;
   struct _Node* head_exact;
   struct _Node* next_head_exact;
   int is_refered;     /* include called node. don't eliminate even if {0} */
 } QualifierNode;
 
 /* status bits */
-#define NST_RECURSION       (1<<0)
-#define NST_CALLED          (1<<1)
-#define NST_ADDR_FIXED      (1<<2)
-#define NST_MIN_FIXED       (1<<3)
-#define NST_MAX_FIXED       (1<<4)
-#define NST_CLEN_FIXED      (1<<5)
-#define NST_MARK1           (1<<6)
-#define NST_MARK2           (1<<7)
-#define NST_MEM_BACKREFED   (1<<8)
-#define NST_SIMPLE_REPEAT   (1<<9)  /* for stop backtrack optimization */
+#define NST_MIN_FIXED        (1<<0)
+#define NST_MAX_FIXED        (1<<1)
+#define NST_CLEN_FIXED       (1<<2)
+#define NST_MARK1            (1<<3)
+#define NST_MARK2            (1<<4)
+#define NST_MEM_BACKREFED    (1<<5)
+#define NST_SIMPLE_REPEAT    (1<<6)  /* for stop backtrack optimization */
+
+#define NST_RECURSION        (1<<7)
+#define NST_CALLED           (1<<8)
+#define NST_ADDR_FIXED       (1<<9)
+#define NST_NAMED_GROUP      (1<<10)
+#define NST_NAME_REF         (1<<11)
 
 #define SET_EFFECT_STATUS(node,f)      (node)->u.effect.state |=  (f)
 #define CLEAR_EFFECT_STATUS(node,f)    (node)->u.effect.state &= ~(f)
@@ -122,20 +134,23 @@ typedef struct {
 #define IS_EFFECT_MAX_FIXED(en)        (((en)->state & NST_MAX_FIXED)     != 0)
 #define IS_EFFECT_CLEN_FIXED(en)       (((en)->state & NST_CLEN_FIXED)    != 0)
 #define IS_EFFECT_SIMPLE_REPEAT(en)    (((en)->state & NST_SIMPLE_REPEAT) != 0)
+#define IS_EFFECT_NAMED_GROUP(en)      (((en)->state & NST_NAMED_GROUP)   != 0)
 
 #define SET_CALL_RECURSION(node)       (node)->u.call.state |= NST_RECURSION
 #define IS_CALL_RECURSION(cn)          (((cn)->state & NST_RECURSION)  != 0)
+#define IS_CALL_NAME_REF(cn)           (((cn)->state & NST_NAME_REF)   != 0)
+#define IS_BACKREF_NAME_REF(bn)        (((bn)->state & NST_NAME_REF)   != 0)
 
 typedef struct {
   int state;
   int type;
   int regnum;
-  RegOptionType option;
+  OnigOptionType option;
   struct _Node* target;
   AbsAddrType call_addr;
   /* for multiple call reference */
-  RegDistance min_len; /* min length (byte) */
-  RegDistance max_len; /* max length (byte) */ 
+  OnigDistance min_len; /* min length (byte) */
+  OnigDistance max_len; /* max length (byte) */ 
   int char_len;        /* character length  */
   int opt_count;       /* referenced count in optimize_node_left() */
 } EffectNode;
@@ -209,10 +224,12 @@ typedef struct _Node {
     (senv)->mem_nodes_dynamic : (senv)->mem_nodes_static)
 
 typedef struct {
-  RegOptionType   option;
-  RegCharEncoding enc;
-  RegSyntaxType*  syntax;
-  BitStatusType   backtrack_mem;
+  OnigOptionType   option;
+  OnigEncoding enc;
+  OnigSyntaxType*  syntax;
+  BitStatusType   capture_history;
+  BitStatusType   bt_mem_start;
+  BitStatusType   bt_mem_end;
   BitStatusType   backrefed_mem;
   UChar*          pattern;
   UChar*          pattern_end;
@@ -224,6 +241,9 @@ typedef struct {
   UnsetAddrList*  unset_addr_list;
 #endif
   int             num_mem;
+#ifdef USE_NAMED_GROUP
+  int             num_named;
+#endif
   int             mem_alloc;
   Node*           mem_nodes_static[SCANENV_MEMNODES_SIZE];
   Node**          mem_nodes_dynamic;
@@ -234,21 +254,23 @@ typedef struct {
 #define IS_SYNTAX_OP2(syn, opm)   (((syn)->op2 & (opm)) != 0)
 #define IS_SYNTAX_BV(syn, bvm)    (((syn)->behavior & (bvm)) != 0)
 
+extern int    onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
+extern int    onig_strncmp P_((UChar* s1, UChar* s2, int n));
+extern void   onig_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
+extern int    onig_scan_unsigned_number P_((UChar** src, UChar* end, OnigEncoding enc));
+extern void   onig_reduce_nested_qualifier P_((Node* pnode, Node* cnode));
+extern void   onig_node_conv_to_str_node P_((Node* node, int raw));
+extern int    onig_node_str_cat P_((Node* node, UChar* s, UChar* end));
+extern void   onig_node_free P_((Node* node));
+extern Node*  onig_node_new_effect P_((int type));
+extern Node*  onig_node_new_anchor P_((int type));
+extern int    onig_free_node_list();
+extern int    onig_names_free P_((regex_t* reg));
+extern int    onig_parse_make_tree P_((Node** root, UChar* pattern, UChar* end, regex_t* reg, ScanEnv* env));
 
-extern void   regex_scan_env_set_error_string P_((ScanEnv* env, int ecode, UChar* arg, UChar* arg_end));
-extern int    regex_scan_unsigned_number P_((UChar** src, UChar* end, RegCharEncoding enc));
-extern void   regex_node_conv_to_str_node P_((Node* node, int raw));
-extern int    regex_node_str_cat P_((Node* node, UChar* s, UChar* end));
-extern void   regex_node_free P_((Node* node));
-extern Node*  regex_node_new_effect P_((int type));
-extern Node*  regex_node_new_anchor P_((int type));
-extern int    regex_free_node_list();
-extern int    regex_names_free P_((regex_t* reg));
-extern int    regex_parse_make_tree P_((Node** root, UChar* pattern, UChar* end, regex_t* reg, ScanEnv* env));
-
-#ifdef REG_DEBUG
-#ifdef USE_NAMED_SUBEXP
-extern int regex_print_names(FILE*, regex_t*);
+#ifdef ONIG_DEBUG
+#ifdef USE_NAMED_GROUP
+extern int onig_print_names(FILE*, regex_t*);
 #endif
 #endif
 
