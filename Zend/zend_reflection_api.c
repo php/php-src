@@ -183,7 +183,7 @@ static void reflection_free_objects_storage(zend_object *object TSRMLS_DC)
 {
 	reflection_object *intern = (reflection_object *) object;
 
-	if (intern->free_ptr) {
+	if (intern->free_ptr && intern->ptr) {
 		efree(intern->ptr);
 	}
 	if (intern->obj) {
@@ -766,7 +766,7 @@ static void reflection_function_factory(zend_function *function, zval *object TS
 	reflection_instanciate(reflection_function_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	intern->ptr = function;
-	intern->free_ptr = 0;
+	intern->free_ptr = function != NULL;
 	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
 }
 /* }}} */
