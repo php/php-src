@@ -37,9 +37,9 @@ database file created
 database file created
 array(3) {
   [%d]=>
-  string(%d) "%sext/dba/tests/test0.dbm"
+  string(%d) "%s/dba/tests/test0.dbm"
   [%d]=>
-  string(%d) "%sext/dba/tests/test1.dbm"
+  string(%d) "%s/dba/tests/test1.dbm"
   [%d]=>
-  string(%d) "%sext/dba/tests/test2.dbm"
+  string(%d) "%s/dba/tests/test2.dbm"
 }
