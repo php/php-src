@@ -110,10 +110,18 @@ static void _ps_files_open(ps_files *data, const char *key)
 		
 		data->lastkey = estrdup(key);
 		
+#ifdef O_EXCL
+		data->fd = open(buf, O_EXCL | O_RDWR | O_CREAT, 0600);
+		/* -1, if file exists and access failed due to O_EXCL|O_CREAT */
+		if(data->fd == -1) {
+			data->fd = open(buf, O_EXCL | O_RDWR);
+		}
+#else
 		data->fd = open(buf, O_CREAT | O_RDWR, 0600);
-		if(data->fd > -1) {
+		if(data->fd != -1) {
 			flock(data->fd, LOCK_EX);
 		}
+#endif
 	}
 }
 
