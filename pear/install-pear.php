@@ -46,7 +46,7 @@ if (!empty($bin_dir)) {
 // User supplied a dir prefix
 if (!empty($with_dir)) {
     $ds = DIRECTORY_SEPARATOR;
-    $config->set('php_dir', $with_dir . $ds . 'lib', 'default');
+    $config->set('php_dir', $with_dir, 'default');
     $config->set('doc_dir', $with_dir . $ds . 'doc', 'default');
     $config->set('data_dir', $with_dir . $ds . 'data', 'default');
     $config->set('test_dir', $with_dir . $ds . 'test', 'default');
