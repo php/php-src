@@ -54,6 +54,16 @@
 #define PHP_INI_PERDIR  (1<<1)
 #define PHP_INI_SYSTEM  (1<<2)
 
+/* These are taken out of main.h
+ * they must be updated if main.h changes!
+ */
+
+int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
+int php_module_startup(sapi_module_struct *sf);
+void php_module_shutdown();
+void php_module_shutdown_for_exec();
+int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
+
 #include "util_script.h"
 
 #include "php_version.h"
@@ -87,10 +97,6 @@ int saved_umask;
 
 php_apache_info_struct php_apache_info;		/* active config */
 
-int apache_php3_module_main(request_rec * r, int fd, int display_source_mode);
-int php_module_startup(sapi_module_struct *sf);
-void php_module_shutdown();
-void php_module_shutdown_for_exec();
 
 
 void php3_save_umask()
@@ -113,7 +119,12 @@ static int zend_apache_ub_write(const char *str, uint str_length)
 
 
 sapi_module_struct sapi_module = {
-	zend_apache_ub_write
+	"PHP Language",					/* name */
+									
+	php_module_startup,				/* startup */
+	php_module_shutdown_wrapper,	/* shutdown */
+
+	zend_apache_ub_write,			/* unbuffered write */
 };
 
 
