@@ -2,7 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2004, PHP 5.1.0
 - Improved performance of:
-  . general execution/compilation. (Andi, Dmitry, Marcus)
+  . general execution/compilation. (Andi, Thies, Sterling, Dmitry, Marcus)
   . switch statement. (Dmitry)
   . several array functions. (Marcus)
   . virtual path handling by adding a realpath() cache. (Andi)
