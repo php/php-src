@@ -1,3 +1,44 @@
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c
+      zend_iterators.c:
+      Fix memleak
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_highlight.c
+      zend_language_scanner.l:
+      Fixed bug #26463 (Incorrect handling of semicolons after heredoc)
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.h:
+      This takes the address of a zval ptr
+
+    * zend_API.h:
+      Add macros to return values of other zvals.
+      This is needed because one cannot use REPLACE_ZVAL_VALUE with
+      return_value.
+
+2003-11-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      Restore original patch for bug #26281.
+      
+
+2003-11-29  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_compile.c:
+      Revert accidential commit until decision
+
+    * zend_compile.c
+      zend_default_classes.c:
+      Make exception code more robust:
+      - Fix error in calculation of trace-string length
+      - Allow to overload __strostring() and make it work for uncaught
+      exceptions
+      - Show exception thrown while displaying exceptions
+
 2003-11-28  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_API.c:
