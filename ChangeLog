@@ -1,3 +1,27 @@
+2001-11-09  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/gettext/config.m4
+      ext/gettext/gettext.c
+      ext/gettext/php_gettext.h:
+     Added support for bind_textdomain_codeset(). (rudib@email.si)
+
+2001-11-09  Alan Brown  <abrown@pobox.com>
+
+    * ext/com/COM.c:
+    Not all components populate every field in the ExceptInfo structure. Thus we sometimes would try to convert NULL strings and see php_OLECHAR_to_char errors while displaying Exception information. This version is a little smarter about the member derefencing and the resulting error string.
+
+2001-11-09  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c:
+    Move code which refers to conditional structure elements into the
+    same #ifdefs.
+
+    Thanks to Sebastian for noticing this.
+
+    * ext/ircg/ircg.c:
+    Some reformatting and addition of {{{..}}} and a fix for a missing
+    header file when compiling against older IRCG versions.
+
 2001-11-08  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/pdf/pdf.c: - oops :)
