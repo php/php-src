@@ -14,7 +14,7 @@ AC_ARG_ENABLE(cli,
 ])
 
 if test "$PHP_SAPI_CLI" != "no"; then
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
+  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag,$abs_srcdir/sapi/cli,sapi/cli)
   SAPI_CLI_PATH=sapi/cli/php
   PHP_SUBST(SAPI_CLI_PATH)
 
