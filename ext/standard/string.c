@@ -773,10 +773,19 @@ PHP_FUNCTION(strtolower)
 
 /* {{{ php_basename
  */
-PHPAPI char *php_basename(char *s, size_t len)
+PHPAPI char *php_basename(char *s, size_t len, char *suffix, size_t sufflen)
 {
 	char *ret=NULL, *c, *p=NULL, buf='\0';
 	c = s + len - 1;	
+
+	/* do suffix removal as the unix command does */
+	if(suffix && (len > sufflen)) {
+		if(!strncmp(suffix,c-sufflen+1,sufflen)) {
+			c -= sufflen; 
+			*(c + 1) = '\0';
+		}
+	}
+
 
 	/* strip trailing slashes */
 	while (*c == '/'
@@ -805,18 +814,32 @@ PHPAPI char *php_basename(char *s, size_t len)
 }
 /* }}} */
 
-/* {{{ proto string basename(string path)
+/* {{{ proto string basename(string path [, string suffix])
    Return the filename component of the path */
 PHP_FUNCTION(basename)
 {
-	zval **str;
+	zval **str, **suffix;
 	char *ret;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &str)) {
-		WRONG_PARAM_COUNT;
+	switch(ZEND_NUM_ARGS()) {
+	case 2:
+		if(zend_get_parameters_ex(2, &str, &suffix)) WRONG_PARAM_COUNT;
+		convert_to_string_ex(str);
+		convert_to_string_ex(suffix);
+		break;
+	case 1:
+		if(zend_get_parameters_ex(1, &str)) WRONG_PARAM_COUNT;
+		convert_to_string_ex(str);
+		suffix=NULL;
+		break;
+	default: WRONG_PARAM_COUNT;
 	}
-	convert_to_string_ex(str);
-	ret = php_basename(Z_STRVAL_PP(str), Z_STRLEN_PP(str));
+
+	ret = php_basename(Z_STRVAL_PP(str)
+					   , Z_STRLEN_PP(str)
+					   , (suffix)?Z_STRVAL_PP(suffix):NULL
+					   , (suffix)?Z_STRLEN_PP(suffix):0
+					   );
 	RETVAL_STRING(ret, 0)
 }
 /* }}} */
@@ -924,7 +947,7 @@ PHP_FUNCTION(pathinfo)
 	}
 	
 	if (argc < 2 || opt == PHP_PATHINFO_BASENAME) {
-		ret = php_basename(Z_STRVAL_PP(path), len);
+		ret = php_basename(Z_STRVAL_PP(path), len, NULL, 0);
 		add_assoc_string(tmp, "basename", ret, 0);
 	}			
 	

@@ -102,7 +102,7 @@ PHPAPI char *php_addslashes(char *str, int length, int *new_length, int freeit);
 PHPAPI char *php_addcslashes(char *str, int length, int *new_length, int freeit, char *what, int wlength);
 PHPAPI void php_stripslashes(char *str, int *len);
 PHPAPI void php_stripcslashes(char *str, int *len);
-PHPAPI char *php_basename(char *str, size_t  len);
+PHPAPI char *php_basename(char *str, size_t  len ,char *suffix, size_t sufflen);
 PHPAPI void php_dirname(char *str, int len);
 PHPAPI char *php_stristr(unsigned char *s, unsigned char *t, size_t s_len, size_t t_len);
 PHPAPI char *php_str_to_str(char *haystack, int length, char *needle,
