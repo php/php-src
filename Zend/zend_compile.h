@@ -208,6 +208,7 @@ BEGIN_EXTERN_C()
 
 void init_compiler(CLS_D ELS_DC);
 void shutdown_compiler(CLS_D);
+void zend_init_compiler_data_structures(CLS_D);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type CLS_DC);
 

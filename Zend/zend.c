@@ -696,6 +696,10 @@ ZEND_API void zend_error(int type, const char *format, ...)
 	}
 
 	va_end(args);
+
+	if (type==E_PARSE) {
+		zend_init_compiler_data_structures(CLS_C);
+	}
 }
 
 
