@@ -278,6 +278,9 @@ parameter.
             if ($info['unstable']) {
                 $unstable = '/(' . $info['unstable'] . $info['state'] . ')';
             }
+            if (!isset($info['stable']) || !$info['stable']) {
+                $info['stable'] = 'none';
+            }
             $data['data'][$info['category']][] = array(
                 $name,
                 $info['stable'] . $unstable,
@@ -287,7 +290,7 @@ parameter.
         }
         if (!isset($data['data'])) {
             return $this->raiseError('no packages found');
-        };
+        }
         $this->ui->outputData($data, $command);
         return true;
     }
