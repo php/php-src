@@ -2167,7 +2167,8 @@ static gdFontPtr php_find_gd_font(int size)
 {
 	gdFontPtr font;
 	int ind_type;
-
+	TSRMLS_FETCH();
+	
 	switch (size) {
     	case 1:
 			 font = gdFontTiny;
@@ -3151,7 +3152,7 @@ PHP_FUNCTION(imagepsbbox)
 {
 #if HAVE_LIBT1
 	zval **str, **fnt, **sz, **sp, **wd, **ang;
-	int i, space, add_width, char_width, amount_kern;
+	int i, space, add_width = 0, char_width, amount_kern;
 	int cur_x, cur_y, dx, dy;
 	int x1, y1, x2, y2, x3, y3, x4, y4;
 	int *f_ind;
@@ -3316,7 +3317,8 @@ static void _php_image_bw_convert( gdImagePtr im_org, gdIOCtx *out, int threshol
 	int dest_height = gdImageSY (im_org);
 	int dest_width = gdImageSX (im_org);
 	int x,y;
-
+	TSRMLS_FETCH();
+	
 	im_dest = gdImageCreate (dest_width, dest_height);
 	if (im_dest == NULL) {
 		php_error (E_WARNING, "%s: unable to allocate temporary buffer", get_active_function_name(TSRMLS_C));
@@ -3458,6 +3460,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 			default:
 				php_error(E_WARNING, "%s: Format not supported", get_active_function_name(TSRMLS_C));
+				RETURN_FALSE;
 				break;
 		}
 
