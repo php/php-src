@@ -28,7 +28,7 @@
 
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
-#include "ext/bcmath/libbcmath/src/bcmath.h"
+#include "libbcmath/src/bcmath.h"
 
 function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									NULL)
