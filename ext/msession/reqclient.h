@@ -147,7 +147,7 @@ char *ReqbErr(REQB *reqb);
 		__FILE__,__LINE__, ReqErr(PREQ->param)); exit(-1); }
 
 #if defined (__cplusplus)
-	// C API but with class definitions
+	/* C API but with class definitions */
 	int ReadRequestTimeout(REQB **ppreq, MSock *sock, int timeout);
 	int ReadRequest(REQB **preq, MSock *sock);
 	int WriteRequest(REQB *preq, MSock *sock);

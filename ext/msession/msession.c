@@ -231,11 +231,11 @@ int PHPDoRequest(void **pconn, REQB **ppreq)
 
 	int result = DoRequest(conn, ppreq);
 
-	// Server closed the connection!
+	/* Server closed the connection! */
 	if((*ppreq)->req.stat == REQ_ERR && (result == REQE_BADCONN || result == REQE_NOSEND))
 	{
-		// In the case of a bad socket, this should be
-		// all that changs!
+		/* In the case of a bad socket, this should be  */
+		/* all that changs!				*/
 		(*ppreq)->req.stat = stat;
 		(*ppreq)->req.param = param;
 		ELOG("Connection was closed by server");
@@ -259,7 +259,7 @@ int PHPMsessionConnect(const char *szhost, int nport)
 	if(!s_reqb)
 		s_reqb = AllocateRequestBuffer(2048);
 
-	if(!s_reqb) // no buffer, it won't work!
+	if(!s_reqb) /* no buffer, it won't work! */
 		return 0;
 	
 	if(strcmp(s_szhost, szhost))
@@ -838,8 +838,8 @@ PHP_FUNCTION(msession_list)
 	}
 	else if(s_reqb->req.stat != REQ_OK)
 	{
-		// May this should be an error?
-		if(s_reqb->req.param !=  REQE_NOSESSION)
+		/* May this should be an error? */
+		if(s_reqb->req.param !=  REQE_NOSESSION) 
 			php_error(E_WARNING, s_szErrFmt, get_active_function_name(TSRMLS_C), ReqbErr(s_reqb));
 		RETURN_NULL();
 	}
@@ -940,7 +940,7 @@ PHP_FUNCTION(msession_set_array)
 
 	ELOG("have pairs");
 
-	// Initializes pos
+	/* Initializes pos */
 	zend_hash_internal_pointer_reset_ex(htTuples, &pos);
 
 	ELOG("reset pointer");
@@ -1284,7 +1284,7 @@ PS_OPEN_FUNC(msession)
 	}
 	
 	ELOG( "ps_open_msession");
-	PS_SET_MOD_DATA((void *)1); // session.c needs a non-zero here!
+	PS_SET_MOD_DATA((void *)1); /* session.c needs a non-zero here! */
 	return PHPMsessionConnect(path, port) ? SUCCESS : FAILURE;
 }
 
