@@ -1325,15 +1325,20 @@ PHP_FUNCTION(session_destroy)
 /* }}} */
 
 #ifdef TRANS_SID
-void session_adapt_uris(const char *src, uint srclen, char **new, uint *newlen)
+void session_adapt_uris(const char *src, size_t srclen, char **new, size_t *newlen)
 {
-	size_t len;
 	PSLS_FETCH();
 
-	if (PS(define_sid) && PS(nr_open_sessions) > 0) {
-		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), &len);
-		*newlen = len;
-	}
+	if (PS(define_sid) && PS(nr_open_sessions) > 0)
+		*new = url_adapt_ext_ex(src, srclen, PS(session_name), PS(id), newlen);
+}
+
+void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen)
+{
+	PSLS_FETCH();
+
+	if (PS(define_sid) && PS(nr_open_sessions) > 0)
+		*new = url_adapt_single_url(url, urllen, PS(session_name), PS(id), newlen);
 }
 #endif
 
