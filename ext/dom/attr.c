@@ -88,7 +88,7 @@ PHP_METHOD(domattr, __construct)
 /* }}} end DOMAttr::__construct */
 
 
-/* {{{ proto name	string	
+/* {{{ name	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
 Since: 
@@ -114,7 +114,7 @@ int dom_attr_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto specified	boolean	
+/* {{{ specified	boolean	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
 Since: 
@@ -131,7 +131,7 @@ int dom_attr_specified_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto value	string	
+/* {{{ value	string	
 readonly=no 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
 Since: 
@@ -200,7 +200,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval TSRMLS_DC)
 
 
 
-/* {{{ proto ownerElement	DOMElement	
+/* {{{ ownerElement	DOMElement	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
 Since: DOM Level 2
@@ -236,7 +236,7 @@ int dom_attr_owner_element_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto schemaTypeInfo	DOMTypeInfo	
+/* {{{ schemaTypeInfo	DOMTypeInfo	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
 Since: DOM Level 3

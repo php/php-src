@@ -41,7 +41,7 @@ zend_function_entry php_dom_domlocator_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ proto line_number	long	
+/* {{{ line_number	long	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-line-number
 Since: 
@@ -57,7 +57,7 @@ int dom_domlocator_line_number_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto column_number	long	
+/* {{{ column_number	long	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-column-number
 Since: 
@@ -73,7 +73,7 @@ int dom_domlocator_column_number_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto offset	long	
+/* {{{ offset	long	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-offset
 Since: 
@@ -89,7 +89,7 @@ int dom_domlocator_offset_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto related_node	node	
+/* {{{ related_node	node	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-node
 Since: 
@@ -105,7 +105,7 @@ int dom_domlocator_related_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto uri	string	
+/* {{{ uri	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-uri
 Since: 

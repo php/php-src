@@ -41,7 +41,7 @@ zend_function_entry php_dom_typeinfo_class_functions[] = {
 
 /* {{{ attribute protos, not implemented yet */
 
-/* {{{ proto type_name	string	
+/* {{{ type_name	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeName
 Since: 
@@ -57,7 +57,7 @@ int dom_typeinfo_type_name_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 
 
-/* {{{ proto type_namespace	string	
+/* {{{ type_namespace	string	
 readonly=yes 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#TypeInfo-typeNamespace
 Since: 
