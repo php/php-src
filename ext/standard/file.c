@@ -1741,7 +1741,7 @@ PHP_FUNCTION(fread)
 }
 
 /* }}} */
-/* {{{ proto array fgetcsv(int fp, int length)
+/* {{{ proto array fgetcsv(int fp, int length [, string delimiter])
    Get line from file pointer and parse for CSV fields */
  
 PHP_FUNCTION(fgetcsv) {
@@ -1813,7 +1813,7 @@ PHP_FUNCTION(fgetcsv) {
 	lineEnd = emalloc(sizeof(char) * (len + 1));
         bptr = buf;
         tptr = buf + strlen(buf) -1;
-        while ( isspace((int)*tptr) && (tptr > bptr) ) tptr--;
+        while ( isspace((int)*tptr) && (*tptr!=delimiter) && (tptr > bptr) ) tptr--;
         tptr++;
         strcpy(lineEnd, tptr);
 
@@ -1839,7 +1839,7 @@ PHP_FUNCTION(fgetcsv) {
 
 	do	{
 		/* 1. Strip any leading space */		
-		while(isspace((int)*bptr)) bptr++;	
+		while(isspace((int)*bptr) && (*bptr!=delimiter)) bptr++;	
 		/* 2. Read field, leaving bptr pointing at start of next field */
 		if (*bptr == '"') {
 			/* 2A. handle quote delimited field */
@@ -1874,7 +1874,7 @@ PHP_FUNCTION(fgetcsv) {
                                                         }
                                                 bptr = buf;
                                                 tptr = buf + strlen(buf) -1;
-                                                while ( isspace((int)*tptr) && (tptr > bptr) ) tptr--;
+                                                while ( isspace((int)*tptr) && (*tptr!=delimiter) && (tptr > bptr) ) tptr--;
                                                 tptr++; strcpy(lineEnd, tptr);
                                                 *tptr++ = ' ';  *tptr = 0;
 
@@ -1889,7 +1889,7 @@ PHP_FUNCTION(fgetcsv) {
 			*tptr=0;	/* terminate temporary string */
 			if (strlen(temp)) {
 				tptr--;
-				while (isspace((int)*tptr)) *tptr-- = 0;	/* strip any trailing spaces */
+				while (isspace((int)*tptr) && (*tptr!=delimiter)) *tptr-- = 0;	/* strip any trailing spaces */
 			}
 			if (*bptr == delimiter) bptr++;
 		}
