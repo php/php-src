@@ -166,7 +166,7 @@ static SchemeHandler sh = {
   _php_sablot_sh_close
 };
 
-PHP_DECLARE_MODULE_GLOBALS(sablot)
+ZEND_DECLARE_MODULE_GLOBALS(sablot)
 
 static unsigned char sixth_arg_force_ref[] = { 6, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_arg_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_NONE };
