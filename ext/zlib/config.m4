@@ -42,5 +42,43 @@ if test "$PHP_ZLIB" != "no"; then
   
   AC_ADD_INCLUDE($ZLIB_INCDIR)
 
-	AC_CHECK_FUNC(fopencookie, [AC_DEFINE(HAVE_FOPENCOOKIE,1,[ ])])
+	dnl check for fopencookie() from glibc
+	AC_CHECK_FUNC(fopencookie, [ have_glibc_fopencookie=yes ])
+
+	if test "$have_glibc_fopencookie" = "yes" ; then
+	  	dnl this comes in two flavors:
+      dnl newer glibcs (since 2.1.2 ? )
+      dnl have a type called cookie_io_functions_t
+		  AC_TRY_COMPILE([ #define _GNU_SOURCE
+                       #include <stdio.h>
+									   ],
+	                   [ cookie_io_functions_t cookie; ],
+                     [ have_cookie_io_functions_t=yes ],
+										 [ ] )
+
+		  if test "$have_cookie_io_functions_t" = "yes" ; then
+        cookie_io_functions_t=cookie_io_functions_t
+	      have_fopen_cookie=yes
+      else
+  	    dnl older glibc versions (up to 2.1.2 ?)
+        dnl call it _IO_cookie_io_functions_t
+		    AC_TRY_COMPILE([ #define _GNU_SOURCE
+                       #include <stdio.h>
+									   ],
+	                   [ _IO_cookie_io_functions_t cookie; ],
+                     [ have_IO_cookie_io_functions_t=yes ],
+										 [] )
+		    if test "$have_cookie_io_functions_t" = "yes" ; then
+          cookie_io_functions_t=_IO_cookie_io_functions_t
+	        have_fopen_cookie=yes
+		    fi
+			fi
+
+		  if test "$have_fopen_cookie" = "yes" ; then
+		    AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
+			  AC_DEFINE_UNQUOTED(COOKIE_IO_FUNCTIONS_T, $cookie_io_functions_t, [ ])
+      fi      
+
+  	fi
+
 fi

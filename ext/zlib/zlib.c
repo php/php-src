@@ -967,7 +967,8 @@ static int gz_closer(void *cookie) {
 }
 
 
-static cookie_io_functions_t gz_cookie_functions =   
+
+static COOKIE_IO_FUNCTIONS_T gz_cookie_functions =   
 { gz_reader 
 , gz_writer
 , gz_seeker
