@@ -30,12 +30,6 @@
 
 #if HAVE_LIBGD
 
-#include <gd.h>
-
-#if HAVE_LIBT1
-#include "gdt1.h"
-#endif
-
 #define PHP_GDIMG_TYPE_GIF      1
 #define PHP_GDIMG_TYPE_PNG      2
 #define PHP_GDIMG_TYPE_JPG      3
