@@ -1,3 +1,178 @@
+2002-03-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dio/dio.c: revert out accidental code
+
+2002-03-23  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cli/README
+      sapi/cli/TODO: Documented -r and added TODO
+
+2002-03-23  Sterling Hughes  <sterling@bumblebury.com>
+
+    * ext/dio/dio.c
+      ext/mcrypt/EXPERIMENTAL
+      ext/xslt/EXPERIMENTAL: remove experimental status
+
+    * ext/mcrypt/EXPERIMENTAL: the point can be made both ways :)
+
+    * ext/xslt/sablot.c: make key identifiers case sensitive
+
+2002-03-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xslt/EXPERIMENTAL: - Fix experimental notice
+
+2002-03-23  Jan Lehnardt  <jan@dasmoped.net>
+
+    * ext/xml/tests/007.phpt:  - MFH
+
+    * ext/xml/tests/007.phpt:
+     - fix "xml_parse_into_struct/umlauts in tags" testcase. It never really
+     - worked
+
+2002-03-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.h
+      ext/standard/basic_functions.c: - Remove read_uploaded_file
+
+2002-03-23  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/bz2/tests/with_strings.phpt: MFH
+
+    * ext/ncurses/tests/.cvsignore
+      ext/xslt/tests/.cvsignore
+      ext/mcve/tests/.cvsignore
+      ext/mailparse/tests/.cvsignore
+      ext/mbstring/tests/.cvsignore
+      ext/dbplus/tests/.cvsignore
+      ext/dio/tests/.cvsignore: .cvsignore in tests dirs cleanup
+
+2002-03-23  jim winstead  <jimw@apache.org>
+
+    * NEWS: MFH
+
+    * NEWS: remove inappropriate article
+
+    * NEWS: MFH.
+
+    * NEWS: rewrite history a bit. there is no is_enum(), it was com_isenum().
+
+2002-03-23  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Registry.php:
+    The System class was modified to always return true or false instead
+    of PEAR Errors. Changed then assertStateDir() to check for false.
+
+    * pear/PEAR/Command/Package.php:
+    Show maintainers name in package-info and show more human friendly
+    column table names
+
+2002-03-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/php_memory_streams.h
+      main/streams.c: -defined php_stream_temp_new() for standard temp streams
+
+2002-03-23  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php: Yet another break; forgotten
+
+    * pear/PEAR/Command/Package.php: Oops, forgot the break;
+
+2002-03-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS: -no german in NEWS
+
+2002-03-23  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Package.php:
+    - Show the real dir where files would be installed (using role & config)
+    - Introduce column wrapping
+
+2002-03-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS: -removed -x
+    -no german in NEWS
+
+    * sapi/cli/php_cli.c: -removed -x
+    -error handling for illegal switch combinations
+    -corrected ws for one case block
+
+2002-03-23  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Frontend/CLI.php:
+    - Use getenv('TERM') instead of $_ENV (empty for me in 4.1.1)
+    - Added 'linux' as bold capable list of term types
+    - Pass the col by reference for making the wrap take effect in tableRow
+
+    * pear/PEAR/Command/Install.php: fix parse error
+
+2002-03-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/dl.c: dl is now aware of modules compiled for php <4.1.0
+    which have a slightly different module_entry structure
+
+2002-03-23  Edin Kadribasic  <edink@proventum.net>
+
+    * main/config.w32.h
+      win32/crypt_win32.c
+      win32/crypt_win32.h
+      win32/php4dllts.dsp: MFH (crypt on win32)
+
+2002-03-23  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    - Added read_uploaded_file (patch by Andrew Sitnikov <sitnikov@infonet.ee>)
+
+2002-03-23  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/cli/php_cli.c: Nuke unused variables.
+
+2002-03-23  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php:
+    * added package-list and package-info commands (for .tgz files)
+
+    * pear/PEAR/Command/Install.php: * use switch/case for what it's worth :-)
+
+    * pear/PEAR/Registry.php: * _lock() calls _assertStateDir()
+
+    * pear/PEAR/Common.php:
+    * support having a toplevel package.xml in tgz files
+
+    * pear/PEAR/Frontend/CLI.php:
+    * wordwrapping and multiline table cell support
+
+2002-03-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbstring.c: fixed some errors in regression tests.
+
+    * ext/mbstring/php_mbregex.c: changed license from GPL2 to PHP License.
+
+    * ext/mbstring/mbregex.c: fixed compile warnings.
+
+2002-03-23  James Cox  <james@wherewithal.com>
+
+    * pear/PEAR/Installer.php: "reverting" to 1.39 as per Tomas Cox's wishes.
+
+2002-03-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * tests/lang/031.phpt: Fix test :)
+
+2002-03-23  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/curl/curl.c: proto fix
+
+2002-03-23  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * tests/lang/031.phpt: Added while(list() = each()) test
+
+2002-03-23  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.c: fixed some compilation warning.
+
+    * ext/mbstring/tests/003.inc: fixed POST/GET argument handling.
+
 2002-03-22  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * sapi/cli/php_cli.c:    -Add -x
