@@ -584,7 +584,7 @@ ZEND_FUNCTION(get_class_methods)
 		while ((key_type = zend_hash_get_current_key(&ce->function_table, &string_key, &num_key)) != HASH_KEY_NON_EXISTANT) {
 			if (key_type == HASH_KEY_IS_STRING) {
 				MAKE_STD_ZVAL(method_name);
-				ZVAL_STRING(method_name, string_key, 0);
+				ZVAL_STRING(method_name, string_key, 1);
 				zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
 			}
 			zend_hash_move_forward(&ce->function_table);
