@@ -1,3 +1,127 @@
+2003-01-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * main/config.w32.h
+      main/internal_functions_win32.c:
+      move the ZE2 check into internal_functions_win32.c
+
+    * ext/bcmath/libbcmath/src/config.h:
+      revert previous commit
+
+    * ext/bcmath/libbcmath/src/config.h:
+      unbreak the build
+
+2003-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/pdf/pdf.c:
+      Fixed bug #21651 (crash in pdf_open_memory_image() when inserting a
+      non truecolor image).
+
+2003-01-16  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/filters.c:
+      Finally fixed a qp encoder bug that line break characters that appear
+      exactly
+      at the end of the chunk lost in the output.
+
+2003-01-16  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/image/getimagesize.phpt
+      ext/standard/tests/image/image_type_to_mime_type.phpt:
+      - JPEG 2000 support
+
+    * ext/standard/image.c
+      ext/standard/php_image.h:
+      - corrected error in file detection for very small files
+      - JPEG 2000 support, mostly Adam Wright <adam@elysium.ltd.uk>
+
+2003-01-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/java/java.dsp:
+      change library name
+
+    * ext/rpc/skeleton/php_skeleton.h
+      ext/rpc/skeleton/skeleton.c
+      ext/rpc/skeleton/skeleton.h:
+      update skeleton
+
+    * win32/php4dllts.dsp:
+      fix path to config.w32.h
+
+    * main/internal_functions_win32.c:
+      add COM
+
+    * main/config.w32.h:
+      prevent HEAD + ZE1 builds and add COM
+
+    * ext/rpc/com/com.dsp:
+      for those who prefer to have com as a shared lib
+
+2003-01-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * (PHP_4)
+      configure.in
+      main/php_version.h:
+      Open up the PHP_4 branch which has been derived from the current PHP_4_3
+      branch, so we don't introduce any ZE2-related changes.
+      
+      This branch has the purpose of housing experimental patches in the
+      context of PHP 4/ZE1.  Patches which don't qualify as bug fixes
+      should not be committed to the PHP_4_3 branch.
+      
+      Note: The code on this branch is unlikely to be ever released in the form
+            of a standard PHP release.  Commit new features to the HEAD branch!
+            Patches for this branch should be the exception.
+      
+      Note: The version is "4.5.0", because 4.4.0 has been used for some time
+            in HEAD before being switched to 5.0.0.  I would have used something
+            like "4.X.X", but letters are not really supported by the current
+            system.
+
+2003-01-16  Harald Radi  <harald.radi+coding.php@nme.at>
+
+    * ext/rpc/handler.h
+      ext/rpc/layer.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/com/com.c
+      ext/rpc/com/com.h
+      ext/rpc/com/php_com.h
+      ext/rpc/skeleton/skeleton.c
+      ext/rpc/skeleton/skeleton.h:
+      make layers loadable as self-sustaining php extension
+      which registeres itself in the rpc framework.
+
+2003-01-16  Dan Kalowsky  <dank@deadmime.org>
+
+    * ext/odbc/php_odbc.h:
+      typo corrected
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+      Adding in test ability for WIndows to fetch_objects
+
+2003-01-16  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/standard/math.c:
+      Fixed bug #21648
+
+2003-01-16  Sascha Schumann  <sascha@schumann.cx>
+
+    * php.ini-dist
+      php.ini-recommended
+      ext/session/mod_files.c
+      ext/session/php_session.h
+      ext/session/session.c:
+      Add INI setting session.hash_bits_per_character which enables developers
+      to choose how session ids are represented, regardless of the hash
+      algorithm.
+
+2003-01-16  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/oracle/oracle.c:
+      Fixed bug #20079 (made ora_logoff return TRUE on success).
+
 2003-01-15  Edin Kadribasic  <edink@proventum.net>
 
     * win32/php_modules.dsw:
