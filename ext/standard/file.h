@@ -67,6 +67,10 @@ PHP_FUNCTION(realpath);
 PHP_NAMED_FUNCTION(php_if_ftruncate);
 PHP_NAMED_FUNCTION(php_if_fstat);
 
+/* temporary function for testing streams */
+PHP_FUNCTION(fopenstream);
+
+
 PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_popen(void);

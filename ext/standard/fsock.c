@@ -204,7 +204,7 @@ PHPAPI int connect_nonb(int sockfd,
 /* }}} */
 /* {{{ php_fsockopen() */
 
-/* 
+/*
    This function takes an optional third argument which should be
    passed by reference.  The error code from the connect call is written
    to this variable.
@@ -221,7 +221,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	unsigned long conv;
 	char *key = NULL;
 	FLS_FETCH();
-	
+
 	if (arg_count > 5 || arg_count < 2 || zend_get_parameters_array_ex(arg_count,args)==FAILURE) {
 		CLOSE_SOCK(1);
 		WRONG_PARAM_COUNT;
@@ -256,7 +256,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		ZEND_REGISTER_RESOURCE(return_value,sock,php_file_le_socket());
 		return;
 	}
-	
+
 	if (portno) {
 		struct sockaddr_in server;
 
@@ -264,23 +264,23 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		if(Z_STRLEN_PP(args[0]) >= 6 && !memcmp(Z_STRVAL_PP(args[0]), "udp://", sizeof("udp://")-1)) {
 			udp = 1;
 		}
-		
+
 		socketd = socket(AF_INET,udp ? SOCK_DGRAM : SOCK_STREAM,0);
 
 		if (socketd == SOCK_ERR) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
-	  
+
 		server.sin_family = AF_INET;
-		
+
 		if(php_lookup_hostname(udp ? &(*args[0])->value.str.val[6] : (*args[0])->value.str.val,&server.sin_addr)) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
-  
+
 		server.sin_port = htons(portno);
-  
+
 		if (connect_nonb(socketd, (struct sockaddr *)&server, sizeof(server), &timeout) == SOCK_CONN_ERR) {
 			CLOSE_SOCK(1);
 
@@ -303,7 +303,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 			CLOSE_SOCK(1);
 			RETURN_FALSE;
 		}
-	  
+
 		memset(&unix_addr, (char)0, sizeof(unix_addr));
 		unix_addr.sun_family = AF_UNIX;
 		strlcpy(unix_addr.sun_path, (*args[0])->value.str.val, sizeof(unix_addr.sun_path));
@@ -328,7 +328,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 		RETURN_LONG(-6);  /* FIXME */
 	}
 
-#ifdef HAVE_SETVBUF  
+#ifdef HAVE_SETVBUF
 	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0){
 		RETURN_LONG(-7);  /* FIXME */
 	}
@@ -337,7 +337,7 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 	*sock=socketd;
 	if (persistent) {
-		zend_hash_update(&FG(ht_fsock_keys), key, strlen(key) + 1, 
+		zend_hash_update(&FG(ht_fsock_keys), key, strlen(key) + 1,
 				sock, sizeof(*sock), NULL);
 		zend_hash_update(&FG(ht_fsock_socks), (char *) sock, sizeof(*sock),
 				key, strlen(key) + 1, NULL);
@@ -350,14 +350,14 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 
 /* {{{ proto int fsockopen(string hostname, int port [, int errno [, string errstr [, double timeout]]])
    Open Internet or Unix domain socket connection */
-PHP_FUNCTION(fsockopen) 
+PHP_FUNCTION(fsockopen)
 {
 	php_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 /* {{{ proto int pfsockopen(string hostname, int port [, int errno [, string errstr [, double timeout]]])
    Open persistent Internet or Unix domain socket connection */
-PHP_FUNCTION(pfsockopen) 
+PHP_FUNCTION(pfsockopen)
 {
 	php_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -396,7 +396,7 @@ static php_sockbuf *php_sockfind(int socket FLS_DC)
 {
 	php_sockbuf *buf = NULL, *tmp;
 
-	for(tmp = FG(phpsockbuf); tmp; tmp = tmp->next) 
+	for(tmp = FG(phpsockbuf); tmp; tmp = tmp->next)
 		if(tmp->socket == socket) {
 			buf = tmp;
 			break;
@@ -412,7 +412,7 @@ static php_sockbuf *php_sockcreate(int socket FLS_DC)
 
 	sock = pecalloc(sizeof(*sock), 1, persistent);
 	sock->socket = socket;
-	if((sock->next = FG(phpsockbuf))) 
+	if((sock->next = FG(phpsockbuf)))
 		FG(phpsockbuf)->prev = sock;
 	sock->persistent = persistent;
 	sock->is_blocked = 1;
@@ -436,7 +436,7 @@ PHPAPI size_t php_sock_set_def_chunk_size(size_t size)
 
 	old = FG(def_chunk_size);
 
-	if(size <= PHP_FSOCK_CHUNK_SIZE || size > 0) 
+	if(size <= PHP_FSOCK_CHUNK_SIZE || size > 0)
 		FG(def_chunk_size) = size;
 
 	return old;
@@ -500,7 +500,7 @@ static void php_sockwait_for_data(php_sockbuf *sock)
 	FD_SET(sock->socket, &fdr);
 	sock->timeout_event = 0;
 
-	if (sock->timeout.tv_sec == -1) 
+	if (sock->timeout.tv_sec == -1)
 		ptimeout = NULL;
 	else
 		ptimeout = &timeout;
@@ -510,7 +510,7 @@ static void php_sockwait_for_data(php_sockbuf *sock)
 		timeout = sock->timeout;
 
 		retval = select(sock->socket + 1, &tfdr, NULL, NULL, ptimeout);
-		
+
 		if (retval == 0)
 			sock->timeout_event = 1;
 
@@ -524,15 +524,15 @@ static size_t php_sockread_internal(php_sockbuf *sock)
 	char buf[PHP_FSOCK_CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
-	
+
 	/* For blocking sockets, we wait until there is some
 	   data to read (real data or EOF)
-	   
+
 	   Otherwise, recv() may time out and return 0 and
 	   therefore sock->eof would be set errornously.
 	 */
 
-	
+
 	if(sock->is_blocked) {
 		php_sockwait_for_data(sock);
 		if (sock->timeout_event)
@@ -569,7 +569,7 @@ static size_t php_sockread(php_sockbuf *sock)
 	size_t nr_bytes;
 	size_t nr_read = 0;
 	int i;
-	
+
 	for(i = 0; !sock->eof && i < MAX_CHUNKS_PER_READ; i++) {
 		nr_bytes = php_sockread_internal(sock);
 		if(nr_bytes == 0) break;
@@ -585,9 +585,9 @@ PHPAPI int php_sockset_blocking(int socket, int mode)
 	SOCK_FIND(sock, socket);
 
 	old = sock->is_blocked;
-	
+
 	sock->is_blocked = mode;
-	
+
 	return old;
 }
 
@@ -632,13 +632,13 @@ PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 		}
 	}
 
-	
+
 	if(p) {
 		amount = (ptrdiff_t) p - (ptrdiff_t) READPTR(sock) + 1;
 	} else {
 		amount = TOREAD(sock);
 	}
-	
+
 	amount = MIN(amount, maxlen);
 
 	if(amount > 0) {
@@ -646,8 +646,8 @@ PHPAPI char *php_sock_fgets(char *buf, size_t maxlen, int socket)
 		sock->readpos += amount;
 	}
 	buf[amount] = '\0';
-	
-	/* signal error only, if we don't return data from this call and 
+
+	/* signal error only, if we don't return data from this call and
 	   if there is no data to read and if the eof flag is set */
 	if(amount || TOREAD(sock) || !sock->eof) {
 		ret = buf;
@@ -685,8 +685,8 @@ PHPAPI int php_sock_feof(int socket)
 
 	if(!sock->is_blocked)
 		php_sockread(sock);
-	
-	if(!TOREAD(sock) && sock->eof) 
+
+	if(!TOREAD(sock) && sock->eof)
 		ret = 1;
 
 	return ret;
@@ -699,7 +699,7 @@ PHPAPI size_t php_sock_fread(char *ptr, size_t size, int socket)
 	size_t ret = 0;
 	SOCK_FIND_AND_READ_MAX(size);
 
-	if(size < 0) 
+	if(size < 0)
 		return ret;
 
 	ret = MIN(TOREAD(sock), size);
@@ -721,6 +721,112 @@ PHPAPI void php_msock_destroy(int *data)
 }
 /* }}} */
 
+
+/* {{{ stream abstraction */
+#if HAVE_PHP_STREAM
+static size_t php_sockop_write(php_stream * stream, const char * buf, size_t count)
+{
+	int socket = (int)stream->abstract;
+	return send(socket, buf, count, 0);
+}
+
+static void php_stream_sockwait_for_data(php_stream * stream)
+{
+	fd_set fdr, tfdr;
+	int retval, socket;
+	struct timeval timeout, *ptimeout;
+
+	socket = (int)stream->abstract;
+
+	FD_ZERO(&fdr);
+	FD_SET(socket, &fdr);
+	stream->timeout_event = 0;
+
+	if (stream->timeout.tv_sec == -1)
+		ptimeout = NULL;
+	else
+		ptimeout = &timeout;
+
+	while(1) {
+		tfdr = fdr;
+		timeout = stream->timeout;
+
+		retval = select(socket + 1, &tfdr, NULL, NULL, ptimeout);
+
+		if (retval == 0)
+			stream->timeout_event = 1;
+
+		if (retval >= 0)
+			break;
+	}
+}
+
+static size_t php_sockop_read(php_stream * stream, char * buf, size_t count)
+{
+	int socket = (int)stream->abstract;
+
+	/* For blocking sockets, we wait until there is some
+	   data to read (real data or EOF)
+
+	   Otherwise, recv() may time out and return 0 and
+	   therefore sock->eof would be set errornously.
+	 */
+
+	if (stream->is_blocked)	{
+		php_stream_sockwait_for_data(stream);
+		if (stream->timeout_event)
+			return 0;
+	}
+	return recv(socket, buf, count, 0);
+}
+
+static int php_sockop_close(php_stream * stream)
+{
+	int socket = (int)stream->abstract;
+	SOCK_CLOSE(socket);
+	return 0;
+}
+
+static int php_sockop_flush(php_stream * stream)
+{
+	int socket = (int)stream->abstract;
+	return fsync(socket);
+}
+
+static int php_sockop_cast(php_stream * stream, int castas, void ** ret)
+{
+	int socket = (int)stream->abstract;
+
+	switch(castas)	{
+		case PHP_STREAM_AS_STDIO:
+			if (ret)	{
+				/* DANGER!: data buffered in stream->readbuf will be forgotten! */
+				*ret = fdopen(socket, stream->mode);
+				if (*ret)
+					return SUCCESS;
+				return FAILURE;
+			}
+			return SUCCESS;
+		case PHP_STREAM_AS_FD:
+		case PHP_STREAM_AS_SOCKETD:
+			if (ret)
+				*ret = (void*)socket;
+			return SUCCESS;
+		default:
+			return FAILURE;
+	}
+}
+
+php_stream_ops php_stream_socket_ops = {
+	php_sockop_write, php_sockop_read,
+	php_sockop_close, php_sockop_flush,
+	NULL, NULL,
+	php_sockop_cast,
+	"socket"
+};
+#endif
+
+/* }}} */
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
