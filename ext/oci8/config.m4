@@ -52,15 +52,9 @@ if test "$PHP_OCI8" != "no"; then
   fi
 
   if test -f "$OCI8_DIR/lib/sysliblist"; then
-	OCI8_SYSLIB="`cat $OCI8_DIR/lib/sysliblist | sed -e 's/-l//g'`"
+  	PHP_EVAL_LIBLINE(`$OCI8_DIR/lib/sysliblist`, OCI8_SYSLIB)
   elif test -f "$OCI8_DIR/rdbms/lib/sysliblist"; then
-	OCI8_SYSLIB="`cat $OCI8_DIR/rdbms/lib/sysliblist | sed -e 's/-l//g'`"
-  fi
-
-  if test -n "$OCI8_SYSLIB"; then
-	for oci8_slib in `echo $OCI8_SYSLIB`; do
-	  AC_ADD_LIBRARY_WITH_PATH($oci8_slib, "", OCI8_SHARED_LIBADD)
-	done
+  	PHP_EVAL_LIBLINE(`$OCI8_DIR/rdbms/lib/sysliblist`, OCI8_SYSLIB)
   fi
 
   AC_OCI8_VERSION($OCI8_DIR)
@@ -86,14 +80,4 @@ if test "$PHP_OCI8" != "no"; then
   PHP_SUBST(OCI8_SHARED_LIBADD)
   PHP_SUBST(OCI8_DIR)
   PHP_SUBST(OCI8_VERSION)
-
-  # i have no idea if the following will work! thies@digicol.de 20000508
-  if test "$CC" = "gcc" -a "`uname -sv`" = "AIX 4"; then
-    if test "$ext_shared" = "yes"; then
-	  OCI8_SHARED_LIBADD="$OCI8_SHARED_LIBADD -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
-    else	  
-	  LIBS="$LIBS -nostdlib /lib/crt0_r.o /usr/lib/libpthreads.a /usr/lib/libc_r.a -lgcc"
-    fi
-  fi
-
 fi
