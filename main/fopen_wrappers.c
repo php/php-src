@@ -496,7 +496,7 @@ static FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, 
 	if (resource->port == 0)
 		resource->port = 80;
 	
-	*socketd = hostconnect(resource->host, resource->port, SOCK_STREAM, 0);
+	*socketd = php_hostconnect(resource->host, resource->port, SOCK_STREAM, 0);
 	if (*socketd == -1) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
