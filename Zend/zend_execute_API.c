@@ -540,6 +540,7 @@ void execute_new_code(CLS_D)
 	CG(active_op_array)->end_op_number = CG(active_op_array)->last;
 	EG(active_op_array) = CG(active_op_array);
 	zend_execute(CG(active_op_array) ELS_CC);
+	zval_ptr_dtor(EG(return_value_ptr_ptr));
 	CG(active_op_array)->start_op_number = CG(active_op_array)->last_executed_op_number;
 }
 #endif
