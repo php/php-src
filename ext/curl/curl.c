@@ -267,6 +267,9 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 	return SUCCESS;
 }
 
+static void curl_free_string(void **string) {
+	efree(*string);
+}
 
 /* {{{ proto string curl_version(void)
    Return the CURL version string. */
@@ -296,6 +299,8 @@ PHP_FUNCTION(curl_init)
 	}
 	memset(curl_handle, 0, sizeof(php_curl));
 
+	zend_llist_init(&curl_handle->to_free,sizeof(char *),curl_free_string,0);
+
 	curl_handle->cp = curl_easy_init();
 	if (!curl_handle->cp) {
 		php_error(E_ERROR, "Cannot initialize CURL Handle");
@@ -308,6 +313,7 @@ PHP_FUNCTION(curl_init)
 
 		urlstr = estrndup(Z_STRVAL_PP(url), Z_STRLEN_PP(url));
 		curl_easy_setopt(curl_handle->cp, CURLOPT_URL, urlstr);
+		zend_llist_add_element(&curl_handle->to_free,&urlstr);
 	}
 
 	curl_easy_setopt(curl_handle->cp, CURLOPT_NOPROGRESS, 1);
@@ -375,6 +381,7 @@ PHP_FUNCTION(curl_setopt)
 				copystr = estrndup(Z_STRVAL_PP(curl_value), Z_STRLEN_PP(curl_value));
 				
 				ret = curl_easy_setopt(curl_handle->cp, option, copystr);
+				zend_llist_add_element(&curl_handle->to_free,&copystr);
 			}
 			break;
 			
@@ -793,6 +800,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc)
 {
 	php_curl *curl_handle = (php_curl *)rsrc->ptr;
 	curl_easy_cleanup(curl_handle->cp);
+	zend_llist_clean(&curl_handle->to_free);
 	efree(curl_handle);
 }
 /* }}} */

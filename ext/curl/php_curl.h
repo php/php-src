@@ -56,6 +56,7 @@ typedef struct {
 	int cerrno;
 	char error[CURL_ERROR_SIZE+1];
 	CURL *cp;
+	zend_llist to_free;
 } php_curl;
 
 typedef struct {
