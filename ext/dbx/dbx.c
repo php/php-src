@@ -213,7 +213,7 @@ ZEND_MINFO_FUNCTION(dbx)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "dbx support", "enabled");
 	php_info_print_table_row(2, "dbx version", "1.0.0");
-	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (not really)\nSybase-CT");
+	php_info_print_table_row(2, "supported databases", "MySQL\nODBC\nPostgreSQL\nMicrosoft SQL Server\nFrontBase\nOracle 8 (oci8)\nSybase-CT");
 	php_info_print_table_end();
 }
 
@@ -673,8 +673,7 @@ int switch_dbx_connect(zval **rv, zval **host, zval **db, zval **username, zval 
 		case DBX_PGSQL: return dbx_pgsql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_MSSQL: return dbx_mssql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_FBSQL: return dbx_fbsql_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		case DBX_OCI8:  zend_error(E_WARNING, "dbx_connect: OCI8 extension is still highly experimental!"); 
-			return dbx_oci8_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_OCI8:  return dbx_oci8_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_connect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 	zend_error(E_WARNING, "dbx_connect: not supported in this module");
@@ -690,8 +689,7 @@ int switch_dbx_pconnect(zval **rv, zval **host, zval **db, zval **username, zval
 		case DBX_PGSQL: return dbx_pgsql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_MSSQL: return dbx_mssql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_FBSQL: return dbx_fbsql_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		case DBX_OCI8:  zend_error(E_WARNING, "dbx_pconnect: OCI8 extension is still highly experimental!"); 
-			return dbx_oci8_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		case DBX_OCI8:  return dbx_oci8_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_SYBASECT: return dbx_sybasect_pconnect(rv, host, db, username, password, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 	zend_error(E_WARNING, "dbx_pconnect: not supported in this module");
@@ -803,7 +801,7 @@ int switch_dbx_error(zval **rv, zval **dbx_handle, INTERNAL_FUNCTION_PARAMETERS,
 		case DBX_PGSQL: return dbx_pgsql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_MSSQL: return dbx_mssql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		case DBX_FBSQL: return dbx_fbsql_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		case DBX_OCI8:  return dbx_oci8_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+		/* case DBX_OCI8:  return dbx_oci8_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU); */
 		case DBX_SYBASECT: return dbx_sybasect_error(rv, dbx_handle, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 	zend_error(E_WARNING, "dbx_error: not supported in this module");
