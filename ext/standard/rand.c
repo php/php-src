@@ -245,7 +245,7 @@ PHP_FUNCTION(mt_srand)
  * -RL
  */    
 #define RAND_RANGE(__n, __min, __max) \
-	(__n) = (__min) + (int)((double)(__max) - (__min) + 1.0) * ((__n) / (PHP_RAND_MAX + 1.0))
+	(__n) = (__min) + (long) ((double) ((__max) - (__min) + 1.0)) * ((__n) / (PHP_RAND_MAX + 1.0))
 
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
