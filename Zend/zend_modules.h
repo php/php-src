@@ -30,7 +30,7 @@
 #define GINIT_FUNC_ARGS		void
 #define GINIT_FUNC_ARGS_PASSTHRU
 
-#include "zend_config.h"
+#include "zend.h"
 
 #define ZEND_MODULE_API_NO 20000310
 
