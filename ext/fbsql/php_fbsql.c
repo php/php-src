@@ -190,6 +190,7 @@ function_entry fbsql_functions[] = {
 	PHP_FE(fbsql_drop_db,		NULL)
 	PHP_FE(fbsql_start_db,		NULL)
 	PHP_FE(fbsql_stop_db,		NULL)
+	PHP_FE(fbsql_db_status,		NULL)
 	PHP_FE(fbsql_query,			NULL)
 	PHP_FE(fbsql_db_query,		NULL)
 	PHP_FE(fbsql_list_dbs,		NULL)
@@ -1363,6 +1364,82 @@ PHP_FUNCTION(fbsql_drop_db)
 }
 /* }}} */
 
+/* {{{ proto int fbsql_start_db(string database_name [, int link_identifier])
+	*/
+PHP_FUNCTION(fbsql_start_db)
+{
+	PHPFBLink* phpLink = NULL;
+	int   i;
+	int   argc = ARG_COUNT(ht);
+	zval	**argv[2];
+	char* databaseName;
+	FBDatabaseStatus status;
+	FBSQLLS_FETCH();
+
+	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+
+	convert_to_string_ex(argv[0]);
+	databaseName = (*argv[0])->value.str.val;
+
+	if (argc >= 2)
+	{
+		convert_to_long_ex(argv[1]);
+		phpLink = phpfbGetLink(Z_LVAL_PP(argv[1]));    
+	}
+	else if (FB_SQL_G(linkIndex) == 0)
+	{
+		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
+	}
+	else
+	{
+		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
+    }
+	if (phpLink == NULL) RETURN_FALSE;
+
+/*	printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
+	status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
+	if ((status != FBStopped) && (status != FBRunning) && (status != FBStarting))
+	{
+		char* txt = "Unknown status";
+		if      (status == FBStopped ) txt = "stopped";
+		else if (status == FBStarting) txt = "starting";
+		else if (status == FBRunning ) txt = "running";
+		else if (status == FBStopping) txt = "stopping";
+		else if (status == FBNoExec  ) txt = "no exec";
+		php_error(E_WARNING, "Could not start %s@%s, as database is %s.",databaseName,phpLink->hostName,txt);
+		RETURN_FALSE;
+	}
+
+	if (status == FBStopped)
+	{
+		if (!fbcehStartDatabaseNamed (phpLink->execHandler, databaseName))
+		{
+			char* error = fbechErrorMessage(phpLink->execHandler);
+			php_error(E_WARNING, "Could not start %s@%s. %s.",databaseName,phpLink->hostName,error);
+			RETURN_FALSE;
+		}
+	}
+
+	for (i=0; i < 20; i++)
+	{
+#ifdef PHP_WIN32
+		Sleep(1000);
+#else
+		sleep(1);
+#endif
+		status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
+		if (status == FBRunning) break;
+	}
+	if (status != FBRunning)
+	{
+		php_error(E_WARNING, "Database %s@%s started -- status unknown",databaseName,phpLink->hostName);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* {{{ proto int fbsql_stop_db(string database_name [, int link_identifier])
 	*/
@@ -1442,84 +1519,48 @@ PHP_FUNCTION(fbsql_stop_db)
 /* }}} */
 
 
-/* {{{ proto int fbsql_start_db(string database_name [, int link_identifier])
-	*/
-PHP_FUNCTION(fbsql_start_db)
+/* {{{ proto int fbsql_db_status(string database_name [, int link_identifier])
+	Get the status (Stoped, Starting, Started, Stopping) for a given database*/
+PHP_FUNCTION(fbsql_db_status)
 {
-	PHPFBLink* phpLink = NULL;
-	int   i;
-	int   argc = ARG_COUNT(ht);
-	zval	**argv[2];
-	char* databaseName;
-	char* hostName;
+	PHPFBDatabase*  phpDatabase;
+	PHPFBLink*      phpLink      = NULL;
 	FBDatabaseStatus status;
+	char*            databaseName;
+
+	int   argc     = ARG_COUNT(ht);
+	zval	**argv[2];
+	int   link;
 	FBSQLLS_FETCH();
 
-	hostName = FB_SQL_G(hostName);
+	link = FB_SQL_G(linkIndex);
 
-	if ((argc < 1) || (argc > 2)) WRONG_PARAM_COUNT;
-	if (zend_get_parameters_ex(argc,&argv[0],&argv[1])==FAILURE) RETURN_FALSE;
+	if ((argc < 0) || (argc > 2)) WRONG_PARAM_COUNT;
+	if (zend_get_parameters_ex(argc,&argv[0],&argv[1],&argv[2])==FAILURE) RETURN_FALSE;
 
 	convert_to_string_ex(argv[0]);
 	databaseName = (*argv[0])->value.str.val;
 
-	if (argc >= 2)
+	if (argc == 2)
 	{
 		convert_to_long_ex(argv[1]);
-		phpLink = phpfbGetLink(Z_LVAL_PP(argv[1]));    
+		link = Z_LVAL_PP(argv[1]);
+		phpLink = phpfbGetLink(link);
+		if (phpLink == NULL) RETURN_FALSE;
 	}
-	else if (FB_SQL_G(linkIndex) == 0)
+	if (phpLink == NULL)
 	{
 		phpLink = phpfbConnect(INTERNAL_FUNCTION_PARAM_PASSTHRU,NULL,NULL,NULL,0);
+		if (phpLink == NULL) RETURN_FALSE;
 	}
-	else
-	{
-		phpLink = phpfbGetLink(FB_SQL_G(linkIndex));
-    }
-	if (phpLink == NULL) RETURN_FALSE;
-/*	printf("Start db at link %s@%s\n",phpLink->hostName,phpLink->userName); */
-	status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
-	if ((status != FBStopped) && (status != FBRunning) && (status != FBStarting))
-	{
-		char* txt = "Unknown status";
-		if      (status == FBStopped ) txt = "stopped";
-		else if (status == FBStarting) txt = "starting";
-		else if (status == FBRunning ) txt = "running";
-		else if (status == FBStopping) txt = "stopping";
-		else if (status == FBNoExec  ) txt = "no exec";
-		php_error(E_WARNING, "Could not start %s@%s, as database is %s.",databaseName,hostName,txt);
+	if (phpLink->execHandler) {
+		RETURN_LONG(fbcehStatusForDatabaseNamed(phpLink->execHandler, databaseName));
+	}
+	else {
 		RETURN_FALSE;
 	}
-
-	if (status == FBStopped)
-	{
-		if (!fbcehStartDatabaseNamed (phpLink->execHandler, databaseName))
-		{
-			char* error = fbechErrorMessage(phpLink->execHandler);
-			php_error(E_WARNING, "Could not start %s@%s. %s.",databaseName,hostName,error);
-			RETURN_FALSE;
-		}
-	}
-
-	for (i=0; i < 20; i++)
-	{
-#ifdef PHP_WIN32
-		Sleep(1000);
-#else
-		sleep(1);
-#endif
-		status = fbcehStatusForDatabaseNamed(phpLink->execHandler,databaseName);
-		if (status == FBRunning) break;
-	}
-	if (status != FBRunning)
-	{
-		php_error(E_WARNING, "Database %s@%s started -- status unknown",databaseName,hostName);
-		RETURN_FALSE;
-	}
-	RETURN_TRUE;
 }
 /* }}} */
-
 
 int mdOk(PHPFBDatabase* database, FBCMetaData* md)
 {
@@ -1536,7 +1577,7 @@ int mdOk(PHPFBDatabase* database, FBCMetaData* md)
 	if (md == NULL)
 	{
 		database->errorNo  = 1;
-		database->errorText  = estrdup("Connection was database server was lost");
+		database->errorText  = estrdup("Connection to database server was lost");
 		if (FB_SQL_G(generateWarnings)) php_error(E_WARNING, database->errorText);
 		result = 0;
 	}
@@ -2625,7 +2666,6 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	}
 	if (result->fetchHandle == NULL)
 	{
-		unsigned int c = 0;
 		if (result->array == NULL)
 		{
 			RETURN_FALSE;
@@ -2636,12 +2676,11 @@ static void php_fbsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		}
 		if (result_type & FBSQL_NUM)
 		{
-			add_index_string(return_value,0,estrdup(fbaObjectAtIndex(result->array,result->rowIndex)),c);
-			c = 1;
+			add_index_string(return_value,0,estrdup(fbaObjectAtIndex(result->array,result->rowIndex)),0);
 		}
 		if (result_type & FBSQL_ASSOC)
 		{
-			add_assoc_string(return_value, "Database", estrdup(fbaObjectAtIndex(result->array,result->rowIndex)), c);
+			add_assoc_string(return_value, "Database", estrdup(fbaObjectAtIndex(result->array,result->rowIndex)), 0);
 		}
 	}
 	else {
