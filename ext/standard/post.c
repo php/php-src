@@ -149,7 +149,7 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 			gpc_element->refcount++;
 		}
 		if (track_vars_array) {
-			zend_hash_update(EG(active_symbol_table), var, var_len+1, &gpc_element, sizeof(pval *), NULL);
+			zend_hash_update(track_vars_array->value.ht, var, var_len+1, &gpc_element, sizeof(pval *), NULL);
 			gpc_element->refcount++;
 		}
 	}
