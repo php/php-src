@@ -9,17 +9,21 @@ if test "$PHP_NCURSES" != "no"; then
 
    SEARCH_PATH="$PHP_NCURSES /usr/local /usr"     
 
-   for i in $SEARCH_PATH ; do
-     if test -d $i/include; then
-       if test -r $i/include/ncurses.h; then
-         NCURSES_DIR=$i
+   for dir in $SEARCH_PATH; do
+    for subdir in include/ncurses include; do
+     if test -d $dir/$subdir; then
+       if test -r $dir/$subdir/ncurses.h; then
+         NCURSES_DIR=$dir
+         NCURSES_INCDIR=$dir/$subdir
          AC_DEFINE(HAVE_NCURSES_H,1,[ ])
-         break
-       elif test -r $i/include/curses.h; then
-         NCURSES_DIR=$i
-         break
+         break 2
+       elif test -r $dir/$subdir/curses.h; then
+         NCURSES_DIR=$dir
+         NCURSES_INCDIR=$dir/$subdir
+         break 2
        fi
      fi
+    done
    done
   
    if test -z "$NCURSES_DIR"; then
@@ -28,7 +32,7 @@ if test "$PHP_NCURSES" != "no"; then
    fi
 
    # --with-ncurses -> add include path
-   PHP_ADD_INCLUDE($NCURSES_DIR/include)
+   PHP_ADD_INCLUDE($NCURSES_INCDIR)
 
    # --with-ncurses -> chech for lib and symbol presence
    LIBNAME=ncurses 
