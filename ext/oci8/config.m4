@@ -9,8 +9,12 @@ AC_DEFUN(AC_OCI8_VERSION,[
 	OCI8_VERSION=8.1
   elif test -f $OCI8_DIR/lib/libclntsh.s?.1.0; then
 	OCI8_VERSION=8.0
-  elif test -f $OCI8_DIR/lib/libclntsh.a; then # AIX - XXX is this check still right for 8.1?
-	OCI8_VERSION=8.0
+  elif test -f $OCI8_DIR/lib/libclntsh.a; then 
+    if test -f $OCI8_DIR/lib/libcore4.a; then 
+      OCI8_VERSION=8.0
+    else
+      OCI8_VERSION=8.1
+    fi
   else
     AC_MSG_ERROR(Oracle-OCI8 needed libraries not found)
   fi
@@ -78,7 +82,7 @@ if test "$PHP_OCI8" != "no"; then
   PHP_EXTENSION(oci8, $ext_shared)
   AC_DEFINE(HAVE_OCI8,1,[ ])
 
-  PHP_SUBST(OCI8_SHARED_LIBADD)
-  PHP_SUBST(OCI8_DIR)
+  PHP_SUBST_OLD(OCI8_SHARED_LIBADD)
+  PHP_SUBST_OLD(OCI8_DIR)
   PHP_SUBST_OLD(OCI8_VERSION)
 fi
