@@ -17,6 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
+#define ZEND_INTENSIVE_DEBUGGING 0
 
 #include <stdio.h>
 #include <signal.h>
@@ -939,6 +940,33 @@ static void call_overloaded_function(int arg_count, zval *return_value ELS_DC)
 }
 
 
+#if ZEND_INTENSIVE_DEBUGGING
+
+#define CHECK_SYMBOL_TABLES()														\
+	zend_hash_apply(&EG(symbol_table), (int (*)()) zend_check_symbol);				\
+	if (&EG(symbol_table)!=EG(active_symbol_table)) {								\
+		zend_hash_apply(EG(active_symbol_table), (int (*)()) zend_check_symbol);	\
+	}
+
+static int zend_check_symbol(zval **pz)
+{
+	if ((*pz)->type>9) {
+		fprintf(stderr, "Warning!  %x has invalid type!\n", *pz);
+	} else if ((*pz)->type==IS_ARRAY) {
+		zend_hash_apply((*pz)->value.ht, (int (*)()) zend_check_symbol);
+	} else if ((*pz)->type==IS_OBJECT) {
+		zend_hash_apply((*pz)->value.obj.properties, (int (*)()) zend_check_symbol);
+	}
+
+	return 0;
+}
+
+
+#else
+#define CHECK_SYMBOL_TABLES()
+#endif
+
+
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && (WINNT|WIN32))
 #	define do_alloca(p) alloca(p)
 #	define free_alloca(p)
@@ -947,8 +975,9 @@ static void call_overloaded_function(int arg_count, zval *return_value ELS_DC)
 #	define free_alloca(p)	efree(p)
 #endif
 
-#define NEXT_OPCODE()	\
-	opline++;			\
+#define NEXT_OPCODE()		\
+	CHECK_SYMBOL_TABLES()	\
+	opline++;				\
 	continue;
 
 typedef struct _object_info {
@@ -2096,7 +2125,6 @@ send_by_ref:
 				NEXT_OPCODE();
 			case ZEND_FE_RESET: {
 					zval *array_ptr;
-					zval **array_ptr_ptr;
 					HashTable *fe_ht;
 					
 					if ((opline->op1.op_type == IS_CONST) || (opline->op1.op_type == IS_TMP_VAR)) {
@@ -2112,12 +2140,7 @@ send_by_ref:
 							array_ptr->refcount++;
 						}
 					} else {
-						array_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
-						if (!PZVAL_IS_REF(*array_ptr_ptr)){
-							SEPARATE_ZVAL(array_ptr_ptr);
-						}
-						array_ptr = *array_ptr_ptr;
-						array_ptr->is_ref = 1;
+						array_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
 						array_ptr->refcount++;
 					}
 					PZVAL_LOCK(array_ptr);
@@ -2144,7 +2167,7 @@ send_by_ref:
 
 					fe_ht = HASH_OF(array);
 
-					if (! fe_ht) {
+					if (!fe_ht) {
 						zend_error(E_WARNING, "Invalid argument supplied for foreach()");
 						opline = op_array->opcodes+opline->op2.u.opline_num;
 						continue;
