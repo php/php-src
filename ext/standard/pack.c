@@ -302,6 +302,10 @@ PHP_FUNCTION(pack)
 				convert_to_string_ex(val);
 				v = (*val)->value.str.val;
 				outputpos--;
+				if(arg > (*val)->value.str.len) {
+					php_error(E_WARNING,"pack type %c: not enough characters in string",code);
+					arg = (*val)->value.str.len;
+				}
 
 				while (arg-- > 0) {
 					char n = *(v++);
