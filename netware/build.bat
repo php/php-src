@@ -6,6 +6,7 @@ if "%2" == "clean" make -f ..\netware\%1.mak clean
 if "%2" == "/?" goto USAGE
 
 if "%1" == "zend" call ..\netware\BisonFlexZend
+if "%1" == "ZendEngine2" call ..\netware\BisonFlexZend
 
 REM Build command
 make -f ..\netware\%1.mak
