@@ -53,6 +53,10 @@ DBA_OPEN_FUNC(db2)
 	struct stat check_stat;
 	int s = VCWD_STAT(info->path, &check_stat);
 
+	if (!s && !check_stat.st_size) {
+		info->mode = DBA_TRUNC; /* force truncate */
+	}
+
 	type = info->mode == DBA_READER ? DB_UNKNOWN :
 		info->mode == DBA_TRUNC ? DB_BTREE :
 		s ? DB_BTREE : DB_UNKNOWN;
