@@ -340,6 +340,10 @@ InputPath=".\zend-scanner.l"
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\LICENSE
+# End Source File
+# Begin Source File
+
 SOURCE=.\ZEND_BUGS
 # End Source File
 # Begin Source File
