@@ -32,11 +32,70 @@
 #include "php_variables.h"
 #include "rfc1867.h"
 
+#undef DEBUG_FILE_UPLOAD
+
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 #include "ext/mbstring/mbstring.h"
-#endif
 
-#undef DEBUG_FILE_UPLOAD
+static void safe_php_register_variable(char *var, char *strval, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+
+#define SAFE_RETURN { \
+    php_mb_flush_gpc_variables(num_vars, val_list, len_list, array_ptr TSRMLS_CC); \
+	if (lbuf) efree(lbuf); \
+	if (abuf) efree(abuf); \
+	if (array_index) efree(array_index); \
+	zend_hash_destroy(&PG(rfc1867_protected_variables)); \
+	zend_llist_destroy(&header); \
+	if (mbuff->boundary_next) efree(mbuff->boundary_next); \
+	if (mbuff->boundary) efree(mbuff->boundary); \
+	if (mbuff->buffer) efree(mbuff->buffer); \
+	if (mbuff) efree(mbuff); \
+	return; }
+
+void php_mb_flush_gpc_variables(int num_vars, char **val_list, int *len_list, zval *array_ptr  TSRMLS_DC)
+{
+	int i;
+	if (php_mb_encoding_translation(TSRMLS_C)) {
+		if (num_vars > 0 &&
+			php_mb_gpc_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC) == SUCCESS) {
+			php_mb_gpc_encoding_converter(val_list, len_list, num_vars, NULL, NULL TSRMLS_CC);
+		}
+		for (i=0; i<num_vars; i+=2){
+			safe_php_register_variable(val_list[i], val_list[i+1], array_ptr, 0 TSRMLS_CC);
+			efree(val_list[i]);
+			efree(val_list[i+1]);
+		} 
+		efree(val_list);
+		efree(len_list);
+	}
+}
+
+void php_mb_gpc_realloc_buffer(char ***pval_list, int **plen_list, int *num_vars_max, int inc  TSRMLS_DC)
+{
+	(*num_vars_max) += inc;
+	*pval_list = (char **)erealloc(*pval_list, (*num_vars_max+2)*sizeof(char *));
+	*plen_list = (int *)erealloc(*plen_list, (*num_vars_max+2)*sizeof(int));
+}
+
+void php_mb_gpc_stack_variable(char *param, char *value, char ***pval_list, int **plen_list, int *num_vars, int *num_vars_max TSRMLS_DC)
+{
+	char **val_list=*pval_list;
+	int *len_list=*plen_list;
+
+	if (*num_vars>=*num_vars_max){	
+		php_mb_gpc_realloc_buffer(pval_list, plen_list, num_vars_max, 
+								  16 TSRMLS_CC);
+	}
+
+	val_list[*num_vars] = (char *)estrdup(param);
+	len_list[*num_vars] = strlen(param);
+	(*num_vars)++;
+	val_list[*num_vars] = (char *)estrdup(value);
+	len_list[*num_vars] = strlen(value);
+	(*num_vars)++;
+}
+
+#else
 
 #define SAFE_RETURN { \
 	if (lbuf) efree(lbuf); \
@@ -49,7 +108,7 @@
 	if (mbuff->buffer) efree(mbuff->buffer); \
 	if (mbuff) efree(mbuff); \
 	return; }
-
+#endif
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -546,7 +605,8 @@ static char *php_ap_getword_conf(char **line TSRMLS_DC)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 	if (php_mb_encoding_translation(TSRMLS_C)) {
-		php_mb_gpc_encoding_detector(str, strlen(str), NULL TSRMLS_CC);
+		int len=strlen(str);
+		php_mb_gpc_encoding_detector(&str, &len, 1, NULL TSRMLS_CC);
 	}
 #endif
 
@@ -694,14 +754,15 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	char *temp_filename=NULL, *lbuf=NULL, *abuf=NULL;
 	int boundary_len=0, total_bytes=0, cancel_upload=0, is_arr_upload=0, array_len=0, max_file_size=0, skip_upload=0;
 	zval *http_post_files=NULL;
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+	int str_len = 0, num_vars = 0, num_vars_max = 2*10, *len_list = NULL;
+	char **val_list = NULL;
+#endif
 	zend_bool magic_quotes_gpc;
 	multipart_buffer *mbuff;
 	zval *array_ptr = (zval *) arg;
 	FILE *fp;
 	zend_llist header;
-#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
-	int str_len=0;
-#endif
 
 	if (SG(request_info).content_length > SG(post_max_size)) {
 		sapi_module.sapi_error(E_WARNING, "POST Content-Length of %d bytes exceeds the limit of %d bytes", SG(request_info).content_length, SG(post_max_size));
@@ -751,6 +812,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 	INIT_PZVAL(http_post_files);
 	PG(http_globals)[TRACK_VARS_FILES] = http_post_files;
 
+#if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
+	if (php_mb_encoding_translation(TSRMLS_C)) {
+		val_list = (char **)ecalloc(num_vars_max+2, sizeof(char *));
+		len_list = (int *)ecalloc(num_vars_max+2, sizeof(int));
+	}
+#endif
 	zend_llist_init(&header, sizeof(mime_header_entry), (llist_dtor_func_t) php_free_hdr_entry, 0);
 
 	while (!multipart_buffer_eof(mbuff TSRMLS_CC))
@@ -812,13 +879,14 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 				if (php_mb_encoding_translation(TSRMLS_C)) {
-					if (php_mb_gpc_encoding_detector(value, strlen(value), NULL TSRMLS_CC) == SUCCESS) {
-						str_len = strlen(value);
-						php_mb_gpc_encoding_converter(&value , &str_len, NULL, NULL TSRMLS_CC);
-					} 
+					php_mb_gpc_stack_variable(param, value, &val_list, &len_list, 
+											  &num_vars, &num_vars_max TSRMLS_CC);
+				} else {
+					safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
 				}
-#endif
+#else
 				safe_php_register_variable(param, value, array_ptr, 0 TSRMLS_CC);
+#endif
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
 					max_file_size = atol(value);
 				}
@@ -944,11 +1012,19 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler)
 
 #if HAVE_MBSTRING && !defined(COMPILE_DL_MBSTRING)
 			if (php_mb_encoding_translation(TSRMLS_C)) {
-				if(php_mb_gpc_encoding_detector(filename, strlen(filename), NULL TSRMLS_CC) == SUCCESS) {
+				if (num_vars>=num_vars_max){	
+					php_mb_gpc_realloc_buffer(&val_list, &len_list, &num_vars_max, 
+											  1 TSRMLS_CC);
+				}
+				val_list[num_vars] = filename;
+				len_list[num_vars] = strlen(filename);
+				num_vars++;
+				if(php_mb_gpc_encoding_detector(val_list, len_list, num_vars, NULL TSRMLS_CC) == SUCCESS) {
 					str_len = strlen(filename);
-					php_mb_gpc_encoding_converter(&filename, &str_len, NULL, NULL TSRMLS_CC);
+					php_mb_gpc_encoding_converter(&filename, &str_len, 1, NULL, NULL TSRMLS_CC);
 				}
 				s = php_mb_strrchr(filename, '\\' TSRMLS_CC);
+				num_vars--;
 			} else {
 				s = strrchr(filename, '\\');
 			}
