@@ -30,6 +30,7 @@ BUILD_FILES = \
 	build/program.mk \
 	build/rules.mk \
 	build/rules_pear.mk \
+	build/dynlib.mk \
 	build/shtool \
 	acinclude.m4
 
