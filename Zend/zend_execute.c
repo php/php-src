@@ -378,7 +378,7 @@ static inline void zend_assign_to_variable(znode *result, znode *op1, znode *op2
 					*/
 					/* break missing intentionally */
 				case IS_CONST:
-					if (PZVAL_IS_REF(value)) {
+					if (PZVAL_IS_REF(value) && value->refcount > 0) {
 						variable_ptr = *variable_ptr_ptr = (zval *) emalloc(sizeof(zval));
 						*variable_ptr = *value;
 						zval_copy_ctor(variable_ptr);
@@ -1544,17 +1544,36 @@ do_fcall_common:
 				}
 				break;
 			case ZEND_RETURN: {
-					zval *retval = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					zval *retval_ptr;
+					zval **retval_ptr_ptr;
 					
-					if (!EG(free_op1)) { /* Not a temp var */
+					if (opline->extended_value) {
+						retval_ptr_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
+						SEPARATE_ZVAL(retval_ptr_ptr);
+						(*retval_ptr_ptr)->is_ref = 1;
+						(*retval_ptr_ptr)->refcount++;
 						efree(*EG(return_value_ptr_ptr));
-						/* Still need to check for reference */
-						*EG(return_value_ptr_ptr) = retval;
-						retval->refcount++;
+						(*EG(return_value_ptr_ptr)) = (*retval_ptr_ptr);
 					} else {
-						**EG(return_value_ptr_ptr) = *retval;
-						(*EG(return_value_ptr_ptr))->refcount = 1;
-						(*EG(return_value_ptr_ptr))->is_ref = 0;
+						retval_ptr = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+					
+						if (!EG(free_op1)) { /* Not a temp var */
+							
+							if (PZVAL_IS_REF(retval_ptr) && retval_ptr->refcount > 0) {
+								**EG(return_value_ptr_ptr) = *retval_ptr;
+								(*EG(return_value_ptr_ptr))->is_ref = 0;
+								(*EG(return_value_ptr_ptr))->refcount = 1;
+								zval_copy_ctor(*EG(return_value_ptr_ptr));
+							} else {
+								efree(*EG(return_value_ptr_ptr));
+								*EG(return_value_ptr_ptr) = retval_ptr;
+								retval_ptr->refcount++;
+							}
+						} else {
+							**EG(return_value_ptr_ptr) = *retval_ptr;
+							(*EG(return_value_ptr_ptr))->refcount = 1;
+							(*EG(return_value_ptr_ptr))->is_ref = 0;
+						}
 					}
 #if SUPPORT_INTERACTIVE
 					op_array->last_executed_op_number = opline-op_array->opcodes;
