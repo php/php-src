@@ -1432,6 +1432,7 @@ class PEAR_Common extends PEAR
         }
         $proxy_host = $proxy_port = null;
         if ($proxy = $config->get('http_proxy')) {
+            $proxy = str_replace('http://', '', $proxy);
             list($proxy_host, $proxy_port) = explode(':', $proxy);
             if (empty($proxy_port)) {
                 $proxy_port = 8080;
