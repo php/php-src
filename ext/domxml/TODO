@@ -14,3 +14,4 @@
 6) Take a hard look at startup/shutdown code. This is really running slower than
 	it ought to be.
 7) Fix the many, many memory leaks.
+8) Modify new_child to allow creation of attribute, cdata, dtd, etc nodes.
