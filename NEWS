@@ -7,6 +7,8 @@ PHP 4                                                                      NEWS
 - Fixed FastCGI IIS document root problem. (Shane)
 - Fixed corruption of multibyte character including 0x5c as second
   byte in multipart/form-data. (Rui)
+- Fixed possible crash in imagerotate() when AN invalid color index
+  is used for background color. (Pierre-Alain Joye)
 - Fixed bug #24313 (file_exist() warning on non-existent files
   when open_basedir is used). (Ilia)
 - Fixed bug #24312 (base64_decode() does not skip 0xF0-0xFF characters).
@@ -16,6 +18,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #24028 (Reading raw post message by php://input failed). (Jani)
 - Fixed bug #24009 (FastCGI handling of file not found). (Shane)
 - Fixed bug #23808 (broken imagecopymerge()). (Pierre-Alain Joye)
+- Fixed bug #23792 (imagerotate() problems with limited platte, the function
+  will always return true color image from now on). (Pierre-Alain Joye)
 - Fixed bug #23664 (FastCGI socket listenting). (Shane)
 
 19 Jun 2003, Version 4.3.3RC1
