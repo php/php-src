@@ -19,10 +19,6 @@
 	$Id$
 */
 
-#ifndef ZEND_ENGINE_2
-#error HEAD does not work with ZendEngine1 anymore
-#endif
-
 /* {{{ includes
  */
 #include "php.h"
@@ -33,6 +29,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#ifndef ZEND_ENGINE_2
+#error HEAD does not work with ZendEngine1 anymore
+#endif
 
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
