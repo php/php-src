@@ -1473,10 +1473,6 @@ PHP_MINIT_FUNCTION(domxml)
 {
 	zend_class_entry ce;
 
-	le_domxmldocp =	zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domdocument", module_number);
-	/* Freeing the document contains freeing the complete tree.
-	   Therefore nodes, attributes etc. may not be freed seperately.
-	 */
 	le_domxmlnodep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domnode", module_number);
 	le_domxmlcommentp = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domcomment", module_number);
 	le_domxmlattrp = zend_register_list_destructors_ex(php_free_xml_attr, NULL, "domattribute", module_number);
@@ -1488,6 +1484,11 @@ PHP_MINIT_FUNCTION(domxml)
 	le_domxmlpip = zend_register_list_destructors_ex(php_free_xml_node, NULL, "dompi", module_number);
 	le_domxmlparserp =	zend_register_list_destructors_ex(php_free_xml_parser, NULL, "domparser", module_number);
 	le_domxmldoctypep = zend_register_list_destructors_ex(php_free_xml_node, NULL, "domdocumenttype", module_number);
+	le_domxmldocp = zend_register_list_destructors_ex(php_free_xml_doc, NULL, "domdocument", module_number);
+	/* Freeing the document contains freeing the complete tree.
+	   Therefore nodes, attributes etc. may not be freed seperately.
+	   Moved to end of list to support loading via dl()
+	*/
 	/* Not yet initialized le_*s */
 	le_domxmlnotationp  = -10003;
 
