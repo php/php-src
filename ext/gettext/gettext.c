@@ -151,9 +151,9 @@ PHP_FUNCTION(bindtextdomain)
 	convert_to_string_ex(dir);
 
 	if (strcmp((*dir)->value.str.val, "") && strcmp((*dir)->value.str.val, "0")) {
-		V_REALPATH((*dir)->value.str.val, dir_name);
+		VCWD_REALPATH((*dir)->value.str.val, dir_name);
 	} else {
-		V_GETCWD(dir_name, MAXPATHLEN);
+		VCWD_GETCWD(dir_name, MAXPATHLEN);
 	}
 
 	retval = bindtextdomain((*domain_name)->value.str.val, dir_name);

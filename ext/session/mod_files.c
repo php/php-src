@@ -139,16 +139,16 @@ static void ps_files_open(ps_files *data, const char *key)
 		data->lastkey = estrdup(key);
 		
 #ifdef O_EXCL
-		data->fd = V_OPEN((buf, O_RDWR | O_BINARY));
+		data->fd = VCWD_OPEN((buf, O_RDWR | O_BINARY));
 		if (data->fd == -1) {
 			if (errno == ENOENT) {
-				data->fd = V_OPEN((buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600));
+				data->fd = VCWD_OPEN((buf, O_EXCL | O_RDWR | O_CREAT | O_BINARY, 0600));
 			}
 		} else {
 			flock(data->fd, LOCK_EX);
 		}
 #else
-		data->fd = V_OPEN((buf, O_CREAT | O_RDWR | O_BINARY, 0600));
+		data->fd = VCWD_OPEN((buf, O_CREAT | O_RDWR | O_BINARY, 0600));
 		if (data->fd != -1)
 			flock(data->fd, LOCK_EX);
 #endif
@@ -196,9 +196,9 @@ static int ps_files_cleanup_dir(const char *dirname, int maxlifetime)
 				/* NUL terminate it and */
 				buf[dirname_len + entry_len + 1] = '\0';
 				/* check whether its last access was more than maxlifet ago */
-				if (V_STAT(buf, &sbuf) == 0 && 
+				if (VCWD_STAT(buf, &sbuf) == 0 && 
 						(now - sbuf.st_atime) > maxlifetime) {
-					V_UNLINK(buf);
+					VCWD_UNLINK(buf);
 					nrdels++;
 				}
 			}
@@ -301,7 +301,7 @@ PS_DESTROY_FUNC(files)
 	
 	ps_files_close(data);
 	
-	if (V_UNLINK(buf) == -1) {
+	if (VCWD_UNLINK(buf) == -1) {
 		return FAILURE;
 	}
 

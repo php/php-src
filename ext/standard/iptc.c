@@ -198,7 +198,7 @@ PHP_FUNCTION(iptcembed)
     if (php_check_open_basedir((*jpeg_file)->value.str.val)) 
 		RETURN_FALSE;
 
-    if ((fp = V_FOPEN((*jpeg_file)->value.str.val,"rb")) == 0) {
+    if ((fp = VCWD_FOPEN((*jpeg_file)->value.str.val,"rb")) == 0) {
         php_error(E_WARNING, "Unable to open %s", (*jpeg_file)->value.str.val);
         RETURN_FALSE;
     }

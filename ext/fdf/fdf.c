@@ -748,7 +748,7 @@ SAPI_POST_HANDLER_FUNC(fdf_post_handler)
 		}   
 		
 		FDFClose(theFDF);
-		V_UNLINK((const char *)filename);
+		VCWD_UNLINK((const char *)filename);
 		efree(filename);
 
 		if(name)          efree(name);

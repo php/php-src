@@ -154,59 +154,59 @@ typedef struct _virtual_cwd_globals {
 
 #ifdef VIRTUAL_DIR
 
-#define V_GETCWD(buff, size) virtual_getcwd(buff,size)
-#define V_FOPEN(path, mode) virtual_fopen(path, mode)
-/* The V_OPEN macro will need to be used as V_OPEN((path, flags, ...)) */
-#define V_OPEN(open_args) virtual_open open_args
-#define V_CREAT(path, mode) virtual_creat(path, mode)
-#define V_CHDIR(path) virtual_chdir(path)
-#define V_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
-#define V_GETWD(buf)
-#define V_REALPATH(path,real_path) virtual_realpath(path,real_path)
-#define V_RENAME(oldname,newname) virtual_rename(oldname,newname)
-#define V_STAT(path, buff) virtual_stat(path, buff)
+#define VCWD_GETCWD(buff, size) virtual_getcwd(buff,size)
+#define VCWD_FOPEN(path, mode) virtual_fopen(path, mode)
+/* The VCWD_OPEN macro will need to be used as VCWD_OPEN((path, flags, ...)) */
+#define VCWD_OPEN(open_args) virtual_open open_args
+#define VCWD_CREAT(path, mode) virtual_creat(path, mode)
+#define VCWD_CHDIR(path) virtual_chdir(path)
+#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, virtual_chdir)
+#define VCWD_GETWD(buf)
+#define VCWD_REALPATH(path,real_path) virtual_realpath(path,real_path)
+#define VCWD_RENAME(oldname,newname) virtual_rename(oldname,newname)
+#define VCWD_STAT(path, buff) virtual_stat(path, buff)
 #ifdef TSRM_WIN32
-#define V_LSTAT(path, buff) virtual_stat(path, buff)
+#define VCWD_LSTAT(path, buff) virtual_stat(path, buff)
 #else
-#define V_LSTAT(path, buff) virtual_lstat(path, buff)
+#define VCWD_LSTAT(path, buff) virtual_lstat(path, buff)
 #endif
-#define V_UNLINK(path) virtual_unlink(path)
-#define V_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
-#define V_RMDIR(pathname) virtual_rmdir(pathname)
-#define V_OPENDIR(pathname) virtual_opendir(pathname)
-#define V_POPEN(command, type) virtual_popen(command, type)
+#define VCWD_UNLINK(path) virtual_unlink(path)
+#define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode)
+#define VCWD_RMDIR(pathname) virtual_rmdir(pathname)
+#define VCWD_OPENDIR(pathname) virtual_opendir(pathname)
+#define VCWD_POPEN(command, type) virtual_popen(command, type)
 #if HAVE_UTIME
-#define V_UTIME(path,time) virtual_utime(path,time)
+#define VCWD_UTIME(path,time) virtual_utime(path,time)
 #endif
-#define V_CHMOD(path,mode) virtual_chmod(path,mode)
+#define VCWD_CHMOD(path,mode) virtual_chmod(path,mode)
 #ifndef TSRM_WIN32
-#define V_CHOWN(path,owner,group) virtual_chown(path,owner,group)
+#define VCWD_CHOWN(path,owner,group) virtual_chown(path,owner,group)
 #endif
 
 #else
 
-#define V_GETCWD(buff, size) getcwd(buff,size)
-#define V_FOPEN(path, mode)  fopen(path, mode)
-#define V_OPEN(open_args) open open_args
-#define V_CREAT(path, mode) creat(path, mode)
-#define V_RENAME(oldname,newname) rename(oldname,newname)
-#define V_CHDIR(path) chdir(path)
-#define V_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
-#define V_GETWD(buf) getwd(buf)
-#define V_STAT(path, buff) stat(path, buff)
-#define V_LSTAT(path, buff) lstat(path, buff)
-#define V_UNLINK(path) unlink(path)
-#define V_MKDIR(pathname, mode) mkdir(pathname, mode)
-#define V_RMDIR(pathname) rmdir(pathname)
-#define V_OPENDIR(pathname) opendir(pathname)
-#define V_POPEN(command, type) popen(command, type)
-#define V_REALPATH(path,real_path) realpath(path,real_path)
+#define VCWD_GETCWD(buff, size) getcwd(buff,size)
+#define VCWD_FOPEN(path, mode)  fopen(path, mode)
+#define VCWD_OPEN(open_args) open open_args
+#define VCWD_CREAT(path, mode) creat(path, mode)
+#define VCWD_RENAME(oldname,newname) rename(oldname,newname)
+#define VCWD_CHDIR(path) chdir(path)
+#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
+#define VCWD_GETWD(buf) getwd(buf)
+#define VCWD_STAT(path, buff) stat(path, buff)
+#define VCWD_LSTAT(path, buff) lstat(path, buff)
+#define VCWD_UNLINK(path) unlink(path)
+#define VCWD_MKDIR(pathname, mode) mkdir(pathname, mode)
+#define VCWD_RMDIR(pathname) rmdir(pathname)
+#define VCWD_OPENDIR(pathname) opendir(pathname)
+#define VCWD_POPEN(command, type) popen(command, type)
+#define VCWD_REALPATH(path,real_path) realpath(path,real_path)
 #if HAVE_UTIME
-#define V_UTIME(path,time) utime(path,time)
+#define VCWD_UTIME(path,time) utime(path,time)
 #endif
-#define V_CHMOD(path,mode) chmod(path,mode)
+#define VCWD_CHMOD(path,mode) chmod(path,mode)
 #ifndef TSRM_WIN32
-#define V_CHOWN(path,owner,group) chown(path,owner,group)
+#define VCWD_CHOWN(path,owner,group) chown(path,owner,group)
 #endif
 
 #endif

@@ -166,7 +166,7 @@ static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 	
 	dirp = emalloc(sizeof(php_dir));
 
-	dirp->dir = V_OPENDIR((*arg)->value.str.val);
+	dirp->dir = VCWD_OPENDIR((*arg)->value.str.val);
 
 #ifdef PHP_WIN32
 	if (!dirp->dir || dirp->dir->finished) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(chdir)
 	}
 	convert_to_string_ex(arg);
 
-	ret = V_CHDIR((*arg)->value.str.val);
+	ret = VCWD_CHDIR((*arg)->value.str.val);
 	
 	if (ret != 0) {
 		php_error(E_WARNING, "ChDir: %s (errno %d)", strerror(errno), errno);
@@ -305,9 +305,9 @@ PHP_FUNCTION(getcwd)
 	}
 
 #if HAVE_GETCWD
-	ret = V_GETCWD(path, MAXPATHLEN);
+	ret = VCWD_GETCWD(path, MAXPATHLEN);
 #elif HAVE_GETWD
-	ret = V_GETWD(path);
+	ret = VCWD_GETWD(path);
 /*
  * #warning is not ANSI C
  * #else

@@ -260,7 +260,7 @@ PHP_FUNCTION(chgrp)
 	if (php_check_open_basedir((*filename)->value.str.val))
 		RETURN_FALSE;
 
-	ret = V_CHOWN((*filename)->value.str.val, -1, gid);
+	ret = VCWD_CHOWN((*filename)->value.str.val, -1, gid);
 	if (ret == -1) {
 		php_error(E_WARNING, "chgrp failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -308,7 +308,7 @@ PHP_FUNCTION(chown)
 	if (php_check_open_basedir((*filename)->value.str.val))
 		RETURN_FALSE;
 
-	ret = V_CHOWN((*filename)->value.str.val, uid, -1);
+	ret = VCWD_CHOWN((*filename)->value.str.val, uid, -1);
 	if (ret == -1) {
 		php_error(E_WARNING, "chown failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -350,7 +350,7 @@ PHP_FUNCTION(chmod)
 	if(PG(safe_mode))
 	  imode &= 0777;
 
-	ret = V_CHMOD((*filename)->value.str.val, imode);
+	ret = VCWD_CHMOD((*filename)->value.str.val, imode);
 	if (ret == -1) {
 		php_error(E_WARNING, "chmod failed: %s", strerror(errno));
 		RETURN_FALSE;
@@ -409,9 +409,9 @@ PHP_FUNCTION(touch)
 	}
 
 	/* create the file if it doesn't exist already */
-	ret = V_STAT((*filename)->value.str.val, &sb);
+	ret = VCWD_STAT((*filename)->value.str.val, &sb);
 	if (ret == -1) {
-		file = V_FOPEN((*filename)->value.str.val, "w");
+		file = VCWD_FOPEN((*filename)->value.str.val, "w");
 		if (file == NULL) {
 			php_error(E_WARNING, "unable to create file %s because %s", (*filename)->value.str.val, strerror(errno));
 			if (newtime) efree(newtime);
@@ -420,7 +420,7 @@ PHP_FUNCTION(touch)
 		fclose(file);
 	}
 
-	ret = V_UTIME((*filename)->value.str.val, newtime);
+	ret = VCWD_UTIME((*filename)->value.str.val, newtime);
 	if (newtime) efree(newtime);
 	if (ret == -1) {
 		php_error(E_WARNING, "utime failed: %s", strerror(errno));
@@ -469,7 +469,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #if HAVE_SYMLINK
 		BG(lsb).st_mode = 0; /* mark lstat buf invalid */
 #endif
-		if (V_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
+		if (VCWD_STAT(BG(CurrentStatFile), &BG(sb)) == -1) {
 			if (!IS_LINK_OPERATION() && (type != 15 || errno != ENOENT)) { /* fileexists() test must print no error */
 				php_error(E_NOTICE,"stat failed for %s (errno=%d - %s)", BG(CurrentStatFile), errno, strerror(errno));
 			}
@@ -484,7 +484,7 @@ static void php_stat(const char *filename, php_stat_len filename_length, int typ
 #if HAVE_SYMLINK
 	if (IS_LINK_OPERATION() && !BG(lsb).st_mode) {
 		/* do lstat if the buffer is empty */
-		if (V_LSTAT(filename, &BG(lsb)) == -1) {
+		if (VCWD_LSTAT(filename, &BG(lsb)) == -1) {
 			php_error(E_NOTICE, "lstat failed for %s (errno=%d - %s)", filename, errno, strerror(errno));
 			RETURN_FALSE;
 		}

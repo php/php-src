@@ -592,9 +592,9 @@ PHP_FUNCTION(ftp_get)
 	}
 
 #ifdef PHP_WIN32
-	if ((outfp = V_FOPEN(Z_STRVAL_P(arg2), "wb")) == NULL) {
+	if ((outfp = VCWD_FOPEN(Z_STRVAL_P(arg2), "wb")) == NULL) {
 #else
-	if ((outfp = V_FOPEN(Z_STRVAL_P(arg2), "w")) == NULL) {
+	if ((outfp = VCWD_FOPEN(Z_STRVAL_P(arg2), "w")) == NULL) {
 #endif
 		fclose(tmpfp);
 		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg2));
@@ -680,9 +680,9 @@ PHP_FUNCTION(ftp_put)
 	XTYPE(xtype, arg4);
 
 #ifdef PHP_WIN32
-	if ((infp = V_FOPEN(Z_STRVAL_P(arg3), "rb")) == NULL) {
+	if ((infp = VCWD_FOPEN(Z_STRVAL_P(arg3), "rb")) == NULL) {
 #else
-	if ((infp = V_FOPEN(Z_STRVAL_P(arg3), "r")) == NULL) {
+	if ((infp = VCWD_FOPEN(Z_STRVAL_P(arg3), "r")) == NULL) {
 #endif
 		php_error(E_WARNING, "error opening %s", Z_STRVAL_P(arg3));
 		RETURN_FALSE;

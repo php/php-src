@@ -973,7 +973,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     int ret;
 	char *tmp;
 
-    infile = V_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
+    infile = VCWD_FOPEN(FileName, "rb"); /* Unix ignores 'b', windows needs it. */
 
     if (infile == NULL) {
         php_error(E_ERROR, "Unable to open '%s'", FileName);
@@ -1002,7 +1002,7 @@ int ReadJpegFile(ImageInfoType *ImageInfo, Section_t *Sections,
     {
         /* Store file date/time. */
         struct stat st;
-        if (V_STAT(FileName, &st) >= 0) {
+        if (VCWD_STAT(FileName, &st) >= 0) {
             ImageInfo->FileDateTime = st.st_mtime;
             ImageInfo->FileSize = st.st_size;
         } else {

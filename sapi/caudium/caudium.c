@@ -640,7 +640,7 @@ static void php_caudium_module_main(php_caudium_request *ureq)
    * isn't. Not a problem though, since it's on by default when using ZTS
    * which we require.
    */
-  V_CHDIR_FILE(THIS->filename->str);
+  VCWD_CHDIR_FILE(THIS->filename->str);
 #endif
   
   file_handle.type = ZEND_HANDLE_FILENAME;

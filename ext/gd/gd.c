@@ -432,7 +432,7 @@ PHP_FUNCTION(imageloadfont)
 	convert_to_string_ex(file);
 
 #ifdef PHP_WIN32
-	fp = V_FOPEN(Z_STRVAL_PP(file), "rb");
+	fp = VCWD_FOPEN(Z_STRVAL_PP(file), "rb");
 #else
 	fp = php_fopen_wrapper(Z_STRVAL_PP(file), "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -1138,7 +1138,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	fn = Z_STRVAL_PP(file);
 
 #ifdef PHP_WIN32
-	fp = V_FOPEN(fn, "rb");
+	fp = VCWD_FOPEN(fn, "rb");
 #else
 	fp = php_fopen_wrapper(fn, "r", IGNORE_PATH|IGNORE_URL_WIN, &issock, &socketd, NULL);
 #endif
@@ -1314,7 +1314,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 			RETURN_FALSE;
 		}
 
-		fp = V_FOPEN(fn, "wb");
+		fp = VCWD_FOPEN(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn);
 			RETURN_FALSE;
@@ -3338,14 +3338,14 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type ) {
 		}
 
 		/* Open origin file */
-		org = V_FOPEN(fn_org, "rb");
+		org = VCWD_FOPEN(fn_org, "rb");
 		if (!org) {
 			php_error (E_WARNING, "%s: unable to open '%s' for reading", get_active_function_name(), fn_org);
 			RETURN_FALSE;
 		}
 
 		/* Open destination file */
-		dest = V_FOPEN(fn_dest, "wb");
+		dest = VCWD_FOPEN(fn_dest, "wb");
 		if (!dest) {
 			php_error (E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn_dest);
 			RETURN_FALSE;

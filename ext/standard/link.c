@@ -87,7 +87,7 @@ PHP_FUNCTION(linkinfo)
 	}
 	convert_to_string_ex(filename);
 
-	ret = V_LSTAT((*filename)->value.str.val, &sb);
+	ret = VCWD_LSTAT((*filename)->value.str.val, &sb);
 	if (ret == -1) {
 		php_error(E_WARNING, "LinkInfo failed (%s)", strerror(errno));
 		RETURN_LONG(-1L);

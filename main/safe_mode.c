@@ -70,7 +70,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 	}
 		
 	if (mode != CHECKUID_ALLOW_ONLY_DIR) {
-		ret = V_STAT(filename, &sb);
+		ret = VCWD_STAT(filename, &sb);
 		if (ret < 0) {
 			if (mode == CHECKUID_DISALLOW_FILE_NOT_EXISTS) {
 				php_error(E_WARNING, "Unable to access %s", filename);
@@ -98,7 +98,7 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 
 	if (s) {
 		*s='\0';
-		ret = V_STAT(filename, &sb);
+		ret = VCWD_STAT(filename, &sb);
 		*s='/';
 		if (ret < 0) {
 			php_error(E_WARNING, "Unable to access %s", filename);
@@ -107,11 +107,11 @@ PHPAPI int php_checkuid(const char *filename, char *fopen_mode, int mode)
 		duid = sb.st_uid;
 	} else {
 		char cwd[MAXPATHLEN];
-		if (!V_GETCWD(cwd, MAXPATHLEN)) {
+		if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			php_error(E_WARNING, "Unable to access current working directory");
 			return 0;
 		}
-		ret = V_STAT(cwd, &sb);
+		ret = VCWD_STAT(cwd, &sb);
 		if (ret < 0) {
 			php_error(E_WARNING, "Unable to access %s", cwd);
 			return 0;

@@ -52,7 +52,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			RETURN_FALSE;
 		}
 
-		fp = V_FOPEN(fn, "wb");
+		fp = VCWD_FOPEN(fn, "wb");
 		if (!fp) {
 			php_error(E_WARNING, "%s: unable to open '%s' for writing", get_active_function_name(), fn);
 			RETURN_FALSE;
