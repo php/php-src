@@ -31,9 +31,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "ext/bcmath/php_bcmath.h"
-#include "ext/db/php_db.h"
-#include "ext/gd/php_gd.h"
 #include "ext/standard/dl.h"
 #include "ext/standard/file.h"
 #include "ext/standard/fsock.h"
@@ -49,44 +46,103 @@
 #include "ext/standard/php_lcg.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/php_assert.h"
+#if WITH_BCMATH
+#include "ext/bcmath/php_bcmath.h"
+#endif
+#if HAVE_CALENDAR
 #include "ext/calendar/php_calendar.h"
+#endif
+#if HAVE_CTYPE
+#include "ext/ctype/php_ctype.h"
+#endif
+#if HAVE_COM
+#include "ext/com/php_COM.h"
+#endif
+#if HAVE_RPC
 #include "ext/rpc/php_rpc.h"
+#endif
+#if HAVE_FTP
 #include "ext/ftp/php_ftp.h"
+#endif
 #include "ext/standard/reg.h"
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
+#endif
+#if HAVE_UODBC
 #include "ext/odbc/php_odbc.h"
+#endif
+#if HAVE_SESSION
 #include "ext/session/php_session.h"
+#endif
+#if HAVE_LIBEXPAT
 #include "ext/xml/php_xml.h"
+#endif
+#if HAVE_LIBEXPAT && HAVE_WDDX
 #include "ext/wddx/php_wddx.h"
+#endif
+#if HAVE_MYSQL
 #include "ext/mysql/php_mysql.h"
+#endif
+#if HAVE_MBSTRING
 #include "ext/mbstring/mbstring.h"
+#endif
 #if HAVE_OVERLOAD
 #include "ext/overload/php_overload.h"
+#endif
+#if HAVE_TOKENIZER
+#include "ext/tokenizer/php_tokenizer.h"
 #endif
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
  */
 zend_module_entry *php_builtin_extensions[] = {
-	phpext_standard_ptr,
+	phpext_standard_ptr
 #if WITH_BCMATH
-	phpext_bcmath_ptr,
+	,phpext_bcmath_ptr
 #endif
-	phpext_calendar_ptr,
-	phpext_rpc_ptr,
-	phpext_ftp_ptr,
-#if defined(MBSTR_ENC_TRANS)
-	phpext_mbstring_ptr,
+#if HAVE_CALENDAR
+	,phpext_calendar_ptr
 #endif
-	phpext_mysql_ptr,
-	phpext_odbc_ptr,
+#if HAVE_CTYPE
+	,phpext_ctype_ptr
+#endif
+#if HAVE_COM
+	,phpext_com_ptr
+#endif
+#if HAVE_RPC
+	,phpext_rpc_ptr
+#endif
+#if HAVE_FTP
+	,phpext_ftp_ptr
+#endif
+#if HAVE_MBSTRING
+	,phpext_mbstring_ptr
+#endif
+#if HAVE_MYSQL
+	,phpext_mysql_ptr
+#endif
+#if HAVE_UODBC
+	,phpext_odbc_ptr
+#endif
 #if HAVE_OVERLOAD
-  phpext_overload_ptr,
+  ,phpext_overload_ptr
 #endif
-	phpext_pcre_ptr,
-	phpext_session_ptr,
-	phpext_xml_ptr,
-	phpext_wddx_ptr
+#if HAVE_PCRE || HAVE_BUNDLED_PCRE
+	,phpext_pcre_ptr
+#endif
+#if HAVE_SESSION
+	,phpext_session_ptr
+#endif
+#if HAVE_TOKENIZER
+	,phpext_tokenizer_ptr
+#endif
+#if HAVE_LIBEXPAT
+	,phpext_xml_ptr
+#endif
+#if HAVE_LIBEXPAT && HAVE_WDDX
+	,phpext_wddx_ptr
+#endif
 };
 /* }}} */
 
