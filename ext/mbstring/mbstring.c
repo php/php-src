@@ -2070,7 +2070,7 @@ PHPAPI char * php_mb_convert_encoding(char *input, size_t length, char *_to_enco
 		return NULL;
 	}
 	/* new encoding */
-	if (_to_encoding) {
+	if (_to_encoding && strlen(_to_encoding)) {
 		to_encoding = mbfl_name2no_encoding(_to_encoding);
 		if (to_encoding == mbfl_no_encoding_invalid) {
 			php_error(E_WARNING, "%s() unknown encoding \"%s\"",
