@@ -377,9 +377,9 @@ static int php_output_filter(ap_filter_t *f, apr_bucket_brigade *bb)
 				php_execute_script(&zfd TSRMLS_CC);
 			} else {
 				
-#define NO_DATA "The PHP Filter did not receive suitable input data"
+#define PHP_NO_DATA "The PHP Filter did not receive suitable input data"
 				
-				eos = apr_bucket_transient_create(NO_DATA, sizeof(NO_DATA)-1);
+				eos = apr_bucket_transient_create(PHP_NO_DATA, sizeof(PHP_NO_DATA)-1);
 				APR_BRIGADE_INSERT_HEAD(bb, eos);
 			}
 		}
