@@ -33,7 +33,6 @@ extern zend_module_entry curl_module_entry;
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
-PHP_RINIT_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
 PHP_FUNCTION(curl_version);
 PHP_FUNCTION(curl_init);
@@ -88,9 +87,16 @@ PHP_FUNCTION(curl_close);
 #define CE_BAD_CALLING_ORDER 44
 #define C_LAST 45
 
+struct curl_fileid_table
+{
+	int id;
+	struct curl_fileid_table *next;
+};
+
 typedef struct {
 	int use_file;
 	int le_curl;
+	struct curl_fileid_table *output_node, output_start;
 } php_curl_globals;
 
 #ifdef ZTS
