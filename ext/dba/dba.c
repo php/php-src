@@ -215,7 +215,7 @@ static int le_pdb;
 static void dba_close(dba_info *info TSRMLS_DC)
 {
 	if (info->hnd) info->hnd->close(info TSRMLS_CC);
-	if (info->path) efree(info->path);
+	if (info->path) pefree(info->path, info->flags&DBA_PERSISTENT);
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
@@ -223,8 +223,8 @@ static void dba_close(dba_info *info TSRMLS_DC)
 		info->lock.fd = 0;
 	}
 	if (info->lock.fp) php_stream_close(info->lock.fp);
-	if (info->lock.name) efree(info->lock.name);
-	efree(info);
+	if (info->lock.name) pefree(info->lock.name, info->flags&DBA_PERSISTENT);
+	pefree(info, info->flags&DBA_PERSISTENT);
 }
 /* }}} */
 
@@ -232,8 +232,8 @@ static void dba_close(dba_info *info TSRMLS_DC)
  */
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	dba_info *info = (dba_info *)rsrc->ptr;
-
+	dba_info *info = (dba_info *)rsrc->ptr; 
+	
 	dba_close(info TSRMLS_CC);
 }
 /* }}} */
@@ -514,7 +514,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	info->mode = modenr;
 	info->argc = ac - 3;
 	info->argv = args + 3;
-	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL);
+	info->flags = (hptr->flags & ~DBA_LOCK_ALL) | (lock_flag & DBA_LOCK_ALL) | (persistent ? DBA_PERSISTENT : 0);
 	info->lock.mode = lock_mode;
 
 	/* if any open call is a locking call:

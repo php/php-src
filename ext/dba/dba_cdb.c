@@ -98,7 +98,7 @@ DBA_OPEN_FUNC(cdb)
 			return FAILURE;
 	}
 
-	cdb = emalloc(sizeof(dba_cdb));
+	cdb = pemalloc(sizeof(dba_cdb), info->flags&DBA_PERSISTENT);
 	memset(cdb, 0, sizeof(dba_cdb));
 
 #if DBA_CDB_BUILTIN
@@ -132,7 +132,7 @@ DBA_CLOSE_FUNC(cdb)
 	cdb_free(&cdb->c);
 	close(cdb->file);
 #endif
-	efree(cdb);
+	pefree(cdb, info->flags&DBA_PERSISTENT);
 }
 
 #if DBA_CDB_BUILTIN
