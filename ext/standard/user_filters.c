@@ -20,27 +20,6 @@
 
 /* $Id$ */
 
-/*
- * TODO: Rewrite for buckets.
- * Concept:
- *       The user defined filter class should implement a method named
- *       "filter" with the following proto:
- *       long filter(object brigade_in, object brigade_out, long &consumed, long flags);
- *
- *       brigade_in and brigade_out are overloaded objects that wrap around
- *       the php_stream_bucket_brigades passed to the underlying filter method.
- *       The brigades have methods for retrieving the head of the brigade as
- *       an overloaded bucket object, a method for appending a
- *       bucket object to the end of the brigade, and a method for creating a new
- *       bucket at the end of the brigade.
- *
- *       The bucket object has methods to unlink it from it's containing brigade,
- *       split into two buckets, and retrieve the buffer from a bucket.
- *       
- *       This approach means that there doesn't need to be very much magic between
- *       userspace and the real C interface.
- */
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
