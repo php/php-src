@@ -28,7 +28,6 @@
 #include "zend.h"
 #include "php.h"
 #include "php_variables.h"
-#include "SAPI.h"
 
 #include "httpd.h"
 #include "http_config.h"
