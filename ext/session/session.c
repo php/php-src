@@ -81,7 +81,7 @@ function_entry session_functions[] = {
 };
 /* }}} */
 
-ZEND_DECLARE_MODULE_GLOBALS(ps);
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps);
 
 static ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 static const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
