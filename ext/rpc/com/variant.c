@@ -181,6 +181,7 @@ static pval php_VARIANT_get_property_handler(zend_property_reference *property_r
 
 			case OE_IS_OBJECT:
 				if (!strcmp(Z_STRVAL(overloaded_property->element), "value")) {
+					// var_arg can't be an idispatch, so we don't care for the implicit AddRef() call here
 					php_variant_to_pval(var_arg, &result, codepage TSRMLS_CC);
 				} else if (!strcmp(Z_STRVAL(overloaded_property->element), "type")) {
 					ZVAL_LONG(&result, V_VT(var_arg))

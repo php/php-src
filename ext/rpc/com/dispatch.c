@@ -280,6 +280,7 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 					ZVAL_NULL(zarg);
 				}
 			} else {
+				// arg can't be an idispatch, so we don't care for the implicit AddRef() call here
 				if (FAILURE == php_variant_to_pval(arg, zarg, codepage TSRMLS_CC)) {
 					trace("failed to convert arg %d to zval\n", i);
 					ZVAL_NULL(zarg);

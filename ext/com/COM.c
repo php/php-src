@@ -281,9 +281,11 @@ PHPAPI HRESULT php_COM_set(comval *obj, IDispatch FAR* FAR* ppDisp, int cleanup 
 	if (C_HASENUM(obj) = SUCCEEDED(C_DISPATCH_VT(obj)->Invoke(C_DISPATCH(obj), DISPID_NEWENUM, &IID_NULL, LOCALE_SYSTEM_DEFAULT,
 															  DISPATCH_METHOD|DISPATCH_PROPERTYGET, &dispparams, var_result, NULL, NULL))) {
 		if (V_VT(var_result) == VT_UNKNOWN) {
+			V_UNKNOWN(var_result)->lpVtbl->AddRef(V_UNKNOWN(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_UNKNOWN(var_result)->lpVtbl->QueryInterface(V_UNKNOWN(var_result), &IID_IEnumVARIANT,
 																					 (void**)&C_ENUMVARIANT(obj)));
 		} else if (V_VT(var_result) == VT_DISPATCH) {
+			V_DISPATCH(var_result)->lpVtbl->AddRef(V_DISPATCH(var_result));
 			C_HASENUM(obj) = SUCCEEDED(V_DISPATCH(var_result)->lpVtbl->QueryInterface(V_DISPATCH(var_result), &IID_IEnumVARIANT,
 																					  (void**)&C_ENUMVARIANT(obj)));
 		}
@@ -1584,10 +1586,11 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 			php_error(E_WARNING,"PropPut() failed: %s", error_message);
 		}
 		LocalFree(error_message);
-		efree(propname);
 
 		FREE_VARIANT(var_result);
-		FREE_VARIANT(new_value);
+
+		efree(new_value);
+		efree(propname);
 
 		RETURN_NULL();
 	}
@@ -1597,20 +1600,22 @@ static void do_COM_propput(pval *return_value, comval *obj, pval *arg_property, 
 
 	hr = php_COM_invoke(obj, dispid, DISPATCH_PROPERTYGET, &dispparams, var_result, &ErrString TSRMLS_CC);
 
-	if (SUCCEEDED(hr)) {
-		php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
-	} else {
-		*return_value = *value;
-		zval_copy_ctor(return_value);
-	}
+	if (return_value) {
+		if (SUCCEEDED(hr)) {
+			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
+		} else {
+			*return_value = *value;
+			zval_copy_ctor(return_value);
+		}
 
-	if (ErrString) {
-		pefree(ErrString, 1);
+		if (ErrString) {
+			pefree(ErrString, 1);
+		}
 	}
 
 	FREE_VARIANT(var_result);
-	FREE_VARIANT(new_value);
 
+	efree(new_value); // FREE_VARIANT does a VariantClear() which is not desired here !
 	efree(propname);
 }
 
@@ -1784,6 +1789,7 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 			obj = obj_prop;
 			php_COM_set(obj, &V_DISPATCH(var_result), TRUE TSRMLS_CC);
+			VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 		} else {
 			php_variant_to_pval(var_result, &return_value, codepage TSRMLS_CC);
 
@@ -1791,7 +1797,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 			obj_prop = NULL;
 		}
 
-		VariantInit(var_result);	// to protect C_DISPATCH(obj) from being freed when var_result is destructed
 		pval_destructor(&overloaded_property->element);
 	}
 
@@ -1808,7 +1813,6 @@ PHPAPI pval php_COM_get_property_handler(zend_property_reference *property_refer
 
 PHPAPI int php_COM_set_property_handler(zend_property_reference *property_reference, pval *value)
 {
-	pval result;
 	zend_overloaded_element *overloaded_property;
 	zend_llist_element *element;
 	pval **comval_handle;
@@ -1878,7 +1882,7 @@ PHPAPI int php_COM_set_property_handler(zend_property_reference *property_refere
 	FREE_VARIANT(var_result);
 
 	overloaded_property = (zend_overloaded_element *) element->data;
-	do_COM_propput(&result, obj, &overloaded_property->element, value TSRMLS_CC);
+	do_COM_propput(NULL, obj, &overloaded_property->element, value TSRMLS_CC);
 	FREE_COM(obj_prop);
 
 	pval_destructor(&overloaded_property->element);
