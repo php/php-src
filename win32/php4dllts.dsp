@@ -1883,6 +1883,10 @@ SOURCE=..\ext\rpc\com\conversion.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\ext\rpc\com\dispatch.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\rpc\com\variant.c
 # End Source File
 # End Group
