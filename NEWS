@@ -66,7 +66,10 @@ PHP 4                                                                      NEWS
   dependencies. Automake is only needed for its aclocal tool. The build 
   process is now more portable and less resource-consuming. (Sascha)
 
-xx xxx 2002, Version 4.2.1
+03 May 2002, Version 4.2.1
+- Fixed SJIS directory name handling under Windows. (Rui)
+- Fixed empty mb_output_handler() output when Content-Type is specified.
+  (Yasuo) 
 - Fixed the false logic in ext/session which made SID constant not to be
   defined when cookies are disabled. (Sascha)
 - Fixed possible crash bug in HTTP uploads. (Patch: Lucas Schroeder)
