@@ -382,10 +382,12 @@ static void register_standard_class(TSRMLS_D)
 	zend_hash_add(GLOBAL_CLASS_TABLE, "stdclass", sizeof("stdclass"), &zend_standard_class_def, sizeof(zend_class_entry *), NULL);
 }
 
+#ifdef ZTS
 static void unregister_standard_class()
 {
 	destroy_zend_class(&zend_standard_class_def);
 }
+#endif
 
 static void zend_set_default_compile_time_values(TSRMLS_D)
 {
@@ -474,10 +476,12 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 }
 
 
+#ifdef ZTS
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
 	shutdown_memory_manager(0, 1 TSRMLS_CC);
 }
+#endif
 
 
 #ifdef __FreeBSD__
@@ -672,8 +676,8 @@ void zend_shutdown(TSRMLS_D)
 	zend_shutdown_constants(TSRMLS_C);
 #ifdef ZTS
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
-#endif
 	unregister_standard_class();
+#endif
 }
 
 
