@@ -10,5 +10,5 @@ echo "ok\n";
 --EXPECTF--
 ok
 
-Notice: Undefined variable:  x in %sunset_cv09.php on line %d
+Notice: Undefined variable: x in %sunset_cv09.php on line %d
 ok

@@ -19,55 +19,55 @@ for ($i = 0; $i < 8; $i++) {
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 string(3) "foo"
 'foo'
 
-Notice: Undefined variable:  a in %s on line %d
+Notice: Undefined variable: a in %s on line %d
 
 Strict Standards: Only variable references should be returned by reference in %s on line %d
 
