@@ -97,14 +97,8 @@ ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend
 
 /* iterator interface, c-level functions used by engine */
 
-typedef struct _zend_user_iterator {
-	zend_object_iterator     it;
-	zend_class_entry         *ce;
-	zval                     *value;
-} zend_user_iterator;
-
-/* {{{ zend_user_new_iterator */
-static zval *zend_user_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+/* {{{ zend_user_it_new_iterator */
+static zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	zval *retval;
 
@@ -113,8 +107,20 @@ static zval *zend_user_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC
 }
 /* }}} */
 
-/* {{{ zend_user_dtor */
-static void zend_user_dtor(zend_object_iterator *_iter TSRMLS_DC)
+/* {{{ zend_user_it_dtor */
+ZEND_API void zend_user_it_free_current(zend_object_iterator *_iter TSRMLS_DC)
+{
+	zend_user_iterator *iter = (zend_user_iterator*)_iter;
+
+	if (iter->value) {
+		zval_ptr_dtor(&iter->value);
+		iter->value = NULL;
+	}
+}
+/* }}} */
+
+/* {{{ zend_user_it_dtor */
+static void zend_user_it_dtor(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -128,8 +134,8 @@ static void zend_user_dtor(zend_object_iterator *_iter TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zend_user_has_more */
-static int zend_user_has_more(zend_object_iterator *_iter TSRMLS_DC)
+/* {{{ zend_user_it_has_more */
+static int zend_user_it_has_more(zend_object_iterator *_iter TSRMLS_DC)
 {
 	if (_iter) {
 		zend_user_iterator *iter = (zend_user_iterator*)_iter;
@@ -148,8 +154,8 @@ static int zend_user_has_more(zend_object_iterator *_iter TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zend_user_get_current_data */
-static void zend_user_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
+/* {{{ zend_user_it_get_current_data */
+static void zend_user_it_get_current_data(zend_object_iterator *_iter, zval ***data TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -161,9 +167,9 @@ static void zend_user_get_current_data(zend_object_iterator *_iter, zval ***data
 }
 /* }}} */
 
-/* {{{ zend_user_get_current_key_default */
+/* {{{ zend_user_it_get_current_key_default */
 #if 0
-static int zend_user_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	*int_key = _iter->index;
 	return HASH_KEY_IS_LONG;
@@ -171,8 +177,8 @@ static int zend_user_get_current_key_default(zend_object_iterator *_iter, char *
 #endif
 /* }}} */
 
-/* {{{ zend_user_get_current_key */
-static int zend_user_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+/* {{{ zend_user_it_get_current_key */
+static int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -213,8 +219,8 @@ static int zend_user_get_current_key(zend_object_iterator *_iter, char **str_key
 }
 /* }}} */
 
-/* {{{ zend_user_move_forward */
-static void zend_user_move_forward(zend_object_iterator *_iter TSRMLS_DC)
+/* {{{ zend_user_it_move_forward */
+static void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -227,8 +233,8 @@ static void zend_user_move_forward(zend_object_iterator *_iter TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ zend_user_rewind */
-static void zend_user_rewind(zend_object_iterator *_iter TSRMLS_DC)
+/* {{{ zend_user_it_rewind */
+static void zend_user_it_rewind(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -238,16 +244,16 @@ static void zend_user_rewind(zend_object_iterator *_iter TSRMLS_DC)
 /* }}} */
 
 zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
-	zend_user_dtor,
-	zend_user_has_more,
-	zend_user_get_current_data,
-	zend_user_get_current_key,
-	zend_user_move_forward,
-	zend_user_rewind
+	zend_user_it_dtor,
+	zend_user_it_has_more,
+	zend_user_it_get_current_data,
+	zend_user_it_get_current_key,
+	zend_user_it_move_forward,
+	zend_user_it_rewind
 };
 
-/* {{{ zend_user_get_iterator */
-static zend_object_iterator *zend_user_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+/* {{{ zend_user_it_get_iterator */
+static zend_object_iterator *zend_user_it_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
 	zend_user_iterator *iterator = emalloc(sizeof(zend_user_iterator));
 
@@ -260,10 +266,10 @@ static zend_object_iterator *zend_user_get_iterator(zend_class_entry *ce, zval *
 }
 /* }}} */
 
-/* {{{ zend_user_get_new_iterator */
-static zend_object_iterator *zend_user_get_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+/* {{{ zend_user_it_get_new_iterator */
+static zend_object_iterator *zend_user_it_get_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
 {
-	zval *iterator = zend_user_new_iterator(ce, object TSRMLS_CC);
+	zval *iterator = zend_user_it_new_iterator(ce, object TSRMLS_CC);
 	zend_object_iterator *new_iterator;
 
 	zend_class_entry *ce_it = Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
@@ -309,13 +315,13 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has necessary userland methods */
 			return SUCCESS;
-		} else if (class_type->get_iterator != zend_user_get_new_iterator) {
+		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
 			/* c-level get_iterator cannot be changed */
 			return FAILURE;
 		}
 	}
 	class_type->iterator_funcs.zf_new_iterator = NULL;
-	class_type->get_iterator = zend_user_get_new_iterator;
+	class_type->get_iterator = zend_user_it_get_new_iterator;
 	return SUCCESS;
 }
 /* }}} */
@@ -323,16 +329,16 @@ static int zend_implement_aggregate(zend_class_entry *interface, zend_class_entr
 /* {{{ zend_implement_iterator */
 static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
-	if (class_type->get_iterator && class_type->get_iterator != zend_user_get_iterator) {
+	if (class_type->get_iterator && class_type->get_iterator != zend_user_it_get_iterator) {
 		if (class_type->type == ZEND_INTERNAL_CLASS) {
 			/* inheritance ensures the class has the necessary userland methods */
 			return SUCCESS;
-		} else if (class_type->get_iterator != zend_user_get_new_iterator) {
+		} else if (class_type->get_iterator != zend_user_it_get_new_iterator) {
 			/* c-level get_iterator cannot be changed */
 			return FAILURE;
 		}
 	}
-	class_type->get_iterator = zend_user_get_iterator;
+	class_type->get_iterator = zend_user_it_get_iterator;
 	class_type->iterator_funcs.zf_has_more = NULL;
 	class_type->iterator_funcs.zf_current = NULL;
 	class_type->iterator_funcs.zf_key = NULL;
@@ -348,6 +354,15 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* {{{ zend_implement_arrayaccess */
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
 {
+#if 0
+	/* get ht from ce */
+	if (ht->read_dimension != zend_std_read_dimension
+	||  ht->write_dimension != zend_std_write_dimension
+	||  ht->has_dimension != zend_std_has_dimension
+	||  ht->unset_dimension != zend_std_unset_dimension) {
+		return FAILURE;
+	}
+#endif
 	return SUCCESS;
 }
 /* }}}*/
