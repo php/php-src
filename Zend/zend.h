@@ -405,6 +405,11 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 		SEPARATE_ZVAL(ppzv);				\
 	}
 
+#define SEPARATE_ZVAL_TO_MAKE_IS_REF(ppzv)	\
+	if (!PZVAL_IS_REF(*ppzv)) {				\
+		SEPARATE_ZVAL(ppzv);				\
+		(*(ppzv))->is_ref = 1;				\
+	}
 
 #define COPY_PZVAL_TO_ZVAL(zv, pzv)			\
 	(zv) = *(pzv);							\
@@ -412,7 +417,7 @@ ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
 		zval_copy_ctor(&(zv));				\
 		(pzv)->refcount--;					\
 	} else {								\
-		FREE_ZVAL(pzv);							\
+		FREE_ZVAL(pzv);						\
 	}										\
 	INIT_PZVAL(&(zv));
 
