@@ -37,7 +37,7 @@ ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 
 /* true globals */
-ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, 0 };
+ZEND_API zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
 #include <process.h>
@@ -526,6 +526,8 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			break;
 	}
 
+	original_function_state_ptr = EG(function_state_ptr);
+
 	/* Initialize execute_data */
 	EX(fbc) = NULL;
 	EX(object) = NULL;
@@ -565,11 +567,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				calling_scope = Z_OBJCE_PP(fci->object_pp);
 				fci->function_table = &calling_scope->function_table;
 				EX(object) =  *fci->object_pp;
-			}
-		}
-
-		if (fci->object_pp) {
-			if (Z_TYPE_PP(fci->object_pp) == IS_STRING) {
+			} else if (Z_TYPE_PP(fci->object_pp) == IS_STRING) {
 				zend_class_entry **ce;
 				char *lc_class;
 				int found = FAILURE;
@@ -604,7 +602,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 
 		function_name_lc = zend_str_tolower_dup(fci->function_name->value.str.val, fci->function_name->value.str.len);
 
-		original_function_state_ptr = EG(function_state_ptr);
 		if (zend_hash_find(fci->function_table, function_name_lc, fci->function_name->value.str.len+1, (void **) &EX(function_state).function)==FAILURE) {
 			/* try calling __call */
 			if (calling_scope && calling_scope->__call) {
@@ -622,7 +619,6 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			}
 		}
 		efree(function_name_lc);
-		EX(function_state).function;
 		if (fci_cache) {
 			fci_cache->function_handler = EX(function_state).function;
 			fci_cache->object_pp = fci->object_pp;
