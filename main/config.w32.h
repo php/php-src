@@ -189,6 +189,7 @@
 #define PHP_SHLIB_SUFFIX "dll"
 #define HAVE_SQLDATASOURCES
 #define POSIX_MALLOC_THRESHOLD 10
+//#define HAVE_SOCKLEN_T 1
 
 /* Win32 supports strcoll */
 #define HAVE_STRCOLL 1

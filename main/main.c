@@ -952,7 +952,7 @@ static void php_message_handler_for_zend(long message, void *data)
 			break;
 		case ZMSG_MEMORY_LEAKS_GRAND_TOTAL:
 #if ZEND_DEBUG
-			if ((EG(error_reporting)&E_WARNING) && PG(report_memleaks)) {
+			if ((EG(error_reporting) & E_WARNING) && PG(report_memleaks)) {
 				char memory_leak_buf[512];
 
 				snprintf(memory_leak_buf, 512, "=== Total %d memory leaks detected ===\n", *((zend_uint *) data));
@@ -1200,8 +1200,10 @@ void php_request_shutdown_for_hook(void *dummy)
  */
 void php_request_shutdown(void *dummy)
 {
+	zend_bool report_memleaks;
 	TSRMLS_FETCH();
 
+	report_memleaks = PG(report_memleaks);
 	/* EG(opline_ptr) points into nirvana and therefore cannot be safely accessed
 	 * inside zend_executor callback functions.
 	 */
@@ -1244,8 +1246,8 @@ void php_request_shutdown(void *dummy)
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
-	zend_try { 
-		shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
+	zend_try {
+		shutdown_memory_manager(CG(unclean_shutdown) || !report_memleaks, 0 TSRMLS_CC);
 	} zend_end_try();
 
 	zend_try { 
