@@ -93,7 +93,7 @@ function_entry ldap_functions[] = {
 	PHP_FE(ldap_error,							NULL)
 	PHP_FE(ldap_compare,							NULL)
 
-#if LDAP_API_VERSION > 2000
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
 	PHP_FE(ldap_get_option,						third_argument_force_ref)
 	PHP_FE(ldap_set_option,							NULL)
 #endif
@@ -161,7 +161,7 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_DEREF_ALWAYS", LDAP_DEREF_ALWAYS, CONST_PERSISTENT | CONST_CS);
 
 
-#if LDAP_API_VERSION > 2000
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
 	/* LDAP options */
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_DEREF", LDAP_OPT_DEREF, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("LDAP_OPT_SIZELIMIT", LDAP_OPT_SIZELIMIT, CONST_PERSISTENT | CONST_CS);
@@ -227,7 +227,7 @@ PHP_MINFO_FUNCTION(ldap)
 	php_info_print_table_row(2, "RCS Version", "$Id$" );
 	php_info_print_table_row(2, "Total Links", maxl );
 #ifdef LDAP_API_VERSION
-	snprintf(ldapapiversion, 31, "%ld", LDAP_API_VERSION);
+	snprintf(ldapapiversion, 31, "%d", LDAP_API_VERSION);
 	php_info_print_table_row(2, "API Version", ldapapiversion);
 #endif
 #if HAVE_NSLDAP
@@ -649,7 +649,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	/* sizelimit */
 	if(ldap_sizelimit > -1) {
-#if LDAP_API_VERSION < 2004
+#if ( LDAP_API_VERSION < 2004 ) || HAVE_NSLDAP
 		ldap->ld_sizelimit = ldap_sizelimit; 
 #else
 		ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &ldap_sizelimit);
@@ -658,7 +658,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	/* timelimit */
 	if(ldap_timelimit > -1) {
-#if LDAP_API_VERSION < 2004
+#if ( LDAP_API_VERSION < 2004 ) || HAVE_NSLDAP
 		ldap->ld_timelimit = ldap_timelimit; 
 #else
 		ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &ldap_timelimit);
@@ -667,7 +667,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 	/* deref */
 	if(ldap_deref > -1) {
-#if LDAP_API_VERSION < 2004
+#if ( LDAP_API_VERSION < 2004 ) || HAVE_NSLDAP
 		ldap->ld_deref = ldap_deref; 
 #else
 		ldap_set_option(ldap, LDAP_OPT_DEREF, &ldap_deref);
@@ -1506,7 +1506,7 @@ PHP_FUNCTION(ldap_compare) {
 /* }}} */
 
 
-#if LDAP_API_VERSION > 2000
+#if ( LDAP_API_VERSION > 2000 ) || HAVE_NSLDAP
 /* {{{ proto boolean ldap_get_option(int link, int option, mixed retval)
    Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option) {
@@ -1550,20 +1550,19 @@ PHP_FUNCTION(ldap_get_option) {
 	case LDAP_OPT_MATCHED_DN:
 	        {
 			char *val;
-			int len;
 			if (ldap_get_option(ldap, opt, &val)) {
 				RETURN_FALSE;
 			}
 			zval_dtor(*retval);
-                        ZVAL_STRING(*retval, val, 1);
+			ZVAL_STRING(*retval, val, 1);
 			ldap_memfree(val);
 		} break;
-		/* options not implemented
+/* options not implemented
 	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
 	case LDAP_OPT_API_INFO:
 	case LDAP_OPT_API_FEATURE_INFO:
-		*/
+*/
 	default:
 		RETURN_FALSE;
 	}
