@@ -322,20 +322,33 @@ char *php_escape_shell_arg(char *str) {
 	
 	cmd = safe_emalloc(4, l, 3); /* worst case */
 	
+#ifdef PHP_WIN32
+	cmd[y++] = '"';
+#else
 	cmd[y++] = '\'';
-	
+#endif
+
 	for (x = 0; x < l; x++) {
 		switch (str[x]) {
+#ifdef PHP_WIN32
+		case '"':
+			cmd[y++] = '\\';
+#else
 		case '\'':
 			cmd[y++] = '\'';
 			cmd[y++] = '\\';
 			cmd[y++] = '\'';
+#endif
 			/* fall-through */
 		default:
 			cmd[y++] = str[x];
 		}
 	}
+#ifdef PHP_WIN32
+	cmd[y++] = '"';
+#else
 	cmd[y++] = '\'';
+#endif
 	cmd[y] = '\0';
 	return cmd;
 }
