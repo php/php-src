@@ -1,3 +1,32 @@
+2000-07-01  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/snmp/snmp.c: revert + note.
+
+    * ext/snmp/snmp.c: - strdup -> estrdup
+    - check whether return_value array is initialized.
+
+2000-07-01  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/SAPI.c:
+    This is documented to not be case sensitive and it is not case sensitive
+    in PHP 3, so let's not make it case sensitive.
+
+2000-07-01  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/image.c:
+    - Commit tiny patch to remove redundant code by Amit Schreiber.
+
+2000-07-01  Sterling Hughes  <stirling@bestweb.net>
+
+    * ext/cybercash/cybercash.c: stylistic modifications.
+
+    * ext/cybercash/cybercash.h: definition.
+
+    * ext/cybercash/cybercash.c:
+    -Allow cybercash to compile as a DL module.
+    -Stylistic changes.
+    -Add RETURN_STRINGL + Z_*_PP macros
+
 2000-06-30  Sterling Hughes  <stirling@bestweb.net>
 
     * ext/dbase/dbase.c: Fix bug 4813.  Fixed by greg@darkphoton.com
