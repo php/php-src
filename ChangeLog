@@ -1,3 +1,62 @@
+2003-12-27  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Just laugh at me :)
+
+    * ext/iconv/iconv.c:
+      - Add missing sanity check.
+
+2003-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+    * ZendEngine2/zend_language_parser.y:
+      Fixed bug #26065 (Crash when nesting classes)
+
+    * (PHP_4_3)
+      NEWS
+      ext/sqlite/sqlite.c:
+      Fixed Bug #25329 sqlite_create_function with method and reference to $this
+
+    * ext/sqlite/sqlite.c:
+      Correct in order
+
+    * ext/sqlite/sqlite.c:
+      Bugfix #25329
+
+    * ext/sqlite/tests/sqlite_oo_029.phpt:
+      Not needed
+
+    * ext/sqlite/tests/sqlite_oo_029.phpt:
+      Add new test related to bug #25329.
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/tests/general_functions/bug25038.phpt:
+      Bugfix #25038 (call_user_func issues warning if function throws exception)
+
+    * ZendEngine2/tests/bug26698.phpt:
+      Add new test
+
+    * ZendEngine2/zend_objects.c:
+      Simplify
+
+    * ZendEngine2/zend_object_handlers.c:
+      Fix __tostring() and concatenation
+
+2003-12-27  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/node.c:
+      fix libxml mem leak
+
+    * NEWS:
+      Fixed bug #26723
+
+    * ext/dom/node.c:
+      Fixed bug #26723 (domNode::appendChild() changes child node namespace)
+      apply fix to insertBefore and replaceChild
+
 2003-12-25  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

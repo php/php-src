@@ -1,3 +1,17 @@
+2003-12-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_language_parser.y:
+      Fixed bug #26065 (Crash when nesting classes)
+
+    * tests/bug26698.phpt:
+      Add new test
+
+    * zend_objects.c:
+      Simplify
+
+    * zend_object_handlers.c:
+      Fix __tostring() and concatenation
+
 2003-12-25  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c
