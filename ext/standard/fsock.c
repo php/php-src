@@ -277,8 +277,8 @@ static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 				key, strlen(key) + 1, NULL);
 	}
     
-	if(key) 
-        efree(key);
+	if (key) 
+		efree(key);
 
 	ZEND_REGISTER_RESOURCE(return_value, sock, php_file_le_socket());
 }
