@@ -1049,6 +1049,7 @@ PHP_FUNCTION(ibase_query)
 
 	switch (ZEND_NUM_ARGS()) {
 		long l;
+		zval *z;
 
 		default:
 		    if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 3 TSRMLS_CC, "rrs",
@@ -1073,9 +1074,9 @@ PHP_FUNCTION(ibase_query)
 				break;
 			}
 
-			/* assume the statement is 'CREATE DATABASE ...' if the link argument is int(0) */
+			/* the statement is 'CREATE DATABASE ...' if the link argument is IBASE_CREATE */
 			if (SUCCESS == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS()
-					TSRMLS_CC, "ls", &l, &query, &query_len) && l == 0) {
+					TSRMLS_CC, "zs", &z, &query, &query_len) ) {//&& l == PHP_IBASE_CREATE) {
 				isc_db_handle db = NULL;
 				isc_tr_handle trans = NULL;
 
