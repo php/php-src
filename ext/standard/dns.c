@@ -22,7 +22,7 @@
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if WIN32|WINNT
+#if PHP_WIN32
 #if HAVE_BINDLIB
 #ifndef WINNT
 #define WINNT 1
@@ -158,7 +158,7 @@ char *php_gethostbyname(char *name)
 	return estrdup(inet_ntoa(in));
 }
 
-#if !(WIN32|WINNT)||HAVE_BINDLIB
+#if !(PHP_WIN32)||HAVE_BINDLIB
 
 /* {{{ proto int checkdnsrr(string host [, string type])
    Check DNS records corresponding to a given Internet host name or IP address */

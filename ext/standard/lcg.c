@@ -29,7 +29,7 @@ int lcg_globals_id;
 static php_lcg_globals lcg_globals;
 #endif
 
-#if WIN32||WINNT
+#if PHP_WIN32
 #include <process.h>
 #endif
 
