@@ -27,17 +27,6 @@
  * running script in the PHP/Zend engine must take place on the engine
  * thread.  Likewise, calling back to the host must take place on the base
  * thread - the thread that set the script site.
- *
- * For talking to the site from engine thread, we use an invisible window:
- * the window processing is guaranteed to occur in the correct thread,
- * and the message queue provides a useful synchronization device.
- *
- * For talking to the engine from any other thread, the engine thread waits
- * for messages to arrive at it's message queue.  Since the only API for
- * dealing with thread messages is asynchronous, we use a mutex to ensure
- * that only one thread can talk to the engine at a time, and an event
- * object to signal to it that the processing is complete.
- *
  * */
 
 #define _WIN32_DCOM
@@ -57,73 +46,10 @@ extern "C" {
 #include "ext/com/php_COM.h"
 #include "ext/com/conversion.h"
 }
+#include "php_ticks.h"
 #include "php4as_scriptengine.h"
 #include "php4as_classfactory.h"
 #include <objbase.h>
-
-enum fragtype {
-	FRAG_MAIN,
-	FRAG_SCRIPTLET,
-	FRAG_PROCEDURE
-};
-
-typedef struct {
-	enum fragtype fragtype;
-	zend_op_array *opcodes;
-	char *code;
-	int persistent;	/* should be retained for Clone */
-	int executed;	/* for "main" */
-	char *functionname;
-	unsigned int codelen;
-	unsigned int starting_line;
-	TPHPScriptingEngine *engine;
-	void *ptr;
-} code_frag;
-
-#define FRAG_CREATE_FUNC	(char*)-1
-static code_frag *compile_code_fragment(
-		enum fragtype fragtype,
-		char *functionname,
-		LPCOLESTR code,
-		ULONG starting_line,
-		EXCEPINFO *excepinfo,
-		TPHPScriptingEngine *engine
-		TSRMLS_DC);
-
-static int execute_code_fragment(code_frag *frag,
-		VARIANT *varResult,
-		EXCEPINFO *excepinfo
-		TSRMLS_DC);
-static void free_code_fragment(code_frag *frag);
-static code_frag *clone_code_fragment(code_frag *frag, TPHPScriptingEngine *engine TSRMLS_DC);
-
-/* Magic for handling threading correctly */
-static inline HRESULT SEND_THREAD_MESSAGE(TPHPScriptingEngine *engine, LONG msg, WPARAM wparam, LPARAM lparam TSRMLS_DC)
-{
-	if (engine->m_enginethread == 0)
-		return E_UNEXPECTED;
-	if (tsrm_thread_id() == (engine)->m_enginethread) 
-		return (engine)->engine_thread_handler((msg), (wparam), (lparam), NULL TSRMLS_CC);
-	return (engine)->SendThreadMessage((msg), (wparam), (lparam));
-}
-	
-
-
-/* {{{ scriptstate_to_string */
-static const char *scriptstate_to_string(SCRIPTSTATE ss)
-{
-	switch(ss) {
-		case SCRIPTSTATE_UNINITIALIZED: return "SCRIPTSTATE_UNINITIALIZED";
-		case SCRIPTSTATE_INITIALIZED: return "SCRIPTSTATE_INITIALIZED";
-		case SCRIPTSTATE_STARTED: return "SCRIPTSTATE_STARTED";
-		case SCRIPTSTATE_CONNECTED: return "SCRIPTSTATE_CONNECTED";
-		case SCRIPTSTATE_DISCONNECTED: return "SCRIPTSTATE_DISCONNECTED";
-		case SCRIPTSTATE_CLOSED: return "SCRIPTSTATE_CLOSED";
-		default:
-			return "unknown";
-	}
-}
-/* }}} */
 
 /* {{{ trace */
 static inline void trace(char *fmt, ...)
@@ -142,7 +68,21 @@ static inline void trace(char *fmt, ...)
 	va_end(ap);
 }
 /* }}} */
-
+/* {{{ scriptstate_to_string */
+static const char *scriptstate_to_string(SCRIPTSTATE ss)
+{
+	switch(ss) {
+		case SCRIPTSTATE_UNINITIALIZED: return "SCRIPTSTATE_UNINITIALIZED";
+		case SCRIPTSTATE_INITIALIZED: return "SCRIPTSTATE_INITIALIZED";
+		case SCRIPTSTATE_STARTED: return "SCRIPTSTATE_STARTED";
+		case SCRIPTSTATE_CONNECTED: return "SCRIPTSTATE_CONNECTED";
+		case SCRIPTSTATE_DISCONNECTED: return "SCRIPTSTATE_DISCONNECTED";
+		case SCRIPTSTATE_CLOSED: return "SCRIPTSTATE_CLOSED";
+		default:
+			return "unknown";
+	}
+}
+/* }}} */
 /* {{{ TWideString */
 /* This class helps manipulate strings from OLE.
  * It does not use emalloc, so it is better suited for passing pointers
@@ -225,6 +165,113 @@ class TWideString {
 		}
 };
 /* }}} */
+
+/* {{{ code fragment structures */
+enum fragtype {
+	FRAG_MAIN,
+	FRAG_SCRIPTLET,
+	FRAG_PROCEDURE
+};
+
+typedef struct {
+	enum fragtype fragtype;
+	zend_op_array *opcodes;
+	char *code;
+	int persistent;	/* should be retained for Clone */
+	int executed;	/* for "main" */
+	char *functionname;
+	unsigned int codelen;
+	unsigned int starting_line;
+	TPHPScriptingEngine *engine;
+	void *ptr;
+} code_frag;
+
+#define FRAG_CREATE_FUNC	(char*)-1
+static code_frag *compile_code_fragment(
+		enum fragtype fragtype,
+		char *functionname,
+		LPCOLESTR code,
+		ULONG starting_line,
+		EXCEPINFO *excepinfo,
+		TPHPScriptingEngine *engine
+		TSRMLS_DC);
+
+static int execute_code_fragment(code_frag *frag,
+		VARIANT *varResult,
+		EXCEPINFO *excepinfo
+		TSRMLS_DC);
+static void free_code_fragment(code_frag *frag);
+static code_frag *clone_code_fragment(code_frag *frag, TPHPScriptingEngine *engine TSRMLS_DC);
+
+/* }}} */
+
+/* Magic for handling threading correctly */
+static inline HRESULT SEND_THREAD_MESSAGE(TPHPScriptingEngine *engine, LONG msg, WPARAM wparam, LPARAM lparam TSRMLS_DC)
+{
+	if (engine->m_enginethread == 0)
+		return E_UNEXPECTED;
+	if (tsrm_thread_id() == (engine)->m_enginethread) 
+		return (engine)->engine_thread_handler((msg), (wparam), (lparam), NULL TSRMLS_CC);
+	return (engine)->SendThreadMessage((msg), (wparam), (lparam));
+}
+
+/* These functions do some magic so that interfaces can be
+ * used across threads without worrying about marshalling
+ * or not marshalling, as appropriate.
+ * Win95 without DCOM 1.1, and NT SP 2 or lower do not have
+ * the GIT; so we emulate the GIT using other means.
+ * If you trace problems back to this code, installing the relevant
+ * SP should solve them.
+ * */
+static inline HRESULT GIT_get(DWORD cookie, REFIID riid, void **obj)
+{
+	IGlobalInterfaceTable *git;
+	HRESULT ret;
+	
+	if (SUCCEEDED(CoCreateInstance(CLSID_StdGlobalInterfaceTable, NULL,
+					CLSCTX_INPROC_SERVER, IID_IGlobalInterfaceTable,
+					(void**)&git))) {
+		
+		ret = git->GetInterfaceFromGlobal(cookie, riid, obj);
+		git->Release();
+		return ret;
+	}
+	return CoGetInterfaceAndReleaseStream((LPSTREAM)cookie, riid, obj);
+}
+
+static inline HRESULT GIT_put(IUnknown *unk, REFIID riid, DWORD *cookie)
+{
+	IGlobalInterfaceTable *git;
+	HRESULT ret;
+	
+	if (SUCCEEDED(CoCreateInstance(CLSID_StdGlobalInterfaceTable, NULL,
+					CLSCTX_INPROC_SERVER, IID_IGlobalInterfaceTable,
+					(void**)&git))) {
+		
+		ret = git->RegisterInterfaceInGlobal(unk, riid, cookie);
+		git->Release();
+		return ret;
+	}
+	return CoMarshalInterThreadInterfaceInStream(riid, unk, (LPSTREAM*)cookie);
+}
+
+static inline HRESULT GIT_revoke(DWORD cookie, IUnknown *unk)
+{
+	IGlobalInterfaceTable *git;
+	HRESULT ret;
+	
+	if (SUCCEEDED(CoCreateInstance(CLSID_StdGlobalInterfaceTable, NULL,
+					CLSCTX_INPROC_SERVER, IID_IGlobalInterfaceTable,
+					(void**)&git))) {
+		
+		ret = git->RevokeInterfaceFromGlobal(cookie);
+		git->Release();
+	}
+	/* Kill remote clients */
+	return CoDisconnectObject(unk, 0);
+}
+
+
 
 /* {{{ A generic stupid IDispatch implementation */
 class IDispatchImpl:
@@ -325,6 +372,7 @@ public:
 	code_frag 		*m_frag;
 	DWORD			m_procflags;
 	TPHPScriptingEngine *m_engine;
+	DWORD			m_gitcookie;
 
 	STDMETHODIMP Invoke( DISPID  dispIdMember, REFIID  riid, LCID  lcid, WORD  wFlags,
 		DISPPARAMS FAR*  pDispParams, VARIANT FAR*  pVarResult, EXCEPINFO FAR*  pExcepInfo,
@@ -340,6 +388,7 @@ public:
 	}
 	ScriptProcedureDispatch() {
 		m_refcount = 1;
+		GIT_put((IDispatch*)this, IID_IDispatch, &m_gitcookie);
 	}
 };
 /* }}} */
@@ -433,7 +482,7 @@ static void free_code_fragment(code_frag *frag)
 			if (frag->ptr) {
 				ScriptProcedureDispatch *disp = (ScriptProcedureDispatch*)frag->ptr;
 				disp->Release();
-				CoDisconnectObject((IUnknown*)disp, 0);
+				GIT_revoke(disp->m_gitcookie, (IDispatch*)disp);
 				frag->ptr = NULL;
 			}
 			break;
@@ -599,6 +648,29 @@ TPHPScriptingEngine::TPHPScriptingEngine()
 	CloseHandle(m_engine_thread_handle);
 }
 
+void activescript_run_ticks(int count)
+{
+	MSG msg;
+	TSRMLS_FETCH();
+	TPHPScriptingEngine *engine;
+	
+	trace("ticking %d\n", count);
+	
+	engine = (TPHPScriptingEngine*)SG(server_context);
+
+/*	PostThreadMessage(engine->m_enginethread, PHPSE_DUMMY_TICK, 0, 0); */
+	
+	while(PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
+		if (msg.hwnd) {
+			PeekMessage(&msg, NULL, 0, 0, PM_REMOVE);
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		} else {
+			break;
+		}
+	}
+}
+
 /* Synchronize with the engine thread */
 HRESULT TPHPScriptingEngine::SendThreadMessage(LONG msg, WPARAM wparam, LPARAM lparam)
 {
@@ -635,6 +707,7 @@ HRESULT TPHPScriptingEngine::SendThreadMessage(LONG msg, WPARAM wparam, LPARAM l
 			MSG msg;
 			while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 				//trace("dispatching message while waiting\n"); 
+				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
 		} else if (result == WAIT_TIMEOUT) {
@@ -786,6 +859,8 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 
 				php_request_startup(TSRMLS_C);
 				PG(during_request_startup) = 0;
+				trace("\n\n     *** ticks func at %08x %08x ***\n\n\n", activescript_run_ticks, &activescript_run_ticks);
+//				php_add_tick_function(activescript_run_ticks);
 
 			}
 			break;
@@ -917,44 +992,32 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 			{
 				struct php_active_script_get_dispatch_info *info = (struct php_active_script_get_dispatch_info *)lParam;
 				IDispatch *disp = NULL;
-				char *itemname;
-				unsigned int itemlen;
 
 				if (info->pstrItemName != NULL) {
 					zval **tmp;
-
-					itemname = php_OLECHAR_to_char((OLECHAR*)info->pstrItemName, &itemlen, CP_ACP TSRMLS_CC);
-
+					/* use this rather than php_OLECHAR_to_char because we want to avoid emalloc here */
+					TWideString itemname(info->pstrItemName);
+					
 					/* Get that item from the global namespace.
 					 * If it is an object, export it as a dispatchable object.
 					 * */
 
-					if (zend_hash_find(&EG(symbol_table), itemname, itemlen+1, (void**)&tmp) == SUCCESS) {
+					if (zend_hash_find(&EG(symbol_table), itemname.ansi_string(),
+								itemname.ansi_len() + 1, (void**)&tmp) == SUCCESS) {
 						if (Z_TYPE_PP(tmp) == IS_OBJECT) {
+							/* FIXME: if this causes an allocation (emalloc) and we are
+							 * not in the engine thread, things could get ugly!!! */
 							disp = php_COM_export_object(*tmp TSRMLS_CC);
 						}
 					}
-					trace("%08x: GetScriptDispatch(%s --> %08x)\n", this, itemname, disp);
-
-					efree(itemname);
 
 				} else {
-#if 0
-					zval *obj;
-
-					MAKE_STD_ZVAL(obj);
-					object_init(obj);
-					disp = php_COM_export_object(obj TSRMLS_CC);
-#else
-
+					/* This object represents PHP global namespace */
 					disp = (IDispatch*) new ScriptDispatch;
-#endif
-					trace("%08x: GetScriptDispatch(NULL --> %08x)\n", this, disp);
 				}
 
 				if (disp) {
-					trace("--- Marshaling to stream\n");
-					ret = CoMarshalInterThreadInterfaceInStream(IID_IDispatch, disp, &info->dispatch);
+					ret = GIT_put(disp, IID_IDispatch, &info->dispatch);
 					disp->Release();
 				} else {
 					ret = S_FALSE;
@@ -972,22 +1035,20 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 				TWideString name(info->pstrName);
 				IDispatch *disp;
 				
-				if (SUCCEEDED(CoGetInterfaceAndReleaseStream(info->marshal, IID_IDispatch, (void**)&disp))) 
+				if (SUCCEEDED(GIT_get(info->marshal, IID_IDispatch, (void**)&disp))) 
 					add_to_global_namespace(disp, info->dwFlags, name.ansi_string() TSRMLS_CC);
 
 			}
 			break;
 		case PHPSE_SET_SITE:
 			{
-				LPSTREAM stream = (LPSTREAM)lParam;
-
 				if (m_pass_eng) {
 					m_pass_eng->Release();
 					m_pass_eng = NULL;
 				}
 
-				if (stream)
-					CoGetInterfaceAndReleaseStream(stream, IID_IActiveScriptSite, (void**)&m_pass_eng);
+				if (lParam)
+					GIT_get(lParam, IID_IActiveScriptSite, (void**)&m_pass_eng);
 
 				trace("%08x: site (engine-side) is now %08x (base=%08x)\n", this, m_pass_eng, m_pass);
 
@@ -1010,15 +1071,14 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 				 * execute the opcodes */
 				struct php_active_script_parse_proc_info *info = (struct php_active_script_parse_proc_info*)lParam;
 				TWideString
-					code(info->pstrCode),
-				formal_params(info->pstrFormalParams),
-				procedure_name(info->pstrProcedureName),
-				item_name(info->pstrItemName),
-				delimiter(info->pstrDelimiter);
+					formal_params(info->pstrFormalParams),
+					procedure_name(info->pstrProcedureName),
+					item_name(info->pstrItemName),
+					delimiter(info->pstrDelimiter);
 
-				trace("%08x: ParseProc:\n state=%s\ncode=%s\n params=%s\nproc=%s\nitem=%s\n delim=%s\n line=%d\n",
+				trace("%08x: ParseProc:\n state=%s\nparams=%s\nproc=%s\nitem=%s\n delim=%s\n line=%d\n",
 						this, scriptstate_to_string(m_scriptstate),
-						code.safe_ansi_string(), formal_params.ansi_string(), procedure_name.ansi_string(),
+						formal_params.ansi_string(), procedure_name.ansi_string(),
 						item_name.safe_ansi_string(), delimiter.safe_ansi_string(),
 						info->ulStartingLineNumber);
 
@@ -1039,17 +1099,12 @@ HRESULT TPHPScriptingEngine::engine_thread_handler(LONG msg, WPARAM wparam, LPAR
 
 					ScriptProcedureDispatch *disp = new ScriptProcedureDispatch;
 
-					disp->AddRef();
 					disp->m_frag = frag;
 					disp->m_procflags = info->dwFlags;
 					disp->m_engine = this;
 					frag->ptr = disp;
+					info->dispcookie = disp->m_gitcookie;
 
-					*info->ppdisp = disp;
-					/*
-					ret = CoMarshalInterThreadInterfaceInStream(IID_IDispatch, disp, &info->disp);
-					disp->Release();
-					*/
 				} else {
 					ret = DISP_E_EXCEPTION;
 				}
@@ -1147,8 +1202,11 @@ void TPHPScriptingEngine::engine_thread_func(void)
 
 					if (msg.message == WM_QUIT) {
 						terminated = 1;
-					} else {
+					} else if (msg.hwnd) {
+						TranslateMessage(&msg);
+						DispatchMessage(&msg);
 
+					} else {
 						handled = 1;
 						m_sync_thread_ret = engine_thread_handler(msg.message, msg.wParam, msg.lParam, &handled TSRMLS_CC);
 						if (handled)
@@ -1354,9 +1412,9 @@ STDMETHODIMP TPHPScriptingEngine::SetScriptSite(IActiveScriptSite *pass)
 	if (m_pass) {
 		m_pass->AddRef();
 
-		LPSTREAM stream;
-		if (SUCCEEDED(CoMarshalInterThreadInterfaceInStream(IID_IActiveScriptSite, m_pass, &stream)))
-			SEND_THREAD_MESSAGE(this, PHPSE_SET_SITE, 0, (LPARAM)stream TSRMLS_CC);
+		DWORD cookie;
+		if (SUCCEEDED(GIT_put(m_pass, IID_IActiveScriptSite, &cookie)))
+			SEND_THREAD_MESSAGE(this, PHPSE_SET_SITE, 0, cookie TSRMLS_CC);
 		
 		if (m_scriptstate == SCRIPTSTATE_UNINITIALIZED)
 			SEND_THREAD_MESSAGE(this, PHPSE_STATE_CHANGE, 0, SCRIPTSTATE_INITIALIZED TSRMLS_CC);
@@ -1424,7 +1482,7 @@ STDMETHODIMP TPHPScriptingEngine::AddNamedItem(LPCOLESTR pstrName, DWORD dwFlags
 	info.dwFlags = dwFlags;
 
 	m_pass->GetItemInfo(pstrName, SCRIPTINFO_IUNKNOWN, &info.punk, NULL);
-	if (SUCCEEDED(CoMarshalInterThreadInterfaceInStream(IID_IDispatch, info.punk, &info.marshal))) {
+	if (SUCCEEDED(GIT_put(info.punk, IID_IDispatch, &info.marshal))) {
 		SEND_THREAD_MESSAGE(this, PHPSE_ADD_NAMED_ITEM, 0, (LPARAM)&info TSRMLS_CC);
 	}
 	info.punk->Release();
@@ -1485,7 +1543,7 @@ STDMETHODIMP TPHPScriptingEngine::GetScriptDispatch(
 	}
 
 	if (S_OK == engine_thread_handler(PHPSE_GET_DISPATCH, 0, (LPARAM)&info, NULL TSRMLS_CC)) {
-		CoGetInterfaceAndReleaseStream(info.dispatch, IID_IDispatch, (void**)ppdisp);
+		GIT_get(info.dispatch, IID_IDispatch, (void**)ppdisp);
 	}
 	
 	if (*ppdisp) {
@@ -1670,16 +1728,12 @@ STDMETHODIMP TPHPScriptingEngine::ParseProcedureText(
 	info.dwSourceContextCookie = dwSourceContextCookie;
 	info.ulStartingLineNumber = ulStartingLineNumber;
 	info.dwFlags = dwFlags;
-	info.ppdisp = ppdisp;
 
 	ret = SEND_THREAD_MESSAGE(this, PHPSE_PARSE_PROC, 0, (LPARAM)&info TSRMLS_CC);
 
-	/*
-	if (ret == S_OK) {
-		ret = CoGetInterfaceAndReleaseStream(info.disp, IID_IDispatch, (void**)ppdisp);
-
-	}
-	*/
+	if (ret == S_OK)
+		ret = GIT_get(info.dispcookie, IID_IDispatch, (void**)ppdisp);
+	
 	trace("ParseProc: ret=%08x disp=%08x\n", ret, *ppdisp);
 	return ret;
 }
