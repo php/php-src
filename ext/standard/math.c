@@ -56,9 +56,8 @@ PHP_FUNCTION(abs)
 }
 
 /* }}} */ 
-/* {{{ proto int ceil(double number)
+/* {{{ proto double ceil(double number)
    Returns the next highest integer value of the number */
-
 PHP_FUNCTION(ceil) 
 {
 	zval **value;
@@ -70,7 +69,7 @@ PHP_FUNCTION(ceil)
 	convert_scalar_to_number_ex(value);
 
 	if ((*value)->type == IS_DOUBLE) {
-		RETURN_LONG((long)ceil((*value)->value.dval));
+		RETURN_DOUBLE(ceil((*value)->value.dval));
 	} else if ((*value)->type == IS_LONG) {
 		RETURN_LONG((*value)->value.lval);
 	}
@@ -79,7 +78,7 @@ PHP_FUNCTION(ceil)
 }
 
 /* }}} */
-/* {{{ proto int floor(double number)
+/* {{{ proto double floor(double number)
    Returns the next lowest integer value from the number */
 
 PHP_FUNCTION(floor) {
@@ -92,7 +91,7 @@ PHP_FUNCTION(floor) {
 	convert_scalar_to_number_ex(value);
 
 	if ((*value)->type == IS_DOUBLE) {
-		RETURN_LONG((long)floor((*value)->value.dval));
+		RETURN_DOUBLE(floor((*value)->value.dval));
 	} else if ((*value)->type == IS_LONG) {
 		RETURN_LONG((*value)->value.lval);
 	}
