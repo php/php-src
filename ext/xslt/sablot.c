@@ -173,9 +173,9 @@ PHP_FUNCTION(xslt_create)
 	int           error;       /* The error container */
 
 	/* Allocate the php-sablotron handle */
-	handle                   = emalloc(sizeof(php_xslt));
-	handle->handlers         = emalloc(sizeof(struct xslt_handlers));
-	handle->err              = emalloc(sizeof(struct xslt_error));
+	handle                   = ecalloc(1, sizeof(php_xslt));
+	handle->handlers         = ecalloc(1, sizeof(struct xslt_handlers));
+	handle->err              = ecalloc(1, sizeof(struct xslt_error));
 
 	XSLT_LOG(handle).path = NULL;
 
