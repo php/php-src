@@ -54,6 +54,8 @@ PHP                                                                        NEWS
 - Fixed bug #24608 (__set not triggered when overloading with array).
   (Stanislav)
 - Fixed bug #24243 (enabling browscap causes segfault). (Wez)
+- Added context option "http"/"request_fulluri" to send entire URI in request.
+  Required format for some proxies. (Sara)
 - Added third optional parameter 'strict' to array_keys(). Works like the
   'strict' parameter of in_array(). Feature request #24258. (Andrey)
 

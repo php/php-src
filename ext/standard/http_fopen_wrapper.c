@@ -105,7 +105,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	size_t chunk_size = 0, file_size = 0;
 	int eol_detect = 0;
 	char *transport_string, *errstr = NULL;
-	int transport_len, have_header = 0;
+	int transport_len, have_header = 0, request_fulluri = 0;
 
 	if (redirect_max < 1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Circular redirect, aborting.");
@@ -189,16 +189,33 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 		strcpy(scratch, "GET ");
 	}
 
-	/* file */
-	if (resource->path && *resource->path)
-		strlcat(scratch, resource->path, scratch_len);
-	else
-		strlcat(scratch, "/", scratch_len);
+	/* Should we send the entire path in the request line, default to no. */
+	if (context &&
+		php_stream_context_get_option(context, "http", "request_fulluri", &tmpzval) == SUCCESS) {
+		SEPARATE_ZVAL(tmpzval);
+		convert_to_boolean_ex(tmpzval);
+		request_fulluri = Z_BVAL_PP(tmpzval) ? 1 : 0;
+		zval_ptr_dtor(tmpzval);
+	}
 
-	/* query string */
-	if (resource->query)	{
-		strlcat(scratch, "?", scratch_len);
-		strlcat(scratch, resource->query, scratch_len);
+	if (request_fulluri) {
+		/* Ask for everything */
+		strcat(scratch, path);
+	} else {
+		/* Send the traditional /path/to/file?query_string */
+
+		/* file */
+		if (resource->path && *resource->path) {
+			strlcat(scratch, resource->path, scratch_len);
+		} else {
+			strlcat(scratch, "/", scratch_len);
+		}
+
+		/* query string */
+		if (resource->query)	{
+			strlcat(scratch, "?", scratch_len);
+			strlcat(scratch, resource->query, scratch_len);
+		}
 	}
 
 	/* protocol version we are speaking */
