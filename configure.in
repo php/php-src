@@ -1135,8 +1135,7 @@ PHP_GEN_GLOBAL_MAKEFILE
 
 $php_shtool mkdir -p pear/scripts
 ALL_OUTPUT_FILES="php4.spec main/build-defs.h \
-pear/scripts/pear pear/scripts/phpize pear/scripts/php-config \
-pear/scripts/pearize pear/scripts/phptar \
+pear/scripts/phpize pear/scripts/php-config \
 $PHP_OUTPUT_FILES"
 
 AC_OUTPUT($ALL_OUTPUT_FILES, [], [

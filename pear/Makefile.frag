@@ -123,7 +123,7 @@ BUILD_FILES = \
 	scan_makefile_in.awk \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config pear pearize phptar
+bin_SCRIPTS = phpize php-config pear phptar
 
 install-build:
 	@echo "Installing build environment"
@@ -174,9 +174,6 @@ $(builddir)/scripts/phpize: $(srcdir)/scripts/phpize.in $(top_builddir)/config.s
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
 $(builddir)/scripts/phptar: $(srcdir)/scripts/phptar.in $(top_builddir)/config.status
-	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
-
-$(builddir)/scripts/pearize: $(srcdir)/scripts/pearize.in $(top_builddir)/config.status
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
 $(builddir)/scripts/php-config: $(srcdir)/scripts/php-config.in $(top_builddir)/config.status
