@@ -1,3 +1,13 @@
+2003-08-22  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_builtin_functions.c
+      zend_constants.h:
+      Replace *magic number* with a much nicer define.
+
+    * zend_builtin_functions.c:
+      Set 2147483647 as the module number of user defined constants
+      Fixed a few bugs and cleaned up get_defined_constants().
+
 2003-08-21  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_default_classes.c
