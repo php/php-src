@@ -170,3 +170,5 @@ PHP                                                                        NEWS
 - Fixed bug #21985 and #22064 (various mb_send_mail() issues). (Moriyoshi)
 - Fixed bug #21600 (Assign by reference function call changes variable 
   contents). (Zeev)
+- Fixed bug #25955 (Mac OS X Panther compile error). (kalowsky, markonen)
+- Added IPv6 support for Panther. (kalowsky, markonen)
