@@ -170,7 +170,7 @@ SOURCE=.\zend_variables.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\config.w32.h
+SOURCE=.\zend_config.w32.h
 # End Source File
 # Begin Source File
 
