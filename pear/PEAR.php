@@ -1,7 +1,7 @@
 <?php
 //
 // +----------------------------------------------------------------------+
-// | PHP Version 4                                                        |
+// | PEAR, the PHP Extension and Application Repository                   |
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1997-2003 The PHP Group                                |
 // +----------------------------------------------------------------------+
@@ -21,11 +21,12 @@
 // $Id$
 //
 
-define('PEAR_ERROR_RETURN',   1);
-define('PEAR_ERROR_PRINT',    2);
-define('PEAR_ERROR_TRIGGER',  4);
-define('PEAR_ERROR_DIE',      8);
-define('PEAR_ERROR_CALLBACK', 16);
+define('PEAR_ERROR_RETURN',     1);
+define('PEAR_ERROR_PRINT',      2);
+define('PEAR_ERROR_TRIGGER',    4);
+define('PEAR_ERROR_DIE',        8);
+define('PEAR_ERROR_CALLBACK',  16);
+define('PEAR_ERROR_EXCEPTION', 32);
 define('PEAR_ZE2', (function_exists('version_compare') &&
                     version_compare(zend_version(), "2-dev", "ge")));
 
@@ -243,8 +244,8 @@ class PEAR
      *
      * @param int $mode
      *        One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
-     *        PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE or
-     *        PEAR_ERROR_CALLBACK.
+     *        PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE,
+     *        PEAR_ERROR_CALLBACK or PEAR_ERROR_EXCEPTION.
      *
      * @param mixed $options
      *        When $mode is PEAR_ERROR_TRIGGER, this is the error level (one
@@ -268,6 +269,7 @@ class PEAR
      * @see PEAR_ERROR_TRIGGER
      * @see PEAR_ERROR_DIE
      * @see PEAR_ERROR_CALLBACK
+     * @see PEAR_ERROR_EXCEPTION
      *
      * @since PHP 4.0.5
      */
@@ -287,6 +289,7 @@ class PEAR
             case PEAR_ERROR_PRINT:
             case PEAR_ERROR_TRIGGER:
             case PEAR_ERROR_DIE:
+            case PEAR_ERROR_EXCEPTION:
             case null:
                 $setmode = $mode;
                 $setoptions = $options;
@@ -436,8 +439,8 @@ class PEAR
      *                  to define these if you want to use codes)
      *
      * @param int $mode      One of PEAR_ERROR_RETURN, PEAR_ERROR_PRINT,
-     *                  PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE or
-     *                  PEAR_ERROR_CALLBACK.
+     *                  PEAR_ERROR_TRIGGER, PEAR_ERROR_DIE,
+     *                  PEAR_ERROR_CALLBACK, PEAR_ERROR_EXCEPTION.
      *
      * @param mixed $options If $mode is PEAR_ERROR_TRIGGER, this parameter
      *                  specifies the PHP-internal error level (one of
@@ -683,8 +686,8 @@ class PEAR_Error
      * @param int $code     (optional) error code
      *
      * @param int $mode     (optional) error mode, one of: PEAR_ERROR_RETURN,
-     * PEAR_ERROR_PRINT, PEAR_ERROR_DIE, PEAR_ERROR_TRIGGER or
-     * PEAR_ERROR_CALLBACK
+     * PEAR_ERROR_PRINT, PEAR_ERROR_DIE, PEAR_ERROR_TRIGGER,
+     * PEAR_ERROR_CALLBACK or PEAR_ERROR_EXCEPTION
      *
      * @param mixed $options   (optional) error level, _OR_ in the case of
      * PEAR_ERROR_CALLBACK, the callback function or object/method
@@ -751,6 +754,9 @@ class PEAR_Error
                       strlen($this->callback[1])) {
                       @call_user_func($this->callback, $this);
             }
+        }
+        if (PEAR_ZE2 && $this->mode & PEAR_ERROR_EXCEPTION) {
+            eval('throw $this;');
         }
     }
 

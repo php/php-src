@@ -31,23 +31,14 @@
     </maintainer>
   </maintainers>
   <release>
-    <version>1.0.1</version>
+    <version>1.1-dev</version>
     <state>stable</state>
     <date>2003-01-10</date>
     <notes>
-* PEAR_Error class has call backtrace available by
-  calling getBacktrace().  Available if used with
-  PHP 4.3 or newer.
-
-* PEAR_Config class uses getenv() rather than $_ENV
-  to read environment variables.
-
-* System::which() Windows fix, now looks for
-  exe/bat/cmd/com suffixes rather than just exe
-
-* Added "pear cvsdiff" command
-
-* Windows output buffering bugfix for "pear" command
+* PEAR_Error now supports exceptions when using Zend Engine 2.  Set the
+  error mode to PEAR_ERROR_EXCEPTION to make PEAR_Error throw itself
+  as an exception (invoke PEAR errors with raiseError() or throwError()
+  just like before).
 </notes>
     <filelist>
       <file role="data" name="package.dtd"/>
@@ -101,6 +92,31 @@
     </deps>
   </release>
   <changelog>
+   <release>
+     <version>1.0.1</version>
+     <state>stable</state>
+     <date>2003-01-10</date>
+     <notes>
+ * PEAR_Error class has call backtrace available by
+   calling getBacktrace().  Available if used with
+   PHP 4.3 or newer.
+ 
+ * PEAR_Config class uses getenv() rather than $_ENV
+   to read environment variables.
+ 
+ * System::which() Windows fix, now looks for
+   exe/bat/cmd/com suffixes rather than just exe
+ 
+ * Added "pear cvsdiff" command
+ 
+ * Windows output buffering bugfix for "pear" command
+ </notes>
+     <deps>
+       <dep type="php" rel="ge" version="4.1"/>
+       <dep type="pkg" rel="ge" version="0.4">Archive_Tar</dep>
+       <dep type="pkg" rel="ge" version="0.11">Console_Getopt</dep>
+     </deps>
+   </release>
    <release>
      <version>1.0</version>
      <state>stable</state>
