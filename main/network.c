@@ -602,19 +602,24 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int
 }
 
 #if HAVE_OPENSSL_EXT
-PHPAPI int php_stream_sock_ssl_activate_with_method_ex(php_stream *stream, int activate, SSL_METHOD *method, php_stream *control TSRMLS_DC)
+PHPAPI int php_stream_sock_ssl_activate_with_method(php_stream *stream, int activate, SSL_METHOD *method, php_stream *session_stream TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
 	php_netstream_data_t *psock = NULL;
 	SSL_CTX *ctx = NULL;
 
-	if (control) {
-		psock = (php_netstream_data_t*)control->abstract;
-	}
 
 	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: stream is not a network stream");
 		return FAILURE;
+	}
+
+	if (session_stream) {
+		if (!php_stream_is(session_stream, PHP_STREAM_IS_SOCKET)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "php_stream_sock_ssl_activate_with_method: session_stream is not a network stream");
+			return FAILURE;
+		}
+		psock = (php_netstream_data_t*)session_stream->abstract;
 	}
 	
 	if (activate == sock->ssl_active)
