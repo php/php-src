@@ -240,6 +240,29 @@ class PEAR_Installer extends PEAR_Common
     }
 
     // }}}
+
+    function uninstall($package)
+    {
+        if (empty($this->registry)) {
+            $this->registry = new PEAR_Registry;
+        }
+        if (!$this->registry->packageExists($package)) {
+            return $this->raiseError("is not installed");
+        }
+        $info = $this->registry->packageInfo($package);
+        foreach ($info['filelist'] as $file => $props) {
+            $base = (isset($props['baseinstalldir'])) ? $props['baseinstalldir'] : '';
+            $path = PEAR_INSTALL_DIR . DIRECTORY_SEPARATOR . $base .
+                    DIRECTORY_SEPARATOR . $file;
+            if (!@unlink($path)) {
+                $this->log(2, "unable to delete: $path");
+            } else {
+                $this->log(2, "+ deleted file: $path");
+            }
+        }
+        $this->registry->deletePackage($package);
+        return true;
+    }
 }
 
 ?>

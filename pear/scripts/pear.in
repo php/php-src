@@ -84,7 +84,7 @@ foreach ($opts as $opt) {
 $config = new PEAR_Config($pear_user_config, $pear_default_config);
 $store_user_config = false;
 $store_default_config = false;
-$verbose = 0;
+$verbose = 1;
 
 foreach ($opts as $opt) {
     $param = $opt[1];
@@ -185,6 +185,19 @@ switch ($command) {
         break;
     }
 
+    // }}}
+    // {{{ uninstall
+    case 'uninstall': {
+        include_once 'PEAR/Installer.php';
+        $pkgfile = $options[1][2];
+        $installer =& new PEAR_Installer($script_dir, $ext_dir, $doc_dir);
+        $installer->setErrorHandling(PEAR_ERROR_DIE,
+                                     basename($pkgfile) . ": %s\n");
+        $installer->debug = $verbose;
+        $installer->uninstall($pkgfile);
+        print "uninstall ok\n";
+        break;
+    }
     // }}}
     // {{{ package
 
@@ -315,6 +328,7 @@ function usage($error = null)
           "     -h, -?     display help/usage (this message)\n".
           "Commands:\n".
           "   install <package file>\n".
+          "   uninstall <package name>\n".
           "   package [package info file]\n".
           "   list-installed\n".
           "   list-available\n".
