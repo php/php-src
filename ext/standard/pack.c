@@ -460,7 +460,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * Rather than depending on error-prone ordered lists or syntactically
  * unpleasant pass-by-reference, we return an object with named paramters 
  * (like *_fetch_object()). Syntax is "f[repeat]name/...", where "f" is the
- * formatter char (like pack()), "[repeatt]" is the optional repeater argument,
+ * formatter char (like pack()), "[repeat]" is the optional repeater argument,
  * and "name" is the name of the variable to use.
  * Example: "c2chars/nints" will return an object with fields
  * chars1, chars2, and ints.
@@ -732,7 +732,7 @@ PHP_FUNCTION(unpack)
 					case 'd': {
 						double v;
 
-						memcpy(&v, &input[inputpos], sizeof(float));
+						memcpy(&v, &input[inputpos], sizeof(double));
 						add_assoc_double(return_value, n, v);
 						break;
 					}
