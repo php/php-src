@@ -233,7 +233,7 @@ PHP_FUNCTION(dbase_pack) {
 /* {{{ proto bool dbase_add_record(int identifier, array data)
    Adds a record to the database */
 PHP_FUNCTION(dbase_add_record) {
-	pval *dbh_id, *fields, *field;
+	pval *dbh_id, *fields, **field;
 	dbhead_t *dbh;
 	int dbh_type;
 
@@ -281,7 +281,7 @@ PHP_FUNCTION(dbase_add_record) {
 			RETURN_FALSE;
 		}
 		
-		tmp = *field;
+		tmp = **field;
 		zval_copy_ctor(&tmp);
 		convert_to_string(&tmp);
 		sprintf(t_cp, cur_f->db_format, tmp.value.str.val);
