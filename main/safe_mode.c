@@ -31,6 +31,9 @@
 #include "SAPI.h"
 #include "php_globals.h"
 
+#ifdef __BEOS__
+#define realpath(x,y) strcpy(y,x)
+#endif
 
 /*
  * php_checkuid
