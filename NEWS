@@ -10,8 +10,8 @@ PHP                                                                        NEWS
   to 3.7.0. (Moriyoshi)
 - Updated bundled libmbfl library (used for multibyte functions). (Moriyoshi)
   Fixed bugs:
-  . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . Bug #32063 (mb_convert_encoding ignores named entity 'alpha')
+  . Bug #31911 (mb_decode_mimeheader() is case-sensitive to hex escapes)
   . bug #30573 (compiler warnings in libmbfl due to invalid type cast)
 - Fixed a bug in mysql_affected_rows and mysql_stmt_affected_rows when the
   api function returns -1 (Georg)
