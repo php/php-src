@@ -143,6 +143,7 @@ static void url_scanner(lexdata *state)
 /*!re2c
   	"<" F R A M E ws+ S R C ws* "=" ws*		{ BEGIN(REF); }
   	"<" A ws+ H R E F ws* "="	ws*			{ BEGIN(REF); }
+	"<" A R E A ws+ H R E F ws* "=" ws*		{ BEGIN(REF); }
 	(all\[<])+							{ BEGIN(INITIAL); }
 	eof									{ FINISH; }
 */
