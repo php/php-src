@@ -37,6 +37,8 @@ PHP_FUNCTION(snmpwalk);
 PHP_FUNCTION(snmprealwalk);
 PHP_FUNCTION(snmp_get_quick_print);
 PHP_FUNCTION(snmp_set_quick_print);
+PHP_FUNCTION(snmp_set_enum_print);
+PHP_FUNCTION(snmp_set_oid_numeric_print);
 PHP_FUNCTION(snmpset);
 PHP_FUNCTION(snmpv3get);
 PHP_FUNCTION(snmpv3getnext);
