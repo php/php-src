@@ -651,6 +651,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	}
 
 	file_handle.free_filename = 0;
+	/* Duplicate the filename with strdup() so that the memory manager doesn't nuke it too early */
+	file_handle.filename = strdup(file_handle.filename);
 	switch (behavior) {
 		case PHP_MODE_STANDARD:
 			php_execute_script(&file_handle CLS_CC ELS_CC PLS_CC);
@@ -667,21 +669,25 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 				return 0;
 			}
 			break;
+#if 0
+		/* Zeev might want to do something with this one day */
 		case PHP_MODE_INDENT:
 			open_file_for_scanning(&file_handle CLS_CC);
 			zend_indent();
 			fclose(file_handle.handle.fp);
 			return 0;
 			break;
+#endif
 	}
 
 	php_header();			/* Make sure headers have been sent */
 	
 	STR_FREE(SG(request_info).path_translated);
-	SG(request_info).path_translated = NULL;
 
 	php_request_shutdown((void *) 0);
 	php_module_shutdown();
+
+	free(file_handle.filename);
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
