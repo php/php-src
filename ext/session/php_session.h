@@ -88,7 +88,6 @@ typedef struct _php_ps_globals {
 	const struct ps_serializer_struct *serializer;
 	zval *http_session_vars;
 	zend_bool auto_start;
-	zend_bool define_sid;
 	zend_bool use_cookies;
 	zend_bool use_trans_sid;
 	zend_bool output_handler_registered;
