@@ -75,6 +75,8 @@ typedef struct {
 	char *session_name;
 	char *id;
 	char *extern_referer_chk;
+	char *entropy_file;
+	int entropy_length;
 	int lifetime;
 	ps_module *mod;
 	void *mod_data;

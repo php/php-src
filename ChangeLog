@@ -2,6 +2,8 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Added support for external entropy sources for session id creation 
+  (on Unices /dev/random and /dev/urandom) (Sascha)
 - Added gpc_globals variable directive to php.ini.  By default it is On, but
   if it is set to Off, GET, POST and Cookie variables will not be inserted
   to the global scope.  Mostly makes sense when coupled with track_vars (Zeev)
