@@ -25,9 +25,11 @@ image_type_to_mime_type()
 	var_dump($result);
 ?>
 --EXPECT--
-array(10) {
+array(11) {
   ["test1pix.bmp"]=>
   string(9) "image/bmp"
+  ["test1pix.jp2"]=>
+  string(9) "image/jp2"
   ["test1pix.jpc"]=>
   string(24) "application/octet-stream"
   ["test1pix.jpg"]=>

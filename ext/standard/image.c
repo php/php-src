@@ -623,7 +623,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	result->channels = php_read2(stream TSRMLS_CC); /* Csiz */
 
-	/* Collect and average bit depth info */
+	/* Collect bit depth info */
 	highest_bit_depth = bit_depth = 0;
 	for (i = 0; i < result->channels; i++) {
 		bit_depth = php_stream_getc(stream); /* Ssiz[i] */
@@ -665,11 +665,7 @@ static struct gfxinfo *php_handle_jp2(php_stream *stream TSRMLS_DC)
 		box_length = php_read4(stream TSRMLS_CC); /* LBox */
 		/* TBox */
 		if (php_stream_read(stream, (void *)&box_type, sizeof(box_type)) != sizeof(box_type)) {
-			break;
-		}
-
-		/* Safe to use the 0 return for EOF as neither of these can be 0 */ 
-		if (box_length == 0 || box_type == 0) {
+			/* Use this as a general "out of stream" error */
 			break;
 		}
 
@@ -1073,9 +1069,6 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	if (!memcmp(filetype, php_sig_iff, 4)) {
 		return IMAGE_FILETYPE_IFF;
 	}
-	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
-		return IMAGE_FILETYPE_WBMP;
-	}
 
 	if (php_stream_read(stream, filetype+4, 8) != 8) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Read error!");
@@ -1086,6 +1079,10 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 		return IMAGE_FILETYPE_JP2;
 	}
 
+/* AFTER ALL ABOVE FAILED */
+	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
+		return IMAGE_FILETYPE_WBMP;
+	}
 	return IMAGE_FILETYPE_UNKNOWN;
 }
 /* }}} */
