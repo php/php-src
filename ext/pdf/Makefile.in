@@ -1,8 +1,0 @@
-
-LTLIBRARY_NAME    = libpdf.la
-LTLIBRARY_SOURCES = pdf.c
-LTLIBRARY_SHARED_NAME    = libpdf_php.la
-PDFLIB_SHARED_LIBBADD    = -lpdf
-LTLIBRARY_SHARED_LIBADD  = $(PDFLIB_SHARED_LIBBADD)
-
-include $(top_srcdir)/build/dynlib.mk

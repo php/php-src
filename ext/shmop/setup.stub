@@ -1,5 +1,0 @@
-# $Source$
-# $Id$
-
-define_option enable-shmop 'System V shmop suppport? ' yesno no \
-'    Whether to use the System V shmop (currently only Solaris and Linux).'
