@@ -1728,27 +1728,23 @@ static EVP_PKEY * php_openssl_evp_from_zval(zval ** val, int public_key, char * 
 		}
 		else	{
 			/* we want the private key */
+			BIO *in;
+
 			if (filename) {
-				BIO *in;
 				if (php_openssl_safe_mode_chk(filename TSRMLS_CC)) {
 					return NULL;
 				}
 				in = BIO_new_file(filename, "r");
-				if (in == NULL)
-					return NULL;
-				key = PEM_read_bio_PrivateKey(in, NULL,NULL, passphrase);
-				BIO_free(in);
+			} else {
+				in = BIO_new_mem_buf(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
 			}
-			else	{
-				BIO *	b = BIO_new_mem_buf(Z_STRVAL_PP(val), Z_STRLEN_PP(val));
-				if (b == NULL)
-					return NULL;
 
-				key = (EVP_PKEY *) PEM_ASN1_read_bio((char *(*)())d2i_PrivateKey,
-					      PEM_STRING_EVP_PKEY, b,
-					      NULL, NULL, passphrase);
-				BIO_free(b);
+			if (in == NULL) {
+				return NULL;
 			}
+
+			key = PEM_read_bio_PrivateKey(in, NULL,NULL, passphrase);
+			BIO_free(in);
 		}
 	}
 
