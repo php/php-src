@@ -320,25 +320,21 @@ PHP_MINIT_FUNCTION(pgsql)
 	
 	le_link = zend_register_list_destructors_ex(_close_pgsql_link, NULL, "pgsql link", module_number);
 	le_plink = zend_register_list_destructors_ex(NULL, _close_pgsql_plink, "pgsql link persistent", module_number);
-	/*	PGG(le_result = register_list_destructors(PQclear,NULL); */
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
 	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
-
+	/* For pg_fetch_array() */
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
-
+	/* For pg_connection_status() */
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_BAD", CONNECTION_BAD, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECTION_OK", CONNECTION_OK, CONST_CS | CONST_PERSISTENT);
-
+	/* For lo_seek() */
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_SET", SEEK_SET, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_CUR", SEEK_CUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_SEEK_END", SEEK_END, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("PGSQL_ESCAPE_STRING", PGSQL_ESCAPE_STRING, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PGSQL_ESCAPE_BYTEA", PGSQL_ESCAPE_BYTEA, CONST_CS | CONST_PERSISTENT);
-	
+	/* For pg_result_status() */
 	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_CS | CONST_PERSISTENT);
