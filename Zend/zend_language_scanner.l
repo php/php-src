@@ -1088,8 +1088,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<%="|"<?=" {
-	if ((yytext[1]=='%' && CG(asp_tags))
-		|| (yytext[1]=='?' && CG(short_tags))) {
+	if ((yytext[1]=='%' && CG(asp_tags)) || (yytext[1]=='?' && CG(short_tags))) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
