@@ -309,6 +309,17 @@ function_entry basic_functions[] = {
 
 static PHP_INI_MH(OnUpdateSafeModeProtectedEnvVars)
 {
+	char *protected_vars, *protected_var;
+	int dummy=1;
+	BLS_FETCH();
+
+	protected_vars = estrndup(new_value, new_value_length);
+	zend_hash_clean(&BG(protected_env_vars));
+
+	while (protected_var=strtok(protected_vars, ",")) {
+		zend_hash_update(&BG(protected_env_vars), protected_var, strlen(protected_var), &dummy, sizeof(int), NULL);
+	}
+	efree(protected_vars);
 	return SUCCESS;
 }
 
@@ -364,13 +375,20 @@ static void basic_globals_ctor(BLS_D)
 {
 	BG(next) = NULL;
 	BG(left) = -1;
+	zend_hash_init(&BG(protected_env_vars), 5, NULL, NULL, 1);
 }
+
+static void basic_globals_dtor(BLS_D)
+{
+	zend_hash_destroy(&BG(protected_env_vars));
+}
+
 
 PHP_MINIT_FUNCTION(basic)
 {
 	ELS_FETCH();
 #ifdef ZTS
-	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, NULL);
+	basic_globals_id = ts_allocate_id(sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, basic_globals_dtor);
 #else
 	basic_globals_ctor(BLS_C);
 #endif
@@ -388,10 +406,14 @@ PHP_MINIT_FUNCTION(basic)
 
 PHP_MSHUTDOWN_FUNCTION(basic)
 {
+	BLS_FETCH();
+
+	basic_globals_dtor(BLS_C);
+
 #ifdef ZTS
 	ts_free_id(basic_globals_id);
 #endif
-	
+
 	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;	
 }
@@ -509,7 +531,12 @@ PHP_FUNCTION(putenv)
 		int ret;
 		char *p,**env;
 		putenv_entry pe;
+		PLS_FETCH();
 		
+		if (PG(safe_mode)) {
+			/* check the protected_env_vars table */
+		}
+
 		pe.putenv_string = estrndup((*str)->value.str.val,(*str)->value.str.len);
 		pe.key = (*str)->value.str.val;
 		if ((p=strchr(pe.key,'='))) { /* nullify the '=' if there is one */

@@ -183,8 +183,6 @@ typedef struct {
 #endif
 
 /* Values are coma-delimited
- * All variables, beginning with the following prefixes, will be protected
- * from change by the PHP runtime function putenv()
  */
 #define SAFE_MODE_PROTECTED_ENV_VARS "LD_"
 
