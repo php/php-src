@@ -37,9 +37,13 @@
 
 #define POOL		TRUE
 #define DONT_POOL	FALSE
-#define HASH_AS_INT	TRUE
-#define HASH_AS_STRING FALSE
-#define DONT_HASH	FALSE
+
+#define DONT_HASH	0
+#define HASH_AS_INT	1
+#define HASH_AS_STRING 2
+#define HASH_WITH_SIGNATURE 4
+#define HASH_AS_INT_WITH_SIGNATURE (HASH_AS_INT + HASH_WITH_SIGNATURE)
+#define HASH_AS_STRING_WITH_SIGNATURE (HASH_AS_STRING + HASH_WITH_SIGNATURE)
 
 #define CLASS 0
 #define METHOD 1
@@ -51,11 +55,11 @@
  */
 typedef struct _rpc_object_handlers {
 	const zend_bool pool_instances;
-	const int hash_type;
-	int (*rpc_hash)(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int type);
+	const zend_uint hash_type;
+	int (*rpc_hash)(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int num_args, zval **args[], int type);
 	int (*rpc_ctor)(char *class_name, zend_uint class_name_len, void **data, int num_args, zval **args[]);
 	int (*rpc_dtor)(void **data);
-	int (*rpc_call)(char *method_name, zend_uint method_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS);
+	int (*rpc_call)(char *method_name, zend_uint method_name_len, void **data, zval **return_value, int num_args, zval **args[]);
 	int (*rpc_get)(char *property_name, zend_uint property_name_len, zval *return_value, void **data);
 	int (*rpc_set)(char *property_name, zend_uint property_name_len, zval *value, zval *return_value, void **data);
 	int (*rpc_compare)(void **data1, void **data2);
@@ -99,6 +103,7 @@ typedef struct _rpc_internal {
 	zend_uint			clonecount;
 	zend_bool			pool_instances;
 	rpc_class_hash		*hash;
+	WormHashTable		function_table;
 	MUTEX_T				mx_handler;
 } rpc_internal;
 
