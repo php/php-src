@@ -464,6 +464,17 @@ void zend_do_abstract_method(znode *function_name, znode *modifiers, znode *body
 	}
 }
 
+static zend_bool opline_is_fetch_this(zend_op *opline TSRMLS_DC)
+{
+	if (CG(active_class_entry) && (opline->opcode == ZEND_FETCH_W) && (opline->op1.op_type == IS_CONST)
+		&& (opline->op1.u.constant.type == IS_STRING)
+		&& (opline->op1.u.constant.value.str.len == (sizeof("this")-1))
+		&& !memcmp(opline->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
 
 void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 {
@@ -487,10 +498,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 		SET_UNUSED(opline->result);
 		*result = last_op->result;
 	} else {
-		if (CG(active_class_entry) && (last_op->opcode == ZEND_FETCH_W) && (last_op->op1.op_type == IS_CONST)
-			&& (last_op->op1.u.constant.type == IS_STRING)
-			&& (last_op->op1.u.constant.value.str.len == (sizeof("this")-1))
-			&& !memcmp(last_op->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+		if (opline_is_fetch_this(last_op TSRMLS_CC)) {
 			zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
 		}
 
@@ -507,9 +515,14 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC)
 
 void zend_do_assign_ref(znode *result, znode *lvar, znode *rvar TSRMLS_DC)
 {
+	int last_op_number = get_next_op_number(CG(active_op_array))-1;
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	zend_op *last_op = &CG(active_op_array)->opcodes[last_op_number];
 
 	opline->opcode = ZEND_ASSIGN_REF;
+	if (opline_is_fetch_this(last_op TSRMLS_CC)) {
+		zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
+	}
 	if (result) {
 		opline->result.op_type = IS_VAR;
 		opline->result.u.EA.type = 0;
@@ -804,12 +817,8 @@ void zend_do_end_variable_parse(int type, int arg_offset TSRMLS_DC)
 		num_of_created_opcodes++;
 	}
 
-	if (num_of_created_opcodes == 1) {
-		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-		(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
-		!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
-			CG(active_op_array)->uses_this = 1;
-		}
+	if (num_of_created_opcodes == 1 && opline_is_fetch_this(opline_ptr TSRMLS_CC)) {
+		CG(active_op_array)->uses_this = 1;
 	}
 
 	zend_llist_destroy(fetch_list_ptr);
@@ -2582,9 +2591,7 @@ void zend_do_fetch_property(znode *result, znode *object, znode *property TSRMLS
 		le = fetch_list_ptr->head;
 		opline_ptr = (zend_op *) le->data;
 
-		if ((opline_ptr->op1.op_type == IS_CONST) && (opline_ptr->op1.u.constant.type == IS_STRING) &&
-			(opline_ptr->op1.u.constant.value.str.len == (sizeof("this")-1)) &&
-			!memcmp(opline_ptr->op1.u.constant.value.str.val, "this", sizeof("this"))) {
+		if (opline_is_fetch_this(opline_ptr TSRMLS_CC)) {
 			efree(opline_ptr->op1.u.constant.value.str.val);
 			SET_UNUSED(opline_ptr->op1); /* this means $this for objects */
 			opline_ptr->op2 = *property;
