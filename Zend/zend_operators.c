@@ -1222,6 +1222,35 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 	return SUCCESS;
 }
 
+#if HAVE_STRCOLL
+ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	zval op1_copy, op2_copy;
+	int use_copy1, use_copy2;
+
+	zend_make_printable_zval(op1, &op1_copy, &use_copy1);
+	zend_make_printable_zval(op2, &op2_copy, &use_copy2);
+
+	if (use_copy1) {
+		op1 = &op1_copy;
+	}
+	if (use_copy2) {
+		op2 = &op2_copy;
+	}
+
+	result->value.lval = strcoll(op1->value.str.val, op2->value.str.val);
+	result->type = IS_LONG;
+
+	if (use_copy1) {
+		zval_dtor(op1);
+	}
+	if (use_copy2) {
+		zval_dtor(op2);
+	}
+	return SUCCESS;
+}
+#endif
+
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
 	zval op1_copy, op2_copy;
