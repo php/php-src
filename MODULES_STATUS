@@ -2,7 +2,7 @@ Module				Status
 ------				------
 MySQL				Working
 COM					Working
-WDDX				Working
+WDDX				Not yet ported
 PCRE				Working
 DBA					Not yet ported
 mcrypt				Working
@@ -14,3 +14,4 @@ ldap				Working
 oci8				Working (but no blob-support yet)
 oracle				Working
 iptc				Working
+informix                        being ported (compiles but does not work yet)
