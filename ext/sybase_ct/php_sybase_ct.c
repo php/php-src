@@ -1091,8 +1091,8 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	CS_INT retcode;
 	
 	/* We've already fetched everything */
-	if (result->last_retcode == CS_END_DATA) {
-		return CS_END_DATA;
+	if (result->last_retcode == CS_END_DATA || result->last_retcode == CS_END_RESULTS) {
+		return result->last_retcode;
 	}
 	
 	if (numrows!=-1) numrows+= result->num_rows;
@@ -1143,7 +1143,6 @@ static int php_sybase_fetch_result_row (sybase_result *result, int numrows)
 	}
 	
 	result->last_retcode= retcode;
-	
 	switch (retcode) {
 		case CS_END_DATA:
 			retcode = php_sybase_finish_results(result);
@@ -1278,12 +1277,13 @@ static sybase_result * php_sybase_fetch_result_set (sybase_link *sybase_ptr, int
 		result->fields[i].numeric = result->numerics[i];
 		Z_TYPE(result->fields[i]) = result->types[i];
 	}
-
+	
 	retcode= php_sybase_fetch_result_row(result, buffered ? 1 : -1);
 	if (retcode == CS_FAIL) {
 		return NULL;
 	}
 
+	result->last_retcode = retcode;
 	return result;
 }
 
@@ -1412,7 +1412,6 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Cannot read results");
 			RETURN_FALSE;
 		}
-
 		switch ((int) restype) {
 			case CS_CMD_FAIL:
 			default:
@@ -1450,6 +1449,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		/* Check for left-over results */
 		if (!buffered && status != Q_RESULT) {
 			while ((retcode = ct_results(sybase_ptr->cmd, &restype))==CS_SUCCEED) {
+
 				switch ((int) restype) {
 					case CS_CMD_SUCCEED:
 					case CS_CMD_DONE:
@@ -1471,6 +1471,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 								RETURN_FALSE;
 							}
 							status = Q_RESULT;
+							retcode = result->last_retcode; 
 						} else {
 							/* Unexpected results, cancel them. */
 							ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_CURRENT);
@@ -1488,8 +1489,10 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 				if (status == Q_FAILURE) {
 					ct_cancel(NULL, sybase_ptr->cmd, CS_CANCEL_ALL);
 				}
+				if (retcode == CS_END_RESULTS) {
+					break;
+				}
 			}
-
 			switch (retcode) {
 				case CS_END_RESULTS:
 					/* Normal. */
@@ -1513,7 +1516,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 					break;
 			}
 		}
-		
+
 		/* Retry deadlocks up until deadlock_retry_count times */		
 		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %ld], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
@@ -1667,7 +1670,7 @@ PHP_FUNCTION(sybase_fetch_row)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	/* Unbuffered? */
-	if (result->last_retcode != CS_END_DATA) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
 		php_sybase_fetch_result_row(result, 1);
 	}
 	
@@ -1704,7 +1707,7 @@ static void php_sybase_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int numerics)
 	ZEND_FETCH_RESOURCE(result, sybase_result *, sybase_result_index, -1, "Sybase result", le_result);
 
 	/* Unbuffered ? Fetch next row */
-	if (result->last_retcode != CS_END_DATA) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS) {
 		php_sybase_fetch_result_row(result, 1);
 	}
 
@@ -1817,7 +1820,7 @@ PHP_FUNCTION(sybase_data_seek)
 	convert_to_long_ex(offset);
 
 	/* Unbuffered ? */
-	if (result->last_retcode != CS_END_DATA && Z_LVAL_PP(offset)>=result->num_rows) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && Z_LVAL_PP(offset)>=result->num_rows) {
 		php_sybase_fetch_result_row(result, Z_LVAL_PP(offset));
 	}
 	
@@ -1945,7 +1948,7 @@ PHP_FUNCTION(sybase_field_seek)
 	field_offset = Z_LVAL_PP(offset);
 	
 	/* Unbuffered ? */
-	if (result->last_retcode != CS_END_DATA && field_offset>=result->num_rows) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && field_offset>=result->num_rows) {
 		php_sybase_fetch_result_row(result, field_offset);
 	}
 
@@ -1978,7 +1981,7 @@ PHP_FUNCTION(sybase_result)
 	convert_to_long_ex(row);
 	
 	/* Unbuffered ? */
-	if (result->last_retcode != CS_END_DATA && Z_LVAL_PP(row) >= result->num_rows) {
+	if (result->last_retcode != CS_END_DATA && result->last_retcode != CS_END_RESULTS && Z_LVAL_PP(row) >= result->num_rows) {
 		php_sybase_fetch_result_row(result, Z_LVAL_PP(row));
 	}
 
