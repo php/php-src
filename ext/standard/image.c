@@ -953,7 +953,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 	if (!memcmp(filetype, php_sig_iff, 4)) {
 		return IMAGE_FILETYPE_IFF;
 	}
-	if (php_get_wbmp(stream, NULL, 1 TSRMLS_DC)) {
+	if (php_get_wbmp(stream, NULL, 1 TSRMLS_CC)) {
 		return IMAGE_FILETYPE_WBMP;
 	}
     
