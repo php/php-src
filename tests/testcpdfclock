@@ -1,0 +1,87 @@
+<?php
+$pdffilename = "clock.pdf";
+$radius = 200;
+$margin = 20;
+$pagecount = 99;
+
+$pdf = cpdf_open(0);
+cpdf_set_creator($pdf, "pdf_clock.php3");
+cpdf_set_title($pdf, "Analog Clock");
+
+while($pagecount-- > 0) {
+  cpdf_page_init($pdf, $pagecount+1, 0, 2 * ($radius + $margin), 2 * ($radius + $margin), 1.0);
+  
+  cpdf_set_page_animation($pdf, 4, 0.5, 0, 0, 0);  /* wipe */
+  
+  cpdf_translate($pdf, $radius + $margin, $radius + $margin);
+  cpdf_save($pdf);
+  cpdf_setrgbcolor($pdf, 0.0, 0.0, 1.0);
+  
+  /* minute strokes */
+  cpdf_setlinewidth($pdf, 2.0);
+  for ($alpha = 0; $alpha < 360; $alpha += 6)
+    {
+    cpdf_rotate($pdf, 6.0);
+    cpdf_moveto($pdf, $radius, 0.0);
+    cpdf_lineto($pdf, $radius-$margin/3, 0.0);
+    cpdf_stroke($pdf);
+    }
+  
+  cpdf_restore($pdf);
+  cpdf_save($pdf);
+  
+  /* 5 minute strokes */
+  cpdf_setlinewidth($pdf, 3.0);
+  for ($alpha = 0; $alpha < 360; $alpha += 30)
+  {
+    cpdf_rotate($pdf, 30.0);
+    cpdf_moveto($pdf, $radius, 0.0);
+    cpdf_lineto($pdf, $radius-$margin, 0.0);
+    cpdf_stroke($pdf);
+  }
+  
+  $ltime = getdate();
+  
+  /* draw hour hand */
+  cpdf_save($pdf);
+  cpdf_rotate($pdf, -(($ltime['minutes']/60.0) + $ltime['hours'] - 3.0) * 30.0);
+  cpdf_moveto($pdf, -$radius/10, -$radius/20);
+  cpdf_lineto($pdf, $radius/2, 0.0);
+  cpdf_lineto($pdf, -$radius/10, $radius/20);
+  cpdf_closepath($pdf);
+  cpdf_fill($pdf);
+  cpdf_restore($pdf);
+  
+  /* draw minute hand */
+  cpdf_save($pdf);
+  cpdf_rotate($pdf, -(($ltime['seconds']/60.0) + $ltime['minutes'] - 15.0) * 6.0);
+  cpdf_moveto($pdf, -$radius/10, -$radius/20);
+  cpdf_lineto($pdf, $radius * 0.8, 0.0);
+  cpdf_lineto($pdf, -$radius/10, $radius/20);
+  cpdf_closepath($pdf);
+  cpdf_fill($pdf);
+  cpdf_restore($pdf);
+  
+  /* draw second hand */
+  cpdf_setrgbcolor($pdf, 1.0, 0.0, 0.0);
+  cpdf_setlinewidth($pdf, 2);
+  cpdf_save($pdf);
+  cpdf_rotate($pdf, -(($ltime['seconds'] - 15.0) * 6.0));
+  cpdf_moveto($pdf, -$radius/5, 0.0);
+  cpdf_lineto($pdf, $radius, 0.0);
+  cpdf_stroke($pdf);
+  cpdf_restore($pdf);
+  
+  /* draw little circle at center */
+  cpdf_circle($pdf, 0, 0, $radius/30);
+  cpdf_fill($pdf);
+  
+  cpdf_restore($pdf);
+  
+  cpdf_finalize_page($pdf, $pagecount+1);
+}
+
+cpdf_finalize($pdf);
+cpdf_save_to_file($pdf, $pdffilename);
+$pdf = cpdf_close($pdf);
+?>
