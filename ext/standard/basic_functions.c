@@ -495,10 +495,6 @@ PHP_FUNCTION(ip2long)
 
 	convert_to_string_ex(str);
 
-	if ((*str)->type != IS_STRING) {
-		RETURN_FALSE;
-	}
-	
 	RETURN_LONG ( inet_addr ( ( *str ) -> value.str.val ) );
 }
 
