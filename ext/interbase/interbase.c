@@ -85,7 +85,9 @@ function_entry ibase_functions[] = {
 	PHP_FE(ibase_prepare, NULL)
 	PHP_FE(ibase_execute, NULL)
 	PHP_FE(ibase_free_query, NULL)
+#if HAVE_STRFTIME
 	PHP_FE(ibase_timefmt, NULL)
+#endif
 
 	PHP_FE(ibase_num_fields, NULL)
 	PHP_FE(ibase_field_info, NULL)

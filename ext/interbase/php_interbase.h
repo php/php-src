@@ -51,7 +51,9 @@ PHP_FUNCTION(ibase_free_result);
 PHP_FUNCTION(ibase_prepare);
 PHP_FUNCTION(ibase_execute);
 PHP_FUNCTION(ibase_free_query);
+#if HAVE_STRFTIME
 PHP_FUNCTION(ibase_timefmt);
+#endif
 
 PHP_FUNCTION(ibase_num_fields);
 PHP_FUNCTION(ibase_field_info);
