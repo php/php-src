@@ -235,21 +235,26 @@ zval *dom_read_property(zval *object, zval *member TSRMLS_DC)
 
 	ret = FAILURE;
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
-	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
-	}
-	if (ret == SUCCESS) {
-		hnd->read_func(obj, &retval TSRMLS_CC);
-		if (retval) {
-			/* ensure we're creating a temporary variable */
-			retval->refcount = 1;
-			PZVAL_UNLOCK(retval);
+	if (obj->ptr != NULL) {
+		if (obj->prop_handler != NULL) {
+			ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		}
+		if (ret == SUCCESS) {
+			ret = hnd->read_func(obj, &retval TSRMLS_CC);
+			if (ret == SUCCESS) {
+				/* ensure we're creating a temporary variable */
+				retval->refcount = 1;
+				PZVAL_UNLOCK(retval);
+			} else {
+				retval = EG(uninitialized_zval_ptr);
+			}
 		} else {
-			retval = EG(uninitialized_zval_ptr);
+			std_hnd = zend_get_std_object_handlers();
+			retval = std_hnd->read_property(object, member TSRMLS_CC);
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member TSRMLS_CC);
+		retval = EG(uninitialized_zval_ptr);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 	}
 	if (member == &tmp_member) {
 		zval_dtor(member);
@@ -276,15 +281,18 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 
 	ret = FAILURE;
 	obj = (dom_object *)zend_objects_get_address(object TSRMLS_CC);
-
-	if (obj->prop_handler != NULL) {
-		ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
-	}
-	if (ret == SUCCESS) {
-		hnd->write_func(obj, value TSRMLS_CC);
+	if (obj->ptr != NULL) {
+		if (obj->prop_handler != NULL) {
+			ret = zend_hash_find((HashTable *)obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
+		}
+		if (ret == SUCCESS) {
+			hnd->write_func(obj, value TSRMLS_CC);
+		} else {
+			std_hnd = zend_get_std_object_handlers();
+			std_hnd->write_property(object, member, value TSRMLS_CC);
+		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Underlying object missing");
 	}
 	if (member == &tmp_member) {
 		zval_dtor(member);
@@ -668,7 +676,7 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 	xmlNodePtr curnode;
 
 	if (node != NULL) {
-		curnode = node->last;
+		curnode = node;
 		while (curnode != NULL) {
 			node = curnode;
 			node_free_list(node->children TSRMLS_CC);
@@ -685,7 +693,7 @@ void node_free_list(xmlNodePtr node TSRMLS_DC)
 			}
 			
 			dom_unregister_node(node TSRMLS_CC);
-			curnode = node->prev;
+			curnode = node->next;
 			xmlUnlinkNode(node);
 			xmlFreeNode(node);
 		}
@@ -758,7 +766,7 @@ void node_free_resource(xmlNodePtr node TSRMLS_DC)
 						xmlFreeNode((xmlNode *) node);
 				}
 			} else {
-				dom_object_set_data(node, NULL TSRMLS_CC);
+				dom_unregister_node(node TSRMLS_CC);
 			}
 	}
 }
