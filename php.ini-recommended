@@ -12,7 +12,7 @@
 ; different values for several directives, in order to improve performance, while
 ; possibly breaking compatibility with the standard out-of-the-box behavior of
 ; PHP 3.  Please make sure you read what's different, and modify your scripts
-; accordingly, if you decide to use this file instead (which is recommended!)
+; accordingly, if you decide to use this file instead.
 ;
 ; - allow_call_time_pass_reference = Off
 ;     It's not possible to decide to force a variable to be passed by reference
