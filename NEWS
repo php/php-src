@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 05 Oct 2000, Version 4.0.3
+- Add Calendar module to default Win32 build (Andi)
 - Add FTP module to default Win32 build (Andi)
 - Fixed crash in the POSIX getrlimit() function (alex@zend.com)
 - Fixed dirname() under certain conditions (Andi)
