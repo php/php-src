@@ -24,6 +24,10 @@ require_once 'PEAR/Common.php';
 /**
  * Administration class used to make a PEAR release tarball.
  *
+ * TODO:
+ *  - add an extra param the dir where to place the created package
+ *  - preserve file permissions (solve umask in copy problem)
+ *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
@@ -139,13 +143,12 @@ class PEAR_Packager extends PEAR_Common
             return $this->raiseError("Unable to create temporary directory $this->tmpdir.",
                               null, PEAR_ERROR_TRIGGER, E_USER_ERROR);
         } else {
-            $this->log(2, "...TmpDir created at: " . $this->tmpdir);
+            $this->log(2, "+ tmp dir created at: " . $this->tmpdir);
         }
         $this->_tempfiles[] = $this->tmpdir;
 
         // Copy files -----------------------------------------------
-        $files = &$pkginfo['filelist'];
-        foreach ($files as $fname => $atts) {
+        foreach ($pkginfo['filelist'] as $fname => $atts) {
             $file = $this->tmpdir . DIRECTORY_SEPARATOR . $fname;
             $dir = dirname($file);
             if (!@is_dir($dir)) {
@@ -156,14 +159,16 @@ class PEAR_Packager extends PEAR_Common
             if (!@copy($fname, $file)) {
                 $this->log(0, "could not copy $fname to $file");
             } else {
-                $this->log(2, "...copying from $fname to $file");
+                $this->log(2, "+ copying from $fname to $file");
             }
         }
         // XXX TODO: Rebuild the package file as the old method did?
-        if (!@copy($pkgfile, $this->tmpdir . DIRECTORY_SEPARATOR . $pkgfile)) {
+
+        // This allows build packages from different pear pack def files
+        if (!@copy($pkgfile, $this->tmpdir . DIRECTORY_SEPARATOR . 'package.xml')) {
             return $this->raiseError("could not copy $pkgfile to " . $this->tmpdir);
         }
-        $this->log(2, "...copying package $pkgfile to " . $this->tmpdir);
+        $this->log(2, "+ copying package $pkgfile to " . $this->tmpdir);
 
         // TAR the Package -------------------------------------------
         chdir(dirname($this->tmpdir));
