@@ -553,14 +553,14 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, char *arKey, uint nKeyLen
 			} else {
 				ht->pListTail = p->pListLast;
 			}
-			if (!p->pDataPtr) {
-				pefree(p->pData,ht->persistent);
-			}
 			if (ht->pInternalPointer == p) {
 				ht->pInternalPointer = p->pListNext;
 			}
 			if (ht->pDestructor) {
 				ht->pDestructor(p->pData);
+			}
+			if (!p->pDataPtr) {
+				pefree(p->pData,ht->persistent);
 			}
 			pefree(p,ht->persistent);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
