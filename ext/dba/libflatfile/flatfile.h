@@ -27,6 +27,8 @@ typedef struct {
 } datum;
 
 typedef struct {
+	char *lockfn;
+	int lockfd;
 	php_stream *fp;
 	long CurrentFlatFilePos;
 	datum nextkey;
