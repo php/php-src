@@ -1,3 +1,134 @@
+2001-08-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/crypt.c: - Fixed bug: #10822
+    - CRYPT_SALT_LENGTH is now set to the maximum length the system
+      supports, like it has been in the documentation for ages.
+    - The automatic salt is now also working like it should.
+
+2001-08-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c: support for multiple exif comments
+
+2001-08-04  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/math/001.phpt: Better abs() testing
+
+    * ext/standard/filestat.c: Layout: revert accidentel joining of lines
+
+    * ext/standard/filestat.c:
+    Named some constants in filestat to improve readability
+
+    * ext/standard/math.c:
+    Another bugfix in pow. Special cases, with 10 times the same thing are
+    _so_ error_prone... :(
+
+2001-08-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/math.c: Kill a warning
+
+2001-08-04  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/math.c: Bugfix. All tests pass now on my system
+
+2001-08-04  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/exif/exif.c: Fix newly introduced crash on a file-not-found
+
+2001-08-04  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/math/pow.phpt: Fix bug in the tests :-(
+    There seems to be one real bug in pow(), I'm trying to fix it...
+
+2001-08-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/var.c: fix serialize:
+    - keys no longer have a trailing \0
+    - no leak on calling __wakeup (also saved 2* malloc & free)
+    - serializing objects that implement __sleep() works again
+    - make test works again:-)
+
+2001-08-04  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache/php_apache.c: Another one bites the dust.
+
+    * sapi/apache/mod_php4.c: Remove duplicate TSRMLS_FETCH() call.
+
+2001-08-04  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed a crash bug in array_map() when NULL callback was passed in. 
+
+2001-08-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/standard/basic_functions.h
+      ext/standard/string.c
+      ext/standard/basic_functions.c:
+    fix possible crash - we should never keep the zval** as they might point
+    somewhere into the Engine. (there's still a new bug in strtok - hunting;-)
+
+2001-08-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/STATUS: forgot transactions in mssql
+
+    * pear/DB/STATUS:
+    fetch rows by number in odbc, transaction in mysql and tableInfo in pgsql
+
+2001-08-04  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/file.c: WS Pollution
+
+2001-08-04  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
+
+    * ext/standard/tests/math/pow.phpt
+      ext/standard/tests/math/test_eval.inc: Added tests for pow()
+
+    * ext/standard/math.c:
+    - A little bit cleaning of pow(), and 12 bytes less memory (wow)
+
+2001-08-04  Sean Bright  <elixer@erols.com>
+
+    * ext/standard/file.c
+      ext/standard/file.h:
+    Don't allocated quoted strings unless we are in a META tag.
+
+2001-08-04  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/imap/config.m4:
+    calling mail_open() causes a SEGFAULT when using imap-2000c. mail_open(0,"",0);
+    seems to work.
+
+2001-08-04  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR.php:
+    don't show the call_user_method deprecated use warning (disturbs tests)
+
+    * pear/DB/tests/db_error.phpt: DB_OK code is 1 now, so change the test
+
+2001-08-04  sbergmann  <sbergmann@pb1.pair.com>
+
+    * ext/standard/var.c: Eliminate TSRMLS_FETCH() call.
+
+    * ext/standard/php_string.h
+      ext/standard/var.c: Fix Win32 (and maybe other ZTS) builds.
+
+2001-08-04  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Fix bug: #9177
+
+2001-08-04  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/var.c:
+    Clean up the serializer by modularizing some of its code.  That also
+    enables us to serialize hash indices without creating zvals for them.
+    Due to its nature, this patch also includes some whitespace changes.
+
+2001-08-04  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/exif/exif.c: fixed a memleak.
+
+    * ext/exif/exif.c:
+    Fixed bug: #11784 (combined with fixes Rasmus committed..)
+
 2001-08-03  Jeroen van Wolffelaar  <jeroen@A-Eskwadraat.nl>
 
     * ext/standard/math.c
