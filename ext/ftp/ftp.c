@@ -202,9 +202,11 @@ ftp_gc(ftpbuf_t *ftp)
 	}
 	if (ftp->pwd) {
 		efree(ftp->pwd);
+		ftp->pwd = NULL;
 	}
 	if (ftp->syst) {
 		efree(ftp->syst);
+		ftp->syst = NULL;
 	}
 }
 /* }}} */
@@ -227,6 +229,7 @@ ftp_quit(ftpbuf_t *ftp)
 
 	if (ftp->pwd) {
 		efree(ftp->pwd);
+		ftp->pwd = NULL;
 	}
 
 	return 1;
@@ -426,9 +429,7 @@ ftp_pwd(ftpbuf_t *ftp)
 	if ((end = strrchr(++pwd, '"')) == NULL) { 
 		return NULL;
 	}
-	*end = 0;
-	ftp->pwd = estrdup(pwd);
-	*end = '"';
+	ftp->pwd = estrndup(pwd, end - pwd);
 
 	return ftp->pwd;
 }
