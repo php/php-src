@@ -1,3 +1,8 @@
+2004-04-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/strings/002.phpt:
+      Fixed test.
+
 2004-04-23  Andi Gutmans  <andi@zend.com>
 
     * ZendEngine2/zend_compile.c:
