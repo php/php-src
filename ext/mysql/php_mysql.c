@@ -1442,7 +1442,7 @@ PHP_FUNCTION(mysql_fetch_row)
    Fetch a result row as an object */
 PHP_FUNCTION(mysql_fetch_object)
 {
-	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAM_PASSTHRU, MYSQL_ASSOC);
 	if (return_value->type==IS_ARRAY) {
 		return_value->type=IS_OBJECT;
 		return_value->value.obj.properties = return_value->value.ht;
