@@ -222,6 +222,11 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 			}
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring, faultactor, details TSRMLS_CC);
+#ifdef ZEND_ENGINE_2
+		if (details) {
+			details->refcount--;
+		}
+#endif
 		xmlFreeDoc(response);
 		return FALSE;
 	}

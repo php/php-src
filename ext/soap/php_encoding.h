@@ -139,6 +139,8 @@
 #define XSD_UR_TYPE 146
 #define XSD_UR_TYPE_STRING "ur-type"
 
+#define XSD_ANYXML 147
+
 #define APACHE_NAMESPACE "http://xml.apache.org/xml-soap"
 #define APACHE_MAP 200
 #define APACHE_MAP_STRING "Map"
@@ -213,6 +215,8 @@ zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data);
 
 void encode_reset_ns();
 xmlNsPtr encode_add_ns(xmlNodePtr node, const char* ns);
+
+encodePtr get_conversion(int encode);
 
 void delete_encoder(void *handle);
 

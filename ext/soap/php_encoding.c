@@ -72,6 +72,9 @@ static zval *to_zval_array(encodeTypePtr type, xmlNodePtr data);
 static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 
+static zval *to_zval_any(encodeTypePtr type, xmlNodePtr data);
+static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
+
 /* Try and guess for non-wsdl clients and servers */
 static zval *guess_zval_convert(encodeTypePtr type, xmlNodePtr data);
 static xmlNodePtr guess_xml_convert(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
@@ -80,8 +83,6 @@ static int is_map(zval *array);
 static void get_array_type(xmlNodePtr node, zval *array, smart_str *out_type TSRMLS_DC);
 
 static xmlNodePtr check_and_resolve_href(xmlNodePtr data);
-
-static encodePtr get_conversion(int encode);
 
 static void get_type_str(xmlNodePtr node, const char* ns, const char* type, smart_str* ret);
 static void set_ns_and_type_ex(xmlNodePtr node, char *ns, char *type);
@@ -200,6 +201,8 @@ encode defaultEncoding[] = {
 	{{XSD_SHORT, XSD_SHORT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_BYTE, XSD_BYTE_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_1999_TIMEINSTANT, XSD_1999_TIMEINSTANT_STRING, XSD_1999_NAMESPACE, NULL}, to_zval_stringc, to_xml_string},
+
+	{{XSD_ANYXML, "<anyXML>", "<anyXML>", NULL}, to_zval_any, to_xml_any},
 
 	{{END_KNOWN_TYPES, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert}
 };
@@ -963,16 +966,57 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 				}
 			}
 			break;
-		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_ALL:
+		case XSD_CONTENT_SEQUENCE:
 		case XSD_CONTENT_CHOICE: {
 			sdlContentModelPtr *tmp;
 			HashPosition pos;
+			sdlContentModelPtr any = NULL;
 
 			zend_hash_internal_pointer_reset_ex(model->u.content, &pos);
 			while (zend_hash_get_current_data_ex(model->u.content, (void**)&tmp, &pos) == SUCCESS) {
-				model_to_zval_object(ret, *tmp, data, sdl TSRMLS_CC);
+				if ((*tmp)->kind == XSD_CONTENT_ANY) {
+					any = *tmp;
+				} else {
+					model_to_zval_object(ret, *tmp, data, sdl TSRMLS_CC);
+				}
 				zend_hash_move_forward_ex(model->u.content, &pos);
+			}
+			if (any) {
+				xmlNodePtr node = data->children;
+				zval* any = NULL;
+
+				while (node != NULL) {
+					if (get_zval_property(ret, (char*)node->name TSRMLS_CC) == NULL) {
+						zval* val = master_to_zval(get_conversion(XSD_ANYXML), node);
+						while (node->next != NULL &&
+						    get_zval_property(ret, (char*)node->next->name TSRMLS_CC) == NULL) {
+							zval* val2 = master_to_zval(get_conversion(XSD_ANYXML), node->next);
+							add_string_to_string(val, val, val2);
+							zval_ptr_dtor(&val2);
+						  node = node->next;
+						}
+						if (any == NULL) {
+							any = val;
+						} else {
+							if (Z_TYPE_P(any) != IS_ARRAY) {
+						    /* Convert into array */
+						    zval *arr;
+
+						    MAKE_STD_ZVAL(arr);
+						    array_init(arr);
+							  add_next_index_zval(arr, any);
+							  any = arr;
+						  }
+						  /* Add array element */
+						  add_next_index_zval(any, val);
+						}
+					}
+					node = node->next;
+				}
+				if (any) {
+					set_zval_property(ret, "any", any TSRMLS_CC);
+				}
 			}
 			break;
 		}
@@ -1200,6 +1244,37 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 			} else {
 				if (strict) {
 					soap_error1(E_ERROR,  "Encoding: object hasn't '%s' property", model->u.element->name);
+				}
+				return 0;
+			}
+			break;
+		}
+		case XSD_CONTENT_ANY: {
+			zval *data;
+			xmlNodePtr property;
+			encodePtr enc;
+
+			data = get_zval_property(object, "any" TSRMLS_CC);
+			if (data) {
+				enc = get_conversion(XSD_ANYXML);
+				if ((model->max_occurs == -1 || model->max_occurs > 1) && Z_TYPE_P(data) == IS_ARRAY) {
+					HashTable *ht = Z_ARRVAL_P(data);
+					zval **val;
+
+					zend_hash_internal_pointer_reset(ht);
+					while (zend_hash_get_current_data(ht,(void**)&val) == SUCCESS) {
+						property = master_to_xml(enc, *val, style, node);
+						zend_hash_move_forward(ht);
+					}
+				} else {
+					property = master_to_xml(enc, data, style, node);
+				}
+				return 1;
+			} else if (model->min_occurs == 0) {
+				return 2;
+			} else {
+				if (strict) {
+					soap_error0(E_ERROR,  "Encoding: object hasn't 'any' property");
 				}
 				return 0;
 			}
@@ -2492,6 +2567,41 @@ static xmlNodePtr to_xml_union(encodeTypePtr enc, zval *data, int style, xmlNode
 	return to_xml_list(enc,data,style, parent);
 }
 
+static zval *to_zval_any(encodeTypePtr type, xmlNodePtr data)
+{
+	xmlBufferPtr buf;
+	zval *ret;
+
+	buf = xmlBufferCreate();
+	xmlNodeDump(buf, NULL, data, 0, 0);
+	MAKE_STD_ZVAL(ret);
+	ZVAL_STRING(ret, (char*)xmlBufferContent(buf), 1);
+	xmlBufferFree(buf);
+	return ret;
+}
+
+extern const xmlChar xmlStringTextNoenc[];
+
+static xmlNodePtr to_xml_any(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
+{	
+	xmlNodePtr ret;
+
+	if (Z_TYPE_P(data) == IS_STRING) {
+		ret = xmlNewTextLen(Z_STRVAL_P(data), Z_STRLEN_P(data));
+	} else {
+		zval tmp = *data;
+
+		zval_copy_ctor(&tmp);
+		convert_to_string(&tmp);
+		ret = xmlNewTextLen(Z_STRVAL_P(data), Z_STRLEN_P(data));
+		zval_dtor(&tmp);
+	}
+	ret->name = xmlStringTextNoenc;
+	xmlAddChild(parent, ret);
+
+	return ret;
+}
+
 zval *sdl_guess_convert_zval(encodeTypePtr enc, xmlNodePtr data)
 {
 	sdlTypePtr type;
@@ -2723,7 +2833,7 @@ void encode_reset_ns()
 	SOAP_GLOBAL(cur_uniq_ns) = 0;
 }
 
-static encodePtr get_conversion(int encode)
+encodePtr get_conversion(int encode)
 {
 	encodePtr *enc = NULL;
 	TSRMLS_FETCH();
