@@ -142,6 +142,8 @@ PHP_FUNCTION(zip_read)
 		RETURN_FALSE;
 	}
 
+	entry->fp = NULL;
+
 	ZEND_REGISTER_RESOURCE(return_value, entry, le_zip_entry);
 }
 /* }}} */
