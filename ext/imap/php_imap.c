@@ -3442,12 +3442,14 @@ PHP_FUNCTION(imap_search)
 	imap_le_struct = (pils *) zend_list_find(ind, &ind_type);
 	if (!imap_le_struct || !IS_STREAM(ind_type)) {
 		php_error(E_WARNING, "Unable to find stream pointer");
+    	efree(search_criteria);
 		RETURN_FALSE;
 	}
 	
 	IMAPG(imap_messages) = NIL;
 	mail_search_full(imap_le_struct->imap_stream, NIL, mail_criteria(search_criteria), flags);
 	if (IMAPG(imap_messages) == NIL) {
+    	efree(search_criteria);
 		RETURN_FALSE;
 	}
 	
