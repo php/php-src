@@ -43,11 +43,6 @@
 
 #include "zend_default_classes.h"
 
-#ifdef HAVE_SPL
-#include "ext/spl/php_spl.h"
-#include "ext/spl/spl_functions.h"
-#endif
-
 #ifndef safe_emalloc
 # define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
 #endif
@@ -1059,16 +1054,6 @@ PHP_MINIT_FUNCTION(sqlite)
 
 PHP_RINIT_FUNCTION(sqlite)
 {
-#if 0 && HAVE_SPL
-	if (!sqlite_ce_query->num_interfaces) {
-		spl_register_implement(sqlite_ce_query, spl_ce_forward TSRMLS_CC);
-		spl_register_implement(sqlite_ce_query, spl_ce_sequence TSRMLS_CC);
-	}
-	if (!sqlite_ce_ub_query->num_interfaces) {
-		spl_register_implement(sqlite_ce_ub_query, spl_ce_forward TSRMLS_CC);
-	}
-#endif
-
 	return SUCCESS;
 }
 
