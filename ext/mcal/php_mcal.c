@@ -49,7 +49,7 @@
 #include <stdarg.h>
 #include "mcal.h"
 #include "php_mcal.h"
-#include "modules.h"
+#include "zend_modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 #endif

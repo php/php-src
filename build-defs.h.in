@@ -39,7 +39,7 @@
 #define PHP_BINNAME		"@BINNAME@"
 #define PHP_CFLAGS		"@CFLAGS@"
 #define PHP_DBASE_LIB		""
-#define PHP_DEBUG		"@DEBUG_CFLAGS@"
+#define PHP_BUILD_DEBUG		"@DEBUG_CFLAGS@"
 #define PHP_GDBM_INCLUDE	""
 #define PHP_HSREGEX		""
 #define PHP_IBASE_INCLUDE	""

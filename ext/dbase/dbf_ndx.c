@@ -50,7 +50,7 @@ static ndx_page_t *ndx_get_page(ndx_header_t *hp, int pageno)
 	dndx_page_t	*dp;
 	ndx_record_t	*rp;
 
-#if DEBUG
+#if PHP_DEBUG
 	printf("getting page %d", pageno);
 #endif
 	if ((fp = (ndx_page_t *)malloc(sizeof(ndx_page_t))) == NULL)
@@ -75,7 +75,7 @@ static ndx_page_t *ndx_get_page(ndx_header_t *hp, int pageno)
 	memset(rp, 0, sizeof(ndx_record_t) * hp->ndx_keys_ppg);
 	fp->ndxp_records = rp;
 	fp->ndxp_header_p = hp;
-#if DEBUG
+#if PHP_DEBUG
 	printf(", n_keys %ld\n", fp->ndxp_num_keys);
 #endif
 	return fp;
@@ -102,7 +102,7 @@ static ndx_record_t *ndx_get_record(ndx_page_t *fp, int rec_no)
 	ndx_header_t		*hp = fp->ndxp_header_p;
 	struct dndx_record	*drp;
 
-#if DEBUG
+#if PHP_DEBUG
 	printf("page %ld, rec %d: ", fp->ndxp_page_no, rec_no);
 #endif
 	if (rec_no >= fp->ndxp_num_keys)
@@ -117,7 +117,7 @@ static ndx_record_t *ndx_get_record(ndx_page_t *fp, int rec_no)
 		rp->ndxr_key_data = &drp->dndx_key_data;
 		rp->ndxr_p_nrec = rec_no;
 	}
-#if DEBUG
+#if PHP_DEBUG
 	printf("left %ld, dbf_rec %ld, data '%s'\n", rp->ndxr_left,
 		rp->ndxr_rec, rp->ndxr_key_data);
 #endif

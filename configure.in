@@ -406,11 +406,9 @@ AC_MSG_CHECKING(whether to include debugging symbols)
 AC_MSG_RESULT($PHP_DEBUG)
 
 if test "$PHP_DEBUG" = "yes"; then
-  AC_DEFINE(DEBUG,1)
   PHP_DEBUG=1
   ZEND_DEBUG=yes
 else
-  AC_DEFINE(DEBUG,0)
   PHP_DEBUG=0
   ZEND_DEBUG=no
 fi
