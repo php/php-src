@@ -70,7 +70,7 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
          if(outbuf) {
             out_ptr = (char*)outbuf;
             while(inlenleft) {
-               st = iconv(ic, &src, &inlenleft, &out_ptr, &outlenleft);
+               st = iconv(ic, (char**)&src, &inlenleft, &out_ptr, &outlenleft);
                if(st == -1) {
                   if(errno == E2BIG) {
                      int diff = out_ptr - outbuf;
