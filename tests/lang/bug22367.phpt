@@ -48,7 +48,7 @@ class bar extends foo
 
 $a = new bar(5);
 var_dump($a->idx);
-@$a->c();
+$a->c();
 $b = $a->b();
 var_dump($b);
 var_dump($a->test);
@@ -61,58 +61,10 @@ var_dump($b);
 var_dump($a->test);
 
 ?>
---EXPECT--
+--EXPECTF--
 int(5)
 bool(false)
-bool(false)
-array(5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
-array(5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
-int(2)
-bool(true)
-bool(true)
-array(5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
-array(5) {
-  [0]=>
-  int(0)
-  [1]=>
-  int(1)
-  [2]=>
-  int(2)
-  [3]=>
-  int(3)
-  [4]=>
-  int(4)
-}
+
+Notice: Undefined offset:  %d in %s on line %d
+
+Fatal error: Only variables or references can be returned by reference in %s on line %d
