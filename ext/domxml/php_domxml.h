@@ -23,6 +23,10 @@
 
 #if HAVE_DOMXML
 #include <libxml/parser.h>
+#include <libxml/xpath.h>
+#if defined(LIBXML_XPTR_ENABLED)
+#include <libxml/xpointer.h>
+#endif
 
 extern zend_module_entry domxml_module_entry;
 #define domxml_module_ptr &domxml_module_entry
@@ -53,6 +57,15 @@ PHP_FUNCTION(domxml_new_child);
 
 /* Class Attribute methods */
 PHP_FUNCTION(domxml_attrname);
+
+/* Class XPathContext methods */
+PHP_FUNCTION(xpath_init);
+PHP_FUNCTION(xpath_new_context);
+PHP_FUNCTION(xpath_eval);
+PHP_FUNCTION(xpath_eval_expression);
+#if defined(LIBXML_XPTR_ENABLED)
+PHP_FUNCTION(xptr_new_context);
+#endif
 
 PHP_FUNCTION(domxml_test);
 #else
