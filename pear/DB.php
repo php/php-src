@@ -80,8 +80,8 @@
    * into your database).
    */
 
-  define( "DB_PARAM_SCALAR", 1);
-  define( "DB_PARAM_OPAQUE", 2);
+  define( "DB_PARAM_SCALAR", 1 );
+  define( "DB_PARAM_OPAQUE", 2 );
 
   /*
    * These constants define different ways of returning binary data
