@@ -1,3 +1,157 @@
+1999-10-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/gd/Makefile.am
+      ext/gd/config.h.stub
+      ext/gd/config.m4
+      ext/gd/gd.c
+      ext/gd/php3_gd.h: Add PNG support. Tested with gd 1.7.3.
+
+1999-10-17  Egon Schmid  <eschmid@delos.lf.net>
+
+    * ext/standard/dl.c: Looks better, but isn't wrong
+
+    * ext/standard/math.c: One typo corrected.
+
+1999-10-17  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/zlib/zlib.c: Fix bug #2548.
+
+1999-10-16  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/xml/xml.c
+      ext/standard/file.c
+      ext/standard/php3_string.h
+      ext/standard/string.c
+      fopen-wrappers.c: _php3/_php3i -> php rename
+
+1999-10-16  Andi Gutmans  <andi@php.net>
+
+    * sapi/cgi/cgi_main.c: - It's OK if we link dynamically.
+
+    * sapi/cgi/cgi_main.c
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      php4ts.dsp
+      mergesort.c
+      php4dllts.dsp:
+    - Get windows version to compile again. No biggy if array_map is not #if 0'd
+      out even if it doesn't work.
+
+1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/basic_functions.h: *** empty log message ***
+
+    * ext/standard/basic_functions.c: (PHP array_map) Temporarily #if 0 this.
+
+    * php.h: Update mergesort() proto.
+
+    * ext/pcre/php_pcre.c: Make string copying a little more efficient.
+
+    * main.c: Small tweak in the error format.
+
+    * main.c (php3_log_err): Don't output error message to stderr when
+    				running as CGI binary.
+
+    * ext/pcre/php_pcre.c
+      ext/standard/php3_string.h
+      ext/standard/string.c:
+    Renamed a couple of functions to have proper php_ prefix.
+
+    * main.c (php_error): finally get rid of those annoying html tags
+                 when running as CGI binary
+
+    * ext/standard/basic_functions.c:
+    Massive change of zend_error() to php_error().
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+    * Makefile.am: Add mergesort.c to compilation list.
+
+    * mergesort.c
+      php.h: Added mergesort.c from FreeBSD.
+
+1999-10-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/basic_functions.h
+      ext/standard/basic_functions.c: (is_resource, is_bool) new functions
+
+1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/pcre/php_pcre.c:
+    (_php_replace_in_subject)
+    (PHP preg_replace):
+    Fixed a bug that happened when regex was an array and replacement was a
+    single non-string value. Also changed conversions to use
+    convert_to_string_ex().
+
+    (PHP preg_grep): use convert_to_string_ex() for proper conversion
+
+1999-10-15  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/file.h
+      ext/standard/fsock.c
+      ext/standard/file.c
+      ext/pdf/pdf.c
+      ext/ftp/php_ftp.c
+      rfc1867.c
+      fopen-wrappers.h
+      php.h:
+    files are now resources, file.c is thread-safe, the le_ vars are no longer shared,
+    but they are accessible thru "php_file_le_socket(), php_file_le_uploads()..."
+    i also updated the ftp, pdf and file-upload stuff to match the new requirements.
+
+1999-10-15  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ext/standard/string.c (PHP implode): Properly separate zval for another case.
+
+1999-10-15  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/string.c:
+    That should do the trick - fix implode() not to modify its arguments
+
+    * ext/odbc/php_odbc.c
+      config.w32.h: Make ODBC work under Win32
+
+1999-10-15  Andi Gutmans  <andi@php.net>
+
+    * tests/testarray
+      tests/testfuncref
+      ext/standard/math.c
+      php4dllts.dsp:
+    - Converted math.c to use new convert_to_number_ex() macro.
+
+1999-10-13  Sascha Schumann  <sascha@schumann.cx>
+
+    * MAINTAINERS: Add dba and mcrypt extensions to list.
+
+1999-10-13  Thies C. Arntzen  <thies@digicol.de>
+
+    * configuration-parser.y
+      ext/standard/dl.c
+      ext/standard/dl.h
+      ext/standard/file.c
+      php3_compat.h:
+    new api fo dl() - renamed php3_dl to php_dl (added compat header)
+
+    * ext/standard/html.c (PHP: htmlspecialchars, htmlentities):
+    new zend-api for html-function (not worth mentioning in NEWS)
+
+    * ext/standard/math.c:
+1999-10-13  Andrei Zmievski  <zmievski@ispi.net>
+
+    * MAINTAINERS: Add mhash module.
+
+1999-10-13  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/exec.c:
+    (shell_exec) use pclose for FILE* that has been opened via popen!
+
+1999-10-13  changelog  <changelog@www>
+
+    * ChangeLog: ChangeLog update
+
+    * NEWS: NEWS update
+
 1999-10-12  Thies C. Arntzen  <thies@digicol.de>
 
     * ext/standard/file.c
