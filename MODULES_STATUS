@@ -11,3 +11,6 @@ dbase				Working
 aspell				Working
 imap				Working
 ldap				Untested
+oci8				Working (but no blob-support yet)
+oracle				Working
+iptc				Working
