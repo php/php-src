@@ -642,10 +642,10 @@ PHP_FUNCTION(sybase_close)
 			break;
 	}
 	
-	sybase_ptr = (sybase_link *) zend_fetch_resource_ex(&sybase_link_index, id, "Sybase link", 2, sybase_globals.le_link, sybase_globals.le_plink);
-	ZEND_VERIFY_RESOURCE(sybase_ptr);
 	
-	zend_list_delete(id);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
+	
+	zend_list_delete(id); /* XXX this IS A BUG!!!! */
 
 	RETURN_TRUE;
 }
@@ -752,8 +752,7 @@ PHP_FUNCTION(sybase_select_db)
 			break;
 	}
 	
-	sybase_ptr = (sybase_link *) zend_fetch_resource_ex(&sybase_link_index, id, "Sybase link", 2, sybase_globals.le_link, sybase_globals.le_plink);
-	ZEND_VERIFY_RESOURCE(sybase_ptr);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
 	
 	convert_to_string(db);
 	cmdbuf = (char *) emalloc(sizeof("use ")+db->value.str.len+1);
@@ -964,8 +963,7 @@ PHP_FUNCTION(sybase_query)
 			break;
 	}
 	
-	sybase_ptr = (sybase_link *) zend_fetch_resource_ex(&sybase_link_index, id, "Sybase link", 2, sybase_globals.le_link, sybase_globals.le_plink);
-	ZEND_VERIFY_RESOURCE(sybase_ptr);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
 	
 	convert_to_string(query);
 	
@@ -1502,8 +1500,7 @@ PHP_FUNCTION(sybase_affected_rows)
 	
 
 	
-	sybase_ptr = (sybase_link *) zend_fetch_resource_ex(&sybase_link_index, id, "Sybase link", 2, sybase_globals.le_link, sybase_globals.le_plink);
-	ZEND_VERIFY_RESOURCE(sybase_ptr);
+	ZEND_FETCH_RESOURCE2(sybase_ptr, sybase_link *, &sybase_link_index, id, "Sybase-Link", sybase_globals.le_link, sybase_globals.le_plink);
 
 	return_value->value.lval = sybase_ptr->affected_rows;
 	return_value->type = IS_LONG;

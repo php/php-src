@@ -727,7 +727,7 @@ static oci_connection *oci_get_conn(zval **conn)
 {
 	oci_connection *connection;
 
-	connection = (oci_connection *) zend_fetch_resource_ex(conn, -1, "OCI8-Connection", 1, le_conn);
+	connection = (oci_connection *) zend_fetch_resource(conn, -1, "OCI8-Connection", NULL, 1, le_conn);
 
 	if (connection && connection->open) {
 		return connection;
@@ -743,7 +743,7 @@ static oci_statement *oci_get_stmt(zval **stmt)
 {
 	oci_statement *statement;
 
-	statement = (oci_statement *) zend_fetch_resource_ex(stmt, -1, "OCI8-Connection", 1, le_stmt);
+	statement = (oci_statement *) zend_fetch_resource(stmt, -1, "OCI8-Connection", NULL, 1, le_stmt);
 
 	if (statement && statement->conn->open) {
 		return statement;
@@ -3233,12 +3233,12 @@ PHP_FUNCTION(ocierror)
 	OCILS_FETCH();
 
 	if (getParametersEx(1, &arg) == SUCCESS) {
-		statement = (oci_statement *) zend_fetch_resource_ex(arg, -1, NULL, 1, le_stmt);
+		statement = (oci_statement *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_stmt);
 		if (statement) {
 			errh = statement->pError;
 			error = statement->error;
 		} else {
-			connection = (oci_connection *) zend_fetch_resource_ex(arg, -1, NULL, 1, le_conn);
+			connection = (oci_connection *) zend_fetch_resource(arg, -1, NULL, NULL, 1, le_conn);
 			if (connection) {
 				errh = connection->pError;
 				error = connection->error;

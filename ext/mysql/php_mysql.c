@@ -642,8 +642,7 @@ PHP_FUNCTION(mysql_close)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	zend_list_delete(id);
 	RETURN_TRUE;
@@ -680,8 +679,7 @@ PHP_FUNCTION(mysql_select_db)
 	}
 	
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	
@@ -722,8 +720,7 @@ PHP_FUNCTION(mysql_create_db)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	if (mysql_create_db(mysql, (*db)->value.str.val)==0) {
@@ -764,8 +761,7 @@ PHP_FUNCTION(mysql_drop_db)
 	}
 	
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	if (mysql_drop_db(mysql, (*db)->value.str.val)==0) {
@@ -806,8 +802,7 @@ PHP_FUNCTION(mysql_query)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(query);
 	/* mysql_query binary unsafe, use mysql_real_query */
@@ -862,8 +857,7 @@ PHP_FUNCTION(mysql_db_query)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
@@ -920,8 +914,7 @@ PHP_FUNCTION(mysql_list_dbs)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	if ((mysql_result=mysql_list_dbs(mysql, NULL))==NULL) {
 		php_error(E_WARNING,"Unable to save MySQL query result");
@@ -961,8 +954,7 @@ PHP_FUNCTION(mysql_list_tables)
 			break;
 	}
 		
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
@@ -1006,8 +998,7 @@ PHP_FUNCTION(mysql_list_fields)
 			break;
 	}
 		
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	convert_to_string_ex(db);
 	if (mysql_select_db(mysql, (*db)->value.str.val)!=0) {
@@ -1050,8 +1041,7 @@ PHP_FUNCTION(mysql_error)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	RETURN_STRING(mysql_error(mysql),1);
 }
@@ -1086,8 +1076,7 @@ PHP_FUNCTION(mysql_errno)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	RETURN_LONG(mysql_errno(mysql));
 }
@@ -1120,8 +1109,7 @@ PHP_FUNCTION(mysql_affected_rows)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long) mysql_affected_rows(mysql);
@@ -1155,8 +1143,7 @@ PHP_FUNCTION(mysql_insert_id)
 			break;
 	}
 	
-	mysql = (MYSQL *) zend_fetch_resource_ex(mysql_link, id, "MySQL link", 2, le_link, le_plink);
-	ZEND_VERIFY_RESOURCE(mysql);
+	ZEND_FETCH_RESOURCE2(mysql, MYSQL *, mysql_link, id, "MySQL-Link", le_link, le_plink);
 	
 	/* conversion from int64 to long happing here */
 	return_value->value.lval = (long) mysql_insert_id(mysql);

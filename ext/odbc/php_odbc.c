@@ -560,8 +560,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 		WRONG_PARAM_COUNT;
 	}                            
  
-	conn = (odbc_connection *) zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 	
 	rc = SQLTransact(conn->henv, conn->hdbc, (UWORD)((type)?SQL_COMMIT:SQL_ROLLBACK));
 	if(rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO){
@@ -620,8 +619,7 @@ PHP_FUNCTION(odbc_prepare)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	convert_to_string_ex(pv_query);
 	query = (*pv_query)->value.str.val;
@@ -922,8 +920,7 @@ PHP_FUNCTION(odbc_exec)
 			WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 	
 	convert_to_string_ex(pv_query);
 	query = (*pv_query)->value.str.val;
@@ -1810,8 +1807,7 @@ PHP_FUNCTION(odbc_close)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *) zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 	
 	zend_list_delete((*pv_conn)->value.lval);
 }
@@ -2019,8 +2015,7 @@ PHP_FUNCTION(odbc_autocommit)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *) zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 		
 	if((*pv_onoff)){
 		convert_to_long_ex(pv_onoff);
@@ -2087,9 +2082,7 @@ PHP_FUNCTION(odbc_setoption)
 
 	switch ((*pv_which)->value.lval) {
 		case 1:		/* SQLSetConnectOption */
-		 	conn = (odbc_connection *) zend_fetch_resource_ex(pv_handle, -1, "ODBC connection",
-					2, le_conn, le_pconn);
-			ZEND_VERIFY_RESOURCE(conn);
+			ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_handle, -1, "ODBC-Link", le_conn, le_pconn);
 			if(conn->persistent){
 				php_error(E_WARNING, "Can't set option for persistent connection");
 				RETURN_FALSE;
@@ -2156,8 +2149,7 @@ PHP_FUNCTION(odbc_tables)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2239,8 +2231,7 @@ PHP_FUNCTION(odbc_columns)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2318,8 +2309,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2404,8 +2394,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2482,8 +2471,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2556,8 +2544,7 @@ PHP_FUNCTION(odbc_primarykeys)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2638,8 +2625,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2719,8 +2705,7 @@ PHP_FUNCTION(odbc_procedures)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2804,8 +2789,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2890,8 +2874,7 @@ PHP_FUNCTION(odbc_statistics)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
@@ -2968,8 +2951,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 		WRONG_PARAM_COUNT;
 	}
 
-	conn = (odbc_connection *)zend_fetch_resource_ex(pv_conn, -1, "ODBC connection", 2, le_conn, le_pconn);
-	ZEND_VERIFY_RESOURCE(conn);
+	ZEND_FETCH_RESOURCE2(conn, odbc_connection *, pv_conn, -1, "ODBC-Link", le_conn, le_pconn);
 
 	result = (odbc_result *)emalloc(sizeof(odbc_result));
 	if(result == NULL){
