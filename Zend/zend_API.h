@@ -171,6 +171,7 @@ ZEND_API int add_index_resource(zval *arg, uint idx, int r);
 ZEND_API int add_index_double(zval *arg, uint idx, double d);
 ZEND_API int add_index_string(zval *arg, uint idx, char *str, int duplicate);
 ZEND_API int add_index_stringl(zval *arg, uint idx, char *str, uint length, int duplicate);
+ZEND_API int add_index_zval(zval *arg, uint index, zval *value);
 
 ZEND_API int add_next_index_long(zval *arg, long n);
 ZEND_API int add_next_index_unset(zval *arg);
