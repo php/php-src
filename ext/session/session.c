@@ -122,7 +122,7 @@ typedef struct {
 	void (*func)(PSLS_D);
 } php_session_cache_limiter;
 
-#define CACHE_LIMITER_FUNC(name) void _php_cache_limiter_##name(PSLS_D)
+#define CACHE_LIMITER_FUNC(name) static void _php_cache_limiter_##name(PSLS_D)
 #define CACHE_LIMITER(name) { #name, _php_cache_limiter_##name },
 
 #define ADD_COOKIE(a) sapi_add_header(estrdup(a), strlen(a));
