@@ -13,7 +13,8 @@
 // | obtain it through the world-wide-web, please send a note to          |
 // | license@php.net so we can mail you a copy immediately.               |
 // +----------------------------------------------------------------------+
-// | Author: Stig Bakken <ssb@fast.no>                                    |
+// | Authors: Stig Bakken <ssb@fast.no>                                   |
+// |          Martin Jansen <mj@php.net>                                  |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -23,6 +24,25 @@ require_once 'PEAR/Command/Common.php';
 
 class PEAR_Command_Package extends PEAR_Command_Common
 {
+    var $_deps_rel_trans = array(
+                                 'lt' => '<',
+                                 'le' => '<=',
+                                 'eq' => '=',
+                                 'ne' => '!=',
+                                 'gt' => '>',
+                                 'ge' => '>=',
+                                 );
+    var $_deps_type_trans = array(
+                                  'pkg' => 'package',
+                                  'extension' => 'extension',
+                                  'php' => 'PHP',
+                                  'prog' => 'external program',
+                                  'ldlib' => 'external library for linking',
+                                  'rtlib' => 'external runtime library',
+                                  'os' => 'operating system',
+                                  'websrv' => 'web server',
+                                  'sapi' => 'SAPI backend'
+                                  );
     var $commands = array(
         'package' => array(
             'summary' => 'Build Package',
@@ -98,6 +118,14 @@ use the "slide" option to move the release tag.
             'doc' => '[testfile|dir ...]
 Run regression tests with PHP\'s regression testing script (run-tests.php).',
             ),
+        'package-dependencies' => array(
+                                        'summary' => 'Show package dependencies',
+                                        'function' => 'doPackageDependencies',
+                                        'shortcut' => 'pd',
+                                        'options' => array(),
+                                        'doc' => '
+List all depencies the package has.'
+                                        ),    
         );
 
     /**
@@ -200,22 +228,14 @@ Run regression tests with PHP\'s regression testing script (run-tests.php).',
                         break;
                     }
                     case 'release_deps': {
-                        static $rel_trans = array(
-                            'lt' => '<',
-                            'le' => '<=',
-                            'eq' => '=',
-                            'ne' => '!=',
-                            'gt' => '>',
-                            'ge' => '>=',
-                            );
                         $i = 0;
                         $dstr = '';
                         foreach ($info[$key] as $d) {
                             if ($i++ > 0) {
                                 $dstr .= ", ";
                             }
-                            if (isset($rel_trans[$d['rel']])) {
-                                $d['rel'] = $rel_trans[$d['rel']];
+                            if (isset($this->_deps_rel_trans[$d['rel']])) {
+                                $d['rel'] = $this->_deps_rel_trans[$d['rel']];
                             }
                             $dstr .= "$d[type] $d[rel]";
                             if (isset($d['version'])) {
@@ -340,6 +360,59 @@ Run regression tests with PHP\'s regression testing script (run-tests.php).',
         system($cmd);
         return true;
     }
-}
 
+    function doPackageDependencies($command, $options, $params)
+    {
+        // $params[0] -> the PEAR package to list its information
+        if (sizeof($params) != 1) {
+            return $this->raiseError("bad parameter(s), try \"help $command\"");
+        }
+
+        $obj = new PEAR_Common();
+        if (PEAR::isError($info = $obj->infoFromAny($params[0]))) {
+            return $info;
+        }
+
+        if (is_array($info['release_deps'])) {
+            $this->ui->startTable(array('caption' => 'Dependencies for ' . $info['package'],
+                                        'border' => true));
+            $this->ui->tableRow(array("Type", "Name", "Relation", "Version"));
+
+            foreach ($info['release_deps'] as $d) {
+
+                if (isset($this->_deps_rel_trans[$d['rel']])) {
+                    $rel = $this->_deps_rel_trans[$d['rel']];
+                } else {
+                    $rel = $d['rel'];
+                }
+
+                if (isset($this->_deps_type_trans[$d['type']])) {
+                    $type = ucfirst($this->_deps_type_trans[$d['type']]);
+                } else {
+                    $type = $d['type'];
+                }
+
+                if (isset($d['name'])) {
+                    $name = $d['name'];
+                } else {
+                    $name = '';
+                }
+
+                if (isset($d['version'])) {
+                    $version = $d['version'];
+                } else {
+                    $version = '';
+                }
+
+                $this->ui->tableRow(array($type, $name, $rel, $version), null, array(1 => array('wrap' => 55)));
+            }
+
+            $this->ui->endTable();
+            return true;
+        }
+
+        // Fallback
+        $this->ui->displayLine("This package does not have any dependencies.");
+    }
+}
 ?>
