@@ -59,12 +59,10 @@ PEAR_FILES = \
 	HTML/Table.php \
 	HTTP.php \
 	HTTP/Compress.php \
-	Image/Remote.php \
 	Mail.php \
 	Mail/RFC822.php \
 	Mail/sendmail.php \
 	Mail/smtp.php \
-	Mail/mime.php \
 	Net/Curl.php \
 	Net/Dig.php \
 	Net/SMTP.php \
