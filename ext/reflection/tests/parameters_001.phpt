@@ -1,5 +1,5 @@
 --TEST--
-invoke with non object or null value
+Check for parameter being optional
 --FILE--
 <?php
 
