@@ -67,9 +67,10 @@
 %left T_SL T_SR
 %left '+' '-' '.'
 %left '*' '/' '%'
+%nonassoc T_INSTANCEOF
 %right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
-%nonassoc T_NEW T_INSTANCEOF T_CLONE
+%nonassoc T_NEW T_CLONE
 %token T_EXIT
 %token T_IF
 %left T_ELSEIF
