@@ -110,6 +110,12 @@ if test "$PHP_IMAP" != "no"; then
       fi
     done
 
+    dnl Check for c-client version 2004
+    AC_EGREP_HEADER(mail_fetch_overview_sequence, $IMAP_INC_DIR/mail.h, [
+      AC_DEFINE(HAVE_IMAP2004,1,[ ])
+    ])
+
+    dnl Check for c-client version 2001
     old_CPPFLAGS=$CPPFLAGS
     CPPFLAGS=-I$IMAP_INC_DIR
     AC_EGREP_CPP(this_is_true, [
