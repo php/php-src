@@ -15,6 +15,7 @@
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Pedro Melo <melo@ip.pt>                                     |
+   |          Sterling Hughes <sterling@php.net>                          |
    |                                                                      |
    | Based on code from: Shawn Cokus <Cokus@math.washington.edu>          |
    +----------------------------------------------------------------------+
@@ -38,31 +39,11 @@
 #define PHP_RAND_MAX RAND_MAX
 #endif
 
-/* Define rand Function wrapper */
-#ifdef HAVE_RANDOM
-#define php_rand() random()
-#else
-#ifdef HAVE_LRAND48
-#define php_rand() lrand48()
-#else
-#define php_rand() rand()
-#endif
-#endif
-
-/* Define srand Function wrapper */
-#ifdef HAVE_SRANDOM
-#define php_srand(seed) srandom((unsigned int)seed)
-#else
-#ifdef HAVE_SRAND48
-#define php_srand(seed) srand48((long)seed)
-#else
-#define php_srand(seed) srand((unsigned int)seed)
-#endif
-#endif
-
 /* MT Rand */
-#define PHP_MT_RAND_MAX ((long)(0x7FFFFFFF)) /* (1<<31) - 1 */ 
+#define PHP_MT_RAND_MAX ((long) (0x7FFFFFFF)) /* (1<<31) - 1 */ 
 
+PHPAPI void php_srand(long seed TSRMLS_DC);
+PHPAPI long php_rand(TSRMLS_D);
 PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC);
 PHPAPI php_uint32 php_mt_rand(TSRMLS_D);
 

@@ -25,7 +25,10 @@
 #include <stdlib.h>
 
 #ifdef PHP_WIN32
-#include <windows.h>
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include <windows.h>
 #endif
 
 #include "php.h"
@@ -34,6 +37,52 @@
 #include "php_lcg.h"
 
 #include "basic_functions.h"
+
+
+/* SYSTEM RAND FUNCTIONS */
+
+/* {{{ php_srand
+ */
+PHPAPI void php_srand(long seed TSRMLS_DC)
+{
+#ifdef ZTS
+	BG(rand_seed) = (unsigned int) seed;
+#else
+# if defined(HAVE_SRANDOM)
+	srandom((unsigned int) seed);
+# elif defined(HAVE_SRAND48)
+	srand48(seed);
+# else
+	srand((unsigned int) seed);
+# endif
+#endif
+}
+/* }}} */
+
+/* {{{ php_rand
+ */
+PHPAPI long php_rand(TSRMLS_D)
+{
+	long ret;
+
+#ifdef ZTS
+	ret = php_rand_r(&BG(rand_seed));
+#else
+# if defined(HAVE_RANDOM)
+	ret = random();
+# elif defined(HAVE_LRAND48)
+	ret = lrand48();
+# else
+	ret = rand();
+# endif
+#endif
+
+	return ret;
+}
+/* }}} */
+
+
+/* MT RAND FUNCTIONS */
 
 /*
    This is the ``Mersenne Twister'' random number generator MT19937, which
@@ -88,8 +137,6 @@
 
    Melo: we should put some ifdefs here to catch those alphas...
 */
-
-
 #define N             MT_N                 /* length of state vector */
 #define M             (397)                /* a period parameter */
 #define K             (0x9908B0DFU)        /* a magic constant */
@@ -157,7 +204,9 @@ PHPAPI void php_mt_srand(php_uint32 seed TSRMLS_DC)
 }
 /* }}} */
 
-static php_uint32 reloadMT(TSRMLS_D)
+/* {{{ php_mt_reload
+ */
+static php_uint32 php_mt_reload(TSRMLS_D)
 {
 	register php_uint32 *p0 = BG(state), *p2 = BG(state) + 2, *pM = BG(state) + M, s0, s1;
 	register int    j;
@@ -180,14 +229,16 @@ static php_uint32 reloadMT(TSRMLS_D)
 
 	return s1 ^ (s1 >> 18);
 }
+/* }}} */
 
-
+/* {{{ php_mt_rand
+ */
 PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 {
 	php_uint32 y;
 
 	if (--BG(left) < 0)
-		return reloadMT(TSRMLS_C);
+		return php_mt_reload(TSRMLS_C);
 
 	y  = *BG(next)++;
 	y ^= (y >> 11);
@@ -196,6 +247,7 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 
 	return y ^ (y >> 18);
 }
+/* }}} */
 
 #ifdef PHP_WIN32
 #define GENERATE_SEED() (time(0) * GetCurrentProcessId() * 1000000 * php_combined_lcg(TSRMLS_C))
@@ -215,7 +267,7 @@ PHP_FUNCTION(srand)
 	if (ZEND_NUM_ARGS() == 0)
 		seed = GENERATE_SEED();
 
-	php_srand(seed);
+	php_srand(seed TSRMLS_CC);
 }
 /* }}} */
 
@@ -276,7 +328,8 @@ PHP_FUNCTION(rand)
 	if (argc != 0 && zend_parse_parameters(argc TSRMLS_CC, "ll", &min, &max) == FAILURE)
 		return;
 
-	number = php_rand();
+	number = php_rand(TSRMLS_C);
+
 	if (argc == 2) {
 		RAND_RANGE(number, min, max, PHP_RAND_MAX);
 	}
