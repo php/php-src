@@ -1,3 +1,137 @@
+2000-06-12  David Hedbor  <david@hedbor.org>
+
+    * sapi/roxen/config.m4: Removed obsolete, commented line
+
+2000-06-12  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: Fix verified, update news
+
+    * ext/mssql/php_mssql.c:
+    - Fixed an initialization problem in the MS-SQL problem that could cause
+      a crash in mssql_query() 
+
+    * ext/standard/dl.c:
+    Fix a bug in extension_dir, where PG(extension_dir) is not yet initialized by the time php_dl() is called
+
+2000-06-12  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/zlib/zlib.dsp:
+    making zlib module compile on win32 with new directory structure
+
+    * ext/oracle/oracle.dsp:
+    making oracle module compile on win32 with new directory structure
+
+    * ext/oci8/oci8.dsp:
+    making oci8 module compile on win32 with new directory structure
+
+    * ext/ldap/ldap.dsp:
+    making ldap module compile on win32 with new directory structure
+
+    * ext/java/java.dsp:
+    making java module compile on win32 with new directory structure
+
+    * ext/imap/imap.dsp:
+    making imap module compile on win32 with new directory structure
+
+    * ext/ftp/ftp.dsp:
+    making ftp module compile on win32 with new directory structure
+
+    * ext/exif/exif.dsp:
+    making exif module compile on win32 with new directory structure
+
+    * ext/calendar/calendar.dsp:
+    making calendar module compile on win32 with new directory structure
+
+2000-06-12  Zeev Suraski  <zeev@php.net>
+
+    * NEWS: news update
+
+    * main/fopen-wrappers.c
+      main/main.c
+      ext/standard/dl.c:
+    Avoid using E_CORE_* errorlevels in any place which is not in the global startup sequence
+
+2000-06-12  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/mssql/mssql.dsp:
+    making MSSQL module compile with new directory structure
+
+2000-06-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/pcrelib/testdata/testinput3
+      ext/pcre/pcrelib/testdata/testoutput1
+      ext/pcre/pcrelib/testdata/testoutput2
+      ext/pcre/pcrelib/testdata/testoutput3
+      ext/pcre/pcrelib/testdata/testoutput4
+      ext/pcre/pcrelib/ChangeLog
+      ext/pcre/pcrelib/LICENCE
+      ext/pcre/pcrelib/doc/pcre.3
+      ext/pcre/pcrelib/doc/pcre.html
+      ext/pcre/pcrelib/doc/pcre.txt
+      ext/pcre/pcrelib/doc/pcretest.txt
+      ext/pcre/pcrelib/internal.h
+      ext/pcre/pcrelib/pcre.c
+      ext/pcre/pcrelib/pcretest.c
+      ext/pcre/php_pcre.c:
+    - Upgraded PCRE to version 3.2 and fixed a bug when anchored pattern
+      matched an empty string. 
+
+    * ext/gd/gdttf.c: Document change.
+
+2000-06-12  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/exec.c
+      ext/standard/file.c
+      main/php.h
+      main/php_virtual_cwd.c:
+    - On UNIX support popen() which works with current working directory
+    - when in VIRTUAL_DIR mode.
+
+2000-06-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/gd/gdttf.c: Make gdttf.c work with virtual dir support.
+
+2000-06-12  Andi Gutmans  <andi@php.net>
+
+    * main/php.h
+      main/php_virtual_cwd.c
+      main/php_virtual_cwd.h:
+    - Start of popen() fix for UNIX. Still unclear what we'll do on Windows.
+
+2000-06-12  Zeev Suraski  <zeev@php.net>
+
+    * main/main.c
+      NEWS: Killed <?php_track_vars?>
+
+2000-06-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/string.c: (PHP str_pad) Terminate string with a null.
+
+2000-06-12  Zeev Suraski  <zeev@php.net>
+
+    * configure.in: Lets not offend anyone :)
+
+2000-06-12  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/math.c: Fixed a proto.
+
+    * ext/standard/filestat.c: Fixed protos.
+
+2000-06-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * main/reentrancy.c: (php_readdir_r) Revert that bad patch.
+
+2000-06-12  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/hyperwave/hw.c: Fixed some protos.
+
+2000-06-12  Andrei Zmievski  <andrei@ispi.net>
+
+    * main/.cvsignore: Quiet CVS.
+
+    * main/reentrancy.c:
+    (php_readdir_r) Last argument to readdir_r was missing.
+
 2000-06-11  Rasmus Lerdorf  <rasmus@php.net>
 
     * build/rules.mk
