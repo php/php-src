@@ -462,8 +462,8 @@ PHPAPI int php_url_decode(char *str, int len)
 		if (*data == '+') {
 			*dest = ' ';
 		}
-		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) 
-		{
+		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) 
+				 && isxdigit((int) *(data + 2))) {
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
@@ -560,8 +560,8 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 	char *data = str;
 
 	while (len--) {
-		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) && isxdigit((int) *(data + 2))) 
-		{
+		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1)) 
+			&& isxdigit((int) *(data + 2))) {
 #ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
 #else
