@@ -1385,7 +1385,7 @@ PHP_FUNCTION(ora_getcolumn)
  	type = column->dbtype; 
 
 	if (column->col_retcode == 1405) {
-		RETURN_NULL;
+		RETURN_NULL();
 	}
 
 	if (column->col_retcode != 0 && column->col_retcode != 1406) {
