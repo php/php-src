@@ -1,0 +1,17 @@
+!!Caution: DO NOT ADD/CHANGE MBSTRING CODE!!
+
+New mbstring is under development, anyone who would like
+add new feature/change behavior should access to development
+source.
+
+http://cvs.sourceforge.jp/cgi-bin/viewcvs.cgi/php-i18n/
+
+All changes made after 2002/5/19 are subject to be
+removed.
+
+You are warned in php-dev and php-cvs lists many times
+already. If you are curious, search archive for details.
+
+Thank you.
+
+
