@@ -1382,10 +1382,15 @@ AC_DEFUN(PHP_SETUP_ICONV, [
       PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
         found_iconv=yes
         PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
-        AC_DEFINE(HAVE_ICONV, 1, [ ])
         AC_DEFINE(HAVE_LIBICONV, 1, [ ])
       ], [
-        found_iconv=no
+        PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
+          found_iconv=yes
+          PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/lib, $1)
+          AC_DEFINE(HAVE_ICONV, 1, [ ])
+        ], [
+          found_iconv=no
+        ])
       ], [
         -L$ICONV_DIR/lib
       ])
