@@ -5,7 +5,8 @@ PHP                                                                        NEWS
   (Paul Hudson, Derick)
 - Fixed bug #29678 (opendir() with ftp:// wrapper segfaults if path does not
   have trailing slash). (Ilia)
-- Fixed bug #29656 (segfault on result and statement properties) (Georg)
+- Fixed bug #29656 (segfault on result and statement properties). (Georg)
+- Fixed bug #29447 (Reflection API issues). (Marcus)
 
 12 Aug 2004, PHP 5.0.1
 - Changed destructor mechanism so that destructors are called prior to request
