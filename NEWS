@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 ?? ??? 2004, PHP 5 RC1
 - Respect property visibility in foreach. (Marcus)
 - Completely overhauled SimpleXML extension. (Marcus, Rob, Sterling)
+- Added new Interbase functions: (Ard)
+  . ibase_service_attach() and ibase_service_detach().
+  . ibase_backup() and ibase_restore().
+  . ibase_maintain_db(), ibase_db_info() and ibase_server_info().
 - Added context option "http"/"request_fulluri" to send entire URI in request.
   Required format for some proxies. (Sara)
 - Added optional third parameter 'strict' to array_keys(). (Andrey)
@@ -14,10 +18,6 @@ PHP                                                                        NEWS
   (Derick)
 - Fixed problems with longlong values in mysqli. (Georg)
 - Fixed class name case preserving of user defined classes. (Marcus)
-- Added Interbase functions: (Ard)
-  . ibase_service_attach() and ibase_service_detach().
-  . ibase_backup() and ibase_restore().
-  . ibase_maintain_db(), ibase_db_info() and ibase_server_info().
 - Fixed bug #27103 (preg_split('//u') incorrectly splits UTF-8 strings into
   octets). (Moriyoshi)
 - Fixed bug #27042 (SPL: SeekableIterator seek() broken). (Marcus)
