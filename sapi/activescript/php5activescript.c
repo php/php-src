@@ -127,7 +127,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		case DLL_PROCESS_ATTACH:
 			module_handle = hinstDLL;
 
-			tsrm_startup(128, 1, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
+			tsrm_startup(128, 32, TSRM_ERROR_LEVEL_CORE, "C:\\TSRM.log");
 
 			sapi_startup(&activescript_sapi_module);
 			if (activescript_sapi_module.startup) {
@@ -137,12 +137,14 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		case DLL_THREAD_ATTACH:
 			break;
 		case DLL_THREAD_DETACH:
+			//OutputDebugString("THREAD_DETACH\n");
 			ts_free_thread();
 			break;
 		case DLL_PROCESS_DETACH:
 			if (activescript_sapi_module.shutdown) {
 				activescript_sapi_module.shutdown(&sapi_module);
 			}
+			//OutputDebugString("PROCESS_DETACH\n");
 			tsrm_shutdown();
 			break;
 	}

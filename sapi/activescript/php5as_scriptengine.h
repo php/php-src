@@ -18,6 +18,7 @@
 /* $Id$ */
 
 #include <activscp.h>
+#include <objsafe.h>
 #include "zend.h"
 #include <setjmp.h>
 
@@ -106,6 +107,9 @@ class TPHPScriptingEngine:
 	public IActiveScript,
 	public IActiveScriptParse,
 	public IActiveScriptParseProcedure
+#if ACTIVEPHP_OBJECT_SAFETY
+	, public IObjectSafety
+#endif
 {
 public:
 	volatile LONG m_refcount;
@@ -227,6 +231,20 @@ public: /* IActiveScriptParseProcedure */
 		/* [in] */ ULONG ulStartingLineNumber,
 		/* [in] */ DWORD dwFlags,
 		/* [out] */ IDispatch **ppdisp);
+
+#if ACTIVEPHP_OBJECT_SAFETY
+public: /* IObjectSafety */
+	STDMETHODIMP GetInterfaceSafetyOptions(
+		/* [in]  */ REFIID	riid,						// Interface that we want options for
+		/* [out] */ DWORD	*pdwSupportedOptions,		// Options meaningful on this interface
+		/* [out] */ DWORD	*pdwEnabledOptions);		// current option values on this interface
+
+	STDMETHODIMP SetInterfaceSafetyOptions(
+		/* [in]  */ REFIID		riid,					// Interface to set options for
+		/* [in]  */ DWORD		dwOptionSetMask,		// Options to change
+		/* [in]  */ DWORD		dwEnabledOptions);		// New option values
+#endif
+	
 public:
 	TPHPScriptingEngine();
 	~TPHPScriptingEngine();
