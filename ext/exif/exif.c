@@ -107,7 +107,7 @@ function_entry exif_functions[] = {
 };
 /* }}} */
 
-#define EXIF_VERSION "1.3 $Id$"
+#define EXIF_VERSION "1.4 $Id$"
 
 /* {{{ PHP_MINFO_FUNCTION
  */
@@ -205,6 +205,7 @@ PHP_MINIT_FUNCTION(exif)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JP2",     IMAGE_FILETYPE_JP2,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPX",     IMAGE_FILETYPE_JPX,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JB2",     IMAGE_FILETYPE_JB2,     CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_SWC",     IMAGE_FILETYPE_SWC,     CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -260,8 +261,8 @@ static size_t php_strnlen(char* str, size_t maxlen) {
 static const char * EXIF_ERROR_EALLOC    = "Cannot allocate memory for all data";
 static const char * EXIF_ERROR_FILEEOF   = "Unexpected end of file reached";
 static const char * EXIF_ERROR_CORRUPT   = "File structure corrupted";
-static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes IFD boundary or end of file reached";
-static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocating of undefined file section";
+static const char * EXIF_ERROR_THUMBEOF  = "Thumbnail goes beyond IFD boundary or end of file reached";
+static const char * EXIF_ERROR_FSREALLOC = "Illegal reallocation of undefined file section";
 
 #define EXIF_ERRLOG_EALLOC     php_error(E_ERROR,   EXIF_ERROR_EALLOC);
 #define EXIF_ERRLOG_FILEEOF    php_error(E_WARNING, EXIF_ERROR_FILEEOF);

@@ -45,6 +45,7 @@ typedef enum
   IMAGE_FILETYPE_JPX,
   IMAGE_FILETYPE_JB2,
   IMAGE_FILETYPE_SWC
+/* WHEN EXTENDING: PLEASE ALSO REGISTER IN ext/exif/exif.c:PHP_MINIT_FUNCTION(exif) */
 } image_filetype;
 /* }}} */
 
