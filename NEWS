@@ -1,7 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
-- Fixed several crash bugs in the mcrypt extension (Derick)
+- Fixed several crash bugs in the mcrypt extension. (Derick)
 - Added concepts to IRCG: bailout-on-trivial issue, write output to
   files, fetch a ressource upon connection end. (Sascha)
 - Fixed POST-related bugs in thttpd, added QUERY_STRING, HTTP_HOST,
