@@ -350,7 +350,9 @@ TSRM_API void tsrm_mutex_free( MUTEX_T mutexp )
 /* Lock a mutex */
 TSRM_API int tsrm_mutex_lock( MUTEX_T mutexp )
 {
-	//tsrm_debug("Mutex locked thread: %ld\n",tsrm_thread_id());
+#if 0
+	tsrm_debug("Mutex locked thread: %ld\n",tsrm_thread_id());
+#endif
 #ifdef WIN32
     return WaitForSingleObject(mutexp,1000);
 #elif defined(PTHREADS)
@@ -366,7 +368,9 @@ TSRM_API int tsrm_mutex_lock( MUTEX_T mutexp )
 /* Unlock a mutex */
 TSRM_API int tsrm_mutex_unlock( MUTEX_T mutexp )
 {
-	//tsrm_debug("Mutex unlocked thread: %ld\n",tsrm_thread_id());
+#if 0
+	tsrm_debug("Mutex unlocked thread: %ld\n",tsrm_thread_id());
+#endif
 #ifdef WIN32
     return ReleaseMutex(mutexp);
 #elif defined(PTHREADS)
