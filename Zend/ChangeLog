@@ -1,3 +1,15 @@
+2002-09-17  Zeev Suraski  <zeev@zend.com>
+
+    * zend_hash.c
+      zend_hash.h: Add tracking for hashtable allocation
+
+    * zend.c: ZE2 fix
+
+    * zend_compile.c: whitespace
+
+    * zend.c
+      zend.h: MFZE1 - threading fix
+
 2002-09-16  Andrei Zmievski  <andrei@php.net>
 
     * zend_API.h
