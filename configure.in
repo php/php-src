@@ -674,7 +674,7 @@ dnl test -n "$GCC" && CFLAGS="$CFLAGS -fpic"
 dnl add -fPIC option on Solaris if we are building dynamic extensions
 dnl PHP_SOLARIS_PIC_WEIRDNESS
 
-EXTRA_LIBS="$EXTRA_LIBS $LIBS"
+EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
 LIBS=""
 LDFLAGS=""
 if test "$PHP_THREAD_SAFETY" = "yes"; then
