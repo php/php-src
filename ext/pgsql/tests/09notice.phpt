@@ -23,6 +23,6 @@ echo "pg_last_notice() is Ok\n";
 
 ?>
 --EXPECTF--
-Notice: pg_query(): NOTICE:  BEGIN: already a transaction in progress in %s on line %d
-NOTICE:  BEGIN: already a transaction in progress
+Notice: pg_query(): %s:  BEGIN: already a transaction in progress in %s on line %d
+%s:  BEGIN: already a transaction in progress
 pg_last_notice() is Ok
