@@ -10,6 +10,22 @@ require_once('skipif.inc');
 require_once('connection.inc');
 require_once('prepare.inc');
 
+require_once($PDO_TESTS . 'pdo.inc');
+
+set_sql('create1', 'CREATE TABLE classtypes(id int PRIMARY KEY, name VARCHAR(20) UNIQUE)');
+set_sql('insert1', 'INSERT INTO classtypes VALUES(0, \'stdClass\')'); 
+set_sql('insert2', 'INSERT INTO classtypes VALUES(1, \'TestBase\')'); 
+set_sql('insert3', 'INSERT INTO classtypes VALUES(2, \'TestDerived\')'); 
+set_sql('selectC', 'SELECT COUNT(*) FROM classtypes'); 
+set_sql('select0', 'SELECT id, name FROM classtypes ORDER by id'); 
+set_sql('create2', 'CREATE TABLE test(id int PRIMARY KEY, classtype int, val VARCHAR(255))');
+set_sql('insert4', 'INSERT INTO test VALUES(:id, :classtype, :val)');
+set_sql('select1', 'SELECT id FROM classtypes WHERE name=:cname');
+set_sql('select2', 'SELECT test.val FROM test');
+set_sql('select3', 'SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id');
+set_sql('select4', 'SELECT COUNT(*) FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
+set_sql('select5', 'SELECT classtypes.name AS name, test.val AS val FROM test LEFT JOIN classtypes ON test.classtype=classtypes.id WHERE (classtypes.id IS NULL OR classtypes.id > 0)');
+
 require_once($PDO_TESTS . 'pdo_018.inc');
 
 ?>
@@ -60,7 +76,7 @@ array(4) {
 ===FAILURE===
 Exception:SQLSTATE[HY000]: General error: cannot unserialize class
 ===COUNT===
-int(3)
+string(1) "3"
 ===DATABASE===
 array(3) {
   [0]=>
