@@ -1593,6 +1593,11 @@ PHP_FUNCTION(iconv_strpos)
 		RETURN_FALSE;
 	}
 
+	if (offset < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Offset not contained in string.");
+		RETURN_FALSE;
+	}
+
 	err = _php_iconv_strpos(&retval, haystk, haystk_len, ndl, ndl_len,
 	                        offset, charset); 
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset TSRMLS_CC);
