@@ -124,7 +124,7 @@ zend_module_entry php_mcve_module_entry = {
 #if ZEND_MODULE_API_NO >= 20010901
 	STANDARD_MODULE_HEADER,
 #endif
-	"MCVE",			/* module name */
+	"mcve",			/* module name */
 	php_mcve_functions,	/* struct of functions (see above) */
 	PHP_MINIT(mcve),	/* module initialization functions */
 	NULL,			/* module shutdown functions */
@@ -140,7 +140,9 @@ zend_module_entry php_mcve_module_entry = {
 /* }}} */
 
 /* declare the module for dynamic loading */
-ZEND_GET_MODULE(php_mcve)
+#ifdef COMPILE_DL_MCVE
+ZEND_GET_MODULE(mcve)
+#endif
 
 /* {{{ MCVE_CONN destructor */
 static void _free_mcve_conn(zend_rsrc_list_entry *rsrc)
