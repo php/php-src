@@ -295,9 +295,14 @@ MAINTENANCE:         Unknown
 STATUS:              Unknown
 SINCE:               4.0.4
 -------------------------------------------------------------------------------
-EXTENSION:           icap
-MAINTENANCE:         Unknown
-STATUS:              Obsolete
+extension:           icap
+maintenance:         unknown
+status:              obsolete
+-------------------------------------------------------------------------------
+EXTENSION:           iconv
+PRIMARY MAINTAINER:  Moriyoshi Koizumi <moriyoshi@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           imap
 PRIMARY MAINTAINER:  Chuck Hagenbuch <chuck@horde.org>
