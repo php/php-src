@@ -187,7 +187,11 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 
 			case VT_BOOL:
 				convert_to_boolean_ex(&pval_arg);
-				V_BOOL(var_arg) = (short)Z_LVAL_P(pval_arg);
+				if (Z_LVAL_P(pval_arg)) {
+					V_BOOL(var_arg) = VT_TRUE;
+				} else {
+					V_BOOL(var_arg) = VT_FALSE;
+				}
 				break;
 
 			case VT_ERROR:
@@ -281,7 +285,13 @@ static void pval_to_variant_ex(pval *pval_arg, VARIANT *var_arg, int type, int c
 
 			case VT_BOOL|VT_BYREF:
 				convert_to_boolean(pval_arg);
-				V_BOOLREF(var_arg) = (short FAR*) &Z_LVAL_P(pval_arg);
+				/* emalloc or malloc ? */
+				V_BOOLREF(var_arg) = (short FAR*) pemalloc(sizeof(short), 1);
+				if (Z_LVAL_P(pval_arg)) {
+					*V_BOOLREF(var_arg) = VT_TRUE;
+				} else {
+					*V_BOOLREF(var_arg) = VT_TRUE;
+				}
 				break;
 
 			case VT_ERROR|VT_BYREF:
@@ -587,9 +597,17 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		case VT_BOOL:
 			if (V_ISBYREF(var_arg)) {
-				ZVAL_BOOL(pval_arg, *V_BOOLREF(var_arg));
+				if (*V_BOOLREF(var_arg)) {
+					ZVAL_BOOL(pval_arg, Z_TRUE);
+				} else {
+					ZVAL_BOOL(pval_arg, Z_FALSE);
+				}
 			} else {
-				ZVAL_BOOL(pval_arg, V_BOOL(var_arg));
+				if (V_BOOL(var_arg)) {
+					ZVAL_BOOL(pval_arg, Z_TRUE);
+				} else {
+					ZVAL_BOOL(pval_arg, Z_FALSE);
+				}
 			}
 			break;
 

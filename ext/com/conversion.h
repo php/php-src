@@ -1,6 +1,14 @@
 #ifndef CONVERSION_H
 #define CONVERSION_H
 
+/* isn't this defined somewhere else ? */
+
+#define Z_TRUE 1
+#define Z_FALSE 0
+
+#define VT_TRUE -1
+#define VT_FALSE 0
+
 BEGIN_EXTERN_C()
 
 PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage TSRMLS_DC);
