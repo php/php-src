@@ -28,7 +28,9 @@ if ('@include_path@' != '@'.'include_path'.'@') {
     ini_set('include_path', '@include_path@');
 }
 ini_set('allow_url_fopen', true);
-set_time_limit(0);
+if (!ini_get('safe_mode')) {
+    set_time_limit(0);
+}
 ob_implicit_flush(true);
 ini_set('track_errors', true);
 ini_set('html_errors', false);
