@@ -241,9 +241,13 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 			}
 		}
 
+#if 0
+		/* if you prepare and then execute passing an array of params keyed by names,
+		 * then this will trigger, and we don't want that */
 		if (param->paramno == -1) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Did not found column name '%s' in the defined columns; it will not be bound", param->name);
 		}
+#endif
 	}
 
 	if (param->name) {
@@ -1012,10 +1016,19 @@ static HashTable *dbstmt_get_properties(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *dbstmt_method_get(zval *object, char *method_name, int method_len TSRMLS_DC)
+static union _zend_function *dbstmt_method_get(
+#if PHP_API_VERSION >= 20041225
+	zval **object_pp,
+#else
+	zval *object,
+#endif
+   	char *method_name, int method_len TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
+#if PHP_API_VERSION >= 20041225
+	zval *object = *object_pp;
+#endif
 
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
@@ -1351,10 +1364,19 @@ static HashTable *row_get_properties(zval *object TSRMLS_DC)
 	return ht;
 }
 
-static union _zend_function *row_method_get(zval *object, char *method_name, int method_len TSRMLS_DC)
+static union _zend_function *row_method_get(
+#if PHP_API_VERSION >= 20041225
+	zval **object_pp,
+#else
+	zval *object,
+#endif
+	char *method_name, int method_len TSRMLS_DC)
 {
 	zend_function *fbc;
 	char *lc_method_name;
+#if PHP_API_VERSION >= 20041225
+	zval *object = *object_pp;
+#endif
 
 	lc_method_name = emalloc(method_len + 1);
 	zend_str_tolower_copy(lc_method_name, method_name, method_len);
