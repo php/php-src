@@ -719,9 +719,6 @@ ZEND_FUNCTION(get_class_methods)
 	zval **class;
 	zval *method_name;
 	zend_class_entry *ce = NULL, **pce;
-	char *string_key;
-	ulong num_key;
-	int key_type;
 	HashPosition pos;
 	zend_function *mptr;
 
