@@ -51,6 +51,7 @@
 #define UDM_FIELD_CATEGORY	13
 #define UDM_FIELD_LANG		14
 #define UDM_FIELD_CHARSET	15
+#define UDM_FIELD_SITEID	16
 
 /* udm_set_agent_param constants */
 #define UDM_PARAM_PAGE_SIZE		1
@@ -79,6 +80,8 @@
 #define UDM_PARAM_REMOTE_ADDR		24
 #define UDM_PARAM_QUERY			25
 #define UDM_PARAM_STORED		26
+#define UDM_PARAM_GROUPBYSITE		27
+#define UDM_PARAM_SITEID		28
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -86,6 +89,7 @@
 #define UDM_LIMIT_LANG		3
 #define UDM_LIMIT_CAT		4
 #define UDM_LIMIT_DATE		5
+#define UDM_LIMIT_TYPE		6
 
 /* word match type */
 #define UDM_MATCH_WORD		0
@@ -112,6 +116,10 @@
 /* crosswords modes */
 #define UDM_CROSS_WORDS_ENABLED	 1
 #define UDM_CROSS_WORDS_DISABLED 0
+
+/* General modes */
+#define UDM_ENABLED	 	1
+#define UDM_DISABLED 		0
 
 /* udm_get_res_param constants */
 #define UDM_PARAM_NUM_ROWS	256
@@ -251,6 +259,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_FIELD_CATEGORY",	UDM_FIELD_CATEGORY,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_LANG",	UDM_FIELD_LANG,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_FIELD_CHARSET",	UDM_FIELD_CHARSET,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_FIELD_SITEID",	UDM_FIELD_SITEID,CONST_CS | CONST_PERSISTENT);
 
 	/* udm_set_agent_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_PAGE_SIZE",	UDM_PARAM_PAGE_SIZE,CONST_CS | CONST_PERSISTENT);
@@ -295,10 +304,12 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SYNONYM",	UDM_PARAM_SYNONYM,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_SEARCHD",	UDM_PARAM_SEARCHD,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_STORED",	UDM_PARAM_STORED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_GROUPBYSITE",	UDM_PARAM_GROUPBYSITE,CONST_CS | CONST_PERSISTENT);
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_QSTRING",	UDM_PARAM_QSTRING,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_REMOTE_ADDR",	UDM_PARAM_REMOTE_ADDR,CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("UDM_PARAM_QUERY",	UDM_PARAM_QUERY,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PARAM_SITEID",	UDM_PARAM_SITEID,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -306,6 +317,7 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_TAG",		UDM_LIMIT_TAG,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_LANG",	UDM_LIMIT_LANG,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_DATE",	UDM_LIMIT_DATE,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_LIMIT_TYPE",	UDM_LIMIT_TYPE,CONST_CS | CONST_PERSISTENT);	
 	
 	/* udm_get_res_param constants */
 	REGISTER_LONG_CONSTANT("UDM_PARAM_FOUND",	UDM_PARAM_FOUND,CONST_CS | CONST_PERSISTENT);
@@ -325,33 +337,37 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	REGISTER_LONG_CONSTANT("UDM_MODE_PHRASE",	UDM_MODE_PHRASE,CONST_CS | CONST_PERSISTENT);
 
 	/* search cache params */
-	REGISTER_LONG_CONSTANT("UDM_CACHE_ENABLED",	UDM_CACHE_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_CACHE_DISABLED",	UDM_CACHE_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CACHE_ENABLED",	UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CACHE_DISABLED",	UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
 	/* track mode params */
-	REGISTER_LONG_CONSTANT("UDM_TRACK_ENABLED",	UDM_TRACK_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_TRACK_DISABLED",	UDM_TRACK_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_TRACK_ENABLED",	UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_TRACK_DISABLED",	UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
 	/* phrase mode params */
-	REGISTER_LONG_CONSTANT("UDM_PHRASE_ENABLED",	UDM_PHRASE_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PHRASE_DISABLED",	UDM_PHRASE_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PHRASE_ENABLED",	UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PHRASE_DISABLED",	UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
+
+	/* general params */
+	REGISTER_LONG_CONSTANT("UDM_ENABLED",		UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_DISABLED",		UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
 	/* crosswords mode params */
-	REGISTER_LONG_CONSTANT("UDM_CROSS_WORDS_ENABLED",UDM_CROSS_WORDS_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_CROSSWORDS_ENABLED",UDM_CROSS_WORDS_ENABLED,CONST_CS | CONST_PERSISTENT);	
-	REGISTER_LONG_CONSTANT("UDM_CROSS_WORDS_DISABLED",UDM_CROSS_WORDS_DISABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_CROSSWORDS_DISABLED",UDM_CROSS_WORDS_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CROSS_WORDS_ENABLED",UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CROSSWORDS_ENABLED",UDM_ENABLED,CONST_CS | CONST_PERSISTENT);	
+	REGISTER_LONG_CONSTANT("UDM_CROSS_WORDS_DISABLED",UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_CROSSWORDS_DISABLED",UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
 	/* prefixes mode params */
-	REGISTER_LONG_CONSTANT("UDM_PREFIXES_ENABLED",	UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PREFIX_ENABLED",	UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_ENABLED",UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_ENABLED",UDM_PREFIXES_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIXES_ENABLED",	UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIX_ENABLED",	UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_ENABLED",UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_ENABLED",UDM_ENABLED,CONST_CS | CONST_PERSISTENT);
 	
-	REGISTER_LONG_CONSTANT("UDM_PREFIXES_DISABLED",	UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_PREFIX_DISABLED",	UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_DISABLED",UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_DISABLED",UDM_PREFIXES_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIXES_DISABLED",	UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_PREFIX_DISABLED",	UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIXES_DISABLED",UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("UDM_ISPELL_PREFIX_DISABLED",UDM_DISABLED,CONST_CS | CONST_PERSISTENT);
 	
 	/* ispell type params */
 	REGISTER_LONG_CONSTANT("UDM_ISPELL_TYPE_AFFIX",	UDM_ISPELL_TYPE_AFFIX,CONST_CS | CONST_PERSISTENT);
@@ -588,7 +604,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 						
 					case UDM_MODE_BOOL: 
 #if UDM_VERSION_ID >= 30204
-						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","all");
+						UdmVarListReplaceStr(&Agent->Conf->Vars,"m","bool");
 #else
 						Agent->search_mode=UDM_MODE_BOOL;
 #endif
@@ -662,9 +678,9 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			break;
 		case UDM_PARAM_CACHE_MODE: 
 			switch (atoi(val)){
-				case UDM_CACHE_ENABLED:
+				case UDM_ENABLED:
 #if UDM_VERSION_ID < 30200
-					Agent->cache_mode=UDM_CACHE_ENABLED;
+					Agent->cache_mode=UDM_ENABLED;
 #elif UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","yes");
 #else		
@@ -672,9 +688,9 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #endif
 					break;
 					
-				case UDM_CACHE_DISABLED:
+				case UDM_DISABLED:
 #if UDM_VERSION_ID < 30200								
-					Agent->cache_mode=UDM_CACHE_DISABLED;
+					Agent->cache_mode=UDM_DISABLED;
 #elif UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","no");
 #else										
@@ -684,7 +700,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 					
 				default:
 #if UDM_VERSION_ID < 30200												
-					Agent->cache_mode=UDM_CACHE_DISABLED;
+					Agent->cache_mode=UDM_DISABLED;
 #elif UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"Cache","no");
 #else									
@@ -699,7 +715,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 		case UDM_PARAM_TRACK_MODE: 
 			switch (atoi(val)){
-				case UDM_TRACK_ENABLED:
+				case UDM_ENABLED:
 #if UDM_VERSION_ID < 30200												
 					Agent->track_mode|=UDM_TRACK_QUERIES;
 #elif UDM_VERSION_ID >= 30204
@@ -709,7 +725,7 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 #endif
 					break;
 					
-				case UDM_TRACK_DISABLED:
+				case UDM_DISABLED:
 #if UDM_VERSION_ID < 30200						
 					Agent->track_mode &= ~(UDM_TRACK_QUERIES);    
 #elif UDM_VERSION_ID >= 30204
@@ -738,12 +754,12 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 		case UDM_PARAM_PHRASE_MODE: 
 #if UDM_VERSION_ID < 30200								
 			switch (atoi(val)){
-				case UDM_PHRASE_ENABLED:
-					Agent->Conf->use_phrases=UDM_PHRASE_ENABLED;
+				case UDM_ENABLED:
+					Agent->Conf->use_phrases=UDM_ENABLED;
 					break;
 					
-				case UDM_PHRASE_DISABLED:
-					Agent->Conf->use_phrases=UDM_PHRASE_DISABLED;
+				case UDM_DISABLED:
+					Agent->Conf->use_phrases=UDM_DISABLED;
 					break;
 					
 				default:
@@ -756,23 +772,23 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 
 		case UDM_PARAM_ISPELL_PREFIXES: 
 			switch (atoi(val)){
-				case UDM_PREFIXES_ENABLED:
+				case UDM_ENABLED:
 #if UDM_VERSION_ID < 30200								
 					Agent->Conf->ispell_mode |= UDM_ISPELL_USE_PREFIXES;
 #elif UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"IspellUsePrefixes","1");
 #else
-					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);					
+					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 1, UDM_VARSRC_GLOBAL);
 #endif								
 					break;
 					
-				case UDM_PREFIXES_DISABLED:
+				case UDM_DISABLED:
 #if UDM_VERSION_ID < 30200												
 					Agent->Conf->ispell_mode &= ~UDM_ISPELL_USE_PREFIXES;
 #elif UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"IspellUsePrefixes","0");
 #else
-					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);						
+					UdmAddIntVar(Agent->Conf->vars, "IspellUsePrefixes", 0, UDM_VARSRC_GLOBAL);
 #endif																	
 					break;
 
@@ -944,19 +960,19 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			
 		case UDM_PARAM_CROSS_WORDS: 
 			switch (atoi(val)){
-				case UDM_CROSS_WORDS_ENABLED:
+				case UDM_ENABLED:
 #if UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"CrossWords","yes");
 #else
-					Agent->Conf->use_crossword=UDM_CROSS_WORDS_ENABLED;
+					Agent->Conf->use_crossword=UDM_ENABLED;
 #endif
 					break;
 					
-				case UDM_CROSS_WORDS_DISABLED:
+				case UDM_DISABLED:
 #if UDM_VERSION_ID >= 30204
 					UdmVarListReplaceStr(&Agent->Conf->Vars,"CrossWords","no");
 #else
-					Agent->Conf->use_crossword=UDM_CROSS_WORDS_DISABLED;
+					Agent->Conf->use_crossword=UDM_DISABLED;
 #endif
 					break;
 					
@@ -980,7 +996,8 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			snprintf(Agent->Conf->vardir,sizeof(Agent->Conf->vardir)-1,"%s%s",val,UDMSLASHSTR);
 #endif			
 			break;
-			
+#endif			
+
 #if UDM_VERSION_ID >= 30204
 		case UDM_PARAM_QUERY:
 			UdmVarListReplaceStr(&Agent->Conf->Vars,"q",val);
@@ -992,8 +1009,35 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 
 			break;
 #endif
+			
+#if UDM_VERSION_ID >= 30207
+		case UDM_PARAM_GROUPBYSITE: 
+			switch (atoi(val)){
+				case UDM_ENABLED:
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"GroupBySite","yes");
+					
+					break;
+					
+				case UDM_DISABLED:
+					UdmVarListReplaceStr(&Agent->Conf->Vars,"GroupBySite","no");
+
+					break;
+					
+				default:
+					php_error(E_WARNING,"%s(): Unknown crosswords mode", get_active_function_name(TSRMLS_C));
+					RETURN_FALSE;
+					break;
+			}
+			
+			break;
+			
+		case UDM_PARAM_SITEID: 
+			UdmVarListReplaceStr(&Agent->Conf->Vars,"site",val);
+		
+			break;
 
 #endif
+
 		default:
 			php_error(E_WARNING,"%s(): Unknown agent session parameter", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
@@ -1234,6 +1278,12 @@ DLEXPORT PHP_FUNCTION(udm_add_search_limit)
 			UdmVarListAddStr(&Agent->Conf->Vars,"cat",val);
 #else
 			UdmAddCatLimit(Agent->Conf,val);
+#endif			
+			break;
+
+		case UDM_LIMIT_TYPE: 
+#if UDM_VERSION_ID >= 30207
+			UdmVarListAddStr(&Agent->Conf->Vars,"type",val);
 #endif			
 			break;
 			
@@ -1729,7 +1779,7 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				
 			case UDM_FIELD_MODIFIED:	
 #if UDM_VERSION_ID >= 30204
-				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Last-Modified",0));
+				RETURN_STRING((char *)UdmVarListFindStr(&(Res->Doc[row].Sections),"Last-Modified",""),1);
 #else
 				RETURN_LONG((Res->Doc[row].last_mod_time));
 #endif
@@ -1775,7 +1825,16 @@ DLEXPORT PHP_FUNCTION(udm_get_res_field)
 				RETURN_STRING((Res->Doc[row].charset)?(Res->Doc[row].charset):"",1);
 #endif
 				break;
+#endif			
+
+#if UDM_VERSION_ID >= 30207
+			case UDM_FIELD_SITEID:
+				RETURN_LONG(UdmVarListFindInt(&(Res->Doc[row].Sections),"Site_id",0));
+				
+				break;
 #endif
+
+
 				
 			default: 
 				php_error(E_WARNING,"%s(): Unknown mnoGoSearch field name", get_active_function_name(TSRMLS_C));
@@ -2064,10 +2123,15 @@ DLEXPORT PHP_FUNCTION(udm_cat_list)
 #if UDM_VERSION_ID >= 30204
 		{
 		    int i;
-		    for(i=0;i<C.ncategories;i++){			
-			snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
-			add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
-			add_next_index_string(return_value, buf, 1);
+		    if (C.ncategories) {
+			for(i=0;i<C.ncategories;i++){
+			    snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
+			    add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
+			    add_next_index_string(return_value, buf, 1);
+			}
+			free(C.Category);
+		    } else {
+			RETURN_FALSE;
 		    }
 		}
 #else
@@ -2133,10 +2197,15 @@ DLEXPORT PHP_FUNCTION(udm_cat_path)
 #if UDM_VERSION_ID >= 30204
 		{
 		    int i;
-		    for(i=0;i<C.ncategories;i++){			
-			snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
-			add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
-			add_next_index_string(return_value, buf, 1);
+		    if (C.ncategories) {
+			for(i=0;i<C.ncategories;i++){			
+			    snprintf(buf, UDMSTRSIZ, "%s%s",C.Category[i].link[0]?"@ ":"", C.Category[i].name);
+			    add_next_index_string(return_value, C.Category[i].link[0]?C.Category[i].link:C.Category[i].path, 1);
+			    add_next_index_string(return_value, buf, 1);
+			}
+			free(C.Category);
+		    } else {
+			RETURN_FALSE;
 		    }
 		}
 #else
@@ -2175,11 +2244,9 @@ DLEXPORT PHP_FUNCTION(udm_get_doc_count)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
-#if UDM_VERSION_ID >= 30207
+#if UDM_VERSION_ID >= 30204
 	if (!Agent->doccount) UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db);
 	RETURN_LONG(Agent->doccount);
-#elif UDM_VERSION_ID >= 30204
-	RETURN_LONG(UdmURLAction(Agent,NULL,UDM_URL_ACTION_DOCCOUNT,Agent->Conf->db));
 #else
 	RETURN_LONG(UdmGetDocCount(Agent));
 #endif
