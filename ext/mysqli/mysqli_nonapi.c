@@ -210,7 +210,7 @@ PHP_FUNCTION(mysqli_multi_query)
 }
 /* }}} */
 
-/* {{{ proto resource mysqli_query(object link, string query [,int resultmode]) */
+/* {{{ proto mixed mysqli_query(object link, string query [,int resultmode]) */
 PHP_FUNCTION(mysqli_query)
 {
 	MYSQL				*mysql;

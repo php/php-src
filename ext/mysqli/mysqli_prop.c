@@ -94,6 +94,15 @@ int link_connect_errno_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 }
 /* }}} */
 
+/* {{{ property link_server_version_read */
+int link_server_version_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
+    MYSQL *mysql = (MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
+	ALLOC_ZVAL(*retval);
+	ZVAL_LONG(*retval, mysql_get_server_version(mysql));
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ property link_connect_error_read */
 int link_connect_error_read(mysqli_object *obj, zval **retval TSRMLS_DC) {
 	ALLOC_ZVAL(*retval);
@@ -117,7 +126,7 @@ MYSQLI_MAP_PROPERTY_LONG(link_protocol_version_read, MYSQL, protocol_version);
 MYSQLI_MAP_PROPERTY_LONG(link_server_capabilities_read, MYSQL, server_capabilities);
 MYSQLI_MAP_PROPERTY_LONG(link_server_language_read, MYSQL, server_language);
 MYSQLI_MAP_PROPERTY_LONG(link_server_status_read, MYSQL, server_status);
-MYSQLI_MAP_PROPERTY_STRING(link_server_version_read, MYSQL, server_version);
+MYSQLI_MAP_PROPERTY_STRING(link_server_info_read, MYSQL, server_version);
 MYSQLI_MAP_PROPERTY_STRING(link_sqlstate_read, MYSQL, net.sqlstate);
 MYSQLI_MAP_PROPERTY_LONG(link_thread_id_read, MYSQL, thread_id);
 MYSQLI_MAP_PROPERTY_STRING(link_user_read, MYSQL, user);
@@ -191,7 +200,8 @@ mysqli_property_entry mysqli_link_property_entries[] = {
 	{"insert_id", link_insert_id_read, NULL},
 	{"server_capabilities", link_server_capabilities_read, NULL},
 	{"server_status", link_server_status_read, NULL},
-	{"server_version", link_server_version_read, NULL},
+	{"server_info", link_server_info_read, NULL},
+    {"server_version", link_server_version_read, NULL},
 	{"sqlstate", link_sqlstate_read, NULL},
 	{"port", link_port_read, NULL},
 	{"protocol_version", link_protocol_version_read, NULL},
