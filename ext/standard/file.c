@@ -1917,6 +1917,7 @@ PHP_FUNCTION(rename)
 			struct stat sb;
 			if (php_copy_file(old_name, new_name TSRMLS_CC) == SUCCESS) {
 				if (VCWD_STAT(old_name, &sb) == 0) {
+#if !defined(TSRM_WIN32) && !defined(NETWARE)
 					if (VCWD_CHMOD(new_name, sb.st_mode)) {
 						if (errno == EPERM) {
 							php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
@@ -1935,6 +1936,7 @@ PHP_FUNCTION(rename)
 						php_error_docref2(NULL TSRMLS_CC, old_name, new_name, E_WARNING, "%s", strerror(errno));
 						RETURN_FALSE;
 					}
+#endif
 					VCWD_UNLINK(old_name);
 					RETURN_TRUE;
 				}
