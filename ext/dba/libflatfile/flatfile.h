@@ -23,14 +23,14 @@
 
 typedef struct {
 	char *dptr;
-	int dsize;
+	size_t dsize;
 } datum;
 
 typedef struct {
 	char *lockfn;
 	int lockfd;
 	php_stream *fp;
-	long CurrentFlatFilePos;
+	size_t CurrentFlatFilePos;
 	datum nextkey;
 } flatfile;
 
