@@ -213,7 +213,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
 	if (info->path) efree(info->path);
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
-		flock(info->lock.fd, LOCK_UN);
+		php_flock(info->lock.fd, LOCK_UN);
 		close(info->lock.fd);
 		info->lock.fd = 0;
 	}
@@ -473,7 +473,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			FREENOW;
 			RETURN_FALSE;
 		}
-		if (flock(info->lock.fd, lock_mode)) {
+		if (php_flock(info->lock.fd, lock_mode)) {
 			error = "Unable to establish lock"; /* force failure exit */
 		}
 	}
