@@ -231,6 +231,14 @@ ZEND_API extern char *undefined_variable_string;
 #define STR_FREE(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree(ptr); }
 #define STR_FREE_REL(ptr) if (ptr && ptr!=empty_string && ptr!=undefined_variable_string) { efree_rel(ptr); }
 
+#define STR_REALLOC(ptr, size)										\
+	if (ptr!=empty_string && ptr!=undefined_variable_string) {		\
+		ptr = (char *) erealloc(ptr, size);							\
+	} else {														\
+		ptr = (char *) emalloc(size);								\
+		memset(ptr, 0, size);										\
+	}
+
 /* output support */
 #define ZEND_WRITE(str, str_len)		zend_write((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))

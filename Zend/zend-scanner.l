@@ -409,7 +409,7 @@ static inline int prepare_string_for_scanning(zval *str CLS_DC)
 {
 #ifndef ZTS
 	/* enforce two trailing NULLs for flex... */
-	str->value.str.val = (char *) erealloc(str->value.str.val,str->value.str.len+2);
+	STR_REALLOC(str->value.str.val, str->value.str.len+2);
 
 	str->value.str.val[str->value.str.len+1]=0;
 

@@ -1251,9 +1251,9 @@ void do_switch_cond(znode *cond CLS_DC)
 	switch_entry.control_var = -1;
 	zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
 
-	if (opline->result.op_type == IS_VAR) {
+/*	if (opline->result.op_type == IS_VAR) {
 		opline->result.u.EA.type |= EXT_TYPE_UNUSED;
-	}
+	}*/
 
 	do_begin_loop(CLS_C);
 
