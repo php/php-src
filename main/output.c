@@ -367,6 +367,42 @@ static void php_ob_init(uint initial_size, uint block_size, zval *output_handler
 }
 /* }}} */
 
+/* {{{ php_ob_list_each
+ */
+
+static int php_ob_list_each(php_ob_buffer *ob_buffer, zval *ob_handler_array) 
+{
+	if (!strcmp(ob_buffer->handler_name, "zlib output compression") && ob_buffer->internal_output_handler) {
+		add_next_index_string(ob_handler_array, "ob_gzhandler", 1);
+	} else {
+		add_next_index_string(ob_handler_array, ob_buffer->handler_name, 1);
+	}
+	return 0;
+}
+/* }}} */
+
+/* {{{ proto array ob_list_handlers()
+   List all output_buffers in an array */
+PHP_FUNCTION(ob_list_handlers)
+{
+	if (ZEND_NUM_ARGS()!=0) {
+		WRONG_PARAM_COUNT;
+		return;
+	}
+
+	if (array_init(return_value) == FAILURE) {
+		php_error(E_ERROR, "%s(): Unable to initialize array", get_active_function_name(TSRMLS_C));
+		return;
+	}
+	if (OG(ob_nesting_level)) {
+		if (OG(ob_nesting_level)>1) {
+			zend_stack_apply_with_argument(&OG(ob_buffers), ZEND_STACK_APPLY_BOTTOMUP, (int (*)(void *element, void *)) php_ob_list_each, return_value);
+		}
+		php_ob_list_each(&OG(active_ob_buffer), return_value);
+	}
+}
+/* }}} */
+
 /* {{{ php_ob_append
  */
 static void php_ob_append(const char *text, uint text_length TSRMLS_DC)

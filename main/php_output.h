@@ -50,6 +50,7 @@ PHP_FUNCTION(ob_get_length);
 PHP_FUNCTION(ob_get_level);
 PHP_FUNCTION(ob_get_status);
 PHP_FUNCTION(ob_implicit_flush);
+PHP_FUNCTION(ob_list_handlers);
 
 typedef struct _php_ob_buffer {
 	char *buffer;
