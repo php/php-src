@@ -22,4 +22,5 @@ print_r($t);
 --EXPECT--
 a Object
 (
+    [x] => 
 )
