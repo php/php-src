@@ -66,6 +66,9 @@
  * 
  * - class ArrayObject implements IteratorAggregate
  * - class ArrayIterator implements Iterator
+ * 
+ * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
+ * iteration (e.g. ArrayObject instance used inside foreach). 
  *
  * 5) Counting
  *
@@ -88,9 +91,13 @@
  * - class OverflowException        extends RuntimeException
  * - class RangeException           extends RuntimeException
  * - class UnderflowException       extends RuntimeException
- * 
- * As the above suggest an ArrayObject creates an ArrayIterator when it comes to
- * iteration (e.g. ArrayObject instance used inside foreach). 
+ *
+ * 7) Observer
+ *
+ * SPL suggests a standard way of implementing the observer pattern.
+ *
+ * - interface Observer
+ * - interface Subject
  * 
  * A nice article about SPL can be found 
  * <a href="http://www.sitepoint.com/article/php5-standard-library/1">here</a>.
@@ -655,6 +662,43 @@ class SimpleXMLIterator extends SimpleXMLElement implements RecursiveIterator
 	/** @return a SimpleXMLIterator for the current node.
 	 */
 	function getChildren();	
+}
+
+/** @ingroup SPL
+ * @brief observer of the observer pattern
+ *
+ * For a detailed explanation see Observer pattern in
+ * <em>
+ * Gamma, Helm, Johnson, Vlissides<br />
+ * Design Patterns
+ * </em>
+ */
+interface Observer
+{
+	/** Called from the subject (i.e. when it's value has changed).
+	 * @param $subject the callee
+	 */
+	function update(Subject $subject);
+}
+
+/** @ingroup SPL
+ * @brief ubject to the observer pattern
+ * @see Observer
+ */
+interface Subject
+{
+	/** @param $observer new observer to attach
+	 */
+    function attach(Observer $observer);
+
+	/** @param $observer existing observer to detach
+	 * @note a non attached observer shouldn't result in a warning or similar
+	 */
+    function detach(Observer $observer);
+
+	/** @param $ignore optional observer that should not be notified
+	 */
+    function notify([Observer $ignore = NULL]);
 }
 
 ?>

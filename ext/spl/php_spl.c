@@ -33,6 +33,7 @@
 #include "spl_iterators.h"
 #include "spl_sxe.h"
 #include "spl_exceptions.h"
+#include "spl_observer.h"
 
 #ifdef COMPILE_DL_SPL
 ZEND_GET_MODULE(spl)
@@ -95,6 +96,7 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_directory)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_sxe)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
@@ -181,6 +183,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(LimitIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(LogicException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(NoRewindIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(Observer, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OuterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OutOfRangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(OutOfBoundsException, z_list, sub, allow, ce_flags); \
@@ -193,6 +196,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RuntimeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SeekableIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(SimpleXMLIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(Subject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 
 /* {{{ spl_classes */
