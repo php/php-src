@@ -6,8 +6,8 @@ AUTOMAKE_OPTIONS=foreign
 EXTRA_LTLIBRARIES=libZend_cc.la libZend_c.la
 noinst_LTLIBRARIES=$(ZEND_SCANNER) libZend.la
 
-libZend_cc_la_SOURCES=zend_language_scanner_cc.cc
-libZend_c_la_SOURCES=zend_language_scanner.c
+libZend_cc_la_SOURCES=zend_language_scanner_cc.cc zend_ini_scanner_cc.cc
+libZend_c_la_SOURCES=zend_language_scanner.c zend_ini_scanner.c
 
 libZend_la_SOURCES=\
 	zend_language_parser.y \
