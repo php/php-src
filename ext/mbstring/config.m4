@@ -98,7 +98,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     PHP_MBSTRING_ADD_INCLUDE([libmbfl])
     PHP_MBSTRING_ADD_INCLUDE([libmbfl/mbfl])
     PHP_MBSTRING_ADD_CONFIG_HEADER([libmbfl/config.h])
-    PHP_MBSTRING_ADD_CFLAG([-DHAVE_LIBMBFL_CONFIG_H=1])
 
     PHP_MBSTRING_ADD_SOURCES([
      libmbfl/filters/html_entities.c
