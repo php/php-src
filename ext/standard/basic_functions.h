@@ -72,7 +72,6 @@ PHP_FUNCTION(is_float);
 PHP_FUNCTION(is_numeric);
 PHP_FUNCTION(is_string);
 PHP_FUNCTION(is_array);
-PHP_FUNCTION(is_array_multidimensional);
 PHP_FUNCTION(is_object);
 PHP_FUNCTION(is_scalar);
 PHP_FUNCTION(is_callable);
