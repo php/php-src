@@ -1,3 +1,8 @@
+2003-08-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * zend_execute.c:
+      fix build
+
 2003-08-18  Wez Furlong  <wez.php@thebrainroom.net>
 
     * zend_ini.h:
