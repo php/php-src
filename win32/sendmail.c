@@ -176,6 +176,7 @@ int TSendMail(char *host, int *error, char **error_message,
 		if (RPath) {
 			efree(RPath);
 		}
+		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		if (NULL == (*error_message = ecalloc(1, HOST_NAME_LEN + 128))) {
 			return FAILURE;
 		}
@@ -257,6 +258,7 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 	char *p;
 	char *tempMailTo, *token, *pos1, *pos2;
 	char *server_response = NULL;
+	char *stripped_header  = NULL;
 
 	/* check for NULL parameters */
 	if (data == NULL)
@@ -299,7 +301,6 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 
 
 	tempMailTo = estrdup(mailTo);
-	
 	/* Send mail to all rcpt's */
 	token = strtok(tempMailTo, ",");
 	while(token != NULL)
@@ -313,9 +314,9 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		}
 		token = strtok(NULL, ",");
 	}
+	efree(tempMailTo);
 
 	/* Send mail to all Cc rcpt's */
-	efree(tempMailTo);
 	if (headers && (pos1 = strstr(headers, "Cc:"))) {
 		pos1 += 3; /* Jump over Cc: */
 		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
@@ -342,21 +343,83 @@ int SendText(char *RPath, char *Subject, char *mailTo, char *data, char *headers
 		efree(tempMailTo);
 	}
 
-	if ((res = Post("DATA\r\n")) != SUCCESS)
+	/* Send mail to all Bcc rcpt's
+	   This is basically a rip of the Cc code above.
+	   Just don't forget to remove the Bcc: from the header afterwards. */
+	if (headers && (pos1 = strstr(headers, "Bcc:"))) {
+		pos1 += 4; /* Jump over Bcc: */
+		if (NULL == (pos2 = strstr(pos1, "\r\n"))) {
+			int foo = strlen(pos1);
+			tempMailTo = estrndup(pos1, strlen(pos1));
+			/* Later, when we remove the Bcc: out of the
+			   header we know it was the last thing. */
+			pos2 = pos1;
+		} else {
+			tempMailTo = estrndup(pos1, pos2 - pos1);
+		}
+
+		token = strtok(tempMailTo, ",");
+		while(token != NULL)
+		{
+			sprintf(Buffer, "RCPT TO:<%s>\r\n", token);
+			if ((res = Post(Buffer)) != SUCCESS) {
+				return (res);
+			}
+			if ((res = Ack(&server_response)) != SUCCESS) {
+				SMTP_ERROR_RESPONSE(server_response);
+				return (res);
+			}
+			token = strtok(NULL, ",");
+		}
+		efree(tempMailTo);
+
+		/* Now that we've identified that we've a Bcc list,
+		   remove it from the current header. */
+		if (NULL == (stripped_header = ecalloc(1, strlen(headers)))) {
+			return OUT_OF_MEMORY;
+		}
+		/* headers = point to string start of header
+		   pos1    = pointer IN headers where the Bcc starts
+		   '4'     = Length of the characters 'Bcc:'
+		   Because we've added +4 above for parsing the Emails
+		   we've to substract them here. */
+		memcpy(stripped_header, headers, pos1 - headers - 4);
+		if (pos1 != pos2) {
+			/* if pos1 != pos2 , pos2 points to the rest of the headers.
+			   Since pos1 != pos2 if "\r\n" was found, we know those characters
+			   are there and so we jump over them (else we would generate a new header
+			   which would look like "\r\n\r\n". */
+			memcpy(stripped_header + (pos1 - headers - 4), pos2 + 2, strlen(pos2) - 2);
+		}
+	} else {
+		/* Simplify the code that we create a copy of stripped_header no matter if
+		   we actually strip something or not. So we've a single efree() later. */
+		if (NULL == (stripped_header = estrndup(headers, strlen(headers)))) {
+			return OUT_OF_MEMORY;
+		}
+	}
+
+	if ((res = Post("DATA\r\n")) != SUCCESS) {
+		efree(stripped_header);
 		return (res);
+	}
 	if ((res = Ack(&server_response)) != SUCCESS) {
 		SMTP_ERROR_RESPONSE(server_response);
+		efree(stripped_header);
 		return (res);
 	}
 
 
 	/* send message header */
-	if (Subject == NULL)
-		res = PostHeader(RPath, "No Subject", mailTo, headers, NULL);
-	else
-		res = PostHeader(RPath, Subject, mailTo, headers, NULL);
-	if (res != SUCCESS)
+	if (Subject == NULL) {
+		res = PostHeader(RPath, "No Subject", mailTo, stripped_header, NULL);
+	} else {
+		res = PostHeader(RPath, Subject, mailTo, stripped_header, NULL);
+	}
+	efree(stripped_header);
+	if (res != SUCCESS) {
 		return (res);
+	}
 
 
 	/* send message contents in 1024 chunks */
