@@ -405,6 +405,17 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 }
 /* }}} */
 
+static zval **dom_property_get_ptr(zval *object, zval *member TSRMLS_DC)
+{
+	zval **prop_ptr;
+	zval *property;
+
+	property = dom_read_property(object, member, 0 TSRMLS_CC);
+	prop_ptr = &property;
+
+	return prop_ptr;
+}
+
 zend_module_entry dom_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dom",
@@ -430,6 +441,7 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	dom_object_handlers.read_property = dom_read_property;
 	dom_object_handlers.write_property = dom_write_property;
+	dom_object_handlers.get_property_ptr = dom_property_get_ptr;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
