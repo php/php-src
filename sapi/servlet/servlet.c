@@ -300,6 +300,7 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 {
 
 	zend_file_handle file_handle;
+	char cwd[MAXPATHLEN+1];
 	jlong addr = 0;
 	SLS_FETCH();
 	PLS_FETCH();
@@ -339,7 +340,9 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	 * Parse the file
 	 */
 	SETSTRING( SG(request_info).path_translated, pathTranslated );
+	getcwd(cwd,MAXPATHLEN);
 	file_handle.handle.fp = php3_fopen_for_parser();
+	chdir(cwd);
 	file_handle.filename = SG(request_info).path_translated;
 	file_handle.free_filename = 0;
 	file_handle.type = ZEND_HANDLE_FP;
