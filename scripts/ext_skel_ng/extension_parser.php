@@ -37,7 +37,10 @@
 		$this->phpini    = array();
 		$this->users     = array();
 		$this->dependson = array();
-    $this->language  = "c";
+		$this->code      = array();
+		$this->libs      = array();
+		$this->headers   = array();
+		$this->language  = "c";
 
 		$this->files = array("c"=>array(), "h"=>array());
 		
@@ -116,6 +119,18 @@
     if (isset($attr["language"])) $this->language = $attr["language"];
   }
 
+	function handle_deps_lib($attr) {
+		$this->libs[$attr['name']] = $attr; 
+	}
+
+	function handle_deps_header($attr) {
+		$this->headers[$attr['name']] = $attr; 
+	}
+
+	function handle_deps_with($attr) {
+		$this->with = $attr; 
+	}
+
   // }}}
 
 	// {{{   constants
@@ -192,6 +207,10 @@
 
 		function handle_functions_function_code($attr) {
 			$this->func_code = $this->cdata;
+		}
+
+		function handle_code($attr) {
+			$this->code[$attr["role"]][] = $this->cdata;
 		}
 
 		function handle_functions_function($attr) {
