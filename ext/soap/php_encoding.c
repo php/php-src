@@ -289,12 +289,13 @@ xmlNodePtr to_xml_string(encodeType type, zval *data, int style)
 	xmlNodePtr ret;
 	char *str, *pstr;
 	int new_len;
+	TSRMLS_FETCH();
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret);
 
 	convert_to_string(data);
-	str = php_escape_html_entities(Z_STRVAL_P(data), Z_STRLEN_P(data), &new_len, 0, 0, NULL);
+	str = php_escape_html_entities(Z_STRVAL_P(data), Z_STRLEN_P(data), &new_len, 0, 0, NULL TSRMLS_CC);
 
 	pstr = malloc(new_len + 1);
 	memcpy(pstr, str, new_len);
