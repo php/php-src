@@ -1,3 +1,156 @@
+1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+
+    * NEWS: NEWS update
+
+    * ChangeLog
+      MAINTAINERS
+      README.CVS-RULES
+      TODO:
+    New files.
+
+    Please read README.CVS-RULES!
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/config.m4
+      sapi/isapi/config.m4
+      sapi/apache/config.m4
+      configure.in: Remove SAPI_TARGET and use PHP_SAPI completely.
+
+    The target filename is now available as SAPI_PROGRAM, SAPI_SHARED, and
+    SAPI_STATIC.
+
+1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ChangeLog.3
+      ChangeLog.TODO
+      TODO-LeftOver: Some ChangeLog surgery.
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ext_skel:     Add help to get people started.
+
+1999-10-07  Andreas Karajannis  <Andreas.Karajannis@gmd.de>
+
+    * ext/odbc/php_odbc.c
+      ext/odbc/php_odbc.h:
+    Made henv a real global var. Seems to work basically when multithreaded
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/nsapi/.cvsignore
+      sapi/nsapi/Makefile.am
+      sapi/nsapi/aolserver.c
+      sapi/nsapi/config.m4:     nsapi => aolserver
+
+        "NSAPI" suggests Netscape too often.
+
+1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+
+    * ChangeLog
+      NEWS:
+    Renaming ChangeLog to NEWS. All future entries intended for public should
+    go into NEWS.
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+        PHP_SHOW_LD_LIBRARY_PATH leaked out of my test environment.
+
+1999-10-07  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/pdf/pdf.c
+      ext/pdf/php3_pdf.h:
+    - new functions pdf_get_font, pdf_get_fontsize, pdf_get_fontname
+
+1999-10-07  Andrei Zmievski  <zmievski@ispi.net>
+
+    * tests/testfunc: Test commit again.
+
+    * tests/testfunc: Testing commit.
+
+    * sapi/nsapi/.cvsignore
+      sapi/cgi/.cvsignore
+      sapi/isapi/.cvsignore
+      sapi/apache/.cvsignore
+      regex/.cvsignore
+      .cvsignore: Ignore generated files.
+
+    * ext/db/db.c: Put PLS_FETCH() in the correct place.
+
+    * ext/pcre/pcrelib/.cvsignore
+      ext/yp/.cvsignore
+      ext/zlib/.cvsignore
+      ext/sysvshm/.cvsignore
+      ext/wddx/.cvsignore
+      ext/sysvsem/.cvsignore
+      ext/sybase/.cvsignore
+      ext/sybase_ct/.cvsignore
+      ext/standard/.cvsignore
+      ext/session/.cvsignore
+      ext/snmp/.cvsignore
+      ext/pdf/.cvsignore
+      ext/pgsql/.cvsignore
+      ext/pcre/.cvsignore
+      ext/oracle/.cvsignore
+      ext/oci8/.cvsignore
+      ext/odbc/.cvsignore
+      ext/msql/.cvsignore
+      ext/mysql/.cvsignore
+      ext/mcrypt/.cvsignore
+      ext/mhash/.cvsignore
+      ext/mcal/.cvsignore
+      ext/interbase/.cvsignore
+      ext/ldap/.cvsignore
+      ext/imap/.cvsignore
+      ext/informix/.cvsignore
+      ext/icap/.cvsignore
+      ext/gettext/.cvsignore
+      ext/hyperwave/.cvsignore
+      ext/ftp/.cvsignore
+      ext/gd/.cvsignore
+      ext/fdf/.cvsignore
+      ext/filepro/.cvsignore
+      ext/dbase/.cvsignore
+      ext/db/.cvsignore
+      ext/dba/.cvsignore
+      ext/com/.cvsignore
+      ext/dav/.cvsignore
+      ext/bcmath/.cvsignore
+      ext/apache/.cvsignore
+      ext/aspell/.cvsignore
+      ext/ext_skel: Ignore generated files.
+
+    * request_info.c: Fix for #2457.
+
+1999-10-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/db/db.c: fix ZTS compile
+
+    * ext/xml/xml.c
+      ChangeLog: fixed hopefully last XML problem. that one was hard!
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/nsapi/aolserver.c (php_ns_request_handler): call ts_free_thread() to clean up
+
+1999-10-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/db/db.c: compiles again - and gets compiled
+
+1999-10-07  Sascha Schumann  <sascha@schumann.cx>
+
+    * configure.in:
+        Pass -avoid-version when building a shared library to avoid problems
+        with "installing" symbolic links. We need to do this conditional, since
+        some libtool versions imply --disable-static with this option.
+
+1999-10-07  Thies C. Arntzen  <thies@digicol.de>
+
+    * ChangeLog
+      php_content_types.c:
+    SET_VAR_STR* expect a emalloc'ed  copy of the string!
+
 1999-10-06  Sascha Schumann  <sascha@schumann.cx>
 
     * patch-aa
