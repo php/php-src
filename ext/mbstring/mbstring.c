@@ -3473,7 +3473,7 @@ PHPAPI int php_mbstring_set_zend_encoding(TSRMLS_D)
 /*
  *	mb_detect_encoding (interface for Zend Engine)
  */
-char* php_mbstring_encoding_detector(char *arg_string, int arg_length, char *arg_list TSRMLS_DC)
+char* php_mbstring_encoding_detector(const char *arg_string, int arg_length, char *arg_list TSRMLS_DC)
 {
 	mbfl_string string;
 	const char *ret;
@@ -3496,7 +3496,7 @@ char* php_mbstring_encoding_detector(char *arg_string, int arg_length, char *arg
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(current_language);
-	string.val = arg_string;
+	string.val = (char*)arg_string;
 	string.len = arg_length;
 	ret = mbfl_identify_encoding_name(&string, elist, size);
 	if (list != NULL) {
@@ -3513,7 +3513,7 @@ char* php_mbstring_encoding_detector(char *arg_string, int arg_length, char *arg
 /*
  *	mb_convert_encoding (interface for Zend Engine)
  */
-int php_mbstring_encoding_converter(char **to, int *to_length, char *from,
+int php_mbstring_encoding_converter(char **to, int *to_length, const char *from,
 		int from_length, const char *encoding_to, const char *encoding_from 
 		TSRMLS_DC)
 {
@@ -3536,7 +3536,7 @@ int php_mbstring_encoding_converter(char **to, int *to_length, char *from,
 	mbfl_string_init(&result);
 	string.no_encoding = from_encoding;
 	string.no_language = MBSTRG(current_language);
-	string.val = from;
+	string.val = (char*)from;
 	string.len = from_length;
 
 	/* initialize converter */
@@ -3562,14 +3562,14 @@ int php_mbstring_encoding_converter(char **to, int *to_length, char *from,
  *	returns number of odd (e.g. appears only first byte of multibyte
  *	character) chars
  */
-int php_mbstring_oddlen(char *string, int length, const char *encoding TSRMLS_DC)
+int php_mbstring_oddlen(const char *string, int length, const char *encoding TSRMLS_DC)
 {
 	mbfl_string mb_string;
 
 	mbfl_string_init(&mb_string);
 	mb_string.no_language = MBSTRG(current_language);
 	mb_string.no_encoding = mbfl_name2no_encoding(encoding);
-	mb_string.val = string;
+	mb_string.val = (char*)string;
 	mb_string.len = length;
 
 	if(mb_string.no_encoding == mbfl_no_encoding_invalid)

@@ -164,12 +164,12 @@ struct mb_overload_def {
 
 #ifdef ZEND_MULTIBYTE
 PHPAPI int php_mbstring_set_zend_encoding(TSRMLS_D);
-char* php_mbstring_encoding_detector(char *string, int length, char *list
+char* php_mbstring_encoding_detector(const char *string, int length, char *list
 		TSRMLS_DC);
-int php_mbstring_encoding_converter(char **to, int *to_length, char *from,
+int php_mbstring_encoding_converter(char **to, int *to_length, const char *from,
 		int from_length, const char *encoding_to, const char *encoding_from
 		TSRMLS_DC);
-int php_mbstring_oddlen(char *string, int length, const char *encoding TSRMLS_DC);
+int php_mbstring_oddlen(const char *string, int length, const char *encoding TSRMLS_DC);
 #endif /* ZEND_MULTIBYTE */
 
 SAPI_POST_HANDLER_FUNC(php_mbstr_post_handler);
