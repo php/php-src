@@ -50,20 +50,20 @@ DWORD PHPDAVTls;
 static int numthreads=0;
 
 typedef struct phpdav_global_struct {
-	phpdav_module php3_dav_module;
+	phpdav_module php_dav_module;
 } phpdav_global_struct;
 
 # else /* !defined(THREAD_SAFE) */
 #  define DAV_GLOBAL(a) a
 #  define DAV_TLS_VARS
 
-phpdav_module php3_dav_module;
+phpdav_module php_dav_module;
 
 # endif /* defined(THREAD_SAFE) */
 
-# define DAV_HANDLER(a) DAV_GLOBAL(php3_dav_module).a##_handler
+# define DAV_HANDLER(a) DAV_GLOBAL(php_dav_module).a##_handler
 # define DAV_SET_HANDLER(a,b) \
-	dav_set_handler(&DAV_GLOBAL(php3_dav_module).a##_handler,(b))
+	dav_set_handler(&DAV_GLOBAL(php_dav_module).a##_handler,(b))
 
 
 /* }}} */
@@ -76,11 +76,10 @@ DLEXPORT zend_module_entry *get_module() { return &phpdav_module_entry; };
 /* }}} */
 /* {{{ function prototypes */
 
-int php3_minit_phpdav(INIT_FUNC_ARGS);
-int php3_rinit_phpdav(INIT_FUNC_ARGS);
-int php3_mshutdown_phpdav(SHUTDOWN_FUNC_ARGS);
-int php3_rshutdown_phpdav(SHUTDOWN_FUNC_ARGS);
-void php3_info_phpdav(ZEND_MODULE_INFO_FUNC_ARGS);
+PHP_MINIT_FUNCTION(phpdav);
+PHP_MSHUTDOWN_FUNCTION(phpdav);
+PHP_RSHUTDOWN_FUNCTION(phpdav);
+PHP_MINFO_FUNCTION(phpdav);
 
 /* }}} */
 /* {{{ extension definition structures */
@@ -93,20 +92,18 @@ function_entry phpdav_functions[] = {
 zend_module_entry phpdav_module_entry = {
     "DAV",                   /* extension name */
     phpdav_functions,        /* extension function list */
-    php3_minit_phpdav,       /* extension-wide startup function */
-    php3_mshutdown_phpdav,   /* extension-wide shutdown function */
-    php3_rinit_phpdav,       /* per-request startup function */
-    php3_rshutdown_phpdav,   /* per-request shutdown function */
-    php3_info_phpdav,        /* information function */
+    PHP_MINIT(phpdav),       /* extension-wide startup function */
+    PHP_MSHUTDOWN(phpdav),   /* extension-wide shutdown function */
+    NULL,       /* per-request startup function */
+    PHP_RSHUTDOWN(phpdav),   /* per-request shutdown function */
+    PHP_MINFO(phpdav),        /* information function */
     STANDARD_MODULE_PROPERTIES
 };
 
 /* }}} */
 /* {{{ startup, shutdown and info functions */
 
-    /* {{{ php3_minit_phpdav */
-
-int php3_minit_phpdav(INIT_FUNC_ARGS)
+PHP_MINIT_FUNCTION(phpdav)
 {
 #if defined(THREAD_SAFE)
     phpdav_global_struct *phpdav_globals;
@@ -129,18 +126,8 @@ int php3_minit_phpdav(INIT_FUNC_ARGS)
     return SUCCESS;
 }
 
-/* }}} */
-    /* {{{ php3_rinit_phpdav */
 
-int php3_rinit_phpdav(INIT_FUNC_ARGS)
-{
-    return SUCCESS;
-}
-
-/* }}} */
-    /* {{{ php3_mshutdown_phpdav() */
-
-int php3_mshutdown_phpdav(SHUTDOWN_FUNC_ARGS)
+PHP_MSHUTDOWN_FUNCTION(phpdav)
 {
     DAV_TLS_VARS;
 #ifdef THREAD_SAFE
@@ -158,10 +145,8 @@ int php3_mshutdown_phpdav(SHUTDOWN_FUNC_ARGS)
     return SUCCESS;
 }
 
-/* }}} */
-    /* {{{ php3_rshutdown_phpdav() */
 
-int php3_rshutdown_phpdav(SHUTDOWN_FUNC_ARGS)
+PHP_RSHUTDOWN_FUNCTION(phpdav)
 {
     if (DAV_HANDLER(mkcol_test)) {
 		efree(DAV_HANDLER(mkcol_test));
@@ -172,16 +157,11 @@ int php3_rshutdown_phpdav(SHUTDOWN_FUNC_ARGS)
     return SUCCESS;
 }
 
-/* }}} */
-    /* {{{ php3_info_phpdav() */
 
-void php3_info_phpdav(ZEND_MODULE_INFO_FUNC_ARGS)
+PHP_MINFO_FUNCTION(phpdav);
 {
 }
 
-/* }}} */
-
-/* }}} */
 /* {{{ extension-internal functions */
 
     /* {{{ dav_set_handler() */
