@@ -234,7 +234,7 @@ typedef struct _zend_utility_functions {
 	void (*message_handler)(long message, void *data);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
-	int (*get_ini_entry)(char *name, uint name_length, zval *contents);
+	int (*get_configuration_directive)(char *name, uint name_length, zval *contents);
 	void (*ticks_function)(int ticks);
 } zend_utility_functions;
 
@@ -356,7 +356,7 @@ BEGIN_EXTERN_C()
 ZEND_API void zend_message_dispatcher(long message, void *data);
 END_EXTERN_C()
 
-ZEND_API int zend_get_ini_entry(char *name, uint name_length, zval *contents);
+ZEND_API int zend_get_configuration_directive(char *name, uint name_length, zval *contents);
 
 
 /* Messages for applications of Zend */
