@@ -387,7 +387,7 @@ static void php_natsort(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in %s() call",
+		php_error(E_WARNING, "%s(): The argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
@@ -553,7 +553,7 @@ PHP_FUNCTION(usort)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in usort() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -581,7 +581,7 @@ PHP_FUNCTION(uasort)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in uasort() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -656,7 +656,7 @@ PHP_FUNCTION(uksort)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in uksort() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		BG(user_compare_func_name) = old_compare_func;
 		RETURN_FALSE;
 	}
@@ -681,7 +681,7 @@ PHP_FUNCTION(end)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to end() is not an array or object");
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	zend_hash_internal_pointer_end(target_hash);
@@ -709,7 +709,7 @@ PHP_FUNCTION(prev)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to prev() is not an array or object");
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	zend_hash_move_backwards(target_hash);
@@ -737,7 +737,7 @@ PHP_FUNCTION(next)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to next() is not an array or object");
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	zend_hash_move_forward(target_hash);
@@ -765,7 +765,7 @@ PHP_FUNCTION(reset)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to reset() is not an array or object");
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	zend_hash_internal_pointer_reset(target_hash);
@@ -793,7 +793,7 @@ PHP_FUNCTION(current)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Variable passed to current() is not an array or object");
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	if (zend_hash_get_current_data(target_hash, (void **) &entry) == FAILURE) {
@@ -819,7 +819,7 @@ PHP_FUNCTION(key)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "%s(): Variable passed is not an array or object", get_active_function_name (TSRMLS_C));
+		php_error(E_WARNING, "%s(): Passed variable is not an array or object", get_active_function_name (TSRMLS_C));
 		RETURN_FALSE;
 	}
 	switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_length, &num_key, 0, NULL)) {
@@ -843,7 +843,7 @@ PHP_FUNCTION(min)
 	pval **result;
 
 	if (argc<=0) {
-		php_error(E_WARNING, "min: must be passed at least 1 value");
+		php_error(E_WARNING, "%s(): Atleast one value should be passed", get_active_function_name(TSRMLS_C));
 		RETURN_NULL();
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
@@ -857,7 +857,7 @@ PHP_FUNCTION(min)
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
-			php_error(E_WARNING, "min: array must contain at least 1 element");
+			php_error(E_WARNING, "%s(): Array must contain atleast one element", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	} else {
@@ -895,7 +895,7 @@ PHP_FUNCTION(max)
 	pval **result;
 
 	if (argc<=0) {
-		php_error(E_WARNING, "max: must be passed at least 1 value");
+		php_error(E_WARNING, "%s(): Atleast one value should be passed", get_active_function_name(TSRMLS_C));
 		RETURN_NULL();
 	}
 	set_compare_func(SORT_REGULAR TSRMLS_CC);
@@ -909,7 +909,7 @@ PHP_FUNCTION(max)
 			*return_value = **result;
 			zval_copy_ctor(return_value);
 		} else {
-			php_error(E_WARNING, "max: array must contain at least 1 element");
+			php_error(E_WARNING, "%s(): Array must contain atleast one element", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 		}
 	} else {
@@ -976,7 +976,8 @@ static int php_array_walk(HashTable *target_hash, zval **userdata TSRMLS_DC)
 		
 			zval_ptr_dtor(&retval_ptr);
 		} else
-			php_error(E_WARNING, "Unable to call %s() - function does not exist",
+			php_error(E_WARNING, "%s(): Unable to call %s() - function does not exist",
+					  get_active_function_name(TSRMLS_C),
 					  (*BG(array_walk_func_name))->value.str.val);
 
 		zend_hash_move_forward_ex(target_hash, &pos);
@@ -1005,14 +1006,14 @@ PHP_FUNCTION(array_walk)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in %s() call",
+		php_error(E_WARNING, "%s(): The argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		BG(array_walk_func_name) = old_walk_func_name;
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_PP(BG(array_walk_func_name)) != IS_ARRAY && 
 		Z_TYPE_PP(BG(array_walk_func_name)) != IS_STRING) {
-		php_error(E_WARNING, "Wrong syntax for function name in %s() call",
+		php_error(E_WARNING, "%s(): Wrong syntax for function name",
 				  get_active_function_name(TSRMLS_C));
 		BG(array_walk_func_name) = old_walk_func_name;
 		RETURN_FALSE;
@@ -1047,12 +1048,12 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	}
 	
 	if (Z_TYPE_PP(value) == IS_OBJECT) {
-		php_error(E_WARNING, "Wrong datatype for first argument in call to %s", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): Wrong datatype for first argument", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
 	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error(E_WARNING, "Wrong datatype for second argument in call to %s", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): Wrong datatype for second argument", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -1159,7 +1160,7 @@ PHP_FUNCTION(extract)
 			convert_to_long_ex(z_extract_type);
 			extract_type = Z_LVAL_PP(z_extract_type);
 			if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS) {
-				php_error(E_WARNING, "%s() expects a prefix to be specified",
+				php_error(E_WARNING, "%s(): Prefix expected to be specified",
 						  get_active_function_name(TSRMLS_C));
 				return;
 			}
@@ -1180,13 +1181,13 @@ PHP_FUNCTION(extract)
 	}
 	
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		php_error(E_WARNING, "Unknown extract type in call to %s()",
+		php_error(E_WARNING, "%s(): Unknown extract type",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
 	
 	if (Z_TYPE_PP(var_array) != IS_ARRAY) {
-		php_error(E_WARNING, "%s() expects first argument to be an array",
+		php_error(E_WARNING, "%s(): First argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
@@ -1362,7 +1363,7 @@ PHP_FUNCTION(array_fill)
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(start_key), val, sizeof(val), NULL);
 			break;
 		default:
-			php_error(E_WARNING, "Wrong datatype for start key in array_init()");
+			php_error(E_WARNING, "%s(): Wrong data type for start key", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 			break;
 	}	
@@ -1370,7 +1371,7 @@ PHP_FUNCTION(array_fill)
 	convert_to_long_ex(num);
 	i = Z_LVAL_PP(num) - 1;	
 	if(i<0) {
-		php_error(E_WARNING, "Number of elements must be positive in array_init()");
+		php_error(E_WARNING, "%s(): Number of elements must be positive", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	newval = *val;
@@ -1635,7 +1636,7 @@ PHP_FUNCTION(array_push)
 	/* Get first argument and check that it's an array */	
 	stack = *args[0];
 	if (Z_TYPE_P(stack) != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to array_push() needs to be an array");
+		php_error(E_WARNING, "%s(): First argument should be an array", get_active_function_name(TSRMLS_C));
 		efree(args);
 		RETURN_FALSE;
 	}
@@ -1669,7 +1670,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 	}
 	
 	if (Z_TYPE_PP(stack) != IS_ARRAY) {
-		php_error(E_WARNING, "The argument needs to be an array");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -1740,7 +1741,7 @@ PHP_FUNCTION(array_unshift)
 	/* Get first argument and check that it's an array */
 	stack = *args[0];
 	if (Z_TYPE_P(stack) != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to array_unshift() needs to be an array");
+		php_error(E_WARNING, "%s(): The first argument should be an array", get_active_function_name(TSRMLS_C));
 		efree(args);
 		RETURN_FALSE;
 	}
@@ -1790,7 +1791,7 @@ PHP_FUNCTION(array_splice)
 	/* Get first argument and check that it's an array */
 	array = *args[0];
 	if (Z_TYPE_P(array) != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to array_splice() should be an array");
+		php_error(E_WARNING, "%s(): The first argument should be an array", get_active_function_name(TSRMLS_C));
 		efree(args);
 		return;
 	}
@@ -1865,7 +1866,7 @@ PHP_FUNCTION(array_slice)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to array_slice() should be an array");
+		php_error(E_WARNING, "%s(): The first argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	
@@ -2045,7 +2046,7 @@ PHP_FUNCTION(array_keys)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "First argument to array_keys() should be an array");
+		php_error(E_WARNING, "%s(): The first argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	
@@ -2102,7 +2103,7 @@ PHP_FUNCTION(array_values)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "Argument to array_values() should be an array");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	
@@ -2139,7 +2140,7 @@ PHP_FUNCTION(array_count_values)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "Argument to array_count_values() should be an array");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 	
@@ -2176,7 +2177,7 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_PP(tmp)++;
 			}
 		} else {
-			php_error(E_WARNING, "Can only count STRING and INTEGER values!");
+			php_error(E_WARNING, "%s(): Can only count STRING and INTEGER values!", get_active_function_name(TSRMLS_C));
 		}
 
 		zend_hash_move_forward_ex(myht, &pos);
@@ -2205,7 +2206,7 @@ PHP_FUNCTION(array_reverse)
 	}
 	
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "Argument to array_reverse() should be an array");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		return;
 	}
 
@@ -2265,7 +2266,7 @@ PHP_FUNCTION(array_pad)
 	
 	/* Make sure arguments are of the proper type */
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "Argument to %s() should be an array",
+		php_error(E_WARNING, "%s(): The argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
@@ -2324,7 +2325,7 @@ PHP_FUNCTION(array_flip)
 
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in array_flip() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	
@@ -2351,7 +2352,7 @@ PHP_FUNCTION(array_flip)
 			zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_PP(entry), Z_STRLEN_PP(entry) + 1, &data, sizeof(data), NULL);
 		} else {
 			zval_ptr_dtor(&data); /* will free also zval structure */
-			php_error(E_WARNING, "Can only flip STRING and INTEGER values!");
+			php_error(E_WARNING, "%s(): Can only flip STRING and INTEGER values!", get_active_function_name(TSRMLS_C));
 		}
 	
 		zend_hash_move_forward_ex(target_hash, &pos);
@@ -2383,7 +2384,7 @@ PHP_FUNCTION(array_change_key_case)
 	}
 
 	if (Z_TYPE_PP(array) != IS_ARRAY) {
-		php_error(E_WARNING, "Wrong datatype in array_change_key_case() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -2432,7 +2433,7 @@ PHP_FUNCTION(array_unique)
 	}
 	target_hash = HASH_OF(*array);
 	if (!target_hash) {
-		php_error(E_WARNING, "Wrong datatype in array_unique() call");
+		php_error(E_WARNING, "%s(): The argument should be an array", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -2503,7 +2504,7 @@ PHP_FUNCTION(array_intersect)
 	set_compare_func(SORT_STRING TSRMLS_CC);
 	for (i=0; i<argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
-			php_error(E_WARNING, "Argument #%d to array_intersect() is not an array", i+1);
+			php_error(E_WARNING, "%s(): Argument #%d is not an array", get_active_function_name(TSRMLS_C), i+1);
 			argc = i; /* only free up to i-1 */
 			goto out;
 		}
@@ -2608,7 +2609,7 @@ PHP_FUNCTION(array_diff)
 	set_compare_func(SORT_STRING TSRMLS_CC);
 	for (i=0; i<argc; i++) {
 		if (Z_TYPE_PP(args[i]) != IS_ARRAY) {
-			php_error(E_WARNING, "Argument #%d to array_diff() is not an array", i+1);
+			php_error(E_WARNING, "%s(): Argument #%d is not an array", get_active_function_name(TSRMLS_C), i+1);
 			argc = i; /* only free up to i-1 */
 			goto out;
 		}
@@ -2778,7 +2779,7 @@ PHP_FUNCTION(array_multisort)
 						sort_order = Z_LVAL_PP(args[i]) == SORT_DESC ? -1 : 1;
 						parse_state[MULTISORT_ORDER] = 0;
 					} else {
-						php_error(E_WARNING, "Argument %i to %s() is expected to be an array or sorting flag that has not already been specified", i+1, get_active_function_name(TSRMLS_C));
+						php_error(E_WARNING, "%s(): Argument #%d is expected to be an array or sorting flag that has not already been specified", get_active_function_name(TSRMLS_C), i+1);
 						MULTISORT_ABORT;
 					}
 					break;
@@ -2792,20 +2793,19 @@ PHP_FUNCTION(array_multisort)
 						sort_type = Z_LVAL_PP(args[i]);
 						parse_state[MULTISORT_TYPE] = 0;
 					} else {
-						php_error(E_WARNING, "Argument %i to %s() is expected to be an array or sorting flag that has not already been specified", i+1, get_active_function_name(TSRMLS_C));
+						php_error(E_WARNING, "%s(): Argument #%d is expected to be an array or sorting flag that has not already been specified", get_active_function_name(TSRMLS_C), i + 1);
 						MULTISORT_ABORT;
 					}
 					break;
 
 				default:
-					php_error(E_WARNING, "Argument %i to %s() is an unknown sort flag", i+1,
-							  get_active_function_name(TSRMLS_C));
+					php_error(E_WARNING, "%s(): Argument #%d is an unknown sort flag", get_active_function_name(TSRMLS_C), i + 1);
 					MULTISORT_ABORT;
 					break;
 
 			}
 		} else {
-			php_error(E_WARNING, "Argument %i to %s() is expected to be an array or a sort flag", i+1, get_active_function_name(TSRMLS_C));
+			php_error(E_WARNING, "%s(): Argument #%d is expected to be an array or a sort flag", get_active_function_name(TSRMLS_C), i + 1);
 			MULTISORT_ABORT;
 		}
 	}
@@ -2817,7 +2817,7 @@ PHP_FUNCTION(array_multisort)
 	array_size = zend_hash_num_elements(Z_ARRVAL_PP(arrays[0]));
 	for (i = 0; i < num_arrays; i++) {
 		if (zend_hash_num_elements(Z_ARRVAL_PP(arrays[i])) != array_size) {
-			php_error(E_WARNING, "Array sizes are inconsistent");
+			php_error(E_WARNING, "%s(): Array sizes are inconsistent", get_active_function_name(TSRMLS_C));
 			MULTISORT_ABORT;
 		}
 	}
@@ -2986,7 +2986,7 @@ PHP_FUNCTION(array_sum)
 	}
 
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "The argument to %s() should be an array",
+		php_error(E_WARNING, "%s(): The argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
@@ -3037,13 +3037,13 @@ PHP_FUNCTION(array_reduce)
 	}
 
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "%s() expects argument 1 to be an array",
+		php_error(E_WARNING, "%s(): The first argument should be an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
 
 	if (!zend_is_callable(*callback, 0, &callback_name)) {
-		php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback",
+		php_error(E_WARNING, "%s(): The second argument, '%s', should be a valid callback",
 				  get_active_function_name(TSRMLS_C), callback_name);
 		efree(callback_name);
 		return;
@@ -3072,7 +3072,7 @@ PHP_FUNCTION(array_reduce)
 				zval_ptr_dtor(&result);
 				result = retval;
 			} else {
-				php_error(E_WARNING, "%s() had an error invoking the reduction callback", get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): An error occurred while invoking the reduction callback", get_active_function_name(TSRMLS_C));
 				return;
 			}
 		} else {
@@ -3110,14 +3110,14 @@ PHP_FUNCTION(array_filter)
 	}
 
 	if (Z_TYPE_PP(input) != IS_ARRAY) {
-		php_error(E_WARNING, "%s() expects argument 1 to be an array",
+		php_error(E_WARNING, "%s(): The first argument shouldbe an array",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
 
 	if (ZEND_NUM_ARGS() > 1) {
 		if (!zend_is_callable(*callback, 0, &callback_name)) {
-			php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback",
+			php_error(E_WARNING, "%s(): The second argument, '%s', should be a valid callback",
 					  get_active_function_name(TSRMLS_C), callback_name);
 			efree(callback_name);
 			return;
@@ -3142,7 +3142,7 @@ PHP_FUNCTION(array_filter)
 				} else
 					zval_ptr_dtor(&retval);
 			} else {
-				php_error(E_WARNING, "%s() had an error invoking the filter callback", get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): An error occurred while invoking the filter callback", get_active_function_name(TSRMLS_C));
 				return;
 			}
 		} else if (!zend_is_true(*operand))
@@ -3191,7 +3191,7 @@ PHP_FUNCTION(array_map)
 	callback = *args[0];
 	if (Z_TYPE_P(callback) != IS_NULL) {
 		if (!zend_is_callable(callback, 0, &callback_name)) {
-			php_error(E_WARNING, "%s() expects argument 1, '%s', to be either NULL or a valid callback", get_active_function_name(TSRMLS_C), callback_name);
+			php_error(E_WARNING, "%s(): The first argument, '%s', should be either NULL or a valid callback", get_active_function_name(TSRMLS_C), callback_name);
 			efree(callback_name);
 			efree(args);
 			return;
@@ -3206,7 +3206,7 @@ PHP_FUNCTION(array_map)
 	/* Check that arrays are indeed arrays and calculate maximum size. */
 	for (i = 0; i < ZEND_NUM_ARGS()-1; i++) {
 		if (Z_TYPE_PP(args[i+1]) != IS_ARRAY) {
-			php_error(E_WARNING, "%s() expects argument %d to be an array",
+			php_error(E_WARNING, "%s(): Argument #%d should be an array",
 					  get_active_function_name(TSRMLS_C), i + 2);
 			efree(array_len);
 			efree(args);
@@ -3278,7 +3278,7 @@ PHP_FUNCTION(array_map)
 
 		if (Z_TYPE_P(callback) != IS_NULL) {
 			if (!call_user_function_ex(EG(function_table), NULL, callback, &result, ZEND_NUM_ARGS()-1, params, 0, NULL TSRMLS_CC) == SUCCESS && result) {
-				php_error(E_WARNING, "%s() had an error invoking the map callback", get_active_function_name(TSRMLS_C));
+				php_error(E_WARNING, "%s(): An error occurred while invoking the map callback", get_active_function_name(TSRMLS_C));
 				efree(array_len);
 				efree(args);
 				efree(array_pos);
@@ -3319,7 +3319,7 @@ PHP_FUNCTION(array_key_exists)
 	}
 
 	if (Z_TYPE_PP(array) != IS_ARRAY && Z_TYPE_PP(array) != IS_OBJECT) {
-		php_error(E_WARNING, "Wrong datatype for second argument in call to %s", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): The second argument should be either an array or an object", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 
@@ -3337,7 +3337,7 @@ PHP_FUNCTION(array_key_exists)
 			RETURN_FALSE;
 
 		default:
-			php_error(E_WARNING, "Wrong datatype for first argument in call to %s", get_active_function_name(TSRMLS_C));
+			php_error(E_WARNING, "%s(): The first argument should be either a string or an integer", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 	}
 
@@ -3366,7 +3366,7 @@ PHP_FUNCTION(array_chunk)
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
-		php_error(E_WARNING, "%s() expects the size parameter to be > 0",
+		php_error(E_WARNING, "%s(): Size parameter expected to be greater than 0",
 				  get_active_function_name(TSRMLS_C));
 		return;
 	}
