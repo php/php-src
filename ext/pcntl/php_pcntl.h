@@ -63,13 +63,10 @@ ZEND_BEGIN_MODULE_GLOBALS(pcntl)
 	int signal_queue_ready;
 	int processing_signal_queue;
 ZEND_END_MODULE_GLOBALS(pcntl)
-
 #ifdef ZTS
-#define PCNTL_G(v) (pcntl_globals->v)
-#define PCNTL_LS_FETCH() zend_pcntl_globals *pcntl_globals = ts_resource(pcntl_globals_id)
+# define PCNTL_G(v) TSRMG(pcntl_globals_id, zend_pcntl_globals *, v)
 #else
-#define PCNTL_G(v) (pcntl_globals.v)
-#define PCNTL_LS_FETCH()
+# define PCNTL_G(v)	(pcntl_globals.v)
 #endif
 
 #endif	/* PHP_PCNTL_H */
