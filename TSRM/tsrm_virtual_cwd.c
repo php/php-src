@@ -420,7 +420,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	 * but *does* have execute permissions */
 	if (IS_ABSOLUTE_PATH(path, path_length) || (state->cwd_length < 1)) {
 		if (use_realpath) {
-			if (realpath(path, resolved_path)) {
+			if (realpath(path, resolved_path)) {  /* Note: Not threadsafe on older *BSD's */
 				path = resolved_path;
 				path_length = strlen(path);
 			} else {
