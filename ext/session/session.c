@@ -36,8 +36,9 @@
  * - complete ZTS support (currently only useable as non-ZTS)
  * - userland callback functions for ps_module
  */
-
+#if !(WIN32|WINNT)
 #include <sys/time.h>
+#endif
 
 #include "php.h"
 #include "php_ini.h"
@@ -115,6 +116,7 @@ static char *_php_session_encode(int *newlen)
 	char *ret = NULL;
 	char strbuf[MAX_STR + 1];
 	PSLS_FETCH();
+	ELS_FETCH();
 
 	buf = ecalloc(sizeof(*buf), 1);
 	buf->type = IS_STRING;
@@ -162,6 +164,7 @@ static void _php_session_decode(char *val, int vallen)
 	int namelen;
 	int has_value;
 	PSLS_FETCH();
+	ELS_FETCH();
 
 	for(p = q = val; (p < endptr) && (q = strchr(p, '|')); p = q) {
 		if(p[0] == '!') {
@@ -267,6 +270,8 @@ static ps_module *_php_find_ps_module(char *name)
 	ps_module *ret = NULL;
 	ps_module **mod;
 
+	PSLS_FETCH();
+
 	for(mod = ps_modules; ((*mod && (*mod)->name) || !*mod); mod++) {
 		if(*mod && !strcasecmp(name, (*mod)->name)) {
 			ret = *mod;
@@ -284,7 +289,8 @@ static void _php_session_start(void)
 	char *session_data;
 	int datalen;
 	PSLS_FETCH();
-	
+	ELS_FETCH();
+
 	if(!PS(id) &&
 		zend_hash_find(&EG(symbol_table), PS(session_name), 
 				strlen(PS(session_name)) + 1, (void **) &ppid) == SUCCESS) {
@@ -513,6 +519,7 @@ void php_rshutdown_globals(php_ps_globals *ps_globals)
 int php_rinit_session(INIT_FUNC_ARGS)
 {
 	php_rinit_globals(&ps_globals);
+
 	if(INI_INT("session_auto_start")) {
 		_php_session_start();
 	}

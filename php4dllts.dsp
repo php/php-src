@@ -383,6 +383,10 @@ SOURCE=.\ext\standard\reg.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ext\session\session.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ext\standard\soundex.c
 # End Source File
 # Begin Source File
@@ -512,6 +516,10 @@ SOURCE=.\functions\php3_string.h
 # Begin Source File
 
 SOURCE=.\functions\php3_syslog.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ext\session\php_session.h
 # End Source File
 # Begin Source File
 
