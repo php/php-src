@@ -50,6 +50,12 @@ static int le_gd, le_gd_font;
 static int le_ps_font, le_ps_enc;
 #endif
 
+#ifdef ZTS
+int gd_globals_id;
+#else
+static php_gd_globals gd_globals;
+#endif
+
 #include <gd.h>
 #include <gdfontt.h>  /* 1 Tiny font */
 #include <gdfonts.h>  /* 2 Small font */
@@ -193,12 +199,6 @@ zend_module_entry gd_module_entry = {
 	"gd", gd_functions, PHP_MINIT(gd), NULL, NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef ZTS
-int gd_globals_id;
-#else
-static php_gd_globals gd_globals;
-#endif
-
 #ifdef COMPILE_DL_GD
 ZEND_GET_MODULE(gd)
 #endif
@@ -310,7 +310,7 @@ PHP_MINFO_FUNCTION(gd)
 }
 
 /* Need this for cpdf. See also comment in file.c php3i_get_le_fp() */
-PHPAPI int phpi_get_le_gd(void)
+PHP_GD_API int phpi_get_le_gd(void)
 {
 	GDLS_FETCH();
 
