@@ -2152,6 +2152,15 @@ PHP_FUNCTION(array_multisort)
 		}
 	}
 
+	/* If all arrays are empty or have only one entry,
+	   we don't need to do anything. */
+	if (array_size < 1) {
+		efree(ARRAYG(multisort_flags));
+		efree(arrays);
+		efree(args);
+		RETURN_TRUE;
+	}
+
 	/* Create the indirection array. This array is of size MxN, where 
 	   M is the number of entries in each input array and N is the number
 	   of the input arrays + 1. The last column is NULL to indicate the end
