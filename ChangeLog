@@ -1,3 +1,48 @@
+2003-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/datetime.c:
+      MFH: Fixed bug #23071 (when DST in effect, date("T") crashed PHP)
+
+    * ext/standard/datetime.c:
+      Fixed bug #23071 (when DST in effect, date("T") crashed PHP)
+
+2003-04-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * .gdbinit:
+      Support for ZTS
+
+2003-04-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      .gdbinit:
+      MFH(r-1.5): improved zmemcheck macro so it displays the size of each memory
+      block too.
+
+    * .gdbinit:
+      Improved zmemcheck macro so it displays the size of each memory block too.
+
+    * (PHP_4_3)
+      .gdbinit:
+      MFH(r-1.4): improved readability of zmemcheck output
+
+    * .gdbinit:
+      Improved readability of zmemcheck output
+
+    * .gdbinit:
+      
+      Added zmemcheck macro, which may help you examine the memory blocks being
+      handled by the memory manager.
+
+2003-04-06  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      reorder
+
 2003-04-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/gd/gd.c:
