@@ -54,7 +54,7 @@ if (PHP_DEBUG == "yes") {
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:msvcrt");
 } else {
 	// Equivalent to Release_TSInline build -> best optimization
-	ADD_FLAG("CFLAGS", "/LD /MD /W3 /O2 /D NDebug /D NDEBUG \
+	ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG \
 /D ZEND_WIN32_FORCE_INLINE /GB /GF /D ZEND_DEBUG=0");
 	// if you have VS.Net /GS hardens the binary against buffer overruns
 	// ADD_FLAG("CFLAGS", "/GS");
@@ -89,6 +89,14 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 // Find the php_build dir - it contains headers and libraries
 // that we need
 ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
+
+if (PHP_PHP_BUILD == 'no') {
+	if (FSO.FolderExists("..\\php_build")) {
+		PHP_PHP_BUILD = "..\\php_build";
+	} else if (FSO.FolderExists("..\\win32build")) {
+		PHP_PHP_BUILD = "..\\win32build";
+	}
+}
 
 ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
 ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
