@@ -2019,7 +2019,7 @@ int zend_assign_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 
 
 int zend_assign_dim_handler(ZEND_OPCODE_HANDLER_ARGS)
-	{
+{
 	zend_op *op_data = EX(opline)+1;
 	zval **object_ptr = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_W TSRMLS_CC);
 
