@@ -111,6 +111,7 @@ void sqliteAuthRead(
   const char *zCol;     /* Name of the column of the table */
   int iSrc;             /* Index in pTabList->a[] of table being read */
   const char *zDBase;   /* Name of database being accessed */
+  TriggerStack *pStack; /* The stack of current triggers */
 
   if( db->xAuth==0 ) return;
   assert( pExpr->op==TK_COLUMN );
@@ -119,15 +120,14 @@ void sqliteAuthRead(
   }
   if( iSrc>=0 && iSrc<pTabList->nSrc ){
     pTab = pTabList->a[iSrc].pTab;
-  }else{
+  }else if( (pStack = pParse->trigStack)!=0 ){
     /* This must be an attempt to read the NEW or OLD pseudo-tables
     ** of a trigger.
     */
-    TriggerStack *pStack; /* The stack of current triggers */
-    pStack = pParse->trigStack;
-    assert( pStack!=0 );
     assert( pExpr->iTable==pStack->newIdx || pExpr->iTable==pStack->oldIdx );
     pTab = pStack->pTab;
+  }else{
+    return;
   }
   if( pTab==0 ) return;
   if( pExpr->iColumn>=0 ){
