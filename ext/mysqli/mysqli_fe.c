@@ -104,12 +104,19 @@ function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_send_query,							NULL)
 	PHP_FALIAS(mysqli_set_opt, 		mysqli_options, 	NULL)
 	PHP_FE(mysqli_slave_query,							NULL)
+
+#if MYSQL_VERSION_ID >= 40101
+	PHP_FE(mysqli_sqlstate,   							NULL)
+#endif
 	PHP_FE(mysqli_ssl_set,								NULL)
 	PHP_FE(mysqli_stat,									NULL)
 	PHP_FE(mysqli_stmt_affected_rows,					NULL)
 	PHP_FE(mysqli_stmt_close,							NULL)
 	PHP_FE(mysqli_stmt_errno,							NULL)
 	PHP_FE(mysqli_stmt_error,							NULL)
+#if MYSQL_VERSION_ID >= 40101
+	PHP_FE(mysqli_stmt_sqlstate,   						NULL)
+#endif
 	PHP_FE(mysqli_store_result,							NULL)
 	PHP_FE(mysqli_stmt_store_result,					NULL)
 	PHP_FE(mysqli_thread_id,							NULL)
@@ -168,6 +175,9 @@ function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(select_db,mysqli_select_db,NULL)
 	PHP_FALIAS(set_opt, mysqli_options,NULL)
 	PHP_FALIAS(slave_query,mysqli_slave_query,NULL)
+#if MYSQL_VERSION_ID >= 40101
+	PHP_FALIAS(sqlstate, mysqli_sqlstate,NULL)
+#endif
 	PHP_FALIAS(ssl_set,mysqli_ssl_set,NULL)
 	PHP_FALIAS(stat,mysqli_stat,NULL)
 	PHP_FALIAS(store_result,mysqli_store_result,NULL)
@@ -221,6 +231,9 @@ function_entry mysqli_stmt_methods[] = {
 	PHP_FALIAS(close,mysqli_stmt_close,NULL)
 	PHP_FALIAS(errno,mysqli_stmt_errno,NULL)
 	PHP_FALIAS(error,mysqli_stmt_error,NULL)
+#if MYSQL_VERSION_ID >= 40101
+	PHP_FALIAS(sqlstate, mysqli_stmt_sqlstate,NULL)
+#endif
 	{NULL, NULL, NULL}
 };
 /* }}} */
