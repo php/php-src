@@ -3650,7 +3650,6 @@ PHP_FUNCTION(array_multisort)
 	 * array, and the very first argument has to be an array.
 	 */
 	for (i = 0; i < argc; i++) {
-		SEPARATE_ZVAL(args[i]);
 		if (Z_TYPE_PP(args[i]) == IS_ARRAY) {
 			/* We see the next array, so we update the sort flags of
 			   the previous array and reset the sort flags. */
