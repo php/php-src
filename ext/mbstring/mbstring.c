@@ -1728,10 +1728,12 @@ PHP_FUNCTION(mb_output_handler)
 	size_t arg_string_len;
 	long arg_status;
 	mbfl_string string, result;
-	const char *mimetype, *charset;
+	const char *charset;
 	char *p;
 	enum mbfl_no_encoding encoding;
 	int last_feed, len;
+	unsigned char send_text_mimetype = 0;
+	char *s, *mimetype = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &arg_string, &arg_string_len, &arg_status) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -1749,9 +1751,22 @@ PHP_FUNCTION(mb_output_handler)
 		if (encoding == mbfl_no_encoding_pass) {
 			RETURN_STRINGL(arg_string, arg_string_len, 1);
 		}
- 		/* if content-type is not yet set, set it and activate the converter */
- 		if (SG(sapi_headers).send_default_content_type ) {
+
+		/* analyze mime type */
+		if (SG(sapi_headers).mimetype && 
+			strncmp(SG(sapi_headers).mimetype, "text/", 5) == 0) {
+			if ((s = strchr(SG(sapi_headers).mimetype,';')) == NULL){
+				mimetype = estrdup(SG(sapi_headers).mimetype);
+			} else {
+				mimetype = estrndup(SG(sapi_headers).mimetype,s-SG(sapi_headers).mimetype);
+			}
+			send_text_mimetype = 1;
+		} else if (SG(sapi_headers).send_default_content_type) {
 			mimetype = SG(default_mimetype) ? SG(default_mimetype) : SAPI_DEFAULT_MIMETYPE;
+		}
+
+ 		/* if content-type is not yet set, set it and activate the converter */
+ 		if (SG(sapi_headers).send_default_content_type || send_text_mimetype) {
 			charset = mbfl_no2preferred_mime_name(encoding);
 			if (charset) {
 				len = (sizeof ("Content-Type:")-1) + strlen(mimetype) + (sizeof (";charset=")-1) + strlen(charset) + 1;
@@ -1765,6 +1780,9 @@ PHP_FUNCTION(mb_output_handler)
 			}
  			/* activate the converter */
  			MBSTRG(outconv) = mbfl_buffer_converter_new(MBSTRG(current_internal_encoding), encoding, 0 TSRMLS_CC);
+			if (send_text_mimetype){
+				efree(mimetype);
+			}
  		}
   	}
 
