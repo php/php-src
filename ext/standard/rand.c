@@ -176,7 +176,7 @@ static php_uint32 reloadMT(TSRMLS_D)
 }
 
 
-static inline php_uint32 randomMT(TSRMLS_D)
+static php_uint32 randomMT(TSRMLS_D)
 {
     php_uint32 y;
 
