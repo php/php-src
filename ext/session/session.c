@@ -664,7 +664,7 @@ static void _php_session_send_cookie(PSLS_D)
 		strcat(cookie, PS(cookie_domain));
 	}
 
-	sapi_add_header(cookie, len, 0);
+	sapi_add_header(cookie, strlen(cookie), 0);
 }
 
 static ps_module *_php_find_ps_module(char *name PSLS_DC)
