@@ -247,7 +247,7 @@
 				switch($attr["type"]) {
 				case "int":
 				case "long":
-					$ini["onupdate"] = "OnUpdateInt";
+					$ini["onupdate"] = "OnUpdateLong";
 					break;
 				case "float":
 				case "double":

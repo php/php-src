@@ -172,7 +172,7 @@ ZEND_API ZEND_INI_DISP(display_link_numbers);
 
 /* Standard message handlers */
 ZEND_API ZEND_INI_MH(OnUpdateBool);
-ZEND_API ZEND_INI_MH(OnUpdateInt);
+ZEND_API ZEND_INI_MH(OnUpdateLong);
 ZEND_API ZEND_INI_MH(OnUpdateReal);
 ZEND_API ZEND_INI_MH(OnUpdateString);
 ZEND_API ZEND_INI_MH(OnUpdateStringUnempty);

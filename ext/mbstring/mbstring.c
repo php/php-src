@@ -653,7 +653,7 @@ static PHP_INI_MH(OnUpdate_mbstring_encoding_translation)
 		new_value_length = sizeof("1");
 	}
 
-	OnUpdateInt(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
 	if (MBSTRG(encoding_translation)){
 		_php_mb_enable_encoding_translation(1);
@@ -677,7 +677,7 @@ PHP_INI_BEGIN()
 #endif /* ZEND_MULTIBYTE */
 	 PHP_INI_ENTRY("mbstring.substitute_character", NULL, PHP_INI_ALL, OnUpdate_mbstring_substitute_character)
 	 STD_PHP_INI_ENTRY("mbstring.func_overload", "0", PHP_INI_SYSTEM |
-	 PHP_INI_PERDIR, OnUpdateInt, func_overload, zend_mbstring_globals, mbstring_globals)
+	 PHP_INI_PERDIR, OnUpdateLong, func_overload, zend_mbstring_globals, mbstring_globals)
 	 	 								  
 	 STD_PHP_INI_BOOLEAN("mbstring.encoding_translation", "0",
 	 PHP_INI_SYSTEM | PHP_INI_PERDIR, OnUpdate_mbstring_encoding_translation, 

@@ -2162,7 +2162,7 @@ static HW_API_info_In *make_HW_API_info_In(zval *arg1) {
 }
 
 PHP_INI_BEGIN()
-//	STD_PHP_INI_ENTRY("hwapi.allow_persistent", "0", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_hwapi_globals, hwapi_globals)
+//	STD_PHP_INI_ENTRY("hwapi.allow_persistent", "0", PHP_INI_SYSTEM, OnUpdateLong, allow_persistent, zend_hwapi_globals, hwapi_globals)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(hwapi) {

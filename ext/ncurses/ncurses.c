@@ -75,7 +75,7 @@ ZEND_GET_MODULE(ncurses)
  */
 /* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("ncurses.value",      "42", PHP_INI_ALL, OnUpdateInt, global_value, zend_ncurses_globals, ncurses_globals)
+	STD_PHP_INI_ENTRY("ncurses.value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_ncurses_globals, ncurses_globals)
 	STD_PHP_INI_ENTRY("ncurses.string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_ncurses_globals, ncurses_globals)
 PHP_INI_END()
 */
