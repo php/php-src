@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - Fixed bug #21007 (html_errors off text-only output in phpinfo). (Marcus)
 - Fixed bug #20442 (upgraded bundled expat to 1.95.5). (Ilia)
 - Fixed bug #20155 (xmlrpc compile problem with ZE2). (Derick, Jan Schneider)
+- Made dirname() / strip_tags() binary-safe. (Moriyoshi)
 - Changed the length parameter in fgetss() to be optional. (Moriyoshi)
 - Changed ini parser to allow for handling of quoted multi-line values. (Ilia)
 - Changed get_extension_funcs() to return list of the built-in Zend Engine 
