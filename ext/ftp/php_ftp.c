@@ -581,7 +581,7 @@ PHP_FUNCTION(ftp_get)
 }
 /* }}} */
 
-/* {{{ proto inf ftp_async_get(resource stream, string local_file, string remote_file, int mode[, int resume_pos])
+/* {{{ proto int ftp_async_get(resource stream, string local_file, string remote_file, int mode[, int resume_pos])
    Retrieves a file from the FTP server asynchronly and writes it to a local file */
 PHP_FUNCTION(ftp_async_get)
 {
