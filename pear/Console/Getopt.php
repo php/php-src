@@ -80,7 +80,7 @@ class Console_Getopt {
         if ($long_options) {
             sort($long_options);
         }
-        if ($args[0]{0} != '-') {
+        if (isset($args[0]{0}) && $args[0]{0} != '-') {
             array_shift($args);
         }
         reset($args);
