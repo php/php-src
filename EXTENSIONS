@@ -298,6 +298,12 @@ PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           satellite
+PRIMARY MAINTAINER:  David Eriksson <eriksson@php.net>
+MAINTENANCE:         Odd Fixes
+STATUS:              Experimental
+SINCE:               4.0.3
+-------------------------------------------------------------------------------
 EXTENSION:           session
 PRIMARY MAINTAINER:  Sascha Schumann <sascha@schumann.cx>
 MAINTENANCE:         Maintained
