@@ -39,6 +39,7 @@ typedef struct {
 	pdo_sqlite_db_handle 	*H;
 	sqlite3_stmt *stmt;
 	unsigned pre_fetched:1;
+	unsigned done:1;
 } pdo_sqlite_stmt;
 
 extern pdo_driver_t pdo_sqlite_driver;
