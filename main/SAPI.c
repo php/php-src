@@ -266,6 +266,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 			newtype = emalloc(newlen + 1);
 	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
 			strlcat(newtype, ";charset=", newlen + 1);
+            strlcat(newtype, charset, newlen + 1);
 			efree(*mimetype);
 			*mimetype = newtype;
 			return newlen;
@@ -327,7 +328,8 @@ SAPI_API void sapi_activate(TSRMLS_D)
 			&&  (!strcmp(SG(request_info).request_method, "POST")
 				|| (PG(allow_webdav_methods) 
 					&& (!strcmp(SG(request_info).request_method, "PROPFIND")
-					|| !strcmp(SG(request_info).request_method, "PROPPATCH")				
+					|| !strcmp(SG(request_info).request_method, "PROPPATCH")
+                    || !strcmp(SG(request_info).request_method, "MKCOL")
 					|| !strcmp(SG(request_info).request_method, "PUT")
 					|| !strcmp(SG(request_info).request_method, "MOVE")
 					|| !strcmp(SG(request_info).request_method, "COPY")
@@ -546,8 +548,6 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 					strlcat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
 					sapi_header.header_len = newlen - 1;
-					colon_offset = strchr(newheader, ':');
-					*colon_offset = '\0';
 					efree(header_line);
 				}
 				efree(mimetype);

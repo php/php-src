@@ -33,7 +33,7 @@ PHPAPI int php_request_startup_for_hook(TSRMLS_D);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI void php_request_shutdown_for_hook(void *dummy);
 PHPAPI void php_request_shutdown_for_exec(void *dummy);
-PHPAPI int php_module_startup(sapi_module_struct *sf);
+PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_modules, uint num_additional_modules);
 PHPAPI void php_module_shutdown(TSRMLS_D);
 PHPAPI void php_module_shutdown_for_exec(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
@@ -47,6 +47,7 @@ PHPAPI int php_lint_script(zend_file_handle *file TSRMLS_DC);
 
 PHPAPI void php_handle_aborted_connection(void);
 PHPAPI int php_handle_auth_data(const char *auth TSRMLS_DC);
+PHPAPI void php_html_puts(const char *str, uint siz TSRMLS_DC);
 
 extern void php_call_shutdown_functions(void);
 
