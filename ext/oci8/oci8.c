@@ -53,19 +53,7 @@
 
 #include "php.h"
 
-#if PHP_API_VERSION < 19990421 
-  #include "internal_functions.h"
-  #include "php3_list.h"
-  #include "head.h"
-  #define HASH_DTOR (void (*)(void *))
-  #ifndef ZEND_MODULE_INFO_FUNC_ARGS
-  #define ZEND_MODULE_INFO_FUNC_ARGS void
-  #endif
-#else
-  #include "ext/standard/head.h"
-  #define php3tls_pval_destructor(a) zval_dtor(a)
-  #define HASH_DTOR (int (*)(void *))
-#endif
+#include "ext/standard/head.h"
 
 #if HAVE_OCI8
 
@@ -123,8 +111,10 @@ static void oci_debug(const char *format,...);
 
 static void _oci_close_conn(oci_connection *connection);
 static void _oci_free_stmt(oci_statement *statement);
-static void _oci_free_column(oci_out_column *column);
-static int _oci_free_descr(oci_descriptor *descr);
+
+static int _oci_column_dtor(void *data);
+static int _oci_descr_dtor(void *data);
+static int _oci_define_dtor(void *data);
 
 static oci_connection *oci_get_conn(int, const char *, HashTable *);
 static oci_statement *oci_get_stmt(int, const char *, HashTable *);
@@ -508,12 +498,14 @@ PHP_MINFO_FUNCTION(oci)
 }
 
 /* }}} */
-/* {{{ oci_free_define() */
+/* {{{ _oci_define_dtor() */
 
 static int
-oci_free_define(oci_define *define)
+_oci_define_dtor(void *data)
 {
-	oci_debug("oci_free_define: %s",define->name);
+	oci_define *define = (oci_define *) data;
+
+	oci_debug("_oci_define_dtor: %s",define->name);
 
 	if (define->name) {
 		efree(define->name);
@@ -523,17 +515,15 @@ oci_free_define(oci_define *define)
 }
 
 /* }}} */
-/* {{{ _oci_free_column() */
+/* {{{ _oci_column_dtor() */
 
-static void
-_oci_free_column(oci_out_column *column)
-{
-	if (! column) {
-		return;
-	}
+static int
+_oci_column_dtor(void *data)
+{	
+	oci_out_column *column = (oci_out_column *) data;
 
 	/*
-	oci_debug("_oci_free_column: %s",column->name);
+	oci_debug("_oci_column_dtor: %s",column->name);
 	*/
 
 	if (column->data) {
@@ -550,7 +540,7 @@ _oci_free_column(oci_out_column *column)
 		efree(column->name);
 	}
 
-	/* efree(column); XXX php cleares this for us */
+	return 1;
 }
 
 /* }}} */
@@ -1024,7 +1014,7 @@ oci_execute(oci_statement *statement, char *func,ub4 mode, HashTable *list)
 
 		statement->columns = emalloc(sizeof(HashTable));
 		if (!statement->columns ||
-			zend_hash_init(statement->columns, 13, NULL,HASH_DTOR _oci_free_column, 0) == FAILURE) {
+			zend_hash_init(statement->columns, 13, NULL,_oci_column_dtor, 0) == FAILURE) {
 			/* out of memory */
 			return 0;
 		}
@@ -1335,7 +1325,7 @@ oci_fetch(oci_statement *statement, ub4 nrows, char *func)
 				continue;
 			}
 			
-			php3tls_pval_destructor(column->define->pval);
+			pval_destructor(column->define->pval);
 
 			oci_make_pval(column->define->pval,statement,column,"OCIFetch",0);
 		}
@@ -1901,12 +1891,14 @@ _oci_close_user(oci_session *session)
 }
 
 /* }}} */
-/* {{{ _oci_free_descr()
+/* {{{ _oci_descr_dtor()
  */
 
 static int
-_oci_free_descr(oci_descriptor *descr)
+_oci_descr_dtor(void *data)
 {
+	oci_descriptor *descr = (oci_descriptor *) data;
+
     oci_debug("oci_free_descr: %x",descr->ocidescr);
 
     OCIDescriptorFree(descr->ocidescr, descr->type);
@@ -2195,7 +2187,7 @@ static void oci_do_connect(INTERNAL_FUNCTION_PARAMETERS,int persistent,int exclu
 
 	connection->descriptors = emalloc(sizeof(HashTable));
 	if (!connection->descriptors ||
-		zend_hash_init(connection->descriptors, 13, NULL,HASH_DTOR _oci_free_descr, 0) == FAILURE) {
+		zend_hash_init(connection->descriptors, 13, NULL, _oci_descr_dtor, 0) == FAILURE) {
         goto CLEANUP;
     }
 
@@ -2258,7 +2250,7 @@ PHP_FUNCTION(ocidefinebyname)
 	if (statement->defines == NULL) {
 		statement->defines = emalloc(sizeof(HashTable));
 		if (statement->defines == NULL ||
-			zend_hash_init(statement->defines, 13, NULL,HASH_DTOR oci_free_define, 0) == FAILURE) {
+			zend_hash_init(statement->defines, 13, NULL, _oci_define_dtor, 0) == FAILURE) {
 			/* out of memory */
 			RETURN_FALSE;
 		}
@@ -3011,6 +3003,7 @@ PHP_FUNCTION(ocifetchinto)
 	}
 
 	if (array->type != IS_ARRAY) {
+		pval_destructor(array);
 		if (array_init(array) == FAILURE) {
 			php_error(E_WARNING, "OCIFetchInto: unable to convert arg 2 to array");
 			RETURN_FALSE;
@@ -3018,10 +3011,6 @@ PHP_FUNCTION(ocifetchinto)
 	}
 
 	zend_hash_internal_pointer_reset(array->value.ht);
-
-#if PHP_API_VERSION < 19990421
-	element = emalloc(sizeof(pval));
-#endif
 
 	for (i = 0; i < statement->ncolumns; i++) {
 		column = oci_get_col(statement, i + 1, 0, "OCIFetchInto");
@@ -3034,35 +3023,21 @@ PHP_FUNCTION(ocifetchinto)
 		}
 
 		if ((mode & OCI_NUM) || (! (mode & OCI_ASSOC))) { /* OCI_NUM is default */
-#if PHP_API_VERSION >= 19990421
 			MAKE_STD_ZVAL(element);
-#endif
+
 			oci_make_pval(element,statement,column, "OCIFetchInto",mode);
 
-#if PHP_API_VERSION >= 19990421
 			zend_hash_index_update(array->value.ht, i, (void *)&element, sizeof(pval*), NULL);
-#else
-			zend_hash_index_update(array->value.ht, i, (void *)element, sizeof(pval), NULL);
-#endif
 		}
 
 		if (mode & OCI_ASSOC) {
-#if PHP_API_VERSION >= 19990421
 			MAKE_STD_ZVAL(element);
-#endif
+
 			oci_make_pval(element,statement,column, "OCIFetchInto",mode);
 
-#if PHP_API_VERSION >= 19990421
 		  	zend_hash_update(array->value.ht, column->name, column->name_len+1, (void *)&element, sizeof(pval*), NULL);
-#else
-		  	zend_hash_update(array->value.ht, column->name, column->name_len+1, (void *)element, sizeof(pval), NULL);
-#endif
 		}
 	}
-
-#if PHP_API_VERSION < 19990421
-	efree(element); 
-#endif
 
 	RETURN_LONG(statement->ncolumns);
 }
@@ -3077,11 +3052,7 @@ PHP_FUNCTION(ocifetchstatement)
 	pval *stmt, *array, *element, *fmode, *tmp;
 	oci_statement *statement;
 	oci_out_column **columns;
-#if PHP_API_VERSION < 19990421
-	pval **outarrs;
-#else
 	pval ***outarrs;
-#endif
 	ub4 nrows = 1;
 	int i;
 	int mode = OCI_NUM;
@@ -3102,6 +3073,7 @@ PHP_FUNCTION(ocifetchstatement)
 	}
 
 	if (array->type != IS_ARRAY) {
+		pval_destructor(array);
 		if (array_init(array) == FAILURE) {
 			php_error(E_WARNING, "OCIFetchStatement: unable to convert arg 2 to array");
 			RETURN_FALSE;
@@ -3109,63 +3081,32 @@ PHP_FUNCTION(ocifetchstatement)
 	}
 
 	columns = emalloc(statement->ncolumns * sizeof(oci_out_column *));
-#if PHP_API_VERSION < 19990421
-	outarrs = emalloc(statement->ncolumns * sizeof(pval));
-#else
 	outarrs = emalloc(statement->ncolumns * sizeof(pval*));
-#endif
-
-#if PHP_API_VERSION < 19990421
-	tmp = emalloc(sizeof(pval));
-#endif
 
 	for (i = 0; i < statement->ncolumns; i++) {
 		columns[ i ] = oci_get_col(statement, i + 1, 0, "OCIFetchStatement");
 
-#if PHP_API_VERSION >= 19990421
 		MAKE_STD_ZVAL(tmp);
-#endif
 
 		array_init(tmp);
 
 		memcpy(namebuf,columns[ i ]->name, columns[ i ]->name_len);
 		namebuf[ columns[ i ]->name_len ] = 0;
 				
-#if PHP_API_VERSION < 19990421
-		zend_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) tmp, sizeof(pval), (void **) &(outarrs[ i ]));
-#else
 		zend_hash_update(array->value.ht, namebuf, columns[ i ]->name_len+1, (void *) &tmp, sizeof(pval*), (void **) &(outarrs[ i ]));
-#endif
 	}
-
-#if PHP_API_VERSION < 19990421
-	efree(tmp);
-#endif
-
-#if PHP_API_VERSION < 19990421
-	element = emalloc(sizeof(pval));
-#endif
 
 	while (oci_fetch(statement, nrows, "OCIFetchStatement")) {
 		for (i = 0; i < statement->ncolumns; i++) {
-#if PHP_API_VERSION >= 19990421
 			MAKE_STD_ZVAL(element);
-#endif
+
 			oci_make_pval(element,statement,columns[ i ], "OCIFetchStatement",OCI_RETURN_LOBS);
 
-#if PHP_API_VERSION < 19990421
-			zend_hash_index_update(outarrs[ i ]->value.ht, rows, (void *)element, sizeof(pval), NULL);
-#else
 			zend_hash_index_update((*(outarrs[ i ]))->value.ht, rows, (void *)&element, sizeof(pval*), NULL);
-#endif
 		}
 		rows++;
 	}
 	
-#if PHP_API_VERSION < 19990421
-	efree(element);
-#endif
-
 	efree(columns);
 	efree(outarrs);
 
