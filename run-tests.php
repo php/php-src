@@ -248,6 +248,24 @@ Time taken      : " . sprintf("%4d seconds", $end_time - $start_time) . "
 =====================================================================
 ";
 
+$failed_test_summary = '';
+if (count($GLOBALS['__PHP_FAILED_TESTS__'])) {
+$failed_test_summary .= "
+=====================================================================
+FAILED TEST SUMMARY
+---------------------------------------------------------------------
+";
+foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $failed_test_data) {
+$failed_test_summary .=  $failed_test_data['test_name'] . "\n";
+}
+$failed_test_summary .=  "=====================================================================
+";
+}
+
+if ($failed_test_summary && !getenv('NO_PHPTEST_SUMMARY')) {
+	echo $failed_test_summary;
+}
+
 define('PHP_QA_EMAIL', 'php-qa@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 
@@ -275,6 +293,8 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		$failed_tests_data .= "Bison:\n". shell_exec('bison --version'). "\n";
 		$failed_tests_data .= "Compiler:\n". shell_exec(getenv('CC').' -v 2>&1'). "\n";
 		$failed_tests_data .= "\n\n";
+		
+		$failed_tests_data .= $failed_test_summary . "\n";
 		
 		foreach ($GLOBALS['__PHP_FAILED_TESTS__'] as $test_info) {
 			$failed_tests_data .= $sep . $test_info['name'];
@@ -576,6 +596,7 @@ COMMAND $cmd
 
 	$GLOBALS['__PHP_FAILED_TESTS__'][] = array(
 						'name' => $file,
+						'test_name' => $tested,
 						'output' => ereg_replace('\.phpt$','.log', $file),
 						'diff'   => ereg_replace('\.phpt$','.diff', $file)
 						);
