@@ -39,14 +39,14 @@ static void start_rwprep(struct rfc2045ac * this_ptr, struct rfc2045 *p)
 {
 	this_ptr->currwp = p;
 	this_ptr->curlinepos=0;
-	this_ptr->curstate=raw;
+	this_ptr->curstate=rfc2045ac_raw;
 	if (p->content_transfer_encoding)
 	{
 		if (strcmp(p->content_transfer_encoding,
 			"quoted-printable") == 0)
-			this_ptr->curstate = quotedprint;
+			this_ptr->curstate = rfc2045ac_quotedprint;
 		else if (strcmp(p->content_transfer_encoding, "base64") == 0)
-			this_ptr->curstate = base64;
+			this_ptr->curstate = rfc2045ac_base64;
 	}
 }
 
@@ -56,14 +56,14 @@ static void do_rwprep(struct rfc2045ac * this_ptr, const char * p, size_t n)
 		return;
 	for ( ; n; --n, ++p)
 		switch (this_ptr->curstate)	{
-		case quotedprint:
+		case rfc2045ac_quotedprint:
 			if (*p == '=')
 			{
-				this_ptr->curstate = qpseeneq;
+				this_ptr->curstate = rfc2045ac_qpseeneq;
 				continue;
 			}
 			/* FALLTHRU */
-		case raw:
+		case rfc2045ac_raw:
 			if (*p == '\r' || *p == '\n')
 				this_ptr->curlinepos = 0;
 			else if (++this_ptr->curlinepos > 500)
@@ -71,25 +71,25 @@ static void do_rwprep(struct rfc2045ac * this_ptr, const char * p, size_t n)
 			if ((unsigned char)*p >= 127)
 				this_ptr->currwp->has8bitchars = 1;
 			break;
-		case qpseeneq:
+		case rfc2045ac_qpseeneq:
 			if (*p == '\n')
 			{
-				this_ptr->curstate = quotedprint;
+				this_ptr->curstate = rfc2045ac_quotedprint;
 				continue;
 			}
 			if (isspace((int)(unsigned char)*p))	continue; /* Ignore WSP */
 			this_ptr->statechar = *p;
-			this_ptr->curstate = qpseeneqh;
+			this_ptr->curstate = rfc2045ac_qpseeneqh;
 			continue;
-		case qpseeneqh:
-			this_ptr->curstate = quotedprint;
+		case rfc2045ac_qpseeneqh:
+			this_ptr->curstate = rfc2045ac_quotedprint;
 			if ( (unsigned char)
 				( (h2nyb(this_ptr->statechar) << 4) + h2nyb(*p) ) >= 127
 				) this_ptr->currwp->has8bitchars=1;
 			if (++this_ptr->curlinepos > 500)
 				this_ptr->currwp->haslongline=1;
 			continue;
-		case base64:
+		case rfc2045ac_base64:
 			break;
 		}
 }
