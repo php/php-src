@@ -1,3 +1,145 @@
+2000-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/php_apache.h
+      sapi/apache2filter/sapi_apache2.c:
+    POST handler for my ubercool new Apache 2.0 function ap_get_req_body.
+
+2000-10-27  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/printer/printer.c:
+    Fixing problems in function caused by wrong use of function.
+
+    * ext/printer/php_printer.h: Adding missing prototype
+
+2000-10-27  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ftp/ftp.c:
+    Fixed PR: 6730. And it is mentioned also in RFC 959 to be this way.
+
+    * ext/ftp/ftp.c: Fixes PR: 7245
+
+2000-10-27  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c: Adding cvs ID's and ading code in hex_to_rgb()
+
+    * ext/standard/math.c:
+    Making _php_math_longtobase() and _php_math_basetolong() callable from DLL and SO modules
+
+2000-10-27  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/printer.c: added printer_draw_elipse()
+
+2000-10-27  Frank M. Kromann  <fmk@swwwing.com>
+
+    * ext/printer/printer.c:
+    Adding checks on pointers before returning values.
+
+2000-10-27  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/printer/php_printer.h
+      ext/printer/printer.c
+      ext/printer/printer.dsp
+      win32/php_modules.dsw:
+    added "printer" extension, to access printers under win32
+
+2000-10-27  Sterling Hughes  <Sterling.Hughes@pentap.net>
+
+    * ext/curl/curl.c
+      ext/curl/php_curl.h
+      ext/sablot/php_sablot.h
+      ext/sablot/sablot.c
+      ext/sockets/sockets.c
+      ext/swf/php_swf.h
+      ext/swf/swf.c
+      ext/bz2/bz2.c
+      ext/bz2/php_bz2.h: New e-mail address.
+
+2000-10-27  Frank M. Kromann  <fmk@swwwing.com>
+
+    * main/fopen-wrappers.c: Kill compiler warning.
+
+2000-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    use puts instead of fprintf in log handler. no need for a format string.
+
+    * sapi/apache2filter/README: Some information about this handler
+
+2000-10-27  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c:
+    - Fixed array_rand() to shuffle results when the number of requested
+      elements is the same as the number of elements in the array. 
+
+2000-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Looks like transient buckets are limited to 4096 bytes, so split up writes.
+
+    * sapi/apache2filter/sapi_apache2.c: Add log message sapi handler.
+
+    Reenable pipelining requests. Looks like the problems are caused by the
+    cache, not pipelining.
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Apache 2.0 does some funky internal caching which works for static
+    content, but fails miserably in our context.
+
+    * sapi/apache2filter/sapi_apache2.c: speling
+
+2000-10-27  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/zlib/zlib.c: type fixes to make compilers happy
+
+2000-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/apache2filter/sapi_apache2.c: Add some comments
+
+    * sapi/apache2filter/sapi_apache2.c
+      sapi/cgi/cgi_main.c
+      sapi/thttpd/thttpd.c:
+    Leave initializing of auth_(user|password) to php_handle_auth_data().
+
+    * main/main.c:
+    Initialize auth_(user|password) to NULL, if data was not suitable.
+
+2000-10-27  Sam Ruby  <rubys@us.ibm.com>
+
+    * ext/java/reflect.java:
+    Allow strings to be passed to methods expecting primitive types.
+
+2000-10-27  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cgi/cgi_main.c:
+    The CGI RFC allows servers to pass Authorization data to the script,
+    if the server did not use the information contained therein.
+
+    See 6.1.5 and 11.2 of the proposed spec.
+
+    * sapi/apache2filter/sapi_apache2.c:
+    Handle cookies and make use of php_handle_auth_data.
+
+    * sapi/thttpd/thttpd.c: Use php_handle_auth_data
+
+    * main/main.c
+      main/php_main.h:
+    Utility function for sapi modules (it is not in SAPI.c, because it
+    relies on php_base64_encode).
+
+    * NEWS: bunch of changes
+
+    * ext/standard/head.c:
+    Allow users to specify whether they want to replace existing header fields.
+
+2000-10-27  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/hyperwave/hg_comm.c
+      ext/hyperwave/hg_comm.h
+      ext/hyperwave/hw.c
+      ext/hyperwave/php_hyperwave.h:
+    - added four functions to do fulltext query
+
 2000-10-22  Chris Vandomelen  <chrisv@b0rked.dhs.org>
 
     * php.ini-dist
