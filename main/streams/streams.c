@@ -1100,6 +1100,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 	size_t len = 0, max_len;
 	int step = CHUNK_SIZE;
 	int min_room = CHUNK_SIZE / 4;
+	php_stream_statbuf ssbuf;
 
 	if (buf)
 		*buf = NULL;
@@ -1129,9 +1130,20 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 			return mapped;
 		}
 	}
+	
+	/* avoid many reallocs by allocating a good sized chunk to begin with, if we can.
+	 * Note that the stream may be filtered, in which case the stat result may be inaccurate,
+	 * as the filter may inflate or deflate the number of bytes that we can read.
+	 * In order to avoid an upsize followed by a downsize of the buffer, overestimate by the
+	 * step size (which is 2K).
+	 * */
+	if (php_stream_stat(src, &ssbuf) == 0 && ssbuf.sb.st_size > 0) {
+		max_len = ssbuf.sb.st_size + step;
+	} else {
+		max_len = step;
+	}
 
-	ptr = *buf = pemalloc_rel_orig(step, persistent);
-	max_len = step;
+	ptr = *buf = pemalloc_rel_orig(max_len, persistent);
 
 	while((ret = php_stream_read(src, ptr, max_len - len)))	{
 		len += ret;
