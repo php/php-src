@@ -39,8 +39,7 @@ AC_DEFUN(PHP_MYSQL_SOCKET_SEARCH, [
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.
-                          If unspecified, the bundled MySQL library will be used.])
+[  --with-mysql[=DIR]      Include MySQL support. DIR is the MySQL base directory.])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
 [  --with-mysql-sock[=DIR]   MySQL: Location of the MySQL unix socket pointer.
@@ -55,7 +54,7 @@ fi
 if test "$PHP_MYSQL" != "no"; then
   AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
 
-  AC_MSG_CHECKING(for MySQL UNIX socket location)
+  AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK
     AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "$MYSQL_SOCK", [ ])
@@ -65,21 +64,21 @@ if test "$PHP_MYSQL" != "no"; then
   else
     AC_MSG_RESULT([no])
   fi
-fi
 
-if test "$PHP_MYSQL" != "no"; then
-  for i in /usr /usr/local $PHP_MYSQL; do
+  for i in $PHP_MYSQL /usr/local /usr; do
     if test -r $i/include/mysql/mysql.h; then
       MYSQL_DIR=$i
       MYSQL_INC_DIR=$i/include/mysql
+      break
     elif test -r $i/include/mysql.h; then
       MYSQL_DIR=$i
       MYSQL_INC_DIR=$i/include
+      break
     fi
   done
 
   if test -z "$MYSQL_DIR"; then
-    AC_MSG_ERROR(Cannot find MySQL header files under $PHP_MYSQL)
+    AC_MSG_ERROR([Cannot find MySQL header files under $PHP_MYSQL])
   fi
 
   for i in lib lib/mysql; do
@@ -87,7 +86,7 @@ if test "$PHP_MYSQL" != "no"; then
   done
 
   if test -z "$MYSQL_LIB_DIR"; then
-    AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
+    AC_MSG_ERROR([Cannot find libmysqlclient under $MYSQL_DIR])
   fi
 
   PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],
@@ -117,4 +116,13 @@ if test "$PHP_MYSQL" != "no"; then
   PHP_ADD_INCLUDE($MYSQL_INC_DIR)
 
   PHP_NEW_EXTENSION(mysql, php_mysql.c, $ext_shared)
+
+  MYSQL_MODULE_TYPE=external
+  MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
+  MYSQL_INCLUDE=-I$MYSQL_INC_DIR
+ 
+  PHP_SUBST(MYSQL_SHARED_LIBADD)
+  PHP_SUBST_OLD(MYSQL_MODULE_TYPE)
+  PHP_SUBST_OLD(MYSQL_LIBS)
+  PHP_SUBST_OLD(MYSQL_INCLUDE)
 fi
