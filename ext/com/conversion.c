@@ -86,7 +86,7 @@ PHPAPI void php_pval_to_variant(pval *pval_arg, VARIANT *var_arg, int codepage T
 	}
 
 	if (pval_arg->is_ref) {	/* deprecated, implemented for downwards compatiblity */
-		type |= VT_BYREF;
+//		type |= VT_BYREF;
 	}
 
 	pval_to_variant_ex(pval_arg, var_arg, type, codepage TSRMLS_CC);

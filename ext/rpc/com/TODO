@@ -1,5 +1,5 @@
 1) Multi-dimenstional array support
-2) IErrorInfo
+-- done 2) IErrorInfo
 3) WithEvents
 4) Documentation (internal and user) and howtos
 5) IEnumVariant::All() which would be like IEnumVariant::Next(IDispatch::Count)
@@ -8,9 +8,17 @@
 8) Test suite (Needs test component)
 9) reduce the need for VARIANT()
 10) lets try if we are able to call non IDispatch - only Typelib components
-11) IEnumVariant::Next() without parameter should only return an object, not an array with one element
+-- done 11) IEnumVariant::Next() without parameter should only return an object, not an array with one element
+12) VARIANT->value as lvalue
 
 
-these seem to be done:
+ad 6.) check vbsample.php (new VARIANT(*, *|VT_BYREF)) GPs
+ad 4.) faq (i've collected a few questions from various lists)
 
-2) 6) 11)
+to be discussed:
+
+- dcom inporc issue
+- mts support (getcontext)
+- adsi support (ads* functions)
+- winapi interface
+- try serialisation support (if component implements IPersist)
