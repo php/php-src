@@ -201,7 +201,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 			}
 		}
 	} else {
-		RETVAL_NULL();
+		RETURN_NULL();
 	}
 
 	if (itemnode) {

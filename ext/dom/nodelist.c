@@ -135,7 +135,7 @@ PHP_FUNCTION(dom_nodelist_item)
 			}
 		}
 	} else {
-		RETVAL_NULL();
+		RETURN_NULL();
 	}
 
 	if (itemnode) {
