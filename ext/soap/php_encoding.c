@@ -27,7 +27,6 @@
 /* zval type decode */
 static zval *to_zval_double(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data);
-static zval *to_zval_ulong(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_bool(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_string(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_stringr(encodeTypePtr type, xmlNodePtr data);
@@ -37,7 +36,6 @@ static zval *to_zval_map(encodeTypePtr type, xmlNodePtr data);
 static zval *to_zval_null(encodeTypePtr type, xmlNodePtr data);
 
 static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
-static xmlNodePtr to_xml_ulong(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_double(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 static xmlNodePtr to_xml_bool(encodeTypePtr type, zval *data, int style, xmlNodePtr parent);
 
@@ -161,7 +159,8 @@ encode defaultEncoding[] = {
 	{{XSD_UNSIGNEDBYTE, XSD_UNSIGNEDBYTE_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_UNSIGNEDSHORT, XSD_UNSIGNEDSHORT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 	{{XSD_UNSIGNEDINT, XSD_UNSIGNEDINT_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
-	{{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_ulong, to_xml_ulong},
+	{{XSD_UNSIGNEDLONG, XSD_UNSIGNEDLONG_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
+	{{XSD_INTEGER, XSD_INTEGER_STRING, XSD_NAMESPACE, NULL}, to_zval_long, to_xml_long},
 
 	{{XSD_ANYTYPE, XSD_ANYTYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
 	{{XSD_UR_TYPE, XSD_UR_TYPE_STRING, XSD_NAMESPACE, NULL}, guess_zval_convert, guess_xml_convert},
@@ -684,25 +683,6 @@ static zval *to_zval_long(encodeTypePtr type, xmlNodePtr data)
 	if (data && data->children) {
 		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
 			whiteSpace_collapse(data->children->content);
-			ZVAL_LONG(ret, atol(data->children->content));
-		} else {
-			soap_error0(E_ERROR, "Encoding: Violation of encoding rules");
-		}
-	} else {
-		ZVAL_NULL(ret);
-	}
-	return ret;
-}
-
-static zval *to_zval_ulong(encodeTypePtr type, xmlNodePtr data)
-{
-	zval *ret;
-	MAKE_STD_ZVAL(ret);
-	FIND_XML_NULL(data, ret);
-
-	if (data && data->children) {
-		if (data->children->type == XML_TEXT_NODE && data->children->next == NULL) {
-			whiteSpace_collapse(data->children->content);
 			errno = 0;
 			ret->value.lval = strtol(data->children->content, NULL, 0);
 			if (errno == ERANGE) { /* overflow */
@@ -723,38 +703,15 @@ static zval *to_zval_ulong(encodeTypePtr type, xmlNodePtr data)
 static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret;
-	zval tmp;
-
-	ret = xmlNewNode(NULL,"BOGUS");
-	xmlAddChild(parent, ret);
-	FIND_ZVAL_NULL(data, ret, style);
-
-	tmp = *data;
-	zval_copy_ctor(&tmp);
-	if (Z_TYPE(tmp) != IS_LONG) {
-		convert_to_long(&tmp);
-	}
-	convert_to_string(&tmp);
-	xmlNodeSetContentLen(ret, Z_STRVAL(tmp), Z_STRLEN(tmp));
-	zval_dtor(&tmp);
-
-	if (style == SOAP_ENCODED) {
-		set_ns_and_type(ret, type);
-	}
-	return ret;
-}
-
-static xmlNodePtr to_xml_ulong(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
-{
-	xmlNodePtr ret;
 
 	ret = xmlNewNode(NULL,"BOGUS");
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
 	if (Z_TYPE_P(data) == IS_DOUBLE) {
-		char s[16];
-		sprintf(s, "%0.0f",Z_DVAL_P(data));
+		char s[256];
+
+		sprintf(s, "%0.0f",floor(Z_DVAL_P(data)));
 		xmlNodeSetContent(ret, s);
 	} else {
 		zval tmp = *data;
