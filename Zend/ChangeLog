@@ -1,3 +1,8 @@
+2003-03-13  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * zend_API.c:
+      Fix warning in va_start().
+
 2003-03-12  Andrei Zmievski  <andrei@gravitonic.com>
 
     * zend_API.c:
