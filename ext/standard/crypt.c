@@ -116,6 +116,8 @@ static void php_to64(char *s, long v, int n)	{
 	} 
 } 
 
+/* {{{ proto string crypt(string str [, string salt])
+   Encrypt a string */
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN+1];
@@ -175,7 +177,7 @@ PHP_FUNCTION(crypt)
 	return_value->type = IS_STRING;
 	pval_copy_constructor(return_value);
 }
-
+/* }}} */
 #endif
 
 
