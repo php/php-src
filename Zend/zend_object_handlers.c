@@ -516,7 +516,7 @@ inline zend_function *zend_check_private(zend_function *fbc, zend_class_entry *c
 
 /* Ensures that we're allowed to call a protected method.
  */
-inline int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
+int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 {
 	zend_class_entry *fbc_scope = ce;
 

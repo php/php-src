@@ -26,7 +26,9 @@
 
 static inline void zend_objects_call_destructor(zend_object *object, zend_object_handle handle TSRMLS_DC)
 {
-	if (object->ce->destructor) {
+	zend_function *destructor = object->ce->destructor;
+
+	if (destructor) {
 		zval *obj;
 		zval *destructor_func_name;
 		zval *retval_ptr;
@@ -38,12 +40,25 @@ static inline void zend_objects_call_destructor(zend_object *object, zend_object
 		obj->value.obj.handlers = &std_object_handlers;
 		zval_copy_ctor(obj);
 
-
 		/* FIXME: Optimize this so that we use the old_object->ce->destructor function pointer instead of the name */
 		MAKE_STD_ZVAL(destructor_func_name);
 		destructor_func_name->type = IS_STRING;
 		destructor_func_name->value.str.val = estrndup("__destruct", sizeof("__destruct")-1);
 		destructor_func_name->value.str.len = sizeof("__destruct")-1;
+
+		if (destructor->op_array.fn_flags & ZEND_ACC_PRIVATE) {
+			/* Ensure that if we're calling a private function, we're allowed to do so.
+			 */
+			if (object->ce != EG(scope)) {
+				zend_error(E_ERROR, "Call to private destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		} else if ((destructor->common.fn_flags & ZEND_ACC_PROTECTED)) {
+			/* Ensure that if we're calling a protected function, we're allowed to do so.
+			 */
+			if (!zend_check_protected(destructor->common.scope, EG(scope))) {
+				zend_error(E_ERROR, "Call to protected destructor from context '%s'", EG(scope) ? EG(scope)->name : "");
+			}
+		}
 
 		ZEND_INIT_SYMTABLE(&symbol_table);
 		
