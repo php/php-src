@@ -1596,10 +1596,12 @@ ZEND_API char *zend_str_tolower_copy(char *str, unsigned int length)
 ZEND_API void zend_str_tolower(char *str, unsigned int length)
 {
 	register char *p=str;
-	
-	do {
-		p[length] = tolower(p[length]);
-	} while (length--);
+	register char *end = str + length;
+
+	while (p < end) {
+		*p = tolower(*p);
+		p++;
+	}
 }
 
 ZEND_API int zend_binary_strcmp(char *s1, uint len1, char *s2, uint len2)
