@@ -1586,25 +1586,30 @@ PHP_FUNCTION(imagecolorat)
 	
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, IM, -1, "Image", le_gd);
 
-#if HAVE_LIBGD20
-	if(im->trueColor) {
-		php_error(E_WARNING, "ImageColorAt does not work on TrueColor images");
-		RETURN_FALSE;
-	}
-#endif
-
 	convert_to_long_ex(x);
 	convert_to_long_ex(y);
 
-	if (im->pixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
-#if HAVE_LIBGD13
-		RETURN_LONG(im->pixels[Z_LVAL_PP(y)][Z_LVAL_PP(x)]);
-#else
-		RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
-#endif
+#if HAVE_LIBGD20
+	if(gdImageTrueColor(im)) {
+		if (im->tpixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
+			RETURN_LONG(im->tpixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
+		} else {
+			RETURN_FALSE;
+		}
 	} else {
-		RETURN_FALSE;
+#endif
+		if (im->pixels && gdImageBoundsSafe(im, Z_LVAL_PP(x), Z_LVAL_PP(y))) {
+#if HAVE_LIBGD13
+			RETURN_LONG(im->pixels[Z_LVAL_PP(y)][Z_LVAL_PP(x)]);
+#else
+			RETURN_LONG(im->pixels[Z_LVAL_PP(x)][Z_LVAL_PP(y)]);
+#endif
+		} else {
+			RETURN_FALSE;
+		}
+#if HAVE_LIBGD20
 	}
+#endif
 }
 /* }}} */
 
@@ -1771,7 +1776,17 @@ PHP_FUNCTION(imagecolorsforindex)
 
 	convert_to_long_ex(index);
 	col = Z_LVAL_PP(index);
-	
+#if HAVE_LIBGD20
+	if ((col >= 0 && gdImageTrueColor(im)) || (!gdImageTrueColor(im) && col >= 0 && col < gdImageColorsTotal(im))) {
+		if (array_init(return_value) == FAILURE) {
+			RETURN_FALSE;
+		}
+		add_assoc_long(return_value,"red",  gdImageRed(im,col));
+		add_assoc_long(return_value,"green", gdImageGreen(im,col));
+		add_assoc_long(return_value,"blue", gdImageBlue(im,col));
+		add_assoc_long(return_value,"alpha", gdImageAlpha(im,col));
+	} 
+#else
 	if (col >= 0 && col < gdImageColorsTotal(im)) {
 		if (array_init(return_value) == FAILURE) {
 			RETURN_FALSE;
@@ -1779,7 +1794,9 @@ PHP_FUNCTION(imagecolorsforindex)
 		add_assoc_long(return_value,"red",  im->red[col]);
 		add_assoc_long(return_value,"green", im->green[col]);
 		add_assoc_long(return_value,"blue", im->blue[col]);
-	} else {
+	}
+#endif
+	else {
 		php_error(E_WARNING, "Color index out of range");
 		RETURN_FALSE;
 	}
