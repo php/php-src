@@ -77,7 +77,7 @@ zend_module_entry readline_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(readline),
 	NULL, 
-    NO_VERSION_YET,
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -87,8 +87,8 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-    using_history();
-	return SUCCESS;
+    	using_history();
+    	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(readline)
@@ -229,7 +229,7 @@ PHP_FUNCTION(readline_add_history)
 	pval **arg;
 	int ac = ZEND_NUM_ARGS();
 
-	if (ac < 1 || ac > 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
+	if (ac != 1 || zend_get_parameters_ex(ac, &arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_string_ex(arg);
@@ -246,7 +246,7 @@ PHP_FUNCTION(readline_clear_history)
 {
 	int ac = ZEND_NUM_ARGS();
 
-	if (ac < 0 || ac > 0) {
+	if (ac != 0) {
 		WRONG_PARAM_COUNT;
 	}
 
