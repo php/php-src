@@ -468,7 +468,7 @@ ZEND_API void start_memory_manager(TSRMLS_D)
 }
 
 
-ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
+ZEND_API void shutdown_memory_manager(int silent, int full_shutdown TSRMLS_DC)
 {
 #if ZEND_DEBUG || !defined(ZEND_MM)
 	zend_mem_header *p, *t;
@@ -477,13 +477,33 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 	zend_uint grand_total_leaks=0;
 #endif
 
+#if !ZEND_DISABLE_MEMORY_CACHE
+	/* Free memory cache even on partial shutdown to avoid fragmentation */
+	if (1 || full_shutdown) {
+		unsigned int i, j;
+		zend_mem_header *ptr;
+
+		for (i=1; i<MAX_CACHED_MEMORY; i++) {
+			for (j=0; j<AG(cache_count)[i]; j++) {
+				ptr = (zend_mem_header *) AG(cache)[i][j];
+#  if MEMORY_LIMIT
+				AG(allocated_memory) -= REAL_SIZE(ptr->size);
+#  endif
+				REMOVE_POINTER_FROM_LIST(ptr);
+				ZEND_DO_FREE(ptr);
+			}
+			AG(cache_count)[i] = 0;
+		}
+	}
+#endif /* !ZEND_DISABLE_MEMORY_CACHE */
+
 #if defined(ZEND_MM) && !ZEND_DEBUG
-	if (clean_cache) {
+	if (full_shutdown) {
 		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
 #elif defined(ZEND_WIN32) && !ZEND_DEBUG
-	if (clean_cache && AG(memory_heap)) {
+	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
 		return;
 	}
@@ -505,25 +525,6 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		}
 	}
 #endif /* ZEND_ENABLE_FAST_CACHE */
-
-#if !ZEND_DISABLE_MEMORY_CACHE && !defined(ZEND_MM)
-	if (1 || clean_cache) {
-		unsigned int i, j;
-		zend_mem_header *ptr;
-
-		for (i=1; i<MAX_CACHED_MEMORY; i++) {
-			for (j=0; j<AG(cache_count)[i]; j++) {
-				ptr = (zend_mem_header *) AG(cache)[i][j];
-#if MEMORY_LIMIT
-				AG(allocated_memory) -= REAL_SIZE(ptr->size);
-#endif
-				REMOVE_POINTER_FROM_LIST(ptr);
-				ZEND_DO_FREE(ptr);
-			}
-			AG(cache_count)[i] = 0;
-		}
-	}
-#endif /* !ZEND_DISABLE_MEMORY_CACHE */
 
 #if ZEND_DEBUG || !defined(ZEND_MM)
 	p = AG(head);
@@ -584,7 +585,7 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 		zval display_memory_cache_stats;
 		int i, j;
 
-		if (clean_cache) {
+		if (full_shutdown) {
 			/* we're shutting down completely, don't even touch the INI subsystem */
 			break;
 		}
@@ -622,12 +623,12 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache TSRMLS_DC)
 #endif
 
 #if defined(ZEND_MM) && ZEND_DEBUG
-	if (clean_cache) {
+	if (full_shutdown) {
 		zend_mm_shutdown(&AG(mm_heap));
 		return;
 	}
 #elif defined(ZEND_WIN32) && ZEND_DEBUG
-	if (clean_cache && AG(memory_heap)) {
+	if (full_shutdown && AG(memory_heap)) {
 		HeapDestroy(AG(memory_heap));
 		return;
 	}
