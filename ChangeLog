@@ -1,3 +1,64 @@
+2000-06-18  Andi Gutmans  <andi@php.net>
+
+    * ext/standard/image.c: - Nuke warning
+
+2000-06-18  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/mcrypt/mcrypt.c: No response from Sascha so changed to lowercase.
+
+    * ext/ldap/ldap.c
+      ext/mcrypt/mcrypt.c
+      ext/informix/ifx.ec: More protos.
+
+2000-06-18  Holger Zimmermann  <zimpel@t-online.de>
+
+    * sapi/pi3web/pi3web_sapi.c: Changed strtok_r to php_strtok_r
+
+2000-06-18  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Fix return type in proto once again...
+
+2000-06-18  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/gd/gd.c
+      ext/hyperwave/hw.c
+      ext/imap/php_imap.c
+      ext/pgsql/pgsql.c: Some protos fixed.
+
+2000-06-18  Jouni Ahto  <jah@mork.net>
+
+    * ext/pgsql/pgsql.c:
+    - Fix return type in proto.
+
+2000-06-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/nsapi/config.m4
+      sapi/pi3web/config.m4: Cosmetic cleanups
+
+2000-06-18  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/string.c:
+    (implode), (strtr) no longer touch the internal array-pointer.
+
+    * ext/standard/var.c:
+    (serialize) no longer touches the internal array-pointer
+
+2000-06-18  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/pi3web/pi3web_sapi.c: Readd pi3web_sapi.c and reset flags.
+
+2000-06-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: One more place.
+
+    * ext/standard/array.c:
+    - Modified in_array() to not touch array pointer. 
+
+2000-06-18  Rasmus Lerdorf  <rasmus@php.net>
+
+    * NEWS: Slightly more accurate description here
+
 2000-06-17  Andrei Zmievski  <andrei@ispi.net>
 
     * NEWS: Relic from cvs conflict?
