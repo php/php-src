@@ -1,6 +1,6 @@
 # Microsoft Developer Studio Project File - Name="php4dllts" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** NICHT BEARBEITEN **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
@@ -1920,6 +1920,10 @@ SOURCE=.\crypt_win32.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\md5crypt.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\win32\pwd.c
 # End Source File
 # Begin Source File
@@ -1965,6 +1969,10 @@ SOURCE=.\crypt_win32.h
 # Begin Source File
 
 SOURCE=..\win32\grp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\md5crypt.h
 # End Source File
 # Begin Source File
 
