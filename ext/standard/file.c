@@ -1310,7 +1310,7 @@ PHP_FUNCTION(stream_set_timeout)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval **arg1, **arg2;
-	int len;
+	int len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
