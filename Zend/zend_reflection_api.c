@@ -729,7 +729,6 @@ ZEND_METHOD(reflection_function, invoke)
 {
 	zval *retval_ptr;
 	zval ***params;
-	zval fname;
 	int result;
 	int argc = ZEND_NUM_ARGS();
 	zend_fcall_info fci;
@@ -746,11 +745,9 @@ ZEND_METHOD(reflection_function, invoke)
 		RETURN_FALSE;
 	}
 
-	ZVAL_STRING(&fname, fptr->common.function_name, 0);
-
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
-	fci.function_name = &fname;
+	fci.function_table = NULL;
+	fci.function_name = NULL;
 	fci.symbol_table = NULL;
 	fci.object_pp = NULL;
 	fci.retval_ptr_ptr = &retval_ptr;
@@ -959,7 +956,6 @@ ZEND_METHOD(reflection_method, invoke)
 	zval **object_pp;
 	reflection_object *intern;
 	zend_function *mptr;
-	zval fname;
 	int argc = ZEND_NUM_ARGS();
 	int result;
 	zend_fcall_info fci;
@@ -1016,11 +1012,9 @@ ZEND_METHOD(reflection_method, invoke)
 		object_pp = params[0];
 	}
 	
-	ZVAL_STRING(&fname, mptr->common.function_name, 0);
-
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
-	fci.function_name = &fname;
+	fci.function_table = NULL;
+	fci.function_name = NULL;
 	fci.symbol_table = NULL;
 	fci.object_pp = object_pp;
 	fci.retval_ptr_ptr = &retval_ptr;
