@@ -1411,7 +1411,7 @@ binary_assign_op_addr: {
 					if (opline->extended_value & ZEND_CTOR_CALL) {
 						/* constructor call */
 
-						if (opline->op1.op_type == IS_VAR) {
+						if (opline->op1.op_type == IS_VAR && !(opline->op1.u.EA.type & EXT_TYPE_UNUSED)) {
 							PZVAL_LOCK(*Ts[opline->op1.u.var].var.ptr_ptr);
 						}
 						if (opline->op2.op_type==IS_VAR) {
@@ -1839,9 +1839,11 @@ send_by_ref:
 					if (zend_hash_find(EG(class_table), class_name.value.str.val, class_name.value.str.len+1, (void **) &ce)==FAILURE) {
 						zend_error(E_ERROR, "Cannot instantiate non-existent class:  %s", class_name.value.str.val);
 					}
-					object_init_ex(&Ts[opline->result.u.var].tmp_var, ce);
-					Ts[opline->result.u.var].tmp_var.refcount=1;
-					Ts[opline->result.u.var].tmp_var.is_ref=1;
+					Ts[opline->result.u.var].var.ptr_ptr = &Ts[opline->result.u.var].var.ptr;
+					ALLOC_ZVAL(Ts[opline->result.u.var].var.ptr);
+					object_init_ex(Ts[opline->result.u.var].var.ptr, ce);
+					Ts[opline->result.u.var].var.ptr->refcount=1;
+					Ts[opline->result.u.var].var.ptr->is_ref=1;
 					zval_dtor(&class_name);
 					FREE_OP(&opline->op1, EG(free_op1));
 				}
