@@ -31,8 +31,7 @@
 
 #define DB2_DATA dba_db2_data *dba = info->dbf
 #define DB2_GKEY \
-	DBT gkey; \
-	memset(&gkey, 0, sizeof(gkey)); \
+	DBT gkey = {0}; \
 	gkey.data = (char *) key; gkey.size = keylen
 
 typedef struct {
@@ -67,13 +66,13 @@ DBA_OPEN_FUNC(db2)
 		filemode = Z_LVAL_PP(info->argv[0]);
 	}
 
-	if(!db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
-		info->dbf = malloc(sizeof(dba_db2_data));
-		memset(info->dbf, 0, sizeof(dba_db2_data));
-		((dba_db2_data *) info->dbf)->dbp = dbp;
-		return SUCCESS;
+	if(db_open(info->path, type, gmode, filemode, NULL, NULL, &dbp)) {
+		return FAILURE;
 	}
-	return FAILURE;
+
+	info->dbf = calloc(sizeof(dba_db2_data), 1);
+	((dba_db2_data *) info->dbf)->dbp = dbp;
+	return SUCCESS;
 }
 
 DBA_CLOSE_FUNC(db2)
@@ -87,47 +86,44 @@ DBA_CLOSE_FUNC(db2)
 
 DBA_FETCH_FUNC(db2)
 {
-	DBT gval;
-	char *new = NULL;
+	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
 	
-	memset(&gval, 0, sizeof(gval));
-	if(!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
-		if(newlen) *newlen = gval.size;
-		new = estrndup(gval.data, gval.size);
+	if(dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
+		return NULL;
 	}
-	return new;
+
+	if(newlen) *newlen = gval.size;
+	return estrndup(gval.data, gval.size);
 }
 
 DBA_UPDATE_FUNC(db2)
 {
-	DBT gval;
+	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
 	
-	memset(&gval, 0, sizeof(gval));
 	gval.data = (char *) val;
 	gval.size = vallen;
 
-	if(!dba->dbp->put(dba->dbp, NULL, &gkey, &gval, 
+	if(dba->dbp->put(dba->dbp, NULL, &gkey, &gval, 
 				mode == 1 ? DB_NOOVERWRITE : 0)) {
-		return SUCCESS;
+		return FAILURE;
 	}
-	return FAILURE;
+	return SUCCESS;
 }
 
 DBA_EXISTS_FUNC(db2)
 {
-	DBT gval;
+	DBT gval = {0};
 	DB2_DATA;
 	DB2_GKEY;
 	
-	memset(&gval, 0, sizeof(gval));
-	if(!dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
-		return SUCCESS;
+	if(dba->dbp->get(dba->dbp, NULL, &gkey, &gval, 0)) {
+		return FAILURE;
 	}
-	return FAILURE;
+	return SUCCESS;
 }
 
 DBA_DELETE_FUNC(db2)
@@ -144,9 +140,9 @@ DBA_FIRSTKEY_FUNC(db2)
 
 	if(dba->cursor) {
 		dba->cursor->c_close(dba->cursor);
+		dba->cursor = NULL;
 	}
 
-	dba->cursor = NULL;
 #if (DB_VERSION_MAJOR > 2) || (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR > 6) || (DB_VERSION_MAJOR == 2 && DB_VERSION_MINOR == 6 && DB_VERSION_PATCH >= 4)
 	if(dba->dbp->cursor(dba->dbp, NULL, &dba->cursor, 0)) {
 #else
@@ -162,19 +158,14 @@ DBA_FIRSTKEY_FUNC(db2)
 DBA_NEXTKEY_FUNC(db2)
 {
 	DB2_DATA;
-	DBT gkey, gval;
-	char *nkey = NULL;
-	
-	memset(&gkey, 0, sizeof(gkey));
-	memset(&gval, 0, sizeof(gval));
+	DBT gkey = {0}, gval = {0};
 
-	if(!dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT)) {
-		if(gkey.data) {
-			nkey = estrndup(gkey.data, gkey.size);
-			if(newlen) *newlen = gkey.size;
-		}
-	}
-	return nkey;
+	if(dba->cursor->c_get(dba->cursor, &gkey, &gval, DB_NEXT)
+			|| !gkey.data)
+		return NULL;
+
+	if(newlen) *newlen = gkey.size;
+	return estrndup(gkey.data, gkey.size);
 }
 
 DBA_OPTIMIZE_FUNC(db2)
