@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 20 February 2000, Version 4.0 Beta 4
+- Introduced $HTTP_POST_FILES[], that contains information about files uploaded
+  through HTTP upload (Zeev)
 - Made PHP work under Microsoft Personal Web Server, under both Windows NT
   workstation and Windows 95 (Zeev)
 - Made multipart/form-data content obey to the variables_order directive (Zeev)
