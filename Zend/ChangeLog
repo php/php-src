@@ -1,3 +1,9 @@
+2004-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_exceptions.c
+      zend_exceptions.c:
+      Fixed bug #30904 (segfault when recording soapclient into session).
+
 2004-12-06  Stanislav Malyshev  <stas@zend.com>
 
     * tests/bug30998.phpt:

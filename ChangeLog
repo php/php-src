@@ -1,3 +1,65 @@
+2004-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/session/session.c
+      ext/session/session.c:
+      Fixed crash in phpinfo() after graceful Apache restart.
+
+    * (PHP_5_0)
+      NEWS:
+      Fixed bug #30928 (When Using WSDL, SoapServer doesn't handle private or
+      protected properties)
+
+2004-12-07  Antony Dovgal  <tony2001@phpclub.net>
+
+    * ext/bcmath/libbcmath/src/raisemod.c:
+      fix leak
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      revert it
+
+2004-12-07  Derick Rethans  <php@derickrethans.nl>
+
+    * NEWS
+      NEWS:
+      - Tidy up NEWS a bit
+
+    * (PHP_4_3)
+      NEWS:
+      - Tidy up NEWS a bit.
+
+2004-12-07  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      NEWS
+      ext/session/session.c:
+      fix bug #30232 (session_start() sends Set-Cookie header only if the cookie
+      is not set yet)
+
+2004-12-07  Dmitry Stogov  <dmitry@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      ZendEngine2/zend_exceptions.c
+      ZendEngine2/zend_exceptions.c:
+      Fixed bug #30904 (segfault when recording soapclient into session).
+
+2004-12-07  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/snmp/snmp.c:
+      MFh: Fixed bug #30995 (snmp extension does not build with net-snmp 5.2).
+
+    * (PHP_5_0)
+      NEWS
+      ext/snmp/snmp.c:
+      MFH: Fixed bug #30995 (snmp extension does not build with net-snmp 5.2).
+
+    * ext/snmp/snmp.c:
+      Fixed bug #30995 (snmp extension does not build with net-snmp 5.2).
+
 2004-12-06  Ilia Alshanetsky  <ilia@prohost.org>
 
     * run-tests.php:
