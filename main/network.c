@@ -529,45 +529,52 @@ int php_sockaddr_size(php_sockaddr_storage *addr)
 }
 /* }}} */
 
-PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream;
 	php_netstream_data_t *sock;
 
-	sock = pemalloc(sizeof(php_netstream_data_t), persistent);
+	sock = pemalloc(sizeof(php_netstream_data_t), persistent_id ? 1 : 0);
 	memset(sock, 0, sizeof(php_netstream_data_t));
 
 	sock->is_blocked = 1;
 	sock->timeout.tv_sec = FG(default_socket_timeout);
 	sock->socket = socket;
 
-	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent, "r+");
+	stream = php_stream_alloc_rel(&php_stream_socket_ops, sock, persistent_id, "r+");
 
 	if (stream == NULL)	
-		pefree(sock, persistent);
+		pefree(sock, persistent_id ? 1 : 0);
 
 	return stream;
 }
 
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, struct timeval *timeout, int persistent STREAMS_DC TSRMLS_DC)
+		int socktype, struct timeval *timeout, const char *persistent_id STREAMS_DC TSRMLS_DC)
 {
 	int socket;
+	php_stream *stream;
 
 	socket = php_hostconnect(host, port, socktype, timeout TSRMLS_CC);
 
 	if (socket == -1)
 		return NULL;
 
-	return php_stream_sock_open_from_socket_rel(socket, persistent);
+	stream = php_stream_sock_open_from_socket_rel(socket, persistent_id);
+
+	if (stream == NULL)
+		closesocket(socket);
+
+	return stream;
 }
 
-PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int persistent,
+PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, const char *persistent_id,
 		struct timeval *timeout STREAMS_DC TSRMLS_DC)
 {
 #if defined(AF_UNIX)
 	int socketd;
 	struct  sockaddr_un unix_addr;
+	php_stream *stream;
 
 	socketd = socket(PF_UNIX, SOCK_STREAM, 0);
 	if (socketd == SOCK_ERR)
@@ -592,7 +599,10 @@ PHPAPI php_stream *_php_stream_sock_open_unix(const char *path, int pathlen, int
 	if (php_connect_nonb(socketd, (struct sockaddr *) &unix_addr, sizeof(unix_addr), timeout) == SOCK_CONN_ERR) 
 		return NULL;
 
-	return php_stream_sock_open_from_socket_rel(socketd, persistent);
+	stream = php_stream_sock_open_from_socket_rel(socketd, persistent_id);
+	if (stream == NULL)
+		closesocket(socketd);
+	return stream;
 #else
 	return NULL;
 #endif

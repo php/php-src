@@ -50,7 +50,6 @@
 #endif
 
 #define STREAM_DEBUG 0
-#define SANITY_CHECK_SEEK 1
 
 #define STREAM_WRAPPER_PLAIN_FILES	((php_stream_wrapper*)-1)
 
@@ -77,31 +76,102 @@
 /* }}} */
 
 static HashTable url_stream_wrappers_hash;
+static int le_stream = FAILURE; /* true global */
+static int le_pstream = FAILURE; /* true global */
+
+PHPAPI int php_file_le_stream(void)
+{
+	return le_stream;
+}
+
+PHPAPI int php_file_le_pstream(void)
+{
+	return le_pstream;
+}
+
+static int forget_persistent_resource_id_numbers(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_stream *stream;
+	
+	if (Z_TYPE_P(rsrc) != le_pstream)
+		return 0;
+
+	stream = (php_stream*)rsrc->ptr;
+
+#if STREAM_DEBUG
+fprintf(stderr, "forget_persistent: %s:%p\n", stream->ops->label, stream);
+#endif
+	
+	stream->rsrc_id = FAILURE;
+
+	return 0;
+}
+
+PHP_RSHUTDOWN_FUNCTION(streams)
+{
+	zend_hash_apply(&EG(persistent_list), (apply_func_t)forget_persistent_resource_id_numbers TSRMLS_CC);
+	return SUCCESS;
+}
+
+PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC)
+{
+	list_entry *le;
+
+	if (zend_hash_find(&EG(persistent_list), (char*)persistent_id, strlen(persistent_id)+1, (void*) &le) == SUCCESS) {
+		if (Z_TYPE_P(le) == le_pstream) {
+			if (stream) {
+				*stream = (php_stream*)le->ptr;
+				if ((*stream)->rsrc_id == FAILURE) {
+					/* first access this request; give it a valid id */
+					(*stream)->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, *stream, le_pstream);
+				}
+			}
+			return PHP_STREAM_PERSISTENT_SUCCESS;
+		}
+		return PHP_STREAM_PERSISTENT_FAILURE;
+	}
+	return PHP_STREAM_PERSISTENT_NOT_EXIST;
+}
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, int persistent, const char *mode STREAMS_DC TSRMLS_DC) /* {{{ */
+PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *ret;
 	
-	ret = (php_stream*) pemalloc_rel_orig(sizeof(php_stream), persistent);
+	ret = (php_stream*) pemalloc_rel_orig(sizeof(php_stream), persistent_id ? 1 : 0);
 
 	memset(ret, 0, sizeof(php_stream));
 
 #if STREAM_DEBUG
-fprintf(stderr, "stream_alloc: %s:%p\n", ops->label, ret);
+fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persistent_id);
 #endif
 	
 	ret->ops = ops;
 	ret->abstract = abstract;
-	ret->is_persistent = persistent;
+	ret->is_persistent = persistent_id ? 1 : 0;
 	ret->chunk_size = FG(def_chunk_size);
 	
 	if (FG(auto_detect_line_endings))
 		ret->flags |= PHP_STREAM_FLAG_DETECT_EOL;
-	
-	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, php_file_le_stream());
-	strlcpy(ret->mode, mode, sizeof(ret->mode));
 
+	if (persistent_id) {
+		list_entry le;
+
+		Z_TYPE(le) = le_pstream;
+		le.ptr = ret;
+
+		if (FAILURE == zend_hash_update(&EG(persistent_list), (char *)persistent_id,
+					strlen(persistent_id) + 1,
+					(void *)&le, sizeof(list_entry), NULL)) {
+			
+			pefree(ret, 1);
+			return NULL;
+		}
+	}
+	
+	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, persistent_id ? le_pstream : le_stream);
+	strlcpy(ret->mode, mode, sizeof(ret->mode));
+	
 	return ret;
 }
 /* }}} */
@@ -111,7 +181,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	int ret = 1;
 
 #if STREAM_DEBUG
-fprintf(stderr, "stream_free: %s:%p in_free=%d opts=%08x\n", stream->ops->label, stream, stream->in_free, close_options);
+fprintf(stderr, "stream_free: %s:%p[%s] in_free=%d opts=%08x\n", stream->ops->label, stream, stream->__orig_path, stream->in_free, close_options);
 #endif
 	
 	if (stream->in_free)
@@ -545,7 +615,7 @@ PHPAPI char *_php_stream_gets(php_stream *stream, char *buf, size_t maxlen TSRML
 	/* terminate the buffer */
 	*buf = '\0';
 	stream->position += didread;
-	
+
 	return buf;
 }
 
@@ -766,7 +836,7 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 			void *srcfile;
 
 #if STREAM_DEBUG
-			fprintf(stderr, "mmap attempt: maxlen=%d filesize=%d\n", maxlen, sbuf.st_size);
+			fprintf(stderr, "mmap attempt: maxlen=%d filesize=%ld\n", maxlen, sbuf.st_size);
 #endif
 	
 			if (maxlen > sbuf.st_size || maxlen == 0)
@@ -1542,12 +1612,33 @@ exit_success:
 /* }}} */
 
 /* {{{ wrapper init and registration */
-int php_init_stream_wrappers(TSRMLS_D)
+
+static void stream_resource_regular_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	return zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS && zend_hash_init(&stream_filters_hash, 0, NULL, NULL, 1) == SUCCESS ? SUCCESS : FAILURE;
+	php_stream *stream = (php_stream*)rsrc->ptr;
+	/* set the return value for pclose */
+	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 }
 
-int php_shutdown_stream_wrappers(TSRMLS_D)
+static void stream_resource_persistent_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
+{
+	php_stream *stream = (php_stream*)rsrc->ptr;
+	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
+}
+
+int php_init_stream_wrappers(int module_number TSRMLS_DC)
+{
+	le_stream = zend_register_list_destructors_ex(stream_resource_regular_dtor, NULL, "stream", module_number);
+	le_pstream = zend_register_list_destructors_ex(NULL, stream_resource_persistent_dtor, "persistent stream", module_number);
+
+	return (
+			zend_hash_init(&url_stream_wrappers_hash, 0, NULL, NULL, 1) == SUCCESS
+			&& 
+			zend_hash_init(&stream_filters_hash, 0, NULL, NULL, 1) == SUCCESS
+		) ? SUCCESS : FAILURE;
+}
+
+int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 {
 	zend_hash_destroy(&url_stream_wrappers_hash);
 	zend_hash_destroy(&stream_filters_hash);

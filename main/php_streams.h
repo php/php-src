@@ -25,7 +25,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-/* See README.STREAMS in php4 root dir for more info about this stuff */
+PHPAPI int php_file_le_stream(void);
+PHPAPI int php_file_le_pstream(void);
 
 /* {{{ Streams memory debugging stuff */
 
@@ -269,8 +270,8 @@ struct _php_stream  {
 
 /* allocate a new stream for a particular ops */
 PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
-		int persistent, const char *mode STREAMS_DC TSRMLS_DC);
-#define php_stream_alloc(ops, thisptr, persistent, mode)	_php_stream_alloc((ops), (thisptr), (persistent), (mode) STREAMS_CC TSRMLS_CC)
+		const char *persistent_id, const char *mode STREAMS_DC TSRMLS_DC);
+#define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC TSRMLS_CC)
 
 /* stack filter onto a stream */
 PHPAPI void php_stream_filter_prepend(php_stream *stream, php_stream_filter *filter);
@@ -306,7 +307,13 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, const
 # define php_stream_to_zval(stream, zval)	{ ZVAL_RESOURCE(zval, (stream)->rsrc_id); }
 #endif
 
-#define php_stream_from_zval(stream, ppzval)	ZEND_FETCH_RESOURCE((stream), php_stream *, (ppzval), -1, "stream", php_file_le_stream())
+#define php_stream_from_zval(stream, ppzval)	ZEND_FETCH_RESOURCE2((stream), php_stream *, (ppzval), -1, "stream", php_file_le_stream(), php_file_le_pstream())
+#define php_stream_from_zval_no_verify(stream, ppzval)	(stream) = (php_stream*)zend_fetch_resource((ppzval) TSRMLS_CC, -1, "stream", NULL, 2, php_file_le_stream(), php_file_le_pstream())
+
+PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream **stream TSRMLS_DC);
+#define PHP_STREAM_PERSISTENT_SUCCESS	0 /* id exists */
+#define PHP_STREAM_PERSISTENT_FAILURE	1 /* id exists but is not a stream! */
+#define PHP_STREAM_PERSISTENT_NOT_EXIST	2 /* id does not exist */
 
 #define PHP_STREAM_FREE_CALL_DTOR			1 /* call ops->close */
 #define PHP_STREAM_FREE_RELEASE_STREAM		2 /* pefree(stream) */
@@ -472,8 +479,10 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 # define IGNORE_URL_WIN 0
 #endif
 
-int php_init_stream_wrappers(TSRMLS_D);
-int php_shutdown_stream_wrappers(TSRMLS_D);
+int php_init_stream_wrappers(int module_number TSRMLS_DC);
+int php_shutdown_stream_wrappers(int module_number TSRMLS_DC);
+PHP_RSHUTDOWN_FUNCTION(streams);
+
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC);
 PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);

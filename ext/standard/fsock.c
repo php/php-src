@@ -139,7 +139,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	int host_len;
 	int port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
-	double timeout = 60;
+	double timeout = FG(default_socket_timeout);
 	unsigned long conv;
 	struct timeval tv;
 	char *hashkey = NULL;
@@ -147,20 +147,27 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #ifdef PHP_WIN32
 	int err;
 #endif
+
+	RETVAL_FALSE;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lzzd", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE)	{
 		RETURN_FALSE;
 	}
 
-	hashkey = emalloc(host_len + 10);
-	sprintf(hashkey, "%s:%d", host, port);
 
-	if (persistent && zend_hash_find(&FG(ht_persistent_socks), hashkey, strlen(hashkey) + 1,
-				(void *) &stream) == SUCCESS)
-	{
-		efree(hashkey);
-		php_stream_to_zval(stream, return_value);
-		return;
+	if (persistent) {
+		spprintf(&hashkey, 0, "pfsockopen__%s:%d", host, port);
+
+		switch(php_stream_from_persistent_id(hashkey, &stream TSRMLS_CC)) {
+			case PHP_STREAM_PERSISTENT_SUCCESS:
+				/* TODO: could check if the socket is still alive here */
+				php_stream_to_zval(stream, return_value);
+				
+				/* fall through */
+			case PHP_STREAM_PERSISTENT_FAILURE:
+				efree(hashkey);
+				return;
+		}
 	}
 
 	/* prepare the timeout value for use */
@@ -211,7 +218,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 		else
 #endif
-		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, &tv, persistent);
+		stream = php_stream_sock_open_host(host, (unsigned short)port, socktype, &tv, hashkey);
 
 #ifdef PHP_WIN32
 		/* Preserve error */
@@ -242,14 +249,10 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 		
 	} else	
-		stream = php_stream_sock_open_unix(host, host_len, persistent, &tv);
+		stream = php_stream_sock_open_unix(host, host_len, hashkey, &tv);
 
-	if (stream && persistent)	{
-		zend_hash_update(&FG(ht_persistent_socks), hashkey, strlen(hashkey) + 1,
-				&stream, sizeof(stream), NULL);
-	}
-
-	efree(hashkey);
+	if (hashkey)
+		efree(hashkey);
 	
 	if (stream == NULL)	{
 		if (zerrno) {
