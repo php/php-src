@@ -83,10 +83,28 @@ elif test "$PHP_MYSQL" != "no"; then
     AC_MSG_ERROR(Cannot find mysqlclient library under $MYSQL_DIR)
   fi
 
-  if test "$PHP_ZLIB_DIR" != "no"; then
-    PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
-    MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -z"
-  fi
+  PHP_CHECK_LIBRARY(mysqlclient, mysql_close, [ ],
+  [
+    if test "$PHP_ZLIB_DIR" != "no"; then
+      PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY(mysqlclient, mysql_error, [], [
+        AC_MSG_ERROR([mysql configure failed. Please check config.log for more information.])
+      ], [
+        -L$PHP_ZLIB_DIR/lib -L$MYSQL_LIB_DIR 
+      ])  
+      MYSQL_LIBS="-L$PHP_ZLIB_DIR/lib -z"
+    else
+      PHP_ADD_LIBRARY(z,, MYSQL_SHARED_LIBADD)
+      PHP_CHECK_LIBRARY(mysqlclient, mysql_errno, [], [
+        AC_MSG_ERROR([Try adding --with-zlib-dir=<DIR>. Please check config.log for more information.])
+      ], [
+        -L$MYSQL_LIB_DIR
+      ])   
+      MYSQL_LIBS="-z"
+    fi
+  ], [
+    -L$MYSQL_LIB_DIR 
+  ])
 
   PHP_ADD_LIBRARY_WITH_PATH(mysqlclient, $MYSQL_LIB_DIR, MYSQL_SHARED_LIBADD)
   MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient $MYSQL_LIBS"
