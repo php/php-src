@@ -15,18 +15,19 @@ PHP 4.0                                                                    NEWS
 - Zeus Webserver support (version 3.3.6+) for ISAPI
 - Fixed several problems with the PATH_TRANSLATED and PHP_SELF under Apache
   (Paul Gregg & Zeev)
-- Added ldap_get_values_len function from PHP3 to PHP4. (Sterling)
+- Ported ldap_get_values_len() function from PHP3 to PHP4. (Sterling)
 - Fixed a problem in include_once() with non constant arguments (Andi & Zeev,
   Zend Engine)
 - Added php.ini-optimized (Zeev)
-- Added ldap_errno, ldap_err2str and ldap_error from PHP3 to PHP4. (Sterling)
+- Ported ldap_errno(), ldap_err2str() and ldap_error() from PHP3 to PHP4.
+  (Sterling)
 - WDDX now defaults to ISO-8859-1. (Thies)
 - Fix crash resulting from IMAP's error handling (Stanislav)
 - Add $HTTP_POST_FILES[filename][tmp_name] - it was previously impossible to
   retrieve the temporary name of an uploaded file using $HTTP_POST_FILES[] (Zeev)
 - Made the IMAP and LDAP modules compilable under Windows and thread-safe (Zeev)
-- Fix a problem when dealing with large POST blocks in CGI mode
-- added session_get_cookie_params (Sterling)
+- Fix a problem when dealing with large POST blocks in CGI mode (Zeev)
+- Added session_get_cookie_params() function. (Sterling)
 - Fixed return of stristr() to no longer always be lowercased. (Andrei)
 - Changed the Windows version of PHP so that a php.ini file is no
   longer mandatory (Zeev)
@@ -38,15 +39,14 @@ PHP 4.0                                                                    NEWS
 - Fixed a very old legacy memory leak in the COM module (Zeev)
 - Fixed problems with object-overloading support - noteably, COM and Java (Zeev,
   Zend Engine)
-- WDDX charset now defaults to ISO-8859-1. (Thies)
 - Fixed an overrun in WDDX. (Thies)
 - Fixed a crash bug with modules loaded through dl() not properly freeing their
   resources (Zeev, Zend Engine)
-- Added the localtime function. (Sterling)
+- Added localtime() function. (Sterling)
 - Added the 'I' format option for the date function, this option will return
   true or false depending on whether or not daylight savings time is in effect.
   (Sterling)
-- Added the gmstrftime.(Sterling)
+- Added gmstrftime() function. (Sterling)
 - snmp_walkoid is now an alias for snmp_realwalk. (Sterling)
 - Fixed a bug that could cause a crash when using 'global' inside large include
   files (Stanislav, Zend Engine)
