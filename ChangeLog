@@ -1,3 +1,55 @@
+2005-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/simplexml/tests/016a.phpt
+      ext/simplexml/tests/022.phpt:
+      - Add tests
+
+    * ZendEngine2/zend_object_handlers.c:
+      - If silence if wanted we do not error out
+
+    * ZendEngine2/zend_reflection_api.c:
+      - Add two new methods
+      - Fix signature, no need to cast it
+
+    * ZendEngine2/zend_API.h:
+      - These must be initailized
+
+2005-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * TSRM/tsrm_virtual_cwd.c:
+      Add a comment to remind me to have a look at this at some point.
+
+2005-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/image.c:
+      Fixed compiler warnings.
+
+2005-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_builtin_functions.c:
+      - Update method_exists to new handlers and allow first parameter as string
+
+2005-02-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * main/main.c:
+      cs fix (really annoying :)
+
+    * acinclude.m4
+      ZendEngine2/Zend.m4:
+      - Cache the version check results
+
+2005-02-27  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      fix typo
+
+2005-02-27  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/info.c:
+      Enum filters in phpinfo()
+
 2005-02-26  Wez Furlong  <wez.php@thebrainroom.net>
 
     * run-tests.php:

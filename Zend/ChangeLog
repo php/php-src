@@ -1,3 +1,23 @@
+2005-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_object_handlers.c:
+      - If silence if wanted we do not error out
+
+    * zend_reflection_api.c:
+      - Add two new methods
+      - Fix signature, no need to cast it
+
+    * zend_API.h:
+      - These must be initailized
+
+    * zend_builtin_functions.c:
+      - Update method_exists to new handlers and allow first parameter as string
+
+2005-02-27  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * Zend.m4:
+      - Cache the version check results
+
 2005-02-24  Andi Gutmans  <andi@zend.com>
 
     * zend_language_scanner.l:
