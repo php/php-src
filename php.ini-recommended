@@ -970,6 +970,12 @@ mssql.min_message_severity = 10
 ; Compatability mode with old versions of PHP 3.0.
 mssql.compatability_mode = Off
 
+; Connec timeout
+;mssql.connect_timeout = 5
+
+; Query timeout
+;mssql.timeout = 60
+
 ; Valid range 0 - 2147483647.  Default = 4096.
 ;mssql.textlimit = 4096
 
@@ -978,6 +984,11 @@ mssql.compatability_mode = Off
 
 ; Limits the number of records in each batch.  0 = all records in one batch.
 ;mssql.batchsize = 0
+
+; Specify how datetime and datetim4 columns are returned
+; On => Returns data converted to SQL server settings
+; Off => Returns values as YYYY-MM-DD hh:mm:ss
+;mssql.datetimeconvert = On
 
 ; Use NT authentication when connecting to the server
 mssql.secure_connection = Off
