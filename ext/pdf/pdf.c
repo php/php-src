@@ -1191,7 +1191,7 @@ PHP_FUNCTION(pdf_setlinewidth)
 }
 /* }}} */
 
-/* {{{ proto void pdf_setdash(int pdfdoc, double white, double black)
+/* {{{ proto void pdf_setdash(int pdfdoc, double black, double white)
    Sets dash pattern */
 PHP_FUNCTION(pdf_setdash)
 {
