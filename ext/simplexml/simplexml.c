@@ -100,7 +100,7 @@ sxe_property_read(zval *object, zval *member TSRMLS_DC)
 			APPEND_PREV_ELEMENT(counter, value);
 			
 			MAKE_STD_ZVAL(value);
-			contents = xmlNodeListGetString(sxe->document, attr->children, 1);
+			contents = xmlNodeListGetString(sxe->document, attr->xmlChildrenNode, 1);
 			ZVAL_STRING(value, contents, 0);
 
 			APPEND_CUR_ELEMENT(counter, value);
@@ -148,7 +148,7 @@ change_node_zval(xmlNodePtr node, zval *value)
 		case IS_NULL:
 			convert_to_string(value);
 		case IS_STRING:
-			xmlNodeSetContentLen(node->xmlChildrenNode, Z_STRVAL_P(value), Z_STRLEN_P(value));
+			xmlNodeSetContentLen(node, Z_STRVAL_P(value), Z_STRLEN_P(value));
 			break;
 		default:
 			php_error(E_WARNING, "It is not yet possible to assign complex types to attributes");
@@ -167,13 +167,27 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	char           *name;
 	xmlNodePtr      node;
 	xmlNodePtr      newnode;
+	xmlAttrPtr      attr;
 	int             counter = 0;
-	
+	int             is_attr = 0;
+
 	name = Z_STRVAL_P(member);
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
 	GET_NODE(sxe, node);
 
+	attr = node->properties;
+	while (attr) {
+		if (!xmlStrcmp(attr->name, name)) {
+			is_attr = 1;
+			++counter;
+			break;
+		}
+
+		attr = attr->next;
+	}
+
+	node = node->xmlChildrenNode;
 	while (node) {
 		if (!xmlStrcmp(node->name, name)) {
 			newnode = node;
@@ -184,9 +198,13 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 	}
 
 	if (counter == 1) {
-		change_node_zval(newnode, value);
+		if (is_attr) {
+			change_node_zval(attr->xmlChildrenNode, value);
+		} else {
+			change_node_zval(newnode->xmlChildrenNode, value);
+		}
 	} else if (counter > 1) {
-		php_error(E_WARNING, "Cannot assign to an array of nodes\n");
+		php_error(E_WARNING, "Cannot assign to an array of nodes (duplicate subnodes or attr detected)\n");
 	}
 		
 }
@@ -197,8 +215,10 @@ sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 static zval **
 sxe_property_get_ptr(zval *object, zval *member TSRMLS_DC)
 {
-	/* XXX: Return NULL till I figure this out */
-	return NULL;
+	zval *property = sxe_property_read(object, member TSRMLS_CC);
+	zval_add_ref(&property);
+
+	return &property;
 }
 /* }}} */
 
