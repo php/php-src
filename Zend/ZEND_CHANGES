@@ -502,17 +502,14 @@ Changes in the Zend Engine 2.0
         $backtrace = debug_backtrace();
 
         foreach ($backtrace as $step) {
-            if (isset($step['class'])) {
-                print $step['class'];
-                print '::';
-            }
+            $class = isset($step['class']) ? $step['class'] . '::' : '';
 
-            print $step['function'];
-            print '   [';
-            print $step['file'];
-            print ':';
-            print $step['line'];
-            print "]\n";
+            printf(
+              "%s [%s:%s]\n",
+              $step['function'],
+              $step['file'],
+              $step['line']
+            );
         }
         ?>
 
