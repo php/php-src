@@ -21,7 +21,8 @@ if test "$PHP_DOM" != "no"; then
                             element.c node.c string_extend.c characterdata.c \
                             documenttype.c domimplementationlist.c entity.c \
                             nodelist.c text.c comment.c domconfiguration.c \
-                            domimplementationsource.c entityreference.c notation.c \
+                            domimplementationsource.c entityreference.c \
+			    notation.c xpath.c \
                             typeinfo.c domerror.c domlocator.c namednodemap.c userdatahandler.c], 
                             $ext_shared)
     PHP_SUBST(DOM_SHARED_LIBADD)

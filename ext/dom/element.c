@@ -311,7 +311,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
-			if (oldobj->ptr->node == (xmlNodePtr) attrp) {
+			if (((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp) {
 				RETURN_NULL();
 			}
 			xmlUnlinkNode((xmlNodePtr) existattrp);
@@ -674,7 +674,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 		if ((oldobj = dom_object_get_data((xmlNodePtr) existattrp)) == NULL) {
 			xmlUnlinkNode((xmlNodePtr) existattrp);
 		} else {
-			if (oldobj->ptr->node == (xmlNodePtr) attrp) {
+			if (((node_ptr *)oldobj->ptr)->node == (xmlNodePtr) attrp) {
 				RETURN_NULL();
 			}
 			xmlUnlinkNode((xmlNodePtr) existattrp);

@@ -68,6 +68,9 @@ void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC);
 dom_object *dom_object_get_data(xmlNodePtr obj);
 xmlNodePtr dom_object_get_node(dom_object *obj);
 zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC);
+#if defined(LIBXML_XPATH_ENABLED)
+zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC);
+#endif
 void php_dom_throw_error(int error_code, zval **retval TSRMLS_DC);
 void node_free_resource(xmlNodePtr node TSRMLS_DC);
 void node_list_unlink(xmlNodePtr node TSRMLS_DC);
@@ -93,7 +96,7 @@ entry = zend_register_internal_class_ex(&ce, parent_ce, NULL TSRMLS_CC);
 
 #define DOM_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = (dom_object *)zend_object_store_get_object(__id TSRMLS_CC); \
-	if (__intern->ptr == NULL || !(__ptr = (__prtype)__intern->ptr->node)) { \
+	if (__intern->ptr == NULL || !(__ptr = (__prtype)((node_ptr *)__intern->ptr)->node)) { \
   		php_error(E_WARNING, "Couldn't fetch %s", __intern->std.ce->name);\
   		RETURN_NULL();\
   	} \

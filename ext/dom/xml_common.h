@@ -41,7 +41,7 @@ typedef struct _node_object {
 
 typedef struct _dom_object {
 	zend_object  std;
-	node_ptr *ptr;
+	void *ptr;
 	dom_ref_obj *document;
 	HashTable *prop_handler;
 	zend_object_handle handle;

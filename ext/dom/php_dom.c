@@ -59,7 +59,9 @@ static HashTable dom_documenttype_prop_handlers;
 static HashTable dom_notation_prop_handlers;
 static HashTable dom_entity_prop_handlers;
 static HashTable dom_processinginstruction_prop_handlers;
-
+#if defined(LIBXML_XPATH_ENABLED)
+static HashTable dom_xpath_prop_handlers;
+#endif
 
 typedef int (*dom_read_t)(dom_object *obj, zval **retval TSRMLS_DC);
 typedef int (*dom_write_t)(dom_object *obj, zval *newval TSRMLS_DC);
@@ -152,12 +154,14 @@ int decrement_document_reference(dom_object *object TSRMLS_DC) {
 /* {{{ int decrement_node_ptr(dom_object *object) */
 int decrement_node_ptr(dom_object *object TSRMLS_DC) {
 	int ret_refcount = -1;
+	node_ptr *obj_node;
 
 	if (object != NULL && object->ptr != NULL) {
-		ret_refcount = --object->ptr->refcount;
+		obj_node = (node_ptr *) object->ptr;
+		ret_refcount = --obj_node->refcount;
 		if (ret_refcount == 0) {
-			if (object->ptr->node != NULL) {
-				object->ptr->node->_private = NULL;
+			if (obj_node->node != NULL) {
+				obj_node->node->_private = NULL;
 			}
 			efree(object->ptr);
 		}
@@ -172,7 +176,7 @@ int decrement_node_ptr(dom_object *object TSRMLS_DC) {
 xmlNodePtr dom_object_get_node(dom_object *obj)
 {
 	if (obj->ptr != NULL) {
-		return obj->ptr->node;
+		return ((node_ptr *)obj->ptr)->node;
 	} else {
 		return NULL;
 	}
@@ -215,17 +219,21 @@ static void php_dom_clear_object(dom_object *object TSRMLS_DC)
 /* {{{ void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC) */
 void php_dom_set_object(dom_object *object, xmlNodePtr obj TSRMLS_DC)
 {
+	node_ptr *obj_node;
+
 	if (obj->_private == NULL) {
 		object->ptr = emalloc(sizeof(node_ptr));
-		object->ptr->node = obj;
-		object->ptr->refcount = 1;
-		object->ptr->_private = object;
+		obj_node = (node_ptr *)object->ptr;
+		obj_node->node = obj;
+		obj_node->refcount = 1;
+		obj_node->_private = object;
 		dom_object_set_data(obj, object TSRMLS_CC);
 	} else if (object->ptr == NULL) {
-		object->ptr = obj->_private;
-		object->ptr->refcount++;
-		if (object->ptr->_private == NULL) {
-			object->ptr->_private = object;
+		(node_ptr *)object->ptr = obj->_private;
+		obj_node = (node_ptr *)object->ptr;
+		obj_node->refcount++;
+		if (obj_node->_private == NULL) {
+			obj_node->_private = object;
 		}
 	}
 }
@@ -573,6 +581,16 @@ PHP_MINIT_FUNCTION(dom)
 
 	REGISTER_DOM_CLASS(ce, "domstring_extend", NULL, php_dom_string_extend_class_functions, dom_string_extend_class_entry);
 
+#if defined(LIBXML_XPATH_ENABLED)
+	INIT_CLASS_ENTRY(ce, "domxpath", php_dom_xpath_class_functions);
+	ce.create_object = dom_xpath_objects_new;
+	dom_xpath_class_entry = zend_register_internal_class_ex(&ce, NULL, NULL TSRMLS_CC);
+
+	zend_hash_init(&dom_xpath_prop_handlers, 0, NULL, NULL, 1);
+	dom_register_prop_handler(&dom_xpath_prop_handlers, "document", dom_xpath_document_read, NULL TSRMLS_CC);
+	zend_hash_add(&classes, ce.name, ce.name_length + 1, &dom_xpath_prop_handlers, sizeof(dom_xpath_prop_handlers), NULL);
+#endif
+
 	REGISTER_LONG_CONSTANT("XML_ELEMENT_NODE",			XML_ELEMENT_NODE,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_ATTRIBUTE_NODE",		XML_ATTRIBUTE_NODE,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_TEXT_NODE",				XML_TEXT_NODE,				CONST_CS | CONST_PERSISTENT);
@@ -653,6 +671,9 @@ PHP_MSHUTDOWN_FUNCTION(dom)
 	zend_hash_destroy(&dom_notation_prop_handlers);
 	zend_hash_destroy(&dom_entity_prop_handlers);
 	zend_hash_destroy(&dom_processinginstruction_prop_handlers);
+#if defined(LIBXML_XPATH_ENABLED)
+	zend_hash_destroy(&dom_xpath_prop_handlers);
+#endif
 	zend_hash_destroy(&classes);
 	
 /*	If you want do find memleaks in this module, compile libxml2 with --with-mem-debug and
@@ -811,6 +832,26 @@ void dom_objects_clone(void *object, void **object_clone TSRMLS_DC)
 }
 /* }}} */
 
+#if defined(LIBXML_XPATH_ENABLED)
+/* {{{ dom_xpath_objects_dtor */
+void dom_xpath_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
+{
+	dom_object *intern = (dom_object *)object;
+
+	zend_hash_destroy(intern->std.properties);
+	FREE_HASHTABLE(intern->std.properties);
+
+	if (intern->ptr != NULL) {
+		xmlXPathFreeContext((xmlXPathContextPtr) intern->ptr);
+		decrement_document_reference((dom_object *) intern TSRMLS_CC);
+		intern->ptr = NULL;
+	}
+
+	efree(object);
+}
+/* }}} */
+#endif
+
 /* {{{ dom_objects_dtor */
 void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 {
@@ -820,8 +861,8 @@ void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 	zend_hash_destroy(intern->std.properties);
 	FREE_HASHTABLE(intern->std.properties);
 
-	if (intern->ptr != NULL && intern->ptr->node != NULL) {
-		if (((xmlNodePtr) intern->ptr->node)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) intern->ptr->node)->type != XML_HTML_DOCUMENT_NODE) {
+	if (intern->ptr != NULL && ((node_ptr *)intern->ptr)->node != NULL) {
+		if (((xmlNodePtr) ((node_ptr *)intern->ptr)->node)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) ((node_ptr *)intern->ptr)->node)->type != XML_HTML_DOCUMENT_NODE) {
 			node_free_resource(dom_object_get_node(intern) TSRMLS_CC);
 		} else {
 			decrement_node_ptr(intern TSRMLS_CC);
@@ -834,13 +875,12 @@ void dom_objects_dtor(void *object, zend_object_handle handle TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ dom_objects_new */
-zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
+/* {{{ dom_objects_set_class */
+static dom_object* dom_objects_set_class(zend_class_entry *class_type TSRMLS_DC)
 {
-	zend_object_value retval;
-	dom_object *intern;
 	zend_class_entry *base_class;
 	zval *tmp;
+	dom_object *intern;
 
 	intern = emalloc(sizeof(dom_object));
 	intern->std.ce = class_type;
@@ -849,7 +889,7 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->ptr = NULL;
 	intern->prop_handler = NULL;
 	intern->document = NULL;
-	
+
 	base_class = class_type;
 	while(base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
 		base_class = base_class->parent;
@@ -861,6 +901,18 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	zend_hash_init(intern->std.properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
 
+	return intern;
+}
+/* }}} */
+
+/* {{{ dom_objects_new */
+zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	zend_object_value retval;
+	dom_object *intern;
+	
+	intern = dom_objects_set_class(class_type TSRMLS_CC);
+
 	retval.handle = zend_objects_store_put(intern, dom_objects_dtor, dom_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
@@ -869,7 +921,25 @@ zend_object_value dom_objects_new(zend_class_entry *class_type TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ php_domobject_new */
+#if defined(LIBXML_XPATH_ENABLED)
+/* {{{ zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC) */
+zend_object_value dom_xpath_objects_new(zend_class_entry *class_type TSRMLS_DC)
+{
+	zend_object_value retval;
+	dom_object *intern;
+	
+	intern = dom_objects_set_class(class_type TSRMLS_CC);
+
+	retval.handle = zend_objects_store_put(intern, dom_xpath_objects_dtor, dom_objects_clone TSRMLS_CC);
+	intern->handle = retval.handle;
+	retval.handlers = &dom_object_handlers;
+
+	return retval;
+}
+/* }}} */
+#endif
+
+/* {{{ php_dom_create_object */
 zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
