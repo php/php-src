@@ -1393,6 +1393,9 @@ PHP_FUNCTION(session_unset)
 	ulong     num_key;
 	PSLS_FETCH();
 	
+	if (PS(nr_open_sessions) < 1)
+		return;
+	
 	for (zend_hash_internal_pointer_reset(&PS(vars));
 			zend_hash_get_current_key(&PS(vars), &variable, &num_key) == HASH_KEY_IS_STRING;
 			zend_hash_move_forward(&PS(vars))) {
