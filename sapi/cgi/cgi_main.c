@@ -89,14 +89,21 @@ static int _print_module_info ( zend_module_entry *module, void *arg ) {
 
 static int sapi_cgibin_ub_write(const char *str, uint str_length)
 {
+	const char *ptr = str;
+	uint remaining = str_length;
 	size_t ret;
 
-	ret = fwrite(str, 1, str_length, stdout);
-	if (ret != str_length) {
-		php_handle_aborted_connection();
+	while (remaining > 0)
+	{
+		ret = fwrite(ptr, 1, MIN(remaining, 16384), stdout);
+		if (!ret) {
+			php_handle_aborted_connection();
+		}
+		ptr += ret;
+		remaining -= ret;
 	}
 
-	return ret;
+	return str_length;
 }
 
 
