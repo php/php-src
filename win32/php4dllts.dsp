@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib libbcmath.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"..\Debug_TS\php4ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug_TS" /libpath:"Debug_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /debug /machine:I386 /nodefaultlib:"libcmt" /nodefaultlib:"libc" /out:"..\Debug_TS\php4ts_debug.dll" /pdbtype:sept /libpath:"..\TSRM\Debug_TS" /libpath:"..\Zend\Debug_TS" /libpath:"..\..\bindlib_w32\Debug" /libpath:"..\ext\mysql\libmysql\Debug_TS" /libpath:"Debug_TS"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
 
@@ -80,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib libcrypt.lib libbcmath.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS" /libpath:"Release_TS"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib libcrypt.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS\php4ts.dll" /libpath:"..\TSRM\Release_TS" /libpath:"..\Zend\Release_TS" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS" /libpath:"Release_TS"
 
 !ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
 
@@ -107,7 +107,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib /nologo /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"Release_TS/php4ts.dll" /libpath:"TSRM\Release_TS" /libpath:"Zend\Release_TS" /libpath:"..\bindlib_w32\Release"
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib libbcmath.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS_inline\php4ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS_inline" /libpath:"Release_TS_Inline"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib wsock32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ZendTS.lib TSRM.lib resolv.lib libmysql.lib /nologo /version:4.0 /dll /machine:I386 /nodefaultlib:"libc.lib" /nodefaultlib:"libcmt.lib" /out:"..\Release_TS_inline\php4ts.dll" /libpath:"..\TSRM\Release_TS_inline" /libpath:"..\Zend\Release_TS_inline" /libpath:"..\..\bindlib_w32\Release" /libpath:"..\ext\mysql\libmysql\Release_TS_inline" /libpath:"Release_TS_Inline"
 
 !ENDIF 
 
@@ -999,6 +999,581 @@ SOURCE=..\ext\calendar\php_calendar.h
 # Begin Source File
 
 SOURCE=..\ext\calendar\sdncal.h
+# End Source File
+# End Group
+# End Group
+# Begin Group "bcmath"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 8"
+
+# PROP Default_Filter ".c"
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\add.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\compare.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\debug.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\div.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\divmod.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\doaddsub.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\init.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\int2num.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\nearzero.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\neg.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\num2long.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\num2str.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\outofmem.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\output.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\raise.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\raisemod.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\recmul.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\rmzero.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\rt.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\sqrt.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\str2num.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\sub.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\zero.c
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+# ADD CPP /I "..\ext\bcmath\libbcmath\src"
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "Header Files No. 8"
+
+# PROP Default_Filter ".h"
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\bcmath.h
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\config.h
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\bcmath\libbcmath\src\private.h
+
+!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Debug_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS"
+
+!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
+
+# PROP Intermediate_Dir "ext\bcmath\libbcmath\Release_TS_inline"
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Group
