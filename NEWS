@@ -15,8 +15,9 @@ PHP 4                                                                      NEWS
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
 - Added long options into CLI & CGI (e.g. --version). (Marcus)
-- Fixed integer overflows in base64_encode(). (Moriyoshi)
-- Fixed possible integer overflows in bundled GD library. (Ilia)
+- Fixed possible integer overflows in:
+  . base64_encode().    (Moriyoshi)
+  . bundled GD library. (Ilia)
 - Fixed "mysql.connect_timeout" php.ini option to be settable with ini_set().
   (Rasmus)
 - Fixed ext/yaz to not log if "yaz.log_file" php.ini option is not set.
