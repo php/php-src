@@ -5,8 +5,8 @@ PHP Coding Standards
 This file lists several standards that any programmer, adding or changing
 code in PHP, should follow.  Since this file was added at a very late
 stage of the development of PHP v3.0, the code base does not (yet) fully
-follow it, but it's going in that general direction.
-This is an initial version - it'll most probably grow as time passes.
+follow it, but it's going in that general direction. Since we are now
+at version 4.0.3, many sections have been recoded to use these rules.
 
 
 Code Implementation
@@ -64,7 +64,24 @@ Naming Conventions
 ------------------
 
 [1] Function names for user functions should be enclosed with in
-    the PHP_FUNCTION() macro.  
+    the PHP_FUNCTION() macro. They should be in lowercase, with words
+    underscore delimited, with care taken to minimize the letter count.
+    If they are part of a "parent set" of functions, that parent should
+    be included in the user function name.
+
+    Good:
+    'mcrypt_enc_self_test'
+    'mysql_list_fields'
+
+    Ok:
+    'mcrypt_module_get_algo_supported_key_sizes'
+    (could be 'mcrypt_mod_get_algo_sup_key_sizes'?)
+    'get_html_translation_table'
+    (could be 'html_get_trans_table'?) 
+
+    Bad:
+    'hw_GetObjectByQueryCollObj'
+    'pg_setclientencoding'
 
 [2] Function names used by user functions should be prefixed
     with "_php_", and followed by a word or an underscore-delimited list of
@@ -145,4 +162,23 @@ Optional arguments are written like this:
 
 And yes, please keep everything on a single line, even if that line is massive.
 
+User Aliases
+--------------------
+You may also have some user-level aliases with close to duplicate
+names, for example, somedb_select_result and somedb_selectresult. For
+documentation puposes, these will only be documented by the most
+clearly separated name, with the aliases listed in the documentation for
+the parent function. For ease of reference, user-functions with
+completely different names, that alias to the same function (such as
+highlight_file and show_source), will be separately documented. The
+proto should still be included, describing which function is aliased.
 
+
+Legacy Documentation
+--------------------
+In order to retire older function naming conventions, older
+function name variants, when changed, will only be documented under
+their current function name, as aliases. Backwards compatible functions
+and names should be maintained as long as the code can be reasonably
+be kept as part of the codebase. See /phpdoc/README for me information
+on documentation.
