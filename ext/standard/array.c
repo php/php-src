@@ -3210,7 +3210,7 @@ PHP_FUNCTION(array_reduce)
 		result = *initial;
 	} else {
 		MAKE_STD_ZVAL(result);
-		ZVAL_LONG(result, 0);
+		ZVAL_NULL(result);
 	}
 
 	/* (zval **)input points to an element of argument stack
