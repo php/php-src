@@ -113,7 +113,7 @@ static void _file_stream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_stream *stream = (php_stream*)rsrc->ptr;
 	/* the stream might be a pipe, so set the return value for pclose */
-	FG(pclose_ret) = php_stream_close(stream);
+	FG(pclose_ret) = php_stream_free(stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 }
 
 PHPAPI int php_file_le_stream(void)
@@ -528,7 +528,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 	stream = php_stream_fopen_tmpfile();
 
 	if (stream)	{
-		ZEND_REGISTER_RESOURCE(return_value, stream, le_stream);
+		php_stream_to_zval(stream, return_value);
 	}
 	else	{
 		RETURN_FALSE;
@@ -593,7 +593,9 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		RETURN_FALSE;
 	}
 	FG(fgetss_state) = 0;
-	ZEND_REGISTER_RESOURCE(return_value, stream, le_stream);
+
+	php_stream_to_zval(stream, return_value);
+
 	return;
 }
 /* }}} */
@@ -676,9 +678,9 @@ PHP_FUNCTION(popen)
 	if (stream == NULL)	{
 		zend_error(E_WARNING, "popen(\"%s\", \"%s\"): %s", Z_STRVAL_PP(arg1), p, strerror(errno));
 		RETVAL_FALSE;
+	} else {
+		php_stream_to_zval(stream, return_value);
 	}
-	else
-		ZEND_REGISTER_RESOURCE(return_value, stream, le_stream);
 
 	efree(p);
 }

@@ -3254,7 +3254,6 @@ PHP_FUNCTION(exif_imagetype)
 {
 	zval **arg1;
 	php_stream * stream;
-	int rsrc_id;
  	int itype = 0;
 
 	if (ZEND_NUM_ARGS() != 1)
@@ -3269,11 +3268,9 @@ PHP_FUNCTION(exif_imagetype)
 		RETURN_FALSE;
 	}
 
-	rsrc_id = ZEND_REGISTER_RESOURCE(NULL, stream, php_file_le_stream());
-
 	itype = itype = php_getimagetype(stream, NULL TSRMLS_CC);
 
-	zend_list_delete(rsrc_id);
+	php_stream_close(stream);
 
 	if ( itype == IMAGE_FILETYPE_UNKNOWN) {
 		RETURN_FALSE;

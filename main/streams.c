@@ -25,6 +25,7 @@
 #include "php_globals.h"
 #include "php_network.h"
 #include "php_open_temporary_file.h"
+#include "ext/standard/file.h"
 
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -35,6 +36,7 @@
 #endif
 
 #define CHUNK_SIZE	8192
+#define PHP_STREAM_MAX_MEM	2 * 1024 * 1024
 
 #ifdef PHP_WIN32
 #define EWOULDBLOCK WSAEWOULDBLOCK
@@ -78,7 +80,7 @@ PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, int pe
 	ret->ops = ops;
 	ret->abstract = abstract;
 	ret->is_persistent = persistent;
-
+	ret->rsrc_id = ZEND_REGISTER_RESOURCE(NULL, ret, php_file_le_stream());
 	strlcpy(ret->mode, mode, sizeof(ret->mode));
 
 	return ret;
@@ -89,6 +91,15 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 {
 	int ret = 1;
 
+	if (stream->in_free)
+		return 1;
+
+	stream->in_free++;
+
+	if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) == 0) {
+		/* Remove entry from the resource list */
+		zend_list_delete(stream->rsrc_id);
+	}
 	if (close_options & PHP_STREAM_FREE_CALL_DTOR) {
 		if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
 			/* calling fclose on an fopencookied stream will ultimately
@@ -98,6 +109,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 				php_stream_free.
 				Lets let the cookie code clean it all up.
 			 */
+			stream->in_free = 0;
 			return fclose(stream->stdiocast);
 		}
 
@@ -125,6 +137,21 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 			stream->wrapperdata = NULL;
 		}
 
+#if ZEND_DEBUG
+		if ((close_options & PHP_STREAM_FREE_RSRC_DTOR) && (stream->__exposed == 0) && (EG(error_reporting) & E_WARNING)) {
+			/* it leaked: Lets deliberately NOT pefree it so that the memory manager shows it
+			 * as leaked; it will log a warning, but lets help it out and display what kind
+			 * of stream it was. */
+			char leakbuf[512];
+			snprintf(leakbuf, sizeof(leakbuf), __FILE__ "(%d) : Stream of type '%s' 0x%08X was not closed\n", __LINE__, stream->ops->label, (unsigned int)stream);
+# if defined(PHP_WIN32)
+			OutputDebugString(leakbuf);
+# else
+			fprintf(stderr, leakbuf);
+# endif
+		}
+		else
+#endif
 		pefree(stream, stream->is_persistent);
 	}
 
@@ -619,8 +646,10 @@ php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_gets, php_stdiop_cast,
 	"STDIO"
 };
+/* }}} */
 
-PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC TSRMLS_DC) /* {{{ */
+/* {{{ php_stream_fopen_with_path */
+PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	/* code ripped off from fopen_wrappers.c */
 	char *pathbuf, *ptr, *end;
@@ -737,6 +766,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 }
 /* }}} */
 
+/* {{{ php_stream_fopen */
 PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	FILE *fp;
@@ -811,7 +841,8 @@ static COOKIE_IO_FUNCTIONS_T stream_cookie_functions =
 #endif
 /* }}} */
 
-PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC) /* {{{ */
+/* {{{ php_stream_cast */
+PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show_err TSRMLS_DC)
 {
 	int flags = castas & PHP_STREAM_CAST_MASK;
 	castas &= ~PHP_STREAM_CAST_MASK;
@@ -902,8 +933,10 @@ exit_success:
 
 	return SUCCESS;
 
-} /* }}} */
+}
+/* }}} */
 
+/* {{{ wrapper init and registration */
 int php_init_stream_wrappers(TSRMLS_D)
 {
 	if (PG(allow_url_fopen)) {
@@ -935,7 +968,9 @@ PHPAPI int php_unregister_url_stream_wrapper(char *protocol TSRMLS_DC)
 	}
 	return SUCCESS;
 }
+/* }}} */
 
+/* {{{ php_stream_open_url */
 static php_stream *php_stream_open_url(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	php_stream_wrapper *wrapper;
@@ -977,7 +1012,9 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 	}
 	return NULL;
 }
+/* }}} */
 
+/* {{{ php_stream_open_wrapper */
 PHPAPI php_stream *_php_stream_open_wrapper(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
@@ -1034,13 +1071,15 @@ out:
 	}
 	return stream;
 }
+/* }}} */
 
+/* {{{ php_stream_open_wrapper_as_file */
 PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	FILE *fp = NULL;
 	php_stream *stream = NULL;
 
-	stream = php_stream_open_wrapper(path, mode, options, opened_path);
+	stream = php_stream_open_wrapper_rel(path, mode, options, opened_path);
 
 	if (stream == NULL)
 		return NULL;
@@ -1055,9 +1094,9 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 	}
 	return fp;
 }
+/* }}} */
 
-#define PHP_STREAM_MAX_MEM	2 * 1024 * 1024
-
+/* {{{ php_stream_make_seekable */
 PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstream, int flags STREAMS_DC TSRMLS_DC)
 {
 	assert(newstream != NULL);
@@ -1090,6 +1129,7 @@ PHPAPI int _php_stream_make_seekable(php_stream *origstream, php_stream **newstr
 	
 	return PHP_STREAM_RELEASED;
 }
+/* }}} */
 
 /*
  * Local variables:
