@@ -58,8 +58,6 @@ struct _php_core_globals {
 	zend_bool magic_quotes_runtime;
 	zend_bool magic_quotes_sybase;
 
-	zend_bool asp_tags;
-	zend_bool short_tags;
 	zend_bool allow_call_time_pass_reference;
 	zend_bool zend_set_utility_values;
 	zend_bool output_buffering;
@@ -72,7 +70,6 @@ struct _php_core_globals {
 
 	long memory_limit;
 
-	int error_reporting;
 	zend_bool track_errors;
 	zend_bool display_errors;
 	zend_bool log_errors;
