@@ -61,7 +61,6 @@ PHP_FUNCTION(mcrypt_module_get_supported_key_sizes);
 PHP_FUNCTION(mcrypt_module_close);
 
 ZEND_BEGIN_MODULE_GLOBALS(mcrypt)
-	int le_h;
 	char *modes_dir;
 	char *algorithms_dir;
 ZEND_END_MODULE_GLOBALS(mcrypt)

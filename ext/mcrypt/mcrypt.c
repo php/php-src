@@ -35,6 +35,8 @@
 #include "php_globals.h"
 #include "ext/standard/info.h"
 
+static int le_mcrypt;
+
 
 function_entry mcrypt_functions[] = {
 	PHP_FE(mcrypt_ecb, NULL)
@@ -196,7 +198,7 @@ ZEND_GET_MODULE(mcrypt)
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &mcryptind) == FAILURE) {			\
 		WRONG_PARAM_COUNT																	\
 	}																						\
-	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", MCG(le_h));				
+	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 
 #define MCRYPT_GET_MODE_DIR_ARGS(DIRECTORY)								\
 	switch (argc) {														\
@@ -244,12 +246,22 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 #endif
 
+static void php_mcrypt_module_dtor(zend_rsrc_list_entry *rsrc)
+{
+	MCRYPT td = (MCRYPT) rsrc->ptr;
+	mcrypt_module_close (td);
+}
+
+    
 static PHP_MINIT_FUNCTION(mcrypt)
 {
 #if defined(ZTS) && defined(HAVE_LIBMCRYPT24)
     ZEND_INIT_MODULE_GLOBALS(mcrypt, NULL, NULL);
     Z_TYPE(mcrypt_module_entry) = type;
 #endif
+	
+	le_mcrypt = zend_register_list_destructors_ex(php_mcrypt_module_dtor, NULL, "mcrypt", module_number);
+    
 	/* modes for mcrypt_??? routines */
 	REGISTER_LONG_CONSTANT("MCRYPT_ENCRYPT", 0, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MCRYPT_DECRYPT", 1, CONST_PERSISTENT);
@@ -427,7 +439,7 @@ PHP_FUNCTION(mcrypt_module_open)
 		php_error (E_WARNING, "could not open encryption module");
 		RETURN_FALSE;
 	} else {
-		ZEND_REGISTER_RESOURCE (return_value, td, MCG(le_h));
+		ZEND_REGISTER_RESOURCE (return_value, td, le_mcrypt);
 	}
 }
 /* }}} */
@@ -449,7 +461,7 @@ PHP_FUNCTION(mcrypt_generic_init)
 	MCRYPT_CHECK_PARAM_COUNT (3,3)
 	
 	zend_get_parameters_ex(3, &mcryptind, &key, &iv);
-	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", MCG(le_h));				
+	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 	convert_to_string_ex (key);
 	convert_to_string_ex (iv);
 
@@ -505,7 +517,7 @@ PHP_FUNCTION(mcrypt_generic)
 	MCRYPT_CHECK_PARAM_COUNT (2,2)
 	
 	zend_get_parameters_ex(2, &mcryptind, &data);
-	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", MCG(le_h));				
+	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 	convert_to_string_ex (data);
 
 	/* Check blocksize */
@@ -545,7 +557,7 @@ PHP_FUNCTION(mdecrypt_generic)
 	MCRYPT_CHECK_PARAM_COUNT (2,2)
 	
 	zend_get_parameters_ex(2, &mcryptind, &data);
-	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", MCG(le_h));				
+	ZEND_FETCH_RESOURCE (td, MCRYPT, mcryptind, -1, "MCrypt", le_mcrypt);				
 	convert_to_string_ex (data);
 
 	/* Check blocksize */
@@ -620,13 +632,8 @@ PHP_FUNCTION(mcrypt_module_close)
 	
 	MCRYPT_GET_TD_ARG
 
-	if (mcrypt_module_close (td) < 0) {
-		php_error (E_WARNING, "could not close module");
-		RETURN_FALSE
-	} else {
-		zend_list_delete (Z_LVAL_PP(mcryptind));
-		RETURN_TRUE
-	}
+	zend_list_delete (Z_LVAL_PP(mcryptind));
+	RETURN_TRUE;
 }
 
 
