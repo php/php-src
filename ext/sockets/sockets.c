@@ -692,6 +692,10 @@ PHP_FUNCTION(read)
 	ret = (*read_function)(Z_LVAL_PP(fd), tmpbuf, Z_LVAL_PP(length));
 	
 	if (ret >= 0) {
+		if(Z_STRLEN_PP(buf) > 0) {
+			efree(Z_STRVAL_PP(buf));
+		}
+
 		tmpbuf[ret] = '\0';
 		Z_STRVAL_PP(buf) = erealloc(tmpbuf, ret+1);
 		Z_STRLEN_PP(buf) = ret;
