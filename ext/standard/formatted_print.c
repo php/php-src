@@ -185,6 +185,7 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 			(*buffer)[(*pos)++] = '-';
 			add++;
 			len--;
+			copy_len--;
 		}
 		while (npad-- > 0) {
 			(*buffer)[(*pos)++] = padding;
