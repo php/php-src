@@ -297,7 +297,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (PG(html_errors)) {
 		php_printf("<title>phpinfo()</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\"></head>", charset);
-		PUTS("<body text=\"#000000\" bgcolor=\"#f0f0ff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
+		PUTS("<body text=\"#000000\" bgcolor=\"#ffffff\" link=\"#0000ff\" vlink=\"#ff00ff\" alink=\"#0000ff\">");
 	} else {
 		PUTS("       _           _        __        ____  \n");
 		PUTS(" _ __ | |__  _ __ (_)_ __  / _| ___  / /\\ \\ \n");
