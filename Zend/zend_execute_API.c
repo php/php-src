@@ -577,6 +577,7 @@ int fast_call_user_function(HashTable *function_table, zval **object_pp, zval *f
 		*function_pointer = EX(function_state).function;
 	} else {
 		EX(function_state).function = *function_pointer;
+		calling_scope= EX(function_state).function->common.scope;
 	}
 	
 	for (i=0; i<param_count; i++) {
