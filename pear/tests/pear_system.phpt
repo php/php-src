@@ -16,7 +16,6 @@ $ereg_sep = $sep;
 if (OS_WINDOWS) {
     $ereg_sep .= $sep;
 }
-
 /*******************
         mkDir
 ********************/
@@ -25,6 +24,7 @@ System::mkDir('singledir');
 if( !is_dir('singledir') ){
     print "System::mkDir('singledir'); failed\n";
 }
+System::rm('singledir');
 
 // Multiple directory creation
 System::mkDir('dir1 dir2 dir3');
