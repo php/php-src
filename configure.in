@@ -1407,7 +1407,7 @@ cat <<X
 | If your application relies on register_globals being ON, you       |
 | should explicitly set it to on in your php.ini file.               |
 | Note that you are strongly encouraged to read                      |
-| http://www.php.net/manual/en/security.registerglobals.php          |
+| http://www.php.net/manual/en/security.globals.php                  |
 | about the implications of having register_globals set to on, and   |
 | avoid using it if possible.                                        |
 +--------------------------------------------------------------------+
