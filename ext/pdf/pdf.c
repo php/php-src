@@ -183,6 +183,49 @@ static void _free_outline(int *outline)
 	if(outline) efree(outline);
 }
 
+#if PDFLIB_MAJORVERSION > 1 & PDFLIB_MINORVERSION > 0
+static void custom_errorhandler(PDF *p, int type, const char*shortmsg) {
+	switch (type){
+		case PDF_NonfatalError:
+			return;
+		case PDF_MemoryError:/*give up in all other cases */
+		case PDF_IOError:
+		case PDF_RuntimeError:
+		case PDF_IndexError:
+		case PDF_TypeError:
+		case PDF_DivisionByZero:
+		case PDF_OverflowError:
+		case PDF_SyntaxError:
+		case PDF_ValueError:
+		case PDF_SystemError:
+		case PDF_UnknownError:
+		default:
+			if (p !=NULL)
+				PDF_delete(p);/*clean up PDFlib */
+			php3_error(E_ERROR,"Internal pdflib error: %s", shortmsg);
+		}
+}
+
+static void *pdf_emalloc(PDF *p, size_t size, const char *caller) {
+	return(emalloc(size));
+}
+
+static void *pdf_realloc(PDF *p, void *mem, size_t size, const char *caller) {
+	return(erealloc(mem, size));
+}
+
+static void pdf_efree(PDF *p, void *mem) {
+	return(efree(mem));
+}
+#endif
+
+#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10
+static size_t pdf_flushwrite(PDF *p, void *data, size_t size){
+	if(php_header())
+		return(php_write(data, size));
+}
+#endif
+
 PHP_MINIT_FUNCTION(pdf)
 {
 	PDF_GLOBAL(le_pdf_image) = register_list_destructors(_free_pdf_image, NULL);
@@ -359,23 +402,53 @@ PHP_FUNCTION(pdf_set_info_keywords) {
    Opens a new pdf document */
 PHP_FUNCTION(pdf_open) {
 	pval **file;
-	pval *info;
-	int id, type;
+	int id;
 	FILE *fp;
 	PDF *pdf;
+	int argc;
 	PDF_TLS_VARS;
 
+#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10
+	argc = ARG_COUNT(ht);
+	if(argc > 1)
+		WRONG_PARAM_COUNT;
+	if (argc != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+		fp = NULL;
+		php3_printf("No File\n");
+	} else {
+		php3_printf("With File\n");
+		ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
+		/* XXX should do anzend_list_addref for <fp> here! */
+	}
+#else
 	if (ARG_COUNT(ht) != 1 || zend_get_parameters_ex(1, &file) == FAILURE) {
+		php3_error(E_WARNING, "Your version of pdflib does not support in memory creation of PDF documents. You have to pass a file handle to pdf_open()");
 		WRONG_PARAM_COUNT;
 	}
 
 	ZEND_FETCH_RESOURCE(fp, FILE *, file, -1, "File-Handle", php_file_le_fopen());
 	/* XXX should do anzend_list_addref for <fp> here! */
+#endif
 
+#if PDFLIB_MAJORVERSION > 1 & PDFLIB_MINORVERSION > 0
+	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
+#else
 	pdf = PDF_new();
+#endif
+
+#if PDFLIB_MAJORVERSION >= 2 & PDFLIB_MINORVERSION >= 10
+	if(fp) {
+		if (0 > PDF_open_fp(pdf, fp))
+			RETURN_FALSE;
+	} else {
+		if (0 > PDF_open_mem(pdf, pdf_flushwrite))
+			RETURN_FALSE;
+	}
+#else
 	if (0 > PDF_open_fp(pdf, fp)) {
 		RETURN_FALSE;
 	}
+#endif
 	id = zend_list_insert(pdf,PDF_GLOBAL(le_pdf));
 	RETURN_LONG(id);
 }
@@ -598,7 +671,7 @@ PHP_FUNCTION(pdf_set_font) {
    Gets the current font */
 PHP_FUNCTION(pdf_get_font) {
 	pval *arg1;
-	int id, type, font, embed;
+	int id, type, font;
 	PDF *pdf;
 	PDF_TLS_VARS;
 
@@ -624,7 +697,7 @@ PHP_FUNCTION(pdf_get_font) {
    Gets the current font name */
 PHP_FUNCTION(pdf_get_fontname) {
 	pval *arg1;
-	int id, type, embed;
+	int id, type;
 	char *fontname;
 	PDF *pdf;
 	PDF_TLS_VARS;
@@ -651,7 +724,7 @@ PHP_FUNCTION(pdf_get_fontname) {
    Gets the current font size */
 PHP_FUNCTION(pdf_get_fontsize) {
 	pval *arg1;
-	int id, type, embed;
+	int id, type;
 	float fontsize;
 	PDF *pdf;
 	PDF_TLS_VARS;
@@ -2217,10 +2290,13 @@ PHP_FUNCTION(pdf_place_image) {
 /* {{{ proto void pdf_put_image(int pdf, int pdfimage)
    Stores image in the pdf document for later use */
 PHP_FUNCTION(pdf_put_image) {
+#if PDFLIB_MINORVERSION > 0
+#else
 	pval *arg1, *arg2;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
+#endif
 	PDF_TLS_VARS;
 	
 #if PDFLIB_MINORVERSION > 0
@@ -2256,11 +2332,14 @@ PHP_FUNCTION(pdf_put_image) {
 /* {{{ proto void pdf_execute_image(int pdf, int pdfimage, int x, int y, int scale)
    Places stored image in the pdf document */
 PHP_FUNCTION(pdf_execute_image) {
+#if PDFLIB_MINORVERSION >= 01
+#else
 	pval *arg1, *arg2, *arg3, *arg4, *arg5;
 	int id, type;
 	int pdf_image;
 	PDF *pdf;
 	PDF_TLS_VARS;
+#endif
 
 #if PDFLIB_MINORVERSION >= 01
 	php_error(E_WARNING, "Version 2.01 of pdflib does not need the pdf_execute_image() anymore, check the docs!");

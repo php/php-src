@@ -283,7 +283,6 @@ int make_return_objrec(pval **return_value, char **objrecs, int count)
 */
 int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr) {
 	char *attrname, *str, *temp, language[3];
-	int i, count;
 	zval *spec_arr;
 	char *strtok_buf = NULL;
 	
@@ -1500,7 +1499,6 @@ PHP_FUNCTION(hw_changeobject) {
 	int link, id, type, i;
 	hw_connection *ptr;
 	char *modification, *oldobjrec, buf[BUFFERLEN];
-	char *tmp;
 	HashTable *newobjarr;
 
 	if (ARG_COUNT(ht) != 3 || getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE) {
@@ -2926,7 +2924,7 @@ PHP_FUNCTION(hw_docbyanchor) {
 	int link, id, type;
 	hw_connection *ptr;
 
-	if (ARG_COUNT(ht) != 2 || getParameters(2, &arg1, &arg2) == FAILURE) {
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &arg1, &arg2) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg1);

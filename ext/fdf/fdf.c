@@ -123,7 +123,7 @@ PHP_MSHUTDOWN_FUNCTION(fdf)
    Opens a new fdf document */
 PHP_FUNCTION(fdf_open) {
 	pval **file;
-	int id, type;
+	int id;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
@@ -174,7 +174,7 @@ PHP_FUNCTION(fdf_close) {
 /* {{{ proto void fdf_create(void)
    Creates a new fdf document */
 PHP_FUNCTION(fdf_create) {
-	int id, type;
+	int id;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;
@@ -367,7 +367,6 @@ PHP_FUNCTION(fdf_set_ap) {
 PHP_FUNCTION(fdf_set_status) {
 	pval **arg1, **arg2;
 	int id, type;
-	ASInt32 nr;
 	FDFDoc fdf;
 	FDFErc err;
 	FDF_TLS_VARS;

@@ -15,13 +15,14 @@ echo $withval
       PHP_EXTENSION(pdf)
       old_LDFLAGS=$LDFLAGS
 		  old_LIBS=$LIBS
-		  LIBS="$LIBS -ltiff -ljpeg -lz"
+		  LIBS="$LIBS -ltiff -ljpeg -lpng -lz"
       AC_CHECK_LIB(pdf, PDF_close, [AC_DEFINE(HAVE_PDFLIB,1,[ ])],
         [AC_MSG_ERROR(pdflib extension requires pdflib 2.x. You may as well need libtiff and libjpeg. In such a case use the options --with-tiff-dir=<DIR> and --with-jpeg-dir=<DIR>)])
       LIBS=$old_LIBS
       LDFLAGS=$old_LDFLAGS
       AC_ADD_LIBRARY(pdf)
       AC_ADD_LIBRARY(tiff)
+      AC_ADD_LIBRARY(png)
       AC_ADD_LIBRARY(jpeg)
       AC_ADD_LIBRARY(z)
       ;;
@@ -71,6 +72,24 @@ echo $withval
         ],[
           AC_MSG_RESULT(no)
           AC_MSG_WARN(If configure fails try --with-jpeg-dir=<DIR>)
+        ]) 
+
+        AC_MSG_CHECKING([for libpng (needed by pdflib 2.x)])
+        AC_ARG_WITH(png-dir,
+        [  --with-png-dir[=DIR]   png dir for pdflib 2.x],[
+          AC_MSG_RESULT(yes)
+          if test -z $withval; then
+            withval="/usr/local"
+          fi
+          old_LIBS=$LIBS
+          LIBS="$LIBS -L$withval/lib"
+          AC_CHECK_LIB(png,png_create_info_struct, [PDFLIB_LIBS="$PDFLIB_LIBS -L$withval/lib -lpng"],[AC_MSG_RESULT(no)],)
+          LIBS=$old_LIBS
+          AC_ADD_LIBRARY_WITH_PATH(png, $withval/lib)
+          LIBS="$LIBS -L$withval/lib -lpng"
+        ],[
+          AC_MSG_RESULT(no)
+          AC_MSG_WARN(If configure fails try --with-png-dir=<DIR>)
         ]) 
 
         AC_MSG_CHECKING([for libtiff (needed by pdflib 2.x)])
