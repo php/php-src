@@ -1899,6 +1899,10 @@ SOURCE=..\win32\wsyslog.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\ext\com\com.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ext\com\conversion.h
 # End Source File
 # Begin Source File
