@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 200?, Version 4.4.0
+- Improved dba extension (Marcus)
 - Fixed bug #21229 (missing 3rd argument to php_module_startup). (Ilia)
 - Fixed bug #21267 (opening URLs that result in redirection to a relative
   path was failing). (Ilia)
