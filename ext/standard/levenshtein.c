@@ -97,7 +97,8 @@ static int calc_levdist(const char *s1, const char *s2) /* faster, but obfuscate
 
 /* {{{ proto int levenshtein(string str1, string str2)
    Calculate Levenshtein distance between two strings */
-PHP_FUNCTION(levenshtein){
+PHP_FUNCTION(levenshtein)
+{
 	zval **str1, **str2;
 	int l;
 
