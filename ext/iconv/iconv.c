@@ -139,7 +139,7 @@ static int php_iconv_string(const char *in_p, size_t in_len,
 							char **out, size_t *out_len,
 							const char *in_charset, const char *out_charset, int *err TSRMLS_DC)
 {
-#if ICONV_SUPPORTS_ERRNO
+#if !ICONV_SUPPORTS_ERRNO
 	unsigned int in_size, out_size, out_left;
 	char *out_buffer, *out_p;
 	iconv_t cd;
