@@ -1,3 +1,178 @@
+2004-02-03  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/scripts/pear.bat:
+      re-adding as binary - file is unmodified
+
+    * pear/scripts/pear.bat:
+      remove in order to re-add as binary
+
+2004-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug24884.phpt
+      ext/simplexml/tests/002.phpt
+      ext/simplexml/tests/006.phpt
+      ext/simplexml/tests/019.phpt
+      tests/classes/__clone_001.phpt
+      tests/classes/clone_001.phpt
+      tests/classes/clone_002.phpt
+      tests/classes/clone_003.phpt
+      tests/classes/clone_004.phpt
+      tests/classes/clone_006.phpt
+      tests/classes/factory_and_singleton_007.phpt
+      tests/classes/factory_and_singleton_008.phpt:
+      Update tests
+
+    * tests/lang/bug26900.phpt:
+      No longer needed
+
+    * ZendEngine2/zend_objects.c:
+      Nuke unused variable
+
+    * ZendEngine2/zend_compile.c:
+      Fix Warning
+
+2004-02-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/ZEND_CHANGES:
+      clone/__clone() related changes.
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Remove unused variable
+
+2004-02-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * ext/standard/var_unserializer.c:
+      touch
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      Remove more garbage - valid bit was not really necessary
+
+    * ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_object_handlers.c
+      ZendEngine2/zend_object_handlers.h
+      ZendEngine2/zend_objects_API.c
+      ZendEngine2/zend_objects_API.h:
+      - Clean garbage (delete was nuked a long time ago)
+
+2004-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      Go with RC2
+
+    * (PHP_4_3)
+      NEWS:
+      RC2 news bit.
+
+    * ZendEngine2/zend_execute.c:
+      More unneeded code removed.
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_language_scanner.l:
+      Abort on parse error in an include file (patch by Ilia)
+
+2004-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      Zend/zend_execute.c
+      Zend/zend_language_scanner.l:
+      Revert the old patch for handling of parse errors inside include/require.
+      Add a new, much simpler patch to address the situation.
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      Remove redundant code
+
+2004-02-03  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/oci8/config.m4
+      ext/oci8/oci8.c:
+      MFH (making oci8 able to compile with Oracle 10)
+
+    * ext/oci8/config.m4
+      ext/oci8/oci8.c:
+      -remove obsolete types
+      -changes in config.m4 to make oci8 to compile with Oracle 10g
+      (thanks to cjbj at hotmail dot com for reporting both problems)
+
+2004-02-03  Stanislav Malyshev  <stas@zend.com>
+
+    * ext/standard/var.c
+      ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re:
+      fix bug #27120 and bug #25975 - preserve is_ref when bound
+      objects are serialized
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_execute.c:
+      Fix try/catch block logic
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_objects.c:
+      Perform a bitwise copy of the object even when __clone() is defined.
+      __clone() is back to not requiring any arguments, as $that is no longer
+      needed ($this already contains a copy of the original object, by the time
+      we __clone() is executed).
+      Calling the parent clone is done using parent::__clone()
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_default_classes.c
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h
+      ZendEngine2/zend_language_parser.y
+      ZendEngine2/zend_language_scanner.l
+      ZendEngine2/zend_opcode.c:
+      Rewrote exception support.  Fixes a few limitations and bugs in the old
+      implementation, and allows exceptions to 'fire' much earlier than before.
+      
+      Instructions on how to use the new mechanism will follow on internals@
+      shortly...
+      
+      Note - this (most probably) breaks the current implementation of
+      set_exception_handler()
+
+2004-02-03  Stig Bakken  <ssb@trd.overture.com>
+
+    * ext/sqlite/config.m4:
+      SQLITE_ENCODING should be UTF8 rather than UTF-8
+
+2004-02-03  Martin Kraemer  <Martin.Kraemer@fujitsu-siemens.com>
+
+    * build/build.mk:
+      Prevent cvsclean from being removed on interrupts
+
+2004-02-03  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      order
+
+2004-02-03  Vlad Krupin  <phpdevel@echospace.com>
+
+    * ext/pspell/pspell.c:
+      This should allow us to read dictionary locations from the win32 registry
+      when we use a custom config.
+      Not doing so when I added win32 support was an oversight.
+      Now all pspell_new_* functions should be usable on win32.
+
+2004-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/snmp/snmp.c:
+      Fixed possible overflow.
+
 2004-02-02  Andrey Hristov  <php@hristov.com>
 
     * ext/skeleton/php_skeleton.h

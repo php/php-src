@@ -1,3 +1,79 @@
+2004-02-03  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug24884.phpt:
+      Update tests
+
+    * zend_objects.c:
+      Nuke unused variable
+
+    * zend_compile.c:
+      Fix Warning
+
+2004-02-03  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZEND_CHANGES:
+      clone/__clone() related changes.
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c:
+      Remove unused variable
+
+    * zend_objects_API.c
+      zend_objects_API.h:
+      Remove more garbage - valid bit was not really necessary
+
+    * zend_execute_API.c
+      zend_object_handlers.c
+      zend_object_handlers.h
+      zend_objects_API.c
+      zend_objects_API.h:
+      - Clean garbage (delete was nuked a long time ago)
+
+2004-02-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_execute.c:
+      More unneeded code removed.
+
+2004-02-03  Zeev Suraski  <zeev@zend.com>
+
+    * zend_execute.c
+      zend_language_scanner.l:
+      Abort on parse error in an include file (patch by Ilia)
+
+    * zend_compile.c:
+      Remove redundant code
+
+    * zend_execute.c:
+      Fix try/catch block logic
+
+    * zend_compile.c
+      zend_objects.c:
+      Perform a bitwise copy of the object even when __clone() is defined.
+      __clone() is back to not requiring any arguments, as $that is no longer
+      needed ($this already contains a copy of the original object, by the time
+      we __clone() is executed).
+      Calling the parent clone is done using parent::__clone()
+
+    * zend_compile.c
+      zend_compile.h
+      zend_default_classes.c
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_globals.h
+      zend_language_parser.y
+      zend_language_scanner.l
+      zend_opcode.c:
+      Rewrote exception support.  Fixes a few limitations and bugs in the old
+      implementation, and allows exceptions to 'fire' much earlier than before.
+      
+      Instructions on how to use the new mechanism will follow on internals@
+      shortly...
+      
+      Note - this (most probably) breaks the current implementation of
+      set_exception_handler()
+
 2004-02-02  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c
