@@ -35,9 +35,9 @@ array(7) {
   ["-2147483648"]=>
   array(2) {
     [0]=>
-    int(0)
+    string(6) "banana"
     [1]=>
-    int(0)
+    string(6) "orange"
   }
   ["test"]=>
   int(27)
@@ -56,9 +56,9 @@ array(7) {
   ["-2147483648"]=>
   array(2) {
     [0]=>
-    int(0)
+    string(6) "banana"
     [1]=>
-    int(0)
+    string(6) "orange"
   }
   [-2147483648]=>
   float(-0.33333333333333)
@@ -80,9 +80,9 @@ array(7) {
   float(-0.33333333333333)
   [1]=>
   array(2) {
-    [0]=>
+    string(6) "banana"
     int(0)
-    [1]=>
+    string(6) "orange"
     int(0)
   }
   [2]=>
