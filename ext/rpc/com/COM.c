@@ -33,7 +33,7 @@
  * Zeev
  */
 
-#if WIN32|WINNT
+#ifdef PHP_WIN32
 
 #define _WIN32_DCOM
 
@@ -41,6 +41,7 @@
 #include "php_COM.h"
 #include "zend_compile.h"
 #include "php_ini.h"
+#include "php_reentrancy.h"
 
 #include "objbase.h"
 #include "olestd.h" 
@@ -182,9 +183,9 @@ static PHP_INI_MH(OnTypelibFileChange)
 		if (typelib_name_buffer[0]==';') {
 			continue;
 		}
-		typelib_name = strtok_r(typelib_name_buffer, "\r\n", &strtok_buf); /* get rid of newlines */
-		typelib_name = strtok_r(typelib_name, "#", &strtok_buf);
-		modifier = strtok_r(NULL, "#", &strtok_buf);
+		typelib_name = php_strtok_r(typelib_name_buffer, "\r\n", &strtok_buf); /* get rid of newlines */
+		typelib_name = php_strtok_r(typelib_name, "#", &strtok_buf);
+		modifier = php_strtok_r(NULL, "#", &strtok_buf);
 		if (modifier) {
 			if (!strcmp(modifier, "cis") || !strcmp(modifier, "case_insensitive")) {
 				mode &= ~CONST_CS;
