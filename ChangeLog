@@ -1,3 +1,46 @@
+2001-07-25  Thies C. Arntzen  <thies@thieso.net>
+
+    * ext/oci8/oci8.c:
+    - Improved the stability of OCIPlogon() after a database restart. 
+
+2001-07-25  Daniel Beulshausen  <daniel@php4win.de>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/php_sockets_win.h
+      ext/sockets/sockets.c: fix recently discovered api flaws
+    - nuke first parameter to socket_select (detemine it ourself)
+    - swap parameters for socket_fd_set, socket_fd_clear & socket_fd_isset
+    - allow to pass an array of sockets to socket_fd_set + socket_fd_clear
+
+2001-07-25  Yavor Shahpasov  <yavo@itenasolutions.com>
+
+    * pear/Benchmark/Iterate.php:
+    Added support for class::method and $object->method calls
+
+2001-07-25  Stig Bakken  <ssb@fast.no>
+
+    * pear/XML/RPC.php:
+    * XML_RPC_encode bugfix from giancarlo pinerolo <ping@alt.it>
+
+    * pear/scripts/pearize.in: * added emacs footer
+
+2001-07-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/fsock.c: Get rid of memchr in SEARCHCR().
+
+    * ext/session/session.c: Get rid of memchr
+
+    * ext/ircg/ircg_scanner.re
+      ext/ircg/ircg.c
+      ext/ircg/ircg_scanner.c:
+    Replace strchr in inner tokener loop for format strings
+
+    Fix the message scanner once again.. the rules matched too much.
+
+2001-07-25  Nikos Mavroyanopoulos  <nmav@altera.gr>
+
+    * ext/ovrimos/ovrimos.c: updated ovrimos driver
+
 2001-07-24  Andrei Zmievski  <andrei@ispi.net>
 
     * main/internal_functions.c.in:
