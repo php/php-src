@@ -199,15 +199,7 @@ PHP_FUNCTION(srand)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
-#ifdef HAVE_SRANDOM
-	srandom((unsigned int) (*arg)->value.lval);
-#else
-#ifdef HAVE_SRAND48
-	srand48((unsigned int) (*arg)->value.lval);
-#else
-	srand((unsigned int) (*arg)->value.lval);
-#endif
-#endif
+	php_srand((*arg)->value.lval);
 }
 /* }}} */
 
@@ -253,15 +245,9 @@ PHP_FUNCTION(rand)
 	}
 			
 	return_value->type = IS_LONG;
-#ifdef HAVE_RANDOM
-	return_value->value.lval = random();
-#else
-#ifdef HAVE_LRAND48
-	return_value->value.lval = lrand48();
-#else
-	return_value->value.lval = rand();
-#endif
-#endif
+
+	return_value->value.lval = php_rand();
+
     /*
      * A bit of tricky math here.  We want to avoid using a modulus because
      * that simply tosses the high-order bits and might skew the distribution
