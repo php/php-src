@@ -2492,7 +2492,7 @@ PHP_FUNCTION(strnatcasecmp)
 /* }}} */
 
 
-/* {{{ proto int str_count(string haystack, string needle)
+/* {{{ proto int substr_count(string haystack, string needle)
    Returns the number of times a substring occurs in the string. */
 PHP_FUNCTION(substr_count)
 {
