@@ -75,6 +75,9 @@ php_array_globals array_globals;
 #define COUNT_NORMAL			0
 #define COUNT_RECURSIVE			1
 
+#define DIFF_NORMAL			0
+#define DIFF_ASSOC			1
+
 PHP_MINIT_FUNCTION(array)
 {
 #ifdef ZTS
@@ -2621,7 +2624,7 @@ out:
 }
 /* }}} */
 
-static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior TSRMLS_DC)
 {
 	zval ***args = NULL;
 	HashTable *hash;
@@ -2660,9 +2663,9 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 			*list++ = p;
 		}
 		*list = NULL;
-		if (behavior == 0) {
+		if (behavior == DIFF_NORMAL) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_data_compare TSRMLS_CC);
-		} else if (behavior == 1) {
+		} else if (behavior == DIFF_ASSOC) {
 			zend_qsort((void *) lists[i], hash->nNumOfElements, sizeof(Bucket *), array_key_compare TSRMLS_CC);
 		}
 	}
@@ -2676,22 +2679,22 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 	while (*ptrs[0]) {
 		c = 1;
 		for (i = 1; i < argc; i++) {
-			if (behavior == 0) {
+			if (behavior == DIFF_NORMAL) {
 				while (*ptrs[i] && (0 < (c = array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
-			} else if (behavior == 1) {
+			} else if (behavior == DIFF_ASSOC) {
 				while (*ptrs[i] && (0 < (c = array_key_compare(ptrs[0], ptrs[i] TSRMLS_CC)))) {
 					ptrs[i]++;
 				}
 			}
 			if (!c) {
-				if (behavior == 0) {
+				if (behavior == DIFF_NORMAL) {
 					if (*ptrs[i]) {
 						ptrs[i]++;
 					}
 					break;
-				} else if (behavior == 1) {
+				} else if (behavior == DIFF_ASSOC) {
 					if (*ptrs[i]) {
 						if (array_data_compare(ptrs[0], ptrs[i] TSRMLS_CC) != 0) {
 							c = -1;
@@ -2715,11 +2718,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				if (!*++ptrs[0]) {
 					goto out;
 				}
-				if (behavior == 0) {
+				if (behavior == DIFF_NORMAL) {
 					if (array_data_compare(ptrs[0] - 1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == 1) {
+				} else if (behavior == DIFF_ASSOC) {
 					/* in this case no array_key_compare is needed */
 					break;
 				}
@@ -2731,11 +2734,11 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior)
 				if (!*++ptrs[0]) {
 					goto out;
 				}
-				if (behavior == 0) {
+				if (behavior == DIFF_NORMAL) {
 					if (array_data_compare(ptrs[0]-1, ptrs[0] TSRMLS_CC)) {
 						break;
 					}
-				} else if (behavior == 1) {
+				} else if (behavior == DIFF_ASSOC) {
 					/* in this case no array_key_compare is needed */
 					break;
 				}
@@ -2756,7 +2759,7 @@ out:
    Returns the entries of arr1 that have values which are not present in any of the others arguments */
 PHP_FUNCTION(array_diff)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_NORMAL TSRMLS_CC);
 }
 /* }}} */
 
@@ -2764,7 +2767,7 @@ PHP_FUNCTION(array_diff)
    Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal */
 PHP_FUNCTION(array_diff_assoc)
 {
-	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_array_diff(INTERNAL_FUNCTION_PARAM_PASSTHRU, DIFF_ASSOC TSRMLS_CC);
 }
 /* }}} */
 
