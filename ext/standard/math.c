@@ -934,10 +934,10 @@ PHP_FUNCTION(base_convert)
 		RETURN_FALSE;
 	}
 
-	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp TSRMLS_CC) != SUCCESS) {
+	if(_php_math_basetozval(*number, Z_LVAL_PP(frombase), &temp) != SUCCESS) {
 		RETURN_FALSE;
 	}
-	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase));
+	result = _php_math_zvaltobase(&temp, Z_LVAL_PP(tobase) TSRMLS_CC);
 	RETVAL_STRING(result, 0);
 } 
 
