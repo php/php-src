@@ -1,3 +1,13 @@
+2004-09-03  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/dio/dio.c:
+      Adjusted input check.
+
+    * (PHP_4_3)
+      ext/session/session.c:
+      MFH: Fixed bug #29925 (Added a check to prevent illegal characters in
+      session key).
+
 2004-09-02  Frank M. Kromann  <frank@kromann.info>
 
     * ext/ming/ming.c:
