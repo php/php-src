@@ -2173,7 +2173,7 @@ PHP_FUNCTION(function_exists)
 	
 	lcname = estrdup(fname->value.str.val);
 	zend_str_tolower(lcname, fname->value.str.len);
-	if (_php3_hash_find(CG(function_table), lcname,
+	if (zend_hash_find(CG(function_table), lcname,
 						fname->value.str.len+1, (void**)&tmp) == FAILURE) {
 		efree(lcname);
 		RETURN_FALSE;
@@ -2186,7 +2186,7 @@ PHP_FUNCTION(function_exists)
 /* }}} */
 
 
-/* {{{ proto bool in_array(array haystack, mixed needle)
+/* {{{ proto bool in_array(mixed needle, array haystack)
    Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
@@ -2261,7 +2261,7 @@ static int _valid_var_name(char *varname)
 PHP_FUNCTION(extract)
 {
 	pval *var_array, *etype, *prefix;
-	pval **var_ptr, *var, *exist;
+	pval **entry_ptr, *entry, *exist;
 	pval *data;
 	char *varname, *finalname;
 	ulong lkey;
@@ -2310,11 +2310,11 @@ PHP_FUNCTION(extract)
 	}
 		
 	zend_hash_internal_pointer_reset(var_array->value.ht);
-	while(zend_hash_get_current_data(var_array->value.ht, (void **)&var_ptr) == SUCCESS) {
-		var = *var_ptr;
+	while(zend_hash_get_current_data(var_array->value.ht, (void **)&entry_ptr) == SUCCESS) {
+		entry = *entry_ptr;
 
-		if (!(var->type == IS_STRING &&
-			var->value.str.val == undefined_variable_string)) {
+		if (!(entry->type == IS_STRING &&
+			entry->value.str.val == undefined_variable_string)) {
 
 			if (zend_hash_get_current_key(var_array->value.ht, &varname, &lkey) ==
 					HASH_KEY_IS_STRING) {
@@ -2351,7 +2351,7 @@ PHP_FUNCTION(extract)
 					
 					if (finalname) {
 						data = (pval *)emalloc(sizeof(pval));
-						*data = *var;
+						*data = *entry;
 						pval_copy_constructor(data);
 						data->is_ref = 0;
 						data->refcount = 1;
