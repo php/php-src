@@ -90,6 +90,9 @@
 #if HAVE_TOKENIZER
 #include "ext/tokenizer/php_tokenizer.h"
 #endif
+#if HAVE_ZLIB
+#include "ext/zlib/php_zlib.h"
+#endif
 /* }}} */
 
 /* {{{ php_builtin_extensions[]
@@ -139,6 +142,9 @@ zend_module_entry *php_builtin_extensions[] = {
 #endif
 #if HAVE_LIBEXPAT && HAVE_WDDX
 	,phpext_wddx_ptr
+#endif
+#if HAVE_ZLIB
+	,phpext_zlib_ptr
 #endif
 };
 /* }}} */
