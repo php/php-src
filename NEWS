@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   the constructor). (Marcus)
 - Fixed bug #29342 (strtotime() does not handle empty date string properly).
   (Ilia)
+- Fixed bug #29340 (win32 build produces invalid php_ifx.dll). (Edin)
 - Fixed bug #29335 (fetch functions now use MYSQLI_BOTH as default) (Georg)
 - Fixed bug #29291 (get_class_vars() return names with NULLs). (Marcus)
 - Fixed buf #29258 (variant_date_from_timestamp() does not honour
