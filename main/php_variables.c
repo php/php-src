@@ -156,7 +156,7 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 			if (!index) {
 				zend_hash_next_index_insert(symtable1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			} else {
-				zend_hash_update(symtable1, index, index_len+1, &gpc_element, sizeof(zval *), (void **) &gpc_element_p);
+				zend_hash_update_ptr(symtable1, index, index_len+1, gpc_element, sizeof(zval *), (void **) &gpc_element_p);
 			}
 			if (!top_gpc_p) {
 				top_gpc_p = gpc_element_p;
@@ -168,7 +168,7 @@ PHPAPI void php_register_variable(char *var, char *val, pval *track_vars_array E
 	if (top_gpc_p) {
 		(*top_gpc_p)->is_ref = 1;
 		if (symtable2) {
-			zend_hash_update(symtable2, var, var_len+1, top_gpc_p, sizeof(zval *), NULL);
+			zend_hash_update_ptr(symtable2, var, var_len+1, *top_gpc_p, sizeof(zval *), NULL);
 			(*top_gpc_p)->refcount++;
 		}	
 	}
@@ -192,13 +192,13 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
 					case PARSE_POST:
-						zend_hash_add(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL);
 						break;
 					case PARSE_GET:
-						zend_hash_add(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), array_ptr, sizeof(pval *),NULL);
 						break;
 					case PARSE_COOKIE:
-						zend_hash_add(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), &array_ptr, sizeof(pval *),NULL);
+						zend_hash_add_ptr(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), array_ptr, sizeof(pval *),NULL);
 						break;
 				}
 			} else {
@@ -294,7 +294,7 @@ void php_import_environment_variables(ELS_D PLS_DC)
 		ALLOC_ZVAL(array_ptr);
 		array_init(array_ptr);
 		INIT_PZVAL(array_ptr);
-		zend_hash_add(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), &array_ptr, sizeof(pval *),NULL);
+		zend_hash_add_ptr(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), array_ptr, sizeof(pval *),NULL);
 	}
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
