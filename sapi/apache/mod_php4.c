@@ -340,6 +340,9 @@ static sapi_module_struct sapi_module = {
 	sapi_apache_register_server_variables,		/* register server variables */
 	php_apache_log_message,			/* Log message */
 
+	block_alarms,					/* Block interruptions */
+	unblock_alarms,					/* Unblock interruptions */
+
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
