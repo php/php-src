@@ -52,7 +52,7 @@
 #include <arpa/inet.h>
 #endif
 #endif
-#ifdef PHP_WIN32
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 #if defined(AF_UNIX)
