@@ -31,7 +31,13 @@
 #include "SAPI.h"
 #include "php_main.h"
 
+#ifdef PHP_WIN32
+#include "readdir.h"
+/* this makes no sence, vc6 errors if this declaration is not here */
+extern int alphasort(const struct dirent **a, const struct dirent **b);
+#else
 #include "dirent.h"
+#endif
 
 #ifndef S_ISREG
 #define S_ISREG(mode)   (((mode) & S_IFMT) == S_IFREG)
