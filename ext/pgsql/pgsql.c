@@ -2679,11 +2679,11 @@ PHP_FUNCTION(pg_result_status)
 
 	pgsql_result = pg_result->result;
 	if (result_type == PGSQL_STATUS_LONG) {
-		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
-	}
-	else if (result_type == PGSQL_STATUS_STRING) {
 		status = PQresultStatus(pgsql_result);
 		RETURN_LONG((int)status);
+	}
+	else if (result_type == PGSQL_STATUS_STRING) {
+		RETURN_STRING(PQcmdStatus(pgsql_result), 1);
 	}
 	else {
 		php_error(E_WARNING, "%s() expects optional 2nd parameter to be PGSQL_STATUS_LONG or PGSQL_STATUS_STRING",
