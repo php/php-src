@@ -8,50 +8,6 @@ pear_install_targets = \
 
 peardir=$(PEAR_INSTALLDIR)
 
-#PEAR_SUBDIRS = \
-#	 Archive \
-#	 Console \
-#	 PEAR \
-#	 PEAR/Command \
-#	 PEAR/Frontend \
-#	 XML 
-
-# These are moving to /pear (in cvs):
-# 	Crypt \
-# 	File \
-# 	Date \
-# 	DB \
-# 	HTML \
-# 	HTTP \
-# 	Image \
-# 	Mail \
-# 	Net \
-#	Schedule \
-
-# These are moving to /pear (in cvs):
-# 	Crypt/HCEMD5.php \
-# 	Date/Calc.php \
-# 	Date/Human.php \
-# 	File/Find.php \
-# 	File/Passwd.php \
-# 	HTML/Form.php \
-# 	HTML/Page.php \
-# 	HTML/Processor.php \
-# 	HTML/Select.php \
-# 	HTML/Table.php \
-# 	HTTP.php \
-# 	HTTP/Compress.php \
-# 	Mail.php \
-# 	Mail/RFC822.php \
-# 	Mail/sendmail.php \
-# 	Mail/smtp.php \
-# 	Net/Curl.php \
-# 	Net/Dig.php \
-# 	Net/SMTP.php \
-#	Schedule/At.php \
-
-#PEARCMD=$(top_builddir)/sapi/cli/php -d include_path=$(top_srcdir)/pear pear/scripts/pear.in
-
 PEAR_INSTALL_FLAGS = \
 	-d 'safe_mode=0' \
 	-d 'open_basedir=' \
@@ -82,8 +38,7 @@ BUILD_FILES = \
 	scan_makefile_in.awk \
 	acinclude.m4
 
-bin_SCRIPTS = phpize php-config
-# pear phptar
+bin_SCRIPTS = phpize php-config phpextdist
 
 install-build:
 	@echo "Installing build environment:     $(INSTALL_ROOT)$(phpbuilddir)/"
@@ -95,13 +50,6 @@ install-programs:
 	@for prog in $(bin_SCRIPTS); do \
 		echo "  program: $$prog"; \
 		$(INSTALL) -m 755 $(builddir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
-	done; \
-	#for file in $(INSTALL_ROOT)$(bindir)/pearcmd-*.php; do \
-	#	rm -f $$file; \
-	#done; \
-	for prog in phpextdist; do \
-		echo "  program: $$prog"; \
-		$(INSTALL) -m 755 $(srcdir)/scripts/$$prog $(INSTALL_ROOT)$(bindir)/$$prog; \
 	done
 
 HEADER_DIRS = \
