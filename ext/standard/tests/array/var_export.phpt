@@ -7,5 +7,5 @@ var_export($a);
 ?>
 --EXPECT--
 class stdClass {
-  var $foo = 'bar';
+  public $foo = 'bar';
 }
