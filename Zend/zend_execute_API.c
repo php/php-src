@@ -209,7 +209,9 @@ void shutdown_executor(TSRMLS_D)
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator TSRMLS_CC);
 
 		zend_hash_destroy(&EG(symbol_table));
-
+	} zend_end_try();
+	
+	zend_try {
 		/* Cleanup static data for functions and arrays.
 		   We need separate cleanup stage because of the following problem:
 		   Suppose we destroy class X, which destroys function table,
