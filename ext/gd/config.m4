@@ -214,7 +214,6 @@ if test "$PHP_GD" != "no"; then
   PHP_SUBST(GD_SHARED_LIBADD)
 
 dnl Various checks for GD features
-  PHP_SHLIB_SUFFIX_NAME
   PHP_GD_TTSTR
   PHP_GD_JPEG
   PHP_GD_PNG
