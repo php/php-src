@@ -267,7 +267,7 @@ static void php_cgi_usage(char *argv0)
 /* }}} */
 
 /* {{{ init_request_info
- */.
+ */
 static void init_request_info(SLS_D)
 {
 	char *content_length = getenv("CONTENT_LENGTH");
