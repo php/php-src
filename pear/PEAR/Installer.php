@@ -455,7 +455,8 @@ class PEAR_Installer extends PEAR_Common
                     $this->pkginfo['filelist'][$data[0]]['installed_as'] = $data[1];
                     if (!isset($this->pkginfo['filelist']['dirtree'][dirname($data[1])])) {
                         $this->pkginfo['filelist']['dirtree'][dirname($data[1])] = true;
-                        while(!empty($data[3]) && $data[3] != '/' && $data[3] != '\\') {
+                        while(!empty($data[3]) && $data[3] != '/' && $data[3] != '\\'
+                              && $data[3] != '.') {
                             $this->pkginfo['filelist']['dirtree']
                                 [$this->_prependPath($data[3], $data[2])] = true;
                             $data[3] = dirname($data[3]);
