@@ -1352,7 +1352,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		if (zend_hash_get_current_key(Z_ARRVAL_PP(entry), &attribute, &index, 0) == HASH_KEY_IS_STRING) {
 			ldap_mods[i]->mod_type = estrdup(attribute);
 		} else {
-			php_error(E_ERROR, "%s(): Unknown Attribute in the data", get_active_function_name(TSRMLS_C));
+			php_error(E_ERROR, "%s(): Unknown attribute in the data", get_active_function_name(TSRMLS_C));
 			/* Free allocated memory */
 			while (i >= 0) {
 				efree(ldap_mods[i--]);
@@ -1605,7 +1605,7 @@ PHP_FUNCTION(ldap_sort)
 	}
 
 	if (ldap_sort_entries(ld->link, (LDAPMessage **) &le->ptr, sflen ? sortfilter : NULL, strcmp) != LDAP_SUCCESS) {
-		php_error(E_WARNING, "%s(): The ldap_sort call failed: %s", get_active_function_name(TSRMLS_C), ldap_err2string(errno));
+		php_error(E_WARNING, "%s(): %s", get_active_function_name(TSRMLS_C), ldap_err2string(errno));
 		RETURN_FALSE;
 	}
 
@@ -2076,7 +2076,7 @@ int _ldap_rebind_proc(LDAP *ldap, const char *url, ber_tag_t req, ber_int_t msgi
 		retval = Z_LVAL_P(cb_retval);
 		zval_ptr_dtor(&cb_retval);
 	} else {
-		php_error(E_WARNING, "%s(): rebind_proc php callback failed", get_active_function_name(TSRMLS_C));
+		php_error(E_WARNING, "%s(): rebind_proc PHP callback failed", get_active_function_name(TSRMLS_C));
 		retval = LDAP_OTHER;
 	}
 	zval_dtor(cb_url);
@@ -2111,7 +2111,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 
 	/* callable? */
 	if (!zend_is_callable(callback, 0, &callback_name)) {
-		php_error(E_WARNING, "%s() expects argument 2, '%s', to be a valid callback", get_active_function_name(TSRMLS_C), callback_name);
+		php_error(E_WARNING, "%s(): Two arguments expected for '%s' to be a valid callback", get_active_function_name(TSRMLS_C), callback_name);
 		efree(callback_name);
 		RETURN_FALSE;
 	}
