@@ -1,4 +1,4 @@
-#if !HAVE_STRLCPY
+#ifndef HAVE_STRLCPY
 
 /*	$OpenBSD: strlcpy.c,v 1.4 1999/05/01 18:56:41 millert Exp $	*/
 

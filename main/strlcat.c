@@ -1,4 +1,4 @@
-#if !HAVE_STRLCAT
+#ifndef HAVE_STRLCAT
 
 /*	$OpenBSD: strlcat.c,v 1.2 1999/06/17 16:28:58 millert Exp $	*/
 
