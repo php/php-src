@@ -1583,6 +1583,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 	if (object->type != IS_OBJECT) {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		FREE_OP(Ts, op2, EG(free_op2));
+		FREE_OP(Ts, value, free_value);
 
 		*retval = EG(uninitialized_zval_ptr);
 
@@ -1659,6 +1660,7 @@ static inline int zend_binary_assign_op_obj_helper(int (*binary_op)(zval *result
 		}
 		
 		FREE_OP(Ts, op2, EG(free_op2));
+		FREE_OP(Ts, value, free_value);
 	}
 
 	/* assign_obj has two opcodes! */
