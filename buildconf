@@ -26,4 +26,6 @@ else
   subdirs=''
 fi
 
+rm -f generated_lists
+
 ${MAKE:-make} -s -f build/build.mk AMFLAGS="$automake_flags"
