@@ -10,6 +10,7 @@ SPL: array_access without return in set()
 class c implements spl_array_access {
 
 	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
+
 	function exists($index) {
 		echo __METHOD__ . "($index)\n";
 		return array_key_exists($index, $this->a);
@@ -82,41 +83,37 @@ c::get(4th)
 int(4)
 c::exists(5th)
 
-Notice: Undefined index:  5th in %s on line %d
+Notice: Undefined index:  5th in %sarray_access_002.php on line %d
 NULL
 c::exists(6)
 
-Notice: Undefined index:  6 in %s on line %d
+Notice: Undefined index:  6 in %sarray_access_002.php on line %d
 NULL
 WRITE 1
-c::exists(1)
 c::set(1,Changed 1)
 
-Warning: Method c::set() did not return a value, using NULL in %s on line %d
+Warning: Method c::set() did not return a value, using input value in %sarray_access_002.php on line %d
 c::exists(1)
 c::get(1)
 string(9) "Changed 1"
 WRITE 2
-c::exists(4th)
 c::set(4th,Changed 4th)
 
-Warning: Method c::set() did not return a value, using NULL in %s on line %d
+Warning: Method c::set() did not return a value, using input value in %sarray_access_002.php on line %d
 c::exists(4th)
 c::get(4th)
 string(11) "Changed 4th"
 WRITE 3
-c::exists(5th)
 c::set(5th,Added 5th)
 
-Warning: Method c::set() did not return a value, using NULL in %s on line %d
+Warning: Method c::set() did not return a value, using input value in %sarray_access_002.php on line %d
 c::exists(5th)
 c::get(5th)
 string(9) "Added 5th"
 WRITE 4
-c::exists(6)
 c::set(6,Added 6)
 
-Warning: Method c::set() did not return a value, using NULL in %s on line %d
+Warning: Method c::set() did not return a value, using input value in %sarray_access_002.php on line %d
 c::exists(6)
 c::get(6)
 string(7) "Added 6"
@@ -126,12 +123,11 @@ string(3) "1st"
 c::exists(2)
 c::get(2)
 string(3) "3rd"
-c::exists(6)
 c::set(6,changed 6)
 
-Warning: Method c::set() did not return a value, using NULL in %s on line %d
+Warning: Method c::set() did not return a value, using input value in %sarray_access_002.php on line %d
 c::exists(6)
 c::get(6)
 string(9) "changed 6"
-NULL
+string(9) "changed 6"
 Done
