@@ -19,7 +19,11 @@
 #ifndef PHP_NCURSES_H
 #define PHP_NCURSES_H
 
-#include <curses.h>
+#ifdef HAVE_NCURSES_H
+# include <ncurses.h>
+#else
+# include <curses.h>
+#endif
 
 extern int le_ncurses_windows;
 
