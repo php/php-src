@@ -248,43 +248,41 @@ if test "$with_gd" != "no" && test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
     fi
   ])
 
-  if test "$with_freetype_dir" != "no" ; then
-  	 CHECK_TTF=""
-  else
-    CHECK_TTF="$withval"
-  fi
-  
   AC_MSG_CHECKING(whether to include FreeType 1.x support)
-  if test -n "$CHECK_TTF" ; then
-    for i in /usr /usr/local "$CHECK_TTF" ; do
-      if test -f "$i/include/freetype.h" ; then
-        TTF_DIR="$i"
-        unset TTF_INC_DIR
-      fi
-      if test -f "$i/include/freetype/freetype.h"; then
-        TTF_DIR="$i"
-        TTF_INC_DIR="$i/include/freetype"
-      fi
-    done
-    if test -n "$TTF_DIR" ; then
-      AC_DEFINE(HAVE_LIBTTF,1,[ ])
-      if test "$shared" = "yes"; then
-        GD_LIBS="$GD_LIBS -lttf"
-        GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
-      else
-        PHP_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
-      fi
-      if test -z "$TTF_INC_DIR"; then
-        TTF_INC_DIR="$TTF_DIR/include"
-      fi
-      PHP_ADD_INCLUDE($TTF_INC_DIR)
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-    fi
-  else
-    AC_MSG_RESULT(no)
-  fi
+  if test "$with_freetype_dir" = "no" ; then
+    if test -n "$CHECK_TTF" ; then
+			for i in /usr /usr/local "$CHECK_TTF" ; do
+				if test -f "$i/include/freetype.h" ; then
+					TTF_DIR="$i"
+					unset TTF_INC_DIR
+				fi
+				if test -f "$i/include/freetype/freetype.h"; then
+					TTF_DIR="$i"
+					TTF_INC_DIR="$i/include/freetype"
+				fi
+			done
+			if test -n "$TTF_DIR" ; then
+				AC_DEFINE(HAVE_LIBTTF,1,[ ])
+				if test "$shared" = "yes"; then
+					GD_LIBS="$GD_LIBS -lttf"
+					GD_LFLAGS="$GD_LFLAGS -L$TTF_DIR/lib"
+				else
+					PHP_ADD_LIBRARY_WITH_PATH(ttf, $TTF_DIR/lib)
+				fi
+				if test -z "$TTF_INC_DIR"; then
+					TTF_INC_DIR="$TTF_DIR/include"
+				fi
+				PHP_ADD_INCLUDE($TTF_INC_DIR)
+				AC_MSG_RESULT(yes)
+			else
+				AC_MSG_RESULT(no)
+			fi
+		else
+			AC_MSG_RESULT(no)
+		fi
+	else
+		AC_MSG_RESULT(no - FreeType 2.x is to be used instead)
+	fi
   
   AC_MSG_CHECKING(for T1lib support)
   AC_ARG_WITH(t1lib,
