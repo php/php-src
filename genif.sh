@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.8 2000-03-26 02:46:59 sas Exp $
+# $Id: genif.sh,v 1.9 2000-06-27 16:22:26 sas Exp $
 # replacement for genif.pl
 
 infile="$1"
@@ -36,7 +36,7 @@ cat $infile | \
 	sed \
 	-e "s'@EXT_INCLUDE_CODE@'$includes'" \
 	-e "s'@EXT_MODULE_PTRS@'$module_ptrs'" \
-	-e 's/\\n/\
+	-e 's/[\]n/\
 /g'
 
 
