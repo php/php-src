@@ -73,7 +73,6 @@
 #define UDM_PARAM_BROWSER_CHARSET	18
 #define UDM_PARAM_HLBEG			19
 #define UDM_PARAM_HLEND			20
-#define UDM_PARAM_STOREDADDR		21
 
 /* udm_add_search_limit constants */
 #define UDM_LIMIT_URL		1
@@ -269,8 +268,6 @@ DLEXPORT PHP_MINIT_FUNCTION(mnogosearch)
 	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_HLBEG",	UDM_PARAM_HLBEG,CONST_CS | CONST_PERSISTENT);	
 	REGISTER_LONG_CONSTANT("UDM_PARAM_HLEND",	UDM_PARAM_HLEND,CONST_CS | CONST_PERSISTENT);	
-	
-	REGISTER_LONG_CONSTANT("UDM_PARAM_STOREDADDR",	UDM_PARAM_STOREDADDR,CONST_CS | CONST_PERSISTENT);
 	
 	/* udm_add_search_limit constants */
 	REGISTER_LONG_CONSTANT("UDM_LIMIT_CAT",		UDM_LIMIT_CAT,CONST_CS | CONST_PERSISTENT);
@@ -686,15 +683,6 @@ DLEXPORT PHP_FUNCTION(udm_set_agent_param)
 			UdmReplaceStrVar(Agent->Conf->vars,"HlBeg",val,UDM_VARSRC_GLOBAL);
 			
 			break;
-			
-#if UDM_VERSION_ID >= 30203	
-		case UDM_PARAM_STOREDADDR:
-			UdmReplaceStrVar(Agent->Conf->vars,"StoredAddr",val,UDM_VARSRC_GLOBAL);
-			Agent->Conf->stored_addr = strdup(UdmFindStrVar(Agent->Conf->vars, "StoredAddr", "localhost"));
-			
-			break;
-#endif
-			
 #endif
 			
 		case UDM_PARAM_STOPTABLE:
@@ -1116,21 +1104,22 @@ DLEXPORT PHP_FUNCTION(udm_crc32)
 }
 /* }}} */
 
-/* {{{ proto int udm_open_stored(int agent)
+/* {{{ proto int udm_open_stored(int agent, string storedaddr)
    Open connection to stored  */
 DLEXPORT PHP_FUNCTION(udm_open_stored)
 {
-	pval ** yyagent;
+	pval ** yyagent, ** yyaddr;
 	
 	int s;
+	char * addr;
 	const char *hello = "F\0";
 	
 	UDM_AGENT * Agent;
 	int id=-1;
 
 	switch(ZEND_NUM_ARGS()){
-		case 1: {
-				if (zend_get_parameters_ex(1, &yyagent)==FAILURE) {
+		case 2: {
+				if (zend_get_parameters_ex(2, &yyagent, &yyaddr)==FAILURE) {
 					RETURN_FALSE;
 				}
 			}
@@ -1140,7 +1129,13 @@ DLEXPORT PHP_FUNCTION(udm_open_stored)
 			break;
 	}
 	ZEND_FETCH_RESOURCE(Agent, UDM_AGENT *, yyagent, id, "mnoGoSearch-Agent", le_link);
+	
+	convert_to_string_ex(yyaddr);
+	addr = Z_STRVAL_PP(yyaddr);
 
+	UdmReplaceStrVar(Agent->Conf->vars,"StoredAddr",addr,UDM_VARSRC_GLOBAL);
+	Agent->Conf->stored_addr = strdup(UdmFindStrVar(Agent->Conf->vars, "StoredAddr", "localhost"));
+	
 	s = UdmStoreOpen(Agent->Conf);
 	
 	if (s >= 0) {
