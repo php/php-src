@@ -79,6 +79,10 @@ typedef struct {
 
 	/* this is necessary for the CGI SAPI module */
 	char *argv0;
+
+	/* this is necessary for Safe Mode */
+	char *current_user;
+	int current_user_length;
 } sapi_request_info;
 
 

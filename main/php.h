@@ -114,8 +114,6 @@ char *strtok_r(char *s, const char *delim, char **last);
 typedef unsigned int socklen_t;
 #endif
 
-#include "request_info.h"
-
 #define CREATE_MUTEX(a,b)
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
