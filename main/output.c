@@ -330,7 +330,7 @@ static int php_b_body_write(const char *str, uint str_length)
 static int php_ub_body_write_no_header(const char *str, uint str_length)
 {
 	char *newstr = NULL;
-	uint new_length=0;
+	size_t new_length=0;
 	int result;
 	OLS_FETCH();
 	BLS_FETCH();
