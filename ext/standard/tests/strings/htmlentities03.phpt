@@ -9,7 +9,8 @@ if (!$result || preg_match('/ISO/i', setlocale(LC_CTYPE, 0)) == 0) {
 ?>
 --INI--
 output_handler=
-mbstring.internal_encoding=pass
+default_charset=
+mbstring.internal_encoding=none
 --FILE--
 <?php
 	setlocale( LC_CTYPE, "de_DE.ISO-8859-1", "de_DE.ISO8859-1");
