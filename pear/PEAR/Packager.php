@@ -20,6 +20,7 @@
 // $Id$
 
 require_once 'PEAR/Common.php';
+require_once 'System.php';
 
 /**
  * Administration class used to make a PEAR release tarball.
@@ -101,12 +102,15 @@ class PEAR_Packager extends PEAR_Common
             chdir($oldcwd);
             return $this->raiseError($new_xml);
         }
-        $tmpdir = $this->mkTempDir(getcwd());
+        if (!($tmpdir = System::mktemp('-t '.getcwd().' -d'))) {
+            return $this->raiseError("PEAR_Packager: mktemp failed");
+        }
         $newpkgfile = $tmpdir . DIRECTORY_SEPARATOR . 'package.xml';
         $np = @fopen($newpkgfile, "w");
         if (!$np) {
             chdir($oldcwd);
-            return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile");
+            system("ls -l ".dirname($newpkgfile));
+            return $this->raiseError("PEAR_Packager: unable to rewrite $pkgfile as $newpkgfile");
         }
         fwrite($np, $new_xml);
         fclose($np);
