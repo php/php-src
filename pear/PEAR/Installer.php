@@ -451,10 +451,12 @@ class PEAR_Installer extends PEAR_Common
 
     function _prependPath($path, $prepend)
     {
-        if (OS_WINDOWS && preg_match('/^[a-z]:/i', $path)) {
-            $path = $prepend . substr($path, 2);
-        } else {
-            $path = $prepend . $path;
+        if (strlen($prepend) > 0) {
+            if (OS_WINDOWS && preg_match('/^[a-z]:/i', $path)) {
+                $path = $prepend . substr($path, 2);
+            } else {
+                $path = $prepend . $path;
+            }
         }
         return $path;
     }
