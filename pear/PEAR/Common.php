@@ -291,7 +291,6 @@ class PEAR_Common extends PEAR
             $this->pkginfo[$k] = trim($v);
         }
         $this->pkginfo['filelist'] = &$this->filelist;
-        //print_r($this->pkginfo);exit;
         return $this->pkginfo;
     }
 
