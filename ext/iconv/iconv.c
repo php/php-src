@@ -27,7 +27,12 @@
 
 #if HAVE_ICONV
 
+#ifdef HAVE_GICONV_H
+#include <giconv.h>
+#else
 #include <iconv.h>
+#endif
+
 #include <errno.h>
 
 #include "php_globals.h"
