@@ -178,6 +178,7 @@ SAPI_API void sapi_activate(SLS_D)
 	SG(request_info).post_data = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
+	SG(request_info).auth_user = SG(request_info).auth_password = NULL;
 
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
@@ -206,6 +207,12 @@ SAPI_API void sapi_deactivate(SLS_D)
 	zend_llist_destroy(&SG(sapi_headers).headers);
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
+	}
+	if (SG(request_info).auth_user) {
+		efree(SG(request_info).auth_user);
+	}
+	if (SG(request_info).auth_password) {
+		efree(SG(request_info).auth_password);
 	}
 	if (SG(request_info).current_user) {
 		efree(SG(request_info).current_user);

@@ -387,7 +387,6 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	FREESTRING(SG(request_info).request_uri);
 	FREESTRING(SG(request_info).path_translated);
 	FREESTRING(SG(request_info).content_type);
-	FREESTRING(SG(request_info).auth_user);
 	FREESTRING(((servlet_request*)SG(server_context))->cookies);    
 	efree(SG(server_context));
 	SG(server_context)=0;
