@@ -316,9 +316,9 @@ void zend_do_receive_arg(zend_uchar op, znode *var, znode *offset, znode *initia
 int zend_do_begin_function_call(znode *function_name TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC);
-void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC);
-void do_fetch_class_name(znode *result, znode *class_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC);
-void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC);
+void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC);
+void zend_do_fetch_class_name(znode *result, znode *class_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC);
+void zend_do_begin_class_member_function_call(TSRMLS_D);
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 

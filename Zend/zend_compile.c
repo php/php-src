@@ -1205,7 +1205,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name TSRMLS_DC)
 }
 
 
-void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC)
+void zend_do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRMLS_DC)
 {
 	long fetch_class_op_number;
 	zend_op *opline;
@@ -1215,7 +1215,9 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 
 	opline->opcode = ZEND_FETCH_CLASS;
 	if (namespace_name) {
-		zend_str_tolower(namespace_name->u.constant.value.str.val, namespace_name->u.constant.value.str.len);
+		if (namespace_name->op_type == IS_CONST) {
+			zend_str_tolower(namespace_name->u.constant.value.str.val, namespace_name->u.constant.value.str.len);
+		}
 		opline->op1 = *namespace_name;
 	} else {
 		SET_UNUSED(opline->op1);
@@ -1235,11 +1237,6 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 				SET_UNUSED(opline->op2);
 				opline->extended_value = ZEND_FETCH_CLASS_PARENT;
 				zval_dtor(&class_name->u.constant);
-			} else if ((class_name->u.constant.value.str.len == (sizeof("main") - 1)) &&
-				!memcmp(class_name->u.constant.value.str.val, "main", sizeof("main"))) {
-				SET_UNUSED(opline->op2);
-				opline->extended_value = ZEND_FETCH_CLASS_MAIN;
-				zval_dtor(&class_name->u.constant);
 			} else {
 				opline->op2 = *class_name;
 			}
@@ -1256,7 +1253,7 @@ void do_fetch_class(znode *result, znode *namespace_name, znode *class_name TSRM
 }
 
 
-void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC)
+void zend_do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_name, zend_bool case_sensitive TSRMLS_DC)
 {
 	zend_uint length;
 
@@ -1277,15 +1274,15 @@ void do_fetch_class_name(znode *result, znode *class_name_entry, znode *class_na
 	result->u.constant.value.str.len = length;
 }
 
-void zend_do_begin_class_member_function_call(znode *class_name, znode *function_name TSRMLS_DC)
+void zend_do_begin_class_member_function_call(TSRMLS_D)
 {
 	unsigned char *ptr = NULL;
-	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	long fetch_const_op_number = get_next_op_number(CG(active_op_array));
+	zend_op *opline = &CG(active_op_array)->opcodes[fetch_const_op_number-1];
 
+	/* a tmp var is leaked here */
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
-	opline->op1 = *class_name;
-	zend_lowercase_znode_if_const(function_name);
-	opline->op2 = *function_name;
+	zend_lowercase_znode_if_const(&opline->op2);
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
 }
@@ -1294,16 +1291,6 @@ void zend_do_begin_class_member_function_call(znode *class_name, znode *function
 void zend_do_end_function_call(znode *function_name, znode *result, znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC)
 {
 	zend_op *opline;
-	
-	if (is_method && function_name && function_name->u.constant.value.lval == ZEND_CLONE) {
-		if (argument_list->u.constant.value.lval > 0) {
-			zend_error(E_COMPILE_ERROR, "Can't pass arguments to __clone()");
-		}
-		/* FIXME: throw_list */
-		zend_stack_del_top(&CG(function_call_stack));
-		*result = CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1].result;
-		return;
-	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2523,7 +2510,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	switch (mode) {
 		case ZEND_CT:
 			if (constant_container) {
-				do_fetch_class_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
+				zend_do_fetch_class_name(NULL, constant_container, constant_name, 1 TSRMLS_CC);
 				*result = *constant_container;
 			} else {
 				*result = *constant_name;
