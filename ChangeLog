@@ -1,3 +1,113 @@
+2005-03-14  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/go-pear-list.php
+      pear/go-pear-list.php:
+      
+      this needs updating
+
+2005-03-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * configure.in:
+      - Fixed bug #32200 (prevent using both --with-apxs2 and --with-apxs2filter)
+
+    * (PHP_4_3)
+      NEWS
+      ext/openssl/openssl.c
+      ext/openssl/openssl.c:
+      MFH: - Fixed bug #18613 (Multiple OUs in x509 certificate not handled
+      properly)
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ext/openssl/openssl.c:
+      - Fixed bug #18613 (Multiple OUs in x509 certificate not handled properly)
+
+2005-03-14  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * main/SAPI.c
+      main/SAPI.h
+      sapi/aolserver/aolserver.c
+      sapi/apache/mod_php5.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache2handler/sapi_apache2.c
+      sapi/apache_hooks/mod_php5.c
+      sapi/cgi/cgi_main.c
+      sapi/thttpd/thttpd.c
+      sapi/tux/php_tux.c:
+      Fix for bug #32263
+      This adds proto_num to request_info.  It is defaulted to HTTP 1.0 (1000)
+      such that it has a valid value even if the underlying sapi doesn't set it
+      correctly.  It is then used to determine if a 302 or a 303 should be sent
+      on a Location redirect.  Any non GET/HEAD HTTP 1.1 redirect will get a 303
+      instead of a 302 to be compatible with the HTTP spec.
+
+2005-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * ZendEngine2/zend_ini.c:
+      Clarify logic
+
+    * win32/registry.c:
+      Merge registry fix
+
+    * (PHP_4_3)
+      win32/registry.c:
+      Fix an age old bug in parsing paths when reading
+      INI values from the registry
+
+2005-03-14  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * (PHP_5_0)
+      ext/session/session.c:
+      NetWare specific stat structure changes
+
+    * (PHP_5_0)
+      main/php.h:
+      PHP_OS and PHP_UNAME for NetWare are getting populated from the
+      ph_config.h(configure.in)
+
+    * (PHP_5_0)
+      configure.in:
+      For cross compiler uname's output while running on build machine can not be
+      stored in PHP_OS and PHP_UNAME
+
+2005-03-14  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_builtin_functions.c
+      ZendEngine2/zend_builtin_functions.c:
+      ws
+
+2005-03-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/curl/curl.c:
+      MFH: - Fixed bug #30609 (cURL functions bypass open_basedir)
+
+    * (PHP_5_0)
+      NEWS
+      ext/curl/interface.c
+      ext/curl/interface.c:
+      - Fixed bug #30609 (cURL functions bypass open_basedir)
+
+2005-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * (PHP_5_0)
+      NEWS:
+      RC1
+
+2005-03-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      -sigh*
+
+2005-03-14  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/xml/tests/bug32001.phpt
+      ext/xml/tests/bug32001.phpt:
+      - Turn off incorrect case folding to let test over.
+
 2005-03-13  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)

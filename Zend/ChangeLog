@@ -1,3 +1,14 @@
+2005-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * zend_ini.c:
+      Clarify logic
+
+2005-03-14  Stanislav Malyshev  <stas@zend.com>
+
+    * zend_builtin_functions.c
+      zend_builtin_functions.c:
+      ws
+
 2005-03-13  Stanislav Malyshev  <stas@zend.com>
 
     * zend_stream.c
