@@ -2420,20 +2420,29 @@ void zend_do_unset(znode *variable, int type TSRMLS_DC)
 
 void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC)
 {
-	zend_op *opline;
+	zend_op *last_op;
 
 	zend_do_end_variable_parse(BP_VAR_IS, 0 TSRMLS_CC);
-	zend_check_writable_variable(variable);
 
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	/* Check what to do with this later on when adding all of the check writable stuff
+	 * zend_check_writable_variable(variable);
+	 */
 
-	opline->opcode = ZEND_ISSET_ISEMPTY;
-	opline->result.op_type = IS_TMP_VAR;
-	opline->result.u.var = get_temporary_variable(CG(active_op_array));
-	opline->op1 = *variable;
-	opline->op2.u.constant.value.lval = type;
-	SET_UNUSED(opline->op2);
-	*result = opline->result;
+	last_op = &CG(active_op_array)->opcodes[get_next_op_number(CG(active_op_array))-1];
+	
+	switch (last_op->opcode) {
+		case ZEND_FETCH_IS:
+			last_op->opcode = ZEND_ISSET_ISEMPTY_VAR;
+			break;
+		case ZEND_FETCH_DIM_IS:
+		case ZEND_FETCH_OBJ_IS:
+			last_op->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
+			break;
+	}
+	last_op->result.op_type = IS_TMP_VAR;
+	last_op->extended_value = type;
+
+	*result = last_op->result;
 }
 
 

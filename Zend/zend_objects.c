@@ -72,9 +72,9 @@ static inline void zend_objects_destroy_object(zend_object *object, zend_object_
 
 void zend_objects_call_destructors(zend_objects *objects TSRMLS_DC)
 {
-	int i = 1;
+	zend_uint i = 1;
 
-	for (i = 0; i < objects->top ; i++) {
+	for (i = 1; i < objects->top ; i++) {
 		if (EG(objects).object_buckets[i].valid) {
 			EG(objects).object_buckets[i].constructor_called = 1;
 			zend_objects_destroy_object(&EG(objects).object_buckets[i].bucket.obj.object, i TSRMLS_CC);

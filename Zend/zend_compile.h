@@ -491,7 +491,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 									
 #define ZEND_UNSET_VAR				74
 #define ZEND_UNSET_DIM_OBJ			75
-#define ZEND_ISSET_ISEMPTY			76
 									
 #define ZEND_FE_RESET				77
 #define ZEND_FE_FETCH				78
@@ -546,6 +545,9 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_INIT_CTOR_CALL			112
 #define ZEND_INIT_METHOD_CALL		113
 #define ZEND_INIT_STATIC_METHOD_CALL 114
+
+#define ZEND_ISSET_ISEMPTY_VAR		115
+#define ZEND_ISSET_ISEMPTY_DIM_OBJ	116
 
 /* end of block */
 
