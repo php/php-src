@@ -250,7 +250,7 @@ class PEAR_Frontend_CLI extends PEAR
                     } else {
                         $attribs = $rowparams;
                     }
-                    $w = $width[$c];
+                    $w = isset($width[$c]) ? $width[$c] : 0;
                     //$cell = $data[$c];
                     $cell = $rowlines[$c][$r];
                     $l = strlen($cell);
