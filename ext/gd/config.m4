@@ -129,6 +129,10 @@ AC_DEFUN(PHP_GD_FREETYPE1,[
             TTF_DIR=$i
             TTF_INC_DIR=$i/include/freetype
           fi
+          if test -f "$i/include/freetype1/freetype/freetype.h"; then
+            TTF_DIR=$i
+            TTF_INC_DIR=$i/include/freetype1/freetype
+          fi
         done
       fi
       if test -n "$TTF_DIR" ; then
