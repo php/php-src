@@ -285,6 +285,7 @@ PHP_FUNCTION(flock)
 #define PHP_META_UNSAFE ".\\+*?[^]$() "
 
 /* {{{ proto array get_meta_tags(string filename [, int use_include_path])
+
    Extracts all meta tag content attributes from a file and returns an array */
 
 PHP_FUNCTION(get_meta_tags)
@@ -348,6 +349,7 @@ PHP_FUNCTION(get_meta_tags)
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
 				in_meta_tag = !strcasecmp("meta",md.token_data);
+				md.in_meta = in_meta_tag;
 			} else if (tok_last == TOK_SLASH && in_tag) {
 				if (strcasecmp("head", md.token_data) == 0) {
 					/* We are done here! */
@@ -444,6 +446,7 @@ PHP_FUNCTION(get_meta_tags)
 			in_tag = in_meta_tag = looking_for_val = 0;
 			have_name = saw_name = 0;
 			have_content = saw_content = 0;
+			md.in_meta = 0;
 		}
 
 		tok_last = tok;
@@ -2378,6 +2381,7 @@ size_t php_fread_all(char **buf, int socket, FILE *fp, int issock) {
 #define PHP_META_HTML401_CHARS "-_.:"
 
 /* {{{ php_next_meta_token
+
    Tokenizes an HTML file for get_meta_tags */
 php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 {
@@ -2429,8 +2433,11 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 				md->lc  = ch;
 			}
 
-            md->token_data = (char *) emalloc(md->token_len + 1);
-			memcpy(md->token_data,buff,md->token_len+1);
+			/* We don't need to alloc unless we are in a meta tag */
+			if (md->in_meta) {
+				md->token_data = (char *) emalloc(md->token_len + 1);
+				memcpy(md->token_data,buff,md->token_len+1);
+			}
 
 			return TOK_STRING;
 			break;
@@ -2474,6 +2481,7 @@ php_meta_tags_token php_next_meta_token(php_meta_tags_data *md)
 
 	return TOK_EOF;
 }
+
 /* }}} */
 
 /*
