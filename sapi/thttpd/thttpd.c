@@ -93,22 +93,20 @@ static int sapi_thttpd_ub_write(const char *str, uint str_length TSRMLS_DC)
 	return sent;
 }
 
-#define ADD_VEC(str,l) vec[n].iov_base=str;len += (vec[n].iov_len=l); n++
-#define ADD_VEC_S(str) ADD_VEC((str), sizeof(str)-1)
-#define COMBINE_HEADERS 30
+#define COMBINE_HEADERS 64
+
+#if defined(IOV_MAX)
+# if IOV_MAX - 64 <= 0
+#  define SERIALIZE_HEADERS
+# endif
+#endif
 
 static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 {
 	int n;
 
-	/*
-	 * XXX: partial writevs are not handled
-	 * This can only cause problems, if the user tries to send
-	 * huge headers, so I consider this a void issue right now.
-	 * The maximum size depends on SO_SNDBUF and is usually
-	 * at least 16KB from my experience.
-	 */
-	
+	assert(nvec <= IOV_MAX);
+
 	if (TG(sbuf).c == 0) {
 		n = writev(TG(hc)->conn_fd, vec, nvec);
 
@@ -151,6 +149,18 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 	return 0;
 }
 
+#ifdef SERIALIZE_HEADERS
+# define ADD_VEC(str,l) smart_str_appendl(&vec_str, (str), (l))
+# define VEC_BASE() smart_str vec_str = {0}
+# define VEC_FREE() smart_str_free(&vec_str)
+#else
+# define ADD_VEC(str,l) vec[n].iov_base=str;len += (vec[n].iov_len=l); n++
+# define VEC_BASE() struct iovec vec[COMBINE_HEADERS]
+# define VEC_FREE() do {} while (0)
+#endif
+
+#define ADD_VEC_S(str) ADD_VEC((str), sizeof(str)-1)
+
 #define CL_TOKEN "Content-length: "
 #define CN_TOKEN "Connection: "
 #define KA_DO "Connection: keep-alive\r\n"
@@ -160,8 +170,7 @@ static int do_writev(struct iovec *vec, int nvec, int len TSRMLS_DC)
 static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[1024], *p;
-	struct iovec vec[COMBINE_HEADERS];
-	
+	VEC_BASE();
 	int n = 0;
 	zend_llist_position pos;
 	sapi_header_struct *h;
@@ -197,10 +206,12 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		}
 
 		ADD_VEC(h->header, h->header_len);
+#ifndef SERIALIZE_HEADERS
 		if (n >= COMBINE_HEADERS - 1) {
 			len = do_writev(vec, n, len TSRMLS_CC);
 			n = 0;
 		}
+#endif
 		ADD_VEC("\r\n", 2);
 		
 		h = zend_llist_get_next_ex(&sapi_headers->headers, &pos);
@@ -214,8 +225,14 @@ static int sapi_thttpd_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	}
 		
 	ADD_VEC("\r\n", 2);
-			
+
+#ifdef SERIALIZE_HEADERS
+	sapi_thttpd_ub_write(vec_str.c, vec_str.len TSRMLS_CC);
+#else			
 	do_writev(vec, n, len TSRMLS_CC);
+#endif
+
+	VEC_FREE();
 
 	return SAPI_HEADER_SENT_SUCCESSFULLY;
 }
