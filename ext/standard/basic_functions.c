@@ -92,6 +92,10 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include "win32/unistd.h"
 #endif
 
+#ifndef INADDR_NONE
+#define INADDR_NONE ((unsigned long int) -1)
+#endif
+
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "SAPI.h"
