@@ -633,7 +633,7 @@ PHP_FUNCTION(stream_get_meta_data)
 
 		add_assoc_bool(return_value, "timed_out", sock->timeout_event);
 		add_assoc_bool(return_value, "blocked", sock->is_blocked);
-		add_assoc_bool(return_value, "eof", sock->eof);
+		add_assoc_bool(return_value, "eof", stream->eof);
 	} else {
 		add_assoc_bool(return_value, "timed_out", 0);
 		add_assoc_bool(return_value, "blocked", 1);
