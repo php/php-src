@@ -2352,9 +2352,79 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */
+/* {{{ proto mixed count_chars(string input[, int mode])
+   Returns info about what characters are used in input */
+PHP_FUNCTION(count_chars)
+{
+	zval **input, **mode;
+	int chars[256];
+	int ac=ARG_COUNT(ht);
+	int mymode=0;
+	unsigned char *buf;
+	int len, inx;
+	char retstr[256];
+	int retlen=0;
+
+	if (ac < 1 || ac > 2 || getParametersEx(ac, &input, &mode) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	convert_to_string_ex(input);
+
+	if (ac == 2) {
+		convert_to_long_ex(mode);
+		mymode = (*mode)->value.lval;
+		
+		if (mymode < 0 || mymode > 4) {
+			php_error(E_WARNING, "unknown mode");
+			RETURN_FALSE;
+		}
+	}
+	
+	len = (*input)->value.str.len;
+	buf = (unsigned char *) (*input)->value.str.val;
+	memset((void*) chars,0,sizeof(chars));
+
+	while (len > 0) {
+		chars[*buf]++;
+		buf++;
+		len--;
+	}
+
+	if (mymode < 3) {
+		array_init(return_value);
+	}
+
+	for (inx=0; inx < 255; inx++) {
+		switch (mymode) {
+ 		case 0:
+			add_index_long(return_value,inx,chars[inx]);
+			break;
+ 		case 1:
+			if (chars[inx] != 0) {
+				add_index_long(return_value,inx,chars[inx]);
+			}
+			break;
+  		case 2:
+			if (chars[inx] == 0) {
+				add_index_long(return_value,inx,chars[inx]);
+			}
+			break;
+  		case 3:
+			if (chars[inx] != 0) {
+				retstr[retlen++] = inx;
+			}
+			break;
+  		case 4:
+			if (chars[inx] == 0) {
+				retstr[retlen++] = inx;
+			}
+			break;
+		}
+	}
+	
+	if (mymode >= 3 && mymode <= 4) {
+		RETURN_STRINGL(retstr,retlen,1);
+	}
+}
+/* }}} */
