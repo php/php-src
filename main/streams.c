@@ -1029,6 +1029,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 #ifdef HAVE_MMAP
 	if (!php_stream_is(stream, PHP_STREAM_IS_SOCKET)
 			&& stream->filterhead == NULL
+			&& php_stream_tell(stream) == 0
 			&& SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)&fd, 0))
 	{
 		struct stat sbuf;
@@ -2047,7 +2048,7 @@ exit_success:
 		 * know that they should try something else */
 		
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"%d bytes of buffered data lost during conversion to FILE*!",
+				"%d bytes of buffered data lost during conversion!",
 				stream->writepos - stream->readpos);
 	}
 	
