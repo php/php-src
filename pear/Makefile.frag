@@ -49,7 +49,6 @@ PEAR_FILES = \
 	PEAR/Packager.php \
 	PEAR/Registry.php \
 	PEAR/Remote.php \
-	PEAR/Uploader.php \
 	System.php \
 	XML/Parser.php 
 
@@ -115,6 +114,7 @@ install-pear:
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Command/Login.php; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandUI/CLI.php; \
 		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/CommandResponse.php; \
+		rm -f $(INSTALL_ROOT)$(peardir)/PEAR/Uploader.php; \
 	else \
 		cat $(srcdir)/install-pear.txt; \
 		exit 5; \
