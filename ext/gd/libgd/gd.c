@@ -873,6 +873,11 @@ static void gdImageAntiAliasedApply (gdImagePtr im, int px, int py)
 	float p_dist, p_alpha;
 	unsigned char opacity;
 
+	/* 2.0.13: bounds check! AA_opacity is just as capable of overflowing as the main pixel array. Arne Jorgensen. */
+	if (!gdImageBoundsSafeMacro(im, px, py)) {
+		return;
+	}
+
 	/* 
 	 * Find the perpendicular distance from point C (px, py) to the line 
 	 * segment AB that is being drawn.  (Adapted from an algorithm from the
@@ -2060,12 +2065,8 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
 				tox++;
 				continue;
 			}
-			/* 
-			 * If it's the same image, mapping is NOT trivial since we 
-			 * merge with greyscale target, but if pct is 100, the grey 
-			 * value is not used, so it becomes trivial. pjw 2.0.12. 
-			 */
-			if (dst == src && pct == 100) {
+			/* If it's the same image, mapping is trivial */
+			if (dst == src) {
 				nc = c;
 			} else {
 				dc = gdImageGetPixel(dst, tox, toy);
@@ -2105,8 +2106,12 @@ void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, i
 				tox++;
 				continue;
 			}
-			/* If it's the same image, mapping is trivial */
-			if (dst == src) {
+			/* 
+			 * If it's the same image, mapping is NOT trivial since we 
+			 * merge with greyscale target, but if pct is 100, the grey 
+			 * value is not used, so it becomes trivial. pjw 2.0.12. 
+			 */
+			if (dst == src && pct == 100) {
 				nc = c;
 			} else {
 				dc = gdImageGetPixel(dst, tox, toy);
