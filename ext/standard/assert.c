@@ -28,6 +28,8 @@ typedef struct {
 	int active;
 	int bail;
 	int warning;
+	int quiet_eval;
+	char *default_callback;
 	char *callback;
 } php_assert_globals;
 
@@ -74,12 +76,14 @@ zend_module_entry assert_module_entry = {
 #define ASSERT_CALLBACK     2
 #define ASSERT_BAIL         3
 #define ASSERT_WARNING      4
+#define ASSERT_QUIET_EVAL   5
 
 PHP_INI_BEGIN()
-	 STD_PHP_INI_BOOLEAN("assert.active",	         "0",	PHP_INI_ALL,		OnUpdateInt,		active,	 php_assert_globals,		assert_globals)
-	 STD_PHP_INI_BOOLEAN("assert.bail",	             "0",	PHP_INI_ALL,		OnUpdateInt,		bail,	 php_assert_globals,		assert_globals)
-	 STD_PHP_INI_BOOLEAN("assert.warning",	         "1",	PHP_INI_ALL,		OnUpdateInt,		warning, php_assert_globals,		assert_globals)
-	 PHP_INI_ENTRY("assert.callback",	         NULL,	PHP_INI_ALL,		NULL)
+	 STD_PHP_INI_ENTRY("assert.active",	    "0",	PHP_INI_ALL,	OnUpdateInt,		active,	 			php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.bail",	    "0",	PHP_INI_ALL,	OnUpdateInt,		bail,	 			php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.warning",	"1",	PHP_INI_ALL,	OnUpdateInt,		warning, 			php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.callback",   NULL,	PHP_INI_ALL,	OnUpdateString,		default_callback, 	php_assert_globals,		assert_globals)
+	 STD_PHP_INI_ENTRY("assert.quiet_eval", "0",	PHP_INI_ALL,	OnUpdateInt,		quiet_eval,		 	php_assert_globals,		assert_globals)
 PHP_INI_END()
 
 static void php_assert_init_globals(php_assert_globals *assert_globals)
@@ -100,6 +104,7 @@ PHP_MINIT_FUNCTION(assert)
 	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_BAIL", ASSERT_BAIL, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ASSERT_QUIET_EVAL", ASSERT_QUIET_EVAL, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -111,15 +116,10 @@ PHP_MSHUTDOWN_FUNCTION(assert)
 
 PHP_RINIT_FUNCTION(assert)
 {
-	char *cbstr;
-
 	ASSERTLS_FETCH();
 
-	cbstr = INI_STR("assert.callback");
-
-	if (cbstr) {
-		ASSERT(callback) = estrdup(cbstr);
-	} else {
+	if (ASSERT(callback)) { 
+		efree(ASSERT(callback));
 		ASSERT(callback) = NULL;
 	}
 
@@ -130,7 +130,10 @@ PHP_RSHUTDOWN_FUNCTION(assert)
 {
 	ASSERTLS_FETCH();
 
-	if (ASSERT(callback)) efree(ASSERT(callback));
+	if (ASSERT(callback)) { 
+		efree(ASSERT(callback));
+		ASSERT(callback) = NULL;
+	}
 
 	return SUCCESS;
 }
@@ -145,7 +148,7 @@ PHP_MINFO_FUNCTION(assert)
 /* }}} */
 /* {{{ internal functions */
 /* }}} */
-/* {{{ proto int assert(string|int assertion)
+/* {{{ proto int assert(string|bool assertion)
    checks if assertion is false */
 
 PHP_FUNCTION(assert)
@@ -153,6 +156,7 @@ PHP_FUNCTION(assert)
 	pval **assertion;	
 	int val;
 	char *myeval = NULL;
+	char *cbfunc;
 	CLS_FETCH();
 	ELS_FETCH();
 	ASSERTLS_FETCH();
@@ -167,9 +171,21 @@ PHP_FUNCTION(assert)
 
 	if ((*assertion)->type == IS_STRING) {
 		zval retval;
+		int old_error_reporting;
 
 		myeval = (*assertion)->value.str.val;
+
+		if (ASSERT(quiet_eval)) {
+			old_error_reporting = EG(error_reporting);
+			EG(error_reporting) = 0;
+		}
+
 		zend_eval_string(myeval, &retval CLS_CC ELS_CC);
+
+		if (ASSERT(quiet_eval)) {
+			EG(error_reporting) = old_error_reporting;
+		}
+
 		convert_to_boolean(&retval);
 		val = retval.value.lval;
 	} else {
@@ -182,6 +198,14 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERT(callback)) {
+		cbfunc = ASSERT(callback);
+	} else if (ASSERT(default_callback)) {
+		cbfunc = ASSERT(default_callback);
+	} else {
+		cbfunc = NULL;
+	}
+
+	if (cbfunc) {
 		zval *args[5];
 		zval *retval;
 		int i;
@@ -199,10 +223,10 @@ PHP_FUNCTION(assert)
 		MAKE_STD_ZVAL(args[4]);
 		*/
 
-		args[0]->type = IS_STRING; args[0]->value.str.val = estrdup(SAFE_STRING(ASSERT(callback))); args[0]->value.str.len = strlen(args[0]->value.str.val);
-		args[1]->type = IS_STRING; args[1]->value.str.val = estrdup(SAFE_STRING(filename));         args[1]->value.str.len = strlen(args[1]->value.str.val);
+		args[0]->type = IS_STRING; args[0]->value.str.val = estrdup(SAFE_STRING(cbfunc)); 	args[0]->value.str.len = strlen(args[0]->value.str.val);
+		args[1]->type = IS_STRING; args[1]->value.str.val = estrdup(SAFE_STRING(filename)); args[1]->value.str.len = strlen(args[1]->value.str.val);
 		args[2]->type = IS_LONG;   args[2]->value.lval    = lineno;      
-		args[3]->type = IS_STRING; args[3]->value.str.val = estrdup(SAFE_STRING(myeval));           args[3]->value.str.len = strlen(args[3]->value.str.val);
+		args[3]->type = IS_STRING; args[3]->value.str.val = estrdup(SAFE_STRING(myeval));   args[3]->value.str.len = strlen(args[3]->value.str.val);
 		/*
 		  this is always "assert" so it's useless
 		  args[4]->type = IS_STRING; args[4]->value.str.val = estrdup(SAFE_STRING(function));         args[4]->value.str.len = strlen(args[4]->value.str.val);
@@ -212,6 +236,7 @@ PHP_FUNCTION(assert)
 		retval->type = IS_BOOL;
 		retval->value.lval = 0;
 
+		/* XXX do we want to check for error here? */
 		call_user_function(CG(function_table), NULL, args[0], retval, 3, args+1);
 
 		for (i = 0; i < 4; i++) {
@@ -266,6 +291,15 @@ PHP_FUNCTION(assert_options)
 		if (ac == 2) {
 			convert_to_long_ex(value);
 			ASSERT(bail) = (*value)->value.lval;
+		}
+		RETURN_LONG(oldint);
+		break;
+
+	case ASSERT_QUIET_EVAL:
+		oldint = ASSERT(quiet_eval);
+		if (ac == 2) {
+			convert_to_long_ex(value);
+			ASSERT(quiet_eval) = (*value)->value.lval;
 		}
 		RETURN_LONG(oldint);
 		break;
