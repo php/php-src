@@ -146,14 +146,23 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC);
 /* no longer supported */
 ZEND_API int add_assoc_function(zval *arg, char *key,void (*function_ptr)(INTERNAL_FUNCTION_PARAMETERS));
 
-ZEND_API int add_assoc_long(zval *arg, char *key, long n);
-ZEND_API int add_assoc_unset(zval *arg, char *key);
-ZEND_API int add_assoc_bool(zval *arg, char *key, int b);
-ZEND_API int add_assoc_resource(zval *arg, char *key, int r);
-ZEND_API int add_assoc_double(zval *arg, char *key, double d);
-ZEND_API int add_assoc_string(zval *arg, char *key, char *str, int duplicate);
-ZEND_API int add_assoc_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
-ZEND_API int add_assoc_zval(zval *arg, char *key, uint key_length, zval *value);
+ZEND_API int add_assoc_long_ex(zval *arg, char *key, uint key_len, long n);
+ZEND_API int add_assoc_unset_ex(zval *arg, char *key, uint key_len);
+ZEND_API int add_assoc_bool_ex(zval *arg, char *key, uint key_len, int b);
+ZEND_API int add_assoc_resource_ex(zval *arg, char *key, uint key_len, int r);
+ZEND_API int add_assoc_double_ex(zval *arg, char *key, uint key_len, double d);
+ZEND_API int add_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate);
+ZEND_API int add_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, int duplicate);
+ZEND_API int add_assoc_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+
+#define add_assoc_long(__arg, __key, __n) add_assoc_long_ex(__arg, __key, strlen(__key)+1, __n)
+#define add_assoc_unset(__arg, __key) add_assoc_unset_ex(__arg, __key, strlen(__key) + 1)
+#define add_assoc_bool(__arg, __key, __b) add_assoc_bool_ex(__arg, __key, strlen(__key)+1, __b)
+#define add_assoc_resource(__arg, __key, __r) add_assoc_resource_ex(__arg, __key, strlen(__key)+1, __r)
+#define add_assoc_double(__arg, __key, __d) add_assoc_double_ex(__arg, __key, strlen(__key)+1, __d)
+#define add_assoc_string(__arg, __key, __str, __duplicate) add_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_assoc_stringl(__arg, __key, __str, __length, __duplicate) add_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key)+1, __value)
 
 ZEND_API int add_index_long(zval *arg, uint idx, long n);
 ZEND_API int add_index_unset(zval *arg, uint idx);
@@ -170,24 +179,39 @@ ZEND_API int add_next_index_resource(zval *arg, int r);
 ZEND_API int add_next_index_double(zval *arg, double d);
 ZEND_API int add_next_index_string(zval *arg, char *str, int duplicate);
 ZEND_API int add_next_index_stringl(zval *arg, char *str, uint length, int duplicate);
+ZEND_API int add_next_index_zval(zval *arg, zval *value);
+
+ZEND_API int add_get_assoc_string_ex(zval *arg, char *key, uint key_len, char *str, void **dest, int duplicate);
+ZEND_API int add_get_assoc_stringl_ex(zval *arg, char *key, uint key_len, char *str, uint length, void **dest, int duplicate);
+
+#define add_get_assoc_string(__arg, __key, __str, __dest, __duplicate) add_get_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __dest, __duplicate)
+#define add_get_assoc_stringl(__arg, __key, __str, __length, __dest, __duplicate) add_get_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __dest, __duplicate)
 
 ZEND_API int add_get_index_long(zval *arg, uint idx, long l, void **dest);
 ZEND_API int add_get_index_double(zval *arg, uint idx, double d, void **dest);
-ZEND_API int add_get_assoc_string(zval *arg, char *key, char *str, void **dest, int duplicate);
-ZEND_API int add_get_assoc_stringl(zval *arg, char *key, char *str, uint length, void **dest, int duplicate);
 ZEND_API int add_get_index_string(zval *arg, uint idx, char *str, void **dest, int duplicate);
 ZEND_API int add_get_index_stringl(zval *arg, uint idx, char *str, uint length, void **dest, int duplicate);
 
+ZEND_API int add_property_long_ex(zval *arg, char *key, uint key_len, long l);
+ZEND_API int add_property_unset_ex(zval *arg, char *key, uint key_len);
+ZEND_API int add_property_bool_ex(zval *arg, char *key, uint key_len, int b);
+ZEND_API int add_property_resource_ex(zval *arg, char *key, uint key_len, long r);
+ZEND_API int add_property_double_ex(zval *arg, char *key, uint key_len, double d);
+ZEND_API int add_property_string_ex(zval *arg, char *key, uint key_len, char *str, int duplicate);
+ZEND_API int add_property_stringl_ex(zval *arg, char *key, uint key_len,  char *str, uint length, int duplicate);
+ZEND_API int add_property_zval_ex(zval *arg, char *key, uint key_len, zval *value);
+
+#define add_property_long(__arg, __key, __n) add_property_long_ex(__arg, __key, strlen(__key)+1, __n)
+#define add_property_unset(__arg, __key) add_assoc_property_ex(__arg, __key, strlen(__key) + 1)
+#define add_property_bool(__arg, __key, __b) add_property_bool_ex(__arg, __key, strlen(__key)+1, __b)
+#define add_property_resource(__arg, __key, __r) add_property_resource_ex(__arg, __key, strlen(__key)+1, __r)
+#define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d) 
+#define add_property_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate)
+#define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate)
+#define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value)       
+
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, int param_count, zval *params[]);
 ZEND_API int call_user_function_ex(HashTable *function_table, zval **object_pp, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table);
-
-ZEND_API int add_property_long(zval *arg, char *key, long l);
-ZEND_API int add_property_unset(zval *arg, char *key);
-ZEND_API int add_property_bool(zval *arg, char *key, int b);
-ZEND_API int add_property_resource(zval *arg, char *key, long r);
-ZEND_API int add_property_double(zval *arg, char *key, double d);
-ZEND_API int add_property_string(zval *arg, char *key, char *str, int duplicate);
-ZEND_API int add_property_stringl(zval *arg, char *key, char *str, uint length, int duplicate);
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, char *name, int name_length,
                                   int is_ref, int num_symbol_tables, ...);
