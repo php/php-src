@@ -385,21 +385,17 @@ SAPI_API int sapi_flush()
 	}
 }
 
-SAPI_API int sapi_get_uid()
+SAPI_API struct stat *sapi_get_stat()
 {
 	SLS_FETCH();
 
-	if (sapi_module.get_uid) {
-		return sapi_module.get_uid(SLS_C);
+	if (sapi_module.get_stat) {
+		return sapi_module.get_stat(SLS_C);
 	} else {
-		struct stat statbuf;
-
-		if (!SG(request_info).path_translated || (stat(SG(request_info).path_translated, &statbuf)==-1)) {
-			return -1;
+		if (!SG(request_info).path_translated || (stat(SG(request_info).path_translated, &SG(global_stat))==-1)) {
+			return NULL;
 		}
-
-		stat(SG(request_info).path_translated, &statbuf);
-		return statbuf.st_uid;
+		return &SG(global_stat);
 	}
 }
 

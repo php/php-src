@@ -40,52 +40,24 @@
 
 #include "ext/standard/basic_functions.h"
 
-static void php_statpage(void)
+static void php_statpage(BLS_D)
 {
-#if !APACHE
-	char *path;
-	struct stat sb;
-	BLS_FETCH();
-#else
-	request_rec *r;
-	BLS_FETCH();
-	SLS_FETCH();
-	
-	r = ((request_rec *) SG(server_context));
-#endif
-	
-#if APACHE
-	/* Apache has already gone through the trouble of doing
-	   the stat(), so the only real overhead is copying three
-	   values. We can afford it, and it means we don't have to
-	   worry about resetting the static variables after every
-	   hit. */
-	BG(page_uid)   = r ->finfo.st_uid;
-	BG(page_inode) = r->finfo.st_ino;
-	BG(page_mtime) = r->finfo.st_mtime;
-#else
-	if (BG(page_uid) == -1) {
-		SLS_FETCH();
+	struct stat *pstat;
 
-		path = SG(request_info).path_translated;
-		if (path != NULL) {
-			if (stat(path, &sb) == -1) {
-				php_error(E_WARNING, "Unable to find file:  '%s'", path);
-				return;
-			}
-			BG(page_uid)   = sb.st_uid;
-			BG(page_inode) = sb.st_ino;
-			BG(page_mtime) = sb.st_mtime;
-		}
+	pstat = sapi_get_stat();
+
+	if (BG(page_uid)==-1) {
+		BG(page_uid)   = pstat->st_uid;
+		BG(page_inode) = pstat->st_ino;
+		BG(page_mtime) = pstat->st_mtime;
 	}
-#endif
 }
 
 long php_getuid(void)
 {
 	BLS_FETCH();
 
-	php_statpage();
+	php_statpage(BLS_C);
 	return (BG(page_uid));
 }
 
@@ -125,7 +97,7 @@ PHP_FUNCTION(getmyinode)
 {
 	BLS_FETCH();
 
-	php_statpage();
+	php_statpage(BLS_C);
 	if (BG(page_inode) < 0) {
 		RETURN_FALSE;
 	} else {
@@ -140,7 +112,7 @@ PHP_FUNCTION(getlastmod)
 {
 	BLS_FETCH();
 
-	php_statpage();
+	php_statpage(BLS_C);
 	if (BG(page_mtime) < 0) {
 		RETURN_FALSE;
 	} else {
