@@ -973,7 +973,6 @@ PHP_FUNCTION(com_invoke)
 	pval **arguments;
 	pval *object, *function_name;
 	comval *obj;
-	int type;
 	int arg_count = ZEND_NUM_ARGS();
 	VARIANT *var_result;
 
@@ -1016,7 +1015,6 @@ PHP_FUNCTION(com_release)
 {
 	pval *object;
 	comval *obj;
-	int type;
 	int arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count != 1) {
@@ -1041,7 +1039,6 @@ PHP_FUNCTION(com_addref)
 {
 	pval *object;
 	comval *obj;
-	int type;
 	int arg_count = ZEND_NUM_ARGS();
 
 	if (arg_count != 1) {
@@ -2309,9 +2306,7 @@ PHPAPI int php_COM_load_typelib(ITypeLib *TypeLib, int mode TSRMLS_DC)
 PHP_FUNCTION(com_isenum)
 {
 	pval *object;
-	pval **comval_handle;
 	comval *obj;
-	int type;
 
 	if (ZEND_NUM_ARGS() != 1) {
 		ZEND_WRONG_PARAM_COUNT();
