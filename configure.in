@@ -1223,13 +1223,6 @@ if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL
   REDO_ALL=yes
 fi
 
-if test ! -f $srcdir/ext/bcmath/number.c; then
-  echo "creating number.c"
-  echo "/* Dummy File */" > $srcdir/ext/bcmath/number.c
-  echo "creating number.h"
-  echo "/* Dummy File */" > $srcdir/ext/bcmath/number.h
-fi
-
 ################################################################
 # Create configuration headers
 #
