@@ -1,3 +1,0 @@
-define_option with-readline 'GNU-Readline support?' yesnodir no \
-'    Whether to build the readline extension.'
-	
