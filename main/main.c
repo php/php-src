@@ -564,7 +564,7 @@ PHP_FUNCTION(set_time_limit)
 static FILE *php_fopen_wrapper_for_zend(const char *filename, char **opened_path)
 {
 	FILE *retval = NULL;
-	php_stream * stream;
+	php_stream *stream;
 	TSRMLS_FETCH();
 
 	stream = php_stream_open_wrapper((char *)filename, "rb", USE_PATH|IGNORE_URL_WIN|REPORT_ERRORS, opened_path TSRMLS_CC);
