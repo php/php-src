@@ -316,15 +316,8 @@ class System extends PEAR
         }
         //print_r($opts);
         $prefix = (isset($opts[1][0])) ? $opts[1][0] : 'tmp';
-        if(!isset($tmpdir)) {
-            if (OS_WINDOWS){
-                $tmpdir = getenv('TMP');
-            } else {
-                $tmpdir = getenv('TMPDIR');
-            }
-            if (empty($tmpdir)) {
-                $tmpdir = (OS_WINDOWS) ? 'c:\\windows\\temp' : '/tmp';
-            }
+        if (!isset($tmpdir)) {
+            $tmpdir = System::tmpdir();
         }
         System::mkDir("-p $tmpdir");
         $tmp = tempnam($tmpdir, $prefix);
@@ -337,5 +330,21 @@ class System extends PEAR
         return $tmp;
     }
 
+    function tmpdir()
+    {
+        if (OS_WINDOWS){
+            if (isset($_ENV['TEMP'])) {
+                return $_ENV['TEMP'];
+            }
+            if (isset($_ENV['TMP'])) {
+                return $_ENV['TMP'];
+            }
+            return $_ENV['SystemRoot'] . '\temp';
+        }
+        if (isset($_ENV['TMPDIR'])) {
+            return $_ENV['TMPDIR'];
+        }
+        return '/tmp';
+    }
 }
 ?>
