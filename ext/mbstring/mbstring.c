@@ -144,7 +144,7 @@ static const enum mbfl_no_encoding php_mb_default_identify_list[] = {
 static const int php_mb_default_identify_list_size = sizeof(php_mb_default_identify_list)/sizeof(enum mbfl_no_encoding);
 /* }}} */
 
-static const
+static
 	ZEND_BEGIN_ARG_INFO(third_and_rest_force_ref, 1)
 		ZEND_ARG_PASS_INFO(0)
 		ZEND_ARG_PASS_INFO(0)
