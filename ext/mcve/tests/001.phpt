@@ -1,7 +1,7 @@
 --TEST--
 Check for mcve presence
 --SKIPIF--
-<?php if (!extension_loaded("MCVE")) print "skip"; ?>
+<?php if (!extension_loaded("mcve")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--
