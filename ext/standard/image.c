@@ -316,8 +316,10 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static void php_skip_variable(php_stream * stream)
 {
-	size_t length = php_read2(stream);
-	php_stream_seek(stream, SEEK_CUR,  length-2);
+	size_t length = ((unsigned int)php_read2(stream)) & 0xFFFF;
+
+	length = length-2;
+	if (length) php_stream_seek(stream, (long)length, SEEK_CUR);
 }
 /* }}} */
 
@@ -389,7 +391,7 @@ static struct gfxinfo *php_handle_jpeg (php_stream * stream, pval *info)
 					result->channels = php_stream_getc(stream);
 					if (!info || length<8) /* if we don't want an extanded info -> return */
 						return result;
-					php_stream_seek(stream, SEEK_CUR,  length-8);
+					php_stream_seek(stream, length-8, SEEK_CUR);
 				} else {
 					php_skip_variable(stream);
 				}
@@ -572,7 +574,7 @@ static struct gfxinfo *php_handle_tiff (php_stream * stream, pval *info, int mot
 
 	php_stream_read(stream, ifd_ptr, 4);
 	ifd_addr = php_ifd_get32u(ifd_ptr, motorola_intel);
-	php_stream_seek(stream, SEEK_CUR, ifd_addr-8);
+	php_stream_seek(stream, ifd_addr-8, SEEK_CUR);
 	ifd_size = 2;
 	ifd_data = emalloc(ifd_size);
 	php_stream_read(stream, ifd_data, 2);
