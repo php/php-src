@@ -91,6 +91,9 @@ These files are updated once a day, so your stuff will not show up until
 somewhat later. Don't go adding stuff to NEWS by hand if you already put @
 lines in the commit message.
 
+You can use LXR (http://lxr.php.net/) and Bonsai (http://bonsai.php.net/)
+to look at PHP CVS repository in various ways.
+
 To receive daily updates to ChangeLog and NEWS, send an empty message to
 php-cvs-daily-subscribe@lists.php.net.
 
