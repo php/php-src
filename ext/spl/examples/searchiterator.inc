@@ -42,7 +42,7 @@ abstract class SearchIterator extends FilterIterator
 	 */	
 	function __call($func, $params)
 	{
-		return call_user_func_array(array($this->getSubIterator(), $func), $params);
+		return call_user_func_array(array($this->getInnerIterator(), $func), $params);
 	}
 }
 
