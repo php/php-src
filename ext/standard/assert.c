@@ -26,6 +26,7 @@
 typedef struct {
 	int active;
 	int exit;
+	int warning;
 	char *callback;
 } php_assert_globals;
 
@@ -38,6 +39,8 @@ int assert_globals_id;
 #define ASSERTLS_FETCH()
 php_assert_globals assert_globals;
 #endif
+
+#define SAFE_STRING(s) ((s)?(s):"")
 
 PHP_MINIT_FUNCTION(assert);
 PHP_MSHUTDOWN_FUNCTION(assert);
@@ -69,6 +72,7 @@ zend_module_entry assert_module_entry = {
 #define ASSERT_ACTIVE       1
 #define ASSERT_CALLBACK     2
 #define ASSERT_EXIT         3
+#define ASSERT_WARNING      4
 
 #ifdef ZTS
 static void php_assert_init_globals(php_assert_globals *assert_globals)
@@ -76,6 +80,7 @@ static void php_assert_init_globals(php_assert_globals *assert_globals)
 	ASSERT(active)   = 0;
 	ASSERT(exit)     = 0;
 	ASSERT(callback) = 0;
+	ASSERT(warning)  = 1;
 }
 #endif
 
@@ -88,17 +93,24 @@ PHP_MINIT_FUNCTION(assert)
 	ASSERT(active)   = 0;
 	ASSERT(exit)     = 0;
 	ASSERT(callback) = 0;
+	ASSERT(warning)  = 1;
 #endif
 
 	REGISTER_LONG_CONSTANT("ASSERT_ACTIVE", ASSERT_ACTIVE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_CALLBACK", ASSERT_CALLBACK, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ASSERT_EXIT", ASSERT_EXIT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ASSERT_WARNING", ASSERT_WARNING, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(assert)
 {
+	if (ASSERT(callback)) {
+		efree(ASSERT(callback));
+		ASSERT(callback) = NULL;
+	}
+
 	return SUCCESS;
 }
 
@@ -109,6 +121,13 @@ PHP_RINIT_FUNCTION(assert)
 
 PHP_RSHUTDOWN_FUNCTION(assert)
 {
+	ASSERTLS_FETCH();
+	
+	if (ASSERT(callback)) {
+		efree(ASSERT(callback));
+		ASSERT(callback) = NULL;
+	}
+
 	return SUCCESS;
 }
 
@@ -126,7 +145,9 @@ PHP_FUNCTION(assert)
 {
 	pval **assertion;	
 	int val;
-	char *myeval = empty_string;
+	char *myeval = NULL;
+	CLS_FETCH();
+	ELS_FETCH();
 	ASSERTLS_FETCH();
 	
 	if (! ASSERT(active)) {
@@ -139,8 +160,6 @@ PHP_FUNCTION(assert)
 
 	if ((*assertion)->type == IS_STRING) {
 		zval retval;
-		CLS_FETCH();
-		ELS_FETCH();
 
 		myeval = (*assertion)->value.str.val;
 		zend_eval_string(myeval, &retval CLS_CC ELS_CC);
@@ -154,7 +173,53 @@ PHP_FUNCTION(assert)
 	if (val) {
 		RETURN_TRUE;
 	}
-	php_error(E_WARNING,"Assertion \"%s\" failed",myeval);
+
+	if (ASSERT(callback)) {
+		zval *args[5];
+		zval *retval;
+		int i;
+		uint lineno = zend_get_executed_lineno(ELS_C);
+		char *filename = zend_get_executed_filename(ELS_C);
+		/*
+		char *function = get_active_function_name();
+		*/
+
+		MAKE_STD_ZVAL(args[0]);
+		MAKE_STD_ZVAL(args[1]);
+		MAKE_STD_ZVAL(args[2]);
+		MAKE_STD_ZVAL(args[3]);
+		/*
+		MAKE_STD_ZVAL(args[4]);
+		*/
+
+		args[0]->type = IS_STRING; args[0]->value.str.val = estrdup(SAFE_STRING(ASSERT(callback))); args[0]->value.str.len = strlen(args[0]->value.str.val);
+		args[1]->type = IS_STRING; args[1]->value.str.val = estrdup(SAFE_STRING(filename));         args[1]->value.str.len = strlen(args[1]->value.str.val);
+		args[2]->type = IS_LONG;   args[2]->value.lval    = lineno;      
+		args[3]->type = IS_STRING; args[3]->value.str.val = estrdup(SAFE_STRING(myeval));           args[3]->value.str.len = strlen(args[3]->value.str.val);
+		/*
+		  this is always "assert" so it's useless
+		  args[4]->type = IS_STRING; args[4]->value.str.val = estrdup(SAFE_STRING(function));         args[4]->value.str.len = strlen(args[4]->value.str.val);
+		*/
+		
+		MAKE_STD_ZVAL(retval);
+		retval->type = IS_BOOL;
+		retval->value.lval = 0;
+
+		call_user_function(CG(function_table), NULL, args[0], retval, 3, args+1);
+
+		for (i = 0; i < 4; i++) {
+			zval_del_ref(&(args[i]));
+		}
+		zval_del_ref(&retval);
+	}
+
+	if (ASSERT(warning)) {
+		if (myeval) {
+			php_error(E_WARNING,"Assertion \"%s\" failed",myeval);
+		} else {
+			php_error(E_WARNING,"Assertion failed");
+		}
+	}
 
 	if (ASSERT(exit)) {
 		zend_bailout();
@@ -198,9 +263,18 @@ PHP_FUNCTION(assert_options)
 		RETURN_LONG(oldint);
 		break;
 
+	case ASSERT_WARNING:
+		oldint = ASSERT(warning);
+		if (ac == 2) {
+			convert_to_long_ex(value);
+			ASSERT(warning) = (*value)->value.lval;
+		}
+		RETURN_LONG(oldint);
+		break;
+
 	case ASSERT_CALLBACK:
 		oldstr = ASSERT(callback);
-		RETVAL_STRING(oldstr,1);
+		RETVAL_STRING(SAFE_STRING(oldstr),1);
 
 		if (ac == 2) {
 			convert_to_string_ex(value);
