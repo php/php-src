@@ -31,6 +31,8 @@ AC_PROG_RANLIB
 AC_PROG_CC_C_O
 AM_PROG_LEX
 
+AM_PROG_CC_STDC
+
 dnl Hack to work around a Mac OS X cpp problem
 dnl Known versions needing this workaround are 5.3 and 5.4
 if test "$ac_cv_prog_gcc" = "yes" -a "`uname -s`" = "Rhapsody"; then
