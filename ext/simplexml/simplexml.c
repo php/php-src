@@ -340,7 +340,7 @@ next_iter:
  */
 static void sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
 {
-	sxe_prop_dim_write(object, member, value, 1, 1 TSRMLS_CC);
+	sxe_prop_dim_write(object, member, value, 1, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -352,14 +352,14 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-/* {{{ sxe_property_exists()
+/* {{{ sxe_prop_dim_exists()
  */
-static int
-sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend_bool elements, zend_bool attribs TSRMLS_DC)
 {
 	php_sxe_object *sxe;
 	char           *name;
 	xmlNodePtr      node;
+	xmlAttrPtr      attr = NULL;
 	
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 	name = Z_STRVAL_P(member);
@@ -367,20 +367,49 @@ sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
 	GET_NODE(sxe, node);
 
 	if (node) {
-		node = node->children;
-		while (node) {
-			SKIP_TEXT(node);
-
-			if (!xmlStrcmp(node->name, name)) {
-				return 1;
+		if (attribs) {
+			attr = node->properties;
+			while (attr) {
+				if (!xmlStrcmp(attr->name, name)) {
+					return 1;
+				}
+	
+				attr = attr->next;
 			}
+		}
+
+		if (elements) {
+			node = node->children;
+			while (node) {
+				SKIP_TEXT(node);
+	
+				if (!xmlStrcmp(node->name, name)) {
+					return 1;
+				}
 
 next_iter:
-			node = node->next;
+				node = node->next;
+			}
 		}
 	}
 
 	return 0;
+}
+/* }}} */
+
+/* {{{ sxe_property_exists()
+ */
+static int sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	return sxe_prop_dim_exists(object, member, check_empty, 1, 0 TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ sxe_property_exists()
+ */
+static int sxe_dimension_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+{
+	return sxe_prop_dim_exists(object, member, check_empty, 0, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -445,10 +474,9 @@ next_iter:
 
 /* {{{ sxe_property_delete()
  */
-static void
-sxe_property_delete(zval *object, zval *member TSRMLS_DC)
+static void sxe_property_delete(zval *object, zval *member TSRMLS_DC)
 {
-	sxe_prop_dim_delete(object, member, 1, 1 TSRMLS_CC);
+	sxe_prop_dim_delete(object, member, 1, 0 TSRMLS_CC);
 }
 /* }}} */
 
@@ -456,7 +484,7 @@ sxe_property_delete(zval *object, zval *member TSRMLS_DC)
  */
 static void sxe_dimension_delete(zval *object, zval *offset TSRMLS_DC)
 {
-	sxe_prop_dim_delete(object, offset, 1, 1 TSRMLS_CC);
+	sxe_prop_dim_delete(object, offset, 0, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -970,6 +998,7 @@ static zend_object_handlers sxe_object_handlers = {
 	sxe_object_set,
 	sxe_property_exists,
 	sxe_property_delete,
+	sxe_dimension_exists,
 	sxe_dimension_delete,
 	sxe_properties_get,
 	sxe_method_get,
