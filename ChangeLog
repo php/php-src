@@ -1,3 +1,31 @@
+2002-07-18  phanto  <phanto@pb1.pair.com>
+
+    * ext/rpc/com/conversion.h
+      ext/rpc/com/dispatch.c
+      ext/rpc/com/php_com.h
+      ext/rpc/com/php_variant.h
+      ext/rpc/com/variant.c
+      ext/rpc/com/variant.h
+      ext/rpc/com/com.c
+      ext/rpc/com/com.h
+      ext/rpc/com/com_wrapper.c
+      ext/rpc/com/com_wrapper.h
+      ext/rpc/com/conversion.c
+      ext/rpc/handler.h
+      ext/rpc/hash.h
+      ext/rpc/layer.h
+      ext/rpc/php_rpc.h
+      ext/rpc/rpc.c
+      ext/rpc/rpc.h
+      ext/rpc/rpc_proxy.c
+      ext/rpc/rpc_proxy.h:
+    ext/rpc/com should work now, but there's still lots of work left.
+
+2002-07-18  yohgaki  <yohgaki@pb1.pair.com>
+
+    * php.ini-dist
+      php.ini-recommended: Move down open_basedir description.
+
 2002-07-17  sniper  <sniper@pb1.pair.com>
 
     * configure.in:
