@@ -822,8 +822,6 @@ PHP_FUNCTION(feof)
 /* }}} */
 
 
-/* {{{ proto int set_socket_blocking(int socket_descriptor, int mode)
-   Set blocking/non-blocking mode on a socket */
 PHPAPI int php_set_sock_blocking(int socketd, int block)
 {
       int ret = SUCCESS;
@@ -854,6 +852,8 @@ PHPAPI int php_set_sock_blocking(int socketd, int block)
       return ret;
 }
 
+/* {{{ proto bool socket_set_blocking(resource socket, int mode)
+   Set blocking/non-blocking mode on a socket */
 PHP_FUNCTION(socket_set_blocking)
 {
 	zval **arg1, **arg2;
