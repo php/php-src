@@ -1,3 +1,102 @@
+2002-06-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command.php: * fix bug that was re-introduced during merge
+
+2002-06-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * win32/sendmail.c:
+    - Only add the To: field with the $to parameter if we don't have it in the
+      custom header. This was the behaviour < 4.2.x (but it was broken, this one
+      isn't).
+
+    * win32/sendmail.c:
+    - Revert fix for #14407. The From: header field IS different from the
+      sendmail_from field which is in fact the retturn path.
+
+    * win32/sendmail.c:
+    - Try to fix most of the buffer overflows and dynamically allocate memory where
+      applicable.
+
+2002-06-02  Adam Dickmeiss  <adam@indexdata.dk>
+
+    * ext/yaz/php_yaz.c: Use ZOOM API for newer YAZ versions.
+
+    * ext/yaz/config.m4: report error when YAZ cannot be found
+
+2002-06-02  Stefan Roehrich  <stefan@roehri.ch>
+
+    * ext/zlib/zlib.c:
+    Added "Vary: Accept-Encoding" header to zlib.output_compression
+    compressed output as with obgzhandler().
+
+2002-06-02  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Frontend/CLI.php: make 'pear remote-info' work with CLI
+
+    * pear/PEAR/Command/Remote.php
+      pear/PEAR/Frontend/CLI.php: make 'pear search' work with CLI. fix a typo
+
+2002-06-02  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * main/main.c
+      win32/sendmail.c:
+    - Finish implementation of custom smtp port (introduces "smtp_port" ini config).
+
+    * win32/sendmail.c: - Rephrase comment
+
+    * win32/sendmail.c: - Classig problem: right idea, wrong pointer ...
+
+2002-06-02  Christian Dickmann  <chrisdicki@gmx.de>
+
+    * pear/PEAR/Registry.php
+      pear/System.php:
+    silence unlink() and rmdir(). fix a bug where  wasn't set due to wrong ini setting
+
+2002-06-02  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Frontend/CLI.php
+      pear/scripts/pear.in
+      pear/tests/pear_config.phpt
+      pear/PEAR/Builder.php
+      pear/PEAR/Command.php
+      pear/PEAR/Command/Auth.php
+      pear/PEAR/Command/Build.php
+      pear/PEAR/Command/Common.php
+      pear/PEAR/Command/Config.php
+      pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Command/Registry.php
+      pear/PEAR/Command/Remote.php
+      pear/PEAR/Common.php
+      pear/PEAR/Config.php
+      pear/PEAR/Installer.php
+      pear/package-PEAR.xml: * merge NEW_UI_API branch
+
+    * pear/PEAR/Common.php
+      pear/PEAR/Installer.php
+      pear/scripts/pear.in
+      pear/package-PEAR.xml:
+    * implemented "package-info" replacement in package.xml
+
+    * pear/PEAR/Installer.php: * typo?
+
+    * pear/PEAR/Command/Config.php:
+    * make output of "config-get" easier to parse
+
+    * pear/PEAR/Command/Config.php: * fix some error reporting
+
+    * pear/PEAR/Config.php: * less verbose
+
+    * pear/PEAR/Installer.php: * fix buildcallback
+
+    * pear/PEAR/Builder.php
+      pear/PEAR/Installer.php
+      pear/package-PEAR.xml: * "pear install" now builds and C extensions
+
+    * pear/scripts/pear.in: * add custom error handler
+
+    * pear/PEAR/Frontend/CLI.php: * de-obsolete display{,Fatal}Error
+
 2002-06-01  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Builder.php: * add some phpdoc
