@@ -911,9 +911,8 @@ static void php_session_start(PSLS_D)
 	if (PS(mod_data) && PS(gc_probability) > 0) {
 		int nrdels = -1;
 
-		srand(time(NULL));
-		nrand = (int) (100.0*rand()/RAND_MAX);
-		if (nrand < PS(gc_probability)) {
+		nrand = (int) (100.0*php_combined_lcg());
+		if (nrand <= PS(gc_probability)) {
 			PS(mod)->gc(&PS(mod_data), PS(gc_maxlifetime), &nrdels);
 #if 0
 			if (nrdels != -1)
