@@ -65,13 +65,15 @@ var_dump($a->test);
 
 ?>
 --EXPECTF--
-Strict Standards: Declaration of bar::a() must be compatible with that of foo::a() in %sbug22367.php on line %d
+Strict Standards: Declaration of bar::a() must be compatible with that of foo::a() in /home/dmitry/php/php5.work/tests/lang/bug22367.php on line 45
+
+Strict Standards: Implicit cloning object of class 'bar' because of 'zend.ze1_compatibility_mode' in /home/dmitry/php/php5.work/tests/lang/bug22367.php on line 47
 int(5)
 bool(false)
 
-Notice: Undefined offset:  %d in %s on line %d
+Notice: Undefined offset:  5 in /home/dmitry/php/php5.work/tests/lang/bug22367.php on line 9
 
-Strict Standards: Only variable references should be returned by reference in %s on line %d
+Strict Standards: Only variable references should be returned by reference in /home/dmitry/php/php5.work/tests/lang/bug22367.php on line 40
 bool(false)
 array(5) {
   [0]=>
@@ -97,6 +99,8 @@ array(5) {
   [4]=>
   int(4)
 }
+
+Strict Standards: Implicit cloning object of class 'bar' because of 'zend.ze1_compatibility_mode' in /home/dmitry/php/php5.work/tests/lang/bug22367.php on line 54
 int(2)
 bool(true)
 bool(true)
