@@ -924,10 +924,6 @@ static int parse_context_params(php_stream_context *context, zval *params)
 		parse_context_options(context, *tmp);
 	}
 
-	if (ret != SUCCESS) {
-		php_stream_context_free(context);
-	}
-
 	return ret;
 }
 
@@ -938,16 +934,20 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 {
 	php_stream_context *context = NULL;
 
-	context = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", NULL, 1, le_stream_context);
+	context = zend_fetch_resource(&contextresource TSRMLS_CC, -1, NULL, NULL, 1, php_le_stream_context());
 	if (context == NULL) {
 		php_stream *stream;
 
-		php_stream_from_zval_no_verify(stream, &contextresource);
+		stream = zend_fetch_resource(&contextresource TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream);
 
 		if (stream) {
 			context = stream->context;
-			if (context == NULL)
+			if (context == NULL) {
 				context = stream->context = php_stream_context_alloc();
+				/* Register this magical context so that it'll
+				   get cleaned up later. PHP5 does this more cleanly */
+				ZEND_REGISTER_RESOURCE(NULL, context, php_le_stream_context());
+			}
 		}
 	}
 
