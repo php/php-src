@@ -200,6 +200,13 @@ zval *mysqli_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		ret = zend_hash_find(obj->prop_handler, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, (void **) &hnd);
 	}
 	if (ret == SUCCESS) {
+		/* check if connection is still valid */
+ 		if (!obj->ptr ||
+		    !((MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql)->thread_id) {
+			retval = EG(uninitialized_zval_ptr);
+			return(retval);
+		}
+
 		ret = hnd->read_func(obj, &retval TSRMLS_CC);
 		if (ret == SUCCESS) {
 			/* ensure we're creating a temporary variable */
