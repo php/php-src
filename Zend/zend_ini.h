@@ -72,7 +72,7 @@ zend_ini_entry *get_ini_entry(char *name, uint name_length);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
-ZEND_API zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg);
+ZEND_API int zend_ini_apply_with_argument(apply_func_arg_t apply_func, void *arg);
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
