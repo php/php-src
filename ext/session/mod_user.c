@@ -24,14 +24,14 @@ ps_module ps_mod_user = {
 	PS_MOD(user)
 };
 
-#define ZVAL_LONG(val, a) 					\
+#define SESS_ZVAL_LONG(val, a) 					\
 {											\
 	MAKE_STD_ZVAL(a); 						\
 	a->type = IS_LONG; 						\
 	a->value.lval = val; 					\
 }
 
-#define ZVAL_STRING(vl, a) 					\
+#define SESS_ZVAL_STRING(vl, a) 					\
 {											\
 	int len = strlen(vl); 					\
 	MAKE_STD_ZVAL(a); 						\
@@ -40,7 +40,7 @@ ps_module ps_mod_user = {
 	a->value.str.val = estrndup(vl, len); 	\
 }
 
-#define ZVAL_STRINGN(vl, ln, a) 			\
+#define SESS_ZVAL_STRINGN(vl, ln, a) 			\
 {											\
 	MAKE_STD_ZVAL(a); 						\
 	a->type = IS_STRING; 					\
@@ -58,7 +58,7 @@ static zval *ps_call_handler(char *name, int argc, zval **argv)
 	if(name && name[0] != '\0') {
 		zval *func;
 
-		ZVAL_STRING(name, func);
+		SESS_ZVAL_STRING(name, func);
 		MAKE_STD_ZVAL(retval);
 
 		if(call_user_function(EG(function_table), NULL, func, retval, 
@@ -101,8 +101,8 @@ PS_OPEN_FUNC(user)
 	zval *args[2];
 	STDVARS;
 	
-	ZVAL_STRING(save_path, args[0]);
-	ZVAL_STRING(session_name, args[1]);
+	SESS_ZVAL_STRING(save_path, args[0]);
+	SESS_ZVAL_STRING(session_name, args[1]);
 	
 	retval = ps_call_handler(PSF(open), 2, args);
 	
@@ -131,7 +131,7 @@ PS_READ_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING(key, args[0]);
 
 	retval = ps_call_handler(PSF(read), 1, args);
 	
@@ -153,8 +153,8 @@ PS_WRITE_FUNC(user)
 	zval *args[2];
 	STDVARS;
 	
-	ZVAL_STRING(key, args[0]);
-	ZVAL_STRINGN(val, vallen, args[1]);
+	SESS_ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRINGN(val, vallen, args[1]);
 
 	retval = ps_call_handler(PSF(write), 2, args);
 
@@ -166,7 +166,7 @@ PS_DESTROY_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	ZVAL_STRING(key, args[0]);
+	SESS_ZVAL_STRING(key, args[0]);
 
 	retval = ps_call_handler(PSF(destroy), 1, args);
 
@@ -178,7 +178,7 @@ PS_GC_FUNC(user)
 	zval *args[1];
 	STDVARS;
 
-	ZVAL_LONG(maxlifetime, args[0]);
+	SESS_ZVAL_LONG(maxlifetime, args[0]);
 
 	retval = ps_call_handler(PSF(gc), 1, args);
 
