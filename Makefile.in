@@ -208,7 +208,7 @@ install: install-recursive $(BINNAME)
 
 install-recursive:
 	if test "$(EXT_SHARED)" != ""; then \
-		for dir in $(EXT_SHARED); do \
+		for dir in X $(EXT_SHARED); do \
 			test -d ext/$$dir && (cd ext/$$dir; $(MAKE) install); \
 		done; \
 	fi
