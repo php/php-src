@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.43 2004-08-02 17:54:49 fmk Exp $
+// $Id: confutils.js,v 1.44 2004-08-02 18:48:49 fmk Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -256,7 +256,9 @@ function conf_process_args()
 	args = WScript.Arguments;
 	for (i = 0; i < args.length; i++) {
 		arg = args(i);
-		nice += ' "' + arg + '"';
+		if (nice.length + arg.length < 2045) {	// The max string length for CONFIGURE_COMMAND is 2048 in VC6
+			nice += ' "' + arg + '"';
+		}
 		if (arg == "--help") {
 			configure_help_mode = true;
 			break;
