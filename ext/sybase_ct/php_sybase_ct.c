@@ -1437,7 +1437,7 @@ static void php_sybase_query (INTERNAL_FUNCTION_PARAMETERS, int buffered)
 		
 		/* Retry deadlocks up until deadlock_retry_count times */		
 		if (sybase_ptr->deadlock && SybCtG(deadlock_retry_count) != -1 && ++deadlock_count > SybCtG(deadlock_retry_count)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %d], giving up\n", deadlock_count- 1, SybCtG(deadlock_retry_count));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Retried deadlock %d times [max: %d], giving up", deadlock_count- 1, SybCtG(deadlock_retry_count));
 			if (result != NULL) {
 				_free_sybase_result(result);
 			}
@@ -1904,7 +1904,7 @@ PHP_FUNCTION(sybase_result)
 	}
 
 	if (Z_LVAL_PP(row) < 0 || Z_LVAL_PP(row) >= result->num_rows) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad row offset (%d)", Z_LVAL_PP(row));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Sybase:  Bad row offset (%ld)", Z_LVAL_PP(row));
 		RETURN_FALSE;
 	}
 
