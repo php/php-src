@@ -128,7 +128,7 @@ SAPI_API void sapi_activate(SLS_D);
 SAPI_API void sapi_deactivate(SLS_D);
 SAPI_API void sapi_initialize_empty_request(SLS_D);
 
-SAPI_API int sapi_add_header(char *header_line, uint header_line_len);
+SAPI_API int sapi_add_header(char *header_line, uint header_line_len, zend_bool duplicate);
 SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg SLS_DC);

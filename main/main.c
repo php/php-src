@@ -656,7 +656,7 @@ int php_request_startup(CLS_D ELS_DC PLS_DC SLS_DC)
 	php_set_timeout(PG(max_execution_time));
 	
 	if (PG(expose_php)) {
-		sapi_add_header(estrdup(SAPI_PHP_VERSION_HEADER), sizeof(SAPI_PHP_VERSION_HEADER) - 1);
+		sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
 	}
 
 	if (PG(output_buffering)) {
@@ -1131,21 +1131,15 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 	if (SG(request_info).query_string && SG(request_info).query_string[0]=='=' 
 		&& PG(expose_php)) {
 		if (!strcmp(SG(request_info).query_string+1, PHP_LOGO_GUID)) {
-			char *header_line = estrndup(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF));
-
-			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
 			PHPWRITE(php_logo, sizeof(php_logo));
 			return;
 		} else if (!strcmp(SG(request_info).query_string+1, PHP_EGG_LOGO_GUID)) {
-			char *header_line = estrndup(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF));
-
-			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
 			PHPWRITE(php_egg_logo, sizeof(php_egg_logo));
 			return;
 		} else if (!strcmp(SG(request_info).query_string+1, ZEND_LOGO_GUID)) {
-			char *header_line = estrndup(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF));
-
-			php4i_add_header_information(header_line, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1);
+			sapi_add_header(CONTEXT_TYPE_IMAGE_GIF, sizeof(CONTEXT_TYPE_IMAGE_GIF)-1, 1);
 			PHPWRITE(zend_logo, sizeof(zend_logo));
 			return;
 		} else if (!strcmp(SG(request_info).query_string+1, "PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000")) {
