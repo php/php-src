@@ -4,6 +4,7 @@ DBA CDB handler test
 <?php 
 	require_once('skipif.inc');
 	if (!in_array('cdb', dba_handlers())) die('skip CDB handler not available');
+	die('skip CDB currently supports only reading');
 ?>
 --FILE--
 <?php
