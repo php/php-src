@@ -444,12 +444,12 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	EG(user_exception_handler) = NULL;
 	EG(in_execution) = 0;
 	EG(current_execute_data) = NULL;
+	EG(active_namespace) = NULL;
 }
 
 
 static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS_DC)
 {
-	zend_shutdown_constants(TSRMLS_C);
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_ini_shutdown(TSRMLS_C);
 }
@@ -654,8 +654,8 @@ void zend_shutdown(TSRMLS_D)
 #ifndef ZTS
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 #endif
-	zend_destroy_rsrc_list_dtors();
 	zend_hash_graceful_reverse_destroy(&module_registry);
+	zend_destroy_rsrc_list_dtors();
 
 #ifndef ZTS
 	/* In ZTS mode these are freed by compiler_globals_dtor() */
@@ -667,9 +667,7 @@ void zend_shutdown(TSRMLS_D)
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
-#ifndef ZTS
-	zend_shutdown_constants();
-#endif
+	zend_shutdown_constants(TSRMLS_C);
 }
 
 
