@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SHMOP_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\TSRM" /I "..\..\ZEND" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D "NDEBUG" /D "PHP_EXPORTS" /D "HAVE_SHMOP" /D COMPILE_DL_SHMOP=1 /D ZEND_DEBUG=0 /D "ZTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\\" /I "..\..\main" /I "..\..\TSRM" /I "..\..\ZEND" /D "WIN32" /D ZEND_WIN32=1 /D PHP_WIN32=1 /D "NDEBUG" /D "PHP_EXPORTS" /D "HAVE_SHMOP" /D COMPILE_DL_SHMOP=1 /D ZEND_DEBUG=0 /D "ZTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "SHMOP_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\TSRM" /I "..\..\ZEND" /D ZEND_DEBUG=1 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP_EXPORTS" /D "COMPILE_DL_SHMOP" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_SHMOP=1 /D ZTS=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\\" /I "..\..\main" /I "..\..\TSRM" /I "..\..\ZEND" /D "WIN32" /D ZEND_DEBUG=1 /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "PHP_EXPORTS" /D "COMPILE_DL_SHMOP" /D "ZEND_WIN32" /D "PHP_WIN32" /D HAVE_SHMOP=1 /D ZTS=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
