@@ -6,7 +6,7 @@ class CachingRecursiveIterator extends CachingIterator implements RecursiveItera
 	protected $getChildren;
 	protected $catch_get_child;
 
-	function __construct(RecursiveIterator $it, $flags = CIT_GET_STR_VALUE)
+	function __construct(RecursiveIterator $it, $flags = CIT_CALL_TOSTRING)
 	{
 		parent::__construct($it, $flags);
 	}
