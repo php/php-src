@@ -1,3 +1,45 @@
+2004-09-22  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_execute_API.c
+      zend_globals.h:
+      NetWare specific stack limit checks
+
+    * zend_API.c:
+      Aligned the ifdef NETWARE blocks to first column.
+
+    * zend_execute.c:
+      Stack limit will be checked while executing the script
+
+    * zend_config.nw.h:
+      To avoid redefinition (of free, alloca etc.) compilation errors in Zend.
+
+    * zend_API.c:
+      When Apache is unloaded, it calls dlclose on all the PHP extensions
+      that are loaded in memory. In the case of Apache 1.3, this call is
+      blocking indefinitely. As a work around, this call is bypassed for Apache
+      1.3 build on NetWare only. This means that none of the loaded PHP
+      extensions are unloaded. They will have to be manually unloaded before
+      re-loading the Apache 1.3 again.
+
+    * zend.h:
+      defined ZEND_PATHS_SEPERATOR to semicolon for NetWare
+
+    * acconfig.h:
+      enabled macros to call the proper LibC functions
+
+2004-09-22  Dmitry Stogov  <dmitry@zend.com>
+
+    * zend_vm_handlers.h
+      zend_vm_spec.h:
+      Specializer was updated with executor's fixes.
+
+    * zend_execute.c
+      zend_execute.c:
+      Fixed bug #29566 (foreach/string handling strangeness (crash)).
+
+    * zend_execute.c:
+      Fixed bug in fix for bug #29707
+
 2004-09-21  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
