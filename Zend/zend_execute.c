@@ -360,10 +360,9 @@ static inline void zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zv
 static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode *op2, znode *value_op, temp_variable *Ts, int opcode TSRMLS_DC)
 {
 	zval *object;
-	zval *property = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+	zval *property_name = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
 	zval *free_value;
 	zval *value = get_zval_ptr(value_op, Ts, &free_value, BP_VAR_R);
-	zval tmp;
 	zval **retval = &T(result->u.var).var.ptr;
 
 	make_real_object(object_ptr TSRMLS_CC); /* this should modify object only if it's empty */
@@ -380,27 +379,10 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	}
 	
 	/* here we are sure we are dealing with an object */
-	switch (op2->op_type) {
-		case IS_CONST:
-			/* already a constant string */
-			break;
-		case IS_VAR:
-			tmp = *property;
-			zval_copy_ctor(&tmp);
-			convert_to_string(&tmp);
-			property = &tmp;
-			break;
-		case IS_TMP_VAR:
-			convert_to_string(property);
-			break;
-	}
-
 	if (EG(implicit_clone)) {
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		object = *object_ptr;
 	}
-	/* by now, property is a string */
-
 
 	/* separate our value if necessary */
 	if (value_op->op_type == IS_TMP_VAR) {
@@ -412,15 +394,32 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 		value->refcount = 0;
 	}
 	if (opcode == ZEND_ASSIGN_OBJ) {
-		Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
+		zval tmp;
+
+		switch (op2->op_type) {
+			case IS_CONST:
+				/* already a constant string */
+				break;
+			case IS_VAR:
+				tmp = *property_name;
+				zval_copy_ctor(&tmp);
+				convert_to_string(&tmp);
+				property_name = &tmp;
+				break;
+			case IS_TMP_VAR:
+				convert_to_string(property_name);
+				break;
+		}
+		Z_OBJ_HT_P(object)->write_property(object, property_name, value TSRMLS_CC);
+		if (property_name == &tmp) {
+			zval_dtor(property_name);
+		}
 	} else {
+		/* Note:  property_name in this case is really the array index! */
 		if (!Z_OBJ_HT_P(object)->write_dimension) {
 			zend_error(E_ERROR, "Cannot use object as array");
 		}
-		Z_OBJ_HT_P(object)->write_dimension(object, property, value TSRMLS_CC);
-	}
-	if (property == &tmp) {
-		zval_dtor(property);
+		Z_OBJ_HT_P(object)->write_dimension(object, property_name, value TSRMLS_CC);
 	}
 	
 	FREE_OP(Ts, op2, EG(free_op2));
