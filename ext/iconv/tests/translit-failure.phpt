@@ -1,5 +1,5 @@
 --TEST--
-Translit failture
+Translit failure
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
