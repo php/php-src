@@ -226,16 +226,15 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 				INIT_PZVAL(array_ptr);
 				switch (arg) {
 					case PARSE_POST:
-						zend_hash_add_ptr(&EG(symbol_table), "HTTP_POST_VARS", sizeof("HTTP_POST_VARS"), array_ptr, sizeof(pval *),NULL);
+						PG(http_globals).post = array_ptr;
 						break;
 					case PARSE_GET:
-						zend_hash_add_ptr(&EG(symbol_table), "HTTP_GET_VARS", sizeof("HTTP_GET_VARS"), array_ptr, sizeof(pval *),NULL);
+						PG(http_globals).get = array_ptr;
 						break;
 					case PARSE_COOKIE:
-						zend_hash_add_ptr(&EG(symbol_table), "HTTP_COOKIE_VARS", sizeof("HTTP_COOKIE_VARS"), array_ptr, sizeof(pval *),NULL);
+						PG(http_globals).cookie = array_ptr;
 						break;
 				}
-				array_ptr->refcount++;  /* If someone overwrites us, array_ptr must stay valid */
 			} else {
 				array_ptr=NULL;
 			}
@@ -247,9 +246,6 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 
 	if (arg==PARSE_POST) {
 		sapi_handle_post(array_ptr SLS_CC);
-		if (array_ptr) {
-			zval_ptr_dtor(&array_ptr);
-		}
 		return;
 	}
 
@@ -275,9 +271,6 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (!res) {
-		if (array_ptr) {
-			zval_ptr_dtor(&array_ptr);
-		}
 		return;
 	}
 
@@ -307,9 +300,6 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	if (free_buffer) {
 		efree(res);
 	}
-	if (array_ptr) {
-		zval_ptr_dtor(&array_ptr);
-	}
 }
 
 
@@ -323,7 +313,7 @@ void php_import_environment_variables(ELS_D PLS_DC)
 		ALLOC_ZVAL(array_ptr);
 		array_init(array_ptr);
 		INIT_PZVAL(array_ptr);
-		zend_hash_add_ptr(&EG(symbol_table), "HTTP_ENV_VARS", sizeof("HTTP_ENV_VARS"), array_ptr, sizeof(pval *),NULL);
+		PG(http_globals).environment = array_ptr;
 	}
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
