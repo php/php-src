@@ -109,8 +109,8 @@ int zend_stream_getc(zend_file_handle *file_handle TSRMLS_DC)
 {
 	char buf;
 
-	if (zend_stream_read(file_handle, &buf, sizeof(buf) TSRMLS_CC)) {
-		return buf;
+	if (file_handle->handle.stream.reader(file_handle->handle.stream.handle, &buf, sizeof(buf) TSRMLS_CC)) {
+		return (int)buf;
 	}
 	return EOF;
 }
