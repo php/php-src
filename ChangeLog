@@ -1,3 +1,7 @@
+2000-09-21  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: Revert controversial patch
+
 2000-09-20  brianlmoon  <brianlmoon@toye>
 
     * ext/mysql/php_mysql.c
