@@ -96,6 +96,12 @@ if test "$ac_cv_c_const" = "yes" ; then
 fi
 AC_SUBST(LEX_CFLAGS)
 
+dnl Hack to work around a Mac OS X cpp problem
+dnl Known versions needing this workaround are 5.3 and 5.4
+if test "$ac_cv_prog_gcc" = "yes" -a "`uname -s`" = "Rhapsody"; then
+  CPPFLAGS="$CPPFLAGS -traditional-cpp"
+fi
+
 if test "`uname -sv`" = "AIX 4" -a "$GCC" != "yes"; then
 	APXS_EXP="-bE:mod_php4.exp"
 fi
