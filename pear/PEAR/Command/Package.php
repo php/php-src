@@ -251,10 +251,7 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $this->output = '';
         include_once 'PEAR/Packager.php';
         $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
-        $packager =& new PEAR_Packager($this->config->get('php_dir'),
-                                       $this->config->get('ext_dir'),
-                                       $this->config->get('doc_dir'));
-        $packager->debug = $this->config->get('verbose');
+        $packager =& new PEAR_Packager();
         $err = $warn = array();
         $dir = dirname($pkginfofile);
         $compress = empty($options['nocompress']) ? true : false;
@@ -561,15 +558,25 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
 
     // }}}
     // {{{ doMakeRPM()
+
     /*
+
     (cox)
+
     TODO:
+
         - Fill the rpm dependencies in the template file.
+
     IDEAS:
+
         - Instead of mapping the role to rpm vars, perhaps it's better
+
           to use directly the pear cmd to install the files by itself
+
           in %postrun so:
+
           pear -d php_dir=%{_libdir}/php/pear -d test_dir=.. <package>
+
     */
 
     function doMakeRPM($command, $options, $params)
@@ -619,27 +626,47 @@ Wrote: /usr/src/redhat/RPMS/i386/PEAR::Net_Socket-1.0-1.i386.rpm
         $info['rpm_package'] = sprintf($rpm_pkgname_format, $info['package']);
         $srcfiles = 0;
         foreach ($info['filelist'] as $name => $attr) {
+
             if ($attr['role'] == 'doc') {
                 $info['doc_files'] .= " $name";
+
             // Map role to the rpm vars
             } else {
+
                 $c_prefix = '%{_libdir}/php/pear';
+
                 switch ($attr['role']) {
+
                     case 'php':
+
                         $prefix = $c_prefix; break;
+
                     case 'ext':
+
                         $prefix = '%{_libdir}/php'; break; // XXX good place?
+
                     case 'src':
+
                         $srcfiles++;
+
                         $prefix = '%{_includedir}/php'; break; // XXX good place?
+
                     case 'test':
+
                         $prefix = "$c_prefix/tests/" . $info['package']; break;
+
                     case 'data':
+
                         $prefix = "$c_prefix/data/" . $info['package']; break;
+
                     case 'script':
+
                         $prefix = '%{_bindir}'; break;
+
                 }
+
                 $info['files'] .= "$prefix/$name\n";
+
             }
         }
         if ($srcfiles > 0) {
