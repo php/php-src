@@ -2710,18 +2710,23 @@ PHPAPI FILE * _php_stream_open_wrapper_as_file(char *path, char *mode, int optio
 PHPAPI zend_bool _php_stream_open_wrapper_as_file_handle(char *path, char *mode, int options, zend_file_handle *fh STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream = NULL;
+	int is_sock = 0;
 
 	stream = php_stream_open_wrapper_rel(path, mode, options|STREAM_WILL_CAST, &fh->opened_path);
 
 	if (stream == NULL)
 		return FAILURE;
 
+	if ((options & STREAM_OPEN_FOR_INCLUDE) 
+			&& php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		is_sock = 1;
+	}
+
 	if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS &&
 			php_stream_cast(stream, PHP_STREAM_AS_FD | PHP_STREAM_CAST_TRY_HARD 
 				| PHP_STREAM_CAST_RELEASE, (void **) &fh->handle.fd, 
 				REPORT_ERRORS) == SUCCESS) {
-		if ((options & STREAM_OPEN_FOR_INCLUDE) 
-				&& php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
+		if (is_sock) {
 			fh->type = ZEND_HANDLE_SOCKET_FD;
 		} else {
 			fh->type = ZEND_HANDLE_FD;
