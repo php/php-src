@@ -52,20 +52,8 @@ Encoding
 ? proper encoding of standard hexBinary type
 ? proper encoding of standard base64Binary type
 ? full support for arrays
-  + arrayType attribute
-  + offset attribute
-  + position attribute
-  + multidimensional arrays
-  + arrays of arrays
-	+ SOAP 1.2 array encoding/decoding (itemType, arraySize)
-  + SOAP 1.1 - arrayType="xsd:ur-type[]", SOAP 1.2 - itemType="xsd:anyType"
   - SOAP 1.1 encoding of arrays with holes (partially transmitted and sparse arrays)
 	  SOAP 1.2 doesn't support partially transmitted and sparse arrays
-? full support for structures
-  + support for attribute encoding/decoding
-  - full support for content model encoding/decoding
-+ references (id,href)
-+ SOAP 1.2 (enc:id,enc:ref)
 - references to external resources
 ? support for "nillable" and "nil"
 - default values
@@ -105,10 +93,10 @@ Schema
 ? support for user defined simple types
   ? restiction
 	  + base
-	  + enumeration
-		+ length (for string, anyURI, hexBinary, base64Binary and derived)
-		+ minLength (for string, hexBinary, base64Binary and derived)
-		+ maxLength (for string, hexBinary, base64Binary and derived)
+	  ? enumeration
+		? length (for string, anyURI, hexBinary, base64Binary and derived) list???
+		? minLength (for string, hexBinary, base64Binary and derived) list???
+		? maxLength (for string, hexBinary, base64Binary and derived) list???
 		+ whiteSpace (preserve, replace [#x9,#xA,#xD=>#x20], collapse [replace+?])
 		- pattern
 	  - minExclusive (for numeric, date types)
@@ -121,18 +109,6 @@ Schema
 	? union
 ? support for user defined complex types
   ? full support for content model encoding/decoding
-  ? simpleContent restriction
-  + simpleContent extension   
-  + complexContent restriction
-  + complexContent extension   
-  + all
-  + choice
-  + sequence
-  + group
-  + element
-  + attribute
-  + attributeGroup
-	- SOAP 1.2 array encoding (itemType, arraySize)
 
 Error Handling
 --------------

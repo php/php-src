@@ -518,11 +518,11 @@ static int schema_simpleContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr simpCompT
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
-			cur_type->kind = XSD_TYPEKIND_SIMPLE_RESTRICTION;
+			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
 			schema_restriction_simpleContent(sdl, tsn, trav, cur_type, 0);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
-			cur_type->kind = XSD_TYPEKIND_SIMPLE_EXTENSION;
+			cur_type->kind = XSD_TYPEKIND_EXTENSION;
 			schema_extension_simpleContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else {
@@ -1263,11 +1263,11 @@ static int schema_complexContent(sdlPtr sdl, xmlAttrPtr tsn, xmlNodePtr compCont
 	}
 	if (trav != NULL) {
 		if (node_is_equal(trav, "restriction")) {
-			cur_type->kind = XSD_TYPEKIND_COMPLEX_RESTRICTION;
+			cur_type->kind = XSD_TYPEKIND_RESTRICTION;
 			schema_restriction_complexContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else if (node_is_equal(trav, "extension")) {
-			cur_type->kind = XSD_TYPEKIND_COMPLEX_EXTENSION;
+			cur_type->kind = XSD_TYPEKIND_EXTENSION;
 			schema_extension_complexContent(sdl, tsn, trav, cur_type);
 			trav = trav->next;
 		} else {
