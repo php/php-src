@@ -634,11 +634,6 @@ static void php_free_xml_doc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	xmlNodePtr node = (xmlNodePtr) rsrc->ptr;
-<<<<<<< php_domxml.c
-
-	node_wrapper_dtor(node);
-	dom_object_set_data(node, NULL);
-=======
 
 	/* if node has no parent, it will not be freed by php_free_xml_doc, so do it here
 	and for all children as well. */
@@ -651,7 +646,6 @@ static void php_free_xml_node(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 		node_wrapper_dtor(node);
 	}
 
->>>>>>> 1.181
 }
 
 
