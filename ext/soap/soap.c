@@ -45,7 +45,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
 static void clear_soap_fault(zval *obj TSRMLS_DC);
 static void set_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail TSRMLS_DC);
-static void soap_server_fault(char* code, char* string, char *actor, zval* details);
+static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, char *param_name, int index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
@@ -1150,7 +1150,7 @@ PHP_METHOD(soapserver, handle)
 
 				header = header->next;
 				if (service->sdl && !h->function && h->mustUnderstand) {
-					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL);
+					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
 				}
 
 				fn_name = estrndup(Z_STRVAL(h->function_name),Z_STRLEN(h->function_name));
@@ -1164,7 +1164,7 @@ PHP_METHOD(soapserver, handle)
 						php_error(E_ERROR, "Function '%s' call failed", Z_STRVAL(function_name));
 					}
 				} else if (h->mustUnderstand) {
-					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL);
+					soap_server_fault("MustUnderstand","Header not understood", NULL, NULL TSRMLS_CC);
 				}
 				efree(fn_name);
 			}
@@ -1266,14 +1266,13 @@ PHP_METHOD(soapserver, handle)
 	SOAP_SERVER_END_CODE();
 }
 
-static void soap_server_fault(char* code, char* string, char *actor, zval* details)
+static void soap_server_fault(char* code, char* string, char *actor, zval* details TSRMLS_DC)
 {
 	int soap_version;
 	xmlChar *buf, cont_len[30];
 	int size;
 	zval ret;
 	xmlDocPtr doc_return;
-	TSRMLS_FETCH();
 
 	soap_version = SOAP_GLOBAL(soap_version);
 
@@ -1956,7 +1955,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 				envelope_ns = SOAP_1_2_ENV_NAMESPACE;
 				SOAP_GLOBAL(soap_version) = SOAP_1_2;
 			} else {
-				soap_server_fault("VersionMismatch","Wrong Version", NULL, NULL);
+				soap_server_fault("VersionMismatch","Wrong Version", NULL, NULL TSRMLS_CC);
 			}
 		}
 		trav = trav->next;
@@ -2048,18 +2047,18 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 		if (*version == SOAP_1_1) {
 			attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_1_ENV_NAMESPACE);
 			if (attr && strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
-				soap_server_fault("Client","Unknown Data Encoding Style", NULL, NULL);
+				soap_server_fault("Client","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 			}
 		} else {
 			attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
 			if (attr && strcmp(attr->children->content,SOAP_1_2_ENC_NAMESPACE) != 0) {
-				soap_server_fault("DataEncodingUnknown","Unknown Data Encoding Style", NULL, NULL);
+				soap_server_fault("DataEncodingUnknown","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 			}
 		}
 		function = find_function(sdl, func, function_name);
 		if (sdl != NULL && function == NULL) {
 			if (*version == SOAP_1_2) {
-				soap_server_fault("rpc:ProcedureNotPresent","Procedure not present", NULL, NULL);
+				soap_server_fault("rpc:ProcedureNotPresent","Procedure not present", NULL, NULL TSRMLS_CC);
 			} else {
 				php_error(E_ERROR, "Procedure '%s' not present", func->name);
 			}
@@ -2093,7 +2092,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 				if (*version == SOAP_1_1) {
 					attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_1_ENV_NAMESPACE);
 					if (attr && strcmp(attr->children->content,SOAP_1_1_ENC_NAMESPACE) != 0) {
-						soap_server_fault("Client","Unknown Data Encoding Style", NULL, NULL);
+						soap_server_fault("Client","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 					}
 					attr = get_attribute_ex(func->properties,"actor",envelope_ns);
 					if (attr != NULL) {
@@ -2105,7 +2104,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 				} else if (*version == SOAP_1_2) {
 					attr = get_attribute_ex(func->properties,"encodingStyle",SOAP_1_2_ENV_NAMESPACE);
 					if (attr && strcmp(attr->children->content,SOAP_1_2_ENC_NAMESPACE) != 0) {
-						soap_server_fault("DataEncodingUnknown","Unknown Data Encoding Style", NULL, NULL);
+						soap_server_fault("DataEncodingUnknown","Unknown Data Encoding Style", NULL, NULL TSRMLS_CC);
 					}
 					attr = get_attribute_ex(func->properties,"role",envelope_ns);
 					if (attr != NULL) {
@@ -2125,7 +2124,7 @@ static sdlFunctionPtr deseralize_function_call(sdlPtr sdl, xmlDocPtr request, ch
 					           strcmp(attr->children->content,"false") == 0) {
 						mustUnderstand = 0;
 					} else {
-						soap_server_fault("Client","mustUnderstand value is not boolean", NULL, NULL);
+						soap_server_fault("Client","mustUnderstand value is not boolean", NULL, NULL TSRMLS_CC);
 					}
 				}
 				h = emalloc(sizeof(soapHeader));
