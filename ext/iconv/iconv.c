@@ -18,15 +18,26 @@
  */
 
 #include "php.h"
-#include "php_config.h"
 
 #if HAVE_ICONV
 
 #include "php_ini.h"
 #include "php_iconv.h"
+#include "ext/standard/info.h"
 
 
 ZEND_DECLARE_MODULE_GLOBALS(iconv)
+
+#if HAVE_LIBICONV
+#define icv_open(a,b) libiconv_open(a,b)
+#define icv_close(a) libiconv_close(a)
+#define icv(a,b,c,d,e) libiconv(a,b,c,d,e)
+#else
+#define icv_open(a,b) iconv_open(a,b)
+#define icv_close(a) iconv_close(a)
+#define icv(a,b,c,d,e) iconv(a,b,c,d,e)
+#endif
+
 
 /* True global resources - no need for thread safety here */
 static int le_iconv;
@@ -68,6 +79,7 @@ PHP_INI_END()
 
 PHP_MINIT_FUNCTION(iconv)
 {
+	ZEND_INIT_MODULE_GLOBALS(iconv, NULL, NULL);
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
@@ -101,7 +113,7 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 	*out = out_buffer;
     out_p = out_buffer;
   
-    cd = iconv_open(out_charset, in_charset);
+    cd = icv_open(out_charset, in_charset);
   
 	if (cd == (iconv_t)(-1)) {
 		php_error(E_WARNING, "iconv: cannot convert from `%s' to `%s'",
@@ -110,7 +122,7 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 		return -1;
 	}
 	
-	result = iconv(cd, (const char **) &in_p, &in_size, (char **)
+	result = icv(cd, (const char **) &in_p, &in_size, (char **)
 				   &out_p, &out_size);
 
     if (result == (size_t)(-1)) {
@@ -118,10 +130,11 @@ int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset
 		return -1;
     }
 
-    iconv_close(cd);
+    icv_close(cd);
 
     return SUCCESS;
 }
+
 
 /* {{{ proto string iconv(string in_charset, string out_charset, string str)
    Returns str converted to the out_charset character set */
