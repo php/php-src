@@ -58,7 +58,7 @@
 #endif
 
 #ifndef S_ISREG
-#define S_ISREG(mode)	(((mode)&S_IFMT) & S_IFREG)
+#define S_ISREG(mode)	(((mode) & S_IFMT) == S_IFREG)
 #endif
 
 #ifdef PHP_WIN32
