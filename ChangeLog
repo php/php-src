@@ -1,3 +1,115 @@
+2001-04-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/rtfm/php_rtfm.h
+      ext/rtfm/rtfm.c: added optional parameter functionname to rtfm()
+
+2001-04-25  Stig Bakken  <ssb@fast.no>
+
+    * main/main.c: * define PEAR_EXTENSION_DIR as well
+
+2001-04-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/skeleton/create_stubs: a backslash was missing (+ whitespace)
+
+    * ext/rtfm/CREDITS: initial checkin
+
+2001-04-25  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/rtfm/EXPERIMENTAL: - Marking this extension as EXPERIMENTAL
+
+2001-04-25  Rasmus Lerdorf  <rasmus@php.net>
+
+    * ext/standard/formatted_print.c: - Make the printf functions binary clean
+     - Make the printf family of functions binary clean
+
+2001-04-25  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/rtfm/.cvsignore
+      ext/rtfm/Makefile.in
+      ext/rtfm/config.m4
+      ext/rtfm/php_rtfm.h
+      ext/rtfm/rtfm.c: guess what ... :)
+
+    * ext/rtfm/tests/001.phpt: guess what ... :)
+    cvs: ----------------------------------------------------------------------
+
+2001-04-25  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/wddx/php_wddx_api.h
+      ext/wddx/wddx.c
+      ext/standard/html.c
+      ext/standard/html.h:
+    * Made ENT_* defines availabe to other functions.
+    * The key/variable names in WDDX are now html escaped to not break XML.
+    - Fixed WDDX serialization to HTML-escape key/variable names so as not to
+      break the XML packet. 
+
+2001-04-25  Frank M. Kromann  <frank@frontbase.com>
+
+    * ext/fbsql/php_fbsql.c: Remove c++ comment
+    Move errormessage when FBExec is not running. This error should not show if we connect through a port number.
+
+    * pear/DB/fbsql.php:
+    Fixing fetchInto to use the right constant and return ASSOC values.
+
+    * ext/fbsql/php_fbsql.c: make fbsql_field_flags return a value
+
+    * ext/fbsql/php_fbsql.h: removed unused code
+
+2001-04-25  Andy Sautins  <asautins@veripost.net>
+
+    * ext/oci8/oci8.c:
+
+        Collections cleanup
+           - Removed date specific methods.  Dates work consistently with
+             the rest of the oci8 code.
+           - Removed unused variables from collection code.
+           - RETURN_FALSE on all errors.
+           - fix error prints to php_error.
+
+    * ext/oci8/php_oci8.h:
+
+       Cleanup collections - removed unused members from oci_collection structure
+
+2001-04-25  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/ircg/ircg.c: Fix format strings typo.
+
+    * ext/ircg/ircg.c: display cache info
+
+    * ext/ircg/ircg.c
+      ext/ircg/ircg_scanner.c
+      ext/ircg/ircg_scanner.re: Use the system malloc in the scanner
+
+    * ext/ircg/ircg.c:
+    Past profiling has shown that we waste too much time in the message
+    scanner.  In the context of a channel message which is supposedly
+    addressed to a large number of users, we therefore cache the result
+    of the operation and recycle it.
+
+    * sapi/thttpd/thttpd.c:
+    Fix optimization -- we did not send out custom Response Status Lines.
+
+2001-04-25  Andi Gutmans  <andi@zend.com>
+
+    * ext/standard/filestat.c: - Fix filetype() and lstat() too.
+
+    * ext/standard/filestat.c: - Another fix
+
+    * ext/standard/filestat.c:
+    - Nuke warning. This signed/unsigned stuff gets really annoying sometimes.
+
+    * ext/standard/filestat.c:
+    - Fix problem with is_link(), there seem to be at least another couple of
+    - bugs lurking around though.
+    - Cleaned up code a bit and optimized it a bit too.
+
+2001-04-25  Thomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/DB/ifx.php: every fetchmode != assoc defaults to ordered
+
+    * pear/DB/STATUS: added "fetch absolute rows" extension status
+
 2001-04-24  Stig Bakken  <ssb@fast.no>
 
     * TODO-4.1.txt: whoops, two less items for 4.1
