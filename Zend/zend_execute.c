@@ -3361,31 +3361,27 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (container) {
 		HashTable *ht;
 
-		switch (EX(opline)->extended_value) {
-			case ZEND_UNSET_DIM:
-				switch (Z_TYPE_PP(container)) {
-					case IS_ARRAY:
-						ht = Z_ARRVAL_PP(container);
-						break;
-					case IS_OBJECT:
-						ht = NULL;
-						if (!Z_OBJ_HT_P(*container)->unset_dimension) {
-							zend_error(E_ERROR, "Cannot use object as array");
-						}
-						Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
-						break;
-					default:
-						ht = NULL;
-						break;
-				}
-				break;
-			case ZEND_UNSET_OBJ:
-				if (Z_TYPE_PP(container) == IS_OBJECT) {
-					Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
-				}
-			default:
-				ht = NULL;
-				break;
+		if (EX(opline)->extended_value == ZEND_UNSET_DIM) {
+			switch (Z_TYPE_PP(container)) {
+				case IS_ARRAY:
+					ht = Z_ARRVAL_PP(container);
+					break;
+				case IS_OBJECT:
+					ht = NULL;
+					if (!Z_OBJ_HT_P(*container)->unset_dimension) {
+						zend_error(E_ERROR, "Cannot use object as array");
+					}
+					Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
+					break;
+				default:
+					ht = NULL;
+					break;
+			}
+		} else { /* ZEND_UNSET_OBJ */
+			ht = NULL;
+			if (Z_TYPE_PP(container) == IS_OBJECT) {
+				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+			}
 		}
 		if (ht)	{
 			switch (offset->type) {
