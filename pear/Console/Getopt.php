@@ -180,7 +180,7 @@ class Console_Getopt {
                 return new Getopt_Error("option --$opt doesn't allow an argument\n");
             }
 
-            $opts[] = array('--' . substr($long_opt, 0, strpos($long_opt, '=')), $opt_arg);
+            $opts[] = array('--' . $opt, $opt_arg);
             return;
         }
 
