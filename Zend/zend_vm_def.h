@@ -382,7 +382,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|CV,
 		case ZEND_ASSIGN_DIM: {
 				zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_W);
 
-				if(OP1_TYPE != IS_CV) {
+				if (OP1_TYPE != IS_CV && free_op1.var == NULL) {
 					(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
 				}
 
@@ -1252,10 +1252,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|UNUSED|CV)
 		zend_free_op free_op2, free_op_data1;
 		zval *value;
 
-		if (object_ptr && OP1_TYPE != IS_CV) {
-			(*object_ptr)->refcount++;  /* undo the effect of get_obj_zval_ptr_ptr() */
-		}
-		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), GET_OP1_ZVAL_PTR_PTR(BP_VAR_W), GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_W TSRMLS_CC);
+		zend_fetch_dimension_address(&EX_T(op_data->op2.u.var), object_ptr, GET_OP2_ZVAL_PTR(BP_VAR_R), BP_VAR_W TSRMLS_CC);
 		FREE_OP2();
 
 		value = get_zval_ptr(&op_data->op1, EX(Ts), &free_op_data1, BP_VAR_R);
@@ -1924,7 +1921,9 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			if (EX_T(opline->op1.u.var).var.ptr_ptr == &EX_T(opline->op1.u.var).var.ptr
 				|| (opline->extended_value == ZEND_RETURNS_FUNCTION && !EX_T(opline->op1.u.var).var.fcall_returned_reference)) {
 				zend_error(E_STRICT, "Only variable references should be returned by reference");
-				PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+				if (OP1_TYPE == IS_VAR && free_op1.var == NULL) {
+					PZVAL_LOCK(*retval_ptr_ptr); /* undo the effect of get_zval_ptr_ptr() */
+				}
 				ZEND_VM_C_GOTO(return_by_value);
 			}
 		}
