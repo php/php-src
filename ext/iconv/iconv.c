@@ -106,7 +106,8 @@ PHP_MINFO_FUNCTION(iconv)
 	DISPLAY_INI_ENTRIES();
 }
 
-int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset) {
+int php_iconv_string(char *in_p, char **out, char *in_charset, char *out_charset)
+{
     unsigned int in_size, out_size;
     char *out_buffer, *out_p;
     iconv_t cd;
