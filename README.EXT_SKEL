@@ -71,9 +71,6 @@ CURRENT LIMITATIONS AND BUGS
   manually correct the switch construct created. But it's nothing more than
   deleting a few 'case ?:' lines and fixing PHP in-source documentation proto.
 
-  It creates incorrect code to handle arguments passed to function when an
-  optional argument is of type 'resource'.
-
 EXAMPLE
 
   The following _one_ line

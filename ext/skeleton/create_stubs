@@ -9,7 +9,7 @@ function gobble(s, x)
 	return x 
 }
 
-function convert(t, n)
+function convert(t, n, o, i)
 {
 	if (t == "int") x = "convert_to_long_ex(" n ");\n"
 	else if (t == "double") x = "convert_to_double_ex(" n ");\n"
@@ -17,7 +17,11 @@ function convert(t, n)
 	else if (t == "array") x = "convert_to_array_ex(" n ");\n"
 	else if (t == "resource") {
 		x = "/* " n ": fetching resources already handled. */\n"
-		resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n"
+		if (o) {
+				resources = resources "\tif (argc > " i ") {\n\t\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n\t}\n"
+		} else {
+				resources = resources "\tZEND_FETCH_RESOURCE(???, ???, " n ", " n "_id, \"???\", ???G());\n"
+		}
 		funcvals = funcvals "\tint " n "_id = -1;\n"
 	}
 	else x = "/* You must write your own code here to handle argument " n ". */\n"
@@ -31,7 +35,7 @@ BEGIN {
 }
 
 {
-	args_max = args_min = optional = 0
+	args_max = args_min = optional = i = 0
 	line = $0
 
 	func_type = gobble(type);
@@ -45,10 +49,16 @@ BEGIN {
 			argnames[num_funcs,args_max] = arg_name
 
 			args_max++
-			if (!optional) args_min++
+			if (optional) {
+					optionals[num_funcs,i] = optional
+			} else {
+					args_min++
+			}
 
-			if (gobble("\\[")) optional = 1
+			if (gobble("\\[")) optional++
+
 			gobble(",")
+			i++
 		}
 	}
 
@@ -98,14 +108,14 @@ END {
 
 			if (useswitch) {
 				if (j > minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) "\t\t\t/* Fall-through. */\n" handleargs
+					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) "\t\t\t/* Fall-through. */\n" handleargs
 				} else if (j >= minargs[i]-1) {
-					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
+					handleargs = "\t\tcase " j+1 ":\n\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) handleargs
 				} else {
-					handleargs = "\t\t\t" convert(argtypes[i,j], argnames[i,j]) handleargs
+					handleargs = "\t\t\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j) handleargs
 				}
 			} else {
-				handleargs = handleargs "\t" convert(argtypes[i,j], argnames[i,j])
+				handleargs = handleargs "\t" convert(argtypes[i,j], argnames[i,j], optionals[i,j], j)
 			}
 		}
 
