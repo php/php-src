@@ -1,6 +1,7 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, Version 4.3.11
+- Fixed bug #31174 (compile warning in url.c). (Ilia, lukem at NetBSD dot org)
 - Fixed bug #31120 (mssql_query returns false on successfull inserts and 
   stored procedures). (Frank)
 - Fixed bug #31111 (Linux/Sparc: Compile failure of zend_strtod.c). (Derick)
