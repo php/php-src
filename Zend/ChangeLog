@@ -1,3 +1,8 @@
+2002-07-18  derick  <derick@pb1.pair.com>
+
+    * zend.h
+      zend_extensions.c: - MFZE1 - MacOSX fixes by Marko Karppinen
+
 2002-07-17  Andi Gutmans  <andi@pb1.pair.com>
 
     * zend_compile.c:
