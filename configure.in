@@ -1017,16 +1017,41 @@ cat <<X
 X
   fi
 
-  echo "+--------------------------------------------------------------------+"
-  echo "| License:                                                           |"
-  echo "| This software is subject to the PHP License, available in this     |"
-  echo "| distribution in the file LICENSE.  By continuing this installation |"
-  echo "| process, you are bound by the terms of this license agreement.     |"
-  echo "| If you do not agree with the terms of this license, you must abort |"
-  echo "| the installation process at this point.                            |"
-  echo "+--------------------------------------------------------------------+"
+  # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
+  if test "$PHP_OCI8" != "no"; then
+    if test "$PHP_SAPI" = "apache"; then
+      if test `uname` = "Linux"; then
+cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| Please check that your Apache (httpd) is linked with libpthread.   |
+| If not, you have to recompile Apache with pthread. For more        |
+| details, see this page: http://www.php.net/manual/ref.oci8.php     |
+X
+      fi
+    fi
+  fi
+
+  if test "$PHP_SIGCHILD" != "yes"; then
+cat <<X
++--------------------------------------------------------------------+
+| Notice:                                                            |
+| If you encounter <defunc> processes when using a local Oracle-DB   |
+| please recompile PHP and specify --enable-sigchild when configuring|
+| (This problem has been reported un Linux using Oracle >= 8.1.5)    |
+X
+  fi
 
 cat<<X
++--------------------------------------------------------------------+
+| License:                                                           |
+| This software is subject to the PHP License, available in this     |
+| distribution in the file LICENSE.  By continuing this installation |
+| process, you are bound by the terms of this license agreement.     |
+| If you do not agree with the terms of this license, you must abort |
+| the installation process at this point.                            |
++--------------------------------------------------------------------+
 
 Thank you for using PHP.
 
