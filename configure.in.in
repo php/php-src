@@ -891,11 +891,6 @@ divert(4)
 dnl If we're using gcc and the user hasn't specified CFLAGS, add -O2.
 test -n "$auto_cflags" && test -n "$GCC" && CFLAGS="$CFLAGS -O2"
 
-dnl If we're using cc on HP-UX, add the -Ae to CFLAGS
-if test -n "$auto_cflags" && test "`uname -s 2>/dev/null`" = "HP-UX"; then
-   test -n "$GCC" || CFLAGS="-Ae $CFLAGS"
-fi
-
 dnl *** Commented out - generates slow code and consumes a lot of 
 dnl *** resources during compilation - we need to figure out how
 dnl *** to supply it only when absolutely necessary
