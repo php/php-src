@@ -1,7 +1,11 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ? ? ??? 2002, Version 4.3.0
-- Fixed compilation errors when compiling with the fribidi extension (Bug #16414) (Tal)
+- Added php.ini option "auto_detect_line_endings" which enables PHP to detect
+  Macintosh, Unix and Dos end-of-line characters in fgets() and file().
+  Fixes Bug #16521. (Wez)
+- Fixed compilation errors when compiling with the fribidi extension.
+  (Bug #16414) (Tal)
 - Fixed bugs #7472, #12120 and #12989 as well as other potential problems
   with strip_tags() function. (Ilia)
 - Upgraded PCRE to version 3.9. (Wez)
@@ -73,7 +77,8 @@ PHP 4                                                                      NEWS
 - Fixed a bug in ODBC where closing the module caused a crash in the Windows 
   executable. (kalowsky)
 - Fixed memory leaks in pack() and unpack(). (Patch by ilia@prohost.org)
-- Added a default timeout to PHP streams. (kalowsky, ilia@prohost.org)
+- Added php.ini option "default_socket_timeout" to set the timeout limit for 
+  PHP streams. (kalowsky, ilia@prohost.org, Wez)
 - Added URLs to error messages which direct to a page describing the error or 
   function in question. (Derick, Wez, Marcus)
 - Added odbc_data_source() functionality to identify DB ServerName, and a 
