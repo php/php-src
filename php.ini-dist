@@ -94,11 +94,23 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
+gpc_order			=	"GPC"	; Order of evaluation of GET/POST/Cookie data.  Later values override
+								; earlier values (e.g., by default, POST variables override GET variables,
+								; and Cookie variables override both POST and GET variables).
+gpc_globals			=	On		; Whether or not to define GET/POST/Cookie variables in the global
+								; scope.  You may want to turn this off if you don't want
+								; to clutter your scripts' global scope with user data.  This makes
+								; most sense when coupled with track_vars - in which case you can
+								; access all of the GPC variables through the $HTTP_GET_VARS[],
+								; $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] variables.
+track_vars			=	On		; enable $HTTP_GET_VARS[], $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] arrays
+
+; Magic quotes
 magic_quotes_gpc	=	On		; magic quotes for incoming GET/POST/Cookie data
 magic_quotes_runtime=	Off		; magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
 magic_quotes_sybase	=	Off		; Use Sybase-style magic quotes (escape ' with '' instead of \')
-track_vars			=	On		; enable $HTTP_GET_VARS[], $HTTP_POST_VARS[] and $HTTP_COOKIE_VARS[] arrays
-; automatically add files before or after any PHP 3.0 document
+
+; automatically add files before or after any PHP document
 auto_prepend_file	=
 auto_append_file	=
 
@@ -220,7 +232,7 @@ sybase.max_links		=	-1	; maximum number of links (persistent+non persistent).  -
 ;sybase.interface_file	=	"/usr/sybase/interfaces"
 sybase.min_error_severity	=	10	; minimum error severity to display
 sybase.min_message_severity	=	10	; minimum message severity to display
-sybase.compatability_mode	= Off	; compatability mode with earlier versions of PHP 3.0.
+sybase.compatability_mode	= Off	; compatability mode with old versions of PHP 3.0.
 									; If on, this will cause PHP to automatically assign types to results
 									; according to their Sybase type, instead of treating them all as
 									; strings.  This compatability mode will probably not stay around

@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
+   |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
 /* $Id: */
@@ -36,17 +37,23 @@
 void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_DC)
 {
 	int var_type;
-	char *ind, *tmp = NULL, *ret = NULL;
+	char *ind, *tmp = NULL, *array_index = NULL;
 	int var_len, val_len;
-	pval *entry;
+	pval *gpc_element;
+	zend_bool do_insert;
 	
+	if (!PG(gpc_globals) && !track_vars_array) {
+		/* we don't need track_vars, and we're not setting GPC globals either. */
+		return;
+	}
+
 	var_type = php3_check_ident_type(var);
 	if (var_type == GPC_INDEXED_ARRAY) {
 		ind = php3_get_ident_index(var);
 		if (PG(magic_quotes_gpc)) {
-			ret = php_addslashes(ind, 0, NULL, 1);
+			array_index = php_addslashes(ind, 0, NULL, 1);
 		} else {
-			ret = ind;
+			array_index = ind;
 		}
 	}
 	if (var_type & GPC_ARRAY) {		/* array (indexed or not) */
@@ -82,93 +89,68 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 	}
 
 	if (var_type & GPC_ARRAY) {
-		pval *arr1, *arr2;
-		pval **arr_ptr;
+		pval *gpc_element;
+		pval **arr_ptr_ptr;
+		pval *array_element;
 
-		/* If the array doesn't exist, create it */
-		if (zend_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr) == FAILURE) {
-			arr1 = (pval *) emalloc(sizeof(pval));
-			INIT_PZVAL(arr1);
-			if (array_init(arr1)==FAILURE) {
-				return;
-			}
-			zend_hash_update(EG(active_symbol_table), var, var_len+1, &arr1, sizeof(pval *), NULL);
-			if (track_vars_array) {
-				arr2 = (pval *) emalloc(sizeof(pval));
-				INIT_PZVAL(arr2);
-				if (array_init(arr2)==FAILURE) {
-					return;
-				}
-				zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
-			}
+		if (zend_hash_find(EG(active_symbol_table), var, var_len+1, (void **) &arr_ptr_ptr) == FAILURE) {
+			/* If the array doesn't exist, create it */
+			MAKE_STD_ZVAL(gpc_element);
+			array_init(gpc_element);
+			do_insert=1;
 		} else {
-			if ((*arr_ptr)->type!=IS_ARRAY) {
-				if (--(*arr_ptr) > 0) {
-					*arr_ptr = (pval *) emalloc(sizeof(pval));
-					INIT_PZVAL(*arr_ptr);
+			if ((*arr_ptr_ptr)->type!=IS_ARRAY) {
+				if (--(*arr_ptr_ptr)->refcount > 0) {
+					MAKE_STD_ZVAL(*arr_ptr_ptr);
 				} else {
-					pval_destructor(*arr_ptr);
+					zval_dtor(*arr_ptr_ptr);
 				}
-				if (array_init(*arr_ptr)==FAILURE) {
-					return;
-				}
-				if (track_vars_array) {
-					arr2 = (pval *) emalloc(sizeof(pval));
-					INIT_PZVAL(arr2);
-					if (array_init(arr2)==FAILURE) {
-						return;
-					}
-					zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &arr2, sizeof(pval *),NULL);
-				}
+				array_init(*arr_ptr_ptr);
 			}
-			arr1 = *arr_ptr;
-			if (track_vars_array && zend_hash_find(track_vars_array->value.ht, var, var_len+1, (void **) &arr_ptr) == FAILURE) {
-				return;
-			}
-			arr2 = *arr_ptr;
+			gpc_element = *arr_ptr_ptr;
+			do_insert=0;
 		}
-		/* Now create the element */
-		entry = (pval *) emalloc(sizeof(pval));
-		INIT_PZVAL(entry);
-		entry->value.str.val = val;
-		entry->value.str.len = val_len;
-		entry->type = IS_STRING;
 
-		/* And then insert it */
-		if (ret) {		/* array */
-			if (php3_check_type(ret) == IS_LONG) { /* numeric index */
-				zend_hash_index_update(arr1->value.ht, atol(ret), &entry, sizeof(pval *),NULL);	/* s[ret]=tmp */
-				if (track_vars_array) {
-					zend_hash_index_update(arr2->value.ht, atol(ret), &entry, sizeof(pval *),NULL);
-					entry->refcount++;
-				}
-			} else { /* associative index */
-				zend_hash_update(arr1->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);	/* s["ret"]=tmp */
-				if (track_vars_array) {
-					zend_hash_update(arr2->value.ht, ret, strlen(ret)+1, &entry, sizeof(pval *),NULL);
-					entry->refcount++;
-				}
+		/* Create the element */
+		array_element = (pval *) emalloc(sizeof(pval));
+		INIT_PZVAL(array_element);
+		array_element->value.str.val = val;
+		array_element->value.str.len = val_len;
+		array_element->type = IS_STRING;
+
+		/* Insert it */
+		if (array_index) {	
+			/* indexed array */
+			if (php3_check_type(array_index) == IS_LONG) {
+				/* numeric index */
+				zend_hash_index_update(gpc_element->value.ht, atol(array_index), &array_element, sizeof(pval *), NULL);	/* s[array_index]=tmp */
+			} else {
+				/* associative index */
+				zend_hash_update(gpc_element->value.ht, array_index, strlen(array_index)+1, &array_element, sizeof(pval *), NULL);	/* s["ret"]=tmp */
 			}
-			efree(ret);
-			ret = NULL;
-		} else {		/* non-indexed array */
-			zend_hash_next_index_insert(arr1->value.ht, &entry, sizeof(pval *),NULL);
-			if (track_vars_array) {
-				zend_hash_next_index_insert(arr2->value.ht, &entry, sizeof(pval *),NULL);
-				entry->refcount++;
-			}
+			efree(array_index);
+		} else {
+			/* non-indexed array */
+			zend_hash_next_index_insert(gpc_element->value.ht, &array_element, sizeof(pval *), NULL);
 		}
 	} else {			/* we have a normal variable */
-		pval *entry = (pval *) emalloc(sizeof(pval));
-		
-		entry->type = IS_STRING;
-		INIT_PZVAL(entry);
-		entry->value.str.val = val;
-		entry->value.str.len = val_len;
-		zend_hash_update(EG(active_symbol_table), var, var_len+1, (void *) &entry, sizeof(pval *),NULL);
+		MAKE_STD_ZVAL(gpc_element);
+		gpc_element->type = IS_STRING;
+		gpc_element->refcount = 0;
+		gpc_element->value.str.val = val;
+		gpc_element->value.str.len = val_len;
+		do_insert=1;
+	}
+
+	if (do_insert) {
+		gpc_element->refcount = 0;
+		if (PG(gpc_globals)) {
+			zend_hash_update(EG(active_symbol_table), var, var_len+1, &gpc_element, sizeof(pval *), NULL);
+			gpc_element->refcount++;
+		}
 		if (track_vars_array) {
-			entry->refcount++;
-			zend_hash_update(track_vars_array->value.ht, var, var_len+1, (void *) &entry, sizeof(pval *), NULL);
+			zend_hash_update(EG(active_symbol_table), var, var_len+1, &gpc_element, sizeof(pval *), NULL);
+			gpc_element->refcount++;
 		}
 	}
 }
