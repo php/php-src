@@ -1325,50 +1325,6 @@ SOURCE=..\ext\bcmath\libbcmath\src\private.h
 # End Source File
 # End Group
 # End Group
-# Begin Group "COM"
-
-# PROP Default_Filter ""
-# Begin Group "Source Files No. 9"
-
-# PROP Default_Filter ".c"
-# Begin Source File
-
-SOURCE=..\ext\com\COM.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\conversion.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\VARIANT.c
-# End Source File
-# End Group
-# Begin Group "Header Files No. 9"
-
-# PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=..\ext\com\com.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\conversion.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\php_COM.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\php_VARIANT.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ext\com\variant.h
-# End Source File
-# End Group
-# End Group
 # Begin Group "Standard"
 
 # PROP Default_Filter ""
@@ -1796,6 +1752,58 @@ SOURCE=..\ext\standard\url_scanner.h
 
 SOURCE=..\ext\standard\url_scanner_ex.h
 # End Source File
+# End Group
+# End Group
+# Begin Group "rpc"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 9"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\handler.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\layer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\php_rpc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ext\rpc\rpc.h
+# End Source File
+# End Group
+# Begin Group "com"
+
+# PROP Default_Filter ""
+# Begin Group "Source Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com.c
+# End Source File
+# End Group
+# Begin Group "Header Files No. 10"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\ext\rpc\com\com.h
+# End Source File
+# End Group
 # End Group
 # End Group
 # End Group
