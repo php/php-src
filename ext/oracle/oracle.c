@@ -591,7 +591,7 @@ void php3_Ora_Do_Logon(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				   NULL);
 
 	efree(hashed_details);
-	return_value->type = IS_LONG;
+	return_value->type = IS_RESOURCE;
 }
 
 /* {{{ proto int ora_logoff(int connection)
@@ -653,7 +653,7 @@ void php3_Ora_Open(INTERNAL_FUNCTION_PARAMETERS)
 	cursor->open = 1;
 	cursor->conn_ptr = conn;	
 	cursor->conn_id = conn_ind;	
-	RETURN_LONG(ora_add_cursor(list, cursor));
+	RETURN_RESOURCE(ora_add_cursor(list, cursor));
 }
 /* }}} */
 
@@ -1099,7 +1099,7 @@ void php3_Ora_Do(INTERNAL_FUNCTION_PARAMETERS)
 		}
 	}
 
-	RETURN_LONG(ora_add_cursor(list, cursor));
+	RETURN_RESOURCE(ora_add_cursor(list, cursor));
 }
 /* }}} */
 
