@@ -39,6 +39,10 @@ documentation
     * add remarks in the documentation which functions are not implemented on win32.
     * add remarks in the documentation which functions are not binary-safe.
 
+ext/pcre
+--------
+    * use/support latest pcre v3.1.
+
 ext/wddx
 --------
     * implement wddx_packet_as_javascript(). (Andrei)
