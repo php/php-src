@@ -38,7 +38,9 @@
 #include "bcmath.h"
 #include "private.h"
 
+#if SANDER_0
  bc_num _bc_Free_list = NULL;
+#endif
 
 /* new_num allocates a number and sets fields to known values. */
 

@@ -57,13 +57,17 @@ new_sub_num (length, scale, value)
 {
   bc_num temp;
 
+#ifdef SANDER_0
   if (_bc_Free_list != NULL) {
     temp = _bc_Free_list;
     _bc_Free_list = temp->n_next;
   } else {
+#endif
     temp = (bc_num) emalloc (sizeof(bc_struct));
+#ifdef SANDER_0
     if (temp == NULL) bc_out_of_memory ();
   }
+#endif
   temp->n_sign = PLUS;
   temp->n_len = length;
   temp->n_scale = scale;
