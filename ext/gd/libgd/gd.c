@@ -2215,7 +2215,7 @@ void gdImageSkewX (gdImagePtr dst, gdImagePtr src, int uRow, int iOffset, double
 	int i, r, g, b, a;
 	FuncPtr f;
 
-	int pxlOldLeft, pxlLeft, pxlSrc;
+	int pxlOldLeft, pxlLeft=0, pxlSrc;
 
 	if (src->trueColor) {
 		f = gdImageGetTrueColorPixel;
@@ -2301,7 +2301,7 @@ void gdImageSkewY (gdImagePtr dst, gdImagePtr src, int uCol, int iOffset, double
 	typedef int (*FuncPtr)(gdImagePtr, int, int);
 	int i, iYPos=0, r, g, b, a;
 	FuncPtr f;
-	int pxlOldLeft, pxlLeft, pxlSrc;
+	int pxlOldLeft, pxlLeft=0, pxlSrc;
 
 	if (src->trueColor) {
 		f = gdImageGetTrueColorPixel;
