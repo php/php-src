@@ -489,10 +489,10 @@ expr_without_variable:
 
 
 function_call:
-		T_STRING	'(' { do_extended_fcall_begin(CLS_C); $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
+		T_STRING	'(' { $2.u.opline_num = do_begin_function_call(&$1 CLS_CC); }
 				function_call_parameter_list
 				')' { do_end_function_call(&$1, &$$, &$4, 0, $2.u.opline_num CLS_CC); do_extended_fcall_end(CLS_C); }
-	|	r_cvar '(' { do_extended_fcall_begin(CLS_C); do_begin_dynamic_function_call(&$1 CLS_CC); } 
+	|	cvar '(' { do_begin_dynamic_function_call(&$1 CLS_CC); } 
 				function_call_parameter_list 
 				')' { do_end_function_call(&$1, &$$, &$4, 0, 1 CLS_CC); do_extended_fcall_end(CLS_C);}
 	|	T_STRING T_PAAMAYIM_NEKUDOTAYIM T_STRING '(' { do_extended_fcall_begin(CLS_C); do_begin_class_member_function_call(&$1, &$3 CLS_CC); } 
