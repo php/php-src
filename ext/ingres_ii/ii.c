@@ -69,8 +69,8 @@ zend_module_entry ingres_ii_module_entry = {
   STANDARD_MODULE_PROPERTIES
 };
 
-#ifdef COMPILE_DL_II
-ZEND_GET_MODULE(ii)
+#ifdef COMPILE_DL_INGRES_II
+ZEND_GET_MODULE(ingres_ii)
 #endif
 
 /* php.ini entries
