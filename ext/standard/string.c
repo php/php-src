@@ -1876,7 +1876,7 @@ PHP_FUNCTION(ucwords)
 
 	*r = toupper((unsigned char) *r);
 	for (r_end = r + Z_STRLEN_P(return_value) - 1; r < r_end; ) {
-		if (isspace((int) *r++)) {
+		if (isspace((int) *(unsigned char *)r++)) {
 			*r = toupper((unsigned char) *r);
 		}
 	}
