@@ -1228,7 +1228,7 @@ PHP_FUNCTION(apache_request_sub_req_method_uri)
 }
 /* }}} */
 
-/* {{{ proto long apache_request_run
+/* {{{ proto long apache_request_run()
     This is a wrapper for ap_sub_run_req and ap_destory_sub_req.  It takes 
     sub_request, runs it, destroys it, and returns it's status.
 */
