@@ -106,7 +106,6 @@ static void php_iconv_init_globals(zend_iconv_globals *iconv_globals)
 
 PHP_MINIT_FUNCTION(miconv)
 {
-	char *impl_name = "unknown";
 	char *version = "";
 
 	ZEND_INIT_MODULE_GLOBALS(iconv, php_iconv_init_globals, NULL);
@@ -115,14 +114,16 @@ PHP_MINIT_FUNCTION(miconv)
 #if HAVE_LIBICONV
 	{
 		static char buf[16];
-		impl_name = "libiconv"; 
 		snprintf(buf, sizeof(buf), "%d.%d",
 		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f)); 
 		version = buf;
 	}
 #endif
-
+#ifdef ICONV_IMPL
 	REGISTER_STRING_CONSTANT("ICONV_IMPL", ICONV_IMPL, CONST_CS | CONST_PERSISTENT);
+#else
+	REGISTER_STRING_CONSTANT("ICONV_IMPL", "unknown", CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_STRING_CONSTANT("ICONV_VERSION", version, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
