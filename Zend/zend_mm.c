@@ -323,7 +323,7 @@ void *zend_mm_realloc(zend_mm_heap *heap, void *p, size_t size)
 						seg->next_segment = segment;
 						break;
 					}
-					segment = segment->next_segment;
+					seg = seg->next_segment;
 				}				
 			}
 		}
