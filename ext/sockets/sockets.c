@@ -50,7 +50,6 @@
 # include <sys/uio.h>
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
-# define set_h_errno(a) (h_errno = a)
 #else /* windows */
 # include "php_sockets.h"
 # include "php_sockets_win.h"
