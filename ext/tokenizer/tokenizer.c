@@ -315,7 +315,7 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
-static void tokenize(zval *return_value)
+static void tokenize(zval *return_value TSRMLS_DC)
 {
 	zval token;
 	zval *keyword;
@@ -482,11 +482,11 @@ PHP_FUNCTION(token_get_all)
 	ZVAL_STRINGL(&source_z, source, source_len, 0);
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 
-	if (zend_prepare_string_for_scanning(&source_z, "") == FAILURE) {
+	if (zend_prepare_string_for_scanning(&source_z, "" TSRMLS_CC) == FAILURE) {
 		RETURN_EMPTY_STRING();
 	}
 
-	tokenize(return_value);
+	tokenize(return_value TSRMLS_CC);
 	
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 }
