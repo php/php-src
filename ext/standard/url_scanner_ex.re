@@ -81,7 +81,7 @@ static PHP_INI_MH(OnUpdateTags)
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=fakeentry", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
+	STD_PHP_INI_ENTRY("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL, OnUpdateTags, url_adapt_state_ex, php_basic_globals, basic_globals)
 PHP_INI_END()
 
 /*!re2c
@@ -180,14 +180,35 @@ static inline void passthru(STD_PARA)
 	smart_str_appendl(&ctx->result, start, YYCURSOR - start);
 }
 
-static inline void handle_form(STD_PARA) 
+/*
+ * This function appends a hidden input field after a <form> or
+ * <fieldset>.  The latter is important for XHTML.
+ */
+
+static void handle_form(STD_PARA) 
 {
-	if (ctx->form_app.len > 0 
-			&& ctx->tag.len == 4 
-			&& strncasecmp(ctx->tag.c, "form", 4) == 0) {
-		smart_str_append(&ctx->result, &ctx->form_app);
+	int doit = 0;
+
+	if (ctx->form_app.len > 0) {
+		switch (ctx->tag.len) {
+		
+			case sizeof("form")-1:
+				if (strcasecmp(ctx->tag.c, "form") == 0)
+					doit = 1;
+				break;
+
+			case sizeof("fieldset")-1:
+				if (strcasecmp(ctx->tag.c, "fieldset") == 0)
+					doit = 1;
+				break;
+		}
+
+		if (doit)
+			smart_str_append(&ctx->result, &ctx->form_app);
 	}
 }
+
+
 
 /*
  *  HANDLE_TAG copies the HTML Tag and checks whether we 
