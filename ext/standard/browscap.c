@@ -108,6 +108,8 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 			break;
 		case ZEND_INI_PARSER_SECTION: {
 				zval *processed;
+				HashTable *section_properties;
+				TSRMLS_FETCH();
 
 				/*printf("'%s' (%d)\n",$1.value.str.val,$1.value.str.len+1);*/
 				current_section = (zval *) malloc(sizeof(zval));
@@ -115,18 +117,17 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				processed = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(processed);
 
-				/* OBJECTS_FIXME */
-				Z_OBJCE_P(current_section) = ZEND_STANDARD_CLASS_DEF_PTR;
-				Z_OBJPROP_P(current_section) = (HashTable *) malloc(sizeof(HashTable));
-				Z_TYPE_P(current_section) = IS_OBJECT;
-				zend_hash_init(Z_OBJPROP_P(current_section), 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
+				section_properties = (HashTable *) malloc(sizeof(HashTable));
+				_object_and_properties_init(current_section, ZEND_STANDARD_CLASS_DEF_PTR, section_properties ZEND_FILE_LINE_CC TSRMLS_CC);
+											
+				zend_hash_init(section_properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
 				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);  
 
 				Z_STRVAL_P(processed) = Z_STRVAL_P(arg1);
 				Z_STRLEN_P(processed) = Z_STRLEN_P(arg1);
 				Z_TYPE_P(processed) = IS_STRING;
 				convert_browscap_pattern(processed);
-				zend_hash_update(Z_OBJPROP_P(current_section), "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
+				zend_hash_update(section_properties, "browser_name_pattern", sizeof("browser_name_pattern"), (void *) &processed, sizeof(zval *), NULL);
 			}
 			break;
 	}
