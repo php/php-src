@@ -137,7 +137,7 @@ LONG_MIN*LONG_MIN ~== pow(LONG_MIN,2.0)
 TESTS;
 
  echo "On failure, please mail result to php-dev@lists.php.net\n";
- include('../../../../tests/quicktester.inc');
+ include('tests/quicktester.inc');
 
 --EXPECT--
 1,1,0,0

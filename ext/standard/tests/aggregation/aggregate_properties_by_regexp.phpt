@@ -4,7 +4,7 @@ aggregating default properties matching regular expression
 --GET--
 --FILE--
 <?php
-include "./aggregate.lib.php";
+include "./ext/standard/tests/aggregation/aggregate.lib.php";
 
 $obj = new simple();
 aggregate_properties_by_regexp($obj, 'helper', '/^my/');

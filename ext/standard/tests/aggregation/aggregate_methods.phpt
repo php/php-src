@@ -4,7 +4,7 @@ aggregating all methods
 --GET--
 --FILE--
 <?php
-include "./aggregate.lib.php";
+include "./ext/standard/tests/aggregation/aggregate.lib.php";
 
 $obj = new simple();
 aggregate_methods($obj, 'mixin');
