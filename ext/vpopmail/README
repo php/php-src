@@ -177,6 +177,10 @@ bool vpopmail_del_user(string user, string domain)
 bool vpopmail_passwd(string user, string domain, string password)
 bool vpopmail_set_user_quota(string user, string domain, string quota)
 bool vpopmail_auth_user(string user, string domain, string password[, string apop])
+bool vpopmail_alias_add(string user, string domain, string alias)
+bool vpopmail_alias_del(string user, string domain)
+bool vpopmail_alias_del_domain(string domain)
+array vpopmail_alias_get(string alias, string domain)
 string vpopmail_error(void)
 
 
