@@ -798,19 +798,23 @@ class PEAR_Installer extends PEAR_Common
     /**
      * Installs the files within the package file specified.
      *
-     * @param $pkgfile path to the package file
+     * @param string $pkgfile path to the package file
+     * @param array $options
+     * recognized options:
+     * - installroot   : optional prefix directory for installation
+     * - force         : force installation
+     * - register-only : update registry but don't install files
+     * - upgrade       : upgrade existing install
+     * - soft          : fail silently
+     * - nodeps        : ignore dependency conflicts/missing dependencies
+     * - alldeps       : install all dependencies
+     * - onlyreqdeps   : install only required dependencies
      *
      * @return array package info if successful, null if not
      */
 
     function install($pkgfile, $options = array())
     {
-        // recognized options:
-        // - force         : force installation
-        // - register-only : update registry but don't install files
-        // - upgrade       : upgrade existing install
-        // - soft          : fail silently
-        //
         $php_dir = $this->config->get('php_dir');
         if (isset($options['installroot'])) {
             if (substr($options['installroot'], -1) == DIRECTORY_SEPARATOR) {
@@ -927,6 +931,8 @@ class PEAR_Installer extends PEAR_Common
                 }
             }
         }
+
+        $this->startFileTransaction();
 
         if (empty($options['upgrade'])) {
             // checks to do only when installing new packages
@@ -1099,6 +1105,7 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(0, $warning);
             }
         }
+        $this->startFileTransaction();
         // Delete the files
         if (PEAR::isError($err = $this->_deletePackageFiles($package))) {
             $this->rollbackFileTransaction();
