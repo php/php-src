@@ -49,7 +49,7 @@ The next few rules are more of a technical nature.
       in the message as shown below.
 
    5. In your commit messages, keep each line shorter than 80 characters. And
-      Try to align your lines vertically, if they wrap. It looks bad otherwise.
+      try to align your lines vertically, if they wrap. It looks bad otherwise.
 
    6. If you modified a function that is callable from PHP, prepend PHP to
       the function name as shown below.
@@ -59,7 +59,10 @@ The format of the commit messages is pretty simple.
 
 If a line begins with #, it is taken to be a comment and will not appear
 in the ChangeLog.  If the line begins with @, it will be redirected to the
-NEWS file. Everything else goes into the ChangeLog. 
+NEWS file. Everything else goes into the ChangeLog.
+
+It is important to note that if your comment or news logline spans multiple
+lines, you have to put # or @ at the beginning of _every_ such line.
 
 Example. Say you modified two files, datetime.c and string.c. In datetime.c
 you added a new format option for date() function, and in string.c you fixed
@@ -70,9 +73,9 @@ following.
 For datetime.c:
 
 (PHP date) Added new 'K' format modifier for printing out number of
-           days until New Year.
+           days until New Year's Eve.
 @- Added new 'K' format modifier that will output the number of days
-   until Christmas. (Bob)
+@  until New Year's Eve. (Bob)
 
 For string.c:
 (php_trim) Fixed a memory leak resulting from improper use of zval_dtor().
@@ -80,8 +83,10 @@ For string.c:
 @- Memory leak in trim() function has finally been fixed. (Bob)
 
 The lines above marked with @ will go into NEWS file automagically, and the
-# line will be omitted from the ChangeLog. Alternatively, you might want
-to modify NEWS file directly and not use the @ lines.
+# lines will be omitted from the ChangeLog. Alternatively, you might want
+to modify NEWS file directly and not use the @ lines. Since ChangeLog and
+NEWS are updated once a day, the lines you prefixed with @ may not show up
+until somewhat later.
 
 Happy hacking,
 
