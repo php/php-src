@@ -221,6 +221,10 @@ SOURCE=..\ext\standard\cyr_convert.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\main\fopen-wrappers.h"
+# End Source File
+# Begin Source File
+
 SOURCE=..\main\getopt.h
 # End Source File
 # Begin Source File
