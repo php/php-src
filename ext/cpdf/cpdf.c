@@ -1131,7 +1131,7 @@ PHP_FUNCTION(cpdf_set_text_pos)
 /* }}} */
 
 /* {{{ proto void cpdf_rotate_text(int pdfdoc, float angle)
-   Sets character spacing */
+   Sets text rotation angle */
 PHP_FUNCTION(cpdf_rotate_text)
 {
 	pval *arg1, *arg2;
