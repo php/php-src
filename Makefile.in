@@ -30,7 +30,6 @@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 srcdir = @srcdir@
-abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
 bindir = @bindir@
 

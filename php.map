@@ -1,3 +1,4 @@
 PHP4 {
-global: *;
+global: php4_module;
+local: *;
 };

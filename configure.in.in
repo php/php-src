@@ -340,7 +340,6 @@ divert(2)
 
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
-AC_SUBST(abs_srcdir)
 AC_SUBST(abs_builddir)
 
 AC_MSG_CHECKING(for Apache module support via DSO through APXS)
@@ -377,15 +376,30 @@ AC_ARG_WITH(apxs,
     AC_MSG_RESULT(no)
 ])
 
+versioning="no"
 AC_MSG_CHECKING(whether to enable versioning)
 AC_ARG_ENABLE(versioning,
-[  --enable-versioning],
+[  --enable-versioning     Take advantage of versioning and scoping
+                          Provided by Solaris 2.x and Linux],
 [
   if test "$enableval" = "yes" ; then
-    VERSION_SCRIPT="-Wl,--version-script=\$(abs_srcdir)/php.map"
+    case "`uname -sr`" in
+    "SunOS 5"*)
+        VERSION_SCRIPT="-M $abs_srcdir/php.map"
+    ;;
+    Linux*)
+        VERSION_SCRIPT="-Wl,--version-script=$abs_srcdir/php.map"
+    ;;
+    *)
+        AC_MSG_ERROR(versioning is not supported on your OS)
+    ;;
+    esac
+    versioning="yes"
   fi
 ])
+AC_MSG_RESULT($versioning)
 AC_SUBST(VERSION_SCRIPT)
+
 
 APACHE_INSTALL_FILES="$srcdir/mod_php4.* libphp4.module"
 
