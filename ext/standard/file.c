@@ -179,6 +179,10 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_WARN",	PHP_STREAM_NOTIFY_SEVERITY_WARN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_NOTIFY_SEVERITY_ERR",	PHP_STREAM_NOTIFY_SEVERITY_ERR,  CONST_CS | CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_READ",			PHP_STREAM_FILTER_READ,				CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_WRITE",			PHP_STREAM_FILTER_WRITE,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_FILTER_ALL",				PHP_STREAM_FILTER_ALL,				CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("FILE_USE_INCLUDE_PATH",	PHP_FILE_USE_INCLUDE_PATH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_IGNORE_NEW_LINES",	PHP_FILE_IGNORE_NEW_LINES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILE_SKIP_EMPTY_LINES",	PHP_FILE_SKIP_EMPTY_LINES, CONST_CS | CONST_PERSISTENT);
@@ -1252,31 +1256,60 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	zval *zstream;
 	php_stream *stream;
 	char *filtername, *filterparams = NULL;
-	int filternamelen, filterparamslen = 0;
+	int filternamelen, filterparamslen = 0, read_write = 0;
 	php_stream_filter *filter;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &zstream,
-				&filtername, &filternamelen, &filterparams, &filterparamslen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream,
+				&filtername, &filternamelen, &read_write, &filterparams, &filterparamslen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	php_stream_from_zval(stream, &zstream);
-	
-	filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
-	if (filter == NULL) {
-		RETURN_FALSE;
+
+	if ((read_write & PHP_STREAM_FILTER_ALL) == 0) {
+		/* Chain not specified.
+		 * Examine stream->mode to determine which filters are needed
+		 * There's no harm in attaching a filter to an unused chain,
+		 * but why waste the memory and clock cycles? 
+		 */
+		if (strchr(stream->mode, 'r') || strchr(stream->mode, '+')) {
+			read_write |= PHP_STREAM_FILTER_READ;
+		}
+		if (strchr(stream->mode, 'w') || strchr(stream->mode, '+') || strchr(stream->mode, 'a')) {
+			read_write |= PHP_STREAM_FILTER_WRITE;
+		}
 	}
 
-	if (append) { 
-		php_stream_filter_append(&stream->readfilters, filter);
-	} else {
-		php_stream_filter_prepend(&stream->readfilters, filter);
+	if (read_write & PHP_STREAM_FILTER_READ) {
+		filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
+		if (filter == NULL) {
+			RETURN_FALSE;
+		}
+
+		if (append) { 
+			php_stream_filter_append(&stream->readfilters, filter);
+		} else {
+			php_stream_filter_prepend(&stream->readfilters, filter);
+		}
+	}
+
+	if (read_write & PHP_STREAM_FILTER_WRITE) {
+		filter = php_stream_filter_create(filtername, filterparams, filterparamslen, php_stream_is_persistent(stream) TSRMLS_CC);
+		if (filter == NULL) {
+			RETURN_FALSE;
+		}
+
+		if (append) { 
+			php_stream_filter_append(&stream->writefilters, filter);
+		} else {
+			php_stream_filter_prepend(&stream->writefilters, filter);
+		}
 	}
 
 	RETURN_TRUE;
 }
 
-/* {{{ proto bool stream_filter_prepend(resource stream, string filtername[, string filterparams])
+/* {{{ proto bool stream_filter_prepend(resource stream, string filtername[, int read_write[, string filterparams]])
    Prepend a filter to a stream */
 PHP_FUNCTION(stream_filter_prepend)
 {
@@ -1284,7 +1317,7 @@ PHP_FUNCTION(stream_filter_prepend)
 }
 /* }}} */
 
-/* {{{ proto bool stream_filter_append(resource stream, string filtername[, string filterparams])
+/* {{{ proto bool stream_filter_append(resource stream, string filtername[, int read_write[, string filterparams]])
    Append a filter to a stream */
 PHP_FUNCTION(stream_filter_append)
 {
