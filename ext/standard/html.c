@@ -35,7 +35,7 @@
    Defaults to ISO-8859-1 for now. */
 
 enum entity_charset { cs_terminator, cs_8859_1, cs_cp1252,
-	cs_8859_15, cs_utf_8 };
+	cs_8859_15, cs_utf_8, cs_big5, cs_gb2312, cs_big5hkscs };
 typedef const char * entity_table_t;
 
 /* codepage 1252 is a Windows extension to iso-8859-1. */
@@ -91,11 +91,14 @@ struct html_entity_map {
 };
 
 static const struct html_entity_map entity_map[] = {
-	{ cs_cp1252, 	0x80, 0x9f, ent_cp_1252 },
-	{ cs_cp1252, 	0xa0, 0xff, ent_iso_8859_1 },
+	{ cs_cp1252, 		0x80, 0x9f, ent_cp_1252 },
+	{ cs_cp1252, 		0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_8859_1, 		0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_8859_15, 		0xa0, 0xff, ent_iso_8859_15 },
 	{ cs_utf_8, 		0xa0, 0xff, ent_iso_8859_1 },
+	{ cs_big5, 			0xa0, 0xff, ent_iso_8859_1 },
+	{ cs_gb2312, 		0xa0, 0xff, ent_iso_8859_1 },
+	{ cs_big5hkscs, 	0xa0, 0xff, ent_iso_8859_1 },
 	{ cs_terminator }
 };
 
@@ -107,6 +110,9 @@ static const struct {
 	{ "ISO-8859-15", 	cs_8859_15 },
 	{ "utf-8", 			cs_utf_8 },
 	{ "cp1252", 		cs_cp1252 },
+	{ "BIG5",			cs_big5 },
+	{ "GB2312",			cs_gb2312 },
+	{ "BIG5-HKSCS",		cs_big5hkscs },
 	{ NULL }
 };
 
@@ -125,86 +131,111 @@ inline static unsigned short get_next_char(enum entity_charset charset,
 	
 	mbseq[mbpos++] = (unsigned char)this_char;
 	
-	if (charset == cs_utf_8)	{
-		unsigned long utf = 0;
-		int stat = 0;
-		int more = 1;
-
-		/* unpack utf-8 encoding into a wide char.
-		 * Code stolen from the mbstring extension */
-		
-		do {
-			if (this_char < 0x80)	{
-				more = 0;
-				break;
-			}
-			else if (this_char < 0xc0)	{
-				switch(stat)	{
-					case 0x10:	/* 2, 2nd */
-					case 0x21:	/* 3, 3rd */
-					case 0x32:	/* 4, 4th */
-					case 0x43:	/* 5, 5th */
-					case 0x54:	/* 6, 6th */
-						/* last byte in sequence */
-						more = 0;
-						utf |= (this_char & 0x3f);
-						this_char = (unsigned short)utf;
-						break;
-					case 0x20:	/* 3, 2nd */
-					case 0x31:	/* 4, 3rd */
-					case 0x42:	/* 5, 4th */
-					case 0x53:	/* 6, 5th */
-						/* penultimate char */
-						utf |= ((this_char & 0x3f) << 6);
-						stat++;
-						break;
-					case 0x30:	/* 4, 2nd */
-					case 0x41:	/* 5, 3rd */
-					case 0x52:	/* 6, 4th */
-						utf |= ((this_char & 0x3f) << 12);
-						stat++;
-						break;
-					case 0x40:	/* 5, 2nd */
-					case 0x51:
-						utf |= ((this_char & 0x3f) << 18);
-						stat++;
-						break;
-					case 0x50:	/* 6, 2nd */
-						utf |= ((this_char & 0x3f) << 24);
-						stat++;
-					default:
-						/* invalid */
-						more = 0;
-				}
-			}
-			/* lead byte */
-			else if (this_char < 0xe0) {
-				stat = 0x10;	/* 2 byte */
-				utf = (this_char & 0x1f) << 6;
-			} else if (this_char < 0xf0)	{
-				stat = 0x20;	/* 3 byte */
-				utf = (this_char & 0xf) << 12;
-			} else if (this_char < 0xf8) {
-				stat = 0x30;	/* 4 byte */
-				utf = (this_char & 0x7) << 18;
-			} else if (this_char < 0xfc)	{
-				stat = 0x40;	/* 5 byte */
-				utf = (this_char & 0x3) << 24;
-			} else if (this_char < 0xfe)	{
-				stat = 0x50;	/* 6 byte */
-				utf = (this_char & 0x1) << 30;
-			}
-			else	{
-				/* invalid; bail */
-				more = 0;
-				break;
-			}
-			if (more)
+	switch(charset)	{
+		case cs_utf_8:
 			{
-				this_char = str[pos++];
-				mbseq[mbpos++] = (unsigned char)this_char;
+				unsigned long utf = 0;
+				int stat = 0;
+				int more = 1;
+
+				/* unpack utf-8 encoding into a wide char.
+				 * Code stolen from the mbstring extension */
+
+				do {
+					if (this_char < 0x80)	{
+						more = 0;
+						break;
+					}
+					else if (this_char < 0xc0)	{
+						switch(stat)	{
+							case 0x10:	/* 2, 2nd */
+							case 0x21:	/* 3, 3rd */
+							case 0x32:	/* 4, 4th */
+							case 0x43:	/* 5, 5th */
+							case 0x54:	/* 6, 6th */
+								/* last byte in sequence */
+								more = 0;
+								utf |= (this_char & 0x3f);
+								this_char = (unsigned short)utf;
+								break;
+							case 0x20:	/* 3, 2nd */
+							case 0x31:	/* 4, 3rd */
+							case 0x42:	/* 5, 4th */
+							case 0x53:	/* 6, 5th */
+								/* penultimate char */
+								utf |= ((this_char & 0x3f) << 6);
+								stat++;
+								break;
+							case 0x30:	/* 4, 2nd */
+							case 0x41:	/* 5, 3rd */
+							case 0x52:	/* 6, 4th */
+								utf |= ((this_char & 0x3f) << 12);
+								stat++;
+								break;
+							case 0x40:	/* 5, 2nd */
+							case 0x51:
+								utf |= ((this_char & 0x3f) << 18);
+								stat++;
+								break;
+							case 0x50:	/* 6, 2nd */
+								utf |= ((this_char & 0x3f) << 24);
+								stat++;
+							default:
+								/* invalid */
+								more = 0;
+						}
+					}
+					/* lead byte */
+					else if (this_char < 0xe0) {
+						stat = 0x10;	/* 2 byte */
+						utf = (this_char & 0x1f) << 6;
+					} else if (this_char < 0xf0)	{
+						stat = 0x20;	/* 3 byte */
+						utf = (this_char & 0xf) << 12;
+					} else if (this_char < 0xf8) {
+						stat = 0x30;	/* 4 byte */
+						utf = (this_char & 0x7) << 18;
+					} else if (this_char < 0xfc)	{
+						stat = 0x40;	/* 5 byte */
+						utf = (this_char & 0x3) << 24;
+					} else if (this_char < 0xfe)	{
+						stat = 0x50;	/* 6 byte */
+						utf = (this_char & 0x1) << 30;
+					}
+					else	{
+						/* invalid; bail */
+						more = 0;
+						break;
+					}
+					if (more)
+					{
+						this_char = str[pos++];
+						mbseq[mbpos++] = (unsigned char)this_char;
+					}
+				} while(more);
 			}
-		} while(more);
+			break;
+		case cs_big5:
+		case cs_gb2312:
+		case cs_big5hkscs:
+			{
+				/* check if this is the first of a 2-byte sequence */
+				if (this_char >= 0xa1 && this_char <= 0xf9)	{
+					/* peek at the next char */
+					unsigned char next_char = str[pos];
+					if ((next_char >= 0x40 && next_char <= 0x73) ||
+							(next_char >= 0xa1 && next_char <= 0xfe))
+					{
+						/* yes, this a wide char */
+						this_char <<= 8;
+						mbseq[mbpos++] = next_char;
+						this_char |= next_char;
+						pos++;
+					}
+					
+				}
+				break;
+			}
 	}
 	*newpos = pos;
 	mbseq[mbpos] = '\0';
@@ -222,7 +253,7 @@ static enum entity_charset determine_charset(char * charset_hint)
 	enum entity_charset charset = cs_8859_1;
 	int len;
 
-	/* Guarantee default behaviour */
+	/* Guarantee default behaviour for backwards compatibility */
 	if (charset_hint == NULL)
 		return cs_8859_1;
 
@@ -296,11 +327,9 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 	i = 0;
 	while (i < oldlen) {
 		int mbseqlen;
-		unsigned char mbsequence[16];	/* allow up to 15 characters
-													in a multibyte sequence
-													it should be more than enough.. */
+		unsigned char mbsequence[16];	/* allow up to 15 characters in a multibyte sequence */
 		unsigned short this_char = get_next_char(charset, old, &i, mbsequence, &mbseqlen);
-		int matches_map = 0;
+		int matches_map;
 		
 		if (len + 9 > maxlen)
 			new = erealloc (new, maxlen += 128);
@@ -309,7 +338,9 @@ PHPAPI char *php_escape_html_entities(unsigned char *old, int oldlen, int *newle
 			/* look for a match in the maps for this charset */
 			int j;
 			unsigned char * rep;
-		
+	
+			matches_map = 0;
+
 			for (j=0; entity_map[j].charset != cs_terminator; j++)	{
 				if (entity_map[j].charset == charset
 						&& this_char >= entity_map[j].basechar
