@@ -1,3 +1,65 @@
+2003-12-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mysqli/mysqli.c
+      ext/sqlite/sqlite.c:
+      emalloc() -> safe_emalloc()
+
+2003-12-31  Andrei Zmievski  <andrei@gravitonic.com>
+
+    * ZendEngine2/zend_default_classes.c:
+      Make default message look better.
+
+2003-12-31  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/gd/config.w32:
+      Make sure zlib.lib is found
+
+2003-12-31  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      BFN
+
+2003-12-31  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      NEWS
+      ext/mysql/config.m4:
+      - MFH: Fixed bug #26751 (PHP can't find the MySQL socket on a case
+      sensitive
+        file system).
+
+    * ext/mysql/config.m4:
+      - Fixed bug #26751 (PHP can't find the MySQL socket on a case sensitive
+      file
+        system).
+
+2003-12-31  Andrey Hristov  <php@hristov.com>
+
+    * ext/standard/fsock.c:
+      proto fix
+
+2003-12-31  Georg Richter  <phpinfo@t-online.de>
+
+    * NEWS:
+      fixed problems with longlong values in mysqli
+
+    * ext/mysqli/mysqli.c
+      ext/mysqli/mysqli_api.c
+      ext/mysqli/mysqli_nonapi.c
+      ext/mysqli/php_mysqli.h:
+      fixed memleak and segfault when constructor call failed
+
+2003-12-31  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      cleanup
+
+2003-12-31  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/gd/libgd/gd_topal.c
+      ext/gd/libgd/wbmp.c:
+      Replace regular malloc with safe_emalloc in several places.
+
 2003-12-30  Georg Richter  <phpinfo@t-online.de>
 
     * ext/mysqli/mysqli_api.c:
