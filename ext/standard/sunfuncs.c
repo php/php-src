@@ -8,8 +8,8 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
-#include "sunfuncs.h"
 #include "php.h"
+#include "sunfuncs.h"
 #include "datetime.h"
 #include "php_ini.h"
 
