@@ -34,6 +34,9 @@
 /* Define if you have the pam library (-lpam). */
 #define HAVE_LIBPAM 0
 
+/* Define if you have the bind library (-lbind). */
+#define HAVE_LIBBIND 0
+
 /* Define if you want safe mode enabled by default. */
 #define PHP_SAFE_MODE 0
 
