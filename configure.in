@@ -723,6 +723,11 @@ dnl test -n "$GCC" && CFLAGS="$CFLAGS -fpic"
 dnl add -fPIC option on Solaris if we are building dynamic extensions
 dnl PHP_SOLARIS_PIC_WEIRDNESS
 
+if test "$PHP_THREAD_SAFETY" = "yes"; then
+  TSRM_BASIC_CHECKS
+  TSRM_OTHER_CHECKS
+fi
+
 
 phplibdir="`pwd`/modules"
 phptempdir="`pwd`/libs"
@@ -754,11 +759,6 @@ AC_SUBST(PHP_LDFLAGS)
 AC_SUBST(PHP_LIBS)
 AC_SUBST(PHP_SAPI)
 AC_SUBST(INSTALL_IT)
-
-if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_BASIC_CHECKS
-  TSRM_PTHREAD
-fi
 	
 #libphp4.module 
 AC_OUTPUT([Makefile php4.spec Zend/Makefile ext/Makefile sapi/Makefile pear/Makefile
