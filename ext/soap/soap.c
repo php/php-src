@@ -922,7 +922,7 @@ PHP_FUNCTION(handle)
 
 		fn_name = estrndup(Z_STRVAL(function_name),Z_STRLEN(function_name));
 		response_name = emalloc(Z_STRLEN(function_name) + strlen("Response") + 1);
-		sprintf(response_name,"%sResponse\0",fn_name);
+		sprintf(response_name,"%sResponse",fn_name);
 
 		if(service->type == SOAP_CLASS)
 		{ 
@@ -1044,7 +1044,7 @@ PHP_FUNCTION(handle)
 		if(size == 0)
 			php_error(E_ERROR, "Dump memory failed");
 
-		sprintf(cont_len, "Content-Length: %d\0", size);
+		sprintf(cont_len, "Content-Length: %d", size);
 		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 
@@ -1118,7 +1118,7 @@ void soap_error_handler(int error_num, const char *error_filename, const uint er
 		  xmlDocDumpMemoryEnc(doc_return, &buf, &size, XML_CHAR_ENCODING_UTF8);
 		*/
 		xmlDocDumpMemory(doc_return, &buf, &size);
-		sprintf(cont_len,"Content-Length: %d\0", size);
+		sprintf(cont_len,"Content-Length: %d", size);
 		sapi_add_header(cont_len, strlen(cont_len) + 1, 1);
 		sapi_add_header("Content-Type: text/xml", sizeof("Content-Type: text/xml"), 1);
 
@@ -1300,35 +1300,39 @@ PHP_FUNCTION(__parse)
 	char *message, *function;
 	int message_len, function_len;
 	int num_params;
-	zval **ret_params;
+	zval **ret_params = NULL;
 	sdlPtr sdl;
 	sdlFunctionPtr fn;
 
-	if(zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &message, &message_len, &function, &function_len) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &message, &message_len, &function, &function_len) == FAILURE) {
 		php_error(E_ERROR, "Invalid arguments to SoapObject->__parse");
+	}
 
 	FETCH_THIS_SDL(sdl);
 
-	if(sdl != NULL)
-	{
+	if (sdl != NULL) {
 		sdlBindingPtr binding;
 
 		FETCH_THIS_PORT(binding);
 		fn = get_function(binding, function);
-		if(fn != NULL)
-			parse_packet_soap(getThis(), message, message_len, fn, NULL, &ret_params, &num_params TSRMLS_CC);
-	}
-	else
-			parse_packet_soap(getThis(), message, message_len, NULL, function, &ret_params, &num_params TSRMLS_CC);
 
-	if(num_params > 0)
-	{
+		if (fn != NULL) {
+			parse_packet_soap(getThis(), message, message_len, fn, NULL, &ret_params, &num_params TSRMLS_CC);
+		}
+	} else {
+		parse_packet_soap(getThis(), message, message_len, NULL, function, &ret_params, &num_params TSRMLS_CC);
+	}
+
+	if (num_params > 0) {
 		*return_value = *ret_params[0];
-		zval_add_ref(&return_value);
+		/* zval_add_ref(&return_value); */
+	} else {
+		ZVAL_NULL(return_value);
+	}
+
+	if (ret_params) {
 		efree(ret_params);
 	}
-	else
-		ZVAL_NULL(return_value)
 }
 
 PHP_FUNCTION(__call)
@@ -1340,7 +1344,7 @@ PHP_FUNCTION(__call)
 	zval **param;
 	xmlDocPtr request = NULL;
 	int num_params, arg_count;
-	zval **ret_params;
+	zval **ret_params = NULL;
 	char *buffer;
 	int len;
 	
@@ -1369,14 +1373,16 @@ PHP_FUNCTION(__call)
 	parse_packet_soap(getThis(), buffer, len, NULL, function, &ret_params, &num_params TSRMLS_CC);
 	efree(buffer);
 
-	if(num_params > 0)
-	{
+	if(num_params > 0) {
 		*return_value = *ret_params[0];
-		zval_add_ref(&return_value);
+		/* zval_add_ref(&return_value); */
+	} else {
+		ZVAL_NULL(return_value);
+	}
+
+	if (ret_params) {
 		efree(ret_params);
 	}
-	else
-		ZVAL_NULL(return_value)
 }
 
 PHP_FUNCTION(__isfault)
@@ -1533,8 +1539,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 
 		clear_soap_fault(thisObj);
 
-		if(sdl != NULL)
-		{
+		if (sdl != NULL) {
 			sdlBindingPtr binding;
 
 			FETCH_THIS_PORT(binding);
@@ -1542,7 +1547,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			if(fn != NULL)
 			{
 				int num_params;
-				zval **ret_params;
+				zval **ret_params = NULL;
 				char *buffer;
 				char *ns;
 				int len;
@@ -1565,14 +1570,16 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 				parse_packet_soap(getThis(), buffer, len, fn, NULL, &ret_params, &num_params TSRMLS_CC);
 				efree(buffer);
 
-				if(num_params > 0)
-				{
+				if(num_params > 0) {
 					*return_value = *ret_params[0];
-					zval_add_ref(&return_value);
+					/* zval_add_ref(&return_value); */
+				} else {
+					ZVAL_NULL(return_value);
+				}
+
+				if (ret_params) {
 					efree(ret_params);
 				}
-				else
-					ZVAL_NULL(return_value);
 			}
 			else
 			{
@@ -1582,7 +1589,7 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 		else
 		{
 			int num_params;
-			zval **ret_params;
+			zval **ret_params = NULL;
 			zval **uri;
 			smart_str *action;
 			char *buffer;
@@ -1596,20 +1603,24 @@ void soap_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_property_refe
 			send_http_soap_request(getThis(), request, function, action->c TSRMLS_CC);
 
 			smart_str_free(action);
+			efree(action);
 			xmlFreeDoc(request);
 
 			get_http_soap_response(getThis(), &buffer, &len TSRMLS_CC);
 			parse_packet_soap(getThis(), buffer, len, NULL, function, &ret_params, &num_params TSRMLS_CC);
 			efree(buffer);
 
-			if(num_params > 0)
-			{
+			if(num_params > 0) {
 				*return_value = *ret_params[0];
-				zval_add_ref(&return_value);
+				/* zval_add_ref(&return_value); */
+			} else {
+				ZVAL_NULL(return_value);
+			}
+
+			if (ret_params) {
+				FREE_ZVAL(ret_params[0]);
 				efree(ret_params);
 			}
-			else
-				ZVAL_NULL(return_value);
 		}
 		efree(arguments);
 	}
@@ -1658,7 +1669,6 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 {
 	xmlNodePtr trav,trav2,trav3,trav4,env,body;
 	int cur_param = 0,num_of_params = 0;
-/*	TSRMLS_FETCH();*/
 
 	trav = request->children;
 	FOREACHNODE(trav,"Envelope",env)
@@ -1669,7 +1679,7 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 			trav3 = body->children;
 			do
 			{
-				/* TODO: make 'strict' (use th sdl defnintions) */
+				/* TODO: make 'strict' (use the sdl defnintions) */
 				if(trav3->type == XML_ELEMENT_NODE)
 				{
 					zval tmp_function_name, **tmp_parameters;
@@ -1695,7 +1705,7 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 								if(trav4->type == XML_ELEMENT_NODE)
 									num_of_params++;
 
-							}while(trav4 = trav4->next);
+							} while ((trav4 = trav4->next));
 						}
 						else
 							num_of_params = zend_hash_num_elements(function->requestParameters);
@@ -1720,13 +1730,13 @@ void deseralize_function_call(sdlPtr sdl, xmlDocPtr request, zval *function_name
 								cur_param++;
 							}
 
-						}while(trav4 = trav4->next);
+						} while ((trav4 = trav4->next));
 					}
 					(*parameters) = tmp_parameters;
 					(*num_params) = num_of_params;
 					break;
 				}
-			}while(trav3 = trav3->next);
+			} while ((trav3 = trav3->next));
 
 		}
 		ENDFOREACH(trav2);
@@ -1740,7 +1750,7 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 	xmlNode *envelope,*body,*method, *param;
 	xmlNs *ns;
 	sdlParamPtr parameter = NULL;
-	smart_str *gen_ns;
+	smart_str *gen_ns = NULL;
 
 	encode_reset_ns();
 
@@ -1798,6 +1808,11 @@ xmlDocPtr seralize_response_call(sdlFunctionPtr function, char *function_name, c
 		xmlAddChild(method,param);
 	}
 
+	if (gen_ns) {
+		smart_str_free(gen_ns);
+		efree(gen_ns);
+	}
+	
 	return doc;
 }
 
@@ -1900,6 +1915,7 @@ xmlDocPtr seralize_function_call(zval *this_ptr, sdlFunctionPtr function, char *
 		}
 	}
 	smart_str_free(gen_ns);
+	efree(gen_ns);
 
 	return doc;
 }
@@ -2103,7 +2119,7 @@ void delete_sdl(void *handle)
 void delete_http_socket(void *handle)
 {
 	SOAP_STREAM stream = (SOAP_STREAM)handle;
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 	TSRMLS_FETCH();
 	php_stream_close(stream);
 #else

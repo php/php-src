@@ -10,8 +10,6 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 	SOAP_STREAM stream;
 	zval **trace;
 
-/*	TSRMLS_FETCH();*/
-
 	FETCH_THIS_SOCKET(stream);
 	FETCH_THIS_URL(phpurl);
 	FETCH_THIS_SDL(sdl);
@@ -45,10 +43,17 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 
 		phpurl = php_url_parse(url);
 
-#ifdef PHP_STREAMS
-		stream = php_stream_sock_open_host(phpurl->host, (unsigned short)(phpurl->port == 0 ? 80 : phpurl->port), SOCK_STREAM, 0, 0);
+		if (phpurl->port == 0) {
+			if (strcmp(phpurl->scheme, "http") == 0)
+				phpurl->port = 80;
+			else if (strcmp(phpurl->scheme, "https") == 0)
+				phpurl->port = 443;
+		}
+		
+#ifdef PHP_HAVE_STREAMS
+		stream = php_stream_sock_open_host(phpurl->host, (unsigned short)phpurl->port, SOCK_STREAM, NULL, NULL);
 #else
-		stream = get_socket(phpurl->host, (phpurl->port == 0 ? 80 : phpurl->port), 10);
+		stream = get_socket(phpurl->host, phpurl->port, 10);
 #endif
 		if(stream)
 		{
@@ -59,12 +64,9 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			ret = zend_list_insert(phpurl, le_url);
 			add_property_resource(this_ptr, "httpurl", ret);
 			zend_list_addref(ret);
-		}
-		else
+		} else {
 			php_error(E_ERROR,"Could not connect to host");
-		/*
-		 php_url_free(phpurl);
-		 */
+		}
 	}
 
 	if(stream)
@@ -85,8 +87,8 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			soap_headers = emalloc(size + strlen(soapaction));
 			sprintf(soap_headers, header, phpurl->path, phpurl->host, buf_size, soapaction);
 		}
-
-#ifdef PHP_STREAMS
+		
+#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, soap_headers, strlen(soap_headers));
 #else
 		err = send(stream, soap_headers, strlen(soap_headers), 0);
@@ -118,7 +120,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			smart_str_appendl(&cookie_str, "\r\n", 2);
 			smart_str_0(&cookie_str);
 
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 			err = php_stream_write(stream, cookie_str.c, cookie_str.len);
 #else
 			err = send(stream, cookie_str.c, cookie_str.len,0);
@@ -129,7 +131,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			smart_str_free(&cookie_str);
 		}
 
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, "\r\n", 2);
 #else
 		err = send(stream, "\r\n", 2, 0);
@@ -138,7 +140,7 @@ void send_http_soap_request(zval *this_ptr, xmlDoc *doc, char *function_name, ch
 			php_error(E_ERROR,"Failed Sending HTTP Headers");
 
 
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 		err = php_stream_write(stream, buf, buf_size);
 #else
 		err = send(stream, buf, buf_size, 0);
@@ -159,8 +161,6 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRML
 	zval **socket_ref;
 	SOAP_STREAM stream;
 	zval **trace;
-
-/*	TSRMLS_FETCH();*/
 
 	FETCH_THIS_SDL(sdl);
 
@@ -246,7 +246,7 @@ void get_http_soap_response(zval *this_ptr, char **buffer, int *buffer_len TSRML
 
 	if(http_close)
 	{
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 		php_stream_close(stream);
 #else
 		SOCK_CLOSE(stream);
@@ -377,7 +377,7 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 		while(!done)
 		{
 			for (cur = 0; cur < 3 || !(chunk_size[cur - 2] == '\r' && chunk_size[cur - 1] == '\n'); cur++)
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 				chunk_size[cur] = php_stream_getc(stream);
 #else
 				chunk_size[cur] = php_sock_fgetc(stream);
@@ -389,14 +389,14 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 				len_size = 0;
 				while(http_buf_size < buf_size)
 				{
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 					len_size += php_stream_read(stream, &http_buf[http_buf_size], buf_size - len_size);
 #else
 					len_size += php_sock_fread(&http_buf[http_buf_size], buf_size - len_size, stream);
 #endif
 					http_buf_size += len_size;
 				}
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 				php_stream_getc(stream);php_stream_getc(stream);
 #else
 				/* Eat up '\r' '\n' */
@@ -415,7 +415,7 @@ int get_http_body(SOAP_STREAM stream, char *headers,  char **response, int *out_
 		http_buf = emalloc(size + 1);
 
 		while(http_buf_size < size)
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 			http_buf_size += php_stream_read(stream, &http_buf[http_buf_size], size - http_buf_size);
 #else
 			http_buf_size += php_sock_fread(&http_buf[http_buf_size], size - http_buf_size, stream);
@@ -436,13 +436,12 @@ int get_http_headers(SOAP_STREAM stream, char **response, int *out_size TSRMLS_D
 	int done;
 	char chr;
 	smart_str tmp_response = {0};
-/*	TSRMLS_FETCH();//i think this is not needed - even the parameter */
 
 	done = FALSE;
 
 	while(!done)
 	{
-#ifdef PHP_STREAMS
+#ifdef PHP_HAVE_STREAMS
 		chr = php_stream_getc(stream);
 #else
 		chr = php_sock_fgetc(stream);
@@ -456,16 +455,16 @@ int get_http_headers(SOAP_STREAM stream, char **response, int *out_size TSRMLS_D
 				smart_str_0(&tmp_response);
 				done = TRUE;
 			}
-		}
-		else
+		} else {
 			return FALSE;
+		}
 	}
 	(*response) = tmp_response.c;
 	(*out_size) = tmp_response.len;
 	return TRUE;
 }
 
-#ifndef PHP_STREAMS
+#ifndef PHP_HAVE_STREAMS
 SOCKET get_socket(char* host,int portno,int time)
 {
 	SOCKET socketd = -1;

@@ -5,7 +5,6 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 	xmlDocPtr response;
 	xmlNodePtr trav, trav2, env, body, resp, cur, fault;
 	zval **tmp_ret;
-/*	TSRMLS_FETCH();*/
 
 	response = xmlParseMemory(buffer, buffer_size);
 	xmlCleanupParser();
