@@ -1051,22 +1051,52 @@ static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, z
 	zend_class_entry *ce  = *pce;
 
 	if (hash_key->nKeyLength==0 || hash_key->arKey[0]!=0) {
-		add_next_index_stringl(array, ce->name, ce->name_length, 1);
+		if (ce->type == ZEND_NAMESPACE) {
+			zval *subarray;
+
+			MAKE_STD_ZVAL(subarray);
+			array_init(subarray);
+			zend_hash_apply_with_arguments(&ce->class_table, (apply_func_args_t) copy_class_name, 1, subarray);
+			add_assoc_zval(array, ce->name, subarray);
+		} else {
+			add_next_index_stringl(array, ce->name, ce->name_length, 1);
+		}
 	}
 	return 0;
 }
 
 
-/* {{{ proto array get_declared_classes(void)
+/* {{{ proto array get_declared_classes([string namespace])
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
+	int global_ns = 1;
+	zval **namespace_name;
+	zend_namespace **pns = NULL, *ns;
+
 	if (ZEND_NUM_ARGS() != 0) {
-		ZEND_WRONG_PARAM_COUNT();
+		if(ZEND_NUM_ARGS() > 1 || zend_get_parameters_ex(1, &namespace_name)==FAILURE) {
+			ZEND_WRONG_PARAM_COUNT();
+		} else {
+			global_ns = 0;
+		}
 	}
 
+	
+	if(!global_ns) {
+		convert_to_string_ex(namespace_name);
+		zend_str_tolower(Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name));
+		if(zend_hash_find(&EG(global_namespace_ptr)->class_table, Z_STRVAL_PP(namespace_name), Z_STRLEN_PP(namespace_name)+1, (void **)&pns) == FAILURE) {
+			zend_error(E_WARNING, "Namespace '%s' is not defined!", Z_STRVAL_PP(namespace_name));
+			RETURN_FALSE;
+		}
+		ns = *pns;
+	} else {
+		ns = EG(global_namespace_ptr);
+	}
+	
 	array_init(return_value);
-	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
+	zend_hash_apply_with_arguments(&ns->class_table, (apply_func_args_t) copy_class_name, 1, return_value);
 }
 /* }}} */
 
