@@ -4,6 +4,7 @@ DBA Multiple File Creation Test
 <?php 
 	require_once('skipif.inc');
 	if (!function_exists('dba_list')) die('skip dba_list() not available');
+	die("info $HND handler used");
 ?>
 --FILE--
 <?php

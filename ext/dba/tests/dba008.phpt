@@ -3,6 +3,7 @@ DBA magic_quotes_runtime Test
 --SKIPIF--
 <?php 
 	require_once('skipif.inc');
+	die("info $HND handler used");
 ?>
 --FILE--
 <?php
