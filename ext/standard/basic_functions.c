@@ -787,6 +787,9 @@ function_entry basic_functions[] = {
 	PHP_FE(assert,															NULL)
 	PHP_FE(assert_options,													NULL)
 
+    /* functions from versioning.c */
+    PHP_FE(version_compare,													NULL)
+
 	{NULL, NULL, NULL}
 };
 
