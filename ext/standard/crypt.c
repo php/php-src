@@ -58,14 +58,17 @@ extern char *crypt(char *__key,char *__salt);
 #if PHP_STD_DES_CRYPT
 #define PHP_MAX_SALT_LEN 2
 #endif
+
 #if PHP_EXT_DES_CRYPT
 #undef PHP_MAX_SALT_LEN
 #define PHP_MAX_SALT_LEN 9
 #endif
+
 #if PHP_MD5_CRYPT
 #undef PHP_MAX_SALT_LEN
 #define PHP_MAX_SALT_LEN 12
 #endif
+
 #if PHP_BLOWFISH_CRYPT
 #undef PHP_MAX_SALT_LEN
 #define PHP_MAX_SALT_LEN 17
@@ -84,22 +87,18 @@ extern char *crypt(char *__key,char *__salt);
 
 #if HAVE_LRAND48
 #define PHP_CRYPT_RAND lrand48()
-#else
-#if HAVE_RANDOM
+#elif HAVE_RANDOM
 #define PHP_CRYPT_RAND random()
 #else
 #define PHP_CRYPT_RAND rand()
-#endif
 #endif
 
 PHP_MINIT_FUNCTION(crypt)
 {
 #if PHP_STD_DES_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 2, CONST_CS | CONST_PERSISTENT);
-#else
-#if PHP_MD5_CRYPT
+#elif PHP_MD5_CRYPT
     REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", 12, CONST_CS | CONST_PERSISTENT);
-#endif
 #endif
     REGISTER_LONG_CONSTANT("CRYPT_STD_DES", PHP_STD_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
     REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", PHP_EXT_DES_CRYPT, CONST_CS | CONST_PERSISTENT);
@@ -152,24 +151,20 @@ PHP_FUNCTION(crypt)
 	if(!*salt) {
 #if HAVE_SRAND48
 		srand48((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#else
-#if HAVE_SRANDOM
+#elif HAVE_SRANDOM
 		srandom((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
 #else
 		srand((unsigned int) time(0) * getpid() * (php_combined_lcg() * 10000.0));
-#endif
 #endif
 
 #if PHP_STD_DES_CRYPT
 		php_to64(&salt[0], PHP_CRYPT_RAND, 2);
 		salt[2] = '\0';
-#else
-#if PHP_MD5_CRYPT
+#elif PHP_MD5_CRYPT
 		strcpy(salt, "$1$");
 		php_to64(&salt[3], PHP_CRYPT_RAND, 4);
 		php_to64(&salt[7], PHP_CRYPT_RAND, 4);
 		strcpy(&salt[11], "$");
-#endif
 #endif
 	}
 
