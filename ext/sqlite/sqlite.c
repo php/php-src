@@ -150,6 +150,8 @@ struct php_sqlite_agg_functions {
 	zval *fini;
 };
 
+static void php_sqlite_fetch_array(struct php_sqlite_result *res, int mode, zend_bool decode_binary, int move_next, zval *return_value TSRMLS_DC);
+static int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC);
 
 enum { PHPSQLITE_ASSOC = 1, PHPSQLITE_NUM = 2, PHPSQLITE_BOTH = PHPSQLITE_ASSOC|PHPSQLITE_NUM };
 
@@ -860,6 +862,123 @@ static zval * sqlite_instanciate(zend_class_entry *pce, zval *object TSRMLS_DC)
 	object->is_ref = 1;
 	return object;
 }
+
+typedef struct _sqlite_object_iterator {
+	zend_object_iterator     it;
+	struct php_sqlite_result *res;
+	zval *value;
+} sqlite_object_iterator;
+
+void sqlite_iterator_dtor(zend_object_iterator *iter TSRMLS_DC)
+{
+	zval *object = (zval*)((sqlite_object_iterator*)iter)->it.data;
+
+	if (((sqlite_object_iterator*)iter)->value) {
+		zval_ptr_dtor(&((sqlite_object_iterator*)iter)->value);
+		((sqlite_object_iterator*)iter)->value = NULL;
+	}
+	zval_ptr_dtor(&object);
+	efree(iter);
+}
+
+void sqlite_iterator_rewind(zend_object_iterator *iter TSRMLS_DC)
+{
+	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
+
+	if (((sqlite_object_iterator*)iter)->value) {
+		zval_ptr_dtor(&((sqlite_object_iterator*)iter)->value);
+		((sqlite_object_iterator*)iter)->value = NULL;
+	}
+	if (res) {
+		res->curr_row = 0;
+	}
+}
+
+int sqlite_iterator_has_more(zend_object_iterator *iter TSRMLS_DC)
+{
+	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
+
+	if (res && res->curr_row < res->nrows && res->nrows) { /* curr_row may be -1 */
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
+void sqlite_iterator_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+{
+	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
+
+	*data = &((sqlite_object_iterator*)iter)->value;
+	if (res && !**data) {
+		MAKE_STD_ZVAL(**data);
+		php_sqlite_fetch_array(res, PHPSQLITE_NUM, 1, 0, **data TSRMLS_CC);
+	}
+	
+}
+
+int sqlite_iterator_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+{
+	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
+
+	*str_key = NULL;
+	*str_key_len = 0;
+	*int_key = res ? res->curr_row : 0;
+	return HASH_KEY_IS_LONG;
+}
+
+void sqlite_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC)
+{
+	struct php_sqlite_result *res = ((sqlite_object_iterator*)iter)->res;
+
+	if (((sqlite_object_iterator*)iter)->value) {
+		zval_ptr_dtor(&((sqlite_object_iterator*)iter)->value);
+		((sqlite_object_iterator*)iter)->value = NULL;
+	}
+	if (res) {
+		if (!res->buffered && res->vm) {
+			php_sqlite_fetch(res TSRMLS_CC);
+		}
+		if (res->curr_row >= res->nrows) {
+			/* php_error_docref(NULL TSRMLS_CC, E_WARNING, "no more rows available"); */
+			return;
+		}
+	
+		res->curr_row++;
+	}
+}
+
+zend_class_iterator_funcs sqlite_ub_query_iterator_funcs;
+
+zend_object_iterator *sqlite_ub_query_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+{
+	sqlite_object_iterator *iterator = emalloc(sizeof(sqlite_object_iterator));
+
+	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
+
+	object->refcount++;
+	iterator->it.data = (void*)object;
+	iterator->it.funcs = &sqlite_ub_query_iterator_funcs.funcs;
+	iterator->res = obj->u.res;
+	iterator->value = NULL;
+	return (zend_object_iterator*)iterator;
+}
+
+zend_class_iterator_funcs sqlite_query_iterator_funcs;
+
+zend_object_iterator *sqlite_query_get_iterator(zend_class_entry *ce, zval *object TSRMLS_DC)
+{
+	sqlite_object_iterator *iterator = emalloc(sizeof(sqlite_object_iterator));
+
+	sqlite_object *obj = (sqlite_object*) zend_object_store_get_object(object TSRMLS_CC);
+
+	object->refcount++;
+	iterator->it.data = (void*)object;
+	iterator->it.funcs = &sqlite_query_iterator_funcs.funcs;
+	iterator->res = obj->u.res;
+	iterator->value = NULL;
+	return (zend_object_iterator*)iterator;
+}
 /* }}} */
 
 static int init_sqlite_globals(zend_sqlite_globals *g)
@@ -876,6 +995,21 @@ PHP_MINIT_FUNCTION(sqlite)
 	REGISTER_SQLITE_CLASS(exception, zend_exception_get_default());
 	sqlite_object_handlers_query.get_class_entry = sqlite_get_ce_query;
 	sqlite_object_handlers_ub_query.get_class_entry = sqlite_get_ce_ub_query;
+	
+	sqlite_ce_ub_query->get_iterator = sqlite_ub_query_get_iterator;
+	sqlite_ce_ub_query->iterator_funcs = &sqlite_ub_query_iterator_funcs;
+	memset(&sqlite_ub_query_iterator_funcs, 0, sizeof(zend_class_iterator_funcs));
+	sqlite_ub_query_iterator_funcs.funcs.dtor = sqlite_iterator_dtor;
+	sqlite_ub_query_iterator_funcs.funcs.rewind = NULL;
+	sqlite_ub_query_iterator_funcs.funcs.has_more = sqlite_iterator_has_more;
+	sqlite_ub_query_iterator_funcs.funcs.get_current_data = sqlite_iterator_get_current_data;
+	sqlite_ub_query_iterator_funcs.funcs.get_current_key = sqlite_iterator_get_current_key;
+	sqlite_ub_query_iterator_funcs.funcs.move_forward = sqlite_iterator_move_forward;
+
+	sqlite_ce_query->get_iterator = sqlite_query_get_iterator;
+	sqlite_ce_query->iterator_funcs = &sqlite_query_iterator_funcs;
+	memcpy(&sqlite_query_iterator_funcs, &sqlite_ub_query_iterator_funcs, sizeof(zend_class_iterator_funcs));
+	sqlite_query_iterator_funcs.funcs.rewind = sqlite_iterator_rewind;
 
 	ZEND_INIT_MODULE_GLOBALS(sqlite, init_sqlite_globals, NULL);
 
@@ -928,7 +1062,7 @@ PHP_MINIT_FUNCTION(sqlite)
 
 PHP_RINIT_FUNCTION(sqlite)
 {
-#ifdef HAVE_SPL
+#if 0 && HAVE_SPL
 	if (!sqlite_ce_query->num_interfaces) {
 		spl_register_implement(sqlite_ce_query, spl_ce_forward TSRMLS_CC);
 		spl_register_implement(sqlite_ce_query, spl_ce_sequence TSRMLS_CC);
@@ -1238,7 +1372,7 @@ PHP_FUNCTION(sqlite_close)
 /* }}} */
 
 /* {{{ php_sqlite_fetch */
-int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
+static int php_sqlite_fetch(struct php_sqlite_result *rres TSRMLS_DC)
 {
 	const char **rowdata, **colnames;
 	int ret, i, base;
