@@ -387,9 +387,9 @@ static void register_standard_class(void)
 	zend_standard_class_def->constructor = NULL;
 	zend_standard_class_def->destructor = NULL;
 	zend_standard_class_def->clone = NULL;
-	zend_standard_class_def->handle_function_call = NULL;
-	zend_standard_class_def->handle_property_get = NULL;
-	zend_standard_class_def->handle_property_set = NULL;
+	zend_standard_class_def->__call = NULL;
+	zend_standard_class_def->__get = NULL;
+	zend_standard_class_def->__set = NULL;
 	zend_standard_class_def->refcount = 1;
 	zend_standard_class_def->constants_updated = 0;
 	zend_standard_class_def->ce_flags = 0;
