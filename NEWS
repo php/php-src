@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Fixed bug #27237 (Working with simplexml crashes apache2). (Rob)
 - Fixed bug #27227 (Mixed case class names causes Fatal Error in Constructor 
   call). (Marcus)
+- Fixed bug #27125 (strval() doesn't work for objects with __toString()).
+  (Marcus)
 - Fixed bug #27123 (Fix crash caused by bug in get_object_vars()). (Andi)
 - Fixed bug #26677 (mbstring compile errors with IRIX compiler).
   (K.Kosako <kosako at sofnec dot co dot jp>, Rui, Moriyoshi)
