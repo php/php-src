@@ -1417,8 +1417,8 @@ overloaded_function_call_cont:
 			case ZEND_SEND_VAR:
 				if (function_being_called
 					&& function_being_called->common.arg_types
-					&& opline->op2.u.opline_num<function_being_called->common.arg_types[0]
-					&& function_being_called->common.arg_types[1+opline->op2.u.opline_num]==BYREF_FORCE) {
+					&& opline->op2.u.opline_num<=function_being_called->common.arg_types[0]
+					&& function_being_called->common.arg_types[opline->op2.u.opline_num]==BYREF_FORCE) {
 						goto send_by_ref;
 				}
 				{
