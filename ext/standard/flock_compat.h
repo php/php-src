@@ -15,6 +15,13 @@ int flock(int fd, int operation);
 #endif /* WIN32|WINNT */
 
 #if !HAVE_INET_ATON
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
 extern int inet_aton(const char *, struct in_addr *);
 #endif
 
