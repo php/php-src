@@ -735,7 +735,6 @@ void php3_request_shutdown(void *dummy INLINE_TLS)
 	}
 	if (GLOBAL(initialized) & INIT_SCANNER) {
 		SHUTDOWN_DEBUG("Scanner");
-		reset_scanner(CLS_C);
 		GLOBAL(initialized) &= ~INIT_SCANNER;
 	}
 	SHUTDOWN_DEBUG("Memory manager");
