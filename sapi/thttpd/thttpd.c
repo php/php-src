@@ -191,12 +191,18 @@ static sapi_module_struct sapi_module = {
 static void thttpd_module_main(TLS_D SLS_DC)
 {
 	zend_file_handle file_handle;
+	char cwd[4096];
+	char *filename;
 	CLS_FETCH();
 	ELS_FETCH();
 	PLS_FETCH();
 
+	V_GETCWD(cwd, sizeof(cwd));
+	filename = alloca(strlen(cwd) + strlen(TG(hc)->expnfilename) + 2);
+	sprintf(filename, "%s%c%s", cwd, PHP_DIR_SEPARATOR, TG(hc)->expnfilename); /* SAFE */
+	
 	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = TG(hc)->expnfilename;
+	file_handle.filename = filename;
 	file_handle.free_filename = 0;
 	file_handle.opened_path = NULL;
 
