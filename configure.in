@@ -578,6 +578,15 @@ PHP_ARG_WITH(layout,[layout of installed files],
 [  --with-layout=TYPE      Sets how installed files will be laid out.  Type is
                           one of "PHP" (default) or "GNU"], PHP)
 
+case $PHP_LAYOUT in
+  GNU)
+    oldstyleextdir=no
+    ;;
+  *)
+    oldstyleextdir=yes
+    ;;
+esac
+
 PHP_ARG_WITH(config-file-path,[path to configuration file],
 [  --with-config-file-path=PATH  
                           Sets the path in which to look for php.ini,
@@ -587,10 +596,10 @@ if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
     GNU)
       PHP_CONFIG_FILE_PATH=$sysconfdir
-      oldstyleextdir=no;;
+      ;;
     *)
       PHP_CONFIG_FILE_PATH=$libdir
-      oldstyleextdir=yes;;
+      ;;
   esac
 fi
 
