@@ -2,6 +2,12 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Added is_numeric() that returns true if the argument is a number
+  or a numeric string. (Andrei)
+- serialize()/unserialize() now call _sleep_() and _wakeup_() when
+  working on objects. (Thies)
+- renamed to_string() method to _string_value_() for consistency.
+  (Thies, Zend library)
 - domxml now supports libxml 2.0 Beta and drops support for older versions,
   due to massive changes in libxml
 - fixed possible crash in unserialize() if serialized data was
