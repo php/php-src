@@ -17,6 +17,8 @@ README FOR THTTPD MODULE (by Sascha Schumann)
 	- Fast Accept Loop
 	- Periodic Connection Expiring
 	- Fixes the Host: header vulnerability
+	- Asynchronous request body handling
+	- Fixup for non-blocking send of thttpd-generated responses
 
 	You can configure the filename extensions by creating a config file for
 	thttpd and setting these entries:
