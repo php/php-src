@@ -115,8 +115,8 @@ $perms = fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATO
 // check to see if chmod works on this OS
 chmod($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt', 0776);
 if (fileperms($temp_path . DIRECTORY_SEPARATOR . 'tmp' . DIRECTORY_SEPARATOR . 'installertestfooblah.phpt')
-      == $perms) {
-    // we are on windows, most likely, so skip this test, but simulate success
+      == $perms && substr(PHP_OS, 0, 3) == 'WIN') {
+    // we are on windows, so skip this test, but simulate success
 echo <<<EOF
 file permissions are: 776
 test valid commitFileTransaction():
