@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Hartmut Holzgraefe <hartmut@six.de>                         |
-   |                                                                      |
+   |          Georg Richter <georg.richter@php-ev.de>                     |
    +----------------------------------------------------------------------+
  */
 
@@ -122,11 +122,7 @@ PHP_FUNCTION(ncurses_mvgetch);
 PHP_FUNCTION(ncurses_mvinch);
 PHP_FUNCTION(ncurses_mvwaddstr);
 PHP_FUNCTION(ncurses_insstr);
-
-#if 0
 PHP_FUNCTION(ncurses_instr);
-#endif
-
 PHP_FUNCTION(ncurses_mvhline);
 PHP_FUNCTION(ncurses_mvcur);
 PHP_FUNCTION(ncurses_init_color);
@@ -136,6 +132,9 @@ PHP_FUNCTION(ncurses_define_key);
 PHP_FUNCTION(ncurses_hline);
 PHP_FUNCTION(ncurses_vline);
 PHP_FUNCTION(ncurses_keyok);
+PHP_FUNCTION(ncurses_termname);
+PHP_FUNCTION(ncurses_longname);
+PHP_FUNCTION(ncurses_mousemask);
 #endif
 
 /*

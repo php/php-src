@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Hartmut Holzgraefe <hartmut@six.de>                         |
-   |                                                                      |
+   |          Georg Richter <georg.richter@php-ev.de                      |
    +----------------------------------------------------------------------+
  */
 
@@ -25,6 +25,8 @@
 #include "php_ini.h"
 #include "php_ncurses.h"
 
+static unsigned char second_args_force_ref[] = {2, BYREF_NONE, BYREF_FORCE};
+static unsigned char first_args_force_ref[] = {1, BYREF_FORCE};
 /* ncurses_functions[]
  *
  * Every user visible function must have an entry in ncurses_functions[].
@@ -132,11 +134,7 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_mvinch, NULL)
   PHP_FE(ncurses_mvwaddstr, NULL)
   PHP_FE(ncurses_insstr, NULL)
-
-#if 0
-  PHP_FE(ncurses_instr, NULL)
-#endif
-
+  PHP_FE(ncurses_instr, first_args_force_ref)
   PHP_FE(ncurses_mvhline, NULL)
   PHP_FE(ncurses_mvcur, NULL)
   PHP_FE(ncurses_init_color, NULL)
@@ -146,6 +144,9 @@ function_entry ncurses_functions[] = {
   PHP_FE(ncurses_hline, NULL)
   PHP_FE(ncurses_vline, NULL)
   PHP_FE(ncurses_keyok, NULL)
+  PHP_FE(ncurses_termname, NULL)
+  PHP_FE(ncurses_longname, NULL)
+  PHP_FE(ncurses_mousemask, second_args_force_ref)
   {NULL, NULL, NULL}  /* Must be the last line in ncurses_functions[] */
 };
 
