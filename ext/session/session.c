@@ -846,7 +846,7 @@ PHPAPI void php_session_start(TSRMLS_D)
 	
 
 	/*
-     * Cookies are preferred, because initially
+	 * Cookies are preferred, because initially
 	 * cookie and get variables will be available. 
 	 */
 
