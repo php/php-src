@@ -26,8 +26,8 @@
 
 #if HAVE_II
 
-extern zend_module_entry ingres_ii_module_entry;
-#define phpext_ingres_ii_ptr &ingres_ii_module_entry
+extern zend_module_entry ingres_module_entry;
+#define phpext_ingres_ptr &ingres_module_entry
 
 #ifdef PHP_WIN32
 #define PHP_II_API __declspec(dllexport)
@@ -85,7 +85,7 @@ ZEND_END_MODULE_GLOBALS(ii)
 
 #else
 
-#define phpext_ii_ptr NULL
+#define phpext_ingres_ptr NULL
 
 #endif
 

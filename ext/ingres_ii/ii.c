@@ -66,9 +66,9 @@ function_entry ii_functions[] = {
 	{NULL, NULL, NULL}	/* Must be the last line in ii_functions[] */
 };
 
-zend_module_entry ingres_ii_module_entry = {
+zend_module_entry ingres_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"ingres_ii",
+	"ingres",
 	ii_functions,
 	PHP_MINIT(ii),
 	PHP_MSHUTDOWN(ii),
@@ -80,7 +80,7 @@ zend_module_entry ingres_ii_module_entry = {
 };
 
 #ifdef COMPILE_DL_INGRES_II
-ZEND_GET_MODULE(ingres_ii)
+ZEND_GET_MODULE(ingres)
 #endif
 
 /* php.ini entries
