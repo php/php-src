@@ -2276,7 +2276,7 @@ PHP_FUNCTION(fgetcsv)
 							efree(lineEnd); 
 							efree(temp); 
 							efree(buf);
-							zval_ptr_dtor(&return_value);
+							zval_dtor(return_value);
 							RETURN_FALSE;
 						}
 
