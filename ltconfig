@@ -1105,6 +1105,9 @@ cygwin* | mingw*)
     with_gnu_ld=no
   fi
   ;;
+openbsd*)
+  with_gnu_ld=no
+  ;;
 
 esac
 
@@ -1402,10 +1405,18 @@ else
     ;;
 
   openbsd*)
-    archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linkopts'
-    hardcode_libdir_flag_spec='-R$libdir'
     hardcode_direct=yes
     hardcode_shlibpath_var=no
+    case "$host_os" in
+      openbsd2.[01234567])
+	archive_cmds='$LD -Bshareable -o $lib $libobjs $deplibs $linkopts'
+	hardcode_libdir_flag_spec='-R$libdir'
+      ;;
+      *)
+	archive_cmds='$CC -shared $pic_flag -o $lib $libobjs $deplibs $linkopts'
+	hardcode_libdir_flag_spec='${wl}-rpath,$libdir'
+      ;;
+    esac
     ;;
 
   os2*)
@@ -2018,13 +2029,10 @@ netbsd*)
 
 openbsd*)
   version_type=sunos
-  if test "$with_gnu_ld" = yes; then
-    need_lib_prefix=no
-    need_version=no
-  fi
   library_names_spec='${libname}${release}.so$versuffix ${libname}.so$versuffix'
   finish_cmds='PATH="\$PATH:/sbin" ldconfig -m $libdir'
   shlibpath_var=LD_LIBRARY_PATH
+  deplibs_check_method='pass_all'
   ;;
 
 os2*)
