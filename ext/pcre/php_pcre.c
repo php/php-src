@@ -111,7 +111,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 #define PCRE_CACHE_SIZE 4096
 
 /* {{{ static pcre_clean_cache */
-static void pcre_clean_cache()
+static void pcre_clean_cache(TSRMLS_D)
 {
 	HashTable *ht = &PCRE_G(pcre_cache);
 	Bucket *p = NULL;
@@ -342,7 +342,7 @@ PHPAPI pcre* pcre_get_compiled_regex(char *regex, pcre_extra **extra, int *preg_
 	 * ones).
 	 */
 	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
-		pcre_clean_cache();
+		pcre_clean_cache(TSRMLS_C);
 	}
 
 	/* Store the compiled pattern and extra info in the cache. */
