@@ -31,6 +31,11 @@ define('PEAR_EXTENSION_DIR', '@EXTENSION_DIR@');
 
 $_PEAR_destructor_object_list = array();
 
+//
+// Tests needed: - PEAR inheritance
+//               - destructors
+//
+
 /**
  * Base class for other PEAR classes.  Provides rudimentary
  * emulation of destructors.
@@ -38,19 +43,25 @@ $_PEAR_destructor_object_list = array();
  * If you want a destructor in your class, inherit PEAR and make a
  * destructor method called _yourclassname (same name as the
  * constructor, but with a "_" prefix).  Also, in your constructor you
- * have to call the PEAR constructor: "$this->PEAR();".  The
- * destructor method will be called without parameters.  Note that at
- * in some SAPI implementations (such as Apache), any output during
+ * have to call the PEAR constructor: <code>$this->PEAR();</code>.
+ * The destructor method will be called without parameters.  Note that
+ * at in some SAPI implementations (such as Apache), any output during
  * the request shutdown (in which destructors are called) seems to be
  * discarded.  If you need to get any debug information from your
- * destructor, use error_log(), syslog() or something like that
- * instead.
+ * destructor, use <code>error_log()</code>, <code>syslog()</code> or
+ * something like that instead.
  *
  * @since PHP 4.0.2
  * @author Stig Bakken <ssb@fast.no>
  */
 class PEAR
 {
+	// {{{ properties
+
+	var $_debug = false;
+
+	// }}}
+
     // {{{ constructor
 
     /**
@@ -60,16 +71,24 @@ class PEAR
 	function PEAR() {
 		global $_PEAR_destructor_object_list;
 		$_PEAR_destructor_object_list[] = &$this;
+		if ($this->_debug) {
+			printf("PEAR constructor called, class=%s\n",
+				   get_class($this));
+		}
 	}
 
     // }}}
     // {{{ destructor
 
     /**
-     * Destructor (the emulated type of...).
+     * Destructor (the emulated type of...).  Does nothing right now,
+	 * but is included for forward compatibility, so subclass
+	 * destructors should always call it.
      * 
      * See the note in the class desciption about output from
      * destructors.
+	 *
+	 * @access public
      */
     function _PEAR() {
     }
@@ -85,7 +104,9 @@ class PEAR
      * @return	bool	true if $data is an error
      */
 	function isError(&$data) {
-		return is_object($data) && is_subclass_of($data, "PEAR_Error");
+		return (bool)(is_object($data) &&
+					  (get_class($data) == "pear_error" ||
+					   is_subclass_of($data, "pear_error")));
 	}
 
     // }}}

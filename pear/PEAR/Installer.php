@@ -250,10 +250,11 @@ class PEAR_Installer extends PEAR {
 
 	while ($data = fread($fp, 2048)) {
 	    if (!xml_parse($xp, $data, feof($fp))) {
-		return new PEAR_Installer_Error(sprintf("XML error: %s at line %d",
+		$err = new PEAR_Installer_Error(sprintf("XML error: %s at line %d",
 							xml_error_string(xml_get_error_code($xp)),
 							xml_get_current_line_number($xp)));
 		xml_parser_free($xp);
+		return $err;
 	    }
 	}
 
