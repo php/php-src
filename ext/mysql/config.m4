@@ -80,8 +80,8 @@ elif test "$PHP_MYSQL" != "no"; then
 
   dnl Check if mysql_config is found. If yes, use the LIBS provided by it..
   if test -x "$MYSQL_DIR/bin/mysql_config"; then
-    MYSQL_LIBS=`$echo $MYSQL_DIR/bin/mysql_config --libs   | sed -e "s/'//g"`
-    MYSQL_INCLUDE=`$echo $MYSQL_DIR/bin/mysql_config --cflags | sed -e "s/'//g"`
+    MYSQL_LIBS=`$MYSQL_DIR/bin/mysql_config --libs   | sed -e "s/'//g"`
+    MYSQL_INCLUDE=`$MYSQL_DIR/bin/mysql_config --cflags | sed -e "s/'//g"`
     AC_DEFINE_UNQUOTED(MYSQL_UNIX_ADDR, "`$MYSQL_DIR/bin/mysql_config --socket`", [Default mysql unix socket])
   else
     MYSQL_LIBS="-L$MYSQL_LIB_DIR -lmysqlclient"
