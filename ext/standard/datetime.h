@@ -46,7 +46,7 @@ PHP_FUNCTION(strftime);
 #endif
 PHP_FUNCTION(strtotime);
 
-extern char *php3_std_date(time_t t);
-void _php3_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
+extern char *php_std_date(time_t t);
+void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm);
 
 #endif /* _DATETIME_H */

@@ -317,7 +317,7 @@ PHP_FUNCTION(mt_rand)
 	return_value->type = IS_LONG;
 	/*
 	 * Melo: hmms.. randomMT() returns 32 random bits...
-	 * Yet, the previous php3_rand only returns 31 at most.
+	 * Yet, the previous php_rand only returns 31 at most.
 	 * So I put a right shift to loose the lsb. It *seems*
 	 * better than clearing the msb. 
 	 * Update: 
@@ -349,7 +349,7 @@ PHP_FUNCTION(mt_getrandmax)
 	return_value->type = IS_LONG;
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
-	 * compatibility with the previous php3_rand
+	 * compatibility with the previous php_rand
 	 */
   	return_value->value.lval = 2147483647;	/* 2^^31 */
 }

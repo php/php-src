@@ -48,8 +48,8 @@
 
 #include "dns.h"
 
-char *_php3_gethostbyaddr(char *ip);
-char *_php3_gethostbyname(char *name);
+char *php_gethostbyaddr(char *ip);
+char *php_gethostbyname(char *name);
 
 /* {{{ proto string gethostbyaddr(string ip_address)
    Get the Internet host name corresponding to a given IP address */
@@ -62,14 +62,14 @@ PHP_FUNCTION(gethostbyaddr)
 	}
 	convert_to_string_ex(arg);
 
-	return_value->value.str.val = _php3_gethostbyaddr((*arg)->value.str.val);
+	return_value->value.str.val = php_gethostbyaddr((*arg)->value.str.val);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
 /* }}} */
 
 
-char *_php3_gethostbyaddr(char *ip)
+char *php_gethostbyaddr(char *ip)
 {
 	unsigned long addr;
 	struct hostent *hp;
@@ -101,7 +101,7 @@ PHP_FUNCTION(gethostbyname)
 	}
 	convert_to_string_ex(arg);
 
-	return_value->value.str.val = _php3_gethostbyname((*arg)->value.str.val);
+	return_value->value.str.val = php_gethostbyname((*arg)->value.str.val);
 	return_value->value.str.len = strlen(return_value->value.str.val);
 	return_value->type = IS_STRING;
 }
@@ -142,7 +142,7 @@ PHP_FUNCTION(gethostbynamel)
 }
 /* }}} */
 
-char *_php3_gethostbyname(char *name)
+char *php_gethostbyname(char *name)
 {
 	struct hostent *hp;
 	struct in_addr in;

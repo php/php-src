@@ -80,7 +80,7 @@ static int big_endian_long_map[4];
 static int little_endian_long_map[4];
 
 
-static void _php3_pack(pval *val, int size, int *map, char *output)
+static void php_pack(pval *val, int size, int *map, char *output)
 {
 	int i;
 	char *v;
@@ -344,7 +344,7 @@ PHP_FUNCTION(pack)
 
 			case 'c': case 'C': {
 				while (arg-- > 0) {
-					_php3_pack(argv[currentarg++], 1, byte_map, &output[outputpos]);
+					php_pack(argv[currentarg++], 1, byte_map, &output[outputpos]);
 					outputpos++;
 				}
 				break;
@@ -360,7 +360,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					_php3_pack(argv[currentarg++], 2, map, &output[outputpos]);
+					php_pack(argv[currentarg++], 2, map, &output[outputpos]);
 					outputpos += 2;
 				}
 				break;
@@ -368,7 +368,7 @@ PHP_FUNCTION(pack)
 
 			case 'i': case 'I': {
 				while (arg-- > 0) {
-					_php3_pack(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
+					php_pack(argv[currentarg++], sizeof(int), int_map, &output[outputpos]);
 					outputpos += sizeof(int);
 				}
 				break;
@@ -384,7 +384,7 @@ PHP_FUNCTION(pack)
 				}
 
 				while (arg-- > 0) {
-					_php3_pack(argv[currentarg++], 4, map, &output[outputpos]);
+					php_pack(argv[currentarg++], 4, map, &output[outputpos]);
 					outputpos += 4;
 				}
 				break;
@@ -451,7 +451,7 @@ PHP_FUNCTION(pack)
 /* }}} */
 
 
-static long _php3_unpack(char *data, int size, int issigned, int *map)
+static long php_unpack(char *data, int size, int issigned, int *map)
 {
 	long result;
 	char *cresult = (char *)&result;
@@ -678,7 +678,7 @@ PHP_FUNCTION(unpack)
 
 					case 'c': case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-						long v = _php3_unpack(&input[inputpos], 1, issigned, byte_map);
+						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
@@ -696,7 +696,7 @@ PHP_FUNCTION(unpack)
 							map = little_endian_short_map;
 						}
 
-						v = _php3_unpack(&input[inputpos], 2, issigned, map);
+						v = php_unpack(&input[inputpos], 2, issigned, map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
@@ -709,7 +709,7 @@ PHP_FUNCTION(unpack)
 							issigned = input[inputpos + (machine_little_endian ? (sizeof(int) - 1) : 0)] & 0x80;
 						}
 
-						v = _php3_unpack(&input[inputpos], sizeof(int), issigned, int_map);
+						v = php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
@@ -727,7 +727,7 @@ PHP_FUNCTION(unpack)
 							map = little_endian_long_map;
 						}
 
-						v = _php3_unpack(&input[inputpos], 4, issigned, map);
+						v = php_unpack(&input[inputpos], 4, issigned, map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}

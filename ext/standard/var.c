@@ -409,7 +409,7 @@ int php_var_unserialize(pval **rval, const char **p, const char *max)
 					}
 
 					efree(class_name);
-				} else { /* old php3 data 'o' */
+				} else { /* old php 3.0 data 'o' */
 					ce = &zend_standard_class_def;
 				}
 

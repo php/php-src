@@ -73,7 +73,7 @@
 #define M_APP14 0xee
 #define M_APP15 0xef
 
-static int php3_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoolbuf)
+static int php_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spoolbuf)
 { 
 	if (spool > 0)
 		PUTC(c);
@@ -83,7 +83,7 @@ static int php3_iptc_put1(FILE *fp,int spool,unsigned char c,unsigned char **spo
   	return c;
 }
 
-static int php3_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf)
+static int php_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf)
 { 	
 	int c;
 	char cc;
@@ -102,57 +102,57 @@ static int php3_iptc_get1(FILE *fp,int spool,unsigned char **spoolbuf)
 	return c;
 }
 
-static int php3_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf)
+static int php_iptc_read_remaining(FILE *fp,int spool,unsigned char **spoolbuf)
 {
  	int c;
 
-  	while ((c = php3_iptc_get1(fp,spool,spoolbuf)) != EOF) continue;
+  	while ((c = php_iptc_get1(fp,spool,spoolbuf)) != EOF) continue;
 
 	return M_EOI;
 }
 
-static int php3_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf)
+static int php_iptc_skip_variable(FILE *fp,int spool,unsigned char **spoolbuf)
 { 
 	unsigned int  length;
 	int c1,c2;
 
-    if ((c1 = php3_iptc_get1(fp,spool,spoolbuf)) == EOF) return M_EOI;
+    if ((c1 = php_iptc_get1(fp,spool,spoolbuf)) == EOF) return M_EOI;
 
-    if ((c2 = php3_iptc_get1(fp,spool,spoolbuf)) == EOF) return M_EOI;
+    if ((c2 = php_iptc_get1(fp,spool,spoolbuf)) == EOF) return M_EOI;
 
 	length = (((unsigned char) c1) << 8) + ((unsigned char) c2);
 
 	length -= 2;
 
 	while (length--)
-		if (php3_iptc_get1(fp,spool,spoolbuf) == EOF) return M_EOI;
+		if (php_iptc_get1(fp,spool,spoolbuf) == EOF) return M_EOI;
 
 	return 0;
 }
 
-static int php3_iptc_nextmarker(FILE *fp,int spool,unsigned char **spoolbuf)
+static int php_iptc_next_marker(FILE *fp,int spool,unsigned char **spoolbuf)
 {
     int c;
 
     /* skip unimportant stuff */
 
-    c = php3_iptc_get1(fp,spool,spoolbuf);
+    c = php_iptc_get1(fp,spool,spoolbuf);
 
 	if (c == EOF) return M_EOI;
 
     while (c != 0xff) {
-        if ((c = php3_iptc_get1(fp,spool,spoolbuf)) == EOF)
+        if ((c = php_iptc_get1(fp,spool,spoolbuf)) == EOF)
             return M_EOI; /* we hit EOF */
     }
 
     /* get marker byte, swallowing possible padding */
     do {
-        c = php3_iptc_get1(fp,0,0);
+        c = php_iptc_get1(fp,0,0);
 		if (c == EOF)
             return M_EOI;       /* we hit EOF */
 		else
 		if (c == 0xff)
-			php3_iptc_put1(fp,spool,(unsigned char)c,spoolbuf);
+			php_iptc_put1(fp,spool,(unsigned char)c,spoolbuf);
     } while (c == 0xff);
 
     return (unsigned int) c;
@@ -226,36 +226,36 @@ PHP_FUNCTION(iptcembed)
 		}
 	} 
 
-	if (php3_iptc_get1(fp,spool,poi?&poi:0) != 0xFF) {
+	if (php_iptc_get1(fp,spool,poi?&poi:0) != 0xFF) {
 		fclose(fp);
 		RETURN_FALSE;
 	}
 
-	if (php3_iptc_get1(fp,spool,poi?&poi:0) != 0xD8) {
+	if (php_iptc_get1(fp,spool,poi?&poi:0) != 0xD8) {
 		fclose(fp);
 		RETURN_FALSE;
 	}
 
 	while (!done) {
-		marker = php3_iptc_nextmarker(fp,spool,poi?&poi:0);
+		marker = php_iptc_next_marker(fp,spool,poi?&poi:0);
 
 		if (marker == M_EOI) { /* EOF */
 			break;
 		} else if (marker != M_APP13) { 
-			php3_iptc_put1(fp,spool,(unsigned char)marker,poi?&poi:0);
+			php_iptc_put1(fp,spool,(unsigned char)marker,poi?&poi:0);
 		}
 
 		switch (marker) {
 			case M_APP13:
 				/* we are going to write a new APP13 marker, so don't output the old one */
-				php3_iptc_skip_variable(fp,0,0);    
-				php3_iptc_read_remaining(fp,spool,poi?&poi:0);
+				php_iptc_skip_variable(fp,0,0);    
+				php_iptc_read_remaining(fp,spool,poi?&poi:0);
 				done = 1;
 				break;
 
 			case M_APP0:
 				/* APP0 is in each and every JPEG, so when we hit APP0 we insert our new APP13! */
-				php3_iptc_skip_variable(fp,spool,poi?&poi:0);
+				php_iptc_skip_variable(fp,spool,poi?&poi:0);
 
 				if (len & 1) len++; /* make the length even */
 
@@ -263,23 +263,23 @@ PHP_FUNCTION(iptcembed)
 				psheader[ 3 ] = (len+28)&0xff;
 
 				for (inx = 0; inx < 28; inx++)
-					php3_iptc_put1(fp,spool,psheader[inx],poi?&poi:0);
+					php_iptc_put1(fp,spool,psheader[inx],poi?&poi:0);
 
-				php3_iptc_put1(fp,spool,(unsigned char)(len>>8),poi?&poi:0);
-				php3_iptc_put1(fp,spool,(unsigned char)(len&0xff),poi?&poi:0);
+				php_iptc_put1(fp,spool,(unsigned char)(len>>8),poi?&poi:0);
+				php_iptc_put1(fp,spool,(unsigned char)(len&0xff),poi?&poi:0);
 					
 				for (inx = 0; inx < len; inx++)
-					php3_iptc_put1(fp,spool,(*iptcdata)->value.str.val[inx],poi?&poi:0);
+					php_iptc_put1(fp,spool,(*iptcdata)->value.str.val[inx],poi?&poi:0);
 				break;
 
 			case M_SOS:								
 				/* we hit data, no more marker-inserting can be done! */
-				php3_iptc_read_remaining(fp,spool,poi?&poi:0);
+				php_iptc_read_remaining(fp,spool,poi?&poi:0);
 				done = 1;
 				break;
 			
 			default:
-				php3_iptc_skip_variable(fp,spool,poi?&poi:0);
+				php_iptc_skip_variable(fp,spool,poi?&poi:0);
 				break;
 		}
 	}

@@ -35,7 +35,7 @@
    been defined with C compiler flags.
  */
 #ifndef PROTOTYPES
-#define PROTOTYPES 1 /* php3 has prototypes everywhere */
+#define PROTOTYPES 1 /* PHP has prototypes everywhere */
 #endif
 
 /* _POINTER defines a generic pointer type */

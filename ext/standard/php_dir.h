@@ -21,8 +21,8 @@
 
 #ifndef _PHP_DIR_H
 #define _PHP_DIR_H
-extern zend_module_entry php3_dir_module_entry;
-#define php3_dir_module_ptr &php3_dir_module_entry
+extern zend_module_entry php_dir_module_entry;
+#define php_dir_module_ptr &php_dir_module_entry
 
 /* directory functions */
 extern PHP_MINIT_FUNCTION(dir);
@@ -34,6 +34,6 @@ PHP_FUNCTION(rewinddir);
 PHP_FUNCTION(readdir);
 PHP_FUNCTION(getdir);
 
-#define phpext_dir_ptr php3_dir_module_ptr
+#define phpext_dir_ptr php_dir_module_ptr
 
 #endif /* _PHP_DIR_H */

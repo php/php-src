@@ -29,9 +29,9 @@
 #ifndef _TYPE_H
 #define _TYPE_H
 
-extern int php3_check_type(char *str);
+extern int php_check_type(char *str);
 extern int php_check_ident_type(char *str);
-extern char *php3_get_ident_index(char *str);
+extern char *php_get_ident_index(char *str);
 
 #define GPC_REGULAR 0x1
 #define GPC_INDEXED_ARRAY 0x2

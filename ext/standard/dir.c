@@ -102,7 +102,7 @@ static zend_function_entry php_dir_class_functions[] = {
 };
 
 
-zend_module_entry php3_dir_module_entry = {
+zend_module_entry php_dir_module_entry = {
 	"PHP_dir", php_dir_functions, PHP_MINIT(dir), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
 };
 

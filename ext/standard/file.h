@@ -29,7 +29,7 @@
 
 /* $Id$ */
 
-/* Synced with php3 revision 1.30 1999-06-16 [ssb] */
+/* Synced with php 3.0 revision 1.30 1999-06-16 [ssb] */
 
 #ifndef _FILE_H
 #define _FILE_H
@@ -72,7 +72,7 @@ PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
 PHP_FUNCTION(select);
 
-PHPAPI int _php3_set_sock_blocking(int socketd, int block);
+PHPAPI int php_set_sock_blocking(int socketd, int block);
 PHPAPI int php_file_le_fopen(void);
 PHPAPI int php_file_le_socket(void);
 PHPAPI int php_file_le_uploads(void);

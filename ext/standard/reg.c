@@ -136,9 +136,9 @@ static PHP_MINFO_FUNCTION(regex)
 #define  NS  10
 
 /*
- * _php3_reg_eprint - convert error number to name
+ * php_reg_eprint - convert error number to name
  */
-static void _php3_reg_eprint(int err, regex_t *re) {
+static void php_reg_eprint(int err, regex_t *re) {
 	char *buf = NULL, *message = NULL;
 	size_t len;
 	size_t buf_len;
@@ -175,7 +175,7 @@ static void _php3_reg_eprint(int err, regex_t *re) {
 	STR_FREE(message);
 }
 
-static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
+static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **regex,			/* Regular expression */
 		**findin,		/* String to apply expression to */
@@ -227,7 +227,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (err) {
-		_php3_reg_eprint(err, &re);
+		php_reg_eprint(err, &re);
 		RETURN_FALSE;
 	}
 
@@ -238,7 +238,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	/* actually execute the regular expression */
 	err = regexec(&re, string, (size_t) NS, subs, 0);
 	if (err && err != REG_NOMATCH) {
-		_php3_reg_eprint(err, &re);
+		php_reg_eprint(err, &re);
 		regfree(&re);
 		RETURN_FALSE;
 	}
@@ -250,7 +250,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 		buf = emalloc(string_len);
 		if (!buf) {
-			php_error(E_WARNING, "Unable to allocate memory in _php3_ereg");
+			php_error(E_WARNING, "Unable to allocate memory in php_ereg");
 			RETURN_FALSE;
 		}
 
@@ -284,7 +284,7 @@ static void _php3_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
    Regular expression match */
 PHP_FUNCTION(ereg)
 {
-	_php3_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -292,12 +292,12 @@ PHP_FUNCTION(ereg)
    Case-insensitive regular expression match */
 PHP_FUNCTION(eregi)
 {
-	_php3_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_ereg(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
 /* this is the meat and potatoes of regex replacement! */
-char *_php3_regreplace(const char *pattern, const char *replace, const char *string, int icase, int extended)
+char *php_reg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
 {
 	regex_t re;
 	regmatch_t subs[NS];
@@ -318,7 +318,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 		copts |= REG_EXTENDED;
 	err = regcomp(&re, pattern, copts);
 	if (err) {
-		_php3_reg_eprint(err, &re);
+		php_reg_eprint(err, &re);
 		return ((char *) -1);
 	}
 
@@ -327,7 +327,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 	buf_len = 2 * string_len + 1;
 	buf = emalloc(buf_len * sizeof(char));
 	if (!buf) {
-		php_error(E_WARNING, "Unable to allocate memory in _php3_regreplace");
+		php_error(E_WARNING, "Unable to allocate memory in php_reg_replace");
 		regfree(&re);
 		return ((char *) -1);
 	}
@@ -339,7 +339,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 		err = regexec(&re, &string[pos], (size_t) NS, subs, (pos ? REG_NOTBOL : 0));
 
 		if (err && err != REG_NOMATCH) {
-			_php3_reg_eprint(err, &re);
+			php_reg_eprint(err, &re);
 			regfree(&re);
 			return ((char *) -1);
 		}
@@ -435,7 +435,7 @@ char *_php3_regreplace(const char *pattern, const char *replace, const char *str
 	return (buf);
 }
 
-static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
+static void php_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
 	pval **arg_pattern,
 		**arg_replace,
@@ -480,7 +480,7 @@ static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string = empty_string;
 
 	/* do the actual work */
-	ret = _php3_regreplace(pattern, replace, string, icase, 1);
+	ret = php_reg_replace(pattern, replace, string, icase, 1);
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
@@ -496,7 +496,7 @@ static void _php3_eregreplace(INTERNAL_FUNCTION_PARAMETERS, int icase)
    Replace regular expression */
 PHP_FUNCTION(ereg_replace)
 {
-	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
@@ -504,7 +504,7 @@ PHP_FUNCTION(ereg_replace)
    Case insensitive replace regular expression */
 PHP_FUNCTION(eregi_replace)
 {
-	_php3_eregreplace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_ereg_replace(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 

@@ -79,7 +79,6 @@ function_entry basic_functions[] = {
 	PHP_FE(doubleval,								NULL)
 	PHP_FE(strval,									NULL)
 	PHP_FE(bin2hex, 								NULL)
-	PHP_FE(toggle_short_open_tag,					NULL)
 	PHP_FE(sleep,									NULL)
 	PHP_FE(usleep,									NULL)
 		
@@ -202,9 +201,6 @@ function_entry basic_functions[] = {
 	PHP_FE(getmypid,								NULL)
 	PHP_FE(getmyinode,								NULL)
 	PHP_FE(getlastmod,								NULL)
-	/*getmyiid is here for forward compatibility with 3.1
-	  See pageinfo.c in 3.1 for more information*/
-	/* {"getmyiid",	php3_getmypid,				NULL}, */
 
 	PHP_FE(base64_decode,							NULL)
 	PHP_FE(base64_encode,							NULL)
@@ -328,7 +324,7 @@ zend_module_entry basic_functions_module = {
 
 #if defined(HAVE_PUTENV)
 
-static int _php3_putenv_destructor(putenv_entry *pe)
+static int php_putenv_destructor(putenv_entry *pe)
 {
 	if (pe->previous_value) {
 		putenv(pe->previous_value);
@@ -407,7 +403,7 @@ PHP_RINIT_FUNCTION(basic)
 	BG(page_inode) = -1;
 	BG(page_mtime) = -1;
 #ifdef HAVE_PUTENV
-	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (int (*)(void *)) _php3_putenv_destructor, 0) == FAILURE) {
+	if (zend_hash_init(&BG(putenv_ht), 1, NULL, (int (*)(void *)) php_putenv_destructor, 0) == FAILURE) {
 		return FAILURE;
 	}
 #endif
@@ -540,25 +536,6 @@ PHP_FUNCTION(putenv)
 #endif
 
 
-
-PHP_FUNCTION(toggle_short_open_tag)
-{
-	/* has to be implemented within Zend */
-#if 0
-	pval **value;
-	int ret;
-	
-	ret = php3_ini.short_open_tag;
-
-	if (ARG_COUNT(ht)!=1 || getParametersEx(1,&value) == FAILURE) {
-		WRONG_PARAM_COUNT;
-	}
-	convert_to_long_ex(value);
-	php3_ini.short_open_tag = (*value)->value.lval;
-	RETURN_LONG(ret);
-#endif
-}
-
 /*******************
  * Basic Functions *
  *******************/
@@ -616,11 +593,7 @@ PHP_FUNCTION(strval)
 	convert_to_string(return_value);
 }
 
-#ifdef __cplusplus
-void php3_flush(HashTable *)
-#else
 PHP_FUNCTION(flush)
-#endif
 {
 #if APACHE 
 	SLS_FETCH();
@@ -937,7 +910,7 @@ PHPAPI int _php_error_log(int opt_err,char *message,char *opt,char *headers){
 	case 1: /*send an email*/
 		{
 #if HAVE_SENDMAIL
-		if (!_php3_mail(opt,"PHP error_log message",message,headers)){
+		if (!php_mail(opt,"PHP error_log message",message,headers)){
 			return FAILURE;
 		}
 #else

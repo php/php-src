@@ -547,7 +547,7 @@ static void _php_session_send_cookie(PSLS_D)
 
 	len = strlen(PS(session_name)) + strlen(PS(id)) + sizeof(COOKIE_FMT);
 	if (PS(cookie_lifetime) > 0) {
-		date_fmt = php3_std_date(time(NULL) + PS(cookie_lifetime));
+		date_fmt = php_std_date(time(NULL) + PS(cookie_lifetime));
 		len += sizeof(COOKIE_EXPIRES) + strlen(date_fmt);
 	}
 

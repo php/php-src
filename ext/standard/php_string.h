@@ -31,7 +31,7 @@
 
 /* $Id$ */
 
-/* Synced with php3 revision 1.43 1999-06-16 [ssb] */
+/* Synced with php 3.0 revision 1.43 1999-06-16 [ssb] */
 
 #ifndef _PHPSTRING_H
 #define _PHPSTRING_H

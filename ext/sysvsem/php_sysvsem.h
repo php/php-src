@@ -43,11 +43,7 @@
 extern zend_module_entry sysvsem_module_entry;
 #define sysvsem_module_ptr &sysvsem_module_entry
 
-extern int php3_minit_sysvsem(INIT_FUNC_ARGS);
-extern int php3_rinit_sysvsem(INIT_FUNC_ARGS);
-extern int php3_mshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
-extern int php3_rshutdown_sysvsem(SHUTDOWN_FUNC_ARGS);
-void php3_info_sysvsem(void);
+PHP_MINIT_FUNCTION(sysvsem);
 PHP_FUNCTION(sysvsem_get);
 PHP_FUNCTION(sysvsem_acquire);
 PHP_FUNCTION(sysvsem_release);
@@ -63,7 +59,7 @@ typedef struct {
 	int count;					/* Acquire count for auto-release. */
 } sysvsem_sem;
 
-extern sysvsem_module php3_sysvsem_module;
+extern sysvsem_module php_sysvsem_module;
 
 #else
 

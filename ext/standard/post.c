@@ -49,7 +49,7 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 
 	var_type = php_check_ident_type(var);
 	if (var_type == GPC_INDEXED_ARRAY) {
-		ind = php3_get_ident_index(var);
+		ind = php_get_ident_index(var);
 		if (PG(magic_quotes_gpc)) {
 			array_index = php_addslashes(ind, 0, NULL, 1);
 		} else {
@@ -121,7 +121,7 @@ void php_parse_gpc_data(char *val, char *var, pval *track_vars_array ELS_DC PLS_
 		/* Insert it */
 		if (array_index) {	
 			/* indexed array */
-			if (php3_check_type(array_index) == IS_LONG) {
+			if (php_check_type(array_index) == IS_LONG) {
 				/* numeric index */
 				zend_hash_index_update(gpc_element->value.ht, atol(array_index), &array_element, sizeof(pval *), NULL);	/* s[array_index]=tmp */
 			} else {
@@ -391,8 +391,8 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 			if (val) { /* have a value */
 				*val++ = '\0';
 				/* FIXME: XXX: not binary safe, discards returned length */
-				_php3_urldecode(var, strlen(var));
-				_php3_urldecode(val, strlen(val));
+				php_url_decode(var, strlen(var));
+				php_url_decode(val, strlen(val));
 				php_parse_gpc_data2(val,var,array_ptr ELS_CC PLS_CC);
 			}
 			if (arg == PARSE_COOKIE) {

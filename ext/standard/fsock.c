@@ -20,8 +20,8 @@
 
 /* $Id$ */
 
-/* Synced with php3 revision 1.121 1999-06-18 [ssb] */
-/* Synced with php3 revision 1.133 1999-07-21 [sas] */
+/* Synced with php 3.0 revision 1.121 1999-06-18 [ssb] */
+/* Synced with php 3.0 revision 1.133 1999-07-21 [sas] */
 
 #include "php.h"
 #include "php_globals.h"
@@ -95,21 +95,21 @@ function_entry fsock_functions[] = {
       {NULL, NULL, NULL}
 };
 
-struct php3i_sockbuf {
+struct php_sockbuf {
 	int socket;
 	unsigned char *readbuf;
 	size_t readbuflen;
 	size_t readpos;
 	size_t writepos;
-	struct php3i_sockbuf *next;
-	struct php3i_sockbuf *prev;
+	struct php_sockbuf *next;
+	struct php_sockbuf *prev;
 	char eof;
 	char persistent;
 	char is_blocked;
 	size_t chunk_size;
 };
 
-typedef struct php3i_sockbuf php3i_sockbuf;
+typedef struct php_sockbuf php_sockbuf;
 
 zend_module_entry fsock_module_entry = {
 	"Socket functions",
@@ -144,9 +144,9 @@ int lookup_hostname(const char *addr, struct in_addr *in)
 	return 0;
 }
 /* }}} */
-/* {{{ _php3_is_persistent_sock */
+/* {{{ php_is_persistent_sock */
 
-int _php3_is_persistent_sock(int sock)
+int php_is_persistent_sock(int sock)
 {
 	char *key;
 	FLS_FETCH();
@@ -228,14 +228,14 @@ PHPAPI int connect_nonb(int sockfd,
 #endif
 }
 /* }}} */
-/* {{{ _php3_fsockopen() */
+/* {{{ php_fsockopen() */
 
 /* 
    This function takes an optional third argument which should be
    passed by reference.  The error code from the connect call is written
    to this variable.
 */
-static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
+static void php_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
 	pval *args[5];
 	int *sock=emalloc(sizeof(int));
 	int *sockp;
@@ -373,14 +373,14 @@ static void _php3_fsockopen(INTERNAL_FUNCTION_PARAMETERS, int persistent) {
    Open Internet or Unix domain socket connection */
 PHP_FUNCTION(fsockopen) 
 {
-	_php3_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	php_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 /* {{{ proto int pfsockopen(string hostname, int port [, int errno [, string errstr [, double timeout]]])
    Open persistent Internet or Unix domain socket connection */
 PHP_FUNCTION(pfsockopen) 
 {
-	_php3_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	php_fsockopen(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -395,7 +395,7 @@ PHP_FUNCTION(pfsockopen)
 
 static void php_cleanup_sockbuf(int persistent FLS_DC)
 {
-	php3i_sockbuf *now, *next;
+	php_sockbuf *now, *next;
 
 	for(now = FG(phpsockbuf); now; now = next) {
 		next = now->next;
@@ -409,14 +409,14 @@ static void php_cleanup_sockbuf(int persistent FLS_DC)
 #define READPTR(sock) ((sock)->readbuf + (sock)->readpos)
 #define WRITEPTR(sock) ((sock)->readbuf + (sock)->writepos)
 #define SOCK_FIND(sock,socket) \
-      php3i_sockbuf *sock; \
+      php_sockbuf *sock; \
       FLS_FETCH(); \
       sock = php_sockfind(socket FLS_CC); \
       if(!sock) sock = php_sockcreate(socket FLS_CC)
 
-static php3i_sockbuf *php_sockfind(int socket FLS_DC)
+static php_sockbuf *php_sockfind(int socket FLS_DC)
 {
-	php3i_sockbuf *buf = NULL, *tmp;
+	php_sockbuf *buf = NULL, *tmp;
 
 	for(tmp = FG(phpsockbuf); tmp; tmp = tmp->next) 
 		if(tmp->socket == socket) {
@@ -427,10 +427,10 @@ static php3i_sockbuf *php_sockfind(int socket FLS_DC)
 	return buf;
 }
 
-static php3i_sockbuf *php_sockcreate(int socket FLS_DC)
+static php_sockbuf *php_sockcreate(int socket FLS_DC)
 {
-	php3i_sockbuf *sock;
-	int persistent = _php3_is_persistent_sock(socket);
+	php_sockbuf *sock;
+	int persistent = php_is_persistent_sock(socket);
 
 	sock = pecalloc(sizeof(*sock), 1, persistent);
 	sock->socket = socket;
@@ -460,7 +460,7 @@ size_t php_sock_set_def_chunk_size(size_t size)
 int php_sockdestroy(int socket)
 {
 	int ret = 0;
-	php3i_sockbuf *sock;
+	php_sockbuf *sock;
 	FLS_FETCH();
 
 	sock = php_sockfind(socket FLS_CC);
@@ -487,7 +487,7 @@ int php_sockdestroy(int socket)
 int php_sock_close(int socket)
 {
 	int ret = 0;
-	php3i_sockbuf *sock;
+	php_sockbuf *sock;
 	FLS_FETCH();
 
 	sock = php_sockfind(socket FLS_CC);
@@ -505,7 +505,7 @@ int php_sock_close(int socket)
 
 #define MAX_CHUNKS_PER_READ 10
 
-static void php_sockwait_for_data(php3i_sockbuf *sock)
+static void php_sockwait_for_data(php_sockbuf *sock)
 {
 	fd_set fdr, tfdr;
 
@@ -519,7 +519,7 @@ static void php_sockwait_for_data(php3i_sockbuf *sock)
 	}
 }
 
-static size_t php_sockread_internal(php3i_sockbuf *sock)
+static size_t php_sockread_internal(php_sockbuf *sock)
 {
 	char buf[CHUNK_SIZE];
 	int nr_bytes;
@@ -555,14 +555,14 @@ static size_t php_sockread_internal(php3i_sockbuf *sock)
 	return nr_read;
 }
 
-static void php_sockread_total(php3i_sockbuf *sock, size_t maxread)
+static void php_sockread_total(php_sockbuf *sock, size_t maxread)
 {
 	while(!sock->eof && TOREAD(sock) < maxread) {
 		php_sockread_internal(sock);
 	}
 }
 
-static size_t php_sockread(php3i_sockbuf *sock)
+static size_t php_sockread(php_sockbuf *sock)
 {
 	size_t nr_bytes;
 	size_t nr_read = 0;
@@ -711,7 +711,6 @@ int php_msock_destroy(int *data)
 	return 1;
 }
 /* }}} */
-	/* {{{ php3_minit_fsock */
 
 static void fsock_globals_ctor(FLS_D)
 {
@@ -737,8 +736,6 @@ PHP_MINIT_FUNCTION(fsock)
 #endif
 	return SUCCESS;
 }
-/* }}} */
-	/* {{{ php3_mshutdown_fsock */
 
 PHP_MSHUTDOWN_FUNCTION(fsock)
 {
@@ -747,8 +744,6 @@ PHP_MSHUTDOWN_FUNCTION(fsock)
 #endif
 	return SUCCESS;
 }
-/* }}} */
-    /* {{{ php3_rshutdown_fsock() */
 
 PHP_RSHUTDOWN_FUNCTION(fsock)
 {
@@ -757,10 +752,6 @@ PHP_RSHUTDOWN_FUNCTION(fsock)
 	php_cleanup_sockbuf(0 FLS_CC);
 	return SUCCESS;
 }
-
-/* }}} */
-
-/* }}} */
 
 /*
  * Local variables:

@@ -19,7 +19,7 @@
 
 /* $Id$ */
 
-/* Synced with php3 revision 1.218 1999-06-16 [ssb] */
+/* Synced with php 3.0 revision 1.218 1999-06-16 [ssb] */
 
 /* {{{ includes */
 
@@ -657,7 +657,7 @@ PHP_FUNCTION(fopen)
 
 	/*
 	 * We need a better way of returning error messages from
-	 * php3_fopen__wrapper().
+	 * php_fopen_wrapper().
 	 */
 	fp = php_fopen_wrapper((*arg1)->value.str.val, p, use_include_path|ENFORCE_SAFE_MODE, &issock, &socketd, NULL);
 	if (!fp && !socketd) {
@@ -813,7 +813,7 @@ PHP_FUNCTION(feof)
 /* {{{ proto int set_socket_blocking(int socket descriptor, int mode)
    Set blocking/non-blocking mode on a socket */
 
-PHPAPI int _php3_set_sock_blocking(int socketd, int block)
+PHPAPI int php_set_sock_blocking(int socketd, int block)
 {
       int ret = SUCCESS;
       int flags;
@@ -862,7 +862,7 @@ PHP_FUNCTION(set_socket_blocking)
 	
 	socketd = *(int*)what;
 
-	if (_php3_set_sock_blocking(socketd, block) == FAILURE)
+	if (php_set_sock_blocking(socketd, block) == FAILURE)
 		RETURN_FALSE;
 
 	php_sockset_blocking(socketd, block == 0 ? 0 : 1);
@@ -1548,7 +1548,7 @@ PHP_FUNCTION(fgetcsv) {
 	char *temp, *tptr, *bptr;
 	char delimiter = ',';	/* allow this to be set as parameter */
 
-	/* first section exactly as php3_fgetss */
+	/* first section exactly as php_fgetss */
 
 	pval **fd, **bytes, **p_delim;
 	int len, type;

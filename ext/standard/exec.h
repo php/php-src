@@ -39,5 +39,5 @@ PHP_FUNCTION(escapeshellcmd);
 PHP_FUNCTION(passthru);
 PHP_FUNCTION(shell_exec);
 
-char *_php3_escapeshellcmd(char *);
+char *php_escape_shell_cmd(char *);
 #endif /* _EXEC_H */

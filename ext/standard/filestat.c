@@ -396,7 +396,7 @@ PHP_FUNCTION(clearstatcache)
 }
 
 
-static void _php3_stat(const char *filename, int type, pval *return_value)
+static void php_stat(const char *filename, int type, pval *return_value)
 {
 	struct stat *stat_sb;
 	BLS_FETCH();
@@ -539,7 +539,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		WRONG_PARAM_COUNT; \
 	} \
 	convert_to_string(filename); \
-	_php3_stat(filename->value.str.val, funcnum, return_value); \
+	php_stat(filename->value.str.val, funcnum, return_value); \
 }
 
 FileFunction(PHP_FN(fileperms),0)
@@ -561,7 +561,7 @@ FileFunction(PHP_FN(file_exists),15)
 FileFunction(PHP_FN(lstat),16)
 FileFunction(PHP_FN(stat),17)
 
-function_entry php3_filestat_functions[] = {
+function_entry php_filestat_functions[] = {
 	PHP_FE(fileatime,								NULL)
 	PHP_FE(filectime,								NULL)
 	PHP_FE(filegroup,								NULL)
@@ -591,8 +591,8 @@ function_entry php3_filestat_functions[] = {
 };
 
 
-zend_module_entry php3_filestat_module_entry = {
-	"PHP_filestat", php3_filestat_functions, NULL, NULL, PHP_RINIT(filestat),
+zend_module_entry php_filestat_module_entry = {
+	"PHP_filestat", php_filestat_functions, NULL, NULL, PHP_RINIT(filestat),
 					PHP_RSHUTDOWN(filestat), NULL, STANDARD_MODULE_PROPERTIES
 };
 
