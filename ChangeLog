@@ -1,3 +1,51 @@
+2000-04-28  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/imap/config.m4: Improve imap-lib check
+
+2000-04-28  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * SAPI.c:
+    no more broken scripts by erroneously terminating header()'s argument
+    with a CR-LF
+
+2000-04-28  tedp  <tedp@va>
+
+    * ext/imap/php_imap.c:
+    Removed bug that prevented it to work on longer strings.
+    Changed commenting to c-style commenting.
+
+2000-04-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/array.c: Fix an empty arrays condition and optimize a bit.
+
+2000-04-28  Zeev Suraski  <zeev@php.net>
+
+    * ext/standard/head.c
+      ext/standard/head.h
+      SAPI.c
+      SAPI.h
+      ext/session/session.c
+      main.c: - Fix an invalid trick (it was valid when header() was using
+      zend_get_parameters(), but it became invalid when someone switched it
+      to zend_get_parameters_ex(), and I decided to remove it anyway).
+    - Remove a redundant function call
+
+2000-04-28  Andrei Zmievski  <andrei@ispi.net>
+
+    * TODO: Fix up.
+
+2000-04-28  Thies C. Arntzen  <thies@digicol.de>
+
+    * main.c:
+    (php_module_startup) is now doing setlocale(LC_ALL, "") instead of just setlocale(LC_CTYPE, ""). suggested by Jon Forsberg <zzed@cyberdude.com>
+
+    * TODO: .
+
+    * ext/oci8/oci8.c
+      ext/oracle/oracle.c: compile fix
+
+    * TODO-LeftOver: no longer needed
+
 2000-04-27  Zeev Suraski  <zeev@php.net>
 
     * main.c: Change to using macros
