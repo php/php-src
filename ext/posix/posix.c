@@ -23,7 +23,7 @@
    | If you did not, or have any questions about PHP licensing, please    |
    | contact core@php.net.                                                |
    +----------------------------------------------------------------------+
-   | Authors: Kristian Koehntopp (kris@koehntopp.de)                      |
+   | Authors: Kristian Koehntopp <kris@koehntopp.de>                      |
    +----------------------------------------------------------------------+
  */
  
@@ -564,7 +564,7 @@ PHP_FUNCTION(posix_isatty)
 				already supported by PHP
  */
 
-/* {{{ proto string posix_getcwd() 
+/* {{{ proto string posix_getcwd(void) 
    Get working directory pathname (POSIX.1, 5.2.2) */
 PHP_FUNCTION(posix_getcwd)
 {
@@ -588,7 +588,7 @@ PHP_FUNCTION(posix_getcwd)
 		already supported by PHP.
  */
 
-/* {{{ proto string posix_mkfifo()
+/* {{{ proto string posix_mkfifo(void)
    Make a FIFO special file (POSIX.1, 5.4.2) */
 PHP_FUNCTION(posix_mkfifo)
 {
