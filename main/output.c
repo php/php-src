@@ -200,7 +200,8 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 
 	to_be_destroyed_buffer = OG(active_ob_buffer).buffer;
 	if (OG(active_ob_buffer).internal_output_handler
-		&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)) {
+		&& (final_buffer != OG(active_ob_buffer).internal_output_handler_buffer)
+		&& (final_buffer != OG(active_ob_buffer).buffer)) {
 		to_be_destroyed_handled_output[0] = final_buffer;
 	}
 
