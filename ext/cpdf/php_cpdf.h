@@ -29,8 +29,6 @@
 #undef T
 #endif
 
-#include <cpdflib.h>
-
 extern zend_module_entry cpdf_module_entry;
 #define cpdf_module_ptr &cpdf_module_entry
 
