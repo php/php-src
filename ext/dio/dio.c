@@ -159,6 +159,10 @@ PHP_FUNCTION(dio_open)
 		return;
 	}
 
+	if (php_check_open_basedir(file_name TSRMLS_CC) || (PG(safe_mode) && !php_checkuid(file_name, "wb+", CHECKUID_CHECK_MODE_PARAM))) {
+		RETURN_FALSE;
+	}
+
 	if (ZEND_NUM_ARGS() == 3) {
 		fd = open(file_name, flags, mode);
 	} else {
