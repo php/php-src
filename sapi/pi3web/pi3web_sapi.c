@@ -71,7 +71,6 @@ static void php_info_pi3web(ZEND_MODULE_INFO_FUNC_ARGS)
 	char variable_buf[PI3WEB_SERVER_VAR_BUF_SIZE];
 	DWORD variable_len;
 	LPCONTROL_BLOCK lpCB;
-	TSRMLS_FETCH();
 
 	lpCB = (LPCONTROL_BLOCK) SG(server_context);
 
@@ -193,7 +192,7 @@ static int sapi_pi3web_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 	combined_headers = (char *) emalloc(total_length+1);
 	combined_headers_ptr = combined_headers;
 	if (SG(sapi_headers).send_default_content_type) {
-		concat_header(&default_content_type, (void *) &combined_headers_ptr);
+		concat_header(&default_content_type, (void *) &combined_headers_ptr TSRMLS_CC);
 		sapi_free_header(&default_content_type); /* we no longer need it */
 	}
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t) concat_header, (void *) &combined_headers_ptr TSRMLS_CC);
@@ -301,7 +300,7 @@ static sapi_module_struct pi3web_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-static void init_request_info(sapi_globals_struct *sapi_globals, LPCONTROL_BLOCK lpCB)
+static void init_request_info(LPCONTROL_BLOCK lpCB TSRMLS_DC)
 {
 	char *path_end = strrchr(lpCB->lpszFileName, PHP_DIR_SEPARATOR);
 	if ( path_end ) *path_end = PHP_DIR_SEPARATOR;
@@ -384,7 +383,7 @@ DWORD PHP4_wrapper(LPCONTROL_BLOCK lpCB)
 		file_handle.opened_path = NULL;
 
 		CG(extended_info) = 0;
-		init_request_info(sapi_globals, lpCB);
+		init_request_info(lpCB TSRMLS_CC);
 		php_request_startup(TSRMLS_C);
 
 		hash_pi3web_variables(TSRMLS_C);
