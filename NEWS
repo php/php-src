@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? ????, Version 4.0 Beta 4
+- Added is_subclass_of() function (Andrei, Zend library)
 - Implemented count_chars(). (Thies)
 - Added class_exists() function (Andrei, Zend library)
 - Made strspn() and strcspn() binary-safe. (Andrei)
