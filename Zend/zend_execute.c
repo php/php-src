@@ -197,7 +197,7 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 	if (variable_ptr == EG(error_zval_ptr) || value_ptr==EG(error_zval_ptr)) {
 		variable_ptr_ptr = &EG(uninitialized_zval_ptr);
 /*	} else if (variable_ptr==&EG(uninitialized_zval) || variable_ptr!=value_ptr) { */
-	} else if (variable_ptr != value_ptr) {
+	} else if (variable_ptr_ptr != value_ptr_ptr) {
 		variable_ptr->refcount--;
 		if (variable_ptr->refcount==0) {
 			zendi_zval_dtor(*variable_ptr);
@@ -220,15 +220,8 @@ void zend_assign_to_variable_reference(znode *result, zval **variable_ptr_ptr, z
 		*variable_ptr_ptr = value_ptr;
 		value_ptr->refcount++;
 	} else {
-		if (variable_ptr==EG(uninitialized_zval_ptr)
-			|| variable_ptr->refcount>2) {
-			/* we need to separate */
-			variable_ptr->refcount -= 2;
-			ALLOC_ZVAL(*variable_ptr_ptr);
-			**variable_ptr_ptr = *variable_ptr;
-			zval_copy_ctor(*variable_ptr_ptr);
-			*value_ptr_ptr = *variable_ptr_ptr;
-			(*variable_ptr_ptr)->refcount = 2;
+		if (variable_ptr->refcount>1) { /* we need to break away */
+			SEPARATE_ZVAL(variable_ptr_ptr);
 		}
 		(*variable_ptr_ptr)->is_ref = 1;
 	}
@@ -2594,11 +2587,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 
-	current_this = EG(This);
-	EG(This) = EX(object);
-	current_scope = EG(scope);
-	EG(scope) = EX(calling_scope);
-
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {	
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
@@ -2618,6 +2606,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		HashTable *calling_symbol_table;
+
+		current_this = EG(This);
+		EG(This) = EX(object);
+		current_scope = EG(scope);
+		EG(scope) = EX(calling_scope);
 
 		EX_T(EX(opline)->result.u.var).var.ptr = NULL;
 		if (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
@@ -2656,6 +2649,11 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zend_hash_clean(*EG(symtable_cache_ptr));
 		}
 		EG(active_symbol_table) = calling_symbol_table;
+		if (EG(This)) {
+			zval_ptr_dtor(&EG(This));
+		}
+		EG(This) = current_this;
+		EG(scope) = current_scope;
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
 		INIT_ZVAL(*(EX_T(EX(opline)->result.u.var).var.ptr));
@@ -2672,11 +2670,6 @@ int zend_do_fcall_common_helper(ZEND_OPCODE_HANDLER_ARGS)
 			zval_ptr_dtor(&EX_T(EX(opline)->result.u.var).var.ptr);
 		}
 	}
-	if (EG(This)) {
-		zval_ptr_dtor(&EG(This));
-	}
-	EG(This) = current_this;
-	EG(scope) = current_scope;
 	zend_ptr_stack_n_pop(&EG(arg_types_stack), 3, &EX(calling_scope), &EX(object), &EX(fbc));
 	
 	if(EG(active_namespace) != active_namespace) {
@@ -3116,7 +3109,6 @@ int zend_new_handler(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	EX_T(EX(opline)->result.u.var).var.ptr_ptr = &EX_T(EX(opline)->result.u.var).var.ptr;
 	ALLOC_ZVAL(EX_T(EX(opline)->result.u.var).var.ptr);
-	printf ("[zend - new handler]\n");
 	object_init_ex(EX_T(EX(opline)->result.u.var).var.ptr, EX_T(EX(opline)->op1.u.var).EA.class_entry);
 	EX_T(EX(opline)->result.u.var).var.ptr->refcount=1;
 	EX_T(EX(opline)->result.u.var).var.ptr->is_ref=1;
