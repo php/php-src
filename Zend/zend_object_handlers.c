@@ -452,6 +452,13 @@ static void zend_std_unset_property(zval *object, zval *member TSRMLS_DC)
 	}
 }
 
+
+static void zend_std_unset_dimension(zval *object, zval *offset TSRMLS_DC)
+{
+	zend_error(E_ERROR, "Cannot use object as array");
+}
+
+
 static void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval ***args;
@@ -875,6 +882,7 @@ zend_object_handlers std_object_handlers = {
 	NULL,									/* set */
 	zend_std_has_property,					/* has_property */
 	zend_std_unset_property,				/* unset_property */
+	zend_std_unset_dimension,				/* unset_dimension */
 	zend_std_get_properties,				/* get_properties */
 	zend_std_get_method,					/* get_method */
 	NULL,									/* call_method */

@@ -338,6 +338,9 @@ static inline void zend_assign_to_object(znode *result, zval **object_ptr, znode
 	if (opcode == ZEND_ASSIGN_OBJ) {
 		Z_OBJ_HT_P(object)->write_property(object, property, value TSRMLS_CC);
 	} else {
+		if (!Z_OBJ_HT_P(object)->write_dimension) {
+			zend_error(E_ERROR, "Cannot use object as array");
+		}
 		Z_OBJ_HT_P(object)->write_dimension(object, property, value TSRMLS_CC);
 	}
 	if (property == &tmp) {
@@ -848,13 +851,17 @@ static void zend_fetch_dimension_address(znode *result, znode *op1, znode *op2, 
 			break;
 		case IS_OBJECT:
 			if (type == BP_VAR_R) {
-				zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
-				zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim TSRMLS_CC);
-				 
-				*retval = &overloaded_result;
-				AI_USE_PTR(T(result->u.var).var);
-				FREE_OP(Ts, op2, EG(free_op2));
-				SELECTIVE_PZVAL_LOCK(**retval, result);
+				if (!Z_OBJ_HT_P(container)->read_dimension) {
+					zend_error(E_ERROR, "Cannot use object as array");
+				} else {
+					zval *dim = get_zval_ptr(op2, Ts, &EG(free_op2), BP_VAR_R);
+					zval *overloaded_result = Z_OBJ_HT_P(container)->read_dimension(container, dim TSRMLS_CC);
+					 
+					*retval = &overloaded_result;
+					AI_USE_PTR(T(result->u.var).var);
+					FREE_OP(Ts, op2, EG(free_op2));
+					SELECTIVE_PZVAL_LOCK(**retval, result);
+				}
 			}
 			break;
 		default: {
@@ -3404,6 +3411,7 @@ int zend_unset_var_handler(ZEND_OPCODE_HANDLER_ARGS)
 }
 
 
+
 int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval **container = get_obj_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R TSRMLS_CC);
@@ -3413,13 +3421,30 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 	if (container) {
 		HashTable *ht;
 
-		if ((*container)->type == IS_ARRAY) {
-			ht = (*container)->value.ht;
-		} else {
-			ht = NULL;
-			if ((*container)->type == IS_OBJECT) {
-				Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
-			}
+		switch (EX(opline)->opcode) {
+			case ZEND_UNSET_DIM:
+				switch (Z_TYPE_PP(container)) {
+					case IS_ARRAY:
+						ht = Z_ARRVAL_PP(container);
+						break;
+					case IS_OBJECT:
+						ht = NULL;
+						if (!Z_OBJ_HT_P(*container)->unset_dimension) {
+							zend_error(E_ERROR, "Cannot use object as array");
+						}
+						Z_OBJ_HT_P(*container)->unset_dimension(*container, offset TSRMLS_CC);
+						break;
+					default:
+						ht = NULL;
+						break;
+				}
+				break;
+			case ZEND_UNSET_OBJ:
+				ht = NULL;
+				if (Z_TYPE_PP(container) == IS_OBJECT) {
+					Z_OBJ_HT_P(*container)->unset_property(*container, offset TSRMLS_CC);
+				}
+				break;
 		}
 		if (ht)	{
 			switch (offset->type) {
@@ -4044,7 +4069,8 @@ void zend_init_opcodes_handlers()
 	zend_opcode_handlers[ZEND_INCLUDE_OR_EVAL] = zend_include_or_eval_handler;
 
 	zend_opcode_handlers[ZEND_UNSET_VAR] = zend_unset_var_handler;
-	zend_opcode_handlers[ZEND_UNSET_DIM_OBJ] = zend_unset_dim_obj_handler;
+	zend_opcode_handlers[ZEND_UNSET_DIM] = zend_unset_dim_obj_handler;
+	zend_opcode_handlers[ZEND_UNSET_OBJ] = zend_unset_dim_obj_handler;
 
 	zend_opcode_handlers[ZEND_FE_RESET] = zend_fe_reset_handler;
 	zend_opcode_handlers[ZEND_FE_FETCH] = zend_fe_fetch_handler;

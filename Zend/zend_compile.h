@@ -571,7 +571,8 @@ int zendlex(znode *zendlval TSRMLS_DC);
 #define ZEND_INCLUDE_OR_EVAL		73
 									
 #define ZEND_UNSET_VAR				74
-#define ZEND_UNSET_DIM_OBJ			75
+#define ZEND_UNSET_DIM				75
+#define ZEND_UNSET_OBJ				76
 									
 #define ZEND_FE_RESET				77
 #define ZEND_FE_FETCH				78
