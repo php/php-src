@@ -249,26 +249,7 @@ SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\config.w32.h.in
-
-!IF  "$(CFG)" == "php4dll - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "php4dll - Win32 Release_inline"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h ( 
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
-	) 
-	
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=..\ext\standard\config.w32.h
 # End Source File
 # Begin Source File
 

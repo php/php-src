@@ -278,58 +278,7 @@ SOURCE=..\ext\standard\aggregation.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\config.w32.h.in
-
-!IF  "$(CFG)" == "php4dllts - Win32 Debug_TS"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h ( 
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
-	) 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h ( 
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
-	) 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TS_inline"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h ( 
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
-	) 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "php4dllts - Win32 Release_TSDbg"
-
-# Begin Custom Build - Generating main/config.w32.h
-InputPath=..\main\config.w32.h.in
-
-"..\main\config.w32.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	if not exist ..\main\config.w32.h ( 
-	copy ..\main\config.w32.h.in ..\main\config.w32.h > nul 
-	) 
-	
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=..\ext\standard\config.w32.h
 # End Source File
 # Begin Source File
 
