@@ -77,8 +77,8 @@ PHP 4                                                                      NEWS
   . ext/cybermut
 - ZLIB extension is now built-in in the Windows distribution.
   External extension (php_zlib.dll) has been removed. (Edin)
-- Fix a crash when using invalid color index with imagecolortransparent()
-  (Pierre-Alain Joye).
+- Fix a crash when using invalid color index with imagecolortransparent().
+  (Pierre-Alain Joye)
 - Fixed bug #20987 (no handling for client certificates). (Ilia)
 - Fixed bug #21039 (crash when not supplying an IV to mcrypt_generic_init).
   (Derick)
@@ -95,7 +95,7 @@ PHP 4                                                                      NEWS
   true-color image). (Ilia)
 - Fixed a crash when converting between true-color images (png/jpeg) and
   gd1/gd2 image formats, png/jpeg -> gd1/gd2 -> png/jpeg conversion now
-  works correctly. (Ilia, (Pierre-Alain Joye).
+  works correctly. (Ilia, Pierre-Alain Joye).
 - Fixed a memory leak in the bundled GD library inside 
   gdImageTrueColorToPalette(). (Ilia)
 - Fixed bug #12776 (array_walk crash). (Moriyoshi)
