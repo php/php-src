@@ -86,7 +86,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	char *http_header_line;
 	int http_header_line_length, http_header_line_size;
 
-	resource = url_parse((char *) path);
+	resource = php_url_parse((char *) path);
 	if (resource == NULL) {
 		php_error(E_WARNING, "Invalid URL specified, %s", path);
 		*issock = BAD_URL;
@@ -101,17 +101,17 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	if (*socketd == -1) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
-		free_url(resource);
+		php_url_free(resource);
 		return NULL;
 	}
 #if 0
 	if ((fp = fdopen(*socketd, "r+")) == NULL) {
-		free_url(resource);
+		php_url_free(resource);
 		return NULL;
 	}
 #ifdef HAVE_SETVBUF
 	if ((setvbuf(fp, NULL, _IONBF, 0)) != 0) {
-		free_url(resource);
+		php_url_free(resource);
 		return NULL;
 	}
 #endif
@@ -137,7 +137,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	if (resource->user != NULL && resource->pass != NULL) {
 		scratch = (char *) emalloc(strlen(resource->user) + strlen(resource->pass) + 2);
 		if (!scratch) {
-			free_url(resource);
+			php_url_free(resource);
 			return NULL;
 		}
 		strcpy(scratch, resource->user);
@@ -271,7 +271,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 	if (!reqok) {
 		SOCK_FCLOSE(*socketd);
 		*socketd = 0;
-		free_url(resource);
+		php_url_free(resource);
 		if (location[0] != '\0') {
 			zval **response_header_new, *entry, **entryp;
 			ELS_FETCH();
@@ -295,7 +295,7 @@ FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, 
 			goto out;
 		}
 	}
-	free_url(resource);
+	php_url_free(resource);
 	*issock = 1;
  out:
 	{
