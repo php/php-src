@@ -117,6 +117,7 @@ foreach ($install_files as $package => $instfile) {
         }
         $ui->outputData('Writing PEAR system config file at: ' . $config->files['system']);
         $ui->outputData('You may want to add: ' . $config->get('php_dir') . ' to your php.ini include_path');
+        $config->set('verbose', 1, 'default');
         foreach ($config->getKeys() as $key) {
             $data[$key] = $config->get($key);
         }
