@@ -1,3 +1,68 @@
+2004-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      really don't blow up
+
+2004-12-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/fbsql/php_fbsql.c:
+      Fixed several buffer overflows.
+
+    * (PHP_4_3)
+      ext/swf/swf.c:
+      Fixed potential buffer overflow inside swf_definepoly().
+
+    * (PHP_4_3)
+      NEWS
+      ext/swf/swf.c:
+      Fixed bug #31270 (missing safe_mode/open_basedir check in swf_openfile()).
+
+2004-12-23  Antony Dovgal  <tony2001@phpclub.net>
+
+    * (PHP_4_3)
+      ext/standard/array.c
+      ext/standard/array.c:
+      MFH: destroy return_value and fix leak in array_fill()
+
+    * ext/standard/array.c:
+      destroy return_value and fix leak in array_fill()
+
+    * (PHP_4_3)
+      NEWS
+      NEWS:
+      news entry
+
+    * (PHP_4_3)
+      ext/oci8/config.m4:
+      MFH: add Oracle Instant Client support (patch by cjbj at hotmail dot com)
+
+    * (PHP_5_0)
+      ext/oci8/config.m4:
+      MFH: add Oracle Instant Client support (initial patch by cjbj at hotmail
+      dot com)
+
+    * ext/oci8/config.m4:
+      add Oracle Instant Client support (initial patch by cjbj at hotmail dot
+      com)
+
+2004-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/standard/streamsfuncs.c:
+      don't crash...
+
+2004-12-23  Edin Kadribasic  <edink@emini.dk>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+2004-12-23  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * (PHP_4_3)
+      ext/com/COM.c:
+      Black magic bad.
+      This will probably fixed reported COM problems (multiple bug #s)
+
 2004-12-22  Ilia Alshanetsky  <ilia@prohost.org>
 
     * (PHP_4_3)
