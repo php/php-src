@@ -499,7 +499,7 @@ PHP_FUNCTION(xslt_process)
 
 	/* Translate a PHP array into a Sablotron array */
 	if (argc > 4) {
-		xslt_make_array(args_p,   &args);
+		xslt_make_array(args_p, &args);
 	}
 	
 	if (argc > 5) {
