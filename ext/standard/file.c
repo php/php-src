@@ -415,7 +415,7 @@ PHP_FUNCTION(file_get_contents)
 {
 	char *filename;
 	int filename_len;
-	char *contents;
+	char *contents = NULL;
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len, newlen;
@@ -441,10 +441,15 @@ PHP_FUNCTION(file_get_contents)
 		}
 
 		RETVAL_STRINGL(contents, len, 0);
+		contents = NULL;
 	} else if (len == 0) {
 		RETVAL_EMPTY_STRING();
 	} else {
 		RETVAL_FALSE;
+	}
+
+	if (contents) {
+		efree(contents);
 	}
 
 	php_stream_close(stream);
