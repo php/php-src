@@ -45,6 +45,7 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
+#include "ext/standard/file.h"
 #include "php_curl.h"
 
 #ifdef ZTS
@@ -267,8 +268,8 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 	return SUCCESS;
 }
 
-static void curl_free_string(void **string) {
-	efree(*string);
+static void curl_free_string(void *string) {
+	free(string);
 }
 
 /* {{{ proto string curl_version(void)
