@@ -1,6 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? March 2004, PHP 5 Release Candidate 1
+- Added support for PHP 4 style object comparisons which is enabled in
+  ze1_compatiblity_mode. (Andi)
+- Added support for PHP 4 style object conversion to long, double, and boolean
+  values which is enabled in ze1_compatibility_mode. (Andi, Stas)
+- Allow objector oriented extensions to overload comparison functions and other
+  operations. Solves problems using SimpleXML values. (Andi, Zeev)
+- Fixed crash when accessing a class constant with a value which in turn is
+  also a constant. (Dmitry)
+- Fixed object's truth value conversion. It is always true unless
+  ze1_compatibility_mode is on in which it behaves like in PHP 4. (Stas)
+- Improve out of memory handling in new memory manager. (Stas)
+- Fixed crash when an object reference itself during destructor call. (Andi)
+- Fixed crash in foreach() when iterating over object properties or a method's
+  return values. (Andi)
+- Fixed crash when an exception is thrown in a destructor. Such exceptions are
+  now ignored as destruction happens out of context at no definite time. (Andi)
+- Fixed crashes in exception handling. (Dmitry, Andi)
+- Changed prototype checks so that they aren't done on constructors. (Andi)
+- Changed prototype checks to output an E_STRICT message instead of
+  an E_COMPILE_ERROR. (Andi)
 - Changed Iterator::has_more() to Iterator::valid(). (Marcus)
 - Upgraded bundled oniguruma library to version 2.2.2. (Rui, Moriyoshi)
 - Added mb_list_encoding() to return an array with all mbstring supported
@@ -21,6 +41,9 @@ PHP                                                                        NEWS
 - Fixed problem preventing startup errors from being displayed. (Marcus)
 - Fixed start-up problem if both SPL and SimpleXML were enabled. The double
   initialization of apache 1.3 was causing problems here. (Marcus, Derick)
+- Fixed bug #27504 (Visibility bugs in call_user_function()). (Dmitry)
+- Fixed bug #27123 (Fix crash caused by bug in get_object_vars()). (Andi)
+- Fixed bug #27535 (Problem with object freeing mechanism). (Dmitry)
 - Fixed bug #27586 (ArrayObject::getIterator crashes with [] assignment). 
   (Marcus)
 - Fixed bug #27537 (Objects pointing to each other segfaults). (Dmitry)
