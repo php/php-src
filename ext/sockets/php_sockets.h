@@ -31,8 +31,10 @@ extern zend_module_entry sockets_module_entry;
 
 #ifdef PHP_WIN32
 #define PHP_SOCKETS_API __declspec(dllexport)
+#include <winsock.h>
 #else
 #define PHP_SOCKETS_API
+#include <netinet/in.h>
 #endif
 
 PHP_MINIT_FUNCTION(sockets);
@@ -106,6 +108,11 @@ typedef struct {
 typedef struct {
 	zend_bool	use_system_read;
 } php_sockets_globals;
+
+/* Prototypes */
+int open_listen_sock(php_socket **php_sock, int port, int backlog TSRMLS_DC);
+int accept_connect(php_socket *in_sock, php_socket **new_sock, struct sockaddr *la TSRMLS_DC);
+int php_read(int bsd_socket, void *buf, int maxlen);
 
 #ifdef ZTS
 #define SOCKETSG(v) (sockets_globals->v)
