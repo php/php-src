@@ -208,8 +208,10 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 
 	long bits;
 	unsigned char a[64];
-	unsigned long len = 64;
-	char *b;
+	unsigned long len=64, szlength;
+	int factor=1,maxfactor=16;
+	int slength, status=0;
+	char *b, *buf=NULL, *bufz=NULL;
 
 	b = ecalloc (1, len + 1);
 
@@ -217,13 +219,52 @@ static struct gfxinfo *php_handle_swc(php_stream * stream TSRMLS_DC)
 	php_stream_seek(stream, 5, SEEK_CUR);
 
 	php_stream_read(stream, a, sizeof(a)); /* fread(a, sizeof(a), 1, fp); */
-	uncompress (b, &len, a, sizeof(a));
+	if (uncompress(b, &len, a, sizeof(a)) != Z_OK) {
+		/* failed to decompress the file, will try reading the rest of the file */
+		php_stream_seek(stream, 8, SEEK_SET);
+		slength = php_stream_copy_to_mem(stream, &bufz, PHP_STREAM_COPY_ALL, 0);
+		
+		/*
+		 * zlib::uncompress() wants to know the output data length
+		 * if none was given as a parameter
+		 * we try from input length * 2 up to input length * 2^8
+		 * doubling it whenever it wasn't big enough
+		 * that should be eneugh for all real life cases
+		*/
+		
+		do {
+			szlength=slength*(1<<factor++);
+			buf = (char *) erealloc(buf,szlength);
+			if (!buf) {
+				status = 1;
+				break;
+			} 
+		        status = uncompress(buf, &szlength, bufz, slength);
+		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
+		
+		if (bufz) {
+			pefree(bufz, 0);
+		}	
+		
+		if (status == Z_OK) {
+			 memcpy(b, buf, len);
+		}
+		
+		if (buf) { 
+			efree(buf);
+		}	
+	}
 	
-	bits = php_swf_get_bits (b, 0, 5);
-	result->width = (php_swf_get_bits (b, 5 + bits, bits) -
-		php_swf_get_bits (b, 5, bits)) / 20;
-	result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
-		php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
+	if (!status) {
+		bits = php_swf_get_bits (b, 0, 5);
+		result->width = (php_swf_get_bits (b, 5 + bits, bits) -
+			php_swf_get_bits (b, 5, bits)) / 20;
+		result->height = (php_swf_get_bits (b, 5 + (3 * bits), bits) -
+			php_swf_get_bits (b, 5 + (2 * bits), bits)) / 20;
+	} else {
+		result->width = result->height = 0;
+	}	
+		
 	efree (b);
 	result->bits     = 0;
 	result->channels = 0;
