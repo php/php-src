@@ -2214,9 +2214,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry->num_interfaces = 0;
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
-	if (class_token->u.constant.value.lval == T_INTERFACE) {
-		new_class_entry->ce_flags |= ZEND_ACC_INTERFACE;
-	}
+	new_class_entry->ce_flags |= class_token->u.constant.value.lval;
 
 	if (parent_class_name->op_type != IS_UNUSED) {
 		doing_inheritance = 1;
@@ -2250,11 +2248,26 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 }
 
 
-void zend_do_end_class_declaration(znode *class_token TSRMLS_DC)
+static do_verify_abstract_class(TSRMLS_D)
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_VERIFY_ABSTRACT_CLASS;
+	opline->op1 = CG(implementing_class);
+}
+
+
+void zend_do_end_class_declaration(znode *class_token, znode *parent_token TSRMLS_DC)
 {
 	do_inherit_parent_constructor(CG(active_class_entry));
+
 	if (CG(active_class_entry)->num_interfaces > 0) {
 		CG(active_class_entry)->interfaces = (zend_class_entry **) emalloc(sizeof(zend_class_entry *)*CG(active_class_entry)->num_interfaces);
+	}
+	if (!(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)
+		&& !(CG(active_class_entry)->ce_flags & ZEND_ACC_ABSTRACT_CLASS)
+		&& ((parent_token->op_type != IS_UNUSED) || (CG(active_class_entry)->num_interfaces > 0))) {
+		do_verify_abstract_class(TSRMLS_C);
 	}
 	CG(active_class_entry) = NULL;
 }

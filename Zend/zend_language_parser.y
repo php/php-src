@@ -294,13 +294,14 @@ unticked_class_declaration_statement:
 			implements_list
 			'{'
 				class_statement_list
-			'}' { zend_do_end_class_declaration(&$1 TSRMLS_CC); }
+			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
 ;
 
 
 class_entry_type:
-		T_CLASS			{ $$.u.constant.value.lval = T_CLASS; }
-	|	T_INTERFACE		{ $$.u.constant.value.lval = T_INTERFACE; }
+		T_CLASS			{  $$.u.constant.value.lval = 0; }
+	|	T_ABSTRACT T_CLASS { $$.u.constant.value.lval = ZEND_ACC_ABSTRACT_CLASS; }
+	|	T_INTERFACE		{ $$.u.constant.value.lval = ZEND_ACC_INTERFACE; }
 ;
 
 namespace_declaration_statement:
