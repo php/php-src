@@ -53,6 +53,11 @@ clean:
 		(cd $$i && $(MAKE) -f build.mk clean); \
 	done 
 
+cvsclean:
+	@for i in $(shell find . -follow -name .cvsignore); do \
+		(cd `dirname $$i` && rm -rf `cat .cvsignore`); \
+	done
+
 acconfig.h: $(acconfig_h_SOURCES)
 	@echo rebuilding $@
 	@cat $(acconfig_h_SOURCES) > $@
