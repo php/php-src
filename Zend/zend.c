@@ -375,8 +375,8 @@ static void register_standard_class(TSRMLS_D)
 	zend_standard_class_def = malloc(sizeof(zend_class_entry));
 
 	zend_standard_class_def->type = ZEND_INTERNAL_CLASS;
-	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_standard_class_def->name_length = sizeof("stdClass") - 1;
+	zend_standard_class_def->name = zend_strndup("stdClass", zend_standard_class_def->name_length);
 	zend_standard_class_def->parent = NULL;
 	zend_initialize_class_data(zend_standard_class_def, 1 TSRMLS_CC);
 
