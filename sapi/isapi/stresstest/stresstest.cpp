@@ -218,7 +218,7 @@ BOOL ParseTestFile(const char *path, const char *fn)
 	char *en = _tempnam(temppath,"exp.");
 	FILE *ft = fopen(tn, "w+");
 	FILE *fe = fopen(en, "w+");
-	if (fp) {
+	if (fp && ft && fe) {
 		while (fgets(line,sizeof(line)-1,fp)) {
 			if (line[0]=='-') {
 				if (_strnicmp(line, "--TEST--", 8)==0) {
