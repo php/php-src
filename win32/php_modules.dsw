@@ -27,6 +27,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "ldap"=.\ext\ldap\ldap.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "mysql"=.\ext\mysql\mysql.dsp - Package Owner=<4>
 
 Package=<5>
