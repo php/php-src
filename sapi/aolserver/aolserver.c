@@ -574,7 +574,6 @@ php_ns_server_shutdown(void *context)
 	
 	ctx->sapi_module->shutdown(ctx->sapi_module);
 	sapi_shutdown();
-	reentrancy_shutdown();
 	tsrm_shutdown();
 
 	free(ctx->ns_module);
@@ -594,7 +593,6 @@ int Ns_ModuleInit(char *server, char *module)
 	php_ns_context *ctx;
 	
 	tsrm_startup(1, 1, 0);
-	reentrancy_startup();
 	sapi_startup(&sapi_module);
 	sapi_module.startup(&sapi_module);
 	
