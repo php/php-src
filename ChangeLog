@@ -2,6 +2,7 @@ PHP 4.0 CHANGE LOG                                                    ChangeLog
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
+- Made ldap_close back into an alias for ldap_unbind (Andrey)
 - OciFetchInto now resets the returned array in all cases (Thies)
 - Fixed mysql_errno() to work with recent versions of MySQL (Zeev)
 - Fixed a problem with define() and boolean values (Zeev)
