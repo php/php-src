@@ -1339,6 +1339,13 @@ static void increment_string(zval *str)
     int last=0; /* Shut up the compiler warning */
     int ch;
     
+	if (str->value.str.len == 0) {
+		STR_FREE(str->value.str.val);
+		str->value.str.val = estrndup("1", sizeof("1")-1);
+		str->value.str.len = 1;
+		return;
+	}
+
 	while(pos >= 0) {
         ch = s[pos];
         if (ch >= 'a' && ch <= 'z') {
