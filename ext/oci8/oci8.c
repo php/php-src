@@ -3144,7 +3144,7 @@ static int _oci_session_cleanup(void *data TSRMLS_DC)
 
 	if (le->type == le_session) {
 		oci_server *server = ((oci_session*) le->ptr)->server;
-		if (server->is_open == 2) 
+		if (server && server->is_open == 2) 
 			return 1;
 	}
 	return 0;
