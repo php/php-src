@@ -3481,7 +3481,7 @@ int zend_unset_dim_obj_handler(ZEND_OPCODE_HANDLER_ARGS)
 					break;
 				case IS_STRING:
 					zend_error(E_ERROR, "Cannot unset string offsets");
-					break;
+					return 0; /* bailed out before */
 				default:
 					ht = NULL;
 					break;
