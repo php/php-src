@@ -2,7 +2,7 @@
 
 /* protos */
 static int com_hash(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int type);
-static int com_ctor(char *class_name, zend_uint class_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS);
+static int com_ctor(char *class_name, zend_uint class_name_len, void **data, int num_args, zval **args[]);
 static int com_dtor(void **data);
 static int com_call(char *method_name, zend_uint method_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS);
 static int com_get(char *property_name, zend_uint property_name_len, zval *return_value, void **data);
@@ -15,9 +15,10 @@ static int com_get_properties(HashTable **properties, void **data);
 
 
 /* register rpc callback function */
-RPC_REGISTER_HANDLERS_START(com, DONT_POOL)
+RPC_REGISTER_HANDLERS_START(com)
+POOL,
+HASH_AS_INT,
 com_hash,
-HASH_AS_STRING,
 com_ctor,
 com_dtor,
 com_call,
@@ -52,10 +53,13 @@ RPC_INIT_FUNCTION(com)
 
 static int com_hash(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int type)
 {
+	*hash = strdup(name);
+	*hash_len = name_len;
+
 	return SUCCESS;
 }
 
-static int com_ctor(char *class_name, zend_uint class_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS)
+static int com_ctor(char *class_name, zend_uint class_name_len, void **data, int num_args, zval **args[])
 {
 	return SUCCESS;
 }

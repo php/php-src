@@ -5,10 +5,9 @@
 
 #define RPC_HANDLER(layer)				{#layer, layer##_handler_init, &layer##_object_handlers,	\
 										&layer##_class_entry, layer##_function_entry,				\
-										layer##_method_entry, &layer##_pool}
+										layer##_method_entry}
 
 #define RPC_DECLARE_HANDLER(layer)		void layer##_handler_init();					\
-										const int layer##_pool;								\
 										rpc_object_handlers layer##_object_handlers;	\
 										zend_class_entry layer##_class_entry;			\
 										function_entry layer##_function_entry[];		\
@@ -16,8 +15,7 @@
 
 #define RPC_INIT_FUNCTION(layer)		void layer##_handler_init()
 
-#define RPC_REGISTER_HANDLERS_START(layer, p)	zend_class_entry layer##_class_entry;				\
-												const int layer##_pool = p;							\
+#define RPC_REGISTER_HANDLERS_START(layer)		zend_class_entry layer##_class_entry;				\
 												rpc_object_handlers layer##_object_handlers = {
 
 #define RPC_REGISTER_HANDLERS_END()				};
@@ -43,17 +41,19 @@
 #define HASH_AS_STRING FALSE
 #define DONT_HASH	FALSE
 
-#define METHOD 0
-#define PROPERTY 1
+#define CLASS 0
+#define METHOD 1
+#define PROPERTY 2
 
 
 /* rpc handler that have to be implemented by a 
  * specific rpc layer
  */
 typedef struct _rpc_object_handlers {
+	const zend_bool pool_instances;
+	const int hash_type;
 	int (*rpc_hash)(char *name, zend_uint name_len, char **hash, zend_uint *hash_len, int type);
-	int hash_type;
-	int (*rpc_ctor)(char *class_name, zend_uint class_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS);
+	int (*rpc_ctor)(char *class_name, zend_uint class_name_len, void **data, int num_args, zval **args[]);
 	int (*rpc_dtor)(void **data);
 	int (*rpc_call)(char *method_name, zend_uint method_name_len, void **data, INTERNAL_FUNCTION_PARAMETERS);
 	int (*rpc_get)(char *property_name, zend_uint property_name_len, zval *return_value, void **data);
@@ -73,17 +73,34 @@ typedef struct _rpc_handler_entry {
 	zend_class_entry	*ce;
 	function_entry		*functions;
 	function_entry		*methods;
-	const int			*pool_instances;
 } rpc_handler_entry;
+
+/* string */
+typedef struct _rpc_string {
+	char *str;
+	zend_uint len;
+} rpc_string;
+
+/* class/method/function hash */
+typedef struct _rpc_class_hash {
+	rpc_string name; /* must be first entry */
+	WormHashTable methods;
+	WormHashTable properties;
+} rpc_class_hash;
 
 /* internal data */
 typedef struct _rpc_internal {
+	char				*class_name;
+	zend_uint			class_name_len;
 	zend_class_entry	*ce;
 	rpc_object_handlers	**handlers;
-	void				**data;
-	unsigned			refcount;
-	unsigned			clonecount;
-	int					pool_instances;
+	void				*data;
+	zend_uint			refcount;
+	zend_uint			clonecount;
+	zend_bool			pool_instances;
+	rpc_class_hash		*hash;
+	MUTEX_T				mx_handler;
 } rpc_internal;
+
 
 #endif /* HANDLER_H */
