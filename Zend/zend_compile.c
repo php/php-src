@@ -1676,6 +1676,7 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 	op = fe->op_array.opcodes;
 	proto_op = fe->common.prototype->op_array.opcodes;
 
+	/* Make sure that the implementation has all of the arguments of the interface */
 	while (proto_op->opcode != ZEND_RAISE_ABSTRACT_ERROR) {
 		if (proto_op->opcode != op->opcode) {
 			return 0;
@@ -1690,7 +1691,21 @@ static zend_bool zend_do_perform_implementation_check(zend_function *fe)
 		proto_op++;
 		op++;
 	}
-	return 1;
+
+	/* Make sure that the implementation doesn't receive more arguments than the interface */
+	while (1) {
+		switch (op->opcode) {
+			case ZEND_FETCH_CLASS:
+			case ZEND_FETCH_W:
+				op++;
+				break;
+			case ZEND_RECV:
+			case ZEND_RECV_INIT:
+				return 0;
+			default:
+				return 1;
+		}
+	}
 }
 
 
