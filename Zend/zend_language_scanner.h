@@ -53,6 +53,8 @@ int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC);
+char *zend_get_last_accepting_character_position();
+
 END_EXTERN_C()
 
 #endif
