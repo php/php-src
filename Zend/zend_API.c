@@ -892,7 +892,7 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 	register_class = zend_register_internal_class(class_entry);
 
 	if (parent_ce) {
-		do_inheritance(register_class, parent_ce);
+		zend_do_inheritance(register_class, parent_ce);
 	}
 	return register_class;
 }
