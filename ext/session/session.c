@@ -75,6 +75,9 @@ static PHP_INI_MH(OnUpdateSaveHandler)
 	PSLS_FETCH();
 	
 	PS(mod) = _php_find_ps_module(new_value PSLS_CC);
+	if(!PS(mod)) {
+	  php_error(E_ERROR,"Can't find save handler %s",new_value);
+	}
 	return SUCCESS;
 }
 
@@ -84,6 +87,9 @@ static PHP_INI_MH(OnUpdateSerializer)
 	PSLS_FETCH();
 
 	PS(serializer) = _php_find_ps_serializer(new_value PSLS_CC);
+	if(!PS(serializer)) {
+	  php_error(E_ERROR,"Can't find serializer handler %s",new_value);
+	}	  
 	return SUCCESS;
 }
 
@@ -481,6 +487,10 @@ static void _php_session_save_current_state(PSLS_D)
 	ulong num_key;
 	PLS_FETCH();
 	
+	if(!PS(http_session_vars)) {
+	  return;
+	}
+
 	if (!PG(register_globals)) {
 		for (zend_hash_internal_pointer_reset(PS(http_session_vars)->value.ht);
 			 zend_hash_get_current_key(PS(http_session_vars)->value.ht, &variable, &num_key) == HASH_KEY_IS_STRING;
@@ -979,7 +989,8 @@ PHP_FUNCTION(session_module_name)
 		if (tempmod) {
 			if (PS(mod_data))
 				PS(mod)->close(&PS(mod_data));
-			PS(mod_data) = tempmod;
+			PS(mod) = tempmod;
+			PS(mod_data) = NULL;
 		} else {
 			efree(old);
 			php_error(E_ERROR, "Cannot find named PHP session module (%s)",
