@@ -30,6 +30,7 @@
 #include "zend_operators.h"
 #include "zend_constants.h"
 #include "zend_extensions.h"
+#include "zend_zval_alloc.h"
 
 #if defined(HAVE_ALLOCA) && defined(HAVE_ALLOCA_H)
 # include <alloca.h>

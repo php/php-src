@@ -284,10 +284,6 @@ END_EXTERN_C()
 
 #define INIT_ZVAL(z) z = zval_used_for_init;
 
-#define ALLOC_ZVAL(z) (z) = (zval *) emalloc(sizeof(zval))
-
-#define FREE_ZVAL(z) efree(z)
-
 #define ALLOC_INIT_ZVAL(zp)						\
 	ALLOC_ZVAL(zp);		\
 	INIT_ZVAL(*zp);

@@ -25,6 +25,7 @@
 #include "zend_API.h"
 #include "zend_variables.h"
 #include "zend_operators.h"
+#include "zend_zval_alloc.h"
 
 
 ZEND_API zend_op_array *(*zend_compile_files)(int mark_as_ref CLS_DC, int file_count, ...);

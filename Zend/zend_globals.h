@@ -179,6 +179,9 @@ struct _zend_alloc_globals {
 	zend_mem_header *phead;		/* persistent list */
 	void *cache[MAX_CACHED_MEMORY][MAX_CACHED_ENTRIES];
 	unsigned char cache_count[MAX_CACHED_MEMORY];
+#if !ZEND_DEBUG
+	void *zval_list_head;
+#endif
 
 #if MEMORY_LIMIT
 	unsigned int memory_limit;

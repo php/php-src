@@ -23,6 +23,7 @@
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"
+#include "zend_zval_alloc.h"
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
@@ -31,7 +32,7 @@
 #endif
 
 #ifndef ZTS
-static zend_alloc_globals alloc_globals;
+zend_alloc_globals alloc_globals;
 #endif
 
 
@@ -321,6 +322,10 @@ ZEND_API void start_memory_manager(ALS_D)
 	AG(memory_exhausted)=0;
 #endif
 
+#if ZEND_DEBUG
+	AG(zval_list_head) = NULL;
+#endif
+
 	memset(AG(cache_count),0,MAX_CACHED_MEMORY*sizeof(unsigned char));
 }
 
@@ -330,8 +335,20 @@ ZEND_API void shutdown_memory_manager(int silent, int clean_cache)
 	zend_mem_header *p, *t;
 #if ZEND_DEBUG
 	int had_leaks=0;
+#else
+	zend_zval_list_entry *zval_list_entry, *next_zval_list_entry;
 #endif
 	ALS_FETCH();
+
+#if !ZEND_DEBUG
+	zval_list_entry = AG(zval_list_head);
+	while (zval_list_entry) {
+		next_zval_list_entry = zval_list_entry->next;
+		efree(zval_list_entry);
+		zval_list_entry = next_zval_list_entry;
+	}
+	AG(zval_list_head) = NULL;
+#endif
 
 	p=AG(head);
 	t=AG(head);
