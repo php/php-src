@@ -1343,6 +1343,27 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC)
 	}
 }
 
+ZEND_API int delete_global_variable(char *name, int name_len TSRMLS_DC)
+{
+	zend_execute_data *ex;
+
+	if (zend_symtable_del(&EG(symbol_table), name, name_len+1) == SUCCESS) {
+		for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
+			if (ex->symbol_table == &EG(symbol_table)) {
+				int i;
+				for (i = 0; i < ex->op_array->last_var; i++) {
+					if (ex->op_array->vars[i].name_len == name_len &&
+					    !memcmp(ex->op_array->vars[i].name, name, name_len)) {
+						ex->CVs[i] = NULL;
+						break;
+					}
+				}
+			}
+		}
+		return SUCCESS;
+	}
+	return FAILURE;
+}
 
 /*
  * Local variables:

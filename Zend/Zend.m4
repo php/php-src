@@ -108,6 +108,22 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN(LIBZEND_OTHER_CHECKS,[
 
+PHP_ARG_WITH(zend-vm,[virtual machine dispatch method],
+[  --with-zend-vm=TYPE     Sets virtual machine dispatch methos. Type is
+                          one of "CALL" (default), "SWITCH" or "GOTO"], CALL, no)
+
+case $PHP_ZEND_VM in
+  SWITCH)
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_SWITCH,[virtual machine dispatch method])
+    ;;
+  GOTO)
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_GOTO,[virtual machine dispatch method])
+    ;;
+  *)
+    AC_DEFINE(ZEND_VM_KIND,ZEND_VM_KIND_CALL,[virtual machine dispatch method])
+    ;;
+esac
+
 AC_ARG_ENABLE(maintainer-zts,
 [  --enable-maintainer-zts Enable thread safety - for code maintainers only],[
   ZEND_MAINTAINER_ZTS=$enableval
