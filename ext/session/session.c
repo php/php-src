@@ -297,8 +297,6 @@ PS_SERIALIZER_ENCODE_FUNC(php_binary)
 			smart_str_appendl(&buf, key, key_length);
 	);
 	
-	smart_str_0(&buf);
-
 	if (newlen) *newlen = buf.len;
 	*newstr = buf.c;
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
@@ -366,8 +364,6 @@ PS_SERIALIZER_ENCODE_FUNC(php)
 			smart_str_appendc(&buf, PS_DELIMITER);
 	);
 	
-	smart_str_0(&buf);
-
 	if (newlen) *newlen = buf.len;
 	*newstr = buf.c;
 

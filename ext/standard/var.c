@@ -163,7 +163,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	return SUCCESS;
 }
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
+static void php_var_serialize_intern(smart_str *buf, zval **struc, HashTable *var_hash)
 {
 	char s[256];
 	ulong slen;
@@ -254,8 +254,8 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
 								}
 
 								if (zend_hash_find(Z_OBJPROP_PP(struc), Z_STRVAL_PP(name), Z_STRLEN_PP(name)+1, (void*)&d) == SUCCESS) {
-									php_var_serialize(buf, name, NULL);
-									php_var_serialize(buf, d, var_hash);	
+									php_var_serialize_intern(buf, name, NULL);
+									php_var_serialize_intern(buf, d, var_hash);	
 								}
 							}
 						}
@@ -317,17 +317,17 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
 					  case HASH_KEY_IS_LONG:
 							MAKE_STD_ZVAL(d);
 							ZVAL_LONG(d,index);
-							php_var_serialize(buf, &d, NULL);
+							php_var_serialize_intern(buf, &d, NULL);
 							FREE_ZVAL(d);
 							break;
 						case HASH_KEY_IS_STRING:
 							MAKE_STD_ZVAL(d);	
 							ZVAL_STRING(d,key,0);
-							php_var_serialize(buf, &d, NULL);
+							php_var_serialize_intern(buf, &d, NULL);
 							FREE_ZVAL(d);
 							break;
 					}
-					php_var_serialize(buf, data, var_hash);
+					php_var_serialize_intern(buf, data, var_hash);
 				}
 			}
 			smart_str_appendc(buf, '}');
@@ -338,6 +338,12 @@ PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
 	} 
 }
 
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, HashTable *var_hash)
+{
+	php_var_serialize_intern(buf, struc, var_hash);
+	smart_str_0(buf);
+}
+	
 /* }}} */
 /* {{{ php_var_dump */
 
@@ -606,7 +612,6 @@ PHP_FUNCTION(serialize)
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, struc, &var_hash);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-	smart_str_0(&buf);
 	RETVAL_STRINGL(buf.c, buf.len, 0);
 }
 
