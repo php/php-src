@@ -1283,7 +1283,7 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 	EG(current_execute_data) = EX(prev_execute_data);						\
 	return 1; /* CHECK_ME */
 
-opcode_handler_t zend_opcode_handlers[512];
+ZEND_API opcode_handler_t zend_opcode_handlers[512];
 
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
 {
