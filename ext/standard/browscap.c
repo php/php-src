@@ -33,12 +33,17 @@ static zval *current_section;
 
 /* OBJECTS_FIXME: This whole extension needs going through. The use of objects looks pretty broken here */
 
-static void browscap_entry_dtor(zval *pvalue)
+static void browscap_entry_dtor(zval **pvalue)
 {
-	if (Z_TYPE_P(pvalue) == IS_ARRAY) {
-		zend_hash_destroy(Z_ARRVAL_P(pvalue));
-		free(Z_ARRVAL_P(pvalue));
+	if (Z_TYPE_PP(pvalue) == IS_ARRAY) {
+		zend_hash_destroy(Z_ARRVAL_PP(pvalue));
+		free(Z_ARRVAL_PP(pvalue));
+	} else if (Z_TYPE_PP(pvalue) == IS_STRING) {
+		if (Z_STRVAL_PP(pvalue) && Z_STRVAL_PP(pvalue) != empty_string) {
+			free(Z_STRVAL_PP(pvalue));
+		}
 	}
+	free(*pvalue);
 }
 
 /* {{{ convert_browscap_pattern
@@ -97,7 +102,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 
 				new_property = (zval *) malloc(sizeof(zval));
 				INIT_PZVAL(new_property);
-				Z_STRVAL_P(new_property) = Z_STRLEN_P(arg2)?zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)):"";
+				Z_STRVAL_P(new_property) = Z_STRLEN_P(arg2)?zend_strndup(Z_STRVAL_P(arg2), Z_STRLEN_P(arg2)):empty_string;
 				Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
 				Z_TYPE_P(new_property) = IS_STRING;
 
@@ -123,6 +128,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, int callback_type, vo
 				section_properties = (HashTable *) malloc(sizeof(HashTable));
 				zend_hash_init(section_properties, 0, NULL, (dtor_func_t) browscap_entry_dtor, 1);
 				current_section->value.ht = section_properties;
+				current_section->type = IS_ARRAY;
 				zend_hash_update(&browser_hash, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)+1, (void *) &current_section, sizeof(zval *), NULL);
 
 				Z_STRVAL_P(processed) = Z_STRVAL_P(arg1);
