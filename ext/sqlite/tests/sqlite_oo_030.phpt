@@ -39,6 +39,4 @@ NULL
 string(1) "1"
 string(3) "PHP"
 
-Warning: sqlite_db::single_query(): call_user_function_ex failed for function foo::bar("PHP")() in %ssqlite_oo_030.php on line %d
-bool(false)
-===DONE===
+Fatal error: Call to undefined method foo::bar("php")() in %ssqlite_oo_030.php on line %d
