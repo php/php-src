@@ -56,7 +56,7 @@ static int cdb_posplus(struct cdb_make *c, uint32 len)
 /* }}} */
 
 /* {{{ cdb_make_start */
-PHPAPI int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
+int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
 {
 	c->head = 0;
 	c->split = 0;
@@ -73,7 +73,7 @@ PHPAPI int cdb_make_start(struct cdb_make *c, php_stream * f TSRMLS_DC)
 /* }}} */
 
 /* {{{ cdb_make_addend */
-PHPAPI int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datalen, uint32 h TSRMLS_DC)
+int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int datalen, uint32 h TSRMLS_DC)
 {
 	struct cdb_hplist *head;
 
@@ -102,7 +102,7 @@ PHPAPI int cdb_make_addend(struct cdb_make *c, unsigned int keylen, unsigned int
 /* }}} */
 
 /* {{{ cdb_make_addbegin */
-PHPAPI int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int datalen TSRMLS_DC)
+int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned int datalen TSRMLS_DC)
 {
 	char buf[8];
 
@@ -123,7 +123,7 @@ PHPAPI int cdb_make_addbegin(struct cdb_make *c, unsigned int keylen, unsigned i
 }
 
 /* {{{ cdb_make_add */
-PHPAPI int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,unsigned int datalen TSRMLS_DC)
+int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *data,unsigned int datalen TSRMLS_DC)
 {
 	if (cdb_make_addbegin(c, keylen, datalen TSRMLS_CC) == -1)
 		return -1;
@@ -136,7 +136,7 @@ PHPAPI int cdb_make_add(struct cdb_make *c,char *key,unsigned int keylen,char *d
 /* }}} */
 
 /* {{{ cdb_make_finish */
-PHPAPI int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
+int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 {
 	char buf[8];
 	int i;
