@@ -183,9 +183,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_COOKIEJAR);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSL_CIPHER_LIST);
 	REGISTER_CURL_CONSTANT(CURLOPT_BINARYTRANSFER);
-	REGISTER_CURL_CONSTANT(CURLOPT_NOSIGNAL);
-	REGISTER_CURL_CONSTANT(CURLOPT_PROXYTYPE);
-	REGISTER_CURL_CONSTANT(CURLOPT_BUFFERSIZE);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTPGET);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_VERSION);
 	REGISTER_CURL_CONSTANT(CURLOPT_SSLKEY);
@@ -223,15 +220,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_CONTENT_TYPE);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_COUNT);
-
-	/* cURL protocol constants (curl_version) */
-	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
-	REGISTER_CURL_CONSTANT(CURL_VERSION_KERBEROS4);
-	REGISTER_CURL_CONSTANT(CURL_VERSION_SSL);
-	REGISTER_CURL_CONSTANT(CURL_VERSION_LIBZ);
-	
-	/* version constants */
-	REGISTER_CURL_CONSTANT(CURLVERSION_NOW);
 
 	/* Error Constants */
 	REGISTER_CURL_CONSTANT(CURLE_OK);
@@ -286,9 +274,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_TELNET_OPTION_SYNTAX);
 	REGISTER_CURL_CONSTANT(CURLE_OBSOLETE);
 	REGISTER_CURL_CONSTANT(CURLE_SSL_PEER_CERTIFICATE);
-
-	REGISTER_CURL_CONSTANT(CURLPROXY_HTTP);
-	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5);
 
 	REGISTER_CURL_CONSTANT(CURL_NETRC_OPTIONAL);
 	REGISTER_CURL_CONSTANT(CURL_NETRC_IGNORED);
@@ -584,45 +569,15 @@ static void curl_free_slist(void **slist)
 /* }}} */
 
 
-/* {{{ proto array curl_version([int version])
+/* {{{ proto array curl_version(void)
    Return cURL version information. */
 PHP_FUNCTION(curl_version)
 {
-	curl_version_info_data *d;
-	long                    uversion = CURLVERSION_NOW;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &uversion) == FAILURE) {
-		return;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
 	}
 
-	d = curl_version_info(uversion);
-	if (d == NULL) {
-		RETURN_FALSE;
-	}
-
-	array_init(return_value);
-
-	CAAL("version_number", d->version_num);
-	CAAL("age", d->age);
-	CAAL("features", d->features);
-	CAAL("ssl_version_number", d->ssl_version_num);
-	CAAS("version", d->version);
-	CAAS("host", d->host);
-	CAAS("ssl_version", d->ssl_version);
-	CAAS("libz_version", d->libz_version);
-	/* Add an array of protocols */
-	{
-		char **p = (char **) d->protocols;
-		zval  *protocol_list = NULL;
-
-		MAKE_STD_ZVAL(protocol_list);
-		array_init(protocol_list);
-
-		while (*p != NULL) {
-			add_next_index_string(protocol_list,  *p++, 1);
-		}
-		CAAZ("protocols", protocol_list);
-	}
+	RETURN_STRING(curl_version(), 1);
 }
 /* }}} */
 
@@ -752,9 +707,6 @@ PHP_FUNCTION(curl_setopt)
 		case CURLOPT_SSL_VERIFYHOST:
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_DNS_USE_GLOBAL_CACHE:
-		case CURLOPT_NOSIGNAL:
-		case CURLOPT_PROXYTYPE:
-		case CURLOPT_BUFFERSIZE:
 		case CURLOPT_HTTPGET:
 		case CURLOPT_HTTP_VERSION:
 		case CURLOPT_CRLF:
