@@ -92,6 +92,9 @@
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
+/*	Could be 1<<32 but for some reason it has been used as 1<<31 in the past */
+#define MT_RAND_MAX ((unsigned long)((1<<31)-1))
+
 static void seedMT(php_uint32 seed BLS_DC)
 {
     /*
@@ -327,7 +330,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (p_min && p_max) { /* implement range */
 		return_value->value.lval = (*p_min)->value.lval +
-			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));
+			(long)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(MT_RAND_MAX+1.0));
 	}
 }
 /* }}} */
@@ -351,7 +354,7 @@ PHP_FUNCTION(mt_getrandmax)
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
-  	return_value->value.lval = 2147483647;	/* 2^^31 */
+  	return_value->value.lval = MT_RAND_MAX;	/* 2^^31 */
 }
 /* }}} */
 /*
