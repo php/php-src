@@ -308,7 +308,7 @@ EXEC SQL END DECLARE SECTION;
 		EXEC SQL close database;
 		EXEC SQL DISCONNECT CURRENT;
 	}
-	efree(link);
+	free(link);
 	IFXG(num_persistent)--;
 	IFXG(num_links)--;
 }
@@ -495,7 +495,7 @@ EXEC SQL END DECLARE SECTION;
 			}
 
 			/* create the link */
-			ifx = (char *) emalloc(sizeof(IFX));
+			ifx = (char *) malloc(sizeof(IFX));
 			IFXG(connectionid)++;
 			sprintf(ifx, "%s%x", SAFE_STRING(user), IFXG(connectionid));
 			
@@ -504,7 +504,7 @@ EXEC SQL END DECLARE SECTION;
 			if (ifx_check() == IFX_ERROR) {
 				IFXG(sv_sqlcode) = SQLCODE;
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ifx_error(ifx));
-				efree(ifx);
+				free(ifx);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -513,7 +513,7 @@ EXEC SQL END DECLARE SECTION;
 			new_le.type = le_plink;
 			new_le.ptr = ifx;
 			if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length + 1, (void *) &new_le, sizeof(list_entry), NULL) == FAILURE) {
-				efree(ifx);
+				free(ifx);
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
