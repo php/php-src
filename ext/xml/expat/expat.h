@@ -7,6 +7,7 @@ See the file COPYING for copying permission.
 #define XmlParse_INCLUDED 1
 
 #include <stdlib.h>
+#include "php_compat.h"
 
 #ifndef XMLPARSEAPI
 #  if defined(__declspec) && !defined(__BEOS__)
