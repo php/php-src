@@ -505,7 +505,7 @@ PHP_FUNCTION(dbminsert)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	
@@ -531,7 +531,7 @@ PHP_FUNCTION(dbmreplace)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 	
@@ -599,7 +599,7 @@ PHP_FUNCTION(dbmfetch)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -675,7 +675,7 @@ PHP_FUNCTION(dbmexists)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -724,7 +724,7 @@ PHP_FUNCTION(dbmdelete)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -771,7 +771,7 @@ PHP_FUNCTION(dbmfirstkey)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 
@@ -833,7 +833,7 @@ PHP_FUNCTION(dbmnextkey)
 
 	info = php_find_dbm(id TSRMLS_CC);
 	if (!info) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %d", Z_LVAL_P(id));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid database identifier %ld", Z_LVAL_P(id));
 		RETURN_FALSE;
 	}
 

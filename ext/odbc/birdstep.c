@@ -103,8 +103,8 @@ ZEND_GET_MODULE(birdstep)
 THREAD_LS birdstep_module php_birdstep_module;
 THREAD_LS static HENV henv;
 
-#define PHP_GET_BIRDSTEP_RES_IDX(id) convert_to_long_ex(id); if (!(res = birdstep_find_result(list, Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%d)", Z_LVAL_PP(id)); RETURN_FALSE; } 
-#define PHP_BIRDSTEP_CHK_LNK(id) convert_to_long_ex(id); if (!(conn = birdstep_find_conn(list,Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%d)", Z_LVAL_PP(id)); RETURN_FALSE; }
+#define PHP_GET_BIRDSTEP_RES_IDX(id) convert_to_long_ex(id); if (!(res = birdstep_find_result(list, Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not result index (%ld)", Z_LVAL_PP(id)); RETURN_FALSE; } 
+#define PHP_BIRDSTEP_CHK_LNK(id) convert_to_long_ex(id); if (!(conn = birdstep_find_conn(list,Z_LVAL_PP(id)))) { php_error_docref(NULL TSRMLS_CC, E_WARNING, "Birdstep: Not connection index (%ld)", Z_LVAL_PP(id)); RETURN_FALSE; }
                                                         
 
 static void _close_birdstep_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)

@@ -173,7 +173,7 @@ PHP_FUNCTION(mysqli_bind_param)
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %d (parameter %d)", Z_LVAL_PP(args[i]), i+1);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %ld (parameter %d)", Z_LVAL_PP(args[i]), i+1);
 				efree(args);
 				efree(bind);
 				RETURN_FALSE; 
