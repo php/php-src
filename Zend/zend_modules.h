@@ -30,7 +30,7 @@
 #define GINIT_FUNC_ARGS		void
 #define GINIT_FUNC_ARGS_PASSTHRU
 
-#include "zend.h"
+#include "zend_config.h"
 
 #ifdef ZTS
 #define USING_ZTS 1
