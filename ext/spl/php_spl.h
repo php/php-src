@@ -44,6 +44,7 @@ PHP_MINFO_FUNCTION(spl);
 
 
 ZEND_BEGIN_MODULE_GLOBALS(spl)
+	int dummy;
 ZEND_END_MODULE_GLOBALS(spl)
 
 #ifdef ZTS
