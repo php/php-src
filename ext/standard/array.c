@@ -3238,18 +3238,18 @@ PHP_FUNCTION(array_map)
 /* }}} */
 
 
-/* {{{ proto bool key_exists(mixed key, array search)
+/* {{{ proto bool array_key_exists(mixed key, array search)
    Checks if the given key or index exists in the array */
-PHP_FUNCTION(key_exists)
+PHP_FUNCTION(array_key_exists)
 {
 	zval **key,					/* key to check for */
 		 **array;				/* array to check in */
-      	
+
 	if (ZEND_NUM_ARGS() != 2 ||
 		zend_get_parameters_ex(ZEND_NUM_ARGS(), &key, &array) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	if (Z_TYPE_PP(array) != IS_ARRAY && Z_TYPE_PP(array) != IS_OBJECT) {
 		php_error(E_WARNING, "Wrong datatype for second argument in call to %s", get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
@@ -3272,7 +3272,7 @@ PHP_FUNCTION(key_exists)
 			php_error(E_WARNING, "Wrong datatype for first argument in call to %s", get_active_function_name(TSRMLS_C));
 			RETURN_FALSE;
 	}
-			
+
 }
 /* }}} */
 

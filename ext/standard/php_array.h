@@ -79,7 +79,7 @@ PHP_FUNCTION(array_diff);
 PHP_FUNCTION(array_sum);
 PHP_FUNCTION(array_filter);
 PHP_FUNCTION(array_map);
-PHP_FUNCTION(key_exists);
+PHP_FUNCTION(array_key_exists);
 PHP_FUNCTION(array_chunk);
 
 HashTable* php_splice(HashTable *, int, int, zval ***, int, HashTable **);
