@@ -1162,16 +1162,14 @@ PHPAPI void php_execute_script(zend_file_handle *primary_file CLS_DC ELS_DC PLS_
 		append_file_p = &append_file;
 	} else {
 		append_file_p = NULL;
-	}	
-	EG(main_op_array) = zend_compile_files(ZEND_REQUIRE CLS_CC, 3, prepend_file_p, primary_file, append_file_p);
-	if (EG(main_op_array)) {
-		EG(active_op_array) = EG(main_op_array);
-		zend_execute(EG(main_op_array) ELS_CC);
 	}
+	zend_execute_scripts(ZEND_REQUIRE CLS_CC ELS_CC, 3, prepend_file_p, primary_file, append_file_p);
 }
 
 PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 {
+	zend_op_array *op_array;
+	int retval;
 	SLS_FETCH();
 
 	php_hash_environment(ELS_C SLS_CC PLS_CC);
@@ -1187,9 +1185,11 @@ PHPAPI int php_lint_script(zend_file_handle *file CLS_DC ELS_DC PLS_DC)
 	UpdateIniFromRegistry(file->filename);
 #endif
 
-	EG(main_op_array) = zend_compile_files(ZEND_REQUIRE CLS_CC, 1, file);
+	op_array = zend_compile_file(file CLS_CC);
+	retval = (op_array?SUCCESS:FAILURE);
+	destroy_op_array(op_array);
 
-	return (EG(main_op_array)) ? SUCCESS : FAILURE;
+	return retval;
 }
 
 #ifdef PHP_WIN32
