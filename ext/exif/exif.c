@@ -131,11 +131,13 @@ PHP_MINFO_FUNCTION(exif);
 /* {{{ exif_module_entry
  */
 zend_module_entry exif_module_entry = {
+    STANDARD_MODULE_HEADER,
     "exif",
     exif_functions,
     NULL, NULL,
     NULL, NULL,
     PHP_MINFO(exif),
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

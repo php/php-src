@@ -146,6 +146,7 @@ function_entry oracle_functions[] = {
 /* {{{ oracle_module_entry
  */
 zend_module_entry oracle_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"oracle",
 	oracle_functions,
 	PHP_MINIT(oracle),       /* extension-wide startup function */
@@ -153,6 +154,7 @@ zend_module_entry oracle_module_entry = {
     PHP_RINIT(oracle),       /* per-request startup function */
     PHP_RSHUTDOWN(oracle),   /* per-request shutdown function */
     PHP_MINFO(oracle),
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

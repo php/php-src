@@ -129,7 +129,8 @@ function_entry hw_functions[] = {
 };
 
 zend_module_entry hw_module_entry = {
-	"hyperwave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER,
+	"hyperwave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
 };
 
 /*

@@ -108,6 +108,7 @@ function_entry ibase_functions[] = {
 
 zend_module_entry ibase_module_entry =
 {
+	STANDARD_MODULE_HEADER,
 	"interbase",
 	ibase_functions,
 	PHP_MINIT(ibase),
@@ -115,6 +116,7 @@ zend_module_entry ibase_module_entry =
 	PHP_RINIT(ibase),
 	PHP_RSHUTDOWN(ibase),
 	PHP_MINFO(ibase),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

@@ -44,6 +44,7 @@ function_entry bcmath_functions[] = {
 };
 
 zend_module_entry bcmath_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"bcmath",
     bcmath_functions,
 	PHP_MINIT(bcmath),
@@ -51,6 +52,7 @@ zend_module_entry bcmath_module_entry = {
 	PHP_RINIT(bcmath),
 	NULL,
 	PHP_MINFO(bcmath),
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

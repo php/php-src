@@ -54,10 +54,12 @@ function_entry sysvshm_functions[] = {
 /* {{{ sysvshm_module_entry
  */
 zend_module_entry sysvshm_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"sysvshm", sysvshm_functions, 
 	PHP_MINIT(sysvshm), NULL,
 	NULL, NULL,
 	NULL,
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

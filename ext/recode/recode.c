@@ -54,13 +54,15 @@ static zend_function_entry php_recode_functions[] = {
 };
 
 zend_module_entry recode_module_entry = {
-	"Recode", 
+    STANDARD_MODULE_HEADER,
+	"recode", 
 	php_recode_functions, 
 	PHP_MINIT(recode), 
 	PHP_MSHUTDOWN(recode), 
 	NULL,
 	NULL, 
 	PHP_MINFO(recode), 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

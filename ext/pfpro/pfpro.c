@@ -57,6 +57,7 @@ function_entry pfpro_functions[] = {
 
 /* {{{ Zend module entry */
 zend_module_entry pfpro_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"pfpro",
 	pfpro_functions,
 	PHP_MINIT(pfpro),
@@ -64,6 +65,7 @@ zend_module_entry pfpro_module_entry = {
 	PHP_RINIT(pfpro),					/* request start */
 	PHP_RSHUTDOWN(pfpro),				/* request end */
 	PHP_MINFO(pfpro),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

@@ -91,6 +91,7 @@ function_entry vpopmail_functions[] = {
 };
 
 zend_module_entry vpopmail_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"vpopmail",
 	vpopmail_functions,
 	PHP_MINIT(vpopmail),
@@ -98,6 +99,7 @@ zend_module_entry vpopmail_module_entry = {
 	PHP_RINIT(vpopmail),
 	PHP_RSHUTDOWN(vpopmail),
 	PHP_MINFO(vpopmail),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

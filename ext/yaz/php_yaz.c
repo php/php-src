@@ -2678,6 +2678,7 @@ PHP_RINIT_FUNCTION(yaz)
 }
 
 zend_module_entry yaz_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"yaz",
 	yaz_functions,
 	PHP_MINIT(yaz),
@@ -2685,6 +2686,7 @@ zend_module_entry yaz_module_entry = {
 	PHP_RINIT(yaz),
 	PHP_RSHUTDOWN(yaz),
 	PHP_MINFO(yaz),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

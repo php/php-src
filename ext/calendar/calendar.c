@@ -57,6 +57,7 @@ function_entry calendar_functions[] = {
 
 
 zend_module_entry calendar_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"calendar", 
 	calendar_functions, 
 	PHP_MINIT(calendar),
@@ -64,6 +65,7 @@ zend_module_entry calendar_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(calendar),
+	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES,
 };
 

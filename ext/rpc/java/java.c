@@ -631,6 +631,7 @@ static PHP_MINFO_FUNCTION(java) {
 }
 
 zend_module_entry java_module_entry = {
+    STANDARD_MODULE_HEADER,
   "java",
   java_functions,
   PHP_MINIT(java),
@@ -638,6 +639,7 @@ zend_module_entry java_module_entry = {
   NULL,
   NULL,
   PHP_MINFO(java),
+	NO_VERSION_YET,
   STANDARD_MODULE_PROPERTIES
 };
 

@@ -97,15 +97,17 @@ static char const cvsid[] = "$Id$";
 
 	/* Declare our module to the Zend engine */
 	zend_module_entry ccvs_module_entry = {
+        STANDARD_MODULE_HEADER,
 		"CCVS",
 		ccvs_functions,
 		NULL, NULL, NULL, NULL,
 		PHP_MINFO(ccvs),
+        NO_VERSION_YET,
 		STANDARD_MODULE_PROPERTIES
 	};
 
-#ifdef COMPILE_DL_LDAP
-ZEND_GET_MODULE(ldap)
+#ifdef COMPILE_DL_CCVS
+ZEND_GET_MODULE(ccvs)
 #endif
 
 /* Full Functions (The actual CCVS functions and any internal php hooked functions such as MINFO) */

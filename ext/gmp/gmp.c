@@ -86,6 +86,7 @@ function_entry gmp_functions[] = {
 /* {{{ gmp_module_entry
  */
 zend_module_entry gmp_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"gmp",
 	gmp_functions,
 	ZEND_MODULE_STARTUP_N(gmp),
@@ -93,6 +94,7 @@ zend_module_entry gmp_module_entry = {
 	NULL,		/* Replace with NULL if there's nothing to do at request start */
 	NULL,	    /* Replace with NULL if there's nothing to do at request end */
 	ZEND_MODULE_INFO_N(gmp),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

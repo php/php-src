@@ -1364,12 +1364,15 @@ function_entry pcre_functions[] = {
 };
 
 zend_module_entry pcre_module_entry = {
-   "pcre", pcre_functions,
+	STANDARD_MODULE_HEADER,
+   "pcre",
+	pcre_functions,
 		   PHP_MINIT(pcre),
 		   PHP_MSHUTDOWN(pcre),
 		   PHP_RINIT(pcre),
 		   NULL,
 		   PHP_MINFO(pcre),
+	NO_VERSION_YET,
 		   STANDARD_MODULE_PROPERTIES
 };
 

@@ -145,6 +145,7 @@ function_entry mnogosearch_functions[] = {
 /* }}} */
 
 zend_module_entry mnogosearch_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"mnogosearch", 
 	mnogosearch_functions, 
 	PHP_MINIT(mnogosearch), 
@@ -152,6 +153,7 @@ zend_module_entry mnogosearch_module_entry = {
 	PHP_RINIT(mnogosearch), 
 	NULL,
 	PHP_MINFO(mnogosearch), 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

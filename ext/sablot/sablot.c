@@ -195,6 +195,7 @@ function_entry sablot_functions[] = {
 };
 
 zend_module_entry sablot_module_entry = {
+    STANDARD_MODULE_HEADER,
     "sablot",
     sablot_functions,
     PHP_MINIT(sablot),
@@ -202,6 +203,7 @@ zend_module_entry sablot_module_entry = {
     NULL,
     PHP_RSHUTDOWN(sablot),
     PHP_MINFO(sablot),
+    NO_VERSION_YET,
     STANDARD_MODULE_PROPERTIES
 };
 

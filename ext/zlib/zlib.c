@@ -112,6 +112,7 @@ function_entry php_zlib_functions[] = {
 /* {{{ php_zlib_module_entry
  */
 zend_module_entry php_zlib_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"zlib",
 	php_zlib_functions,
 	PHP_MINIT(zlib),
@@ -119,6 +120,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_RINIT(zlib),
 	NULL,
 	PHP_MINFO(zlib),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

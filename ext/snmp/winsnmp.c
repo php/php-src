@@ -33,7 +33,16 @@ function_entry snmp_functions[] = {
 /* {{{ snmp_module_entry
  */
 zend_module_entry snmp_module_entry = {
-	"SNMP",snmp_functions,NULL,NULL,NULL,NULL,NULL,0,0,0,NULL
+	STANDARD_MODULE_HEADER,
+	"SNMP",
+    snmp_functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NO_VERSION_YET,
+    STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 

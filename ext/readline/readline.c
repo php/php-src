@@ -69,6 +69,7 @@ static zend_function_entry php_readline_functions[] = {
 };
 
 zend_module_entry readline_module_entry = { 
+	STANDARD_MODULE_HEADER,
 	"readline", 
 	php_readline_functions, 
 	PHP_MINIT(readline), 
@@ -76,6 +77,7 @@ zend_module_entry readline_module_entry = {
 	NULL,
 	PHP_RSHUTDOWN(readline),
 	NULL, 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

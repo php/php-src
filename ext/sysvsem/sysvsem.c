@@ -70,7 +70,8 @@ function_entry sysvsem_functions[] = {
 /* {{{ sysvsem_module_entry
  */
 zend_module_entry sysvsem_module_entry = {
-	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+	"sysvsem", sysvsem_functions, PHP_MINIT(sysvsem), NULL, NULL, NULL, NULL, NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 

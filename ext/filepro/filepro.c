@@ -144,7 +144,8 @@ function_entry filepro_functions[] = {
 };
 
 zend_module_entry filepro_module_entry = {
-	"filepro", filepro_functions, PHP_MINIT(filepro), PHP_MSHUTDOWN(filepro), NULL, NULL, NULL, STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER,
+	"filepro", filepro_functions, PHP_MINIT(filepro), PHP_MSHUTDOWN(filepro), NULL, NULL, NULL, NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
 };
 
 

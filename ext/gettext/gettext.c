@@ -45,7 +45,8 @@ function_entry php_gettext_functions[] = {
 /* }}} */
 
 zend_module_entry php_gettext_module_entry = {
-	"gettext", php_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+	"gettext", php_gettext_functions, NULL, NULL, NULL, NULL, PHP_MINFO(gettext), NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_GETTEXT

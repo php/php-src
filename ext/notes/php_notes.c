@@ -97,6 +97,7 @@ function_entry notes_functions[] = {
 };
 
 zend_module_entry notes_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"notes", 
 	notes_functions, 
 	PHP_MINIT(notes), 
@@ -104,6 +105,7 @@ zend_module_entry notes_module_entry = {
 	PHP_RINIT(notes), 
 	PHP_RSHUTDOWN(notes), 
 	PHP_MINFO(notes), 
+        NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

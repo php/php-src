@@ -62,6 +62,7 @@ function_entry iconv_functions[] = {
 /* {{{ iconv_module_entry
  */
 zend_module_entry iconv_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"iconv",
 	iconv_functions,
 	PHP_MINIT(miconv),
@@ -69,6 +70,7 @@ zend_module_entry iconv_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(miconv),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

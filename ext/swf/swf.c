@@ -111,6 +111,7 @@ function_entry swf_functions[] = {
 /* {{{ swf_module_entry
  */
 zend_module_entry swf_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"swf",
 	swf_functions,
 	PHP_MINIT(swf),
@@ -118,6 +119,7 @@ zend_module_entry swf_module_entry = {
 	PHP_RINIT(swf),
 	NULL,
 	PHP_MINFO(swf),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

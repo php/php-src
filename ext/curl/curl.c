@@ -69,6 +69,7 @@ function_entry curl_functions[] = {
 /* {{{ curl_module_entry
  */
 zend_module_entry curl_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"curl",
 	curl_functions,
 	PHP_MINIT(curl),
@@ -76,6 +77,7 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(curl),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

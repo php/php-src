@@ -43,6 +43,7 @@ function_entry crack_functions[] = {
 };
 
 zend_module_entry crack_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"crack",
 	crack_functions,
 	ZEND_MODULE_STARTUP_N(crack),
@@ -50,6 +51,7 @@ zend_module_entry crack_module_entry = {
 	ZEND_MODULE_ACTIVATE_N(crack),
 	ZEND_MODULE_DEACTIVATE_N(crack),
 	ZEND_MODULE_INFO_N(crack),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

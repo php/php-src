@@ -47,6 +47,7 @@ function_entry fribidi_functions[] = {
 };
 
 zend_module_entry fribidi_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"fribidi",
 	fribidi_functions,
 	PHP_MINIT(fribidi),
@@ -54,6 +55,7 @@ zend_module_entry fribidi_module_entry = {
 	NULL,
 	NULL,
 	PHP_MINFO(fribidi),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

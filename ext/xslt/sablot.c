@@ -95,6 +95,7 @@ function_entry xslt_functions[] = {
 /* {{{ xslt_module_entry
  */
 zend_module_entry xslt_module_entry = {
+	STANDARD_MODULE_HEADER,
 	"xslt",
 	xslt_functions,
 	PHP_MINIT(xslt),
@@ -102,6 +103,7 @@ zend_module_entry xslt_module_entry = {
 	NULL,	
 	NULL,
 	PHP_MINFO(xslt),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */

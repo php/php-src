@@ -236,6 +236,7 @@ function_entry pdf_functions[] = {
 /* {{{ pdf_module_entry
  */
 zend_module_entry pdf_module_entry = {
+    STANDARD_MODULE_HEADER,
 	"pdf", 
 	pdf_functions, 
 	PHP_MINIT(pdf), 
@@ -243,6 +244,7 @@ zend_module_entry pdf_module_entry = {
 	NULL, 
 	NULL, 
 	PHP_MINFO(pdf), 
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES 
 };
 /* }}} */

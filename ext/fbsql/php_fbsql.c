@@ -218,6 +218,7 @@ function_entry fbsql_functions[] = {
 /* }}} */
 
 zend_module_entry fbsql_module_entry = {
+	STANDARD_MODULE_HEADER,
    "fbsql",
    fbsql_functions,
    PHP_MINIT(fbsql),
@@ -225,6 +226,7 @@ zend_module_entry fbsql_module_entry = {
    PHP_RINIT(fbsql),
    PHP_RSHUTDOWN(fbsql),
    PHP_MINFO(fbsql),
+	NO_VERSION_YET,
    STANDARD_MODULE_PROPERTIES
 };
 

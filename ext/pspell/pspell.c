@@ -71,7 +71,8 @@ function_entry pspell_functions[] = {
 static int le_pspell, le_pspell_config;
 
 zend_module_entry pspell_module_entry = {
-	"pspell", pspell_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), STANDARD_MODULE_PROPERTIES
+    STANDARD_MODULE_HEADER,
+	"pspell", pspell_functions, PHP_MINIT(pspell), NULL, NULL, NULL, PHP_MINFO(pspell), NO_VERSION_YET, STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_PSPELL

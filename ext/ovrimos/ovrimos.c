@@ -1299,13 +1299,15 @@ function_entry ovrimos_functions[] = {
 /* }}} */
 
 zend_module_entry ovrimos_module_entry = {
-	"Ovrimos",
+	STANDARD_MODULE_HEADER,
+	"ovrimos",
 	ovrimos_functions,
 	NULL,
 	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(ovrimos),
+    NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
 };
 

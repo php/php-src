@@ -111,7 +111,16 @@ function_entry mcal_functions[] = {
 };
 
 zend_module_entry php_mcal_module_entry = {
-	"mcal", mcal_functions, PHP_MINIT(mcal), NULL, NULL, NULL, PHP_MINFO(mcal), STANDARD_MODULE_PROPERTIES
+	STANDARD_MODULE_HEADER,
+	"mcal",
+        mcal_functions,
+        PHP_MINIT(mcal),
+        NULL,
+        NULL,
+        NULL,
+        PHP_MINFO(mcal),
+        NO_VERSION_YET,
+        STANDARD_MODULE_PROPERTIES
 };
 
 #ifdef COMPILE_DL_MCAL
