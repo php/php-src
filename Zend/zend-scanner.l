@@ -36,6 +36,7 @@
 
 #ifdef ZTS
 #include <fstream.h>
+#include <strstrea.h>
 #endif
 
 #include "zend.h"
@@ -178,14 +179,13 @@ inline int open_file_for_scanning(zend_file_handle *file_handle CLS_DC)
 	BEGIN(INITIAL);
 	
 	zend_set_compiled_filename(file_handle->filename);
-	return SUCCESS;
 #else
 	ifstream *input_file = new ifstream(file_handle->filename);
 	CG(ZFL) = new ZendFlexLexer;
 
 	CG(ZFL)->switch_streams(input_file, &cout);
-	return SUCCESS;
 #endif
+	return SUCCESS;
 }
 END_EXTERN_C()
 
@@ -273,15 +273,21 @@ zend_op_array *compile_filename(zval *filename CLS_DC)
 }
 
 
-static inline int prepare_string_for_scanning(zval *str)
+static inline int prepare_string_for_scanning(zval *str CLS_DC)
 {
 #ifndef ZTS
 	/* enforce two trailing NULLs for flex... */
 	str->value.str.val = (char *) erealloc(str->value.str.val,str->value.str.len+2);
+
 	str->value.str.val[str->value.str.len+1]=0;
 
 	yyin=NULL;
 	yy_scan_buffer(str->value.str.val, str->value.str.len+2);
+#else
+	istrstream *input_stream = new istrstream(str->value.str.val, str->value.str.len);
+	CG(ZFL) = new ZendFlexLexer;
+
+	CG(ZFL)->switch_streams(input_stream, &cout);
 #endif
 	return SUCCESS;
 }
@@ -289,7 +295,6 @@ static inline int prepare_string_for_scanning(zval *str)
 
 zend_op_array *compile_string(zval *source_string CLS_DC)
 {
-#ifndef ZTS
 	zend_lex_state original_lex_state;
 	zend_op_array *op_array = (zend_op_array *) emalloc(sizeof(zend_op_array));
 	zend_op_array *original_active_op_array = CG(active_op_array);
@@ -303,13 +308,17 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 
 	init_op_array(op_array, INITIAL_OP_ARRAY_SIZE);
 	save_lexical_state(&original_lex_state CLS_CC);
-	if (prepare_string_for_scanning(source_string)==FAILURE) {
+	if (prepare_string_for_scanning(source_string CLS_CC)==FAILURE) {
 		destroy_op_array(op_array);
 		efree(op_array);
 		retval = NULL;
 	} else {
 		CG(active_op_array) = op_array;
+#ifndef ZTS
 		BEGIN(IN_SCRIPTING);
+#else
+		CG(ZFL)->BeginState(IN_SCRIPTING);
+#endif
 		if (zendparse(CLS_C)==1) {
 			retval = NULL;
 		} else {
@@ -324,9 +333,6 @@ zend_op_array *compile_string(zval *source_string CLS_DC)
 	zval_dtor(&tmp);
 
 	return retval;
-#else
-	return NULL;
-#endif
 }
 
 
@@ -390,7 +396,7 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 	str = &tmp;
 	zval_copy_ctor(str);
 	save_lexical_state(&original_lex_state CLS_CC);
-	if (prepare_string_for_scanning(str)==FAILURE) {
+	if (prepare_string_for_scanning(str CLS_CC)==FAILURE) {
 		return FAILURE;
 	}
 	zend_highlight(syntax_highlighter_ini);
@@ -404,6 +410,12 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 int lex_scan(zval *zendlval CLS_DC)
 {
 	return CG(ZFL)->lex_scan(zendlval CLS_CC);
+}
+
+
+void ZendFlexLexer::BeginState(int state)
+{
+	BEGIN(state);
 }
 
 

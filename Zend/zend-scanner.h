@@ -22,6 +22,7 @@ class ZendFlexLexer : public yyFlexLexer
 {
 public:
 	int lex_scan(zval *zendlval CLS_DC);
+	void BeginState(int state);
 };
 
 #endif	/* ZTS */
