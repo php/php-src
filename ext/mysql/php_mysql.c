@@ -24,10 +24,6 @@
  * ? Safe mode implementation
  */
 
-#ifdef COMPILE_DL
-# include "dl/phpdl.h"
-#endif
-
 #include "php.h"
 #include "php_globals.h"
 #include "ext/standard/php3_standard.h"
@@ -157,7 +153,8 @@ int mysql_globals_id;
 PHP_MYSQL_API php_mysql_globals mysql_globals;
 #endif
 
-#ifdef COMPILE_DL
+#ifdef COMPILE_DL_MYSQL
+# include "dl/phpdl.h"
 DLEXPORT zend_module_entry *get_module(void) { return &mysql_module_entry; }
 #endif
 

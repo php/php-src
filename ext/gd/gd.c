@@ -135,7 +135,7 @@ php3_module_entry gd_module_entry = {
 	"gd", gd_functions, PHP_MINIT(gd), PHP_MSHUTDOWN(gd), NULL, NULL, PHP_MINFO(gd), STANDARD_MODULE_PROPERTIES
 };
 
-#if COMPILE_DL
+#ifdef COMPILE_DL_GD
 # include "dl/phpdl.h"
 DLEXPORT php3_module_entry *get_module(void) { return &gd_module_entry; }
 #endif
