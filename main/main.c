@@ -1138,6 +1138,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	setlocale(LC_CTYPE, "");
 #endif
 
+#if HAVE_TZSET
+	tzset();
+#endif
+
 #if defined(PHP_WIN32) || (defined(NETWARE) && defined(USE_WINSOCK))
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
