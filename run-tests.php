@@ -78,7 +78,9 @@ function initialize() {
 
     $windows_p = (substr(php_uname(), 0, 7) == "Windows");
     if ($windows_p) {
-	$php = "./php.exe";
+		if  (file_exists('Release_TS_inline/php.exe')) 	$php ="Release_TS_inline\\php.exe";
+		elseif (file_exists('Release_TS/php.exe')) 				$php ="Release_TS\\php.exe";
+		else 	$php = "./php.exe";
     } else {
 	$php = "./php";
     }
