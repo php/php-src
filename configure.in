@@ -96,10 +96,7 @@ case $host_alias in
 *darwin*|*rhapsody*)
     CPPFLAGS="$CPPFLAGS -no-cpp-precomp";;
 *bsdi*)
-    if test "GNU" != `${MAKE} --version | sed -n -e "s|^GNU.*|GNU|p"`; then
-        BSD_MAKEFILE=yes
-    fi
-    ;;
+    BSD_MAKEFILE=yes;;
 *beos*)
     beos_threads=1
     LIBS="$LIBS -lbe -lroot";;
@@ -330,73 +327,30 @@ AC_CHECK_LIB(m, sin)
 
 dnl Only include libbind if inet_aton is not found in 
 dnl libresolv.
-dnl As of bind9, a shared libbind requires libisc.
-dnl BSDi 4.4 has inet_aton in libc.
-dnl 20020327 Reworked this, to give libc precedence.
-
-AC_MSG_CHECKING([for native inet_aton])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>],
-  [struct in_addr in; inet_aton(0, &in); return (0);],
-  [AC_MSG_RESULT(yes)
-    AC_DEFINE(HAVE_INET_ATON,1,[ ])
-  ],
-  [
-    AC_MSG_RESULT(no)
-    AC_CHECK_LIB(resolv, inet_aton, [], [
-      AC_CHECK_LIB(bind, inet_aton, [], [
-        AC_CHECK_LIB(bind, __inet_aton, [
-          AC_CHECK_LIB(bind, inet_aton, [
-          LIBS="$LIBS -lisc"],[], -lisc)
-        ])
-      ])
-    ])
+AC_CHECK_LIB(resolv, inet_aton, [], [
+  AC_CHECK_LIB(bind, inet_aton, [], [
+    AC_CHECK_LIB(bind, __inet_aton)
   ])
 ])
 
 dnl The res_search may be in libsocket as well, and if it is
 dnl make sure to check for dn_skipname in libresolv, or if res_search
 dnl is in neither of these libs, still check for dn_skipname in libresolv
-dnl There are systems (BSDi4.x) with a native res_search. Check these
-dnl first, so no linking is necessary.
+AC_CHECK_LIB(socket, res_search, [
+ AC_CHECK_LIB(resolv, dn_skipname)
+ AC_CHECK_LIB(resolv, __dn_skipname)
+ LIBS="$LIBS -lsocket"
+ AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
+ AC_CHECK_LIB(resolv, res_search, [
+  LIBS="$LIBS -lresolv"
+  AC_DEFINE(HAVE_LIBRESOLV,1,[ ]) 
+ ], [
+  AC_CHECK_LIB(resolv, dn_skipname)
+  AC_CHECK_LIB(resolv, __dn_skipname)
+ ]) 
+])
 
-AC_MSG_CHECKING([for native res_search])
-AC_TRY_LINK([
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <arpa/nameser.h>
-#include <resolv.h>],
-        [
-const char host[7]="php.net";
-u_char ans[1024];
-int r;
-res_init();
-/* Capture result in r but return 0, since a working nameserver is
- * not a requirement for compilation.
- */
-r =  res_search( host, C_IN, T_MX, (u_char *)&ans, sizeof(ans));
-return 0;
-res_close();
-        ],
-        [AC_MSG_RESULT(yes)
-         AC_DEFINE(HAVE_RES_SEARCH,1,[ ])],
-        [AC_MSG_RESULT(no)
-         AC_CHECK_LIB(socket, res_search, [
-           AC_CHECK_LIB(resolv, dn_skipname)
-           AC_CHECK_LIB(resolv, __dn_skipname)
-           LIBS="$LIBS -lsocket"
-           AC_DEFINE(HAVE_LIBSOCKET,1,[ ]) ], [
-           AC_CHECK_LIB(resolv, res_search, [
-             LIBS="$LIBS -lresolv"
-             AC_DEFINE(HAVE_LIBRESOLV,1,[ ]) 
-        ], [
-         AC_CHECK_LIB(resolv, dn_skipname)
-         AC_CHECK_LIB(resolv, __dn_skipname)
-       ])
-])
-])
+
 
 dnl Then headers.
 dnl -------------------------------------------------------------------------
