@@ -2168,8 +2168,12 @@ $endif;
                 ++locind;
 
                 EXEC SQL GET DESCRIPTOR :descrpid VALUE :i :*locator_b = DATA;
-                
-		if (locator_b->loc_indicator == -1) { // additional check for NULL 
+                /* work around for ESQL/C bug with NULL values and BLOBS */                
+                if ((locator_b->loc_status < 0) && (locator_b->loc_bufsize == 0)){
+                  locator_b->loc_indicator == -1;
+                }      
+                /* normal check for NULL values */
+                if (locator_b->loc_indicator == -1) { 
                   if((IFXG(textasvarchar)==0 && fieldtype==SQLTEXT) 
                       || (IFXG(byteasvarchar)==0 && fieldtype==SQLBYTES)) {
                     bid_b=Ifx_Result->res_id[locind];
@@ -2187,7 +2191,7 @@ $endif;
                     add_assoc_string(return_value, fieldname, nullstr, DUP);
 		    break;
                   }
-		}
+                }
 		
                 if (locator_b->loc_status < 0) {  /* blob too large */   
                        php_error(E_WARNING,"no memory (%d bytes) for blob",
@@ -2529,6 +2533,11 @@ $endif;
                   
                     EXEC SQL GET DESCRIPTOR :descrpid VALUE :i 
                                             :*locator_b = DATA;
+                    /* work around for ESQL/C bug with NULL values and BLOBS */                
+                    if ((locator_b->loc_status < 0) && (locator_b->loc_bufsize == 0)){
+                    locator_b->loc_indicator == -1;
+                    }      
+                    /* normal check for NULL values */
                     if (locator_b->loc_indicator == -1) {
                       if (
                          (fieldtype==SQLTEXT) || (fieldtype==SQLBYTES)
