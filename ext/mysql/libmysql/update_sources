@@ -89,6 +89,8 @@ sub diff_files {
     else
     {
       print STDERR "DIFF: $f\n";
+      $f eq 'config-win.h' and
+	print STDERR "/n/nDon't forget to undefine HAVE_COMPRESS in $f/n/n/n";
     }
   }
 }

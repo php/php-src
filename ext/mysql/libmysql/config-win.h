@@ -239,7 +239,7 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_ALLOCA
 #define HAVE_STRPBRK
 #define HAVE_STRSTR
-#define HAVE_COMPRESS
+/* #define HAVE_COMPRESS     -- not with PHP, please */
 
 #ifdef NOT_USED
 #define HAVE_SNPRINTF		/* Gave link error */
