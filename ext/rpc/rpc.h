@@ -134,4 +134,40 @@
 			_class_hash->handlers = _handlers; \
 		}
 
+#define INIT_RPC_OBJECT(__intern, __clh) \
+			(__intern)->ce = (__clh)->ce; \
+			(__intern)->function_table.hash = (__intern)->ce->function_table;
+
+#define OVERLOAD_RPC_CLASS(__name, __intern, __clh) { \
+			zend_class_entry overloaded_class_entry; \
+			INIT_CLASS_ENTRY(overloaded_class_entry, NULL, NULL); \
+			overloaded_class_entry.name = __name.str; \
+			overloaded_class_entry.name_length = (__name.str != NULL) ? __name.len : 0; \
+			(__clh)->ce = zend_register_internal_class_ex(&overloaded_class_entry, (__intern)->ce, NULL TSRMLS_CC); \
+			INIT_RPC_OBJECT(__intern, __clh); \
+		}
+
+#define  SEPARATE_RPC_CLASS(__intern) \
+			(__intern)->free_function_table = 1; \
+			zend_ts_hash_init(&((__intern)->function_table), 0, NULL, NULL, TRUE); \
+			zend_hash_copy(&((__intern)->function_table.hash), &((__intern)->ce->function_table), NULL, NULL, 0);
+
+#define REGISTER_RPC_CLASS(__name, __class_hash) { \
+			rpc_class_hash **_tmp; \
+			if ((__name).str != NULL) { \
+				zend_ts_hash_add(&classes, (__name).str, (__name).len + 1, &(__class_hash), sizeof(rpc_class_hash *), (void **) &_tmp); \
+			} \
+            \
+			tsrm_mutex_lock(classes.mx_writer); \
+			zend_llist_add_element(&classes_list, _tmp); \
+			tsrm_mutex_unlock(classes.mx_writer); \
+			\
+			if ((__class_hash)->name.str) { \
+				zend_ts_hash_add(&classes, (__class_hash)->name.str, (__class_hash)->name.len + 1, &(__class_hash), sizeof(rpc_class_hash *), NULL); \
+			} else { \
+				zend_ts_hash_index_update(&classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL); \
+			} \
+		}
+
+
 #endif

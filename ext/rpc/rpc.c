@@ -229,6 +229,11 @@ static void rpc_instance_dtor(void *pDest)
 
 	RPC_HT(*intern)->rpc_dtor((*intern)->data);
 
+	tsrm_mutex_free((*intern)->mx_handler);
+	if ((*intern)->free_function_table) {
+		zend_ts_hash_destroy(&((*intern)->function_table));
+	}
+
 	pefree(*intern, TRUE);
 }
 
@@ -439,7 +444,6 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 	zval *object = getThis();
 	zval ***args, ***args_free;
 	zend_uint num_args = ZEND_NUM_ARGS();
-	zend_class_entry overloaded_class_entry;
 	rpc_class_hash *class_hash;
 	rpc_internal *intern;
 	rpc_string hash_val, class_val;
@@ -474,7 +478,7 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 	GET_ARGS_EX(num_args, args, args_free, 1);
 
 	/* if classname != integer */
-	if ((zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 1 TSRMLS_CC, "l", &class_val.str) != SUCCESS) ||
+	if ((zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, 1 TSRMLS_CC, "l", &class_val.len) != SUCCESS) ||
 		/* or we have no hash function */
 		!(RPC_HT(intern)->rpc_hash) ||
 		/* or integer hashing is not allowed */
@@ -495,12 +499,10 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 
 				/* check if already hashed */	
  				if ((class_hash = rpc_class_hash_find(&hash_val)) == NULL) {
-					rpc_class_hash **class_hash_find;
-
 					ALLOC_CLASS_HASH(class_hash, intern->handlers);
 
 					/* do hashing */
-					if (RPC_HT(intern)->rpc_hash(class_val, (rpc_string *)(class_hash), NULL, num_args, arg_types, CLASS) != SUCCESS) {
+					if (RPC_HT(intern)->rpc_hash(class_val, (rpc_string *) class_hash, NULL, num_args, arg_types, CLASS) != SUCCESS) {
 						/* TODO: exception */
 						ZVAL_NULL(object);
 						return;
@@ -508,39 +510,22 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 
 					/* overload class entry */
 					RPC_HT(intern)->rpc_name(class_val, &class_val, NULL, CLASS);
-					INIT_CLASS_ENTRY(overloaded_class_entry, NULL, NULL);
-					overloaded_class_entry.name = class_val.str;
-					overloaded_class_entry.name_length = class_val.len;
-					class_hash->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
-					intern->ce = class_hash->ce;
-					intern->function_table.hash = intern->ce->function_table;
+					OVERLOAD_RPC_CLASS(class_val, intern, class_hash);
 
 					/* register with non-hashed key
 					 * also track all instaces in a llist for destruction later on, because there might be duplicate entries in
 					 * the hashtable and we can't determine if a pointer references to an already freed element
 					 */
-					tsrm_mutex_lock(classes.mx_writer);
-					zend_ts_hash_add(&classes, hash_val.str, hash_val.len + 1, &class_hash, sizeof(rpc_class_hash *), (void **) &class_hash_find);
-					zend_llist_add_element(&classes_list, class_hash_find);
-					tsrm_mutex_unlock(classes.mx_writer);
-
-					if (class_hash->name.str) {
-						/* register string hashcode */
-						zend_ts_hash_add(&classes, class_hash->name.str, class_hash->name.len + 1, &class_hash, sizeof(rpc_class_hash *), NULL);
-					} else if (!class_hash->name.str && (RPC_HT(intern)->hash_type & HASH_AS_INT)) {
-						/* register int hashcode */
-						zend_ts_hash_index_update(&classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
-					}
+					REGISTER_RPC_CLASS(class_val, class_hash);
 				} else {
-					intern->ce = class_hash->ce;
+					INIT_RPC_OBJECT(intern, class_hash);
 				}
 
 				FREE_SIGNATURE(hash_val, arg_types);
 			} else {
-				/* overload class entry */
-				INIT_CLASS_ENTRY(overloaded_class_entry, class_val.str, NULL);
-				intern->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
-				intern->function_table.hash = intern->ce->function_table;
+				/* Copy the function table hash for this object, so that it is separated
+				 * from the "global" table */
+				SEPARATE_RPC_CLASS(intern);
 			}
 		}
 	} else {
@@ -548,20 +533,18 @@ ZEND_API ZEND_FUNCTION(rpc_load)
 		if ((class_hash = rpc_class_hash_find(&hash_val)) == NULL) {
 			ALLOC_CLASS_HASH(class_hash, intern->handlers);
 
+			class_val.str = NULL;
 			class_hash->name.str = NULL;
 			class_hash->name.len = class_val.len;
 
 			/* overload class entry */
 			RPC_HT(intern)->rpc_name(class_val, &class_val, NULL, CLASS);
-			INIT_CLASS_ENTRY(overloaded_class_entry, class_val.str, NULL);
-			class_hash->ce = zend_register_internal_class_ex(&overloaded_class_entry, intern->ce, NULL TSRMLS_CC);
-			intern->ce = class_hash->ce;
-			intern->function_table.hash = intern->ce->function_table;
+			OVERLOAD_RPC_CLASS(class_val, intern, class_hash);
 
 			/* register int hashcode, we don't know more */
-			zend_ts_hash_index_update(&classes, class_hash->name.len, &class_hash, sizeof(rpc_class_hash *), NULL);
+			REGISTER_RPC_CLASS(class_val, class_hash);
 		} else {
-			intern->ce = class_hash->ce;
+			INIT_RPC_OBJECT(intern, class_hash);
 		}
 	}
 	
@@ -795,6 +778,7 @@ ZEND_API zend_object_value rpc_objects_new(zend_class_entry *class_type TSRMLS_D
 
 	intern->ce = class_type;
 	intern->data = NULL;
+	intern->free_function_table = 0;
 	intern->function_table.reader = 0;
 	intern->function_table.mx_reader = tsrm_mutex_alloc();
 	intern->function_table.mx_writer = tsrm_mutex_alloc();
@@ -893,7 +877,7 @@ static rpc_class_hash *rpc_class_hash_find(rpc_string *name)
 ZEND_API zval* _rpc_object_from_data(zval *z, rpc_handler_entry *handler, void *data, rpc_class_hash *class_hash)
 {
 	rpc_internal *intern;
-	rpc_string name = {NULL, 0};
+	rpc_string hash, name = {NULL, 0};
 	TSRMLS_FETCH();
 
 	if (z == NULL) {
@@ -908,27 +892,34 @@ ZEND_API zval* _rpc_object_from_data(zval *z, rpc_handler_entry *handler, void *
 		return NULL;
 	}
 
+	intern->ce = *(handler->ce);
 	intern->data = data;
 
-	if (class_hash == NULL) {
-		if (handler->handlers->rpc_name(name, &name, data, CLASS) == SUCCESS) {
-			class_hash = rpc_class_hash_find(&name);
-		} else {
-			ALLOC_CLASS_HASH(class_hash, intern->handlers);
+	if ((handler->handlers->rpc_hash) &&
+		(handler->handlers->rpc_hash(name, &hash, data, 0, "", CLASS) == SUCCESS)) {
+			/* We are hashing, try to find an appropriate hash or create a new one */
+			if ((class_hash == NULL) &&
+				((class_hash = rpc_class_hash_find(&hash)) == NULL)) {
+				ALLOC_CLASS_HASH(class_hash, intern->handlers);
 
-			if (class_hash == NULL) {
-				/* TODO: exception */
-				return NULL;
+				class_hash->name = hash;
+
+				if (handler->handlers->rpc_name(hash, &name, data, CLASS) != SUCCESS) {
+					/* TODO exception */
+				}
+
+				OVERLOAD_RPC_CLASS(name, intern, class_hash);
+				REGISTER_RPC_CLASS(name, class_hash);
+			} else {
+				INIT_RPC_OBJECT(intern, class_hash);
 			}
-		    
-			/* Copy the function table hash for this object, so that it is separated
-		     * from the "global" table */
-		    zend_ts_hash_init(&(intern->function_table), 0, NULL, NULL, TRUE);
-		    zend_hash_copy(&intern->function_table.hash, &((*(handler->ce))->function_table), NULL, NULL, 0);
-		}
-	}
 
-	RPC_CLASS(intern) = class_hash;
+			RPC_CLASS(intern) = class_hash;
+	} else {
+		/* Copy the function table hash for this object, so that it is separated
+		 * from the "global" table */
+		SEPARATE_RPC_CLASS(intern);
+	}
 
 	return z;
 }

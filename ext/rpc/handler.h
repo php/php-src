@@ -116,6 +116,7 @@ typedef struct _rpc_class_hash {
 typedef struct _rpc_internal {
 	MUTEX_T					mx_handler;
 	TsHashTable				function_table;
+	zend_bool				free_function_table;
 	rpc_object_handlers		**handlers;
 	rpc_class_hash			*hash;
 	zend_class_entry		*ce;
