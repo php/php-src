@@ -6,27 +6,21 @@ Fixed:
 
     i18n_convert/mb_convert_encoding (Moriyoshi Koizumi)
     socket_iovec_alloc (Rasmus)
-	exif_imagetype,exif_thumbnail (Rasmus)
+    exif_imagetype,exif_thumbnail (Rasmus)
     dbase_open (Rasmus)
-	array_pad (Rasmus)
-	str_repeat (Ilia)
+    array_pad (Rasmus)
+    str_repeat (Ilia)
     setlocale (Rasmus)
     unregister_tick_function (Rasmus)
-	bcsub (Rasmus)
+    bcsub (Rasmus)
+    mb_ereg, mb_ereg_match, mb_eregi, mb_split (Moriyoshi Koizumi)
 
 Open:
 
-    mb_ereg (2)
-    mb_ereg_match (2)
-    mb_eregi (2)
-    mb_split
     ob_start (3)
     xml_parser_create (Unable to reproduce - Rasmus)
 
     Notes:
-
-(2) sometimes, mb_ereg passes the test, although a subsequent mbereg
-    will cause a segfault. Probably something in-between screws up the engine.
 
 (3) calling ob_start in weird ways caused a segfault in 
     php_formatted_print(). In this line:
