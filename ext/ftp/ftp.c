@@ -394,6 +394,9 @@ ftp_syst(ftpbuf_t *ftp)
 		return NULL;
 	}
 	syst = ftp->inbuf;
+	while (*syst == ' ') {
+		syst++;
+	}
 	if ((end = strchr(syst, ' '))) {
 		*end = 0;
 	}
