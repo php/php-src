@@ -34,6 +34,7 @@ typedef struct {
 typedef struct {
 	ProcessPair *process;
 	int process_size;
+	char *comspec;
 } tsrm_win32_globals;
 
 #ifdef ZTS
