@@ -1120,9 +1120,9 @@ static void php_strtr_array(zval *return_value,char *str,int slen,HashTable *has
 		}
 			
 		found = 0;
+		memcpy(key,str+pos,maxlen);
 
 		for (len = maxlen; len >= minlen; len--) {
-			memcpy(key,str+pos,len);
 			key[ len ]=0;
 			
 			if (zend_hash_find(hash,key,len+1,(void**)&trans) == SUCCESS) {
