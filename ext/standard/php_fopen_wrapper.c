@@ -95,9 +95,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 
 static php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
-	NULL,
-	NULL,
-	NULL
+	NULL, /* close */
+	NULL, /* fstat */
+	NULL, /* stat */
+	NULL, /* opendir */
+	"PHP"
 };
 
 php_stream_wrapper php_stream_php_wrapper =	{

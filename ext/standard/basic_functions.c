@@ -634,14 +634,14 @@ function_entry basic_functions[] = {
 	PHP_FE(set_socket_blocking,												NULL)
 	PHP_FE(socket_set_blocking,												NULL)
 
-	PHP_FE(file_get_wrapper_data,											NULL)
+	PHP_FE(file_get_meta_data,												NULL)
 	PHP_FE(file_register_wrapper,											NULL)
 
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 	PHP_FE(socket_set_timeout,												NULL)
 #endif
 
-	PHP_FE(socket_get_status,												NULL)
+	PHP_FALIAS(socket_get_status, file_get_meta_data,						NULL)
 
 #if (!defined(PHP_WIN32) && !defined(__BEOS__) && !defined(NETWARE) && HAVE_REALPATH) || defined(ZTS)
 	PHP_FE(realpath,														NULL)

@@ -120,7 +120,8 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,
 	NULL, /* stat_url */
-	NULL  /* opendir */
+	NULL, /* opendir */
+	"FTP"
 };
 
 php_stream_wrapper php_stream_ftp_wrapper =	{
