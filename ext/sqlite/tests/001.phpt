@@ -1,24 +1,29 @@
 --TEST--
-Check for sqlite presence
+sqlite: Simple insert/select
 --SKIPIF--
-<?php if (!extension_loaded("sqlite")) print "skip"; ?>
---POST--
---GET--
---INI--
+<?php # vim:ft=php
+if (!extension_loaded("sqlite")) print "skip"; ?>
 --FILE--
 <?php 
-echo "sqlite extension is available";
-/*
-	you can add regression tests for your extension here
+include "blankdb.inc";
 
-  the output of your test code has to be equal to the
-  text in the --EXPECT-- section below for the tests
-  to pass, differences between the output and the
-  expected text are interpreted as failure
-
-	see php4/README.TESTING for further information on
-  writing regression tests
-*/
+sqlite_query("CREATE TABLE foo(c1 date, c2 time, c3 varchar(64))", $db);
+sqlite_query("INSERT INTO foo VALUES ('2002-01-02', '12:49:00', NULL)", $db);
+$r = sqlite_query("SELECT * from foo", $db);
+var_dump(sqlite_fetch_array($r));
 ?>
 --EXPECT--
-sqlite extension is available
+array(4) {
+  [0]=>
+  string(10) "2002-01-02"
+  ["c1"]=>
+  string(10) "2002-01-02"
+  [1]=>
+  string(8) "12:49:00"
+  ["c2"]=>
+  string(8) "12:49:00"
+  [2]=>
+  NULL
+  ["c3"]=>
+  NULL
+}
