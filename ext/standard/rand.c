@@ -243,6 +243,8 @@ PHP_FUNCTION(rand)
 			convert_to_long_ex(p_max);
 			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
 				php_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
+			}else if ((*p_max)->value.lval-(*p_min)->value.lval > RAND_MAX){
+				php3_error(E_WARNING,"rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
 			}
 			break;
 		default:
@@ -287,7 +289,7 @@ PHP_FUNCTION(rand)
      */
 	if (p_min && p_max) { /* implement range */
 		return_value->value.lval = (*p_min)->value.lval +
-			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(PHP_RAND_MAX+1.0));     
+			(int)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1.0) * return_value->value.lval/(PHP_RAND_MAX+1.0));     
 	}
 }
 /* }}} */
@@ -308,7 +310,9 @@ PHP_FUNCTION(mt_rand)
 			convert_to_long_ex(p_min);
 			convert_to_long_ex(p_max);
 			if ((*p_max)->value.lval-(*p_min)->value.lval <= 0) {
-				php_error(E_WARNING,"mtrand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
+				php_error(E_WARNING,"mt_rand():  Invalid range:  %ld..%ld", (*p_min)->value.lval, (*p_max)->value.lval);
+			}else if ((*p_max)->value.lval-(*p_min)->value.lval > MT_RAND_MAX){
+				php3_error(E_WARNING,"mt_rand():  Invalid range:  %ld..%ld",(*p_min)->value.lval, (*p_max)->value.lval);
 			}
 			break;
 		default:
@@ -329,7 +333,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (p_min && p_max) { /* implement range */
 		return_value->value.lval = (*p_min)->value.lval +
-			(long)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1) * return_value->value.lval/(MT_RAND_MAX+1.0));
+			(long)((double)((*p_max)->value.lval - (*p_min)->value.lval + 1.0) * return_value->value.lval/(MT_RAND_MAX+1.0));
 	}
 }
 /* }}} */
