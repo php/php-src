@@ -89,7 +89,7 @@ ZEND_API void _zval_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 }
 
 
-void zval_del_ref(zval **p)
+ZEND_API void zval_del_ref(zval **p)
 {
 	(*p)->refcount--;
 	if ((*p)->refcount==0) {
@@ -99,7 +99,7 @@ void zval_del_ref(zval **p)
 }                                                                                                                               
 
 
-void zval_add_ref(zval **p)
+ZEND_API void zval_add_ref(zval **p)
 {
 	(*p)->refcount++;
 }
