@@ -1082,6 +1082,9 @@ ZEND_FUNCTION(get_declared_classes)
 		}
 	}
 
+	if(!Z_STRVAL_PP(namespace_name) || !Z_STRLEN_PP(namespace_name)) {
+		global_ns = 1;
+	}
 	
 	if(!global_ns) {
 		convert_to_string_ex(namespace_name);
