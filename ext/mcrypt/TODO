@@ -1,6 +1,0 @@
-/* $Id$ */
-
-TODO:
-- Convert to zend_parse_parameters
-- Unify error handling
-- Implement encryption streams
