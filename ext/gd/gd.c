@@ -1103,7 +1103,7 @@ PHP_FUNCTION(imagearc)
 	GDLS_FETCH();
 
 	if (ARG_COUNT(ht) != 8 ||
-		zend_get_parameters_ex(ht, 8, &IM, &CX, &CY, &W, &H, &ST, &E, &COL) == FAILURE)
+		zend_get_parameters_ex(8, &IM, &CX, &CY, &W, &H, &ST, &E, &COL) == FAILURE)
 	{
 		WRONG_PARAM_COUNT;
 	}
