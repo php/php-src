@@ -403,6 +403,7 @@ PHP_FUNCTION(openssl_seal)
 		i++;
 	}
 
+#if OPENSSL_VERSION_NUMBER >= 0x0090600fL
 	if (!EVP_EncryptInit(&ctx,EVP_rc4(),NULL,NULL)) {
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
@@ -412,6 +413,9 @@ PHP_FUNCTION(openssl_seal)
 		efree(pkeys);
 		RETURN_FALSE;
 	}
+#else
+	EVP_EncryptInit(&ctx,EVP_rc4(),NULL,NULL);
+#endif
 
 #if 0
 	/* Need this if allow ciphers that require initialization vector */
@@ -443,9 +447,12 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_FALSE;
 	}
 
-	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys) ||
-	    !EVP_SealUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
-			    Z_STRLEN_PP(data))) {
+	if (!EVP_SealInit(&ctx, EVP_rc4(), eks, eksl, NULL, pkeys, nkeys)
+#if OPENSSL_VERSION_NUMBER >= 0x0090600fL
+	    || !EVP_SealUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
+			       Z_STRLEN_PP(data))
+#endif
+	    ) {
 		efree(buf);
 		for (i=0; i<nkeys; i++) {
 			efree(eks[i]);
@@ -456,6 +463,9 @@ PHP_FUNCTION(openssl_seal)
 		RETURN_FALSE;
 	}
 
+#if OPENSSL_VERSION_NUMBER < 0x0090600fL
+	EVP_SealUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+#endif
 	EVP_SealFinal(&ctx, buf + len1, &len2);
 
 	efree(pkeys);
@@ -536,12 +546,23 @@ PHP_FUNCTION(openssl_open)
 		RETURN_FALSE;
 	}
 
-	if (!EVP_OpenInit(&ctx, EVP_rc4(), Z_STRVAL_PP(ekey),
-			  Z_STRLEN_PP(ekey), NULL, pkey) ||
-	    !EVP_OpenUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
-			    Z_STRLEN_PP(data)) ||
-	    !EVP_OpenFinal(&ctx, buf + len1, &len2) ||
-	    (len1 + len2 == 0)) {
+	if (EVP_OpenInit(&ctx, EVP_rc4(), Z_STRVAL_PP(ekey),
+			  Z_STRLEN_PP(ekey), NULL, pkey)
+#if OPENSSL_VERSION_NUMBER >= 0x0090600fL
+	    && EVP_OpenUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
+			       Z_STRLEN_PP(data))
+#endif
+	    ) {
+#if OPENSSL_VERSION_NUMBER < 0x0090600fL
+		EVP_OpenUpdate(&ctx, buf, &len1, Z_STRVAL_PP(data),
+			       Z_STRLEN_PP(data));
+#endif
+		if (!EVP_OpenFinal(&ctx, buf + len1, &len2) ||
+		    (len1 + len2 == 0)) {
+			efree(buf);
+			RETURN_FALSE;
+		}
+	} else {
 		efree(buf);
 		RETURN_FALSE;
 	}
