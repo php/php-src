@@ -5,6 +5,8 @@ PHP                                                                        NEWS
   (vnegrier at esds dot com, Wez).
 - Fixed potential problems with unserializing invalid serialize data. (Marcus)
 - Fixed bug #30375 (cal_info() does not work without a parameter). (Ilia)
+- Fixed bug #30362 (stream_get_line() not handling end string correctly).
+  (Ilia)
 - Fixed bug #30356 (str_ireplace() does not work on all strings). (Ilia)
 - Fixed bug #30344 (Reflection::getModifierNames() returns too long strings).
   (Marcus)
