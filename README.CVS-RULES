@@ -84,7 +84,7 @@ For datetime.c:
 For string.c:
 (php_trim) Fixed a memory leak resulting from improper use of zval_dtor().
 # Man, that thing was leaking all over the place!
-@- Memory leak in trim() function has finally been fixed. (Bob)
+@- Fixed memory leak in trim(). (Bob)
 
 The lines above marked with @ will go into NEWS file automagically, and the
 # lines will be omitted from the ChangeLog. Alternatively, you might want
