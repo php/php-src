@@ -6,7 +6,7 @@ PHP_ARG_WITH(mhash, for mhash support,
 [  --with-mhash[=DIR]      Include mhash support.])
 
 if test "$PHP_MHASH" != "no"; then
-  for i in /usr/local /usr /opt/mhash $PHP_MHASH; do
+  for i in $PHP_MHASH /usr/local /usr /opt/mhash; do
     if test -f $i/include/mhash.h; then
       MHASH_DIR=$i
     fi

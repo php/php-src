@@ -17,7 +17,7 @@ if test "$PHP_SESSION" != "no"; then
 fi
 
 if test "$PHP_MM" != "no"; then
-  for i in /usr/local /usr $PHP_MM; do
+  for i in $PHP_MM /usr/local /usr; do
     if test -f "$i/include/mm.h"; then
       MM_DIR=$i
     fi
