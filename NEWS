@@ -1,6 +1,8 @@
 PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.0.7-dev
+- Added import_request_variables(), to allow users to safely import form
+  variables to the global scope (Zeev)
 - Introduced a new $_REQUEST array, which includes any GET, POST or COOKIE
   variables.  Like the other new variables, this variable is also available
   regardless of the context.  (Andi & Zeev)
