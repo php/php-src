@@ -58,5 +58,8 @@ recode_format_table();
 		fi
 
 		AC_DEFINE(HAVE_LIBRECODE, 1, [Whether we have librecode 3.5 or higher])
+
+		AC_CHECK_HEADERS(stdbool.h)
+
 		PHP_EXTENSION(recode,$ext_shared)
 	fi
