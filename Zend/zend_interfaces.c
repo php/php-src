@@ -109,6 +109,7 @@ static zval *zend_user_new_iterator(zend_class_entry *ce, zval *object TSRMLS_DC
 	zval *retval;
 
 	return zend_call_method_with_0_params(&object, ce, &ce->iterator_funcs.zf_new_iterator, "getiterator", &retval);
+
 }
 /* }}} */
 
@@ -265,9 +266,11 @@ static zend_object_iterator *zend_user_get_new_iterator(zend_class_entry *ce, zv
 {
 	zval *iterator = zend_user_new_iterator(ce, object TSRMLS_CC);
 
-	zend_class_entry *ce_it = Z_OBJCE_P(iterator);
-	if (!ce || !ce_it->get_iterator) {
+	zend_class_entry *ce_it = Z_TYPE_P(iterator) == IS_OBJECT ? Z_OBJCE_P(iterator) : NULL;
+
+	if (!ce || !ce_it || !ce_it->get_iterator) {
 		zend_error(E_WARNING, "Objects returned by %s::getIterator() must be traversable or implement interface Iterator", ce->name);
+		zval_ptr_dtor(&iterator);
 		return NULL;
 	}
 	iterator->refcount--; /* from return */
