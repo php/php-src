@@ -704,7 +704,6 @@ char *php_pcre_replace(char *regex,   int regex_len,
 			return NULL;
 		}
 	} else {
-		convert_to_string(replace_val);
 		replace = Z_STRVAL_P(replace_val);
 		replace_len = Z_STRLEN_P(replace_val);
 		replace_end = replace + replace_len;
@@ -906,6 +905,9 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 			if (Z_TYPE_P(replace) == IS_ARRAY && !is_callable_replace) {
 				/* Get current entry */
 				if (zend_hash_get_current_data(Z_ARRVAL_P(replace), (void **)&replace_entry) == SUCCESS) {
+					if (!is_callable_replace) {
+						convert_to_string_ex(replace_entry);
+					}
 					replace_value = *replace_entry;
 					zend_hash_move_forward(Z_ARRVAL_P(replace));
 				} else {
