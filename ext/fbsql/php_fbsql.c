@@ -2278,7 +2278,7 @@ void phpfbColumnAsString(PHPFBResult* result, int column, void* data , int* leng
 #ifdef FB_TinyInteger
 		case FB_TinyInteger:
 		{ 
-			short int   v = *((short int*)data);
+			short int   v = *((FBTinyInteger*)data);
 			char  b[128];
 			sprintf(b, "%d", v);
 			phpfbestrdup(b, length, value);
