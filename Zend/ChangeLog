@@ -1,3 +1,9 @@
+2002-04-07  Stanislav Malyshev  <stas@zend.com>
+
+    * zend.h: make compatible with current PHP
+
+    * zend_compile.c: sync
+
 2002-03-29  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * zend_compile.c: - revert patch

@@ -1,3 +1,134 @@
+2002-04-07  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: correcting some more whitespace
+
+2002-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ming/ming.c: Fixed compile failure with ZTS build.
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Installer.php:
+    * append "?uncompress=yes" to the package download url if zlib extension
+      is not loaded
+
+    * pear/package-db.xml: * package xml file for DB
+
+2002-04-07  Andi Gutmans  <andi@zend.com>
+
+    * ext/mysql/libmysql/strto.c
+      ext/mysql/libmysql/strtoll.c
+      ext/mysql/libmysql/strtoull.c:
+    - Fix build with Visual Studio .NET. The MySQL team said they'll commit
+    - their fix a long time ago and never did. One day they'll update the
+    - whole MySQL client library.
+
+2002-04-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: Added PEAR_Common::getUserRoles() and a suggestion
+
+2002-04-07  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/levenshtein.c
+      ext/standard/tests/general_functions/003.phpt:
+    fix and regression test for Bug #16473
+
+2002-04-07  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/exif/tests/003.phpt
+      ext/exif/tests/test3.jpg:
+    -found userland solution to fix UNICODE comments (see tests/003.phpt)
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php
+      pear/PEAR/Frontend/CLI.php
+      pear/PEAR/Packager.php: * added "cvstag" command
+
+2002-04-07  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c: -fix warnings
+    -fix layout
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbregex.c
+      ext/mbstring/mbstring.c: -fix warnings
+
+2002-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * php.ini-recommended
+      php.ini-dist: Removed relics from PHP3.
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Packager.php:
+    * give PEAR_Packager::package an option to disable compression and make
+      plain .tar files
+
+    * pear/PEAR/Command/Install.php: * remove empty fold
+
+    * pear/scripts/pear.in: * use the UI's displayFatalError method
+
+    * pear/PEAR/Frontend/CLI.php:
+    * added displayError and displayFatalError methods
+
+    * pear/PEAR/Command.php: * initialize _PEAR_Command_uiobject
+
+2002-04-07  Sterling Hughes  <sterling@bumblebury.com>
+
+    * configure.in:
+    apply jan's configure check for apache2 and freebsd (relating to the use
+    of tsrm-pth).
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Common.php: * leave error reporting to the validator
+
+    * pear/PEAR/Packager.php: * more clear cvs tag hint
+
+2002-04-07  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Command/Install.php: Just some help cleanup
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Package.php: * typo
+
+    * pear/PEAR/Command/Package.php:
+    * rename package-verify command to package-validate
+
+2002-04-07  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/string.c: fix for #16469
+
+2002-04-07  Stig Bakken  <ssb@fast.no>
+
+    * pear/PEAR/Command/Install.php
+      pear/PEAR/Command/Package.php
+      pear/PEAR/Packager.php
+      pear/PEAR/Installer.php
+      pear/PEAR/Common.php: * support for .tar files in PEAR_Installer
+    * new command: package-verify
+    * "package" command now sanity-checks the package information before
+      making the tarball
+    * -Z option to the install/update commands for downloading non-compressed
+      packages
+
+2002-04-07  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * php.ini-dist
+      php.ini-recommended:
+    Added pgsql.ignore_notice and pgsql.log_notice ini entry.
+
+    * ext/pgsql/pgsql.c: Nuke waring with ZTS build
+
+    * ext/msession/msession.c: Fixed ZTS build
+
+2002-04-07  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Fixed bad entries.
+
 2002-04-06  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * main/php_globals.h
