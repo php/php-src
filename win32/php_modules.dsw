@@ -111,6 +111,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "filepro"=".\ext\filepro\filepro.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "exif"=.\ext\exif\exif.dsp - Package Owner=<4>
 
 Package=<5>
@@ -305,6 +317,18 @@ Package=<4>
 ###############################################################################
 
 Project: "pgsql"=.\ext\pgsql\pgsql.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "snmp"=.\ext\snmp\snmp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
