@@ -20,7 +20,6 @@
  * PHP includes
  */
 #define NSAPI 1
-#define XP_UNIX
 
 #include "php.h"
 #include "php_variables.h"
@@ -55,11 +54,6 @@
 #include "frame/protocol.h"  /* protocol_start_response */
 #include "base/util.h"       /* is_mozilla, getline */
 #include "frame/log.h"       /* log_error */
-
-/* for unix */
-#ifndef WINAPI
-	#define WINAPI
-#endif
 
 /*
  * Timeout for net_read(). This should probably go into php.ini
@@ -496,7 +490,7 @@ nsapi_module_main(NSLS_D SLS_DC)
 	return SUCCESS;
 }
 
-void WINAPI 
+void NSAPI_PUBLIC 
 php4_close(void *vparam)
 {
 	if (sapi_module.shutdown) {
@@ -505,7 +499,7 @@ php4_close(void *vparam)
 	tsrm_shutdown();
 }
 
-int WINAPI
+int NSAPI_PUBLIC
 php4_init(pblock *pb, Session *sn, Request *rq)
 {
 	php_core_globals *core_globals;
@@ -520,7 +514,7 @@ php4_init(pblock *pb, Session *sn, Request *rq)
 	return REQ_PROCEED;
 }
 
-int WINAPI
+int NSAPI_PUBLIC
 php4_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
@@ -559,7 +553,7 @@ php4_execute(pblock *pb, Session *sn, Request *rq)
 /		<Object ppath="path/to/be/authenticated/by/php/*">
 /		AuthTrans fn="php4_auth_trans"
 /*********************************************************/
-int WINAPI 
+int NSAPI_PUBLIC 
 php4_auth_trans(pblock * pb, Session * sn, Request * rq)
 {
 	/*This is a DO NOTHING function that allows authentication information
