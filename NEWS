@@ -9,6 +9,7 @@ PHP 4                                                                      NEWS
     Allows different settings per virtual server. 
     (See sapi/nsapi/nsapi-readme.txt for more information)
   . Added support for virtual()
+  . Added "nsapi.read_timeout" php.ini option. 
   . Synced $_SERVER variables to be similar to Apache variables
 - Added DBA handler 'inifile' to support ini files. (Marcus)
 - Added a "DEBUG" note to 'php -v' output when --enable-debug is used. (Derick)
