@@ -3,14 +3,12 @@ parenthesis means that person has taken on this project.
 
 Zend
 ----
-    For PHP 5.0.0:
     * Allow foreach ($array as $k => list($a, $b)) syntax for multi
       dimensional arrays.
     * Look at replacing c-lib call tolower().
     * Make hash API functions work with HASH_OF() to save time.
     * Allow to set a default value for call-by-reference-parameters. 
       eg: function hello (&$pallo = NULL) {} 
-    * Disallow function(method) redefinition in class.
     * Add configure test to determine if dlsym() requires underscore and set
       DLSYM_NEEDS_UNDERSCORE accordingly. Perl and zsh have it in configure, 
       for example. (DONE?)
@@ -24,7 +22,6 @@ Zend
 
 global
 ------
-    For PHP 5.0.0
     * Make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * on some platforms unimplemented function will just do nothing 
@@ -32,7 +29,6 @@ global
       (DONE ?)
     * Use arg_separator.input to implode args in the CGI sapi extension
       and arg_separator.input to explode in php_build_argv(). (DONE?)
-    * bundle and use curl lib for fopen wrapper.
     * --enable-all in configure. (--enable-shared=max ...)
     * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
@@ -48,11 +44,22 @@ global
     Other
     * use thread-safe resolver functions (either require BIND 8 or adns).
     * implement javadoc based function docs template system.
-    * provide optional IPv6 support.
+    * provide optional IPv6 support (seems to be done?).
     * find a better way to implement script timeouts. SIGVTALRM is used
       by some POSIX threads implementations (i.e. OpenBSD) and is not
       available in ZTS mode.
     * Implement flush feature suitable for nested output buffers.
+
+Streams
+-------
+    * Route filestat.c through the wrapper layer; isolate the statcache code
+	  so that it is independent of php functions and can be applied to any
+	  stream/path.
+    * Add unlink() operation to wrappers, route userland unlink() through it.
+      Implement unlink() operation for the ftp wrapper.	  
+	* Add a method to take ownership of the memory buffer in memory streams so
+	  that generating string values for zvals doesn't require an estrdup.
+    * bundle and use curl lib for fopen wrapper.
 
 documentation
 -------------
