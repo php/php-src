@@ -336,7 +336,7 @@ if ($sum_results['FAILED'] && !getenv('NO_INTERACTION')) {
 		 */
 		
 		/* Ask the user to provide an email address, so that QA team can contact the user */
-		if (!strncasecmp($user_input, 'y', 1)) {
+		if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
 			echo "Please enter your email address: ";
 			flush();
 			$fp = fopen("php://stdin", "r+");
