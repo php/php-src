@@ -270,6 +270,11 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	php_zlib_filter_data *data;
 	int status;
 
+	if (persistent) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "this filter is not safe to use with a persistent stream");
+		return NULL;
+	}
+
 	/* Create this filter */
 	data = ecalloc(1, sizeof(php_zlib_filter_data));
 
@@ -356,7 +361,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				case IS_DOUBLE:
 				case IS_LONG:
 					tmpzval = &filterparams;
- factory_setlevel:
+factory_setlevel:
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
