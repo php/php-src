@@ -446,16 +446,17 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 	
 	server = Ns_ConnServer(NSG(conn));
 	
-	SG(request_info).query_string = NSG(conn->request->query);
+#define safe_strdup(x) ((x)?strdup((x)):NULL)
+	SG(request_info).query_string = safe_strdup(NSG(conn->request->query));
 
 	Ns_DStringInit(&ds);
 	Ns_UrlToFile(&ds, server, NSG(conn->request->url));
 	
 	/* path_translated is the absolute path to the file */
-	SG(request_info).path_translated = strdup(Ns_DStringValue(&ds));
+	SG(request_info).path_translated = safe_strdup(Ns_DStringValue(&ds));
 	Ns_DStringFree(&ds);
 	root = Ns_PageRoot(server);
-	SG(request_info).request_uri = SG(request_info).path_translated + strlen(root);
+	SG(request_info).request_uri = strdup(SG(request_info).path_translated + strlen(root));
 	SG(request_info).request_method = NSG(conn)->request->method;
 	SG(request_info).content_length = Ns_ConnContentLength(NSG(conn));
 	index = Ns_SetIFind(NSG(conn)->headers, "content-type");
@@ -464,15 +465,13 @@ php_ns_request_ctor(NSLS_D SLS_DC)
 	SG(sapi_headers).http_response_code = 200;
 
 	tmp = Ns_ConnAuthUser(NSG(conn));
-	if(tmp) {
+	if (tmp)
 		tmp = estrdup(tmp);
-	}
 	SG(request_info).auth_user = tmp;
 
 	tmp = Ns_ConnAuthPasswd(NSG(conn));
-	if(tmp) {
+	if (tmp)
 		tmp = estrdup(tmp);
-	}
 	SG(request_info).auth_password = tmp;
 
 	NSG(data_avail) = SG(request_info).content_length;
@@ -487,6 +486,9 @@ static void
 php_ns_request_dtor(NSLS_D SLS_DC)
 {
 	free(SG(request_info).path_translated);
+	if (SG(request_info).query_string)
+		free(SG(request_info).query_string);
+	free(SG(request_info).request_uri);
 }
 
 /*
