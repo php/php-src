@@ -313,7 +313,7 @@ void php_print_credits(int flag)
 		CREDIT_LINE("WDDX", "Andrey Zmievski");
 		CREDIT_LINE("XML", "Stig Bakken");
 		CREDIT_LINE("Yellow Pages", "Stephanie Wehner");
-		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Ruhrich");
+		CREDIT_LINE("Zlib", "Rasmus Lerdorf, Stefan Roehrich");
 		PUTS("</table>\n");
 	}
 
