@@ -17,7 +17,6 @@ global
     * make sure all source files have the "right" copyright.
     * the following modules still use PHP3_TLS_*() macros (and thereby don't 
       work in ZTS mode): ext/dav/dav.c, ext/db/db.c, ext/gd/gd.c, ext/ldap/ldap.c
-    * INI system causes segfaults in ZTS mode (operates on static HashTable)
     * make sure that all ZTS globals get destructed. Most ts_allocate_id()
       calls should have a dtor entry.
     * activate all extensions by default that don't rely on external
@@ -25,7 +24,7 @@ global
     * --enable-all in configure. (--enable-shared=max ...)
     * make configure print out a summary when it's done (like XEmacs)
     * replace standard functions which work on static data with 
-      reentrancy-safe functions.
+      reentrancy-safe functions (DONE?).
     * on some platforms unimplemented function will just do nothing (e.g. symlink)
       they should print a warning or not even be defined!
     * implement javadoc based function docs template system.
@@ -50,10 +49,6 @@ documentation
 ext/dav
 --------
     * rewrite.
-
-ext/mcrypt
-----------
-    * port to mcrypt-2.6 or later
 
 ext/oci8
 --------
