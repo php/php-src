@@ -816,14 +816,14 @@ void zend_deactivate(TSRMLS_D)
 
 static int exec_done_cb(zend_module_entry *module TSRMLS_DC)
 {
-	if (module->exec_finished_func) {
-		module->exec_finished_func();
+	if (module->post_deactivate_func) {
+		module->post_deactivate_func();
 	}
 	return 0;
 }
 
 
-void zend_exec_finished(TSRMLS_D)
+void zend_post_deactivate_modules(TSRMLS_D)
 {
 	zend_hash_apply(&module_registry, (apply_func_t) exec_done_cb TSRMLS_CC);
 }

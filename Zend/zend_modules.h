@@ -74,7 +74,7 @@ struct _zend_module_entry {
 	int (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
 	char *version;
-	int (*exec_finished_func)(void);
+	int (*post_deactivate_func)(void);
 	int globals_id;
 	int module_started;
 	unsigned char type;
