@@ -1,3 +1,13 @@
+2002-08-24  Andi Gutmans  <andi@pb1.pair.com>
+
+    * zend_builtin_functions.c: - Whitespace
+
+    * zend_builtin_functions.c: - Whitespace and better variable name
+
+2002-08-24  Thies Arntzen  <thies@pb1.pair.com>
+
+    * zend_builtin_functions.c: fix warning
+
 2002-08-23  Andi Gutmans  <andi@pb1.pair.com>
 
     * Zend.m4: - Add \n to configure fprintf
