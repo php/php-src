@@ -1,3 +1,92 @@
+2003-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      configure.in
+      main/php_version.h:
+      4.3.4RC1 is a go.
+
+    * main/snprintf.c:
+      More NaN & INF handling fixes.
+
+2003-09-29  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml:
+      preparing 1.3b2
+
+2003-09-29  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/package-PEAR.xml:
+      " => &quot;, take 2
+
+    * pear/package-PEAR.xml:
+      noted fixed #45, also " => &quot;
+
+    * (PHP_4_3)
+      pear/PEAR/Installer.php:
+      MFH #45, whitespace, bug in return of install()
+
+    * pear/PEAR/Installer.php:
+      Bug #45 preferred_state works incorrectly
+
+2003-09-29  Pierre-Alain Joye  <paj@pearfr.org>
+
+    * (PHP_4_3)
+      pear/packages/DB-1.5.0RC1.tar
+      pear/packages/DB-1.5.0RC2.tar
+      pear/packages/DB-1.5.0RC2.tar:
+      - Upgrade DB to 1.5.0RC2
+
+2003-09-29  Stanislav Malyshev  <stas@zend.com>
+
+    * (PHP_4_3)
+      ext/standard/basic_functions.c
+      ext/standard/file.c
+      ext/standard/file.h:
+      allow realpath() for win32 non-ZTS
+
+    * (PHP_4_3)
+      TSRM/tsrm_config.w32.h:
+      Have realpath now
+
+    * (PHP_4_3)
+      TSRM/tsrm_win32.c
+      TSRM/tsrm_win32.h:
+      add realpath for Win32 non-ZTS
+
+2003-09-29  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/package-PEAR.xml:
+      Ready for 1.3b1
+      Removed Changelog
+
+2003-09-29  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/characterdata.c
+      ext/dom/php_dom.c
+      ext/dom/xpath.c:
+      add property_get_ptr handler
+      fix possible segfault in xpath
+      add wide character support for characterdata
+
+    * ext/xml/compat.c
+      ext/xml/expat_compat.h:
+      fix for bug #25666 (XML namespaces broken in PHP5)
+
+2003-09-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/string.c:
+      Simplification.
+
+2003-09-29  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      main/spprintf.c:
+      MFH: Fixed Bug #25665 (var_dump() hangs on Nan and INF).
+
+    * main/spprintf.c:
+      Fixed Bug #25665 (var_dump() hangs on Nan and INF).
+
 2003-09-28  Tal Peer  <tal@twisthost.com>
 
     * build/buildcheck.sh:
