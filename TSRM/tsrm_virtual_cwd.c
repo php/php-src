@@ -727,7 +727,7 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 	int retval;
 	char *p;
 
-	p = virtual_link(path, strlen(path) TSRMLS_CC);
+	p = virtual_link((char *)path, strlen(path) TSRMLS_CC);
 	retval = lstat(p, buf);
 
 	return retval;
@@ -736,15 +736,12 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC)
 
 CWD_API int virtual_unlink(const char *path TSRMLS_DC)
 {
-	cwd_state new_state;
 	int retval;
+	char *resolved_path;
 
-	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	virtual_file_ex(&new_state, path, NULL);
+	resolved_path = virtual_link((char *)path, strlen(path) TSRMLS_CC);
+	retval = unlink(resolved_path);
 
-	retval = unlink(new_state.cwd);
-
-	CWD_STATE_FREE(&new_state);
 	return retval;
 }
 
