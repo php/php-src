@@ -53,7 +53,7 @@ char *day_short_names[] =
 };
 
 #if !defined(HAVE_TM_ZONE) && !defined(_TIMEZONE) && !defined(HAVE_DECLARED_TIMEZONE)
-extern time_t timezone, altzone;
+extern time_t timezone;
 extern int daylight;
 #endif
 
@@ -169,11 +169,10 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #else
 	    /*
 	    ** If correcting for daylight savings time, we set the adjustment to
-		** the value of altzone variable. Otherwise, we need to overcorrect and
-		** set the adjustment to the main timezone offset plus difference
-		** between the main and alternate ones.
+		** the value of timezone - 3600 seconds. Otherwise, we need to overcorrect and
+		** set the adjustment to the main timezone + 3600 seconds.
 	    */
-	    gmadjust = -(is_dst ? altzone : timezone + (timezone - altzone));
+	    gmadjust = -(is_dst ? timezone - 3600 : timezone + 3600);
 #endif
 		seconds += gmadjust;
 	}
@@ -411,7 +410,7 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 #if HAVE_TM_GMTOFF
 				sprintf(tmp_buff, "%ld", ta->tm_gmtoff);
 #else
-				sprintf(tmp_buff, "%ld", ta->tm_isdst ? altzone : timezone);
+				sprintf(tmp_buff, "%ld", ta->tm_isdst ? timezone - 3600 : timezone);
 #endif
 				strcat(return_value->value.str.val, tmp_buff);
 				break;
