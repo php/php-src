@@ -2,25 +2,42 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <zlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+
+#include "php_config.h"
+
+#ifdef _MSC_VER
+# if _MSC_VER >= 1300
+/* in MSVC.NET the these are available but only for __cplusplus and not _MSC_EXTENSIONS */
+#  ifdef _MSC_EXTENSIONS
+#   define HAVE_FABSF 1
+extern float fabsf(float x);
+#   define HAVE_FLOORF 1
+extern float floorf(float x);
+#  endif /*MSVC.NET */
+# endif /* MSC */
+#endif
+#ifndef HAVE_FABSF
+# define HAVE_FABSF 0
+#endif
+#ifndef HAVE_FLOORF
+# define HAVE_FLOORF 0
+#endif
+#if HAVE_FABSF == 0
+/* float fabsf(float x); */
+# define fabsf(x) ((float)(abs(x)))
+#endif
+#if HAVE_FLOORF == 0
+/* float floorf(float x);*/
+#define floorf(x) ((float)(floor(x)))
+#endif
 
 #ifdef _OSD_POSIX		/* BS2000 uses the EBCDIC char set instead of ASCII */
 #define CHARSET_EBCDIC
 #define __attribute__(any)	/*nothing */
 #endif
 /*_OSD_POSIX*/
-
-#ifdef _MSC_VER
-#if _MSC_VER < 1300
-/* following functions are available since MSVC.NET, emulate for earlier versions */
-/* float fabsf(float x); */
-#define fabsf(x) ((float)(abs(x)))
-/* float floorf(float x);*/
-#define floorf(x) ((float)(floor(x)))
-#endif
-#endif
 
 #ifndef CHARSET_EBCDIC
 #define ASC(ch)  ch
