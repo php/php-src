@@ -213,12 +213,13 @@ end
 define zmemcheck
 	set $p = alloc_globals.head
 	set $stat = "?"
+	set $total_size = 0
 	if $arg0 != 0
 		set $not_found = 1
 	else
 		set $not_found = 0
 	end
-	printf " block      status file:line\n"
+	printf " block      size      status file:line\n"
 	printf "-------------------------------------------------------------------------------\n"
 	while $p
 		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
@@ -238,7 +239,14 @@ define zmemcheck
 			else
 				set $filename = $filename + 1
 			end
-			printf " 0x%08x %-06s %s:%d", $aptr, $stat, $filename, $p->lineno
+			printf " 0x%08x ", $aptr
+			if $p->size == sizeof(struct _zval_struct) && ((struct _zval_struct *)$aptr)->type >= 0 && ((struct _zval_struct *)$aptr)->type < 10
+				printf "ZVAL?(%-2d) ", $p->size
+			else
+				printf "%-9d ", $p->size
+			end
+			set $total_size = $total_size + $p->size
+			printf "%-06s %s:%d", $stat, $filename, $p->lineno
 			if $p->orig_filename
 				set $orig_filename = strrchr($p->orig_filename, '/')
 				if !$orig_filename
@@ -262,6 +270,10 @@ define zmemcheck
 	end
 	if $not_found
 		printf "no such block that begins at 0x%08x.\n", $aptr 
+	end
+	if $arg0 == 0
+		printf "-------------------------------------------------------------------------------\n"
+		printf "     total: %d bytes\n", $total_size
 	end
 end
 
