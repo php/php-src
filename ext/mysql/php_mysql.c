@@ -481,13 +481,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				MYSQL_DO_CONNECT_RETURN_FALSE();
 			}
 			/* create the link */
-		mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
-		mysql->active_result_id = 0;
+			mysql = (php_mysql_conn *) malloc(sizeof(php_mysql_conn));
+			mysql->active_result_id = 0;
 #if MYSQL_VERSION_ID > 32199 /* this lets us set the port number */
-		mysql_init(&mysql->conn);
-		if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
+			mysql_init(&mysql->conn);
+			if (mysql_real_connect(&mysql->conn, host, user, passwd, NULL, port, socket, 0)==NULL) {
 #else
-		if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
+			if (mysql_connect(&mysql->conn, host, user, passwd)==NULL) {
 #endif
 				php_error(E_WARNING, "%s", mysql_error(&mysql->conn));
 				free(mysql);
