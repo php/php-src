@@ -1202,7 +1202,7 @@ PHP_FUNCTION(sqlite_popen)
 	}
 
 	/* now we need to open the database */
-	php_sqlite_open(fullpath, mode, hashkey, return_value, errmsg, NULL TSRMLS_CC);
+	php_sqlite_open(fullpath, (int)mode, hashkey, return_value, errmsg, NULL TSRMLS_CC);
 
 	efree(fullpath);
 	efree(hashkey);
@@ -1254,7 +1254,7 @@ PHP_FUNCTION(sqlite_open)
 		}
 	}
 
-	php_sqlite_open(fullpath ? fullpath : filename, mode, NULL, return_value, errmsg, object TSRMLS_CC);
+	php_sqlite_open(fullpath ? fullpath : filename, (int)mode, NULL, return_value, errmsg, object TSRMLS_CC);
 
 	if (fullpath) {
 		efree(fullpath);
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(sqlite_factory)
 		}
 	}
 
-	php_sqlite_open(filename, mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
+	php_sqlite_open(filename, (int)mode, NULL, return_value, errmsg, return_value TSRMLS_CC);
 
 	php_std_error_handling();
 }
@@ -1434,7 +1434,7 @@ next_row:
 /* }}} */
 
 /* {{{ sqlite_query */
-void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, long mode, int buffered, zval *return_value, struct php_sqlite_result **prres TSRMLS_DC)
+void sqlite_query(zval *object, struct php_sqlite_db *db, char *sql, long sql_len, int mode, int buffered, zval *return_value, struct php_sqlite_result **prres TSRMLS_DC)
 {
 	struct php_sqlite_result res, *rres;
 	int ret;
@@ -1539,7 +1539,7 @@ PHP_FUNCTION(sqlite_unbuffered_query)
 		return;
 	}
 
-	sqlite_query(object, db, sql, sql_len, mode, 0, return_value, NULL TSRMLS_CC);
+	sqlite_query(object, db, sql, sql_len, (int)mode, 0, return_value, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -1646,7 +1646,7 @@ PHP_FUNCTION(sqlite_query)
 		return;
 	}
 
-	sqlite_query(object, db, sql, sql_len, mode, 1, return_value, NULL TSRMLS_CC);
+	sqlite_query(object, db, sql, sql_len, (int)mode, 1, return_value, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -2006,7 +2006,7 @@ PHP_FUNCTION(sqlite_array_query)
 	}
 	
 	rres = (struct php_sqlite_result *)emalloc(sizeof(*rres));
-	sqlite_query(NULL, db, sql, sql_len, mode, 0, NULL, &rres TSRMLS_CC);
+	sqlite_query(NULL, db, sql, sql_len, (int)mode, 0, NULL, &rres TSRMLS_CC);
  	if (db->last_err_code != SQLITE_OK) {
  		if (rres) {
 	 		efree(rres);

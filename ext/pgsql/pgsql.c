@@ -1401,7 +1401,7 @@ PHP_FUNCTION(pg_fetch_result)
 /* }}} */
 
 /* {{{ void php_pgsql_fetch_hash */
-static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type, int into_object)
+static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type, int into_object)
 {
 	zval                *result;
 	PGresult            *pgsql_result;
@@ -3254,12 +3254,13 @@ PHP_FUNCTION(pg_result_status)
 PHP_FUNCTION(pg_get_notify)
 {
 	zval *pgsql_link;
-	int id = -1, result_type = PGSQL_ASSOC;
+	int id = -1;
+	long result_type = PGSQL_ASSOC;
 	PGconn *pgsql;
 	PGnotify *pgsql_notify;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "r|l",
-								 &pgsql_link) == FAILURE) {
+								 &pgsql_link, &result_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
