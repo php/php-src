@@ -1,3 +1,40 @@
+2005-02-18  Derick Rethans  <php@derickrethans.nl>
+
+    * (PHP_4_3)
+      ext/standard/tests/array/bug32021.phpt:
+      - Added test case for bug #32021.
+
+    * (PHP_5_0)
+      NEWS
+      ext/standard/array.c
+      ext/standard/tests/array/bug32021.phpt:
+      - MFH: Fixed bug #32021: Crash caused by range('', 'z')
+
+    * ext/standard/array.c:
+      - Fixed bug #32021: Crash caused by range('', 'z')
+
+    * ext/standard/tests/array/bug32021.phpt:
+        1.1.4;
+      - Fixed bug #32021: Crash caused by range('', 'z')
+
+2005-02-18  Rob Richards  <rrichards@ctindustries.net>
+
+    * ext/dom/documentfragment.c:
+      Fragment must have associated document to append xml otherwise it is
+      read-only
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * (PHP_5_0)
+      ext/dom/node.c:
+      MFH: Fixed bug #32011 (Fragments which replaced Nodes are not globaly
+      useable)
+
+    * ext/dom/node.c:
+      Fixed bug #32011 (Fragments which replaced Nodes are not globaly useable)
+
 2005-02-17  Andi Gutmans  <andi@zend.com>
 
     * (PHP_5_0)
