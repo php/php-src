@@ -769,7 +769,6 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		}
 
 		php_request_shutdown((void *) 0);
-		php_module_shutdown();
 
 		if (SG(request_info).path_translated) {
 			free(SG(request_info).path_translated);
@@ -778,6 +777,8 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 		if (cgi_sapi_module.php_ini_path_override) {
 			free(cgi_sapi_module.php_ini_path_override);
 		}
+
+		php_module_shutdown();
 	} zend_catch {
 		exit_status = -1;
 	} zend_end_try();
