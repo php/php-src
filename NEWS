@@ -5,6 +5,8 @@ PHP 4                                                                      NEWS
 - Added platform independent socket error constants for better error handling.
 - Fixed include(), require() and GD functions to work with remote files under
   win32. (Wez)
+- Update output of phpinfo() to use more CSS to reduce the file size, do
+  proper HTML escaping, and make it XHTML compliant. (Colin)
 - Added php.ini option "auto_detect_line_endings" which enables PHP to detect
   Macintosh, Unix and Dos end-of-line characters in fgets() and file().
   Fixes Bug #16521. (Wez)
