@@ -187,9 +187,9 @@ main() {
 
 AC_CHECK_FUNC(dlopen, [AC_DEFINE(HAVE_LIBDL,1,[ ])])
 
-AC_CHECK_LIB(pam, pam_start, [
-  EXTRA_LIBS="$EXTRA_LIBS -lpam"
-  AC_DEFINE(HAVE_LIBPAM,1,[ ]) ], []) 
+dnl AC_CHECK_LIB(pam, pam_start, [
+dnl   EXTRA_LIBS="$EXTRA_LIBS -lpam"
+dnl   AC_DEFINE(HAVE_LIBPAM,1,[ ]) ], []) 
 
 AC_CHECK_FUNCS(getcwd getwd)
 
