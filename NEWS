@@ -109,6 +109,7 @@ PHP                                                                        NEWS
   in segfault). (pdan-php at esync dot org, Tony)
 - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
   parameters). (Jani)
+- Fixed bug #29989 (type re_registers redefined in oniguruma.h). (Moriyoshi)
 - Fixed bug #29767 (Weird behaviour of __set($name, $value)). (Dmitry)
 - Fixed bug #29733 (printf() handles repeated placeholders wrong).
   (bugs dot php dot net at bluetwanger dot de, Ilia)
