@@ -38,6 +38,8 @@ PHP 4                                                                      NEWS
 - Fixed bug #27337 (missing sapi_shutdown() in sapi/isapi causes memory leak). 
   (Jani, msisolak at yahoo dot com)
 - Fixed bug #27328 (ftp extension relies on 32-bit longs). (Sara)
+- Fixed bug #27300 (Improved regex for pg_convert()).
+  (benjcarson at digitaljunkies dot ca, Ilia)
 - Fixed bug #27295 (memory leak inside sscanf()). (Ilia)
 - Fixed bug #27293 (two crashes inside image2wbmp()). (Ilia)
 - Fixed bug #27291 (get_browser matches browscap.ini patterns incorrectly).

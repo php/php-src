@@ -3853,16 +3853,63 @@ PHPAPI int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval
 							ZVAL_STRING(new_val, "NULL", 1);
 						}
 						else {
-							/* FIXME: better regex must be used */
-							if (php_pgsql_convert_match(Z_STRVAL_PP(val), "^[+-]{0,1}[ \\t]+((second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago){0,1}$", 1 TSRMLS_CC) == FAILURE &&
-								php_pgsql_convert_match(Z_STRVAL_PP(val), "^@[ \\t]+[+-]{0,1}[ \\t]+(second|seconds|minute|minute|hour|hour|day|days|week|weeks|month|monthes|year|years|decade|decades|century|centuries|millennium|millenniums){1,1}[ \\t]+)+([ \\t]+ago$", 1 TSRMLS_CC) == FAILURE) {
+
+							/* From the Postgres docs:
+
+							   interval values can be written with the following syntax:
+							   [@] quantity unit [quantity unit...] [direction]
+							   
+							   Where: quantity is a number (possibly signed); unit is second, minute, hour,
+							   day, week, month, year, decade, century, millennium, or abbreviations or
+							   plurals of these units [note not *all* abbreviations] ; direction can be
+							   ago or empty. The at sign (@) is optional noise.
+							   
+							   ...
+							   
+							   Quantities of days, hours, minutes, and seconds can be specified without explicit
+							   unit markings. For example, '1 12:59:10' is read the same as '1 day 12 hours 59 min 10
+							   sec'.
+							*/							  
+							if (php_pgsql_convert_match(Z_STRVAL_PP(val),
+														"^(@?[ \\t]+)?("
+														
+														/* Textual time units and their abbreviations: */
+														"(([-+]?[ \\t]+)?"
+														"[0-9]+(\\.[0-9]*)?[ \\t]*"
+														"(millenniums|millennia|millennium|mil|mils|"
+														"centuries|century|cent|c|"
+														"decades|decade|dec|decs|"
+														"years|year|y|"
+														"months|month|mon|"
+														"weeks|week|w|" 
+														"days|day|d|"
+														"hours|hour|hr|hrs|h|"
+														"minutes|minute|mins|min|m|"
+														"seconds|second|secs|sec|s))+|"
+
+														/* Textual time units plus (dd)* hh[:mm[:ss]] */
+														"((([-+]?[ \\t]+)?"
+														"[0-9]+(\\.[0-9]*)?[ \\t]*"
+														"(millenniums|millennia|millennium|mil|mils|"
+														"centuries|century|cent|c|"
+														"decades|decade|dec|decs|"
+														"years|year|y|"
+														"months|month|mon|"
+														"weeks|week|w|"
+														"days|day|d))+" 
+														"([-+]?[ \\t]+"
+														"([0-9]+[ \\t]+)+"				 /* dd */
+														"(([0-9]{1,2}:){0,2}[0-9]{0,2})" /* hh:[mm:[ss]] */
+														")?))"
+														"([ \\t]+ago)?$",
+														1 TSRMLS_CC) == FAILURE) {
 								err = 1;
 							}
 							else {
 								ZVAL_STRING(new_val, Z_STRVAL_PP(val), 1);
 								php_pgsql_add_quotes(new_val, 1 TSRMLS_CC);
 							}
-						}
+						}	
 						break;
 				
 					case IS_NULL:
