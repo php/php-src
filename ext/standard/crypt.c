@@ -119,10 +119,6 @@ PHP_FUNCTION(crypt)
 	char *str, *salt_in = NULL;
 	int str_len, salt_in_len;
 
-	if (!BG(rand_is_seeded)) {
-		php_srand(GENERATE_SEED() TSRMLS_CC);
-	} 
-
 	salt[0]=salt[PHP_MAX_SALT_LEN]='\0';
 	/* This will produce suitable results if people depend on DES-encryption
 	   available (passing always 2-character salt). At least for glibc6.1 */
