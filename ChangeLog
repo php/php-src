@@ -1,3 +1,131 @@
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * main/output.c:
+    Users can shoot themselves by their own output handler always.
+    Therefore, this check is overkill and it should be documented
+    limitation, IMO.
+
+    Anyway, a little optimization.
+
+2002-09-30  David Reid  <dreid@jetnet.co.uk>
+
+    * ext/standard/config.m4:
+    Use the built in autoconf test for fnmatch. Simply using the
+    AC_CHECK_FUNCS seems to give false positives on beos and reading
+    the comments on other systems as well.
+
+2002-09-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/session/mod_files.c:
+    Add header file required for pread/pwrite (on my system at least).
+
+    * ext/zlib/zlib.c
+      main/output.c:
+    Fix infinite recursion bug when using zlib output compression.
+    Cause: the chunk size is taken from the zlib.output_compression setting,
+    which is 0 or 1.  This causes the block_size for output buffer to be set
+    to 0 (1 / 2) and thus causes infinite recursion in php_ob_allocate().
+    Solution: use a value of 0 for the chunk size which will use the default
+    sizes.  Also add a sanity check which will default the block_size to 1
+    if it ends up as 0.
+
+2002-09-30  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/cgi/.cvsignore: Those can be safely ignored.
+
+2002-09-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/overload/php_overload.h: - Fix ZE2 build when overload is enabled
+
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Fixed typo.
+
+2002-09-30  Uwe Steinmann  <uwe@steinmann.cx>
+
+    * ext/hyperwave/hw.c:
+    - make_objrec_from_array() gets a second parameter to handle key/pairs of
+      the form key=value and key:value.
+    - Proper treatment of the attribute SQLStmt
+
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * Makefile.global: Remove space
+
+    * ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h:
+    Added pg_fetch_assoc(). Fixed proto. Added/fixed comments.
+
+2002-09-30  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * NEWS: Even better.
+
+    * NEWS: Slight grammar fix.
+
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS: Consolidate some entries.
+
+    * NEWS: Fixed my name :)
+
+    * NEWS: Added pg_fetch_assoc()
+
+    * ext/pgsql/pgsql.c: Use PGSQL_CONV_FORCE_NULL as it is supposed.
+    PGSQL_CONV_FORCE_NULL inserts NULL to field instead of
+    NULL string for string type tuples.
+
+    * ext/pgsql/pgsql.c:
+    Use of PGSQL_CONV_INGORE_NOT_NULL as it is supposed. Change comment a little.
+
+2002-09-30  Tim Toohey  <php@toowards.com>
+
+    * ext/gd/libgd/gd.c:
+    fix gdImageCopyResampled() for non-constant alpha layer
+
+2002-09-30  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * NEWS: - Rewording
+
+2002-09-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/url_scanner_ex.c: sync
+
+    * ext/standard/url_scanner_ex.re:
+    Fix my stupid mistake which broke <form> handling
+
+    * Makefile.global:
+    Apparently, Solaris 2.6's find is overwhelmed with more than 2 -names per
+    invocation (add some parantheses and it segfaults).  And thus, we split
+    the clean target up.
+
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * ext/pgsql/pgsql.c: Fix TODO desc
+
+    * ext/pgsql/pgsql.c: Remove unused def. Add TODO.
+
+    * ext/pgsql/pgsql.c: Improve error message. Fix proto.
+
+2002-09-30  Jon Parise  <jon@csh.rit.edu>
+
+    * ext/standard/basic_functions.h
+      ext/standard/basic_functions.c:
+     - Added getopt() for parsing command line options and arguments. 
+
+2002-09-30  Jason Greene  <jason@inetgurus.net>
+
+    * ext/sockets/php_sockets.h
+      ext/sockets/sockets.c: Fix thread safety issue
+
+2002-09-30  Yasuo Ohgaki  <yohgaki@ohgaki.net>
+
+    * NEWS:
+    Added warning for CLI and CGI SAPI changes. Fixed wrong description for 4.2.0.
+
+2002-09-30  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4: remove unused lines
+
 2002-09-29  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/ncurses/ncurses_functions.c:
