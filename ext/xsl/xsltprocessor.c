@@ -337,7 +337,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	std_hnd = zend_get_std_object_handlers();
 	MAKE_STD_ZVAL(member);
 	ZVAL_STRING(member, "cloneDocument", 0);
-	cloneDocu = std_hnd->read_property(id, member, 1 TSRMLS_CC);
+	cloneDocu = std_hnd->read_property(id, member, BP_VAR_IS TSRMLS_CC);
 	if (Z_TYPE_P(cloneDocu) != IS_NULL) {
 		convert_to_long(cloneDocu);
 		clone_docu = Z_LVAL_P(cloneDocu);
