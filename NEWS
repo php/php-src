@@ -41,6 +41,7 @@ PHP 4                                                                      NEWS
 - Fixed bug #22403 (PHP crashes when executing a sql procedure without
   parameters). (Timm)
 - Fixed bug #21513 (shutdown functions not executed if timed out). (Zeev)
+- Changed allow_url_fopen ini option to be PHP_INI_STSTEM. (Sara)
 
 12 Jan 2004, Version 4.3.5RC1
 - Synchronized bundled GD library with GD 2.0.17
