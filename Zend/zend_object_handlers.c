@@ -238,7 +238,7 @@ static inline zend_property_info *zend_get_property_info(zend_object *zobj, zval
 }
 
 
-zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
+zval *zend_std_read_property(zval *object, zval *member, zend_bool silent TSRMLS_DC)
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -274,7 +274,9 @@ zval *zend_std_read_property(zval *object, zval *member TSRMLS_DC)
 				retval = &EG(uninitialized_zval_ptr);	
 			}
 		} else {
-			zend_error(E_NOTICE,"Undefined property:  %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
+			if (!silent) {
+				zend_error(E_NOTICE,"Undefined property:  %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
+			}
 			retval = &EG(uninitialized_zval_ptr);
 		}
 	}

@@ -25,7 +25,7 @@
 union _zend_function;
 
 /* Used to fetch property from the object, read-only */
-typedef zval *(*zend_object_read_property_t)(zval *object, zval *member TSRMLS_DC);
+typedef zval *(*zend_object_read_property_t)(zval *object, zval *member, zend_bool silent TSRMLS_DC);
 
 /* Used to fetch dimension from the object, read-only */
 typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset TSRMLS_DC);
