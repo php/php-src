@@ -2321,11 +2321,6 @@ detect_end:
 			n = 2;
 			while (n < argc || stack_level > 0) {
 				if (stack_level <= 0) {
-					if (!ParameterPassedByReference(ht, n + 1)) {
-						n++;
-						php_error(E_WARNING, "argument %d not passed by reference", n);
-						continue;
-					}
 					var = args[n++];
 					if (Z_TYPE_PP(var) == IS_ARRAY || Z_TYPE_PP(var) == IS_OBJECT) {
 						target_hash = HASH_OF(*var);

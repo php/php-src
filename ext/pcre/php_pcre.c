@@ -366,19 +366,11 @@ static void php_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global)
 			}
 			if (global)
 				subpats_order_val = PREG_PATTERN_ORDER;
-			if (!ParameterPassedByReference(ht, 3)) {
-				zend_error(E_WARNING, "Array to be filled with matches must be passed by reference.");
-				RETURN_FALSE;
-			}
 			break;
 
 		case 4:
 			if (zend_get_parameters_ex(4, &regex, &subject, &subpats, &subpats_order) == FAILURE) {
 				WRONG_PARAM_COUNT;
-			}
-			if (!ParameterPassedByReference(ht, 3)) {
-				zend_error(E_WARNING, "Array to be filled with matches must be passed by reference.");
-				RETURN_FALSE;
 			}
 	
 			/* Make sure subpats_order is a number */
@@ -1377,8 +1369,6 @@ PHP_FUNCTION(preg_grep)
 /* }}} */
 
 /* {{{ module definition structures */
-
-unsigned char third_arg_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 
 function_entry pcre_functions[] = {
 	PHP_FE(preg_match,				third_arg_force_ref)

@@ -422,11 +422,6 @@ PHP_FUNCTION(getimagesize)
 		if (zend_get_parameters_ex(2, &arg1, &info) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		if (!ParameterPassedByReference(ht, 2)) {
-			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-			RETURN_FALSE;
-		}
-
 		zval_dtor(*info);
 
 		if (array_init(*info) == FAILURE) {

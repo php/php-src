@@ -194,10 +194,6 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		if (zend_get_parameters_ex(3, &regex, &findin, &array) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		if (!ParameterPassedByReference(ht, 3)) {
-			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-			RETURN_FALSE;
-		}
 		break;
 	default:
 		WRONG_PARAM_COUNT;

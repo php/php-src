@@ -2188,10 +2188,6 @@ PHP_FUNCTION(yaz_scan_result)
 		{
 			WRONG_PARAM_COUNT;
 		}
-		if (!ParameterPassedByReference(ht, 2))
-		{
-			WRONG_PARAM_COUNT;
-		}
 	}
 	else if (ZEND_NUM_ARGS() == 1)
 	{
@@ -2325,10 +2321,6 @@ PHP_FUNCTION(yaz_ccl_parse)
 		WRONG_PARAM_COUNT;
 	}
 	
-	if (!ParameterPassedByReference(ht, 3)) {
-		php_error(E_WARNING, "Third argument must be passed by reference.");
-		RETURN_FALSE;
-	}
 	pval_destructor(*pval_res);
 	if (array_init(*pval_res) == FAILURE)
 	{

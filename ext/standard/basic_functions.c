@@ -72,7 +72,6 @@ php_basic_globals basic_globals;
 
 static unsigned char second_and_third_args_force_ref[] = { 3, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char second_args_force_ref[] = { 2, BYREF_NONE, BYREF_FORCE };
-static unsigned char third_argument_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE };
 static unsigned char third_and_fourth_args_force_ref[] = { 4, BYREF_NONE, BYREF_NONE, BYREF_FORCE, BYREF_FORCE };
 static unsigned char third_and_rest_force_ref[] = { 3, BYREF_NONE, BYREF_NONE, BYREF_FORCE_REST };
 
@@ -188,7 +187,7 @@ function_entry basic_functions[] = {
 	PHP_FE(trim,									NULL)
 	PHP_FE(ltrim,									NULL)
 	PHP_FE(strip_tags,								NULL)
-	PHP_FE(similar_text,							third_argument_force_ref)
+	PHP_FE(similar_text,							third_arg_force_ref)
 	PHP_FE(explode,									NULL)
 	PHP_FE(implode,									NULL)
 	PHP_FE(setlocale,								NULL)
@@ -335,21 +334,21 @@ function_entry basic_functions[] = {
 	PHP_FE(get_magic_quotes_gpc,					NULL)
 	PHP_FE(get_magic_quotes_runtime,				NULL)
 
-	PHP_FE(is_null,                                 first_arg_allow_ref)
-	PHP_FE(is_resource,								first_arg_allow_ref)
-	PHP_FE(is_bool,									first_arg_allow_ref)
-	PHP_FE(is_long,									first_arg_allow_ref)
-	PHP_FALIAS(is_int,			is_long,			first_arg_allow_ref)
-	PHP_FALIAS(is_integer,		is_long,			first_arg_allow_ref)
-	PHP_FALIAS(is_float,		is_double,			first_arg_allow_ref)
-	PHP_FE(is_double,								first_arg_allow_ref)
-	PHP_FALIAS(is_real,			is_double,			first_arg_allow_ref)
+	PHP_FE(is_null,                                 NULL)
+	PHP_FE(is_resource,								NULL)
+	PHP_FE(is_bool,									NULL)
+	PHP_FE(is_long,									NULL)
+	PHP_FALIAS(is_int,			is_long,			NULL)
+	PHP_FALIAS(is_integer,		is_long,			NULL)
+	PHP_FALIAS(is_float,		is_double,			NULL)
+	PHP_FE(is_double,								NULL)
+	PHP_FALIAS(is_real,			is_double,			NULL)
 	PHP_FE(is_numeric,								NULL)
-	PHP_FE(is_string,								first_arg_allow_ref)
-	PHP_FE(is_array,								first_arg_allow_ref)
-	PHP_FE(is_object,								first_arg_allow_ref)
+	PHP_FE(is_string,								NULL)
+	PHP_FE(is_array,								NULL)
+	PHP_FE(is_object,								NULL)
     PHP_FE(is_scalar,                               NULL)
-	PHP_FE(is_callable,								third_argument_force_ref)
+	PHP_FE(is_callable,								third_arg_force_ref)
 
 	PHP_FE(error_log,								NULL)
 	PHP_FE(call_user_func,							NULL)
@@ -358,8 +357,8 @@ function_entry basic_functions[] = {
 	PHP_FE(call_user_method_array,                  second_arg_force_ref)
 
 	PHP_FE(var_dump,								NULL)
-	PHP_FE(serialize,								first_arg_allow_ref)
-	PHP_FE(unserialize,								first_arg_allow_ref)
+	PHP_FE(serialize,								NULL)
+	PHP_FE(unserialize,								NULL)
 
 	PHP_FE(register_shutdown_function,	NULL)
 
@@ -391,9 +390,9 @@ function_entry basic_functions[] = {
 	PHP_FE(move_uploaded_file,			NULL)
 
 	/* functions from reg.c */
-	PHP_FE(ereg,									third_argument_force_ref)
+	PHP_FE(ereg,									third_arg_force_ref)
 	PHP_FE(ereg_replace,							NULL)
-	PHP_FE(eregi,									third_argument_force_ref)
+	PHP_FE(eregi,									third_arg_force_ref)
 	PHP_FE(eregi_replace,							NULL)
 	PHP_FE(split,									NULL)
 	PHP_FE(spliti,									NULL)
@@ -563,7 +562,7 @@ function_entry basic_functions[] = {
 	PHP_FE(uksort,									first_arg_force_ref)
 	PHP_FE(shuffle,									first_arg_force_ref)
 	PHP_FE(array_walk,								first_arg_force_ref)
-	PHP_FE(count,									first_arg_allow_ref)
+	PHP_FE(count,									NULL)
 	PHP_FE(end, 									first_arg_force_ref)
 	PHP_FE(prev, 									first_arg_force_ref)
 	PHP_FE(next, 									first_arg_force_ref)
@@ -604,7 +603,7 @@ function_entry basic_functions[] = {
 
 	/* aliases from array.c */
 	PHP_FALIAS(pos,				current,			first_arg_force_ref)
-	PHP_FALIAS(sizeof,			count,				first_arg_allow_ref)
+	PHP_FALIAS(sizeof,			count,				NULL)
 
 	/* functions from assert.c */
 	PHP_FE(assert,          NULL)

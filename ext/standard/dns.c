@@ -256,18 +256,10 @@ PHP_FUNCTION(getmxrr)
 		if (zend_get_parameters(ht, 2, &host, &mx_list) == FAILURE) {
 			WRONG_PARAM_COUNT;
 		}
-		if (!ParameterPassedByReference(ht, 2)) {
-			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-			RETURN_FALSE;
-		}
         break;
     case 3:
 		if (zend_get_parameters(ht, 3, &host, &mx_list, &weight_list) == FAILURE) {
 			WRONG_PARAM_COUNT;
-		}
-		if (!ParameterPassedByReference(ht, 2) || !ParameterPassedByReference(ht, 3)) {
-			php_error(E_WARNING, "Array to be filled with values must be passed by reference.");
-			RETURN_FALSE;
 		}
         need_weight = 1;
 		pval_destructor(weight_list); /* start with clean array */
