@@ -2344,7 +2344,7 @@ static php_iconv_err_t php_iconv_stream_filter_ctor(php_iconv_stream_filter *sel
 /* }}} */
 
 /* {{{ php_iconv_stream_filter_append_bucket */
-static size_t php_iconv_stream_filter_append_bucket(
+static int php_iconv_stream_filter_append_bucket(
 		php_iconv_stream_filter *self,
 		php_stream *stream, php_stream_filter *filter,
 		php_stream_bucket_brigade *buckets_out,
@@ -2367,7 +2367,11 @@ static size_t php_iconv_stream_filter_append_bucket(
 	}
 
 	out_buf_size = ocnt = prev_ocnt = initial_out_buf_size; 
-	out_buf = pd = pemalloc(out_buf_size, self->persistent);
+	if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
+		return FAILURE;
+	}
+
+	pd = out_buf;
 
 	if (self->stub_len > 0) {
 		pt = self->stub;
@@ -2407,14 +2411,26 @@ static size_t php_iconv_stream_filter_append_bucket(
 
 						if (new_out_buf_size < out_buf_size) {
 							/* whoa! no bigger buckets are sold anywhere... */
-							new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+							if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
+								goto out_failure;
+							}
 
 							php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 
 							out_buf_size = ocnt = initial_out_buf_size;
-							out_buf = pd = pemalloc(out_buf_size, self->persistent);
+							if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
+								return FAILURE;
+							}
+							pd = out_buf;
 						} else {
-							new_out_buf = perealloc(out_buf, new_out_buf_size, self->persistent);
+							if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
+								if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
+									goto out_failure;
+								}
+
+								php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+								return FAILURE;
+							}
 							pd = new_out_buf + (pd - out_buf);
 							ocnt += (new_out_buf_size - out_buf_size);
 							out_buf = new_out_buf;
@@ -2472,14 +2488,26 @@ static size_t php_iconv_stream_filter_append_bucket(
 
 					if (new_out_buf_size < out_buf_size) {
 						/* whoa! no bigger buckets are sold anywhere... */
-						new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+						if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
+							goto out_failure;
+						}
 
 						php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 
 						out_buf_size = ocnt = initial_out_buf_size;
-						out_buf = pd = pemalloc(out_buf_size, self->persistent);
+						if (NULL == (out_buf = pemalloc(out_buf_size, persistent))) {
+							return FAILURE;
+						}
+						pd = out_buf;
 					} else {
-						new_out_buf = perealloc(out_buf, new_out_buf_size, self->persistent);
+						if (NULL == (new_out_buf = perealloc(out_buf, new_out_buf_size, persistent))) {
+							if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
+								goto out_failure;
+							}
+
+							php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
+							return FAILURE;
+						}
 						pd = new_out_buf + (pd - out_buf);
 						ocnt += (new_out_buf_size - out_buf_size);
 						out_buf = new_out_buf;
@@ -2506,17 +2534,19 @@ static size_t php_iconv_stream_filter_append_bucket(
 	}
 
 	if (out_buf_size - ocnt > 0) {
-		new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, self->persistent TSRMLS_CC);
+		if (NULL == (new_bucket = php_stream_bucket_new(stream, out_buf, (out_buf_size - ocnt), 1, persistent TSRMLS_CC))) {
+			goto out_failure;
+		}
 		php_stream_bucket_append(buckets_out, new_bucket TSRMLS_CC);
 	} else {
-		pefree(out_buf, self->persistent);
+		pefree(out_buf, persistent);
 	}
 	*consumed += buf_len - icnt;
 
 	return SUCCESS;
 
 out_failure:
-	pefree(out_buf, self->persistent);
+	pefree(out_buf, persistent);
 	return FAILURE;
 }
 
@@ -2536,14 +2566,19 @@ static php_stream_filter_status_t php_iconv_stream_filter_do_filter(
 
 		php_stream_bucket_unlink(bucket TSRMLS_CC);
 
-		if (php_iconv_stream_filter_append_bucket(self, stream, filter, buckets_out, bucket->buf, bucket->buflen, &consumed, self->persistent TSRMLS_CC) != SUCCESS) {				goto out_failure;
+		if (php_iconv_stream_filter_append_bucket(self, stream, filter,
+				buckets_out, bucket->buf, bucket->buflen, &consumed,
+				php_stream_is_persistent(stream) TSRMLS_CC) != SUCCESS) {
+			goto out_failure;
 		}
 
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
 	if (flags != PSFS_FLAG_NORMAL) {
-		if (php_iconv_stream_filter_append_bucket(self, stream, filter, buckets_out, NULL, 0, &consumed, self->persistent TSRMLS_CC) != SUCCESS) {
+		if (php_iconv_stream_filter_append_bucket(self, stream, filter,
+				buckets_out, NULL, 0, &consumed,
+				php_stream_is_persistent(stream) TSRMLS_CC) != SUCCESS) {
 			goto out_failure;
 		}
 	}
