@@ -286,6 +286,12 @@ php_date(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		}
 		convert_to_long_ex(timestamp);
 		the_time = Z_LVAL_PP(timestamp);
+#ifdef PHP_WIN32
+		if (the_time < 0) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Windows does not support dates prior to midnight (00:00:00), January 1, 1970");
+			RETURN_FALSE;
+		}
+#endif
 		break;
 	default:
 		WRONG_PARAM_COUNT;
