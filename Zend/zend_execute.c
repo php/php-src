@@ -807,9 +807,10 @@ static void call_overloaded_function(int arg_count, zval *return_value, HashTabl
 
 
 #if (HAVE_ALLOCA || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && (WINNT|WIN32))
+#	define do_alloca(p) alloca(p)
 #	define free_alloca(p)
 #else
-#	define alloca(p)		emalloc(p)
+#	define do_alloca(p)		emalloc(p)
 #	define free_alloca(p)	efree(p)
 #endif
 
@@ -826,7 +827,7 @@ void execute(zend_op_array *op_array ELS_DC)
 	zend_function *function_being_called=NULL;
 	zval **object_ptr=NULL;
 #if !defined (__GNUC__) || __GNUC__ < 2
-	temp_variable *Ts = (temp_variable *) alloca(sizeof(temp_variable)*op_array->T);
+	temp_variable *Ts = (temp_variable *) do_alloca(sizeof(temp_variable)*op_array->T);
 #else
 	temp_variable Ts[op_array->T];
 #endif

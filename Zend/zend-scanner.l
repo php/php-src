@@ -1248,6 +1248,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 
 <ST_IN_SCRIPTING>"<<<"{TABS_AND_SPACES}{LABEL}("\r")?"\n" {
 	char *s;
+	CG(zend_lineno)++;
 	CG(heredoc_len) = yyleng-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+3;
 	while ((*s == ' ') || (*s == '\t')) {
@@ -1276,6 +1277,7 @@ ESCAPED_AND_WHITESPACE [\n\t\r #'.:;,()|^&+-/*=%!~<>?@]+
 	int label_len;
 	unsigned char unput_semicolon;
 
+	CG(zend_lineno)++;
 	if (yytext[yyleng-2]=='\r') {
 		label_len = yyleng-2;
 	} else {
