@@ -2,24 +2,26 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
-- Introduced ImageCreateFromString(), creates an image
-  stream out of eg a MySQL blob. (Mathieu)
+- Fixed a bug in ftp_mkdir() when used on ftp server which doesn't return
+  the full path (Jani)
+- Added ImageCreateFromString() which creates an image stream out of 
+  e.g. a MySQL blob. (Mathieu)
 - Changed the sablot configuration file so that if you use any version of
   Sablotron below 0.44 you must use Sablotron's built-in Expat libraries.
   (Sterling)
-- Support for the Caudium webserver (http://caudium.net/) added. It's based
+- Added support for the Caudium webserver (http://caudium.net/). It's based
   on the Roxen SAPI module. Many bugs have been identified and fixed. (David)
 - Fixed mysql_close(), pg_close(), msql_close() and sybase_close() - they
   weren't properly closing the SQL connections (Zeev)
 - Fixed crypt() to supply random seed if none is given (Andi)
-- Made print_r support recursive data structures, e.g., $GLOBALS. (Zeev)
+- Made print_r() support recursive data structures, e.g. $GLOBALS. (Zeev)
 - Fixed a bug that caused PHP not to properly flush its output buffer, if more
   than one output buffer was used. (Zeev)
 - Fixed a bug that could draw the shutdown sequence of the PHP Apache module
   into an endless loop, under certain circumstances.  It could cause Apache
   processes under Solaris to get stuck, especially when using output
   buffering. (Zeev)
-- Add support for serializing references (Stas)
+- Added support for serializing references (Stas)
 - Fixed conflict with OpenLDAP and Oracle 8.1.x (Jani)
 - parse_ini_file() supports a new optional 2nd argument that instructs it
   to divide the directives to arrays according to the sections in which they
@@ -41,10 +43,8 @@ PHP 4.0                                                                    NEWS
   session_module_name with a parameter. (alex@zend.com)
 - Added IIS Admin extension. (Frank)
 - OCIBindByName() now does better parameter-checking. (Thies)
-- Attempted to make compile fixes for Solaris in ext/sockets/sockets.c
-  (Chris Vandomelen)
 - Made read() binary-safe in sockets.c (Chris Vandomelen)
-- Made array_intersect and array_diff not alter order (Stig Venaas)
+- Made array_intersect() and array_diff() not alter order (Stig Venaas)
 - Made ldap_connect() accept URL in host parameter when using OpenLDAP
   2.x. To use SSL, use ldaps://host/ as URL. (Stig Venaas)
 - Made resource type names visible, e.g. var_dump() and
@@ -54,8 +54,8 @@ PHP 4.0                                                                    NEWS
 - Renamed the shm_* functions to shmop_* (Derick)
 - Updated ext/mysql/libmysql to version 3.23 (tim@mysql.com)
 - Added ldap_get_option() and ldap_set_option() functions (Stig Venaas)
-- Fixed a crash in CGI mode, in case no file was provided (Daniel Beulshausen
-  & Zeev)
+- Fixed a crash in CGI mode, in case no file was provided 
+  (Daniel Beulshausen& Zeev)
 - Fixed possible crash bug in imap_fetchstructure() (Jani)
 - Fixed possible crash bug in imap_open() (Jani & Mark Musone)
 - Added url_rewriter.tags configuration directive (Sascha)
