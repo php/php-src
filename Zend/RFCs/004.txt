@@ -74,3 +74,34 @@ Fixed Delegation
     where locally defined or inherited from a superclass. The difference
     to the dynamic delegation is that once the delegatee object is set,
     it cannot be changed.
+
+
+Default Delegation
+
+  Syntax / Example
+
+    <?php
+      class Foo {
+        function __delegate($name, $parameters = array()) {
+          echo $name;
+        }
+      }
+
+      $foo = new Foo;
+      $foo->bar(); /* prints "bar" */
+    ?>
+
+  Semantics / Synopsis
+
+    If a class has a __delegate() method, it is called whenever a
+    method on an object of this class is called that is
+
+      * Not defined in the class.
+
+      * Not provided by a delegatee object.
+
+    The __delegate() method is called with the name and parameters
+    of the method call.
+
+    This supersedes / obsoletes similar functionality introduced in
+    Zend Engine 1 by ext/overload.
