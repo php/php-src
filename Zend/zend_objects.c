@@ -48,9 +48,6 @@ zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class
 	*object = &EG(objects).object_buckets[handle].bucket.obj.object;
 
 	(*object)->ce = class_type;
-	/* Try and change ALLOC_HASHTABLE to ALLOC_HASHTABLE_REL by also fixing this function's prototype */
-	ALLOC_HASHTABLE((*object)->properties);
-	zend_hash_init((*object)->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 
 	retval.handle = handle;
 	retval.handlers = zoh;

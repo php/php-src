@@ -539,10 +539,7 @@ ZEND_API void convert_to_object(zval *op)
 				/* OBJECTS_OPTIMIZE */
 				TSRMLS_FETCH();
 
-				object_init(op);
-				zend_hash_destroy(Z_OBJPROP_P(op));
-				FREE_HASHTABLE(Z_OBJPROP_P(op));
-				Z_OBJPROP_P(op) = op->value.ht;
+				object_and_properties_init(op, &zend_standard_class_def, op->value.ht);
 				return;
 				break;
 			}

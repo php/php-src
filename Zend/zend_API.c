@@ -565,7 +565,7 @@ ZEND_API int _array_init(zval *arg ZEND_FILE_LINE_DC)
 }
 
 
-ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC TSRMLS_DC)
+ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	zval *tmp;
 	zend_object *object;
@@ -578,11 +578,20 @@ ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_L
 	arg->type = IS_OBJECT;
 	arg->value.obj = zend_objects_new(&object, class_type);
 
-	zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-	
+	if (properties) {
+		object->properties = properties;
+	} else {
+		ALLOC_HASHTABLE_REL(object->properties);
+		zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
+		zend_hash_copy(object->properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	}	
 	return SUCCESS;
 }
 
+ZEND_API int _object_init_ex(zval *arg, zend_class_entry *class_type ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	return _object_and_properties_init(arg, class_type, 0 ZEND_FILE_LINE_CC TSRMLS_CC);
+}
 
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC TSRMLS_DC)
 {
