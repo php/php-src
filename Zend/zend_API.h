@@ -293,8 +293,8 @@ if ((z)->value.str.val[ (z)->value.str.len ] != '\0') zend_error(E_WARNING, "Str
 		(z)->type = IS_STRING;		    \
 	}
 
-#define ZVAL_FALSE  { (z)->value.lval = 0;  (z)->type = IS_BOOL; }
-#define ZVAL_TRUE   { (z)->value.lval = 1;  (z)->type = IS_BOOL; }
+#define ZVAL_FALSE(z)  					ZVAL_BOOL(z,0)
+#define ZVAL_TRUE(z)  					ZVAL_BOOL(z,1)
 
 #define RETVAL_RESOURCE(l)				ZVAL_RESOURCE(return_value,l)
 #define RETVAL_BOOL(b)					ZVAL_BOOL(return_value,b)
