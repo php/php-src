@@ -2,6 +2,7 @@
 
 /* Scanner skeleton version:
  * $Header$
+ * vim:ft=lex:
  */
 
 #define FLEX_SCANNER
@@ -154,7 +155,7 @@ typedef unsigned int yy_size_t;
 struct yy_buffer_state
 	{
 %-
-	FILE *yy_input_file;
+	struct _zend_file_handle *yy_input_file;
 %+
 	istream* yy_input_file;
 %*
@@ -256,13 +257,13 @@ static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 /* static int yy_did_buffer_switch_on_eof; */
 #define yy_did_buffer_switch_on_eof SCNG(_yy_did_buffer_switch_on_eof)
 
-void yyrestart YY_PROTO(( FILE *input_file TSRMLS_DC ));
+void yyrestart YY_PROTO(( struct _zend_file_handle *input_file TSRMLS_DC ));
 
 void yy_switch_to_buffer YY_PROTO(( YY_BUFFER_STATE new_buffer TSRMLS_DC ));
 void yy_load_buffer_state YY_PROTO(( TSRMLS_D ));
-YY_BUFFER_STATE yy_create_buffer YY_PROTO(( FILE *file, int size TSRMLS_DC ));
+YY_BUFFER_STATE yy_create_buffer YY_PROTO(( struct _zend_file_handle *file, int size TSRMLS_DC ));
 void yy_delete_buffer YY_PROTO(( YY_BUFFER_STATE b TSRMLS_DC ));
-void yy_init_buffer YY_PROTO(( YY_BUFFER_STATE b, FILE *file TSRMLS_DC ));
+void yy_init_buffer YY_PROTO(( YY_BUFFER_STATE b, struct _zend_file_handle *file TSRMLS_DC ));
 void yy_flush_buffer YY_PROTO(( YY_BUFFER_STATE b TSRMLS_DC ));
 #define YY_FLUSH_BUFFER yy_flush_buffer( yy_current_buffer TSRMLS_CC )
 
@@ -434,6 +435,18 @@ YY_MALLOC_DECL
 
 /* Copy whatever the last rule matched to the standard output. */
 
+/* Zend file handle reading */
+#ifndef ECHO
+#define ECHO /* There is no output */
+#endif
+
+#define YY_INPUT(buf, result, max_size) \
+	if ( ((result = zend_stream_read(yyin, buf, max_size TSRMLS_CC)) == 0) \
+		  && zend_stream_ferror( yyin ) ) \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
+
+
+
 #ifndef ECHO
 %- Standard (non-C++) definition
 /* This used to be an fputs(), but since the string might contain NUL's,
@@ -524,6 +537,7 @@ YY_DECL
 		if ( ! yy_start )
 			yy_start = 1;	/* first start state */
 
+#if 0
 		if ( ! SCNG(yy_in) )
 %-
 			SCNG(yy_in) = stdin;
@@ -537,6 +551,7 @@ YY_DECL
 %+
 			SCNG(yy_out) = &cout;
 %*
+#endif
 
 		if ( ! yy_current_buffer )
 			yy_current_buffer =
@@ -1111,10 +1126,10 @@ int yyFlexLexer::yyinput(TSRMLS_D)
 
 %-
 #ifdef YY_USE_PROTOS
-void yyrestart( FILE *input_file TSRMLS_DC )
+void yyrestart( struct _zend_file_handle *input_file TSRMLS_DC )
 #else
 void yyrestart( input_file TSRMLS_CC )
-FILE *input_file;
+struct _zend_file_handle *input_file;
 #endif
 %+
 void yyFlexLexer::yyrestart( istream* input_file TSRMLS_DC )
@@ -1187,10 +1202,10 @@ void yyFlexLexer::yy_load_buffer_state()
 
 %-
 #ifdef YY_USE_PROTOS
-YY_BUFFER_STATE yy_create_buffer( FILE *file, int size TSRMLS_DC )
+YY_BUFFER_STATE yy_create_buffer( struct _zend_file_handle *file, int size TSRMLS_DC )
 #else
 YY_BUFFER_STATE yy_create_buffer( file, size TSRMLS_CC )
-FILE *file;
+struct _zend_file_handle *file;
 int size;
 #ifdef ZTS
 void ***tsrm_ls;
@@ -1251,18 +1266,13 @@ void yyFlexLexer::yy_delete_buffer( YY_BUFFER_STATE b TSRMLS_DC )
 
 
 %-
-#ifndef YY_ALWAYS_INTERACTIVE
-#ifndef YY_NEVER_INTERACTIVE
-ZEND_DLIMPORT int isatty YY_PROTO(( int ));
-#endif
-#endif
 
 #ifdef YY_USE_PROTOS
-void yy_init_buffer( YY_BUFFER_STATE b, FILE *file TSRMLS_DC )
+void yy_init_buffer( YY_BUFFER_STATE b, struct _zend_file_handle *file TSRMLS_DC )
 #else
 void yy_init_buffer( b, file TSRMLS_CC )
 YY_BUFFER_STATE b;
-FILE *file;
+struct _zend_file_handle *file;
 #ifdef ZTS
 void ***tsrm_ls;
 #endif
@@ -1286,7 +1296,7 @@ void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, istream* file TSRMLS_DC )
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
-	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+	b->yy_is_interactive = file->handle.stream.interactive;
 #endif
 #endif
 %+

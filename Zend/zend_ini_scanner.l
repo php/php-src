@@ -71,22 +71,12 @@ char *zend_ini_scanner_get_filename(TSRMLS_D)
 
 int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 {
-	FILE *fp;
-
-	switch (fh->type) {
-		case ZEND_HANDLE_FP:
-			fp = fh->handle.fp;
-			break;
-		case ZEND_HANDLE_FILENAME:
-			fp = zend_fopen(fh->filename, NULL);
-			fh->type = ZEND_HANDLE_FP;
-			break;
-		default:
-			return FAILURE;
+	if (FAILURE == zend_stream_fixup(fh TSRMLS_CC)) {
+		return FAILURE;
 	}
 
 	init_ini_scanner(TSRMLS_C);
-	yyin = fp;
+	yyin = fh;
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE TSRMLS_CC) TSRMLS_CC);
 	ini_filename = fh->filename;
 	return SUCCESS;
@@ -95,11 +85,7 @@ int zend_ini_open_file_for_scanning(zend_file_handle *fh TSRMLS_DC)
 
 void zend_ini_close_file(zend_file_handle *fh TSRMLS_DC)
 {
-	switch (fh->type) {
-		case ZEND_HANDLE_FP:
-			fclose(fh->handle.fp);
-			break;
-	}
+	zend_stream_close(fh);
 }
 
 %}

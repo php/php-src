@@ -3338,28 +3338,21 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 	switch (EX(opline)->op2.u.constant.value.lval) {
 		case ZEND_INCLUDE_ONCE:
 		case ZEND_REQUIRE_ONCE: {
-				char *opened_path=NULL;
 				int dummy = 1;
 				zend_file_handle file_handle;
 
-				file_handle.handle.fp = zend_fopen(inc_filename->value.str.val, &opened_path);
-				file_handle.type = ZEND_HANDLE_FP;
-				file_handle.filename = inc_filename->value.str.val;
-				file_handle.opened_path = opened_path;
-				file_handle.free_filename = 0;
+				if (SUCCESS == zend_stream_open(inc_filename->value.str.val, &file_handle TSRMLS_CC)) {
 
-				if (file_handle.handle.fp) {
-					if (!opened_path) {
-						opened_path = file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
+					if (!file_handle.opened_path) {
+						file_handle.opened_path = estrndup(inc_filename->value.str.val, inc_filename->value.str.len);
 					}	
 				
-					if (zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
+					if (zend_hash_add(&EG(included_files), file_handle.opened_path, strlen(file_handle.opened_path)+1, (void *)&dummy, sizeof(int), NULL)==SUCCESS) {
 						CG(active_namespace) = EG(active_namespace);
 						new_op_array = zend_compile_file(&file_handle, (EX(opline)->op2.u.constant.value.lval==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE) TSRMLS_CC);
 						zend_destroy_file_handle(&file_handle TSRMLS_CC);
-						opened_path = NULL; /* zend_destroy_file_handle() already frees it */
 					} else {
-						fclose(file_handle.handle.fp);
+						zend_file_handle_dtor(&file_handle);
 						failure_retval=1;
 					}
 				} else {
@@ -3368,9 +3361,6 @@ int zend_include_or_eval_handler(ZEND_OPCODE_HANDLER_ARGS)
 					} else {
 						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle.filename);
 					}
-				}
-				if (opened_path) {
-					efree(opened_path);
 				}
 				break;
 			}
