@@ -1291,11 +1291,6 @@ PHP_FUNCTION(stristr)
 	
 	convert_to_string_ex(haystack);
 
-	if (!Z_STRLEN_PP(needle)) {
-		php_error(E_WARNING, "Empty Delimiter");
-		RETURN_FALSE;
-	}
-
 	haystack_orig = estrndup(Z_STRVAL_PP(haystack), Z_STRLEN_PP(haystack));
 
 	if (Z_TYPE_PP(needle) == IS_STRING) {
