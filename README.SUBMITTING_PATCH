@@ -37,7 +37,7 @@ Note though that you might get little response, if your patch is
 too hard to review.
 
 If you would like change/add many lines, it is better to ask module
-maintainer and/or php-dev@lists.php.net, or pear-dev@lists.php.net if
+maintainer and/or internals@lists.php.net, or pear-dev@lists.php.net if
 you are patching PEAR. Official module maintainers can be found in
 EXTENSIONS file in PHP source.
 
@@ -79,7 +79,7 @@ Check list for submitting patch
 
 Where to send your patch?
 -------------------------
-If you are patching C source, send the patch to php-dev@lists.php.net. 
+If you are patching C source, send the patch to internals@lists.php.net. 
 If you are patching a module, you should also send the patch to the 
 maintainer. Official module maintainers are listed in EXTENSION file 
 in source.
