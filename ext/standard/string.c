@@ -3496,6 +3496,8 @@ PHPAPI void php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, int 
 				/* JavaScript & Other HTML scripting languages */
 				if (state == 1 && *(p-1) == '<') { 
 					state = 3;
+				} else {
+					*(rp++) = c;
 				}	
 				break;
 			
