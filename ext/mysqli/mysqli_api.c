@@ -54,7 +54,6 @@ PHP_FUNCTION(mysqli_autocommit)
 {
 	MY_MYSQL 		*mysql;
 	zval  			*mysql_link;
-	unsigned long	rc;
 	unsigned long	automode;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ob", &mysql_link, mysqli_link_class_entry, &automode) == FAILURE) {
@@ -62,9 +61,10 @@ PHP_FUNCTION(mysqli_autocommit)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	rc = (long) mysql_autocommit(mysql->mysql, automode);
-
-	RETURN_BOOL(rc);
+	if (mysql_autocommit(mysql->mysql, automode)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -417,14 +417,15 @@ PHP_FUNCTION(mysqli_commit)
 {
 	MY_MYSQL 	*mysql;
 	zval 		*mysql_link;
-	ulong		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
-	rc = mysql_commit(mysql->mysql);
-	RETURN_BOOL(rc);
+	if (mysql_commit(mysql->mysql)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1396,7 +1397,10 @@ PHP_FUNCTION(mysqli_rollback)
 	}
 	MYSQLI_FETCH_RESOURCE(mysql, MY_MYSQL *, &mysql_link, "mysqli_link");
 
-	RETURN_BOOL(mysql_rollback(mysql->mysql));
+	if (mysql_rollback(mysql->mysql)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
 }
 /* }}} */
 
