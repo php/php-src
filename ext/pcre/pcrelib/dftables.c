@@ -55,13 +55,17 @@ int main(void)
 int i;
 const unsigned char *tables = pcre_maketables();
 
+/* There are two printf() calls here, because gcc in pedantic mode complains
+about the very long string otherwise. */
+
 printf(
   "/*************************************************\n"
   "*      Perl-Compatible Regular Expressions       *\n"
   "*************************************************/\n\n"
   "/* This file is automatically written by the dftables auxiliary \n"
   "program. If you edit it by hand, you might like to edit the Makefile to \n"
-  "prevent its ever being regenerated.\n\n"
+  "prevent its ever being regenerated.\n\n");
+printf(
   "This file is #included in the compilation of pcre.c to build the default\n"
   "character tables which are used when no tables are passed to the compile\n"
   "function. */\n\n"
