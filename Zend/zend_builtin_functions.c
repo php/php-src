@@ -1254,7 +1254,7 @@ static zval *debug_backtrace_get_args(void ***curpos, int andjustonly TSRMLS_DC)
 
 	*curpos -= (arg_count+2); 
 
-	if (! andjustonly) {
+	if (!andjustonly) {
 		MAKE_STD_ZVAL(arg_array);
 		array_init(arg_array);
 		p -= arg_count;
