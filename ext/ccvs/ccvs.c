@@ -523,8 +523,9 @@ PHP_MINFO_FUNCTION(ccvs)
 {
     php_info_print_table_start();
     php_info_print_table_header(2, "RedHat CCVS support", "enabled");
-    php_info_print_table_row(2,"CCVS Support by","Brendan W. McAdams &lt;brendan@plexmedia.com&gt;");
+    php_info_print_table_row(2,"CCVS Support by","Brendan W. McAdams &lt;brendan@plexmedia.com&gt;<br>&amp; Doug DeJulio &lt;ddj@redhat.com&gt;");
     php_info_print_table_row(2,"Release ID",cvsid);
+    php_info_print_table_row(2,"This Release Certified For CCVS Versions","3.3");
     php_info_print_table_end();  
     
     /*  DISPLAY_INI_ENTRIES(); */
