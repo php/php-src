@@ -961,7 +961,7 @@ mssql.min_message_severity = 10
 ; Compatability mode with old versions of PHP 3.0.
 mssql.compatability_mode = Off
 
-; Connec timeout
+; Connect timeout
 ;mssql.connect_timeout = 5
 
 ; Query timeout
