@@ -2936,6 +2936,7 @@ PHP_FUNCTION(imagepsextendfont)
 
 	ZEND_FETCH_RESOURCE(f_ind, int *, fnt, -1, "Type 1 font", le_ps_font);
 
+	T1_DeleteAllSizes(*f_ind);
 	if (T1_ExtendFont(*f_ind, Z_DVAL_PP(ext)) != 0) RETURN_FALSE;
 
 	RETURN_TRUE;
