@@ -1,3 +1,124 @@
+2002-06-24  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: Minor cleanup.
+
+2002-06-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/tests/003.phpt
+      ext/exif/tests/test3.jpg: modified test3 (old one had a warning)
+
+    * ext/standard/image.c: missing return value
+
+    * NEWS: cleanup
+
+    * ext/exif/exif.c
+      ext/standard/image.c
+      ext/standard/php_image.h
+      ext/standard/basic_functions.c:
+    register IMAGETYPE_<xxx> constants in image.c as they are needed
+    there.
+
+2002-06-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/gd/config.m4
+      ext/gd/gd.c:
+    - Make functions not exist when they are not available. This means you can
+      now safely do function_exists() on all gd functions.
+
+2002-06-24  Marko Karppinen  <karppinen@pobox.com>
+
+    * ext/xslt/php_sablot.h
+      ext/xslt/sablot.c: Revert to php_4_2_1 to get sablotron working again.
+
+2002-06-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c
+      ext/standard/image.c
+      ext/standard/php_image.h:
+    GetImageSize now allways set fields unknown to 0 and new Imagetype
+    iff. 
+
+2002-06-24  Christian Stocker  <chregu@phant.ch>
+
+    * ext/domxml/TODO: added some points to the todo list
+
+2002-06-24  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache2filter/sapi_apache2.c:
+     Add runtime Apache2 thread check to ensure we don't run a non-threaded
+     PHP inside a threaded Apache2 MPM.  
+
+2002-06-24  Martin Jansen  <mail@martin-jansen.de>
+
+    * pear/PEAR/Command/Remote.php: * Rephrase help text.
+
+2002-06-24  Rasmus Lerdorf  <rasmus@lerdorf.on.ca>
+
+    * sapi/apache2filter/config.m4
+      sapi/apache2filter/sapi_apache2.c:
+     Turn off ZTS if Apache2 is using the prefork MPM. 
+
+2002-06-24  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in:
+    - gethostname() is found in glibc (at least on Linux) and the yp_* funcs
+      are in libnsl. Fixes bug: #17941
+
+    * NEWS: ..unless someone adds all the missing ones.. :)
+
+    * ext/mcal/config.m4: Fix the shared build properly.
+
+    * acinclude.m4:
+    Fixed PHP_ADD_LIBRARY_DEFER_WITH_PATH to work with shared builds.
+
+2002-06-24  Edin Kadribasic  <edink@proventum.net>
+
+    * sapi/apache2filter/CREDITS
+      sapi/apache2filter/README
+      sapi/apache2filter/apache_config.c
+      sapi/apache2filter/php_apache.h
+      sapi/apache2filter/php_functions.c
+      sapi/apache2filter/sapi_apache2.c: MFH
+
+2002-06-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/ldap/config.m4: No need to have multiple AC_CHECK_FUNCS calls
+
+2002-06-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * Makefile.in:
+    - Fix make install to respect the prefix= argument (patch by Troels Arvin
+      <troels@arvin.dk>)
+
+    * ext/mcal/config.m4:
+    - Fix building a shared extension (patch by Troels Arvin <troels@arvin.dk>)
+
+    * ext/sysvsem/php_sysvsem.h
+      ext/sysvsem/sysvsem.c
+      ext/standard/versioning.c: - MFH
+
+2002-06-24  Edin Kadribasic  <edink@proventum.net>
+
+    * win32/time.c
+      win32/time.h: MFH
+
+2002-06-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/string.c: - MFH
+
+    * ext/standard/math.c: - Fix the MFH :)
+
+    * ext/standard/basic_functions.c: - MFH
+
+    * ext/mcrypt/mcrypt.c: - Partly MFH
+
+    * ext/standard/math.c
+      ext/gmp/config.m4: - MFH
+
+2002-06-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * buildconf: iterate through passed arguments
+
 2002-06-23  Edin Kadribasic  <edink@proventum.net>
 
     * win32/time.c
