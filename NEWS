@@ -24,6 +24,7 @@ PHP 4.0                                                                    NEWS
 - Improved support for autoconf-2.50+/libtool 1.4b+. (Jan Kneschke, Sascha)
 
 ?? ??? 200?, Version 4.0.7
+- Fixed pg_last_notice() (Zeev)
 - Fixed DOM-XML's error reporting, so E_WARNING errors are given instead of 
   E_ERROR error's, this allows you to trap errors thrown by DOMXML functions.
   (Sterling)
