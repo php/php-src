@@ -610,6 +610,9 @@ SPL_METHOD(dual_it, getInnerIterator)
 
 static INLINE void spl_dual_it_free(spl_dual_it_object *intern TSRMLS_DC)
 {
+	if (intern->inner.iterator->funcs->invalidate_current) {
+		intern->inner.iterator->funcs->invalidate_current(intern->inner.iterator TSRMLS_CC);
+	}
 	if (intern->current.data) {
 		zval_ptr_dtor(&intern->current.data);
 		intern->current.data = NULL;
@@ -904,10 +907,9 @@ static INLINE void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS
 	if (instanceof_function(intern->inner.ce, spl_ce_SeekableIterator TSRMLS_CC)) {
 		MAKE_STD_ZVAL(zpos);
 		ZVAL_LONG(zpos, pos);
+		spl_dual_it_free(intern TSRMLS_CC);
 		zend_call_method_with_1_params(&intern->inner.zobject, intern->inner.ce, NULL, "seek", NULL, zpos);
 		zval_ptr_dtor(&zpos);
-		spl_dual_it_free(intern TSRMLS_CC);
-		zend_user_it_free_current(intern->inner.iterator TSRMLS_CC);
 		intern->current.pos = pos;
 		if (spl_limit_it_valid(intern TSRMLS_CC) == SUCCESS) {
 			spl_dual_it_fetch(intern, 0 TSRMLS_CC);
