@@ -76,7 +76,7 @@
   
 
   
-   uint32 must be an unsigned integer type capable of holding at least 32
+   php_uint32 must be an unsigned integer type capable of holding at least 32
    bits; exactly 32 should be fastest, but 64 is better on an Alpha with
    GCC at -O3 optimization so try your options and see what's best for you
 
@@ -92,7 +92,7 @@
 #define loBits(u)     ((u) & 0x7FFFFFFFU)  /* mask     the highest   bit of u */
 #define mixBits(u, v) (hiBit(u)|loBits(v)) /* move hi bit of u to hi bit of v */
 
-static void seedMT(uint32 seed BLS_DC)
+static void seedMT(php_uint32 seed BLS_DC)
 {
     /*
        We initialize state[0..(N-1)] via the generator
@@ -140,7 +140,7 @@ static void seedMT(uint32 seed BLS_DC)
        so-- that's why the only change I made is to restrict to odd seeds.
     */
 
-    register uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = BG(state);
+    register php_uint32 x = (seed | 1U) & 0xFFFFFFFFU, *s = BG(state);
     register int    j;
 
     for(BG(left)=0, *s++=x, j=N; --j;
@@ -148,9 +148,9 @@ static void seedMT(uint32 seed BLS_DC)
 }
 
 
-static uint32 reloadMT(BLS_D)
+static php_uint32 reloadMT(BLS_D)
 {
-    register uint32 *p0=BG(state), *p2=BG(state)+2, *pM=BG(state)+M, s0, s1;
+    register php_uint32 *p0=BG(state), *p2=BG(state)+2, *pM=BG(state)+M, s0, s1;
     register int    j;
 
     if(BG(left) < -1)
@@ -172,9 +172,9 @@ static uint32 reloadMT(BLS_D)
 }
 
 
-static inline uint32 randomMT(void)
+static inline php_uint32 randomMT(void)
 {
-    uint32 y;
+    php_uint32 y;
 	BLS_FETCH();
 
     if(--BG(left) < 0)
