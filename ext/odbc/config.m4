@@ -271,7 +271,7 @@ AC_ARG_WITH(custom-odbc,
                           E.g., you should define following for 
                           Sybase SQL Anywhere 5.5.00 on QNX, prior to
                           run configure script:
-                              CFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
+                              CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
                               LDFLAGS=-lunix
                               CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\".],
 [
