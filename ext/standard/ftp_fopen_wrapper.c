@@ -77,16 +77,20 @@ static int php_get_ftp_result(php_stream *stream TSRMLS_DC)
 	return strtol(tmp_line, NULL, 10);
 }
 
-php_stream_wrapper php_stream_ftp_wrapper =	{
+static php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
-	NULL,
+	NULL
+};
+
+php_stream_wrapper php_stream_ftp_wrapper =	{
+	&ftp_stream_wops,
 	NULL
 };
 
 
 /* {{{ php_fopen_url_wrap_ftp
  */
-php_stream * php_stream_url_wrap_ftp(char *path, char *mode, int options, char **opened_path, void *wrappercontext STREAMS_DC TSRMLS_DC)
+php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path STREAMS_DC TSRMLS_DC)
 {
 	php_stream *stream=NULL;
 	php_url *resource=NULL;

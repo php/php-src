@@ -126,8 +126,8 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 
 	if (close_options & PHP_STREAM_FREE_RELEASE_STREAM) {
 
-		if (stream->wrapper && stream->wrapper->destroy) {
-			stream->wrapper->destroy(stream TSRMLS_CC);
+		if (stream->wrapper && stream->wrapper->wops->closer) {
+			stream->wrapper->wops->closer(stream->wrapper, stream TSRMLS_CC);
 			stream->wrapper = NULL;
 		}
 
@@ -1038,7 +1038,7 @@ static php_stream *php_stream_open_url(char *path, char *mode, int options, char
 			protocol = NULL;
 		}
 		if (wrapper)	{
-			php_stream *stream = wrapper->create(path, mode, options, opened_path, wrapper->wrappercontext STREAMS_REL_CC TSRMLS_CC);
+			php_stream *stream = wrapper->wops->opener(wrapper, path, mode, options, opened_path STREAMS_REL_CC TSRMLS_CC);
 			if (stream)
 				stream->wrapper = wrapper;
 			return stream;

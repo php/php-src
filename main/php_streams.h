@@ -86,6 +86,7 @@
  * retrieve using fgetwrapperdata(). */
 
 typedef struct _php_stream php_stream;
+typedef struct _php_stream_wrapper php_stream_wrapper;
 
 typedef struct _php_stream_ops  {
 	/* stdio like functions - these are mandatory! */
@@ -100,15 +101,16 @@ typedef struct _php_stream_ops  {
 	const char *label; /* label for this ops structure */
 } php_stream_ops;
 
-/* options uses the IGNORE_URL family of defines from fopen_wrappers.h */
-typedef php_stream *(*php_stream_factory_func_t)(char *filename, char *mode, int options, char **opened_path, void * wrappercontext STREAMS_DC TSRMLS_DC);
-typedef void (*php_stream_wrapper_dtor_func_t)(php_stream *stream TSRMLS_DC);
+typedef struct _php_stream_wrapper_ops {
+	php_stream *(*opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
+			int options, char **opened_path STREAMS_DC TSRMLS_DC);
+	php_stream *(*closer)(php_stream_wrapper *wrapper, php_stream *stream TSRMLS_DC);
+} php_stream_wrapper_ops;
 
-typedef struct _php_stream_wrapper	{
-	php_stream_factory_func_t		create;
-	php_stream_wrapper_dtor_func_t	destroy;
-	void * wrappercontext;
-} php_stream_wrapper;
+struct _php_stream_wrapper	{
+	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
+	void *abstract;					/* context for the wrapper */
+};
 
 struct _php_stream  {
 	php_stream_ops *ops;
