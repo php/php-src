@@ -1,3 +1,101 @@
+2000-05-17  Andi Gutmans  <andi@php.net>
+
+    * php4dll.dsp: - Make non-threaded project build on Win32
+
+    * configuration-parser.y: - Fix Win32 build
+
+2000-05-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/sysvshm/sysvshm.c: proto corrected
+
+2000-05-17  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/image.c: Fixed the format.
+
+2000-05-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * main.c: proto-takeover from php3
+
+    * ext/standard/var.c: proto takeover from php3
+
+    * ext/standard/image.c
+      ext/standard/head.c
+      ext/standard/crypt.c: proto-takeover from php3
+
+    * ext/standard/filestat.c: typo fix
+
+    * ext/standard/filestat.c: correction
+
+2000-05-17  Andi Gutmans  <andi@php.net>
+
+    * php4dllts.dsp: - Nuke dlist.[ch] from Win32 build.
+
+    * Makefile.in: - Remove dlist from build
+
+    * dlist.c
+      dlist.h: - Remove dlist.[ch]. Should not be needed anymore
+
+2000-05-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4
+      configure.in
+      ext/standard/config.m4:
+    Add debug.log facility. If there are any obscure bugs in our build system,
+    this will give us enough information to find and fix it.
+
+2000-05-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/db/db.c: proto-takeover from php3
+
+2000-05-17  Egon Schmid  <eschmid@s.netic.de>
+
+    * ext/standard/math.c: Second parameter is optional.
+
+2000-05-17  Hartmut Holzgraefe  <hholzgra@media-engineering.de>
+
+    * ext/standard/filestat.c: took over missing prototypes from php3 source
+    (copied them only, didn't check for parameter changes!)
+
+    * ext/imap/php_imap.c:
+    name in proto should be name of real function, not alias
+
+2000-05-17  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/thttpd/thttpd.c: Fix build against recent thttpd versions
+
+    * NEWS: .
+
+    * ext/standard/dns.c: Fix 64-bit issue in gethostbyaddr().
+
+2000-05-17  Uwe Steinmann  <Uwe.Steinmann@fernuni-hagen.de>
+
+    * ext/swf/config.m4
+      ext/swf/swf.c:
+    - fixed wrong interpretation of last parameter of swf_rotate()
+    - add MOD_COLOR and MOD_MATRIX constants
+
+    * tests/testswf: - test script to test creation of flash files
+
+2000-05-17  Zeev Suraski  <zeev@php.net>
+
+    * configuration-parser.y:
+    Only allow loading of extensions only during .ini file parsing
+
+2000-05-17  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/standard/math.c: Let's cast it.
+
+    * configure.in
+      ext/standard/math.c:
+    - Improved round() to allow specification of rounding precision.
+      (Andrei, Todd Kirby <kirbyt@yahoo.com>)
+
+2000-05-17  Zeev Suraski  <zeev@php.net>
+
+    * sapi/apache/mod_php4.c:
+    Fix crash when server_context is not longer valid (e.g., when
+    coming from php_apache_request_shutdown)
+
 2000-05-16  Sascha Schumann  <sascha@schumann.cx>
 
     * php_virtual_cwd.c
