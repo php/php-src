@@ -222,6 +222,10 @@ class PEAR_Installer extends PEAR_Common
             $this->log(3, "+ mkdir $dest_dir");
         }
         if (empty($atts['replacements'])) {
+            if (!file_exists($orig_file)) {
+                return $this->raiseError("file does not exist",
+                                         PEAR_INSTALLER_FAILED);
+            }
             if (!@copy($orig_file, $dest_file)) {
                 return $this->raiseError("failed to write $dest_file",
                                          PEAR_INSTALLER_FAILED);
@@ -231,6 +235,10 @@ class PEAR_Installer extends PEAR_Common
                 $md5sum = md5_file($dest_file);
             }
         } else {
+            if (!file_exists($orig_file)) {
+                return $this->raiseError("file does not exist",
+                                         PEAR_INSTALLER_FAILED);
+            }
             $fp = fopen($orig_file, "r");
             $contents = fread($fp, filesize($orig_file));
             fclose($fp);
@@ -273,7 +281,7 @@ class PEAR_Installer extends PEAR_Common
             fclose($wp);
         }
         if (isset($md5sum)) {
-            if ($md5sum == $atts['md5sum']) {
+            if (strtolower($md5sum) == strtolower($atts['md5sum'])) {
                 $this->log(3, "md5sum ok: $final_dest_file");
             } else {
                 $this->log(0, "warning : bad md5sum for file $final_dest_file");
@@ -695,6 +703,9 @@ class PEAR_Installer extends PEAR_Common
                 if (PEAR::isError($res)) {
                     if (empty($options['ignore-errors'])) {
                         $this->rollbackFileTransaction();
+                        if ($res->getMessage() == "file does not exist") {
+                            $this->raiseError("file $file in package.xml does not exist");
+                        }
                         return $this->raiseError($res);
                     } else {
                         $this->log(0, "Warning: " . $res->getMessage());
