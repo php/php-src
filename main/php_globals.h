@@ -43,12 +43,12 @@ extern ZEND_API struct _php_core_globals core_globals;
 #endif
 
 
-#define TRACK_VARS_POST		1
-#define TRACK_VARS_GET		2
-#define TRACK_VARS_COOKIE	3
-#define TRACK_VARS_SERVER	4
-#define TRACK_VARS_ENV		5
-#define TRACK_VARS_FILES	6
+#define TRACK_VARS_POST		0
+#define TRACK_VARS_GET		1
+#define TRACK_VARS_COOKIE	2
+#define TRACK_VARS_SERVER	3
+#define TRACK_VARS_ENV		4
+#define TRACK_VARS_FILES	5
 
 struct _php_tick_function_entry;
 
