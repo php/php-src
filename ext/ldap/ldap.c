@@ -1507,7 +1507,7 @@ PHP_FUNCTION(ldap_compare) {
 
 
 #if LDAP_API_VERSION > 2000
-/* {{{ proto int ldap_get_option(int link, int option, int retval)
+/* {{{ proto boolean ldap_get_option(int link, int option, mixed retval)
    Get the current value of various session-wide parameters */
 PHP_FUNCTION(ldap_get_option) {
 	LDAP *ldap;
@@ -1572,7 +1572,7 @@ PHP_FUNCTION(ldap_get_option) {
 /* }}} */
 
 
-/* {{{ proto int ldap_set_option(int link, int option, int newval)
+/* {{{ proto boolean ldap_set_option(int link, int option, mixed newval)
    Set the value of various session-wide parameters */
 PHP_FUNCTION(ldap_set_option) {
 	LDAP *ldap;
