@@ -163,26 +163,14 @@ PHP_MINFO_FUNCTION(calendar)
 	php_info_print_table_end();
 }
 
-/* {{{ proto array cal_info(int calendar)
-   Returns information about a particular calendar */
-PHP_FUNCTION(cal_info)
+static void _php_cal_info(int cal, zval **ret)
 {
-	long cal;
 	zval *months, *smonths;
 	int i;
 	struct cal_entry_t *calendar;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &cal) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld.", cal);
-		RETURN_FALSE;
-	}
-
 	calendar = &cal_conversion_table[cal];
-	array_init(return_value);
+	array_init(*ret);
 
 	MAKE_STD_ZVAL(months);
 	MAKE_STD_ZVAL(smonths);
@@ -193,11 +181,46 @@ PHP_FUNCTION(cal_info)
 		add_index_string(months, i, calendar->month_name_long[i], 1);
 		add_index_string(smonths, i, calendar->month_name_short[i], 1);
 	}
-	add_assoc_zval(return_value, "months", months);
-	add_assoc_zval(return_value, "abbrevmonths", smonths);
-	add_assoc_long(return_value, "maxdaysinmonth", calendar->max_days_in_month);
-	add_assoc_string(return_value, "calname", calendar->name, 1);
-	add_assoc_string(return_value, "calsymbol", calendar->symbol, 1);
+	add_assoc_zval(*ret, "months", months);
+	add_assoc_zval(*ret, "abbrevmonths", smonths);
+	add_assoc_long(*ret, "maxdaysinmonth", calendar->max_days_in_month);
+	add_assoc_string(*ret, "calname", calendar->name, 1);
+	add_assoc_string(*ret, "calsymbol", calendar->symbol, 1);
+	
+}
+
+/* {{{ proto array cal_info(int calendar)
+   Returns information about a particular calendar */
+PHP_FUNCTION(cal_info)
+{
+	long cal = -1;
+	
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cal) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (cal == -1) {
+		int i;
+		zval *val;
+
+		array_init(return_value);
+
+		for (i = 0; i < CAL_NUM_CALS; i++) {
+			MAKE_STD_ZVAL(val);
+			_php_cal_info(i, &val);
+			add_index_zval(return_value, i, val);
+		}
+		return;
+	}
+
+
+	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid calendar ID %ld.", cal);
+		RETURN_FALSE;
+	}
+
+	_php_cal_info(cal, &return_value);
 
 }
 /* }}} */
