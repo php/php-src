@@ -230,6 +230,7 @@ next_step:
 				zend_call_method_with_0_params(&zobject, ce, NULL, "getchildren", &child);
 				ce = Z_OBJCE_P(child);
 				if (!ce || !instanceof_function(ce, spl_ce_RecursiveIterator TSRMLS_CC)) {
+					zval_ptr_dtor(&child);
 					zend_throw_exception(zend_exception_get_default(), "Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator", 0 TSRMLS_CC);
 					return;
 				}
