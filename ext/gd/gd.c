@@ -514,13 +514,13 @@ PHP_FUNCTION(imageloadfont)
 	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)))
 		b += n;
 	if (!n) {
-		php_stream_close(stream);
 		efree(font);
 		if (php_stream_eof(stream)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "End of file while reading header");
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading header");
 		}
+		php_stream_close(stream);
 		RETURN_FALSE;
 	}
 	i = php_stream_tell(stream);
