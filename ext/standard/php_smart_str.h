@@ -47,6 +47,7 @@
 #define smart_str_appendl(dest, src, len) smart_str_appendl_ex(dest, src, len, 0)
 #define smart_str_append(dest, src) smart_str_append_ex(dest, src, 0)
 #define smart_str_append_long(dest, val) smart_str_append_long_ex(dest, val, 0)
+#define smart_str_append_unsigned(dest, val) smart_str_append_unsigned_ex(dest, val, 0)
 
 static inline void smart_str_appendc_ex(smart_str *dest, char c, int what)
 {
@@ -76,47 +77,50 @@ static inline void smart_str_appendl_ex(smart_str *dest, const char *src, size_t
 	dest->len = newlen;
 }
 
-static inline char *smart_str_print_long(char *buf, long num)
+/* buf points to the END of the buffer */
+static inline char *smart_str_print_unsigned(char *buf, unsigned long num)
 {
-	char *p = buf, *end;
-	int n;
-	long tmp;
+	char *p = buf;
 	
-	if (num < 0) {
-		num = -num;
-		*p++ = '-';
-	}
-
-	/* many numbers are < 10 */
-	if (num < 10) {
-		*p++ = num + '0';
-		return p;
-	}
-
-	n = 1;
-	tmp = num;
-
-	/* calculate the number of digits we need */
-	do {
-		tmp /= 10;
-		n++;
-	} while (tmp >= 10);
-
-	end = p += n;
-	
+	*p = '\0';
 	do {
 		*--p = (num % 10) + '0';
 		num /= 10;
-	} while (--n > 0);
+	} while (num > 0);
 
-	return end;
+	return p;
+}
+
+/* buf points to the END of the buffer */
+static inline char *smart_str_print_long(char *buf, long num)
+{
+	char *p;
+	
+	if (num < 0) {
+		/* this might cause problems when dealing with LONG_MIN
+		   and machines which don't support long long.  Works
+		   flawlessly on 32bit x86 */
+		p = smart_str_print_unsigned(buf, -num);
+		*--p = '-';
+	} else {
+		p = smart_str_print_unsigned(buf, num);
+	}
+
+	return p;
 }
 
 static inline void smart_str_append_long_ex(smart_str *dest, long num, int type)
 {
 	char buf[32];
-	char *p = smart_str_print_long(buf, num);
-	smart_str_appendl_ex(dest, buf, p - buf, type);
+	char *p = smart_str_print_long(buf + sizeof(buf) - 1, num);
+	smart_str_appendl_ex(dest, p, (buf + sizeof(buf) - 1) - p, type);
+}
+
+static inline void smart_str_append_unsigned_ex(smart_str *dest, long num, int type)
+{
+	char buf[32];
+	char *p = smart_str_print_unsigned(buf + sizeof(buf) - 1, num);
+	smart_str_appendl_ex(dest, p, (buf + sizeof(buf) - 1) - p, type);
 }
 
 static inline void smart_str_append_ex(smart_str *dest, smart_str *src, int what)
