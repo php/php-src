@@ -1,3 +1,42 @@
+2004-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/zend_mm.c:
+      Check if realloc() succeeds or not. (Noticed by Andrey)
+
+2004-01-06  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/http.c:
+      Fix C++ style declaration
+
+2004-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/http.c
+      ext/standard/php_http.h
+      ext/standard/tests/strings/bug26817.phpt
+      ext/standard/tests/strings/bug26819.phpt:
+      Fixed bug #26819 (http_build_query() crashes on NULL output).
+      Fixed bug #26817 (http_build_query() does not handle private & protected
+      object properties correctly).
+
+    * ext/standard/rand.c:
+      Revert proto 'fix'.
+
+2004-01-06  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/iconv/iconv.c:
+      Prevent a character from being wrongly doubled in the buffer.
+
+2004-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/rand.c:
+      Proto fixes.
+
+2004-01-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/tests/bug26802.phpt:
+      Update
+
 2004-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend_execute.c

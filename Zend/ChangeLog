@@ -1,3 +1,13 @@
+2004-01-06  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * zend_mm.c:
+      Check if realloc() succeeds or not. (Noticed by Andrey)
+
+2004-01-06  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/bug26802.phpt:
+      Update
+
 2004-01-05  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_execute.c
