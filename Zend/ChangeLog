@@ -1,3 +1,9 @@
+2004-02-17  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * zend_list.c:
+      MFB: - Fix bug #26753 (zend_fetch_list_dtor_id() does not check NULL
+      strings)
+
 2004-02-16  Derick Rethans  <php@derickrethans.nl>
 
     * ZEND_CHANGES:
