@@ -719,7 +719,7 @@ char *_php_pcre_replace(char *regex, char *subject, char *replace)
 						backref < count) {
 						match_len = offsets[(backref<<1)+1] - offsets[backref<<1];
 						memcpy (walkbuf,
-								piece + offsets[backref<<1],
+								subject + offsets[backref<<1],
 								match_len);
 						walkbuf += match_len;
 						walk += (backref > 9) ? 3 : 2;
