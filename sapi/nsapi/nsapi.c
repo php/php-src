@@ -34,6 +34,8 @@
 #include "php_version.h"
 #include "TSRM.h"
 #include "ext/standard/php_standard.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /*
  * If neither XP_UNIX not XP_WIN32 is defined use PHP_WIN32
@@ -323,6 +325,7 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 					*p = '_';
 				}
 			}
+			buf[NS_BUF_SIZE]='\0';
 			php_register_variable(buf, entry->param->value, track_vars_array TSRMLS_CC);
 			entry=entry->next;
 		}
@@ -376,19 +379,22 @@ static void sapi_nsapi_register_server_variables(zval *track_vars_array TSRMLS_D
 
 	/* Create full Request-URI */
 	if (value = pblock_findval("uri", rc->rq->reqpb)) {
-		snprintf(buf,NS_BUF_SIZE, "%s", value);
+		strncpy(buf, value, NS_BUF_SIZE);
+		buf[NS_BUF_SIZE]='\0';
 		if (value = pblock_findval("query", rc->rq->reqpb)) {
 		  	p = strchr(buf, 0);
 			snprintf(p, NS_BUF_SIZE-(p-buf), "?%s", value);
+			buf[NS_BUF_SIZE]='\0';
 		}
 		php_register_variable("REQUEST_URI", buf, track_vars_array TSRMLS_CC);
   	}
 
 	/* Create Script-Name */
 	if (value = pblock_findval("uri", rc->rq->reqpb)) {
-		snprintf(buf,NS_BUF_SIZE, "%s", value);
+		strncpy(buf, value, NS_BUF_SIZE);
+		buf[NS_BUF_SIZE]='\0';
 		if (value = pblock_findval("path-info", rc->rq->vars)) {
-			buf[strlen(buf) - strlen(value)] = 0;
+			buf[strlen(buf) - strlen(value)] = '\0';
 		}
 		php_register_variable("SCRIPT_NAME", buf, track_vars_array TSRMLS_CC);
 	}
@@ -444,53 +450,6 @@ static sapi_module_struct nsapi_sapi_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
-
-static void nsapi_request_ctor(NSLS_D TSRMLS_DC)
-{
-	char *query_string    = pblock_findval("query", NSG(rq)->reqpb);
-	char *uri             = pblock_findval("uri", NSG(rq)->reqpb);
-	char *path_info       = pblock_findval("path-info", NSG(rq)->vars);
-	char *request_method  = pblock_findval("method", NSG(rq)->reqpb);
-	char *content_type    = pblock_findval("content-type", NSG(rq)->headers);
-	char *content_length  = pblock_findval("content-length", NSG(rq)->headers);
-	char *path_translated = pblock_findval("path", NSG(rq)->vars);;
-
-#if defined(NSAPI_DEBUG)
-	log_error(LOG_INFORM, "nsapi_request_ctor", NSG(sn), NSG(rq),
-		"query_string = %s, "
-		"uri = %s, "
-		"path_info = %s, "
-		"path_translated = %s, "
-		"request_method = %s, "
-		"content_type = %s, "
-		"content_length = %s",
-		query_string,
-		uri,
-		path_info,
-		path_translated,
-		request_method,
-		content_type,
-		content_length);
-#endif
-
-	SG(request_info).query_string = nsapi_strdup(query_string);
-	SG(request_info).request_uri = nsapi_strdup(uri);
-	SG(request_info).request_method = nsapi_strdup(request_method);
-	SG(request_info).path_translated = nsapi_strdup(path_translated);
-	SG(request_info).content_type = nsapi_strdup(content_type);
-	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
-	SG(sapi_headers).http_response_code = 200;
-}
-
-static void nsapi_request_dtor(NSLS_D TSRMLS_DC)
-{
-	nsapi_free(SG(request_info).query_string);
-	nsapi_free(SG(request_info).request_uri);
-	nsapi_free(SG(request_info).request_method);
-	nsapi_free(SG(request_info).path_translated);
-	nsapi_free(SG(request_info).content_type);
-}
-
 static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 {
 	struct pb_entry *entry;
@@ -501,7 +460,7 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 		while (entry) {
 			/* exclude standard entries given to "Service" which should not go into ini entries */
 			if (strcasecmp(entry->param->name,"fn") && strcasecmp(entry->param->name,"type")
-			 && strcasecmp(entry->param->name,"method")  && strcasecmp(entry->param->name,"Directive")) {
+			 && strcasecmp(entry->param->name,"method")  && strcasecmp(entry->param->name,"directive")) {
 				/* change the ini entry */
 				if (zend_alter_ini_entry(entry->param->name, strlen(entry->param->name)+1,
 				 entry->param->value, strlen(entry->param->value),
@@ -512,33 +471,6 @@ static void nsapi_php_ini_entries(NSLS_D TSRMLS_DC)
 			entry=entry->next;
 		}
   	}
-}
-
-int nsapi_module_main(NSLS_D TSRMLS_DC)
-{
-	zend_file_handle file_handle = {0};
-
-	if (php_request_startup(TSRMLS_C) == FAILURE) {
-		return FAILURE;
-	}
-
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = SG(request_info).path_translated;
-	file_handle.free_filename = 0;
-	file_handle.opened_path = NULL;
-
-#if defined(NSAPI_DEBUG)
-	log_error(LOG_INFORM, "nsapi_module_main", NSG(sn), NSG(rq), "Parsing [%s]", SG(request_info).path_translated);
-#endif
-
-	php_execute_script(&file_handle TSRMLS_CC);
-	php_request_shutdown(NULL);
-
-#if defined(NSAPI_DEBUG)
-	log_error(LOG_INFORM, "nsapi_module_main", NSG(sn), NSG(rq), "PHP request finished Ok");
-#endif
-
-	return SUCCESS;
 }
 
 void NSAPI_PUBLIC php4_close(void *vparam)
@@ -552,6 +484,8 @@ void NSAPI_PUBLIC php4_close(void *vparam)
 	}
 
 	tsrm_shutdown();
+
+	log_error(LOG_INFORM, "php4_close", NULL, NULL, "Shutdown PHP Module");
 }
 
 int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
@@ -571,7 +505,9 @@ int NSAPI_PUBLIC php4_init(pblock *pb, Session *sn, Request *rq)
 	sapi_startup(&nsapi_sapi_module);
 	nsapi_sapi_module.startup(&nsapi_sapi_module);
 
-	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module\n");
+	daemon_atrestart(&php4_close, NULL);
+
+	log_error(LOG_INFORM, "php4_init", sn, rq, "Initialized PHP Module");
 	return REQ_PROCEED;
 }
 
@@ -579,6 +515,17 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 {
 	int retval;
 	nsapi_request_context *request_context;
+	zend_file_handle file_handle = {0};
+	struct stat fst;
+
+	char *query_string    = pblock_findval("query", rq->reqpb);
+	char *uri             = pblock_findval("uri", rq->reqpb);
+	char *path_info       = pblock_findval("path-info", rq->vars);
+	char *request_method  = pblock_findval("method", rq->reqpb);
+	char *content_type    = pblock_findval("content-type", rq->headers);
+	char *content_length  = pblock_findval("content-length", rq->headers);
+	char *path_translated = pblock_findval("path", rq->vars);
+
 	TSRMLS_FETCH();
 
 	request_context = (nsapi_request_context *)MALLOC(sizeof(nsapi_request_context));
@@ -588,15 +535,48 @@ int NSAPI_PUBLIC php4_execute(pblock *pb, Session *sn, Request *rq)
 	request_context->read_post_bytes = 0;
 
 	SG(server_context) = request_context;
+	SG(request_info).query_string = nsapi_strdup(query_string);
+	SG(request_info).request_uri = nsapi_strdup(uri);
+	SG(request_info).request_method = nsapi_strdup(request_method);
+	SG(request_info).path_translated = nsapi_strdup(path_translated);
+	SG(request_info).content_type = nsapi_strdup(content_type);
+	SG(request_info).content_length = (content_length == NULL) ? 0 : strtoul(content_length, 0, 0);
+	SG(sapi_headers).http_response_code = 200;
 
-	nsapi_request_ctor(NSLS_C TSRMLS_CC);
 	nsapi_php_ini_entries(NSLS_C TSRMLS_CC);
-	retval = nsapi_module_main(NSLS_C TSRMLS_CC);
-	nsapi_request_dtor(NSLS_C TSRMLS_CC);
+
+	file_handle.type = ZEND_HANDLE_FILENAME;
+	file_handle.filename = SG(request_info).path_translated;
+	file_handle.free_filename = 0;
+	file_handle.opened_path = NULL;
+
+	if (stat(SG(request_info).path_translated, &fst)==0 && S_ISREG(fst.st_mode)) {
+		if (php_request_startup(TSRMLS_C) == SUCCESS) {
+			php_execute_script(&file_handle TSRMLS_CC);
+			php_request_shutdown(NULL);
+			retval=REQ_PROCEED;
+		} else {
+			/* send 500 internal server error */
+			log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot prepare PHP engine!");
+			protocol_status(sn, rq, 500, NULL);
+			retval=REQ_ABORTED;
+		}
+	} else {
+		/* send 404 because file not found */
+		log_error(LOG_WARN, "php4_execute", sn, rq, "Cannot execute PHP script: %s", SG(request_info).path_translated);
+		protocol_status(sn, rq, 404, NULL);
+		retval=REQ_ABORTED;
+	}
+
+	nsapi_free(SG(request_info).query_string);
+	nsapi_free(SG(request_info).request_uri);
+	nsapi_free(SG(request_info).request_method);
+	nsapi_free(SG(request_info).path_translated);
+	nsapi_free(SG(request_info).content_type);
 
 	FREE(request_context);
 
-	return (retval == SUCCESS) ? REQ_PROCEED : REQ_EXIT;
+	return retval;
 }
 
 /*********************************************************
