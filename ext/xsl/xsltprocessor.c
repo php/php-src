@@ -128,13 +128,14 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsltStylesheetPtr sheetp, oldsheetp;
 	xmlDocPtr newdocp;
 	xsl_object *intern;
+	dom_object *docobj;
 	
 	DOM_GET_THIS(id);
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	DOM_GET_OBJ(doc, docp, xmlDocPtr);
+	DOM_GET_OBJ(doc, docp, xmlDocPtr, docobj);
 	/* copy the doc, so that it's not accessable from outside
 	FIXME: and doubling memory consumption...
 	*/
@@ -175,14 +176,17 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	int ret;
 	char **params = NULL;
 	xsl_object *intern;
+	dom_object *docobj;
 	
-	DOM_GET_THIS_OBJ(sheetp, id, xsltStylesheetPtr);
-	
+	id = getThis();
+	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	sheetp = (xsltStylesheetPtr) intern->ptr;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	DOM_GET_OBJ(doc, docp, xmlDocPtr);
-	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	DOM_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}
@@ -193,7 +197,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	}
 
 	if (newdocp) {
-		DOM_RET_OBJ(rv, (xmlNodePtr) newdocp, &ret);
+		DOM_RET_OBJ(rv, (xmlNodePtr) newdocp, &ret, NULL);
 	} else {
 		RETURN_FALSE;
 	}
@@ -224,14 +228,17 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	int doc_txt_len;
 	char **params = NULL;
 	xsl_object *intern;
+	dom_object *docobj;
 	
-	DOM_GET_THIS_OBJ(sheetp, id, xsltStylesheetPtr);
-	
+	id = getThis();
+	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	sheetp = (xsltStylesheetPtr) intern->ptr;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &docp) == FAILURE) {
 		RETURN_FALSE;
 	}
-	DOM_GET_OBJ(doc, docp, xmlDocPtr);
-	intern = (xsl_object *)zend_object_store_get_object(id TSRMLS_CC);
+	DOM_GET_OBJ(doc, docp, xmlDocPtr, docobj);
+
 	if (intern->parameter) {
 		params = php_xsl_xslt_make_params(intern->parameter, 0 TSRMLS_CC);
 	}

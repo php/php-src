@@ -45,8 +45,9 @@ extern zend_module_entry xsl_module_entry;
 typedef struct _xsl_object {
 	zend_object  std;
 	void *ptr;
+	dom_ref_obj *document;
 	HashTable *prop_handler;
-	node_list_pointer *node_list;
+	zend_object_handle handle;
     HashTable *parameter;
 } xsl_object;
 

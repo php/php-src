@@ -127,9 +127,9 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->std.in_get = 0;
 	intern->std.in_set = 0;
 	intern->ptr = NULL;
-	intern->node_list = NULL;
 	intern->prop_handler = NULL;
 	intern->parameter = NULL;
+	intern->document = NULL;
 	
 	base_class = class_type;
 	while(base_class->type != ZEND_INTERNAL_CLASS && base_class->parent != NULL) {
@@ -144,6 +144,7 @@ zend_object_value xsl_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	ALLOC_HASHTABLE(intern->parameter);
 	zend_hash_init(intern->parameter, 0, NULL, ZVAL_PTR_DTOR, 0);
 	retval.handle = zend_objects_store_put(intern, xsl_objects_dtor, dom_objects_clone TSRMLS_CC);
+	intern->handle = retval.handle;
 	retval.handlers = &dom_object_handlers;
 	return retval;
 }
