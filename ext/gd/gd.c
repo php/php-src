@@ -1915,7 +1915,10 @@ PHP_FUNCTION(imagepsloadfont)
 		}
 	}
 
-	T1_LoadFont(f_ind);
+	if (T1_LoadFont(f_ind)) {
+		php_error(E_WARNING, "Couldn't load the font");
+		RETURN_FALSE;
+	}
 
 	font = (int *) emalloc(sizeof(int));
 	*font = f_ind;
@@ -2221,7 +2224,10 @@ PHP_FUNCTION(imagepstext)
 								 space, T1_KERNING, (*sz)->value.lval, transform);
 	}
 
-	if (T1_errno) RETURN_FALSE;
+	if (T1_errno) {
+		php_error(E_WARNING, "libt1 returned error %d", T1_errno);
+		RETURN_FALSE;
+	}
 
 	h_lines = str_img->metrics.ascent -  str_img->metrics.descent;
 	v_lines = str_img->metrics.rightSideBearing - str_img->metrics.leftSideBearing;
@@ -2239,6 +2245,7 @@ PHP_FUNCTION(imagepstext)
 	}
 
 	if (array_init(return_value) == FAILURE) {
+		php_error(E_WARNING, "Couldn't initialize array for returning bounding box");
 		RETURN_FALSE;
 	}
 
