@@ -3,7 +3,7 @@ PHP 4                                                                      NEWS
 ?? ??? 2002, Version 4.3.0
 - Fixed shuffle() to provide equal distribution of values. (Andrei)
 - Added --with-mysql-sock configure option which can be used to override
-  the unix socket location. (e.g. NFS compiles, etc.) (imajes)
+  the unix socket location. (e.g. NFS compiles, etc.) (James Cox)
 - Fixed is_a() to properly work on extension registered classes. (Andrei)
 - Added new constants: PHP_PREFIX and PHP_SHLIB_SUFFIX. (Stig)
 - Added STDIN, STDOUT and STDERR constants for CLI sapi reflecting opened
