@@ -51,11 +51,14 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
    <version>    The version to compare with
 '),
         'info' => array(
-            'summary'  => 'Information of an installed package',
+            'summary'  => 'Display information about a package',
             'function' => 'doInfo',
             'shortcut' => 'i',
             'options'  => array(),
-            'doc'      => '[package] Displays the information of an installed package'
+            'doc'      => '<pacakge>
+Displays information about a package. The package argument may be a
+local package file, an URL to a package file, or the name of an
+installed package.'
             )
         );
 
@@ -212,15 +215,84 @@ Tests if a package is installed in the system. Will exit(1) if it is not.
             return $this->raiseError("This command only accepts one param: ".
                                      "the package you want information");
         }
-        $package = $params[0];
-        $reg = &new PEAR_Registry($this->config->get('php_dir'));
-        if (!$reg->packageExists($package)) {
-            return $this->raiseError("The package $package is not installed");
+        if (@is_file($params[0])) {
+            $obj  = &new PEAR_Common();
+            $info = $obj->infoFromAny($params[0]);
+        } else {
+            $reg = &new PEAR_Registry($this->config->get('php_dir'));
+            $info = $reg->packageInfo($params[0]);
         }
-        $info = $reg->packageInfo($package);
-        include_once 'PEAR/Command/Package.php';
-        $data = &PEAR_Command_Package::_infoForDisplaying($info);
-        $this->ui->outputData($data, $command);
+        if (PEAR::isError($info)) {
+            return $info;
+        }
+        if (empty($info)) {
+            $this->ui->displayLine("Nothing found for `$params[0]'");
+            return;
+        }
+        unset($info['filelist']);
+        unset($info['changelog']);
+        $keys = array_keys($info);
+        $longtext = array('description', 'summary');
+        foreach ($keys as $key) {
+            if (is_array($info[$key])) {
+                switch ($key) {
+                    case 'maintainers': {
+                        $i = 0;
+                        $mstr = '';
+                        foreach ($info[$key] as $m) {
+                            if ($i++ > 0) {
+                                $mstr .= "\n";
+                            }
+                            $mstr .= $m['name'] . " <";
+                            if (isset($m['email'])) {
+                                $mstr .= $m['email'];
+                            } else {
+                                $mstr .= $m['handle'] . '@php.net';
+                            }
+                            $mstr .= "> ($m[role])";
+                        }
+                        $info[$key] = $mstr;
+                        break;
+                    }
+                    case 'release_deps': {
+                        $i = 0;
+                        $dstr = '';
+                        foreach ($info[$key] as $d) {
+                            if ($i++ > 0) {
+                                $dstr .= ", ";
+                            }
+                            if (isset($this->_deps_rel_trans[$d['rel']])) {
+                                $d['rel'] = $this->_deps_rel_trans[$d['rel']];
+                            }
+                            $dstr .= "$d[type] $d[rel]";
+                            if (isset($d['version'])) {
+                                $dstr .= " $d[version]";
+                            }
+                        }
+                        $info[$key] = $dstr;
+                        break;
+                    }
+                    default: {
+                        $info[$key] = implode(", ", $info[$key]);
+                        break;
+                    }
+                }
+            }
+            $info[$key] = trim($info[$key]);
+            if (in_array($key, $longtext)) {
+                $info[$key] = preg_replace('/  +/', ' ', $info[$key]);
+            }
+        }
+        $caption = 'About ' . $info['package'] . '-' . $info['version'];
+        $data = array(
+            'caption' => $caption,
+            'border' => true);
+        foreach ($info as $key => $value) {
+            $key = ucwords(str_replace('_', ' ', $key));
+            $data['data'][] = array($key, $value);
+        }
+
+        $this->ui->outputData($data, 'package-info');
     }
 
     // }}}
