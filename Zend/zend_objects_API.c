@@ -190,6 +190,20 @@ ZEND_API void *zend_object_store_get_object(zval *zobject TSRMLS_DC)
 	return EG(objects_store).object_buckets[handle].bucket.obj.object;
 }
 
+/* zend_object_store_set_object:
+ * It is ONLY valid to call this function from within the constructor of an
+ * overloaded object.  Its purpose is to set the object pointer for the object
+ * when you can't possibly know its value until you have parsed the arguments
+ * from the constructor function.  You MUST NOT use this function for any other
+ * weird games, or call it at any other time after the object is constructed.
+ * */
+ZEND_API void zend_object_store_set_object(zval *zobject, void *object TSRMLS_DC)
+{
+	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
+
+	EG(objects_store).object_buckets[handle].bucket.obj.object = object;
+}
+
 
 /* Proxy objects workings */
 typedef struct _zend_proxy_object {
