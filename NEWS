@@ -2,6 +2,8 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 200?, Version 4.0.5
+- Added iconv() function (using libc or libiconv) (Stig)
+- Added ODBC_TYPE constant (Stig)
 - Added the call_user_method_array function which allows you to call a method
   with an arbitrary number of parameters. (Sterling)
 - ext/odbc: IBM DB2 patch by Walter Franzini <walter@sys-net.it>
