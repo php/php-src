@@ -1,3 +1,78 @@
+2003-08-19  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * tests/lang/bug25145.phpt:
+      
+      Add test for #25145
+
+2003-08-19  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/mime_magic/mime_magic.c
+      ext/mime_magic/php_mime_magic.h:
+      Fixed bug #25155 (Possible namespace conflict between mime-magic & mssql)
+
+2003-08-19  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      MFH(r-1.189): more accurate fix for bug #25140
+
+    * ext/mbstring/mbstring.c:
+      More accurate fix for bug #25140
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Revert the last patch. This patch should not be included in the forthcoming
+      release.
+
+2003-08-19  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS:
+      Lets put this here when we really know its gonna be only in PHP 5
+
+2003-08-19  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c
+      ext/mbstring/tests/bug25140.phpt:
+      - MFH: Fix for bug #25140 (mb_convert_encoding returns FALSE when it tries
+      to
+        convert empty string)
+
+    * ext/mbstring/tests/bug25140.phpt:
+      
+      - Fix for bug #25140 (mb_convert_encoding returns FALSE when it tries to
+        convert empty string)
+
+    * NEWS
+      ext/mbstring/mbstring.c:
+      - Fix for bug #25140 (mb_convert_encoding returns FALSE when it tries to
+        convert empty string)
+
+    * ext/standard/parsedate.y:
+      - Back out Ilia's not-yet-ready patch.
+
+2003-08-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * main/main.c:
+      Unify TSRMLS_FETCH() usage.
+      Fix release build: two instances of } were placed inside #ifdef ZEND_DEBUG
+
+2003-08-19  Sascha Schumann  <sascha@schumann.cx>
+
+    * NEWS
+      NEWS
+      NEWS
+      NEWS:
+      dummy commit
+
+2003-08-19  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ZendEngine2/zend_execute.c
+      ext/dom/php_dom.c
+      ext/simplexml/simplexml.c
+      ext/xsl/php_xsl.c:
+      fix build
+
 2003-08-18  Wez Furlong  <wez.php@thebrainroom.net>
 
     * ext/standard/credits_ext.h:
