@@ -11,4 +11,3 @@
 #define USE_WIN32_NATIVE_THREAD 1
 #define ENABLE_THREADS 1
 
-#define strcasecmp(s1, s2) stricmp(s1, s2)
