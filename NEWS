@@ -442,8 +442,6 @@ PHP 4                                                                      NEWS
 - Made mime_magic and ZIP extensions available on Windows. (Edin)
 - Added xslt_backend_version() and xslt_backend_name() for getting
   information about the processor backend. (chregu)
-- Added php.ini option "allow_webdav_methods" to allow handling of
-  WebDAV http requests within PHP scripts. (chregu)
 - Added ImageColorMatch() and ImageLayerEffect() functions which are only 
   available when using the bundled GD library. (ttoohey)
 - Made major improvents to the pcntl extension. (Jason)
