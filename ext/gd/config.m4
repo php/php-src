@@ -49,6 +49,6 @@ if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
   fi
   AC_CHECK_LIB(ttf, TT_Open_Face)
   PHP_EXTENSION(gd)
-  LIBS="$LIBS $GD_LIBS"
-  INCLUDE="$INCLUDE $GD_INCLUDE"
+  EXTRA_LIBS="$EXTRA_LIBS $GD_LIBS"
+  INCLUDES="$INCLUDES $GD_INCLUDE"
 fi

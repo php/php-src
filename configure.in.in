@@ -5,6 +5,8 @@ divert(0)
 recurse=yes
 for arg in $@; do
 	case $arg in
+		## This is to prevent "./config.status --recheck" from
+		## running configure in libzend again.
 		--no-recursion) recurse=no;;
 		*) ;;
 	esac
@@ -332,7 +334,7 @@ AC_ARG_WITH(apxs,
 ])
 
 
-APACHE_INSTALL_FILES="$srcdir/mod_php3.* $srcdir/php_version.h libphp3.module $srcdir/libzend/libzend.a"
+APACHE_INSTALL_FILES="$srcdir/mod_php3.* $srcdir/php_version.h libphp3.module"
 
 
 AC_MSG_CHECKING(for Apache module support via DSO through APACI)
@@ -380,7 +382,7 @@ AC_ARG_WITH(shared-apache,
 	  fi
 	fi
     INCLUDES="$INCLUDES $APACHE_INCLUDE"
-dnl## AC_SUBST(APACHE_INCLUDE)
+    AC_SUBST(APACHE_INCLUDE)
 	AC_SUBST(APACHE_TARGET)
 	AC_SUBST(INSTALL_IT)
 	AC_SUBST(BINNAME)
@@ -840,6 +842,8 @@ AC_ARG_ENABLE(url-fopen-wrapper,
 
 
 divert(3)
+
+AC_SUBST(EXTRA_LIBS)
 
 # reading config stubs
 esyscmd(./scripts/config-stubs)

@@ -62,6 +62,6 @@ for archive in $in_archives; do
 	    ext_files="$ext_files $prefix$file"
 	done
     fi
-    ar vr $out_archive $ext_files
+    ar r $out_archive $ext_files
     rm -f $ext_files
 done
