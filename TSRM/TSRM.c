@@ -181,6 +181,7 @@ TSRM_API void tsrm_shutdown(void)
 #if defined(GNUPTH)
 	pth_kill();
 #elif defined(PTHREADS)
+	pthread_setspecific(tls_key, 0);
 	pthread_key_delete(tls_key);
 #elif defined(TSRM_WIN32)
 	TlsFree(tls_key);
