@@ -2,6 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.4
+- Fixed ext/java so that it will compile with SUN CC
 - Modified preg_grep() to always return the results with keys from the original
   array. (Andrei)
 - Modified preg_replace() to accept Perl-style $n backreferences in addition
