@@ -201,7 +201,7 @@ PHP_MSHUTDOWN_FUNCTION(pdf){
 	return SUCCESS;
 }
 
-/* {{{ proto pdf_set_info_creator(int info, string creator)
+/* {{{ proto bool pdf_set_info_creator(int info, string creator)
    Fills the creator field of the info structure */
 PHP_FUNCTION(pdf_set_info_creator) {
 	pval *arg1, *arg2;
@@ -229,7 +229,7 @@ PHP_FUNCTION(pdf_set_info_creator) {
 }
 /* }}} */
 
-/* {{{ proto pdf_set_info_title(int info, string title)
+/* {{{ proto bool pdf_set_info_title(int info, string title)
    Fills the title field of the info structure */
 PHP_FUNCTION(pdf_set_info_title) {
 	pval *arg1, *arg2;
@@ -257,7 +257,7 @@ PHP_FUNCTION(pdf_set_info_title) {
 }
 /* }}} */
 
-/* {{{ proto pdf_set_info_subject(int info, string subject)
+/* {{{ proto bool pdf_set_info_subject(int info, string subject)
    Fills the subject field of the info structure */
 PHP_FUNCTION(pdf_set_info_subject) {
 	pval *arg1, *arg2;
@@ -285,7 +285,7 @@ PHP_FUNCTION(pdf_set_info_subject) {
 }
 /* }}} */
 
-/* {{{ proto pdf_set_info_author(int info, string author)
+/* {{{ proto bool pdf_set_info_author(int info, string author)
    Fills the author field of the info structure */
 PHP_FUNCTION(pdf_set_info_author) {
 	pval *arg1, *arg2;
@@ -313,7 +313,7 @@ PHP_FUNCTION(pdf_set_info_author) {
 }
 /* }}} */
 
-/* {{{ proto pdf_set_info_keywords(int info, string keywords)
+/* {{{ proto bool pdf_set_info_keywords(int info, string keywords)
    Fills the keywords field of the info structure */
 PHP_FUNCTION(pdf_set_info_keywords) {
 	pval *arg1, *arg2;
@@ -733,7 +733,7 @@ PHP_FUNCTION(pdf_set_text_matrix) {
 /* }}} */
 
 /* {{{ proto void pdf_set_text_pos(int pdfdoc, double x, double y)
-   ??? */
+   Set the position of text for the next pdf_show call */
 PHP_FUNCTION(pdf_set_text_pos) {
 	pval *arg1, *arg2, *arg3;
 	int id, type;
