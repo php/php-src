@@ -203,12 +203,6 @@ static void _close_pgsql_link(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	PGconn *link = (PGconn *)rsrc->ptr;
 	PGresult *res;
 
-	PQsetnonblocking(link,1);
-	if (PQisBusy(link)) {
-		if (!PQrequestCancel(link)) {
-			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
-		}
-	}
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
@@ -224,12 +218,6 @@ static void _close_pgsql_plink(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	PGconn *link = (PGconn *)rsrc->ptr;
 	PGresult *res;
 
-	PQsetnonblocking(link,1);
-	if (PQisBusy(link)) {
-		if (!PQrequestCancel(link)) {
-			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
-		}
-	}
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
@@ -268,12 +256,7 @@ static int _rollback_transactions(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	link = (PGconn *) rsrc->ptr;
 	
-	PQsetnonblocking(link,0); /* Just in case */
-	if (PQisBusy(link)) {
-		if (!PQrequestCancel(link)) {
-			php_error(E_WARNING,"PostgreSQL: failed to cancel qeury. %s", PQerrorMessage(link));
-		}
-	}
+	PQsetnonblocking(link, 0);
 	while ((res = PQgetResult(link))) {
 		PQclear(res);
 	}
@@ -847,17 +830,13 @@ PHP_FUNCTION(pg_query)
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
 	convert_to_string_ex(query);
-	if (PQisBusy(pgsql)) {
-		php_error(E_NOTICE,"%s() cannot execute query while executing async query.",
-				  get_active_function_name(TSRMLS_C));
-		RETURN_FALSE;
-	}
+	PQsetnonblocking(pgsql, 0);
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 		leftover = 1;
 	}
 	if (leftover) {
-		php_error(E_WARNING,"%s() found results on this connection. Use pg_get_result() to get results",
+		php_error(E_NOTICE,"%s() found results on this connection. Use pg_get_result() to get results",
 				  get_active_function_name(TSRMLS_C));
 	}
 	pgsql_result = PQexec(pgsql, Z_STRVAL_PP(query));
@@ -2466,6 +2445,11 @@ void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 
+	if (PQsetnonblocking(pgsql, 1)) {
+		php_error(E_NOTICE,"%s() cannot set connection to nonblocking mode",
+				  get_active_function_name(TSRMLS_C));
+		RETURN_FALSE;
+	}
 	switch(entry_type) {
 		case PHP_PG_ASYNC_IS_BUSY:
 			PQconsumeInput(pgsql);
@@ -2482,6 +2466,10 @@ void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 		default:
 			php_error(E_ERROR,"Pgsql module error. Report this error");
 			break;
+	}
+	if (PQsetnonblocking(pgsql, 0)) {
+		php_error(E_NOTICE,"%s() cannot set connection to blocking mode",
+				  get_active_function_name(TSRMLS_C));
 	}
 	convert_to_boolean_ex(&return_value);
 }
@@ -2525,10 +2513,6 @@ PHP_FUNCTION(pg_send_query)
 	if (PQsetnonblocking(pgsql, 1)) {
 		php_error(E_NOTICE,"%s() cannot set connection to nonblocking mode",
 				  get_active_function_name(TSRMLS_C));
-	}
-	if (PQisBusy(pgsql)) {
-		php_error(E_WARNING,"%s() annot send multiple query",
-				  get_active_function_name(TSRMLS_C));
 		RETURN_FALSE;
 	}
 	while ((res = PQgetResult(pgsql))) {
@@ -2536,7 +2520,7 @@ PHP_FUNCTION(pg_send_query)
 		leftover = 1;
 	}
 	if (leftover) {
-		php_error(E_NOTICE,"%s() - There are results on this connection. Call pg_get_result() until it returns false",
+		php_error(E_NOTICE,"%s() - There are results on this connection. Call pg_get_result() until it returns FALSE",
 				  get_active_function_name(TSRMLS_C));
 	}
 	if (!PQsendQuery(pgsql, query)) {
@@ -2568,18 +2552,10 @@ PHP_FUNCTION(pg_get_result)
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	
-	if (PQsetnonblocking(pgsql, 1)) {
-		php_error(E_NOTICE,"%s() failed to set connection to nonblocking mode",
-				  get_active_function_name(TSRMLS_C));
-	}
 	pgsql_result = PQgetResult(pgsql);
 	if (!pgsql_result) {
 		/* no result */
 		RETURN_FALSE;
-	}
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error(E_NOTICE,"%s() failed to set connection to blocking mode",
-				  get_active_function_name(TSRMLS_C));
 	}
 	pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 	pg_result->conn = pgsql;
