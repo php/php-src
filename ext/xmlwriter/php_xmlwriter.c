@@ -59,12 +59,8 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_end_cdata,			NULL)
 	PHP_FE(xmlwriter_write_cdata,		NULL)
 	PHP_FE(xmlwriter_text,				NULL)
-#ifdef HAVE_XMLTEXTWRITERSTARTCOMMENT 
 	PHP_FE(xmlwriter_start_document,	NULL)
-#endif
-#ifdef HAVE_XMLTEXTWRITERENDCOMMENT 
 	PHP_FE(xmlwriter_end_document,		NULL)
-#endif
 	PHP_FE(xmlwriter_write_comment,		NULL)
 	PHP_FE(xmlwriter_start_dtd,			NULL)
 	PHP_FE(xmlwriter_end_dtd,			NULL)
@@ -72,6 +68,7 @@ static zend_function_entry xmlwriter_functions[] = {
 	PHP_FE(xmlwriter_start_dtd_element,	NULL)
 	PHP_FE(xmlwriter_end_dtd_element,	NULL)
 	PHP_FE(xmlwriter_output_memory,		NULL)
+	PHP_FE(xmlwriter_flush,				NULL)
 	{NULL, NULL, NULL}
 };
 
@@ -294,7 +291,7 @@ PHP_FUNCTION(xmlwriter_end_attribute)
 }
 /* }}} */
 
-#if LIBXML_VERSION >= 20616
+#if LIBXML_VERSION > 20617
 /* {{{ proto bool xmlwriter_start_attribute_ns(resource xmlwriter, string prefix, string name, string uri)
 Create start namespaced attribute - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_attribute_ns)
@@ -774,7 +771,7 @@ PHP_FUNCTION(xmlwriter_text)
 }
 /* }}} */
 
-#ifdef HAVE_XMLTEXTWRITERSTARTCOMMENT 
+#if LIBXML_VERSION >= 20607
 /* {{{ proto bool xmlwriter_start_comment(resource xmlwriter)
 Create start comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_start_comment)
@@ -801,9 +798,7 @@ PHP_FUNCTION(xmlwriter_start_comment)
 	RETURN_FALSE;
 }
 /* }}} */
-#endif /* HAVE_XMLTEXTWRITERSTARTCOMMENT */
 
-#ifdef HAVE_XMLTEXTWRITERENDCOMMENT 
 /* {{{ proto bool xmlwriter_end_comment(resource xmlwriter)
 Create end comment - returns FALSE on error */
 PHP_FUNCTION(xmlwriter_end_comment)
@@ -830,7 +825,8 @@ PHP_FUNCTION(xmlwriter_end_comment)
 	RETURN_FALSE;
 }
 /* }}} */
-#endif /* HAVE_XMLTEXTWRITERENDCOMMENT */
+#endif  /* LIBXML_VERSION >= 20607 */
+
 
 /* {{{ proto bool xmlwriter_write_comment(resource xmlwriter, string content)
 Write full comment tag - returns FALSE on error */
@@ -1353,34 +1349,54 @@ PHP_FUNCTION(xmlwriter_open_memory)
 }
 /* }}} */
 
-/* {{{ proto string xmlwriter_output_memory(resource xmlwriter [,bool flush])
-Output current buffer as string */
-PHP_FUNCTION(xmlwriter_output_memory)
-{
+static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) {
 	zval *pind;
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	xmlBufferPtr buffer;
-	zend_bool flush = 1;
+	zend_bool empty = 1;
+	int output_bytes;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &pind, &flush) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|b", &pind, &empty) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(intern,xmlwriter_object *, &pind, -1, "XMLWriter", le_xmlwriter);
 	ptr = intern->ptr;
-	buffer = intern->output;
 
-	if (ptr && buffer) {
-		xmlTextWriterFlush(ptr);
-		RETVAL_STRING(buffer->content, 1);
-		if (flush) {
-			xmlBufferEmpty(buffer);
+	if (ptr) {
+		buffer = intern->output;
+		if (force_string == 1 && buffer == NULL) {
+			RETURN_EMPTY_STRING();
+		}
+		output_bytes = xmlTextWriterFlush(ptr);
+		if (buffer) {
+			RETVAL_STRING(buffer->content, 1);
+			if (empty) {
+				xmlBufferEmpty(buffer);
+			}
+		} else {
+			RETVAL_LONG(output_bytes);
 		}
 		return;
 	}
 	
-	RETURN_EMPTY_STRING()
+	RETURN_EMPTY_STRING();
+}
+
+/* {{{ proto string xmlwriter_output_memory(resource xmlwriter [,bool flush])
+Output current buffer as string */
+PHP_FUNCTION(xmlwriter_output_memory)
+{
+	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+}
+/* }}} */
+
+/* {{{ proto mixed xmlwriter_flush(resource xmlwriter [,bool empty])
+Output current buffer */
+PHP_FUNCTION(xmlwriter_flush)
+{
+	php_xmlwriter_flush(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
