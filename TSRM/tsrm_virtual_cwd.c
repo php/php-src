@@ -332,6 +332,24 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		free(tmp);
 	}
 #endif
+#ifdef TSRM_WIN32
+	{
+		char *dummy;
+		char *new_path;
+		int new_path_length;
+  
+		new_path_length = GetFullPathName(path, 0, 0, &dummy) + 1;
+		new_path = (char *) malloc(new_path_length);
+		if (!new_path) {
+			return 1;
+		}
+		
+		GetFullPathName(path, new_path_length, new_path, &dummy);
+		free(path);
+		path = new_path;
+		path_length = new_path_length;
+	}
+#endif
 	free_path = path_copy = tsrm_strndup(path, path_length);
 
 	old_state = (cwd_state *) malloc(sizeof(cwd_state));
