@@ -444,7 +444,7 @@ PHP_FUNCTION(file_get_contents)
 }
 /* }}} */
 
-/* {{{ proto array file(string filename [, bool use_include_path])
+/* {{{ proto array file(string filename [, bool use_include_path [, bool include_new_line [, bool skip_blank_lines]]])
    Read entire file into an array */
 
 #define PHP_FILE_BUF_SIZE	80
@@ -1733,32 +1733,86 @@ PHPAPI PHP_FUNCTION(fseek)
 }
 
 /* }}} */
-/* {{{ proto bool mkdir(string pathname[, int mode])
+
+/* {{{ proto int mkdir(char *dir int mode)
+*/
+
+PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
+{
+	int ret;
+	
+	if (PG(safe_mode) && (!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		return -1;
+	}
+
+	if (php_check_open_basedir(dir TSRMLS_CC)) {
+		return -1;
+	}
+
+	if ((ret = VCWD_MKDIR(dir, (mode_t)mode)) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, strerror(errno));
+	}
+
+	return ret;	
+}
+/* }}} */
+
+/* {{{ proto bool mkdir(string pathname [, int mode [, bool recursive])
    Create a directory */
 PHP_FUNCTION(mkdir)
 {
 	int dir_len, ret;
 	long mode = 0777;
 	char *dir;
+	zend_bool recursive = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &dir, &dir_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lb", &dir, &dir_len, &mode, &recursive) == FAILURE) {
 		return;
 	}
 
-	if (PG(safe_mode) && (!php_checkuid(dir, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
+	if (!recursive) {
+		ret = php_mkdir(dir, mode);
+	} else {
+		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+		char *p, *e, *buf;
+		struct stat sb;
+		
+		buf = estrndup(dir, dir_len);
+		e = buf + dir_len;
+		
+		/* find a top level directory we need to create */
+		while ((p = strrchr(buf, DEFAULT_SLASH))) {
+			*p = '\0';
+			if (VCWD_STAT(buf, &sb) == 0) {
+				*p = DEFAULT_SLASH;
+				break;
+			}
+		}
+		if (p == buf) {
+			ret = php_mkdir(dir, mode);
+		} else if (!(ret = php_mkdir(buf, mode))) {
+			if (!p) {
+				p = buf;
+			}
+			/* create any needed directories if the creation of the 1st directory worked */
+			while (++p != e) {
+				if (*p == '\0' && *(p + 1) != '\0') {
+					*p = DEFAULT_SLASH;
+					if ((ret = VCWD_MKDIR(buf, (mode_t)mode)) < 0) {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, strerror(errno));
+						break;
+					}
+				}
+			}
+		}
+		efree(buf);
 	}
 
-	if (php_check_open_basedir(dir TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	ret = VCWD_MKDIR(dir, (mode_t)mode);
 	if (ret < 0) {
-		php_error_docref1(NULL TSRMLS_CC, dir, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
 	}
-	RETURN_TRUE;
 }
 /* }}} */
 
