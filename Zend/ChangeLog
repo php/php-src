@@ -1,3 +1,13 @@
+2002-03-14  Stanislav Malyshev  <stas@zend.com>
+
+    * OBJECTS2_HOWTO: more cleanup
+
+    * OBJECTS2_HOWTO: Update howto
+
+    * zend_execute.c: fix for delete $this and unset $this
+
+    * zend_execute_API.c: Fix call_user_function
+
 2002-03-12  Andi Gutmans  <andi@zend.com>
 
     * zend.h: - Forgot to close comment.

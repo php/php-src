@@ -1,3 +1,109 @@
+2002-03-14  Rasmus Lerdorf  <rasmus@php.net>
+
+    * main/safe_mode.c: MFH of safe_mode.c typo
+
+2002-03-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/var.c: - Fix bug #16078
+
+2002-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c: Change case for consistency
+
+    * ext/standard/info.c: MFH
+
+2002-03-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/safe_mode.c: fixed a typo within checkuid
+
+2002-03-14  Andi Gutmans  <andi@zend.com>
+
+    * main/config.w32.h:
+    - Define HAVE_ASSERT_H under Windows. There was a macro redefinition before
+    - this.
+
+2002-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * main/php_version.h
+      configure.in:
+    Good suggestion, but I'm not sure we want to start receiving bug
+    reports with that version
+
+2002-03-14  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/standard/var.c: fix buglet
+
+2002-03-14  Sterling Hughes  <sterling@bumblebury.com>
+
+    * main/php_version.h
+      configure.in: update version
+
+2002-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * configure.in
+      main/php_version.h: Childish, are we?
+
+2002-03-14  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in
+      main/php_version.h: - Fixed version
+
+2002-03-14  Zeev Suraski  <zeev@zend.com>
+
+    * ext/standard/info.c: Make it clearer what this entry means
+
+    * configure.in
+      main/php_version.h: Fix version number
+
+2002-03-14  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/xmlrpc/xmlrpc-epi-php.c: - Whitespace part 1
+
+2002-03-14  Stefan Esser  <s.esser@e-matters.de>
+
+    * ext/filepro/filepro.c: fixed: last commit had debug code in it
+
+    * ext/filepro/filepro.c: fixed whitespace
+    fixed lots of possible bufferoverflows
+    fixed memoryleak
+
+2002-03-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/README
+      sapi/apache2filter/sapi_apache2.c: MFH (Apache2Filter update).
+
+2002-03-14  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/standard/var.c: Fixed var_dump() crash when there is recursion.
+
+2002-03-14  Stefan Roehrich  <sr@linux.de>
+
+    * NEWS: Added NEWS entry for gzencode() change.
+
+    * NEWS: Fixed NEWS entry, make it consistent with other entries.
+
+2002-03-14  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * sapi/apache2filter/README:
+    Add note on which version of Apache 2 this SAPI module is compatible with.
+
+2002-03-14  Sean Bright  <elixer@erols.com>
+
+    * CODING_STANDARDS: Translate to English.
+
+2002-03-14  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * main/php.h
+      CODING_STANDARDS
+      configure.in: Include/enable assert.h/assert() when it is available
+
+2002-03-14  Jani Taskinen  <sniper@iki.fi>
+
+    * main/config.w32.h: MFH fix for the include_path issue
+
+    * main/config.w32.h:
+    - Fixed bug: #16047, #15865, and propably a few more..
+
 2002-03-13  Ludovico Magnocavallo  <ludo@sumatrasolutions.com>
 
     * pear/DB/ibase.php: fixed typo in modifyLimitQuery()
