@@ -94,11 +94,11 @@ void php_var_dump(zval **struc, int level TSRMLS_DC)
 		goto head_done;
 	case IS_OBJECT:
 		object = Z_OBJ_PP(struc);
+		myht = Z_OBJPROP_PP(struc);
 		if (myht->nApplyCount > 1) {
 			PUTS("*RECURSION*\n");
 			return;
 		}
-		myht = Z_OBJPROP_PP(struc);
 		php_printf("%sobject(%s)(%d) {\n", COMMON, Z_OBJCE_PP(struc)->name, zend_hash_num_elements(myht));
 head_done:
 		zend_hash_apply_with_arguments(myht, (apply_func_args_t) php_array_element_dump, 1, level);
