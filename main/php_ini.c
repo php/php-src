@@ -377,6 +377,6 @@ PHPAPI int cfg_get_string(char *varname, char **result)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
- * vim600: sw=4 ts=4 tw=78 fdm=marker
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */
