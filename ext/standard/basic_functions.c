@@ -294,6 +294,7 @@ function_entry basic_functions[] = {
 	{"setcookie",		php3_SetCookie,		NULL},
 	{"header",			php3_Header,		NULL},
 	PHP_FE(function_exists,				NULL)
+	PHP_FE(in_array,					NULL)
 	PHP_FE(extract,						NULL)
 
 	{NULL, NULL, NULL}
@@ -2182,6 +2183,50 @@ PHP_FUNCTION(function_exists)
 	}
 }
 
+/* }}} */
+
+
+/* {{{ proto bool in_array(array haystack, mixed needle)
+   Checks if the given value exists in the array */
+PHP_FUNCTION(in_array)
+{
+	zval *value,				/* value to check for */
+		 *array,				/* array to check in */
+		 **entry_ptr,			/* pointer to array entry */
+		 *entry,				/* actual array entry */
+		  res;					/* comparison result */
+	HashTable *target_hash;		/* array hashtable */
+
+	if (ARG_COUNT(ht) != 2 || getParameters(ht, 2, &value, &array) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	
+	if (value->type == IS_ARRAY || value->type == IS_OBJECT) {
+		zend_error(E_WARNING, "Wrong datatype for first argument in call to in_array()");
+		return;
+	}
+	
+	if (array->type != IS_ARRAY) {
+		zend_error(E_WARNING, "Wrong datatype for second argument in call to in_array()");
+		return;
+	}
+
+	target_hash = HASH_OF(array);
+	zend_hash_internal_pointer_reset(target_hash);
+	while(zend_hash_get_current_data(target_hash, (void **)&entry_ptr) == SUCCESS) {
+		entry = *entry_ptr;
+		if (entry->type == IS_STRING && entry->value.str.val == undefined_variable_string)
+			continue;
+     	is_equal_function(&res, value, entry);
+		if (zval_is_true(&res)) {
+			RETURN_TRUE;
+		}
+		
+		zend_hash_move_forward(target_hash);
+	}
+	
+	RETURN_FALSE;
+}
 /* }}} */
 
 
