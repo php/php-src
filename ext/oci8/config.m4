@@ -56,9 +56,13 @@ AC_ARG_WITH(oci8,
       ORACLE_INCLUDE=-I$ORACLEINST_TOP/rdbms/demo
     fi
 
+    if test -d "$ORACLEINST_TOP/rdbms/public"
+    then
+      ORACLE_INCLUDE="$ORACLE_INCLUDE -I$ORACLEINST_TOP/rdbms/public"
+    fi
+
     if test -d "$ORACLEINST_TOP/network/public"
     then
-      # V8
       ORACLE_INCLUDE="$ORACLE_INCLUDE -I$ORACLEINST_TOP/network/public"
     fi
 
