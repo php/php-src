@@ -516,8 +516,8 @@ ZEND_FUNCTION(defined)
 ZEND_FUNCTION(get_class)
 {
 	zval **arg;
-	char *name;
-	zend_uint name_len;
+	char *name = "";
+	zend_uint name_len = 0;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
@@ -535,11 +535,15 @@ ZEND_FUNCTION(get_class)
 			RETURN_FALSE;
 		}
 
-		name = ce->name;
-		name_len = ce->name_length;
-	}
+		if(ce->ns) {
+			zend_make_full_classname(ce, &name, &name_len);
+			RETURN_STRINGL(name, name_len, 0);
+		} else {
+			RETURN_STRINGL(ce->name, ce->name_length, 1);
+		}
+	} 
 
-	RETURN_STRINGL(name, name_len, 1);
+	RETURN_STRINGL(name, name_len, 0);
 }
 /* }}} */
 
@@ -550,20 +554,21 @@ ZEND_FUNCTION(get_parent_class)
 {
 	zval **arg;
 	zend_class_entry *ce = NULL;
+	char *name;
+	zend_uint name_length;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &arg)==FAILURE) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
 
 	if (Z_TYPE_PP(arg) == IS_OBJECT) {
-		char *name;
-		zend_uint name_length;
 
 		if (Z_OBJ_HT_PP(arg)->get_class_name
 			&& Z_OBJ_HT_PP(arg)->get_class_name(*arg, &name, &name_length, 1 TSRMLS_CC) == SUCCESS) {
-			RETURN_STRINGL(name, name_length, 1);
+			RETURN_STRINGL(name, name_length, 0);
 		} else if (Z_OBJ_HT_PP(arg)->get_class_entry && (ce = zend_get_class_entry(*arg TSRMLS_CC))) {
-			RETURN_STRINGL(ce->name, ce->name_length, 1);
+			zend_make_full_classname(ce, &name, &name_length);
+			RETURN_STRINGL(name, name_length, 0);
 		} else {
 			RETURN_FALSE;
 		}
@@ -578,7 +583,8 @@ ZEND_FUNCTION(get_parent_class)
 	}
 
 	if (ce && ce->parent) {
-		RETURN_STRINGL(ce->parent->name, ce->parent->name_length, 1);
+		zend_make_full_classname(ce->parent, &name, &name_length);
+		RETURN_STRINGL(name, name_length, 0);
 	} else {
 		RETURN_FALSE;
 	}
@@ -846,7 +852,7 @@ ZEND_FUNCTION(function_exists)
 {
 	zval **function_name;
 	zend_function *func;
-	char *lcname;
+	char *lcname, *func_name, *func_name_end;
 	zend_bool retval;
 	
 	if (ZEND_NUM_ARGS()!=1 || zend_get_parameters_ex(1, &function_name)==FAILURE) {
@@ -856,14 +862,45 @@ ZEND_FUNCTION(function_exists)
 	lcname = estrndup((*function_name)->value.str.val, (*function_name)->value.str.len);
 	zend_str_tolower(lcname, (*function_name)->value.str.len);
 
-	retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
+	func_name_end = lcname + (*function_name)->value.str.len;
+	if((func_name = zend_memnstr(lcname, "::", sizeof("::")-1, func_name_end)) == NULL) {
+		retval = (zend_hash_find(EG(function_table), lcname, (*function_name)->value.str.len+1, (void **)&func) == SUCCESS);
+	} else {
+		/* handle ::f case */
+		if (func_name == lcname) {
+			retval = (zend_hash_find(EG(function_table), lcname+sizeof("::")-1, (*function_name)->value.str.len-(sizeof("::")-1)+1, (void **)&func) == SUCCESS);
+		} else {
+			/* handle ns::f case */
+			int ns_name_length = func_name - lcname;
+			char *ns_name;
+			zend_namespace **ns;
+			
+			func_name += sizeof("::")-1;
+
+			if(func_name >= func_name_end) {
+				/* ns:: case */
+				retval = 0;
+			} else {
+				ns_name = estrndup(lcname, ns_name_length);
+
+				if (zend_hash_find(&EG(global_namespace_ptr)->class_table, ns_name, ns_name_length+1, (void **)&ns) == SUCCESS &&
+					CLASS_IS_NAMESPACE(*ns) && 
+					zend_hash_find(&(*ns)->function_table, func_name, func_name_end - func_name + 1, (void **)&func) == SUCCESS) {
+					retval = 1;
+				} else {
+					retval = 0;
+				}
+				efree(ns_name);
+			}
+		}
+	}
 	efree(lcname);
 
 	/*
 	 * A bit of a hack, but not a bad one: we see if the handler of the function
 	 * is actually one that displays "function is disabled" message.
 	 */
-	if (retval &&
+	if (retval && func->type == ZEND_INTERNAL_FUNCTION &&
 		func->internal_function.handler == zif_display_disabled_function) {
 		retval = 0;
 	}

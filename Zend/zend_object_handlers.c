@@ -795,18 +795,19 @@ zend_class_entry *zend_std_object_get_class(zval *object TSRMLS_DC)
 int zend_std_object_get_class_name(zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	zend_object *zobj;
+	zend_class_entry *ce;
 	zobj = Z_OBJ_P(object);
 
 	if (parent) {
 		if (!zobj->ce->parent) {
 			return FAILURE;
 		}
-		*class_name = zobj->ce->parent->name;
-		*class_name_len = zobj->ce->parent->name_length;
+		ce = zobj->ce->parent;
 	} else {
-		*class_name = zobj->ce->name;
-		*class_name_len = zobj->ce->name_length;
+		ce = zobj->ce;
 	}
+
+	zend_make_full_classname(ce, class_name, class_name_len);
 	return SUCCESS;
 }
 
