@@ -520,6 +520,8 @@ static char *substring_conf(char *start, int len, char quote TSRMLS_DC)
 			} else {
 				*resp++ = start[i];
 			}
+#else
+			*resp++ = start[i];
 #endif
 		}
 	}
