@@ -1,3 +1,105 @@
+2003-12-10  Christian Stocker  <chregu@phant.ch>
+
+    * ext/xsl/php_xsl.c:
+      fix crashes when you call php:functionString() with a
+      non-string handler (by adam)
+
+2003-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/exif/exif.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Fixed ZTS build.
+
+2003-12-10  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/html.c:
+      - Test before commit - test before commit
+
+2003-12-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * NEWS:
+      oops.
+
+    * NEWS:
+      NFN
+
+2003-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_oo_027.phpt:
+      The changes() method should be that of the database object not that of
+      a result.
+      Added a test case for this bug.
+
+2003-12-10  Derick Rethans  <php@derickrethans.nl>
+
+    * ext/standard/html.c:
+      - Added support for MacRoman encoding to htmlentities(). (Marcus Bointon)
+
+2003-12-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c
+      ext/mbstring/mbstring.c:
+      Eliminate compiler warnings.
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.dsp:
+      DOS line endings...
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.dsp:
+      Fix win32 build.
+
+2003-12-10  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/parsedate.y:
+      MFH: Fixed bug #26565 (strtotime("this month") resolving to the wrong
+      month)
+
+    * ext/standard/parsedate.y:
+      Fixed bug #26565 (strtotime("this month") resolving to the wrong month)
+
+2003-12-10  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_execute_API.c:
+      Do not double copy the string
+
+2003-12-10  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli.c:
+      freeing result and stmt properties in MSHUTDOWN
+
+2003-12-10  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/ftp_fopen_wrapper.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Fix bug #26574 (basename() doesn't work properly with multibyte characters)
+
+    * ext/standard/file.c
+      ext/standard/php_string.h:
+      Expose the macro globally
+
+    * ext/standard/string.c:
+      Fix typo.
+
+2003-12-10  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_025.phpt:
+      Fixed a crash in SQLite when fetching data using sqlite_fetch_object() in
+      a loop.
+
+2003-12-10  Wez Furlong  <wez.php@thebrainroom.net>
+
+    * ext/bcmath/config.w32:
+      consistency with unix build....
+
 2003-12-09  Jani Taskinen  <jani.taskinen@kolumbus.fi>
 
     * ZendEngine2/zend_operators.c
