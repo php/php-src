@@ -64,9 +64,7 @@ PHP_FUNCTION(stream_socket_client)
 		RETURN_FALSE;
 	}
 	
-	if (zcontext) {
-		context = decode_context_param(zcontext TSRMLS_CC);
-	}
+	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (flags & PHP_STREAM_CLIENT_PERSISTENT) {
 		spprintf(&hashkey, 0, "stream_socket_client__%s", host);
@@ -149,9 +147,7 @@ PHP_FUNCTION(stream_socket_server)
 		RETURN_FALSE;
 	}
 	
-	if (zcontext) {
-		context = decode_context_param(zcontext TSRMLS_CC);
-	}
+	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (zerrno)	{
 		zval_dtor(zerrno);
@@ -698,15 +694,19 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
 {
 	php_stream_context *context = NULL;
 
-	context = zend_fetch_resource(&contextresource TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	context = zend_fetch_resource(&contextresource TSRMLS_CC, -1, NULL, NULL, 1, php_le_stream_context());
 	if (context == NULL) {
 		php_stream *stream;
 
-		php_stream_from_zval_no_verify(stream, &contextresource);
+		stream = zend_fetch_resource(&contextresource TSRMLS_CC, -1, NULL, NULL, 2, php_file_le_stream(), php_file_le_pstream);
 
 		if (stream) {
 			context = stream->context;
 			if (context == NULL) {
+				/* Only way this happens is if file is opened with NO_DEFAULT_CONTEXT
+				   param, but then something is called which requires a context.
+				   Don't give them the default one though since they already said they
+	 			   didn't want it. */
 				context = stream->context = php_stream_context_alloc();
 			}
 		}
@@ -727,7 +727,10 @@ PHP_FUNCTION(stream_context_get_options)
 		RETURN_FALSE;
 	}
 	context = decode_context_param(zcontext TSRMLS_CC);
-	ZEND_VERIFY_RESOURCE(context);
+	if (!context) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		RETURN_FALSE;
+	}
 
 	*return_value = *context->options;
 	zval_copy_ctor(return_value);
@@ -756,7 +759,10 @@ PHP_FUNCTION(stream_context_set_option)
 
 	/* figure out where the context is coming from exactly */
 	context = decode_context_param(zcontext TSRMLS_CC);
-	ZEND_VERIFY_RESOURCE(context);
+	if (!context) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		RETURN_FALSE;
+	}
 
 	if (options) {
 		/* handle the array syntax */
@@ -780,7 +786,10 @@ PHP_FUNCTION(stream_context_set_params)
 	}
 
 	context = decode_context_param(zcontext TSRMLS_CC);
-	ZEND_VERIFY_RESOURCE(context);
+	if (!context) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid stream/context parameter.");
+		RETURN_FALSE;
+	}
 
 	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
 }
