@@ -293,12 +293,13 @@ static PHP_FUNCTION(com_method_handler)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-static union _zend_function *com_method_get(zval *object, char *name, int len TSRMLS_DC)
+static union _zend_function *com_method_get(zval **object_ptr, char *name, int len TSRMLS_DC)
 {
 	zend_internal_function f, *fptr = NULL;
 	php_com_dotnet_object *obj;
 	union _zend_function *func;
 	DISPID dummy;
+	zval *object = *object_ptr;
 
 	obj = CDNO_FETCH(object);
 
