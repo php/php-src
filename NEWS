@@ -20,6 +20,13 @@ PHP 4                                                                      NEWS
 - Moved extensions to PECL (http://pear.php.net/): (James, Derick)
   . ext/vpopmail
   . ext/cybermut
+- Fixed bug #20785 (crash when using pdf_open_memory_image() to load a
+  true-color image). (Ilia)
+- Fixed a crash when converting between true-color images (peg/jpeg) and
+  gd1/gd2 image formats, png/jpeg -> gd1/gd2 -> png/jpeg conversion now
+  works correctly. (Ilia, (Pierre-Alain Joye).
+- Fixed a memory leak in the bundled GD library inside 
+  gdImageTrueColorToPalette(). (Ilia)
 - Fixed bug #12776 (array_walk crash). (Moriyoshi)
 - Fixed bugs #20270, #15702, #18600 (segfaults in ext/java). (Tony J. White)
 - Fixed bug #19566 (get_declared_classes() segfaults). (Moriyoshi, Marcus, Andi)
