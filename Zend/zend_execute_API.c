@@ -325,7 +325,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 	for (i=0; i<param_count; i++) {
 		params_array[i] = &params[i];
 	}
-	ex_retval = call_user_function_ex(function_table, object, function_name, &local_retval_ptr, param_count, params_array, 1);
+	ex_retval = call_user_function_ex(function_table, object, function_name, &local_retval_ptr, param_count, params_array, 1, NULL);
 	if (local_retval_ptr) {
 		COPY_PZVAL_TO_ZVAL(*retval_ptr, local_retval_ptr);
 	} else {
@@ -336,7 +336,7 @@ int call_user_function(HashTable *function_table, zval *object, zval *function_n
 }
 
 
-int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation)
+int call_user_function_ex(HashTable *function_table, zval *object, zval *function_name, zval **retval_ptr_ptr, int param_count, zval **params[], int no_separation, HashTable *symbol_table)
 {
 	int i;
 	zval **original_return_value;
@@ -417,8 +417,12 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 
 	if (function_state.function->type == ZEND_USER_FUNCTION) {
 		calling_symbol_table = EG(active_symbol_table);
-		ALLOC_HASHTABLE(EG(active_symbol_table));
-		zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+		if (symbol_table) {
+			EG(active_symbol_table) = symbol_table;
+		} else {
+			ALLOC_HASHTABLE(EG(active_symbol_table));
+			zend_hash_init(EG(active_symbol_table), 0, NULL, ZVAL_PTR_DTOR, 0);
+		}
 		if (object) {
 			zval *dummy, **this_ptr;
 
@@ -434,8 +438,10 @@ int call_user_function_ex(HashTable *function_table, zval *object, zval *functio
 		EG(active_op_array) = (zend_op_array *) function_state.function;
 		original_opline_ptr = EG(opline_ptr);
 		zend_execute(EG(active_op_array) ELS_CC);
-		zend_hash_destroy(EG(active_symbol_table));		
-		FREE_HASHTABLE(EG(active_symbol_table));
+		if (!symbol_table) {
+			zend_hash_destroy(EG(active_symbol_table));
+			FREE_HASHTABLE(EG(active_symbol_table));
+		}
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
 		EG(return_value_ptr_ptr)=original_return_value;
