@@ -199,11 +199,11 @@ PHP_FUNCTION(srand)
 		WRONG_PARAM_COUNT;
 	}
 	convert_to_long_ex(arg);
-#ifdef HAVE_SRAND48
-	srand48((unsigned int) (*arg)->value.lval);
-#else
 #ifdef HAVE_SRANDOM
 	srandom((unsigned int) (*arg)->value.lval);
+#else
+#ifdef HAVE_SRAND48
+	srand48((unsigned int) (*arg)->value.lval);
 #else
 	srand((unsigned int) (*arg)->value.lval);
 #endif
@@ -253,11 +253,11 @@ PHP_FUNCTION(rand)
 	}
 			
 	return_value->type = IS_LONG;
-#ifdef HAVE_LRAND48
-	return_value->value.lval = lrand48();
-#else
 #ifdef HAVE_RANDOM
 	return_value->value.lval = random();
+#else
+#ifdef HAVE_LRAND48
+	return_value->value.lval = lrand48();
 #else
 	return_value->value.lval = rand();
 #endif

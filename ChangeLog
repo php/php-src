@@ -1,3 +1,10 @@
+2001-02-06  Jim Jagielski  <jim@jaguNET.com>
+
+    * ext/standard/array.c:
+      ext/standard/crypt.c:
+      ext/standard/rand.c:
+    Prefer the random() family over the *rand48() one
+
 2001-02-05  Zeev Suraski  <zeev@zend.com>
 
     * ext/com/typedef_VARIANT.c
