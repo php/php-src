@@ -1,3 +1,83 @@
+2003-10-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      configure.in
+      main/php_version.h:
+      Next is beta3..
+
+2003-10-30  Zak Greant  <zak@mysql.com>
+
+    * ext/mysqli/mysqli.c:
+      Ensure that INI entries are unregistered on shutdown
+
+2003-10-30  Georg Richter  <phpinfo@t-online.de>
+
+    * ext/mysqli/mysqli_api.c:
+      changed return value from long to boolean for mysql_execute
+
+2003-10-30  Stanislav Malyshev  <stas@zend.com>
+
+    * ZendEngine2/zend_compile.c:
+      make CATCH opcode use "class" T like other opcodes do - via IS_CONST
+
+2003-10-30  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Typo
+
+2003-10-30  Christian Stocker  <chregu@phant.ch>
+
+    * (php_5_0_0b2)
+      ext/dom/tests/dom005.phpt:
+      make test work with libxml2 2.6.x and lower
+      (I used lowercase html again in the EXPECT part, as this is now the
+      default
+      behaviour for newer libxml2 releases)
+
+2003-10-30  Andi Gutmans  <andi@zend.com>
+
+    * (php_5_0_0b2)
+      configure.in
+      ZendEngine2/ZEND_CHANGES
+      main/php_version.h:
+      - Beta 2
+
+    * (php_5_0_0b2)
+      win32/php4dllts.dsp:
+      - Move uuencode to the right place (ext/standard)
+
+    * (php_5_0_0b2)
+      TSRM/tsrm_virtual_cwd.c:
+      - Don't fix include_once() case sensitivity problem for beta 2.
+      - I suggest discussing to stop supporting win95 and NT 4 in our binary
+      - distributions and change the code to #ifdef.
+
+    * (php_5_0_0b2)
+      NEWS:
+      - Go with beta 2
+
+2003-10-30  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS:
+      fixes are fixes..
+
+    * NEWS:
+      Remove bogus entry
+
+2003-10-30  Uwe Schindler  <uwe@thetaphi.de>
+
+    * (PHP_4_3)
+      ext/mbstring/mbstring.c:
+      Fix ZTS build #2
+
+2003-10-30  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/php_string.h
+      ext/standard/string.c:
+      Added substr_compare().
+
 2003-10-29  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
 
     * ext/standard/file.c:
