@@ -85,7 +85,7 @@ if test "$PHP_PDFLIB" != "no"; then
 
   case $PHP_PDFLIB in
     yes)
-      PHP_CHECK_LIBRARY(pdf, PDF_show_boxed, [
+      AC_CHECK_LIB(pdf, PDF_show_boxed, [
         AC_DEFINE(HAVE_PDFLIB,1,[ ])
         PHP_ADD_LIBRARY(pdf,, PDFLIB_SHARED_LIBADD)
       ],[
@@ -94,8 +94,6 @@ PDFlib extension requires at least pdflib 3.x. You may also need libtiff, libjpe
 Use the options --with-tiff-dir=<DIR>, --with-jpeg-dir=<DIR>, --with-png-dir=<DIR> and --with-zlib-dir=<DIR>
 See config.log for more information.
 ])
-      ],[
-        -ltiff -ljpeg -lpng -lz
       ])
     ;;
     *)
