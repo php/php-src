@@ -215,7 +215,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
 	if (info->fp && info->fp!=info->lock.fp) php_stream_close(info->fp);
 	if (info->lock.fd) {
 		php_flock(info->lock.fd, LOCK_UN);
-		close(info->lock.fd);
+		/*close(info->lock.fd);*/
 		info->lock.fd = 0;
 	}
 	if (info->lock.fp) php_stream_close(info->lock.fp);
@@ -417,6 +417,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 *
 	 * d: force lock on database file
 	 * l: force lock on lck file
+	 * -: ignore locking
 	 *
 	 * t: test open database, warning if locked
 	 */
@@ -440,6 +441,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	} else {
 		lock_flag = (hptr->flags&DBA_LOCK_ALL);
+		lock_dbf = 1;
 	}
 	switch (*pmode++) {
 		case 'r': 
@@ -526,9 +528,20 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			lock_file_mode = file_mode;
 		} else {
 			spprintf(&info->lock.name, 0, "%s.lck", info->path);
-			lock_file_mode = "a+b";
+			if (!strcmp(file_mode, "r")) {
+				/* when in read only mode try to use existing .lck file first */
+				/* do not log errors for .lck file while in read ony mode on .lck file */
+			lock_file_mode = "rb";
+				info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 		}
-		info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+			if (!info->lock.fp) {
+				/* when not in read mode or failed to open .lck file read only. now try again in create(write) mode and log errors */
+			lock_file_mode = "a+b";
+			}
+		}
+		if (!info->lock.fp) {
+			info->lock.fp = php_stream_open_wrapper(info->lock.name, lock_file_mode, STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
+		}
 		if (!info->lock.fp) {
 			dba_close(info TSRMLS_CC);
 			/* stream operation already wrote an error message */
@@ -797,4 +810,3 @@ PHP_FUNCTION(dba_list)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
