@@ -18,7 +18,7 @@ AC_ARG_WITH(thttpd,
     echo 'PHP_LIBS = -L. -lphp4 \$(PHP_LIBS) \$(EXTRA_LIBS)' > $THTTPD/php_makefile; \
     echo 'PHP_LDFLAGS = \$(NATIVE_RPATHS) \$(PHP_LDFLAGS)' >> $THTTPD/php_makefile; \
     echo 'PHP_CFLAGS = \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(CPPFLAGS) \$(EXTRA_CFLAGS)' >> $THTTPD/php_makefile; \
-    rm -f $THTTPD/php_thttpd.c $THTTPD/thttpd.c $THTTPD/libphp4.a; \
+    rm -f $THTTPD/php_thttpd.c $THTTPD/php_thttpd.h $THTTPD/libphp4.a; \
     \$(LN_S) $abs_srcdir/sapi/thttpd/thttpd.c $THTTPD/php_thttpd.c; \
     \$(LN_S) $abs_srcdir/sapi/thttpd/php_thttpd.h $abs_builddir/$SAPI_STATIC $THTTPD/;\
     test -f $THTTPD/php_patched || \
