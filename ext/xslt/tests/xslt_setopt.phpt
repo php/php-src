@@ -1,5 +1,5 @@
 --TEST--
-xslt_set_opt function and public entities
+xslt_setopt function and public entities
 --SKIPIF--
 <?php
 include("skipif.inc");
