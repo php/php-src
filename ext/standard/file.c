@@ -417,7 +417,7 @@ PHP_FUNCTION(get_meta_tags)
 
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path])
+/* {{{ proto string file_get_contents(string filename [[, bool use_include_path], resource context])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -427,16 +427,22 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	int len, newlen;
+	zval *zcontext = NULL;
+	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
-							  &filename, &filename_len, &use_include_path) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|br!",
+				  &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
 		return;
 	}
 
-	stream = php_stream_open_wrapper(filename, "rb", 
-			(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
-			NULL);
+	if (zcontext) {
+		context = zend_fetch_resource(&zcontext TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
+	}
+
+	stream = php_stream_open_wrapper_ex(filename, "rb", 
+				(use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS,
+				NULL, context);
 	if (!stream) {
 		RETURN_FALSE;
 	}
