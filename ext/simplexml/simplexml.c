@@ -177,7 +177,7 @@ next_iter:
 	if (counter == 1) {
 		SEPARATE_ZVAL(&value);
 		zval_dtor(return_value);
-		FREE_ZVAL(return_value);
+		FREE_ZVAL(return_value); 
 		return_value = value;
 	}
 
@@ -715,7 +715,7 @@ sxe_class_name_get(zval *object, char **class_name, zend_uint *class_name_len, i
 
 /* {{{ cast_object()
  */
-static inline void
+static void
 cast_object(zval *object, int type, char *contents TSRMLS_DC)
 {
 	if (contents) {
@@ -727,7 +727,8 @@ cast_object(zval *object, int type, char *contents TSRMLS_DC)
 
 	switch (type) {
 		case IS_STRING:
-			return;
+			convert_to_string(object);
+			break;
 		case IS_BOOL:
 			convert_to_boolean(object);
 			break;
@@ -762,9 +763,8 @@ sxe_object_cast(zval *readobj, zval *writeobj, int type, int should_free TSRMLS_
 	}
 
 	if (sxe->node) {
-		contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->children, 1);
-		if (!xmlIsBlankNode(sxe->node->children) && contents) {
-			cast_object(writeobj, type, NULL TSRMLS_CC);
+		if (sxe->node->children) {
+			contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->children, 1);
 		}
 	} 
 
