@@ -34,7 +34,8 @@ HEADER_DIRS = \
 	main/streams \
 	ext/mbstring \
 	ext/pgsql \
-	regex
+	regex \
+	ext/sqlite/libsqlite/src
 
 install-headers:
 	-@for i in $(HEADER_DIRS); do \
