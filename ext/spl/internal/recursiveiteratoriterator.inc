@@ -46,6 +46,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	{
 		while ($this->count) {
 			unset($this->ait[$this->count--]);
+			$this->endChildren();
 		}
 		$this->ait[0]->rewind();
 		$this->ait[0]->recursed = false;
@@ -62,6 +63,7 @@ class RecursiveIteratorIterator implements OuterIterator
 				return true;
 			}
 			$count--;
+			$this->endChildren();
 		}
 		return false;
 	}
@@ -98,7 +100,8 @@ class RecursiveIteratorIterator implements OuterIterator
 						$this->ait[++$this->count] = $sub;
 						if (!$sub instanceof RecursiveIterator) {
 							throw new Exception(get_class($sub).'::getChildren() must return an object that implements RecursiveIterator');
-						} 
+						}
+						$this->beginChildren();
 						return;
 					}
 					unset($sub);
@@ -113,6 +116,7 @@ class RecursiveIteratorIterator implements OuterIterator
 			if ($this->count) {
 				unset($this->ait[$this->count--]);
 				$it = $this->ait[$this->count];
+				$this->endChildren();
 			}
 		}
 	}
@@ -141,6 +145,18 @@ class RecursiveIteratorIterator implements OuterIterator
 	function getDepth()
 	{
 		return $this->level;
+	}
+	
+	/** Called right after calling getChildren()
+	 */
+	function beginChildren()
+	{
+	}
+	
+	/** Called after current child iterator is invalid
+	 */
+	function endChildren()
+	{
 	}
 }
 
