@@ -64,6 +64,8 @@ function_entry php3_ftp_functions[] = {
 	PHP_FE(ftp_fput,			NULL)
 	PHP_FE(ftp_size,			NULL)
 	PHP_FE(ftp_mdtm,			NULL)
+	PHP_FE(ftp_rename,			NULL)
+	PHP_FE(ftp_delete,			NULL)
 	PHP_FE(ftp_quit,			NULL)
 	{NULL, NULL, NULL}
 };
@@ -711,6 +713,66 @@ PHP_FUNCTION(ftp_mdtm)
 
 	/* get file mod time */
 	RETURN_LONG(ftp_mdtm(ftp, arg2->value.str.val));
+}
+/* }}} */
+
+/* {{{ proto int ftp_rename(int stream, string src, string dest)
+   Renames the given file to a new path */
+PHP_FUNCTION(ftp_rename)
+{
+	pval		*arg1, *arg2, *arg3;
+	ftpbuf_t	*ftp;
+
+	/* arg1 - ftp
+	 * arg2 - src
+	 * arg3 - dest
+	 */
+	if (	ARG_COUNT(ht) != 3 ||
+		getParameters(ht, 3, &arg1, &arg2, &arg3) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_string(arg2);
+	convert_to_string(arg3);
+
+	/* rename the file */
+	if (!ftp_rename(ftp, arg2->value.str.val, arg3->value.str.val)) {
+		php_error(E_WARNING, "ftp_rename: %s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto int ftp_delete(int stream, string path)
+   Deletes a file */
+PHP_FUNCTION(ftp_delete)
+{
+	pval		*arg1, *arg2;
+	ftpbuf_t	*ftp;
+
+	/* arg1 - ftp
+	 * arg2 - path
+	 */
+	if (	ARG_COUNT(ht) != 2 ||
+		getParameters(ht, 2, &arg1, &arg2) == FAILURE)
+	{
+		WRONG_PARAM_COUNT;
+	}
+
+	FTPBUF(ftp, arg1);
+	convert_to_string(arg2);
+
+	/* delete the file */
+	if (!ftp_delete(ftp, arg2->value.str.val)) {
+		php_error(E_WARNING, "ftp_delete: %s", ftp->inbuf);
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 

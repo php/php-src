@@ -632,6 +632,38 @@ ftp_mdtm(ftpbuf_t *ftp, const char *path)
 }
 
 
+int
+ftp_delete(ftpbuf_t *ftp, const char *path)
+{
+	if (ftp == NULL)
+		return 0;
+
+	fprintf(ftp->fp, "DELE %s\r\n", path);
+	if (!ftp_getresp(ftp) || ftp->resp != 250)
+		return 0;
+
+	return 1;
+}
+
+
+int
+ftp_rename(ftpbuf_t *ftp, const char *src, const char *dest)
+{
+	if (ftp == NULL)
+		return 0;
+
+	fprintf(ftp->fp, "RNFR %s\r\n", src);
+	if (!ftp_getresp(ftp) || ftp->resp != 350)
+		return 0;
+
+	fprintf(ftp->fp, "RNTO %s\r\n", dest);
+	if (!ftp_getresp(ftp) || ftp->resp != 250)
+		return 0;
+
+	return 1;
+}
+
+
 /* static functions */
 
 databuf_t*
