@@ -1889,7 +1889,7 @@ PHP_FUNCTION(ini_restore)
 
 	convert_to_string_ex(varname);
 
-	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len, PHP_INI_STAGE_RUNTIME);
+	php_restore_ini_entry((*varname)->value.str.val, (*varname)->value.str.len+1, PHP_INI_STAGE_RUNTIME);
 }
 /* }}} */
 
