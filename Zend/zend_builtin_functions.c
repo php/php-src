@@ -634,7 +634,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 
 /* {{{ proto bool is_subclass_of(object object, string class_name)
-    Returns true if the object has this class as one of its parents */
+   Returns true if the object has this class as one of its parents */
 ZEND_FUNCTION(is_subclass_of)
 {
 	is_a_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
@@ -964,7 +964,7 @@ ZEND_FUNCTION(set_error_handler)
 	}
 	ALLOC_ZVAL(EG(user_error_handler));
 
-    if (!zend_is_true(*error_handler)) { /* unset user-defined handler */
+	if (!zend_is_true(*error_handler)) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_error_handler));
 		EG(user_error_handler) = NULL;
 		RETURN_TRUE;
@@ -1066,9 +1066,9 @@ static int copy_class_name(zend_class_entry **pce, int num_args, va_list args, z
    Returns an array of all declared classes. */
 ZEND_FUNCTION(get_declared_classes)
 {
-    if (ZEND_NUM_ARGS() != 0) {
-        ZEND_WRONG_PARAM_COUNT();
-    }
+	if (ZEND_NUM_ARGS() != 0) {
+		ZEND_WRONG_PARAM_COUNT();
+	}
 	array_init(return_value);
 	zend_hash_apply_with_arguments(EG(class_table), (apply_func_args_t) copy_class_name, 1, return_value);
 }
@@ -1135,8 +1135,8 @@ ZEND_FUNCTION(get_defined_vars)
 	
 	array_init(return_value);
 	
-    zend_hash_copy(return_value->value.ht, EG(active_symbol_table),
-                   (copy_ctor_func_t)zval_add_ref, &tmp, sizeof(zval *));
+	zend_hash_copy(return_value->value.ht, EG(active_symbol_table),
+					(copy_ctor_func_t)zval_add_ref, &tmp, sizeof(zval *));
 }
 /* }}} */
 
@@ -1453,7 +1453,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 			}
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
 				if (arg_stack_consistent && (frames_on_stack > 0)) {
-				    arg_array = debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC);
+					arg_array = debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC);
 					frames_on_stack--;
 				}
 			}	
