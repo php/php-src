@@ -20,42 +20,54 @@
 
 #if HAVE_SABLOT
 
+/* Sablotron Includes */
 #include <sablot.h>
+
+/* Standard Includes */
 #include <string.h>
-#include <stdarg.h>
+
+/* PHP Includes */
 #include "ext/standard/php_output.h"
 #include "php_sablot.h"
 
 /* Functions related to PHP's list handling */
-static void _php_sablot_free_processor(php_sablot *handle);
+static void _php_sablot_free_processor(php_sablot *);
 
 /* SAX Handlers */
-static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval **second_func, zval **indiv_handlers);
-static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval **args, char *function_name);
-static SAX_RETURN _php_sablot_sax_startDoc(void *userData);
-static SAX_RETURN _php_sablot_sax_startElement(void *userData, const char *name, const char **attributes);
-static SAX_RETURN _php_sablot_sax_endElement(void *userData, const char *name);
-static SAX_RETURN _php_sablot_sax_startNamespace(void *userData, const char *prefix, const char *uri);
-static SAX_RETURN _php_sablot_sax_endNamespace(void *userData, const char *prefix);
-static SAX_RETURN _php_sablot_sax_comment(void *userData, const char *contents);
-static SAX_RETURN _php_sablot_sax_PI(void *userData, const char *target, const char *contents);
-static SAX_RETURN _php_sablot_sax_characters(void *userData, const char *contents, int length);
-static SAX_RETURN _php_sablot_sax_endDoc(void *userData);
+static void _php_sablot_handler_pair(php_sablot *, zval **, zval **, zval **);
+static void _php_sablot_call_handler_function(zval *, int, zval **, char *);
+static SAX_RETURN _php_sablot_sax_startDoc(void *);
+static SAX_RETURN _php_sablot_sax_startElement(void *, const char *, const char **);
+static SAX_RETURN _php_sablot_sax_endElement(void *, const char *);
+static SAX_RETURN _php_sablot_sax_startNamespace(void *, const char *, const char *);
+static SAX_RETURN _php_sablot_sax_endNamespace(void *, const char *);
+static SAX_RETURN _php_sablot_sax_comment(void *, const char *);
+static SAX_RETURN _php_sablot_sax_PI(void *, const char *, const char *);
+static SAX_RETURN _php_sablot_sax_characters(void *, const char *, int);
+static SAX_RETURN _php_sablot_sax_endDoc(void *);
 
 /* Error Handling Functions */
-#ifdef SABLOT_ERRORS
-static MH_ERROR _php_sablot_make_code(void *userData, SablotHandle p, int severity, unsigned short facility, unsigned short code);
-static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code, MH_LEVEL level, char **fields);
-#endif
+static MH_ERROR _php_sablot_make_code(void *, SablotHandle, int, unsigned short, unsigned short);
+static MH_ERROR _php_sablot_error(void *, SablotHandle, MH_ERROR, MH_LEVEL, char **);
 
 /* PHP Utility Functions */
-static void m_convert_to_string_ex(int argc, ...);
-static zval *_php_sablot_string_zval(const char *str);
-static zval *_php_sablot_resource_zval(long value);
+static void _php_sablot_ht_char(HashTable *, char **);
+static zval *_php_sablot_string_zval(const char *);
+static zval *_php_sablot_resource_zval(long);
 
 /* Free macros */
-#define S_FREE(var) if (var) efree(var);
-#define FUNCH_FREE(var) if (var) zval_del_ref(&(var));
+#define S_FREE(__var) if (__var) efree(__var);
+#define FUNCH_FREE(__var) if (__var) zval_del_ref(&(__var));		
+
+/* ERROR Macro */
+#define SEND_ERROR_INFO(__error, __errlevel) \
+	php_printf("A %s has occurred, sending all relevant information\n", __error); \
+	handle->errors = handle->errors_start.next; \
+	while (handle->errors) { \
+		php_printf("%s: %s\n", handle->errors->key, handle->errors->value); \
+		handle->errors = handle->errors->next; \
+	} \
+	php_error(__errlevel, "");
 
 
 static SAXHandler sax = {
@@ -70,13 +82,11 @@ static SAXHandler sax = {
        _php_sablot_sax_endDoc
 };
 
-#ifdef SABLOT_ERRORS
 static MessageHandler mh = {
 	_php_sablot_make_code,
 	_php_sablot_error,
 	_php_sablot_error
 };
-#endif
 
 /* {{{ Begin PHP Extension code */
 
@@ -136,7 +146,7 @@ PHP_MINIT_FUNCTION(sablot)
 PHP_MINFO_FUNCTION(sablot)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Sablotron support", "enabled");
+	php_info_print_table_row(2, "Sablotron support", "enabled");
 	php_info_print_table_end();
 
 }
@@ -172,58 +182,39 @@ PHP_FUNCTION(xslt_output_begintransform)
    End filtering that data through the XSL file set by xslt_output_transform() and output the data */
 PHP_FUNCTION(xslt_output_endtransform)
 {
-	zval **buffer;
+	char *tRes   = NULL,
+	     *buffer = NULL;
 	int ret = 0;
-	char *tRes = NULL;
 	OLS_FETCH();
 	SABLOTLS_FETCH();
 
 	if (OG(nesting_level) == 0) {
-		return;
+		RETURN_NULL();
 	}
-	ZVAL_STRINGL(*buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
-	
-	if (Z_STRVAL_PP(buffer)) {
-		char *args[] = {"/_xmlinput", Z_STRVAL_PP(buffer),
+
+	buffer = estrndup(OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length);
+
+	if (strlen(buffer)) {
+		char *args[] = {"/_xmlinput", buffer,
 		                "/_output",   NULL};
 		
-		if (SABLOTG(processor)) {
-			php_sablot *handle;
-			zval **lookup;
-			
-			MAKE_STD_ZVAL(*lookup);
-			ZVAL_RESOURCE(*lookup, SABLOTG(processor));
-			
-			ZEND_FETCH_RESOURCE(handle, php_sablot *, lookup, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
-			
-			ret = SablotRunProcessor(handle->p, SABLOTG(output_transform_file), 
-			                         "arg:/_xmlinput", "arg:/_output", NULL, args);
-			if (ret) {
-				php_error(E_WARNING, "Error [%d]: %s", ret, SablotGetMsgText(ret));
-				SABLOTG(last_errno) = ret;
-				S_FREE(SABLOTG(output_transform_file));
-				return;
-			}
-			
-			ret = SablotGetResultArg(handle->p, "/_output", &tRes);
-		} else {
-			ret = SablotProcess(SABLOTG(output_transform_file), "arg:/_xmlinput", "arg:/_output", NULL, args, &tRes);
-		}
-		
-		if (ret) {
-			php_error(E_WARNING, "Error [%d]: %s", ret, SablotGetMsgText(ret));
-			SABLOTG(last_errno) = ret;
-			S_FREE(SABLOTG(output_transform_file));
-			return;
-		}
-		
-		php_end_ob_buffer(0);
-		
-		PUTS(tRes);
+		ret = SablotProcess(SABLOTG(output_transform_file), "arg:/_xmlinput", "arg:/_output", NULL, args, &tRes);
+	}
+
+	if (ret) {
+		SABLOTG(last_errno) = ret;
 		S_FREE(SABLOTG(output_transform_file));
+		return;
+	}
 		
-		if (tRes)
-			SablotFree(tRes);
+	php_end_ob_buffer(0);
+	
+	PUTS(tRes);
+	S_FREE(SABLOTG(output_transform_file));
+	S_FREE(buffer);
+
+	if (tRes) {
+		SablotFree(tRes);
 	} else {
 		php_end_ob_buffer(0);
 	}
@@ -231,34 +222,36 @@ PHP_FUNCTION(xslt_output_endtransform)
 /* }}} */
 
 /* }}} */
-
 /* {{{ Begin Simple API */
 
 /* {{{ bool xslt_transform(string xslt_uri, string transform_uri, string result_uri[, array xslt_params[, array xslt_args[, string &result]]])
    Transform an XML document, transform_uri, with an XSL stylesheet, xslt_uri with parameters, xslt_params, into the Result buffer, result_uri, xslt_args defines the variables in xslt_uri, transform_uri and result_uri. */
 PHP_FUNCTION(xslt_transform)
 {
-	zval **xslt_uri, **transform_uri, **result_uri,
-	     **xslt_params, **xslt_args, **result, **value;
-	
+	zval **xslt_uri, 
+	     **transform_uri, 
+		 **result_uri,
+	     **xslt_params, 
+		 **xslt_args, 
+		 **result, 
+		 **value;
 	char **args   = NULL,
 	     **params = NULL,
-	     *tResult = NULL,
-	     *string_key;
-	
-	int argc = ZEND_NUM_ARGS(), ret = 0;
-	ulong num_key;
+	     *tResult = NULL;
+	int argc = ZEND_NUM_ARGS(), 
+	    ret  = 0;
 	SABLOTLS_FETCH();
 	
 	if (argc < 3 || argc > 6 ||
 	    zend_get_parameters_ex(argc, &xslt_uri, &transform_uri, &result_uri, &xslt_params, &xslt_args, &result) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	m_convert_to_string_ex(3, xslt_uri, transform_uri, result_uri);
+	multi_convert_to_string_ex(3, xslt_uri, transform_uri, result_uri);
 	
 	if (argc > 3) {
 		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0) {
-			int numelems, size, i=0;
+			int numelems, 
+			    size;
 			HashTable *ar = HASH_OF(*xslt_params);
 
 			numelems = zend_hash_num_elements(ar);
@@ -267,27 +260,14 @@ PHP_FUNCTION(xslt_transform)
 			params = (char **)emalloc(size+1);
 			memset((char *)params, 0, size);
 			
-			for (zend_hash_internal_pointer_reset(ar);
-			     zend_hash_get_current_data(ar, (void **)&value) == SUCCESS;
-			     zend_hash_move_forward(ar)) {
-				SEPARATE_ZVAL(value);
-				convert_to_string_ex(value);
-				
-				if (zend_hash_get_current_key(ar, &string_key, &num_key) == HASH_KEY_IS_LONG) {
-					params[i++] = Z_STRVAL_PP(value);
-					continue;
-				}
-				
-				params[i++] = string_key;
-				params[i++] = Z_STRVAL_PP(value);
-			}
-			params[i] = NULL;
+			_php_sablot_ht_char(ar, params);
 		}
 	}
 	
 	if (argc > 4) {
 		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0) {
-			int numelems, size, i=0;
+			int numelems, 
+			    size;
 			HashTable *ar = HASH_OF(*xslt_args);
 
 			numelems = zend_hash_num_elements(ar);
@@ -296,55 +276,21 @@ PHP_FUNCTION(xslt_transform)
 			args = (char **)emalloc(size+1);
 			memset((char *)args, 0, size);
 			
-			for (zend_hash_internal_pointer_reset(ar);
-			     zend_hash_get_current_data(ar, (void **)&value) == SUCCESS;
-			     zend_hash_move_forward(ar)) {
-				SEPARATE_ZVAL(value);
-				convert_to_string_ex(value);
-				
-				if (zend_hash_get_current_key(ar, &string_key, &num_key) == HASH_KEY_IS_LONG) {
-					args[i++] = Z_STRVAL_PP(value);
-					continue;
-				}
-				
-				args[i++] = string_key;
-				args[i++] = Z_STRVAL_PP(value);
-			}
-			args[i] = NULL;
+			_php_sablot_ht_char(ar, args);
 		}
 	}
 	
-	if (SABLOTG(processor)) {
-		php_sablot *handle;
-		zval **lookup;
-		char *resname = NULL;
-		
-		if (strncmp(Z_STRVAL_PP(result_uri), "arg:", 4)) {
-			resname = estrndup(Z_STRVAL_PP(result_uri) + 4, Z_STRLEN_PP(result_uri) - 4); 
-		}
-		
-		MAKE_STD_ZVAL(*lookup);
-		ZVAL_RESOURCE(*lookup, SABLOTG(processor));
-		
-		ZEND_FETCH_RESOURCE(handle, php_sablot *, lookup, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
-		ret = SablotRunProcessor(handle->p, Z_STRVAL_PP(xslt_uri), Z_STRVAL_PP(transform_uri),
-		                         Z_STRVAL_PP(result_uri), params, args);
-		
-		if (resname) { 
-			ret = SablotGetResultArg(handle->p, resname, &tResult);
-		}
-	} else {	
-		ret = SablotProcess(Z_STRVAL_PP(xslt_uri), Z_STRVAL_PP(transform_uri),
-		                    Z_STRVAL_PP(result_uri), params, args, &tResult);
-	}
+	ret = SablotProcess(Z_STRVAL_PP(xslt_uri), Z_STRVAL_PP(transform_uri),
+	                    Z_STRVAL_PP(result_uri), params, args, &tResult);
 	
 	if (ret) {
 		SABLOTG(last_errno) = ret;
 		
 		S_FREE(params);
 		S_FREE(args);
-		if (tResult)
+		if (tResult) {
 			SablotFree(tResult);
+		}
 		
 		RETURN_FALSE;
 	} else { RETVAL_TRUE; }
@@ -367,63 +313,33 @@ PHP_FUNCTION(xslt_transform)
    Process data given by input_str through xslt and place the results in the string result.  If base is supplied, it will be used as the base URI. */
 PHP_FUNCTION(xslt_process)
 {
-	zval **xslt, **input, **result, **base;
+	zval **xslt, 
+	     **input, 
+		 **result, 
+		 **base;
 	char *tRes = NULL;
-	int ret = 0, argc = ZEND_NUM_ARGS();
+	int ret  = 0, 
+	    argc = ZEND_NUM_ARGS();
 	SABLOTLS_FETCH();
 	
 	if (argc < 3 || argc > 4 ||
 	    zend_get_parameters_ex(argc, &xslt, &input, &result, &base) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
-	m_convert_to_string_ex(2, xslt, input);
-	
-	if (SABLOTG(processor)) {
-		char *args[] = {"/_xslsheet", Z_STRVAL_PP(xslt),
-		                "/_xmlinput", Z_STRVAL_PP(input),
-		                "/_output",   NULL};
-		php_sablot *handle;
-		zval **lookup;
-		
-		MAKE_STD_ZVAL(*lookup);
-		ZVAL_RESOURCE(*lookup, SABLOTG(processor));
+	multi_convert_to_string_ex(2, xslt, input);
 
-		ZEND_FETCH_RESOURCE(handle, php_sablot *, lookup, -1, "PHP-Sablot Handle", SABLOTG(le_sablot));
-		if (argc > 3) {
-			ret = SablotSetBase(handle->p, Z_STRVAL_PP(base));
-			if (ret) {
-				SABLOTG(last_errno) = ret;
-				RETURN_FALSE;
-			}
-		}
-
-		ret = SablotRunProcessor(handle->p, "arg:/_xslsheet", "arg:/_xmlinput", "arg:/_output", NULL, args);
-		if (ret) {
-			SABLOTG(last_errno) = ret;
-			RETURN_FALSE;
-		}
-
-		ret = SablotGetResultArg(handle->p, "/_output", &tRes);
-		
-		if (ret) {
-			SABLOTG(last_errno) = errno;
-			RETURN_FALSE;
-		}
-		
-		ret = SablotSetBase(handle->p, NULL);
+	if (argc > 3) {
+		convert_to_string_ex(base);
+		ret = SablotProcessStringsWithBase(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes, Z_STRVAL_PP(base));
 	} else {
-		if (argc > 3) {
-			convert_to_string_ex(base);
-			ret = SablotProcessStringsWithBase(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes, Z_STRVAL_PP(base));
-		} else {
-			ret = SablotProcessStrings(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes);
-		}
+		ret = SablotProcessStrings(Z_STRVAL_PP(xslt), Z_STRVAL_PP(input), &tRes);
 	}
 	
 	if (ret) {
 		SABLOTG(last_errno) = ret;
-		if (tRes)
+		if (tRes) {
 			SablotFree(tRes);
+		}
 		RETURN_FALSE;
 	}
 
@@ -448,12 +364,6 @@ PHP_FUNCTION(xslt_create)
 	int ret;
 	SABLOTLS_FETCH();
 	
-	if (SABLOTG(processor)) {
-		Z_TYPE_P(return_value) = IS_RESOURCE;
-		Z_LVAL_P(return_value) = SABLOTG(processor);
-		return;
-	}
-	
 	ret = SablotCreateProcessor(&p);
 	
 	if (ret) {
@@ -476,18 +386,15 @@ PHP_FUNCTION(xslt_create)
 		RETURN_FALSE;
 	}
 
-#ifdef SABLOT_ERRORS	
 	ret = SablotRegHandler(handle->p, HLR_MESSAGE, (void *)&mh, (void *)handle);
 	
 	if (ret) {
 		SABLOTG(last_errno) = ret;
 		RETURN_FALSE;
 	}
-#endif
 	
 	ZEND_REGISTER_RESOURCE(return_value, handle, SABLOTG(le_sablot));
 	handle->index = Z_LVAL_P(return_value);
-	SABLOTG(processor) = Z_LVAL_P(return_value);
 }
 /* }}} */
 
@@ -495,19 +402,19 @@ PHP_FUNCTION(xslt_create)
    Process the file data_file with the XSL stylesheet xslt_file and parameters xslt_parameters place the results in the buffer pointed to by the result parameter (defaults to "/_result"), args contains the values of the variables in the other parameters.  */
 PHP_FUNCTION(xslt_run)
 {
-	zval **xh, **xslt_file, **data_file, 
-	     **xslt_result, **xslt_params, **xslt_args, **value;
-
+	zval **xh, 
+	     **xslt_file, 
+		 **data_file, 
+	     **xslt_result, 
+		 **xslt_params, 
+		 **xslt_args, 
+		 **value;
 	php_sablot *handle;
 	char **args   = NULL,
 	     **params = NULL,
-	     *result  = NULL,
-	     *string_key;
-	
+	     *result  = NULL;
 	int argc = ZEND_NUM_ARGS(),
 	    ret  = 0;
-	ulong num_key;
-
 	SABLOTLS_FETCH();
 	
 	if (argc < 3 || argc > 6 ||
@@ -515,10 +422,11 @@ PHP_FUNCTION(xslt_run)
 		WRONG_PARAM_COUNT;
 	}
 	ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron handle", SABLOTG(le_sablot));
-	m_convert_to_string_ex(2, xslt_file, data_file);
+	multi_convert_to_string_ex(2, xslt_file, data_file);
 	
-	if (argc == 3)
+	if (argc == 3) {
 		result = estrdup("arg:/_result");
+	}
 	
 	if (argc > 3) {
 		convert_to_string_ex(xslt_result);
@@ -527,7 +435,8 @@ PHP_FUNCTION(xslt_run)
 	
 	if (argc > 4) {
 		if (Z_TYPE_PP(xslt_params) != IS_LONG || Z_LVAL_PP(xslt_params) != 0) { 
-			int numelems, size, i=0;
+			int numelems, 
+			    size;	
 			HashTable *ar = HASH_OF(*xslt_params);
 
 			numelems = zend_hash_num_elements(ar);
@@ -536,27 +445,14 @@ PHP_FUNCTION(xslt_run)
 			params = (char **)emalloc(size+1);
 			memset((char *)params, 0, size);
 			
-			for (zend_hash_internal_pointer_reset(ar);
-			     zend_hash_get_current_data(ar, (void **)&value) == SUCCESS;
-			     zend_hash_move_forward(ar)) {
-				SEPARATE_ZVAL(value);
-				convert_to_string_ex(value);
-				
-				if (zend_hash_get_current_key(ar, &string_key, &num_key) == HASH_KEY_IS_LONG) {
-					params[i++] = Z_STRVAL_PP(value);
-					continue;
-				}
-				
-				params[i++] = string_key;
-				params[i++] = Z_STRVAL_PP(value);
-			}
-			params[i] = NULL;
+			_php_sablot_ht_char(ar, params);
 		}
 	}
 	
 	if (argc > 5) {
 		if (Z_TYPE_PP(xslt_args) != IS_LONG || Z_LVAL_PP(xslt_args) != 0) {
-			int numelems, size, i=0;
+			int numelems, 
+			    size;
 			HashTable *ar = HASH_OF(*xslt_args);
 
 			numelems = zend_hash_num_elements(ar);
@@ -565,21 +461,7 @@ PHP_FUNCTION(xslt_run)
 			args = (char **)emalloc(size+1);
 			memset((char *)args, 0, size);
 			
-			for (zend_hash_internal_pointer_reset(ar);
-			     zend_hash_get_current_data(ar, (void **)&value) == SUCCESS;
-			     zend_hash_move_forward(ar)) {
-				SEPARATE_ZVAL(value);
-				convert_to_string_ex(value);
-				
-				if (zend_hash_get_current_key(ar, &string_key, &num_key) == HASH_KEY_IS_LONG) {
-					args[i++] = Z_STRVAL_PP(value);
-					continue;
-				}
-				
-				args[i++] = string_key;
-				args[i++] = Z_STRVAL_PP(value);
-			}
-			args[i] = NULL;
+			_php_sablot_ht_char(ar, args);
 		}
 	}
 	
@@ -606,9 +488,14 @@ PHP_FUNCTION(xslt_run)
    Sets a logfile for Sablotron to place all of its error messages */
 PHP_FUNCTION(xslt_openlog)
 {
-	zval **xh, **logfile, **opt_loglevel;
+	zval **xh, 
+	     **logfile, 
+		 **opt_loglevel;
+	
 	php_sablot *handle;
-	int ret = 0, loglevel = 0, argc = ZEND_NUM_ARGS();
+	int ret      = 0, 
+	    loglevel = 0, 
+		argc     = ZEND_NUM_ARGS();
 	
 	if (argc < 2 || argc > 3 ||
 	    zend_get_parameters_ex(argc, &xh, &logfile, &opt_loglevel) == FAILURE) {
@@ -662,10 +549,13 @@ PHP_FUNCTION(xslt_closelog)
    Fetch a result buffer on process handle, xh, with name, result_name, if name is not given than the "/_result" buffer is fetched. */
 PHP_FUNCTION(xslt_fetch_result)
 {
-	zval **xh, **result_name;
+	zval **xh, 
+	     **result_name;
 	php_sablot *handle;
-	char *rname, *value=NULL;
-	int argc = ZEND_NUM_ARGS(), ret = 0;
+	char *value = NULL, 
+	     *rname = NULL;
+	int argc = ZEND_NUM_ARGS(), 
+	    ret = 0;
 	SABLOTLS_FETCH();
 
 	if (argc < 1 || argc > 2 ||
@@ -676,18 +566,21 @@ PHP_FUNCTION(xslt_fetch_result)
 	
 	if (argc > 1) {
 		convert_to_string_ex(result_name);
-		rname = Z_STRVAL_PP(result_name);
+		rname = estrndup(Z_STRVAL_PP(result_name), Z_STRLEN_PP(result_name));
 	} else {
-		rname = "/_result";
+		rname = estrdup("/_result");
 	}
 	
 	ret = SablotGetResultArg(handle->p, rname, &value);
 	
+	S_FREE(rname);
+	
 	if (ret) {
 		handle->last_errno  = ret;
 		SABLOTG(last_errno) = ret;
-		if (value)
+		if (value) {
 			SablotFree(value);
+		}
 		RETURN_FALSE;
 	}
 	
@@ -720,13 +613,17 @@ PHP_FUNCTION(xslt_free)
    Set SAX Handlers on the resource handle given by xh. */
 PHP_FUNCTION(xslt_set_sax_handler)
 {
-	zval **xh, **handlers, **indiv_handlers, **handler;
+	zval **xh, 
+	     **handlers, 
+		 **indiv_handlers, 
+		 **handler;
 	php_sablot *handle;
 	HashTable *handlers_list;
 	char *string_key = NULL;
 	ulong num_key;
 	SABLOTLS_FETCH();
 	
+
 	if (ZEND_NUM_ARGS() != 2 ||
 	    zend_get_parameters_ex(2, &xh, &handlers) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -786,9 +683,9 @@ PHP_FUNCTION(xslt_set_sax_handler)
 PHP_FUNCTION(xslt_error)
 {
 	zval **xh;
-	int errno;
 	php_sablot *handle;
-	int argc = ZEND_NUM_ARGS();
+	int serrno = 0,
+	    argc = ZEND_NUM_ARGS();
 	
 	if (argc < 0 || argc > 1 ||
 	    zend_get_parameters_ex(argc, &xh) == FAILURE) {
@@ -798,10 +695,9 @@ PHP_FUNCTION(xslt_error)
 	if (argc) {
 		ZEND_FETCH_RESOURCE(handle, php_sablot *, xh, -1, "PHP-Sablotron Handle", SABLOTG(le_sablot));
 
-#ifdef SABLOT_ERRORS		
 		if (handle->errors) {
 			if (array_init(return_value) == FAILURE) {
-				php_error(E_WARNING, "Cannot initialize return array from xslt_error");
+				php_error(E_WARNING, "Cannot initialize return array from xslt_error()");
 				RETURN_FALSE;
 			}
 		
@@ -814,11 +710,10 @@ PHP_FUNCTION(xslt_error)
 			add_assoc_long(return_value, "errno", handle->last_errno);
 			return;
 		}
-#endif
-		
-		errno = handle->last_errno;
+	
+		serrno = handle->last_errno;
 	} else {
-		errno = SABLOTG(last_errno);
+		serrno = SABLOTG(last_errno);
 	}
 
 	RETURN_STRING((char *)SablotGetMsgText(errno), 1);
@@ -830,7 +725,6 @@ PHP_FUNCTION(xslt_error)
 PHP_FUNCTION(xslt_errno)
 {
 	zval **xh;
-	int errno;
 	php_sablot *handle;
 	int argc = ZEND_NUM_ARGS();
 	
@@ -863,7 +757,7 @@ static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval
 	HashTable *second_level = HASH_OF(*indiv_handlers);
 	zval **handler;
 	int item = 0;
-		
+
 	for (zend_hash_internal_pointer_reset(second_level);
 	     zend_hash_get_current_data(second_level, (void **)&handler) == SUCCESS;
 	     zend_hash_move_forward(second_level)) {
@@ -895,9 +789,9 @@ static void _php_sablot_handler_pair(php_sablot *handle, zval **first_func, zval
 static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval **args, char *function_name)
 {
 	zval *retval;
-	int result, i;
+	int result, 
+	    i;
 	ELS_FETCH();
-	
 	MAKE_STD_ZVAL(retval);
 	
 	if (call_user_function(EG(function_table), NULL, handlerName, retval, argc, args) == FAILURE) {
@@ -913,7 +807,8 @@ static void _php_sablot_call_handler_function(zval *handlerName, int argc, zval 
 }
 /* }}} */
 
-/* {{{ _php_sablot_startDoc() */
+/* {{{ _php_sablot_startDoc() 
+   Start document handler */
 static SAX_RETURN _php_sablot_sax_startDoc(void *userData)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -927,7 +822,8 @@ static SAX_RETURN _php_sablot_sax_startDoc(void *userData)
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_startElement() */
+/* {{{ _php_sablot_sax_startElement() 
+   Start Element handler */
 static SAX_RETURN _php_sablot_sax_startElement(void *userData, const char *name, const char **attributes)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -957,7 +853,8 @@ static SAX_RETURN _php_sablot_sax_startElement(void *userData, const char *name,
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_endElement() */
+/* {{{ _php_sablot_sax_endElement() 
+   End element handler */
 static SAX_RETURN _php_sablot_sax_endElement(void *userData, const char *name)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -973,7 +870,8 @@ static SAX_RETURN _php_sablot_sax_endElement(void *userData, const char *name)
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_startNamespace() */
+/* {{{ _php_sablot_sax_startNamespace() 
+   Start Namespace handler */
 static SAX_RETURN _php_sablot_sax_startNamespace(void *userData, const char *prefix, const char *uri)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -990,7 +888,8 @@ static SAX_RETURN _php_sablot_sax_startNamespace(void *userData, const char *pre
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_endNamespace() */
+/* {{{ _php_sablot_sax_endNamespace() 
+   End Namespace Handler */
 static SAX_RETURN _php_sablot_sax_endNamespace(void *userData, const char *prefix)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -1006,7 +905,8 @@ static SAX_RETURN _php_sablot_sax_endNamespace(void *userData, const char *prefi
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_comment() */
+/* {{{ _php_sablot_sax_comment() 
+   Comment Handler */
 static SAX_RETURN _php_sablot_sax_comment(void *userData, const char *contents)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -1022,7 +922,8 @@ static SAX_RETURN _php_sablot_sax_comment(void *userData, const char *contents)
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_PI() */
+/* {{{ _php_sablot_sax_PI() 
+   Processing Instruction Handler */
 static SAX_RETURN _php_sablot_sax_PI(void *userData, const char *target, const char *contents)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -1039,7 +940,8 @@ static SAX_RETURN _php_sablot_sax_PI(void *userData, const char *target, const c
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_characters() */
+/* {{{ _php_sablot_sax_characters() 
+   Character handler */
 static SAX_RETURN _php_sablot_sax_characters(void *userData, const char *contents, int length)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -1055,7 +957,8 @@ static SAX_RETURN _php_sablot_sax_characters(void *userData, const char *content
 }
 /* }}} */
 
-/* {{{ _php_sablot_sax_endDoc() */
+/* {{{ _php_sablot_sax_endDoc() 
+   End document handler */
 static SAX_RETURN _php_sablot_sax_endDoc(void *userData)
 {
 	php_sablot *handle = (php_sablot *)userData;
@@ -1075,8 +978,8 @@ static SAX_RETURN _php_sablot_sax_endDoc(void *userData)
 
 /* {{{ Sablotron Error Handling */
 
-#ifdef SABLOT_ERRORS
-/* {{{ _php_sablot_make_code() */
+/* {{{ _php_sablot_make_code() 
+   Makes an error code, currently does nothing */
 static MH_ERROR _php_sablot_make_code(void *userData, SablotHandle p, int severity, unsigned short facility, unsigned short code)
 {
 	return(code);
@@ -1088,27 +991,17 @@ static MH_ERROR _php_sablot_make_code(void *userData, SablotHandle p, int severi
 static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code, MH_LEVEL level, char **fields)
 {
 	php_sablot *handle = (php_sablot *)userData;
-	int idx, len;
+
 	char *sep;
+
+	int idx, 
+	    len;
 
 	if (!fields) {
 		if (code) {
 			handle->last_errno = (int)code;
 		}
 		return(0);
-	}
-	
-	switch (code)
-	{
-		case MH_LEVEL_CRITICAL:
-			php_error(E_CORE, "Critical Error with Sablotron XSL Processor, must abort");
-			return (0);
-		case MH_LEVEL_ERROR:
-			php_error(E_ERROR, "Error with Sablotron XSL Processor, must abort");
-			return (0);
-		case MH_LEVEL_WARN:
-			php_error(E_WARNING, "Error occured with Sablotron XSL Processor");
-			break;
 	}	
 	
 	if (handle->errors) {
@@ -1142,11 +1035,22 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 		fields++;
 	}
 	handle->last_errno = (int)code;
+	
+	switch (code) {
+		case MH_LEVEL_CRITICAL:
+			SEND_ERROR_INFO("Fatal Error", E_CORE);
+			return (0);
+		case MH_LEVEL_ERROR:
+			SEND_ERROR_INFO("Serious Error", E_ERROR);
+			return (0);
+		case MH_LEVEL_WARN:
+			SEND_ERROR_INFO("Warning", E_WARNING);
+			break;
+	}
 
 	return(0);
 }
 /* }}} */
-#endif
 
 /* }}} */
 
@@ -1157,9 +1061,7 @@ static MH_ERROR _php_sablot_error(void *userData, SablotHandle p, MH_ERROR code,
 static void _php_sablot_free_processor(php_sablot *handle)
 {
 	if (handle->p) {
-#ifdef SABLOT_ERRORS
 		SablotUnregHandler(handle->p, HLR_MESSAGE, NULL, NULL);
-#endif
 		SablotUnregHandler(handle->p, HLR_SAX, NULL, NULL);
 		SablotDestroyProcessor(handle->p);
 	}
@@ -1174,7 +1076,6 @@ static void _php_sablot_free_processor(php_sablot *handle)
 	FUNCH_FREE(handle->charactersHandler);
 	FUNCH_FREE(handle->endDocHandler);
 
-#ifdef SABLOT_ERRORS
 	if (handle->errors) {
 		handle->errors = handle->errors_start.next;
 		while (handle->errors) {
@@ -1184,7 +1085,6 @@ static void _php_sablot_free_processor(php_sablot *handle)
 		}
 		S_FREE(handle->errors);
 	}
-#endif
 	S_FREE(handle);
 }
 /* }}} */
@@ -1193,24 +1093,33 @@ static void _php_sablot_free_processor(php_sablot *handle)
 
 /* {{{ Conversion Helper functions */
 
-/* {{{ m_convert_to_string_ex()
-   A little wrapper function to convert a bunch o' function arguments to strings */
-static void m_convert_to_string_ex(int argc, ...)
+/* {{{ _php_sablot_zval_char()
+   Translates a PHP array to a Sablotron character array */
+static void _php_sablot_ht_char(HashTable *php, char **sablot)
 {
-	zval **arg;
-	va_list ap;
-	int i;
+	zval **value;
+	char *string_key = NULL;
+	ulong num_key;
+	int i = 0;
 	
-	va_start(ap, argc);
-	
-	for (i = 0; i < argc; i++) {
-		arg = va_arg(ap, zval **);
-		convert_to_string_ex(arg);
+	for (zend_hash_internal_pointer_reset(php);
+	     zend_hash_get_current_data(php, (void **)&value) == SUCCESS;
+	     zend_hash_move_forward(php)) {
+		SEPARATE_ZVAL(value);
+		convert_to_string_ex(value);
+		
+		switch (zend_hash_get_current_key(php, &string_key, &num_key)) {
+			case HASH_KEY_IS_LONG:
+				sablot[i++] = Z_STRVAL_PP(value);
+				break;
+			case HASH_KEY_IS_STRING:
+				sablot[i++] = string_key;
+				sablot[i++] = Z_STRVAL_PP(value);
+				break;
+		}
 	}
-	
-	va_end(ap);
+	sablot[i++] = NULL;
 }
-/* }}} */
 
 /* {{{ _php_sablot_string_zval()
    Converts a Sablotron string to a zval */
@@ -1218,11 +1127,13 @@ static zval *_php_sablot_string_zval(const char *str)
 {
 	zval *ret;
 	int len = strlen(str);
+
 	MAKE_STD_ZVAL(ret);
 	
 	Z_TYPE_P(ret)   = IS_STRING;
 	Z_STRLEN_P(ret) = len;
 	Z_STRVAL_P(ret) = estrndup(str, len);
+
 	return(ret);
 }
 /* }}} */
@@ -1238,6 +1149,7 @@ static zval *_php_sablot_resource_zval(long value)
 	Z_LVAL_P(ret) = value;
 	
 	zend_list_addref(value);
+
 	return(ret);
 }
 /* }}} */
