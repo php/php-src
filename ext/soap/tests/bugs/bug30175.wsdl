@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="qweb"
+ targetNamespace="http://www.newsblob.com/qweb.wsdl"
+ xmlns:tns="http://www.newsblob.com/qweb.wsdl"
+ xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:ns1="urn:qweb"
+ xmlns:SOAP="http://schemas.xmlsoap.org/wsdl/soap/"
+ xmlns:WSDL="http://schemas.xmlsoap.org/wsdl/"
+ xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+<types>
+
+ <schema targetNamespace="urn:qweb"
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:ns1="urn:qweb"
+  xmlns="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="unqualified"
+  attributeFormDefault="unqualified">
+  <import namespace="http://schemas.xmlsoap.org/soap/encoding/"/>
+  <complexType name="qwebGetHostInfoResponse">
+   <sequence>
+    <element name="return" type="ns1:HostInfo" minOccurs="1" maxOccurs="1"/>
+   </sequence>
+  </complexType>
+  <complexType name="ArrayOfHostInfo">
+   <complexContent>
+    <restriction base="SOAP-ENC:Array">
+     <sequence>
+      <element name="item" type="ns1:HostInfo" minOccurs="0" maxOccurs="unbounded"/>
+     </sequence>
+     <attribute ref="SOAP-ENC:arrayType" WSDL:arrayType="ns1:HostInfo[]"/>
+    </restriction>
+   </complexContent>
+  </complexType>
+ </schema>
+
+</types>
+
+<message name="qwebSquareRequest">
+ <part name="mynum" type="xsd:int"/>
+</message>
+
+<message name="qwebSquareResponse">
+ <part name="result" type="xsd:int"/>
+</message>
+
+<message name="qwebStrlenRequest">
+ <part name="mystr" type="xsd:string"/>
+</message>
+
+<message name="qwebStrlenResponse">
+ <part name="result" type="xsd:int"/>
+</message>
+
+<message name="qwebGetHostInfoRequest">
+</message>
+
+<message name="HostInfo">
+ <part name="name" type="xsd:string"/>
+ <part name="shortDescription" type="xsd:string"/>
+ <part name="ipAddress" type="xsd:string"/>
+</message>
+
+<portType name="qwebPortType">
+ <operation name="qwebSquare">
+  <documentation>Service definition of function ns1__qwebSquare</documentation>
+  <input message="tns:qwebSquareRequest"/>
+  <output message="tns:qwebSquareResponse"/>
+ </operation>
+ <operation name="qwebStrlen">
+  <documentation>Service definition of function ns1__qwebStrlen</documentation>
+  <input message="tns:qwebStrlenRequest"/>
+  <output message="tns:qwebStrlenResponse"/>
+ </operation>
+ <operation name="qwebGetHostInfo">
+  <documentation>Service definition of function ns1__qwebGetHostInfo</documentation>
+  <input message="tns:qwebGetHostInfoRequest"/>
+  <output message="tns:HostInfo"/>
+ </operation>
+</portType>
+
+<binding name="qweb" type="tns:qwebPortType">
+ <SOAP:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+ <operation name="qwebSquare">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="qwebStrlen">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+ <operation name="qwebGetHostInfo">
+  <SOAP:operation style="rpc" soapAction=""/>
+  <input>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </input>
+  <output>
+   <SOAP:body use="encoded" namespace="urn:qweb" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+  </output>
+ </operation>
+</binding>
+
+<service name="qweb">
+ <documentation>Demo Qweb SOAP interface</documentation>
+ <port name="qweb" binding="tns:qweb">
+  <SOAP:address location="http://www.newsblob.com:6969"/>
+ </port>
+</service>
+
+</definitions>

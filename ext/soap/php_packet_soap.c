@@ -271,6 +271,9 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 						cur = get_node(resp, name);
 						/* TODO: produce warning invalid ns */
 					}
+					if (!cur && fnb->style == SOAP_RPC) {
+					  cur = resp;
+					}
 					if (cur) {
 						if (fnb->style == SOAP_DOCUMENT) {
 							val = cur;
