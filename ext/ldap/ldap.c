@@ -49,15 +49,8 @@ void *ldap_mutex;
 
 #if HAVE_LDAP
 
-#if COMPILE_DL
-#if PHP_31
-#include "ext/phpdl.h"
-#include "ext/standard/dl.h"
-#else
 #include "dl/phpdl.h"
-#include "functions/dl.h"
-#endif
-#endif
+#include "ext/standard/dl.h"
 #include "php3_ldap.h"
 
 #if WIN32|WINNT
@@ -73,11 +66,7 @@ void *ldap_mutex;
 #define __STDC__ 1
 #endif
 
-#if PHP_31
 #include "ext/standard/php3_string.h"
-#else
-#include "functions/php3_string.h"
-#endif
 
 
 #if THREAD_SAFE & HAVE_NSLDAP
@@ -268,7 +257,7 @@ int php3_minit_ldap(INIT_FUNC_ARGS)
 	return SUCCESS;
 }
 
-int php3_mshutdown_ldap(void){
+int php3_mshutdown_ldap(SHUTDOWN_FUNC_ARGS) {
 #ifdef THREAD_SAFE
 	LDAP_TLS_VARS;
 	PHP3_TLS_THREAD_FREE(php3_ldap_module);
