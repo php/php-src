@@ -70,7 +70,7 @@
 
 /* {{{ php_fopen_url_wrap_http
  */
-FILE *php_fopen_url_wrap_http(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+FILE *php_fopen_url_wrap_http(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	FILE *fp=NULL;
 	php_url *resource=NULL;
