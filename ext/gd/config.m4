@@ -153,6 +153,7 @@ dnl A whole whack of possible places where this might be
   AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
   if test "$ac_cv_lib_gd_gdImageLine" = "yes"; then
 		old_LIBS=$LIBS
+	        old_LDFLAGS=$LDFLAGS
         AC_CHECK_LIB(gd, gdImageString16, [ AC_DEFINE(HAVE_LIBGD13,1, [ ]) ])
 		AC_CHECK_LIB(z,compress, LIBS="-lz $LIBS",,)
 		AC_CHECK_LIB(png,png_info_init, LIBS="-lpng $LIBS",,)
