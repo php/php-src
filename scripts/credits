@@ -20,5 +20,7 @@ do
 */
 
 END
-  awk "$awkprog" $what/*/CREDITS | sort -f  >> $file
+  # Do not process skeleton #
+  files=`find "$what" -name CREDITS | grep -v "$what"/skeleton/CREDITS`
+  awk "$awkprog" $files | sort -f  >> $file
 done
