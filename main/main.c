@@ -667,7 +667,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				 * but DO NOT overwrite a pending excepption
 				 */
 				if (PG(error_handling) == EH_THROW && !EG(exception)) {
-					zend_throw_exception(PG(exception_class), buffer, 0 TSRMLS_CC);
+					zend_throw_error_exception(PG(exception_class), buffer, 0, type TSRMLS_CC);
 				}
 				efree(buffer);
 				return;
