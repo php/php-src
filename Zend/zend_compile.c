@@ -1582,8 +1582,6 @@ ZEND_API void function_add_ref(zend_function *function)
 
 static void do_inherit_parent_constructor(zend_class_entry *ce)
 {
-	zend_function *function;
-
 	if (!ce->parent) {
 		return;
 	}
