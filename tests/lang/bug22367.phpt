@@ -65,6 +65,7 @@ var_dump($a->test);
 
 ?>
 --EXPECTF--
+Strict Standards: Declaration of bar::a() must be compatible with that of foo::a() in %sbug22367.php on line %d
 int(5)
 bool(false)
 
