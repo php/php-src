@@ -288,39 +288,27 @@ PHP_FUNCTION(flock)
 
 PHP_FUNCTION(get_meta_tags)
 {
-	zval **filename, **arg2;
-	int use_include_path = 0;
-	int in_tag=0, in_meta_tag=0, done=0;
-	int looking_for_val=0, have_name=0, have_content=0;
-	int saw_name=0, saw_content=0;
-	char *name=NULL, *value=NULL, *temp=NULL;
+	char *filename;
+	int filename_len;
+	zend_bool use_include_path = 0;
+	int in_tag = 0, done = 0;
+	int looking_for_val = 0, have_name = 0, have_content = 0;
+	int saw_name = 0, saw_content = 0;
+	char *name = NULL, *value = NULL, *temp = NULL;
 	php_meta_tags_token tok, tok_last;
 	php_meta_tags_data md;
 
-	/* check args */
-	switch (ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &filename) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &filename, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg2);
-		use_include_path = Z_LVAL_PP(arg2);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+	/* Parse arguments */
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
+							  &filename, &filename_len, &use_include_path) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	md.fp = php_fopen_wrapper(Z_STRVAL_PP(filename), "rb", 
+	md.fp = php_fopen_wrapper(filename, "rb", 
 			   use_include_path | ENFORCE_SAFE_MODE, &md.issock, &md.socketd, NULL TSRMLS_CC);
 	if (!md.fp && !md.socketd) {
 		if (md.issock != BAD_URL) {
-			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
+			char *tmp = estrndup(filename, filename_len);
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING, "get_meta_tags(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
@@ -335,12 +323,12 @@ PHP_FUNCTION(get_meta_tags)
 	md.ulc        = 0;
 	md.token_data = NULL;
 	md.token_len  = 0;
+	md.in_meta    = 0;
 
 	while (!done && (tok = php_next_meta_token(&md)) != TOK_EOF) {
 		if (tok == TOK_ID) {
 			if (tok_last == TOK_OPENTAG) {
-				in_meta_tag = !strcasecmp("meta", md.token_data);
-				md.in_meta = in_meta_tag;
+				md.in_meta = !strcasecmp("meta", md.token_data);
 			} else if (tok_last == TOK_SLASH && in_tag) {
 				if (strcasecmp("head", md.token_data) == 0) {
 					/* We are done here! */
@@ -372,7 +360,7 @@ PHP_FUNCTION(get_meta_tags)
 
 				looking_for_val = 0;
 			} else {
-				if (in_meta_tag) {
+				if (md.in_meta) {
 					if (strcasecmp("name", md.token_data) == 0) {
 						saw_name = 1;
 						saw_content = 0;
@@ -434,7 +422,7 @@ PHP_FUNCTION(get_meta_tags)
 			name = value = NULL;
 				
 			/* Reset all of our flags */
-			in_tag = in_meta_tag = looking_for_val = 0;
+			in_tag = looking_for_val = 0;
 			have_name = saw_name = 0;
 			have_content = saw_content = 0;
 			md.in_meta = 0;
@@ -463,39 +451,27 @@ PHP_FUNCTION(get_meta_tags)
 
 PHP_FUNCTION(file)
 {
-	zval **filename, **arg2;
+	char *filename;
+	int filename_len;
 	FILE *fp;
 	char *slashed, *target_buf;
-	register int i=0;
-	int use_include_path = 0;
-	int issock=0, socketd=0;
+	register int i = 0;
+	int issock = 0, socketd = 0;
 	int target_len, len;
-	zend_bool reached_eof=0;
+	zend_bool use_include_path = 0;
+	zend_bool reached_eof = 0;
 
-	/* check args */
-	switch (ZEND_NUM_ARGS()) {
-	case 1:
-		if (zend_get_parameters_ex(1, &filename) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		break;
-	case 2:
-		if (zend_get_parameters_ex(2, &filename, &arg2) == FAILURE) {
-			WRONG_PARAM_COUNT;
-		}
-		convert_to_long_ex(arg2);
-		use_include_path = Z_LVAL_PP(arg2);
-		break;
-	default:
-		WRONG_PARAM_COUNT;
+    /* Parse arguments */
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
+							  &filename, &filename_len, &use_include_path) == FAILURE) {
+		return;
 	}
-	convert_to_string_ex(filename);
 
-	fp = php_fopen_wrapper(Z_STRVAL_PP(filename), "rb", 
+	fp = php_fopen_wrapper(filename, "rb", 
 			use_include_path | ENFORCE_SAFE_MODE, &issock, &socketd, NULL TSRMLS_CC);
 	if (!fp && !socketd) {
 		if (issock != BAD_URL) {
-			char *tmp = estrndup(Z_STRVAL_PP(filename), Z_STRLEN_PP(filename));
+			char *tmp = estrndup(filename, filename_len);
 			php_strip_url_passwd(tmp);
 			php_error(E_WARNING, "file(\"%s\") - %s", tmp, strerror(errno));
 			efree(tmp);
