@@ -155,7 +155,7 @@ warn_plus_overloading	=	Off		; warn if the + operator is used with strings
 ;;;;;;;;;;;;;;;;;
 ; Data Handling ;
 ;;;;;;;;;;;;;;;;;
-variables_order		=	"EGPCB"	; This directive describes the order in which PHP registers
+variables_order		=	"EGPCBS"; This directive describes the order in which PHP registers
 								; GET, POST, Cookie, Environment and Built-in variables (G, P,
 								; C, E & B respectively, often referred to as EGPCB or GPC).
 								; Registration is done from left to right, newer values override
