@@ -1,3 +1,48 @@
+2004-09-16  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Go with PHP 5.0.2RC1
+
+    * ZendEngine2/tests/bug27669.phpt:
+      - Add test for bug #27669
+
+2004-09-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ZendEngine2/zend_language_parser.y:
+      ZTS fix.
+
+2004-09-16  Andi Gutmans  <andi@zend.com>
+
+    * NEWS:
+      - Only 5.0.x news which we'll copy over before 5.1.0 release
+
+    * (PHP_5_0)
+      NEWS:
+      - NEWS
+
+    * NEWS:
+      - News
+
+    * ZendEngine2/zend_compile.c
+      ZendEngine2/zend_compile.h
+      ZendEngine2/zend_language_parser.y:
+      - Fix bug #27669 (Dmitry).
+      Fixes:
+      <?
+              class A
+              {
+                      function hello()
+                      {
+                              echo "Hello World\n";
+                      }
+              }
+              $y[0] = 'hello';
+              A::$y[0]();
+      ?>
+
 2004-09-15  Uwe Schindler  <uwe@thetaphi.de>
 
     * (PHP_4_3)

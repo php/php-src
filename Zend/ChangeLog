@@ -1,3 +1,36 @@
+2004-09-16  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - Go with PHP 5.0.2RC1
+
+    * tests/bug27669.phpt:
+      - Add test for bug #27669
+
+2004-09-16  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * zend_language_parser.y:
+      ZTS fix.
+
+2004-09-16  Andi Gutmans  <andi@zend.com>
+
+    * zend_compile.c
+      zend_compile.h
+      zend_language_parser.y:
+      - Fix bug #27669 (Dmitry).
+      Fixes:
+      <?
+              class A
+              {
+                      function hello()
+                      {
+                              echo "Hello World\n";
+                      }
+              }
+              $y[0] = 'hello';
+              A::$y[0]();
+      ?>
+
 2004-09-15  Ilia Alshanetsky  <ilia@prohost.org>
 
     * zend_operators.h:
