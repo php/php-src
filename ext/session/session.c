@@ -544,7 +544,7 @@ CACHE_LIMITER_FUNC(public)
 	strcat_gmt(buf, &now);
 	ADD_COOKIE(buf);
 	
-	sprintf(buf, "Cache-Control: public, max-age=%d", PS(cache_expire) * 60);
+	sprintf(buf, "Cache-Control: public, max-age=%ld", PS(cache_expire) * 60);
 	ADD_COOKIE(buf);
 	
 	last_modified();
@@ -555,7 +555,7 @@ CACHE_LIMITER_FUNC(private)
 	char buf[MAX_STR + 1];
 	
 	ADD_COOKIE("Expires: Thu, 19 Nov 1981 08:52:00 GMT");
-	sprintf(buf, "Cache-Control: private, max-age=%d, pre-check=%d", PS(cache_expire) * 60, PS(cache_expire) * 60);
+	sprintf(buf, "Cache-Control: private, max-age=%ld, pre-check=%ld", PS(cache_expire) * 60, PS(cache_expire) * 60);
 	ADD_COOKIE(buf);
 
 	last_modified();
