@@ -21,7 +21,7 @@
 #define PHP_SAFE_MODE 0
 #define MAGIC_QUOTES 0
 /* This is the default configuration file to read */
-#define CONFIGURATION_FILE_PATH "php3.ini"
+#define CONFIGURATION_FILE_PATH "php.ini"
 #define USE_CONFIG_FILE 1
 
 /* Undefine if you want stricter XML/SGML compliance by default */

@@ -86,7 +86,7 @@ static char *ErrorMessages[] =
 	{"Bad Message Return Path"},
 	{"Bad Mail Host"},
 	{"Bad Message File"},
-	{"PHP Internal error: php3.ini sendmail from variable not set!"}
+	{"PHP Internal error: php.ini sendmail from variable not set!"}
 };
 
 
