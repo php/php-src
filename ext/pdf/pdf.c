@@ -60,7 +60,6 @@ static int le_gd;
 static int le_pdf;
 
 /* {{{ constants
-/*
  * to adopt the php way of error handling to PDFlib
  * The image related functions in PDFlib return -1 on error
  * but they may return 0 (FALSE) in normal cases
@@ -487,8 +486,9 @@ PHP_FUNCTION(pdf_open)
 	} else {
 		PDF_open_mem(pdf, pdf_flushwrite);
 	}
-
+#if (PDFLIB_MAJORVERSION >= 4)
 	PDF_set_parameter(pdf, "imagewarning", "true");
+#endif
 	PDF_set_parameter(pdf, "binding", "PHP");
 
 	ZEND_REGISTER_RESOURCE(return_value, pdf, le_pdf);
@@ -2226,7 +2226,9 @@ PHP_FUNCTION(pdf_new) {
 	PDF *pdf;
 
 	pdf = PDF_new2(custom_errorhandler, pdf_emalloc, pdf_realloc, pdf_efree, NULL);
+#if (PDFLIB_MAJORVERSION >= 4)
 	PDF_set_parameter(pdf, "imagewarning", "true");
+#endif
 	PDF_set_parameter(pdf, "binding", "PHP");
 
 	ZEND_REGISTER_RESOURCE(return_value, pdf, le_pdf);
