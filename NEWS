@@ -1,6 +1,8 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? Feb 2004, Version 4.3.5
+- Fixed possible crashes inside socket extension, due to missing check inside
+  allocation functions. (Ilia)
 - Fixed bug #27384 (unpack() misbehaves with 1 char string). (GeorgeS)
 - Fixed bug #27383 (Potential crash inside fopen_wrapper, while parsing
   response code). (Ilia)
@@ -16,6 +18,8 @@ PHP 4                                                                      NEWS
   (Jani, Markus dot Lidel at shadowconnect dot com)
 - Fixed bug #26005 (Random "cannot change the session ini settings" errors).
   (Jani, jsnajdr at kerio dot com)
+- Fixed bug #21760 (Use of uninitialized pointer inside php_read()). (Ilia, 
+  uce at ftc dot gov)
 
 16 Feb 2004, Version 4.3.5RC3
 - Fixed zero bytes memory allocation when no extra ini files are found in the
