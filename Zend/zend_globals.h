@@ -255,6 +255,9 @@ struct _zend_scanner_globals {
 	char *_yy_last_accepting_cpos;
 	int _yy_more_flag;
 	int _yy_more_len;
+	int yy_start_stack_ptr;
+	int yy_start_stack_depth;
+	int *yy_start_stack;
 };
 
 #endif /* ZEND_GLOBALS_H */
