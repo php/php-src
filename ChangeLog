@@ -1,3 +1,64 @@
+2003-10-19  Shane Caraveo  <shane@caraveo.com>
+
+    * ext/dom/php_dom.c
+      ext/simplexml/simplexml.c
+      ext/xml/xml.c:
+      add global init/shutdown functions for libxml.  this is required as
+      shutdown is not safe to call multiple times, and to make streams work
+      correctly some init stuff has to happen in a specific order
+
+    * main/internal_functions_win32.c
+      win32/php4dllts.dsp:
+      Add libxml extension for common code that is needed to be shared between
+      various xml extensions.  currently the only implemented support is the
+      addition of the streams support for libxml.  One new function,
+      libxml_set_streams_context, which allows a streams context to bet set
+      prior to loading or writing documents.  This works transparently with any
+      extension that uses libxml.  All ini settings that effect streams will
+      also now effect the loading and writing of xml documents.
+      
+      TODO: linux support, not sure if config.m4 will work right.
+
+    * main/streams/plain_wrapper.c:
+      finish file uri support, this stuff was unecessary.
+
+    * main/streams/plain_wrapper.c
+      main/streams/streams.c:
+      A simpler patch to add file uri support
+
+    * main/streams/plain_wrapper.c:
+      revert file: support in preparation for simpler patch
+
+    * ext/standard/basic_functions.c
+      ext/standard/php_fopen_wrappers.h
+      main/streams/plain_wrapper.c:
+      make file uri's work with streams
+
+    * ext/standard/url.c:
+      make parse_url work correctly for file uri's on windows, such as
+      file:///c:/somepath/somefile.txt
+
+2003-10-19  Stanislav Malyshev  <stas@zend.com>
+
+    * win32/registry.c:
+      fix wrong string length for registry values
+
+    * main/php_ini.c:
+      Enable setting php.ini path via the registry
+
+    * win32/registry.c:
+      fix compilation
+
+    * win32/php_registry.h
+      win32/registry.c:
+      Add function for getting php.ini path from registry
+
+2003-10-19  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/zend_language_parser.y:
+      - Nuke const in function parameters. I just can't remember why this exists
+      - and it seems no one else remembers either. It has no semantic meaning.
+
 2003-10-18  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * ZendEngine2/zend.h
