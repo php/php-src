@@ -68,7 +68,7 @@
 #define SNMP_MSG_GETNEXT GETNEXT_REQ_MSG
 #endif
 
-void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st);
+void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st);
 
 /* constant - can be shared among threads */
 static oid objid_mib[] = {1, 3, 6, 1, 2, 1};
@@ -85,21 +85,23 @@ function_entry snmp_functions[] = {
 };
 
 zend_module_entry snmp_module_entry = {
-	"SNMP",snmp_functions,php3i_snmp_init,NULL,NULL,NULL,php3_info_snmp,STANDARD_MODULE_PROPERTIES
+	"SNMP",snmp_functions,PHP_MINIT(snmp),NULL,NULL,NULL,PHP_MINFO(snmp),STANDARD_MODULE_PROPERTIES
 };
 
 #if COMPILE_DL
 DLEXPORT zend_module_entry *get_module() { return &snmp_module_entry; };
 #endif
 
-/* THREAD_LS snmp_module php3_snmp_module; - may need one of these at some point */
+/* THREAD_LS snmp_module php_snmp_module; - may need one of these at some point */
 
-int php3i_snmp_init(INIT_FUNC_ARGS) {
+PHP_MINIT_FUNCTION(snmp)
+{
 	init_mib();
 	return SUCCESS;
 }
 
-void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS) {
+PHP_MINFO_FUNCTION(snmp)
+{
 	php_printf("ucd-snmp");
 }
 
@@ -119,7 +121,7 @@ void php3_info_snmp(ZEND_MODULE_INFO_FUNC_ARGS) {
 * st=11  snmpset() - query an agent and set a single value
 *
 */
-void _php3_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
+void php_snmp(INTERNAL_FUNCTION_PARAMETERS, int st) {
 	pval *a1, *a2, *a3, *a4, *a5, *a6, *a7;
 	struct snmp_session session, *ss;
 	struct snmp_pdu *pdu=NULL, *response;
@@ -318,14 +320,14 @@ retry:
 /* {{{ proto string snmpget(string host, string community, string object_id [, int timeout [, int retries]]) 
 Fetch an SNMP object */
 PHP_FUNCTION(snmpget) {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,1);
 }
 /* }}} */
 
 /* {{{ proto string snmpwalk(string host, string community, string object_id [, int timeout [, int retries]]) 
 Return all objects under the specified object id */
 PHP_FUNCTION(snmpwalk) {
-	return _php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
+	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,2);
 }
 /* }}} */
 
@@ -333,7 +335,7 @@ PHP_FUNCTION(snmpwalk) {
 Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmprealwalk)
 {
-	return _php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
+	return php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,3);
 }
 /* }}} */
 
@@ -341,7 +343,7 @@ PHP_FUNCTION(snmprealwalk)
 Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmpwalkoid)
 {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,4);
 }
 /* }}} */
 
@@ -349,7 +351,7 @@ PHP_FUNCTION(snmpwalkoid)
 Return the current status of quick_print */
 PHP_FUNCTION(snmp_get_quick_print)
 {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,9);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,9);
 }
 /* }}} */
 
@@ -357,14 +359,14 @@ PHP_FUNCTION(snmp_get_quick_print)
 Return all objects including their respective object id withing the specified one */
 PHP_FUNCTION(snmp_set_quick_print)
 {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,10);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,10);
 }
 /* }}} */
 
 /* {{{ proto int snmpset(string host, string community, string object_id, string type, mixed value [, int timeout [, int retries]]) 
 Set the value of a SNMP object */
 PHP_FUNCTION(snmpset) {
-	_php3_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
+	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU,11);
 }
 /* }}} */
 
