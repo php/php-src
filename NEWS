@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   returning the value). (Ilia)
 
 10 Aug 2004, PHP 5.0.1RC1
-- Changed destructor mechanism so that derstructors are called prior to request
+- Changed destructor mechanism so that destructors are called prior to request
   shutdown. (Marcus)
 - Rewritten UNIX and Windows install help files. (Documentation Team)
 - Updated several libraries bundled with the windows release which now 
