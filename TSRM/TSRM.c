@@ -1,3 +1,19 @@
+/*
+   +----------------------------------------------------------------------+
+   | Thread Safe Resource Manager                                         |
+   +----------------------------------------------------------------------+
+   | Copyright (c) 1998, 1999 Zeev Suraski                                |
+   +----------------------------------------------------------------------+
+   | This source file is subject to the Zend license, that is bundled     |
+   | with this package in the file LICENSE.  If you did not receive a     |
+   | copy of the Zend license, please mail us at zend@zend.com so we can  |
+   | send you a copy immediately.                                         |
+   +----------------------------------------------------------------------+
+   | Author:  Zeev Suraski <zeev@zend.com>                                |
+   +----------------------------------------------------------------------+
+*/
+
+
 #include "TSRM.h"
 #include <stdio.h>
 
@@ -129,6 +145,9 @@ TSRM_FUNC ts_rsrc_id ts_allocate_id(size_t size, void (*ctor)(void *resource), v
 				p->storage = realloc(p->storage, sizeof(void *)*id_count);
 				for (j=p->count; j<id_count; j++) {
 					p->storage[j] = (void *) malloc(resource_types_table[j].size);
+					if (resource_types_table[j].ctor) {
+						resource_types_table[j].ctor(p->storage[j]);
+					}
 				}
 				p->count = id_count;
 			}
@@ -153,7 +172,9 @@ static void allocate_new_resource(tsrm_tls_entry **thread_resources_ptr, THREAD_
 	(*thread_resources_ptr)->next = NULL;
 	for (i=0; i<id_count; i++) {
 		(*thread_resources_ptr)->storage[i] = (void *) malloc(resource_types_table[i].size);
-		resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);
+		if (resource_types_table[i].ctor) {
+			resource_types_table[i].ctor((*thread_resources_ptr)->storage[i]);
+		}
 	}
 }
 
@@ -216,7 +237,9 @@ void ts_free_thread()
 			int i;
 
 			for (i=0; i<thread_resources->count; i++) {
-				resource_types_table[i].dtor(thread_resources->storage[i]);
+				if (resource_types_table[i].dtor) {
+					resource_types_table[i].dtor(thread_resources->storage[i]);
+				}
 				free(thread_resources->storage[i]);
 			}
 			free(thread_resources->storage);
