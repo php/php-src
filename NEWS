@@ -6,6 +6,7 @@ PHP 4                                                                      NEWS
   for doing performance stats without warnings in server-log. (Uwe Schindler)
 - Fixed bug #29116 (Zend constant warning uses memory after free). (Marcus,
   jdolecek at NetBSD dot org)
+- Fixed Bug #29075 (strnatcmp() incorrectly handles whitespace). (Curt, Ilia)
 - Fixed bug #29049 (array sorting via user function/method does not validate 
   it). (Ilia)
 - Fixed bug #29038 (extract() with EXTR_PREFIX_SAME prefixes empty strings).
@@ -14,7 +15,6 @@ PHP 4                                                                      NEWS
   (Ilia)
 - Fixed bug #28974 (overflow in array_slice(), array_splice(), substr,
   substr_replace(), strspn(), strcspn()). (Andrey)
-- Fixed bug #28963 (Missing space for \0 in address allocation). (Ilia)
 - Fixed bug #28897 (ibase: -1 returned as -0.000 for 64-bit scaled int). (Ard)
 - Fixed bug #28879 (Implicit/Explicit array creation inconsistency when using
   Resources, Arrays, or Objects as indices). (Sara)
