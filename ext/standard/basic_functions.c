@@ -731,6 +731,7 @@ function_entry basic_functions[] = {
 	PHP_FE(ob_get_status,													NULL)
 	PHP_FE(ob_get_contents,													NULL)
 	PHP_FE(ob_implicit_flush,												NULL)
+	PHP_FE(ob_list_handlers,												NULL)
 
 	/* functions from array.c */
 	PHP_FE(ksort,					first_arg_force_ref)
