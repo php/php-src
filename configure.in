@@ -91,8 +91,6 @@ if test -z "$host_alias"; then
     host_alias=$ac_cv_host_alias
 fi
 
-BSD_MAKEFILE=no
-
 case $host_alias in
 *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
@@ -105,8 +103,6 @@ case $host_alias in
 *darwin*|*rhapsody*)
     CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
     php_multiple_shlib_versions_ok=yes;;
-*bsdi*)
-    BSD_MAKEFILE=yes;;
 *beos*)
     beos_threads=1
     LIBS="$LIBS -lbe -lroot";;
