@@ -74,7 +74,6 @@
 
 /* Enable / Disable XML extension (default: enabled) */
 #define HAVE_LIBEXPAT 1
-#define HAVE_XML 1
 
 /* Enable / Disable ZLIB extension (default: enabled) */
 #define HAVE_ZLIB 1
