@@ -460,7 +460,9 @@ fi
 if test -n "$ODBC_TYPE"; then
   INCLUDES="$INCLUDES $ODBC_INCLUDE"
   if test "$ODBC_TYPE" != "dbmaker"; then
-    EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
+    if test $shared != "yes"; then
+      EXTRA_LIBS="$EXTRA_LIBS $ODBC_LFLAGS $ODBC_LIBS"
+    fi
   fi
   AC_DEFINE(HAVE_UODBC,1,[ ])
   PHP_SUBST(ODBC_INCDIR)
