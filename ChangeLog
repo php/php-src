@@ -1,3 +1,344 @@
+2002-10-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/tests/strings/htmlentities10.phpt
+      ext/standard/tests/strings/htmlentities11.phpt
+      ext/standard/tests/strings/htmlentities12.phpt
+      ext/standard/tests/strings/htmlentities13.phpt
+      ext/standard/tests/strings/htmlentities14.phpt:
+    Added some cases which test if charset determination with
+    SG(default_charset) works.
+
+    * ext/standard/html.c:
+    Improved determine_charset() to look up SG(default_charset) value
+
+    * ext/standard/tests/strings/htmlentities1.phpt
+      ext/standard/tests/strings/htmlentities2.phpt
+      ext/standard/tests/strings/htmlentities3.phpt
+      ext/standard/tests/strings/htmlentities4.phpt
+      ext/standard/tests/strings/htmlentities5.phpt
+      ext/standard/tests/strings/htmlentities6.phpt
+      ext/standard/tests/strings/htmlentities7.phpt
+      ext/standard/tests/strings/htmlentities8.phpt
+      ext/standard/tests/strings/htmlentities9.phpt:
+    Added new test cases for htmlentities
+
+    * ext/standard/html.c: Fixed ISO-8859-1 handling.
+
+2002-10-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dba/php_dba.h
+      ext/dba/dba.c: implemented dba_handlers()
+
+2002-10-24  Hartmut Holzgraefe  <hartmut@six.de>
+
+    * ext/standard/basic_functions.c
+      ext/standard/config.m4: trying to fix #20063
+
+2002-10-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/html.c: Added &euro; support to cp1252 table
+
+2002-10-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/dbx/tests/001.phpt
+      ext/dbx/tests/002.phpt
+      ext/dbx/tests/003.phpt
+      ext/dbx/tests/004.phpt
+      ext/dbx/tests/005.phpt
+      ext/dbx/tests/006.phpt
+      ext/dbx/tests/007.phpt
+      ext/dbx/tests/008.phpt
+      ext/dbx/tests/skipif.inc: -specify reason if connection is not specified
+    -remove unnecessary sections
+
+2002-10-24  Melvyn Sopacua  <msopacua@idg.nl>
+
+    * ext/standard/tests/strings/strtoupper.phpt:
+    - Add locale string for FreeBSD
+    ATTN: Test nog longer skips, but fails. So whatever has changed since 4.2.3
+    affects BSD systems.
+
+2002-10-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/file.c:
+    fix compiler warning?: implement default mentioned by manual
+
+    * ext/standard/math.c
+      ext/standard/string.c
+      ext/mbstring/mbstring.c
+      ext/dbx/dbx_odbc.c
+      ext/pcre/php_pcre.c
+      ext/pgsql/pgsql.c
+      ext/mysql/libmysql/string.c: fix compiler warning
+
+2002-10-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/php_math.h:
+    - Protect function definitions with #ifdef's too
+
+2002-10-24  Tal Peer  <tal@twisthost.com>
+
+    * pear/HTML/Select.php:
+    More raiseError fixes.
+
+2002-10-24  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/math.c:
+    - If functions are not available on OS, they're not available in PHP.
+
+2002-10-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/session/tests/008-php4.2.3.phpt
+      ext/session/tests/008.phpt:
+    one version for php<4.2.3 and one for php>=4.2.3
+
+    * run-tests.php: -improoved number detection
+    -display every error/warning only once
+
+2002-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/domxml/tests/001.phpt:
+    Added an ini option to hide the expected memory leak. This is done for
+    compatibility with systems where report_memleak is turned off or running
+    PHP with --disable-debug.
+
+2002-10-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * main/main.c: - Allow the report_memleak setting to be set everywhere
+
+2002-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cli/php_cli.c: add missing {}
+
+2002-10-24  Marc Boeren  <M.Boeren@guidance.nl>
+
+    * ext/dbx/dbx_oci8.c:
+    Changed the dbx_oci8 behaviour to return lowercase column-names,
+    which is a hack but at least it makes it easier for users
+    to create portable apps.
+
+    * ext/dbx/tests/007.phpt
+      ext/dbx/tests/008.phpt
+      ext/dbx/tests/dbx_test.p
+      ext/dbx/tests/005.phpt:
+    Not happy with the hack to handle the uppercase fieldnames that oracle
+    returns. Changed the dbx_oci8 behaviour to return lowercase instead,
+    which is also a hack but at least it makes it much easier for users
+    to create portable apps (Mc).
+
+2002-10-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * ext/standard/dl.c:
+    Reverted because my patch doesn't make sense: it was just my problem.
+
+    * ext/standard/dl.c: Fix build
+
+2002-10-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php_cli.c: - whitespace
+
+2002-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cli/php_cli.c: Improve shutdown-behaviour
+
+    Noticed by: Anantha Kesari H Y
+
+2002-10-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * sapi/cli/php_cli.c: *** empty log message ***
+
+2002-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * sapi/cli/php_cli.c
+      sapi/servlet/servlet.c
+      regex/regex_extra.h
+      sapi/apache/php_apache.c
+      sapi/cgi/cgi_main.c
+      main/streams.c
+      main/php.h
+      main/php_ini.c
+      ext/xml/xml.c
+      main/main.c
+      ext/standard/info.c
+      ext/standard/mail.c
+      ext/oracle/oracle.c
+      ext/standard/dl.c
+      ext/standard/fsock.c
+      ext/odbc/php_odbc.c
+      ext/oci8/oci8.c
+      ext/mysql/php_mysql.c
+      ext/mcal/php_mcal.h
+      ext/imap/php_imap.h
+      ext/informix/ifx.ec
+      ext/hwapi/hwapi.cpp
+      ext/hyperwave/hw.c
+      ext/filepro/filepro.c
+      ext/gd/gdcache.c
+      ext/fbsql/php_fbsql.c
+      ext/dbase/dbase.c
+      ext/dotnet/php_dotnet.h
+      configure.in:
+    centralize #include "build-defs.h" and drop (sometimes inconsistent) other
+    instances
+
+2002-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * run-tests.php: Added failed test summary.
+
+2002-10-24  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/dbx/dbx_oci8.c:
+    - True and false are not always defined, used numbers now
+
+2002-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/math.c
+      acinclude.m4
+      configure.in
+      ext/standard/config.m4: Make PHP compile out-of-the-box with uClibc
+
+2002-10-24  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * win32/sendmail.c
+      win32/sendmail.h
+      sapi/cli/php_cli.c
+      sapi/apache2filter/sapi_apache2.c
+      sapi/apache/sapi_apache.c
+      sapi/apache/php_apache.c
+      sapi/apache/mod_php4.c: NetWare related changes/modifications.
+
+    * sapi/apache/libpre.c: NetWare related file.
+
+    * sapi/apache/libpre.c: New file.
+
+    * main/SAPI.h
+      main/SAPI.c
+      main/safe_mode.c
+      main/reentrancy.c
+      main/php_syslog.h
+      main/php_sprintf.c
+      main/php_open_temporary_file.c
+      main/php_logos.c
+      main/php_ini.c
+      main/php_compat.h
+      main/php.h
+      main/network.c
+      main/mergesort.c
+      main/main.c: NetWare related changes/modifications.
+
+    * main/internal_functions_nw.c: NetWare related file.
+
+    * main/internal_functions_nw.c: New file.
+
+    * main/fopen_wrappers.c: NetWare related changes/modifications.
+
+    * main/config.nw.h: NetWare related file.
+
+    * ext/xml/expat/xmltok_impl.c
+      ext/xml/xml.c
+      ext/standard/var_unserializer.c
+      ext/standard/syslog.c
+      ext/standard/string.c
+      ext/standard/rand.c
+      ext/standard/pageinfo.c
+      ext/standard/pack.c
+      ext/standard/microtime.c
+      ext/standard/md5.c
+      ext/standard/math.c
+      ext/standard/mail.c
+      ext/standard/link.c
+      ext/standard/lcg.c
+      ext/standard/iptc.c
+      ext/standard/info.c
+      ext/standard/image.c
+      ext/standard/html.c
+      ext/standard/head.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/fsock.h
+      ext/standard/fsock.c
+      ext/standard/flock_compat.c
+      ext/standard/filestat.c
+      ext/standard/file.c
+      ext/standard/dns.c
+      ext/standard/dl.c
+      ext/standard/datetime.c
+      ext/standard/basic_functions.c
+      ext/standard/base64.c: NetWare related changes/modifications.
+
+2002-10-24  Sascha Schumann  <sascha@schumann.cx>
+
+    * acinclude.m4:
+    Quote macro names in AC_DEFUN() and prefix the internal macros using
+    a single underscore. Also rename AC_PHP_ONCE as PHP_RUN_ONCE.
+
+    * ext/session/session.c: improved warning message
+
+
+2002-10-24  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * ext/snmp/snmp.c
+      ext/session/mod_files.c
+      ext/session/session.c
+      ext/pgsql/php_pgsql.h: NetWare related changes/modifications.
+
+    * ext/pgsql/pgsql.mak: NetWare related file.
+
+    * ext/pgsql/pgsql.mak: New file.
+
+    * ext/pcre/pcrelib/internal.h
+      ext/mysql/php_mysql.c: NetWare related changes/modifications.
+
+    * ext/mysql/mysql.mak: NetWare related file.
+
+    * ext/ldap/php_ldap.h
+      ext/ldap/ldap.c: NetWare related changes/modifications.
+
+    * ext/ldap/ldap.mak
+      ext/imap/imap.mak: NetWare related file.
+
+    * ext/imap/imap.mak: New file.
+
+    * ext/imap/php_imap.c
+      ext/ftp/php_ftp.c
+      ext/ftp/ftp.c
+      ext/bcmath/libbcmath/src/config.h:
+    NetWare related changes/modifications.
+
+2002-10-24  Jan Lehnardt  <jan@dasmoped.net>
+
+    * run-tests.php:
+     - gcc prints -v information on stderr, make sure that we catch it anyway.
+     - I hope this does not cause problems with other compilers or shells. IMHO we
+     - already rely on /bin/sh anyway, right?
+
+    * ext/standard/exec.c:  - fix segfault in proc_open
+
+2002-10-24  Jani Taskinen  <sniper@iki.fi>
+
+    * NEWS: style is everything
+
+2002-10-24  Moriyoshi Koizumi  <moriyoshi@at.wakwak.com>
+
+    * main/rfc1867.c:
+    Fixed build when mbstring is not used - my previous patch is insufficient.
+
+    * main/rfc1867.c:
+    MFH; we would see a nasty problem again if it was not fixed...
+
+2002-10-24  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/xslt/tests/009.phpt:
+    Various corrections aimed at making the test's results consistent across
+    all enviroments.
+
+2002-10-24  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/standard/tests/strings/strtoupper.phpt:
+    use german characters for a test with german locale
+
+    * README.TESTING: additions
+
 2002-10-23  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
 
     * ext/exif/tests/001.phpt
