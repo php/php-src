@@ -555,6 +555,9 @@ function_entry basic_functions[] = {
 	PHP_FE(ini_set,															NULL)
 	PHP_FALIAS(ini_alter,			ini_set,								NULL)
 	PHP_FE(ini_restore,														NULL)
+	PHP_FE(get_include_path,												NULL)
+	PHP_FE(set_include_path,												NULL)
+	PHP_FE(restore_include_path,											NULL)
 
 	PHP_FE(setcookie,														NULL)
 	PHP_FE(header,															NULL)
@@ -2381,6 +2384,68 @@ PHP_FUNCTION(ini_restore)
 
 	zend_restore_ini_entry(Z_STRVAL_PP(varname), Z_STRLEN_PP(varname)+1, PHP_INI_STAGE_RUNTIME);
 }
+/* }}} */
+
+/* {{{ proto string set_include_path(string varname, string newvalue)
+   Sets the include_path configuration option */
+
+PHP_FUNCTION(set_include_path)
+{
+	pval **new_value;
+	char *old_value;
+
+	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &new_value) == FAILURE) {
+		WRONG_PARAM_COUNT;
+	}
+	convert_to_string_ex(new_value);
+	old_value = zend_ini_string("include_path", sizeof("include_path"), 0);
+	/* copy to return here, because alter might free it! */
+	if (old_value) {
+		RETVAL_STRING(old_value, 1);
+	} else {
+		RETVAL_FALSE;
+	}
+	if (zend_alter_ini_entry("include_path", sizeof("include_path"),
+                             Z_STRVAL_PP(new_value), Z_STRLEN_PP(new_value),
+                             PHP_INI_USER, PHP_INI_STAGE_RUNTIME) == FAILURE) {
+		zval_dtor(return_value);
+		RETURN_FALSE;
+	}
+}
+
+/* }}} */
+
+/* {{{ proto string get_include_path()
+   Get the current include_path configuration option */
+
+PHP_FUNCTION(get_include_path)
+{
+    char *str;
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+	str = zend_ini_string("include_path", sizeof("include_path"), 0);
+	if (str == NULL) {
+		RETURN_FALSE;
+	}
+	RETURN_STRING(str, 1);
+}
+
+/* }}} */
+
+/* {{{ proto string restore_include_path()
+   Restore the value of the include_path configuration option */
+
+PHP_FUNCTION(restore_include_path)
+{
+	if (ZEND_NUM_ARGS() != 0) {
+		WRONG_PARAM_COUNT;
+	}
+
+	zend_restore_ini_entry("include_path", sizeof("include_path"),
+                           PHP_INI_STAGE_RUNTIME);
+}
+
 /* }}} */
 
 /* {{{ proto bool print_r(mixed var [, bool return])
