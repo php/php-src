@@ -1508,7 +1508,7 @@ PHP_FUNCTION(rename)
 	if (PG(safe_mode) &&(!php_checkuid(old_name, NULL, 2))) {
 		RETURN_FALSE;
 	}
-	ret = rename(old_name, new_name);
+	ret = V_RENAME(old_name, new_name);
 
 	if (ret == -1) {
 		php_error(E_WARNING,"Rename failed (%s)", strerror(errno));
