@@ -39,6 +39,10 @@
 #include "win32/readdir.h"
 #endif
 
+#if !HAVE_ALPHASORT || !HAVE_SCANDIR
+#include "php_scandir.h"
+#endif
+
 #ifdef HAVE_GLOB
 #ifndef PHP_WIN32
 #include <glob.h>
@@ -421,6 +425,77 @@ PHP_FUNCTION(glob)
 }
 /* }}} */
 #endif 
+
+/* {{{ php_alphasortr
+*/
+static int php_alphasortr(const struct dirent **a, const struct dirent **b)
+{
+	return strcoll((*b)->d_name, (*a)->d_name);
+}
+/* }}} */
+
+/* {{{ proto array scandir(string dir [, int sorting_order])
+   List files & directories inside the specified path */
+PHP_FUNCTION(scandir)
+{
+	char *dirn;
+	int dirn_len;
+	int flags = 0;
+	char *path;
+	struct dirent **namelist;
+	int n, i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &dirn, &dirn_len, &flags) == FAILURE) {
+		return;
+	}
+
+#ifdef ZTS
+	if(!IS_ABSOLUTE_PATH(dirn, dirn_len)) {
+		path = expand_filepath(dirn, NULL TSRMLS_CC);
+	} else 
+#endif
+		path = dirn;
+
+	if (PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
+		RETVAL_FALSE;
+		goto err;
+	}
+	if(php_check_open_basedir(path TSRMLS_CC)) {
+		RETVAL_FALSE;
+		goto err;
+	}
+
+	if (!flags) {
+		n = scandir(path, &namelist, 0, alphasort);
+	} else {
+		n = scandir(path, &namelist, 0, php_alphasortr);
+	}
+
+	if (n < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "(errno %d): %s", errno, strerror(errno));
+		RETVAL_FALSE;
+		goto err;
+	}
+	
+	array_init(return_value);
+
+	for (i = 0; i < n; i++) {
+		add_next_index_string(return_value, namelist[i]->d_name, 1);
+		free(namelist[i]);
+	}
+
+	if (n) {
+		free(namelist);
+	}
+
+err:
+	if (path && path != dirn) {
+		efree(path);
+	}
+
+	return;
+}
+/* }}} */
 
 /*
  * Local variables:

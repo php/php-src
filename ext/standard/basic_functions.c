@@ -724,6 +724,7 @@ function_entry basic_functions[] = {
 	PHP_FE(rewinddir,														NULL)
 	PHP_STATIC_FE("readdir",		php_if_readdir,							NULL)
 	PHP_FALIAS(dir,					getdir,									NULL)
+	PHP_FE(scandir,															NULL)
 #ifdef HAVE_GLOB
 	PHP_FE(glob,															NULL)
 #endif
