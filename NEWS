@@ -1,6 +1,13 @@
 PHP 4                                                                      NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 200?, Version 4.2.0-dev
+- added function domxml_dump_node($doc,$node). Dumps a node plus all
+  children into a string. (chregu)
+- Added function domxml_node_get_content() (chregu)
+- added function domxml_dump_file($filename,[$compression]). Dumps XML to
+  a file and uses compression, if specified (chregu)
+- added exslt integration (see http://exslt.org for details). To be
+  configured with --with-dom-exslt[=DIR] (and --with-dom-xslt) (chregu, jaroslaw)
 - Don't touch any globals in session_unset() if register_globals is set
   to off. (Thies)
 - Added 3 new optional parameters to OCIFetchStatement(). They control
