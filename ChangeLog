@@ -1,3 +1,63 @@
+2001-11-18  Jani Taskinen  <sniper@iki.fi>
+
+    * config.guess
+      config.sub: MFH
+
+    * config.guess
+      config.sub: Fixed bug: #14014.
+
+    * ext/ncurses/config.m4: Test before commit..test before commit..
+
+    * ext/ncurses/config.m4: Now this might even work.
+
+2001-11-18  Doug MacEachern  <dougm@covalent.net>
+
+    * ext/session/php_session.h:
+    AIX compiler doesn't like having a comma at the end of the enum
+    (Ryan Bloom <rbb@apache.org>)
+
+2001-11-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/basic_functions.c
+      ext/standard/md5.c
+      ext/standard/md5.h:
+    - Added md5_file(), which calculaties the MD5 sum of a file.
+      (patch by: Alessandro Astarita <aleast@capri.it>) (Derick)
+    - Added md5_file(), which calculaties the MD5 sum of a file.
+      (patch by: Alessandro Astarita <aleast@capri.it>) 
+
+    * NEWS: - MFB
+
+    * NEWS: - Fix typo
+
+    * NEWS: - Updated NEWS to reflect removal of ext/sablotron
+
+    * ext/ncurses/config.m4: - MFH (fix build under FreeBSD)
+
+    * ext/ncurses/config.m4: - Fix build on FreeBSD (patch by Markus Fischer)
+
+2001-11-18  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/standard/file.c: WS fix
+
+    * NEWS: Some typos..
+
+2001-11-18  Andrei Zmievski  <andrei@ispi.net>
+
+    * NEWS
+      ext/wddx/wddx.c: MFH
+
+    * ext/wddx/wddx.c
+      NEWS:
+    - Added support for parsing recordsets.
+    - Fixed a bug that sometimes would corrupt top-level element
+      if it was a scalar one.
+
+2001-11-18  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * acinclude.m4
+      configure.in: - MFH
+
 2001-11-17  Stig Bakken  <ssb@fast.no>
 
     * pear/DB/IDEAS: ideas scratch file
