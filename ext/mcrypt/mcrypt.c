@@ -62,47 +62,49 @@ static mcrypt_global_struct mcryptg;
 
 #endif
 
-#define MCRYPT_ARGS2 \
-	pval *cipher, *data, *key, *mode; \
-	int td; \
-	char *ndata; \
-	size_t bsize; \
-	size_t nr; \
+#define MCRYPT_ARGS2 											\
+	pval **cipher, **data, **key, **mode; 						\
+	int td; 													\
+	char *ndata; 												\
+	size_t bsize; 												\
+	size_t nr; 													\
 	size_t nsize
 
-#define MCRYPT_ARGS MCRYPT_ARGS2; pval *iv
+#define MCRYPT_ARGS 											\
+	MCRYPT_ARGS2; 												\
+	pval **iv
 
-#define MCRYPT_CONVERT \
-	convert_to_long(cipher); \
-	convert_to_long(mode); \
-	convert_to_string(data); \
-	convert_to_string(key)
+#define MCRYPT_CONVERT 											\
+	convert_to_long_ex(cipher); 								\
+	convert_to_long_ex(mode); 									\
+	convert_to_string_ex(data); 								\
+	convert_to_string_ex(key)
 
-#define MCRYPT_SIZE \
-	bsize = get_block_size(cipher->value.lval); \
-	nr = (data->value.str.len + bsize - 1) / bsize; \
+#define MCRYPT_SIZE 											\
+	bsize = get_block_size((*cipher)->value.lval); 				\
+	nr = ((*data)->value.str.len + bsize - 1) / bsize; 			\
 	nsize = nr * bsize
 
-#define MCRYPT_CHECK_TD_CPY \
-	if(td == -1) { \
-		php_error(E_WARNING, MCRYPT_FAILED); \
-		RETURN_FALSE; \
-	} \
-	ndata = ecalloc(nr, bsize); \
-	memcpy(ndata, data->value.str.val, data->value.str.len)
+#define MCRYPT_CHECK_TD_CPY 									\
+	if(td == -1) { 												\
+		php_error(E_WARNING, MCRYPT_FAILED); 					\
+		RETURN_FALSE; 											\
+	} 															\
+	ndata = ecalloc(nr, bsize); 								\
+	memcpy(ndata, (*data)->value.str.val, (*data)->value.str.len)
 
-#define MCRYPT_CHECK_IV \
-	convert_to_string(iv); \
-	if(iv->value.str.len != bsize) { \
-		php_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); \
-		RETURN_FALSE; \
+#define MCRYPT_CHECK_IV 										\
+	convert_to_string_ex(iv);	 								\
+	if((*iv)->value.str.len != bsize) { 						\
+		php_error(E_WARNING, MCRYPT_IV_WRONG_SIZE); 			\
+		RETURN_FALSE; 											\
 	}
 
-#define MCRYPT_ACTION(x) \
-	if(mode->value.lval == 0) \
-		mcrypt_##x(td, ndata, nsize); \
-	else \
-		mdecrypt_##x(td, ndata, nsize); \
+#define MCRYPT_ACTION(x) 										\
+	if((*mode)->value.lval == 0) 								\
+		mcrypt_##x(td, ndata, nsize); 							\
+	else 														\
+		mdecrypt_##x(td, ndata, nsize); 						\
 	end_mcrypt_##x(td)
 
 #define MCRYPT_IV_WRONG_SIZE "The IV paramater must be as long as the blocksize"
@@ -165,20 +167,22 @@ typedef enum {
    create an initializing vector (IV) */
 PHP_FUNCTION(mcrypt_create_iv)
 {
-	pval *size, *psource;
+	pval **size, **psource;
 	char *iv;
 	iv_source source;
 	int i;
+	int n = 0;
 
-	if(ARG_COUNT(ht) != 2 || getParameters(ht, 2, &size, &psource) == FAILURE) {
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &size, &psource) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(size);
-	convert_to_long(psource);
-	source = psource->value.lval;
-
-	i = size->value.lval;
+	convert_to_long_ex(size);
+	convert_to_long_ex(psource);
+	
+	source = (*psource)->value.lval;
+	i = (*size)->value.lval;
+	
 	if(i <= 0) {
 		php_error(E_WARNING, "illegal size input parameter");
 		RETURN_FALSE;
@@ -196,30 +200,31 @@ PHP_FUNCTION(mcrypt_create_iv)
 			php_error(E_WARNING, "cannot open source device");
 			RETURN_FALSE;
 		}
-		read(fd, iv, i);
+		n = read(fd, iv, i);
 		close(fd);
 	} else {
 		while(i) {
-			iv[--i] = rand();
+			iv[--i] = 255.0 * rand() / RAND_MAX;
 		}
+		n = (*size)->value.lval;
 	}
-	RETURN_STRINGL(iv, size->value.lval, 0);
+	RETURN_STRINGL(iv, n, 0);
 }
 
 /* proto mcrypt_get_cipher_name(int cipher)
    get the name of cipher */
 PHP_FUNCTION(mcrypt_get_cipher_name)
 {
-	pval *cipher;
+	pval **cipher;
 	char *str, *nstr;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(cipher);
+	convert_to_long_ex(cipher);
 
-	str = get_algorithms_name(cipher->value.lval);
+	str = get_algorithms_name((*cipher)->value.lval);
 	nstr = estrdup(str);
 	free(str);
 
@@ -230,30 +235,30 @@ PHP_FUNCTION(mcrypt_get_cipher_name)
    get the key size of cipher */
 PHP_FUNCTION(mcrypt_get_key_size)
 {
-	pval *cipher;
+	pval **cipher;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(cipher);
+	convert_to_long_ex(cipher);
 
-	RETURN_LONG(get_key_size(cipher->value.lval));
+	RETURN_LONG(get_key_size((*cipher)->value.lval));
 }
 
 /* proto mcrypt_get_block_size(int cipher)
    get the block size of cipher */
 PHP_FUNCTION(mcrypt_get_block_size)
 {
-	pval *cipher;
+	pval **cipher;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &cipher) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &cipher) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(cipher);
+	convert_to_long_ex(cipher);
 
-	RETURN_LONG(get_block_size(cipher->value.lval));
+	RETURN_LONG(get_block_size((*cipher)->value.lval));
 }
 
 /* proto mcrypt_ofb(int cipher, string key, string data, int mode, string iv)
@@ -263,14 +268,14 @@ PHP_FUNCTION(mcrypt_ofb)
 	MCRYPT_ARGS;
 	
 	if(ARG_COUNT(ht) != 5 || 
-			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
+			getParametersEx(5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	MCRYPT_CHECK_IV;
 
-	td = init_mcrypt_ofb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
+	td = init_mcrypt_ofb((*cipher)->value.lval, (*key)->value.str.val, (*key)->value.str.len, (*iv)->value.str.val);
 	MCRYPT_CHECK_TD_CPY;
 	MCRYPT_ACTION(ofb);
 
@@ -284,14 +289,14 @@ PHP_FUNCTION(mcrypt_cfb)
 	MCRYPT_ARGS;
 
 	if(ARG_COUNT(ht) != 5 || 
-			getParameters(ht, 5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
+			getParametersEx(5, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	MCRYPT_CHECK_IV;
 
-	td = init_mcrypt_cfb(cipher->value.lval, key->value.str.val, key->value.str.len, iv->value.str.val);
+	td = init_mcrypt_cfb((*cipher)->value.lval, (*key)->value.str.val, (*key)->value.str.len, (*iv)->value.str.val);
 	MCRYPT_CHECK_TD_CPY;
 	MCRYPT_ACTION(cfb);
 
@@ -307,8 +312,7 @@ PHP_FUNCTION(mcrypt_cbc)
 	int ac = ARG_COUNT(ht);
 
 	if(ac < 4 || ac > 5 || 
-			getParameters(ht, ac, &cipher, &key, &data, &mode, &iv) == 
-			FAILURE) {
+			getParametersEx(ac, &cipher, &key, &data, &mode, &iv) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	MCRYPT_CONVERT;
@@ -317,11 +321,11 @@ PHP_FUNCTION(mcrypt_cbc)
 		MCRYPT_CHECK_IV;
 	}
 	
-	td = init_mcrypt_cbc(cipher->value.lval, key->value.str.val, key->value.str.len);
+	td = init_mcrypt_cbc((*cipher)->value.lval, (*key)->value.str.val, (*key)->value.str.len);
 	MCRYPT_CHECK_TD_CPY;
 	
 	if(ac > 4) {
-		mcrypt(td, iv->value.str.val);
+		mcrypt(td, (*iv)->value.str.val);
 	}
 	
 	MCRYPT_ACTION(cbc);
@@ -336,13 +340,13 @@ PHP_FUNCTION(mcrypt_ecb)
 	MCRYPT_ARGS2;
 
 	if(ARG_COUNT(ht) != 4 || 
-			getParameters(ht, 4, &cipher, &key, &data, &mode) == FAILURE) {
+			getParametersEx(4, &cipher, &key, &data, &mode) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 	MCRYPT_CONVERT;
 	MCRYPT_SIZE;
 	
-	td = init_mcrypt_ecb(cipher->value.lval, key->value.str.val, key->value.str.len);
+	td = init_mcrypt_ecb((*cipher)->value.lval, (*key)->value.str.val, (*key)->value.str.len);
 	MCRYPT_CHECK_TD_CPY;
 	MCRYPT_ACTION(ecb);
 

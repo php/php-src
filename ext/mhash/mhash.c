@@ -74,31 +74,31 @@ PHP_FUNCTION(mhash_count)
    get the block size of hash */
 PHP_FUNCTION(mhash_get_block_size)
 {
-	pval *hash;
+	pval **hash;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &hash) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(hash);
+	convert_to_long_ex(hash);
 
-	RETURN_LONG(mhash_get_block_size(hash->value.lval));
+	RETURN_LONG(mhash_get_block_size((*hash)->value.lval));
 }
 
 /* proto mhash_get_hash_name(int hash)
    get the name of hash */
 PHP_FUNCTION(mhash_get_hash_name)
 {
-	pval *hash;
+	pval **hash;
 	char *name;
 
-	if(ARG_COUNT(ht) != 1 || getParameters(ht, 1, &hash) == FAILURE) {
+	if(ARG_COUNT(ht) != 1 || getParametersEx(1, &hash) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(hash);
+	convert_to_long_ex(hash);
 
-	name = mhash_get_hash_name(hash->value.lval);
+	name = mhash_get_hash_name((*hash)->value.lval);
 	if(name) {
 		RETVAL_STRING(name, 1);
 		free(name);
@@ -111,27 +111,26 @@ PHP_FUNCTION(mhash_get_hash_name)
    hash data with hash */
 PHP_FUNCTION(mhash)
 {
-	pval *hash, *data;
+	pval **hash, **data;
 	MHASH td;
 	int bsize;
 	unsigned char *hash_data;
-	int i;
 
-	if(ARG_COUNT(ht) != 2 || getParameters(ht, 2, &hash, &data) == FAILURE) {
+	if(ARG_COUNT(ht) != 2 || getParametersEx(2, &hash, &data) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	convert_to_long(hash);
-	convert_to_string(data);
+	convert_to_long_ex(hash);
+	convert_to_string_ex(data);
 
-	bsize = mhash_get_block_size(hash->value.lval);
-	td = mhash_init(hash->value.lval);
+	bsize = mhash_get_block_size((*hash)->value.lval);
+	td = mhash_init((*hash)->value.lval);
 	if(td == MHASH_FAILED) {
 		php_error(E_WARNING, MHASH_FAILED_MSG);
 		RETURN_FALSE;
 	}
 
-	mhash(td, data->value.str.val, data->value.str.len);
+	mhash(td, (*data)->value.str.val, (*data)->value.str.len);
 
 	hash_data = (unsigned char *) mhash_end(td);
 	
