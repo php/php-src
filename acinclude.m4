@@ -1457,6 +1457,7 @@ int main(void) {
 
 AC_DEFUN([PHP_BROKEN_GLIBC_FOPEN_APPEND],[
   AC_MSG_CHECKING([for broken libc stdio])
+  AC_CACHE_VAL(have_broken_glibc_fopen_append,[
   AC_TRY_RUN([
 #include <stdio.h>
 int main(int argc, char *argv[])
@@ -1483,7 +1484,17 @@ int main(int argc, char *argv[])
 }
 ],
 [have_broken_glibc_fopen_append=no],
-[have_broken_glibc_fopen_append=yes ])
+[have_broken_glibc_fopen_append=yes ],
+AC_TRY_COMPILE([
+#include <features.h>
+],[
+#if !__GLIBC_PREREQ(2,2)
+choke me
+#endif
+],
+[have_broken_glibc_fopen_append=yes],
+[have_broken_glibc_fopen_append=no ])
+)])
 
   if test "$have_broken_glibc_fopen_append" = "yes"; then
 	AC_MSG_RESULT(yes)
