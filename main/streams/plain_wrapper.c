@@ -896,9 +896,14 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 	return php_stream_fopen_rel(path, mode, opened_path, options);
 }
 
-static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC)
+static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
-	return VCWD_STAT(url, &ssb->sb);
+#ifdef HAVE_SYMLINK
+	if (flags & PHP_STREAM_URL_STAT_LINK) {
+		return VCWD_LSTAT(url, &ssb->sb);
+	} else
+#endif
+		return VCWD_STAT(url, &ssb->sb);
 }
 
 static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)

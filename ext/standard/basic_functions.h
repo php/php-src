@@ -170,11 +170,9 @@ typedef struct _php_basic_globals {
 	long page_inode;
 	long page_mtime;
 
-	/* filestat.c */
-	char *CurrentStatFile;
-	php_stat_len CurrentStatLength;
-	struct stat sb;
-	struct stat lsb;
+	/* filestat.c && main/streams/streams.c */
+	char *CurrentStatFile, *CurrentLStatFile;
+	php_stream_statbuf *ssb, *lssb;
 
 	/* rand.c */
 	php_uint32   state[MT_N+1];  /* state vector + 1 extra to not violate ANSI C */

@@ -139,7 +139,7 @@ typedef struct _php_stream_wrapper_ops {
 	/* stat a wrapped stream */
 	int (*stream_stat)(php_stream_wrapper *wrapper, php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 	/* stat a URL */
-	int (*url_stat)(php_stream_wrapper *wrapper, char *url, php_stream_statbuf *ssb TSRMLS_DC);
+	int (*url_stat)(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
 	/* open a "directory" stream */
 	php_stream *(*dir_opener)(php_stream_wrapper *wrapper, char *filename, char *mode,
 			int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
@@ -301,8 +301,9 @@ PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC);
 PHPAPI int _php_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC);
 #define php_stream_stat(stream, ssb)	_php_stream_stat((stream), (ssb) TSRMLS_CC)
 
-PHPAPI int _php_stream_stat_path(char *path, php_stream_statbuf *ssb TSRMLS_DC);
-#define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), (ssb) TSRMLS_CC)
+PHPAPI int _php_stream_stat_path(char *path, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
+#define php_stream_stat_path(path, ssb)	_php_stream_stat_path((path), 0, (ssb), NULL TSRMLS_CC)
+#define php_stream_stat_path_ex(path, flags, ssb, context)	_php_stream_stat_path((path), (flags), (ssb), (context) TSRMLS_CC)
 
 PHPAPI php_stream *_php_stream_opendir(char *path, int options, php_stream_context *context STREAMS_DC TSRMLS_DC);
 #define php_stream_opendir(path, options, context)	_php_stream_opendir((path), (options), (context) STREAMS_CC TSRMLS_CC)
@@ -315,6 +316,9 @@ PHPAPI int _php_stream_set_option(php_stream *stream, int option, int value, voi
 #define php_stream_set_option(stream, option, value, ptrvalue)	_php_stream_set_option((stream), (option), (value), (ptrvalue) TSRMLS_CC)
 
 #define php_stream_set_chunk_size(stream, size) _php_stream_set_option((stream), PHP_STREAM_OPTION_SET_CHUNK_SIZE, (size), NULL TSRMLS_CC)
+
+/* Flags for url_stat method in wrapper ops */
+#define PHP_STREAM_URL_STAT_LINK	1
 
 /* change the blocking mode of stream: value == 1 => blocking, value == 0 => non-blocking. */
 #define PHP_STREAM_OPTION_BLOCKING	1

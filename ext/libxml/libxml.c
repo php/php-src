@@ -253,7 +253,7 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode)
 	   in xml processing (eg. DTD files)  */
 	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, ENFORCE_SAFE_MODE TSRMLS_CC);
 	if (wrapper && wrapper->wops->url_stat) {
-		if (wrapper->wops->url_stat(wrapper, path_to_open, &ssbuf TSRMLS_CC) == -1) {
+		if (wrapper->wops->url_stat(wrapper, path_to_open, 0, &ssbuf, NULL TSRMLS_CC) == -1) {
 			return NULL;
 		}
 	}
