@@ -602,6 +602,7 @@ int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
 }
 #endif
 
-#define gdImageBoundsSafe(im, x, y) (!(y < 0 || y >= (im)->sy || x < 0 || x >= (im)->sx))
+/* 2.0.12: this now checks the clipping rectangle */
+#define gdImageBoundsSafe(im, x, y) (!((((y) < (im)->cy1) || ((y) > (im)->cy2)) || (((x) < (im)->cx1) || ((x) > (im)->cx2))))
 
 #endif /* GD_H */
