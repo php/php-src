@@ -3340,7 +3340,8 @@ PHP_FUNCTION(mb_get_info)
 }
 /* }}} */
 
-PHPAPI int mbstr_encoding_translation(TSRMLS_D) {
+PHPAPI int mbstr_encoding_translation(TSRMLS_D)
+{
 	return MBSTRG(encoding_translation);
 }
 
