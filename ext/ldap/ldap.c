@@ -1343,7 +1343,13 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			ldap_mods[i]->mod_bvalues[0]->bv_val = Z_STRVAL_PP(value);
 		} else {	
 			for(j=0; j < num_values; j++) {
-				zend_hash_index_find(Z_ARRVAL_PP(value), j, (void **) &ivalue);
+				if (zend_hash_index_find(Z_ARRVAL_PP(value), j, (void **) &ivalue) == FAILURE) {
+					php_error(E_WARNING, "LDAP: Value array must have consecutive indices 0, 1, ...");
+					num_berval[i] = j;
+					num_attribs = i + 1;
+					RETVAL_FALSE;
+					goto errexit;
+				}
 				convert_to_string_ex(ivalue);
 				ldap_mods[i]->mod_bvalues[j] = (struct berval *) emalloc (sizeof(struct berval));
 				ldap_mods[i]->mod_bvalues[j]->bv_len = Z_STRLEN_PP(ivalue);
@@ -1370,6 +1376,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 		} else RETVAL_TRUE;	
 	}
 
+errexit:
 	for(i=0; i < num_attribs; i++) {
 		efree(ldap_mods[i]->mod_type);
 		for(j=0; j<num_berval[i]; j++) {
