@@ -2022,7 +2022,7 @@ PHP_FUNCTION(pdf_open_memory_image) {
 #if PDFLIB_MINORVERSION == 0
 		pdf_image = PDF_open_memory_image(pdf, buffer, im->sx, im->sy, 3, 8);
 #else
-		pdf_image = PDF_open_memory_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
+		pdf_image = PDF_open_image(pdf, "raw", "memory", buffer, im->sx*im->sy*3, im->sx, im->sy, 3, 8, NULL);
 #endif
 
 	if(-1 == pdf_image) {
