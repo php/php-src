@@ -484,7 +484,7 @@ PHP_FUNCTION(ereg_replace)
 }
 /* }}} */
 
-/* {{{ proto string eregi_replace(string pattern, string replacement, string string])
+/* {{{ proto string eregi_replace(string pattern, string replacement, string string)
    Case insensitive replace regular expression */
 PHP_FUNCTION(eregi_replace)
 {
