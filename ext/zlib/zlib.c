@@ -19,15 +19,16 @@
 /* $Id$ */
 #define IS_EXT_MODULE
 
-#include "php.h"
+#include "php_config.h"
 
 #if HAVE_FOPENCOOKIE 
 #define _GNU_SOURCE
 #define __USE_GNU
-#include "libio.h"
+#include <stdio.h>
 #endif 
 
-#include <stdio.h>
+#include "php.h"
+
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -786,9 +787,10 @@ static int gz_seeker(void *cookie,fpos_t position, int whence) {
 }
 
 static int gz_closer(void *cookie) {
-	gzclose(((struct gz_cookie *)cookie)->gz_file);
+	int ret=gzclose(((struct gz_cookie *)cookie)->gz_file);
 	efree(cookie);
 	cookie=NULL;  
+	return ret;
 }
 
 
