@@ -378,20 +378,24 @@ PHP_RSHUTDOWN_FUNCTION(pdo)
 PHP_MINFO_FUNCTION(pdo)
 {
 	HashPosition pos;
-	ulong num_key;
-	char *name;
-	int namelen;
+	char *drivers = NULL, *ldrivers = estrdup("");
+	pdo_driver_t **pdriver;
 	
 	php_info_print_table_start();
-	php_info_print_table_header(2, "pdo support", "enabled");
-	php_info_print_table_header(1, "Available PDO Drivers");
+	php_info_print_table_header(2, "PDO support", "enabled");
 
 	zend_hash_internal_pointer_reset_ex(&pdo_driver_hash, &pos);
-	while (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(&pdo_driver_hash, &name, &namelen, &num_key, 0, &pos)) {
-		php_info_print_table_row(1, name);
+	while (SUCCESS == zend_hash_get_current_data_ex(&pdo_driver_hash, (void**)&pdriver, &pos)) {
+		spprintf(&drivers, 0, "%s, %s", ldrivers, (*pdriver)->driver_name);
 		zend_hash_move_forward_ex(&pdo_driver_hash, &pos);
+		efree(ldrivers);
+		ldrivers = drivers;
 	}
 	
+	php_info_print_table_row(2, "PDO drivers", drivers+2);
+	
+	efree(drivers);
+
 	php_info_print_table_end();
 
 #if 0
