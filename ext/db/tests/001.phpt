@@ -1,5 +1,7 @@
 --TEST--
 DBM File Creation Test
+--SKIPIF--
+<?php if (!extension_loaded("db")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--

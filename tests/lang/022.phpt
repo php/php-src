@@ -11,10 +11,10 @@ cfunction switchtest ($i, $j)
 		case 0:
 				switch($j) {
 					case 0:
-						echo zero;
+						echo "zero";
 						break;
 					case 1: 
-						echo one;
+						echo "one";
 						break;
 					default:
 						echo $j;

@@ -1,5 +1,7 @@
 --TEST--
 DBM FirstKey/NextKey with 2 deletes
+--SKIPIF--
+<?php if (!extension_loaded("db")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--

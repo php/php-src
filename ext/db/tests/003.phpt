@@ -1,5 +1,7 @@
 --TEST--
 DBM Insert/Replace/Fetch Test
+--SKIPIF--
+<?php if (!extension_loaded("db")) print "skip"; ?>
 --POST--
 --GET--
 --FILE--

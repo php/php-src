@@ -245,7 +245,7 @@ while ($i<$arr_len) {
   while ($j<$arr_len) {
     $k=0;
     while ($k<$arr_len) {
-      ${test.$i.$j}[$k] = $i+$j+$k;
+      ${"test$i$j"}[$k] = $i+$j+$k;
       $k++;
     }
     $j++;
@@ -294,17 +294,17 @@ echo "commented out...";
 *** Hash resizing test ***
 <?php 
 $i = 10;
-$a = b;
+$a = "b";
 while ($i > 0) {
-	$a = $a . a;
+	$a = $a . "a";
 	echo "$a\n";
 	$resize[$a] = $i;
 	$i--;
 }
 $i = 10;
-$a = b;
+$a = "b";
 while ($i > 0) {
-	$a = $a . a;
+	$a = $a . "a";
 	echo "$a\n";
 	echo $resize[$a]."\n";
 	$i--;
