@@ -456,7 +456,7 @@ PHPAPI int php_variant_to_pval(VARIANT *var_arg, pval *pval_arg, int codepage TS
 
 		/* This call has failed for everything I have tried */
 		/* But best leave it to be on the safe side */
-		if (FAILED(SafeArrayGetVartype(array, &vartype))) {
+		if (FAILED(SafeArrayGetVartype(array, &vartype)) || (vartype == VT_EMPTY)) {
 			/* Fall back to what we do know */
 			/* Mask off the array bit and assume */
 			/* what is left is the type of the array */

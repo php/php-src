@@ -554,7 +554,7 @@ PHP_FUNCTION(com_load)
 			pResults.pIID = &IID_IDispatch;
 			pResults.pItf = NULL;
 			pResults.hr = S_OK;
-			hr=CoCreateInstanceEx(&clsid, NULL, CLSCTX_SERVER, &server_info, 1, &pResults);
+			hr=CoCreateInstanceEx(&clsid, NULL, CLSCTX_REMOTE_SERVER, &server_info, 1, &pResults);
 			if (SUCCEEDED(hr)) {
 				hr = pResults.hr;
 				C_DISPATCH(obj) = (IDispatch *) pResults.pItf;
