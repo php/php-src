@@ -1,7 +1,7 @@
 dnl config.m4 for extension cyrus
 
 PHP_ARG_WITH(cyrus, for cyrus imap support,
-[  --with-cyrus             Include cyrus imap support])
+[  --with-cyrus            Include cyrus imap support])
 
 if test "$PHP_CYRUS" != "no"; then
 	found_cyrus=no
