@@ -1,3 +1,74 @@
+2002-03-31  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/exif/exif.c: - Fix compilation.
+
+2002-03-31  Tomas V.V.Cox  <cox@idecnet.com>
+
+    * pear/PEAR/Common.php: E_ALL fix
+
+    * pear/PEAR/Packager.php: if (!function_exists('md5_file')) { ...
+
+2002-03-31  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/java/.cvsignore
+      ext/java/Makefile.frag
+      ext/java/Makefile.in
+      ext/java/config.m4: Fixed the build issues reported by Stas.
+
+    * ext/pspell/tests/.cvsignore: missing .cvsignore
+
+2002-03-31  Stanislav Malyshev  <stas@zend.com>
+
+    * configure.in: Fix ZE2 builds
+
+2002-03-31  Mark L. Woodward  <mlwmohawk@mohawksoft.com>
+
+    * ext/msession/msession.c:
+    Fixed conditional compilation based on macros changed in
+    ext/session/php_session.h which changed.
+
+2002-03-31  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbregex.c
+      ext/mbstring/unicode_table.h
+      ext/mbstring/unicode_table_ja.h
+      ext/mbstring/cp932_table.h
+      ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_ja.c:
+    moved static constant definitions for separeted files to fix compilation problem in Tru64.
+
+2002-03-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/Schedule/At.php: * updated error handling
+
+    * pear/PEAR/Common.php: * E_ALL fix
+
+    * pear/PEAR/Command/Auth.php: * avoid object copying
+
+    * pear/PEAR/Remote.php: * oops, config object was copied
+    * call parameters were not passed on to xmlrpc_encode_request()
+
+2002-03-31  Yasuo Ohgaki  <yohgaki@dd.iij4u.or.jp>
+
+    * ext/pgsql/pgsql.c:
+    Print multibyte and SSL support is compiled in libpq or not.
+
+    * ext/pgsql/config.m4
+      ext/pgsql/pgsql.c
+      ext/pgsql/php_pgsql.h: Print PostgreSQL version number in phpinfo()
+
+2002-03-31  Stig Bakken  <ssb@fast.no>
+
+    * pear/Makefile.frag: * install PEAR/Command/Remote.php
+
+2002-03-31  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
+
+    * ext/mbstring/mbfilter.c
+      ext/mbstring/mbfilter_ja.c:
+    revert Sascha's patch to fix compile error in Tru64.
+
+    * ext/mbstring/mbstring.h: fixed crash bug in Tru64.
+
 2002-03-30  Stig Bakken  <ssb@fast.no>
 
     * configure.in: * added sys/utsname.h test
