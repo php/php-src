@@ -22,10 +22,12 @@
 #include "config.h"
 #endif
 
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlreader.h"
+#include "ext/dom/xml_common.h"
 #include <libxml/uri.h>
 
 zend_class_entry *xmlreader_class_entry;
@@ -953,6 +955,36 @@ PHP_METHOD(xmlreader, XML)
 }
 /* }}} */
 
+/* {{{ proto boolean expand()
+Moves the position of the current instance to the next node in the stream. */
+PHP_METHOD(xmlreader, expand)
+{
+	zval *id, *rv = NULL;
+	int ret;
+	xmlreader_object *intern;
+	xmlNode *node, *nodec;
+
+	id = getThis();
+	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
+	//nodeobj = (php_libxml_node_object *) zend_object_store_get_object(id TSRMLS_CC);
+	if (intern && intern->ptr) {
+		node = xmlTextReaderExpand(intern->ptr);
+		
+		if (node == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding ");
+			RETURN_FALSE;
+		} else {
+			nodec = xmlCopyNode(node, 1);
+			DOM_RET_OBJ(rv, nodec, &ret, NULL);
+		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to expand");
+		RETURN_FALSE;
+	}
+	
+}
+/* }}} */
+
 static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, close, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, getAttribute, NULL, ZEND_ACC_PUBLIC)
@@ -979,6 +1011,7 @@ static zend_function_entry xmlreader_functions[] = {
 	PHP_ME(xmlreader, setRelaxNGSchema, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, setRelaxNGSchemaSource, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(xmlreader, XML, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_ALLOW_STATIC)
+	PHP_ME(xmlreader, expand, NULL, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
