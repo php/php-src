@@ -1,0 +1,19 @@
+EXPORTS
+
+pcre_malloc DATA
+pcre_free DATA
+
+pcre_compile
+pcre_copy_substring
+pcre_exec
+pcre_get_substring
+pcre_get_substring_list
+pcre_info
+pcre_maketables
+pcre_study
+pcre_version
+
+regcomp
+regexec
+regerror
+regfree
