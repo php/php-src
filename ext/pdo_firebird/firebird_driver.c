@@ -84,7 +84,7 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, long li
 			break;
 	}
 #else
-	strcpy(*pdo_err, "HY000");
+	strcpy(*error_code, "HY000");
 #endif
 }
 /* }}} */
