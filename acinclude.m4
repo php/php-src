@@ -429,18 +429,19 @@ ifelse($3,,[
   if test -n "$2"; then
     AC_ADD_LIBPATH($2)
   fi
-  AC_ADD_LIBRARY($1,1)
+  AC_ADD_LIBRARY($1)
 ],[
   if test "$ext_shared" = "yes"; then
     if test -n "$2"; then
-      $3="[$]$3 -R$2 -L$2"
+      $3="-R$2 -L$2 -l$1 [$]$3"
+	else
+      $3="-l$1 [$]$3"
     fi
-    $3="[$]$3 -l$1"
   else
     if test -n "$2"; then
       AC_ADD_LIBPATH($2)
 	fi
-    AC_ADD_LIBRARY($1,1)
+    AC_ADD_LIBRARY($1)
  fi
 ])
 ])
