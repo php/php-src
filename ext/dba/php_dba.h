@@ -41,6 +41,12 @@ typedef enum {
 	DBA_CREAT
 } dba_mode_t;
 
+typedef enum { 
+	DBA_BTREE = 1,
+	DBA_HASH,
+	DBA_RECNO
+} dba_type_t;
+
 typedef struct dba_info {
 	/* public */
 	void *dbf;               /* ptr to private data or whatever */
