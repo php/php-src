@@ -238,7 +238,6 @@ static void sapi_cgibin_flush(void *server_context)
 static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 {
 	char buf[1024];
-	int len;
 	sapi_header_struct *h;
 	zend_llist_position pos;
 	long rfc2616_headers = 0;
@@ -252,13 +251,17 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
 		rfc2616_headers = 0;
 	}
 
-	if (rfc2616_headers && SG(sapi_headers).http_status_line) {
-		len = sprintf(buf, "%s\r\n", SG(sapi_headers).http_status_line);
-	} else {
-		len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
-	}
+	if (SG(sapi_headers).http_response_code != 200) {
+		int len;
+		
+		if (rfc2616_headers) {
+			len = sprintf(buf, "%s\r\n", SG(sapi_headers).http_status_line);
+		} else {
+			len = sprintf(buf, "Status: %d\r\n", SG(sapi_headers).http_response_code);
+		}
 
-	PHPWRITE_H(buf, len);
+		PHPWRITE_H(buf, len);
+	}
 
 	if (SG(sapi_headers).send_default_content_type) {
 		char *hd;
