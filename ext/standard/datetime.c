@@ -123,7 +123,15 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 	*/
 	switch(arg_count) {
 	case 7: /* daylight saving time flag */
+#ifdef PHP_WIN32
+		if (daylight > 0) {
+			ta->tm_isdst = is_dst = Z_LVAL_PP(arguments[6]);
+		} else {
+			ta->tm_isdst = is_dst = 0;
+		}
+#else
 		ta->tm_isdst = is_dst = Z_LVAL_PP(arguments[6]);
+#endif
 		/* fall-through */
 	case 6: /* year */
 		/* special case: 
