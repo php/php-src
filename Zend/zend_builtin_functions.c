@@ -509,6 +509,7 @@ ZEND_FUNCTION(define)
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
+	c.module_number = 2147483647;
 	if (zend_register_constant(&c TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
@@ -1321,60 +1322,53 @@ ZEND_FUNCTION(get_defined_constants)
 	if (argc) {
 		HashPosition pos;
 		zend_constant *val;
-		int prev_module_number = -1;
+		int module_number;
+		zval **modules;
 		char **module_names;
-		zval *module_constants = NULL;
 		zend_module_entry *module;
 		int i = 1;
+
+		modules = ecalloc(zend_hash_num_elements(&module_registry) + 2, sizeof(zval *));
+		module_names = emalloc((zend_hash_num_elements(&module_registry) + 2) * sizeof(char *));
 		
-		module_names = emalloc((zend_hash_num_elements(&module_registry) + 1) * sizeof(char *));
+		module_names[0] = "internal";
 		zend_hash_internal_pointer_reset_ex(&module_registry, &pos);
-		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &module, &pos) != FAILURE) {
+		while (zend_hash_get_current_data_ex(&module_registry, (void *) &module, &pos) != FAILURE) {
 			module_names[i++] = module->name;
 			zend_hash_move_forward_ex(&module_registry, &pos);
 		}
-		
-		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
+		module_names[i] = "user";
 
+		zend_hash_internal_pointer_reset_ex(EG(zend_constants), &pos);
 		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
 			zval *const_val;
 
-			if (val->module_number != prev_module_number) {
-				if (prev_module_number != -1) {
-					if (prev_module_number == 0) {
-						add_assoc_zval(return_value, "internal", module_constants);
-					} else if (prev_module_number <= i) {
-						add_assoc_zval(return_value, module_names[prev_module_number], module_constants);
-					} else {
-						add_assoc_zval(return_value, "user", module_constants);
-					}
-				}
+			if (val->module_number == 2147483647) {
+				module_number = i;
+			} else if (val->module_number > i || val->module_number < 0) {
+				/* should not happen */
+				goto bad_module_id;
+			} else {
+				module_number = val->module_number;
+			}
 
-				MAKE_STD_ZVAL(module_constants);
-				array_init(module_constants);
-
-				prev_module_number = val->module_number;
-			}	
+			if (!modules[module_number]) {
+				MAKE_STD_ZVAL(modules[module_number]);
+				array_init(modules[module_number]);
+				add_assoc_zval(return_value, module_names[module_number], modules[module_number]);
+			}
 
 			MAKE_STD_ZVAL(const_val);
 			*const_val = val->value;
 			zval_copy_ctor(const_val);
 			INIT_PZVAL(const_val);
 
-			add_assoc_zval_ex(module_constants, val->name, val->name_len, const_val);
-
+			add_assoc_zval_ex(modules[module_number], val->name, val->name_len, const_val);
+bad_module_id:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
-		if (module_constants) {
-			if (prev_module_number == 0) {
-				add_assoc_zval(return_value, "internal", module_constants);
-			} else if (prev_module_number <= i) {
-				add_assoc_zval(return_value, module_names[prev_module_number], module_constants);
-			} else {
-				add_assoc_zval(return_value, "user", module_constants);
-			}
-		}
 		efree(module_names);
+		efree(modules);
 	} else {
 		zend_hash_apply_with_argument(EG(zend_constants), (apply_func_arg_t) add_constant_info, return_value TSRMLS_CC);
 	}
