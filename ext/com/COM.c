@@ -1439,34 +1439,38 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		pval *object_handle;
 
 		PHP_FN(com_load)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-		if (!zend_is_true(return_value)) {
-			ZVAL_FALSE(object);
-			return;
+		if (zend_is_true(return_value)) {
+			ALLOC_ZVAL(object_handle);
+			*object_handle = *return_value;
+			pval_copy_constructor(object_handle);
+			INIT_PZVAL(object_handle);
+			zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
+			pval_destructor(&function_name->element);
+		} else {
+			ZVAL_NULL(object);
 		}
-		ALLOC_ZVAL(object_handle);
-		*object_handle = *return_value;
-		pval_copy_constructor(object_handle);
-		INIT_PZVAL(object_handle);
-		zend_hash_index_update(Z_OBJPROP_P(object), 0, &object_handle, sizeof(pval *), NULL);
-		pval_destructor(&function_name->element);
 
 		return;
 	}
 
+	RETVAL_NULL();
 	property = php_COM_get_property_handler(property_reference);
-	if (Z_TYPE(property) == IS_NULL) {
-		if (property.refcount == 1) {
-			pval_destructor(&property);
-		}
+
+	if (Z_TYPE(property) != IS_OBJECT) {
+		pval_destructor(&property);
 		pval_destructor(&function_name->element);
+
+		/* error message - function call on a non-object */
 		return;
 	}
+
 	zend_hash_index_find(Z_OBJPROP(property), 0, (void **) &handle);
 	obj = (comval *)zend_list_find(Z_LVAL_PP(handle), &type);
 
 	if (!obj || (type != IS_COM)) {
 		pval_destructor(&property);
 		pval_destructor(&function_name->element);
+
 		return;
 	}
 
@@ -1486,9 +1490,7 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		arguments = (pval **) emalloc(sizeof(pval *)*arg_count);
 		zend_get_parameters_array(ht, arg_count, arguments);
 
-		if (do_COM_invoke(obj , &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == FAILURE) {
-			RETVAL_FALSE;
-		} else {
+		if (do_COM_invoke(obj , &function_name->element, var_result, arguments, arg_count TSRMLS_CC) == SUCCESS) {
 			php_variant_to_pval(var_result, return_value, codepage TSRMLS_CC);
 		}
 
@@ -1496,9 +1498,12 @@ PHPAPI void php_COM_call_function_handler(INTERNAL_FUNCTION_PARAMETERS, zend_pro
 		efree(arguments);
 	}
 
-	if (property.refcount == 1) {
+	if (zend_llist_count(property_reference->elements_list) > 1) {
+		/* destruct temporary object */
+		zend_list_delete(Z_LVAL_PP(handle));
 		pval_destructor(&property);
 	}
+	
 	pval_destructor(&function_name->element);
 }
 
