@@ -266,6 +266,7 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len TSRMLS_DC
 			newtype = emalloc(newlen + 1);
 	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
 			strlcat(newtype, ";charset=", newlen + 1);
+			strlcat(newtype, charset, newlen + 1);
 			efree(*mimetype);
 			*mimetype = newtype;
 			return newlen;
