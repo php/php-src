@@ -542,7 +542,8 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 		WRONG_PARAM_COUNT; \
 	} \
 	convert_to_string_ex(filename); \
-	php_stat((*filename)->value.str.val, funcnum, return_value); \
+	if ((*filename)->value.str.len) \
+		php_stat((*filename)->value.str.val, funcnum, return_value); \
 }
 
 FileFunction(PHP_FN(fileperms),0)
