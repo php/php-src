@@ -109,6 +109,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 	EXCEPINFO ExceptInfo;
 
 	*ErrString = NULL;
+	/* @todo use DispInvoke here ? */
 	if (C_ISREFD(obj)) {
 		if (C_HASTLIB(obj)) {
 			hr = C_TYPEINFO_VT(obj)->Invoke(C_TYPEINFO(obj), C_DISPATCH(obj), dispIdMember, wFlags, pDispParams, pVarResult, &ExceptInfo, &ArgErr);
@@ -153,8 +154,7 @@ PHPAPI HRESULT php_COM_invoke(comval *obj, DISPID dispIdMember, WORD wFlags, DIS
 			}
 		}
 
-		if (!pVarResult) {
-			VariantInit(pVarResult);
+		if (pVarResult && (V_VT(pVarResult) == VT_EMPTY)) {
 			V_VT(pVarResult) = VT_I4;
 			V_I4(pVarResult) = hr;
 		}
