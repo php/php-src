@@ -130,7 +130,7 @@ if test "\$PHP_$EXTNAME" != "no"; then
   dnl # --with-$extname -> check with-path
   dnl SEARCH_PATH="/usr/local /usr"     # you might want to change this
   dnl SEARCH_FOR="/include/$extname.h"  # you most likely want to change this
-  dnl if test -r \$PHP_$EXTNAME/$SEARCH_FOR; then # path given as parameter
+  dnl if test -r \$PHP_$EXTNAME/\$SEARCH_FOR; then # path given as parameter
   dnl   ${EXTNAME}_DIR=\$PHP_$EXTNAME
   dnl else # search default path list
   dnl   AC_MSG_CHECKING([for $extname files in default path])
