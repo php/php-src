@@ -1356,6 +1356,16 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 			VCWD_CHDIR_FILE(primary_file->filename);
 		}
 
+		if(primary_file->filename) {			
+			char *realfile;
+			int dummy = 1;
+			realfile = emalloc(PATH_MAX);
+			if(realpath(primary_file->filename, realfile)) {
+				zend_hash_add(&EG(included_files), realfile, strlen(realfile)+1, (void *)&dummy, sizeof(int), NULL);
+			}
+			efree(realfile);
+		}
+
 		if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 			prepend_file.filename = PG(auto_prepend_file);
 			prepend_file.opened_path = NULL;
