@@ -2,6 +2,11 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ??? 2000, Version 4.0.2
+- Added 3 additional arguments to the user-defined error handler - the file
+  name and line number in which the error occured, and the context (local
+  variables) of the code in which the error occured (Zeev, Zend Engine)
+- Improved the error handling code to handle an error in a user-defined error
+  handling function (Zeev, Zend Engine)
 - Fixed leak when using string offsets in the array() construct.
   (Andi, Zend Engine)
 - Fixed corruption problem when changing deeply nested values in objects.
@@ -9,7 +14,8 @@ PHP 4.0                                                                    NEWS
 - Improved array_multisort() to be able to specify sort type as well sort
   order. Incidentally, it can be used to sort multi-dimensional arrays
   as well. (Andrei)
-- Fixed a possible data corruption in case of a huge amount of aborted requests (Zeev)
+- Fixed a possible data corruption in case of a huge amount of aborted requests
+  (Zeev)
 - Apache module would sometimes close a wrong file-descriptor. (Sascha)
 - Fixed use of alternative storage handlers in the session module. (Sascha)
 - Updated str_pad() to be able to pad on left/right/both sides. (Andrei)
@@ -23,8 +29,9 @@ PHP 4.0                                                                    NEWS
 - Added new 'O' format modifier that will output the GMT offset as "[+-]HHMM"
   (eg: Pacific time is -0700).  This is useful for things such as Date: mail
   headers. (Mike W)
-- Fixed crash on OCI?Logon() failure. (thies)
-- Make the special Header("http/...") response be case insensitive like 3.0 (Rasmus)
+- Fixed crash on OCI?Logon() failure. (Thies)
+- Make the special Header("http/...") response be case insensitive like 3.0
+  (Rasmus)
 - Allow cybercash to compile as a DL module. (Sterling)
 - Fixed the dbase_create function. (Sterling)
 - Fixed a problem under some versions of Windows that could cause PHP to hang
