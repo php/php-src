@@ -4,8 +4,23 @@ AC_MSG_CHECKING(for SNMP support)
 AC_ARG_WITH(snmp,
 [  --with-snmp[=DIR]       Include SNMP support.  DIR is the SNMP base
                           install directory, defaults to searching through
-                          a number of common locations for the snmp install.],
+                          a number of common locations for the snmp install.
+                          Set DIR to "shared" to build as a dl, or "shared,DIR"
+                          to build as a dl and still specify DIR.],
 [
+  case $withval in
+    shared)
+      shared=yes
+      withval=yes
+      ;;
+    shared,*)
+      shared=yes
+      withval=`echo $withval | sed -e 's/^shared,//'`      
+      ;;
+    *)
+      shared=no
+      ;;
+  esac
   if test "$withval" != "no"; then
     if test "$withval" = "yes"; then
       SNMP_INCDIR=/usr/local/include
@@ -14,23 +29,42 @@ AC_ARG_WITH(snmp,
 	  test -d /usr/include/ucd-snmp && SNMP_INCDIR=/usr/include/ucd-snmp
 	  test -d /usr/include/snmp && SNMP_INCDIR=/usr/include/snmp
 	  test -f /usr/lib/libsnmp.a && SNMP_LIBDIR=/usr/lib
+	  test -f /usr/lib/libsnmp.so && SNMP_LIBDIR=/usr/lib
     else
       SNMP_INCDIR=$withval/include
       test -d $withval/include/ucd-snmp && SNMP_INCDIR=$withval/include/ucd-snmp
       SNMP_LIBDIR=$withval/lib
     fi
     AC_DEFINE(HAVE_SNMP)
-    AC_MSG_RESULT(yes)
-    PHP_EXTENSION(snmp)
-    AC_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR)
-    AC_ADD_INCLUDE($SNMP_INCDIR)
-	AC_CHECK_LIB(kstat, kstat_read, [AC_ADD_LIBRARY(kstat)])
+    if test "$shared" = "yes"; then
+      AC_MSG_RESULT(yes (shared))
+      SNMP_INCLUDE="-I$SNMP_INCDIR"
+      SNMP_SHARED="snmp.la"
+    else
+      AC_MSG_RESULT(yes (static))
+      AC_ADD_LIBRARY_WITH_PATH(snmp, $SNMP_LIBDIR)
+      AC_ADD_INCLUDE($SNMP_INCDIR)
+      SNMP_STATIC="libphpext_snmp.a"
+    fi
+    PHP_EXTENSION(snmp,$shared)
+	AC_CHECK_LIB(kstat, kstat_read, [
+	  if test "$shared" = yes; then
+	    KSTAT_LIBS="-lkstat"
+	  else 
+	    AC_ADD_LIBRARY(kstat)
+	  fi
+        ])
   else
     AC_MSG_RESULT(no)
   fi
 ],[
   AC_MSG_RESULT(no)
 ])
+AC_SUBST(SNMP_LIBDIR)
+AC_SUBST(SNMP_INCLUDE)
+AC_SUBST(SNMP_SHARED)
+AC_SUBST(SNMP_STATIC)
+AC_SUBST(KSTAT_LIBS)
 
 AC_MSG_CHECKING(whether to enable UCD SNMP hack)
 AC_ARG_ENABLE(ucd-snmp-hack,
