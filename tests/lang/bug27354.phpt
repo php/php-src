@@ -7,8 +7,8 @@ Bug #27354 (Modulus operator crashes PHP)
 	var_dump(-2147483648 % -1);
 	var_dump(-2147483648 % -2);
 ?>
---EXPECT--
-int(0)
-int(0)
-int(0)
-int(0)
+--EXPECTF--
+int(%i)
+int(%i)
+int(%i)
+int(%i)
