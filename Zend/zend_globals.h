@@ -116,9 +116,6 @@ struct _zend_compiler_globals {
 	int interactive;
 
 	zend_bool increment_lineno;
-
-	char *namespace;
-	int namespace_len;
 };
 
 

@@ -82,8 +82,6 @@ void zend_init_compiler_data_structures(TSRMLS_D)
 	CG(in_compilation) = 0;
 	init_compiler_declarables(TSRMLS_C);
 	CG(throw_list) = NULL;
-	CG(namespace) = NULL;
-	CG(namespace_len) = 0;
 }
 
 
@@ -108,10 +106,6 @@ void shutdown_compiler(TSRMLS_D)
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
-
-	if (CG(namespace)) {
-		efree(CG(namespace));
-	}
 }
 
 
@@ -928,7 +922,14 @@ void do_fetch_class(znode *result, znode *class_entry, znode *class_name TSRMLS_
 		SET_UNUSED(opline->op1);
 	}
 	zend_str_tolower(class_name->u.constant.value.str.val, class_name->u.constant.value.str.len);
-	opline->op2 = *class_name;
+	if ((class_name->u.constant.value.str.len == (sizeof("self") - 1)) &&
+		!memcmp(class_name->u.constant.value.str.val, "self", sizeof("self"))) {
+		SET_UNUSED(opline->op2);
+		opline->extended_value = ZEND_FETCH_CLASS_SELF;
+		zval_dtor(&class_name->u.constant);
+	} else {
+		opline->op2 = *class_name;
+	}
 	opline->result.u.var = get_temporary_variable(CG(active_op_array));
 	opline->result.op_type = IS_CONST; /* FIXME: Hack so that INIT_FCALL_BY_NAME still knows this is a class */
 	*result = opline->result;
@@ -1702,7 +1703,7 @@ void zend_do_default_before_statement(znode *case_list, znode *default_token TSR
 }
 
 
-void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name, zend_bool is_namespace TSRMLS_DC)
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znode *parent_class_name TSRMLS_DC)
 {
 	zend_op *opline;
 	int runtime_inheritance = 0;
@@ -1715,7 +1716,6 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, znod
 	new_class_entry.refcount = (int *) emalloc(sizeof(int));
 	*new_class_entry.refcount = 1;
 	new_class_entry.constants_updated = 0;
-	new_class_entry.is_namespace = is_namespace;
 	
 	zend_str_tolower(new_class_entry.name, new_class_entry.name_length);
 
