@@ -19,70 +19,35 @@
 #include "php.h"
 #include "php_network.h"
 
+#ifdef PHP_WIN32
+
 /* $Id$ */
 
-/* Win32 select() will only work with sockets, so we roll our own implementation that will
- * get the OS file handle from regular fd's and sockets and then use WaitForMultipleObjects().
- * This implementation is not as feature-full as posix select, but it works for our purposes
- */
+/* Win32 select() will only work with sockets, so we roll our own implementation here.
+ * - If you supply only sockets, this simply passes through to winsock select().
+ * - If you supply file handles, there is no way to distinguish between
+ *   ready for read/write or OOB, so any set in which the handle is found will
+ *   be marked as ready.
+ * - If you supply a mixture of handles and sockets, the system will interleave
+ *   calls between select() and WaitForMultipleObjects(). The time slicing may
+ *   cause this function call to take up to 100 ms longer than you specified.
+ * - Calling this with NULL sets as a portable way to sleep with sub-second
+ *   accuracy is not supported.
+ * */
 PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
-	HANDLE *handles;
-	DWORD waitret;
-	DWORD ms_total;
-	int f, s, fd_count = 0, sock_count = 0;
-	int retval;
-	php_socket_t i;
-	fd_set ard, awr, aex; /* active fd sets */
+	DWORD ms_total, limit, slice;
+	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
+	int n_handles = 0, i;
+	fd_set sock_read, sock_write, sock_except;
+	fd_set aread, awrite, aexcept;
+	int sock_max_fd = -1;
+	struct timeval tvslice;
+	int retcode;
 
-	for (i = 0; i < max_fd; i++) {
-		if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
-			if (_get_osfhandle(i) == 0xffffffff) {
-				/* it is a socket */
-				sock_count++;
-			} else {
-				fd_count++;
-			}
-		}
-	}
-
-	if (fd_count + sock_count == 0) {
-		return 0;
-	}
-
-	handles = (HANDLE*)safe_emalloc((fd_count + sock_count), sizeof(HANDLE), 0);
-
-	/* populate the events and handles arrays */
-	f = 0;
-	s = 0;
-	for (i = 0; i < max_fd; i++) {
-		if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
-			long h = _get_osfhandle(i);
-			if (h == 0xFFFFFFFF) {
-				HANDLE evt;
-				long evt_flags = 0;
-
-				if (FD_ISSET(i, rfds)) {
-					evt_flags |= FD_READ|FD_CONNECT|FD_ACCEPT|FD_CLOSE;
-				}
-				if (FD_ISSET(i, wfds)) {
-					evt_flags |= FD_WRITE;
-				}
-				if (FD_ISSET(i, efds)) {
-					evt_flags |= FD_OOB;
-				}
-
-				evt = WSACreateEvent();
-				WSAEventSelect(i, evt, evt_flags); 
-
-				handles[fd_count + s] = evt;
-				s++;
-			} else {
-				handles[f++] = (HANDLE)h;
-			}
-		}
-	}
-
+#define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
+	
 	/* calculate how long we need to wait in milliseconds */
 	if (tv == NULL) {
 		ms_total = INFINITE;
@@ -91,85 +56,115 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 		ms_total += tv->tv_usec / 1000;
 	}
 
-	waitret = MsgWaitForMultipleObjects(fd_count + sock_count, handles, FALSE, ms_total, QS_ALLEVENTS);
-
-	if (waitret == WAIT_TIMEOUT) {
-		retval = 0;
-	} else if (waitret == 0xFFFFFFFF) {
-		retval = -1;
-	} else {
-
-		FD_ZERO(&ard);
-		FD_ZERO(&awr);
-		FD_ZERO(&aex);
-
-		f = 0;
-		retval = 0;
-		for (i = 0; i < max_fd; i++) {
-			if (FD_ISSET(i, rfds) || FD_ISSET(i, wfds) || FD_ISSET(i, efds)) {
-				if (f >= fd_count) {
-					/* socket event */
-					HANDLE evt = handles[f];
-
-					if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
-						/* check for various signal states */
-						if (FD_ISSET(i, rfds)) {
-							WSAEventSelect(i, evt, FD_READ|FD_CONNECT|FD_ACCEPT|FD_CLOSE);
-							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
-								FD_SET(i, &ard);
-							}
-						}
-						if (FD_ISSET(i, wfds)) {
-							WSAEventSelect(i, evt, FD_WRITE);
-							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
-								FD_SET(i, &awr);
-							}
-						}
-						if (FD_ISSET(i, efds)) {
-							WSAEventSelect(i, evt, FD_OOB);
-							if (WAIT_OBJECT_0 == WaitForSingleObject(evt, 0)) {
-								FD_SET(i, &aex);
-							}
-						}
-						retval++;
-					}
-
-					WSACloseEvent(evt);
-
-				} else {
-					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[f], 0)) {
-						if (FD_ISSET(i, rfds)) {
-							FD_SET(i, &ard);
-						}
-						if (FD_ISSET(i, wfds)) {
-							FD_SET(i, &awr);
-						}
-						if (FD_ISSET(i, efds)) {
-							FD_SET(i, &aex);
-						}
-						retval++;
-					}
-
+	FD_ZERO(&sock_read);
+	FD_ZERO(&sock_write);
+	FD_ZERO(&sock_except);
+	
+	/* build an array of handles for non-sockets */
+	for (i = 0; i < max_fd; i++) {
+		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
+			handles[n_handles] = (HANDLE)_get_osfhandle(i);
+			if ((DWORD)handles[n_handles] == 0xffffffff) {
+				/* socket */
+				if (SAFE_FD_ISSET(i, rfds)) {
+					FD_SET(i, &sock_read);
 				}
-				f++;
+				if (SAFE_FD_ISSET(i, wfds)) {
+					FD_SET(i, &sock_write);
+				}
+				if (SAFE_FD_ISSET(i, efds)) {
+					FD_SET(i, &sock_except);
+				}
+				if (i > sock_max_fd) {
+					sock_max_fd = i;
+				}
+			} else {
+				handle_slot_to_fd[n_handles] = i;
+				n_handles++;
 			}
-		}
-
-		if (rfds) {
-			*rfds = ard;
-		}
-		if (wfds) {
-			*wfds = awr;
-		}
-		if (efds) {
-			*efds = aex;
 		}
 	}
 
-	efree(handles);
+	if (n_handles == 0) {
+		/* plain sockets only - let winsock handle the whole thing */
+		return select(max_fd, rfds, wfds, efds, tv);
+	}
+	
+	/* mixture of handles and sockets; lets multiplex between
+	 * winsock and waiting on the handles */
 
-	return retval;
+	FD_ZERO(&aread);
+	FD_ZERO(&awrite);
+	FD_ZERO(&aexcept);
+	
+	limit = GetTickCount() + ms_total;
+	do {
+		retcode = 0;
+	
+		if (sock_max_fd >= 0) {
+			/* overwrite the zero'd sets here; the select call
+			 * will clear those that are not active */
+			aread = sock_read;
+			awrite = sock_write;
+			aexcept = sock_except;
+
+			tvslice.tv_sec = 0;
+			tvslice.tv_usec = 100000;
+
+			retcode = select(sock_max_fd+1, &aread, &awrite, &aexcept, &tvslice);
+		}
+		if (n_handles > 0) {
+			/* check handles */
+			DWORD wret;
+
+			wret = MsgWaitForMultipleObjects(n_handles, handles, FALSE, retcode > 0 ? 0 : 100, QS_ALLEVENTS);
+
+			if (wret == WAIT_TIMEOUT) {
+				/* set retcode to 0; this is the default.
+				 * select() may have set it to something else,
+				 * in which case we leave it alone, so this branch
+				 * does nothing */
+				;
+			} else if (wret == WAIT_FAILED) {
+				if (retcode == 0) {
+					retcode = -1;
+				}
+			} else {
+				if (retcode < 0) {
+					retcode = 0;
+				}
+				for (i = 0; i < n_handles; i++) {
+					if (WAIT_OBJECT_0 == WaitForSingleObject(handles[i], 0)) {
+						if (SAFE_FD_ISSET(handle_slot_to_fd[i], rfds)) {
+							FD_SET(handle_slot_to_fd[i], &aread);
+						}
+						if (SAFE_FD_ISSET(handle_slot_to_fd[i], wfds)) {
+							FD_SET(handle_slot_to_fd[i], &awrite);
+						}
+						if (SAFE_FD_ISSET(handle_slot_to_fd[i], efds)) {
+							FD_SET(handle_slot_to_fd[i], &aexcept);
+						}
+						retcode++;
+					}
+				}
+			}
+		}
+	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount() < limit));
+
+	if (rfds) {
+		*rfds = aread;
+	}
+	if (wfds) {
+		*wfds = awrite;
+	}
+	if (efds) {
+		*efds = aexcept;
+	}	
+	
+	return retcode;
 }
+
+#endif
 
 /*
  * Local variables:
