@@ -456,7 +456,7 @@ PHP_FUNCTION(dio_tcsetattr)
         }
         
         if (zend_hash_find(fh, "stop", sizeof("stop"), (void **) &element) == FAILURE) {
-                Stop_Bits    = 8;
+                Stop_Bits    = 0;
         }
         else {
                 Stop_Bits  = Z_LVAL_PP(element);
