@@ -79,7 +79,7 @@ static int php_get_ftp_result(int socketd)
 
 /* {{{ php_fopen_url_wrap_ftp
  */
-FILE *php_fopen_url_wrap_ftp(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+FILE *php_fopen_url_wrap_ftp(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	FILE *fp=NULL;
 	php_url *resource=NULL;

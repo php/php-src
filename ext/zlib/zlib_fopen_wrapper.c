@@ -59,7 +59,7 @@ static COOKIE_IO_FUNCTIONS_T gz_cookie_functions =
 , gz_closer
 };
 
-FILE *zlib_fopen_wrapper(char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
+FILE *zlib_fopen_wrapper(const char *path, char *mode, int options, int *issock, int *socketd, char **opened_path TSRMLS_DC)
 {
 	struct gz_cookie *gc = NULL;
 	FILE *fp;
