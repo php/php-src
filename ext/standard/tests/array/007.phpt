@@ -255,55 +255,55 @@ array(9) {
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_udiff_uassoc($a, $b, "comp_func_cr", "comp_func"));
@@ -327,55 +327,55 @@ array(3) {
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_udiff_uassoc($a, $b, array("cr", "comp_func_cr"), "comp_func"));
@@ -399,55 +399,55 @@ array(3) {
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_diff_assoc($a, $b));
@@ -481,55 +481,55 @@ array(5) {
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_udiff($a, $b, "comp_func_cr"));
@@ -548,55 +548,55 @@ array(2) {
 $a=array (
   '0.1' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 12;
-    var $public_member = 12;
+    private $priv_member = 12;
+    public $public_member = 12;
   },
   0 => 
   class cr {
-    var $ = 23;
-    var $public_member = 23;
+    private $priv_member = 23;
+    public $public_member = 23;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 $b=array (
   '0.2' => 
   class cr {
-    var $ = 9;
-    var $public_member = 9;
+    private $priv_member = 9;
+    public $public_member = 9;
   },
   '0.5' => 
   class cr {
-    var $ = 22;
-    var $public_member = 22;
+    private $priv_member = 22;
+    public $public_member = 22;
   },
   0 => 
   class cr {
-    var $ = 3;
-    var $public_member = 3;
+    private $priv_member = 3;
+    public $public_member = 3;
   },
   1 => 
   class cr {
-    var $ = 4;
-    var $public_member = 4;
+    private $priv_member = 4;
+    public $public_member = 4;
   },
   2 => 
   class cr {
-    var $ = -15;
-    var $public_member = -15;
+    private $priv_member = -15;
+    public $public_member = -15;
   },
 );
 var_dump(array_udiff_assoc($a, $b, "comp_func_cr"));
