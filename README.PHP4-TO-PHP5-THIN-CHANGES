@@ -52,3 +52,19 @@
    always make argc and argv available in the CLI version regardless of the
    variables_order setting.  As in, the CLI version will now always populate
    the global $argc and $argv variables.
+
+8. Classes should be declared before used :
+   <?php
+   $test = new fubar();
+   $test->echo();
+
+   class fubar {
+       function echo() {
+           echo 'fubar';
+       }
+   }
+   ?>
+   This script is perfectly valid and works in PHP4 but with PHP5 there
+   will be a fatal error like :
+   Fatal error: Class 'fubar' not found in ....
+   If there is defined function __autoload() it will be called.
