@@ -76,6 +76,7 @@ PHP_FUNCTION(array_rand);
 PHP_FUNCTION(array_unique);
 PHP_FUNCTION(array_intersect);
 PHP_FUNCTION(array_diff);
+PHP_FUNCTION(array_diff_assoc);
 PHP_FUNCTION(array_sum);
 PHP_FUNCTION(array_filter);
 PHP_FUNCTION(array_map);

@@ -797,6 +797,7 @@ function_entry basic_functions[] = {
 	PHP_FE(array_unique,													NULL)
 	PHP_FE(array_intersect,													NULL)
 	PHP_FE(array_diff,														NULL)
+	PHP_FE(array_diff_assoc,														NULL)
 	PHP_FE(array_sum,														NULL)
 	PHP_FE(array_filter,													NULL)
 	PHP_FE(array_map,														NULL)
