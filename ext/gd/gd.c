@@ -3390,6 +3390,13 @@ PHP_FUNCTION(imagepstext)
 		extend = T1_GetExtend(*f_ind);
 		str_path = T1_GetCharOutline(*f_ind, _str[0], Z_LVAL_PP(sz), transform);
 
+		if (!str_path) {
+			if (T1_errno) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "libt1 returned error %d", T1_errno);
+			}	
+			RETURN_FALSE;
+		}
+
 		for (i = 1; i < Z_STRLEN_PP(str); i++) {
 			amount_kern = (int) T1_GetKerning(*f_ind, _str[i-1], _str[i]);
 			amount_kern += _str[i-1] == ' ' ? space : 0;
