@@ -637,7 +637,6 @@ static size_t php_sock_stream_read_internal(php_stream *stream, php_netstream_da
 	char buf[PHP_SOCK_CHUNK_SIZE];
 	int nr_bytes;
 	size_t nr_read = 0;
-	php_sockaddr_storage sa;
 	
 	/* For blocking sockets, we wait until there is some
 	   data to read (real data or EOF)
