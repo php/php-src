@@ -47,14 +47,12 @@
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
-#include "icap.h"
-#include "icapclient.h"
+#include "cal.h"
 #include "php3_icap.h"
 #include "modules.h"
 #if (WIN32|WINNT)
 #include "winsock.h"
 #endif
-event_t global_event;
 CALSTREAM *cal_open();
 CALSTREAM *cal_close_it ();
 CALSTREAM *cal_close_full ();
@@ -74,7 +72,6 @@ struct cal_list *next;
 
 static cal_list_t *g_cal_list=NULL;
 static cal_list_t *g_cal_list_end=NULL;
-static u_int32_t guid;
 /* 
  * this array should be set up as:
  * {"PHPScriptFunctionName",dllFunctionName,1} 
@@ -98,7 +95,7 @@ function_entry icap_functions[] = {
 
 
 php3_module_entry php3_icap_module_entry = {
-	ICAPVER, icap_functions, icap_init, NULL, NULL, NULL, icap_info, 0, 0, 0, NULL
+	CALVER, icap_functions, icap_init, NULL, NULL, NULL, icap_info, 0, 0, 0, NULL
 };
 
 
@@ -122,8 +119,7 @@ char icap_password[80]="";
 CALSTREAM *cal_close_it (pils *icap_le_struct)
 {
 	CALSTREAM *ret;
-	ret = cal_logout (icap_le_struct->icap_stream,icap_le_struct->flags);
-	event_destroy(&global_event);
+	ret = cal_close (icap_le_struct->icap_stream,0);
 	efree(icap_le_struct);
 	return ret;
 }
@@ -134,7 +130,7 @@ void icap_info(void)
 	php3_printf("Icap Support enabled<br>");
 	php3_printf("<table>");
 	php3_printf("<tr><td>Icap Version:</td>");
-	php3_printf("<td>%s</td>",ICAPVER);
+	php3_printf("<td>%s</td>",CALVER);
 	php3_printf("</tr></table>");
 }
 
@@ -142,13 +138,23 @@ int icap_init(INIT_FUNC_ARGS)
 {
 
     le_icap = register_list_destructors(cal_close_it,NULL);
-	REGISTER_MAIN_LONG_CONSTANT("CLASS_PRIVATE", CLASS_PRIVATE, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("CLASS_PUBLIC", CLASS_PUBLIC, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("CLASS_CONFIDENTIAL", CLASS_CONFIDENTIAL, CONST_PERSISTENT | CONST_CS);
 
-    event_init(&global_event);
-	return SUCCESS;
+    return SUCCESS;
 }
+
+
+inline int add_assoc_object(pval *arg, char *key, pval *tmp)
+{
+        HashTable *symtable;
+        
+        if (arg->type == IS_OBJECT) {
+                symtable = arg->value.obj.properties;
+        } else {
+                symtable = arg->value.ht;
+        }
+        return zend_hash_update(symtable, key, strlen(key)+1, (void *) &tmp, sizeof(pval *), NULL);
+}
+
 
 void php3_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
@@ -177,13 +183,12 @@ void php3_icap_do_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		convert_to_long(options);
 		flags=options->value.lval;
 	}
-		icap_stream = cal_connect(calendar->value.str.val);
+		icap_stream = cal_open(NULL,calendar->value.str.val,0);
 	if (!icap_stream) {
 		php3_error(E_WARNING,"Couldn't open stream %s\n",calendar->value.str.val);
 		RETURN_FALSE;
 	}
-	cal_login(icap_stream,user->value.str.val,passwd->value.str.val);
-	cal_select(icap_stream,"INBOX");
+
 	icap_le_struct = emalloc(sizeof(pils));
 	icap_le_struct->icap_stream = icap_stream;
 	icap_le_struct->flags = 0;	
@@ -272,7 +277,7 @@ void php3_icap_reopen(INTERNAL_FUNCTION_PARAMETERS)
 		flags = options->value.lval;
 		icap_le_struct->flags = cl_flags;	
 	}
-	icap_stream = cal_connect(calendar->value.str.val);
+	//	icap_stream = cal_connect(calendar->value.str.val);
 	//	cal_login(icap_stream, calendar->value.str.val);
 	if (icap_stream == NULL) {
 		php3_error(E_WARNING,"Couldn't re-open stream\n");
@@ -289,6 +294,7 @@ void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind;
 	int ind, ind_type;
+	pval *start,*end;
 	pils *icap_le_struct; 
 
 	if (ARG_COUNT(ht) != 1 || getParameters(ht, 1, &streamind) == FAILURE) {
@@ -316,10 +322,10 @@ void php3_icap_expunge(INTERNAL_FUNCTION_PARAMETERS)
    Fetch an event*/
 void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 {
-	pval *streamind,*eventid,*options=NULL;
+	pval *streamind,*eventid,*start,*end,*options=NULL;
 	int ind, ind_type;
 	pils *icap_le_struct=NULL; 
-	event_t *myevent=NULL;
+	CALEVENT *myevent;
 	int myargcount=ARG_COUNT(ht);
 	
 	if (myargcount < 1 || myargcount > 3 || getParameters(ht, myargcount, &streamind, &eventid,&options) == FAILURE) {
@@ -336,25 +342,47 @@ void php3_icap_fetch_event(INTERNAL_FUNCTION_PARAMETERS)
 	if(myargcount==3) {
 		convert_to_long(options);
 	}
-	cal_fetch(icap_le_struct->icap_stream,eventid->value.lval);
+	cal_fetch(icap_le_struct->icap_stream,eventid->value.lval,&myevent);
 
 	object_init(return_value);
-	add_property_long(return_value,"uid",global_event.uid);
-	add_property_long(return_value,"year",global_event.date.year);
-	add_property_long(return_value,"month",global_event.date.month);
-	add_property_long(return_value,"day",global_event.date.mday);
-	add_property_long(return_value,"starthour",global_event.start.hour);
-	add_property_long(return_value,"startminute",global_event.start.minute);
-	add_property_long(return_value,"endhour",global_event.end.hour);
-	add_property_long(return_value,"endminute",global_event.end.minute);
-	add_property_string(return_value,"category",global_event.category,1);
-	add_property_string(return_value,"title",global_event.title,1);
-	add_property_string(return_value,"description",global_event.description,1);
-	add_property_long(return_value,"class",global_event.ical_class);
-	add_property_long(return_value,"alarm_year",global_event.alarm_last.year);
-	add_property_long(return_value,"alarm_month",global_event.alarm_last.month);
-	add_property_long(return_value,"alarm_day",global_event.alarm_last.mday);
-	add_property_long(return_value,"alarm",global_event.alarm);
+	add_property_long(return_value,"id",myevent->id);
+	add_property_long(return_value,"public",myevent->public);
+	MAKE_STD_ZVAL(start);
+	object_init(start);
+	if(myevent->start.has_date)
+	  {
+	    add_property_long(start,"year",myevent->start.year);
+	    add_property_long(start,"month",myevent->start.mon);
+	    add_property_long(start,"mday",myevent->start.mday);
+	  }
+	if(myevent->start.has_time)
+	  {
+	    add_property_long(start,"hour",myevent->start.hour);
+	    add_property_long(start,"min",myevent->start.min);
+	    add_property_long(start,"sec",myevent->start.sec);
+	  }
+	add_assoc_object(return_value, "start",start);
+
+	MAKE_STD_ZVAL(end);
+	object_init(end);
+	if(myevent->end.has_date)
+	  {
+	    add_property_long(end,"year",myevent->end.year);
+	    add_property_long(end,"month",myevent->end.mon);
+	    add_property_long(end,"mday",myevent->end.mday);
+	  }
+	if(myevent->end.has_time)
+	  {
+	    add_property_long(end,"hour",myevent->end.hour);
+	    add_property_long(end,"min",myevent->end.min);
+	    add_property_long(end,"sec",myevent->end.sec);
+	  }
+	add_assoc_object(return_value, "end",end);
+	
+	add_property_string(return_value,"category",myevent->category,1);
+	add_property_string(return_value,"title",myevent->title,1);
+	add_property_string(return_value,"description",myevent->description,1);
+	add_property_long(return_value,"alarm",myevent->alarm);
 }
 /* }}} */
 
@@ -371,7 +399,7 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	unsigned int msgno;
 	pils *icap_le_struct; 
 	cal_list_t *my_cal_list;
-	caldate_t begincal,endcal;
+	datetime_t begincal,endcal;
 	int myargc;
 	myargc=ARG_COUNT(ht);
 	if (myargc <2 || myargc > 3 || getParameters(ht,myargc,&streamind,&begindate,&enddate) == FAILURE) {
@@ -394,8 +422,9 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-
-       if(_php3_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	begincal.has_time=0;
+	endcal.has_time=0;
+	if(_php3_hash_find(begindate->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
 	 SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
           begincal.year=(*pvalue)->value.lval;
@@ -403,7 +432,7 @@ void php3_icap_list_events(INTERNAL_FUNCTION_PARAMETERS)
        if(_php3_hash_find(begindate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          begincal.month=(*pvalue)->value.lval;
+          begincal.mon=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(begindate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
@@ -420,7 +449,7 @@ if(myargc == 3)
     if(_php3_hash_find(enddate->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
       convert_to_long(*pvalue);
-      endcal.month=(*pvalue)->value.lval;
+      endcal.mon=(*pvalue)->value.lval;
     }
     if(_php3_hash_find(enddate->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
@@ -431,7 +460,7 @@ if(myargc == 3)
  
 
 g_cal_list=NULL;
- cal_search(icap_le_struct->icap_stream,&begincal,(myargc == 3) ? NULL : &endcal);
+ cal_search_range(icap_le_struct->icap_stream,&begincal,(myargc == 3) ? NULL : &endcal);
  my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
@@ -518,14 +547,12 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
 {
 	pval *streamind, *date,*time;
         pval **pvalue;
-	caldate_t mydate;
-	caltime_t mytime;
+	datetime_t mydate;
 	int ind, ind_type;
 	pils *icap_le_struct; 
         int icap_folders=0;
         unsigned int msgno;
         cal_list_t *my_cal_list;
-        caldate_t begincal,endcal;
 
 	int myargc=ARG_COUNT(ht);
 	if (myargc != 3 || getParameters(ht,myargc,&streamind,&date,&time) == FAILURE) {
@@ -546,7 +573,8 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
         if (array_init(return_value) == FAILURE) {
                 RETURN_FALSE;
         }
-
+	mydate.has_date=1;
+	mydate.has_time=1;
        if(_php3_hash_find(date->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
@@ -555,7 +583,7 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
        if(_php3_hash_find(date->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mydate.month=(*pvalue)->value.lval;
+          mydate.mon=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(date->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
@@ -566,16 +594,16 @@ void php3_icap_list_alarms(INTERNAL_FUNCTION_PARAMETERS)
        if(_php3_hash_find(time->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mytime.hour=(*pvalue)->value.lval;
+          mydate.hour=(*pvalue)->value.lval;
        }
        if(_php3_hash_find(time->value.ht,"minute",sizeof("minute"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
           convert_to_long(*pvalue);
-          mytime.minute=(*pvalue)->value.lval;
+          mydate.min=(*pvalue)->value.lval;
        }
-
+       mydate.sec=0;
        g_cal_list=NULL;
-       cal_search_alarming(icap_le_struct->icap_stream,&mydate,&mytime);
+       cal_search_alarm(icap_le_struct->icap_stream,&mydate);
        my_cal_list=g_cal_list;
  while(my_cal_list != NULL)
    {
@@ -611,6 +639,7 @@ void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 		php3_error(E_WARNING, "Unable to find stream pointer");
 		RETURN_FALSE;
 	}
+	
 	if (icap_delete_calendar(icap_le_struct->icap_stream,calendar->value.str.val)) 
 	  {
 	    RETURN_TRUE;
@@ -619,6 +648,7 @@ void php3_icap_delete_calendar(INTERNAL_FUNCTION_PARAMETERS)
 	  {
 	    RETURN_FALSE;
 	  }
+	
 }
 /* }}} */
 
@@ -677,11 +707,11 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	int icap_folders=0;
 	unsigned int msgno;
 	pils *icap_le_struct; 
-	pval **pvalue;
+	pval **pvalue,**temppvalue;
 	cal_list_t *my_cal_list;
 	int myargc;
-	int uid;
-	event_t myevent;
+	unsigned long uid;
+	CALEVENT *myevent;
 	myargc=ARG_COUNT(ht);
 	if (myargc !=2 || getParameters(ht,myargc,&streamind,&storeobject) == FAILURE) {
 		WRONG_PARAM_COUNT;
@@ -703,94 +733,115 @@ void php3_icap_store_event(INTERNAL_FUNCTION_PARAMETERS)
 	if (array_init(return_value) == FAILURE) {
 		RETURN_FALSE;
 	}
-	event_init(&myevent);
+	myevent=calevent_new();
 	if(_php3_hash_find(storeobject->value.ht,"uid",sizeof("uid"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent.uid=(*pvalue)->value.lval;
+	  myevent->id=(*pvalue)->value.lval;
 	}
-	if(_php3_hash_find(storeobject->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	if(_php3_hash_find(storeobject->value.ht,"public",sizeof("public"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent.date.year=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.date.month=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"day",sizeof("day"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.date.mday=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"starthour",sizeof("starthour"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.start.hour=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"startminute",sizeof("startminute"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.start.minute=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"endhour",sizeof("endhour"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.end.hour=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"endminute",sizeof("endminute"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.end.minute=(*pvalue)->value.lval;
+	  myevent->public=(*pvalue)->value.lval;
 	}
 	if(_php3_hash_find(storeobject->value.ht,"category",sizeof("category"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent.category=strdup((*pvalue)->value.str.val);
+	  myevent->category=strdup((*pvalue)->value.str.val);
 	}
 	if(_php3_hash_find(storeobject->value.ht,"title",sizeof("title"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent.title=strdup((*pvalue)->value.str.val);
+	  myevent->title=strdup((*pvalue)->value.str.val);
 	}
 	if(_php3_hash_find(storeobject->value.ht,"description",sizeof("description"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_string(*pvalue);
-	  myevent.description=strdup((*pvalue)->value.str.val);
+	  myevent->description=strdup((*pvalue)->value.str.val);
 	}
 
 	if(_php3_hash_find(storeobject->value.ht,"alarm",sizeof("alarm"),(void **) &pvalue)== SUCCESS){
           SEPARATE_ZVAL(pvalue);
 	  convert_to_long(*pvalue);
-	  myevent.alarm=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"alarm_year",sizeof("alarm_year"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.alarm_last.year=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"alarm_month",sizeof("alarm_month"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_string(*pvalue);
-	  myevent.alarm_last.month=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"alarm_mday",sizeof("alarm_day"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_string(*pvalue);
-	  myevent.alarm_last.mday=(*pvalue)->value.lval;
-	}
-	if(_php3_hash_find(storeobject->value.ht,"class",sizeof("class"),(void **) &pvalue)== SUCCESS){
-          SEPARATE_ZVAL(pvalue);
-	  convert_to_long(*pvalue);
-	  myevent.ical_class=(*pvalue)->value.lval;
+	  myevent->alarm=(*pvalue)->value.lval;
 	}
 
 
+       	if(_php3_hash_find(storeobject->value.ht,"start",sizeof("start"),(void **) &temppvalue)== SUCCESS){
+          SEPARATE_ZVAL(temppvalue);
+	  convert_to_object(*temppvalue);
+	  
+	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.year=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.mon=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.mday=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.hour=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.min=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->start.sec=(*pvalue)->value.lval;
+	  }
+	}
 
-	cal_append(icap_le_struct->icap_stream,"INBOX",&myevent);
-	event_destroy(&myevent);
-	RETURN_LONG(guid);
+       	if(_php3_hash_find(storeobject->value.ht,"end",sizeof("end"),(void **) &temppvalue)== SUCCESS){
+          SEPARATE_ZVAL(temppvalue);
+	  convert_to_object(*temppvalue);
+	  
+	  if(_php3_hash_find((*temppvalue)->value.ht,"year",sizeof("year"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.year=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"month",sizeof("month"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.mon=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"mday",sizeof("mday"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.mday=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"hour",sizeof("hour"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.hour=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"min",sizeof("min"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.min=(*pvalue)->value.lval;
+	  }
+	  if(_php3_hash_find((*temppvalue)->value.ht,"sec",sizeof("sec"),(void **) &pvalue)== SUCCESS){
+	    SEPARATE_ZVAL(pvalue);
+	    convert_to_long(*pvalue);
+	    myevent->end.sec=(*pvalue)->value.lval;
+	  }
+	}
+
+	cal_append(icap_le_struct->icap_stream,"INBOX",&uid,myevent);
+	calevent_free(myevent);
+	RETURN_LONG(uid);
 }
 /* }}} */
 
@@ -838,7 +889,7 @@ void php3_icap_snooze(INTERNAL_FUNCTION_PARAMETERS)
 /* Interfaces to callbacks */
 
 
-void cc_searched (u_int32_t cal_uid)
+void cc_searched (unsigned long cal_uid)
 {
 
   if(g_cal_list==NULL)
@@ -864,13 +915,12 @@ void cc_searched (u_int32_t cal_uid)
 
 void cc_appended(u_int32_t uid)
 {
-guid=uid;
+
 }
 
 
-void cc_fetched(const event_t *event)
+void cc_fetched(const CALEVENT *event)
 {
-event_copy(&global_event,event);
 
 }
 
@@ -884,6 +934,12 @@ void cc_dlog(const char *fmt, ...)
 
 }
 
+void cc_login(const char **user, const char **pwd)
+{
+
+*user=icap_user;
+*pwd=icap_password; 
+}
 #endif
 
 /*
