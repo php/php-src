@@ -2,6 +2,9 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ???, Version 4.0 Beta 5
+- Changed $HTTP_STATE_VARS to $HTTP_SESSION_VARS. Use only the latter
+  version now! (Andrei)
+- Add GD-JPEG Support (Rasmus)
 - Prevent from loading dynamic PHP modules which were compiled with different
   debug and thread safety modes than PHP, which resulted in a crash (Andi)
 - connection_aborted() and friends work again. (Thies)
