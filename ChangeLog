@@ -1,3 +1,40 @@
+1999-12-08  Zeev Suraski  <zeev@php.net>
+
+    * ext/session/session.c
+      configuration-parser.y:
+    - Use Set-Cookie for consistency with SetCookie() (and possibly for adherence with
+      with some clients?)
+    - Remove unnecessary directive from configuration-parser.y
+
+1999-12-08  Sascha Schumann  <sascha@schumann.cx>
+
+    * ext/standard/assert.c: Use global ctor in non-ZTS mode as well
+
+1999-12-08  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/standard/var.c: (unserialize) now cleans up better on failure!
+
+    * ext/standard/assert.c: make non-ZTS happy again
+
+    * ext/oci8/oci8.c:
+1999-12-08  Stig Bakken  <ssb@fast.no>
+
+    * pear/DB/common.php
+      pear/DB/mysql.php
+      pear/DB.php: Added some more error defines (CANNOT_CREATE/DELETE/DROP).
+    Folded up the methods in DB.php.
+    Started adding documentation for DB_result methods.
+    Added doOne() doRow() and doAssoc() methods in DB_common.
+    Added numCols() to DB_mysql.
+
+1999-12-08  Thies C. Arntzen  <thies@digicol.de>
+
+    * ext/ftp/php_ftp.c
+      ext/readline/php_readline.h
+      ext/readline/readline.c: ZTS compile fixes
+
+    * ext/standard/assert.c: this is the "right" ZTS-fix
+
 1999-12-07  Andrei Zmievski  <andrei@ispi.net>
 
     * pear/DB.php: Oops.
