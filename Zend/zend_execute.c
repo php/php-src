@@ -1294,7 +1294,8 @@ binary_assign_op_addr: {
 							object_ptr = get_zval_ptr_ptr(&opline->op1, Ts, BP_VAR_R);
 
 
-							if (!object_ptr || (*object_ptr)->value.obj.ce->handle_function_call) { /* overloaded function call */
+							if (!object_ptr
+								|| ((*object_ptr)->type==IS_OBJECT && (*object_ptr)->value.obj.ce->handle_function_call)) { /* overloaded function call */
 								zend_overloaded_element overloaded_element;
 								zend_property_reference *property_reference;
 
@@ -1303,10 +1304,6 @@ binary_assign_op_addr: {
 
 								if (object_ptr) {
 									zend_property_reference property_reference;
-
-									if ((*object_ptr)->type != IS_OBJECT) {
-										zend_error(E_ERROR, "Call to a member function on a non-object");
-									}
 
 									property_reference.object = object_ptr;
 									property_reference.type = BP_VAR_NA;
