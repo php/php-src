@@ -3879,7 +3879,7 @@ PHP_FUNCTION(pg_convert)
 }
 /* }}} */
 
-static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, zend_bool async)
+static int do_exec(smart_str *querystr, int expect, PGconn *pg_link, zend_bool async TSRMLS_DC)
 {
 	if (async) {
 		if (PQsendQuery(pg_link, querystr->c)) {
@@ -3920,6 +3920,10 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 	assert(convert == 1 || convert == 0);
 	assert(async == 1 || async == 0);
 
+	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
+		return FAILURE;
+	}
+
 	/* convert input array if needed */
 	if (convert) {
 		MAKE_STD_ZVAL(converted);
@@ -3928,10 +3932,6 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 			goto cleanup;
 		}
 		var_array = converted;
-	}
-
-	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0) {
-		goto cleanup;
 	}
 	
 	smart_str_appends(&querystr, "INSERT INTO ");
@@ -3981,7 +3981,7 @@ PHPAPI int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var_array,
 	smart_str_appends(&querystr, ");");
 	smart_str_0(&querystr);
 
-	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async) == 0)
+	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async TSRMLS_CC) == 0)
 		ret = SUCCESS;
 
 cleanup:
@@ -4083,6 +4083,11 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 	assert(convert == 1 || convert == 0);
 	assert(async == 1 || async == 0);
 
+	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0
+			|| zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		return FAILURE;
+	}
+
 	if (convert) {
 		MAKE_STD_ZVAL(var_converted);
 		array_init(var_converted);
@@ -4096,11 +4101,6 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 			goto cleanup;
 		}
 		ids_array = ids_converted;
-	}
-
-	if (zend_hash_num_elements(Z_ARRVAL_P(var_array)) == 0
-			|| zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
-		goto cleanup;
 	}
 
 	smart_str_appends(&querystr, "UPDATE ");
@@ -4118,7 +4118,7 @@ PHPAPI int php_pgsql_update(PGconn *pg_link, const char *table, zval *var_array,
 	smart_str_appendc(&querystr, ';');	
 	smart_str_0(&querystr);
 
-	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async) == 0)
+	if (do_exec(&querystr, PGRES_COMMAND_OK, pg_link, async TSRMLS_CC) == 0)
 		ret = SUCCESS;
 
 cleanup:
@@ -4178,6 +4178,10 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 	assert(convert == 1 || convert == 0);
 	assert(async == 1 || async == 0);
 
+	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		return FAILURE;
+	}
+
 	if (convert) {
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
@@ -4185,10 +4189,6 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 			goto cleanup;
 		}
 		ids_array = ids_converted;
-	}
-
-	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
-		goto cleanup;
 	}
 
 	smart_str_appends(&querystr, "DELETE FROM ");
@@ -4201,7 +4201,7 @@ PHPAPI int php_pgsql_delete(PGconn *pg_link, const char *table, zval *ids_array,
 	smart_str_appendc(&querystr, ';');
 	smart_str_0(&querystr);
 
-	if (do_exec(&querystr, PGRES_TUPLES_OK, pg_link, async) == 0)
+	if (do_exec(&querystr, PGRES_TUPLES_OK, pg_link, async TSRMLS_CC) == 0)
 		ret = SUCCESS;
 
 cleanup:
@@ -4300,6 +4300,10 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 	assert(Z_TYPE_P(ret_array) == IS_ARRAY);
 	assert(convert == 1 || convert == 0);
 
+	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
+		return FAILURE;
+	}
+
 	if (convert) {
 		MAKE_STD_ZVAL(ids_converted);
 		array_init(ids_converted);
@@ -4307,10 +4311,6 @@ PHPAPI int php_pgsql_select(PGconn *pg_link, const char *table, zval *ids_array,
 			goto cleanup;
 		}
 		ids_array = ids_converted;
-	}
-
-	if (zend_hash_num_elements(Z_ARRVAL_P(ids_array)) == 0) {
-		goto cleanup;
 	}
 
 	smart_str_appends(&querystr, "SELECT * FROM ");
