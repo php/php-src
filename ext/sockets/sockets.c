@@ -746,7 +746,7 @@ PHP_FUNCTION(socket_write)
 
 typedef int (*read_func)(int, void *, int);
 
-/* {{{ proto string socket_read(resource socket, int length [, int type])
+/* {{{ proto mixed socket_read(resource socket, int length [, int type])
    Reads length bytes from socket */
 PHP_FUNCTION(socket_read)
 {
