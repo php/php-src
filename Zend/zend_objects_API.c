@@ -50,9 +50,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 
 			if (obj->dtor && !objects->object_buckets[i].destructor_called) {
 				objects->object_buckets[i].destructor_called = 1;
-				if (obj->dtor) {
-					obj->dtor(obj->object, i TSRMLS_CC);
-				}
+				obj->dtor(obj->object, i TSRMLS_CC);
 			}
 		}
 	}
