@@ -645,9 +645,9 @@ enable_static=yes
 
 case "$php_build_target" in
 program)
-	enable_static=no
+	enable_shared=no
     PHP_PROGRAM=php
-	passthru="$passthru --disable-static"
+	passthru="$passthru --disable-shared"
 ;;
 shared)
 	enable_static=no
