@@ -45,7 +45,7 @@ AC_ARG_WITH(apxs2,
   case $host_alias in
   *aix*)
     APXS_SBINDIR=`$APXS -q SBINDIR`
-    LDFLAGS="$LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_SBINDIR/httpd.exp"
     ;;
   esac
 ],[

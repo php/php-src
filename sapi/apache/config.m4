@@ -60,7 +60,7 @@ AC_ARG_WITH(apxs,
   case $host_alias in
   *aix*)
     APXS_LIBEXECDIR=`$APXS -q LIBEXECDIR`
-    LDFLAGS="$LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
+    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
     ;;
   esac
 ],[
