@@ -136,7 +136,7 @@ PHPAPI void php_print_info(int flag)
 	SLS_FETCH();
 
 	the_time = time(NULL);
-	ta = localtime_r(&the_time, &tmbuf);
+	ta = php_localtime_r(&the_time, &tmbuf);
 	
 	if (flag & PHP_INFO_GENERAL) {
 #ifdef PHP_WIN32

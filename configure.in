@@ -136,6 +136,7 @@ divert(3)
 
 PHP_CONFIGURE_PART(Running system checks)
 
+PHP_MISSING_TIME_R_DECL
 
 dnl check for -R, etc. switch
 AC_MSG_CHECKING(whether compiler supports -R)

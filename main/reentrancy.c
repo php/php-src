@@ -48,33 +48,29 @@ static MUTEX_T reentrant_locks[NUMBER_OF_LOCKS];
 
 #if defined(PHP_HPUX_TIME_R)
 
-PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm)
 {
-#undef localtime_r
 	if (localtime_r(timep, p_tm) == 0)
 		return (p_tm);
 	return (NULL);
 }
 
-PHPAPI char *ctime_r(const time_t *clock, char *buf)
+PHPAPI char *php_ctime_r(const time_t *clock, char *buf)
 {
-#undef ctime_r
 	if (ctime_r(clock, buf, 26) != -1)
 		return (buf);
 	return (NULL);
 }
 
-PHPAPI char *asctime_r(const struct tm *tm, char *buf)
+PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 {
-#undef asctime_r
 	if (asctime_r(tm, buf, 26) != -1)
 		return (buf);
 	return (NULL);
 }
 
-PHPAPI struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
-#undef gmtime_r
 	if (gmtime_r(timep, p_tm) == 0)
 		return (p_tm);
 	return (NULL);
@@ -123,7 +119,7 @@ PHPAPI char *ctime_r(const time_t *clock, char *buf)
 
 #if !defined(HAVE_ASCTIME_R) && defined(HAVE_ASCTIME)
 
-PHPAPI char *asctime_r(const struct tm *tm, char *buf)
+PHPAPI char *php_asctime_r(const struct tm *tm, char *buf)
 {
 	char *tmp;
 	
@@ -141,7 +137,7 @@ PHPAPI char *asctime_r(const struct tm *tm, char *buf)
 
 #if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 
-PHPAPI struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm)
+PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm)
 {
 	struct tm *tmp;
 	
@@ -227,7 +223,7 @@ do_rand(unsigned long *ctx)
 
 
 PHPAPI int
-rand_r(unsigned int *ctx)
+php_rand_r(unsigned int *ctx)
 {
 	u_long val = (u_long) *ctx;
 	*ctx = do_rand(&val);
@@ -285,7 +281,7 @@ rand_r(unsigned int *ctx)
 #include <stddef.h>
 
 PHPAPI char *
-strtok_r(char *s, const char *delim, char **last)
+php_strtok_r(char *s, const char *delim, char **last)
 {
     char *spanp;
     int c, sc;

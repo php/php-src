@@ -192,7 +192,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 	ELS_FETCH();
 	PLS_FETCH();
 
-	var = strtok_r(SG(request_info).post_data, "&", &strtok_buf);
+	var = php_strtok_r(SG(request_info).post_data, "&", &strtok_buf);
 
 	while (var) {
 		val = strchr(var, '=');
@@ -203,7 +203,7 @@ SAPI_POST_HANDLER_FUNC(php_std_post_handler)
 			php_url_decode(val, strlen(val));
 			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
 		}
-		var = strtok_r(NULL, "&", &strtok_buf);
+		var = php_strtok_r(NULL, "&", &strtok_buf);
 	}
 }
 
@@ -274,11 +274,11 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 	}
 
 	if (arg == PARSE_COOKIE) {
-		var = strtok_r(res, ";", &strtok_buf);
+		var = php_strtok_r(res, ";", &strtok_buf);
 	} else if (arg == PARSE_POST) {
-		var = strtok_r(res, "&", &strtok_buf);
+		var = php_strtok_r(res, "&", &strtok_buf);
 	} else {
-		var = strtok_r(res, PG(arg_separator), &strtok_buf);
+		var = php_strtok_r(res, PG(arg_separator), &strtok_buf);
 	}
 
 	while (var) {
@@ -291,9 +291,9 @@ void php_treat_data(int arg, char *str ELS_DC PLS_DC SLS_DC)
 			php_register_variable(var, val, array_ptr ELS_CC PLS_CC);
 		}
 		if (arg == PARSE_COOKIE) {
-			var = strtok_r(NULL, ";", &strtok_buf);
+			var = php_strtok_r(NULL, ";", &strtok_buf);
 		} else {
-			var = strtok_r(NULL, PG(arg_separator), &strtok_buf);
+			var = php_strtok_r(NULL, PG(arg_separator), &strtok_buf);
 		}
 	}
 	if (free_buffer) {

@@ -45,7 +45,7 @@ PHP_FUNCTION(unixtojd)
     t = time(NULL);
   }
 
-  ta = localtime_r(&t, &tmbuf);
+  ta = php_localtime_r(&t, &tmbuf);
   jdate = GregorianToSdn(ta->tm_year+1900, ta->tm_mon+1,ta->tm_mday);
   
   RETURN_LONG(jdate);

@@ -223,13 +223,13 @@ PHP_FUNCTION(filepro)
 	}
 	
 	/* Get the field count, assume the file is readable! */
-	if (strcmp(strtok_r(readbuf, ":", &strtok_buf), "map")) {
+	if (strcmp(php_strtok_r(readbuf, ":", &strtok_buf), "map")) {
 		php_error(E_WARNING, "filePro: map file corrupt or encrypted");
 		RETURN_FALSE;
 	}
-	FP_GLOBAL(fp_keysize) = atoi(strtok_r(NULL, ":", &strtok_buf));
-	strtok_r(NULL, ":", &strtok_buf);
-	FP_GLOBAL(fp_fcount) = atoi(strtok_r(NULL, ":", &strtok_buf));
+	FP_GLOBAL(fp_keysize) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
+	php_strtok_r(NULL, ":", &strtok_buf);
+	FP_GLOBAL(fp_fcount) = atoi(php_strtok_r(NULL, ":", &strtok_buf));
     
     /* Read in the fields themselves */
 	for (i = 0; i < FP_GLOBAL(fp_fcount); i++) {
@@ -241,9 +241,9 @@ PHP_FUNCTION(filepro)
 		}
 		new_field = emalloc(sizeof(FP_FIELD));
 		new_field->next = NULL;
-		new_field->name = estrdup(strtok_r(readbuf, ":", &strtok_buf));
-		new_field->width = atoi(strtok_r(NULL, ":", &strtok_buf));
-		new_field->format = estrdup(strtok_r(NULL, ":", &strtok_buf));
+		new_field->name = estrdup(php_strtok_r(readbuf, ":", &strtok_buf));
+		new_field->width = atoi(php_strtok_r(NULL, ":", &strtok_buf));
+		new_field->format = estrdup(php_strtok_r(NULL, ":", &strtok_buf));
         
 		/* Store in forward-order to save time later */
 		if (!FP_GLOBAL(fp_fieldlist)) {

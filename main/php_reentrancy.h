@@ -42,39 +42,60 @@
 
 #if !defined(HAVE_LOCALTIME_R) && defined(HAVE_LOCALTIME)
 #define PHP_NEED_REENTRANCY 1
-#define localtime_r php_localtime_r
-PHPAPI struct tm *localtime_r(const time_t *const timep, struct tm *p_tm);
+PHPAPI struct tm *php_localtime_r(const time_t *const timep, struct tm *p_tm);
+#else
+#define php_localtime_r localtime_r
+#ifdef MISSING_LOCALTIME_R_DECL
+struct tm *localtime_r(const time_t *const timep, struct tm *p_tm);
+#endif
 #endif
 
 
 #if !defined(HAVE_CTIME_R) && defined(HAVE_CTIME)
 #define PHP_NEED_REENTRANCY 1
-#define ctime_r php_ctime_r
-PHPAPI char *ctime_r(const time_t *clock, char *buf);
+PHPAPI char *php_ctime_r(const time_t *clock, char *buf);
+#else
+#define php_ctime_r ctime_r
+#ifdef MISSING_CTIME_R_DECL
+char *ctime_r(const time_t *clock, char *buf);
+#endif
 #endif
 
 
 #if !defined(HAVE_ASCTIME_R) && defined(HAVE_ASCTIME)
 #define PHP_NEED_REENTRANCY 1
-#define asctime_r php_asctime_r
-PHPAPI char *asctime_r(const struct tm *tm, char *buf);
+PHPAPI char *php_asctime_r(const struct tm *tm, char *buf);
+#else
+#define php_asctime_r asctime_r
+#ifdef MISSING_ASCTIME_R_DECL
+char *asctime_r(const struct tm *tm, char *buf);
+#endif
 #endif
 
 
 #if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 #define PHP_NEED_REENTRANCY 1
-#define gmtime_r php_gmtime_r
-PHPAPI struct tm *gmtime_r(const time_t *const timep, struct tm *p_tm);
+PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm);
+#else
+#define php_gmtime_r gmtime_r
+#ifdef MISSING_GMTIME_R_DECL
+struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm);
+#endif
 #endif
 
 #if !defined(HAVE_STRTOK_R)
-#define strtok_r php_strtok_r
-PHPAPI char *strtok_r(char *s, const char *delim, char **last);
+PHPAPI char *php_strtok_r(char *s, const char *delim, char **last);
+#else
+#define php_strtok_r strtok_r
+#ifdef MISSING_STRTOK_R_DECL
+char *strtok_r(char *s, const char *delim, char **last);
+#endif
 #endif
 
 #if !defined(HAVE_RAND_R)
-#define rand_r php_rand_r
-PHPAPI int rand_r(unsigned int *seed);
+PHPAPI int php_rand_r(unsigned int *seed);
+#else
+#define php_rand_r rand_r
 #endif
 
 #if !defined(ZTS)

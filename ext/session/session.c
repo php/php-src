@@ -485,7 +485,7 @@ static void strcat_gmt(char *ubuf, time_t *when)
 	char buf[MAX_STR];
 	struct tm tm;
 	
-	gmtime_r(when, &tm);
+	php_gmtime_r(when, &tm);
 	
 	/* we know all components, thus it is safe to use sprintf */
 	sprintf(buf, "%s, %d %s %d %02d:%02d:%02d GMT", week_days[tm.tm_wday], tm.tm_mday, month_names[tm.tm_mon], tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);

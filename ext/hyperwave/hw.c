@@ -316,7 +316,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 	   to the return_value array.
 	*/
 	temp = estrdup(objrec);
-	attrname = strtok_r(temp, "\n", &strtok_buf);
+	attrname = php_strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		zval *data, **dataptr;
 		long spec;
@@ -372,7 +372,7 @@ int make2_return_array_from_objrec(pval **return_value, char *objrec, zval *sarr
 			}
 		}
 
-		attrname = strtok_r(NULL, "\n", &strtok_buf);
+		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
 	if(NULL == sarr){
 //		spec_arr->refcount--;
@@ -413,7 +413,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* Fill Array of titles, descriptions and keywords */
 	temp = estrdup(objrec);
-	attrname = strtok_r(temp, "\n", &strtok_buf);
+	attrname = php_strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		str = attrname;
 		iTitle = 0;
@@ -468,7 +468,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 			if(iGroup)
 				add_next_index_string(group_arr, str, 1);
 		}
-		attrname = strtok_r(NULL, "\n", &strtok_buf);
+		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 
@@ -507,7 +507,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 
 	/* All other attributes. Make a another copy first */
 	temp = estrdup(objrec);
-	attrname = strtok_r(temp, "\n", &strtok_buf);
+	attrname = php_strtok_r(temp, "\n", &strtok_buf);
 	while(attrname != NULL) {
 		str = attrname;
 		/* We don't want to insert titles, descr., keywords a second time */
@@ -521,7 +521,7 @@ int make_return_array_from_objrec(pval **return_value, char *objrec) {
 			str++;
 			add_assoc_string(*return_value, attrname, str, 1);
 		}
-		attrname = strtok_r(NULL, "\n", &strtok_buf);
+		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 
@@ -1171,7 +1171,7 @@ php_printf("%s\n", ptr);
 	}
 
 	temp = estrdup(ptr);
-	attrname = strtok_r(temp, "\n", &strtok_buf);
+	attrname = php_strtok_r(temp, "\n", &strtok_buf);
 	i = 0;
 	while(attrname != NULL) {
 		char *name;
@@ -1245,7 +1245,7 @@ php_printf("%s\n", ptr);
 		/* Add the user array */
 		zend_hash_index_update(return_value->value.ht, i++, &user_arr, sizeof(pval), NULL);
 
-		attrname = strtok_r(NULL, "\n", &strtok_buf);
+		attrname = php_strtok_r(NULL, "\n", &strtok_buf);
 	}
 	efree(temp);
 	efree(object);
