@@ -208,17 +208,10 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	int expose_php = INI_INT("expose_php");
 	time_t the_time;
 	struct tm *ta, tmbuf;
-	char php_api_no[9];
-	char mod_api_no[9];
-	char ext_api_no[9];
 	
 
 	the_time = time(NULL);
 	ta = php_localtime_r(&the_time, &tmbuf);
-
-	snprintf (php_api_no, 9, "%d", PHP_API_VERSION);
-	snprintf (mod_api_no, 9, "%d", ZEND_MODULE_API_NO);
-	snprintf (ext_api_no, 9, "%d", ZEND_EXTENSION_API_NO);
 
 	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n");
 	PUTS("<head>");
@@ -227,6 +220,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
+		char *api_numbers;
 
 		php_uname = php_get_uname('a');
 
@@ -261,10 +255,11 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 #endif
 
 		php_info_print_table_row(2, "Configuration File (php.ini) Path", php_ini_opened_path?php_ini_opened_path:PHP_CONFIG_FILE_PATH);
-
-		php_info_print_table_row(2, "PHP API No.", php_api_no);
-		php_info_print_table_row(2, "PHP Extensions API No.", mod_api_no);
-		php_info_print_table_row(2, "Zend Extensions API No.", ext_api_no);
+		
+		api_numbers = emalloc(sizeof("PHP: \nPHP Extension: \nZend Extension: ") + 3*8);
+		snprintf(api_numbers, sizeof("PHP: \nPHP Extension: \nZend Extension: ") + 3*8, "PHP: %d\nPHP Extension: %d\nZend Extension: %d", PHP_API_VERSION, ZEND_MODULE_API_NO, ZEND_EXTENSION_API_NO);
+		php_info_print_table_row(2, "API Versions:", api_numbers);
+		efree(api_numbers);
 
 #if ZEND_DEBUG
 		php_info_print_table_row(2, "Debug Build", "yes" );
