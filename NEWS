@@ -13,8 +13,7 @@ PHP 4                                                                      NEWS
 - Fixed a bug that under certain circumstances could invalidate safe_mode.
   (Ilia)
 - Fixed bug #24640 (var_export and var_dump can't output large float). (Marcus)
-- Fixed bug #24592 (Possible crash in session extnsion, with NULL values).
-  (Sascha)
+- Fixed bug #24592 (NULL related crash in session extension). (Sascha)
 - Fixed bug #24573 (debug_backtrace() crashes if $this set to null). (Jani)
 - Fixed bug #24560 (parse_url() incorrectly handling certain file:// based 
   schemas). (Ilia)
