@@ -146,7 +146,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	(*quoted)[0] = '\'';
 	(*quoted)[*quotedlen-1] = '\'';
 	(*quoted)[*quotedlen] = '\0';
-	PQfreemem(escaped);
+	free(escaped);
 
 	return 1;
 }
