@@ -93,6 +93,7 @@ PHP 4.0                                                                    NEWS
   to each ENCAPSULATED TC_STRING) (alex@zend.com)
 - Added HMAC support in the mhash module (nmav@altera.gr)
 - Added module for Ovrimos sql server (nmav@altera.gr)
+- Fixed ext/java so that SUN CC can compile it (Jason)
 
 11 Oct 2000, Version 4.0.3
 - Fixed a possible crash in -a interactive mode (Zeev, Zend Engine)
