@@ -602,7 +602,6 @@ set, eg via an Apache Action directive.</p>\n\
 consult the installation file that came with this distribution, or visit \n\
 <a href="http://php.net/install.windows">the manual page</a></p>\n");
 
-			/* remove that detailed explanation some time */
 #ifdef ZTS
 	        tsrm_shutdown();
 #endif
