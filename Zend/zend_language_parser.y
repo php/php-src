@@ -586,7 +586,7 @@ catch_or_import_class_entry:
 ;
 
 new_class_entry:
-		parse_class_entry T_STRING { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
+		parse_class_entry static_or_variable_string { do_fetch_class(&$$, &$1, &$2 TSRMLS_CC); }
 	|	static_or_variable_string { do_fetch_class(&$$, NULL, &$1 TSRMLS_CC); }
 ;
 
