@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifndef PHP_XSLT_H
 #define PHP_XSLT_H
 
@@ -43,7 +41,6 @@ extern zend_module_entry xslt_module_entry;
 #define XSLT_ERROR(handle)     ((handle)->handlers->error)
 
 #define XSLT_PROCESSOR(handle) ((handle)->processor.ptr)
-#define XSLT_CONTEXT(handle)   ((handle)->processor.ctx)
 
 #define XSLT_ERRNO(handle)     ((handle)->err->no)
 #define XSLT_ERRSTR(handle)    ((handle)->err->str)
@@ -62,9 +59,9 @@ PHP_FUNCTION(xslt_set_base);
 PHP_FUNCTION(xslt_set_encoding);
 PHP_FUNCTION(xslt_set_log);
 PHP_FUNCTION(xslt_process);
-PHP_FUNCTION(xslt_free);
 PHP_FUNCTION(xslt_error);
 PHP_FUNCTION(xslt_errno);
+PHP_FUNCTION(xslt_free);
 
 struct scheme_handlers {
 	zval *get_all;
@@ -93,9 +90,8 @@ struct xslt_handlers {
 };
 
 struct xslt_processor {
-	SablotSituation ctx;
-	SablotHandle    ptr;
-	long            idx;
+	SablotHandle ptr;
+	long         idx;
 };
 
 struct xslt_log {
@@ -111,10 +107,9 @@ struct xslt_error {
 };
 
 typedef struct {
-	struct xslt_processor  processor;
 	struct xslt_handlers  *handlers;
+	struct xslt_processor  processor;
 	struct xslt_error     *err;
-	int cacheable;
 } php_xslt;
 
 #else
