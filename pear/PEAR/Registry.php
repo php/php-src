@@ -271,9 +271,7 @@ class PEAR_Registry extends PEAR
                 $open_mode = 'r';
             }
 
-            @ini_set('track_errors', true);
             $this->lock_fp = @fopen($this->lockfile, $open_mode);
-            @ini_restore('track_errors');
 
             if (!is_resource($this->lock_fp)) {
                 return $this->raiseError("could not create lock file" .
