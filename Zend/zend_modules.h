@@ -27,6 +27,8 @@
 #define SHUTDOWN_FUNC_ARGS_PASSTHRU type, module_number
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
+#define GINIT_FUNC_ARGS		void
+#define GINIT_FUNC_ARGS_PASSTHRU
 
 #define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0
 
