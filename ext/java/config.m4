@@ -29,12 +29,12 @@ AC_ARG_WITH(java,
 
     if test -d $withval/lib/kaffe; then
       PHP_ADD_LIBPATH($withval/lib)
-      PHP_ADD_LIBPATH($withval/lib/kaffe)
 
       JAVA_CFLAGS=-DKAFFE
       JAVA_INCLUDE=-I$withval/include/kaffe
       JAVA_CLASSPATH=$withval/share/kaffe/Klasses.jar
       JAVA_LIB=kaffevm
+      JAVA_LIBPATH=$withval/lib/kaffe
       java_libext=kaffevm
 
       test -f $withval/lib/$JAVA_LIB && JAVA_LIBPATH=$withval/lib
