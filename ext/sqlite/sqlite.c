@@ -1773,7 +1773,7 @@ PHP_FUNCTION(sqlite_fetch_object)
 			efree(fci.params);
 		}
 	} else if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
-		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Class %s does not have a constructor use NULL for parameter ctor_params", class_name);
+		zend_throw_exception_ex(sqlite_ce_exception, 0 TSRMLS_CC, "Class %s does not have a constructor, use NULL for parameter ctor_params or omit it", class_name);
 	}
 }
 /* }}} */
