@@ -41,6 +41,7 @@ if (PEAR::isError($options)) {
     usage($options);
 }
 
+
 $php_sysconfdir = getenv('PHP_SYSCONFDIR');
 if (!empty($php_sysconfdir)) {
     $pear_default_config = $php_sysconfdir.DIRECTORY_SEPARATOR.'pearsys.ini';
@@ -51,6 +52,9 @@ if (!empty($php_sysconfdir)) {
 }
 
 $opts = $options[0];
+
+//echo "ini_get : ".ini_get("pear_install_dir")."\n";
+//echo "get_cfg_var : ".get_cfg_var("pear_install_dir")."\n";
 
 foreach ($opts as $opt) {
     switch ($opt[0]) {
@@ -203,16 +207,16 @@ function usage($obj = null)
     fputs($stderr,
           "Usage: pear [options] command [command-options] <parameters>\n".
           "Options:\n".
-          "     -v         increase verbosity level (default 1)\n".
-          "     -q         be quiet, decrease verbosity level\n".
-          "     -c file    find user configuration in `file'\n".
-          "     -C file    find system configuration in `file'\n".
-          "     -d foo=bar set user config variable `foo' to `bar'\n".
-          "     -D foo=bar set system config variable `foo' to `bar'\n".
-          "     -s         store user configuration\n".
-          "     -S         store system configuration\n".
-          "     -u foo     unset `foo' in the user configuration\n".
-          "     -h, -?     display help/usage (this message)\n".
+          "     -v             increase verbosity level (default 1)\n".
+          "     -q             be quiet, decrease verbosity level\n".
+          "     -c file        find user configuration in `file'\n".
+          "     -C file        find system configuration in `file'\n".
+          "     -d \"foo=bar\" set user config variable `foo' to `bar'\n".
+          "     -D \"foo=bar\" set system config variable `foo' to `bar'\n".
+          "     -s             store user configuration\n".
+          "     -S             store system configuration\n".
+          "     -u foo         unset `foo' in the user configuration\n".
+          "     -h, -?         display help/usage (this message)\n".
           "Commands:\n".
           "   help [command]\n".
           "   install [-r] <package file>\n".
