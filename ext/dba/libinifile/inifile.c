@@ -154,7 +154,7 @@ static char *etrim(const char *str)
 		return NULL;
 	}
 	val = (char*)str;
-	while (strchr(" \t\r\n", *val)) {
+	while (*val && strchr(" \t\r\n", *val)) {
 		val++;
 	}
 	l = strlen(val);
