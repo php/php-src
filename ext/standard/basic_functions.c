@@ -2670,15 +2670,19 @@ PHP_FUNCTION(array_unshift)
 PHP_FUNCTION(array_splice)
 {
 	zval	   **args,				/* Function arguments array */
-				*array;				/* Input array */
-	HashTable		*new_hash = NULL;	/* Output array's hash */
+				*array,				/* Input array */
+			   **repl = NULL;		/* Replacement elements */
+	HashTable	*new_hash = NULL;	/* Output array's hash */
+	Bucket		*p;					/* Bucket used for traversing hash */
 	int			 argc,				/* Number of function arguments */
+				 i,
 				 offset,
-				 length;
+				 length,
+				 repl_num = 0;		/* Number of replacement elements */
 
 	/* Get the argument count and check it */
 	argc = ARG_COUNT(ht);
-	if (argc < 2) {
+	if (argc < 2 || argc > 4) {
 		WRONG_PARAM_COUNT;
 	}
 	
@@ -2687,7 +2691,7 @@ PHP_FUNCTION(array_splice)
 	if (getParametersArray(ht, argc, args) == FAILURE) {
 		efree(args);
 		WRONG_PARAM_COUNT;
-	}
+	}	
 
 	/* Get first argument and check that it's an array */
 	array = args[0];
@@ -2707,13 +2711,25 @@ PHP_FUNCTION(array_splice)
 	} else
 		length = -1;
 
+	if (argc == 4) {
+		/* Make sure the last argument, if passed, is an array */
+		convert_to_array(args[3]);
+		
+		/* Create the array of replacement elements */
+		repl_num = zend_hash_num_elements(args[3]->value.ht);
+		repl = (zval **)emalloc(repl_num * sizeof(zval *));
+		for (p=args[3]->value.ht->pListHead, i=0; p; p=p->pListNext, i++) {
+			repl[i] = *((zval **)p->pData);
+		}
+	}
+	
 	/* Initialize return value */
 	array_init(return_value);
 	
 	/* Perform splice */
 	new_hash = _phpi_splice(array->value.ht, offset, length,
-					(argc>3) ? &args[3] : NULL , argc-3,
-					&return_value->value.ht);
+							repl, repl_num,
+							&return_value->value.ht);
 	
 	/* Replace input array's hashtable with the new one */
 	zend_hash_destroy(array->value.ht);
@@ -2721,6 +2737,8 @@ PHP_FUNCTION(array_splice)
 	array->value.ht = new_hash;
 	
 	/* Clean up */
+	if (argc == 4)
+		efree(repl);
 	efree(args);
 }
 /* }}} */
