@@ -2755,26 +2755,12 @@ send_by_ref:
 			case ZEND_UNSET_VAR:
 				{
 					zval tmp, *variable = get_zval_ptr(&EX(opline)->op1, EX(Ts), &EG(free_op1), BP_VAR_R);
-					zval **object;
-					zend_bool unset_object;
 
-			
-					unset_object = (EX(opline)->extended_value == ZEND_UNSET_OBJ);
 					if (variable->type != IS_STRING) {
 						tmp = *variable;
 						zval_copy_ctor(&tmp);
 						convert_to_string(&tmp);
 						variable = &tmp;
-					}
-
-					if (unset_object) {
-						if (zend_hash_find(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1, (void **)&object) == FAILURE) {
-							zend_error(E_ERROR, "Cannot delete non-existing object");
-						}
-						if (Z_TYPE_PP(object) != IS_OBJECT) {
-							zend_error(E_ERROR, "Cannot call delete on non-object type");
-						}
-						Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
 					}
 
 					zend_hash_del(EG(active_symbol_table), variable->value.str.val, variable->value.str.len+1);
@@ -2788,10 +2774,6 @@ send_by_ref:
 			case ZEND_UNSET_DIM_OBJ: {
 					zval **container = get_zval_ptr_ptr(&EX(opline)->op1, EX(Ts), BP_VAR_R);
 					zval *offset = get_zval_ptr(&EX(opline)->op2, EX(Ts), &EG(free_op2), BP_VAR_R);
-					zend_bool unset_object;
-					zval **object;
-
-					unset_object = (EX(opline)->extended_value == ZEND_UNSET_OBJ);
 					
 					if (container) {
 						HashTable *ht;
@@ -2818,44 +2800,14 @@ send_by_ref:
 										} else {
 											index = offset->value.lval;
 										}
-
-										if (unset_object) {
-											if (zend_hash_index_find(ht, index, (void **)&object) == FAILURE) {
-												zend_error(E_ERROR, "Cannot delete non-existing object");
-											}
-											if (Z_TYPE_PP(object) != IS_OBJECT) {
-												zend_error(E_ERROR, "Cannot call delete on non-object type");
-											}
-											Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
-										}
 					
 										zend_hash_index_del(ht, index);
 										break;
 									}
 								case IS_STRING:
-									if (unset_object) {
-										if (zend_hash_find(ht, offset->value.str.val, offset->value.str.len+1, (void **)&object) == FAILURE) {
-											zend_error(E_ERROR, "Cannot delete non-existing object");
-										}
-										if (Z_TYPE_PP(object) != IS_OBJECT) {
-											zend_error(E_ERROR, "Cannot call delete on non-object type");
-										}
-										Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
-									}
-
 									zend_hash_del(ht, offset->value.str.val, offset->value.str.len+1);
 									break;
 								case IS_NULL:
-									if (unset_object) {
-										if (zend_hash_find(ht, "", sizeof(""), (void **)&object) == FAILURE) {
-											zend_error(E_ERROR, "Cannot delete non-existing object");
-										}
-										if (Z_TYPE_PP(object) != IS_OBJECT) {
-											zend_error(E_ERROR, "Cannot call delete on non-object type");
-										}
-										Z_OBJ_HT_PP(object)->delete_obj(*object TSRMLS_CC);
-									}
-
 									zend_hash_del(ht, "", sizeof(""));
 									break;
 								default: 

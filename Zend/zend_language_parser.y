@@ -67,7 +67,7 @@
 %left '*' '/' '%'
 %right '!' '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right '['
-%nonassoc T_NEW T_DELETE
+%nonassoc T_NEW
 %token T_EXIT
 %token T_IF
 %left T_ELSEIF
@@ -211,7 +211,6 @@ unticked_statement:
 		T_CATCH '(' catch_or_import_class_entry T_VARIABLE ')' { zend_do_begin_catch(&$1, &$8, &$9, 1 TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
-	|	T_DELETE  variable 	';' { zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$2, ZEND_UNSET_OBJ TSRMLS_CC); }
 	|	T_IMPORT { zend_do_begin_import(TSRMLS_C); } import_rule T_FROM catch_or_import_class_entry { zend_do_end_import(&$5 TSRMLS_CC); } ';'
 ;
 
@@ -252,7 +251,7 @@ unset_variables:
 ;
 
 unset_variable:
-		variable	{ zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1, ZEND_UNSET_REG TSRMLS_CC); }
+		variable	{ zend_do_end_variable_parse(BP_VAR_UNSET, 0 TSRMLS_CC); zend_do_unset(&$1 TSRMLS_CC); }
 ;
 
 use_filename:

@@ -2625,7 +2625,7 @@ void zend_do_indirect_references(znode *result, znode *num_references, znode *va
 }
 
 
-void zend_do_unset(znode *variable, int type TSRMLS_DC)
+void zend_do_unset(znode *variable TSRMLS_DC)
 {
 	zend_op *last_op;
 
@@ -2643,7 +2643,6 @@ void zend_do_unset(znode *variable, int type TSRMLS_DC)
 			break;
 
 	}
-	last_op->extended_value = type;
 }
 
 

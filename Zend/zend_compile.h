@@ -354,7 +354,7 @@ void zend_do_new_list_end(TSRMLS_D);
 void zend_do_cast(znode *result, znode *expr, int type TSRMLS_DC);
 void zend_do_include_or_eval(int type, znode *result, znode *op1 TSRMLS_DC);
 
-void zend_do_unset(znode *variable, int type TSRMLS_DC);
+void zend_do_unset(znode *variable TSRMLS_DC);
 void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC);
 
 void zend_do_foreach_begin(znode *foreach_token, znode *array, znode *open_brackets_token, znode *as_token, int variable TSRMLS_DC);
@@ -623,7 +623,6 @@ int zendlex(znode *zendlval TSRMLS_DC);
 
 /* unset types */
 #define ZEND_UNSET_REG 0
-#define ZEND_UNSET_OBJ 1
 
 /* var status for backpatching */
 #define BP_VAR_R			0
