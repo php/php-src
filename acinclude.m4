@@ -46,7 +46,9 @@ AC_DEFUN(AC_EXPAND_PATH,[
   if test -z "$1" || echo "$1" | grep '^/' >/dev/null ; then
     $2="$1"
   else
-    $2="`pwd`/$1"
+    ep_dir="`dirname \"$1\"`"
+    ep_realdir="`(cd \"$ep_dir\" && pwd)`"
+    $2="$ep_realdir/`basename \"$1\"`"
   fi
 ])
 
