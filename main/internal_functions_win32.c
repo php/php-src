@@ -48,7 +48,7 @@
 #include "ext/COM/php3_COM.h"
 #include "ext/standard/reg.h"
 #include "ext/pcre/php_pcre.h"
-#include "ext/odbc/php3_odbc.h"
+#include "ext/odbc/php_odbc.h"
 #include "ext/session/php_session.h"
 
 /* SNMP has to be moved to ext */
