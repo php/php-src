@@ -233,7 +233,7 @@ int php_libxml_streams_IO_match_wrapper(const char *filename)
 	return php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC) ? 1 : 0;
 }
 
-void *php_libxml_streams_IO_open_wrapper(const char *filename)
+void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode)
 {
 	char resolved_path[MAXPATHLEN + 1];
 	php_stream_statbuf ssbuf;
@@ -260,9 +260,19 @@ void *php_libxml_streams_IO_open_wrapper(const char *filename)
 
 	if (LIBXML(stream_context)) {
 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context());
-		return php_stream_open_wrapper_ex((char *)resolved_path, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
+		return php_stream_open_wrapper_ex((char *)resolved_path, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL, context);
 	}
-	return php_stream_open_wrapper((char *)resolved_path, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+	return php_stream_open_wrapper((char *)resolved_path, (char *)mode, ENFORCE_SAFE_MODE|REPORT_ERRORS, NULL);
+}
+
+void *php_libxml_streams_IO_open_read_wrapper(const char *filename)
+{
+	return php_libxml_streams_IO_open_wrapper(filename, "rb");
+}
+
+void *php_libxml_streams_IO_open_write_wrapper(const char *filename)
+{
+	return php_libxml_streams_IO_open_wrapper(filename, "wb");
 }
 
 int php_libxml_streams_IO_read(void *context, char *buffer, int len)
@@ -313,13 +323,13 @@ PHP_LIBXML_API void php_libxml_initialize() {
 		*/
 		xmlRegisterInputCallbacks(
 			php_libxml_streams_IO_match_wrapper, 
-			php_libxml_streams_IO_open_wrapper,
+			php_libxml_streams_IO_open_read_wrapper,
 			php_libxml_streams_IO_read, 
 			php_libxml_streams_IO_close);
 
 		xmlRegisterOutputCallbacks(
 			php_libxml_streams_IO_match_wrapper, 
-			php_libxml_streams_IO_open_wrapper,
+			php_libxml_streams_IO_open_write_wrapper,
 			php_libxml_streams_IO_write, 
 			php_libxml_streams_IO_close);
 
