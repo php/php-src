@@ -346,10 +346,10 @@ PHP_FUNCTION(dio_fcntl)
 				lk.l_whence = 0;
 			}
 			else {
-				lk.l_whence = SEEK_SET;
+				lk.l_whence = Z_LVAL_PP(element);
 			}
 
-			if (zend_hash_find(fh, "type", 6, (void **) &element) == FAILURE) {
+			if (zend_hash_find(fh, "type", 4, (void **) &element) == FAILURE) {
 				lk.l_type = 0;
 			}
 			else {
