@@ -78,7 +78,6 @@ ext/session
 
 ext/standard
 ------------
-    * array_mean()
     * add a version number to data serialized via serialize().
     * array_add(). (Andrei)
     * possibly modify parsing of GPC data to automatically create arrays if
