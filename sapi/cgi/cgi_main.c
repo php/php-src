@@ -391,12 +391,14 @@ int main(int argc, char *argv[])
 #endif
 
 
-#if HAVE_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
-	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so that sockets created via
-								fsockopen() don't kill PHP if the remote site closes it. 
-								in apache|apxs mode apache does that for us! 
-								thies@digicol.de 20000419 */
+	signal(SIGPIPE,SIG_IGN); /* ignore SIGPIPE in standalone mode so
+								that sockets created via fsockopen()
+								don't kill PHP if the remote site
+								closes it.  in apache|apxs mode apache
+								does that for us!  thies@digicol.de
+								20000419 */
 #endif
 #endif
 
@@ -754,3 +756,9 @@ any .htaccess restrictions anywhere on your site you can leave doc_root undefine
 	return exit_status;
 }
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ */

@@ -24,8 +24,6 @@
 
 require_once "PEAR.php";
 
-// {{{ Database independent error codes.
-
 /*
  * The method mapErrorCode in each DB_dbtype implementation maps
  * native error codes to one of these.
@@ -55,15 +53,15 @@ define("DB_ERROR_NOSUCHTABLE",     -18);
 define("DB_ERROR_NOSUCHFIELD",     -19);
 define("DB_ERROR_NEED_MORE_DATA",  -20);
 
+
 /*
  * Warnings are not detected as errors by DB::isError(), and are not
  * fatal.  You can detect whether an error is in fact a warning with
  * DB::isWarning().
  */
-define("DB_WARNING_READ_ONLY",   -1000);
+define("DB_WARNING",             -1000);
+define("DB_WARNING_READ_ONLY",   -1001);
 
-// }}}
-// {{{ Prepare/execute parameter types
 
 /*
  * These constants are used when storing information about prepared
@@ -79,8 +77,6 @@ define("DB_WARNING_READ_ONLY",   -1000);
 define("DB_PARAM_SCALAR",           1);
 define("DB_PARAM_OPAQUE",           2);
 
-// }}}
-// {{{ Binary data modes
 
 /*
  * These constants define different ways of returning binary data
@@ -97,8 +93,6 @@ define("DB_BINMODE_PASSTHRU",       1);
 define("DB_BINMODE_RETURN",         2);
 define("DB_BINMODE_CONVERT",        3);
 
-// }}}
-// {{{ Get modes: flags that control the layout of query result structures
 
 /**
  * Column data indexed by numbers, ordered from 0 and up
@@ -116,6 +110,7 @@ define('DB_GETMODE_ASSOC',   2);
  */
 define('DB_GETMODE_FLIPPED', 4);
 
+
 /**
  * This constant DB's default get mode.  It is possible to override by
  * defining in your scripts before including DB.
@@ -124,7 +119,6 @@ if (!defined('DB_GETMODE_DEFAULT')) {
 	define('DB_GETMODE_DEFAULT', DB_GETMODE_ORDERED);
 }
 
-// }}}
 
 /**
  * The main "DB" class is simply a container class with some static
@@ -152,9 +146,6 @@ if (!defined('DB_GETMODE_DEFAULT')) {
  * @since    PHP 4.0
  */
 class DB {
-
-    // {{{ factory()
-
 	/**
 	 * Create a new DB object for the specified database type
 	 *
@@ -173,9 +164,6 @@ class DB {
 		return $obj;
 	}
 
-    // }}}
-    // {{{ connect()
-
 	/**
 	 * Create a new DB object and connect to the specified database
 	 *
@@ -189,9 +177,7 @@ class DB {
 	 * @return object a newly created DB object, or a DB error code on
 	 * error
 	 */
-	function &connect(&$dsn, $persistent = false) {
-		global $USED_PACKAGES;
-
+	function &connect($dsn, $persistent = false) {
 		$dsninfo = DB::parseDSN($dsn);
 		$type = $dsninfo['phptype'];
 		@include_once("DB/${type}.php");
@@ -207,9 +193,6 @@ class DB {
 		return $obj;
 	}
 
-    // }}}
-    // {{{ apiVersion()
-
 	/**
 	 * Return the DB API version
 	 *
@@ -219,9 +202,6 @@ class DB {
 		return 1;
     }
 
-    // }}}
-    // {{{ isError()
-
 	/**
 	 * Tell whether a result code from a DB method is an error
 	 *
@@ -230,11 +210,10 @@ class DB {
 	 * @return bool whether $value is an error
 	 */
 	function isError($value) {
-		return is_object($value) && is_subclass_of($value, "DB_Error");
+		return is_object($value) &&
+			(get_class($value) == "db_error" ||
+			 is_subclass_of($value, "db_error"));
 	}
-
-    // }}}
-    // {{{ isWarning()
 
 	/**
 	 * Tell whether a result code from a DB method is a warning.
@@ -246,11 +225,10 @@ class DB {
 	 * @return bool whether $value is a warning
 	 */
 	function isWarning($value) {
-		return is_object($value) && is_subclass_of($value, "DB_Warning");
+		return is_object($value) &&
+			(get_class($value) == "db_warning" ||
+			 is_subclass_of($value, "db_warning"));
 	}
-
-    // }}}
-    // {{{ errorMessage()
 
 	/**
 	 * Return a textual error message for a DB error code
@@ -282,7 +260,8 @@ class DB {
 				DB_ERROR_CANNOT_DROP    => "can not drop",
 				DB_ERROR_NOSUCHTABLE    => "no such table",
 				DB_ERROR_NOSUCHFIELD    => "no such field",
-				DB_WARNING_READ_ONLY    => "warning: read only"
+				DB_WARNING              => "unknown warning",
+				DB_WARNING_READ_ONLY    => "read only"
 			);
 		}
 		if (DB::isError($value)) {
@@ -290,9 +269,6 @@ class DB {
 		}
 		return $errorMessages[$value];
 	}
-
-    // }}}
-    // {{{ parseDSN()
 
 	/**
 	 * Parse a data source name
@@ -401,8 +377,6 @@ class DB {
 
 		return $parsed;
 	}
-
-    // }}}
 }
 
 /**
@@ -413,13 +387,9 @@ class DB {
  * @author Stig Bakken <ssb@fast.no>
  */
 class DB_result {
-    // {{{ properties
 
     var $dbh;
     var $result;
-
-    // }}}
-    // {{{ DB_result()
 
     /**
 	 * DB_result constructor.
@@ -431,9 +401,6 @@ class DB_result {
 		$this->result = $result;
     }
 
-    // }}}
-    // {{{ fetchRow()
-
 	/**
 	 * Fetch and return a row of data.
 	 * @return  array   a row of data, or false on error
@@ -441,9 +408,6 @@ class DB_result {
     function fetchRow($getmode = DB_GETMODE_DEFAULT) {
 		return $this->dbh->fetchRow($this->result, $getmode);
     }
-
-    // }}}
-    // {{{ fetchInto()
 
     /**
 	 * Fetch a row of data into an existing array.
@@ -455,9 +419,6 @@ class DB_result {
 		return $this->dbh->fetchInto($this->result, $arr, $getmode);
     }
 
-    // }}}
-	// {{{ numCols()
-
 	/**
 	 * Get the the number of columns in a result set.
 	 *
@@ -466,9 +427,6 @@ class DB_result {
 	function numCols() {
 		return $this->dbh->numCols($this->result);
 	}
-
-	// }}}
-    // {{{ free()
 
     /**
 	 * Frees the resources allocated for this result set.
@@ -482,8 +440,6 @@ class DB_result {
 		$this->result = false;
 		return true;
     }
-
-    // }}}
 }
 
 /**
@@ -493,10 +449,23 @@ class DB_result {
  * @author Stig Bakken <ssb@fast.no>
  */
 class DB_Error extends PEAR_Error {
+	/**
+	 * DB_Error constructor.
+	 *
+	 * @param $code mixed DB error code, or string with error message.
+	 * @param $mode int what "error mode" to operate in
+	 * @param $level what error level to use for $mode == PEAR_ERROR_TRIGGER
+	 *
+	 * @access public
+	 */
 	function DB_Error($code = DB_ERROR,
 					  $mode = PEAR_ERROR_RETURN,
 					  $level = E_USER_NOTICE) {
-		$this->PEAR_Error("DB Error: " . DB::errorMessage($code), $code, $mode, $level);
+		if (is_int($code)) {
+			$this->PEAR_Error("DB Error: " . DB::errorMessage($code), $code, $mode, $level);
+		} else {
+			$this->PEAR_Error("DB Error: $code", 0, $mode, $level);
+		}
 	}
 }
 
@@ -507,10 +476,23 @@ class DB_Error extends PEAR_Error {
  * @author Stig Bakken <ssb@fast.no>
  */
 class DB_Warning extends PEAR_Error {
-	function DB_Error($code = DB_WARNING,
-					  $mode = PEAR_ERROR_RETURN,
-					  $level = E_USER_NOTICE) {
-		$this->PEAR_Error("DB Warning: " . DB::errorMessage($code), $code, $mode, $level);
+	/**
+	 * DB_Warning constructor.
+	 *
+	 * @param $code mixed DB error code, or string with error message.
+	 * @param $mode int what "error mode" to operate in
+	 * @param $level what error level to use for $mode == PEAR_ERROR_TRIGGER
+	 *
+	 * @access public
+	 */
+	function DB_Warning($code = DB_WARNING,
+						$mode = PEAR_ERROR_RETURN,
+						$level = E_USER_NOTICE) {
+		if (is_int($code)) {
+			$this->PEAR_Error("DB Warning: " . DB::errorMessage($code), $code, $mode, $level);
+		} else {
+			$this->PEAR_Error("DB Warning: $code", 0, $mode, $level);
+		}
 	}
 }
 
