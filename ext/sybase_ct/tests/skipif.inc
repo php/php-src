@@ -4,5 +4,5 @@
  * $Id$ 
  */
 
-  if (!extension_loaded('sybase_ct')) die('Sybase-CT extension not loaded');
+  if (!extension_loaded('sybase_ct')) die('skip Sybase-CT extension not loaded');
 ?>
