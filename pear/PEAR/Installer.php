@@ -505,7 +505,18 @@ class PEAR_Installer extends PEAR_Common
 
     // }}}
     // {{{ _downloadFile()
-    function _downloadFile($pkgfile, &$config, $options, &$errors, $version)
+    /**
+     * @param string filename to download
+     * @param PEAR_Config Configuration object
+     * @param array options returned from Console_GetOpt
+     * @param array empty array to populate with error messages, if any
+     * @param string version/state
+     * @param string original value passed to command-line
+     * @param string preferred state (snapshot/devel/alpha/beta/stable)
+     * @access private
+     */
+    function _downloadFile($pkgfile, &$config, $options, &$errors, $version,
+                           $origpkgfile, $state)
     {
         $need_download = false;
         if (preg_match('#^(http|ftp)://#', $pkgfile)) {
@@ -540,9 +551,25 @@ class PEAR_Installer extends PEAR_Common
                 $this->log(2, '+ tmp dir created at ' . $downloaddir);
             }
             $callback = $this->ui ? array(&$this, '_downloadCallback') : null;
+            $this->pushErrorHandling(PEAR_ERROR_RETURN);
             $file = $this->downloadHttp($pkgfile, $this->ui, $downloaddir, $callback);
+            $this->popErrorHandling();
             if (PEAR::isError($file)) {
-                return $this->raiseError($file);
+                if ($this->validPackageName($origpkgfile)) {
+                    include_once 'Remote.php';
+                    $remote = new PEAR_Remote($config);
+                    if (!PEAR::isError($info = $remote->call('package.info',
+                          $origpkgfile))) {
+                        return $this->raiseError('No releases of preferred state "'
+                            . $state . '" exist for package ' . $origpkgfile .
+                            '.  Use ' . $origpkgfile . '-state to install another' .
+                            ' state (like ' . $origpkgfile .'-beta)');
+                    } else {
+                        return $pkgfile;
+                    }
+                } else {
+                    return $this->raiseError($file);
+                }
             }
             $pkgfile = $file;
         }
@@ -603,6 +630,7 @@ class PEAR_Installer extends PEAR_Common
 
         // download files in this list if necessary
         foreach($packages as $pkgfile) {
+            $origpkgfile = $pkgfile;
             $pkgfile = $this->extractDownloadFileName($pkgfile, $version);
             if ($version === null) {
                 // use preferred state if no version number was specified
@@ -615,7 +643,8 @@ class PEAR_Installer extends PEAR_Common
                     continue;
                 }
             }
-            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors, $version);
+            $pkgfile = $this->_downloadFile($pkgfile, $config, $options, $errors,
+                $version, $origpkgfile, $state);
             if (PEAR::isError($pkgfile)) {
                 return $pkgfile;
             }
@@ -633,14 +662,13 @@ class PEAR_Installer extends PEAR_Common
         // extract dependencies from downloaded files and then download them
         // if necessary
         if (isset($options['alldeps']) || isset($options['onlyreqdeps'])) {
-            $reg = new PEAR_Registry($config->get('php_dir'));
+            include_once "PEAR/Remote.php";
+            $remote = new PEAR_Remote($config);
             if (!$installed) {
-                $installed = $reg->listPackages();
+                $installed = $this->registry->listPackages();
                 array_walk($installed, create_function('&$v,$k','$v = strtolower($v);'));
                 $installed = array_flip($installed);
             }
-            include_once "PEAR/Remote.php";
-            $remote = new PEAR_Remote($config);
             $deppackages = array();
             // construct the list of dependencies for each file
             foreach ($mywillinstall as $package => $alldeps) {
@@ -709,7 +737,7 @@ class PEAR_Installer extends PEAR_Common
                     }
 
                     // see if a dependency must be upgraded
-                    $inst_version = $reg->packageInfo($info['name'], 'version');
+                    $inst_version = $this->registry->packageInfo($info['name'], 'version');
                     if (!isset($info['version'])) {
                         // this is a rel='has' dependency, check against latest
                         if (version_compare($release_version, $inst_version, 'le')) {
