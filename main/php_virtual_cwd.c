@@ -164,7 +164,7 @@ static void cwd_globals_dtor(zend_cwd_globals *cwd_globals)
 
 CWD_API void virtual_cwd_startup(void)
 {
-	char cwd[MAXPATHLEN]; /* Should probably use system define here */
+	char cwd[MAXPATHLEN];
 	char *result;
 
 	result = getcwd(cwd, sizeof(cwd));	
