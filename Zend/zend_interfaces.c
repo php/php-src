@@ -22,10 +22,10 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 
-zend_class_entry *zend_ce_traversable;
-zend_class_entry *zend_ce_aggregate;
-zend_class_entry *zend_ce_iterator;
-zend_class_entry *zend_ce_arrayaccess;
+ZEND_API zend_class_entry *zend_ce_traversable;
+ZEND_API zend_class_entry *zend_ce_aggregate;
+ZEND_API zend_class_entry *zend_ce_iterator;
+ZEND_API zend_class_entry *zend_ce_arrayaccess;
 
 /* {{{ zend_call_method 
  Only returns the returned zval if retval_ptr != NULL */
