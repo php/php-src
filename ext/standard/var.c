@@ -258,7 +258,7 @@ static int php_array_element_export(zval **zv, int num_args, va_list args, zend_
 	} else { /* string key */
 		char *key;
 		int key_len;
-		key = php_addcslashes(hash_key->arKey, strlen(hash_key->arKey), &key_len, 0, "'\\", 2 TSRMLS_CC);
+		key = php_addcslashes(hash_key->arKey, hash_key->nKeyLength - 1, &key_len, 0, "'\\", 2 TSRMLS_CC);
 		php_printf("%*c'%s' => ", level + 1, ' ', key);
 		efree(key);
 	}
