@@ -1,3 +1,45 @@
+2004-09-23  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      zend.h:
+      - PHP 5.0.3-dev
+
+    * zend_compile.h
+      zend_execute.c
+      zend_execute.h
+      zend_execute_API.c
+      zend_opcode.c
+      zend_vm.h:
+      - Commit new VM architecture. This one allows people (aka Derick) to
+      - ask the engine to use function handler mode. Will update the README
+      - about that.
+
+    * (PHP_5_0)
+      zend.h:
+      - Roll 5.0.2
+
+2004-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * tests/bug20240.phpt:
+      Fixed test.
+
+2004-09-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_reflection_api.c:
+      Bugfix # 30209
+
+2004-09-23  Andi Gutmans  <andi@zend.com>
+
+    * tests/bench.php:
+      - Commit synthetic benchmark
+
+2004-09-23  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * zend_execute.c
+      zend_execute_API.c
+      zend_globals.h:
+      Reverted the NetWare Specific Stack limit related patches as asked by Andi
+
 2004-09-22  Anantha Kesari H Y  <hyanantha@novell.com>
 
     * zend_execute_API.c

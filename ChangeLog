@@ -1,3 +1,71 @@
+2004-09-23  Andi Gutmans  <andi@zend.com>
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - PHP 5.0.3-dev
+
+    * ZendEngine2/zend_compile.h
+      ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute.h
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_opcode.c
+      ZendEngine2/zend_vm.h:
+      - Commit new VM architecture. This one allows people (aka Derick) to
+      - ask the engine to use function handler mode. Will update the README
+      - about that.
+
+    * (PHP_5_0)
+      NEWS
+      configure.in
+      ZendEngine2/zend.h
+      main/php_version.h:
+      - Roll 5.0.2
+
+2004-09-23  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ZendEngine2/tests/bug20240.phpt:
+      Fixed test.
+
+2004-09-23  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_5_0)
+      NEWS:
+      BFN
+
+    * ZendEngine2/zend_reflection_api.c:
+      Bugfix # 30209
+
+2004-09-23  Andi Gutmans  <andi@zend.com>
+
+    * ZendEngine2/tests/bench.php:
+      - Commit synthetic benchmark
+
+2004-09-23  Anantha Kesari H Y  <hyanantha@novell.com>
+
+    * main/mergesort.c:
+      removed unwanted NetWare specific changes
+
+    * main/fopen_wrappers.c:
+      removed redundant checks for NETWARE
+
+    * sapi/apache2filter/sapi_apache2.c:
+      TSRMLS_FETCH should be called prior to accessing any of the SG members
+
+    * sapi/apache2filter/php_apache.h:
+      NetWare now has a POSIX compliant stat structure so no need of
+      CLIB_STAT_PATCH and all such macros
+
+    * main/streams/userspace.c:
+      CLIB_STAT_PATCH check is redundant. So removing it
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_execute_API.c
+      ZendEngine2/zend_globals.h:
+      Reverted the NetWare Specific Stack limit related patches as asked by Andi
+
 2004-09-22  Wez Furlong  <wez.php@thebrainroom.net>
 
     * pear/PEAR/Builder.php
