@@ -276,6 +276,9 @@ static void php_mssql_init_globals(zend_mssql_globals *mssql_globals)
 			mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
 		}
 	}
+	else {
+		mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
+	}
 }
 
 PHP_MINIT_FUNCTION(mssql)
