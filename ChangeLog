@@ -1,3 +1,71 @@
+2005-01-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      MFH: - Fixed bug #31060 (imageftbbox() does not use linespacing parameter)
+
+    * ext/gd/gd.c:
+      - Fixed bug #31060 (imageftbbox() does not use linespacing parameter)
+
+    * (PHP_4_3)
+      NEWS
+      NEWS
+      ext/gd/gd.c
+      ext/gd/gd.c:
+      MFH: - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
+      parameters)
+
+    * ext/gd/gd.c:
+      - Fixed bug #30120 (imagettftext() and imagettfbbox() accept too many
+      parameters)
+
+    * (PHP_5_0)
+      main/php.h
+      sapi/apache_hooks/php_apache.c:
+      MFH: - Fix another generated header include
+
+    * main/php.h
+      sapi/apache_hooks/php_apache.c:
+      - Fix another generated header include
+
+2005-01-14  Dmitry Stogov  <dmitry@zend.com>
+
+    * ext/standard/streamsfuncs.c:
+      Fixed SIGSEGV in ext/standard/tests/network/tcp4loop.phpt and
+      ext/standard/tests/network/unixloop.phpt
+
+    * ZendEngine2/zend_execute.c
+      ZendEngine2/zend_vm_def.h
+      ZendEngine2/zend_vm_execute.h
+      ZendEngine2/zend_vm_opcodes.h
+      ZendEngine2/tests/bug31098.phpt:
+      Restore behavior of $str["str"]. (Now $str["str"] is equivalent to $str[0]
+      again)
+
+    * (PHP_5_0)
+      ZendEngine2/tests/bug31098.phpt:
+      Path -> pattern
+
+    * (PHP_5_0)
+      ext/standard/streamsfuncs.c:
+      Fixed SIGSEGV with ext/standard/tests/network/tcp4loop.phpt and
+      ext/standard/tests/network/unixloop.phpt
+
+    * (PHP_5_0)
+      ZendEngine2/zend_execute.c
+      ZendEngine2/tests/bug31098.phpt:
+      Revert to old behavior of $str["str"]. ($str["str"] is equivalent of
+      $str[0])
+
+2005-01-14  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
 2005-01-13  Ard Biesheuvel  <a.k.biesheuvel@ewi.tudelft.nl>
 
     * (PHP_4_3)
