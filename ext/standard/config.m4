@@ -259,7 +259,7 @@ dnl using the standard AC_CHECK macros
 dnl AC_CHECK_HEADERS(getopt.h)
 dnl AC_CHECK_FUNCS(getopt_long getopt_long_only)
 
-AC_CHECK_FUNCS(glob strfmon)
+AC_CHECK_FUNCS(glob strfmon nice)
 
 if test "$PHP_SAPI" = "cgi" -o "$PHP_SAPI" = "cli" -o "$PHP_SAPI" = "embed"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
@@ -273,11 +273,6 @@ PHP_CHECK_FUNC(res_nmkquery, resolv, bind, socket)
 PHP_CHECK_FUNC(res_nsend, resolv, bind, socket)
 PHP_CHECK_FUNC(dn_expand, resolv, bind, socket)
 dnl already done PHP_CHECK_FUNC(dn_skipname, resolv, bind, socket)
-
-dnl
-dnl Check for the availability of the nice function
-dnl
-PHP_CHECK_FUNC(nice)
 
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
                             cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
