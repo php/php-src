@@ -39,6 +39,12 @@ AC_ARG_WITH(apxs,
     esac
   done
   PHP_ADD_INCLUDE($APXS_INCLUDEDIR)
+
+  # Test that we're trying to configure with apache 1.x
+  if test -f "$APXS_INCLUDEDIR/ap_mpm.h"; then
+    AC_MSG_ERROR([Use --with-apxs2 with Apache 2.x!]) 
+  fi
+
   PHP_SAPI=apache
 
   # Test whether apxs support -S option
