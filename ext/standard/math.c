@@ -520,19 +520,35 @@ PHP_FUNCTION(log1p)
 /* }}} */
 
 #endif
-/* {{{ proto float log(float number)
-   Returns the natural logarithm of the number */
+/* {{{ proto float log(float number, [float base])
+   Returns the natural logarithm of the number, or the base log if base is specified */
 
 PHP_FUNCTION(log)
 {
-	zval **num;
-
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &num) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	zval **num, **base;
+	
+	switch (ZEND_NUM_ARGS()) {
+		case 1:
+			if (zend_get_parameters_ex(1, &num) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_double_ex(num);
+			RETURN_DOUBLE(log(Z_DVAL_PP(num)));
+		case 2:
+			if (zend_get_parameters_ex(2, &num, &base) == FAILURE) {
+				WRONG_PARAM_COUNT;
+			}
+			convert_to_double_ex(num);
+			convert_to_double_ex(base);
+		
+			if (Z_DVAL_PP(base) <= 0.0) {
+				php_error(E_WARNING, "base must be greater than 0", Z_DVAL_PP(base));
+				RETURN_FALSE;
+			}
+			RETURN_DOUBLE(log(Z_DVAL_PP(num)) / log(Z_DVAL_PP(base)));
+		default:
+			WRONG_PARAM_COUNT;
 	}
-	convert_to_double_ex(num);
-	Z_DVAL_P(return_value) = log(Z_DVAL_PP(num));
-	Z_TYPE_P(return_value) = IS_DOUBLE;
 }
 
 /* }}} */
