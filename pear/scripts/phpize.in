@@ -38,3 +38,5 @@ echo "Configuring for:"
 echo "  PHP Api Version:  "$PHP_API_VERSION
 echo "  Zend Module Api No:  "$ZEND_MODULE_API_NO
 echo "  Zend Extension Api No:  "$ZEND_EXTENSION_API_NO
+
+exit 0
