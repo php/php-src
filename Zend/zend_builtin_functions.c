@@ -1299,10 +1299,6 @@ ZEND_FUNCTION(debug_backtrace)
 		}
 	}
 
-	if (! arg_stack_consitent) {
-		zend_error(E_ERROR, "debug_backtrace(): Can't be called by function parameter");
-	}
-	
 	ptr = EG(current_execute_data);
 
 	/* skip debug_backtrace() */
@@ -1350,7 +1346,9 @@ ZEND_FUNCTION(debug_backtrace)
 			}
 
 			if ((! ptr->opline) || ((ptr->opline->opcode == ZEND_DO_FCALL_BY_NAME) || (ptr->opline->opcode == ZEND_DO_FCALL))) {
-				add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+				if (arg_stack_consitent) {
+					add_assoc_zval_ex(stack_frame, "args", sizeof("args"), debug_backtrace_get_args(&cur_arg_pos TSRMLS_CC));
+				}
 			}	
 		} else {
 			/* i know this is kinda ugly, but i'm trying to avoid extra cycles in the main execution loop */
