@@ -1608,7 +1608,7 @@ static inline int zend_binary_assign_op_helper(int (*binary_op)(zval *result, zv
 					var_ptr = get_zval_ptr_ptr(&data_opline->op2, EX(Ts), BP_VAR_RW);
 					EG(free_op2) = 0;
 					increment_opline = 1;
-//	 				zend_assign_to_variable(&EX(opline)->result, &data_opline->op2, &data_opline->op1, value, (EG(free_op1)?IS_TMP_VAR:EX(opline)->op1.op_type), EX(Ts) TSRMLS_CC);
+/*	 				zend_assign_to_variable(&EX(opline)->result, &data_opline->op2, &data_opline->op1, value, (EG(free_op1)?IS_TMP_VAR:EX(opline)->op1.op_type), EX(Ts) TSRMLS_CC); */
 				}
 			}
 			break;
