@@ -161,7 +161,7 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 			ta->tm_year = Z_LVAL_PP(arguments[5])
 			  - ((Z_LVAL_PP(arguments[5]) > 1000) ? 1900 : 0);
 		/* fall-through */
-	case 5: /* day in month (1-baesd) */
+	case 5: /* day in month (1-based) */
  		val = (*arguments[4])->value.lval; 
 		if (val < 1) { 
 			chgsecs += (1-val) * 60*60*24; 
@@ -192,8 +192,14 @@ void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gm)
 		/* fall-through */ 
 	case 1: /* hour */
 		val = (*arguments[0])->value.lval; 
-		if (val < 1) { 
-			chgsecs += (1-val) * 60*60; val = 1; 
+		/* 
+		   We don't use 1 here to work around problems in some mktime implementations
+		   when it comes to daylight savings time.  Setting it to 2 and working back from
+		   there with the chgsecs offset makes us immune to these problems.  
+		   See http://bugs.php.net/27533 for more info.
+		*/
+		if (val < 2) { 
+			chgsecs += (2-val) * 60*60; val = 2; 
 		} 
 		ta->tm_hour = val; 
 		/* fall-through */ 
