@@ -1,3 +1,10 @@
+2003-01-05  Zeev Suraski  <zeev@zend.com>
+
+    * zend_compile.c
+      zend_globals.h
+      zend_language_scanner.l:
+      MFZE1 - lineno fix
+
 2003-01-02  Zeev Suraski  <zeev@zend.com>
 
     * zend_compile.c

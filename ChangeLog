@@ -1,3 +1,74 @@
+2003-01-05  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/file.c
+      ext/standard/user_filters.c:
+      Fixes to stream_get_wrappers() and stream_get_filters() handle hash table
+      layouts better, plus some picune whitespace fixes
+
+2003-01-05  Georg Richter  <georg.richter@phpev.de>
+
+    * ext/mysql/php_mysql.c:
+      fixed bug #21435
+
+2003-01-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * ext/gd/gd_bundled.dsp:
+      Define HAVE_GD_GIF_READ.
+
+2003-01-05  Zeev Suraski  <zeev@zend.com>
+
+    * main/main.c:
+      Remove unnnecessary initialization
+
+    * sapi/cgi/cgi_main.c
+      sapi/cli/php_cli.c:
+      Initialize lineno using the new infrastructure
+
+2003-01-05  Sebastian Bergmann  <sb@sebastian-bergmann.de>
+
+    * main/.cvsignore
+      main/config.w32.h
+      main/config.w32.h.in
+      win32/php4dll.dsp
+      win32/php4dllts.dsp:
+      Revert config.w32.h.in -> config.w32.h build step per discussion with Zeev.
+
+2003-01-05  Zeev Suraski  <zeev@zend.com>
+
+    * sapi/apache/php4apache.dsp:
+      Make the .dsp use the php4build build directories
+
+2003-01-05  Edin Kadribasic  <edink@proventum.net>
+
+    * ext/xslt/xslt.dsp:
+      MFB:
+      Made xslt_set_encoding() available on windows (bug #20640).
+
+    * (PHP_4_3)
+      ext/xslt/xslt.dsp:
+      Made xslt_set_encoding() available on windows (bug #20640).
+
+    * (PHP_4_3)
+      ext/standard/php_incomplete_class.h:
+      Fixed ZTS build.
+
+2003-01-05  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * ext/standard/string.c:
+      Fixed a memory leak in setlocale() & localeconv().
+
+2003-01-05  Sara Golemon  <php@alphaweb.net>
+
+    * ext/standard/basic_functions.c
+      ext/standard/basic_functions.h
+      ext/standard/user_filters.c:
+      Added stream_get_filters(); to list registered filters
+
+2003-01-05  Derick Rethans  <d.rethans@jdimedia.nl>
+
+    * ext/standard/filestat.c:
+      - Fix some of the netware crap
+
 2003-01-04  Derick Rethans  <d.rethans@jdimedia.nl>
 
     * ext/standard/filestat.c:
