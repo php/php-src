@@ -839,7 +839,12 @@ static zval get_overloaded_property(temp_variable *T ELS_DC)
 
 static void set_overloaded_property(temp_variable *T, zval *value ELS_DC)
 {
-	(T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set(&T->EA.data.overloaded_element, value);
+	if ((T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set) {
+		(T->EA.data.overloaded_element.object)->value.obj.ce->handle_property_set(&T->EA.data.overloaded_element, value);
+	} else {
+		zend_error(E_ERROR, "Class '%s' does not support setting overloaded properties",
+			(T->EA.data.overloaded_element.object)->value.obj.ce->name);
+	}
 	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
 	efree(T->EA.data.overloaded_element.elements_list);
 }
@@ -847,7 +852,12 @@ static void set_overloaded_property(temp_variable *T, zval *value ELS_DC)
 
 static void call_overloaded_function(temp_variable *T, int arg_count, zval *return_value ELS_DC)
 {
-	(T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call(arg_count, return_value, T->EA.data.overloaded_element.object, 1 ELS_CC, &T->EA.data.overloaded_element);
+	if ((T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call) {
+		(T->EA.data.overloaded_element.object)->value.obj.ce->handle_function_call(arg_count, return_value, T->EA.data.overloaded_element.object, 1 ELS_CC, &T->EA.data.overloaded_element);
+	} else {
+		zend_error(E_ERROR, "Class '%s' does not support overloaded method calls",
+			(T->EA.data.overloaded_element.object)->value.obj.ce->name);
+	}
 	zend_llist_destroy(T->EA.data.overloaded_element.elements_list);
 	efree(T->EA.data.overloaded_element.elements_list);
 }
