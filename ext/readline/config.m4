@@ -9,7 +9,7 @@ PHP_ARG_WITH(readline,for readline support,
 [  --with-readline[=DIR]   Include readline support (CLI/CGI only).])
 
 if test "$PHP_READLINE" != "no"; then
-  for i in /usr/local /usr $PHP_READLINE; do
+  for i in $PHP_READLINE /usr/local /usr; do
     if test -f $i/include/readline/readline.h; then
       READLINE_DIR=$i
     fi
@@ -56,7 +56,7 @@ if test "$PHP_READLINE" != "no"; then
 
 elif test "$PHP_LIBEDIT" != "no"; then
 
-  for i in /usr/local /usr $PHP_LIBEDIT; do
+  for i in $PHP_LIBEDIT /usr/local /usr; do
     if test -f $i/include/readline/readline.h; then
       LIBEDIT_DIR=$i
     fi
