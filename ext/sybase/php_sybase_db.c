@@ -707,6 +707,7 @@ PHP_FUNCTION(sybase_query)
 	int blocks_initialized=1;
 	int i,j;
 	int *column_types;
+	PLS_FETCH();
 
 	switch(ZEND_NUM_ARGS()) {
 		case 1:
