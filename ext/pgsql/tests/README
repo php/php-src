@@ -1,0 +1,14 @@
+Test scripts assume: 
+ - PostgreSQL server is installed locally
+ - there is a PostgreSQL account for the users running test script 
+ - there is database named "test"
+
+For instance, if you login name is 'testuser', you should
+have PostgreSQL user account named 'testuser' and have 'test'
+database.
+
+If you have account and database, type "createdb test" from
+command prompt to create database to execute test scripts.
+
+If you find problems in PostgreSQL module, please mail to
+yohgaki@php.net or php-dev@lists.php.net.
