@@ -100,8 +100,8 @@ AC_ARG_ENABLE(debug,
 
 AC_DEFUN(LIBZEND_OTHER_CHECKS,[
 
-AC_ARG_ENABLE(c0x-inline,
-[  --enable-c0x-inline     Enable C9x-inline semantics],[
+AC_ARG_ENABLE(c9x-inline,
+[  --enable-c9x-inline     Enable C9x-inline semantics],[
   ZEND_C9X_INLINE=$enableval
 ],[
   ZEND_C9X_INLINE=no
