@@ -18,7 +18,7 @@ AC_DEFUN(AC_OCI8_VERSION,[
 ])                                                                                                                                                                
 
 PHP_ARG_WITH(oci8, for Oracle-OCI8 support,
-[  --with-oci8[=DIR]     Include oci8 support. DIR is the ORACLE_HOME.])
+[  --with-oci8[=DIR]       Include Oracle-oci8 support. Default DIR is ORACLE_HOME.])
 
 if test "$PHP_OCI8" != "no"; then
   AC_MSG_CHECKING([Oracle Install-Dir])
