@@ -320,7 +320,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"d:" (iv | nv | nvexp | "NAN" | "INF") ";"	{
+"d:" (iv | nv | nvexp | "NAN" | "-"? "INF") ";"	{
 	*p = YYCURSOR;
 	INIT_PZVAL(*rval);
 	ZVAL_DOUBLE(*rval, atof(start + 2));
