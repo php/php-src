@@ -192,16 +192,22 @@ class PEAR_Installer extends PEAR_Common
         }
         $tmp_path = dirname($descfile);
         foreach ($pkginfo['filelist'] as $fname => $atts) {
-            $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR . dirname($fname);
+            $dest_dir = $this->phpdir . DIRECTORY_SEPARATOR;
+            if (isset($atts['BaseInstallDir'])) {
+                $dest_dir .= $atts['BaseInstallDir'] . DIRECTORY_SEPARATOR;
+            }
+            if (dirname($fname) != '.') {
+                $dest_dir .= dirname($fname) . DIRECTORY_SEPARATOR;
+            }
             $fname = $tmp_path . DIRECTORY_SEPARATOR . $fname;
-            $this->_copyFile($fname, $dest_dir, $atts);
+            $this->_installFile($fname, $dest_dir, $atts);
         }
         return true;
     }
 
-    function _copyFile($file, $dest_dir, $atts)
+    function _installFile($file, $dest_dir, $atts)
     {
-        $type = strtolower($atts["Role"]);
+        $type = strtolower($atts['Role']);
         switch ($type) {
             case "test":
                 // don't install test files for now
@@ -211,7 +217,7 @@ class PEAR_Installer extends PEAR_Common
             case 'doc':
             case 'php':
             default:
-                $dest_file = $dest_dir . DIRECTORY_SEPARATOR . basename($file);
+                $dest_file = $dest_dir . basename($file);
                 break;
         }
         if (!@is_dir($dest_dir)) {
