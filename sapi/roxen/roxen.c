@@ -671,7 +671,13 @@ void f_php_roxen_request_handler(INT32 args)
   SG(request_info).request_method = lookup_string_header("REQUEST_METHOD", "GET");
   SG(request_info).content_length = lookup_integer_header("HTTP_CONTENT_LENGTH", 0);
   SG(request_info).content_type = lookup_string_header("HTTP_CONTENT_TYPE", NULL);
-  
+  SG(sapi_headers).http_response_code = 200;
+  if (!strcmp(SG(request_info).request_method, "HEAD")) {
+    SG(request_info).headers_only = 1;
+  } else {
+    SG(request_info).headers_only = 0;
+  }
+
   /* FIXME: Check for auth stuff needs to be fixed... */ 
   SG(request_info).auth_user = NULL; 
   SG(request_info).auth_password = NULL;

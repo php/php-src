@@ -379,6 +379,8 @@ static void init_request_info(SLS_D)
 	SG(request_info).request_method = (char *)r->method;
 	SG(request_info).content_type = (char *) table_get(r->subprocess_env, "CONTENT_TYPE");
 	SG(request_info).content_length = (content_length ? atoi(content_length) : 0);
+	SG(request_info).headers_only = r->header_only;
+	SG(sapi_headers).http_response_code = r->status;
 
 	if (r->headers_in) {
 		authorization = table_get(r->headers_in, "Authorization");

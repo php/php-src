@@ -356,6 +356,12 @@ JNIEXPORT void JNICALL Java_net_php_servlet_send
 	SETSTRING( SG(request_info).query_string, queryString );
 	SETSTRING( SG(request_info).request_uri, requestURI );
 	SETSTRING( SG(request_info).content_type, contentType );
+	SG(sapi_headers).http_response_code = 200;
+	if (!strcmp(SG(request_info).request_method, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 1;
+	}
 	SG(request_info).content_length = contentLength;
 	SG(request_info).auth_password = NULL;
 	if (php_request_startup(CLS_C ELS_CC PLS_CC SLS_CC)==FAILURE) {

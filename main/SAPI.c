@@ -267,19 +267,27 @@ SAPI_API void sapi_activate(SLS_D)
 	zend_llist_init(&SG(sapi_headers).headers, sizeof(sapi_header_struct), (void (*)(void *)) sapi_free_header, 0);
 	SG(sapi_headers).send_default_content_type = 1;
 
+	/*
 	SG(sapi_headers).http_response_code = 200;
 	SG(sapi_headers).http_status_line = NULL;
+	*/
 	SG(headers_sent) = 0;
 	SG(read_post_bytes) = 0;
 	SG(request_info).post_data = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 
+#if 0
+	/* This can't be done here.  We need to do that in the individual SAPI
+	 * modules because you can actually have a GET request that is only
+	 * allowed to send back headers. 
+	 */
 	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
 		SG(request_info).headers_only = 1;
 	} else {
 		SG(request_info).headers_only = 0;
 	}
+#endif
 
 	if (SG(server_context)) {
 		if (SG(request_info).request_method 

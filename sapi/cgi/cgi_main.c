@@ -315,7 +315,12 @@ static void init_request_info(SLS_D)
 	SG(request_info).path_translated = NULL; /* we have to update it later, when we have that information */
 	SG(request_info).content_type = getenv("CONTENT_TYPE");
 	SG(request_info).content_length = (content_length?atoi(content_length):0);
-
+	SG(sapi_headers).http_response_code = 200;
+	if (SG(request_info).request_method && !strcmp(SG(request_info).request_method, "HEAD")) {
+		SG(request_info).headers_only = 1;
+	} else {
+		SG(request_info).headers_only = 0;
+	}
 	/* CGI does not support HTTP authentication */
 	SG(request_info).auth_user = NULL;
 	SG(request_info).auth_password = NULL;
