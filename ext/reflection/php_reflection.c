@@ -1583,7 +1583,6 @@ ZEND_METHOD(reflection_class, newinstance)
 	/* Run the constructor if there is one */
 	if (ce->constructor) {
 		zval ***params;
-		zval *fname;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
