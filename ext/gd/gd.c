@@ -284,7 +284,11 @@ zend_module_entry gd_module_entry = {
 	PHP_MINIT(gd),
 	NULL,
 	NULL,
+#if HAVE_LIBGD20 && HAVE_GD_STRINGFT
 	PHP_RSHUTDOWN(gd),
+#else
+	NULL,
+#endif
 	PHP_MINFO(gd),
 	NO_VERSION_YET,
 	STANDARD_MODULE_PROPERTIES
