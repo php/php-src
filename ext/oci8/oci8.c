@@ -4396,7 +4396,7 @@ PHP_FUNCTION(ocisetprefetch)
 
 /* }}} */
 
-/* {{{ proto bool ocipasswordchange(int conn, string user, string old_password, string new_password)
+/* {{{ proto bool ocipasswordchange(int conn, string username, string old_password, string new_password)
   changes the password of an account*/
 
 PHP_FUNCTION(ocipasswordchange)
