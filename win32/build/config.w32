@@ -88,6 +88,9 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 // that we need
 ARG_WITH('php-build', 'Path to where you extracted http://www.php.net/extra/win32build.zip. Assumes that it is a sibling of this source dir (..\\php_build) if not specified', 'no');
 
+ARG_WITH('extra-includes', 'Extra include path to use when building everything', '');
+ARG_WITH('extra-libs', 'Extra library path to use when linking everything', '');
+
 var php_usual_include_suspects = "..\\php_build\\include;..\\win32build\\include;..\\bindlib_w32";
 var php_usual_lib_suspects = "..\\php_build\\lib;..\\win32build\\lib;..\\bindlib_w32";
 
@@ -111,7 +114,29 @@ function probe_basic_headers()
 	}
 }
 
+function add_extra_dirs()
+{
+	var path, i, f;
+
+	path = PHP_EXTRA_INCLUDES.split(';');
+	for (i = 0; i < path.length; i++) {
+		f = FSO.GetAbsolutePathName(path[i]);
+		if (FSO.FolderExists(f)) {
+			ADD_FLAG("CFLAGS", '/I "' + f + '" ');
+		}
+	}	
+	path = PHP_EXTRA_LIBS.split(';');
+	for (i = 0; i < path.length; i++) {
+		f = FSO.GetAbsolutePathName(path[i]);
+		if (FSO.FolderExists(f)) {
+			ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+		}
+	}	
+
+}
+
 probe_basic_headers();
+add_extra_dirs();
 
 //DEFINE("PHP_BUILD", PHP_PHP_BUILD);
 

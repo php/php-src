@@ -60,7 +60,7 @@ clean:
 	del /F /Q $(BUILD_DIR)\*.*
 
 test:
-	%COMSPEC% /c <<test_suite_uses_lame_env_vars.bat
+	<<test_suite_uses_lame_env_vars.bat
 set TEST_PHP_EXECUTABLE=$(BUILD_DIR)\\php.exe
 $(BUILD_DIR)\\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-tests.php $(TESTS)
 <<NOKEEP
