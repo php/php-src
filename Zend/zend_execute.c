@@ -2049,13 +2049,21 @@ send_by_ref:
 					return_value_used = RETURN_VALUE_USED(opline);
 
 					switch (opline->op2.u.constant.value.lval) {
-						case ZEND_INCLUDE_ONCE:
-							{
+						case ZEND_INCLUDE_ONCE: {
 								FILE *inc_file;
 								char *opened_path;
 								int dummy = 0;
+								zval *inc_filename = get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R);
+								zval tmp_inc_filename;
 
-								inc_file = zend_fopen(opline->op1.u.constant.value.str.val, &opened_path);
+								if (inc_filename->type!=IS_STRING) {
+									tmp_inc_filename = *inc_filename;
+									zval_copy_ctor(&tmp_inc_filename);
+									convert_to_string(&tmp_inc_filename);
+									inc_filename = &tmp_inc_filename;
+								}
+
+								inc_file = zend_fopen(inc_filename->value.str.val, &opened_path);
 								
 								if (inc_file && opened_path) {
 									if (zend_hash_add(&EG(included_files), opened_path, strlen(opened_path)+1, (void *)&dummy, sizeof(int), NULL)==FAILURE) {
@@ -2066,7 +2074,12 @@ send_by_ref:
 									fclose(inc_file);
 									free(opened_path);
 								}
+								new_op_array = compile_filename(opline->op2.u.constant.value.lval, inc_filename CLS_CC ELS_CC);
+								if (inc_filename==&tmp_inc_filename) {
+									zval_dtor(&tmp_inc_filename);
+								}
 							}
+							break;
 						case ZEND_INCLUDE:
 						case ZEND_REQUIRE:
 							new_op_array = compile_filename(opline->op2.u.constant.value.lval, get_zval_ptr(&opline->op1, Ts, &EG(free_op1), BP_VAR_R) CLS_CC ELS_CC);
