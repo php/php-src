@@ -2686,7 +2686,7 @@ ZEND_METHOD(reflection_property, export)
    Constructor. Throws an Exception in case the given property does not exist */
 ZEND_METHOD(reflection_property, __construct)
 {
-	zval *name, *classname;
+	zval *propname, *classname;
 	char *name_str;
 	int name_len;
 	zval *object;
@@ -2695,7 +2695,6 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_class_entry *ce;
 	zend_property_info *property_info;
 	property_reference *reference;
-	char *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
 		return;
@@ -2727,10 +2726,7 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	lcname = do_alloca(name_len + 1);
-	zend_str_tolower_copy(lcname, name_str, name_len);
-	if (zend_hash_find(&ce->properties_info, lcname, name_len + 1, (void **) &property_info) == FAILURE) {
-		free_alloca(lcname);
+	if (zend_hash_find(&ce->properties_info, name_str, name_len + 1, (void **) &property_info) == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, 
 			"Property %s::$%s does not exist", ce->name, name_str);
 		return;
@@ -2741,7 +2737,7 @@ ZEND_METHOD(reflection_property, __construct)
 		zend_class_entry *tmp_ce = ce->parent;
 		zend_property_info *tmp_info;
 		
-		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, lcname, name_len + 1, (void **) &tmp_info) == SUCCESS) {
+		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, name_str, name_len + 1, (void **) &tmp_info) == SUCCESS) {
 			if (tmp_info->flags & ZEND_ACC_PRIVATE) {
 				/* private in super class => NOT the same property */
 				break;
@@ -2752,15 +2748,13 @@ ZEND_METHOD(reflection_property, __construct)
 		}
 	}
 
-	free_alloca(lcname);
-
 	MAKE_STD_ZVAL(classname);
 	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
 	zend_hash_update(Z_OBJPROP_P(object), "class", sizeof("class"), (void **) &classname, sizeof(zval *), NULL);
 	
-	MAKE_STD_ZVAL(name);
-	ZVAL_STRING(name, property_info->name, 1);
-	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &name, sizeof(zval *), NULL);
+	MAKE_STD_ZVAL(propname);
+	ZVAL_STRING(propname, property_info->name, 1);
+	zend_hash_update(Z_OBJPROP_P(object), "name", sizeof("name"), (void **) &propname, sizeof(zval *), NULL);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
