@@ -16,7 +16,7 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id: buildconf.js,v 1.10 2004-01-08 21:53:48 wez Exp $ */
+/* $Id: buildconf.js,v 1.11 2004-02-12 12:30:41 wez Exp $ */
 // This generates a configure script for win32 build
 
 WScript.StdOut.WriteLine("Rebuilding configure.js");
@@ -99,6 +99,30 @@ function find_config_w32(dirname)
 	}
 }
 
+// Emit core modules array.  This is used by a snapshot
+// build to override a default "yes" value so that external
+// modules don't break the build by becoming statically compiled
+function emit_core_module_list()
+{
+	var module_names = (new VBArray(MODULES.Keys())).toArray();
+	var i, mod_name, j;
+	var item;
+	var output = "";
+
+	C.WriteLine("core_module_list = new Array(");
+
+	// first, look for modules with empty deps; emit those first
+	for (i in module_names) {
+		mod_name = module_names[i];
+		C.WriteLine("\"" + mod_name.replace(/_/g, "-") + "\",");
+	}
+
+	C.WriteLine("false // dummy");
+
+	C.WriteLine(");");
+}
+
+
 function emit_module(item)
 {
 	return item.dir_line + item.content;
@@ -168,10 +192,13 @@ modules = file_get_contents("win32/build/config.w32");
 find_config_w32(".");
 find_config_w32("sapi");
 find_config_w32("ext");
+emit_core_module_list();
+
 find_config_w32("pecl");
 find_config_w32("..\\pecl");
 find_config_w32("pecl\\rpc");
 find_config_w32("..\\pecl\\rpc");
+
 
 // Now generate contents of module based on MODULES, chasing dependencies
 // to ensure that dependent modules are emitted first

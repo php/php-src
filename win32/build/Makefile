@@ -65,15 +65,15 @@ $(BUILD_DIR) $(BUILD_DIRS_SUB):
 
 clean-sapi:
 	@echo Cleaning SAPI
-	@for %D in ($(EXT_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
-	@for %D in ($(PECL_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
-	@for %D in ($(SAPI_TARGETS)) do @del /F /Q $(BUILD_DIR)\%D > NUL
-	@del /F /Q $(BUILD_DIR)\$(PHPDLL)
+	@for %D in (_x $(EXT_TARGETS)) do @if exist $(BUILD_DIR)\%D @del /F /Q $(BUILD_DIR)\%D > NUL
+	@for %D in (_x $(PECL_TARGETS)) do @if exist $(BUILD_DIR)\%D @del /F /Q $(BUILD_DIR)\%D > NUL
+	@for %D in (_x $(SAPI_TARGETS)) do @if exist $(BUILD_DIR)\%D @del /F /Q $(BUILD_DIR)\%D > NUL
+	-@del /F /Q $(BUILD_DIR)\$(PHPDLL)
 
 clean: clean-sapi
-	@echo Cleaning
-	@for %D in ($(BUILD_DIRS_SUB)) do @del /F /Q %D\*.* > NUL
-	@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip > NUL
+	@echo Cleaning build dirs
+	@for %D in (_x $(BUILD_DIRS_SUB)) do @if exist @del /F /Q %D\*.* > NUL
+	-@del /F /Q $(BUILD_DIR)\*.res $(BUILD_DIR)\*.lib $(BUILD_DIR)\*.ilk $(BUILD_DIR)\*.pdb $(BUILD_DIR)\*.exp $(PHPDEF) $(BUILD_DIR)\php-$(PHP_VERSION_STRING).zip > NUL
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING) 
 
 test:
@@ -84,9 +84,9 @@ $(BUILD_DIR)\php.exe -d open_basedir= -d safe_mode=0 -d output_buffering=0 run-t
 
 build-snap:
 	@$(MAKE) "$(BUILD_DIR)\$(PHPDLL)"
-	for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
-	for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
-	for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
+	-for %T in ($(SAPI_TARGETS)) do $(MAKE) /I /nologo "%T"
+	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
+	-for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
 
 build-dist: $(BUILD_DIR)\deplister.exe
 	-rmdir /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
