@@ -99,4 +99,26 @@ typedef zval pval;
 
 #define list_entry			zend_rsrc_list_entry
 
+/* Compatibility macros */
+#define PHP_FN(name)				ZEND_FN(name)
+#define PHP_NAMED_FUNCTION(name)	ZEND_NAMED_FUNCTION(name)
+#define PHP_FUNCTION(name)			ZEND_FUNCTION(name)
+
+#define PHP_NAMED_FE(php_name, name, arg_types)	ZEND_NAMED_FE(php_name, name, arg_types)
+#define PHP_FE(name, arg_types)					ZEND_FE(name, arg_types)
+#define PHP_FALIAS(name, alias, arg_types)		ZEND_FALIAS(name, alias, arg_types)
+#define PHP_STATIC_FE(php_name, func_name, arg_types) ZEND_STATIC_FE(php_name, func_name, arg_types)
+
+#define PHP_MINIT(module)		ZEND_MINIT(module)
+#define PHP_MSHUTDOWN(module)	ZEND_MSHUTDOWN(module)
+#define PHP_RINIT(module)		ZEND_RINIT(module)
+#define PHP_RSHUTDOWN(module)	ZEND_RSHUTDOWN(module)
+#define PHP_MINFO(module)		ZEND_MINFO(module)
+
+#define PHP_MINIT_FUNCTION(module)		ZEND_MINIT_FUNCTION(module)
+#define PHP_MSHUTDOWN_FUNCTION(module)	ZEND_MSHUTDOWN_FUNCTION(module)
+#define PHP_RINIT_FUNCTION(module)		ZEND_RINIT_FUNCTION(module)
+#define PHP_RSHUTDOWN_FUNCTION(module)	ZEND_RSHUTDOWN_FUNCTION(module)
+#define PHP_MINFO_FUNCTION(module)		ZEND_MINFO_FUNCTION(module)
+
 #endif							/* PHP3_COMPAT_H */
