@@ -55,15 +55,15 @@ typedef struct {
 	long max_links,max_persistent;
 	long allow_persistent;
 	int le_socketp, le_psocketp, le_document;
-} php_hw_globals;
+} zend_hw_globals;
 
 #ifdef ZTS
-# define HwSLS_D        php_hw_globals *hw_globals
+# define HwSLS_D        zend_hw_globals *hw_globals
 # define HwSLS_DC       , HwSLS_D
 # define HwSLS_C        hw_globals
 # define HwSLS_CC , HwSLS_C
 # define HwSG(v) (hw_globals->v)
-# define HwSLS_FETCH()  php_hw_globals *hw_globals = ts_resource(hw_globals_id)
+# define HwSLS_FETCH()  zend_hw_globals *hw_globals = ts_resource(hw_globals_id)
 #else
 # define HwSLS_D
 # define HwSLS_DC
@@ -71,7 +71,7 @@ typedef struct {
 # define HwSLS_CC
 # define HwSG(v) (hw_globals.v)
 # define HwSLS_FETCH()
-extern PHP_HW_API php_hw_globals hw_globals;
+extern PHP_HW_API zend_hw_globals hw_globals;
 #endif
 
 /*extern hw_module php_hw_module;*/

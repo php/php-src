@@ -113,24 +113,24 @@ function_entry hw_functions[] = {
 };
 
 zend_module_entry hw_module_entry = {
-	"hyperwave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), 0, 0, 0, NULL
+	"hyperwave", hw_functions, PHP_MINIT(hw), PHP_MSHUTDOWN(hw), NULL, NULL, PHP_MINFO(hw), STANDARD_MODULE_PROPERTIES
 };
 
+/*
 #ifdef ZTS
 int hw_globals_id;
 #else
 PHP_HW_API php_hw_globals hw_globals;
 #endif
+*/
+
+ZEND_DECLARE_MODULE_GLOBALS(hw)
 
 #ifdef COMPILE_DL_HYPERWAVE
 ZEND_GET_MODULE(hw)
 #endif
 
 void print_msg(hg_msg *msg, char *str, int txt);
-
-#ifdef COMPILE_DL_HYPERWAVE
-ZEND_GET_MODULE(hw)
-#endif
 
 void _close_hw_link(hw_connection *conn)
 {
@@ -166,12 +166,10 @@ void _free_hw_document(hw_document *doc)
 	free(doc);
 }
 
-#ifdef ZTS
-static void php_hw_init_globals(php_hw_globals *hw_globals)
+static void php_hw_init_globals(zend_hw_globals *hw_globals)
 {
-	HwSG(num_persistent) = 0;
+	hw_globals->num_persistent = 0;
 }
-#endif
 
 static PHP_INI_MH(OnHyperwavePort) {
 	HwSLS_FETCH();
@@ -185,17 +183,13 @@ static PHP_INI_MH(OnHyperwavePort) {
 }
 
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("hyerwave.allow_persistent",	"0",	PHP_INI_SYSTEM,		OnUpdateInt,		allow_persistent,	php_hw_globals, hw_globals)
+	STD_PHP_INI_ENTRY("hyerwave.allow_persistent", "0", PHP_INI_SYSTEM, OnUpdateInt, allow_persistent, zend_hw_globals, hw_globals)
 	PHP_INI_ENTRY("hyperwave.default_port",	"418", PHP_INI_ALL,	OnHyperwavePort)
 PHP_INI_END()
 
 PHP_MINIT_FUNCTION(hw) {
+	ZEND_INIT_MODULE_GLOBALS(hw, php_hw_init_globals, NULL);
 
-#ifdef ZTS
-        hw_globals_id = ts_allocate_id(sizeof(php_hw_globals), php_hw_init_globals, NULL);
-#else
-        HwSG(num_persistent)=0;
-#endif
 	REGISTER_INI_ENTRIES();
 	HwSG(le_socketp) = register_list_destructors(_close_hw_link,NULL);
 	HwSG(le_psocketp) = register_list_destructors(NULL,_close_hw_plink);
@@ -635,7 +629,7 @@ static int * make_ints_from_array(HashTable *lht) {
 #define BUFFERLEN 30
 static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	pval *argv[4];
+	zval **argv[4];
 	int argc;
 	int sockfd;
 	int port = 0;
@@ -656,7 +650,7 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	switch(argc) {
 		case 2:
 		case 4:
-			if (getParametersArray(ht, argc, argv) == FAILURE) {
+			if (zend_get_parameters_array_ex(argc, argv) == FAILURE) {
 				WRONG_PARAM_COUNT;
 			}
 			break;
@@ -665,21 +659,21 @@ static void php_hw_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	/* Host: */
-	convert_to_string(argv[0]);
-	host = (char *) estrndup(argv[0]->value.str.val,argv[0]->value.str.len);
+	convert_to_string_ex(argv[0]);
+	host = (char *) estrndup((*argv[0])->value.str.val, (*argv[0])->value.str.len);
 
 	/* Port: */
-	convert_to_long(argv[1]);
-	port = argv[1]->value.lval;
+	convert_to_long_ex(argv[1]);
+	port = (*argv[1])->value.lval;
 
 	/* Username and Password */
 	if(argc > 2) {
 		/* Username */
-		convert_to_string(argv[2]);
-		username = (char *) estrndup(argv[2]->value.str.val,argv[2]->value.str.len);
+		convert_to_string_ex(argv[2]);
+		username = (char *) estrndup((*argv[2])->value.str.val, (*argv[2])->value.str.len);
 		/* Password */
-		convert_to_string(argv[3]);
-		password = (char *) estrndup(argv[3]->value.str.val,argv[3]->value.str.len);
+		convert_to_string_ex(argv[3]);
+		password = (char *) estrndup((*argv[3])->value.str.val, (*argv[3])->value.str.len);
 	}
 
 	/* Create identifier string for connection */
@@ -1589,7 +1583,7 @@ PHP_FUNCTION(hw_changeobject) {
    Modifies attributes of an object */
 #define BUFFERLEN 200
 PHP_FUNCTION(hw_modifyobject) {
-	pval *argv[5];
+	zval **argv[5];
 	int argc;
 	int link, id, type, i, mode;
 	hw_connection *ptr;
@@ -1600,23 +1594,23 @@ PHP_FUNCTION(hw_modifyobject) {
 	if((argc > 5) || (argc < 4))
 		WRONG_PARAM_COUNT;
 
-	if (getParametersArray(ht, argc, argv) == FAILURE)
+	if (zend_get_parameters_array_ex(argc, argv) == FAILURE)
 	if(argc < 4) {
 		WRONG_PARAM_COUNT;
 	}
-	convert_to_long(argv[0]); /* Connection */
-	convert_to_long(argv[1]); /* object ID */
-	convert_to_array(argv[2]); /* Array with attributes to remove */
-	convert_to_array(argv[3]); /* Array with attributes to add */
+	convert_to_long_ex(argv[0]); /* Connection */
+	convert_to_long_ex(argv[1]); /* object ID */
+	convert_to_array_ex(argv[2]); /* Array with attributes to remove */
+	convert_to_array_ex(argv[3]); /* Array with attributes to add */
 	if(argc == 5) {
-		convert_to_long(argv[4]);
-		mode = argv[4]->value.lval;
+		convert_to_long_ex(argv[4]);
+		mode = (*argv[4])->value.lval;
 	} else
 		mode = 0;
-	link=argv[0]->value.lval;
-	id=argv[1]->value.lval;
-	remobjarr=argv[2]->value.ht;
-	addobjarr=argv[3]->value.ht;
+	link=(*argv[0])->value.lval;
+	id=(*argv[1])->value.lval;
+	remobjarr=(*argv[2])->value.ht;
+	addobjarr=(*argv[3])->value.ht;
 	ptr = zend_list_find(link,&type);
 	if(!ptr || (type!=HwSG(le_socketp) && type!=HwSG(le_psocketp))) {
 		php_error(E_WARNING,"Unable to find file identifier %d",id);
@@ -2764,7 +2758,7 @@ PHP_FUNCTION(hw_getparents) {
 /* {{{ proto array hw_children(int link, int objid)
    Returns array of children object ids */
 PHP_FUNCTION(hw_children) {
-	pval **arg1, **arg2;
+	zval **arg1, **arg2;
 	int link, id, type;
 	int count;
 	hw_connection *ptr;
@@ -3520,7 +3514,7 @@ PHP_FUNCTION(hw_inscoll) {
 /* {{{ proto void hw_insdoc(int link, int parentid, string objrec [, string text])
    Inserts document */
 PHP_FUNCTION(hw_insdoc) {
-	pval **argv[4];
+	zval **argv[4];
 	char *objrec, *text;
 	int id, newid, type, link, argc;
 	hw_connection *ptr;
