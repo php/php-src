@@ -37,6 +37,7 @@ PHP 4                                                                      NEWS
 - Fixed several errors in hwapi extension. Objects weren't handled properly. (Uwe)
 - Fixed bug #23371 (configure falsely detects c-client using SSL). (Jani)
 - Fixed bug #23340 (fopen on multiple URLs causes memory corruption). (Wez)
+- Fixed bug #23298 (serialize cuts off floats & doubles). (Ilia)
 - Fixed bug #23232 (safe_mode does not honor PHP_AUTH_* in apache2). (Ilia)
 - Fixed bug #23225 (money_format() didn't handle erroneous return of strfmon).
   (Ilia, marcot@tabini.ca)
