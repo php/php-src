@@ -495,12 +495,15 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, long ad
 	if (*addr == '[') {
 		colon = memchr(addr + 1, ']', addrlen-1);
 		if (!colon || colon[1] != ':') {
-			return 0;
+			return FAILURE;
 		}
 		port = atoi(colon + 2);
 		addr++;
 	} else {
 		colon = memchr(addr, ':', addrlen);
+		if (!colon) {
+			return FAILURE;
+		}
 		port = atoi(colon + 1);
 	}
 
@@ -589,8 +592,8 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 				/* generally not thread safe, but it *is* thread safe under win32 */
 				buf = inet_ntoa(((struct sockaddr_in*)sa)->sin_addr);
 				if (buf) {
-					*textaddrlen = strlen(buf);
-					*textaddr = estrndup(buf, *textaddrlen);
+					*textaddrlen = spprintf(textaddr, 0, "%s:%d", 
+						buf, ntohs(((struct sockaddr_in*)sa)->sin_port));
 				}
 
 				break;
@@ -599,8 +602,8 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
-					*textaddrlen = strlen(buf);
-					*textaddr = estrndup(buf, *textaddrlen);
+					*textaddrlen = spprintf(textaddr, 0, "%s:%d", 
+						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
 				}
 
 				break;
