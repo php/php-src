@@ -1,3 +1,8 @@
+2002-01-15  Andrei Zmievski  <andrei@ispi.net>
+
+    * ext/pcre/php_pcre.c
+      NEWS: - Fixed a bug with matching string containing null bytes.
+
 2002-01-14  Chris Jarecki  <zenderx@ipro.pl>
 
     * ext/domxml/php_domxml.c: - using macro in xpath_register_ns()
