@@ -364,7 +364,7 @@ ZEND_FUNCTION(define)
 	
 	c.value = **val;
 	zval_copy_ctor(&c.value);
-	c.flags = case_sensitive | ~CONST_PERSISTENT; /* non persistent */
+	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_strndup((*var)->value.str.val, (*var)->value.str.len);
 	c.name_len = (*var)->value.str.len+1;
 	zend_register_constant(&c ELS_CC);
