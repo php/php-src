@@ -14,7 +14,7 @@ AC_DEFUN(PHP_WITH_PHP_CONFIG,[
   EXTENSION_DIR=`$PHP_CONFIG --extension-dir`
  
   if test -z "$prefix"; then
-    AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=[PATH])
+    AC_MSG_ERROR(Cannot find php-config. Please use --with-php-config=PATH)
   fi
   AC_MSG_CHECKING(for PHP prefix)
   AC_MSG_RESULT($prefix)
