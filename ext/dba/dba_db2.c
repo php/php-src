@@ -76,11 +76,8 @@ DBA_OPEN_FUNC(db2)
 		return FAILURE;
 	}
 
-	info->dbf = ecalloc(sizeof(dba_db2_data), 1);
-	if (!info->dbf) {
-		*error = "Out of memory";
-		return FAILURE;
-	}
+	info->dbf = emalloc(sizeof(dba_db2_data));
+	memset(info->dbf, 0, sizeof(dba_db2_data));
 	((dba_db2_data *) info->dbf)->dbp = dbp;
 	return SUCCESS;
 }
