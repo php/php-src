@@ -1,3 +1,55 @@
+2004-02-27  Rasmus Lerdorf  <rasmus@lerdorf.com>
+
+    * sapi/cgi/cgi_main.c:
+      As discussed a while ago.  There is no reason to disallow command-line
+      arguments for the cgi version when run in a cgi context.  Our own test
+      framework is in fact broken because of this unnecessary restriction.
+
+2004-02-27  Frank M. Kromann  <frank@kromann.info>
+
+    * ext/fbsql/php_fbsql.c:
+      Define buffer size macro and add a comment about the buffer size.
+
+2004-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.h:
+      Add some comments
+
+    * tests/classes/abstract_redeclare.phpt:
+      The order of error has changed here. So the expectations must change too.
+
+    * ZendEngine2/zend_API.c
+      ZendEngine2/zend_compile.c
+      ZendEngine2/zend_execute.c:
+      Fixes for abstract classes/methods
+
+2004-02-27  Greg Beaver  <greg@chiaraquartet.net>
+
+    * pear/PEAR.php:
+      fix #640, error in comment for getStaticProperty
+
+    * pear/PEAR/Autoloader.php
+      pear/PEAR/Command.php:
+      get_class -> is_a
+
+2004-02-27  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PECL_4_3)
+      ext/sqlite/sqlite.c
+      ext/sqlite/tests/sqlite_027.phpt:
+      MFH: Fixed possible crash inside sqlite_escape_string() and
+      sqlite_udf_encode_binary().
+
+    * ext/sqlite/tests/sqlite_027.phpt:
+      
+      Fixed possible crash inside sqlite_escape_string() and
+      sqlite_udf_encode_binary().
+
+    * ext/sqlite/sqlite.c:
+      Fixed possible crash inside sqlite_escape_string() and
+      sqlite_udf_encode_binary().
+
 2004-02-26  Frank M. Kromann  <frank@kromann.info>
 
     * ext/fbsql/php_fbsql.c

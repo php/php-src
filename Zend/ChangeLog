@@ -1,3 +1,14 @@
+2004-02-27  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * zend_API.c
+      zend_compile.h:
+      Add some comments
+
+    * zend_API.c
+      zend_compile.c
+      zend_execute.c:
+      Fixes for abstract classes/methods
+
 2004-02-26  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
 
     * zend_language_parser.y
