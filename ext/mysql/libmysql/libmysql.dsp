@@ -23,6 +23,7 @@ CFG=libmysql - Win32 Debug
 !MESSAGE "libmysql - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libmysql - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libmysql - Win32 Release_inline" (based on "Win32 (x86) Static Library")
+!MESSAGE "libmysql - Win32 Release_TSDbg" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -170,6 +171,29 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "libmysql - Win32 Release_TSDbg"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "libmysql___Win32_Release_TSDbg"
+# PROP BASE Intermediate_Dir "libmysql___Win32_Release_TSDbg"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_TSDbg"
+# PROP Intermediate_Dir "Release_TSDbg"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "." /D "NDEBUG" /D "_LIB" /D "__WIN32__" /D "USE_TLS" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I "." /D "NDEBUG" /D "_LIB" /D "__WIN32__" /D "USE_TLS" /D "WIN32" /D "_MBCS" /YX /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
@@ -180,6 +204,7 @@ LIB32=link.exe -lib
 # Name "libmysql - Win32 Debug"
 # Name "libmysql - Win32 Release"
 # Name "libmysql - Win32 Release_inline"
+# Name "libmysql - Win32 Release_TSDbg"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

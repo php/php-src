@@ -20,6 +20,7 @@ CFG=php4ts - Win32 Debug_TS
 !MESSAGE "php4ts - Win32 Release_TS" (based on "Win32 (x86) Console Application")
 !MESSAGE "php4ts - Win32 Debug_TS" (based on "Win32 (x86) Console Application")
 !MESSAGE "php4ts - Win32 Release_TS_inline" (based on "Win32 (x86) Console Application")
+!MESSAGE "php4ts - Win32 Release_TSDbg" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -107,6 +108,33 @@ LINK32=link.exe
 # ADD BASE LINK32 php4ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:3.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"Release_TS\php.exe" /libpath:"Release_TS"
 # ADD LINK32 php4ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS_inline\php.exe" /libpath:"..\Release_TS_inline"
 
+!ELSEIF  "$(CFG)" == "php4ts - Win32 Release_TSDbg"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "php4ts___Win32_Release_TSDbg"
+# PROP BASE Intermediate_Dir "php4ts___Win32_Release_TSDbg"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Release_TSDbg"
+# PROP Intermediate_Dir "Release_TSDbg"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_CONSOLE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /Fr /FD /c
+# SUBTRACT BASE CPP /YX /Yc /Yu
+# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I ".." /I "..\main" /I "..\regex" /I "..\..\bindlib_w32" /I "..\Zend" /I "..\TSRM" /D "NDEBUG" /D ZEND_DEBUG=0 /D "_CONSOLE" /D "MSVC5" /D "ZTS" /D "ZEND_WIN32" /D "PHP_WIN32" /D "WIN32" /D "_MBCS" /Fr /FD /c
+# SUBTRACT CPP /YX /Yc /Yu
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 php4ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TS\php.exe" /libpath:"..\Release_TS"
+# ADD LINK32 php4ts.lib winmm.lib wsock32.lib netapi32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /version:4.0 /subsystem:console /debug /machine:I386 /nodefaultlib:"libc.lib" /out:"..\Release_TSDbg\php.exe" /libpath:"..\Release_TSDbg"
+
 !ENDIF 
 
 # Begin Target
@@ -114,6 +142,7 @@ LINK32=link.exe
 # Name "php4ts - Win32 Release_TS"
 # Name "php4ts - Win32 Debug_TS"
 # Name "php4ts - Win32 Release_TS_inline"
+# Name "php4ts - Win32 Release_TSDbg"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
