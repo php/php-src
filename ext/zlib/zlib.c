@@ -971,10 +971,16 @@ int php_enable_output_compression(int buffer_size TSRMLS_DC)
 		if (sapi_add_header("Content-Encoding: gzip", sizeof("Content-Encoding: gzip") - 1, 1)==FAILURE) {
 			return FAILURE;
 		}
+		if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+			return FAILURE;			
+		}
 		ZLIBG(ob_gzip_coding) = CODING_GZIP;
 	} else if(php_memnstr(Z_STRVAL_PP(a_encoding), "deflate", 7, Z_STRVAL_PP(a_encoding) + Z_STRLEN_PP(a_encoding))) {
 		if (sapi_add_header("Content-Encoding: deflate", sizeof("Content-Encoding: deflate") - 1, 1)==FAILURE) {
 			return FAILURE;
+		}
+		if (sapi_add_header("Vary: Accept-Encoding", sizeof("Vary: Accept-Encoding") - 1, 1)==FAILURE) {
+			return FAILURE;			
 		}
 		ZLIBG(ob_gzip_coding) = CODING_DEFLATE;
 	} else {
