@@ -466,7 +466,7 @@ ZEND_API inline void zend_ptr_stack_clear_multiple(ELS_D)
 
 ZEND_API int zend_ptr_stack_get_arg(int requested_arg, void **data)
 {
-	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	void **p = EG(argument_stack).top_element-1;
 	int arg_count = (ulong) *p;
 
 	if (requested_arg>arg_count) {

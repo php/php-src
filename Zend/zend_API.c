@@ -33,7 +33,7 @@ HashTable list_destructors, module_registry;
 /* this function doesn't check for too many parameters */
 int getParameters(int ht, int param_count,...)
 {
-	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	void **p = EG(argument_stack).top_element-1;
 	int arg_count = (ulong) *p;
 	va_list ptr;
 	zval **param, *param_ptr;
@@ -57,6 +57,7 @@ int getParameters(int ht, int param_count,...)
 			new_tmp->refcount = 1;
 			new_tmp->is_ref = 0;
 			param_ptr = new_tmp;
+			((zval *) *(p-param_count))->refcount--;
 			*(p-param_count) = param_ptr;
 		}
 		*param = param_ptr;
@@ -70,7 +71,7 @@ int getParameters(int ht, int param_count,...)
 
 int getParametersArray(int ht, int param_count, zval **argument_array)
 {
-	void **p = EG(argument_stack).elements+EG(argument_stack).top-1;
+	void **p = EG(argument_stack).top_element-1;
 	int arg_count = (ulong) *p;
 	zval *param_ptr;
 	ELS_FETCH();
@@ -91,6 +92,7 @@ int getParametersArray(int ht, int param_count, zval **argument_array)
 			new_tmp->refcount = 1;
 			new_tmp->is_ref = 0;
 			param_ptr = new_tmp;
+			((zval *) *(p-param_count))->refcount--;
 			*(p-param_count) = param_ptr;
 		}
 		*(argument_array++) = param_ptr;
