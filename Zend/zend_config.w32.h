@@ -63,7 +63,7 @@ typedef unsigned int uint;
 # define inline
 #endif
 
-#define finite(A) _finite(A)
+#define zend_finite(A) _finite(A)
 
 #ifdef LIBZEND_EXPORTS
 #	define ZEND_API __declspec(dllexport)

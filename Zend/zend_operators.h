@@ -24,14 +24,8 @@
 #include <errno.h>
 #include <math.h>
 
-#ifndef HAVE_FINITE
-#ifndef finite  				/* in case it's already a macro */
-#define finite(a) isfinite(a)	/* HPUX 11 only has isfinite() */
-#endif
-#else
-#if HAVE_IEEEFP_H
+#ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
-#endif
 #endif
 
 #if WITH_BCMATH
@@ -87,7 +81,7 @@ ZEND_API inline int is_numeric_string(char *str, int length, long *lval, double 
 	errno=0;
 	local_dval = strtod(str, &end_ptr);
 	if (errno!=ERANGE && end_ptr == str+length) { /* floating point string */
-		if (! finite(local_dval)) {
+		if (! zend_finite(local_dval)) {
 			/* "inf","nan" and maybe other weird ones */
 			return 0;
 		}
