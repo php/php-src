@@ -184,6 +184,6 @@ typedef struct {
 
 /* Values are coma-delimited
  */
-#define SAFE_MODE_PROTECTED_ENV_VARS "LD_"
+#define SAFE_MODE_PROTECTED_ENV_VARS "LD_LIBRARY_PATH"
 
 #endif /* _BASIC_FUNCTIONS_H */
