@@ -63,9 +63,9 @@ class Interop_Client
 
     function Interop_Client() {
         global $interopConfig;
-    		$this->DSN = $interopConfig['DSN'];
-    		$this->baseURL = $interopConfig['baseURL'];
-    		//$this->baseURL = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']);
+        $this->DSN = $interopConfig['DSN'];
+        $this->baseURL = $interopConfig['baseURL'];
+        //$this->baseURL = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']);
         // set up the database connection
         $this->dbc = DB::connect($this->DSN, true);
         // if it errors out, just ignore it and rely on regular methods
@@ -96,10 +96,10 @@ class Interop_Client
         // retreive endpoints from the endpoint server
         $endpointArray = $soapclient->__call("GetEndpointInfo",array("groupName"=>$test),array('soapaction'=>"http://soapinterop.org/",'uri'=>"http://soapinterop.org/"));
         if (is_soap_fault($endpointArray) || PEAR::isError($endpointArray)) {
-        		if ($this->html) print "<pre>";
+            if ($this->html) print "<pre>";
             print $soapclient->wire."\n";
             print_r($endpointArray);
-        		if ($this->html) print "</pre>";
+            if ($this->html) print "</pre>";
             print "\n";
             return;
         }
@@ -152,10 +152,10 @@ class Interop_Client
             }
         } catch (SoapFault $fault) {
             if ($this->html) {
-        		    echo "<pre>$fault</pre>\n";
-        		} else {
-        		    echo "$fault\n";
-        		}
+                echo "<pre>$fault</pre>\n";
+            } else {
+                echo "$fault\n";
+            }
             return NULL;
         }
         // retreive all endpoints now
@@ -212,13 +212,7 @@ class Interop_Client
         foreach ($db_ep as $entry) {
             $this->endpoints[$entry['endpointName']] = $entry;
         }
-/*
-        $this->endpoints["PHP ext/soap"] =
-          array("endpointName" => "PHP ext/soap",
-                "endpointURL"  => "http://soap.4s4c.com/ilab/soap.asp",
-                "wsdlURL"      => "http://www.pocketsoap.com/services/ilab.wsdl",
-                "class"        => "base" "status"]=> string(1) "1" }
-*/
+
         if (count($this->endpoints) > 0) {
             $this->currentTest = $base;
             return TRUE;
@@ -269,7 +263,7 @@ class Interop_Client
             $success = $result['fault']->faultcode;
             $pos = strpos($success,':');
             if ($pos !== false) {
-            	$success = substr($success,$pos+1);                	
+              $success = substr($success,$pos+1);                 
             }
             $error = $result['fault']->faultstring;
             if (!$wire) $wire= $result['fault']->detail;
@@ -347,7 +341,7 @@ class Interop_Client
     */
     function compareResult($expect, $result, $type = NULL)
     {
-    	return compare($expect, $result);
+      return compare($expect, $result);
     }
 
 
@@ -433,17 +427,15 @@ try {
             }
             $return = eval('return $soap->'.$soap_test->method_name.'('.$args.');');
         } else {
-        	if ($soap_test->headers || $soap_test->headers_expect) {
+          if ($soap_test->headers || $soap_test->headers_expect) {
             $return = $soap->__call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace), $soap_test->headers, $result_headers);
           } else {
             $return = $soap->__call($soap_test->method_name,$soap_test->method_params,array('soapaction'=>$soapaction,'uri'=>$namespace));
           }
         }
 } catch (SoapFault $ex) {
-	$return = $ex;
+  $return = $ex;
 }
-//var_dump($return);
-
 
         if(!is_soap_fault($return)){
             if ($soap_test->expect !== NULL) {
@@ -460,7 +452,7 @@ try {
             // compare header results
             $headers_ok = TRUE;
             if ($soap_test->headers || $soap_test->headers_expect) {
-							$headers_ok = $this->compareResult($soap_test->headers_expect, $result_headers);            	
+              $headers_ok = $this->compareResult($soap_test->headers_expect, $result_headers);              
             }
 
             # we need to decode what we sent so we can compare!
@@ -486,10 +478,10 @@ try {
                     "RESPONSE:\n".str_replace('" ',"\" \n",str_replace('>',">\n",$soap->__getlastresponse()))."\n\n".
                     "EXPECTED:\n".var_dump_str($sent_d)."\n".
                     "RESULTL:\n".var_dump_str($return);
-						if ($soap_test->headers_expect) {
-							$wire .= "\nEXPECTED HEADERS:\n".var_dump_str($soap_test->headers_expect)."\n".
-							         "RESULT HEADERS:\n".var_dump_str($result_headers);
-						}
+            if ($soap_test->headers_expect) {
+              $wire .= "\nEXPECTED HEADERS:\n".var_dump_str($soap_test->headers_expect)."\n".
+                       "RESULT HEADERS:\n".var_dump_str($result_headers);
+            }
             #print "Wire:".htmlentities($wire);
 
             if($ok){
@@ -522,7 +514,7 @@ try {
                 $res =$fault->faultcode;
                 $pos = strpos($res,':');
                 if ($pos !== false) {
-                	$res = substr($res,$pos+1);                	
+                  $res = substr($res,$pos+1);                 
                 }
             }
             // save the wire
@@ -565,7 +557,7 @@ try {
             if ($this->show) {
               print "Processing $endpoint at {$endpoint_info['endpointURL']}";
               if ($this->html) print "<br>\n"; else print "\n";
-           	}
+            }
 
             foreach($soap_tests[$this->currentTest] as $soap_test) {
             //foreach(array_keys($method_params[$this->currentTest][$this->paramType]) as $method)
@@ -708,12 +700,6 @@ try {
             }
         }
         $this->totals['calls'] = count($methods) * $this->totals['servers'];
-
-#        if ($this->totals['fail'] == $this->totals['calls']) {
-#            // assume tests have not run, skip outputing table
-#            print "No Data Available<br>\n";
-#            return;
-#        }
 
         echo "\n\n<b>Servers: {$this->totals['servers']} Calls: {$this->totals['calls']} Success: {$this->totals['success']} Fail: {$this->totals['fail']}</b><br>\n";
 
