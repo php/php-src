@@ -1,3 +1,136 @@
+2002-03-17  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * main/memory_streams.c
+      main/php_memory_streams.h: -added temporary streams
+    -added stream debug code
+
+2002-03-17  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/network.c
+      main/php_network.h
+      main/php_streams.h
+      main/streams.c
+      ext/zlib/php_zlib.h
+      ext/zlib/zlib.c
+      ext/zlib/zlib_fopen_wrapper.c
+      main/main.c
+      ext/standard/ftp_fopen_wrapper.c
+      ext/standard/http_fopen_wrapper.c
+      ext/standard/image.c
+      ext/standard/php_fopen_wrapper.c
+      ext/standard/php_fopen_wrappers.h
+      ext/pgsql/pgsql.c
+      ext/standard/basic_functions.c
+      ext/ftp/php_ftp.c
+      ext/gd/gd.c
+      ext/mailparse/mailparse.c
+      ext/ming/ming.c
+      ext/exif/exif.c:
+    Streams now make more use of the memory manager, so tracking down
+    leaking streams should be easier.
+
+2002-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * ext/iconv/config.m4
+      ext/xmlrpc/config.m4
+      ext/xslt/config.m4
+      acinclude.m4:
+    - Made one test/setup macro for iconv and fixed it to check
+      for libc first.
+
+2002-03-17  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/safe_mode.c:
+    SAFE_MODE restriction error message fixed if the file doesn't exist
+
+    * ext/standard/basic_functions.c:
+    move_uploaded_files checks open_basedir now
+
+2002-03-17  Jason Greene  <jason@inetgurus.net>
+
+    * ext/pcntl/pcntl.c: Remove already included file
+
+2002-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * configure.in: Fix build.
+
+2002-03-17  Sander Roobol  <phy@wanadoo.nl>
+
+    * ext/gd/php_gd.h:
+    Fixed compile error about gdImageColorResolve (#14426, #15000).
+
+2002-03-17  Harald Radi  <h.radi@nme.at>
+
+    * ext/standard/var_unserializer.c
+      ext/standard/var_unserializer.re: removed anoying warnings
+
+    * win32/php4dllts.dsp: reduced warninglevel to remove the annoying
+    warnings from the re2c generated code
+
+2002-03-17  James Cox  <james@wherewithal.com>
+
+    * NEWS: NEWS is my friend...
+
+    * NEWS: s/-/ ./
+
+    * NEWS: no, really update it
+
+2002-03-17  Jani Taskinen  <sniper@iki.fi>
+
+    * main/Makefile.in: - This is not used anymore.
+
+2002-03-17  James Cox  <james@wherewithal.com>
+
+    * NEWS: updated NEWS
+
+2002-03-17  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * main/php_streams.h
+      main/streams.c
+      main/fopen_wrappers.h
+      README.STREAMS:
+    Fix for php_stream_gets when the implementation does not support it
+    natively (Thanks Marcus).
+
+    Implement php_stream_make_seekable() and add STREAM_MUST_SEEK as an
+    option to php_stream_open_wrapper().
+    See README.STREAMS for usage.
+
+    * main/fopen_wrappers.h
+      main/php_network.h: tidy up the headers (streams related)
+
+    * main/network.c
+      main/php_network.h
+      ext/standard/fsock.c:
+    Fix for Bug #16121: make unix socket names binary safe.
+
+    * run-tests.php: fix problems with cgi/cli sapi when running tests
+
+2002-03-17  Marcus Börger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/exif/exif.c:
+    * main/streams.c: -fix bug with wrappers
+
+2002-03-17  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/vpopmail/config.m4:
+    - Let configure also detect installation in standard unix paths.
+    - Properly format error message.
+
+2002-03-17  Shane Caraveo  <shane@caraveo.com>
+
+    * sapi/cgi/libfcgi/os_win32.c: fix closing pipes
+    fix buffer overrun
+
+2002-03-17  Markus Fischer  <mfischer@guru.josefine.at>
+
+    * ext/pcntl/pcntl.c: - Fix some compiler warnings and errors.
+
+2002-03-17  Wez Furlong  <wez.php@thebrainroom.com>
+
+    * ext/ming/ming.c
+      ext/standard/fsock.c: fix win32 warning and ming leak
+
 2002-03-16  Stig Bakken  <ssb@fast.no>
 
     * pear/PEAR/Config.php: * added optional layer parameter to get() method

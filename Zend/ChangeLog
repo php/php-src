@@ -1,3 +1,10 @@
+2002-03-17  Andi Gutmans  <andi@zend.com>
+
+    * zend_language_parser.y
+      zend_compile.c:
+    - Start putting error handling where method calls are being used in a
+    - context where only writable variables should be used.
+
 2002-03-15  Andi Gutmans  <andi@zend.com>
 
     * zend_execute.c
