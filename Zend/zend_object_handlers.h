@@ -59,6 +59,9 @@ typedef int (*zend_object_has_property_t)(zval *object, zval *member, int check_
 /* Used to remove a property of the object */
 typedef void (*zend_object_unset_property_t)(zval *object, zval *member TSRMLS_DC);
 
+/* Used to remove a property of the object */
+typedef void (*zend_object_unset_dimension_t)(zval *object, zval *offset TSRMLS_DC);
+
 /* Used to get hash of the properties of the object, as hash of zval's */
 typedef HashTable *(*zend_object_get_properties_t)(zval *object TSRMLS_DC);
 
@@ -99,6 +102,7 @@ typedef struct _zend_object_handlers {
 	zend_object_set_t						set;
 	zend_object_has_property_t				has_property;
 	zend_object_unset_property_t			unset_property;
+	zend_object_unset_dimension_t			unset_dimension;
 	zend_object_get_properties_t			get_properties;
 	zend_object_get_method_t				get_method;
 	zend_object_call_method_t				call_method;
