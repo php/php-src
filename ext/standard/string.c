@@ -3308,6 +3308,8 @@ PHPAPI size_t php_strip_tags(char *rbuf, int len, int *stateptr, char *allow, in
 
 	while (i < len) {
 		switch (c) {
+			case '\0':
+				break;
 			case '<':
 				if (isspace(*(p + 1))) {
 					goto reg_char;
