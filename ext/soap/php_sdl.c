@@ -71,27 +71,33 @@ encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, co
 encodePtr create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const char *ns, const char *type)
 {
 	smart_str nscat = {0};
-	encodePtr enc;
+	encodePtr enc, *enc_ptr;
 
-	enc = malloc(sizeof(encode));
-	memset(enc, 0, sizeof(encode));
-
+	if (sdl->encoders == NULL) {
+		sdl->encoders = malloc(sizeof(HashTable));
+		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
+	}
 	smart_str_appends(&nscat, ns);
 	smart_str_appendc(&nscat, ':');
 	smart_str_appends(&nscat, type);
 	smart_str_0(&nscat);
+	if (zend_hash_find(sdl->encoders, nscat.c, nscat.len + 1, (void**)&enc_ptr) == SUCCESS) {
+		enc = *enc_ptr;
+	} else {
+		enc_ptr = NULL;
+		enc = malloc(sizeof(encode));
+	}
+	memset(enc, 0, sizeof(encode));
 
 	enc->details.ns = strdup(ns);
 	enc->details.type_str = strdup(type);
 	enc->details.sdl_type = cur_type;
 	enc->to_xml = sdl_guess_convert_xml;
 	enc->to_zval = sdl_guess_convert_zval;
-
-	if (sdl->encoders == NULL) {
-		sdl->encoders = malloc(sizeof(HashTable));
-		zend_hash_init(sdl->encoders, 0, NULL, delete_encoder, 1);
+	
+	if (enc_ptr == NULL) {
+		zend_hash_update(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
 	}
-	zend_hash_update(sdl->encoders, nscat.c, nscat.len + 1, &enc, sizeof(encodePtr), NULL);
 	smart_str_free(&nscat);
 	return enc;
 }
@@ -165,44 +171,6 @@ xmlNodePtr sdl_guess_convert_xml(encodeType enc, zval *data, int style)
 	return ret;
 }
 
-zval* sdl_to_zval_object(sdlTypePtr type, xmlNodePtr data)
-{
-	zval *ret;
-	xmlNodePtr trav;
-
-	TSRMLS_FETCH();
-
-	MAKE_STD_ZVAL(ret);
-	FIND_XML_NULL(data, ret);
-
-	if (data) {
-		object_init(ret);
-		trav = data->children;
-
-		while (trav != NULL) {
-			if (trav->type == XML_ELEMENT_NODE) {
-				sdlTypePtr *element;
-				encodePtr enc = NULL;
-				zval *tmpVal;
-				if (trav->name != NULL &&
-				    zend_hash_find(type->elements, (char*)trav->name, strlen(trav->name)+1,(void **)&element) == SUCCESS) {
-				  enc = (*element)->encode;
-				}
-				if (enc == NULL) {
-					enc = get_conversion(UNKNOWN_TYPE);
-				}
-				tmpVal = master_to_zval(enc, trav);
-#ifdef ZEND_ENGINE_2
-				tmpVal->refcount--;
-#endif
-				add_property_zval(ret, (char *)trav->name, tmpVal);
-			}
-			trav = trav->next;
-		}
-	}
-	return ret;
-}
-
 xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 {
 	xmlNodePtr ret;
@@ -211,6 +179,10 @@ xmlNodePtr sdl_to_xml_object(sdlTypePtr type, zval *data, int style)
 
 	ret = xmlNewNode(NULL, "BOGUS");
 	FIND_ZVAL_NULL(data, ret, style);
+
+	if (Z_TYPE_P(data) != IS_OBJECT) {
+		return ret;
+	}
 
 	zend_hash_internal_pointer_reset(type->elements);
 	while (zend_hash_get_current_data(type->elements, (void **)&t) != FAILURE) {
