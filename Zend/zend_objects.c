@@ -145,8 +145,5 @@ zend_object_value zend_objects_clone_obj(zend_object_handle handle)
 	zend_hash_init(new_object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
 	zend_hash_copy(new_object->properties, old_object->properties, (copy_ctor_func_t) zval_add_ref, (void *) NULL /* Not used anymore */, sizeof(zval *));
 
-#if ZEND_DEBUG_OBJECTS
-	fprintf(stderr, "Allocated object id #%d\n", handle);
-#endif
 	return retval;
 }
