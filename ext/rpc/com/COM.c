@@ -70,7 +70,7 @@ static PHP_MINFO_FUNCTION(COM)
 }
 
 
-php3_module_entry COM_module_entry = {
+zend_module_entry COM_module_entry = {
 	"Win32 COM", COM_functions, PHP_MINIT(COM), PHP_MSHUTDOWN(COM), NULL, NULL, PHP_MINFO(COM), STANDARD_MODULE_PROPERTIES
 };
 
@@ -78,7 +78,7 @@ void php_register_COM_class();
 
 static int php_COM_load_typelib(char *typelib_name, int mode);
 
-static char *_php3_COM_error_message(HRESULT hr)
+static char *php_COM_error_message(HRESULT hr)
 {
 	void *pMsgBuf;
 
@@ -126,7 +126,7 @@ char *php_OLECHAR_to_char(OLECHAR *unicode_str, uint *out_length, int persistent
 }
 
 
-static char *_php3_string_from_clsid(CLSID *clsid)
+static char *php_string_from_clsid(CLSID *clsid)
 {
 	LPOLESTR ole_clsid;
 	char *clsid_str;
@@ -140,7 +140,7 @@ static char *_php3_string_from_clsid(CLSID *clsid)
 }
 
 
-static void _php3_idispatch_destructor(IDispatch *i_dispatch)
+static void php_idispatch_destructor(IDispatch *i_dispatch)
 {
 	i_dispatch->lpVtbl->Release(i_dispatch);
 }
@@ -217,7 +217,7 @@ PHP_INI_END()
 PHP_MINIT_FUNCTION(COM)
 {
 	CoInitialize(NULL);
-	le_idispatch = register_list_destructors(_php3_idispatch_destructor,NULL);
+	le_idispatch = register_list_destructors(php_idispatch_destructor,NULL);
 	php_register_COM_class();
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;
@@ -266,7 +266,7 @@ PHP_FUNCTION(COM_load)
 
 	// obtain CLSID
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);	
+		error_message = php_COM_error_message(hr);	
 		php_error(E_WARNING,"Invalid ProgID:  %s\n", error_message);
 		LocalFree(error_message);
 		RETURN_FALSE;
@@ -295,8 +295,8 @@ PHP_FUNCTION(COM_load)
 		efree(server_info.pwszName);
 	}
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
-		clsid_str = _php3_string_from_clsid(&clsid);
+		error_message = php_COM_error_message(hr);
+		clsid_str = php_string_from_clsid(&clsid);
 		php_error(E_WARNING,"Unable to obtain IDispatch interface for CLSID %s:  %s",clsid_str,error_message);
 		LocalFree(error_message);
 		efree(clsid_str);
@@ -309,43 +309,78 @@ PHP_FUNCTION(COM_load)
 
 static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persistent)
 {
-	switch (var_arg->vt) {
+	
+	switch (var_arg->vt & ~VT_BYREF) {
 		case VT_EMPTY:
 			var_uninit(pval_arg);
 			break;
 		case VT_UI1:
-			pval_arg->value.lval = (long) var_arg->bVal;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+				pval_arg->value.lval = (long) var_arg->bVal;
+			else
+				pval_arg->value.lval = (long)*(var_arg->pbVal);
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_I2:
-			pval_arg->value.lval = (long) var_arg->iVal;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+				pval_arg->value.lval = (long) var_arg->iVal;
+			else
+				pval_arg->value.lval = (long )*(var_arg->piVal);
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_I4:
-			pval_arg->value.lval = var_arg->lVal;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+				pval_arg->value.lval = var_arg->lVal;
+			else
+				pval_arg->value.lval = *(var_arg->plVal);
 			pval_arg->type = IS_LONG;
 			break;
 		case VT_R4:
-			pval_arg->value.dval = (double) var_arg->fltVal;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+				pval_arg->value.dval = (double) var_arg->fltVal;
+			else
+				pval_arg->value.dval = (double)*(var_arg->pfltVal);
+
 			pval_arg->type = IS_DOUBLE;
 			break;
 		case VT_R8:
-			pval_arg->value.dval = var_arg->dblVal;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+				pval_arg->value.dval = var_arg->dblVal;
+			else
+				pval_arg->value.dval = *(var_arg->pdblVal);
 			pval_arg->type = IS_DOUBLE;
 			break;
 		case VT_BOOL:
-
-			if (var_arg->boolVal & 0xFFFF) {
-				pval_arg->value.lval = 1;
-			} else {
-
-				pval_arg->value.lval = 0;
+			if (pval_arg->is_ref == 0 || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			{
+				if (var_arg->boolVal & 0xFFFF) {
+					pval_arg->value.lval = 1;
+				} else {
+					pval_arg->value.lval = 0;
+				}
 			}
-
+			else
+			{
+				if (*(var_arg->pboolVal) & 0xFFFF) {
+					pval_arg->value.lval = 1;
+				} else {
+					pval_arg->value.lval = 0;
+				}
+			}
 			pval_arg->type = IS_BOOL;
 			break;
 		case VT_BSTR:
-			pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent);
+			if (pval_arg->is_ref == 0  || (var_arg->vt & VT_BYREF) != VT_BYREF)
+			{
+				pval_arg->value.str.val = php_OLECHAR_to_char(var_arg->bstrVal, &pval_arg->value.str.len, persistent);
+				SysFreeString(var_arg->bstrVal);
+			}
+			else
+			{
+				pval_arg->value.str.val = php_OLECHAR_to_char(*(var_arg->pbstrVal), &pval_arg->value.str.len, persistent);
+				SysFreeString(*(var_arg->pbstrVal));
+				efree(var_arg->pbstrVal);
+			}
 			pval_arg->type = IS_STRING;
 			break;
 		case VT_UNKNOWN:
@@ -362,7 +397,7 @@ static void php_variant_to_pval(VARIANTARG *var_arg, pval *pval_arg, int persist
 }
 
 
-static void _php3_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
+static void php_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 {
 	OLECHAR *unicode_str;
 
@@ -373,8 +408,16 @@ static void _php3_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 		break;
 	case IS_LONG:
 	case IS_BOOL:
-		var_arg->vt = VT_I4;  // assuming 32-bit platform
-		var_arg->lVal = pval_arg->value.lval;
+		if (pval_arg->is_ref == 0)
+		{
+			var_arg->vt = VT_I4;	// assuming 32-bit platform
+			var_arg->lVal = pval_arg->value.lval;
+		}
+		else
+		{
+			var_arg->vt = VT_I4 | VT_BYREF; // assuming 32-bit platform
+			var_arg->plVal = &(pval_arg->value.lval);
+		}
 		break;
 	case IS_DOUBLE:
 		var_arg->vt = VT_R8;  // assuming 64-bit double precision
@@ -382,13 +425,21 @@ static void _php3_pval_to_variant(pval *pval_arg, VARIANTARG *var_arg)
 		break;
 	case IS_STRING:
 		unicode_str = php_char_to_OLECHAR(pval_arg->value.str.val, pval_arg->value.str.len);
-		var_arg->bstrVal = SysAllocString(unicode_str);
-		var_arg->vt = VT_BSTR;
+		if (pval_arg->is_ref == 0)
+		{
+			var_arg->bstrVal = SysAllocString(unicode_str);
+			var_arg->vt = VT_BSTR;
+		}
+		else
+		{
+			var_arg->pbstrVal = (BSTR *)emalloc(sizeof(BSTR *));
+			*(var_arg->pbstrVal) = SysAllocString(unicode_str);
+			var_arg->vt = VT_BSTR | VT_BYREF;
+			break;
+		}
 		efree(unicode_str);
-		break;
 	}
 }
-
 
 
 int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_result, pval **arguments, int arg_count)
@@ -407,7 +458,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 											1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"Unable to lookup %s:  %s\n", function_name->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(funcname);
@@ -418,7 +469,7 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 
 	for (current_arg=0; current_arg<arg_count; current_arg++) {
 		current_variant = arg_count - current_arg - 1;
-		_php3_pval_to_variant(arguments[current_arg], &variant_args[current_variant]);
+		php_pval_to_variant(arguments[current_arg], &variant_args[current_variant]);
 	}
 
 
@@ -432,13 +483,21 @@ int do_COM_invoke(IDispatch *i_dispatch, pval *function_name, VARIANTARG *var_re
 									&dispparams, var_result, NULL, 0);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"Invoke() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(funcname);
 		efree(variant_args);
 		return FAILURE;
 	}
+
+//	variant_args = dispparams.rgvarg;
+
+	for (current_arg=0; current_arg<arg_count; current_arg++) {
+		current_variant = arg_count - current_arg - 1;
+		php_variant_to_pval(&variant_args[current_variant], arguments[current_arg], 0);
+	}
+
 
 	efree(variant_args);
 	efree(funcname);
@@ -525,7 +584,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 											1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(propname);
@@ -543,7 +602,7 @@ static int do_COM_propget(VARIANTARG *var_result, IDispatch *i_dispatch, pval *a
 									&dispparams, var_result, NULL, 0);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"PropGet() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);
@@ -581,7 +640,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 											1, LOCALE_SYSTEM_DEFAULT, &dispid);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"Unable to lookup %s:  %s\n", arg_property->value.str.val, error_message);
 		LocalFree(error_message);
 		efree(propname);
@@ -589,7 +648,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 	}
 
 
-	_php3_pval_to_variant(value, &new_value);
+	php_pval_to_variant(value, &new_value);
 	dispparams.rgvarg = &new_value;
 	dispparams.rgdispidNamedArgs = &mydispid;
 	dispparams.cArgs = 1;
@@ -607,7 +666,7 @@ static void do_COM_propput(pval *return_value, IDispatch *i_dispatch, pval *arg_
 									&dispparams, &var_result, NULL, 0);
 
 	if (FAILED(hr)) {
-		error_message = _php3_COM_error_message(hr);
+		error_message = php_COM_error_message(hr);
 		php_error(E_WARNING,"PropPut() failed:  %s\n", error_message);
 		LocalFree(error_message);
 		efree(propname);

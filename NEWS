@@ -2,7 +2,7 @@ PHP 4.0                                                                    NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
 ?? ?? 1999, Version 4.0 Beta 3
-
+- Improved the Win32 COM module to support [out] parameters (Boris Wedl)
 - Fixed garbage returned at the end of certain Sybase-Columns (Thies)
   Patch submitted by: neal@wanlink.com
 - Added Microsoft SQL Server module for Win32 (Frank)

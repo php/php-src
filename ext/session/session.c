@@ -891,7 +891,7 @@ static void php_rinit_session_globals(PSLS_D)
 		
 	zend_hash_init(&PS(vars), 0, NULL, NULL, 0);
 	PS(define_sid) = 0;
-	PS(use_cookies) = INI_INT("session.use_cookies");
+	PS(use_cookies) = INI_BOOL("session.use_cookies");
 	PS(save_path) = estrdup(INI_STR("session.save_path"));
 	PS(session_name) = estrdup(INI_STR("session.name"));
 	PS(entropy_file) = estrdup(INI_STR("session.entropy_file"));
