@@ -107,7 +107,6 @@ int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle)
 
 	zend_llist_add_element(&zend_extensions, &extension);
 
-	zend_append_version_info(&extension);
 	/*fprintf(stderr, "Loaded %s, version %s\n", extension.name, extension.version);*/
 #endif
 
@@ -131,6 +130,7 @@ static int zend_extension_startup(zend_extension *extension)
 		if (extension->startup(extension)!=SUCCESS) {
 			return 1;
 		}
+		zend_append_version_info(extension);
 	}
 #endif
 	return 0;
