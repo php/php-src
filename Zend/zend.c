@@ -495,21 +495,16 @@ static void zend_new_thread_end_handler(THREAD_T thread_id TSRMLS_DC)
 	zend_ini_refresh_caches(ZEND_INI_STAGE_STARTUP TSRMLS_CC);
 }
 
-#endif
-
-
-static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
-{
-	start_memory_manager(TSRMLS_C);
-}
-
-
-#ifdef ZTS
 static void alloc_globals_dtor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
 {
 	shutdown_memory_manager(0, 1 TSRMLS_CC);
 }
 #endif
+
+static void alloc_globals_ctor(zend_alloc_globals *alloc_globals_p TSRMLS_DC)
+{
+	start_memory_manager(TSRMLS_C);
+}
 
 
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -707,6 +702,7 @@ void zend_shutdown(TSRMLS_D)
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
+
 	zend_shutdown_extensions(TSRMLS_C);
 	free(zend_version_info);
 
