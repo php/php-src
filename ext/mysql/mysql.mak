@@ -4,7 +4,7 @@ PROJECT_ROOT = ..\..
 
 # Module details
 MODULE_NAME = phpmysql
-MODULE_DESC = "PHP 4.2.3 - MySQL Extension"
+MODULE_DESC = "PHP 4.3 - MySQL Extension"
 VMAJ = 3
 VMIN = 0
 VREV = 0
