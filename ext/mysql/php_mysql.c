@@ -1317,8 +1317,11 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 				add_assoc_stringl(return_value, mysql_field->name, data, data_len, should_copy);
 			}
 		} else {
-			/* NULL field, don't set it */
-			/* add_get_index_stringl(return_value, i, empty_string, 0, (void **) &pval_ptr); */
+			/* NULL value. */
+			if (result_type & MYSQL_NUM)
+				add_index_unset(return_value, i);
+			else
+				add_assoc_unset(return_value, mysql_field->name);
 		}
 	}
 }
