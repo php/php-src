@@ -404,7 +404,11 @@ void php_print_credits(int flag)
 	}
 
 	if (flag & PHP_CREDITS_DOCS) {
-		/* Documentation */
+		php_info_print_table_start();
+		php_info_print_table_header(1, "PHP Documentation Team");
+		php_info_print_table_row(1, "Alexander Aulbach, Stig Bakken, Rasmus Lerdorf, Egon Scmid, Zeev Suraski, Lars Torben Wilson, Jim Winstead");
+		php_info_print_table_row(1, "Edited by:  Stig Bakken");
+		php_info_print_table_end();
 	}
 
 	if (flag & PHP_CREDITS_FULLPAGE) {
