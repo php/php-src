@@ -613,8 +613,6 @@ static void php_caudium_module_main(php_caudium_request *ureq)
   extern struct program *thread_id_prog;
 #endif
   TSRMLS_FETCH();
-  TSRMLS_FETCH();
-  TSRMLS_FETCH();
   GET_THIS();
   THIS->filename = ureq->filename;
   THIS->done_cb = ureq->done_cb;

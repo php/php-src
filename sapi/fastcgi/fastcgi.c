@@ -196,7 +196,6 @@ static void fastcgi_module_main(TSRMLS_D TSRMLS_DC)
 {
 	zend_file_handle file_handle;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	file_handle.type = ZEND_HANDLE_FILENAME;
 	file_handle.filename = SG(request_info).path_translated;

@@ -255,7 +255,6 @@ int php_doit(TSRMLS_D TSRMLS_DC)
 	zend_file_handle file_handle;
 	struct httpinfo *hip = PHG(cip)->hip;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
         return -1;

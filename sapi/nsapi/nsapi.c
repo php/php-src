@@ -448,7 +448,6 @@ nsapi_module_main(NSLS_D SLS_DC)
 	int result;
 	zend_file_handle file_handle;
 	TSRMLS_FETCH();
-	TSRMLS_FETCH();
 
 	if (php_request_startup(TSRMLS_C) == FAILURE) {
 		return FAILURE;
