@@ -17,7 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.29 2003-12-23 13:10:54 wez Exp $
+// $Id: confutils.js,v 1.30 2003-12-23 17:20:50 wez Exp $
 
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
@@ -463,7 +463,6 @@ function CHECK_LIB(libnames, target, path_to_check)
 	} else {
 		target = "_" + target.toUpperCase();
 	}
-
 	
 	if (path_to_check == null) {
 		path_to_check = php_usual_lib_suspects;
@@ -475,10 +474,19 @@ function CHECK_LIB(libnames, target, path_to_check)
 	var i;
 	var libname;
 
+	var subdir = PHP_DEBUG == "yes" ? "Debug" : "Release";
+
 	libnames = libnames.split(';');
 	for (i = 0; i < libnames.length; i++) {
 		libname = libnames[i];
 		p = search_paths(libname, path_to_check, "LIB");
+
+		if (!p) {
+			p = search_paths(subdir + "\\" + libname, path_to_check, "LIB");
+			if (p) {
+				p += "\\" + subdir;
+			}
+		}
 
 		if (typeof(p) == "string") {
 			ADD_FLAG("LDFLAGS" + target, '/libpath:"' + p + '" ');
