@@ -40,7 +40,7 @@
 /* header                                                */
 /*********************************************************/
 
-#ifndef _OSD_POSIX
+#if (!defined _OSD_POSIX) && HAVE_MALLOC_H
 #include <malloc.h>
 #else
 #include <stdlib.h> /* BS2000/OSD defines malloc() & friends in stdlib.h */
