@@ -70,7 +70,7 @@ echo "$data\n";
 $a = unserialize($data);
 var_dump($a);
 ?>
---EXPECT--
+--EXPECTF--
 N;
 b:1;
 b:0;
@@ -87,16 +87,18 @@ d:-1.123456789;
 s:5:"hallo";
 a:6:{i:0;i:1;i:1;d:1.1;i:2;s:5:"hallo";i:3;N;i:4;b:1;i:5;a:0:{}}
 O:1:"t":1:{s:1:"a";s:5:"hallo";}
-object(t)(1) {
+object(t)#%d (1) {
   ["a"]=>
   string(5) "hallo"
 }
 __sleep called
 O:1:"s":2:{s:1:"a";s:5:"hallo";s:1:"c";s:5:"world";}
 __wakeup called
-object(s)(2) {
+object(s)#%d (2) {
   ["a"]=>
   string(5) "hallo"
+  ["b"]=>
+  NULL
   ["c"]=>
   string(5) "world"
 }
