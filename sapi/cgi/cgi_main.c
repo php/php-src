@@ -390,8 +390,6 @@ int main(int argc, char *argv[])
 	char *script_file=NULL;
 	zend_llist global_vars;
 	int interactive=0;
-        int force_redirect = 1;
-        char *redirect_status_env = NULL;
 /* end of temporary locals */
 #ifdef ZTS
 	zend_compiler_globals *compiler_globals;
