@@ -14,7 +14,8 @@ if test "$PHP_ICONV" != "no"; then
   ])
 
   if test "$iconv_avail" != "no"; then
-
+    iconv_cflags_save="$CFLAGS"
+    CFLAGS="$CFLAGS $INCLUDES"
     AC_MSG_CHECKING([if iconv supports errno])
     AC_TRY_RUN([
 #define LIBICONV_PLUG
@@ -106,6 +107,8 @@ int main() {
         AC_DEFINE([PHP_ICONV_IMPL],["glibc"],[Which iconv implementation to use])
         ;;
     esac
+
+    CFLAGS="$iconv_cflags_save"
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared)
     PHP_SUBST(ICONV_SHARED_LIBADD)
