@@ -1,3 +1,98 @@
+2003-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * configure.in
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Added configure check for nanosleep() availability.
+
+2003-11-12  Jani Taskinen  <jani.taskinen@kolumbus.fi>
+
+    * NEWS
+      ext/dom/config.m4
+      ext/simplexml/config.m4
+      ext/xml/config.m4:
+      - Fixed bug #26072 (--disable-libxml does not work).
+
+2003-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * (PHP_4_3)
+      NEWS:
+      BFN
+
+    * (PHP_4_3)
+      ext/standard/image.c:
+      MFH Bugfix #26216: ("getimagesize(): stream does not support seeking" when
+      using remote files)
+
+    * ext/standard/image.c:
+      Bugfix #26216: ("getimagesize(): stream does not support seeking" when
+      using remote files)
+
+2003-11-12  Stefan Esser  <s.esser@e-matters.de>
+
+    * main/rfc1867.c
+      main/rfc1867.c:
+      Fix odd increments to repair the boundary checks.
+
+2003-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * NEWS
+      ext/standard/basic_functions.c
+      ext/standard/basic_functions.h:
+      Added nanosleep(), in addition to allowing setting of very short states.
+      This function is signal safe.
+
+2003-11-12  Jay Smith  <jsmith@tutorbuddy.com>
+
+    * ext/standard/fsock.c:
+      Plugged a small memleak when errstr isn't efree()'d.
+
+2003-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * NEWS:
+      Update
+
+    * ext/dba/dba.c
+      ext/dba/php_dba.h:
+      Add helper function that splits inifile keys into an array which again
+      can be used in dba_fetch calls.
+
+2003-11-12  Ard Biesheuvel  <a.k.biesheuvel@its.tudelft.nl>
+
+    * NEWS:
+      Added new ibase array handling (was already present in b2)
+
+2003-11-12  Marcus Boerger  <marcus.boerger@post.rwth-aachen.de>
+
+    * ext/ming/ming.c:
+      Compiler fixes for older ming versions
+
+2003-11-12  Sergey Kartashoff  <gluke@mail.ru>
+
+    * (PHP_4_3)
+      ext/mnogosearch/php_mnogo.c:
+      - A WORDINFO calculation in mnogosearch extension was fixed
+
+    * ext/mnogosearch/php_mnogo.c:
+      - A bug in WORDINFO calculation in mnogosearch extension was fixed.
+
+2003-11-12  Ilia Alshanetsky  <ilia@prohost.org>
+
+    * (PHP_4_3)
+      NEWS
+      ext/interbase/interbase.c:
+      Fixed bug #26201 (crash in ibase_trans() on invalid link handle).
+
+    * (PHP_4_3)
+      NEWS
+      ext/standard/parsedate.y
+      ext/standard/tests/time/bug26198.phpt:
+      MFH: Fixed bug #26198 (strtotime() handling of M/F Y date format).
+
+    * ext/standard/parsedate.y
+      ext/standard/tests/time/bug26198.phpt:
+      Fixed bug #26198 (strtotime() handling of M/F Y date format).
+
 2003-11-11  Rui Hirokawa  <rui_hirokawa@ybb.ne.jp>
 
     * (PHP_4_3)
