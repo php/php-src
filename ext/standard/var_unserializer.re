@@ -226,9 +226,11 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, int elements)
 		return 0;
 	}
 
-	INIT_PZVAL(&fname);
-	ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
-	call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+	if(Z_OBJCE_PP(rval) != PHP_IC_ENTRY) {
+		INIT_PZVAL(&fname);
+		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
+		call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+	}
 
 	if (retval_ptr)
 		zval_ptr_dtor(&retval_ptr);
