@@ -335,7 +335,7 @@ utime \
 vsnprintf \
 )
 
-AC_REPLACE_FUNCS(strlcat strlcpy)
+AC_REPLACE_FUNCS(strlcat strlcpy strtok_r getopt)
 AC_FUNC_UTIME_NULL
 AC_FUNC_ALLOCA
 dnl## OLDLIBS=$LIBS; LIBS=""
@@ -343,7 +343,6 @@ dnl This is also defined/used in libzend. To avoid a redefinition
 dnl we use that version
 dnl AC_BROKEN_SPRINTF
 dnl## LIBS=$OLDLIBS
-AC_REPLACE_FUNCS(getopt)
 
 dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
 dnl AC_MSG_CHECKING(for in_addr_t)
