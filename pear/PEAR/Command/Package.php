@@ -18,9 +18,8 @@
 //
 // $Id$
 
-require_once 'PEAR/Command/Common.php';
-require_once 'PEAR/Packager.php';
 require_once 'PEAR/Common.php';
+require_once 'PEAR/Command/Common.php';
 
 class PEAR_Command_Package extends PEAR_Command_Common
 {
@@ -33,11 +32,9 @@ class PEAR_Command_Package extends PEAR_Command_Common
                     'shortopt' => 'Z',
                     'doc' => 'Do not gzip the package file'
                     ),
-                '???' => array(
+                'showname' => array(
                     'shortopt' => 'n',
-                    'doc' => 'Return only the created package file name.  Useful for
-shell script operations.
-',
+                    'doc' => 'Print the name of the packaged file.',
                     ),
                 ),
             'doc' => 'Creates a PEAR package from its description file (usually
@@ -119,95 +116,9 @@ called package.xml).
                      'run-tests' => 'Run Regression Tests');
     }
 
-    // {{{ getOptions()
-
-    function getOptions()
-    {
-        return array('Z', 'n', 'F' /*, 'd', 'q', 'Q'*/);
-    }
-
-    // }}}
-    // {{{ getHelp()
-
-    function getHelp($command)
-    {
-        switch ($command) {
-            case 'package':
-                return array('[-n] [<package.xml>]',
-                             'Creates a PEAR package from its description file (usually '.
-                             "named as package.xml)\n".
-                             "   -n    Return only the created package file name. Useful for\n".
-                             "         shell script operations.\n".
-                             "   -Z    Do not compress the tar package");
-            case 'package-list':
-                return array('<pear package>',
-                             'List the contents (the files) of a PEAR package');
-            case 'package-info':
-                return array('<pear package>',
-                             'Shows information about a PEAR package');
-            case 'package-validate':
-                return array('<package.(tgz|tar|xml)>',
-                             'Verifies a package or description file');
-            case 'cvstag':
-                return array('<package.xml>',
-                             'Runs "cvs tag" on files contained in a release');
-        }
-    }
-
-    // }}}
-    // {{{ run()
-
-    /**
-     * Execute the command.
-     *
-     * @param string command name
-     *
-     * @param array option_name => value
-     *
-     * @param array list of additional parameters
-     *
-     * @return bool TRUE on success, FALSE for unknown commands, or
-     * a PEAR error on failure
-     *
-     * @access public
-     */
-    function run($command, $options, $params)
-    {
-        $failmsg = '';
-        switch ($command) {
-            case 'package':
-            case 'package-list':
-            case 'package-info':
-            case 'package-validate':
-                break;
-            // {{{ cvstag
-
-            case 'cvstag': {
-            }
-
-            // }}}
-            // {{{ run-tests 
-
-            case 'run-tests': {
-                break;
-            }
-
-            // }}}
-            default: {
-                return false;
-            }
-        }
-        if ($failmsg) {
-            return $this->raiseError($failmsg);
-        }
-        return true;
-    }
-
-    // }}}
-
-
     function doPackage($command, $options, $params)
     {
+        include_once 'PEAR/Packager.php';
         $pkginfofile = isset($params[0]) ? $params[0] : 'package.xml';
         ob_start();
         $packager =& new PEAR_Packager($this->config->get('php_dir'),
@@ -380,8 +291,7 @@ called package.xml).
         }
         $obj = new PEAR_Common;
         $info = null;
-        if (file_exists($params[0])) {
-            $fp = fopen($params[0], "r");
+        if ($fp = @fopen($params[0], "r")) {
             $test = fread($fp, 5);
             fclose($fp);
             if ($test == "<?xml") {
