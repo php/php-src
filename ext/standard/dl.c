@@ -152,7 +152,6 @@ void php_dl(pval *file,int type,pval *return_value)
 		php_error(E_ERROR,"%s:  Loaded module got lost",module_entry->name);
 		RETURN_FALSE;
 	}
-	tmp->request_started=1;
 	tmp->handle = handle;
 	
 	RETURN_TRUE;
