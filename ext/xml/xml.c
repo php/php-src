@@ -66,7 +66,6 @@ DLEXPORT zend_module_entry *get_module(void) { return &xml_module_entry; }
 /* }}} */
 /* {{{ function prototypes */
 
-
 PHP_MINIT_FUNCTION(xml);
 PHP_RINIT_FUNCTION(xml);
 PHP_MSHUTDOWN_FUNCTION(xml);
@@ -248,6 +247,8 @@ static zval *_xml_resource_zval(long value)
 	ret->type = IS_RESOURCE;
 	ret->value.lval = value;
 
+	zend_list_addref(value);
+
 	return ret;
 }
 
@@ -365,7 +366,7 @@ xml_call_handler(xml_parser *parser, char *funcName, int argc, zval **argv)
 
 		MAKE_STD_ZVAL(retval);
 		retval->type = IS_BOOL;
-		retval->value.lval = IS_BOOL;
+		retval->value.lval = 0;
 
 		/* We cannot call internal variables from a function module as
 		   it breaks any chance of compiling it as a module on windows.
@@ -379,14 +380,13 @@ xml_call_handler(xml_parser *parser, char *funcName, int argc, zval **argv)
 			zval_dtor(retval);
 			efree(retval);
 		}
-		zval_dtor(func);
-		efree(func);
+
+		zval_del_ref(&func);
+
 		for (i = 0; i < argc; i++) {
-			if (i != 0) { /* arg 0 is always our parser-resource - we don't wat to destruct that! */
-				zval_dtor(argv[i]);
-			}
-			efree(argv[i]);
+			zval_del_ref(&(argv[i]));
 		}
+
 		if (result == FAILURE) {
 			return NULL;
 		} else {
