@@ -114,11 +114,6 @@ fi
 
 ./scripts/preconfig
 
-rm -f ltmain.sh ltconfig
-libtoolize --automake --copy --force
-patch ltconfig < patch-aa
-patch ltmain.sh < patch-ab
-
 mv aclocal.m4 aclocal.m4.old 2>/dev/null
 aclocal
 if test "$?" != "0" -a "$am_prefix" != "$lt_prefix"; then
