@@ -149,7 +149,7 @@ static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRML
 	if(ac != 2 || zend_get_parameters_ex(ac, &key, &id) != SUCCESS) { 	\
 		WRONG_PARAM_COUNT; 										\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC) < 0)) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
@@ -175,7 +175,7 @@ static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRML
 	default:													\
 		WRONG_PARAM_COUNT; 										\
 	} 															\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC) < 0)) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
@@ -187,7 +187,7 @@ static size_t php_dba_make_key(zval **key, char **key_str, char **key_free TSRML
 		WRONG_PARAM_COUNT; 										\
 	} 															\
 	convert_to_string_ex(val);									\
-	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC) < 0)) {\
+	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
 		RETURN_FALSE;											\
 	}
 
