@@ -366,11 +366,12 @@ PHPAPI int php_connect_nonb_win32(SOCKET sockfd,
  * port, returns the created socket on success, else returns -1.
  * timeout gives timeout in seconds, 0 means blocking mode.
  */
-int php_hostconnect(const char *host, unsigned short port, int socktype, int timeout)
+int php_hostconnect(const char *host, unsigned short port, int socktype, struct timeval *timeout)
 {	
 	int n, repeatto, s;
 	struct sockaddr **sal, **psal;
-	struct timeval timeoutval;
+	struct timeval individual_timeout;
+	int set_timeout = 0;
 #ifdef PHP_WIN32
 	int err;
 #endif
@@ -380,14 +381,24 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 	if (n == 0)
 		return -1;
 	
-	/* is this a good idea? 5s? */
-	repeatto = timeout / n > 5;
-	if (repeatto) {
-		timeout /= n;
-	}
-	timeoutval.tv_sec = timeout;
-	timeoutval.tv_usec = 0;
+	if (timeout != NULL) {
+		/* is this a good idea? 5s? */
+		repeatto = timeout->tv_sec / n > 5;
+		if (repeatto) {
+			individual_timeout.tv_sec = timeout->tv_sec / n;
+		} else {
+			individual_timeout.tv_sec = timeout->tv_sec;
+		}
 
+		individual_timeout.tv_usec = timeout->tv_usec;
+	} else {
+		individual_timeout.tv_sec = 0;
+		individual_timeout.tv_usec = 0;
+	}
+	
+	/* Boolean indicating whether to pass a timeout */
+	set_timeout = individual_timeout.tv_sec + individual_timeout.tv_usec;
+	
 	psal = sal;
 	while (*sal != NULL) {
 		s = socket((*sal)->sa_family, socktype, 0);
@@ -402,7 +413,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 						sa->sin6_family = (*sal)->sa_family;
 						sa->sin6_port = htons(port);
 						if (php_connect_nonb(s, (struct sockaddr *) sa,
-									sizeof(*sa), timeout ? &timeoutval : NULL) != SOCK_CONN_ERR)
+									sizeof(*sa), (set_timeout) ? &individual_timeout : NULL) != SOCK_CONN_ERR)
 							goto ok;
 					} 
 					break;
@@ -415,7 +426,7 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 						sa->sin_family = (*sal)->sa_family;
 						sa->sin_port = htons(port);
 						if (php_connect_nonb(s, (struct sockaddr *) sa,
-									sizeof(*sa), timeout ? &timeoutval : NULL) != SOCK_CONN_ERR)
+									sizeof(*sa), (set_timeout) ? &individual_timeout : NULL) != SOCK_CONN_ERR)
 							goto ok;
 
 					} 
@@ -428,10 +439,6 @@ int php_hostconnect(const char *host, unsigned short port, int socktype, int tim
 			close (s);
 		}
 		sal++;
-		if (repeatto) {
-			timeoutval.tv_sec = timeout;
-			timeoutval.tv_usec = 0;
-		}
 	}
 	php_network_freeaddresses(psal);
 	php_error(E_WARNING, "php_hostconnect: connect failed");
@@ -520,7 +527,7 @@ PHPAPI php_stream *_php_stream_sock_open_from_socket(int socket, int persistent 
 }
 
 PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short port,
-		int socktype, int timeout, int persistent STREAMS_DC TSRMLS_DC)
+		int socktype, struct timeval *timeout, int persistent STREAMS_DC TSRMLS_DC)
 {
 	int socket;
 

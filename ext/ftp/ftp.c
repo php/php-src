@@ -105,6 +105,7 @@ ftp_open(const char *host, short port, long timeout_sec)
 {
 	ftpbuf_t		*ftp;
 	int			size;
+	struct timeval tv;
 
 
 	/* alloc the ftp structure */
@@ -113,8 +114,11 @@ ftp_open(const char *host, short port, long timeout_sec)
 		perror("calloc");
 		return NULL;
 	}
+	
+	tv.tv_sec = timeout_sec;
+	tv.tv_usec = 0;
 
-	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, (int) timeout_sec);
+	ftp->fd = php_hostconnect(host, (unsigned short) (port ? port : 21), SOCK_STREAM, &tv);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
