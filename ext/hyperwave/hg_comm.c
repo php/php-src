@@ -604,17 +604,21 @@ DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorr
 ***********************************************************************/
 #define BUFFERLEN 200
 #ifdef newlist
-char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char *urlprefix) {
+char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char **urlprefix) {
 	ANCHOR **ptr;
 #else
-char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix) {
+char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char **urlprefix) {
 #endif
 	ANCHOR *cur_ptr;
 	char bgstr[BUFFERLEN], istr[BUFFERLEN];
-	char *scriptname;
+	char **scriptname;
 	char *newtext;
 	int offset = 0;
 	int laststart=0;
+	char emptystring[BUFFERLEN];
+	int i;
+	
+	emptystring[0] = '\0';
 
 /* The following is very tricky and depends on how rewriting is setup on your webserver.
    If you skip the scriptname in the url you will have to map each hyperwave name
@@ -629,11 +633,14 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 		scriptname = urlprefix;
 	} else {
 		zval **script_name;
+		scriptname = emalloc(5*sizeof(char *));
 		if (zend_hash_find(&EG(symbol_table), "SCRIPT_NAME", sizeof("SCRIPT_NAME"), (void **) &script_name)==FAILURE)
-			scriptname = NULL;
+			for(i=0; i<5; i++)
+				scriptname[i] = &emptystring;
 		else {
 			convert_to_string_ex(script_name);
-			scriptname = (*script_name)->value.str.val;
+			for(i=0; i<5; i++)
+				scriptname[i] = (*script_name)->value.str.val;
 		}
 
 #if 0
@@ -707,7 +714,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 				switch(cur_ptr->linktype) {
 					case HW_BACKGROUND_LINK:
 						if(NULL != cur_ptr->destdocname)
-							snprintf(bgstr, BUFFERLEN, " background='%s/%s'", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname);
+							snprintf(bgstr, BUFFERLEN, " background='%s/%s'", scriptname[HW_BACKGROUND_LINK], cur_ptr->destdocname);
 						else
 							bgstr[0] = '\0';
 						break;
@@ -715,14 +722,14 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						if(cur_ptr->fragment)
 							snprintf(istr, BUFFERLEN, " %s='#%s'", cur_ptr->tagattr, cur_ptr->fragment);
 						else
-							snprintf(istr, BUFFERLEN, " %s='%s/%s'", cur_ptr->tagattr, scriptname == NULL ? "." : scriptname, cur_ptr->destdocname); 
+							snprintf(istr, BUFFERLEN, " %s='%s/%s'", cur_ptr->tagattr, scriptname[HW_INTAG_LINK], cur_ptr->destdocname); 
 						offset -= 4; /* because there is no closing tag </A> */
 /*						laststart = cur_ptr->start; */
 						break;
 					case HW_APPLET_LINK:
 						if(cur_ptr->codebase)
 /*						  snprintf(istr, BUFFERLEN, " CODEBASE='%s%s' CODE='%s'", scriptname == NULL ? "" : scriptname, cur_ptr->codebase, cur_ptr->code); */
-						  snprintf(istr, BUFFERLEN, " CODEBASE='%s' CODE='%s'", cur_ptr->codebase, cur_ptr->code);
+						  snprintf(istr, BUFFERLEN, " CODEBASE='%s%s' CODE='%s'", scriptname[HW_APPLET_LINK], cur_ptr->codebase, cur_ptr->code); 
 						else
 						  snprintf(istr, BUFFERLEN, " CODEBASE='/' CODE='%s'", cur_ptr->code);
 						break;
@@ -730,11 +737,11 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 						newtext = fnInsStr(newtext, cur_ptr->end+offset, "</A>");
 
 						if(cur_ptr->nameanchor)
-							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s'", scriptname == NULL ? "schade" : scriptname, cur_ptr->destdocname, cur_ptr->nameanchor);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s#%s'", scriptname[HW_DEFAULT_LINK], cur_ptr->destdocname, cur_ptr->nameanchor);
 						else if(cur_ptr->fragment)
-							snprintf(istr, BUFFERLEN, "<A HREF=\"%s/%s#%s\"", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname, cur_ptr->fragment);
+							snprintf(istr, BUFFERLEN, "<A HREF=\"%s/%s#%s\"", scriptname[HW_DEFAULT_LINK], cur_ptr->destdocname, cur_ptr->fragment);
 						else
-							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s'", scriptname == NULL ? "" : scriptname, cur_ptr->destdocname);
+							snprintf(istr, BUFFERLEN, "<A HREF='%s/%s'", scriptname[HW_DEFAULT_LINK], cur_ptr->destdocname);
 
 						if(cur_ptr->htmlattr) {
 							strncat(istr, " ", BUFFERLEN - 1 - strlen(istr));
@@ -771,6 +778,7 @@ char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char 
 	}
 	snprintf(istr, BUFFERLEN, "<BODY %s>", bgstr);
 	*bodytag = estrdup(istr);
+	if(scriptname != urlprefix) efree(scriptname);
 	return(newtext);
 }
 #undef BUFFERLEN
@@ -2020,6 +2028,7 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 	int  length, *ptr, ancount, error;
 	char *tmp, *attributes, *documenttype;
 	char **anchors;
+	int i;
 
 	length = HEADER_LENGTH + sizeof(hw_objectID);
 
@@ -2130,8 +2139,15 @@ int send_gettext(int sockfd, hw_objectID objectID, int mode, int rootid, char **
 			if(pAnchorList != NULL) {
 				char *newtext;
 				char *body;
+				char **prefixarray;
 
-				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, urlprefix);
+				prefixarray = emalloc(5*sizeof(char *));
+				for(i=0; i<5; i++)
+					prefixarray[i] = urlprefix;
+
+				newtext = fnInsAnchorsIntoText(*text, pAnchorList, &body, prefixarray);
+
+				efree(prefixarray);
 #ifdef newlist
 				zend_llist_destroy(pAnchorList);
 				efree(pAnchorList);
@@ -4875,7 +4891,7 @@ int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *
 	return(0);
 }
 
-int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count, char *urlprefix)
+int send_pipedocument(int sockfd, char *host, hw_objectID objectID, int mode, int rootid, char **objattr, char **bodytag, char **text, int *count, char **urlprefix)
 {
 	hg_msg msg, *retmsg;
 	int	length, len;

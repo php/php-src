@@ -152,14 +152,14 @@ typedef float hw_float;
 void fnDeleteAnchor(void *ptr1);
 void fnListAnchor(zend_llist *pAnchorList);
 zend_llist *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
-char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char *urlprefix);
+char *fnInsAnchorsIntoText(char *text, zend_llist *pAnchorList, char **bodytag, char **urlprefix);
 int fnCmpAnchors(const void *e1, const void *e2);
 ANCHOR *fnAddAnchor(zend_llist *pAnchorList, int objectID, int start, int end);
 #else
 void fnDeleteAnchor(ANCHOR *ptr);
 void fnListAnchor(DLIST *pAnchorList);
 DLIST *fnCreateAnchorList(hw_objectID objID, char **anchors, char **docofanchorrec, char **reldestrec, int ancount, int anchormode);
-char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char *urlprefix);
+char *fnInsAnchorsIntoText(char *text, DLIST *pAnchorList, char **bodytag, char **urlprefix);
 int fnCmpAnchors(ANCHOR *a1, ANCHOR *a2);
 ANCHOR *fnAddAnchor(DLIST *pAnchorList, int objectID, int start, int end);
 #endif
@@ -215,7 +215,7 @@ extern int send_identify(int sockfd, char *name, char *passwd, char **userdata);
 extern int send_getparents(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);
 extern int send_children(int sockfd, hw_objectID objectID, hw_objectID **childIDs, int *count);
 extern int send_getparentsobj(int sockfd, hw_objectID objectID, char ***childrec, int *count);
-extern int send_pipedocument(int sockfd, char *hostname, hw_objectID objectID, int mode, int rootid, char** objattr, char **bodytag, char **text, int *count, char *urlprefix);
+extern int send_pipedocument(int sockfd, char *hostname, hw_objectID objectID, int mode, int rootid, char** objattr, char **bodytag, char **text, int *count, char **urlprefix);
 extern int send_pipecgi(int sockfd, char *host, hw_objectID objectID, char *cgi_env_str, char **objattr, char **text, int *count);
 extern int send_putdocument(int sockfd, char *hostname, hw_objectID parentID, char *objectRec, char *text, int count, hw_objectID *objectID);
 extern int send_inscoll(int sockfd, hw_objectID objectID, char *objrec, hw_objectID *new_objectID);
