@@ -1139,6 +1139,7 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 				ce->parent = parent_ce;
 				do_inherit_parent_constructor(ce);
 
+
 				/* Register the derived class */
 				if (zend_hash_add(class_table, class_name, strlen(class_name)+1, ce, sizeof(zend_class_entry), NULL)==FAILURE) {
 					if (!compile_time) {
@@ -1147,8 +1148,10 @@ ZEND_API int do_bind_function_or_class(zend_op *opline, HashTable *function_tabl
 					(*ce->refcount)--;
 					zend_hash_destroy(&ce->function_table);
 					zend_hash_destroy(&ce->default_properties);
+					*(class_name-1) = ':';
 					return FAILURE;
 				}
+				*(class_name-1) = ':';
 				return SUCCESS;
 			}
 			break;
