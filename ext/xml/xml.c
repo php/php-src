@@ -655,7 +655,7 @@ static char *_xml_decode_tag(xml_parser *parser, const char *tag)
 void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Char **attributes)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	const char **attrs = attributes;
+	const char **attrs = (const char **) attributes;
 	char *tag_name;
 	char *att, *val;
 	int val_len;
@@ -707,7 +707,7 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 			parser->ltags[parser->level-1] = estrdup(tag_name);
 			parser->lastwasopen = 1;
 
-			attributes = attrs;
+			attributes = (const XML_Char **) attrs;
 
 			while (attributes && *attributes) {
 				att = _xml_decode_tag(parser, attributes[0]);
@@ -1252,7 +1252,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	ZEND_FETCH_RESOURCE(parser,xml_parser *, pind, -1, "XML Parser", le_xml_parser);
 
 	xml_set_handler(&parser->externalEntityRefHandler, hdl);
-	XML_SetExternalEntityRefHandler(parser->parser, _xml_externalEntityRefHandler);
+	XML_SetExternalEntityRefHandler(parser->parser, (void *) _xml_externalEntityRefHandler);
 	RETVAL_TRUE;
 }
 /* }}} */
